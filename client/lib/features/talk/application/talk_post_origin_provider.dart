@@ -39,7 +39,7 @@ final talkPostOriginProvider = FutureProvider.autoDispose
         final isPostGone =
             AppFailure.of(e).server?.code == ServerErrorCode.talkPostNotFound;
         if (!isPostGone) {
-          AppLogger.error('[talk origin] fetch failed', e, stack);
+          AppLogger.error('talk', e, stack, {'step': 'fetchPostOrigin'});
         }
         return const TalkPostOrigin(isPostAvailable: false);
       }

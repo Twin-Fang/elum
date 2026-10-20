@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/talk_repository.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_report_reason.dart';
-import 'talk_feed_controller.dart';
-import 'talk_popular_provider.dart';
+import 'talk_lists_invalidation.dart';
 
 /// 글 상세: 인자는 글 id
 final talkDetailControllerProvider = AsyncNotifierProvider.autoDispose
@@ -69,10 +68,10 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
     }
   }
 
-  /// 내 글 내리기 > 피드·인기 줄 다시 받기
+  /// 내 글 내리기 > 피드·인기·내 공유 맵 다시 받기
   Future<void> delete() async {
     await _repository.delete(postId);
-    _refreshLists();
+    invalidateTalkLists(ref);
   }
 
   /// 한마디·분류 고치기: 서버가 돌려준 글로 화면을 바꾼다 (note 가 빈 문자열이면 한마디 삭제)
@@ -83,7 +82,7 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
       category: category,
     );
     if (ref.mounted) state = AsyncData(updated);
-    _refreshLists();
+    invalidateTalkLists(ref);
   }
 
   /// 이 글 신고 (중복 신고는 서버가 TALK_REPORT_DUPLICATED 로 거절)
@@ -93,10 +92,10 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
     reason: reason.serverValue,
   );
 
-  /// 글쓴이 숨기기 > 피드·인기 줄 다시 받기 (그 보호자 글이 사라진다)
+  /// 글쓴이 숨기기 > 피드·인기·내 공유 맵 다시 받기 (그 보호자 글이 사라진다)
   Future<void> blockAuthor() async {
     await _repository.block(postId: postId);
-    _refreshLists();
+    invalidateTalkLists(ref);
   }
 
   /// 댓글 수 맞추기: 댓글을 달거나 지운 직후 (서버 재요청 없이)
@@ -113,11 +112,5 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
     final current = state.value;
     if (current == null) return;
     state = AsyncData(current.copyWith(isImportedByMe: true));
-  }
-
-  /// 피드·인기 줄 목록 무효화 (분류별 전부)
-  void _refreshLists() {
-    ref.invalidate(talkFeedControllerProvider);
-    ref.invalidate(talkPopularProvider);
   }
 }

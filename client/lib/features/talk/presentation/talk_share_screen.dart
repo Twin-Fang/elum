@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
+import '../application/talk_rules_provider.dart';
 import '../application/talk_share_controller.dart';
 import '../application/talk_shareable_routines_provider.dart';
 import '../domain/talk_preview.dart';
@@ -123,7 +124,8 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
-  Future<void> _submit() async {
+  /// 올리기: 서버가 동의 안 함으로 거절하면 규칙 시트를 다시 띄우고 한 번만 다시 시도
+  Future<void> _submit({bool canRetryAfterRules = true}) async {
     final l10n = context.l10n;
     final router = GoRouter.of(context);
     // 화면을 옮긴 뒤에도 토스트를 띄우려고 미리 잡아 둔다
@@ -138,6 +140,18 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
     } catch (e) {
       // 입력은 그대로 두고 안내만 띄운다
       if (!mounted) return;
+      final isRulesRejected =
+          canRetryAfterRules &&
+          ref.read(talkRulesAgreementProvider.notifier).forgetIfRejected(e);
+      if (isRulesRejected) {
+        final isAgreed = await ensureTalkRulesAgreed(
+          context,
+          ref,
+          fallbackCode: TalkScreenCodes.share,
+        );
+        if (isAgreed && mounted) await _submit(canRetryAfterRules: false);
+        return;
+      }
       await showFailure(
         context,
         e,

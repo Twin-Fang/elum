@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
+import '../../../core/network/server_error_code.dart';
 import '../data/talk_repository.dart';
 
 /// 이야기 이용 규칙 동의: 이 실행 중 확인한 결과를 기억한다
@@ -22,6 +24,15 @@ class TalkRulesAgreementNotifier extends Notifier<bool> {
     final hasAgreedOnServer = await _repository.hasAgreedRules();
     if (hasAgreedOnServer) state = true;
     return hasAgreedOnServer;
+  }
+
+  /// 서버가 동의 안 함(TALK_RULES_NOT_AGREED)으로 거절했으면 기억을 버리고 true
+  /// 다른 기기에서 동의가 지워진 경우처럼 기억과 서버가 어긋날 때 규칙 시트를 다시 띄우는 신호
+  bool forgetIfRejected(Object error) {
+    final isRejected =
+        AppFailure.of(error).server?.code == ServerErrorCode.talkRulesNotAgreed;
+    if (isRejected) state = false;
+    return isRejected;
   }
 
   /// 동의 저장

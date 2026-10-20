@@ -14,6 +14,7 @@ import '../../domain/talk_post.dart';
 import '../../domain/talk_screen_codes.dart';
 import '../../domain/talk_text_limits.dart';
 import 'talk_category_picker.dart';
+import 'talk_note_caption.dart';
 import 'talk_sheet_frame.dart';
 
 /// 내 글 고치기 시트: 한마디(300자) + 분류 > 저장. 저장하면 true
@@ -94,26 +95,14 @@ class _TalkEditSheetState extends ConsumerState<_TalkEditSheet> {
           SizedBox(height: space.xs.h),
           ElumMultilineTextField(
             controller: _noteController,
-            hintText: l10n.talkNoteGuide,
+            hintText: '',
             maxLength: TalkTextLimits.maxNoteLength,
             minLines: 3,
             maxLines: 6,
             enabled: !_isSaving,
             onChanged: (_) => setState(() {}),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(top: space.xs.h),
-              child: Text(
-                '${_noteController.text.length}'
-                '/${TalkTextLimits.maxNoteLength}',
-                style: context.typo.caption.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ),
-          ),
+          TalkNoteCaption(noteLength: _noteController.text.length),
           SizedBox(height: space.sm.h),
           // 분류
           Text(

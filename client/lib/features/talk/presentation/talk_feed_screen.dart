@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,14 +10,17 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/min_tap_target.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../guardian/domain/routine_template.dart';
 import '../application/talk_feed_controller.dart';
 import '../application/talk_popular_provider.dart';
 import '../domain/talk_post.dart';
+import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_category_chips.dart';
 import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_popular_row.dart';
@@ -40,6 +45,9 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   static const _loadMoreExtent = 320.0;
   static const _cardGap = 12.0;
   static const _sectionGap = 20.0;
+
+  /// 첫 쪽 실패 화면에서 다시 받는 중 (버튼에 진행 표시)
+  bool _isRetrying = false;
 
   String? get _categoryValue => _selectedCategory?.serverValue;
 
@@ -76,11 +84,39 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   void _openShare() => context.push(Routes.guardianTalkShare);
 
   /// 당겨서 새로고침: 인기 줄과 최신 글을 함께 다시 받는다
+  /// 실패하면 보던 목록은 두고 실패 팝업만 띄운다 (스피너가 팝업을 기다리지 않게 await 하지 않음)
   Future<void> _refresh() async {
     ref.invalidate(talkPopularProvider(_categoryValue));
-    await ref
-        .read(talkFeedControllerProvider(_categoryValue).notifier)
-        .refresh();
+    try {
+      await ref
+          .read(talkFeedControllerProvider(_categoryValue).notifier)
+          .refresh();
+    } catch (e) {
+      if (!mounted) return;
+      unawaited(
+        showFailure(
+          context,
+          e,
+          fallback: context.l10n.talkFeedFailed,
+          fallbackCode: TalkScreenCodes.feed,
+        ),
+      );
+    }
+  }
+
+  /// 첫 쪽 실패 화면의 다시 하기: 받는 동안 버튼에 진행 표시
+  Future<void> _retryFirstPage() async {
+    if (_isRetrying) return;
+    setState(() => _isRetrying = true);
+    try {
+      await ref
+          .read(talkFeedControllerProvider(_categoryValue).notifier)
+          .refresh();
+    } catch (_) {
+      // 목록이 없는 상태의 실패는 에러 상태로 다시 그려지므로 따로 안내하지 않는다
+    } finally {
+      if (mounted) setState(() => _isRetrying = false);
+    }
   }
 
   @override
@@ -113,46 +149,50 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
       talkFeedControllerProvider(_categoryValue).notifier,
     );
 
-    return switch (feed) {
-      AsyncData(value: final state) when state.items.isEmpty =>
-        RefreshIndicator(
-          onRefresh: _refresh,
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: _EmptyBody(onSharePressed: _openShare)),
-              ),
-            ],
-          ),
+    // 받아 둔 목록이 있으면 새로고침 중·실패여도 계속 그린다
+    final state = feed.value;
+    if (state != null && state.items.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _refresh,
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: _EmptyBody(onSharePressed: _openShare)),
+            ),
+          ],
         ),
-      AsyncData(value: final state) => RefreshIndicator(
+      );
+    }
+    if (state != null) {
+      return RefreshIndicator(
         onRefresh: _refresh,
         child: _list(state, controller),
-      ),
-      AsyncError(:final error) => ElumStateBody(
+      );
+    }
+    if (feed.hasError) {
+      return ElumStateBody(
         child: ElumErrorView.failure(
-          error,
+          feed.error,
           fallback: context.l10n.talkFeedFailed,
-          fallbackCode: 'E-TALK-001',
-          onRetry: controller.refresh,
+          fallbackCode: TalkScreenCodes.feed,
+          onRetry: _retryFirstPage,
+          isRetrying: _isRetrying,
         ),
-      ),
-      _ => const ElumStateBody.loading(),
-    };
+      );
+    }
+    return const ElumStateBody.loading();
   }
 
   Widget _list(TalkFeedState state, TalkFeedController controller) {
     final space = context.space;
     // 인기 줄: 받는 중·실패·0건이면 자리째 숨김
-    final popularPosts = switch (ref.watch(
-      talkPopularProvider(_categoryValue),
-    )) {
-      AsyncData(value: final posts) => posts,
-      _ => const <TalkPostSummary>[],
-    };
+    // 새로고침 중에는 이전 값을 그대로 그려 깜빡이지 않게 한다
+    final popularPosts =
+        ref.watch(talkPopularProvider(_categoryValue)).value ??
+        const <TalkPostSummary>[];
 
     return ListView(
       controller: _scrollController,
@@ -233,19 +273,21 @@ class _Header extends StatelessWidget {
           ),
           AppPressable(
             onTap: onWritePressed,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: space.sm.w,
-                vertical: space.xs.h,
-              ),
-              decoration: BoxDecoration(
-                color: colors.buttonEnabled,
-                borderRadius: BorderRadius.circular(space.buttonRadius.r),
-              ),
-              child: Text(
-                context.l10n.talkWriteButton,
-                style: context.typo.chipLabel.copyWith(
-                  color: colors.buttonEnabledText,
+            child: MinTapTarget(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: space.sm.w,
+                  vertical: space.xs.h,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.buttonEnabled,
+                  borderRadius: BorderRadius.circular(space.buttonRadius.r),
+                ),
+                child: Text(
+                  context.l10n.talkWriteButton,
+                  style: context.typo.chipLabel.copyWith(
+                    color: colors.buttonEnabledText,
+                  ),
                 ),
               ),
             ),

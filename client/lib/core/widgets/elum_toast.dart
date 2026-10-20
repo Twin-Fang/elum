@@ -37,15 +37,23 @@ void showElumToastOn(
   final maxWidth = metrics.isScaleOverridden
       ? metrics.layout.sheetMaxWidth * metrics.scale
       : null;
+  final hasAction = actionLabel != null && onAction != null;
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
         content: Text(message),
         width: maxWidth,
-        action: actionLabel == null || onAction == null
-            ? null
-            : SnackBarAction(label: actionLabel, onPressed: onAction),
+        // 액션이 있으면 Flutter 가 기본으로 안 사라지게(persist) 두므로 끄고, 누를 시간만 조금 더 준다
+        persist: hasAction ? false : null,
+        duration: hasAction ? _actionToastDuration : _plainToastDuration,
+        action: hasAction
+            ? SnackBarAction(label: actionLabel, onPressed: onAction)
+            : null,
       ),
     );
 }
+
+// 토스트가 떠 있는 시간: 액션 없음은 Flutter 기본값 그대로, 액션 있음은 누를 시간을 더 준다
+const _plainToastDuration = Duration(seconds: 4);
+const _actionToastDuration = Duration(seconds: 6);

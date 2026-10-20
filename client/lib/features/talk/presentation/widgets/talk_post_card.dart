@@ -5,6 +5,7 @@ import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/min_tap_target.dart';
 import '../../domain/talk_post.dart';
 import 'talk_category_badge.dart';
 import 'talk_step_image.dart';
@@ -214,19 +215,21 @@ class _ImportButton extends StatelessWidget {
     final colors = context.colors;
     return AppPressable(
       onTap: onPressed,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: _paddingH.w,
-          vertical: _paddingV.h,
-        ),
-        decoration: BoxDecoration(
-          color: colors.buttonEnabled,
-          borderRadius: BorderRadius.circular(context.space.buttonRadius.r),
-        ),
-        child: Text(
-          context.l10n.talkImportButtonShort,
-          style: context.typo.chipLabel.copyWith(
-            color: colors.buttonEnabledText,
+      child: MinTapTarget(
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: _paddingH.w,
+            vertical: _paddingV.h,
+          ),
+          decoration: BoxDecoration(
+            color: colors.buttonEnabled,
+            borderRadius: BorderRadius.circular(context.space.buttonRadius.r),
+          ),
+          child: Text(
+            context.l10n.talkImportButtonShort,
+            style: context.typo.chipLabel.copyWith(
+              color: colors.buttonEnabledText,
+            ),
           ),
         ),
       ),

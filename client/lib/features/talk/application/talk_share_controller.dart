@@ -7,9 +7,7 @@ import '../../guardian/domain/routine_template.dart';
 import '../data/talk_repository.dart';
 import '../domain/talk_category_suggester.dart';
 import '../domain/talk_preview.dart';
-import 'talk_feed_controller.dart';
-import 'talk_my_shared_posts_provider.dart';
-import 'talk_popular_provider.dart';
+import 'talk_lists_invalidation.dart';
 
 /// 올리기 흐름 상태: 고른 일과, 미리보기, 사진별 흐리게 선택, 한마디, 분류, 올리는 중
 @immutable
@@ -146,10 +144,7 @@ class TalkShareController extends Notifier<TalkShareState> {
         note: trimmedNote.isEmpty ? null : trimmedNote,
         blurredStepIds: state.blurredStepIds,
       );
-      ref
-        ..invalidate(talkFeedControllerProvider)
-        ..invalidate(talkPopularProvider)
-        ..invalidate(talkMySharedPostsProvider);
+      invalidateTalkLists(ref);
       return postId;
     } finally {
       // 성공·실패 공통: 화면이 이미 닫혔으면 건드리지 않는다

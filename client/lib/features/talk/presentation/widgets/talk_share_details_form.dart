@@ -9,6 +9,7 @@ import '../../../guardian/domain/routine_template.dart';
 import '../../domain/talk_preview.dart';
 import '../../domain/talk_text_limits.dart';
 import 'talk_category_picker.dart';
+import 'talk_note_caption.dart';
 import 'talk_share_step_card.dart';
 
 /// 올리기 마지막 단계: 한마디(300자) > 분류 > 이름을 가린 카드 미리보기
@@ -66,23 +67,14 @@ class TalkShareDetailsForm extends StatelessWidget {
         SizedBox(height: space.xs.h),
         ElumMultilineTextField(
           controller: noteController,
-          hintText: l10n.talkNoteGuide,
+          hintText: '',
           maxLength: TalkTextLimits.maxNoteLength,
           minLines: 3,
           maxLines: 6,
           enabled: isEnabled,
           onChanged: onNoteChanged,
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: EdgeInsets.only(top: space.xs.h),
-            child: Text(
-              '${noteController.text.length}/${TalkTextLimits.maxNoteLength}',
-              style: typo.caption.copyWith(color: colors.textSecondary),
-            ),
-          ),
-        ),
+        TalkNoteCaption(noteLength: noteController.text.length),
         SizedBox(height: space.sm.h),
         // 분류
         Text(

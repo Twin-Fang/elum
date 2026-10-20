@@ -60,6 +60,15 @@ class LibraryGroupEntry extends LibraryEntry {
   int? get order => group.displayOrder;
 }
 
+/// 이 칸이 그 일과를 담고 있는가 (낱개 칸이거나 묶음 안)
+bool doesLibraryEntryHoldRoutine(LibraryEntry entry, String routineId) =>
+    switch (entry) {
+      LibraryRoutineEntry(:final routine) => routine.id == routineId,
+      LibraryGroupEntry(:final routines) => routines.any(
+        (routine) => routine.id == routineId,
+      ),
+    };
+
 /// 원본 목록 + 묶음 목록 > 격자 칸: 서버에 저장된 자리 순서(묶음·일과 한 줄), 자리가 없는 칸은 그 뒤
 ///
 /// 자리가 같거나 없으면 묶음 먼저, 그다음 서버가 준 원본 순서(최신순).

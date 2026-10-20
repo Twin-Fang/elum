@@ -131,7 +131,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
           SizedBox(height: _sectionGap.h),
           TalkCommentList(
             comments: comments,
-            onCommentLongPressed: _actions.openCommentMenu,
+            onCommentMenuRequested: _actions.openCommentMenu,
             onRetryPressed: () =>
                 ref.invalidate(talkCommentControllerProvider(widget.postId)),
             onRetryLoadMorePressed: ref

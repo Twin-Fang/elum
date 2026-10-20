@@ -30,7 +30,7 @@ Future<Map<String, String>> _fetchSharedPostIdByRoutineIdOrEmpty(
   try {
     return await ref.watch(talkMySharedPostsProvider.future);
   } catch (e) {
-    AppLogger.error('talk shareable routines', e);
+    AppLogger.error('talk', e, null, {'step': 'fetchMySharedPosts'});
     return const {};
   }
 }

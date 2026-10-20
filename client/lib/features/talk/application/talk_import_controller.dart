@@ -4,6 +4,7 @@ import '../../guardian/application/routine_providers.dart';
 import '../data/talk_repository.dart';
 import '../domain/talk_post.dart';
 import 'talk_detail_controller.dart';
+import 'talk_lists_invalidation.dart';
 
 final talkImportControllerProvider = Provider<TalkImportController>(
   (ref) => TalkImportController(ref),
@@ -26,6 +27,8 @@ class TalkImportController {
         .read(talkRepositoryProvider)
         .importToLibrary(postId, profileId: profileId, groupId: groupId);
     _ref.refreshRoutines();
+    // 가져간 수·인기 순서가 바뀌므로 목록도 다시 받게 한다
+    invalidateTalkLists(_ref);
     // 상세가 열려 있을 때만 (없는 상세를 새로 만들어 받지 않는다)
     final detailProvider = talkDetailControllerProvider(postId);
     if (_ref.exists(detailProvider)) {

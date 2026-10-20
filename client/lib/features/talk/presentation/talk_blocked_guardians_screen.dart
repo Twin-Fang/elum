@@ -6,6 +6,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/min_tap_target.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -129,19 +130,21 @@ class _BlockedRow extends StatelessWidget {
           SizedBox(width: space.xs.w),
           AppPressable(
             onTap: onUnblockPressed,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: _paddingH.w,
-                vertical: _paddingV.h,
-              ),
-              decoration: BoxDecoration(
-                color: colors.buttonEnabled,
-                borderRadius: BorderRadius.circular(space.buttonRadius.r),
-              ),
-              child: Text(
-                l10n.talkUnblockAction,
-                style: context.typo.chipLabel.copyWith(
-                  color: colors.buttonEnabledText,
+            child: MinTapTarget(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: _paddingH.w,
+                  vertical: _paddingV.h,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.buttonEnabled,
+                  borderRadius: BorderRadius.circular(space.buttonRadius.r),
+                ),
+                child: Text(
+                  l10n.talkUnblockAction,
+                  style: context.typo.chipLabel.copyWith(
+                    color: colors.buttonEnabledText,
+                  ),
                 ),
               ),
             ),

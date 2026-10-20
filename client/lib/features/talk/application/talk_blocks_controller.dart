@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/talk_repository.dart';
 import '../domain/talk_block_entry.dart';
-import 'talk_feed_controller.dart';
-import 'talk_popular_provider.dart';
+import 'talk_lists_invalidation.dart';
 
 /// 내가 숨긴 보호자 목록
 final talkBlocksControllerProvider =
@@ -31,7 +30,6 @@ class TalkBlocksController extends AsyncNotifier<List<TalkBlockEntry>> {
         ]);
       }
     }
-    ref.invalidate(talkFeedControllerProvider);
-    ref.invalidate(talkPopularProvider);
+    invalidateTalkLists(ref);
   }
 }

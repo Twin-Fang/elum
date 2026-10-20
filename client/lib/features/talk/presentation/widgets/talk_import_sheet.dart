@@ -67,7 +67,7 @@ Future<void> _showImportedRoutine(
         .select(outcome.profile);
   } catch (e, stack) {
     // 이룸이를 못 바꿔도 일과관리 칸으로는 간다
-    AppLogger.error('[talk import] profile select failed', e, stack);
+    AppLogger.error('talk', e, stack, {'step': 'importSelectProfile'});
   }
   router.go(Routes.guardianManage);
 }
@@ -160,6 +160,9 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
     final groupId = groups.any((g) => g.id == _pickedGroupId)
         ? _pickedGroupId
         : null;
+    // 회원 정보를 처음 받는 중이면 이룸이 목록이 덜 찼을 수 있어 넣기를 잠근다
+    final member = ref.watch(memberProvider);
+    final isMemberLoading = member.isLoading && !member.hasValue;
     final colors = context.colors;
     final space = context.space;
 
@@ -228,7 +231,9 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
                   label: l10n.talkImportConfirm,
                   labelStyle: context.typo.sheetActionLabel,
                   loading: _isSubmitting,
-                  onPressed: () => _submit(selected, groupId),
+                  onPressed: isMemberLoading
+                      ? null
+                      : () => _submit(selected, groupId),
                 ),
               ),
             ],

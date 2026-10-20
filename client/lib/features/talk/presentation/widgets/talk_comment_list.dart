@@ -7,23 +7,26 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/min_tap_target.dart';
+import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../application/talk_comment_controller.dart';
 import '../../domain/talk_comment.dart';
+import '../../domain/talk_screen_codes.dart';
 
 /// 댓글 영역(스크롤 안에 이어 붙이는 조각): 제목 > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
-/// 빈 상태·첫 쪽 실패도 여기서 그린다. 댓글을 길게 누르면 [onCommentLongPressed]
+/// 빈 상태·첫 쪽 실패도 여기서 그린다. 댓글 ⋯ 버튼이나 길게 누르기로 [onCommentMenuRequested]
 class TalkCommentList extends StatelessWidget {
   const TalkCommentList({
     super.key,
     required this.comments,
-    required this.onCommentLongPressed,
+    required this.onCommentMenuRequested,
     required this.onRetryPressed,
     required this.onRetryLoadMorePressed,
   });
 
   final AsyncValue<TalkCommentState> comments;
-  final ValueChanged<TalkComment> onCommentLongPressed;
+  final ValueChanged<TalkComment> onCommentMenuRequested;
 
   /// 첫 쪽 받기 실패 줄을 눌렀을 때
   final VoidCallback onRetryPressed;
@@ -58,7 +61,7 @@ class TalkCommentList extends StatelessWidget {
                   _CommentRow(
                     key: ValueKey(comment.id),
                     comment: comment,
-                    onLongPress: () => onCommentLongPressed(comment),
+                    onMenuRequested: () => onCommentMenuRequested(comment),
                   ),
                 if (state.isLoadingMore)
                   Padding(
@@ -77,9 +80,12 @@ class TalkCommentList extends StatelessWidget {
                   ),
               ],
             ),
-            AsyncError() => _MessageLine(
-              text: l10n.talkCommentsFailed,
-              onTap: onRetryPressed,
+            AsyncError(:final error) => ElumErrorView.failure(
+              error,
+              fallback: l10n.talkCommentsFailed,
+              fallbackCode: TalkScreenCodes.comment,
+              onRetry: onRetryPressed,
+              compact: true,
             ),
             _ => Padding(
               padding: EdgeInsets.symmetric(vertical: space.md.h),
@@ -97,16 +103,18 @@ class TalkCommentList extends StatelessWidget {
   }
 }
 
-/// 댓글 한 줄: 닉네임 · 시간 > 내용 (길게 누르면 메뉴)
+/// 댓글 한 줄: 닉네임 · 시간 + ⋯ > 내용 (⋯ 버튼이나 길게 누르면 메뉴)
 class _CommentRow extends StatelessWidget {
   const _CommentRow({
     super.key,
     required this.comment,
-    required this.onLongPress,
+    required this.onMenuRequested,
   });
 
   final TalkComment comment;
-  final VoidCallback onLongPress;
+  final VoidCallback onMenuRequested;
+
+  static const _moreIconSize = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -117,20 +125,37 @@ class _CommentRow extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: onLongPress,
+      onLongPress: onMenuRequested,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: space.xs.h),
+        padding: EdgeInsets.symmetric(vertical: space.xs.h / 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${comment.authorNickname ?? l10n.talkAuthorFallback}'
-              ' · ${l10n.timeAgoOf(comment.createdAt, DateTime.now())}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: typo.caption.copyWith(color: colors.textSecondary),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${comment.authorNickname ?? l10n.talkAuthorFallback}'
+                    ' · ${l10n.timeAgoOf(comment.createdAt, DateTime.now())}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: typo.caption.copyWith(color: colors.textSecondary),
+                  ),
+                ),
+                AppPressable(
+                  onTap: onMenuRequested,
+                  scaleDown: AppPressable.scaleIcon,
+                  semanticLabel: l10n.talkMoreLabel,
+                  child: MinTapTarget(
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: _moreIconSize.w,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: space.xs.h / 2),
             Text(
               comment.body,
               style: typo.body.paragraph.copyWith(color: colors.textPrimary),

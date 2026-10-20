@@ -6,8 +6,7 @@ import '../data/talk_repository.dart';
 import '../domain/talk_comment.dart';
 import '../domain/talk_report_reason.dart';
 import 'talk_detail_controller.dart';
-import 'talk_feed_controller.dart';
-import 'talk_popular_provider.dart';
+import 'talk_lists_invalidation.dart';
 
 /// 댓글 상태: 지금까지 받은 댓글(오래된 순), 다음 쪽 커서, 다음 쪽 받는 중·실패 여부
 @immutable
@@ -160,8 +159,7 @@ class TalkCommentController extends AsyncNotifier<TalkCommentState> {
   /// 댓글쓴이 숨기기 > 댓글 목록과 피드·인기 줄 다시 받기
   Future<void> blockAuthorOf(String commentId) async {
     await _repository.block(commentId: commentId);
-    ref.invalidate(talkFeedControllerProvider);
-    ref.invalidate(talkPopularProvider);
+    invalidateTalkLists(ref);
     await refresh();
   }
 }

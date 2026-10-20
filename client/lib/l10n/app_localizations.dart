@@ -5096,7 +5096,7 @@ abstract class AppLocalizations {
   /// **'이렇게 해요'**
   String get talkStepsTitle;
 
-  /// 상세 화면: 도움돼요 누르기 실패 안내(토스트)
+  /// 상세 화면: 도움돼요 누르기 실패 안내(팝업)
   ///
   /// In ko, this message translates to:
   /// **'도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요'**
@@ -5192,10 +5192,10 @@ abstract class AppLocalizations {
   /// **'아직 댓글이 없어요'**
   String get talkCommentsEmpty;
 
-  /// 상세 화면: 댓글 첫 쪽 불러오기 실패 줄(누르면 다시 받기)
+  /// 상세 화면: 댓글 첫 쪽 불러오기 실패 안내(다시 하기 버튼과 에러 코드가 아래에 붙는다)
   ///
   /// In ko, this message translates to:
-  /// **'댓글을 불러오지 못했어요. 눌러서 다시 해 보세요'**
+  /// **'댓글을 불러오지 못했어요'**
   String get talkCommentsFailed;
 
   /// 상세 화면 댓글 입력창 안내 문구

@@ -76,6 +76,7 @@ class ElumErrorView extends StatelessWidget {
     String? description,
     VoidCallback? onRetry,
     bool compact = false,
+    bool isRetrying = false,
   }) {
     final failure = AppFailure.of(error);
     return ElumErrorView(
@@ -87,6 +88,7 @@ class ElumErrorView extends StatelessWidget {
       errorCode: failure.badgeOr(fallbackCode),
       onRetry: onRetry,
       compact: compact,
+      isRetrying: isRetrying,
     );
   }
 

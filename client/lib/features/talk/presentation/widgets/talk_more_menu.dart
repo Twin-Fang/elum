@@ -50,7 +50,7 @@ Future<TalkPostMenuAction?> showTalkPostMenu(
   );
 }
 
-/// 댓글 메뉴: 남의 댓글은 신고하기 · 이 보호자 글 숨기기, 내 댓글은 지우기
+/// 댓글 메뉴(⋯ 버튼·길게 누르기): 남의 댓글은 신고하기 · 이 보호자 글 숨기기, 내 댓글은 지우기
 Future<TalkCommentMenuAction?> showTalkCommentMenu(
   BuildContext context, {
   required bool isMine,
@@ -103,7 +103,7 @@ Future<T?> _showMenu<T>(
   required List<_MenuItem<T>> rows,
 }) => showElumSheet<T>(
   context: context,
-  builder: (_) => TalkSheetFrame(
+  builder: (sheetContext) => TalkSheetFrame(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -112,7 +112,7 @@ Future<T?> _showMenu<T>(
             icon: row.icon,
             label: row.label,
             isDanger: row.isDanger,
-            onTap: () => Navigator.of(context).pop(row.value),
+            onTap: () => Navigator.of(sheetContext).pop(row.value),
           ),
       ],
     ),

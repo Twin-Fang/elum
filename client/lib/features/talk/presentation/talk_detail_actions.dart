@@ -7,6 +7,7 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/talk_comment_controller.dart';
 import '../application/talk_detail_controller.dart';
+import '../application/talk_rules_provider.dart';
 import '../domain/talk_comment.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_screen_codes.dart';
@@ -35,14 +36,19 @@ class TalkDetailActions {
   TalkCommentController get _comments =>
       ref.read(talkCommentControllerProvider(postId).notifier);
 
-  /// 도움이 됐어요 누르기: 실패하면 되돌려진 뒤 토스트로 알린다
+  /// 도움이 됐어요 누르기: 실패하면 되돌려진 뒤 에러 코드가 붙은 팝업으로 알린다
   Future<void> toggleHelpful() async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
     final failedText = context.l10n.talkHelpfulFailed;
     try {
       await _detail.toggleHelpful();
-    } catch (_) {
-      showElumToastOn(messenger, failedText);
+    } catch (e) {
+      if (!context.mounted) return;
+      await showFailure(
+        context,
+        e,
+        fallback: failedText,
+        fallbackCode: TalkScreenCodes.detail,
+      );
     }
   }
 
@@ -77,7 +83,11 @@ class TalkDetailActions {
   }
 
   /// 댓글 보내기: 첫 댓글이면 이용 규칙 동의 > 전송. 보냈으면 true
-  Future<bool> sendComment(String body) async {
+  /// 서버가 동의 안 함으로 거절하면 규칙 시트를 다시 띄우고 한 번만 다시 시도
+  Future<bool> sendComment(
+    String body, {
+    bool canRetryAfterRules = true,
+  }) async {
     final isAgreed = await ensureTalkRulesAgreed(context, ref);
     if (!isAgreed || !context.mounted) return false;
     final l10n = context.l10n;
@@ -86,6 +96,12 @@ class TalkDetailActions {
       return true;
     } catch (e) {
       if (!context.mounted) return false;
+      final isRulesRejected =
+          canRetryAfterRules &&
+          ref.read(talkRulesAgreementProvider.notifier).forgetIfRejected(e);
+      if (isRulesRejected) {
+        return sendComment(body, canRetryAfterRules: false);
+      }
       await showFailure(
         context,
         e,

@@ -2987,7 +2987,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkCommentsEmpty => '아직 댓글이 없어요';
 
   @override
-  String get talkCommentsFailed => '댓글을 불러오지 못했어요. 눌러서 다시 해 보세요';
+  String get talkCommentsFailed => '댓글을 불러오지 못했어요';
 
   @override
   String get talkCommentHint => '댓글을 남겨 보세요';

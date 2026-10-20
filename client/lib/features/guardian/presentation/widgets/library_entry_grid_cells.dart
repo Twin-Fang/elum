@@ -119,12 +119,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     if (!mounted || targetId == null || geometry == null) return;
     if (!_scroll.hasClients) return;
     final index = widget.entries.indexWhere(
-      (entry) => switch (entry) {
-        LibraryRoutineEntry(:final routine) => routine.id == targetId,
-        LibraryGroupEntry(:final routines) => routines.any(
-          (routine) => routine.id == targetId,
-        ),
-      },
+      (entry) => doesLibraryEntryHoldRoutine(entry, targetId),
     );
     if (index < 0) return;
     widget.onScrollTargetHandled?.call();
