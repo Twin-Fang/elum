@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoServic
 import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.member.application.controller.MemberController;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.member.application.service.OnboardingService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +73,8 @@ class SecurityConfigInternalPathTest {
 
   @MockitoBean
   private MemberService memberService;
+  @MockitoBean
+  private OnboardingService onboardingService;
 
   // SecurityConfig 생성자가 요구하는 빈들
   @MockitoBean(name = "memberUserDetailsService")

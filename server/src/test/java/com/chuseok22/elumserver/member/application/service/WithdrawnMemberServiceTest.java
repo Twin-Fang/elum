@@ -63,6 +63,8 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.RoutineGroupService routineGroupService;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -232,6 +234,7 @@ class WithdrawnMemberServiceTest {
     verify(authIdentityRepository).deleteAllByMemberId("m1");
     // AI 기록 행은 운영 지표라 남기고, 누가 썼는지만 뗀다 (#191).
     verify(aiCallLogRepository).detachMember("m1");
+    verify(routineGroupService).detachCreatorOf("m1");
     verify(aiCallLogRepository, never()).deleteAll();
     // 크레딧 계정도 행은 남기고 회원만 뗀다 — 재가입하면 신원으로 다시 붙어 주간 사용량이 이어진다 (#407).
     verify(aiCreditAccountRepository).detachMember("m1");

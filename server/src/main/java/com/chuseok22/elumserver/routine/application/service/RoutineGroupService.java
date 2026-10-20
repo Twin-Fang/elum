@@ -250,4 +250,15 @@ public class RoutineGroupService {
   private List<String> idsOf(List<Routine> routines) {
     return routines.stream().map(Routine::getId).toList();
   }
+
+  /**
+   * 완전 삭제한 회원이 만든 묶음 > 만든 사람 비움. 묶음은 함께 돌보는 이룸이에 남는다 (V44)
+   */
+  @Transactional
+  public void detachCreatorOf(String memberId) {
+    int detached = routineGroupRepository.detachCreator(memberId);
+    if (detached > 0) {
+      log.info("[routine group] creator detached : memberId={}, groups={}", memberId, detached);
+    }
+  }
 }

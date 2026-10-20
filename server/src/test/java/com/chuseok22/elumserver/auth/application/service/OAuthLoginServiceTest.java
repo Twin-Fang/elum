@@ -101,6 +101,8 @@ class OAuthLoginServiceTest {
 
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.RoutineGroupService routineGroupService;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -145,7 +147,7 @@ class OAuthLoginServiceTest {
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
-      adRewardSessionRepository, feedbackService, notificationCleanupService);
+      adRewardSessionRepository, feedbackService, notificationCleanupService, routineGroupService);
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,

@@ -67,7 +67,7 @@ public class PushDispatcher {
     if (!isPushEnabled(recorded.recipientMemberId(), rowType)) {
       return;
     }
-    List<PushDevice> devices = pushDeviceRepository.findAllByMemberIdIn(List.of(recorded.recipientMemberId()));
+    List<PushDevice> devices = pushDeviceRepository.findAllByMemberId(recorded.recipientMemberId());
     for (PushDevice device : devices) {
       PushMessage message = pushMessageFactory.create(notification.get(), recorded, device);
       PushResult result = pushSender.send(message);
