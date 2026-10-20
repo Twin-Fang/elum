@@ -231,6 +231,20 @@ enum ServerErrorCode {
   adminCreditPolicyApplyInvalid('ADMIN_CREDIT_POLICY_APPLY_INVALID'),
   adminCreditPolicyValueNegative('ADMIN_CREDIT_POLICY_VALUE_NEGATIVE'),
 
+  // 이야기. 내려간 글·지워진 댓글, 이용 규칙 미동의, 남의 글 수정, 중복 나눔·신고에서 난다.
+  talkPostNotFound('TALK_POST_NOT_FOUND'),
+  talkCommentNotFound('TALK_COMMENT_NOT_FOUND'),
+  talkRulesNotAgreed('TALK_RULES_NOT_AGREED'),
+  talkNotAuthor('TALK_NOT_AUTHOR'),
+  talkRoutineNotShareable('TALK_ROUTINE_NOT_SHAREABLE'),
+  talkAlreadyShared('TALK_ALREADY_SHARED'),
+  talkTextTooLong('TALK_TEXT_TOO_LONG'),
+  talkTextNotAllowed('TALK_TEXT_NOT_ALLOWED'),
+  talkNicknameMaskFailed('TALK_NICKNAME_MASK_FAILED'),
+  talkReportDuplicated('TALK_REPORT_DUPLICATED'),
+  talkCannotBlockSelf('TALK_CANNOT_BLOCK_SELF'),
+  talkImageNotFound('TALK_IMAGE_NOT_FOUND'),
+
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.
   unknown('');
