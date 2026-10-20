@@ -5,6 +5,7 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/notifications/local_notifications_plugin.dart';
 import '../domain/routine_reminder.dart';
 
 /// 알림 글 (기기 언어로 부르는 쪽이 채운다)
@@ -23,17 +24,16 @@ abstract interface class ReminderScheduler {
 
 /// flutter_local_notifications 구현: 첫 사용 때 초기화(시간대 포함) > 예약
 class LocalNotificationReminderScheduler implements ReminderScheduler {
-  LocalNotificationReminderScheduler({FlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  LocalNotificationReminderScheduler({LocalNotificationsPlugin? notifications})
+    : _notifications = notifications ?? LocalNotificationsPlugin();
 
-  final FlutterLocalNotificationsPlugin _plugin;
+  /// 앱 전체가 함께 쓰는 플러그인 (초기화는 그쪽이 한 번만)
+  final LocalNotificationsPlugin _notifications;
+  FlutterLocalNotificationsPlugin get _plugin => _notifications.plugin;
   Future<void>? _initializing;
 
   // 안드로이드 알림 채널 id (한 번 만들면 이름 외엔 바꿀 수 없다)
   static const _channelId = 'routine_reminder';
-
-  // 상단바 작은 아이콘 (런처 아이콘 재사용)
-  static const _androidIcon = '@mipmap/ic_launcher';
 
   Future<void> _ensureInitialized() =>
       _initializing ??= _initialize().catchError((Object e) {
@@ -52,17 +52,7 @@ class LocalNotificationReminderScheduler implements ReminderScheduler {
       AppLogger.error('reminder', 'timezone lookup failed → Asia/Seoul: $e');
       tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
     }
-    await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: AndroidInitializationSettings(_androidIcon),
-        // 권한은 알림을 처음 켤 때 묻는다 (앱 시작 때 묻지 않음)
-        iOS: DarwinInitializationSettings(
-          requestAlertPermission: false,
-          requestSoundPermission: false,
-          requestBadgePermission: false,
-        ),
-      ),
-    );
+    await _notifications.ensureInitialized();
   }
 
   @override

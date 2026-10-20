@@ -6,3 +6,8 @@
 
 # Claude AI Settings
 /.claude/settings.local.json
+
+# Firebase (FCM) 설정 — 서비스 계정 키와 앱 설정 파일은 커밋하지 않는다
+/server/src/main/resources/firebase-adminsdk.json
+/client/android/app/google-services.json
+/client/ios/Runner/GoogleService-Info.plist

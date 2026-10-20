@@ -990,6 +990,108 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianHomeGoChildScreen => '이룸이 화면으로 가기';
 
   @override
+  String get notificationBellLabel => '알림';
+
+  @override
+  String get notificationBellUnreadLabel => '읽지 않은 알림이 있어요';
+
+  @override
+  String get notificationTabNotifications => '알림';
+
+  @override
+  String get notificationTabNotices => '공지사항';
+
+  @override
+  String get notificationDayToday => '오늘';
+
+  @override
+  String get notificationDayYesterday => '어제';
+
+  @override
+  String get notificationDayEarlier => '이전';
+
+  @override
+  String get notificationMarkAllRead => '모두 읽음';
+
+  @override
+  String get notificationEmpty => '아직 받은 알림이 없어요';
+
+  @override
+  String get notificationNoticeEmpty => '아직 올라온 공지가 없어요';
+
+  @override
+  String get notificationNoticeFailed => '공지를 불러오지 못했어요';
+
+  @override
+  String get notificationSettingsTitle => '알림 설정';
+
+  @override
+  String get notificationSettingAll => '모든 알림 받기';
+
+  @override
+  String get notificationSettingRoutineCompleted => '이룸이가 일과를 끝냈을 때';
+
+  @override
+  String get notificationSettingRoutineSent => '다른 보호자가 일과를 보냈을 때';
+
+  @override
+  String get notificationSettingCoGuardianJoined => '새 보호자가 함께할 때';
+
+  @override
+  String get notificationSettingCreditRefilled => '이번 주 크레딧이 채워졌을 때';
+
+  @override
+  String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
+
+  @override
+  String get notificationPermissionOff => '기기 알림이 꺼져 있어 알림을 받을 수 없어요';
+
+  @override
+  String get notificationOpenDeviceSettings => '기기 설정 열기';
+
+  @override
+  String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
+
+  @override
+  String get notificationSettingLoadFailed => '설정을 불러오지 못했어요';
+
+  @override
+  String get notificationListFailed => '알림을 불러오지 못했어요';
+
+  @override
+  String get notificationProfileUnavailable => '이 이룸이의 알림은 더 볼 수 없어요';
+
+  @override
+  String notificationRoutineCompletedOne(String title) {
+    return '\'$title\' 일과를 끝냈어요';
+  }
+
+  @override
+  String notificationRoutineCompletedMany(int count) {
+    return '일과 $count개를 끝냈어요';
+  }
+
+  @override
+  String get notificationRoutineCompletedNoTitle => '일과를 끝냈어요';
+
+  @override
+  String notificationRoutineSent(String title) {
+    return '함께하는 보호자가 \'$title\' 일과를 보냈어요';
+  }
+
+  @override
+  String get notificationRoutineSentNoTitle => '함께하는 보호자가 새 일과를 보냈어요';
+
+  @override
+  String get notificationCoGuardianJoined => '새 보호자가 함께하기 시작했어요';
+
+  @override
+  String get notificationCreditRefilled => '이번 주 크레딧이 채워졌어요';
+
+  @override
+  String get notificationFeedbackResolved => '보내 주신 의견을 확인하고 처리했어요';
+
+  @override
   String get guardianHomeSettings => '설정';
 
   @override
@@ -2184,12 +2286,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianMyInfoProfileName => '보호자';
 
   @override
-  String guardianMyInfoLinkedCount(int count) {
-    return '이룸이 $count명과 함께해요';
-  }
+  String get guardianMyInfoEmailPrivate => '이메일 비공개';
 
   @override
-  String get guardianMyInfoNoLinked => '연결된 이룸이가 아직 없어요';
+  String guardianMyInfoJoinedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat(
+      'y.MM.dd',
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString 가입';
+  }
 
   @override
   String get guardianMyInfoChildrenHeader => '이룸이';
@@ -2485,4 +2593,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
+
+  @override
+  String get pushPermissionSheetTitle => '이룸이가 일과를 끝내면 알려 드릴까요?';
+
+  @override
+  String get pushPermissionSheetBody => '다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요';
+
+  @override
+  String get pushPermissionAllow => '알림 받기';
+
+  @override
+  String get pushPermissionLater => '나중에';
+
+  @override
+  String get pushPermissionDenied => '알림 설정에서 언제든 켤 수 있어요';
+
+  @override
+  String get pushChannelGuardianUpdates => '보호자 알림';
+
+  @override
+  String get signInProviderKakao => 'Kakao';
+
+  @override
+  String get signInProviderNaver => 'Naver';
+
+  @override
+  String get signInProviderGoogle => 'Google';
+
+  @override
+  String get signInProviderApple => 'Apple';
 }

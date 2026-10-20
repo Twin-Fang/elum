@@ -1826,6 +1826,198 @@ abstract class AppLocalizations {
   /// **'이룸이 화면으로 가기'**
   String get guardianHomeGoChildScreen;
 
+  /// 보호자 홈 종 아이콘 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get notificationBellLabel;
+
+  /// 종 아이콘에 빨간 점이 있을 때 낭독 이름에 덧붙이는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'읽지 않은 알림이 있어요'**
+  String get notificationBellUnreadLabel;
+
+  /// 알림 화면 제목과 첫 번째 탭 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get notificationTabNotifications;
+
+  /// 알림 화면 두 번째 탭 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'공지사항'**
+  String get notificationTabNotices;
+
+  /// 알림 목록 날짜 묶음 머리글: 오늘
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get notificationDayToday;
+
+  /// 알림 목록 날짜 묶음 머리글: 어제
+  ///
+  /// In ko, this message translates to:
+  /// **'어제'**
+  String get notificationDayYesterday;
+
+  /// 알림 목록 날짜 묶음 머리글: 어제보다 오래된 것
+  ///
+  /// In ko, this message translates to:
+  /// **'이전'**
+  String get notificationDayEarlier;
+
+  /// 알림 목록의 전체 읽음 처리 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 읽음'**
+  String get notificationMarkAllRead;
+
+  /// 알림이 하나도 없을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 받은 알림이 없어요'**
+  String get notificationEmpty;
+
+  /// 알림 화면 공지사항 탭에 공지가 하나도 없을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 올라온 공지가 없어요'**
+  String get notificationNoticeEmpty;
+
+  /// 공지사항 탭 목록을 받지 못했을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'공지를 불러오지 못했어요'**
+  String get notificationNoticeFailed;
+
+  /// 알림 설정 화면 제목과 보호자 설정의 진입 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정'**
+  String get notificationSettingsTitle;
+
+  /// 알림 설정: 전체 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 알림 받기'**
+  String get notificationSettingAll;
+
+  /// 알림 설정: 일과 완료 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝냈을 때'**
+  String get notificationSettingRoutineCompleted;
+
+  /// 알림 설정: 일과 전송 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자가 일과를 보냈을 때'**
+  String get notificationSettingRoutineSent;
+
+  /// 알림 설정: 보호자 합류 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'새 보호자가 함께할 때'**
+  String get notificationSettingCoGuardianJoined;
+
+  /// 알림 설정: 크레딧 충전 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 채워졌을 때'**
+  String get notificationSettingCreditRefilled;
+
+  /// 알림 설정: 의견 처리 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'의견을 처리했을 때'**
+  String get notificationSettingFeedbackResolved;
+
+  /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 알림이 꺼져 있어 알림을 받을 수 없어요'**
+  String get notificationPermissionOff;
+
+  /// 기기 알림 권한 안내 줄의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 설정 열기'**
+  String get notificationOpenDeviceSettings;
+
+  /// 알림 설정 저장 실패 팝업 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 저장하지 못했어요'**
+  String get notificationSettingSaveFailed;
+
+  /// 알림 설정 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 불러오지 못했어요'**
+  String get notificationSettingLoadFailed;
+
+  /// 알림 목록을 받지 못했을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 불러오지 못했어요'**
+  String get notificationListFailed;
+
+  /// 알림이 가리키는 이룸이가 내 목록에 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 이룸이의 알림은 더 볼 수 없어요'**
+  String get notificationProfileUnavailable;
+
+  /// 알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'\'{title}\' 일과를 끝냈어요'**
+  String notificationRoutineCompletedOne(String title);
+
+  /// 알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 {count}개를 끝냈어요'**
+  String notificationRoutineCompletedMany(int count);
+
+  /// 알림 줄: 일과를 끝냄(제목을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 끝냈어요'**
+  String get notificationRoutineCompletedNoTitle;
+
+  /// 알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자가 \'{title}\' 일과를 보냈어요'**
+  String notificationRoutineSent(String title);
+
+  /// 알림 줄: 다른 보호자가 일과를 보냄(제목을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자가 새 일과를 보냈어요'**
+  String get notificationRoutineSentNoTitle;
+
+  /// 알림 줄: 새 보호자가 합류함
+  ///
+  /// In ko, this message translates to:
+  /// **'새 보호자가 함께하기 시작했어요'**
+  String get notificationCoGuardianJoined;
+
+  /// 알림 줄: 주간 크레딧이 다시 채워짐
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 채워졌어요'**
+  String get notificationCreditRefilled;
+
+  /// 알림 줄: 보낸 의견이 처리됨
+  ///
+  /// In ko, this message translates to:
+  /// **'보내 주신 의견을 확인하고 처리했어요'**
+  String get notificationFeedbackResolved;
+
   /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
   ///
   /// In ko, this message translates to:
@@ -3980,23 +4172,23 @@ abstract class AppLocalizations {
   /// **'내 정보'**
   String get guardianTabMe;
 
-  /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
+  /// 내정보 프로필 카드: 닉네임 위 역할 이름. 닉네임이 없으면 이 문구가 이름 자리에 감
   ///
   /// In ko, this message translates to:
   /// **'보호자'**
   String get guardianMyInfoProfileName;
 
-  /// 내정보 프로필 카드 안내: 연결된 이룸이 수
+  /// 내정보 프로필 카드: 이메일이 없거나 애플 숨김 주소인 계정 (#849)
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 {count}명과 함께해요'**
-  String guardianMyInfoLinkedCount(int count);
+  /// **'이메일 비공개'**
+  String get guardianMyInfoEmailPrivate;
 
-  /// 내정보 프로필 카드 안내: 연결된 이룸이가 0명
+  /// 내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)
   ///
   /// In ko, this message translates to:
-  /// **'연결된 이룸이가 아직 없어요'**
-  String get guardianMyInfoNoLinked;
+  /// **'{date} 가입'**
+  String guardianMyInfoJoinedOn(DateTime date);
 
   /// 내정보 이룸이 목록 묶음 머리 글
   ///
@@ -4531,6 +4723,66 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과관리 사용법 다시 보기'**
   String get guardianSettingsRoutineManageGuide;
+
+  /// 첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝내면 알려 드릴까요?'**
+  String get pushPermissionSheetTitle;
+
+  /// 알림 권한 안내 시트 설명 — 받게 되는 알림 종류
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요'**
+  String get pushPermissionSheetBody;
+
+  /// 알림 권한 안내 시트의 허용 버튼 (누르면 시스템 권한 창)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 받기'**
+  String get pushPermissionAllow;
+
+  /// 알림 권한 안내 시트의 보류 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get pushPermissionLater;
+
+  /// 시스템 권한 창에서 거부했을 때 안내 팝업 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정에서 언제든 켤 수 있어요'**
+  String get pushPermissionDenied;
+
+  /// 안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 알림'**
+  String get pushChannelGuardianUpdates;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카카오'**
+  String get signInProviderKakao;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'네이버'**
+  String get signInProviderNaver;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'구글'**
+  String get signInProviderGoogle;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'애플'**
+  String get signInProviderApple;
 }
 
 class _AppLocalizationsDelegate

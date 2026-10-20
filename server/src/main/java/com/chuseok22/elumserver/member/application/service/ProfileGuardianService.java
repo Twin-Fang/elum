@@ -53,6 +53,31 @@ public class ProfileGuardianService {
     return names;
   }
 
+  /**
+   * 이 보호자가 접근할 수 있는 이룸이의 현재 이름 한 번에 조회 (profileId > 이름)
+   * 연결되지 않았거나 지워진 이룸이는 담지 않는다 (알림 목록이 이름을 흘리지 않게)
+   */
+  @Transactional(readOnly = true)
+  public Map<String, String> profileNamesOf(String memberId, Collection<String> profileIds) {
+    Map<String, String> names = new HashMap<>();
+    if (memberId == null || profileIds == null || profileIds.isEmpty()) {
+      return names;
+    }
+    for (ProfileGuardianRepository.ProfileName profile
+      : profileGuardianRepository.findProfileNamesByMemberIdAndProfileIdIn(memberId, profileIds)) {
+      names.put(profile.getProfileId(), profile.getNickname());
+    }
+    return names;
+  }
+
+  /** 이 이룸이를 돌보는 보호자들의 member id, 먼저 합류한 차례 (알림 받는 사람 계산용) */
+  @Transactional(readOnly = true)
+  public List<String> guardianMemberIdsOf(String profileId) {
+    return profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(profileId).stream()
+      .map(guardian -> guardian.getMember().getId())
+      .toList();
+  }
+
   /** 함께하는 사람 목록, 먼저 합류한 차례. */
   @Transactional(readOnly = true)
   public GuardianListResponse list(Caller caller, String profileId) {

@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
+import '../domain/guardian_account.dart';
 import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -21,6 +23,7 @@ class Member {
     this.imageStyle = ImageStyle.cartoon,
     this.profiles = const [],
     this.adsRemoved = false,
+    this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
 
@@ -48,6 +51,11 @@ class Member {
   /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
   final bool adsRemoved;
 
+  /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
+  ///
+  /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
+  final GuardianAccount? account;
+
   final bool? _profilesKnown;
 
   /// 응답에 이룸이 목록이 **있었는가.** 다중 보호자 이전 서버는 필드가 없다 — 그때 빈
@@ -64,6 +72,7 @@ class Member {
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
         adsRemoved != other.adsRemoved ||
+        account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
         profiles.length != other.profiles.length) {
@@ -107,6 +116,7 @@ class Member {
         final Map<dynamic, dynamic> e => e['adsRemoved'] == true,
         _ => false,
       },
+      account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );
   }
@@ -152,6 +162,38 @@ class MemberRepository {
       final member = body == null ? null : Member.fromJson(body);
       if (member == null || member.profiles.isEmpty) {
         // 목록이 없으면 어느 이룸이가 생겼는지 몰라 실패로 본다
+        throw const AppFailure(fault: NetworkFault.app);
+      }
+      return member;
+    });
+  }
+
+  /// 온보딩 완료 한 번 저장: 이룸이 확보 > 호칭·목표·캐릭터·그림 방식 > 예시 일과 (서버 한 트랜잭션)
+  ///
+  /// 고른 이룸이 헤더를 싣지 않는다. 탈퇴 후 재가입처럼 지워진 이룸이 id 가 남아 있어도 내 이룸이에 저장된다.
+  Future<Attempt<Member>> completeOnboarding({
+    required String nickname,
+    required List<String> supportGoals,
+    required String? character,
+    required String imageStyle,
+    required List<String> exampleCategories,
+  }) {
+    return guarded(_repo, 'completeOnboarding', () async {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/member/onboarding',
+        data: {
+          'nickname': nickname,
+          'supportGoals': supportGoals,
+          'character': ?character,
+          'imageStyle': imageStyle,
+          'exampleCategories': exampleCategories,
+        },
+        options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+      );
+      final body = res.data;
+      final member = body == null ? null : Member.fromJson(body);
+      if (member == null || member.profiles.isEmpty) {
+        // 어느 이룸이에 저장됐는지 몰라 실패로 본다
         throw const AppFailure(fault: NetworkFault.app);
       }
       return member;

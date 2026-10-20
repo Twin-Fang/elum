@@ -28,6 +28,83 @@ class AppNotice {
   final NoticeButton? button;
 }
 
+/// 알림 화면 공지 탭의 공지 한 건 (서버 `NoticeHistoryItemResponse`). 게시가 끝난 공지도 포함
+@immutable
+class NoticeHistoryItem {
+  const NoticeHistoryItem({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.visibleSince,
+    this.imageUrl,
+    this.button,
+  });
+
+  final String id;
+
+  /// `**…**` 강조 표기 포함, 그릴 때 [parseNoticeTitle] 로 나눔
+  final String title;
+  final String body;
+  final String? imageUrl;
+  final NoticeButton? button;
+
+  /// 공지가 올라온 시각 (다시 보이게 고친 공지는 고친 시각)
+  final DateTime visibleSince;
+
+  /// 필수값이 깨졌으면 null (그 항목만 버림)
+  static NoticeHistoryItem? fromJson(Object? entry, {required String baseUrl}) {
+    if (entry is! Map) return null;
+    final id = entry['id'];
+    final title = entry['title'];
+    final body = entry['body'];
+    final visibleSinceRaw = entry['visibleSince'];
+    if (id is! String || id.trim().isEmpty) return null;
+    if (title is! String || _visible(title).trim().isEmpty) return null;
+    if (body is! String || body.trim().isEmpty) return null;
+    final visibleSince =
+        visibleSinceRaw is String ? DateTime.tryParse(visibleSinceRaw) : null;
+    if (visibleSince == null) return null;
+
+    return NoticeHistoryItem(
+      id: id,
+      title: title,
+      body: body,
+      visibleSince: visibleSince,
+      imageUrl: NoticeFeed._resolveImage(entry['imageUrl'], baseUrl),
+      button: NoticeFeed._readButton({
+        'label': entry['buttonLabel'],
+        'url': entry['buttonUrl'],
+      }),
+    );
+  }
+}
+
+/// 공지 탭 목록 한 쪽. [nextCursor] 가 null 이면 마지막 쪽
+@immutable
+class NoticeHistoryPage {
+  const NoticeHistoryPage({required this.items, this.nextCursor});
+
+  final List<NoticeHistoryItem> items;
+  final String? nextCursor;
+
+  factory NoticeHistoryPage.fromJson(
+    Map<String, dynamic> json, {
+    required String baseUrl,
+  }) {
+    final raw = json['items'];
+    final items = <NoticeHistoryItem>[
+      if (raw is List)
+        for (final entry in raw)
+          ?NoticeHistoryItem.fromJson(entry, baseUrl: baseUrl),
+    ];
+    final cursor = json['nextCursor'];
+    return NoticeHistoryPage(
+      items: List.unmodifiable(items),
+      nextCursor: cursor is String && cursor.isNotEmpty ? cursor : null,
+    );
+  }
+}
+
 /// 공지 버튼. `https://` 만 받는다 (N12).
 @immutable
 class NoticeButton {

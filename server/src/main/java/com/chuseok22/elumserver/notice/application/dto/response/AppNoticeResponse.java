@@ -53,7 +53,7 @@ public record AppNoticeResponse(
    * 열쇠의 파일 이름을 {@code v} 로 붙인다. 그림을 바꾸면 열쇠가 바뀌므로 주소도 바뀐다 —
    * 같은 주소에 다른 그림을 두면 앱 이미지 캐시가 옛 그림을 계속 보여준다.
    */
-  private static String imageUrlOf(AppNotice notice) {
+  public static String imageUrlOf(AppNotice notice) {
     String key = notice.getImageKey();
     if (key == null || key.isBlank()) {
       return null;

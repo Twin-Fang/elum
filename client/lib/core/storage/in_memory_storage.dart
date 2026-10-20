@@ -247,6 +247,15 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
       _noticeHidden[noticeId] = json;
 
+  bool _hasAskedPushPermission = false;
+
+  @override
+  bool get hasAskedPushPermission => _hasAskedPushPermission;
+
+  @override
+  Future<void> setHasAskedPushPermission(bool v) async =>
+      _hasAskedPushPermission = v;
+
   @override
   bool get isHomeCoachSeen => _homeCoachSeen;
 

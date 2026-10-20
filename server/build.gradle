@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.chuseok22'
-version = '2.56.0'
+version = '2.57.0'
 description = 'elum-server'
 
 java {
@@ -23,6 +23,11 @@ repositories {
             mavenPom()
             artifact()
         }
+    }
+    // 보호자 닉네임 생성기(suh-random-engine)
+    maven {
+        name = 'suhsaechanNexusReleases'
+        url = uri('https://nexus.suhsaechan.kr/repository/maven-releases/')
     }
 }
 
@@ -64,8 +69,14 @@ dependencies {
     // Chuseok22 API Change Log
     implementation 'com.chuseok22:ApiChangeLog:1.0.1'
 
+    // Firebase Admin (FCM)
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+
     // Chuseok22 Method Logging
     implementation 'com.chuseok22:logging:0.0.9'
+
+    // 보호자 닉네임 자동 생성 (형용사+명사-4자리)
+    implementation 'me.suhsaechan:suh-random-engine:1.1.0'
 }
 
 tasks.named('test') {

@@ -34,6 +34,8 @@ abstract final class AppAssets {
   static const loginKakao = '$_loginIcons/kakao.svg';
   static const loginNaver = '$_loginIcons/naver.svg';
   static const loginApple = '$_loginIcons/apple.svg';
+  // 구글 G 로고 (공식 4색). 로그인 버튼엔 없고 내 정보 가입 방법 배지에만 씀 (#849)
+  static const loginGoogle = '$_loginIcons/google.svg';
 
   /// 공통 팝업의 성공 아이콘 (40×40 원 + 흰 체크). Figma `채크_라운드`(726:4882).
   /// 원과 체크가 한 파일에 있어 크기만 바꿔 쓰면 된다.
@@ -195,8 +197,17 @@ abstract final class AppAssets {
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
 
+  /// 홈 머리 줄의 종 아이콘 (96×96, 투명 배경). 빨간 점은 코드로 그린다.
+  static const notificationBell = '$_images/notification_bell.png';
+
+  /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
+  static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
+
   /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
   static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
+
+  /// 일과관리 빈 상태의 루미 (민트색 폴더를 듦, 1254×1254 투명 배경)
+  static const routinesEmptyLumi = '$_images/routines_empty_lumi.png';
 
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';

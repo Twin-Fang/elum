@@ -193,6 +193,10 @@ enum ServerErrorCode {
   feedbackRateLimited('FEEDBACK_RATE_LIMITED'),
   feedbackNotFound('FEEDBACK_NOT_FOUND'),
 
+  // 알림. 푸시 기기 토큰이 비었거나 너무 길 때, 없는 알림을 읽음 처리할 때.
+  pushTokenInvalid('PUSH_TOKEN_INVALID'),
+  notificationNotFound('NOTIFICATION_NOT_FOUND'),
+
   // 일과 생성 가능 언어. 서버 문구 파일이 빈 언어를 켜려 할 때 관리자 화면에서만 난다 — 앱 사용자는 거의 못 본다.
   contentLocaleNotReady('CONTENT_LOCALE_NOT_READY'),
 

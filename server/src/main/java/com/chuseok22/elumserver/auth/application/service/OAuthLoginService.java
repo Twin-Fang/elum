@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
+import com.chuseok22.elumserver.member.application.service.MemberNicknameService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -55,6 +56,7 @@ public class OAuthLoginService {
   private final RefreshTokenService refreshTokenService;
   private final WithdrawnMemberService withdrawnMemberService;
   private final CreditAccountService creditAccountService;
+  private final MemberNicknameService memberNicknameService;
 
   public OAuthLoginService(
     List<OAuthVerifier> oAuthVerifiers,
@@ -67,7 +69,8 @@ public class OAuthLoginService {
     JwtProperties jwtProperties,
     RefreshTokenService refreshTokenService,
     WithdrawnMemberService withdrawnMemberService,
-    CreditAccountService creditAccountService
+    CreditAccountService creditAccountService,
+    MemberNicknameService memberNicknameService
   ) {
     oAuthVerifiers.forEach(verifier -> this.verifiers.put(verifier.provider(), verifier));
     this.authIdentityRepository = authIdentityRepository;
@@ -80,6 +83,7 @@ public class OAuthLoginService {
     this.refreshTokenService = refreshTokenService;
     this.withdrawnMemberService = withdrawnMemberService;
     this.creditAccountService = creditAccountService;
+    this.memberNicknameService = memberNicknameService;
   }
 
   @Transactional
@@ -181,6 +185,7 @@ public class OAuthLoginService {
     member.setUsername(provider.name().toLowerCase() + "_" + oAuthUser.providerUserId());
     // 소셜 계정은 비밀번호 로그인을 쓰지 않는다. 아무도 모르는 값을 넣어 그 경로를 막는다.
     member.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+    memberNicknameService.assignIfAbsent(member);
     memberRepository.save(member);
 
     AuthIdentity identity = new AuthIdentity();

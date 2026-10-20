@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
+import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,12 +41,14 @@ class FeedbackServiceTest {
 
   @Mock
   private FeedbackRepository repository;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   private FeedbackService service;
 
   @BeforeEach
   void setUp() {
-    service = new FeedbackService(repository, CLOCK);
+    service = new FeedbackService(repository, CLOCK, eventPublisher);
   }
 
   private static FeedbackRequest request(String message, String appLog, String version, String os) {
@@ -223,6 +227,38 @@ class FeedbackServiceTest {
 
     assertThat(feedback.getStatusChangedBy()).isEqualTo("first");
     assertThat(feedback.getStatusChangedAt()).isEqualTo(NOW.minusDays(1));
+  }
+
+  @Test
+  @DisplayName("처리 완료로 바꾸면 의견을 보낸 사람 id 로 의견 처리 이벤트가 나간다")
+  void changeStatus_toDone_publishesFeedbackResolved() {
+    Feedback feedback = storedFeedback("f1");
+    feedback.setMemberId("member-1");
+
+    service.changeStatus("f1", FeedbackStatus.DONE, "kimchi");
+
+    verify(eventPublisher).publishEvent(new FeedbackResolvedEvent("f1", "member-1"));
+  }
+
+  @Test
+  @DisplayName("처리 중으로 바꾸면 이벤트가 나가지 않는다")
+  void changeStatus_toInProgress_publishesNothing() {
+    storedFeedback("f1");
+
+    service.changeStatus("f1", FeedbackStatus.IN_PROGRESS, "kimchi");
+
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
+  }
+
+  @Test
+  @DisplayName("이미 처리 완료인 의견을 같은 상태로 바꾸면 이벤트가 나가지 않는다")
+  void changeStatus_sameStatus_publishesNothing() {
+    Feedback feedback = storedFeedback("f1");
+    feedback.setStatus(FeedbackStatus.DONE);
+
+    service.changeStatus("f1", FeedbackStatus.DONE, "second");
+
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
   }
 
   @Test

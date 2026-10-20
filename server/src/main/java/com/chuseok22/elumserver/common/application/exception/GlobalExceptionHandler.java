@@ -34,6 +34,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
     "com.chuseok22.elumserver.feedback",
     "com.chuseok22.elumserver.link",
     "com.chuseok22.elumserver.notice",
+    "com.chuseok22.elumserver.notification",
     "com.chuseok22.elumserver.routine",
     "com.chuseok22.elumserver.systemconfig"
   },

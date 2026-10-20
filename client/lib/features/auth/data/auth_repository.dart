@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
@@ -95,11 +96,13 @@ class AuthRepository {
     required TokenStore tokens,
     required OAuthSdk sdk,
     CardImageDiskCache? imageCache,
+    PushUnregister? unregisterPush,
   }) : _dio = dio,
        _storage = storage,
        _tokens = tokens,
        _sdk = sdk,
-       _imageCache = imageCache;
+       _imageCache = imageCache,
+       _unregisterPush = unregisterPush;
 
   final Dio _dio;
   final LocalStorage _storage;
@@ -108,6 +111,9 @@ class AuthRepository {
 
   /// 기기에 남은 카드 그림. 보호자가 올린 사진이 들어 있어 계정이 끝나면 함께 지운다.
   final CardImageDiskCache? _imageCache;
+
+  /// 로그아웃·회원삭제 직전 푸시 토큰 해제 (세션이 살아 있을 때만 서버 해제가 통함)
+  final PushUnregister? _unregisterPush;
 
   /// 진행 중인 갱신 요청. **동시에 여러 번 갱신하지 않기 위한 장치다.**
   ///
@@ -410,6 +416,8 @@ class AuthRepository {
   /// 로그아웃했다고 생각하는데 앱은 로그인 상태로 동작한다.
   Future<void> logout() async {
     finishGuardianPinSetup();
+    // 푸시 해제 (로그아웃 요청 전, 실패해도 계속)
+    await _unregisterPush?.call();
     final refresh = _tokens.refreshToken;
     if (refresh != null && refresh.isNotEmpty) {
       try {
@@ -443,6 +451,8 @@ class AuthRepository {
   /// null 이면 지워졌다. 실패하면 **서버가 알려준 이유**가 담겨 온다.
   Future<AppFailure?> deleteAccount() async {
     finishGuardianPinSetup();
+    // 푸시 해제 (계정 삭제 전, 실패해도 계속)
+    await _unregisterPush?.call();
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
@@ -487,6 +497,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     sdk: ref.watch(oAuthSdkProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
+    // 호출 시점에 읽는다 (알림 기능이 인증을 읽으므로 만들 때 읽으면 순환)
+    unregisterPush: () => ref.read(pushUnregisterProvider)(),
   )..restoreGuardianPinRequirement(lockMissing: ref.watch(startupLockMissingProvider));
 });
 

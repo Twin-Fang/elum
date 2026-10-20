@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
@@ -60,8 +61,8 @@ class LibraryEmptyState extends StatelessWidget {
 
   final double bottomSpace;
 
-  /// 안내 아이콘 한 변
-  static const _iconSize = 56.0;
+  /// 루미 일러스트 한 변 (정사각형, 여백 포함)
+  static const _illustrationSize = 220.0;
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +78,12 @@ class LibraryEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.folder_outlined,
-              size: _iconSize.w,
-              color: colors.navIconUnselected,
+            Image.asset(
+              AppAssets.routinesEmptyLumi,
+              width: _illustrationSize.w,
+              height: _illustrationSize.w,
+              // 장식 그림 (제목이 뜻을 전한다)
+              excludeFromSemantics: true,
             ),
             SizedBox(height: space.md.h),
             Text(

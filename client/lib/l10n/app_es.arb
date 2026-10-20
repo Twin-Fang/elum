@@ -15,5 +15,9 @@
   "exampleCategoryHouseSelfHint": "Ordenar, poner la mesa",
   "exampleCategoryOutside": "Salir y probar",
   "exampleCategoryOutsideHint": "Tomar el autobús, hacer compras",
-  "exampleRoutinesFailed": "No se pudieron añadir las rutinas de ejemplo"
+  "exampleRoutinesFailed": "No se pudieron añadir las rutinas de ejemplo",
+  "signInProviderKakao": "Kakao",
+  "signInProviderNaver": "Naver",
+  "signInProviderGoogle": "Google",
+  "signInProviderApple": "Apple"
 }

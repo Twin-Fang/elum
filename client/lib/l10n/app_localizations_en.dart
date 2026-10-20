@@ -1040,6 +1040,115 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianHomeGoChildScreen => 'Go to Elumi mode';
 
   @override
+  String get notificationBellLabel => 'Notifications';
+
+  @override
+  String get notificationBellUnreadLabel => 'You have unread notifications';
+
+  @override
+  String get notificationTabNotifications => 'Notifications';
+
+  @override
+  String get notificationTabNotices => 'Notices';
+
+  @override
+  String get notificationDayToday => 'Today';
+
+  @override
+  String get notificationDayYesterday => 'Yesterday';
+
+  @override
+  String get notificationDayEarlier => 'Earlier';
+
+  @override
+  String get notificationMarkAllRead => 'Mark all read';
+
+  @override
+  String get notificationEmpty => 'No notifications yet';
+
+  @override
+  String get notificationNoticeEmpty => 'No notices yet';
+
+  @override
+  String get notificationNoticeFailed => 'Couldn\'t load notices';
+
+  @override
+  String get notificationSettingsTitle => 'Notification settings';
+
+  @override
+  String get notificationSettingAll => 'All notifications';
+
+  @override
+  String get notificationSettingRoutineCompleted =>
+      'When an ELUM user finishes a routine';
+
+  @override
+  String get notificationSettingRoutineSent =>
+      'When a co-guardian sends a routine';
+
+  @override
+  String get notificationSettingCoGuardianJoined => 'When a new guardian joins';
+
+  @override
+  String get notificationSettingCreditRefilled =>
+      'When this week\'s credits are refilled';
+
+  @override
+  String get notificationSettingFeedbackResolved =>
+      'When your feedback is resolved';
+
+  @override
+  String get notificationPermissionOff =>
+      'Device notifications are off, so you won\'t receive alerts';
+
+  @override
+  String get notificationOpenDeviceSettings => 'Open device settings';
+
+  @override
+  String get notificationSettingSaveFailed => 'Couldn\'t save your settings';
+
+  @override
+  String get notificationSettingLoadFailed => 'Couldn\'t load your settings';
+
+  @override
+  String get notificationListFailed => 'Couldn\'t load notifications';
+
+  @override
+  String get notificationProfileUnavailable =>
+      'This ELUM user is no longer available';
+
+  @override
+  String notificationRoutineCompletedOne(String title) {
+    return 'Finished \'$title\'';
+  }
+
+  @override
+  String notificationRoutineCompletedMany(int count) {
+    return 'Finished $count routines';
+  }
+
+  @override
+  String get notificationRoutineCompletedNoTitle => 'Finished a routine';
+
+  @override
+  String notificationRoutineSent(String title) {
+    return 'A co-guardian sent \'$title\'';
+  }
+
+  @override
+  String get notificationRoutineSentNoTitle =>
+      'A co-guardian sent a new routine';
+
+  @override
+  String get notificationCoGuardianJoined => 'A new guardian joined';
+
+  @override
+  String get notificationCreditRefilled => 'This week\'s credits are refilled';
+
+  @override
+  String get notificationFeedbackResolved => 'We reviewed your feedback';
+
+  @override
   String get guardianHomeSettings => 'Settings';
 
   @override
@@ -2283,18 +2392,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianMyInfoProfileName => 'Guardian';
 
   @override
-  String guardianMyInfoLinkedCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Together with $count Elumis',
-      one: 'Together with 1 Elumi',
-    );
-    return '$_temp0';
-  }
+  String get guardianMyInfoEmailPrivate => 'Email private';
 
   @override
-  String get guardianMyInfoNoLinked => 'No Elumi connected yet';
+  String guardianMyInfoJoinedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat(
+      'y.MM.dd',
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Joined $dateString';
+  }
 
   @override
   String get guardianMyInfoChildrenHeader => 'Elumi';
@@ -2599,4 +2708,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
+
+  @override
+  String get pushPermissionSheetTitle =>
+      'Want a heads-up when your ELUM user finishes a routine?';
+
+  @override
+  String get pushPermissionSheetBody =>
+      'You\'ll also get updates from other guardians and credit reminders';
+
+  @override
+  String get pushPermissionAllow => 'Turn on';
+
+  @override
+  String get pushPermissionLater => 'Not now';
+
+  @override
+  String get pushPermissionDenied =>
+      'You can turn this on anytime in notification settings';
+
+  @override
+  String get pushChannelGuardianUpdates => 'Guardian updates';
+
+  @override
+  String get signInProviderKakao => 'Kakao';
+
+  @override
+  String get signInProviderNaver => 'Naver';
+
+  @override
+  String get signInProviderGoogle => 'Google';
+
+  @override
+  String get signInProviderApple => 'Apple';
 }

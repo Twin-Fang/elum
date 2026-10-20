@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/notifications/local_notifications_plugin.dart';
 import '../../../core/storage/local_storage.dart';
 import '../data/reminder_scheduler.dart';
 import '../domain/routine_reminder.dart';
@@ -12,7 +13,9 @@ import '../domain/routine_reminder.dart';
 enum ReminderSaveResult { scheduled, permissionDenied, failed }
 
 final reminderSchedulerProvider = Provider<ReminderScheduler>(
-  (ref) => LocalNotificationReminderScheduler(),
+  (ref) => LocalNotificationReminderScheduler(
+    notifications: ref.read(localNotificationsPluginProvider),
+  ),
 );
 
 /// 일과별 알림 상태 (#777): 저장소 읽기 > 켜기(권한 > 예약 > 저장) / 끄기(취소 > 저장)

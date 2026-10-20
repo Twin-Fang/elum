@@ -18,6 +18,11 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   boolean existsByUsername(String username);
 
+  boolean existsByNickname(String nickname);
+
+  /** 닉네임이 없는 계정 (V46 이전 가입자). 기동 시 일괄 채움용 */
+  List<Member> findAllByNicknameIsNull();
+
   /**
    * 계정 행을 잠그고 읽는다. 같은 보호자의 새 이룸이 만들기가 겹칠 때 차례로 줄 세우려는 것이다 —
    * 아직 없는 이룸이는 잠글 행이 없어서, 이 보호자의 계정 행을 대신 잠근다.

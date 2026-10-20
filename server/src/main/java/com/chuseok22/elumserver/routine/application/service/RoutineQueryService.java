@@ -62,6 +62,16 @@ public class RoutineQueryService {
       .collect(Collectors.toMap(Routine::getId, Routine::getTitle));
   }
 
+  /// 일과 제목 묶음 조회 (id > 제목), 주어진 이룸이에 속한 일과만. 알림 목록이 접근 가능한 이룸이의 일과만 보이게 쓴다.
+  /// 지워졌거나 다른 이룸이의 일과는 결과에 없다.
+  public Map<String, String> titlesOf(Collection<String> routineIds, Collection<String> accessibleProfileIds) {
+    if (routineIds.isEmpty() || accessibleProfileIds.isEmpty()) {
+      return Map.of();
+    }
+    return routineRepository.findAllByIdInAndProfileIdIn(routineIds, accessibleProfileIds).stream()
+      .collect(Collectors.toMap(Routine::getId, Routine::getTitle, (first, second) -> first));
+  }
+
   /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
   /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.
   public List<RecentRewardResponse> getRecentRewards(Caller caller) {

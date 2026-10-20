@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,6 +22,7 @@ import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
+import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
@@ -200,7 +203,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       );
       return;
     }
+    // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+    final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
     context.go(Routes.guardian);
+    // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
+    // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
+    // ignore: use_build_context_synchronously
+    unawaited(pushPermissionPrompt.maybeAsk(rootContext));
   }
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.

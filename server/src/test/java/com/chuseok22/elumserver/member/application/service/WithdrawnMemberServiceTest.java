@@ -62,6 +62,9 @@ class WithdrawnMemberServiceTest {
   private com.chuseok22.elumserver.feedback.application.service.FeedbackService feedbackService;
 
   @Mock
+  private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock

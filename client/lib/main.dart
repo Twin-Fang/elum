@@ -8,6 +8,8 @@ import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
+import 'core/push/push_unregister_hook.dart';
+import 'core/push/firebase_bootstrap.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
@@ -18,6 +20,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/elum_error_view.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
+import 'features/notification/application/push_token_registrar.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
 
@@ -34,6 +37,9 @@ Future<void> main() async {
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
   await AppConfig.load();
+
+  // 푸시(FCM) 준비. 실패해도 앱은 계속 시작한다.
+  await initializeFirebase();
 
   // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
   // 하므로 초기화 직후에 건다.
@@ -112,6 +118,10 @@ Future<void> main() async {
         localStorageProvider.overrideWithValue(storage),
         tokenStoreProvider.overrideWithValue(tokens),
         startupLockMissingProvider.overrideWithValue(lockMissing),
+        // 로그아웃·회원삭제·이룸이 기기 전환 직전 푸시 토큰 해제 (인증·연결 data 가 알림을 직접 모르므로 여기서 연결)
+        pushUnregisterProvider.overrideWith(
+          (ref) => ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+        ),
       ],
       child: const ElumApp(),
     ),

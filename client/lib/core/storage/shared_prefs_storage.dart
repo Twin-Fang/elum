@@ -51,6 +51,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
+  static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
@@ -301,6 +302,16 @@ class SharedPrefsStorage implements LocalStorage {
     // 판과 기한 숫자뿐이라 값을 남겨도 된다
     AppLogger.storageWrite('$_kNoticeHiddenPrefix$noticeId', json);
     return _prefs.setString('$_kNoticeHiddenPrefix$noticeId', json);
+  }
+
+  @override
+  bool get hasAskedPushPermission =>
+      _prefs.getBool(_kHasAskedPushPermission) ?? false;
+
+  @override
+  Future<void> setHasAskedPushPermission(bool v) async {
+    AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
+    await _prefs.setBool(_kHasAskedPushPermission, v);
   }
 
   @override
