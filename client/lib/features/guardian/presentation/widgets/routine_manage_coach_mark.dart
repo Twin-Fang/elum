@@ -7,9 +7,9 @@ import '../../../ads/application/tracking_prompt_gate.dart';
 import '../../application/routine_manage_coach_notifier.dart';
 import 'routine_manage_coach_stage.dart';
 
-/// 일과관리 코치마크 트리거: 이 칸이 보이는 순간 연습 무대를 띄운다 (#861)
+/// 일과관리 코치마크 트리거: 이 칸이 보이는 순간 안내 무대를 띄운다 (#861)
 ///
-/// 화면에는 아무것도 그리지 않는다. 안내는 루트 위 전체 화면 연습 무대가 맡아 하단 바까지 터치를 막는다.
+/// 화면에는 아무것도 그리지 않는다. 안내는 루트 위 전체 화면 안내 무대가 맡아 하단 바까지 터치를 막는다.
 class RoutineManageCoachTrigger extends ConsumerStatefulWidget {
   const RoutineManageCoachTrigger({super.key});
 
@@ -28,7 +28,7 @@ class _RoutineManageCoachTriggerState
   int _retryCount = 0;
   bool _isWaitingRoute = false;
 
-  /// 연습 무대를 띄운 상태인가 (같은 무대를 두 번 띄우지 않게)
+  /// 안내 무대를 띄운 상태인가 (같은 무대를 두 번 띄우지 않게)
   bool _isStageOpen = false;
 
   /// 추적 허용 팝업이 끝났는가. 팝업과 겹치면 무대가 팝업에 가려지므로 끝난 뒤에 띄운다

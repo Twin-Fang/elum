@@ -2743,10 +2743,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInProviderApple => 'Apple';
 
   @override
-  String get routineManageCoachPracticeBanner =>
-      '연습 화면이에요 · 여기서 누른 것은 실제 일과를 바꾸지 않아요';
-
-  @override
   String get routineManageCoachSampleMorning => '아침 준비';
 
   @override

@@ -4784,25 +4784,19 @@ abstract class AppLocalizations {
   /// **'애플'**
   String get signInProviderApple;
 
-  /// 일과관리 코치마크 연습 무대 위 안내 (#861)
-  ///
-  /// In ko, this message translates to:
-  /// **'연습 화면이에요 · 여기서 누른 것은 실제 일과를 바꾸지 않아요'**
-  String get routineManageCoachPracticeBanner;
-
-  /// 일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)
+  /// 일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)
   ///
   /// In ko, this message translates to:
   /// **'아침 준비'**
   String get routineManageCoachSampleMorning;
 
-  /// 일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)
+  /// 일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)
   ///
   /// In ko, this message translates to:
   /// **'양치하기'**
   String get routineManageCoachSampleBrush;
 
-  /// 일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)
+  /// 일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)
   ///
   /// In ko, this message translates to:
   /// **'가방 챙기기'**

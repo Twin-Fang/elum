@@ -11,12 +11,13 @@ import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
 import '../../application/routine_manage_coach_notifier.dart';
+import 'coach_demo_content.dart';
 import 'coach_demo_layers.dart';
 import 'library_entry_grid.dart';
 import 'library_parts.dart';
 import 'library_routine_tile.dart';
 
-/// 일과관리 연습 무대 (#861): 예시 일과가 놓인 연습 화면 위에서 코치마크를 보여 준다
+/// 일과관리 안내 무대 (#861): 예시 일과가 놓인 일과관리 화면 위에서 코치마크를 보여 준다
 ///
 /// 루트 위 전체 화면이라 하단 바까지 터치가 막힌다. 칸·버튼은 실제 위젯과 같은 모양이지만 눌러도 아무 일도 없고,
 /// 서버·실제 일과는 건드리지 않는다. 일과가 0개인 사용자도 같은 장면을 본다.
@@ -44,14 +45,10 @@ class _RoutineManageCoachStageState
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
 
-  /// 예시 칸을 내려 두는 비율 (격자 자리 높이 기준). 말풍선이 칸 위에 오게 해
-  /// 아래에서 올라오는 시트 · 칸 옆 메뉴와 겹치지 않는다
-  static const _gridTopFraction = 0.34;
-
   /// 코치마크 ✕ 가 차지하는 위쪽 높이 (안전영역 아래 8 + 버튼 40)
   static const _closeButtonSpace = 48.0;
 
-  /// 연습 화면의 칸: 예시 일과 첫째 · 둘째, `+ 일과 만들기`
+  /// 안내 화면의 칸: 예시 일과 첫째 · 둘째, `+ 일과 만들기`
   final _firstTileKey = GlobalKey();
   final _secondTileKey = GlobalKey();
   final _createButtonKey = GlobalKey();
@@ -117,8 +114,8 @@ class _RoutineManageCoachStageState
           message: l10n.routineManageCoachLongPressMessage,
           holeRadius: tileRadius,
           demoBuilder: longPressDemo,
-          // 칸 옆·아래로 메뉴가 펼쳐지므로 말풍선은 칸 위에
-          shouldPlaceBubbleAbove: true,
+          // 칸 옆 메뉴가 칸보다 길게 내려오므로 말풍선은 메뉴 아래에
+          pointerGap: _menuOverhangBelowTile(),
         );
       case RoutineManageCoachStep.sentBadge:
         return CoachMarkStep(
@@ -130,8 +127,6 @@ class _RoutineManageCoachStageState
             rect,
             routineTitle: samples.first.displayTitle,
           ),
-          // 칸 아래에 토스트가 뜨므로 말풍선은 칸 위에
-          shouldPlaceBubbleAbove: true,
         );
       case RoutineManageCoachStep.dragToGroup:
         return CoachMarkStep(
@@ -143,6 +138,11 @@ class _RoutineManageCoachStageState
             firstRect,
             _secondTileRect(firstRect),
             ghost: LibraryRoutineThumbnail(routine: samples.first),
+            // 놓으면 생기는 묶음 칸: 끈 일과 + 받은 일과
+            groupItems: [
+              for (final routine in samples.take(2))
+                LibraryRoutineThumbnail(routine: routine),
+            ],
           ),
         );
       case RoutineManageCoachStep.createGroup:
@@ -153,6 +153,27 @@ class _RoutineManageCoachStageState
           demoBuilder: createGroupDemo,
         );
     }
+  }
+
+  /// 칸 옆 메뉴가 첫 칸 아래로 삐져나오는 길이 + 간격. 칸을 아직 못 쟀으면 0
+  double _menuOverhangBelowTile() {
+    final box = _firstTileKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return 0;
+    final menuHeight =
+        CoachDemoAnchoredMenu.rowHeight.h * CoachDemoAnchoredMenu.rowCount;
+    final overhang = menuHeight - box.size.height;
+    return overhang > 0 ? overhang + context.space.sm.h : 0;
+  }
+
+  /// 예시 칸 줄 아래 끝 + 간격 (무대 좌표). 칸을 아직 못 쟀으면 null
+  double? _belowTileRow() {
+    final stageBox = context.findRenderObject();
+    final box = _firstTileKey.currentContext?.findRenderObject();
+    if (stageBox is! RenderBox || box is! RenderBox || !box.attached) {
+      return null;
+    }
+    final origin = box.localToGlobal(Offset.zero, ancestor: stageBox);
+    return origin.dy + box.size.height + context.space.xl.h;
   }
 
   /// 둘째 칸 상자 (무대 좌표). 못 재면 첫 칸 오른쪽 옆으로 본다
@@ -200,7 +221,7 @@ class _RoutineManageCoachStageState
       _retainedIndex = state.index;
     }
     final steps = _retainedSteps ?? const [];
-    // 보여 줄 단계 없이 열렸으면(이미 끝남) 빈 연습 화면에 갇히지 않게 바로 닫는다
+    // 보여 줄 단계 없이 열렸으면(이미 끝남) 빈 안내 화면에 갇히지 않게 바로 닫는다
     if (steps.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _close());
     }
@@ -232,20 +253,7 @@ class _RoutineManageCoachStageState
                 // 위 왼쪽 ✕ 자리만큼 제목을 내린다 (✕ 가 제목 첫 글자를 덮지 않게)
                 SizedBox(height: _closeButtonSpace.h),
                 const LibraryManageHeader(),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) => Column(
-                      children: [
-                        SizedBox(
-                          height: constraints.maxHeight * _gridTopFraction,
-                        ),
-                        Expanded(
-                          child: _buildSampleGrid(samples, isArrangingDemo),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                Expanded(child: _buildSampleGrid(samples, isArrangingDemo)),
               ],
             ),
           ),
@@ -260,8 +268,8 @@ class _RoutineManageCoachStageState
                 ],
                 index: state.isActive ? state.index : _retainedIndex,
                 visible: state.isActive,
-                // 연습 화면 안내: 아래 점과 함께 다녀 말풍선 · 시범과 겹치지 않는다
-                footerNote: context.l10n.routineManageCoachPracticeBanner,
+                // 점·문구를 위로 옮길 때 제목·칸 줄 아래에 둔다
+                footerTopOffset: _belowTileRow(),
                 onNext: notifier.next,
                 onClose: notifier.finish,
                 // 다 사라지면 무대를 닫는다 (본 것 저장은 띄운 쪽이 맡는다)

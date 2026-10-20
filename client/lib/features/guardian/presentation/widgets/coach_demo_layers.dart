@@ -53,14 +53,14 @@ Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
               LibraryRoutineTile.iconSize.w / 2 -
               gap -
               menuWidth;
-    // 칸 위 끝에 맞추되, 아래 점·안내 문구(+알림 띠) 자리는 넘지 않게 올린다
+    // 칸 위 끝에 맞추되, 아래 점·안내 문구 자리는 넘지 않게 올린다
     final media = MediaQuery.of(context);
     final menuHeight =
         CoachDemoAnchoredMenu.rowHeight.h * CoachDemoAnchoredMenu.rowCount;
     final menuBottomLimit =
         media.size.height -
         media.padding.bottom -
-        (CoachMarkOverlay.bottomReserve + CoachMarkOverlay.footerNoteReserve).h;
+        CoachMarkOverlay.bottomReserve.h;
     final menuTop = target.top.clamp(
       media.padding.top,
       (menuBottomLimit - menuHeight).clamp(media.padding.top, double.infinity),
@@ -124,8 +124,11 @@ Widget sentBadgeDemo(
         Positioned(
           left: 0,
           right: 0,
-          // 칸 바로 아래 (아래 점·안내 자리와 겹치지 않게)
-          top: target.bottom + context.space.lg.h,
+          // 아래 점·안내 문구 바로 위 (말풍선은 칸 아래에 온다)
+          bottom:
+              MediaQuery.paddingOf(context).bottom +
+              CoachMarkOverlay.bottomReserve.h +
+              context.space.sm.h,
           child: Opacity(
             opacity:
                 coachDemoPhase(t, 0.35, 0.5) * (1 - coachDemoPhase(t, 0.9, 1)),
@@ -143,12 +146,13 @@ Widget sentBadgeDemo(
 
 /// 끌어서 묶기: 첫 칸 그림을 들어 올려 둘째 칸 위로 > 놓으면 그 자리에 묶음 칸이 생김
 ///
-/// [ghost] 는 끌려가는 그림 칸에 들어갈 내용 (연습 무대는 예시 일과 그림을 넘긴다). 없으면 빈 칸.
+/// [ghost] 는 끌려가는 그림 칸 내용, [groupItems] 는 놓은 뒤 묶음 칸 안 그림 (안내 무대는 예시 일과 그림). 없으면 빈 칸.
 Widget dragToGroupDemo(
   BuildContext context,
   Rect first,
   Rect second, {
   Widget? ghost,
+  List<Widget> groupItems = const [],
 }) => buildCoachDemoLoop(
   endScene: 0.8,
   builder: (context, t) {
@@ -208,7 +212,10 @@ Widget dragToGroupDemo(
           rect: to,
           child: Transform.scale(
             scale: Curves.easeOutBack.transform(drop),
-            child: Opacity(opacity: drop, child: const CoachDemoGroupPreview()),
+            child: Opacity(
+              opacity: drop,
+              child: CoachDemoGroupPreview(items: groupItems),
+            ),
           ),
         ),
         CoachDemoFinger(

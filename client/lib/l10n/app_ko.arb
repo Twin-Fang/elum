@@ -2225,12 +2225,10 @@
   "@signInProviderGoogle": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
   "signInProviderApple": "애플",
   "@signInProviderApple": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
-  "routineManageCoachPracticeBanner": "연습 화면이에요 · 여기서 누른 것은 실제 일과를 바꾸지 않아요",
-  "@routineManageCoachPracticeBanner": {"description": "일과관리 코치마크 연습 무대 위 안내 (#861)"},
   "routineManageCoachSampleMorning": "아침 준비",
-  "@routineManageCoachSampleMorning": {"description": "일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)"},
+  "@routineManageCoachSampleMorning": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
   "routineManageCoachSampleBrush": "양치하기",
-  "@routineManageCoachSampleBrush": {"description": "일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)"},
+  "@routineManageCoachSampleBrush": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
   "routineManageCoachSampleBag": "가방 챙기기",
-  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 연습 무대의 예시 일과 이름 (#861)"}
+  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"}
 }

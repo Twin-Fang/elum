@@ -179,22 +179,42 @@ class CoachDemoGhostTile extends StatelessWidget {
 
 /// 묶음 칸의 2×2 미리보기 모양 (일과 둘 + 빈 칸 둘)
 class CoachDemoGroupPreview extends StatelessWidget {
-  const CoachDemoGroupPreview({super.key});
+  const CoachDemoGroupPreview({super.key, this.items = const []});
+
+  /// 앞 두 칸에 그릴 일과 그림 (최대 2개). 없으면 색 칸
+  final List<Widget> items;
+
+  /// 칸 그림을 먼저 그리는 크기 (실제 묶음 칸과 같다)
+  static const _itemRenderSize = 100.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    Widget cell({required bool isFilled}) => Expanded(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: isFilled ? colors.checkDone : colors.buttonNeutral,
-          borderRadius: BorderRadius.circular(6.r),
+    Widget cell({required bool isFilled, Widget? child}) => Expanded(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6.r),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isFilled ? colors.surface : colors.background,
+          ),
+          // 실제 묶음 칸처럼 큰 칸에 그린 뒤 줄인다 (그림 여백이 고정이라 작은 칸에 바로 그리면 흰 칸이 된다)
+          child: child == null
+              ? null
+              : FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox.square(
+                    dimension: _itemRenderSize,
+                    child: child,
+                  ),
+                ),
         ),
       ),
     );
+    Widget? itemAt(int index) => index < items.length ? items[index] : null;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.surface,
+        // 막 위에 떠 있으므로 실제 화면 바탕에 얹은 색으로 (반투명이면 어둡게 비친다)
+        color: Color.alphaBlend(colors.folderFill, colors.background),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Padding(
@@ -204,7 +224,10 @@ class CoachDemoGroupPreview extends StatelessWidget {
             Expanded(
               child: Row(
                 spacing: 4.w,
-                children: [cell(isFilled: true), cell(isFilled: true)],
+                children: [
+                  cell(isFilled: true, child: itemAt(0)),
+                  cell(isFilled: true, child: itemAt(1)),
+                ],
               ),
             ),
             SizedBox(height: 4.w),
