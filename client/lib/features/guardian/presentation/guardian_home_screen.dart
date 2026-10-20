@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../ads/application/tracking_prompt_gate.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/elum_toast.dart';
@@ -76,6 +77,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
   /// 홈이 맨 앞에서 가만히 있는지 지켜보는 타이머.
   Timer? _coachSettle;
+
+  /// 추적 허용 팝업이 끝났는가. 팝업과 코치마크가 겹치면 팝업에 가려 안내가 보이지 않는다
+  bool _isTrackingPromptDone = false;
 
   /// 다시 확인하는 간격과 최대 횟수(0.5초 × 60 = 30초). 팝업은 닫혀도 홈이 다시 그려지지
   /// 않아서, 기다렸다 물어보지 않으면 코치마크가 그 실행에서 영영 시작하지 못한다.
@@ -156,6 +160,14 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   void _startCoachNow() {
     _coachSettle = null;
     if (!mounted) return;
+    if (!_isTrackingPromptDone) {
+      waitForTrackingPrompt().whenComplete(() {
+        _isTrackingPromptDone = true;
+        // 기다리는 사이 화면이 바뀌었을 수 있어 처음부터 다시 따진다
+        if (mounted) _maybeStartCoach();
+      });
+      return;
+    }
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) {
       _retryCoachLater();

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../ads/application/tracking_prompt_gate.dart';
 import '../../application/routine_manage_coach_notifier.dart';
 import 'routine_manage_coach_stage.dart';
 
@@ -30,6 +31,10 @@ class _RoutineManageCoachTriggerState
   /// 연습 무대를 띄운 상태인가 (같은 무대를 두 번 띄우지 않게)
   bool _isStageOpen = false;
 
+  /// 추적 허용 팝업이 끝났는가. 팝업과 겹치면 무대가 팝업에 가려지므로 끝난 뒤에 띄운다
+  bool _isTrackingPromptDone = false;
+  bool _isWaitingTrackingPrompt = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +56,7 @@ class _RoutineManageCoachTriggerState
 
   /// 띄울 때인지 보고 맞으면 바로 띄운다
   ///
-  /// 조건 3개: 이 칸이 보이는 탭, 이 화면이 맨 앞, 화면 전환이 끝남. 기다리는 시간은 두지 않는다.
+  /// 조건 4개: 이 칸이 보이는 탭, 이 화면이 맨 앞, 화면 전환이 끝남, 추적 허용 팝업이 끝남. 그 밖의 대기는 없다.
   void _maybeOpen() {
     if (!mounted || _isStageOpen || !TickerMode.of(context)) return;
     final route = ModalRoute.of(context);
@@ -71,6 +76,18 @@ class _RoutineManageCoachTriggerState
       }
 
       animation.addStatusListener(onStatus);
+      return;
+    }
+
+    if (!_isTrackingPromptDone) {
+      if (_isWaitingTrackingPrompt) return;
+      _isWaitingTrackingPrompt = true;
+      waitForTrackingPrompt().whenComplete(() {
+        _isTrackingPromptDone = true;
+        _isWaitingTrackingPrompt = false;
+        // 기다리는 사이 칸·화면이 바뀌었을 수 있어 처음부터 다시 따진다
+        _maybeOpen();
+      });
       return;
     }
 

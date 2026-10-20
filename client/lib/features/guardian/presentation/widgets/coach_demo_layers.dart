@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/coach_mark_overlay.dart';
 import 'coach_demo_content.dart';
 import 'coach_demo_parts.dart';
 import 'library_routine_tile.dart';
@@ -12,9 +13,6 @@ import 'library_routine_tile.dart';
 ///
 /// 모두 `CoachMarkStep.demoBuilder` 에 꽂을 수 있게 [Positioned] 를 돌려준다.
 /// 한 주기는 [AppMotion.coachDemoLoop]. 동작 줄이기면 멈춘 마지막 장면만 그린다.
-
-/// 보낸 뒤 토스트: 화면 바닥에서 띄우는 거리 (진행 점·안내 문구 위)
-const _toastBottomInset = 190.0;
 
 /// 누르기: 칸 탭 > 상세 시트(카드 고치기 | 오늘 보내기)가 올라옴
 Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
@@ -38,19 +36,64 @@ Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
   ),
 );
 
-/// 길게 누르기: 칸 꾹 + 링이 퍼짐 (실제 메뉴는 칸 옆에 뜨는데 말풍선 글자를 가려서 그리지 않는다)
+/// 길게 눌렀다 떼기: 꾹 누르면 링이 퍼지고, 손을 떼면 칸 옆에 메뉴가 뜬다 (끌지 않으면 메뉴)
+///
+/// 메뉴는 실제처럼 그림 칸 오른쪽 위에 붙인다. 화면 오른쪽 끝을 넘으면 칸 왼쪽으로 돌린다.
 Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
-  endScene: 0.5,
-  builder: (context, t) => Stack(
-    children: [
-      CoachDemoFinger(
-        center: target.center,
-        press: coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.6, 0.7)),
-        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),
-      ),
-      CoachDemoRing(center: target.center, spread: coachDemoPhase(t, 0.2, 0.6)),
-    ],
-  ),
+  endScene: 0.85,
+  builder: (context, t) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final menuWidth = CoachDemoAnchoredMenu.width.w;
+    final gap = context.space.xs.w;
+    final iconRight = target.center.dx + LibraryRoutineTile.iconSize.w / 2;
+    final isRoomOnRight = iconRight + gap + menuWidth <= screenWidth - gap;
+    final menuLeft = isRoomOnRight
+        ? iconRight + gap
+        : target.center.dx -
+              LibraryRoutineTile.iconSize.w / 2 -
+              gap -
+              menuWidth;
+    // 칸 위 끝에 맞추되, 아래 점·안내 문구(+알림 띠) 자리는 넘지 않게 올린다
+    final media = MediaQuery.of(context);
+    final menuHeight =
+        CoachDemoAnchoredMenu.rowHeight.h * CoachDemoAnchoredMenu.rowCount;
+    final menuBottomLimit =
+        media.size.height -
+        media.padding.bottom -
+        (CoachMarkOverlay.bottomReserve + CoachMarkOverlay.footerNoteReserve).h;
+    final menuTop = target.top.clamp(
+      media.padding.top,
+      (menuBottomLimit - menuHeight).clamp(media.padding.top, double.infinity),
+    );
+    final appear = coachDemoPhase(t, 0.5, 0.6);
+    return Stack(
+      children: [
+        CoachDemoFinger(
+          center: target.center,
+          press:
+              coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.45, 0.5)),
+          appear:
+              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.5, 0.58)),
+        ),
+        CoachDemoRing(
+          center: target.center,
+          spread: coachDemoPhase(t, 0.2, 0.45),
+        ),
+        Positioned(
+          left: menuLeft,
+          top: menuTop,
+          child: Opacity(
+            opacity: appear,
+            child: Transform.scale(
+              scale: 0.92 + 0.08 * appear,
+              alignment: isRoomOnRight ? Alignment.topLeft : Alignment.topRight,
+              child: const CoachDemoAnchoredMenu(),
+            ),
+          ),
+        ),
+      ],
+    );
+  },
 );
 
 /// 보낸 뒤: ✓ 배지가 칸에 톡 붙고 실제 토스트 문구가 뜸
@@ -81,7 +124,8 @@ Widget sentBadgeDemo(
         Positioned(
           left: 0,
           right: 0,
-          bottom: _toastBottomInset.h,
+          // 칸 바로 아래 (아래 점·안내 자리와 겹치지 않게)
+          top: target.bottom + context.space.lg.h,
           child: Opacity(
             opacity:
                 coachDemoPhase(t, 0.35, 0.5) * (1 - coachDemoPhase(t, 0.9, 1)),

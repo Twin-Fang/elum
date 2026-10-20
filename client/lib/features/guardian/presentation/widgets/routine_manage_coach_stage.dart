@@ -44,6 +44,13 @@ class _RoutineManageCoachStageState
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
 
+  /// 예시 칸을 내려 두는 비율 (격자 자리 높이 기준). 말풍선이 칸 위에 오게 해
+  /// 아래에서 올라오는 시트 · 칸 옆 메뉴와 겹치지 않는다
+  static const _gridTopFraction = 0.34;
+
+  /// 코치마크 ✕ 가 차지하는 위쪽 높이 (안전영역 아래 8 + 버튼 40)
+  static const _closeButtonSpace = 48.0;
+
   /// 연습 화면의 칸: 예시 일과 첫째 · 둘째, `+ 일과 만들기`
   final _firstTileKey = GlobalKey();
   final _secondTileKey = GlobalKey();
@@ -53,7 +60,13 @@ class _RoutineManageCoachStageState
   List<RoutineManageCoachStep>? _retainedSteps;
   int _retainedIndex = 0;
 
-  /// 예시 일과 3개 (카드 3장씩, 그림 없이 제목 첫 글자 칸)
+  /// 예시 일과 3개 (카드 3장씩). 첫 카드 픽토그램이 칸 그림이 된다: 일어나기, 양치, 가방
+  static const _samplePictogramIds = [
+    'wake_up_,_to',
+    'brush_teeth_,_to',
+    'school_bag',
+  ];
+
   List<Routine> _sampleRoutines(BuildContext context) {
     final l10n = context.l10n;
     final titles = [
@@ -71,9 +84,12 @@ class _RoutineManageCoachStageState
           steps: [
             for (var order = 1; order <= 3; order++)
               ActionCard(
-                id: 'coach-sample-$index-$order',
+                // 카드 id 비움: 그림 서버 요청을 건너뛰고 픽토그램으로 바로 그린다
+                id: '',
+                title: title,
                 stepOrder: order,
                 description: '',
+                pictogramId: _samplePictogramIds[index],
               ),
           ],
         ),
@@ -101,6 +117,8 @@ class _RoutineManageCoachStageState
           message: l10n.routineManageCoachLongPressMessage,
           holeRadius: tileRadius,
           demoBuilder: longPressDemo,
+          // 칸 옆·아래로 메뉴가 펼쳐지므로 말풍선은 칸 위에
+          shouldPlaceBubbleAbove: true,
         );
       case RoutineManageCoachStep.sentBadge:
         return CoachMarkStep(
@@ -112,6 +130,8 @@ class _RoutineManageCoachStageState
             rect,
             routineTitle: samples.first.displayTitle,
           ),
+          // 칸 아래에 토스트가 뜨므로 말풍선은 칸 위에
+          shouldPlaceBubbleAbove: true,
         );
       case RoutineManageCoachStep.dragToGroup:
         return CoachMarkStep(
@@ -150,10 +170,30 @@ class _RoutineManageCoachStageState
     if (mounted) Navigator.of(context).pop();
   }
 
+  /// 예시 일과 격자: 실제 일과관리 격자 위젯 그대로 (눌러도 아무 일도 없다)
+  Widget _buildSampleGrid(List<Routine> samples, bool isArranging) =>
+      LibraryEntryGrid(
+        entries: [for (final routine in samples) LibraryRoutineEntry(routine)],
+        sentIds: const {},
+        bottomSpace: (_createButtonHeight + _createButtonMargin * 2).h,
+        isArranging: isArranging,
+        onRoutineTap: null,
+        onRoutineMenu: null,
+        onGroupTap: null,
+        onGroupMenu: null,
+        onDropOnRoutine: null,
+        onDropOnGroup: null,
+        onMoveCell: null,
+        onArrangeStart: null,
+        onRemoveRoutine: null,
+        onRemoveGroup: null,
+        firstRoutineTileKey: _firstTileKey,
+        secondRoutineTileKey: _secondTileKey,
+      );
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final space = context.space;
     final state = ref.watch(routineManageCoachProvider);
     if (state.isActive) {
       _retainedSteps = state.steps;
@@ -166,6 +206,9 @@ class _RoutineManageCoachStageState
     }
     final samples = _sampleRoutines(context);
     final notifier = ref.read(routineManageCoachProvider.notifier);
+    // 끌어서 묶기 단계에서는 실제처럼 정리 상태(흔들림 · ⊖ · 가운데 버튼 완료)를 켠다
+    final isArrangingDemo =
+        state.isActive && state.current == RoutineManageCoachStep.dragToGroup;
 
     return Stack(
       children: [
@@ -178,6 +221,7 @@ class _RoutineManageCoachStageState
             child: CreateRoutineFab(
               height: _createButtonHeight.h,
               isBusy: false,
+              isArranging: isArrangingDemo,
               onTap: () {},
             ),
           ),
@@ -185,43 +229,21 @@ class _RoutineManageCoachStageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 위 왼쪽 ✕ 자리만큼 제목을 내린다 (✕ 가 제목 첫 글자를 덮지 않게)
+                SizedBox(height: _closeButtonSpace.h),
                 const LibraryManageHeader(),
-                // 연습 화면임을 알린다: 여기서 일어나는 일은 실제 일과를 바꾸지 않는다
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: space.md.w,
-                    vertical: space.xs.h,
-                  ),
-                  child: Text(
-                    context.l10n.routineManageCoachPracticeBanner,
-                    style: context.typo.caption.copyWith(
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ),
                 Expanded(
-                  child: LibraryEntryGrid(
-                    entries: [
-                      for (final routine in samples)
-                        LibraryRoutineEntry(routine),
-                    ],
-                    sentIds: const {},
-                    bottomSpace:
-                        (_createButtonHeight + _createButtonMargin * 2).h,
-                    isArranging: false,
-                    // 연습 화면의 칸은 눌러도 아무 일도 없다
-                    onRoutineTap: null,
-                    onRoutineMenu: null,
-                    onGroupTap: null,
-                    onGroupMenu: null,
-                    onDropOnRoutine: null,
-                    onDropOnGroup: null,
-                    onMoveCell: null,
-                    onArrangeStart: null,
-                    onRemoveRoutine: null,
-                    onRemoveGroup: null,
-                    firstRoutineTileKey: _firstTileKey,
-                    secondRoutineTileKey: _secondTileKey,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Column(
+                      children: [
+                        SizedBox(
+                          height: constraints.maxHeight * _gridTopFraction,
+                        ),
+                        Expanded(
+                          child: _buildSampleGrid(samples, isArrangingDemo),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -238,6 +260,8 @@ class _RoutineManageCoachStageState
                 ],
                 index: state.isActive ? state.index : _retainedIndex,
                 visible: state.isActive,
+                // 연습 화면 안내: 아래 점과 함께 다녀 말풍선 · 시범과 겹치지 않는다
+                footerNote: context.l10n.routineManageCoachPracticeBanner,
                 onNext: notifier.next,
                 onClose: notifier.finish,
                 // 다 사라지면 무대를 닫는다 (본 것 저장은 띄운 쪽이 맡는다)

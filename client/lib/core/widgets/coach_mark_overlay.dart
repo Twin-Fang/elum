@@ -30,7 +30,14 @@ class CoachMarkOverlay extends StatefulWidget {
     required this.onNext,
     required this.onClose,
     required this.onDismissed,
+    this.footerNote,
   });
+
+  /// 아래 점과 안내 문구가 차지하는 자리. 말풍선·시범 메뉴가 여기를 침범하지 않게 한다.
+  static const bottomReserve = 176.0;
+
+  /// [footerNote] 가 있을 때 아래 자리에 더하는 높이 (알림 띠 한 줄 + 간격)
+  static const footerNoteReserve = 44.0;
 
   final List<CoachMarkStep> steps;
   final int index;
@@ -46,6 +53,9 @@ class CoachMarkOverlay extends StatefulWidget {
 
   /// 사라지는 연출이 끝났을 때. 이제 위젯을 치워도 된다.
   final VoidCallback onDismissed;
+
+  /// 아래 점 위에 늘 띄우는 알림 띠 (연습 화면 안내 등). 점과 함께 위·아래로 옮겨 다닌다
+  final String? footerNote;
 
   @override
   State<CoachMarkOverlay> createState() => _CoachMarkOverlayState();
@@ -96,9 +106,6 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
 
   /// 처음 나타날 때 구멍이 대상보다 얼마나 넓게 시작하는가.
   static const _introSpread = 28.0;
-
-  /// 아래 점과 안내 문구가 차지하는 자리. 말풍선이 여기를 침범하지 않게 한다.
-  static const _bottomReserve = 176.0;
 
   bool get _reduceMotion => MediaQuery.disableAnimationsOf(context);
 
@@ -385,6 +392,8 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                                     textAlign: textAlign,
                                     alignEnd: step.align == CoachMarkAlign.end,
                                     gapY: step.pointerGap,
+                                    shouldPlaceAbove:
+                                        step.shouldPlaceBubbleAbove,
                                   ),
                                 )
                               : null,
@@ -396,6 +405,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                           isMotionReduced: reduce,
                           // 대상이 아래 문구 자리에 닿으면 말풍선이 거기를 쓴다 — 문구를 위로 옮긴다
                           isAtTop: _isTargetInFooterZone(context),
+                          note: widget.footerNote,
                         ),
                         CoachMarkCloseButton(onClose: _close),
                       ],
@@ -409,13 +419,21 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     );
   }
 
-  /// 가리키는 대상이 아래 점·문구 자리(바닥 [_bottomReserve])에 걸치는가
+  /// 아래 점·문구(+알림 띠) 자리 높이
+  double get _bottomReservePixels =>
+      (CoachMarkOverlay.bottomReserve +
+              (widget.footerNote == null
+                  ? 0
+                  : CoachMarkOverlay.footerNoteReserve))
+          .h;
+
+  /// 가리키는 대상이 아래 점·문구 자리(바닥 [_bottomReservePixels])에 걸치는가
   bool _isTargetInFooterZone(BuildContext context) {
     final hole = _to;
     if (hole == null) return false;
     final media = MediaQuery.of(context);
     return hole.rect.bottom >
-        media.size.height - media.padding.bottom - _bottomReserve.h;
+        media.size.height - media.padding.bottom - _bottomReservePixels;
   }
 
   /// 화살표 + 글. 아래에 자리가 모자라면 위에 놓고 화살표를 뒤집는다.
@@ -427,6 +445,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     required TextAlign textAlign,
     required bool alignEnd,
     required double gapY,
+    required bool shouldPlaceAbove,
   }) {
     final media = MediaQuery.of(context);
     final size = media.size;
@@ -444,10 +463,12 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     final roomBelow =
         size.height -
         media.padding.bottom -
-        _bottomReserve.h -
+        _bottomReservePixels -
         hole.rect.bottom;
     final roomAbove = hole.rect.top - media.padding.top;
-    final below = roomBelow >= need || roomBelow >= roomAbove;
+    final below = shouldPlaceAbove && roomAbove >= need
+        ? false
+        : roomBelow >= need || roomBelow >= roomAbove;
 
     final reduce = _reduceMotion;
     return CustomMultiChildLayout(
