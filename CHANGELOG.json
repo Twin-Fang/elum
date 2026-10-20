@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T10:14:47Z",
-    "currentVersion": "2.61.0",
+    "lastUpdated": "2026-10-20T11:49:51Z",
+    "currentVersion": "2.62.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 287
+    "totalReleases": 288
   },
   "releases": [
+    {
+      "version": "2.62.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 894,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 일과 관리에서 일과를 길게 누르면 바로 메뉴가 떠요\n  * 묶음에서 일과를 뺄 때 한 번 더 확인해요\n\n* **개선**\n  * 일과를 끌면 손가락을 따라 부드럽게 움직여요\n  * 홈·묶음·카드 순서 바꾸기가 더 자연스러워졌어요\n  * 기기 알림이 꺼져 있을 때 알림 설정 안내가 깔끔해졌어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "일과 관리에서 일과를 길게 누르면 바로 메뉴가 떠요",
+            "묶음에서 일과를 뺄 때 한 번 더 확인해요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과를 끌면 손가락을 따라 부드럽게 움직여요",
+            "홈·묶음·카드 순서 바꾸기가 더 자연스러워졌어요",
+            "기기 알림이 꺼져 있을 때 알림 설정 안내가 깔끔해졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.61.0",
       "project_type": "flutter",
