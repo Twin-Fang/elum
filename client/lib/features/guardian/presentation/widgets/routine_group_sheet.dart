@@ -7,6 +7,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
@@ -136,6 +137,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
 
   /// 빼기: 하나만 남으면 묶음이 풀려 시트를 닫는다
   Future<void> _remove(LibraryGroupEntry entry, Routine routine) async {
+    if (!await _confirmRemove(routine) || !mounted) return;
     setState(() => _isSaving = true);
     final removal = await ref
         .read(routineGroupControllerProvider)
@@ -149,6 +151,31 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     if (removal.outcome == RemoveOutcome.ungrouped) {
       _close(GroupSheetAction.ungroupedLastOne);
     }
+  }
+
+  /// ⊖ 확인: 지우기가 아니라 묶음에서 빼기 (일과는 일과 관리에 남는다). 빼기를 골랐으면 true
+  Future<bool> _confirmRemove(Routine routine) async {
+    final l10n = context.l10n;
+    final isConfirmed = await showElumDialog<bool>(
+      context: context,
+      icon: ElumDialogIcon.alert,
+      title: l10n.routineGroupRemoveConfirmTitle(routine.displayTitle),
+      message: l10n.routineGroupRemoveConfirmMessage,
+      keepWordsInMessage: true,
+      actions: [
+        ElumDialogAction(
+          label: l10n.commonCancel,
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(
+          label: l10n.routineGroupRemoveConfirmAction,
+          value: true,
+          tone: ElumDialogTone.primary,
+        ),
+      ],
+    );
+    return isConfirmed == true;
   }
 
   Future<void> _showFailure(Object? failure, String code) => showFailure(

@@ -4658,6 +4658,24 @@ abstract class AppLocalizations {
   /// **'안에 있던 일과는 일과 관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
 
+  /// 묶음 시트 ⊖ 확인 팝업 제목 (#890)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title} 일과를 묶음에서 뺄까요?'**
+  String routineGroupRemoveConfirmTitle(String title);
+
+  /// 묶음 시트 ⊖ 확인 팝업 본문 (#890) — 지우기가 아니라 묶음에서 빼기
+  ///
+  /// In ko, this message translates to:
+  /// **'일과는 일과 관리에 그대로 남아요'**
+  String get routineGroupRemoveConfirmMessage;
+
+  /// 묶음 시트 ⊖ 확인 팝업 실행 버튼 (#890)
+  ///
+  /// In ko, this message translates to:
+  /// **'빼기'**
+  String get routineGroupRemoveConfirmAction;
+
   /// 이룸이 홈 묶음 상자 (#808)
   ///
   /// In ko, this message translates to:

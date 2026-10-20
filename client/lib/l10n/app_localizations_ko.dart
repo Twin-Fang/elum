@@ -2554,6 +2554,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과 관리에 그대로 남아요';
 
   @override
+  String routineGroupRemoveConfirmTitle(String title) {
+    return '$title 일과를 묶음에서 뺄까요?';
+  }
+
+  @override
+  String get routineGroupRemoveConfirmMessage => '일과는 일과 관리에 그대로 남아요';
+
+  @override
+  String get routineGroupRemoveConfirmAction => '빼기';
+
+  @override
   String childHomeGroupProgress(int done, int total) {
     return '$done / $total';
   }
