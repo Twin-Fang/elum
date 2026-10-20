@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoServic
 import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.notice.application.dto.response.NoticeHistoryPageResponse;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,6 +63,9 @@ class NoticeHistorySecurityTest {
   private LinkAccessValidator linkAccessValidator;
   @MockitoBean
   private SystemConfigService systemConfigService;
+
+  @MockitoBean
+  private SharedStateStore sharedStateStore;
   @MockitoBean
   private AidlpCryptoService aidlpCryptoService;
   @MockitoBean

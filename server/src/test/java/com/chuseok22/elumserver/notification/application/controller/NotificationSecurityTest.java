@@ -25,6 +25,7 @@ import com.chuseok22.elumserver.notification.application.service.NotificationRea
 import com.chuseok22.elumserver.notification.application.service.NotificationSettingService;
 import com.chuseok22.elumserver.notification.application.service.PushDeviceService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,9 @@ class NotificationSecurityTest {
   private LinkAccessValidator linkAccessValidator;
   @MockitoBean
   private SystemConfigService systemConfigService;
+
+  @MockitoBean
+  private SharedStateStore sharedStateStore;
   @MockitoBean
   private AidlpCryptoService aidlpCryptoService;
   @MockitoBean

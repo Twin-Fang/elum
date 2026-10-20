@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.common.infrastructure.config;
 
+import com.chuseok22.elumserver.admin.infrastructure.security.AdminLoginAttemptFilter;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
@@ -9,6 +10,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -44,6 +46,7 @@ public class SecurityConfig {
   private final AidlpDecryptionFilter aidlpDecryptionFilter;
   private final TokenAccessValidator tokenAccessValidator;
   private final SystemConfigService systemConfigService;
+  private final SharedStateStore sharedStateStore;
 
   // Lombok @RequiredArgsConstructor는 필드의 @Qualifier를 생성자 파라미터로 복사하지 않고,
   // UserDetailsService 구현체를 직접 import하면 common -> member/admin 역방향 패키지 의존이
@@ -57,7 +60,8 @@ public class SecurityConfig {
     AidlpDecryptionFilter aidlpDecryptionFilter,
     TokenAccessValidator tokenAccessValidator,
     LinkAccessValidator linkAccessValidator,
-    SystemConfigService systemConfigService
+    SystemConfigService systemConfigService,
+    SharedStateStore sharedStateStore
   ) {
     this.memberUserDetailsService = memberUserDetailsService;
     this.adminUserDetailsService = adminUserDetailsService;
@@ -67,6 +71,7 @@ public class SecurityConfig {
     this.linkAccessValidator = linkAccessValidator;
     this.tokenAccessValidator = tokenAccessValidator;
     this.systemConfigService = systemConfigService;
+    this.sharedStateStore = sharedStateStore;
   }
 
   @Bean
@@ -119,7 +124,11 @@ public class SecurityConfig {
       .logout(logout -> logout
         .logoutUrl(SecurityPaths.ADMIN_LOGOUT)
         .logoutSuccessUrl(SecurityPaths.ADMIN_LOGIN)
-      );
+      )
+      // 관리자 화면 안에서만 iframe 허용 (API 문서 화면). 외부 사이트가 끼워 넣는 것은 계속 막는다.
+      .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+      // 로그인 시도 제한: 인증 처리보다 먼저 (한도 초과 시 비밀번호를 대조하지 않는다)
+      .addFilterBefore(new AdminLoginAttemptFilter(sharedStateStore), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
@@ -167,25 +176,6 @@ public class SecurityConfig {
       .addFilterBefore(maintenanceModeFilter, JwtAuthenticationFilter.class)
       // JWT 인증 이후 실행 — 인증된 요청의 암호화 본문을 복호화해 컨트롤러에 평문 DTO로 넘긴다.
       .addFilterAfter(aidlpDecryptionFilter, JwtAuthenticationFilter.class);
-
-    return http.build();
-  }
-
-  // Swagger UI/OpenAPI 문서 경로는 /admin/**, /api/** 어느 securityMatcher에도 걸리지 않아
-  // 지금까지는 암묵적으로(어떤 체인도 적용되지 않아서) 인증 없이 열려 있었다. 이 상태를
-  // 명시적인 permitAll 체인으로 고정해, 나중에 catch-all 체인이 추가되더라도 문서 접근이
-  // 조용히 막히지 않도록 한다.
-  @Bean
-  @Order(3)
-  public SecurityFilterChain docsSecurityFilterChain(HttpSecurity http) throws Exception {
-    http
-      .securityMatcher(
-        SecurityPaths.DOCS_SWAGGER,
-        SecurityPaths.DOCS_SWAGGER_UI_MATCHER,
-        SecurityPaths.DOCS_API_DOCS_MATCHER
-      )
-      .csrf(csrf -> csrf.disable())
-      .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
     return http.build();
   }

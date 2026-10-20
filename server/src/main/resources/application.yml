@@ -73,5 +73,8 @@ springdoc:
 
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+  # API 문서는 관리자 화면 안에 둔다: /admin/** 체인이 로그인한 관리자에게만 연다 (#870)
+  api-docs:
+    path: /admin/v3/api-docs
   swagger-ui:
-    path: /docs/swagger
+    path: /admin/docs/swagger
