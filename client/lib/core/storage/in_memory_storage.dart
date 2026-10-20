@@ -277,6 +277,13 @@ class InMemoryStorage implements LocalStorage {
       _isGroupCoachSeen = isSeen;
 
   @override
+  Future<void> resetCoachMarks() async {
+    _homeCoachSeen = false;
+    _isManageCoachSeen = false;
+    _isGroupCoachSeen = false;
+  }
+
+  @override
   Future<void> clearChildProfile() async {
     _nickname = null;
     _goals = const [];
