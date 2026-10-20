@@ -985,11 +985,13 @@
   "notificationSettingFeedbackResolved": "의견을 처리했을 때",
   "@notificationSettingFeedbackResolved": {"description": "알림 설정: 의견 처리 푸시 스위치"},
 
-  "notificationPermissionOff": "기기 알림이 꺼져 있어 알림을 받을 수 없어요",
+  "notificationPermissionOff": "기기 알림이 꺼져 있어요",
   "@notificationPermissionOff": {"description": "알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐"},
 
-  "notificationOpenDeviceSettings": "기기 설정 열기",
-  "@notificationOpenDeviceSettings": {"description": "기기 알림 권한 안내 줄의 버튼"},
+  "notificationTurnOnDeviceNotification": "켜기",
+  "@notificationTurnOnDeviceNotification": {"description": "기기 알림 꺼짐 안내 띠의 버튼 (안 물었으면 권한 창, 거부했으면 기기 설정)"},
+  "notificationSettingsLockedHint": "기기 알림을 켜면 이 설정대로 받아요",
+  "@notificationSettingsLockedHint": {"description": "기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명"},
 
   "notificationSettingSaveFailed": "설정을 저장하지 못했어요",
   "@notificationSettingSaveFailed": {"description": "알림 설정 저장 실패 팝업 문구"},

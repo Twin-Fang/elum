@@ -1098,11 +1098,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'When your feedback is resolved';
 
   @override
-  String get notificationPermissionOff =>
-      'Device notifications are off, so you won\'t receive alerts';
+  String get notificationPermissionOff => 'Device notifications are off';
 
   @override
-  String get notificationOpenDeviceSettings => 'Open device settings';
+  String get notificationTurnOnDeviceNotification => 'Turn on';
+
+  @override
+  String get notificationSettingsLockedHint =>
+      'Turn on device notifications to get these alerts';
 
   @override
   String get notificationSettingSaveFailed => 'Couldn\'t save your settings';

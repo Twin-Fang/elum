@@ -1937,14 +1937,20 @@ abstract class AppLocalizations {
   /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
   ///
   /// In ko, this message translates to:
-  /// **'기기 알림이 꺼져 있어 알림을 받을 수 없어요'**
+  /// **'기기 알림이 꺼져 있어요'**
   String get notificationPermissionOff;
 
-  /// 기기 알림 권한 안내 줄의 버튼
+  /// 기기 알림 꺼짐 안내 띠의 버튼 (안 물었으면 권한 창, 거부했으면 기기 설정)
   ///
   /// In ko, this message translates to:
-  /// **'기기 설정 열기'**
-  String get notificationOpenDeviceSettings;
+  /// **'켜기'**
+  String get notificationTurnOnDeviceNotification;
+
+  /// 기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 알림을 켜면 이 설정대로 받아요'**
+  String get notificationSettingsLockedHint;
 
   /// 알림 설정 저장 실패 팝업 문구
   ///

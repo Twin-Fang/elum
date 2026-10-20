@@ -1044,10 +1044,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
 
   @override
-  String get notificationPermissionOff => '기기 알림이 꺼져 있어 알림을 받을 수 없어요';
+  String get notificationPermissionOff => '기기 알림이 꺼져 있어요';
 
   @override
-  String get notificationOpenDeviceSettings => '기기 설정 열기';
+  String get notificationTurnOnDeviceNotification => '켜기';
+
+  @override
+  String get notificationSettingsLockedHint => '기기 알림을 켜면 이 설정대로 받아요';
 
   @override
   String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
