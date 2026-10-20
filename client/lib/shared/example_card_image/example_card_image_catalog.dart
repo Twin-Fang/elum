@@ -1,8 +1,5 @@
-/// 서버가 예시 일과 카드마다 내려주는 `exampleImageId` 의 허용 목록.
-///
-/// 파일은 `assets/images/example_routines/{id}.webp` 31장이다. 서버가 앞서 새 id 를 내려줘도
-/// (앱 업데이트 전) **없는 자산을 그리려다 깨지지 않게** 여기서 걸러 null 로 돌린다 —
-/// 그러면 카드는 픽토그램·기본 카드로 나온다.
+/// 서버 `exampleImageId` 허용 목록: `assets/images/example_routines/{id}.webp` 31장
+/// 번들에 없는 id 는 null 로 걸러 픽토그램·기본 카드로 대체
 abstract final class ExampleCardImageCatalog {
   static const _ids = <String>{
     'board_bus',

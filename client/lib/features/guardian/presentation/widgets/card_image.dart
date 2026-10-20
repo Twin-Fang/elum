@@ -49,11 +49,8 @@ CardImageState watchCardImageState(
       );
 }
 
-/// 이 카드가 그림 자리에 번들 그림(예시 이미지·픽토그램)을 보여주는가.
-///
-/// 사진·AI 그림이 **없을 때만**(우선순위: 사진/AI > 예시 이미지 > 픽토그램 > 기본 카드) 그리고
-/// 번들에 있는 id 일 때만 참이다. [CardImage] 와 카드 안 배치(제목 줄)가 **같은 판정**을
-/// 써야 그림 자리는 번들 그림인데 제목이 그림 자리로 올라가는 어긋남이 없다.
+/// 사진·AI 그림 없이 번들 그림(예시 이미지·픽토그램)이 그림 자리를 채우는가
+/// [CardImage] 와 카드 안 제목 줄 배치가 같은 판정을 쓴다
 bool showsBundledArt(
   CardImageState state, {
   String? pictogramId,
