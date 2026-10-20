@@ -26,8 +26,13 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -204,6 +209,48 @@ public class MemberService {
     member.setConsentVersion(request.consentVersion());
 
     return MemberConsentResponse.from(member);
+  }
+
+  /**
+   * 이야기 이용 규칙 동의 기록 (처음 동의한 시각을 유지, 다시 불러도 덮어쓰지 않음)
+   */
+  @Transactional
+  public void agreeTalkRules(String memberId) {
+    Member member = requireMember(memberId);
+    if (member.getTalkRulesAgreedAt() == null) {
+      member.setTalkRulesAgreedAt(LocalDateTime.now());
+    }
+  }
+
+  public boolean hasAgreedTalkRules(String memberId) {
+    return requireMember(memberId).getTalkRulesAgreedAt() != null;
+  }
+
+  /**
+   * 보호자 id > 보호자 닉네임 (이야기 글쓴이 표시용, 닉네임 없는 계정은 빠짐)
+   */
+  public Map<String, String> nicknamesOf(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<String, String> nicknameByMemberId = new HashMap<>();
+    memberRepository.findAllById(memberIds).stream()
+      .filter(member -> member.getNickname() != null)
+      .forEach(member -> nicknameByMemberId.put(member.getId(), member.getNickname()));
+    return nicknameByMemberId;
+  }
+
+  /**
+   * 주어진 보호자 중 정지된 계정 id (이야기 피드에서 글·댓글을 숨길 때 사용)
+   */
+  public Set<String> suspendedAmong(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Set.of();
+    }
+    return memberRepository.findAllById(memberIds).stream()
+      .filter(member -> member.getStatus() == MemberStatus.SUSPENDED)
+      .map(Member::getId)
+      .collect(Collectors.toSet());
   }
 
   /**
