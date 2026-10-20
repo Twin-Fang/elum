@@ -119,6 +119,11 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                           label: context.l10n.notificationTabNotices,
                           onTap: () => _openNotices(context, ref),
                         ),
+                        SettingsTile(
+                          isInCard: true,
+                          label: context.l10n.talkBlockedGuardiansTitle,
+                          onTap: () => context.push(Routes.guardianTalkBlocks),
+                        ),
                       ],
                     ),
                   ],

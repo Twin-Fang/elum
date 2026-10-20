@@ -2766,6 +2766,196 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkLoadMoreRetry => '더 불러오지 못했어요. 눌러서 다시 해 보세요';
 
   @override
+  String talkDetailStepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '카드 $count장',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get talkDetailLoadFailed => '글을 불러오지 못했어요';
+
+  @override
+  String get talkPostGoneTitle => '내려간 글이에요';
+
+  @override
+  String get talkPostGoneBack => '이야기로 돌아가기';
+
+  @override
+  String get talkStepsTitle => '이렇게 해요';
+
+  @override
+  String get talkHelpfulFailed => '도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요';
+
+  @override
+  String get talkImportButton => '내 일과로 가져오기';
+
+  @override
+  String get talkImportedButton => '✓ 일과관리에 넣었어요';
+
+  @override
+  String get talkCommentsTitle => '댓글';
+
+  @override
+  String get talkCommentsEmpty => '아직 댓글이 없어요';
+
+  @override
+  String get talkCommentsFailed => '댓글을 불러오지 못했어요. 눌러서 다시 해 보세요';
+
+  @override
+  String get talkCommentHint => '댓글을 남겨 보세요';
+
+  @override
+  String get talkCommentSend => '보내기';
+
+  @override
+  String get talkCommentSendFailedTitle => '댓글을 보내지 못했어요';
+
+  @override
+  String get talkFailedFallback => '잠시 뒤에 다시 해 주세요';
+
+  @override
+  String get talkCommentDeleteTitle => '댓글을 지울까요?';
+
+  @override
+  String get talkCommentDeleteAction => '지우기';
+
+  @override
+  String get talkCommentDeleteFailedTitle => '댓글을 지우지 못했어요';
+
+  @override
+  String get talkMenuReport => '신고하기';
+
+  @override
+  String get talkMenuBlock => '이 보호자 글 숨기기';
+
+  @override
+  String get talkMenuEdit => '고치기';
+
+  @override
+  String get talkMenuTakeDown => '내리기';
+
+  @override
+  String get talkMoreLabel => '더보기';
+
+  @override
+  String get talkTakeDownTitle => '이 글을 내릴까요?';
+
+  @override
+  String get talkTakeDownMessage => '내린 글은 다른 보호자에게 더 이상 보이지 않아요.';
+
+  @override
+  String get talkTakeDownDone => '글을 내렸어요';
+
+  @override
+  String get talkTakeDownFailedTitle => '글을 내리지 못했어요';
+
+  @override
+  String get talkEditTitle => '글 고치기';
+
+  @override
+  String get talkEditSave => '저장하기';
+
+  @override
+  String get talkEditSaved => '고쳤어요';
+
+  @override
+  String get talkEditFailedTitle => '글을 고치지 못했어요';
+
+  @override
+  String get talkNoteGuide => '다른 사람 이름·연락처는 적지 말아 주세요';
+
+  @override
+  String get talkCategoryTitle => '분류';
+
+  @override
+  String get talkReportTitle => '신고하기';
+
+  @override
+  String get talkReportSubmit => '신고하기';
+
+  @override
+  String get talkReportDone => '신고했어요';
+
+  @override
+  String get talkReportFailedTitle => '신고하지 못했어요';
+
+  @override
+  String get talkReportReasonPersonalInfo => '이룸이나 가족 정보가 보여요';
+
+  @override
+  String get talkReportReasonOffensive => '기분 나쁜 말이 있어요';
+
+  @override
+  String get talkReportReasonAdvertising => '광고나 홍보예요';
+
+  @override
+  String get talkReportReasonOther => '그 밖의 이유';
+
+  @override
+  String talkBlockTitle(String nickname) {
+    return '$nickname님 글을 숨길까요?';
+  }
+
+  @override
+  String get talkBlockMessage =>
+      '이 보호자의 글과 댓글이 나에게 안 보여요. 상대방은 알 수 없어요. 내 정보 › 숨긴 보호자에서 다시 볼 수 있어요.';
+
+  @override
+  String get talkBlockAction => '숨기기';
+
+  @override
+  String get talkBlockDone => '숨겼어요';
+
+  @override
+  String get talkBlockFailedTitle => '숨기지 못했어요';
+
+  @override
+  String get talkBlockedGuardiansTitle => '숨긴 보호자';
+
+  @override
+  String get talkBlockedGuardiansEmpty => '숨긴 보호자가 없어요';
+
+  @override
+  String get talkBlockedGuardiansFailed => '숨긴 보호자를 불러오지 못했어요';
+
+  @override
+  String get talkUnblockAction => '다시 보기';
+
+  @override
+  String get talkUnblockDone => '다시 볼 수 있어요';
+
+  @override
+  String get talkUnblockFailedTitle => '숨김을 풀지 못했어요';
+
+  @override
+  String get talkRulesTitle => '이야기 이용 규칙';
+
+  @override
+  String get talkRulesIntro => '보호자끼리 안전하게 나누려고 이 세 가지를 지켜 주세요.';
+
+  @override
+  String get talkRulesPrivacy => '얼굴·이름·학교·집 주소가 보이지 않게 해 주세요';
+
+  @override
+  String get talkRulesRespect => '다른 보호자를 존중해 주세요. 비난·광고·홍보는 안 돼요';
+
+  @override
+  String get talkRulesNoDiagnosis => '진단명·병원 정보는 적지 말아 주세요';
+
+  @override
+  String get talkRulesAgreeCheck => '위 규칙을 읽었고 지킬게요';
+
+  @override
+  String get talkRulesAgreeButton => '동의하고 계속하기';
+
+  @override
+  String get talkRulesFailedTitle => '동의를 저장하지 못했어요';
+
+  @override
   String get timeAgoJustNow => '방금 전';
 
   @override

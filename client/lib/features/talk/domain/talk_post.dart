@@ -149,10 +149,11 @@ class TalkPostDetail {
   /// 내가 일과관리로 가져갔는가
   final bool isImportedByMe;
 
-  /// 값을 바꾼 복사본: 도움이 됐어요 토글 직후 화면 갱신용
+  /// 값을 바꾼 복사본: 도움이 됐어요 토글·댓글 수 갱신용
   TalkPostDetail copyWith({
     bool? isHelpfulByMe,
     int? helpfulCount,
+    int? commentCount,
     String? note,
   }) => TalkPostDetail(
     id: id,
@@ -163,12 +164,28 @@ class TalkPostDetail {
     stepCount: stepCount,
     note: note ?? this.note,
     helpfulCount: helpfulCount ?? this.helpfulCount,
-    commentCount: commentCount,
+    commentCount: commentCount ?? this.commentCount,
     importCount: importCount,
     createdAt: createdAt,
     steps: steps,
     isHelpfulByMe: isHelpfulByMe ?? this.isHelpfulByMe,
     isImportedByMe: isImportedByMe,
+  );
+
+  /// 목록 요약 형태로 변환: 가져오기 시트처럼 요약을 받는 곳에 넘길 때
+  TalkPostSummary toSummary() => TalkPostSummary(
+    id: id,
+    authorNickname: authorNickname,
+    isMine: isMine,
+    title: title,
+    category: category,
+    stepCount: stepCount,
+    previewSteps: steps,
+    note: note,
+    helpfulCount: helpfulCount,
+    commentCount: commentCount,
+    importCount: importCount,
+    createdAt: createdAt,
   );
 
   /// id·제목·올린 시각이 깨졌으면 null

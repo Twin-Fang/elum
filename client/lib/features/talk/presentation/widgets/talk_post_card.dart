@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../domain/talk_post.dart';
+import 'talk_category_badge.dart';
 import 'talk_step_image.dart';
 
 /// 피드 글 카드: 닉네임 · 시간 · 분류 > 제목 > 카드 그림 4장(+N) > 한마디 > 도움돼요 · 댓글 · 내 일과로
@@ -64,7 +65,7 @@ class TalkPostCard extends StatelessWidget {
                 ),
                 if (category != null) ...[
                   SizedBox(width: space.xs.w),
-                  _CategoryBadge(label: category.labelOf(l10n)),
+                  TalkCategoryBadge(label: category.labelOf(l10n)),
                 ],
               ],
             ),
@@ -133,35 +134,6 @@ class TalkPostCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CategoryBadge extends StatelessWidget {
-  const _CategoryBadge({required this.label});
-
-  final String label;
-
-  static const _paddingH = 8.0;
-  static const _paddingV = 4.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: _paddingH.w,
-        vertical: _paddingV.h,
-      ),
-      decoration: BoxDecoration(
-        color: colors.editChipBg,
-        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        style: context.typo.caption.copyWith(color: colors.textPrimary),
       ),
     );
   }

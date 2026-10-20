@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/theme_context_ext.dart';
+import '../theme/theme_context_ext.dart';
 
-/// 체크박스 한 줄. 줄 전체가 눌린다. 앱에 체크박스 컴포넌트가 없어 의견 화면용으로 둔다.
-class FeedbackCheckRow extends StatelessWidget {
-  const FeedbackCheckRow({
+/// 체크박스 한 줄. 줄 전체가 눌린다 (의견 보내기·이야기 이용 규칙 동의).
+class ElumCheckRow extends StatelessWidget {
+  const ElumCheckRow({
     super.key,
     required this.label,
     required this.checked,
@@ -61,9 +61,7 @@ class FeedbackCheckRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: context.typo.input.copyWith(
-                    color: colors.textPrimary,
-                  ),
+                  style: context.typo.input.copyWith(color: colors.textPrimary),
                 ),
               ),
             ],

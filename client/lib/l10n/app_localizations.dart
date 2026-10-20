@@ -5012,6 +5012,366 @@ abstract class AppLocalizations {
   /// **'더 불러오지 못했어요. 눌러서 다시 해 보세요'**
   String get talkLoadMoreRetry;
 
+  /// 상세 머리: 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{카드 {count}장}}'**
+  String talkDetailStepCount(int count);
+
+  /// 상세 화면: 글 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 불러오지 못했어요'**
+  String get talkDetailLoadFailed;
+
+  /// 상세 화면: 글이 내려갔거나 없을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'내려간 글이에요'**
+  String get talkPostGoneTitle;
+
+  /// 상세 화면: 내려간 글 안내의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기로 돌아가기'**
+  String get talkPostGoneBack;
+
+  /// 상세 화면: 카드 목록 위 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 해요'**
+  String get talkStepsTitle;
+
+  /// 상세 화면: 도움돼요 누르기 실패 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요'**
+  String get talkHelpfulFailed;
+
+  /// 상세 화면 아래 고정 버튼: 이 일과를 내 일과관리로 가져오기
+  ///
+  /// In ko, this message translates to:
+  /// **'내 일과로 가져오기'**
+  String get talkImportButton;
+
+  /// 상세 화면 아래 고정 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ 일과관리에 넣었어요'**
+  String get talkImportedButton;
+
+  /// 상세 화면: 댓글 목록 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글'**
+  String get talkCommentsTitle;
+
+  /// 상세 화면: 댓글 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 댓글이 없어요'**
+  String get talkCommentsEmpty;
+
+  /// 상세 화면: 댓글 첫 쪽 불러오기 실패 줄(누르면 다시 받기)
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 불러오지 못했어요. 눌러서 다시 해 보세요'**
+  String get talkCommentsFailed;
+
+  /// 상세 화면 댓글 입력창 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 남겨 보세요'**
+  String get talkCommentHint;
+
+  /// 상세 화면 댓글 보내기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get talkCommentSend;
+
+  /// 댓글 보내기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 보내지 못했어요'**
+  String get talkCommentSendFailedTitle;
+
+  /// 이야기 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤에 다시 해 주세요'**
+  String get talkFailedFallback;
+
+  /// 내 댓글 지우기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 지울까요?'**
+  String get talkCommentDeleteTitle;
+
+  /// 내 댓글 지우기 확인 대화상자·메뉴의 지우기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기'**
+  String get talkCommentDeleteAction;
+
+  /// 댓글 지우기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 지우지 못했어요'**
+  String get talkCommentDeleteFailedTitle;
+
+  /// 글·댓글 더보기 메뉴: 신고
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkMenuReport;
+
+  /// 글·댓글 더보기 메뉴: 글쓴이 숨기기
+  ///
+  /// In ko, this message translates to:
+  /// **'이 보호자 글 숨기기'**
+  String get talkMenuBlock;
+
+  /// 내 글 더보기 메뉴: 한마디와 분류 고치기
+  ///
+  /// In ko, this message translates to:
+  /// **'고치기'**
+  String get talkMenuEdit;
+
+  /// 내 글 더보기 메뉴: 글 내리기
+  ///
+  /// In ko, this message translates to:
+  /// **'내리기'**
+  String get talkMenuTakeDown;
+
+  /// 상세 화면 오른쪽 위 점 세 개 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'더보기'**
+  String get talkMoreLabel;
+
+  /// 내 글 내리기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이 글을 내릴까요?'**
+  String get talkTakeDownTitle;
+
+  /// 내 글 내리기 확인 대화상자 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'내린 글은 다른 보호자에게 더 이상 보이지 않아요.'**
+  String get talkTakeDownMessage;
+
+  /// 글 내리기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 내렸어요'**
+  String get talkTakeDownDone;
+
+  /// 글 내리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 내리지 못했어요'**
+  String get talkTakeDownFailedTitle;
+
+  /// 내 글 고치기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글 고치기'**
+  String get talkEditTitle;
+
+  /// 내 글 고치기 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get talkEditSave;
+
+  /// 글 고치기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'고쳤어요'**
+  String get talkEditSaved;
+
+  /// 글 고치기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 고치지 못했어요'**
+  String get talkEditFailedTitle;
+
+  /// 한마디 입력창 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 사람 이름·연락처는 적지 말아 주세요'**
+  String get talkNoteGuide;
+
+  /// 분류 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'분류'**
+  String get talkCategoryTitle;
+
+  /// 신고 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkReportTitle;
+
+  /// 신고 시트 보내기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkReportSubmit;
+
+  /// 신고 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'신고했어요'**
+  String get talkReportDone;
+
+  /// 신고 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하지 못했어요'**
+  String get talkReportFailedTitle;
+
+  /// 신고 사유 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이나 가족 정보가 보여요'**
+  String get talkReportReasonPersonalInfo;
+
+  /// 신고 사유 2
+  ///
+  /// In ko, this message translates to:
+  /// **'기분 나쁜 말이 있어요'**
+  String get talkReportReasonOffensive;
+
+  /// 신고 사유 3
+  ///
+  /// In ko, this message translates to:
+  /// **'광고나 홍보예요'**
+  String get talkReportReasonAdvertising;
+
+  /// 신고 사유 4
+  ///
+  /// In ko, this message translates to:
+  /// **'그 밖의 이유'**
+  String get talkReportReasonOther;
+
+  /// 글쓴이 숨기기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'{nickname}님 글을 숨길까요?'**
+  String talkBlockTitle(String nickname);
+
+  /// 글쓴이 숨기기 확인 대화상자 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 보호자의 글과 댓글이 나에게 안 보여요. 상대방은 알 수 없어요. 내 정보 › 숨긴 보호자에서 다시 볼 수 있어요.'**
+  String get talkBlockMessage;
+
+  /// 글쓴이 숨기기 확인 대화상자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'숨기기'**
+  String get talkBlockAction;
+
+  /// 글쓴이 숨기기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'숨겼어요'**
+  String get talkBlockDone;
+
+  /// 글쓴이 숨기기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨기지 못했어요'**
+  String get talkBlockFailedTitle;
+
+  /// 내 정보 줄 이름이자 숨긴 보호자 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자'**
+  String get talkBlockedGuardiansTitle;
+
+  /// 숨긴 보호자 화면 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자가 없어요'**
+  String get talkBlockedGuardiansEmpty;
+
+  /// 숨긴 보호자 화면 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자를 불러오지 못했어요'**
+  String get talkBlockedGuardiansFailed;
+
+  /// 숨긴 보호자 줄 버튼: 숨김 풀기
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 보기'**
+  String get talkUnblockAction;
+
+  /// 숨김 풀기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 볼 수 있어요'**
+  String get talkUnblockDone;
+
+  /// 숨김 풀기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨김을 풀지 못했어요'**
+  String get talkUnblockFailedTitle;
+
+  /// 이용 규칙 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기 이용 규칙'**
+  String get talkRulesTitle;
+
+  /// 이용 규칙 시트 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자끼리 안전하게 나누려고 이 세 가지를 지켜 주세요.'**
+  String get talkRulesIntro;
+
+  /// 이용 규칙 1
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴·이름·학교·집 주소가 보이지 않게 해 주세요'**
+  String get talkRulesPrivacy;
+
+  /// 이용 규칙 2
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자를 존중해 주세요. 비난·광고·홍보는 안 돼요'**
+  String get talkRulesRespect;
+
+  /// 이용 규칙 3
+  ///
+  /// In ko, this message translates to:
+  /// **'진단명·병원 정보는 적지 말아 주세요'**
+  String get talkRulesNoDiagnosis;
+
+  /// 이용 규칙 동의 체크 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'위 규칙을 읽었고 지킬게요'**
+  String get talkRulesAgreeCheck;
+
+  /// 이용 규칙 동의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'동의하고 계속하기'**
+  String get talkRulesAgreeButton;
+
+  /// 이용 규칙 동의 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'동의를 저장하지 못했어요'**
+  String get talkRulesFailedTitle;
+
   /// 1분이 안 지난 시각 표기
   ///
   /// In ko, this message translates to:

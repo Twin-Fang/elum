@@ -21,6 +21,8 @@ import '../../features/profile/presentation/elumi_info_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
+import '../../features/talk/presentation/talk_blocked_guardians_screen.dart';
+import '../../features/talk/presentation/talk_detail_screen.dart';
 import '../../features/talk/presentation/talk_feed_screen.dart';
 import '../config/ad_ids.dart';
 import '../layout/adaptive_page_frame.dart';
@@ -93,6 +95,20 @@ List<RouteBase> guardianRoutes() => [
         ],
       ),
     ],
+  ),
+  // 이야기 글 상세·숨긴 보호자: 하단 바를 덮는 화면이라 셸 밖에 둔다
+  GoRoute(
+    path: Routes.guardianTalkPost,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      TalkDetailScreen(postId: state.pathParameters['postId'] ?? ''),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  GoRoute(
+    path: Routes.guardianTalkBlocks,
+    pageBuilder: (context, state) =>
+        slidePage(state, const TalkBlockedGuardiansScreen()),
   ),
   // 설정은 내정보 칸 위에 열린다 (하단 바를 덮고 뒤로가기가 있다)
   GoRoute(
