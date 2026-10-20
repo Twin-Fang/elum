@@ -5,7 +5,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/state/single_flight.dart';
 import '../../../shared/models/action_card.dart';
-import '../../credit/data/credit_repository.dart';
+import '../../credit/application/credit_summary_refresh.dart';
 import '../data/routine_repository.dart';
 import '../domain/added_card_image_state.dart';
 import 'routine_flow_state.dart';
@@ -118,7 +118,7 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     );
     // 그림 1장 크레딧 예약됨 > 잔액 표시 갱신
     if (imageState == AddedCardImageState.generating) {
-      ref.invalidate(creditSummaryProvider);
+      refreshCreditSummary(ref);
     }
     return (
       failure: null,
