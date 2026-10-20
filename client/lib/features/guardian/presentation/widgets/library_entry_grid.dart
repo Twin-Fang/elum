@@ -48,6 +48,7 @@ class LibraryEntryGrid extends StatefulWidget {
     this.secondRoutineTileKey,
     this.scrollTargetRoutineId,
     this.onScrollTargetHandled,
+    this.sharedPostIdBySourceRoutineId = const {},
   });
 
   final List<LibraryEntry> entries;
@@ -91,6 +92,9 @@ class LibraryEntryGrid extends StatefulWidget {
   /// 스크롤해 보여 줄 일과 id (묶음 안이면 그 묶음 칸). 칸을 찾아 스크롤하면 [onScrollTargetHandled] 를 부른다
   final String? scrollTargetRoutineId;
   final VoidCallback? onScrollTargetHandled;
+
+  /// 이야기에 올린 글(원본 일과 id > 글 id): 길게 누를 때 미리보기 메뉴의 `내 글 보기` 줄 판단
+  final Map<String, String> sharedPostIdBySourceRoutineId;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();

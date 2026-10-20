@@ -276,7 +276,11 @@ extension _LibraryGridCells on _LibraryEntryGridState {
         AnchoredQuickMenuView<LibraryMenuAction>(
           anchor: target.rect,
           highlight: _routineTile(routine),
-          rows: libraryMenuRows(context, routine),
+          rows: libraryMenuRows(
+            context,
+            routine,
+            sharedPostIdBySourceRoutineId: widget.sharedPostIdBySourceRoutineId,
+          ),
         ),
       final LibraryGroupEntry group => AnchoredQuickMenuView<GroupMenuAction>(
         anchor: target.rect,

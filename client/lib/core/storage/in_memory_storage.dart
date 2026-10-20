@@ -38,6 +38,7 @@ class InMemoryStorage implements LocalStorage {
   bool _isManageCoachSeen;
   bool _isGroupCoachSeen;
   List<String> _talkImportedSeenRoutineIds = const [];
+  List<String> _talkShareHintDismissedRoutineIds = const [];
 
   String? _nickname;
   List<String> _goals = const [];
@@ -284,6 +285,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) async =>
       _talkImportedSeenRoutineIds = routineIds;
+
+  @override
+  List<String> get talkShareHintDismissedRoutineIds =>
+      _talkShareHintDismissedRoutineIds;
+
+  @override
+  Future<void> setTalkShareHintDismissedRoutineIds(
+    List<String> routineIds,
+  ) async => _talkShareHintDismissedRoutineIds = routineIds;
 
   @override
   bool get isGroupCoachSeen => _isGroupCoachSeen;

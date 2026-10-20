@@ -3058,6 +3058,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkShareFailedTitle => '올리지 못했어요';
 
   @override
+  String get talkShareHint => '📖 이야기에 공유해 보기 ›';
+
+  @override
+  String get talkMenuShare => '이야기에 공유하기';
+
+  @override
+  String get talkMenuViewMyPost => '내 글 보기';
+
+  @override
   String get timeAgoJustNow => '방금 전';
 
   @override

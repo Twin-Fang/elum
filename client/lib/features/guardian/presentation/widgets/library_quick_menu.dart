@@ -9,7 +9,7 @@ import '../../../../shared/models/routine.dart';
 import 'anchored_quick_menu.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
-enum LibraryMenuAction { send, rename, addToGroup, copy, remove }
+enum LibraryMenuAction { send, rename, addToGroup, copy, shareToTalk, remove }
 
 /// 일과관리 묶음(폴더)을 길게 눌렀을 때 고르는 동작 (#807)
 enum GroupMenuAction { send, rename, reorder, copy, ungroup }
@@ -17,35 +17,50 @@ enum GroupMenuAction { send, rename, reorder, copy, ungroup }
 /// 낱개 원본 메뉴. 남이 만든 일과는 보내기·묶음에 넣기·복사하기만 (#805)
 ///
 /// 이름 바꾸기·지우기는 만든 사람만 할 수 있어 서버도 막지만, 누를 수 없는 줄은 처음부터 보이지 않는다.
+/// [sharedPostIdBySourceRoutineId] 는 이야기에 올린 글(원본 일과 id > 글 id), 올린 일과면 `내 글 보기` 줄이 된다.
 Future<LibraryMenuAction?> showLibraryQuickMenu(
   BuildContext context,
   Routine routine, {
   required Rect anchor,
   required Widget highlight,
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
 }) => showAnchoredQuickMenu(
   context,
   anchor: anchor,
   highlight: highlight,
-  rows: libraryMenuRows(context, routine),
+  rows: libraryMenuRows(
+    context,
+    routine,
+    sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+  ),
 );
 
 /// 같은 메뉴를 아래 시트로: 상세 시트의 ⋯ 처럼 눌린 칸이 없을 때 (#834)
 Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
   BuildContext context,
-  Routine routine,
-) => showQuickMenuSheet(
+  Routine routine, {
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
+}) => showQuickMenuSheet(
   context,
   title: routine.displayTitle,
-  rows: libraryMenuRows(context, routine),
+  rows: libraryMenuRows(
+    context,
+    routine,
+    sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+  ),
 );
 
 /// 낱개 원본 메뉴 줄 (격자가 길게 누르는 동안 그리는 미리보기도 이 줄을 쓴다)
 List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
   BuildContext context,
-  Routine routine,
-) {
+  Routine routine, {
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
+}) {
   final l10n = context.l10n;
   final isMine = routine.isEditableByMe;
+  // 예시 일과 · 이야기에서 가져온 일과는 올릴 수 없다
+  final canShareToTalk = !routine.isExample && routine.talkPostId == null;
+  final hasSharedPost = sharedPostIdBySourceRoutineId.containsKey(routine.id);
   return [
     (
       value: LibraryMenuAction.send,
@@ -72,6 +87,13 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
       label: l10n.routineLibraryMenuCopy,
       isDanger: false,
     ),
+    if (canShareToTalk)
+      (
+        value: LibraryMenuAction.shareToTalk,
+        icon: Icons.menu_book_outlined,
+        label: hasSharedPost ? l10n.talkMenuViewMyPost : l10n.talkMenuShare,
+        isDanger: false,
+      ),
     if (isMine)
       (
         value: LibraryMenuAction.remove,

@@ -9,6 +9,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
+import '../../talk/application/talk_my_shared_posts_provider.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -84,6 +85,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       routine,
       anchor: anchor.rect,
       highlight: anchor.tile,
+      sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
     );
     await _runMenuAction(routine, action);
   }
@@ -91,8 +93,26 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 상세 시트 ⋯ 로 연 같은 메뉴 (눌린 칸이 없어 아래 시트)
   Future<void> _openMenuSheet(Routine routine) async => _runMenuAction(
     routine,
-    await showLibraryQuickMenuSheet(context, routine),
+    await showLibraryQuickMenuSheet(
+      context,
+      routine,
+      sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
+    ),
   );
+
+  /// 이야기에 올린 글(원본 일과 id > 글 id). 불러오는 중이거나 실패하면 빈 맵으로 본다
+  Map<String, String> get _sharedPostIdBySourceRoutineId =>
+      ref.read(talkMySharedPostsProvider).value ?? const {};
+
+  /// 이야기로: 이미 올린 일과면 내 글 상세, 아니면 올리기 (올리기 중복은 서버도 막는다)
+  void _shareToTalk(Routine routine) {
+    final postId = _sharedPostIdBySourceRoutineId[routine.id];
+    if (postId != null) {
+      context.push(Routes.guardianTalkPostOf(postId));
+      return;
+    }
+    context.push(Routes.guardianTalkShare, extra: routine.id);
+  }
 
   Future<void> _runMenuAction(
     Routine routine,
@@ -108,6 +128,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await chooseGroupFor(routine);
       case LibraryMenuAction.copy:
         await _copy(routine);
+      case LibraryMenuAction.shareToTalk:
+        _shareToTalk(routine);
       case LibraryMenuAction.remove:
         await _remove(routine);
     }
@@ -297,6 +319,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
+    // 메뉴가 열릴 때 올린 글을 알도록 미리 받아 둔다 (autoDispose 라 보는 동안만 유지)
+    final sharedPostIdBySourceRoutineId =
+        ref.watch(talkMySharedPostsProvider).value ?? const <String, String>{};
     final scrollTargetRoutineId = ref.watch(
       libraryScrollTargetRoutineIdProvider,
     );
@@ -324,6 +349,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
             ? null
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
         scrollTargetRoutineId: scrollTargetRoutineId,
+        sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
         onScrollTargetHandled: ref
             .read(libraryScrollTargetRoutineIdProvider.notifier)
             .clear,

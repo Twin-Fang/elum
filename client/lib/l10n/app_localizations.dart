@@ -5564,6 +5564,24 @@ abstract class AppLocalizations {
   /// **'올리지 못했어요'**
   String get talkShareFailedTitle;
 
+  /// 홈: 끝낸 일과 카드 아래 링크, 누르면 이야기 올리기로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'📖 이야기에 공유해 보기 ›'**
+  String get talkShareHint;
+
+  /// 일과관리 ⋯ 메뉴 줄: 이 일과를 이야기에 올리러 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 공유하기'**
+  String get talkMenuShare;
+
+  /// 일과관리 ⋯ 메뉴 줄: 이미 이야기에 올린 일과면 그 글로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'내 글 보기'**
+  String get talkMenuViewMyPost;
+
   /// 1분이 안 지난 시각 표기
   ///
   /// In ko, this message translates to:
