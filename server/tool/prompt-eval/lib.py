@@ -122,10 +122,10 @@ def character_reference_png(character: str) -> bytes:
 CHARACTER_APPEARANCE_KO = {
     "LULU": "아이보리색(#EFEDE8) 둥근 아기 고양이. 몸이 얼굴만큼 크고 통통하며 다리가 아주 짧다. "
             "귀는 삼각형이고 안쪽이 연분홍색이다. 눈은 점처럼 작고 동그란 검은색이며 "
-            "코는 작은 분홍색 삼각형, 입은 짧은 곡선 두 개다. 꼬리는 가늘고 길게 옆으로 뻗는다.",
+            "코는 작은 분홍색 삼각형, 입은 짧은 곡선 두 개다. 수염은 없다. 꼬리는 가늘고 길게 옆으로 뻗는다.",
     "POPO": "주황색(#FF8B26) 아기 여우. 몸이 둥글고 다리가 아주 짧다. 귀는 뾰족한 삼각형이고 "
             "안쪽이 크림색이다. 배와 가슴, 꼬리 끝이 크림색이다. 눈은 점처럼 작고 동그란 검은색이며 "
-            "코는 작은 검은 점, 입은 짧은 곡선이다.",
+            "코는 작은 검은 점, 입은 짧은 곡선이다. 수염은 없다.",
 }
 
 STEP_TITLE_HINT = "카드에 크게 표시할 2~4어절짜리 짧은 라벨. '~해요' 체 (예: '옷을 입어요')"
@@ -259,15 +259,18 @@ def call_image_model(prompt_text: str, character: str, settings: dict, aspect_ra
 
 
 CHARACTER_APPEARANCE_EN = {
-    "LULU": "a round ivory baby kitten, chubby body as big as its head, very short legs, "
-            "triangle ears with light pink insides, tiny round black dot eyes, small pink triangle nose, "
-            "mouth of two short curves, long thin tail stretched to the side",
+    "LULU": "a round baby kitten with plain pale gray-ivory fur (a soft light gray with only a faint warm tone, "
+            "never yellow or cream-yellow), chubby body as big as its head, very short legs, "
+            "triangle ears with light pink insides, tiny round black dot eyes, a tiny pink triangle nose, "
+            "a tiny small mouth, no whiskers, long thin tail stretched to the side",
     "POPO": "a round orange baby fox, very short legs, pointed triangle ears with cream insides, "
-            "cream belly, chest and tail tip, tiny round black dot eyes, small black dot nose, short curved mouth",
+            "cream belly, chest and tail tip, tiny round black dot eyes with small brow marks, "
+            "small black dot nose, short curved mouth, no whiskers",
 }
 
 
-def image_prompt(prefix: str, scene: dict, character: str, is_reference_provided: bool = True, language: str = "KO") -> str:
+def image_prompt(prefix: str, scene: dict, character: str, is_reference_provided: bool = True, language: str = "KO",
+                 appearance_en: dict = None) -> str:
     """GeminiRoutineImagePromptBuilder.build 와 같은 조립: 지시문 + 빈 줄 + 장면 머리말 + JSON (언어별 머리말·생김새)"""
     is_english = language == "EN"
     payload = {
@@ -275,7 +278,7 @@ def image_prompt(prefix: str, scene: dict, character: str, is_reference_provided
         "scene": scene,
         "character": {
             "type": character,
-            "appearance": (CHARACTER_APPEARANCE_EN if is_english else CHARACTER_APPEARANCE_KO)[character],
+            "appearance": ((appearance_en or CHARACTER_APPEARANCE_EN) if is_english else CHARACTER_APPEARANCE_KO)[character],
             "referenceImageProvided": is_reference_provided,
         },
     }

@@ -44,8 +44,11 @@ def load_image_config(variant: str, prod: dict) -> dict:
         prefix = lib.baseline_prompt(prefix_key, config["defaults_ref"])
     if config["image_layout"]:
         prefix = prefix + "\n\n" + lib.layout_rules(language)
+        if config.get("layout_extra"):
+            prefix = prefix + "\n" + config["layout_extra"][language]
     config["image_prefix"] = prefix
     config["language"] = language
+    config["appearance_en"] = config.get("appearance_en")
     return config
 
 
@@ -64,7 +67,7 @@ def render_step(config: dict, prod: dict, settings: dict, record: dict, step: di
     # OpenAI 는 참조 이미지를 못 받는다: 프롬프트에도 사실대로 적는다 (서버 OpenAiImageClient 동일)
     prompt = lib.image_prompt(
         config["image_prefix"], build_scene(config["image_scene_mode"], record["result"]["title"], step), character,
-        is_reference_provided=(provider == "GEMINI"), language=config["language"],
+        is_reference_provided=(provider == "GEMINI"), language=config["language"], appearance_en=config["appearance_en"],
     )
     try:
         if provider == "OPENAI":
@@ -111,6 +114,7 @@ def main():
     parser.add_argument("--max-steps", type=int, default=5)
     parser.add_argument("--max-images", type=int, default=DEFAULT_MAX_IMAGES)
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--character", default="", choices=["", "LULU", "POPO"], help="모든 케이스를 한 캐릭터로 고정 (비교 실험용)")
     parser.add_argument("--yes", action="store_true", help="추정 비용을 확인하고 실행")
     parser.add_argument("--allow-gemini-image", action="store_true",
                         help="사용자가 Gemini 이미지로 테스트하라고 명시했을 때만. 운영 그림 제공자는 OpenAI")
@@ -140,10 +144,14 @@ def main():
     out_dir = lib.TOOL_DIR / "results" / args.variant / "images"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    meta_path = out_dir / "meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     for index, case_id in enumerate(case_ids):
         record = records[case_id]
         # 케이스마다 캐릭터를 하나로 고정한다 (카드 간 일관성 확인)
-        character = ["LULU", "POPO"][index % 2]
+        character = args.character or ["LULU", "POPO"][index % 2]
+        meta[case_id] = character
+        meta_path.write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
         steps = record["result"]["steps"][: args.max_steps]
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             paths = list(pool.map(lambda step: render_step(config, prod, settings, record, step, character, out_dir), steps))

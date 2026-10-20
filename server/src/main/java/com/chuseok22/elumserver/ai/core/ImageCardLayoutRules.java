@@ -16,7 +16,8 @@ public final class ImageCardLayoutRules {
     - 그림 전체에 캐릭터는 한 명뿐입니다. 가족, 친구, 선생님, 의사 같은 다른 사람이나 동물은 그리지 않고 문, 의자, 가방 같은 물건과 캐릭터의 자세로 보여줍니다.
     - scene.sceneDetail이 있으면 그 문장의 자세, 손에 든 물건, 물건 위치를 그대로 그립니다. scene.routineTitle은 참고용이고 그리지 않습니다.
     - 장면에 간판, 표지판, EXIT, 시계 문자판, 책 제목, 숫자가 언급되어도 글자는 그리지 않습니다.
-    - 온도계, 구름, 하트, 땀방울 같은 기분·상태 기호와 장식을 넣지 않습니다.""";
+    - 온도계, 구름, 하트, 땀방울 같은 기분·상태 기호와 장식을 넣지 않습니다.
+    - 포장된 물건, 상자, 가방, 가전, 화면에는 글자, 로고, 라벨, 숫자를 그리지 않고 무늬 없는 무지로 그립니다.""";
 
   public static final String EN = """
     [Canvas rules - identical for every card]
@@ -28,7 +29,8 @@ public final class ImageCardLayoutRules {
     - Exactly one character in the whole picture. Never draw other people or animals (family, friend, teacher, doctor); show them with objects such as a door, chair, or bag and the character's pose.
     - If scene.sceneDetail is present, draw its pose, held objects, and object positions exactly. scene.routineTitle is for reference only; do not draw it.
     - Even if the scene mentions a sign, EXIT, clock face, book title, or numbers, draw no text.
-    - No mood or status symbols or decorations such as thermometers, clouds, hearts, or sweat drops.""";
+    - No mood or status symbols or decorations such as thermometers, clouds, hearts, or sweat drops.
+    - Packaged goods, boxes, bags, appliances, and screens are plain and unmarked: no printed letters, logos, labels, or numbers on them.""";
 
   private ImageCardLayoutRules() {
   }

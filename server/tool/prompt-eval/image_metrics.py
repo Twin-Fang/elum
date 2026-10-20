@@ -3,7 +3,9 @@
 사용: python3 image_metrics.py <variant> [<variant> ...]
 """
 import glob
+import json
 import sys
+from pathlib import Path
 
 from PIL import Image
 
@@ -28,6 +30,19 @@ def measure(path: str) -> dict:
     return {"is_white_background": min(corner_means) >= WHITE_THRESHOLD, "has_dark_block": dark_ratio > DARK_RATIO_LIMIT}
 
 
+YELLOW_CAST_MIN = 20        # (R+G)/2 - B 가 이 값 넘으면 노란 기 (루루 원색 #EFEDE8 은 5 안팎)
+LIGHT_PIXEL_MIN = 200       # 털 색 후보: 밝지만 순백이 아닌 픽셀
+
+
+def yellow_cast_share(path: str) -> float:
+    """밝은 비백색 픽셀 중 노란 기가 도는 비율 (루루 털색이 크림 노랑으로 번졌는지)"""
+    pixels = Image.open(path).convert("RGB").resize((200, 150)).get_flattened_data()
+    light = [(r, g, b) for r, g, b in pixels if min(r, g, b) >= LIGHT_PIXEL_MIN and not (r > 250 and g > 250 and b > 250)]
+    if not light:
+        return 0.0
+    return sum(1 for r, g, b in light if (r + g) / 2 - b > YELLOW_CAST_MIN) / len(light)
+
+
 def main():
     for variant in sys.argv[1:]:
         folder = lib.TOOL_DIR / "results" / variant / "images"
@@ -37,6 +52,12 @@ def main():
         total = max(len(results), 1)
         white = sum(1 for r in results if r["is_white_background"])
         dark = sum(1 for r in results if r["has_dark_block"])
+        meta_file = folder / "meta.json"
+        if meta_file.exists():
+            meta = json.loads(meta_file.read_text(encoding="utf-8"))
+            lulu = [yellow_cast_share(p) for p in paths if meta.get(Path(p).name.split("_")[0]) == "LULU"]
+            if lulu:
+                print(f"  루루 {len(lulu)}장: 노란 기 평균 {sum(lulu) / len(lulu):.2f}, 0.5 초과 {sum(1 for v in lulu if v > 0.5)}장")
         print(f"{variant}: 그림 {len(results)}장, 흰 배경 {white}장 ({white * 100 // total}%), 검은 덩어리 {dark}장, 생성 실패 {failed}장")
 
 

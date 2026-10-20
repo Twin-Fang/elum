@@ -39,6 +39,7 @@ final class GeminiRoutineSchemas {
       + "Turn invisible actions (rest, wait, meet, arrive) into a visible pose (sits on a bench with hands on knees). "
       + "Draw only the character: never other people or animals (grandmother, friend, doctor are shown by objects only). "
       + "No background places, weather, traffic. "
+      + "Describe packaged goods and appliances (milk, medicine, snacks, registers) as plain and unmarked, with nothing printed on them. "
       + "Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number.";
 
   /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
