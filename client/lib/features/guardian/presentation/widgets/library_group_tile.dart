@@ -27,7 +27,9 @@ class LibraryGroupTile extends StatelessWidget {
   /// 끌어 온 일과가 이 묶음 위에 있다 — 넣을 자리라는 걸 키워서 보여 준다
   final bool isDropTarget;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+
+  /// null 이면 길게 누르기를 바깥(끌기)에 맡긴다
+  final VoidCallback? onLongPress;
 
   /// 미리보기 칸 수 (2×2)
   static const _previewCount = 4;
