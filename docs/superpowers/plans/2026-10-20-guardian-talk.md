@@ -484,7 +484,7 @@ ko 문구(해요체): 내려간 글이에요 / 지워진 댓글이에요 / 이�
 
 **Files:** Modify `features/guardian/presentation/widgets/today_routine_section.dart`(끝낸 일과 카드 아래 링크), `widgets/library_quick_menu.dart`(`LibraryMenuAction.shareToTalk`), `routine_manage_screen.dart`(처리), 로컬 저장 키 `talkShareHintDismissedRoutineIds`.
 
-**Interfaces — Consumes:** `TalkRepository.fetchMySharedPosts() -> Future<Map<String, String>>` (Task 13에 추가, `GET /api/talk/posts/mine/source-routine-ids`), `talkMySharedPostsProvider = FutureProvider.autoDispose<Map<String, String>>`(올리기·내리기 뒤 invalidate). 실패하면 빈 맵으로 보고 입구를 보여 준다(올리기 시 서버가 `TALK_ALREADY_SHARED`로 막는다).
+**Interfaces — Consumes:** `TalkRepository.fetchMySharedPosts() -> Future<Map<String, String>>` (Task 13에 추가, `GET /api/talk/posts/mine/by-source-routine`), `talkMySharedPostsProvider = FutureProvider.autoDispose<Map<String, String>>`(올리기·내리기 뒤 invalidate). 실패하면 빈 맵으로 보고 입구를 보여 준다(올리기 시 서버가 `TALK_ALREADY_SHARED`로 막는다).
 
 **Interfaces — Produces:**
 - 홈: `_isFinished(routine)`이고, 원본 id(`routine.sourceRoutineId ?? routine.id`)가 공유 맵에 없고, 닫은 적 없으면 "📖 이야기에 공유해 보기 ›" + ✕. 누르면 `Routes.guardianTalkShare`(extra: 원본 id).
