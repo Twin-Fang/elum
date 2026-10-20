@@ -11,19 +11,22 @@ public enum CharacterType {
     "루루",
     "아이보리색(#EFEDE8) 둥근 아기 고양이. 몸이 얼굴만큼 크고 통통하며 다리가 아주 짧다. "
       + "귀는 삼각형이고 안쪽이 연분홍색이다. 눈은 점처럼 작고 동그란 검은색이며 "
-      + "코는 작은 분홍색 삼각형, 입은 짧은 곡선 두 개다. 꼬리는 가늘고 길게 옆으로 뻗는다.",
-    "a round ivory baby kitten, chubby body as big as its head, very short legs, "
-      + "triangle ears with light pink insides, tiny round black dot eyes, small pink triangle nose, "
-      + "mouth of two short curves, long thin tail stretched to the side",
+      + "코는 작은 분홍색 삼각형, 입은 짧은 곡선 두 개다. 수염은 없다. 꼬리는 가늘고 길게 옆으로 뻗는다.",
+    "a round baby kitten with plain pale gray-ivory fur (a soft light gray with only a faint warm tone, "
+      + "never yellow or cream-yellow), "
+      + "chubby body as big as its head, very short legs, "
+      + "triangle ears with light pink insides, tiny round black dot eyes, a tiny pink triangle nose, "
+      + "a tiny small mouth, no whiskers, long thin tail stretched to the side",
     "kitten"
   ),
   POPO(
     "포포",
     "주황색(#FF8B26) 아기 여우. 몸이 둥글고 다리가 아주 짧다. 귀는 뾰족한 삼각형이고 "
       + "안쪽이 크림색이다. 배와 가슴, 꼬리 끝이 크림색이다. 눈은 점처럼 작고 동그란 검은색이며 "
-      + "코는 작은 검은 점, 입은 짧은 곡선이다.",
+      + "코는 작은 검은 점, 입은 짧은 곡선이다. 수염은 없다.",
     "a round orange baby fox, very short legs, pointed triangle ears with cream insides, "
-      + "cream belly, chest and tail tip, tiny round black dot eyes, small black dot nose, short curved mouth",
+      + "cream belly, chest and tail tip, tiny round black dot eyes with small brow marks, "
+      + "small black dot nose, short curved mouth, no whiskers",
     "fox cub"
   );
 

@@ -1,0 +1,21 @@
+{
+ "_설명": "운영 DB system_config 와 prompt_template 에서 읽은 값 (2026-10-20, 읽기 전용 조회). 운영 설정이 바뀌면 갱신한다. 비밀값은 두지 않는다.",
+ "text": {
+  "provider": "GEMINI",
+  "model": "gemini-flash-latest",
+  "temperature": 0,
+  "thinking_budget": "UNSET",
+  "verified": true
+ },
+ "image": {
+  "provider": "OPENAI",
+  "openai_model": "gpt-image-1-mini",
+  "openai_quality": "low",
+  "prompt_language": "EN",
+  "verified": true
+ },
+ "prompts": {
+  "dir": "prod-prompts",
+  "verified": true
+ }
+}

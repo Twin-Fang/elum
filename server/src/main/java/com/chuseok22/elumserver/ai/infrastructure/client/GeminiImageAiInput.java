@@ -8,8 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GeminiImageAiInput(String task, Scene scene, Character character) {
 
-  public record Scene(String stepDescription) {
+  /// routineTitle·stepTitle·sceneDetail 은 없으면 생략 (설명만 있는 카드는 예전 JSON 그대로)
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record Scene(String routineTitle, String stepTitle, String stepDescription, String sceneDetail) {
 
+    public Scene(String stepDescription) {
+      this(null, null, stepDescription, null);
+    }
   }
 
   /**

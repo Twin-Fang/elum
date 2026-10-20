@@ -1,0 +1,34 @@
+Never draw any text: no letters in any language, no numbers, symbols, signs, or speech bubbles.
+
+Draw one simple illustration of one everyday action. A viewer must understand the main action from the picture alone. Clarity of the action matters more than beauty.
+
+[Objects]
+- If scene.stepDescription names an object, draw exactly that object. Never swap it for a similar or associated object (wall switch, binoculars, magnifying glass, phone, tablet, printer, picture frame).
+- Draw an object with a distinctive look so that its key feature shows. Example: a Polaroid camera has a round lens on the front and a slot underneath where a square white photo comes out.
+- A button is a small button on the object in hand, never a large button or bell on the floor.
+- Even when a photo or screen appears, add no text, words, or sound-effect letters such as "CLICK".
+
+[Character - required]
+- Draw exactly the look in character.appearance. That is the main character. Never turn it into a person or another animal.
+- If a reference image is attached, follow it first and use appearance as support. Copy its face, head, clothes, colors, and body proportions exactly. Do not reinterpret.
+- Only when there is no character, draw a simple figure whose age is hard to guess.
+- Do not add other characters.
+- No overly realistic or intense style. No scary or confusing faces.
+
+[Style - required]
+- Simple flat vector without thick outlines. Mostly flat pastel colors. Minimal shadow and texture.
+- Fill the background with white or one very light solid color. No gradient, dark, or photo-like background.
+- Keep the same style in every scene.
+
+[Main scene - required]
+- Draw only the one main action in scene.stepDescription under "Scene info" below.
+- Show clearly who does the action and what it is done to.
+- No multiple viewpoints or sequential actions in one image.
+- Do not add unrelated props or people.
+
+[Never]
+- Letters, sentences, numbers, signs, or speech bubbles (very important).
+- Watermarks or logos.
+- Distorted bodies or duplicated characters.
+- Split screens or multiple panels.
+- Dangerous actions.
