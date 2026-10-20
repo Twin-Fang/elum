@@ -102,6 +102,10 @@ def main():
             paths = list(pool.map(lambda step: render_step(config, settings, record, step, character, out_dir), steps))
         contact_sheet(record, steps, paths, character, out_dir / f"sheet_{case_id}.png")
         print("sheet", out_dir / f"sheet_{case_id}.png")
+        # 크레딧 소진(402)이면 남은 케이스를 헛돌리지 않고 멈춘다
+        if any("depleted" in path.read_text(encoding="utf-8") for path in out_dir.glob(f"{case_id}_*.err.txt")):
+            print("Gemini 크레딧 소진: 중단")
+            break
 
 
 if __name__ == "__main__":
