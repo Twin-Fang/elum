@@ -107,6 +107,9 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
   /// 칸 가장자리로 보는 폭 비율 (앞·뒤 각 25%, 가운데는 묶기)
   static const _edgeFraction = 0.25;
 
+  /// 칸 이름 두 줄 높이를 잴 때 쓰는 글 (줄바꿈으로 정확히 두 줄)
+  static const _twoLineSample = '가\n가';
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
@@ -128,9 +131,11 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
             crossAxisCount: columns,
             mainAxisSpacing: space.md.h,
             crossAxisSpacing: space.xs.w,
-            // 그림 칸 + 이름 두 줄이 들어가는 높이
+            // 그림 칸 + 이름 두 줄이 들어가는 높이 (글자 크기 설정 반영)
             mainAxisExtent:
-                LibraryRoutineTile.iconSize.w + space.xs.h + space.xl.h * 1.4,
+                LibraryRoutineTile.iconSize.w +
+                space.xs.h +
+                _twoLineLabelHeight(context),
           ),
           itemCount: widget.entries.length,
           itemBuilder: (context, index) => switch (widget.entries[index]) {
@@ -143,6 +148,23 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
         );
       },
     );
+  }
+
+  /// 칸 이름 두 줄 높이: 굵은 캡션 기준 실제 측정 (글자 배율 반영). 기본 크기에서는 기존 높이 이상
+  double _twoLineLabelHeight(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: _twoLineSample,
+        style: context.typo.caption.copyWith(fontWeight: FontWeight.w700),
+      ),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    )..layout();
+    final measured = painter.height;
+    painter.dispose();
+    final minimum = context.space.xl.h * 1.4;
+    return measured > minimum ? measured : minimum;
   }
 
   /// 낱개 일과 칸 중 첫째 · 둘째에 코치마크 키를 붙인다 (일과 id > 키)
@@ -159,7 +181,6 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
         looseRoutines[1]: widget.secondRoutineTileKey!,
     };
   }
-
 
   /// 끌어 온 칸이 [tileContext] 칸의 어느 자리 위에 놓였는가 (앞·가운데·뒤)
   _DropZone _zoneOf(
