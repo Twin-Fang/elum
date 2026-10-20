@@ -166,6 +166,12 @@ public enum ConfigKey {
     "FLUX 이미지 1장 생성 요금. 비용 추정에 사용. fal 은 1MP 미만도 1MP 로 청구한다 (schnell $0.003/MP)",
     ConfigValueType.DECIMAL, List.of(), "0.003"
   ),
+  // 관리자 화면 비용 원화 환산 전용. 청구·한도 계산에는 쓰지 않는다.
+  USD_TO_KRW_RATE(
+    ConfigGroup.PRICING, "원화 환산 환율 (원/USD)",
+    "관리자 대시보드·AI 모니터링에서 추정 비용(USD)을 원화로 함께 보여 줄 때 쓰는 환율. 표시용이라 한도·크레딧 계산에는 영향 없다",
+    ConfigValueType.DECIMAL, List.of(), "1400"
+  ),
 
   // 탈퇴 계정 보관 기간.
   //

@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -83,6 +84,8 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private AiCreditAccountRepository aiCreditAccountRepository;
+  @Mock
+  private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @InjectMocks
   private WithdrawnMemberService withdrawnMemberService;

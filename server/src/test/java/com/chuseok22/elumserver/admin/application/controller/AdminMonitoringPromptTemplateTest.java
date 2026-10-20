@@ -4,9 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminAiMonthSummary;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMonitoringList;
+import com.chuseok22.elumserver.ai.application.dto.response.AiFailureCount;
+import com.chuseok22.elumserver.ai.application.dto.response.AiHealthSnapshot;
+import com.chuseok22.elumserver.ai.application.dto.response.AiProviderStatus;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.AiFailureKind;
+import com.chuseok22.elumserver.ai.core.AiProviderHealth;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
@@ -53,7 +59,24 @@ class AdminMonitoringPromptTemplateTest {
     model.put("definition", AdminMonitoringList.DEFINITION);
     model.put("query", query);
     model.put("pagerBaseUrl", "/admin/monitoring" + query.toQueryString(query.sort(), 1));
+    model.put("monthSummary", new AdminAiMonthSummary(12, 8.3, 1.5, 2100, 40L, List.of(
+      new AdminAiMonthSummary.ProviderCost("OpenAI 그림", 1.2), new AdminAiMonthSummary.ProviderCost("Gemini 글", 0.3))));
+    model.put("aiHealth", new AiHealthSnapshot(
+      List.of(new AiProviderStatus("OpenAI 글", AiProviderHealth.CREDIT_EXHAUSTED, 2, 0, 900, null, SAVED_AT,
+        AiFailureKind.CREDIT, "429 Too Many Requests: You have no credits remaining")),
+      List.of(new AiFailureCount(AiFailureKind.CREDIT, "OpenAI 글", 4, SAVED_AT))));
     return renderer.render("admin/monitoring", model);
+  }
+
+  @Test
+  @DisplayName("AI 상태·이번 달 요약·제공자 비용 비율·실패 원인·추이 카드가 그려진다")
+  void rendersHealthSummaryAndTrendCard() {
+    String html = renderMonitoring(Map.of(), List.of(), 0);
+
+    assertThat(html).contains("data-ai-health", "크레딧 소진 의심", "badge-error", "24시간 안에 없음",
+      "data-month-summary", "약 2,100원", "약 40원", "8.3%",
+      "data-provider-costs", "(80%)", "width:80%",
+      "크레딧·결제", "data-trend-chart", "/admin/stats/api/ai-usage", "/admin/vendor/chart.umd.min.js");
   }
 
   private AiCallLog call(String memberId) {
