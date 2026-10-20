@@ -3791,25 +3791,25 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'몸 돌보기'**
+  /// **'생활 습관'**
   String get routineTemplateCategorySelfCare;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'씻기·옷 입기·밥 먹기처럼 매일 하는 일'**
+  /// **'양치 · 세수 · 옷 입기'**
   String get routineTemplateCategorySelfCareHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'하루 흐름'**
+  /// **'하루 순서'**
   String get routineTemplateCategoryDailyFlow;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'아침부터 잠들 때까지 큰 순서'**
+  /// **'아침 준비 · 하교 후 · 잠자리 (여러 일을 차례로)'**
   String get routineTemplateCategoryDailyFlowHint;
 
   /// 예시 일과 카테고리 이름
@@ -3821,19 +3821,19 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'내 물건과 자리를 스스로 정리하기'**
+  /// **'방 정리 · 그릇 치우기 · 빨래 개기'**
   String get routineTemplateCategoryHouseholdHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'밖에서 해 보기'**
+  /// **'바깥 활동'**
   String get routineTemplateCategoryCommunity;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'버스 타기·물건 사기처럼 혼자 해 보는 연습'**
+  /// **'버스 타기 · 물건 사기 · 병원 가기'**
   String get routineTemplateCategoryCommunityHint;
 
   /// 예시 일과 카테고리 이름
@@ -3845,19 +3845,19 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'공부를 시작하고 끝까지 하는 순서'**
+  /// **'숙제 시작 · 이름 쓰기 · 책 읽기'**
   String get routineTemplateCategoryLearningHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'마음과 관계'**
+  /// **'감정·관계'**
   String get routineTemplateCategoryFeelings;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'감정 표현·인사·차례 기다리기'**
+  /// **'감정 카드 · 인사 · 차례 기다리기'**
   String get routineTemplateCategoryFeelingsHint;
 
   /// 예시 일과 이름 (selfCare)

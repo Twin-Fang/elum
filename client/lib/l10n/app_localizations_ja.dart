@@ -2065,40 +2065,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineTemplateBeginnerBadge => '처음이라면 추천';
 
   @override
-  String get routineTemplateCategorySelfCare => '몸 돌보기';
+  String get routineTemplateCategorySelfCare => '생활 습관';
 
   @override
-  String get routineTemplateCategorySelfCareHint => '씻기·옷 입기·밥 먹기처럼 매일 하는 일';
+  String get routineTemplateCategorySelfCareHint => '양치 · 세수 · 옷 입기';
 
   @override
-  String get routineTemplateCategoryDailyFlow => '하루 흐름';
+  String get routineTemplateCategoryDailyFlow => '하루 순서';
 
   @override
-  String get routineTemplateCategoryDailyFlowHint => '아침부터 잠들 때까지 큰 순서';
+  String get routineTemplateCategoryDailyFlowHint =>
+      '아침 준비 · 하교 후 · 잠자리 (여러 일을 차례로)';
 
   @override
   String get routineTemplateCategoryHousehold => '집안일';
 
   @override
-  String get routineTemplateCategoryHouseholdHint => '내 물건과 자리를 스스로 정리하기';
+  String get routineTemplateCategoryHouseholdHint => '방 정리 · 그릇 치우기 · 빨래 개기';
 
   @override
-  String get routineTemplateCategoryCommunity => '밖에서 해 보기';
+  String get routineTemplateCategoryCommunity => '바깥 활동';
 
   @override
-  String get routineTemplateCategoryCommunityHint => '버스 타기·물건 사기처럼 혼자 해 보는 연습';
+  String get routineTemplateCategoryCommunityHint => '버스 타기 · 물건 사기 · 병원 가기';
 
   @override
   String get routineTemplateCategoryLearning => '공부';
 
   @override
-  String get routineTemplateCategoryLearningHint => '공부를 시작하고 끝까지 하는 순서';
+  String get routineTemplateCategoryLearningHint => '숙제 시작 · 이름 쓰기 · 책 읽기';
 
   @override
-  String get routineTemplateCategoryFeelings => '마음과 관계';
+  String get routineTemplateCategoryFeelings => '감정·관계';
 
   @override
-  String get routineTemplateCategoryFeelingsHint => '감정 표현·인사·차례 기다리기';
+  String get routineTemplateCategoryFeelingsHint => '감정 카드 · 인사 · 차례 기다리기';
 
   @override
   String get routineTemplateBrushTeethText => '양치하기';
