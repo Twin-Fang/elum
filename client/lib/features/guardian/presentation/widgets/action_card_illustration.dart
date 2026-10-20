@@ -14,6 +14,7 @@ class ActionCardIllustration extends StatelessWidget {
     required this.stepId,
     this.imagePath,
     this.pictogramId,
+    this.exampleImageId,
     this.pictogramLabel = '',
     required this.emptyBuilder,
     this.onDelete,
@@ -24,6 +25,7 @@ class ActionCardIllustration extends StatelessWidget {
   final String stepId;
   final String? imagePath;
   final String? pictogramId;
+  final String? exampleImageId;
   final String pictogramLabel;
   final WidgetBuilder emptyBuilder;
   final VoidCallback? onDelete;
@@ -50,6 +52,7 @@ class ActionCardIllustration extends StatelessWidget {
                 stepId: stepId,
                 imagePath: imagePath,
                 pictogramId: pictogramId,
+                exampleImageId: exampleImageId,
                 pictogramLabel: pictogramLabel,
                 emptyBuilder: emptyBuilder,
               ),

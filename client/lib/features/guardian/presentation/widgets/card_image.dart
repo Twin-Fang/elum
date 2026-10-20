@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_motion.dart';
+import '../../../../shared/example_card_image/example_card_image_catalog.dart';
 import '../../../../shared/pictogram/pictogram_catalog.dart';
 import '../../data/card_image_repository.dart';
+import 'example_card_art.dart';
 import 'pictogram_art.dart';
 
 /// 카드 그림 조회 상태 — 화면이 "그림이 없다"를 알아야 할 때 쓴다.
@@ -47,13 +49,19 @@ CardImageState watchCardImageState(
       );
 }
 
-/// 이 카드가 그림 자리에 픽토그램을 보여주는가.
+/// 이 카드가 그림 자리에 번들 그림(예시 이미지·픽토그램)을 보여주는가.
 ///
-/// 사진·AI 그림이 **없을 때만**(우선순위: 사진/AI > 픽토그램 > 기본 카드) 그리고
+/// 사진·AI 그림이 **없을 때만**(우선순위: 사진/AI > 예시 이미지 > 픽토그램 > 기본 카드) 그리고
 /// 번들에 있는 id 일 때만 참이다. [CardImage] 와 카드 안 배치(제목 줄)가 **같은 판정**을
-/// 써야 그림 자리는 픽토그램인데 제목이 그림 자리로 올라가는 어긋남이 없다.
-bool showsPictogram(CardImageState state, String? pictogramId) =>
-    state == CardImageState.none && PictogramCatalog.parse(pictogramId) != null;
+/// 써야 그림 자리는 번들 그림인데 제목이 그림 자리로 올라가는 어긋남이 없다.
+bool showsBundledArt(
+  CardImageState state, {
+  String? pictogramId,
+  String? exampleImageId,
+}) =>
+    state == CardImageState.none &&
+    (ExampleCardImageCatalog.parse(exampleImageId) != null ||
+        PictogramCatalog.parse(pictogramId) != null);
 
 /// 카드 이미지.
 ///
@@ -70,6 +78,7 @@ class CardImage extends ConsumerWidget {
     required this.stepId,
     this.imagePath,
     this.pictogramId,
+    this.exampleImageId,
     this.pictogramLabel = '',
     required this.emptyBuilder,
   });
@@ -80,7 +89,10 @@ class CardImage extends ConsumerWidget {
   /// 그림이 없을 때 보여줄 무료 픽토그램 id. null·카탈로그에 없는 값이면 [emptyBuilder].
   final String? pictogramId;
 
-  /// 낭독기가 픽토그램 대신 읽을 이름 — 카드 제목.
+  /// 앱에 번들된 예시 카드 이미지 id (#866). 있으면 픽토그램보다 먼저 보여준다.
+  final String? exampleImageId;
+
+  /// 낭독기가 번들 그림 대신 읽을 이름 — 카드 제목.
   final String pictogramLabel;
 
   /// 서버가 준 그림 열쇠. **캐시 열쇠의 일부다** — 보호자가 사진으로 바꾸면 값이 바뀌고,
@@ -90,14 +102,23 @@ class CardImage extends ConsumerWidget {
   /// 그림도 픽토그램도 없을 때 자리를 채울 기본 카드.
   final WidgetBuilder emptyBuilder;
 
-  /// 그림이 없을 때 자리를 채운다: 픽토그램 > 기본 카드.
+  /// 그림이 없을 때 자리를 채운다: 예시 이미지 > 픽토그램 > 기본 카드.
   WidgetBuilder get _noPictureBuilder {
-    final id = PictogramCatalog.parse(pictogramId);
-    if (id == null) return emptyBuilder;
-    return (context) => PictogramArt(
-      id: id,
+    final pictogram = PictogramCatalog.parse(pictogramId);
+    final pictogramBuilder = pictogram == null
+        ? emptyBuilder
+        : (BuildContext context) => PictogramArt(
+            id: pictogram,
+            label: pictogramLabel,
+            fallbackBuilder: emptyBuilder,
+          );
+    final exampleImage = ExampleCardImageCatalog.parse(exampleImageId);
+    if (exampleImage == null) return pictogramBuilder;
+    // 예시 이미지를 못 읽으면 픽토그램 > 기본 카드로 내려간다
+    return (context) => ExampleCardArt(
+      id: exampleImage,
       label: pictogramLabel,
-      fallbackBuilder: emptyBuilder,
+      fallbackBuilder: pictogramBuilder,
     );
   }
 

@@ -35,7 +35,11 @@ public record RoutineStepResponse(
 
   @Schema(description = "미리 만든 단계 음성 열쇠. 아직 없으면 null — 앱은 기기 음성으로 읽는다. "
     + "글이 바뀌면 값이 바뀐다", example = "step-1/3f2a9c0d1b2e4f60.wav")
-  String speechPath
+  String speechPath,
+
+  @Schema(description = "앱에 번들된 예시 카드 이미지 id(온보딩 예시 일과 단계만). 사진·AI 그림이 없을 때 픽토그램보다 먼저 보여준다. "
+    + "null 이면 예시 이미지가 없는 카드", example = "fold_blanket")
+  String exampleImageId
 ) {
 
   public static RoutineStepResponse from(RoutineStep step) {
@@ -48,7 +52,8 @@ public record RoutineStepResponse(
       step.getCompleted(),
       step.getCompletedAt(),
       step.getPictogramId(),
-      step.getSpeechPath()
+      step.getSpeechPath(),
+      step.getExampleImageId()
     );
   }
 }

@@ -56,6 +56,11 @@ public class RoutineStep extends BaseEntity {
   @Column(length = 100)
   private String pictogramId;
 
+  // 앱에 번들된 예시 카드 이미지 id (#866). 온보딩 예시 일과 단계만 값이 있고 나머지는 null.
+  // 앱 표시 우선순위: 사진 > AI 그림 > 예시 이미지 > 픽토그램
+  @Column(length = 100)
+  private String exampleImageId;
+
   // 단계 음성 저장 열쇠 {stepId}/{문장 해시}.wav (#675). 아직 없거나 실패, 한국어 아닌 일과는 null
   private String speechPath;
 

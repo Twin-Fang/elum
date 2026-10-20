@@ -111,6 +111,7 @@ class LibraryRoutineThumbnail extends StatelessWidget {
         stepId: first.id,
         imagePath: first.imagePath,
         pictogramId: first.pictogramId,
+        exampleImageId: first.exampleImageId,
         pictogramLabel: first.title,
         emptyBuilder: (_) => placeholder,
       ),

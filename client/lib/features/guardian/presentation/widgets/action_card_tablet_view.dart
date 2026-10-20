@@ -80,13 +80,18 @@ class ActionCardTabletView extends ConsumerWidget {
     // 그림이 없으면 제목이 그림 자리에 크게 들어간다 — 줄에 또 쓰지 않는다
     final isTitleInArt =
         imageState == CardImageState.none &&
-        !showsPictogram(imageState, card.pictogramId);
+        !showsBundledArt(
+          imageState,
+          pictogramId: card.pictogramId,
+          exampleImageId: card.exampleImageId,
+        );
 
     final illustration = ActionCardIllustration(
       routineId: routineId,
       stepId: card.id,
       imagePath: card.imagePath,
       pictogramId: card.pictogramId,
+      exampleImageId: card.exampleImageId,
       pictogramLabel: card.displayTitle,
       emptyBuilder: (context) =>
           DefaultCardTitleArt(title: card.displayTitle, color: palette.border),

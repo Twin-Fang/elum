@@ -237,6 +237,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                             imagePath: step?.imagePath,
                             // 사진·AI 그림이 없으면 무료 픽토그램이 자리를 채운다. 사진 바꾸기 칩은 그대로다.
                             pictogramId: step?.pictogramId,
+                            exampleImageId: step?.exampleImageId,
                             pictogramLabel: step?.displayTitle ?? '',
                             // 픽토그램도 없으면 기본 카드의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
                             // 시작되게 잇는다. 올리는 중에는 누를 수 없다.

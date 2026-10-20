@@ -26,6 +26,13 @@ abstract final class AppAssets {
   /// 허용 id 는 `PictogramCatalog` 가 걸러 준다.
   static String pictogram(String id) => 'assets/pictograms/$id.svg';
 
+  /// 온보딩 예시 일과 카드 이미지 (루미, 512×512 투명 배경 WebP).
+  ///
+  /// [id] 는 서버가 내려주는 `exampleImageId` (파일명 stem, 예 `fold_blanket`).
+  /// 허용 id 는 `ExampleCardImageCatalog` 가 걸러 준다.
+  static String exampleRoutineImage(String id) =>
+      '$_images/example_routines/$id.webp';
+
   /// 소셜 로그인 제공자 로고 (22×22). Figma `로그인`(238:1808)에서 받았다.
   ///
   /// **각 사의 브랜드 자산이다.** 색·비율을 바꾸면 제공자 검수·스토어 심사에서

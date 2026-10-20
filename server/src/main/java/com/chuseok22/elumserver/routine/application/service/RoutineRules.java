@@ -72,6 +72,7 @@ final class RoutineRules {
       copied.setImagePath(step.getImagePath());
       // 픽토그램도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
       copied.setPictogramId(step.getPictogramId());
+      copied.setExampleImageId(step.getExampleImageId());
       copied.setCompleted(false);
       copiedSteps.add(copied);
     }

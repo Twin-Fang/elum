@@ -235,7 +235,11 @@ class _ActionCardViewState extends State<ActionCardView> {
     final titleInArt =
         childLayout &&
         imageState == CardImageState.none &&
-        !showsPictogram(imageState, widget.card.pictogramId);
+        !showsBundledArt(
+          imageState,
+          pictogramId: widget.card.pictogramId,
+          exampleImageId: widget.card.exampleImageId,
+        );
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,
@@ -285,6 +289,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                         stepId: widget.card.id,
                         imagePath: widget.card.imagePath,
                         pictogramId: widget.card.pictogramId,
+                        exampleImageId: widget.card.exampleImageId,
                         pictogramLabel: widget.card.displayTitle,
                         onDelete: widget.onDelete,
                         isImageGenerating: widget.isImageGenerating,

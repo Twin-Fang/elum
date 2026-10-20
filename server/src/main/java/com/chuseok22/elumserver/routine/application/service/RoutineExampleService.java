@@ -128,6 +128,7 @@ public class RoutineExampleService {
       // 카드 문장이 한 줄뿐이라 설명도 같은 문장 (NOT NULL)
       step.setDescription(text);
       step.setPictogramId(exampleStep.pictogramId());
+      step.setExampleImageId(exampleStep.exampleImageId());
       step.setCompleted(false);
       steps.add(step);
     }
