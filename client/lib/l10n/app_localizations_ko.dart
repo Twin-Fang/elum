@@ -2662,4 +2662,41 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get updateSuggestionLater => '나중에';
+
+  @override
+  String elumiInfoTitle(String name) {
+    return '$name 정보';
+  }
+
+  @override
+  String elumiInfoEditLabel(String name) {
+    return '$name 정보 고치기';
+  }
+
+  @override
+  String get elumiInfoName => '이름';
+
+  @override
+  String get elumiInfoCharacter => '캐릭터';
+
+  @override
+  String get elumiInfoCharacterSheetTitle => '캐릭터 바꾸기';
+
+  @override
+  String get elumiInfoImageStyleSheetTitle => '그림 방식 바꾸기';
+
+  @override
+  String get elumiInfoSave => '저장하기';
+
+  @override
+  String get elumiInfoSaved => '저장했어요';
+
+  @override
+  String get elumiInfoSaveFailedTitle => '저장하지 못했어요';
+
+  @override
+  String get elumiInfoSaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get elumiInfoNotFound => '이룸이 정보를 불러오지 못했어요';
 }

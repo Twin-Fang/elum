@@ -2780,4 +2780,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateSuggestionLater => 'Later';
+
+  @override
+  String elumiInfoTitle(String name) {
+    return '$name\'s info';
+  }
+
+  @override
+  String elumiInfoEditLabel(String name) {
+    return 'Edit $name\'s info';
+  }
+
+  @override
+  String get elumiInfoName => 'Name';
+
+  @override
+  String get elumiInfoCharacter => 'Character';
+
+  @override
+  String get elumiInfoCharacterSheetTitle => 'Change character';
+
+  @override
+  String get elumiInfoImageStyleSheetTitle => 'Change picture style';
+
+  @override
+  String get elumiInfoSave => 'Save';
+
+  @override
+  String get elumiInfoSaved => 'Saved';
+
+  @override
+  String get elumiInfoSaveFailedTitle => 'Couldn\'t save';
+
+  @override
+  String get elumiInfoSaveFailedFallback => 'Try again in a moment';
+
+  @override
+  String get elumiInfoNotFound => 'Couldn\'t load Elumi\'s info';
 }

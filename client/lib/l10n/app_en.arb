@@ -776,5 +776,16 @@
 
   "updateSuggestionTitle": "A new version is here",
   "updateSuggestionBody": "Update to get the latest fixes and features",
-  "updateSuggestionLater": "Later"
+  "updateSuggestionLater": "Later",
+  "elumiInfoTitle": "{name}'s info",
+  "elumiInfoEditLabel": "Edit {name}'s info",
+  "elumiInfoName": "Name",
+  "elumiInfoCharacter": "Character",
+  "elumiInfoCharacterSheetTitle": "Change character",
+  "elumiInfoImageStyleSheetTitle": "Change picture style",
+  "elumiInfoSave": "Save",
+  "elumiInfoSaved": "Saved",
+  "elumiInfoSaveFailedTitle": "Couldn't save",
+  "elumiInfoSaveFailedFallback": "Try again in a moment",
+  "elumiInfoNotFound": "Couldn't load Elumi's info"
 }

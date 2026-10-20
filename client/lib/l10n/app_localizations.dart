@@ -4855,6 +4855,72 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나중에'**
   String get updateSuggestionLater;
+
+  /// 이룸이 정보 화면 제목. name 은 이룸이 호칭 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보'**
+  String elumiInfoTitle(String name);
+
+  /// 내정보 이룸이 줄의 연필 버튼을 낭독기가 읽는 이름. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보 고치기'**
+  String elumiInfoEditLabel(String name);
+
+  /// 이룸이 정보 화면: 이름 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이름'**
+  String get elumiInfoName;
+
+  /// 이룸이 정보 화면: 캐릭터 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터'**
+  String get elumiInfoCharacter;
+
+  /// 이룸이 정보 화면: 캐릭터 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 바꾸기'**
+  String get elumiInfoCharacterSheetTitle;
+
+  /// 이룸이 정보 화면: 그림 방식 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식 바꾸기'**
+  String get elumiInfoImageStyleSheetTitle;
+
+  /// 이룸이 정보 시트의 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get elumiInfoSave;
+
+  /// 이룸이 정보를 저장한 뒤 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'저장했어요'**
+  String get elumiInfoSaved;
+
+  /// 이룸이 정보 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요'**
+  String get elumiInfoSaveFailedTitle;
+
+  /// 이룸이 정보 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get elumiInfoSaveFailedFallback;
+
+  /// 이룸이 정보 화면: 회원 정보를 못 받았거나 그 이룸이가 목록에 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 정보를 불러오지 못했어요'**
+  String get elumiInfoNotFound;
 }
 
 class _AppLocalizationsDelegate

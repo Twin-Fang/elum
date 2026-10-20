@@ -67,6 +67,19 @@ abstract final class Routes {
   /// 이룸이 바꾸기. 연결된 이룸이가 둘 이상일 때만 설정에 보인다. 임시 화면이다.
   static const guardianProfileSwitch = '/guardian/settings/profile';
 
+  /// 이룸이 정보 고치기 (이름·캐릭터·그림 방식). 내정보 이룸이 줄의 연필에서 들어온다 (#660)
+  /// 어느 이룸이인지는 `?id={profileId}` 로 넘긴다 — [guardianElumiInfoOf]
+  static const guardianElumiInfo = '/guardian/settings/elumi';
+
+  /// 이룸이 정보 고치기 경로: `/guardian/settings/elumi?id={profileId}`
+  static String guardianElumiInfoOf(String profileId) => Uri(
+    path: guardianElumiInfo,
+    queryParameters: {'id': profileId},
+  ).toString();
+
+  /// [guardianElumiInfo] 의 이룸이 id 쿼리 이름
+  static const elumiInfoProfileIdQuery = 'id';
+
   /// 초대 코드 넣기. **온보딩 아래에 둔 이유** — 새로 가입한 보호자는 이룸이 등록
   /// (온보딩)을 건너뛰고 들어오므로 온보딩을 마치기 전에도 열려야 한다. 이미 쓰는 보호자는
   /// 설정에서 들어온다. 임시 화면이다.

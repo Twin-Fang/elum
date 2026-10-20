@@ -18,9 +18,16 @@ import '../assets/app_assets.dart';
 /// 두 홈이 각자 그리던 때는 보호자 홈만 고쳐지고 이룸이 홈은 그대로 깨져 있었다.
 /// 한 곳에 두어 다시 어긋나지 않게 한다.
 class CharacterBadge extends StatelessWidget {
-  const CharacterBadge({super.key, required this.character});
+  const CharacterBadge({
+    super.key,
+    required this.character,
+    this.badgeSize = size,
+  });
 
   final CardCharacter character;
+
+  /// 이 배지의 한 변 (기본: 홈 배지 [size]). 모서리는 같은 비율로 줄고 는다
+  final double badgeSize;
 
   /// 배지 한 변. 시안 356:5106(보호자) · 356:5079(이룸이) 모두 56이다.
   static const size = 56.0;
@@ -33,12 +40,12 @@ class CharacterBadge extends StatelessWidget {
     final badge = SvgPicture.asset(
       AppAssets.characterBadgeFramed(character),
       // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
-      width: size.w,
-      height: size.w,
+      width: badgeSize.w,
+      height: badgeSize.w,
     );
     if (character != CardCharacter.fox) return badge;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(radius.r),
+      borderRadius: BorderRadius.circular((radius * badgeSize / size).r),
       child: badge,
     );
   }

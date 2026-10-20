@@ -210,8 +210,11 @@ class MemberRepository {
     return s.statusCode == 404 || s.statusCode == 405;
   }
 
-  /// 아이 호칭 저장. 온보딩 결과를 서버와 맞춘다.
-  Future<AppFailure?> updateNickname(String nickname) async {
+  /// 이룸이 호칭 저장. [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateNickname(
+    String nickname, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -219,6 +222,7 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/nickname',
         data: {'nickname': nickname},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
@@ -246,7 +250,11 @@ class MemberRepository {
   ///
   /// ⚠️ [character]는 서버 `CharacterType` enum 값이어야 한다 (`LULU` / `POPO`).
   /// `CardCharacter.apiValue`를 그대로 넘긴다. 없는 값을 보내면 서버가 400을 준다.
-  Future<AppFailure?> updateCharacter(String character) async {
+  /// [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateCharacter(
+    String character, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -254,6 +262,7 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/character',
         data: {'character': character},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
@@ -264,7 +273,11 @@ class MemberRepository {
   /// ⚠️ [imageStyle]은 서버 enum 값이어야 한다 (`CARTOON` / `REALISTIC` /
   /// `PHOTO_ONLY`). `ImageStyle.apiValue`를 그대로 넘긴다.
   /// 대상 프로필은 캐릭터 저장과 같은 방식으로 정해진다(인증 인터셉터).
-  Future<AppFailure?> updateImageStyle(String imageStyle) async {
+  /// [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateImageStyle(
+    String imageStyle, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -272,10 +285,16 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/image-style',
         data: {'imageStyle': imageStyle},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
   }
+
+  /// 저장 대상 이룸이 지정 (null 이면 고른 이룸이 그대로)
+  static Options? _targetProfileOptions(String? profileId) => profileId == null
+      ? null
+      : Options(extra: {ProfileHeaderInterceptor.targetProfileKey: profileId});
 }
 
 /// 회원 정보 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다.
