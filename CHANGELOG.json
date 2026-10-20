@@ -1,15 +1,39 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T11:49:51Z",
-    "currentVersion": "2.62.0",
+    "lastUpdated": "2026-10-20T12:13:43Z",
+    "currentVersion": "2.63.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 288
+    "totalReleases": 289
   },
   "releases": [
+    {
+      "version": "2.63.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 896,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과를 만들 때 묻는 질문의 선택지가 짧고 알아보기 쉬워졌어요\n  * 카드 그림이 흰 배경에 같은 크기의 캐릭터로 더 일정하게 나와요\n  * 카드 그림에서 물건에 글자가 찍히거나 다른 동물이 함께 나오는 일이 줄었어요\n  * 루루가 원래 모습에 더 가깝게 그려져요\n  * 불조심 같은 안전 일과의 그림이 상황에 알맞게 나와요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과를 만들 때 묻는 질문의 선택지가 짧고 알아보기 쉬워졌어요",
+            "카드 그림이 흰 배경에 같은 크기의 캐릭터로 더 일정하게 나와요",
+            "카드 그림에서 물건에 글자가 찍히거나 다른 동물이 함께 나오는 일이 줄었어요",
+            "루루가 원래 모습에 더 가깝게 그려져요",
+            "불조심 같은 안전 일과의 그림이 상황에 알맞게 나와요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.62.0",
       "project_type": "flutter",
