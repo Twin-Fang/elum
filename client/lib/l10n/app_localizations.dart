@@ -1934,6 +1934,18 @@ abstract class AppLocalizations {
   /// **'의견을 처리했을 때'**
   String get notificationSettingFeedbackResolved;
 
+  /// 알림 설정: 이야기 글 댓글 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기: 내 글에 댓글이 달렸을 때'**
+  String get notificationSettingTalkCommented;
+
+  /// 알림 설정: 이야기 글 가져감 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기: 내 글을 가져갔을 때'**
+  String get notificationSettingTalkImported;
+
   /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
   ///
   /// In ko, this message translates to:
@@ -2023,6 +2035,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보내 주신 의견을 확인하고 처리했어요'**
   String get notificationFeedbackResolved;
+
+  /// 알림 줄: 내 이야기 글에 댓글이 달림(묶음). count 는 댓글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'내 글에 댓글이 {count}개 달렸어요'**
+  String notificationTalkPostCommented(int count);
+
+  /// 알림 줄: 내 이야기 글을 다른 보호자가 가져감(묶음). count 는 가져간 사람 수
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 {count}명이 내 글을 가져갔어요'**
+  String notificationTalkPostImported(int count);
 
   /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
   ///

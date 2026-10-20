@@ -1044,6 +1044,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
 
   @override
+  String get notificationSettingTalkCommented => '이야기: 내 글에 댓글이 달렸을 때';
+
+  @override
+  String get notificationSettingTalkImported => '이야기: 내 글을 가져갔을 때';
+
+  @override
   String get notificationPermissionOff => '기기 알림이 꺼져 있어요';
 
   @override
@@ -1093,6 +1099,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationFeedbackResolved => '보내 주신 의견을 확인하고 처리했어요';
+
+  @override
+  String notificationTalkPostCommented(int count) {
+    return '내 글에 댓글이 $count개 달렸어요';
+  }
+
+  @override
+  String notificationTalkPostImported(int count) {
+    return '보호자 $count명이 내 글을 가져갔어요';
+  }
 
   @override
   String get guardianHomeSettings => '설정';

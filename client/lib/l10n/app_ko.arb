@@ -985,6 +985,12 @@
   "notificationSettingFeedbackResolved": "의견을 처리했을 때",
   "@notificationSettingFeedbackResolved": {"description": "알림 설정: 의견 처리 푸시 스위치"},
 
+  "notificationSettingTalkCommented": "이야기: 내 글에 댓글이 달렸을 때",
+  "@notificationSettingTalkCommented": {"description": "알림 설정: 이야기 글 댓글 푸시 스위치"},
+
+  "notificationSettingTalkImported": "이야기: 내 글을 가져갔을 때",
+  "@notificationSettingTalkImported": {"description": "알림 설정: 이야기 글 가져감 푸시 스위치"},
+
   "notificationPermissionOff": "기기 알림이 꺼져 있어요",
   "@notificationPermissionOff": {"description": "알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐"},
 
@@ -1028,6 +1034,12 @@
 
   "notificationFeedbackResolved": "보내 주신 의견을 확인하고 처리했어요",
   "@notificationFeedbackResolved": {"description": "알림 줄: 보낸 의견이 처리됨"},
+
+  "notificationTalkPostCommented": "내 글에 댓글이 {count}개 달렸어요",
+  "@notificationTalkPostCommented": {"description": "알림 줄: 내 이야기 글에 댓글이 달림(묶음). count 는 댓글 수", "placeholders": {"count": {"type": "int"}}},
+
+  "notificationTalkPostImported": "보호자 {count}명이 내 글을 가져갔어요",
+  "@notificationTalkPostImported": {"description": "알림 줄: 내 이야기 글을 다른 보호자가 가져감(묶음). count 는 가져간 사람 수", "placeholders": {"count": {"type": "int"}}},
   "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
 
   "guardianHomeSettings": "설정",

@@ -27,6 +27,10 @@ String notificationHeadline(AppLocalizations l10n, AppNotification notification)
       return l10n.notificationCreditRefilled;
     case NotificationType.feedbackResolved:
       return l10n.notificationFeedbackResolved;
+    case NotificationType.talkPostCommented:
+      return l10n.notificationTalkPostCommented(notification.count);
+    case NotificationType.talkPostImported:
+      return l10n.notificationTalkPostImported(notification.count);
   }
 }
 
@@ -37,6 +41,8 @@ IconData notificationIcon(NotificationType type) => switch (type) {
       NotificationType.coGuardianJoined => Icons.group_add_rounded,
       NotificationType.creditRefilled => Icons.toll_rounded,
       NotificationType.feedbackResolved => Icons.chat_bubble_outline_rounded,
+      NotificationType.talkPostCommented => Icons.forum_outlined,
+      NotificationType.talkPostImported => Icons.download_rounded,
     };
 
 /// 날짜 묶음 > 머리글

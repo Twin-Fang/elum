@@ -31,7 +31,7 @@ class NotificationNavigator {
     try {
       final isProfileReady = await _selectProfileIfNeeded(context, target.profileId);
       if (!isProfileReady || !context.mounted) return;
-      _goTo(context, target.type);
+      _goTo(context, target);
     } finally {
       _isOpening = false;
     }
@@ -88,8 +88,8 @@ class NotificationNavigator {
     return profiles?.where((profile) => profile.id == profileId).firstOrNull;
   }
 
-  void _goTo(BuildContext context, NotificationType type) {
-    switch (type) {
+  void _goTo(BuildContext context, NotificationTarget target) {
+    switch (target.type) {
       case NotificationType.routineCompleted:
       case NotificationType.routineSentByCoGuardian:
         context.go(Routes.guardian);
@@ -99,6 +99,15 @@ class NotificationNavigator {
         context.push(Routes.guardianCreditHistory);
       case NotificationType.feedbackResolved:
         break; // 이동할 화면 없음
+      case NotificationType.talkPostCommented:
+      case NotificationType.talkPostImported:
+        // 글 id 가 없으면 이야기 칸으로 (지워진 글은 상세 화면이 안내)
+        final postId = target.targetId;
+        if (postId == null) {
+          context.go(Routes.guardianTalk);
+        } else {
+          context.push(Routes.guardianTalkPostOf(postId));
+        }
     }
   }
 }

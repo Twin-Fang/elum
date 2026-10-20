@@ -9,7 +9,7 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../application/notification_settings_controller.dart';
 import '../../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 묶음: 모든 알림 받기 + 종류별 5개 (all 이 꺼지면 종류별은 회색, 값 유지)
+/// 알림 설정 스위치 묶음: 모든 알림 받기 + 종류별 7개 (all 이 꺼지면 종류별은 회색, 값 유지)
 class NotificationSettingRows extends ConsumerWidget {
   const NotificationSettingRows({super.key, required this.settings});
 
@@ -47,6 +47,8 @@ class NotificationSettingRows extends ConsumerWidget {
       NotificationSettingField.coGuardianJoined: l10n.notificationSettingCoGuardianJoined,
       NotificationSettingField.creditRefilled: l10n.notificationSettingCreditRefilled,
       NotificationSettingField.feedbackResolved: l10n.notificationSettingFeedbackResolved,
+      NotificationSettingField.talkCommented: l10n.notificationSettingTalkCommented,
+      NotificationSettingField.talkImported: l10n.notificationSettingTalkImported,
     };
 
     return Column(

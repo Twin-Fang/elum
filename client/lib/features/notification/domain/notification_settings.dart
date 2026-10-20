@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 알림 설정: 푸시 여부 6개 (알림 목록은 설정과 무관하게 항상 쌓임)
+/// 알림 설정: 푸시 여부 8개 (알림 목록은 설정과 무관하게 항상 쌓임)
 /// JSON 키는 서버 `NotificationSettingResponse` 그대로, 저장 행이 없으면 모두 켜짐
 @immutable
 class NotificationSettings {
@@ -11,6 +11,8 @@ class NotificationSettings {
     required this.isCoGuardianJoinedEnabled,
     required this.isCreditRefilledEnabled,
     required this.isFeedbackResolvedEnabled,
+    required this.isTalkCommentedEnabled,
+    required this.isTalkImportedEnabled,
   });
 
   /// 전체 푸시: false 면 종류별 값과 무관하게 푸시 없음
@@ -20,6 +22,8 @@ class NotificationSettings {
   final bool isCoGuardianJoinedEnabled;
   final bool isCreditRefilledEnabled;
   final bool isFeedbackResolvedEnabled;
+  final bool isTalkCommentedEnabled;
+  final bool isTalkImportedEnabled;
 
   static const allOn = NotificationSettings(
     isAllEnabled: true,
@@ -28,6 +32,8 @@ class NotificationSettings {
     isCoGuardianJoinedEnabled: true,
     isCreditRefilledEnabled: true,
     isFeedbackResolvedEnabled: true,
+    isTalkCommentedEnabled: true,
+    isTalkImportedEnabled: true,
   );
 
   NotificationSettings copyWith({
@@ -37,6 +43,8 @@ class NotificationSettings {
     bool? isCoGuardianJoinedEnabled,
     bool? isCreditRefilledEnabled,
     bool? isFeedbackResolvedEnabled,
+    bool? isTalkCommentedEnabled,
+    bool? isTalkImportedEnabled,
   }) =>
       NotificationSettings(
         isAllEnabled: isAllEnabled ?? this.isAllEnabled,
@@ -49,6 +57,10 @@ class NotificationSettings {
             isCreditRefilledEnabled ?? this.isCreditRefilledEnabled,
         isFeedbackResolvedEnabled:
             isFeedbackResolvedEnabled ?? this.isFeedbackResolvedEnabled,
+        isTalkCommentedEnabled:
+            isTalkCommentedEnabled ?? this.isTalkCommentedEnabled,
+        isTalkImportedEnabled:
+            isTalkImportedEnabled ?? this.isTalkImportedEnabled,
       );
 
   /// 빠진 키는 켜짐으로 읽는다 (서버 기본값과 같음)
@@ -60,6 +72,8 @@ class NotificationSettings {
         isCoGuardianJoinedEnabled: json['coGuardianJoined'] != false,
         isCreditRefilledEnabled: json['creditRefilled'] != false,
         isFeedbackResolvedEnabled: json['feedbackResolved'] != false,
+        isTalkCommentedEnabled: json['talkCommented'] != false,
+        isTalkImportedEnabled: json['talkImported'] != false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -69,6 +83,8 @@ class NotificationSettings {
         'coGuardianJoined': isCoGuardianJoinedEnabled,
         'creditRefilled': isCreditRefilledEnabled,
         'feedbackResolved': isFeedbackResolvedEnabled,
+        'talkCommented': isTalkCommentedEnabled,
+        'talkImported': isTalkImportedEnabled,
       };
 
   @override
@@ -79,7 +95,9 @@ class NotificationSettings {
       other.isRoutineSentEnabled == isRoutineSentEnabled &&
       other.isCoGuardianJoinedEnabled == isCoGuardianJoinedEnabled &&
       other.isCreditRefilledEnabled == isCreditRefilledEnabled &&
-      other.isFeedbackResolvedEnabled == isFeedbackResolvedEnabled;
+      other.isFeedbackResolvedEnabled == isFeedbackResolvedEnabled &&
+      other.isTalkCommentedEnabled == isTalkCommentedEnabled &&
+      other.isTalkImportedEnabled == isTalkImportedEnabled;
 
   @override
   int get hashCode => Object.hash(
@@ -89,5 +107,7 @@ class NotificationSettings {
         isCoGuardianJoinedEnabled,
         isCreditRefilledEnabled,
         isFeedbackResolvedEnabled,
+        isTalkCommentedEnabled,
+        isTalkImportedEnabled,
       );
 }

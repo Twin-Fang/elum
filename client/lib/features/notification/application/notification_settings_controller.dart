@@ -4,7 +4,7 @@ import '../../../core/logger/app_logger.dart';
 import '../data/notification_repository.dart';
 import '../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 6개 (all 이 꺼지면 종류별 값은 유지한 채 푸시만 멈춤)
+/// 알림 설정 스위치 8개 (all 이 꺼지면 종류별 값은 유지한 채 푸시만 멈춤)
 enum NotificationSettingField {
   all,
   routineCompleted,
@@ -12,6 +12,8 @@ enum NotificationSettingField {
   coGuardianJoined,
   creditRefilled,
   feedbackResolved,
+  talkCommented,
+  talkImported,
 }
 
 extension NotificationSettingFieldValue on NotificationSettings {
@@ -22,6 +24,8 @@ extension NotificationSettingFieldValue on NotificationSettings {
         NotificationSettingField.coGuardianJoined => isCoGuardianJoinedEnabled,
         NotificationSettingField.creditRefilled => isCreditRefilledEnabled,
         NotificationSettingField.feedbackResolved => isFeedbackResolvedEnabled,
+        NotificationSettingField.talkCommented => isTalkCommentedEnabled,
+        NotificationSettingField.talkImported => isTalkImportedEnabled,
       };
 
   NotificationSettings withValue(NotificationSettingField field, bool value) =>
@@ -37,6 +41,10 @@ extension NotificationSettingFieldValue on NotificationSettings {
           copyWith(isCreditRefilledEnabled: value),
         NotificationSettingField.feedbackResolved =>
           copyWith(isFeedbackResolvedEnabled: value),
+        NotificationSettingField.talkCommented =>
+          copyWith(isTalkCommentedEnabled: value),
+        NotificationSettingField.talkImported =>
+          copyWith(isTalkImportedEnabled: value),
       };
 }
 
