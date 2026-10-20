@@ -50,7 +50,7 @@ public interface AuthControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"OAUTH_PROVIDER_UNSUPPORTED\",\"errorMessage\":\"지원하지 않는 로그인 방식입니다.\"}"
+          value = "{\"errorCode\":\"OAUTH_PROVIDER_UNSUPPORTED\",\"errorMessage\":\"지원하지 않는 로그인 방식이에요.\"}"
         )
       )
     ),
@@ -60,7 +60,7 @@ public interface AuthControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"OAUTH_VERIFICATION_FAILED\",\"errorMessage\":\"소셜 로그인 확인에 실패했습니다.\"}"
+          value = "{\"errorCode\":\"OAUTH_VERIFICATION_FAILED\",\"errorMessage\":\"소셜 로그인을 확인하지 못했어요.\"}"
         )
       )
     ),
@@ -70,7 +70,7 @@ public interface AuthControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"OAUTH_EMAIL_CONFLICT\",\"errorMessage\":\"이미 다른 방법으로 가입된 이메일입니다.\"}"
+          value = "{\"errorCode\":\"OAUTH_EMAIL_CONFLICT\",\"errorMessage\":\"처음 가입한 방법으로 로그인해 주세요.\"}"
         )
       )
     )
@@ -104,7 +104,7 @@ public interface AuthControllerDocs {
         examples = {
           @ExampleObject(
             name = "유효하지 않음",
-            value = "{\"errorCode\":\"REFRESH_TOKEN_INVALID\",\"errorMessage\":\"유효하지 않은 리프레시 토큰입니다.\"}"
+            value = "{\"errorCode\":\"REFRESH_TOKEN_INVALID\",\"errorMessage\":\"유효하지 않은 리프레시 토큰이에요.\"}"
           ),
           @ExampleObject(
             name = "재사용 감지",

@@ -17,7 +17,7 @@ public record RoutineQuestionRequest(
     example = "내일 비가 많이 올 예정이야. 이룸이가 학교에 갈 수 있게 준비해야 해.",
     requiredMode = Schema.RequiredMode.REQUIRED)
   @NotBlank(message = "일과 내용을 입력해주세요.")
-  @Size(max = 1000, message = "일과 내용은 1000자를 넘을 수 없습니다.")
+  @Size(max = 1000, message = "일과 내용은 1000자를 넘을 수 없어요.")
   String rawInputText
 ) {
 

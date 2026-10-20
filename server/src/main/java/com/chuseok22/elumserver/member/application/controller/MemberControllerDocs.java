@@ -59,7 +59,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰이에요.\"}"
         )
       )
     ),
@@ -69,7 +69,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원입니다.\"}"
+          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원이에요.\"}"
         )
       )
     )
@@ -195,7 +195,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -226,7 +226,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -262,7 +262,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -304,7 +304,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰이에요.\"}"
         )
       )
     ),
@@ -314,7 +314,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원입니다.\"}"
+          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원이에요.\"}"
         )
       )
     )

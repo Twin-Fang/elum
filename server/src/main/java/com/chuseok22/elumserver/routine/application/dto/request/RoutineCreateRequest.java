@@ -20,7 +20,7 @@ public record RoutineCreateRequest(
   @Schema(description = "보호자가 입력한 자연어 일과 원문", example = "내일 오후 3시에 병원 가기",
     requiredMode = Schema.RequiredMode.REQUIRED)
   @NotBlank(message = "일과 내용을 입력해주세요.")
-  @Size(max = 1000, message = "일과 내용은 1000자를 넘을 수 없습니다.")
+  @Size(max = 1000, message = "일과 내용은 1000자를 넘을 수 없어요.")
   String rawInputText,
 
   @Schema(description = "일과를 수행할 날짜/시각. 생략하면 **서버가 지금 시각으로 채운다**",
@@ -31,7 +31,7 @@ public record RoutineCreateRequest(
   List<String> answers,
 
   @Schema(description = "보호자가 정한 보상(강화물). 선택 항목이라 생략 가능하다", example = "젤리 먹기")
-  @Size(max = 100, message = "보상은 100자를 넘을 수 없습니다.")
+  @Size(max = 100, message = "보상은 100자를 넘을 수 없어요.")
   String rewardText,
 
   @Schema(description = "보상 프리셋 키(SNACK/VIDEO/PLAY/WALK/CUSTOM). 직접 입력이면 CUSTOM 또는 생략", example = "SNACK")

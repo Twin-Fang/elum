@@ -13,13 +13,13 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "일과 카드 추가 요청")
 public record RoutineStepCreateRequest(
 
-  @NotBlank(message = "카드 제목은 비울 수 없습니다.")
-  @Size(max = 100, message = "카드 제목은 100자를 넘을 수 없습니다.")
+  @NotBlank(message = "카드 제목은 비울 수 없어요.")
+  @Size(max = 100, message = "카드 제목은 100자를 넘을 수 없어요.")
   @Schema(description = "카드 제목", example = "우산을 챙겨요", requiredMode = Schema.RequiredMode.REQUIRED)
   String title,
 
   // 설명은 이룸이 화면에서 TTS로 그대로 읽힌다. 너무 길면 듣다 지친다.
-  @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없습니다.")
+  @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없어요.")
   @Schema(description = "카드 설명 (이룸이 화면에서 소리로 읽어 준다)", example = "현관에서 우산을 챙겨요.")
   String description,
 

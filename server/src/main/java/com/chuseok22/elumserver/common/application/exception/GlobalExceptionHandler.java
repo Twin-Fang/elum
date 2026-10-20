@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity
       .status(errorCode.getStatus())
       .body(new ErrorResponse(errorCode,
-        messages.of("detail.requestBodyUnreadable", CurrentLocale.get(), "요청 본문을 읽을 수 없습니다.")));
+        messages.of("detail.requestBodyUnreadable", CurrentLocale.get(), "요청 본문을 읽을 수 없어요.")));
   }
 
   // @RequestParam 타입 파싱 실패(예: count에 숫자가 아닌 값 전달)를 400으로 처리한다.

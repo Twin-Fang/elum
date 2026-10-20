@@ -27,7 +27,7 @@ class JwtAuthenticationEntryPointTest {
     assertThat(response.getContentType()).isEqualTo("application/json;charset=UTF-8");
     assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
     assertThat(response.getContentAsByteArray()).isEqualTo(
-      "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+      "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰이에요.\"}"
         .getBytes(StandardCharsets.UTF_8));
   }
 }
