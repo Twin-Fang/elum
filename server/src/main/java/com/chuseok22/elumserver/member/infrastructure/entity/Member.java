@@ -99,6 +99,9 @@ public class Member extends BaseEntity {
   /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
   private String consentVersion;
 
+  /// 이야기 이용 규칙에 동의한 시각. 동의 전이면 null (글쓰기·댓글 전에 한 번 받음)
+  private LocalDateTime talkRulesAgreedAt;
+
   /// 동의를 받기 전 상태로 돌린다. 탈퇴 계정을 되살릴 때 동의를 다시 받기 위해 쓴다.
   /// 옛 동의 시각을 남기면 새로 동의받지 않았는데도 동의한 것처럼 보인다.
   public void clearConsents() {

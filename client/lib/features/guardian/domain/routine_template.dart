@@ -4,12 +4,25 @@ import '../../../l10n/app_localizations.dart';
 
 /// 예시 일과 카테고리 6개 (#777, 실증 1차 요구: 자조·학습·사회참여·마음 등으로 나눠 달라)
 enum RoutineTemplateCategory {
-  selfCare,
-  dailyFlow,
-  household,
-  community,
-  learning,
-  feelings;
+  selfCare('SELF_CARE'),
+  dailyFlow('DAILY_FLOW'),
+  household('HOUSEHOLD'),
+  community('COMMUNITY'),
+  learning('LEARNING'),
+  feelings('FEELINGS');
+
+  const RoutineTemplateCategory(this.serverValue);
+
+  /// 서버 TalkCategory 와 같은 이름 (CrossStackContractTest 가 대조)
+  final String serverValue;
+
+  /// 서버 값 > 카테고리 (모르는 값·null 은 null)
+  static RoutineTemplateCategory? fromServer(String? raw) {
+    for (final category in values) {
+      if (category.serverValue == raw) return category;
+    }
+    return null;
+  }
 
   /// 카테고리 > 화면 이름
   String labelOf(AppLocalizations l10n) => switch (this) {

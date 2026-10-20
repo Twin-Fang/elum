@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineExampleCategory;
+import com.chuseok22.elumserver.talk.core.TalkCategory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -71,6 +72,7 @@ class CrossStackContractTest {
     assertSameValues("features/onboarding/domain/image_style.dart", ImageStyle.values(), ImageStyle::name);
     assertSameValues("shared/models/routine_example_category.dart", RoutineExampleCategory.values(),
       RoutineExampleCategory::name);
+    assertSameValues("features/guardian/domain/routine_template.dart", TalkCategory.values(), Enum::name);
   }
 
   @Test
