@@ -15,11 +15,12 @@ FORBIDDEN_LABELS = ["직접 입력", "기타", "그 외", "없음", "해당 없�
 
 def load_prompt(variant: str) -> str:
     folder = lib.TOOL_DIR / "variants" / variant
-    path = folder / "question.txt"
-    if path.exists():
-        return path.read_text(encoding="utf-8")
-    ref = json.loads((folder / "variant.json").read_text(encoding="utf-8")).get("defaults_ref") if (folder / "variant.json").exists() else None
-    return lib.baseline_prompt("GEMINI_ROUTINE_QUESTION_PREFIX", ref)
+    config = json.loads((folder / "variant.json").read_text(encoding="utf-8")) if (folder / "variant.json").exists() else {}
+    if (folder / "question.txt").exists():
+        return (folder / "question.txt").read_text(encoding="utf-8")
+    if config.get("use_prod_prompts"):
+        return (lib.TOOL_DIR / lib.load_prod_config()["prompts"]["dir"] / "question.txt").read_text(encoding="utf-8")
+    return lib.baseline_prompt("GEMINI_ROUTINE_QUESTION_PREFIX", config.get("defaults_ref"))
 
 
 def measure(goals: list, result: dict) -> list:

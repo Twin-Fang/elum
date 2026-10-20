@@ -10,5 +10,6 @@
  "question_hint": "질문 한 문장, 20자 안팎, 이름 없이",
  "option_label_hint": "10자 이내의 짧은 말 (문장 금지)",
  "option_emoji_hint": "그 선택지를 나타내는 이모지 하나",
- "image_layout": true
+ "image_layout": true,
+ "use_prod_prompts": true
 }

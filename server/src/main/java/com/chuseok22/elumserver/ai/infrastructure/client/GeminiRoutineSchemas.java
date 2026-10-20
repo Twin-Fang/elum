@@ -29,7 +29,7 @@ final class GeminiRoutineSchemas {
   static final String STEP_DESCRIPTION_HINT = ContentLanguageSpec.KO_STEP_DESCRIPTION_HINT;
 
   /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
-  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다.
+  /// 배포로 바로 바뀌고, 만화 그림이 아니면 통째로 빠져 토큰도 들지 않는다.
   private static final String IMAGE_PROMPT_EN_DESCRIPTION =
     "One English sentence (under 25 words) telling the illustrator what to draw. Start with 'The character'. "
       + "Show one visible pose and the 1-2 objects held or used, placed where they are "
@@ -41,7 +41,7 @@ final class GeminiRoutineSchemas {
       + "No background places, weather, traffic. "
       + "Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number.";
 
-  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
+  /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
   static Map<String, Object> responseSchema(boolean includeImagePromptEn, boolean hasPictogramCatalog) {
     // 설명 문구는 일과 언어의 사양에서 읽는다 (ko 는 사양이 기존 문장 그대로)
     ContentLanguageSpec spec = ContentLanguageSpec.of(AiCallContext.currentContentLocale());

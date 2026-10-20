@@ -191,14 +191,14 @@ def question_response_schema(goal_count: int, hints: dict = None) -> dict:
     }
 
 
-def create_user_content(routine_text: str, support_goals: list, answers: list, include_catalog: bool = True) -> str:
+def create_user_content(routine_text: str, support_goals: list, answers: list, should_include_catalog: bool = True) -> str:
     """RoutineCreateAiInput JSON (이름은 서버가 '이룸이' 자리표시로 바꿔 보낸다)"""
     payload = {
         "task": "CREATE_ROUTINE",
         "routineText": routine_text,
         "childProfile": {"nickname": "이룸이", "supportGoals": support_goals},
         "additionalAnswers": answers,
-        "pictogramCatalog": pictogram_ids() if include_catalog else [],
+        "pictogramCatalog": pictogram_ids() if should_include_catalog else [],
     }
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
@@ -267,7 +267,7 @@ CHARACTER_APPEARANCE_EN = {
 }
 
 
-def image_prompt(prefix: str, scene: dict, character: str, reference_provided: bool = True, language: str = "KO") -> str:
+def image_prompt(prefix: str, scene: dict, character: str, is_reference_provided: bool = True, language: str = "KO") -> str:
     """GeminiRoutineImagePromptBuilder.build 와 같은 조립: 지시문 + 빈 줄 + 장면 머리말 + JSON (언어별 머리말·생김새)"""
     is_english = language == "EN"
     payload = {
@@ -276,7 +276,7 @@ def image_prompt(prefix: str, scene: dict, character: str, reference_provided: b
         "character": {
             "type": character,
             "appearance": (CHARACTER_APPEARANCE_EN if is_english else CHARACTER_APPEARANCE_KO)[character],
-            "referenceImageProvided": reference_provided,
+            "referenceImageProvided": is_reference_provided,
         },
     }
     label = "Scene info" if is_english else "장면 정보"

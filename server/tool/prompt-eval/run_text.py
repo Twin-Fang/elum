@@ -33,10 +33,12 @@ def load_variant(name: str) -> dict:
     if (folder / "variant.json").exists():
         config.update(json.loads((folder / "variant.json").read_text(encoding="utf-8")))
     create_file = folder / "create.txt"
-    config["create_prompt"] = (
-        create_file.read_text(encoding="utf-8") if create_file.exists()
-        else lib.baseline_prompt("GEMINI_ROUTINE_CREATE_PREFIX", config.get("defaults_ref"))
-    )
+    if create_file.exists():
+        config["create_prompt"] = create_file.read_text(encoding="utf-8")
+    elif config.get("use_prod_prompts"):
+        config["create_prompt"] = (lib.TOOL_DIR / lib.load_prod_config()["prompts"]["dir"] / "create.txt").read_text(encoding="utf-8")
+    else:
+        config["create_prompt"] = lib.baseline_prompt("GEMINI_ROUTINE_CREATE_PREFIX", config.get("defaults_ref"))
     preprocess_file = folder / "preprocess.txt"
     config["preprocess_prompt"] = preprocess_file.read_text(encoding="utf-8") if preprocess_file.exists() else None
     return config

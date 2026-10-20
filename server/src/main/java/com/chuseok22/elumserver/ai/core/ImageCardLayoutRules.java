@@ -2,8 +2,7 @@ package com.chuseok22.elumserver.ai.core;
 
 /**
  * 만화 카드 그림 화면 규격: 흰 배경, 같은 크기, 캐릭터 한 명, 글자·장식 금지
- * 운영 DB 지시문(관리자가 손으로 고침)과 별개로 코드에 둠 > 배포하면 바로 모든 카드에 적용
- * (실사·FLUX 는 이 규격을 쓰지 않음, 캐릭터 그림 지시문 뒤에 붙임)
+ * 운영 DB 지시문과 별개로 코드에 둠 > 배포 즉시 적용 (실사·FLUX 는 제외)
  */
 public final class ImageCardLayoutRules {
 

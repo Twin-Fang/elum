@@ -35,7 +35,7 @@ def load_image_config(variant: str, prod: dict) -> dict:
     prefix_key = "GEMINI_ROUTINE_IMAGE_PREFIX" if language == "KO" else "ROUTINE_IMAGE_PREFIX_EN"
     prompts_dir = prod["prompts"]["dir"]
     override = folder / "image.txt"
-    prod_file = lib.TOOL_DIR / prompts_dir / f"image_{language.lower()}.txt" if prompts_dir else None
+    prod_file = lib.TOOL_DIR / prompts_dir / f"image_{language.lower()}.txt" if (prompts_dir and config.get("use_prod_prompts")) else None
     if override.exists():
         prefix = override.read_text(encoding="utf-8")
     elif prod_file is not None and prod_file.exists():
@@ -64,7 +64,7 @@ def render_step(config: dict, prod: dict, settings: dict, record: dict, step: di
     # OpenAI 는 참조 이미지를 못 받는다: 프롬프트에도 사실대로 적는다 (서버 OpenAiImageClient 동일)
     prompt = lib.image_prompt(
         config["image_prefix"], build_scene(config["image_scene_mode"], record["result"]["title"], step), character,
-        reference_provided=(provider == "GEMINI"), language=config["language"],
+        is_reference_provided=(provider == "GEMINI"), language=config["language"],
     )
     try:
         if provider == "OPENAI":
