@@ -9,6 +9,7 @@ import 'child_routine_detail_tablet_body.dart';
 import 'child_routine_detail_top_bar.dart';
 import 'child_routine_check_button.dart';
 
+import '../../../core/device/screen_awake.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/theme/app_motion.dart';
@@ -101,6 +102,8 @@ class _ChildRoutineDetailScreenState
   @override
   void initState() {
     super.initState();
+    // 행동하러 다녀오는 동안 화면 꺼짐 방지 (#869)
+    ScreenAwake.keepOn();
     // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -115,6 +118,8 @@ class _ChildRoutineDetailScreenState
   void dispose() {
     // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
     _speech?.stop();
+    // 다른 화면은 기기 설정대로 꺼짐
+    ScreenAwake.release();
     _confetti.dispose();
     super.dispose();
   }
