@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_motion.dart';
+import '../../../../shared/example_card_image/example_card_art.dart';
 import '../../../../shared/example_card_image/example_card_image_catalog.dart';
+import '../../../../shared/pictogram/pictogram_art.dart';
 import '../../../../shared/pictogram/pictogram_catalog.dart';
 import '../../data/card_image_repository.dart';
-import 'example_card_art.dart';
-import 'pictogram_art.dart';
 
 /// 카드 그림 조회 상태 — 화면이 "그림이 없다"를 알아야 할 때 쓴다.
 enum CardImageState {

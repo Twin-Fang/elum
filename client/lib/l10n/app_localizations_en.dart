@@ -2430,13 +2430,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSideNavChildScreen => 'Elumi mode';
 
   @override
-  String get guardianTalkComingSoonTitle => 'Community is coming';
-
-  @override
-  String get guardianTalkComingSoonBody =>
-      'A place to share tips with other guardians\nopens soon';
-
-  @override
   String get routineLibraryEmptyTitle => 'No routines yet';
 
   @override
@@ -2818,4 +2811,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get elumiInfoNotFound => 'Couldn\'t load Elumi\'s info';
+
+  @override
+  String get talkTitle => '이야기';
+
+  @override
+  String get talkWriteButton => '+ 올리기';
+
+  @override
+  String get talkCategoryAll => '전체';
+
+  @override
+  String get talkPopularTitle => '많이 가져갔어요';
+
+  @override
+  String get talkPopularPeriod => '이번 주';
+
+  @override
+  String talkPopularImportCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count명 가져감',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get talkLatestTitle => '새로 올라왔어요';
+
+  @override
+  String get talkEmptyTitle => '아직 나눈 일과가 없어요';
+
+  @override
+  String get talkEmptyAction => '첫 일과를 나눠 보세요';
+
+  @override
+  String get talkFeedFailed => '이야기를 불러오지 못했어요';
+
+  @override
+  String get talkAuthorFallback => '보호자';
+
+  @override
+  String get talkNoteLabel => '이렇게 했어요';
+
+  @override
+  String get talkImportButtonShort => '내 일과로';
+
+  @override
+  String talkHelpfulCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '도움돼요 $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String talkCommentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '댓글 $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get talkLoadMoreRetry => '더 불러오지 못했어요. 눌러서 다시 해 보세요';
+
+  @override
+  String get timeAgoJustNow => '방금 전';
+
+  @override
+  String timeAgoMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count분 전',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count시간 전',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 전',
+    );
+    return '$_temp0';
+  }
 }

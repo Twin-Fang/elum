@@ -686,8 +686,6 @@
   "guardianMyInfoActiveBadge": "Viewing",
   "guardianSideNavCaption": "Guardian mode",
   "guardianSideNavChildScreen": "Elumi mode",
-  "guardianTalkComingSoonTitle": "Community is coming",
-  "guardianTalkComingSoonBody": "A place to share tips with other guardians\nopens soon",
   "routineLibraryEmptyTitle": "No routines yet",
   "routineLibraryEmptyBody": "Tap + New routine below to make your first one",
   "routineLibraryLoadFailedFallback": "Couldn't load your routines",

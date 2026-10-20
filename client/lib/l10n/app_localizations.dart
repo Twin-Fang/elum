@@ -4238,18 +4238,6 @@ abstract class AppLocalizations {
   /// **'이룸이 화면'**
   String get guardianSideNavChildScreen;
 
-  /// 이야기 칸 준비 중 안내 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'이야기를 준비하고 있어요'**
-  String get guardianTalkComingSoonTitle;
-
-  /// 이야기 칸 준비 중 안내 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요'**
-  String get guardianTalkComingSoonBody;
-
   /// 일과관리 칸 빈 상태 제목
   ///
   /// In ko, this message translates to:
@@ -4927,6 +4915,126 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이 정보를 불러오지 못했어요'**
   String get elumiInfoNotFound;
+
+  /// 이야기 칸 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기'**
+  String get talkTitle;
+
+  /// 이야기 칸 오른쪽 위: 내 일과를 올리러 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'+ 올리기'**
+  String get talkWriteButton;
+
+  /// 이야기 분류 칩: 분류 없이 전체 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get talkCategoryAll;
+
+  /// 이야기 칸 인기 줄 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'많이 가져갔어요'**
+  String get talkPopularTitle;
+
+  /// 이야기 칸 인기 줄 제목 옆 기간 표시 (최근 7일)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주'**
+  String get talkPopularPeriod;
+
+  /// 인기 줄 카드: 일과관리로 가져간 보호자 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}명 가져감}}'**
+  String talkPopularImportCount(int count);
+
+  /// 이야기 칸 최신 글 목록 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새로 올라왔어요'**
+  String get talkLatestTitle;
+
+  /// 이야기 칸 글이 0건일 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 나눈 일과가 없어요'**
+  String get talkEmptyTitle;
+
+  /// 이야기 칸 빈 상태 버튼: 올리기로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 일과를 나눠 보세요'**
+  String get talkEmptyAction;
+
+  /// 이야기 칸 첫 쪽 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기를 불러오지 못했어요'**
+  String get talkFeedFailed;
+
+  /// 닉네임이 없는 글쓴이를 부르는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get talkAuthorFallback;
+
+  /// 글쓴이의 한마디 앞에 붙는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 했어요'**
+  String get talkNoteLabel;
+
+  /// 글 카드의 작은 버튼: 이 일과를 내 일과관리로 가져오기
+  ///
+  /// In ko, this message translates to:
+  /// **'내 일과로'**
+  String get talkImportButtonShort;
+
+  /// 글 카드: 도움이 됐어요 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{도움돼요 {count}}}'**
+  String talkHelpfulCount(int count);
+
+  /// 글 카드: 댓글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{댓글 {count}}}'**
+  String talkCommentCount(int count);
+
+  /// 이야기 목록 끝: 다음 쪽 불러오기 실패 시 다시 시도 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'더 불러오지 못했어요. 눌러서 다시 해 보세요'**
+  String get talkLoadMoreRetry;
+
+  /// 1분이 안 지난 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'방금 전'**
+  String get timeAgoJustNow;
+
+  /// 1시간 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}분 전}}'**
+  String timeAgoMinutes(int count);
+
+  /// 하루 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}시간 전}}'**
+  String timeAgoHours(int count);
+
+  /// 일주일 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 전}}'**
+  String timeAgoDays(int count);
 }
 
 class _AppLocalizationsDelegate

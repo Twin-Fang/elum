@@ -8,9 +8,7 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
-import '../../features/guardian/presentation/navigation/guardian_coming_soon_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
-import '../../features/guardian/presentation/navigation/guardian_tab.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
@@ -23,6 +21,7 @@ import '../../features/profile/presentation/elumi_info_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
+import '../../features/talk/presentation/talk_feed_screen.dart';
 import '../config/ad_ids.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
@@ -75,7 +74,7 @@ List<RouteBase> guardianRoutes() => [
             path: Routes.guardianTalk,
             pageBuilder: (context, state) => fadePage(
               state,
-              const GuardianComingSoonScreen(tab: GuardianTab.talk),
+              const TalkFeedScreen(),
               layoutKind: ScreenLayoutKind.contentColumn,
             ),
           ),

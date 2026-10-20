@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/logger/app_logger.dart';
+import '../../core/assets/app_assets.dart';
+import '../../core/logger/app_logger.dart';
 
 /// 사진·AI 그림이 없는 예시 일과 카드의 그림 자리에 그리는 번들 이미지 (루미, 투명 배경 WebP).
 ///

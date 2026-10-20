@@ -31,6 +31,16 @@ abstract final class Routes {
   /// 이야기 칸. 보호자 커뮤니티(#786)가 들어올 자리
   static const guardianTalk = '/guardian/talk';
 
+  /// 이야기 글 상세. 탭 바를 덮는 화면이라 셸 밖에 둔다
+  static const guardianTalkPost = '/guardian/talk/posts/:postId';
+
+  /// 이야기 글 상세 경로: `/guardian/talk/posts/{postId}`
+  static String guardianTalkPostOf(String postId) =>
+      '/guardian/talk/posts/${Uri.encodeComponent(postId)}';
+
+  /// 이야기 올리기 (일과 고르기 > 사진 > 한마디·분류)
+  static const guardianTalkShare = '/guardian/talk/share';
+
   /// 내정보 칸 = 보호자 프로필 (#817). 오른쪽 위 설정 아이콘으로 [guardianSettings] 에 들어간다.
   static const guardianMyInfo = '/guardian/me';
 

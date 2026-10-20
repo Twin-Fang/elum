@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/logger/app_logger.dart';
-import '../../../../shared/pictogram/pictogram_svg_loader.dart';
+import '../../core/logger/app_logger.dart';
+import 'pictogram_svg_loader.dart';
 
 /// 사진·AI 그림이 없는 카드의 그림 자리에 그리는 **무료 픽토그램**.
 ///
