@@ -44,7 +44,11 @@ class HomeCoachNotifier extends Notifier<HomeCoachState> {
   bool _shownThisRun = false;
 
   @override
-  HomeCoachState build() => const HomeCoachState();
+  HomeCoachState build() {
+    // invalidate 는 Notifier 를 새로 만들지 않고 build 만 다시 부른다 — 필드도 함께 되돌린다
+    _shownThisRun = false;
+    return const HomeCoachState();
+  }
 
   /// 읽지 못하면 **봤다고 친다.** 안내는 없어도 앱이 돌지만, 못 읽는 저장소에서
   /// 매번 뜨는 안내는 닫을 방법 없는 반복이 된다.

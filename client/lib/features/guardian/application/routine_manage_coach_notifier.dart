@@ -64,7 +64,11 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
   bool _hasShownThisRun = false;
 
   @override
-  RoutineManageCoachState build() => const RoutineManageCoachState();
+  RoutineManageCoachState build() {
+    // invalidate 는 Notifier 를 새로 만들지 않고 build 만 다시 부른다 — 필드도 함께 되돌린다
+    _hasShownThisRun = false;
+    return const RoutineManageCoachState();
+  }
 
   /// 읽지 못하면 **봤다고 친다.** 못 읽는 저장소에서 매번 뜨는 안내는 닫을 방법 없는 반복이다.
   bool _isSeen(bool Function(LocalStorage storage) read) {
