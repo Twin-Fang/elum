@@ -42,7 +42,7 @@ final class RoutineRules {
   static final int ROUTINE_TITLE_MAX_LENGTH = 30;
 
   /**
-   * 카드 복사: 제목·언어·보상·단계(글·그림·픽토그램) > 저장 전 새 일과 (오늘 09:00, CONFIRMED)
+   * 카드 복사: 제목·언어·보상·단계(글·그림·픽토그램·예시 이미지) > 저장 전 새 일과 (오늘 09:00, CONFIRMED)
    * 복제·보내기·복사하기가 함께 쓴다. AI 를 부르지 않고 원문은 복사하지 않음 (서비스 원칙 5)
    */
   static Routine copyCardsOf(Routine origin, String createdBy) {
@@ -70,7 +70,7 @@ final class RoutineRules {
       copied.setDescription(step.getDescription());
       // 이미지는 새로 만들지 않고 그대로 쓴다 — 재생성은 비용이고 같은 행동이면 같은 그림이면 된다.
       copied.setImagePath(step.getImagePath());
-      // 픽토그램도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
+      // 픽토그램·예시 이미지도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
       copied.setPictogramId(step.getPictogramId());
       copied.setExampleImageId(step.getExampleImageId());
       copied.setCompleted(false);
