@@ -263,7 +263,10 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     final dragId = _dragId;
     final hover = _hover;
     final geometry = _geometry;
-    if (dragId == null || hover == null || geometry == null || _landing != null) {
+    if (dragId == null ||
+        hover == null ||
+        geometry == null ||
+        _landing != null) {
       return;
     }
     final shown = _shownEntries;

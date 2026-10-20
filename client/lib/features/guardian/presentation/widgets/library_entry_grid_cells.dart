@@ -19,10 +19,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     var entries = widget.entries;
     if (override != null) {
       final byId = {for (final entry in entries) entry.id: entry};
-      entries = [
-        for (final id in override) ?byId.remove(id),
-        ...byId.values,
-      ];
+      entries = [for (final id in override) ?byId.remove(id), ...byId.values];
     }
     return [
       for (final entry in entries)
@@ -31,9 +28,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
   }
 
   /// 칸마다 설 자리: 끄는 중이면 나머지가 빈자리를 건너뛰고, 끄는 칸은 빈자리에(보이지 않게)
-  List<({LibraryEntry entry, int slot})> _placements(
-    List<LibraryEntry> shown,
-  ) {
+  List<({LibraryEntry entry, int slot})> _placements(List<LibraryEntry> shown) {
     final dragId = _dragId;
     final gap = _hover?.gap;
     if (dragId == null || gap == null) {
@@ -232,8 +227,9 @@ extension _LibraryGridCells on _LibraryEntryGridState {
               DelayedMultiDragGestureRecognizer
             >(
               () => DelayedMultiDragGestureRecognizer(debugOwner: this),
-              (recognizer) => recognizer.onStart = (position) =>
-                  _startDrag(entry, position, isLongPress: true),
+              (recognizer) =>
+                  recognizer.onStart = (position) =>
+                      _startDrag(entry, position, isLongPress: true),
             ),
         if (widget.isArranging)
           ImmediateMultiDragGestureRecognizer:
@@ -241,8 +237,9 @@ extension _LibraryGridCells on _LibraryEntryGridState {
                 ImmediateMultiDragGestureRecognizer
               >(
                 () => ImmediateMultiDragGestureRecognizer(debugOwner: this),
-                (recognizer) => recognizer.onStart = (position) =>
-                    _startDrag(entry, position, isLongPress: false),
+                (recognizer) =>
+                    recognizer.onStart = (position) =>
+                        _startDrag(entry, position, isLongPress: false),
               ),
       },
       child: tile,

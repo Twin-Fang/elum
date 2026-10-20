@@ -22,6 +22,7 @@ import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
 import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
@@ -274,6 +275,25 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
         .firstOrNull
         ?.id;
 
+    return ReorderFingerFollow(
+      builder: (context, follow) => _buildReorderList(
+        routines: routines,
+        progress: progress,
+        demoOpen: demoOpen,
+        coachId: coachId,
+        follow: follow,
+      ),
+    );
+  }
+
+  /// 오늘 일과 목록: 길게 눌러 끌어 순서 바꾸기 (들린 줄은 손가락에 붙음) · 밀어서 편집 · 삭제
+  Widget _buildReorderList({
+    required List<Routine> routines,
+    required ChildRoutineState progress,
+    required bool demoOpen,
+    required String? coachId,
+    required ReorderFingerFollowState follow,
+  }) {
     return ReorderableListView.builder(
       shrinkWrap: true,
       // 바깥 화면이 이미 스크롤한다. 여기까지 스크롤하면 둘이 맞물려 튄다.
@@ -285,24 +305,30 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       itemCount: routines.length,
       onReorderStart: (index) {
         HapticFeedback.mediumImpact();
+        follow.start();
         setState(() {
           _draggingId = routines[index].id;
           // 들고 있는 카드가 밀려 있으면 버튼만 제자리에 남는다.
           _openId = null;
         });
       },
-      onReorderEnd: (_) => setState(() => _draggingId = null),
+      onReorderEnd: (_) {
+        follow.end();
+        setState(() => _draggingId = null);
+      },
       onReorder: (oldIndex, newIndex) => _reorder(routines, oldIndex, newIndex),
-      proxyDecorator: (child, index, animation) => AnimatedBuilder(
-        animation: animation,
-        builder: (context, inner) {
-          final lift = Curves.easeOut.transform(animation.value);
-          return Transform.scale(
-            scale: 1 + _liftScale * lift,
-            child: Material(type: MaterialType.transparency, child: inner),
-          );
-        },
-        child: child,
+      proxyDecorator: (child, index, animation) => follow.decorate(
+        AnimatedBuilder(
+          animation: animation,
+          builder: (context, inner) {
+            final lift = Curves.easeOut.transform(animation.value);
+            return Transform.scale(
+              scale: 1 + _liftScale * lift,
+              child: Material(type: MaterialType.transparency, child: inner),
+            );
+          },
+          child: child,
+        ),
       ),
       itemBuilder: (context, index) {
         final routine = routines[index];
