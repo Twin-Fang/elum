@@ -9,8 +9,10 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
 
@@ -44,4 +46,25 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
     @Param("status") TalkPostStatus status, @Param("language") AppLocale language,
     @Param("categories") Collection<TalkCategory> categories, @Param("since") LocalDateTime since,
     Pageable pageable);
+
+  // 집계 증감: 동시에 눌려도 값이 겹쳐 쓰이지 않게 DB 에서 바로 더하고, 줄일 때는 0 아래로 내려가지 않게 막음
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.helpfulCount = p.helpfulCount + 1 where p.id = :postId")
+  int increaseHelpfulCount(@Param("postId") String postId);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.helpfulCount = p.helpfulCount - 1 where p.id = :postId and p.helpfulCount > 0")
+  int decreaseHelpfulCount(@Param("postId") String postId);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.commentCount = p.commentCount + 1 where p.id = :postId")
+  int increaseCommentCount(@Param("postId") String postId);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.commentCount = p.commentCount - 1 where p.id = :postId and p.commentCount > 0")
+  int decreaseCommentCount(@Param("postId") String postId);
 }

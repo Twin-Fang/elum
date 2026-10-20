@@ -23,6 +23,24 @@ public final class TalkTextRules {
    * @throws CustomException 300자 초과는 TALK_TEXT_TOO_LONG
    */
   public static String normalizeNote(String raw) {
+    return normalizeText(raw, MAX_NOTE_LENGTH);
+  }
+
+  /**
+   * 댓글 정리: 한마디와 같은 정리 > 빈 값은 거절
+   *
+   * @throws CustomException 빈 값은 INVALID_INPUT_VALUE, 300자 초과는 TALK_TEXT_TOO_LONG
+   */
+  public static String normalizeComment(String raw) {
+    String comment = normalizeText(raw, MAX_COMMENT_LENGTH);
+    if (comment == null) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    return comment;
+  }
+
+  // 제어문자 제거(줄바꿈 제외) > 앞뒤 공백 제거 > 빈 값은 null > 길이 검사
+  private static String normalizeText(String raw, int maxLength) {
     if (raw == null) {
       return null;
     }
@@ -34,7 +52,7 @@ public final class TalkTextRules {
     if (note.isEmpty()) {
       return null;
     }
-    if (note.codePointCount(0, note.length()) > MAX_NOTE_LENGTH) {
+    if (note.codePointCount(0, note.length()) > maxLength) {
       throw new CustomException(ErrorCode.TALK_TEXT_TOO_LONG);
     }
     return note;

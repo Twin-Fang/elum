@@ -29,4 +29,22 @@ class TalkTextRulesTest {
       .isInstanceOfSatisfying(CustomException.class,
         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_TEXT_TOO_LONG));
   }
+
+  @Test
+  void normalizeComment_blankOrNullIsInvalidInput() {
+    assertThatThrownBy(() -> TalkTextRules.normalizeComment(" \n "))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+    assertThatThrownBy(() -> TalkTextRules.normalizeComment(null))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  void normalizeComment_stripsAndLimitsToThreeHundredCodePoints() {
+    assertThat(TalkTextRules.normalizeComment("  좋아요 \n")).isEqualTo("좋아요");
+    assertThatThrownBy(() -> TalkTextRules.normalizeComment("가".repeat(301)))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_TEXT_TOO_LONG));
+  }
 }
