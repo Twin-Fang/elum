@@ -3,9 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/elum_bottom_sheet.dart';
 
-/// 코치마크 시범 연출의 조각들 (손가락·링·시트 미리보기·메뉴 줄·토스트·묶음 모양)과 시간 계산
+/// 코치마크 시범 연출의 조각들 (손가락·링·메뉴 줄·토스트·묶음 모양)과 시간 계산
 
 /// 한 주기를 도는 시범. 동작 줄이기면 [endScene] 지점의 멈춘 장면만 그린다.
 Widget buildCoachDemoLoop({
@@ -152,30 +151,4 @@ class CoachDemoRing extends StatelessWidget {
       ),
     );
   }
-}
-
-/// 아래에서 올라오는 시트 미리보기. [slide] 0 = 화면 밖, 1 = 올라옴
-class CoachDemoPreviewSheet extends StatelessWidget {
-  const CoachDemoPreviewSheet({
-    super.key,
-    required this.slide,
-    required this.child,
-  });
-
-  final double slide;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.bottomCenter,
-    child: FractionalTranslation(
-      translation: Offset(0, 1 - Curves.easeOutCubic.transform(slide)),
-      child: ElumSheetSurface(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 32.h, 16.w, 28.h),
-          child: child,
-        ),
-      ),
-    ),
-  );
 }
