@@ -68,20 +68,28 @@ Future<void> main() async {
   // 판단할 수 있도록 여기서 미리 읽어 메모리에 올린다.
   late final SecureTokenStore tokens;
   var lockMissing = false;
+  // 실패하면 이 단계의 오류 코드를 보여 준다
+  var stage = StartupStage.installation;
   try {
     final installationId = await const InstallationStore().load();
+    stage = StartupStage.tokens;
     tokens = SecureTokenStore(
       installationId: installationId,
       allowLegacyMigration: canMigrateLegacyInstallation(storage),
     );
     await tokens.load();
-    await storage.configureLock(installationId, reset: tokens.installationChanged);
+    stage = StartupStage.lock;
+    await storage.configureLock(
+      installationId,
+      reset: tokens.installationChanged,
+    );
     try {
       lockMissing = !await storage.hasPin();
     } catch (error) {
       // 잠금 기록이 깨졌으면 새로 만들 수 없다 — 기존 동작대로 둔다.
       AppLogger.error('잠금 확인', error);
     }
+    stage = StartupStage.reset;
     if (tokens.installationChanged) {
       // 큐와 프로필은 회원 대조까지 보존하되 연결 상태로 로그인을 우회하지 못하게 한다.
       await storage.setElumiDevice(false);
@@ -91,8 +99,8 @@ Future<void> main() async {
       await storage.setOnboardingCompleted(false);
     }
   } catch (error) {
-    AppLogger.error('설치 세션 초기화', error);
-    runApp(InstallationRetryApp(onRetry: main));
+    AppLogger.error('설치 세션 초기화 (${stage.errorCode})', error);
+    runApp(InstallationRetryApp(onRetry: main, errorCode: stage.errorCode));
     return;
   }
 
@@ -128,19 +136,42 @@ Future<void> main() async {
   );
 }
 
+/// 앱 시작 단계별 오류 코드 4개 (제보를 받았을 때 어느 단계가 실패했는지)
+enum StartupStage {
+  /// 설치 표식 읽기
+  installation('E-INSTALL'),
+
+  /// 보안 저장소 토큰 읽기
+  tokens('E-TOKEN'),
+
+  /// 잠금(PIN) 저장소 설정
+  lock('E-LOCK'),
+
+  /// 설치가 바뀐 뒤 연결·역할 상태 초기화
+  reset('E-RESET');
+
+  const StartupStage(this.errorCode);
+
+  final String errorCode;
+}
+
 /// 설치 표식 확인 실패 화면: 인증·잠금 화면 대신 오류 안내와 다시 시도만 보여준다
 /// ProviderScope·라우터 이전 단계라 테마·화면 배율·번역만 직접 감싼다
 class InstallationRetryApp extends StatefulWidget {
-  const InstallationRetryApp({required this.onRetry, super.key});
+  const InstallationRetryApp({
+    required this.onRetry,
+    required this.errorCode,
+    super.key,
+  });
   final Future<void> Function() onRetry;
+
+  /// 실패한 시작 단계의 오류 코드 ([StartupStage.errorCode])
+  final String errorCode;
   @override
   State<InstallationRetryApp> createState() => _InstallationRetryAppState();
 }
 
 class _InstallationRetryAppState extends State<InstallationRetryApp> {
-  // 설치 표식 오류 식별자 (제보 추적용)
-  static const String _errorCode = 'E-INSTALL';
-
   bool _isRetrying = false;
 
   Future<void> _onRetryPressed() async {
@@ -170,7 +201,7 @@ class _InstallationRetryAppState extends State<InstallationRetryApp> {
                 message: context.l10n.installationRetryTitle,
                 description: context.l10n.installationRetryMessage,
                 actionLabel: context.l10n.installationRetryButton,
-                errorCode: _errorCode,
+                errorCode: widget.errorCode,
                 onRetry: _onRetryPressed,
                 isRetrying: _isRetrying,
               ),
