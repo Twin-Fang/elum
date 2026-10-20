@@ -53,6 +53,12 @@ tts:
   # /app 마운트 아래 (그림 data/routine-images 와 같은 볼륨)
   speech-storage-path: data/routine-speech
 
+# 이야기(보호자끼리 일과 나눔). 그림 사본은 일과 그림과 같은 볼륨 아래에 둔다
+talk:
+  image-storage-path: ${ELUM_TALK_IMAGE_PATH:data/talk-images}
+  # 신고 알림 받을 메일. 비면 메일을 보내지 않는다
+  report-mail-to: ${ELUM_TALK_REPORT_MAIL_TO:}
+
 elum:
   auth:
     legacy-password:
