@@ -11,6 +11,7 @@ import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/domain/guardian_account.dart';
+import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
 import 'widgets/my_info_elumi_group.dart';
 import 'widgets/sign_in_provider_badge.dart';
@@ -113,6 +114,11 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                           label: context.l10n.guardianSettingsDrafts,
                           onTap: () => context.push(Routes.guardianDrafts),
                         ),
+                        SettingsTile(
+                          isInCard: true,
+                          label: context.l10n.notificationTabNotices,
+                          onTap: () => _openNotices(context, ref),
+                        ),
                       ],
                     ),
                   ],
@@ -124,6 +130,12 @@ class GuardianMyInfoScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// 공지사항 탭 열기 > 돌아오면 종 아이콘 점 다시 받기 (본 공지 기록이 바뀌었을 수 있음)
+Future<void> _openNotices(BuildContext context, WidgetRef ref) async {
+  await context.push(Routes.guardianNotices);
+  await ref.read(unreadSummaryProvider.notifier).refresh();
 }
 
 /// 보호자 프로필 카드: 역할 > 닉네임 > 가입 방법 배지 + 가린 이메일 > 가입일 (#849)

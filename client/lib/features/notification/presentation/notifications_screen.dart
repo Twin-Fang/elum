@@ -11,9 +11,12 @@ import 'widgets/notification_settings_gear_button.dart';
 import 'widgets/notice_history_tab.dart';
 import 'widgets/notification_list_tab.dart';
 
-/// 알림 화면: 위에 `알림 / 공지사항` 두 탭, 아래에 고른 탭의 목록 (종 아이콘으로 들어옴)
+/// 알림 화면: 위에 `알림 / 공지사항` 두 탭, 아래에 고른 탭의 목록 (종 아이콘 · 내정보 `공지사항` 줄로 들어옴)
 class NotificationsScreen extends ConsumerStatefulWidget {
-  const NotificationsScreen({super.key});
+  const NotificationsScreen({super.key, this.isNoticeTabInitiallySelected = false});
+
+  /// 공지사항 탭이 골라진 채로 연다 (내정보 `공지사항` 줄)
+  final bool isNoticeTabInitiallySelected;
 
   @override
   ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -30,10 +33,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   static const _gearRight = 16.0;
   static const _titleRowTop = 67.0;
 
-  int _selectedTabIndex = _notificationTabIndex;
+  late int _selectedTabIndex = widget.isNoticeTabInitiallySelected
+      ? _noticeTabIndex
+      : _notificationTabIndex;
 
   /// 공지 탭을 한 번이라도 열었나 (처음 열 때 만들고, 이후 오가도 유지해 본 공지 기록을 한 번만 보냄)
-  bool _isNoticeTabOpened = false;
+  late bool _isNoticeTabOpened = widget.isNoticeTabInitiallySelected;
 
   @override
   Widget build(BuildContext context) {

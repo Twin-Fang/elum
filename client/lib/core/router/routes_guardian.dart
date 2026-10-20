@@ -133,8 +133,14 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianNotifications,
-    pageBuilder: (context, state) =>
-        slidePage(state, const NotificationsScreen()),
+    pageBuilder: (context, state) => slidePage(
+      state,
+      NotificationsScreen(
+        isNoticeTabInitiallySelected:
+            state.uri.queryParameters[Routes.notificationsTabQuery] ==
+            Routes.notificationsNoticeTabValue,
+      ),
+    ),
   ),
   GoRoute(
     path: Routes.guardianNotificationSettings,

@@ -40,6 +40,14 @@ abstract final class Routes {
   /// 알림·공지사항 화면. 홈 종 아이콘이 연다.
   static const guardianNotifications = '/guardian/notifications';
 
+  /// [guardianNotifications] 의 처음 고를 탭 쿼리: `tab=notice` 면 공지사항 탭 (#660)
+  static const notificationsTabQuery = 'tab';
+  static const notificationsNoticeTabValue = 'notice';
+
+  /// 알림 화면을 공지사항 탭으로 연다. 내정보 `공지사항` 줄이 연다 (#660)
+  static const guardianNotices =
+      '$guardianNotifications?$notificationsTabQuery=$notificationsNoticeTabValue';
+
   /// 알림 설정. 알림 화면 오른쪽 위에서 들어간다.
   static const guardianNotificationSettings = '/guardian/settings/notifications';
 
