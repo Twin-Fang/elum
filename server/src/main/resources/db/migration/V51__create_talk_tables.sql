@@ -28,6 +28,9 @@ CREATE INDEX IF NOT EXISTS idx_talk_post_status_language_category_created
   ON talk_post (status, language, category, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_talk_post_author_member_id ON talk_post (author_member_id);
 CREATE INDEX IF NOT EXISTS idx_talk_post_source_routine_id ON talk_post (source_routine_id);
+-- 같은 원본 일과로 보이는 글은 하나만 (동시 두 번 올리기 방지, JPA @Index 로는 부분 인덱스를 못 씀)
+CREATE UNIQUE INDEX IF NOT EXISTS uk_talk_post_visible_source
+  ON talk_post (source_routine_id) WHERE status = 'VISIBLE';
 
 -- 글의 카드: 올릴 때의 스냅샷 (원본 일과를 고쳐도 글은 그대로)
 CREATE TABLE IF NOT EXISTS talk_post_step (

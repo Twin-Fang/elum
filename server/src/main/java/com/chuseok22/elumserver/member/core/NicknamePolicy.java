@@ -32,6 +32,9 @@ public class NicknamePolicy {
   private static final List<String> PROFANITY_RESOURCES = List.of(
     "nickname/profanity-ko.txt", "nickname/profanity-en.txt", "nickname/profanity-ja.txt",
     "nickname/profanity-zh.txt", "nickname/profanity-es.txt");
+  private static final String KOREAN_PROFANITY_RESOURCE = "nickname/profanity-ko.txt";
+  // 글 검사에서 뺄 한국어 욕설의 최대 길이 (코드포인트). "보지"·"자지" 같은 짧은 낱말이 "보지 않아요" 에 걸림
+  private static final int MAX_TEXT_EXCLUDED_KOREAN_WORD_LENGTH = 2;
   private static final String RESERVED_RESOURCE = "nickname/reserved.txt";
   private static final String ALLOW_RESOURCE = "nickname/profanity-allow.txt";
 
@@ -41,7 +44,7 @@ public class NicknamePolicy {
 
   // 닉네임 판정용: 욕설 + 예약어
   private final List<String> blockedKeys;
-  // 글 검사용: 욕설만 (예약어 "관리자"·"elum" 등은 글에서는 정상 낱말)
+  // 글 검사용: 욕설만 (예약어 "관리자"·"elum" 등은 글에서는 정상 낱말), 2자 이하 한국어 욕설도 뺌
   private final List<String> profanityKeys;
   private final List<String> allowedKeys;
 
@@ -50,7 +53,7 @@ public class NicknamePolicy {
     PROFANITY_RESOURCES.forEach(resource -> profanity.addAll(readRequiredWords(resource)));
     List<String> blocked = new ArrayList<>(profanity);
     blocked.addAll(readRequiredWords(RESERVED_RESOURCE));
-    this.profanityKeys = toNonEmptyKeys(profanity);
+    this.profanityKeys = toNonEmptyKeys(profanityForText());
     this.blockedKeys = toNonEmptyKeys(blocked);
     this.allowedKeys = readRequiredWords(ALLOW_RESOURCE).stream().map(NicknamePolicy::toComparisonKey).toList();
   }
@@ -102,6 +105,18 @@ public class NicknamePolicy {
 
   private static boolean containsAnyKey(String comparisonKey, List<String> keys) {
     return keys.stream().anyMatch(comparisonKey::contains);
+  }
+
+  // 글 검사용 욕설 단어: 5개 언어 목록에서 2자 이하 한국어 단어만 제외
+  private static List<String> profanityForText() {
+    List<String> words = new ArrayList<>();
+    for (String resource : PROFANITY_RESOURCES) {
+      boolean isKorean = KOREAN_PROFANITY_RESOURCE.equals(resource);
+      readRequiredWords(resource).stream()
+        .filter(word -> !isKorean || word.codePointCount(0, word.length()) > MAX_TEXT_EXCLUDED_KOREAN_WORD_LENGTH)
+        .forEach(words::add);
+    }
+    return words;
   }
 
   private static List<String> toNonEmptyKeys(List<String> words) {

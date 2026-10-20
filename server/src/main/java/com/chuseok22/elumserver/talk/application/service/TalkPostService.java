@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.talk.application.service;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.core.NicknamePolicy;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,8 @@ public class TalkPostService {
 
   // 흐리게 처리한 그림은 항상 JPEG
   private static final String BLURRED_CONTENT_TYPE = "image/jpeg";
+  // 남은 호칭을 문자열 그대로 치환하는 최소 호칭 길이 (코드포인트)
+  private static final int MINIMUM_STRICT_MASK_NAME_LENGTH = 2;
 
   private final TalkPostRepository talkPostRepository;
   private final TalkPostStepRepository talkPostStepRepository;
@@ -91,12 +95,12 @@ public class TalkPostService {
     rejectBlockedWords(masked);
 
     // 글 저장 > 카드·그림 저장 (그림 단계 실패 시 쓴 파일 정리 후 롤백)
-    TalkPost post = talkPostRepository.save(newPost(caller, snapshot, masked, category));
+    TalkPost post = saveNewPost(newPost(caller, snapshot, masked, category));
     Set<String> blurredStepIds = request.blurredStepIds() == null ? Set.of() : new HashSet<>(request.blurredStepIds());
     try {
       talkPostStepRepository.saveAll(newSteps(post.getId(), masked.steps(), blurredStepIds));
     } catch (RuntimeException e) {
-      talkImageStorage.deletePost(post.getId());
+      deleteWrittenImagesQuietly(post.getId());
       throw e;
     }
     log.info("[talk post] created : stepCount={}", post.getStepCount());
@@ -110,23 +114,73 @@ public class TalkPostService {
     return routineShareService.snapshotForShare(caller, routineId);
   }
 
-  // 제목·카드 제목·카드 설명·한마디의 이룸이 호칭 > 자리표시 (실패하면 원문을 쓰지 않고 거절)
+  // 저장 + 즉시 반영: 같은 원본의 보이는 글이 동시에 올라오면 V51 부분 유니크 인덱스가 막음 > TALK_ALREADY_SHARED
+  private TalkPost saveNewPost(TalkPost post) {
+    try {
+      return talkPostRepository.saveAndFlush(post);
+    } catch (DataIntegrityViolationException e) {
+      log.warn("[talk post] rejected 409 : same routine shared concurrently");
+      throw new CustomException(ErrorCode.TALK_ALREADY_SHARED);
+    }
+  }
+
+  // 그림 정리 실패가 원래 예외를 가리지 않게 삼키고 로그만 남김
+  private void deleteWrittenImagesQuietly(String postId) {
+    try {
+      talkImageStorage.deletePost(postId);
+    } catch (RuntimeException cleanupFailure) {
+      log.warn("[talk post] image cleanup failed : postId={}", postId, cleanupFailure);
+    }
+  }
+
+  // 제목·카드 제목·카드 설명·한마디의 이룸이 호칭 > 자리표시 (실패하거나 호칭이 남으면 원문을 쓰지 않고 거절)
   private MaskedPost maskNames(RoutineShareSnapshot snapshot, String note) {
+    MaskedPost masked;
     try {
       String nickname = snapshot.profileNickname();
       List<MaskedStep> steps = snapshot.steps().stream()
         .map(step -> new MaskedStep(step,
           mask(step.title(), nickname, snapshot), mask(step.description(), nickname, snapshot)))
         .toList();
-      return new MaskedPost(mask(snapshot.title(), nickname, snapshot), mask(note, nickname, snapshot), steps);
+      masked = new MaskedPost(mask(snapshot.title(), nickname, snapshot), mask(note, nickname, snapshot), steps);
     } catch (RuntimeException e) {
       log.warn("[talk post] rejected 500 : nickname mask failed");
       throw new CustomException(ErrorCode.TALK_NICKNAME_MASK_FAILED);
     }
+    if (hasRemainingNickname(masked, snapshot)) {
+      log.warn("[talk post] rejected 500 : nickname remains after mask");
+      throw new CustomException(ErrorCode.TALK_NICKNAME_MASK_FAILED);
+    }
+    return masked;
   }
 
+  // 조사 규칙 가리기 > 남은 호칭 문자열 전부 치환 (예: "하늘색" 처럼 낱말 일부로 남은 것)
   private static String mask(String text, String nickname, RoutineShareSnapshot snapshot) {
-    return NicknamePlaceholder.mask(text, nickname, snapshot.language());
+    String masked = NicknamePlaceholder.mask(text, nickname, snapshot.language());
+    if (masked == null || !isStrictMaskTarget(nickname, snapshot.language())) {
+      return masked;
+    }
+    return masked.replace(nickname.trim(), NicknamePlaceholder.placeholderFor(snapshot.language()));
+  }
+
+  // 호칭 2자 이상만 (1자는 오탐이 커서 제외), 자리표시가 호칭을 품으면 구분할 수 없어 제외
+  private static boolean isStrictMaskTarget(String nickname, AppLocale language) {
+    if (nickname == null) {
+      return false;
+    }
+    String name = nickname.trim();
+    return name.codePointCount(0, name.length()) >= MINIMUM_STRICT_MASK_NAME_LENGTH
+      && !NicknamePlaceholder.placeholderFor(language).contains(name);
+  }
+
+  private static boolean hasRemainingNickname(MaskedPost masked, RoutineShareSnapshot snapshot) {
+    if (!isStrictMaskTarget(snapshot.profileNickname(), snapshot.language())) {
+      return false;
+    }
+    String name = snapshot.profileNickname().trim();
+    Stream<String> stepTexts = masked.steps().stream().flatMap(step -> Stream.of(step.title(), step.description()));
+    return Stream.concat(Stream.of(masked.title(), masked.note()), stepTexts)
+      .anyMatch(text -> text != null && text.contains(name));
   }
 
   // 제목·한마디·카드 글에 욕설이 있으면 거절

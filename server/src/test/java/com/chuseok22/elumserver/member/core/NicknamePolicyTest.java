@@ -50,13 +50,13 @@ class NicknamePolicyTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"오늘은 시발 힘들었어요", "this is sh1t today", "그냥 FUCK 해요", "아침에 개새끼7 같은 말"})
+  @ValueSource(strings = {"오늘은 개새끼 같아요", "this is sh1t today", "그냥 FUCK 해요", "아침에 개새끼7 같은 말"})
   void containsBlockedWord_detectsInsideSentence(String sentence) {
     assertThat(nicknamePolicy.containsBlockedWord(sentence)).isTrue();
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"양치하고 세수해요", "시발점에서 버스를 타요", "sussex 에서 놀아요", "시 발표를 해요", "관리자에게 말해요 elum support"})
+  @ValueSource(strings = {"양치하고 세수해요", "시발점에서 버스를 타요", "sussex 에서 놀아요", "시 발표를 해요", "관리자에게 말해요 elum support", "TV를 보지 않아요", "일찍 자지 않아요"})
   void containsBlockedWord_allowsCleanSentence(String sentence) {
     assertThat(nicknamePolicy.containsBlockedWord(sentence)).isFalse();
   }

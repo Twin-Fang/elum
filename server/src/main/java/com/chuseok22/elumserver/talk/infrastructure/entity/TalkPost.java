@@ -21,6 +21,7 @@ import lombok.Setter;
 /**
  * 이야기 글 1건: 보호자가 일과를 나눈 글 (V51 과 같은 이름)
  * member·routine 에 외래키를 걸지 않음 (탈퇴·삭제와 무관하게 글은 남고, 정리는 서비스가 맡음)
+ * 부분 유니크 인덱스 uk_talk_post_visible_source (VISIBLE 글은 source_routine_id 당 하나) 는 V51 에만 있음
  */
 @Entity
 @Getter

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,7 @@ import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepositor
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostStepRepository;
 import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -116,7 +118,66 @@ class TalkPostServiceTest {
 
       assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_NICKNAME_MASK_FAILED);
     }
-    verify(talkPostRepository, never()).save(any());
+    verify(talkPostRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("호칭이 낱말 일부로 남아도(하늘색) 실제 가리기 경로에서 호칭이 사라지고, 조사 붙은 호칭은 이룸이로 바뀐다")
+  void create_realMask_replacesNicknameInsideWordsAndKeepsParticles() {
+    stubCreatable(snapshot("하늘", "하늘색 옷 입기",
+      step("s1", 1, "옷", "하늘색 옷을 입어요", null, false),
+      step("s2", 2, "찍기", "하늘이가 카드를 찍어요", null, false)));
+
+    talkPostService.create(GUARDIAN, request("하늘 이야기", "SELF_CARE", List.of()));
+
+    assertThat(savedPost().getTitle()).doesNotContain("하늘");
+    assertThat(savedPost().getNote()).doesNotContain("하늘");
+    assertThat(savedSteps().get(0).getDescription()).doesNotContain("하늘").contains("이룸이");
+    assertThat(savedSteps().get(1).getDescription()).doesNotContain("하늘").contains("이룸이가");
+  }
+
+  @Test
+  @DisplayName("호칭이 자리표시와 같으면(이룸이) 가리기·검증을 건너뛰고 올린다")
+  void create_nicknameSameAsPlaceholder_succeeds() {
+    stubCreatable(snapshot("이룸이", "이룸이 버스 타기", step("s1", 1, "버스", "이룸이가 버스를 타요", null, false)));
+
+    talkPostService.create(GUARDIAN, request(null, "DAILY_FLOW", List.of()));
+
+    assertThat(savedPost().getTitle()).isEqualTo("이룸이 버스 타기");
+  }
+
+  @Test
+  @DisplayName("가린 뒤에도 호칭이 남으면 TALK_NICKNAME_MASK_FAILED (치환이 새 호칭 모양을 만든 경우)")
+  void create_nicknameRemainsAfterMask_rejects() {
+    // "이하" 를 "이룸이" 로 바꾸면 뒤 글자와 이어져 다시 "이하" 가 생긴다
+    stubAgreedAndSnapshot(snapshot("이하", "이하하 버스 타기", step("s1", 1, "버스", "버스를 타요", null, false)));
+    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+
+    assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_NICKNAME_MASK_FAILED);
+    verify(talkPostRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("동시에 같은 원본을 올려 유니크 인덱스에 걸리면 TALK_ALREADY_SHARED 로 바꾸고 카드는 저장하지 않는다")
+  void create_concurrentDuplicate_mapsToAlreadyShared() {
+    stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
+    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.saveAndFlush(any(TalkPost.class))).thenThrow(new DataIntegrityViolationException("uk"));
+
+    assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_ALREADY_SHARED);
+    verify(talkPostStepRepository, never()).saveAll(any());
+  }
+
+  @Test
+  @DisplayName("그림 정리가 실패해도 원래 예외(그림 저장 실패)가 그대로 나간다")
+  void create_cleanupFails_originalExceptionSurvives() {
+    stubCreatable(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", "batch/1.png", false)));
+    when(routineShareService.readImage("batch/1.png")).thenReturn(new ImageContent(new byte[]{1}, "image/png"));
+    when(talkImageStorage.save(anyString(), anyInt(), any(), anyString()))
+      .thenThrow(new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED));
+    doThrow(new IllegalStateException("disk")).when(talkImageStorage).deletePost("post-1");
+
+    assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED);
   }
 
   @Test
@@ -221,7 +282,7 @@ class TalkPostServiceTest {
     when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(true);
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_ALREADY_SHARED);
-    verify(talkPostRepository, never()).save(any());
+    verify(talkPostRepository, never()).saveAndFlush(any());
   }
 
   @Test
@@ -246,14 +307,14 @@ class TalkPostServiceTest {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
     when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
 
-    assertCreateFails(request("이거 시발 별로예요", "DAILY_FLOW", List.of()), ErrorCode.TALK_TEXT_NOT_ALLOWED);
-    verify(talkPostRepository, never()).save(any());
+    assertCreateFails(request("이거 개새끼 별로예요", "DAILY_FLOW", List.of()), ErrorCode.TALK_TEXT_NOT_ALLOWED);
+    verify(talkPostRepository, never()).saveAndFlush(any());
   }
 
   @Test
   @DisplayName("카드 글에 금칙어가 있으면 TALK_TEXT_NOT_ALLOWED")
   void create_blockedWordInStep_throwsNotAllowed() {
-    stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "존나 빨리 가요", null, false)));
+    stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "개새끼 빨리 가요", null, false)));
     when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_TEXT_NOT_ALLOWED);
@@ -287,7 +348,7 @@ class TalkPostServiceTest {
   private void stubCreatable(RoutineShareSnapshot snapshot) {
     stubAgreedAndSnapshot(snapshot);
     when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
-    when(talkPostRepository.save(any(TalkPost.class))).thenAnswer(invocation -> {
+    when(talkPostRepository.saveAndFlush(any(TalkPost.class))).thenAnswer(invocation -> {
       TalkPost post = invocation.getArgument(0);
       post.setId("post-1");
       return post;
@@ -301,7 +362,7 @@ class TalkPostServiceTest {
 
   private TalkPost savedPost() {
     ArgumentCaptor<TalkPost> captor = ArgumentCaptor.forClass(TalkPost.class);
-    verify(talkPostRepository).save(captor.capture());
+    verify(talkPostRepository).saveAndFlush(captor.capture());
     return captor.getValue();
   }
 
