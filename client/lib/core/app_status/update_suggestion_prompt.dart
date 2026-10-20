@@ -37,14 +37,22 @@ class _UpdateSuggestionSheet extends StatelessWidget {
   /// 루미 그림 크기 (정사각형)
   static const lumiSize = 168.0;
 
+  /// 손잡이 아래 ~ 루미 더듬이 위 간격
+  static const handleToLumiGap = 16.0;
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // 손잡이는 여백 안쪽 기준으로 그려짐 > 위 여백 0, 손잡이 자리(위치 + 높이 4)를 비우고 그림 시작
     return ElumSheetSurface(
-      padding: EdgeInsets.fromLTRB(20.w, 34.h, 20.w, 20.h + bottomInset),
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h + bottomInset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          SizedBox(
+            height:
+                (ElumSheetSurface.defaultHandleTop + 4 + handleToLumiGap).h,
+          ),
           Image.asset(
             AppAssets.updateSuggestionLumi,
             width: lumiSize.w,
