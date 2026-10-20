@@ -28,7 +28,7 @@ class LoginController {
   Future<AuthResult> signIn(OAuthProvider provider) =>
       _ref.read(authRepositoryProvider).signInWith(provider);
 
-  /// 로그인 성공 뒤 이전 계정의 메모리 상태를 버린다.
+  /// 로그인 성공 뒤: 이전 계정 메모리 상태 버리기 > 새 계정으로 푸시 토큰 다시 등록
   Future<void> resetPreviousAccount() async {
     // 주기 갱신이 받아 둔 이전 계정 회원 정보 (남기면 그 이룸이 id 로 요청해 403)
     _ref.read(memberPrefetchProvider).discard();

@@ -21,20 +21,20 @@ public class NotificationSetting extends BaseEntity {
 
   // 전체 끔이면 종류별 값과 무관하게 푸시 없음
   @Column(name = "all_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean allEnabled = true;
+  private boolean isAllEnabled = true;
 
   @Column(name = "routine_completed_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean routineCompletedEnabled = true;
+  private boolean isRoutineCompletedEnabled = true;
 
   @Column(name = "routine_sent_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean routineSentEnabled = true;
+  private boolean isRoutineSentEnabled = true;
 
   @Column(name = "co_guardian_joined_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean coGuardianJoinedEnabled = true;
+  private boolean isCoGuardianJoinedEnabled = true;
 
   @Column(name = "credit_refilled_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean creditRefilledEnabled = true;
+  private boolean isCreditRefilledEnabled = true;
 
   @Column(name = "feedback_resolved_enabled", nullable = false, columnDefinition = "boolean not null default true")
-  private boolean feedbackResolvedEnabled = true;
+  private boolean isFeedbackResolvedEnabled = true;
 }

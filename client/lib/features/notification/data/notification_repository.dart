@@ -27,22 +27,22 @@ class NotificationRepository {
   /// 알림 한 쪽 (최신순). cursor 는 `|`·`:` 가 있어 queryParameters 로만 넘김
   Future<NotificationPage> fetchPage({String? cursor, int size = defaultPageSize}) =>
       _call('fetchPage', () async {
-        final res = await _dio.get<Map<String, dynamic>>(
+        final response = await _dio.get<Map<String, dynamic>>(
           '/api/notifications',
           queryParameters: {'size': size, 'cursor': ?cursor},
           options: _guardianLevelOptions,
         );
-        return NotificationPage.fromJson(_bodyOf(res));
+        return NotificationPage.fromJson(_bodyOf(response));
       });
 
   Future<UnreadSummary> fetchUnreadSummary(NoticePlatform platform) =>
       _call('fetchUnreadSummary', () async {
-        final res = await _dio.get<Map<String, dynamic>>(
+        final response = await _dio.get<Map<String, dynamic>>(
           '/api/notifications/unread-summary',
           queryParameters: {'platform': platform.wire},
           options: _guardianLevelOptions,
         );
-        return UnreadSummary.fromJson(_bodyOf(res));
+        return UnreadSummary.fromJson(_bodyOf(response));
       });
 
   Future<void> markRead(String id) => _call('markRead', () async {
@@ -61,22 +61,22 @@ class NotificationRepository {
 
   Future<NotificationSettings> fetchSettings() =>
       _call('fetchSettings', () async {
-        final res = await _dio.get<Map<String, dynamic>>(
+        final response = await _dio.get<Map<String, dynamic>>(
           '/api/notification-settings',
           options: _guardianLevelOptions,
         );
-        return NotificationSettings.fromJson(_bodyOf(res));
+        return NotificationSettings.fromJson(_bodyOf(response));
       });
 
   /// 여섯 값을 통째로 저장 > 서버가 저장한 값 반환
   Future<NotificationSettings> saveSettings(NotificationSettings settings) =>
       _call('saveSettings', () async {
-        final res = await _dio.put<Map<String, dynamic>>(
+        final response = await _dio.put<Map<String, dynamic>>(
           '/api/notification-settings',
           data: settings.toJson(),
           options: _guardianLevelOptions,
         );
-        return NotificationSettings.fromJson(_bodyOf(res));
+        return NotificationSettings.fromJson(_bodyOf(response));
       });
 
   /// 로그 + 모든 실패를 [AppFailure] 로 통일
@@ -88,8 +88,8 @@ class NotificationRepository {
     }
   }
 
-  Map<String, dynamic> _bodyOf(Response<Map<String, dynamic>> res) {
-    final body = res.data;
+  Map<String, dynamic> _bodyOf(Response<Map<String, dynamic>> response) {
+    final body = response.data;
     if (body == null) throw const FormatException('empty response');
     return body;
   }

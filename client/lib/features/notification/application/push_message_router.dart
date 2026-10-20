@@ -57,7 +57,7 @@ class PushMessageRouter {
   int _nextFallbackBannerId = _fallbackBannerIdStart;
 
   bool _isRefreshingSummary = false;
-  bool _needsSummaryRefreshAgain = false;
+  bool _shouldRefreshSummaryAgain = false;
 
   PushMessagingClient get _client => _ref.read(pushMessagingClientProvider);
 
@@ -142,7 +142,7 @@ class PushMessageRouter {
       _ref.read(authSessionControllerProvider).hasSession &&
       !_ref.read(localStorageProvider).isElumiDevice;
 
-  // ----- 전경 수신 -----
+  // 전경 수신
 
   void _onForegroundMessage(PushMessage message) {
     if (!_isGuardianSignedIn) return;
@@ -155,15 +155,15 @@ class PushMessageRouter {
   // 안 읽음 요약 다시 받기 (연속 수신은 진행 중인 것 끝나고 한 번 더)
   Future<void> _refreshUnreadSummary() async {
     if (_isRefreshingSummary) {
-      _needsSummaryRefreshAgain = true;
+      _shouldRefreshSummaryAgain = true;
       return;
     }
     _isRefreshingSummary = true;
     try {
       do {
-        _needsSummaryRefreshAgain = false;
+        _shouldRefreshSummaryAgain = false;
         await _ref.read(unreadSummaryProvider.notifier).refresh();
-      } while (_needsSummaryRefreshAgain);
+      } while (_shouldRefreshSummaryAgain);
     } catch (e, st) {
       AppLogger.error('push', e, st, {'step': 'refreshUnreadSummary'});
     } finally {
@@ -195,15 +195,15 @@ class PushMessageRouter {
     return _nextFallbackBannerId--;
   }
 
-  // ----- 누름 > 이동 -----
+  // 누름 > 이동
 
   void _onMessageOpened(PushMessage message) => _onTapped(message.data);
 
   void _onLocalNotificationTapped(String payload) {
-    final data = _decodePushPayload(payload);
+    final pushData = _decodePushPayload(payload);
     // 일과 알림 등 다른 로컬 알림의 payload 는 푸시가 아니라 무시
-    if (data == null) return;
-    _onTapped(data);
+    if (pushData == null) return;
+    _onTapped(pushData);
   }
 
   // 배너 payload(JSON 맵) > data 맵 (푸시 payload 가 아니면 null)

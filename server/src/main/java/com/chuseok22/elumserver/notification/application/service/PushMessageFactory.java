@@ -56,12 +56,12 @@ public class PushMessageFactory {
 
   // data: 앱이 눌렀을 때 화면을 정하는 id 만 (없는 값은 키째 뺌: FCM 이 null 값을 거부)
   private Map<String, String> buildData(Notification notification, NotificationType type) {
-    Map<String, String> data = new HashMap<>();
-    data.put("type", type.name());
-    putIfPresent(data, "notificationId", notification.getId());
-    putIfPresent(data, "profileId", notification.getProfileId());
-    putIfPresent(data, "targetId", notification.getTargetId());
-    return data;
+    Map<String, String> pushData = new HashMap<>();
+    pushData.put("type", type.name());
+    putIfPresent(pushData, "notificationId", notification.getId());
+    putIfPresent(pushData, "profileId", notification.getProfileId());
+    putIfPresent(pushData, "targetId", notification.getTargetId());
+    return pushData;
   }
 
   private void putIfPresent(Map<String, String> data, String key, String value) {

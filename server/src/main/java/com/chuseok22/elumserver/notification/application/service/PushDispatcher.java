@@ -70,8 +70,8 @@ public class PushDispatcher {
     List<PushDevice> devices = pushDeviceRepository.findAllByMemberId(recorded.recipientMemberId());
     for (PushDevice device : devices) {
       PushMessage message = pushMessageFactory.create(notification.get(), recorded, device);
-      PushResult result = pushSender.send(message);
-      if (result == PushResult.INVALID_TOKEN) {
+      PushResult pushResult = pushSender.send(message);
+      if (pushResult == PushResult.INVALID_TOKEN) {
         pushDeviceRepository.deleteByToken(device.getToken());
         log.info("[notification push] invalid token removed : platform={}", device.getPlatform());
       }

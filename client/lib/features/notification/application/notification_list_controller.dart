@@ -70,13 +70,13 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
       if (!ref.mounted) return;
       // 기다리는 동안 바뀐 읽음 상태를 잃지 않도록 지금 상태에 이어 붙임
       final latest = state.value ?? current;
-      final knownIds = {for (final item in latest.items) item.id};
+      final knownIds = {for (final notification in latest.items) notification.id};
       state = AsyncData(
         NotificationListState(
           items: [
             ...latest.items,
-            for (final item in page.items)
-              if (!knownIds.contains(item.id)) item,
+            for (final notification in page.items)
+              if (!knownIds.contains(notification.id)) notification,
           ],
           nextCursor: page.nextCursor,
         ),
@@ -96,23 +96,23 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
 
   /// 처음부터 다시 받기 (실패 시 에러 상태)
   Future<void> refresh() async {
-    final result = await AsyncValue.guard(build);
+    final refreshedState = await AsyncValue.guard(build);
     if (!ref.mounted) return;
-    state = result;
+    state = refreshedState;
   }
 
   /// 한 줄 읽음: 화면 먼저 > 서버 요청 (실패해도 되돌리지 않음) > 종 아이콘 점 갱신
   Future<void> markRead(String id) async {
     final current = state.value;
     if (current == null) return;
-    final target = current.items.where((item) => item.id == id).firstOrNull;
+    final target = current.items.where((notification) => notification.id == id).firstOrNull;
     if (target == null || target.isRead) return;
 
     state = AsyncData(
       current.copyWith(
         items: [
-          for (final item in current.items)
-            if (item.id == id) item.copyWith(isRead: true) else item,
+          for (final notification in current.items)
+            if (notification.id == id) notification.copyWith(isRead: true) else notification,
         ],
       ),
     );
@@ -126,7 +126,7 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
 
     state = AsyncData(
       current.copyWith(
-        items: [for (final item in current.items) item.copyWith(isRead: true)],
+        items: [for (final notification in current.items) notification.copyWith(isRead: true)],
       ),
     );
     await _syncToServer('markAllRead', _repository.markAllRead);

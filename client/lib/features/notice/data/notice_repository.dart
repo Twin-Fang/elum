@@ -53,7 +53,7 @@ class NoticeRepository {
   }) async {
     try {
       return await logged('NoticeRepository', 'fetchHistory', () async {
-        final res = await _dio.get<Map<String, dynamic>>(
+        final response = await _dio.get<Map<String, dynamic>>(
           '/api/notices/history',
           queryParameters: {
             'platform': platform.wire,
@@ -62,7 +62,7 @@ class NoticeRepository {
           },
           options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
         );
-        final body = res.data;
+        final body = response.data;
         if (body == null) throw const FormatException('empty response');
         return NoticeHistoryPage.fromJson(body, baseUrl: _dio.options.baseUrl);
       });

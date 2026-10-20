@@ -63,13 +63,13 @@ class NoticeHistoryController extends AsyncNotifier<NoticeHistoryState> {
       if (!ref.mounted) return;
       // 기다리는 동안 바뀐 상태를 잃지 않도록 지금 상태에 이어 붙임
       final latest = state.value ?? current;
-      final knownIds = {for (final item in latest.items) item.id};
+      final knownIds = {for (final notice in latest.items) notice.id};
       state = AsyncData(
         NoticeHistoryState(
           items: [
             ...latest.items,
-            for (final item in page.items)
-              if (!knownIds.contains(item.id)) item,
+            for (final notice in page.items)
+              if (!knownIds.contains(notice.id)) notice,
           ],
           nextCursor: page.nextCursor,
         ),
@@ -101,8 +101,8 @@ class NoticeHistoryController extends AsyncNotifier<NoticeHistoryState> {
 
   /// 처음부터 다시 받기 (실패 시 에러 상태)
   Future<void> refresh() async {
-    final result = await AsyncValue.guard(build);
+    final refreshedState = await AsyncValue.guard(build);
     if (!ref.mounted) return;
-    state = result;
+    state = refreshedState;
   }
 }

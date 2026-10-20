@@ -65,9 +65,9 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
 
   Future<void> reload() async {
     state = const AsyncLoading();
-    final result = await AsyncValue.guard(build);
+    final refreshedState = await AsyncValue.guard(build);
     if (!ref.mounted) return;
-    state = result;
+    state = refreshedState;
   }
 
   /// 화면 먼저 바꾸고 저장. 실패하면 서버 확정값으로 되돌리고 그 오류를 반환 (성공·중복 호출은 null)
