@@ -21,7 +21,7 @@
 - 새 ErrorCode는 `messages_ko.properties` 문구 + 클라 `server_error_code.dart` 같은 이름 (서버 CLAUDE.md).
 - 모든 엔드포인트 `@LogMonitoring` + `*ControllerDocs`. request DTO에 `jakarta.validation` 금지.
 - `notification` 패키지를 `GlobalExceptionHandler` `basePackages`에 추가.
-- 마이그레이션 V46 (develop 에 V43~V45 가 먼저 있어 번호를 밀었다), 추가만, `IF NOT EXISTS`, NOT NULL엔 DEFAULT.
+- 마이그레이션 V47 (develop 에 V43~V46 이 먼저 있어 번호를 밀었다), 추가만, `IF NOT EXISTS`, NOT NULL엔 DEFAULT.
 - 시간대 `Asia/Seoul` (`NoticeService.ZONE` 재사용 금지 — `notification`에 `NotificationClock` 없이 `Clock` 주입, 기본 `Clock.system(ZoneId.of("Asia/Seoul"))`).
 
 ## Review Focus
@@ -36,7 +36,7 @@
 ### Task 1: 저장 구조 (마이그레이션 · 엔티티 · 저장소 · 탈퇴 정리)
 
 **Files:**
-- Create: `server/src/main/resources/db/migration/V46__create_notification_tables.sql`
+- Create: `server/src/main/resources/db/migration/V47__create_notification_tables.sql`
 - Create: `M/notification/core/NotificationType.java`
 - Create: `M/notification/infrastructure/entity/{Notification,PushDevice,NotificationSetting,NoticeSeen}.java`
 - Create: `M/notification/infrastructure/repository/{Notification,PushDevice,NotificationSetting,NoticeSeen}Repository.java`
