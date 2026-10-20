@@ -245,10 +245,10 @@ packages:
     dependency: "direct main"
     description:
       name: connectivity_plus
-      sha256: "33bae12a398f841c6cda09d1064212957265869104c478e5ad51e2fb26c3973c"
+      sha256: "762c99f890ca8bf87f7337236f99edd42793843bc6c3631da294a76653a54bd0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.0"
+    version: "7.3.1"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -1094,7 +1094,7 @@ packages:
     source: hosted
     version: "2.3.1"
   path_provider_foundation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: path_provider_foundation
       sha256: "4843174df4d288f5e29185bd6e72a6fbdf5a4a4602717eed565497429f179942"
@@ -1586,6 +1586,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.2.0"
+  wakelock_plus:
+    dependency: "direct main"
+    description:
+      name: wakelock_plus
+      sha256: "824c5bba0f800e86d32e57d3d1843c531f090005cc89d9a837933e6601093d53"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.1"
+  wakelock_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: wakelock_plus_platform_interface
+      sha256: b13f99e992e7ae6a152e16c5559d3c07ff445b13330192662494e614ca3e7d7b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   watcher:
     dependency: transitive
     description:
