@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.link.application.service.DeviceLinkService;
 import com.chuseok22.elumserver.link.application.service.RedeemRateLimiter;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,9 @@ class DeviceLinkSecurityTest {
   private LinkAccessValidator linkAccessValidator;
   @MockitoBean
   private SystemConfigService systemConfigService;
+
+  @MockitoBean
+  private SharedStateStore sharedStateStore;
   @MockitoBean
   private AidlpCryptoService aidlpCryptoService;
   @MockitoBean

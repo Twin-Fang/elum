@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('API 문서', 'api-docs', ~{:: content})}">
+<body>
+
+<!-- Swagger UI 는 같은 출처(/admin/docs/swagger)라 관리자 로그인 세션으로만 열린다. -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-4">
+  <h1 class="text-2xl font-bold">API 문서</h1>
+  <iframe th:src="@{/admin/docs/swagger}" title="API 문서"
+          class="w-full rounded-box border border-base-300 bg-white"
+          style="height:calc(100vh - 11rem);min-height:32rem"></iframe>
+</main>
+
+</body>
+</html>

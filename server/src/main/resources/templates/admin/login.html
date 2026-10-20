@@ -25,6 +25,10 @@
     <div th:if="${param.error}" class="alert alert-error py-2 text-sm">
       <span>아이디 또는 비밀번호가 맞지 않아요</span>
     </div>
+    <!-- 아이디별 로그인 시도 한도(15분 5회)를 넘긴 경우 -->
+    <div th:if="${param.locked}" class="alert alert-warning py-2 text-sm">
+      <span>시도가 너무 많아요. 잠시 후 다시 해 주세요</span>
+    </div>
     <div th:if="${param.logout}" class="alert py-2 text-sm">
       <span>로그아웃했어요</span>
     </div>

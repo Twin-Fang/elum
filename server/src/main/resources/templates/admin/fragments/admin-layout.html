@@ -101,7 +101,7 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
-  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그) -->
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그, API 문서) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
     <li data-menu-group="operations">
@@ -128,6 +128,7 @@
         <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링</a></li>
         <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
           <span data-log-error-badge class="badge badge-error badge-sm hidden" title="최근 24시간 오류"></span></a></li>
+        <li><a th:href="@{/admin/api-docs}" th:classappend="${active == 'api-docs'} ? 'active'">API 문서</a></li>
       </ul>
     </li>
   </ul>
