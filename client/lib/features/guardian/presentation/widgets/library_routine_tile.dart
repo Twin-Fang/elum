@@ -29,9 +29,9 @@ class LibraryRoutineTile extends StatelessWidget {
   /// null 이면 길게 누르기를 바깥(끌기)에 맡긴다 (#807)
   final VoidCallback? onLongPress;
 
-  /// 그림 칸 한 변 · 모서리 · ✓ 배지 한 변
-  static const iconSize = 64.0;
-  static const iconRadius = 18.0;
+  /// 그림 칸 한 변 · 모서리 · ✓ 배지 한 변 (시안 1664:6876)
+  static const iconSize = 68.0;
+  static const iconRadius = 16.0;
   static const badgeSize = 22.0;
 
   @override
@@ -81,7 +81,9 @@ class LibraryRoutineTile extends StatelessWidget {
                 maxLines: 2,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
-                style: context.typo.caption.copyWith(color: colors.textPrimary),
+                style: context.typo.libraryTileLabel.copyWith(
+                  color: colors.libraryTileLabel,
+                ),
               ),
             ),
           ],

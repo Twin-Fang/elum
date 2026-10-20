@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/assets/app_assets.dart';
@@ -37,7 +38,7 @@ class LibraryManageHeader extends ConsumerWidget {
           Expanded(
             child: Text(
               context.l10n.guardianTabManage,
-              style: context.typo.greeting.copyWith(
+              style: context.typo.libraryTitle.copyWith(
                 color: context.colors.textPrimary,
               ),
             ),
@@ -106,42 +107,57 @@ class LibraryEmptyState extends StatelessWidget {
   }
 }
 
-/// 가운데 아래 `+ 일과 만들기` (글자가 있는 둥근 버튼 — 무엇을 하는지 바로 보이게)
+/// 가운데 아래 `+ 새로 만들기` (글자가 있는 둥근 버튼 — 무엇을 하는지 바로 보이게, 시안 1664:6876)
 class CreateRoutineFab extends StatelessWidget {
   const CreateRoutineFab({
-    required this.height,
     required this.isBusy,
     required this.onTap,
     this.isArranging = false,
   });
 
-  final double height;
   final bool isBusy;
   final VoidCallback onTap;
 
-  /// 정리 상태면 `+ 일과 만들기` 대신 `완료`가 된다 (#837)
+  /// 정리 상태면 `+ 새로 만들기` 대신 `완료`가 된다 (#837)
   final bool isArranging;
 
-  /// 더하기 아이콘 한 변
-  static const _iconSize = 20.0;
+  /// 버튼 높이 · 하단 바와의 간격 (시안: 58, 하단 바 위 32)
+  static const height = 58.0;
+  static const navGap = 32.0;
+
+  /// 격자가 버튼 아래로 숨지 않게 남길 아래 여백 (버튼 + 간격 + 버튼 위 숨 16)
+  static const scrollBottomSpace = height + navGap + 16;
+
+  /// 버튼 자리: 가운데 아래, 하단 바 위 [navGap]
+  static const FloatingActionButtonLocation location = _CreateButtonLocation();
+
+  /// 더하기 아이콘 한 변 · 글자 좌우 여백 (시안: 폭 177 = 37.5 + 아이콘 16 + 8 + 글자 + 37.5)
+  static const _iconSize = 16.0;
+  static const _horizontalPadding = 37.5;
+
+  /// 그림자 (#242634 25%, 아래 4, 흐림 20)
+  static const _shadowAlpha = 0.25;
+  static const _shadowBlur = 20.0;
+  static const _shadowOffsetY = 4.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
+    final scaledHeight = height.h;
     return AppPressable(
       onTap: isBusy ? null : onTap,
       child: Container(
-        height: height,
-        padding: EdgeInsets.symmetric(horizontal: space.lg.w),
+        height: scaledHeight,
+        padding: EdgeInsets.symmetric(horizontal: _horizontalPadding.w),
         decoration: BoxDecoration(
           color: colors.textPrimary,
-          borderRadius: BorderRadius.circular(height / 2),
+          borderRadius: BorderRadius.circular(scaledHeight / 2),
           boxShadow: [
             BoxShadow(
-              color: colors.textPrimary.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: colors.textPrimary.withValues(alpha: _shadowAlpha),
+              blurRadius: _shadowBlur,
+              offset: Offset(0, _shadowOffsetY.h),
             ),
           ],
         ),
@@ -151,13 +167,18 @@ class CreateRoutineFab extends StatelessWidget {
             if (isBusy)
               ElumSpinner(size: _iconSize.w, color: colors.surface)
             else if (!isArranging)
-              Icon(Icons.add_rounded, size: _iconSize.w, color: colors.surface),
+              SvgPicture.asset(
+                AppAssets.iconPlus,
+                width: _iconSize.w,
+                height: _iconSize.w,
+                colorFilter: ColorFilter.mode(colors.surface, BlendMode.srcIn),
+              ),
             if (!isArranging) SizedBox(width: space.xs.w),
             Text(
               isArranging
                   ? context.l10n.libraryArrangeDone
                   : context.l10n.routineLibraryCreate,
-              style: context.typo.floatingActionLabel.copyWith(
+              style: context.typo.libraryCreateLabel.copyWith(
                 color: colors.surface,
               ),
             ),
@@ -166,4 +187,18 @@ class CreateRoutineFab extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 가운데 아래 버튼 자리: 기본 centerFloat(바닥 위 16)에서 [CreateRoutineFab.navGap] 까지 올린다
+class _CreateButtonLocation extends StandardFabLocation
+    with FabCenterOffsetX, FabFloatOffsetY {
+  const _CreateButtonLocation();
+
+  @override
+  double getOffsetY(
+    ScaffoldPrelayoutGeometry scaffoldGeometry,
+    double adjustment,
+  ) =>
+      super.getOffsetY(scaffoldGeometry, adjustment) -
+      (CreateRoutineFab.navGap - kFloatingActionButtonMargin).h;
 }

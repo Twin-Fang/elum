@@ -4265,7 +4265,7 @@ abstract class AppLocalizations {
   /// 일과관리 칸 가운데 아래 떠 있는 버튼 글자 (앞에 + 아이콘)
   ///
   /// In ko, this message translates to:
-  /// **'일과 만들기'**
+  /// **'새로 만들기'**
   String get routineLibraryCreate;
 
   /// 일과관리 상세 시트·빠른 메뉴의 오늘 이룸이에게 보내기

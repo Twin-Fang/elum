@@ -52,6 +52,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineTileReward,
     required this.routineSectionLabel,
     required this.routineCreateLabel,
+    required this.libraryTitle,
+    required this.libraryTileLabel,
+    required this.libraryCreateLabel,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
@@ -289,6 +292,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `새로운 일과 만들기` 버튼 문구 (Pretendard 500/17).
   final TextStyle routineCreateLabel;
+
+  /// 일과관리 화면 제목 (Tmoney 800/22, 시안 1664:6876)
+  final TextStyle libraryTitle;
+
+  /// 일과관리 칸 이름 (Pretendard 400/12, 줄 높이 12 — 두 줄 24, 시안 1664:6876)
+  final TextStyle libraryTileLabel;
+
+  /// 일과관리 `새로 만들기` 버튼 문구 (Pretendard 500/17). 홈 `새로운 일과 만들기` 와 값만 같다
+  final TextStyle libraryCreateLabel;
 
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
@@ -754,6 +766,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    libraryTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    libraryTileLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    libraryCreateLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1147,6 +1177,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineTileReward,
     TextStyle? routineSectionLabel,
     TextStyle? routineCreateLabel,
+    TextStyle? libraryTitle,
+    TextStyle? libraryTileLabel,
+    TextStyle? libraryCreateLabel,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
@@ -1246,6 +1279,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: routineTileReward ?? this.routineTileReward,
       routineSectionLabel: routineSectionLabel ?? this.routineSectionLabel,
       routineCreateLabel: routineCreateLabel ?? this.routineCreateLabel,
+      libraryTitle: libraryTitle ?? this.libraryTitle,
+      libraryTileLabel: libraryTileLabel ?? this.libraryTileLabel,
+      libraryCreateLabel: libraryCreateLabel ?? this.libraryCreateLabel,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
@@ -1364,6 +1400,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: TextStyle.lerp(routineTileReward, other.routineTileReward, t)!,
       routineSectionLabel: TextStyle.lerp(routineSectionLabel, other.routineSectionLabel, t)!,
       routineCreateLabel: TextStyle.lerp(routineCreateLabel, other.routineCreateLabel, t)!,
+      libraryTitle: TextStyle.lerp(libraryTitle, other.libraryTitle, t)!,
+      libraryTileLabel: TextStyle.lerp(libraryTileLabel, other.libraryTileLabel, t)!,
+      libraryCreateLabel: TextStyle.lerp(libraryCreateLabel, other.libraryCreateLabel, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,

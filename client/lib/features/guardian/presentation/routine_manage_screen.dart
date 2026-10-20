@@ -47,10 +47,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     with
         BusyStateMixin<RoutineManageScreen>,
         LibraryGroupActions<RoutineManageScreen> {
-  /// `+ 일과 만들기` 버튼 높이 · 버튼 둘레 여백 (목록 끝이 버튼에 가리지 않게 그만큼 비운다)
-  static const _createButtonHeight = 54.0;
-  static const _createButtonMargin = 16.0;
-
   /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
   bool _isArranging = false;
 
@@ -300,7 +296,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
-    final bottomSpace = (_createButtonHeight + _createButtonMargin * 2).h;
+    final bottomSpace = CreateRoutineFab.scrollBottomSpace.h;
 
     final Widget body = switch (async) {
       AsyncValue(:final value?) when value.isNotEmpty => LibraryEntryGrid(
@@ -341,9 +337,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: CreateRoutineFab.location,
       floatingActionButton: CreateRoutineFab(
-        height: _createButtonHeight.h,
         isBusy: busy,
         isArranging: _isArranging,
         // 정리 상태에서는 가운데 버튼이 `완료`

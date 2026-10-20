@@ -2053,7 +2053,7 @@
   "@routineLibraryEmptyBody": { "description": "일과관리 칸 빈 상태 설명" },
   "routineLibraryLoadFailedFallback": "일과를 불러오지 못했어요",
   "@routineLibraryLoadFailedFallback": { "description": "일과관리 목록을 못 받았을 때" },
-  "routineLibraryCreate": "일과 만들기",
+  "routineLibraryCreate": "새로 만들기",
   "@routineLibraryCreate": { "description": "일과관리 칸 가운데 아래 떠 있는 버튼 글자 (앞에 + 아이콘)" },
   "routineLibrarySendToday": "오늘 보내기",
   "@routineLibrarySendToday": { "description": "일과관리 상세 시트·빠른 메뉴의 오늘 이룸이에게 보내기" },

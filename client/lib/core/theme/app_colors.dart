@@ -88,6 +88,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navSelectedFill,
     required this.navItemUnselected,
     required this.folderFill,
+    required this.folderStroke,
+    required this.libraryTileLabel,
     required this.homeCardShadow,
     required this.homeCardIconBg,
     required this.glassSurface,
@@ -378,8 +380,14 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 하단 바 · 옆 메뉴 고르지 않은 칸 아이콘·글자 (#242634 20%, 시안 1666:7082, #835). 고른 칸은 navIconSelected
   final Color navItemUnselected;
 
-  /// 일과관리 묶음(폴더) 칸 바탕 — 진한 남색 10% (#807)
+  /// 일과관리 묶음(폴더) 칸 바탕 (#DDD9D9, 시안 1664:6876 회색 2x2 폴더)
   final Color folderFill;
+
+  /// 일과관리 묶음 칸 테두리 1px 안쪽 (#BFBDBD, 시안 1664:6876)
+  final Color folderStroke;
+
+  /// 일과관리 칸 이름 (#000000, 시안 1664:6876 — 본문색 #242634 와 다르다)
+  final Color libraryTileLabel;
 
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
@@ -937,7 +945,9 @@ class AppColors extends ThemeExtension<AppColors> {
     navIconUnselected: Color(0xFFA6A8B4),
     navSelectedFill: Color(0xFFEEF1FD),
     navItemUnselected: Color(0x33242634),
-    folderFill: Color(0x1A242634),
+    folderFill: Color(0xFFDDD9D9),
+    folderStroke: Color(0xFFBFBDBD),
+    libraryTileLabel: Color(0xFF000000),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
@@ -1150,6 +1160,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navSelectedFill,
     Color? navItemUnselected,
     Color? folderFill,
+    Color? folderStroke,
+    Color? libraryTileLabel,
     Color? homeCardShadow,
     Color? homeCardIconBg,
     Color? glassSurface,
@@ -1351,6 +1363,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: navSelectedFill ?? this.navSelectedFill,
       navItemUnselected: navItemUnselected ?? this.navItemUnselected,
       folderFill: folderFill ?? this.folderFill,
+      folderStroke: folderStroke ?? this.folderStroke,
+      libraryTileLabel: libraryTileLabel ?? this.libraryTileLabel,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
@@ -1606,6 +1620,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
       navItemUnselected: Color.lerp(navItemUnselected, other.navItemUnselected, t)!,
       folderFill: Color.lerp(folderFill, other.folderFill, t)!,
+      folderStroke: Color.lerp(folderStroke, other.folderStroke, t)!,
+      libraryTileLabel: Color.lerp(libraryTileLabel, other.libraryTileLabel, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,

@@ -132,16 +132,16 @@ extension _LibraryGridCells on _LibraryEntryGridState {
       spacingX: spacingX,
       spacingY: space.md.h,
       paddingLeft: paddingX,
-      paddingTop: space.xs.h,
+      paddingTop: space.sm.h,
     );
   }
 
-  /// 칸 이름 두 줄 높이: 굵은 캡션 기준 실제 측정 (글자 배율 반영). 기본 크기에서는 기존 높이 이상
+  /// 칸 이름 두 줄 높이: 칸 이름 글자 기준 실제 측정 (글자 배율 반영, 기본 크기면 시안 24)
   double _twoLineLabelHeight(BuildContext context) {
     final painter = TextPainter(
       text: TextSpan(
         text: _twoLineSample,
-        style: context.typo.caption.copyWith(fontWeight: FontWeight.w700),
+        style: context.typo.libraryTileLabel,
       ),
       textScaler: MediaQuery.textScalerOf(context),
       textDirection: TextDirection.ltr,
@@ -149,8 +149,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     )..layout();
     final measured = painter.height;
     painter.dispose();
-    final minimum = context.space.xl.h * 1.4;
-    return measured > minimum ? measured : minimum;
+    return measured;
   }
 
   /// 낱개 일과 칸 중 첫째 · 둘째에 코치마크 키를 붙인다 (일과 id > 키)

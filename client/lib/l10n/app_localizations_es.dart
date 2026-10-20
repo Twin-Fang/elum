@@ -2338,7 +2338,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineLibraryLoadFailedFallback => '일과를 불러오지 못했어요';
 
   @override
-  String get routineLibraryCreate => '일과 만들기';
+  String get routineLibraryCreate => '새로 만들기';
 
   @override
   String get routineLibrarySendToday => '오늘 보내기';
