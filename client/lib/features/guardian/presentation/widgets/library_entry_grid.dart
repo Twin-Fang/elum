@@ -107,8 +107,8 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
   /// 칸 가장자리로 보는 폭 비율 (앞·뒤 각 25%, 가운데는 묶기)
   static const _edgeFraction = 0.25;
 
-  /// 칸 이름 두 줄 높이를 잴 때 쓰는 글 (줄바꿈으로 정확히 두 줄)
-  static const _twoLineSample = '가\n가';
+  /// 칸 이름 두 줄 높이를 잴 때 쓰는 글 (줄바꿈으로 정확히 두 줄, 줄 높이는 글자와 무관)
+  static const _twoLineSample = 'A\nA';
 
   @override
   Widget build(BuildContext context) {
