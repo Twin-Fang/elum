@@ -959,7 +959,7 @@ abstract class AppLocalizations {
   /// 로그아웃 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'로그아웃 하실건가요?'**
+  /// **'로그아웃할까요?'**
   String get elumiSettingsLogoutTitle;
 
   /// 로그아웃 확인 팝업 본문
@@ -2429,7 +2429,7 @@ abstract class AppLocalizations {
   /// 로그아웃 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'로그아웃 하실건가요?'**
+  /// **'로그아웃할까요?'**
   String get guardianSettingsLogoutConfirmTitle;
 
   /// 회원탈퇴 확인 팝업 제목
@@ -4589,7 +4589,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'손잡이를 끌어 순서를 바꿔요'**
+  /// **'길게 눌러 끌면 순서를 바꿀 수 있어요'**
   String get routineGroupSheetDragHint;
 
   /// 일과 묶음 (#807)

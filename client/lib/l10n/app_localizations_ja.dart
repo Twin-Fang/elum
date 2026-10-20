@@ -503,7 +503,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get elumiSettingsWithdrawLabel => '회원탈퇴';
 
   @override
-  String get elumiSettingsLogoutTitle => '로그아웃 하실건가요?';
+  String get elumiSettingsLogoutTitle => '로그아웃할까요?';
 
   @override
   String get elumiSettingsLogoutMessage =>
@@ -1301,7 +1301,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineInputSend => '보내기';
 
   @override
-  String get guardianSettingsLogoutConfirmTitle => '로그아웃 하실건가요?';
+  String get guardianSettingsLogoutConfirmTitle => '로그아웃할까요?';
 
   @override
   String get guardianSettingsWithdrawConfirmTitle => '회원탈퇴 하실건가요?';
@@ -2516,7 +2516,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get routineGroupSheetDragHint => '손잡이를 끌어 순서를 바꿔요';
+  String get routineGroupSheetDragHint => '길게 눌러 끌면 순서를 바꿀 수 있어요';
 
   @override
   String get routineGroupCreated => '묶음을 만들었어요';

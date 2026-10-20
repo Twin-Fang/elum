@@ -476,7 +476,7 @@
   "elumiSettingsWithdrawLabel": "회원탈퇴",
   "@elumiSettingsWithdrawLabel": { "description": "이룸이 설정의 회원탈퇴 줄" },
 
-  "elumiSettingsLogoutTitle": "로그아웃 하실건가요?",
+  "elumiSettingsLogoutTitle": "로그아웃할까요?",
   "@elumiSettingsLogoutTitle": { "description": "로그아웃 확인 팝업 제목" },
 
   "elumiSettingsLogoutMessage": "이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요",
@@ -1232,7 +1232,7 @@
   "routineInputSend": "보내기",
   "@routineInputSend": { "description": "일과 입력창 전송 버튼의 낭독 이름" },
 
-  "guardianSettingsLogoutConfirmTitle": "로그아웃 하실건가요?",
+  "guardianSettingsLogoutConfirmTitle": "로그아웃할까요?",
   "@guardianSettingsLogoutConfirmTitle": { "description": "로그아웃 확인 팝업 제목" },
 
   "guardianSettingsWithdrawConfirmTitle": "회원탈퇴 하실건가요?",
@@ -2161,7 +2161,7 @@
   "@routineGroupSheetAdd": {"description": "일과 묶음 (#807)"},
   "routineGroupSheetRemove": "{title} 묶음에서 빼기",
   "@routineGroupSheetRemove": {"description": "일과 묶음 (#807)", "placeholders": {"title": {"type": "String"}}},
-  "routineGroupSheetDragHint": "손잡이를 끌어 순서를 바꿔요",
+  "routineGroupSheetDragHint": "길게 눌러 끌면 순서를 바꿀 수 있어요",
   "@routineGroupSheetDragHint": {"description": "일과 묶음 (#807)"},
   "routineGroupCreated": "묶음을 만들었어요",
   "@routineGroupCreated": {"description": "일과 묶음 (#807)"},
