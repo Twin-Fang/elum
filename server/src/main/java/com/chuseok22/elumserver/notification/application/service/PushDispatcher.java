@@ -39,14 +39,19 @@ public class PushDispatcher {
     this.pushSender = pushSender;
   }
 
-  // 트랜잭션 없음: FCM 호출 동안 DB 연결을 잡지 않고, 삭제만 저장소의 짧은 트랜잭션으로 확정
   public void dispatch(List<RecordedNotification> recorded, NotificationType type) {
+    dispatch(recorded, type, null);
+  }
+
+  // 트랜잭션 없음: FCM 호출 동안 DB 연결을 잡지 않고, 삭제만 저장소의 짧은 트랜잭션으로 확정
+  // pushSubjectTitle: 문구에 제목이 들어가는 종류(이야기)만 값이 있고, 저장하지 않음
+  public void dispatch(List<RecordedNotification> recorded, NotificationType type, String pushSubjectTitle) {
     for (RecordedNotification notification : recorded) {
       if (!notification.shouldPush()) {
         continue;
       }
       try {
-        dispatchOne(notification, type);
+        dispatchOne(notification, type, pushSubjectTitle);
       } catch (RuntimeException exception) {
         // 한 사람 실패가 다른 사람 발송을 막지 않음
         log.warn("[notification push] failed type={} : {}", type, exception.getClass().getSimpleName());
@@ -54,7 +59,7 @@ public class PushDispatcher {
     }
   }
 
-  private void dispatchOne(RecordedNotification recorded, NotificationType type) {
+  private void dispatchOne(RecordedNotification recorded, NotificationType type, String pushSubjectTitle) {
     Optional<Notification> notification = notificationRepository.findById(recorded.notificationId());
     if (notification.isEmpty()) {
       return;
@@ -69,7 +74,7 @@ public class PushDispatcher {
     }
     List<PushDevice> devices = pushDeviceRepository.findAllByMemberId(recorded.recipientMemberId());
     for (PushDevice device : devices) {
-      PushMessage message = pushMessageFactory.create(notification.get(), recorded, device);
+      PushMessage message = pushMessageFactory.create(notification.get(), recorded, device, pushSubjectTitle);
       PushResult pushResult = pushSender.send(message);
       if (pushResult == PushResult.INVALID_TOKEN) {
         pushDeviceRepository.deleteByToken(device.getToken());
@@ -92,6 +97,8 @@ public class PushDispatcher {
       case CO_GUARDIAN_JOINED -> setting.isCoGuardianJoinedEnabled();
       case CREDIT_REFILLED -> setting.isCreditRefilledEnabled();
       case FEEDBACK_RESOLVED -> setting.isFeedbackResolvedEnabled();
+      case TALK_POST_COMMENTED -> setting.isTalkCommentedEnabled();
+      case TALK_POST_IMPORTED -> setting.isTalkImportedEnabled();
     };
   }
 }

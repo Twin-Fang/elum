@@ -35,6 +35,13 @@ public class NotificationSettingService {
     setting.setCoGuardianJoinedEnabled(request.coGuardianJoined());
     setting.setCreditRefilledEnabled(request.creditRefilled());
     setting.setFeedbackResolvedEnabled(request.feedbackResolved());
+    // 옛 앱은 이야기 두 값을 모름 (null = 그대로)
+    if (request.talkCommented() != null) {
+      setting.setTalkCommentedEnabled(request.talkCommented());
+    }
+    if (request.talkImported() != null) {
+      setting.setTalkImportedEnabled(request.talkImported());
+    }
     return NotificationSettingResponse.from(notificationSettingRepository.save(setting));
   }
 }

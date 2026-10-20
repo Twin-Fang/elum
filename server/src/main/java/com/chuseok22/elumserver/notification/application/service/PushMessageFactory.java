@@ -35,14 +35,20 @@ public class PushMessageFactory {
 
   /** 알림 행 + 기록 결과 + 받는 기기 > 푸시 메시지 */
   public PushMessage create(Notification notification, RecordedNotification recorded, PushDevice device) {
+    return create(notification, recorded, device, null);
+  }
+
+  /** 문구에 글 제목이 들어가는 종류(이야기)는 subjectTitle 을 넘김 (저장하지 않는 값) */
+  public PushMessage create(Notification notification, RecordedNotification recorded, PushDevice device,
+    String subjectTitle) {
     NotificationType type = notification.getType();
     AppLocale locale = device.getLocale() == null ? AppLocale.EN : device.getLocale();
     String title = text(locale, TITLE_KEY);
-    String body = buildBody(type, recorded.count(), locale);
+    String body = buildBody(type, recorded.count(), locale, subjectTitle);
     return new PushMessage(device.getToken(), title, body, buildData(notification, type), notification.getGroupKey());
   }
 
-  private String buildBody(NotificationType type, int count, AppLocale locale) {
+  private String buildBody(NotificationType type, int count, AppLocale locale, String subjectTitle) {
     return switch (type) {
       case ROUTINE_COMPLETED -> count >= 2
         ? MessageFormat.format(text(locale, ROUTINE_COMPLETED_MANY_KEY), count)
@@ -51,6 +57,11 @@ public class PushMessageFactory {
       case CO_GUARDIAN_JOINED -> text(locale, "push.co_guardian_joined");
       case CREDIT_REFILLED -> text(locale, "push.credit_refilled");
       case FEEDBACK_RESOLVED -> text(locale, "push.feedback_resolved");
+      // {0} 글 제목, {1} 댓글 수 또는 가져간 보호자 수
+      case TALK_POST_COMMENTED -> MessageFormat.format(text(locale, "push.talk_post_commented"),
+        subjectTitle == null ? "" : subjectTitle, count);
+      case TALK_POST_IMPORTED -> MessageFormat.format(text(locale, "push.talk_post_imported"),
+        subjectTitle == null ? "" : subjectTitle, count);
     };
   }
 

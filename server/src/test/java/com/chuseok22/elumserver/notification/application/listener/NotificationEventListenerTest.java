@@ -20,6 +20,8 @@ import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
 import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
+import com.chuseok22.elumserver.notification.core.event.TalkPostCommentedEvent;
+import com.chuseok22.elumserver.notification.core.event.TalkPostImportedEvent;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -113,6 +115,50 @@ class NotificationEventListenerTest {
   }
 
   @Test
+  @DisplayName("이야기 댓글 알림은 보호자 조회 없이 글쓴이 한 명에게만 가고, 푸시에 글 제목을 넘긴다")
+  void onTalkPostCommented_recordsForAuthorOnly() {
+    List<RecordedNotification> recorded = List.of(new RecordedNotification("n1", "author-1", 1, true));
+    when(notificationRecorder.record(any(NotificationDraft.class), anyCollection())).thenReturn(recorded);
+
+    listener.onTalkPostCommented(new TalkPostCommentedEvent("post-1", "author-1", "actor-1", "버스 타기"));
+
+    ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
+    ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
+    verify(notificationRecorder).record(draft.capture(), recipients.capture());
+    assertThat(draft.getValue().type()).isEqualTo(NotificationType.TALK_POST_COMMENTED);
+    assertThat(draft.getValue().groupKey()).isEqualTo("TALK_POST_COMMENTED:post-1");
+    assertThat(draft.getValue().profileId()).isNull();
+    assertThat(draft.getValue().targetId()).isEqualTo("post-1");
+    assertThat(recipients.getValue()).containsExactly("author-1");
+    verify(pushDispatcher).dispatch(recorded, NotificationType.TALK_POST_COMMENTED, "버스 타기");
+    verifyNoInteractions(profileGuardianService);
+  }
+
+  @Test
+  @DisplayName("자기 글에 자기가 댓글을 달면 알림도 푸시도 만들지 않는다")
+  void onTalkPostCommented_selfComment_skipped() {
+    listener.onTalkPostCommented(new TalkPostCommentedEvent("post-1", "author-1", "author-1", "버스 타기"));
+
+    verifyNoInteractions(notificationRecorder, pushDispatcher);
+  }
+
+  @Test
+  @DisplayName("이야기 가져감 알림은 글쓴이 한 명에게만 가고, 자기 글을 가져가면 만들지 않는다")
+  void onTalkPostImported_recordsForAuthorOnly_selfSkipped() {
+    listener.onTalkPostImported(new TalkPostImportedEvent("post-1", "author-1", "author-1", "버스 타기"));
+    verifyNoInteractions(notificationRecorder);
+
+    listener.onTalkPostImported(new TalkPostImportedEvent("post-1", "author-1", "actor-1", "버스 타기"));
+
+    ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
+    ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
+    verify(notificationRecorder).record(draft.capture(), recipients.capture());
+    assertThat(draft.getValue().type()).isEqualTo(NotificationType.TALK_POST_IMPORTED);
+    assertThat(draft.getValue().groupKey()).isEqualTo("TALK_POST_IMPORTED:post-1");
+    assertThat(recipients.getValue()).containsExactly("author-1");
+  }
+
+  @Test
   @DisplayName("기록이 예외를 던져도 리스너 밖으로 번지지 않는다")
   void recorderThrows_doesNotPropagate() {
     when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-1"));
@@ -133,14 +179,14 @@ class NotificationEventListenerTest {
 
     listener.onRoutineCompleted(new RoutineCompletedEvent("routine-1", "profile-1", LocalDate.of(2026, 10, 19), null));
 
-    verify(pushDispatcher).dispatch(recorded, NotificationType.ROUTINE_COMPLETED);
+    verify(pushDispatcher).dispatch(recorded, NotificationType.ROUTINE_COMPLETED, null);
   }
 
   @Test
   @DisplayName("푸시 발송이 예외를 던져도 리스너 밖으로 번지지 않는다")
   void dispatchThrows_notPropagated() {
     when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-2"));
-    doThrow(new IllegalStateException("fcm down")).when(pushDispatcher).dispatch(any(), any());
+    doThrow(new IllegalStateException("fcm down")).when(pushDispatcher).dispatch(any(), any(), any());
 
     assertThatCode(() -> listener.onRoutineCompleted(
       new RoutineCompletedEvent("routine-1", "profile-1", LocalDate.of(2026, 10, 19), null)))

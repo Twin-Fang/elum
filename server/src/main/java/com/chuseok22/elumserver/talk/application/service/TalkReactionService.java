@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.core.NicknamePolicy;
+import com.chuseok22.elumserver.notification.core.event.TalkPostCommentedEvent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkCommentRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentResponse;
@@ -15,6 +16,7 @@ import com.chuseok22.elumserver.talk.core.TalkTextRules;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkBlock;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkComment;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkHelpful;
+import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkCommentRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkHelpfulRepository;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -53,6 +56,7 @@ public class TalkReactionService {
   private final TalkBlockRepository talkBlockRepository;
   private final MemberService memberService;
   private final NicknamePolicy nicknamePolicy;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 도움이 됐어요 누르기: 보이는 글 확인 > 이미 눌렀으면 그대로 끝 > 기록 저장 > 수 +1
@@ -138,7 +142,7 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 보이는 글 확인 > 저장 > 댓글 수 +1
+   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 보이는 글 확인 > 저장 > 댓글 수 +1 > 글쓴이 알림 이벤트
    * 이룸이 호칭은 가리지 않음
    */
   @Transactional
@@ -152,7 +156,7 @@ public class TalkReactionService {
       log.warn("[talk comment] rejected 400 : blocked word in text");
       throw new CustomException(ErrorCode.TALK_TEXT_NOT_ALLOWED);
     }
-    requireVisiblePost(postId);
+    TalkPost post = requireVisiblePost(postId);
 
     // 저장 > 댓글 수
     TalkComment comment = new TalkComment();
@@ -161,6 +165,9 @@ public class TalkReactionService {
     comment.setBody(body);
     TalkComment saved = talkCommentRepository.save(comment);
     talkPostRepository.increaseCommentCount(postId);
+    // 알림 이벤트 (커밋 뒤 리스너가 처리, 글쓴이 본인 댓글은 리스너가 거름)
+    eventPublisher.publishEvent(
+      new TalkPostCommentedEvent(postId, post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
     log.info("[talk comment] created : postId={}", postId);
     return toResponses(caller, List.of(saved)).get(0);
   }
@@ -188,8 +195,8 @@ public class TalkReactionService {
   }
 
   // 보이지 않는 글은 없는 글로 취급
-  private void requireVisiblePost(String postId) {
-    talkPostRepository.findById(postId)
+  private TalkPost requireVisiblePost(String postId) {
+    return talkPostRepository.findById(postId)
       .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE)
       .orElseThrow(() -> new CustomException(ErrorCode.TALK_POST_NOT_FOUND));
   }

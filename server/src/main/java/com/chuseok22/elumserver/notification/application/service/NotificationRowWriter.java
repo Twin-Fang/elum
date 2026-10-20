@@ -48,6 +48,10 @@ class NotificationRowWriter {
   }
 
   private RecordedNotification updateExisting(Notification row, NotificationDraft draft) {
+    // 이야기 알림: 글마다 한 줄에 발생마다 횟수 +1
+    if (isCountedPerOccurrence(draft.type())) {
+      return countOneMoreOccurrence(row, draft);
+    }
     // 묶음 없는 종류: 이미 있으면 아무것도 안 함
     if (draft.type() != NotificationType.ROUTINE_COMPLETED || draft.subjectId() == null) {
       return new RecordedNotification(row.getId(), row.getRecipientMemberId(), row.getCount(), false);
@@ -61,6 +65,20 @@ class NotificationRowWriter {
       ? draft.subjectId()
       : row.getSubjectIds() + Notification.SUBJECT_ID_DELIMITER + draft.subjectId();
     row.setSubjectIds(mergedSubjectIds);
+    row.setCount(row.getCount() + 1);
+    row.setLastOccurredAt(draft.occurredAt());
+    row.setReadAt(null);
+    Notification saved = notificationRepository.saveAndFlush(row);
+    return new RecordedNotification(saved.getId(), row.getRecipientMemberId(), saved.getCount(), true);
+  }
+
+  // 발생 한 번마다 횟수가 오르는 종류 (이벤트가 발생당 한 번만 나오므로 중복 판정 없음)
+  private boolean isCountedPerOccurrence(NotificationType type) {
+    return type == NotificationType.TALK_POST_COMMENTED || type == NotificationType.TALK_POST_IMPORTED;
+  }
+
+  // 횟수 +1, 다시 안 읽음 상태로
+  private RecordedNotification countOneMoreOccurrence(Notification row, NotificationDraft draft) {
     row.setCount(row.getCount() + 1);
     row.setLastOccurredAt(draft.occurredAt());
     row.setReadAt(null);

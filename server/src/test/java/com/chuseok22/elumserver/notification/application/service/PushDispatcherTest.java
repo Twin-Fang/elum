@@ -86,6 +86,28 @@ class PushDispatcherTest {
   }
 
   @Test
+  @DisplayName("이야기 댓글 알림은 그 종류가 꺼져 있으면 보내지 않고, 켜져 있으면 보낸다")
+  void isTypeEnabled_talkCommented_respectsSetting() {
+    Notification talkNotification = new Notification();
+    talkNotification.setId("n2");
+    talkNotification.setType(NotificationType.TALK_POST_COMMENTED);
+    talkNotification.setGroupKey("TALK_POST_COMMENTED:post-1");
+    when(notificationRepository.findById("n2")).thenReturn(Optional.of(talkNotification));
+    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1")));
+    RecordedNotification talkRecorded = new RecordedNotification("n2", "m1", 1, true);
+    NotificationSetting setting = new NotificationSetting();
+    setting.setTalkCommentedEnabled(false);
+    when(notificationSettingRepository.findById("m1")).thenReturn(Optional.of(setting));
+
+    dispatcher.dispatch(List.of(talkRecorded), NotificationType.TALK_POST_COMMENTED, "버스 타기");
+    verify(pushSender, never()).send(any());
+
+    setting.setTalkCommentedEnabled(true);
+    dispatcher.dispatch(List.of(talkRecorded), NotificationType.TALK_POST_COMMENTED, "버스 타기");
+    verify(pushSender, times(1)).send(any(PushMessage.class));
+  }
+
+  @Test
   @DisplayName("설정 행이 없으면 모든 기기에 보낸다")
   void noSettingRow_sendsToAllDevices() {
     when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1"), device("t2")));

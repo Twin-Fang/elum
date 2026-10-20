@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.notification.core.event.TalkPostImportedEvent;
 import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft;
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /// 가져가기: 내린 글을 가져가거나, 같은 보호자의 반복 가져가기가 횟수를 부풀리는 것을 막는다.
 @ExtendWith(MockitoExtension.class)
@@ -52,13 +54,16 @@ class TalkImportServiceTest {
   private TalkImageStorage talkImageStorage;
   @Mock
   private RoutineShareService routineShareService;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   private TalkImportService talkImportService;
 
   @BeforeEach
   void setUp() {
     talkImportService = new TalkImportService(
-      talkPostRepository, talkPostStepRepository, talkImportRepository, talkImageStorage, routineShareService);
+      talkPostRepository, talkPostStepRepository, talkImportRepository, talkImageStorage, routineShareService,
+      eventPublisher);
   }
 
   @Test
@@ -139,6 +144,23 @@ class TalkImportServiceTest {
     assertThat(post.getImportCount()).isEqualTo(1);
     // 기록은 가져갈 때마다 남음 (일과 연결 추적용)
     verify(talkImportRepository, org.mockito.Mockito.times(2)).save(any(TalkImport.class));
+  }
+
+  @Test
+  @DisplayName("보호자의 첫 가져가기에만 글쓴이·행동한 사람·글 제목을 담은 알림 이벤트를 내보낸다")
+  void importToLibrary_publishesEvent_onlyOnFirstImport() {
+    TalkPost post = post(TalkPostStatus.VISIBLE);
+    post.setAuthorMemberId("author-1");
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(talkPostStepRepository.findByPostIdOrderByStepOrderAsc("post-1")).thenReturn(List.of(step(0, null)));
+    when(routineShareService.importToLibrary(any(), any(), any(), any())).thenReturn("routine-1", "routine-2");
+    when(talkImportRepository.existsByPostIdAndMemberId("post-1", "member-1")).thenReturn(false, true);
+
+    talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
+    talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
+
+    verify(eventPublisher, org.mockito.Mockito.times(1))
+      .publishEvent(new TalkPostImportedEvent("post-1", "author-1", "member-1", "버스 타기"));
   }
 
   @Test

@@ -62,6 +62,30 @@ class PushMessageFactoryTest {
     assertThat(message.data()).containsOnlyKeys("type", "notificationId");
   }
 
+  @Test
+  @DisplayName("이야기 가져감 푸시는 글 제목과 가져간 보호자 수를 넣고 collapseKey 는 글 묶음 키와 같다")
+  void buildBody_talkPostImported_ko() {
+    Notification notification = notification(NotificationType.TALK_POST_IMPORTED, "TALK_POST_IMPORTED:post-1");
+
+    PushMessage message = factory.create(notification, new RecordedNotification("n1", "m1", 3, true),
+      device(AppLocale.KO), "버스 타기");
+
+    assertThat(message.body()).isEqualTo("보호자 3명이 \"버스 타기\" 일과를 가져갔어요");
+    assertThat(message.collapseKey()).isEqualTo("TALK_POST_IMPORTED:post-1");
+  }
+
+  @Test
+  @DisplayName("이야기 댓글 푸시는 글 제목과 댓글 수를 넣고, 영어도 같은 자리에 넣는다")
+  void buildBody_talkPostCommented_koAndEn() {
+    Notification notification = notification(NotificationType.TALK_POST_COMMENTED, "TALK_POST_COMMENTED:post-1");
+    RecordedNotification recorded = new RecordedNotification("n1", "m1", 2, true);
+
+    assertThat(factory.create(notification, recorded, device(AppLocale.KO), "버스 타기").body())
+      .isEqualTo("\"버스 타기\"에 댓글이 2개 달렸어요");
+    assertThat(factory.create(notification, recorded, device(AppLocale.EN), "Bus").body())
+      .isEqualTo("2 new comment(s) on \"Bus\"");
+  }
+
   private Notification notification(NotificationType type, String groupKey) {
     Notification notification = new Notification();
     notification.setId("n1");

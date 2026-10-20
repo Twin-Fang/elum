@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.core.NicknamePolicy;
+import com.chuseok22.elumserver.notification.core.event.TalkPostCommentedEvent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkCommentRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentResponse;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -62,13 +64,15 @@ class TalkReactionServiceTest {
   private TalkBlockRepository talkBlockRepository;
   @Mock
   private MemberService memberService;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   private TalkReactionService talkReactionService;
 
   @BeforeEach
   void setUp() {
     talkReactionService = new TalkReactionService(talkPostRepository, talkHelpfulRepository, talkCommentRepository,
-      talkBlockRepository, memberService, new NicknamePolicy());
+      talkBlockRepository, memberService, new NicknamePolicy(), eventPublisher);
   }
 
   @Test
@@ -171,7 +175,7 @@ class TalkReactionServiceTest {
     NicknamePolicy rejectingPolicy = org.mockito.Mockito.mock(NicknamePolicy.class);
     when(rejectingPolicy.containsBlockedWord("나쁜말")).thenReturn(true);
     TalkReactionService service = new TalkReactionService(talkPostRepository, talkHelpfulRepository,
-      talkCommentRepository, talkBlockRepository, memberService, rejectingPolicy);
+      talkCommentRepository, talkBlockRepository, memberService, rejectingPolicy, eventPublisher);
 
     assertThatThrownBy(() -> service.addComment(VIEWER, "post-1", new TalkCommentRequest("나쁜말")))
       .isInstanceOfSatisfying(CustomException.class,
@@ -218,6 +222,32 @@ class TalkReactionServiceTest {
     assertThat(response.id()).isEqualTo("comment-1");
     assertThat(response.isMine()).isTrue();
     assertThat(response.authorNickname()).isEqualTo("내닉네임");
+  }
+
+  @Test
+  @DisplayName("댓글을 쓰면 글쓴이·행동한 사람·글 제목을 담은 알림 이벤트를 내보낸다")
+  void addComment_publishesEvent() {
+    when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(true);
+    TalkPost post = post("post-1", "author-1");
+    post.setTitle("버스 타기");
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(talkCommentRepository.save(any(TalkComment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of());
+
+    talkReactionService.addComment(VIEWER, "post-1", new TalkCommentRequest("좋아요"));
+
+    verify(eventPublisher).publishEvent(new TalkPostCommentedEvent("post-1", "author-1", "viewer-1", "버스 타기"));
+  }
+
+  @Test
+  @DisplayName("댓글 규칙에 걸려 거절되면 알림 이벤트를 내보내지 않는다")
+  void addComment_rejected_publishesNothing() {
+    when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(false);
+
+    assertThatThrownBy(() -> talkReactionService.addComment(VIEWER, "post-1", new TalkCommentRequest("좋아요")))
+      .isInstanceOf(CustomException.class);
+
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
   }
 
   @Test

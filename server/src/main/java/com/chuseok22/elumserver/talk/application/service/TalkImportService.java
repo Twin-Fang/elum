@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.talk.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.notification.core.event.TalkPostImportedEvent;
 import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft;
 import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft.DraftStep;
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
@@ -20,6 +21,7 @@ import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +39,10 @@ public class TalkImportService {
   private final TalkImportRepository talkImportRepository;
   private final TalkImageStorage talkImageStorage;
   private final RoutineShareService routineShareService;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
-   * 가져가기: 요청 검증 > 보이는 글 > 카드·그림 초안 > 일과 만들기 위임 > 가져간 기록 > 첫 가져가기면 횟수 +1
+   * 가져가기: 요청 검증 > 보이는 글 > 카드·그림 초안 > 일과 만들기 위임 > 가져간 기록 > 첫 가져가기면 횟수 +1 > 글쓴이 알림 이벤트
    *
    * @throws CustomException 내렸거나 없는 글은 TALK_POST_NOT_FOUND, 이룸이·묶음 오류는 일과 쪽 예외 그대로
    */
@@ -61,6 +64,9 @@ public class TalkImportService {
     if (isFirstImportByMember) {
       post.setImportCount(post.getImportCount() + 1);
       talkPostRepository.save(post);
+      // 알림 이벤트는 보호자당 첫 가져가기만 (알림의 숫자 = 가져간 보호자 수)
+      eventPublisher.publishEvent(
+        new TalkPostImportedEvent(post.getId(), post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
     }
     return new TalkImportResponse(routineId, request.profileId());
   }
