@@ -334,17 +334,11 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
         child: Stack(
           children: [
             scaffold,
-            // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
-            // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
-            Positioned.fill(
-              child: Material(
-                type: MaterialType.transparency,
-                child: HomeCoachMark(
-                  createKey: _createKey,
-                  swipeKey: _swipeKey,
-                  modeKey: _modeKey,
-                ),
-              ),
+            // 처음 들어왔을 때만 뜨는 안내. 막은 루트 오버레이에 그려 하단 바까지 덮는다
+            HomeCoachMark(
+              createKey: _createKey,
+              swipeKey: _swipeKey,
+              modeKey: _modeKey,
             ),
           ],
         ),
