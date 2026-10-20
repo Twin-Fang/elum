@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -249,16 +250,29 @@ class TalkReactionServiceTest {
   }
 
   @Test
-  @DisplayName("내 댓글을 지우면 DELETED 가 되고 댓글 수가 하나 준다")
+  @DisplayName("내 댓글을 지우면 DELETED 로 바꾸고 댓글 수가 하나 준다")
   void deleteComment_byAuthor_marksDeletedAndDecreasesCount() {
     TalkComment comment = comment("comment-1", "post-1", "viewer-1", BASE_TIME);
     when(talkCommentRepository.findById("comment-1")).thenReturn(Optional.of(comment));
+    when(talkCommentRepository.updateStatusIfVisible("comment-1", TalkCommentStatus.DELETED, TalkCommentStatus.VISIBLE))
+      .thenReturn(1);
 
     talkReactionService.deleteComment(VIEWER, "comment-1");
 
-    assertThat(comment.getStatus()).isEqualTo(TalkCommentStatus.DELETED);
-    verify(talkCommentRepository).saveAndFlush(comment);
     verify(talkPostRepository).decreaseCommentCount("post-1");
+  }
+
+  @Test
+  @DisplayName("동시에 두 번 지워져 먼저 바뀐 뒤면 댓글 수를 줄이지 않는다")
+  void deleteComment_alreadyChangedByConcurrentDelete_doesNotDecrease() {
+    TalkComment comment = comment("comment-1", "post-1", "viewer-1", BASE_TIME);
+    when(talkCommentRepository.findById("comment-1")).thenReturn(Optional.of(comment));
+    when(talkCommentRepository.updateStatusIfVisible("comment-1", TalkCommentStatus.DELETED, TalkCommentStatus.VISIBLE))
+      .thenReturn(0);
+
+    talkReactionService.deleteComment(VIEWER, "comment-1");
+
+    verify(talkPostRepository, never()).decreaseCommentCount(anyString());
   }
 
   @Test
@@ -306,6 +320,59 @@ class TalkReactionServiceTest {
   }
 
   @Test
+  @DisplayName("첫 묶음이 전부 차단이면 이어 읽고, 이어 읽는 위치는 방금 읽은 마지막 댓글이다")
+  void comments_firstBatchAllBlocked_readsNextBatchFromLastScannedRow() {
+    stubScanDependencies();
+    List<TalkComment> blockedBatch = List.of(
+      comment("c1", "post-1", "author-blocked", BASE_TIME),
+      comment("c2", "post-1", "author-blocked", BASE_TIME.plusMinutes(1)),
+      comment("c3", "post-1", "author-blocked", BASE_TIME.plusMinutes(2)));
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+      .thenReturn(blockedBatch, List.of(comment("c4", "post-1", "author-ok", BASE_TIME.plusMinutes(3))));
+
+    TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, 2);
+
+    ArgumentCaptor<LocalDateTime> createdAts = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<String> ids = ArgumentCaptor.forClass(String.class);
+    verify(talkCommentRepository, times(2))
+      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), createdAts.capture(), ids.capture(), any());
+    assertThat(createdAts.getAllValues().get(1)).isEqualTo(BASE_TIME.plusMinutes(2));
+    assertThat(ids.getAllValues().get(1)).isEqualTo("c3");
+    assertThat(page.items()).extracting(TalkCommentResponse::id).containsExactly("c4");
+    assertThat(page.nextCursor()).isNull();
+  }
+
+  @Test
+  @DisplayName("다섯 번 읽어도 전부 차단이면 빈 쪽과 함께 읽은 마지막 위치로 nextCursor 를 준다")
+  void comments_maxScanRoundsReached_returnsCursorAtScanPosition() {
+    stubScanDependencies();
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+      .thenReturn(blockedBatch(0), blockedBatch(3), blockedBatch(6), blockedBatch(9), blockedBatch(12));
+
+    TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, 2);
+
+    verify(talkCommentRepository, times(5))
+      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any());
+    assertThat(page.items()).isEmpty();
+    assertThat(page.nextCursor()).isEqualTo(BASE_TIME.plusMinutes(14) + "|c14");
+  }
+
+  @Test
+  @DisplayName("형식이 틀린 cursor 는 첫 쪽으로 본다")
+  void comments_malformedCursor_readsFirstPage() {
+    stubScanDependencies();
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+      .thenReturn(List.of());
+
+    talkReactionService.comments(VIEWER, "post-1", "garbage", null);
+
+    ArgumentCaptor<LocalDateTime> createdAt = ArgumentCaptor.forClass(LocalDateTime.class);
+    verify(talkCommentRepository).findCommentPage(
+      eq("post-1"), eq(TalkCommentStatus.VISIBLE), createdAt.capture(), eq(""), any());
+    assertThat(createdAt.getValue()).isEqualTo(LocalDateTime.of(1970, 1, 1, 0, 0));
+  }
+
+  @Test
   @DisplayName("내려간 글의 댓글은 볼 수 없다")
   void comments_onDeletedPost_throwsNotFound() {
     TalkPost deleted = post("post-1", "author-1");
@@ -315,6 +382,25 @@ class TalkReactionServiceTest {
     assertThatThrownBy(() -> talkReactionService.comments(VIEWER, "post-1", null, null))
       .isInstanceOfSatisfying(CustomException.class,
         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
+  }
+
+  // 차단한 보호자 1명(author-blocked), 정지 회원 없음
+  private void stubScanDependencies() {
+    stubVisiblePost("post-1");
+    TalkBlock block = new TalkBlock();
+    block.setBlockerMemberId("viewer-1");
+    block.setBlockedMemberId("author-blocked");
+    when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of(block));
+    lenient().when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of());
+    lenient().when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of());
+  }
+
+  // 차단 작성자 댓글 3건 (c{firstIndex}..c{firstIndex+2}, 1분 간격)
+  private static List<TalkComment> blockedBatch(int firstIndex) {
+    return List.of(
+      comment("c" + firstIndex, "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex)),
+      comment("c" + (firstIndex + 1), "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex + 1)),
+      comment("c" + (firstIndex + 2), "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex + 2)));
   }
 
   private void stubVisiblePost(String postId) {

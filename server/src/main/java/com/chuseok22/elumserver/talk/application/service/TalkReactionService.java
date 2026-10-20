@@ -166,7 +166,7 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 지우기: 보이는 내 댓글 확인 > DELETED > 댓글 수 -1
+   * 댓글 지우기: 보이는 내 댓글 확인 > 조건부 DELETED > 바뀐 경우만 댓글 수 -1
    * 없거나 이미 지운 댓글은 TALK_COMMENT_NOT_FOUND, 남의 댓글은 TALK_NOT_AUTHOR
    */
   @Transactional
@@ -178,10 +178,13 @@ public class TalkReactionService {
       log.warn("[talk comment] rejected 403 : not the author");
       throw new CustomException(ErrorCode.TALK_NOT_AUTHOR);
     }
-    comment.setStatus(TalkCommentStatus.DELETED);
-    talkCommentRepository.saveAndFlush(comment);
-    talkPostRepository.decreaseCommentCount(comment.getPostId());
-    log.info("[talk comment] deleted : postId={}", comment.getPostId());
+    // 내가 바꾼 경우에만 댓글 수 감소 (동시에 두 번 지워도 한 번만)
+    int changedCount = talkCommentRepository.updateStatusIfVisible(
+      commentId, TalkCommentStatus.DELETED, TalkCommentStatus.VISIBLE);
+    if (changedCount > 0) {
+      talkPostRepository.decreaseCommentCount(comment.getPostId());
+      log.info("[talk comment] deleted : postId={}", comment.getPostId());
+    }
   }
 
   // 보이지 않는 글은 없는 글로 취급

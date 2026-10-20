@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TalkCommentRepository extends JpaRepository<TalkComment, String> {
 
@@ -22,4 +24,11 @@ public interface TalkCommentRepository extends JpaRepository<TalkComment, String
     @Param("postId") String postId, @Param("status") TalkCommentStatus status,
     @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt, @Param("cursorId") String cursorId,
     Pageable pageable);
+
+  // 보이는 댓글만 DELETED 로 (바꾼 건수: 이미 지워졌으면 0, 동시에 두 번 눌러도 한 번만 1)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkComment c set c.status = :deletedStatus where c.id = :commentId and c.status = :visibleStatus")
+  int updateStatusIfVisible(@Param("commentId") String commentId, @Param("deletedStatus") TalkCommentStatus deletedStatus,
+    @Param("visibleStatus") TalkCommentStatus visibleStatus);
 }
