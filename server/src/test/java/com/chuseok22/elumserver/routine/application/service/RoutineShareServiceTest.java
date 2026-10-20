@@ -3,7 +3,12 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -11,20 +16,27 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft;
+import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft.DraftStep;
 import com.chuseok22.elumserver.routine.application.dto.RoutineShareSnapshot;
+import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineGroup;
+import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineGroupRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,6 +54,14 @@ class RoutineShareServiceTest {
   private ProfileAccessGuard profileAccessGuard;
   @Mock
   private RoutineImageStorage routineImageStorage;
+  @Mock
+  private RoutineGroupRepository routineGroupRepository;
+  @Mock
+  private RoutineGroupMembership routineGroupMembership;
+  @Mock
+  private RoutineLibraryOrderService routineLibraryOrderService;
+  @Mock
+  private RoutineStepSpeechQueue routineStepSpeechQueue;
 
   @InjectMocks
   private RoutineShareService routineShareService;
@@ -148,6 +168,187 @@ class RoutineShareServiceTest {
     assertThat(routineShareService.readImage("gone.jpg")).isNull();
     assertThat(routineShareService.readImage("there.jpg")).isSameAs(content);
     assertThat(routineShareService.readImage(null)).isNull();
+  }
+
+  @Test
+  @DisplayName("가져오면 일과관리에만 있는 보낸 상태 원본이 만들어지고 글 id 가 남는다")
+  void importToLibrary_createsLibraryOnlyConfirmedOriginal() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+
+    String routineId = routineShareService.importToLibrary(GUARDIAN, "profile-1", null, draft(step(0, null)));
+
+    Routine saved = savedRoutine();
+    assertThat(routineId).isEqualTo(saved.getId());
+    assertThat(saved.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
+    assertThat(saved.isLibraryOnly()).isTrue();
+    assertThat(saved.getSourceRoutineId()).isNull();
+    assertThat(saved.getTalkPostId()).isEqualTo("post-1");
+    assertThat(saved.getCreatedBy()).isEqualTo("member-1");
+    assertThat(saved.getProfile().getId()).isEqualTo("profile-1");
+    assertThat(saved.getTitle()).isEqualTo("가져온 일과");
+    assertThat(saved.getRawInputText()).isEqualTo("가져온 일과");
+    assertThat(saved.getLanguage()).isEqualTo(AppLocale.EN);
+    assertThat(saved.getScheduledAt()).isNotNull();
+    verify(routineStepSpeechQueue).enqueueAfterCommit(anyCollection());
+  }
+
+  @Test
+  @DisplayName("묶음 없이 가져오면 일과관리 맨 앞에 놓고 기존 칸은 한 칸씩 밀린다")
+  void importToLibrary_noGroup_placedFirst() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+
+    routineShareService.importToLibrary(GUARDIAN, "profile-1", null, draft(step(0, null)));
+
+    verify(routineLibraryOrderService).makeRoomAtFront("profile-1");
+    Routine saved = savedRoutine();
+    assertThat(saved.getLibraryOrder()).isZero();
+    assertThat(saved.getGroupId()).isNull();
+    verify(routineGroupMembership, never()).assign(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("묶음을 고르면 그 묶음의 맨 뒤에 들어간다")
+  void importToLibrary_withGroup_placedLast() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+    RoutineGroup group = groupOf("group-1", "profile-1");
+    Routine first = routine("existing-1", "먼저");
+    Routine second = routine("existing-2", "그다음");
+    when(routineGroupRepository.findById("group-1")).thenReturn(Optional.of(group));
+    when(routineGroupMembership.membersOf("group-1")).thenReturn(List.of(first, second));
+
+    routineShareService.importToLibrary(GUARDIAN, "profile-1", "group-1", draft(step(0, null)));
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<List<Routine>> orderedRoutines = ArgumentCaptor.forClass(List.class);
+    verify(routineGroupMembership).assign(eq("group-1"), orderedRoutines.capture());
+    assertThat(orderedRoutines.getValue()).extracting(Routine::getTitle).containsExactly("먼저", "그다음", "가져온 일과");
+    verify(routineLibraryOrderService, never()).makeRoomAtFront(anyString());
+  }
+
+  @Test
+  @DisplayName("다른 이룸이의 묶음이거나 없는 묶음이면 INVALID_INPUT_VALUE, 아무것도 저장하지 않는다")
+  void importToLibrary_foreignGroup_throwsInvalidInput() {
+    stubProfileAccess();
+    when(routineGroupRepository.findById("group-foreign")).thenReturn(Optional.of(groupOf("group-foreign", "profile-2")));
+    when(routineGroupRepository.findById("group-gone")).thenReturn(Optional.empty());
+
+    assertImportRejected("group-foreign", ErrorCode.INVALID_INPUT_VALUE);
+    assertImportRejected("group-gone", ErrorCode.INVALID_INPUT_VALUE);
+    verify(routineRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("연결되지 않은 이룸이로는 가져올 수 없다")
+  void importToLibrary_otherProfile_throwsAccessDenied() {
+    when(profileAccessGuard.profileFor(any(Caller.class), eq(ProfileAction.MANAGE)))
+      .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
+
+    assertImportRejected(null, ErrorCode.PROFILE_ACCESS_DENIED);
+    verify(routineRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("그림 없는 카드는 픽토그램·예시 이미지를 그대로 갖고, 그림 저장을 부르지 않는다")
+  void importToLibrary_stepWithoutImage_keepsPictogram() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+
+    routineShareService.importToLibrary(GUARDIAN, "profile-1", null, draft(step(0, null)));
+
+    RoutineStep savedStep = savedRoutine().getSteps().get(0);
+    assertThat(savedStep.getPictogramId()).isEqualTo("pictogram-0");
+    assertThat(savedStep.getExampleImageId()).isEqualTo("example-0");
+    assertThat(savedStep.getTitle()).isEqualTo("카드 0");
+    assertThat(savedStep.getDescription()).isEqualTo("설명 0");
+    assertThat(savedStep.getStepOrder()).isZero();
+    assertThat(savedStep.getCompleted()).isFalse();
+    assertThat(savedStep.getImagePath()).isNull();
+    verify(routineImageStorage, never()).saveImported(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("그림이 있는 카드는 가져온 그림 열쇠를 갖는다")
+  void importToLibrary_stepWithImage_savesImportedKey() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+    ImageContent image = new ImageContent(new byte[]{1}, "image/png");
+    when(routineImageStorage.saveImported("saved-step-0", image)).thenReturn("saved-step-0/talk-1.png");
+
+    routineShareService.importToLibrary(GUARDIAN, "profile-1", null, draft(step(0, image)));
+
+    assertThat(savedRoutine().getSteps().get(0).getImagePath()).isEqualTo("saved-step-0/talk-1.png");
+  }
+
+  @Test
+  @DisplayName("한 카드의 그림 저장이 실패해도 그 카드만 그림 없이 두고 계속한다")
+  void importToLibrary_imageSaveFails_continuesWithoutImage() {
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+    ImageContent broken = new ImageContent(new byte[]{1}, "image/png");
+    ImageContent healthy = new ImageContent(new byte[]{2}, "image/jpeg");
+    when(routineImageStorage.saveImported("saved-step-0", broken))
+      .thenThrow(new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED));
+    when(routineImageStorage.saveImported("saved-step-1", healthy)).thenReturn("saved-step-1/talk-2.jpg");
+
+    String routineId = routineShareService.importToLibrary(GUARDIAN, "profile-1", null,
+      draft(step(0, broken), step(1, healthy)));
+
+    List<RoutineStep> steps = savedRoutine().getSteps();
+    assertThat(routineId).isNotNull();
+    assertThat(steps.get(0).getImagePath()).isNull();
+    assertThat(steps.get(0).getPictogramId()).isEqualTo("pictogram-0");
+    assertThat(steps.get(1).getImagePath()).isEqualTo("saved-step-1/talk-2.jpg");
+  }
+
+  private void assertImportRejected(String groupId, ErrorCode expected) {
+    assertThatThrownBy(() -> routineShareService.importToLibrary(GUARDIAN, "profile-1", groupId, draft(step(0, null))))
+      .isInstanceOfSatisfying(CustomException.class, e -> assertThat(e.getErrorCode()).isEqualTo(expected));
+  }
+
+  private void stubProfileAccess() {
+    when(profileAccessGuard.profileFor(any(Caller.class), eq(ProfileAction.MANAGE))).thenReturn(profileOf("profile-1"));
+  }
+
+  // 저장 흉내: 일과·카드에 id 를 붙여 돌려줌
+  private void stubSaveAssigningStepIds() {
+    when(routineRepository.save(any(Routine.class))).thenAnswer(invocation -> {
+      Routine routine = invocation.getArgument(0);
+      routine.setId("saved-routine");
+      for (RoutineStep step : routine.getSteps()) {
+        step.setId("saved-step-" + step.getStepOrder());
+      }
+      return routine;
+    });
+  }
+
+  private Routine savedRoutine() {
+    ArgumentCaptor<Routine> captor = ArgumentCaptor.forClass(Routine.class);
+    verify(routineRepository).save(captor.capture());
+    return captor.getValue();
+  }
+
+  private static RoutineImportDraft draft(DraftStep... steps) {
+    return new RoutineImportDraft("post-1", "가져온 일과", AppLocale.EN, List.of(steps));
+  }
+
+  private static DraftStep step(int order, ImageContent image) {
+    return new DraftStep(order, "카드 " + order, "설명 " + order, "pictogram-" + order, "example-" + order, image);
+  }
+
+  private static RoutineGroup groupOf(String id, String profileId) {
+    RoutineGroup group = new RoutineGroup();
+    group.setId(id);
+    group.setProfile(profileOf(profileId));
+    return group;
+  }
+
+  private static Profile profileOf(String id) {
+    Profile profile = new Profile();
+    profile.setId(id);
+    return profile;
   }
 
   private void assertNotShareable(String routineId) {

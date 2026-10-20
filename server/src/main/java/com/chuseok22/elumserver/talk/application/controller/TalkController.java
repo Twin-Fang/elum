@@ -3,15 +3,18 @@ package com.chuseok22.elumserver.talk.application.controller;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkImportRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
+import com.chuseok22.elumserver.talk.application.dto.response.TalkImportResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostSummaryResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse;
 import com.chuseok22.elumserver.talk.application.service.TalkFeedQueryService;
+import com.chuseok22.elumserver.talk.application.service.TalkImportService;
 import com.chuseok22.elumserver.talk.application.service.TalkPostService;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import java.util.List;
@@ -42,6 +45,7 @@ public class TalkController implements TalkControllerDocs {
 
   private final TalkFeedQueryService talkFeedQueryService;
   private final TalkPostService talkPostService;
+  private final TalkImportService talkImportService;
 
   // 글 원문이 서버 로그에 남으면 안 되므로 파라미터·결과를 남기지 않는다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
@@ -111,6 +115,14 @@ public class TalkController implements TalkControllerDocs {
     Authentication authentication, @PathVariable String postId, @RequestBody TalkPostUpdateRequest request
   ) {
     return ResponseEntity.ok(talkPostService.update(Caller.from(authentication), postId, request));
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/posts/{postId}/import")
+  public ResponseEntity<TalkImportResponse> importToLibrary(
+    Authentication authentication, @PathVariable String postId, @RequestBody TalkImportRequest request
+  ) {
+    return ResponseEntity.ok(talkImportService.importToLibrary(Caller.from(authentication), postId, request));
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -50,7 +51,7 @@ class RoutineLibraryOrderServiceTest {
     service = new RoutineLibraryOrderService(routineRepository, routineGroupRepository, profileAccessGuard);
     Profile profile = new Profile();
     profile.setId("profile-1");
-    when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
+    lenient().when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
     looseA = routine("routine-a", null);
     looseB = routine("routine-b", null);
     looseC = routine("routine-c", null);
@@ -88,6 +89,22 @@ class RoutineLibraryOrderServiceTest {
       List.of(cell(CellType.ROUTINE, "routine-a"), cell(CellType.ROUTINE, "routine-a"))))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT_VALUE);
     assertThat(looseA.getLibraryOrder()).isNull();
+  }
+
+  @Test
+  @DisplayName("맨 앞 자리 만들기: 번호 있는 낱개·묶음은 한 칸씩 밀리고, 번호 없는 칸·묶음 안 일과는 그대로다")
+  void makeRoomAtFront_shiftsNumberedCellsByOne() {
+    looseA.setLibraryOrder(0);
+    looseC.setLibraryOrder(3);
+    folder.setDisplayOrder(1);
+
+    service.makeRoomAtFront("profile-1");
+
+    assertThat(looseA.getLibraryOrder()).isEqualTo(1);
+    assertThat(looseC.getLibraryOrder()).isEqualTo(4);
+    assertThat(folder.getDisplayOrder()).isEqualTo(2);
+    assertThat(looseB.getLibraryOrder()).isNull();
+    assertThat(inGroup.getLibraryOrder()).isNull();
   }
 
   private static Cell cell(CellType type, String id) {

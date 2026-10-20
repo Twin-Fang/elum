@@ -107,7 +107,11 @@ public record RoutineResponse(
 
   @Schema(description = "일과관리 칸 순서(0부터) (#844). 묶음 밖 낱개 원본의 자리이며 묶음의 displayOrder 와 같은 번호 공간. "
     + "정한 적 없으면 null — 앱이 정한 칸 뒤에 기본 순서로 놓는다", example = "2", nullable = true)
-  Integer libraryOrder
+  Integer libraryOrder,
+
+  @Schema(description = "이야기에서 가져와 만든 일과면 그 글 ID. 앱이 '이야기에서' 표시와 다시 나누기 막기에 쓴다. 아니면 null",
+    nullable = true)
+  String talkPostId
 ) {
 
   /**
@@ -131,7 +135,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
@@ -139,7 +143,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, reason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답. 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -148,7 +152,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -189,14 +193,14 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
   }
 
   private RoutineResponse withCreatedByMe(Boolean mine) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -240,7 +244,8 @@ public record RoutineResponse(
       routine.getSentGroupId(),
       routine.getSentGroupName(),
       routine.getSentGroupOrder(),
-      routine.getLibraryOrder()
+      routine.getLibraryOrder(),
+      routine.getTalkPostId()
     );
   }
 }

@@ -27,6 +27,8 @@ import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStora
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
 import com.chuseok22.elumserver.talk.application.service.TalkFeedQueryService;
+import com.chuseok22.elumserver.talk.application.dto.response.TalkImportResponse;
+import com.chuseok22.elumserver.talk.application.service.TalkImportService;
 import com.chuseok22.elumserver.talk.application.service.TalkPostService;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,8 @@ class TalkSecurityTest {
   private TalkFeedQueryService talkFeedQueryService;
   @MockitoBean
   private TalkPostService talkPostService;
+  @MockitoBean
+  private TalkImportService talkImportService;
 
   // SecurityConfig 생성자가 요구하는 빈들
   @MockitoBean(name = "memberUserDetailsService")
@@ -148,6 +152,23 @@ class TalkSecurityTest {
     mockMvc.perform(delete.with(guardian)).andExpect(status().isNoContent());
     verify(talkPostService).update(any(), eq("p1"), any());
     verify(talkPostService).delete(any(), eq("p1"));
+  }
+
+  @Test
+  @DisplayName("가져가기는 이룸이 권한이면 403, 보호자면 200 으로 서비스 결과를 돌려준다")
+  void importToLibrary_guardianOnly() throws Exception {
+    var post = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/talk/posts/p1/import");
+    when(talkImportService.importToLibrary(any(), eq("p1"), any())).thenReturn(new TalkImportResponse("r1", "profile-1"));
+
+    mockMvc.perform(post.with(user("e1").authorities(MEMBER, ELUMI)).contentType("application/json")
+      .content("{\"profileId\":\"profile-1\"}")).andExpect(status().isForbidden());
+    verify(talkImportService, never()).importToLibrary(any(), any(), any());
+
+    mockMvc.perform(post.with(user("g1").authorities(MEMBER, GUARDIAN)).contentType("application/json")
+        .content("{\"profileId\":\"profile-1\",\"groupId\":null}"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.routineId").value("r1"))
+      .andExpect(jsonPath("$.profileId").value("profile-1"));
   }
 
   @Test

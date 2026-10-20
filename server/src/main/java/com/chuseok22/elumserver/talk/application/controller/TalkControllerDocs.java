@@ -1,10 +1,12 @@
 package com.chuseok22.elumserver.talk.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkImportRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
+import com.chuseok22.elumserver.talk.application.dto.response.TalkImportResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostSummaryResponse;
@@ -209,6 +211,43 @@ public interface TalkControllerDocs {
     Authentication authentication,
     @Parameter(description = "글 id") String postId,
     TalkPostUpdateRequest request
+  );
+
+  @Operation(
+    summary = "내 일과관리로 가져가기",
+    description = """
+      보이는 글의 일과를 내 이룸이의 일과관리로 가져옵니다. 카드와 그림 사본이 그대로 새 일과가 되며
+      AI 를 부르지 않고 크레딧도 쓰지 않습니다. 만들어진 일과는 일과관리에만 있고 홈에는 뜨지 않습니다.
+
+      **자리**
+      - `groupId` 를 비우면 일과관리 맨 앞, 보내면 그 묶음의 맨 뒤.
+
+      **검사**
+      1. `profileId` 가 비었거나 이 이룸이의 묶음이 아닌 `groupId` 면 400 `INVALID_INPUT_VALUE`.
+      2. 내가 연결된 이룸이가 아니면 403 `PROFILE_ACCESS_DENIED`.
+      3. 없거나 내린 글이면 404 `TALK_POST_NOT_FOUND`.
+
+      같은 보호자가 같은 글을 다시 가져가도 일과는 새로 만들어지고, 글의 가져간 수는 보호자당 한 번만 오릅니다.
+      가져온 일과는 응답의 `talkPostId` 로 알아볼 수 있고 이야기로 다시 나눌 수 없습니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "가져오기 성공",
+      content = @Content(schema = @Schema(implementation = TalkImportResponse.class))),
+    @ApiResponse(responseCode = "400", description = "이룸이 비어 있음·남의 묶음(INVALID_INPUT_VALUE)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "403", description = "연결되지 않은 이룸이(PROFILE_ACCESS_DENIED)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "없거나 내린 글(TALK_POST_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<TalkImportResponse> importToLibrary(
+    Authentication authentication,
+    @Parameter(description = "글 id") String postId,
+    TalkImportRequest request
   );
 
   @Operation(
