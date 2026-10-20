@@ -29,9 +29,4 @@ enum GuardianTab {
     GuardianTab.talk => context.l10n.guardianTabTalk,
     GuardianTab.me => context.l10n.guardianTabMe,
   };
-
-  /// 아래 광고 띠를 둘 칸인가
-  ///
-  /// 내정보는 설정으로 이어지는 칸이라 광고를 잘못 누르면 계정 정리(`회원탈퇴`) 근처에서 오탭이 날 수 있어 뺀다
-  bool get isAdStripAllowed => this != GuardianTab.me;
 }
