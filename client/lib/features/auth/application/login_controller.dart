@@ -30,6 +30,8 @@ class LoginController {
 
   /// 로그인 성공 뒤 이전 계정의 메모리 상태를 버린다.
   Future<void> resetPreviousAccount() async {
+    // 주기 갱신이 받아 둔 이전 계정 회원 정보 (남기면 그 이룸이 id 로 요청해 403)
+    _ref.read(memberPrefetchProvider).discard();
     _ref.invalidate(memberProvider);
     _ref.invalidate(profileSessionProvider);
     // 안 읽음 요약(종 아이콘 점)도 이전 계정 값이다
