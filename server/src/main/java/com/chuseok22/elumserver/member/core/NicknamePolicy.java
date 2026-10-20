@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 보호자 닉네임 판정: 형식, 예약어, 욕설 (한국어·영어·일본어·중국어·스페인어)
- * 비교용 문자열(소문자, 하이픈 제거, 숫자 우회 정리)에 목록 단어가 들어 있으면 거절
- * 자모만 쓴 줄임 표기(ㅅㅂ)는 형식 검사에서 먼저 걸림
+ * 형식 검사 > 비교용 문자열(소문자, 하이픈 제거, 숫자 우회 정리)에 목록 단어 포함 시 거절
  */
 @Component
 public class NicknamePolicy {
@@ -24,6 +23,10 @@ public class NicknamePolicy {
   private static final int MAX_LENGTH = 16;
   // 한글 완성형, 영문, 숫자, 하이픈만 (자모 단독·공백·이모지·보이지 않는 문자는 여기서 걸림)
   private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[가-힣A-Za-z0-9-]+$");
+  // 글자(한글·영문) 최소 1자 ("--", "1-" 같은 기호·숫자만 이름 차단)
+  private static final Pattern HAS_LETTER = Pattern.compile("[가-힣A-Za-z]");
+  // 허용 예외 단어를 지운 자리 (앞뒤가 이어붙어 새 금지어가 되지 않게)
+  private static final String ALLOWED_WORD_MASK = "\u0000";
 
   // 리소스 목록 (한 줄 한 단어, # 주석)
   private static final List<String> PROFANITY_RESOURCES = List.of(
@@ -66,7 +69,7 @@ public class NicknamePolicy {
     }
     String comparisonKey = toComparisonKey(normalizedNickname);
     for (String allowedKey : allowedKeys) {
-      comparisonKey = comparisonKey.replace(allowedKey, "");
+      comparisonKey = comparisonKey.replace(allowedKey, ALLOWED_WORD_MASK);
     }
     for (String blockedKey : blockedKeys) {
       if (comparisonKey.contains(blockedKey)) {
@@ -78,11 +81,12 @@ public class NicknamePolicy {
 
   private boolean isValidFormat(String nickname) {
     int length = nickname.codePointCount(0, nickname.length());
-    return length >= MIN_LENGTH && length <= MAX_LENGTH && ALLOWED_CHARACTERS.matcher(nickname).matches();
+    return length >= MIN_LENGTH && length <= MAX_LENGTH
+      && ALLOWED_CHARACTERS.matcher(nickname).matches() && HAS_LETTER.matcher(nickname).find();
   }
 
   /**
-   * 비교용 문자열: NFKC·소문자 > 하이픈·기호 제거 > 숫자 정리(영문 사이 치환, 그 외 제거)
+   * 비교용 문자열: NFKC·소문자 > 하이픈·기호 제거 > 숫자 정리(영문 사이 치환, 그 외 제거) > 연속 글자 줄임
    */
   static String toComparisonKey(String word) {
     String lowered = Normalizer.normalize(word, Normalizer.Form.NFKC).toLowerCase(Locale.ROOT);
@@ -90,7 +94,19 @@ public class NicknamePolicy {
     lowered.codePoints()
       .filter(codePoint -> Character.isLetterOrDigit(codePoint))
       .forEach(withoutSymbols::appendCodePoint);
-    return resolveDigits(withoutSymbols.toString());
+    return collapseRepeatedCharacters(resolveDigits(withoutSymbols.toString()));
+  }
+
+  // 같은 글자 연속 > 한 글자 (sh11t > shiit > shit, fuuuck > fuck). 목록 단어도 같은 규칙으로 줄여 비교
+  private static String collapseRepeatedCharacters(String text) {
+    StringBuilder collapsed = new StringBuilder();
+    for (int index = 0; index < text.length(); index++) {
+      char current = text.charAt(index);
+      if (index == 0 || current != text.charAt(index - 1)) {
+        collapsed.append(current);
+      }
+    }
+    return collapsed.toString();
   }
 
   // 숫자 앞뒤가 영문이면 비슷한 글자로, 아니면 지움 (시1발 > 시발, sh1t > shit)

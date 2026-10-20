@@ -30,14 +30,14 @@ class NicknamePolicyTest {
   @ParameterizedTest
   @ValueSource(strings = {
     "시발놈", "시1발", "씨-발", "개새끼7", "sh1t-man", "FUCK", "Fu-ck", "b1tch", "kusoman", "caonima1",
-    "puta-loca", "관리자", "admin-1", "Admin1", "elum공식", "이룸팀장"})
+    "puta-loca", "sh11t", "fuuuck", "관리자", "admin-1", "Admin1", "elum공식", "이룸팀장"})
   void 욕설이나_예약어가_들어가면_NOT_ALLOWED(String rawNickname) {
     assertThat(judgeRaw(rawNickname)).isEqualTo(NicknameVerdict.NOT_ALLOWED);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
-    "가파른블록-1269", "가파른블록-12345678", "푸른하늘", "Sky-7", "시발점", "시바견", "Sussex7", "cocktail", "ab",
+    "가파른블록-1269", "가파른블록-12345678", "푸른하늘", "Sky-7", "시발점", "시바견", "Sussex7", "cocktail", "ab", "Hancock", "Vergara", "새끼손가락", "Wessex",
     "가나다라마바사아자차카타파하가나"})
   void 정상_이름은_ALLOWED(String rawNickname) {
     assertThat(judgeRaw(rawNickname)).isEqualTo(NicknameVerdict.ALLOWED);

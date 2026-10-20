@@ -167,7 +167,7 @@ public class MemberService {
   }
 
   /**
-   * 닉네임 + 처음 가입한 소셜 신원 (계정 연결로 여럿이면 가장 먼저 만든 것)
+   * 닉네임 + 처음 가입한 소셜 신원(여럿이면 가장 먼저 만든 것) + 닉네임 다음 변경 가능 시각
    */
   private GuardianAccountResponse toGuardianAccount(Member member) {
     AuthIdentity firstIdentity = authIdentityRepository.findAllByMemberId(member.getId()).stream()
