@@ -104,7 +104,7 @@ public class AdminConsentController {
       case CONSENT_REASON_REQUIRED ->
         "수정 사유를 적어주세요. 약관은 법적 문서라 변경 근거가 남아야 합니다. (E-CNS-001)";
       case CONSENT_FIELD_BLANK ->
-        "항목 이름·요약·전문은 비워둘 수 없습니다. 하나라도 비면 앱이 서버 약관 전체를 버립니다. (E-CNS-002)";
+        "항목 이름·요약·전문은 비워둘 수 없어요. 하나라도 비면 앱이 서버 약관 전체를 버려요. (E-CNS-002)";
       case CONSENT_FIELD_TOO_LONG ->
         "항목 이름과 요약은 " + ConsentDocumentService.TEXT_FIELD_MAX_LENGTH
           + "자까지 적을 수 있습니다. (E-CNS-003)";
@@ -113,7 +113,7 @@ public class AdminConsentController {
       case CONSENT_VERSION_INVALID ->
         "버전은 2026-09-21 같은 날짜로 적어주세요. (E-CNS-005)";
       case CONSENT_VERSION_NOT_NEWER ->
-        "새 버전은 지금 버전보다 늦은 날짜여야 합니다. (E-CNS-006)";
+        "새 버전은 지금 버전보다 늦은 날짜여야 해요. (E-CNS-006)";
       default -> "저장하지 못했습니다. (E-CNS-000)";
     };
   }

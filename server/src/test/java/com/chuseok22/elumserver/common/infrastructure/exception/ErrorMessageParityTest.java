@@ -45,7 +45,8 @@ class ErrorMessageParityTest {
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
-      + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size());
+      + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
+      + ADDED_NICKNAME_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -106,6 +107,24 @@ class ErrorMessageParityTest {
     for (ErrorCode code : ADDED_NOTIFICATION_CODES) {
       assertThat(GOLDEN).doesNotContainKey(code.name());
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
+  private static final java.util.List<ErrorCode> ADDED_NICKNAME_CODES = java.util.List.of(
+    ErrorCode.NICKNAME_INVALID_FORMAT, ErrorCode.NICKNAME_NOT_ALLOWED,
+    ErrorCode.NICKNAME_DUPLICATED, ErrorCode.NICKNAME_CHANGE_TOO_SOON);
+
+  @Test
+  @DisplayName("보호자 닉네임 변경 코드는 golden 밖에서 상태와 문구를 단언한다")
+  void nicknameCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.NICKNAME_INVALID_FORMAT.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.NICKNAME_NOT_ALLOWED.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.NICKNAME_DUPLICATED.getStatus().name()).isEqualTo("CONFLICT");
+    assertThat(ErrorCode.NICKNAME_CHANGE_TOO_SOON.getStatus().name()).isEqualTo("TOO_MANY_REQUESTS");
+    for (ErrorCode code : ADDED_NICKNAME_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이").endsWith("요.");
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
     }
   }

@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
+import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +54,7 @@ public class MemberService {
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
   private final EntitlementService entitlementService;
+  private final GuardianNicknameChangeService guardianNicknameChangeService;
 
   /**
    * 내 정보. 헤더로 이룸이를 짚었으면 그 이룸이(연결 안 됐으면 403), 아니면 가장 먼저 연결된 이룸이.
@@ -106,6 +109,21 @@ public class MemberService {
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
+  /**
+   * 보호자 닉네임 변경: 검사·반영 > 즉시 flush (동시 요청 유니크 위반 > 중복 오류) > 내 정보 응답
+   */
+  @Transactional
+  public MemberResponse updateGuardianNickname(Caller caller, GuardianNicknameUpdateRequest request) {
+    Member member = requireMember(caller.memberId());
+    guardianNicknameChangeService.change(member, request == null ? null : request.nickname());
+    try {
+      memberRepository.saveAndFlush(member);
+    } catch (DataIntegrityViolationException uniqueViolation) {
+      throw new CustomException(ErrorCode.NICKNAME_DUPLICATED);
+    }
+    return getMyInfo(caller);
+  }
+
   @Transactional
   public MemberResponse updateSupportGoals(Caller caller, MemberSupportGoalsUpdateRequest request) {
     Member member = requireMember(caller.memberId());
@@ -149,13 +167,14 @@ public class MemberService {
   }
 
   /**
-   * 닉네임 + 처음 가입한 소셜 신원 (계정 연결로 여럿이면 가장 먼저 만든 것)
+   * 닉네임 + 처음 가입한 소셜 신원(여럿이면 가장 먼저 만든 것) + 닉네임 다음 변경 가능 시각
    */
   private GuardianAccountResponse toGuardianAccount(Member member) {
     AuthIdentity firstIdentity = authIdentityRepository.findAllByMemberId(member.getId()).stream()
       .min(Comparator.comparing(AuthIdentity::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
       .orElse(null);
-    return GuardianAccountResponse.of(member.getNickname(), firstIdentity);
+    return GuardianAccountResponse.of(
+      member.getNickname(), firstIdentity, GuardianNicknameChangeService.changeableAt(member));
   }
 
   public MemberConsentResponse getConsents(String memberId) {

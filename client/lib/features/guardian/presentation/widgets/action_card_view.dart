@@ -230,8 +230,8 @@ class _ActionCardViewState extends State<ActionCardView> {
   }) {
     // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다. 줄에 또 두면
     // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
-    // 픽토그램이 그림 자리를 채우면 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
-    // 글자는 줄에서 읽는다.
+    // 번들 그림(예시 이미지·픽토그램)이 그림 자리를 채우면 제목은 줄에 그대로 둔다 —
+    // 그림이 뜻을 전하고 글자는 줄에서 읽는다.
     final titleInArt =
         childLayout &&
         imageState == CardImageState.none &&

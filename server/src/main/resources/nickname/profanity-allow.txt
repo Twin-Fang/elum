@@ -1,0 +1,22 @@
+# 금지 단어와 우연히 겹치는 정상어. 판정 전에 비교 문자열에서 먼저 지운다 (NicknamePolicy)
+시발점
+시발역
+sussex
+essex
+middlesex
+scunthorpe
+cocktail
+shiitake
+computa
+dickens
+grape
+drape
+therapist
+peacock
+hancock
+hitchcock
+vergara
+wessex
+parapet
+reputa
+새끼손가락
