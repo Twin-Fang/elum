@@ -46,7 +46,7 @@ public class TalkReportMailListener {
       }
       talkReportMailer.sendReportNotice(toNotice(report));
     } catch (RuntimeException e) {
-      log.warn("[talk report mail] failed : {}", event.reportId());
+      log.warn("[talk report mail] failed : {} ({})", event.reportId(), e.getClass().getSimpleName());
     }
   }
 

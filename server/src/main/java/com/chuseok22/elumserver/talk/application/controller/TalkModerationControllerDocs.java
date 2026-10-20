@@ -65,7 +65,7 @@ public interface TalkModerationControllerDocs {
       **오류**
       1. 둘 다 보내거나 둘 다 비면 400 `INVALID_INPUT_VALUE`.
       2. 자기 자신이면 400 `TALK_CANNOT_BLOCK_SELF`.
-      3. 없는 글·댓글이면 404 `TALK_POST_NOT_FOUND` · `TALK_COMMENT_NOT_FOUND`.
+      3. 없는 글·댓글 id 면 404 `TALK_POST_NOT_FOUND` · `TALK_COMMENT_NOT_FOUND`. 내려간 글·지운 댓글도 글쓴이는 차단할 수 있습니다.
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -100,7 +100,7 @@ public interface TalkModerationControllerDocs {
 
   @Operation(
     summary = "내 차단 목록",
-    description = "내가 차단한 보호자를 최근 차단 순으로 돌려줍니다. 보호자 id 는 내려주지 않고 닉네임만 보여줍니다."
+    description = "내가 차단한 보호자를 최근 차단 순으로 돌려줍니다. 보호자 id 는 내려주지 않고 닉네임만 보여주며, 탈퇴 등으로 닉네임이 없는 보호자는 목록에서 빠집니다."
   )
   @SecurityRequirement(name = "bearerAuth")
   @ApiResponses({

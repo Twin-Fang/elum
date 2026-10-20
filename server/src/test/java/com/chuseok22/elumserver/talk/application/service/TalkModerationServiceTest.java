@@ -246,6 +246,20 @@ class TalkModerationServiceTest {
     assertThat(responses.get(0).createdAt()).isEqualTo(LocalDateTime.of(2026, 10, 20, 9, 0));
   }
 
+  @Test
+  @DisplayName("닉네임이 없는 탈퇴 회원의 차단 행은 목록에서 뺀다")
+  void blocks_skipsRowsWithoutNickname() {
+    TalkBlock withdrawn = block("block-1", "reporter-1", "gone-1");
+    TalkBlock active = block("block-2", "reporter-1", "author-1");
+    when(talkBlockRepository.findByBlockerMemberIdOrderByCreatedAtDesc("reporter-1"))
+      .thenReturn(List.of(withdrawn, active));
+    when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of("author-1", "이웃"));
+
+    List<TalkBlockResponse> responses = talkModerationService.blocks(REPORTER);
+
+    assertThat(responses).extracting(TalkBlockResponse::blockId).containsExactly("block-2");
+  }
+
   private TalkReportRequest postReport(String postId) {
     return new TalkReportRequest("POST", postId, "OFFENSIVE");
   }

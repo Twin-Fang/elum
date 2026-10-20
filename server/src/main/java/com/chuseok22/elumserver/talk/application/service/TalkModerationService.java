@@ -129,13 +129,15 @@ public class TalkModerationService {
     List<TalkBlock> blocks = talkBlockRepository.findByBlockerMemberIdOrderByCreatedAtDesc(caller.memberId());
     Set<String> blockedMemberIds = blocks.stream().map(TalkBlock::getBlockedMemberId).collect(Collectors.toSet());
     Map<String, String> nicknameByMemberId = memberService.nicknamesOf(blockedMemberIds);
+    // 닉네임이 없는 탈퇴 회원 행은 제외
     return blocks.stream()
+      .filter(block -> nicknameByMemberId.get(block.getBlockedMemberId()) != null)
       .map(block -> new TalkBlockResponse(
         block.getId(), nicknameByMemberId.get(block.getBlockedMemberId()), block.getCreatedAt()))
       .toList();
   }
 
-  // 글·댓글 중 정확히 하나 > 글쓴이 (없거나 지운 댓글은 없는 것으로 취급)
+  // 글·댓글 중 정확히 하나 > 글쓴이 (상태와 무관하게 존재하면 차단 가능, 없는 id 만 404)
   private String findTargetAuthorMemberId(TalkBlockRequest request) {
     boolean hasPostId = request != null && request.postId() != null && !request.postId().isBlank();
     boolean hasCommentId = request != null && request.commentId() != null && !request.commentId().isBlank();

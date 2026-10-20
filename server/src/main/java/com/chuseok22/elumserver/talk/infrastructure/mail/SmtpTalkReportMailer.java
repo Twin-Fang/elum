@@ -29,7 +29,7 @@ public class SmtpTalkReportMailer implements TalkReportMailer {
     try {
       javaMailSender.send(toMessage(notice));
     } catch (RuntimeException e) {
-      log.warn("[talk report mail] failed : {}", notice.reportId());
+      log.warn("[talk report mail] failed : {} ({})", notice.reportId(), e.getClass().getSimpleName());
     }
   }
 

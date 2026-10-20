@@ -11,6 +11,10 @@ spring:
       mail:
         smtp:
           auth: true
+          # 응답 없는 메일 서버가 공용 알림 스레드풀을 붙잡지 않게 (ms)
+          connectiontimeout: 5000
+          timeout: 10000
+          writetimeout: 10000
           starttls:
             enable: true
   jpa:
