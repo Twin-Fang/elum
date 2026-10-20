@@ -115,7 +115,6 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
       _retainedIndex = state.index;
     }
     final steps = _retained;
-    // 오버레이 쪽 빌더는 홈 밖에서 불린다 — 홈 기준 값은 여기서 미리 만든다
     final overlay = steps == null
         ? const SizedBox.shrink()
         : _buildOverlay(context, steps, state);
@@ -143,8 +142,8 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
       child: Material(
         type: MaterialType.transparency,
         child: CoachMarkOverlay(
-          // 단계 계산은 홈 열 기준 (밀린 줄 폭이 홈 열을 따른다)
-          steps: [for (final s in steps) _stepFor(s, context)],
+          // 단계 계산은 홈 context 기준 (밀린 줄 폭이 홈 열을 따른다)
+          steps: [for (final homeStep in steps) _stepFor(homeStep, context)],
           index: state.active ? state.index : _retainedIndex,
           visible: state.active,
           onNext: notifier.next,
