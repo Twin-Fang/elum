@@ -29,7 +29,7 @@ class LibraryGridGeometry {
   final double paddingTop;
 
   /// 그림 가운데에서 이 비율(그림 한 변 기준) 안에 들어오면 묶기로 본다 (그 밖은 자리 옮기기)
-  static const mergeRadiusFraction = 0.35;
+  static const mergeRadiusFraction = 0.5;
 
   double get _strideX => tileWidth + spacingX;
   double get _strideY => tileHeight + spacingY;

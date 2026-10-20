@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart' show listEquals, setEquals;
@@ -98,6 +99,9 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   static const _liftScale = 0.12;
   static const _mergeLandScale = 0.4;
 
+  /// 칸 사이에 이만큼 머물러야 이웃이 비킨다 (겹쳐 묶으러 가며 지나치는 칸은 그대로)
+  static const _gapShiftDelay = Duration(milliseconds: 250);
+
   /// 손가락이 화면 위아래 끝 이 거리 안이면 격자를 굴린다 · 최고 속도(px/s)
   static const _edgeScrollZone = 56.0;
   static const _edgeScrollSpeed = 520.0;
@@ -130,6 +134,10 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   String? _dragId;
   int _dragFrom = 0;
   LibraryGridHover? _hover;
+
+  /// 머무르면 옮길 빈자리 (머무는 시간을 재는 중)
+  int? _pendingGap;
+  Timer? _gapShiftTimer;
   Offset _fingerGlobal = Offset.zero;
   Offset _startGlobal = Offset.zero;
 
@@ -164,6 +172,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
 
   @override
   void dispose() {
+    _gapShiftTimer?.cancel();
     _edgeTicker.dispose();
     _lift.dispose();
     _land.dispose();
@@ -222,6 +231,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   }
 
   /// 끄는 칸 그림 가운데로 빈자리 · 묶을 칸을 다시 잰다
+  /// 묶기 표시는 바로, 빈자리 옮기기는 칸 사이에 [_gapShiftDelay] 머문 뒤 (지나가는 칸이 비켜 버리면 겹칠 수 없다)
   void _updateHover() {
     final geometry = _geometry;
     final hover = _hover;
@@ -244,14 +254,47 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
           widget.onDropOnRoutine != null &&
           widget.onDropOnGroup != null,
     );
-    if (next == hover) return;
-    if (next.mergeOtherIndex != null) HapticFeedback.lightImpact();
-    setState(() => _hover = next);
+    // 묶기 · 지금 빈자리 그대로: 바로 반영, 재던 머무름은 취소
+    if (next.mergeOtherIndex != null || next.gap == hover.gap) {
+      _cancelPendingGap();
+      if (next == hover) return;
+      if (next.mergeOtherIndex != null) HapticFeedback.lightImpact();
+      setState(() => _hover = next);
+      return;
+    }
+    // 다른 칸 자리: 묶기 표시는 끄고, 머무르면 빈자리를 옮긴다
+    if (hover.mergeOtherIndex != null) {
+      setState(() => _hover = LibraryGridHover(gap: hover.gap));
+    }
+    if (_pendingGap == next.gap) return;
+    _pendingGap = next.gap;
+    _gapShiftTimer?.cancel();
+    _gapShiftTimer = Timer(_gapShiftDelay, _applyPendingGap);
+  }
+
+  void _applyPendingGap() {
+    final pendingGap = _pendingGap;
+    _pendingGap = null;
+    if (!mounted || pendingGap == null || _dragId == null || _landing != null) {
+      return;
+    }
+    setState(() => _hover = LibraryGridHover(gap: pendingGap));
+  }
+
+  void _cancelPendingGap() {
+    _gapShiftTimer?.cancel();
+    _pendingGap = null;
   }
 
   void _onDrop() {
     final dragId = _dragId;
-    final hover = _hover;
+    // 머무름을 재던 칸 사이에서 놓았으면 그 자리로 (멈췄다 바로 놓아도 그 자리에 들어간다)
+    final pendingGap = _pendingGap;
+    _cancelPendingGap();
+    final hover = pendingGap != null && _hover?.mergeOtherIndex == null
+        ? LibraryGridHover(gap: pendingGap)
+        : _hover;
+    if (hover != _hover) _hover = hover;
     final geometry = _geometry;
     if (dragId == null ||
         hover == null ||
@@ -369,6 +412,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   }
 
   void _clearDragState() {
+    _cancelPendingGap();
     _dragId = null;
     _hover = null;
     _landing = null;
