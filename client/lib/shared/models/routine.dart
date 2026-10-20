@@ -103,6 +103,9 @@ abstract class Routine with _$Routine {
 
     /// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
     @Default(false) bool isExample,
+
+    /// 이야기에서 가져온 일과면 그 글 id, 아니면 null. 서버 `talkPostId`.
+    String? talkPostId,
   }) = _Routine;
 
   const Routine._();
@@ -211,6 +214,7 @@ abstract class Routine with _$Routine {
     if (sentGroupName != null) 'sentGroupName': sentGroupName,
     if (sentGroupOrder != null) 'sentGroupOrder': sentGroupOrder,
     'isExample': isExample,
+    if (talkPostId != null) 'talkPostId': talkPostId,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -253,6 +257,7 @@ abstract class Routine with _$Routine {
       sentGroupOrder: _optionalInt(json['sentGroupOrder']),
       // bool 이 아니면 예시 아님 — 옛 응답·캐시에 배지가 붙지 않게
       isExample: json['isExample'] == true,
+      talkPostId: _optionalId(json['talkPostId']),
     );
   }
 

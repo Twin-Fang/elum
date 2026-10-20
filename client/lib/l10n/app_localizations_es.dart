@@ -2962,6 +2962,56 @@ class AppLocalizationsEs extends AppLocalizations {
   String get talkRulesFailedTitle => '동의를 저장하지 못했어요';
 
   @override
+  String get talkShareTitle => '이야기에 올리기';
+
+  @override
+  String get talkSharePickTitle => '어떤 일과를 나눌까요?';
+
+  @override
+  String get talkSharePickEmpty => '올릴 수 있는 일과가 없어요';
+
+  @override
+  String get talkSharePickEmptyHint =>
+      '일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 예시, 이야기에서 가져온 일과는 빠져요.';
+
+  @override
+  String get talkSharePickFailed => '일과를 불러오지 못했어요';
+
+  @override
+  String get talkSharePreviewFailed => '올릴 내용을 불러오지 못했어요';
+
+  @override
+  String get talkSharePhotoTitle => '사진을 어떻게 올릴까요?';
+
+  @override
+  String get talkSharePhotoGuide =>
+      '얼굴, 이름표, 집 주소가 보이면 흐리게 해 주세요. AI로 만든 그림은 그대로 올라가요.';
+
+  @override
+  String get talkSharePhotoBlur => '흐리게';
+
+  @override
+  String get talkSharePhotoKeep => '그대로';
+
+  @override
+  String get talkSharePhotoNext => '다음';
+
+  @override
+  String get talkSharePreviewTitle => '이렇게 올라가요';
+
+  @override
+  String get talkSharePreviewHint => '이름은 모두 \'이룸이\'로 바뀌어 올라가요';
+
+  @override
+  String get talkShareSubmit => '올리기';
+
+  @override
+  String get talkShareDone => '이야기에 올렸어요';
+
+  @override
+  String get talkShareFailedTitle => '올리지 못했어요';
+
+  @override
   String get timeAgoJustNow => '방금 전';
 
   @override

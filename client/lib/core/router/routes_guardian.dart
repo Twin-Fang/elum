@@ -24,6 +24,7 @@ import '../../features/profile/presentation/profile_switch_screen.dart';
 import '../../features/talk/presentation/talk_blocked_guardians_screen.dart';
 import '../../features/talk/presentation/talk_detail_screen.dart';
 import '../../features/talk/presentation/talk_feed_screen.dart';
+import '../../features/talk/presentation/talk_share_screen.dart';
 import '../config/ad_ids.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
@@ -96,12 +97,23 @@ List<RouteBase> guardianRoutes() => [
       ),
     ],
   ),
-  // 이야기 글 상세·숨긴 보호자: 하단 바를 덮는 화면이라 셸 밖에 둔다
+  // 이야기 글 상세·올리기·숨긴 보호자: 하단 바를 덮는 화면이라 셸 밖에 둔다
   GoRoute(
     path: Routes.guardianTalkPost,
     pageBuilder: (context, state) => slidePage(
       state,
       TalkDetailScreen(postId: state.pathParameters['postId'] ?? ''),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 이야기 올리기: extra 는 입구가 정한 일과 id (없으면 일과 고르기부터)
+  GoRoute(
+    path: Routes.guardianTalkShare,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      TalkShareScreen(
+        initialRoutineId: state.extra is String ? state.extra as String : null,
+      ),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),

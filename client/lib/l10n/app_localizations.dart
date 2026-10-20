@@ -5372,6 +5372,102 @@ abstract class AppLocalizations {
   /// **'동의를 저장하지 못했어요'**
   String get talkRulesFailedTitle;
 
+  /// 올리기 화면 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올리기'**
+  String get talkShareTitle;
+
+  /// 올리기 1단계 일과 고르기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 일과를 나눌까요?'**
+  String get talkSharePickTitle;
+
+  /// 올릴 일과가 하나도 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'올릴 수 있는 일과가 없어요'**
+  String get talkSharePickEmpty;
+
+  /// 올릴 일과가 없을 때 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 예시, 이야기에서 가져온 일과는 빠져요.'**
+  String get talkSharePickEmptyHint;
+
+  /// 올릴 일과 목록 실패 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 불러오지 못했어요'**
+  String get talkSharePickFailed;
+
+  /// 올리기 미리보기 받기 실패 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'올릴 내용을 불러오지 못했어요'**
+  String get talkSharePreviewFailed;
+
+  /// 올리기 2단계 사진 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 어떻게 올릴까요?'**
+  String get talkSharePhotoTitle;
+
+  /// 올리기 2단계 사진 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴, 이름표, 집 주소가 보이면 흐리게 해 주세요. AI로 만든 그림은 그대로 올라가요.'**
+  String get talkSharePhotoGuide;
+
+  /// 사진을 흐리게 올리는 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'흐리게'**
+  String get talkSharePhotoBlur;
+
+  /// 사진을 그대로 올리는 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'그대로'**
+  String get talkSharePhotoKeep;
+
+  /// 사진 고르기를 마치고 넘어가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다음'**
+  String get talkSharePhotoNext;
+
+  /// 올리기 3단계 카드 미리보기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 올라가요'**
+  String get talkSharePreviewTitle;
+
+  /// 카드 미리보기 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이름은 모두 \'이룸이\'로 바뀌어 올라가요'**
+  String get talkSharePreviewHint;
+
+  /// 올리기 3단계 완료 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기'**
+  String get talkShareSubmit;
+
+  /// 올리기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올렸어요'**
+  String get talkShareDone;
+
+  /// 올리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'올리지 못했어요'**
+  String get talkShareFailedTitle;
+
   /// 1분이 안 지난 시각 표기
   ///
   /// In ko, this message translates to:

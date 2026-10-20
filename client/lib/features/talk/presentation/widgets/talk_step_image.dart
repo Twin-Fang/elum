@@ -3,12 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../shared/example_card_image/example_card_art.dart';
-import '../../../../shared/example_card_image/example_card_image_catalog.dart';
-import '../../../../shared/pictogram/pictogram_art.dart';
-import '../../../../shared/pictogram/pictogram_catalog.dart';
 import '../../application/talk_step_image_provider.dart';
 import '../../domain/talk_post.dart';
+import 'talk_bundled_card_art.dart';
 
 /// 글 카드 한 장의 그림: 올린 그림 > 예시 이미지 > 픽토그램 > 빈 칸
 /// 흐리게 올린 그림은 서버가 이미 흐리게 만들어 보내므로 앱은 가공하지 않음
@@ -19,23 +16,11 @@ class TalkStepImage extends ConsumerWidget {
   final String postId;
   final TalkStep step;
 
-  /// 올린 그림이 없을 때 자리를 채운다: 예시 이미지 > 픽토그램 > 빈 칸
-  Widget _bundledArtOrEmpty(BuildContext context) {
-    final label = step.title ?? '';
-    final pictogram = PictogramCatalog.parse(step.pictogramId);
-    final exampleImage = ExampleCardImageCatalog.parse(step.exampleImageId);
-    Widget emptySlot(BuildContext context) =>
-        ColoredBox(color: context.colors.editChipBg);
-    Widget pictogramOrEmpty(BuildContext context) => pictogram == null
-        ? emptySlot(context)
-        : PictogramArt(id: pictogram, label: label, fallbackBuilder: emptySlot);
-    if (exampleImage == null) return pictogramOrEmpty(context);
-    return ExampleCardArt(
-      id: exampleImage,
-      label: label,
-      fallbackBuilder: pictogramOrEmpty,
-    );
-  }
+  Widget _bundledArtOrEmpty(BuildContext context) => TalkBundledCardArt(
+    label: step.title ?? '',
+    pictogramId: step.pictogramId,
+    exampleImageId: step.exampleImageId,
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
