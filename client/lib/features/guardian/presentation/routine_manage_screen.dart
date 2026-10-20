@@ -52,6 +52,20 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
 
   // --- 동작 ---
 
+  /// 다른 탭으로 가면(탭 묶음이 이 화면 TickerMode 를 끈다) 정리 상태를 끝낸다 — 돌아왔을 때 흔들리고 있지 않게
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 바로 뒤에 build 가 돌므로 setState 없이 값만 바꾼다
+    if (!TickerMode.of(context)) _isArranging = false;
+  }
+
+  /// 정리 상태 끝내기 (완료 버튼 · 빈 곳 누르기 · 뒤로가기 공통)
+  void _stopArranging() {
+    if (!_isArranging) return;
+    setState(() => _isArranging = false);
+  }
+
   @override
   Future<void> openRoutineDetail(
     Routine routine, {
@@ -342,28 +356,38 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         isBusy: busy,
         isArranging: _isArranging,
         // 정리 상태에서는 가운데 버튼이 `완료`
-        onTap: _isArranging
-            ? () => setState(() => _isArranging = false)
-            : onCreatePressed,
+        onTap: _isArranging ? _stopArranging : onCreatePressed,
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const LibraryManageHeader(),
-            SizedBox(height: space.md.h),
-            Expanded(child: body),
-          ],
+      // 정리 상태에서 칸·버튼 밖 빈 곳을 누르면 끝낸다 (칸 · ⊖ · 머리 버튼은 자기 탭이 먼저 이긴다)
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _isArranging ? _stopArranging : null,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const LibraryManageHeader(),
+              SizedBox(height: space.md.h),
+              Expanded(child: body),
+            ],
+          ),
         ),
       ),
     );
 
-    return Stack(
-      children: [
-        scaffold,
-        // 처음 들어왔을 때만 연습 무대를 띄운다. 이 자리에는 아무것도 그리지 않는다
-        const RoutineManageCoachTrigger(),
-      ],
+    // 정리 상태에서 뒤로가기는 화면을 떠나지 않고 정리 상태만 끝낸다
+    return PopScope(
+      canPop: !_isArranging,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _stopArranging();
+      },
+      child: Stack(
+        children: [
+          scaffold,
+          // 처음 들어왔을 때만 연습 무대를 띄운다. 이 자리에는 아무것도 그리지 않는다
+          const RoutineManageCoachTrigger(),
+        ],
+      ),
     );
   }
 }

@@ -33,8 +33,8 @@ class LibraryArrangeShell extends StatefulWidget {
 
 class _LibraryArrangeShellState extends State<LibraryArrangeShell>
     with SingleTickerProviderStateMixin {
-  /// 흔들림 한 번(왕복의 절반) 시간 · 최대 기울기(도)
-  static const _jiggleHalfPeriod = Duration(milliseconds: 260);
+  /// 흔들림 한 번(왕복의 절반) 시간 · 최대 기울기(도). 홈 화면 편집처럼 빠르게 (왕복 0.26초)
+  static const _jiggleHalfPeriod = Duration(milliseconds: 130);
   static const _maxTiltDegrees = 2.4;
 
   late final AnimationController _controller;
