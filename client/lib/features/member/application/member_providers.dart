@@ -28,6 +28,9 @@ class MemberPrefetch {
     _value = null;
     return value;
   }
+
+  /// 받아 둔 값 버리기. 다른 계정으로 들어온 뒤 이전 계정 회원 정보가 꺼내지지 않게
+  void discard() => _value = null;
 }
 
 final memberPrefetchProvider = Provider<MemberPrefetch>((ref) => MemberPrefetch());
