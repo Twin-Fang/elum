@@ -1,15 +1,47 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T15:59:44Z",
-    "currentVersion": "2.69.0",
+    "lastUpdated": "2026-10-20T19:07:13Z",
+    "currentVersion": "2.69.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 296
+    "totalReleases": 297
   },
   "releases": [
+    {
+      "version": "2.69.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 918,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 휴대폰의 새 버전 안내에서 위쪽 손잡이가 루미 그림과 겹치던 것을 고쳤어요.\n\n* **문서**\n  * 새 버전 안내 구현 보고서를 정리했어요.\n\n* **기타**\n  * 개발용 작업 폴더를 저장소에서 제외했어요.",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "휴대폰의 새 버전 안내에서 위쪽 손잡이가 루미 그림과 겹치던 것을 고쳤어요."
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "새 버전 안내 구현 보고서를 정리했어요."
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "개발용 작업 폴더를 저장소에서 제외했어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.69.0",
       "project_type": "flutter",
