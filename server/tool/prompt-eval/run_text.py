@@ -21,7 +21,8 @@ VARIANT_ROOT = lib.TOOL_DIR / "variants"
 # 보호자 문구에 나오면 안 되는 말 (용어 규칙, 진단명 수집 금지)
 BANNED_TERMS = ["아이", "아동", "우리 아이", "자폐", "진단", "장애", "발달"]
 # 한 문장에 행동을 이어 붙이는 표현
-CHAINING_PATTERN = re.compile(r"(고 |하고|해서|한 뒤|하면서|며 |,)")
+# "~라고 말해요"(인용)는 행동 연결이 아니므로 제외
+CHAINING_PATTERN = re.compile(r"((?<!라)고 |해서|한 뒤|하면서|며 |,)")
 # 개인정보가 그대로 나오면 안 됨
 PERSONAL_TERMS = ["김하늘", "010", "5678"]
 
