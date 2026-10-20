@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T12:38:49Z",
-    "currentVersion": "2.64.0",
+    "lastUpdated": "2026-10-20T13:02:36Z",
+    "currentVersion": "2.65.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 290
+    "totalReleases": 291
   },
   "releases": [
+    {
+      "version": "2.65.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 901,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 내 정보에서 공지사항을 바로 볼 수 있어요\n  * 내 정보에서 이룸이 이름·캐릭터·그림 방식을 고칠 수 있어요\n  * 새 버전이 나오면 하루 한 번 업데이트를 알려 드려요\n  * 일과관리 화면이 새 디자인으로 바뀌었어요\n* **버그 수정**\n  * 일과를 겹쳐 놓아도 묶음이 만들어지지 않던 문제를 고쳤어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "내 정보에서 공지사항을 바로 볼 수 있어요",
+            "내 정보에서 이룸이 이름·캐릭터·그림 방식을 고칠 수 있어요",
+            "새 버전이 나오면 하루 한 번 업데이트를 알려 드려요",
+            "일과관리 화면이 새 디자인으로 바뀌었어요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과를 겹쳐 놓아도 묶음이 만들어지지 않던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.64.0",
       "project_type": "flutter",
