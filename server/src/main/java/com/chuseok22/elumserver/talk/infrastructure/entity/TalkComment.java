@@ -20,7 +20,10 @@ import lombok.Setter;
 @Setter
 @Table(
   name = "talk_comment",
-  indexes = @Index(name = "idx_talk_comment_post_created", columnList = "post_id, created_at")
+  indexes = {
+    @Index(name = "idx_talk_comment_post_created", columnList = "post_id, created_at"),
+    @Index(name = "idx_talk_comment_author_member_id", columnList = "author_member_id")
+  }
 )
 public class TalkComment extends BaseEntity {
 

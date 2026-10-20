@@ -17,7 +17,10 @@ import lombok.Setter;
 @Setter
 @Table(
   name = "talk_import",
-  indexes = @Index(name = "idx_talk_import_post_created", columnList = "post_id, created_at")
+  indexes = {
+    @Index(name = "idx_talk_import_post_created", columnList = "post_id, created_at"),
+    @Index(name = "idx_talk_import_member_id", columnList = "member_id")
+  }
 )
 public class TalkImport extends BaseEntity {
 

@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS talk_comment (
   updated_at       TIMESTAMP    NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_talk_comment_post_created ON talk_comment (post_id, created_at);
+-- 탈퇴 정리: 그 회원의 댓글
+CREATE INDEX IF NOT EXISTS idx_talk_comment_author_member_id ON talk_comment (author_member_id);
 
 -- 도움이 됐어요: 한 글에 한 사람이 한 번
 CREATE TABLE IF NOT EXISTS talk_helpful (
@@ -69,6 +71,8 @@ CREATE TABLE IF NOT EXISTS talk_helpful (
   updated_at TIMESTAMP    NOT NULL DEFAULT now(),
   CONSTRAINT uk_talk_helpful_post_member UNIQUE (post_id, member_id)
 );
+-- 탈퇴 정리: 그 회원이 누른 도움
+CREATE INDEX IF NOT EXISTS idx_talk_helpful_member_id ON talk_helpful (member_id);
 
 -- 가져간 기록: 누가 어느 프로필의 어떤 일과로 가져갔는가
 CREATE TABLE IF NOT EXISTS talk_import (
@@ -81,6 +85,8 @@ CREATE TABLE IF NOT EXISTS talk_import (
   updated_at TIMESTAMP    NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_talk_import_post_created ON talk_import (post_id, created_at);
+-- 탈퇴 정리·첫 가져가기 판정: 그 회원의 가져간 기록
+CREATE INDEX IF NOT EXISTS idx_talk_import_member_id ON talk_import (member_id);
 
 -- 신고: 한 대상에 한 사람이 한 번. resolved_at 이 비면 미처리
 CREATE TABLE IF NOT EXISTS talk_report (
@@ -95,6 +101,8 @@ CREATE TABLE IF NOT EXISTS talk_report (
   updated_at         TIMESTAMP    NOT NULL DEFAULT now(),
   CONSTRAINT uk_talk_report_target_reporter UNIQUE (target_type, target_id, reporter_member_id)
 );
+-- 글별 신고 조회·미처리 건수
+CREATE INDEX IF NOT EXISTS idx_talk_report_post_id ON talk_report (post_id);
 
 -- 차단: 차단한 사람 > 차단당한 사람
 CREATE TABLE IF NOT EXISTS talk_block (
@@ -105,6 +113,8 @@ CREATE TABLE IF NOT EXISTS talk_block (
   updated_at        TIMESTAMP    NOT NULL DEFAULT now(),
   CONSTRAINT uk_talk_block_blocker_blocked UNIQUE (blocker_member_id, blocked_member_id)
 );
+-- 탈퇴 정리: 그 회원을 차단한 기록
+CREATE INDEX IF NOT EXISTS idx_talk_block_blocked_member_id ON talk_block (blocked_member_id);
 
 -- 이야기에서 가져와 만든 일과면 그 글 ID. 비면 가져오지 않은 일과
 ALTER TABLE routine ADD COLUMN IF NOT EXISTS talk_post_id VARCHAR(255);

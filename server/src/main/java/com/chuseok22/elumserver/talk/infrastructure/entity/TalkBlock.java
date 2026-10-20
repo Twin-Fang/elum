@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @Setter
 @Table(
   name = "talk_block",
+  indexes = @Index(name = "idx_talk_block_blocked_member_id", columnList = "blocked_member_id"),
   uniqueConstraints = @UniqueConstraint(
     name = "uk_talk_block_blocker_blocked",
     columnNames = {"blocker_member_id", "blocked_member_id"})
