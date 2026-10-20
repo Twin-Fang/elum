@@ -5,9 +5,18 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/state/single_flight.dart';
 import '../../../shared/models/action_card.dart';
+import '../../credit/data/credit_repository.dart';
 import '../data/routine_repository.dart';
+import '../domain/added_card_image_state.dart';
 import 'routine_flow_state.dart';
 import 'routine_providers.dart';
+
+/// 카드 추가 결과: 실패, 새 카드 id, 그림 상태
+typedef CardAddOutcome = ({
+  AppFailure? failure,
+  String? addedStepId,
+  AddedCardImageState imageState,
+});
 
 /// 일과 카드 편집: 추가, 수정, 삭제, 순서 변경, 저장(승인)
 /// 뺀 카드·바뀐 순서는 저장 전까지 로컬에만 두었다가 [save]가 서버에 반영
@@ -49,8 +58,9 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
   /// 목록 **맨 뒤**에 붙인다. 서버가 돌려준 전체 목록을 그대로 쓰지 않는다: 그 안에는
   /// 보호자가 이미 뺀(저장 전이라 서버에 남은) 카드가 있어 되살아난다.
   ///
-  /// null 이면 성공. 실패하면 이유가 담겨 오고 목록은 그대로다.
-  Future<AppFailure?> addStep({
+  /// failure 가 null 이면 성공. 실패하면 이유가 담겨 오고 목록은 그대로다.
+  /// 그림은 서버가 그림 방식대로 커밋 뒤 채움 > [CardAddOutcome.imageState] 로 화면이 기다릴지 정함 (#868)
+  Future<CardAddOutcome> addStep({
     required String title,
     required String description,
   }) async {
@@ -58,7 +68,9 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     AppLogger.notifierCall('RoutineFlowNotifier', 'addStep');
 
     final routine = state.routine;
-    if (routine == null) return const AppFailure(fault: NetworkFault.app);
+    if (routine == null) {
+      return _addFailed(const AppFailure(fault: NetworkFault.app));
+    }
 
     final repo = ref.read(routineRepositoryProvider);
 
@@ -69,7 +81,7 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     if (_removedStepIds.isNotEmpty &&
         routine.steps.length + _removedStepIds.length >= _maxSteps) {
       final failure = await _deleteRemovedSteps(repo, routine.id);
-      if (failure != null) return failure;
+      if (failure != null) return _addFailed(failure);
     }
 
     final result = await repo.addStep(
@@ -77,7 +89,8 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
       title: title,
       description: description,
     );
-    if (result.failure != null) return result.failure;
+    final failure = result.failure;
+    if (failure != null) return _addFailed(failure);
 
     // 응답에서 새로 생긴 카드만 뽑는다. 하나도 없으면 서버가 무엇을 했는지 알 수 없다 —
     // 없는 카드를 만들어 내지 않고 실패로 본다.
@@ -86,7 +99,9 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
       for (final s in result.routine.steps)
         if (!known.contains(s.id)) s,
     ];
-    if (added.isEmpty) return const AppFailure(fault: NetworkFault.app);
+    if (added.isEmpty) {
+      return _addFailed(const AppFailure(fault: NetworkFault.app));
+    }
 
     // 서버 응답에는 카드 제목이 없다(RoutineStep 에 title 컬럼이 없다) —
     // 보호자가 쓴 제목을 되살린다.
@@ -96,7 +111,35 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     state = state.copyWith(
       routine: routine.copyWith(steps: [...routine.steps, ...withTitle]),
     );
-    return null;
+
+    final imageState = AddedCardImageState.fromAddResponse(
+      imageSkippedReason: result.imageSkippedReason,
+      description: description,
+    );
+    // 그림 1장 크레딧 예약됨 > 잔액 표시 갱신
+    if (imageState == AddedCardImageState.generating) {
+      ref.invalidate(creditSummaryProvider);
+    }
+    return (
+      failure: null,
+      addedStepId: withTitle.last.id,
+      imageState: imageState,
+    );
+  }
+
+  CardAddOutcome _addFailed(AppFailure failure) => (
+    failure: failure,
+    addedStepId: null,
+    imageState: AddedCardImageState.notRequested,
+  );
+
+  /// 그림을 기다리는 카드의 현재 그림 경로 (아직이면 null)
+  Future<String?> fetchStepImagePath(String stepId) async {
+    final routineId = state.routine?.id;
+    if (routineId == null || routineId.isEmpty) return null;
+    return ref
+        .read(routineRepositoryProvider)
+        .fetchStepImagePath(routineId, stepId);
   }
 
   /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다.

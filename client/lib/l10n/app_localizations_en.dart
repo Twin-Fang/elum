@@ -1337,6 +1337,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardReviewAddFailedFallback => 'Try again in a moment';
 
   @override
+  String get cardImageGeneratingLabel => '그림을 만들고 있어요';
+
+  @override
+  String get cardImageNoCreditToast => '크레딧이 모자라 기본 그림을 넣었어요';
+
+  @override
+  String get cardImageUnavailableToast => '그림을 만들지 못해 기본 그림을 넣었어요';
+
+  @override
   String get cardReviewReorderDone => 'Done';
 
   @override
