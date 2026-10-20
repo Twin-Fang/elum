@@ -50,6 +50,7 @@ public class TalkReactionService {
   // 한 쪽을 채우려고 차단·정지 댓글을 건너뛰며 다시 읽는 최대 횟수
   private static final int MAX_COMMENT_SCAN_ROUNDS = 5;
 
+  private final TalkPostAccess talkPostAccess;
   private final TalkPostRepository talkPostRepository;
   private final TalkHelpfulRepository talkHelpfulRepository;
   private final TalkCommentRepository talkCommentRepository;
@@ -59,11 +60,11 @@ public class TalkReactionService {
   private final ApplicationEventPublisher eventPublisher;
 
   /**
-   * 도움이 됐어요 누르기: 보이는 글 확인 > 이미 눌렀으면 그대로 끝 > 기록 저장 > 수 +1
+   * 도움이 됐어요 누르기: 읽을 수 있는 글 확인(차단·정지 글쓴이 제외) > 이미 눌렀으면 그대로 끝 > 기록 저장 > 수 +1
    * 트랜잭션 밖에서 저장해야 동시에 눌려 유니크가 겹쳐도 잡고 넘어갈 수 있음 (그 경우 수는 올리지 않음)
    */
   public void markHelpful(Caller caller, String postId) {
-    requireVisiblePost(postId);
+    talkPostAccess.requireReadablePost(caller, postId);
     if (talkHelpfulRepository.existsByPostIdAndMemberId(postId, caller.memberId())) {
       return;
     }
@@ -91,12 +92,12 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 한 쪽: 보이는 글 확인 > 오래된 순 읽기 > 차단·정지 댓글 거르기 > size 만큼 자르고 nextCursor
+   * 댓글 한 쪽: 읽을 수 있는 글 확인 > 오래된 순 읽기 > 차단·정지 댓글 거르기 > size 만큼 자르고 nextCursor
    * cursor 형식이 틀리면 첫 쪽, size 는 1~50 (기본 20)
    */
   @Transactional(readOnly = true)
   public TalkCommentPageResponse comments(Caller caller, String postId, String cursor, Integer size) {
-    requireVisiblePost(postId);
+    talkPostAccess.requireReadablePost(caller, postId);
     int pageSize = size == null ? TalkFeedQueryService.DEFAULT_PAGE_SIZE
       : Math.clamp(size, 1, TalkFeedQueryService.MAX_PAGE_SIZE);
     int fetchSize = pageSize + 1;
@@ -142,7 +143,7 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 보이는 글 확인 > 저장 > 댓글 수 +1 > 글쓴이 알림 이벤트
+   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 읽을 수 있는 글 확인 > 저장 > 댓글 수 +1 > 글쓴이 알림 이벤트
    * 이룸이 호칭은 가리지 않음
    */
   @Transactional
@@ -156,7 +157,7 @@ public class TalkReactionService {
       log.warn("[talk comment] rejected 400 : blocked word in text");
       throw new CustomException(ErrorCode.TALK_TEXT_NOT_ALLOWED);
     }
-    TalkPost post = requireVisiblePost(postId);
+    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
 
     // 저장 > 댓글 수
     TalkComment comment = new TalkComment();
@@ -175,7 +176,7 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 지우기: 보이는 내 댓글 확인 > 조건부 DELETED > 바뀐 경우만 댓글 수 -1
+   * 댓글 지우기: 보이는 내 댓글 확인 > 조건부 DELETED + 본문 비움 > 바뀐 경우만 댓글 수 -1
    * 없거나 이미 지운 댓글은 TALK_COMMENT_NOT_FOUND, 남의 댓글은 TALK_NOT_AUTHOR
    */
   @Transactional

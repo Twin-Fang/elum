@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.notification.core.event.TalkPostImportedEvent;
 import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft;
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
@@ -23,6 +24,7 @@ import com.chuseok22.elumserver.talk.core.TalkPostStatus;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkImport;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
+import com.chuseok22.elumserver.talk.infrastructure.entity.TalkBlock;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkImportRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepository;
@@ -59,13 +61,15 @@ class TalkImportServiceTest {
   private RoutineShareService routineShareService;
   @Mock
   private ApplicationEventPublisher eventPublisher;
+  @Mock
+  private MemberService memberService;
 
   private TalkImportService talkImportService;
 
   @BeforeEach
   void setUp() {
     talkImportService = new TalkImportService(
-      talkPostRepository, talkPostStepRepository, talkImportRepository, talkBlockRepository, talkImageStorage,
+      new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService), talkPostRepository, talkPostStepRepository, talkImportRepository, talkBlockRepository, talkImageStorage,
       routineShareService, eventPublisher);
   }
 
@@ -144,7 +148,8 @@ class TalkImportServiceTest {
     talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
     talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
 
-    assertThat(post.getImportCount()).isEqualTo(1);
+    // DB 에서 바로 +1 하는 쿼리는 첫 가져가기 한 번만
+    verify(talkPostRepository, org.mockito.Mockito.times(1)).increaseImportCount("post-1");
     // 기록은 가져갈 때마다 남음 (일과 연결 추적용)
     verify(talkImportRepository, org.mockito.Mockito.times(2)).save(any(TalkImport.class));
   }
@@ -179,8 +184,31 @@ class TalkImportServiceTest {
 
     talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
 
-    assertThat(post.getImportCount()).isEqualTo(1);
+    verify(talkPostRepository).increaseImportCount("post-1");
     verify(eventPublisher, never()).publishEvent(any(Object.class));
+  }
+
+  @Test
+  @DisplayName("내가 차단한 글쓴이나 정지 회원의 글은 TALK_POST_NOT_FOUND, 일과를 만들지 않는다")
+  void importToLibrary_blockedOrSuspendedAuthor_throwsNotFound() {
+    TalkPost blockedAuthorPost = post(TalkPostStatus.VISIBLE);
+    blockedAuthorPost.setAuthorMemberId("blocked-author");
+    TalkBlock block = new TalkBlock();
+    block.setBlockerMemberId("member-1");
+    block.setBlockedMemberId("blocked-author");
+    when(talkPostRepository.findById("post-blocked")).thenReturn(Optional.of(blockedAuthorPost));
+    when(talkBlockRepository.findByBlockerMemberId("member-1")).thenReturn(List.of(block));
+
+    assertImportRejected("post-blocked", ErrorCode.TALK_POST_NOT_FOUND);
+
+    TalkPost suspendedAuthorPost = post(TalkPostStatus.VISIBLE);
+    suspendedAuthorPost.setAuthorMemberId("suspended-author");
+    when(talkPostRepository.findById("post-suspended")).thenReturn(Optional.of(suspendedAuthorPost));
+    when(memberService.suspendedAmong(any())).thenReturn(java.util.Set.of("suspended-author"));
+
+    assertImportRejected("post-suspended", ErrorCode.TALK_POST_NOT_FOUND);
+    verifyNoInteractions(routineShareService);
+    verify(talkPostRepository, never()).increaseImportCount(any());
   }
 
   @Test
@@ -205,6 +233,7 @@ class TalkImportServiceTest {
     TalkPost post = new TalkPost();
     post.setId("post-1");
     post.setTitle("버스 타기");
+    post.setAuthorMemberId("author-0");
     post.setLanguage(AppLocale.KO);
     post.setStatus(status);
     return post;

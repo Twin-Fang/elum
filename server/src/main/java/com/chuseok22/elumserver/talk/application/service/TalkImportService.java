@@ -10,7 +10,6 @@ import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkImportRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkImportResponse;
-import com.chuseok22.elumserver.talk.core.TalkPostStatus;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkImport;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
@@ -35,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TalkImportService {
 
+  private final TalkPostAccess talkPostAccess;
   private final TalkPostRepository talkPostRepository;
   private final TalkPostStepRepository talkPostStepRepository;
   private final TalkImportRepository talkImportRepository;
@@ -44,18 +44,16 @@ public class TalkImportService {
   private final ApplicationEventPublisher eventPublisher;
 
   /**
-   * 가져가기: 요청 검증 > 보이는 글 > 카드·그림 초안 > 일과 만들기 위임 > 가져간 기록 > 첫 가져가기면 횟수 +1 > 글쓴이 알림 이벤트
+   * 가져가기: 요청 검증 > 읽을 수 있는 글(차단·정지 글쓴이 제외) > 카드·그림 초안 > 일과 만들기 위임 > 가져간 기록 > 첫 가져가기면 횟수 +1 > 글쓴이 알림 이벤트
    *
-   * @throws CustomException 내렸거나 없는 글은 TALK_POST_NOT_FOUND, 이룸이·묶음 오류는 일과 쪽 예외 그대로
+   * @throws CustomException 내렸거나 없거나 차단·정지 글쓴이의 글은 TALK_POST_NOT_FOUND, 이룸이·묶음 오류는 일과 쪽 예외 그대로
    */
   @Transactional
   public TalkImportResponse importToLibrary(Caller caller, String postId, TalkImportRequest request) {
     if (request == null || request.profileId() == null || request.profileId().isBlank()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
-    TalkPost post = talkPostRepository.findById(postId)
-      .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE)
-      .orElseThrow(() -> new CustomException(ErrorCode.TALK_POST_NOT_FOUND));
+    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
 
     RoutineImportDraft draft = toDraft(post, talkPostStepRepository.findByPostIdOrderByStepOrderAsc(post.getId()));
     String routineId = routineShareService.importToLibrary(caller, request.profileId(), request.groupId(), draft);
@@ -64,8 +62,7 @@ public class TalkImportService {
     boolean isFirstImportByMember = !talkImportRepository.existsByPostIdAndMemberId(post.getId(), caller.memberId());
     talkImportRepository.save(newImportRecord(post.getId(), caller.memberId(), request.profileId(), routineId));
     if (isFirstImportByMember) {
-      post.setImportCount(post.getImportCount() + 1);
-      talkPostRepository.save(post);
+      talkPostRepository.increaseImportCount(post.getId());
       // 알림 이벤트는 보호자당 첫 가져가기만 (알림의 숫자 = 가져간 보호자 수), 글쓴이가 나를 차단했으면 내지 않음
       if (!talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId(post.getAuthorMemberId(), caller.memberId())) {
         eventPublisher.publishEvent(

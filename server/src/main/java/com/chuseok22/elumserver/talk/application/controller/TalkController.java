@@ -86,7 +86,7 @@ public class TalkController implements TalkControllerDocs {
   public ResponseEntity<byte[]> getStepImage(
     Authentication authentication, @PathVariable String postId, @PathVariable int stepOrder
   ) {
-    ImageContent content = talkFeedQueryService.stepImage(postId, stepOrder);
+    ImageContent content = talkFeedQueryService.stepImage(Caller.from(authentication), postId, stepOrder);
     return ResponseEntity.ok()
       .header(HttpHeaders.CACHE_CONTROL, IMAGE_CACHE_CONTROL)
       .contentType(MediaType.parseMediaType(content.contentType()))

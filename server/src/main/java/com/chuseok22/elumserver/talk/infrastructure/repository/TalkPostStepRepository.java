@@ -19,6 +19,12 @@ public interface TalkPostStepRepository extends JpaRepository<TalkPostStep, Stri
 
   Optional<TalkPostStep> findByPostIdAndStepOrder(String postId, int stepOrder);
 
+  // 글 내리기: 그 글의 카드 전부
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from TalkPostStep s where s.postId = :postId")
+  int deleteAllByPostId(@Param("postId") String postId);
+
   // 탈퇴 정리: 그 회원이 쓴 모든 글의 카드
   @Transactional
   @Modifying(flushAutomatically = true)

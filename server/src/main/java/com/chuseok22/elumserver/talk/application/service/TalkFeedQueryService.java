@@ -14,10 +14,8 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkPostSummaryRes
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkCursor;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
-import com.chuseok22.elumserver.talk.infrastructure.entity.TalkBlock;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
-import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkHelpfulRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkImportRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepository;
@@ -28,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,37 +61,36 @@ public class TalkFeedQueryService {
 
   private final TalkPostRepository talkPostRepository;
   private final TalkPostStepRepository talkPostStepRepository;
-  private final TalkBlockRepository talkBlockRepository;
   private final TalkHelpfulRepository talkHelpfulRepository;
   private final TalkImportRepository talkImportRepository;
   private final TalkImageStorage talkImageStorage;
   private final MemberService memberService;
+  private final TalkPostAccess talkPostAccess;
   private final Clock clock;
 
   @Autowired
   public TalkFeedQueryService(
     TalkPostRepository talkPostRepository, TalkPostStepRepository talkPostStepRepository,
-    TalkBlockRepository talkBlockRepository, TalkHelpfulRepository talkHelpfulRepository,
-    TalkImportRepository talkImportRepository, TalkImageStorage talkImageStorage, MemberService memberService
+    TalkHelpfulRepository talkHelpfulRepository, TalkImportRepository talkImportRepository,
+    TalkImageStorage talkImageStorage, MemberService memberService, TalkPostAccess talkPostAccess
   ) {
-    this(talkPostRepository, talkPostStepRepository, talkBlockRepository, talkHelpfulRepository,
-      talkImportRepository, talkImageStorage, memberService, Clock.systemDefaultZone());
+    this(talkPostRepository, talkPostStepRepository, talkHelpfulRepository, talkImportRepository,
+      talkImageStorage, memberService, talkPostAccess, Clock.systemDefaultZone());
   }
 
   // 테스트가 시계를 고정할 수 있게 둔다
   TalkFeedQueryService(
     TalkPostRepository talkPostRepository, TalkPostStepRepository talkPostStepRepository,
-    TalkBlockRepository talkBlockRepository, TalkHelpfulRepository talkHelpfulRepository,
-    TalkImportRepository talkImportRepository, TalkImageStorage talkImageStorage, MemberService memberService,
-    Clock clock
+    TalkHelpfulRepository talkHelpfulRepository, TalkImportRepository talkImportRepository,
+    TalkImageStorage talkImageStorage, MemberService memberService, TalkPostAccess talkPostAccess, Clock clock
   ) {
     this.talkPostRepository = talkPostRepository;
     this.talkPostStepRepository = talkPostStepRepository;
-    this.talkBlockRepository = talkBlockRepository;
     this.talkHelpfulRepository = talkHelpfulRepository;
     this.talkImportRepository = talkImportRepository;
     this.talkImageStorage = talkImageStorage;
     this.memberService = memberService;
+    this.talkPostAccess = talkPostAccess;
     this.clock = clock;
   }
 
@@ -106,7 +102,7 @@ public class TalkFeedQueryService {
     List<TalkCategory> categories = categoriesOf(category);
     int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
     int fetchSize = pageSize + 1;
-    Set<String> blockedAuthorIds = blockedAuthorIdsOf(caller);
+    Set<String> blockedAuthorIds = talkPostAccess.blockedAuthorIdsOf(caller);
 
     // 읽기 (한 건 더, 거른 만큼 부족하면 이어서 읽기)
     TalkCursor position = TalkCursor.decode(cursor).orElse(null);
@@ -120,7 +116,7 @@ public class TalkFeedQueryService {
         isExhausted = true;
         break;
       }
-      for (TalkPost post : readablePosts(caller, batch, blockedAuthorIds)) {
+      for (TalkPost post : talkPostAccess.readablePosts(caller, batch, blockedAuthorIds)) {
         if (collected.size() < fetchSize) {
           collected.add(post);
         }
@@ -161,7 +157,8 @@ public class TalkFeedQueryService {
     Map<String, TalkPost> postById = talkPostRepository.findAllById(rankedPostIds).stream()
       .collect(Collectors.toMap(TalkPost::getId, post -> post, (first, second) -> first));
     List<TalkPost> rankedPosts = rankedPostIds.stream().map(postById::get).filter(Objects::nonNull).toList();
-    List<TalkPost> page = readablePosts(caller, rankedPosts, blockedAuthorIdsOf(caller)).stream()
+    Set<String> blockedAuthorIds = talkPostAccess.blockedAuthorIdsOf(caller);
+    List<TalkPost> page = talkPostAccess.readablePosts(caller, rankedPosts, blockedAuthorIds).stream()
       .limit(POPULAR_MAX_COUNT).toList();
     return toSummaries(caller, page);
   }
@@ -170,12 +167,7 @@ public class TalkFeedQueryService {
    * 글 상세: 보이는 글 확인 > 차단·정지 글쓴이 확인 > 카드·내 반응 (보이지 않으면 TALK_POST_NOT_FOUND)
    */
   public TalkPostDetailResponse detail(Caller caller, String postId) {
-    TalkPost post = talkPostRepository.findById(postId)
-      .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE)
-      .orElseThrow(() -> new CustomException(ErrorCode.TALK_POST_NOT_FOUND));
-    if (readablePosts(caller, List.of(post), blockedAuthorIdsOf(caller)).isEmpty()) {
-      throw new CustomException(ErrorCode.TALK_POST_NOT_FOUND);
-    }
+    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
 
     TalkPostSummaryResponse summary = toSummaries(caller, List.of(post), false).get(0);
     List<DetailStep> steps = talkPostStepRepository.findByPostIdOrderByStepOrderAsc(postId).stream()
@@ -190,11 +182,10 @@ public class TalkFeedQueryService {
   }
 
   /**
-   * 카드 그림: 보이는 글 확인 > 카드의 그림 열쇠 > 파일 읽기 (내려간 글·열쇠 없음은 TALK_IMAGE_NOT_FOUND)
+   * 카드 그림: 읽을 수 있는 글 확인 > 카드의 그림 열쇠 > 파일 읽기 (내려간·차단·정지 글, 열쇠 없음은 TALK_IMAGE_NOT_FOUND)
    */
-  public ImageContent stepImage(String postId, int stepOrder) {
-    Optional<TalkPost> post = talkPostRepository.findById(postId)
-      .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE);
+  public ImageContent stepImage(Caller caller, String postId, int stepOrder) {
+    Optional<TalkPost> post = talkPostAccess.findReadablePost(caller, postId);
     String imageKey = post.flatMap(found -> talkPostStepRepository.findByPostIdAndStepOrder(postId, stepOrder))
       .map(TalkPostStep::getImageKey)
       .orElseThrow(() -> new CustomException(ErrorCode.TALK_IMAGE_NOT_FOUND));
@@ -220,23 +211,6 @@ public class TalkFeedQueryService {
       return List.of(TalkCategory.values());
     }
     return List.of(TalkCategory.parse(category));
-  }
-
-  private Set<String> blockedAuthorIdsOf(Caller caller) {
-    return talkBlockRepository.findByBlockerMemberId(caller.memberId()).stream()
-      .map(TalkBlock::getBlockedMemberId)
-      .collect(Collectors.toSet());
-  }
-
-  // 차단한 보호자·정지 회원의 글 제외 (내 글은 항상 보임)
-  private List<TalkPost> readablePosts(Caller caller, List<TalkPost> posts, Set<String> blockedAuthorIds) {
-    Set<String> authorIds = posts.stream().map(TalkPost::getAuthorMemberId).collect(Collectors.toSet());
-    Set<String> suspendedAuthorIds = new HashSet<>(memberService.suspendedAmong(authorIds));
-    return posts.stream()
-      .filter(post -> post.getAuthorMemberId().equals(caller.memberId())
-        || (!blockedAuthorIds.contains(post.getAuthorMemberId())
-        && !suspendedAuthorIds.contains(post.getAuthorMemberId())))
-      .toList();
   }
 
   private List<TalkPostSummaryResponse> toSummaries(Caller caller, List<TalkPost> posts) {

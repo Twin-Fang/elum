@@ -71,8 +71,8 @@ class TalkReactionServiceTest {
 
   @BeforeEach
   void setUp() {
-    talkReactionService = new TalkReactionService(talkPostRepository, talkHelpfulRepository, talkCommentRepository,
-      talkBlockRepository, memberService, new NicknamePolicy(), eventPublisher);
+    talkReactionService = new TalkReactionService(postAccess(), talkPostRepository, talkHelpfulRepository,
+      talkCommentRepository, talkBlockRepository, memberService, new NicknamePolicy(), eventPublisher);
   }
 
   @Test
@@ -111,6 +111,19 @@ class TalkReactionServiceTest {
       .isInstanceOfSatisfying(CustomException.class,
         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
     verify(talkHelpfulRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("내가 차단한 글쓴이의 글에는 도움이 됐어요를 누를 수 없다")
+  void markHelpful_onBlockedAuthorPost_throwsNotFound() {
+    stubVisiblePost("post-1");
+    blockAuthor("author-1");
+
+    assertThatThrownBy(() -> talkReactionService.markHelpful(VIEWER, "post-1"))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
+    verify(talkHelpfulRepository, never()).saveAndFlush(any());
+    verify(talkPostRepository, never()).increaseHelpfulCount(anyString());
   }
 
   @Test
@@ -174,12 +187,39 @@ class TalkReactionServiceTest {
     when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(true);
     NicknamePolicy rejectingPolicy = org.mockito.Mockito.mock(NicknamePolicy.class);
     when(rejectingPolicy.containsBlockedWord("나쁜말")).thenReturn(true);
-    TalkReactionService service = new TalkReactionService(talkPostRepository, talkHelpfulRepository,
+    TalkReactionService service = new TalkReactionService(postAccess(), talkPostRepository, talkHelpfulRepository,
       talkCommentRepository, talkBlockRepository, memberService, rejectingPolicy, eventPublisher);
 
     assertThatThrownBy(() -> service.addComment(VIEWER, "post-1", new TalkCommentRequest("나쁜말")))
       .isInstanceOfSatisfying(CustomException.class,
         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_TEXT_NOT_ALLOWED));
+    verify(talkCommentRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("내가 차단한 글쓴이의 글에는 댓글을 쓸 수 없고 댓글 수도 늘지 않는다")
+  void addComment_onBlockedAuthorPost_throwsNotFound() {
+    when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(true);
+    stubVisiblePost("post-1");
+    blockAuthor("author-1");
+
+    assertThatThrownBy(() -> talkReactionService.addComment(VIEWER, "post-1", new TalkCommentRequest("좋아요")))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
+    verify(talkCommentRepository, never()).save(any());
+    verify(talkPostRepository, never()).increaseCommentCount(anyString());
+  }
+
+  @Test
+  @DisplayName("정지 회원의 글에는 댓글을 쓸 수 없다")
+  void addComment_onSuspendedAuthorPost_throwsNotFound() {
+    when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(true);
+    stubVisiblePost("post-1");
+    when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of("author-1"));
+
+    assertThatThrownBy(() -> talkReactionService.addComment(VIEWER, "post-1", new TalkCommentRequest("좋아요")))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
     verify(talkCommentRepository, never()).save(any());
   }
 
@@ -447,6 +487,19 @@ class TalkReactionServiceTest {
       comment("c" + firstIndex, "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex)),
       comment("c" + (firstIndex + 1), "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex + 1)),
       comment("c" + (firstIndex + 2), "post-1", "author-blocked", BASE_TIME.plusMinutes(firstIndex + 2)));
+  }
+
+  // 내가 차단한 글쓴이 1명
+  private void blockAuthor(String blockedMemberId) {
+    TalkBlock block = new TalkBlock();
+    block.setBlockerMemberId("viewer-1");
+    block.setBlockedMemberId(blockedMemberId);
+    when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of(block));
+  }
+
+  // 같은 목 저장소로 만든 실제 접근 규칙
+  private TalkPostAccess postAccess() {
+    return new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService);
   }
 
   private void stubVisiblePost(String postId) {

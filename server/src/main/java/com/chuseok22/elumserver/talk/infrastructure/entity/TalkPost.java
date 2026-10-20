@@ -17,13 +17,16 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * 이야기 글 1건: 보호자가 일과를 나눈 글 (V52 와 같은 이름)
  * member·routine 에 외래키를 걸지 않음 (탈퇴·삭제와 무관하게 글은 남고, 정리는 서비스가 맡음)
+ * 바뀐 칼럼만 UPDATE (집계·상태를 다른 요청이 바꾼 값을 덮어쓰지 않음)
  * 부분 유니크 인덱스 uk_talk_post_visible_source (VISIBLE 글은 source_routine_id 당 하나) 는 V52 에만 있음
  */
 @Entity
+@DynamicUpdate
 @Getter
 @Setter
 @Table(

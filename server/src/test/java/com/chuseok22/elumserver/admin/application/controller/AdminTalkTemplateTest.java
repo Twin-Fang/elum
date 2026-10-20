@@ -204,6 +204,24 @@ class AdminTalkTemplateTest {
   }
 
   @Test
+  @DisplayName("글쓴이가 내린 글(제목 빈 값)과 지운 댓글(본문 빈 값)도 깨지지 않고 안내 문구로 보인다")
+  void deletedPostAndComment_renderPlaceholders() {
+    TalkPost deleted = post("p1", "", TalkPostStatus.DELETED);
+    deleted.setNote(null);
+    TalkAdminPostDetail detail = new TalkAdminPostDetail(deleted, "하늘", List.of(),
+      List.of(new CommentRow(comment("c1", "", TalkCommentStatus.DELETED), "바람")),
+      List.of(new TalkAdminReportRow(report("r1", TalkReportTargetType.COMMENT, null), "달", "", "")));
+
+    String list = renderPosts(List.of(new TalkAdminPostRow(deleted, "하늘", 0)));
+    String detailHtml = renderDetail(detail);
+    String reports = renderReports(List.of(new TalkAdminReportRow(report("r1", TalkReportTargetType.COMMENT, null), "달", "", "")));
+
+    assertThat(list).contains("(지운 글)");
+    assertThat(detailHtml).contains("(지운 글)").contains("(지운 댓글)");
+    assertThat(reports).contains("(지운 글)").contains("(지운 댓글)");
+  }
+
+  @Test
   @DisplayName("글 제목·한마디·댓글은 사용자 입력이라 태그가 그대로 실행되지 않게 이스케이프한다")
   void escapesUserInput() {
     TalkPost hostile = post("p1", "<script>alert(1)</script>", TalkPostStatus.VISIBLE);

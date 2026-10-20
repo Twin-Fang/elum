@@ -25,10 +25,11 @@ public interface TalkCommentRepository extends JpaRepository<TalkComment, String
     @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt, @Param("cursorId") String cursorId,
     Pageable pageable);
 
-  // 보이는 댓글만 DELETED 로 (바꾼 건수: 이미 지워졌으면 0, 동시에 두 번 눌러도 한 번만 1)
+  // 보이는 댓글만 DELETED 로 바꾸고 본문을 비움 (바꾼 건수: 이미 지워졌으면 0, 동시에 두 번 눌러도 한 번만 1)
   @Transactional
   @Modifying(flushAutomatically = true)
-  @Query("update TalkComment c set c.status = :deletedStatus where c.id = :commentId and c.status = :visibleStatus")
+  @Query("update TalkComment c set c.status = :deletedStatus, c.body = '' "
+    + "where c.id = :commentId and c.status = :visibleStatus")
   int updateStatusIfVisible(@Param("commentId") String commentId, @Param("deletedStatus") TalkCommentStatus deletedStatus,
     @Param("visibleStatus") TalkCommentStatus visibleStatus);
 

@@ -42,7 +42,7 @@
         <td class="wrap-anywhere" style="min-width:10rem">
           <span class="badge badge-ghost badge-sm" th:text="${row.report.targetType.label}">글</span>
           <p th:if="${row.commentBody != null}" class="text-xs whitespace-pre-wrap wrap-anywhere"
-             th:text="${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
+             th:text="${row.commentBody.isBlank()} ? '(지운 댓글)' : ${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
         </td>
         <td class="text-xs whitespace-nowrap" th:text="${row.report.reason.label}">불쾌한 내용</td>
         <td class="text-xs">
@@ -51,7 +51,7 @@
         </td>
         <td class="wrap-anywhere" style="min-width:10rem">
           <a th:href="@{/admin/talk/posts/{id}(id=${row.report.postId})}" class="link link-hover"
-             th:text="${row.postTitle != null ? #strings.abbreviate(row.postTitle, 40) : '(찾을 수 없는 글)'}">제목</a>
+             th:text="${row.postTitle == null ? '(찾을 수 없는 글)' : (row.postTitle.isBlank() ? '(지운 글)' : #strings.abbreviate(row.postTitle, 40))}">제목</a>
         </td>
         <td>
           <span th:replace="~{admin/fragments/talk-report-parts :: resolvedState(${row.report})}"></span>

@@ -37,7 +37,7 @@
         <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(row.post.createdAt)}">2026-10-20 10:00</td>
         <td class="wrap-anywhere" style="min-width:12rem">
           <a th:href="@{/admin/talk/posts/{id}(id=${row.post.id})}" class="link link-hover"
-             th:text="${#strings.abbreviate(row.post.title, 40)}">제목</a>
+             th:text="${row.post.title.isBlank()} ? '(지운 글)' : ${#strings.abbreviate(row.post.title, 40)}">제목</a>
         </td>
         <td class="text-xs">
           <a th:href="@{/admin/members/{id}(id=${row.post.authorMemberId})}" class="link link-hover"

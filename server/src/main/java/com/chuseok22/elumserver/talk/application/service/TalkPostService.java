@@ -49,6 +49,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 public class TalkPostService {
 
+  // 내린 글의 제목 (본문을 남기지 않음)
+  private static final String DELETED_POST_TITLE = "";
   // 흐리게 처리한 그림은 항상 JPEG
   private static final String BLURRED_CONTENT_TYPE = "image/jpeg";
   // 남은 호칭을 문자열 그대로 치환하는 최소 호칭 길이 (코드포인트)
@@ -137,13 +139,17 @@ public class TalkPostService {
   }
 
   /**
-   * 내리기: 내 글 확인 > DELETED > 커밋 뒤 그림 파일 삭제 (같은 원본은 다시 올릴 수 있음)
+   * 내리기: 내 글 확인 > 제목·한마디 비움 + DELETED > 카드 삭제 > 커밋 뒤 그림 파일 삭제 (같은 원본은 다시 올릴 수 있음)
    */
   @Transactional
   public void delete(Caller caller, String postId) {
     TalkPost post = findOwnVisiblePost(caller, postId);
+    // 개인정보처리방침: 내린 글의 본문은 남기지 않음 (title 은 NOT NULL 이라 빈 문자열)
+    post.setTitle(DELETED_POST_TITLE);
+    post.setNote(null);
     post.setStatus(TalkPostStatus.DELETED);
     talkPostRepository.saveAndFlush(post);
+    talkPostStepRepository.deleteAllByPostId(postId);
     deleteImagesAfterCommit(postId);
     log.info("[talk post] deleted : postId={}", postId);
   }

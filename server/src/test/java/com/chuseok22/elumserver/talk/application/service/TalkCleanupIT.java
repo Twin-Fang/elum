@@ -140,7 +140,7 @@ class TalkCleanupIT {
     step.setTitle("step");
     step.setDescription("description");
     talkPostStepRepository.saveAndFlush(step);
-    // 집계를 일부러 틀리게 둔다 (실제 행: 도움 2·보이는 댓글 2·가져가기 2, 이 중 탈퇴자 몫이 하나씩)
+    // 집계를 일부러 틀리게 둔다 (실제 행: 도움 2·보이는 댓글 2·가져간 보호자 2, 이 중 탈퇴자 몫이 하나씩)
     TalkPost stayersPost = newPost(stayer, "stayer", 3, 5, 4);
 
     addHelpful(stayersPost.getId(), leaver);
@@ -152,6 +152,8 @@ class TalkCleanupIT {
     addComment(stayersPost.getId(), bystander, TalkCommentStatus.HIDDEN_BY_ADMIN);
     TalkComment stayersCommentOnLeavers = addComment(leaversPost.getId(), stayer, TalkCommentStatus.VISIBLE);
     addImport(stayersPost.getId(), leaver);
+    addImport(stayersPost.getId(), bystander);
+    // 같은 보호자의 두 번째 가져가기 (기록은 두 행, 가져간 수는 한 명)
     addImport(stayersPost.getId(), bystander);
     addImport(leaversPost.getId(), stayer);
     TalkReport reportByLeaver = addReport(stayersPost.getId(), TalkReportTargetType.POST, stayersPost.getId(), leaver);
@@ -186,7 +188,7 @@ class TalkCleanupIT {
     assertThat(talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId(bystander, stayer)).isTrue();
     assertThat(talkHelpfulRepository.existsByPostIdAndMemberId(stayersPost.getId(), bystander)).isTrue();
 
-    // 남의 글 집계는 행 수로 (도움 1, 보이는 댓글 1, 가져가기 1)
+    // 남의 글 집계는 행 수로 (도움 1, 보이는 댓글 1, 가져간 보호자 1 - 같은 보호자의 두 번째 기록은 세지 않음)
     TalkPost recounted = talkPostRepository.findById(stayersPost.getId()).orElseThrow();
     assertThat(recounted.getHelpfulCount()).isEqualTo(1);
     assertThat(recounted.getCommentCount()).isEqualTo(1);

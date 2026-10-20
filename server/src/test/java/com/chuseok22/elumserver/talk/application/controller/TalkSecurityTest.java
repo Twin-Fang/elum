@@ -184,7 +184,7 @@ class TalkSecurityTest {
   @Test
   @DisplayName("그림은 비공개 캐시 하루로 내려준다")
   void stepImage_isPrivateCachedForOneDay() throws Exception {
-    when(talkFeedQueryService.stepImage("p1", 0)).thenReturn(new ImageContent(new byte[] {1, 2, 3}, "image/jpeg"));
+    when(talkFeedQueryService.stepImage(any(), eq("p1"), eq(0))).thenReturn(new ImageContent(new byte[] {1, 2, 3}, "image/jpeg"));
 
     mockMvc.perform(get("/api/talk/posts/p1/steps/0/image").with(user("g1").authorities(MEMBER, GUARDIAN)))
       .andExpect(status().isOk())

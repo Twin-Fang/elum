@@ -458,7 +458,7 @@ class TalkPostServiceTest {
   }
 
   @Test
-  @DisplayName("내리면 DELETED 로 바꾸고, 그림 파일은 커밋 뒤에만 지운다")
+  @DisplayName("내리면 제목·한마디를 비우고 DELETED 로 바꾸며 카드를 지우고, 그림 파일은 커밋 뒤에만 지운다")
   void delete_marksDeleted_andSchedulesImageRemoval() {
     TalkPost post = visiblePost("post-1", "member-1", "한마디", TalkCategory.DAILY_FLOW);
     when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
@@ -467,7 +467,10 @@ class TalkPostServiceTest {
       talkPostService.delete(GUARDIAN, "post-1");
 
       assertThat(post.getStatus()).isEqualTo(TalkPostStatus.DELETED);
+      assertThat(post.getTitle()).isEmpty();
+      assertThat(post.getNote()).isNull();
       verify(talkPostRepository).saveAndFlush(post);
+      verify(talkPostStepRepository).deleteAllByPostId("post-1");
       verify(talkImageStorage, never()).deletePost(anyString());
 
       TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);

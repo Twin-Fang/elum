@@ -61,6 +61,11 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
 
   @Transactional
   @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.importCount = p.importCount + 1 where p.id = :postId")
+  int increaseImportCount(@Param("postId") String postId);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
   @Query("update TalkPost p set p.commentCount = p.commentCount + 1 where p.id = :postId")
   int increaseCommentCount(@Param("postId") String postId);
 
@@ -120,7 +125,7 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
   @Query("delete from TalkPost p where p.authorMemberId = :memberId")
   int deleteAllByAuthorMemberId(@Param("memberId") String memberId);
 
-  // 탈퇴 정리: 집계를 행 수로 다시 셈 (증감이 아니라 재계산, 가려진·지운 댓글은 센 값에서 제외)
+  // 탈퇴 정리: 집계를 행 수로 다시 셈 (증감이 아니라 재계산, 가려진·지운 댓글은 센 값에서 제외, 가져간 수는 보호자당 1회)
   @Transactional
   @Modifying(flushAutomatically = true)
   @Query("update TalkPost p set p.helpfulCount = cast((select count(h) from TalkHelpful h where h.postId = p.id) as integer) "
@@ -136,7 +141,7 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
 
   @Transactional
   @Modifying(flushAutomatically = true)
-  @Query("update TalkPost p set p.importCount = cast((select count(i) from TalkImport i where i.postId = p.id) as integer) "
+  @Query("update TalkPost p set p.importCount = cast((select count(distinct i.memberId) from TalkImport i where i.postId = p.id) as integer) "
     + "where p.id in :postIds")
   int recountImportCounts(@Param("postIds") Collection<String> postIds);
 }

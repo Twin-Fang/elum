@@ -80,8 +80,9 @@ class TalkFeedQueryServiceTest {
   @BeforeEach
   void setUp() {
     Clock clock = Clock.fixed(NOW.atZone(ZONE).toInstant(), ZONE);
-    service = new TalkFeedQueryService(talkPostRepository, talkPostStepRepository, talkBlockRepository,
-      talkHelpfulRepository, talkImportRepository, talkImageStorage, memberService, clock);
+    TalkPostAccess talkPostAccess = new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService);
+    service = new TalkFeedQueryService(talkPostRepository, talkPostStepRepository, talkHelpfulRepository,
+      talkImportRepository, talkImageStorage, memberService, talkPostAccess, clock);
   }
 
   @Test
@@ -395,7 +396,7 @@ class TalkFeedQueryServiceTest {
       .thenReturn(Optional.of(step("p1", 0, "p1/0.jpg", null, null, false)));
     when(talkImageStorage.read("p1/0.jpg")).thenReturn(content);
 
-    assertThat(service.stepImage("p1", 0)).isSameAs(content);
+    assertThat(service.stepImage(GUARDIAN, "p1", 0)).isSameAs(content);
   }
 
   @Test
@@ -409,10 +410,22 @@ class TalkFeedQueryServiceTest {
       .thenReturn(Optional.of(step("p2", 0, null, "7", null, false)));
 
     for (String postId : List.of("p1", "p2", "missing")) {
-      assertThatThrownBy(() -> service.stepImage(postId, 0))
+      assertThatThrownBy(() -> service.stepImage(GUARDIAN, postId, 0))
         .isInstanceOfSatisfying(CustomException.class,
           e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_IMAGE_NOT_FOUND));
     }
+    verifyNoImageRead();
+  }
+
+  @Test
+  @DisplayName("내가 차단한 글쓴이의 카드 그림은 TALK_IMAGE_NOT_FOUND 로 읽지 않는다")
+  void stepImage_blockedAuthor_throwsImageNotFound() {
+    when(talkPostRepository.findById("p1")).thenReturn(Optional.of(post("p1", "author-blocked", NOW)));
+    blockAuthor("author-blocked");
+
+    assertThatThrownBy(() -> service.stepImage(GUARDIAN, "p1", 0))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_IMAGE_NOT_FOUND));
     verifyNoImageRead();
   }
 

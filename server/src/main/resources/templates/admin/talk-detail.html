@@ -65,7 +65,7 @@
 
   <div class="card bg-base-100 shadow-md border border-base-300">
     <div class="card-body space-y-2">
-      <h2 class="card-title text-lg" th:text="${detail.post.title}">제목</h2>
+      <h2 class="card-title text-lg" th:text="${detail.post.title.isBlank()} ? '(지운 글)' : ${detail.post.title}">제목</h2>
       <p th:if="${detail.post.note != null and !detail.post.note.isBlank()}"
          class="text-base leading-relaxed whitespace-pre-wrap wrap-anywhere" th:text="${detail.post.note}">한마디</p>
       <p th:unless="${detail.post.note != null and !detail.post.note.isBlank()}"
@@ -119,7 +119,8 @@
               <a th:href="@{/admin/members/{id}(id=${row.comment.authorMemberId})}" class="link link-hover"
                  th:text="${row.authorNickname != null ? row.authorNickname : '(닉네임 없음)'}">닉네임</a>
             </td>
-            <td class="whitespace-pre-wrap wrap-anywhere" style="min-width:12rem" th:text="${row.comment.body}">댓글</td>
+            <td class="whitespace-pre-wrap wrap-anywhere" style="min-width:12rem"
+                th:text="${row.comment.body.isBlank()} ? '(지운 댓글)' : ${row.comment.body}">댓글</td>
             <td>
               <span class="badge badge-sm"
                     th:classappend="${row.comment.status.name() == 'VISIBLE'} ? 'badge-success' : (${row.comment.status.name() == 'HIDDEN_BY_ADMIN'} ? 'badge-warning' : 'badge-ghost')"
@@ -160,7 +161,7 @@
             <td class="wrap-anywhere" style="min-width:10rem">
               <span class="badge badge-ghost badge-sm" th:text="${row.report.targetType.label}">글</span>
               <p th:if="${row.commentBody != null}" class="text-xs whitespace-pre-wrap wrap-anywhere"
-                 th:text="${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
+                 th:text="${row.commentBody.isBlank()} ? '(지운 댓글)' : ${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
             </td>
             <td class="text-xs whitespace-nowrap" th:text="${row.report.reason.label}">불쾌한 내용</td>
             <td class="text-xs">
