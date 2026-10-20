@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T14:08:39Z",
-    "currentVersion": "2.66.0",
+    "lastUpdated": "2026-10-20T14:30:44Z",
+    "currentVersion": "2.67.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 292
+    "totalReleases": 293
   },
   "releases": [
+    {
+      "version": "2.67.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 907,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과관리 첫 안내에서 일과를 누르는 장면을 더 간단하게 바꿨어요. 화면 아래에서 창이 올라오지 않고 누르는 손가락만 보여 줘요.\n  * 길게 누르기 안내에서 메뉴가 일과 칸에 붙지 않고 떨어져서 보여요.\n  * 누르기·길게 누르기 안내 문구를 한 줄로 짧게 줄였어요.",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과관리 첫 안내에서 일과를 누르는 장면을 더 간단하게 바꿨어요. 화면 아래에서 창이 올라오지 않고 누르는 손가락만 보여 줘요.",
+            "길게 누르기 안내에서 메뉴가 일과 칸에 붙지 않고 떨어져서 보여요.",
+            "누르기·길게 누르기 안내 문구를 한 줄로 짧게 줄였어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.66.0",
       "project_type": "flutter",
