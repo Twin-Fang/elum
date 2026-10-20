@@ -4,51 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 
-/// 코치마크 시범 안에 그려지는 내용물: 시트 버튼·메뉴 줄·만들기 선택지·토스트·묶음 모양.
+/// 코치마크 시범 안에 그려지는 내용물: 메뉴 줄·만들기 선택지·토스트·묶음 모양.
 /// 문구는 실제 화면과 같은 ARB 키를 쓴다 (따로 적으면 어긋난다).
-
-/// 상세 시트 아래 버튼 둘 (실제 `_LibraryActions` 와 같은 문구·색·2:3 비율)
-class CoachDemoSheetButtons extends StatelessWidget {
-  const CoachDemoSheetButtons({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-    final shape = BorderRadius.circular(18.r);
-    Widget button(String label, Color background, Color foreground) =>
-        Container(
-          height: 56.h,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: background, borderRadius: shape),
-          child: Text(
-            label,
-            style: typo.sheetActionLabel.copyWith(color: foreground),
-          ),
-        );
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: button(
-            context.l10n.routineLibraryEditCards,
-            colors.buttonNeutral,
-            colors.buttonNeutralText,
-          ),
-        ),
-        SizedBox(width: context.space.xs.w),
-        Expanded(
-          flex: 3,
-          child: button(
-            context.l10n.routineLibrarySendToday,
-            colors.textPrimary,
-            colors.surface,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 /// 칸 옆 메뉴 미리보기: 실제 길게 누르기 메뉴와 같은 폭 · 줄 높이 · 항목 5개 (지우기는 붉게)
 class CoachDemoAnchoredMenu extends StatelessWidget {

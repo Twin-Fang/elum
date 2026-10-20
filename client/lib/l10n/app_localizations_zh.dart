@@ -2595,12 +2595,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get routineManageCoachTapMessage =>
-      '일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요';
+  String get routineManageCoachTapMessage => '일과를 *누르면* 카드를 볼 수 있어요';
 
   @override
-  String get routineManageCoachLongPressMessage =>
-      '길게 눌렀다 *떼면* 칸 옆에 메뉴가 떠요\n오늘 보내기 · 이름 바꾸기\n묶음에 넣기 · 복사하기 · 지우기';
+  String get routineManageCoachLongPressMessage => '길게 눌렀다 *떼면* 메뉴가 열려요';
 
   @override
   String get routineManageCoachSentMessage =>
