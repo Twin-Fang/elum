@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
@@ -147,7 +149,8 @@ class OAuthLoginServiceTest {
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
-      adRewardSessionRepository, feedbackService, notificationCleanupService, routineGroupService);
+      adRewardSessionRepository, feedbackService, notificationCleanupService, routineGroupService,
+      mock(MemberDailyVisitRepository.class));
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,

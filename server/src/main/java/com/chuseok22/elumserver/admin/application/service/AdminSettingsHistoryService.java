@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminDateParameter;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Column;
@@ -11,7 +12,6 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigHis
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigHistoryService;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfigHistory;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -89,14 +89,7 @@ public class AdminSettingsHistoryService {
 
   /// 읽을 수 없는 날짜는 조건 없음으로 (화면이 깨지지 않게)
   private static LocalDate parseDate(String text) {
-    if (text == null) {
-      return null;
-    }
-    try {
-      return LocalDate.parse(text);
-    } catch (DateTimeParseException e) {
-      return null;
-    }
+    return AdminDateParameter.parseOrNull(text);
   }
 
   private AdminListRow toRow(SystemConfigHistory history) {

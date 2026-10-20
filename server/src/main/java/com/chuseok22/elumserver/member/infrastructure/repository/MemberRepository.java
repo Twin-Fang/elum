@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
+import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
    *
    * @param hasKeyword  false 면 pattern 을 보지 않는다 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
    * @param planFilter  ALL, PRO, FREE
+   * @param joinedFrom  가입일 기간 시작(포함). 필터가 없으면 아주 이른 날 (null 바인딩을 피하려고 늘 값을 넣음)
    */
   @Query("""
     select m from Member m
@@ -55,6 +57,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
       and s.status = com.chuseok22.elumserver.license.core.SubscriptionStatus.ACTIVE
       and (s.expiresAt is null or s.expiresAt >= :now)
     where m.status in :statuses
+      and m.createdAt >= :joinedFrom and m.createdAt < :joinedToExclusive
       and (:hasKeyword = false
         or lower(m.username) like lower(:pattern) escape '\\'
         or exists (
@@ -69,7 +72,8 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   Page<Member> searchForAdmin(
     @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
     @Param("statuses") Collection<MemberStatus> statuses, @Param("planFilter") String planFilter,
-    @Param("now") LocalDateTime now, Pageable pageable
+    @Param("now") LocalDateTime now, @Param("joinedFrom") LocalDateTime joinedFrom,
+    @Param("joinedToExclusive") LocalDateTime joinedToExclusive, Pageable pageable
   );
 
   long countByStatus(MemberStatus status);
@@ -115,4 +119,27 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   // 최근 활동 회원수(대시보드) — lastActivityAt 기준.
   long countByLastActivityAtAfter(LocalDateTime after);
+
+  /// 기간[from, to) 가입 수 (탈퇴 회원 포함 — 그날 가입한 사실은 남음)
+  long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime from, LocalDateTime to);
+
+  /// 기간[from, to) 칸별 가입 수 (unit: day, month)
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), created_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member
+    where created_at >= :from and created_at < :to
+    group by 1
+    """, nativeQuery = true)
+  List<StatsBucketCount> countJoinedByBucket(
+    @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  /// 기간[from, to) 칸별 탈퇴 수 (되살린 계정은 탈퇴 시각이 비어 빠짐)
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), withdrawn_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member
+    where withdrawn_at >= :from and withdrawn_at < :to
+    group by 1
+    """, nativeQuery = true)
+  List<StatsBucketCount> countWithdrawnByBucket(
+    @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

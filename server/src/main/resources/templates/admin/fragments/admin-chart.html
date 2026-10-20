@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  추이 그래프 카드 부품. 동작은 /admin/js/admin-charts.js 가 [data-trend-chart] 를 찾아 붙인다.
+  scripts: 페이지 끝에 한 번 / unitToggle: 일별·월별 버튼 / trendBody: 그래프 자리 + 상태 문구 + 표로 보기
+-->
+<body>
+
+<th:block th:fragment="scripts">
+  <script th:src="@{/admin/vendor/chart.umd.min.js}" defer></script>
+  <script th:src="@{/admin/js/admin-charts.js}" defer></script>
+</th:block>
+
+<div th:fragment="unitToggle(dayLabel, monthLabel)" class="join" role="group" aria-label="묶음 단위">
+  <button type="button" data-trend-unit="day" class="btn btn-xs join-item btn-active" th:text="${dayLabel}">일별</button>
+  <button type="button" data-trend-unit="month" class="btn btn-xs join-item" th:text="${monthLabel}">월별</button>
+</div>
+
+<th:block th:fragment="trendBody(heightClass)">
+  <div class="relative w-full" th:classappend="${heightClass}">
+    <canvas data-trend-canvas role="img" aria-label="추이 그래프"></canvas>
+  </div>
+  <p data-trend-status class="text-sm text-base-content/60">불러오는 중…</p>
+  <details class="text-sm">
+    <summary class="cursor-pointer text-base-content/60">표로 보기</summary>
+    <div data-trend-table class="max-h-64 overflow-auto overflow-x-auto"></div>
+  </details>
+</th:block>
+
+</body>
+</html>

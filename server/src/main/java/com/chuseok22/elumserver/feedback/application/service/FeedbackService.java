@@ -116,6 +116,12 @@ public class FeedbackService {
     return feedback;
   }
 
+  /** 아직 확인하지 않은 의견 수 (상태 새 의견) */
+  @Transactional(readOnly = true)
+  public long countNew() {
+    return feedbackRepository.countByStatus(FeedbackStatus.NEW);
+  }
+
   @Transactional(readOnly = true)
   public Feedback get(String id) {
     return feedbackRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.FEEDBACK_NOT_FOUND));

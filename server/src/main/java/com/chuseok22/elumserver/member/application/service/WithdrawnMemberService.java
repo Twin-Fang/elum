@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRe
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.routine.application.service.RoutineGroupService;
@@ -59,6 +60,7 @@ public class WithdrawnMemberService {
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
   private final RoutineGroupService routineGroupService;
+  private final MemberDailyVisitRepository memberDailyVisitRepository;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -141,6 +143,7 @@ public class WithdrawnMemberService {
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     feedbackService.deleteAllOf(memberId);
     notificationCleanupService.deleteAllOf(memberId);
+    memberDailyVisitRepository.deleteAllByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);
 

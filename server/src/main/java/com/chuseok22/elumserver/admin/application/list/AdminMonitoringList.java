@@ -6,7 +6,6 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Optio
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
@@ -97,14 +96,8 @@ public final class AdminMonitoringList {
   }
 
   private static LocalDate parseDate(String raw, LocalDate fallback) {
-    if (raw == null) {
-      return fallback;
-    }
-    try {
-      return LocalDate.parse(raw);
-    } catch (DateTimeParseException e) {
-      return fallback;
-    }
+    LocalDate parsed = AdminDateParameter.parseOrNull(raw);
+    return parsed == null ? fallback : parsed;
   }
 
   private static LocalDate clamp(LocalDate date, LocalDate today) {
