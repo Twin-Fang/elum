@@ -114,7 +114,7 @@ public class TalkPostService {
     return routineShareService.snapshotForShare(caller, routineId);
   }
 
-  // 저장 + 즉시 반영: 같은 원본의 보이는 글이 동시에 올라오면 V51 부분 유니크 인덱스가 막음 > TALK_ALREADY_SHARED
+  // 저장 + 즉시 반영: 같은 원본의 보이는 글이 동시에 올라오면 V52 부분 유니크 인덱스가 막음 > TALK_ALREADY_SHARED
   private TalkPost saveNewPost(TalkPost post) {
     try {
       return talkPostRepository.saveAndFlush(post);
