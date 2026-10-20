@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T13:02:36Z",
-    "currentVersion": "2.65.0",
+    "lastUpdated": "2026-10-20T14:08:39Z",
+    "currentVersion": "2.66.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 291
+    "totalReleases": 292
   },
   "releases": [
+    {
+      "version": "2.66.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 905,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 화면 모든 칸에서 하단 광고 위치가 같아졌어요\n  * 칸을 옮겨도 아래 메뉴가 흔들리지 않아요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 화면 모든 칸에서 하단 광고 위치가 같아졌어요",
+            "칸을 옮겨도 아래 메뉴가 흔들리지 않아요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.65.0",
       "project_type": "flutter",
