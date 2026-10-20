@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageSafetyRejection;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -324,6 +325,11 @@ public class RoutineAiPipeline {
     try {
       return cardImageGenerator.generate(request);
     } catch (Exception first) {
+      // 안전 거절은 CardImageGenerator 가 장면을 바꿔 이미 한 번 더 시도했다 — 같은 요청 반복은 낭비라 기본 그림으로
+      if (ImageSafetyRejection.isRejection(first)) {
+        log.warn("이미지 안전 거절, 기본 그림으로 진행: descriptionLength={}", LogTextLength.of(description));
+        return null;
+      }
       log.warn("이미지 생성 1차 실패, 1회 재시도: descriptionLength={}", LogTextLength.of(description), first);
       try {
         return cardImageGenerator.generate(request);

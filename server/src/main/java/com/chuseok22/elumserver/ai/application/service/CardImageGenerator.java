@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageSafetyRejection;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -83,7 +84,7 @@ public class CardImageGenerator {
       return generateRealistic(request);
     }
     if (imageClientRouter.selected() != ImageProvider.FLUX) {
-      return imageClientRouter.current().generateCardImage(toCardScene(request), request.characterType());
+      return generateWithSafetyRetry(imageClientRouter.current(), request);
     }
     if (!fluxImageClient.available()) {
       log.warn("FLUX 를 골랐지만 키가 없다 — 이 카드는 OpenAI 로 그린다");
@@ -178,7 +179,32 @@ public class CardImageGenerator {
     if (request.imageStyle() == ImageStyle.REALISTIC) {
       return openAi.get().generateRealisticImage(request.description());
     }
-    return openAi.get().generateCardImage(toCardScene(request), request.characterType());
+    return generateWithSafetyRetry(openAi.get(), request);
+  }
+
+  /**
+   * 안전 시스템이 거절하면 카드 제목만으로 한 번 더 시도: 장면 문장이 걸린 경우를 피함
+   * 거절 사유는 로그로 남김 (원문 제외), 제목이 없는 카드나 재시도도 거절이면 그대로 던져 기본 그림으로 대체
+   */
+  private GeneratedImage generateWithSafetyRetry(ImageGenerationClient client, CardImageRequest request) {
+    try {
+      return client.generateCardImage(toCardScene(request), request.characterType());
+    } catch (RuntimeException rejected) {
+      if (!ImageSafetyRejection.isRejection(rejected) || request.stepTitle() == null || request.stepTitle().isBlank()) {
+        throw rejected;
+      }
+      String reasons = ImageSafetyRejection.reasonsOf(rejected);
+      log.warn("[image safety] rejected 400 : reasons={}, provider={}, retry with title only", reasons, client.provider());
+      try {
+        GeneratedImage image = client.generateCardImage(
+          CardScene.descriptionOnly(request.stepTitle()), request.characterType());
+        log.info("[image safety] retry succeeded : reasons={}", reasons);
+        return image;
+      } catch (RuntimeException retryFailed) {
+        log.warn("[image safety] retry failed : reasons={}, retryReasons={}", reasons, ImageSafetyRejection.reasonsOf(retryFailed));
+        throw retryFailed;
+      }
+    }
   }
 
   /// 글 AI 의 영어 장면은 한 줄·영어일 때만 싣는다 (그림 지시문 JSON 의 sceneDetail)

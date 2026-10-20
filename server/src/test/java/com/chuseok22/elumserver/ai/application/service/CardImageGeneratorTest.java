@@ -77,6 +77,65 @@ class CardImageGeneratorTest {
     verifyNoInteractions(fluxImageClient, translator);
   }
 
+  private static RuntimeException safetyRejected() {
+    return new RuntimeException("400 Bad Request: Your request was rejected by the safety system. safety_violations=[self-harm].");
+  }
+
+  private CardImageGenerator.CardImageRequest requestWithTitle(String stepTitle) {
+    return new CardImageGenerator.CardImageRequest(
+      "귀에 체온계를 대요", "The character holds a thermometer near the ear.", CharacterType.LULU, SEED_KEY,
+      ImageStyle.CARTOON, "병원에 가요", stepTitle);
+  }
+
+  @Test
+  @DisplayName("안전 거절이면 장면 문장을 빼고 카드 제목만으로 한 번 더 시도해 그림을 얻는다 (#895)")
+  void safetyRejection_retriesWithTitleOnly() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(argThat(scene -> scene != null && "귀에 체온계를 대요".equals(scene.stepDescription())), any()))
+      .thenThrow(safetyRejected());
+    when(openAiClient.generateCardImage(argThat(scene -> scene != null && "체온을 재요".equals(scene.stepDescription())
+      && scene.sceneDetail() == null), any())).thenReturn(OPENAI_IMAGE);
+
+    GeneratedImage image = generator.generate(requestWithTitle("체온을 재요"));
+
+    assertThat(image).isSameAs(OPENAI_IMAGE);
+  }
+
+  @Test
+  @DisplayName("제목으로 다시 시도해도 거절이면 그대로 던진다 — 부르는 쪽이 기본 그림으로 대체 (#895)")
+  void safetyRejection_retryAlsoRejected_throws() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(safetyRejected());
+
+    assertThatThrownBy(() -> generator.generate(requestWithTitle("체온을 재요")))
+      .hasMessageContaining("safety system");
+    verify(openAiClient, org.mockito.Mockito.times(2)).generateCardImage(any(), any());
+  }
+
+  @Test
+  @DisplayName("제목이 없는 카드(직접 추가)는 안전 거절을 다시 시도하지 않는다 — 바꿀 문장이 없다 (#895)")
+  void safetyRejection_withoutTitle_doesNotRetry() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(safetyRejected());
+
+    assertThatThrownBy(() -> generator.generate(request(null))).hasMessageContaining("safety system");
+    verify(openAiClient, org.mockito.Mockito.times(1)).generateCardImage(any(), any());
+  }
+
+  @Test
+  @DisplayName("안전 거절이 아닌 오류는 이 단계에서 다시 시도하지 않는다 (429 는 호출부 대기 로직 몫) (#895)")
+  void otherError_doesNotRetryHere() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(new RuntimeException("429 Too Many Requests"));
+
+    assertThatThrownBy(() -> generator.generate(requestWithTitle("체온을 재요"))).hasMessageContaining("429");
+    verify(openAiClient, org.mockito.Mockito.times(1)).generateCardImage(any(), any());
+  }
+
   @Test
   @DisplayName("글 AI 가 준 영어 장면이 있으면 그대로 FLUX 에 — 번역 호출 없음(추가 비용 없음), seed 는 일과로 고정")
   void flux_withEnglishScene() {
