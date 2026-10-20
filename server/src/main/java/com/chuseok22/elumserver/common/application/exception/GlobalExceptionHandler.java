@@ -36,7 +36,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
     "com.chuseok22.elumserver.notice",
     "com.chuseok22.elumserver.notification",
     "com.chuseok22.elumserver.routine",
-    "com.chuseok22.elumserver.systemconfig"
+    "com.chuseok22.elumserver.systemconfig",
+    "com.chuseok22.elumserver.talk"
   },
   annotations = JsonErrorResponse.class
 )

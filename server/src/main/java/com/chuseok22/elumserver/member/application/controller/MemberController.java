@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoal
 import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.dto.response.TalkRulesAgreementResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.application.service.OnboardingService;
@@ -132,5 +133,18 @@ public class MemberController implements MemberControllerDocs {
   public ResponseEntity<Void> withdraw(Authentication authentication) {
     memberService.withdraw(authentication.getName());
     return ResponseEntity.noContent().build();
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/talk-rules-agreement")
+  public ResponseEntity<Void> agreeTalkRules(Authentication authentication) {
+    memberService.agreeTalkRules(authentication.getName());
+    return ResponseEntity.noContent().build();
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @GetMapping("/talk-rules-agreement")
+  public ResponseEntity<TalkRulesAgreementResponse> getTalkRulesAgreement(Authentication authentication) {
+    return ResponseEntity.ok(new TalkRulesAgreementResponse(memberService.hasAgreedTalkRules(authentication.getName())));
   }
 }
