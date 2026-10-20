@@ -36,6 +36,8 @@
     text: ['#52514e', '#c3c2b7']
   };
   var METRIC_SUFFIX = { count: '건', cost: '원', failure: '%' };
+  // 선 그래프에 점을 함께 그리는 값 개수 상한 (7칸 이하)
+  var MAXIMUM_VALUE_COUNT_WITH_POINTS = 7;
   var ERROR_FETCH = 'E-ADMIN-STATS';
   var ERROR_CHART_LIBRARY = 'E-ADMIN-CHART';
 
@@ -104,6 +106,8 @@
     return chartData.series.map(function (series) {
       var color = colorOf(series.key);
       var isLine = type === 'line' || card.dataset.metric === 'failure';
+      // 값 있는 칸이 적으면(기록 시작 직후) 선이 안 그려지므로 점을 보인다
+      var valueCount = series.values.filter(function (value) { return value != null; }).length;
       return {
         type: isLine ? 'line' : 'bar',
         label: series.label,
@@ -114,7 +118,7 @@
         borderRadius: isLine ? 0 : 4,
         borderSkipped: 'start',
         maxBarThickness: 28,
-        pointRadius: 0,
+        pointRadius: isLine && valueCount <= MAXIMUM_VALUE_COUNT_WITH_POINTS ? 3 : 0,
         pointHoverRadius: 4,
         fill: isLine && chartData.series.length === 1,
         tension: 0.3,
