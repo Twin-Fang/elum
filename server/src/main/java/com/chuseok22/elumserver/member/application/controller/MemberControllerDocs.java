@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
@@ -146,6 +147,54 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<MemberResponse> completeOnboarding(Authentication authentication, OnboardingCompleteRequest request);
+
+  @Operation(
+    summary = "보호자 닉네임 변경",
+    description = """
+      보호자 본인 닉네임을 바꿉니다 (이룸이 호칭은 `PATCH /api/member/nickname`).
+      - 2~16자, 한글·영문·숫자·하이픈. 앞뒤 공백은 지우고 저장합니다.
+      - 욕설·사칭 이름은 이유를 알리지 않고 `NICKNAME_NOT_ALLOWED` 로 거절합니다.
+      - 7일에 한 번 바꿀 수 있습니다(첫 변경은 제한 없음). 다음 가능 시각은 응답 `account.nicknameChangeableAt`.
+      - 지금 닉네임과 같으면 아무것도 바꾸지 않고 200 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "변경 완료 (내 정보와 같은 모양)",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "형식 오류",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_INVALID_FORMAT\",\"errorMessage\":\"닉네임은 한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요.\"}")
+      )
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "다른 보호자가 사용 중",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_DUPLICATED\",\"errorMessage\":\"다른 보호자가 이미 쓰고 있어요. 다른 이름을 적어 주세요.\"}")
+      )
+    ),
+    @ApiResponse(
+      responseCode = "429",
+      description = "7일 안에 다시 변경",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_CHANGE_TOO_SOON\",\"errorMessage\":\"닉네임은 7일에 한 번 바꿀 수 있어요.\"}")
+      )
+    )
+  })
+  ResponseEntity<MemberResponse> updateGuardianNickname(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    GuardianNicknameUpdateRequest request
+  );
 
   @Operation(
     summary = "아이 호칭 설정",

@@ -40,6 +40,9 @@ public class Member extends BaseEntity {
   @Column(unique = true, length = 50)
   private String nickname;
 
+  // 보호자가 닉네임을 직접 바꾼 마지막 시각. null 이면 바꾼 적 없음 (변경 주기 판정)
+  private LocalDateTime nicknameChangedAt;
+
   // 계정 상태. SUSPENDED면 로그인·API 사용이 모두 차단된다(MemberAccessGuard).
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, columnDefinition = "varchar(255) not null default 'ACTIVE'")
