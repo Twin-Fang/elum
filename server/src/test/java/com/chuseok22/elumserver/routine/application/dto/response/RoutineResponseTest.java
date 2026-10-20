@@ -151,5 +151,7 @@ class RoutineResponseTest {
     assertThat(RoutineResponse.from(own).talkPostId()).isNull();
     // 호출자별 변환(원문 가림·이름 붙이기)을 거쳐도 유지
     assertThat(RoutineResponse.from(imported).forCaller(Caller.guardian("member-1")).talkPostId()).isEqualTo("post-1");
+    // 이룸이 휴대폰에는 싣지 않음
+    assertThat(RoutineResponse.from(imported).forCaller(Caller.elumi("member-2", "link-1")).talkPostId()).isNull();
   }
 }

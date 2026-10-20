@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
 import com.chuseok22.elumserver.talk.application.service.TalkAdminService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 관리자 추이 그래프·사이드바 배지 JSON: 가입, 방문, AI 사용량, 배지 (기간: unit, from, to, days — 틀린 값은 기본값)
  * @LogMonitoring 없음: 배지가 화면마다 불려 로그만 채움 (AdminLogApiController 와 같음)
  */
+@Slf4j
 @RestController
 @JsonErrorResponse
 @RequiredArgsConstructor
@@ -69,7 +71,17 @@ public class AdminStatsApiController {
     AdminDashboardAttention attention = adminDashboardService.summary().attention();
     return new AdminSidebarBadges(
       attention.newFeedbackCount(), attention.pendingReviewRoutineCount(), attention.aiHealth().alertCount(),
-      talkAdminService.countUnresolvedReports());
+      countUnresolvedTalkReportsSafely());
+  }
+
+  // 이야기 표 조회가 실패해도 다른 배지는 보여 줌 (실패 시 0)
+  private long countUnresolvedTalkReportsSafely() {
+    try {
+      return talkAdminService.countUnresolvedReports();
+    } catch (RuntimeException e) {
+      log.warn("[admin badges] talk report count failed : badge shown as 0", e);
+      return 0;
+    }
   }
 
   private static AdminTrendRange rangeOf(String unit, String from, String to, Integer days) {

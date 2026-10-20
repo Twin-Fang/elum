@@ -185,7 +185,18 @@ public record RoutineResponse(
   /// 만든 사람 이름(creatorName)은 이름을 찾아야 하므로 RoutineAuthorResolver 가 채운다.
   public RoutineResponse forCaller(Caller caller) {
     RoutineResponse base = hidesSourceTextFrom(caller) ? withoutSourceText() : this;
+    // 이야기 출처 표시는 보호자 화면용이라 이룸이 휴대폰에는 보내지 않음
+    if (caller.isElumi()) {
+      base = base.withoutTalkPostId();
+    }
     return base.withCreatedByMe(createdByMeFor(caller));
+  }
+
+  private RoutineResponse withoutTalkPostId() {
+    return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
+      completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, null);
   }
 
   /// 만든 사람 이름을 붙인 응답.

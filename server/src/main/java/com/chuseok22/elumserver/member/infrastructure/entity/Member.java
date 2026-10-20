@@ -112,6 +112,7 @@ public class Member extends BaseEntity {
     marketingAgreed = false;
     consentedAt = null;
     consentVersion = null;
+    talkRulesAgreedAt = null;
   }
 
   /// 필수 항목을 모두 동의했는가. 하나라도 빠지면 서비스를 쓸 수 없다.

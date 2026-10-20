@@ -36,4 +36,24 @@ class AdminTalkSidebarBadgeTest {
     assertThat(badges.newFeedbackCount()).isEqualTo(2L);
     assertThat(badges.pendingReviewRoutineCount()).isEqualTo(1L);
   }
+
+  @Test
+  @DisplayName("이야기 신고 수 조회가 실패하면 그 배지만 0 이고 다른 배지는 그대로다")
+  void badges_talkCountFails_onlyTalkBadgeIsZero() {
+    AdminDashboardService dashboardService = mock(AdminDashboardService.class);
+    TalkAdminService talkAdminService = mock(TalkAdminService.class);
+    AdminDashboardSummary summary = mock(AdminDashboardSummary.class);
+    when(summary.attention()).thenReturn(new AdminDashboardAttention(
+      2, 1, 0, new AiHealthSnapshot(List.of(), List.of()), -1, 0));
+    when(dashboardService.summary()).thenReturn(summary);
+    when(talkAdminService.countUnresolvedReports()).thenThrow(new IllegalStateException("talk table missing"));
+    AdminStatsApiController controller =
+      new AdminStatsApiController(mock(AdminStatsService.class), dashboardService, talkAdminService);
+
+    AdminSidebarBadges badges = controller.badges();
+
+    assertThat(badges.unresolvedTalkReportCount()).isZero();
+    assertThat(badges.newFeedbackCount()).isEqualTo(2L);
+    assertThat(badges.pendingReviewRoutineCount()).isEqualTo(1L);
+  }
 }
