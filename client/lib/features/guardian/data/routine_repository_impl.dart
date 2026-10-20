@@ -220,11 +220,15 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<({Routine routine, AppFailure? failure})> addStep(
+  Future<StepAddResult> addStep(
     Routine routine, {
     required String title,
     required String description,
   }) => _stepApi.addStep(routine, title: title, description: description);
+
+  @override
+  Future<String?> fetchStepImagePath(String routineId, String stepId) =>
+      _stepApi.fetchStepImagePath(routineId, stepId);
 
   @override
   Future<({Routine routine, AppFailure? failure})> updateStep(

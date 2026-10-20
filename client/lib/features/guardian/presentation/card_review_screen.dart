@@ -15,6 +15,7 @@ import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
+import 'card_review_added_image.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_review_parts.dart';
@@ -55,7 +56,9 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 }
 
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
-    with BusyStateMixin<CardReviewScreen> {
+    with
+        BusyStateMixin<CardReviewScreen>,
+        CardReviewAddedImage<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -256,7 +259,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   /// 새 카드를 직접 추가한다 (시안 1197:6044).
   ///
   /// 서버에 **시트 안에서** 넣는다 — 실패하면 시트가 열린 채 쓴 글이 남는다.
-  /// 그림은 만들지 않는다(시안에 고르는 자리가 없다). 성공하면 새 카드로 넘어간다.
+  /// 그림은 그림 방식대로 서버가 그림 (#868). 성공하면 새 카드로 넘어간다.
   Future<void> _add() async {
     final notifier = ref.read(routineFlowProvider.notifier);
     final before = ref.read(routineFlowProvider).routine?.steps.length ?? 0;
@@ -264,11 +267,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     final added = await CardEditSheet.showAdd(
       context,
       onSubmit: (title, description) async {
-        final failure = await notifier.addStep(
+        final outcome = await notifier.addStep(
           title: title,
           description: description,
         );
-        if (failure == null) return true;
+        final failure = outcome.failure;
+        if (failure == null) {
+          followAddedCardImage(outcome.addedStepId, outcome.imageState);
+          return true;
+        }
         if (mounted) {
           showFailure(
             context,
@@ -426,6 +433,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
                         language: routine?.language ?? 'ko',
                         onSpeak: () => _speak(cards[index]),
                         isSpeaking: _speakingId == cards[index].id,
+                        isImageGenerating: isAddedCardImageGenerating(
+                          cards[index].id,
+                        ),
                         // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
                         onDelete: cards.length > 1
                             ? () => _confirmRemove(cards[index])

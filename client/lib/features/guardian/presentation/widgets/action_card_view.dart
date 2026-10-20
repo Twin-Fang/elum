@@ -40,6 +40,7 @@ class ActionCardView extends StatefulWidget {
     this.isSpeaking = false,
     this.layout = ActionCardLayout.review,
     this.onAddPhoto,
+    this.isImageGenerating = false,
   });
 
   /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230).
@@ -82,6 +83,9 @@ class ActionCardView extends StatefulWidget {
   /// 자리만 보이고 눌러도 아무 일이 없다. 이룸이 화면([ActionCardLayout.childDetail])은
   /// 사진을 넣는 자리가 아니라 무시한다.
   final VoidCallback? onAddPhoto;
+
+  /// 서버가 이 카드 그림을 그리는 중인가 (직접 추가한 카드, #868)
+  final bool isImageGenerating;
 
   @override
   State<ActionCardView> createState() => _ActionCardViewState();
@@ -283,6 +287,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                         pictogramId: widget.card.pictogramId,
                         pictogramLabel: widget.card.displayTitle,
                         onDelete: widget.onDelete,
+                        isImageGenerating: widget.isImageGenerating,
                         // 이룸이 화면은 사진을 넣는 자리가 아니다
                         emptyBuilder: (context) => childLayout
                             ? DefaultCardTitleArt(

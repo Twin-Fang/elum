@@ -3,6 +3,13 @@ import '../../../shared/models/routine.dart';
 import '../../../shared/models/support_goal.dart';
 import '../domain/routine_suggestion.dart';
 
+/// 카드 추가 결과: 일과, 실패, 그림 건너뛴 까닭(서버 `imageSkippedReason`, 그림을 만들면 null)
+typedef StepAddResult = ({
+  Routine routine,
+  AppFailure? failure,
+  String? imageSkippedReason,
+});
+
 /// 일과 저장소.
 ///
 /// **절대 throw하지 않는다.** 데모는 어떤 실패에도 끝까지 진행되어야 한다 (docs 원칙 6번).
@@ -64,17 +71,20 @@ abstract interface class RoutineRepository {
 
   /// 카드 한 장을 직접 추가한다 (시안 1197:6044 `새로운 카드 추가`).
   ///
-  /// **그림은 만들지 않는다.** 서버는 `generateImage` 를 줄 때만 그림을 그리고,
-  /// 시안에는 그림을 고르는 자리가 없다.
+  /// 그림은 이룸이 그림 방식대로 서버가 커밋 뒤 채움 (만화·실사 > 그림 1장 크레딧, 기본 그림 > 건너뜀, #868).
+  /// 그림이 채워졌는지는 [fetchStepImagePath] 로 확인.
   ///
   /// [failure]가 null이 아니면 서버에 못 넣었다는 뜻이고 [routine]은 그대로다 — 수정과 달리
   /// **로컬에만 넣지 않는다.** 새 카드는 서버가 준 id 가 있어야 이후에 고치고 옮길 수 있다.
   /// (서버가 없는 로컬 데모 일과는 로컬에 넣는다.)
-  Future<({Routine routine, AppFailure? failure})> addStep(
+  Future<StepAddResult> addStep(
     Routine routine, {
     required String title,
     required String description,
   });
+
+  /// 카드 1장의 현재 그림 경로. 아직 그리는 중이거나 조회 실패면 null
+  Future<String?> fetchStepImagePath(String routineId, String stepId);
 
   /// 카드 문장 수정.
   ///
@@ -134,4 +144,3 @@ abstract interface class RoutineRepository {
   /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다.
   Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds);
 }
-

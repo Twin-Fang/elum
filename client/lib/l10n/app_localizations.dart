@@ -2372,6 +2372,24 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get cardReviewAddFailedFallback;
 
+  /// 직접 추가한 카드의 그림을 서버가 그리는 동안 그림칸에 뜨는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 만들고 있어요'**
+  String get cardImageGeneratingLabel;
+
+  /// 카드 추가 때 크레딧이 모자라 AI 그림 대신 그림 기호를 넣었을 때 아래 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧이 모자라 기본 그림을 넣었어요'**
+  String get cardImageNoCreditToast;
+
+  /// 카드 추가 때 AI 그림을 만들지 못해 그림 기호로 남았을 때 아래 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 만들지 못해 기본 그림을 넣었어요'**
+  String get cardImageUnavailableToast;
+
   /// 카드 순서 바꾸기 중 하단 버튼
   ///
   /// In ko, this message translates to:
