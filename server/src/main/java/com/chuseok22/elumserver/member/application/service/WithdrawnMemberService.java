@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
+import com.chuseok22.elumserver.routine.application.service.RoutineGroupService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -57,6 +58,7 @@ public class WithdrawnMemberService {
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
+  private final RoutineGroupService routineGroupService;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -148,6 +150,8 @@ public class WithdrawnMemberService {
     // 크레딧 계정도 행·원장은 운영 지표로 남기고 회원과 소셜 신원 해시를 뗀다. 1년 안의 재가입은
     // 같은 계정이 복원돼 사용량이 이어지고, 보관 기간이 지난 뒤에는 방침대로 식별값을 파기한다.
     aiCreditAccountRepository.detachMember(memberId);
+    // 일과 묶음은 함께 돌보는 이룸이에 남기고 만든 사람만 뗀다
+    routineGroupService.detachCreatorOf(memberId);
 
     memberRepository.delete(member);
     // 지우기를 바로 DB 에 보낸다. 로그인 경로(S2)는 같은 트랜잭션에서 같은 아이디로 새 계정을 만드는데,
