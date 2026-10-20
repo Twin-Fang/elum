@@ -165,9 +165,11 @@ public class TalkReactionService {
     comment.setBody(body);
     TalkComment saved = talkCommentRepository.save(comment);
     talkPostRepository.increaseCommentCount(postId);
-    // 알림 이벤트 (커밋 뒤 리스너가 처리, 글쓴이 본인 댓글은 리스너가 거름)
-    eventPublisher.publishEvent(
-      new TalkPostCommentedEvent(postId, post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
+    // 알림 이벤트 (글쓴이가 나를 차단했으면 내지 않음, 커밋 뒤 리스너가 처리, 글쓴이 본인 댓글은 리스너가 거름)
+    if (!talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId(post.getAuthorMemberId(), caller.memberId())) {
+      eventPublisher.publishEvent(
+        new TalkPostCommentedEvent(postId, post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
+    }
     log.info("[talk comment] created : postId={}", postId);
     return toResponses(caller, List.of(saved)).get(0);
   }

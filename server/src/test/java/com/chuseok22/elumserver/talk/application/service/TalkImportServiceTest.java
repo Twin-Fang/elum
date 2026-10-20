@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.talk.core.TalkPostStatus;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkImport;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
+import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkImportRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostStepRepository;
@@ -51,6 +52,8 @@ class TalkImportServiceTest {
   @Mock
   private TalkImportRepository talkImportRepository;
   @Mock
+  private TalkBlockRepository talkBlockRepository;
+  @Mock
   private TalkImageStorage talkImageStorage;
   @Mock
   private RoutineShareService routineShareService;
@@ -62,8 +65,8 @@ class TalkImportServiceTest {
   @BeforeEach
   void setUp() {
     talkImportService = new TalkImportService(
-      talkPostRepository, talkPostStepRepository, talkImportRepository, talkImageStorage, routineShareService,
-      eventPublisher);
+      talkPostRepository, talkPostStepRepository, talkImportRepository, talkBlockRepository, talkImageStorage,
+      routineShareService, eventPublisher);
   }
 
   @Test
@@ -161,6 +164,23 @@ class TalkImportServiceTest {
 
     verify(eventPublisher, org.mockito.Mockito.times(1))
       .publishEvent(new TalkPostImportedEvent("post-1", "author-1", "member-1", "버스 타기"));
+  }
+
+  @Test
+  @DisplayName("글쓴이가 가져간 보호자를 차단했으면 알림 이벤트를 내보내지 않고 가져가기는 그대로 된다")
+  void importToLibrary_authorBlockedActor_publishesNoEvent() {
+    TalkPost post = post(TalkPostStatus.VISIBLE);
+    post.setAuthorMemberId("author-1");
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(talkPostStepRepository.findByPostIdOrderByStepOrderAsc("post-1")).thenReturn(List.of(step(0, null)));
+    when(routineShareService.importToLibrary(any(), any(), any(), any())).thenReturn("routine-1");
+    when(talkImportRepository.existsByPostIdAndMemberId("post-1", "member-1")).thenReturn(false);
+    when(talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId("author-1", "member-1")).thenReturn(true);
+
+    talkImportService.importToLibrary(GUARDIAN, "post-1", new TalkImportRequest("profile-1", null));
+
+    assertThat(post.getImportCount()).isEqualTo(1);
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
   }
 
   @Test

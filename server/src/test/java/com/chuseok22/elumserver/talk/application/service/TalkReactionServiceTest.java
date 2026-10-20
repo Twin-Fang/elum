@@ -240,6 +240,22 @@ class TalkReactionServiceTest {
   }
 
   @Test
+  @DisplayName("글쓴이가 댓글 쓴 보호자를 차단했으면 댓글은 저장하되 알림 이벤트는 내보내지 않는다")
+  void addComment_authorBlockedActor_publishesNoEvent() {
+    when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(true);
+    TalkPost post = post("post-1", "author-1");
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(talkCommentRepository.save(any(TalkComment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of());
+    when(talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId("author-1", "viewer-1")).thenReturn(true);
+
+    talkReactionService.addComment(VIEWER, "post-1", new TalkCommentRequest("좋아요"));
+
+    verify(talkCommentRepository).save(any(TalkComment.class));
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
+  }
+
+  @Test
   @DisplayName("댓글 규칙에 걸려 거절되면 알림 이벤트를 내보내지 않는다")
   void addComment_rejected_publishesNothing() {
     when(memberService.hasAgreedTalkRules("viewer-1")).thenReturn(false);

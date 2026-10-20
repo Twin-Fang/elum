@@ -1,6 +1,18 @@
 spring:
   profiles:
     active: prod
+  # 신고 메일 발송기. host 가 비면 메일을 보내지 않는다
+  mail:
+    host: ${ELUM_MAIL_HOST:}
+    port: ${ELUM_MAIL_PORT:587}
+    username: ${ELUM_MAIL_USERNAME:}
+    password: ${ELUM_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   jpa:
     open-in-view: false
     properties:
@@ -58,6 +70,8 @@ talk:
   image-storage-path: ${ELUM_TALK_IMAGE_PATH:data/talk-images}
   # 신고 알림 받을 메일. 비면 메일을 보내지 않는다
   report-mail-to: ${ELUM_TALK_REPORT_MAIL_TO:}
+  # 신고 메일의 관리자 화면 링크 기준 주소
+  admin-base-url: ${ELUM_TALK_ADMIN_BASE_URL:https://api.elum.chuseok22.com}
 
 elum:
   auth:

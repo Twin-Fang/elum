@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.talk.core.TalkPostStatus;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkImport;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
+import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkImportRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepository;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostStepRepository;
@@ -37,6 +38,7 @@ public class TalkImportService {
   private final TalkPostRepository talkPostRepository;
   private final TalkPostStepRepository talkPostStepRepository;
   private final TalkImportRepository talkImportRepository;
+  private final TalkBlockRepository talkBlockRepository;
   private final TalkImageStorage talkImageStorage;
   private final RoutineShareService routineShareService;
   private final ApplicationEventPublisher eventPublisher;
@@ -64,9 +66,11 @@ public class TalkImportService {
     if (isFirstImportByMember) {
       post.setImportCount(post.getImportCount() + 1);
       talkPostRepository.save(post);
-      // 알림 이벤트는 보호자당 첫 가져가기만 (알림의 숫자 = 가져간 보호자 수)
-      eventPublisher.publishEvent(
-        new TalkPostImportedEvent(post.getId(), post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
+      // 알림 이벤트는 보호자당 첫 가져가기만 (알림의 숫자 = 가져간 보호자 수), 글쓴이가 나를 차단했으면 내지 않음
+      if (!talkBlockRepository.existsByBlockerMemberIdAndBlockedMemberId(post.getAuthorMemberId(), caller.memberId())) {
+        eventPublisher.publishEvent(
+          new TalkPostImportedEvent(post.getId(), post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
+      }
     }
     return new TalkImportResponse(routineId, request.profileId());
   }

@@ -23,7 +23,7 @@ class LocalFileTalkImageStorageTest {
 
   @BeforeEach
   void setUp() {
-    talkImageStorage = new LocalFileTalkImageStorage(new TalkProperties(tempDir.toString(), null));
+    talkImageStorage = new LocalFileTalkImageStorage(new TalkProperties(tempDir.toString(), null, null));
   }
 
   @Test
