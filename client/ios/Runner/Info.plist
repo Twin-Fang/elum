@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- 크래시 수집은 기본 꺼짐. 릴리스 빌드에서만 앱이 켠다 (CrashReporter.enableIfAllowed) -->
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<!-- 홈 화면에 보이는 이름. 한국어만 지원하는 서비스라 한글로 둔다 (이슈 #289). -->

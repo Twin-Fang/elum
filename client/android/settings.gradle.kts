@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
     // FCM 설정 파일(google-services.json)을 리소스로 변환
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // 릴리스 크래시 수집(Crashlytics) 매핑 파일 업로드
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 include(":app")

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n_context.dart';
+import '../logger/crash_reporter.dart';
 import '../network/app_failure.dart';
 import 'elum_dialog.dart';
 
@@ -37,6 +38,11 @@ Future<void> showFailure(
 }) async {
   final failure = AppFailure.of(error);
   if (failure.isSilent) return;
+  // 앱 쪽 실패만 비치명 오류로 보냄 (서버가 답한 업무 오류·사용자 네트워크 사정은 제외)
+  if (failure.server == null && !failure.isUnreachable) {
+    CrashReporter.recordHandled(error ?? failure, StackTrace.current,
+        errorCode: failure.badgeOr(fallbackCode));
+  }
 
   final l10n = context.l10n;
   await showElumDialog<void>(
