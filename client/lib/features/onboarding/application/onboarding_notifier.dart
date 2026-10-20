@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/application/home_coach_notifier.dart';
+import '../../guardian/application/routine_manage_coach_notifier.dart';
 import '../../member/data/member_repository.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../../../shared/models/character.dart';
@@ -211,6 +212,7 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     try {
       await storage.resetCoachMarks();
       ref.invalidate(homeCoachProvider);
+      ref.invalidate(routineManageCoachProvider);
     } catch (e, stack) {
       AppLogger.error('[onboarding] coach mark reset failed (flow continues)', e, stack);
     }
