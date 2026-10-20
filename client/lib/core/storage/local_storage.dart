@@ -174,6 +174,12 @@ abstract interface class LocalStorage {
   bool get hasAskedPushPermission;
   Future<void> setHasAskedPushPermission(bool v);
 
+  /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
+  ///
+  /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
+  String? get updateSuggestionShownRecord;
+  Future<void> setUpdateSuggestionShownRecord(String record);
+
   /// 보호자 홈 코치마크를 이 휴대폰에서 이미 봤는가.
   ///
   /// 공지 숨김과 같은 이유로 **계정이 아니라 휴대폰에 속한다.** [clearAll] 이 지우지 않는다 —

@@ -985,11 +985,13 @@
   "notificationSettingFeedbackResolved": "의견을 처리했을 때",
   "@notificationSettingFeedbackResolved": {"description": "알림 설정: 의견 처리 푸시 스위치"},
 
-  "notificationPermissionOff": "기기 알림이 꺼져 있어 알림을 받을 수 없어요",
+  "notificationPermissionOff": "기기 알림이 꺼져 있어요",
   "@notificationPermissionOff": {"description": "알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐"},
 
-  "notificationOpenDeviceSettings": "기기 설정 열기",
-  "@notificationOpenDeviceSettings": {"description": "기기 알림 권한 안내 줄의 버튼"},
+  "notificationTurnOnDeviceNotification": "켜기",
+  "@notificationTurnOnDeviceNotification": {"description": "기기 알림 꺼짐 안내 띠의 버튼 (안 물었으면 권한 창, 거부했으면 기기 설정)"},
+  "notificationSettingsLockedHint": "기기 알림을 켜면 이 설정대로 받아요",
+  "@notificationSettingsLockedHint": {"description": "기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명"},
 
   "notificationSettingSaveFailed": "설정을 저장하지 못했어요",
   "@notificationSettingSaveFailed": {"description": "알림 설정 저장 실패 팝업 문구"},
@@ -2245,5 +2247,35 @@
   "routineManageCoachSampleBrush": "양치하기",
   "@routineManageCoachSampleBrush": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
   "routineManageCoachSampleBag": "가방 챙기기",
-  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"}
+  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
+
+  "updateSuggestionTitle": "새 버전이 나왔어요",
+  "@updateSuggestionTitle": {"description": "보호자 홈에서 하루 한 번 뜨는 업데이트 권유 팝업 제목 (#660)"},
+  "updateSuggestionBody": "업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요",
+  "@updateSuggestionBody": {"description": "업데이트 권유 팝업 본문"},
+  "updateSuggestionLater": "나중에",
+  "@updateSuggestionLater": {"description": "업데이트 권유 팝업의 닫기 버튼"},
+
+  "elumiInfoTitle": "{name} 정보",
+  "@elumiInfoTitle": {"description": "이룸이 정보 화면 제목. name 은 이룸이 호칭 (#660)", "placeholders": {"name": {"type": "String"}}},
+  "elumiInfoEditLabel": "{name} 정보 고치기",
+  "@elumiInfoEditLabel": {"description": "내정보 이룸이 줄의 연필 버튼을 낭독기가 읽는 이름. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}},
+  "elumiInfoName": "이름",
+  "@elumiInfoName": {"description": "이룸이 정보 화면: 이름 줄"},
+  "elumiInfoCharacter": "캐릭터",
+  "@elumiInfoCharacter": {"description": "이룸이 정보 화면: 캐릭터 줄"},
+  "elumiInfoCharacterSheetTitle": "캐릭터 바꾸기",
+  "@elumiInfoCharacterSheetTitle": {"description": "이룸이 정보 화면: 캐릭터 바꾸기 시트 제목"},
+  "elumiInfoImageStyleSheetTitle": "그림 방식 바꾸기",
+  "@elumiInfoImageStyleSheetTitle": {"description": "이룸이 정보 화면: 그림 방식 바꾸기 시트 제목"},
+  "elumiInfoSave": "저장하기",
+  "@elumiInfoSave": {"description": "이룸이 정보 시트의 저장 버튼"},
+  "elumiInfoSaved": "저장했어요",
+  "@elumiInfoSaved": {"description": "이룸이 정보를 저장한 뒤 알림"},
+  "elumiInfoSaveFailedTitle": "저장하지 못했어요",
+  "@elumiInfoSaveFailedTitle": {"description": "이룸이 정보 저장 실패 팝업 제목"},
+  "elumiInfoSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@elumiInfoSaveFailedFallback": {"description": "이룸이 정보 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)"},
+  "elumiInfoNotFound": "이룸이 정보를 불러오지 못했어요",
+  "@elumiInfoNotFound": {"description": "이룸이 정보 화면: 회원 정보를 못 받았거나 그 이룸이가 목록에 없을 때"}
 }

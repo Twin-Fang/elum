@@ -1098,11 +1098,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'When your feedback is resolved';
 
   @override
-  String get notificationPermissionOff =>
-      'Device notifications are off, so you won\'t receive alerts';
+  String get notificationPermissionOff => 'Device notifications are off';
 
   @override
-  String get notificationOpenDeviceSettings => 'Open device settings';
+  String get notificationTurnOnDeviceNotification => 'Turn on';
+
+  @override
+  String get notificationSettingsLockedHint =>
+      'Turn on device notifications to get these alerts';
 
   @override
   String get notificationSettingSaveFailed => 'Couldn\'t save your settings';
@@ -2770,4 +2773,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => 'A new version is here';
+
+  @override
+  String get updateSuggestionBody =>
+      'Update to get the latest fixes and features';
+
+  @override
+  String get updateSuggestionLater => 'Later';
+
+  @override
+  String elumiInfoTitle(String name) {
+    return '$name\'s info';
+  }
+
+  @override
+  String elumiInfoEditLabel(String name) {
+    return 'Edit $name\'s info';
+  }
+
+  @override
+  String get elumiInfoName => 'Name';
+
+  @override
+  String get elumiInfoCharacter => 'Character';
+
+  @override
+  String get elumiInfoCharacterSheetTitle => 'Change character';
+
+  @override
+  String get elumiInfoImageStyleSheetTitle => 'Change picture style';
+
+  @override
+  String get elumiInfoSave => 'Save';
+
+  @override
+  String get elumiInfoSaved => 'Saved';
+
+  @override
+  String get elumiInfoSaveFailedTitle => 'Couldn\'t save';
+
+  @override
+  String get elumiInfoSaveFailedFallback => 'Try again in a moment';
+
+  @override
+  String get elumiInfoNotFound => 'Couldn\'t load Elumi\'s info';
 }

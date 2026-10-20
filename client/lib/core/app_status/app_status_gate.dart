@@ -7,11 +7,9 @@ import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import '../config/app_config.dart';
-import '../logger/app_logger.dart';
-import '../widgets/show_failure.dart';
 import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
-import 'store_launcher.dart';
+import 'update_suggestion.dart';
 import 'app_notice_card.dart';
 
 /// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다.
@@ -33,9 +31,6 @@ class AppStatusGate extends ConsumerStatefulWidget {
 
 class _AppStatusGateState extends ConsumerState<AppStatusGate>
     with WidgetsBindingObserver {
-  /// 스토어를 못 열었을 때 붙는 식별자.
-  static const storeFailureCode = 'E-UPDATE-STORE';
-
   @override
   void initState() {
     super.initState();
@@ -53,29 +48,6 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
     if (state == AppLifecycleState.resumed) {
       ref.read(appStatusRecheckProvider.notifier).request();
     }
-  }
-
-  /// 스토어를 연다. 못 열면 에러 코드와 함께 알리고 이 화면에 남는다 —
-  /// 사용자는 다시 누르거나 스토어를 직접 찾아갈 수 있다.
-  Future<void> _openStore(BuildContext noticeContext, Uri url) async {
-    // await 뒤에서 context 를 쓰지 않도록 문구를 먼저 잡는다.
-    final l10n = noticeContext.l10n;
-    Object? error;
-    var opened = false;
-    try {
-      opened = await ref.read(storeLauncherProvider)(url);
-    } catch (e, st) {
-      error = e;
-      AppLogger.error('app-status', e, st, {'step': 'openStore'});
-    }
-    if (opened || !noticeContext.mounted) return;
-    await showFailure(
-      noticeContext,
-      error,
-      title: l10n.appStatusStoreOpenFailedTitle,
-      fallback: l10n.appStatusStoreOpenFailedFallback,
-      fallbackCode: storeFailureCode,
-    );
   }
 
   @override
@@ -128,7 +100,8 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                     : context.l10n.appStatusGoUpdate,
                 onAction: storeUrl == null
                     ? (_) => ref.invalidate(appStatusProvider)
-                    : (noticeContext) => _openStore(noticeContext, storeUrl),
+                    : (noticeContext) =>
+                          openStoreOrShowFailure(noticeContext, ref, storeUrl),
               ),
             ),
           );

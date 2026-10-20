@@ -2,6 +2,9 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -50,7 +53,7 @@ class RoutineAiPipelineLocaleTest {
   @BeforeEach
   void setUp() {
     pipeline = new RoutineAiPipeline(
-      textClientRouter, imageClientRouter,
+      textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, PictogramCatalog.empty());
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
@@ -69,7 +72,7 @@ class RoutineAiPipelineLocaleTest {
     String json = "{\"title\":\"Elumi va al colegio\",\"steps\":["
       + "{\"order\":1,\"title\":\"Elumi guarda el cepillo\",\"description\":\"Elumi se lava los dientes\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(imageGenerationClient.generateCardImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = pipeline.generateForCreate(
@@ -79,7 +82,7 @@ class RoutineAiPipelineLocaleTest {
     assertThat(result.steps().get(0).title()).isEqualTo("Haneul guarda el cepillo");
     assertThat(result.steps().get(0).description()).isEqualTo("Haneul se lava los dientes");
     // 이름은 그림 AI 에도 가면 안 된다 — 치환은 그림을 그린 뒤에 한다
-    verify(imageGenerationClient).generateImage("Elumi se lava los dientes", CharacterType.LULU);
+    verify(imageGenerationClient).generateCardImage(argThat(scene -> "Elumi se lava los dientes".equals(scene.stepDescription())), eq(CharacterType.LULU));
   }
 
   @Test
@@ -88,7 +91,7 @@ class RoutineAiPipelineLocaleTest {
     String json = "{\"title\":\"Ir al colegio\",\"steps\":["
       + "{\"order\":1,\"title\":\"Ponte la ropa\",\"description\":\"Ponte la ropa\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any())).thenThrow(new IllegalStateException("image down"));
+    when(imageGenerationClient.generateCardImage(any(), any())).thenThrow(new IllegalStateException("image down"));
 
     RoutineAiPipeline.RoutineGenerationResult result = pipeline.generateForCreate(
       "Ir al colegio", "Haneul", Set.of(), null, CharacterType.LULU, ImageStyle.CARTOON, "profile-1");

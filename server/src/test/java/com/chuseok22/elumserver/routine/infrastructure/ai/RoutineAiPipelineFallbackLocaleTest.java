@@ -48,7 +48,7 @@ class RoutineAiPipelineFallbackLocaleTest {
   @BeforeEach
   void setUp() {
     pipeline = new RoutineAiPipeline(
-      textClientRouter, imageClientRouter,
+      textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, PictogramCatalog.empty());
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);

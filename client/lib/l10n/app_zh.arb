@@ -19,5 +19,9 @@
   "signInProviderKakao": "Kakao",
   "signInProviderNaver": "Naver",
   "signInProviderGoogle": "Google",
-  "signInProviderApple": "Apple"
+  "signInProviderApple": "Apple",
+
+  "updateSuggestionTitle": "有新版本了",
+  "updateSuggestionBody": "更新后即可使用最新的修复和功能",
+  "updateSuggestionLater": "以后再说"
 }

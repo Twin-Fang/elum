@@ -1937,14 +1937,20 @@ abstract class AppLocalizations {
   /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
   ///
   /// In ko, this message translates to:
-  /// **'기기 알림이 꺼져 있어 알림을 받을 수 없어요'**
+  /// **'기기 알림이 꺼져 있어요'**
   String get notificationPermissionOff;
 
-  /// 기기 알림 권한 안내 줄의 버튼
+  /// 기기 알림 꺼짐 안내 띠의 버튼 (안 물었으면 권한 창, 거부했으면 기기 설정)
   ///
   /// In ko, this message translates to:
-  /// **'기기 설정 열기'**
-  String get notificationOpenDeviceSettings;
+  /// **'켜기'**
+  String get notificationTurnOnDeviceNotification;
+
+  /// 기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 알림을 켜면 이 설정대로 받아요'**
+  String get notificationSettingsLockedHint;
 
   /// 알림 설정 저장 실패 팝업 문구
   ///
@@ -4837,6 +4843,90 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'가방 챙기기'**
   String get routineManageCoachSampleBag;
+
+  /// 보호자 홈에서 하루 한 번 뜨는 업데이트 권유 팝업 제목 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 버전이 나왔어요'**
+  String get updateSuggestionTitle;
+
+  /// 업데이트 권유 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요'**
+  String get updateSuggestionBody;
+
+  /// 업데이트 권유 팝업의 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get updateSuggestionLater;
+
+  /// 이룸이 정보 화면 제목. name 은 이룸이 호칭 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보'**
+  String elumiInfoTitle(String name);
+
+  /// 내정보 이룸이 줄의 연필 버튼을 낭독기가 읽는 이름. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보 고치기'**
+  String elumiInfoEditLabel(String name);
+
+  /// 이룸이 정보 화면: 이름 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이름'**
+  String get elumiInfoName;
+
+  /// 이룸이 정보 화면: 캐릭터 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터'**
+  String get elumiInfoCharacter;
+
+  /// 이룸이 정보 화면: 캐릭터 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 바꾸기'**
+  String get elumiInfoCharacterSheetTitle;
+
+  /// 이룸이 정보 화면: 그림 방식 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식 바꾸기'**
+  String get elumiInfoImageStyleSheetTitle;
+
+  /// 이룸이 정보 시트의 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get elumiInfoSave;
+
+  /// 이룸이 정보를 저장한 뒤 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'저장했어요'**
+  String get elumiInfoSaved;
+
+  /// 이룸이 정보 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요'**
+  String get elumiInfoSaveFailedTitle;
+
+  /// 이룸이 정보 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get elumiInfoSaveFailedFallback;
+
+  /// 이룸이 정보 화면: 회원 정보를 못 받았거나 그 이룸이가 목록에 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 정보를 불러오지 못했어요'**
+  String get elumiInfoNotFound;
 }
 
 class _AppLocalizationsDelegate

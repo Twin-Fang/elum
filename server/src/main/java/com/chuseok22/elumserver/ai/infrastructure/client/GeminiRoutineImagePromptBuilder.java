@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,9 +39,20 @@ public class GeminiRoutineImagePromptBuilder {
     String prefix, String stepDescription, CharacterType characterType,
     boolean referenceImageProvided, ImagePromptLanguage language
   ) {
+    return build(prefix, CardScene.descriptionOnly(stepDescription), characterType, referenceImageProvided, language);
+  }
+
+  /**
+   * 제목·영어 장면까지 담는 조립: 지시문 + 빈 줄 + 장면 머리말 + 장면 JSON (없는 필드는 생략)
+   */
+  public String build(
+    String prefix, CardScene scene, CharacterType characterType,
+    boolean referenceImageProvided, ImagePromptLanguage language
+  ) {
     GeminiImageAiInput input = new GeminiImageAiInput(
       "CREATE_ROUTINE_CARD_IMAGE",
-      new GeminiImageAiInput.Scene(stepDescription),
+      new GeminiImageAiInput.Scene(
+        scene.routineTitle(), scene.stepTitle(), scene.stepDescription(), scene.sceneDetail()),
       characterType == null
         ? null
         : new GeminiImageAiInput.Character(

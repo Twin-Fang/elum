@@ -19,6 +19,11 @@ enum ServerErrorCode {
   // 탈퇴 계정. 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
   memberWithdrawn('MEMBER_WITHDRAWN'),
   memberNotWithdrawn('MEMBER_NOT_WITHDRAWN'),
+  // 보호자 닉네임 변경. 욕설·예약어는 걸린 이유를 알리지 않고 NOT_ALLOWED 하나로 돌려준다.
+  nicknameInvalidFormat('NICKNAME_INVALID_FORMAT'),
+  nicknameNotAllowed('NICKNAME_NOT_ALLOWED'),
+  nicknameDuplicated('NICKNAME_DUPLICATED'),
+  nicknameChangeTooSoon('NICKNAME_CHANGE_TOO_SOON'),
 
   // AUTH
   invalidCredentials('INVALID_CREDENTIALS'),

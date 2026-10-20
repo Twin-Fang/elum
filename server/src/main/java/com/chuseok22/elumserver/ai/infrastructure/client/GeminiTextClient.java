@@ -311,7 +311,7 @@ public class GeminiTextClient implements TextGenerationClient {
     return responseSchema(false);
   }
 
-  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
+  /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
   public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
     return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !pictogramCatalog.isEmpty());
   }

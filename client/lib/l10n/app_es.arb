@@ -19,5 +19,9 @@
   "signInProviderKakao": "Kakao",
   "signInProviderNaver": "Naver",
   "signInProviderGoogle": "Google",
-  "signInProviderApple": "Apple"
+  "signInProviderApple": "Apple",
+
+  "updateSuggestionTitle": "Hay una nueva versión",
+  "updateSuggestionBody": "Actualiza para usar las últimas mejoras y funciones",
+  "updateSuggestionLater": "Más tarde"
 }

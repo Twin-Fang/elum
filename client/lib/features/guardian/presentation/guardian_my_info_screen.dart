@@ -7,15 +7,13 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
-import '../../../shared/models/character.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/domain/guardian_account.dart';
-import '../../profile/application/profile_session.dart';
-import '../../profile/domain/profile_summary.dart';
+import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
+import 'widgets/my_info_elumi_group.dart';
 import 'widgets/sign_in_provider_badge.dart';
 
 /// 하단 바 내정보 칸의 첫 화면: 보호자 프로필 > 이룸이 > AI 크레딧(사용 내역 링크 포함) > 바로가기 (#817)
@@ -98,7 +96,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                     // 이룸이 목록: 회원 정보를 받았고 1명 이상일 때만
                     if (profiles != null && profiles.isNotEmpty) ...[
                       SizedBox(height: _groupGap.h),
-                      _ChildrenGroup(profiles: profiles),
+                      MyInfoElumiGroup(profiles: profiles),
                     ],
                     SizedBox(height: _groupGap.h),
                     // 이번 주 AI 생성: 꺼져 있으면 자리도 없고, 아래 간격은 카드가 가진다
@@ -116,6 +114,11 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                           label: context.l10n.guardianSettingsDrafts,
                           onTap: () => context.push(Routes.guardianDrafts),
                         ),
+                        SettingsTile(
+                          isInCard: true,
+                          label: context.l10n.notificationTabNotices,
+                          onTap: () => _openNotices(context, ref),
+                        ),
                       ],
                     ),
                   ],
@@ -127,6 +130,12 @@ class GuardianMyInfoScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// 공지사항 탭 열기 > 돌아오면 종 아이콘 점 다시 받기 (본 공지 기록이 바뀌었을 수 있음)
+Future<void> _openNotices(BuildContext context, WidgetRef ref) async {
+  await context.push(Routes.guardianNotices);
+  await ref.read(unreadSummaryProvider.notifier).refresh();
 }
 
 /// 보호자 프로필 카드: 역할 > 닉네임 > 가입 방법 배지 + 가린 이메일 > 가입일 (#849)
@@ -244,86 +253,5 @@ class _InfoRow extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-class _ChildrenGroup extends ConsumerWidget {
-  const _ChildrenGroup({required this.profiles});
-
-  final List<ProfileSummary> profiles;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activeId = ref.watch(activeProfileProvider)?.id;
-    final hasSeveral = profiles.length > 1;
-
-    return SettingsGroup(
-      header: context.l10n.guardianMyInfoChildrenHeader,
-      hasDividers: false,
-      children: [
-        for (final profile in profiles)
-          _ChildRow(
-            profile: profile,
-            isActive: hasSeveral && profile.id == activeId,
-            onTap: hasSeveral
-                ? () => context.push(Routes.guardianProfileSwitch)
-                : null,
-          ),
-      ],
-    );
-  }
-}
-
-/// 이룸이 한 줄: 캐릭터 + 호칭 (+ `보는 중`)
-class _ChildRow extends StatelessWidget {
-  const _ChildRow({
-    required this.profile,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  final ProfileSummary profile;
-  final bool isActive;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    // 캐릭터를 모르는 값이면 첫 캐릭터로 둔다 (화면이 죽지 않게)
-    final character =
-        CardCharacter.fromApiValue(profile.character) ??
-        CardCharacter.values.first;
-
-    final row = Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: space.md.w,
-        vertical: space.sm.h,
-      ),
-      child: Row(
-        children: [
-          CharacterBadge(character: character),
-          SizedBox(width: space.md.w),
-          Expanded(
-            child: Text(
-              profile.displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.sectionTitle.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
-          ),
-          if (isActive)
-            Text(
-              context.l10n.guardianMyInfoActiveBadge,
-              style: context.typo.bodySmall.copyWith(
-                color: colors.creditAccentText,
-              ),
-            ),
-        ],
-      ),
-    );
-    return onTap == null ? row : AppPressable(onTap: onTap, child: row);
   }
 }

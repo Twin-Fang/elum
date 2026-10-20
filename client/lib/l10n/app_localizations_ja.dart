@@ -1044,10 +1044,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
 
   @override
-  String get notificationPermissionOff => '기기 알림이 꺼져 있어 알림을 받을 수 없어요';
+  String get notificationPermissionOff => '기기 알림이 꺼져 있어요';
 
   @override
-  String get notificationOpenDeviceSettings => '기기 설정 열기';
+  String get notificationTurnOnDeviceNotification => '켜기';
+
+  @override
+  String get notificationSettingsLockedHint => '기기 알림을 켜면 이 설정대로 받아요';
 
   @override
   String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
@@ -2653,4 +2656,50 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => '新しいバージョンがあります';
+
+  @override
+  String get updateSuggestionBody => 'アップデートすると最新の修正と機能を使えます';
+
+  @override
+  String get updateSuggestionLater => 'あとで';
+
+  @override
+  String elumiInfoTitle(String name) {
+    return '$name 정보';
+  }
+
+  @override
+  String elumiInfoEditLabel(String name) {
+    return '$name 정보 고치기';
+  }
+
+  @override
+  String get elumiInfoName => '이름';
+
+  @override
+  String get elumiInfoCharacter => '캐릭터';
+
+  @override
+  String get elumiInfoCharacterSheetTitle => '캐릭터 바꾸기';
+
+  @override
+  String get elumiInfoImageStyleSheetTitle => '그림 방식 바꾸기';
+
+  @override
+  String get elumiInfoSave => '저장하기';
+
+  @override
+  String get elumiInfoSaved => '저장했어요';
+
+  @override
+  String get elumiInfoSaveFailedTitle => '저장하지 못했어요';
+
+  @override
+  String get elumiInfoSaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get elumiInfoNotFound => '이룸이 정보를 불러오지 못했어요';
 }

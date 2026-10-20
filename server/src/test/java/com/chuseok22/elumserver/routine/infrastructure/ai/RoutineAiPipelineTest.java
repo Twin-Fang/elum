@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
@@ -72,7 +74,7 @@ class RoutineAiPipelineTest {
     // 제공자 고르기는 실제 CardImageGenerator 로 돈다. 가짜 라우터의 selected() 는 null 이라
     // FLUX 가 아니고, 지금처럼 current() 의 제공자로 그린다.
     routineAiPipeline = new RoutineAiPipeline(
-      textClientRouter, imageClientRouter,
+      textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, PictogramCatalog.empty());
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
@@ -232,7 +234,7 @@ class RoutineAiPipelineTest {
       + "{\"order\":2,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\"},"
       + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateCardImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
@@ -246,8 +248,8 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).description()).isEqualTo("우산을 챙겨요");
     assertThat(result.steps().get(1).order()).isEqualTo(2);
     assertThat(result.steps().get(1).description()).isEqualTo("옷을 입어요");
-    verify(imageGenerationClient).generateImage("우산을 챙겨요", CharacterType.LULU);
-    verify(imageGenerationClient).generateImage("옷을 입어요", CharacterType.LULU);
+    verify(imageGenerationClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
+    verify(imageGenerationClient).generateCardImage(argThat(scene -> "옷을 입어요".equals(scene.stepDescription())), eq(CharacterType.LULU));
     assertThat(result.steps().get(0).title()).isEqualTo("우산을 챙겨요");
     assertThat(result.steps().get(1).title()).isEqualTo("옷을 입어요");
   }
@@ -258,7 +260,7 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
       + "{\"order\":1,\"title\":\"이룸이는 칫솔을 챙겨요\",\"description\":\"이룸이와 함께 가요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateCardImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
@@ -270,7 +272,7 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).title()).isEqualTo("하늘은 칫솔을 챙겨요");
     assertThat(result.steps().get(0).description()).isEqualTo("하늘과 함께 가요");
     // 이름은 그림 AI(OpenAI·FLUX)에도 가면 안 된다 — 치환은 그림을 그린 뒤에 한다
-    verify(imageGenerationClient).generateImage("이룸이와 함께 가요", CharacterType.LULU);
+    verify(imageGenerationClient).generateCardImage(argThat(scene -> "이룸이와 함께 가요".equals(scene.stepDescription())), eq(CharacterType.LULU));
   }
 
   @Test
@@ -279,7 +281,7 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
       + "{\"order\":1,\"title\":\"칫솔을 챙겨요\",\"description\":\"칫솔을 챙겨요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateCardImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
@@ -313,13 +315,13 @@ class RoutineAiPipelineTest {
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateCardImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1");
 
-    verify(imageGenerationClient).generateImage("옷을 입어요", null);
+    verify(imageGenerationClient).generateCardImage(argThat(scene -> "옷을 입어요".equals(scene.stepDescription())), isNull());
   }
 
   @Test
@@ -353,7 +355,7 @@ class RoutineAiPipelineTest {
   void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateCardImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
@@ -364,7 +366,7 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps()).hasSize(1);
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
-    verify(imageGenerationClient, times(2)).generateImage(any(), any());
+    verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
   }
 
   @Test
@@ -374,7 +376,7 @@ class RoutineAiPipelineTest {
     // create()가 500으로 죽어 일과가 서버에 저장조차 안 되던 버그의 근본 원인이었다.
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
+    when(imageGenerationClient.generateCardImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
       "내일 병원 가기", "하늘이", Set.of(), List.of(), null, ImageStyle.CARTOON, "profile-1"
@@ -384,7 +386,7 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).imagePath()).isNull();
     // 이미지가 없으므로 저장은 아예 호출되지 않는다.
     verify(routineImageStorage, never()).save(any(), any(), any());
-    verify(imageGenerationClient, times(2)).generateImage(any(), any());
+    verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
   }
 
   @Test
@@ -408,16 +410,22 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("FLUX 가 아니면 영어 장면을 달라고 하지 않는다 — 쓰지도 않을 출력 토큰 (#375)")
-  void generateForCreate_notFlux_doesNotAskEnglishScene() {
-    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), eq(false))).thenReturn(json);
-    when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+  @DisplayName("만화이면 제공자와 무관하게 영어 장면을 요청한다 — Gemini·OpenAI 그림 지시문의 sceneDetail 로 쓴다 (#888)")
+  void generateForCreate_cartoonAnyProvider_asksEnglishScene() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"진찰을 받아요\",\"description\":\"가슴에 청진기를 대요\","
+      + "\"imagePromptEn\":\"The character holds a stethoscope against the chest.\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), eq(true))).thenReturn(json);
+    when(imageGenerationClient.generateCardImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1");
 
-    verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(false));
+    verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(true));
+    // 그림 AI 에는 일과 제목, 카드 제목, 영어 장면이 함께 간다
+    verify(imageGenerationClient).generateCardImage(
+      argThat(scene -> "병원 가기".equals(scene.routineTitle()) && "진찰을 받아요".equals(scene.stepTitle())
+        && "The character holds a stethoscope against the chest.".equals(scene.sceneDetail())),
+      any());
   }
 
 
@@ -442,9 +450,8 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("직접 사진은 FLUX 를 골라 둬도 영어 장면을 요청하지 않는다 — 쓰지 않을 출력 토큰")
+  @DisplayName("직접 사진은 영어 장면을 요청하지 않는다 — 그림을 안 그리니 쓰지 않을 출력 토큰")
   void generateForCreate_photoOnly_doesNotAskForEnglishScene() {
-    when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
 
     routineAiPipeline.generateForCreate(
@@ -461,7 +468,7 @@ class RoutineAiPipelineTest {
     when(fluxImageClient.available()).thenReturn(false);
     when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(java.util.Optional.of(imageGenerationClient));
     when(imageGenerationClient.available()).thenReturn(true);
-    when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(imageGenerationClient.generateCardImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     routineAiPipeline.generateForCreate(
@@ -482,7 +489,7 @@ class RoutineAiPipelineTest {
       "내일 병원 가기", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.REALISTIC, "profile-1");
 
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
-    verify(imageGenerationClient, never()).generateImage(any(), any());
+    verify(imageGenerationClient, never()).generateCardImage(any(), any());
   }
 
   // ── 무료 픽토그램 (#247) ────────────────────────────────────────────
@@ -491,7 +498,7 @@ class RoutineAiPipelineTest {
 
   private RoutineAiPipeline pipelineWith(PictogramCatalog catalog) {
     return new RoutineAiPipeline(
-      textClientRouter, imageClientRouter,
+      textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, catalog);
   }
@@ -550,7 +557,7 @@ class RoutineAiPipelineTest {
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(
       "{\"title\":\"아침\",\"steps\":[{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\","
         + "\"pictogramId\":\"brush_teeth\"}]}");
-    when(imageGenerationClient.generateImage(any(), any())).thenThrow(new IllegalStateException("이미지 실패"));
+    when(imageGenerationClient.generateCardImage(any(), any())).thenThrow(new IllegalStateException("이미지 실패"));
 
     var steps = pipelineWith(catalog).generateForCreate(
       "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.CARTOON, "profile-1").steps();

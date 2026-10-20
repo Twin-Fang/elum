@@ -19,6 +19,7 @@ import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import '../../features/notification/presentation/notification_settings_screen.dart';
 import '../../features/notification/presentation/notifications_screen.dart';
+import '../../features/profile/presentation/elumi_info_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
@@ -132,8 +133,14 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianNotifications,
-    pageBuilder: (context, state) =>
-        slidePage(state, const NotificationsScreen()),
+    pageBuilder: (context, state) => slidePage(
+      state,
+      NotificationsScreen(
+        isNoticeTabInitiallySelected:
+            state.uri.queryParameters[Routes.notificationsTabQuery] ==
+            Routes.notificationsNoticeTabValue,
+      ),
+    ),
   ),
   GoRoute(
     path: Routes.guardianNotificationSettings,
@@ -158,6 +165,17 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianProfileSwitch,
     pageBuilder: (context, state) =>
         slidePage(state, const ProfileSwitchScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianElumiInfo,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      ElumiInfoScreen(
+        profileId:
+            state.uri.queryParameters[Routes.elumiInfoProfileIdQuery] ?? '',
+      ),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
   ),
   GoRoute(
     path: Routes.guardianLinkStatus,

@@ -61,7 +61,7 @@ class RoutineStepImageFillerLocaleTest {
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
       new RoutineStepImageThrottle(new InMemorySharedStateStore()), creditReservationService);
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
-    lenient().when(imageClient.generateImage(anyString(), any())).thenReturn(IMAGE);
+    lenient().when(imageClient.generateCardImage(any(), any())).thenReturn(IMAGE);
     lenient().when(routineImageStorage.save(anyString(), anyInt(), any())).thenReturn("images/step-1/1.png");
     lenient().when(routineStepRepository.existsById(anyString())).thenReturn(true);
     lenient().when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(1);
@@ -79,7 +79,7 @@ class RoutineStepImageFillerLocaleTest {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     AtomicReference<AppLocale> seen = new AtomicReference<>();
     CountDownLatch called = new CountDownLatch(1);
-    when(imageClient.generateImage(anyString(), any())).thenAnswer(invocation -> {
+    when(imageClient.generateCardImage(any(), any())).thenAnswer(invocation -> {
       seen.set(AiCallContext.currentContentLocale());
       called.countDown();
       return IMAGE;

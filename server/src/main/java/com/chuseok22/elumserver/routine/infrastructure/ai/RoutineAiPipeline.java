@@ -3,13 +3,12 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
-import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageSafetyRejection;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -48,7 +47,6 @@ public class RoutineAiPipeline {
   private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
 
   private final TextClientRouter textClientRouter;
-  private final ImageClientRouter imageClientRouter;
   private final CardImageGenerator cardImageGenerator;
   private final RoutineImageStorage routineImageStorage;
   private final PictogramCatalog pictogramCatalog;
@@ -61,10 +59,10 @@ public class RoutineAiPipeline {
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
     CharacterType characterType, ImageStyle imageStyle, String profileId
   ) {
-    // FLUX + 만화일 때만 카드마다 영어 장면을 같은 호출로 받는다 — 다른 제공자·방식은 쓰지 않을 출력 토큰이다.
+    // 만화일 때 카드마다 영어 장면(자세·물건)을 같은 호출로 받는다 — FLUX 는 그대로 그리고, Gemini·OpenAI 는
+    // 그림 지시문의 sceneDetail 로 싣는다 (설명 12자만으로는 행동이 안 그려졌다).
     // 실사는 그 문장("The character" 관례)을 버리고 실사용 번역을 따로 하고, 직접 사진은 그림을 안 그린다.
-    boolean includeImagePromptEn =
-      imageClientRouter.selected() == ImageProvider.FLUX && ImageStyle.orDefault(imageStyle) == ImageStyle.CARTOON;
+    boolean includeImagePromptEn = ImageStyle.orDefault(imageStyle) == ImageStyle.CARTOON;
     RoutineStepDraft draft = parseDraft(
       () -> textClientRouter.current()
         .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
@@ -250,7 +248,8 @@ public class RoutineAiPipeline {
     try {
       List<CompletableFuture<StepResult>> futures = draft.steps().stream()
         .map(stepDraft -> CompletableFuture.supplyAsync(
-          () -> resolveStepResult(stepDraft, characterType, imageStyle, reusableImagePathsByOrder, seedKey), executor
+          () -> resolveStepResult(
+            stepDraft, characterType, imageStyle, reusableImagePathsByOrder, seedKey, draft.title()), executor
         ))
         .toList();
 
@@ -297,7 +296,7 @@ public class RoutineAiPipeline {
 
   private StepResult resolveStepResult(
     RoutineStepDraft.StepDraft stepDraft, CharacterType characterType, ImageStyle imageStyle,
-    Map<Integer, String> reusableImagePathsByOrder, String seedKey
+    Map<Integer, String> reusableImagePathsByOrder, String seedKey, String routineTitle
   ) {
     String reusablePath = reusableImagePathsByOrder.get(stepDraft.order());
     if (reusablePath != null) {
@@ -309,7 +308,8 @@ public class RoutineAiPipeline {
       return new StepResult(stepDraft, null, null);
     }
     CardImageGenerator.CardImageRequest request = new CardImageGenerator.CardImageRequest(
-      stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey, imageStyle);
+      stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey, imageStyle,
+      routineTitle, stepDraft.title());
     return new StepResult(stepDraft, generateImageWithRetry(request), null);
   }
 
@@ -325,6 +325,11 @@ public class RoutineAiPipeline {
     try {
       return cardImageGenerator.generate(request);
     } catch (Exception first) {
+      // 안전 거절은 CardImageGenerator 가 장면을 바꿔 이미 한 번 더 시도했다 — 같은 요청 반복은 낭비라 기본 그림으로
+      if (ImageSafetyRejection.isRejection(first)) {
+        log.warn("이미지 안전 거절, 기본 그림으로 진행: descriptionLength={}", LogTextLength.of(description));
+        return null;
+      }
       log.warn("이미지 생성 1차 실패, 1회 재시도: descriptionLength={}", LogTextLength.of(description), first);
       try {
         return cardImageGenerator.generate(request);

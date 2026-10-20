@@ -76,7 +76,7 @@ class RoutineStepImageFillerTest {
       creditReservationService
     );
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
-    lenient().when(imageClient.generateImage(anyString(), any())).thenReturn(IMAGE);
+    lenient().when(imageClient.generateCardImage(any(), any())).thenReturn(IMAGE);
     lenient().when(routineImageStorage.save(anyString(), anyInt(), any())).thenReturn("images/step-1/1.png");
     lenient().when(routineStepRepository.existsById(anyString())).thenReturn(true);
     lenient().when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(1);
@@ -109,7 +109,7 @@ class RoutineStepImageFillerTest {
 
     fill("member-1");
 
-    verify(imageClient, never()).generateImage(anyString(), any());
+    verify(imageClient, never()).generateCardImage(any(), any());
     verify(routineStepRepository, never()).updateImagePath(anyString(), anyString());
   }
 
@@ -122,7 +122,7 @@ class RoutineStepImageFillerTest {
       fill("member-1");
     }
 
-    verify(imageClient, times(10)).generateImage(anyString(), any());
+    verify(imageClient, times(10)).generateCardImage(any(), any());
   }
 
   @Test
@@ -135,7 +135,7 @@ class RoutineStepImageFillerTest {
 
     fill("member-2");
 
-    verify(imageClient, times(11)).generateImage(anyString(), any());
+    verify(imageClient, times(11)).generateCardImage(any(), any());
   }
 
   @Test
@@ -149,7 +149,7 @@ class RoutineStepImageFillerTest {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     fill("member-1");
 
-    verify(imageClient, times(1)).generateImage(anyString(), any());
+    verify(imageClient, times(1)).generateCardImage(any(), any());
   }
 
   @Test
@@ -158,7 +158,7 @@ class RoutineStepImageFillerTest {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     AtomicReference<String> memberSeenByImageCall = new AtomicReference<>();
     CountDownLatch called = new CountDownLatch(1);
-    when(imageClient.generateImage(anyString(), any())).thenAnswer(invocation -> {
+    when(imageClient.generateCardImage(any(), any())).thenAnswer(invocation -> {
       // AiCallLogService 가 기록할 때 읽는 바로 그 자리다.
       memberSeenByImageCall.set(AiCallContext.currentMemberId());
       called.countDown();
@@ -221,7 +221,7 @@ class RoutineStepImageFillerTest {
     fill("member-1");
 
     // 지워진 카드 열 번은 부르지도, 회원의 그림 횟수를 깎지도 않았다
-    verify(imageClient, times(1)).generateImage(anyString(), any());
+    verify(imageClient, times(1)).generateCardImage(any(), any());
   }
 
   @Test
@@ -235,7 +235,7 @@ class RoutineStepImageFillerTest {
     // 폴더째(deleteBatch) 지우면 보호자가 올린 사진까지 사라진다 — 방금 만든 파일 하나만 지운다
     verify(routineImageStorage).delete("images/step-1/1.png");
     verify(routineImageStorage, never()).deleteBatch(anyString());
-    verify(imageClient, times(1)).generateImage(anyString(), any());
+    verify(imageClient, times(1)).generateCardImage(any(), any());
   }
 
   @Test
