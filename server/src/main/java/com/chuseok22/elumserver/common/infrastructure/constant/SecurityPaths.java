@@ -63,9 +63,6 @@ public final class SecurityPaths {
    * 아니라 전부 막는다. 관리자 프롬프트 시험 화면은 서비스를 직접 불러 이 경로를 쓰지 않는다.
    */
   public static final String API_INTERNAL_MATCHER = "/api/internal/**";
-  public static final String DOCS_SWAGGER = "/docs/swagger";
-  public static final String DOCS_SWAGGER_UI_MATCHER = "/docs/swagger-ui/**";
-  public static final String DOCS_API_DOCS_MATCHER = "/v3/api-docs/**";
 
   private SecurityPaths() {
   }
