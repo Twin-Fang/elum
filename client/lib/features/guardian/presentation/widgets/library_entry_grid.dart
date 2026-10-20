@@ -46,6 +46,8 @@ class LibraryEntryGrid extends StatefulWidget {
     required this.onRemoveGroup,
     this.firstRoutineTileKey,
     this.secondRoutineTileKey,
+    this.scrollTargetRoutineId,
+    this.onScrollTargetHandled,
   });
 
   final List<LibraryEntry> entries;
@@ -85,6 +87,10 @@ class LibraryEntryGrid extends StatefulWidget {
   /// 코치마크가 가리킬 낱개 일과 칸의 첫째 · 둘째 (묶음 칸은 세지 않는다)
   final GlobalKey? firstRoutineTileKey;
   final GlobalKey? secondRoutineTileKey;
+
+  /// 스크롤해 보여 줄 일과 id (묶음 안이면 그 묶음 칸). 칸을 찾아 스크롤하면 [onScrollTargetHandled] 를 부른다
+  final String? scrollTargetRoutineId;
+  final VoidCallback? onScrollTargetHandled;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();
@@ -153,8 +159,15 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   double get _easedLand => Curves.easeOutCubic.transform(_land.value);
 
   @override
+  void initState() {
+    super.initState();
+    _scheduleScrollToTarget();
+  }
+
+  @override
   void didUpdateWidget(LibraryEntryGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _scheduleScrollToTarget();
     final override = _orderOverride;
     final ids = [for (final entry in widget.entries) entry.id];
     // 서버 목록이 놓은 순서와 같아졌거나, 칸이 늘거나 줄었으면(덧씌우기가 낡음) 걷는다

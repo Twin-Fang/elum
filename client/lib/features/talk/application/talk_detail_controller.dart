@@ -108,6 +108,13 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
     );
   }
 
+  /// 일과관리로 가져왔다는 표시 켜기: 아래 버튼이 "✓ 일과관리에 넣었어요"로 바뀐다 (서버 재요청 없이)
+  void markImportedByMe() {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(isImportedByMe: true));
+  }
+
   /// 피드·인기 줄 목록 무효화 (분류별 전부)
   void _refreshLists() {
     ref.invalidate(talkFeedControllerProvider);

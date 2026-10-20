@@ -61,6 +61,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
   static const _kRoutineReminders = 'reminder.routines';
+  // 이야기에서 가져온 일과 중 상세를 연 일과 id 목록
+  static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -342,6 +344,16 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setManageCoachSeen(bool isSeen) async {
     AppLogger.storageWrite(_kManageCoachSeen, '$isSeen');
     await _prefs.setBool(_kManageCoachSeen, isSeen);
+  }
+
+  @override
+  List<String> get talkImportedSeenRoutineIds =>
+      _prefs.getStringList(_kTalkImportedSeenRoutineIds) ?? const [];
+
+  @override
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) {
+    AppLogger.storageWrite(_kTalkImportedSeenRoutineIds, routineIds);
+    return _prefs.setStringList(_kTalkImportedSeenRoutineIds, routineIds);
   }
 
   @override

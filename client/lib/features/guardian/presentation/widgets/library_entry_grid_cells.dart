@@ -106,6 +106,40 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     ];
   }
 
+  /// 다음 프레임(칸 자리가 잡힌 뒤)에 스크롤 대상 칸을 찾아 보여 준다
+  void _scheduleScrollToTarget() {
+    if (widget.scrollTargetRoutineId == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToTarget());
+  }
+
+  /// 대상 일과가 든 칸을 맨 위로 스크롤. 아직 목록에 없으면 다음 갱신을 기다린다
+  void _scrollToTarget() {
+    final targetId = widget.scrollTargetRoutineId;
+    final geometry = _geometry;
+    if (!mounted || targetId == null || geometry == null) return;
+    if (!_scroll.hasClients) return;
+    final index = widget.entries.indexWhere(
+      (entry) => switch (entry) {
+        LibraryRoutineEntry(:final routine) => routine.id == targetId,
+        LibraryGroupEntry(:final routines) => routines.any(
+          (routine) => routine.id == targetId,
+        ),
+      },
+    );
+    if (index < 0) return;
+    widget.onScrollTargetHandled?.call();
+    final position = _scroll.position;
+    final offset = (geometry.slotRect(index).top - geometry.paddingTop).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    _scroll.animateTo(
+      offset,
+      duration: AppMotion.normal,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   /// 끄는 칸을 뺀 나머지 칸
   List<LibraryEntry> _othersOf(List<LibraryEntry> shown) => [
     for (final entry in shown)

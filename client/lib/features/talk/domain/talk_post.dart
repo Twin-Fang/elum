@@ -149,12 +149,13 @@ class TalkPostDetail {
   /// 내가 일과관리로 가져갔는가
   final bool isImportedByMe;
 
-  /// 값을 바꾼 복사본: 도움이 됐어요 토글·댓글 수 갱신용
+  /// 값을 바꾼 복사본: 도움이 됐어요 토글·댓글 수·가져옴 표시 갱신용
   TalkPostDetail copyWith({
     bool? isHelpfulByMe,
     int? helpfulCount,
     int? commentCount,
     String? note,
+    bool? isImportedByMe,
   }) => TalkPostDetail(
     id: id,
     authorNickname: authorNickname,
@@ -169,7 +170,7 @@ class TalkPostDetail {
     createdAt: createdAt,
     steps: steps,
     isHelpfulByMe: isHelpfulByMe ?? this.isHelpfulByMe,
-    isImportedByMe: isImportedByMe,
+    isImportedByMe: isImportedByMe ?? this.isImportedByMe,
   );
 
   /// 목록 요약 형태로 변환: 가져오기 시트처럼 요약을 받는 곳에 넘길 때

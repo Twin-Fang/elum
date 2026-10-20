@@ -19,6 +19,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../application/library_entries.dart';
+import '../application/library_talk_import_state.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
@@ -296,6 +297,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
+    final scrollTargetRoutineId = ref.watch(
+      libraryScrollTargetRoutineIdProvider,
+    );
     final bottomSpace = CreateRoutineFab.scrollBottomSpace.h;
 
     final Widget body = switch (async) {
@@ -319,6 +323,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         onDropOnGroup: busy
             ? null
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
+        scrollTargetRoutineId: scrollTargetRoutineId,
+        onScrollTargetHandled: ref
+            .read(libraryScrollTargetRoutineIdProvider.notifier)
+            .clear,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,

@@ -4382,6 +4382,36 @@ abstract class AppLocalizations {
   /// **'길게 누르면 메뉴가 열려요'**
   String get routineLibraryTileHint;
 
+  /// 격자 칸 이름 아래: 이야기에서 가져온 일과 표시 (계속 남는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서'**
+  String get routineLibraryFromTalk;
+
+  /// 격자 칸 배지: 이야기에서 가져온 뒤 아직 열어 보지 않은 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'새로'**
+  String get routineLibraryNewBadge;
+
+  /// 가져온 일과 상세 맨 위 안내. authorNickname 은 글쓴이 닉네임
+  ///
+  /// In ko, this message translates to:
+  /// **'📖 {authorNickname}님이 이야기에 나눈 일과예요'**
+  String routineDetailTalkOriginBanner(String authorNickname);
+
+  /// 가져온 일과 상세 맨 위 안내: 글이 내려갔거나 닉네임을 모를 때
+  ///
+  /// In ko, this message translates to:
+  /// **'📖 이야기에 나눈 일과예요'**
+  String get routineDetailTalkOriginBannerNoAuthor;
+
+  /// 가져온 일과 상세 안내의 링크: 이야기 글 상세로 이동 (글이 내려갔으면 숨김)
+  ///
+  /// In ko, this message translates to:
+  /// **'원래 글 보기'**
+  String get routineDetailTalkOriginOpen;
+
   /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
   ///
   /// In ko, this message translates to:
@@ -5059,6 +5089,72 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'✓ 일과관리에 넣었어요'**
   String get talkImportedButton;
+
+  /// 가져오기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어느 일과관리에 넣을까요?'**
+  String get talkImportSheetTitle;
+
+  /// 가져오기 시트 안내: 일과관리에만 들어가고 이룸이에게는 보호자가 보내야 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'넣은 뒤 우리 집에 맞게 고치고, 준비되면 보내기를 눌러 주세요.'**
+  String get talkImportSheetHint;
+
+  /// 가져오기 시트: 어느 이룸이의 일과관리에 넣을지 고르는 줄 이름 (연결된 이룸이가 2명 이상일 때만)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get talkImportElumiLabel;
+
+  /// 가져오기 시트: 넣을 묶음을 고르는 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음'**
+  String get talkImportGroupLabel;
+
+  /// 가져오기 시트: 묶음에 넣지 않고 맨 앞 칸으로 넣는 선택지 (기본값)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 없이'**
+  String get talkImportGroupNone;
+
+  /// 가져오기 시트 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 넣기'**
+  String get talkImportConfirm;
+
+  /// 가져오기 시트: 연결된 이룸이가 한 명도 없을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 먼저 연결해 주세요'**
+  String get talkImportNoElumiTitle;
+
+  /// 가져오기 시트: 이룸이 연결 화면으로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 연결하기'**
+  String get talkImportNoElumiAction;
+
+  /// 가져온 직후 토스트. elumiName 은 고른 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{elumiName} 일과관리에 넣었어요'**
+  String talkImportDone(String elumiName);
+
+  /// 가져온 직후 토스트의 버튼: 일과관리 칸으로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'보러 가기'**
+  String get talkImportGoToLibrary;
+
+  /// 가져오기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 넣지 못했어요'**
+  String get talkImportFailedTitle;
 
   /// 상세 화면: 댓글 목록 제목
   ///

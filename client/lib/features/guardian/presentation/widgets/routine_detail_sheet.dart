@@ -12,9 +12,11 @@ import '../../../../shared/models/routine.dart';
 import 'routine_detail_header.dart';
 import 'routine_detail_reward_row.dart';
 import 'routine_detail_step_badge.dart';
+import 'routine_detail_talk_banner.dart';
 import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
+import '../../application/library_talk_import_state.dart';
 import 'routine_reminder_row.dart';
 
 // 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
@@ -113,6 +115,20 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     for (final step in widget.routine.steps)
       widget.isLibrary ? step.copyWith(completed: false) : step,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 이야기에서 가져온 일과를 열어 봤다 > 목록 칸의 `새로` 표시 끄기 (빌드 중 상태 변경을 피해 프레임 뒤에)
+    if (widget.isLibrary && widget.routine.talkPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(talkImportedSeenRoutineIdsProvider.notifier)
+            .markSeen(widget.routine.id);
+      });
+    }
+  }
 
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///
@@ -217,6 +233,17 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 child: ReorderFingerFollow(
                   builder: (context, follow) => CustomScrollView(
                     slivers: [
+                      // 이야기에서 가져온 일과면 맨 위에 원래 글 안내
+                      if (widget.routine.talkPostId case final talkPostId?)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: RoutineDetailTalkBanner(
+                              postId: talkPostId,
+                              language: widget.routine.language,
+                            ),
+                          ),
+                        ),
                       SliverPadding(
                         // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
                         padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),

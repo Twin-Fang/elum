@@ -210,6 +210,12 @@ abstract interface class LocalStorage {
   bool get isChildPraiseSoundOn;
   Future<void> setChildPraiseSoundOn(bool v);
 
+  /// 이야기에서 가져온 일과 중 상세를 한 번이라도 연 일과 id. 목록 칸의 `새로` 표시를 끄는 근거
+  ///
+  /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다
+  List<String> get talkImportedSeenRoutineIds;
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds);
+
   /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
   String? get routineRemindersJson;
   Future<void> setRoutineRemindersJson(String json);

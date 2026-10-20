@@ -2398,6 +2398,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryTileHint => '길게 누르면 메뉴가 열려요';
 
   @override
+  String get routineLibraryFromTalk => '이야기에서';
+
+  @override
+  String get routineLibraryNewBadge => '새로';
+
+  @override
+  String routineDetailTalkOriginBanner(String authorNickname) {
+    return '📖 $authorNickname님이 이야기에 나눈 일과예요';
+  }
+
+  @override
+  String get routineDetailTalkOriginBannerNoAuthor => '📖 이야기에 나눈 일과예요';
+
+  @override
+  String get routineDetailTalkOriginOpen => '원래 글 보기';
+
+  @override
   String routineLibrarySent(String title) {
     return '$title을(를) 오늘 일과로 보냈어요';
   }
@@ -2794,6 +2811,41 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get talkImportedButton => '✓ 일과관리에 넣었어요';
+
+  @override
+  String get talkImportSheetTitle => '어느 일과관리에 넣을까요?';
+
+  @override
+  String get talkImportSheetHint => '넣은 뒤 우리 집에 맞게 고치고, 준비되면 보내기를 눌러 주세요.';
+
+  @override
+  String get talkImportElumiLabel => '이룸이';
+
+  @override
+  String get talkImportGroupLabel => '묶음';
+
+  @override
+  String get talkImportGroupNone => '묶음 없이';
+
+  @override
+  String get talkImportConfirm => '일과관리에 넣기';
+
+  @override
+  String get talkImportNoElumiTitle => '이룸이를 먼저 연결해 주세요';
+
+  @override
+  String get talkImportNoElumiAction => '이룸이 연결하기';
+
+  @override
+  String talkImportDone(String elumiName) {
+    return '$elumiName 일과관리에 넣었어요';
+  }
+
+  @override
+  String get talkImportGoToLibrary => '보러 가기';
+
+  @override
+  String get talkImportFailedTitle => '일과관리에 넣지 못했어요';
 
   @override
   String get talkCommentsTitle => '댓글';
