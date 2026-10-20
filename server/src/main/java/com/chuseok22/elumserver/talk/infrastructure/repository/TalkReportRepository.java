@@ -39,4 +39,13 @@ public interface TalkReportRepository extends JpaRepository<TalkReport, String> 
   @Modifying(flushAutomatically = true)
   @Query("update TalkReport r set r.resolvedAt = :resolvedAt where r.id = :reportId and r.resolvedAt is null")
   int markResolvedIfUnresolved(@Param("reportId") String reportId, @Param("resolvedAt") LocalDateTime resolvedAt);
+
+  // 탈퇴 정리: 그 회원이 한 신고, 그 회원의 글(글·그 글의 댓글 신고 모두)에 대한 신고, 그 회원의 댓글에 대한 신고
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from TalkReport r where r.reporterMemberId = :memberId "
+    + "or r.postId in (select p.id from TalkPost p where p.authorMemberId = :memberId) "
+    + "or (r.targetType = com.chuseok22.elumserver.talk.core.TalkReportTargetType.COMMENT and r.targetId in "
+    + "(select c.id from TalkComment c where c.authorMemberId = :memberId))")
+  int deleteAllInvolving(@Param("memberId") String memberId);
 }

@@ -149,7 +149,8 @@ class OAuthLoginServiceTest {
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
-      adRewardSessionRepository, feedbackService, notificationCleanupService, routineGroupService,
+      adRewardSessionRepository, feedbackService, notificationCleanupService,
+      mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class), routineGroupService,
       mock(MemberDailyVisitRepository.class));
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,

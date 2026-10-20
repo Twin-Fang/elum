@@ -5,6 +5,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TalkPostStepRepository extends JpaRepository<TalkPostStep, String> {
 
@@ -14,4 +18,11 @@ public interface TalkPostStepRepository extends JpaRepository<TalkPostStep, Stri
   List<TalkPostStep> findByPostIdInAndStepOrderLessThanOrderByStepOrderAsc(Collection<String> postIds, int stepOrder);
 
   Optional<TalkPostStep> findByPostIdAndStepOrder(String postId, int stepOrder);
+
+  // 탈퇴 정리: 그 회원이 쓴 모든 글의 카드
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from TalkPostStep s where s.postId in "
+    + "(select p.id from TalkPost p where p.authorMemberId = :memberId)")
+  int deleteAllByPostAuthor(@Param("memberId") String memberId);
 }

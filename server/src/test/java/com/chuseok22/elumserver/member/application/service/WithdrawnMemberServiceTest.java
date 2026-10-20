@@ -65,6 +65,8 @@ class WithdrawnMemberServiceTest {
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
   @Mock
+  private com.chuseok22.elumserver.talk.application.service.TalkCleanupService talkCleanupService;
+  @Mock
   private com.chuseok22.elumserver.routine.application.service.RoutineGroupService routineGroupService;
 
   @Mock
@@ -224,6 +226,17 @@ class WithdrawnMemberServiceTest {
 
     verifyNoInteractions(deviceLinkRepository);
     verifyNoInteractions(refreshTokenRepository);
+  }
+
+  @Test
+  @DisplayName("완전 삭제는 탈퇴 때 지웠어야 할 이야기 데이터를 한 번 더 지운다")
+  void purge_callsTalkCleanup() {
+    Member member = withdrawn("m1", LocalDateTime.now().minusDays(400));
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    withdrawnMemberService.purge("m1");
+
+    verify(talkCleanupService).deleteAllOf("m1");
   }
 
   @Test

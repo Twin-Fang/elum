@@ -41,4 +41,15 @@ public interface TalkCommentRepository extends JpaRepository<TalkComment, String
   @Query("update TalkComment c set c.status = :nextStatus where c.id = :commentId and c.status = :expectedStatus")
   int updateStatusIfCurrent(@Param("commentId") String commentId, @Param("nextStatus") TalkCommentStatus nextStatus,
     @Param("expectedStatus") TalkCommentStatus expectedStatus);
+
+  // 탈퇴 정리: 남의 글에 단 댓글이 반영된 글 id (집계 재계산 대상)
+  @Query("select distinct c.postId from TalkComment c where c.authorMemberId = :memberId")
+  List<String> findPostIdsCommentedBy(@Param("memberId") String memberId);
+
+  // 탈퇴 정리: 그 회원이 쓴 댓글과 그 회원의 글에 달린 댓글
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from TalkComment c where c.authorMemberId = :memberId or c.postId in "
+    + "(select p.id from TalkPost p where p.authorMemberId = :memberId)")
+  int deleteAllOfMemberOrOnPostsOf(@Param("memberId") String memberId);
 }

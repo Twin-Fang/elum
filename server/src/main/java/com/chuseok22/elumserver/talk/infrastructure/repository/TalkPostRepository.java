@@ -109,4 +109,34 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
   @Query("update TalkPost p set p.status = :nextStatus where p.id = :postId and p.status = :expectedStatus")
   int updateStatusIfCurrent(@Param("postId") String postId, @Param("nextStatus") TalkPostStatus nextStatus,
     @Param("expectedStatus") TalkPostStatus expectedStatus);
+
+  // 탈퇴 정리: 그 회원이 쓴 모든 상태의 글 id (그림 디렉터리 삭제용)
+  @Query("select p.id from TalkPost p where p.authorMemberId = :memberId")
+  List<String> findIdsByAuthorMemberId(@Param("memberId") String memberId);
+
+  // 탈퇴 정리: 그 회원의 글 삭제 (카드·댓글·반응·신고는 호출부가 먼저 지움)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from TalkPost p where p.authorMemberId = :memberId")
+  int deleteAllByAuthorMemberId(@Param("memberId") String memberId);
+
+  // 탈퇴 정리: 집계를 행 수로 다시 셈 (증감이 아니라 재계산, 가려진·지운 댓글은 센 값에서 제외)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.helpfulCount = cast((select count(h) from TalkHelpful h where h.postId = p.id) as integer) "
+    + "where p.id in :postIds")
+  int recountHelpfulCounts(@Param("postIds") Collection<String> postIds);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.commentCount = cast((select count(c) from TalkComment c "
+    + "where c.postId = p.id and c.status = com.chuseok22.elumserver.talk.core.TalkCommentStatus.VISIBLE) as integer) "
+    + "where p.id in :postIds")
+  int recountCommentCounts(@Param("postIds") Collection<String> postIds);
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.importCount = cast((select count(i) from TalkImport i where i.postId = p.id) as integer) "
+    + "where p.id in :postIds")
+  int recountImportCounts(@Param("postIds") Collection<String> postIds);
 }

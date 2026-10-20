@@ -26,6 +26,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
+import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -59,6 +60,7 @@ public class MemberService {
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
+  private final TalkCleanupService talkCleanupService;
   private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
@@ -285,6 +287,8 @@ public class MemberService {
     feedbackService.deleteAllOf(memberId);
     // 알림 기록·푸시 기기·알림 설정·공지 확인. 푸시 토큰이 남으면 탈퇴한 사람에게 푸시가 간다.
     notificationCleanupService.deleteAllOf(memberId);
+    // 이야기 글·댓글·반응·신고·차단·가져가기 기록. 남의 글 집계는 다시 센다.
+    talkCleanupService.deleteAllOf(memberId);
     // 하루 방문 기록. 방침의 보관 항목이 아니라 남기지 않는다 (지난 방문 수에서도 빠짐).
     memberDailyVisitRepository.deleteAllByMemberId(memberId);
 
