@@ -2578,15 +2578,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineManageCoachLongPressMessage =>
-      '*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기';
+      '*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기\n묶음에 넣기 · 복사하기 · 지우기';
 
   @override
   String get routineManageCoachSentMessage =>
-      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고, 여기 일과는 그대로 남아요';
+      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요';
 
   @override
   String get routineManageCoachDragMessage =>
-      '일과를 *꾹 눌러* 다른 일과 위에 놓으면 묶음이 돼요\n묶음을 보내면 안 일과가 순서대로 한꺼번에 가요';
+      '일과를 *꾹 눌러* 다른 일과 위에 놓으면\n*묶음*이 돼요\n묶음을 보내면 순서대로 한꺼번에 가요';
 
   @override
   String get routineManageCoachCreateGroupMessage =>
@@ -2624,4 +2624,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get signInProviderApple => 'Apple';
+
+  @override
+  String get routineManageCoachPracticeBanner =>
+      '연습 화면이에요 · 여기서 누른 것은 실제 일과를 바꾸지 않아요';
+
+  @override
+  String get routineManageCoachSampleMorning => '아침 준비';
+
+  @override
+  String get routineManageCoachSampleBrush => '양치하기';
+
+  @override
+  String get routineManageCoachSampleBag => '가방 챙기기';
 }

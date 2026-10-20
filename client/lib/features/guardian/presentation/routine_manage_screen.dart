@@ -54,11 +54,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
   bool _isArranging = false;
 
-  /// 첫 사용 안내가 가리킬 칸: 낱개 일과 첫째 · 둘째, `+ 일과 만들기`
-  final _firstRoutineTileKey = GlobalKey();
-  final _secondRoutineTileKey = GlobalKey();
-  final _createButtonKey = GlobalKey();
-
   // --- 동작 ---
 
   @override
@@ -302,8 +297,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         entries: value,
         sentIds: sentIds,
         bottomSpace: bottomSpace,
-        firstRoutineTileKey: _firstRoutineTileKey,
-        secondRoutineTileKey: _secondRoutineTileKey,
         onRoutineTap: busy ? null : openRoutineDetail,
         onRoutineMenu: busy ? null : _openMenu,
         onGroupTap: busy ? null : openGroup,
@@ -339,17 +332,14 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: KeyedSubtree(
-        key: _createButtonKey,
-        child: CreateRoutineFab(
-          height: _createButtonHeight.h,
-          isBusy: busy,
-          isArranging: _isArranging,
-          // 정리 상태에서는 가운데 버튼이 `완료`
-          onTap: _isArranging
-              ? () => setState(() => _isArranging = false)
-              : onCreatePressed,
-        ),
+      floatingActionButton: CreateRoutineFab(
+        height: _createButtonHeight.h,
+        isBusy: busy,
+        isArranging: _isArranging,
+        // 정리 상태에서는 가운데 버튼이 `완료`
+        onTap: _isArranging
+            ? () => setState(() => _isArranging = false)
+            : onCreatePressed,
       ),
       body: SafeArea(
         child: Column(
@@ -366,19 +356,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     return Stack(
       children: [
         scaffold,
-        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다.
-        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
-        Positioned.fill(
-          child: Material(
-            type: MaterialType.transparency,
-            child: RoutineManageCoachMark(
-              entries: async.value,
-              firstRoutineTileKey: _firstRoutineTileKey,
-              secondRoutineTileKey: _secondRoutineTileKey,
-              createButtonKey: _createButtonKey,
-            ),
-          ),
-        ),
+        // 처음 들어왔을 때만 연습 무대를 띄운다. 이 자리에는 아무것도 그리지 않는다
+        const RoutineManageCoachTrigger(),
       ],
     );
   }

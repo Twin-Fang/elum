@@ -76,27 +76,20 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     }
   }
 
-  /// 가리킬 낱개 일과 칸이 있고 안 본 단계가 있으면 켠다 (켰으면 true)
-  /// 묶음 단계: 일과 2개 이상 + 묶음 0개일 때만 (끌어다 놓을 대상이 있어야 한다)
-  bool maybeStart({
-    required int routineCount,
-    required int groupCount,
-    required bool hasFirstRoutineTile,
-  }) {
-    if (state.isActive || _hasShownThisRun || !hasFirstRoutineTile) {
-      return false;
-    }
-    final steps = _unseenStepsFor(
-      routineCount: routineCount,
-      groupCount: groupCount,
-    );
+  /// 안 본 단계가 있으면 켠다 (켰으면 true). 연습 무대의 예시 일과로 보여 주므로 실제 일과 수와 무관하다
+  bool maybeStart() {
+    if (state.isActive || _hasShownThisRun) return false;
+    final steps = [
+      if (!_isSeen((storage) => storage.isManageCoachSeen)) ..._basicSteps,
+      if (!_isSeen((storage) => storage.isGroupCoachSeen)) ..._groupSteps,
+    ];
     if (steps.isEmpty) return false;
     _hasShownThisRun = true;
     _turnOn(steps);
     return true;
   }
 
-  /// 다시 보기 요청: 일과관리 화면이 목록을 받은 뒤 [replay] 로 켠다. 내정보 줄이 부른다
+  /// 다시 보기 요청: 일과관리 칸이 보이면 [replay] 로 켠다. 내정보 설정 줄이 부른다
   void requestReplay() {
     state = RoutineManageCoachState(
       steps: state.steps,
@@ -105,40 +98,11 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     );
   }
 
-  /// 다시 보기: 봤어도 켠다. 봤음 기록은 바꾸지 않는다 (이미 true).
-  /// 가리킬 칸이 없으면 켜지 않고 요청만 지운다 (나중에 뜬금없이 뜨지 않게)
-  void replay({
-    required int routineCount,
-    required int groupCount,
-    bool hasFirstRoutineTile = true,
-  }) {
+  /// 다시 보기: 봤어도 다섯 단계를 모두 켠다. 봤음 기록은 바꾸지 않는다 (이미 true)
+  void replay() {
     if (state.isActive) return;
-    if (routineCount < 1 || !hasFirstRoutineTile) {
-      state = const RoutineManageCoachState();
-      return;
-    }
-    _turnOn([
-      ..._basicSteps,
-      if (_canGroup(routineCount: routineCount, groupCount: groupCount))
-        ..._groupSteps,
-    ]);
+    _turnOn(const [..._basicSteps, ..._groupSteps]);
   }
-
-  List<RoutineManageCoachStep> _unseenStepsFor({
-    required int routineCount,
-    required int groupCount,
-  }) {
-    if (routineCount < 1) return const [];
-    return [
-      if (!_isSeen((storage) => storage.isManageCoachSeen)) ..._basicSteps,
-      if (_canGroup(routineCount: routineCount, groupCount: groupCount) &&
-          !_isSeen((storage) => storage.isGroupCoachSeen))
-        ..._groupSteps,
-    ];
-  }
-
-  bool _canGroup({required int routineCount, required int groupCount}) =>
-      routineCount >= 2 && groupCount == 0;
 
   void _turnOn(List<RoutineManageCoachStep> steps) {
     state = RoutineManageCoachState(steps: steps);

@@ -3,100 +3,59 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/coach_mark_overlay.dart';
-import '../../../../core/widgets/coach_mark_step.dart';
-import '../../application/library_entries.dart';
 import '../../application/routine_manage_coach_notifier.dart';
-import 'coach_demo_layers.dart';
+import 'routine_manage_coach_stage.dart';
 
-/// 일과관리 코치마크: 언제 띄울지와 단계를 칸·글·시범에 연결한다 (설계 #832)
+/// 일과관리 코치마크 트리거: 이 칸이 보이는 순간 연습 무대를 띄운다 (#861)
 ///
-/// 가리킬 칸은 화면이 [GlobalKey] 로 넘겨준다. 목록이 도착한 뒤 맨 앞에서 잠시 가만히 있을 때만 켠다.
-class RoutineManageCoachMark extends ConsumerStatefulWidget {
-  const RoutineManageCoachMark({
-    super.key,
-    required this.entries,
-    required this.firstRoutineTileKey,
-    required this.secondRoutineTileKey,
-    required this.createButtonKey,
-  });
-
-  /// 받아 온 격자 항목. 불러오는 중·실패면 null (가리킬 칸이 있는지 모른다)
-  final List<LibraryEntry>? entries;
-
-  /// 낱개 일과 칸의 첫째 · 둘째, `+ 일과 만들기` 버튼
-  final GlobalKey firstRoutineTileKey;
-  final GlobalKey secondRoutineTileKey;
-  final GlobalKey createButtonKey;
+/// 화면에는 아무것도 그리지 않는다. 안내는 루트 위 전체 화면 연습 무대가 맡아 하단 바까지 터치를 막는다.
+class RoutineManageCoachTrigger extends ConsumerStatefulWidget {
+  const RoutineManageCoachTrigger({super.key});
 
   @override
-  ConsumerState<RoutineManageCoachMark> createState() =>
-      _RoutineManageCoachMarkState();
+  ConsumerState<RoutineManageCoachTrigger> createState() =>
+      _RoutineManageCoachTriggerState();
 }
 
-class _RoutineManageCoachMarkState
-    extends ConsumerState<RoutineManageCoachMark> {
-  /// 맨 앞에서 이만큼 가만히 있어야 켠다 (홈 코치마크와 같다)
-  static const _settleFor = Duration(milliseconds: 1200);
-
-  /// 다시 보기는 사용자가 방금 눌러서 온 것이라 오래 기다리게 하지 않는다
-  static const _replaySettleFor = Duration(milliseconds: 300);
+class _RoutineManageCoachTriggerState
+    extends ConsumerState<RoutineManageCoachTrigger> {
+  /// 다른 화면이 위에 있을 때 다시 볼 간격 · 최대 횟수
   static const _retryEvery = Duration(milliseconds: 500);
   static const _maxRetries = 60;
 
-  Timer? _settle;
   Timer? _retry;
   int _retryCount = 0;
   bool _isWaitingRoute = false;
 
-  /// 사라지는 연출이 끝날 때까지 직전 단계 목록을 들고 있는다
-  List<RoutineManageCoachStep>? _retainedSteps;
-  int _retainedIndex = 0;
+  /// 연습 무대를 띄운 상태인가 (같은 무대를 두 번 띄우지 않게)
+  bool _isStageOpen = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpen());
   }
 
   /// 탭 화면은 안 보이는 동안에도 살아 있다. 이 칸이 보이게 되는 순간(TickerMode 변화) 다시 따진다
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
-  }
-
-  @override
-  void didUpdateWidget(covariant RoutineManageCoachMark old) {
-    super.didUpdateWidget(old);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpen());
   }
 
   @override
   void dispose() {
-    _settle?.cancel();
     _retry?.cancel();
     super.dispose();
   }
 
-  /// 코치마크를 띄워도 되는 때인지 보고, 맞으면 켠다.
+  /// 띄울 때인지 보고 맞으면 바로 띄운다
   ///
-  /// 조건 4개: 목록을 받아 옴, 이 칸이 보이는 탭, 화면이 맨 앞이고 전환이 끝남, 그 상태로 [_settleFor] 유지.
-  void _maybeStart() {
-    if (!mounted || widget.entries == null) return;
-    // 다른 탭이 보이는 중이면 대상을 못 재서 단계가 전부 건너뛰어지고 본 것으로 남는다
-    if (!TickerMode.of(context)) {
-      _settle?.cancel();
-      _settle = null;
-      return;
-    }
-
+  /// 조건 3개: 이 칸이 보이는 탭, 이 화면이 맨 앞, 화면 전환이 끝남. 기다리는 시간은 두지 않는다.
+  void _maybeOpen() {
+    if (!mounted || _isStageOpen || !TickerMode.of(context)) return;
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) {
-      _settle?.cancel();
-      _settle = null;
       _retryLater();
       return;
     }
@@ -108,171 +67,48 @@ class _RoutineManageCoachMarkState
         if (status != AnimationStatus.completed) return;
         animation.removeStatusListener(onStatus);
         _isWaitingRoute = false;
-        _maybeStart();
+        _maybeOpen();
       }
 
       animation.addStatusListener(onStatus);
       return;
     }
-    if (_settle?.isActive ?? false) return;
-    final isReplay = ref.read(routineManageCoachProvider).isReplayRequested;
-    _settle = Timer(isReplay ? _replaySettleFor : _settleFor, _startNow);
+
+    final notifier = ref.read(routineManageCoachProvider.notifier);
+    if (ref.read(routineManageCoachProvider).isReplayRequested) {
+      notifier.replay();
+    } else if (!notifier.maybeStart()) {
+      return;
+    }
+    _openStage();
   }
 
   void _retryLater() {
     if (_retry?.isActive ?? false) return;
     if (_retryCount++ >= _maxRetries) return;
-    _retry = Timer(_retryEvery, _maybeStart);
+    _retry = Timer(_retryEvery, _maybeOpen);
   }
 
-  void _startNow() {
-    _settle = null;
-    if (!mounted || !TickerMode.of(context)) return;
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) {
-      _retryLater();
-      return;
-    }
-    // 기다리는 사이 목록이 바뀌었을 수 있어 지금 값으로 다시 센다
-    final entries = widget.entries;
-    if (entries == null) return;
-    // 가리킬 첫 칸이 화면 안에 없으면 켜지 않는다 (단계가 전부 건너뛰어져 본 것으로만 남는다)
-    if (!_isFullyVisible(widget.firstRoutineTileKey)) {
-      _retryLater();
-      return;
-    }
-    final notifier = ref.read(routineManageCoachProvider.notifier);
-    final routineCount = _routineCountOf(entries);
-    final groupCount = entries.whereType<LibraryGroupEntry>().length;
-    if (ref.read(routineManageCoachProvider).isReplayRequested) {
-      notifier.replay(
-        routineCount: routineCount,
-        groupCount: groupCount,
-        hasFirstRoutineTile: entries.any(
-          (entry) => entry is LibraryRoutineEntry,
-        ),
-      );
-      return;
-    }
-    notifier.maybeStart(
-      routineCount: routineCount,
-      groupCount: groupCount,
-      hasFirstRoutineTile: entries.any((entry) => entry is LibraryRoutineEntry),
-    );
-  }
-
-  /// 대상이 이 위젯(화면 전체) 안에 온전히 들어와 있는가
-  bool _isFullyVisible(GlobalKey key) {
-    final overlayBox = context.findRenderObject();
-    final targetBox = key.currentContext?.findRenderObject();
-    if (overlayBox is! RenderBox || !overlayBox.hasSize) return false;
-    if (targetBox is! RenderBox || !targetBox.attached || !targetBox.hasSize) {
-      return false;
-    }
-    final origin = targetBox.localToGlobal(Offset.zero, ancestor: overlayBox);
-    final screen = (Offset.zero & overlayBox.size).inflate(1);
-    return screen.contains(origin) &&
-        screen.contains(origin + targetBox.size.bottomRight(Offset.zero));
-  }
-
-  /// 묶음 안 일과까지 센 일과 수
-  int _routineCountOf(List<LibraryEntry> entries) => entries.fold(
-    0,
-    (count, entry) => switch (entry) {
-      LibraryRoutineEntry() => count + 1,
-      LibraryGroupEntry(:final routines) => count + routines.length,
-    },
-  );
-
-  /// 보낸 뒤 시범에 쓸 일과 이름: 첫 낱개 칸의 이름
-  String _firstRoutineTitle() {
-    final entry = widget.entries?.whereType<LibraryRoutineEntry>().firstOrNull;
-    return entry?.routine.displayTitle ?? '';
-  }
-
-  CoachMarkStep _stepFor(RoutineManageCoachStep step, BuildContext context) {
-    final l10n = context.l10n;
-    final tileRadius = context.space.md;
-    switch (step) {
-      case RoutineManageCoachStep.tapRoutine:
-        return CoachMarkStep(
-          target: widget.firstRoutineTileKey,
-          message: l10n.routineManageCoachTapMessage,
-          holeRadius: tileRadius,
-          demoBuilder: tapDemo,
-        );
-      case RoutineManageCoachStep.longPressRoutine:
-        return CoachMarkStep(
-          target: widget.firstRoutineTileKey,
-          message: l10n.routineManageCoachLongPressMessage,
-          holeRadius: tileRadius,
-          demoBuilder: longPressDemo,
-        );
-      case RoutineManageCoachStep.sentBadge:
-        final title = _firstRoutineTitle();
-        return CoachMarkStep(
-          target: widget.firstRoutineTileKey,
-          message: l10n.routineManageCoachSentMessage,
-          holeRadius: tileRadius,
-          demoBuilder: (context, rect) =>
-              sentBadgeDemo(context, rect, routineTitle: title),
-        );
-      case RoutineManageCoachStep.dragToGroup:
-        return CoachMarkStep(
-          target: widget.firstRoutineTileKey,
-          message: l10n.routineManageCoachDragMessage,
-          holeRadius: tileRadius,
-          demoBuilder: (context, firstRect) =>
-              dragToGroupDemo(context, firstRect, _secondTileRect(firstRect)),
-        );
-      case RoutineManageCoachStep.createGroup:
-        return CoachMarkStep(
-          target: widget.createButtonKey,
-          message: l10n.routineManageCoachCreateGroupMessage,
-          holeRadius: tileRadius,
-          demoBuilder: createGroupDemo,
-        );
-    }
-  }
-
-  /// 둘째 칸 상자 (오버레이 좌표). 못 재면 첫 칸 오른쪽 옆으로 본다
-  Rect _secondTileRect(Rect firstRect) {
-    final overlayBox = context.findRenderObject();
-    final box = widget.secondRoutineTileKey.currentContext?.findRenderObject();
-    if (overlayBox is RenderBox && box is RenderBox && box.attached) {
-      final origin = box.localToGlobal(Offset.zero, ancestor: overlayBox);
-      return origin & box.size;
-    }
-    return firstRect.shift(Offset(firstRect.width, 0));
+  Future<void> _openStage() async {
+    _isStageOpen = true;
+    await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(RoutineManageCoachStage.route());
+    // 무대를 닫는 길이 무엇이든(✕ · 뒤로가기 · 마지막 단계) 본 것으로 남긴다
+    await ref.read(routineManageCoachProvider.notifier).finish();
+    if (mounted) _isStageOpen = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    // 내정보에서 다시 보기를 눌러 이미 떠 있는 이 화면으로 돌아온 경우
+    // 내정보에서 다시 보기를 눌러 이미 떠 있는 이 칸으로 돌아온 경우
     ref.listen(
       routineManageCoachProvider.select((state) => state.isReplayRequested),
       (_, isRequested) {
-        if (isRequested) _maybeStart();
+        if (isRequested) _maybeOpen();
       },
     );
-    final state = ref.watch(routineManageCoachProvider);
-    if (state.isActive) {
-      _retainedSteps = state.steps;
-      _retainedIndex = state.index;
-    }
-    final steps = _retainedSteps;
-    if (steps == null) return const SizedBox.shrink();
-
-    final notifier = ref.read(routineManageCoachProvider.notifier);
-    return CoachMarkOverlay(
-      steps: [for (final step in steps) _stepFor(step, context)],
-      index: state.isActive ? state.index : _retainedIndex,
-      visible: state.isActive,
-      onNext: notifier.next,
-      onClose: notifier.finish,
-      onDismissed: () {
-        if (mounted) setState(() => _retainedSteps = null);
-      },
-    );
+    return const SizedBox.shrink();
   }
 }

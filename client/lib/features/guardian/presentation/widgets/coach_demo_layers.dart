@@ -97,47 +97,78 @@ Widget sentBadgeDemo(
   },
 );
 
-/// 끌어서 묶기: 첫 칸을 들어 올려 둘째 칸 위로 > 놓으면 묶음 칸이 생김
+/// 끌어서 묶기: 첫 칸 그림을 들어 올려 둘째 칸 위로 > 놓으면 그 자리에 묶음 칸이 생김
+///
+/// [ghost] 는 끌려가는 그림 칸에 들어갈 내용 (연습 무대는 예시 일과 그림을 넘긴다). 없으면 빈 칸.
 Widget dragToGroupDemo(
   BuildContext context,
   Rect first,
-  Rect second,
-) => buildCoachDemoLoop(
+  Rect second, {
+  Widget? ghost,
+}) => buildCoachDemoLoop(
   endScene: 0.8,
   builder: (context, t) {
     final move = Curves.easeInOut.transform(coachDemoPhase(t, 0.25, 0.6));
     final lift = coachDemoPhase(t, 0.15, 0.25);
     final drop = coachDemoPhase(t, 0.6, 0.7);
-    final ghost = Rect.lerp(first, second, move)!;
+    // 칸 전체가 아니라 실제 칸의 그림 자리(가운데 위)만 움직인다
+    final iconSize = LibraryRoutineTile.iconSize.w;
+    Rect iconOf(Rect cell) => Rect.fromLTWH(
+      cell.center.dx - iconSize / 2,
+      cell.top,
+      iconSize,
+      iconSize,
+    );
+    final from = iconOf(first);
+    final to = iconOf(second);
+    final moving = Rect.lerp(from, to, move)!;
     final colors = context.colors;
+    final radius = BorderRadius.circular(LibraryRoutineTile.iconRadius.w);
     return Stack(
       children: [
-        // 받는 칸: 위에 올라오면 살짝 커짐
+        // 받는 칸: 위에 올라오면 테두리가 뜨며 살짝 커짐
         Positioned.fromRect(
-          rect: second,
+          rect: to,
           child: Transform.scale(
             scale: 1 + 0.1 * coachDemoPhase(t, 0.5, 0.6) * (1 - drop),
-            child: CoachDemoGhostTile(color: colors.surface, opacity: 1 - drop),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: Border.all(
+                  color: colors.surface.withValues(
+                    alpha: coachDemoPhase(t, 0.45, 0.55) * (1 - drop),
+                  ),
+                  width: 2.w,
+                ),
+              ),
+            ),
           ),
         ),
-        // 끌려가는 칸
+        // 끌려가는 그림 칸
         Positioned.fromRect(
-          rect: ghost,
+          rect: moving,
           child: Transform.scale(
-            scale: 1 + 0.15 * lift - 0.4 * drop,
-            child: CoachDemoGhostTile(color: colors.surface, opacity: 1 - drop),
+            scale: 1 + 0.12 * lift - 0.4 * drop,
+            child: Opacity(
+              opacity: 1 - drop,
+              child: CoachDemoGhostTile(
+                color: colors.surface,
+                opacity: 1,
+                child: ghost,
+              ),
+            ),
           ),
         ),
         // 놓은 자리에 묶음 칸: 2×2 미리보기
         Positioned.fromRect(
-          rect: second,
+          rect: to,
           child: Transform.scale(
             scale: Curves.easeOutBack.transform(drop),
             child: Opacity(opacity: drop, child: const CoachDemoGroupPreview()),
           ),
         ),
         CoachDemoFinger(
-          center: ghost.center,
+          center: moving.center,
           press: lift * (1 - drop),
           appear:
               coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),

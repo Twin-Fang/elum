@@ -74,10 +74,14 @@ class CoachDemoGhostTile extends StatelessWidget {
     super.key,
     required this.color,
     required this.opacity,
+    this.child,
   });
 
   final Color color;
   final double opacity;
+
+  /// 칸 안에 그릴 내용 (예시 일과 그림). 없으면 빈 칸
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) => Opacity(
@@ -93,6 +97,9 @@ class CoachDemoGhostTile extends StatelessWidget {
           ),
         ],
       ),
+      child: child == null
+          ? null
+          : ClipRRect(borderRadius: BorderRadius.circular(16.r), child: child),
     ),
   );
 }
