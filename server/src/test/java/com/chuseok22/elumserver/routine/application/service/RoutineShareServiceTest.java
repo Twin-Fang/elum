@@ -128,6 +128,17 @@ class RoutineShareServiceTest {
   }
 
   @Test
+  @DisplayName("일과의 이룸이 호칭을 돌려주고, 지워진 일과·null id 는 null")
+  void findProfileNickname_returnsNicknameOrNull() {
+    when(routineRepository.findById("original-1")).thenReturn(Optional.of(routine("original-1", "버스 타기")));
+    when(routineRepository.findById("gone-1")).thenReturn(Optional.empty());
+
+    assertThat(routineShareService.findProfileNickname("original-1")).isEqualTo("하늘이");
+    assertThat(routineShareService.findProfileNickname("gone-1")).isNull();
+    assertThat(routineShareService.findProfileNickname(null)).isNull();
+  }
+
+  @Test
   @DisplayName("그림 읽기는 없으면 null, 던지지 않는다")
   void readImage_missingReturnsNull() {
     when(routineImageStorage.read("gone.jpg")).thenThrow(new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND));

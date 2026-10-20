@@ -12,8 +12,10 @@ import com.chuseok22.elumserver.routine.application.dto.RoutineShareSnapshot.Ste
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
+import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse.PreviewStep;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
@@ -35,9 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * 이야기 올리기: 미리보기(이름 가린 글), 글 저장(카드 스냅샷, 그림 사본, 흐리게)
+ * 이야기 올리기·고치기·내리기: 미리보기(이름 가린 글), 글 저장(카드 스냅샷, 그림 사본, 흐리게), 한마디·분류 고치기, 글 내리기
  * 일과·회원 데이터는 RoutineShareService·MemberService 로만 읽음, 글·그림 원문은 로그에 남기지 않음
  */
 @Slf4j
@@ -57,6 +61,7 @@ public class TalkPostService {
   private final RoutineShareService routineShareService;
   private final MemberService memberService;
   private final NicknamePolicy nicknamePolicy;
+  private final TalkFeedQueryService talkFeedQueryService;
 
   /**
    * 미리보기: 스냅샷 > 이름 가리기 > 가린 글과 사진 카드 여부 (저장 없음)
@@ -107,6 +112,90 @@ public class TalkPostService {
     return new TalkPostCreatedResponse(post.getId());
   }
 
+  /**
+   * 고치기: 입력 확인 > 내 글 확인 > 분류 > 한마디(정리, 이름 가리기, 금칙어) > 저장 > 상세
+   * 보낸 항목만 바꿈, 한마디는 빈 값이면 지움, 원본 일과가 지워졌으면 호칭 없이(글 그대로) 가림
+   */
+  @Transactional
+  public TalkPostDetailResponse update(Caller caller, String postId, TalkPostUpdateRequest request) {
+    // 요청 검증 (바꿀 항목 있음)
+    if (request == null || (request.note() == null && request.category() == null)) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    TalkPost post = findOwnVisiblePost(caller, postId);
+
+    // 분류 > 한마디 (이룸이 호칭 가리기, 가린 뒤 금칙어)
+    if (request.category() != null) {
+      post.setCategory(TalkCategory.parse(request.category()));
+    }
+    if (request.note() != null) {
+      post.setNote(maskedNoteOf(post, request.note()));
+    }
+    talkPostRepository.saveAndFlush(post);
+    log.info("[talk post] updated : postId={}", postId);
+    return talkFeedQueryService.detail(caller, postId);
+  }
+
+  /**
+   * 내리기: 내 글 확인 > DELETED > 커밋 뒤 그림 파일 삭제 (같은 원본은 다시 올릴 수 있음)
+   */
+  @Transactional
+  public void delete(Caller caller, String postId) {
+    TalkPost post = findOwnVisiblePost(caller, postId);
+    post.setStatus(TalkPostStatus.DELETED);
+    talkPostRepository.saveAndFlush(post);
+    deleteImagesAfterCommit(postId);
+    log.info("[talk post] deleted : postId={}", postId);
+  }
+
+  // 없거나 이미 내린 글은 NOT_FOUND, 남의 글은 NOT_AUTHOR
+  private TalkPost findOwnVisiblePost(Caller caller, String postId) {
+    TalkPost post = talkPostRepository.findById(postId)
+      .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE)
+      .orElseThrow(() -> new CustomException(ErrorCode.TALK_POST_NOT_FOUND));
+    if (!post.getAuthorMemberId().equals(caller.memberId())) {
+      log.warn("[talk post] rejected 403 : not the author");
+      throw new CustomException(ErrorCode.TALK_NOT_AUTHOR);
+    }
+    return post;
+  }
+
+  // 한마디 정리 > 이름 가리기 > 금칙어 (빈 값은 null = 지움)
+  private String maskedNoteOf(TalkPost post, String rawNote) {
+    String note = TalkTextRules.normalizeNote(rawNote);
+    if (note == null) {
+      return null;
+    }
+    String nickname = routineShareService.findProfileNickname(post.getSourceRoutineId());
+    String maskedNote;
+    try {
+      maskedNote = mask(note, nickname, post.getLanguage());
+    } catch (RuntimeException e) {
+      log.warn("[talk post] rejected 500 : nickname mask failed");
+      throw new CustomException(ErrorCode.TALK_NICKNAME_MASK_FAILED);
+    }
+    if (hasRemainingNickname(Stream.of(maskedNote), nickname, post.getLanguage())) {
+      log.warn("[talk post] rejected 500 : nickname remains after mask");
+      throw new CustomException(ErrorCode.TALK_NICKNAME_MASK_FAILED);
+    }
+    rejectBlockedWords(Stream.of(maskedNote));
+    return maskedNote;
+  }
+
+  // 커밋 뒤에만 그림 삭제 (롤백되면 글이 남으므로), 트랜잭션 밖이면 바로
+  private void deleteImagesAfterCommit(String postId) {
+    if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+      deleteWrittenImagesQuietly(postId);
+      return;
+    }
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+      @Override
+      public void afterCommit() {
+        deleteWrittenImagesQuietly(postId);
+      }
+    });
+  }
+
   private RoutineShareSnapshot snapshotOf(Caller caller, String routineId) {
     if (routineId == null || routineId.isBlank()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
@@ -139,10 +228,11 @@ public class TalkPostService {
     try {
       String nickname = snapshot.profileNickname();
       List<MaskedStep> steps = snapshot.steps().stream()
-        .map(step -> new MaskedStep(step,
-          mask(step.title(), nickname, snapshot), mask(step.description(), nickname, snapshot)))
+        .map(step -> new MaskedStep(step, mask(step.title(), nickname, snapshot.language()),
+          mask(step.description(), nickname, snapshot.language())))
         .toList();
-      masked = new MaskedPost(mask(snapshot.title(), nickname, snapshot), mask(note, nickname, snapshot), steps);
+      masked = new MaskedPost(mask(snapshot.title(), nickname, snapshot.language()),
+        mask(note, nickname, snapshot.language()), steps);
     } catch (RuntimeException e) {
       log.warn("[talk post] rejected 500 : nickname mask failed");
       throw new CustomException(ErrorCode.TALK_NICKNAME_MASK_FAILED);
@@ -155,12 +245,12 @@ public class TalkPostService {
   }
 
   // 조사 규칙 가리기 > 남은 호칭 문자열 전부 치환 (예: "하늘색" 처럼 낱말 일부로 남은 것)
-  private static String mask(String text, String nickname, RoutineShareSnapshot snapshot) {
-    String masked = NicknamePlaceholder.mask(text, nickname, snapshot.language());
-    if (masked == null || !isStrictMaskTarget(nickname, snapshot.language())) {
+  private static String mask(String text, String nickname, AppLocale language) {
+    String masked = NicknamePlaceholder.mask(text, nickname, language);
+    if (masked == null || !isStrictMaskTarget(nickname, language)) {
       return masked;
     }
-    return masked.replace(nickname.trim(), NicknamePlaceholder.placeholderFor(snapshot.language()));
+    return masked.replace(nickname.trim(), NicknamePlaceholder.placeholderFor(language));
   }
 
   // 호칭 2자 이상만 (1자는 오탐이 커서 제외), 자리표시가 호칭을 품으면 구분할 수 없어 제외
@@ -174,20 +264,30 @@ public class TalkPostService {
   }
 
   private static boolean hasRemainingNickname(MaskedPost masked, RoutineShareSnapshot snapshot) {
-    if (!isStrictMaskTarget(snapshot.profileNickname(), snapshot.language())) {
+    return hasRemainingNickname(allTextsOf(masked), snapshot.profileNickname(), snapshot.language());
+  }
+
+  private static boolean hasRemainingNickname(Stream<String> texts, String nickname, AppLocale language) {
+    if (!isStrictMaskTarget(nickname, language)) {
       return false;
     }
-    String name = snapshot.profileNickname().trim();
+    String name = nickname.trim();
+    return texts.anyMatch(text -> text != null && text.contains(name));
+  }
+
+  // 제목·한마디·카드 제목·카드 설명
+  private static Stream<String> allTextsOf(MaskedPost masked) {
     Stream<String> stepTexts = masked.steps().stream().flatMap(step -> Stream.of(step.title(), step.description()));
-    return Stream.concat(Stream.of(masked.title(), masked.note()), stepTexts)
-      .anyMatch(text -> text != null && text.contains(name));
+    return Stream.concat(Stream.of(masked.title(), masked.note()), stepTexts);
   }
 
   // 제목·한마디·카드 글에 욕설이 있으면 거절
   private void rejectBlockedWords(MaskedPost masked) {
-    Stream<String> stepTexts = masked.steps().stream().flatMap(step -> Stream.of(step.title(), step.description()));
-    boolean hasBlockedWord = Stream.concat(Stream.of(masked.title(), masked.note()), stepTexts)
-      .anyMatch(nicknamePolicy::containsBlockedWord);
+    rejectBlockedWords(allTextsOf(masked));
+  }
+
+  private void rejectBlockedWords(Stream<String> texts) {
+    boolean hasBlockedWord = texts.anyMatch(nicknamePolicy::containsBlockedWord);
     if (hasBlockedWord) {
       log.warn("[talk post] rejected 400 : blocked word in text");
       throw new CustomException(ErrorCode.TALK_TEXT_NOT_ALLOWED);

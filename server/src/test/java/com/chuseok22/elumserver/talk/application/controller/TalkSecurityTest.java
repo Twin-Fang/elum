@@ -130,6 +130,27 @@ class TalkSecurityTest {
   }
 
   @Test
+  @DisplayName("고치기·내리기는 이룸이 권한이면 403, 보호자면 200·204 로 서비스에 닿는다")
+  void updateAndDelete_guardianOnly() throws Exception {
+    var elumi = user("e1").authorities(MEMBER, ELUMI);
+    var guardian = user("g1").authorities(MEMBER, GUARDIAN);
+    var patch = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/talk/posts/p1");
+    var delete = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/talk/posts/p1");
+
+    mockMvc.perform(patch.with(elumi).contentType("application/json").content("{}"))
+      .andExpect(status().isForbidden());
+    mockMvc.perform(delete.with(elumi)).andExpect(status().isForbidden());
+    verify(talkPostService, never()).update(any(), any(), any());
+    verify(talkPostService, never()).delete(any(), any());
+
+    mockMvc.perform(patch.with(guardian).contentType("application/json").content("{\"category\":\"FEELINGS\"}"))
+      .andExpect(status().isOk());
+    mockMvc.perform(delete.with(guardian)).andExpect(status().isNoContent());
+    verify(talkPostService).update(any(), eq("p1"), any());
+    verify(talkPostService).delete(any(), eq("p1"));
+  }
+
+  @Test
   @DisplayName("내 글 매핑은 원본 일과 id > 글 id 맵으로 나온다 (mine 이 {id} 로 잡히지 않는다)")
   void mineBySourceRoutine_returnsMap() throws Exception {
     when(talkFeedQueryService.mySharedPosts(any())).thenReturn(Map.of("routine-1", "post-1"));

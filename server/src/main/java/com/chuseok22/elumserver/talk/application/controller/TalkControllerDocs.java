@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.talk.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
@@ -176,4 +177,57 @@ public interface TalkControllerDocs {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<TalkPostCreatedResponse> create(Authentication authentication, TalkPostCreateRequest request);
+
+  @Operation(
+    summary = "내 글 고치기",
+    description = """
+      내가 올린 글의 한마디와 분류를 고칩니다. 보낸 항목만 바뀌고, 한마디를 빈 문자열로 보내면 지웁니다.
+
+      **검사**
+      1. 둘 다 안 보내거나 분류가 6개 중 하나가 아니면 400 `INVALID_INPUT_VALUE`.
+      2. 없거나 이미 내린 글이면 404 `TALK_POST_NOT_FOUND`, 남의 글이면 403 `TALK_NOT_AUTHOR`.
+      3. 한마디도 올릴 때와 같이 이룸이 호칭을 가리고 금칙어를 거릅니다. 금칙어는 400 `TALK_TEXT_NOT_ALLOWED`,
+         길면 400 `TALK_TEXT_TOO_LONG`, 호칭을 가리지 못하면 500 `TALK_NICKNAME_MASK_FAILED`.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "고치기 성공. 고친 글의 상세",
+      content = @Content(schema = @Schema(implementation = TalkPostDetailResponse.class))),
+    @ApiResponse(responseCode = "400",
+      description = "고칠 항목 없음·모르는 분류(INVALID_INPUT_VALUE) · 금칙어(TALK_TEXT_NOT_ALLOWED) · "
+        + "한마디 초과(TALK_TEXT_TOO_LONG)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "403", description = "남의 글(TALK_NOT_AUTHOR)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "없거나 이미 내린 글(TALK_POST_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<TalkPostDetailResponse> update(
+    Authentication authentication,
+    @Parameter(description = "글 id") String postId,
+    TalkPostUpdateRequest request
+  );
+
+  @Operation(
+    summary = "내 글 내리기",
+    description = """
+      내가 올린 글을 내립니다. 글은 목록·상세에서 사라지고 카드 그림 파일도 지워집니다.
+      이미 가져간 일과는 그대로 남고, 같은 일과를 다시 올릴 수 있습니다.
+      없거나 이미 내린 글이면 404 `TALK_POST_NOT_FOUND`, 남의 글이면 403 `TALK_NOT_AUTHOR`.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "내리기 성공"),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "403", description = "남의 글(TALK_NOT_AUTHOR)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "없거나 이미 내린 글(TALK_POST_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<Void> delete(Authentication authentication, @Parameter(description = "글 id") String postId);
 }

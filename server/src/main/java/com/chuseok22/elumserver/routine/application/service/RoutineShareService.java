@@ -54,6 +54,19 @@ public class RoutineShareService {
   }
 
   /**
+   * 일과의 이룸이 호칭 (글 고치기 때 한마디 이름 가리기용): 일과가 지워졌으면 null, 권한 확인 없음(글쓴이 확인은 호출부)
+   */
+  @Transactional(readOnly = true)
+  public String findProfileNickname(String routineId) {
+    if (routineId == null) {
+      return null;
+    }
+    return routineRepository.findById(routineId)
+      .map(routine -> routine.getProfile().getNickname())
+      .orElse(null);
+  }
+
+  /**
    * 일과 그림 읽기 (없거나 읽기 실패는 null, 던지지 않음)
    */
   public ImageContent readImage(String imageKey) {

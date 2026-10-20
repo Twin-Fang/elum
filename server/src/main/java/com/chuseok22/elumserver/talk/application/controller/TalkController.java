@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
@@ -20,7 +21,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,5 +103,20 @@ public class TalkController implements TalkControllerDocs {
     Authentication authentication, @RequestBody TalkPostCreateRequest request
   ) {
     return ResponseEntity.ok(talkPostService.create(Caller.from(authentication), request));
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/posts/{postId}")
+  public ResponseEntity<TalkPostDetailResponse> update(
+    Authentication authentication, @PathVariable String postId, @RequestBody TalkPostUpdateRequest request
+  ) {
+    return ResponseEntity.ok(talkPostService.update(Caller.from(authentication), postId, request));
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @DeleteMapping("/posts/{postId}")
+  public ResponseEntity<Void> delete(Authentication authentication, @PathVariable String postId) {
+    talkPostService.delete(Caller.from(authentication), postId);
+    return ResponseEntity.noContent().build();
   }
 }

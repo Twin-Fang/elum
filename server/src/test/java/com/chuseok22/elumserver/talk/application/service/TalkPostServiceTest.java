@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,8 +27,10 @@ import com.chuseok22.elumserver.routine.application.dto.RoutineShareSnapshot.Ste
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPostCreateRequest;
+import com.chuseok22.elumserver.talk.application.dto.request.TalkPostUpdateRequest;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkPreviewRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostCreatedResponse;
+import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
@@ -38,6 +41,9 @@ import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostRepositor
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkPostStepRepository;
 import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +54,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/// 올리기: 이룸이 실명 노출·원본 사진 노출·선택 무시·실패 시 파일 잔재를 막는다.
+/// 올리기·고치기·내리기: 이룸이 실명 노출·원본 사진 노출·남의 글 수정·내린 글의 그림 잔재를 막는다.
 @ExtendWith(MockitoExtension.class)
 class TalkPostServiceTest {
 
@@ -68,13 +74,15 @@ class TalkPostServiceTest {
   private RoutineShareService routineShareService;
   @Mock
   private MemberService memberService;
+  @Mock
+  private TalkFeedQueryService talkFeedQueryService;
 
   private TalkPostService talkPostService;
 
   @BeforeEach
   void setUp() {
     talkPostService = new TalkPostService(talkPostRepository, talkPostStepRepository, talkImageStorage,
-      talkImageBlurrer, routineShareService, memberService, new NicknamePolicy());
+      talkImageBlurrer, routineShareService, memberService, new NicknamePolicy(), talkFeedQueryService);
   }
 
   @Test
@@ -337,6 +345,199 @@ class TalkPostServiceTest {
       .containsExactly(true, false);
     assertThat(response.steps().get(0).description()).doesNotContain("하늘이").contains("이룸이");
     verifyNoInteractions(talkPostRepository, talkPostStepRepository, talkImageStorage, talkImageBlurrer);
+  }
+
+  @Test
+  @DisplayName("작성자가 아니면 고칠 수 없다 (TALK_NOT_AUTHOR) 그리고 아무것도 바꾸지 않는다")
+  void update_byOther_throwsNotAuthor() {
+    TalkPost post = visiblePost("post-1", "other-member", "원래 한마디", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+
+    assertUpdateFails("post-1", new TalkPostUpdateRequest("바꿈", null), ErrorCode.TALK_NOT_AUTHOR);
+    assertThat(post.getNote()).isEqualTo("원래 한마디");
+    verify(talkPostRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("없거나 이미 내린 글은 TALK_POST_NOT_FOUND")
+  void update_missingOrDeleted_throwsNotFound() {
+    TalkPost deleted = visiblePost("post-2", "member-1", null, TalkCategory.DAILY_FLOW);
+    deleted.setStatus(TalkPostStatus.DELETED);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.empty());
+    when(talkPostRepository.findById("post-2")).thenReturn(Optional.of(deleted));
+
+    assertUpdateFails("post-1", new TalkPostUpdateRequest("바꿈", null), ErrorCode.TALK_POST_NOT_FOUND);
+    assertUpdateFails("post-2", new TalkPostUpdateRequest("바꿈", null), ErrorCode.TALK_POST_NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("한마디·분류를 둘 다 안 보내면 INVALID_INPUT_VALUE")
+  void update_nothingToChange_throwsInvalidInput() {
+    assertUpdateFails("post-1", new TalkPostUpdateRequest(null, null), ErrorCode.INVALID_INPUT_VALUE);
+    assertUpdateFails("post-1", null, ErrorCode.INVALID_INPUT_VALUE);
+    verifyNoInteractions(talkPostRepository);
+  }
+
+  @Test
+  @DisplayName("고친 한마디도 이룸이 호칭을 가리고 저장하고, 상세를 돌려준다")
+  void update_noteMaskedAndChecked() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(routineShareService.findProfileNickname("original-1")).thenReturn("하늘이");
+    TalkPostDetailResponse detail = mock(TalkPostDetailResponse.class);
+    when(talkFeedQueryService.detail(GUARDIAN, "post-1")).thenReturn(detail);
+
+    TalkPostDetailResponse response =
+      talkPostService.update(GUARDIAN, "post-1", new TalkPostUpdateRequest("  하늘이는 좋아했어요 ", null));
+
+    assertThat(post.getNote()).doesNotContain("하늘이").contains("이룸이");
+    assertThat(post.getCategory()).isEqualTo(TalkCategory.DAILY_FLOW);
+    assertThat(response).isSameAs(detail);
+    verify(talkPostRepository).saveAndFlush(post);
+  }
+
+  @Test
+  @DisplayName("고친 한마디에 금칙어가 있으면 TALK_TEXT_NOT_ALLOWED 로 거절하고 글은 그대로다")
+  void update_blockedWord_rejectsAndKeepsPost() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(routineShareService.findProfileNickname("original-1")).thenReturn("하늘이");
+
+    assertUpdateFails("post-1", new TalkPostUpdateRequest("이거 개새끼 별로예요", null), ErrorCode.TALK_TEXT_NOT_ALLOWED);
+    assertThat(post.getNote()).isEqualTo("원래");
+    verify(talkPostRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("가린 뒤에도 호칭이 남거나 가리기 중 예외가 나면 TALK_NICKNAME_MASK_FAILED")
+  void update_maskFails_rejects() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    // "이하" 를 "이룸이" 로 바꾸면 뒤 글자와 이어져 다시 "이하" 가 생긴다
+    when(routineShareService.findProfileNickname("original-1")).thenReturn("이하");
+
+    assertUpdateFails("post-1", new TalkPostUpdateRequest("이하하 좋아요", null), ErrorCode.TALK_NICKNAME_MASK_FAILED);
+    assertThat(post.getNote()).isEqualTo("원래");
+  }
+
+  @Test
+  @DisplayName("분류만 보내면 한마디는 그대로 두고 분류만 바꾼다 (원본 일과는 조회하지 않음)")
+  void update_categoryOnly_keepsNote() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래 한마디", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+
+    talkPostService.update(GUARDIAN, "post-1", new TalkPostUpdateRequest(null, "FEELINGS"));
+
+    assertThat(post.getCategory()).isEqualTo(TalkCategory.FEELINGS);
+    assertThat(post.getNote()).isEqualTo("원래 한마디");
+    verifyNoInteractions(routineShareService);
+  }
+
+  @Test
+  @DisplayName("모르는 분류는 INVALID_INPUT_VALUE, 빈 한마디는 한마디를 지운다")
+  void update_unknownCategoryRejected_emptyNoteClears() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래 한마디", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+
+    assertUpdateFails("post-1", new TalkPostUpdateRequest(null, "NOPE"), ErrorCode.INVALID_INPUT_VALUE);
+
+    talkPostService.update(GUARDIAN, "post-1", new TalkPostUpdateRequest("   ", null));
+    assertThat(post.getNote()).isNull();
+  }
+
+  @Test
+  @DisplayName("원본 일과가 지워졌으면 호칭 없이(글 그대로) 고친다")
+  void update_sourceRoutineGone_keepsTextUnchanged() {
+    TalkPost post = visiblePost("post-1", "member-1", "원래", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    when(routineShareService.findProfileNickname("original-1")).thenReturn(null);
+
+    talkPostService.update(GUARDIAN, "post-1", new TalkPostUpdateRequest("하늘이는 좋아했어요", null));
+
+    assertThat(post.getNote()).isEqualTo("하늘이는 좋아했어요");
+  }
+
+  @Test
+  @DisplayName("내리면 DELETED 로 바꾸고, 그림 파일은 커밋 뒤에만 지운다")
+  void delete_marksDeleted_andSchedulesImageRemoval() {
+    TalkPost post = visiblePost("post-1", "member-1", "한마디", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    TransactionSynchronizationManager.initSynchronization();
+    try {
+      talkPostService.delete(GUARDIAN, "post-1");
+
+      assertThat(post.getStatus()).isEqualTo(TalkPostStatus.DELETED);
+      verify(talkPostRepository).saveAndFlush(post);
+      verify(talkImageStorage, never()).deletePost(anyString());
+
+      TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+      verify(talkImageStorage).deletePost("post-1");
+    } finally {
+      TransactionSynchronizationManager.clearSynchronization();
+    }
+  }
+
+  @Test
+  @DisplayName("트랜잭션 밖이면 바로 그림을 지우고, 그림 삭제 실패는 내리기를 막지 않는다")
+  void delete_withoutTransaction_removesImagesAndSwallowsFailure() {
+    TalkPost post = visiblePost("post-1", "member-1", "한마디", TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    doThrow(new IllegalStateException("disk")).when(talkImageStorage).deletePost("post-1");
+
+    talkPostService.delete(GUARDIAN, "post-1");
+
+    assertThat(post.getStatus()).isEqualTo(TalkPostStatus.DELETED);
+  }
+
+  @Test
+  @DisplayName("작성자가 아니면 내릴 수 없고, 이미 내린 글은 TALK_POST_NOT_FOUND")
+  void delete_byOtherOrAlreadyDeleted_throws() {
+    TalkPost others = visiblePost("post-1", "other-member", null, TalkCategory.DAILY_FLOW);
+    TalkPost deleted = visiblePost("post-2", "member-1", null, TalkCategory.DAILY_FLOW);
+    deleted.setStatus(TalkPostStatus.DELETED);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(others));
+    when(talkPostRepository.findById("post-2")).thenReturn(Optional.of(deleted));
+
+    assertThatThrownBy(() -> talkPostService.delete(GUARDIAN, "post-1"))
+      .isInstanceOfSatisfying(CustomException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_NOT_AUTHOR));
+    assertThatThrownBy(() -> talkPostService.delete(GUARDIAN, "post-2"))
+      .isInstanceOfSatisfying(CustomException.class, e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND));
+    assertThat(others.getStatus()).isEqualTo(TalkPostStatus.VISIBLE);
+    verify(talkImageStorage, never()).deletePost(anyString());
+  }
+
+  @Test
+  @DisplayName("내린 뒤 같은 원본을 다시 올릴 수 있다 (중복 확인은 보이는 글만 본다)")
+  void delete_thenShareAgain_allowed() {
+    TalkPost post = visiblePost("post-1", "member-1", null, TalkCategory.DAILY_FLOW);
+    when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
+    talkPostService.delete(GUARDIAN, "post-1");
+    // 저장소 흉내: 같은 원본의 VISIBLE 글은 이제 없다
+    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE))
+      .thenReturn(post.getStatus() == TalkPostStatus.VISIBLE);
+    stubCreatable(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
+
+    TalkPostCreatedResponse response = talkPostService.create(GUARDIAN, request(null, "DAILY_FLOW", List.of()));
+
+    assertThat(response.postId()).isEqualTo("post-1");
+  }
+
+  private void assertUpdateFails(String postId, TalkPostUpdateRequest request, ErrorCode expected) {
+    assertThatThrownBy(() -> talkPostService.update(GUARDIAN, postId, request))
+      .isInstanceOfSatisfying(CustomException.class, e -> assertThat(e.getErrorCode()).isEqualTo(expected));
+  }
+
+  private static TalkPost visiblePost(String id, String authorMemberId, String note, TalkCategory category) {
+    TalkPost post = new TalkPost();
+    post.setId(id);
+    post.setAuthorMemberId(authorMemberId);
+    post.setSourceRoutineId("original-1");
+    post.setTitle("버스 타기");
+    post.setNote(note);
+    post.setCategory(category);
+    post.setLanguage(AppLocale.KO);
+    post.setStatus(TalkPostStatus.VISIBLE);
+    return post;
   }
 
   private void assertCreateFails(TalkPostCreateRequest request, ErrorCode expected) {
