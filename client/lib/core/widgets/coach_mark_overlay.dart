@@ -274,8 +274,17 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     widget.onClose();
   }
 
+  /// 글자 확대 상한 (기기 글자 크기 설정 기준 배율). 넘으면 말풍선이 아래 안내·시범과 겹친다
+  static const _maxTextScale = 1.5;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => MediaQuery.withClampedTextScaling(
+    maxScaleFactor: _maxTextScale,
+    child: Builder(builder: _buildOverlay),
+  );
+
+  /// 막 + 구멍 + 시범 층 + 말풍선 + 아래 안내 + 닫기
+  Widget _buildOverlay(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
     final step = widget.steps[widget.index];
