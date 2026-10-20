@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
+import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -14,6 +15,7 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleU
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.response.GuardianAccountResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
@@ -21,7 +23,9 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +50,7 @@ public class MemberService {
   private final SubscriptionRepository subscriptionRepository;
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
+  private final NotificationCleanupService notificationCleanupService;
   private final EntitlementService entitlementService;
 
   /**
@@ -59,7 +64,7 @@ public class MemberService {
     Profile current = caller.profileId() != null
       ? profileAccessGuard.profileFor(caller, ProfileAction.VIEW)
       : profiles.stream().findFirst().orElse(null);
-    return MemberResponse.from(member, current, profiles, entitlementService.snapshot(caller.memberId()));
+    return toResponse(member, current, profiles);
   }
 
   /**
@@ -89,7 +94,7 @@ public class MemberService {
     if (profiles.isEmpty()) {
       profiles = List.of(guardianshipService.createOwnProfile(member));
     }
-    return MemberResponse.from(member, profiles.get(0), profiles, entitlementService.snapshot(caller.memberId()));
+    return toResponse(member, profiles.get(0), profiles);
   }
 
   // 이룸이 정보는 연결된 보호자 누구나 고친다. 마지막에 바꾼 값이 남는다 (명세 2장 · E23).
@@ -98,8 +103,7 @@ public class MemberService {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setNickname(request.nickname());
-    return MemberResponse.from(
-      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
+    return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
   @Transactional
@@ -108,8 +112,7 @@ public class MemberService {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.getSupportGoals().clear();
     profile.getSupportGoals().addAll(request.supportGoals());
-    return MemberResponse.from(
-      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
+    return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
   @Transactional
@@ -117,8 +120,7 @@ public class MemberService {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setCharacter(request.character());
-    return MemberResponse.from(
-      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
+    return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
   /**
@@ -135,8 +137,25 @@ public class MemberService {
     }
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setImageStyle(request.imageStyle());
+    return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
+  }
+
+  /**
+   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보
+   */
+  private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
-      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
+      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member));
+  }
+
+  /**
+   * 닉네임 + 처음 가입한 소셜 신원 (계정 연결로 여럿이면 가장 먼저 만든 것)
+   */
+  private GuardianAccountResponse toGuardianAccount(Member member) {
+    AuthIdentity firstIdentity = authIdentityRepository.findAllByMemberId(member.getId()).stream()
+      .min(Comparator.comparing(AuthIdentity::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+      .orElse(null);
+    return GuardianAccountResponse.of(member.getNickname(), firstIdentity);
   }
 
   public MemberConsentResponse getConsents(String memberId) {
@@ -196,6 +215,8 @@ public class MemberService {
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     // 의견 글과 앱 상태 기록. 개인 정보가 섞여 있을 수 있어 남기지 않는다.
     feedbackService.deleteAllOf(memberId);
+    // 알림 기록·푸시 기기·알림 설정·공지 확인. 푸시 토큰이 남으면 탈퇴한 사람에게 푸시가 간다.
+    notificationCleanupService.deleteAllOf(memberId);
 
     // ── 남긴다 (보관 기간 동안) ──
     // 소셜 신원: 같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다. 이메일은 비운다 —

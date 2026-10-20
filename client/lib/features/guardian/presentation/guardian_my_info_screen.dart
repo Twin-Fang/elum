@@ -12,9 +12,11 @@ import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../shared/models/character.dart';
 import '../../member/application/member_providers.dart';
+import '../../member/domain/guardian_account.dart';
 import '../../profile/application/profile_session.dart';
 import '../../profile/domain/profile_summary.dart';
 import 'widgets/ai_credit_card.dart';
+import 'widgets/sign_in_provider_badge.dart';
 
 /// 하단 바 내정보 칸의 첫 화면: 보호자 프로필 > 이룸이 > AI 크레딧(사용 내역 링크 포함) > 바로가기 (#817)
 ///
@@ -36,6 +38,9 @@ class GuardianMyInfoScreen extends ConsumerWidget {
     final colors = context.colors;
     final profiles = ref.watch(
       memberProvider.select((member) => member.value?.profiles),
+    );
+    final account = ref.watch(
+      memberProvider.select((member) => member.value?.account),
     );
 
     return Scaffold(
@@ -89,7 +94,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _ProfileCard(profileCount: profiles?.length),
+                    _ProfileCard(account: account),
                     // 이룸이 목록: 회원 정보를 받았고 1명 이상일 때만
                     if (profiles != null && profiles.isNotEmpty) ...[
                       SizedBox(height: _groupGap.h),
@@ -124,27 +129,25 @@ class GuardianMyInfoScreen extends ConsumerWidget {
   }
 }
 
-/// 보호자 프로필 카드: 기본 아이콘 + 이름 + 연결된 이룸이 수
+/// 보호자 프로필 카드: 역할 > 닉네임 > 가입 방법 배지 + 가린 이메일 > 가입일 (#849)
 ///
-/// 서버에 보호자 이름이 없어 "보호자"로 둔다. [profileCount] 가 null 이면(회원 정보 못 받음) 안내 줄을 뺀다.
+/// 회원 정보를 못 받았거나 닉네임이 아직 없으면 "보호자"만 이름 자리에 둔다.
+/// 사진 변경은 지원하지 않아 사람 아이콘 자리를 두지 않는다.
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.profileCount});
+  const _ProfileCard({required this.account});
 
-  final int? profileCount;
+  final GuardianAccount? account;
 
-  static const _avatarSize = 56.0;
-  static const _avatarIconSize = 32.0;
+  /// 정보 줄 아이콘(배지 포함) 한 변
+  static const _infoIconSize = 18.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
-    final count = profileCount;
-    final summary = switch (count) {
-      null => null,
-      0 => context.l10n.guardianMyInfoNoLinked,
-      _ => context.l10n.guardianMyInfoLinkedCount(count),
-    };
+    final typo = context.typo;
+    final nickname = account?.nickname;
+    final joinedAt = account?.joinedAt;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -153,52 +156,97 @@ class _ProfileCard extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.all(space.md.w),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.creditNoticeBg,
-                shape: BoxShape.circle,
+            // 역할 (닉네임 있을 때만 작은 글씨로 위에)
+            if (nickname != null) ...[
+              Text(
+                context.l10n.guardianMyInfoProfileName,
+                style: typo.bodySmall.copyWith(color: colors.textSecondary),
               ),
-              child: SizedBox(
-                width: _avatarSize.w,
-                height: _avatarSize.w,
-                child: Icon(
-                  Icons.person_rounded,
-                  size: _avatarIconSize.w,
-                  color: colors.creditAccentText,
-                ),
-              ),
+              SizedBox(height: space.xs.h),
+            ],
+            Text(
+              nickname ?? context.l10n.guardianMyInfoProfileName,
+              style: typo.sectionTitle.copyWith(color: colors.textPrimary),
             ),
-            SizedBox(width: space.md.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.guardianMyInfoProfileName,
-                    style: context.typo.sectionTitle.copyWith(
-                      color: colors.textPrimary,
-                    ),
+            // 계정 정보 (회원 정보 받았을 때만)
+            if (account != null) ...[
+              SizedBox(height: space.sm.h),
+              _InfoRow(
+                leading: _emailLeading(context, account!),
+                text: account!.maskedEmail ?? context.l10n.guardianMyInfoEmailPrivate,
+                isMuted: account!.maskedEmail == null,
+              ),
+              if (joinedAt != null) ...[
+                SizedBox(height: space.xs.h),
+                _InfoRow(
+                  leading: Icon(
+                    Icons.calendar_today_outlined,
+                    size: _infoIconSize.w,
+                    color: colors.textSecondary,
                   ),
-                  if (summary != null)
-                    Text(
-                      summary,
-                      style: context.typo.bodySmall.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
+                  text: context.l10n.guardianMyInfoJoinedOn(joinedAt),
+                ),
+              ],
+            ],
           ],
         ),
       ),
     );
   }
+
+  /// 가입 방법 배지 (아이디·비밀번호 가입이면 편지 아이콘)
+  Widget _emailLeading(BuildContext context, GuardianAccount account) {
+    final provider = account.signInProvider;
+    if (provider == null) {
+      return Icon(
+        Icons.mail_outline_rounded,
+        size: _infoIconSize.w,
+        color: context.colors.textSecondary,
+      );
+    }
+    return SignInProviderBadge(provider: provider, size: _infoIconSize);
+  }
 }
 
-/// 연결된 이룸이 목록. 둘 이상이면 줄을 눌러 이룸이 바꾸기로 가고, 지금 보는 이룸이에 `보는 중`을 붙인다.
+/// 아이콘 + 한 줄 글 (길면 말줄임)
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.leading,
+    required this.text,
+    this.isMuted = false,
+  });
+
+  final Widget leading;
+  final String text;
+
+  /// 비공개처럼 값이 없는 줄은 흐리게
+  final bool isMuted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      children: [
+        leading,
+        SizedBox(width: context.space.sm.w),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.typo.bodySmall.copyWith(
+              color: isMuted ? colors.textPlaceholder : colors.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ChildrenGroup extends ConsumerWidget {
   const _ChildrenGroup({required this.profiles});
 

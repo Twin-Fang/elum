@@ -30,6 +30,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -66,6 +68,7 @@ class ProfileInviteServiceTest {
   @Mock private ProfileAccessGuard profileAccessGuard;
   @Mock private GuardianshipService guardianshipService;
   @Mock private ProfileInviteRateLimiter rateLimiter;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   @InjectMocks private ProfileInviteService service;
 
@@ -320,6 +323,24 @@ class ProfileInviteServiceTest {
       .thenReturn(List.of());
 
     assertFails(() -> service.redeem(Caller.guardian("J"), CODE, null), ErrorCode.PROFILE_INVITE_NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("합류에 성공하면 공동 보호자 합류 이벤트가 이룸이·합류자 id 로 한 번 나간다")
+  void redeem_success_publishesCoGuardianJoined() {
+    service.redeem(Caller.guardian("J"), CODE, null);
+
+    verify(eventPublisher).publishEvent(new CoGuardianJoinedEvent("p1", "J"));
+  }
+
+  @Test
+  @DisplayName("합류에 실패하면(이미 보호자) 이벤트가 나가지 않는다")
+  void redeem_failure_publishesNothing() {
+    when(profileGuardianRepository.existsByProfileIdAndMemberId("p1", "J")).thenReturn(true);
+
+    assertFails(() -> service.redeem(Caller.guardian("J"), CODE, null), ErrorCode.PROFILE_ALREADY_GUARDIAN);
+
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
   }
 
   @Test

@@ -51,8 +51,10 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
+  static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   static const _kHomeCoachSeen = 'coach.homeSeen';
-  static const _kLibraryCoachSeen = 'coach.librarySeen';
+  static const _kManageCoachSeen = 'coach.manageSeen';
+  static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
@@ -303,6 +305,16 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get hasAskedPushPermission =>
+      _prefs.getBool(_kHasAskedPushPermission) ?? false;
+
+  @override
+  Future<void> setHasAskedPushPermission(bool v) async {
+    AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
+    await _prefs.setBool(_kHasAskedPushPermission, v);
+  }
+
+  @override
   bool get isHomeCoachSeen => _prefs.getBool(_kHomeCoachSeen) ?? false;
 
   @override
@@ -312,12 +324,21 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
-  bool get isLibraryCoachSeen => _prefs.getBool(_kLibraryCoachSeen) ?? false;
+  bool get isManageCoachSeen => _prefs.getBool(_kManageCoachSeen) ?? false;
 
   @override
-  Future<void> setLibraryCoachSeen(bool v) async {
-    AppLogger.storageWrite(_kLibraryCoachSeen, '$v');
-    await _prefs.setBool(_kLibraryCoachSeen, v);
+  Future<void> setManageCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kManageCoachSeen, '$isSeen');
+    await _prefs.setBool(_kManageCoachSeen, isSeen);
+  }
+
+  @override
+  bool get isGroupCoachSeen => _prefs.getBool(_kGroupCoachSeen) ?? false;
+
+  @override
+  Future<void> setGroupCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kGroupCoachSeen, '$isSeen');
+    await _prefs.setBool(_kGroupCoachSeen, isSeen);
   }
 
   @override

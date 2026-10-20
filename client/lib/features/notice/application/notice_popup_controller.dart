@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/local_storage.dart';
+import '../../../shared/models/notice_platform.dart';
 import '../data/notice_hide_store.dart';
 import '../data/notice_repository.dart';
 import '../domain/app_notice.dart';

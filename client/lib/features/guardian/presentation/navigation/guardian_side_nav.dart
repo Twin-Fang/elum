@@ -11,6 +11,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../application/guardian_child_identity.dart';
+import '../widgets/notification_bell_button.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_tab.dart';
 import 'guardian_tab_icon.dart';
@@ -67,16 +68,19 @@ class GuardianSideNav extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 로고
+              // 로고(왼쪽) + 종 아이콘(오른쪽 끝)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: space.sm.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: SvgPicture.asset(
-                    AppAssets.homeLogo,
-                    width: _logoWidth.w,
-                    height: _logoHeight.h,
-                  ),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      AppAssets.homeLogo,
+                      width: _logoWidth.w,
+                      height: _logoHeight.h,
+                    ),
+                    const Spacer(),
+                    const NotificationBellButton(),
+                  ],
                 ),
               ),
               SizedBox(height: space.md.h),

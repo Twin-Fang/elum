@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,7 @@ public class RoutineService {
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
   private final RoutineGroupMembership routineGroupMembership;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public RoutineResponse confirm(Caller caller, String routineId) {
@@ -52,6 +55,7 @@ public class RoutineService {
     // 날짜 선택 UI를 두지 않는 대신, 미리 만들어 둔 일과를 그날 승인하면 그날 일과가 된다.
     // (아이 홈은 scheduledAt이 오늘인 CONFIRMED만 조회하므로 이 갱신이 없으면 미리 만든 일과가 뜨지 않는다)
     routine.setScheduledAt(LocalDate.now().atTime(9, 0));
+    publishRoutineSent(caller, routine);
     return RoutineResponse.from(routine);
   }
 
@@ -76,7 +80,16 @@ public class RoutineService {
     Routine copy = RoutineRules.copyCardsOf(origin, caller.memberId());
     // 다시하기도 보낸 일과다: 맨 처음 원본을 가리켜 일과관리에 복제본이 원본처럼 쌓이지 않게 (#804)
     copy.setSourceRoutineId(origin.getSourceRoutineId() != null ? origin.getSourceRoutineId() : origin.getId());
-    return RoutineResponse.from(RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy));
+    Routine savedCopy = RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy);
+    publishRoutineSent(caller, savedCopy);
+    return RoutineResponse.from(savedCopy);
+  }
+
+  /// 일과 보냄 알림 이벤트 (요청자 제외는 보호자 기기일 때만)
+  private void publishRoutineSent(Caller caller, Routine sentRoutine) {
+    String actorMemberId = caller.isElumi() ? null : caller.memberId();
+    eventPublisher.publishEvent(new RoutineSentEvent(sentRoutine.getId(), sentRoutine.getProfile().getId(),
+      actorMemberId));
   }
 
   /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다.

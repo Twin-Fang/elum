@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,8 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
+import 'features/notification/application/push_message_router.dart';
+import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
@@ -108,6 +112,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   /// 이룸이 화면으로 가는 길이 여럿이라(보호자 홈 버튼·일과 완료 뒤 등) 화면마다 저장하면
   /// 하나를 빠뜨리기 쉽다. 라우터가 옮길 때마다 여기 한 곳에서 본다.
   void _rememberScreen() {
+    // 화면이 바뀌면 푸시를 눌러 기다리던 이동을 열 수 있는지 확인
+    ref.read(pushMessageRouterProvider).onRouteChanged();
     final storage = ref.read(localStorageProvider);
     // 이룸이 전용 휴대폰은 늘 이룸이 화면이다 — 따로 기억할 것이 없다
     if (storage.isElumiDevice) return;
@@ -128,6 +134,14 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     });
   }
 
+  /// 푸시로 화면을 열어도 되는 때의 루트 네비게이터 컨텍스트 (보호자 화면 안일 때만, 아니면 null)
+  BuildContext? _contextIfInGuardianArea() {
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final isInGuardianArea =
+        path == Routes.guardian || path.startsWith('${Routes.guardian}/');
+    return isInGuardianArea ? _router.routerDelegate.navigatorKey.currentContext : null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,6 +152,12 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
+    });
+    // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
+      ref.read(pushMessageRouterProvider).start(readyContext: _contextIfInGuardianArea);
     });
   }
 

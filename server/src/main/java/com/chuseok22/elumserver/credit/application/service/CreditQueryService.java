@@ -5,15 +5,19 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.application.dto.response.CreditSummaryResponse;
 import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
+import com.chuseok22.elumserver.credit.core.CreditLedgerType;
+import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,11 +37,16 @@ public class CreditQueryService {
   /// 일과 하나의 최대 카드 수. RoutineAiPipeline.MAX_STEPS · RoutineService.STEP_MAX_COUNT 와 같은 값이다.
   public static final int MAX_CARDS_PER_ROUTINE = 10;
 
+  /// 잔액을 줄이는 확정 줄 2개: 사용, 초과 (RESERVE 는 해제로 잔액이 되살아날 수 있어 제외, GRANT·EXPIRE 도 제외)
+  private static final List<CreditLedgerType> DEPLETING_LEDGER_TYPES =
+    List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE);
+
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
   private final CreditReservationService reservationService;
   private final EntitlementService entitlementService;
   private final AiCreditJobRepository jobRepository;
+  private final AiCreditLedgerRepository ledgerRepository;
   private final TransactionTemplate transaction;
   private final Clock clock;
 
@@ -46,22 +55,25 @@ public class CreditQueryService {
   public CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
     CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, PlatformTransactionManager transactionManager
+    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    PlatformTransactionManager transactionManager
   ) {
-    this(policyService, accountService, reservationService, entitlementService, jobRepository,
+    this(policyService, accountService, reservationService, entitlementService, jobRepository, ledgerRepository,
       transactionManager, Clock.systemDefaultZone());
   }
 
   CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
     CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, PlatformTransactionManager transactionManager, Clock clock
+    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    PlatformTransactionManager transactionManager, Clock clock
   ) {
     this.policyService = policyService;
     this.accountService = accountService;
     this.reservationService = reservationService;
     this.entitlementService = entitlementService;
     this.jobRepository = jobRepository;
+    this.ledgerRepository = ledgerRepository;
     this.transaction = new TransactionTemplate(transactionManager);
     this.clock = clock;
   }
@@ -122,6 +134,12 @@ public class CreditQueryService {
       log.info("크레딧 부족 — 추가 질문을 막는다: memberId={}, available={}", memberId, snapshot.balance().available());
       throw new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT);
     }
+  }
+
+  /// 주기 안에 사용·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, memberId 가 없는(완전 삭제된) 계정 제외)
+  public List<String> memberIdsDepletedIn(CreditPeriod period) {
+    return ledgerRepository.findMemberIdsWithBalanceDepletedIn(DEPLETING_LEDGER_TYPES, period.start(), period.end())
+      .stream().filter(Objects::nonNull).toList();
   }
 
   private AiCreditPolicy currentPolicy() {

@@ -366,6 +366,18 @@ jobs:
         env:
           CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release ${{ env.ENV_FILE_PATH }}
+      # Firebase iOS 설정 파일 (푸시 #828). 커밋되지 않으므로 Secret 에서 만든다.
+      - name: Create GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST secret 이 비었다"
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+          echo "✅ ios/Runner/GoogleService-Info.plist 생성"
+
       # ⚠️ projectops 템플릿 업데이트 시 이 스텝이 사라지지 않도록 주의한다 (#156 참고).
       # iOS는 URL 스킴·네이버 SDK 설정을 Info.plist에서 읽는데 그 값이 빌드 타임에
       # 필요하다. Info.plist에 직접 적으면 시크릿이 저장소에 커밋되므로,

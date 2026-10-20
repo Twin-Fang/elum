@@ -22,7 +22,7 @@ import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../test/helpers/fake_dio.dart';
+import 'fake_dio.dart';
 
 /// 어느 화면으로 시작할지: child(이룸이 기기) | guardian(보호자 홈) | login(로그인 전) | onboarding(로그인 뒤 가입 절차)
 const _previewRole = String.fromEnvironment(

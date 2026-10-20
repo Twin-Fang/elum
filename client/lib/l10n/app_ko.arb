@@ -930,6 +930,102 @@
   "@guardianHomePastRoutine": { "description": "보호자 홈의 지난 일과 구역 제목" },
 
   "guardianHomeGoChildScreen": "이룸이 화면으로 가기",
+
+  "notificationBellLabel": "알림",
+  "@notificationBellLabel": { "description": "보호자 홈 종 아이콘 버튼의 낭독 이름" },
+
+  "notificationBellUnreadLabel": "읽지 않은 알림이 있어요",
+  "@notificationBellUnreadLabel": { "description": "종 아이콘에 빨간 점이 있을 때 낭독 이름에 덧붙이는 말" },
+
+  "notificationTabNotifications": "알림",
+  "@notificationTabNotifications": {"description": "알림 화면 제목과 첫 번째 탭 이름"},
+
+  "notificationTabNotices": "공지사항",
+  "@notificationTabNotices": {"description": "알림 화면 두 번째 탭 이름"},
+
+  "notificationDayToday": "오늘",
+  "@notificationDayToday": {"description": "알림 목록 날짜 묶음 머리글: 오늘"},
+
+  "notificationDayYesterday": "어제",
+  "@notificationDayYesterday": {"description": "알림 목록 날짜 묶음 머리글: 어제"},
+
+  "notificationDayEarlier": "이전",
+  "@notificationDayEarlier": {"description": "알림 목록 날짜 묶음 머리글: 어제보다 오래된 것"},
+
+  "notificationMarkAllRead": "모두 읽음",
+  "@notificationMarkAllRead": {"description": "알림 목록의 전체 읽음 처리 버튼"},
+
+  "notificationEmpty": "아직 받은 알림이 없어요",
+  "@notificationEmpty": {"description": "알림이 하나도 없을 때의 문구"},
+
+  "notificationNoticeEmpty": "아직 올라온 공지가 없어요",
+  "@notificationNoticeEmpty": {"description": "알림 화면 공지사항 탭에 공지가 하나도 없을 때의 문구"},
+
+  "notificationNoticeFailed": "공지를 불러오지 못했어요",
+  "@notificationNoticeFailed": {"description": "공지사항 탭 목록을 받지 못했을 때의 문구"},
+
+  "notificationSettingsTitle": "알림 설정",
+  "@notificationSettingsTitle": {"description": "알림 설정 화면 제목과 보호자 설정의 진입 줄"},
+
+  "notificationSettingAll": "모든 알림 받기",
+  "@notificationSettingAll": {"description": "알림 설정: 전체 푸시 스위치"},
+
+  "notificationSettingRoutineCompleted": "이룸이가 일과를 끝냈을 때",
+  "@notificationSettingRoutineCompleted": {"description": "알림 설정: 일과 완료 푸시 스위치"},
+
+  "notificationSettingRoutineSent": "다른 보호자가 일과를 보냈을 때",
+  "@notificationSettingRoutineSent": {"description": "알림 설정: 일과 전송 푸시 스위치"},
+
+  "notificationSettingCoGuardianJoined": "새 보호자가 함께할 때",
+  "@notificationSettingCoGuardianJoined": {"description": "알림 설정: 보호자 합류 푸시 스위치"},
+
+  "notificationSettingCreditRefilled": "이번 주 크레딧이 채워졌을 때",
+  "@notificationSettingCreditRefilled": {"description": "알림 설정: 크레딧 충전 푸시 스위치"},
+
+  "notificationSettingFeedbackResolved": "의견을 처리했을 때",
+  "@notificationSettingFeedbackResolved": {"description": "알림 설정: 의견 처리 푸시 스위치"},
+
+  "notificationPermissionOff": "기기 알림이 꺼져 있어 알림을 받을 수 없어요",
+  "@notificationPermissionOff": {"description": "알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐"},
+
+  "notificationOpenDeviceSettings": "기기 설정 열기",
+  "@notificationOpenDeviceSettings": {"description": "기기 알림 권한 안내 줄의 버튼"},
+
+  "notificationSettingSaveFailed": "설정을 저장하지 못했어요",
+  "@notificationSettingSaveFailed": {"description": "알림 설정 저장 실패 팝업 문구"},
+
+  "notificationSettingLoadFailed": "설정을 불러오지 못했어요",
+  "@notificationSettingLoadFailed": {"description": "알림 설정 불러오기 실패 문구"},
+
+  "notificationListFailed": "알림을 불러오지 못했어요",
+  "@notificationListFailed": {"description": "알림 목록을 받지 못했을 때의 문구"},
+
+  "notificationProfileUnavailable": "이 이룸이의 알림은 더 볼 수 없어요",
+  "@notificationProfileUnavailable": {"description": "알림이 가리키는 이룸이가 내 목록에 없을 때의 안내"},
+
+  "notificationRoutineCompletedOne": "'{title}' 일과를 끝냈어요",
+  "@notificationRoutineCompletedOne": {"description": "알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
+
+  "notificationRoutineCompletedMany": "일과 {count}개를 끝냈어요",
+  "@notificationRoutineCompletedMany": {"description": "알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수", "placeholders": {"count": {"type": "int"}}},
+
+  "notificationRoutineCompletedNoTitle": "일과를 끝냈어요",
+  "@notificationRoutineCompletedNoTitle": {"description": "알림 줄: 일과를 끝냄(제목을 모를 때)"},
+
+  "notificationRoutineSent": "함께하는 보호자가 '{title}' 일과를 보냈어요",
+  "@notificationRoutineSent": {"description": "알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
+
+  "notificationRoutineSentNoTitle": "함께하는 보호자가 새 일과를 보냈어요",
+  "@notificationRoutineSentNoTitle": {"description": "알림 줄: 다른 보호자가 일과를 보냄(제목을 모를 때)"},
+
+  "notificationCoGuardianJoined": "새 보호자가 함께하기 시작했어요",
+  "@notificationCoGuardianJoined": {"description": "알림 줄: 새 보호자가 합류함"},
+
+  "notificationCreditRefilled": "이번 주 크레딧이 채워졌어요",
+  "@notificationCreditRefilled": {"description": "알림 줄: 주간 크레딧이 다시 채워짐"},
+
+  "notificationFeedbackResolved": "보내 주신 의견을 확인하고 처리했어요",
+  "@notificationFeedbackResolved": {"description": "알림 줄: 보낸 의견이 처리됨"},
   "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
 
   "guardianHomeSettings": "설정",
@@ -1918,16 +2014,16 @@
   "@guardianTabMe": { "description": "보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목" },
 
   "guardianMyInfoProfileName": "보호자",
-  "@guardianMyInfoProfileName": { "description": "내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구" },
+  "@guardianMyInfoProfileName": { "description": "내정보 프로필 카드: 닉네임 위 역할 이름. 닉네임이 없으면 이 문구가 이름 자리에 감" },
 
-  "guardianMyInfoLinkedCount": "이룸이 {count}명과 함께해요",
-  "@guardianMyInfoLinkedCount": {
-    "description": "내정보 프로필 카드 안내: 연결된 이룸이 수",
-    "placeholders": { "count": { "type": "int" } }
+  "guardianMyInfoEmailPrivate": "이메일 비공개",
+  "@guardianMyInfoEmailPrivate": { "description": "내정보 프로필 카드: 이메일이 없거나 애플 숨김 주소인 계정 (#849)" },
+
+  "guardianMyInfoJoinedOn": "{date} 가입",
+  "@guardianMyInfoJoinedOn": {
+    "description": "내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)",
+    "placeholders": { "date": { "type": "DateTime", "format": "y.MM.dd", "isCustomDateFormat": "true" } }
   },
-
-  "guardianMyInfoNoLinked": "연결된 이룸이가 아직 없어요",
-  "@guardianMyInfoNoLinked": { "description": "내정보 프로필 카드 안내: 연결된 이룸이가 0명" },
 
   "guardianMyInfoChildrenHeader": "이룸이",
   "@guardianMyInfoChildrenHeader": { "description": "내정보 이룸이 목록 묶음 머리 글" },
@@ -2084,10 +2180,6 @@
   "@childHomeGroupProgress": {"description": "이룸이 홈 묶음 상자 (#808)", "placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
   "childHomeGroupAllDone": "다 했어요!",
   "@childHomeGroupAllDone": {"description": "이룸이 홈 묶음 상자 (#808)"},
-  "libraryCoachMenu": "일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요",
-  "@libraryCoachMenu": {"description": "일과관리 메뉴 찾기 (#834)"},
-  "libraryCoachCreate": "새 묶음도 여기서 만들 수 있어요",
-  "@libraryCoachCreate": {"description": "일과관리 메뉴 찾기 (#834)"},
   "routineDetailMore": "더 보기",
   "@routineDetailMore": {"description": "일과관리 메뉴 찾기 (#834)"},
   "libraryArrangeDone": "완료",
@@ -2099,5 +2191,38 @@
   "routineLibrarySendOnlyThis": "이 일과만 오늘 보내기",
   "@routineLibrarySendOnlyThis": {"description": "일과관리 묶음 열기 (#837)"},
   "routineGroupRowCardCount": "카드 {count}장",
-  "@routineGroupRowCardCount": {"description": "묶음 열기 일과 줄의 보조 글 (#846)", "placeholders": {"count": {"type": "int"}}}
+  "@routineGroupRowCardCount": {"description": "묶음 열기 일과 줄의 보조 글 (#846)", "placeholders": {"count": {"type": "int"}}},
+
+  "routineManageCoachTapMessage": "일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요",
+  "@routineManageCoachTapMessage": {"description": "일과관리 코치마크 1단계. *로 감싼 부분이 강조된다 (#832)"},
+  "routineManageCoachLongPressMessage": "*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기",
+  "@routineManageCoachLongPressMessage": {"description": "일과관리 코치마크 2단계 (#832)"},
+  "routineManageCoachSentMessage": "오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고, 여기 일과는 그대로 남아요",
+  "@routineManageCoachSentMessage": {"description": "일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)"},
+  "routineManageCoachDragMessage": "일과를 *꾹 눌러* 다른 일과 위에 놓으면 묶음이 돼요\n묶음을 보내면 안 일과가 순서대로 한꺼번에 가요",
+  "@routineManageCoachDragMessage": {"description": "일과관리 묶음 코치마크 1단계 (#832)"},
+  "routineManageCoachCreateGroupMessage": "끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요",
+  "@routineManageCoachCreateGroupMessage": {"description": "일과관리 묶음 코치마크 2단계 (#832)"},
+  "guardianSettingsRoutineManageGuide": "일과관리 사용법 다시 보기",
+  "@guardianSettingsRoutineManageGuide": {"description": "설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)"},
+  "pushPermissionSheetTitle": "이룸이가 일과를 끝내면 알려 드릴까요?",
+  "@pushPermissionSheetTitle": {"description": "첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)"},
+  "pushPermissionSheetBody": "다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요",
+  "@pushPermissionSheetBody": {"description": "알림 권한 안내 시트 설명 — 받게 되는 알림 종류"},
+  "pushPermissionAllow": "알림 받기",
+  "@pushPermissionAllow": {"description": "알림 권한 안내 시트의 허용 버튼 (누르면 시스템 권한 창)"},
+  "pushPermissionLater": "나중에",
+  "@pushPermissionLater": {"description": "알림 권한 안내 시트의 보류 버튼"},
+  "pushPermissionDenied": "알림 설정에서 언제든 켤 수 있어요",
+  "@pushPermissionDenied": {"description": "시스템 권한 창에서 거부했을 때 안내 팝업 문구"},
+  "pushChannelGuardianUpdates": "보호자 알림",
+  "@pushChannelGuardianUpdates": {"description": "안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)"},
+  "signInProviderKakao": "카카오",
+  "@signInProviderKakao": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderNaver": "네이버",
+  "@signInProviderNaver": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderGoogle": "구글",
+  "@signInProviderGoogle": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderApple": "애플",
+  "@signInProviderApple": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" }
 }

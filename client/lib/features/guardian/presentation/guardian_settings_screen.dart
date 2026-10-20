@@ -23,6 +23,7 @@ import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import '../application/routine_manage_coach_notifier.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -46,6 +47,12 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 
   /// 뒤로가기 상자 하단(107) > 스크롤 고정 영역 끝(115)
   static const _fixedAreaExtraHeight = 8.0;
+
+  /// 일과관리 칸으로 가서 첫 사용 안내를 다시 띄운다 (요청만 남기면 그 화면이 목록을 받은 뒤 켠다)
+  void _replayRoutineManageGuide() {
+    ref.read(routineManageCoachProvider.notifier).requestReplay();
+    context.go(Routes.guardianManage);
+  }
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -191,6 +198,13 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [
             SettingsTile(
               isInCard: true,
+              label: context.l10n.notificationSettingsTitle,
+              onTap: busy
+                  ? null
+                  : () => context.push(Routes.guardianNotificationSettings),
+            ),
+            SettingsTile(
+              isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),
@@ -214,6 +228,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
                         builder: (_) => const ConsentDocumentListScreen(),
                       ),
                     ),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsRoutineManageGuide,
+              onTap: busy ? null : _replayRoutineManageGuide,
             ),
             SettingsTile(
               isInCard: true,

@@ -28,6 +28,7 @@ import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
+import com.chuseok22.elumserver.member.application.service.MemberNicknameService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -99,6 +100,9 @@ class OAuthLoginServiceTest {
   private com.chuseok22.elumserver.feedback.application.service.FeedbackService feedbackService;
 
   @Mock
+  private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock
@@ -137,15 +141,15 @@ class OAuthLoginServiceTest {
     // 가입·되살리기가 이룸이를 관계와 함께 만드는지까지 보려고 목이 아니라 실제 서비스를 쓴다.
     GuardianshipService guardianshipService = new GuardianshipService(
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository,
-      profileInviteRepository);
+      profileInviteRepository, notificationCleanupService);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
-      adRewardSessionRepository, feedbackService);
+      adRewardSessionRepository, feedbackService, notificationCleanupService);
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,
-      withdrawnMemberService, creditAccountService);
+      withdrawnMemberService, creditAccountService, new MemberNicknameService(memberRepository));
   }
 
   private Member existingMember(MemberStatus status) {
