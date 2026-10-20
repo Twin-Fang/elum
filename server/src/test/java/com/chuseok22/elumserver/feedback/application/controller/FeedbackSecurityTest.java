@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
 import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,9 @@ class FeedbackSecurityTest {
   private LinkAccessValidator linkAccessValidator;
   @MockitoBean
   private SystemConfigService systemConfigService;
+
+  @MockitoBean
+  private SharedStateStore sharedStateStore;
   @MockitoBean
   private AidlpCryptoService aidlpCryptoService;
   @MockitoBean

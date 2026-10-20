@@ -27,4 +27,10 @@ public class AdminViewController {
     model.addAttribute("recentErrors", adminLogOverviewService.dashboardErrors(Instant.now()));
     return "admin/dashboard";
   }
+
+  // API 문서(Swagger)를 관리자 화면 안에 iframe 으로 보여준다. /admin/** 체인이 로그인한 관리자에게만 연다.
+  @GetMapping("/admin/api-docs")
+  public String apiDocs() {
+    return "admin/api-docs";
+  }
 }
