@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -67,4 +68,45 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
   @Modifying(flushAutomatically = true)
   @Query("update TalkPost p set p.commentCount = p.commentCount - 1 where p.id = :postId and p.commentCount > 0")
   int decreaseCommentCount(@Param("postId") String postId);
+
+  /**
+   * 관리자 글 목록: 상태 필터, 제목 검색 (정렬은 Pageable)
+   * 검색어는 호출부가 이스케이프한 LIKE 패턴으로 넘김 (ESCAPE '\\'), hasKeyword 가 false 면 pattern 을 보지 않음
+   */
+  @Query(value = "select p from TalkPost p where p.status in :statuses "
+    + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\')",
+    countQuery = "select count(p) from TalkPost p where p.status in :statuses "
+      + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\')")
+  Page<TalkPost> searchForAdmin(
+    @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
+    @Param("statuses") Collection<TalkPostStatus> statuses, Pageable pageable);
+
+  // 관리자 글 목록, 미처리 신고(글·댓글 합산) 많은 순 (같으면 최신순, id 로 고정). Pageable 은 정렬 없이 넘김
+  @Query(value = "select p from TalkPost p where p.status in :statuses "
+    + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\') "
+    + "order by (select count(r) from TalkReport r where r.postId = p.id and r.resolvedAt is null) desc, "
+    + "p.createdAt desc, p.id asc",
+    countQuery = "select count(p) from TalkPost p where p.status in :statuses "
+      + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\')")
+  Page<TalkPost> searchForAdminByUnresolvedReportsDescending(
+    @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
+    @Param("statuses") Collection<TalkPostStatus> statuses, Pageable pageable);
+
+  // 미처리 신고 적은 순
+  @Query(value = "select p from TalkPost p where p.status in :statuses "
+    + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\') "
+    + "order by (select count(r) from TalkReport r where r.postId = p.id and r.resolvedAt is null) asc, "
+    + "p.createdAt desc, p.id asc",
+    countQuery = "select count(p) from TalkPost p where p.status in :statuses "
+      + "and (:hasKeyword = false or lower(p.title) like lower(:pattern) escape '\\')")
+  Page<TalkPost> searchForAdminByUnresolvedReportsAscending(
+    @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
+    @Param("statuses") Collection<TalkPostStatus> statuses, Pageable pageable);
+
+  // 상태 전환: 지금 상태가 expected 일 때만 바꿈 (바꾼 건수: 이미 바뀌었거나 지워진 글이면 0)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkPost p set p.status = :nextStatus where p.id = :postId and p.status = :expectedStatus")
+  int updateStatusIfCurrent(@Param("postId") String postId, @Param("nextStatus") TalkPostStatus nextStatus,
+    @Param("expectedStatus") TalkPostStatus expectedStatus);
 }

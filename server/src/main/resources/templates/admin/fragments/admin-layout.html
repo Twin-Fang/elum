@@ -68,7 +68,7 @@
         console.warn('[관리자] 최근 오류 건수를 불러오지 못했어요', error);
       });
     })();
-    // 사이드바 확인할 일 배지 (새 의견·검토 대기·AI 이상). 0이거나 불러오지 못하면 배지만 숨긴 채 둔다.
+    // 사이드바 확인할 일 배지 (새 의견·검토 대기·이야기 신고·AI 이상). 0이거나 불러오지 못하면 배지만 숨긴 채 둔다.
     (function () {
       var badges = document.querySelectorAll('[data-sidebar-badge]');
       if (!badges.length || !window.fetch) return;
@@ -122,8 +122,8 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
-  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그, API 문서)
-       배지: 검토 대기 일과 · 새 의견 · AI 이상 · 서버 오류 (아래 스크립트가 채운다) -->
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견, 이야기) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그, API 문서)
+       배지: 검토 대기 일과 · 새 의견 · 이야기 신고 · AI 이상 · 서버 오류 (아래 스크립트가 채운다) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
     <li data-menu-group="operations">
@@ -135,6 +135,8 @@
         <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
         <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리
           <span data-sidebar-badge="newFeedbackCount" class="badge badge-error badge-sm hidden" title="확인하지 않은 새 의견"></span></a></li>
+        <li><a th:href="@{/admin/talk/posts}" th:classappend="${active == 'talk'} ? 'active'">이야기
+          <span data-sidebar-badge="unresolvedTalkReportCount" class="badge badge-error badge-sm hidden" title="처리하지 않은 신고"></span></a></li>
       </ul>
     </li>
     <li data-menu-group="contents">

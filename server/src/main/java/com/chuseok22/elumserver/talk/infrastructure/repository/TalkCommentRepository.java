@@ -31,4 +31,14 @@ public interface TalkCommentRepository extends JpaRepository<TalkComment, String
   @Query("update TalkComment c set c.status = :deletedStatus where c.id = :commentId and c.status = :visibleStatus")
   int updateStatusIfVisible(@Param("commentId") String commentId, @Param("deletedStatus") TalkCommentStatus deletedStatus,
     @Param("visibleStatus") TalkCommentStatus visibleStatus);
+
+  // 관리자 상세: 모든 상태의 댓글, 오래된 순
+  List<TalkComment> findByPostIdOrderByCreatedAtAscIdAsc(String postId);
+
+  // 상태 전환: 지금 상태가 expected 일 때만 바꿈 (바꾼 건수: 이미 바뀌었거나 지워진 댓글이면 0)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkComment c set c.status = :nextStatus where c.id = :commentId and c.status = :expectedStatus")
+  int updateStatusIfCurrent(@Param("commentId") String commentId, @Param("nextStatus") TalkCommentStatus nextStatus,
+    @Param("expectedStatus") TalkCommentStatus expectedStatus);
 }

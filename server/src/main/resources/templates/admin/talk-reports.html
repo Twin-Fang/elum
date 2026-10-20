@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('이야기 신고', 'talk', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('이야기 신고',
+       '보호자가 신고한 글과 댓글이에요. 신고를 처리해도 글·댓글은 그대로예요. 가리려면 글 상세에서 해요.')}"></div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <div class="flex items-center gap-3 flex-wrap">
+    <!-- 처리 여부 칩: 검색할 글이 없는 목록이라 검색창 없이 칩만 둔다 -->
+    <div th:each="filter : ${definition.filters}" class="join" role="group" th:attr="aria-label=${filter.label}"
+         data-admin-filter-bar>
+      <a th:href="${query.withFilter(filter.key, null).toQueryString(query.sort, 1)}"
+         th:classappend="${query.filters.get(filter.key) == null} ? 'btn-primary'"
+         class="btn btn-sm join-item">전체</a>
+      <a th:each="option : ${filter.options}"
+         th:href="${query.withFilter(filter.key, option.value).toQueryString(query.sort, 1)}"
+         th:classappend="${option.value == query.filters.get(filter.key)} ? 'btn-primary'"
+         class="btn btn-sm join-item" th:text="${option.label}">옵션</a>
+    </div>
+    <a th:href="@{/admin/talk/posts}" class="btn btn-ghost btn-sm">글 목록</a>
+    <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${reports.totalElements}">0</span>건</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+      <tr>
+        <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:if="${reports.isEmpty()}">
+        <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(7, (${!query.filters.isEmpty()} ? '조건에 맞는 신고가 없어요' : '아직 들어온 신고가 없어요'))}"></tr>
+      </th:block>
+      <tr th:each="row : ${reports.content}">
+        <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(row.report.createdAt)}">2026-10-20 10:00</td>
+        <td class="wrap-anywhere" style="min-width:10rem">
+          <span class="badge badge-ghost badge-sm" th:text="${row.report.targetType.label}">글</span>
+          <p th:if="${row.commentBody != null}" class="text-xs whitespace-pre-wrap wrap-anywhere"
+             th:text="${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
+        </td>
+        <td class="text-xs whitespace-nowrap" th:text="${row.report.reason.label}">불쾌한 내용</td>
+        <td class="text-xs">
+          <a th:href="@{/admin/members/{id}(id=${row.report.reporterMemberId})}" class="link link-hover"
+             th:text="${row.reporterNickname != null ? row.reporterNickname : '(닉네임 없음)'}">닉네임</a>
+        </td>
+        <td class="wrap-anywhere" style="min-width:10rem">
+          <a th:href="@{/admin/talk/posts/{id}(id=${row.report.postId})}" class="link link-hover"
+             th:text="${row.postTitle != null ? #strings.abbreviate(row.postTitle, 40) : '(찾을 수 없는 글)'}">제목</a>
+        </td>
+        <td>
+          <span th:replace="~{admin/fragments/talk-report-parts :: resolvedState(${row.report})}"></span>
+        </td>
+        <td>
+          <form th:replace="~{admin/fragments/talk-report-parts :: resolveForm(${row.report}, 'list', ${query})}"></form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div th:replace="~{admin/fragments/admin-list :: pager(${reports}, @{${pagerBaseUrl}})}"></div>
+</main>
+</body>
+</html>

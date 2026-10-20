@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.admin.application.service.AdminStatsService;
 import com.chuseok22.elumserver.admin.application.stats.AdminAiUsageMetric;
 import com.chuseok22.elumserver.admin.application.stats.AdminTrendRange;
 import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
+import com.chuseok22.elumserver.talk.application.service.TalkAdminService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class AdminStatsApiController {
 
   private final AdminStatsService adminStatsService;
   private final AdminDashboardService adminDashboardService;
+  private final TalkAdminService talkAdminService;
 
   @GetMapping("/admin/stats/api/signups")
   public AdminTrendChart signups(
@@ -61,12 +63,13 @@ public class AdminStatsApiController {
     return adminStatsService.loadAiUsageTrend(rangeOf(unit, from, to, days), AdminAiUsageMetric.fromParameter(metric));
   }
 
-  /// 사이드바 배지: 대시보드 집계(60초 캐시)를 그대로 씀
+  /// 사이드바 배지: 대시보드 집계(60초 캐시)를 쓰되, 이야기 신고 수는 가벼운 건수 조회라 바로 읽음
   @GetMapping("/admin/stats/api/badges")
   public AdminSidebarBadges badges() {
     AdminDashboardAttention attention = adminDashboardService.summary().attention();
     return new AdminSidebarBadges(
-      attention.newFeedbackCount(), attention.pendingReviewRoutineCount(), attention.aiHealth().alertCount());
+      attention.newFeedbackCount(), attention.pendingReviewRoutineCount(), attention.aiHealth().alertCount(),
+      talkAdminService.countUnresolvedReports());
   }
 
   private static AdminTrendRange rangeOf(String unit, String from, String to, Integer days) {
