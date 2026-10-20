@@ -112,10 +112,15 @@ def main():
     parser.add_argument("--max-images", type=int, default=DEFAULT_MAX_IMAGES)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--yes", action="store_true", help="추정 비용을 확인하고 실행")
+    parser.add_argument("--allow-gemini-image", action="store_true",
+                        help="사용자가 Gemini 이미지로 테스트하라고 명시했을 때만. 운영 그림 제공자는 OpenAI")
     args = parser.parse_args()
 
     prod = lib.load_prod_config()
     print(lib.describe_prod_config(prod))
+    # Gemini 그림은 명시 허락이 있을 때만 (루트 CLAUDE.md "AI 호출 테스트는 운영 서버 기준으로만")
+    if prod["image"]["provider"] == "GEMINI" and not args.allow_gemini_image:
+        sys.exit("Gemini 그림 금지: 운영 그림 제공자는 OpenAI. 사용자가 명시했을 때만 --allow-gemini-image")
     config = load_image_config(args.variant, prod)
     case_ids = args.cases.split(",")
     records = {
