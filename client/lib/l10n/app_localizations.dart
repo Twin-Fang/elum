@@ -4625,7 +4625,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과 {count}개 · 이 순서대로 보여요'**
+  /// **'일과 {count}개'**
   String routineGroupSheetCount(int count);
 
   /// 일과 묶음 (#807)
@@ -4639,12 +4639,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title} 묶음에서 빼기'**
   String routineGroupSheetRemove(String title);
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'길게 눌러 끌면 순서를 바꿀 수 있어요'**
-  String get routineGroupSheetDragHint;
 
   /// 일과 묶음 (#807)
   ///
@@ -4763,7 +4757,7 @@ abstract class AppLocalizations {
   /// 일과관리 묶음 열기 (#837)
   ///
   /// In ko, this message translates to:
-  /// **'순서 편집'**
+  /// **'편집'**
   String get routineGroupEditOrder;
 
   /// 일과관리 묶음 열기 (#837)
@@ -5066,10 +5060,10 @@ abstract class AppLocalizations {
   /// **'보호자'**
   String get talkAuthorFallback;
 
-  /// 글쓴이의 한마디 앞에 붙는 이름
+  /// 글쓴이 한마디 칸 이름 (올리기·고치기·상세)
   ///
   /// In ko, this message translates to:
-  /// **'이렇게 했어요'**
+  /// **'내용'**
   String get talkNoteLabel;
 
   /// 글 카드의 작은 버튼: 이 일과를 내 일과관리로 가져오기

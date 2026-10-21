@@ -2536,7 +2536,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String routineGroupSheetCount(int count) {
-    return '일과 $count개 · 이 순서대로 보여요';
+    return '일과 $count개';
   }
 
   @override
@@ -2546,9 +2546,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String routineGroupSheetRemove(String title) {
     return '$title 묶음에서 빼기';
   }
-
-  @override
-  String get routineGroupSheetDragHint => '길게 눌러 끌면 순서를 바꿀 수 있어요';
 
   @override
   String get routineGroupCreated => '묶음을 만들었어요';
@@ -2614,7 +2611,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
 
   @override
-  String get routineGroupEditOrder => '순서 편집';
+  String get routineGroupEditOrder => '편집';
 
   @override
   String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
@@ -2786,7 +2783,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkAuthorFallback => '보호자';
 
   @override
-  String get talkNoteLabel => '이렇게 했어요';
+  String get talkNoteLabel => '내용';
 
   @override
   String get talkImportButtonShort => '내 일과로';

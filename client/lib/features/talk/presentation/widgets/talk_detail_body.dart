@@ -10,7 +10,7 @@ import '../../domain/talk_post.dart';
 import 'talk_category_badge.dart';
 import 'talk_step_image.dart';
 
-/// 상세 본문: 닉네임 · 시간 · 분류 > 제목 · 카드 수 > 이렇게 했어요 > 카드 전체 > 도움돼요 · 댓글 수
+/// 상세 본문: 닉네임 · 시간 · 분류 > 제목 · 카드 수 > 내용 > 카드 전체 > 도움돼요 · 댓글 수
 class TalkDetailBody extends StatelessWidget {
   const TalkDetailBody({
     super.key,
@@ -103,7 +103,7 @@ class TalkDetailBody extends StatelessWidget {
   }
 }
 
-/// 이렇게 했어요: 글쓴이의 한마디 전문
+/// 내용: 글쓴이의 한마디 전문
 class _NoteBox extends StatelessWidget {
   const _NoteBox({required this.note});
 
