@@ -4,7 +4,8 @@ import '../../../core/logger/app_logger.dart';
 import '../data/notification_repository.dart';
 import '../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 8개 (all 이 꺼지면 종류별 값은 유지한 채 푸시만 멈춤)
+/// 알림 설정 스위치 8개: 모든 알림 받기(all) + 종류별 7개
+/// all 은 "종류별이 전부 켜짐"을 뜻한다 — 켜면 전부 켜고, 끄면 전부 끔
 enum NotificationSettingField {
   all,
   routineCompleted,
@@ -13,11 +14,15 @@ enum NotificationSettingField {
   creditRefilled,
   feedbackResolved,
   talkCommented,
-  talkImported,
+  talkImported;
+
+  /// 종류별 7개 (all 제외)
+  static final types = values.where((field) => field != all).toList();
 }
 
 extension NotificationSettingFieldValue on NotificationSettings {
-  bool valueOf(NotificationSettingField field) => switch (field) {
+  /// 저장된 값 그대로
+  bool _storedValueOf(NotificationSettingField field) => switch (field) {
         NotificationSettingField.all => isAllEnabled,
         NotificationSettingField.routineCompleted => isRoutineCompletedEnabled,
         NotificationSettingField.routineSent => isRoutineSentEnabled,
@@ -28,24 +33,30 @@ extension NotificationSettingFieldValue on NotificationSettings {
         NotificationSettingField.talkImported => isTalkImportedEnabled,
       };
 
-  NotificationSettings withValue(NotificationSettingField field, bool value) =>
-      switch (field) {
-        NotificationSettingField.all => copyWith(isAllEnabled: value),
-        NotificationSettingField.routineCompleted =>
-          copyWith(isRoutineCompletedEnabled: value),
-        NotificationSettingField.routineSent =>
-          copyWith(isRoutineSentEnabled: value),
-        NotificationSettingField.coGuardianJoined =>
-          copyWith(isCoGuardianJoinedEnabled: value),
-        NotificationSettingField.creditRefilled =>
-          copyWith(isCreditRefilledEnabled: value),
-        NotificationSettingField.feedbackResolved =>
-          copyWith(isFeedbackResolvedEnabled: value),
-        NotificationSettingField.talkCommented =>
-          copyWith(isTalkCommentedEnabled: value),
-        NotificationSettingField.talkImported =>
-          copyWith(isTalkImportedEnabled: value),
-      };
+  /// 화면에 보일 스위치 값 (서버 allEnabled 가 꺼져 있으면 실제로 푸시가 없으므로 전부 꺼짐)
+  /// all: 종류별 7개가 전부 켜졌을 때만 켜짐
+  bool valueOf(NotificationSettingField field) {
+    if (!isAllEnabled) return false;
+    if (field != NotificationSettingField.all) return _storedValueOf(field);
+    return NotificationSettingField.types.every(_storedValueOf);
+  }
+
+  /// 스위치 하나 > 저장할 값 (allEnabled = 종류별 중 하나라도 켜짐)
+  /// all: 종류별 7개를 한꺼번에 같은 값으로
+  NotificationSettings withValue(NotificationSettingField field, bool isOn) {
+    bool nextValueOf(NotificationSettingField type) =>
+        field == NotificationSettingField.all || field == type ? isOn : valueOf(type);
+    return NotificationSettings(
+      isAllEnabled: NotificationSettingField.types.any(nextValueOf),
+      isRoutineCompletedEnabled: nextValueOf(NotificationSettingField.routineCompleted),
+      isRoutineSentEnabled: nextValueOf(NotificationSettingField.routineSent),
+      isCoGuardianJoinedEnabled: nextValueOf(NotificationSettingField.coGuardianJoined),
+      isCreditRefilledEnabled: nextValueOf(NotificationSettingField.creditRefilled),
+      isFeedbackResolvedEnabled: nextValueOf(NotificationSettingField.feedbackResolved),
+      isTalkCommentedEnabled: nextValueOf(NotificationSettingField.talkCommented),
+      isTalkImportedEnabled: nextValueOf(NotificationSettingField.talkImported),
+    );
+  }
 }
 
 final notificationSettingsControllerProvider = AsyncNotifierProvider.autoDispose<
@@ -80,10 +91,10 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
 
   /// 화면 먼저 바꾸고 저장. 실패하면 서버 확정값으로 되돌리고 그 오류를 반환 (성공·중복 호출은 null)
   /// 저장 중 들어온 토글은 화면 값만 바꿔 두고, 진행 중 요청이 끝난 뒤 최신 값으로 한 번 더 저장
-  Future<Object?> toggle(NotificationSettingField field, bool value) async {
+  Future<Object?> toggle(NotificationSettingField field, bool isOn) async {
     final current = state.value;
     if (current == null) return null;
-    state = AsyncData(current.withValue(field, value));
+    state = AsyncData(current.withValue(field, isOn));
     if (_isSaving) return null;
 
     _isSaving = true;

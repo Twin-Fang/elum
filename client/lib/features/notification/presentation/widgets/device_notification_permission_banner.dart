@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../application/device_notification_permission_controller.dart';
 
-/// 기기 알림이 꺼져 있을 때만 보이는 얇은 안내 띠: 꺼짐 아이콘 + 한 줄 + 검정 알약 "켜기"
+/// 기기 알림이 꺼져 있을 때만 보이는 띠: 종+사선 아이콘 + 한 줄 + 검정 `켜기` (시안 1732:8433)
 /// 설정 앱에서 돌아오면(resume) 권한을 다시 확인해 띠를 걷음
 class DeviceNotificationPermissionBanner extends ConsumerStatefulWidget {
   const DeviceNotificationPermissionBanner({super.key});
@@ -20,16 +22,22 @@ class DeviceNotificationPermissionBanner extends ConsumerStatefulWidget {
 class _DeviceNotificationPermissionBannerState
     extends ConsumerState<DeviceNotificationPermissionBanner>
     with WidgetsBindingObserver {
-  static const _minHeight = 48.0;
-  static const _paddingLeft = 14.0;
-  static const _paddingRight = 8.0;
-  static const _iconSize = 18.0;
-  static const _iconToTextGap = 8.0;
-  static const _radius = 14.0;
+  /// 띠 56 높이(최소) · 모서리 20 · 왼쪽 20 · 오른쪽 11
+  static const _minHeight = 56.0;
+  static const _radius = 20.0;
+  static const _paddingLeft = 20.0;
+  static const _paddingRight = 11.0;
 
-  /// 알약 버튼 (높이 32, 띠 여백 포함 터치 48)
-  static const _pillHeight = 32.0;
-  static const _pillPaddingH = 14.0;
+  /// 아이콘 22×20 · 아이콘 > 글 13
+  static const _iconWidth = 22.0;
+  static const _iconHeight = 20.0;
+  static const _iconToTextGap = 13.0;
+
+  /// `켜기` 버튼 (높이 34, 좌우 20, 모서리 8)
+  static const _buttonHeight = 34.0;
+  static const _buttonPaddingH = 20.0;
+  static const _buttonRadius = 8.0;
+  static const _textToButtonGap = 8.0;
 
   @override
   void initState() {
@@ -62,39 +70,40 @@ class _DeviceNotificationPermissionBannerState
       constraints: BoxConstraints(minHeight: _minHeight.h),
       padding: EdgeInsets.only(left: _paddingLeft.w, right: _paddingRight.w),
       decoration: BoxDecoration(
-        color: colors.buttonNeutral,
+        color: colors.notificationPermissionBannerBg,
         borderRadius: BorderRadius.circular(_radius.r),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.notifications_off_outlined,
-            size: _iconSize.r,
-            color: colors.textSecondary,
+          SvgPicture.asset(
+            AppAssets.iconNotificationOff,
+            width: _iconWidth.w,
+            height: _iconHeight.w,
+            excludeFromSemantics: true,
           ),
           SizedBox(width: _iconToTextGap.w),
           Expanded(
             child: Text(
               l10n.notificationPermissionOff,
-              style: context.typo.bodySmall.copyWith(color: colors.textPrimary),
+              style: context.typo.settingsTileLabel
+                  .copyWith(color: colors.notificationMutedText),
             ),
           ),
+          SizedBox(width: _textToButtonGap.w),
           AppPressable(
             onTap: controller.turnOn,
             child: Container(
-              height: _pillHeight.h,
-              padding: EdgeInsets.symmetric(horizontal: _pillPaddingH.w),
+              height: _buttonHeight.h,
+              padding: EdgeInsets.symmetric(horizontal: _buttonPaddingH.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: colors.buttonEnabled,
-                borderRadius: BorderRadius.circular(_pillHeight.h / 2),
+                borderRadius: BorderRadius.circular(_buttonRadius.r),
               ),
               child: Text(
                 l10n.notificationTurnOnDeviceNotification,
-                style: context.typo.bodySmall.copyWith(
-                  color: colors.buttonEnabledText,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: context.typo.notificationBannerButton
+                    .copyWith(color: colors.buttonEnabledText),
               ),
             ),
           ),

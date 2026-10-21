@@ -90,6 +90,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.creditHistoryDate,
     required this.creditHistoryRowTitle,
     required this.creditHistoryRowDetail,
+    required this.notificationRowText,
+    required this.notificationRowTime,
+    required this.notificationBannerButton,
     required this.peopleHeading,
     required this.peopleCaption,
     required this.peopleSectionLabel,
@@ -430,6 +433,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 크레딧 사용 내역 줄의 부제 `카드 그림 4장・오전 11:23` (13/w400).
   final TextStyle creditHistoryRowDetail;
+
+  /// 알림 줄 문장 (14/w400 Pretendard, 두 줄일 때 줄 높이 1.2 — 시안 1724:8346).
+  final TextStyle notificationRowText;
+
+  /// 알림 줄 시각 `오전 11:23` (12/w400 Pretendard, 시안 1724:8346).
+  final TextStyle notificationRowTime;
+
+  /// 기기 알림 꺼짐 띠의 `켜기` 버튼 글자 (14/w600 Pretendard, 시안 1732:8433).
+  final TextStyle notificationBannerButton;
   /// 함께하는 사람 머리 제목 `함께 돌보는 사람 N명` (18/w600 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleHeading;
 
@@ -989,6 +1001,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    notificationRowText: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    notificationRowTime: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    notificationBannerButton: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     creditUnit: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1215,6 +1245,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? creditHistoryDate,
     TextStyle? creditHistoryRowTitle,
     TextStyle? creditHistoryRowDetail,
+    TextStyle? notificationRowText,
+    TextStyle? notificationRowTime,
+    TextStyle? notificationBannerButton,
     TextStyle? peopleHeading,
     TextStyle? peopleCaption,
     TextStyle? peopleSectionLabel,
@@ -1317,6 +1350,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditHistoryDate: creditHistoryDate ?? this.creditHistoryDate,
       creditHistoryRowTitle: creditHistoryRowTitle ?? this.creditHistoryRowTitle,
       creditHistoryRowDetail: creditHistoryRowDetail ?? this.creditHistoryRowDetail,
+      notificationRowText: notificationRowText ?? this.notificationRowText,
+      notificationRowTime: notificationRowTime ?? this.notificationRowTime,
+      notificationBannerButton: notificationBannerButton ?? this.notificationBannerButton,
       peopleHeading: peopleHeading ?? this.peopleHeading,
       peopleCaption: peopleCaption ?? this.peopleCaption,
       peopleSectionLabel: peopleSectionLabel ?? this.peopleSectionLabel,
@@ -1450,6 +1486,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditHistoryDate: TextStyle.lerp(creditHistoryDate, other.creditHistoryDate, t)!,
       creditHistoryRowTitle: TextStyle.lerp(creditHistoryRowTitle, other.creditHistoryRowTitle, t)!,
       creditHistoryRowDetail: TextStyle.lerp(creditHistoryRowDetail, other.creditHistoryRowDetail, t)!,
+      notificationRowText: TextStyle.lerp(notificationRowText, other.notificationRowText, t)!,
+      notificationRowTime: TextStyle.lerp(notificationRowTime, other.notificationRowTime, t)!,
+      notificationBannerButton: TextStyle.lerp(notificationBannerButton, other.notificationBannerButton, t)!,
       peopleHeading: TextStyle.lerp(peopleHeading, other.peopleHeading, t)!,
       peopleCaption: TextStyle.lerp(peopleCaption, other.peopleCaption, t)!,
       peopleSectionLabel: TextStyle.lerp(peopleSectionLabel, other.peopleSectionLabel, t)!,

@@ -195,6 +195,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsCardLabel,
     required this.settingsCardValue,
     required this.settingsToggleOn,
+    required this.settingsToggleOff,
     required this.settingsGroupBg,
     required this.settingsGroupDivider,
     required this.peopleMeBadgeBg,
@@ -222,7 +223,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditMutedText,
     required this.creditHistoryMutedText,
     required this.notificationIconBackground,
-    required this.notificationUnreadBackground,
+    required this.notificationIconForeground,
+    required this.notificationUnreadDot,
+    required this.notificationRowText,
+    required this.notificationMutedText,
+    required this.notificationPermissionBannerBg,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -757,6 +762,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
   final Color settingsToggleOn;
 
+  /// 묶음 카드 설정 줄의 꺼짐 토글 바탕 (#D7D3D1, 시안 1732:8563).
+  final Color settingsToggleOff;
+
   // --- 설정 묶음 카드 (iOS inset grouped, 임시 시안 #645) ---
 
   /// 설정 줄을 묶는 흰 카드 바탕.
@@ -841,11 +849,23 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 크레딧 사용 내역의 날짜·부제·줄어든 값 (Figma `1589:8359` `#74757D`).
   final Color creditHistoryMutedText;
 
-  /// 알림 줄 왼쪽 원형 아이콘의 바탕
+  /// 알림 줄 왼쪽 둥근 네모 아이콘 바탕 (#AEE4D9, 시안 1724:8346)
   final Color notificationIconBackground;
 
-  /// 알림 목록에서 안 읽은 줄의 연한 민트 바탕 (시안 알림 탭)
-  final Color notificationUnreadBackground;
+  /// 알림 줄 아이콘 상자 안 그림 (#FFFFFF, 시안 1724:8346)
+  final Color notificationIconForeground;
+
+  /// 알림 줄 오른쪽 안 읽음 점 (#55CFBA, 시안 1724:8346)
+  final Color notificationUnreadDot;
+
+  /// 알림 줄 문장 (#000000, 시안 1724:8346). 본문색(`textPrimary`)과 값이 달라 나눈다.
+  final Color notificationRowText;
+
+  /// 알림 화면의 회색 글자·아이콘: 날짜 머리글, 시각, 톱니, 기기 알림 꺼짐 띠 (#74757D)
+  final Color notificationMutedText;
+
+  /// 알림 설정 맨 위 기기 알림 꺼짐 띠 바탕 (#EEE9E6, 시안 1732:8433)
+  final Color notificationPermissionBannerBg;
 
   // --- 약관 동의 선택 상태 ---
   //
@@ -1061,6 +1081,7 @@ class AppColors extends ThemeExtension<AppColors> {
     settingsCardLabel: Color(0xFF000000),
     settingsCardValue: Color(0xFF74757D),
     settingsToggleOn: Color(0xFF55CFBA),
+    settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
     settingsGroupDivider: Color(0xFFEFEFEF),
     peopleMeBadgeBg: Color(0xFFD7D3D1),
@@ -1088,8 +1109,12 @@ class AppColors extends ThemeExtension<AppColors> {
     creditNumberText: Color(0xFFBAA0F9),
     creditMutedText: Color(0xFF9B97A4),
     creditHistoryMutedText: Color(0xFF74757D),
-    notificationIconBackground: Color(0xFFE7DEFB),
-    notificationUnreadBackground: Color(0xFFEAF7F5),
+    notificationIconBackground: Color(0xFFAEE4D9),
+    notificationIconForeground: Color(0xFFFFFFFF),
+    notificationUnreadDot: Color(0xFF55CFBA),
+    notificationRowText: Color(0xFF000000),
+    notificationMutedText: Color(0xFF74757D),
+    notificationPermissionBannerBg: Color(0xFFEEE9E6),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1264,6 +1289,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsCardLabel,
     Color? settingsCardValue,
     Color? settingsToggleOn,
+    Color? settingsToggleOff,
     Color? settingsGroupBg,
     Color? settingsGroupDivider,
     Color? peopleMeBadgeBg,
@@ -1291,7 +1317,11 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditMutedText,
     Color? creditHistoryMutedText,
     Color? notificationIconBackground,
-    Color? notificationUnreadBackground,
+    Color? notificationIconForeground,
+    Color? notificationUnreadDot,
+    Color? notificationRowText,
+    Color? notificationMutedText,
+    Color? notificationPermissionBannerBg,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1470,6 +1500,7 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsCardLabel: settingsCardLabel ?? this.settingsCardLabel,
       settingsCardValue: settingsCardValue ?? this.settingsCardValue,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
+      settingsToggleOff: settingsToggleOff ?? this.settingsToggleOff,
       settingsGroupBg: settingsGroupBg ?? this.settingsGroupBg,
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
@@ -1497,7 +1528,11 @@ class AppColors extends ThemeExtension<AppColors> {
       creditMutedText: creditMutedText ?? this.creditMutedText,
       creditHistoryMutedText: creditHistoryMutedText ?? this.creditHistoryMutedText,
       notificationIconBackground: notificationIconBackground ?? this.notificationIconBackground,
-      notificationUnreadBackground: notificationUnreadBackground ?? this.notificationUnreadBackground,
+      notificationIconForeground: notificationIconForeground ?? this.notificationIconForeground,
+      notificationUnreadDot: notificationUnreadDot ?? this.notificationUnreadDot,
+      notificationRowText: notificationRowText ?? this.notificationRowText,
+      notificationMutedText: notificationMutedText ?? this.notificationMutedText,
+      notificationPermissionBannerBg: notificationPermissionBannerBg ?? this.notificationPermissionBannerBg,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1846,6 +1881,7 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsCardLabel: Color.lerp(settingsCardLabel, other.settingsCardLabel, t)!,
       settingsCardValue: Color.lerp(settingsCardValue, other.settingsCardValue, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,
+      settingsToggleOff: Color.lerp(settingsToggleOff, other.settingsToggleOff, t)!,
       settingsGroupBg: Color.lerp(settingsGroupBg, other.settingsGroupBg, t)!,
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
@@ -1874,7 +1910,11 @@ class AppColors extends ThemeExtension<AppColors> {
       creditMutedText: Color.lerp(creditMutedText, other.creditMutedText, t)!,
       creditHistoryMutedText: Color.lerp(creditHistoryMutedText, other.creditHistoryMutedText, t)!,
       notificationIconBackground: Color.lerp(notificationIconBackground, other.notificationIconBackground, t)!,
-      notificationUnreadBackground: Color.lerp(notificationUnreadBackground, other.notificationUnreadBackground, t)!,
+      notificationIconForeground: Color.lerp(notificationIconForeground, other.notificationIconForeground, t)!,
+      notificationUnreadDot: Color.lerp(notificationUnreadDot, other.notificationUnreadDot, t)!,
+      notificationRowText: Color.lerp(notificationRowText, other.notificationRowText, t)!,
+      notificationMutedText: Color.lerp(notificationMutedText, other.notificationMutedText, t)!,
+      notificationPermissionBannerBg: Color.lerp(notificationPermissionBannerBg, other.notificationPermissionBannerBg, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

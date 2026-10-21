@@ -1056,9 +1056,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationTurnOnDeviceNotification => '켜기';
 
   @override
-  String get notificationSettingsLockedHint => '기기 알림을 켜면 이 설정대로 받아요';
-
-  @override
   String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
 
   @override

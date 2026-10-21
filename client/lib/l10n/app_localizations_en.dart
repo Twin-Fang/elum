@@ -1110,10 +1110,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationTurnOnDeviceNotification => 'Turn on';
 
   @override
-  String get notificationSettingsLockedHint =>
-      'Turn on device notifications to get these alerts';
-
-  @override
   String get notificationSettingSaveFailed => 'Couldn\'t save your settings';
 
   @override
