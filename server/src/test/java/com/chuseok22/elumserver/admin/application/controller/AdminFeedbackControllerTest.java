@@ -10,9 +10,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminFeedbackSenderPanel;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportLink;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
+import com.chuseok22.elumserver.admin.application.service.AdminFeedbackSenderService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackAdminSearch;
@@ -36,8 +38,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 class AdminFeedbackControllerTest {
 
   private final FeedbackService feedbackService = mock(FeedbackService.class);
+  private final AdminFeedbackSenderService adminFeedbackSenderService = mock(AdminFeedbackSenderService.class);
   private final AdminFeedbackController controller =
-    new AdminFeedbackController(feedbackService, new AdminDateFormatter());
+    new AdminFeedbackController(feedbackService, new AdminDateFormatter(), adminFeedbackSenderService);
   private final RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
   private static final Sort NEWEST_FIRST = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));
@@ -178,6 +181,23 @@ class AdminFeedbackControllerTest {
 
     assertThat(controller.detail("f1", model)).isEqualTo("admin/feedback-detail");
     assertThat(model.get("feedback")).isSameAs(feedback);
+  }
+
+  @Test
+  @DisplayName("보낸 회원 패널 조회가 터져도 상세는 의견을 그리고 패널만 실패(에러 코드 안내)로 둔다")
+  void detail_senderPanelFails_stillRendersFeedback() {
+    Feedback feedback = new Feedback();
+    feedback.setId("f1");
+    feedback.setMemberId("m1");
+    when(feedbackService.get("f1")).thenReturn(feedback);
+    when(adminFeedbackSenderService.loadSenderPanel(eq("m1"), any())).thenThrow(new IllegalStateException("db down"));
+    ExtendedModelMap model = new ExtendedModelMap();
+
+    assertThat(controller.detail("f1", model)).isEqualTo("admin/feedback-detail");
+    assertThat(model.get("feedback")).isSameAs(feedback);
+    AdminFeedbackSenderPanel panel = (AdminFeedbackSenderPanel) model.get("senderPanel");
+    assertThat(panel.isLoadFailed()).isTrue();
+    assertThat(panel.memberId()).isEqualTo("m1");
   }
 
   @Test

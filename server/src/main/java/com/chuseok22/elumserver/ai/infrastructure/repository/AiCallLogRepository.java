@@ -15,6 +15,11 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
 
   List<AiCallLog> findTop20ByMemberIdOrderByCreatedAtDesc(String memberId);
 
+  /// 회원의 until 이전(포함) 최근 호출 10건, 최신순 (idx_ai_call_log_member_created 사용)
+  List<AiCallLog> findTop10ByMemberIdAndCreatedAtLessThanEqualOrderByCreatedAtDesc(
+    String memberId, LocalDateTime until
+  );
+
   /**
    * 특정 기간에 이 회원이 낸 호출 건수. 요금제 한도 계산에 쓴다.
    *
