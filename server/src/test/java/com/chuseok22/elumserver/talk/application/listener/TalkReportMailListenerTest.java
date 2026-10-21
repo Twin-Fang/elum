@@ -47,7 +47,7 @@ class TalkReportMailListenerTest {
   @BeforeEach
   void setUp() {
     talkReportMailListener = new TalkReportMailListener(talkReportRepository, talkPostRepository,
-      talkCommentRepository, talkReportMailer, new TalkProperties(null, "ops@example.com", "https://api.example.com/"));
+      talkCommentRepository, talkReportMailer, new TalkProperties(null, "https://api.example.com/"));
   }
 
   @Test

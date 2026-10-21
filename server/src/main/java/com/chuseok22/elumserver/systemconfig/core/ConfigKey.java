@@ -444,6 +444,42 @@ public enum ConfigKey {
       + "서버 문구 파일이 비어 있으면 저장되지 않는다",
     ConfigValueType.STRING, List.of(), "ko"
   ),
+
+  // --- 신고 메일 ---
+  //
+  // 이야기 신고가 들어오면 운영자에게 메일을 보낸다. 재시작 없이 바꾸도록 환경 변수 대신 여기에 둔다.
+  // 기본값 꺼짐이라 배포만으로는 메일이 나가지 않는다. 보내는 주소는 SMTP 계정(MAIL_SMTP_USERNAME)을 쓴다.
+  // 주소·호스트·계정은 한번 채우면 화면에서 비울 수 없다 — 끄려면 이것만 끈다.
+  TALK_REPORT_MAIL_ENABLED(
+    ConfigGroup.MAIL, "신고 메일 켜기",
+    "켜면 이야기 신고가 들어올 때 아래 주소로 메일을 보낸다. 받는 주소·호스트·계정·비밀번호 중 하나라도 비면 보내지 않는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  TALK_REPORT_MAIL_TO(
+    ConfigGroup.MAIL, "받는 주소",
+    "신고 메일을 받을 주소. 쉼표로 여러 개를 적을 수 있다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_HOST(
+    ConfigGroup.MAIL, "SMTP 호스트",
+    "메일 서버 주소. 예: smtp.gmail.com",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_PORT(
+    ConfigGroup.MAIL, "SMTP 포트",
+    "STARTTLS 접속 포트. 보통 587. 1~65535",
+    ConfigValueType.INTEGER, List.of(), "587", 1, 65_535
+  ),
+  MAIL_SMTP_USERNAME(
+    ConfigGroup.MAIL, "SMTP 계정",
+    "메일 서버 로그인 계정이자 보내는 주소",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_PASSWORD(
+    ConfigGroup.MAIL, "SMTP 비밀번호",
+    "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
   ;
 
 

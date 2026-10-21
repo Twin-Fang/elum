@@ -30,6 +30,8 @@ public enum ConfigGroup {
   AD_REWARD("광고 보상"),
   // 일과를 만들 수 있는 언어.
   LANGUAGE("언어"),
+  // 이야기 신고 알림 메일: 켜기, 받는 주소, 보내는 SMTP 계정.
+  MAIL("신고 메일"),
   ;
 
   private final String label;

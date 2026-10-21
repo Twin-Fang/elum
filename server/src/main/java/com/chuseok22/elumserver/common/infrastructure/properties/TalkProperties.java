@@ -3,10 +3,10 @@ package com.chuseok22.elumserver.common.infrastructure.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 이야기 설정: 그림 사본 저장 폴더, 신고 알림 받을 메일(없으면 메일 안 보냄), 관리자 링크 기준 주소
+ * 이야기 설정: 그림 사본 저장 폴더, 신고 메일의 관리자 링크 기준 주소
  */
 @ConfigurationProperties(prefix = "talk")
-public record TalkProperties(String imageStoragePath, String reportMailTo, String adminBaseUrl) {
+public record TalkProperties(String imageStoragePath, String adminBaseUrl) {
 
   private static final String DEFAULT_IMAGE_STORAGE_PATH = "data/talk-images";
   private static final String DEFAULT_ADMIN_BASE_URL = "https://api.elum.chuseok22.com";
@@ -14,9 +14,6 @@ public record TalkProperties(String imageStoragePath, String reportMailTo, Strin
   public TalkProperties {
     if (imageStoragePath == null || imageStoragePath.isBlank()) {
       imageStoragePath = DEFAULT_IMAGE_STORAGE_PATH;
-    }
-    if (reportMailTo != null && reportMailTo.isBlank()) {
-      reportMailTo = null;
     }
     if (adminBaseUrl == null || adminBaseUrl.isBlank()) {
       adminBaseUrl = DEFAULT_ADMIN_BASE_URL;
