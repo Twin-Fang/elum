@@ -14,18 +14,24 @@ import '../../application/talk_comment_controller.dart';
 import '../../domain/talk_comment.dart';
 import '../../domain/talk_screen_codes.dart';
 
-/// 댓글 영역(스크롤 안에 이어 붙이는 조각): 제목 > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
+/// 댓글 영역(스크롤 안에 이어 붙이는 조각): 머리 `댓글  N` > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
 /// 빈 상태·첫 쪽 실패도 여기서 그린다. 댓글 ⋯ 버튼이나 길게 누르기로 [onCommentMenuRequested]
 class TalkCommentList extends StatelessWidget {
   const TalkCommentList({
     super.key,
+    required this.commentCount,
     required this.comments,
     required this.onCommentMenuRequested,
     required this.onRetryPressed,
     required this.onRetryLoadMorePressed,
   });
 
+  /// 머리 숫자. 목록을 못 받아도 보이게 글 응답의 댓글 수를 쓴다
+  final int commentCount;
   final AsyncValue<TalkCommentState> comments;
+
+  /// 머리 `댓글` > 숫자 (시안 8)
+  static const _titleToCount = 8.0;
   final ValueChanged<TalkComment> onCommentMenuRequested;
 
   /// 첫 쪽 받기 실패 줄을 눌렀을 때
@@ -38,17 +44,22 @@ class TalkCommentList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final space = context.space;
+    final headerStyle = context.typo.talkCommentsHeader.copyWith(
+      color: context.colors.talkMetaText,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.talkCommentsTitle,
-            style: context.typo.cardTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
+          // 머리 `댓글  3` (시안 1830:7916 · 1830:7917)
+          Row(
+            children: [
+              Text(l10n.talkCommentsTitle, style: headerStyle),
+              SizedBox(width: _titleToCount.w),
+              Text('$commentCount', style: headerStyle),
+            ],
           ),
           SizedBox(height: space.sm.h),
           switch (comments) {

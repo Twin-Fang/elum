@@ -71,6 +71,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkMetaIcon,
     required this.talkPopularCardFill,
     required this.talkMetaDivider,
+    required this.talkSectionDivider,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -345,6 +346,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color talkPopularCardFill;
   /// 상세 작성자 | 작성 시각 사이 세로선 (#D9D3CF, 시안 1813:7491)
   final Color talkMetaDivider;
+  /// 상세 본문 | 댓글 사이 화면 폭 띠 (#EEE9E6 · 높이 7, 시안 1830:7918)
+  final Color talkSectionDivider;
 
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
@@ -996,6 +999,7 @@ class AppColors extends ThemeExtension<AppColors> {
     talkMetaIcon: Color(0xFFCACACA),
     talkPopularCardFill: Color(0xFFEEE9E6),
     talkMetaDivider: Color(0xFFD9D3CF),
+    talkSectionDivider: Color(0xFFEEE9E6),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1228,6 +1232,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkMetaIcon,
     Color? talkPopularCardFill,
     Color? talkMetaDivider,
+    Color? talkSectionDivider,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1448,6 +1453,7 @@ class AppColors extends ThemeExtension<AppColors> {
       talkMetaIcon: talkMetaIcon ?? this.talkMetaIcon,
       talkPopularCardFill: talkPopularCardFill ?? this.talkPopularCardFill,
       talkMetaDivider: talkMetaDivider ?? this.talkMetaDivider,
+      talkSectionDivider: talkSectionDivider ?? this.talkSectionDivider,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1708,6 +1714,7 @@ class AppColors extends ThemeExtension<AppColors> {
       talkMetaIcon: Color.lerp(talkMetaIcon, other.talkMetaIcon, t)!,
       talkPopularCardFill: Color.lerp(talkPopularCardFill, other.talkPopularCardFill, t)!,
       talkMetaDivider: Color.lerp(talkMetaDivider, other.talkMetaDivider, t)!,
+      talkSectionDivider: Color.lerp(talkSectionDivider, other.talkSectionDivider, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,
