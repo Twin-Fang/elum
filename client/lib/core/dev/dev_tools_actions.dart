@@ -64,7 +64,7 @@ class _LocaleTile extends StatelessWidget {
 ///
 /// `showDialog`를 쓰지 않는다. 이 위젯도 Navigator보다 위에 있어
 /// 다이얼로그를 띄울 수 없다. 시트 안에서 화면만 바꾼다.
-class _ConfirmResetView extends ConsumerWidget {
+class _ConfirmResetView extends ConsumerStatefulWidget {
   const _ConfirmResetView({
     required this.onCancel,
     required this.onDone,
@@ -76,7 +76,17 @@ class _ConfirmResetView extends ConsumerWidget {
   final void Function(String route) onNavigate;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ConfirmResetView> createState() => _ConfirmResetViewState();
+}
+
+class _ConfirmResetViewState extends ConsumerState<_ConfirmResetView> {
+  // 서버 삭제 실패 사유 (있으면 화면을 옮기지 않고 보여줌)
+  String? _failureText;
+  bool _isDeleting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final failureText = _failureText;
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -86,34 +96,22 @@ class _ConfirmResetView extends ConsumerWidget {
             '계정과 저장된 호칭·목표·캐릭터·PIN이\n모두 지워집니다.\n같은 이름을 넣어도 새로 시작합니다.',
             textAlign: TextAlign.center,
           ),
+          if (failureText != null) _Message(failureText, isError: true),
           const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: onCancel,
+                  onPressed: widget.onCancel,
                   child: const Text('취소'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () async {
-                    // 서버 계정까지 지운다. 실패하면 로컬도 그대로 남는다 —
-                    // 개발 도구라 여기서는 결과를 따지지 않고 로그인으로 보낸다.
-                    await ref.read(authRepositoryProvider).deleteAccount();
-                    // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다.
-                    // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지
-                    // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다.
-                    ref.read(routineFlowProvider.notifier).reset();
-                    ref.refreshRoutines();
-                    ref.invalidate(onboardingProvider);
-                    if (!context.mounted) return;
-                    onDone();
-                    // 계정이 사라졌으니 로그인부터 다시 한다.
-                    onNavigate(Routes.login);
-                  },
-                  child: const Text('회원삭제'),
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+                  onPressed: _isDeleting ? null : _deleteAccount,
+                  child: Text(_isDeleting ? '지우는 중…' : '회원삭제'),
                 ),
               ),
             ],
@@ -121,6 +119,32 @@ class _ConfirmResetView extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  // 서버 계정 삭제 > 실패면 사유 표시하고 멈춤 (로컬도 그대로) > 성공이면 메모리 비우고 로그인으로
+  Future<void> _deleteAccount() async {
+    setState(() {
+      _isDeleting = true;
+      _failureText = null;
+    });
+    final failure = await ref.read(authRepositoryProvider).deleteAccount();
+    if (!mounted) return;
+    if (failure != null) {
+      setState(() {
+        _isDeleting = false;
+        _failureText = '삭제하지 못했습니다 (서버 계정·이 기기 저장값 그대로)\n${_describeFailure(failure)}';
+      });
+      return;
+    }
+    // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다.
+    // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지
+    // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다.
+    ref.read(routineFlowProvider.notifier).reset();
+    ref.refreshRoutines();
+    ref.invalidate(onboardingProvider);
+    widget.onDone();
+    // 계정이 사라졌으니 로그인부터 다시 한다.
+    widget.onNavigate(Routes.login);
   }
 }
 

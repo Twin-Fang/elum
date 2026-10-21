@@ -169,15 +169,50 @@ class AuthRepository {
         AppLogger.error('소셜 로그인', code);
         return const AuthResult(AuthOutcome.failedSdk);
       case OAuthSdkSuccess(token: final providerToken):
-        return _exchange(provider, providerToken);
+        return _exchange(
+          () => _dio.post<Map<String, dynamic>>(
+            '/api/auth/oauth/${provider.path}',
+            data: {'token': providerToken},
+          ),
+          lastLoginProviderName: provider.name,
+        );
     }
   }
 
-  /// 제공자 토큰을 우리 토큰으로 바꾼다.
+  /// 테스트 계정 가입 (개발자 도구, 운영이 아닌 서버만 열림). 성공이면 null, 실패면 사유
+  Future<AppFailure?> signUpTestAccount({
+    required String username,
+    required String password,
+  }) async {
+    try {
+      await _dio.post<dynamic>(
+        '/api/auth/signup',
+        data: {'username': username, 'password': password},
+      );
+      return null;
+    } catch (e) {
+      return AppFailure.of(e);
+    }
+  }
+
+  /// 테스트 계정 로그인: 아이디·비밀번호 > 우리 토큰 (이후 갈래는 소셜 로그인과 같음)
+  Future<AuthResult> signInWithTestAccount({
+    required String username,
+    required String password,
+  }) {
+    return _exchange(
+      () => _dio.post<Map<String, dynamic>>(
+        '/api/auth/login',
+        data: {'username': username, 'password': password},
+      ),
+    );
+  }
+
+  /// 로그인 요청 > 우리 토큰 저장 > 다음 화면 갈래. [lastLoginProviderName] 은 소셜 로그인만
   Future<AuthResult> _exchange(
-    OAuthProvider provider,
-    String providerToken,
-  ) async {
+    Future<Response<Map<String, dynamic>>> Function() requestTokens, {
+    String? lastLoginProviderName,
+  }) async {
     _guardianPinSetupAllowed = false;
     _restoring = true;
     final previousOwner =
@@ -186,10 +221,7 @@ class AuthRepository {
     final previousProfile = _storage.selectedProfileId;
     var exchanged = false;
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
-        '/api/auth/oauth/${provider.path}',
-        data: {'token': providerToken},
-      );
+      final res = await requestTokens();
 
       final access = res.data?['accessToken']?.toString();
       final refresh = res.data?['refreshToken']?.toString();
@@ -209,7 +241,9 @@ class AuthRepository {
         previousProfile,
         access,
       );
-      await _storage.setLastLoginProvider(provider.name);
+      if (lastLoginProviderName != null) {
+        await _storage.setLastLoginProvider(lastLoginProviderName);
+      }
       await _tokens.save(accessToken: access, refreshToken: refresh);
       return AuthResult(outcome);
     } on DioException catch (e) {

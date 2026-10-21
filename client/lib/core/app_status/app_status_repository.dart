@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../dev/dev_simulation.dart';
 import 'app_status.dart';
 import 'app_status_recheck.dart';
 import '../../app/dio_provider.dart';
@@ -58,6 +59,11 @@ final appVersionProvider = FutureProvider<String>(
 final appStatusProvider = FutureProvider<({AppStatus status, String version})>(
   (ref) async {
     ref.watch(appStatusRecheckProvider);
+    // 개발자 도구 앱 상태 흉내 (서버에 묻지 않음)
+    final simulated = DevSimulation.simulatedAppStatus();
+    if (simulated != null) {
+      return (status: simulated, version: await AppStatusRepository.currentVersion());
+    }
     final repo = ref.watch(appStatusRepositoryProvider);
     final results = await Future.wait([
       repo.fetch(),
