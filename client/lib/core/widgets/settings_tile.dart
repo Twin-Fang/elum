@@ -74,19 +74,7 @@ class SettingsTile extends StatelessWidget {
     final colors = context.colors;
     final value = valueText;
     final chevron = isInCard
-        // 시안과 같은 SVG: 원본이 아래를 보므로 반시계 90°를 돌려 `>` 로 쓴다
-        ? Transform.rotate(
-            angle: -math.pi / 2,
-            child: SvgPicture.asset(
-              AppAssets.iconAngleSmall,
-              width: cardChevronSize.w,
-              height: cardChevronSize.w,
-              colorFilter: ColorFilter.mode(
-                colors.settingsChevron,
-                BlendMode.srcIn,
-              ),
-            ),
-          )
+        ? const SettingsCardChevron()
         : Icon(
             Icons.chevron_right_rounded,
             size: 20.w,
@@ -161,5 +149,27 @@ class SettingsTile extends StatelessWidget {
       return MergeSemantics(child: row);
     }
     return AppPressable(onTap: loading ? null : onTap, child: row);
+  }
+}
+
+/// 묶음 카드 줄의 `>` (24×24, 시안 1532:7501 · 1736:8780). 설정 줄 모양을 따르는 다른 카드(내 정보 이룸이)도 쓴다
+class SettingsCardChevron extends StatelessWidget {
+  const SettingsCardChevron({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 시안과 같은 SVG: 원본이 아래를 보므로 반시계 90°를 돌려 `>` 로 쓴다
+    return Transform.rotate(
+      angle: -math.pi / 2,
+      child: SvgPicture.asset(
+        AppAssets.iconAngleSmall,
+        width: SettingsTile.cardChevronSize.w,
+        height: SettingsTile.cardChevronSize.w,
+        colorFilter: ColorFilter.mode(
+          context.colors.settingsChevron,
+          BlendMode.srcIn,
+        ),
+      ),
+    );
   }
 }

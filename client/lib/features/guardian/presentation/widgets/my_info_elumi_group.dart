@@ -9,56 +9,74 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../../../core/widgets/settings_group.dart';
+import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/character.dart';
 import '../../../profile/application/profile_session.dart';
 import '../../../profile/domain/profile_summary.dart';
 
-/// 내정보 이룸이 묶음: 줄 누르면 이룸이 바꾸기(여럿일 때), 연필 누르면 이룸이 정보 고치기 (#660)
+/// 내정보 이룸이 카드 묶음 (시안 1736:8780): 이룸이마다 카드 하나, 누르면 이룸이 정보 고치기
+///
+/// 여럿이면 지금 보는 이룸이에 `보는 중` + 카드 아래 `이룸이 바꾸기` 줄 (바꾸기 입구는 여기 하나)
 class MyInfoElumiGroup extends ConsumerWidget {
   const MyInfoElumiGroup({super.key, required this.profiles});
 
   final List<ProfileSummary> profiles;
+
+  /// 이룸이 카드 사이 (화면 카드 간격과 같음)
+  static const _cardGap = 16.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeId = ref.watch(activeProfileProvider)?.id;
     final hasSeveral = profiles.length > 1;
 
-    return SettingsGroup(
-      header: context.l10n.guardianMyInfoChildrenHeader,
-      hasDividers: false,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final profile in profiles)
-          _ElumiRow(
+        for (final (index, profile) in profiles.indexed) ...[
+          if (index > 0) SizedBox(height: _cardGap.h),
+          _ElumiCard(
             profile: profile,
             isActive: hasSeveral && profile.id == activeId,
-            onTap: hasSeveral
-                ? () => context.push(Routes.guardianProfileSwitch)
-                : null,
-            onEdit: () => context.push(Routes.guardianElumiInfoOf(profile.id)),
+            onTap: () => context.push(Routes.guardianElumiInfoOf(profile.id)),
           ),
+        ],
+        if (hasSeveral) ...[
+          SizedBox(height: _cardGap.h),
+          SettingsGroup(
+            hasDividers: false,
+            children: [
+              SettingsTile(
+                isInCard: true,
+                label: context.l10n.guardianSettingsProfileSwitch,
+                onTap: () => context.push(Routes.guardianProfileSwitch),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
 }
 
-/// 이룸이 한 줄: 캐릭터 + 호칭 (+ `보는 중`) + 연필
-class _ElumiRow extends StatelessWidget {
-  const _ElumiRow({
+/// 이룸이 카드: 캐릭터 48 + 호칭 (+ `보는 중`) + `>`
+class _ElumiCard extends StatelessWidget {
+  const _ElumiCard({
     required this.profile,
     required this.isActive,
     required this.onTap,
-    required this.onEdit,
   });
 
   final ProfileSummary profile;
   final bool isActive;
-  final VoidCallback? onTap;
-  final VoidCallback onEdit;
+  final VoidCallback onTap;
 
-  /// 연필 아이콘 크기 · 누름 영역 한 변
-  static const _editIconSize = 22.0;
-  static const _editTapSize = 44.0;
+  /// 시안 실측 (카드 높이 88): 왼쪽·위아래 20, 오른쪽 16, 캐릭터 48, 캐릭터와 이름 사이 12
+  static const _padLeft = 20.0;
+  static const _padRight = 16.0;
+  static const _padV = 20.0;
+  static const _badgeSize = 48.0;
+  static const _badgeToName = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -69,52 +87,49 @@ class _ElumiRow extends StatelessWidget {
         CardCharacter.fromApiValue(profile.character) ??
         CardCharacter.values.first;
 
-    final row = Padding(
-      // 오른쪽은 연필 누름 영역이 여백을 대신함
-      padding: EdgeInsets.fromLTRB(
-        space.md.w,
-        space.sm.h,
-        space.md.w - (_editTapSize - _editIconSize) / 2,
-        space.sm.h,
-      ),
-      child: Row(
-        children: [
-          CharacterBadge(character: character),
-          SizedBox(width: space.md.w),
-          Expanded(
-            child: Text(
-              profile.displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.sectionTitle.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
+    return AppPressable(
+      onTap: onTap,
+      semanticLabel: context.l10n.elumiInfoEditLabel(profile.displayName),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.settingsGroupBg,
+          borderRadius: BorderRadius.circular(space.cardRadius.r),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            _padLeft.w,
+            _padV.h,
+            _padRight.w,
+            _padV.h,
           ),
-          if (isActive)
-            Text(
-              context.l10n.guardianMyInfoActiveBadge,
-              style: context.typo.bodySmall.copyWith(
-                color: colors.creditAccentText,
+          child: Row(
+            children: [
+              CharacterBadge(character: character, badgeSize: _badgeSize),
+              SizedBox(width: _badgeToName.w),
+              Expanded(
+                child: Text(
+                  profile.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.typo.myInfoElumiName.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
               ),
-            ),
-          AppPressable(
-            onTap: onEdit,
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: context.l10n.elumiInfoEditLabel(profile.displayName),
-            child: SizedBox(
-              width: _editTapSize.w,
-              height: _editTapSize.w,
-              child: Icon(
-                Icons.edit_outlined,
-                size: _editIconSize.w,
-                color: colors.textSecondary,
-              ),
-            ),
+              if (isActive) ...[
+                Text(
+                  context.l10n.guardianMyInfoActiveBadge,
+                  style: context.typo.bodySmall.copyWith(
+                    color: colors.creditAccentText,
+                  ),
+                ),
+                SizedBox(width: space.xs.w),
+              ],
+              const SettingsCardChevron(),
+            ],
           ),
-        ],
+        ),
       ),
     );
-    return onTap == null ? row : AppPressable(onTap: onTap, child: row);
   }
 }
