@@ -2790,7 +2790,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get talkAuthorFallback => '보호자';
 
   @override
-  String get talkNoteLabel => '이렇게 했어요';
+  String get talkNoteLabel => '내용';
 
   @override
   String get talkImportButtonShort => '내 일과로';

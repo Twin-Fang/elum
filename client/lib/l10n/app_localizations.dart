@@ -5060,10 +5060,10 @@ abstract class AppLocalizations {
   /// **'보호자'**
   String get talkAuthorFallback;
 
-  /// 글쓴이의 한마디 앞에 붙는 이름
+  /// 글쓴이 한마디 칸 이름 (올리기·고치기·상세)
   ///
   /// In ko, this message translates to:
-  /// **'이렇게 했어요'**
+  /// **'내용'**
   String get talkNoteLabel;
 
   /// 글 카드의 작은 버튼: 이 일과를 내 일과관리로 가져오기

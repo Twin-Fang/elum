@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../guardian/domain/routine_template.dart';
 import 'talk_choice_row.dart';
 
-/// 분류 고르기: 6개를 세로로, 칸마다 이름 + 한 줄 설명 (올리기·고치기가 함께 쓴다)
+/// 분류 고르기: 6개를 3×2 칸으로, 칸마다 이름만 (올리기·고치기가 함께 쓴다)
 class TalkCategoryPicker extends StatelessWidget {
   const TalkCategoryPicker({
     super.key,
@@ -22,24 +22,51 @@ class TalkCategoryPicker extends StatelessWidget {
   /// false 면 누를 수 없다 (보내는 중)
   final bool isEnabled;
 
+  // 한 줄에 놓는 칸 수
+  static const _columnCount = 3;
+
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final space = context.space;
+    const categories = RoutineTemplateCategory.values;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final category in RoutineTemplateCategory.values) ...[
-          TalkChoiceRow(
-            label: category.labelOf(l10n),
-            hint: category.hintOf(l10n),
-            isSelected: category == selectedCategory,
-            onTap: isEnabled ? () => onSelected(category) : null,
+        for (var start = 0; start < categories.length; start += _columnCount)
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: start + _columnCount < categories.length
+                  ? space.xs.h
+                  : 0,
+            ),
+            // 이름이 두 줄로 넘어가도 같은 줄 칸 높이를 맞춘다
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var column = 0; column < _columnCount; column++) ...[
+                    if (column > 0) SizedBox(width: space.xs.w),
+                    Expanded(
+                      child: start + column < categories.length
+                          ? _buildCell(context, categories[start + column])
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
-          SizedBox(height: space.xs.h),
-        ],
       ],
+    );
+  }
+
+  Widget _buildCell(BuildContext context, RoutineTemplateCategory category) {
+    return TalkChoiceRow(
+      label: category.labelOf(context.l10n),
+      isSelected: category == selectedCategory,
+      isLabelCentered: true,
+      onTap: isEnabled ? () => onSelected(category) : null,
     );
   }
 }
