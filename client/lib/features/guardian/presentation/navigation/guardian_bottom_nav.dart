@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import 'guardian_tab.dart';
 import 'guardian_tab_icon.dart';
+import 'guardian_tab_pressable.dart';
 
 /// 폰 보호자 하단 바: 아이콘 + 칸 이름 (시안 `네비게이션바` 1666:7082, #835)
 ///
@@ -61,7 +61,7 @@ class GuardianBottomNav extends StatelessWidget {
   }
 }
 
-/// 하단 바 칸 하나 (누름 영역 = 칸 전체, 고른 칸 · 아닌 칸은 색만 다름)
+/// 하단 바 칸 하나 (누름 영역 = 칸 전체, 눌림 · 고름 동작은 아이콘만, 고른 칸 · 아닌 칸은 색만 다름)
 class _BottomNavItem extends StatelessWidget {
   const _BottomNavItem({
     required this.tab,
@@ -82,11 +82,10 @@ class _BottomNavItem extends StatelessWidget {
     final label = tab.labelOf(context);
     return Semantics(
       selected: isSelected,
-      child: AppPressable(
+      child: GuardianTabPressable(
         onTap: onTap,
-        scaleDown: AppPressable.scaleIcon,
         semanticLabel: label,
-        child: Padding(
+        builder: (context, isPressed, selectionPlayCount) => Padding(
           padding: EdgeInsets.only(top: GuardianBottomNav._topPadding.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -96,16 +95,17 @@ class _BottomNavItem extends StatelessWidget {
                 tab: tab,
                 size: GuardianBottomNav._iconSize.w,
                 color: itemColor,
+                isPressed: isPressed,
+                selectionPlayCount: selectionPlayCount,
               ),
               SizedBox(height: GuardianBottomNav._iconLabelGap.h),
               // 큰 글자에서도 한 줄 유지 (칸 폭을 넘으면 줄여서 맞춤)
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
+                child: AnimatedDefaultTextStyle(
+                  duration: GuardianTabIcon.colorChangeDurationOf(context),
                   style: context.typo.bottomNavLabel.copyWith(color: itemColor),
+                  child: Text(label, maxLines: 1, softWrap: false),
                 ),
               ),
             ],

@@ -15,6 +15,7 @@ import '../widgets/notification_bell_button.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_tab.dart';
 import 'guardian_tab_icon.dart';
+import 'guardian_tab_pressable.dart';
 
 /// 태블릿 보호자 옆 메뉴: 로고 · 이룸이 카드 · 칸 4개 · 맨 아래 이룸이 화면 (#798 시안 T3)
 ///
@@ -162,7 +163,7 @@ class _ChildCard extends StatelessWidget {
   }
 }
 
-/// 옆 메뉴 칸 하나: 아이콘 + 이름, 고른 칸은 연한 보라 바탕
+/// 옆 메뉴 칸 하나: 아이콘 + 이름, 고른 칸은 연한 보라 바탕 (눌림 · 고름 동작은 아이콘만)
 class _SideNavItem extends StatelessWidget {
   const _SideNavItem({
     required this.tab,
@@ -181,13 +182,14 @@ class _SideNavItem extends StatelessWidget {
     final color = isSelected
         ? colors.navIconSelected
         : colors.navItemUnselected;
+    final colorChangeDuration = GuardianTabIcon.colorChangeDurationOf(context);
     return Semantics(
       selected: isSelected,
       button: true,
-      child: AppPressable(
+      child: GuardianTabPressable(
         onTap: onTap,
-        scaleDown: AppPressable.scaleCard,
-        child: DecoratedBox(
+        builder: (context, isPressed, selectionPlayCount) => AnimatedContainer(
+          duration: colorChangeDuration,
           decoration: BoxDecoration(
             color: isSelected ? colors.navSelectedFill : null,
             borderRadius: BorderRadius.circular(GuardianSideNav._itemRadius.w),
@@ -203,16 +205,21 @@ class _SideNavItem extends StatelessWidget {
                   tab: tab,
                   size: GuardianSideNav._itemIconSize.w,
                   color: color,
+                  isPressed: isPressed,
+                  selectionPlayCount: selectionPlayCount,
                 ),
                 SizedBox(width: space.sm.w),
                 Expanded(
-                  child: Text(
-                    tab.labelOf(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: AnimatedDefaultTextStyle(
+                    duration: colorChangeDuration,
                     style: context.typo.tileLabel.copyWith(
                       color: color,
                       fontWeight: isSelected ? FontWeight.w800 : null,
+                    ),
+                    child: Text(
+                      tab.labelOf(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),

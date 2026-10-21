@@ -67,6 +67,9 @@ abstract final class AppAssets {
   static const navComment = '$_navIcons/nav_comment.svg';
   static const navUser = '$_navIcons/nav_user.svg';
 
+  /// 일과 관리 칸을 고를 때 폴더 안에 그려졌다 사라지는 체크. 폴더(24×22)와 같은 viewBox라 그대로 겹친다
+  static const navFolderCheck = '$_navIcons/nav_folder_check.svg';
+
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
   /// 전용 그림 2종이 아직 없다. 도형을 코드로

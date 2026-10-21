@@ -53,6 +53,19 @@ class AppPressable extends StatefulWidget {
   /// 아이콘 버튼 (뒤로가기 등 작은 터치 영역)
   static const scaleIcon = 0.93;
 
+  /// 줄이지 않음 — 안쪽 그림이 눌림을 따로 보여 줄 때 (보호자 칸 아이콘 등)
+  static const scaleNone = 1.0;
+
+  /// 뗄 때 복귀 스프링. 안쪽 그림이 따로 눌림을 보여 줄 때도 같은 느낌으로 맞춘다.
+  ///
+  /// damping ratio = damping / (2 × √(mass × stiffness)) ≈ 0.65
+  /// 1.0 미만이라 복귀할 때 살짝 튕긴다.
+  static const releaseSpring = SpringDescription(
+    mass: 1,
+    stiffness: 300,
+    damping: 20,
+  );
+
   @override
   State<AppPressable> createState() => _AppPressableState();
 }
@@ -82,12 +95,8 @@ class _AppPressableState extends State<AppPressable>
 
   void _releaseWithSpring() {
     if (!_isEnabled || _reduceMotion) return;
-
-    // damping ratio = damping / (2 × √(mass × stiffness)) ≈ 0.65
-    // 1.0 미만이라 복귀할 때 살짝 튕긴다.
-    const spring = SpringDescription(mass: 1, stiffness: 300, damping: 20);
     _controller.animateWith(
-      SpringSimulation(spring, _controller.value, 1, 0),
+      SpringSimulation(AppPressable.releaseSpring, _controller.value, 1, 0),
     );
   }
 
