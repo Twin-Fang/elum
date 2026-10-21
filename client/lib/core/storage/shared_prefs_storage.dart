@@ -312,6 +312,13 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> clearNoticeHidden() async {
+    for (final key in _prefs.getKeys().where((k) => k.startsWith(_kNoticeHiddenPrefix)).toList()) {
+      await _prefs.remove(key);
+    }
+  }
+
+  @override
   bool get hasAskedPushPermission =>
       _prefs.getBool(_kHasAskedPushPermission) ?? false;
 

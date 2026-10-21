@@ -195,6 +195,14 @@ class PushMessageRouter {
     return _nextFallbackBannerId--;
   }
 
+  // 개발자 도구 흉내 (서버 발송 없이 이 기기에서만)
+
+  /// 받은 것처럼 배너 띄우기: 실제 배너와 같은 채널·payload > 누르면 실제 이동 경로
+  Future<void> showBannerAsReceived(PushMessage message) => _showBanner(message);
+
+  /// 배너를 누른 것처럼 바로 이동
+  void openAsTapped(PushMessage message) => _onTapped(message.data);
+
   // 누름 > 이동
 
   void _onMessageOpened(PushMessage message) => _onTapped(message.data);
