@@ -26,6 +26,8 @@ public class SmtpMailSenderFactory {
     Properties properties = sender.getJavaMailProperties();
     properties.setProperty("mail.smtp.auth", "true");
     properties.setProperty("mail.smtp.starttls.enable", "true");
+    // STARTTLS 없이 평문으로 계정이 넘어가지 않게 (다운그레이드 차단)
+    properties.setProperty("mail.smtp.starttls.required", "true");
     properties.setProperty("mail.smtp.connectiontimeout", CONNECTION_TIMEOUT_MILLISECONDS);
     properties.setProperty("mail.smtp.timeout", READ_TIMEOUT_MILLISECONDS);
     properties.setProperty("mail.smtp.writetimeout", WRITE_TIMEOUT_MILLISECONDS);
