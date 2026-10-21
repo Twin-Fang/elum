@@ -5,14 +5,16 @@
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
   <div th:replace="~{admin/fragments/admin-ui :: pageHeader('의견 관리',
-       '보호자가 앱에서 보낸 의견이에요. 지우기 전까지 남아요. 처리 상태를 바꿔 어디까지 봤는지 표시해요.')}"></div>
+       '보호자가 앱에서 보낸 의견이에요. 지우기 전까지 남아요. 처리 상태를 바꿔 어디까지 봤는지 표시하고, 기간·앱 버전·OS로 좁혀요.')}"></div>
 
   <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
   <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
 
   <div class="flex items-center gap-3 flex-wrap">
     <div th:replace="~{admin/fragments/admin-list :: filterBar(${definition}, ${query})}"></div>
-    <a th:href="@{/admin/feedback}" class="btn btn-ghost btn-sm">초기화</a>
+  </div>
+  <div class="flex items-center gap-3 flex-wrap">
+    <div th:replace="~{admin/fragments/admin-list :: csvExport(${csvExport})}"></div>
     <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${feedbacks.totalElements}">0</span>건</span>
   </div>
 
@@ -30,7 +32,12 @@
       </th:block>
       <tr th:each="f : ${feedbacks.content}">
         <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(f.createdAt)}">2026-10-08 10:00</td>
-        <td class="font-mono text-xs" th:text="${#strings.abbreviate(f.memberId, 8)}">abcd1234</td>
+        <td class="text-xs">
+          <a th:href="@{/admin/members/{id}(id=${f.memberId})}" class="link link-hover font-mono"
+             th:title="${f.memberId}" th:text="${#strings.abbreviate(f.memberId, 8)}">abcd1234</a>
+          <div class="text-base-content/60 whitespace-nowrap" th:if="${f.appVersion != null or f.os != null}"
+               th:text="${f.appVersion ?: '-'} + ' · ' + ${f.os ?: '-'}">1.0.30 · ios 17.5</div>
+        </td>
         <td class="wrap-anywhere" style="min-width:12rem">
           <a th:href="@{/admin/feedback/{id}(id=${f.id})}" class="link link-hover"
              th:text="${#strings.abbreviate(f.message, 40)}">의견</a>

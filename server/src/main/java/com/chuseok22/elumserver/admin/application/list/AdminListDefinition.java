@@ -22,16 +22,60 @@ public record AdminListDefinition(
   public record Column(String key, String label, boolean isSortable) {
   }
 
-  /** 칩 필터: options 가 비어 있으면 값 제한 없는 자유 입력 필터 */
-  public record Filter(String key, String label, List<Option> options) {
+  /**
+   * 필터: options 가 있으면 칩, 비어 있으면 값 제한 없는 자유 입력 필터
+   * inputType 이 TEXT·DATE 면 필터 바가 입력 칸을 그림 (NONE 은 화면이 직접 그리거나 숨은 값으로만 유지)
+   */
+  public record Filter(String key, String label, List<Option> options, InputType inputType) {
 
     public Filter {
       options = options == null ? List.of() : List.copyOf(options);
+      inputType = inputType == null ? InputType.NONE : inputType;
+    }
+
+    public Filter(String key, String label, List<Option> options) {
+      this(key, label, options, InputType.NONE);
+    }
+
+    /// 날짜 입력 필터 (yyyy-MM-dd, 형식이 틀리면 보정 단계에서 빠짐)
+    public static Filter date(String key, String label) {
+      return new Filter(key, label, List.of(), InputType.DATE);
+    }
+
+    /// 글자 입력 필터 (최대 AdminListQuery.MAX_KEYWORD_LENGTH 자)
+    public static Filter text(String key, String label) {
+      return new Filter(key, label, List.of(), InputType.TEXT);
     }
 
     public boolean isAllowedValue(String value) {
+      if (inputType == InputType.DATE) {
+        return AdminDateParameter.parseOrNull(value) != null;
+      }
       return options.isEmpty() || options.stream().anyMatch(option -> option.value().equals(value));
     }
+
+    /// 필터 바가 입력 칸(글자·날짜)을 그리는 필터인가
+    public boolean hasInputField() {
+      return inputType != InputType.NONE;
+    }
+
+    public boolean isDateInput() {
+      return inputType == InputType.DATE;
+    }
+
+    /// 적용된 값 > 칩에 보일 글 (선택지면 선택지 이름, 아니면 값 그대로)
+    public String displayValueOf(String value) {
+      return options.stream()
+        .filter(option -> option.value().equals(value))
+        .map(Option::label)
+        .findFirst()
+        .orElse(value);
+    }
+  }
+
+  /// 필터 입력 방식: NONE 칩·숨은 값, TEXT 글자 칸, DATE 날짜 칸
+  public enum InputType {
+    NONE, TEXT, DATE
   }
 
   public record Option(String value, String label) {
@@ -45,6 +89,11 @@ public record AdminListDefinition(
     if (!isValidSort(columns, defaultSort)) {
       throw new IllegalArgumentException("defaultSort must be a sortable column: " + defaultSort);
     }
+  }
+
+  /// 키 > 필터 (없으면 null: 화면이 적용된 필터 칩 이름을 찾을 때)
+  public Filter filterOf(String key) {
+    return filters.stream().filter(filter -> filter.key().equals(key)).findFirst().orElse(null);
   }
 
   public boolean isValidSort(String sort) {

@@ -34,8 +34,28 @@ public record SettingRow(
   boolean hasHistory,
   LocalDateTime lastChangedAt,
   String lastChangedBy,
-  String lastReason
+  String lastReason,
+  /** 문자열 형식 규칙 이름 (ConfigFormat, 회원 고르기 위젯 구분) */
+  String formatName,
+  /** 입력 형식 안내 (없으면 빈 값) */
+  String formatHint,
+  /** 저장값이 지금 규칙에 어긋난 이유 (맞으면 null) */
+  String validationWarning,
+  /** 지금 적용 값의 출처 표시 이름 (DB 저장값·배포 설정(yml)·코드 기본값) */
+  String valueSourceLabel,
+  /** 배포 설정(yml)에 묶인 키의 yml 값 (묶이지 않았으면 null) */
+  String deployPropertyValue
 ) {
+
+  /** "규칙에 어긋남" 배지·칩 */
+  public boolean hasValidationWarning() {
+    return validationWarning != null && !validationWarning.isBlank();
+  }
+
+  /** yml 에 묶인 키(모델명 3개)만 출처·yml 값을 보여 줌 */
+  public boolean hasDeployProperty() {
+    return deployPropertyValue != null;
+  }
 
   /** 입력 위젯 구분: 불리언은 토글, 날짜시간은 날짜 선택기 */
   public boolean isBoolean() {

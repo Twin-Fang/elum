@@ -21,6 +21,8 @@ public enum ConfigGroup {
   // 구독 행이 없는 새 회원에게 기간 한정으로 Pro 를 주는 이벤트.
   SIGNUP_PRO_EVENT("신규가입 PRO 이벤트"),
   AI_BUDGET("AI 비용 상한"),
+  // 호출 비용·남용 방지 한도: 요청 간격, 창당 횟수, 동시 실행 수.
+  USAGE_LIMIT("사용 한도·남용 방지"),
   APP_CONTROL("앱 점검·버전"),
   // 앱이 서버에서 받아 쓰는 시간값. 서버가 주므로 바꿔도 앱을 다시 빌드하지 않는다.
   APP_TUNING("앱 대기·연출 시간"),

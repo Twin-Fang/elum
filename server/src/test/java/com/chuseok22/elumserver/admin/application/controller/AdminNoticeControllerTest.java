@@ -14,13 +14,16 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
+import com.chuseok22.elumserver.notice.application.service.NoticeAdminSearch;
 import com.chuseok22.elumserver.notice.application.service.NoticeService;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,20 +79,31 @@ class AdminNoticeControllerTest {
     return notice;
   }
 
+  /// 요청 파라미터 맵 (키, 값 번갈아)
+  private static Map<String, String> parameters(String... keyValues) {
+    Map<String, String> parameters = new LinkedHashMap<>();
+    for (int index = 0; index < keyValues.length; index += 2) {
+      parameters.put(keyValues[index], keyValues[index + 1]);
+    }
+    return parameters;
+  }
+
   private void stubSearch(Page<AppNotice> page) {
     when(noticeService.search(any(), any(Pageable.class))).thenReturn(page);
   }
 
   @Test
-  @DisplayName("목록은 검색·정렬·페이지를 서비스 조건으로 옮기고 행마다 서버 시계로 판단한 상태를 담는다")
+  @DisplayName("목록은 검색·상태·대상·기간·정렬·페이지를 서비스 조건으로 옮기고 행마다 서버 시계로 판단한 상태를 담는다")
   void list_translatesConditions() {
     AppNotice live = stored("n1");
     stubSearch(new PageImpl<>(List.of(live), PageRequest.of(1, 20), 25));
 
-    String view = controller.list("100%", "title,asc", "2", model);
+    String view = controller.list(parameters("q", "100%", "status", "LIVE", "platform", "IOS",
+      "from", "2026-09-01", "to", "2026-09-30", "sort", "title,asc", "page", "2"), model);
 
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    verify(noticeService).search(eq("%100\\%%"), pageable.capture());
+    verify(noticeService).search(eq(new NoticeAdminSearch("%100\\%%", NoticeStatus.LIVE, NoticePlatform.IOS,
+      LocalDateTime.of(2026, 9, 1, 0, 0), LocalDateTime.of(2026, 10, 1, 0, 0))), pageable.capture());
     assertThat(view).isEqualTo("admin/notices");
     assertThat(pageable.getValue().getPageNumber()).isEqualTo(1);
     assertThat(pageable.getValue().getPageSize()).isEqualTo(AdminListDefaults.PAGE_SIZE);
@@ -98,7 +112,8 @@ class AdminNoticeControllerTest {
     List<AdminNoticeRow> rows = (List<AdminNoticeRow>) model.get("rows");
     assertThat(rows).hasSize(1);
     assertThat(rows.get(0).status()).isEqualTo(NoticeStatus.LIVE);
-    assertThat(model.get("pagerBaseUrl")).isEqualTo("/admin/notices?q=100%25&sort=title,asc");
+    assertThat(model.get("pagerBaseUrl")).isEqualTo(
+      "/admin/notices?q=100%25&status=LIVE&platform=IOS&from=2026-09-01&to=2026-09-30&sort=title,asc");
   }
 
   @Test
@@ -106,10 +121,10 @@ class AdminNoticeControllerTest {
   void list_invalidConditionsFallBack() {
     stubSearch(new PageImpl<>(List.of()));
 
-    controller.list(null, "body,asc", "abc", model);
+    controller.list(parameters("status", "GONE", "platform", "WEB", "sort", "body,asc", "page", "abc"), model);
 
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    verify(noticeService).search(eq(null), pageable.capture());
+    verify(noticeService).search(eq(NoticeAdminSearch.none()), pageable.capture());
     assertThat(pageable.getValue().getPageNumber()).isZero();
     assertThat(pageable.getValue().getSort().toString()).startsWith("updatedAt: DESC");
     assertThat(model.get("previewJson")).isNotNull();
@@ -123,7 +138,7 @@ class AdminNoticeControllerTest {
       return new PageImpl<AppNotice>(requested.getPageNumber() == 2 ? List.of(stored("n1")) : List.of(), requested, 41);
     });
 
-    controller.list(null, null, "9", model);
+    controller.list(parameters("page", "9"), model);
 
     assertThat(((Page<?>) model.get("notices")).getNumber()).isEqualTo(2);
   }
@@ -257,7 +272,7 @@ class AdminNoticeControllerTest {
     ended.setEndsAt(LocalDateTime.of(2026, 9, 23, 11, 0));
     stubSearch(new PageImpl<>(List.of(now, tomorrow, ended)));
 
-    controller.list(null, null, null, model);
+    controller.list(parameters(), model);
 
     @SuppressWarnings("unchecked")
     List<AdminNoticeRow> rows = (List<AdminNoticeRow>) model.get("rows");

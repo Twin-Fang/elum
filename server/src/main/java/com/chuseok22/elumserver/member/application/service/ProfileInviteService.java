@@ -21,6 +21,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRe
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,15 @@ public class ProfileInviteService {
   private final GuardianshipService guardianshipService;
   private final ProfileInviteRateLimiter rateLimiter;
   private final ApplicationEventPublisher eventPublisher;
+
+  /** 관리자 회원 상세: 이룸이들의 초대 코드 전부 (최신순, 코드 원문 없음) */
+  @Transactional(readOnly = true)
+  public List<ProfileInvite> invitesOf(Collection<String> profileIds) {
+    if (profileIds == null || profileIds.isEmpty()) {
+      return List.of();
+    }
+    return profileInviteRepository.findAllByProfileIdInOrderByCreatedAtDesc(profileIds);
+  }
 
   /**
    * 초대 코드를 새로 낸다.

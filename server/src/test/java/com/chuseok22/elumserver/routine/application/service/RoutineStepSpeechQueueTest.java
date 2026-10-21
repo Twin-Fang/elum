@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.infrastructure.client.SupertonicTtsClient;
 import com.chuseok22.elumserver.common.infrastructure.properties.TtsProperties;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineStepSpeechStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -46,7 +47,7 @@ class RoutineStepSpeechQueueTest {
   void setUp() {
     lenient().when(supertonicTtsClient.isAvailable()).thenReturn(true);
     queue = new RoutineStepSpeechQueue(filler, storage, new TtsProperties(true, "x"), supertonicTtsClient,
-      executor, Clock.fixed(now, ZoneOffset.UTC));
+      executor, Clock.fixed(now, ZoneOffset.UTC), UsageLimitSettings.fromDefaults()::ttsFailureCooldown);
   }
 
   @Test
@@ -120,7 +121,8 @@ class RoutineStepSpeechQueueTest {
     executor.runAll();
 
     RoutineStepSpeechQueue later = new RoutineStepSpeechQueue(filler, storage, new TtsProperties(true, "x"),
-      supertonicTtsClient, executor, Clock.fixed(now.plus(Duration.ofMinutes(31)), ZoneOffset.UTC));
+      supertonicTtsClient, executor, Clock.fixed(now.plus(Duration.ofMinutes(31)), ZoneOffset.UTC),
+      UsageLimitSettings.fromDefaults()::ttsFailureCooldown);
 
     assertThat(later.isCoolingDown("step-1")).isFalse();
   }

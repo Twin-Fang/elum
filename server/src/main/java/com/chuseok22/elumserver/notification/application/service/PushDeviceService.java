@@ -10,6 +10,8 @@ import com.chuseok22.elumserver.notification.infrastructure.repository.PushDevic
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +54,14 @@ public class PushDeviceService {
     device.setLocale(CurrentLocale.get());
     device.setLastRegisteredAt(LocalDateTime.now(clock));
     pushDeviceRepository.save(device);
+  }
+
+  /// 관리자 회원 상세: 이 회원의 푸시 기기 전부 (마지막 등록 최신순)
+  @Transactional(readOnly = true)
+  public List<PushDevice> devicesOf(String memberId) {
+    return pushDeviceRepository.findAllByMemberId(memberId).stream()
+      .sorted(Comparator.comparing(PushDevice::getLastRegisteredAt, Comparator.nullsLast(Comparator.reverseOrder())))
+      .toList();
   }
 
   /// 기기 해제: 내 토큰일 때만 지운다 (남의 토큰·없는 토큰은 아무 일 없음)

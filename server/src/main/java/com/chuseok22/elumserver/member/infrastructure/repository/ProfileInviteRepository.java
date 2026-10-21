@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.infrastructure.repository;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileInvite;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,6 +43,9 @@ public interface ProfileInviteRepository extends JpaRepository<ProfileInvite, St
   /** 이 사람이 이 이룸이에 낸 코드 중 지금 넣을 수 있는 것(미사용·미폐기·만료 전). 가장 늦게 만료되는 것이 앞에 온다. */
   Optional<ProfileInvite> findFirstByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNullAndExpiresAtAfterOrderByExpiresAtDesc(
     String profileId, String issuedBy, LocalDateTime now);
+
+  /** 관리자 회원 상세: 이룸이들의 초대 코드 전부 (최신순) */
+  List<ProfileInvite> findAllByProfileIdInOrderByCreatedAtDesc(Collection<String> profileIds);
 
   /** 이룸이를 지울 때 그 이룸이의 초대 코드를 모두 치운다. 쓰인 기록까지 — 이룸이가 없으면 의미가 없다. */
   void deleteAllByProfileId(String profileId);

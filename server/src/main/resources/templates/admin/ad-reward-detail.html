@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('광고 보상 상세', 'ad-rewards', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6"
+      th:with="row=${detail.row()}, adSession=${detail.row().session()}">
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-bold">광고 보상 세션</h1>
+      <span class="badge" th:classappend="${row.statusBadgeClass()}" th:text="${row.statusLabel()}"
+            data-ad-reward-status>지급</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a th:href="@{/admin/ad-rewards(memberId=${adSession.memberId()})}" class="btn btn-outline btn-sm">이 회원의 세션</a>
+      <a th:href="@{/admin/ad-rewards}" class="btn btn-ghost btn-sm">목록으로</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">회원</div>
+      <div class="stat-value text-lg wrap-anywhere"
+           th:text="${row.memberDisplayName() != null ? #strings.abbreviate(row.memberDisplayName(), 20) : '(없는 회원)'}">닉네임</div>
+      <div class="stat-desc">
+        <a th:href="@{/admin/members/{id}(id=${adSession.memberId()})}" class="link link-hover">회원 상세</a>
+        · <a th:href="@{/admin/credits/members/{id}(id=${adSession.memberId()})}" class="link link-hover">크레딧 원장</a>
+      </div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">결과</div>
+      <div class="stat-value text-lg" th:text="${row.statusLabel()}">지급</div>
+      <div class="stat-desc wrap-anywhere"
+           th:classappend="${adSession.effectiveStatus().name() == 'REJECTED'} ? 'text-error' : ''"
+           th:text="${row.reasonLabel() != null ? row.reasonLabel() : '-'}">사유</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">지급 크레딧</div>
+      <div class="stat-value text-lg" th:classappend="${adSession.grantedCredits() > 0} ? 'text-success' : ''"
+           th:text="${adSession.grantedCredits() > 0 ? '+' + adSession.grantedCredits() : '0'}">+1</div>
+      <div class="stat-desc" th:text="${@adminDate.format(adSession.grantedAt())}">2026-10-21 10:01</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">만든 때</div>
+      <div class="stat-value text-lg" th:text="${@adminDate.format(adSession.createdAt())}">2026-10-21 10:00</div>
+      <div class="stat-desc" th:text="'유효 시간 끝 ' + ${@adminDate.format(adSession.expiresAt())}">유효 시간 끝</div>
+    </div>
+  </div>
+
+  <!-- 타임라인: 세션 생성 > 콜백 수신 > 지급·거절·만료 (콜백이 없으면 유효 시간 끝) -->
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-3">
+      <h2 class="card-title text-lg">흐름</h2>
+      <ul class="space-y-3" data-ad-reward-timeline>
+        <li th:each="event : ${detail.timeline()}" class="flex items-start gap-3">
+          <span class="badge badge-xs mt-1"
+                th:classappend="${event.tone() == 'neutral'} ? 'badge-ghost' : ('badge-' + ${event.tone()})"></span>
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-semibold" th:text="${event.title()}">세션 생성</span>
+              <span class="text-xs text-base-content/60" th:text="${@adminDate.format(event.at())}">2026-10-21 10:00</span>
+              <span th:if="${event.isExpected()}" class="badge badge-outline badge-sm">예정</span>
+            </div>
+            <div class="text-sm text-base-content/70" th:text="${event.description()}">설명</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 콜백 결과·지급 내역: 비밀에 가까운 값(nonce·transaction id)은 앞 6자만 (서버 로그 미리보기와 같은 길이) -->
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <h2 class="card-title text-lg">콜백 결과 · 지급 내역</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <tbody>
+          <tr>
+            <th>세션 ID</th>
+            <td class="font-mono text-xs wrap-anywhere" th:text="${adSession.id()}">id</td>
+          </tr>
+          <tr>
+            <th>nonce</th>
+            <td class="font-mono text-xs" th:text="${row.noncePreview()}">abc123…</td>
+          </tr>
+          <tr>
+            <th>콜백 받은 때</th>
+            <td th:if="${adSession.hasCallback()}" th:text="${@adminDate.format(adSession.callbackReceivedAt())}">2026-10-21 10:01</td>
+            <td th:unless="${adSession.hasCallback()}" class="text-base-content/60"
+                th:text="${adSession.isExpiredWithoutCallback()} ? '받지 않음 (유효 시간 안에 오지 않았어요)' : '아직 받지 않음'">받지 않음</td>
+          </tr>
+          <tr>
+            <th>Google transaction ID</th>
+            <td class="font-mono text-xs" th:text="${row.transactionIdPreview()}">tx1234…</td>
+          </tr>
+          <tr>
+            <th>결과</th>
+            <td>
+              <span class="badge badge-sm" th:classappend="${row.statusBadgeClass()}" th:text="${row.statusLabel()}">지급</span>
+              <span th:if="${row.reasonLabel() != null}" class="text-sm"
+                    th:classappend="${adSession.effectiveStatus().name() == 'REJECTED'} ? 'text-error' : 'text-warning'"
+                    th:text="${row.reasonLabel()}">사유</span>
+            </td>
+          </tr>
+          <tr>
+            <th>지급 시각</th>
+            <td th:text="${@adminDate.format(adSession.grantedAt())}">2026-10-21 10:01</td>
+          </tr>
+          <tr>
+            <th>지급 크레딧</th>
+            <td th:text="${adSession.grantedCredits()} + '개'">1개</td>
+          </tr>
+          <tr>
+            <th>적립 묶음 ID</th>
+            <td>
+              <span th:if="${adSession.grantId() != null}" class="font-mono text-xs" th:title="${adSession.grantId()}"
+                    th:text="${#strings.abbreviate(adSession.grantId(), 14)}">grant-id</span>
+              <a th:if="${adSession.grantId() != null}" th:href="@{/admin/credits/members/{id}(id=${adSession.memberId()})}"
+                 class="link link-hover text-sm">크레딧 원장에서 보기</a>
+              <span th:if="${adSession.grantId() == null}" class="text-base-content/40">-</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">
+        광고 단위·콜백 원문·광고 사용자 ID 는 세션에 저장하지 않아요. 지급량은 Google 이 보낸 값이 아니라 서버 설정으로 정해요.
+      </p>
+    </div>
+  </div>
+</main>
+</body>
+</html>

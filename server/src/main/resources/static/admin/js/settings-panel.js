@@ -48,6 +48,10 @@
     var form = panel.querySelector('[data-panel-form]');
     var widget = panel.querySelector('[data-panel-widget]');
     var historyBox = panel.querySelector('[data-panel-history]');
+    var hintText = panel.querySelector('[data-panel-hint]');
+    var errorText = panel.querySelector('[data-panel-error]');
+    var warningBox = panel.querySelector('[data-panel-warning]');
+    var sourceBox = panel.querySelector('[data-panel-source]');
     var reasonInput = form.querySelector('input[name=reason]');
     var saveButton = form.querySelector('button[type=submit]');
     var openKey = null;
@@ -63,6 +67,11 @@
       var current = row.getAttribute('data-current') || '';
       widget.textContent = '';
       var input;
+      // 회원 ID 목록: 검색해서 고르는 위젯 (스크립트가 없으면 아래 글 입력으로)
+      if (row.getAttribute('data-format') === 'MEMBER_ID_LIST' && window.elumSettingsMemberPicker) {
+        window.elumSettingsMemberPicker.build(widget, current);
+        return;
+      }
       if (type === 'BOOLEAN') {
         // 토글: 체크 상태를 숨은 값(true/false)으로 보냄
         var hidden = element('input');
@@ -158,6 +167,36 @@
         });
     }
 
+    // --- 안내·경고·저장 실패 이유 ---
+    // 입력 안내: 정수는 허용 범위, 문자열은 형식
+    function hintOf(row) {
+      var min = row.getAttribute('data-min');
+      var max = row.getAttribute('data-max');
+      if (row.getAttribute('data-type') === 'INTEGER' && (min !== null || max !== null)) {
+        return '허용 범위 ' + (min !== null ? min : '') + ' ~ ' + (max !== null ? max : '');
+      }
+      var formatHint = row.getAttribute('data-format-hint');
+      return formatHint ? '형식: ' + formatHint : '';
+    }
+
+    function showError(message) {
+      errorText.textContent = message || '';
+      errorText.classList.toggle('hidden', !message);
+    }
+
+    // yml 에 묶인 모델명 키만: 실제 적용 값과 출처 (DB 값이 있으면 yml 값은 쓰지 않음)
+    function fillSource(row) {
+      var deployValue = row.getAttribute('data-deploy-value');
+      sourceBox.textContent = '';
+      sourceBox.classList.toggle('hidden', deployValue === null);
+      if (deployValue === null) return;
+      sourceBox.appendChild(element('div', 'font-medium',
+        '실제 적용 값: ' + (row.getAttribute('data-current') || '-') + ' · 출처: ' + row.getAttribute('data-source')));
+      sourceBox.appendChild(element('div', 'text-base-content/60',
+        '배포 설정(yml) 값: ' + deployValue + ' — DB 에 값이 있으면 yml 값은 쓰지 않아요. '
+        + '기본값으로 복원하면 지금 yml 값을 저장해요.'));
+    }
+
     // --- 열기·닫기 ---
     function fillPanel(row) {
       panel.querySelector('[data-panel-label]').textContent = row.getAttribute('data-label');
@@ -169,6 +208,12 @@
       panel.querySelector('[data-panel-reset]').textContent =
         row.getAttribute('data-secret') === 'true' ? '저장한 값 지우기' : '기본값으로 복원';
       buildWidget(row);
+      hintText.textContent = hintOf(row);
+      var warning = row.getAttribute('data-warning') === 'true' ? row.getAttribute('data-warning-text') : '';
+      warningBox.textContent = warning ? '지금 저장된 값이 규칙에 어긋나요: ' + warning + '. 고쳐서 다시 저장해 주세요.' : '';
+      warningBox.classList.toggle('hidden', !warning);
+      fillSource(row);
+      showError('');
     }
 
     function openPanel(key) {
@@ -245,6 +290,9 @@
         });
     }
 
+    // 값을 고치기 시작하면 지난 저장 실패 이유는 지움
+    form.addEventListener('input', function () { showError(''); });
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (!openKey) return;
@@ -256,6 +304,8 @@
         .then(function (response) { return response.json(); })
         .then(function (result) {
           if (!result.ok) {
+            // 입력칸 옆에 이유 (입력값은 그대로 두고 고쳐서 다시 저장)
+            showError(result.reason || result.message);
             showToast(false, result.message, panel);
             return null;
           }

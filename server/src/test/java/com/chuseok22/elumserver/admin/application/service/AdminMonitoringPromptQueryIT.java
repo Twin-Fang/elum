@@ -99,6 +99,34 @@ class AdminMonitoringPromptQueryIT {
   }
 
   @Test
+  @DisplayName("모델명·오류 메시지는 대소문자 무시 포함 검색, 회원 검색은 회원 ID 그대로도 찾는다 (서브쿼리가 실제 SQL 로 돈다)")
+  void modelErrorAndMemberSearchWork() {
+    AiCallLog gemini = newCall(AiCallType.GEMINI_TEXT_CREATE, false);
+    gemini.setModel("gemini-2.5-flash");
+    gemini.setErrorMessage("Read TIMEOUT after 30s");
+    aiCallLogRepository.save(gemini);
+    AiCallLog openAi = newCall(AiCallType.GEMINI_IMAGE, true);
+    openAi.setModel("gpt-image-1-mini");
+    aiCallLogRepository.save(openAi);
+
+    assertThat(searchBy(Map.of("model", "GEMINI"))).containsExactly(gemini.getId());
+    assertThat(searchBy(Map.of("error", "timeout"))).containsExactly(gemini.getId());
+    assertThat(searchBy(Map.of("model", "100%"))).isEmpty();
+    // 회원 ID 를 회원 칸에 그대로 넣어도 찾고, 없는 아이디·이메일 일부면 비어 있다
+    assertThat(searchBy(Map.of("member", memberId))).containsExactlyInAnyOrder(gemini.getId(), openAi.getId());
+    assertThat(searchBy(Map.of("member", "no-such-" + memberId))).isEmpty();
+  }
+
+  // 이 시험 회원으로 한정한 채 추가 필터만 바꿔 조회
+  private List<String> searchBy(Map<String, String> extraFilters) {
+    Map<String, String> filters = new HashMap<>(extraFilters);
+    filters.put("memberId", memberId);
+    AdminListQuery query = AdminMonitoringList.withCorrectedPeriod(
+      AdminListQuery.of(null, filters, null, null, AdminMonitoringList.DEFINITION), LocalDate.now());
+    return adminMonitoringService.search(query).getContent().stream().map(AiCallLog::getId).toList();
+  }
+
+  @Test
   @DisplayName("프롬프트를 저장하면 이력에 changed_by 가 채워지고, 키별 최근 수정자로 읽힌다")
   void promptChangedByIsRecorded() {
     PromptKey key = PromptKey.GEMINI_ROUTINE_CREATE_PREFIX;

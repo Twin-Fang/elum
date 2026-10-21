@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.link.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,18 +23,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedeemRateLimiter {
 
-  /** 사람이 받아적어 넣는 속도로는 넉넉하다. */
-  private static final int MAX_PER_WINDOW = 10;
-
+  // 한도: 설정 LINK_REDEEM_LIMIT_PER_MINUTE (기본 10번). 창 길이는 키 이름의 "분"과 함께 바꾼다
   private static final Duration WINDOW = Duration.ofMinutes(1);
   private static final String KEY_PREFIX = "link-redeem:";
 
   private final SharedStateStore sharedStateStore;
+  private final UsageLimitSettings usageLimitSettings;
 
   /** 시도해도 되면 true. 창 안에서 한도를 넘었으면 false. */
   public boolean tryAcquire(String caller) {
     boolean allowed = sharedStateStore.tryRecordInWindow(
-      KEY_PREFIX + caller, WINDOW, MAX_PER_WINDOW, System.currentTimeMillis());
+      KEY_PREFIX + caller, WINDOW, usageLimitSettings.linkRedeemLimitPerMinute(), System.currentTimeMillis());
     if (!allowed) {
       log.warn("연결 암호 시도가 너무 잦습니다: caller={}", caller);
     }

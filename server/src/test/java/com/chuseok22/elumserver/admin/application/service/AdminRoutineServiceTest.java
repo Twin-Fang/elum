@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,9 @@ class AdminRoutineServiceTest {
   @Mock private MemberRepository memberRepository;
   @InjectMocks private AdminRoutineService adminRoutineService;
 
-  private record SearchCall(boolean hasKeyword, String pattern, Collection<RoutineStatus> statuses, Pageable pageable) {
+  private record SearchCall(boolean hasKeyword, String pattern, Collection<RoutineStatus> statuses,
+                            LocalDateTime scheduledFrom, LocalDateTime scheduledToExclusive,
+                            boolean hasGuardian, String guardianId, String guardianPattern, Pageable pageable) {
   }
 
   private AdminListQuery query(String q, Map<String, String> filters, String sort, String page) {
@@ -51,16 +54,25 @@ class AdminRoutineServiceTest {
   }
 
   private SearchCall searchAndCapture(AdminListQuery query) {
-    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(Pageable.class)))
-      .thenReturn(new PageImpl<>(List.of()));
+    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), anyBoolean(), any(), any(),
+      any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
     adminRoutineService.search(query);
     ArgumentCaptor<Boolean> hasKeyword = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<String> pattern = ArgumentCaptor.forClass(String.class);
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Collection<RoutineStatus>> statuses = ArgumentCaptor.forClass(Collection.class);
+    ArgumentCaptor<LocalDateTime> scheduledFrom = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<LocalDateTime> scheduledTo = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<Boolean> hasGuardian = ArgumentCaptor.forClass(Boolean.class);
+    ArgumentCaptor<String> guardianId = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> guardianPattern = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    verify(routineRepository).searchForAdmin(hasKeyword.capture(), pattern.capture(), statuses.capture(), pageable.capture());
-    return new SearchCall(hasKeyword.getValue(), pattern.getValue(), statuses.getValue(), pageable.getValue());
+    verify(routineRepository).searchForAdmin(hasKeyword.capture(), pattern.capture(), statuses.capture(),
+      scheduledFrom.capture(), scheduledTo.capture(), hasGuardian.capture(), guardianId.capture(),
+      guardianPattern.capture(), pageable.capture());
+    return new SearchCall(hasKeyword.getValue(), pattern.getValue(), statuses.getValue(), scheduledFrom.getValue(),
+      scheduledTo.getValue(), hasGuardian.getValue(), guardianId.getValue(), guardianPattern.getValue(),
+      pageable.getValue());
   }
 
   private Routine routine(String id, String createdBy) {
@@ -122,17 +134,37 @@ class AdminRoutineServiceTest {
   }
 
   @Test
+  @DisplayName("보호자 필터는 회원 ID 원문과 이스케이프된 포함 패턴을, 예정일은 시작 0시·끝 다음 날 0시를 넘긴다")
+  void guardianAndScheduledFilters_translateToQueryArguments() {
+    SearchCall filtered = searchAndCapture(query(null,
+      Map.of("guardian", "kim_", "scheduledFrom", "2026-10-01", "scheduledTo", "2026-10-02"), null, null));
+    assertThat(filtered.hasGuardian()).isTrue();
+    assertThat(filtered.guardianId()).isEqualTo("kim_");
+    assertThat(filtered.guardianPattern()).isEqualTo("%kim\\_%");
+    assertThat(filtered.scheduledFrom()).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
+    assertThat(filtered.scheduledToExclusive()).isEqualTo(LocalDateTime.of(2026, 10, 3, 0, 0));
+
+    Mockito.clearInvocations(routineRepository);
+    SearchCall none = searchAndCapture(query(null, Map.of("scheduledFrom", "어제"), null, null));
+    assertThat(none.hasGuardian()).isFalse();
+    assertThat(none.guardianId()).isEmpty();
+    assertThat(none.scheduledFrom()).isEqualTo(LocalDateTime.of(2000, 1, 1, 0, 0));
+  }
+
+  @Test
   @DisplayName("범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회한다")
   void pageBeyondLast_requeriesLastPage() {
     Page<Routine> empty = new PageImpl<>(List.of(), PageRequest.of(8, 20), 41);
     Page<Routine> last = new PageImpl<>(List.of(), PageRequest.of(2, 20), 41);
-    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(Pageable.class))).thenReturn(empty, last);
+    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), anyBoolean(), any(), any(),
+      any(Pageable.class))).thenReturn(empty, last);
 
     Page<AdminRoutineResponse> result = adminRoutineService.search(query(null, Map.of(), null, "9"));
 
     assertThat(result.getNumber()).isEqualTo(2);
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    verify(routineRepository, times(2)).searchForAdmin(anyBoolean(), any(), any(), pageable.capture());
+    verify(routineRepository, times(2)).searchForAdmin(anyBoolean(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), pageable.capture());
     assertThat(pageable.getAllValues().get(1).getPageNumber()).isEqualTo(2);
   }
 
@@ -142,7 +174,8 @@ class AdminRoutineServiceTest {
     Member member = new Member();
     member.setId("m1");
     member.setUsername("parent1");
-    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(Pageable.class)))
+    when(routineRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), anyBoolean(), any(), any(),
+      any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(routine("r1", "m1"), routine("r2", "m1"), routine("r3", "gone"))));
     when(memberRepository.findAllById(any())).thenReturn(List.of(member));
 

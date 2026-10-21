@@ -78,6 +78,21 @@ public class ProfileGuardianService {
       .toList();
   }
 
+  /** 관리자 회원 상세: 이 보호자의 이룸이 관계 전부, 이룸이까지 채워서 (먼저 합류한 차례) */
+  @Transactional(readOnly = true)
+  public List<ProfileGuardian> guardianshipsWithProfileOf(String memberId) {
+    return profileGuardianRepository.findAllWithProfileByMemberIdIn(List.of(memberId));
+  }
+
+  /** 관리자 회원 상세: 이룸이들을 함께 돌보는 사람 전부, 계정까지 채워서 (먼저 합류한 차례) */
+  @Transactional(readOnly = true)
+  public List<ProfileGuardian> guardiansWithMemberOf(Collection<String> profileIds) {
+    if (profileIds == null || profileIds.isEmpty()) {
+      return List.of();
+    }
+    return profileGuardianRepository.findAllWithMemberByProfileIdIn(profileIds);
+  }
+
   /** 함께하는 사람 목록, 먼저 합류한 차례. */
   @Transactional(readOnly = true)
   public GuardianListResponse list(Caller caller, String profileId) {

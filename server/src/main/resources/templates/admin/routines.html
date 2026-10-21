@@ -8,12 +8,11 @@
     <div>
       <h1 class="text-2xl font-bold">루틴 관리</h1>
       <!-- 원문은 검색 대상이 아니다 — 보호자가 적은 말 그대로라 들여다보는 통로가 된다. -->
-      <p class="text-base-content/60">제목·이룸이 호칭 검색과 상태 필터로 찾습니다. 열 이름을 누르면 정렬해요.</p>
+      <p class="text-base-content/60">제목·이룸이 호칭 검색과 상태·보호자(아이디·닉네임·회원 ID)·예정일 필터로 찾습니다. 열 이름을 누르면 정렬해요.</p>
     </div>
 
     <div class="flex items-center gap-3 flex-wrap">
       <div th:replace="~{admin/fragments/admin-list :: filterBar(${definition}, ${query})}"></div>
-      <a th:href="@{/admin/routines}" class="btn btn-ghost btn-sm">초기화</a>
       <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${routines.totalElements}">0</span>건</span>
     </div>
 

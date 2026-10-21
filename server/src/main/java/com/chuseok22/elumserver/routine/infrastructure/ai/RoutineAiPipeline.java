@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -40,8 +41,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RoutineAiPipeline {
-
-  private static final int MAX_STEPS = 10;
 
   // 공통 JSON 매퍼 (DefaultJsonMapper)
   private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
@@ -196,7 +195,8 @@ public class RoutineAiPipeline {
         log.warn("AI가 title 없이 응답함: responseLength={}", LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
-      if (draft.steps() == null || draft.steps().isEmpty() || draft.steps().size() > MAX_STEPS) {
+      if (draft.steps() == null || draft.steps().isEmpty()
+        || draft.steps().size() > RoutineStepLimits.MAX_STEP_COUNT) {
         log.warn("AI가 반환한 단계 수가 허용 범위를 벗어남: count={}, responseLength={}",
           draft.steps() == null ? 0 : draft.steps().size(), LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);

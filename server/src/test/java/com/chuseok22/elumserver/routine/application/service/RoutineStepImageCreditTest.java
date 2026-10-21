@@ -41,6 +41,7 @@ import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThr
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,7 @@ class RoutineStepImageCreditTest {
   @BeforeEach
   void setUp() {
     filler = new RoutineStepImageFiller(cardImageGenerator, routineImageStorage, routineStepRepository,
-      aiDailyBudgetGuard, new RoutineStepImageThrottle(new InMemorySharedStateStore()), creditReservationService);
+      aiDailyBudgetGuard, new RoutineStepImageThrottle(new InMemorySharedStateStore(), UsageLimitSettings.fromDefaults()), creditReservationService);
     lenient().when(routineStepRepository.existsById(anyString())).thenReturn(true);
     lenient().when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(1);
     lenient().when(routineImageStorage.save(anyString(), anyInt(), any())).thenReturn("images/step-1/1.png");
