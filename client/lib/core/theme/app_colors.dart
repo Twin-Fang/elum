@@ -69,6 +69,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkTitleText,
     required this.talkMetaText,
     required this.talkMetaIcon,
+    required this.talkPopularCardFill,
+    required this.talkMetaDivider,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -339,6 +341,10 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color talkMetaText;
   /// 도움돼요·댓글·가져감 10px 아이콘 (#CACACA)
   final Color talkMetaIcon;
+  /// 인기 카드 판 (#EEE9E6, 테두리 없음 — 시안 1783:6666)
+  final Color talkPopularCardFill;
+  /// 상세 작성자 | 작성 시각 사이 세로선 (#D9D3CF, 시안 1813:7491)
+  final Color talkMetaDivider;
 
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
@@ -988,6 +994,8 @@ class AppColors extends ThemeExtension<AppColors> {
     talkTitleText: Color(0xFF000000),
     talkMetaText: Color(0xFF74757D),
     talkMetaIcon: Color(0xFFCACACA),
+    talkPopularCardFill: Color(0xFFEEE9E6),
+    talkMetaDivider: Color(0xFFD9D3CF),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1218,6 +1226,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkTitleText,
     Color? talkMetaText,
     Color? talkMetaIcon,
+    Color? talkPopularCardFill,
+    Color? talkMetaDivider,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1436,6 +1446,8 @@ class AppColors extends ThemeExtension<AppColors> {
       talkTitleText: talkTitleText ?? this.talkTitleText,
       talkMetaText: talkMetaText ?? this.talkMetaText,
       talkMetaIcon: talkMetaIcon ?? this.talkMetaIcon,
+      talkPopularCardFill: talkPopularCardFill ?? this.talkPopularCardFill,
+      talkMetaDivider: talkMetaDivider ?? this.talkMetaDivider,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1694,6 +1706,8 @@ class AppColors extends ThemeExtension<AppColors> {
       talkTitleText: Color.lerp(talkTitleText, other.talkTitleText, t)!,
       talkMetaText: Color.lerp(talkMetaText, other.talkMetaText, t)!,
       talkMetaIcon: Color.lerp(talkMetaIcon, other.talkMetaIcon, t)!,
+      talkPopularCardFill: Color.lerp(talkPopularCardFill, other.talkPopularCardFill, t)!,
+      talkMetaDivider: Color.lerp(talkMetaDivider, other.talkMetaDivider, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,

@@ -2384,14 +2384,29 @@
   "@talkPostGoneTitle": { "description": "상세 화면: 글이 내려갔거나 없을 때 안내" },
   "talkPostGoneBack": "이야기로 돌아가기",
   "@talkPostGoneBack": { "description": "상세 화면: 내려간 글 안내의 버튼" },
-  "talkStepsTitle": "이렇게 해요",
-  "@talkStepsTitle": { "description": "상세 화면: 카드 목록 위 제목" },
+  "talkDetailCardCountChip": "{count, plural, other{{count}장}}",
+  "@talkDetailCardCountChip": {
+    "description": "상세 머리 칩: 카드 아이콘 뒤 카드 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "talkDetailPostedAt": "{date} {time}",
+  "@talkDetailPostedAt": {
+    "description": "상세 작성 시각 (예: 10/21 오후 11:42)",
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "M/d", "isCustomDateFormat": "true" },
+      "time": { "type": "DateTime", "format": "jm" }
+    }
+  },
+  "talkViewGrid": "한 눈에 보기",
+  "@talkViewGrid": { "description": "상세 보기 전환 칩: 카드를 2열 격자로 모아 보기" },
+  "talkViewLarge": "크게 보기",
+  "@talkViewLarge": { "description": "상세 보기 전환 칩: 카드를 한 장씩 크게 넘겨 보기" },
   "talkHelpfulFailed": "도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요",
   "@talkHelpfulFailed": { "description": "상세 화면: 도움돼요 누르기 실패 안내(팝업)" },
-  "talkImportButton": "내 일과로 가져오기",
-  "@talkImportButton": { "description": "상세 화면 아래 고정 버튼: 이 일과를 내 일과관리로 가져오기" },
+  "talkImportButton": "일과로 가져오기",
+  "@talkImportButton": { "description": "상세 카드 아래 버튼: 이 일과를 내 일과관리로 가져오기 (앞의 내려받기는 아이콘)" },
   "talkImportedButton": "✓ 일과관리에 넣었어요",
-  "@talkImportedButton": { "description": "상세 화면 아래 고정 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)" },
+  "@talkImportedButton": { "description": "상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)" },
   "talkImportSheetTitle": "어느 일과관리에 넣을까요?",
   "@talkImportSheetTitle": { "description": "가져오기 시트 제목" },
   "talkImportSheetHint": "넣은 뒤 우리 집에 맞게 고치고, 준비되면 보내기를 눌러 주세요.",

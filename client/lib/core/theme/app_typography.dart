@@ -62,6 +62,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkMeta,
     required this.talkCategoryLabel,
     required this.talkWriteLabel,
+    required this.talkDetailTitle,
+    required this.talkDetailNote,
+    required this.talkImportLabel,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
@@ -335,6 +338,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 떠 있는 `+ 올리기` 버튼 (Pretendard 500/16, 시안 1783:6846)
   final TextStyle talkWriteLabel;
+
+  /// 상세 글 제목 (Pretendard 700/20, 시안 1806:7483)
+  final TextStyle talkDetailTitle;
+
+  /// 상세 한마디 (Pretendard 400/14, 시안 1813:7495). 여러 줄이라 줄 높이를 띄운다
+  final TextStyle talkDetailNote;
+
+  /// 상세 `일과로 가져오기` 버튼 (Pretendard 800/22, 시안 1813:7660 — 기본 버튼은 Tmoney)
+  final TextStyle talkImportLabel;
 
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
@@ -878,6 +890,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    talkDetailTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+    ),
+    talkDetailNote: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkImportLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1320,6 +1350,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkMeta,
     TextStyle? talkCategoryLabel,
     TextStyle? talkWriteLabel,
+    TextStyle? talkDetailTitle,
+    TextStyle? talkDetailNote,
+    TextStyle? talkImportLabel,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
@@ -1435,6 +1468,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkMeta: talkMeta ?? this.talkMeta,
       talkCategoryLabel: talkCategoryLabel ?? this.talkCategoryLabel,
       talkWriteLabel: talkWriteLabel ?? this.talkWriteLabel,
+      talkDetailTitle: talkDetailTitle ?? this.talkDetailTitle,
+      talkDetailNote: talkDetailNote ?? this.talkDetailNote,
+      talkImportLabel: talkImportLabel ?? this.talkImportLabel,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
@@ -1569,6 +1605,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkMeta: TextStyle.lerp(talkMeta, other.talkMeta, t)!,
       talkCategoryLabel: TextStyle.lerp(talkCategoryLabel, other.talkCategoryLabel, t)!,
       talkWriteLabel: TextStyle.lerp(talkWriteLabel, other.talkWriteLabel, t)!,
+      talkDetailTitle: TextStyle.lerp(talkDetailTitle, other.talkDetailTitle, t)!,
+      talkDetailNote: TextStyle.lerp(talkDetailNote, other.talkDetailNote, t)!,
+      talkImportLabel: TextStyle.lerp(talkImportLabel, other.talkImportLabel, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,

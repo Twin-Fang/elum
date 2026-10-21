@@ -29,7 +29,7 @@ import 'widgets/talk_comment_list.dart';
 import 'widgets/talk_detail_body.dart';
 import 'widgets/talk_import_sheet.dart';
 
-/// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯) > 본문 + 댓글 스크롤 > 댓글 입력 > 하단 고정 "내 일과로 가져오기"
+/// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
 /// 상태: 받는 중 / 내려간 글(404) / 실패(다시 하기 + 에러 코드) / 본문
 class TalkDetailScreen extends ConsumerStatefulWidget {
   const TalkDetailScreen({super.key, required this.postId});
@@ -142,10 +142,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
                 _ => const ElumStateBody.loading(),
               },
             ),
-            if (post != null) ...[
-              TalkCommentInput(onSubmit: _actions.sendComment),
-              _ImportBar(post: post),
-            ],
+            if (post != null) TalkCommentInput(onSubmit: _actions.sendComment),
           ],
         ),
       ),
@@ -168,6 +165,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
             TalkDetailBody(
               post: post,
               onHelpfulPressed: _actions.toggleHelpful,
+              onImportPressed: () =>
+                  showTalkImportSheet(context, ref, post.toSummary()),
             ),
             SizedBox(height: _sectionGap.h),
             TalkCommentList(
@@ -281,37 +280,6 @@ class _GoneBody extends StatelessWidget {
             ElumButton(label: l10n.talkPostGoneBack, onPressed: onBackPressed),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// 하단 고정 버튼: 내 일과로 가져오기 (이미 가져왔으면 "✓ 일과관리에 넣었어요", 다시 누르면 한 번 더)
-/// 키보드가 올라와 있으면 입력줄을 가리지 않게 감춘다
-class _ImportBar extends ConsumerWidget {
-  const _ImportBar({required this.post});
-
-  final TalkPostDetail post;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    if (isKeyboardOpen) return const SizedBox.shrink();
-
-    final l10n = context.l10n;
-    final space = context.space;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        space.screenH.w,
-        space.xs.h,
-        space.screenH.w,
-        space.sm.h,
-      ),
-      child: ElumButton(
-        label: post.isImportedByMe
-            ? l10n.talkImportedButton
-            : l10n.talkImportButton,
-        onPressed: () => showTalkImportSheet(context, ref, post.toSummary()),
       ),
     );
   }

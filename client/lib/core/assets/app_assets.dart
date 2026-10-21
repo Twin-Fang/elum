@@ -366,6 +366,16 @@ abstract final class AppAssets {
   /// 이야기 카드 가져간 수 앞 (10×10 #CACACA). Figma `fi-br-download`(1783:6306).
   static const iconDownload = '$_images/icon_download.svg';
 
+  /// 이야기 상세 카드 수 칩 (10×10). Figma `fi-br-playing-cards`(1813:7668).
+  static const iconPlayingCards = '$_images/icon_playing_cards.svg';
+
+  /// 이야기 상세 보기 전환 칩: 한 눈에 보기 격자 (12×12, 시안 1813:7717 을 단순 사각형으로 다시 그림)
+  static const iconViewGrid = '$_images/icon_view_grid.svg';
+
+  /// 이야기 상세 보기 전환 칩: 크게 보기 겹친 카드 (10×12, 시안 1813:7839).
+  /// 앞 카드 속이 바탕색(#F7F2EF)이라 색을 덧칠하지 않는다
+  static const iconViewLarge = '$_images/icon_view_large.svg';
+
   /// 내 정보 가입일 달력 (20×20 #CACACA). Figma `fi-br-calendar`(1759:9582).
   static const iconCalendar = '$_images/icon_calendar.svg';
 

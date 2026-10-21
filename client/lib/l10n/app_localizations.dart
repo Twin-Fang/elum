@@ -5162,11 +5162,29 @@ abstract class AppLocalizations {
   /// **'이야기로 돌아가기'**
   String get talkPostGoneBack;
 
-  /// 상세 화면: 카드 목록 위 제목
+  /// 상세 머리 칩: 카드 아이콘 뒤 카드 수
   ///
   /// In ko, this message translates to:
-  /// **'이렇게 해요'**
-  String get talkStepsTitle;
+  /// **'{count, plural, other{{count}장}}'**
+  String talkDetailCardCountChip(int count);
+
+  /// 상세 작성 시각 (예: 10/21 오후 11:42)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} {time}'**
+  String talkDetailPostedAt(DateTime date, DateTime time);
+
+  /// 상세 보기 전환 칩: 카드를 2열 격자로 모아 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'한 눈에 보기'**
+  String get talkViewGrid;
+
+  /// 상세 보기 전환 칩: 카드를 한 장씩 크게 넘겨 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'크게 보기'**
+  String get talkViewLarge;
 
   /// 상세 화면: 도움돼요 누르기 실패 안내(팝업)
   ///
@@ -5174,13 +5192,13 @@ abstract class AppLocalizations {
   /// **'도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요'**
   String get talkHelpfulFailed;
 
-  /// 상세 화면 아래 고정 버튼: 이 일과를 내 일과관리로 가져오기
+  /// 상세 카드 아래 버튼: 이 일과를 내 일과관리로 가져오기 (앞의 내려받기는 아이콘)
   ///
   /// In ko, this message translates to:
-  /// **'내 일과로 가져오기'**
+  /// **'일과로 가져오기'**
   String get talkImportButton;
 
-  /// 상세 화면 아래 고정 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
+  /// 상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
   ///
   /// In ko, this message translates to:
   /// **'✓ 일과관리에 넣었어요'**

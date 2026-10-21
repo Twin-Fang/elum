@@ -2859,13 +2859,36 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkPostGoneBack => '이야기로 돌아가기';
 
   @override
-  String get talkStepsTitle => '이렇게 해요';
+  String talkDetailCardCountChip(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count장',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String talkDetailPostedAt(DateTime date, DateTime time) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat('M/d', localeName);
+    final String dateString = dateDateFormat.format(date);
+    final intl.DateFormat timeDateFormat = intl.DateFormat.jm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$dateString $timeString';
+  }
+
+  @override
+  String get talkViewGrid => '한 눈에 보기';
+
+  @override
+  String get talkViewLarge => '크게 보기';
 
   @override
   String get talkHelpfulFailed => '도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요';
 
   @override
-  String get talkImportButton => '내 일과로 가져오기';
+  String get talkImportButton => '일과로 가져오기';
 
   @override
   String get talkImportedButton => '✓ 일과관리에 넣었어요';

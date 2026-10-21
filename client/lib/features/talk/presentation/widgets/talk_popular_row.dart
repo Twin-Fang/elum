@@ -8,7 +8,7 @@ import '../../domain/talk_post.dart';
 import 'talk_stat_row.dart';
 import 'talk_step_tile.dart';
 
-/// "이번 주에 많이 가져간 일과에요": 제목 줄 + 가로 스크롤 카드 (시안 1783:6665)
+/// "이번 주에 많이 가져간 일과에요": 제목 줄 + 가로 스크롤 카드 (시안 1783:6665, 웜그레이 판)
 /// 카드: 그림 2x2 > 제목 두 줄 > 숫자 줄. 글이 0건이면 부르는 쪽이 이 위젯을 만들지 않는다
 class TalkPopularRow extends StatelessWidget {
   const TalkPopularRow({
@@ -20,10 +20,11 @@ class TalkPopularRow extends StatelessWidget {
   final List<TalkPostSummary> posts;
   final ValueChanged<TalkPostSummary> onPostTapped;
 
-  /// 카드 폭 · 카드 사이 · 제목과 카드 사이 (시안 156 · 8 · 16)
+  /// 카드 폭 · 카드 사이 · 제목과 카드 사이 · 가로 줄 좌우 (시안 156 · 8 · 16 · 16)
   static const _cardWidth = 156.0;
   static const _cardGap = 8.0;
   static const _titleToCards = 16.0;
+  static const _rowInset = 16.0;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,8 @@ class TalkPopularRow extends StatelessWidget {
         SizedBox(height: _titleToCards.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
+          // 제목은 화면 여백 24, 카드 줄은 16 (시안 1806:7480)
+          padding: EdgeInsets.symmetric(horizontal: _rowInset.w),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -104,9 +106,8 @@ class _PopularCard extends StatelessWidget {
           _bottomPadding.h,
         ),
         decoration: BoxDecoration(
-          color: colors.surface,
+          color: colors.talkPopularCardFill,
           borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-          border: Border.all(color: colors.talkCardBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
