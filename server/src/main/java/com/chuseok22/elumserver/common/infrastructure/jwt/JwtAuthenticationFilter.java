@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.jwt;
 
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.logging.RequestIdFilter;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,6 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(new AccessTokenDetails(
           role == LinkRole.ELUMI ? asString(claims.get("linkId")) : null));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 로그 줄의 회원 id (정리는 RequestIdFilter, #656)
+        MDC.put(RequestIdFilter.MDC_MEMBER_ID_KEY, memberId);
       }
     }
 

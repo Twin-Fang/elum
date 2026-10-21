@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberAccessInfo;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
@@ -10,9 +11,12 @@ import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRo
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
+import com.chuseok22.elumserver.admin.application.service.AdminMemberAccessService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.application.service.MemberAdminMemoService;
+import com.chuseok22.elumserver.member.core.MemberAdminMemoSaveResult;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +48,8 @@ public class AdminMemberController {
   private final AdminMemberService adminMemberService;
   private final AdminDateFormatter adminDateFormatter;
   private final AdminCreditQueryService adminCreditQueryService;
+  private final AdminMemberAccessService adminMemberAccessService;
+  private final MemberAdminMemoService memberAdminMemoService;
 
   /// 회원 목록: 검색어(q), 필터(AdminMemberList 정의 7개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
@@ -82,7 +88,7 @@ public class AdminMemberController {
       AdminMemberList.csvColumns(adminDateFormatter), export.rows());
   }
 
-  /// 회원 상세 + 크레딧 요약 카드 (탈퇴 회원은 카드 없음)
+  /// 회원 상세 + 크레딧 요약 카드(탈퇴 회원은 없음) + 접속 정보(로그인 방식·마지막 앱 버전/OS) + 운영 메모 상한
   @GetMapping("/admin/members/{id}")
   public String detail(@PathVariable String id, Model model) {
     AdminMemberDetailResponse member = adminMemberService.getDetail(id);
@@ -90,7 +96,44 @@ public class AdminMemberController {
     if (member.status() != MemberStatus.WITHDRAWN) {
       model.addAttribute("creditSummary", memberCreditSummaryOf(id));
     }
+    model.addAttribute("accessInfo", accessInfoOf(id));
+    model.addAttribute("adminMemoMaxLength", MemberAdminMemoService.MAX_ADMIN_MEMO_LENGTH);
     return "admin/member-detail";
+  }
+
+  /**
+   * 운영 메모 저장: 길이 초과·탈퇴 회원이면 저장 없이 안내 > 저장(빈 값이면 지움) > 상세로
+   * 메모 원문은 로그에 남기지 않음 (글자 수만)
+   */
+  @PostMapping("/admin/members/{id}/memo")
+  public String saveMemo(
+    @PathVariable String id,
+    @RequestParam(name = "adminMemo", required = false) String adminMemo,
+    Principal principal,
+    RedirectAttributes redirectAttributes
+  ) {
+    String detailPath = "redirect:/admin/members/" + id;
+    int memoLength = adminMemo == null ? 0 : adminMemo.length();
+    MemberAdminMemoSaveResult result = memberAdminMemoService.saveAdminMemo(id, adminMemo, actorOf(principal));
+    switch (result) {
+      case REJECTED_TOO_LONG -> {
+        log.info("[admin members] memo rejected : memberId={}, length={} over limit",
+          AdminLogIds.toLoggableId(id), memoLength);
+        redirectAttributes.addFlashAttribute("errorMessage",
+          "메모는 " + MemberAdminMemoService.MAX_ADMIN_MEMO_LENGTH + "자까지 저장할 수 있어요. 줄여서 다시 저장해 주세요.");
+      }
+      case REJECTED_WITHDRAWN -> {
+        log.info("[admin members] memo rejected : memberId={}, withdrawn", AdminLogIds.toLoggableId(id));
+        redirectAttributes.addFlashAttribute("errorMessage", "탈퇴한 계정에는 메모를 남길 수 없어요.");
+      }
+      case SAVED, CLEARED -> {
+        log.info("[admin members] memo saved : memberId={}, length={}, admin={}",
+          AdminLogIds.toLoggableId(id), memoLength, actorOf(principal));
+        redirectAttributes.addFlashAttribute("message",
+          result == MemberAdminMemoSaveResult.CLEARED ? "메모를 지웠어요." : "메모를 저장했어요.");
+      }
+    }
+    return detailPath;
   }
 
   @PostMapping("/admin/members/{id}/suspend")
@@ -210,6 +253,16 @@ public class AdminMemberController {
     } catch (RuntimeException e) {
       log.warn("[admin members] credit summary failed : members={}", members.size(), e);
       return Map.of();
+    }
+  }
+
+  /// 회원 상세 접속 정보 (실패하면 그 영역에 오류 코드만, 상세는 그대로)
+  private AdminMemberAccessInfo accessInfoOf(String memberId) {
+    try {
+      return adminMemberAccessService.getAccessInfo(memberId);
+    } catch (RuntimeException e) {
+      log.warn("[admin members] access info failed : memberId={}", AdminLogIds.toLoggableId(memberId), e);
+      return AdminMemberAccessInfo.failed();
     }
   }
 
