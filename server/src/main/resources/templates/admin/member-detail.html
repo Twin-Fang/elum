@@ -217,6 +217,10 @@
       <div class="card-body grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
         <div class="text-base-content/60">아이디</div>
         <div th:text="${member.username()}">username</div>
+        <!-- 접속 정보 (#656): 컨트롤러가 따로 조회, 없거나 실패하면 "-" -->
+        <div class="text-base-content/60">로그인 방식</div>
+        <div th:text="${accessInfo != null and !accessInfo.isLoadFailed() ? accessInfo.loginMethodText() : '-'}"
+             data-member-login-method>카카오</div>
         <div class="text-base-content/60">이룸이</div>
         <div th:text="${member.connections().isLoadFailed() ? '-' : #lists.size(member.connections().profiles()) + '명'}">0명</div>
         <div class="text-base-content/60">가입일</div>
@@ -227,6 +231,39 @@
         <div th:text="${@adminDate.format(member.lastActivityAt())}">-</div>
         <div class="text-base-content/60">로그인 횟수</div>
         <div th:text="${member.loginCount() ?: 0}">0</div>
+        <!-- 앱 버전·OS 는 따로 저장하지 않아 가장 최근 의견에 실린 값 (상태 3개: 있음, 의견 없음, 조회 실패) -->
+        <div class="text-base-content/60">마지막 앱 버전·OS</div>
+        <div class="col-span-3" data-member-last-app>
+          <th:block th:if="${accessInfo != null and !accessInfo.isLoadFailed() and accessInfo.lastAppReport() != null}">
+            <span th:text="${(accessInfo.lastAppReport().appVersion() ?: '-') + ' · ' + (accessInfo.lastAppReport().os() ?: '-')}">1.0.40 · iOS 18.1</span>
+            <span class="text-xs text-base-content/60"
+                  th:text="'(' + ${@adminDate.format(accessInfo.lastAppReport().reportedAt())} + ' 의견 기준)'">(의견 기준)</span>
+          </th:block>
+          <span th:if="${accessInfo != null and !accessInfo.isLoadFailed() and accessInfo.lastAppReport() == null}"
+                class="text-base-content/60">의견을 보낸 적이 없어 알 수 없어요</span>
+          <span th:if="${accessInfo != null and accessInfo.isLoadFailed()}" class="text-error" data-member-access-load-failed
+                th:text="'접속 정보를 불러오지 못했어요 (' + ${accessInfo.loadFailedErrorCode()} + ')'">접속 정보를 불러오지 못했어요</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 운영 메모 (#656): 관리자끼리만 봄. 2,000자 상한·비우면 지움 (의견 메모와 같은 규칙). 탈퇴 계정은 보관 항목이 아니라 없음 -->
+    <div th:if="${member.status().name() != 'WITHDRAWN'}" class="card bg-base-100 shadow-md border border-base-300"
+         data-member-admin-memo>
+      <div class="card-body space-y-2">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="card-title text-lg">운영 메모</h2>
+          <span th:replace="~{admin/fragments/admin-list :: lastChangedOr(${member.adminMemoChangedAt()}, ${member.adminMemoChangedBy()}, '메모 기록 없음')}"></span>
+        </div>
+        <form th:action="@{/admin/members/{id}/memo(id=${member.id()})}" method="post" class="space-y-2">
+          <textarea name="adminMemo" rows="4" class="textarea textarea-bordered w-full"
+                    th:attr="maxlength=${adminMemoMaxLength}"
+                    placeholder="문의 내용이나 처리한 일, 다음 관리자에게 남길 말을 적어 주세요. 비우고 저장하면 메모를 지워요."
+                    th:text="${member.adminMemo()}"></textarea>
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary btn-sm">메모 저장</button>
+          </div>
+        </form>
       </div>
     </div>
 

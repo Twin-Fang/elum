@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.chuseok22.elumserver.admin.application.service.AdminMemberAccessService;
+import com.chuseok22.elumserver.member.application.service.MemberAdminMemoService;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminListRow;
@@ -46,7 +48,8 @@ class AdminMemberListCreditFailureTest {
     when(adminCreditQueryService.currentWeekRemainingByMemberId(anyCollection()))
       .thenThrow(new IllegalStateException("db down"));
     MockMvc mockMvc = MockMvcBuilders.standaloneSetup(
-      new AdminMemberController(adminMemberService, new AdminDateFormatter(), adminCreditQueryService)).build();
+      new AdminMemberController(adminMemberService, new AdminDateFormatter(), adminCreditQueryService,
+        mock(AdminMemberAccessService.class), mock(MemberAdminMemoService.class))).build();
 
     MvcResult result = mockMvc.perform(get("/admin/members")).andExpect(status().isOk()).andReturn();
 

@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminDeviceLinkLine;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminDeviceLinkStatus;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminInviteStatus;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberAccessInfo;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberConnections;
+import com.chuseok22.elumserver.feedback.core.FeedbackAppReport;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberProfileCard;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminProfileGuardianLine;
@@ -67,17 +69,51 @@ class AdminMemberConnectionsRenderTest {
   }
 
   private String renderDetail(AdminMemberConnections connections) {
-    Member member = new Member();
-    member.setId("m1");
-    member.setUsername("parent1");
-    member.setStatus(MemberStatus.ACTIVE);
+    return renderDetail(connections, activeMember(), Map.of());
+  }
+
+  private String renderDetail(AdminMemberConnections connections, Member member, Map<String, Object> extraVariables) {
     AdminMemberDetailResponse detail = AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
       AdminSubscriptionSummary.none(), List.of(), null).withConnections(connections);
     Context context = new Context();
     context.setVariables(Map.of("member", detail));
+    context.setVariables(extraVariables);
     context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
       new ThymeleafEvaluationContext(applicationContext, null));
     return engine.process("admin/member-detail", context);
+  }
+
+  private static Member activeMember() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    return member;
+  }
+
+  @Test
+  @DisplayName("접속 정보·운영 메모 (#656): 로그인 방식·마지막 앱 버전/OS·메모 폼, 조회 실패면 오류 코드, 탈퇴면 메모 카드 없음")
+  void rendersAccessInfoAndAdminMemo() {
+    Member member = activeMember();
+    member.setAdminMemo("환불 문의 <b>답함</b>");
+    member.setAdminMemoChangedAt(AT);
+    member.setAdminMemoChangedBy("opsadmin");
+    String html = renderDetail(AdminMemberConnections.empty(), member, Map.of(
+      "accessInfo", new AdminMemberAccessInfo("카카오, 애플", new FeedbackAppReport("1.0.40", "iOS 18.1", AT), false),
+      "adminMemoMaxLength", 2000));
+
+    assertThat(html).contains("카카오, 애플").contains("1.0.40 · iOS 18.1").contains("의견 기준");
+    assertThat(html).contains("action=\"/admin/members/m1/memo\"").contains("maxlength=\"2000\"").contains("opsadmin");
+    // 메모는 이스케이프되어 그대로 보인다
+    assertThat(html).contains("환불 문의 &lt;b&gt;답함&lt;/b&gt;");
+
+    String failed = renderDetail(AdminMemberConnections.empty(), activeMember(),
+      Map.of("accessInfo", AdminMemberAccessInfo.failed()));
+    assertThat(failed).contains("data-member-access-load-failed").contains(AdminMemberAccessInfo.LOAD_FAILED_ERROR_CODE);
+
+    Member withdrawn = activeMember();
+    withdrawn.setStatus(MemberStatus.WITHDRAWN);
+    assertThat(renderDetail(AdminMemberConnections.empty(), withdrawn, Map.of())).doesNotContain("data-member-admin-memo");
   }
 
   private AdminMemberConnections connectionsWithOneProfile() {

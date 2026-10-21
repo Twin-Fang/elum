@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
 import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
+import com.chuseok22.elumserver.feedback.core.FeedbackAppReport;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -168,6 +170,13 @@ public class FeedbackService {
     feedback.setAdminNoteChangedAt(LocalDateTime.now(clock));
     feedback.setAdminNoteChangedBy(actor);
     return trimmedNote.isEmpty() ? FeedbackAdminNoteSaveResult.CLEARED : FeedbackAdminNoteSaveResult.SAVED;
+  }
+
+  /// 회원의 가장 최근 의견에 실린 앱 버전·OS (의견이 없으면 빈 값)
+  @Transactional(readOnly = true)
+  public Optional<FeedbackAppReport> findLatestAppReport(String memberId) {
+    return feedbackRepository.findFirstByMemberIdOrderByCreatedAtDesc(memberId)
+      .map(feedback -> new FeedbackAppReport(feedback.getAppVersion(), feedback.getOs(), feedback.getCreatedAt()));
   }
 
   /** 아직 확인하지 않은 의견 수 (상태 새 의견) */
