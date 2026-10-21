@@ -291,7 +291,14 @@
     </div>
 
     <div>
-      <h2 class="text-lg font-semibold mb-2">최근 AI 호출 (최대 20건)</h2>
+      <!-- 20건 넘는 기록은 모니터링에서 (기간 시작 = 가입일, 모니터링 기본 7일보다 넓게) -->
+      <div class="flex items-center gap-2 mb-2">
+        <h2 class="text-lg font-semibold">최근 AI 호출 (최대 20건)</h2>
+        <a th:href="${member.createdAt() != null}
+                    ? @{/admin/monitoring(memberId=${member.id()}, from=${member.createdAt().toLocalDate()})}
+                    : @{/admin/monitoring(memberId=${member.id()})}"
+           class="link link-primary text-sm ml-auto" data-member-ai-calls-all-link>AI 호출 전체 보기</a>
+      </div>
       <div class="overflow-x-auto">
         <table class="table table-sm">
           <thead>

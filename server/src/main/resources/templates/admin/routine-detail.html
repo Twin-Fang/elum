@@ -74,6 +74,10 @@
       </div>
     </div>
 
+    <th:block th:if="${aiJobs != null}">
+      <div th:replace="~{admin/fragments/routine-ai-jobs :: aiJobsCard(${aiJobs})}"></div>
+    </th:block>
+
 <dialog id="imageModal" class="modal">
   <div class="modal-box">
     <img id="imageModalImg" src="" alt="단계 이미지" class="w-full rounded"/>

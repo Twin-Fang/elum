@@ -1,9 +1,13 @@
 package com.chuseok22.elumserver.ai.application.service;
 
+import com.chuseok22.elumserver.ai.application.dto.response.AiCreditJobCallSummary;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,5 +28,16 @@ public class AiCallLogQueryService {
       return List.of();
     }
     return aiCallLogRepository.findTop10ByMemberIdAndCreatedAtLessThanEqualOrderByCreatedAtDesc(memberId, until);
+  }
+
+  /// 크레딧 작업 id 목록 > 작업 id 별 호출 요약 (쿼리 1회, 호출이 없는 작업은 빠짐). 목록이 비면 빈 맵
+  public Map<String, AiCreditJobCallSummary> summarizeCallsByCreditJob(Collection<String> creditJobIds) {
+    if (creditJobIds == null || creditJobIds.isEmpty()) {
+      return Map.of();
+    }
+    return aiCallLogRepository.sumCostByCreditJobIds(creditJobIds).stream()
+      .map(cost -> new AiCreditJobCallSummary(
+        cost.getCreditJobId(), cost.getCallCount(), cost.getSuccessCount(), cost.getTotalCostUsd()))
+      .collect(Collectors.toMap(AiCreditJobCallSummary::creditJobId, summary -> summary, (first, second) -> first));
   }
 }

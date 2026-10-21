@@ -100,6 +100,12 @@ public record AdminListDefinition(
     }
   }
 
+  /// 키 > 열 (표를 직접 그리는 화면이 정렬 머리 칸 1개를 그릴 때). 없는 키는 정의 오류라 바로 드러낸다
+  public Column columnOf(String key) {
+    return columns.stream().filter(column -> column.key().equals(key)).findFirst()
+      .orElseThrow(() -> new IllegalArgumentException("unknown column: " + key));
+  }
+
   /// 키 > 필터 (없으면 null: 화면이 적용된 필터 칩 이름을 찾을 때)
   public Filter filterOf(String key) {
     return filters.stream().filter(filter -> filter.key().equals(key)).findFirst().orElse(null);
