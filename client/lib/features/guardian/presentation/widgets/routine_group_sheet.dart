@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/elum_sheet_header.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
@@ -231,65 +232,58 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 머리: ✕ · 편집 / 완료 (시안)
-        Row(
-          children: [
-            AppPressable(
-              onTap: () => Navigator.of(context).pop(),
-              scaleDown: AppPressable.scaleIcon,
-              semanticLabel: l10n.commonClose,
-              child: Padding(
-                padding: EdgeInsets.all(space.xs.w),
-                child: Icon(
-                  Icons.close_rounded,
-                  size: space.lg.w,
-                  color: colors.textSecondary,
-                ),
+        // 머리 한 줄: ✕ · 이름(그 자리에서 고침) · 편집/완료, 아래 일과 N개
+        ElumSheetHeader(
+          leading: AppPressable(
+            onTap: () => Navigator.of(context).pop(),
+            scaleDown: AppPressable.scaleIcon,
+            semanticLabel: l10n.commonClose,
+            child: Padding(
+              padding: EdgeInsets.all(space.xs.w),
+              child: Icon(
+                Icons.close_rounded,
+                size: space.lg.w,
+                color: colors.textSecondary,
               ),
             ),
-            const Spacer(),
-            AppPressable(
-              onTap: _isSaving
-                  ? null
-                  : () => setState(() => _isEditing = !_isEditing),
-              scaleDown: AppPressable.scaleIcon,
-              child: Padding(
-                padding: EdgeInsets.all(space.xs.w),
-                child: Text(
-                  _isEditing
-                      ? l10n.libraryArrangeDone
-                      : l10n.routineGroupEditOrder,
-                  style: context.typo.tileLabel.copyWith(
-                    color: colors.textSecondary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        // 이름: 가운데에 크게, 그 자리에서 바로 고친다
-        TextField(
-          controller: _nameController,
-          focusNode: _nameFocus,
-          maxLength: RoutineGroup.nameMaxLength,
-          maxLines: 1,
-          textAlign: TextAlign.center,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _nameFocus.unfocus(),
-          style: context.typo.sectionTitle.copyWith(color: colors.textPrimary),
-          decoration: InputDecoration(
-            isDense: true,
-            counterText: '',
-            border: InputBorder.none,
-            hintText: l10n.routineGroupNameHint,
           ),
-        ),
-        SizedBox(height: space.xs.h / 2),
-        Text(
-          l10n.routineGroupSheetCount(routines.length),
-          textAlign: TextAlign.center,
-          style: context.typo.caption.copyWith(color: colors.textSecondary),
+          title: TextField(
+            controller: _nameController,
+            focusNode: _nameFocus,
+            maxLength: RoutineGroup.nameMaxLength,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _nameFocus.unfocus(),
+            style: context.typo.sectionTitle.copyWith(
+              color: colors.textPrimary,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              counterText: '',
+              border: InputBorder.none,
+              hintText: l10n.routineGroupNameHint,
+            ),
+          ),
+          trailing: AppPressable(
+            onTap: _isSaving
+                ? null
+                : () => setState(() => _isEditing = !_isEditing),
+            scaleDown: AppPressable.scaleIcon,
+            child: Padding(
+              padding: EdgeInsets.all(space.xs.w),
+              child: Text(
+                _isEditing
+                    ? l10n.libraryArrangeDone
+                    : l10n.routineGroupEditOrder,
+                style: context.typo.tileLabel.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          subtitle: l10n.routineGroupSheetCount(routines.length),
         ),
         SizedBox(height: space.sm.h),
         // 순서대로 일과: 번호 칸과 카드 칸을 나란히 따로 둔다 (행동카드 순서 변경과 같은 구조).
