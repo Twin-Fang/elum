@@ -99,6 +99,18 @@ public class Member extends BaseEntity {
   /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
   private String consentVersion;
 
+  // --- 관리자 운영 메모 (V55, #656) ---
+  // 관리자끼리만 보는 CS 메모. 회원에게는 안 감. 없으면 null
+  @Column(name = "admin_memo", columnDefinition = "TEXT")
+  private String adminMemo;
+
+  // 메모를 마지막으로 저장·지운 시각과 관리자. 한 번도 안 건드렸으면 null
+  @Column(name = "admin_memo_changed_at")
+  private LocalDateTime adminMemoChangedAt;
+
+  @Column(name = "admin_memo_changed_by")
+  private String adminMemoChangedBy;
+
   /// 동의를 받기 전 상태로 돌린다. 탈퇴 계정을 되살릴 때 동의를 다시 받기 위해 쓴다.
   /// 옛 동의 시각을 남기면 새로 동의받지 않았는데도 동의한 것처럼 보인다.
   public void clearConsents() {
@@ -109,6 +121,13 @@ public class Member extends BaseEntity {
     marketingAgreed = false;
     consentedAt = null;
     consentVersion = null;
+  }
+
+  /// 운영 메모 비움 (탈퇴: 방침 4조 보관 항목이 아님)
+  public void clearAdminMemo() {
+    adminMemo = null;
+    adminMemoChangedAt = null;
+    adminMemoChangedBy = null;
   }
 
   /// 필수 항목을 모두 동의했는가. 하나라도 빠지면 서비스를 쓸 수 없다.
