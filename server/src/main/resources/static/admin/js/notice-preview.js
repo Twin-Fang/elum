@@ -732,48 +732,47 @@
 
     // 나가고 있지 않던 공지가 이 저장으로 곧바로 나가게 될 때만 한 번 묻는다. 게시 중인 공지의
     // 오타 수정·예약 공지 저장까지 매번 물으면 확인 창을 읽지 않고 누르는 버릇이 든다.
-    form.addEventListener('submit', function (event) {
-      var outcome = current();
-      if (outcome.kind === 'live' && !wasLive
-        && !window.confirm('저장하면 바로 ' + audience(platform ? platform.value : 'ALL')
-          + ' 보여요. 다음에 앱을 켜는 보호자부터 떠요. 저장할까요?')) {
-        event.preventDefault();
+    // 묻기는 공통 확인창(data-confirm-*)이 한다. 제출 순간 시각 기준이라 window 캡처 단계(공통 확인창보다 먼저)에서 맞춘다
+    window.addEventListener('submit', function (event) {
+      if (event.target !== form) return;
+      if (current().kind === 'live' && !wasLive) {
+        form.setAttribute('data-confirm-title', '공지 바로 게시');
+        form.setAttribute('data-confirm-message', '저장하면 바로 ' + audience(platform ? platform.value : 'ALL')
+          + ' 보여요. 다음에 앱을 켜는 보호자부터 떠요. 저장할까요?');
+      } else {
+        form.removeAttribute('data-confirm-message');
       }
-    });
+    }, true);
 
     update();
   }
 
   // 목록의 "켜기" — 게시 기간 안이라 누르는 순간 나가는 줄만 묻는다. 판단은 서버가 했다(data-goes-live).
+  // 묻기는 공통 확인창(data-confirm-*)이 한다
   function initEnableConfirm() {
     document.querySelectorAll('form[data-notice-enable]').forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        if (form.getAttribute('data-goes-live') !== 'true') return;
-        var title = (form.getAttribute('data-title') || '').split('**').join('');
-        if (!window.confirm("'" + title + "' 공지를 켜면 바로 " + audience(form.getAttribute('data-platform'))
-          + ' 보여요. 켤까요?')) {
-          event.preventDefault();
-        }
-      });
+      if (form.getAttribute('data-goes-live') !== 'true') return;
+      var title = (form.getAttribute('data-title') || '').split('**').join('');
+      form.setAttribute('data-confirm-title', '공지 켜기');
+      form.setAttribute('data-confirm-message', "'" + title + "' 공지를 켜면 바로 "
+        + audience(form.getAttribute('data-platform')) + ' 보여요. 켤까요?');
     });
   }
 
   // ── 지우기 확인 ─────────────────────────────────────────────
 
+  // 게시 중이면 지금 보호자에게 나가고 있다는 말을 덧붙인다 (공통 확인창 한 번으로)
   function initDeleteConfirm() {
     document.querySelectorAll('form[data-notice-delete]').forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        var title = (form.getAttribute('data-title') || '').split('**').join('');
-        if (!window.confirm("'" + title + "' 공지를 지울까요? 이미지도 함께 지워지고 되돌릴 수 없어요.")) {
-          event.preventDefault();
-          return;
-        }
-        // 게시 중이면 한 번 더 묻는다 — 지금 보호자에게 나가고 있는 것이다.
-        if (form.getAttribute('data-live') === 'true'
-          && !window.confirm('지금 게시 중인 공지예요. 지우면 다음에 앱을 켜는 보호자부터 안 보여요. 정말 지울까요?')) {
-          event.preventDefault();
-        }
-      });
+      var title = (form.getAttribute('data-title') || '').split('**').join('');
+      var message = "'" + title + "' 공지를 지울까요? 이미지도 함께 지워지고 되돌릴 수 없어요.";
+      if (form.getAttribute('data-live') === 'true') {
+        message += '\n\n지금 게시 중인 공지예요. 지우면 다음에 앱을 켜는 보호자부터 안 보여요.';
+      }
+      form.setAttribute('data-confirm-title', '공지 지우기');
+      form.setAttribute('data-confirm-danger', '');
+      form.setAttribute('data-confirm-accept', '지우기');
+      form.setAttribute('data-confirm-message', message);
     });
   }
 

@@ -1,18 +1,28 @@
 package com.chuseok22.elumserver.credit.core;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * 적립 묶음이 어디서 왔는가.
  *
  * <p>PROMO·PURCHASE 는 아직 쓰지 않는다. 결제·이벤트를 붙일 때 표를 바꾸지 않으려고 자리만 둔다.
+ *
+ * <p>label 은 관리자 화면 표시 이름
  */
+@Getter
+@AllArgsConstructor
 public enum CreditGrantSource {
 
   /// 매주 월요일 0시 주기로 한 번 지급. 주기가 끝나면 남은 양은 만료된다(이월 없음).
-  WEEKLY,
+  WEEKLY("주간"),
   /// 관리자가 손으로 준 보너스. 만료는 지급 때 고른다(기본 이번 주 말, 무기한 가능).
-  ADMIN_BONUS,
+  ADMIN_BONUS("관리자 보너스"),
   /// 보상형 광고를 끝까지 보고 받은 크레딧. 이번 주 끝에 만료된다.
-  AD_REWARD,
-  PROMO,
-  PURCHASE,
+  AD_REWARD("광고 보상"),
+  PROMO("이벤트"),
+  PURCHASE("구매"),
+  ;
+
+  private final String label;
 }

@@ -20,16 +20,16 @@
       <span class="label-text text-xs">상태</span>
       <select name="status" class="select select-bordered select-sm">
         <option value="" th:selected="${filter.status() == null}">전체</option>
-        <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.name()}"
-                th:selected="${filter.status() == status}">RESERVED</option>
+        <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.label}"
+                th:selected="${filter.status() == status}">예약 중</option>
       </select>
     </label>
     <label class="form-control">
       <span class="label-text text-xs">종류</span>
       <select name="kind" class="select select-bordered select-sm">
         <option value="" th:selected="${filter.kind() == null}">전체</option>
-        <option th:each="kind : ${kinds}" th:value="${kind.name()}" th:text="${kind.name()}"
-                th:selected="${filter.kind() == kind}">ROUTINE_CREATE</option>
+        <option th:each="kind : ${kinds}" th:value="${kind.name()}" th:text="${kind.label}"
+                th:selected="${filter.kind() == kind}">일과 생성</option>
       </select>
     </label>
     <label class="form-control">
@@ -72,16 +72,21 @@
         <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(12, '조건에 맞는 작업이 없어요')}"></tr>
       </th:block>
       <tr th:each="row : ${rows.content}">
-        <td class="text-xs whitespace-nowrap" th:text="${#temporals.format(row.job().startedAt, 'MM-dd HH:mm:ss')}">-</td>
+        <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(row.job().startedAt)}">-</td>
         <td>
           <a th:if="${row.memberId() != null}" th:href="@{/admin/credits/members/{id}(id=${row.memberId()})}"
              class="link link-hover text-xs" th:text="${row.username() ?: #strings.abbreviate(row.memberId(), 10)}">회원</a>
           <span th:if="${row.memberId() == null}" class="text-xs text-base-content/40">-</span>
         </td>
-        <td class="text-xs" th:text="${row.job().kind.name()}">ROUTINE_CREATE</td>
+        <!-- 종류 + 만든 일과 상세 링크 (일과가 저장된 작업만) -->
+        <td class="text-xs">
+          <span th:text="${row.job().kind.label}">일과 생성</span>
+          <a th:if="${row.job().routineId != null}" th:href="@{/admin/routines/{id}(id=${row.job().routineId})}"
+             class="link link-hover ml-1" data-credit-job-routine-link>일과</a>
+        </td>
         <td>
-          <span class="badge badge-sm" th:text="${row.job().status.name()}"
-                th:classappend="${row.stuck()} ? 'badge-error' : (${row.job().status.name() == 'SETTLED'} ? 'badge-success' : 'badge-ghost')">SETTLED</span>
+          <span class="badge badge-sm" th:text="${row.job().status.label}"
+                th:classappend="${row.stuck()} ? 'badge-error' : (${row.job().status.name() == 'SETTLED'} ? 'badge-success' : 'badge-ghost')">정산</span>
         </td>
         <td class="text-right" th:text="${row.job().reserved}">0</td>
         <td class="text-right" th:text="${row.job().charged}">0</td>
@@ -99,7 +104,7 @@
           <span th:text="${row.job().failReason}"></span>
           <form th:if="${row.releasable()}" th:action="@{/admin/credits/jobs/{id}/release(id=${row.job().id})}"
                 method="post" class="flex gap-1 mt-1"
-                onsubmit="return confirm('이 예약을 반환할까요? 잡아 둔 크레딧이 바로 돌아가요.');">
+                data-confirm-title="예약 반환" data-confirm-message="이 예약을 반환할까요? 잡아 둔 크레딧이 바로 돌아가요.">
             <input type="hidden" name="back" value="/admin/credits/jobs?status=RESERVED"/>
             <input type="text" name="reason" required maxlength="200" placeholder="반환 사유"
                    class="input input-bordered input-sm w-32"/>

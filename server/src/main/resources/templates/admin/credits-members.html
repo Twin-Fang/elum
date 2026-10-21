@@ -78,7 +78,7 @@
         <td class="text-right" th:classappend="${row.overage() > 0} ? 'text-warning'"
             th:text="${row.overage() > 0 ? row.overage() + ' (' + row.overageJobs() + '건)' : '0'}">0</td>
         <td class="text-xs whitespace-nowrap"
-            th:text="${row.lastUsedAt() != null ? #temporals.format(row.lastUsedAt(), 'MM-dd HH:mm') : '-'}">-</td>
+            th:text="${row.lastUsedAt() != null ? @adminDate.format(row.lastUsedAt()) : '-'}">-</td>
         <td>
           <span th:if="${row.frozen()}" class="badge badge-error badge-sm">동결</span>
           <span th:if="${!row.frozen() and row.exhausted()}" class="badge badge-warning badge-sm">소진</span>

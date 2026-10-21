@@ -1,18 +1,23 @@
 package com.chuseok22.elumserver.credit.core;
 
-/** 크레딧을 쓰는 생성 작업의 종류. 종류마다 예약량·청구 산식이 다르다. */
+import lombok.Getter;
+
+/** 크레딧을 쓰는 생성 작업의 종류. 종류마다 예약량·청구 산식이 다르다. label 은 관리자 화면 표시 이름 */
 public enum CreditJobKind {
 
   /// AI 일과 생성 — 글 1 + 붙은 그림 수만큼 청구한다.
-  ROUTINE_CREATE(true),
+  ROUTINE_CREATE("일과 생성", true),
   /// 수동 카드 한 장의 그림.
-  CARD_IMAGE(false),
+  CARD_IMAGE("카드 그림", false),
   /// 그림 다시 만들기. 엔드포인트는 아직 없다(범위 밖) — 단가 키만 맞춰 둔다.
-  IMAGE_REGENERATE(false);
+  IMAGE_REGENERATE("그림 다시 만들기", false);
 
+  @Getter
+  private final String label;
   private final boolean overageAllowed;
 
-  CreditJobKind(boolean overageAllowed) {
+  CreditJobKind(String label, boolean overageAllowed) {
+    this.label = label;
     this.overageAllowed = overageAllowed;
   }
 

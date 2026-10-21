@@ -132,7 +132,7 @@ class AdminPromptsLocaleTemplateTest {
   }
 
   @Test
-  @DisplayName("행 만들기 폼: 제출하면 버튼이 잠겨 두 번 눌러도 한 번만 간다")
+  @DisplayName("행 만들기 폼: 공통 확인창을 거치고, 확인 뒤 버튼이 잠겨 두 번 눌러도 한 번만 간다")
   void seedButtonLocksOnSubmit() {
     Context context = new Context();
     context.setVariable("prompts", List.of(row(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "es")));
@@ -142,7 +142,9 @@ class AdminPromptsLocaleTemplateTest {
 
     String html = render("admin/prompts", context);
 
-    assertThat(html).contains("disabled = true");
+    // 잠금은 공통 확인창이 확인을 마친 data-confirm 폼마다 한다 (#657)
+    assertThat(html).containsPattern("/seed\"[^>]*data-confirm-message=")
+      .contains("button.disabled = true");
   }
 
   @Test

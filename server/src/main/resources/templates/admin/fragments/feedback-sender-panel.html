@@ -43,7 +43,7 @@
         <div class="flex items-center gap-2 flex-wrap">
           <h3 class="font-semibold">의견 즈음 AI 호출 (최근 10건)</h3>
           <span class="text-xs text-base-content/60"
-                th:text="${#temporals.format(panel.aiCallsUntil(), 'yyyy-MM-dd HH:mm')} + ' 까지 (보낸 때 + 30분)'">까지</span>
+                th:text="${@adminDate.format(panel.aiCallsUntil())} + ' 까지 (보낸 때 + 30분)'">까지</span>
           <a th:href="@{/admin/monitoring(memberId=${panel.memberId()}, from=${panel.monitoringFromDate()}, to=${panel.monitoringToDate()})}"
              class="link link-primary text-sm ml-auto">모니터링에서 보기</a>
         </div>
@@ -65,7 +65,7 @@
               <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '이 무렵 AI 호출 기록이 없어요')}"></tr>
             </th:block>
             <tr th:each="call : ${panel.recentAiCalls()}">
-              <td th:text="${call.createdAt != null ? #temporals.format(call.createdAt, 'MM-dd HH:mm:ss') : '-'}">시각</td>
+              <td th:text="${@adminDate.format(call.createdAt)}">시각</td>
               <td th:text="${call.callType.label}">유형</td>
               <td class="text-xs" th:text="${call.model ?: '-'}">모델</td>
               <td>

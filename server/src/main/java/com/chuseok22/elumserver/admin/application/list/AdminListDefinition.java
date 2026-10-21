@@ -18,8 +18,17 @@ public record AdminListDefinition(
   public static final String SORT_ASCENDING = "asc";
   public static final String SORT_DESCENDING = "desc";
 
-  /** 표의 열: isSortable 인 열만 정렬 허용 목록에 든다 */
-  public record Column(String key, String label, boolean isSortable) {
+  /** 표의 열: isSortable 인 열만 정렬 허용 목록에 든다, isNumeric 이면 표에서 우측 정렬 */
+  public record Column(String key, String label, boolean isSortable, boolean isNumeric) {
+
+    public Column(String key, String label, boolean isSortable) {
+      this(key, label, isSortable, false);
+    }
+
+    /// 숫자 열 (건수·토큰·금액·크레딧, 우측 정렬)
+    public static Column numeric(String key, String label, boolean isSortable) {
+      return new Column(key, label, isSortable, true);
+    }
   }
 
   /**
