@@ -1,12 +1,14 @@
 package com.chuseok22.elumserver.ai.application.service;
 
 import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageSafetyRejection;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -23,7 +25,7 @@ import org.springframework.stereotype.Service;
  * 타도록 한 곳에 둔다.
  *
  * <ul>
- *   <li><b>FLUX 가 아니면 지금과 똑같다</b> — 고른 제공자에 한국어 카드 설명 그대로.</li>
+ *   <li><b>FLUX 가 아니면 고른 제공자에 카드 설명, 제목, 영어 장면을 장면 정보로 싣는다.</b></li>
  *   <li><b>FLUX 면 영어 장면이 필요하다.</b> 글 AI 가 같은 호출에서 준 한 줄을 쓰고, 없으면(보호자가
  *       직접 추가한 카드) 싼 글 모델로 한 줄 번역한다. seed 는 일과마다 고정한다.</li>
  *   <li><b>FLUX 쪽 무엇이 실패해도 그 카드만 OpenAI 로</b> — 키 없음·번역 실패·에러·타임아웃·
@@ -53,13 +55,23 @@ public class CardImageGenerator {
    * @param imagePromptEn 글 AI 가 같은 호출에서 준 영어 장면. 없으면 null
    * @param seedKey       {@link FluxSeed#routineKey} — 한 일과의 카드들이 같은 캐릭터로 나오게
    * @param imageStyle    이룸이의 그림 방식. null 이면 만화 — 기존 동작
+   * @param routineTitle  일과 제목 (그림 AI 에게 어떤 일과인지 알리는 참고용). 직접 추가한 카드는 null
+   * @param stepTitle     카드 제목. 직접 추가한 카드는 null
    */
   public record CardImageRequest(
-    String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
+    String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle,
+    String routineTitle, String stepTitle
   ) {
 
     public CardImageRequest {
       imageStyle = ImageStyle.orDefault(imageStyle);
+    }
+
+    /// 설명만 있는 카드 (보호자가 직접 추가한 카드, 제목·영어 장면 없음)
+    public CardImageRequest(
+      String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
+    ) {
+      this(description, imagePromptEn, characterType, seedKey, imageStyle, null, null);
     }
   }
 
@@ -72,7 +84,7 @@ public class CardImageGenerator {
       return generateRealistic(request);
     }
     if (imageClientRouter.selected() != ImageProvider.FLUX) {
-      return imageClientRouter.current().generateImage(request.description(), request.characterType());
+      return generateWithSafetyRetry(imageClientRouter.current(), request);
     }
     if (!fluxImageClient.available()) {
       log.warn("FLUX 를 골랐지만 키가 없다 — 이 카드는 OpenAI 로 그린다");
@@ -167,6 +179,37 @@ public class CardImageGenerator {
     if (request.imageStyle() == ImageStyle.REALISTIC) {
       return openAi.get().generateRealisticImage(request.description());
     }
-    return openAi.get().generateImage(request.description(), request.characterType());
+    return generateWithSafetyRetry(openAi.get(), request);
+  }
+
+  /**
+   * 안전 시스템이 거절하면 카드 제목만으로 한 번 더 시도: 장면 문장이 걸린 경우를 피함
+   * 거절 사유는 로그로 남김 (원문 제외), 제목이 없는 카드나 재시도도 거절이면 그대로 던져 기본 그림으로 대체
+   */
+  private GeneratedImage generateWithSafetyRetry(ImageGenerationClient client, CardImageRequest request) {
+    try {
+      return client.generateCardImage(toCardScene(request), request.characterType());
+    } catch (RuntimeException rejected) {
+      if (!ImageSafetyRejection.isRejection(rejected) || request.stepTitle() == null || request.stepTitle().isBlank()) {
+        throw rejected;
+      }
+      String reasons = ImageSafetyRejection.reasonsOf(rejected);
+      log.warn("[image safety] rejected 400 : reasons={}, provider={}, retry with title only", reasons, client.provider());
+      try {
+        GeneratedImage image = client.generateCardImage(
+          CardScene.descriptionOnly(request.stepTitle()), request.characterType());
+        log.info("[image safety] retry succeeded : reasons={}", reasons);
+        return image;
+      } catch (RuntimeException retryFailed) {
+        log.warn("[image safety] retry failed : reasons={}, retryReasons={}", reasons, ImageSafetyRejection.reasonsOf(retryFailed));
+        throw retryFailed;
+      }
+    }
+  }
+
+  /// 글 AI 의 영어 장면은 한 줄·영어일 때만 싣는다 (그림 지시문 JSON 의 sceneDetail)
+  private CardScene toCardScene(CardImageRequest request) {
+    return new CardScene(
+      request.routineTitle(), request.stepTitle(), request.description(), usableScene(request.imagePromptEn()));
   }
 }

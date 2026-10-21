@@ -68,6 +68,27 @@
         console.warn('[관리자] 최근 오류 건수를 불러오지 못했어요', error);
       });
     })();
+    // 사이드바 확인할 일 배지 (새 의견·검토 대기·이야기 신고·AI 이상). 0이거나 불러오지 못하면 배지만 숨긴 채 둔다.
+    (function () {
+      var badges = document.querySelectorAll('[data-sidebar-badge]');
+      if (!badges.length || !window.fetch) return;
+      fetch('/admin/stats/api/badges').then(function (response) {
+        var type = response.headers.get('content-type') || '';
+        if (!response.ok || response.redirected || type.indexOf('application/json') < 0) {
+          throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+      }).then(function (data) {
+        badges.forEach(function (badge) {
+          var count = data ? data[badge.getAttribute('data-sidebar-badge')] : 0;
+          if (!(count > 0)) return;
+          badge.textContent = badge.getAttribute('data-badge-text') || (count > 99 ? '99+' : String(count));
+          badge.classList.remove('hidden');
+        });
+      }).catch(function (error) {
+        console.warn('[관리자] 사이드바 배지를 불러오지 못했어요', error);
+      });
+    })();
   </script>
   </body>
   </html>
@@ -101,16 +122,21 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
-  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그) -->
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견, 이야기) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그, API 문서)
+       배지: 검토 대기 일과 · 새 의견 · 이야기 신고 · AI 이상 · 서버 오류 (아래 스크립트가 채운다) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
     <li data-menu-group="operations">
       <h2 class="menu-title">운영</h2>
       <ul>
         <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
-        <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리</a></li>
+        <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리
+          <span data-sidebar-badge="pendingReviewRoutineCount" class="badge badge-warning badge-sm hidden" title="검토 대기 일과"></span></a></li>
         <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
-        <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리</a></li>
+        <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리
+          <span data-sidebar-badge="newFeedbackCount" class="badge badge-error badge-sm hidden" title="확인하지 않은 새 의견"></span></a></li>
+        <li><a th:href="@{/admin/talk/posts}" th:classappend="${active == 'talk'} ? 'active'">이야기
+          <span data-sidebar-badge="unresolvedTalkReportCount" class="badge badge-error badge-sm hidden" title="처리하지 않은 신고"></span></a></li>
       </ul>
     </li>
     <li data-menu-group="contents">
@@ -125,9 +151,11 @@
       <h2 class="menu-title">시스템</h2>
       <ul>
         <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>
-        <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링</a></li>
+        <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링
+          <span data-sidebar-badge="aiAlertCount" data-badge-text="주의" class="badge badge-warning badge-sm hidden" title="AI 제공자 이상"></span></a></li>
         <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
           <span data-log-error-badge class="badge badge-error badge-sm hidden" title="최근 24시간 오류"></span></a></li>
+        <li><a th:href="@{/admin/api-docs}" th:classappend="${active == 'api-docs'} ? 'active'">API 문서</a></li>
       </ul>
     </li>
   </ul>

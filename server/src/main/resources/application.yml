@@ -1,6 +1,22 @@
 spring:
   profiles:
     active: prod
+  # 신고 메일 발송기. host 가 비면 메일을 보내지 않는다
+  mail:
+    host: ${ELUM_MAIL_HOST:}
+    port: ${ELUM_MAIL_PORT:587}
+    username: ${ELUM_MAIL_USERNAME:}
+    password: ${ELUM_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          # 응답 없는 메일 서버가 공용 알림 스레드풀을 붙잡지 않게 (ms)
+          connectiontimeout: 5000
+          timeout: 10000
+          writetimeout: 10000
+          starttls:
+            enable: true
   jpa:
     open-in-view: false
     properties:
@@ -53,6 +69,14 @@ tts:
   # /app 마운트 아래 (그림 data/routine-images 와 같은 볼륨)
   speech-storage-path: data/routine-speech
 
+# 이야기(보호자끼리 일과 나눔). 그림 사본은 일과 그림과 같은 볼륨 아래에 둔다
+talk:
+  image-storage-path: ${ELUM_TALK_IMAGE_PATH:data/talk-images}
+  # 신고 알림 받을 메일. 비면 메일을 보내지 않는다
+  report-mail-to: ${ELUM_TALK_REPORT_MAIL_TO:}
+  # 신고 메일의 관리자 화면 링크 기준 주소
+  admin-base-url: ${ELUM_TALK_ADMIN_BASE_URL:https://api.elum.chuseok22.com}
+
 elum:
   auth:
     legacy-password:
@@ -73,5 +97,8 @@ springdoc:
 
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+  # API 문서는 관리자 화면 안에 둔다: /admin/** 체인이 로그인한 관리자에게만 연다 (#870)
+  api-docs:
+    path: /admin/v3/api-docs
   swagger-ui:
-    path: /docs/swagger
+    path: /admin/docs/swagger

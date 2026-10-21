@@ -45,7 +45,8 @@ class ErrorMessageParityTest {
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
-      + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size());
+      + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -92,6 +93,71 @@ class ErrorMessageParityTest {
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
     }
+  }
+
+  // 알림·푸시(#827)가 더한 코드
+  private static final java.util.List<ErrorCode> ADDED_NOTIFICATION_CODES = java.util.List.of(
+    ErrorCode.PUSH_TOKEN_INVALID, ErrorCode.NOTIFICATION_NOT_FOUND);
+
+  @Test
+  @DisplayName("알림·푸시 코드(#827)는 golden 밖에서 상태와 문구를 단언한다")
+  void notificationCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.PUSH_TOKEN_INVALID.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.NOTIFICATION_NOT_FOUND.getStatus().name()).isEqualTo("NOT_FOUND");
+    for (ErrorCode code : ADDED_NOTIFICATION_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
+  private static final java.util.List<ErrorCode> ADDED_NICKNAME_CODES = java.util.List.of(
+    ErrorCode.NICKNAME_INVALID_FORMAT, ErrorCode.NICKNAME_NOT_ALLOWED,
+    ErrorCode.NICKNAME_DUPLICATED, ErrorCode.NICKNAME_CHANGE_TOO_SOON);
+
+  @Test
+  @DisplayName("보호자 닉네임 변경 코드는 golden 밖에서 상태와 문구를 단언한다")
+  void nicknameCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.NICKNAME_INVALID_FORMAT.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.NICKNAME_NOT_ALLOWED.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.NICKNAME_DUPLICATED.getStatus().name()).isEqualTo("CONFLICT");
+    assertThat(ErrorCode.NICKNAME_CHANGE_TOO_SOON.getStatus().name()).isEqualTo("TOO_MANY_REQUESTS");
+    for (ErrorCode code : ADDED_NICKNAME_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이").endsWith("요.");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
+  // 이야기(보호자끼리 일과 나누기)가 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_TALK_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.TALK_POST_NOT_FOUND, "NOT_FOUND"),
+    Map.entry(ErrorCode.TALK_COMMENT_NOT_FOUND, "NOT_FOUND"),
+    Map.entry(ErrorCode.TALK_RULES_NOT_AGREED, "FORBIDDEN"),
+    Map.entry(ErrorCode.TALK_NOT_AUTHOR, "FORBIDDEN"),
+    Map.entry(ErrorCode.TALK_ROUTINE_NOT_SHAREABLE, "BAD_REQUEST"),
+    Map.entry(ErrorCode.TALK_ALREADY_SHARED, "CONFLICT"),
+    Map.entry(ErrorCode.TALK_TEXT_TOO_LONG, "BAD_REQUEST"),
+    Map.entry(ErrorCode.TALK_TEXT_NOT_ALLOWED, "BAD_REQUEST"),
+    Map.entry(ErrorCode.TALK_NICKNAME_MASK_FAILED, "INTERNAL_SERVER_ERROR"),
+    Map.entry(ErrorCode.TALK_REPORT_DUPLICATED, "CONFLICT"),
+    Map.entry(ErrorCode.TALK_CANNOT_BLOCK_SELF, "BAD_REQUEST"),
+    Map.entry(ErrorCode.TALK_IMAGE_NOT_FOUND, "NOT_FOUND")));
+
+  @Test
+  @DisplayName("이야기 코드 12개는 golden 밖에서 상태와 모든 언어 문구를 단언한다")
+  void talkCodes_haveMessagesInAllLocales() {
+    assertThat(ADDED_TALK_CODES).hasSize(12);
+    ADDED_TALK_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
+      for (AppLocale locale : AppLocale.values()) {
+        assertThat(ErrorMessages.standard().of(code, locale)).as("%s %s", locale.code(), code)
+          .isNotBlank().isNotEqualTo(code.name());
+      }
+    });
   }
 
   // 관리자 크레딧 화면이 더한 코드. 문구·detail 은 AdminCreditServiceTest 가 코드 단위로 본다.

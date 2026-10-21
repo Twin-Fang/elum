@@ -11,12 +11,16 @@ class InMemoryStorage implements LocalStorage {
     // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
-    bool libraryCoachSeen = true,
+    bool isManageCoachSeen = true,
+    bool isGroupCoachSeen = true,
+    bool isCardReviewCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
-       _libraryCoachSeen = libraryCoachSeen,
+       _isManageCoachSeen = isManageCoachSeen,
+       _isGroupCoachSeen = isGroupCoachSeen,
+       _isCardReviewCoachSeen = isCardReviewCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -33,7 +37,11 @@ class InMemoryStorage implements LocalStorage {
   bool _elumi;
   bool _elumiLinkLost = false;
   bool _homeCoachSeen;
-  bool _libraryCoachSeen;
+  bool _isManageCoachSeen;
+  bool _isGroupCoachSeen;
+  bool _isCardReviewCoachSeen;
+  List<String> _talkImportedSeenRoutineIds = const [];
+  List<String> _talkShareHintDismissedRoutineIds = const [];
 
   String? _nickname;
   List<String> _goals = const [];
@@ -244,17 +252,73 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
       _noticeHidden[noticeId] = json;
 
+  bool _hasAskedPushPermission = false;
+  String? _updateSuggestionShownRecord;
+
+  @override
+  String? get updateSuggestionShownRecord => _updateSuggestionShownRecord;
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async =>
+      _updateSuggestionShownRecord = record;
+
+  @override
+  bool get hasAskedPushPermission => _hasAskedPushPermission;
+
+  @override
+  Future<void> setHasAskedPushPermission(bool v) async =>
+      _hasAskedPushPermission = v;
+
   @override
   bool get isHomeCoachSeen => _homeCoachSeen;
 
   @override
-  bool get isLibraryCoachSeen => _libraryCoachSeen;
-
-  @override
-  Future<void> setLibraryCoachSeen(bool v) async => _libraryCoachSeen = v;
-
-  @override
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
+
+  @override
+  bool get isManageCoachSeen => _isManageCoachSeen;
+
+  @override
+  Future<void> setManageCoachSeen(bool isSeen) async =>
+      _isManageCoachSeen = isSeen;
+
+  @override
+  List<String> get talkImportedSeenRoutineIds => _talkImportedSeenRoutineIds;
+
+  @override
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) async =>
+      _talkImportedSeenRoutineIds = routineIds;
+
+  @override
+  List<String> get talkShareHintDismissedRoutineIds =>
+      _talkShareHintDismissedRoutineIds;
+
+  @override
+  Future<void> setTalkShareHintDismissedRoutineIds(
+    List<String> routineIds,
+  ) async => _talkShareHintDismissedRoutineIds = routineIds;
+
+  @override
+  bool get isGroupCoachSeen => _isGroupCoachSeen;
+
+  @override
+  Future<void> setGroupCoachSeen(bool isSeen) async =>
+      _isGroupCoachSeen = isSeen;
+
+  @override
+  bool get isCardReviewCoachSeen => _isCardReviewCoachSeen;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async =>
+      _isCardReviewCoachSeen = isSeen;
+
+  @override
+  Future<void> resetCoachMarks() async {
+    _homeCoachSeen = false;
+    _isManageCoachSeen = false;
+    _isGroupCoachSeen = false;
+    _isCardReviewCoachSeen = false;
+  }
 
   @override
   Future<void> clearChildProfile() async {

@@ -22,7 +22,6 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
-import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -35,6 +34,8 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
@@ -54,6 +55,7 @@ import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCoold
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +75,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class RoutineServiceTest {
@@ -83,6 +86,9 @@ class RoutineServiceTest {
   private RoutineRepository routineRepository;
   @Mock
   private RoutineGroupMembership routineGroupMembership;
+
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   @Mock
   private RoutineImageStorage routineImageStorage;
@@ -697,6 +703,7 @@ class RoutineServiceTest {
     routine.setId("routine-1");
     routine.setProfile(profile);
     routine.setStatus(RoutineStatus.CONFIRMED);
+    routine.setScheduledAt(LocalDateTime.of(2026, 10, 19, 9, 0));
     java.util.List<RoutineStep> steps = new java.util.ArrayList<>();
     for (int i = 1; i <= stepCount; i++) {
       RoutineStep step = new RoutineStep();
@@ -1178,6 +1185,118 @@ class RoutineServiceTest {
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_FOUND);
     verifyNoInteractions(profileAccessGuard);
+  }
+
+  @Test
+  @DisplayName("보호자가 마지막 단계를 체크하면 완료 이벤트에 요청한 보호자 id 와 일과 날짜가 담긴다")
+  void completeStep_lastStep_byGuardian_publishesActorMemberId() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
+
+    verify(eventPublisher).publishEvent(new RoutineCompletedEvent("routine-1", "profile-1",
+      java.time.LocalDate.of(2026, 10, 19), "member-1"));
+  }
+
+  @Test
+  @DisplayName("이룸이 기기가 마지막 단계를 체크하면 요청자 제외 없이(actor null) 완료 이벤트가 나간다")
+  void completeStep_lastStep_publishesRoutineCompleted_withActorNullForElumi() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.completeStep(Caller.elumi("member-1", "link-1"), "routine-1", "step-1");
+
+    verify(eventPublisher).publishEvent(new RoutineCompletedEvent("routine-1", "profile-1",
+      java.time.LocalDate.of(2026, 10, 19), null));
+  }
+
+  @Test
+  @DisplayName("마지막이 아닌 단계를 체크하면 완료 이벤트가 나가지 않는다")
+  void completeStep_notLastStep_publishesNothing() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
+
+    verifyNoInteractions(eventPublisher);
+  }
+
+  @Test
+  @DisplayName("이미 완료된 일과의 단계 체크는 거절되어 이벤트가 나가지 않는다")
+  void completeStep_alreadyCompleted_publishesNothing() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
+    routine.setStatus(RoutineStatus.COMPLETED);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1"))
+      .isInstanceOf(CustomException.class);
+
+    verifyNoInteractions(eventPublisher);
+  }
+
+  @Test
+  @DisplayName("syncProgress 로 새로 전부 완료되면 완료 이벤트가 한 번 나간다")
+  void syncProgress_newlyCompleted_publishes() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
+
+    verify(eventPublisher).publishEvent(new RoutineCompletedEvent("routine-1", "profile-1",
+      java.time.LocalDate.of(2026, 10, 19), "member-1"));
+  }
+
+  @Test
+  @DisplayName("이미 완료였던 일과를 같은 집합으로 다시 보내도 완료 이벤트가 나가지 않는다")
+  void syncProgress_wasCompleted_publishesNothing() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    routine.getSteps().forEach(step -> step.setCompleted(true));
+    routine.setStatus(RoutineStatus.COMPLETED);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
+
+    verifyNoInteractions(eventPublisher);
+  }
+
+  @Test
+  @DisplayName("일부만 완료한 syncProgress 는 완료 이벤트가 나가지 않는다")
+  void syncProgress_partial_publishesNothing() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
+
+    verifyNoInteractions(eventPublisher);
+  }
+
+  @Test
+  @DisplayName("임시저장 일과를 승인하면 일과 보냄 이벤트에 요청한 보호자 id 가 담긴다")
+  void confirm_publishesRoutineSent() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
+    routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.confirm(GUARDIAN, "routine-1");
+
+    verify(eventPublisher).publishEvent(new RoutineSentEvent("routine-1", "profile-1", "member-1"));
+  }
+
+  @Test
+  @DisplayName("다시하기 복제는 새로 만든 일과로 일과 보냄 이벤트를 낸다")
+  void duplicate_publishesRoutineSent() {
+    Routine origin = confirmedRoutine(profileWithStars(0), 1);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(origin));
+    when(routineRepository.save(any(Routine.class))).thenAnswer(invocation -> {
+      Routine savedCopy = invocation.getArgument(0);
+      savedCopy.setId("copy-1");
+      return savedCopy;
+    });
+
+    routineService.duplicate(GUARDIAN, "routine-1");
+
+    verify(eventPublisher).publishEvent(new RoutineSentEvent("copy-1", "profile-1", "member-1"));
   }
 
   @Test

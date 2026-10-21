@@ -36,6 +36,13 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private String password;
 
+  // 보호자 닉네임 (가입 시 자동 생성, 유니크). 기존 회원은 기동 시 MemberNicknameBackfill 이 채움
+  @Column(unique = true, length = 50)
+  private String nickname;
+
+  // 보호자가 닉네임을 직접 바꾼 마지막 시각. null 이면 바꾼 적 없음 (변경 주기 판정)
+  private LocalDateTime nicknameChangedAt;
+
   // 계정 상태. SUSPENDED면 로그인·API 사용이 모두 차단된다(MemberAccessGuard).
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, columnDefinition = "varchar(255) not null default 'ACTIVE'")
@@ -92,6 +99,9 @@ public class Member extends BaseEntity {
   /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
   private String consentVersion;
 
+  /// 이야기 이용 규칙에 동의한 시각. 동의 전이면 null (글쓰기·댓글 전에 한 번 받음)
+  private LocalDateTime talkRulesAgreedAt;
+
   /// 동의를 받기 전 상태로 돌린다. 탈퇴 계정을 되살릴 때 동의를 다시 받기 위해 쓴다.
   /// 옛 동의 시각을 남기면 새로 동의받지 않았는데도 동의한 것처럼 보인다.
   public void clearConsents() {
@@ -102,6 +112,7 @@ public class Member extends BaseEntity {
     marketingAgreed = false;
     consentedAt = null;
     consentVersion = null;
+    talkRulesAgreedAt = null;
   }
 
   /// 필수 항목을 모두 동의했는가. 하나라도 빠지면 서비스를 쓸 수 없다.

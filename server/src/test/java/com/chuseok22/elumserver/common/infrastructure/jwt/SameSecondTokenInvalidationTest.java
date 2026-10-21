@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.member.application.service.MemberAccessGuard;
+import com.chuseok22.elumserver.member.application.service.MemberVisitRecorder;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
@@ -62,7 +63,7 @@ class SameSecondTokenInvalidationTest {
     member.setId("m1");
     member.setStatus(MemberStatus.ACTIVE);
     when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
-    guard = new MemberAccessGuard(memberRepository);
+    guard = new MemberAccessGuard(memberRepository, mock(MemberVisitRecorder.class));
     server = providerAt(AFTER_REVIVE.plusMillis(50));
   }
 

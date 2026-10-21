@@ -83,7 +83,6 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 결과가 온 뒤에도 한 줄을 보여주는 최소 시간.
   ///
   /// 0으로 두면 세 줄이 한 프레임에 스쳐 지나가 무엇을 했는지 읽을 수 없다.
-  /// 개인정보를 가린다는 사실은 보호자가 **봐야** 의미가 있다.
   static const _minVisible = Duration(milliseconds: 300);
 
   /// 대기를 쪼개는 간격. 통째로 기다리면 도중에 결과가 와도 깨어나지 못한다.

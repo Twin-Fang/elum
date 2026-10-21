@@ -65,6 +65,12 @@ abstract final class AppMotion {
   /// 모든 요소의 주기가 이 값의 약수라서 반복 이음매에서 튀지 않는다.
   static const celebrationAmbientLoop = Duration(seconds: 12);
 
+  /// 코치마크 시범 연출(탭·꾹 누르기·끌어서 묶기)의 한 주기.
+  ///
+  /// 안내를 읽는 동안 되풀이되는 장면이라 조작 하나(누름 > 결과)가 보일 만큼 느리다.
+  /// 눌러서 기다리게 하는 전환이 아니므로 [emphasis](500) 상한 밖에 둔다.
+  static const coachDemoLoop = Duration(seconds: 4);
+
   // --- Curve ---
 
   /// 일반 상태 변화

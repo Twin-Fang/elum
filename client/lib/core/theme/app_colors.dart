@@ -63,6 +63,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.highlightBorder,
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
+    required this.talkOriginBandFill,
+    required this.talkOriginBandAction,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -88,6 +90,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navSelectedFill,
     required this.navItemUnselected,
     required this.folderFill,
+    required this.folderStroke,
+    required this.libraryTileLabel,
     required this.homeCardShadow,
     required this.homeCardIconBg,
     required this.glassSurface,
@@ -195,8 +199,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsGroupDivider,
     required this.peopleMeBadgeBg,
     required this.peopleMeBadgeText,
-    required this.exampleBadgeBg,
-    required this.exampleBadgeText,
     required this.peopleGuardianChipBg,
     required this.peopleGuardianChipText,
     required this.peopleCaregiverChipBg,
@@ -219,6 +221,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditNumberText,
     required this.creditMutedText,
     required this.creditHistoryMutedText,
+    required this.notificationIconBackground,
+    required this.notificationUnreadBackground,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -307,6 +311,11 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color goalSelectedFill;
   final Color goalSelectedBorder;
 
+  // 가져온 일과 상세의 출처 띠 — 바탕은 연한 민트, 오른쪽 글씨는 진한 민트
+  // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
+  final Color talkOriginBandFill;
+  final Color talkOriginBandAction;
+
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
@@ -378,8 +387,14 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 하단 바 · 옆 메뉴 고르지 않은 칸 아이콘·글자 (#242634 20%, 시안 1666:7082, #835). 고른 칸은 navIconSelected
   final Color navItemUnselected;
 
-  /// 일과관리 묶음(폴더) 칸 바탕 — 진한 남색 10% (#807)
+  /// 일과관리 묶음(폴더) 칸 바탕 (#DDD9D9, 시안 1664:6876 회색 2x2 폴더)
   final Color folderFill;
+
+  /// 일과관리 묶음 칸 테두리 1px 안쪽 (#BFBDBD, 시안 1664:6876)
+  final Color folderStroke;
+
+  /// 일과관리 칸 이름 (#000000, 시안 1664:6876 — 본문색 #242634 와 다르다)
+  final Color libraryTileLabel;
 
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
@@ -757,8 +772,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color peopleMeBadgeText;
 
   /// 홈 일과 타일의 `예시` 배지 — 온보딩 예시 일과 (#803).
-  final Color exampleBadgeBg;
-  final Color exampleBadgeText;
 
   /// 구분 칩 `보호자`.
   final Color peopleGuardianChipBg;
@@ -827,6 +840,12 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 크레딧 사용 내역의 날짜·부제·줄어든 값 (Figma `1589:8359` `#74757D`).
   final Color creditHistoryMutedText;
+
+  /// 알림 줄 왼쪽 원형 아이콘의 바탕
+  final Color notificationIconBackground;
+
+  /// 알림 목록에서 안 읽은 줄의 연한 민트 바탕 (시안 알림 탭)
+  final Color notificationUnreadBackground;
 
   // --- 약관 동의 선택 상태 ---
   //
@@ -909,6 +928,8 @@ class AppColors extends ThemeExtension<AppColors> {
     highlightBorder: Color(0xFFEB9B73),
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
+    talkOriginBandFill: Color(0xFFF2FBFA),
+    talkOriginBandAction: Color(0xFF1D6B66),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -933,7 +954,9 @@ class AppColors extends ThemeExtension<AppColors> {
     navIconUnselected: Color(0xFFA6A8B4),
     navSelectedFill: Color(0xFFEEF1FD),
     navItemUnselected: Color(0x33242634),
-    folderFill: Color(0x1A242634),
+    folderFill: Color(0xFFDDD9D9),
+    folderStroke: Color(0xFFBFBDBD),
+    libraryTileLabel: Color(0xFF000000),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
@@ -1043,8 +1066,6 @@ class AppColors extends ThemeExtension<AppColors> {
     peopleMeBadgeBg: Color(0xFFD7D3D1),
     peopleMeBadgeText: Color(0xFFFFFFFF),
     // 녹색 계열 연한 배지 — 상태(완료·진행)와 겹치지 않는 보조 표시
-    exampleBadgeBg: Color(0xFFE8F5E9),
-    exampleBadgeText: Color(0xFF2E7D32),
     peopleGuardianChipBg: Color(0xFFB5EAEC),
     peopleGuardianChipText: Color(0xFF388E7C),
     peopleCaregiverChipBg: Color(0xFFFFDAC7),
@@ -1067,6 +1088,8 @@ class AppColors extends ThemeExtension<AppColors> {
     creditNumberText: Color(0xFFBAA0F9),
     creditMutedText: Color(0xFF9B97A4),
     creditHistoryMutedText: Color(0xFF74757D),
+    notificationIconBackground: Color(0xFFE7DEFB),
+    notificationUnreadBackground: Color(0xFFEAF7F5),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1121,6 +1144,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? highlightBorder,
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
+    Color? talkOriginBandFill,
+    Color? talkOriginBandAction,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1146,6 +1171,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navSelectedFill,
     Color? navItemUnselected,
     Color? folderFill,
+    Color? folderStroke,
+    Color? libraryTileLabel,
     Color? homeCardShadow,
     Color? homeCardIconBg,
     Color? glassSurface,
@@ -1241,8 +1268,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsGroupDivider,
     Color? peopleMeBadgeBg,
     Color? peopleMeBadgeText,
-    Color? exampleBadgeBg,
-    Color? exampleBadgeText,
     Color? peopleGuardianChipBg,
     Color? peopleGuardianChipText,
     Color? peopleCaregiverChipBg,
@@ -1265,6 +1290,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditNumberText,
     Color? creditMutedText,
     Color? creditHistoryMutedText,
+    Color? notificationIconBackground,
+    Color? notificationUnreadBackground,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1321,6 +1348,8 @@ class AppColors extends ThemeExtension<AppColors> {
       highlightBorder: highlightBorder ?? this.highlightBorder,
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
+      talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
+      talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1347,6 +1376,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: navSelectedFill ?? this.navSelectedFill,
       navItemUnselected: navItemUnselected ?? this.navItemUnselected,
       folderFill: folderFill ?? this.folderFill,
+      folderStroke: folderStroke ?? this.folderStroke,
+      libraryTileLabel: libraryTileLabel ?? this.libraryTileLabel,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
@@ -1443,8 +1474,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
       peopleMeBadgeText: peopleMeBadgeText ?? this.peopleMeBadgeText,
-      exampleBadgeBg: exampleBadgeBg ?? this.exampleBadgeBg,
-      exampleBadgeText: exampleBadgeText ?? this.exampleBadgeText,
       peopleGuardianChipBg: peopleGuardianChipBg ?? this.peopleGuardianChipBg,
       peopleGuardianChipText: peopleGuardianChipText ?? this.peopleGuardianChipText,
       peopleCaregiverChipBg: peopleCaregiverChipBg ?? this.peopleCaregiverChipBg,
@@ -1467,6 +1496,8 @@ class AppColors extends ThemeExtension<AppColors> {
       creditNumberText: creditNumberText ?? this.creditNumberText,
       creditMutedText: creditMutedText ?? this.creditMutedText,
       creditHistoryMutedText: creditHistoryMutedText ?? this.creditHistoryMutedText,
+      notificationIconBackground: notificationIconBackground ?? this.notificationIconBackground,
+      notificationUnreadBackground: notificationUnreadBackground ?? this.notificationUnreadBackground,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1553,6 +1584,16 @@ class AppColors extends ThemeExtension<AppColors> {
         other.goalSelectedBorder,
         t,
       )!,
+      talkOriginBandFill: Color.lerp(
+        talkOriginBandFill,
+        other.talkOriginBandFill,
+        t,
+      )!,
+      talkOriginBandAction: Color.lerp(
+        talkOriginBandAction,
+        other.talkOriginBandAction,
+        t,
+      )!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,
@@ -1602,6 +1643,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
       navItemUnselected: Color.lerp(navItemUnselected, other.navItemUnselected, t)!,
       folderFill: Color.lerp(folderFill, other.folderFill, t)!,
+      folderStroke: Color.lerp(folderStroke, other.folderStroke, t)!,
+      libraryTileLabel: Color.lerp(libraryTileLabel, other.libraryTileLabel, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
@@ -1807,8 +1850,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
       peopleMeBadgeText: Color.lerp(peopleMeBadgeText, other.peopleMeBadgeText, t)!,
-      exampleBadgeBg: Color.lerp(exampleBadgeBg, other.exampleBadgeBg, t)!,
-      exampleBadgeText: Color.lerp(exampleBadgeText, other.exampleBadgeText, t)!,
       peopleGuardianChipBg: Color.lerp(peopleGuardianChipBg, other.peopleGuardianChipBg, t)!,
       peopleGuardianChipText: Color.lerp(peopleGuardianChipText, other.peopleGuardianChipText, t)!,
       peopleCaregiverChipBg: Color.lerp(peopleCaregiverChipBg, other.peopleCaregiverChipBg, t)!,
@@ -1832,6 +1873,8 @@ class AppColors extends ThemeExtension<AppColors> {
       creditNumberText: Color.lerp(creditNumberText, other.creditNumberText, t)!,
       creditMutedText: Color.lerp(creditMutedText, other.creditMutedText, t)!,
       creditHistoryMutedText: Color.lerp(creditHistoryMutedText, other.creditHistoryMutedText, t)!,
+      notificationIconBackground: Color.lerp(notificationIconBackground, other.notificationIconBackground, t)!,
+      notificationUnreadBackground: Color.lerp(notificationUnreadBackground, other.notificationUnreadBackground, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

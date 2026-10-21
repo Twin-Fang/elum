@@ -15,7 +15,9 @@ import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoServic
 import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.member.application.controller.MemberController;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.member.application.service.OnboardingService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,6 +74,8 @@ class SecurityConfigInternalPathTest {
 
   @MockitoBean
   private MemberService memberService;
+  @MockitoBean
+  private OnboardingService onboardingService;
 
   // SecurityConfig 생성자가 요구하는 빈들
   @MockitoBean(name = "memberUserDetailsService")
@@ -86,6 +90,9 @@ class SecurityConfigInternalPathTest {
   private LinkAccessValidator linkAccessValidator;
   @MockitoBean
   private SystemConfigService systemConfigService;
+
+  @MockitoBean
+  private SharedStateStore sharedStateStore;
 
   // AidlpDecryptionFilter(@Component Filter)는 슬라이스에 자동으로 들어온다. 평문 본문은 그대로 통과시킨다.
   @MockitoBean

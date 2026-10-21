@@ -42,6 +42,6 @@ class AidlpDecryptionFilterErrorResponseTest {
       response.getContentAsByteArray(), new TypeReference<Map<String, String>>() { });
     assertThat(body).containsExactlyInAnyOrderEntriesOf(Map.of(
       "errorCode", "DLP_SECRET_NOT_CONFIGURED",
-      "errorMessage", "서버에 암호화 시크릿이 설정되지 않았습니다."));
+      "errorMessage", "서버에 암호화 시크릿이 설정되지 않았어요."));
   }
 }

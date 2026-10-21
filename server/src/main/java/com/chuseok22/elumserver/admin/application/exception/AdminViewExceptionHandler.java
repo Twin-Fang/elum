@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.admin.application.controller.AdminNoticeControll
 import com.chuseok22.elumserver.admin.application.controller.AdminPromptController;
 import com.chuseok22.elumserver.admin.application.controller.AdminRoutineController;
 import com.chuseok22.elumserver.admin.application.controller.AdminSettingsHistoryController;
+import com.chuseok22.elumserver.admin.application.controller.AdminTalkController;
 import com.chuseok22.elumserver.admin.application.controller.AdminViewController;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
   AdminPromptController.class,
   AdminRoutineController.class,
   AdminSettingsHistoryController.class,
+  AdminTalkController.class,
   AdminViewController.class,
 })
 @Slf4j

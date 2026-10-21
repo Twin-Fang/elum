@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateReq
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
@@ -35,13 +36,13 @@ class RoutineControllerAuthorTest {
   private final RoutineProgressService progressService = mock(RoutineProgressService.class);
   private final ProfileGuardianRepository guardians = mock(ProfileGuardianRepository.class);
   private final RoutineController controller = new RoutineController(
-    service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(RoutineLibraryService.class), new RoutineAuthorResolver(guardians));
+    service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), new RoutineAuthorResolver(guardians));
 
   private final Authentication guardian = new TestingAuthenticationToken("member-1", null);
 
   private static RoutineResponse routineBy(String createdBy) {
     return new RoutineResponse("r1", "제목", "원문", "마스킹본", null, "CONFIRMED", null, null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, "p1", "ko", null, false, null, null, null, null, null);
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, "p1", "ko", null, false, null, null, null, null, null, null, null);
   }
 
   private static GuardianName dad() {

@@ -40,6 +40,7 @@ class ActionCardView extends StatefulWidget {
     this.isSpeaking = false,
     this.layout = ActionCardLayout.review,
     this.onAddPhoto,
+    this.isImageGenerating = false,
   });
 
   /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230).
@@ -82,6 +83,9 @@ class ActionCardView extends StatefulWidget {
   /// 자리만 보이고 눌러도 아무 일이 없다. 이룸이 화면([ActionCardLayout.childDetail])은
   /// 사진을 넣는 자리가 아니라 무시한다.
   final VoidCallback? onAddPhoto;
+
+  /// 서버가 이 카드 그림을 그리는 중인가 (직접 추가한 카드, #868)
+  final bool isImageGenerating;
 
   @override
   State<ActionCardView> createState() => _ActionCardViewState();
@@ -226,12 +230,16 @@ class _ActionCardViewState extends State<ActionCardView> {
   }) {
     // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다. 줄에 또 두면
     // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
-    // 픽토그램이 그림 자리를 채우면 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
-    // 글자는 줄에서 읽는다.
+    // 번들 그림(예시 이미지·픽토그램)이 그림 자리를 채우면 제목은 줄에 그대로 둔다 —
+    // 그림이 뜻을 전하고 글자는 줄에서 읽는다.
     final titleInArt =
         childLayout &&
         imageState == CardImageState.none &&
-        !showsPictogram(imageState, widget.card.pictogramId);
+        !showsBundledArt(
+          imageState,
+          pictogramId: widget.card.pictogramId,
+          exampleImageId: widget.card.exampleImageId,
+        );
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,
@@ -281,8 +289,10 @@ class _ActionCardViewState extends State<ActionCardView> {
                         stepId: widget.card.id,
                         imagePath: widget.card.imagePath,
                         pictogramId: widget.card.pictogramId,
+                        exampleImageId: widget.card.exampleImageId,
                         pictogramLabel: widget.card.displayTitle,
                         onDelete: widget.onDelete,
+                        isImageGenerating: widget.isImageGenerating,
                         // 이룸이 화면은 사진을 넣는 자리가 아니다
                         emptyBuilder: (context) => childLayout
                             ? DefaultCardTitleArt(

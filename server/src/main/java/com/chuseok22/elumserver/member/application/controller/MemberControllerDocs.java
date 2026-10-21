@@ -1,13 +1,16 @@
 package com.chuseok22.elumserver.member.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.dto.response.TalkRulesAgreementResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,7 +61,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰이에요.\"}"
         )
       )
     ),
@@ -68,7 +71,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원입니다.\"}"
+          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원이에요.\"}"
         )
       )
     )
@@ -110,6 +113,89 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<MemberResponse> createProfile(Authentication authentication);
+
+  @Operation(
+    summary = "온보딩 완료 (한 번에 저장)",
+    description = """
+      온보딩에서 받은 이룸이 정보와 예시 일과 분류를 **한 트랜잭션으로** 저장합니다.
+
+      **처리 순서**
+      1. 연결된 이룸이가 없으면 새로 만듭니다 (`POST /api/member/profile` 과 같음, 멱등).
+      2. 그 이룸이(가장 먼저 연결된 이룸이)에 호칭, 도움 목표, 캐릭터, 그림 방식을 저장합니다.
+      3. `exampleCategories` 가 있으면 예시 일과를 만듭니다. 모르는 분류 코드는 빼고, 이미 만든 이룸이면 건너뜁니다.
+      4. 저장된 내 정보를 `/api/member/me` 와 같은 모양으로 돌려줍니다.
+
+      **`X-Profile-Id` 헤더를 보지 않습니다.** 탈퇴 후 재가입처럼 앱에 지워진 이룸이 id 가 남아 있어도 403 이나 일부만 저장되는 일이 없습니다.
+      하나라도 실패하면 전부 되돌립니다. 이룸이 휴대폰 토큰은 403(`DEVICE_LINK_FORBIDDEN_FOR_ELUMI`), 호칭이 비면 400 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "저장 완료",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "호칭 없음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "이룸이 휴대폰 토큰",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+  })
+  ResponseEntity<MemberResponse> completeOnboarding(Authentication authentication, OnboardingCompleteRequest request);
+
+  @Operation(
+    summary = "보호자 닉네임 변경",
+    description = """
+      보호자 본인 닉네임을 바꿉니다 (이룸이 호칭은 `PATCH /api/member/nickname`).
+      - 2~16자, 한글·영문·숫자·하이픈. 앞뒤 공백은 지우고 저장합니다.
+      - 욕설·사칭 이름은 이유를 알리지 않고 `NICKNAME_NOT_ALLOWED` 로 거절합니다.
+      - 7일에 한 번 바꿀 수 있습니다(첫 변경은 제한 없음). 다음 가능 시각은 응답 `account.nicknameChangeableAt`.
+      - 지금 닉네임과 같으면 아무것도 바꾸지 않고 200 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "변경 완료 (내 정보와 같은 모양)",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "형식 오류",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_INVALID_FORMAT\",\"errorMessage\":\"닉네임은 한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요.\"}")
+      )
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "다른 보호자가 사용 중",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_DUPLICATED\",\"errorMessage\":\"다른 보호자가 이미 쓰고 있어요. 다른 이름을 적어 주세요.\"}")
+      )
+    ),
+    @ApiResponse(
+      responseCode = "429",
+      description = "7일 안에 다시 변경",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(value = "{\"errorCode\":\"NICKNAME_CHANGE_TOO_SOON\",\"errorMessage\":\"닉네임은 7일에 한 번 바꿀 수 있어요.\"}")
+      )
+    )
+  })
+  ResponseEntity<MemberResponse> updateGuardianNickname(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    GuardianNicknameUpdateRequest request
+  );
 
   @Operation(
     summary = "아이 호칭 설정",
@@ -159,7 +245,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -190,7 +276,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -226,7 +312,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력한 내용이 올바르지 않아요.\"}"
         )
       )
     )
@@ -268,7 +354,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰이에요.\"}"
         )
       )
     ),
@@ -278,7 +364,7 @@ public interface MemberControllerDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원입니다.\"}"
+          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원이에요.\"}"
         )
       )
     )
@@ -315,4 +401,36 @@ public interface MemberControllerDocs {
   )
   ResponseEntity<MemberConsentResponse> agreeConsents(
     Authentication authentication, MemberConsentRequest request);
+
+  @Operation(
+    summary = "이야기 이용 규칙 동의",
+    description = """
+      이야기 이용 규칙에 동의했다고 기록합니다. 이미 동의했으면 처음 시각을 그대로 두고 204 로 답합니다.
+      동의하지 않으면 이야기 올리기가 403 `TALK_RULES_NOT_AGREED` 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "동의 기록 완료"),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "회원 없음(MEMBER_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<Void> agreeTalkRules(Authentication authentication);
+
+  @Operation(
+    summary = "이야기 이용 규칙 동의 여부 조회",
+    description = "이야기 이용 규칙에 동의했는지 `{ \"hasAgreed\": bool }` 로 돌려줍니다. 앱은 false 면 규칙 화면을 먼저 보여줍니다."
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+      content = @Content(schema = @Schema(implementation = TalkRulesAgreementResponse.class))),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "회원 없음(MEMBER_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<TalkRulesAgreementResponse> getTalkRulesAgreement(Authentication authentication);
 }

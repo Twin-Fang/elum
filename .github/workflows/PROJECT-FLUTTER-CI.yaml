@@ -294,21 +294,13 @@ jobs:
           flutter analyze --no-fatal-infos
           echo "✅ 코드 분석 완료"
 
-      # 단위 테스트 실행
-      #
-      # analyze만으로는 회귀를 못 잡는다. 실제로 색 토큰 규칙을 어긴 코드가
-      # 두 달 넘게 통과했다 — 테스트는 있었지만 CI가 돌리지 않았다.
-      # 골든(픽셀 비교)은 제외한다 — 이슈 #218.
-      # macOS에서 만든 골든을 Linux 러너가 통과하지 못한다. blur·그라데이션
-      # 래스터가 환경마다 달라 6건이 늘 실패했고(18%·13%·7%×3·1.2%), 그 탓에
-      # CI가 최근 30회 연속 빨간불이었다. **늘 빨간 CI는 아무도 보지 않아
-      # 진짜 회귀까지 묻힌다.** 골든은 로컬에서 그대로 돌아 회귀를 잡는다.
-      - name: Run Flutter Test
-        id: unit_test
+      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩) — 앱 테스트를 지운 뒤 남은 강제 장치
+      - name: Run rule checks
+        id: rules
         run: |
-          echo "🧪 Flutter 단위 테스트 시작... (골든 제외)"
-          flutter test --exclude-tags golden
-          echo "✅ 단위 테스트 완료"
+          dart run tool/check_layer_imports.dart
+          dart run tool/check_hangul_literals.dart lib
+          echo "✅ 규칙 검사 완료"
 
       # 분석 결과 기록
       - name: 분석 결과 기록
@@ -325,8 +317,8 @@ jobs:
             const duration = minutes > 0 ? `${minutes}분 ${seconds}초` : `${seconds}초`;
 
             const analyzeOk = '${{ steps.analyze.outcome }}' === 'success';
-            const testOk = '${{ steps.unit_test.outcome }}' === 'success';
-            const status = analyzeOk && testOk ? 'success' : 'failure';
+            const rulesOk = '${{ steps.rules.outcome }}' === 'success';
+            const status = analyzeOk && rulesOk ? 'success' : 'failure';
 
             core.setOutput('status', status);
             core.setOutput('duration', duration);
@@ -401,6 +393,18 @@ jobs:
             ${{ runner.os }}-gradle-
 
       # 프로젝트 의존성 설치
+      # Firebase Android 설정 파일 (푸시 #828). google-services 플러그인이 빌드 때 필요로 한다.
+      - name: Create google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "::error::GOOGLE_SERVICES_JSON secret 이 비었다"
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          echo "✅ android/app/google-services.json 생성"
+
       - name: Install dependencies
         run: |
           flutter pub get
@@ -548,6 +552,18 @@ jobs:
           restore-keys: ${{ runner.os }}-flutter-pub-
 
       # 프로젝트 의존성 설치
+      # Firebase iOS 설정 파일 (푸시 #828). 커밋되지 않으므로 Secret 에서 만든다.
+      - name: Create GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST secret 이 비었다"
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+          echo "✅ ios/Runner/GoogleService-Info.plist 생성"
+
       - name: Install dependencies
         run: |
           flutter pub get

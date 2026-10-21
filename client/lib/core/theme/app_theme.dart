@@ -43,6 +43,8 @@ abstract final class AppTheme {
         backgroundColor: colors.textPrimary,
         // body 는 줄 높이 1.0 이라 이름이 길어 두 줄이 되면 위아래 줄이 붙는다.
         contentTextStyle: typo.body.copyWith(color: colors.surface, height: 1.4),
+        // 문구 옆 누르는 글자(`보러 가기`): 본문과 같은 색
+        actionTextColor: colors.surface,
         insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,

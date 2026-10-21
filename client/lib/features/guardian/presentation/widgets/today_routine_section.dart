@@ -20,8 +20,10 @@ import 'routine_loading_tile.dart';
 import 'routine_tile_gap.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
+import 'talk_share_hint_link.dart';
 import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
@@ -274,6 +276,25 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
         .firstOrNull
         ?.id;
 
+    return ReorderFingerFollow(
+      builder: (context, follow) => _buildReorderList(
+        routines: routines,
+        progress: progress,
+        isDemoSwipeOpen: demoOpen,
+        coachId: coachId,
+        follow: follow,
+      ),
+    );
+  }
+
+  /// 오늘 일과 목록: 길게 눌러 끌어 순서 바꾸기 (들린 줄은 손가락에 붙음) · 밀어서 편집 · 삭제
+  Widget _buildReorderList({
+    required List<Routine> routines,
+    required ChildRoutineState progress,
+    required bool isDemoSwipeOpen,
+    required String? coachId,
+    required ReorderFingerFollowState follow,
+  }) {
     return ReorderableListView.builder(
       shrinkWrap: true,
       // 바깥 화면이 이미 스크롤한다. 여기까지 스크롤하면 둘이 맞물려 튄다.
@@ -285,24 +306,30 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       itemCount: routines.length,
       onReorderStart: (index) {
         HapticFeedback.mediumImpact();
+        follow.start();
         setState(() {
           _draggingId = routines[index].id;
           // 들고 있는 카드가 밀려 있으면 버튼만 제자리에 남는다.
           _openId = null;
         });
       },
-      onReorderEnd: (_) => setState(() => _draggingId = null),
+      onReorderEnd: (_) {
+        follow.end();
+        setState(() => _draggingId = null);
+      },
       onReorder: (oldIndex, newIndex) => _reorder(routines, oldIndex, newIndex),
-      proxyDecorator: (child, index, animation) => AnimatedBuilder(
-        animation: animation,
-        builder: (context, inner) {
-          final lift = Curves.easeOut.transform(animation.value);
-          return Transform.scale(
-            scale: 1 + _liftScale * lift,
-            child: Material(type: MaterialType.transparency, child: inner),
-          );
-        },
-        child: child,
+      proxyDecorator: (child, index, animation) => follow.decorate(
+        AnimatedBuilder(
+          animation: animation,
+          builder: (context, inner) {
+            final lift = Curves.easeOut.transform(animation.value);
+            return Transform.scale(
+              scale: 1 + _liftScale * lift,
+              child: Material(type: MaterialType.transparency, child: inner),
+            );
+          },
+          child: child,
+        ),
       ),
       itemBuilder: (context, index) {
         final routine = routines[index];
@@ -311,52 +338,59 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
           padding: EdgeInsets.only(
             bottom: index == routines.length - 1 ? 0 : routineTileGap.h,
           ),
-          child: ReorderableDelayedDragStartListener(
-            // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
-            key: routine.id == coachId ? widget.coachKey : null,
-            index: index,
-            child: RoutineSwipeActions(
-              // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
-              //. 만든 사람을 모르면 지금처럼 민다.
-              //
-              // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
-              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
-              // `다 끝낸 일과예요`로 이유를 본다.
-              enabled:
-                  routine.isEditableByMe &&
-                  !_isFinished(routine) &&
-                  !isBusy(routine.id),
-              isOpen:
-                  _openId == routine.id || (demoOpen && routine.id == coachId),
-              onOpenChanged: (open) =>
-                  setState(() => _openId = open ? routine.id : null),
-              onDelete: () => _delete(routine),
-              onEdit: () => _edit(routine),
-              child: RoutineSummaryTile(
-                routine: routine,
-                progress: routineProgress(routine, progress),
-                highlighted:
-                    _openId == routine.id ||
-                    _draggingId == routine.id ||
-                    (demoOpen && routine.id == coachId),
-                // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
-                // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
-                // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.
-                //
-                // 길게 눌러 끄는 길은 남겨 둔다 — 목록이 `ReorderableListView` 라
-                // 아래 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
-                // 지우는 중인 줄만 오른쪽 끝에 스피너를 둔다.
-                dragHandle: isBusy(routine.id)
-                    ? ElumSpinner(size: 18.w, strokeWidth: 2.w)
-                    : null,
-                // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
-                onTap: isBusy(routine.id)
-                    ? null
-                    : () => _openId == routine.id
-                          ? setState(() => _openId = null)
-                          : _openSheet(routine),
+          child: Column(
+            children: [
+              ReorderableDelayedDragStartListener(
+                // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
+                key: routine.id == coachId ? widget.coachKey : null,
+                index: index,
+                child: RoutineSwipeActions(
+                  // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
+                  //. 만든 사람을 모르면 지금처럼 민다.
+                  //
+                  // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
+                  // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
+                  // `다 끝낸 일과예요`로 이유를 본다.
+                  enabled:
+                      routine.isEditableByMe &&
+                      !_isFinished(routine) &&
+                      !isBusy(routine.id),
+                  isOpen:
+                      _openId == routine.id ||
+                      (isDemoSwipeOpen && routine.id == coachId),
+                  onOpenChanged: (open) =>
+                      setState(() => _openId = open ? routine.id : null),
+                  onDelete: () => _delete(routine),
+                  onEdit: () => _edit(routine),
+                  child: RoutineSummaryTile(
+                    routine: routine,
+                    progress: routineProgress(routine, progress),
+                    highlighted:
+                        _openId == routine.id ||
+                        _draggingId == routine.id ||
+                        (isDemoSwipeOpen && routine.id == coachId),
+                    // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
+                    // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
+                    // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.
+                    //
+                    // 길게 눌러 끄는 길은 남겨 둔다 — 목록이 `ReorderableListView` 라
+                    // 아래 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
+                    // 지우는 중인 줄만 오른쪽 끝에 스피너를 둔다.
+                    dragHandle: isBusy(routine.id)
+                        ? ElumSpinner(size: 18.w, strokeWidth: 2.w)
+                        : null,
+                    // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
+                    onTap: isBusy(routine.id)
+                        ? null
+                        : () => _openId == routine.id
+                              ? setState(() => _openId = null)
+                              : _openSheet(routine),
+                  ),
+                ),
               ),
-            ),
+              // 끝낸 일과 카드 아래 이야기 공유 링크 (조건은 위젯이 판단)
+              if (_isFinished(routine)) TalkShareHintLink(routine: routine),
+            ],
           ),
         );
       },

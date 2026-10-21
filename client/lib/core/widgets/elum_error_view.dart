@@ -28,6 +28,7 @@ class ElumErrorView extends StatelessWidget {
     this.onRetry,
     this.actionLabel,
     this.compact = false,
+    this.isRetrying = false,
   });
 
   /// 무엇을 못 했는지. 해요체·긍정형으로 쓴다 (예: '일과를 불러오지 못했어요').
@@ -52,6 +53,9 @@ class ElumErrorView extends StatelessWidget {
   /// 멀쩡한 나머지까지 쓸 수 없게 된다. 그래서 실패한 자리에만 작게 놓는다.
   final bool compact;
 
+  /// 다시 시도 중: 버튼은 남기되 눌리지 않고 스피너를 보여준다 (전체 화면 모드만).
+  final bool isRetrying;
+
   /// 잡은 예외에서 바로 만든다 — **문구·코드 판정을 [AppFailure] 에 맡긴다.**
   ///
   /// `message` 를 손으로 적으면 서버가 이유를 알려줘도 앱 문구가 덮어쓴다.
@@ -72,6 +76,7 @@ class ElumErrorView extends StatelessWidget {
     String? description,
     VoidCallback? onRetry,
     bool compact = false,
+    bool isRetrying = false,
   }) {
     final failure = AppFailure.of(error);
     return ElumErrorView(
@@ -83,6 +88,7 @@ class ElumErrorView extends StatelessWidget {
       errorCode: failure.badgeOr(fallbackCode),
       onRetry: onRetry,
       compact: compact,
+      isRetrying: isRetrying,
     );
   }
 
@@ -145,9 +151,9 @@ class ElumErrorView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            AppAssets.lumiThinking,
-            width: 100.w,
-            height: 100.w,
+            AppAssets.temporaryErrorLumi,
+            width: 160.w,
+            height: 160.w,
             fit: BoxFit.contain,
           ),
           SizedBox(height: space.lg),
@@ -167,6 +173,7 @@ class ElumErrorView extends StatelessWidget {
             ElumButton(
               label: actionLabel ?? context.l10n.commonRetry,
               onPressed: onRetry,
+              loading: isRetrying,
             ),
           ],
           if (errorCode != null) ...[

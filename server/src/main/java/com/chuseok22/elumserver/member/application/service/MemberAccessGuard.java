@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * - WITHDRAWN 회원 → 거부 (탈퇴해도 행이 남으므로 "없는 회원"으로 걸러지지 않는다)
  * - tokenInvalidBefore 이전에 발급된 토큰 → 거부 (강제 로그아웃)
  * - 통과 시 lastActivityAt을 60초 스로틀로 갱신 (요청마다 UPDATE가 나가지 않게)
+ * - 통과 시 그날 첫 요청이면 방문 1줄 (관리자 방문 추이)
  * DB 장애 시에는 가용성을 우선해 통과시키고 경고 로그만 남긴다 — 상태 확인 실패로
  * 전체 API가 죽는 것보다 정지 반영이 잠시 늦는 쪽이 낫다.
  */
@@ -29,6 +31,7 @@ public class MemberAccessGuard implements TokenAccessValidator {
   private static final long ACTIVITY_THROTTLE_SECONDS = 60;
 
   private final MemberRepository memberRepository;
+  private final MemberVisitRecorder memberVisitRecorder;
 
   @Override
   @Transactional
@@ -49,6 +52,7 @@ public class MemberAccessGuard implements TokenAccessValidator {
         return false;
       }
       touchActivity(member);
+      memberVisitRecorder.recordFirstVisitOfDay(memberId, LocalDate.now());
       return true;
     } catch (Exception e) {
       log.warn("회원 접근 상태 확인 실패, 가용성 우선으로 통과: memberId={}", memberId, e);

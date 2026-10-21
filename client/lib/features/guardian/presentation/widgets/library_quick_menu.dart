@@ -6,112 +6,151 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../shared/models/routine.dart';
+import 'anchored_quick_menu.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
-enum LibraryMenuAction { send, rename, addToGroup, copy, remove }
+enum LibraryMenuAction { send, rename, addToGroup, copy, shareToTalk, remove }
 
 /// 일과관리 묶음(폴더)을 길게 눌렀을 때 고르는 동작 (#807)
 enum GroupMenuAction { send, rename, reorder, copy, ungroup }
 
-/// 빠른 메뉴 한 줄: 돌려줄 값 · 아이콘 · 글자 · 붉게(되돌리기 어려운 동작)
-typedef QuickMenuRow<T> = ({
-  T value,
-  IconData icon,
-  String label,
-  bool isDanger,
-});
-
 /// 낱개 원본 메뉴. 남이 만든 일과는 보내기·묶음에 넣기·복사하기만 (#805)
 ///
 /// 이름 바꾸기·지우기는 만든 사람만 할 수 있어 서버도 막지만, 누를 수 없는 줄은 처음부터 보이지 않는다.
+/// [sharedPostIdBySourceRoutineId] 는 이야기에 올린 글(원본 일과 id > 글 id), 올린 일과면 `내 글 보기` 줄이 된다.
 Future<LibraryMenuAction?> showLibraryQuickMenu(
   BuildContext context,
-  Routine routine,
-) {
+  Routine routine, {
+  required Rect anchor,
+  required Widget highlight,
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
+}) => showAnchoredQuickMenu(
+  context,
+  anchor: anchor,
+  highlight: highlight,
+  rows: libraryMenuRows(
+    context,
+    routine,
+    sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+  ),
+);
+
+/// 같은 메뉴를 아래 시트로: 상세 시트의 ⋯ 처럼 눌린 칸이 없을 때 (#834)
+Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
+  BuildContext context,
+  Routine routine, {
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
+}) => showQuickMenuSheet(
+  context,
+  title: routine.displayTitle,
+  rows: libraryMenuRows(
+    context,
+    routine,
+    sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+  ),
+);
+
+/// 낱개 원본 메뉴 줄 (격자가 길게 누르는 동안 그리는 미리보기도 이 줄을 쓴다)
+List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
+  BuildContext context,
+  Routine routine, {
+  Map<String, String> sharedPostIdBySourceRoutineId = const {},
+}) {
   final l10n = context.l10n;
   final isMine = routine.isEditableByMe;
-  return showQuickMenuSheet(
-    context,
-    title: routine.displayTitle,
-    rows: [
+  // 예시 일과 · 이야기에서 가져온 일과는 올릴 수 없다
+  final canShareToTalk = !routine.isExample && routine.talkPostId == null;
+  final hasSharedPost = sharedPostIdBySourceRoutineId.containsKey(routine.id);
+  return [
+    (
+      value: LibraryMenuAction.send,
+      icon: Icons.send_rounded,
+      label: l10n.routineLibrarySendToday,
+      isDanger: false,
+    ),
+    if (isMine)
       (
-        value: LibraryMenuAction.send,
-        icon: Icons.send_rounded,
-        label: l10n.routineLibrarySendToday,
+        value: LibraryMenuAction.rename,
+        icon: Icons.edit_rounded,
+        label: l10n.routineLibraryMenuRename,
         isDanger: false,
       ),
-      if (isMine)
-        (
-          value: LibraryMenuAction.rename,
-          icon: Icons.edit_rounded,
-          label: l10n.routineLibraryMenuRename,
-          isDanger: false,
-        ),
+    (
+      value: LibraryMenuAction.addToGroup,
+      icon: Icons.create_new_folder_outlined,
+      label: l10n.routineGroupMenuAddToGroup,
+      isDanger: false,
+    ),
+    (
+      value: LibraryMenuAction.copy,
+      icon: Icons.content_copy_rounded,
+      label: l10n.routineLibraryMenuCopy,
+      isDanger: false,
+    ),
+    if (canShareToTalk)
       (
-        value: LibraryMenuAction.addToGroup,
-        icon: Icons.create_new_folder_outlined,
-        label: l10n.routineGroupMenuAddToGroup,
+        value: LibraryMenuAction.shareToTalk,
+        icon: Icons.menu_book_outlined,
+        label: hasSharedPost ? l10n.talkMenuViewMyPost : l10n.talkMenuShare,
         isDanger: false,
       ),
+    if (isMine)
       (
-        value: LibraryMenuAction.copy,
-        icon: Icons.content_copy_rounded,
-        label: l10n.routineLibraryMenuCopy,
-        isDanger: false,
+        value: LibraryMenuAction.remove,
+        icon: Icons.delete_outline_rounded,
+        label: l10n.routineLibraryMenuRemove,
+        isDanger: true,
       ),
-      if (isMine)
-        (
-          value: LibraryMenuAction.remove,
-          icon: Icons.delete_outline_rounded,
-          label: l10n.routineLibraryMenuRemove,
-          isDanger: true,
-        ),
-    ],
-  );
+  ];
 }
 
 /// 묶음 메뉴: 보내기 · 이름 바꾸기 · 순서 바꾸기 · 복사하기 · 묶음 풀기 (풀어도 일과는 남는다)
 Future<GroupMenuAction?> showGroupQuickMenu(
   BuildContext context, {
-  required String groupName,
-}) {
+  required Rect anchor,
+  required Widget highlight,
+}) => showAnchoredQuickMenu(
+  context,
+  anchor: anchor,
+  highlight: highlight,
+  rows: groupMenuRows(context),
+);
+
+/// 묶음 메뉴 줄 (격자 미리보기도 이 줄을 쓴다)
+List<QuickMenuRow<GroupMenuAction>> groupMenuRows(BuildContext context) {
   final l10n = context.l10n;
-  return showQuickMenuSheet(
-    context,
-    title: groupName,
-    rows: [
-      (
-        value: GroupMenuAction.send,
-        icon: Icons.send_rounded,
-        label: l10n.routineLibrarySendToday,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.rename,
-        icon: Icons.edit_rounded,
-        label: l10n.routineLibraryMenuRename,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.reorder,
-        icon: Icons.swap_vert_rounded,
-        label: l10n.routineGroupMenuReorder,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.copy,
-        icon: Icons.content_copy_rounded,
-        label: l10n.routineLibraryMenuCopy,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.ungroup,
-        icon: Icons.folder_off_outlined,
-        label: l10n.routineGroupMenuUngroup,
-        isDanger: false,
-      ),
-    ],
-  );
+  return [
+    (
+      value: GroupMenuAction.send,
+      icon: Icons.send_rounded,
+      label: l10n.routineLibrarySendToday,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.rename,
+      icon: Icons.edit_rounded,
+      label: l10n.routineLibraryMenuRename,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.reorder,
+      icon: Icons.swap_vert_rounded,
+      label: l10n.routineGroupMenuReorder,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.copy,
+      icon: Icons.content_copy_rounded,
+      label: l10n.routineLibraryMenuCopy,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.ungroup,
+      icon: Icons.folder_off_outlined,
+      label: l10n.routineGroupMenuUngroup,
+      isDanger: false,
+    ),
+  ];
 }
 
 /// 빠른 메뉴 시트: 무엇에 대한 메뉴인지(제목) + 동작 줄. 고른 줄의 값을 돌려준다

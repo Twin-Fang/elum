@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
+import '../domain/guardian_account.dart';
 import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -21,6 +23,7 @@ class Member {
     this.imageStyle = ImageStyle.cartoon,
     this.profiles = const [],
     this.adsRemoved = false,
+    this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
 
@@ -48,6 +51,11 @@ class Member {
   /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
   final bool adsRemoved;
 
+  /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
+  ///
+  /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
+  final GuardianAccount? account;
+
   final bool? _profilesKnown;
 
   /// 응답에 이룸이 목록이 **있었는가.** 다중 보호자 이전 서버는 필드가 없다 — 그때 빈
@@ -64,6 +72,7 @@ class Member {
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
         adsRemoved != other.adsRemoved ||
+        account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
         profiles.length != other.profiles.length) {
@@ -107,6 +116,7 @@ class Member {
         final Map<dynamic, dynamic> e => e['adsRemoved'] == true,
         _ => false,
       },
+      account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );
   }
@@ -158,6 +168,38 @@ class MemberRepository {
     });
   }
 
+  /// 온보딩 완료 한 번 저장: 이룸이 확보 > 호칭·목표·캐릭터·그림 방식 > 예시 일과 (서버 한 트랜잭션)
+  ///
+  /// 고른 이룸이 헤더를 싣지 않는다. 탈퇴 후 재가입처럼 지워진 이룸이 id 가 남아 있어도 내 이룸이에 저장된다.
+  Future<Attempt<Member>> completeOnboarding({
+    required String nickname,
+    required List<String> supportGoals,
+    required String? character,
+    required String imageStyle,
+    required List<String> exampleCategories,
+  }) {
+    return guarded(_repo, 'completeOnboarding', () async {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/member/onboarding',
+        data: {
+          'nickname': nickname,
+          'supportGoals': supportGoals,
+          'character': ?character,
+          'imageStyle': imageStyle,
+          'exampleCategories': exampleCategories,
+        },
+        options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+      );
+      final body = res.data;
+      final member = body == null ? null : Member.fromJson(body);
+      if (member == null || member.profiles.isEmpty) {
+        // 어느 이룸이에 저장됐는지 몰라 실패로 본다
+        throw const AppFailure(fault: NetworkFault.app);
+      }
+      return member;
+    });
+  }
+
   /// 이 경로를 모르는 서버(다중 보호자 이전)가 준 실패인가.
   ///
   /// 서버가 코드를 붙인 404(예: `PROFILE_NOT_FOUND`)는 해당하지 않는다 — 그건 경로가 있는
@@ -168,8 +210,11 @@ class MemberRepository {
     return s.statusCode == 404 || s.statusCode == 405;
   }
 
-  /// 아이 호칭 저장. 온보딩 결과를 서버와 맞춘다.
-  Future<AppFailure?> updateNickname(String nickname) async {
+  /// 이룸이 호칭 저장. [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateNickname(
+    String nickname, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -177,6 +222,7 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/nickname',
         data: {'nickname': nickname},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
@@ -204,7 +250,11 @@ class MemberRepository {
   ///
   /// ⚠️ [character]는 서버 `CharacterType` enum 값이어야 한다 (`LULU` / `POPO`).
   /// `CardCharacter.apiValue`를 그대로 넘긴다. 없는 값을 보내면 서버가 400을 준다.
-  Future<AppFailure?> updateCharacter(String character) async {
+  /// [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateCharacter(
+    String character, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -212,6 +262,7 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/character',
         data: {'character': character},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
@@ -222,7 +273,11 @@ class MemberRepository {
   /// ⚠️ [imageStyle]은 서버 enum 값이어야 한다 (`CARTOON` / `REALISTIC` /
   /// `PHOTO_ONLY`). `ImageStyle.apiValue`를 그대로 넘긴다.
   /// 대상 프로필은 캐릭터 저장과 같은 방식으로 정해진다(인증 인터셉터).
-  Future<AppFailure?> updateImageStyle(String imageStyle) async {
+  /// [profileId] 가 있으면 그 이룸이, 없으면 고른 이룸이다.
+  Future<AppFailure?> updateImageStyle(
+    String imageStyle, {
+    String? profileId,
+  }) async {
     // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
     final r = await guarded<void>(
       _repo,
@@ -230,10 +285,16 @@ class MemberRepository {
       () => _dio.patch<dynamic>(
         '/api/member/image-style',
         data: {'imageStyle': imageStyle},
+        options: _targetProfileOptions(profileId),
       ),
     );
     return r.failure;
   }
+
+  /// 저장 대상 이룸이 지정 (null 이면 고른 이룸이 그대로)
+  static Options? _targetProfileOptions(String? profileId) => profileId == null
+      ? null
+      : Options(extra: {ProfileHeaderInterceptor.targetProfileKey: profileId});
 }
 
 /// 회원 정보 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다.

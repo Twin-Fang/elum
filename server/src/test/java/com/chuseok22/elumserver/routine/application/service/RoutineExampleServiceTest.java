@@ -89,6 +89,8 @@ class RoutineExampleServiceTest {
       .containsExactlyElementsOf(first.steps().stream().map(s -> s.textKo()).toList());
     assertThat(morning.getSteps()).extracting(RoutineStep::getPictogramId)
       .containsExactlyElementsOf(first.steps().stream().map(s -> s.pictogramId()).toList());
+    assertThat(morning.getSteps()).extracting(RoutineStep::getExampleImageId)
+      .containsExactlyElementsOf(first.steps().stream().map(s -> s.exampleImageId()).toList());
     assertThat(morning.getSteps()).extracting(RoutineStep::getStepOrder).containsExactly(1, 2, 3, 4, 5);
     // description 은 NOT NULL 컬럼 — 비면 저장이 실패한다
     assertThat(morning.getSteps()).extracting(RoutineStep::getDescription)

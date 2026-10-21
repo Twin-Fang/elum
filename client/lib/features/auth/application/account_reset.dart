@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../talk/application/talk_rules_provider.dart';
 
 /// 다른 계정으로 로그인했을 때 **이전 계정의 일과를 메모리에서 버린다**.
 ///
@@ -23,6 +24,8 @@ extension AccountScopedReset on WidgetRef {
     invalidate(routineSuggestionsProvider);
     // 만들던 일과 입력·질문·카드. 이전 계정의 원문이 새 계정 화면에 남지 않게 한다.
     invalidate(routineFlowProvider);
+    // 이야기 계정별 상태: 이용 규칙 동의 기억
+    invalidate(talkRulesAgreementProvider);
   }
 }
 
@@ -32,5 +35,7 @@ extension AccountScopedResetRef on Ref {
     refreshRoutines();
     invalidate(routineSuggestionsProvider);
     invalidate(routineFlowProvider);
+    // 이야기 계정별 상태: 이용 규칙 동의 기억
+    invalidate(talkRulesAgreementProvider);
   }
 }

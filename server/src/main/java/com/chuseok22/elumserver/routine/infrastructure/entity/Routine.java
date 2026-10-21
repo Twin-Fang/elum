@@ -170,6 +170,14 @@ public class Routine extends BaseEntity {
   @Column(name = "group_order")
   private Integer groupOrder;
 
+  /// 이야기에서 가져와 만든 일과면 그 글 ID. 가져오지 않은 일과는 null. 외래키 없는 문자열 (글이 지워져도 일과는 남음)
+  @Column(name = "talk_post_id")
+  private String talkPostId;
+
+  /// 일과관리 칸 순서 (#844). 묶음 밖 낱개 원본의 자리. 묶음의 displayOrder 와 같은 번호 공간(0부터), 없으면 null(맨 뒤)
+  @Column(name = "library_order")
+  private Integer libraryOrder;
+
   /// 묶음째 보내기로 만든 오늘 일과면 그 묶음 ID (#806). 보낸 때 스냅샷 — 묶음을 풀어도 그대로
   @Column(name = "sent_group_id")
   private String sentGroupId;

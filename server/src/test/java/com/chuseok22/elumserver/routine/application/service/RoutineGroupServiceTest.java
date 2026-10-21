@@ -6,8 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +20,7 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineGroupResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -37,8 +40,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /// 일과관리 묶음(#806): 구성원 규칙(원본만 · 한 묶음 · 2개 이상) · 풀기 · 복사 · 묶음째 보내기 · 권한
 /// 저장소는 메모리 목록으로 흉내 내 묶음 구성 변화를 결과로 확인한다
@@ -55,6 +60,8 @@ class RoutineGroupServiceTest {
   private ProfileAccessGuard profileAccessGuard;
   @Mock
   private RoutineStepSpeechQueue routineStepSpeechQueue;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   private final List<Routine> storedRoutines = new ArrayList<>();
   private final AtomicInteger idSequence = new AtomicInteger();
@@ -67,7 +74,7 @@ class RoutineGroupServiceTest {
   void setUp() {
     RoutineGroupMembership membership = new RoutineGroupMembership(routineRepository, routineGroupRepository);
     routineLibraryService = new RoutineLibraryService(routineRepository, profileAccessGuard, routineStepSpeechQueue,
-      membership);
+      membership, eventPublisher);
     routineGroupService = new RoutineGroupService(routineGroupRepository, routineRepository, profileAccessGuard,
       routineLibraryService, membership);
 
@@ -174,6 +181,55 @@ class RoutineGroupServiceTest {
   }
 
   @Test
+  @DisplayName("묶음 만들기는 구성원 중 가장 앞 칸 자리를 묶음이 받고 낱개 칸 자리는 비운다 — 자리를 정한 일과가 없으면 맨 뒤")
+  void create_takesSmallestLibraryOrder_orAppendsAtEnd() {
+    Routine first = original("routine-a");
+    first.setLibraryOrder(5);
+    Routine second = original("routine-b");
+    second.setLibraryOrder(2);
+    Routine third = original("routine-c");
+    Routine fourth = original("routine-d");
+    when(routineGroupRepository.maxDisplayOrder("profile-1")).thenReturn(3);
+    when(routineRepository.maxLibraryOrder("profile-1")).thenReturn(7);
+
+    RoutineGroup createdByOrder = createdGroupOf(List.of("routine-a", "routine-b"));
+    RoutineGroup createdAtEnd = createdGroupOf(List.of("routine-c", "routine-d"));
+
+    assertThat(createdByOrder.getDisplayOrder()).isEqualTo(2);
+    assertThat(first.getLibraryOrder()).isNull();
+    assertThat(second.getLibraryOrder()).isNull();
+    // 묶음 칸 3, 낱개 칸 7 중 큰 쪽 다음
+    assertThat(createdAtEnd.getDisplayOrder()).isEqualTo(8);
+    assertThat(third.getLibraryOrder()).isNull();
+    assertThat(fourth.getLibraryOrder()).isNull();
+  }
+
+  @Test
+  @DisplayName("묶음 풀기는 풀린 일과가 묶음이 있던 칸 자리를 이어받는다 — 1개만 남아 풀릴 때도 같다")
+  void delete_andDissolveBelowTwo_freedRoutinesTakeGroupPosition() {
+    Routine first = original("routine-a");
+    Routine second = original("routine-b");
+    Routine lonelyRemaining = original("routine-c");
+    Routine leaving = original("routine-d");
+    RoutineGroup folder = group("group-1", "아침");
+    folder.setDisplayOrder(4);
+    RoutineGroup shrinking = group("group-2", "저녁");
+    shrinking.setDisplayOrder(6);
+    when(routineGroupRepository.findById("group-1")).thenReturn(Optional.of(folder));
+    when(routineGroupRepository.findById("group-2")).thenReturn(Optional.of(shrinking));
+    putInGroup("group-1", first, second);
+    putInGroup("group-2", lonelyRemaining, leaving);
+    when(routineRepository.findById("routine-d")).thenReturn(Optional.of(leaving));
+
+    routineGroupService.delete(GUARDIAN, "group-1");
+    routineLibraryService.removeFromLibrary(GUARDIAN, "routine-d");
+
+    assertThat(first.getLibraryOrder()).isEqualTo(4);
+    assertThat(second.getLibraryOrder()).isEqualTo(4);
+    assertThat(lonelyRemaining.getLibraryOrder()).isEqualTo(6);
+  }
+
+  @Test
   @DisplayName("묶음 복사: 이름에만 '복사'(12자 안, 원래 이름 쪽을 자름) · 일과는 제목 그대로 일과관리 전용 복사본 · 같은 차례")
   void copy_copiesMembersAsLibraryOnly_andSuffixesGroupName() {
     Routine first = original("routine-a");
@@ -224,6 +280,21 @@ class RoutineGroupServiceTest {
     when(routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(anyString(), any(), any())).thenReturn(true);
     assertThatThrownBy(() -> routineGroupService.send(GUARDIAN, "group-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
+  }
+
+  @Test
+  @DisplayName("묶음째 보내기는 일과를 여러 개 만들어도 일과 보냄 이벤트를 첫 일과 id 로 한 번만 낸다")
+  void groupSend_publishesOneRoutineSent() {
+    Routine first = original("routine-a");
+    Routine second = original("routine-b");
+    when(routineGroupRepository.findById("group-1")).thenReturn(Optional.of(group("group-1", "아침 묶음")));
+    putInGroup("group-1", first, second);
+    when(routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(anyString(), any(), any())).thenReturn(false);
+
+    List<RoutineResponse> sent = routineGroupService.send(GUARDIAN, "group-1");
+
+    verify(eventPublisher, times(1)).publishEvent(any(Object.class));
+    verify(eventPublisher).publishEvent(new RoutineSentEvent(sent.get(0).id(), "profile-1", "member-1"));
   }
 
   @Test
@@ -282,6 +353,13 @@ class RoutineGroupServiceTest {
 
     assertThat(groups).extracting(RoutineGroupResponse::id).containsExactly("group-1");
     assertThat(groups.get(0).routineIds()).containsExactly("routine-b", "routine-a");
+  }
+
+  private RoutineGroup createdGroupOf(List<String> routineIds) {
+    RoutineGroupResponse response = routineGroupService.create(GUARDIAN, "아침", routineIds);
+    ArgumentCaptor<RoutineGroup> saved = ArgumentCaptor.forClass(RoutineGroup.class);
+    verify(routineGroupRepository, atLeastOnce()).save(saved.capture());
+    return saved.getAllValues().stream().filter(group -> group.getId().equals(response.id())).findFirst().orElseThrow();
   }
 
   private void assertCreateFails(List<String> routineIds, ErrorCode expected) {

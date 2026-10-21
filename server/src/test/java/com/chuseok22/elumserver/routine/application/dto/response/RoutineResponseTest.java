@@ -131,4 +131,27 @@ class RoutineResponseTest {
     assertThat(base.forCaller(Caller.guardian("member-1")).language()).isEqualTo("es");
     assertThat(base.forCaller(Caller.guardian("someone-else")).language()).isEqualTo("es");
   }
+
+  @Test
+  @DisplayName("이야기에서 가져온 일과는 talkPostId 를 응답에 싣고, 아니면 null")
+  void from_mapsTalkPostId() {
+    Routine imported = new Routine();
+    imported.setId("routine-1");
+    imported.setTitle("버스 타기");
+    imported.setStatus(RoutineStatus.CONFIRMED);
+    imported.setSteps(List.of());
+    imported.setTalkPostId("post-1");
+    Routine own = new Routine();
+    own.setId("routine-2");
+    own.setTitle("양치하기");
+    own.setStatus(RoutineStatus.CONFIRMED);
+    own.setSteps(List.of());
+
+    assertThat(RoutineResponse.from(imported).talkPostId()).isEqualTo("post-1");
+    assertThat(RoutineResponse.from(own).talkPostId()).isNull();
+    // 호출자별 변환(원문 가림·이름 붙이기)을 거쳐도 유지
+    assertThat(RoutineResponse.from(imported).forCaller(Caller.guardian("member-1")).talkPostId()).isEqualTo("post-1");
+    // 이룸이 휴대폰에는 싣지 않음
+    assertThat(RoutineResponse.from(imported).forCaller(Caller.elumi("member-2", "link-1")).talkPostId()).isNull();
+  }
 }

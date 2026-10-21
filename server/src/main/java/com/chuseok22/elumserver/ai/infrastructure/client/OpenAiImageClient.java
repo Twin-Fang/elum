@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -35,6 +37,10 @@ public class OpenAiImageClient implements ImageGenerationClient {
   // 픽셀이 1.5배라 같은 품질(low)에서도 더 선명하다. 가격은 크기가 클수록 조금 오른다(low 기준 약 $0.005→0.006
   // 으로 추정, 크기별 공식 가격표는 확인하지 못했다).
   static final String IMAGE_SIZE = "1536x1024";
+
+  // 429 재시도: 최대 3회, 총 대기 20초 (보호자 화면이 "그림 만드는 중"으로 오래 멈추지 않게)
+  private static final int MAX_RATE_LIMIT_RETRY_COUNT = 3;
+  private static final long MAX_RATE_LIMIT_TOTAL_WAIT_MILLISECONDS = 20_000;
 
   private final RoutineImagePromptComposer promptComposer;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
@@ -72,7 +78,12 @@ public class OpenAiImageClient implements ImageGenerationClient {
   // 비교가 성립하지 않는다. 언어(KO/EN)도 조립기가 한 곳에서 고른다.
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
-    return call(promptComposer.compose(stepDescription, characterType, false), characterType);
+    return generateCardImage(CardScene.descriptionOnly(stepDescription), characterType);
+  }
+
+  @Override
+  public GeneratedImage generateCardImage(CardScene scene, CharacterType characterType) {
+    return call(promptComposer.compose(scene, characterType, false), characterType);
   }
 
   /// 실사: Gemini 와 같은 실사 지시문을 쓴다 — 제공자를 바꿨다고 그림의 결이 달라지면 안 된다.
@@ -97,23 +108,18 @@ public class OpenAiImageClient implements ImageGenerationClient {
     log.info("OpenAI 이미지 생성 호출 시작: model={}, quality={}, characterType={}",
       model, quality, characterType);
     try {
-      OpenAiImageResponse response = restClient.post()
-        .uri("/v1/images/generations")
-        .header("Authorization", "Bearer " + apiKey)
-        .body(Map.of(
-          "model", model,
-          "prompt", prompt,
-          "quality", quality,
-          "size", IMAGE_SIZE,
-          // **배경을 반드시 불투명으로 받는다.** 기본값(auto)에서는 모델이 투명 배경을
-          // 골라 버리는데, 그때 배경만 비는 것이 아니라 **캐릭터 몸통 안쪽까지 투명하게
-          // 나온다.** 윤곽선만 남아 색이 빠진 그림이 되어, 카드에 얹으면 선화처럼 보인다
-          //.
-          "background", "opaque",
-          "n", 1
-        ))
-        .retrieve()
-        .body(OpenAiImageResponse.class);
+      OpenAiImageResponse response = requestImageWithRateLimitRetry(apiKey, Map.of(
+        "model", model,
+        "prompt", prompt,
+        "quality", quality,
+        "size", IMAGE_SIZE,
+        // **배경을 반드시 불투명으로 받는다.** 기본값(auto)에서는 모델이 투명 배경을
+        // 골라 버리는데, 그때 배경만 비는 것이 아니라 **캐릭터 몸통 안쪽까지 투명하게
+        // 나온다.** 윤곽선만 남아 색이 빠진 그림이 되어, 카드에 얹으면 선화처럼 보인다
+        //.
+        "background", "opaque",
+        "n", 1
+      ));
 
       GeneratedImage image = extractImage(response);
       aiCallLogService.recordSuccess(
@@ -127,6 +133,44 @@ public class OpenAiImageClient implements ImageGenerationClient {
       log.warn("OpenAI 이미지 생성 호출 실패: model={}, elapsedMs={}", model, elapsedMs, e);
       aiCallLogService.recordFailure(AiCallType.OPENAI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
+    }
+  }
+
+  // 429(분당 한도)만 기다렸다 다시 보낸다 (그 외 오류는 같은 요청을 반복해도 결과가 같아 바로 던짐)
+  // 횟수·총 대기 시간 상한 초과 시 그대로 던져 호출한 쪽이 기본 그림으로 대체
+  private OpenAiImageResponse requestImageWithRateLimitRetry(String apiKey, Map<String, Object> requestBody) {
+    long totalWaitMilliseconds = 0;
+    for (int retryCount = 0; ; retryCount++) {
+      try {
+        return restClient.post()
+          .uri("/v1/images/generations")
+          .header("Authorization", "Bearer " + apiKey)
+          .body(requestBody)
+          .retrieve()
+          .body(OpenAiImageResponse.class);
+      } catch (HttpClientErrorException.TooManyRequests e) {
+        long waitMilliseconds = OpenAiRateLimitWait.resolveMilliseconds(
+          e.getResponseHeaders(), e.getResponseBodyAsString(), retryCount);
+        boolean isRetryExhausted = retryCount >= MAX_RATE_LIMIT_RETRY_COUNT
+          || totalWaitMilliseconds + waitMilliseconds > MAX_RATE_LIMIT_TOTAL_WAIT_MILLISECONDS;
+        if (isRetryExhausted) {
+          log.warn("OpenAI 이미지 429 재시도 한도 초과: retryCount={}, totalWaitMs={}",
+            retryCount, totalWaitMilliseconds);
+          throw e;
+        }
+        log.info("OpenAI 이미지 429 대기 후 재시도: retryCount={}, waitMs={}", retryCount + 1, waitMilliseconds);
+        sleepOrThrow(waitMilliseconds, e);
+        totalWaitMilliseconds += waitMilliseconds;
+      }
+    }
+  }
+
+  private void sleepOrThrow(long waitMilliseconds, RuntimeException originalFailure) {
+    try {
+      Thread.sleep(waitMilliseconds);
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      throw originalFailure;
     }
   }
 

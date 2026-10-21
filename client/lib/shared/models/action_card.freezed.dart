@@ -27,7 +27,11 @@ mixin _$ActionCard {
 ///
 /// **사진·AI 그림이 없을 때만** 쓰인다(우선순위: 사진/AI > 픽토그램 > 기본 카드).
 /// 값이 없는 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
- String? get pictogramId;/// 서버가 미리 만든 음성 열쇠 (#675). 아직 없으면 null. 글이 바뀌면 값도 바뀐다.
+ String? get pictogramId;/// 그림 자리에 보여줄 앱 번들 예시 이미지 id (온보딩 예시 일과 단계만, #866).
+///
+/// 우선순위: 사진/AI > 예시 이미지 > 픽토그램 > 기본 카드. 값이 없으면 null 이고,
+/// 번들에 없는 id 는 [fromJson] 이 null 로 돌린다.
+ String? get exampleImageId;/// 서버가 미리 만든 음성 열쇠 (#675). 아직 없으면 null. 글이 바뀌면 값도 바뀐다.
  String? get speechPath;
 /// Create a copy of ActionCard
 /// with the given fields replaced by the non-null parameter values.
@@ -39,16 +43,16 @@ $ActionCardCopyWith<ActionCard> get copyWith => _$ActionCardCopyWithImpl<ActionC
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.pictogramId, pictogramId) || other.pictogramId == pictogramId)&&(identical(other.speechPath, speechPath) || other.speechPath == speechPath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.pictogramId, pictogramId) || other.pictogramId == pictogramId)&&(identical(other.exampleImageId, exampleImageId) || other.exampleImageId == exampleImageId)&&(identical(other.speechPath, speechPath) || other.speechPath == speechPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed,pictogramId,speechPath);
+int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed,pictogramId,exampleImageId,speechPath);
 
 @override
 String toString() {
-  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed, pictogramId: $pictogramId, speechPath: $speechPath)';
+  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed, pictogramId: $pictogramId, exampleImageId: $exampleImageId, speechPath: $speechPath)';
 }
 
 
@@ -59,7 +63,7 @@ abstract mixin class $ActionCardCopyWith<$Res>  {
   factory $ActionCardCopyWith(ActionCard value, $Res Function(ActionCard) _then) = _$ActionCardCopyWithImpl;
 @useResult
 $Res call({
- String id, String description, String title, int stepOrder, String? imagePath, bool completed, String? pictogramId, String? speechPath
+ String id, String description, String title, int stepOrder, String? imagePath, bool completed, String? pictogramId, String? exampleImageId, String? speechPath
 });
 
 
@@ -76,7 +80,7 @@ class _$ActionCardCopyWithImpl<$Res>
 
 /// Create a copy of ActionCard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,Object? pictogramId = freezed,Object? speechPath = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,Object? pictogramId = freezed,Object? exampleImageId = freezed,Object? speechPath = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -85,6 +89,7 @@ as String,stepOrder: null == stepOrder ? _self.stepOrder : stepOrder // ignore: 
 as int,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String?,completed: null == completed ? _self.completed : completed // ignore: cast_nullable_to_non_nullable
 as bool,pictogramId: freezed == pictogramId ? _self.pictogramId : pictogramId // ignore: cast_nullable_to_non_nullable
+as String?,exampleImageId: freezed == exampleImageId ? _self.exampleImageId : exampleImageId // ignore: cast_nullable_to_non_nullable
 as String?,speechPath: freezed == speechPath ? _self.speechPath : speechPath // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -171,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? speechPath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? exampleImageId,  String? speechPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActionCard() when $default != null:
-return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.speechPath);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.exampleImageId,_that.speechPath);case _:
   return orElse();
 
 }
@@ -192,10 +197,10 @@ return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.ima
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? speechPath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? exampleImageId,  String? speechPath)  $default,) {final _that = this;
 switch (_that) {
 case _ActionCard():
-return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.speechPath);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.exampleImageId,_that.speechPath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +217,10 @@ return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.ima
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? speechPath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed,  String? pictogramId,  String? exampleImageId,  String? speechPath)?  $default,) {final _that = this;
 switch (_that) {
 case _ActionCard() when $default != null:
-return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.speechPath);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed,_that.pictogramId,_that.exampleImageId,_that.speechPath);case _:
   return null;
 
 }
@@ -227,7 +232,7 @@ return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.ima
 
 
 class _ActionCard extends ActionCard {
-  const _ActionCard({required this.id, required this.description, this.title = '', this.stepOrder = 0, this.imagePath, this.completed = false, this.pictogramId, this.speechPath}): super._();
+  const _ActionCard({required this.id, required this.description, this.title = '', this.stepOrder = 0, this.imagePath, this.completed = false, this.pictogramId, this.exampleImageId, this.speechPath}): super._();
   
 
 @override final  String id;
@@ -250,6 +255,11 @@ class _ActionCard extends ActionCard {
 /// **사진·AI 그림이 없을 때만** 쓰인다(우선순위: 사진/AI > 픽토그램 > 기본 카드).
 /// 값이 없는 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
 @override final  String? pictogramId;
+/// 그림 자리에 보여줄 앱 번들 예시 이미지 id (온보딩 예시 일과 단계만, #866).
+///
+/// 우선순위: 사진/AI > 예시 이미지 > 픽토그램 > 기본 카드. 값이 없으면 null 이고,
+/// 번들에 없는 id 는 [fromJson] 이 null 로 돌린다.
+@override final  String? exampleImageId;
 /// 서버가 미리 만든 음성 열쇠 (#675). 아직 없으면 null. 글이 바뀌면 값도 바뀐다.
 @override final  String? speechPath;
 
@@ -263,16 +273,16 @@ _$ActionCardCopyWith<_ActionCard> get copyWith => __$ActionCardCopyWithImpl<_Act
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.pictogramId, pictogramId) || other.pictogramId == pictogramId)&&(identical(other.speechPath, speechPath) || other.speechPath == speechPath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.pictogramId, pictogramId) || other.pictogramId == pictogramId)&&(identical(other.exampleImageId, exampleImageId) || other.exampleImageId == exampleImageId)&&(identical(other.speechPath, speechPath) || other.speechPath == speechPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed,pictogramId,speechPath);
+int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed,pictogramId,exampleImageId,speechPath);
 
 @override
 String toString() {
-  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed, pictogramId: $pictogramId, speechPath: $speechPath)';
+  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed, pictogramId: $pictogramId, exampleImageId: $exampleImageId, speechPath: $speechPath)';
 }
 
 
@@ -283,7 +293,7 @@ abstract mixin class _$ActionCardCopyWith<$Res> implements $ActionCardCopyWith<$
   factory _$ActionCardCopyWith(_ActionCard value, $Res Function(_ActionCard) _then) = __$ActionCardCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String description, String title, int stepOrder, String? imagePath, bool completed, String? pictogramId, String? speechPath
+ String id, String description, String title, int stepOrder, String? imagePath, bool completed, String? pictogramId, String? exampleImageId, String? speechPath
 });
 
 
@@ -300,7 +310,7 @@ class __$ActionCardCopyWithImpl<$Res>
 
 /// Create a copy of ActionCard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,Object? pictogramId = freezed,Object? speechPath = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,Object? pictogramId = freezed,Object? exampleImageId = freezed,Object? speechPath = freezed,}) {
   return _then(_ActionCard(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -309,6 +319,7 @@ as String,stepOrder: null == stepOrder ? _self.stepOrder : stepOrder // ignore: 
 as int,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String?,completed: null == completed ? _self.completed : completed // ignore: cast_nullable_to_non_nullable
 as bool,pictogramId: freezed == pictogramId ? _self.pictogramId : pictogramId // ignore: cast_nullable_to_non_nullable
+as String?,exampleImageId: freezed == exampleImageId ? _self.exampleImageId : exampleImageId // ignore: cast_nullable_to_non_nullable
 as String?,speechPath: freezed == speechPath ? _self.speechPath : speechPath // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

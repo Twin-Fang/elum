@@ -1,31 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/logger/app_logger.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../domain/app_notice.dart';
 import 'notice_popup.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../shared/utils/open_notice_link.dart';
 
 /// 링크를 연다. 열었으면 true. 테스트는 브라우저 대신 가짜를 넣는다.
 typedef NoticeLinkOpener = Future<bool> Function(Uri url);
-
-/// 링크를 **외부 브라우저로** 연다 (명세 3-2).
-///
-/// 앱 안 웹뷰로 열지 않는다 — 보호자가 앱으로 돌아오는 길을 잃지 않게, 그리고
-/// 외부 페이지가 앱의 모양을 흉내 내지 못하게.
-///
-/// 서버가 `https://` 만 저장하게 막지만 **여기서 한 번 더 거른다(N12).**
-Future<bool> openNoticeLink(Uri url) async {
-  if (url.scheme != 'https' || url.host.isEmpty) return false;
-  try {
-    return await launchUrl(url, mode: LaunchMode.externalApplication);
-  } catch (e, st) {
-    // 주소 전체를 남기지 않는다 — 공지 로그에는 원문을 두지 않는다
-    AppLogger.error('notice', e, st, {'step': 'openLink', 'host': url.host});
-    return false;
-  }
-}
 
 ImageProvider _networkImage(String url) => NetworkImage(url);
 

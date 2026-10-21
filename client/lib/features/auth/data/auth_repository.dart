@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
@@ -95,11 +96,13 @@ class AuthRepository {
     required TokenStore tokens,
     required OAuthSdk sdk,
     CardImageDiskCache? imageCache,
+    PushUnregister? unregisterPush,
   }) : _dio = dio,
        _storage = storage,
        _tokens = tokens,
        _sdk = sdk,
-       _imageCache = imageCache;
+       _imageCache = imageCache,
+       _unregisterPush = unregisterPush;
 
   final Dio _dio;
   final LocalStorage _storage;
@@ -108,6 +111,9 @@ class AuthRepository {
 
   /// 기기에 남은 카드 그림. 보호자가 올린 사진이 들어 있어 계정이 끝나면 함께 지운다.
   final CardImageDiskCache? _imageCache;
+
+  /// 로그아웃·회원삭제 직전 푸시 토큰 해제 (세션이 살아 있을 때만 서버 해제가 통함)
+  final PushUnregister? _unregisterPush;
 
   /// 진행 중인 갱신 요청. **동시에 여러 번 갱신하지 않기 위한 장치다.**
   ///
@@ -404,12 +410,14 @@ class AuthRepository {
     }
   }
 
-  /// 로그아웃. 서버 세션을 끊고 로컬 토큰을 지운다.
+  /// 로그아웃: 푸시 토큰 해제 > 서버 세션 끊기 > 로컬 토큰 지우기
   ///
   /// **서버 요청이 실패해도 로컬은 반드시 지운다.** 로컬에 남으면 사용자는
   /// 로그아웃했다고 생각하는데 앱은 로그인 상태로 동작한다.
   Future<void> logout() async {
     finishGuardianPinSetup();
+    // 푸시 해제 (로그아웃 요청 전, 실패해도 계속)
+    await _unregisterPush?.call();
     final refresh = _tokens.refreshToken;
     if (refresh != null && refresh.isNotEmpty) {
       try {
@@ -428,12 +436,12 @@ class AuthRepository {
     );
   }
 
-  /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다. 지워졌으면 true.
+  /// 회원삭제: 푸시 토큰 해제 > 서버 계정 삭제 > 로컬 저장값 지우기. 지워졌으면 null
   ///
   /// 로그아웃과 다르다. 로그아웃 후 같은 계정으로 다시 들어오면 데이터가 그대로지만,
   /// 회원삭제 후에는 같은 소셜 계정으로 로그인해도 **신규 가입**이 된다.
   ///
-  /// **서버가 실패하면 로컬도 건드리지 않고 false를 돌려준다**.
+  /// **서버가 실패하면 로컬도 건드리지 않고 실패 사유를 돌려준다**.
   /// 계정이 서버에 그대로 있는데 로컬만 비우면, 사용자는 지워진 줄 알고 떠나고
   /// 실제로는 아무것도 지워지지 않는다. 되돌릴 수 없다고 안내한 동작은 됐는지
   /// 안 됐는지를 말해야 한다.
@@ -443,6 +451,8 @@ class AuthRepository {
   /// null 이면 지워졌다. 실패하면 **서버가 알려준 이유**가 담겨 온다.
   Future<AppFailure?> deleteAccount() async {
     finishGuardianPinSetup();
+    // 푸시 해제 (계정 삭제 전, 실패해도 계속)
+    await _unregisterPush?.call();
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
@@ -487,6 +497,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     sdk: ref.watch(oAuthSdkProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
+    // 호출 시점에 읽는다 (알림 기능이 인증을 읽으므로 만들 때 읽으면 순환)
+    unregisterPush: () => ref.read(pushUnregisterProvider)(),
   )..restoreGuardianPinRequirement(lockMissing: ref.watch(startupLockMissingProvider));
 });
 

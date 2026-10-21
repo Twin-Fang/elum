@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,15 +13,19 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
+import '../application/card_review_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
+import 'card_review_added_image.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
+import 'widgets/card_review_coach_mark.dart';
 import 'widgets/card_review_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
+import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
@@ -52,7 +58,9 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 }
 
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
-    with BusyStateMixin<CardReviewScreen> {
+    with
+        BusyStateMixin<CardReviewScreen>,
+        CardReviewAddedImage<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -84,6 +92,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   /// dispose에서 `ref`를 읽으면 "unmounted" 오류가 난다.
   /// 미리 잡아두고 정리할 때 쓴다.
   SpeechService? _speech;
+
+  final _coachKeys = CardReviewCoachKeys();
 
   @override
   void initState() {
@@ -200,7 +210,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       );
       return;
     }
+    // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+    final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
     context.go(Routes.guardian);
+    // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
+    // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
+    // ignore: use_build_context_synchronously
+    unawaited(pushPermissionPrompt.maybeAsk(rootContext));
   }
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
@@ -246,7 +263,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   /// 새 카드를 직접 추가한다 (시안 1197:6044).
   ///
   /// 서버에 **시트 안에서** 넣는다 — 실패하면 시트가 열린 채 쓴 글이 남는다.
-  /// 그림은 만들지 않는다(시안에 고르는 자리가 없다). 성공하면 새 카드로 넘어간다.
+  /// 그림은 그림 방식대로 서버가 그림 (#868). 성공하면 새 카드로 넘어간다.
   Future<void> _add() async {
     final notifier = ref.read(routineFlowProvider.notifier);
     final before = ref.read(routineFlowProvider).routine?.steps.length ?? 0;
@@ -254,11 +271,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     final added = await CardEditSheet.showAdd(
       context,
       onSubmit: (title, description) async {
-        final failure = await notifier.addStep(
+        final outcome = await notifier.addStep(
           title: title,
           description: description,
         );
-        if (failure == null) return true;
+        final failure = outcome.failure;
+        if (failure == null) {
+          followAddedCardImage(outcome.addedStepId, outcome.imageState);
+          return true;
+        }
         if (mounted) {
           showFailure(
             context,
@@ -367,18 +388,34 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
           ? CardReviewReorderTopBar(onClose: _cancelReorder)
           : null,
       showDraftAction: !_reorderMode,
+      onHelp: () => ref
+          .read(cardReviewCoachProvider.notifier)
+          .replay(cardCount: cards.length),
+      // 코치마크 중 뒤로가기는 안내만 닫는다 (나가기 확인을 띄우지 않음)
+      shouldIgnoreSystemBack: ref.watch(
+        cardReviewCoachProvider.select((state) => state.isActive),
+      ),
       // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56
       bottomFigmaInset: 56,
-      bottomButton: ElumButton(
-        label: _reorderMode
-            ? context.l10n.cardReviewReorderDone
-            : context.l10n.cardReviewSave,
-        onPressed: _reorderMode ? _finishReorder : _save,
-        loading: busy,
+      bottomButton: KeyedSubtree(
+        key: _coachKeys.save,
+        child: ElumButton(
+          label: _reorderMode
+              ? context.l10n.cardReviewReorderDone
+              : context.l10n.cardReviewSave,
+          onPressed: _reorderMode ? _finishReorder : _save,
+          loading: busy,
+        ),
       ),
       aurora: CardReviewScreen.aurora,
       child: Column(
         children: [
+          // 크기 0 — 막은 루트 오버레이에 그린다. 모드가 바뀌어도 같은 자리에 둔다
+          CardReviewCoachMark(
+            keys: _coachKeys,
+            cardCount: cards.length,
+            canStart: !_reorderMode,
+          ),
           // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
           SizedBox(height: 12.h),
           SizedBox(
@@ -416,6 +453,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
                         language: routine?.language ?? 'ko',
                         onSpeak: () => _speak(cards[index]),
                         isSpeaking: _speakingId == cards[index].id,
+                        isImageGenerating: isAddedCardImageGenerating(
+                          cards[index].id,
+                        ),
                         // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
                         onDelete: cards.length > 1
                             ? () => _confirmRemove(cards[index])
@@ -439,6 +479,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
           // 보상 줄 끝 633 → 도구 버튼 654
           SizedBox(height: 21.h),
           CardReviewToolRow(
+            reorderKey: _coachKeys.reorder,
+            editKey: _coachKeys.edit,
             reorderMode: _reorderMode,
             onReorder: _enterReorder,
             // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다

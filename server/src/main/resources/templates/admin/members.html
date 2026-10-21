@@ -7,13 +7,63 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">회원 관리</h1>
-      <p class="text-base-content/60">검색·요금제·상태 필터와 회원별 AI 사용량을 확인합니다. 열 이름을 누르면 정렬해요.</p>
+      <p class="text-base-content/60">가입·방문 추이와 검색·요금제·상태·가입일 필터, 회원별 AI 사용량을 확인합니다. 열 이름을 누르면 정렬해요.</p>
     </div>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
 
+    <!-- 추이: 가입·탈퇴와 방문은 따로 (막대를 누르면 그 기간 가입자로 목록을 거른다) -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/signups" data-days="90"
+           data-click-link="/admin/members?joinedFrom={from}&amp;joinedTo={to}">
+        <div class="card-body p-4 gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-semibold">가입 추이</h2>
+            <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별', '월별')}"></div></div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <input type="date" data-trend-from class="input input-bordered input-xs" aria-label="시작일"/>
+            <span>~</span>
+            <input type="date" data-trend-to class="input input-bordered input-xs" aria-label="종료일"/>
+            <span class="text-xs text-base-content/60">비우면 일별 90일 · 월별 12달</span>
+          </div>
+          <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-64')}"></th:block>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/visits" data-days="90" data-type="line">
+        <div class="card-body p-4 gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-semibold">방문 추이</h2>
+            <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별', '월별')}"></div></div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <input type="date" data-trend-from class="input input-bordered input-xs" aria-label="시작일"/>
+            <span>~</span>
+            <input type="date" data-trend-to class="input input-bordered input-xs" aria-label="종료일"/>
+          </div>
+          <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-64')}"></th:block>
+          <p class="text-xs text-base-content/60">하루 한 번이라도 앱을 쓴 회원 수. 방문 기록을 시작한 날부터 그려져요</p>
+        </div>
+      </div>
+    </div>
+
     <div class="flex items-center gap-3 flex-wrap">
       <div th:replace="~{admin/fragments/admin-list :: filterBar(${definition}, ${query})}"></div>
+      <!-- 가입일 기간: 다른 검색·필터는 숨은 칸으로 유지 -->
+      <form method="get" th:action="@{/admin/members}" class="flex flex-wrap items-center gap-1" data-joined-filter>
+        <input type="hidden" name="q" th:value="${query.q}"/>
+        <input type="hidden" name="sort" th:value="${query.sort}"/>
+        <input th:each="activeFilter : ${query.filters}"
+               th:unless="${activeFilter.key == 'joinedFrom' or activeFilter.key == 'joinedTo'}"
+               type="hidden" th:name="${activeFilter.key}" th:value="${activeFilter.value}"/>
+        <span class="text-sm">가입일</span>
+        <input type="date" name="joinedFrom" th:value="${query.filters.get('joinedFrom')}"
+               class="input input-bordered input-sm" aria-label="가입일 시작"/>
+        <span>~</span>
+        <input type="date" name="joinedTo" th:value="${query.filters.get('joinedTo')}"
+               class="input input-bordered input-sm" aria-label="가입일 끝"/>
+        <button type="submit" class="btn btn-outline btn-sm">적용</button>
+      </form>
       <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">초기화</a>
       <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${members.totalElements}">0</span>명</span>
     </div>
@@ -21,6 +71,7 @@
     <div th:replace="~{admin/fragments/admin-list :: table(${definition}, ${query}, ${rows})}"></div>
 
     <div th:replace="~{admin/fragments/admin-list :: pager(${members}, @{${pagerBaseUrl}})}"></div>
+    <th:block th:replace="~{admin/fragments/admin-chart :: scripts}"></th:block>
   </main>
 </body>
 </html>

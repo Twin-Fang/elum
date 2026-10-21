@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,8 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
+import 'features/notification/application/push_message_router.dart';
+import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
@@ -103,6 +107,12 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
+  /// 화면 이동마다: 푸시 대기 이동 확인 > 마지막 화면 기억
+  void _onRouteChanged() {
+    ref.read(pushMessageRouterProvider).onRouteChanged();
+    _rememberScreen();
+  }
+
   /// 보호자 휴대폰이 지금 어느 화면에 있는지 남긴다.
   ///
   /// 이룸이 화면으로 가는 길이 여럿이라(보호자 홈 버튼·일과 완료 뒤 등) 화면마다 저장하면
@@ -128,10 +138,18 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     });
   }
 
+  /// 푸시로 화면을 열어도 되는 때의 루트 네비게이터 컨텍스트 (보호자 화면 안일 때만, 아니면 null)
+  BuildContext? _contextIfInGuardianArea() {
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final isInGuardianArea =
+        path == Routes.guardian || path.startsWith('${Routes.guardian}/');
+    return isInGuardianArea ? _router.routerDelegate.navigatorKey.currentContext : null;
+  }
+
   @override
   void initState() {
     super.initState();
-    _router.routerDelegate.addListener(_rememberScreen);
+    _router.routerDelegate.addListener(_onRouteChanged);
     // 추적 허용(ATT)은 광고 요청이 아니라 앱을 열자마자 묻는다. 광고가 안 뜨는 경로로 쓰는
     // 사람도 팝업을 보게 하려는 것이다. 첫 프레임을 그린 뒤 불러야 팝업이 뜬다.
     // 이룸이 전용 휴대폰은 광고를 보여 주지 않으므로 묻지 않는다.
@@ -139,11 +157,17 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
     });
+    // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
+      ref.read(pushMessageRouterProvider).start(readyContext: _contextIfInGuardianArea);
+    });
   }
 
   @override
   void dispose() {
-    _router.routerDelegate.removeListener(_rememberScreen);
+    _router.routerDelegate.removeListener(_onRouteChanged);
     super.dispose();
   }
 

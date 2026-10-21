@@ -208,7 +208,7 @@ public class AdminCreditQueryService {
     // 원가는 크레딧 작업에 연결된 호출만 센다 — 분모(사용 크레딧)와 같은 작업 집합이어야 나눈 값이 뜻을 가진다.
     double linkedUsd = kinds.stream().mapToDouble(AdminCreditOverview.KindCost::usd).sum();
 
-    long stuck = jobRepository.countByStatusAndStartedAtBefore(CreditJobStatus.RESERVED, AdminCreditJobQueryService.stuckThreshold(policy, now));
+    long stuck = countStuckReservations(policy, now);
     long mismatch = jobRepository.countSettledWithoutCallLog(CreditJobStatus.SETTLED, period.start(), period.end());
 
     CreditPeriod prev = CreditPeriod.of(period.start().minusWeeks(1));
@@ -216,6 +216,16 @@ public class AdminCreditQueryService {
     return new AdminCreditOverview(period, prev.key(), nextKey, current, active, granted, bonus, used, reserved,
       remaining, overageJobs, overageCredits, released, exhausted, totalUsd, linkedUsd, perCredit(linkedUsd, used), models, kinds,
       stuck, mismatch, budgetReached(), policy);
+  }
+
+  /** 멈춘 예약 수: 예약 유지 시간이 지났는데 아직 예약 중 (대시보드 확인할 일) */
+  public long countStuckReservations() {
+    return countStuckReservations(policyService.current(), LocalDateTime.now(clock));
+  }
+
+  private long countStuckReservations(AiCreditPolicy policy, LocalDateTime now) {
+    return jobRepository.countByStatusAndStartedAtBefore(
+      CreditJobStatus.RESERVED, AdminCreditJobQueryService.stuckThreshold(policy, now));
   }
 
   // --- 회원별 ---

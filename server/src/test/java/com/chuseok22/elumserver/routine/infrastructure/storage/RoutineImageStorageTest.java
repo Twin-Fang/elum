@@ -188,4 +188,36 @@ class RoutineImageStorageTest {
     assertThat(routineImageStorage.read(routineImageStorage.save("b", 5, new GeneratedImage(new byte[]{1}, "xyz")))
       .contentType()).isEqualTo("application/octet-stream");
   }
+
+  @Test
+  @DisplayName("보호자가 올린 사진 열쇠({stepId}/{UUID}.jpg)만 사진으로 판정한다")
+  void isGuardianUploadedPhoto_matchesOnlyUploadedKeys() {
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto("s1/0f8fad5b-d9cb-469f-a165-70867728950e.jpg")).isTrue();
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto("batch/1.png")).isFalse();
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto("s1/1.webp")).isFalse();
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto("s1/talk-0f8fad5b-d9cb-469f-a165-70867728950e.jpg")).isFalse();
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto(null)).isFalse();
+  }
+
+  @Test
+  @DisplayName("가져온 그림은 talk- 접두 열쇠로 저장돼 사진 판정에 걸리지 않고 읽힌다")
+  void saveImported_keyHasTalkPrefix_andReadable() {
+    byte[] importedBytes = {7, 8, 9};
+
+    String key = routineImageStorage.saveImported("step-1",
+      new RoutineImageStorage.ImageContent(importedBytes, "image/png"));
+
+    assertThat(key).matches("^step-1/talk-[0-9a-f-]{36}\\.png$");
+    assertThat(RoutineImageStorage.isGuardianUploadedPhoto(key)).isFalse();
+    assertThat(routineImageStorage.read(key).bytes()).isEqualTo(importedBytes);
+  }
+
+  @Test
+  @DisplayName("가져온 그림의 형식을 모르면 jpg 로 저장한다")
+  void saveImported_unknownContentType_fallsBackToJpg() {
+    String key = routineImageStorage.saveImported("step-1",
+      new RoutineImageStorage.ImageContent(new byte[]{1}, "application/octet-stream"));
+
+    assertThat(key).endsWith(".jpg");
+  }
 }

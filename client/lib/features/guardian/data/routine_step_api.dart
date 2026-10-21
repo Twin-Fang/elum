@@ -4,6 +4,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
+import 'routine_repository.dart' show StepAddResult;
 
 /// 일과 카드 서버 호출: 추가, 수정, 순서 변경, 삭제
 /// 서버에 없는 로컬 일과(id 비어 있음)는 호출 없이 로컬 결과를 돌려줌
@@ -12,7 +13,9 @@ class RoutineStepApi {
 
   final Dio _dio;
 
-  Future<({Routine routine, AppFailure? failure})> addStep(
+  /// 카드 1장 추가: 그림 방식대로 그림 요청 포함 (#868)
+  /// 그림 여부는 서버가 이룸이 그림 방식으로 판단 (기본 그림이면 건너뜀, 크레딧 부족이면 카드만 저장)
+  Future<StepAddResult> addStep(
     Routine routine, {
     required String title,
     required String description,
@@ -33,26 +36,42 @@ class RoutineStepApi {
       return (
         routine: routine.copyWith(steps: [...routine.steps, added]),
         failure: null,
+        imageSkippedReason: null,
       );
     }
 
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/routines/${routine.id}/steps',
-        data: {'title': title, 'description': description},
+        data: {
+          'title': title,
+          'description': description,
+          'generateImage': true,
+        },
       );
       final body = res.data;
       if (body == null) {
         return (
           routine: routine,
           failure: const AppFailure(fault: NetworkFault.app),
+          imageSkippedReason: null,
         );
       }
+      // 그림 건너뛴 까닭: IMAGE_STYLE_PHOTO_ONLY, AI_CREDIT_INSUFFICIENT, AI_CREDIT_ACCOUNT_FROZEN
+      final skippedReason = body['imageSkippedReason'];
       AppLogger.repositorySuccess('RoutineRepository', 'addStep', '카드 추가 완료');
-      return (routine: Routine.fromJson(body), failure: null);
+      return (
+        routine: Routine.fromJson(body),
+        failure: null,
+        imageSkippedReason: skippedReason is String ? skippedReason : null,
+      );
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'addStep', e);
-      return (routine: routine, failure: AppFailure.of(e));
+      return (
+        routine: routine,
+        failure: AppFailure.of(e),
+        imageSkippedReason: null,
+      );
     }
   }
 
@@ -118,6 +137,25 @@ class RoutineStepApi {
       '로컬에서 카드 내용 수정됨',
     );
     return (routine: updated, failure: failure);
+  }
+
+  /// 일과 다시 조회 > 카드 1장의 그림 경로 (아직 없거나 실패면 null)
+  Future<String?> fetchStepImagePath(String routineId, String stepId) async {
+    if (routineId.isEmpty) return null;
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/api/routines/$routineId',
+      );
+      final body = res.data;
+      if (body == null) return null;
+      final steps = Routine.fromJson(body).steps.where((s) => s.id == stepId);
+      final imagePath = steps.isEmpty ? null : steps.first.imagePath;
+      return (imagePath == null || imagePath.isEmpty) ? null : imagePath;
+    } catch (e) {
+      // 그림 기다리기 중 한 번 실패 — 다음 확인에서 다시 봄
+      AppLogger.repositoryError('RoutineRepository', 'fetchStepImagePath', e);
+      return null;
+    }
   }
 
   Future<AppFailure?> reorderSteps(

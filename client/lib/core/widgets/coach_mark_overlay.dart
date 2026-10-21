@@ -30,7 +30,11 @@ class CoachMarkOverlay extends StatefulWidget {
     required this.onNext,
     required this.onClose,
     required this.onDismissed,
+    this.footerTopOffset,
   });
+
+  /// 아래 점과 안내 문구가 차지하는 자리. 말풍선·시범 메뉴·토스트가 여기를 침범하지 않게 한다.
+  static const bottomReserve = 176.0;
 
   final List<CoachMarkStep> steps;
   final int index;
@@ -46,6 +50,9 @@ class CoachMarkOverlay extends StatefulWidget {
 
   /// 사라지는 연출이 끝났을 때. 이제 위젯을 치워도 된다.
   final VoidCallback onDismissed;
+
+  /// 아래 점·문구를 위로 옮길 때 화면 맨 위에서 띄울 거리 (픽셀). 없으면 닫기 버튼 바로 아래
+  final double? footerTopOffset;
 
   @override
   State<CoachMarkOverlay> createState() => _CoachMarkOverlayState();
@@ -96,9 +103,6 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
 
   /// 처음 나타날 때 구멍이 대상보다 얼마나 넓게 시작하는가.
   static const _introSpread = 28.0;
-
-  /// 아래 점과 안내 문구가 차지하는 자리. 말풍선이 여기를 침범하지 않게 한다.
-  static const _bottomReserve = 176.0;
 
   bool get _reduceMotion => MediaQuery.disableAnimationsOf(context);
 
@@ -270,8 +274,17 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     widget.onClose();
   }
 
+  /// 글자 확대 상한 (기기 글자 크기 설정 기준 배율). 넘으면 말풍선이 아래 안내·시범과 겹친다
+  static const _maxTextScale = 1.5;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => MediaQuery.withClampedTextScaling(
+    maxScaleFactor: _maxTextScale,
+    child: Builder(builder: _buildOverlay),
+  );
+
+  /// 막 + 구멍 + 시범 층 + 말풍선 + 아래 안내 + 닫기
+  Widget _buildOverlay(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
     final step = widget.steps[widget.index];
@@ -328,6 +341,27 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                     ),
                   ),
                 ),
+                // 시범 층: 구멍이 대상에 자리 잡은 뒤에만 (옮겨 가는 동안은 어긋나 보인다)
+                if (_to != null &&
+                    _measuredIndex == widget.index &&
+                    step.demoBuilder != null)
+                  Positioned.fill(
+                    // 시범의 가짜 버튼·토스트를 낭독기가 읽지 않게 한다 (설명은 말풍선이 맡는다)
+                    child: ExcludeSemantics(
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: _move,
+                          builder: (context, _) => Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (_move.isCompleted)
+                                step.demoBuilder!(context, _to!.rect),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (_to != null)
                   FadeTransition(
                     opacity: _contentFade,
@@ -375,6 +409,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                           isMotionReduced: reduce,
                           // 대상이 아래 문구 자리에 닿으면 말풍선이 거기를 쓴다 — 문구를 위로 옮긴다
                           isAtTop: _isTargetInFooterZone(context),
+                          topOffset: widget.footerTopOffset,
                         ),
                         CoachMarkCloseButton(onClose: _close),
                       ],
@@ -388,13 +423,15 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     );
   }
 
-  /// 가리키는 대상이 아래 점·문구 자리(바닥 [_bottomReserve])에 걸치는가
+  /// 가리키는 대상이 아래 점·문구 자리(바닥 [CoachMarkOverlay.bottomReserve])에 걸치는가
   bool _isTargetInFooterZone(BuildContext context) {
     final hole = _to;
     if (hole == null) return false;
     final media = MediaQuery.of(context);
     return hole.rect.bottom >
-        media.size.height - media.padding.bottom - _bottomReserve.h;
+        media.size.height -
+            media.padding.bottom -
+            CoachMarkOverlay.bottomReserve.h;
   }
 
   /// 화살표 + 글. 아래에 자리가 모자라면 위에 놓고 화살표를 뒤집는다.
@@ -423,7 +460,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     final roomBelow =
         size.height -
         media.padding.bottom -
-        _bottomReserve.h -
+        CoachMarkOverlay.bottomReserve.h -
         hole.rect.bottom;
     final roomAbove = hole.rect.top - media.padding.top;
     final below = roomBelow >= need || roomBelow >= roomAbove;

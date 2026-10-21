@@ -166,7 +166,16 @@ class CardReviewToolRow extends StatelessWidget {
     required this.onFinishReorder,
     required this.onEdit,
     required this.onAdd,
+    this.reorderKey,
+    this.editKey,
   });
+
+  /// 도구 버튼 모서리 반지름 (코치마크 구멍도 같은 값)
+  static const buttonRadius = 18.0;
+
+  /// 코치마크가 가리킬 `카드 순서 변경` · `이 카드 수정` 버튼
+  final GlobalKey? reorderKey;
+  final GlobalKey? editKey;
 
   final bool reorderMode;
   final VoidCallback onReorder;
@@ -185,6 +194,7 @@ class CardReviewToolRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _ToolButton(
+            key: reorderKey,
             icon: AppAssets.iconInterlining,
             label: context.l10n.cardReviewToolReorder,
             pressed: reorderMode,
@@ -193,6 +203,7 @@ class CardReviewToolRow extends StatelessWidget {
             onTap: reorderMode ? onFinishReorder : onReorder,
           ),
           _ToolButton(
+            key: editKey,
             icon: AppAssets.iconPencilEdit,
             label: context.l10n.cardReviewToolEdit,
             dimmed: reorderMode,
@@ -212,6 +223,7 @@ class CardReviewToolRow extends StatelessWidget {
 
 class _ToolButton extends StatelessWidget {
   const _ToolButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -243,7 +255,7 @@ class _ToolButton extends StatelessWidget {
           height: 60.h,
           decoration: BoxDecoration(
             color: pressed ? colors.editChipPressedBg : colors.editChipBg,
-            borderRadius: BorderRadius.circular(18.r),
+            borderRadius: BorderRadius.circular(CardReviewToolRow.buttonRadius.r),
           ),
           alignment: Alignment.center,
           // 글꼴을 키워도 버튼 밖으로 넘치지 않게 줄인다

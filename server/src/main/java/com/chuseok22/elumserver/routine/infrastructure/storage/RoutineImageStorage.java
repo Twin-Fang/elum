@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import java.util.regex.Pattern;
 
 /**
  * 카드 삽화를 담아 두는 곳.
@@ -17,6 +18,16 @@ import com.chuseok22.elumserver.ai.core.GeneratedImage;
  * 이 인터페이스를 쓰는 쪽은 바뀌지 않는다.
  */
 public interface RoutineImageStorage {
+
+  // 보호자가 올린 사진 열쇠: {stepId}/{UUID}.jpg (saveUploaded 가 만드는 모양)
+  Pattern GUARDIAN_UPLOADED_PHOTO_KEY = Pattern.compile("^[^/]+/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\\.jpg$");
+
+  /**
+   * 열쇠가 보호자가 직접 올린 사진인지 판정 (AI 그림·가져온 그림은 false)
+   */
+  static boolean isGuardianUploadedPhoto(String key) {
+    return key != null && GUARDIAN_UPLOADED_PHOTO_KEY.matcher(key).matches();
+  }
 
   /**
    * 그림을 담고 <b>열쇠</b>를 돌려준다.
@@ -47,6 +58,17 @@ public interface RoutineImageStorage {
    *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
    */
   String saveUploaded(String stepId, byte[] bytes);
+
+  /**
+   * 이야기에서 가져온 그림 한 장을 담고 <b>열쇠</b>를 돌려준다.
+   *
+   * <p>열쇠는 {@code {stepId}/talk-{UUID}.{확장자}} — {@code talk-} 접두라 보호자 사진 판정에 걸리지 않는다.
+   * 확장자는 형식에서 정한다(jpeg·png·webp, 모르면 jpg).
+   *
+   * @throws com.chuseok22.elumserver.common.infrastructure.exception.CustomException 쓰기에 실패하면
+   *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
+   */
+  String saveImported(String stepId, ImageContent content);
 
   /**
    * 열쇠 하나의 파일을 지운다.

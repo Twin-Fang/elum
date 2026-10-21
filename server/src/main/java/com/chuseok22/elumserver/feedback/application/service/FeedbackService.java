@@ -6,11 +6,13 @@ import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
+import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,16 +35,18 @@ public class FeedbackService {
 
   private final FeedbackRepository feedbackRepository;
   private final Clock clock;
+  private final ApplicationEventPublisher eventPublisher;
 
   // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 이 앱에는 Clock 빈이 없다.
   @Autowired
-  public FeedbackService(FeedbackRepository feedbackRepository) {
-    this(feedbackRepository, Clock.systemDefaultZone());
+  public FeedbackService(FeedbackRepository feedbackRepository, ApplicationEventPublisher eventPublisher) {
+    this(feedbackRepository, Clock.systemDefaultZone(), eventPublisher);
   }
 
-  FeedbackService(FeedbackRepository feedbackRepository, Clock clock) {
+  FeedbackService(FeedbackRepository feedbackRepository, Clock clock, ApplicationEventPublisher eventPublisher) {
     this.feedbackRepository = feedbackRepository;
     this.clock = clock;
+    this.eventPublisher = eventPublisher;
   }
 
   /// 의견을 저장하고 id 를 돌려준다. 앱 버전·OS 는 길면 거절하지 않고 잘라 저장한다.
@@ -105,7 +109,17 @@ public class FeedbackService {
     feedback.setStatus(status);
     feedback.setStatusChangedAt(LocalDateTime.now(clock));
     feedback.setStatusChangedBy(actor);
+    // 처리 완료로 바뀐 때만 알림 (같은 의견 재처리는 기록 쪽 묶음 키가 중복을 막음)
+    if (status == FeedbackStatus.DONE) {
+      eventPublisher.publishEvent(new FeedbackResolvedEvent(feedback.getId(), feedback.getMemberId()));
+    }
     return feedback;
+  }
+
+  /** 아직 확인하지 않은 의견 수 (상태 새 의견) */
+  @Transactional(readOnly = true)
+  public long countNew() {
+    return feedbackRepository.countByStatus(FeedbackStatus.NEW);
   }
 
   @Transactional(readOnly = true)

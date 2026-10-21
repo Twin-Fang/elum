@@ -8,13 +8,19 @@ import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
+import 'core/push/push_unregister_hook.dart';
+import 'core/push/firebase_bootstrap.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
 import 'core/storage/installation_store.dart';
-import 'l10n/app_localizations.dart';
+import 'core/l10n/l10n_context.dart';
+import 'core/layout/adaptive_screen_scale.dart';
+import 'core/theme/app_theme.dart';
+import 'core/widgets/elum_error_view.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
+import 'features/notification/application/push_token_registrar.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
 
@@ -31,6 +37,9 @@ Future<void> main() async {
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
   await AppConfig.load();
+
+  // 푸시(FCM) 준비. 실패해도 앱은 계속 시작한다.
+  await initializeFirebase();
 
   // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
   // 하므로 초기화 직후에 건다.
@@ -59,20 +68,28 @@ Future<void> main() async {
   // 판단할 수 있도록 여기서 미리 읽어 메모리에 올린다.
   late final SecureTokenStore tokens;
   var lockMissing = false;
+  // 실패하면 이 단계의 오류 코드를 보여 준다
+  var stage = StartupStage.installation;
   try {
     final installationId = await const InstallationStore().load();
+    stage = StartupStage.tokens;
     tokens = SecureTokenStore(
       installationId: installationId,
       allowLegacyMigration: canMigrateLegacyInstallation(storage),
     );
     await tokens.load();
-    await storage.configureLock(installationId, reset: tokens.installationChanged);
+    stage = StartupStage.lock;
+    await storage.configureLock(
+      installationId,
+      reset: tokens.installationChanged,
+    );
     try {
       lockMissing = !await storage.hasPin();
     } catch (error) {
       // 잠금 기록이 깨졌으면 새로 만들 수 없다 — 기존 동작대로 둔다.
       AppLogger.error('잠금 확인', error);
     }
+    stage = StartupStage.reset;
     if (tokens.installationChanged) {
       // 큐와 프로필은 회원 대조까지 보존하되 연결 상태로 로그인을 우회하지 못하게 한다.
       await storage.setElumiDevice(false);
@@ -82,8 +99,8 @@ Future<void> main() async {
       await storage.setOnboardingCompleted(false);
     }
   } catch (error) {
-    AppLogger.error('설치 세션 초기화', error);
-    runApp(InstallationRetryApp(onRetry: main));
+    AppLogger.error('설치 세션 초기화 (${stage.errorCode})', error);
+    runApp(InstallationRetryApp(onRetry: main, errorCode: stage.errorCode));
     return;
   }
 
@@ -109,51 +126,85 @@ Future<void> main() async {
         localStorageProvider.overrideWithValue(storage),
         tokenStoreProvider.overrideWithValue(tokens),
         startupLockMissingProvider.overrideWithValue(lockMissing),
+        // 로그아웃·회원삭제·이룸이 기기 전환 직전 푸시 토큰 해제 (인증·연결 data 가 알림을 직접 모르므로 여기서 연결)
+        pushUnregisterProvider.overrideWith(
+          (ref) => ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+        ),
       ],
       child: const ElumApp(),
     ),
   );
 }
 
-/// 설치 표식 확인 전에는 인증과 잠금 화면을 만들지 않는다.
+/// 앱 시작 단계별 오류 코드 4개 (제보를 받았을 때 어느 단계가 실패했는지)
+enum StartupStage {
+  /// 설치 표식 읽기
+  installation('E-INSTALL'),
+
+  /// 보안 저장소 토큰 읽기
+  tokens('E-TOKEN'),
+
+  /// 잠금(PIN) 저장소 설정
+  lock('E-LOCK'),
+
+  /// 설치가 바뀐 뒤 연결·역할 상태 초기화
+  reset('E-RESET');
+
+  const StartupStage(this.errorCode);
+
+  final String errorCode;
+}
+
+/// 설치 표식 확인 실패 화면: 인증·잠금 화면 대신 오류 안내와 다시 시도만 보여준다
+/// ProviderScope·라우터 이전 단계라 테마·화면 배율·번역만 직접 감싼다
 class InstallationRetryApp extends StatefulWidget {
-  const InstallationRetryApp({required this.onRetry, super.key});
+  const InstallationRetryApp({
+    required this.onRetry,
+    required this.errorCode,
+    super.key,
+  });
   final Future<void> Function() onRetry;
+
+  /// 실패한 시작 단계의 오류 코드 ([StartupStage.errorCode])
+  final String errorCode;
   @override
   State<InstallationRetryApp> createState() => _InstallationRetryAppState();
 }
 
 class _InstallationRetryAppState extends State<InstallationRetryApp> {
-  bool _retrying = false;
+  bool _isRetrying = false;
+
+  Future<void> _onRetryPressed() async {
+    if (_isRetrying) return; // 진행 중 중복 호출 차단
+    setState(() => _isRetrying = true);
+    try {
+      await widget.onRetry();
+    } finally {
+      if (mounted) setState(() => _isRetrying = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Builder(
-      builder: (context) => Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(AppLocalizations.of(context).installationRetryMessage),
-                const Text('E-INSTALL'),
-                FilledButton(
-                  onPressed: _retrying
-                      ? null
-                      : () async {
-                          setState(() => _retrying = true);
-                          try {
-                            await widget.onRetry();
-                          } finally {
-                            if (mounted) setState(() => _retrying = false);
-                          }
-                        },
-                  child: Text(
-                    AppLocalizations.of(context).installationRetryButton,
-                  ),
-                ),
-              ],
+  Widget build(BuildContext context) => AdaptiveScreenScale(
+    baseDesignSize: const Size(393, 852),
+    minTextAdapt: true,
+    builder: (context, child) => MaterialApp(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: SafeArea(
+            child: Center(
+              child: ElumErrorView(
+                message: context.l10n.installationRetryTitle,
+                description: context.l10n.installationRetryMessage,
+                actionLabel: context.l10n.installationRetryButton,
+                errorCode: widget.errorCode,
+                onRetry: _onRetryPressed,
+                isRetrying: _isRetrying,
+              ),
             ),
           ),
         ),

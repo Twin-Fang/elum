@@ -21,6 +21,11 @@ public enum ErrorCode {
   // 탈퇴 계정. 둘 다 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
   MEMBER_WITHDRAWN(HttpStatus.CONFLICT),
   MEMBER_NOT_WITHDRAWN(HttpStatus.CONFLICT),
+  // 보호자 닉네임 변경. 욕설·예약어는 걸린 이유를 알리지 않고 NOT_ALLOWED 하나로 돌려준다.
+  NICKNAME_INVALID_FORMAT(HttpStatus.BAD_REQUEST),
+  NICKNAME_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  NICKNAME_DUPLICATED(HttpStatus.CONFLICT),
+  NICKNAME_CHANGE_TOO_SOON(HttpStatus.TOO_MANY_REQUESTS),
 
   // AUTH
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED),
@@ -203,6 +208,12 @@ public enum ErrorCode {
   FEEDBACK_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
   FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND),
 
+  // 알림. 푸시 기기 토큰이 비었거나 너무 길다.
+  PUSH_TOKEN_INVALID(HttpStatus.BAD_REQUEST),
+
+  // 알림. 없는 알림이거나 남의 알림을 읽음 처리하려 할 때.
+  NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND),
+
   // 일과 생성 가능 언어. 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다 —
   // 켜 두면 다음 기동의 시작 검사가 서버를 세우지 않는다. 관리자 화면은 E-CFG-004 를 함께 보여준다.
   CONTENT_LOCALE_NOT_READY(HttpStatus.BAD_REQUEST),
@@ -233,6 +244,21 @@ public enum ErrorCode {
   ADMIN_CREDIT_POLICY_TTL_TOO_SHORT(HttpStatus.BAD_REQUEST),
   ADMIN_CREDIT_POLICY_APPLY_INVALID(HttpStatus.BAD_REQUEST),
   ADMIN_CREDIT_POLICY_VALUE_NEGATIVE(HttpStatus.BAD_REQUEST),
+
+  // TALK. 보호자끼리 일과를 나누는 이야기. 내려간 글·지워진 댓글은 404, 이용 규칙 미동의·남의 글 수정은 403,
+  // 중복(이미 나눔·이미 신고)은 409 다. 별명 가림 실패(500)는 앱이 잠시 뒤 다시 시도하게 하는 신호다.
+  TALK_POST_NOT_FOUND(HttpStatus.NOT_FOUND),
+  TALK_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND),
+  TALK_RULES_NOT_AGREED(HttpStatus.FORBIDDEN),
+  TALK_NOT_AUTHOR(HttpStatus.FORBIDDEN),
+  TALK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
+  TALK_ALREADY_SHARED(HttpStatus.CONFLICT),
+  TALK_TEXT_TOO_LONG(HttpStatus.BAD_REQUEST),
+  TALK_TEXT_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  TALK_NICKNAME_MASK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
+  TALK_REPORT_DUPLICATED(HttpStatus.CONFLICT),
+  TALK_CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST),
+  TALK_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND),
 
   ;
 

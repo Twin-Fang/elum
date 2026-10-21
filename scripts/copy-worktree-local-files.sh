@@ -17,6 +17,9 @@ LOCAL_FILES=(
   "client/android/app/keystore/key.jks"      # Android 서명 키
   "server/src/main/resources/application-dev.yml"  # 서버 개발 설정
   "server/src/main/resources/application-prod.yml" # 서버 운영 설정
+  "server/src/main/resources/firebase-adminsdk.json"   # FCM 서비스 계정 키 (없으면 푸시만 꺼짐)
+  "client/android/app/google-services.json"            # Firebase Android 설정
+  "client/ios/Runner/GoogleService-Info.plist"         # Firebase iOS 설정 (없으면 시작 시 Firebase 초기화 실패)
 )
 
 # 로컬 빌드 보조 (없어도 되지만 있으면 같이 복사): Xcode 26 미만 connectivity_plus 우회

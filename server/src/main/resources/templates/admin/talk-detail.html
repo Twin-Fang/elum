@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('이야기 글 상세', 'talk', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-bold">이야기 글 상세</h1>
+      <span class="badge"
+            th:classappend="${detail.post.status.name() == 'VISIBLE'} ? 'badge-success' : (${detail.post.status.name() == 'HIDDEN_BY_ADMIN'} ? 'badge-warning' : 'badge-ghost')"
+            th:text="${detail.post.status.label}" data-talk-status>보이는 글</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a th:href="@{/admin/talk/posts}" class="btn btn-ghost btn-sm">목록으로</a>
+      <form th:if="${detail.post.status.name() == 'VISIBLE'}"
+            th:action="@{/admin/talk/posts/{id}/hide(id=${detail.post.id})}" method="post"
+            onsubmit="return confirm('이 글을 가릴까요? 앱에서 더 이상 보이지 않아요.');">
+        <button type="submit" class="btn btn-warning btn-sm">글 가리기</button>
+      </form>
+      <form th:if="${detail.post.status.name() == 'HIDDEN_BY_ADMIN'}"
+            th:action="@{/admin/talk/posts/{id}/restore(id=${detail.post.id})}" method="post"
+            onsubmit="return confirm('이 글을 되돌릴까요? 앱에 다시 보여요.');">
+        <button type="submit" class="btn btn-success btn-sm">글 되돌리기</button>
+      </form>
+      <span th:if="${detail.post.status.name() == 'DELETED'}" class="text-sm text-base-content/60">
+        글쓴이가 지운 글이라 되돌릴 수 없어요.
+      </span>
+    </div>
+  </div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <!-- 글·댓글은 사용자 입력이라 아래 모든 출력은 th:text 로 이스케이프한다. -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">올린 때</div>
+      <div class="stat-value text-lg"
+           th:text="${detail.post.createdAt != null ? #temporals.format(detail.post.createdAt, 'yyyy-MM-dd') : '-'}">2026-10-20</div>
+      <div class="stat-desc"
+           th:text="${detail.post.createdAt != null ? #temporals.format(detail.post.createdAt, 'HH:mm:ss') : ''}">10:00:00</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">글쓴이</div>
+      <div class="stat-value text-lg"
+           th:text="${detail.authorNickname != null ? detail.authorNickname : '(닉네임 없음)'}">닉네임</div>
+      <div class="stat-desc">
+        <a th:href="@{/admin/members/{id}(id=${detail.post.authorMemberId})}" class="link link-hover">회원 정보 보기</a>
+      </div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">분류 · 언어</div>
+      <div class="stat-value text-lg"
+           th:text="${detail.post.category.name()} + ' · ' + ${detail.post.language.name()}">SELF_CARE · KO</div>
+      <div class="stat-desc" th:text="'카드 ' + ${detail.post.stepCount} + '장'">카드 3장</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">반응</div>
+      <div class="stat-value text-lg"
+           th:text="'도움 ' + ${detail.post.helpfulCount} + ' · 댓글 ' + ${detail.post.commentCount}">도움 0 · 댓글 0</div>
+      <div class="stat-desc" th:text="'가져감 ' + ${detail.post.importCount}">가져감 0</div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <h2 class="card-title text-lg" th:text="${detail.post.title.isBlank()} ? '(지운 글)' : ${detail.post.title}">제목</h2>
+      <p th:if="${detail.post.note != null and !detail.post.note.isBlank()}"
+         class="text-base leading-relaxed whitespace-pre-wrap wrap-anywhere" th:text="${detail.post.note}">한마디</p>
+      <p th:unless="${detail.post.note != null and !detail.post.note.isBlank()}"
+         class="text-sm text-base-content/60">글쓴이가 덧붙인 한마디가 없어요.</p>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-3">
+      <h2 class="card-title text-lg">카드</h2>
+      <p th:if="${detail.steps.isEmpty()}" class="text-sm text-base-content/60">카드가 없어요.</p>
+      <div th:each="step : ${detail.steps}" class="flex flex-wrap items-start gap-3" data-talk-step>
+        <a th:if="${step.imageKey != null}"
+           th:href="@{/admin/talk/posts/{id}/steps/{order}/image(id=${detail.post.id}, order=${step.stepOrder})}"
+           target="_blank" rel="noopener">
+          <img th:src="@{/admin/talk/posts/{id}/steps/{order}/image(id=${detail.post.id}, order=${step.stepOrder})}"
+               th:alt="'카드 ' + ${step.stepOrder + 1} + ' 그림'" loading="lazy"
+               style="width:8rem;height:8rem;object-fit:cover;border-radius:.5rem"/>
+        </a>
+        <div class="space-y-1" style="min-width:12rem;flex:1">
+          <div class="flex items-center gap-2">
+            <span class="badge badge-info badge-sm" th:text="${step.stepOrder + 1} + '번'">1번</span>
+            <span th:if="${step.blurred}" class="badge badge-ghost badge-sm">얼굴 흐림</span>
+            <span th:if="${step.imageKey == null and step.exampleImageId != null}" class="badge badge-ghost badge-sm"
+                  th:text="'예시 이미지 ' + ${step.exampleImageId}">예시 이미지</span>
+            <span th:if="${step.imageKey == null and step.exampleImageId == null and step.pictogramId != null}"
+                  class="badge badge-ghost badge-sm" th:text="'픽토그램 ' + ${step.pictogramId}">픽토그램</span>
+          </div>
+          <p th:if="${step.title != null and !step.title.isBlank()}" class="font-semibold wrap-anywhere"
+             th:text="${step.title}">카드 제목</p>
+          <p class="whitespace-pre-wrap wrap-anywhere" th:text="${step.description}">카드 설명</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <h2 class="card-title text-lg">댓글 <span class="text-sm font-normal text-base-content/60"
+                                              th:text="'(' + ${detail.comments.size()} + '건, 지운 것 포함)'">(0건)</span></h2>
+      <p th:if="${detail.comments.isEmpty()}" class="text-sm text-base-content/60">댓글이 없어요.</p>
+      <div th:unless="${detail.comments.isEmpty()}" class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr><th>쓴 때</th><th>쓴 사람</th><th>내용</th><th>상태</th><th></th></tr>
+          </thead>
+          <tbody>
+          <tr th:each="row : ${detail.comments}" data-talk-comment>
+            <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(row.comment.createdAt)}">2026-10-20 10:00</td>
+            <td class="text-xs">
+              <a th:href="@{/admin/members/{id}(id=${row.comment.authorMemberId})}" class="link link-hover"
+                 th:text="${row.authorNickname != null ? row.authorNickname : '(닉네임 없음)'}">닉네임</a>
+            </td>
+            <td class="whitespace-pre-wrap wrap-anywhere" style="min-width:12rem"
+                th:text="${row.comment.body.isBlank()} ? '(지운 댓글)' : ${row.comment.body}">댓글</td>
+            <td>
+              <span class="badge badge-sm"
+                    th:classappend="${row.comment.status.name() == 'VISIBLE'} ? 'badge-success' : (${row.comment.status.name() == 'HIDDEN_BY_ADMIN'} ? 'badge-warning' : 'badge-ghost')"
+                    th:text="${row.comment.status.label}" data-talk-comment-status>보이는 댓글</span>
+            </td>
+            <td>
+              <form th:if="${row.comment.status.name() == 'VISIBLE'}"
+                    th:action="@{/admin/talk/comments/{id}/hide(id=${row.comment.id})}" method="post"
+                    onsubmit="return confirm('이 댓글을 가릴까요?');">
+                <button type="submit" class="btn btn-warning btn-xs">가리기</button>
+              </form>
+              <form th:if="${row.comment.status.name() == 'HIDDEN_BY_ADMIN'}"
+                    th:action="@{/admin/talk/comments/{id}/restore(id=${row.comment.id})}" method="post"
+                    onsubmit="return confirm('이 댓글을 되돌릴까요?');">
+                <button type="submit" class="btn btn-success btn-xs">되돌리기</button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <h2 class="card-title text-lg">신고 <span class="text-sm font-normal text-base-content/60"
+                                              th:text="'(' + ${detail.reports.size()} + '건)'">(0건)</span></h2>
+      <p th:if="${detail.reports.isEmpty()}" class="text-sm text-base-content/60">들어온 신고가 없어요.</p>
+      <div th:unless="${detail.reports.isEmpty()}" class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr><th>접수 때</th><th>대상</th><th>사유</th><th>신고자</th><th>처리</th><th></th></tr>
+          </thead>
+          <tbody>
+          <tr th:each="row : ${detail.reports}" data-talk-report>
+            <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(row.report.createdAt)}">2026-10-20 10:00</td>
+            <td class="wrap-anywhere" style="min-width:10rem">
+              <span class="badge badge-ghost badge-sm" th:text="${row.report.targetType.label}">글</span>
+              <p th:if="${row.commentBody != null}" class="text-xs whitespace-pre-wrap wrap-anywhere"
+                 th:text="${row.commentBody.isBlank()} ? '(지운 댓글)' : ${#strings.abbreviate(row.commentBody, 60)}">댓글 내용</p>
+            </td>
+            <td class="text-xs whitespace-nowrap" th:text="${row.report.reason.label}">불쾌한 내용</td>
+            <td class="text-xs">
+              <a th:href="@{/admin/members/{id}(id=${row.report.reporterMemberId})}" class="link link-hover"
+                 th:text="${row.reporterNickname != null ? row.reporterNickname : '(닉네임 없음)'}">닉네임</a>
+            </td>
+            <td><span th:replace="~{admin/fragments/talk-report-parts :: resolvedState(${row.report})}"></span></td>
+            <td><form th:replace="~{admin/fragments/talk-report-parts :: resolveForm(${row.report}, 'detail', null)}"></form></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

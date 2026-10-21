@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
@@ -38,7 +39,7 @@ class RoutineControllerStepImageTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
   private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineStepEditService.class), mock(RoutineCreateService.class),
-    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService, mock(RoutineLibraryService.class),
+    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService, mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class),
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   @Test
@@ -46,7 +47,7 @@ class RoutineControllerStepImageTest {
   void delegatesToService() {
     Authentication auth = new TestingAuthenticationToken("member-1", null);
     MockMultipartFile file = new MockMultipartFile("image", "a.jpg", "image/jpeg", new byte[]{1});
-    RoutineStepResponse body = new RoutineStepResponse("step-1", 1, "제목", "설명", "step-1/new.jpg", false, null, null, null);
+    RoutineStepResponse body = new RoutineStepResponse("step-1", 1, "제목", "설명", "step-1/new.jpg", false, null, null, null, null);
     when(photoService.replaceStepImage(any(), any(), any(), any())).thenReturn(body);
 
     ResponseEntity<RoutineStepResponse> response = controller.replaceStepImage(auth, "routine-1", "step-1", file);

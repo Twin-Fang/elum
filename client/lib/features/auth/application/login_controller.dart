@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/local_storage.dart';
 import '../../child/application/child_routine_notifier.dart';
 import '../../member/application/member_providers.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../notification/application/push_token_registrar.dart';
+import '../../notification/application/unread_summary_provider.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
@@ -24,10 +28,14 @@ class LoginController {
   Future<AuthResult> signIn(OAuthProvider provider) =>
       _ref.read(authRepositoryProvider).signInWith(provider);
 
-  /// 로그인 성공 뒤 이전 계정의 메모리 상태를 버린다.
+  /// 로그인 성공 뒤: 이전 계정 메모리 상태 버리기 > 새 계정으로 푸시 토큰 다시 등록
   Future<void> resetPreviousAccount() async {
+    // 주기 갱신이 받아 둔 이전 계정 회원 정보 (남기면 그 이룸이 id 로 요청해 403)
+    _ref.read(memberPrefetchProvider).discard();
     _ref.invalidate(memberProvider);
     _ref.invalidate(profileSessionProvider);
+    // 안 읽음 요약(종 아이콘 점)도 이전 계정 값이다
+    _ref.invalidate(unreadSummaryProvider);
     // 이룸이 설정도 이전 계정 값이라 함께 비운다
     _ref.invalidate(onboardingProvider);
     // 일과 목록도 이전 계정 것이다
@@ -35,6 +43,8 @@ class LoginController {
     // 메모리 큐까지 상속하지 않는다. 같은 계정은 로컬 큐에서 복원한다.
     _ref.invalidate(childRoutineProvider);
     await _ref.read(childRoutineProvider.notifier).hydrate();
+    // 이 기기가 이미 알림 권한을 받아 둔 상태면 새 계정으로 푸시 토큰 등록 (기다리지 않음, 실패는 안에서 기록)
+    unawaited(_ref.read(pushTokenRegistrarProvider).syncRegistration());
   }
 
   /// 이전 계정의 이룸이 정보를 메모리에서 잊는다.

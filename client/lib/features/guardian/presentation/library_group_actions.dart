@@ -14,6 +14,7 @@ import '../application/routine_group_controller.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_providers.dart';
 import '../domain/routine_group.dart';
+import 'widgets/library_entry_grid.dart' show LibraryMenuAnchor;
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_group_picker_sheet.dart';
 import 'widgets/routine_group_sheet.dart';
@@ -25,7 +26,7 @@ import 'widgets/routine_rename_sheet.dart';
 mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
     on ConsumerState<T>, BusyStateMixin<T> {
   /// 묶음 안 일과를 눌렀을 때 — 낱개 상세와 같은 길
-  Future<void> openRoutineDetail(Routine routine);
+  Future<void> openRoutineDetail(Routine routine, {bool isInGroup = false});
 
   /// 새 일과 만들기 흐름 (크레딧 확인 포함)
   Future<void> startCreateRoutine();
@@ -45,32 +46,38 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
 
   // --- 열기 · 메뉴 ---
 
-  Future<void> openGroup(LibraryGroupEntry entry) async {
+  Future<void> openGroup(
+    LibraryGroupEntry entry, {
+    bool startsEditing = false,
+  }) async {
     final sheetResult = await showRoutineGroupSheet(
       context,
       groupId: entry.group.id,
+      startsEditing: startsEditing,
     );
     if (!mounted || sheetResult == null) return;
     switch (sheetResult.action) {
       case GroupSheetAction.send:
         await _sendGroup(entry);
-      case GroupSheetAction.rename:
-        await _renameGroup(entry.group);
       case GroupSheetAction.addRoutines:
         await _pickIntoGroup(entry.group);
       case GroupSheetAction.openRoutine:
         if (sheetResult.routine case final routine?) {
-          await openRoutineDetail(routine);
+          await openRoutineDetail(routine, isInGroup: true);
         }
       case GroupSheetAction.ungroupedLastOne:
         showElumToast(context, context.l10n.routineGroupUngroupedLastOne);
     }
   }
 
-  Future<void> openGroupMenu(LibraryGroupEntry entry) async {
+  Future<void> openGroupMenu(
+    LibraryGroupEntry entry,
+    LibraryMenuAnchor anchor,
+  ) async {
     final action = await showGroupQuickMenu(
       context,
-      groupName: entry.group.name,
+      anchor: anchor.rect,
+      highlight: anchor.tile,
     );
     if (!mounted || action == null) return;
     switch (action) {
@@ -78,9 +85,9 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
         await _sendGroup(entry);
       case GroupMenuAction.rename:
         await _renameGroup(entry.group);
-      // 순서는 묶음 시트의 손잡이로 바꾼다
+      // 순서는 묶음을 순서 편집 상태로 열어 바꾼다
       case GroupMenuAction.reorder:
-        await openGroup(entry);
+        await openGroup(entry, startsEditing: true);
       case GroupMenuAction.copy:
         await _run(
           () => _failureOf(_groups.copy(entry.group)),
@@ -88,7 +95,7 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
           code: 'E-GRP-COPY',
         );
       case GroupMenuAction.ungroup:
-        await _confirmUngroup(entry.group);
+        await confirmUngroup(entry.group);
     }
   }
 
@@ -252,7 +259,8 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
   }
 
   /// 풀기: 확인 팝업 > 풀기 (안의 일과는 낱개로 남는다)
-  Future<void> _confirmUngroup(RoutineGroup group) async {
+  /// 묶음 풀기 확인 > 풀기. 정리 상태 ⊖ 와 메뉴가 같이 쓴다
+  Future<void> confirmUngroup(RoutineGroup group) async {
     final l10n = context.l10n;
     final isConfirmed = await showElumDialog<bool>(
       context: context,

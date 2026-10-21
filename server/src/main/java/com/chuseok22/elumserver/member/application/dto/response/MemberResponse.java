@@ -49,7 +49,11 @@ public record MemberResponse(
 
   @Schema(description = "카드 그림 방식. CARTOON(만화, 기본) · REALISTIC(실사) · PHOTO_ONLY(직접 사진). "
     + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.", example = "CARTOON")
-  ImageStyle imageStyle
+  ImageStyle imageStyle,
+
+  @Schema(description = "보호자 계정 표시 정보(닉네임·가입 방법·가린 이메일). "
+    + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
+  GuardianAccountResponse account
 ) {
 
   /**
@@ -62,7 +66,8 @@ public record MemberResponse(
    * 화면이 죽지 않게 한다.
    */
   public static MemberResponse from(
-    Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements
+    Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements,
+    GuardianAccountResponse account
   ) {
     return new MemberResponse(
       member.getId(),
@@ -76,7 +81,8 @@ public record MemberResponse(
       entitlements,
       profiles.stream().map(ProfileSummaryResponse::from).toList(),
       // 당사자 항목이 없으면(E29) 기본 만화 — 화면이 null 을 만나지 않게 한다
-      profile == null ? ImageStyle.CARTOON : profile.getImageStyle()
+      profile == null ? ImageStyle.CARTOON : profile.getImageStyle(),
+      account
     );
   }
 }

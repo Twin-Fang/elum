@@ -93,6 +93,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- 푸시 알림 (#828): 앱이 꺼져 있을 때 FCM이 직접 띄우는 알림의 채널·아이콘 -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="guardian_updates"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher"/>
         <!-- 일과 알림 (#777): 예약 시각 수신 · 재부팅/업데이트 뒤 재예약 -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">

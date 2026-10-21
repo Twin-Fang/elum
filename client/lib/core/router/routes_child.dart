@@ -9,6 +9,7 @@ import '../../features/child/presentation/routine_done_screen.dart';
 import '../../features/child/presentation/widgets/child_night_sky_backdrop.dart';
 import '../../features/link/presentation/elumi_settings_screen.dart';
 import '../../shared/models/routine.dart';
+import '../app_status/update_suggestion_launcher.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
@@ -20,9 +21,10 @@ List<RouteBase> childRoutes() => [
   GoRoute(
     path: Routes.child,
     // 홈이 태블릿 구성(가운데 열·가로 두 칸)을 직접 정한다
+    // 업데이트 권유는 이 자리에서만 (일과 진행 화면에는 띄우지 않음)
     builder: (context, state) => const AdaptivePageFrame(
       kind: ScreenLayoutKind.adaptive,
-      child: ChildHomeScreen(),
+      child: UpdateSuggestionLauncher(child: ChildHomeScreen()),
     ),
   ),
   GoRoute(

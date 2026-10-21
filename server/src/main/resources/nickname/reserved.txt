@@ -1,0 +1,16 @@
+# 사칭·운영 혼동 이름 (NicknamePolicy, 포함 기준)
+관리자
+운영자
+운영진
+고객센터
+공식
+이룸공식
+이룸팀
+이룸운영
+admin
+administrator
+moderator
+official
+support
+elum
+system

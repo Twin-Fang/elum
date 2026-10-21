@@ -8,13 +8,15 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Optio
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 회원 목록 선언: 열, 요금제·상태 필터, 정렬 허용 열, 응답 > 표 행 변환
+ * 회원 목록 선언: 열, 요금제·상태·가입일 기간 필터, 정렬 허용 열, 응답 > 표 행 변환
  * 정렬은 isSortable 열만 허용되고 그 밖은 기본 정렬(가입일 최신순)로 돌아감
  */
 public final class AdminMemberList {
@@ -22,6 +24,12 @@ public final class AdminMemberList {
   /// 필터 키: plan 은 지금 유효한 요금제, status 는 계정 상태
   public static final String FILTER_PLAN = "plan";
   public static final String FILTER_STATUS = "status";
+  /// 필터 키: 가입일 기간 (yyyy-MM-dd, 비우면 제한 없음 — 가입 추이 막대에서 넘어옴)
+  public static final String FILTER_JOINED_FROM = "joinedFrom";
+  public static final String FILTER_JOINED_TO = "joinedTo";
+  /// 가입일 필터가 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
+  private static final LocalDateTime UNBOUNDED_JOINED_FROM = LocalDateTime.of(2000, 1, 1, 0, 0);
+  private static final LocalDateTime UNBOUNDED_JOINED_TO = LocalDateTime.of(9999, 1, 1, 0, 0);
   /// 정렬 키 (열 키와 같음)
   public static final String SORT_USERNAME = "username";
   public static final String SORT_PLAN = "plan";
@@ -55,10 +63,24 @@ public final class AdminMemberList {
         new Option(MemberStatus.ACTIVE.name(), MemberStatus.ACTIVE.getLabel()),
         new Option(MemberStatus.SUSPENDED.name(), MemberStatus.SUSPENDED.getLabel()),
         // 탈퇴 계정은 상태 필터가 없으면 빠진다. 보관 중인 탈퇴 계정은 이 필터로만 본다 (#372)
-        new Option(MemberStatus.WITHDRAWN.name(), MemberStatus.WITHDRAWN.getLabel())))),
+        new Option(MemberStatus.WITHDRAWN.name(), MemberStatus.WITHDRAWN.getLabel()))),
+      new Filter(FILTER_JOINED_FROM, "가입일 시작", List.of()),
+      new Filter(FILTER_JOINED_TO, "가입일 끝", List.of())),
     SORT_CREATED_AT + AdminListDefinition.SORT_DELIMITER + AdminListDefinition.SORT_DESCENDING);
 
   private AdminMemberList() {
+  }
+
+  /// 가입일 기간 시작(포함): 형식이 틀리거나 비면 제한 없음
+  public static LocalDateTime joinedFromOf(AdminListQuery query) {
+    LocalDate from = AdminDateParameter.parseOrNull(query.filters().get(FILTER_JOINED_FROM));
+    return from == null ? UNBOUNDED_JOINED_FROM : from.atStartOfDay();
+  }
+
+  /// 가입일 기간 끝(미포함): 끝 날 다음 날 0시, 형식이 틀리거나 비면 제한 없음
+  public static LocalDateTime joinedToExclusiveOf(AdminListQuery query) {
+    LocalDate to = AdminDateParameter.parseOrNull(query.filters().get(FILTER_JOINED_TO));
+    return to == null ? UNBOUNDED_JOINED_TO : to.plusDays(1).atStartOfDay();
   }
 
   /// 응답 > 표 한 행 (첫 칸이 회원 상세 링크)

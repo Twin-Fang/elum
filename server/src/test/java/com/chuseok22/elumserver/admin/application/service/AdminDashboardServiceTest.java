@@ -27,6 +27,8 @@ class AdminDashboardServiceTest {
   private AdminRoutineService routineService;
   private AdminMonitoringService monitoringService;
   private SystemConfigOverviewService configOverviewService;
+  private AdminAttentionService attentionService;
+  private AdminStatsService statsService;
   private AtomicLong nowMilliseconds;
   private AdminDashboardService dashboardService;
 
@@ -36,6 +38,8 @@ class AdminDashboardServiceTest {
     routineService = mock(AdminRoutineService.class);
     monitoringService = mock(AdminMonitoringService.class);
     configOverviewService = mock(SystemConfigOverviewService.class);
+    attentionService = mock(AdminAttentionService.class);
+    statsService = mock(AdminStatsService.class);
     nowMilliseconds = new AtomicLong(1_000_000L);
 
     when(memberService.count()).thenReturn(10L);
@@ -48,7 +52,8 @@ class AdminDashboardServiceTest {
     when(configOverviewService.buildOverview(any(), any())).thenReturn(new SettingsOverview(2, List.of(), List.of()));
 
     dashboardService = new AdminDashboardService(
-      memberService, routineService, monitoringService, configOverviewService, nowMilliseconds::get);
+      memberService, routineService, monitoringService, configOverviewService, attentionService, statsService,
+      nowMilliseconds::get);
   }
 
   @Test

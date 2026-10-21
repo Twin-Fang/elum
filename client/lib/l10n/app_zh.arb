@@ -4,7 +4,7 @@
   "installationRetryButton": "重试",
   "issuedCodeCopyFailedTitle": "复制失败了",
   "issuedCodeCopyFailedFallback": "请直接告知屏幕上显示的代码",
-  "onboardingExampleTitle": "想和{name}\n先从哪些日常开始?",
+  "onboardingExampleTitle": "想在哪些方面\n帮助{name}?",
   "onboardingExampleDescription": "我们会为所选分类加入示例日常。\n可以选择多个。",
   "onboardingExampleSkip": "跳过",
   "exampleCategoryMorningEvening": "早晚准备",
@@ -15,6 +15,17 @@
   "exampleCategoryHouseSelfHint": "整理、摆餐桌",
   "exampleCategoryOutside": "外出试试",
   "exampleCategoryOutsideHint": "坐公交、买东西",
-  "routineTileExampleBadge": "示例",
-  "exampleRoutinesFailed": "未能加入示例日常"
+  "exampleRoutinesFailed": "未能加入示例日常",
+  "signInProviderKakao": "Kakao",
+  "signInProviderNaver": "Naver",
+  "signInProviderGoogle": "Google",
+  "signInProviderApple": "Apple",
+
+  "updateSuggestionTitle": "有新版本了",
+  "updateSuggestionBody": "更新后即可使用最新的修复和功能",
+  "updateSuggestionLater": "以后再说",
+  "routineDetailTalkOriginBand": "来自故事区",
+  "routineDetailTalkOriginOpenPost": "原帖",
+  "routineDetailTalkOriginPostGone": "已下架的帖子",
+  "routineDetailTalkOriginBandOpenLabel": "来自故事区,查看原帖"
 }

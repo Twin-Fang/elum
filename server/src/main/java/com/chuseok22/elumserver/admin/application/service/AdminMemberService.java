@@ -214,7 +214,8 @@ public class AdminMemberService {
     String planFilter = query.filters().getOrDefault(AdminMemberList.FILTER_PLAN, PLAN_FILTER_ALL);
     Pageable pageable = PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query));
     return memberRepository.searchForAdmin(
-      query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(), pageable);
+      query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(),
+      AdminMemberList.joinedFromOf(query), AdminMemberList.joinedToExclusiveOf(query), pageable);
   }
 
   // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다

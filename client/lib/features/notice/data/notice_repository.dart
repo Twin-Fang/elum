@@ -1,27 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/profile_header_interceptor.dart';
+import '../../../shared/models/notice_platform.dart';
 import '../domain/app_notice.dart';
 import '../../../app/dio_provider.dart';
-
-/// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다.
-enum NoticePlatform {
-  ios('IOS'),
-  android('ANDROID');
-
-  const NoticePlatform(this.wire);
-
-  final String wire;
-
-  /// `dart:io` 의 Platform 대신 [defaultTargetPlatform] 으로 가린다 —
-  /// 테스트에서 바꿔 볼 수 있어야 스토어별 공지가 섞이지 않는지 확인할 수 있다.
-  static NoticePlatform get current =>
-      defaultTargetPlatform == TargetPlatform.iOS ? ios : android;
-}
 
 /// 관리자가 올린 공지를 받는다 (명세 3-1).
 ///
@@ -54,6 +40,48 @@ class NoticeRepository {
         'code': AppFailure.of(e).badgeOr(failureCode),
       });
       return NoticeFeed.empty;
+    }
+  }
+
+  /// 한 번에 받는 공지 수 (서버 기본값과 같음)
+  static const historyPageSize = 20;
+
+  /// 공지 탭 목록 한 쪽 (최근 90일, 게시 끝난 공지 포함). 부가 기능 [fetch] 와 달리 실패를 던짐
+  Future<NoticeHistoryPage> fetchHistory(
+    NoticePlatform platform, {
+    String? cursor,
+  }) async {
+    try {
+      return await logged('NoticeRepository', 'fetchHistory', () async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/api/notices/history',
+          queryParameters: {
+            'platform': platform.wire,
+            'size': historyPageSize,
+            'cursor': ?cursor,
+          },
+          options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+        );
+        final body = response.data;
+        if (body == null) throw const FormatException('empty response');
+        return NoticeHistoryPage.fromJson(body, baseUrl: _dio.options.baseUrl);
+      });
+    } catch (e) {
+      throw AppFailure.of(e);
+    }
+  }
+
+  /// 공지 탭을 열었다고 서버에 기록 (안 읽은 공지 표시 지움)
+  Future<void> markSeen() async {
+    try {
+      await logged('NoticeRepository', 'markSeen', () async {
+        await _dio.post<void>(
+          '/api/notices/seen',
+          options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+        );
+      });
+    } catch (e) {
+      throw AppFailure.of(e);
     }
   }
 }

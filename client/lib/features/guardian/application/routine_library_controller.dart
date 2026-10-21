@@ -43,6 +43,13 @@ class RoutineLibraryController {
     return failure;
   }
 
+  /// 칸 자리 저장 (칸 사이에 놓아 옮겼을 때). 실패면 격자는 그대로
+  Future<AppFailure?> saveOrder(List<({String type, String id})> cells) async {
+    final failure = await _api.saveOrder(cells);
+    if (failure == null) _ref.refreshRoutines();
+    return failure;
+  }
+
   /// 성공했을 때만 일과관리·오늘·지난 목록을 다시 받는다 (실패면 화면 그대로)
   Future<Attempt<Routine>> _refreshAfter(Future<Attempt<Routine>> call) async {
     final result = await call;

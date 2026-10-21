@@ -51,12 +51,21 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
+  static const _kHasAskedPushPermission = 'push.hasAskedPermission';
+  // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
+  static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
-  static const _kLibraryCoachSeen = 'coach.librarySeen';
+  static const _kManageCoachSeen = 'coach.manageSeen';
+  static const _kGroupCoachSeen = 'coach.groupSeen';
+  static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
   static const _kRoutineReminders = 'reminder.routines';
+  // 이야기에서 가져온 일과 중 상세를 연 일과 id 목록
+  static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
+  static const _kTalkShareHintDismissedRoutineIds =
+      'talkShareHintDismissedRoutineIds';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -303,6 +312,26 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get hasAskedPushPermission =>
+      _prefs.getBool(_kHasAskedPushPermission) ?? false;
+
+  @override
+  Future<void> setHasAskedPushPermission(bool v) async {
+    AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
+    await _prefs.setBool(_kHasAskedPushPermission, v);
+  }
+
+  @override
+  String? get updateSuggestionShownRecord =>
+      _prefs.getString(_kUpdateSuggestionShown);
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async {
+    AppLogger.storageWrite(_kUpdateSuggestionShown, record);
+    await _prefs.setString(_kUpdateSuggestionShown, record);
+  }
+
+  @override
   bool get isHomeCoachSeen => _prefs.getBool(_kHomeCoachSeen) ?? false;
 
   @override
@@ -312,12 +341,67 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
-  bool get isLibraryCoachSeen => _prefs.getBool(_kLibraryCoachSeen) ?? false;
+  bool get isManageCoachSeen => _prefs.getBool(_kManageCoachSeen) ?? false;
 
   @override
-  Future<void> setLibraryCoachSeen(bool v) async {
-    AppLogger.storageWrite(_kLibraryCoachSeen, '$v');
-    await _prefs.setBool(_kLibraryCoachSeen, v);
+  Future<void> setManageCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kManageCoachSeen, '$isSeen');
+    await _prefs.setBool(_kManageCoachSeen, isSeen);
+  }
+
+  @override
+  List<String> get talkImportedSeenRoutineIds =>
+      _prefs.getStringList(_kTalkImportedSeenRoutineIds) ?? const [];
+
+  @override
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) {
+    AppLogger.storageWrite(_kTalkImportedSeenRoutineIds, routineIds);
+    return _prefs.setStringList(_kTalkImportedSeenRoutineIds, routineIds);
+  }
+
+  @override
+  List<String> get talkShareHintDismissedRoutineIds =>
+      _prefs.getStringList(_kTalkShareHintDismissedRoutineIds) ?? const [];
+
+  @override
+  Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds) {
+    AppLogger.storageWrite(_kTalkShareHintDismissedRoutineIds, routineIds);
+    return _prefs.setStringList(
+      _kTalkShareHintDismissedRoutineIds,
+      routineIds,
+    );
+  }
+
+  @override
+  bool get isGroupCoachSeen => _prefs.getBool(_kGroupCoachSeen) ?? false;
+
+  @override
+  Future<void> setGroupCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kGroupCoachSeen, '$isSeen');
+    await _prefs.setBool(_kGroupCoachSeen, isSeen);
+  }
+
+  @override
+  bool get isCardReviewCoachSeen =>
+      _prefs.getBool(_kCardReviewCoachSeen) ?? false;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kCardReviewCoachSeen, '$isSeen');
+    await _prefs.setBool(_kCardReviewCoachSeen, isSeen);
+  }
+
+  @override
+  Future<void> resetCoachMarks() async {
+    for (final key in [
+      _kHomeCoachSeen,
+      _kManageCoachSeen,
+      _kGroupCoachSeen,
+      _kCardReviewCoachSeen,
+    ]) {
+      AppLogger.storageWrite(key, 'reset');
+      await _prefs.remove(key);
+    }
   }
 
   @override

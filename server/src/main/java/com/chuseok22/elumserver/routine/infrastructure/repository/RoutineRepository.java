@@ -15,6 +15,9 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   List<Routine> findAllByProfileId(String profileId);
 
+  /// 주어진 이룸이들에 속한 일과만 (id 목록 중 남의 이룸이 일과는 걸러진다)
+  List<Routine> findAllByIdInAndProfileIdIn(Collection<String> ids, Collection<String> profileIds);
+
   /** 이 이룸이에 일과가 하나라도 있는가. 합류한 사람의 빈 이룸이를 가릴 때 쓴다 (다중 보호자 4-4). */
   boolean existsByProfileId(String profileId);
 
@@ -127,6 +130,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 이 보호자가 만든 일과 전부. 탈퇴 마지막에 관계 밖에 남은 것을 치운다.
   List<Routine> findAllByCreatedBy(String createdBy);
+
+  /// 새 칸 순서의 기준 (#844). 순서를 정한 낱개 원본이 없으면 -1
+  @Query("select coalesce(max(r.libraryOrder), -1) from Routine r where r.profile.id = :profileId")
+  int maxLibraryOrder(@Param("profileId") String profileId);
 
   /// 일과관리 목록: 원본(보낸 일과 아님) · 지우지 않음 · 보낸 상태만, 최신순 (#804)
   @Query("""

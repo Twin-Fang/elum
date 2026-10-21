@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  AI 제공자 상태 부품 (대시보드·AI 모니터링 공통). 판정은 서버(AiCallStatsService)가 한다.
+  providerCards: 제공자 줄별 카드 / failureTable: 최근 24시간 실패 원인 묶음
+  상태 색은 글자(배지 이름)와 늘 함께 — 색만으로 뜻을 전하지 않는다
+-->
+<body>
+
+<div th:fragment="providerCards(aiHealth)" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3" data-ai-health>
+  <p th:if="${aiHealth.providerStatuses().isEmpty()}" class="text-sm text-base-content/60">
+    최근 24시간 AI 호출 기록이 없고 선택된 제공자도 없어요</p>
+  <div th:each="status : ${aiHealth.providerStatuses()}"
+       th:with="healthName=${status.health().name()}"
+       class="rounded-box bg-base-100 p-3 border-l-4"
+       th:classappend="${healthName == 'CREDIT_EXHAUSTED' or healthName == 'KEY_INVALID'} ? 'border-error'
+         : (${healthName == 'DEGRADED'} ? 'border-warning' : (${healthName == 'HEALTHY'} ? 'border-success' : 'border-base-300'))">
+    <div class="flex items-center justify-between gap-2">
+      <b th:text="${status.laneLabel()}">Gemini 글</b>
+      <span class="badge"
+            th:classappend="${healthName == 'CREDIT_EXHAUSTED' or healthName == 'KEY_INVALID'} ? 'badge-error'
+              : (${healthName == 'DEGRADED'} ? 'badge-warning' : (${healthName == 'HEALTHY'} ? 'badge-success' : 'badge-ghost'))"
+            th:text="${status.health().label}">정상</span>
+    </div>
+    <p class="mt-1 text-sm text-base-content/70">
+      최근 1시간 성공 <span th:text="${status.windowSuccessCount()}">0</span>/<span th:text="${status.windowCallCount()}">0</span>
+      <th:block th:if="${status.windowCallCount() > 0}">
+        · 평균 <span th:text="${#numbers.formatDecimal(status.windowAverageLatencyMilliseconds() / 1000.0, 1, 1)}">0</span>초
+      </th:block>
+    </p>
+    <p class="text-xs text-base-content/60">
+      마지막 성공
+      <span th:text="${status.lastSuccessAt() != null ? @adminDate.format(status.lastSuccessAt()) : '24시간 안에 없음'}">시각</span>
+    </p>
+    <p th:if="${status.lastFailureAt() != null}" class="text-xs text-base-content/60 break-all">
+      마지막 실패 <span th:text="${@adminDate.format(status.lastFailureAt())}">시각</span>
+      · <span th:text="${status.lastFailureKind().label}">분류</span>
+      <span class="block" th:title="${status.lastFailureSummary()}"
+            th:text="${#strings.abbreviate(status.lastFailureSummary(), 80)}">문구</span>
+    </p>
+  </div>
+</div>
+
+<div th:fragment="failureTable(aiHealth)" class="overflow-x-auto">
+  <table class="table table-sm">
+    <thead>
+    <tr><th>원인</th><th>제공자</th><th>건수</th><th>마지막</th></tr>
+    </thead>
+    <tbody>
+    <th:block th:if="${aiHealth.failureCounts().isEmpty()}">
+      <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(4, '최근 24시간 실패가 없어요')}"></tr>
+    </th:block>
+    <tr th:each="failure : ${aiHealth.failureCounts()}">
+      <td><span class="badge badge-sm"
+                th:classappend="${failure.kind().name() == 'CREDIT' or failure.kind().name() == 'KEY'} ? 'badge-error'
+                  : (${failure.kind().name() == 'RATE_LIMIT' or failure.kind().name() == 'PROVIDER_DOWN'} ? 'badge-warning' : 'badge-ghost')"
+                th:text="${failure.kind().label}">원인</span></td>
+      <td th:text="${failure.laneLabel()}">제공자</td>
+      <td th:text="${failure.count()}">0</td>
+      <td th:text="${@adminDate.format(failure.lastAt())}">시각</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

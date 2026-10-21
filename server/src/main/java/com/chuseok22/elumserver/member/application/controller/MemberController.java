@@ -1,14 +1,18 @@
 package com.chuseok22.elumserver.member.application.controller;
 
+import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.dto.response.TalkRulesAgreementResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.member.application.service.OnboardingService;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
+  private final OnboardingService onboardingService;
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/me")
@@ -59,6 +64,15 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(memberService.createProfile(Caller.from(authentication)));
   }
 
+  // X-Profile-Id 를 받지 않는다 — 앱에 남은 옛 선택값과 무관하게 내 이룸이에 저장
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/onboarding")
+  public ResponseEntity<MemberResponse> completeOnboarding(
+    Authentication authentication, @RequestBody OnboardingCompleteRequest request
+  ) {
+    return ResponseEntity.ok(onboardingService.complete(Caller.from(authentication), request));
+  }
+
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/nickname")
   public ResponseEntity<MemberResponse> updateNickname(
@@ -68,6 +82,17 @@ public class MemberController implements MemberControllerDocs {
   ) {
     MemberResponse response = memberService.updateNickname(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
+  }
+
+  // 보호자 본인 닉네임 (위 /nickname 은 이룸이 호칭). 헤더는 응답의 이룸이 칸을 고르는 데만 씀
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/account/nickname")
+  public ResponseEntity<MemberResponse> updateGuardianNickname(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody GuardianNicknameUpdateRequest request
+  ) {
+    return ResponseEntity.ok(memberService.updateGuardianNickname(Caller.from(authentication, profileId), request));
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
@@ -108,5 +133,18 @@ public class MemberController implements MemberControllerDocs {
   public ResponseEntity<Void> withdraw(Authentication authentication) {
     memberService.withdraw(authentication.getName());
     return ResponseEntity.noContent().build();
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/talk-rules-agreement")
+  public ResponseEntity<Void> agreeTalkRules(Authentication authentication) {
+    memberService.agreeTalkRules(authentication.getName());
+    return ResponseEntity.noContent().build();
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @GetMapping("/talk-rules-agreement")
+  public ResponseEntity<TalkRulesAgreementResponse> getTalkRulesAgreement(Authentication authentication) {
+    return ResponseEntity.ok(new TalkRulesAgreementResponse(memberService.hasAgreedTalkRules(authentication.getName())));
   }
 }

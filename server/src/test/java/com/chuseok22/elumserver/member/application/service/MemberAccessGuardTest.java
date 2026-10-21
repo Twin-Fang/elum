@@ -23,6 +23,9 @@ class MemberAccessGuardTest {
   @Mock
   private MemberRepository memberRepository;
 
+  @Mock
+  private MemberVisitRecorder memberVisitRecorder;
+
   @InjectMocks
   private MemberAccessGuard memberAccessGuard;
 

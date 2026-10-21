@@ -15,6 +15,7 @@ class CoachMarkFooter extends StatelessWidget {
     required this.isLast,
     required this.isMotionReduced,
     this.isAtTop = false,
+    this.topOffset,
   });
 
   final int stepCount;
@@ -26,6 +27,9 @@ class CoachMarkFooter extends StatelessWidget {
 
   /// 위쪽에 둔다 — 가리키는 대상이 화면 아래쪽이라 말풍선이 아래 문구 자리를 쓸 때 (#834)
   final bool isAtTop;
+
+  /// 위쪽에 둘 때 화면 맨 위에서 띄울 거리 (픽셀). 없으면 닫기 버튼 바로 아래
+  final double? topOffset;
 
   /// 점과 문구를 화면 바닥에서 띄우는 거리(안전영역 제외). 하단 배너 광고(약 60~100) 위에 놓는다 -
   /// 광고와 겹치면 글자가 광고 위에 얹혀 지저분하다.
@@ -43,7 +47,7 @@ class CoachMarkFooter extends StatelessWidget {
     return Positioned(
       left: 0,
       right: 0,
-      top: isAtTop ? media.padding.top + _topOffset.h : null,
+      top: isAtTop ? (topOffset ?? media.padding.top + _topOffset.h) : null,
       bottom: isAtTop ? null : media.padding.bottom + _bottomOffset.h,
       child: ExcludeSemantics(
         child: Column(

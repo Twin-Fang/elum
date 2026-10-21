@@ -5,6 +5,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/device/device_name_reader.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
@@ -87,13 +88,18 @@ class DeviceLinkRepository {
     required LocalStorage storage,
     CardImageDiskCache? imageCache,
     DeviceNameReader deviceNameReader = readDeviceName,
+    PushUnregister? unregisterPush,
   })  : _deviceNameReader = deviceNameReader,
+        _unregisterPush = unregisterPush,
         _dio = dio,
         _tokens = tokens,
         _storage = storage,
         _imageCache = imageCache;
 
   static const _repo = 'DeviceLinkRepository';
+
+  /// 이 기기가 이룸이 기기로 바뀌기 직전 보호자 푸시 토큰 해제
+  final PushUnregister? _unregisterPush;
 
   final Dio _dio;
 
@@ -235,6 +241,8 @@ class DeviceLinkRepository {
         AppLogger.error('연결', '응답에 토큰이 없습니다');
         return const RedeemResult(RedeemOutcome.failed);
       }
+      // 보호자 토큰이 살아 있는 지금 푸시 해제 (이 기기는 이룸이 기기가 되어 알림을 받지 않음)
+      await _unregisterPush?.call();
       await _tokens.save(accessToken: access, refreshToken: refresh);
       // 이 휴대폰이 이룸이 것임을 남긴다. 세션이 끊겼을 때 보호자 로그인 화면이 아니라
       // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다.
@@ -314,6 +322,7 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     storage: ref.watch(localStorageProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
+    unregisterPush: () => ref.read(pushUnregisterProvider)(),
   );
 });
 

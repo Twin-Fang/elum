@@ -1,216 +1,494 @@
+import 'dart:async';
+import 'dart:ui' show lerpDouble;
+
+import 'package:flutter/foundation.dart' show listEquals, setEquals;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
+import 'anchored_quick_menu.dart';
+import 'library_arrange_shell.dart';
+import 'library_grid_geometry.dart';
+import 'library_grid_lifted_tile.dart';
 import 'library_group_tile.dart';
+import 'library_quick_menu.dart';
 import 'library_routine_tile.dart';
 
-/// 일과관리 격자 (#807): 묶음 칸 + 낱개 칸. 창 폭으로 열 수를 정한다 (폰 4열, 넓으면 늘어남)
-///
-/// 낱개 칸 길게 누르기: 그냥 떼면 메뉴, 누른 채 움직이면 끌기
-/// > 다른 일과 위에 놓으면 새 묶음, 묶음 위에 놓으면 그 묶음에 넣기.
+part 'library_entry_grid_cells.dart';
+
+/// 길게 누른 칸의 화면 자리와 그 칸 모양 (칸 옆 메뉴가 쓴다)
+typedef LibraryMenuAnchor = ({Rect rect, Widget tile});
+
+/// 일과관리 격자: 묶음 · 낱개 칸, 길게 누르면 메뉴, 누른 채 움직이면 끌기 (갤럭시 홈 화면과 같음)
+/// 끄는 칸은 손가락에 붙고 이웃이 비켜 빈자리 > 놓으면 그 자리로 · 그림 위에 겹쳐 놓으면 묶기
 class LibraryEntryGrid extends StatefulWidget {
   const LibraryEntryGrid({
     super.key,
     required this.entries,
     required this.sentIds,
     required this.bottomSpace,
+    required this.isArranging,
     required this.onRoutineTap,
     required this.onRoutineMenu,
     required this.onGroupTap,
     required this.onGroupMenu,
     required this.onDropOnRoutine,
     required this.onDropOnGroup,
-    this.firstTileKey,
+    required this.onMoveCell,
+    required this.onArrangeStart,
+    required this.onRemoveRoutine,
+    required this.onRemoveGroup,
+    this.firstRoutineTileKey,
+    this.secondRoutineTileKey,
+    this.scrollTargetRoutineId,
+    this.onScrollTargetHandled,
+    this.sharedPostIdBySourceRoutineId = const {},
   });
 
   final List<LibraryEntry> entries;
   final Set<String> sentIds;
   final double bottomSpace;
 
-  /// 다른 동작이 도는 중이면 null — 같은 요청이 두 번 가지 않게
+  /// 정리 상태인가 (흔들림 · ⊖ · 바로 끌기)
+  final bool isArranging;
+
+  /// 다른 동작이 도는 중이면 null — 같은 요청이 두 번 가지 않게. 메뉴가 null 이면 그 칸은 끌리지 않는다
   final ValueChanged<Routine>? onRoutineTap;
-  final ValueChanged<Routine>? onRoutineMenu;
+  final void Function(Routine routine, LibraryMenuAnchor anchor)? onRoutineMenu;
   final ValueChanged<LibraryGroupEntry>? onGroupTap;
-  final ValueChanged<LibraryGroupEntry>? onGroupMenu;
+  final void Function(LibraryGroupEntry entry, LibraryMenuAnchor anchor)?
+  onGroupMenu;
 
-  /// (끌어 온 일과, 놓은 자리의 일과)
-  final void Function(Routine dragged, Routine target)? onDropOnRoutine;
-  final void Function(Routine dragged, LibraryGroupEntry target)? onDropOnGroup;
+  /// (끌어 온 일과, 겹쳐 놓은 칸의 일과 · 묶음). 끝나면 격자가 숨겼던 칸을 다시 본다
+  final Future<void> Function(Routine dragged, Routine target)? onDropOnRoutine;
+  final Future<void> Function(Routine dragged, LibraryGroupEntry target)?
+  onDropOnGroup;
 
-  /// 코치마크가 가리킬 첫 칸에 붙일 키 (#834)
-  final GlobalKey? firstTileKey;
+  /// 빈자리에 놓았다: [dragged] 를 [target] 앞([isBefore])이나 뒤로 옮긴다. 저장했으면 true (#837)
+  final Future<bool> Function(
+    LibraryEntry dragged,
+    LibraryEntry target, {
+    required bool isBefore,
+  })?
+  onMoveCell;
+
+  /// 길게 누른 채 움직이기 시작했다 — 정리 상태로 들어간다
+  final VoidCallback? onArrangeStart;
+
+  /// 정리 상태 ⊖: 일과 지우기 · 묶음 풀기
+  final ValueChanged<Routine>? onRemoveRoutine;
+  final ValueChanged<LibraryGroupEntry>? onRemoveGroup;
+
+  /// 코치마크가 가리킬 낱개 일과 칸의 첫째 · 둘째 (묶음 칸은 세지 않는다)
+  final GlobalKey? firstRoutineTileKey;
+  final GlobalKey? secondRoutineTileKey;
+
+  /// 스크롤해 보여 줄 일과 id (묶음 안이면 그 묶음 칸). 칸을 찾아 스크롤하면 [onScrollTargetHandled] 를 부른다
+  final String? scrollTargetRoutineId;
+  final VoidCallback? onScrollTargetHandled;
+
+  /// 이야기에 올린 글(원본 일과 id > 글 id): 길게 누를 때 미리보기 메뉴의 `내 글 보기` 줄 판단
+  final Map<String, String> sharedPostIdBySourceRoutineId;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();
 }
 
-class _LibraryEntryGridState extends State<LibraryEntryGrid> {
-  /// 칸 한 개가 차지하는 최소 폭(393 기준). 이 폭으로 열 수를 정한다 (폰 4열)
-  static const _tileMinWidth = 84.0;
-  static const _minColumns = 4;
-  static const _maxColumns = 8;
-
-  /// 이만큼 안 움직이고 떼면 끌기가 아니라 메뉴 열기로 본다 (논리 픽셀)
+class _LibraryEntryGridState extends State<LibraryEntryGrid>
+    with TickerProviderStateMixin {
+  /// 길게 누른 뒤 이만큼 움직이면 메뉴를 거두고 끌기로 넘어간다 (논리 픽셀)
   static const _menuSlopPixels = 12.0;
 
-  /// 끌어 온 일과가 위에 있을 때 키우는 비율 · 끄는 동안 제자리 칸 흐리기
-  static const _dropTargetScale = 1.1;
-  static const _draggingOpacity = 0.3;
+  /// 집은 칸을 키우는 비율 · 묶음에 빨려 들어갈 때 줄이는 비율
+  static const _liftScale = 0.12;
+  static const _mergeLandScale = 0.4;
 
-  /// 끌기를 시작한 칸의 화면 위치 (놓은 자리와 견줘 메뉴/끌기를 가른다)
-  Offset? _dragOrigin;
+  /// 칸 사이에 이만큼 머물러야 이웃이 비킨다 (겹쳐 묶으러 가며 지나치는 칸은 그대로)
+  static const _gapShiftDelay = Duration(milliseconds: 250);
+
+  /// 손가락이 화면 위아래 끝 이 거리 안이면 격자를 굴린다 · 최고 속도(px/s)
+  static const _edgeScrollZone = 56.0;
+  static const _edgeScrollSpeed = 520.0;
+
+  final _viewportKey = GlobalKey();
+  final _contentKey = GlobalKey();
+  final _scroll = ScrollController();
+  late final _lift = AnimationController(vsync: this, duration: AppMotion.fast);
+  late final _land = AnimationController(
+    vsync: this,
+    duration: AppMotion.normal,
+  );
+  late final Ticker _edgeTicker = createTicker(_onEdgeTick);
+  Duration _lastEdgeTick = Duration.zero;
+
+  /// 길게 누르는 동안의 메뉴 미리보기 (화면을 띄우지 않는다 — 띄우면 Navigator 가 손가락을 취소해 끌기가 끊긴다)
+  final _menuPreview = OverlayPortalController();
+  ({LibraryEntry entry, Rect rect})? _menuPreviewTarget;
+
+  LibraryGridGeometry? _geometry;
+
+  /// 놓은 직후 서버 목록이 오기 전까지 보여 줄 칸 순서 (id). 서버 순서가 같아지면 지운다
+  List<String>? _orderOverride;
+
+  /// 묶음에 넣는 중이라 숨긴 칸 (요청이 끝나면 다시 본다 — 실패면 제자리로 돌아온다)
+  String? _hiddenId;
+  String? _mergeInFlightId;
+
+  // --- 끌기 ---
+  String? _dragId;
+  int _dragFrom = 0;
+  LibraryGridHover? _hover;
+
+  /// 머무르면 옮길 빈자리 (머무는 시간을 재는 중)
+  int? _pendingGap;
+  Timer? _gapShiftTimer;
+  Offset _fingerGlobal = Offset.zero;
+  Offset _startGlobal = Offset.zero;
+
+  /// 집은 지점 (칸 왼쪽 위 기준). 칸이 커져도 이 점이 손가락 밑에 남는다
+  Offset _grab = Offset.zero;
+  bool _hasMoved = false;
+  bool _isLongPressDrag = false;
+
+  /// 놓은 뒤 안착 움직임 (null 이면 끄는 중이거나 쉬는 중)
+  _LandingPlan? _landing;
+
+  double get _easedLift => Curves.easeOutCubic.transform(_lift.value);
+  double get _easedLand => Curves.easeOutCubic.transform(_land.value);
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleScrollToTarget();
+  }
+
+  @override
+  void didUpdateWidget(LibraryEntryGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleScrollToTarget();
+    final override = _orderOverride;
+    final ids = [for (final entry in widget.entries) entry.id];
+    // 서버 목록이 놓은 순서와 같아졌거나, 칸이 늘거나 줄었으면(덧씌우기가 낡음) 걷는다
+    if (override != null &&
+        (listEquals(ids, override) ||
+            !setEquals(ids.toSet(), override.toSet()))) {
+      _orderOverride = null;
+    }
+    // 끌던 칸이 목록에서 사라졌다 — 끌기를 접는다
+    final dragId = _dragId;
+    if (dragId != null && !widget.entries.any((entry) => entry.id == dragId)) {
+      _resetDrag();
+    }
+  }
+
+  @override
+  void dispose() {
+    _gapShiftTimer?.cancel();
+    _edgeTicker.dispose();
+    _lift.dispose();
+    _land.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  // 집기 · 끌기 · 놓기
+
+  /// 집기: 칸을 든다. 길게 누른 것이면 칸 옆 메뉴 미리보기부터 (움직여야 메뉴가 사라지고 이웃이 비킨다)
+  Drag? _startDrag(
+    LibraryEntry entry,
+    Offset globalPosition, {
+    required bool isLongPress,
+  }) {
+    final geometry = _geometry;
+    final shown = _shownEntries;
+    final index = shown.indexWhere((candidate) => candidate.id == entry.id);
+    if (_dragId != null || _landing != null || geometry == null || index < 0) {
+      return null;
+    }
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _dragId = entry.id;
+      _dragFrom = index;
+      _hover = LibraryGridHover(gap: index);
+      _fingerGlobal = globalPosition;
+      _startGlobal = globalPosition;
+      _grab = _toContent(globalPosition) - geometry.slotRect(index).topLeft;
+      // 정리 상태에서 바로 끈 것은 처음부터 끌기 (메뉴 아님)
+      _hasMoved = !isLongPress;
+      _isLongPressDrag = isLongPress;
+    });
+    _lift.forward(from: 0);
+    _lastEdgeTick = Duration.zero;
+    _edgeTicker.start();
+    if (isLongPress) _showMenuPreview(entry, geometry.slotRect(index));
+    return _GridDrag(
+      onUpdate: _onDragUpdate,
+      onEnd: (_) => _onDrop(),
+      onCancel: _onCancel,
+    );
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (_dragId == null || _landing != null) return;
+    _fingerGlobal = details.globalPosition;
+    if (!_hasMoved &&
+        (_fingerGlobal - _startGlobal).distance >= _menuSlopPixels) {
+      _hasMoved = true;
+      _hideMenuPreview();
+      if (_isLongPressDrag) widget.onArrangeStart?.call();
+    }
+    _updateHover();
+    setState(() {});
+  }
+
+  /// 끄는 칸 그림 가운데로 빈자리 · 묶을 칸을 다시 잰다
+  /// 묶기 표시는 바로, 빈자리 옮기기는 칸 사이에 [_gapShiftDelay] 머문 뒤 (지나가는 칸이 비켜 버리면 겹칠 수 없다)
+  void _updateHover() {
+    final geometry = _geometry;
+    final hover = _hover;
+    if (!_hasMoved || geometry == null || hover == null) return;
+    final shown = _shownEntries;
+    final dragged = shown.where((entry) => entry.id == _dragId).firstOrNull;
+    if (dragged == null) return;
+    final scale = 1 + _liftScale * _easedLift;
+    final iconCenterInTile = Offset(
+      geometry.tileWidth / 2,
+      geometry.iconSize / 2,
+    );
+    final next = geometry.resolveHover(
+      draggedIconCenter:
+          _toContent(_fingerGlobal) + (iconCenterInTile - _grab) * scale,
+      otherCount: shown.length - 1,
+      gap: hover.gap,
+      canMerge:
+          dragged is LibraryRoutineEntry &&
+          widget.onDropOnRoutine != null &&
+          widget.onDropOnGroup != null,
+    );
+    // 묶기 · 지금 빈자리 그대로: 바로 반영, 재던 머무름은 취소
+    if (next.mergeOtherIndex != null || next.gap == hover.gap) {
+      _cancelPendingGap();
+      if (next == hover) return;
+      if (next.mergeOtherIndex != null) HapticFeedback.lightImpact();
+      setState(() => _hover = next);
+      return;
+    }
+    // 다른 칸 자리: 묶기 표시는 끄고, 머무르면 빈자리를 옮긴다
+    if (hover.mergeOtherIndex != null) {
+      setState(() => _hover = LibraryGridHover(gap: hover.gap));
+    }
+    if (_pendingGap == next.gap) return;
+    _pendingGap = next.gap;
+    _gapShiftTimer?.cancel();
+    _gapShiftTimer = Timer(_gapShiftDelay, _applyPendingGap);
+  }
+
+  void _applyPendingGap() {
+    final pendingGap = _pendingGap;
+    _pendingGap = null;
+    if (!mounted || pendingGap == null || _dragId == null || _landing != null) {
+      return;
+    }
+    setState(() => _hover = LibraryGridHover(gap: pendingGap));
+  }
+
+  void _cancelPendingGap() {
+    _gapShiftTimer?.cancel();
+    _pendingGap = null;
+  }
+
+  void _onDrop() {
+    final dragId = _dragId;
+    // 머무름을 재던 칸 사이에서 놓았으면 그 자리로 (멈췄다 바로 놓아도 그 자리에 들어간다)
+    final pendingGap = _pendingGap;
+    _cancelPendingGap();
+    final hover = pendingGap != null && _hover?.mergeOtherIndex == null
+        ? LibraryGridHover(gap: pendingGap)
+        : _hover;
+    if (hover != _hover) _hover = hover;
+    final geometry = _geometry;
+    if (dragId == null ||
+        hover == null ||
+        geometry == null ||
+        _landing != null) {
+      return;
+    }
+    final shown = _shownEntries;
+    final dragged = shown.where((entry) => entry.id == dragId).firstOrNull;
+    if (dragged == null) return _resetDrag();
+    // 안 움직이고 뗐다 — 미리보기 자리를 진짜 메뉴가 이어받는다 (한 프레임 겹친 뒤 미리보기를 거둔다)
+    if (!_hasMoved) {
+      _resetDrag();
+      _openMenu(dragged, geometry.slotRect(_dragFrom));
+      WidgetsBinding.instance.addPostFrameCallback((_) => _hideMenuPreview());
+      return;
+    }
+    final others = _othersOf(shown);
+    final mergeIndex = hover.mergeOtherIndex;
+    if (mergeIndex != null && dragged is LibraryRoutineEntry) {
+      final targetSlot = mergeIndex < hover.gap ? mergeIndex : mergeIndex + 1;
+      _beginLanding(
+        geometry.slotRect(targetSlot),
+        toScale: _mergeLandScale,
+        toOpacity: 0,
+      );
+      _merge(dragged.routine, others[mergeIndex]);
+      return;
+    }
+    _beginLanding(geometry.slotRect(hover.gap));
+    if (hover.gap != _dragFrom && others.isNotEmpty) {
+      _move(dragged, others, hover.gap);
+    }
+  }
+
+  /// 손가락이 끊겼다(전화 수신 등): 옮기지 않고 원래 자리로 돌려놓는다
+  void _onCancel() {
+    final geometry = _geometry;
+    if (_dragId == null || _landing != null || geometry == null) return;
+    _hideMenuPreview();
+    setState(() => _hover = LibraryGridHover(gap: _dragFrom));
+    _beginLanding(geometry.slotRect(_dragFrom));
+  }
+
+  /// 빈자리로 옮기기: 놓은 순서를 바로 덧씌우고 저장. 실패하면 덧씌우기를 걷어 제자리로 돌아간다
+  Future<void> _move(
+    LibraryEntry dragged,
+    List<LibraryEntry> others,
+    int gap,
+  ) async {
+    final onMoveCell = widget.onMoveCell;
+    if (onMoveCell == null) return;
+    final ordered = [...others]..insert(gap, dragged);
+    _orderOverride = [for (final entry in ordered) entry.id];
+    final isBefore = gap < others.length;
+    final target = isBefore ? others[gap] : others.last;
+    final isSaved = await onMoveCell(dragged, target, isBefore: isBefore);
+    if (!isSaved && mounted) setState(() => _orderOverride = null);
+  }
+
+  /// 묶기: 빨려 들어간 칸은 요청이 끝날 때까지 숨긴다 (성공이면 묶음 안으로, 실패면 제자리로)
+  Future<void> _merge(Routine dragged, LibraryEntry target) async {
+    final call = switch (target) {
+      LibraryRoutineEntry(:final routine) => widget.onDropOnRoutine?.call(
+        dragged,
+        routine,
+      ),
+      final LibraryGroupEntry group => widget.onDropOnGroup?.call(
+        dragged,
+        group,
+      ),
+    };
+    _mergeInFlightId = dragged.id;
+    await call;
+    if (!mounted) return;
+    setState(() {
+      _mergeInFlightId = null;
+      _hiddenId = null;
+    });
+  }
+
+  /// 들린 칸을 [to] 자리로 내려놓는다 (크기 · 투명도도 함께)
+  void _beginLanding(Rect to, {double toScale = 1, double toOpacity = 1}) {
+    _edgeTicker.stop();
+    setState(() {
+      _landing = _LandingPlan(
+        from: _overlayRect(),
+        fromScale: _overlayScale(),
+        to: to,
+        toScale: toScale,
+        toOpacity: toOpacity,
+      );
+    });
+    _land.forward(from: 0).whenComplete(_finishLanding);
+  }
+
+  void _finishLanding() {
+    if (!mounted || _landing == null) return;
+    final landedId = _dragId;
+    final isMerge = _landing?.toOpacity == 0;
+    HapticFeedback.selectionClick();
+    setState(() {
+      // 묶음 요청이 아직 끝나지 않았으면 빨려 들어간 칸을 숨긴 채 둔다
+      if (isMerge && landedId != null && _mergeInFlightId == landedId) {
+        _hiddenId = landedId;
+      }
+      _clearDragState();
+    });
+  }
+
+  void _resetDrag() {
+    _edgeTicker.stop();
+    _land.stop();
+    if (mounted) setState(_clearDragState);
+  }
+
+  void _clearDragState() {
+    _cancelPendingGap();
+    _dragId = null;
+    _hover = null;
+    _landing = null;
+    _hasMoved = false;
+    _lift.value = 0;
+    _land.value = 0;
+  }
+
+  /// 손가락이 화면 위아래 끝에 닿으면 격자를 굴린다
+  void _onEdgeTick(Duration elapsed) {
+    final seconds = (elapsed - _lastEdgeTick).inMicroseconds / 1e6;
+    _lastEdgeTick = elapsed;
+    final viewport = _viewportKey.currentContext?.findRenderObject();
+    if (_dragId == null ||
+        !_hasMoved ||
+        _landing != null ||
+        viewport is! RenderBox ||
+        !_scroll.hasClients) {
+      return;
+    }
+    final fingerY = viewport.globalToLocal(_fingerGlobal).dy;
+    final zone = _edgeScrollZone.h;
+    final height = viewport.size.height;
+    var velocity = 0.0;
+    if (fingerY < zone) {
+      velocity = -((zone - fingerY) / zone).clamp(0.0, 1.0) * _edgeScrollSpeed;
+    } else if (fingerY > height - zone) {
+      velocity =
+          ((fingerY - (height - zone)) / zone).clamp(0.0, 1.0) *
+          _edgeScrollSpeed;
+    }
+    if (velocity == 0) return;
+    final position = _scroll.position;
+    final next = (position.pixels + velocity * seconds).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (next == position.pixels) return;
+    _scroll.jumpTo(next);
+    _updateHover();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = (constraints.maxWidth / _tileMinWidth.w).floor().clamp(
-          _minColumns,
-          _maxColumns,
-        );
-        return GridView.builder(
-          padding: EdgeInsets.fromLTRB(
-            space.md.w,
-            space.xs.h,
-            space.md.w,
-            widget.bottomSpace,
-          ),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisSpacing: space.md.h,
-            crossAxisSpacing: space.xs.w,
-            // 그림 칸 + 이름 두 줄이 들어가는 높이
-            mainAxisExtent:
-                LibraryRoutineTile.iconSize.w + space.xs.h + space.xl.h * 1.4,
-          ),
-          itemCount: widget.entries.length,
-          itemBuilder: (context, index) {
-            final tile = switch (widget.entries[index]) {
-              final LibraryGroupEntry entry => _buildGroup(entry),
-              final LibraryRoutineEntry entry => _buildRoutine(entry.routine),
-            };
-            final coachKey = widget.firstTileKey;
-            if (index != 0 || coachKey == null) return tile;
-            return KeyedSubtree(key: coachKey, child: tile);
-          },
-        );
-      },
-    );
-  }
-
-  /// 묶음 칸: 끌어 온 일과를 받는다
-  Widget _buildGroup(LibraryGroupEntry entry) {
-    final isSentToday = entry.routines.every(
-      (routine) => widget.sentIds.contains(routine.id),
-    );
-    return DragTarget<Routine>(
-      key: ValueKey('group-${entry.group.id}'),
-      onWillAcceptWithDetails: (_) => widget.onDropOnGroup != null,
-      onAcceptWithDetails: (details) =>
-          widget.onDropOnGroup?.call(details.data, entry),
-      builder: (context, candidates, _) => LibraryGroupTile(
-        entry: entry,
-        isSentToday: isSentToday,
-        isDropTarget: candidates.isNotEmpty,
-        onTap: () => widget.onGroupTap?.call(entry),
-        onLongPress: () => widget.onGroupMenu?.call(entry),
-      ),
-    );
-  }
-
-  /// 낱개 칸: 끌 수 있고, 다른 일과를 받으면 새 묶음
-  Widget _buildRoutine(Routine routine) {
-    final isSentToday = widget.sentIds.contains(routine.id);
-    final isDragEnabled = widget.onRoutineMenu != null;
-    return Builder(
-      key: ValueKey(routine.id),
-      builder: (tileContext) => DragTarget<Routine>(
-        onWillAcceptWithDetails: (details) =>
-            widget.onDropOnRoutine != null && details.data.id != routine.id,
-        onAcceptWithDetails: (details) =>
-            widget.onDropOnRoutine?.call(details.data, routine),
-        builder: (context, candidates, _) {
-          final tile = AnimatedScale(
-            scale: candidates.isNotEmpty ? _dropTargetScale : 1,
-            duration: AppMotion.fast,
-            child: LibraryRoutineTile(
-              routine: routine,
-              isSentToday: isSentToday,
-              onTap: () => widget.onRoutineTap?.call(routine),
-            ),
-          );
-          if (!isDragEnabled) return tile;
-          return LongPressDraggable<Routine>(
-            data: routine,
-            onDragStarted: () => _dragOrigin = _originOf(tileContext),
-            // 아무 데도 안 놓였다: 거의 안 움직였으면 메뉴, 아니면 제자리
-            onDraggableCanceled: (_, offset) {
-              if (_isMenuGesture(offset)) widget.onRoutineMenu?.call(routine);
-              _dragOrigin = null;
-            },
-            onDragCompleted: () => _dragOrigin = null,
-            feedback: _DragFeedback(routine: routine),
-            childWhenDragging: Opacity(opacity: _draggingOpacity, child: tile),
-            child: tile,
+    // 메뉴 미리보기는 화면 전체 흐림이라 맨 위 오버레이에 그린다 (칸 자리는 화면 좌표)
+    return OverlayPortal(
+      controller: _menuPreview,
+      overlayLocation: OverlayChildLocation.rootOverlay,
+      overlayChildBuilder: _buildMenuPreview,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final geometry = _geometryFor(context, constraints.maxWidth);
+          _geometry = geometry;
+          return AnimatedBuilder(
+            animation: Listenable.merge([_lift, _land]),
+            builder: (context, _) => _buildGrid(geometry, constraints),
           );
         },
-      ),
-    );
-  }
-
-  Offset? _originOf(BuildContext tileContext) {
-    if (tileContext.findRenderObject() case final RenderBox box
-        when box.hasSize) {
-      return box.localToGlobal(Offset.zero);
-    }
-    return null;
-  }
-
-  bool _isMenuGesture(Offset dropOffset) {
-    final origin = _dragOrigin;
-    // 시작 위치를 못 잡았으면 메뉴로 본다 (끌기보다 안전한 쪽)
-    if (origin == null) return true;
-    return (dropOffset - origin).distance < _menuSlopPixels;
-  }
-}
-
-/// 끌고 다니는 그림: 칸과 같은 모양을 살짝 키우고 그림자
-class _DragFeedback extends StatelessWidget {
-  const _DragFeedback({required this.routine});
-
-  final Routine routine;
-
-  /// 끄는 그림 확대 비율 · 그림자 번짐
-  static const _scale = 1.1;
-  static const _shadowBlur = 16.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(LibraryRoutineTile.iconRadius.w);
-    return Transform.scale(
-      scale: _scale,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.textPrimary.withValues(alpha: 0.25),
-              blurRadius: _shadowBlur,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: radius,
-          child: SizedBox.square(
-            dimension: LibraryRoutineTile.iconSize.w,
-            child: LibraryRoutineThumbnail(routine: routine),
-          ),
-        ),
       ),
     );
   }

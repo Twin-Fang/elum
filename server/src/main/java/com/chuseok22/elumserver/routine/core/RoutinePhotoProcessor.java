@@ -65,6 +65,24 @@ public class RoutinePhotoProcessor {
     return encodeJpeg(oriented);
   }
 
+  /**
+   * 원본 바이트 > 검증된 그림(긴 변 1024 이하, RGB, 방향 보정)
+   *
+   * @throws CustomException process 와 같다
+   */
+  public BufferedImage processToImage(byte[] raw) {
+    byte[] jpeg = process(raw);
+    try {
+      BufferedImage image = ImageIO.read(new ByteArrayInputStream(jpeg));
+      if (image == null) {
+        throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE);
+      }
+      return image;
+    } catch (IOException e) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE);
+    }
+  }
+
   // ── 디코드 ──────────────────────────────────────────
 
   private BufferedImage decode(byte[] raw) {
@@ -285,7 +303,8 @@ public class RoutinePhotoProcessor {
 
   // ── 인코딩 ──────────────────────────────────────────
 
-  private byte[] encodeJpeg(BufferedImage image) {
+  /** RGB 그림을 메타데이터 없는 JPEG(품질 0.85)로 인코딩 */
+  public byte[] encodeJpeg(BufferedImage image) {
     Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
     if (!writers.hasNext()) {
       log.error("JPEG 인코더를 찾을 수 없다");

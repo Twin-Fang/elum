@@ -136,4 +136,76 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
 
     double getTotalCostUsd();
   }
+
+  /// 기간[from, to) 칸·유형별 호출 수·성공 수·비용 (unit: day, month) — idx_ai_call_log_created
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), created_at), 'YYYY-MM-DD') as bucket,
+           call_type as callType,
+           count(*) as totalCount,
+           coalesce(sum(case when success then 1 else 0 end), 0) as successCount,
+           coalesce(sum(estimated_cost_usd), 0) as totalCostUsd
+    from ai_call_log
+    where created_at >= :from and created_at < :to
+    group by 1, 2
+    """, nativeQuery = true)
+  List<UsageBucketRow> sumUsageByBucketAndCallType(
+    @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  interface UsageBucketRow {
+
+    String getBucket();
+
+    String getCallType();
+
+    long getTotalCount();
+
+    long getSuccessCount();
+
+    double getTotalCostUsd();
+  }
+
+  /// 기간[from, to) 유형별 호출 수·성공 수·비용
+  @Query("""
+    select l.callType as callType, count(l) as totalCount,
+           coalesce(sum(case when l.success = true then 1 else 0 end), 0) as successCount,
+           coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
+    from AiCallLog l
+    where l.createdAt >= :from and l.createdAt < :to
+    group by l.callType
+    """)
+  List<CallTypeUsage> sumUsageByCallTypeBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  interface CallTypeUsage {
+
+    AiCallType getCallType();
+
+    long getTotalCount();
+
+    long getSuccessCount();
+
+    double getTotalCostUsd();
+  }
+
+  /// from 이후 호출 결과, 최신순 (제공자 상태 판정 — 최근 24시간만 넘긴다)
+  @Query("""
+    select l.callType as callType, l.success as success, l.errorMessage as errorMessage,
+           l.latencyMs as latencyMs, l.createdAt as createdAt
+    from AiCallLog l
+    where l.createdAt >= :from
+    order by l.createdAt desc
+    """)
+  List<CallOutcome> findOutcomesSince(@Param("from") LocalDateTime from);
+
+  interface CallOutcome {
+
+    AiCallType getCallType();
+
+    boolean isSuccess();
+
+    String getErrorMessage();
+
+    Long getLatencyMs();
+
+    LocalDateTime getCreatedAt();
+  }
 }

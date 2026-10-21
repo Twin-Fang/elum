@@ -4,7 +4,7 @@
   "installationRetryButton": "Reintentar",
   "issuedCodeCopyFailedTitle": "No se pudo copiar",
   "issuedCodeCopyFailedFallback": "Indica tú mismo el código que aparece en la pantalla",
-  "onboardingExampleTitle": "¿Con qué rutinas quieres\nempezar con {name}?",
+  "onboardingExampleTitle": "¿En qué te gustaría\nayudar a {name}?",
   "onboardingExampleDescription": "Añadiremos rutinas de ejemplo de lo que elijas.\nPuedes elegir más de una.",
   "onboardingExampleSkip": "Omitir",
   "exampleCategoryMorningEvening": "Mañana y noche",
@@ -15,6 +15,17 @@
   "exampleCategoryHouseSelfHint": "Ordenar, poner la mesa",
   "exampleCategoryOutside": "Salir y probar",
   "exampleCategoryOutsideHint": "Tomar el autobús, hacer compras",
-  "routineTileExampleBadge": "Ejemplo",
-  "exampleRoutinesFailed": "No se pudieron añadir las rutinas de ejemplo"
+  "exampleRoutinesFailed": "No se pudieron añadir las rutinas de ejemplo",
+  "signInProviderKakao": "Kakao",
+  "signInProviderNaver": "Naver",
+  "signInProviderGoogle": "Google",
+  "signInProviderApple": "Apple",
+
+  "updateSuggestionTitle": "Hay una nueva versión",
+  "updateSuggestionBody": "Actualiza para usar las últimas mejoras y funciones",
+  "updateSuggestionLater": "Más tarde",
+  "routineDetailTalkOriginBand": "Traído de Historias",
+  "routineDetailTalkOriginOpenPost": "Publicación original",
+  "routineDetailTalkOriginPostGone": "Publicación retirada",
+  "routineDetailTalkOriginBandOpenLabel": "Traído de Historias, ver la publicación original"
 }

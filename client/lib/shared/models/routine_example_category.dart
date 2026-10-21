@@ -2,7 +2,7 @@ import '../../core/l10n/current_l10n.dart';
 
 /// 온보딩 예시 일과 분류 4개 (#803). 고른 분류마다 서버가 예시 일과 2개를 넣는다.
 ///
-/// [apiValue] 는 서버 `RoutineExampleCategory` enum name 과 같아야 한다 — 어긋나면 400.
+/// [apiValue] 는 서버 `RoutineExampleCategory` enum name 과 같아야 한다 — 어긋나면 온보딩 저장에서 그 분류만 빠진다 (서버 CrossStackContractTest 가 대조).
 enum RoutineExampleCategory {
   morningEvening('MORNING_EVENING', 'brush_teeth_,_to'),
   schoolStudy('SCHOOL_STUDY', 'school_bag'),

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -52,7 +53,7 @@ class CardImageGeneratorLocaleTest {
     lenient().when(fluxImageClient.available()).thenReturn(true);
     lenient().when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(Optional.of(openAiClient));
     lenient().when(openAiClient.available()).thenReturn(true);
-    lenient().when(openAiClient.generateImage(anyString(), any())).thenReturn(OPENAI_IMAGE);
+    lenient().when(openAiClient.generateCardImage(any(), any())).thenReturn(OPENAI_IMAGE);
     lenient().when(fluxImageClient.generate(any(), any(), any())).thenReturn(FLUX_IMAGE);
   }
 
@@ -91,7 +92,7 @@ class CardImageGeneratorLocaleTest {
     GeneratedImage image = generator.generate(request("带上雨伞", null));
 
     assertThat(image).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("带上雨伞", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "带上雨伞".equals(scene.stepDescription())), eq(CharacterType.LULU));
     verify(fluxImageClient, never()).generate(any(), any(), any());
   }
 

@@ -95,7 +95,7 @@ class GlobalExceptionHandlerLocaleMvcTest {
     var result = mockMvc.perform(get("/probe/error")).andExpect(status().isNotFound());
 
     assertThat(body(result).getBytes(StandardCharsets.UTF_8)).isEqualTo(
-      "{\"errorCode\":\"ROUTINE_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 일과입니다.\"}".getBytes(StandardCharsets.UTF_8));
+      "{\"errorCode\":\"ROUTINE_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 일과예요.\"}".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -116,7 +116,7 @@ class GlobalExceptionHandlerLocaleMvcTest {
       .content("{깨진 json")).andExpect(status().isBadRequest());
 
     assertThat(body(result).getBytes(StandardCharsets.UTF_8)).isEqualTo(
-      "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"요청 본문을 읽을 수 없습니다.\"}"
+      "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"요청 본문을 읽을 수 없어요.\"}"
         .getBytes(StandardCharsets.UTF_8));
   }
 
@@ -166,7 +166,7 @@ class GlobalExceptionHandlerLocaleMvcTest {
       .andExpect(jsonPath("$.errorMessage").value("JA-FAKE:requestBodyUnreadable"));
 
     mockMvc.perform(post("/probe/routine").contentType(MediaType.APPLICATION_JSON).content("{깨진 json"))
-      .andExpect(jsonPath("$.errorMessage").value("요청 본문을 읽을 수 없습니다."));
+      .andExpect(jsonPath("$.errorMessage").value("요청 본문을 읽을 수 없어요."));
   }
 
   @ParameterizedTest

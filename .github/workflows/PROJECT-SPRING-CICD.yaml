@@ -51,12 +51,12 @@ jobs:
           APPLICATION_PROD_YML: ${{ secrets.APPLICATION_PROD_YML }}
         run: printf '%s' "$APPLICATION_PROD_YML" > src/main/resources/application-prod.yml
 
-#      # firebase-adminsdk.json 파일을 빌드 전에 생성
-#      # env: 로 먼저 받아 쉘 변수로 전달해야 JSON 내부 " 문자가 쉘 쿼팅을 깨지 않음
-#      - name: Create firebase-adminsdk.json from secret
-#        env:
-#          FIREBASE_ADMINSDK_JSON: ${{ secrets.FIREBASE_ADMINSDK_JSON }}
-#        run: printf '%s' "$FIREBASE_ADMINSDK_JSON" > src/main/resources/firebase-adminsdk.json
+      # firebase-adminsdk.json 파일을 빌드 전에 생성 (FCM 푸시, 시크릿이 비어 있으면 서버는 푸시만 끄고 기동)
+      # env: 로 먼저 받아 쉘 변수로 전달해야 JSON 내부 " 문자가 쉘 쿼팅을 깨지 않음
+      - name: Create firebase-adminsdk.json from secret
+        env:
+          FIREBASE_ADMINSDK_JSON: ${{ secrets.FIREBASE_ADMINSDK_JSON }}
+        run: printf '%s' "$FIREBASE_ADMINSDK_JSON" > src/main/resources/firebase-adminsdk.json
 
       # 브랜치 별 active profile 설정
       - name: Decide active profile
@@ -139,8 +139,9 @@ jobs:
             echo "이미지=${IMAGE}"
             echo "도메인=${DOMAIN} | BLUE_PORT=${BLUE_PORT} GREEN_PORT=${GREEN_PORT}"
 
-            if [ "${BRANCH}" != "main" ]; then
-              echo "지원하지 않는 브랜치: ${BRANCH}"
+            # 허용 브랜치: main(자동 배포), develop(손으로 실행할 때만, 앱 심사 없이 서버를 먼저 올림)
+            if [ "${BRANCH}" != "main" ] && ! { [ "${BRANCH}" = "develop" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; }; then
+              echo "지원하지 않는 브랜치: ${BRANCH} (${{ github.event_name }})"
               exit 1
             fi
 

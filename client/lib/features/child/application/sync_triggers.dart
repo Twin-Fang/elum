@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'child_routine_notifier.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../notification/application/push_token_registrar.dart';
 
 /// 카드 진행 동기화를 언제 다시 시도할지 정하는 위젯.
 ///
@@ -110,6 +111,8 @@ class _SyncTriggersState extends ConsumerState<SyncTriggers>
     if (state == AppLifecycleState.resumed) {
       _refreshIfDayChanged();
       ref.read(childRoutineProvider.notifier).syncPending();
+      // 기기 설정에서 알림을 켜고 돌아온 경우 토큰 등록 (보호자·권한 조건은 안에서 확인)
+      unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
     }
   }
 

@@ -69,14 +69,16 @@ public class RoutineGroupService {
   }
 
   /**
-   * 묶음 만들기: 이룸이(헤더, 보호자만) > 이름 검증 > 구성원 검증 > 저장(맨 뒤 순서) > 구성원 넣기(다른 묶음에서 옮김)
+   * 묶음 만들기: 이룸이(헤더, 보호자만) > 이름 검증 > 구성원 검증 > 저장(칸 자리 = 구성원 중 가장 앞 칸, 없으면 맨 뒤) > 구성원 넣기(다른 묶음에서 옮김)
    */
   @Transactional
   public RoutineGroupResponse create(Caller caller, String name, List<String> routineIds) {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     String trimmedName = validateName(name);
     List<Routine> members = loadMembers(profile.getId(), routineIds);
-    RoutineGroup group = routineGroupRepository.save(newGroup(profile, caller.memberId(), trimmedName));
+    int displayOrder = members.stream().map(Routine::getLibraryOrder).filter(Objects::nonNull)
+      .min(Integer::compare).orElseGet(() -> nextLibraryOrder(profile.getId()));
+    RoutineGroup group = routineGroupRepository.save(newGroup(profile, caller.memberId(), trimmedName, displayOrder));
     routineGroupMembership.assign(group.getId(), members);
     return RoutineGroupResponse.of(group, idsOf(members));
   }
@@ -123,7 +125,8 @@ public class RoutineGroupService {
     List<Routine> members = requireMembers(groupId);
     String copyName = RoutineLibraryService.toCopyName(group.getName(), members.get(0).getLanguage(),
       GROUP_NAME_MAX_LENGTH);
-    RoutineGroup copiedGroup = routineGroupRepository.save(newGroup(group.getProfile(), caller.memberId(), copyName));
+    RoutineGroup copiedGroup = routineGroupRepository.save(newGroup(group.getProfile(), caller.memberId(), copyName,
+      nextLibraryOrder(group.getProfile().getId())));
     List<Routine> copies = members.stream()
       .map(member -> routineLibraryService.newLibraryCopyOf(member, caller.memberId(), false))
       .toList();
@@ -141,6 +144,7 @@ public class RoutineGroupService {
     RoutineGroup group = groupFor(caller, groupId);
     List<Routine> members = requireMembers(groupId);
     List<RoutineResponse> sentRoutines = new ArrayList<>();
+    Routine firstSentRoutine = null;
     for (int order = 0; order < members.size(); order++) {
       Routine member = members.get(order);
       if (routineLibraryService.isAlreadySentToday(member)) {
@@ -151,12 +155,18 @@ public class RoutineGroupService {
       todayCopy.setSentGroupName(group.getName());
       // 묶음 안 자리 그대로 (건너뛴 일과 자리는 비움)
       todayCopy.setSentGroupOrder(order);
-      sentRoutines.add(RoutineResponse.from(routineLibraryService.saveCopy(todayCopy)));
+      Routine savedTodayCopy = routineLibraryService.saveCopy(todayCopy);
+      if (firstSentRoutine == null) {
+        firstSentRoutine = savedTodayCopy;
+      }
+      sentRoutines.add(RoutineResponse.from(savedTodayCopy));
     }
     if (sentRoutines.isEmpty()) {
       log.info("[routine group] send rejected 409 : all routines already sent today, groupId={}", groupId);
       throw new CustomException(ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     }
+    // 묶음 1회 보내기는 알림 1건 (첫 번째로 만든 일과 기준)
+    routineLibraryService.publishRoutineSent(caller, firstSentRoutine);
     return sentRoutines;
   }
 
@@ -222,17 +232,33 @@ public class RoutineGroupService {
       && (routine.getStatus() == RoutineStatus.CONFIRMED || routine.getStatus() == RoutineStatus.COMPLETED);
   }
 
-  /// 새 묶음 (저장 전, 이 이룸이 묶음 맨 뒤 순서)
-  private RoutineGroup newGroup(Profile profile, String createdBy, String name) {
+  /// 새 칸 자리: 묶음 칸·낱개 칸을 통틀어 맨 뒤 (#844)
+  private int nextLibraryOrder(String profileId) {
+    return Math.max(routineGroupRepository.maxDisplayOrder(profileId), routineRepository.maxLibraryOrder(profileId)) + 1;
+  }
+
+  /// 새 묶음 (저장 전, 칸 자리 지정)
+  private RoutineGroup newGroup(Profile profile, String createdBy, String name, int displayOrder) {
     RoutineGroup group = new RoutineGroup();
     group.setProfile(profile);
     group.setCreatedBy(createdBy);
     group.setName(name);
-    group.setDisplayOrder(routineGroupRepository.maxDisplayOrder(profile.getId()) + 1);
+    group.setDisplayOrder(displayOrder);
     return group;
   }
 
   private List<String> idsOf(List<Routine> routines) {
     return routines.stream().map(Routine::getId).toList();
+  }
+
+  /**
+   * 완전 삭제한 회원이 만든 묶음 > 만든 사람 비움. 묶음은 함께 돌보는 이룸이에 남는다 (V44)
+   */
+  @Transactional
+  public void detachCreatorOf(String memberId) {
+    int detached = routineGroupRepository.detachCreator(memberId);
+    if (detached > 0) {
+      log.info("[routine group] creator detached : memberId={}, groups={}", memberId, detached);
+    }
   }
 }

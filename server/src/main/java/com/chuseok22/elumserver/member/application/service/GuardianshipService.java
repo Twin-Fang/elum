@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ProfileInvite;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class GuardianshipService {
   private final DeviceLinkRepository deviceLinkRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final ProfileInviteRepository profileInviteRepository;
+  private final NotificationCleanupService notificationCleanupService;
 
   /**
    * 가입한 사람의 빈 이룸이를 만든다. 온보딩에서 이름·캐릭터를 채운다.
@@ -214,6 +216,8 @@ public class GuardianshipService {
     // 남은 초대 코드(쓰인 기록 포함). 운영 스키마는 profile 삭제에 CASCADE 가 걸려 있지만, 그것에 기대지 않고 직접 치운다 —
     // 로컬(ddl-auto)에는 그 외래키가 없어 코드 행이 이룸이 없이 남는다.
     profileInviteRepository.deleteAllByProfileId(profileId);
+    // 이 이룸이에 딸린 알림 (profile_id 에 외래키가 없어 직접 지움)
+    notificationCleanupService.deleteAllOfProfile(profileId);
     profileRepository.delete(profile);
   }
 

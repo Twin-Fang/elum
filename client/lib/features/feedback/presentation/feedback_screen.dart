@@ -6,13 +6,13 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_check_row.dart';
+import '../../../core/widgets/elum_multiline_text_field.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/feedback_sender.dart';
 import '../data/feedback_repository.dart';
-import 'widgets/feedback_check_row.dart';
-import 'widgets/feedback_text_box.dart';
 
 /// 의견 보내기 화면. 글과 (선택) 앱 상태 기록을 보낸다.
 ///
@@ -92,7 +92,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SizedBox(height: 24.h),
-                  FeedbackTextBox(
+                  ElumMultilineTextField(
                     controller: _controller,
                     hintText: l10n.feedbackHint,
                     maxLength: FeedbackSender.maxMessageLength,
@@ -100,7 +100,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   SizedBox(height: 8.h),
-                  FeedbackCheckRow(
+                  ElumCheckRow(
                     label: l10n.feedbackIncludeLog,
                     checked: _includeLog,
                     onChanged: _sending

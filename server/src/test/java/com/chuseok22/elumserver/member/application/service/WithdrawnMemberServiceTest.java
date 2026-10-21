@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -62,6 +63,13 @@ class WithdrawnMemberServiceTest {
   private com.chuseok22.elumserver.feedback.application.service.FeedbackService feedbackService;
 
   @Mock
+  private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+  @Mock
+  private com.chuseok22.elumserver.talk.application.service.TalkCleanupService talkCleanupService;
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.RoutineGroupService routineGroupService;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock
@@ -78,6 +86,8 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private AiCreditAccountRepository aiCreditAccountRepository;
+  @Mock
+  private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @InjectMocks
   private WithdrawnMemberService withdrawnMemberService;
@@ -219,6 +229,17 @@ class WithdrawnMemberServiceTest {
   }
 
   @Test
+  @DisplayName("완전 삭제는 탈퇴 때 지웠어야 할 이야기 데이터를 한 번 더 지운다")
+  void purge_callsTalkCleanup() {
+    Member member = withdrawn("m1", LocalDateTime.now().minusDays(400));
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    withdrawnMemberService.purge("m1");
+
+    verify(talkCleanupService).deleteAllOf("m1");
+  }
+
+  @Test
   @DisplayName("S2·S7·S9 완전 삭제는 남겨 둔 계정·소셜 신원을 지우고 AI 기록에서 회원을 뗀다")
   void purge_removesRetainedRowsAndDetachesAiLogs() {
     Member member = withdrawn("m1", LocalDateTime.now().minusDays(400));
@@ -229,6 +250,7 @@ class WithdrawnMemberServiceTest {
     verify(authIdentityRepository).deleteAllByMemberId("m1");
     // AI 기록 행은 운영 지표라 남기고, 누가 썼는지만 뗀다 (#191).
     verify(aiCallLogRepository).detachMember("m1");
+    verify(routineGroupService).detachCreatorOf("m1");
     verify(aiCallLogRepository, never()).deleteAll();
     // 크레딧 계정도 행은 남기고 회원만 뗀다 — 재가입하면 신원으로 다시 붙어 주간 사용량이 이어진다 (#407).
     verify(aiCreditAccountRepository).detachMember("m1");

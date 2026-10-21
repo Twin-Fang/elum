@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
@@ -11,9 +12,11 @@ import '../../../../shared/models/routine.dart';
 import 'routine_detail_header.dart';
 import 'routine_detail_reward_row.dart';
 import 'routine_detail_step_badge.dart';
+import 'routine_detail_talk_banner.dart';
 import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
+import '../../application/library_talk_import_state.dart';
 import 'routine_reminder_row.dart';
 
 // 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
@@ -54,12 +57,16 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     this.isPast = false,
     this.isFinished = false,
     this.isLibrary = false,
+    this.isInGroup = false,
   });
 
   final Routine routine;
 
   /// 일과관리 칸에서 연 원본인가 (#805). 아래 버튼이 `카드 고치기` · `오늘 보내기` 둘이 된다.
   final bool isLibrary;
+
+  /// 묶음 안에서 연 일과인가 — 보내기 버튼이 `이 일과만 오늘 보내기`가 된다 (#837)
+  final bool isInGroup;
 
   /// 지난 일과인가 (시안 `980:4777`).
   ///
@@ -82,6 +89,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     bool isPast = false,
     bool isFinished = false,
     bool isLibrary = false,
+    bool isInGroup = false,
   }) {
     return showElumSheet<RoutineSheetAction>(
       context: context,
@@ -92,6 +100,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
         isPast: isPast,
         isFinished: isFinished,
         isLibrary: isLibrary,
+        isInGroup: isInGroup,
       ),
     );
   }
@@ -106,6 +115,20 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     for (final step in widget.routine.steps)
       widget.isLibrary ? step.copyWith(completed: false) : step,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 이야기에서 가져온 일과를 열어 봤다 > 목록 칸의 `새로` 표시 끄기 (빌드 중 상태 변경을 피해 프레임 뒤에)
+    if (widget.isLibrary && widget.routine.talkPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(talkImportedSeenRoutineIdsProvider.notifier)
+            .markSeen(widget.routine.id);
+      });
+    }
+  }
 
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///
@@ -206,113 +229,136 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
               // --- 스크롤: 단계 + 보상 ---
               Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
-                      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-                      // **번호 칸과 카드 칸을 나란히 따로 둔다**.
-                      //
-                      // 한 줄로 묶으면 오래 누를 때 번호까지 들리고
-                      // 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를
-                      // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
-                      // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
-                      //
-                      // 한 스크롤 안에 두어야 같이 스크롤되고, 끌면서 가장자리에 닿았을 때의
-                      // 자동 스크롤도 이 목록 하나로 돈다.
-                      sliver: SliverCrossAxisGroup(
-                        slivers: [
-                          SliverConstrainedCrossAxis(
-                            // 뱃지 40 + 카드와의 틈 4
-                            maxExtent: 44.w,
-                            sliver: SliverList.builder(
-                              itemCount: _steps.length,
-                              itemBuilder: (context, index) => Padding(
-                                padding: EdgeInsets.only(
-                                  right: 4.w,
-                                  bottom: 8.h,
+                // 들린 카드를 가로로도 손가락에 붙인다
+                child: ReorderFingerFollow(
+                  builder: (context, follow) => CustomScrollView(
+                    slivers: [
+                      // 이야기에서 가져온 일과면 맨 위에 원래 글 안내
+                      // 위는 제목 영역 여백(약 22) 그대로, 아래는 카드 목록 위 여백(8)과 합쳐 16
+                      if (widget.routine.talkPostId case final talkPostId?)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            16.w,
+                            0,
+                            16.w,
+                            context.space.xs.h,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: RoutineDetailTalkBanner(postId: talkPostId),
+                          ),
+                        ),
+                      SliverPadding(
+                        // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                        // **번호 칸과 카드 칸을 나란히 따로 둔다**.
+                        //
+                        // 한 줄로 묶으면 오래 누를 때 번호까지 들리고
+                        // 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를
+                        // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
+                        // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
+                        //
+                        // 한 스크롤 안에 두어야 같이 스크롤되고, 끌면서 가장자리에 닿았을 때의
+                        // 자동 스크롤도 이 목록 하나로 돈다.
+                        sliver: SliverCrossAxisGroup(
+                          slivers: [
+                            SliverConstrainedCrossAxis(
+                              // 뱃지 40 + 카드와의 틈 4
+                              maxExtent: 44.w,
+                              sliver: SliverList.builder(
+                                itemCount: _steps.length,
+                                itemBuilder: (context, index) => Padding(
+                                  padding: EdgeInsets.only(
+                                    right: 4.w,
+                                    bottom: 8.h,
+                                  ),
+                                  child: RoutineDetailStepBadge(index: index),
                                 ),
-                                child: RoutineDetailStepBadge(index: index),
                               ),
                             ),
-                          ),
-                          SliverReorderableList(
-                            // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-                            // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다.
-                            proxyDecorator: (child, index, animation) =>
-                                Material(
-                                  color: Colors.transparent,
-                                  child: child,
-                                ),
-                            itemCount: _steps.length,
-                            // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
-                            // 남이 만든 일과도 카드 순서는 만든 사람의 몫이라 같다.
-                            onReorder: _canEdit ? _reorder : (_, _) {},
-                            onReorderStart: (index) =>
-                                setState(() => _draggingIndex = index),
-                            onReorderEnd: (_) =>
-                                setState(() => _draggingIndex = null),
-                            itemBuilder: (context, index) {
-                              final step = _steps[index];
-                              // **전역 키로 한 번 더 감싼다.** 끌기가 시작되면 목록은 이
-                              // 카드를 빼고 시트 위의 사본으로 다시 그린다. 전역 키가 없으면
-                              // 그때 카드 상태가 버려져, 손을 떼는 순간 이미 사라진 들어올림
-                              // 애니메이션을 되돌리려다 오류가 난다. `ReorderableListView`는
-                              // 이 일을 안에서 해 주지만 `SliverReorderableList`는 하지 않는다.
-                              return KeyedSubtree(
-                                key: ValueKey(step.id),
-                                child: KeyedSubtree(
-                                  key: _StepItemKey(step.id, this),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(bottom: 8.h),
-                                    child: RoutineDetailStepCard(
-                                      step: step,
-                                      index: index,
-                                      language: widget.routine.language,
-                                      dragging: _draggingIndex == index,
-                                      // 손잡이를 아예 그리지 않는다 (시안 980:4777)
-                                      reorderable: _canEdit,
-                                      // 카드를 눌러 크게 본다 (시안 1274:8864)
-                                      onOpen: () => StepCardViewer.show(
-                                        context,
-                                        cards: _steps,
-                                        initialIndex: index,
-                                        routineId: widget.routine.id,
+                            SliverReorderableList(
+                              // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
+                              // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다.
+                              proxyDecorator: (child, index, animation) =>
+                                  follow.decorate(
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: child,
+                                    ),
+                                  ),
+                              itemCount: _steps.length,
+                              // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
+                              // 남이 만든 일과도 카드 순서는 만든 사람의 몫이라 같다.
+                              onReorder: _canEdit ? _reorder : (_, _) {},
+                              onReorderStart: (index) {
+                                follow.start();
+                                setState(() => _draggingIndex = index);
+                              },
+                              onReorderEnd: (_) {
+                                follow.end();
+                                setState(() => _draggingIndex = null);
+                              },
+                              itemBuilder: (context, index) {
+                                final step = _steps[index];
+                                // **전역 키로 한 번 더 감싼다.** 끌기가 시작되면 목록은 이
+                                // 카드를 빼고 시트 위의 사본으로 다시 그린다. 전역 키가 없으면
+                                // 그때 카드 상태가 버려져, 손을 떼는 순간 이미 사라진 들어올림
+                                // 애니메이션을 되돌리려다 오류가 난다. `ReorderableListView`는
+                                // 이 일을 안에서 해 주지만 `SliverReorderableList`는 하지 않는다.
+                                return KeyedSubtree(
+                                  key: ValueKey(step.id),
+                                  child: KeyedSubtree(
+                                    key: _StepItemKey(step.id, this),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      child: RoutineDetailStepCard(
+                                        step: step,
+                                        index: index,
                                         language: widget.routine.language,
+                                        dragging: _draggingIndex == index,
+                                        // 손잡이를 아예 그리지 않는다 (시안 980:4777)
+                                        reorderable: _canEdit,
+                                        // 카드를 눌러 크게 본다 (시안 1274:8864)
+                                        onOpen: () => StepCardViewer.show(
+                                          context,
+                                          cards: _steps,
+                                          initialIndex: index,
+                                          routineId: widget.routine.id,
+                                          language: widget.routine.language,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SliverPadding(
-                      // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
-                      // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
-                      // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
-                      padding: EdgeInsets.fromLTRB(
-                        16.w,
-                        0,
-                        16.w,
-                        buttonBottom + buttonHeight + space.md,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
-                          children: [
-                            RoutineDetailRewardRow(routine: widget.routine),
-                            // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
-                            if (_isReminderRowVisible && !widget.isPast) ...[
-                              SizedBox(height: 8.h),
-                              RoutineReminderRow(routine: widget.routine),
-                            ],
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      SliverPadding(
+                        // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
+                        // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
+                        // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
+                        padding: EdgeInsets.fromLTRB(
+                          16.w,
+                          0,
+                          16.w,
+                          buttonBottom + buttonHeight + space.md,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            children: [
+                              RoutineDetailRewardRow(routine: widget.routine),
+                              // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
+                              if (_isReminderRowVisible && !widget.isPast) ...[
+                                SizedBox(height: 8.h),
+                                RoutineReminderRow(routine: widget.routine),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -352,7 +398,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               bottom: buttonBottom,
               height: buttonHeight,
               child: widget.isLibrary
-                  ? _LibraryActions(isEditable: widget.routine.isEditableByMe)
+                  ? _LibraryActions(
+                      isEditable: widget.routine.isEditableByMe,
+                      isInGroup: widget.isInGroup,
+                    )
                   : FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: colors.textPrimary,
@@ -411,9 +460,10 @@ class _StepItemKey extends GlobalObjectKey {
 ///
 /// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
 class _LibraryActions extends StatelessWidget {
-  const _LibraryActions({required this.isEditable});
+  const _LibraryActions({required this.isEditable, required this.isInGroup});
 
   final bool isEditable;
+  final bool isInGroup;
 
   @override
   Widget build(BuildContext context) {
@@ -429,7 +479,9 @@ class _LibraryActions extends StatelessWidget {
       ),
       onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
       child: Text(
-        context.l10n.routineLibrarySendToday,
+        isInGroup
+            ? context.l10n.routineLibrarySendOnlyThis
+            : context.l10n.routineLibrarySendToday,
         style: typo.sheetActionLabel.copyWith(color: colors.surface),
       ),
     );
