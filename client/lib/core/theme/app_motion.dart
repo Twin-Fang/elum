@@ -71,6 +71,12 @@ abstract final class AppMotion {
   /// 눌러서 기다리게 하는 전환이 아니므로 [emphasis](500) 상한 밖에 둔다.
   static const coachDemoLoop = Duration(seconds: 4);
 
+  /// 보호자 칸 아이콘 고름 동작 한 번 (홈 튐 · 일과 관리 체크 · 말풍선 흔들 · 고개 쏙).
+  ///
+  /// [emphasis](500)를 넘긴다. 일과 관리 체크가 그려진 뒤 잠깐 머물러야 읽힌다. 칸 전환은
+  /// 누르는 순간 끝나 아무것도 막지 않는다. 나머지 아이콘은 앞쪽 0.66 안에서 멎는다.
+  static const tabIconSelect = Duration(milliseconds: 1000);
+
   // --- Curve ---
 
   /// 일반 상태 변화
