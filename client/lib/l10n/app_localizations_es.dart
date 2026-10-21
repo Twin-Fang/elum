@@ -2422,15 +2422,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineLibraryNewBadge => '새로';
 
   @override
-  String routineDetailTalkOriginBanner(String authorNickname) {
-    return '📖 $authorNickname님이 이야기에 나눈 일과예요';
-  }
+  String get routineDetailTalkOriginBand => 'Traído de Historias';
 
   @override
-  String get routineDetailTalkOriginBannerNoAuthor => '📖 이야기에 나눈 일과예요';
+  String get routineDetailTalkOriginOpenPost => 'Publicación original';
 
   @override
-  String get routineDetailTalkOriginOpen => '원래 글 보기';
+  String get routineDetailTalkOriginPostGone => 'Publicación retirada';
+
+  @override
+  String get routineDetailTalkOriginBandOpenLabel =>
+      'Traído de Historias, ver la publicación original';
 
   @override
   String routineLibrarySent(String title) {

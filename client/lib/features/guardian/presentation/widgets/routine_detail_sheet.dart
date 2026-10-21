@@ -238,10 +238,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                         SliverPadding(
                           padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
                           sliver: SliverToBoxAdapter(
-                            child: RoutineDetailTalkBanner(
-                              postId: talkPostId,
-                              language: widget.routine.language,
-                            ),
+                            child: RoutineDetailTalkBanner(postId: talkPostId),
                           ),
                         ),
                       SliverPadding(

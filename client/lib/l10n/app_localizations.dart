@@ -4418,23 +4418,29 @@ abstract class AppLocalizations {
   /// **'새로'**
   String get routineLibraryNewBadge;
 
-  /// 가져온 일과 상세 맨 위 안내. authorNickname 은 글쓴이 닉네임
+  /// 가져온 일과 상세 맨 위 띠의 왼쪽 문구
   ///
   /// In ko, this message translates to:
-  /// **'📖 {authorNickname}님이 이야기에 나눈 일과예요'**
-  String routineDetailTalkOriginBanner(String authorNickname);
+  /// **'이야기에서 가져왔어요'**
+  String get routineDetailTalkOriginBand;
 
-  /// 가져온 일과 상세 맨 위 안내: 글이 내려갔거나 닉네임을 모를 때
+  /// 가져온 일과 상세 띠의 오른쪽 버튼: 이야기 글 상세로 이동
   ///
   /// In ko, this message translates to:
-  /// **'📖 이야기에 나눈 일과예요'**
-  String get routineDetailTalkOriginBannerNoAuthor;
+  /// **'원래 글'**
+  String get routineDetailTalkOriginOpenPost;
 
-  /// 가져온 일과 상세 안내의 링크: 이야기 글 상세로 이동 (글이 내려갔으면 숨김)
+  /// 가져온 일과 상세 띠의 오른쪽 표시: 원래 글이 내려갔거나 못 받았을 때 (누를 수 없음)
   ///
   /// In ko, this message translates to:
-  /// **'원래 글 보기'**
-  String get routineDetailTalkOriginOpen;
+  /// **'내려간 글'**
+  String get routineDetailTalkOriginPostGone;
+
+  /// 가져온 일과 상세 띠 전체의 화면 낭독 이름 (버튼)
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서 가져왔어요, 원래 글 보기'**
+  String get routineDetailTalkOriginBandOpenLabel;
 
   /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
   ///
