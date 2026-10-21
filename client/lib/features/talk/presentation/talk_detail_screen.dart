@@ -109,7 +109,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(talkDetailControllerProvider(widget.postId));
-    final post = detail.value;
+    // 에러 상태(내려간 글 등)는 이전 값이 남아 있어도 메뉴·입력줄·가져오기를 숨김
+    final post = detail.hasError ? null : detail.value;
 
     return Scaffold(
       backgroundColor: context.colors.background,
