@@ -2,7 +2,10 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.request.PromptUpdateRequest;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptLocaleView;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminPromptService;
+import com.chuseok22.elumserver.admin.core.AdminAuditAction;
+import com.chuseok22.elumserver.admin.core.AdminAuditTargetType;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateSeeder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -37,6 +40,7 @@ public class AdminPromptController {
 
   private final AdminPromptService adminPromptService;
   private final EnabledLocales enabledLocales;
+  private final AdminAuditService adminAuditService;
 
   @GetMapping("/admin/prompts")
   public String list(@RequestParam(value = "locale", defaultValue = "ko") String locale, Model model) {
@@ -90,6 +94,10 @@ public class AdminPromptController {
       redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + " 프롬프트를 저장하지 않았습니다. " + reason);
       return back;
     }
+    // 관리자 기록: 언어·글자 수만 (지시문 원문은 프롬프트 이력에 있음, 복원도 같은 저장 경로)
+    adminAuditService.record(AdminAuditAction.PROMPT_UPDATED,
+      AdminAuditTargetType.toPromptTargetId(key.name(), target.code()),
+      "언어 " + target.code() + " · " + request.content().length() + "자");
     redirectAttributes.addFlashAttribute("message", key.getLabel() + " 프롬프트를 저장했습니다.");
     return back;
   }

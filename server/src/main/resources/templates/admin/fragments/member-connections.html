@@ -201,7 +201,8 @@
                 <form th:if="${link.canUnlink()}"
                       th:action="@{/admin/members/{id}/device-links/{linkId}/unlink(id=${member.id()},linkId=${link.id()})}"
                       method="post" data-device-unlink-form
-                      onsubmit="return confirm('이 이룸이 기기 연결을 끊을까요?\n\n그 기기는 바로 일과를 볼 수 없게 되고, 보호자가 새 연결 암호를 내서 다시 연결해야 해요. 보호자 로그인은 그대로예요.');">
+                      data-confirm-title="기기 연결 끊기" data-confirm-danger data-confirm-accept="연결 끊기"
+                      data-confirm-message="이 이룸이 기기 연결을 끊을까요?&#10;&#10;그 기기는 바로 일과를 볼 수 없게 되고, 보호자가 새 연결 암호를 내서 다시 연결해야 해요. 보호자 로그인은 그대로예요.">
                   <button type="submit" class="btn btn-ghost btn-xs text-error">연결 끊기</button>
                 </form>
               </td>

@@ -18,8 +18,17 @@ public record AdminListDefinition(
   public static final String SORT_ASCENDING = "asc";
   public static final String SORT_DESCENDING = "desc";
 
-  /** 표의 열: isSortable 인 열만 정렬 허용 목록에 든다 */
-  public record Column(String key, String label, boolean isSortable) {
+  /** 표의 열: isSortable 인 열만 정렬 허용 목록에 든다, isNumeric 이면 표에서 우측 정렬 */
+  public record Column(String key, String label, boolean isSortable, boolean isNumeric) {
+
+    public Column(String key, String label, boolean isSortable) {
+      this(key, label, isSortable, false);
+    }
+
+    /// 숫자 열 (건수·토큰·금액·크레딧, 우측 정렬)
+    public static Column numeric(String key, String label, boolean isSortable) {
+      return new Column(key, label, isSortable, true);
+    }
   }
 
   /**
@@ -89,6 +98,12 @@ public record AdminListDefinition(
     if (!isValidSort(columns, defaultSort)) {
       throw new IllegalArgumentException("defaultSort must be a sortable column: " + defaultSort);
     }
+  }
+
+  /// 키 > 열 (표를 직접 그리는 화면이 정렬 머리 칸 1개를 그릴 때). 없는 키는 정의 오류라 바로 드러낸다
+  public Column columnOf(String key) {
+    return columns.stream().filter(column -> column.key().equals(key)).findFirst()
+      .orElseThrow(() -> new IllegalArgumentException("unknown column: " + key));
   }
 
   /// 키 > 필터 (없으면 null: 화면이 적용된 필터 칩 이름을 찾을 때)

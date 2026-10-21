@@ -279,6 +279,8 @@ public class MemberService {
     member.setLastLoginAt(null);
     member.setLastActivityAt(null);
     member.setLoginCount(0);
+    // 관리자 운영 메모도 보관 항목이 아니라 비운다 (#656)
+    member.clearAdminMemo();
     // 남기는 값: 아이디·비밀번호 변환값(1년 안 같은 아이디로 복원), 동의 기록(값·시각·버전 — 동의 증빙).
     // 둘 다 방침 4조 보관 항목이다. 여기서 남기는 값을 늘리면 방침도 함께 고친다.
   }

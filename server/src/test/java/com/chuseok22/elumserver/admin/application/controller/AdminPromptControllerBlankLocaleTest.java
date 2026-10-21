@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminPromptService;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -29,7 +30,7 @@ class AdminPromptControllerBlankLocaleTest {
   void setUp() {
     adminPromptService = mock(AdminPromptService.class);
     mockMvc = MockMvcBuilders
-      .standaloneSetup(new AdminPromptController(adminPromptService, mock(EnabledLocales.class)))
+      .standaloneSetup(new AdminPromptController(adminPromptService, mock(EnabledLocales.class), mock(AdminAuditService.class)))
       .build();
   }
 

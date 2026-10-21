@@ -110,7 +110,7 @@
         </label>
         <label class="form-control">
           <span class="label-text text-xs">키워드</span>
-          <input id="search-q" type="text" class="input input-bordered input-sm w-48" placeholder="예: Exception, 회원 ID"/>
+          <input id="search-q" type="text" class="input input-bordered input-sm w-48" placeholder="예: 요청 id, 회원 id, Exception"/>
         </label>
         <label class="form-control">
           <span class="label-text text-xs">이 시각 이후</span>
@@ -125,7 +125,14 @@
           </select>
         </label>
         <button type="submit" class="btn btn-primary btn-sm">검색</button>
+        <!-- 지금 검색 조건 그대로 CSV (#656). 검색 결과가 있을 때만 보임 -->
+        <a id="search-export" class="btn btn-outline btn-sm hidden" href="#" data-log-search-export>CSV로 받기</a>
       </form>
+      <!-- 요청 id 로 찾기 (#656): 줄마다 [인스턴스] [요청 id] [회원 id] 가 붙음. 응답 헤더 X-Request-Id·에러 응답 requestId 와 같은 값 -->
+      <p class="text-xs text-base-content/60" data-log-request-id-guide>
+        요청 id로 찾기: 에러 응답의 requestId(응답 헤더 X-Request-Id)나 회원 id를 키워드에 넣으면 그 요청·회원의 로그만 모아 볼 수 있어요.
+        이 기능을 배포하기 전 로그에는 요청 id가 없어요.
+      </p>
       <p id="search-summary" class="text-sm text-base-content/60"></p>
       <div id="search-loading" class="hidden flex items-center gap-2 text-sm">
         <span class="loading loading-spinner loading-sm"></span> 파일을 읽는 중...
@@ -544,7 +551,11 @@
     }
 
     async function deleteFile(file) {
-      if (!confirm(file.path + ' (' + formatBytes(file.size) + ') 파일을 지울까요? 되돌릴 수 없어요.')) return;
+      const isConfirmed = await window.ElumAdminConfirm.ask({
+        title: '로그 파일 지우기', isDanger: true, acceptLabel: '지우기',
+        message: file.path + ' (' + formatBytes(file.size) + ') 파일을 지울까요? 되돌릴 수 없어요.'
+      });
+      if (!isConfirmed) return;
       try {
         await api('/admin/logs/api/files?path=' + encodeURIComponent(file.path), {method: 'DELETE'});
         loadFiles();
@@ -595,11 +606,15 @@
       if ($('search-from').value.trim()) params.set('from', $('search-from').value.trim());
       $('search-loading').classList.remove('hidden');
       $('search-empty').classList.add('hidden');
+      $('search-export').classList.add('hidden');
       $('search-results').replaceChildren();
       $('search-summary').textContent = '';
       try {
         const data = await api('/admin/logs/api/search?' + params);
         renderSearch(data);
+        // 화면과 같은 조건으로 내려받기 (조용 모드 밖 경로라 내보낸 기록이 남는다)
+        $('search-export').href = '/admin/logs/search/export.csv?' + params;
+        $('search-export').classList.toggle('hidden', data.entries.length === 0);
       } catch (e) {
         toast(e);
       } finally {

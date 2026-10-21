@@ -30,18 +30,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IExpressionContext;
-import org.thymeleaf.linkbuilder.StandardLinkBuilder;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * AI 크레딧 관리자 화면 다섯 개가 실제로 그려지는지 (#407).
@@ -55,30 +48,11 @@ class AdminCreditTemplateTest {
   private static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 23, 15, 0);
   private static final CreditPeriod PERIOD = CreditPeriod.of(NOW);
 
-  private SpringTemplateEngine engine;
-
-  @BeforeEach
-  void setUp() {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    // 웹 요청 없이 그리므로 @{/...} 링크에 붙일 컨텍스트 경로가 없다. 빈 값으로 둔다.
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
-  }
+  // 화면이 ${@adminDate} 로 날짜를 찍으므로 날짜 포맷 빈을 주는 공용 시험 도구로 그린다
+  private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
 
   private String render(String template, Map<String, Object> variables) {
-    Context context = new Context();
-    context.setVariables(variables);
-    return engine.process(template, context);
+    return renderer.render(template, variables);
   }
 
   private static AiCreditPolicy policy(boolean enabled) {
@@ -107,6 +81,8 @@ class AdminCreditTemplateTest {
     job.setImageCount(4);
     job.setStartedAt(NOW.minusMinutes(30));
     job.setFailReason(status == CreditJobStatus.RELEASED ? "AI 실패" : null);
+    // 일과가 저장된 작업만 일과 id 를 가진다 (j1)
+    job.setRoutineId("j1".equals(id) ? "r1" : null);
     return job;
   }
 
@@ -134,7 +110,7 @@ class AdminCreditTemplateTest {
       List.of(new AdminCreditOverview.KindCost(CreditJobKind.ROUTINE_CREATE, 10, 25, 0.5)), true)));
 
     assertThat(html).contains("AI 크레딧").contains("2026-W39").contains("이번 주")
-      .contains("gemini-2.5-flash").contains("$0.0041").contains("ROUTINE_CREATE").contains("2.5")
+      .contains("gemini-2.5-flash").contains("$0.0041").contains("일과 생성").contains("2.5")
       .contains("크레딧 정책이 꺼져 있어요").contains("비용 상한").contains("멈춘 예약").contains("대조 불일치")
       .contains("/admin/credits/jobs?mismatch=true&amp;from=2026-09-21&amp;to=2026-09-27")
       .contains("/admin/credits?week=2026-W38");
@@ -312,7 +288,8 @@ class AdminCreditTemplateTest {
 
     assertThat(html).contains("영향 미리보기").contains("2040 → 3000 (+960)").contains("3.5 → 1.2")
       .contains("하루 <b>2개</b>").contains("주당 <b>무제한</b>").contains("끄고 발행")
-      .contains("data-confirm=\"크레딧을 끌까요?").contains("name=\"enabled\" value=\"false\"")
+      .contains("data-confirm-message=\"크레딧을 끌까요?").contains("data-confirm-danger=\"true\"")
+      .contains("name=\"enabled\" value=\"false\"")
       .contains("이번 주 지급 12개 계정을 +600");
   }
 
@@ -327,6 +304,9 @@ class AdminCreditTemplateTest {
 
     assertThat(html).contains("지난 4주 사용 없음").contains("발행한 정책이 없어요").contains("꺼진 기본값")
       .contains("이대로 발행").contains("E-CRD-003");
+    // 끄지 않는 발행은 확인창을 거치되 빨간 확인 버튼이 아니다 (null 이면 속성이 빠진다)
+    assertThat(html).contains("data-confirm-message=\"이 정책을 발행할까요?\"")
+      .doesNotContainPattern("<form[^>]*data-confirm-danger");
   }
 
   // --- 작업 탐색 ---
@@ -343,6 +323,11 @@ class AdminCreditTemplateTest {
     assertThat(html).contains("kimchi").contains("호출 기록 없음").contains("멈춤").contains("5 / 4")
       .contains("$0.0123").contains("value=\"2026-09-21\"").contains("/admin/credits/jobs/j3/release")
       .contains("mismatch=true").contains("AI 실패");
+    // 상태·종류는 한글 이름으로 (필터 선택지·표 모두), 일과가 있는 작업은 일과 상세로 이어진다 (#657)
+    assertThat(html).contains(">정산<").contains(">예약 중<").contains(">일과 생성<")
+      .doesNotContain(">SETTLED<").doesNotContain(">RESERVED<").doesNotContain(">ROUTINE_CREATE<")
+      .contains("href=\"/admin/routines/r1\"");
+    assertThat(html.split("data-credit-job-routine-link", -1)).as("일과 id 가 있는 j1 만 링크").hasSize(2);
   }
 
   @Test

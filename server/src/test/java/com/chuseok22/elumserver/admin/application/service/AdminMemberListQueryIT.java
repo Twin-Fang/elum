@@ -129,6 +129,18 @@ class AdminMemberListQueryIT {
   }
 
   @Test
+  @DisplayName("모니터링·의견 화면에 보이는 회원 id 8자 조각으로 그 회원을 찾는다 (#651)")
+  void keyword_matchesMemberIdFragment() {
+    Member target = newMember("idfrag");
+    newMember("other");
+    // 화면이 보여 주는 앞 8자 대신 가운데 조각: 앞부분 일치(접두)만 되는 구현도 걸러냄
+    String idFragment = target.getId().substring(9, 17).toUpperCase();
+
+    assertThat(adminMemberService.search(query(idFragment, Map.of(), null)).getContent())
+      .extracting(AdminMemberResponse::id).containsExactly(target.getId());
+  }
+
+  @Test
   @DisplayName("연속 부여 후 이력 2건과 마지막 변경이 DB 에서 읽힌다")
   void history_persistedAndLatestRead() {
     Member member = newMember("hist");

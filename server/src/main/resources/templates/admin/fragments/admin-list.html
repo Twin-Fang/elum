@@ -93,16 +93,21 @@
 
 <!-- 표 머리 칸들: 정렬 가능한 열은 헤더 링크 (표를 직접 그리는 화면도 같은 헤더를 쓴다) -->
 <th:block th:fragment="sortHeaders(definition, query)">
-  <th th:each="column : ${definition.columns}">
-    <a th:if="${column.isSortable()}" th:href="${query.toQueryString(query.nextSortFor(column.key), 1)}"
-       class="link link-hover" th:text="${column.label} + (${query.sortKey() == column.key} ? (${query.isAscending()} ? ' ▲' : ' ▼') : '')">열</a>
-    <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
-  </th>
+  <th:block th:each="column : ${definition.columns}">
+    <th th:replace="~{admin/fragments/admin-list :: sortHeader(${column}, ${query})}"></th>
+  </th:block>
 </th:block>
 
-<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크. rows 는 AdminListRow 목록 -->
+<!-- 머리 칸 1개: 정의에 없는 열 사이에 정렬 열을 끼워 넣는 화면용 (column 은 definition.columnOf(키)) -->
+<th th:fragment="sortHeader(column, query)" th:classappend="${column.isNumeric()} ? 'text-right'">
+  <a th:if="${column.isSortable()}" th:href="${query.toQueryString(query.nextSortFor(column.key), 1)}"
+     class="link link-hover" th:text="${column.label} + (${query.sortKey() == column.key} ? (${query.isAscending()} ? ' ▲' : ' ▼') : '')">열</a>
+  <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
+</th>
+
+<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크, 숫자 열은 우측 정렬. rows 는 AdminListRow 목록 -->
 <div th:fragment="table(definition, query, rows)" class="overflow-x-auto">
-  <table class="table">
+  <table class="table table-sm">
     <thead>
     <tr>
       <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
@@ -110,7 +115,7 @@
     </thead>
     <tbody>
     <tr th:each="row : ${rows}" class="hover">
-      <td th:each="column, columnStat : ${definition.columns}">
+      <td th:each="column, columnStat : ${definition.columns}" th:classappend="${column.isNumeric()} ? 'text-right'">
         <th:block th:with="cellLink=${columnStat.first and row.linkUrl != null ? row.linkUrl : row.cellLinks.get(column.key)}">
           <a th:if="${cellLink != null}" th:href="${cellLink}" class="link link-hover"
              th:text="${row.cells.get(column.key)}">값</a>

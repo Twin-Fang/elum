@@ -35,7 +35,11 @@ public record AdminMemberDetailResponse(
   LocalDateTime withdrawnAt,
   LocalDateTime retentionExpiresAt,
   /// 이룸이별 공동 보호자·초대 코드·기기 연결, 푸시 기기 (조회 실패 시 isLoadFailed)
-  AdminMemberConnections connections
+  AdminMemberConnections connections,
+  /// 관리자 운영 메모와 마지막 저장 시각·관리자 (#656, 없으면 null)
+  String adminMemo,
+  LocalDateTime adminMemoChangedAt,
+  String adminMemoChangedBy
 ) {
 
   /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null
@@ -68,7 +72,10 @@ public record AdminMemberDetailResponse(
       planHistory,
       member.getWithdrawnAt(),
       retentionExpiresAt,
-      AdminMemberConnections.empty()
+      AdminMemberConnections.empty(),
+      member.getAdminMemo(),
+      member.getAdminMemoChangedAt(),
+      member.getAdminMemoChangedBy()
     );
   }
 
@@ -77,7 +84,7 @@ public record AdminMemberDetailResponse(
     return new AdminMemberDetailResponse(
       id, username, nickname, character, status, supportGoals, totalStars, createdAt, lastLoginAt, lastActivityAt,
       loginCount, aiCallCount, totalTokens, estimatedCostUsd, routines, recentAiCalls, subscription, planHistory,
-      withdrawnAt, retentionExpiresAt, newConnections
+      withdrawnAt, retentionExpiresAt, newConnections, adminMemo, adminMemoChangedAt, adminMemoChangedBy
     );
   }
 

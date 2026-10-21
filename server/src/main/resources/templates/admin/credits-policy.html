@@ -30,7 +30,7 @@
         <div class="text-base-content/60">예약 유지 시간</div>
         <div th:text="${current.reservationTtlMinutes} + '분'">15분</div>
         <div class="text-base-content/60">시작</div>
-        <div th:text="${current.version > 0 ? #temporals.format(current.effectiveFrom, 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+        <div th:text="${current.version > 0 ? @adminDate.format(current.effectiveFrom) : '-'}">-</div>
         <div class="text-base-content/60">발행</div>
         <div th:text="${current.createdBy ?: '-'}">-</div>
         <div class="text-base-content/60">사유</div>
@@ -73,10 +73,11 @@
         </span>
       </div>
 
-      <!-- 끄기는 한 번 더 묻는다. 문구는 data 속성으로 넘긴다 — Thymeleaf 가 이벤트 속성에 식 결과를 넣는 것을 막는다. -->
+      <!-- 발행 확인: 끄기는 빨간 확인 버튼 -->
       <form th:action="@{/admin/credits/policy}" method="post" class="flex flex-wrap gap-2"
-            th:data-confirm="${preview.disabling()} ? '크레딧을 끌까요? 기존 횟수 한도로 돌아가요.' : '이 정책을 발행할까요?'"
-            onsubmit="return confirm(this.dataset.confirm);">
+            data-confirm-title="크레딧 정책 발행"
+            th:data-confirm-message="${preview.disabling()} ? '크레딧을 끌까요? 기존 횟수 한도로 돌아가요.' : '이 정책을 발행할까요?'"
+            th:data-confirm-danger="${preview.disabling()} ? 'true' : null">
         <input type="hidden" name="freeGrant" th:value="${form.freeGrant()}"/>
         <input type="hidden" name="proGrant" th:value="${form.proGrant()}"/>
         <input type="hidden" name="costRoutineText" th:value="${form.costRoutineText()}"/>
@@ -162,7 +163,7 @@
               <span class="badge badge-sm" th:classappend="${policy.enabled} ? 'badge-success' : 'badge-error'"
                     th:text="${policy.enabled} ? '켜짐' : '꺼짐'">켜짐</span>
             </td>
-            <td class="text-xs whitespace-nowrap" th:text="${#temporals.format(policy.effectiveFrom, 'yyyy-MM-dd HH:mm')}">-</td>
+            <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(policy.effectiveFrom)}">-</td>
             <td class="text-xs font-mono" th:text="${policy.weeklyGrantJson}">{}</td>
             <td class="text-xs font-mono" th:text="${policy.actionCostsJson}">{}</td>
             <td th:text="${policy.reservationTtlMinutes} + '분'">15분</td>

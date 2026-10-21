@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  관리자 확인창 단일 원본 (#657): 레이아웃이 한 번 포함, 화면은 폼에 data 속성만 단다
+  폼 속성 5개: data-confirm-message(필수, 확인창을 켜는 스위치·줄바꿈은 &#10;), data-confirm-title,
+    data-confirm-danger(빨간 확인 버튼), data-confirm-accept(확인 버튼 글), data-confirm-typed-name(이 글을 입력해야 확인 버튼이 켜짐)
+  스크립트에서 쓸 때: ElumAdminConfirm.ask({title, message, isDanger, acceptLabel, typedName}).then(isConfirmed => ...)
+  모달을 못 쓰면(구형 브라우저·스크립트 오류) 브라우저 기본 확인창으로 묻고, 스크립트가 꺼져 있으면 확인이 필요한 버튼을 막는다
+-->
+<body>
+
+<th:block th:fragment="confirmDialog">
+  <!-- 스크립트 꺼짐: 확인을 받을 길이 없으므로 확인이 필요한 제출 버튼을 누를 수 없게 -->
+  <noscript><style>form[data-confirm-message] [type=submit]{pointer-events:none;opacity:.4}</style></noscript>
+
+  <dialog class="modal" data-admin-confirm-dialog aria-labelledby="admin-confirm-title">
+    <div class="modal-box">
+      <h3 id="admin-confirm-title" class="text-lg font-bold" data-admin-confirm-title>한 번 더 확인해요</h3>
+      <p class="mt-2 text-sm whitespace-pre-wrap" data-admin-confirm-message>내용</p>
+      <label class="form-control mt-2 hidden" data-admin-confirm-typed>
+        <span class="label-text text-sm">확인하려면 <b class="font-mono" data-admin-confirm-typed-name>이름</b> 을(를) 그대로 적어 주세요</span>
+        <input type="text" class="input input-bordered input-sm w-full mt-1" autocomplete="off" spellcheck="false"
+               data-admin-confirm-typed-input/>
+      </label>
+      <div class="modal-action">
+        <button type="button" class="btn btn-ghost btn-sm" data-admin-confirm-cancel>취소</button>
+        <button type="button" class="btn btn-primary btn-sm" data-admin-confirm-accept>확인</button>
+      </div>
+    </div>
+    <!-- 바깥을 누르면 취소 -->
+    <form method="dialog" class="modal-backdrop">
+      <button type="submit" aria-label="닫기">닫기</button>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var DEFAULT_TITLE = '한 번 더 확인해요';
+      var DEFAULT_ACCEPT_LABEL = '확인';
+      // 확인을 마친 폼 표시 (다시 제출할 때 한 번만 통과)
+      var PASSED_FLAG = 'adminConfirmPassed';
+      // 확인 후 잠근 버튼 표시 (뒤로 가기로 돌아오면 다시 풂)
+      var LOCKED_ATTRIBUTE = 'data-admin-confirm-locked';
+      var dialog = document.querySelector('[data-admin-confirm-dialog]');
+
+      function canUseModal() {
+        return !!dialog && typeof dialog.showModal === 'function';
+      }
+
+      // 모달을 못 쓸 때: 기본 확인창, 이름 입력이 필요하면 입력창
+      function askWithBrowserDialog(options) {
+        var text = options.title + '\n\n' + options.message;
+        if (!options.typedName) {
+          return window.confirm(text);
+        }
+        var typed = window.prompt(text + '\n\n확인하려면 "' + options.typedName + '" 을(를) 그대로 적어 주세요.');
+        return typed !== null && typed.trim() === options.typedName;
+      }
+
+      // 모달 1회: 내용 채움 > 열기 > 닫힐 때 결과(확인 true, 취소·Esc·바깥 false)
+      function askWithModal(options) {
+        return new Promise(function (resolve) {
+          var accept = dialog.querySelector('[data-admin-confirm-accept]');
+          var cancel = dialog.querySelector('[data-admin-confirm-cancel]');
+          var typedBox = dialog.querySelector('[data-admin-confirm-typed]');
+          var typedInput = dialog.querySelector('[data-admin-confirm-typed-input]');
+          var isConfirmed = false;
+
+          dialog.querySelector('[data-admin-confirm-title]').textContent = options.title;
+          dialog.querySelector('[data-admin-confirm-message]').textContent = options.message;
+          dialog.querySelector('[data-admin-confirm-typed-name]').textContent = options.typedName;
+          typedBox.classList.toggle('hidden', !options.typedName);
+          typedInput.value = '';
+          accept.textContent = options.acceptLabel;
+          accept.classList.toggle('btn-error', options.isDanger);
+          accept.classList.toggle('btn-primary', !options.isDanger);
+          accept.disabled = !!options.typedName;
+
+          function isTypedNameMatched() {
+            return !options.typedName || typedInput.value.trim() === options.typedName;
+          }
+          function onTypedInput() {
+            accept.disabled = !isTypedNameMatched();
+          }
+          function onTypedKeydown(event) {
+            if (event.key === 'Enter' && isTypedNameMatched()) {
+              event.preventDefault();
+              onAccept();
+            }
+          }
+          function onAccept() {
+            if (!isTypedNameMatched()) return;
+            isConfirmed = true;
+            dialog.close();
+          }
+          function onCancel() {
+            dialog.close();
+          }
+          // 닫힘 (확인·취소·Esc·바깥 공통): 듣기 해제 > 결과 전달
+          function onClose() {
+            typedInput.removeEventListener('input', onTypedInput);
+            typedInput.removeEventListener('keydown', onTypedKeydown);
+            accept.removeEventListener('click', onAccept);
+            cancel.removeEventListener('click', onCancel);
+            dialog.removeEventListener('close', onClose);
+            resolve(isConfirmed);
+          }
+
+          typedInput.addEventListener('input', onTypedInput);
+          typedInput.addEventListener('keydown', onTypedKeydown);
+          accept.addEventListener('click', onAccept);
+          cancel.addEventListener('click', onCancel);
+          dialog.addEventListener('close', onClose);
+          dialog.showModal();
+          // 이름 입력이면 입력 칸, 위험 동작이면 취소, 그 외 확인에 초점 (Enter 한 번에 위험 동작이 실행되지 않게)
+          (options.typedName ? typedInput : (options.isDanger ? cancel : accept)).focus();
+        });
+      }
+
+      // 확인 1회 > Promise<boolean>. 모달이 실패하면 기본 확인창으로 다시 묻는다
+      function ask(rawOptions) {
+        var options = {
+          title: (rawOptions && rawOptions.title) || DEFAULT_TITLE,
+          message: (rawOptions && rawOptions.message) || '',
+          isDanger: !!(rawOptions && rawOptions.isDanger),
+          acceptLabel: (rawOptions && rawOptions.acceptLabel) || DEFAULT_ACCEPT_LABEL,
+          typedName: ((rawOptions && rawOptions.typedName) || '').trim()
+        };
+        if (!canUseModal()) {
+          return Promise.resolve(askWithBrowserDialog(options));
+        }
+        return askWithModal(options).catch(function (error) {
+          console.warn('[관리자] 확인창을 열지 못해 기본 확인창으로 물어요 (E-ADM-CONFIRM)', error);
+          try {
+            if (dialog.open) dialog.close();
+          } catch (closeError) {
+            console.warn('[관리자] 확인창을 닫지 못했어요', closeError);
+          }
+          return askWithBrowserDialog(options);
+        });
+      }
+
+      // 폼 data 속성 > 확인 옵션
+      function optionsOf(form) {
+        return {
+          title: form.getAttribute('data-confirm-title'),
+          message: form.getAttribute('data-confirm-message'),
+          isDanger: form.hasAttribute('data-confirm-danger'),
+          acceptLabel: form.getAttribute('data-confirm-accept'),
+          typedName: form.getAttribute('data-confirm-typed-name')
+        };
+      }
+
+      // 확인 후 제출 버튼 잠금 (중복 제출 방지). 제출 값이 모인 뒤에 잠그려고 다음 차례로 미룸
+      function lockSubmitButtons(form) {
+        setTimeout(function () {
+          form.querySelectorAll('[type=submit]').forEach(function (button) {
+            button.disabled = true;
+            button.setAttribute(LOCKED_ATTRIBUTE, '');
+          });
+        }, 0);
+      }
+
+      // 확인을 마친 폼 다시 제출 (누른 버튼 유지, requestSubmit 없으면 submit)
+      function submitConfirmed(form, submitter) {
+        form.dataset[PASSED_FLAG] = 'true';
+        if (typeof form.requestSubmit === 'function') {
+          if (submitter) {
+            form.requestSubmit(submitter);
+          } else {
+            form.requestSubmit();
+          }
+          return;
+        }
+        delete form.dataset[PASSED_FLAG];
+        lockSubmitButtons(form);
+        form.submit();
+      }
+
+      // data-confirm-message 폼 제출 가로채기 (캡처 단계: 화면 스크립트보다 먼저)
+      document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!form || typeof form.hasAttribute !== 'function' || !form.hasAttribute('data-confirm-message')) return;
+        if (form.dataset[PASSED_FLAG] === 'true') {
+          delete form.dataset[PASSED_FLAG];
+          lockSubmitButtons(form);
+          return;
+        }
+        event.preventDefault();
+        var submitter = event.submitter && event.submitter.form === form ? event.submitter : null;
+        var options = optionsOf(form);
+        ask(options).then(function (isConfirmed) {
+          if (isConfirmed) submitConfirmed(form, submitter);
+        });
+      }, true);
+
+      // 뒤로 가기로 돌아온 화면: 잠갔던 버튼 다시 풂
+      window.addEventListener('pageshow', function (event) {
+        if (!event.persisted) return;
+        document.querySelectorAll('[' + LOCKED_ATTRIBUTE + ']').forEach(function (button) {
+          button.disabled = false;
+          button.removeAttribute(LOCKED_ATTRIBUTE);
+        });
+      });
+
+      window.ElumAdminConfirm = {ask: ask};
+    })();
+  </script>
+</th:block>
+
+</body>
+</html>

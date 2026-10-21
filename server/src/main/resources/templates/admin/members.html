@@ -7,7 +7,7 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">회원 관리</h1>
-      <p class="text-base-content/60">가입·방문 추이와 검색·요금제·상태·로그인·가입일·최근 활동 필터, 회원별 이룸이·보호자 수와 AI 사용량을 확인합니다. 열 이름을 누르면 정렬해요.</p>
+      <p class="text-base-content/60">가입·방문 추이와 요금제·상태·로그인·가입일·최근 활동 필터, 회원별 이룸이·보호자 수와 AI 사용량·이번 주 남은 크레딧을 확인해요. 검색은 회원 id 일부·아이디·보호자 닉네임·이룸이 호칭으로 돼요. 열 이름을 누르면 정렬하고, 크레딧 칸을 누르면 그 회원 크레딧 화면으로 가요.</p>
     </div>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>

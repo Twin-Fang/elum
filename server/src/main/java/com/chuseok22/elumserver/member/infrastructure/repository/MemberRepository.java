@@ -39,7 +39,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   Optional<Member> findByUsername(String username);
 
   /**
-   * 관리자 회원 목록: 상태 · 검색어(아이디 또는 이룸이 호칭) · 지금 유효한 요금제로 거른다.
+   * 관리자 회원 목록: 상태 · 검색어(회원 id 조각 · 아이디 · 보호자 닉네임 · 이룸이 호칭) · 지금 유효한 요금제로 거른다.
    *
    * <p>요금제는 {@code Subscription.effectivePlan} 과 같은 기준(ACTIVE · 만료 전 PRO)이다. 구독을 그 조건으로
    * left join 하므로 s 가 있으면 지금 PRO, 없으면 FREE(구독 행이 없는 회원 포함)이고 정렬 "s.plan" 도 같은 기준이 된다
@@ -69,7 +69,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
           where a.memberId = m.id and a.provider in :providers
         ))
       and (:hasKeyword = false
+        or lower(m.id) like lower(:pattern) escape '\\'
         or lower(m.username) like lower(:pattern) escape '\\'
+        or lower(m.nickname) like lower(:pattern) escape '\\'
         or exists (
           select 1 from ProfileGuardian g
           where g.member = m

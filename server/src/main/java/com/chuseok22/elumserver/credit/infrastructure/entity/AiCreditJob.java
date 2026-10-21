@@ -33,7 +33,9 @@ import lombok.Setter;
   uniqueConstraints = @UniqueConstraint(name = "uk_ai_credit_job_request", columnNames = {"account_id", "request_key"}),
   indexes = {
     @Index(name = "idx_ai_credit_job_account_created", columnList = "account_id, created_at"),
-    @Index(name = "idx_ai_credit_job_status_started", columnList = "status, started_at")
+    @Index(name = "idx_ai_credit_job_status_started", columnList = "status, started_at"),
+    // 관리자 일과 상세의 AI 작업 카드 (일과별 최근 작업, V54)
+    @Index(name = "idx_ai_credit_job_routine_started", columnList = "routine_id, started_at")
   }
 )
 public class AiCreditJob extends BaseEntity {

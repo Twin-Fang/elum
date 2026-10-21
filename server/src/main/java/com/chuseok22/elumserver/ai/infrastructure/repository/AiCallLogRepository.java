@@ -15,6 +15,11 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
 
   List<AiCallLog> findTop20ByMemberIdOrderByCreatedAtDesc(String memberId);
 
+  /// 회원의 until 이전(포함) 최근 호출 10건, 최신순 (idx_ai_call_log_member_created 사용)
+  List<AiCallLog> findTop10ByMemberIdAndCreatedAtLessThanEqualOrderByCreatedAtDesc(
+    String memberId, LocalDateTime until
+  );
+
   /**
    * 특정 기간에 이 회원이 낸 호출 건수. 요금제 한도 계산에 쓴다.
    *
@@ -108,9 +113,11 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
     double getTotalCostUsd();
   }
 
-  /// 크레딧 작업별로 연결된 호출 수·비용. 작업 목록 한 페이지를 한 번에 대조한다.
+  /// 크레딧 작업별로 연결된 호출 수·성공 수·비용. 작업 목록 한 페이지를 한 번에 대조한다.
   @Query("""
-    select l.creditJobId as creditJobId, count(l) as callCount, coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
+    select l.creditJobId as creditJobId, count(l) as callCount,
+           coalesce(sum(case when l.success = true then 1L else 0L end), 0L) as successCount,
+           coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
     from AiCallLog l
     where l.creditJobId in :jobIds
     group by l.creditJobId
@@ -122,6 +129,8 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
     String getCreditJobId();
 
     long getCallCount();
+
+    long getSuccessCount();
 
     double getTotalCostUsd();
   }

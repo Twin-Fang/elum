@@ -8,11 +8,15 @@ import com.chuseok22.elumserver.admin.application.dto.response.LogSearchResponse
 import com.chuseok22.elumserver.admin.application.dto.response.LogTailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.LoggerLevelResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.RecentErrorsResponse;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
+import com.chuseok22.elumserver.admin.application.list.AdminLogSearchCsv;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogLevelService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogOverviewService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogSearchService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogService;
 import com.chuseok22.elumserver.admin.application.service.DeployHistoryService;
+import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -22,7 +26,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.Principal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +57,7 @@ public class AdminLogApiController {
   private final DeployHistoryService deployHistoryService;
   private final AdminLogLevelService adminLogLevelService;
   private final AdminLogOverviewService adminLogOverviewService;
+  private final AdminAuditService adminAuditService;
 
   @GetMapping("/admin/logs/api/instance")
   public LogInstanceResponse instance() {
@@ -74,6 +81,7 @@ public class AdminLogApiController {
   @DeleteMapping("/admin/logs/api/files")
   public ResponseEntity<Void> delete(@RequestParam String path) {
     adminLogService.delete(path);
+    adminAuditService.record(AdminAuditAction.LOG_FILE_DELETED, path, null);
     return ResponseEntity.noContent().build();
   }
 
@@ -111,6 +119,26 @@ public class AdminLogApiController {
     @RequestParam(required = false) Integer limit
   ) {
     return adminLogSearchService.search(path, level, q, from, limit);
+  }
+
+  /**
+   * 검색 결과 CSV: 검색과 같은 조건·상한(최대 500건, 항목당 20,000자) > 첨부 파일 (내보낸 관리자·건수 기록)
+   * /admin/logs/api/ 밖 경로: 조용 모드(AdminLogQuietFilter)가 내보내기 기록까지 버리지 않게
+   */
+  @GetMapping("/admin/logs/search" + AdminCsvExporter.EXPORT_PATH_SUFFIX)
+  public ResponseEntity<byte[]> exportSearch(
+    @RequestParam(required = false) String path,
+    @RequestParam(required = false) String level,
+    @RequestParam(required = false) String q,
+    @RequestParam(required = false) String from,
+    @RequestParam(required = false) Integer limit,
+    Principal principal
+  ) {
+    LogSearchResponse result = adminLogSearchService.search(path, level, q, from, limit);
+    log.info("[admin csv] exported server logs : rows={}, matched={}, admin={}",
+      result.entries().size(), result.matched(), principal == null ? null : principal.getName());
+    return AdminCsvExporter.toAttachment(AdminLogSearchCsv.CSV_FILE_PREFIX, LocalDate.now(),
+      AdminLogSearchCsv.csvColumns(), result.entries());
   }
 
   @GetMapping("/admin/logs/api/deploys")

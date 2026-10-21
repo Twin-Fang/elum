@@ -271,6 +271,11 @@ class AdminCreditQueryServiceTest {
       }
 
       @Override
+      public long getSuccessCount() {
+        return calls;
+      }
+
+      @Override
       public double getTotalCostUsd() {
         return usd;
       }
