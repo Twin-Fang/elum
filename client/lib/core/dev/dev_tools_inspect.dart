@@ -204,40 +204,6 @@ class _LogViewer extends StatelessWidget {
   }
 }
 
-/// 저장값·설정값을 보여준다.
-class _StatusView extends ConsumerWidget {
-  const _StatusView();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final storage = ref.read(localStorageProvider);
-
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text('저장값', style: TextStyle(fontWeight: FontWeight.bold)),
-        _Row('온보딩 완료', '${storage.isOnboardingCompleted}'),
-        _Row('호칭', storage.nickname ?? '(없음)'),
-        _Row('목표', storage.goals.isEmpty ? '(없음)' : storage.goals.join(', ')),
-        _Row('캐릭터', storage.character ?? '(없음)'),
-        // 존재 여부만 조회해 암호 검증값이 개발 화면에도 노출되지 않게 한다
-        FutureBuilder<bool>(
-          future: storage.hasPin(),
-          builder: (context, snap) =>
-              _Row('PIN', (snap.data ?? false) ? '설정됨' : '(없음)'),
-        ),
-        const SizedBox(height: 16),
-        const Text('설정값', style: TextStyle(fontWeight: FontWeight.bold)),
-        _Row('API', AppConfig.apiBaseUrl),
-        _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
-        _Row('온보딩 건너뛰기', '${AppConfig.skipOnboarding}'),
-        _Row('준비 로딩 최소 대기', '${AppConfig.prepareMinimumWait.inMilliseconds}ms'),
-      ],
-    );
-  }
-}
-
 /// 화면 바로 이동.
 class _NavigateView extends StatelessWidget {
   const _NavigateView({required this.onClose, required this.onNavigate});

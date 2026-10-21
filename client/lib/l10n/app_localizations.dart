@@ -1958,12 +1958,6 @@ abstract class AppLocalizations {
   /// **'켜기'**
   String get notificationTurnOnDeviceNotification;
 
-  /// 기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'기기 알림을 켜면 이 설정대로 받아요'**
-  String get notificationSettingsLockedHint;
-
   /// 알림 설정 저장 실패 팝업 문구
   ///
   /// In ko, this message translates to:

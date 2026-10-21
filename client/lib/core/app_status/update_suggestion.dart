@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/app_config.dart';
+import '../dev/dev_simulation.dart';
 import '../l10n/l10n_context.dart';
 import '../logger/app_logger.dart';
 import '../storage/local_storage.dart';
@@ -58,7 +59,10 @@ Future<void> showUpdateSuggestionIfNeeded(BuildContext context, WidgetRef ref) a
     return;
   }
   // 확인 실패는 checker 안에서 null 로 바뀜 (서버 값으로 판단)
-  final storeCheck = await ref.read(storeUpdateCheckerProvider)(result.version);
+  // 개발자 도구 권유 흉내는 스토어 확인을 건너뜀 (스토어에 새 버전이 없어도 띄움)
+  final storeCheck = DevSimulation.isSuggestingUpdate
+      ? null
+      : await ref.read(storeUpdateCheckerProvider)(result.version);
   final target = updateSuggestionTarget(
     status: result.status,
     currentVersion: result.version,

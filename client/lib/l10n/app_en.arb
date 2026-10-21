@@ -305,7 +305,6 @@
   "notificationSettingFeedbackResolved": "When your feedback is resolved",
   "notificationPermissionOff": "Device notifications are off",
   "notificationTurnOnDeviceNotification": "Turn on",
-  "notificationSettingsLockedHint": "Turn on device notifications to get these alerts",
   "notificationSettingSaveFailed": "Couldn't save your settings",
   "notificationSettingLoadFailed": "Couldn't load your settings",
   "notificationListFailed": "Couldn't load notifications",

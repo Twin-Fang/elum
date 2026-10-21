@@ -329,6 +329,9 @@ PNG로 바꿨다. 37.11 → **36.65%**, 27.37 → **26.95%**.
 | `1532:7501` | 설정 (크레딧 카드 + 묶음 카드 넷) | `guardian_settings_screen` | ✅ (#683) |
 | `1274:9315` | 설정_약관 (필수 카드 넷 + 선택 카드 하나) | `consent_document_list_screen` | ✅ (#694) · 시안 export `docs/figma/i694/x1/` |
 | `1589:8359` | 설정 — 크레딧 사용 내역 | `credit_history_screen` | ✅ (#658) |
+| `1732:8563` | 알림 설정 (켜짐) | `notification_settings_screen` | ✅ (#932, 2026-10-21 덤프) |
+| `1732:8433` | 알림 설정 (기기 알림 꺼짐) | 〃 · `device_notification_permission_banner` | ✅ (#932) |
+| `1724:8346` | 알림 (위쪽 `오늘` 묶음만, 아래 날짜 칸은 목업) | `notifications_screen` · `notification_row` | ✅ (#932) |
 | `425:4199` | 〃 _완료 | `card_completion_screen` | ✅ |
 
 ### 이룸이 (`425:4392` 아이)

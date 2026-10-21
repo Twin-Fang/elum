@@ -35,7 +35,8 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
   static const _loadMoreExtent = 320.0;
   static const _sidePadding = 16.0;
   static const _rowGap = 8.0;
-  static const _groupGap = 20.0;
+  /// 묶음 사이 24 = 마지막 줄 아래 _rowGap 8 + 16 (시안 1724:8346)
+  static const _groupGap = 16.0;
 
   @override
   void initState() {
@@ -153,17 +154,17 @@ class _DayHeader extends StatelessWidget {
   final bool hasMarkAllRead;
   final VoidCallback onMarkAllRead;
 
-  static const _insetLeft = 4.0;
-  static const _bottomGap = 12.0;
+  /// 머리글 > 첫 줄 8 (시안 1724:8346)
+  static const _bottomGap = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final mutedStyle = context.typo.creditHistoryDate.copyWith(
-      color: context.colors.creditHistoryMutedText,
+      color: context.colors.notificationMutedText,
     );
 
     return Padding(
-      padding: EdgeInsets.only(left: _insetLeft.w, bottom: _bottomGap.h),
+      padding: EdgeInsets.only(bottom: _bottomGap.h),
       child: Row(
         children: [
           Expanded(child: Text(label, style: mutedStyle)),

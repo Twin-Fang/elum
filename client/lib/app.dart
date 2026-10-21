@@ -213,13 +213,16 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       forcedLocale: ref.watch(devLocaleOverrideProvider),
       inner: (context, child) => SyncTriggers(
         // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다
-        child: AppStatusGate(
-          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
-          // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
-          child: DevToolsOverlay(
-            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-            onNavigate: _router.go,
+        // 개발자 도구는 앱 상태 게이트 바깥 (점검·강제 업데이트 화면에서도 흉내를 끌 수 있게)
+        child: DevToolsOverlay(
+          // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+          // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+          onNavigate: _router.go,
+          // 견본 공지 팝업을 띄울 화면 (라우터 Navigator)
+          navigatorContext: () => _router.routerDelegate.navigatorKey.currentContext,
+          child: AppStatusGate(
+            // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
+            // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
             child: child ?? const SizedBox.shrink(),
           ),
         ),

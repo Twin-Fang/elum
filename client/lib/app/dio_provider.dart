@@ -4,7 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_status/app_status_recheck.dart';
+import '../core/config/app_config.dart';
 import '../core/dev/dev_locale_override.dart';
+import '../core/dev/dev_simulation.dart';
 import '../core/l10n/effective_locale.dart';
 import '../core/l10n/region_code.dart';
 import '../core/network/accept_language_interceptor.dart';
@@ -26,6 +28,9 @@ import '../features/profile/application/profile_session.dart';
 /// 부르면 인터셉터 없는 인스턴스가 생겨 401이 그대로 터진다.
 final dioProvider = Provider<Dio>((ref) {
   final dio = DioClient.create(attachLog: false);
+
+  // 개발자 도구 실패 흉내 (맨 앞: 요청을 보내기 전에 끊음)
+  if (AppConfig.showDevTools) dio.interceptors.add(DevFaultInterceptor());
 
   // 앱 언어를 모든 요청에 싣는다. 요청마다 판정해 OS 언어가 바뀌어도 따라간다.
   // 맨 앞에 둔다 — 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.

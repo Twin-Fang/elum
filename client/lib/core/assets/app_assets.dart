@@ -356,6 +356,14 @@ abstract final class AppAssets {
   /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
   static const iconSettings = '$_images/icon_settings.svg';
 
+  /// 기기 알림 꺼짐 띠의 종+사선 (22×20 #74757D). Figma `1732:8559`.
+  static const iconNotificationOff = '$_images/icon_notification_off.svg';
+
+  /// 알림 줄 종류 아이콘 3개 (16×16, 흰색). Figma `1724:8346` 의 체크 · 종이비행기 · 사람 더하기.
+  static const iconNotificationCheck = '$_images/icon_notification_check.svg';
+  static const iconNotificationPaperPlane = '$_images/icon_notification_paper_plane.svg';
+  static const iconNotificationUserAdd = '$_images/icon_notification_user_add.svg';
+
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.
   static const starBadge = '$_images/star_badge.svg';

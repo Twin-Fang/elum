@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
 /// 알림 화면 제목 줄 오른쪽의 톱니 버튼: 알림 설정으로 이동
@@ -30,6 +31,8 @@ class NotificationSettingsGearButton extends StatelessWidget {
             AppAssets.iconSettings,
             width: _iconSize.w,
             height: _iconSize.w,
+            // 같은 톱니를 홈과 함께 쓰고 색만 시안(1724:8416 #74757D)대로 칠한다
+            colorFilter: ColorFilter.mode(context.colors.notificationMutedText, BlendMode.srcIn),
             excludeFromSemantics: true,
           ),
         ),
