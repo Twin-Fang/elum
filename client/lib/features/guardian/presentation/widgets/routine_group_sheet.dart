@@ -194,19 +194,26 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
         .where((candidate) => candidate.group.id == widget.groupId)
         .firstOrNull;
     final media = MediaQuery.of(context);
-    return ElumSheetSurface(
-      height: media.size.height * _heightRatio,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          context.space.md.w,
-          context.space.lg.h,
-          context.space.md.w,
-          context.space.md.h + media.padding.bottom,
+    return PopScope(
+      // 편집 중 뒤로가기는 편집만 끝낸다 (시트는 한 번 더 눌러야 닫힘). ✕ · 끌어 내리기는 그대로 닫는다
+      canPop: !_isEditing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(() => _isEditing = false);
+      },
+      child: ElumSheetSurface(
+        height: media.size.height * _heightRatio,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            context.space.md.w,
+            context.space.lg.h,
+            context.space.md.w,
+            context.space.md.h + media.padding.bottom,
+          ),
+          // 다른 기기에서 풀었거나 목록을 다시 받는 중 — 빈 시트 대신 닫기만 남긴다
+          child: entry == null
+              ? const SizedBox.shrink()
+              : _buildBody(context, entry),
         ),
-        // 다른 기기에서 풀었거나 목록을 다시 받는 중 — 빈 시트 대신 닫기만 남긴다
-        child: entry == null
-            ? const SizedBox.shrink()
-            : _buildBody(context, entry),
       ),
     );
   }
@@ -224,7 +231,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 머리: ✕ · 순서 편집 / 완료 (시안)
+        // 머리: ✕ · 편집 / 완료 (시안)
         Row(
           children: [
             AppPressable(
@@ -280,10 +287,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
         ),
         SizedBox(height: space.xs.h / 2),
         Text(
-          _isEditing
-              ? '${l10n.routineGroupSheetCount(routines.length)} · '
-                    '${l10n.routineGroupSheetDragHint}'
-              : l10n.routineGroupSheetCount(routines.length),
+          l10n.routineGroupSheetCount(routines.length),
           textAlign: TextAlign.center,
           style: context.typo.caption.copyWith(color: colors.textSecondary),
         ),

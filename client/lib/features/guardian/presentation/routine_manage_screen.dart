@@ -26,6 +26,7 @@ import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
+import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
@@ -53,6 +54,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   bool _isArranging = false;
 
   // --- 동작 ---
+
+  void _endArranging() => setState(() => _isArranging = false);
 
   @override
   Future<void> openRoutineDetail(
@@ -376,18 +379,20 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         isBusy: busy,
         isArranging: _isArranging,
         // 정리 상태에서는 가운데 버튼이 `완료`
-        onTap: _isArranging
-            ? () => setState(() => _isArranging = false)
-            : onCreatePressed,
+        onTap: _isArranging ? _endArranging : onCreatePressed,
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const LibraryManageHeader(),
-            SizedBox(height: space.md.h),
-            Expanded(child: body),
-          ],
+      body: LibraryArrangeExitScope(
+        isArranging: _isArranging,
+        onExit: _endArranging,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const LibraryManageHeader(),
+              SizedBox(height: space.md.h),
+              Expanded(child: body),
+            ],
+          ),
         ),
       ),
     );

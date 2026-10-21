@@ -4625,7 +4625,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과 {count}개 · 이 순서대로 보여요'**
+  /// **'일과 {count}개'**
   String routineGroupSheetCount(int count);
 
   /// 일과 묶음 (#807)
@@ -4639,12 +4639,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title} 묶음에서 빼기'**
   String routineGroupSheetRemove(String title);
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'길게 눌러 끌면 순서를 바꿀 수 있어요'**
-  String get routineGroupSheetDragHint;
 
   /// 일과 묶음 (#807)
   ///
@@ -4763,7 +4757,7 @@ abstract class AppLocalizations {
   /// 일과관리 묶음 열기 (#837)
   ///
   /// In ko, this message translates to:
-  /// **'순서 편집'**
+  /// **'편집'**
   String get routineGroupEditOrder;
 
   /// 일과관리 묶음 열기 (#837)

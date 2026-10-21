@@ -2646,7 +2646,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String routineGroupSheetCount(int count) {
-    return '$count routines · shown in this order';
+    return '$count routines';
   }
 
   @override
@@ -2656,9 +2656,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineGroupSheetRemove(String title) {
     return 'Remove $title from bundle';
   }
-
-  @override
-  String get routineGroupSheetDragHint => 'Drag the handle to reorder';
 
   @override
   String get routineGroupCreated => 'Bundle created';
@@ -2727,7 +2724,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryArrangeRemove => 'Remove or ungroup';
 
   @override
-  String get routineGroupEditOrder => 'Edit order';
+  String get routineGroupEditOrder => 'Edit';
 
   @override
   String get routineLibrarySendOnlyThis => 'Send only this one today';
