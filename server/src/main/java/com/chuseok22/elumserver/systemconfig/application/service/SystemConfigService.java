@@ -336,7 +336,9 @@ public class SystemConfigService {
   private synchronized void forceReload() {
     try {
       Map<ConfigKey, String> loaded = new EnumMap<>(ConfigKey.class);
-      systemConfigRepository.findAll()
+      // 이 버전이 모르는 키(다른 버전이 먼저 넣은 행)는 건너뜀
+      systemConfigRepository.findAll().stream()
+        .filter(config -> config.getConfigKey() != null)
         .forEach(config -> loaded.put(config.getConfigKey(), config.getConfigValue()));
       cache = Map.copyOf(loaded);
     } catch (Exception e) {
