@@ -52,7 +52,7 @@
     <div class="stat rounded-box bg-base-200 shadow">
       <div class="stat-title text-sm">분류 · 언어</div>
       <div class="stat-value text-lg"
-           th:text="${detail.post.category.name()} + ' · ' + ${detail.post.language.name()}">SELF_CARE · KO</div>
+           th:text="${detail.post.category.label} + ' · ' + ${detail.post.language.name()}">SELF_CARE · KO</div>
       <div class="stat-desc" th:text="'카드 ' + ${detail.post.stepCount} + '장'">카드 3장</div>
     </div>
     <div class="stat rounded-box bg-base-200 shadow">

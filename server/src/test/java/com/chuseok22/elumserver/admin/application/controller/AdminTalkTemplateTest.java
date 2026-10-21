@@ -173,7 +173,7 @@ class AdminTalkTemplateTest {
       .contains("/admin/talk/posts/p1").contains("/admin/talk/posts/p2")
       .contains("하늘").contains("/admin/members/author-member-p1").contains("(닉네임 없음)")
       .contains("보이는 글").contains("가린 글")
-      .contains("3건").contains("도움 4 · 댓글 2 · 가져감 1").contains("SELF_CARE");
+      .contains("3건").contains("도움 4 · 댓글 2 · 가져감 1").contains("생활 습관").doesNotContain("SELF_CARE");
     assertThat(html).containsPattern("data-talk-report-count[^>]*>3건").containsPattern("data-talk-report-count[^>]*>0건");
   }
 
@@ -246,7 +246,7 @@ class AdminTalkTemplateTest {
 
     assertThat(html).contains("이야기 글 상세").contains("양치하기 루틴").contains("글쓴이 한마디")
       .contains("하늘").contains("/admin/members/author-member-p1").contains("2026-10-20").contains("09:30:15")
-      .contains("도움 4 · 댓글 2").contains("가져감 1");
+      .contains("도움 4 · 댓글 2").contains("가져감 1").contains("생활 습관 · ").doesNotContain("SELF_CARE");
     assertThat(html).contains("src=\"/admin/talk/posts/p1/steps/0/image\"").contains("양치하기 0").contains("칫솔에 치약을 짜요")
       .contains("픽토그램 pict-7");
     assertThat(html).doesNotContain("/admin/talk/posts/p1/steps/1/image");
