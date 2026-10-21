@@ -147,6 +147,8 @@ class GuardianTabIconMotion extends StatelessWidget {
   }
 
   /// 아이콘 한 겹 (칸 전체 크기, 필요하면 영역만 잘라냄)
+  ///
+  /// 칸 크기로 고정 (Stack 안 느슨한 제약이면 SVG 비율대로 줄어 왼쪽 위에 붙음 > 가운데 기준 영역과 어긋남)
   Widget _layer(
     String asset, {
     Color? color,
@@ -158,8 +160,12 @@ class GuardianTabIconMotion extends StatelessWidget {
       height: size,
       colorFilter: ColorFilter.mode(color ?? this.color, BlendMode.srcIn),
     );
-    if (clipper == null) return picture;
-    return ClipPath(clipper: clipper, child: picture);
+    return SizedBox.square(
+      dimension: size,
+      child: clipper == null
+          ? picture
+          : ClipPath(clipper: clipper, child: picture),
+    );
   }
 
   // --- 시간표 (구간은 전체 1초 대비 비율, 값의 위치·거리는 viewBox 단위) ---
