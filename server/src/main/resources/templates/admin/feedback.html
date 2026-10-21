@@ -41,6 +41,8 @@
         <td class="wrap-anywhere" style="min-width:12rem">
           <a th:href="@{/admin/feedback/{id}(id=${f.id})}" class="link link-hover"
              th:text="${#strings.abbreviate(f.message, 40)}">의견</a>
+          <!-- 관리자 메모가 있으면 표시만 (내용은 상세에서) -->
+          <span th:if="${f.hasAdminNote()}" class="badge badge-outline badge-xs ml-1" data-feedback-has-note>메모</span>
         </td>
         <td>
           <span th:if="${f.hasAppLog()}" class="badge badge-info badge-sm">있음</span>

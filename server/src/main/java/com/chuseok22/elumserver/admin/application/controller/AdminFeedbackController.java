@@ -1,12 +1,16 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminFeedbackSenderPanel;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.format.AdminLogIds;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRows;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.service.AdminFeedbackSenderService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
+import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/// 보호자가 보낸 의견을 관리자 화면에서 보고, 처리 상태를 바꾸고, 지우고, CSV 로 내보낸다. 자동 삭제는 없다.
+/// 보호자가 보낸 의견을 관리자 화면에서 보고, 처리 상태·메모를 바꾸고, 지우고, CSV 로 내보낸다. 자동 삭제는 없다.
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -43,6 +47,7 @@ public class AdminFeedbackController {
 
   private final FeedbackService feedbackService;
   private final AdminDateFormatter adminDateFormatter;
+  private final AdminFeedbackSenderService adminFeedbackSenderService;
 
   /// 의견 목록: 검색어(q), 필터(AdminFeedbackList 정의 5개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
@@ -80,10 +85,14 @@ public class AdminFeedbackController {
       AdminFeedbackList.csvColumns(adminDateFormatter), export.rows());
   }
 
+  /// 의견 상세 + 보낸 회원 패널 (패널 실패해도 의견 본문은 그대로)
   @GetMapping("/admin/feedback/{id}")
   public String detail(@PathVariable("id") String id, Model model) {
-    model.addAttribute("feedback", feedbackService.get(id));
+    Feedback feedback = feedbackService.get(id);
+    model.addAttribute("feedback", feedback);
     model.addAttribute("statuses", FeedbackStatus.values());
+    model.addAttribute("adminNoteMaxLength", FeedbackService.MAX_ADMIN_NOTE_LENGTH);
+    model.addAttribute("senderPanel", senderPanelOf(feedback));
     return "admin/feedback-detail";
   }
 
@@ -113,11 +122,49 @@ public class AdminFeedbackController {
     return "redirect:" + destination;
   }
 
+  /**
+   * 관리자 메모 저장: 길이 초과면 저장 없이 안내 > 저장(빈 값이면 지움) > 상세로
+   * 메모 원문은 로그에 남기지 않음 (글자 수만)
+   */
+  @PostMapping("/admin/feedback/{id}/note")
+  public String saveNote(
+    @PathVariable("id") String id,
+    @RequestParam(name = "adminNote", required = false) String adminNote,
+    Principal principal,
+    RedirectAttributes redirectAttributes
+  ) {
+    String detailPath = LIST_PATH + "/" + id;
+    int noteLength = adminNote == null ? 0 : adminNote.length();
+    FeedbackAdminNoteSaveResult result =
+      feedbackService.saveAdminNote(id, adminNote, principal == null ? null : principal.getName());
+    if (result == FeedbackAdminNoteSaveResult.REJECTED_TOO_LONG) {
+      log.info("[admin feedback] note rejected : id={}, length={} over limit", AdminLogIds.toLoggableId(id), noteLength);
+      redirectAttributes.addFlashAttribute("errorMessage",
+        "메모는 " + FeedbackService.MAX_ADMIN_NOTE_LENGTH + "자까지 저장할 수 있어요. 줄여서 다시 저장해 주세요.");
+      return "redirect:" + detailPath;
+    }
+    log.info("[admin feedback] note saved : id={}, length={}", AdminLogIds.toLoggableId(id), noteLength);
+    redirectAttributes.addFlashAttribute("message",
+      result == FeedbackAdminNoteSaveResult.CLEARED ? "메모를 지웠어요." : "메모를 저장했어요.");
+    return "redirect:" + detailPath;
+  }
+
   @PostMapping("/admin/feedback/{id}/delete")
   public String delete(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
     feedbackService.delete(id);
     redirectAttributes.addFlashAttribute("message", "의견을 지웠어요.");
     return "redirect:" + LIST_PATH;
+  }
+
+  /// 보낸 회원 패널 (실패하면 안내와 에러 코드만: 읽기 트랜잭션 rollback-only 가 상세로 번지지 않게 여기서 잡음)
+  private AdminFeedbackSenderPanel senderPanelOf(Feedback feedback) {
+    try {
+      return adminFeedbackSenderService.loadSenderPanel(feedback.getMemberId(), feedback.getCreatedAt());
+    } catch (RuntimeException e) {
+      log.warn("[admin feedback] sender panel failed : feedbackId={}, memberId={}",
+        AdminLogIds.toLoggableId(feedback.getId()), AdminLogIds.toLoggableId(feedback.getMemberId()), e);
+      return AdminFeedbackSenderPanel.loadFailed(feedback.getMemberId());
+    }
   }
 
   /// 검색·필터·정렬·페이지를 유지한 목록 주소 (값은 정의로 보정·URL 인코딩된 것만 쓴다)

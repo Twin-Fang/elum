@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  의견 상세 "보낸 회원" 패널 (#655): 닉네임·요금제·회원 상태, 크레딧 요약, 의견 시각 기준 최근 AI 호출 10건.
+  상태 3개: 불러옴, 회원 없음(완전 삭제), 불러오기 실패. panel 이 null 이면 회원 id 와 링크만.
+  도움 방식(supportGoals) 같은 민감 정보는 싣지 않는다.
+-->
+<body>
+
+<div th:fragment="senderPanel(feedback, panel)" class="card bg-base-100 shadow-md border border-base-300"
+     data-feedback-sender-panel>
+  <div class="card-body space-y-3">
+    <div class="flex items-center gap-2 flex-wrap">
+      <h2 class="card-title text-lg">보낸 회원</h2>
+      <th:block th:if="${panel != null and panel.isMemberFound()}">
+        <span class="font-semibold" th:text="${panel.displayName()}">보호자 닉네임</span>
+        <span class="badge badge-sm"
+              th:classappend="${panel.plan().name() == 'PRO'} ? 'badge-primary' : 'badge-ghost'"
+              th:text="${panel.plan().label}">무료</span>
+        <span th:if="${panel.status().name() == 'ACTIVE'}" class="badge badge-success badge-sm">활성</span>
+        <span th:if="${panel.status().name() == 'SUSPENDED'}" class="badge badge-error badge-sm">정지</span>
+        <span th:if="${panel.isWithdrawn()}" class="badge badge-ghost badge-sm">탈퇴</span>
+      </th:block>
+      <span class="font-mono text-xs text-base-content/60" th:text="${feedback.memberId}">member-id</span>
+      <a th:if="${panel == null or panel.canOpenMemberDetail()}"
+         th:href="@{/admin/members/{id}(id=${feedback.memberId})}" class="link link-primary text-sm ml-auto">회원 정보 보기</a>
+    </div>
+
+    <p th:if="${panel != null and panel.isLoadFailed()}" class="text-sm text-error" role="alert">
+      회원 정보를 불러오지 못했어요. 잠시 뒤 새로 고쳐 주세요. (E-ADM-FEEDBACK-001)
+    </p>
+    <p th:if="${panel != null and !panel.canOpenMemberDetail()}" class="text-sm text-base-content/60">
+      탈퇴했거나 찾을 수 없는 회원이에요
+    </p>
+
+    <th:block th:if="${panel != null and panel.isMemberFound()}">
+      <!-- 탈퇴 회원은 크레딧 요약이 없다 (서비스가 넣지 않음) -->
+      <th:block th:if="${panel.creditSummary() != null}">
+        <div th:replace="~{admin/fragments/member-credit-summary :: creditSummaryCard(${panel.creditSummary()}, ${panel.memberId()})}"></div>
+      </th:block>
+
+      <div class="space-y-2" data-feedback-sender-ai-calls>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h3 class="font-semibold">의견 즈음 AI 호출 (최근 10건)</h3>
+          <span class="text-xs text-base-content/60"
+                th:text="${#temporals.format(panel.aiCallsUntil(), 'yyyy-MM-dd HH:mm')} + ' 까지 (보낸 때 + 30분)'">까지</span>
+          <a th:href="@{/admin/monitoring(memberId=${panel.memberId()}, from=${panel.monitoringFromDate()}, to=${panel.monitoringToDate()})}"
+             class="link link-primary text-sm ml-auto">모니터링에서 보기</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>시각</th>
+              <th>유형</th>
+              <th>모델</th>
+              <th>결과</th>
+              <th>오류</th>
+              <th>추정 비용</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- th:replace 가 th:if 보다 먼저 실행되므로 조건은 바깥 블록에 둔다 -->
+            <th:block th:if="${#lists.isEmpty(panel.recentAiCalls())}">
+              <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '이 무렵 AI 호출 기록이 없어요')}"></tr>
+            </th:block>
+            <tr th:each="call : ${panel.recentAiCalls()}">
+              <td th:text="${call.createdAt != null ? #temporals.format(call.createdAt, 'MM-dd HH:mm:ss') : '-'}">시각</td>
+              <td th:text="${call.callType.label}">유형</td>
+              <td class="text-xs" th:text="${call.model ?: '-'}">모델</td>
+              <td>
+                <span th:if="${call.success}" class="badge badge-success badge-sm">성공</span>
+                <span th:unless="${call.success}" class="badge badge-error badge-sm">실패</span>
+              </td>
+              <!-- 오류 문구는 외부 응답이 섞여 있어 th:text 로 이스케이프, 80자까지 (전체는 title) -->
+              <td class="text-xs max-w-xs wrap-anywhere"
+                  th:text="${!call.success and call.errorMessage != null ? #strings.abbreviate(call.errorMessage, 80) : '-'}"
+                  th:title="${call.success ? null : call.errorMessage}">오류</td>
+              <td th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </th:block>
+  </div>
+</div>
+
+</body>
+</html>

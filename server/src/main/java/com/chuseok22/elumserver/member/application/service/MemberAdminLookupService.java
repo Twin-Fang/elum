@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,22 @@ public class MemberAdminLookupService {
     }
     Map<String, String> displayNameById = new HashMap<>();
     for (Member member : memberRepository.findAllById(memberIds)) {
-      String nickname = member.getNickname();
-      displayNameById.put(member.getId(), nickname != null && !nickname.isBlank() ? nickname : member.getUsername());
+      displayNameById.put(member.getId(), displayNameOf(member));
     }
     return displayNameById;
+  }
+
+  /// 회원 id > 회원 (탈퇴 회원 포함, 완전 삭제됐으면 빈 값)
+  public Optional<Member> findMember(String memberId) {
+    if (memberId == null || memberId.isBlank()) {
+      return Optional.empty();
+    }
+    return memberRepository.findById(memberId);
+  }
+
+  /// 회원 > 표시 이름 (보호자 닉네임, 없으면 아이디)
+  public static String displayNameOf(Member member) {
+    String nickname = member.getNickname();
+    return nickname != null && !nickname.isBlank() ? nickname : member.getUsername();
   }
 }

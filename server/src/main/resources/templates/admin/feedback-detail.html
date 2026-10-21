@@ -38,22 +38,33 @@
     </div>
   </div>
 
-  <!-- 보낸 사람과 환경. 의견·기록은 사용자 입력이라 아래 모든 출력은 th:text 로 이스케이프한다. -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  <!-- 관리자 메모 (#655): 관리자끼리만 본다. 비우고 저장하면 지운다. 사용자 입력이라 th:text 로 이스케이프 -->
+  <div class="card bg-base-100 shadow-md border border-base-300" data-feedback-admin-note>
+    <div class="card-body space-y-2">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="card-title text-lg">관리자 메모</h2>
+        <span th:replace="~{admin/fragments/admin-list :: lastChangedOr(${feedback.adminNoteChangedAt}, ${feedback.adminNoteChangedBy}, '메모 기록 없음')}"></span>
+      </div>
+      <form th:action="@{/admin/feedback/{id}/note(id=${feedback.id})}" method="post" class="space-y-2">
+        <textarea name="adminNote" rows="4" class="textarea textarea-bordered w-full"
+                  th:attr="maxlength=${adminNoteMaxLength}"
+                  placeholder="처리한 내용이나 다음 관리자에게 남길 말을 적어 주세요. 비우고 저장하면 메모를 지워요."
+                  th:text="${feedback.adminNote}"></textarea>
+        <div class="flex justify-end">
+          <button type="submit" class="btn btn-primary btn-sm">메모 저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 보낸 때와 환경. 의견·기록은 사용자 입력이라 아래 모든 출력은 th:text 로 이스케이프한다. -->
+  <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
     <div class="stat rounded-box bg-base-200 shadow">
       <div class="stat-title text-sm">보낸 때</div>
       <div class="stat-value text-lg"
            th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'yyyy-MM-dd') : '-'}">2026-10-08</div>
       <div class="stat-desc"
            th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'HH:mm:ss') : ''}">10:00:00</div>
-    </div>
-    <div class="stat rounded-box bg-base-200 shadow">
-      <div class="stat-title text-sm">회원</div>
-      <div class="stat-value text-lg font-mono"
-           th:text="${#strings.abbreviate(feedback.memberId, 12)}">member-id</div>
-      <div class="stat-desc">
-        <a th:href="@{/admin/members/{id}(id=${feedback.memberId})}" class="link link-hover">회원 정보 보기</a>
-      </div>
     </div>
     <div class="stat rounded-box bg-base-200 shadow">
       <div class="stat-title text-sm">앱 버전</div>
@@ -74,6 +85,8 @@
          th:text="${feedback.message}">의견 전체</p>
     </div>
   </div>
+
+  <div th:replace="~{admin/fragments/feedback-sender-panel :: senderPanel(${feedback}, ${senderPanel})}"></div>
 
   <div class="card bg-base-100 shadow-md border border-base-300">
     <div class="card-body space-y-2">

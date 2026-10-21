@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCredit
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.format.AdminLogIds;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRows;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
@@ -191,8 +192,7 @@ public class AdminMemberController {
         throw e;
       }
       // linkId 는 주소에서 온 값이라 UUID 문자(16진수, -) 밖은 ? 로 바꿔 남김
-      log.info("[admin device unlink] rejected 404 : not connected, linkId={}",
-        linkId.replaceAll("[^0-9a-fA-F-]", "?"));
+      log.info("[admin device unlink] rejected 404 : not connected, linkId={}", AdminLogIds.toLoggableId(linkId));
       redirectAttributes.addFlashAttribute("errorMessage",
         "연결 해제 실패: 이미 끊겼거나 이 회원의 이룸이 기기가 아니에요. 화면을 새로 고쳐 확인해주세요. (E-ADM-LINK-001)");
       return "redirect:/admin/members/" + id;
@@ -220,7 +220,7 @@ public class AdminMemberController {
     } catch (RuntimeException e) {
       // memberId 는 주소에서 온 값이라 UUID 문자(16진수, -) 밖은 ? 로 바꿔 남김
       log.warn("[admin members] credit summary failed : detail, memberId={}",
-        memberId.replaceAll("[^0-9a-fA-F-]", "?"), e);
+        AdminLogIds.toLoggableId(memberId), e);
       return AdminMemberCreditSummary.loadFailed();
     }
   }
