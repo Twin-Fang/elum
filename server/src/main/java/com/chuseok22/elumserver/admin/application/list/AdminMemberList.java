@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 회원 목록 선언: 열, 필터 7개(요금제, 상태, 로그인 제공자, 가입일·최근 활동 기간), 정렬 허용 열, 응답 > 표 행·CSV 변환
+ * 회원 목록 선언: 열, 검색(회원 id 조각·아이디·보호자 닉네임·이룸이 호칭), 필터 7개(요금제, 상태, 로그인 제공자, 가입일·최근 활동 기간), 정렬 허용 열, 응답 > 표 행·CSV 변환
  * 정렬은 isSortable 열만 허용되고 그 밖은 기본 정렬(가입일 최신순)로 돌아감
  */
 public final class AdminMemberList {
@@ -48,6 +48,9 @@ public final class AdminMemberList {
   private static final String COLUMN_LOGIN_PROVIDERS = "loginProviders";
   private static final String COLUMN_PROFILE_COUNT = "profileCount";
   private static final String COLUMN_GUARDIAN_COUNT = "guardianCount";
+  /// 크레딧 열: 이번 주 지금 사용 가능량, 칸 링크는 회원 크레딧 상세
+  private static final String COLUMN_CURRENT_WEEK_CREDIT = "currentWeekCredit";
+  private static final String CREDIT_DETAIL_PATH = "/admin/credits/members/";
   private static final String PROVIDER_DELIMITER = ", ";
   private static final String NO_HISTORY_TEXT = "변경 이력 없음";
   private static final String BLANK_TEXT = "-";
@@ -66,10 +69,11 @@ public final class AdminMemberList {
       new Column("aiCallCount", "AI 호출", false),
       new Column("totalTokens", "토큰", false),
       new Column("estimatedCostUsd", "추정 비용", false),
+      new Column(COLUMN_CURRENT_WEEK_CREDIT, "크레딧(이번 주 남음)", false),
       new Column(SORT_LAST_ACTIVITY, "최근 활동", true),
       new Column(SORT_CREATED_AT, "가입일", true),
       new Column(COLUMN_PLAN_LAST_CHANGED, "요금제 마지막 변경", false)),
-    List.of("username", "nickname"),
+    List.of("id", "username", "nickname", "profileNickname"),
     List.of(
       new Filter(FILTER_PLAN, "요금제", List.of(
         new Option(PlanType.FREE.name(), PlanType.FREE.getLabel()),
@@ -135,8 +139,19 @@ public final class AdminMemberList {
     };
   }
 
-  /// 응답 > 표 한 행 (첫 칸이 회원 상세 링크)
+  /// 응답 > 표 한 행 (크레딧 모름: 크레딧 칸 "-")
   public static AdminListRow toRow(AdminMemberResponse member, AdminDateFormatter dateFormatter) {
+    return toRow(member, null, dateFormatter);
+  }
+
+  /**
+   * 응답 > 표 한 행 (첫 칸 회원 상세 링크, 크레딧 칸 회원 크레딧 상세 링크)
+   *
+   * @param currentWeekRemainingCredit 이번 주 남은 크레딧, 이번 주 기록 없음·조회 실패면 null ("-")
+   */
+  public static AdminListRow toRow(
+    AdminMemberResponse member, Long currentWeekRemainingCredit, AdminDateFormatter dateFormatter
+  ) {
     Map<String, String> cells = new LinkedHashMap<>();
     String displayName = member.nickname() != null ? member.nickname() : member.username();
     cells.put(SORT_USERNAME, displayName + " (" + member.username() + ")");
@@ -151,10 +166,13 @@ public final class AdminMemberList {
     cells.put("aiCallCount", String.valueOf(member.aiCallCount()));
     cells.put("totalTokens", String.format("%,d", member.totalTokens()));
     cells.put("estimatedCostUsd", String.format("$%.4f", member.estimatedCostUsd()));
+    cells.put(COLUMN_CURRENT_WEEK_CREDIT,
+      currentWeekRemainingCredit == null ? BLANK_TEXT : String.format("%,d", currentWeekRemainingCredit));
     cells.put(SORT_LAST_ACTIVITY, dateFormatter.format(member.lastActivityAt()));
     cells.put(SORT_CREATED_AT, dateFormatter.format(member.createdAt()));
     cells.put(COLUMN_PLAN_LAST_CHANGED, lastChangedText(member, dateFormatter));
-    return new AdminListRow("/admin/members/" + member.id(), cells);
+    return new AdminListRow("/admin/members/" + member.id(), cells,
+      Map.of(COLUMN_CURRENT_WEEK_CREDIT, CREDIT_DETAIL_PATH + member.id()));
   }
 
   /**
