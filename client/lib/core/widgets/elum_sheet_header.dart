@@ -33,18 +33,27 @@ class ElumSheetHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // 큰 글자 설정에서 버튼이 칸보다 커지면 줄여 넣는다 (줄바꿈 · 넘침 방지)
         ElumCenteredTitleRow(
           sideSlotWidth: sideSlotWidth.w,
-          leading: Align(alignment: Alignment.centerLeft, child: leading),
+          leading: Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(fit: BoxFit.scaleDown, child: leading),
+          ),
           title: title,
-          trailing: Align(alignment: Alignment.centerRight, child: trailing),
+          trailing: Align(
+            alignment: Alignment.centerRight,
+            child: FittedBox(fit: BoxFit.scaleDown, child: trailing),
+          ),
         ),
-        if (subtitle != null)
+        if (subtitle != null) ...[
+          SizedBox(height: context.space.xs.h / 2),
           Text(
             subtitle!,
             textAlign: TextAlign.center,
             style: context.typo.caption.copyWith(color: colors.textSecondary),
           ),
+        ],
       ],
     );
   }
