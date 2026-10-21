@@ -2773,16 +2773,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkTitle => '이야기';
 
   @override
-  String get talkWriteButton => '+ 올리기';
+  String get talkWriteButton => '올리기';
 
   @override
   String get talkCategoryAll => '전체';
 
   @override
-  String get talkPopularTitle => '많이 가져갔어요';
-
-  @override
-  String get talkPopularPeriod => '이번 주';
+  String get talkPopularTitle => '이번 주에 많이 가져간 일과에요';
 
   @override
   String talkPopularImportCount(int count) {
@@ -2817,9 +2814,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get talkNoteLabel => '내용';
-
-  @override
-  String get talkImportButtonShort => '내 일과로';
 
   @override
   String talkHelpfulCount(int count) {

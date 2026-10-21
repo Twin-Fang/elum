@@ -65,6 +65,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.goalSelectedBorder,
     required this.talkOriginBandFill,
     required this.talkOriginBandAction,
+    required this.talkCardBorder,
+    required this.talkTitleText,
+    required this.talkMetaText,
+    required this.talkMetaIcon,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -325,6 +329,16 @@ class AppColors extends ThemeExtension<AppColors> {
   // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
   final Color talkOriginBandFill;
   final Color talkOriginBandAction;
+
+  // 이야기 피드 카드 (시안 1783:6640)
+  /// 흰 카드·그림 칸 1px 테두리 (#EEE9E6)
+  final Color talkCardBorder;
+  /// 섹션 제목·카드 제목·분류 글자 (#000000 — 본문색 #242634 와 다르다)
+  final Color talkTitleText;
+  /// 시간·한마디·숫자·작성자 (#74757D)
+  final Color talkMetaText;
+  /// 도움돼요·댓글·가져감 10px 아이콘 (#CACACA)
+  final Color talkMetaIcon;
 
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
@@ -970,6 +984,10 @@ class AppColors extends ThemeExtension<AppColors> {
     goalSelectedBorder: Color(0xFF93DBCC),
     talkOriginBandFill: Color(0xFFF2FBFA),
     talkOriginBandAction: Color(0xFF1D6B66),
+    talkCardBorder: Color(0xFFEEE9E6),
+    talkTitleText: Color(0xFF000000),
+    talkMetaText: Color(0xFF74757D),
+    talkMetaIcon: Color(0xFFCACACA),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1196,6 +1214,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? goalSelectedBorder,
     Color? talkOriginBandFill,
     Color? talkOriginBandAction,
+    Color? talkCardBorder,
+    Color? talkTitleText,
+    Color? talkMetaText,
+    Color? talkMetaIcon,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1410,6 +1432,10 @@ class AppColors extends ThemeExtension<AppColors> {
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
       talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
       talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
+      talkCardBorder: talkCardBorder ?? this.talkCardBorder,
+      talkTitleText: talkTitleText ?? this.talkTitleText,
+      talkMetaText: talkMetaText ?? this.talkMetaText,
+      talkMetaIcon: talkMetaIcon ?? this.talkMetaIcon,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1664,6 +1690,10 @@ class AppColors extends ThemeExtension<AppColors> {
         other.talkOriginBandAction,
         t,
       )!,
+      talkCardBorder: Color.lerp(talkCardBorder, other.talkCardBorder, t)!,
+      talkTitleText: Color.lerp(talkTitleText, other.talkTitleText, t)!,
+      talkMetaText: Color.lerp(talkMetaText, other.talkMetaText, t)!,
+      talkMetaIcon: Color.lerp(talkMetaIcon, other.talkMetaIcon, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,

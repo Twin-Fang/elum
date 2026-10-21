@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.chuseok22.elumserver.admin.application.exception.AdminViewExceptionHandler;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -40,7 +41,8 @@ class AdminGrantProFailureTest {
   @BeforeEach
   void setUp() {
     adminMemberService = mock(AdminMemberService.class);
-    mockMvc = MockMvcBuilders.standaloneSetup(new AdminMemberController(adminMemberService, new AdminDateFormatter()))
+    mockMvc = MockMvcBuilders.standaloneSetup(new AdminMemberController(
+        adminMemberService, new AdminDateFormatter(), mock(AdminCreditQueryService.class)))
       .setControllerAdvice(new AdminViewExceptionHandler())
       .build();
   }

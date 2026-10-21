@@ -10,7 +10,6 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/min_tap_target.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
@@ -22,11 +21,11 @@ import '../application/talk_popular_provider.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_category_chips.dart';
-import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_popular_row.dart';
 import 'widgets/talk_post_card.dart';
+import 'widgets/talk_write_button.dart';
 
-/// 하단 바 이야기 칸: 제목 + 올리기 > 분류 칩 > 인기 줄 > 최신 글 무한 스크롤
+/// 하단 바 이야기 칸 (시안 1783:6640): 제목 > 분류 칩 (고정) > 인기 줄 > 최신 글 무한 스크롤 + 아래 가운데 올리기
 /// 상태: 받는 중 / 0건 / 첫 쪽 실패(다시 하기 + 에러 코드) / 목록 (인기 줄은 실패해도 숨기기만 함)
 class TalkFeedScreen extends ConsumerStatefulWidget {
   const TalkFeedScreen({super.key});
@@ -43,8 +42,16 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
 
   /// 끝까지 이만큼 남으면 다음 쪽을 받는다
   static const _loadMoreExtent = 320.0;
-  static const _cardGap = 12.0;
-  static const _sectionGap = 20.0;
+
+  /// 안전영역 > 제목 (시안 y=87, 상태 바 59 아래)
+  static const _titleTop = 28.0;
+
+  /// 제목 > 칩 > 목록, 섹션 사이, 섹션 제목 > 카드, 카드 사이 (시안 23 · 32 · 32 · 16 · 8)
+  static const _titleToChips = 23.0;
+  static const _chipsToList = 32.0;
+  static const _sectionGap = 32.0;
+  static const _sectionTitleToCards = 16.0;
+  static const _cardGap = 8.0;
 
   /// 첫 쪽 실패 화면에서 다시 받는 중 (버튼에 진행 표시)
   bool _isRetrying = false;
@@ -126,16 +133,33 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
 
     return Scaffold(
       backgroundColor: colors.background,
+      // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: TalkWriteButton(onPressed: _openShare),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Header(onWritePressed: _openShare),
-            SizedBox(height: space.sm.h),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                space.screenH.w,
+                _titleTop.h,
+                space.screenH.w,
+                0,
+              ),
+              child: Text(
+                context.l10n.talkTitle,
+                style: context.typo.libraryTitle.copyWith(
+                  color: colors.talkTitleText,
+                ),
+              ),
+            ),
+            SizedBox(height: _titleToChips.h),
             TalkCategoryChips(
               selectedCategory: _selectedCategory,
               onSelected: _onCategorySelected,
             ),
-            SizedBox(height: space.sm.h),
+            SizedBox(height: _chipsToList.h),
             Expanded(child: _body()),
           ],
         ),
@@ -203,7 +227,7 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
     return ListView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.only(bottom: space.xl.h),
+      padding: EdgeInsets.only(bottom: TalkWriteButton.scrollBottomSpace.h),
       children: [
         if (popularPosts.isNotEmpty) ...[
           TalkPopularRow(posts: popularPosts, onPostTapped: _openPost),
@@ -213,12 +237,12 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
           padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
           child: Text(
             context.l10n.talkLatestTitle,
-            style: context.typo.cardTitle.copyWith(
-              color: context.colors.textPrimary,
+            style: context.typo.talkSectionTitle.copyWith(
+              color: context.colors.talkTitleText,
             ),
           ),
         ),
-        SizedBox(height: space.sm.h),
+        SizedBox(height: _sectionTitleToCards.h),
         for (final post in state.items)
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -231,7 +255,6 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
               key: ValueKey(post.id),
               post: post,
               onTap: () => _openPost(post),
-              onImportPressed: () => showTalkImportSheet(context, ref, post),
             ),
           ),
         if (state.isLoadingMore)
@@ -247,59 +270,6 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
         if (state.hasLoadMoreFailed)
           _LoadMoreRetryRow(onTap: controller.retryLoadMore),
       ],
-    );
-  }
-}
-
-/// 제목 줄: 이야기 | + 올리기
-class _Header extends StatelessWidget {
-  const _Header({required this.onWritePressed});
-
-  final VoidCallback onWritePressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        space.screenH.w,
-        space.sm.h,
-        space.screenH.w,
-        0,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              context.l10n.talkTitle,
-              style: context.typo.greeting.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          AppPressable(
-            onTap: onWritePressed,
-            child: MinTapTarget(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: space.sm.w,
-                  vertical: space.xs.h,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.buttonEnabled,
-                  borderRadius: BorderRadius.circular(space.buttonRadius.r),
-                ),
-                child: Text(
-                  context.l10n.talkWriteButton,
-                  style: context.typo.chipLabel.copyWith(
-                    color: colors.buttonEnabledText,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -12,31 +12,45 @@
         <span th:if="${member.status().name() == 'SUSPENDED'}" class="badge badge-error">정지</span>
         <span th:if="${member.status().name() == 'WITHDRAWN'}" class="badge badge-ghost">탈퇴</span>
       </div>
-      <div class="flex items-center gap-2">
-        <form th:if="${member.status().name() == 'ACTIVE'}"
-              th:action="@{/admin/members/{id}/suspend(id=${member.id()})}" method="post"
-              onsubmit="return confirm('이 계정을 정지할까요? 로그인과 API 사용이 모두 차단됩니다.');">
-          <button type="submit" class="btn btn-error btn-sm">계정 정지</button>
-        </form>
-        <form th:if="${member.status().name() == 'SUSPENDED'}"
-              th:action="@{/admin/members/{id}/unsuspend(id=${member.id()})}" method="post"
-              onsubmit="return confirm('이 계정의 정지를 해제할까요?');">
-          <button type="submit" class="btn btn-success btn-sm">정지 해제</button>
-        </form>
-        <!-- 탈퇴 계정은 이미 모든 토큰이 막혀 있고, 서버도 이 동작을 받지 않는다 (MEMBER_WITHDRAWN). -->
-        <form th:if="${member.status().name() != 'WITHDRAWN'}"
-              th:action="@{/admin/members/{id}/force-logout(id=${member.id()})}" method="post"
-              onsubmit="return confirm('강제 로그아웃할까요? 발급된 모든 토큰이 무효화되어 다시 로그인해야 합니다.');">
-          <button type="submit" class="btn btn-warning btn-sm">강제 로그아웃</button>
-        </form>
-        <!-- 이 회원의 주간 AI 크레딧 잔액·조정·작업 기록 (#407). -->
-        <a th:href="@{/admin/credits/members/{id}(id=${member.id()})}" class="btn btn-outline btn-sm">AI 크레딧</a>
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- 주 버튼: 이 회원의 주간 AI 크레딧 잔액·지급·작업 기록 (#407, #651) -->
+        <a th:href="@{/admin/credits/members/{id}(id=${member.id()})}" class="btn btn-primary btn-sm" data-member-credit-link>크레딧 지급</a>
         <!-- 이 회원의 알림 기록·광고 보상 기록 (#908, 화면은 #910) -->
         <a th:href="@{/admin/notifications(memberId=${member.id()})}" class="btn btn-outline btn-sm" data-member-notifications-link>알림 기록</a>
         <a th:href="@{/admin/ad-rewards(memberId=${member.id()})}" class="btn btn-outline btn-sm" data-member-ad-rewards-link>광고 보상</a>
+        <!-- 계정 조치 3개(정지, 정지 해제, 강제 로그아웃)는 잘못 누르지 않게 더보기 안에 둔다 (#651). 탈퇴 계정은 조치가 없어 숨김 -->
+        <details th:if="${member.status().name() != 'WITHDRAWN'}" class="dropdown dropdown-end" data-member-actions-menu>
+          <summary class="btn btn-ghost btn-sm">더보기</summary>
+          <ul class="dropdown-content menu bg-base-100 rounded-box shadow z-10 w-44 p-2 gap-1">
+            <li th:if="${member.status().name() == 'ACTIVE'}">
+              <form th:action="@{/admin/members/{id}/suspend(id=${member.id()})}" method="post"
+                    onsubmit="return confirm('이 계정을 정지할까요? 로그인과 API 사용이 모두 차단됩니다.');">
+                <button type="submit" class="btn btn-error btn-sm w-full">계정 정지</button>
+              </form>
+            </li>
+            <li th:if="${member.status().name() == 'SUSPENDED'}">
+              <form th:action="@{/admin/members/{id}/unsuspend(id=${member.id()})}" method="post"
+                    onsubmit="return confirm('이 계정의 정지를 해제할까요?');">
+                <button type="submit" class="btn btn-success btn-sm w-full">정지 해제</button>
+              </form>
+            </li>
+            <!-- 탈퇴 계정은 이미 모든 토큰이 막혀 있고, 서버도 이 동작을 받지 않는다 (MEMBER_WITHDRAWN). -->
+            <li th:if="${member.status().name() != 'WITHDRAWN'}">
+              <form th:action="@{/admin/members/{id}/force-logout(id=${member.id()})}" method="post"
+                    onsubmit="return confirm('강제 로그아웃할까요? 발급된 모든 토큰이 무효화되어 다시 로그인해야 합니다.');">
+                <button type="submit" class="btn btn-warning btn-sm w-full">강제 로그아웃</button>
+              </form>
+            </li>
+          </ul>
+        </details>
         <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
       </div>
     </div>
+
+    <!-- 크레딧 요약 (#651): 상태 3개(불러옴, 계정 없음, 실패). 탈퇴 회원은 컨트롤러가 요약을 넣지 않아 숨김 -->
+    <th:block th:if="${creditSummary != null and member.status().name() != 'WITHDRAWN'}">
+      <div th:replace="~{admin/fragments/member-credit-summary :: creditSummaryCard(${creditSummary}, ${member.id()})}"></div>
+    </th:block>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
     <!-- 성공만 알리고 실패를 안 알리면, 관리자는 눌렀는데 아무 일도 안 일어난 것처럼 보인다. -->

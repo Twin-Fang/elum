@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.feedback.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
+import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
@@ -30,6 +31,8 @@ public class FeedbackService {
   static final int MAX_LOG_BYTES = 256 * 1024;
   static final int MAX_VERSION_LENGTH = 32;
   static final int MAX_OS_LENGTH = 64;
+  /// 관리자 메모 최대 글자 수 (앞뒤 공백 뺀 길이, 화면 textarea maxlength 와 같은 값)
+  public static final int MAX_ADMIN_NOTE_LENGTH = 2000;
   // 관리자 목록 한 쪽 건수: admin 이 이 패키지를 부르므로 AdminListDefaults.PAGE_SIZE 를 못 읽는다. 같은 값인지는 시험이 지킨다
   public static final int ADMIN_PAGE_SIZE = 20;
   /// 관리자 검색에 보낸 기간이 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
@@ -147,6 +150,24 @@ public class FeedbackService {
       eventPublisher.publishEvent(new FeedbackResolvedEvent(feedback.getId(), feedback.getMemberId()));
     }
     return feedback;
+  }
+
+  /**
+   * 관리자 메모 저장: 줄바꿈(CRLF > LF)·앞뒤 공백 정리 > 길이 검사(초과면 저장 안 함) > 메모·변경자·변경 시각 기록
+   * 빈 값이면 메모를 지움(null). 지울 때도 변경자·시각은 남김
+   */
+  @Transactional
+  public FeedbackAdminNoteSaveResult saveAdminNote(String id, String note, String actor) {
+    // 폼 전송은 줄바꿈을 CRLF 로 보내 브라우저 maxlength 보다 길어짐 > LF 로 맞춘 뒤 셈
+    String trimmedNote = note == null ? "" : note.replace("\r\n", "\n").strip();
+    if (trimmedNote.length() > MAX_ADMIN_NOTE_LENGTH) {
+      return FeedbackAdminNoteSaveResult.REJECTED_TOO_LONG;
+    }
+    Feedback feedback = get(id);
+    feedback.setAdminNote(trimmedNote.isEmpty() ? null : trimmedNote);
+    feedback.setAdminNoteChangedAt(LocalDateTime.now(clock));
+    feedback.setAdminNoteChangedBy(actor);
+    return trimmedNote.isEmpty() ? FeedbackAdminNoteSaveResult.CLEARED : FeedbackAdminNoteSaveResult.SAVED;
   }
 
   /** 아직 확인하지 않은 의견 수 (상태 새 의견) */

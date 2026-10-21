@@ -5048,10 +5048,10 @@ abstract class AppLocalizations {
   /// **'이야기'**
   String get talkTitle;
 
-  /// 이야기 칸 오른쪽 위: 내 일과를 올리러 가는 버튼
+  /// 이야기 칸 아래 가운데 떠 있는 버튼: 내 일과를 올리러 간다 (앞의 + 는 아이콘)
   ///
   /// In ko, this message translates to:
-  /// **'+ 올리기'**
+  /// **'올리기'**
   String get talkWriteButton;
 
   /// 이야기 분류 칩: 분류 없이 전체 보기
@@ -5060,19 +5060,13 @@ abstract class AppLocalizations {
   /// **'전체'**
   String get talkCategoryAll;
 
-  /// 이야기 칸 인기 줄 제목
+  /// 이야기 칸 인기 줄 제목 (최근 7일)
   ///
   /// In ko, this message translates to:
-  /// **'많이 가져갔어요'**
+  /// **'이번 주에 많이 가져간 일과에요'**
   String get talkPopularTitle;
 
-  /// 이야기 칸 인기 줄 제목 옆 기간 표시 (최근 7일)
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 주'**
-  String get talkPopularPeriod;
-
-  /// 인기 줄 카드: 일과관리로 가져간 보호자 수
+  /// 피드 카드 가져감 아이콘 숫자의 읽기 프로그램 문구: 일과관리로 가져간 보호자 수
   ///
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}명 가져감}}'**
@@ -5125,12 +5119,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내용'**
   String get talkNoteLabel;
-
-  /// 글 카드의 작은 버튼: 이 일과를 내 일과관리로 가져오기
-  ///
-  /// In ko, this message translates to:
-  /// **'내 일과로'**
-  String get talkImportButtonShort;
 
   /// 글 카드: 도움이 됐어요 수
   ///

@@ -359,6 +359,13 @@ abstract final class AppAssets {
   /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
   static const iconSettings = '$_images/icon_settings.svg';
 
+  /// 이야기 카드 도움돼요 숫자 앞 (10×10 #CACACA). Figma `fi-br-thumbs-up`(1783:6318).
+  /// 댓글 숫자 앞은 [navComment] 를 같은 크기·색으로 줄여 쓴다 (같은 `fi-br-comment`)
+  static const iconThumbsUp = '$_images/icon_thumbs_up.svg';
+
+  /// 이야기 카드 가져간 수 앞 (10×10 #CACACA). Figma `fi-br-download`(1783:6306).
+  static const iconDownload = '$_images/icon_download.svg';
+
   /// 내 정보 가입일 달력 (20×20 #CACACA). Figma `fi-br-calendar`(1759:9582).
   static const iconCalendar = '$_images/icon_calendar.svg';
 

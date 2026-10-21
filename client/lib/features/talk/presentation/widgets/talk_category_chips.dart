@@ -6,7 +6,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../guardian/domain/routine_template.dart';
 
-/// 분류 칩 줄: 전체 + 분류 6개, 가로 스크롤, 고른 칩은 진한 바탕
+/// 분류 칩 줄: 전체 + 분류 6개, 가로 스크롤, 고른 칩은 진한 바탕 (시안 1783:6645)
 class TalkCategoryChips extends StatelessWidget {
   const TalkCategoryChips({
     super.key,
@@ -83,7 +83,7 @@ class _Chip extends StatelessWidget {
           child: Text(
             label,
             style: context.typo.chipLabel.copyWith(
-              color: isSelected ? colors.surface : colors.textPrimary,
+              color: isSelected ? colors.surface : colors.talkTitleText,
             ),
           ),
         ),
