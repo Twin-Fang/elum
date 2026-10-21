@@ -139,8 +139,9 @@ jobs:
             echo "이미지=${IMAGE}"
             echo "도메인=${DOMAIN} | BLUE_PORT=${BLUE_PORT} GREEN_PORT=${GREEN_PORT}"
 
-            if [ "${BRANCH}" != "main" ]; then
-              echo "지원하지 않는 브랜치: ${BRANCH}"
+            # 허용 브랜치: main(자동 배포), develop(손으로 실행할 때만, 앱 심사 없이 서버를 먼저 올림)
+            if [ "${BRANCH}" != "main" ] && ! { [ "${BRANCH}" = "develop" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; }; then
+              echo "지원하지 않는 브랜치: ${BRANCH} (${{ github.event_name }})"
               exit 1
             fi
 
