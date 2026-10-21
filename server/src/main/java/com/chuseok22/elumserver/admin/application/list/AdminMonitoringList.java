@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * AI 모니터링 목록 선언: 필터 8개(호출 유형, 결과, 회원 ID, 회원 검색, 모델명, 오류 메시지, 시작일, 종료일), 정렬 허용 열, 기간 보정, CSV 열
+ * AI 모니터링 목록 선언: 필터 8개(호출 유형, 결과, 회원 ID, 회원 검색, 모델명, 오류 메시지, 시작일, 종료일), 정렬 허용 열 2개(시각, 추정 비용), 기간 보정, CSV 열
  * 기간은 기본 최근 N일(AdminListDefaults.DEFAULT_PERIOD_DAYS, 오늘 포함), 범위 밖·역전 날짜는 보정
  */
 public final class AdminMonitoringList {
@@ -34,14 +34,15 @@ public final class AdminMonitoringList {
   public static final String FILTER_FROM = AdminListPeriod.FILTER_FROM;
   public static final String FILTER_TO = AdminListPeriod.FILTER_TO;
 
-  /// 정렬 키 (열 키와 같음): 시각 열만 정렬 허용
+  /// 정렬 키 (열 키 = 엔티티 필드 이름): 시각, 추정 비용
   public static final String SORT_CREATED_AT = "createdAt";
+  public static final String SORT_ESTIMATED_COST = "estimatedCostUsd";
 
   public static final String SUCCESS_TRUE = "true";
   public static final String SUCCESS_FALSE = "false";
 
   public static final AdminListDefinition DEFINITION = new AdminListDefinition(
-    List.of(new Column(SORT_CREATED_AT, "시각", true)),
+    List.of(new Column(SORT_CREATED_AT, "시각", true), Column.numeric(SORT_ESTIMATED_COST, "추정 비용", true)),
     List.of(),
     List.of(
       new Filter(FILTER_CALL_TYPE, "호출 유형", Arrays.stream(AiCallType.values())
@@ -103,10 +104,14 @@ public final class AdminMonitoringList {
     return PageRequest.of(query.pageIndex(), AdminListDefaults.LOG_PAGE_SIZE, sortOf(query));
   }
 
-  /// 정렬: 동률은 id 로 고정해 페이지가 겹치지 않게 한다 (목록·CSV 공통)
+  /// 정렬 (목록·CSV 공통): 비용 없는 호출(실패 등)은 방향과 무관하게 뒤로, 동률은 시각 최신 > id 로 고정해 페이지가 겹치지 않게
   public static Sort sortOf(AdminListQuery query) {
     Sort.Direction direction = query.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
-    return Sort.by(new Sort.Order(direction, "createdAt"), new Sort.Order(Sort.Direction.ASC, "id"));
+    if (SORT_ESTIMATED_COST.equals(query.sortKey())) {
+      return Sort.by(new Sort.Order(direction, SORT_ESTIMATED_COST).nullsLast(),
+        new Sort.Order(Sort.Direction.DESC, SORT_CREATED_AT), new Sort.Order(Sort.Direction.ASC, "id"));
+    }
+    return Sort.by(new Sort.Order(direction, SORT_CREATED_AT), new Sort.Order(Sort.Direction.ASC, "id"));
   }
 
   /**

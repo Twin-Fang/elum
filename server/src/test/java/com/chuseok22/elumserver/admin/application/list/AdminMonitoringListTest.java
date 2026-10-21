@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 
 class AdminMonitoringListTest {
 
@@ -83,12 +84,24 @@ class AdminMonitoringListTest {
   }
 
   @Test
-  @DisplayName("정렬은 시각만 허용하고 기본은 내림차순, 한 쪽은 50건이다")
+  @DisplayName("정렬은 시각·추정 비용만 허용하고 기본은 시각 내림차순, 한 쪽은 50건이다")
   void sortAndPageSize() {
     AdminListQuery query = AdminListQuery.of(null, null, "memberId,asc", "2", AdminMonitoringList.DEFINITION);
 
     assertThat(query.sort()).isEqualTo("createdAt,desc");
     assertThat(AdminMonitoringList.pageableOf(query).getPageSize()).isEqualTo(AdminListDefaults.LOG_PAGE_SIZE);
     assertThat(AdminMonitoringList.pageableOf(query).getPageNumber()).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("비용 큰 순: 비용 없는 호출(실패 등)이 맨 앞을 차지하지 않게 뒤로 보낸다")
+  void costSort_putsMissingCostLast() {
+    AdminListQuery query = AdminListQuery.of(null, null, "estimatedCostUsd,desc", null, AdminMonitoringList.DEFINITION);
+
+    Sort.Order costOrder = AdminMonitoringList.sortOf(query).getOrderFor("estimatedCostUsd");
+    assertThat(query.sort()).isEqualTo("estimatedCostUsd,desc");
+    assertThat(costOrder).isNotNull();
+    assertThat(costOrder.getDirection()).isEqualTo(Sort.Direction.DESC);
+    assertThat(costOrder.getNullHandling()).isEqualTo(Sort.NullHandling.NULLS_LAST);
   }
 }

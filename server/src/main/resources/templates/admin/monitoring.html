@@ -21,6 +21,14 @@
         <div class="stat-title text-sm">오늘 성공률</div>
         <div class="stat-value text-primary text-2xl"
              th:text="${todayStats.totalCount == 0 ? '-' : #numbers.formatDecimal(todayStats.successCount * 100.0 / todayStats.totalCount, 1, 1) + '%'}">-</div>
+        <!-- 실패 원인 분류는 아래 '최근 24시간 실패 원인' 표 (AiFailureKind) -->
+        <div class="stat-desc" data-today-failure-count>
+          실패 <span th:classappend="${todayStats.totalCount - todayStats.successCount > 0} ? 'text-error'"
+                   th:text="${todayStats.totalCount - todayStats.successCount}">0</span>건
+          <a th:if="${todayStats.totalCount - todayStats.successCount > 0}"
+             th:href="@{/admin/monitoring(success='false', from=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+             class="link link-hover ml-1">보기</a>
+        </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow p-4">
         <div class="stat-title text-sm">오늘 평균 지연</div>
@@ -188,14 +196,14 @@
       <table class="table table-sm">
         <thead>
         <tr>
-          <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
+          <th th:replace="~{admin/fragments/admin-list :: sortHeader(${definition.columnOf('createdAt')}, ${query})}"></th>
           <th>유형</th>
           <th>모델</th>
           <th>회원</th>
           <th>결과</th>
           <th class="text-right">지연</th>
           <th class="text-right">토큰(입력/출력)</th>
-          <th class="text-right">추정 비용</th>
+          <th th:replace="~{admin/fragments/admin-list :: sortHeader(${definition.columnOf('estimatedCostUsd')}, ${query})}"></th>
         </tr>
         </thead>
         <tbody>
