@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,9 +6,9 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
 import '../../../../core/widgets/coach_mark_step.dart';
-import '../../../ads/application/tracking_prompt_gate.dart';
 import '../../application/card_review_coach_notifier.dart';
 import 'card_review_parts.dart';
+import 'coach_mark_start_gate.dart';
 import 'coach_demo_layers.dart';
 
 /// 코치마크가 가리킬 버튼: `이 카드 수정` · `카드 순서 변경` · `카드 저장하기`
@@ -45,19 +43,8 @@ class CardReviewCoachMark extends ConsumerStatefulWidget {
       _CardReviewCoachMarkState();
 }
 
-class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark> {
-  /// 다른 화면(시트·팝업)이 위에 있을 때 다시 볼 간격 · 최대 횟수
-  static const _retryEvery = Duration(milliseconds: 500);
-  static const _maxRetries = 60;
-
-  Timer? _retry;
-  int _retryCount = 0;
-  bool _isWaitingRoute = false;
-
-  /// 추적 허용 팝업이 끝났는가. 팝업과 겹치면 막이 팝업에 가려진다
-  bool _isTrackingPromptDone = false;
-  bool _isWaitingTrackingPrompt = false;
-
+class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark>
+    with CoachMarkStartGate<CardReviewCoachMark> {
   /// dispose 에서 ref 를 읽을 수 없어 미리 잡아 둔다
   late final CardReviewCoachNotifier _notifier;
 
@@ -85,55 +72,20 @@ class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark> {
 
   @override
   void dispose() {
-    _retry?.cancel();
     // 안내 중 화면이 사라지면(알림 탭 이동 등) 켜진 채 남지 않게 끝낸다 (빌드 밖에서)
     final notifier = _notifier;
     Future.microtask(notifier.finish);
     super.dispose();
   }
 
-  /// 처음 켤 때인지 보고 맞으면 켠다
-  ///
-  /// 조건 4개: 켜도 되는 화면 상태, 이 화면이 맨 앞, 화면 전환이 끝남, 추적 허용 팝업이 끝남
   void _maybeStart() {
-    if (!mounted || !widget.canStart) return;
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) {
-      _retryLater();
-      return;
-    }
-    final animation = route?.animation;
-    if (animation != null && animation.status != AnimationStatus.completed) {
-      if (_isWaitingRoute) return;
-      _isWaitingRoute = true;
-      void onStatus(AnimationStatus status) {
-        if (status != AnimationStatus.completed) return;
-        animation.removeStatusListener(onStatus);
-        _isWaitingRoute = false;
-        _maybeStart();
-      }
-
-      animation.addStatusListener(onStatus);
-      return;
-    }
-    if (!_isTrackingPromptDone) {
-      if (_isWaitingTrackingPrompt) return;
-      _isWaitingTrackingPrompt = true;
-      waitForTrackingPrompt().whenComplete(() {
-        _isTrackingPromptDone = true;
-        _isWaitingTrackingPrompt = false;
-        // 기다리는 사이 화면 상태가 바뀌었을 수 있어 처음부터 다시 따진다
-        _maybeStart();
-      });
-      return;
-    }
-    _notifier.maybeStart(cardCount: widget.cardCount);
+    if (mounted && widget.canStart) checkCoachMarkStart();
   }
 
-  void _retryLater() {
-    if (_retry?.isActive ?? false) return;
-    if (_retryCount++ >= _maxRetries) return;
-    _retry = Timer(_retryEvery, _maybeStart);
+  @override
+  void onCoachMarkStartReady() {
+    // 기다리는 사이 순서 변경 모드로 들어갔을 수 있다
+    if (widget.canStart) _notifier.maybeStart(cardCount: widget.cardCount);
   }
 
   /// 단계 > 가리킬 버튼과 글 (모두 누르기 시범)
