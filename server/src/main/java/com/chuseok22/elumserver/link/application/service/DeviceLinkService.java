@@ -27,6 +27,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,6 +144,44 @@ public class DeviceLinkService {
       .orElse(null);
 
     return new LinkStatusResponse(devices, pending);
+  }
+
+  /** 관리자 회원 상세: 이룸이들의 연결·발급 기록 전부 (최신순, 끊긴 것 포함) */
+  @Transactional(readOnly = true)
+  public List<DeviceLink> linksOf(Collection<String> profileIds) {
+    if (profileIds == null || profileIds.isEmpty()) {
+      return List.of();
+    }
+    return deviceLinkRepository.findAllByProfileIdInOrderByCreatedAtDesc(profileIds);
+  }
+
+  /**
+   * 연결된 기기별 마지막 토큰 발급 시각 (linkId > 시각). 관리자 회원 상세의 마지막 사용 표시용
+   * 연결 안 된 행·세션 기록이 지워진 기기는 담지 않음
+   */
+  @Transactional(readOnly = true)
+  public Map<String, LocalDateTime> lastSessionAtByLinkId(Collection<DeviceLink> links) {
+    // 기기 값 > linkId (기기 값은 연결할 때 서버가 만든 값, 없으면 같은 규칙으로 계산)
+    Map<String, String> linkIdByDeviceId = new HashMap<>();
+    Set<String> memberIds = new HashSet<>();
+    for (DeviceLink link : links) {
+      if (link.getRedeemedAt() == null) {
+        continue;
+      }
+      String deviceId = link.getLinkedDeviceId() != null
+        ? link.getLinkedDeviceId() : ElumiDeviceId.of(link.getId());
+      linkIdByDeviceId.put(deviceId, link.getId());
+      memberIds.add(link.getMemberId());
+    }
+    if (linkIdByDeviceId.isEmpty()) {
+      return Map.of();
+    }
+    Map<String, LocalDateTime> lastSessionAtByLinkId = new HashMap<>();
+    for (RefreshTokenRepository.DeviceLastIssued lastIssued : refreshTokenRepository
+      .findLastIssuedAtByMemberIdInAndDeviceIdIn(memberIds, linkIdByDeviceId.keySet())) {
+      lastSessionAtByLinkId.put(linkIdByDeviceId.get(lastIssued.getDeviceId()), lastIssued.getLastIssuedAt());
+    }
+    return lastSessionAtByLinkId;
   }
 
   /** 이룸이별로 한 번씩만 묻는다 — 연결마다 묻지 않는다(N+1 방지). */

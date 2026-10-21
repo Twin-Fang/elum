@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.exception;
 
+import com.chuseok22.elumserver.admin.application.controller.AdminAdRewardController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConfigController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConsentController;
 import com.chuseok22.elumserver.admin.application.controller.AdminCreditController;
@@ -8,6 +9,7 @@ import com.chuseok22.elumserver.admin.application.controller.AdminLogController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMemberController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMonitoringController;
 import com.chuseok22.elumserver.admin.application.controller.AdminNoticeController;
+import com.chuseok22.elumserver.admin.application.controller.AdminNotificationController;
 import com.chuseok22.elumserver.admin.application.controller.AdminPromptController;
 import com.chuseok22.elumserver.admin.application.controller.AdminRoutineController;
 import com.chuseok22.elumserver.admin.application.controller.AdminSettingsHistoryController;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * 그쪽이 HTML을 받게 된다.
  */
 @ControllerAdvice(assignableTypes = {
+  AdminAdRewardController.class,
   AdminConfigController.class,
   AdminConsentController.class,
   AdminCreditController.class,
@@ -45,6 +48,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
   AdminMemberController.class,
   AdminMonitoringController.class,
   AdminNoticeController.class,
+  AdminNotificationController.class,
   AdminPromptController.class,
   AdminRoutineController.class,
   AdminSettingsHistoryController.class,

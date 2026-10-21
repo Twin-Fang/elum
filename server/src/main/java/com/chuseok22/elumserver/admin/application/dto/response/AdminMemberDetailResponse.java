@@ -33,7 +33,9 @@ public record AdminMemberDetailResponse(
   /// 요금제 부여·회수 이력 (최신순)
   List<AdminSubscriptionHistoryLine> planHistory,
   LocalDateTime withdrawnAt,
-  LocalDateTime retentionExpiresAt
+  LocalDateTime retentionExpiresAt,
+  /// 이룸이별 공동 보호자·초대 코드·기기 연결, 푸시 기기 (조회 실패 시 isLoadFailed)
+  AdminMemberConnections connections
 ) {
 
   /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null
@@ -65,7 +67,17 @@ public record AdminMemberDetailResponse(
       subscription,
       planHistory,
       member.getWithdrawnAt(),
-      retentionExpiresAt
+      retentionExpiresAt,
+      AdminMemberConnections.empty()
+    );
+  }
+
+  /// 연결 정보만 바꾼 사본 (연결 정보는 다른 트랜잭션에서 따로 조회)
+  public AdminMemberDetailResponse withConnections(AdminMemberConnections newConnections) {
+    return new AdminMemberDetailResponse(
+      id, username, nickname, character, status, supportGoals, totalStars, createdAt, lastLoginAt, lastActivityAt,
+      loginCount, aiCallCount, totalTokens, estimatedCostUsd, routines, recentAiCalls, subscription, planHistory,
+      withdrawnAt, retentionExpiresAt, newConnections
     );
   }
 

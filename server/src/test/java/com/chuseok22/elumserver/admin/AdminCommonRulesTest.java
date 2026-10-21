@@ -39,7 +39,8 @@ class AdminCommonRulesTest {
   /// 공통 목록(AdminListQuery) 없이 자체 목록 파라미터를 받아도 되는 컨트롤러와 이유
   private static final Map<String, String> OWN_LIST_PARAMETER_ALLOWED = Map.of(
     "AdminCreditController.java", "크레딧 4탭(회원별, 작업 탐색, 회원 상세의 작업·원장)은 탭마다 집계 조인이 달라 정의 하나로 못 담는다",
-    "AdminLogApiController.java", "서버 로그는 DB 목록이 아니라 파일 tail·검색(offset, limit)이다"
+    "AdminLogApiController.java", "서버 로그는 DB 목록이 아니라 파일 tail·검색(offset, limit)이다",
+    "AdminConfigMemberApiController.java", "설정 회원 고르기 자동완성(keyword)이라 쪽·정렬이 있는 목록이 아니다 (#912)"
   );
 
   private static final Set<String> VOID_TAGS = Set.of(

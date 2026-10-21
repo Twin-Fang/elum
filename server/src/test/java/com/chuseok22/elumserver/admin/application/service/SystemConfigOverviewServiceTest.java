@@ -8,6 +8,8 @@ import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview.Highlight;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview.PlanRow;
+import com.chuseok22.elumserver.member.application.service.MemberPickerService;
+import com.chuseok22.elumserver.systemconfig.application.service.ConfigValueSource;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigHistoryService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
@@ -37,6 +39,7 @@ class SystemConfigOverviewServiceTest {
 
   @Mock private SystemConfigService systemConfigService;
   @Mock private SystemConfigHistoryService historyService;
+  @Mock private MemberPickerService memberPickerService;
 
   private SystemConfigOverviewService service;
   /** 키 > 현재 값 (없으면 기본값). 테스트가 바꿔 끼움 */
@@ -46,7 +49,7 @@ class SystemConfigOverviewServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new SystemConfigOverviewService(systemConfigService, historyService);
+    service = new SystemConfigOverviewService(systemConfigService, historyService, memberPickerService);
   }
 
   private void stubViews() {
@@ -55,13 +58,15 @@ class SystemConfigOverviewServiceTest {
       if (key.getValueType() == ConfigValueType.SECRET) {
         views.add(new SystemConfigView(key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
           key.getValueType(), key.getAllowedValues(), isSecretStored ? "••••••••" : "", "", isSecretStored,
-          key.getMinValue(), key.getMaxValue()));
+          key.getMinValue(), key.getMaxValue(), key.getFormat(), null,
+          isSecretStored ? ConfigValueSource.STORED : ConfigValueSource.CODE_DEFAULT, null));
         continue;
       }
       String current = currentValueByKey.getOrDefault(key, key.getDefaultValue());
       views.add(new SystemConfigView(key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
         key.getValueType(), key.getAllowedValues(), current, key.getDefaultValue(),
-        !current.equals(key.getDefaultValue()), key.getMinValue(), key.getMaxValue()));
+        !current.equals(key.getDefaultValue()), key.getMinValue(), key.getMaxValue(), key.getFormat(), null,
+        ConfigValueSource.CODE_DEFAULT, null));
     }
     when(systemConfigService.getAllViews()).thenReturn(views);
     lenient().when(historyService.latestByKey()).thenReturn(latestByKey);

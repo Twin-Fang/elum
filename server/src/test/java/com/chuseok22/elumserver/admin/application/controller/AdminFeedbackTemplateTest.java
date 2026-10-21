@@ -146,8 +146,8 @@ class AdminFeedbackTemplateTest {
 
     assertThat(html).contains("data-admin-filter-bar").contains("value=\"느림\"").contains("처리 상태")
       .contains("처리 상태 ▲");
-    assertThat(html).contains("name=\"returnQ\" value=\"느림\"").contains("name=\"returnStatus\" value=\"NEW\"")
-      .contains("name=\"returnSort\" value=\"status,asc\"").contains("name=\"returnPage\" value=\"2\"");
+    assertThat(html).contains("name=\"return.q\" value=\"느림\"").contains("name=\"return.status\" value=\"NEW\"")
+      .contains("name=\"return.sort\" value=\"status,asc\"").contains("name=\"return.page\" value=\"2\"");
   }
 
   @Test
@@ -170,7 +170,7 @@ class AdminFeedbackTemplateTest {
 
     assertThat(html).contains("처리 상태").contains("처리 완료").contains("2026-10-09 08:30").contains("· kimchi")
       .contains("action=\"/admin/feedback/f1/status\"").contains("name=\"returnTo\" value=\"detail\"")
-      .doesNotContain("name=\"returnQ\"");
+      .doesNotContain("name=\"return.q\"");
   }
 
   @Test

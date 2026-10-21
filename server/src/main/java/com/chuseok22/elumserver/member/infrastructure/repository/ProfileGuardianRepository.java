@@ -43,6 +43,35 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
   @Query("select g from ProfileGuardian g join fetch g.profile where g.member.id in :memberIds order by g.joinedAt asc")
   List<ProfileGuardian> findAllWithProfileByMemberIdIn(@Param("memberIds") Collection<String> memberIds);
 
+  /** 보호자별 이룸이 수·보호자 수(본인 포함) 투영 */
+  interface MemberGuardianshipCount {
+
+    String getMemberId();
+
+    Long getProfileCount();
+
+    Long getGuardianCount();
+  }
+
+  /**
+   * 관리자 회원 목록: 보호자별 이룸이 수, 그 이룸이들을 돌보는 보호자 수(본인 포함) 집계 쿼리 1회
+   * mine(이 보호자의 관계) <-> other(같은 이룸이의 모든 관계) 자기 조인. 이룸이가 없으면 행이 없음
+   */
+  @Query("""
+    select mine.member.id as memberId,
+           count(distinct mine.profile.id) as profileCount,
+           count(distinct other.member.id) as guardianCount
+    from ProfileGuardian mine, ProfileGuardian other
+    where other.profile.id = mine.profile.id
+      and mine.member.id in :memberIds
+    group by mine.member.id
+    """)
+  List<MemberGuardianshipCount> countGuardianshipByMemberIds(@Param("memberIds") Collection<String> memberIds);
+
+  /** 관리자 회원 상세: 이룸이들을 함께 돌보는 사람 전부, 계정까지 한 번에 (합류 순) */
+  @Query("select g from ProfileGuardian g join fetch g.member where g.profile.id in :profileIds order by g.joinedAt asc")
+  List<ProfileGuardian> findAllWithMemberByProfileIdIn(@Param("profileIds") Collection<String> profileIds);
+
   /** 이룸이 id 와 이름만 읽는 투영 */
   interface ProfileName {
 

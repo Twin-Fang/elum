@@ -4,9 +4,12 @@ import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview.Highlight;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsOverview.PlanRow;
+import com.chuseok22.elumserver.member.application.dto.response.MemberPickerItem;
+import com.chuseok22.elumserver.member.application.service.MemberPickerService;
 import com.chuseok22.elumserver.systemconfig.application.service.ConfigDateTime;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigHistoryService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigValueValidator;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -18,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 설정 화면 데이터: 표 행(현재·기본값·마지막 변경), 상단 요약(기본값과 다름·켜진 이벤트), Free/Pro 비교
  * 마지막 변경은 키별 최신 이력을 쿼리 1회로 가져와 붙임 (키마다 조회하지 않음)
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,16 +50,19 @@ public class SystemConfigOverviewService {
   /** 플랜 비교에서 Free 키 이름에서 Pro 키 이름을 만들 때 바꾸는 접두사 */
   private static final String FREE_KEY_PREFIX = "FREE_";
   private static final String PRO_KEY_PREFIX = "PRO_";
+  // 없는 회원 경고에 보일 ID 앞부분 길이
+  private static final int MEMBER_ID_PREVIEW_LENGTH = 8;
 
   private final SystemConfigService systemConfigService;
   private final SystemConfigHistoryService historyService;
+  private final MemberPickerService memberPickerService;
 
   /// 전체 설정 표 행 (기본 정렬: 최근 변경순, 이력 없는 키는 맨 뒤)
   public List<SettingRow> buildRows() {
     Map<String, SystemConfigHistory> latestByKey = historyService.latestByKey();
     List<SettingRow> rows = new ArrayList<>();
     for (SystemConfigView view : systemConfigService.getAllViews()) {
-      rows.add(toRow(view, latestByKey.get(view.key())));
+      rows.add(toRow(view, latestByKey.get(view.key()), validationWarningOf(view)));
     }
     // 최근 변경순 (이력 없는 키 맨 뒤, 같으면 선언 순서 유지)
     rows.sort(Comparator.comparing(SettingRow::lastChangedAt, Comparator.nullsLast(Comparator.reverseOrder())));
@@ -68,7 +77,35 @@ public class SystemConfigOverviewService {
     return new SettingsOverview(differsFromDefaultCount, highlightsOf(rowByKey, now), planComparisonOf(rowByKey));
   }
 
-  private SettingRow toRow(SystemConfigView view, SystemConfigHistory latest) {
+  /**
+   * 저장값 경고: 형식 규칙(systemconfig) > 회원 ID 목록이면 없는 회원
+   * 회원 조회가 실패해도 화면은 그대로 (경고만 빠짐)
+   */
+  private String validationWarningOf(SystemConfigView view) {
+    if (view.validationWarning() != null || !ConfigKey.ADS_ALWAYS_SHOWN_MEMBER_IDS.name().equals(view.key())) {
+      return view.validationWarning();
+    }
+    List<String> memberIds = SystemConfigValueValidator.splitListItems(view.value());
+    if (memberIds.isEmpty()) {
+      return null;
+    }
+    try {
+      Set<String> existingIds = memberPickerService.findExisting(memberIds).stream()
+        .map(MemberPickerItem::id)
+        .collect(Collectors.toSet());
+      List<String> unknownIdPreviews = memberIds.stream()
+        .filter(memberId -> !existingIds.contains(memberId))
+        .map(memberId -> memberId.length() > MEMBER_ID_PREVIEW_LENGTH
+          ? memberId.substring(0, MEMBER_ID_PREVIEW_LENGTH) + "…" : memberId)
+        .toList();
+      return unknownIdPreviews.isEmpty() ? null : "없는 회원 ID가 있어요: " + String.join(", ", unknownIdPreviews);
+    } catch (RuntimeException e) {
+      log.warn("[admin settings] member id check failed : warning skipped", e);
+      return null;
+    }
+  }
+
+  private SettingRow toRow(SystemConfigView view, SystemConfigHistory latest, String validationWarning) {
     boolean isSecret = view.valueType() == ConfigValueType.SECRET;
     // 비밀값은 값 자체를 화면으로 보내지 않음 (설정 여부만)
     String currentValue = isSecret ? "" : view.value();
@@ -82,7 +119,9 @@ public class SystemConfigOverviewService {
       isSecret ? "" : displayText(view.valueType(), view.defaultValue()),
       !isSecret && view.changed(), isSecret,
       latest != null, latest == null ? null : latest.getCreatedAt(),
-      latest == null ? null : latest.getChangedBy(), latest == null ? null : latest.getReason());
+      latest == null ? null : latest.getChangedBy(), latest == null ? null : latest.getReason(),
+      view.format().name(), view.format().getFormatHint(), validationWarning,
+      view.valueSource().getLabel(), view.deployPropertyValue());
   }
 
   private static String displayText(ConfigValueType valueType, String value) {

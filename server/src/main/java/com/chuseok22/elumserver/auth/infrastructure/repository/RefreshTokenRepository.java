@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.auth.infrastructure.repository;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -53,6 +54,23 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
                              @Param("elumiPattern") String elumiPattern,
                              @Param("now") LocalDateTime now,
                              @Param("reason") RevokeReason reason);
+
+  /** 기기 값과 그 기기에 마지막으로 토큰을 발급한 시각만 읽는 투영 */
+  interface DeviceLastIssued {
+
+    String getDeviceId();
+
+    LocalDateTime getLastIssuedAt();
+  }
+
+  /**
+   * 기기별 마지막 토큰 발급 시각 (로그인·갱신마다 새 토큰이 생기므로 마지막 접속에 가깝다).
+   * 관리자 회원 상세의 이룸이 기기 마지막 사용 표시용. member_id 인덱스로 좁힌다
+   */
+  @Query("select t.deviceId as deviceId, max(t.createdAt) as lastIssuedAt from RefreshToken t "
+    + "where t.memberId in :memberIds and t.deviceId in :deviceIds group by t.deviceId")
+  List<DeviceLastIssued> findLastIssuedAtByMemberIdInAndDeviceIdIn(
+    @Param("memberIds") Collection<String> memberIds, @Param("deviceIds") Collection<String> deviceIds);
 
   /** 회원 탈퇴 시 남은 세션 기록까지 지운다. */
   void deleteAllByMemberId(String memberId);

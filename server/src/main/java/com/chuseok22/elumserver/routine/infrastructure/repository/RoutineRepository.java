@@ -28,25 +28,51 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
    * <p><b>원문({@code rawInputText})은 찾지 않는다.</b> 보호자가 적은 말 그대로라
    * 관리자가 그것으로 검색할 수 있으면 원문을 들여다보는 통로가 된다 (서비스 원칙 5번).
    *
-   * @param hasKeyword false 면 pattern 을 보지 않음 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
-   * @param statuses   보여줄 상태 (필터 없으면 전체)
+   * <p>보호자 필터는 만든 보호자(createdBy)의 회원 ID 정확히 일치, 또는 아이디·닉네임 일부로 찾는다.
+   *
+   * @param hasKeyword  false 면 pattern 을 보지 않음 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
+   * @param statuses    보여줄 상태 (필터 없으면 전체)
+   * @param scheduledFrom 예정일 기간 시작(포함). 필터가 없으면 아주 이른 날 (null 바인딩을 피하려고 늘 값을 넣음)
+   * @param hasGuardian false 면 guardianId·guardianPattern 을 보지 않음
    */
   @Query(value = """
     select r from Routine r join fetch r.profile p
     where r.status in :statuses
+      and r.scheduledAt >= :scheduledFrom and r.scheduledAt < :scheduledToExclusive
       and (:hasKeyword = false
         or lower(r.title) like lower(:pattern) escape '\\'
         or lower(p.nickname) like lower(:pattern) escape '\\')
+      and (:hasGuardian = false
+        or r.createdBy = :guardianId
+        or exists (
+          select 1 from Member m
+          where m.id = r.createdBy
+            and (lower(m.username) like lower(:guardianPattern) escape '\\'
+              or lower(m.nickname) like lower(:guardianPattern) escape '\\')
+        ))
     """, countQuery = """
     select count(r) from Routine r join r.profile p
     where r.status in :statuses
+      and r.scheduledAt >= :scheduledFrom and r.scheduledAt < :scheduledToExclusive
       and (:hasKeyword = false
         or lower(r.title) like lower(:pattern) escape '\\'
         or lower(p.nickname) like lower(:pattern) escape '\\')
+      and (:hasGuardian = false
+        or r.createdBy = :guardianId
+        or exists (
+          select 1 from Member m
+          where m.id = r.createdBy
+            and (lower(m.username) like lower(:guardianPattern) escape '\\'
+              or lower(m.nickname) like lower(:guardianPattern) escape '\\')
+        ))
     """)
   Page<Routine> searchForAdmin(
     @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
-    @Param("statuses") Collection<RoutineStatus> statuses, Pageable pageable);
+    @Param("statuses") Collection<RoutineStatus> statuses,
+    @Param("scheduledFrom") LocalDateTime scheduledFrom,
+    @Param("scheduledToExclusive") LocalDateTime scheduledToExclusive,
+    @Param("hasGuardian") boolean hasGuardian, @Param("guardianId") String guardianId,
+    @Param("guardianPattern") String guardianPattern, Pageable pageable);
 
   // 회원 목록 화면용 회원별 루틴 개수 집계 — N+1을 피하기 위해 in + group by 한 번에.
   @org.springframework.data.jpa.repository.Query("""

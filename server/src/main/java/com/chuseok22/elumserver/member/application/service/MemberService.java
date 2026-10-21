@@ -27,8 +27,11 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisi
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -206,6 +209,20 @@ public class MemberService {
     member.setConsentVersion(request.consentVersion());
 
     return MemberConsentResponse.from(member);
+  }
+
+  /**
+   * 보호자 id > 보호자 닉네임 (관리자 모니터링 회원 표시용, 닉네임 없는 계정은 빠짐)
+   */
+  public Map<String, String> nicknamesOf(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<String, String> nicknameByMemberId = new HashMap<>();
+    memberRepository.findAllById(memberIds).stream()
+      .filter(member -> member.getNickname() != null)
+      .forEach(member -> nicknameByMemberId.put(member.getId(), member.getNickname()));
+    return nicknameByMemberId;
   }
 
   /**

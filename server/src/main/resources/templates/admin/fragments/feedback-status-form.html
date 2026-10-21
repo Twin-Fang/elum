@@ -10,11 +10,13 @@
       th:action="@{/admin/feedback/{id}/status(id=${feedback.id})}" method="post"
       class="flex items-center gap-1" data-feedback-status-form>
   <input type="hidden" name="returnTo" th:value="${returnTo}"/>
+  <!-- 목록 조건 전부를 return.* 로 싣는다 (필터가 늘어도 이 폼은 그대로) -->
   <th:block th:if="${query != null}">
-    <input type="hidden" name="returnQ" th:value="${query.q}"/>
-    <input type="hidden" name="returnStatus" th:value="${query.filters.get('status')}"/>
-    <input type="hidden" name="returnSort" th:value="${query.sort}"/>
-    <input type="hidden" name="returnPage" th:value="${query.page}"/>
+    <input type="hidden" name="return.q" th:value="${query.q}"/>
+    <input th:each="activeFilter : ${query.filters}" type="hidden"
+           th:name="'return.' + ${activeFilter.key}" th:value="${activeFilter.value}"/>
+    <input type="hidden" name="return.sort" th:value="${query.sort}"/>
+    <input type="hidden" name="return.page" th:value="${query.page}"/>
   </th:block>
   <select name="status" class="select select-bordered select-xs" aria-label="처리 상태">
     <option th:each="candidate : ${statuses}" th:value="${candidate.name()}" th:text="${candidate.label}"

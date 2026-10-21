@@ -22,26 +22,38 @@ public interface FeedbackRepository extends JpaRepository<Feedback, String> {
   void deleteAllByMemberId(String memberId);
 
   /**
-   * 관리자 목록 검색: 처리 상태 필터, 의견 본문·회원 id 검색
-   * 검색어는 호출부가 {@code AdminListQuery.likePattern()} 으로 이스케이프해 넘김 (ESCAPE '\\')
+   * 관리자 목록 검색: 처리 상태, 보낸 기간, 앱 버전·OS 앞부분 필터, 의견 본문·회원 id 검색
+   * 문자열 패턴은 호출부가 {@code AdminListQuery} 의 LIKE 패턴 함수로 이스케이프해 넘김 (ESCAPE '\\')
    *
-   * @param hasKeyword false 면 pattern 을 보지 않음
-   * @param statuses   보여줄 상태 (필터 없으면 전체)
+   * @param hasKeyword    false 면 pattern 을 보지 않음
+   * @param statuses      보여줄 상태 (필터 없으면 전체)
+   * @param createdFrom   보낸 기간 시작(포함). 필터가 없으면 아주 이른 날 (null 바인딩을 피하려고 늘 값을 넣음)
+   * @param hasAppVersion false 면 appVersionPattern 을 보지 않음 (OS 도 같은 방식)
    */
   @Query(value = """
     select f from Feedback f
     where f.status in :statuses
+      and f.createdAt >= :createdFrom and f.createdAt < :createdToExclusive
       and (:hasKeyword = false
         or lower(f.message) like lower(:pattern) escape '\\'
         or lower(f.memberId) like lower(:pattern) escape '\\')
+      and (:hasAppVersion = false or lower(f.appVersion) like lower(:appVersionPattern) escape '\\')
+      and (:hasOs = false or lower(f.os) like lower(:osPattern) escape '\\')
     """, countQuery = """
     select count(f) from Feedback f
     where f.status in :statuses
+      and f.createdAt >= :createdFrom and f.createdAt < :createdToExclusive
       and (:hasKeyword = false
         or lower(f.message) like lower(:pattern) escape '\\'
         or lower(f.memberId) like lower(:pattern) escape '\\')
+      and (:hasAppVersion = false or lower(f.appVersion) like lower(:appVersionPattern) escape '\\')
+      and (:hasOs = false or lower(f.os) like lower(:osPattern) escape '\\')
     """)
   Page<Feedback> searchForAdmin(
     @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
-    @Param("statuses") Collection<FeedbackStatus> statuses, Pageable pageable);
+    @Param("statuses") Collection<FeedbackStatus> statuses,
+    @Param("createdFrom") LocalDateTime createdFrom, @Param("createdToExclusive") LocalDateTime createdToExclusive,
+    @Param("hasAppVersion") boolean hasAppVersion, @Param("appVersionPattern") String appVersionPattern,
+    @Param("hasOs") boolean hasOs, @Param("osPattern") String osPattern,
+    Pageable pageable);
 }
