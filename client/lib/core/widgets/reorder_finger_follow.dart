@@ -20,10 +20,8 @@ class ReorderFingerFollowState extends State<ReorderFingerFollow>
   final _offsetX = ValueNotifier<double>(0);
 
   /// 놓은 뒤 어긋남을 0으로 되돌리는 움직임 (목록 안착 250ms 안에 끝나게)
-  late final _settle = AnimationController(
-    vsync: this,
-    duration: AppMotion.fast,
-  )..addListener(_onSettleTick);
+  /// initState 에서 만듦 (지연 생성이면 끌지 않고 닫을 때 dispose 안에서 처음 만들어져 TickerMode 조회 assert)
+  late final AnimationController _settle;
 
   /// 첫 손가락만 따라간다 (두 번째 손가락은 무시)
   int? _pointer;
@@ -31,6 +29,13 @@ class ReorderFingerFollowState extends State<ReorderFingerFollow>
   double _startX = 0;
   double _settleFrom = 0;
   bool _isDragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _settle = AnimationController(vsync: this, duration: AppMotion.fast)
+      ..addListener(_onSettleTick);
+  }
 
   @override
   void dispose() {
