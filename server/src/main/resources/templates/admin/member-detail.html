@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <!-- 이 회원의 기록 4곳 (#657): 의견(검색어=회원 id), 일과(보호자=회원 id), AI 호출(모니터링 회원 id), 크레딧 원장 -->
+    <!-- 이 회원의 기록 5곳 (#657, #653): 의견(검색어=회원 id), 일과(보호자=회원 id), AI 호출(모니터링 회원 id), 크레딧 원장, 관리자 기록(대상=회원) -->
     <nav class="flex flex-wrap items-center gap-2 text-sm" aria-label="이 회원의 기록" data-member-related-links>
       <span class="text-base-content/60">이 회원의 기록</span>
       <a th:href="@{/admin/feedback(q=${member.id()})}" class="link link-hover" data-member-feedback-link>의견</a>
@@ -59,6 +59,8 @@
       <a th:href="@{/admin/monitoring(memberId=${member.id()})}" class="link link-hover" data-member-ai-calls-link>AI 호출</a>
       <span class="text-base-content/40">·</span>
       <a th:href="@{/admin/credits/members/{id}#ledger(id=${member.id()})}" class="link link-hover" data-member-ledger-link>크레딧 원장</a>
+      <span class="text-base-content/40">·</span>
+      <a th:href="@{/admin/audit(targetType='MEMBER', targetId=${member.id()})}" class="link link-hover" data-member-audit-link>이 회원 관련 관리자 기록</a>
     </nav>
 
     <!-- 크레딧 요약 (#651): 상태 3개(불러옴, 계정 없음, 실패). 탈퇴 회원은 컨트롤러가 요약을 넣지 않아 숨김 -->

@@ -196,9 +196,12 @@ public class FeedbackService {
     feedbackRepository.deleteAllByMemberId(memberId);
   }
 
+  /// 의견 1건 삭제 > 보낸 회원 id (관리자 기록용)
   @Transactional
-  public void delete(String id) {
-    feedbackRepository.delete(get(id));
+  public String delete(String id) {
+    Feedback feedback = get(id);
+    feedbackRepository.delete(feedback);
+    return feedback.getMemberId();
   }
 
   private static String truncate(String value, int max) {

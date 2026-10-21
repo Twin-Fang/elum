@@ -10,11 +10,13 @@ import com.chuseok22.elumserver.admin.application.dto.response.LoggerLevelRespon
 import com.chuseok22.elumserver.admin.application.dto.response.RecentErrorsResponse;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminLogSearchCsv;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogLevelService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogOverviewService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogSearchService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogService;
 import com.chuseok22.elumserver.admin.application.service.DeployHistoryService;
+import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -55,6 +57,7 @@ public class AdminLogApiController {
   private final DeployHistoryService deployHistoryService;
   private final AdminLogLevelService adminLogLevelService;
   private final AdminLogOverviewService adminLogOverviewService;
+  private final AdminAuditService adminAuditService;
 
   @GetMapping("/admin/logs/api/instance")
   public LogInstanceResponse instance() {
@@ -78,6 +81,7 @@ public class AdminLogApiController {
   @DeleteMapping("/admin/logs/api/files")
   public ResponseEntity<Void> delete(@RequestParam String path) {
     adminLogService.delete(path);
+    adminAuditService.record(AdminAuditAction.LOG_FILE_DELETED, path, null);
     return ResponseEntity.noContent().build();
   }
 

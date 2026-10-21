@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.admin.application.dto.request.PromptUpdateRequest;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptLocaleView;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminPromptService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateSeeder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
@@ -38,7 +39,7 @@ class AdminPromptControllerLocaleTest {
     enabledLocales = mock(EnabledLocales.class);
     when(enabledLocales.current()).thenReturn(EnumSet.of(AppLocale.KO, AppLocale.EN));
     when(adminPromptService.missingKeys(any())).thenReturn(List.of());
-    controller = new AdminPromptController(adminPromptService, enabledLocales);
+    controller = new AdminPromptController(adminPromptService, enabledLocales, mock(AdminAuditService.class));
   }
 
   @Test
