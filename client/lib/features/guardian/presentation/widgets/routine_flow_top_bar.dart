@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import 'coach_help_button.dart';
 
 /// 뒤로가기 + 홈 (Figma x=24 / x=72, y=87)
 class RoutineFlowTopBar extends StatelessWidget {
@@ -109,7 +110,7 @@ class RoutineFlowTopBar extends StatelessWidget {
           ),
           if (onHelp != null || showDraft) const Spacer(),
           if (onHelp != null) ...[
-            _buildHelpButton(context, onHelp!),
+            CoachHelpButton(onTap: onHelp!),
             SizedBox(width: (showDraft ? _helpToDraftGap : 16.0).w),
           ],
           if (showDraft) ...[
@@ -153,35 +154,4 @@ class RoutineFlowTopBar extends StatelessWidget {
       ),
     );
   }
-
-  /// `?` 버튼: 뒤로·홈과 같이 자리는 아이콘 크기, 그 위로 40×40 누름 영역 (색은 `임시저장` 글자와 같다)
-  Widget _buildHelpButton(BuildContext context, VoidCallback onTap) =>
-      AppPressable(
-        onTap: onTap,
-        scaleDown: AppPressable.scaleIcon,
-        semanticLabel: context.l10n.cardReviewHelpLabel,
-        child: SizedBox(
-          width: 24.w,
-          height: 24.w,
-          child: OverflowBox(
-            maxWidth: 40.w,
-            maxHeight: 40.w,
-            child: SizedBox(
-              width: 40.w,
-              height: 40.w,
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.iconQuestionCircle,
-                  width: 24.w,
-                  height: 24.w,
-                  colorFilter: ColorFilter.mode(
-                    context.colors.topBarActionText,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
 }

@@ -523,7 +523,7 @@
   "cardReviewCoachEditMessage": "Fix the *words and picture* of this card\nYou can also use *your own photo*",
   "cardReviewCoachReorderMessage": "Tap here, then *press and drag* a card\nto change the order",
   "cardReviewCoachSaveMessage": "When you're done, be sure to tap *Save cards*\nThe routine is finished only after saving",
-  "cardReviewHelpLabel": "How to use",
+  "coachHelpLabel": "How to use",
   "childHomeGreeting": "Here's what {name}\nhas to do today. You can do it!",
   "childHomeEmptyTitle": "No routines\nfor {name} yet",
   "childHomeEmptyHint": "Make a routine in Guardian mode",

@@ -229,13 +229,11 @@ extension _LibraryGridCells on _LibraryEntryGridState {
                 child: Opacity(
                   // 끄는 칸의 제자리는 비워 둔다 (손가락 밑의 들린 칸이 그 칸이다)
                   opacity: entry.id == _dragId ? 0 : 1,
-                  child: KeyedSubtree(
-                    key: coachKeys[entry.id],
-                    child: _buildCell(
-                      entry,
-                      slot,
-                      isMergeTarget: entry.id == mergeTargetId,
-                    ),
+                  child: _buildCell(
+                    entry,
+                    slot,
+                    isMergeTarget: entry.id == mergeTargetId,
+                    coachKey: coachKeys[entry.id],
                   ),
                 ),
               ),
@@ -299,15 +297,22 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     LibraryEntry entry,
     int slot, {
     required bool isMergeTarget,
+    GlobalKey? coachKey,
   }) {
     final isArranging = widget.isArranging;
     final Widget tile = switch (entry) {
-      LibraryRoutineEntry(:final routine) => AnimatedScale(
-        scale: isMergeTarget ? _mergeTargetScale : 1,
-        duration: AppMotion.fast,
-        child: _routineTile(
-          routine,
-          onTap: isArranging ? null : () => widget.onRoutineTap?.call(routine),
+      // 코치마크 키는 칸 자리가 아니라 그려진 칸(그림 + 이름)에 단다 — 칸은 자리 왼쪽 위에 붙어 자리보다 좁다
+      LibraryRoutineEntry(:final routine) => KeyedSubtree(
+        key: coachKey,
+        child: AnimatedScale(
+          scale: isMergeTarget ? _mergeTargetScale : 1,
+          duration: AppMotion.fast,
+          child: _routineTile(
+            routine,
+            onTap: isArranging
+                ? null
+                : () => widget.onRoutineTap?.call(routine),
+          ),
         ),
       ),
       final LibraryGroupEntry group => _groupTile(

@@ -2768,7 +2768,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'When you\'re done, be sure to tap *Save cards*\nThe routine is finished only after saving';
 
   @override
-  String get cardReviewHelpLabel => 'How to use';
+  String get coachHelpLabel => 'How to use';
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';

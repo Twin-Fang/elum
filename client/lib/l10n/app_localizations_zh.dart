@@ -2654,7 +2654,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요';
 
   @override
-  String get cardReviewHelpLabel => '사용법 보기';
+  String get coachHelpLabel => '사용법 보기';
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';

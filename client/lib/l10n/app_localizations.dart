@@ -4826,11 +4826,11 @@ abstract class AppLocalizations {
   /// **'다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요'**
   String get cardReviewCoachSaveMessage;
 
-  /// 카드 검토 상단바 ? 버튼의 낭독 이름. 누르면 코치마크를 다시 띄운다
+  /// ? 버튼의 낭독 이름 (카드 검토 상단바, 일과관리 머리). 누르면 그 화면의 코치마크를 다시 띄운다
   ///
   /// In ko, this message translates to:
   /// **'사용법 보기'**
-  String get cardReviewHelpLabel;
+  String get coachHelpLabel;
 
   /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
   ///
