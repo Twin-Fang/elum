@@ -4802,6 +4802,30 @@ abstract class AppLocalizations {
   /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
   String get routineManageCoachCreateGroupMessage;
 
+  /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요'**
+  String get cardReviewCoachEditMessage;
+
+  /// 카드 검토 코치마크 — 카드 순서 변경 버튼. 카드 1장이면 나오지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요'**
+  String get cardReviewCoachReorderMessage;
+
+  /// 카드 검토 코치마크 마지막 단계 — 저장 버튼. 버튼 이름은 cardReviewSave 와 같아야 한다
+  ///
+  /// In ko, this message translates to:
+  /// **'다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요'**
+  String get cardReviewCoachSaveMessage;
+
+  /// 카드 검토 상단바 ? 버튼의 낭독 이름. 누르면 코치마크를 다시 띄운다
+  ///
+  /// In ko, this message translates to:
+  /// **'사용법 보기'**
+  String get cardReviewHelpLabel;
+
   /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
   ///
   /// In ko, this message translates to:

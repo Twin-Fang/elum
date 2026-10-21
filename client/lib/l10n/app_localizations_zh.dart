@@ -2641,6 +2641,21 @@ class AppLocalizationsZh extends AppLocalizations {
       '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
 
   @override
+  String get cardReviewCoachEditMessage =>
+      '보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요';
+
+  @override
+  String get cardReviewCoachReorderMessage =>
+      '여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요';
+
+  @override
+  String get cardReviewCoachSaveMessage =>
+      '다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요';
+
+  @override
+  String get cardReviewHelpLabel => '사용법 보기';
+
+  @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
 
   @override

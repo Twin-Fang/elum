@@ -2754,6 +2754,21 @@ class AppLocalizationsEn extends AppLocalizations {
       '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
 
   @override
+  String get cardReviewCoachEditMessage =>
+      'Fix the *words and picture* of this card\nYou can also use *your own photo*';
+
+  @override
+  String get cardReviewCoachReorderMessage =>
+      'Tap here, then *press and drag* a card\nto change the order';
+
+  @override
+  String get cardReviewCoachSaveMessage =>
+      'When you\'re done, be sure to tap *Save cards*\nThe routine is finished only after saving';
+
+  @override
+  String get cardReviewHelpLabel => 'How to use';
+
+  @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
 
   @override

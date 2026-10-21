@@ -15,6 +15,7 @@ class RoutineFlowTopBar extends StatelessWidget {
     required this.onHome,
     required this.showDraft,
     required this.onDraft,
+    this.onHelp,
   });
 
   final VoidCallback? onBack;
@@ -25,6 +26,12 @@ class RoutineFlowTopBar extends StatelessWidget {
 
   /// 홈도 나가는 길이다 — 뒤로가기와 같은 확인을 거친다.
   final VoidCallback onHome;
+
+  /// 오른쪽 `?` (사용법 다시 보기). null 이면 그리지 않는다 — 카드 검토 화면만 넘긴다
+  final VoidCallback? onHelp;
+
+  /// `?` ↔ `임시저장` 누름 영역 사이
+  static const _helpToDraftGap = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +107,12 @@ class RoutineFlowTopBar extends StatelessWidget {
               ),
             ),
           ),
+          if (onHelp != null || showDraft) const Spacer(),
+          if (onHelp != null) ...[
+            _buildHelpButton(context, onHelp!),
+            SizedBox(width: (showDraft ? _helpToDraftGap : 16.0).w),
+          ],
           if (showDraft) ...[
-            const Spacer(),
             // 시안 1173:5589 — 터치 영역 72×40 @ x=305(오른쪽 여백 16), 글자 16/w600.
             // 자리는 아이콘 높이 그대로 두고 **그 위로** 40 높이 누름 영역을 덮는다.
             Padding(
@@ -142,4 +153,35 @@ class RoutineFlowTopBar extends StatelessWidget {
       ),
     );
   }
+
+  /// `?` 버튼: 뒤로·홈과 같이 자리는 아이콘 크기, 그 위로 40×40 누름 영역 (색은 `임시저장` 글자와 같다)
+  Widget _buildHelpButton(BuildContext context, VoidCallback onTap) =>
+      AppPressable(
+        onTap: onTap,
+        scaleDown: AppPressable.scaleIcon,
+        semanticLabel: context.l10n.cardReviewHelpLabel,
+        child: SizedBox(
+          width: 24.w,
+          height: 24.w,
+          child: OverflowBox(
+            maxWidth: 40.w,
+            maxHeight: 40.w,
+            child: SizedBox(
+              width: 40.w,
+              height: 40.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconQuestionCircle,
+                  width: 24.w,
+                  height: 24.w,
+                  colorFilter: ColorFilter.mode(
+                    context.colors.topBarActionText,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

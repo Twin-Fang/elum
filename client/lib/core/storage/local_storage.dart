@@ -195,7 +195,11 @@ abstract interface class LocalStorage {
   bool get isGroupCoachSeen;
   Future<void> setGroupCoachSeen(bool isSeen);
 
-  /// 코치마크 3종(홈·일과관리·묶음)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
+  /// 카드 검토 코치마크(수정·순서 변경·저장)를 봤는가
+  bool get isCardReviewCoachSeen;
+  Future<void> setCardReviewCoachSeen(bool isSeen);
+
+  /// 코치마크 4종(홈·일과관리·묶음·카드 검토)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
   Future<void> resetCoachMarks();
 
 
