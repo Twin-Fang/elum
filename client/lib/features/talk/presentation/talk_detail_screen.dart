@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -92,7 +94,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               child: switch (detail) {
                 AsyncData(value: final post) => _content(post),
                 AsyncError(:final error) when _isPostGone(error) => _GoneBody(
-                  onBackPressed: context.popOrHome,
+                  // 진입 경로와 무관하게 이야기 탭으로 이동
+                  onBackPressed: () => context.go(Routes.guardianTalk),
                 ),
                 AsyncError(:final error) => ElumStateBody(
                   child: ElumErrorView.failure(
