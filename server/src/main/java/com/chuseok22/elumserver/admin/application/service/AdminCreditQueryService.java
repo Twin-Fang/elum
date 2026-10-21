@@ -4,11 +4,13 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditJobRow
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditMemberDetail;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditOverview;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditWeekRow;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
+import com.chuseok22.elumserver.credit.application.service.CreditBalance;
 import com.chuseok22.elumserver.credit.application.service.CreditPolicyService;
 import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
@@ -418,6 +420,38 @@ public class AdminCreditQueryService {
     return new AdminCreditMemberDetail(memberId, member.getUsername(), nickname, plan, account,
       accountService.balance(account, now), accountService.spendableGrants(account.getId(), now),
       jobRows, ledger, ledgerType, policy);
+  }
+
+  // --- 회원 관리 화면 ---
+
+  /**
+   * 회원 id 목록 > 이번 주 지금 사용 가능량 (회원 목록 크레딧 열)
+   * 이번 주 기록이 없는 회원은 맵에 없음. 계정별 group by 몇 번으로 끝나 회원 수만큼 쿼리를 내지 않음
+   */
+  public Map<String, Long> currentWeekRemainingByMemberId(Collection<String> memberIds) {
+    if (memberIds == null || memberIds.isEmpty()) {
+      return Map.of();
+    }
+    Set<String> wantedMemberIds = new HashSet<>(memberIds);
+    LocalDateTime now = LocalDateTime.now(clock);
+    Map<String, Long> remainingByMemberId = new HashMap<>();
+    for (AdminCreditWeekRow row : weekRows(CreditPeriod.of(now), now)) {
+      if (row.memberId() != null && wantedMemberIds.contains(row.memberId())) {
+        remainingByMemberId.put(row.memberId(), row.remaining());
+      }
+    }
+    return remainingByMemberId;
+  }
+
+  /// 회원 상세 크레딧 요약: 계정 조회 > 이번 주 잔액 (계정 없으면 noAccount)
+  public AdminMemberCreditSummary memberCreditSummary(String memberId) {
+    AiCreditAccount account = accountRepository.findByMemberId(memberId).orElse(null);
+    if (account == null) {
+      return AdminMemberCreditSummary.noAccount();
+    }
+    CreditBalance balance = accountService.balance(account, LocalDateTime.now(clock));
+    return new AdminMemberCreditSummary(false, true, balance.available(), balance.weeklyGrant(),
+      balance.bonus(), balance.used(), account.isFrozen());
   }
 
   /// 비용 상한 도달 여부. 집계 실패는 가드가 false 로 돌려준다 — 경고 하나 때문에 개요가 깨지지 않게 여기서도 감싼다.
