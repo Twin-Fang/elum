@@ -13,6 +13,7 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_centered_title_row.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../application/talk_comment_controller.dart';
@@ -167,52 +168,49 @@ class _Header extends StatelessWidget {
         horizontal: space.xs.w,
         vertical: space.xs.h,
       ),
-      child: Row(
-        children: [
-          Semantics(
-            button: true,
-            label: l10n.commonBack,
-            child: AppPressable(
-              onTap: context.popOrHome,
-              scaleDown: AppPressable.scaleIcon,
-              child: SizedBox(
-                width: _tapSize.w,
-                height: _tapSize.w,
-                child: Center(
-                  child: SvgPicture.asset(
-                    AppAssets.iconBack,
-                    width: _iconSize.w,
-                    height: _iconSize.w,
-                    excludeFromSemantics: true,
-                  ),
+      child: ElumCenteredTitleRow(
+        sideSlotWidth: _tapSize.w,
+        leading: Semantics(
+          button: true,
+          label: l10n.commonBack,
+          child: AppPressable(
+            onTap: context.popOrHome,
+            scaleDown: AppPressable.scaleIcon,
+            child: SizedBox(
+              width: _tapSize.w,
+              height: _tapSize.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconBack,
+                  width: _iconSize.w,
+                  height: _iconSize.w,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
           ),
-          Expanded(
-            child: Text(
-              l10n.talkTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.navTitle.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          SizedBox(
-            width: _tapSize.w,
-            height: _tapSize.w,
-            child: onMorePressed == null
-                ? null
-                : AppPressable(
-                    onTap: onMorePressed,
-                    scaleDown: AppPressable.scaleIcon,
-                    semanticLabel: l10n.talkMoreLabel,
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-                      size: _iconSize.w,
-                      color: colors.textPrimary,
-                    ),
+        ),
+        title: Text(
+          l10n.talkTitle,
+          textAlign: TextAlign.center,
+          style: context.typo.navTitle.copyWith(color: colors.textPrimary),
+        ),
+        trailing: SizedBox(
+          width: _tapSize.w,
+          height: _tapSize.w,
+          child: onMorePressed == null
+              ? null
+              : AppPressable(
+                  onTap: onMorePressed,
+                  scaleDown: AppPressable.scaleIcon,
+                  semanticLabel: l10n.talkMoreLabel,
+                  child: Icon(
+                    Icons.more_horiz_rounded,
+                    size: _iconSize.w,
+                    color: colors.textPrimary,
                   ),
-          ),
-        ],
+                ),
+        ),
       ),
     );
   }
