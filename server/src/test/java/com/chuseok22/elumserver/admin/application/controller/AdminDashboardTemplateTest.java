@@ -135,7 +135,7 @@ class AdminDashboardTemplateTest {
     String contentsGroup = html.substring(contents, system);
     assertThat(contentsGroup).contains("/admin/notices", "/admin/consents", "/admin/prompts");
     String systemGroup = html.substring(system);
-    assertThat(systemGroup).contains("/admin/settings", "/admin/monitoring", "/admin/logs", "data-log-error-badge");
+    assertThat(systemGroup).contains("/admin/settings", "/admin/monitoring", "/admin/logs", "/admin/audit", "data-log-error-badge");
     assertThat(html).containsOnlyOnce("class=\"active\"");
   }
 }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('관리자 기록', 'audit', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('관리자 기록',
+       '관리자가 회원·프롬프트·의견·로그 파일에 한 일을 누가, 언제 했는지 남겨요. 읽기 전용이에요.')}"></div>
+
+  <!-- 따로 남는 기록 2곳: 크레딧 조정·예약 반환은 원장, 시스템 설정은 설정 변경 이력 -->
+  <p class="text-sm text-base-content/60" data-audit-other-records>
+    크레딧 조정·예약 반환은 <a th:href="@{/admin/credits}" class="link link-hover">크레딧 원장</a>에,
+    시스템 설정 변경은 <a th:href="@{/admin/settings/history}" class="link link-hover">설정 변경 이력</a>에 따로 남아요.
+  </p>
+
+  <!-- 필터: 동작·대상 종류는 선택 상자 (칩으로 그리면 줄이 넘침), 관리자·대상 id 는 완전 일치 -->
+  <form method="get" th:action="@{/admin/audit}" class="flex flex-wrap items-end gap-2" data-admin-filter-bar>
+    <label class="form-control">
+      <span class="label-text text-xs">관리자</span>
+      <input type="text" name="admin" th:value="${query.filters.get('admin')}" maxlength="100"
+             placeholder="관리자 아이디" class="input input-bordered input-sm w-full sm:w-64"/>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">동작</span>
+      <select name="action" class="select select-bordered select-sm">
+        <option value="" th:selected="${query.filters.get('action') == null}">전체 동작</option>
+        <option th:each="option : ${definition.filterOf('action').options}" th:value="${option.value}"
+                th:text="${option.label}" th:selected="${option.value == query.filters.get('action')}">동작</option>
+      </select>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">대상 종류</span>
+      <select name="targetType" class="select select-bordered select-sm">
+        <option value="" th:selected="${query.filters.get('targetType') == null}">전체 대상</option>
+        <option th:each="option : ${definition.filterOf('targetType').options}" th:value="${option.value}"
+                th:text="${option.label}" th:selected="${option.value == query.filters.get('targetType')}">대상</option>
+      </select>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">대상 id</span>
+      <input type="text" name="targetId" th:value="${query.filters.get('targetId')}" maxlength="100"
+             placeholder="회원 ID 등 전체" class="input input-bordered input-sm w-full sm:w-72"/>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">시작일</span>
+      <input type="date" name="from" th:value="${query.filters.get('from')}" class="input input-bordered input-sm"/>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">종료일</span>
+      <input type="date" name="to" th:value="${query.filters.get('to')}" class="input input-bordered input-sm"/>
+    </label>
+    <input type="hidden" name="sort" th:value="${query.sort}"/>
+    <button type="submit" class="btn btn-primary btn-sm">필터</button>
+    <a th:href="@{/admin/audit}" class="btn btn-ghost btn-sm">초기화</a>
+  </form>
+
+  <div th:replace="~{admin/fragments/admin-list :: activeFilters(${definition}, ${query})}"></div>
+
+  <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
+    <span>조건에 맞는 <span th:text="${auditLogs.totalElements}">0</span>건 · 최신순</span>
+    <div class="ml-auto">
+      <div th:replace="~{admin/fragments/admin-list :: csvExport(${csvExport})}"></div>
+    </div>
+  </div>
+
+  <div th:replace="~{admin/fragments/admin-list :: table(${definition}, ${query}, ${rows})}"></div>
+
+  <div th:replace="~{admin/fragments/admin-list :: pager(${auditLogs}, @{${pagerBaseUrl}})}"></div>
+
+  <p class="text-xs text-base-content/60">
+    요청 id는 서버 로그 줄의 요청 id와 같아요. <a th:href="@{/admin/logs}" class="link link-hover">서버 로그</a>
+    검색 키워드에 넣으면 그 요청의 로그를 모아 볼 수 있어요. 메모·사유 원문은 여기에 남기지 않아요.
+  </p>
+</main>
+</body>
+</html>

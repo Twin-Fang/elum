@@ -10,9 +10,11 @@ import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRows;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberAccessService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
+import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.MemberAdminMemoService;
@@ -50,6 +52,7 @@ public class AdminMemberController {
   private final AdminCreditQueryService adminCreditQueryService;
   private final AdminMemberAccessService adminMemberAccessService;
   private final MemberAdminMemoService memberAdminMemoService;
+  private final AdminAuditService adminAuditService;
 
   /// 회원 목록: 검색어(q), 필터(AdminMemberList 정의 7개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
@@ -129,6 +132,9 @@ public class AdminMemberController {
       case SAVED, CLEARED -> {
         log.info("[admin members] memo saved : memberId={}, length={}, admin={}",
           AdminLogIds.toLoggableId(id), memoLength, actorOf(principal));
+        // 관리자 기록: 메모 원문 대신 글자 수만
+        adminAuditService.record(AdminAuditAction.MEMBER_MEMO_SAVED, id,
+          AdminAuditService.memoSavedDetailOf(result == MemberAdminMemoSaveResult.CLEARED ? 0 : memoLength));
         redirectAttributes.addFlashAttribute("message",
           result == MemberAdminMemoSaveResult.CLEARED ? "메모를 지웠어요." : "메모를 저장했어요.");
       }
@@ -139,6 +145,7 @@ public class AdminMemberController {
   @PostMapping("/admin/members/{id}/suspend")
   public String suspend(@PathVariable String id, RedirectAttributes redirectAttributes) {
     adminMemberService.suspend(id);
+    adminAuditService.record(AdminAuditAction.MEMBER_SUSPENDED, id, null);
     redirectAttributes.addFlashAttribute("message", "계정을 정지했습니다. 로그인과 API 사용이 차단됩니다.");
     return "redirect:/admin/members/" + id;
   }
@@ -146,6 +153,7 @@ public class AdminMemberController {
   @PostMapping("/admin/members/{id}/unsuspend")
   public String unsuspend(@PathVariable String id, RedirectAttributes redirectAttributes) {
     adminMemberService.unsuspend(id);
+    adminAuditService.record(AdminAuditAction.MEMBER_UNSUSPENDED, id, null);
     redirectAttributes.addFlashAttribute("message", "계정 정지를 해제했습니다.");
     return "redirect:/admin/members/" + id;
   }
@@ -178,6 +186,8 @@ public class AdminMemberController {
         "Pro 발급 실패: 사유를 입력해주세요. (E-ADM-001)");
       return "redirect:/admin/members/" + id;
     }
+    // 관리자 기록: 기간만 (사유 원문은 요금제 이력에 있음)
+    adminAuditService.record(AdminAuditAction.PRO_GRANTED, id, days == null || days <= 0 ? "기간 무기한" : "기간 " + days + "일");
     redirectAttributes.addFlashAttribute("message",
       days == null || days <= 0 ? "Pro를 무기한으로 발급했습니다." : "Pro를 " + days + "일간 발급했습니다.");
     return "redirect:/admin/members/" + id;
@@ -192,6 +202,7 @@ public class AdminMemberController {
     RedirectAttributes redirectAttributes
   ) {
     adminMemberService.revokePro(id, reason, actorOf(principal));
+    adminAuditService.record(AdminAuditAction.PRO_REVOKED, id, null);
     redirectAttributes.addFlashAttribute("message", "Pro를 회수했습니다. 이 계정은 Free로 돌아갑니다.");
     return "redirect:/admin/members/" + id;
   }
@@ -204,6 +215,7 @@ public class AdminMemberController {
   @PostMapping("/admin/members/{id}/purge")
   public String purge(@PathVariable String id, Principal principal, RedirectAttributes redirectAttributes) {
     adminMemberService.purgeNow(id, principal == null ? null : principal.getName());
+    adminAuditService.record(AdminAuditAction.WITHDRAWN_MEMBER_PURGED, id, null);
     redirectAttributes.addFlashAttribute("message",
       "탈퇴 계정을 완전히 지웠어요. 남아 있던 계정 식별값을 지우고 AI 이용 기록에서 회원을 뗐어요.");
     return "redirect:/admin/members?status=WITHDRAWN";
@@ -212,6 +224,7 @@ public class AdminMemberController {
   @PostMapping("/admin/members/{id}/force-logout")
   public String forceLogout(@PathVariable String id, RedirectAttributes redirectAttributes) {
     adminMemberService.forceLogout(id);
+    adminAuditService.record(AdminAuditAction.MEMBER_FORCE_LOGGED_OUT, id, null);
     redirectAttributes.addFlashAttribute("message", "강제 로그아웃했습니다. 기존 토큰이 모두 무효화됩니다.");
     return "redirect:/admin/members/" + id;
   }
@@ -240,6 +253,7 @@ public class AdminMemberController {
         "연결 해제 실패: 이미 끊겼거나 이 회원의 이룸이 기기가 아니에요. 화면을 새로 고쳐 확인해주세요. (E-ADM-LINK-001)");
       return "redirect:/admin/members/" + id;
     }
+    adminAuditService.record(AdminAuditAction.DEVICE_UNLINKED, id, "연결 " + AdminLogIds.toLoggableId(linkId));
     redirectAttributes.addFlashAttribute("message",
       "이룸이 기기 연결을 끊었어요. 그 기기는 다시 연결 암호를 넣어야 일과를 볼 수 있어요.");
     return "redirect:/admin/members/" + id;

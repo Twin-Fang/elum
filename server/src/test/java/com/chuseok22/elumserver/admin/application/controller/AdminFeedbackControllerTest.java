@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminFeedbackSend
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportLink;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminFeedbackSenderService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -40,7 +41,8 @@ class AdminFeedbackControllerTest {
   private final FeedbackService feedbackService = mock(FeedbackService.class);
   private final AdminFeedbackSenderService adminFeedbackSenderService = mock(AdminFeedbackSenderService.class);
   private final AdminFeedbackController controller =
-    new AdminFeedbackController(feedbackService, new AdminDateFormatter(), adminFeedbackSenderService);
+    new AdminFeedbackController(feedbackService, new AdminDateFormatter(), adminFeedbackSenderService,
+      mock(AdminAuditService.class));
   private final RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
   private static final Sort NEWEST_FIRST = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id"));

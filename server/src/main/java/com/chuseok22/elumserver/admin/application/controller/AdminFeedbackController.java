@@ -8,7 +8,9 @@ import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRo
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminFeedbackSenderService;
+import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
@@ -48,6 +50,7 @@ public class AdminFeedbackController {
   private final FeedbackService feedbackService;
   private final AdminDateFormatter adminDateFormatter;
   private final AdminFeedbackSenderService adminFeedbackSenderService;
+  private final AdminAuditService adminAuditService;
 
   /// 의견 목록: 검색어(q), 필터(AdminFeedbackList 정의 5개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
@@ -144,14 +147,20 @@ public class AdminFeedbackController {
       return "redirect:" + detailPath;
     }
     log.info("[admin feedback] note saved : id={}, length={}", AdminLogIds.toLoggableId(id), noteLength);
+    // 관리자 기록: 메모 원문 대신 글자 수만
+    adminAuditService.record(AdminAuditAction.FEEDBACK_NOTE_SAVED, id,
+      AdminAuditService.memoSavedDetailOf(result == FeedbackAdminNoteSaveResult.CLEARED ? 0 : noteLength));
     redirectAttributes.addFlashAttribute("message",
       result == FeedbackAdminNoteSaveResult.CLEARED ? "메모를 지웠어요." : "메모를 저장했어요.");
     return "redirect:" + detailPath;
   }
 
+  /// 의견 삭제 > 관리자 기록 (보낸 회원 id 만, 의견 원문은 남기지 않음)
   @PostMapping("/admin/feedback/{id}/delete")
   public String delete(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-    feedbackService.delete(id);
+    String senderMemberId = feedbackService.delete(id);
+    adminAuditService.record(AdminAuditAction.FEEDBACK_DELETED, id,
+      senderMemberId == null ? null : "보낸 회원 " + senderMemberId);
     redirectAttributes.addFlashAttribute("message", "의견을 지웠어요.");
     return "redirect:" + LIST_PATH;
   }
