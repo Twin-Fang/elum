@@ -99,6 +99,7 @@ class _TalkRulesSheetState extends ConsumerState<TalkRulesSheet> {
           SizedBox(height: space.xs.h),
           ElumCheckRow(
             label: l10n.talkRulesAgreeCheck,
+            labelStyle: context.typo.body,
             checked: _isChecked,
             onChanged: _isSaving
                 ? null
