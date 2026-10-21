@@ -3,7 +3,9 @@ package com.chuseok22.elumserver.routine.infrastructure.guard;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Duration;
+import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,30 +20,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class RoutineRequestCooldownGuard {
 
-  private static final Duration DEFAULT_COOLDOWN = Duration.ofSeconds(30);
   private static final String KEY_PREFIX = "routine-cooldown:";
 
   private final SharedStateStore sharedStateStore;
-  private final Duration cooldown;
+  // 간격: 요청마다 설정(ROUTINE_REQUEST_COOLDOWN_SECONDS)에서 읽음
+  private final Supplier<Duration> cooldownSupplier;
 
   // 생성자가 둘이면 스프링이 어느 것으로 만들지 알 수 없다. 둘 다 인자를 받으므로
   // 명시하지 않으면 서버가 아예 뜨지 않는다.
   @Autowired
-  public RoutineRequestCooldownGuard(SharedStateStore sharedStateStore) {
-    this(sharedStateStore, DEFAULT_COOLDOWN);
+  public RoutineRequestCooldownGuard(SharedStateStore sharedStateStore, UsageLimitSettings usageLimitSettings) {
+    this.sharedStateStore = sharedStateStore;
+    this.cooldownSupplier = usageLimitSettings::routineRequestCooldown;
   }
 
   // 테스트에서 30초를 그대로 기다리지 않고 만료 이후 재요청 케이스를 검증할 수 있도록
   // cooldown을 주입받는 생성자를 패키지 내부에 별도로 둔다.
   RoutineRequestCooldownGuard(SharedStateStore sharedStateStore, Duration cooldown) {
     this.sharedStateStore = sharedStateStore;
-    this.cooldown = cooldown;
+    this.cooldownSupplier = () -> cooldown;
   }
 
   /// 쿨다운 안에 다시 오면 거부한다. 같은 회원이 동시에 두 요청을 보내도 하나만 통과한다.
   public void guard(String memberId) {
     boolean allowed = sharedStateStore.firstSeen(
-      KEY_PREFIX + memberId, cooldown, System.currentTimeMillis());
+      KEY_PREFIX + memberId, cooldownSupplier.get(), System.currentTimeMillis());
     if (!allowed) {
       throw new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT);
     }

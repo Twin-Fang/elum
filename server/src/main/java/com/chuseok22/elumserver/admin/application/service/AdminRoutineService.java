@@ -55,7 +55,13 @@ public class AdminRoutineService {
       ? List.of(RoutineStatus.values())
       : List.of(RoutineStatus.valueOf(statusFilter));
     Pageable pageable = PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query));
-    return routineRepository.searchForAdmin(query.q() != null, query.likePattern(), statuses, pageable);
+    // 보호자 필터: 회원 ID 정확히 일치 또는 아이디·닉네임 일부 (없으면 빈 값을 넘겨 파라미터 타입 고정)
+    String guardian = AdminRoutineList.guardianOf(query);
+    String guardianPattern = AdminListQuery.toLikePattern(guardian);
+    return routineRepository.searchForAdmin(query.q() != null, query.likePattern(), statuses,
+      AdminRoutineList.scheduledFromOf(query), AdminRoutineList.scheduledToExclusiveOf(query),
+      guardianPattern != null, guardian == null ? "" : guardian, guardianPattern == null ? "" : guardianPattern,
+      pageable);
   }
 
   // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다

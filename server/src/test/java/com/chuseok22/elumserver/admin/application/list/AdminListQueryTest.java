@@ -107,6 +107,14 @@ class AdminListQueryTest {
   }
 
   @Test
+  @DisplayName("검색어의 + 는 %2B 로 실어 페이지를 넘겨도 공백으로 바뀌지 않는다")
+  void toQueryString_keepsPlusSign() {
+    AdminListQuery query = of("C++", Map.of(), "name,asc", "1");
+
+    assertThat(query.toQueryString(query.sort(), 2)).startsWith("?q=C%2B%2B&");
+  }
+
+  @Test
   @DisplayName("같은 열을 다시 누르면 방향이 뒤집히고 다른 열은 내림차순으로 시작한다")
   void nextSortFor_togglesDirection() {
     AdminListQuery query = of(null, null, "name,asc", null);
@@ -120,5 +128,46 @@ class AdminListQueryTest {
   void definitionWithBadDefaultSort_fails() {
     org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
       new AdminListDefinition(List.of(new Column("memo", "메모", false)), List.of(), List.of(), "memo,desc"));
+  }
+
+  @Test
+  @DisplayName("요청 파라미터 맵에서 정의에 있는 필터만 읽고, 형식이 틀린 날짜 필터는 빼서 칩·조건에 남지 않는다")
+  void fromParameters_readsDefinedFiltersOnly() {
+    AdminListDefinition withDate = new AdminListDefinition(DEFINITION.columns(), List.of("name"),
+      List.of(DEFINITION.filters().get(0), Filter.date("from", "시작일"), Filter.text("guardian", "보호자")),
+      "createdAt,desc");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("q", " 하늘 ");
+    parameters.put("status", "ACTIVE");
+    parameters.put("from", "2026-13-40");
+    parameters.put("guardian", "kim");
+    parameters.put("password", "x");
+    parameters.put("page", "2");
+
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, withDate);
+
+    assertThat(query.q()).isEqualTo("하늘");
+    assertThat(query.filters()).containsOnlyKeys("status", "guardian");
+    assertThat(query.page()).isEqualTo(2);
+    assertThat(AdminListQuery.fromParameters(null, withDate).hasConditions()).isFalse();
+  }
+
+  @Test
+  @DisplayName("필터 초기화는 검색어·필터를 모두 빼고 정렬은 유지하며, 칩 하나 빼기는 그 조건만 뺀다")
+  void withoutConditions_keepsSortOnly() {
+    AdminListQuery query = of("하늘", Map.of("status", "ACTIVE"), "name,asc", "3");
+
+    assertThat(query.hasConditions()).isTrue();
+    assertThat(query.withoutConditions().toQueryString(query.sort(), 1)).isEqualTo("?sort=name,asc");
+    assertThat(query.withKeyword(null).toQueryString(query.sort(), 1)).isEqualTo("?status=ACTIVE&sort=name,asc");
+  }
+
+  @Test
+  @DisplayName("필터 값 LIKE 패턴: 포함·앞부분 일치 모두 %, _, \\ 를 이스케이프하고 빈 값은 null")
+  void filterLikePatterns_escapeSpecialCharacters() {
+    assertThat(AdminListQuery.toLikePattern(" a_b% ")).isEqualTo("%a\\_b\\%%");
+    assertThat(AdminListQuery.toPrefixLikePattern("1.0_")).isEqualTo("1.0\\_%");
+    assertThat(AdminListQuery.toLikePattern("  ")).isNull();
+    assertThat(AdminListQuery.toPrefixLikePattern(null)).isNull();
   }
 }

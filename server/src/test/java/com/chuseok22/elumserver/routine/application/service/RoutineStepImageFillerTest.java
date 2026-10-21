@@ -27,6 +27,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,7 +73,7 @@ class RoutineStepImageFillerTest {
     filler = new RoutineStepImageFiller(
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
-      new RoutineStepImageThrottle(new InMemorySharedStateStore()),
+      new RoutineStepImageThrottle(new InMemorySharedStateStore(), UsageLimitSettings.fromDefaults()),
       creditReservationService
     );
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);

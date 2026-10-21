@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileReposito
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -40,17 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RoutineStepEditService {
-
-  /// 한 일과에 담을 수 있는 카드 수 상한.
-  ///
-  /// AI 생성 경로가 이미 같은 값으로 막혀 있다(`RoutineAiPipeline.MAX_STEPS`, 프롬프트도
-  /// "1개 이상 10개 이하"). 같은 값으로 맞춰야 **기존 일과 중 상한을 넘는 것이 없다** —
-  /// 더 낮게 잡으면 AI가 만든 일과가 처음부터 상한 초과 상태가 된다.
-  ///
-  /// 카드 1장을 추가할 때마다 AI 이미지가 1회 생성된다. 다만 이 상한은 비용의 천장이
-  /// 아니다 — 지우면 자리가 다시 나서 추가·삭제를 되풀이할 수 있다. 그림 횟수는
-  /// {@link RoutineStepImageFiller}가 따로 묶는다.
-  private static final int STEP_MAX_COUNT = 10;
 
   /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다.
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
@@ -194,7 +184,8 @@ public class RoutineStepEditService {
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
-    if (steps.size() >= STEP_MAX_COUNT) {
+    // 카드 수 상한 (AI 생성과 같은 값). 지우면 자리가 다시 나므로 그림 횟수는 RoutineStepImageFiller 가 따로 묶음
+    if (steps.size() >= RoutineStepLimits.MAX_STEP_COUNT) {
       throw new CustomException(ErrorCode.ROUTINE_STEP_MAX_COUNT);
     }
 

@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberRespon
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Column;
@@ -110,6 +111,37 @@ class AdminFragmentRenderTest {
       .contains("href=\"/admin/test?q=a%26b&amp;page=3\"");
     // 마지막 변경
     assertThat(html).contains("2026-10-18 09:05").contains("· admin").contains("변경 이력 없음");
+  }
+
+  @Test
+  @DisplayName("필터 바: 날짜·글자 필터는 입력 칸으로, 적용된 조건은 x 링크 칩과 필터 초기화로, CSV 는 상한을 넘으면 막힌다")
+  void filterBar_rendersInputsChipsAndCsvLimit() {
+    AdminListDefinition definition = new AdminListDefinition(DEFINITION.columns(), List.of("name"),
+      List.of(DEFINITION.filters().get(0), Filter.date("from", "시작일"), Filter.text("guardian", "보호자")),
+      "name,asc");
+    AdminListQuery query = AdminListQuery.of("하늘", Map.of("status", "ACTIVE", "from", "2026-10-01"), null, null,
+      definition);
+    java.util.Map<String, Object> model = new java.util.HashMap<>();
+    model.put("definition", definition);
+    model.put("query", query);
+    model.put("page", pageOf(1, 0));
+    model.put("rows", List.<AdminListRow>of());
+    model.put("csvExport", AdminCsvExporter.linkOf("/admin/test", query, AdminCsvExporter.MAX_ROWS + 1L));
+
+    String html = engine.process("test/admin-list-smoke", contextWith(model));
+
+    // 입력 칸: 날짜 필터는 값이 채워진 date, 글자 필터는 text. 입력 칸 필터는 숨은 값으로 겹쳐 싣지 않는다
+    assertThat(html).containsPattern("type=\"date\" name=\"from\"\\s+value=\"2026-10-01\"")
+      .containsPattern("type=\"text\" name=\"guardian\"");
+    assertThat(html).doesNotContainPattern("type=\"hidden\"\\s+name=\"from\"")
+      .containsPattern("type=\"hidden\"\\s+name=\"status\" value=\"ACTIVE\"");
+    // 칩: 선택지 이름으로 보이고 x 링크는 그 조건만 뺀다. 초기화는 정렬만 남긴다
+    assertThat(html).contains("data-admin-active-filters").contains("상태: 활성").contains("시작일: 2026-10-01")
+      .contains("href=\"?q=%ED%95%98%EB%8A%98&amp;from=2026-10-01&amp;sort=name,asc\"")
+      .contains("href=\"?sort=name,asc\"").contains("필터 초기화");
+    // CSV: 상한을 넘으면 링크 대신 막힌 버튼과 이유
+    assertThat(html).contains("data-admin-csv-export").contains("disabled").contains("10,000건 이하로 좁히면")
+      .doesNotContain("href=\"/admin/test/export.csv");
   }
 
   @Test

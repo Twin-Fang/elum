@@ -45,7 +45,8 @@ class AdminConfigControllerLocaleGuardTest {
   @BeforeEach
   void setUp() {
     controller = new AdminConfigController(systemConfigService, imageClientRouter, textClientRouter, promptLocaleGate,
-      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class));
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class),
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.member.application.service.MemberPickerService.class));
     Map<String, String> complete = new HashMap<>();
     complete.put("suggestion.01.text", "t");
     for (String goal : new String[]{"PREPARE_ITEMS", "PREPARE_NEW"}) {

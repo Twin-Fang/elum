@@ -27,6 +27,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,9 @@ public class NoticeService {
   private static final int HIDE_DAYS_MIN = 1;
   private static final int HIDE_DAYS_MAX = 30;
   private static final String HTTPS_PREFIX = "https://";
+  /// 관리자 검색에 기간이 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
+  private static final LocalDateTime UNBOUNDED_PERIOD_FROM = LocalDateTime.of(2000, 1, 1, 0, 0);
+  private static final LocalDateTime UNBOUNDED_PERIOD_TO = LocalDateTime.of(9999, 1, 1, 0, 0);
 
   /** 슬라이드 순서 — 우선순위가 큰 것 먼저, 같으면 시작이 늦은 것 먼저. 마지막은 순서를 고정하려는 것이다. */
   static final Comparator<AppNotice> SLIDE_ORDER = Comparator
@@ -155,13 +159,32 @@ public class NoticeService {
   // ── 관리자 ──────────────────────────────────────────
 
   /**
-   * 관리자 목록: 제목·본문 검색(이스케이프된 LIKE 패턴, null 이면 전체) + 정렬·페이지는 호출부 Pageable
-   * 게시 판단은 목록 쿼리가 아니라 statusOf 가 한다 (앱 API 와 같은 판단)
+   * 관리자 목록: 검색·플랫폼·기간은 쿼리, 상태는 statusAt(앱 API 와 같은 판단) + 정렬·페이지는 호출부 Pageable
+   * 상태 필터가 있으면 조건에 맞는 공지를 전부 읽어 자바에서 거른 뒤 쪽을 자름 (공지는 손으로 올리는 몇십 건)
    */
-  public Page<AppNotice> search(String likePattern, Pageable pageable) {
-    boolean hasKeyword = likePattern != null;
-    // 검색어가 없을 때도 파라미터 타입이 흔들리지 않게 빈 문자열을 넘긴다 (hasKeyword 가 false 면 쓰이지 않음)
-    return appNoticeRepository.searchForAdmin(hasKeyword, hasKeyword ? likePattern : "", pageable);
+  public Page<AppNotice> search(NoticeAdminSearch condition, Pageable pageable) {
+    if (condition.status() == null) {
+      return searchByQuery(condition, pageable);
+    }
+    LocalDateTime now = now();
+    List<AppNotice> matched = searchByQuery(condition, Pageable.unpaged(pageable.getSort())).getContent().stream()
+      .filter(notice -> notice.statusAt(now) == condition.status())
+      .toList();
+    int fromIndex = (int) Math.min(pageable.getOffset(), matched.size());
+    int toIndex = Math.min(fromIndex + pageable.getPageSize(), matched.size());
+    return new PageImpl<>(matched.subList(fromIndex, toIndex), pageable, matched.size());
+  }
+
+  // 조건 > 쿼리 파라미터: 없는 조건은 플래그 false·전체 플랫폼·끝값 (null 바인딩 타입 문제를 피함)
+  private Page<AppNotice> searchByQuery(NoticeAdminSearch condition, Pageable pageable) {
+    boolean hasKeyword = condition.likePattern() != null;
+    List<NoticePlatform> platforms = condition.platform() == null
+      ? List.of(NoticePlatform.values())
+      : List.of(condition.platform());
+    return appNoticeRepository.searchForAdmin(hasKeyword, hasKeyword ? condition.likePattern() : "", platforms,
+      condition.periodFrom() == null ? UNBOUNDED_PERIOD_FROM : condition.periodFrom(),
+      condition.periodToExclusive() == null ? UNBOUNDED_PERIOD_TO : condition.periodToExclusive(),
+      pageable);
   }
 
   public NoticeStatus statusOf(AppNotice notice) {

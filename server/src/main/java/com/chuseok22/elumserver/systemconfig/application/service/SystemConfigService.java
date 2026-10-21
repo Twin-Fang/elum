@@ -5,15 +5,12 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
-import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
-import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfigHistory;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
-import java.time.format.DateTimeParseException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class SystemConfigService {
 
   private static final long CACHE_TTL_MILLIS = 30_000;
-  private static final int MAX_VALUE_LENGTH = 500;
-  // 암호문이 Base64로 부풀어도 MAX_VALUE_LENGTH 안에 들어오도록 평문을 더 좁게 제한한다.
-  private static final int SECRET_MAX_LENGTH = 300;
   private static final String SECRET_MASK = "••••••••";
   /// 이력에 남기는 비밀값 표시. 평문도 암호문도 남기지 않는다 — 바뀌었다는 사실만 보인다.
   static final String HISTORY_SECRET_MASK = "••••";
@@ -62,12 +56,19 @@ public class SystemConfigService {
   // 저장된 값이 손상돼 파싱에 실패해도(수동 DB 조작 등) AI 호출이 죽지 않도록
   // 기본값으로 폴백한다.
   public int getInt(ConfigKey key) {
+    int number;
     try {
-      return Integer.parseInt(getString(key).trim());
+      number = Integer.parseInt(getString(key).trim());
     } catch (NumberFormatException e) {
       log.warn("시스템 설정 정수 파싱 실패, 기본값 사용: key={}, value={}", key, storedValue(key));
       return Integer.parseInt(defaultValueFor(key));
     }
+    // 범위 밖 저장값(수동 DB 조작·옛 규칙으로 저장) > 기본값 (한도 0·세마포어 0 같은 멈춤 방지)
+    if (key.isOutOfRange(number)) {
+      log.warn("[system config] out of range, default used : key={}, value={}", key, number);
+      return Integer.parseInt(defaultValueFor(key));
+    }
+    return number;
   }
 
   public double getDouble(ConfigKey key) {
@@ -120,16 +121,19 @@ public class SystemConfigService {
   // 배포 환경(yml)에 바인딩된 모델명이 있으면 그것이 사실상의 기본값이다.
   // enum defaultValue는 yml에도 값이 없을 때의 마지막 폴백.
   public String defaultValueFor(ConfigKey key) {
+    String propertyValue = deployPropertyValueOf(key);
+    return propertyValue != null ? propertyValue : key.getDefaultValue();
+  }
+
+  /// 배포 설정(yml)에 묶인 키 3개(모델명)의 yml 값. 묶이지 않았거나 비었으면 null
+  private String deployPropertyValueOf(ConfigKey key) {
     String propertyValue = switch (key) {
       case GEMINI_TEXT_MODEL -> geminiProperties.textModel();
       case GEMINI_IMAGE_MODEL -> geminiProperties.imageModel();
       case LOCAL_LLM_MODEL -> localLlmProperties.model();
       default -> null;
     };
-    if (propertyValue != null && !propertyValue.isBlank()) {
-      return propertyValue;
-    }
-    return key.getDefaultValue();
+    return propertyValue == null || propertyValue.isBlank() ? null : propertyValue;
   }
 
   // 관리자 화면용 전체 조회. 저장값이 없으면 기본값을 현재값으로 보여준다.
@@ -138,23 +142,46 @@ public class SystemConfigService {
       .map(key -> {
         String defaultValue = defaultValueFor(key);
         String current = getString(key);
+        String stored = storedValue(key);
+        boolean isStored = stored != null && !stored.isBlank();
         if (key.getValueType() == ConfigValueType.SECRET) {
           // 암호문을 화면에 그대로 내보내지 않는다. 있는지 없는지만 보이면 된다.
-          String stored = storedValue(key);
-          boolean set = stored != null && !stored.isBlank();
           return new SystemConfigView(
             key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
-            key.getValueType(), key.getAllowedValues(), set ? SECRET_MASK : "", "", set,
-            key.getMinValue(), key.getMaxValue()
+            key.getValueType(), key.getAllowedValues(), isStored ? SECRET_MASK : "", "", isStored,
+            key.getMinValue(), key.getMaxValue(), key.getFormat(), null,
+            isStored ? ConfigValueSource.STORED : ConfigValueSource.CODE_DEFAULT, null
           );
         }
+        String deployPropertyValue = deployPropertyValueOf(key);
         return new SystemConfigView(
           key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
           key.getValueType(), key.getAllowedValues(), current, defaultValue,
-          !current.equals(defaultValue), key.getMinValue(), key.getMaxValue()
+          !current.equals(defaultValue), key.getMinValue(), key.getMaxValue(), key.getFormat(),
+          isStored ? validationWarningOf(key, stored) : null,
+          valueSourceOf(isStored, deployPropertyValue), deployPropertyValue
         );
       })
       .toList();
+  }
+
+  /// 저장값이 지금 규칙에 어긋나면 이유 (화면 경고용, 읽기는 막지 않음)
+  private static String validationWarningOf(ConfigKey key, String stored) {
+    try {
+      ConfigValueCheck check = SystemConfigValueValidator.check(key, stored);
+      return check.isValid() ? null : check.rejectReason();
+    } catch (RuntimeException e) {
+      // 검사 실패로 설정 화면 전체가 깨지지 않게 경고로만
+      log.warn("[system config] stored value check failed : key={}", key, e);
+      return "저장된 값을 검사하지 못했어요";
+    }
+  }
+
+  private static ConfigValueSource valueSourceOf(boolean isStored, String deployPropertyValue) {
+    if (isStored) {
+      return ConfigValueSource.STORED;
+    }
+    return deployPropertyValue != null ? ConfigValueSource.DEPLOY_PROPERTY : ConfigValueSource.CODE_DEFAULT;
   }
 
   /// 코드가 바꿀 때. 이력의 변경자는 system 이다.
@@ -267,59 +294,13 @@ public class SystemConfigService {
     return trimmed.length() > HISTORY_REASON_MAX_LENGTH ? trimmed.substring(0, HISTORY_REASON_MAX_LENGTH) : trimmed;
   }
 
+  /// 저장 전 검사 (규칙은 SystemConfigValueValidator 한 곳). 거부 사유는 detail 로 관리자 화면에 전달
   private String validate(ConfigKey key, String rawValue) {
-    // 비밀값만 빈 값을 허용한다 — 화면에서 키를 지울 수 있어야 하기 때문이다.
-    // 암호문이 평문보다 길어지므로 평문 길이를 더 좁게 본다.
-    if (key.getValueType() == ConfigValueType.SECRET) {
-      if (rawValue == null) {
-        return "";
-      }
-      String secret = rawValue.trim();
-      if (secret.length() > SECRET_MAX_LENGTH) {
-        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-      }
-      return secret;
+    ConfigValueCheck check = SystemConfigValueValidator.check(key, rawValue);
+    if (!check.isValid()) {
+      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE, check.rejectReason());
     }
-    // 날짜시간은 비울 수 있다 (비어 있으면 그 기능이 꺼진 것 — 신규가입 PRO 이벤트 기간 등)
-    if (key.getValueType() == ConfigValueType.DATETIME && (rawValue == null || rawValue.isBlank())) {
-      return "";
-    }
-    if (rawValue == null || rawValue.isBlank() || rawValue.length() > MAX_VALUE_LENGTH) {
-      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-    }
-    String value = rawValue.trim();
-    try {
-      if (key == ConfigKey.ENABLED_CONTENT_LOCALES) {
-        // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다.
-        return EnabledLocales.normalize(value);
-      }
-      if (key.getValueType() == ConfigValueType.DATETIME) {
-        // 읽을 수 없는 날짜는 저장하지 않는다 (이벤트가 조용히 꺼지는 것을 막음)
-        ConfigDateTime.parse(value);
-        return value;
-      }
-      if (key.getValueType() == ConfigValueType.INTEGER) {
-        int number = Integer.parseInt(value);
-        // 시간값에 0 이나 음수가 들어가면 앱의 요청이 끝없이 기다리게 된다. 범위가 있는 키만 본다.
-        if ((key.getMinValue() != null && number < key.getMinValue())
-          || (key.getMaxValue() != null && number > key.getMaxValue())) {
-          throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-        }
-      } else if (key.getValueType() == ConfigValueType.DECIMAL) {
-        Double.parseDouble(value);
-      } else if (key.getValueType() == ConfigValueType.SELECT && !key.getAllowedValues().contains(value)) {
-        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-      } else if (key.getValueType() == ConfigValueType.BOOLEAN
-        && !"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
-        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-      } else if (StoreUrlPolicy.appliesTo(key) && !StoreUrlPolicy.isAllowed(key, value)) {
-        // 막힌 사용자를 엉뚱한 곳으로 보내지 않도록 공식 스토어 주소만 받는다
-        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-      }
-    } catch (NumberFormatException | DateTimeParseException e) {
-      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
-    }
-    return value;
+    return check.normalizedValue();
   }
 
   // 빈 값이면 "지우기"이므로 그대로 둔다. 값이 있는데 마스터 키가 없으면 저장을 거부한다 —
