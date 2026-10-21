@@ -13,7 +13,7 @@ import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/l10n/current_l10n.dart';
 import 'core/layout/adaptive_screen_scale.dart';
-import 'core/layout/phone_text_scale.dart';
+import 'core/layout/app_text_scale.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -247,9 +247,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         scaffoldMessengerKey: _messengerKey,
         debugShowCheckedModeBanner: false,
         // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
-        // 폰은 글자도 상자처럼 창 폭에 비례 (PhoneTextScale)
+        // 글자 배율: 시스템 글자 크기(시안보다 작게는 안 줄임) × 폰 폭 비례 (AppTextScale)
         builder: (context, child) =>
-            PhoneTextScale(child: l10n.builder(context, child)),
+            AppTextScale(child: l10n.builder(context, child)),
       ),
     );
   }
