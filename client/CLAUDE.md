@@ -134,6 +134,7 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
   // ❌ Color(0xFF443E39), fontSize: 28
   // ✅ AppColors.textPrimary, AppTypography.title
   ```
+- **글자 배율은 `core/layout/app_text_scale.dart`(`AppTextScale`) 한 곳에서 정한다.** 시스템 글자 크기(1.0 미만은 1.0) × 폰 폭 배율(창 폭/393)이라 글자 토큰은 고정 pt 로 두고 `.sp` 를 쓰지 않는다. 화면에서 `TextScaler.noScaling`·숫자 `TextScaler.linear(…)` 로 덮지 않고, `TextPainter` 로 글자를 잴 때는 `MediaQuery.textScalerOf(context)` 를 넘긴다. 글자가 기기마다 커질 수 있으니 글자가 든 칸 높이를 고정하지 않는다. 시뮬레이터(393 · 1.0)만 보면 안 드러난다 — 원인과 실측은 #940.
 - **창 크기·방향은 `context.sizeClass` / `context.isLandscape` / `context.layout` 으로만 읽는다.** 화면에서 `600`·`840` 같은 breakpoint 를 직접 비교하거나 `1.sw`·`ScreenUtil()` 을 부르지 않는다. 시트·팝업은 `showElumSheet`·`showElumDialog` 로만 띄운다. 태블릿 설계는 `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
 - **화면 위젯은 `ConsumerWidget` 우선.** `StatefulWidget`은 애니메이션 컨트롤러가 필요할 때만.
 - **`build()` 안에서 비즈니스 로직 금지.** provider 또는 notifier로 뺀다.
