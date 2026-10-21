@@ -110,6 +110,7 @@ class _BlockedRow extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final space = context.space;
+    final nickname = entry.nickname ?? l10n.talkAuthorFallback;
 
     return Container(
       padding: EdgeInsets.all(space.sm.w),
@@ -121,7 +122,7 @@ class _BlockedRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              entry.nickname ?? l10n.talkAuthorFallback,
+              nickname,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.typo.tileLabel.copyWith(color: colors.textPrimary),
@@ -130,6 +131,8 @@ class _BlockedRow extends StatelessWidget {
           SizedBox(width: space.xs.w),
           AppPressable(
             onTap: onUnblockPressed,
+            // 닉네임과 합쳐지지 않는 버튼 노드 (줄마다 어느 보호자인지 구분)
+            semanticLabel: '$nickname ${l10n.talkUnblockAction}',
             child: MinTapTarget(
               child: Container(
                 padding: EdgeInsets.symmetric(
