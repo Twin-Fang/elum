@@ -192,6 +192,9 @@ abstract final class AppAssets {
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
 
+  /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
+  static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
+
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
