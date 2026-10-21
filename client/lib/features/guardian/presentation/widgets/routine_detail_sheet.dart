@@ -234,14 +234,17 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                   builder: (context, follow) => CustomScrollView(
                     slivers: [
                       // 이야기에서 가져온 일과면 맨 위에 원래 글 안내
+                      // 위는 제목 영역 여백(약 22) 그대로, 아래는 카드 목록 위 여백(8)과 합쳐 16
                       if (widget.routine.talkPostId case final talkPostId?)
                         SliverPadding(
-                          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                          padding: EdgeInsets.fromLTRB(
+                            16.w,
+                            0,
+                            16.w,
+                            context.space.xs.h,
+                          ),
                           sliver: SliverToBoxAdapter(
-                            child: RoutineDetailTalkBanner(
-                              postId: talkPostId,
-                              language: widget.routine.language,
-                            ),
+                            child: RoutineDetailTalkBanner(postId: talkPostId),
                           ),
                         ),
                       SliverPadding(

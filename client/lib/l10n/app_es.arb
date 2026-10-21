@@ -23,5 +23,9 @@
 
   "updateSuggestionTitle": "Hay una nueva versión",
   "updateSuggestionBody": "Actualiza para usar las últimas mejoras y funciones",
-  "updateSuggestionLater": "Más tarde"
+  "updateSuggestionLater": "Más tarde",
+  "routineDetailTalkOriginBand": "Traído de Historias",
+  "routineDetailTalkOriginOpenPost": "Publicación original",
+  "routineDetailTalkOriginPostGone": "Publicación retirada",
+  "routineDetailTalkOriginBandOpenLabel": "Traído de Historias, ver la publicación original"
 }

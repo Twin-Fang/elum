@@ -63,6 +63,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.highlightBorder,
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
+    required this.talkOriginBandFill,
+    required this.talkOriginBandAction,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -308,6 +310,11 @@ class AppColors extends ThemeExtension<AppColors> {
   // 목표 칩 (Figma 온보딩_목표_선택 204:1147)
   final Color goalSelectedFill;
   final Color goalSelectedBorder;
+
+  // 가져온 일과 상세의 출처 띠 — 바탕은 연한 민트, 오른쪽 글씨는 진한 민트
+  // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
+  final Color talkOriginBandFill;
+  final Color talkOriginBandAction;
 
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
@@ -921,6 +928,8 @@ class AppColors extends ThemeExtension<AppColors> {
     highlightBorder: Color(0xFFEB9B73),
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
+    talkOriginBandFill: Color(0xFFF2FBFA),
+    talkOriginBandAction: Color(0xFF1D6B66),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1135,6 +1144,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? highlightBorder,
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
+    Color? talkOriginBandFill,
+    Color? talkOriginBandAction,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1337,6 +1348,8 @@ class AppColors extends ThemeExtension<AppColors> {
       highlightBorder: highlightBorder ?? this.highlightBorder,
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
+      talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
+      talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1569,6 +1582,16 @@ class AppColors extends ThemeExtension<AppColors> {
       goalSelectedBorder: Color.lerp(
         goalSelectedBorder,
         other.goalSelectedBorder,
+        t,
+      )!,
+      talkOriginBandFill: Color.lerp(
+        talkOriginBandFill,
+        other.talkOriginBandFill,
+        t,
+      )!,
+      talkOriginBandAction: Color.lerp(
+        talkOriginBandAction,
+        other.talkOriginBandAction,
         t,
       )!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,

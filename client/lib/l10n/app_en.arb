@@ -790,5 +790,9 @@
   "elumiInfoSaved": "Saved",
   "elumiInfoSaveFailedTitle": "Couldn't save",
   "elumiInfoSaveFailedFallback": "Try again in a moment",
-  "elumiInfoNotFound": "Couldn't load Elumi's info"
+  "elumiInfoNotFound": "Couldn't load Elumi's info",
+  "routineDetailTalkOriginBand": "Imported from Community",
+  "routineDetailTalkOriginOpenPost": "Original post",
+  "routineDetailTalkOriginPostGone": "Post removed",
+  "routineDetailTalkOriginBandOpenLabel": "Imported from Community, view original post"
 }

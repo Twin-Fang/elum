@@ -23,5 +23,9 @@
 
   "updateSuggestionTitle": "新しいバージョンがあります",
   "updateSuggestionBody": "アップデートすると最新の修正と機能を使えます",
-  "updateSuggestionLater": "あとで"
+  "updateSuggestionLater": "あとで",
+  "routineDetailTalkOriginBand": "トークから持ってきました",
+  "routineDetailTalkOriginOpenPost": "元の投稿",
+  "routineDetailTalkOriginPostGone": "削除された投稿",
+  "routineDetailTalkOriginBandOpenLabel": "トークから持ってきました、元の投稿を見る"
 }

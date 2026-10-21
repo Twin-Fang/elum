@@ -2420,15 +2420,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryNewBadge => '새로';
 
   @override
-  String routineDetailTalkOriginBanner(String authorNickname) {
-    return '📖 $authorNickname님이 이야기에 나눈 일과예요';
-  }
+  String get routineDetailTalkOriginBand => '来自故事区';
 
   @override
-  String get routineDetailTalkOriginBannerNoAuthor => '📖 이야기에 나눈 일과예요';
+  String get routineDetailTalkOriginOpenPost => '原帖';
 
   @override
-  String get routineDetailTalkOriginOpen => '원래 글 보기';
+  String get routineDetailTalkOriginPostGone => '已下架的帖子';
+
+  @override
+  String get routineDetailTalkOriginBandOpenLabel => '来自故事区,查看原帖';
 
   @override
   String routineLibrarySent(String title) {
