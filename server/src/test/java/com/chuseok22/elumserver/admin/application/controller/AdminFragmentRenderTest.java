@@ -298,4 +298,30 @@ class AdminFragmentRenderTest {
     assertThat(failedHtml).contains("크레딧 정보를 불러오지 못했어요").contains("E-ADM-CREDIT-001")
       .doesNotContain("아직 크레딧 기록이 없어요");
   }
+
+  @Test
+  @DisplayName("회원 상세: 공통 확인창이 한 번 그려지고 위험 동작은 data-confirm 으로 거치며, 완전 삭제는 이름 입력을 요구한다 (#657)")
+  void memberDetail_routesDangerousActionsThroughSharedConfirmDialog() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    String activeHtml = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.none(), List.of(), null))));
+
+    // 확인창 조각은 레이아웃이 한 번만 넣는다 (두 번이면 스크립트가 다른 dialog 를 붙잡는다)
+    assertThat(activeHtml.split("<dialog", -1)).hasSize(2);
+    assertThat(activeHtml).contains("window.ElumAdminConfirm").doesNotContain("onsubmit=");
+    assertThat(activeHtml).containsPattern("/suspend\"[^>]*data-confirm-danger[^>]*data-confirm-message=\"이 계정을 정지할까요?");
+    // 이 회원의 기록: 각 화면이 받는 필터 이름으로 회원 id 를 싣는다
+    assertThat(activeHtml).contains("href=\"/admin/feedback?q=m1\"").contains("href=\"/admin/routines?guardian=m1\"")
+      .contains("href=\"/admin/monitoring?memberId=m1\"").contains("href=\"/admin/credits/members/m1#ledger\"");
+
+    member.setStatus(MemberStatus.WITHDRAWN);
+    String withdrawnHtml = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.none(), List.of(), null))));
+    assertThat(withdrawnHtml).containsPattern("/purge\"[^>]*data-confirm-typed-name=\"parent1\"");
+  }
 }

@@ -206,7 +206,9 @@
 
   <!-- 지우기는 저장 폼 밖에 둔다. 폼 안에 폼을 넣으면 브라우저가 안쪽 폼을 버린다. -->
   <form th:if="${notice != null}" th:action="@{/admin/notices/{id}/delete(id=${notice.id})}" method="post"
-        class="flex justify-end" data-notice-delete th:data-live="${status.name() == 'LIVE'}" th:data-title="${notice.title}">
+        class="flex justify-end" data-notice-delete th:data-live="${status.name() == 'LIVE'}" th:data-title="${notice.title}"
+        data-confirm-title="공지 지우기" data-confirm-danger data-confirm-accept="지우기"
+        data-confirm-message="이 공지를 지울까요? 이미지도 함께 지워지고 되돌릴 수 없어요.">
     <button type="submit" class="btn btn-outline btn-error btn-sm">이 공지 지우기</button>
   </form>
 

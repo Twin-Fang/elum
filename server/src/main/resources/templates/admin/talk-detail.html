@@ -15,12 +15,13 @@
       <a th:href="@{/admin/talk/posts}" class="btn btn-ghost btn-sm">목록으로</a>
       <form th:if="${detail.post.status.name() == 'VISIBLE'}"
             th:action="@{/admin/talk/posts/{id}/hide(id=${detail.post.id})}" method="post"
-            onsubmit="return confirm('이 글을 가릴까요? 앱에서 더 이상 보이지 않아요.');">
+            data-confirm-title="글 가리기" data-confirm-danger data-confirm-accept="가리기"
+            data-confirm-message="이 글을 가릴까요? 앱에서 더 이상 보이지 않아요.">
         <button type="submit" class="btn btn-warning btn-sm">글 가리기</button>
       </form>
       <form th:if="${detail.post.status.name() == 'HIDDEN_BY_ADMIN'}"
             th:action="@{/admin/talk/posts/{id}/restore(id=${detail.post.id})}" method="post"
-            onsubmit="return confirm('이 글을 되돌릴까요? 앱에 다시 보여요.');">
+            data-confirm-title="글 되돌리기" data-confirm-message="이 글을 되돌릴까요? 앱에 다시 보여요.">
         <button type="submit" class="btn btn-success btn-sm">글 되돌리기</button>
       </form>
       <span th:if="${detail.post.status.name() == 'DELETED'}" class="text-sm text-base-content/60">
@@ -129,12 +130,13 @@
             <td>
               <form th:if="${row.comment.status.name() == 'VISIBLE'}"
                     th:action="@{/admin/talk/comments/{id}/hide(id=${row.comment.id})}" method="post"
-                    onsubmit="return confirm('이 댓글을 가릴까요?');">
+                    data-confirm-title="댓글 가리기" data-confirm-danger data-confirm-accept="가리기"
+                    data-confirm-message="이 댓글을 가릴까요? 앱에서 더 이상 보이지 않아요.">
                 <button type="submit" class="btn btn-warning btn-xs">가리기</button>
               </form>
               <form th:if="${row.comment.status.name() == 'HIDDEN_BY_ADMIN'}"
                     th:action="@{/admin/talk/comments/{id}/restore(id=${row.comment.id})}" method="post"
-                    onsubmit="return confirm('이 댓글을 되돌릴까요?');">
+                    data-confirm-title="댓글 되돌리기" data-confirm-message="이 댓글을 되돌릴까요? 앱에 다시 보여요.">
                 <button type="submit" class="btn btn-success btn-xs">되돌리기</button>
               </form>
             </td>

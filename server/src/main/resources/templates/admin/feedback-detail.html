@@ -15,7 +15,8 @@
     <div class="flex items-center gap-2">
       <a th:href="@{/admin/feedback}" class="btn btn-ghost btn-sm">목록으로</a>
       <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
-            onsubmit="return confirm('이 의견을 지울까요? 되돌릴 수 없어요.');">
+            data-confirm-title="의견 지우기" data-confirm-danger data-confirm-accept="지우기"
+            data-confirm-message="이 의견을 지울까요? 되돌릴 수 없어요.">
         <button type="submit" class="btn btn-error btn-sm">지우기</button>
       </form>
     </div>

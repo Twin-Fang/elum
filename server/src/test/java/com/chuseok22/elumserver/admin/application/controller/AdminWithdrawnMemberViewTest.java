@@ -50,15 +50,15 @@ class AdminWithdrawnMemberViewTest {
   }
 
   @Test
-  @DisplayName("S9 즉시 완전 삭제 버튼은 탈퇴 계정에만 보이고, 확인 창을 거친다")
+  @DisplayName("S9 즉시 완전 삭제 버튼은 탈퇴 계정에만 보이고, 이름을 입력하는 확인 창을 거친다")
   void purgeButton_onlyForWithdrawn_withConfirm() throws IOException {
     String detail = Files.readString(TEMPLATES.resolve("member-detail.html"));
     Matcher form = Pattern.compile("<form[^>]*/purge[^>]*>", Pattern.DOTALL).matcher(detail);
 
     assertThat(form.find()).as("완전 삭제 폼이 없다").isTrue();
     String tag = form.group();
-    // 되돌릴 수 없는 삭제다. 잘못 누른 한 번으로 지워지면 안 된다.
-    assertThat(tag).contains("confirm(");
+    // 되돌릴 수 없는 삭제다. 잘못 누른 한 번으로 지워지면 안 된다 (공통 확인창 + 이름 입력, #657)
+    assertThat(tag).contains("data-confirm-message").contains("data-confirm-typed-name");
     // 쓰는 중인 계정에 보이면 먼저 탈퇴하지 않은 계정을 지우려 들게 된다 (서버도 막는다).
     assertThat(tag).contains("'WITHDRAWN'");
     assertThat(tag).contains("method=\"post\"");

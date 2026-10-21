@@ -94,7 +94,7 @@
           </div>
           <form th:unless="${provider.selected()}"
                 th:action="@{/admin/settings/{key}(key='IMAGE_PROVIDER_SELECTED')}" method="post"
-                onsubmit="return confirm('이 제공자로 바꿀까요? 다음 카드 생성부터 반영됩니다.');">
+                data-confirm-title="그림 제공자 바꾸기" data-confirm-message="이 제공자로 바꿀까요? 다음 카드 생성부터 반영돼요.">
             <input type="hidden" name="value" th:value="${provider.name()}"/>
             <!-- 키가 없는 제공자로 바꾸면 카드 생성이 전부 실패한다. 버튼에서 먼저 막고
                  서버에서도 한 번 더 막는다. -->
@@ -136,7 +136,7 @@
           </div>
           <form th:unless="${provider.selected()}"
                 th:action="@{/admin/settings/{key}(key='TEXT_PROVIDER_SELECTED')}" method="post"
-                onsubmit="return confirm('이 제공자로 바꿀까요? 다음 일과 생성부터 반영됩니다.');">
+                data-confirm-title="글 제공자 바꾸기" data-confirm-message="이 제공자로 바꿀까요? 다음 일과 생성부터 반영돼요.">
             <input type="hidden" name="value" th:value="${provider.name()}"/>
             <!-- 키가 없는 제공자로 바꾸면 일과 생성이 전부 실패한다. 버튼에서 먼저 막고
                  서버에서도 한 번 더 막는다. -->

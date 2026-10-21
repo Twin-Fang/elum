@@ -47,6 +47,8 @@
       <div th:replace="~{admin/fragments/admin-layout :: sidebar(${active})}"></div>
     </div>
   </div>
+  <!-- 확인창 (폼 data-confirm-* 속성, ElumAdminConfirm.ask) -->
+  <th:block th:replace="~{admin/fragments/admin-confirm :: confirmDialog}"></th:block>
   <script>
     // 사이드바 "서버 로그" 옆 최근 24시간 오류 건수. 불러오지 못하면 배지만 숨긴 채 둔다.
     (function () {

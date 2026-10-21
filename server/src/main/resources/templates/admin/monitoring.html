@@ -193,9 +193,9 @@
           <th>모델</th>
           <th>회원</th>
           <th>결과</th>
-          <th>지연</th>
-          <th>토큰(입력/출력)</th>
-          <th>추정 비용</th>
+          <th class="text-right">지연</th>
+          <th class="text-right">토큰(입력/출력)</th>
+          <th class="text-right">추정 비용</th>
         </tr>
         </thead>
         <tbody>
@@ -205,8 +205,13 @@
           <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(8, '조건에 맞는 AI 호출이 없어요')}"></tr>
         </th:block>
         <tr th:each="call : ${calls.content}">
-          <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
-          <td th:text="${call.callType.label}">유형</td>
+          <td th:text="${@adminDate.format(call.createdAt)}">시각</td>
+          <!-- 유형 + 크레딧 작업 링크 (작업 탐색은 작업 id 정확히 일치로 찾음, 작업에 묶인 호출만) -->
+          <td>
+            <span th:text="${call.callType.label}">유형</span>
+            <a th:if="${call.creditJobId != null}" th:href="@{/admin/credits/jobs(q=${call.creditJobId})}"
+               class="link link-hover text-xs ml-1" data-ai-call-credit-job-link>작업</a>
+          </td>
           <td class="text-xs" th:text="${call.model}">모델</td>
           <td>
             <!-- substring은 ID가 8자보다 짧으면 예외를 던져 화면이 통째로 죽는다.
@@ -225,9 +230,9 @@
             <div th:if="${!call.success and call.errorMessage != null}" class="text-xs text-error truncate max-w-xs"
                  th:title="${call.errorMessage}" th:text="${call.errorMessage}">오류</div>
           </td>
-          <td th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
-          <td th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
-          <td th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
+          <td class="text-right" th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
+          <td class="text-right" th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
+          <td class="text-right" th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
         </tr>
         </tbody>
       </table>

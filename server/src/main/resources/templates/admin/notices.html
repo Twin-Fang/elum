@@ -74,9 +74,11 @@
                   <input type="hidden" name="enabled" th:value="${!n.enabled}"/>
                   <button type="submit" class="btn btn-ghost btn-xs" th:text="${n.enabled} ? '끄기' : '켜기'">끄기</button>
                 </form>
-                <!-- 게시 중이면 한 번 더 묻는다 (notice-preview.js). 지우면 이미지 파일도 함께 지운다. -->
+                <!-- 지우기 확인은 공통 확인창. 제목·게시 중 안내는 notice-preview.js 가 덧붙인다. 지우면 이미지 파일도 함께 지운다. -->
                 <form th:action="@{/admin/notices/{id}/delete(id=${n.id})}" method="post"
-                      data-notice-delete th:data-live="${live}" th:data-title="${n.title}">
+                      data-notice-delete th:data-live="${live}" th:data-title="${n.title}"
+                      data-confirm-title="공지 지우기" data-confirm-danger data-confirm-accept="지우기"
+                      data-confirm-message="이 공지를 지울까요? 이미지도 함께 지워지고 되돌릴 수 없어요.">
                   <button type="submit" class="btn btn-ghost btn-xs text-error">지우기</button>
                 </form>
               </div>

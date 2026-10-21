@@ -142,7 +142,7 @@
               <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(4, '그 주 정산한 작업이 없어요')}"></tr>
             </th:block>
             <tr th:each="cost : ${overview.kindCosts()}">
-              <td th:text="${cost.kind().name()}">ROUTINE_CREATE</td>
+              <td th:text="${cost.kind().label}">일과 생성</td>
               <td class="text-right" th:text="${cost.jobs()}">0</td>
               <td class="text-right" th:text="${#numbers.formatDecimal(cost.avgCalls(), 1, 1)}">0</td>
               <td class="text-right font-mono" th:text="'$' + ${#numbers.formatDecimal(cost.avgUsd(), 1, 4)}">$0</td>

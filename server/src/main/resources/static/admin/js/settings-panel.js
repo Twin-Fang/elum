@@ -326,12 +326,21 @@
     // 기본값 복원: 서버가 처리한 뒤 화면을 다시 받는다(메시지는 상단에)
     panel.querySelector('[data-panel-reset]').addEventListener('click', function () {
       if (!openKey) return;
-      var isSecret = rowOfKey(openKey).getAttribute('data-secret') === 'true';
-      if (!window.confirm(isSecret
-        ? '저장된 값을 지울까요? 이 키를 쓰는 기능이 꺼집니다.' : '기본값으로 복원할까요?')) return;
+      var resetKey = openKey;
+      var isSecret = rowOfKey(resetKey).getAttribute('data-secret') === 'true';
+      window.ElumAdminConfirm.ask(isSecret
+        ? {title: '저장된 값 지우기', message: '저장된 값을 지울까요? 이 키를 쓰는 기능이 꺼져요.', isDanger: true, acceptLabel: '지우기'}
+        : {title: '기본값으로 복원', message: '기본값으로 복원할까요?'})
+        .then(function (isConfirmed) {
+          if (isConfirmed) submitReset(resetKey);
+        });
+    });
+
+    // 기본값 복원 제출 (사유는 입력 칸 값, 비면 빈 값)
+    function submitReset(resetKey) {
       var resetForm = element('form');
       resetForm.method = 'post';
-      resetForm.action = '/admin/settings/' + encodeURIComponent(openKey) + '/reset';
+      resetForm.action = '/admin/settings/' + encodeURIComponent(resetKey) + '/reset';
       var reason = element('input');
       reason.type = 'hidden';
       reason.name = 'reason';
@@ -339,7 +348,7 @@
       resetForm.appendChild(reason);
       document.body.appendChild(resetForm);
       resetForm.submit();
-    });
+    }
 
   });
 })();
