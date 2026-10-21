@@ -4226,7 +4226,7 @@ abstract class AppLocalizations {
   /// **'이메일 비공개'**
   String get guardianMyInfoEmailPrivate;
 
-  /// 내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)
+  /// 내정보 닉네임 카드: 가입일 (예: 2026. 10. 19 가입, 시안 1736:8780)
   ///
   /// In ko, this message translates to:
   /// **'{date} 가입'**
@@ -4243,6 +4243,60 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보는 중'**
   String get guardianMyInfoActiveBadge;
+
+  /// 내정보 닉네임 카드: 연필 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임 바꾸기'**
+  String get guardianNicknameEditLabel;
+
+  /// 보호자 닉네임 변경 시트 제목 (시안 1759:9649 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'내 이름 변경하기'**
+  String get guardianNicknameSheetTitle;
+
+  /// 보호자 닉네임 변경 시트 설명 2줄. 둘째 줄은 서버 7일 제한 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기를 작성할 때 보이는 이름이에요.\n이름은 7일에 한 번 바꿀 수 있어요'**
+  String get guardianNicknameSheetDescription;
+
+  /// 보호자 닉네임 변경 시트 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요'**
+  String get guardianNicknameSheetHint;
+
+  /// 보호자 닉네임 변경 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get guardianNicknameSheetSave;
+
+  /// 보호자 닉네임 형식이 맞지 않을 때 입력칸 아래 안내 (서버 NICKNAME_INVALID_FORMAT 과 같은 규칙)
+  ///
+  /// In ko, this message translates to:
+  /// **'한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요'**
+  String get guardianNicknameInvalidFormat;
+
+  /// 7일 제한 중 연필을 눌렀을 때 안내. since 는 dateMonthDaySince 결과(예: 10월 27일부터)
+  ///
+  /// In ko, this message translates to:
+  /// **'{since} 바꿀 수 있어요'**
+  String guardianNicknameChangeableFrom(String since);
+
+  /// 보호자 닉네임 저장 성공 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임을 바꿨어요'**
+  String get guardianNicknameChanged;
+
+  /// 보호자 닉네임 저장이 네트워크·서버 오류로 실패했을 때 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임을 바꾸지 못했어요'**
+  String get guardianNicknameSaveFailed;
 
   /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
   ///

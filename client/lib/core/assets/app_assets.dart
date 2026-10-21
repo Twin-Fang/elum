@@ -356,6 +356,9 @@ abstract final class AppAssets {
   /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
   static const iconSettings = '$_images/icon_settings.svg';
 
+  /// 내 정보 가입일 달력 (20×20 #CACACA). Figma `fi-br-calendar`(1759:9582).
+  static const iconCalendar = '$_images/icon_calendar.svg';
+
   /// 기기 알림 꺼짐 띠의 종+사선 (22×20 #74757D). Figma `1732:8559`.
   static const iconNotificationOff = '$_images/icon_notification_off.svg';
 

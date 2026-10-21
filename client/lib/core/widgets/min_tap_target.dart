@@ -8,14 +8,14 @@ class MinTapTarget extends StatelessWidget {
 
   final Widget child;
 
-  // 접근성 최소 누르기 크기
-  static const _minimumSize = 44.0;
+  /// 접근성 최소 누르기 크기 (줄 높이를 이 값에 맞추는 곳이 읽음)
+  static const minimumSize = 44.0;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
     constraints: BoxConstraints(
-      minWidth: _minimumSize.w,
-      minHeight: _minimumSize.w,
+      minWidth: minimumSize.w,
+      minHeight: minimumSize.w,
     ),
     child: Center(widthFactor: 1, heightFactor: 1, child: child),
   );

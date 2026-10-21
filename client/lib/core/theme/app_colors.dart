@@ -194,6 +194,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsChevron,
     required this.settingsCardLabel,
     required this.settingsCardValue,
+    required this.myInfoMetaText,
+    required this.myInfoMutedIcon,
     required this.settingsToggleOn,
     required this.settingsToggleOff,
     required this.settingsGroupBg,
@@ -762,6 +764,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 묶음 카드 설정 줄 오른쪽 값 글자 (`그림 방식  실사`, `앱 정보  버전`).
   final Color settingsCardValue;
 
+  /// 내 정보 닉네임 카드의 이메일·가입일 글자와 제목 줄 톱니 (Figma `1736:8780` #74757D).
+  final Color myInfoMetaText;
+
+  /// 내 정보 닉네임 카드의 연필·달력 아이콘 (Figma `1736:8780` #CACACA).
+  final Color myInfoMutedIcon;
+
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
   final Color settingsToggleOn;
 
@@ -1092,6 +1100,8 @@ class AppColors extends ThemeExtension<AppColors> {
     settingsChevron: Color(0xFFCDCDCD),
     settingsCardLabel: Color(0xFF000000),
     settingsCardValue: Color(0xFF74757D),
+    myInfoMetaText: Color(0xFF74757D),
+    myInfoMutedIcon: Color(0xFFCACACA),
     settingsToggleOn: Color(0xFF55CFBA),
     settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
@@ -1303,6 +1313,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsChevron,
     Color? settingsCardLabel,
     Color? settingsCardValue,
+    Color? myInfoMetaText,
+    Color? myInfoMutedIcon,
     Color? settingsToggleOn,
     Color? settingsToggleOff,
     Color? settingsGroupBg,
@@ -1517,6 +1529,8 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsChevron: settingsChevron ?? this.settingsChevron,
       settingsCardLabel: settingsCardLabel ?? this.settingsCardLabel,
       settingsCardValue: settingsCardValue ?? this.settingsCardValue,
+      myInfoMetaText: myInfoMetaText ?? this.myInfoMetaText,
+      myInfoMutedIcon: myInfoMutedIcon ?? this.myInfoMutedIcon,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
       settingsToggleOff: settingsToggleOff ?? this.settingsToggleOff,
       settingsGroupBg: settingsGroupBg ?? this.settingsGroupBg,
@@ -1901,6 +1915,8 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
       settingsCardLabel: Color.lerp(settingsCardLabel, other.settingsCardLabel, t)!,
       settingsCardValue: Color.lerp(settingsCardValue, other.settingsCardValue, t)!,
+      myInfoMetaText: Color.lerp(myInfoMetaText, other.myInfoMetaText, t)!,
+      myInfoMutedIcon: Color.lerp(myInfoMutedIcon, other.myInfoMutedIcon, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,
       settingsToggleOff: Color.lerp(settingsToggleOff, other.settingsToggleOff, t)!,
       settingsGroupBg: Color.lerp(settingsGroupBg, other.settingsGroupBg, t)!,

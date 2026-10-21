@@ -98,6 +98,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.peopleSectionLabel,
     required this.peopleRowName,
     required this.peopleChipLabel,
+    required this.myInfoNickname,
+    required this.myInfoElumiName,
+    required this.myInfoMeta,
     required this.peopleRenameLabel,
     required this.peopleEditDescription,
     required this.peopleEditChipLabel,
@@ -456,6 +459,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `나` 배지 · 구분 칩 글자 (12/w500 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleChipLabel;
+
+  /// 내 정보 닉네임 (18/w600 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoNickname;
+
+  /// 내 정보 이룸이 카드 이름 (16/w600 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoElumiName;
+
+  /// 내 정보 이메일·가입일 (13/w400 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoMeta;
 
   /// `이름 변경` 버튼 글자 (14/w600 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleRenameLabel;
@@ -1072,6 +1084,27 @@ class AppTypography extends ThemeExtension<AppTypography> {
       letterSpacing: 0,
       height: 1.0,
     ),
+    myInfoNickname: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    myInfoElumiName: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    myInfoMeta: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
     peopleRenameLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1253,6 +1286,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? peopleSectionLabel,
     TextStyle? peopleRowName,
     TextStyle? peopleChipLabel,
+    TextStyle? myInfoNickname,
+    TextStyle? myInfoElumiName,
+    TextStyle? myInfoMeta,
     TextStyle? peopleRenameLabel,
     TextStyle? peopleEditDescription,
     TextStyle? peopleEditChipLabel,
@@ -1358,6 +1394,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       peopleSectionLabel: peopleSectionLabel ?? this.peopleSectionLabel,
       peopleRowName: peopleRowName ?? this.peopleRowName,
       peopleChipLabel: peopleChipLabel ?? this.peopleChipLabel,
+      myInfoNickname: myInfoNickname ?? this.myInfoNickname,
+      myInfoElumiName: myInfoElumiName ?? this.myInfoElumiName,
+      myInfoMeta: myInfoMeta ?? this.myInfoMeta,
       peopleRenameLabel: peopleRenameLabel ?? this.peopleRenameLabel,
       peopleEditDescription: peopleEditDescription ?? this.peopleEditDescription,
       peopleEditChipLabel: peopleEditChipLabel ?? this.peopleEditChipLabel,
@@ -1494,6 +1533,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       peopleSectionLabel: TextStyle.lerp(peopleSectionLabel, other.peopleSectionLabel, t)!,
       peopleRowName: TextStyle.lerp(peopleRowName, other.peopleRowName, t)!,
       peopleChipLabel: TextStyle.lerp(peopleChipLabel, other.peopleChipLabel, t)!,
+      myInfoNickname: TextStyle.lerp(myInfoNickname, other.myInfoNickname, t)!,
+      myInfoElumiName: TextStyle.lerp(myInfoElumiName, other.myInfoElumiName, t)!,
+      myInfoMeta: TextStyle.lerp(myInfoMeta, other.myInfoMeta, t)!,
       peopleRenameLabel: TextStyle.lerp(peopleRenameLabel, other.peopleRenameLabel, t)!,
       peopleEditDescription: TextStyle.lerp(peopleEditDescription, other.peopleEditDescription, t)!,
       peopleEditChipLabel: TextStyle.lerp(peopleEditChipLabel, other.peopleEditChipLabel, t)!,

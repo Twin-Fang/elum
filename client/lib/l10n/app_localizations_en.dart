@@ -2436,6 +2436,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianMyInfoActiveBadge => 'Viewing';
 
   @override
+  String get guardianNicknameEditLabel => '닉네임 바꾸기';
+
+  @override
+  String get guardianNicknameSheetTitle => '내 이름 변경하기';
+
+  @override
+  String get guardianNicknameSheetDescription =>
+      '이야기를 작성할 때 보이는 이름이에요.\n이름은 7일에 한 번 바꿀 수 있어요';
+
+  @override
+  String get guardianNicknameSheetHint => '이름을 입력해주세요';
+
+  @override
+  String get guardianNicknameSheetSave => '저장하기';
+
+  @override
+  String get guardianNicknameInvalidFormat =>
+      '한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요';
+
+  @override
+  String guardianNicknameChangeableFrom(String since) {
+    return '$since 바꿀 수 있어요';
+  }
+
+  @override
+  String get guardianNicknameChanged => '닉네임을 바꿨어요';
+
+  @override
+  String get guardianNicknameSaveFailed => '닉네임을 바꾸지 못했어요';
+
+  @override
   String get guardianSideNavCaption => 'Guardian mode';
 
   @override
