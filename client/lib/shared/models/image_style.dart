@@ -1,4 +1,4 @@
-import '../../../core/l10n/current_l10n.dart';
+import '../../core/l10n/current_l10n.dart';
 
 /// 카드 그림을 어떤 방식으로 만들지.
 ///

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/text/keep_words.dart';
-import '../../../../core/theme/app_motion.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../shared/models/character.dart';
-import '../../domain/image_style.dart';
+import '../assets/app_assets.dart';
+import '../l10n/l10n_context.dart';
+import '../text/keep_words.dart';
+import '../theme/app_motion.dart';
+import '../theme/theme_context_ext.dart';
+import '../../shared/models/character.dart';
+import '../../shared/models/image_style.dart';
 
 /// 그림 방식 선택 카드 한 장 — 온보딩과 보호자 설정이 같이 쓴다.
 ///

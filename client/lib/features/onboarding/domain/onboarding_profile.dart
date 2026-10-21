@@ -2,7 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/l10n/current_l10n.dart';
 import '../../../shared/models/character.dart';
-import 'image_style.dart';
+import '../../../shared/models/image_style.dart';
 import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';
 

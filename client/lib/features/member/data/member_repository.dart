@@ -6,7 +6,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
-import '../../onboarding/domain/image_style.dart';
+import '../../../shared/models/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../domain/guardian_account.dart';
 import '../../../app/dio_provider.dart';

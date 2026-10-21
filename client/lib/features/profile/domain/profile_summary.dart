@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../core/l10n/current_l10n.dart';
-import '../../onboarding/domain/image_style.dart';
+import '../../../shared/models/image_style.dart';
 
 /// 연결된 이룸이 한 명 — 서버 `ProfileSummaryResponse`에 대응한다.
 ///

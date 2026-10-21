@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/elum_bottom_sheet.dart';
-import '../../../../core/widgets/elum_button.dart';
-import '../../../../core/widgets/elum_text_field.dart';
+import '../l10n/l10n_context.dart';
+import '../theme/theme_context_ext.dart';
+import 'elum_bottom_sheet.dart';
+import 'elum_button.dart';
+import 'elum_text_field.dart';
 
 /// 일과 이름 글자 수 상한. 서버 `PATCH /api/routines/{id}/title` 검증과 같은 값 (#804)
 const routineTitleMaxLength = 30;

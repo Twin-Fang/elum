@@ -7,7 +7,7 @@ import '../../guardian/application/routine_manage_coach_notifier.dart';
 import '../../member/data/member_repository.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../../../shared/models/character.dart';
-import '../domain/image_style.dart';
+import '../../../shared/models/image_style.dart';
 import '../domain/onboarding_profile.dart';
 import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';

@@ -11,7 +11,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
-import 'widgets/character_card.dart';
+import '../../../core/widgets/character_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 

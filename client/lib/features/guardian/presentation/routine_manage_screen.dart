@@ -32,7 +32,7 @@ import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
-import 'widgets/routine_rename_sheet.dart';
+import '../../../core/widgets/routine_rename_sheet.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///

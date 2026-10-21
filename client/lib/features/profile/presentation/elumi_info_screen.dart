@@ -15,9 +15,9 @@ import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/character.dart';
-import '../../guardian/presentation/widgets/routine_rename_sheet.dart';
+import '../../../core/widgets/routine_rename_sheet.dart';
 import '../../member/application/member_providers.dart';
-import '../application/elumi_info_editor.dart';
+import '../../member/application/elumi_info_editor.dart';
 import '../domain/profile_summary.dart';
 import 'widgets/elumi_choice_sheets.dart';
 

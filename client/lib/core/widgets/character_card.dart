@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/theme/app_motion.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../shared/models/character.dart';
+import '../assets/app_assets.dart';
+import '../theme/app_motion.dart';
+import '../theme/theme_context_ext.dart';
+import '../../shared/models/character.dart';
 
 /// 캐릭터 선택 카드. Figma 기준 176×202.
 ///

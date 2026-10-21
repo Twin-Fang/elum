@@ -18,7 +18,7 @@ import 'widgets/library_entry_grid.dart' show LibraryMenuAnchor;
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_group_picker_sheet.dart';
 import 'widgets/routine_group_sheet.dart';
-import 'widgets/routine_rename_sheet.dart';
+import '../../../core/widgets/routine_rename_sheet.dart';
 
 /// 일과관리 칸의 묶음 동작 (#807): 열기 · 메뉴 · 만들기 · 넣기 · 끌어 묶기 · 보내기 · 이름 · 복사 · 풀기
 ///

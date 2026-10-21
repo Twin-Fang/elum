@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../shared/models/character.dart';
-import '../../member/application/member_providers.dart';
-import '../../member/data/member_repository.dart';
-import '../../onboarding/domain/image_style.dart';
+import 'member_providers.dart';
+import '../data/member_repository.dart';
+import '../../../shared/models/image_style.dart';
 
 /// 이룸이 정보 고치기: 이름·캐릭터·그림 방식을 지정한 이룸이에 저장 > 회원 정보 다시 받기 (#660)
 ///

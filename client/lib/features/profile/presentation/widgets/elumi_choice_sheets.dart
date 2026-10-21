@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
@@ -7,10 +8,11 @@ import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/selectable_group.dart';
 import '../../../../shared/models/character.dart';
-import '../../../onboarding/domain/image_style.dart';
-import '../../../onboarding/presentation/widgets/character_card.dart';
-import '../../../onboarding/presentation/widgets/image_style_credit_bar.dart';
-import '../../../onboarding/presentation/widgets/image_style_option_card.dart';
+import '../../../../shared/models/image_style.dart';
+import '../../../../core/widgets/character_card.dart';
+import '../../../../core/widgets/image_style_credit_bar.dart';
+import '../../../../core/widgets/image_style_option_card.dart';
+import '../../../credit/application/credit_costs.dart';
 
 /// 캐릭터 바꾸기 시트: 카드 2장 중 하나 > 저장하기. 저장하면 고른 캐릭터를 돌려준다 (#660)
 Future<CardCharacter?> showElumiCharacterSheet(
@@ -177,7 +179,13 @@ class _ImageStyleChoices extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 고른 방식의 비용을 저장 전에 보여 줌
-        ImageStyleCreditBar(style: picked),
+        // 단가는 크레딧 기능에서 읽어 넘긴다
+        Consumer(
+          builder: (context, ref, _) => ImageStyleCreditBar(
+            style: picked,
+            costs: ref.watch(creditCostsProvider),
+          ),
+        ),
         SizedBox(height: gap),
         SelectableGroup<ImageStyle>(
           items: ImageStyle.values,

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../credit/application/credit_costs.dart';
-import '../../domain/image_style.dart';
+import '../assets/app_assets.dart';
+import '../l10n/l10n_context.dart';
+import '../theme/theme_context_ext.dart';
+import '../../shared/models/image_style.dart';
 
 /// 그림 방식 목록 위의 크레딧 띠 — 고른 방식이 크레딧을 얼마나 쓰는지 보인다.
 ///
@@ -15,18 +13,25 @@ import '../../domain/image_style.dart';
 /// 목록과 한 덩어리로 읽히고, 방식을 바꿔도 높이가 그대로라 아래 카드가 움직이지 않는다.
 /// 시안에 없는 임시 모양이다.
 ///
-/// 숫자는 서버 단가를 쓴다 — 관리자가 단가를 바꾸면 따라간다. 못 받으면 기본 단가(1)다.
-/// 크레딧 기능이 꺼져 있으면 쓸 일이 없으니 띠를 감춘다.
-class ImageStyleCreditBar extends ConsumerWidget {
-  const ImageStyleCreditBar({super.key, required this.style});
+/// 숫자는 서버 단가를 쓴다 — 부르는 쪽이 `creditCostsProvider` 값을 [costs] 로 넘긴다.
+/// 크레딧 기능이 꺼져 있으면(null) 쓸 일이 없으니 띠를 감춘다.
+class ImageStyleCreditBar extends StatelessWidget {
+  const ImageStyleCreditBar({
+    super.key,
+    required this.style,
+    required this.costs,
+  });
 
   final ImageStyle style;
+
+  /// 일과 하나(`routine`) · 그림 한 장(`image`) 단가. null 이면 띠를 그리지 않는다
+  final ({int routine, int image})? costs;
 
   static const _coinSize = 22.0;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final costs = ref.watch(creditCostsProvider);
+  Widget build(BuildContext context) {
+    final costs = this.costs;
     if (costs == null) return const SizedBox.shrink();
 
     final colors = context.colors;

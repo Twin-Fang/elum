@@ -10,11 +10,12 @@ import '../../../core/widgets/selectable_group.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
-import '../../onboarding/domain/image_style.dart';
-import '../../onboarding/presentation/widgets/image_style_credit_bar.dart';
-import '../../onboarding/presentation/widgets/image_style_option_card.dart';
+import '../../../shared/models/image_style.dart';
+import '../../../core/widgets/image_style_credit_bar.dart';
+import '../../../core/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../credit/application/credit_costs.dart';
 
 /// 보호자 설정의 `그림 방식` 선택 화면.
 ///
@@ -123,7 +124,10 @@ class _ImageStyleSettingsScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 고른 방식의 비용을 보여 준다 (저장 전)
-              ImageStyleCreditBar(style: _pickedStyle),
+              ImageStyleCreditBar(
+                style: _pickedStyle,
+                costs: ref.watch(creditCostsProvider),
+              ),
               SizedBox(height: 12.h),
               group,
             ],
