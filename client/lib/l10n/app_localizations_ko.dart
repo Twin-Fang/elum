@@ -2764,6 +2764,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkEmptyAction => '첫 일과를 나눠 보세요';
 
   @override
+  String get talkEmptyCategoryTitle => '이 분류에는 아직 나눈 일과가 없어요';
+
+  @override
+  String get talkEmptyCategoryAction => '전체 보기';
+
+  @override
   String get talkFeedFailed => '이야기를 불러오지 못했어요';
 
   @override

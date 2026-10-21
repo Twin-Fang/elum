@@ -72,7 +72,7 @@ class TalkShareStepCard extends StatelessWidget {
                   color: colors.textPrimary,
                 ),
                 child: Text(
-                  '${step.stepOrder + 1}',
+                  '${step.cardNumber}',
                   style: typo.caption.copyWith(
                     color: colors.surface,
                     fontWeight: FontWeight.w800,

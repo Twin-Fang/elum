@@ -42,12 +42,17 @@ class TalkPreviewStep {
 
   /// 원본 카드 id (올리기의 blurredStepIds 에 쓴다)
   final String stepId;
+
+  /// 카드 순서 (1부터, 서버 미리보기 기준)
   final int stepOrder;
   final String? title;
   final String description;
 
   /// 보호자가 올린 사진인가 (흐리게 선택 대상)
   final bool isGuardianPhoto;
+
+  /// 화면에 보이는 카드 번호 (1부터)
+  int get cardNumber => stepOrder;
 
   static TalkPreviewStep? fromJson(Map<String, dynamic> json) {
     final stepId = TalkJson.nonEmptyText(json['stepId']);

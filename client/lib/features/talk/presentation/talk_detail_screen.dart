@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,6 +15,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../application/talk_comment_controller.dart';
 import '../application/talk_detail_controller.dart';
 import '../domain/talk_post.dart';
@@ -69,6 +72,33 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
     }
   }
 
+  /// 당겨서 새로고침: 글 > 댓글 첫 쪽 순서로 다시 받는다 (앱 복귀 시 자동 갱신은 하지 않음)
+  /// 글이 내려갔으면 댓글은 받지 않고, 실패하면 보던 내용은 두고 실패 팝업만 띄운다
+  Future<void> _refresh() async {
+    try {
+      await ref
+          .read(talkDetailControllerProvider(widget.postId).notifier)
+          .refresh();
+      if (!ref.read(talkDetailControllerProvider(widget.postId)).hasValue) {
+        return;
+      }
+      await ref
+          .read(talkCommentControllerProvider(widget.postId).notifier)
+          .refresh();
+    } catch (e) {
+      if (!mounted) return;
+      // 스피너가 팝업을 기다리지 않게 await 하지 않음
+      unawaited(
+        showFailure(
+          context,
+          e,
+          fallback: context.l10n.talkDetailLoadFailed,
+          fallbackCode: TalkScreenCodes.detail,
+        ),
+      );
+    }
+  }
+
   /// 글이 내려갔는가 (없는 글·내가 내린 글)
   bool _isPostGone(Object error) =>
       AppFailure.of(error).server?.code == ServerErrorCode.talkPostNotFound;
@@ -120,25 +150,32 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   Widget _content(TalkPostDetail post) {
     final space = context.space;
     final comments = ref.watch(talkCommentControllerProvider(widget.postId));
-    return SingleChildScrollView(
-      controller: _scrollController,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.only(bottom: space.lg.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TalkDetailBody(post: post, onHelpfulPressed: _actions.toggleHelpful),
-          SizedBox(height: _sectionGap.h),
-          TalkCommentList(
-            comments: comments,
-            onCommentMenuRequested: _actions.openCommentMenu,
-            onRetryPressed: () =>
-                ref.invalidate(talkCommentControllerProvider(widget.postId)),
-            onRetryLoadMorePressed: ref
-                .read(talkCommentControllerProvider(widget.postId).notifier)
-                .retryLoadMore,
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: EdgeInsets.only(bottom: space.lg.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TalkDetailBody(
+              post: post,
+              onHelpfulPressed: _actions.toggleHelpful,
+            ),
+            SizedBox(height: _sectionGap.h),
+            TalkCommentList(
+              comments: comments,
+              onCommentMenuRequested: _actions.openCommentMenu,
+              onRetryPressed: () =>
+                  ref.invalidate(talkCommentControllerProvider(widget.postId)),
+              onRetryLoadMorePressed: ref
+                  .read(talkCommentControllerProvider(widget.postId).notifier)
+                  .retryLoadMore,
+            ),
+          ],
+        ),
       ),
     );
   }

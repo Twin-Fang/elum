@@ -160,7 +160,13 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
           slivers: [
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: _EmptyBody(onSharePressed: _openShare)),
+              child: Center(
+                child: _EmptyBody(
+                  isCategoryFiltered: _selectedCategory != null,
+                  onSharePressed: _openShare,
+                  onShowAllPressed: () => _onCategorySelected(null),
+                ),
+              ),
             ),
           ],
         ),
@@ -298,11 +304,18 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 글이 0건일 때: 루미 그림 + 안내 + 올리기 버튼 (받는 중·실패와 다른 화면)
+/// 글이 0건일 때: 루미 그림 + 안내 + 버튼 (받는 중·실패와 다른 화면)
+/// 분류로 거른 0건이면 "전체 보기", 전체가 0건이면 "올리기"
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody({required this.onSharePressed});
+  const _EmptyBody({
+    required this.isCategoryFiltered,
+    required this.onSharePressed,
+    required this.onShowAllPressed,
+  });
 
+  final bool isCategoryFiltered;
   final VoidCallback onSharePressed;
+  final VoidCallback onShowAllPressed;
 
   static const _illustrationSize = 200.0;
 
@@ -324,7 +337,9 @@ class _EmptyBody extends StatelessWidget {
           ),
           SizedBox(height: space.md.h),
           Text(
-            context.l10n.talkEmptyTitle,
+            isCategoryFiltered
+                ? context.l10n.talkEmptyCategoryTitle
+                : context.l10n.talkEmptyTitle,
             textAlign: TextAlign.center,
             style: context.typo.sectionTitle.copyWith(
               color: context.colors.textPrimary,
@@ -332,8 +347,10 @@ class _EmptyBody extends StatelessWidget {
           ),
           SizedBox(height: space.lg.h),
           ElumButton(
-            label: context.l10n.talkEmptyAction,
-            onPressed: onSharePressed,
+            label: isCategoryFiltered
+                ? context.l10n.talkEmptyCategoryAction
+                : context.l10n.talkEmptyAction,
+            onPressed: isCategoryFiltered ? onShowAllPressed : onSharePressed,
           ),
         ],
       ),

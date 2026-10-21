@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
+import '../../../core/network/server_error_code.dart';
 import '../data/talk_repository.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_report_reason.dart';
@@ -30,6 +32,20 @@ class TalkDetailController extends AsyncNotifier<TalkPostDetail> {
 
   @override
   Future<TalkPostDetail> build() => _repository.fetchDetail(postId);
+
+  /// 처음부터 다시 받기 (당겨서 새로고침)
+  /// 내려간 글(404)이면 에러 상태로 바꿔 화면이 "내려간 글이에요"를 보인다. 그 밖의 실패는 보던 글을 두고 던진다
+  Future<void> refresh() async {
+    final previousPost = state.value;
+    final refreshedState = await AsyncValue.guard(build);
+    if (!ref.mounted) return;
+    final failure = refreshedState.error;
+    final isPostGone =
+        failure != null &&
+        AppFailure.of(failure).server?.code == ServerErrorCode.talkPostNotFound;
+    if (failure != null && previousPost != null && !isPostGone) throw failure;
+    state = refreshedState;
+  }
 
   /// 도움이 됐어요 켜기·끄기: 먼저 화면을 바꾸고, 실패하면 되돌린 뒤 던진다
   Future<void> toggleHelpful() async {

@@ -5024,6 +5024,18 @@ abstract class AppLocalizations {
   /// **'첫 일과를 나눠 보세요'**
   String get talkEmptyAction;
 
+  /// 이야기 칸 분류 칩으로 거른 결과가 0건일 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 분류에는 아직 나눈 일과가 없어요'**
+  String get talkEmptyCategoryTitle;
+
+  /// 이야기 칸 분류 빈 상태 버튼: 전체 칩으로 되돌림
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 보기'**
+  String get talkEmptyCategoryAction;
+
   /// 이야기 칸 첫 쪽 불러오기 실패 문구
   ///
   /// In ko, this message translates to:

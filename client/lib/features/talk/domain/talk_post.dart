@@ -30,6 +30,9 @@ class TalkStep {
   /// 그림을 흐리게 보여줄 것인가
   final bool isBlurred;
 
+  /// 화면에 보이는 카드 번호 (1부터, 서버 상세 stepOrder 는 0부터)
+  int get cardNumber => stepOrder + 1;
+
   /// 순서가 없으면 null (그 카드만 버린다)
   static TalkStep? fromJson(Map<String, dynamic> json) {
     final order = json['stepOrder'];

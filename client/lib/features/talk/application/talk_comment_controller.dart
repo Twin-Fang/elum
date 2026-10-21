@@ -108,10 +108,14 @@ class TalkCommentController extends AsyncNotifier<TalkCommentState> {
     await loadMore();
   }
 
-  /// 처음부터 다시 받기 (차단 직후처럼 목록이 바뀐 뒤)
+  /// 처음부터 다시 받기 (당겨서 새로고침, 차단 직후처럼 목록이 바뀐 뒤)
+  /// 이미 받은 목록이 있으면 실패해도 그대로 두고 던진다 (화면이 안내). 목록이 없으면 에러 상태로
   Future<void> refresh() async {
+    final previousState = state.value;
     final refreshedState = await AsyncValue.guard(build);
     if (!ref.mounted) return;
+    final failure = refreshedState.error;
+    if (failure != null && previousState != null) throw failure;
     state = refreshedState;
   }
 
