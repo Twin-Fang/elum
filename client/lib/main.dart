@@ -5,7 +5,9 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/client_tuning.dart';
 import 'core/dev/dev_log_buffer.dart';
+import 'core/dev/app_restart.dart';
 import 'core/dev/dev_log_file.dart';
+import 'core/dev/dev_server_store.dart';
 import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
 import 'core/push/push_unregister_hook.dart';
@@ -49,6 +51,8 @@ Future<void> main() async {
   if (AppConfig.showDevTools) {
     await DevLogFile.init();
     DevLogBuffer.install();
+    // 개발자 도구에서 고른 서버 주소 (첫 Dio 생성 전)
+    await DevServerStore.applySavedApiBaseUrl();
   }
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
@@ -119,19 +123,22 @@ Future<void> main() async {
   await OAuthSdk.initialize();
 
   runApp(
-    ProviderScope(
-      // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다.
-      retry: elumProviderRetry,
-      overrides: [
-        localStorageProvider.overrideWithValue(storage),
-        tokenStoreProvider.overrideWithValue(tokens),
-        startupLockMissingProvider.overrideWithValue(lockMissing),
-        // 로그아웃·회원삭제·이룸이 기기 전환 직전 푸시 토큰 해제 (인증·연결 data 가 알림을 직접 모르므로 여기서 연결)
-        pushUnregisterProvider.overrideWith(
-          (ref) => ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
-        ),
-      ],
-      child: const ElumApp(),
+    // 개발자 도구가 서버를 바꾸면 이 아래를 통째로 다시 만든다
+    AppRestart(
+      builder: (_) => ProviderScope(
+        // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다.
+        retry: elumProviderRetry,
+        overrides: [
+          localStorageProvider.overrideWithValue(storage),
+          tokenStoreProvider.overrideWithValue(tokens),
+          startupLockMissingProvider.overrideWithValue(lockMissing),
+          // 로그아웃·회원삭제·이룸이 기기 전환 직전 푸시 토큰 해제 (인증·연결 data 가 알림을 직접 모르므로 여기서 연결)
+          pushUnregisterProvider.overrideWith(
+            (ref) => ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+          ),
+        ],
+        child: const ElumApp(),
+      ),
     ),
   );
 }

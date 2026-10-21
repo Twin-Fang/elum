@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_centered_title_row.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -122,7 +125,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               child: switch (detail) {
                 AsyncData(value: final post) => _content(post),
                 AsyncError(:final error) when _isPostGone(error) => _GoneBody(
-                  onBackPressed: context.popOrHome,
+                  // 진입 경로와 무관하게 이야기 탭으로 이동
+                  onBackPressed: () => context.go(Routes.guardianTalk),
                 ),
                 AsyncError(:final error) => ElumStateBody(
                   child: ElumErrorView.failure(
@@ -201,52 +205,49 @@ class _Header extends StatelessWidget {
         horizontal: space.xs.w,
         vertical: space.xs.h,
       ),
-      child: Row(
-        children: [
-          Semantics(
-            button: true,
-            label: l10n.commonBack,
-            child: AppPressable(
-              onTap: context.popOrHome,
-              scaleDown: AppPressable.scaleIcon,
-              child: SizedBox(
-                width: _tapSize.w,
-                height: _tapSize.w,
-                child: Center(
-                  child: SvgPicture.asset(
-                    AppAssets.iconBack,
-                    width: _iconSize.w,
-                    height: _iconSize.w,
-                    excludeFromSemantics: true,
-                  ),
+      child: ElumCenteredTitleRow(
+        sideSlotWidth: _tapSize.w,
+        leading: Semantics(
+          button: true,
+          label: l10n.commonBack,
+          child: AppPressable(
+            onTap: context.popOrHome,
+            scaleDown: AppPressable.scaleIcon,
+            child: SizedBox(
+              width: _tapSize.w,
+              height: _tapSize.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconBack,
+                  width: _iconSize.w,
+                  height: _iconSize.w,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
           ),
-          Expanded(
-            child: Text(
-              l10n.talkTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.navTitle.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          SizedBox(
-            width: _tapSize.w,
-            height: _tapSize.w,
-            child: onMorePressed == null
-                ? null
-                : AppPressable(
-                    onTap: onMorePressed,
-                    scaleDown: AppPressable.scaleIcon,
-                    semanticLabel: l10n.talkMoreLabel,
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-                      size: _iconSize.w,
-                      color: colors.textPrimary,
-                    ),
+        ),
+        title: Text(
+          l10n.talkTitle,
+          textAlign: TextAlign.center,
+          style: context.typo.navTitle.copyWith(color: colors.textPrimary),
+        ),
+        trailing: SizedBox(
+          width: _tapSize.w,
+          height: _tapSize.w,
+          child: onMorePressed == null
+              ? null
+              : AppPressable(
+                  onTap: onMorePressed,
+                  scaleDown: AppPressable.scaleIcon,
+                  semanticLabel: l10n.talkMoreLabel,
+                  child: Icon(
+                    Icons.more_horiz_rounded,
+                    size: _iconSize.w,
+                    color: colors.textPrimary,
                   ),
-          ),
-        ],
+                ),
+        ),
       ),
     );
   }

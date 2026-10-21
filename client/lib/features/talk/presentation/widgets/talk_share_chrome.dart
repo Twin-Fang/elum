@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_centered_title_row.dart';
 
 /// 올리기 화면 머리 줄: 뒤로 | 이야기에 올리기
 class TalkShareHeader extends StatelessWidget {
@@ -27,39 +28,35 @@ class TalkShareHeader extends StatelessWidget {
         horizontal: space.xs.w,
         vertical: space.xs.h,
       ),
-      child: Row(
-        children: [
-          Semantics(
-            button: true,
-            label: l10n.commonBack,
-            child: AppPressable(
-              onTap: onBackPressed,
-              scaleDown: AppPressable.scaleIcon,
-              child: SizedBox(
-                width: _tapSize.w,
-                height: _tapSize.w,
-                child: Center(
-                  child: SvgPicture.asset(
-                    AppAssets.iconBack,
-                    width: _iconSize.w,
-                    height: _iconSize.w,
-                    excludeFromSemantics: true,
-                  ),
+      child: ElumCenteredTitleRow(
+        sideSlotWidth: _tapSize.w,
+        leading: Semantics(
+          button: true,
+          label: l10n.commonBack,
+          child: AppPressable(
+            onTap: onBackPressed,
+            scaleDown: AppPressable.scaleIcon,
+            child: SizedBox(
+              width: _tapSize.w,
+              height: _tapSize.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconBack,
+                  width: _iconSize.w,
+                  height: _iconSize.w,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
           ),
-          Expanded(
-            child: Text(
-              l10n.talkShareTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.navTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
+        ),
+        title: Text(
+          l10n.talkShareTitle,
+          textAlign: TextAlign.center,
+          style: context.typo.navTitle.copyWith(
+            color: context.colors.textPrimary,
           ),
-          SizedBox(width: _tapSize.w),
-        ],
+        ),
       ),
     );
   }

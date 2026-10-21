@@ -10,10 +10,14 @@ class ElumCheckRow extends StatelessWidget {
     required this.label,
     required this.checked,
     required this.onChanged,
+    this.labelStyle,
   });
 
   final String label;
   final bool checked;
+
+  /// null 이면 input 글꼴(기본). 화면 글꼴에 맞출 때만 넘긴다.
+  final TextStyle? labelStyle;
 
   /// null 이면 잠긴다(전송 중).
   final ValueChanged<bool>? onChanged;
@@ -61,7 +65,9 @@ class ElumCheckRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: context.typo.input.copyWith(color: colors.textPrimary),
+                  style: (labelStyle ?? context.typo.input).copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
             ],

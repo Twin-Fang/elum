@@ -1056,9 +1056,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationTurnOnDeviceNotification => '켜기';
 
   @override
-  String get notificationSettingsLockedHint => '기기 알림을 켜면 이 설정대로 받아요';
-
-  @override
   String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
 
   @override
@@ -2420,15 +2417,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryNewBadge => '새로';
 
   @override
-  String routineDetailTalkOriginBanner(String authorNickname) {
-    return '📖 $authorNickname님이 이야기에 나눈 일과예요';
-  }
+  String get routineDetailTalkOriginBand => '来自故事区';
 
   @override
-  String get routineDetailTalkOriginBannerNoAuthor => '📖 이야기에 나눈 일과예요';
+  String get routineDetailTalkOriginOpenPost => '原帖';
 
   @override
-  String get routineDetailTalkOriginOpen => '원래 글 보기';
+  String get routineDetailTalkOriginPostGone => '已下架的帖子';
+
+  @override
+  String get routineDetailTalkOriginBandOpenLabel => '来自故事区,查看原帖';
 
   @override
   String routineLibrarySent(String title) {
@@ -2534,7 +2532,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String routineGroupSheetCount(int count) {
-    return '일과 $count개 · 이 순서대로 보여요';
+    return '일과 $count개';
   }
 
   @override
@@ -2544,9 +2542,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String routineGroupSheetRemove(String title) {
     return '$title 묶음에서 빼기';
   }
-
-  @override
-  String get routineGroupSheetDragHint => '길게 눌러 끌면 순서를 바꿀 수 있어요';
 
   @override
   String get routineGroupCreated => '묶음을 만들었어요';
@@ -2612,7 +2607,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
 
   @override
-  String get routineGroupEditOrder => '순서 편집';
+  String get routineGroupEditOrder => '편집';
 
   @override
   String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
@@ -2639,6 +2634,21 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get routineManageCoachCreateGroupMessage =>
       '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
+
+  @override
+  String get cardReviewCoachEditMessage =>
+      '보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요';
+
+  @override
+  String get cardReviewCoachReorderMessage =>
+      '여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요';
+
+  @override
+  String get cardReviewCoachSaveMessage =>
+      '다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요';
+
+  @override
+  String get coachHelpLabel => '사용법 보기';
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
@@ -2775,7 +2785,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkAuthorFallback => '보호자';
 
   @override
-  String get talkNoteLabel => '이렇게 했어요';
+  String get talkNoteLabel => '내용';
 
   @override
   String get talkImportButtonShort => '내 일과로';

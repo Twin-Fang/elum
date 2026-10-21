@@ -1110,10 +1110,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationTurnOnDeviceNotification => 'Turn on';
 
   @override
-  String get notificationSettingsLockedHint =>
-      'Turn on device notifications to get these alerts';
-
-  @override
   String get notificationSettingSaveFailed => 'Couldn\'t save your settings';
 
   @override
@@ -2527,15 +2523,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLibraryNewBadge => '새로';
 
   @override
-  String routineDetailTalkOriginBanner(String authorNickname) {
-    return '📖 $authorNickname님이 이야기에 나눈 일과예요';
-  }
+  String get routineDetailTalkOriginBand => 'Imported from Community';
 
   @override
-  String get routineDetailTalkOriginBannerNoAuthor => '📖 이야기에 나눈 일과예요';
+  String get routineDetailTalkOriginOpenPost => 'Original post';
 
   @override
-  String get routineDetailTalkOriginOpen => '원래 글 보기';
+  String get routineDetailTalkOriginPostGone => 'Post removed';
+
+  @override
+  String get routineDetailTalkOriginBandOpenLabel =>
+      'Imported from Community, view original post';
 
   @override
   String routineLibrarySent(String title) {
@@ -2644,7 +2642,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String routineGroupSheetCount(int count) {
-    return '$count routines · shown in this order';
+    return '$count routines';
   }
 
   @override
@@ -2654,9 +2652,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineGroupSheetRemove(String title) {
     return 'Remove $title from bundle';
   }
-
-  @override
-  String get routineGroupSheetDragHint => 'Drag the handle to reorder';
 
   @override
   String get routineGroupCreated => 'Bundle created';
@@ -2725,7 +2720,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryArrangeRemove => 'Remove or ungroup';
 
   @override
-  String get routineGroupEditOrder => 'Edit order';
+  String get routineGroupEditOrder => 'Edit';
 
   @override
   String get routineLibrarySendOnlyThis => 'Send only this one today';
@@ -2752,6 +2747,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get routineManageCoachCreateGroupMessage =>
       '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
+
+  @override
+  String get cardReviewCoachEditMessage =>
+      'Fix the *words and picture* of this card\nYou can also use *your own photo*';
+
+  @override
+  String get cardReviewCoachReorderMessage =>
+      'Tap here, then *press and drag* a card\nto change the order';
+
+  @override
+  String get cardReviewCoachSaveMessage =>
+      'When you\'re done, be sure to tap *Save cards*\nThe routine is finished only after saving';
+
+  @override
+  String get coachHelpLabel => 'How to use';
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
@@ -2892,7 +2902,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkAuthorFallback => '보호자';
 
   @override
-  String get talkNoteLabel => '이렇게 했어요';
+  String get talkNoteLabel => '내용';
 
   @override
   String get talkImportButtonShort => '내 일과로';

@@ -34,17 +34,6 @@ String notificationHeadline(AppLocalizations l10n, AppNotification notification)
   }
 }
 
-/// 종류 > 왼쪽 원 안 아이콘
-IconData notificationIcon(NotificationType type) => switch (type) {
-      NotificationType.routineCompleted => Icons.check_rounded,
-      NotificationType.routineSentByCoGuardian => Icons.send_rounded,
-      NotificationType.coGuardianJoined => Icons.group_add_rounded,
-      NotificationType.creditRefilled => Icons.toll_rounded,
-      NotificationType.feedbackResolved => Icons.chat_bubble_outline_rounded,
-      NotificationType.talkPostCommented => Icons.forum_outlined,
-      NotificationType.talkPostImported => Icons.download_rounded,
-    };
-
 /// 날짜 묶음 > 머리글
 String notificationDayLabel(AppLocalizations l10n, NotificationDay day) =>
     switch (day) {

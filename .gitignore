@@ -7,6 +7,15 @@
 # Claude AI Settings
 /.claude/settings.local.json
 
+# macOS 폴더 메타데이터
+.DS_Store
+
+# projectops 이슈 작업 메모 (로컬 전용, 이미 추적 중인 파일은 그대로)
+/docs/projectops/issue/
+
+# 로컬 Xcode 26 미만 빌드용 의존성 오버라이드
+/client/pubspec_overrides.yaml
+
 # Firebase (FCM) 설정 — 서비스 계정 키와 앱 설정 파일은 커밋하지 않는다
 /server/src/main/resources/firebase-adminsdk.json
 /client/android/app/google-services.json

@@ -14,6 +14,8 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../application/guardian_child_identity.dart';
+import '../../application/routine_manage_coach_notifier.dart';
+import 'coach_help_button.dart';
 
 // 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
@@ -35,12 +37,25 @@ class LibraryManageHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
+          // 제목 + 사용법(코치마크) 다시 보기 `?` — 배지는 오른쪽 끝에 붙는다
           Expanded(
-            child: Text(
-              context.l10n.guardianTabManage,
-              style: context.typo.libraryTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    context.l10n.guardianTabManage,
+                    style: context.typo.libraryTitle.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
+                  ),
+                ),
+                SizedBox(width: space.xs.w),
+                CoachHelpButton(
+                  onTap: () => ref
+                      .read(routineManageCoachProvider.notifier)
+                      .requestReplay(),
+                ),
+              ],
             ),
           ),
           if (isPhone)

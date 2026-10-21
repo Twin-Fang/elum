@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/elum_sheet_header.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
@@ -194,19 +195,26 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
         .where((candidate) => candidate.group.id == widget.groupId)
         .firstOrNull;
     final media = MediaQuery.of(context);
-    return ElumSheetSurface(
-      height: media.size.height * _heightRatio,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          context.space.md.w,
-          context.space.lg.h,
-          context.space.md.w,
-          context.space.md.h + media.padding.bottom,
+    return PopScope(
+      // 편집 중 뒤로가기는 편집만 끝낸다 (시트는 한 번 더 눌러야 닫힘). ✕ · 끌어 내리기는 그대로 닫는다
+      canPop: !_isEditing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(() => _isEditing = false);
+      },
+      child: ElumSheetSurface(
+        height: media.size.height * _heightRatio,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            context.space.md.w,
+            context.space.lg.h,
+            context.space.md.w,
+            context.space.md.h + media.padding.bottom,
+          ),
+          // 다른 기기에서 풀었거나 목록을 다시 받는 중 — 빈 시트 대신 닫기만 남긴다
+          child: entry == null
+              ? const SizedBox.shrink()
+              : _buildBody(context, entry),
         ),
-        // 다른 기기에서 풀었거나 목록을 다시 받는 중 — 빈 시트 대신 닫기만 남긴다
-        child: entry == null
-            ? const SizedBox.shrink()
-            : _buildBody(context, entry),
       ),
     );
   }
@@ -224,68 +232,58 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 머리: ✕ · 순서 편집 / 완료 (시안)
-        Row(
-          children: [
-            AppPressable(
-              onTap: () => Navigator.of(context).pop(),
-              scaleDown: AppPressable.scaleIcon,
-              semanticLabel: l10n.commonClose,
-              child: Padding(
-                padding: EdgeInsets.all(space.xs.w),
-                child: Icon(
-                  Icons.close_rounded,
-                  size: space.lg.w,
-                  color: colors.textSecondary,
-                ),
+        // 머리 한 줄: ✕ · 이름(그 자리에서 고침) · 편집/완료, 아래 일과 N개
+        ElumSheetHeader(
+          leading: AppPressable(
+            onTap: () => Navigator.of(context).pop(),
+            scaleDown: AppPressable.scaleIcon,
+            semanticLabel: l10n.commonClose,
+            child: Padding(
+              padding: EdgeInsets.all(space.xs.w),
+              child: Icon(
+                Icons.close_rounded,
+                size: space.lg.w,
+                color: colors.textSecondary,
               ),
             ),
-            const Spacer(),
-            AppPressable(
-              onTap: _isSaving
-                  ? null
-                  : () => setState(() => _isEditing = !_isEditing),
-              scaleDown: AppPressable.scaleIcon,
-              child: Padding(
-                padding: EdgeInsets.all(space.xs.w),
-                child: Text(
-                  _isEditing
-                      ? l10n.libraryArrangeDone
-                      : l10n.routineGroupEditOrder,
-                  style: context.typo.tileLabel.copyWith(
-                    color: colors.textSecondary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        // 이름: 가운데에 크게, 그 자리에서 바로 고친다
-        TextField(
-          controller: _nameController,
-          focusNode: _nameFocus,
-          maxLength: RoutineGroup.nameMaxLength,
-          maxLines: 1,
-          textAlign: TextAlign.center,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _nameFocus.unfocus(),
-          style: context.typo.sectionTitle.copyWith(color: colors.textPrimary),
-          decoration: InputDecoration(
-            isDense: true,
-            counterText: '',
-            border: InputBorder.none,
-            hintText: l10n.routineGroupNameHint,
           ),
-        ),
-        SizedBox(height: space.xs.h / 2),
-        Text(
-          _isEditing
-              ? '${l10n.routineGroupSheetCount(routines.length)} · '
-                    '${l10n.routineGroupSheetDragHint}'
-              : l10n.routineGroupSheetCount(routines.length),
-          textAlign: TextAlign.center,
-          style: context.typo.caption.copyWith(color: colors.textSecondary),
+          title: TextField(
+            controller: _nameController,
+            focusNode: _nameFocus,
+            maxLength: RoutineGroup.nameMaxLength,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _nameFocus.unfocus(),
+            style: context.typo.sectionTitle.copyWith(
+              color: colors.textPrimary,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              counterText: '',
+              border: InputBorder.none,
+              hintText: l10n.routineGroupNameHint,
+            ),
+          ),
+          trailing: AppPressable(
+            onTap: _isSaving
+                ? null
+                : () => setState(() => _isEditing = !_isEditing),
+            scaleDown: AppPressable.scaleIcon,
+            child: Padding(
+              padding: EdgeInsets.all(space.xs.w),
+              child: Text(
+                _isEditing
+                    ? l10n.libraryArrangeDone
+                    : l10n.routineGroupEditOrder,
+                style: context.typo.tileLabel.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          subtitle: l10n.routineGroupSheetCount(routines.length),
         ),
         SizedBox(height: space.sm.h),
         // 순서대로 일과: 번호 칸과 카드 칸을 나란히 따로 둔다 (행동카드 순서 변경과 같은 구조).

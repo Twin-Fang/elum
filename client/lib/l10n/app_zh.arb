@@ -23,5 +23,9 @@
 
   "updateSuggestionTitle": "有新版本了",
   "updateSuggestionBody": "更新后即可使用最新的修复和功能",
-  "updateSuggestionLater": "以后再说"
+  "updateSuggestionLater": "以后再说",
+  "routineDetailTalkOriginBand": "来自故事区",
+  "routineDetailTalkOriginOpenPost": "原帖",
+  "routineDetailTalkOriginPostGone": "已下架的帖子",
+  "routineDetailTalkOriginBandOpenLabel": "来自故事区,查看原帖"
 }

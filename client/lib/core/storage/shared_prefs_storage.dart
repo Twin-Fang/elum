@@ -57,6 +57,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
+  static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
@@ -311,6 +312,13 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> clearNoticeHidden() async {
+    for (final key in _prefs.getKeys().where((k) => k.startsWith(_kNoticeHiddenPrefix)).toList()) {
+      await _prefs.remove(key);
+    }
+  }
+
+  @override
   bool get hasAskedPushPermission =>
       _prefs.getBool(_kHasAskedPushPermission) ?? false;
 
@@ -381,8 +389,23 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isCardReviewCoachSeen =>
+      _prefs.getBool(_kCardReviewCoachSeen) ?? false;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kCardReviewCoachSeen, '$isSeen');
+    await _prefs.setBool(_kCardReviewCoachSeen, isSeen);
+  }
+
+  @override
   Future<void> resetCoachMarks() async {
-    for (final key in [_kHomeCoachSeen, _kManageCoachSeen, _kGroupCoachSeen]) {
+    for (final key in [
+      _kHomeCoachSeen,
+      _kManageCoachSeen,
+      _kGroupCoachSeen,
+      _kCardReviewCoachSeen,
+    ]) {
       AppLogger.storageWrite(key, 'reset');
       await _prefs.remove(key);
     }

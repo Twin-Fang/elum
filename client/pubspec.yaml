@@ -169,6 +169,8 @@ flutter:
     - assets/icon/dialog/
     # 보호자 하단 바 아이콘 4개 (#835)
     - assets/icon/nav/
+    # 머리 줄 알림 종 아이콘 (#931)
+    - assets/icon/notification/
     # Mulberry Symbols 픽토그램 811개 + 라이선스 원문(CC BY-SA 4.0) + 카탈로그 (#469).
     # 파일명에 쉼표·밑줄이 있어 목록 등록이 아니라 폴더째 올린다. SVG 는 고치지 않는다.
     - assets/pictograms/

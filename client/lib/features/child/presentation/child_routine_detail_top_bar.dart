@@ -7,6 +7,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_centered_title_row.dart';
 import '../../../core/haptics/child_haptics.dart';
 
 /// 뒤로가기 + 일과 제목 (Figma 1197:6775 상단).
@@ -38,44 +39,40 @@ class ChildRoutineDetailTopBar extends StatelessWidget {
     return Padding(
       // 좌우 16 씩 같은 폭을 비워 제목이 정확히 가운데 온다
       padding: EdgeInsets.symmetric(horizontal: _left.w),
-      child: Row(
-        children: [
-          AppPressable(
-            onTap: () {
-              playChildHaptic(context, ChildHapticKind.tap);
-              onBack();
-            },
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: context.l10n.commonBack,
-            child: SizedBox(
-              width: _box.w,
-              height: _box.w,
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.iconBack,
-                  width: 24.w,
-                  height: 24.w,
-                  excludeFromSemantics: true,
-                ),
+      child: ElumCenteredTitleRow(
+        sideSlotWidth: _box.w,
+        leading: AppPressable(
+          onTap: () {
+            playChildHaptic(context, ChildHapticKind.tap);
+            onBack();
+          },
+          scaleDown: AppPressable.scaleIcon,
+          semanticLabel: context.l10n.commonBack,
+          child: SizedBox(
+            width: _box.w,
+            height: _box.w,
+            child: Center(
+              child: SvgPicture.asset(
+                AppAssets.iconBack,
+                width: 24.w,
+                height: 24.w,
+                excludeFromSemantics: true,
               ),
             ),
           ),
-          Expanded(
-            child: ContentLocale(
-              language: language,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.childDetailTitle.copyWith(
-                  color: context.colors.textPrimary,
-                ),
-              ),
+        ),
+        title: ContentLocale(
+          language: language,
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.typo.childDetailTitle.copyWith(
+              color: context.colors.textPrimary,
             ),
           ),
-          SizedBox(width: _box.w),
-        ],
+        ),
       ),
     );
   }

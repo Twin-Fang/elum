@@ -1958,12 +1958,6 @@ abstract class AppLocalizations {
   /// **'켜기'**
   String get notificationTurnOnDeviceNotification;
 
-  /// 기기 알림 꺼짐 동안 흐려진 알림 스위치 아래 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'기기 알림을 켜면 이 설정대로 받아요'**
-  String get notificationSettingsLockedHint;
-
   /// 알림 설정 저장 실패 팝업 문구
   ///
   /// In ko, this message translates to:
@@ -4418,23 +4412,29 @@ abstract class AppLocalizations {
   /// **'새로'**
   String get routineLibraryNewBadge;
 
-  /// 가져온 일과 상세 맨 위 안내. authorNickname 은 글쓴이 닉네임
+  /// 가져온 일과 상세 맨 위 띠의 왼쪽 문구
   ///
   /// In ko, this message translates to:
-  /// **'📖 {authorNickname}님이 이야기에 나눈 일과예요'**
-  String routineDetailTalkOriginBanner(String authorNickname);
+  /// **'이야기에서 가져왔어요'**
+  String get routineDetailTalkOriginBand;
 
-  /// 가져온 일과 상세 맨 위 안내: 글이 내려갔거나 닉네임을 모를 때
+  /// 가져온 일과 상세 띠의 오른쪽 버튼: 이야기 글 상세로 이동
   ///
   /// In ko, this message translates to:
-  /// **'📖 이야기에 나눈 일과예요'**
-  String get routineDetailTalkOriginBannerNoAuthor;
+  /// **'원래 글'**
+  String get routineDetailTalkOriginOpenPost;
 
-  /// 가져온 일과 상세 안내의 링크: 이야기 글 상세로 이동 (글이 내려갔으면 숨김)
+  /// 가져온 일과 상세 띠의 오른쪽 표시: 원래 글이 내려갔거나 못 받았을 때 (누를 수 없음)
   ///
   /// In ko, this message translates to:
-  /// **'원래 글 보기'**
-  String get routineDetailTalkOriginOpen;
+  /// **'내려간 글'**
+  String get routineDetailTalkOriginPostGone;
+
+  /// 가져온 일과 상세 띠 전체의 화면 낭독 이름 (버튼)
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서 가져왔어요, 원래 글 보기'**
+  String get routineDetailTalkOriginBandOpenLabel;
 
   /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
   ///
@@ -4619,7 +4619,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과 {count}개 · 이 순서대로 보여요'**
+  /// **'일과 {count}개'**
   String routineGroupSheetCount(int count);
 
   /// 일과 묶음 (#807)
@@ -4633,12 +4633,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title} 묶음에서 빼기'**
   String routineGroupSheetRemove(String title);
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'길게 눌러 끌면 순서를 바꿀 수 있어요'**
-  String get routineGroupSheetDragHint;
 
   /// 일과 묶음 (#807)
   ///
@@ -4757,7 +4751,7 @@ abstract class AppLocalizations {
   /// 일과관리 묶음 열기 (#837)
   ///
   /// In ko, this message translates to:
-  /// **'순서 편집'**
+  /// **'편집'**
   String get routineGroupEditOrder;
 
   /// 일과관리 묶음 열기 (#837)
@@ -4801,6 +4795,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
   String get routineManageCoachCreateGroupMessage;
+
+  /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요'**
+  String get cardReviewCoachEditMessage;
+
+  /// 카드 검토 코치마크 — 카드 순서 변경 버튼. 카드 1장이면 나오지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요'**
+  String get cardReviewCoachReorderMessage;
+
+  /// 카드 검토 코치마크 마지막 단계 — 저장 버튼. 버튼 이름은 cardReviewSave 와 같아야 한다
+  ///
+  /// In ko, this message translates to:
+  /// **'다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요'**
+  String get cardReviewCoachSaveMessage;
+
+  /// ? 버튼의 낭독 이름 (카드 검토 상단바, 일과관리 머리). 누르면 그 화면의 코치마크를 다시 띄운다
+  ///
+  /// In ko, this message translates to:
+  /// **'사용법 보기'**
+  String get coachHelpLabel;
 
   /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
   ///
@@ -5048,10 +5066,10 @@ abstract class AppLocalizations {
   /// **'보호자'**
   String get talkAuthorFallback;
 
-  /// 글쓴이의 한마디 앞에 붙는 이름
+  /// 글쓴이 한마디 칸 이름 (올리기·고치기·상세)
   ///
   /// In ko, this message translates to:
-  /// **'이렇게 했어요'**
+  /// **'내용'**
   String get talkNoteLabel;
 
   /// 글 카드의 작은 버튼: 이 일과를 내 일과관리로 가져오기

@@ -207,8 +207,8 @@ abstract final class AppAssets {
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
 
-  /// 홈 머리 줄의 종 아이콘 (96×96, 투명 배경). 빨간 점은 코드로 그린다.
-  static const notificationBell = '$_images/notification_bell.png';
+  /// 홈 머리 줄의 종 아이콘 (Figma `alarm` 1724:7739, 24×24). 색과 안 읽음 원은 코드에서 입힌다
+  static const notificationBell = 'assets/icon/notification/notification_bell.svg';
 
   /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
   static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
@@ -355,6 +355,14 @@ abstract final class AppAssets {
   /// **Material 아이콘으로 대신하지 않는다.** 시안의 톱니는 날이 8개고
   /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
   static const iconSettings = '$_images/icon_settings.svg';
+
+  /// 기기 알림 꺼짐 띠의 종+사선 (22×20 #74757D). Figma `1732:8559`.
+  static const iconNotificationOff = '$_images/icon_notification_off.svg';
+
+  /// 알림 줄 종류 아이콘 3개 (16×16, 흰색). Figma `1724:8346` 의 체크 · 종이비행기 · 사람 더하기.
+  static const iconNotificationCheck = '$_images/icon_notification_check.svg';
+  static const iconNotificationPaperPlane = '$_images/icon_notification_paper_plane.svg';
+  static const iconNotificationUserAdd = '$_images/icon_notification_user_add.svg';
 
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.

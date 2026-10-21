@@ -13,12 +13,14 @@ class InMemoryStorage implements LocalStorage {
     bool homeCoachSeen = true,
     bool isManageCoachSeen = true,
     bool isGroupCoachSeen = true,
+    bool isCardReviewCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
        _isManageCoachSeen = isManageCoachSeen,
        _isGroupCoachSeen = isGroupCoachSeen,
+       _isCardReviewCoachSeen = isCardReviewCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -37,6 +39,7 @@ class InMemoryStorage implements LocalStorage {
   bool _homeCoachSeen;
   bool _isManageCoachSeen;
   bool _isGroupCoachSeen;
+  bool _isCardReviewCoachSeen;
   List<String> _talkImportedSeenRoutineIds = const [];
   List<String> _talkShareHintDismissedRoutineIds = const [];
 
@@ -249,6 +252,9 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
       _noticeHidden[noticeId] = json;
 
+  @override
+  Future<void> clearNoticeHidden() async => _noticeHidden.clear();
+
   bool _hasAskedPushPermission = false;
   String? _updateSuggestionShownRecord;
 
@@ -303,10 +309,18 @@ class InMemoryStorage implements LocalStorage {
       _isGroupCoachSeen = isSeen;
 
   @override
+  bool get isCardReviewCoachSeen => _isCardReviewCoachSeen;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async =>
+      _isCardReviewCoachSeen = isSeen;
+
+  @override
   Future<void> resetCoachMarks() async {
     _homeCoachSeen = false;
     _isManageCoachSeen = false;
     _isGroupCoachSeen = false;
+    _isCardReviewCoachSeen = false;
   }
 
   @override

@@ -94,24 +94,9 @@ class TalkPostCard extends StatelessWidget {
             // 한마디 한 줄
             if (note != null && note.isNotEmpty) ...[
               SizedBox(height: space.sm.h),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: l10n.talkNoteLabel,
-                      style: typo.tileLabel.copyWith(
-                        color: colors.textPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '  $note',
-                      style: typo.tileLabel.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                note,
+                style: typo.tileLabel.copyWith(color: colors.textSecondary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

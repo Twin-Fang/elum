@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import 'coach_help_button.dart';
 
 /// 뒤로가기 + 홈 (Figma x=24 / x=72, y=87)
 class RoutineFlowTopBar extends StatelessWidget {
@@ -15,6 +16,7 @@ class RoutineFlowTopBar extends StatelessWidget {
     required this.onHome,
     required this.showDraft,
     required this.onDraft,
+    this.onHelp,
   });
 
   final VoidCallback? onBack;
@@ -25,6 +27,12 @@ class RoutineFlowTopBar extends StatelessWidget {
 
   /// 홈도 나가는 길이다 — 뒤로가기와 같은 확인을 거친다.
   final VoidCallback onHome;
+
+  /// 오른쪽 `?` (사용법 다시 보기). null 이면 그리지 않는다 — 카드 검토 화면만 넘긴다
+  final VoidCallback? onHelp;
+
+  /// `?` ↔ `임시저장` 누름 영역 사이
+  static const _helpToDraftGap = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +108,12 @@ class RoutineFlowTopBar extends StatelessWidget {
               ),
             ),
           ),
+          if (onHelp != null || showDraft) const Spacer(),
+          if (onHelp != null) ...[
+            CoachHelpButton(onTap: onHelp!),
+            SizedBox(width: (showDraft ? _helpToDraftGap : 16.0).w),
+          ],
           if (showDraft) ...[
-            const Spacer(),
             // 시안 1173:5589 — 터치 영역 72×40 @ x=305(오른쪽 여백 16), 글자 16/w600.
             // 자리는 아이콘 높이 그대로 두고 **그 위로** 40 높이 누름 영역을 덮는다.
             Padding(

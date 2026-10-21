@@ -13,6 +13,7 @@ class TalkChoiceRow extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.hint,
+    this.isLabelCentered = false,
   });
 
   final String label;
@@ -21,6 +22,9 @@ class TalkChoiceRow extends StatelessWidget {
 
   /// null 이면 잠긴다 (보내는 중)
   final VoidCallback? onTap;
+
+  /// true 면 이름을 칸 가운데에 (좁은 칸을 여러 개 나란히 둘 때)
+  final bool isLabelCentered;
 
   static const _rowMinHeight = 52.0;
 
@@ -45,7 +49,7 @@ class TalkChoiceRow extends StatelessWidget {
             horizontal: space.sm.w,
             vertical: space.xs.h,
           ),
-          alignment: Alignment.centerLeft,
+          alignment: isLabelCentered ? Alignment.center : Alignment.centerLeft,
           decoration: BoxDecoration(
             color: isSelected ? colors.goalSelectedFill : colors.surface,
             borderRadius: BorderRadius.circular(space.fieldRadius.r),
@@ -55,11 +59,14 @@ class TalkChoiceRow extends StatelessWidget {
             ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: isLabelCentered
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label,
+                textAlign: isLabelCentered ? TextAlign.center : TextAlign.start,
                 style: context.typo.tileLabel.copyWith(
                   color: colors.textPrimary,
                 ),

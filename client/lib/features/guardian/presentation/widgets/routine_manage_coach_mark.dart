@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../ads/application/tracking_prompt_gate.dart';
 import '../../application/routine_manage_coach_notifier.dart';
+import 'coach_mark_start_gate.dart';
 import 'routine_manage_coach_stage.dart';
 
 /// 일과관리 코치마크 트리거: 이 칸이 보이는 순간 안내 무대를 띄운다 (#861)
@@ -19,21 +17,10 @@ class RoutineManageCoachTrigger extends ConsumerStatefulWidget {
 }
 
 class _RoutineManageCoachTriggerState
-    extends ConsumerState<RoutineManageCoachTrigger> {
-  /// 다른 화면이 위에 있을 때 다시 볼 간격 · 최대 횟수
-  static const _retryEvery = Duration(milliseconds: 500);
-  static const _maxRetries = 60;
-
-  Timer? _retry;
-  int _retryCount = 0;
-  bool _isWaitingRoute = false;
-
+    extends ConsumerState<RoutineManageCoachTrigger>
+    with CoachMarkStartGate<RoutineManageCoachTrigger> {
   /// 안내 무대를 띄운 상태인가 (같은 무대를 두 번 띄우지 않게)
   bool _isStageOpen = false;
-
-  /// 추적 허용 팝업이 끝났는가. 팝업과 겹치면 무대가 팝업에 가려지므로 끝난 뒤에 띄운다
-  bool _isTrackingPromptDone = false;
-  bool _isWaitingTrackingPrompt = false;
 
   @override
   void initState() {
@@ -48,49 +35,18 @@ class _RoutineManageCoachTriggerState
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpen());
   }
 
-  @override
-  void dispose() {
-    _retry?.cancel();
-    super.dispose();
-  }
-
   /// 띄울 때인지 보고 맞으면 바로 띄운다
   ///
-  /// 조건 4개: 이 칸이 보이는 탭, 이 화면이 맨 앞, 화면 전환이 끝남, 추적 허용 팝업이 끝남. 그 밖의 대기는 없다.
+  /// 조건: 이 칸이 보이는 탭 + [CoachMarkStartGate] (화면 맨 앞, 전환 끝, 추적 허용 팝업 끝)
   void _maybeOpen() {
     if (!mounted || _isStageOpen || !TickerMode.of(context)) return;
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) {
-      _retryLater();
-      return;
-    }
-    final animation = route?.animation;
-    if (animation != null && animation.status != AnimationStatus.completed) {
-      if (_isWaitingRoute) return;
-      _isWaitingRoute = true;
-      void onStatus(AnimationStatus status) {
-        if (status != AnimationStatus.completed) return;
-        animation.removeStatusListener(onStatus);
-        _isWaitingRoute = false;
-        _maybeOpen();
-      }
+    checkCoachMarkStart();
+  }
 
-      animation.addStatusListener(onStatus);
-      return;
-    }
-
-    if (!_isTrackingPromptDone) {
-      if (_isWaitingTrackingPrompt) return;
-      _isWaitingTrackingPrompt = true;
-      waitForTrackingPrompt().whenComplete(() {
-        _isTrackingPromptDone = true;
-        _isWaitingTrackingPrompt = false;
-        // 기다리는 사이 칸·화면이 바뀌었을 수 있어 처음부터 다시 따진다
-        _maybeOpen();
-      });
-      return;
-    }
-
+  @override
+  void onCoachMarkStartReady() {
+    // 기다리는 사이 탭이 바뀌었거나 무대가 열렸을 수 있다
+    if (_isStageOpen || !TickerMode.of(context)) return;
     final notifier = ref.read(routineManageCoachProvider.notifier);
     if (ref.read(routineManageCoachProvider).isReplayRequested) {
       notifier.replay();
@@ -98,12 +54,6 @@ class _RoutineManageCoachTriggerState
       return;
     }
     _openStage();
-  }
-
-  void _retryLater() {
-    if (_retry?.isActive ?? false) return;
-    if (_retryCount++ >= _maxRetries) return;
-    _retry = Timer(_retryEvery, _maybeOpen);
   }
 
   Future<void> _openStage() async {

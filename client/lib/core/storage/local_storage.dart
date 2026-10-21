@@ -168,6 +168,9 @@ abstract interface class LocalStorage {
   String? getNoticeHiddenJson(String noticeId);
   Future<void> setNoticeHiddenJson(String noticeId, String json);
 
+  /// 공지 숨김 기록 전부 지우기 (개발자 도구: 숨긴 공지 다시 보기)
+  Future<void> clearNoticeHidden();
+
   /// 알림 권한 안내 시트를 이 휴대폰에서 이미 보여 줬는가 (첫 일과를 보낸 뒤 한 번만).
   ///
   /// 시스템 권한이 휴대폰 단위라 [clearAll] 이 지우지 않는다.
@@ -195,7 +198,11 @@ abstract interface class LocalStorage {
   bool get isGroupCoachSeen;
   Future<void> setGroupCoachSeen(bool isSeen);
 
-  /// 코치마크 3종(홈·일과관리·묶음)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
+  /// 카드 검토 코치마크(수정·순서 변경·저장)를 봤는가
+  bool get isCardReviewCoachSeen;
+  Future<void> setCardReviewCoachSeen(bool isSeen);
+
+  /// 코치마크 4종(홈·일과관리·묶음·카드 검토)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
   Future<void> resetCoachMarks();
 
 

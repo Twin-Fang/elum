@@ -104,8 +104,7 @@ class SettingsToggle extends StatelessWidget {
       height: height.h,
       padding: EdgeInsets.all(_inset.w),
       decoration: BoxDecoration(
-        // 꺼짐 색은 시안에 없다 - 빈 칸 색(`textPlaceholder`)을 쓴다
-        color: isOn ? colors.settingsToggleOn : colors.textPlaceholder,
+        color: isOn ? colors.settingsToggleOn : colors.settingsToggleOff,
         borderRadius: BorderRadius.circular((height / 2).r),
       ),
       child: AnimatedAlign(
