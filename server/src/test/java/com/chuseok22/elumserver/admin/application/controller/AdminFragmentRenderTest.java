@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
@@ -275,5 +276,26 @@ class AdminFragmentRenderTest {
         AdminSubscriptionSummary.none(), List.of(), null))));
     assertThat(freeHtml).doesNotContain("data-revoke-pro-form").contains("아직 요금제를 바꾼 기록이 없어요")
       .contains("변경 이력 없음");
+  }
+
+  @Test
+  @DisplayName("회원 상세 크레딧 요약 카드: 잔액·동결이 그려지고, 조회 실패면 안내와 에러 코드만 나온다 (#651)")
+  void memberDetail_rendersCreditSummaryStates() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    AdminMemberDetailResponse detail = AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+      AdminSubscriptionSummary.none(), List.of(), null);
+
+    String loadedHtml = engine.process("admin/member-detail", contextWith(Map.of("member", detail,
+      "creditSummary", new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, true))));
+    assertThat(loadedHtml).contains("data-member-credit-summary").contains("1,234").contains("동결")
+      .contains("data-member-actions-menu").contains("크레딧 지급");
+
+    String failedHtml = engine.process("admin/member-detail", contextWith(Map.of("member", detail,
+      "creditSummary", AdminMemberCreditSummary.loadFailed())));
+    assertThat(failedHtml).contains("크레딧 정보를 불러오지 못했어요").contains("E-ADM-CREDIT-001")
+      .doesNotContain("아직 크레딧 기록이 없어요");
   }
 }
