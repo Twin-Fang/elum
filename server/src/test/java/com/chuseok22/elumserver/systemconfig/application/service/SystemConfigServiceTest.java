@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmPropert
 import com.chuseok22.elumserver.common.infrastructure.properties.SecretProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.chuseok22.elumserver.systemconfig.infrastructure.entity.ConfigKeyConverter;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
@@ -55,6 +56,19 @@ class SystemConfigServiceTest {
     config.setConfigKey(key);
     config.setConfigValue(value);
     return config;
+  }
+
+  @Test
+  @DisplayName("이 버전이 모르는 키가 DB 에 섞여 있어도 나머지 저장값은 읽힌다")
+  void getString_unknownKeyRowMixed_stillReadsKnownValues() {
+    // 모르는 키 행은 ConfigKeyConverter 가 null 키로 읽는다
+    SystemConfig unknownKeyRow = config(
+      new ConfigKeyConverter().convertToEntityAttribute("TALK_REPORT_MAIL_ENABLED"), "true");
+    when(systemConfigRepository.findAll())
+      .thenReturn(List.of(unknownKeyRow, config(ConfigKey.GEMINI_TEXT_MODEL, "gemini-custom")));
+
+    assertThat(unknownKeyRow.getConfigKey()).isNull();
+    assertThat(systemConfigService.getString(ConfigKey.GEMINI_TEXT_MODEL)).isEqualTo("gemini-custom");
   }
 
   @Test
