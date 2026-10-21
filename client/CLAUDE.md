@@ -11,6 +11,7 @@
 | 문서 | 내용 |
 | --- | --- |
 | [docs/figma-frames.md](./docs/figma-frames.md) | **화면 지도** — 전체 프레임 노드 ID + 대조 현황. 화면을 건드리기 전에 |
+| [docs/design-language.md](./docs/design-language.md) | **디자인 입맛** — 철학·반복 패턴·하지 않는 것·체크리스트. **시안 없이 새 화면을 만들기 전에** (AI 브레인스토밍 프롬프트에도 붙인다) |
 | [docs/design-system.md](./docs/design-system.md) | 색·타이포·간격·컴포넌트 토큰 (Figma 추출값) |
 | [docs/motion.md](./docs/motion.md) | **애니메이션 duration·curve·눌림 반응** — 화면에 모션을 넣기 전 |
 | [docs/onboarding-flow.md](./docs/onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 + **프레임 노드 ID 표** |
