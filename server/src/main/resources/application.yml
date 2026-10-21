@@ -30,6 +30,8 @@ spring:
     baseline-version: 0
     # 핫픽스가 main 에 높은 번호를 먼저 올려도, develop 의 낮은 번호(예: V52)가 나중에 배포될 때 적용되게 함
     out-of-order: true
+    # 운영 DB 에 이미 적용됐지만 이 브랜치에 파일이 없는 버전(예: main 핫픽스 시점의 V52)은 검증에서 건너뜀
+    ignore-migration-patterns: "*:missing"
 
 chuseok22:
   api-change-log:
