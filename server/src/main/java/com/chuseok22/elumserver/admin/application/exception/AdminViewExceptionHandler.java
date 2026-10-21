@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.exception;
 
 import com.chuseok22.elumserver.admin.application.controller.AdminAdRewardController;
+import com.chuseok22.elumserver.admin.application.controller.AdminAuditController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConfigController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConsentController;
 import com.chuseok22.elumserver.admin.application.controller.AdminCreditController;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  */
 @ControllerAdvice(assignableTypes = {
   AdminAdRewardController.class,
+  AdminAuditController.class,
   AdminConfigController.class,
   AdminConsentController.class,
   AdminCreditController.class,
