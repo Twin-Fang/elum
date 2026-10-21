@@ -19,8 +19,9 @@ class TalkSheetFrame extends StatelessWidget {
     final space = context.space;
     final media = MediaQuery.of(context);
     final title = this.title;
+    // 바닥 시트 라우트가 padding.top 을 0 으로 지우므로 viewPadding 으로 상태 표시줄 높이를 읽는다
     final availableHeight =
-        media.size.height - media.viewInsets.bottom - media.padding.top;
+        media.size.height - media.viewInsets.bottom - media.viewPadding.top;
 
     return Padding(
       padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
