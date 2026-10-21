@@ -7,7 +7,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
-// 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼. 배치는 talk_detail_body.dart
+// 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼, 가져감 숫자. 배치는 talk_detail_body.dart
 
 /// 작성 정보: 작성자 | 10/21 오후 11:42 (시안 1813:7497)
 class TalkDetailPostedRow extends StatelessWidget {
@@ -177,7 +177,8 @@ class TalkDetailImportButton extends StatelessWidget {
   }
 }
 
-/// 도움돼요 버튼: 누르면 켜지고 다시 누르면 꺼진다
+/// 도움돼요 칩 (시안 1813:7881): 누르면 켜지고 다시 누르면 꺼진다
+/// 꺼짐은 시안 값(웜그레이 판 · 연회색 아이콘), 켜짐은 시안에 없어 민트 판 · 테두리 · 아이콘으로 구분
 class TalkHelpfulButton extends StatelessWidget {
   const TalkHelpfulButton({
     super.key,
@@ -190,9 +191,12 @@ class TalkHelpfulButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onPressed;
 
-  static const _iconSize = 18.0;
-  static const _paddingH = 14.0;
-  static const _paddingV = 8.0;
+  /// 시안: 아이콘 20, 좌우 16 · 위아래 10, 높이 40 알약(모서리 20), 아이콘 > 글자 4
+  static const _iconSize = 20.0;
+  static const _paddingH = 16.0;
+  static const _paddingV = 10.0;
+  static const _radius = 20.0;
+  static const _iconToLabel = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -210,37 +214,79 @@ class TalkHelpfulButton extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected ? colors.goalSelectedFill : colors.editChipBg,
-            borderRadius: BorderRadius.circular(space.buttonRadius.r),
-            border: isSelected
-                ? Border.all(
+            borderRadius: BorderRadius.circular(_radius.r),
+          ),
+          // 테두리는 위에 그려 켜고 꺼도 칩 크기 그대로 (아래 줄이 밀리지 않게)
+          foregroundDecoration: isSelected
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(_radius.r),
+                  border: Border.all(
                     color: colors.goalSelectedBorder,
                     width: space.selectedBorderWidth,
-                  )
-                : null,
-          ),
+                  ),
+                )
+              : null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 피드 숫자 줄과 같은 `fi-br-thumbs-up`. 켜짐은 민트 판 · 테두리 · 아이콘으로 구분
               SvgPicture.asset(
                 AppAssets.iconThumbsUp,
                 width: _iconSize.w,
                 height: _iconSize.w,
                 colorFilter: ColorFilter.mode(
-                  isSelected ? colors.goalSelectedBorder : colors.textPrimary,
+                  isSelected ? colors.goalSelectedBorder : colors.talkMetaIcon,
                   BlendMode.srcIn,
                 ),
               ),
-              SizedBox(width: space.xs.w),
+              SizedBox(width: _iconToLabel.w),
               Text(
                 context.l10n.talkHelpfulCount(count),
-                style: context.typo.chipLabel.copyWith(
-                  color: colors.textPrimary,
+                style: context.typo.talkDetailStatLabel.copyWith(
+                  color: isSelected ? colors.textPrimary : colors.talkMetaText,
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 가져감 숫자 (시안 1813:7861): 다운로드 아이콘 16 + 숫자. 누르는 칸이 아니다
+/// 읽기 프로그램에는 `3명 가져감` 처럼 이름과 함께 읽힌다
+class TalkImportCountLabel extends StatelessWidget {
+  const TalkImportCountLabel({super.key, required this.count});
+
+  final int count;
+
+  /// 시안: 아이콘 16, 아이콘 > 숫자 4
+  static const _iconSize = 16.0;
+  static const _iconToCount = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      label: context.l10n.talkPopularImportCount(count),
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            AppAssets.iconDownload,
+            width: _iconSize.w,
+            height: _iconSize.w,
+            colorFilter: ColorFilter.mode(colors.talkMetaIcon, BlendMode.srcIn),
+          ),
+          SizedBox(width: _iconToCount.w),
+          Text(
+            '$count',
+            style: context.typo.talkDetailStatLabel.copyWith(
+              color: colors.talkMetaText,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -11,7 +11,7 @@ import 'talk_detail_parts.dart';
 import 'talk_step_cards.dart';
 
 /// 상세 본문 (시안 1783:7172 · 1813:7718): 분류 · 카드 수 칩 > 제목 > 작성 정보 > 한마디
-/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 · 댓글 수
+/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자
 /// 보기 전환은 이 화면 안에서만 기억한다 (다시 들어오면 크게 보기)
 class TalkDetailBody extends StatefulWidget {
   const TalkDetailBody({
@@ -42,7 +42,10 @@ class _TalkDetailBodyState extends State<TalkDetailBody> {
   static const _noteToToggle = 32.0;
   static const _toggleToCards = 24.0;
   static const _cardsToImport = 32.0;
-  static const _importToHelpful = 24.0;
+  static const _importToHelpful = 40.0;
+
+  /// 도움돼요 칩 > 가져감 숫자 (시안 16)
+  static const _helpfulToImportCount = 16.0;
 
   /// 가져오기 버튼 좌우 (시안 16)
   static const _buttonInset = 16.0;
@@ -138,7 +141,7 @@ class _TalkDetailBodyState extends State<TalkDetailBody> {
           ),
         ),
         SizedBox(height: _importToHelpful.h),
-        // 도움돼요 · 댓글 수 (시안에 아직 자리가 없어 버튼 아래 둔다)
+        // 도움돼요 칩 · 가져감 숫자 (댓글 수는 아래 댓글 머리에)
         Padding(
           padding: textInset,
           child: Row(
@@ -148,11 +151,8 @@ class _TalkDetailBodyState extends State<TalkDetailBody> {
                 isSelected: post.isHelpfulByMe,
                 onPressed: widget.onHelpfulPressed,
               ),
-              SizedBox(width: space.sm.w),
-              Text(
-                l10n.talkCommentCount(post.commentCount),
-                style: typo.tileLabel.copyWith(color: colors.textSecondary),
-              ),
+              SizedBox(width: _helpfulToImportCount.w),
+              TalkImportCountLabel(count: post.importCount),
             ],
           ),
         ),

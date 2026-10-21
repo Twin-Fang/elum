@@ -45,7 +45,10 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
 
   /// 끝까지 이만큼 남으면 다음 댓글 쪽을 받는다
   static const _loadMoreExtent = 320.0;
-  static const _sectionGap = 24.0;
+  /// 도움돼요 칩 > 구분 띠 15 · 띠 높이 7 · 띠 > 댓글 머리 14 (시안 1830:7918)
+  static const _bodyToDivider = 15.0;
+  static const _dividerHeight = 7.0;
+  static const _dividerToComments = 14.0;
 
   late final _actions = TalkDetailActions(
     context: context,
@@ -168,8 +171,14 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               onImportPressed: () =>
                   showTalkImportSheet(context, ref, post.toSummary()),
             ),
-            SizedBox(height: _sectionGap.h),
+            SizedBox(height: _bodyToDivider.h),
+            Container(
+              height: _dividerHeight.h,
+              color: context.colors.talkSectionDivider,
+            ),
+            SizedBox(height: _dividerToComments.h),
             TalkCommentList(
+              commentCount: post.commentCount,
               comments: comments,
               onCommentMenuRequested: _actions.openCommentMenu,
               onRetryPressed: () =>

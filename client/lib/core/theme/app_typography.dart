@@ -65,6 +65,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkDetailTitle,
     required this.talkDetailNote,
     required this.talkImportLabel,
+    required this.talkDetailStatLabel,
+    required this.talkCommentsHeader,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
@@ -347,6 +349,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 상세 `일과로 가져오기` 버튼 (Pretendard 800/22, 시안 1813:7660 — 기본 버튼은 Tmoney)
   final TextStyle talkImportLabel;
+
+  /// 상세 `도움돼요 13` 칩 · 가져감 숫자 (Pretendard 500/16, 시안 1813:7887)
+  final TextStyle talkDetailStatLabel;
+
+  /// 상세 댓글 머리 `댓글  3` (Pretendard 600/20, 시안 1830:7916)
+  final TextStyle talkCommentsHeader;
 
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
@@ -908,6 +916,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    talkDetailStatLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkCommentsHeader: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1353,6 +1373,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkDetailTitle,
     TextStyle? talkDetailNote,
     TextStyle? talkImportLabel,
+    TextStyle? talkDetailStatLabel,
+    TextStyle? talkCommentsHeader,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
@@ -1471,6 +1493,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkDetailTitle: talkDetailTitle ?? this.talkDetailTitle,
       talkDetailNote: talkDetailNote ?? this.talkDetailNote,
       talkImportLabel: talkImportLabel ?? this.talkImportLabel,
+      talkDetailStatLabel: talkDetailStatLabel ?? this.talkDetailStatLabel,
+      talkCommentsHeader: talkCommentsHeader ?? this.talkCommentsHeader,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
@@ -1608,6 +1632,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkDetailTitle: TextStyle.lerp(talkDetailTitle, other.talkDetailTitle, t)!,
       talkDetailNote: TextStyle.lerp(talkDetailNote, other.talkDetailNote, t)!,
       talkImportLabel: TextStyle.lerp(talkImportLabel, other.talkImportLabel, t)!,
+      talkDetailStatLabel: TextStyle.lerp(talkDetailStatLabel, other.talkDetailStatLabel, t)!,
+      talkCommentsHeader: TextStyle.lerp(talkCommentsHeader, other.talkCommentsHeader, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
