@@ -16,11 +16,6 @@ public final class StoreUrlPolicy {
   private StoreUrlPolicy() {
   }
 
-  /** 이 규칙이 적용되는 키인가. */
-  public static boolean appliesTo(ConfigKey key) {
-    return key == ConfigKey.IOS_STORE_URL || key == ConfigKey.ANDROID_STORE_URL;
-  }
-
   /** 플랫폼에 맞는 공식 스토어 주소인가. 형식이 깨졌으면 false. */
   public static boolean isAllowed(ConfigKey key, String value) {
     URI uri;

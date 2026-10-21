@@ -41,6 +41,7 @@
       if (chip === 'all') return true;
       if (chip === 'different') return row.getAttribute('data-different') === 'true';
       if (chip === 'today') return row.getAttribute('data-today') === 'true';
+      if (chip === 'warning') return row.getAttribute('data-warning') === 'true';
       return chip.indexOf('group:') === 0 && row.getAttribute('data-group') === chip.substring('group:'.length);
     }
 

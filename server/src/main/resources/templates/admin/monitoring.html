@@ -7,8 +7,10 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">AI 모니터링</h1>
-      <p class="text-base-content/60">AI 호출 현황과 토큰 사용량, 추정 비용을 확인합니다.</p>
+      <p class="text-base-content/60">AI 호출 현황과 토큰 사용량, 추정 비용을 확인합니다. 회원·모델·오류 메시지로 호출을 찾아요.</p>
     </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       <div class="stat bg-base-200 rounded-box shadow p-4">
@@ -155,14 +157,32 @@
         </select>
       </label>
       <label class="form-control">
-        <span class="label-text text-xs">회원 ID</span>
-        <input type="text" name="memberId" th:value="${query.filters.get('memberId')}" maxlength="100"
-               placeholder="회원 ID 전체" class="input input-bordered input-sm w-full sm:w-72"/>
+        <span class="label-text text-xs">회원</span>
+        <input type="text" name="member" th:value="${query.filters.get('member')}" maxlength="100"
+               placeholder="아이디·닉네임·이메일·회원 ID" class="input input-bordered input-sm w-full sm:w-56"/>
       </label>
+      <label class="form-control">
+        <span class="label-text text-xs">모델</span>
+        <input type="text" name="model" th:value="${query.filters.get('model')}" maxlength="100"
+               placeholder="예: gemini" class="input input-bordered input-sm w-full sm:w-40"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">오류 메시지</span>
+        <input type="text" name="error" th:value="${query.filters.get('error')}" maxlength="100"
+               placeholder="예: timeout" class="input input-bordered input-sm w-full sm:w-48"/>
+      </label>
+      <!-- 회원 상세에서 넘어온 회원 ID 는 칸 없이 유지하고, 적용된 조건 칩의 x 로 뺀다 -->
+      <input th:if="${query.filters.get('memberId') != null}" type="hidden" name="memberId"
+             th:value="${query.filters.get('memberId')}"/>
       <input type="hidden" name="sort" th:value="${query.sort}"/>
       <button type="submit" class="btn btn-primary btn-sm">필터</button>
-      <a th:href="@{/admin/monitoring}" class="btn btn-ghost btn-sm">기간 초기화</a>
+      <div th:replace="~{admin/fragments/admin-list :: activeFilters(${definition}, ${query})}"></div>
     </form>
+
+    <div class="flex items-center gap-3 flex-wrap">
+      <div th:replace="~{admin/fragments/admin-list :: csvExport(${csvExport})}"></div>
+      <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${#numbers.formatInteger(calls.totalElements, 1, 'COMMA')}">0</span>건</span>
+    </div>
 
     <div class="overflow-x-auto">
       <table class="table table-sm">
@@ -191,13 +211,19 @@
           <td>
             <!-- substring은 ID가 8자보다 짧으면 예외를 던져 화면이 통째로 죽는다.
                  abbreviate는 짧으면 자르지 않고 그대로 둔다. -->
+            <!-- 닉네임이 있으면 닉네임, 없으면 ID 앞부분. 전체 ID 는 툴팁 -->
             <a th:if="${call.memberId != null}" th:href="@{/admin/members/{id}(id=${call.memberId})}"
-               class="link link-hover text-xs" th:text="${#strings.abbreviate(call.memberId, 10)}">회원</a>
+               class="link link-hover text-xs" th:title="${call.memberId}"
+               th:text="${memberNicknames != null and memberNicknames.get(call.memberId) != null}
+                        ? ${#strings.abbreviate(memberNicknames.get(call.memberId), 16)}
+                        : ${#strings.abbreviate(call.memberId, 10)}">회원</a>
             <span th:if="${call.memberId == null}" class="text-base-content/40 text-xs">-</span>
           </td>
           <td>
             <span th:if="${call.success}" class="badge badge-success badge-sm">성공</span>
             <span th:unless="${call.success}" class="badge badge-error badge-sm" th:title="${call.errorMessage}">실패</span>
+            <div th:if="${!call.success and call.errorMessage != null}" class="text-xs text-error truncate max-w-xs"
+                 th:title="${call.errorMessage}" th:text="${call.errorMessage}">오류</div>
           </td>
           <td th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
           <td th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>

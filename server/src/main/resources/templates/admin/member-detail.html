@@ -31,6 +31,9 @@
         </form>
         <!-- 이 회원의 주간 AI 크레딧 잔액·조정·작업 기록 (#407). -->
         <a th:href="@{/admin/credits/members/{id}(id=${member.id()})}" class="btn btn-outline btn-sm">AI 크레딧</a>
+        <!-- 이 회원의 알림 기록·광고 보상 기록 (#908, 화면은 #910) -->
+        <a th:href="@{/admin/notifications(memberId=${member.id()})}" class="btn btn-outline btn-sm" data-member-notifications-link>알림 기록</a>
+        <a th:href="@{/admin/ad-rewards(memberId=${member.id()})}" class="btn btn-outline btn-sm" data-member-ad-rewards-link>광고 보상</a>
         <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
       </div>
     </div>
@@ -184,10 +187,8 @@
       <div class="card-body grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
         <div class="text-base-content/60">아이디</div>
         <div th:text="${member.username()}">username</div>
-        <div class="text-base-content/60">캐릭터</div>
-        <div th:text="${member.character() != null ? member.character().label : '-'}">캐릭터</div>
-        <div class="text-base-content/60">별 개수</div>
-        <div th:text="${member.totalStars()}">0</div>
+        <div class="text-base-content/60">이룸이</div>
+        <div th:text="${member.connections().isLoadFailed() ? '-' : #lists.size(member.connections().profiles()) + '명'}">0명</div>
         <div class="text-base-content/60">가입일</div>
         <div th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd HH:mm')}">2026-01-01</div>
         <div class="text-base-content/60">마지막 로그인</div>
@@ -196,13 +197,10 @@
         <div th:text="${member.lastActivityAt() != null ? #temporals.format(member.lastActivityAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</div>
         <div class="text-base-content/60">로그인 횟수</div>
         <div th:text="${member.loginCount() ?: 0}">0</div>
-        <div class="text-base-content/60">도움 방식</div>
-        <div>
-          <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline badge-sm mr-1"
-                th:text="${goal.label}">도움방식</span>
-        </div>
       </div>
     </div>
+
+    <div th:replace="~{admin/fragments/member-connections :: connections(${member})}"></div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="stat bg-base-200 rounded-box shadow p-4">

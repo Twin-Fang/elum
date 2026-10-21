@@ -1,33 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../member/application/member_providers.dart';
-import '../../member/domain/guardian_account.dart';
 import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
 import 'widgets/my_info_elumi_group.dart';
-import 'widgets/sign_in_provider_badge.dart';
+import 'widgets/my_info_nickname_card.dart';
 
-/// 하단 바 내정보 칸의 첫 화면: 보호자 프로필 > 이룸이 > AI 크레딧(사용 내역 링크 포함) > 바로가기 (#817)
+/// 하단 바 내정보 칸의 첫 화면 (시안 1736:8780): AI 크레딧 > 닉네임 > 이룸이 > 바로가기
 ///
-/// 설정은 오른쪽 위 아이콘으로만 들어간다. 이룸이가 여러 명이어도(교육 라이선스) 같은 구조로 늘어난다.
-/// 회원 정보를 못 받으면 이룸이 영역만 빠지고 나머지는 그대로 뜬다 (화면이 회원 정보에 막히지 않게).
+/// 카드 묶음이 위에서부터 차례로 올라오며 나타남 (탭을 처음 열 때 한 번).
+/// 회원 정보를 못 받으면 이룸이 카드만 빠지고 나머지는 그대로 뜸 (화면이 회원 정보에 막히지 않게)
 class GuardianMyInfoScreen extends ConsumerWidget {
   const GuardianMyInfoScreen({super.key});
 
-  /// 카드 묶음 사이 간격 (설정 화면과 같다)
+  /// 카드 묶음 사이 간격 (시안 gap 16)
   static const _groupGap = 16.0;
 
-  /// 설정 아이콘 크기 · 누름 영역 한 변
-  static const _gearIconSize = 26.0;
+  /// 시안 실측: 제목 줄 왼쪽 24 · 카드 좌우 16 · 제목 줄 > 첫 카드 20
+  static const _cardsH = 16.0;
+  static const _titleToCards = 20.0;
+
+  /// 설정 톱니 그림 24 · 누름 영역 44
+  static const _gearIconSize = 24.0;
   static const _gearTapSize = 44.0;
 
   @override
@@ -41,98 +48,132 @@ class GuardianMyInfoScreen extends ConsumerWidget {
       memberProvider.select((member) => member.value?.account),
     );
 
+    // 위에서부터 차례로 나타날 묶음 (크레딧이 꺼져 있으면 자리도 간격도 없음 > 카드가 아래 간격을 가짐)
+    final sections = <Widget>[
+      const AiCreditCard(),
+      MyInfoNicknameCard(account: account),
+      if (profiles != null && profiles.isNotEmpty) ...[
+        SizedBox(height: _groupGap.h),
+        MyInfoElumiGroup(profiles: profiles),
+      ],
+      SizedBox(height: _groupGap.h),
+      _buildShortcuts(context, ref),
+    ];
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // 제목 줄 (제목 | 설정 아이콘)
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                space.screenH.w,
-                space.sm.h,
-                space.screenH.w - (_gearTapSize - _gearIconSize) / 2,
-                0,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.guardianTabMe,
-                      style: context.typo.greeting.copyWith(
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  AppPressable(
-                    onTap: () => context.push(Routes.guardianSettings),
-                    scaleDown: AppPressable.scaleIcon,
-                    semanticLabel: context.l10n.guardianSettingsTitle,
-                    child: SizedBox(
-                      width: _gearTapSize.w,
-                      height: _gearTapSize.w,
-                      child: Icon(
-                        Icons.settings_outlined,
-                        size: _gearIconSize.w,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildTitleRow(context),
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
-                  space.screenH.w,
-                  space.md.h,
-                  space.screenH.w,
+                  _cardsH.w,
+                  _titleToCards.h,
+                  _cardsH.w,
                   space.lg.h,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _ProfileCard(account: account),
-                    // 이룸이 목록: 회원 정보를 받았고 1명 이상일 때만
-                    if (profiles != null && profiles.isNotEmpty) ...[
-                      SizedBox(height: _groupGap.h),
-                      MyInfoElumiGroup(profiles: profiles),
-                    ],
-                    SizedBox(height: _groupGap.h),
-                    // 이번 주 AI 생성: 꺼져 있으면 자리도 없고, 아래 간격은 카드가 가진다
-                    const AiCreditCard(),
-                    SettingsGroup(
-                      hasDividers: false,
-                      children: [
-                        SettingsTile(
-                          isInCard: true,
-                          label: context.l10n.guardianSettingsPeople,
-                          onTap: () => context.push(Routes.guardianPeople),
-                        ),
-                        SettingsTile(
-                          isInCard: true,
-                          label: context.l10n.guardianSettingsDrafts,
-                          onTap: () => context.push(Routes.guardianDrafts),
-                        ),
-                        SettingsTile(
-                          isInCard: true,
-                          label: context.l10n.notificationTabNotices,
-                          onTap: () => _openNotices(context, ref),
-                        ),
-                        SettingsTile(
-                          isInCard: true,
-                          label: context.l10n.talkBlockedGuardiansTitle,
-                          onTap: () => context.push(Routes.guardianTalkBlocks),
-                        ),
-                      ],
-                    ),
-                  ],
+                  children: _staggered(sections),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// 간격이 아닌 묶음만 순서대로 늦춰 등장 (간격은 그대로 자리만 지킴)
+  List<Widget> _staggered(List<Widget> sections) {
+    var order = 0;
+    return [
+      for (final section in sections)
+        if (section is SizedBox)
+          section
+        else
+          AppFadeSlideIn(
+            delay: AppMotion.sectionStagger * order++,
+            child: section,
+          ),
+    ];
+  }
+
+  /// 제목 줄: 제목 | 설정 톱니 (톱니 누름 영역이 오른쪽 여백을 겸함)
+  Widget _buildTitleRow(BuildContext context) {
+    final space = context.space;
+    final colors = context.colors;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        space.screenH.w,
+        space.sm.h,
+        space.screenH.w - (_gearTapSize - _gearIconSize) / 2,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              context.l10n.guardianTabMe,
+              style: context.typo.libraryTitle.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+          ),
+          AppPressable(
+            onTap: () => context.push(Routes.guardianSettings),
+            scaleDown: AppPressable.scaleIcon,
+            semanticLabel: context.l10n.guardianSettingsTitle,
+            child: SizedBox(
+              width: _gearTapSize.w,
+              height: _gearTapSize.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconSettings,
+                  width: _gearIconSize.w,
+                  height: _gearIconSize.w,
+                  colorFilter: ColorFilter.mode(
+                    colors.myInfoMetaText,
+                    BlendMode.srcIn,
+                  ),
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 바로가기 4줄: 함께하는 사람 · 임시저장 · 공지사항 · 숨긴 보호자
+  Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
+    return SettingsGroup(
+      hasDividers: false,
+      children: [
+        SettingsTile(
+          isInCard: true,
+          label: context.l10n.guardianSettingsPeople,
+          onTap: () => context.push(Routes.guardianPeople),
+        ),
+        SettingsTile(
+          isInCard: true,
+          label: context.l10n.guardianSettingsDrafts,
+          onTap: () => context.push(Routes.guardianDrafts),
+        ),
+        SettingsTile(
+          isInCard: true,
+          label: context.l10n.notificationTabNotices,
+          onTap: () => _openNotices(context, ref),
+        ),
+        SettingsTile(
+          isInCard: true,
+          label: context.l10n.talkBlockedGuardiansTitle,
+          onTap: () => context.push(Routes.guardianTalkBlocks),
+        ),
+      ],
     );
   }
 }
@@ -141,122 +182,4 @@ class GuardianMyInfoScreen extends ConsumerWidget {
 Future<void> _openNotices(BuildContext context, WidgetRef ref) async {
   await context.push(Routes.guardianNotices);
   await ref.read(unreadSummaryProvider.notifier).refresh();
-}
-
-/// 보호자 프로필 카드: 역할 > 닉네임 > 가입 방법 배지 + 가린 이메일 > 가입일 (#849)
-///
-/// 회원 정보를 못 받았거나 닉네임이 아직 없으면 "보호자"만 이름 자리에 둔다.
-/// 사진 변경은 지원하지 않아 사람 아이콘 자리를 두지 않는다.
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.account});
-
-  final GuardianAccount? account;
-
-  /// 정보 줄 아이콘(배지 포함) 한 변
-  static const _infoIconSize = 18.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    final typo = context.typo;
-    final nickname = account?.nickname;
-    final joinedAt = account?.joinedAt;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.settingsGroupBg,
-        borderRadius: BorderRadius.circular(space.cardRadius.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(space.md.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 역할 (닉네임 있을 때만 작은 글씨로 위에)
-            if (nickname != null) ...[
-              Text(
-                context.l10n.guardianMyInfoProfileName,
-                style: typo.bodySmall.copyWith(color: colors.textSecondary),
-              ),
-              SizedBox(height: space.xs.h),
-            ],
-            Text(
-              nickname ?? context.l10n.guardianMyInfoProfileName,
-              style: typo.sectionTitle.copyWith(color: colors.textPrimary),
-            ),
-            // 계정 정보 (회원 정보 받았을 때만)
-            if (account != null) ...[
-              SizedBox(height: space.sm.h),
-              _InfoRow(
-                leading: _emailLeading(context, account!),
-                text: account!.maskedEmail ?? context.l10n.guardianMyInfoEmailPrivate,
-                isMuted: account!.maskedEmail == null,
-              ),
-              if (joinedAt != null) ...[
-                SizedBox(height: space.xs.h),
-                _InfoRow(
-                  leading: Icon(
-                    Icons.calendar_today_outlined,
-                    size: _infoIconSize.w,
-                    color: colors.textSecondary,
-                  ),
-                  text: context.l10n.guardianMyInfoJoinedOn(joinedAt),
-                ),
-              ],
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 가입 방법 배지 (아이디·비밀번호 가입이면 편지 아이콘)
-  Widget _emailLeading(BuildContext context, GuardianAccount account) {
-    final provider = account.signInProvider;
-    if (provider == null) {
-      return Icon(
-        Icons.mail_outline_rounded,
-        size: _infoIconSize.w,
-        color: context.colors.textSecondary,
-      );
-    }
-    return SignInProviderBadge(provider: provider, size: _infoIconSize);
-  }
-}
-
-/// 아이콘 + 한 줄 글 (길면 말줄임)
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.leading,
-    required this.text,
-    this.isMuted = false,
-  });
-
-  final Widget leading;
-  final String text;
-
-  /// 비공개처럼 값이 없는 줄은 흐리게
-  final bool isMuted;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      children: [
-        leading,
-        SizedBox(width: context.space.sm.w),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.typo.bodySmall.copyWith(
-              color: isMuted ? colors.textPlaceholder : colors.textSecondary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

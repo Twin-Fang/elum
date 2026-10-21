@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_label_chip.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../domain/guardian_member.dart';
 
@@ -72,12 +73,12 @@ class GuardianPersonRow extends StatelessWidget {
                     runSpacing: _chipToChipGap.h,
                     children: [
                       if (guardian.me)
-                        _PersonChip(
+                        ElumLabelChip(
                           label: context.l10n.guardiansMeBadge,
                           background: colors.peopleMeBadgeBg,
                           foreground: colors.peopleMeBadgeText,
                         ),
-                      _PersonChip(
+                      ElumLabelChip(
                         label: guardian.kind.label,
                         background: isCaregiver
                             ? colors.peopleCaregiverChipBg
@@ -103,44 +104,6 @@ class GuardianPersonRow extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// 이름 옆 작은 칩 (나 · 보호자 · 선생님). 테두리는 있을 때만
-class _PersonChip extends StatelessWidget {
-  const _PersonChip({
-    required this.label,
-    required this.background,
-    required this.foreground,
-    this.border,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-  final Color? border;
-
-  static const _padH = 12.0;
-  static const _padV = 6.0;
-  static const _radius = 8.0;
-  static const _borderWidth = 1.0;
-
-  @override
-  Widget build(BuildContext context) {
-    // 시안은 테두리가 칩 크기 안쪽이라 테두리 두께만큼 여백을 덜어 같은 크기로 맞춤
-    final inset = border == null ? 0.0 : _borderWidth;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: (_padH - inset).w,
-        vertical: (_padV - inset).h,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(_radius.r),
-        border: border == null ? null : Border.all(color: border!, width: _borderWidth),
-      ),
-      child: Text(label, maxLines: 1, style: context.typo.peopleChipLabel.copyWith(color: foreground)),
     );
   }
 }

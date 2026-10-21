@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.infrastructure.client.SupertonicTtsClient;
 import com.chuseok22.elumserver.common.infrastructure.properties.TtsProperties;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineStepSpeechStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import jakarta.annotation.PreDestroy;
 import java.time.Clock;
 import java.time.Duration;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +38,8 @@ public class RoutineStepSpeechQueue {
   private final ExecutorService executor;
 
   /// 실패한 단계를 주기 작업이 다시 넣기까지 쉬는 시간 (같은 실패 단계가 매번 자리를 차지하지 않게)
-  private static final Duration FAILURE_COOLDOWN = Duration.ofMinutes(30);
+  /// 확인마다 설정 TTS_FAILURE_COOLDOWN_MINUTES 에서 읽음
+  private final Supplier<Duration> failureCooldownSupplier;
 
   private final Clock clock;
 
@@ -55,17 +58,19 @@ public class RoutineStepSpeechQueue {
   @Autowired
   public RoutineStepSpeechQueue(
     RoutineStepSpeechFiller routineStepSpeechFiller, RoutineStepSpeechStorage routineStepSpeechStorage,
-    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient
+    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient, UsageLimitSettings usageLimitSettings
   ) {
     this(routineStepSpeechFiller, routineStepSpeechStorage, ttsProperties, supertonicTtsClient,
       Executors.newSingleThreadExecutor(Thread.ofPlatform().name("routine-speech").daemon(true).factory()),
-      Clock.systemUTC());
+      Clock.systemUTC(), usageLimitSettings::ttsFailureCooldown);
   }
 
   RoutineStepSpeechQueue(
     RoutineStepSpeechFiller routineStepSpeechFiller, RoutineStepSpeechStorage routineStepSpeechStorage,
-    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient, ExecutorService executor, Clock clock
+    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient, ExecutorService executor, Clock clock,
+    Supplier<Duration> failureCooldownSupplier
   ) {
+    this.failureCooldownSupplier = failureCooldownSupplier;
     this.clock = clock;
     this.routineStepSpeechFiller = routineStepSpeechFiller;
     this.routineStepSpeechStorage = routineStepSpeechStorage;
@@ -182,7 +187,7 @@ public class RoutineStepSpeechQueue {
    */
   public boolean isCoolingDown(String stepId) {
     Instant failedAt = lastFailureAtByStepId.get(stepId);
-    return failedAt != null && failedAt.plus(FAILURE_COOLDOWN).isAfter(clock.instant());
+    return failedAt != null && failedAt.plus(failureCooldownSupplier.get()).isAfter(clock.instant());
   }
 
   /// 대기·처리 중인 건수 (주기 작업이 적체를 보고 건너뜀)

@@ -6,7 +6,6 @@ import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminRoutineList;
 import com.chuseok22.elumserver.admin.application.service.AdminRoutineService;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,18 +24,10 @@ public class AdminRoutineController {
   private final AdminRoutineService adminRoutineService;
   private final AdminDateFormatter adminDateFormatter;
 
-  /// 일과 목록: 검색어(q), 필터(status), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
+  /// 일과 목록: 검색어(q), 필터(AdminRoutineList 정의 4개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/routines")
-  public String list(
-    @RequestParam(name = "q", required = false) String q,
-    @RequestParam(name = "status", required = false) String status,
-    @RequestParam(name = "sort", required = false) String sort,
-    @RequestParam(name = "page", required = false) String page,
-    Model model
-  ) {
-    Map<String, String> rawFilters = new HashMap<>();
-    rawFilters.put(AdminRoutineList.FILTER_STATUS, status);
-    AdminListQuery query = AdminListQuery.of(q, rawFilters, sort, page, AdminRoutineList.DEFINITION);
+  public String list(@RequestParam Map<String, String> parameters, Model model) {
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, AdminRoutineList.DEFINITION);
 
     Page<AdminRoutineResponse> routines = adminRoutineService.search(query);
     model.addAttribute("routines", routines);

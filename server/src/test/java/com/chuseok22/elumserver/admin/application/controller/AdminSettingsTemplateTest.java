@@ -71,7 +71,8 @@ class AdminSettingsTemplateTest {
   ) {
     return new SettingRow(key, label, "설명 " + label, "PLAN_FREE", "Free 플랜 한도", isSecret ? "SECRET" : "BOOLEAN",
       List.of(), null, null, isSecret ? "" : "true", isSecret ? "설정됨" : "켜짐", "false", isSecret ? "" : "꺼짐",
-      isDifferent, isSecret, changedAt != null, changedAt, changedAt == null ? null : "admin", reason);
+      isDifferent, isSecret, changedAt != null, changedAt, changedAt == null ? null : "admin", reason,
+      "FREE_TEXT", "", null, "DB 저장값", null);
   }
 
   private Map<String, Object> settingsModel(List<SettingRow> rows) {
@@ -86,6 +87,7 @@ class AdminSettingsTemplateTest {
     model.put("groupLabelByName", new LinkedHashMap<>(Map.of("PLAN_FREE", "Free 플랜 한도")));
     model.put("imageProviders", List.of());
     model.put("textProviders", List.of());
+    model.put("ruleWarningCount", 0L);
     return model;
   }
 
@@ -123,6 +125,22 @@ class AdminSettingsTemplateTest {
       row("OPENAI_API_KEY", "OpenAI 키", false, true, LocalDateTime.of(2026, 10, 1, 0, 0), null))));
 
     assertThat(html).contains("설정됨").contains("data-secret=\"true\"").doesNotContain("data-current=");
+  }
+
+  @Test
+  @DisplayName("저장값이 지금 규칙에 어긋나면 행에 경고 배지·이유와 걸러 보기 칩이 보인다 — 어긋난 값이 조용히 묻히지 않는다")
+  void settingsPage_ruleWarning_showsBadgeAndChip() {
+    SettingRow warnedRow = new SettingRow("MIN_APP_VERSION_IOS", "iOS 최소 버전", "설명", "APP_CONTROL", "앱 점검·버전",
+      "STRING", List.of(), null, null, "v2.1", "v2.1", "", "(비어 있음)", true, false, false, null, null, null,
+      "APP_VERSION", "숫자.숫자.숫자 (예: 2.69.1)", "버전은 2.69.1 로 적어요", "DB 저장값", null);
+    Map<String, Object> model = settingsModel(List.of(warnedRow));
+    model.put("ruleWarningCount", 1L);
+
+    String html = render("admin/settings", model);
+
+    assertThat(html).contains("규칙에 어긋남").contains("버전은 2.69.1 로 적어요");
+    assertThat(html).contains("data-chip=\"warning\"").contains("data-warning=\"true\"")
+      .contains("data-format=\"APP_VERSION\"");
   }
 
   @Test

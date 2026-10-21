@@ -228,6 +228,22 @@ class MemberRepository {
     return r.failure;
   }
 
+  /// 보호자 본인 닉네임 저장 (`PATCH /api/member/account/nickname`). 응답은 [getMyInfo] 와 같은 모양
+  ///
+  /// 거절 4종: 형식 · 금지어 · 중복 · 7일 제한 (`NICKNAME_*`). 이룸이 호칭은 [updateNickname]
+  Future<Attempt<Member>> updateGuardianNickname(String nickname) {
+    return guarded(_repo, 'updateGuardianNickname', () async {
+      final res = await _dio.patch<Map<String, dynamic>>(
+        '/api/member/account/nickname',
+        data: {'nickname': nickname},
+      );
+      final body = res.data;
+      // 응답 모양이 다르면 저장 여부를 몰라 실패로 본다 (다시 받기로 맞춤)
+      if (body == null) throw const AppFailure(fault: NetworkFault.app);
+      return Member.fromJson(body);
+    });
+  }
+
   /// 도움 목표 저장 (전체 교체).
   ///
   /// ⚠️ [goals]는 서버 enum 값이어야 한다

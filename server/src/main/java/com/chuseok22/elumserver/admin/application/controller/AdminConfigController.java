@@ -12,9 +12,12 @@ import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.member.application.dto.response.MemberPickerItem;
+import com.chuseok22.elumserver.member.application.service.MemberPickerService;
 import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigValueValidator;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.security.Principal;
@@ -23,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,11 +41,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AdminConfigController {
 
+  // 없는 회원 ID 거부 사유에 보일 ID 앞부분 길이
+  private static final int MEMBER_ID_PREVIEW_LENGTH = 8;
+
   private final SystemConfigService systemConfigService;
   private final ImageClientRouter imageClientRouter;
   private final TextClientRouter textClientRouter;
   private final PromptLocaleGate promptLocaleGate;
   private final SystemConfigOverviewService overviewService;
+  private final MemberPickerService memberPickerService;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
@@ -57,6 +65,8 @@ public class AdminConfigController {
     rows.stream().sorted(java.util.Comparator.comparing(row -> ConfigGroup.valueOf(row.groupName()).ordinal()))
       .forEach(row -> groupLabelByName.putIfAbsent(row.groupName(), row.groupLabel()));
     model.addAttribute("groupLabelByName", groupLabelByName);
+    // "규칙에 어긋난 값" 칩: 저장 뒤 규칙이 바뀌어 지금 규칙에 맞지 않는 저장값 수
+    model.addAttribute("ruleWarningCount", rows.stream().filter(SettingRow::hasValidationWarning).count());
     model.addAttribute("imageProviders", imageProviderViews());
     model.addAttribute("textProviders", textProviderViews());
     return "admin/settings";
@@ -81,11 +91,13 @@ public class AdminConfigController {
     Principal principal
   ) {
     try {
-      rejectUnavailableProvider(key, value);
+      rejectValueNotReady(key, value);
       systemConfigService.update(key, value, actorOf(principal), reason);
       return Map.of("ok", true, "message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
-      return Map.of("ok", false, "message", key.getLabel() + failureReason(e));
+      // reason: 입력칸 옆에 그대로 보일 이유 (입력값은 화면에 그대로 둠)
+      String failureReason = failureReason(e);
+      return Map.of("ok", false, "message", key.getLabel() + " 저장 실패: " + failureReason, "reason", failureReason);
     }
   }
 
@@ -100,11 +112,11 @@ public class AdminConfigController {
     try {
       // 키 없는 제공자로 바꾸면 그 순간부터 카드 생성이 전부 실패한다. 화면 버튼이
       // 먼저 막지만, 요청을 직접 보내면 뚫리므로 여기서 한 번 더 막는다.
-      rejectUnavailableProvider(key, value);
+      rejectValueNotReady(key, value);
       systemConfigService.update(key, value, actorOf(principal), reason);
       redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
-      redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + failureReason(e));
+      redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + " 저장 실패: " + failureReason(e));
     }
     return "redirect:/admin/settings";
   }
@@ -116,25 +128,53 @@ public class AdminConfigController {
   private String failureReason(CustomException e) {
     return switch (e.getErrorCode()) {
       case SECRET_MASTER_KEY_MISSING ->
-        " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
+        "서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
       case IMAGE_PROVIDER_UNAVAILABLE, TEXT_PROVIDER_UNAVAILABLE ->
-        " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
+        "그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
       case CONTENT_LOCALE_NOT_READY ->
-        " 저장 실패: 그 언어의 서버 문구 파일(폴백 질문·추천)이 비어 있어 켤 수 없습니다. (E-CFG-004)";
+        "그 언어의 서버 문구 파일(폴백 질문·추천)이 비어 있어 켤 수 없습니다. (E-CFG-004)";
       case CONTENT_LOCALE_PROMPT_MISSING ->
-        " 저장 실패: 프롬프트 행이 모두 있는 언어만 켤 수 있어요. 프롬프트 화면에서 그 언어의 '기본값으로 행 만들기'를 누르고 시험한 뒤 다시 켜세요. (E-CFG-005)";
-      default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
+        "프롬프트 행이 모두 있는 언어만 켤 수 있어요. 프롬프트 화면에서 그 언어의 '기본값으로 행 만들기'를 누르고 시험한 뒤 다시 켜세요. (E-CFG-005)";
+      // 값 검사 거부: 검사기가 준 이유 (없으면 일반 문구)
+      default -> (e.getDetail() == null || e.getDetail().isBlank() ? "값이 올바르지 않습니다." : e.getDetail())
+        + " (E-CFG-001)";
     };
   }
 
-  private void rejectUnavailableProvider(ConfigKey key, String value) {
+  /// 값 형식과 별개로 지금 상태 때문에 못 받는 값 거부: 키 없는 제공자, 준비 안 된 언어, 없는 회원
+  private void rejectValueNotReady(ConfigKey key, String value) {
     switch (key) {
       case IMAGE_PROVIDER_SELECTED -> rejectUnavailableImageProvider(value);
       case TEXT_PROVIDER_SELECTED -> rejectUnavailableTextProvider(value);
       case ENABLED_CONTENT_LOCALES -> rejectIncompleteLocales(value);
+      case ADS_ALWAYS_SHOWN_MEMBER_IDS -> rejectUnknownMembers(value);
       default -> {
-        // 제공자 선택이 아닌 설정은 검사할 것이 없다.
+        // 그 외 설정은 상태에 따라 막을 것이 없다.
       }
+    }
+  }
+
+  /**
+   * 없는 회원 ID 는 저장하지 않는다 (오타가 저장되면 광고 시험이 조용히 빗나감)
+   * 형식이 틀린 항목은 여기서 건너뛰고 서비스의 형식 검사가 거부
+   */
+  private void rejectUnknownMembers(String value) {
+    List<String> memberIds = SystemConfigValueValidator.splitListItems(value).stream()
+      .filter(SystemConfigValueValidator::isMemberIdFormat)
+      .toList();
+    if (memberIds.isEmpty()) {
+      return;
+    }
+    Set<String> existingIds = memberPickerService.findExisting(memberIds).stream()
+      .map(MemberPickerItem::id)
+      .collect(Collectors.toSet());
+    List<String> unknownIdPreviews = memberIds.stream()
+      .filter(memberId -> !existingIds.contains(memberId))
+      .map(memberId -> memberId.substring(0, MEMBER_ID_PREVIEW_LENGTH) + "…")
+      .toList();
+    if (!unknownIdPreviews.isEmpty()) {
+      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE,
+        "없는 회원 ID가 있어요: " + String.join(", ", unknownIdPreviews));
     }
   }
 

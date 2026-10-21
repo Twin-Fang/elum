@@ -103,6 +103,19 @@ abstract final class AppMotion {
   /// 한 덩어리씩 "얹히는" 호흡이 필요해 간격이 더 길다.
   static const sceneStagger = Duration(milliseconds: 120);
 
+  /// 한 화면의 카드 묶음이 위에서부터 차례로 얹히는 간격 (내 정보 등).
+  ///
+  /// 리스트 [staggerDelayMs](30)는 카드 단위로는 한 번에 뜬 것처럼 보이고,
+  /// [sceneStagger](120)는 카드 4장이면 마지막이 늦게 떠 기다리게 된다.
+  static const sectionStagger = Duration(milliseconds: 70);
+
+  /// 숫자·막대가 이전 값에서 새 값으로 움직이는 시간 (크레딧 잔액).
+  ///
+  /// [emphasis](500)를 넘긴다. 숫자를 세며 줄어드는 것이 눈에 읽혀야 하는데
+  /// 500 안에서는 숫자가 건너뛰어 "바뀌었다"만 보이고 "얼마나 줄었다"가 안 보인다.
+  /// 아무것도 막지 않는 연출이라 기다림이 생기지 않는다.
+  static const valueChange = Duration(milliseconds: 800);
+
   /// 아동 화면 최소 전환 시간.
   ///
   /// 발달장애 아동은 급격한 전환의 인지 부하가 크다. 아동 모드 화면에서는

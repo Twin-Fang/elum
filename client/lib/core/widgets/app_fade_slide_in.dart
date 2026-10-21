@@ -60,6 +60,8 @@ class _AppFadeSlideInState extends State<AppFadeSlideIn>
 
   @override
   Widget build(BuildContext context) {
+    // 기기 "동작 줄이기" 켜짐 > 움직이지 않고 바로 보임
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
     return AnimatedBuilder(
       animation: _progress,
       builder: (context, child) {

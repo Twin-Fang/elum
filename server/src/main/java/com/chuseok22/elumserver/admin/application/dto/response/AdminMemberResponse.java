@@ -9,7 +9,9 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 // 회원 목록 한 줄 — 프로필에 루틴수·AI 사용량·최근 활동을 붙여 운영 판단이 한 화면에서 되게 한다.
@@ -35,8 +37,17 @@ public record AdminMemberResponse(
   LocalDateTime planExpiresAt,
   /// 요금제 마지막 변경 시각·변경자. 이력이 없으면 null
   LocalDateTime planLastChangedAt,
-  String planLastChangedBy
+  String planLastChangedBy,
+  /// 이 보호자가 연결된 이룸이 수, 그 이룸이들을 돌보는 보호자 수(본인 포함). 목록 보강 전에는 0
+  long profileCount,
+  long guardianCount,
+  /// 연결된 로그인 제공자 (제공자 순서 고정). 목록 보강 전에는 빈 목록
+  List<OAuthProvider> loginProviders
 ) {
+
+  public AdminMemberResponse {
+    loginProviders = loginProviders == null ? List.of() : List.copyOf(loginProviders);
+  }
 
   /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null
   /// @param subscription       구독 행. 없으면 null (Free 로 봄)
@@ -65,7 +76,20 @@ public record AdminMemberResponse(
       plan,
       plan == PlanType.PRO ? subscription.getExpiresAt() : null,
       lastPlanChange == null ? null : lastPlanChange.getChangedAt(),
-      lastPlanChange == null ? null : lastPlanChange.getChangedBy()
+      lastPlanChange == null ? null : lastPlanChange.getChangedBy(),
+      0,
+      0,
+      List.of()
     );
+  }
+
+  /// 목록 보강: 이룸이·보호자 수, 로그인 제공자를 채운 사본
+  public AdminMemberResponse withGuardianshipAndProviders(
+    long profileCountToSet, long guardianCountToSet, List<OAuthProvider> loginProvidersToSet
+  ) {
+    return new AdminMemberResponse(id, username, nickname, character, status, supportGoals, totalStars,
+      routineCount, aiCallCount, totalTokens, estimatedCostUsd, lastActivityAt, createdAt, withdrawnAt,
+      retentionExpiresAt, plan, planExpiresAt, planLastChangedAt, planLastChangedBy,
+      profileCountToSet, guardianCountToSet, loginProvidersToSet);
   }
 }

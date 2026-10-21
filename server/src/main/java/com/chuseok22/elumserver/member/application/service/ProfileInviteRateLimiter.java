@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +22,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProfileInviteRateLimiter {
 
-  /** 10분에 입력 10번 — 받아적다 몇 번 틀려도 넉넉하고, 시간당 60번 이하로 묶는다. */
-  static final int REDEEM_MAX_PER_WINDOW = 10;
-
-  /** 10분에 발급 10번. "다시 만들기"를 몇 번 눌러도 넉넉하고, 발급을 쏟아내 행을 불리지는 못하게 한다. */
-  static final int ISSUE_MAX_PER_WINDOW = 10;
-
+  // 한도: 설정 PROFILE_INVITE_REDEEM/ISSUE_LIMIT_PER_10_MINUTES (기본 10번씩)
+  // 창 길이: 위 키 이름의 "10분"과 함께 바꾼다
   static final Duration WINDOW = Duration.ofMinutes(10);
 
   private static final String REDEEM_PREFIX = "profile-invite-redeem:";
   private static final String ISSUE_PREFIX = "profile-invite-issue:";
 
   private final SharedStateStore sharedStateStore;
+  private final UsageLimitSettings usageLimitSettings;
 
   /** 코드를 넣어 봐도 되면 true. 창 안에서 한도를 넘었으면 false. */
   public boolean tryRedeem(String memberId) {
     boolean allowed = sharedStateStore.tryRecordInWindow(
-      REDEEM_PREFIX + memberId, WINDOW, REDEEM_MAX_PER_WINDOW, System.currentTimeMillis());
+      REDEEM_PREFIX + memberId, WINDOW, usageLimitSettings.profileInviteRedeemLimitPerTenMinutes(),
+      System.currentTimeMillis());
     if (!allowed) {
       log.warn("초대 코드 입력이 너무 잦습니다: memberId={}", memberId);
     }
@@ -47,7 +46,8 @@ public class ProfileInviteRateLimiter {
   /** 코드를 새로 내도 되면 true. */
   public boolean tryIssue(String memberId) {
     boolean allowed = sharedStateStore.tryRecordInWindow(
-      ISSUE_PREFIX + memberId, WINDOW, ISSUE_MAX_PER_WINDOW, System.currentTimeMillis());
+      ISSUE_PREFIX + memberId, WINDOW, usageLimitSettings.profileInviteIssueLimitPerTenMinutes(),
+      System.currentTimeMillis());
     if (!allowed) {
       log.warn("초대 코드 발급이 너무 잦습니다: memberId={}", memberId);
     }

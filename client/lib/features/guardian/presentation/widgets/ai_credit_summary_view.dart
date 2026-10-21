@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../credit/domain/credit_summary.dart';
 import 'ai_credit_card.dart';
+import 'animated_credit_values.dart';
 import 'credit_history_link.dart';
 
 /// 크레딧 카드 안의 내용 — 조회에 성공했을 때.
@@ -71,70 +72,80 @@ class AiCreditSummaryView extends StatelessWidget {
         for (final (text, _) in lines) text,
         reset,
       ].join(', '),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 제목 줄의 안내 버튼 자리 (누름 영역이 제목 줄보다 높아 위로 겹쳐 둔다)
-          SizedBox(height: CreditInfoButton.titleRowHeight(context)),
-          SizedBox(height: space.xs),
-          // 반짝임 + 큰 숫자, 오른쪽에 단위 (글꼴이 커지면 단위가 다음 줄로 흐른다)
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.end,
-            spacing: _inlineGap.w,
-            runSpacing: _inlineGap.h,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    AppAssets.iconSparkles,
-                    width: _sparkleWidth.w,
-                    height: _sparkleHeight.h,
-                    colorFilter: ColorFilter.mode(
-                      colors.creditNumberText,
-                      BlendMode.srcIn,
+      // 숫자·막대는 직전에 본 값에서 새 값으로 함께 움직임 (낭독 문구는 처음부터 새 값)
+      child: AnimatedCreditValues(
+        available: s.available,
+        ratio: s.remainingRatio,
+        builder: (context, available, ratio) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목 줄의 안내 버튼 자리 (누름 영역이 제목 줄보다 높아 위로 겹쳐 둔다)
+            SizedBox(height: CreditInfoButton.titleRowHeight(context)),
+            SizedBox(height: space.xs),
+            // 반짝임 + 큰 숫자, 오른쪽에 단위 (글꼴이 커지면 단위가 다음 줄로 흐른다)
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.end,
+              spacing: _inlineGap.w,
+              runSpacing: _inlineGap.h,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      AppAssets.iconSparkles,
+                      width: _sparkleWidth.w,
+                      height: _sparkleHeight.h,
+                      colorFilter: ColorFilter.mode(
+                        colors.creditNumberText,
+                        BlendMode.srcIn,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: _inlineGap.w),
-                  Text(
-                    '${s.available}',
-                    style: context.typo.creditNumber.copyWith(
-                      color: colors.creditNumberText,
+                    SizedBox(width: _inlineGap.w),
+                    Text(
+                      '$available',
+                      style: context.typo.creditNumber.copyWith(
+                        color: colors.creditNumberText,
+                        // 세는 동안 숫자 폭이 바뀌어 단위가 흔들리지 않게 고정폭 숫자
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Text(
-                unit,
-                style: context.typo.creditUnit.copyWith(
-                  color: colors.creditMutedText,
+                  ],
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: space.xs),
-          AiCreditBar(
-            key: AiCreditCard.barKey,
-            ratio: s.remainingRatio,
-            color: colors.creditBarFill,
-          ),
-          // 알릴 줄이 없는 정상 상태면 막대 아래에 바로 다시 채워지는 날이 온다
-          if (lines.isNotEmpty) ...[
-            SizedBox(height: space.md),
-            for (final (i, (text, color)) in lines.indexed) ...[
-              if (i > 0) SizedBox(height: space.xs / 2),
-              Text(text, style: context.typo.creditBody.copyWith(color: color)),
-            ],
-          ],
-          SizedBox(height: _sectionGap.h),
-          Text(
-            reset,
-            style: context.typo.creditReset.copyWith(
-              color: colors.creditMutedText,
+                Text(
+                  unit,
+                  style: context.typo.creditUnit.copyWith(
+                    color: colors.creditMutedText,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: space.xs),
+            AiCreditBar(
+              key: AiCreditCard.barKey,
+              ratio: ratio,
+              color: colors.creditBarFill,
+            ),
+            // 알릴 줄이 없는 정상 상태면 막대 아래에 바로 다시 채워지는 날이 온다
+            if (lines.isNotEmpty) ...[
+              SizedBox(height: space.md),
+              for (final (i, (text, color)) in lines.indexed) ...[
+                if (i > 0) SizedBox(height: space.xs / 2),
+                Text(
+                  text,
+                  style: context.typo.creditBody.copyWith(color: color),
+                ),
+              ],
+            ],
+            SizedBox(height: _sectionGap.h),
+            Text(
+              reset,
+              style: context.typo.creditReset.copyWith(
+                color: colors.creditMutedText,
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -144,7 +155,12 @@ class AiCreditSummaryView extends StatelessWidget {
         Stack(
           children: [
             body,
-            Positioned(top: 0, left: 0, right: 0, child: CreditInfoButton(summary: s)),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: CreditInfoButton(summary: s),
+            ),
           ],
         ),
         // 다시 채워지는 날 > 사용 내역 보기: 시안 간격 16 에서 누름 영역이 12 를 가져간다

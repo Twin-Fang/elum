@@ -70,7 +70,7 @@ class AdminFeedbackNoticeListQueryIT {
     Map<String, String> filters = new HashMap<>();
     filters.put("status", status);
     AdminListQuery query = AdminListQuery.of(q, filters, sort, null, AdminFeedbackList.DEFINITION);
-    return feedbackService.search(query.likePattern(), AdminFeedbackList.statusFilterOf(query),
+    return feedbackService.search(AdminFeedbackList.searchOf(query),
         AdminFeedbackList.sortOf(query), query.pageIndex()).getContent().stream()
       .map(Feedback::getMessage).filter(message -> message.startsWith(prefix)).toList();
   }
@@ -89,7 +89,7 @@ class AdminFeedbackNoticeListQueryIT {
 
   private List<String> noticeTitles(String q, String sort) {
     AdminListQuery query = AdminListQuery.of(q, Map.of(), sort, null, AdminNoticeList.DEFINITION);
-    return noticeService.search(query.likePattern(), AdminNoticeList.pageableOf(query)).getContent().stream()
+    return noticeService.search(AdminNoticeList.searchOf(query), AdminNoticeList.pageableOf(query)).getContent().stream()
       .map(AppNotice::getTitle).filter(title -> title.startsWith(prefix)).toList();
   }
 

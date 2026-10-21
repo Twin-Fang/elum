@@ -2,16 +2,22 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRows;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.HashMap;
+import java.time.LocalDate;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,31 +26,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AdminMemberController {
 
+  private static final String LIST_PATH = "/admin/members";
+  /// CSV 파일명 접두어: members_{yyyyMMdd}.csv
+  private static final String CSV_FILE_PREFIX = "members";
+
   private final AdminMemberService adminMemberService;
   private final AdminDateFormatter adminDateFormatter;
 
-  /// 회원 목록: 검색어(q), 필터(plan, status, joinedFrom, joinedTo), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
-  @GetMapping("/admin/members")
-  public String list(
-    @RequestParam(name = "q", required = false) String q,
-    @RequestParam(name = "plan", required = false) String plan,
-    @RequestParam(name = "status", required = false) String status,
-    @RequestParam(name = "joinedFrom", required = false) String joinedFrom,
-    @RequestParam(name = "joinedTo", required = false) String joinedTo,
-    @RequestParam(name = "sort", required = false) String sort,
-    @RequestParam(name = "page", required = false) String page,
-    Model model
-  ) {
-    Map<String, String> rawFilters = new HashMap<>();
-    rawFilters.put(AdminMemberList.FILTER_PLAN, plan);
-    rawFilters.put(AdminMemberList.FILTER_STATUS, status);
-    rawFilters.put(AdminMemberList.FILTER_JOINED_FROM, joinedFrom);
-    rawFilters.put(AdminMemberList.FILTER_JOINED_TO, joinedTo);
-    AdminListQuery query = AdminListQuery.of(q, rawFilters, sort, page, AdminMemberList.DEFINITION);
+  /// 회원 목록: 검색어(q), 필터(AdminMemberList 정의 7개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
+  @GetMapping(LIST_PATH)
+  public String list(@RequestParam Map<String, String> parameters, Model model) {
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, AdminMemberList.DEFINITION);
 
     Page<AdminMemberResponse> members = adminMemberService.search(query);
     model.addAttribute("members", members);
@@ -53,8 +50,26 @@ public class AdminMemberController {
     model.addAttribute("definition", AdminMemberList.DEFINITION);
     model.addAttribute("query", query);
     // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
-    model.addAttribute("pagerBaseUrl", "/admin/members" + query.toQueryString(query.sort(), 1));
+    model.addAttribute("pagerBaseUrl", LIST_PATH + query.toQueryString(query.sort(), 1));
+    model.addAttribute("csvExport", AdminCsvExporter.linkOf(LIST_PATH, query, members.getTotalElements()));
     return "admin/members";
+  }
+
+  /// 회원 CSV: 목록과 같은 조건 > 상한 이내면 파일, 넘으면 같은 조건 목록으로 돌아가 안내 (내보낸 관리자·건수 기록)
+  @GetMapping(LIST_PATH + AdminCsvExporter.EXPORT_PATH_SUFFIX)
+  public ResponseEntity<byte[]> exportCsv(
+    @RequestParam Map<String, String> parameters, Principal principal,
+    HttpServletRequest request, HttpServletResponse response
+  ) {
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, AdminMemberList.DEFINITION);
+    ExportRows<AdminMemberResponse> export = adminMemberService.searchForExport(query);
+    if (export.isOverLimit()) {
+      log.info("[admin csv] rejected members : total={} over limit", export.totalCount());
+      return AdminCsvExporter.redirectOverLimit(LIST_PATH, query, export.totalCount(), request, response);
+    }
+    log.info("[admin csv] exported members : rows={}, admin={}", export.rows().size(), actorOf(principal));
+    return AdminCsvExporter.toAttachment(CSV_FILE_PREFIX, LocalDate.now(),
+      AdminMemberList.csvColumns(adminDateFormatter), export.rows());
   }
 
   @GetMapping("/admin/members/{id}")
@@ -140,6 +155,36 @@ public class AdminMemberController {
   public String forceLogout(@PathVariable String id, RedirectAttributes redirectAttributes) {
     adminMemberService.forceLogout(id);
     redirectAttributes.addFlashAttribute("message", "강제 로그아웃했습니다. 기존 토큰이 모두 무효화됩니다.");
+    return "redirect:/admin/members/" + id;
+  }
+
+  /**
+   * 이룸이 기기 연결 해제: 앱의 끊기와 같은 경로 (그 기기 세션만 폐기, 보호자 세션 유지)
+   * 이미 끊겼거나 이 회원의 이룸이가 아닌 연결은 상세 화면에 머물러 오류 안내
+   */
+  @PostMapping("/admin/members/{id}/device-links/{linkId}/unlink")
+  public String unlinkDevice(
+    @PathVariable String id,
+    @PathVariable String linkId,
+    Principal principal,
+    RedirectAttributes redirectAttributes
+  ) {
+    // 끊긴 연결만 화면에서 안내 (상세를 열어 둔 사이 보호자가 끊은 경우). 그 밖의 예외는 공통 오류 화면으로
+    try {
+      adminMemberService.unlinkDevice(id, linkId, actorOf(principal));
+    } catch (CustomException e) {
+      if (e.getErrorCode() != ErrorCode.DEVICE_LINK_NOT_CONNECTED) {
+        throw e;
+      }
+      // linkId 는 주소에서 온 값이라 UUID 문자(16진수, -) 밖은 ? 로 바꿔 남김
+      log.info("[admin device unlink] rejected 404 : not connected, linkId={}",
+        linkId.replaceAll("[^0-9a-fA-F-]", "?"));
+      redirectAttributes.addFlashAttribute("errorMessage",
+        "연결 해제 실패: 이미 끊겼거나 이 회원의 이룸이 기기가 아니에요. 화면을 새로 고쳐 확인해주세요. (E-ADM-LINK-001)");
+      return "redirect:/admin/members/" + id;
+    }
+    redirectAttributes.addFlashAttribute("message",
+      "이룸이 기기 연결을 끊었어요. 그 기기는 다시 연결 암호를 넣어야 일과를 볼 수 있어요.");
     return "redirect:/admin/members/" + id;
   }
 
