@@ -223,6 +223,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditHistoryMutedText,
     required this.notificationIconBackground,
     required this.notificationUnreadBackground,
+    required this.notificationBellIcon,
+    required this.notificationBellUnreadDot,
+    required this.notificationBellUnreadDotBorder,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -847,6 +850,15 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 알림 목록에서 안 읽은 줄의 연한 민트 바탕 (시안 알림 탭)
   final Color notificationUnreadBackground;
 
+  /// 머리 줄 종 아이콘 (Figma `alarm` 1724:7739 `#74757D`)
+  final Color notificationBellIcon;
+
+  /// 종 아이콘의 안 읽음 원 (Figma `alarm` `#55CFBA`)
+  final Color notificationBellUnreadDot;
+
+  /// 안 읽음 원 테두리 2. 종과 겹친 자리를 바탕색으로 끊어 보임 (Figma `#F7F2EF`)
+  final Color notificationBellUnreadDotBorder;
+
   // --- 약관 동의 선택 상태 ---
   //
   // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
@@ -1090,6 +1102,9 @@ class AppColors extends ThemeExtension<AppColors> {
     creditHistoryMutedText: Color(0xFF74757D),
     notificationIconBackground: Color(0xFFE7DEFB),
     notificationUnreadBackground: Color(0xFFEAF7F5),
+    notificationBellIcon: Color(0xFF74757D),
+    notificationBellUnreadDot: Color(0xFF55CFBA),
+    notificationBellUnreadDotBorder: Color(0xFFF7F2EF),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1292,6 +1307,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditHistoryMutedText,
     Color? notificationIconBackground,
     Color? notificationUnreadBackground,
+    Color? notificationBellIcon,
+    Color? notificationBellUnreadDot,
+    Color? notificationBellUnreadDotBorder,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1498,6 +1516,9 @@ class AppColors extends ThemeExtension<AppColors> {
       creditHistoryMutedText: creditHistoryMutedText ?? this.creditHistoryMutedText,
       notificationIconBackground: notificationIconBackground ?? this.notificationIconBackground,
       notificationUnreadBackground: notificationUnreadBackground ?? this.notificationUnreadBackground,
+      notificationBellIcon: notificationBellIcon ?? this.notificationBellIcon,
+      notificationBellUnreadDot: notificationBellUnreadDot ?? this.notificationBellUnreadDot,
+      notificationBellUnreadDotBorder: notificationBellUnreadDotBorder ?? this.notificationBellUnreadDotBorder,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1875,6 +1896,9 @@ class AppColors extends ThemeExtension<AppColors> {
       creditHistoryMutedText: Color.lerp(creditHistoryMutedText, other.creditHistoryMutedText, t)!,
       notificationIconBackground: Color.lerp(notificationIconBackground, other.notificationIconBackground, t)!,
       notificationUnreadBackground: Color.lerp(notificationUnreadBackground, other.notificationUnreadBackground, t)!,
+      notificationBellIcon: Color.lerp(notificationBellIcon, other.notificationBellIcon, t)!,
+      notificationBellUnreadDot: Color.lerp(notificationBellUnreadDot, other.notificationBellUnreadDot, t)!,
+      notificationBellUnreadDotBorder: Color.lerp(notificationBellUnreadDotBorder, other.notificationBellUnreadDotBorder, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
