@@ -221,12 +221,15 @@ class TalkHelpfulButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isSelected
-                    ? Icons.thumb_up_alt_rounded
-                    : Icons.thumb_up_alt_outlined,
-                size: _iconSize.w,
-                color: colors.textPrimary,
+              // 피드 숫자 줄과 같은 `fi-br-thumbs-up`. 켜짐은 민트 판 · 테두리 · 아이콘으로 구분
+              SvgPicture.asset(
+                AppAssets.iconThumbsUp,
+                width: _iconSize.w,
+                height: _iconSize.w,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? colors.goalSelectedBorder : colors.textPrimary,
+                  BlendMode.srcIn,
+                ),
               ),
               SizedBox(width: space.xs.w),
               Text(
