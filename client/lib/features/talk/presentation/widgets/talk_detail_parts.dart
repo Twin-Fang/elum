@@ -9,16 +9,20 @@ import '../../../../core/widgets/app_pressable.dart';
 
 // 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼, 가져감 숫자. 배치는 talk_detail_body.dart
 
-/// 작성 정보: 작성자 | 10/21 오후 11:42 (시안 1813:7497)
+/// 작성 정보: 작성자 | 10/21 오후 11:42 (시안 1813:7497, 댓글 칸도 같은 줄)
 class TalkDetailPostedRow extends StatelessWidget {
   const TalkDetailPostedRow({
     super.key,
     required this.authorName,
     required this.createdAt,
+    this.authorColor,
   });
 
   final String authorName;
   final DateTime createdAt;
+
+  /// 이름만 다른 색 (내 댓글 민트). null 이면 시각과 같은 회색
+  final Color? authorColor;
 
   /// 세로선 앞뒤 · 높이 (시안 8 · 12)
   static const _dividerGap = 8.0;
@@ -37,7 +41,9 @@ class TalkDetailPostedRow extends StatelessWidget {
             authorName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: style,
+            style: authorColor == null
+                ? style
+                : style.copyWith(color: authorColor),
           ),
         ),
         SizedBox(width: _dividerGap.w),
@@ -89,7 +95,10 @@ class TalkDetailViewToggle extends StatelessWidget {
             AppAssets.iconViewGrid,
             width: _gridIconSize.w,
             height: _gridIconSize.w,
-            colorFilter: ColorFilter.mode(colors.talkTitleText, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+              colors.talkTitleText,
+              BlendMode.srcIn,
+            ),
           );
     return AppPressable(
       onTap: onToggled,

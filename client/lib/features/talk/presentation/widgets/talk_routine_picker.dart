@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_fade_slide_in.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/widgets/routine_preview_hook.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../guardian/application/routine_providers.dart';
@@ -27,7 +28,7 @@ class TalkRoutinePicker extends ConsumerWidget {
   /// 목록 좌우 · 위 · 머리 > 첫 줄 · 줄 사이 · 차례로 떠오르는 줄 수 상한
   static const _listInsetH = 16.0;
   static const _listTop = 8.0;
-  static const _headingToList = 24.0;
+  static const _headingToList = 16.0;
   static const _rowGap = 8.0;
   static const _maxStaggerCount = 8;
 
@@ -89,25 +90,31 @@ class TalkRoutinePicker extends ConsumerWidget {
   }
 }
 
-/// 올릴 일과 한 줄 (일과관리 줄 결): 제목 > 카드 수 | 꺾쇠
-class _ShareableRoutineRow extends StatelessWidget {
+/// 올릴 일과 한 줄 (일과관리 줄 결, 시안 1870:9375): 그림 52 | 제목 > 카드 수 | 꺾쇠
+class _ShareableRoutineRow extends ConsumerWidget {
   const _ShareableRoutineRow({required this.routine, required this.onTap});
 
   final Routine routine;
   final VoidCallback onTap;
 
-  /// 일과관리 줄과 같은 높이 68 · 왼쪽 18 · 오른쪽 14 · 제목 > 카드 수 8
+  /// 일과관리 줄과 같은 높이 68 · 그림 쪽 8 · 오른쪽 14 · 위아래 8 · 제목 > 카드 수 8 (시안 x 24 · 84)
   static const _minHeight = 68.0;
-  static const _padLeft = 18.0;
+  static const _padLeft = 8.0;
   static const _padRight = 14.0;
-  static const _padV = 14.0;
+  static const _padV = 8.0;
   static const _titleToMeta = 8.0;
   static const _textToChevron = 8.0;
 
+  /// 첫 카드 그림 한 변 · 둥글기 · 그림 > 글 (시안 52 · 12 · 8)
+  static const _thumbnailSize = 52.0;
+  static const _thumbnailRadius = 12.0;
+  static const _thumbnailToText = 8.0;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typo = context.typo;
+    final buildThumbnail = ref.watch(routineThumbnailBuilderProvider);
     return Semantics(
       button: true,
       child: AppPressable(
@@ -127,6 +134,14 @@ class _ShareableRoutineRow extends StatelessWidget {
           ),
           child: Row(
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(_thumbnailRadius.w),
+                child: SizedBox.square(
+                  dimension: _thumbnailSize.w,
+                  child: buildThumbnail(routine),
+                ),
+              ),
+              SizedBox(width: _thumbnailToText.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -20,8 +20,11 @@ import 'core/l10n/l10n_context.dart';
 import 'core/layout/adaptive_screen_scale.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/elum_error_view.dart';
+import 'core/widgets/routine_preview_hook.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
+import 'features/guardian/presentation/widgets/library_group_tile.dart';
+import 'features/guardian/presentation/widgets/library_routine_tile.dart';
 import 'features/notification/application/push_token_registrar.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
@@ -134,7 +137,15 @@ Future<void> main() async {
           startupLockMissingProvider.overrideWithValue(lockMissing),
           // 로그아웃·회원삭제·이룸이 기기 전환 직전 푸시 토큰 해제 (인증·연결 data 가 알림을 직접 모르므로 여기서 연결)
           pushUnregisterProvider.overrideWith(
-            (ref) => ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+            (ref) =>
+                ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+          ),
+          // 이야기 올리기·가져오기의 일과 그림 (이야기 화면이 일과관리 화면 층을 직접 모르므로 여기서 연결)
+          routineThumbnailBuilderProvider.overrideWithValue(
+            (routine) => LibraryRoutineThumbnail(routine: routine),
+          ),
+          routineGroupPreviewBuilderProvider.overrideWithValue(
+            (routines) => RoutineGroupPreviewGrid(routines: routines),
           ),
         ],
         child: const ElumApp(),

@@ -375,7 +375,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 이야기 고르기 줄 이름 (Pretendard 500/16)
   final TextStyle talkChoiceLabel;
 
-  /// 댓글 본문 (Pretendard 400/15). 여러 줄이라 줄 높이를 띄운다
+  /// 댓글 본문 (Pretendard 400/14, 시안 1860:7925)
   final TextStyle talkCommentBody;
 
   /// 댓글 입력 글자 (Pretendard 400/16, 시안 1806:7486)
@@ -988,9 +988,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     ),
     talkCommentBody: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: FontWeight.w400,
-      height: 1.45,
+      height: 1.2,
     ),
     talkCommentField: TextStyle(
       fontFamily: promptFontFamily,

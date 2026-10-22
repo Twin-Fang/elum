@@ -99,7 +99,7 @@ class LibraryGroupTile extends StatelessWidget {
                         width: _strokeWidth,
                       ),
                     ),
-                    child: _PreviewGrid(routines: previews),
+                    child: RoutineGroupPreviewGrid(routines: previews),
                   ),
                 ),
                 if (isSentToday)
@@ -129,9 +129,9 @@ class LibraryGroupTile extends StatelessWidget {
   }
 }
 
-/// 묶음 안 일과 그림 2×2 (빈 자리는 바탕만)
-class _PreviewGrid extends StatelessWidget {
-  const _PreviewGrid({required this.routines});
+/// 묶음 안 일과 그림 2×2 (빈 자리는 바탕만). 이야기 가져오기 시트도 core 연결 고리(routine_preview_hook)로 쓴다
+class RoutineGroupPreviewGrid extends StatelessWidget {
+  const RoutineGroupPreviewGrid({super.key, required this.routines});
 
   final List<Routine> routines;
 

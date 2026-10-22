@@ -64,7 +64,7 @@ public class TalkReactionService {
    * 트랜잭션 밖에서 저장해야 동시에 눌려 유니크가 겹쳐도 잡고 넘어갈 수 있음 (그 경우 수는 올리지 않음)
    */
   public void markHelpful(Caller caller, String postId) {
-    talkPostAccess.requireReadablePost(caller, postId);
+    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
     if (talkHelpfulRepository.existsByPostIdAndMemberId(postId, caller.memberId())) {
       return;
     }
@@ -97,7 +97,7 @@ public class TalkReactionService {
    */
   @Transactional(readOnly = true)
   public TalkCommentPageResponse comments(Caller caller, String postId, String cursor, Integer size) {
-    talkPostAccess.requireReadablePost(caller, postId);
+    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
     int pageSize = size == null ? TalkFeedQueryService.DEFAULT_PAGE_SIZE
       : Math.clamp(size, 1, TalkFeedQueryService.MAX_PAGE_SIZE);
     int fetchSize = pageSize + 1;
@@ -139,7 +139,7 @@ public class TalkReactionService {
     } else if (!isExhausted && position != null) {
       nextCursor = TalkCursor.encode(position.createdAt(), position.id());
     }
-    return new TalkCommentPageResponse(toResponses(caller, page), nextCursor);
+    return new TalkCommentPageResponse(toResponses(caller, post.getAuthorMemberId(), page), nextCursor);
   }
 
   /**
@@ -172,7 +172,7 @@ public class TalkReactionService {
         new TalkPostCommentedEvent(postId, post.getAuthorMemberId(), caller.memberId(), post.getTitle()));
     }
     log.info("[talk comment] created : postId={}", postId);
-    return toResponses(caller, List.of(saved)).get(0);
+    return toResponses(caller, post.getAuthorMemberId(), List.of(saved)).get(0);
   }
 
   /**
@@ -215,8 +215,8 @@ public class TalkReactionService {
       .toList();
   }
 
-  // 댓글 > 응답 (닉네임은 한 번에 읽음)
-  private List<TalkCommentResponse> toResponses(Caller caller, List<TalkComment> comments) {
+  // 댓글 > 응답 (닉네임은 한 번에 읽음, 글쓴이 표시는 글 작성자 id 와 비교)
+  private List<TalkCommentResponse> toResponses(Caller caller, String postAuthorMemberId, List<TalkComment> comments) {
     if (comments.isEmpty()) {
       return List.of();
     }
@@ -228,7 +228,7 @@ public class TalkReactionService {
         boolean isHidden = comment.getStatus() == TalkCommentStatus.HIDDEN_BY_ADMIN;
         return new TalkCommentResponse(comment.getId(), nicknameByMemberId.get(comment.getAuthorMemberId()),
           comment.getAuthorMemberId().equals(caller.memberId()), isHidden ? "" : comment.getBody(),
-          comment.getCreatedAt(), isHidden);
+          comment.getCreatedAt(), isHidden, comment.getAuthorMemberId().equals(postAuthorMemberId));
       })
       .toList();
   }

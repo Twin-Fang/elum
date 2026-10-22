@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -13,7 +12,7 @@ import '../../../../core/widgets/elum_spinner.dart';
 import '../../application/talk_comment_controller.dart';
 import '../../domain/talk_comment.dart';
 import '../../domain/talk_screen_codes.dart';
-import 'talk_empty_message.dart';
+import 'talk_detail_parts.dart';
 import 'talk_top_bar.dart';
 
 /// 댓글 영역(스크롤 안에 이어 붙이는 조각): 머리 `댓글  N` > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
@@ -35,8 +34,11 @@ class TalkCommentList extends StatelessWidget {
   /// 머리 `댓글` > 숫자 (시안 8)
   static const _titleToCount = 8.0;
 
-  /// 댓글 사이 가는 선 (웜그레이 1)
-  static const _dividerHeight = 1.0;
+  /// 댓글 칸 좌우 · 머리 글자가 칸보다 더 들어가는 폭 · 머리 > 첫 칸 · 칸 사이 (시안 16 · 8 · 16 · 8)
+  static const _cardInset = 16.0;
+  static const _headerInset = 8.0;
+  static const _headerToComments = 16.0;
+  static const _commentGap = 8.0;
 
   /// 차례로 떠오르는 댓글 수 상한
   static const _maxStaggerCount = 6;
@@ -57,31 +59,30 @@ class TalkCommentList extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
+      padding: EdgeInsets.symmetric(horizontal: _cardInset.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 머리 `댓글  3` (시안 1830:7916 · 1830:7917)
-          Row(
-            children: [
-              Text(l10n.talkCommentsTitle, style: headerStyle),
-              SizedBox(width: _titleToCount.w),
-              Text('$commentCount', style: headerStyle),
-            ],
+          // 머리 `댓글  3` (시안 1830:7916 · 1830:7917, 글자는 화면 여백 24 줄)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: _headerInset.w),
+            child: Row(
+              children: [
+                Text(l10n.talkCommentsTitle, style: headerStyle),
+                SizedBox(width: _titleToCount.w),
+                Text('$commentCount', style: headerStyle),
+              ],
+            ),
           ),
-          SizedBox(height: space.sm.h),
+          SizedBox(height: _headerToComments.h),
           switch (comments) {
             AsyncData(value: final state) when state.items.isEmpty =>
-              TalkEmptyMessage(title: l10n.talkCommentsEmpty, isInPanel: true),
+              _MessageLine(text: l10n.talkCommentsEmpty),
             AsyncData(value: final state) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (var index = 0; index < state.items.length; index++) ...[
-                  if (index > 0)
-                    Container(
-                      height: _dividerHeight,
-                      color: context.colors.talkSectionDivider,
-                    ),
+                  if (index > 0) SizedBox(height: _commentGap.h),
                   // 첫 화면 댓글만 차례로 떠오른다 (뒤 쪽은 기다리지 않게 늦춤 상한)
                   AppFadeSlideIn(
                     key: ValueKey(state.items[index].id),
@@ -138,21 +139,22 @@ class TalkCommentList extends StatelessWidget {
   }
 }
 
-/// 댓글 한 줄: 이름 · 시각 + ⋯ > 내용 (⋯ 버튼이나 길게 누르면 메뉴)
+/// 댓글 칸: 이름 | 날짜 시각 + ⋯ > 내용 (시안 1860:7944, ⋯ 버튼이나 길게 누르면 메뉴)
+/// 이름 뒤 표시 2개: 글쓴이 댓글 (글쓴이), 내 댓글 (나) + 민트 이름
 class _CommentRow extends StatelessWidget {
   const _CommentRow({required this.comment, required this.onMenuRequested});
 
   final TalkComment comment;
   final VoidCallback onMenuRequested;
 
-  /// 줄 위아래 · 이름 > 시각 · 머리 > 내용 (⋯ 누름 영역 44 가 머리 줄 높이를 정하므로 위는 덜 띄운다)
-  static const _padTop = 6.0;
-  static const _padBottom = 16.0;
-  static const _nameToTime = 8.0;
-  static const _headerToBody = 2.0;
+  /// 칸 안쪽 · 아래 · 머리 > 내용 (시안 16 · 15 · 8)
+  static const _padding = 16.0;
+  static const _padBottom = 15.0;
+  static const _headerToBody = 8.0;
 
-  /// ⋯ 누름 영역(44)에서 아이콘(18) 오른쪽 남는 폭 (44 - 18) / 2
-  static const _dotsOverhang = 13.0;
+  /// ⋯ 누름 영역(44) 중심을 머리 줄(12) 중심에 맞추고 아이콘(18) 오른쪽 끝을 칸 안쪽 선에 맞춘다
+  static const _dotsTop = -16.0;
+  static const _dotsRight = -13.0;
 
   @override
   Widget build(BuildContext context) {
@@ -162,45 +164,47 @@ class _CommentRow extends StatelessWidget {
 
     // 가린 댓글은 지우기·신고 메뉴가 의미 없어 ⋯ 와 길게 누르기를 뺀다
     final isHidden = comment.isHidden;
+    final name = comment.authorNickname ?? l10n.talkAuthorFallback;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: isHidden ? null : onMenuRequested,
-      child: Padding(
-        padding: EdgeInsets.only(top: _padTop.h, bottom: _padBottom.h),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          _padding.w,
+          _padding.h,
+          _padding.w,
+          _padBottom.h,
+        ),
+        decoration: BoxDecoration(
+          color: colors.talkCommentFill,
+          borderRadius: BorderRadius.circular(context.space.cardRadius.r),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                // 이름 · 시각은 남은 폭 안에서, ⋯ 는 오른쪽 끝에
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          comment.authorNickname ?? l10n.talkAuthorFallback,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: typo.talkFormLabel.copyWith(
-                            color: colors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: _nameToTime.w),
-                      Text(
-                        l10n.timeAgoOf(comment.createdAt, DateTime.now()),
-                        style: typo.talkMeta.copyWith(
-                          color: colors.talkMetaText,
-                        ),
-                      ),
-                    ],
+                Padding(
+                  // ⋯ 자리만큼 이름 줄을 비운다
+                  padding: EdgeInsets.only(right: isHidden ? 0 : _padding.w),
+                  child: TalkDetailPostedRow(
+                    authorName: comment.isMine
+                        ? l10n.talkCommentAuthorMine(name)
+                        : comment.isPostAuthor
+                        ? l10n.talkCommentAuthorPostWriter(name)
+                        : name,
+                    authorColor: comment.isMine
+                        ? colors.talkCommentMineName
+                        : null,
+                    createdAt: comment.createdAt,
                   ),
                 ),
-                // 누름 영역 44 중 아이콘(18) 오른쪽 끝을 본문 끝선에 맞춘다
                 if (!isHidden)
-                  Transform.translate(
-                    offset: Offset(_dotsOverhang.w, 0),
+                  Positioned(
+                    top: _dotsTop.w,
+                    right: _dotsRight.w,
                     child: TalkMoreDotsButton(onTap: onMenuRequested),
                   ),
               ],

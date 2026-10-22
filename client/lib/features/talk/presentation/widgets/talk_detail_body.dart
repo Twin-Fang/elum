@@ -36,14 +36,14 @@ class TalkDetailBody extends ConsumerStatefulWidget {
 class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
   late bool _isGridView = ref.read(localStorageProvider).isTalkGridView;
 
-  /// 머리 줄 > 칩 > 제목 > 작성 정보 > 한마디 > 전환 칩 > 카드 > 버튼 간격 (시안 20 · 12 · 12 · 24 · 32 · 24 · 32)
+  /// 머리 줄 > 칩 > 제목 > 작성 정보 > 한마디 > 전환 칩 > 카드 > 버튼 간격 (시안 20 · 12 · 12 · 24 · 24 · 24 · 32)
   /// 제목 > 작성 정보는 8: 제목 줄 높이 1.2 가 시안(1.0)보다 4 높아 그만큼 뺀다
   static const _headerToChips = 20.0;
   static const _chipGap = 8.0;
   static const _chipsToTitle = 12.0;
   static const _titleToPosted = 8.0;
   static const _postedToNote = 24.0;
-  static const _noteToToggle = 32.0;
+  static const _noteToToggle = 24.0;
   static const _toggleToCards = 24.0;
   static const _cardsToImport = 32.0;
   static const _importToHelpful = 40.0;

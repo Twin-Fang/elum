@@ -77,6 +77,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkChoiceRadioBorder,
     required this.talkAccentText,
     required this.talkPanelFill,
+    required this.talkCommentFill,
+    required this.talkCommentMineName,
+    required this.talkImportGroupSelectedFill,
+    required this.talkImportGroupSelectedStroke,
     required this.talkCommentFieldFill,
     required this.talkToastFill,
     required this.talkToastShadow,
@@ -371,6 +375,16 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 규칙 · 빈 상태 안내를 담는 웜그레이 판
   final Color talkPanelFill;
+
+  /// 이야기 댓글 칸 바탕 (시안 1860:7944)
+  final Color talkCommentFill;
+
+  /// 내가 쓴 댓글의 이름 (시안 1860:7930)
+  final Color talkCommentMineName;
+
+  /// 가져오기 시트에서 고른 묶음 칸 바탕 · 테두리 (시안 1869:8959)
+  final Color talkImportGroupSelectedFill;
+  final Color talkImportGroupSelectedStroke;
 
   /// 댓글 입력칸 판 (흰색 60%, 시안 1806:7485)
   final Color talkCommentFieldFill;
@@ -1037,6 +1051,10 @@ class AppColors extends ThemeExtension<AppColors> {
     talkChoiceRadioBorder: Color(0xFFD9D3CF),
     talkAccentText: Color(0xFF1D6B66),
     talkPanelFill: Color(0xFFEEE9E6),
+    talkCommentFill: Color(0xFFEEE9E6),
+    talkCommentMineName: Color(0xFF55CFBA),
+    talkImportGroupSelectedFill: Color(0xFFB5EAEC),
+    talkImportGroupSelectedStroke: Color(0xFF55CFBA),
     talkCommentFieldFill: Color(0x99FFFFFF),
     talkToastFill: Color(0xFFFFFFFF),
     talkToastShadow: Color(0x1F000000),
@@ -1278,6 +1296,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkChoiceRadioBorder,
     Color? talkAccentText,
     Color? talkPanelFill,
+    Color? talkCommentFill,
+    Color? talkCommentMineName,
+    Color? talkImportGroupSelectedFill,
+    Color? talkImportGroupSelectedStroke,
     Color? talkCommentFieldFill,
     Color? talkToastFill,
     Color? talkToastShadow,
@@ -1507,6 +1529,10 @@ class AppColors extends ThemeExtension<AppColors> {
       talkChoiceRadioBorder: talkChoiceRadioBorder ?? this.talkChoiceRadioBorder,
       talkAccentText: talkAccentText ?? this.talkAccentText,
       talkPanelFill: talkPanelFill ?? this.talkPanelFill,
+      talkCommentFill: talkCommentFill ?? this.talkCommentFill,
+      talkCommentMineName: talkCommentMineName ?? this.talkCommentMineName,
+      talkImportGroupSelectedFill: talkImportGroupSelectedFill ?? this.talkImportGroupSelectedFill,
+      talkImportGroupSelectedStroke: talkImportGroupSelectedStroke ?? this.talkImportGroupSelectedStroke,
       talkCommentFieldFill: talkCommentFieldFill ?? this.talkCommentFieldFill,
       talkToastFill: talkToastFill ?? this.talkToastFill,
       talkToastShadow: talkToastShadow ?? this.talkToastShadow,
@@ -1776,6 +1802,10 @@ class AppColors extends ThemeExtension<AppColors> {
       talkChoiceRadioBorder: Color.lerp(talkChoiceRadioBorder, other.talkChoiceRadioBorder, t)!,
       talkAccentText: Color.lerp(talkAccentText, other.talkAccentText, t)!,
       talkPanelFill: Color.lerp(talkPanelFill, other.talkPanelFill, t)!,
+      talkCommentFill: Color.lerp(talkCommentFill, other.talkCommentFill, t)!,
+      talkCommentMineName: Color.lerp(talkCommentMineName, other.talkCommentMineName, t)!,
+      talkImportGroupSelectedFill: Color.lerp(talkImportGroupSelectedFill, other.talkImportGroupSelectedFill, t)!,
+      talkImportGroupSelectedStroke: Color.lerp(talkImportGroupSelectedStroke, other.talkImportGroupSelectedStroke, t)!,
       talkCommentFieldFill: Color.lerp(talkCommentFieldFill, other.talkCommentFieldFill, t)!,
       talkToastFill: Color.lerp(talkToastFill, other.talkToastFill, t)!,
       talkToastShadow: Color.lerp(talkToastShadow, other.talkToastShadow, t)!,
