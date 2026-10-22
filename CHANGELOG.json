@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T14:09:18Z",
-    "currentVersion": "2.74.0",
+    "lastUpdated": "2026-10-22T14:39:39Z",
+    "currentVersion": "2.75.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 306
+    "totalReleases": 307
   },
   "releases": [
+    {
+      "version": "2.75.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 971,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카드 볼 때 화면을 켜 둘지 설정에서 고를 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카드 볼 때 화면을 켜 둘지 설정에서 고를 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.74.0",
       "project_type": "flutter",
