@@ -20,10 +20,11 @@ import 'core/l10n/l10n_context.dart';
 import 'core/layout/adaptive_screen_scale.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/elum_error_view.dart';
-import 'core/widgets/routine_group_preview_hook.dart';
+import 'core/widgets/routine_preview_hook.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
 import 'features/guardian/presentation/widgets/library_group_tile.dart';
+import 'features/guardian/presentation/widgets/library_routine_tile.dart';
 import 'features/notification/application/push_token_registrar.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
@@ -139,7 +140,10 @@ Future<void> main() async {
             (ref) =>
                 ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
           ),
-          // 이야기 가져오기 시트의 묶음 그림 (이야기 화면이 일과관리 화면 층을 직접 모르므로 여기서 연결)
+          // 이야기 올리기·가져오기의 일과 그림 (이야기 화면이 일과관리 화면 층을 직접 모르므로 여기서 연결)
+          routineThumbnailBuilderProvider.overrideWithValue(
+            (routine) => LibraryRoutineThumbnail(routine: routine),
+          ),
           routineGroupPreviewBuilderProvider.overrideWithValue(
             (routines) => RoutineGroupPreviewGrid(routines: routines),
           ),

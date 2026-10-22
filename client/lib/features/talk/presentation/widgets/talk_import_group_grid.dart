@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/routine_group_preview_hook.dart';
+import '../../../../core/widgets/routine_preview_hook.dart';
 import '../../../../shared/models/routine.dart';
 
 /// 가져오기 시트 묶음 한 칸: 묶음 id · 이름 · 안 일과 (그림 미리보기용)

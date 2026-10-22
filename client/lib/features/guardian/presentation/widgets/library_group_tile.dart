@@ -129,7 +129,7 @@ class LibraryGroupTile extends StatelessWidget {
   }
 }
 
-/// 묶음 안 일과 그림 2×2 (빈 자리는 바탕만). 이야기 가져오기 시트도 core 연결 고리로 쓴다
+/// 묶음 안 일과 그림 2×2 (빈 자리는 바탕만). 이야기 가져오기 시트도 core 연결 고리(routine_preview_hook)로 쓴다
 class RoutineGroupPreviewGrid extends StatelessWidget {
   const RoutineGroupPreviewGrid({super.key, required this.routines});
 
