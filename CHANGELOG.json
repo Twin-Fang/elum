@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T09:08:49Z",
-    "currentVersion": "2.71.1",
+    "lastUpdated": "2026-10-22T11:25:57Z",
+    "currentVersion": "2.72.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 301
+    "totalReleases": 302
   },
   "releases": [
+    {
+      "version": "2.72.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 957,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 운영 정책으로 가려진 내 댓글 자리에 \"운영 정책에 따라 가렸어요\" 안내가 보여요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "운영 정책으로 가려진 내 댓글 자리에 \"운영 정책에 따라 가렸어요\" 안내가 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.71.1",
       "project_type": "flutter",
