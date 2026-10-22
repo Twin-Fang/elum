@@ -10,8 +10,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/show_failure.dart';
+import '../../../guardian/application/library_entries.dart';
 import '../../../guardian/application/library_talk_import_state.dart';
-import '../../../guardian/application/routine_providers.dart';
 import '../../../member/application/member_providers.dart';
 import '../../../profile/application/profile_session.dart';
 import '../../../profile/domain/profile_summary.dart';
@@ -21,6 +21,7 @@ import '../../domain/talk_screen_codes.dart';
 import 'talk_choice_row.dart';
 import 'talk_form_section.dart';
 import 'talk_import_done_toast.dart';
+import 'talk_import_group_grid.dart';
 import 'talk_sheet_frame.dart';
 
 /// 시트가 닫히며 돌려주는 값: 일과가 들어간 이룸이와 새 일과 id
@@ -73,7 +74,8 @@ Future<void> _showImportedRoutine(
   router.go(Routes.guardianManage);
 }
 
-/// 가져오기 시트 본문: 이룸이(2명 이상일 때) > 묶음 > 일과관리에 넣기, 연결된 이룸이가 없으면 연결 안내 (닫기는 끌어내리기)
+/// 가져오기 시트 본문 (시안 1860:8578): 이룸이(2명 이상일 때) > 묶음 격자 > 취소 | 완료, 연결된 이룸이가 없으면 연결 안내
+/// 묶음을 안 고르고 완료하면 묶음 없이 넣는다
 class TalkImportSheet extends ConsumerStatefulWidget {
   const TalkImportSheet({super.key, required this.post});
 
@@ -127,6 +129,16 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
     }
   }
 
+  /// 지금 보는 이룸이의 일과관리 묶음 (일과관리 격자 순서, 받는 중·실패면 없음)
+  List<TalkImportGroupChoice> _groupChoices() {
+    final entries = ref.watch(libraryEntriesProvider).value ?? const [];
+    return [
+      for (final entry in entries)
+        if (entry case LibraryGroupEntry(:final group, :final routines))
+          (id: group.id, name: group.name, routines: routines),
+    ];
+  }
+
   /// 시트를 닫고 이룸이 연결 화면으로
   void _openLink() {
     final router = GoRouter.of(context);
@@ -134,10 +146,14 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
     router.push(Routes.linkCode);
   }
 
-  /// 고르기 줄 사이 · 구역 사이 · 마지막 구역 > 버튼
+  /// 고르기 줄 사이 · 구역 사이 · 마지막 구역 > 버튼 (시안 격자 > 버튼 16)
   static const _choiceGap = 8.0;
   static const _sectionGap = 28.0;
-  static const _sectionsToButton = 32.0;
+  static const _sectionsToButton = 16.0;
+
+  /// 취소 버튼 폭 · 버튼 사이 (시안 100 · 4)
+  static const _cancelWidth = 100.0;
+  static const _buttonGap = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -161,8 +177,8 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
         profiles.first;
     // 묶음은 지금 보는 이룸이 것만 받아 둔 목록이라, 다른 이룸이를 고르면 묶음 없이만 넣는다
     final groups = selected.id == activeProfileId
-        ? ref.watch(routineGroupsProvider).value ?? const []
-        : const [];
+        ? _groupChoices()
+        : const <TalkImportGroupChoice>[];
     final groupId = groups.any((g) => g.id == _pickedGroupId)
         ? _pickedGroupId
         : null;
@@ -196,37 +212,41 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
           if (hasProfileChoice && groups.isNotEmpty)
             SizedBox(height: _sectionGap.h),
           if (groups.isNotEmpty)
-            TalkFormSection(
-              label: l10n.talkImportGroupLabel,
-              child: _ChoiceList(
-                children: [
-                  TalkChoiceRow(
-                    label: l10n.talkImportGroupNone,
-                    isSelected: groupId == null,
-                    onTap: _isSubmitting
-                        ? null
-                        : () => setState(() => _pickedGroupId = null),
-                  ),
-                  for (final group in groups)
-                    TalkChoiceRow(
-                      label: group.name,
-                      isSelected: group.id == groupId,
-                      onTap: _isSubmitting
-                          ? null
-                          : () => setState(() => _pickedGroupId = group.id),
-                    ),
-                ],
-              ),
+            TalkImportGroupGrid(
+              groups: groups,
+              selectedGroupId: groupId,
+              onSelected: _isSubmitting
+                  ? null
+                  : (id) => setState(() => _pickedGroupId = id),
             ),
           if (hasProfileChoice || groups.isNotEmpty)
             SizedBox(height: _sectionsToButton.h),
-          ElumButton(
-            label: l10n.talkImportConfirm,
-            labelStyle: context.typo.sheetActionLabel,
-            loading: _isSubmitting,
-            onPressed: isMemberLoading
-                ? null
-                : () => _submit(selected, groupId),
+          Row(
+            children: [
+              SizedBox(
+                width: _cancelWidth.w,
+                child: ElumButton(
+                  label: l10n.commonCancel,
+                  labelStyle: context.typo.sheetActionLabel,
+                  backgroundColor: context.colors.dialogNeutral,
+                  labelColor: context.colors.dialogNeutralText,
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                ),
+              ),
+              SizedBox(width: _buttonGap.w),
+              Expanded(
+                child: ElumButton(
+                  label: l10n.talkImportConfirm,
+                  labelStyle: context.typo.sheetActionLabel,
+                  loading: _isSubmitting,
+                  onPressed: isMemberLoading
+                      ? null
+                      : () => _submit(selected, groupId),
+                ),
+              ),
+            ],
           ),
         ],
       ),

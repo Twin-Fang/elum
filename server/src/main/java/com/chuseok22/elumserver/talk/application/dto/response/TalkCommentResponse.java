@@ -16,7 +16,9 @@ public record TalkCommentResponse(
   @Schema(description = "쓴 시각")
   LocalDateTime createdAt,
   @Schema(description = "관리자가 가린 내 댓글인가. 가린 댓글은 쓴 사람 본인에게만 내려간다")
-  boolean isHidden
+  boolean isHidden,
+  @Schema(description = "이 글을 올린 보호자가 쓴 댓글인가 (댓글 칸 이름 뒤 '(글쓴이)')")
+  boolean isPostAuthor
 ) {
 
 }

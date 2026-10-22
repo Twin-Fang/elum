@@ -27,7 +27,7 @@ class TalkRoutinePicker extends ConsumerWidget {
   /// 목록 좌우 · 위 · 머리 > 첫 줄 · 줄 사이 · 차례로 떠오르는 줄 수 상한
   static const _listInsetH = 16.0;
   static const _listTop = 8.0;
-  static const _headingToList = 24.0;
+  static const _headingToList = 16.0;
   static const _rowGap = 8.0;
   static const _maxStaggerCount = 8;
 

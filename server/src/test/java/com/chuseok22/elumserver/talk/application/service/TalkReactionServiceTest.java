@@ -362,6 +362,23 @@ class TalkReactionServiceTest {
   }
 
   @Test
+  @DisplayName("글을 올린 보호자의 댓글만 글쓴이로 표시한다")
+  void comments_markPostAuthor() {
+    stubVisiblePost("post-1");
+    when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of());
+    when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of());
+    when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of());
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
+      .thenReturn(List.of(
+        comment("c1", "post-1", "author-1", BASE_TIME),
+        comment("c2", "post-1", "viewer-1", BASE_TIME.plusMinutes(1))));
+
+    TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, null);
+
+    assertThat(page.items()).extracting(TalkCommentResponse::isPostAuthor).containsExactly(true, false);
+  }
+
+  @Test
   @DisplayName("차단한 보호자와 정지 회원의 댓글은 빠지고 내 댓글은 남는다")
   void comments_excludeBlockedAuthors() {
     stubVisiblePost("post-1");

@@ -5207,13 +5207,13 @@ abstract class AppLocalizations {
   /// 가져오기 시트 제목
   ///
   /// In ko, this message translates to:
-  /// **'어느 일과관리에 넣을까요?'**
+  /// **'일과로 가져오기'**
   String get talkImportSheetTitle;
 
   /// 가져오기 시트 안내: 일과관리에만 들어가고 이룸이에게는 보호자가 보내야 간다
   ///
   /// In ko, this message translates to:
-  /// **'넣은 뒤 우리 집에 맞게 고치고, 준비되면 보내기를 눌러 주세요.'**
+  /// **'일과에 추가한 뒤 이룸이에게 맞게 고칠 수 있어요'**
   String get talkImportSheetHint;
 
   /// 가져오기 시트: 어느 이룸이의 일과관리에 넣을지 고르는 줄 이름 (연결된 이룸이가 2명 이상일 때만)
@@ -5222,22 +5222,10 @@ abstract class AppLocalizations {
   /// **'이룸이'**
   String get talkImportElumiLabel;
 
-  /// 가져오기 시트: 넣을 묶음을 고르는 줄 이름
+  /// 가져오기 시트 확인 버튼 (묶음을 안 고르면 묶음 없이 넣는다)
   ///
   /// In ko, this message translates to:
-  /// **'묶음'**
-  String get talkImportGroupLabel;
-
-  /// 가져오기 시트: 묶음에 넣지 않고 맨 앞 칸으로 넣는 선택지 (기본값)
-  ///
-  /// In ko, this message translates to:
-  /// **'묶음 없이'**
-  String get talkImportGroupNone;
-
-  /// 가져오기 시트 확인 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'일과관리에 넣기'**
+  /// **'완료'**
   String get talkImportConfirm;
 
   /// 가져오기 시트: 연결된 이룸이가 한 명도 없을 때 안내
@@ -5281,6 +5269,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'아직 댓글이 없어요'**
   String get talkCommentsEmpty;
+
+  /// 댓글 칸 이름: 내가 쓴 댓글 (이름은 민트색)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}(나)'**
+  String talkCommentAuthorMine(String name);
+
+  /// 댓글 칸 이름: 이 글을 올린 보호자가 쓴 댓글
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}(글쓴이)'**
+  String talkCommentAuthorPostWriter(String name);
 
   /// 상세 화면: 운영 정책으로 가려진 내 댓글 자리에 보이는 안내 (작성자 본인에게만)
   ///
@@ -5417,7 +5417,7 @@ abstract class AppLocalizations {
   /// 한마디 입력창 안내 문구
   ///
   /// In ko, this message translates to:
-  /// **'다른 사람 이름·연락처는 적지 말아 주세요'**
+  /// **'다른 사람 이름, 연락처 등 개인정보는 적지 말아 주세요'**
   String get talkNoteGuide;
 
   /// 분류 고르기 제목
@@ -5657,7 +5657,7 @@ abstract class AppLocalizations {
   /// 올리기 3단계 카드 미리보기 제목
   ///
   /// In ko, this message translates to:
-  /// **'이렇게 올라가요'**
+  /// **'이렇게 보여요'**
   String get talkSharePreviewTitle;
 
   /// 카드 미리보기 아래 안내

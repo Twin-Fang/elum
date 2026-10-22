@@ -2894,22 +2894,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkImportedButton => '✓ 일과관리에 넣었어요';
 
   @override
-  String get talkImportSheetTitle => '어느 일과관리에 넣을까요?';
+  String get talkImportSheetTitle => '일과로 가져오기';
 
   @override
-  String get talkImportSheetHint => '넣은 뒤 우리 집에 맞게 고치고, 준비되면 보내기를 눌러 주세요.';
+  String get talkImportSheetHint => '일과에 추가한 뒤 이룸이에게 맞게 고칠 수 있어요';
 
   @override
   String get talkImportElumiLabel => '이룸이';
 
   @override
-  String get talkImportGroupLabel => '묶음';
-
-  @override
-  String get talkImportGroupNone => '묶음 없이';
-
-  @override
-  String get talkImportConfirm => '일과관리에 넣기';
+  String get talkImportConfirm => '완료';
 
   @override
   String get talkImportNoElumiTitle => '이룸이를 먼저 연결해 주세요';
@@ -2933,6 +2927,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get talkCommentsEmpty => '아직 댓글이 없어요';
+
+  @override
+  String talkCommentAuthorMine(String name) {
+    return '$name(나)';
+  }
+
+  @override
+  String talkCommentAuthorPostWriter(String name) {
+    return '$name(글쓴이)';
+  }
 
   @override
   String get talkCommentHiddenNotice => '운영 정책에 따라 가렸어요';
@@ -3001,7 +3005,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkEditFailedTitle => '글을 고치지 못했어요';
 
   @override
-  String get talkNoteGuide => '다른 사람 이름·연락처는 적지 말아 주세요';
+  String get talkNoteGuide => '다른 사람 이름, 연락처 등 개인정보는 적지 말아 주세요';
 
   @override
   String get talkCategoryTitle => '분류';
@@ -3126,7 +3130,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkSharePhotoNext => '다음';
 
   @override
-  String get talkSharePreviewTitle => '이렇게 올라가요';
+  String get talkSharePreviewTitle => '이렇게 보여요';
 
   @override
   String get talkSharePreviewHint => '이름은 모두 \'이룸이\'로 바뀌어 올라가요';

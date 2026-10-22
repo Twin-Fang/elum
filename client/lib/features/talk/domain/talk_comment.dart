@@ -12,6 +12,7 @@ class TalkComment {
     required this.createdAt,
     this.authorNickname,
     this.isHidden = false,
+    this.isPostAuthor = false,
   });
 
   final String id;
@@ -27,6 +28,9 @@ class TalkComment {
   /// 운영 정책으로 가려진 내 댓글 (서버는 쓴 사람 본인에게만 내려준다)
   final bool isHidden;
 
+  /// 이 글을 올린 보호자가 쓴 댓글 (서버가 안 주면 false)
+  final bool isPostAuthor;
+
   /// id·내용·쓴 시각이 깨졌으면 null (그 댓글만 버린다)
   static TalkComment? fromJson(Map<String, dynamic> json) {
     final id = TalkJson.nonEmptyText(json['id']);
@@ -40,6 +44,7 @@ class TalkComment {
       body: body,
       createdAt: createdAt,
       isHidden: TalkJson.flag(json['isHidden']),
+      isPostAuthor: TalkJson.flag(json['isPostAuthor']),
     );
   }
 }

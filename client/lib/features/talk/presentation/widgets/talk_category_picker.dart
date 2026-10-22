@@ -21,9 +21,9 @@ class TalkCategoryPicker extends StatelessWidget {
   /// false 면 누를 수 없다 (보내는 중)
   final bool isEnabled;
 
-  /// 한 줄 칸 수 · 칸 사이 (가로 · 세로 같은 8)
+  /// 한 줄 칸 수 · 칸 사이 (가로 · 세로 같은 12, 시안 1870:9475)
   static const _columnCount = 3;
-  static const _gap = 8.0;
+  static const _gap = 12.0;
 
   @override
   Widget build(BuildContext context) {

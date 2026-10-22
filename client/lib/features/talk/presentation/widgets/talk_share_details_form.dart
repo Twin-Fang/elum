@@ -41,11 +41,11 @@ class TalkShareDetailsForm extends StatelessWidget {
   /// false 면 입력을 잠근다 (올리는 중)
   final bool isEnabled;
 
-  /// 머리 > 첫 구역 · 구역 사이 · 미리보기 안내 > 격자
-  static const _headingToSection = 24.0;
-  static const _sectionGap = 32.0;
+  /// 머리 > 첫 구역 · 구역 사이 · 미리보기 안내 > 격자 (시안 1870:9398: 32 · 40 · 24)
+  static const _headingToSection = 32.0;
+  static const _sectionGap = 40.0;
   static const _hintInset = 8.0;
-  static const _hintToGrid = 12.0;
+  static const _hintToGrid = 24.0;
 
   @override
   Widget build(BuildContext context) {

@@ -52,6 +52,9 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   static const _sectionTitleToCards = 16.0;
   static const _cardGap = 8.0;
 
+  /// 글 카드 좌우 (시안 16, 섹션 제목 24보다 바깥)
+  static const _postCardInset = 16.0;
+
   /// 첫 쪽 실패 화면에서 다시 받는 중 (버튼에 진행 표시)
   bool _isRetrying = false;
 
@@ -245,9 +248,9 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
         for (final post in state.items)
           Padding(
             padding: EdgeInsets.fromLTRB(
-              space.screenH.w,
+              _postCardInset.w,
               0,
-              space.screenH.w,
+              _postCardInset.w,
               _cardGap.h,
             ),
             child: TalkPostCard(
