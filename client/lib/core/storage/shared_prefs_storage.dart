@@ -66,6 +66,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
   static const _kTalkShareHintDismissedRoutineIds =
       'talkShareHintDismissedRoutineIds';
+  // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
+  static const _kTalkGridView = 'talk.isGridView';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -377,6 +379,15 @@ class SharedPrefsStorage implements LocalStorage {
       _kTalkShareHintDismissedRoutineIds,
       routineIds,
     );
+  }
+
+  @override
+  bool get isTalkGridView => _prefs.getBool(_kTalkGridView) ?? false;
+
+  @override
+  Future<void> setTalkGridView(bool isGridView) async {
+    AppLogger.storageWrite(_kTalkGridView, '$isGridView');
+    await _prefs.setBool(_kTalkGridView, isGridView);
   }
 
   @override

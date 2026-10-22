@@ -301,6 +301,15 @@ class InMemoryStorage implements LocalStorage {
     List<String> routineIds,
   ) async => _talkShareHintDismissedRoutineIds = routineIds;
 
+  bool _isTalkGridView = false;
+
+  @override
+  bool get isTalkGridView => _isTalkGridView;
+
+  @override
+  Future<void> setTalkGridView(bool isGridView) async =>
+      _isTalkGridView = isGridView;
+
   @override
   bool get isGroupCoachSeen => _isGroupCoachSeen;
 

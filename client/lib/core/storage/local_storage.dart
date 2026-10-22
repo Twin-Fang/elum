@@ -229,6 +229,12 @@ abstract interface class LocalStorage {
   List<String> get talkShareHintDismissedRoutineIds;
   Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
 
+  /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
+  ///
+  /// 보기 취향이라 휴대폰에 속하고 [clearAll] 이 지우지 않는다
+  bool get isTalkGridView;
+  Future<void> setTalkGridView(bool isGridView);
+
   /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
   String? get routineRemindersJson;
   Future<void> setRoutineRemindersJson(String json);
