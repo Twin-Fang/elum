@@ -31,7 +31,7 @@ import org.springframework.security.core.Authentication;
  * 이룸이 토큰이 받는 일과 응답에서 보호자 원문을 뺀다 (#357).
  *
  * <p>스프링을 띄우지 않는다. 컨트롤러가 호출자 종류에 따라 응답을 가공하는지만 본다.
- * 이룸이 토큰이 부를 수 있는 일과 엔드포인트(조회 전부 + 완료·취소·진행 동기화)가 대상이다.
+ * 이룸이 토큰이 부를 수 있는 일과 엔드포인트(조회 전부 + 진행 동기화)가 대상이다.
  */
 class RoutineControllerSourceTextTest {
 
@@ -98,14 +98,10 @@ class RoutineControllerSourceTextTest {
   }
 
   @Test
-  @DisplayName("이룸이 토큰: 단계 완료·취소·진행 동기화 응답에서도 원문 계열이 빠진다")
+  @DisplayName("이룸이 토큰: 진행 동기화 응답에서도 원문 계열이 빠진다")
   void elumiProgressWritesAreStripped() {
-    when(progressService.completeStep(any(), anyString(), anyString())).thenReturn(routine());
-    when(progressService.cancelStep(any(), anyString(), anyString())).thenReturn(routine());
     when(progressService.syncProgress(any(), anyString(), any())).thenReturn(routine());
 
-    assertStripped(controller.completeStep(elumi, "r1", "s1").getBody());
-    assertStripped(controller.cancelStep(elumi, "r1", "s1").getBody());
     assertStripped(controller.syncProgress(elumi, "r1", new RoutineProgressSyncRequest(List.of())).getBody());
   }
 
@@ -138,14 +134,10 @@ class RoutineControllerSourceTextTest {
   }
 
   @Test
-  @DisplayName("다른 보호자가 만든 일과: 단계 완료·취소·진행 동기화 응답에서도 원문 계열이 빠진다")
+  @DisplayName("다른 보호자가 만든 일과: 진행 동기화 응답에서도 원문 계열이 빠진다")
   void otherGuardiansProgressWritesAreStripped() {
-    when(progressService.completeStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
-    when(progressService.cancelStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
     when(progressService.syncProgress(any(), anyString(), any())).thenReturn(routineBy("member-2"));
 
-    assertStripped(controller.completeStep(guardian, "r1", "s1").getBody());
-    assertStripped(controller.cancelStep(guardian, "r1", "s1").getBody());
     assertStripped(controller.syncProgress(guardian, "r1", new RoutineProgressSyncRequest(List.of())).getBody());
   }
 

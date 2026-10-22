@@ -11,11 +11,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
-import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import com.chuseok22.elumserver.systemconfig.infrastructure.security.MaintenanceModeFilter;
-import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -104,27 +100,6 @@ class LocalizedErrorWiringTest {
 
     JsonNode body = new ObjectMapper().readTree(response.getContentAsString(StandardCharsets.UTF_8));
     assertThat(body.get("errorMessage").asText()).isEqualTo(fake(ErrorCode.INVALID_TOKEN));
-  }
-
-  @Test
-  @DisplayName("AidlpDecryptionFilter: ja 요청은 요청 언어 문구를 쓴다")
-  void dlpFilter_usesRequestLanguage() throws Exception {
-    AidlpDecryptionFilter filter =
-      new AidlpDecryptionFilter(mock(AidlpCryptoService.class), mock(NonceStore.class), new AidlpProperties());
-    MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/routines");
-    request.setContent("{\"encrypted\":{}}".getBytes(StandardCharsets.UTF_8));
-    MockHttpServletResponse response = new MockHttpServletResponse();
-
-    CurrentLocale.runAs(AppLocale.JA, () -> {
-      try {
-        filter.doFilter(request, response, new MockFilterChain());
-      } catch (Exception e) {
-        throw new IllegalStateException(e);
-      }
-    });
-
-    JsonNode body = new ObjectMapper().readTree(response.getContentAsString(StandardCharsets.UTF_8));
-    assertThat(body.get("errorMessage").asText()).isEqualTo(fake(ErrorCode.DLP_SECRET_NOT_CONFIGURED));
   }
 
   private String maintenanceMessage(String configured) throws Exception {

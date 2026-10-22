@@ -11,11 +11,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
-import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import com.chuseok22.elumserver.systemconfig.infrastructure.security.MaintenanceModeFilter;
-import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -113,23 +109,6 @@ class LocalizedErrorResponsesTest {
 
     assertThat(response.getStatus()).isEqualTo(401);
     assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo(legacyJson(ErrorCode.INVALID_TOKEN));
-  }
-
-  @Test
-  @DisplayName("DLP 필터의 오류 본문은 에러 코드와 문구가 이전과 같다 (키 순서는 원래 보장되지 않았다)")
-  void dlpFilter_headerless_isLegacy() throws Exception {
-    AidlpDecryptionFilter filter =
-      new AidlpDecryptionFilter(mock(AidlpCryptoService.class), mock(NonceStore.class), new AidlpProperties());
-    MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/routines");
-    request.setContent("{\"encrypted\":{}}".getBytes(StandardCharsets.UTF_8));
-    MockHttpServletResponse response = new MockHttpServletResponse();
-
-    filter.doFilter(request, response, new MockFilterChain());
-
-    JsonNode body = MAPPER.readTree(response.getContentAsString(StandardCharsets.UTF_8));
-    assertThat(body.get("errorCode").asText()).isEqualTo("DLP_SECRET_NOT_CONFIGURED");
-    assertThat(body.get("errorMessage").asText())
-      .isEqualTo(GOLDEN.get("DLP_SECRET_NOT_CONFIGURED").get("message"));
   }
 
   // --- 점검 모드: 관리자가 적은 안내는 그대로, 기본 문구는 요청 언어로 ---
