@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T08:02:13Z",
-    "currentVersion": "2.71.0",
+    "lastUpdated": "2026-10-22T09:08:49Z",
+    "currentVersion": "2.71.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 300
+    "totalReleases": 301
   },
   "releases": [
+    {
+      "version": "2.71.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 955,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과 관리 안내에서 '새로 만들기' 버튼 강조 모양을 버튼에 맞게 다듬었어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 관리 안내에서 '새로 만들기' 버튼 강조 모양을 버튼에 맞게 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.71.0",
       "project_type": "flutter",
