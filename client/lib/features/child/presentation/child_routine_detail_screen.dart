@@ -102,8 +102,8 @@ class _ChildRoutineDetailScreenState
   @override
   void initState() {
     super.initState();
-    // 행동하러 다녀오는 동안 화면 꺼짐 방지 (#869)
-    ScreenAwake.keepOn();
+    // 행동하러 다녀오는 동안 화면 꺼짐 방지 (#869). 설정에서 끄면 기기 설정대로 (#970)
+    if (ref.read(childScreenAwakeOnProvider)) ScreenAwake.keepOn();
     // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

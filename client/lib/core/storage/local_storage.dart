@@ -217,6 +217,10 @@ abstract interface class LocalStorage {
   bool get isChildPraiseSoundOn;
   Future<void> setChildPraiseSoundOn(bool v);
 
+  /// 일과 진행(카드) 화면이 떠 있는 동안 기기 화면을 켜 둘지. 진동과 같은 이유로 기기에 속하고 기본은 켜짐 (#970)
+  bool get isChildScreenAwakeOn;
+  Future<void> setChildScreenAwakeOn(bool v);
+
   /// 이야기에서 가져온 일과 중 상세를 한 번이라도 연 일과 id. 목록 칸의 `새로` 표시를 끄는 근거
   ///
   /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다

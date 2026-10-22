@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../logger/app_logger.dart';
+import '../storage/local_storage.dart';
 
 /// 기기 화면 켜 두기: 켜기, 풀기 (#869)
 /// 이룸이가 카드를 보고 행동하러 다녀오는 사이 화면이 꺼지지 않게 함. 실패해도 앱은 그대로 동작
@@ -22,3 +24,32 @@ class ScreenAwake {
     }
   }
 }
+
+/// 일과 진행 화면 켜 두기 켜기/끄기 (#970). 보호자 설정·이룸이 설정이 같은 값 하나를 본다. 못 읽으면 켜짐
+class ChildScreenAwakeOnNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    try {
+      return ref.read(localStorageProvider).isChildScreenAwakeOn;
+    } catch (e, st) {
+      AppLogger.error('ChildScreenAwakeOnNotifier.build', e, st);
+      return true;
+    }
+  }
+
+  /// 값을 바꾸고 저장 (일과 진행 화면에 다음에 들어갈 때 반영)
+  Future<void> set(bool on) async {
+    state = on;
+    try {
+      await ref.read(localStorageProvider).setChildScreenAwakeOn(on);
+    } catch (e, st) {
+      // 저장이 안 돼도 이번 실행 동안은 바뀐 값을 쓴다
+      AppLogger.error('ChildScreenAwakeOnNotifier.set', e, st);
+    }
+  }
+}
+
+final childScreenAwakeOnProvider =
+    NotifierProvider<ChildScreenAwakeOnNotifier, bool>(
+      ChildScreenAwakeOnNotifier.new,
+    );

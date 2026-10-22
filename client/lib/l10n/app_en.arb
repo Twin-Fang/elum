@@ -590,6 +590,8 @@
   "creditHistoryMoreFailed": "Couldn't load more",
   "elumiSettingsPraiseSoundLabel": "Praise sound on card check",
   "guardianSettingsPraiseSound": "Praise sound on card check",
+  "elumiSettingsScreenAwakeLabel": "Keep screen on while viewing cards",
+  "guardianSettingsScreenAwake": "Keep screen on while viewing cards",
   "reminderRowLabel": "Routine reminder",
   "reminderRowOff": "No reminder",
   "reminderRowDaily": "Every day at {time}",

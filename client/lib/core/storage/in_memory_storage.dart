@@ -142,6 +142,14 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setChildPraiseSoundOn(bool v) async => _childPraiseSoundOn = v;
 
+  bool _childScreenAwakeOn = true;
+
+  @override
+  bool get isChildScreenAwakeOn => _childScreenAwakeOn;
+
+  @override
+  Future<void> setChildScreenAwakeOn(bool v) async => _childScreenAwakeOn = v;
+
   String? _routineRemindersJson;
 
   @override
