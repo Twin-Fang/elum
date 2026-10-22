@@ -9,7 +9,6 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +42,6 @@ public class SecurityConfig {
   private final LinkAccessValidator linkAccessValidator;
   private final JwtProvider jwtProvider;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-  private final AidlpDecryptionFilter aidlpDecryptionFilter;
   private final TokenAccessValidator tokenAccessValidator;
   private final SystemConfigService systemConfigService;
   private final SharedStateStore sharedStateStore;
@@ -57,7 +55,6 @@ public class SecurityConfig {
     @Qualifier("adminUserDetailsService") UserDetailsService adminUserDetailsService,
     JwtProvider jwtProvider,
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-    AidlpDecryptionFilter aidlpDecryptionFilter,
     TokenAccessValidator tokenAccessValidator,
     LinkAccessValidator linkAccessValidator,
     SystemConfigService systemConfigService,
@@ -67,7 +64,6 @@ public class SecurityConfig {
     this.adminUserDetailsService = adminUserDetailsService;
     this.jwtProvider = jwtProvider;
     this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-    this.aidlpDecryptionFilter = aidlpDecryptionFilter;
     this.linkAccessValidator = linkAccessValidator;
     this.tokenAccessValidator = tokenAccessValidator;
     this.systemConfigService = systemConfigService;
@@ -158,9 +154,6 @@ public class SecurityConfig {
         // 일과 삭제·회원 탈퇴가 그대로 된다. **허용할 것만 적고 나머지는 막는다** —
         // 반대로 하면 엔드포인트가 늘 때마다 막는 걸 잊는다.
         .requestMatchers(HttpMethod.GET, "/api/routines/**", "/api/member/me").hasAnyAuthority(ELUMI, GUARDIAN)
-        .requestMatchers(HttpMethod.PATCH,
-          "/api/routines/*/steps/*/complete",
-          "/api/routines/*/steps/*/cancel").hasAnyAuthority(ELUMI, GUARDIAN)
         .requestMatchers(HttpMethod.PUT, "/api/routines/*/progress").hasAnyAuthority(ELUMI, GUARDIAN)
         // 이룸이 휴대폰이 자기 연결을 끊는다. 보호자 토큰도 컨트롤러까지 보내 코드가 있는 403 으로 답하게 한다.
         .requestMatchers(HttpMethod.DELETE, "/api/device-links/current").hasAnyAuthority(ELUMI, GUARDIAN)
@@ -173,9 +166,7 @@ public class SecurityConfig {
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
       // 점검 중이면 인증보다 먼저 503 — 만료 토큰이 401을 받고 갱신에 나서지 않게 한다.
-      .addFilterBefore(maintenanceModeFilter, JwtAuthenticationFilter.class)
-      // JWT 인증 이후 실행 — 인증된 요청의 암호화 본문을 복호화해 컨트롤러에 평문 DTO로 넘긴다.
-      .addFilterAfter(aidlpDecryptionFilter, JwtAuthenticationFilter.class);
+      .addFilterBefore(maintenanceModeFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }

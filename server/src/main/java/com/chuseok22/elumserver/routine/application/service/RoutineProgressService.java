@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/// 이룸이가 카드를 완료·취소하고 진행을 맞추는 쓰기.
+/// 이룸이 카드 진행 맞추기 (완료 집합 통째 동기화).
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,85 +33,8 @@ public class RoutineProgressService {
   private final ProfileAccessGuard profileAccessGuard;
   private final ApplicationEventPublisher eventPublisher;
 
-  @Transactional
-  public RoutineResponse completeStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
-    if (routine.getStatus() != RoutineStatus.CONFIRMED) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
-
-    List<RoutineStep> steps = routine.getSteps();
-    RoutineStep targetStep = steps.stream()
-      .filter(step -> step.getId().equals(stepId))
-      .findFirst()
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-
-    if (Boolean.TRUE.equals(targetStep.getCompleted())) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_ALREADY_COMPLETED);
-    }
-
-    boolean hasIncompletePriorStep = steps.stream()
-      .filter(step -> step.getStepOrder() < targetStep.getStepOrder())
-      .anyMatch(step -> !Boolean.TRUE.equals(step.getCompleted()));
-    if (hasIncompletePriorStep) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_ORDER_VIOLATION);
-    }
-
-    LocalDateTime now = LocalDateTime.now();
-    targetStep.setCompleted(true);
-    targetStep.setCompletedAt(now);
-    // 별은 쿼리로 더한다 — 두 기기가 동시에 체크해도 하나가 사라지지 않는다 (E25).
-    profileRepository.addStars(routine.getProfile().getId(), 1);
-
-    boolean allCompleted = steps.stream().allMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
-    if (allCompleted) {
-      routine.setStatus(RoutineStatus.COMPLETED);
-      routine.setCompletedAt(now);
-      // 위에서 CONFIRMED 만 통과시키므로 여기는 항상 새 완료
-      publishRoutineCompleted(caller, routine);
-    }
-
-    return RoutineResponse.from(routine);
-  }
-
-  @Transactional
-  public RoutineResponse cancelStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
-    if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
-
-    List<RoutineStep> steps = routine.getSteps();
-    RoutineStep targetStep = steps.stream()
-      .filter(step -> step.getId().equals(stepId))
-      .findFirst()
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-
-    if (!Boolean.TRUE.equals(targetStep.getCompleted())) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_NOT_COMPLETED);
-    }
-
-    boolean hasLaterCompletedStep = steps.stream()
-      .filter(step -> step.getStepOrder() > targetStep.getStepOrder())
-      .anyMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
-    if (hasLaterCompletedStep) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_CANCEL_ORDER_VIOLATION);
-    }
-
-    targetStep.setCompleted(false);
-    targetStep.setCompletedAt(null);
-    profileRepository.addStars(routine.getProfile().getId(), -1);
-
-    if (routine.getStatus() == RoutineStatus.COMPLETED) {
-      routine.setStatus(RoutineStatus.CONFIRMED);
-      routine.setCompletedAt(null);
-    }
-
-    return RoutineResponse.from(routine);
-  }
-
   // 오프라인 퍼스트 클라이언트가 "이 일과의 완료 집합은 이것이다"를 통째로 보낸다.
-  // 단계별 complete/cancel과 달리 **순서를 검사하지 않고** 최종 상태로 맞춘다 —
+  // **순서를 검사하지 않고** 최종 상태로 맞춘다 —
   // 오프라인 재전송에서 요청 하나가 거부돼 뒤가 연쇄로 무너지는 문제를
   // 구조적으로 없애기 위함. 별은 완료 수의 차이만큼만 움직여 같은 요청을 여러 번
   // 보내도 결과가 같다(멱등).

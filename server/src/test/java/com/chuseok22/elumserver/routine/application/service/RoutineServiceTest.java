@@ -1147,8 +1147,6 @@ class RoutineServiceTest {
         (Consumer<Services>) s -> s.stepEdit().addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
       Arguments.of("reorderSteps", RoutineAction.EDIT,
         (Consumer<Services>) s -> s.edit().reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
-      Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<Services>) s -> s.progress().completeStep(GUARDIAN, "routine-1", "step-1")),
-      Arguments.of("cancelStep", RoutineAction.PROGRESS, (Consumer<Services>) s -> s.progress().cancelStep(GUARDIAN, "routine-1", "step-1")),
       Arguments.of("syncProgress", RoutineAction.PROGRESS,
         (Consumer<Services>) s -> s.progress().syncProgress(GUARDIAN, "routine-1", List.of("step-1"))),
       Arguments.of("getRoutine", RoutineAction.VIEW, (Consumer<Services>) s -> s.query().getRoutine(GUARDIAN, "routine-1")),
@@ -1181,58 +1179,22 @@ class RoutineServiceTest {
   void e11_routineRemovedByLeave_elumiGetsNotFound() {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> routineProgressService.completeStep(Caller.elumi("member-1", "l1"), "routine-1", "step-1"))
+    assertThatThrownBy(() -> routineProgressService.syncProgress(Caller.elumi("member-1", "l1"), "routine-1", List.of("step-1")))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_FOUND);
     verifyNoInteractions(profileAccessGuard);
   }
 
   @Test
-  @DisplayName("보호자가 마지막 단계를 체크하면 완료 이벤트에 요청한 보호자 id 와 일과 날짜가 담긴다")
-  void completeStep_lastStep_byGuardian_publishesActorMemberId() {
-    Routine routine = confirmedRoutine(profileWithStars(0), 1);
-    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-
-    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
-
-    verify(eventPublisher).publishEvent(new RoutineCompletedEvent("routine-1", "profile-1",
-      java.time.LocalDate.of(2026, 10, 19), "member-1"));
-  }
-
-  @Test
   @DisplayName("이룸이 기기가 마지막 단계를 체크하면 요청자 제외 없이(actor null) 완료 이벤트가 나간다")
-  void completeStep_lastStep_publishesRoutineCompleted_withActorNullForElumi() {
+  void syncProgress_lastStep_publishesRoutineCompleted_withActorNullForElumi() {
     Routine routine = confirmedRoutine(profileWithStars(0), 1);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineProgressService.completeStep(Caller.elumi("member-1", "link-1"), "routine-1", "step-1");
+    routineProgressService.syncProgress(Caller.elumi("member-1", "link-1"), "routine-1", List.of("step-1"));
 
     verify(eventPublisher).publishEvent(new RoutineCompletedEvent("routine-1", "profile-1",
       java.time.LocalDate.of(2026, 10, 19), null));
-  }
-
-  @Test
-  @DisplayName("마지막이 아닌 단계를 체크하면 완료 이벤트가 나가지 않는다")
-  void completeStep_notLastStep_publishesNothing() {
-    Routine routine = confirmedRoutine(profileWithStars(0), 2);
-    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-
-    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
-
-    verifyNoInteractions(eventPublisher);
-  }
-
-  @Test
-  @DisplayName("이미 완료된 일과의 단계 체크는 거절되어 이벤트가 나가지 않는다")
-  void completeStep_alreadyCompleted_publishesNothing() {
-    Routine routine = confirmedRoutine(profileWithStars(0), 1);
-    routine.setStatus(RoutineStatus.COMPLETED);
-    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-
-    assertThatThrownBy(() -> routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1"))
-      .isInstanceOf(CustomException.class);
-
-    verifyNoInteractions(eventPublisher);
   }
 
   @Test
@@ -1379,28 +1341,15 @@ class RoutineServiceTest {
 
   @Test
   @DisplayName("E25 단계를 체크하면 별은 쿼리로 1 오른다 — 엔티티 값을 읽어 더하지 않는다")
-  void e25_completeStep_addsStarAtomically() {
+  void e25_syncProgress_addsStarAtomically() {
     Profile profile = profileWithStars(5);
     Routine routine = confirmedRoutine(profile, 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
 
     verify(profileRepository).addStars("profile-1", 1);
     assertThat(profile.getTotalStars()).as("엔티티 값으로 더하면 동시 요청 하나가 덮어쓴다").isEqualTo(5);
-  }
-
-  @Test
-  @DisplayName("E25 체크를 풀면 별은 쿼리로 1 내려간다")
-  void e25_cancelStep_subtractsStarAtomically() {
-    Profile profile = profileWithStars(5);
-    Routine routine = confirmedRoutine(profile, 2);
-    routine.getSteps().get(0).setCompleted(true);
-    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-
-    routineProgressService.cancelStep(GUARDIAN, "routine-1", "step-1");
-
-    verify(profileRepository).addStars("profile-1", -1);
   }
 
   @Test

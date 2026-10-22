@@ -141,8 +141,7 @@ public class RoutineStepEditService {
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
     // 이미 별을 받은 카드를 지우면 그 별도 함께 거둔다.
-    // 별은 "완료한 카드 수"를 따라간다 — completeStep(+1) · cancelStep(-1) ·
-    // syncProgress(증감분)가 모두 그 규칙이다. 카드가 사라졌는데 별만 남으면
+    // 별은 "완료한 카드 수"를 따라간다 — syncProgress(증감분)도 같은 규칙이다. 카드가 사라졌는데 별만 남으면
     // 이룸이 화면의 별 개수가 무엇을 센 것인지 설명할 수 없게 된다.
     // 보호자가 스스로 카드를 지울 때의 동작이다. 나가기에 의한 삭제는 별을 건드리지 않는다 (명세 4-3).
     if (Boolean.TRUE.equals(targetStep.getCompleted())) {

@@ -17,9 +17,6 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntry
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
-import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
-import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.notification.application.service.NotificationQueryService;
 import com.chuseok22.elumserver.notification.application.service.NotificationReadService;
 import com.chuseok22.elumserver.notification.application.service.NotificationSettingService;
@@ -76,12 +73,6 @@ class NotificationSecurityTest {
 
   @MockitoBean
   private SharedStateStore sharedStateStore;
-  @MockitoBean
-  private AidlpCryptoService aidlpCryptoService;
-  @MockitoBean
-  private NonceStore nonceStore;
-  @MockitoBean
-  private AidlpProperties aidlpProperties;
   @MockitoBean
   private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
