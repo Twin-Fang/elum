@@ -26,7 +26,7 @@ import 'widgets/talk_empty_message.dart';
 import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_top_bar.dart';
 
-/// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
+/// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯ · 공유) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
 /// 상태: 받는 중 / 내려간 글(404) / 실패(다시 하기 + 에러 코드) / 본문
 class TalkDetailScreen extends ConsumerStatefulWidget {
   const TalkDetailScreen({super.key, required this.postId});
@@ -127,6 +127,9 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               onMorePressed: post == null
                   ? null
                   : () => _actions.openPostMenu(post),
+              onSharePressed: post == null
+                  ? null
+                  : (origin) => _actions.shareLink(post, origin),
             ),
             Expanded(
               child: switch (detail) {
@@ -173,7 +176,6 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               onHelpfulPressed: _actions.toggleHelpful,
               onImportPressed: () =>
                   showTalkImportSheet(context, ref, post.toSummary()),
-              onShareLinkPressed: (origin) => _actions.shareLink(post, origin),
             ),
             SizedBox(height: _bodyToDivider.h),
             Container(

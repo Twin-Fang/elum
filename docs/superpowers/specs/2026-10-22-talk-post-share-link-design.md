@@ -79,7 +79,8 @@ Thymeleaf `templates/share/talk-post.html`.
 
 ### 보내기
 
-- 상세 화면 `도움이 됐어요` 줄 오른쪽 끝에 `공유하기` (아이콘 + 글자)
+- 상세 머리 줄 오른쪽 끝에 공유 아이콘 (시안 1813:7718 · 1860:8085 `fi-br-upload` 20×20 #74757D, x 349)
+- 시안에는 ⋯ 가 없지만 신고·숨기기(App Store 가이드라인 1.2)·내 글 고치기·내리기가 들어 있어 남긴다: `[⋯][공유]` 순서, 양옆 칸을 상자 두 개 폭으로 넓혀 제목은 가운데 (2026-10-22 사용자 결정)
 - 문구(ARB `talkShareMessage`): `{제목}\n이룸 이야기에서 같이 봐요\n{링크}`
 - 공유 시트는 기존 `shareWithSystemSheet`(share_plus) 재사용, 아이패드 팝오버 기준 사각형 전달
 - 실패하면 `showFailure` (에러 코드 `TalkScreenCodes.shareLink` = `E-TALK-070`, `E-TALK-010` 은 올리기가 이미 씀)

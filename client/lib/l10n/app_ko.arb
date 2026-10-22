@@ -2408,7 +2408,7 @@
   "talkImportedButton": "✓ 일과관리에 넣었어요",
   "@talkImportedButton": { "description": "상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)" },
   "talkShareLinkButton": "공유하기",
-  "@talkShareLinkButton": { "description": "상세 도움돼요 줄 오른쪽 버튼: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)" },
+  "@talkShareLinkButton": { "description": "상세 머리 줄 오른쪽 공유 아이콘의 읽기 이름: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)" },
   "talkShareLinkMessage": "{title}\n이룸 이야기에서 같이 봐요\n\n{url}",
   "@talkShareLinkMessage": { "description": "이야기 글 링크를 메신저로 보낼 때의 글. title 은 글 제목, url 은 링크(번역하지 않는다)", "placeholders": { "title": { "type": "String" }, "url": { "type": "String" } } },
   "talkShareLinkFailed": "공유하지 못했어요. 잠시 뒤에 다시 해 주세요",

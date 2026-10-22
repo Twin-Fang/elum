@@ -5204,7 +5204,7 @@ abstract class AppLocalizations {
   /// **'✓ 일과관리에 넣었어요'**
   String get talkImportedButton;
 
-  /// 상세 도움돼요 줄 오른쪽 버튼: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
+  /// 상세 머리 줄 오른쪽 공유 아이콘의 읽기 이름: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
   ///
   /// In ko, this message translates to:
   /// **'공유하기'**

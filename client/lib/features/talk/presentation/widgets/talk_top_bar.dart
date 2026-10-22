@@ -8,7 +8,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_centered_title_row.dart';
 
-/// 이야기 하위 화면 머리 줄 (시안 1783:7473): 뒤로 | 가운데 제목 | (있으면) ⋯
+/// 이야기 하위 화면 머리 줄 (시안 1783:7473 · 1813:7718): 뒤로 | 가운데 제목 | (있으면) ⋯ · 공유
+/// 공유가 있으면 양옆 칸을 상자 두 개 폭으로 넓혀 제목을 가운데에 둔다. 공유가 맨 오른쪽 (시안 x 349)
 /// 뒤로가기 상자 40×40 이 x=16, y=67 (상태 표시줄 포함 화면 위 기준) — 다른 하위 화면(`ElumScaffold backTop: 67`)과 같은 자리
 /// SafeArea 밖에서 쓴다: 상태 표시줄 높이를 직접 빼서 시안 y 를 맞춘다
 class TalkTopBar extends StatelessWidget {
@@ -18,6 +19,7 @@ class TalkTopBar extends StatelessWidget {
     required this.onBackPressed,
     this.onMorePressed,
     this.isMoreVisible = false,
+    this.onSharePressed,
   });
 
   final String title;
@@ -29,11 +31,17 @@ class TalkTopBar extends StatelessWidget {
   /// ⋯ 자리를 둘지 (글을 받기 전에는 자리만 비워 제목이 흔들리지 않게)
   final bool isMoreVisible;
 
+  /// 공유를 눌렀을 때 (아이콘 상자 영역 > 아이패드 공유 시트 팝오버 기준). null 이면 공유 없음
+  final ValueChanged<Rect?>? onSharePressed;
+
   /// 시안 실측: 뒤로가기 상자 y 67 · 상자 40 · 좌우 16 · 상자 아래 본문까지 12 (상세 본문 첫 칩 위치를 #939 실측 그대로 둠)
   static const _boxTop = 67.0;
   static const _boxSize = 40.0;
   static const _sideInset = 16.0;
   static const _iconSize = 24.0;
+
+  /// 공유 아이콘 (시안 fi-br-upload 20×20)
+  static const _shareIconSize = 20.0;
   static const _bottomGap = 12.0;
 
   /// 화면 위에서 본문이 시작하는 시안 y (상자 아래 + 간격)
@@ -47,6 +55,10 @@ class TalkTopBar extends StatelessWidget {
     // 시안 y 는 상태 표시줄을 포함한 값 > 상태 표시줄을 빼고 남은 만큼만 띄운다
     final topGap = (_boxTop.h - safeTop).clamp(0.0, _boxTop.h);
     final onMorePressed = this.onMorePressed;
+    final onSharePressed = this.onSharePressed;
+    final isMoreShown = isMoreVisible && onMorePressed != null;
+    // 공유 화면(상세)은 상자 두 개, 그 밖은 하나
+    final slotBoxCount = onSharePressed != null ? 2 : 1;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -56,13 +68,7 @@ class TalkTopBar extends StatelessWidget {
         _bottomGap.h,
       ),
       child: ElumCenteredTitleRow(
-        sideSlotWidth: _boxSize.w,
-        leading: _IconBox(
-          asset: AppAssets.iconBack,
-          semanticLabel: l10n.commonBack,
-          color: null,
-          onTap: onBackPressed,
-        ),
+        sideSlotWidth: _boxSize.w * slotBoxCount,
         title: Text(
           title,
           textAlign: TextAlign.center,
@@ -70,26 +76,49 @@ class TalkTopBar extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: context.typo.navTitle.copyWith(color: colors.textPrimary),
         ),
-        trailing: isMoreVisible && onMorePressed != null
-            ? _IconBox(
+        // 칸이 상자보다 넓을 수 있어 왼쪽에 붙인다
+        leading: Align(
+          alignment: Alignment.centerLeft,
+          child: _IconBox(
+            asset: AppAssets.iconBack,
+            semanticLabel: l10n.commonBack,
+            color: null,
+            onTap: (_) => onBackPressed(),
+          ),
+        ),
+        trailing: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (isMoreShown)
+              _IconBox(
                 asset: AppAssets.iconMenuDots,
                 semanticLabel: l10n.talkMoreLabel,
                 color: colors.textPrimary,
-                onTap: onMorePressed,
-              )
-            : SizedBox(width: _boxSize.w, height: _boxSize.w),
+                onTap: (_) => onMorePressed(),
+              ),
+            if (onSharePressed != null)
+              _IconBox(
+                asset: AppAssets.iconShare,
+                semanticLabel: l10n.talkShareLinkButton,
+                color: colors.talkMetaText,
+                iconSize: _shareIconSize,
+                onTap: onSharePressed,
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// 40×40 누름 상자 가운데 24 아이콘
+/// 40×40 누름 상자 가운데 아이콘 (기본 24). 누르면 상자 영역을 넘긴다 (공유 팝오버 기준)
 class _IconBox extends StatelessWidget {
   const _IconBox({
     required this.asset,
     required this.semanticLabel,
     required this.color,
     required this.onTap,
+    this.iconSize = TalkTopBar._iconSize,
   });
 
   final String asset;
@@ -97,7 +126,8 @@ class _IconBox extends StatelessWidget {
 
   /// null 이면 SVG 원래 색 (뒤로가기)
   final Color? color;
-  final VoidCallback onTap;
+  final ValueChanged<Rect?> onTap;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +136,7 @@ class _IconBox extends StatelessWidget {
       button: true,
       label: semanticLabel,
       child: AppPressable(
-        onTap: onTap,
+        onTap: () => onTap(_globalRectOf(context)),
         scaleDown: AppPressable.scaleIcon,
         child: SizedBox(
           width: TalkTopBar._boxSize.w,
@@ -114,8 +144,8 @@ class _IconBox extends StatelessWidget {
           child: Center(
             child: SvgPicture.asset(
               asset,
-              width: TalkTopBar._iconSize.w,
-              height: TalkTopBar._iconSize.w,
+              width: iconSize.w,
+              height: iconSize.w,
               excludeFromSemantics: true,
               colorFilter: color == null
                   ? null
@@ -125,6 +155,13 @@ class _IconBox extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // 화면 기준 상자 영역 (아직 그려지기 전이면 null)
+  static Rect? _globalRectOf(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 }
 
