@@ -62,6 +62,11 @@ talk:
   image-storage-path: ${ELUM_TALK_IMAGE_PATH:data/talk-images}
   # 신고 메일의 관리자 화면 링크 기준 주소
   admin-base-url: ${ELUM_TALK_ADMIN_BASE_URL:https://api.elum.chuseok22.com}
+  # 앱 밖 공유 링크 (/s/{글id}). 미리보기 페이지·썸네일·앱 연결 검증 파일
+  share:
+    public-base-url: ${ELUM_TALK_SHARE_PUBLIC_BASE_URL:https://api.elum.chuseok22.com}
+    # Play Console 앱 서명 키 SHA-256 (쉼표 구분, 비면 Android 앱 링크 검증 안 됨 > 웹 페이지로 열림)
+    android-cert-sha256: ${ELUM_TALK_SHARE_ANDROID_CERT_SHA256:}
 
 elum:
   auth:

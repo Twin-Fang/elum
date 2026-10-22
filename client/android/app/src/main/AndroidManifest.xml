@@ -50,6 +50,17 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="elum" android:host="invite"/>
                 <data android:scheme="elum" android:host="link"/>
+                <!-- 이야기 글 공유 페이지의 `이룸 앱에서 보기` (elum://talk?post=…) -->
+                <data android:scheme="elum" android:host="talk"/>
+            </intent-filter>
+            <!-- 이야기 글 공유 링크 App Links: https://api.elum.chuseok22.com/s/{글id} 를 브라우저 대신 앱이 받는다.
+                 서버 /.well-known/assetlinks.json 에 Play 앱 서명 키 SHA-256 이 있어야 검증된다
+                 (없으면 링크는 웹 공유 페이지로 열리고, 거기서 elum://talk 로 앱을 연다). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="api.elum.chuseok22.com" android:pathPrefix="/s/"/>
             </intent-filter>
         </activity>
         <!-- 카카오 로그인 리다이렉트.

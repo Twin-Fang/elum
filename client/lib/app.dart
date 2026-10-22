@@ -27,6 +27,7 @@ import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
+import 'features/talk/application/talk_post_link_intake.dart';
 import 'core/storage/local_storage.dart';
 import 'app/dio_provider.dart';
 import 'core/router/routes.dart';
@@ -57,6 +58,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     onInviteLink: (link) => _inviteIntake.accept(link),
     // 같은 경우의 이룸이 휴대폰 연결 암호 링크
     onLinkCodeLink: (link) => _linkCodeIntake.accept(link),
+    // 같은 경우의 이야기 글 링크
+    onTalkPostLink: (link) => _talkPostIntake.accept(link),
   );
 
   // 연결 암호 링크의 코드를 로그인·역할 선택 뒤 암호 넣기 화면까지 맡겨 둔다.
@@ -70,13 +73,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     onNotice: (notice) {
       WidgetsBinding.instance
         ..addPostFrameCallback(
-          (_) => showElumToastOn(
-            _messengerKey.currentState,
-            switch (notice) {
-              LinkCodeNotice.alreadyLinked => appL10n.linkRejectedAlreadyLinked,
-              LinkCodeNotice.openOnElumiPhone => appL10n.linkRejectedOnGuardianPhone,
-            },
-          ),
+          (_) => showElumToastOn(_messengerKey.currentState, switch (notice) {
+            LinkCodeNotice.alreadyLinked => appL10n.linkRejectedAlreadyLinked,
+            LinkCodeNotice.openOnElumiPhone =>
+              appL10n.linkRejectedOnGuardianPhone,
+          }),
         )
         ..ensureVisualUpdate();
     },
@@ -99,6 +100,26 @@ class _ElumAppState extends ConsumerState<ElumApp> {
           (_) => showElumToastOn(
             _messengerKey.currentState,
             appL10n.inviteRejectedOnElumiDevice,
+          ),
+        )
+        ..ensureVisualUpdate();
+    },
+  );
+
+  // 이야기 글 링크를 보호자 홈·이야기에 닿았을 때 글 상세로 이어 준다.
+  late final TalkPostLinkIntake _talkPostIntake = TalkPostLinkIntake(
+    isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+    hasSession: () => ref.read(authRepositoryProvider).hasSession,
+    topLocation: () =>
+        _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
+    open: (postId) => _router.push(Routes.guardianTalkPostOf(postId)),
+    // 초대 링크 안내와 같은 이유로 다음 프레임에 띄우고 프레임을 요청한다
+    onElumiDeviceRejected: () {
+      WidgetsBinding.instance
+        ..addPostFrameCallback(
+          (_) => showElumToastOn(
+            _messengerKey.currentState,
+            appL10n.talkPostLinkRejectedOnElumiDevice,
           ),
         )
         ..ensureVisualUpdate();
@@ -144,7 +165,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     final path = _router.routerDelegate.currentConfiguration.uri.path;
     final isInGuardianArea =
         path == Routes.guardian || path.startsWith('${Routes.guardian}/');
-    return isInGuardianArea ? _router.routerDelegate.navigatorKey.currentContext : null;
+    return isInGuardianArea
+        ? _router.routerDelegate.navigatorKey.currentContext
+        : null;
   }
 
   @override
@@ -162,7 +185,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
-      ref.read(pushMessageRouterProvider).start(readyContext: _contextIfInGuardianArea);
+      ref
+          .read(pushMessageRouterProvider)
+          .start(readyContext: _contextIfInGuardianArea);
     });
   }
 
@@ -204,6 +229,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       router: _router,
       intake: _inviteIntake,
       linkIntake: _linkCodeIntake,
+      talkPostIntake: _talkPostIntake,
       child: _buildApp(),
     );
   }
@@ -220,7 +246,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
           // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
           onNavigate: _router.go,
           // 견본 공지 팝업을 띄울 화면 (라우터 Navigator)
-          navigatorContext: () => _router.routerDelegate.navigatorKey.currentContext,
+          navigatorContext: () =>
+              _router.routerDelegate.navigatorKey.currentContext,
           child: AppStatusGate(
             // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
             // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.

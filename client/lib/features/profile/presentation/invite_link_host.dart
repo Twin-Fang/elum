@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../link/application/link_code_intake.dart';
 import '../../link/domain/link_code_link.dart';
+import '../../talk/application/talk_post_link_intake.dart';
+import '../../talk/domain/talk_post_link.dart';
 import '../application/invite_link_intake.dart';
 import '../domain/invite_link.dart';
 
@@ -30,6 +33,7 @@ class InviteLinkHost extends StatefulWidget {
     required this.intake,
     required this.child,
     this.linkIntake,
+    this.talkPostIntake,
   });
 
   final GoRouter router;
@@ -37,13 +41,17 @@ class InviteLinkHost extends StatefulWidget {
 
   /// 이룸이 휴대폰 연결 암호 링크(`elum://link`)를 받는 쪽. 없으면 그 링크는 라우터로 넘어간다.
   final LinkCodeIntake? linkIntake;
+
+  /// 이야기 글 링크(`elum://talk`·`/s/{글id}`)를 받는 쪽. 없으면 그 링크는 라우터로 넘어간다.
+  final TalkPostLinkIntake? talkPostIntake;
   final Widget child;
 
   @override
   State<InviteLinkHost> createState() => _InviteLinkHostState();
 }
 
-class _InviteLinkHostState extends State<InviteLinkHost> with WidgetsBindingObserver {
+class _InviteLinkHostState extends State<InviteLinkHost>
+    with WidgetsBindingObserver {
   /// 열기를 이미 예약했다. 한 프레임에 두 번 얹지 않는다.
   bool _scheduled = false;
 
@@ -62,11 +70,22 @@ class _InviteLinkHostState extends State<InviteLinkHost> with WidgetsBindingObse
   }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
     final codeLink = LinkCodeLink.parse(routeInformation.uri);
     final codeIntake = widget.linkIntake;
     if (codeLink != null && codeIntake != null) {
       codeIntake.accept(codeLink);
+      return true;
+    }
+    final talkLink = TalkPostLink.parse(
+      routeInformation.uri,
+      webHosts: TalkPostLink.webHostsOf(AppConfig.apiBaseUrl),
+    );
+    final talkIntake = widget.talkPostIntake;
+    if (talkLink != null && talkIntake != null) {
+      talkIntake.accept(talkLink);
       return true;
     }
     final link = InviteLink.parse(routeInformation.uri);
@@ -85,6 +104,7 @@ class _InviteLinkHostState extends State<InviteLinkHost> with WidgetsBindingObse
       if (!mounted) return;
       widget.intake.tryOpen();
       widget.linkIntake?.tryOpen();
+      widget.talkPostIntake?.tryOpen();
     });
   }
 

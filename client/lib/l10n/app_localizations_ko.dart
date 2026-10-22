@@ -2894,6 +2894,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkImportedButton => '✓ 일과관리에 넣었어요';
 
   @override
+  String get talkShareLinkButton => '공유하기';
+
+  @override
+  String talkShareLinkMessage(String title, String url) {
+    return '$title\n이룸 이야기에서 같이 봐요\n\n$url';
+  }
+
+  @override
+  String get talkShareLinkFailed => '공유하지 못했어요. 잠시 뒤에 다시 해 주세요';
+
+  @override
+  String get talkPostLinkRejectedOnElumiDevice => '이야기 글은 보호자 기기에서 볼 수 있어요';
+
+  @override
   String get talkImportSheetTitle => '일과로 가져오기';
 
   @override

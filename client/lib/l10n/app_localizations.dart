@@ -5204,6 +5204,30 @@ abstract class AppLocalizations {
   /// **'✓ 일과관리에 넣었어요'**
   String get talkImportedButton;
 
+  /// 상세 도움돼요 줄 오른쪽 버튼: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
+  ///
+  /// In ko, this message translates to:
+  /// **'공유하기'**
+  String get talkShareLinkButton;
+
+  /// 이야기 글 링크를 메신저로 보낼 때의 글. title 은 글 제목, url 은 링크(번역하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title}\n이룸 이야기에서 같이 봐요\n\n{url}'**
+  String talkShareLinkMessage(String title, String url);
+
+  /// 상세 화면: 공유 시트를 띄우지 못했을 때 안내(팝업)
+  ///
+  /// In ko, this message translates to:
+  /// **'공유하지 못했어요. 잠시 뒤에 다시 해 주세요'**
+  String get talkShareLinkFailed;
+
+  /// 이룸이 전용 기기에서 이야기 글 링크를 열었을 때의 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기 글은 보호자 기기에서 볼 수 있어요'**
+  String get talkPostLinkRejectedOnElumiDevice;
+
   /// 가져오기 시트 제목
   ///
   /// In ko, this message translates to:

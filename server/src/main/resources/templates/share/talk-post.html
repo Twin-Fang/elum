@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--
+  이야기 글 공유 페이지 (/s/{글id}). 메신저 미리보기(OG) + 앱 열기 + 스토어 안내.
+  글 값(제목·한마디)은 th:text·th:content 로만 넣는다 — 자동 이스케이프.
+  색은 docs/public-pages/invite/index.html 과 같은 팔레트.
+-->
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- 검색에 잡히지 않게 (메신저 미리보기는 robots 와 무관하게 OG 를 읽음) -->
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="referrer" content="no-referrer"/>
+
+  <title th:text="${post != null} ? ${post.title} + ' · 이룸 이야기' : '이룸 ELUM'">이룸 ELUM</title>
+  <meta name="description"
+        th:content="${post != null} ? (${post.notePreview} ?: '카드 ' + ${post.stepCount} + '장으로 만든 일과예요') : '하루 일과를 행동 카드로 한 장씩'"/>
+
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="이룸 ELUM"/>
+  <meta property="og:locale" content="ko_KR"/>
+  <meta property="og:url" th:content="${pageUrl}"/>
+  <meta property="og:title" th:content="${post != null} ? ${post.title} : '이룸 ELUM'"/>
+  <meta property="og:description"
+        th:content="${post != null} ? (${post.notePreview} ?: '카드 ' + ${post.stepCount} + '장으로 만든 일과예요') : '하루 일과를 행동 카드로 한 장씩'"/>
+  <meta property="og:image" th:content="${imageUrl}"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+
+  <style>
+    :root {
+      --bg: #F7F2EF; --ink: #242634; --muted: #6B6C78; --line: rgba(36, 38, 52, .09);
+      --card: #fff; --accent: #FF8B26; --soft: #FFF7EE;
+    }
+    * { box-sizing: border-box }
+    html { -webkit-text-size-adjust: 100% }
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.62;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased }
+    main { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px }
+    .brand { margin: 0; color: var(--muted); font-size: 14px; font-weight: 700; text-align: center }
+    .card { margin: 16px 0 0; background: var(--card); border-radius: 24px; border: 1px solid var(--line); overflow: hidden }
+    .thumb { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: var(--soft) }
+    .body { padding: 18px 20px 20px }
+    .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--soft); color: var(--accent);
+      font-size: 13px; font-weight: 800 }
+    h1 { margin: 10px 0 0; font-size: 22px; line-height: 1.35; letter-spacing: -.02em; font-weight: 800; word-break: keep-all }
+    .note { margin: 8px 0 0; color: var(--muted); font-size: 15px; white-space: pre-line; word-break: keep-all }
+    .count { margin: 12px 0 0; color: var(--muted); font-size: 13px }
+    .btn { display: block; width: 100%; margin: 12px 0 0; padding: 16px 20px; border-radius: 18px; border: 0;
+      font: inherit; font-size: 17px; font-weight: 800; text-align: center; text-decoration: none }
+    .btn-solid { background: var(--ink); color: #fff }
+    .btn-ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line) }
+    .hint { margin: 16px 0 0; color: var(--muted); font-size: 13px; text-align: center }
+    .gone { margin: 24px 0 0; padding: 24px 20px; background: var(--card); border-radius: 24px; border: 1px solid var(--line); text-align: center }
+    .gone b { display: block; font-size: 18px }
+    .gone span { display: block; margin-top: 6px; color: var(--muted); font-size: 14px }
+    .gone code { font-size: 12px }
+    footer { margin-top: 36px; color: var(--muted); font-size: 12px; text-align: center }
+    footer a { color: inherit }
+  </style>
+</head>
+<body>
+<main>
+  <p class="brand">이룸 이야기</p>
+
+  <!-- 볼 수 있는 글 -->
+  <th:block th:if="${post != null}">
+    <article class="card">
+      <img class="thumb" th:src="${imageUrl}" alt=""/>
+      <div class="body">
+        <span class="chip" th:text="${post.categoryLabel}">하루 순서</span>
+        <h1 th:text="${post.title}">일과 제목</h1>
+        <p class="note" th:if="${post.notePreview != null}" th:text="${post.notePreview}">한마디</p>
+        <p class="count" th:text="'카드 ' + ${post.stepCount} + '장'">카드 3장</p>
+      </div>
+    </article>
+    <!-- 앱 주소는 눌렀을 때만 연다 — 앱이 없는 기기에서 저절로 오류가 뜨지 않게 -->
+    <a class="btn btn-solid" th:href="${appUrl}">이룸 앱에서 보기</a>
+  </th:block>
+
+  <!-- 없음·내려감·정지 회원 글·잘못된 주소 -->
+  <section class="gone" th:if="${post == null}">
+    <b>글을 찾을 수 없어요</b>
+    <span>글쓴이가 내렸거나 주소가 맞지 않아요</span>
+    <span><code>E-TALK-SHARE-GONE</code></span>
+  </section>
+
+  <!-- 스토어: 기기에 맞는 하나, 모르면 둘 다 -->
+  <a class="btn btn-ghost" th:if="${platform != 'ios'}" th:href="${playStoreUrl}">Google Play 에서 이룸 받기</a>
+  <a class="btn btn-ghost" th:if="${platform != 'android'}" th:href="${appStoreUrl}">App Store 에서 이룸 받기</a>
+
+  <p class="hint" th:if="${post != null}">앱을 받은 뒤 이 링크를 다시 누르면 글이 열려요</p>
+
+  <footer>이룸 ELUM · <a href="https://twin-fang.github.io/elum/privacy.html">개인정보처리방침</a></footer>
+</main>
+</body>
+</html>

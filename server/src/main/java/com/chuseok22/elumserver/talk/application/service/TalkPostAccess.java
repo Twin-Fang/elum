@@ -43,6 +43,15 @@ public class TalkPostAccess {
       .filter(found -> !readablePosts(caller, List.of(found), blockedAuthorIdsOf(caller)).isEmpty());
   }
 
+  /**
+   * 앱 밖 공개 조회 한 건: 보이는 글 > 정지 글쓴이 제외 (보는 사람이 없어 차단은 보지 않음)
+   */
+  public Optional<TalkPost> findPubliclyVisiblePost(String postId) {
+    return talkPostRepository.findById(postId)
+      .filter(found -> found.getStatus() == TalkPostStatus.VISIBLE)
+      .filter(found -> memberService.suspendedAmong(List.of(found.getAuthorMemberId())).isEmpty());
+  }
+
   // 내가 차단한 글쓴이 id
   public Set<String> blockedAuthorIdsOf(Caller caller) {
     return talkBlockRepository.findByBlockerMemberId(caller.memberId()).stream()

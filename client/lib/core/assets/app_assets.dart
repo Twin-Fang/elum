@@ -366,6 +366,9 @@ abstract final class AppAssets {
   /// 이야기 카드 가져간 수 앞 (10×10 #CACACA). Figma `fi-br-download`(1783:6306).
   static const iconDownload = '$_images/icon_download.svg';
 
+  /// 이야기 상세 공유하기 (위 화살표 + 상자). Figma 원본 없음 — 같은 굵기 둥근 선으로 그림 (시안 나오면 교체)
+  static const iconShare = '$_images/icon_share.svg';
+
   /// 이야기 상세 카드 수 칩 (10×10). Figma `fi-br-playing-cards`(1813:7668).
   static const iconPlayingCards = '$_images/icon_playing_cards.svg';
 

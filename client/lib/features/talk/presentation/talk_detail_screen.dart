@@ -173,6 +173,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               onHelpfulPressed: _actions.toggleHelpful,
               onImportPressed: () =>
                   showTalkImportSheet(context, ref, post.toSummary()),
+              onShareLinkPressed: (origin) => _actions.shareLink(post, origin),
             ),
             SizedBox(height: _bodyToDivider.h),
             Container(

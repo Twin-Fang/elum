@@ -12,10 +12,11 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/talk_post.dart';
 import 'talk_category_badge.dart';
 import 'talk_detail_parts.dart';
+import 'talk_share_link_button.dart';
 import 'talk_step_cards.dart';
 
 /// 상세 본문 (시안 1783:7172 · 1813:7718): 분류 · 카드 수 칩 > 제목 > 작성 정보 > 한마디
-/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자
+/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자 · (오른쪽 끝) 공유하기
 /// 보기 전환은 기기에 기억한다 (다른 글·다시 들어와도 마지막 선택, #959)
 class TalkDetailBody extends ConsumerStatefulWidget {
   const TalkDetailBody({
@@ -23,11 +24,15 @@ class TalkDetailBody extends ConsumerStatefulWidget {
     required this.post,
     required this.onHelpfulPressed,
     required this.onImportPressed,
+    required this.onShareLinkPressed,
   });
 
   final TalkPostDetail post;
   final VoidCallback onHelpfulPressed;
   final VoidCallback onImportPressed;
+
+  /// 공유하기: 칩 영역(아이패드 팝오버 기준)을 받는다
+  final ValueChanged<Rect?> onShareLinkPressed;
 
   @override
   ConsumerState<TalkDetailBody> createState() => _TalkDetailBodyState();
@@ -149,7 +154,7 @@ class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
           ),
         ),
         SizedBox(height: _importToHelpful.h),
-        // 도움돼요 칩 · 가져감 숫자 (댓글 수는 아래 댓글 머리에)
+        // 도움돼요 칩 · 가져감 숫자 · 공유하기 (댓글 수는 아래 댓글 머리에)
         Padding(
           padding: textInset,
           child: Row(
@@ -161,6 +166,8 @@ class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
               ),
               SizedBox(width: _helpfulToImportCount.w),
               TalkImportCountLabel(count: post.importCount),
+              const Spacer(),
+              TalkShareLinkButton(onPressed: widget.onShareLinkPressed),
             ],
           ),
         ),

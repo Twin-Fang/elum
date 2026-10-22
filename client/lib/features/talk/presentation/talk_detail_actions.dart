@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
@@ -8,8 +9,10 @@ import '../../../core/widgets/show_failure.dart';
 import '../application/talk_comment_controller.dart';
 import '../application/talk_detail_controller.dart';
 import '../application/talk_rules_provider.dart';
+import '../../profile/application/invite_sharer.dart';
 import '../domain/talk_comment.dart';
 import '../domain/talk_post.dart';
+import '../domain/talk_post_link.dart';
 import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_block_dialog.dart';
 import 'widgets/talk_delete_dialogs.dart';
@@ -48,6 +51,27 @@ class TalkDetailActions {
         e,
         fallback: failedText,
         fallbackCode: TalkScreenCodes.detail,
+      );
+    }
+  }
+
+  /// 공유하기: 제목 + 웹 링크 문구 > OS 공유 시트. 실패하면 에러 코드가 붙은 팝업
+  /// [origin] 은 아이패드 팝오버 기준 칩 영역
+  Future<void> shareLink(TalkPostDetail post, Rect? origin) async {
+    final l10n = context.l10n;
+    final message = l10n.talkShareLinkMessage(
+      post.title,
+      TalkPostLink.shareUrl(AppConfig.apiBaseUrl, post.id),
+    );
+    try {
+      await ref.read(inviteSharerProvider)(message, origin);
+    } catch (e) {
+      if (!context.mounted) return;
+      await showFailure(
+        context,
+        e,
+        fallback: l10n.talkShareLinkFailed,
+        fallbackCode: TalkScreenCodes.shareLink,
       );
     }
   }
