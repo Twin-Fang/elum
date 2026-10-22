@@ -87,7 +87,7 @@ class TalkShareController extends Notifier<TalkShareState> {
   @override
   TalkShareState build() => const TalkShareState();
 
-  /// 일과를 고르고 미리보기 받기 (분류는 제목으로 추천해 미리 고름)
+  /// 일과를 고르고 미리보기 받기 (분류는 제목으로 추천, 사진 카드는 그대로로 미리 고름)
   Future<void> selectRoutine(String routineId, AppLocalizations l10n) async {
     state = TalkShareState(routineId: routineId, isPreviewLoading: true);
     try {
@@ -99,7 +99,7 @@ class TalkShareController extends Notifier<TalkShareState> {
         preview: preview,
         blurChoiceByStepId: {
           for (final step in preview.steps)
-            if (step.isGuardianPhoto) step.stepId: null,
+            if (step.isGuardianPhoto) step.stepId: false,
         },
         category: suggestTalkCategory(preview.title, l10n),
       );

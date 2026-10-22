@@ -10,7 +10,7 @@ import '../../domain/talk_preview.dart';
 import 'talk_page_heading.dart';
 import 'talk_share_step_card.dart';
 
-/// 사진 고르기 (시안 1877:10456): 보호자 사진 카드마다 웜그레이 판 > 카드 > `흐리게 | 그대로` (기본값 없음)
+/// 사진 고르기 (시안 1877:10456): 보호자 사진 카드마다 웜그레이 판 > 카드 > `흐리게 | 그대로` (기본 그대로)
 /// 2열 격자, 고르면 카드 그림이 바로 흐려진다
 class TalkPhotoBlurPicker extends StatelessWidget {
   const TalkPhotoBlurPicker({
