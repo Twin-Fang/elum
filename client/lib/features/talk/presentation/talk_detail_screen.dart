@@ -3,19 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_centered_title_row.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -27,7 +22,9 @@ import 'talk_detail_actions.dart';
 import 'widgets/talk_comment_input.dart';
 import 'widgets/talk_comment_list.dart';
 import 'widgets/talk_detail_body.dart';
+import 'widgets/talk_empty_message.dart';
 import 'widgets/talk_import_sheet.dart';
+import 'widgets/talk_top_bar.dart';
 
 /// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
 /// 상태: 받는 중 / 내려간 글(404) / 실패(다시 하기 + 에러 코드) / 본문
@@ -45,6 +42,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
 
   /// 끝까지 이만큼 남으면 다음 댓글 쪽을 받는다
   static const _loadMoreExtent = 320.0;
+
   /// 도움돼요 칩 > 구분 띠 15 · 띠 높이 7 · 띠 > 댓글 머리 14 (시안 1830:7918)
   static const _bodyToDivider = 15.0;
   static const _dividerHeight = 7.0;
@@ -117,10 +115,15 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
 
     return Scaffold(
       backgroundColor: context.colors.background,
+      // 위 안전영역은 머리 줄이 시안 y 로 직접 맞춘다
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            _Header(
+            TalkTopBar(
+              title: context.l10n.talkTitle,
+              onBackPressed: context.popOrHome,
+              isMoreVisible: post != null,
               onMorePressed: post == null
                   ? null
                   : () => _actions.openPostMenu(post),
@@ -194,75 +197,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   }
 }
 
-/// 머리 줄: 뒤로 | 이야기 | ⋯ (글을 받기 전에는 ⋯ 없음)
-class _Header extends StatelessWidget {
-  const _Header({required this.onMorePressed});
-
-  final VoidCallback? onMorePressed;
-
-  static const _tapSize = 44.0;
-  static const _iconSize = 24.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    final l10n = context.l10n;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: space.xs.w,
-        vertical: space.xs.h,
-      ),
-      child: ElumCenteredTitleRow(
-        sideSlotWidth: _tapSize.w,
-        leading: Semantics(
-          button: true,
-          label: l10n.commonBack,
-          child: AppPressable(
-            onTap: context.popOrHome,
-            scaleDown: AppPressable.scaleIcon,
-            child: SizedBox(
-              width: _tapSize.w,
-              height: _tapSize.w,
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.iconBack,
-                  width: _iconSize.w,
-                  height: _iconSize.w,
-                  excludeFromSemantics: true,
-                ),
-              ),
-            ),
-          ),
-        ),
-        title: Text(
-          l10n.talkTitle,
-          textAlign: TextAlign.center,
-          style: context.typo.navTitle.copyWith(color: colors.textPrimary),
-        ),
-        trailing: SizedBox(
-          width: _tapSize.w,
-          height: _tapSize.w,
-          child: onMorePressed == null
-              ? null
-              : AppPressable(
-                  onTap: onMorePressed,
-                  scaleDown: AppPressable.scaleIcon,
-                  semanticLabel: l10n.talkMoreLabel,
-                  child: Icon(
-                    Icons.more_horiz_rounded,
-                    size: _iconSize.w,
-                    color: colors.textPrimary,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 내려간 글: 안내 + 돌아가기
+/// 내려간 글: 안내 + 이야기로 돌아가기
 class _GoneBody extends StatelessWidget {
   const _GoneBody({required this.onBackPressed});
 
@@ -271,23 +206,13 @@ class _GoneBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final space = context.space;
     return ElumStateBody(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.talkPostGoneTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.sectionTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            SizedBox(height: space.lg.h),
-            ElumButton(label: l10n.talkPostGoneBack, onPressed: onBackPressed),
-          ],
+        padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
+        child: TalkEmptyMessage(
+          title: l10n.talkPostGoneTitle,
+          actionLabel: l10n.talkPostGoneBack,
+          onActionPressed: onBackPressed,
         ),
       ),
     );

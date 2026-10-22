@@ -5,12 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -21,6 +19,7 @@ import '../application/talk_popular_provider.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_category_chips.dart';
+import 'widgets/talk_empty_message.dart';
 import 'widgets/talk_popular_row.dart';
 import 'widgets/talk_post_card.dart';
 import 'widgets/talk_write_button.dart';
@@ -287,42 +286,19 @@ class _EmptyBody extends StatelessWidget {
   final VoidCallback onSharePressed;
   final VoidCallback onShowAllPressed;
 
-  static const _illustrationSize = 200.0;
-
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
+    final l10n = context.l10n;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            AppAssets.storiesComingSoonLumi,
-            width: _illustrationSize.w,
-            height: _illustrationSize.w,
-            fit: BoxFit.contain,
-            // 장식 그림 (제목이 뜻을 전한다)
-            excludeFromSemantics: true,
-          ),
-          SizedBox(height: space.md.h),
-          Text(
-            isCategoryFiltered
-                ? context.l10n.talkEmptyCategoryTitle
-                : context.l10n.talkEmptyTitle,
-            textAlign: TextAlign.center,
-            style: context.typo.sectionTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
-          ),
-          SizedBox(height: space.lg.h),
-          ElumButton(
-            label: isCategoryFiltered
-                ? context.l10n.talkEmptyCategoryAction
-                : context.l10n.talkEmptyAction,
-            onPressed: isCategoryFiltered ? onShowAllPressed : onSharePressed,
-          ),
-        ],
+      padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
+      child: TalkEmptyMessage(
+        title: isCategoryFiltered
+            ? l10n.talkEmptyCategoryTitle
+            : l10n.talkEmptyTitle,
+        actionLabel: isCategoryFiltered
+            ? l10n.talkEmptyCategoryAction
+            : l10n.talkEmptyAction,
+        onActionPressed: isCategoryFiltered ? onShowAllPressed : onSharePressed,
       ),
     );
   }
@@ -349,8 +325,8 @@ class _LoadMoreRetryRow extends StatelessWidget {
           child: Text(
             context.l10n.talkLoadMoreRetry,
             textAlign: TextAlign.center,
-            style: context.typo.tileLabel.copyWith(
-              color: context.colors.textSecondary,
+            style: context.typo.talkGuide.copyWith(
+              color: context.colors.talkMetaText,
             ),
           ),
         ),

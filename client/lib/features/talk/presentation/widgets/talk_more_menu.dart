@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/settings_tile.dart';
 import 'talk_sheet_frame.dart';
 
 /// 글 ⋯ 메뉴에서 고른 동작
@@ -25,12 +28,12 @@ Future<TalkPostMenuAction?> showTalkPostMenu(
         ? [
             _MenuItem(
               value: TalkPostMenuAction.edit,
-              icon: Icons.edit_rounded,
+              icon: AppAssets.iconPencil,
               label: l10n.talkMenuEdit,
             ),
             _MenuItem(
               value: TalkPostMenuAction.takeDown,
-              icon: Icons.delete_outline_rounded,
+              icon: AppAssets.iconTrash,
               label: l10n.talkMenuTakeDown,
               isDanger: true,
             ),
@@ -38,12 +41,12 @@ Future<TalkPostMenuAction?> showTalkPostMenu(
         : [
             _MenuItem(
               value: TalkPostMenuAction.report,
-              icon: Icons.flag_outlined,
+              icon: AppAssets.iconFlag,
               label: l10n.talkMenuReport,
             ),
             _MenuItem(
               value: TalkPostMenuAction.block,
-              icon: Icons.visibility_off_outlined,
+              icon: AppAssets.iconEyeCrossed,
               label: l10n.talkMenuBlock,
             ),
           ],
@@ -62,7 +65,7 @@ Future<TalkCommentMenuAction?> showTalkCommentMenu(
         ? [
             _MenuItem(
               value: TalkCommentMenuAction.delete,
-              icon: Icons.delete_outline_rounded,
+              icon: AppAssets.iconTrash,
               label: l10n.talkCommentDeleteAction,
               isDanger: true,
             ),
@@ -70,12 +73,12 @@ Future<TalkCommentMenuAction?> showTalkCommentMenu(
         : [
             _MenuItem(
               value: TalkCommentMenuAction.report,
-              icon: Icons.flag_outlined,
+              icon: AppAssets.iconFlag,
               label: l10n.talkMenuReport,
             ),
             _MenuItem(
               value: TalkCommentMenuAction.block,
-              icon: Icons.visibility_off_outlined,
+              icon: AppAssets.iconEyeCrossed,
               label: l10n.talkMenuBlock,
             ),
           ],
@@ -91,7 +94,9 @@ class _MenuItem<T> {
   });
 
   final T value;
-  final IconData icon;
+
+  /// `fi-br` 아이콘 SVG 경로
+  final String icon;
   final String label;
 
   /// 되돌리기 어려운 동작은 붉게
@@ -104,22 +109,29 @@ Future<T?> _showMenu<T>(
 }) => showElumSheet<T>(
   context: context,
   builder: (sheetContext) => TalkSheetFrame(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final row in rows)
-          _MenuRow(
-            icon: row.icon,
-            label: row.label,
-            isDanger: row.isDanger,
-            onTap: () => Navigator.of(sheetContext).pop(row.value),
-          ),
-      ],
+    // 흰 묶음 판 안에 줄을 잇는다 (설정 묶음과 같은 r20 판, 줄 사이 선 없음)
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(context.space.cardRadius.r),
+      child: ColoredBox(
+        color: context.colors.settingsGroupBg,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final row in rows)
+              _MenuRow(
+                icon: row.icon,
+                label: row.label,
+                isDanger: row.isDanger,
+                onTap: () => Navigator.of(sheetContext).pop(row.value),
+              ),
+          ],
+        ),
+      ),
     ),
   ),
 );
 
-/// 메뉴 한 줄 (아이콘 + 글자)
+/// 메뉴 한 줄 (설정 묶음 줄 결: 높이 56 · 왼쪽 20): 아이콘 20 + 글자
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
     required this.icon,
@@ -128,34 +140,53 @@ class _MenuRow extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final String icon;
   final String label;
   final bool isDanger;
   final VoidCallback onTap;
 
-  static const _iconSize = 22.0;
-  static const _rowMinHeight = 52.0;
+  static const _iconSize = 20.0;
+  static const _iconToLabel = 12.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final color = isDanger ? colors.danger : colors.textPrimary;
+    final labelColor = isDanger
+        ? colors.settingsDestructive
+        : colors.settingsCardLabel;
+    final iconColor = isDanger
+        ? colors.settingsDestructive
+        : colors.talkMetaText;
     return AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleCard,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: _rowMinHeight.h),
-        child: Row(
-          children: [
-            Icon(icon, size: _iconSize.w, color: color),
-            SizedBox(width: context.space.sm.w),
-            Expanded(
-              child: Text(
-                label,
-                style: context.typo.tileLabel.copyWith(color: color),
+        constraints: BoxConstraints(minHeight: SettingsTile.cardHeight.h),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: SettingsTile.cardPadLeft.w,
+            right: SettingsTile.cardPadRight.w,
+          ),
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                icon,
+                width: _iconSize.w,
+                height: _iconSize.w,
+                excludeFromSemantics: true,
+                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
               ),
-            ),
-          ],
+              SizedBox(width: _iconToLabel.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: context.typo.settingsTileLabel.copyWith(
+                    color: labelColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

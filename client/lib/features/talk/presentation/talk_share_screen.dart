@@ -20,8 +20,9 @@ import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_photo_blur_picker.dart';
 import 'widgets/talk_routine_picker.dart';
 import 'widgets/talk_rules_sheet.dart';
-import 'widgets/talk_share_chrome.dart';
+import 'widgets/talk_share_bottom_button.dart';
 import 'widgets/talk_share_details_form.dart';
+import 'widgets/talk_top_bar.dart';
 
 /// 올리기 화면의 단계: 이용 규칙 확인 중 > 일과 고르기 > 미리보기 받기 > 사진 고르기 > 한마디·분류
 enum _ShareStage {
@@ -174,10 +175,15 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
       },
       child: Scaffold(
         backgroundColor: context.colors.background,
+        // 위 안전영역은 머리 줄이 시안 y 로 직접 맞춘다
         body: SafeArea(
+          top: false,
           child: Column(
             children: [
-              TalkShareHeader(onBackPressed: _goBack),
+              TalkTopBar(
+                title: context.l10n.talkShareTitle,
+                onBackPressed: _goBack,
+              ),
               Expanded(child: _body(stage, state)),
               if (stage == _ShareStage.pickPhotos ||
                   stage == _ShareStage.writeDetails)
@@ -245,9 +251,11 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
     return SingleChildScrollView(
       controller: _scrollController,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.symmetric(
-        horizontal: space.screenH.w,
-        vertical: space.sm.h,
+      padding: EdgeInsets.fromLTRB(
+        space.md.w,
+        space.xs.h,
+        space.md.w,
+        space.lg.h,
       ),
       child: stage == _ShareStage.pickPhotos
           ? TalkPhotoBlurPicker(

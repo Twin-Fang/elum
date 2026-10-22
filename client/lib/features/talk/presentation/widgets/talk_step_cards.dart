@@ -47,7 +47,7 @@ class TalkStepCards extends StatelessWidget {
         clipBehavior: Clip.none,
         itemCount: steps.length,
         separatorBuilder: (_, _) => SizedBox(width: _largeGap.w),
-        itemBuilder: (context, index) => TalkStepCard(
+        itemBuilder: (context, index) => TalkStepCard.fromStep(
           postId: postId,
           step: steps[index],
           index: index,
@@ -72,7 +72,7 @@ class TalkStepCards extends StatelessWidget {
           runSpacing: _gridGapV.w,
           children: [
             for (var index = 0; index < steps.length; index++)
-              TalkStepCard(
+              TalkStepCard.fromStep(
                 postId: postId,
                 step: steps[index],
                 index: index,

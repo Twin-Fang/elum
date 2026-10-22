@@ -5,20 +5,37 @@ import '../../../guardian/domain/card_palette.dart';
 import '../../domain/talk_post.dart';
 import 'talk_step_image.dart';
 
-/// 이야기 상세 카드 한 장 (시안 1813:7501): 순서별 색 판 > 그림 313×230 > 번호 · 제목 > 설명
+/// 이야기 카드 한 장 (시안 1813:7501): 순서별 색 판 > 그림 313×230 > 번호 · 제목 > 설명
 /// 일과 카드와 같은 모양. 시안 단위(333×410)로 그리고 [width] 에 맞춰 통째로 줄인다
-/// (한 눈에 보기 격자 1813:7733 은 같은 카드의 0.53배)
+/// (한 눈에 보기 격자 1813:7733 은 같은 카드의 0.53배). 상세는 [TalkStepCard.fromStep], 올리기 미리보기는 그림을 직접 넘긴다
 class TalkStepCard extends StatelessWidget {
   const TalkStepCard({
     super.key,
-    required this.postId,
-    required this.step,
+    required this.picture,
+    required this.cardNumber,
+    required this.title,
+    required this.description,
     required this.index,
     required this.width,
   });
 
-  final String postId;
-  final TalkStep step;
+  /// 상세: 올라간 글의 카드 그림을 서버에서 받는다
+  TalkStepCard.fromStep({
+    super.key,
+    required String postId,
+    required TalkStep step,
+    required this.index,
+    required this.width,
+  }) : picture = TalkStepImage(postId: postId, step: step),
+       cardNumber = step.cardNumber,
+       title = step.title ?? '',
+       description = step.description;
+
+  /// 그림칸(313×230)을 꽉 채울 그림
+  final Widget picture;
+  final int cardNumber;
+  final String title;
+  final String description;
 
   /// 색을 정하는 목록 순서 (0부터, 5색을 돌려 쓴다)
   final int index;
@@ -39,7 +56,13 @@ class TalkStepCard extends StatelessWidget {
         child: SizedBox(
           width: designWidth,
           height: designHeight,
-          child: _DesignCanvas(postId: postId, step: step, index: index),
+          child: _DesignCanvas(
+            picture: picture,
+            cardNumber: cardNumber,
+            title: title,
+            description: description,
+            index: index,
+          ),
         ),
       ),
     );
@@ -49,13 +72,17 @@ class TalkStepCard extends StatelessWidget {
 /// 시안 단위 카드 본체. 바깥 [FittedBox] 가 비율을 맞추므로 여기서는 `.w` 를 쓰지 않는다
 class _DesignCanvas extends StatelessWidget {
   const _DesignCanvas({
-    required this.postId,
-    required this.step,
+    required this.picture,
+    required this.cardNumber,
+    required this.title,
+    required this.description,
     required this.index,
   });
 
-  final String postId;
-  final TalkStep step;
+  final Widget picture;
+  final int cardNumber;
+  final String title;
+  final String description;
   final int index;
 
   /// 테두리 포함 안쪽 여백 · 테두리 · 판 반지름 · 그림 반지름 (시안 10 · 2 · 20 · 10)
@@ -89,7 +116,6 @@ class _DesignCanvas extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
     final palette = CardPalette.at(index);
-    final title = step.title ?? '';
 
     return Container(
       decoration: BoxDecoration(
@@ -113,7 +139,7 @@ class _DesignCanvas extends StatelessWidget {
             aspectRatio: _imageAspect,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(_imageRadius),
-              child: TalkStepImage(postId: postId, step: step),
+              child: picture,
             ),
           ),
           const SizedBox(height: _imageToTitle),
@@ -129,7 +155,7 @@ class _DesignCanvas extends StatelessWidget {
                   borderRadius: BorderRadius.circular(_badgeRadius),
                 ),
                 child: Text(
-                  '${step.cardNumber}',
+                  '$cardNumber',
                   textAlign: TextAlign.center,
                   style: typo.cardHeadline.copyWith(color: colors.surface),
                 ),
@@ -153,7 +179,7 @@ class _DesignCanvas extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: _badgeSize + _badgeToTitle),
               child: Text(
-                step.description,
+                description,
                 overflow: TextOverflow.ellipsis,
                 maxLines: _descriptionMaxLines,
                 style: typo.cardDescription.copyWith(color: colors.textPrimary),

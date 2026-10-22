@@ -67,6 +67,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkImportLabel,
     required this.talkDetailStatLabel,
     required this.talkCommentsHeader,
+    required this.talkFormLabel,
+    required this.talkGuide,
+    required this.talkChoiceLabel,
+    required this.talkCommentBody,
+    required this.talkCommentField,
+    required this.talkEmptyTitle,
+    required this.talkEmptyBody,
+    required this.talkRuleText,
+    required this.talkToastMessage,
+    required this.talkToastAction,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
@@ -355,6 +365,36 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 상세 댓글 머리 `댓글  3` (Pretendard 600/20, 시안 1830:7916)
   final TextStyle talkCommentsHeader;
+
+  /// 이야기 폼 · 시트 구역 이름 (Pretendard 600/14, 일과 구역 이름과 같은 결)
+  final TextStyle talkFormLabel;
+
+  /// 이야기 안내 한 줄 · 글자 수 (Pretendard 400/13)
+  final TextStyle talkGuide;
+
+  /// 이야기 고르기 줄 이름 (Pretendard 500/16)
+  final TextStyle talkChoiceLabel;
+
+  /// 댓글 본문 (Pretendard 400/15). 여러 줄이라 줄 높이를 띄운다
+  final TextStyle talkCommentBody;
+
+  /// 댓글 입력 글자 (Pretendard 400/16, 시안 1806:7486)
+  final TextStyle talkCommentField;
+
+  /// 이야기 빈 상태 · 안내 제목 (Pretendard 600/16)
+  final TextStyle talkEmptyTitle;
+
+  /// 이야기 빈 상태 · 안내 설명 (Pretendard 400/14)
+  final TextStyle talkEmptyBody;
+
+  /// 이용 규칙 한 줄 (Pretendard 500/15)
+  final TextStyle talkRuleText;
+
+  /// 가져오기 완료 토스트 문구 (Pretendard 600/15)
+  final TextStyle talkToastMessage;
+
+  /// 가져오기 완료 토스트 `보러 가기` (Pretendard 600/13)
+  final TextStyle talkToastAction;
 
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
@@ -928,6 +968,66 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
+    talkFormLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkGuide: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkChoiceLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
+    talkCommentBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+    ),
+    talkCommentField: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.3,
+    ),
+    talkEmptyTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.3,
+    ),
+    talkEmptyBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkRuleText: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      height: 1.4,
+    ),
+    talkToastMessage: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+      height: 1.3,
+    ),
+    talkToastAction: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1375,6 +1475,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkImportLabel,
     TextStyle? talkDetailStatLabel,
     TextStyle? talkCommentsHeader,
+    TextStyle? talkFormLabel,
+    TextStyle? talkGuide,
+    TextStyle? talkChoiceLabel,
+    TextStyle? talkCommentBody,
+    TextStyle? talkCommentField,
+    TextStyle? talkEmptyTitle,
+    TextStyle? talkEmptyBody,
+    TextStyle? talkRuleText,
+    TextStyle? talkToastMessage,
+    TextStyle? talkToastAction,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
@@ -1495,6 +1605,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkImportLabel: talkImportLabel ?? this.talkImportLabel,
       talkDetailStatLabel: talkDetailStatLabel ?? this.talkDetailStatLabel,
       talkCommentsHeader: talkCommentsHeader ?? this.talkCommentsHeader,
+      talkFormLabel: talkFormLabel ?? this.talkFormLabel,
+      talkGuide: talkGuide ?? this.talkGuide,
+      talkChoiceLabel: talkChoiceLabel ?? this.talkChoiceLabel,
+      talkCommentBody: talkCommentBody ?? this.talkCommentBody,
+      talkCommentField: talkCommentField ?? this.talkCommentField,
+      talkEmptyTitle: talkEmptyTitle ?? this.talkEmptyTitle,
+      talkEmptyBody: talkEmptyBody ?? this.talkEmptyBody,
+      talkRuleText: talkRuleText ?? this.talkRuleText,
+      talkToastMessage: talkToastMessage ?? this.talkToastMessage,
+      talkToastAction: talkToastAction ?? this.talkToastAction,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
@@ -1634,6 +1754,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkImportLabel: TextStyle.lerp(talkImportLabel, other.talkImportLabel, t)!,
       talkDetailStatLabel: TextStyle.lerp(talkDetailStatLabel, other.talkDetailStatLabel, t)!,
       talkCommentsHeader: TextStyle.lerp(talkCommentsHeader, other.talkCommentsHeader, t)!,
+      talkFormLabel: TextStyle.lerp(talkFormLabel, other.talkFormLabel, t)!,
+      talkGuide: TextStyle.lerp(talkGuide, other.talkGuide, t)!,
+      talkChoiceLabel: TextStyle.lerp(talkChoiceLabel, other.talkChoiceLabel, t)!,
+      talkCommentBody: TextStyle.lerp(talkCommentBody, other.talkCommentBody, t)!,
+      talkCommentField: TextStyle.lerp(talkCommentField, other.talkCommentField, t)!,
+      talkEmptyTitle: TextStyle.lerp(talkEmptyTitle, other.talkEmptyTitle, t)!,
+      talkEmptyBody: TextStyle.lerp(talkEmptyBody, other.talkEmptyBody, t)!,
+      talkRuleText: TextStyle.lerp(talkRuleText, other.talkRuleText, t)!,
+      talkToastMessage: TextStyle.lerp(talkToastMessage, other.talkToastMessage, t)!,
+      talkToastAction: TextStyle.lerp(talkToastAction, other.talkToastAction, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,

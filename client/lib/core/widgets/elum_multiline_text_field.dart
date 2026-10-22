@@ -15,6 +15,7 @@ class ElumMultilineTextField extends StatelessWidget {
     this.maxLines,
     this.enabled = true,
     this.onChanged,
+    this.textStyle,
   });
 
   final TextEditingController controller;
@@ -31,6 +32,9 @@ class ElumMultilineTextField extends StatelessWidget {
   final bool enabled;
   final ValueChanged<String>? onChanged;
 
+  /// 입력 · 안내 글자. null 이면 input 글꼴(기본). 화면 글꼴에 맞출 때만 넘긴다 (이야기는 Pretendard)
+  final TextStyle? textStyle;
+
   static const defaultMinLines = 8;
 
   @override
@@ -38,6 +42,7 @@ class ElumMultilineTextField extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
     final radius = BorderRadius.circular(space.fieldRadius.r);
+    final textStyle = this.textStyle ?? context.typo.input;
     final border = OutlineInputBorder(
       borderRadius: radius,
       borderSide: BorderSide(color: colors.border),
@@ -52,10 +57,10 @@ class ElumMultilineTextField extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       textInputAction: TextInputAction.newline,
       inputFormatters: [LengthLimitingTextInputFormatter(maxLength)],
-      style: context.typo.input.copyWith(color: colors.textPrimary),
+      style: textStyle.copyWith(color: colors.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: context.typo.input.copyWith(color: colors.textPlaceholder),
+        hintStyle: textStyle.copyWith(color: colors.textPlaceholder),
         filled: true,
         fillColor: colors.surface,
         contentPadding: EdgeInsets.all(space.md.w),

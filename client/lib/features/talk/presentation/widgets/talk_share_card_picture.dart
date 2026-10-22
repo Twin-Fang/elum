@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../guardian/application/routine_card_picture_provider.dart';
@@ -64,15 +65,20 @@ class TalkShareCardPicture extends ConsumerWidget {
         errorBuilder: (context, _, _) => bundledArt(),
       ),
     );
-    if (!isBlurred) return picture;
-    return ClipRect(
-      child: ImageFiltered(
-        imageFilter: ImageFilter.blur(
-          sigmaX: _previewBlurSigma,
-          sigmaY: _previewBlurSigma,
-        ),
-        child: picture,
-      ),
+    // 흐리게 · 그대로를 바꾸면 번지듯 흐려졌다 맑아진다
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: isBlurred ? _previewBlurSigma : 0),
+      duration: AppMotion.normal,
+      curve: AppMotion.standard,
+      child: picture,
+      builder: (context, sigma, child) => sigma == 0
+          ? child!
+          : ClipRect(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+                child: child,
+              ),
+            ),
     );
   }
 }

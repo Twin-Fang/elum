@@ -77,10 +77,13 @@ class _TalkReportSheetState extends State<_TalkReportSheet> {
     }
   }
 
+  /// 사유 줄 사이 · 마지막 줄 > 버튼
+  static const _choiceGap = 8.0;
+  static const _choicesToButton = 24.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final space = context.space;
 
     return TalkSheetFrame(
       title: l10n.talkReportTitle,
@@ -88,6 +91,8 @@ class _TalkReportSheetState extends State<_TalkReportSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final reason in TalkReportReason.values) ...[
+            if (reason != TalkReportReason.values.first)
+              SizedBox(height: _choiceGap.h),
             TalkChoiceRow(
               label: _reasonLabelOf(l10n, reason),
               isSelected: reason == _selectedReason,
@@ -95,11 +100,11 @@ class _TalkReportSheetState extends State<_TalkReportSheet> {
                   ? null
                   : () => setState(() => _selectedReason = reason),
             ),
-            SizedBox(height: space.xs.h),
           ],
-          SizedBox(height: space.xs.h),
+          SizedBox(height: _choicesToButton.h),
           ElumButton(
             label: l10n.talkReportSubmit,
+            labelStyle: context.typo.sheetActionLabel,
             loading: _isSending,
             onPressed: _selectedReason == null ? null : _submit,
           ),

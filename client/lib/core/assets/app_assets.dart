@@ -376,6 +376,16 @@ abstract final class AppAssets {
   /// 앞 카드 속이 바탕색(#F7F2EF)이라 색을 덧칠하지 않는다
   static const iconViewLarge = '$_images/icon_view_large.svg';
 
+  /// 이야기 ⋯ 더보기 (글 머리 · 댓글). 시안 세트 `fi-br-menu-dots` — Figma 파일에 없어
+  /// Flaticon UIcons Bold Rounded 3.3.1 글꼴에서 같은 글리프를 꺼냄 (#948)
+  static const iconMenuDots = '$_images/icon_menu_dots.svg';
+
+  /// 이야기 메뉴 신고하기. `fi-br-flag` (꺼낸 경로는 [iconMenuDots] 와 같다)
+  static const iconFlag = '$_images/icon_flag.svg';
+
+  /// 이야기 메뉴 이 보호자 글 숨기기. `fi-br-eye-crossed` (꺼낸 경로는 [iconMenuDots] 와 같다)
+  static const iconEyeCrossed = '$_images/icon_eye_crossed.svg';
+
   /// 내 정보 가입일 달력 (20×20 #CACACA). Figma `fi-br-calendar`(1759:9582).
   static const iconCalendar = '$_images/icon_calendar.svg';
 

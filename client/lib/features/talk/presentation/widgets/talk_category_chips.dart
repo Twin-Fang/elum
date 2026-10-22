@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../guardian/domain/routine_template.dart';
@@ -30,14 +31,14 @@ class TalkCategoryChips extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: space.screenH.w),
       child: Row(
         children: [
-          _Chip(
+          TalkCategoryChip(
             label: l10n.talkCategoryAll,
             isSelected: selectedCategory == null,
             onTap: () => onSelected(null),
           ),
           for (final category in RoutineTemplateCategory.values) ...[
             SizedBox(width: _chipGap.w),
-            _Chip(
+            TalkCategoryChip(
               label: category.labelOf(l10n),
               isSelected: category == selectedCategory,
               onTap: () => onSelected(category),
@@ -49,16 +50,25 @@ class TalkCategoryChips extends StatelessWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
-  const _Chip({
+/// 알약 칩 한 개 (시안 1783:6645): 고르면 남색 판 · 흰 글자, 아니면 웜그레이 판
+/// 피드 분류 줄 · 올리기 분류 고르기 · 사진 흐리게/그대로가 함께 쓴다
+class TalkCategoryChip extends StatelessWidget {
+  const TalkCategoryChip({
+    super.key,
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.isExpanded = false,
   });
 
   final String label;
   final bool isSelected;
-  final VoidCallback onTap;
+
+  /// null 이면 잠긴다 (보내는 중)
+  final VoidCallback? onTap;
+
+  /// true 면 받은 폭을 채우고 글자를 가운데에 (격자 · 나란히 두 칸)
+  final bool isExpanded;
 
   static const _paddingH = 16.0;
   static const _paddingV = 10.0;
@@ -66,26 +76,33 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final text = Text(
+      label,
+      textAlign: TextAlign.center,
+      style: context.typo.chipLabel.copyWith(
+        color: isSelected ? colors.surface : colors.talkTitleText,
+      ),
+    );
     return Semantics(
       selected: isSelected,
       button: true,
+      enabled: onTap != null,
       child: AppPressable(
         onTap: onTap,
-        child: Container(
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.standard,
+          width: isExpanded ? double.infinity : null,
           padding: EdgeInsets.symmetric(
             horizontal: _paddingH.w,
             vertical: _paddingV.h,
           ),
+          alignment: isExpanded ? Alignment.center : null,
           decoration: BoxDecoration(
             color: isSelected ? colors.textPrimary : colors.editChipBg,
             borderRadius: BorderRadius.circular(context.space.cardRadius.r),
           ),
-          child: Text(
-            label,
-            style: context.typo.chipLabel.copyWith(
-              color: isSelected ? colors.surface : colors.talkTitleText,
-            ),
-          ),
+          child: text,
         ),
       ),
     );

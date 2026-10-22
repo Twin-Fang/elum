@@ -72,6 +72,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkPopularCardFill,
     required this.talkMetaDivider,
     required this.talkSectionDivider,
+    required this.talkChoiceSelectedFill,
+    required this.talkChoiceSelectedBorder,
+    required this.talkChoiceRadioBorder,
+    required this.talkAccentText,
+    required this.talkPanelFill,
+    required this.talkCommentFieldFill,
+    required this.talkToastFill,
+    required this.talkToastShadow,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -348,6 +356,30 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color talkMetaDivider;
   /// 상세 본문 | 댓글 사이 화면 폭 띠 (#EEE9E6 · 높이 7, 시안 1830:7918)
   final Color talkSectionDivider;
+
+  /// 고르기 줄 · 칩을 고른 판 (연민트)
+  final Color talkChoiceSelectedFill;
+
+  /// 고르기 줄을 고른 테두리 (민트, 도움돼요 켜짐과 같은 결)
+  final Color talkChoiceSelectedBorder;
+
+  /// 고르기 줄 빈 동그라미 테두리 (웜그레이 선)
+  final Color talkChoiceRadioBorder;
+
+  /// 고른 동그라미 점 · 토스트 동작 글자 (짙은 민트)
+  final Color talkAccentText;
+
+  /// 규칙 · 빈 상태 안내를 담는 웜그레이 판
+  final Color talkPanelFill;
+
+  /// 댓글 입력칸 판 (흰색 60%, 시안 1806:7485)
+  final Color talkCommentFieldFill;
+
+  /// 가져오기 완료 토스트 판
+  final Color talkToastFill;
+
+  /// 가져오기 완료 토스트 그림자 (검정 12%)
+  final Color talkToastShadow;
 
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
@@ -1000,6 +1032,14 @@ class AppColors extends ThemeExtension<AppColors> {
     talkPopularCardFill: Color(0xFFEEE9E6),
     talkMetaDivider: Color(0xFFD9D3CF),
     talkSectionDivider: Color(0xFFEEE9E6),
+    talkChoiceSelectedFill: Color(0xFFF2FBFA),
+    talkChoiceSelectedBorder: Color(0xFF93DBCC),
+    talkChoiceRadioBorder: Color(0xFFD9D3CF),
+    talkAccentText: Color(0xFF1D6B66),
+    talkPanelFill: Color(0xFFEEE9E6),
+    talkCommentFieldFill: Color(0x99FFFFFF),
+    talkToastFill: Color(0xFFFFFFFF),
+    talkToastShadow: Color(0x1F000000),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1233,6 +1273,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkPopularCardFill,
     Color? talkMetaDivider,
     Color? talkSectionDivider,
+    Color? talkChoiceSelectedFill,
+    Color? talkChoiceSelectedBorder,
+    Color? talkChoiceRadioBorder,
+    Color? talkAccentText,
+    Color? talkPanelFill,
+    Color? talkCommentFieldFill,
+    Color? talkToastFill,
+    Color? talkToastShadow,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1454,6 +1502,14 @@ class AppColors extends ThemeExtension<AppColors> {
       talkPopularCardFill: talkPopularCardFill ?? this.talkPopularCardFill,
       talkMetaDivider: talkMetaDivider ?? this.talkMetaDivider,
       talkSectionDivider: talkSectionDivider ?? this.talkSectionDivider,
+      talkChoiceSelectedFill: talkChoiceSelectedFill ?? this.talkChoiceSelectedFill,
+      talkChoiceSelectedBorder: talkChoiceSelectedBorder ?? this.talkChoiceSelectedBorder,
+      talkChoiceRadioBorder: talkChoiceRadioBorder ?? this.talkChoiceRadioBorder,
+      talkAccentText: talkAccentText ?? this.talkAccentText,
+      talkPanelFill: talkPanelFill ?? this.talkPanelFill,
+      talkCommentFieldFill: talkCommentFieldFill ?? this.talkCommentFieldFill,
+      talkToastFill: talkToastFill ?? this.talkToastFill,
+      talkToastShadow: talkToastShadow ?? this.talkToastShadow,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1715,6 +1771,14 @@ class AppColors extends ThemeExtension<AppColors> {
       talkPopularCardFill: Color.lerp(talkPopularCardFill, other.talkPopularCardFill, t)!,
       talkMetaDivider: Color.lerp(talkMetaDivider, other.talkMetaDivider, t)!,
       talkSectionDivider: Color.lerp(talkSectionDivider, other.talkSectionDivider, t)!,
+      talkChoiceSelectedFill: Color.lerp(talkChoiceSelectedFill, other.talkChoiceSelectedFill, t)!,
+      talkChoiceSelectedBorder: Color.lerp(talkChoiceSelectedBorder, other.talkChoiceSelectedBorder, t)!,
+      talkChoiceRadioBorder: Color.lerp(talkChoiceRadioBorder, other.talkChoiceRadioBorder, t)!,
+      talkAccentText: Color.lerp(talkAccentText, other.talkAccentText, t)!,
+      talkPanelFill: Color.lerp(talkPanelFill, other.talkPanelFill, t)!,
+      talkCommentFieldFill: Color.lerp(talkCommentFieldFill, other.talkCommentFieldFill, t)!,
+      talkToastFill: Color.lerp(talkToastFill, other.talkToastFill, t)!,
+      talkToastShadow: Color.lerp(talkToastShadow, other.talkToastShadow, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,

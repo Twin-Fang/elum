@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../domain/talk_preview.dart';
-import 'talk_choice_row.dart';
+import 'talk_category_chips.dart';
+import 'talk_page_heading.dart';
 import 'talk_share_step_card.dart';
 
-/// 사진 고르기: 보호자 사진 카드마다 "흐리게 / 그대로" (기본값 없음)
-/// 고른 카드는 바로 흐린 모습으로 미리 보인다
+/// 사진 고르기: 보호자 사진 카드마다 "흐리게 / 그대로" 알약 칩 (기본값 없음)
+/// 2열 격자 칸마다 카드 > 칩 둘. 고르면 카드 그림이 바로 흐려진다
 class TalkPhotoBlurPicker extends StatelessWidget {
   const TalkPhotoBlurPicker({
     super.key,
@@ -33,58 +32,71 @@ class TalkPhotoBlurPicker extends StatelessWidget {
   final void Function(String stepId, {required bool shouldBlur}) onChoose;
   final bool isEnabled;
 
+  /// 머리 > 격자 · 카드 > 칩 · 칩 사이
+  static const _headingToGrid = 24.0;
+  static const _cardToChips = 10.0;
+  static const _chipGap = 6.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
-    final typo = context.typo;
-    final space = context.space;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.talkSharePhotoTitle,
-          style: typo.sectionTitle.copyWith(color: colors.textPrimary),
+        TalkPageHeading(
+          title: l10n.talkSharePhotoTitle,
+          description: l10n.talkSharePhotoGuide,
         ),
-        SizedBox(height: space.xs.h),
-        Text(
-          l10n.talkSharePhotoGuide,
-          style: typo.body.paragraph.copyWith(color: colors.textSecondary),
-        ),
-        SizedBox(height: space.md.h),
-        for (final step in photoSteps) ...[
-          TalkShareStepCard(
-            routineId: routineId,
-            step: step,
-            card: cardByStepId[step.stepId],
-            isBlurred: blurChoiceByStepId[step.stepId] == true,
-            footer: Row(
+        SizedBox(height: _headingToGrid.h),
+        TalkShareCardGrid(
+          itemCount: photoSteps.length,
+          isCenteredWhenSingle: true,
+          itemBuilder: (context, index, cellWidth) {
+            final step = photoSteps[index];
+            final choice = blurChoiceByStepId[step.stepId];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: TalkChoiceRow(
-                    label: l10n.talkSharePhotoBlur,
-                    isSelected: blurChoiceByStepId[step.stepId] == true,
-                    onTap: isEnabled
-                        ? () => onChoose(step.stepId, shouldBlur: true)
-                        : null,
-                  ),
+                TalkShareStepCard(
+                  routineId: routineId,
+                  step: step,
+                  card: cardByStepId[step.stepId],
+                  // 색 판은 카드 순서를 따른다 (stepOrder 는 1부터)
+                  index: step.stepOrder - 1,
+                  width: cellWidth,
+                  isBlurred: choice == true,
                 ),
-                SizedBox(width: space.xs.w),
-                Expanded(
-                  child: TalkChoiceRow(
-                    label: l10n.talkSharePhotoKeep,
-                    isSelected: blurChoiceByStepId[step.stepId] == false,
-                    onTap: isEnabled
-                        ? () => onChoose(step.stepId, shouldBlur: false)
-                        : null,
-                  ),
+                SizedBox(height: _cardToChips.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TalkCategoryChip(
+                        label: l10n.talkSharePhotoBlur,
+                        isSelected: choice == true,
+                        isExpanded: true,
+                        onTap: isEnabled
+                            ? () => onChoose(step.stepId, shouldBlur: true)
+                            : null,
+                      ),
+                    ),
+                    SizedBox(width: _chipGap.w),
+                    Expanded(
+                      child: TalkCategoryChip(
+                        label: l10n.talkSharePhotoKeep,
+                        isSelected: choice == false,
+                        isExpanded: true,
+                        onTap: isEnabled
+                            ? () => onChoose(step.stepId, shouldBlur: false)
+                            : null,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ),
-          SizedBox(height: space.sm.h),
-        ],
+            );
+          },
+        ),
       ],
     );
   }
