@@ -14,7 +14,7 @@ class ElumSheetTextField extends StatelessWidget {
     this.label,
     this.maxLines = 1,
     this.maxLength,
-    this.autofocus = false,
+    this.isAutofocused = false,
     this.onChanged,
     this.onSubmitted,
   });
@@ -26,7 +26,7 @@ class ElumSheetTextField extends StatelessWidget {
   final String? label;
   final int maxLines;
   final int? maxLength;
-  final bool autofocus;
+  final bool isAutofocused;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
@@ -72,7 +72,7 @@ class ElumSheetTextField extends StatelessWidget {
             controller: controller,
             onChanged: onChanged,
             onSubmitted: onSubmitted,
-            autofocus: autofocus,
+            autofocus: isAutofocused,
             minLines: 1,
             maxLines: maxLines,
             textInputAction: maxLines == 1

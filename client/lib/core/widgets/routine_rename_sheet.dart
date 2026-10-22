@@ -92,7 +92,7 @@ class _RoutineRenameSheetState extends State<_RoutineRenameSheet> {
             controller: _controller,
             hintText: widget.hintText ?? l10n.routineLibraryRenameHint,
             maxLength: widget.maxLength,
-            autofocus: true,
+            isAutofocused: true,
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _save(),
           ),

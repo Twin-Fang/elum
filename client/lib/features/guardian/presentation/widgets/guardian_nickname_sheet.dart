@@ -137,7 +137,7 @@ class _GuardianNicknameSheetState
               controller: _controller,
               hintText: context.l10n.guardianNicknameSheetHint,
               maxLength: GuardianNicknamePolicy.maxLength,
-              autofocus: true,
+              isAutofocused: true,
               onChanged: _onChanged,
               onSubmitted: (_) => _save(),
             ),
