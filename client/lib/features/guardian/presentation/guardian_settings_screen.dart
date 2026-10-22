@@ -12,6 +12,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/device/screen_awake.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/sound/child_praise_sound.dart';
 import '../../../core/widgets/settings_group.dart';
@@ -211,6 +212,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
             _ImageStyleTile(busy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
+            const _ScreenAwakeTile(),
           ],
         ),
         _groupGap,
@@ -359,6 +361,21 @@ class _HapticTile extends ConsumerWidget {
       label: context.l10n.guardianSettingsHaptic,
       value: ref.watch(childHapticOnProvider),
       onChanged: (on) => ref.read(childHapticOnProvider.notifier).set(on),
+    );
+  }
+}
+
+/// 이룸이 일과 진행 화면 켜 두기 켜기/끄기 줄 (#970).
+class _ScreenAwakeTile extends ConsumerWidget {
+  const _ScreenAwakeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsSwitchTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsScreenAwake,
+      value: ref.watch(childScreenAwakeOnProvider),
+      onChanged: (on) => ref.read(childScreenAwakeOnProvider.notifier).set(on),
     );
   }
 }

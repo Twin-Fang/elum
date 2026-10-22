@@ -466,6 +466,8 @@
   "@elumiSettingsHapticLabel": { "description": "이룸이 설정의 카드 체크 진동 스위치 줄" },
   "elumiSettingsPraiseSoundLabel": "카드 체크 칭찬 소리",
   "@elumiSettingsPraiseSoundLabel": { "description": "이룸이 설정의 칭찬 소리 스위치 줄 — 카드를 체크하면 효과음과 '잘했어요!' 음성이 나온다 (#777)" },
+  "elumiSettingsScreenAwakeLabel": "카드 볼 때 화면 켜 두기",
+  "@elumiSettingsScreenAwakeLabel": { "description": "이룸이 설정의 스위치 줄 — 일과 진행(카드) 화면이 떠 있는 동안 기기 화면이 꺼지지 않게 한다 (#970)" },
 
   "elumiSettingsTermsLabel": "약관 및 개인정보처리방침",
   "@elumiSettingsTermsLabel": { "description": "이룸이 설정의 약관 줄" },
@@ -1323,6 +1325,8 @@
   "@guardianSettingsHaptic": { "description": "설정 줄 — 이룸이가 카드를 체크할 때 진동 켜기/끄기" },
   "guardianSettingsPraiseSound": "카드 체크 칭찬 소리",
   "@guardianSettingsPraiseSound": { "description": "설정 줄 — 이룸이가 카드를 체크할 때 효과음과 칭찬 음성 켜기/끄기 (#777)" },
+  "guardianSettingsScreenAwake": "카드 볼 때 화면 켜 두기",
+  "@guardianSettingsScreenAwake": { "description": "설정 줄 — 이룸이 일과 진행(카드) 화면이 떠 있는 동안 기기 화면 꺼짐 막기 켜기/끄기 (#970)" },
 
   "questionMakeCards": "카드 만들기",
   "@questionMakeCards": { "description": "추가 질문 화면 하단 버튼" },

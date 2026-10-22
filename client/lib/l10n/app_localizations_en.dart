@@ -516,6 +516,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get elumiSettingsPraiseSoundLabel => 'Praise sound on card check';
 
   @override
+  String get elumiSettingsScreenAwakeLabel =>
+      'Keep screen on while viewing cards';
+
+  @override
   String get elumiSettingsTermsLabel => 'Terms and Privacy Policy';
 
   @override
@@ -1461,6 +1465,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSettingsPraiseSound => 'Praise sound on card check';
+
+  @override
+  String get guardianSettingsScreenAwake =>
+      'Keep screen on while viewing cards';
 
   @override
   String get questionMakeCards => 'Make cards';

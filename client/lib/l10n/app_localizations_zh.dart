@@ -494,6 +494,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get elumiSettingsPraiseSoundLabel => '카드 체크 칭찬 소리';
 
   @override
+  String get elumiSettingsScreenAwakeLabel => '카드 볼 때 화면 켜 두기';
+
+  @override
   String get elumiSettingsTermsLabel => '약관 및 개인정보처리방침';
 
   @override
@@ -1397,6 +1400,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guardianSettingsPraiseSound => '카드 체크 칭찬 소리';
+
+  @override
+  String get guardianSettingsScreenAwake => '카드 볼 때 화면 켜 두기';
 
   @override
   String get questionMakeCards => '카드 만들기';

@@ -60,6 +60,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
+  static const _kChildScreenAwakeOn = 'screen.childAwakeOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
   static const _kRoutineReminders = 'reminder.routines';
   // 이야기에서 가져온 일과 중 상세를 연 일과 id 목록
@@ -438,6 +439,16 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setChildPraiseSoundOn(bool v) async {
     AppLogger.storageWrite(_kChildPraiseSoundOn, '$v');
     await _prefs.setBool(_kChildPraiseSoundOn, v);
+  }
+
+  @override
+  bool get isChildScreenAwakeOn =>
+      _prefs.getBool(_kChildScreenAwakeOn) ?? true;
+
+  @override
+  Future<void> setChildScreenAwakeOn(bool v) async {
+    AppLogger.storageWrite(_kChildScreenAwakeOn, '$v');
+    await _prefs.setBool(_kChildScreenAwakeOn, v);
   }
 
   @override

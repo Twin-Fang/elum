@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'카드 체크 칭찬 소리'**
   String get elumiSettingsPraiseSoundLabel;
 
+  /// 이룸이 설정의 스위치 줄 — 일과 진행(카드) 화면이 떠 있는 동안 기기 화면이 꺼지지 않게 한다 (#970)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 볼 때 화면 켜 두기'**
+  String get elumiSettingsScreenAwakeLabel;
+
   /// 이룸이 설정의 약관 줄
   ///
   /// In ko, this message translates to:
@@ -2611,6 +2617,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'카드 체크 칭찬 소리'**
   String get guardianSettingsPraiseSound;
+
+  /// 설정 줄 — 이룸이 일과 진행(카드) 화면이 떠 있는 동안 기기 화면 꺼짐 막기 켜기/끄기 (#970)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 볼 때 화면 켜 두기'**
+  String get guardianSettingsScreenAwake;
 
   /// 추가 질문 화면 하단 버튼
   ///

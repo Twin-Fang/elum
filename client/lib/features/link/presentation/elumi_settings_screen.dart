@@ -8,6 +8,7 @@ import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/device/screen_awake.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/sound/child_praise_sound.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
@@ -167,6 +168,13 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
               value: ref.watch(childPraiseSoundOnProvider),
               onChanged: (on) =>
                   ref.read(childPraiseSoundOnProvider.notifier).set(on),
+            ),
+            // 일과 진행 화면 켜 두기 (#970). 보호자 설정과 같은 값
+            SettingsSwitchTile(
+              label: context.l10n.elumiSettingsScreenAwakeLabel,
+              value: ref.watch(childScreenAwakeOnProvider),
+              onChanged: (on) =>
+                  ref.read(childScreenAwakeOnProvider.notifier).set(on),
             ),
             SettingsTile(
               label: context.l10n.elumiSettingsTermsLabel,
