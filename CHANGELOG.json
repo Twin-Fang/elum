@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T13:39:26Z",
-    "currentVersion": "2.73.2",
+    "lastUpdated": "2026-10-22T14:09:18Z",
+    "currentVersion": "2.74.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 305
+    "totalReleases": 306
   },
   "releases": [
+    {
+      "version": "2.74.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 969,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 이야기 글을 카카오톡·문자로 공유할 수 있어요\n  * 공유한 링크에 글 제목과 카드 그림이 미리 보여요\n  * 링크에서 이룸 앱으로 그 글을 바로 열 수 있어요\n  * 앱이 없으면 링크에서 이룸을 받을 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "이야기 글을 카카오톡·문자로 공유할 수 있어요",
+            "공유한 링크에 글 제목과 카드 그림이 미리 보여요",
+            "링크에서 이룸 앱으로 그 글을 바로 열 수 있어요",
+            "앱이 없으면 링크에서 이룸을 받을 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.73.2",
       "project_type": "flutter",
