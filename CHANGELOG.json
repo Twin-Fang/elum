@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T13:16:29Z",
-    "currentVersion": "2.73.0",
+    "lastUpdated": "2026-10-22T13:29:20Z",
+    "currentVersion": "2.73.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 303
+    "totalReleases": 304
   },
   "releases": [
+    {
+      "version": "2.73.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 963,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이야기 목록의 글 카드가 더 크게 보여요\n  * 댓글을 칸으로 나눠 읽기 쉽게 바꿨어요\n  * 댓글에 쓴 날짜와 시각이 함께 보여요\n  * 내 댓글과 글쓴이 댓글을 바로 알아볼 수 있어요\n  * 일과로 가져올 때 묶음을 그림으로 골라요\n  * 이야기에 올릴 일과를 그림과 함께 골라요\n  * 올리기 화면의 간격과 안내 문구를 다듬었어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이야기 목록의 글 카드가 더 크게 보여요",
+            "댓글을 칸으로 나눠 읽기 쉽게 바꿨어요",
+            "댓글에 쓴 날짜와 시각이 함께 보여요",
+            "내 댓글과 글쓴이 댓글을 바로 알아볼 수 있어요",
+            "일과로 가져올 때 묶음을 그림으로 골라요",
+            "이야기에 올릴 일과를 그림과 함께 골라요",
+            "올리기 화면의 간격과 안내 문구를 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.73.0",
       "project_type": "flutter",
