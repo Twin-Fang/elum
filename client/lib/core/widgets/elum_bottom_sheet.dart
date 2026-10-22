@@ -8,7 +8,7 @@ import '../theme/theme_context_ext.dart';
 /// 바닥에서 올라오는 시트를 연다.
 ///
 /// 시트 면(둥근 모서리·배경)은 [ElumSheetSurface] 가 그리므로 라우트 배경은 투명으로 둔다.
-/// [barrierColor] 는 화면마다 달라 그대로 넘긴다 — null 이면 Material 기본 색이다.
+/// [barrierColor] 는 null 이면 시안 뒤 막(`sheetScrim`, 검정 50%)이다.
 /// [isSidePanelOnWideTablet] 이면 가로 태블릿에서 오른쪽 옆 패널로 연다 (폰·세로는 그대로 시트, #789).
 Future<T?> showElumSheet<T>({
   required BuildContext context,
@@ -33,7 +33,7 @@ Future<T?> showElumSheet<T>({
     // 큰 화면에서는 전폭으로 펴지 않고 폭 상한으로 가운데에 둔다 (폰은 창 폭이 더 작아 그대로)
     constraints: BoxConstraints(maxWidth: context.layout.sheetMaxWidth.w),
     backgroundColor: Colors.transparent,
-    barrierColor: barrierColor,
+    barrierColor: barrierColor ?? context.colors.sheetScrim,
     builder: builder,
   );
 }

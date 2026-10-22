@@ -351,6 +351,44 @@ PNG로 바꿨다. 37.11 → **36.65%**, 27.37 → **26.95%**.
 
 > 섹션 밖에 `980:5186` · `980:5187`(Frame 36 · 37)이 있다. 이름이 없어 무엇인지
 > 알 수 없으므로 **추측해 구현하지 않는다.** 필요해지면 디자이너에게 묻는다.
+>
+> 2026-10-22 다시 보니 `Frame 36·38·39·42·43`(`980:5186` `1024:4553` `1045:5235` `1759:9492` `1768:9799`)은
+> 화면이 아니라 캔버스의 **구역 이름표**(민트 띠: 보호자_홈 · 설정 · 설정/바텀시트, 모달 · 알림, 알림 설정 · 내 정보)다.
+
+### 시안은 있는데 위 표에 없던 화면 (2026-10-22 전체 덤프, #967)
+
+`238:1846` 아래 프레임 121장을 전부 PNG로 받아 앱 화면과 짝지었다. 아래는 시안이 있는데 위 표에 빠져
+**아무도 대조하지 않던** 화면이다. 대조를 올리기 전까지는 이 표로 찾는다.
+
+| 노드 | 시안 이름 | 앱 화면 |
+|---|---|---|
+| `1736:8780` | 내 정보 | `guardian_my_info_screen` |
+| `1759:9649` | 내 정보_내 이름 변경하기 | `guardian_nickname_sheet` |
+| `1578:7674` | 설정 — 로그아웃 팝업 | `guardian_settings_screen` · `elum_dialog` |
+| `1045:4910` · `1274:9262` | 설정_임시저장 · 왼쪽으로 밀어 삭제 | `draft_routines_screen` |
+| `1027:4683` · `1274:9466` · `1274:9564` · `1274:9661` | 설정_비밀암호변경 (지금 · 틀림 · 새 암호 · 한번 더) | `pin_change_screen` |
+| `1274:9342` | 설정_약관_상세 | `consent_document_screen` |
+| `1090:4992` | 보호자_홈 — 방침 변경 공지 팝업 | `notice_popup` |
+| `1045:5106` | 로그인_실패시 | `login_screen` · `show_failure` |
+| `1274:9883` · `1274:10129` | 그림방식 · 실사·사진 고른 뒤 | `image_style_screen` (설정판 `image_style_settings_screen` 도 이 결) |
+| `1724:7552` | 일과 관리 | `routine_manage_screen` |
+| `1877:9740` | 일과 관리 — 새 묶음 만들기 시트 | `routine_group_sheet` |
+| `1274:9831` · `1313:6559` | 일과완료 (보호자 기기 · 이룸이 기기) | `routine_done_screen` |
+| `1274:7522` · `1274:7537` · `1274:7554` · `1274:7740` | 온보딩_이룸이 (역할 · 로그인 · 스플래시 · 약관) | 온보딩 화면들 (이룸이 기기 변형) |
+| `1274:7909` · `1274:7988` | 온보딩_이룸이 코드연결 (빈 칸 · 입력) | `link_enter_screen` |
+| `1783:6640` · `1774:6090` | 이야기 피드 | `talk_feed_screen` |
+| `1783:7172` · `1860:8458` · `1813:7718` | 이야기 상세 (크게 보기 · 한 눈에 보기) | `talk_detail_screen` |
+| `1860:8085` | 이야기 댓글 작성 | `talk_detail_screen` 댓글 입력줄 |
+| `1860:8578` · `1869:8838` | 이야기 일과로 가져오기 시트 (안 고름 · 고름) | `talk_import_sheet` |
+| `1870:9066` · `1870:9398` · `1870:9543` | 이야기 올리기 (일과 고르기 · 내용 · 입력 뒤) | `talk_share_screen` · `talk_routine_picker` |
+
+**시안이 아예 없는 화면** — 디자이너 결(`design-language.md` §4 골격)로 맞춘다:
+의견 보내기(`feedback_screen`), 이룸이 정보(`elumi_info_screen`), 이룸이 바꾸기(`profile_switch_screen`),
+이룸이 기기 상태·설정(`link_status_screen` · `elumi_settings_screen`), 크레딧 부족 팝업(`credit_blocked_dialog`),
+알림 권한 시트(`push_permission_sheet`), 일과 이름 바꾸기·묶음 고르기·알림 시트(`routine_rename_sheet` ·
+`routine_group_picker_sheet` · `routine_reminder_sheet`), 예시 일과(`routine_template_sheet` · `example_category_screen`),
+카드 사진 바꾸기(`card_photo_source_sheet` · `card_photo_permission_screen`), 이야기 숨긴 보호자·수정·신고·규칙
+(`talk_blocked_guardians_screen` · `talk_edit_sheet` · `talk_report_sheet` · `talk_rules_sheet`), 공지 목록.
 
 ## 대조하는 법
 

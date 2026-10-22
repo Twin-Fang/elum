@@ -1,0 +1,73 @@
+# 디자인 규칙 동결 목록 — `tool/check_design_rules.dart` 가 이미 있던 위반으로 본다 (2026-10-22, #967 이후 남은 것)
+# 줄을 지울 수는 있어도 더하지 않는다. 고치면 `dart run tool/check_design_rules.dart` 가 "지울 줄" 로 알려 준다.
+# 남은 갈래
+# - spacing · radius: 시안 대조(✅) 화면의 실측 값일 수 있다 → 노드를 재서 맞으면 design_rules.yaml `measured_exceptions` 로 옮기고, 아니면 단계 값으로 고친다
+# - color-literal (card_palette): 카드 번호 파스텔 (design-language §3-1). 시안 밖 3색(#FFF3C4 · #C7EB73 · #E8F5C8)은 디자이너 확인 대기
+# - recommended_routine_strip: 쓰는 곳 없음 — 지울 후보
+# - type-token: 시안에 없는 글자 조합 토큰. 쓰는 곳을 시안 토큰으로 옮기면 토큰째 지운다
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFF93DBCC)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFF9CADF1)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFB5EAEC)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFC7EB73)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFCED8FF)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFE8F5C8)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFEB9B73)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFF3C500)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFFFDAC7)
+color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFFFF3C4)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFA0B7DB)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFADE2DC)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFCEDBEF)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFCEEFEB)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFE0D185)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFF4B0E7)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFF5E9AE)
+color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFFCCAF3)
+font-literal  lib/core/widgets/login_scene.dart  fontSize
+font-literal  lib/core/widgets/login_scene.dart  fontSize
+font-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  fontSize
+material-color  lib/core/widgets/inset_shadow.dart  Colors.black
+material-color  lib/features/child/presentation/child_routine_tile.dart  Colors.black
+material-color  lib/features/guardian/presentation/widgets/card_review_reorder_card.dart  Colors.black
+material-color  lib/features/guardian/presentation/widgets/step_card_viewer.dart  Colors.black
+material-color  lib/features/guardian/presentation/widgets/step_card_viewer.dart  Colors.white
+material-color  lib/shared/example_card_image/example_card_art.dart  Colors.white
+material-color  lib/shared/pictogram/pictogram_art.dart  Colors.white
+material-widget  lib/features/guardian/presentation/routine_loading_stage_row.dart  CircularProgressIndicator
+material-widget  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  TextButton
+radius  lib/features/guardian/presentation/navigation/guardian_side_nav.dart  14
+radius  lib/features/guardian/presentation/widgets/coach_demo_content.dart  6
+radius  lib/features/guardian/presentation/widgets/create_routine_button.dart  2.7
+radius  lib/features/guardian/presentation/widgets/home_coach_mark.dart  34
+radius  lib/features/guardian/presentation/widgets/library_grid_geometry.dart  0.5
+spacing  lib/core/app_status/app_notice_card.dart  28
+spacing  lib/core/app_status/app_notice_card.dart  28
+spacing  lib/core/widgets/coach_mark_overlay.dart  11
+spacing  lib/core/widgets/coach_mark_parts.dart  3
+spacing  lib/features/child/presentation/child_home_screen.dart  28
+spacing  lib/features/child/presentation/child_no_routine.dart  35
+spacing  lib/features/child/presentation/child_routine_detail_screen.dart  34
+spacing  lib/features/guardian/presentation/card_review_screen.dart  21
+spacing  lib/features/guardian/presentation/guardian_home_header.dart  11
+spacing  lib/features/guardian/presentation/guardian_home_landscape_body.dart  28
+spacing  lib/features/guardian/presentation/lumi_peek.dart  31
+spacing  lib/features/guardian/presentation/lumi_peek.dart  37
+spacing  lib/features/guardian/presentation/routine_input_field.dart  9
+spacing  lib/features/guardian/presentation/routine_loading_stage_row.dart  5
+spacing  lib/features/guardian/presentation/widgets/home_coach_mark.dart  3
+spacing  lib/features/guardian/presentation/widgets/routine_flow_top_bar.dart  26
+spacing  lib/features/guardian/presentation/widgets/routine_summary_tile.dart  21
+spacing  lib/features/guardian/presentation/widgets/routine_summary_tile.dart  3
+spacing  lib/features/guardian/presentation/widgets/routine_summary_tile.dart  7
+spacing  lib/features/talk/presentation/widgets/talk_share_step_card.dart  9
+type-token  lib/core/theme/app_typography.dart  appVersionTag=Pretendard/400/10
+type-token  lib/core/theme/app_typography.dart  caption=TmoneyRoundWind/400/12
+type-token  lib/core/theme/app_typography.dart  cardBody=TmoneyRoundWind/400/15
+type-token  lib/core/theme/app_typography.dart  cardTitle=TmoneyRoundWind/800/17
+type-token  lib/core/theme/app_typography.dart  childTileTitle=TmoneyRoundWind/400/18
+type-token  lib/core/theme/app_typography.dart  defaultCardTitle=TmoneyRoundWind/800/44
+type-token  lib/core/theme/app_typography.dart  docSection=Pretendard/700/14
+type-token  lib/core/theme/app_typography.dart  imageStyleCreditBar=TmoneyRoundWind/600/14
+type-token  lib/core/theme/app_typography.dart  reviewTitle=Pretendard/600/24
+type-token  lib/core/theme/app_typography.dart  sectionTitle=TmoneyRoundWind/800/14
+type-token  lib/core/theme/app_typography.dart  tileLabel=TmoneyRoundWind/400/13

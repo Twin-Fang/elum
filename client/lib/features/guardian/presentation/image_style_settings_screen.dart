@@ -77,6 +77,9 @@ class _ImageStyleSettingsScreenState
     );
   }
 
+  /// 크레딧 띠 · 카드 사이 (온보딩 그림 방식 1274:9883 과 같음)
+  static const _cardGap = 16.0;
+
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(onboardingProvider);
@@ -88,7 +91,7 @@ class _ImageStyleSettingsScreenState
       selected: {_pickedStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
-      gap: 12.h,
+      gap: _cardGap.h,
       asRadio: true,
       onChanged: (next) {
         // 저장 중에는 고른 값을 바꾸지 않는다
@@ -128,7 +131,7 @@ class _ImageStyleSettingsScreenState
                 style: _pickedStyle,
                 costs: ref.watch(creditCostsProvider),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: _cardGap.h),
               group,
             ],
           ),

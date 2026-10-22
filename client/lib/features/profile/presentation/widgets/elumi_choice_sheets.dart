@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/selectable_group.dart';
 import '../../../../shared/models/character.dart';
 import '../../../../shared/models/image_style.dart';
@@ -54,7 +55,7 @@ Future<ImageStyle?> showElumiImageStyleSheet(
   );
 }
 
-/// 하나 고르기 시트 틀: 제목 > 고르기 영역(스크롤) > 저장하기 (지금 값 그대로면 저장 막음)
+/// 하나 고르기 시트: 제목 > 고르기 영역 > 저장하기 (지금 값 그대로면 저장 막음)
 class _ChoiceSheet<T> extends StatefulWidget {
   const _ChoiceSheet({
     required this.title,
@@ -82,45 +83,25 @@ class _ChoiceSheetState<T> extends State<_ChoiceSheet<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-    return ElumSheetSurface(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          space.md.w,
-          space.lg.h,
-          space.md.w,
-          space.md.h + MediaQuery.paddingOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              widget.title,
-              style: context.typo.sectionTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            SizedBox(height: space.md.h),
-            // 글자를 키우면 카드가 시트를 넘음 > 스크롤
-            Flexible(
-              child: SingleChildScrollView(
-                child: widget.bodyBuilder(
-                  context,
-                  _picked,
-                  (next) => setState(() => _picked = next),
-                ),
-              ),
-            ),
-            SizedBox(height: space.md.h),
-            ElumButton(
-              label: context.l10n.elumiInfoSave,
-              onPressed: _canSave
-                  ? () => Navigator.of(context).pop(_picked)
-                  : null,
-            ),
-          ],
-        ),
+    // 공통 시트 틀 (제목 700/20 x=24 · 키보드 · 넘치면 스크롤)
+    return ElumSheetFrame(
+      title: widget.title,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          widget.bodyBuilder(
+            context,
+            _picked,
+            (next) => setState(() => _picked = next),
+          ),
+          SizedBox(height: context.space.lg.h),
+          ElumButton(
+            label: context.l10n.elumiInfoSave,
+            onPressed: _canSave
+                ? () => Navigator.of(context).pop(_picked)
+                : null,
+          ),
+        ],
       ),
     );
   }
@@ -174,7 +155,8 @@ class _ImageStyleChoices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gap = context.space.sm.h;
+    // 카드 사이 16 (온보딩 · 설정 그림 방식 화면과 같음)
+    final gap = context.space.md.h;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

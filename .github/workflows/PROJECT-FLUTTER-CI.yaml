@@ -294,12 +294,14 @@ jobs:
           flutter analyze --no-fatal-infos
           echo "✅ 코드 분석 완료"
 
-      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩) — 앱 테스트를 지운 뒤 남은 강제 장치
+      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩, 디자인 규칙) — 앱 테스트를 지운 뒤 남은 강제 장치
+      # 디자인 규칙 원본: tool/design_rules.yaml (Figma 화면 통계), 동결 목록: tool/design_rules_allowed.txt
       - name: Run rule checks
         id: rules
         run: |
           dart run tool/check_layer_imports.dart
           dart run tool/check_hangul_literals.dart lib
+          dart run tool/check_design_rules.dart
           echo "✅ 규칙 검사 완료"
 
       # 분석 결과 기록

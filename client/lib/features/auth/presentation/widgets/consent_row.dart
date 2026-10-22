@@ -6,9 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_check_circle.dart';
 import '../../domain/consent_documents.dart';
 
 /// 약관 항목 한 줄 (Figma `726:5066` 외).
@@ -78,7 +78,7 @@ class ConsentRow extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(width: _checkLeft.w),
-                  _CheckCircle(checked: isChecked),
+                  ElumCheckCircle(isChecked: isChecked, size: _checkSize),
                   SizedBox(width: _checkToBadge.w),
                   SizedBox(
                     width: _badgeSlot.w,
@@ -139,50 +139,6 @@ class ConsentRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 원형 체크.
-///
-/// 꺼져 있어도 **체크가 보인다** — 원만 비워 두면 눌러야 할 자리인지 알기 어렵다.
-/// 켜지면 포인트색으로 차고 체크가 흰색이 된다 (Figma 739:3747 ↔ 726:5056).
-class _CheckCircle extends StatelessWidget {
-  const _CheckCircle({required this.checked});
-
-  final bool checked;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.standard,
-      width: ConsentRow._checkSize.w,
-      height: ConsentRow._checkSize.w,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: checked ? colors.checkDone : Colors.transparent,
-        border: Border.all(
-          // border(#EFEFEF)는 배경(#F7F2EF)과 거의 같아 원이 사라진다
-          color: checked ? colors.checkDone : colors.consentCheckIdle,
-          width: context.space.borderWidth,
-        ),
-      ),
-      // Material 체크는 획 끝이 달라 시안과 다르게 보인다 — 같은 에셋을 쓴다.
-      // Figma 원(20) 안 10.91×8.13 (`726:4867` Union).
-      child: Center(
-        child: SvgPicture.asset(
-          AppAssets.iconCheckMark,
-          width: 10.91.w,
-          height: 8.13.w,
-          colorFilter: ColorFilter.mode(
-            checked ? colors.surface : colors.consentCheckIdle,
-            BlendMode.srcIn,
-          ),
-        ),
       ),
     );
   }

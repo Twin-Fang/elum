@@ -8,6 +8,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
+import '../../../../core/widgets/elum_label_chip.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/character.dart';
@@ -44,7 +45,6 @@ class MyInfoElumiGroup extends ConsumerWidget {
         if (hasSeveral) ...[
           SizedBox(height: _cardGap.h),
           SettingsGroup(
-            hasDividers: false,
             children: [
               SettingsTile(
                 isInCard: true,
@@ -117,11 +117,12 @@ class _ElumiCard extends StatelessWidget {
                 ),
               ),
               if (isActive) ...[
-                Text(
-                  context.l10n.guardianMyInfoActiveBadge,
-                  style: context.typo.bodySmall.copyWith(
-                    color: colors.creditAccentText,
-                  ),
+                // 보호자 칩과 같은 민트 칩 (보라는 크레딧 숫자 전용)
+                ElumLabelChip(
+                  label: context.l10n.guardianMyInfoActiveBadge,
+                  background: colors.peopleGuardianChipBg,
+                  foreground: colors.peopleGuardianChipText,
+                  border: colors.peopleGuardianChipBorder,
                 ),
                 SizedBox(width: space.xs.w),
               ],

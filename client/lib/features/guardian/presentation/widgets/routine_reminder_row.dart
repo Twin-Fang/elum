@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../reminder/application/routine_reminder_controller.dart';
 import '../../../reminder/domain/routine_reminder.dart';
@@ -23,10 +26,18 @@ class RoutineReminderRow extends ConsumerWidget {
 
   static const rowKey = ValueKey('routine.reminder.row');
 
+  /// 왼쪽 종 칸 폭 · 모서리 · 종 한 변 · 종 칸 ↔ 카드 · 카드 안쪽 좌우
+  static const _bellBoxWidth = 40.0;
+  static const _bellBoxRadius = 16.0;
+  static const _bellIconSize = 20.0;
+  static const _bellToCard = 4.0;
+  static const _cardPaddingH = 18.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typo = context.typo;
+    final space = context.space;
     final reminder = ref.watch(routineReminderProvider)[routine.id];
     final isOn = reminder != null;
 
@@ -37,29 +48,33 @@ class RoutineReminderRow extends ConsumerWidget {
       child: Row(
         children: [
           Container(
-            width: 40.w,
+            width: _bellBoxWidth.w,
             height: rowHeight.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: colors.editChipBg,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(_bellBoxRadius.r),
             ),
-            child: Icon(
-              isOn
-                  ? Icons.notifications_active_rounded
-                  : Icons.notifications_none_rounded,
-              size: 24.w,
-              color: isOn ? colors.textPrimary : colors.rewardEmptyLabel,
+            // 켜짐 = 종 · 꺼짐 = 빗금 종
+            child: SvgPicture.asset(
+              isOn ? AppAssets.iconBell : AppAssets.iconBellSlash,
+              width: _bellIconSize.w,
+              height: _bellIconSize.w,
+              excludeFromSemantics: true,
+              colorFilter: ColorFilter.mode(
+                isOn ? colors.textPrimary : colors.rewardEmptyLabel,
+                BlendMode.srcIn,
+              ),
             ),
           ),
-          SizedBox(width: 4.w),
+          SizedBox(width: _bellToCard.w),
           Expanded(
             child: Container(
               height: rowHeight.h,
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
+              padding: EdgeInsets.symmetric(horizontal: _cardPaddingH.w),
               decoration: BoxDecoration(
                 color: colors.editChipBg,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(space.cardRadius.r),
               ),
               child: Row(
                 children: [
@@ -77,11 +92,7 @@ class RoutineReminderRow extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 24.w,
-                    color: colors.rewardEmptyLabel,
-                  ),
+                  const SettingsCardChevron(),
                 ],
               ),
             ),

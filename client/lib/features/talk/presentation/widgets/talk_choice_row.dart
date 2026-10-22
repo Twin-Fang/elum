@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_check_circle.dart';
 
 /// 오른쪽 표시: 하나만 고르기(동그라미) | 켜고 끄기(네모 체크)
 enum TalkChoiceIndicator { radio, check }
@@ -39,7 +38,7 @@ class TalkChoiceRow extends StatelessWidget {
   static const _labelToIndicator = 12.0;
 
   /// 고른 테두리 두께
-  static const _selectedBorderWidth = 1.5;
+  static const _selectedBorderWidth = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +106,7 @@ class TalkChoiceRow extends StatelessWidget {
               SizedBox(width: _labelToIndicator.w),
               switch (indicator) {
                 TalkChoiceIndicator.radio => _RadioMark(isOn: isSelected),
-                TalkChoiceIndicator.check => _CheckMark(isOn: isSelected),
+                TalkChoiceIndicator.check => ElumCheckCircle(isChecked: isSelected),
               },
             ],
           ),
@@ -117,7 +116,7 @@ class TalkChoiceRow extends StatelessWidget {
   }
 }
 
-/// 동그라미: 빈 원 > 고르면 민트 테두리 안에 짙은 민트 점이 튀어나온다
+/// 동그라미: 빈 원 > 고르면 민트 테두리 안에 민트 점이 튀어나온다
 class _RadioMark extends StatelessWidget {
   const _RadioMark({required this.isOn});
 
@@ -157,49 +156,6 @@ class _RadioMark extends StatelessWidget {
             shape: BoxShape.circle,
             color: colors.talkAccentText,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 네모 체크: 빈 칸 > 켜면 짙은 민트 칸에 흰 체크가 튀어나온다
-class _CheckMark extends StatelessWidget {
-  const _CheckMark({required this.isOn});
-
-  final bool isOn;
-
-  static const _size = 22.0;
-  static const _iconSize = 14.0;
-  static const _radius = 6.0;
-  static const _borderWidth = 1.5;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.standard,
-      width: _size.w,
-      height: _size.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isOn ? colors.talkAccentText : colors.surface,
-        borderRadius: BorderRadius.circular(_radius.r),
-        border: Border.all(
-          color: isOn ? colors.talkAccentText : colors.talkChoiceRadioBorder,
-          width: _borderWidth,
-        ),
-      ),
-      child: AnimatedScale(
-        scale: isOn ? 1 : 0,
-        duration: AppMotion.normal,
-        curve: isOn ? AppMotion.springOut : AppMotion.standard,
-        child: SvgPicture.asset(
-          AppAssets.iconCheckMark,
-          width: _iconSize.w,
-          height: _iconSize.w,
-          colorFilter: ColorFilter.mode(colors.surface, BlendMode.srcIn),
         ),
       ),
     );

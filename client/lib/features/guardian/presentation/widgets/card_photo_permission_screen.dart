@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_header.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../data/card_photo.dart';
@@ -21,8 +21,7 @@ enum PhotoPermissionChoice {
 
 /// 카메라·사진 접근을 쓸 수 없을 때.
 ///
-/// **임시 시안이다** — 목업(`perm_denied`)을 그대로 옮겼다. 거부해도 앱은 계속 돌아야
-/// 하므로(docs 08 ⑤) 왜 안 되는지 말하고 **우회 경로**(다른 출처)를 주 버튼으로 둔다.
+/// 거부해도 앱은 계속 돌아야 하므로(docs 08 ⑤) 왜 안 되는지 말하고 **우회 경로**(다른 출처)를 주 버튼으로 둔다.
 /// `설정 열기` 는 열 수 있는 휴대폰에서만 보인다([PhotoSettings.available]).
 class CardPhotoPermissionScreen extends ConsumerWidget {
   const CardPhotoPermissionScreen({super.key, required this.denied});
@@ -50,7 +49,6 @@ class CardPhotoPermissionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final typo = context.typo;
     final settings = ref.watch(photoSettingsProvider);
 
     return ElumScaffold(
@@ -70,48 +68,25 @@ class CardPhotoPermissionScreen extends ConsumerWidget {
               onPressed: () => _openSettings(context, settings),
             )
           : null,
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _cameraDenied
-                    ? Icons.no_photography_outlined
-                    : Icons.hide_image_outlined,
-                size: 64.w,
-                // 장식이라 옅게 — 뜻은 아래 글이 말한다
-                color: colors.border,
-                semanticLabel: null,
-              ),
-              SizedBox(height: 24.h),
-              Text(
-                _cameraDenied
-                    ? context.l10n.cardPhotoPermissionCameraTitle
-                    : context.l10n.cardPhotoPermissionGalleryTitle,
-                textAlign: TextAlign.center,
-                style: typo.sheetHeading.copyWith(color: colors.textPrimary),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                _cameraDenied
-                    ? context.l10n.cardPhotoPermissionCameraBody
-                    : context.l10n.cardPhotoPermissionGalleryBody,
-                textAlign: TextAlign.center,
-                style: typo.bodySmall.copyWith(
-                  color: colors.textSecondary,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
+      // 한 가지 묻는 화면 골격 (§4-3): 왼쪽 제목 > 회색 설명, 아래 주 버튼
+      child: SingleChildScrollView(
+        child: ElumHeader(
+          title: _cameraDenied
+              ? context.l10n.cardPhotoPermissionCameraTitle
+              : context.l10n.cardPhotoPermissionGalleryTitle,
+          description: _cameraDenied
+              ? context.l10n.cardPhotoPermissionCameraBody
+              : context.l10n.cardPhotoPermissionGalleryBody,
         ),
       ),
     );
   }
 
   /// 설정을 못 열어도 화면에 남는다 — 갤러리 길이 아직 있다.
-  Future<void> _openSettings(BuildContext context, PhotoSettings settings) async {
+  Future<void> _openSettings(
+    BuildContext context,
+    PhotoSettings settings,
+  ) async {
     // await 뒤에는 context 를 읽지 않으므로 문구를 미리 잡아 둔다
     final l10n = context.l10n;
     final opened = await settings.open();

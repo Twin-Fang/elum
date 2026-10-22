@@ -129,33 +129,20 @@ class _NotificationTypeIcon extends StatelessWidget {
   final double boxRadius;
   final double iconSize;
 
-  /// 종류 > 시안 에셋 (없으면 null)
-  static String? _assetOf(NotificationType type) => switch (type) {
+  /// 종류 > fi-br 아이콘 (시안 1724:8346: 체크 · 종이비행기 · 사람 더하기, 나머지는 같은 벌)
+  static String _assetOf(NotificationType type) => switch (type) {
         NotificationType.routineCompleted => AppAssets.iconNotificationCheck,
         NotificationType.routineSentByCoGuardian => AppAssets.iconNotificationPaperPlane,
         NotificationType.coGuardianJoined => AppAssets.iconNotificationUserAdd,
-        NotificationType.creditRefilled ||
-        NotificationType.feedbackResolved ||
-        NotificationType.talkPostCommented ||
-        NotificationType.talkPostImported =>
-          null,
-      };
-
-  /// 종류 > 시안 없는 종류의 Material 아이콘
-  static IconData _fallbackIconOf(NotificationType type) => switch (type) {
-        NotificationType.creditRefilled => Icons.toll_rounded,
-        NotificationType.feedbackResolved => Icons.chat_bubble_outline_rounded,
-        NotificationType.talkPostCommented => Icons.forum_outlined,
-        NotificationType.talkPostImported => Icons.download_rounded,
-        NotificationType.routineCompleted => Icons.check_rounded,
-        NotificationType.routineSentByCoGuardian => Icons.send_rounded,
-        NotificationType.coGuardianJoined => Icons.person_add_alt_rounded,
+        NotificationType.creditRefilled => AppAssets.iconCoins,
+        NotificationType.feedbackResolved => AppAssets.iconComment,
+        NotificationType.talkPostCommented => AppAssets.iconComments,
+        NotificationType.talkPostImported => AppAssets.iconDownload,
       };
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final asset = _assetOf(type);
     return Container(
       width: boxSize.w,
       height: boxSize.w,
@@ -164,14 +151,17 @@ class _NotificationTypeIcon extends StatelessWidget {
         color: colors.notificationIconBackground,
         borderRadius: BorderRadius.circular(boxRadius.r),
       ),
-      child: asset == null
-          ? Icon(_fallbackIconOf(type), size: iconSize.w, color: colors.notificationIconForeground)
-          : SvgPicture.asset(
-              asset,
-              width: iconSize.w,
-              height: iconSize.w,
-              excludeFromSemantics: true,
-            ),
+      // 아이콘 색은 종류마다 바꾸지 않음 (흰 16, §3-5)
+      child: SvgPicture.asset(
+        _assetOf(type),
+        width: iconSize.w,
+        height: iconSize.w,
+        colorFilter: ColorFilter.mode(
+          colors.notificationIconForeground,
+          BlendMode.srcIn,
+        ),
+        excludeFromSemantics: true,
+      ),
     );
   }
 }

@@ -3,17 +3,17 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/text/keep_words.dart';
-import '../../../../core/theme/app_motion.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
-import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../l10n/l10n_context.dart';
+import '../text/keep_words.dart';
+import '../theme/app_motion.dart';
+import '../theme/theme_context_ext.dart';
+import 'app_fade_slide_in.dart';
+import 'elum_bottom_sheet.dart';
 
-/// 이야기 시트 공통 틀 (시안 시트 1759:9649 결): 제목 > 설명 > 본문, 키보드가 올라와도 남은 높이 안에서 스크롤
+/// 시트 공통 틀 (시안 1759:9649 · 1869:8838): 제목 > 설명 > 본문, 키보드가 올라와도 남은 높이 안에서 스크롤
 /// 제목 · 설명은 본문보다 8 안쪽(x=24)에서 시작하고, 본문은 시트 좌우 16 을 쓴다 (입력칸 · 버튼 361 폭)
-class TalkSheetFrame extends StatelessWidget {
-  const TalkSheetFrame({
+class ElumSheetFrame extends StatelessWidget {
+  const ElumSheetFrame({
     super.key,
     this.title,
     this.description,
@@ -27,10 +27,10 @@ class TalkSheetFrame extends StatelessWidget {
   final String? description;
   final Widget child;
 
-  /// 시안 실측 (시트 윗변 기준): 제목 40 · 제목 > 설명 8 · 머리 > 본문 24 · 바닥 22
+  /// 시안 실측 (시트 윗변 기준): 제목 40 · 제목 > 설명 24 · 머리 > 본문 24 · 바닥 22
   static const _titleTop = 40.0;
   static const _menuTop = 32.0;
-  static const _titleToDescription = 8.0;
+  static const _titleToDescription = 24.0;
   static const _headerToBody = 24.0;
   static const _bottomGap = 22.0;
 
@@ -82,7 +82,7 @@ class TalkSheetFrame extends StatelessWidget {
                           Text(
                             title,
                             style: typo.sheetTitle.copyWith(
-                              color: colors.textPrimary,
+                              color: colors.sheetTitleText,
                               height: 1.2,
                             ),
                           ),
@@ -92,8 +92,8 @@ class TalkSheetFrame extends StatelessWidget {
                               // 어절 중간에서 꺾이지 않게
                               keepWords(description, locale: context.appLocale),
                               semanticsLabel: description,
-                              style: typo.talkEmptyBody.copyWith(
-                                color: colors.talkMetaText,
+                              style: typo.sheetDescription.copyWith(
+                                color: colors.sheetTitleText,
                               ),
                             ),
                           ],

@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../guardian/domain/routine_template.dart';
 import '../../application/talk_detail_controller.dart';
@@ -14,7 +15,6 @@ import '../../domain/talk_screen_codes.dart';
 import 'talk_category_picker.dart';
 import 'talk_form_section.dart';
 import 'talk_note_field.dart';
-import 'talk_sheet_frame.dart';
 
 /// 내 글 고치기 시트: 한마디(300자) + 분류 > 저장. 저장하면 true
 Future<bool> showTalkEditSheet(
@@ -75,15 +75,15 @@ class _TalkEditSheetState extends ConsumerState<_TalkEditSheet> {
     }
   }
 
-  /// 구역 사이 · 마지막 구역 > 버튼
-  static const _sectionGap = 28.0;
+  /// 구역 사이 · 마지막 구역 > 버튼 (구역 사이 40: 올리기 1870:9398 · design-language 구역 간격)
+  static const _sectionGap = 40.0;
   static const _sectionsToButton = 32.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return TalkSheetFrame(
+    return ElumSheetFrame(
       title: l10n.talkEditTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

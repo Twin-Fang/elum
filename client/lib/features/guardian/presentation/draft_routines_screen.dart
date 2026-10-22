@@ -16,6 +16,7 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
+import 'widgets/grey_tile_shell.dart';
 import 'widgets/routine_swipe_actions.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/state/busy_state_mixin.dart';
@@ -100,7 +101,12 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
                 ),
               ),
               data: (list) => list.isEmpty
-                  ? const ElumStateBody(child: _Empty())
+                  // 빈 상태는 목록 첫 줄 자리에 (보호자 빈 상태 결 217:2655)
+                  // Align 은 폭을 풀어 칸이 글자 폭으로 줄어든다 — 폭을 채운다
+                  ? const Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [_Empty()],
+                    )
                   : ListView.separated(
                       padding: EdgeInsets.only(bottom: space.xl),
                       itemCount: list.length,
@@ -337,29 +343,35 @@ class _DraftTile extends StatelessWidget {
 }
 
 /// 0건. **로딩과 다른 화면이어야 한다.**
+/// 홈 빈 상태(217:2655)와 같은 글만 든 웜그레이 줄 — 제목 + 회색 안내 한 줄
 class _Empty extends StatelessWidget {
   const _Empty();
+
+  /// 두 줄 사이 (홈 빈 상태와 같음)
+  static const _lineGap = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final space = context.space;
+    final typo = context.typo;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: space.xl),
+    return GreyTileShell(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.draftRoutinesEmptyTitle,
-            textAlign: TextAlign.center,
-            style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
+            style: typo.routineEmptyTitle.copyWith(
+              color: colors.routineTileLabel,
+            ),
           ),
-          SizedBox(height: space.sm),
+          SizedBox(height: _lineGap.h),
           Text(
             context.l10n.draftRoutinesEmptyBody,
-            textAlign: TextAlign.center,
-            style: context.typo.promptBody.copyWith(color: colors.promptMuted),
+            style: typo.routineTileMeta.copyWith(
+              color: colors.routineEmptyHint,
+            ),
           ),
         ],
       ),

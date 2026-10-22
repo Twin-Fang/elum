@@ -7,8 +7,9 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_tile.dart';
-import 'talk_sheet_frame.dart';
 
 /// 글 ⋯ 메뉴에서 고른 동작
 enum TalkPostMenuAction { report, block, edit, takeDown }
@@ -108,25 +109,18 @@ Future<T?> _showMenu<T>(
   required List<_MenuItem<T>> rows,
 }) => showElumSheet<T>(
   context: context,
-  builder: (sheetContext) => TalkSheetFrame(
-    // 흰 묶음 판 안에 줄을 잇는다 (설정 묶음과 같은 r20 판, 줄 사이 선 없음)
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-      child: ColoredBox(
-        color: context.colors.settingsGroupBg,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final row in rows)
-              _MenuRow(
-                icon: row.icon,
-                label: row.label,
-                isDanger: row.isDanger,
-                onTap: () => Navigator.of(sheetContext).pop(row.value),
-              ),
-          ],
-        ),
-      ),
+  builder: (sheetContext) => ElumSheetFrame(
+    // 흰 묶음 판 안에 줄을 잇는다 (설정 묶음과 같은 판, 줄 사이 선 없음)
+    child: SettingsGroup(
+      children: [
+        for (final row in rows)
+          _MenuRow(
+            icon: row.icon,
+            label: row.label,
+            isDanger: row.isDanger,
+            onTap: () => Navigator.of(sheetContext).pop(row.value),
+          ),
+      ],
     ),
   ),
 );

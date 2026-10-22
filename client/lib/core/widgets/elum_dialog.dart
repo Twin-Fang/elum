@@ -115,6 +115,24 @@ Future<T?> showElumDialog<T>({
   );
 }
 
+/// 내용을 직접 그리는 팝업 열기 (공지 · 크레딧 대기처럼 [ElumDialogCard] 틀에 안 맞는 것)
+/// 뒤 막 · 가운데 자리는 [showElumDialog] 와 같다. 내용은 [ElumDialogSurface] 로 감싼다
+Future<T?> showElumDialogContent<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = false,
+}) {
+  return showDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: context.l10n.commonPopupClose,
+    barrierColor: context.colors.dialogScrim,
+    useSafeArea: false,
+    useRootNavigator: true,
+    builder: builder,
+  );
+}
+
 /// 팝업 본체. [showElumDialog]가 쓰지만, 골든·테스트에서 직접 세울 수 있게 공개한다.
 class ElumDialogCard<T> extends StatelessWidget {
   const ElumDialogCard({

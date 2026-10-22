@@ -1,81 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import 'anchored_quick_menu.dart';
 
 /// 코치마크 시범 안에 그려지는 내용물: 메뉴 줄·만들기 선택지·토스트·묶음 모양.
 /// 문구는 실제 화면과 같은 ARB 키를 쓴다 (따로 적으면 어긋난다).
 
-/// 칸 옆 메뉴 미리보기: 실제 길게 누르기 메뉴와 같은 폭 · 줄 높이 · 항목 5개 (지우기는 붉게)
+/// 칸 옆 메뉴 미리보기: 실제 길게 누르기 메뉴와 같은 판 · 폭 · 줄 높이 · 항목 5개 (지우기는 붉게)
 class CoachDemoAnchoredMenu extends StatelessWidget {
   const CoachDemoAnchoredMenu({super.key});
 
   /// 실제 칸 옆 메뉴와 같은 폭 · 줄 높이
-  static const width = 230.0;
-  static const rowHeight = 46.0;
+  static const width = AnchoredQuickMenuView.menuWidth;
+  static const rowHeight = AnchoredQuickMenuView.rowHeight;
 
   /// 항목 5개: 오늘 보내기, 이름 바꾸기, 묶음에 넣기, 복사하기, 지우기
   static const rowCount = 5;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final l10n = context.l10n;
-    final rows = <(IconData, String, bool)>[
-      (Icons.send_rounded, l10n.routineLibrarySendToday, false),
-      (Icons.edit_rounded, l10n.routineLibraryMenuRename, false),
+    // 값은 쓰지 않는다 (누를 수 없는 미리보기)
+    final List<QuickMenuRow<int>> rows = [
       (
-        Icons.create_new_folder_outlined,
-        l10n.routineGroupMenuAddToGroup,
-        false,
+        value: 0,
+        icon: AppAssets.iconPaperPlane,
+        label: l10n.routineLibrarySendToday,
+        isDanger: false,
       ),
-      (Icons.content_copy_rounded, l10n.routineLibraryMenuCopy, false),
-      (Icons.delete_outline_rounded, l10n.routineLibraryMenuRemove, true),
+      (
+        value: 1,
+        icon: AppAssets.iconPencil,
+        label: l10n.routineLibraryMenuRename,
+        isDanger: false,
+      ),
+      (
+        value: 2,
+        icon: AppAssets.iconFolderAdd,
+        label: l10n.routineGroupMenuAddToGroup,
+        isDanger: false,
+      ),
+      (
+        value: 3,
+        icon: AppAssets.iconCopy,
+        label: l10n.routineLibraryMenuCopy,
+        isDanger: false,
+      ),
+      (
+        value: 4,
+        icon: AppAssets.iconTrash,
+        label: l10n.routineLibraryMenuRemove,
+        isDanger: true,
+      ),
     ];
-    return Container(
+    return SizedBox(
       width: width.w,
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(context.space.md.r),
-        boxShadow: [
-          BoxShadow(
-            color: colors.textPrimary.withValues(alpha: 0.2),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (icon, label, isDanger) in rows)
-            SizedBox(
-              height: rowHeight.h,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.space.md.w),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.typo.body.copyWith(
-                          color: isDanger ? colors.danger : colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      icon,
-                      size: 20.w,
-                      color: isDanger ? colors.danger : colors.textSecondary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
+      child: AnchoredQuickMenuPanel<int>(rows: rows),
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -270,6 +272,32 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   }
 }
 
+/// 칩 모양: 알약 (시안 모서리 100)
+const _chipPillRadius = 100.0;
+
+/// 칩 앞 아이콘 (`fi-br` 16, 남색)
+class _ChipIcon extends StatelessWidget {
+  const _ChipIcon({required this.asset});
+
+  final String asset;
+
+  static const _size = 16.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      asset,
+      width: _size.w,
+      height: _size.w,
+      excludeFromSemantics: true,
+      colorFilter: ColorFilter.mode(
+        context.colors.textPrimary,
+        BlendMode.srcIn,
+      ),
+    );
+  }
+}
+
 /// `사진 바꾸기` 칩 — 보이는 알약은 작아도 누름 영역은 48 이상이다.
 class _Chip extends StatelessWidget {
   const _Chip({required this.onTap});
@@ -291,16 +319,12 @@ class _Chip extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: colors.editChipBg,
-              borderRadius: BorderRadius.circular(18.r),
+              borderRadius: BorderRadius.circular(_chipPillRadius),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.photo_camera_outlined,
-                  size: 16.w,
-                  color: colors.textPrimary,
-                ),
+                const _ChipIcon(asset: AppAssets.iconCamera),
                 SizedBox(width: 6.w),
                 Text(
                   context.l10n.cardPhotoChange,
@@ -358,11 +382,7 @@ class _UploadingOverlay extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ElumSpinner(
-              size: 36.w,
-              strokeWidth: 3,
-              color: colors.textPrimary,
-            ),
+            ElumSpinner(size: 36.w, strokeWidth: 3, color: colors.textPrimary),
             SizedBox(height: 12.h),
             Text(
               context.l10n.cardPhotoUploading,
@@ -428,17 +448,13 @@ class _FailureOverlay extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: colors.editChipBg,
-                    borderRadius: BorderRadius.circular(18.r),
+                    borderRadius: BorderRadius.circular(_chipPillRadius),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (!dismiss) ...[
-                        Icon(
-                          Icons.refresh,
-                          size: 16.w,
-                          color: colors.textPrimary,
-                        ),
+                        const _ChipIcon(asset: AppAssets.iconRefresh),
                         SizedBox(width: 6.w),
                       ],
                       Text(

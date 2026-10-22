@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -13,7 +15,7 @@ import 'card_image.dart';
 /// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
-/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 주황 테두리 + `새로` 배지.
+/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새로` 배지 (민트 = 안 읽음).
 class LibraryRoutineTile extends ConsumerWidget {
   const LibraryRoutineTile({
     super.key,
@@ -78,7 +80,7 @@ class LibraryRoutineTile extends ConsumerWidget {
                       ? BoxDecoration(
                           borderRadius: BorderRadius.circular(iconRadius.w),
                           border: Border.all(
-                            color: colors.brandOrange,
+                            color: colors.checkDone,
                             width: _newOutlineWidth.w,
                           ),
                         )
@@ -136,7 +138,7 @@ class LibraryRoutineTile extends ConsumerWidget {
   }
 }
 
-/// `새로` 배지 (주황 바탕 + 흰 글자, 바탕색 테두리로 그림과 떨어뜨린다)
+/// `새로` 배지 (민트 알약 + 흰 글자, 바탕색 테두리로 그림과 떨어뜨린다)
 class _NewBadge extends StatelessWidget {
   const _NewBadge();
 
@@ -152,7 +154,7 @@ class _NewBadge extends StatelessWidget {
         vertical: _paddingV.h,
       ),
       decoration: BoxDecoration(
-        color: colors.brandOrange,
+        color: colors.checkDone,
         borderRadius: BorderRadius.circular(context.space.cardRadius.r),
         border: Border.all(color: colors.background, width: 2),
       ),
@@ -222,6 +224,10 @@ class LibrarySentBadge extends StatelessWidget {
 
   final double size;
 
+  /// 원 안 체크 비율 (시안 원 20 안 10.91×8.13, `ElumCheckCircle` 과 같다)
+  static const _markWidthRatio = 10.91 / 20;
+  static const _markHeightRatio = 8.13 / 20;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -233,10 +239,15 @@ class LibrarySentBadge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: colors.background, width: 2),
       ),
-      child: Icon(
-        Icons.check_rounded,
-        size: size * 0.65,
-        color: colors.surface,
+      // 앱 체크와 같은 에셋 (`ElumCheckCircle` 원 안 비율)
+      child: Center(
+        child: SvgPicture.asset(
+          AppAssets.iconCheckMark,
+          width: size * _markWidthRatio,
+          height: size * _markHeightRatio,
+          excludeFromSemantics: true,
+          colorFilter: ColorFilter.mode(colors.surface, BlendMode.srcIn),
+        ),
       ),
     );
   }

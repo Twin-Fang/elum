@@ -189,10 +189,12 @@ class _TemplateButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.auto_awesome_mosaic_rounded,
-              size: 20.w,
-              color: colors.textPrimary,
+            SvgPicture.asset(
+              AppAssets.iconApps,
+              width: 20.w,
+              height: 20.w,
+              excludeFromSemantics: true,
+              colorFilter: ColorFilter.mode(colors.textPrimary, BlendMode.srcIn),
             ),
             SizedBox(width: 6.w),
             Text(

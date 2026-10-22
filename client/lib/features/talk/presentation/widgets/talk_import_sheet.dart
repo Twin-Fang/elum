@@ -9,6 +9,8 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_sheet_action_row.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../guardian/application/library_entries.dart';
 import '../../../guardian/application/library_talk_import_state.dart';
@@ -22,7 +24,6 @@ import 'talk_choice_row.dart';
 import 'talk_form_section.dart';
 import 'talk_import_done_toast.dart';
 import 'talk_import_group_grid.dart';
-import 'talk_sheet_frame.dart';
 
 /// 시트가 닫히며 돌려주는 값: 일과가 들어간 이룸이와 새 일과 id
 typedef _ImportOutcome = ({ProfileSummary profile, String routineId});
@@ -146,21 +147,17 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
     router.push(Routes.linkCode);
   }
 
-  /// 고르기 줄 사이 · 구역 사이 · 마지막 구역 > 버튼 (시안 격자 > 버튼 16)
+  /// 고르기 줄 사이 · 구역 사이 · 마지막 구역 > 버튼 (시안 격자 > 버튼 16, 구역 사이 40: design-language 구역 간격)
   static const _choiceGap = 8.0;
-  static const _sectionGap = 28.0;
+  static const _sectionGap = 40.0;
   static const _sectionsToButton = 16.0;
-
-  /// 취소 버튼 폭 · 버튼 사이 (시안 100 · 4)
-  static const _cancelWidth = 100.0;
-  static const _buttonGap = 4.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final profiles = _profiles();
     if (profiles.isEmpty) {
-      return TalkSheetFrame(
+      return ElumSheetFrame(
         title: l10n.talkImportNoElumiTitle,
         child: ElumButton(
           label: l10n.talkImportNoElumiAction,
@@ -187,7 +184,7 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
     final isMemberLoading = member.isLoading && !member.hasValue;
     final hasProfileChoice = profiles.length >= 2;
 
-    return TalkSheetFrame(
+    return ElumSheetFrame(
       title: l10n.talkImportSheetTitle,
       description: l10n.talkImportSheetHint,
       child: Column(
@@ -221,32 +218,12 @@ class _TalkImportSheetState extends ConsumerState<TalkImportSheet> {
             ),
           if (hasProfileChoice || groups.isNotEmpty)
             SizedBox(height: _sectionsToButton.h),
-          Row(
-            children: [
-              SizedBox(
-                width: _cancelWidth.w,
-                child: ElumButton(
-                  label: l10n.commonCancel,
-                  labelStyle: context.typo.sheetActionLabel,
-                  backgroundColor: context.colors.dialogNeutral,
-                  labelColor: context.colors.dialogNeutralText,
-                  onPressed: _isSubmitting
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                ),
-              ),
-              SizedBox(width: _buttonGap.w),
-              Expanded(
-                child: ElumButton(
-                  label: l10n.talkImportConfirm,
-                  labelStyle: context.typo.sheetActionLabel,
-                  loading: _isSubmitting,
-                  onPressed: isMemberLoading
-                      ? null
-                      : () => _submit(selected, groupId),
-                ),
-              ),
-            ],
+          ElumSheetActionRow(
+            confirmLabel: l10n.talkImportConfirm,
+            isLoading: _isSubmitting,
+            onConfirm: isMemberLoading
+                ? null
+                : () => _submit(selected, groupId),
           ),
         ],
       ),

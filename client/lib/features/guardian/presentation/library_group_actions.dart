@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
@@ -114,13 +114,13 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
       rows: [
         (
           value: false,
-          icon: Icons.add_rounded,
+          icon: AppAssets.iconPlus,
           label: l10n.routineGroupCreateRoutine,
           isDanger: false,
         ),
         (
           value: true,
-          icon: Icons.create_new_folder_outlined,
+          icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
           isDanger: false,
         ),
@@ -162,13 +162,13 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
         for (final entry in groups)
           (
             value: (group: entry.group),
-            icon: Icons.folder_rounded,
+            icon: AppAssets.iconFolder,
             label: entry.group.name,
             isDanger: false,
           ),
         (
           value: (group: null),
-          icon: Icons.create_new_folder_outlined,
+          icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
           isDanger: false,
         ),
