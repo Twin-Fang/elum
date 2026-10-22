@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T14:39:39Z",
-    "currentVersion": "2.75.0",
+    "lastUpdated": "2026-10-22T14:53:43Z",
+    "currentVersion": "2.75.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 307
+    "totalReleases": 308
   },
   "releases": [
+    {
+      "version": "2.75.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 975,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이야기 글 오른쪽 위에 신고 버튼을 바로 보이게 했어요\n  * 시트·체크·탭 등 화면 곳곳을 디자인에 맞게 다듬었어요\n  * 앱 전체 아이콘을 같은 모양으로 통일했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이야기 글 오른쪽 위에 신고 버튼을 바로 보이게 했어요",
+            "시트·체크·탭 등 화면 곳곳을 디자인에 맞게 다듬었어요",
+            "앱 전체 아이콘을 같은 모양으로 통일했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.75.0",
       "project_type": "flutter",
