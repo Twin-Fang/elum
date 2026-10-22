@@ -8,8 +8,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_centered_title_row.dart';
 
-/// 이야기 하위 화면 머리 줄 (시안 1783:7473 · 1813:7718): 뒤로 | 가운데 제목 | (있으면) ⋯ · 공유
-/// 공유가 있으면 양옆 칸을 상자 두 개 폭으로 넓혀 제목을 가운데에 둔다. 공유가 맨 오른쪽 (시안 x 349)
+/// 이야기 하위 화면 머리 줄 (시안 1783:7473 · 1860:8458): 뒤로 | 가운데 제목 | (있으면) 신고 깃발 또는 ⋯ · 공유
+/// 공유가 있으면 양옆 칸을 오른쪽 상자 두 개 폭으로 넓혀 제목을 가운데에 둔다. 깃발 x 313 · 공유 x 349 (아이콘 20, 사이 16)
 /// 뒤로가기 상자 40×40 이 x=16, y=67 (상태 표시줄 포함 화면 위 기준) — 다른 하위 화면(`ElumScaffold backTop: 67`)과 같은 자리
 /// SafeArea 밖에서 쓴다: 상태 표시줄 높이를 직접 빼서 시안 y 를 맞춘다
 class TalkTopBar extends StatelessWidget {
@@ -19,6 +19,7 @@ class TalkTopBar extends StatelessWidget {
     required this.onBackPressed,
     this.onMorePressed,
     this.isMoreVisible = false,
+    this.shouldShowReportIcon = false,
     this.onSharePressed,
   });
 
@@ -31,6 +32,9 @@ class TalkTopBar extends StatelessWidget {
   /// ⋯ 자리를 둘지 (글을 받기 전에는 자리만 비워 제목이 흔들리지 않게)
   final bool isMoreVisible;
 
+  /// 메뉴 버튼을 ⋯ 대신 신고 깃발로 그릴지 (남의 글: 신고 · 숨기기 메뉴)
+  final bool shouldShowReportIcon;
+
   /// 공유를 눌렀을 때 (아이콘 상자 영역 > 아이패드 공유 시트 팝오버 기준). null 이면 공유 없음
   final ValueChanged<Rect?>? onSharePressed;
 
@@ -40,8 +44,11 @@ class TalkTopBar extends StatelessWidget {
   static const _sideInset = 16.0;
   static const _iconSize = 24.0;
 
-  /// 공유 아이콘 (시안 fi-br-upload 20×20)
-  static const _shareIconSize = 20.0;
+  /// 오른쪽 아이콘 상자: 20 아이콘 사이 16 을 시안대로 두려고 뒤로가기(40)보다 좁힌다
+  static const _trailingBoxSize = 36.0;
+
+  /// 신고 깃발 · 공유 아이콘 (시안 fi-br-flag · fi-br-upload 20×20)
+  static const _trailingIconSize = 20.0;
   static const _bottomGap = 12.0;
 
   /// 화면 위에서 본문이 시작하는 시안 y (상자 아래 + 간격)
@@ -57,8 +64,10 @@ class TalkTopBar extends StatelessWidget {
     final onMorePressed = this.onMorePressed;
     final onSharePressed = this.onSharePressed;
     final isMoreShown = isMoreVisible && onMorePressed != null;
-    // 공유 화면(상세)은 상자 두 개, 그 밖은 하나
-    final slotBoxCount = onSharePressed != null ? 2 : 1;
+    // 공유 화면(상세)은 오른쪽 상자 두 개, 그 밖은 뒤로가기 상자 하나
+    final sideSlotWidth = onSharePressed != null
+        ? _trailingBoxSize.w * 2
+        : _boxSize.w;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -68,7 +77,7 @@ class TalkTopBar extends StatelessWidget {
         _bottomGap.h,
       ),
       child: ElumCenteredTitleRow(
-        sideSlotWidth: _boxSize.w * slotBoxCount,
+        sideSlotWidth: sideSlotWidth,
         title: Text(
           title,
           textAlign: TextAlign.center,
@@ -89,11 +98,21 @@ class TalkTopBar extends StatelessWidget {
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (isMoreShown)
+            if (isMoreShown && shouldShowReportIcon)
+              _IconBox(
+                asset: AppAssets.iconFlag,
+                semanticLabel: l10n.talkMenuReport,
+                color: colors.talkMetaText,
+                boxSize: _trailingBoxSize,
+                iconSize: _trailingIconSize,
+                onTap: (_) => onMorePressed(),
+              )
+            else if (isMoreShown)
               _IconBox(
                 asset: AppAssets.iconMenuDots,
                 semanticLabel: l10n.talkMoreLabel,
                 color: colors.textPrimary,
+                boxSize: _trailingBoxSize,
                 onTap: (_) => onMorePressed(),
               ),
             if (onSharePressed != null)
@@ -101,7 +120,8 @@ class TalkTopBar extends StatelessWidget {
                 asset: AppAssets.iconShare,
                 semanticLabel: l10n.talkShareLinkButton,
                 color: colors.talkMetaText,
-                iconSize: _shareIconSize,
+                boxSize: _trailingBoxSize,
+                iconSize: _trailingIconSize,
                 onTap: onSharePressed,
               ),
           ],
@@ -111,13 +131,14 @@ class TalkTopBar extends StatelessWidget {
   }
 }
 
-/// 40×40 누름 상자 가운데 아이콘 (기본 24). 누르면 상자 영역을 넘긴다 (공유 팝오버 기준)
+/// 누름 상자(기본 40×40) 가운데 아이콘 (기본 24). 누르면 상자 영역을 넘긴다 (공유 팝오버 기준)
 class _IconBox extends StatelessWidget {
   const _IconBox({
     required this.asset,
     required this.semanticLabel,
     required this.color,
     required this.onTap,
+    this.boxSize = TalkTopBar._boxSize,
     this.iconSize = TalkTopBar._iconSize,
   });
 
@@ -127,6 +148,7 @@ class _IconBox extends StatelessWidget {
   /// null 이면 SVG 원래 색 (뒤로가기)
   final Color? color;
   final ValueChanged<Rect?> onTap;
+  final double boxSize;
   final double iconSize;
 
   @override
@@ -139,8 +161,8 @@ class _IconBox extends StatelessWidget {
         onTap: () => onTap(_globalRectOf(context)),
         scaleDown: AppPressable.scaleIcon,
         child: SizedBox(
-          width: TalkTopBar._boxSize.w,
-          height: TalkTopBar._boxSize.w,
+          width: boxSize.w,
+          height: boxSize.w,
           child: Center(
             child: SvgPicture.asset(
               asset,

@@ -27,7 +27,7 @@ import 'widgets/talk_empty_line.dart';
 import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_top_bar.dart';
 
-/// 이야기 글 상세: 머리(뒤로 · 제목 · ⋯ · 공유) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
+/// 이야기 글 상세: 머리(뒤로 · 제목 · 신고 또는 ⋯ · 공유) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
 /// 상태: 받는 중 / 내려간 글(404) / 실패(다시 하기 + 에러 코드) / 본문
 class TalkDetailScreen extends ConsumerStatefulWidget {
   const TalkDetailScreen({super.key, required this.postId});
@@ -125,6 +125,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               title: context.l10n.talkTitle,
               onBackPressed: context.popOrHome,
               isMoreVisible: post != null,
+              // 남의 글은 신고 깃발(신고 · 숨기기), 내 글은 ⋯(고치기 · 내리기)
+              shouldShowReportIcon: post != null && !post.isMine,
               onMorePressed: post == null
                   ? null
                   : () => _actions.openPostMenu(post),
