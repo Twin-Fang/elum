@@ -74,6 +74,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkEmptyTitle,
     required this.talkEmptyBody,
     required this.talkRuleText,
+    required this.talkShareStepTitle,
+    required this.talkShareRoutineTitle,
+    required this.talkShareGuide,
+    required this.talkShareSectionLabel,
+    required this.talkCategoryPickerLabel,
+    required this.talkNoteInput,
+    required this.talkNoteCounter,
+    required this.talkBlurChoiceLabel,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
@@ -387,6 +395,30 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 이용 규칙 한 줄 (Pretendard 500/15)
   final TextStyle talkRuleText;
+
+  /// 올리기 단계 제목 `어떤 일과를 나눌까요?` · `사진을 어떻게 올릴까요?` (Pretendard 600/18, 시안 1870:9066 · 1877:10504)
+  final TextStyle talkShareStepTitle;
+
+  /// 올리기 내용 쓰기 맨 위 일과 제목 (Pretendard 700/20, 시안 1870:9441)
+  final TextStyle talkShareRoutineTitle;
+
+  /// 올리기 단계 제목 아래 안내 (Pretendard 400/14 · 줄 높이 1.2, 시안 1877:10505)
+  final TextStyle talkShareGuide;
+
+  /// 올리기 · 고치기 구역 이름 `내용` · `분류` · `이렇게 보여요` (Pretendard 500/16, 시안 1870:9448)
+  final TextStyle talkShareSectionLabel;
+
+  /// 분류 고르기 칩 글자 (Pretendard 500/16, 시안 1870:9476). 목록 분류 칩(14)보다 크다
+  final TextStyle talkCategoryPickerLabel;
+
+  /// 한마디 입력 · 안내 글자 (Pretendard 400/14 · 줄 높이 1.2, 시안 1870:9451)
+  final TextStyle talkNoteInput;
+
+  /// 한마디 글자 수 `0/300` (Pretendard 400/13, 시안 1870:9456)
+  final TextStyle talkNoteCounter;
+
+  /// 사진 `흐리게` · `그대로` 버튼 글자 (Pretendard 500/14, 시안 1877:10590)
+  final TextStyle talkBlurChoiceLabel;
 
 
 
@@ -1016,6 +1048,54 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.4,
     ),
+    talkShareStepTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkShareRoutineTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+    ),
+    talkShareGuide: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    talkShareSectionLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkCategoryPickerLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkNoteInput: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    talkNoteCounter: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    talkBlurChoiceLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1495,6 +1575,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkEmptyTitle,
     TextStyle? talkEmptyBody,
     TextStyle? talkRuleText,
+    TextStyle? talkShareStepTitle,
+    TextStyle? talkShareRoutineTitle,
+    TextStyle? talkShareGuide,
+    TextStyle? talkShareSectionLabel,
+    TextStyle? talkCategoryPickerLabel,
+    TextStyle? talkNoteInput,
+    TextStyle? talkNoteCounter,
+    TextStyle? talkBlurChoiceLabel,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
@@ -1626,6 +1714,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyTitle: talkEmptyTitle ?? this.talkEmptyTitle,
       talkEmptyBody: talkEmptyBody ?? this.talkEmptyBody,
       talkRuleText: talkRuleText ?? this.talkRuleText,
+      talkShareStepTitle: talkShareStepTitle ?? this.talkShareStepTitle,
+      talkShareRoutineTitle: talkShareRoutineTitle ?? this.talkShareRoutineTitle,
+      talkShareGuide: talkShareGuide ?? this.talkShareGuide,
+      talkShareSectionLabel: talkShareSectionLabel ?? this.talkShareSectionLabel,
+      talkCategoryPickerLabel: talkCategoryPickerLabel ?? this.talkCategoryPickerLabel,
+      talkNoteInput: talkNoteInput ?? this.talkNoteInput,
+      talkNoteCounter: talkNoteCounter ?? this.talkNoteCounter,
+      talkBlurChoiceLabel: talkBlurChoiceLabel ?? this.talkBlurChoiceLabel,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
@@ -1776,6 +1872,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyTitle: TextStyle.lerp(talkEmptyTitle, other.talkEmptyTitle, t)!,
       talkEmptyBody: TextStyle.lerp(talkEmptyBody, other.talkEmptyBody, t)!,
       talkRuleText: TextStyle.lerp(talkRuleText, other.talkRuleText, t)!,
+      talkShareStepTitle: TextStyle.lerp(talkShareStepTitle, other.talkShareStepTitle, t)!,
+      talkShareRoutineTitle: TextStyle.lerp(talkShareRoutineTitle, other.talkShareRoutineTitle, t)!,
+      talkShareGuide: TextStyle.lerp(talkShareGuide, other.talkShareGuide, t)!,
+      talkShareSectionLabel: TextStyle.lerp(talkShareSectionLabel, other.talkShareSectionLabel, t)!,
+      talkCategoryPickerLabel: TextStyle.lerp(talkCategoryPickerLabel, other.talkCategoryPickerLabel, t)!,
+      talkNoteInput: TextStyle.lerp(talkNoteInput, other.talkNoteInput, t)!,
+      talkNoteCounter: TextStyle.lerp(talkNoteCounter, other.talkNoteCounter, t)!,
+      talkBlurChoiceLabel: TextStyle.lerp(talkBlurChoiceLabel, other.talkBlurChoiceLabel, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,

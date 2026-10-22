@@ -48,24 +48,28 @@ class TalkShareStepCard extends StatelessWidget {
   }
 }
 
-/// 2열 격자 (상세 한 눈에 보기와 같은 칸 사이 9 × 8): 칸 폭을 받아 칸마다 그린다
+/// 2열 격자 (상세 한 눈에 보기와 같은 칸 사이 9 × 8, 줄 사이는 바꿀 수 있다): 칸 폭을 받아 칸마다 그린다
 class TalkShareCardGrid extends StatelessWidget {
   const TalkShareCardGrid({
     super.key,
     required this.itemCount,
     required this.itemBuilder,
     this.isCenteredWhenSingle = false,
+    this.rowSpacing = defaultRowSpacing,
   });
 
   final int itemCount;
 
   /// true 면 칸이 하나뿐일 때 가운데에 둔다 (사진 고르기)
   final bool isCenteredWhenSingle;
+
+  /// 줄 사이 (사진 고르기는 판 사이 24)
+  final double rowSpacing;
   final Widget Function(BuildContext context, int index, double cellWidth)
   itemBuilder;
 
+  static const defaultRowSpacing = 8.0;
   static const _gapH = 9.0;
-  static const _gapV = 8.0;
   static const _columnCount = 2;
 
   @override
@@ -82,7 +86,7 @@ class TalkShareCardGrid extends StatelessWidget {
               ? WrapAlignment.center
               : WrapAlignment.start,
           spacing: _gapH.w,
-          runSpacing: _gapV.w,
+          runSpacing: rowSpacing.w,
           children: [
             for (var index = 0; index < itemCount; index++)
               SizedBox(

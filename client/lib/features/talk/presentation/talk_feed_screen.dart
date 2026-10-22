@@ -49,7 +49,10 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   /// 제목 > 칩 > 목록, 섹션 사이, 섹션 제목 > 카드, 카드 사이 (시안 23 · 32 · 32 · 16 · 8)
   /// 제목 > 칩 23 은 시안 실측 (제목 y87 h22 줄 높이 1.0 > 칩 y132)
   static const _titleToChips = 23.0;
-  static const _chipsToList = 32.0;
+
+  /// 칩 > 목록 32 = 고정 머리 아래 8 (시안 상단 픽스 h174, 칩 끝 y166) + 목록 위 24 (스크롤과 함께 올라감)
+  static const _chipsToFixedHeaderEnd = 8.0;
+  static const _listTop = 24.0;
   static const _sectionGap = 32.0;
   static const _sectionTitleToCards = 16.0;
   static const _cardGap = 8.0;
@@ -163,7 +166,7 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
               selectedCategory: _selectedCategory,
               onSelected: _onCategorySelected,
             ),
-            SizedBox(height: _chipsToList.h),
+            SizedBox(height: _chipsToFixedHeaderEnd.h),
             Expanded(child: _body()),
           ],
         ),
@@ -210,7 +213,10 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
     return ListView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.only(bottom: TalkWriteButton.scrollBottomSpace.h),
+      padding: EdgeInsets.only(
+        top: _listTop.h,
+        bottom: TalkWriteButton.scrollBottomSpace.h,
+      ),
       children: [
         if (popularPosts.isNotEmpty) ...[
           TalkPopularRow(posts: popularPosts, onPostTapped: _openPost),

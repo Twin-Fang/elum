@@ -41,23 +41,24 @@ class TalkShareDetailsForm extends StatelessWidget {
   /// false 면 입력을 잠근다 (올리는 중)
   final bool isEnabled;
 
-  /// 머리 > 첫 구역 · 구역 사이 · 미리보기 안내 > 격자 (시안 1870:9398: 32 · 40 · 24)
+  /// 머리 > 첫 구역 · 구역 사이 (시안 1870:9398: 제목 끝 167 > 내용 199, 분류 칩 끝 529 > 이렇게 보여요 569)
   static const _headingToSection = 32.0;
   static const _sectionGap = 40.0;
-  static const _hintInset = 8.0;
-  static const _hintToGrid = 24.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final sectionLabelStyle = context.typo.talkShareSectionLabel;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TalkPageHeading(title: preview.title),
+        TalkPageHeading(title: preview.title, isRoutineTitle: true),
         SizedBox(height: _headingToSection.h),
         TalkFormSection(
           label: l10n.talkNoteLabel,
+          labelStyle: sectionLabelStyle,
+          labelToChildSpacing: TalkFormSection.labelToFieldSpacing,
           child: TalkNoteField(
             controller: noteController,
             isEnabled: isEnabled,
@@ -67,6 +68,8 @@ class TalkShareDetailsForm extends StatelessWidget {
         SizedBox(height: _sectionGap.h),
         TalkFormSection(
           label: l10n.talkCategoryTitle,
+          labelStyle: sectionLabelStyle,
+          labelToChildSpacing: TalkFormSection.labelToChoicesSpacing,
           child: TalkCategoryPicker(
             selectedCategory: category,
             isEnabled: isEnabled,
@@ -74,37 +77,24 @@ class TalkShareDetailsForm extends StatelessWidget {
           ),
         ),
         SizedBox(height: _sectionGap.h),
-        // 이름을 가린 카드 미리보기 (올라간 뒤 상세와 같은 모양)
+        // 올라간 뒤 상세와 같은 카드 격자
         TalkFormSection(
           label: l10n.talkSharePreviewTitle,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: _hintInset.w),
-                child: Text(
-                  l10n.talkSharePreviewHint,
-                  style: context.typo.talkGuide.copyWith(
-                    color: context.colors.talkMetaText,
-                  ),
-                ),
-              ),
-              SizedBox(height: _hintToGrid.h),
-              TalkShareCardGrid(
-                itemCount: preview.steps.length,
-                itemBuilder: (context, index, cellWidth) {
-                  final step = preview.steps[index];
-                  return TalkShareStepCard(
-                    routineId: routineId,
-                    step: step,
-                    card: cardByStepId[step.stepId],
-                    index: index,
-                    width: cellWidth,
-                    isBlurred: blurChoiceByStepId[step.stepId] == true,
-                  );
-                },
-              ),
-            ],
+          labelStyle: sectionLabelStyle,
+          labelToChildSpacing: TalkFormSection.labelToChoicesSpacing,
+          child: TalkShareCardGrid(
+            itemCount: preview.steps.length,
+            itemBuilder: (context, index, cellWidth) {
+              final step = preview.steps[index];
+              return TalkShareStepCard(
+                routineId: routineId,
+                step: step,
+                card: cardByStepId[step.stepId],
+                index: index,
+                width: cellWidth,
+                isBlurred: blurChoiceByStepId[step.stepId] == true,
+              );
+            },
           ),
         ),
       ],

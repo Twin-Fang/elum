@@ -5675,7 +5675,7 @@ abstract class AppLocalizations {
   /// 올리기 2단계 사진 안내
   ///
   /// In ko, this message translates to:
-  /// **'얼굴, 이름표, 집 주소가 보이면 흐리게 해 주세요. AI로 만든 그림은 그대로 올라가요.'**
+  /// **'얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 올라가요'**
   String get talkSharePhotoGuide;
 
   /// 사진을 흐리게 올리는 선택지
@@ -5701,12 +5701,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이렇게 보여요'**
   String get talkSharePreviewTitle;
-
-  /// 카드 미리보기 아래 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'이름은 모두 \'이룸이\'로 바뀌어 올라가요'**
-  String get talkSharePreviewHint;
 
   /// 올리기 3단계 완료 버튼
   ///

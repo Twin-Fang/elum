@@ -92,3 +92,5 @@ measured_exceptions:
   - {path: lib/features/profile/presentation/guardians_screen.dart, rule: spacing, value: "17", reason: "1027:4617 초대 카드 끝 603 > 그만두기 620"}
   - {path: lib/features/talk/presentation/talk_feed_screen.dart, rule: spacing, value: "23", reason: "1783:6640 제목 y87 h22 > 칩 y132"}
   - {path: lib/features/talk/presentation/widgets/talk_comment_list.dart, rule: spacing, value: "15", reason: "1860:7944 내용 y36 h17 > 칸 68"}
+  - {path: lib/features/talk/presentation/widgets/talk_form_section.dart, rule: spacing, value: "9", reason: "1870:9448 내용 y199 h16 > 입력칸 y224"}
+  - {path: lib/features/talk/presentation/widgets/talk_page_heading.dart, rule: spacing, value: "28", reason: "1870:9398 머리 줄 끝 y119 > 제목 y147"}

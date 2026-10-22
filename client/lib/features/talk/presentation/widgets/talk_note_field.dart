@@ -20,9 +20,10 @@ class TalkNoteField extends StatelessWidget {
   final bool isEnabled;
   final ValueChanged<String> onChanged;
 
-  /// 처음 보이는 줄 · 늘어나는 최대 줄
-  static const _minLines = 4;
+  /// 처음 보이는 줄 · 늘어나는 최대 줄 · 칸 안쪽 (시안 칸 높이 124 = 안쪽 20 + 5줄 × 16.8 + 20)
+  static const _minLines = 5;
   static const _maxLines = 8;
+  static const _contentInset = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,10 @@ class TalkNoteField extends StatelessWidget {
           maxLines: _maxLines,
           enabled: isEnabled,
           onChanged: onChanged,
-          textStyle: context.typo.talkCommentField,
+          textStyle: context.typo.talkNoteInput,
+          contentInset: _contentInset,
+          textColor: context.colors.talkNoteText,
+          hintColor: context.colors.talkNoteHint,
         ),
         TalkNoteCaption(noteLength: controller.text.length),
       ],
@@ -61,7 +65,9 @@ class TalkNoteCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final style = context.typo.talkGuide.copyWith(color: colors.talkMetaText);
+    final style = context.typo.talkNoteCounter.copyWith(
+      color: colors.talkMetaText,
+    );
     final isNearLimit =
         TalkTextLimits.maxNoteLength - noteLength <= _nearLimitRemaining;
     return Padding(

@@ -16,6 +16,9 @@ class ElumMultilineTextField extends StatelessWidget {
     this.enabled = true,
     this.onChanged,
     this.textStyle,
+    this.contentInset,
+    this.textColor,
+    this.hintColor,
   });
 
   final TextEditingController controller;
@@ -34,6 +37,13 @@ class ElumMultilineTextField extends StatelessWidget {
 
   /// 입력 · 안내 글자. null 이면 input 글꼴(기본). 화면 글꼴에 맞출 때만 넘긴다 (이야기는 Pretendard)
   final TextStyle? textStyle;
+
+  /// 칸 안쪽 여백. null 이면 16 (이야기 한마디는 시안 20)
+  final double? contentInset;
+
+  /// 입력 · 안내 글자 색. null 이면 본문색 · placeholder 색
+  final Color? textColor;
+  final Color? hintColor;
 
   static const defaultMinLines = 8;
 
@@ -57,13 +67,15 @@ class ElumMultilineTextField extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       textInputAction: TextInputAction.newline,
       inputFormatters: [LengthLimitingTextInputFormatter(maxLength)],
-      style: textStyle.copyWith(color: colors.textPrimary),
+      style: textStyle.copyWith(color: textColor ?? colors.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: textStyle.copyWith(color: colors.textPlaceholder),
+        hintStyle: textStyle.copyWith(
+          color: hintColor ?? colors.textPlaceholder,
+        ),
         filled: true,
         fillColor: colors.surface,
-        contentPadding: EdgeInsets.all(space.md.w),
+        contentPadding: EdgeInsets.all((contentInset ?? space.md).w),
         border: border,
         enabledBorder: border,
         disabledBorder: border,

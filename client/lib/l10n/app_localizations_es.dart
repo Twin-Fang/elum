@@ -3148,7 +3148,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get talkSharePhotoGuide =>
-      '얼굴, 이름표, 집 주소가 보이면 흐리게 해 주세요. AI로 만든 그림은 그대로 올라가요.';
+      '얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 올라가요';
 
   @override
   String get talkSharePhotoBlur => '흐리게';
@@ -3161,9 +3161,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get talkSharePreviewTitle => '이렇게 보여요';
-
-  @override
-  String get talkSharePreviewHint => '이름은 모두 \'이룸이\'로 바뀌어 올라가요';
 
   @override
   String get talkShareSubmit => '올리기';

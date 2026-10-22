@@ -82,6 +82,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkImportGroupSelectedFill,
     required this.talkImportGroupSelectedStroke,
     required this.talkCommentFieldFill,
+    required this.talkBlurChoicePanelFill,
+    required this.talkBlurChoiceSelectedFill,
+    required this.talkBlurChoiceFill,
+    required this.talkBlurChoiceLabel,
+    required this.talkNoteText,
+    required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -389,6 +395,24 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 댓글 입력칸 판 (흰색 60%, 시안 1806:7485)
   final Color talkCommentFieldFill;
+
+  /// 사진 고르기 칸 판 (#EEE9E6, 시안 1877:10569)
+  final Color talkBlurChoicePanelFill;
+
+  /// `흐리게` · `그대로` 고른 버튼 (#242634, 시안 1877:10589)
+  final Color talkBlurChoiceSelectedFill;
+
+  /// `흐리게` · `그대로` 안 고른 버튼 (#D7D3D1, 시안 1877:10591)
+  final Color talkBlurChoiceFill;
+
+  /// `흐리게` · `그대로` 버튼 글자 (고름 · 안 고름 모두 흰색)
+  final Color talkBlurChoiceLabel;
+
+  /// 한마디 입력 글자 (#000000, 시안 1870:9545)
+  final Color talkNoteText;
+
+  /// 한마디 입력칸 안내 글자 (#242634 40%, 시안 1870:9451)
+  final Color talkNoteHint;
 
 
 
@@ -1062,6 +1086,12 @@ class AppColors extends ThemeExtension<AppColors> {
     talkImportGroupSelectedFill: Color(0xFFB5EAEC),
     talkImportGroupSelectedStroke: Color(0xFF55CFBA),
     talkCommentFieldFill: Color(0x99FFFFFF),
+    talkBlurChoicePanelFill: Color(0xFFEEE9E6),
+    talkBlurChoiceSelectedFill: Color(0xFF242634),
+    talkBlurChoiceFill: Color(0xFFD7D3D1),
+    talkBlurChoiceLabel: Color(0xFFFFFFFF),
+    talkNoteText: Color(0xFF000000),
+    talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1308,6 +1338,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkImportGroupSelectedFill,
     Color? talkImportGroupSelectedStroke,
     Color? talkCommentFieldFill,
+    Color? talkBlurChoicePanelFill,
+    Color? talkBlurChoiceSelectedFill,
+    Color? talkBlurChoiceFill,
+    Color? talkBlurChoiceLabel,
+    Color? talkNoteText,
+    Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1542,6 +1578,12 @@ class AppColors extends ThemeExtension<AppColors> {
       talkImportGroupSelectedFill: talkImportGroupSelectedFill ?? this.talkImportGroupSelectedFill,
       talkImportGroupSelectedStroke: talkImportGroupSelectedStroke ?? this.talkImportGroupSelectedStroke,
       talkCommentFieldFill: talkCommentFieldFill ?? this.talkCommentFieldFill,
+      talkBlurChoicePanelFill: talkBlurChoicePanelFill ?? this.talkBlurChoicePanelFill,
+      talkBlurChoiceSelectedFill: talkBlurChoiceSelectedFill ?? this.talkBlurChoiceSelectedFill,
+      talkBlurChoiceFill: talkBlurChoiceFill ?? this.talkBlurChoiceFill,
+      talkBlurChoiceLabel: talkBlurChoiceLabel ?? this.talkBlurChoiceLabel,
+      talkNoteText: talkNoteText ?? this.talkNoteText,
+      talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1816,6 +1858,12 @@ class AppColors extends ThemeExtension<AppColors> {
       talkImportGroupSelectedFill: Color.lerp(talkImportGroupSelectedFill, other.talkImportGroupSelectedFill, t)!,
       talkImportGroupSelectedStroke: Color.lerp(talkImportGroupSelectedStroke, other.talkImportGroupSelectedStroke, t)!,
       talkCommentFieldFill: Color.lerp(talkCommentFieldFill, other.talkCommentFieldFill, t)!,
+      talkBlurChoicePanelFill: Color.lerp(talkBlurChoicePanelFill, other.talkBlurChoicePanelFill, t)!,
+      talkBlurChoiceSelectedFill: Color.lerp(talkBlurChoiceSelectedFill, other.talkBlurChoiceSelectedFill, t)!,
+      talkBlurChoiceFill: Color.lerp(talkBlurChoiceFill, other.talkBlurChoiceFill, t)!,
+      talkBlurChoiceLabel: Color.lerp(talkBlurChoiceLabel, other.talkBlurChoiceLabel, t)!,
+      talkNoteText: Color.lerp(talkNoteText, other.talkNoteText, t)!,
+      talkNoteHint: Color.lerp(talkNoteHint, other.talkNoteHint, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,

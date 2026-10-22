@@ -90,6 +90,8 @@ class _TalkEditSheetState extends ConsumerState<_TalkEditSheet> {
         children: [
           TalkFormSection(
             label: l10n.talkNoteLabel,
+            labelStyle: context.typo.talkShareSectionLabel,
+            labelToChildSpacing: TalkFormSection.labelToFieldSpacing,
             child: TalkNoteField(
               controller: _noteController,
               isEnabled: !_isSaving,
@@ -99,6 +101,8 @@ class _TalkEditSheetState extends ConsumerState<_TalkEditSheet> {
           SizedBox(height: _sectionGap.h),
           TalkFormSection(
             label: l10n.talkCategoryTitle,
+            labelStyle: context.typo.talkShareSectionLabel,
+            labelToChildSpacing: TalkFormSection.labelToChoicesSpacing,
             child: TalkCategoryPicker(
               selectedCategory: _category,
               isEnabled: !_isSaving,

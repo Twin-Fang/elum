@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/theme/theme_context_ext.dart';
 import '../../../guardian/domain/routine_template.dart';
 import 'talk_category_chips.dart';
 
@@ -53,6 +54,7 @@ class TalkCategoryPicker extends StatelessWidget {
                                   categories[start + column] ==
                                   selectedCategory,
                               isExpanded: true,
+                              labelStyle: context.typo.talkCategoryPickerLabel,
                               onTap: isEnabled
                                   ? () => onSelected(categories[start + column])
                                   : null,

@@ -25,9 +25,8 @@ class TalkRoutinePicker extends ConsumerWidget {
 
   final ValueChanged<String> onSelected;
 
-  /// 목록 좌우 · 위 · 머리 > 첫 줄 · 줄 사이 · 차례로 떠오르는 줄 수 상한
+  /// 목록 좌우 · 머리 > 첫 줄 · 줄 사이 · 차례로 떠오르는 줄 수 상한
   static const _listInsetH = 16.0;
-  static const _listTop = 8.0;
   static const _headingToList = 16.0;
   static const _rowGap = 8.0;
   static const _maxStaggerCount = 8;
@@ -50,7 +49,7 @@ class TalkRoutinePicker extends ConsumerWidget {
       AsyncData(value: final routines) => ListView(
         padding: EdgeInsets.fromLTRB(
           _listInsetH.w,
-          _listTop.h,
+          TalkPageHeading.topSpacing.h,
           _listInsetH.w,
           context.space.lg.h,
         ),
@@ -97,10 +96,10 @@ class _ShareableRoutineRow extends ConsumerWidget {
   final Routine routine;
   final VoidCallback onTap;
 
-  /// 일과관리 줄과 같은 높이 68 · 그림 쪽 8 · 오른쪽 14 · 위아래 8 · 제목 > 카드 수 8 (시안 x 24 · 84)
+  /// 일과관리 줄과 같은 높이 68 · 그림 쪽 8 · 오른쪽 16 · 위아래 8 · 제목 > 카드 수 8 (시안 x 24 · 84, 꺾쇠 x 337)
   static const _minHeight = 68.0;
   static const _padLeft = 8.0;
-  static const _padRight = 14.0;
+  static const _padRight = 16.0;
   static const _padV = 8.0;
   static const _titleToMeta = 8.0;
   static const _textToChevron = 8.0;

@@ -59,6 +59,7 @@ class TalkCategoryChip extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.isExpanded = false,
+    this.labelStyle,
   });
 
   final String label;
@@ -70,6 +71,9 @@ class TalkCategoryChip extends StatelessWidget {
   /// true 면 받은 폭을 채우고 글자를 가운데에 (격자 · 나란히 두 칸)
   final bool isExpanded;
 
+  /// 글자. null 이면 목록 분류 칩 500/14
+  final TextStyle? labelStyle;
+
   static const _paddingH = 16.0;
   static const _paddingV = 10.0;
 
@@ -79,7 +83,7 @@ class TalkCategoryChip extends StatelessWidget {
     final text = Text(
       label,
       textAlign: TextAlign.center,
-      style: context.typo.chipLabel.copyWith(
+      style: (labelStyle ?? context.typo.chipLabel).copyWith(
         color: isSelected ? colors.surface : colors.talkTitleText,
       ),
     );

@@ -45,3 +45,8 @@ final talkShareSourceRoutineProvider = Provider.autoDispose
       }
       return null;
     });
+
+/// 올리기 진입: 다른 기기에서 만들거나 올린 일과까지 반영되게 일과관리 목록 · 내가 올린 글을 다시 받는다
+void refreshShareableRoutineSources(WidgetRef ref) => ref
+  ..invalidate(routineLibraryProvider)
+  ..invalidate(talkMySharedPostsProvider);

@@ -17,6 +17,7 @@ import '../application/talk_share_controller.dart';
 import '../application/talk_shareable_routines_provider.dart';
 import '../domain/talk_preview.dart';
 import '../domain/talk_screen_codes.dart';
+import 'widgets/talk_page_heading.dart';
 import 'widgets/talk_photo_blur_picker.dart';
 import 'widgets/talk_routine_picker.dart';
 import 'widgets/talk_rules_sheet.dart';
@@ -66,8 +67,9 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
     super.dispose();
   }
 
-  /// 이용 규칙 동의 확인 > (안 하면 닫기) > 입구가 준 일과가 있으면 미리보기 받기
+  /// 일과 목록 새로 받기 > 이용 규칙 동의 확인 > (안 하면 닫기) > 입구가 준 일과가 있으면 미리보기 받기
   Future<void> _begin() async {
+    refreshShareableRoutineSources(ref);
     final isAgreed = await ensureTalkRulesAgreed(
       context,
       ref,
@@ -175,33 +177,49 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
       },
       child: Scaffold(
         backgroundColor: context.colors.background,
-        // 위 안전영역은 머리 줄이 시안 y 로 직접 맞춘다
-        body: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              TalkTopBar(
-                title: context.l10n.talkShareTitle,
-                onBackPressed: _goBack,
+        // 위 안전영역은 머리 줄이 시안 y 로 직접 맞추고, 아래는 버튼 띠가 홈 표시줄까지 덮는다
+        body: Column(
+          children: [
+            TalkTopBar(
+              title: context.l10n.talkShareTitle,
+              onBackPressed: _goBack,
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: SafeArea(
+                      top: false,
+                      bottom: !_hasBottomButton(stage),
+                      child: _body(stage, state),
+                    ),
+                  ),
+                  if (_hasBottomButton(stage))
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: TalkShareBottomButton(
+                        label: stage == _ShareStage.pickPhotos
+                            ? context.l10n.talkSharePhotoNext
+                            : context.l10n.talkShareSubmit,
+                        isLoading: state.isSubmitting,
+                        onPressed: stage == _ShareStage.pickPhotos
+                            ? (state.hasChosenAllPhotos ? _goToDetails : null)
+                            : (state.canSubmit ? _submit : null),
+                      ),
+                    ),
+                ],
               ),
-              Expanded(child: _body(stage, state)),
-              if (stage == _ShareStage.pickPhotos ||
-                  stage == _ShareStage.writeDetails)
-                TalkShareBottomButton(
-                  label: stage == _ShareStage.pickPhotos
-                      ? context.l10n.talkSharePhotoNext
-                      : context.l10n.talkShareSubmit,
-                  isLoading: state.isSubmitting,
-                  onPressed: stage == _ShareStage.pickPhotos
-                      ? (state.hasChosenAllPhotos ? _goToDetails : null)
-                      : (state.canSubmit ? _submit : null),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  bool _hasBottomButton(_ShareStage stage) =>
+      stage == _ShareStage.pickPhotos || stage == _ShareStage.writeDetails;
 
   Widget _body(_ShareStage stage, TalkShareState state) {
     final routineId = state.routineId;
@@ -251,11 +269,12 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
     return SingleChildScrollView(
       controller: _scrollController,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      // 마지막 줄이 버튼 띠 위까지 올라오게 띠 높이만큼 비운다
       padding: EdgeInsets.fromLTRB(
         space.md.w,
-        space.xs.h,
+        TalkPageHeading.topSpacing.h,
         space.md.w,
-        space.lg.h,
+        TalkShareBottomButton.heightOf(context) + space.lg.h,
       ),
       child: stage == _ShareStage.pickPhotos
           ? TalkPhotoBlurPicker(
