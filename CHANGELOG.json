@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T15:39:09Z",
-    "currentVersion": "2.75.4",
+    "lastUpdated": "2026-10-22T15:41:14Z",
+    "currentVersion": "2.75.5",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 311
+    "totalReleases": 312
   },
   "releases": [
+    {
+      "version": "2.75.5",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 982,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이야기 상세의 댓글 제목 글자 크기를 디자인에 맞게 줄였어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이야기 상세의 댓글 제목 글자 크기를 디자인에 맞게 줄였어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.75.4",
       "project_type": "flutter",
