@@ -2521,7 +2521,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineGroupDefaultName => '새 묶음';
 
   @override
-  String get routineGroupNameHint => '묶음 이름 (예: 아침 준비)';
+  String get routineGroupNameLabel => '묶음 이름';
+
+  @override
+  String get routineGroupNameHint => '예시: 등교 전 준비';
 
   @override
   String get routineGroupNewTitle => '새 묶음 만들기';

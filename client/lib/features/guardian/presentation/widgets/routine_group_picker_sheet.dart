@@ -3,16 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_text_field.dart';
 import '../../../../shared/models/routine.dart';
 import '../../domain/routine_group.dart';
-import 'library_routine_tile.dart';
+import 'routine_group_pick_row.dart';
 
 /// 일과 고르기 결과: 묶음 이름(새 묶음일 때) + 누른 순서대로의 일과 id
 typedef RoutinePickResult = ({String name, List<String> routineIds});
@@ -56,8 +54,23 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
   late final _nameController = TextEditingController();
   late final List<String> _picked = [...widget.preselectedIds];
 
-  /// 시트 높이 (화면 대비) — 목록이 길어도 이름 칸과 버튼이 늘 보이게
-  static const _heightRatio = 0.85;
+  /// 시트 높이 (화면 대비, 시안 770/852) — 목록이 길어도 이름 칸과 버튼이 늘 보이게
+  static const _heightRatio = 770 / 852;
+
+  /// 시트 윗변 > 제목 · 칸 좌우 여백 · 글자 줄 추가 안쪽 (시안 40, 16, 8)
+  static const _titleTop = 40.0;
+  static const _contentInset = 16.0;
+  static const _textInset = 8.0;
+
+  /// 덩어리 사이(제목 > 라벨, 칸 > 안내) · 라벨 > 칸 · 안내 > 목록 · 줄 사이 (시안 24, 9, 16, 8)
+  static const _blockGap = 24.0;
+  static const _labelToField = 9.0;
+  static const _hintToList = 16.0;
+  static const _rowGap = 8.0;
+
+  /// 그라데이션 윗변 > 버튼 · 홈 표시줄 위 버튼 아래 여백 (시안 16, 56 - 34)
+  static const _fadeAboveButton = 16.0;
+  static const _buttonBottomExtra = 22.0;
 
   bool get _isNewGroup => widget.groupName == null;
 
@@ -85,12 +98,7 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final colors = context.colors;
-    final space = context.space;
     final media = MediaQuery.of(context);
-    final groupName = widget.groupName;
-
     return Padding(
       padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
       child: ElumSheetSurface(
@@ -100,174 +108,146 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
           media.size.height -
               media.viewInsets.bottom -
               media.padding.top -
-              space.md.h,
+              context.space.md.h,
         ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            space.md.w,
-            space.lg.h,
-            space.md.w,
-            space.md.h + media.padding.bottom,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 제목
-              Text(
-                groupName == null
-                    ? l10n.routineGroupNewTitle
-                    : l10n.routineGroupAddTitle(groupName),
-                style: context.typo.sectionTitle.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              // 새 묶음이면 이름 칸
-              if (_isNewGroup) ...[
-                SizedBox(height: space.sm.h),
-                ElumTextField(
-                  controller: _nameController,
-                  hintText: l10n.routineGroupNameHint,
-                  maxLength: RoutineGroup.nameMaxLength,
-                ),
-              ],
-              SizedBox(height: space.xs.h),
-              Text(
-                _isNewGroup
-                    ? l10n.routineGroupPickHintNew
-                    : l10n.routineGroupPickHint,
-                style: context.typo.caption.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              SizedBox(height: space.sm.h),
-              // 고를 일과 목록
-              Expanded(
-                child: widget.candidates.isEmpty
-                    ? Center(
-                        child: Text(
-                          l10n.routineGroupPickEmpty,
-                          textAlign: TextAlign.center,
-                          style: context.typo.body.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: widget.candidates.length,
-                        separatorBuilder: (_, _) =>
-                            SizedBox(height: space.xs.h),
-                        itemBuilder: (context, index) {
-                          final routine = widget.candidates[index];
-                          final order = _picked.indexOf(routine.id);
-                          return _PickRow(
-                            routine: routine,
-                            order: order < 0 ? null : order + 1,
-                            onTap: () => _toggle(routine.id),
-                          );
-                        },
-                      ),
-              ),
-              SizedBox(height: space.sm.h),
-              ElumButton(
-                label: _isNewGroup
-                    ? l10n.routineGroupPickConfirmNew(_picked.length)
-                    : l10n.routineGroupPickConfirmAdd(_picked.length),
-                onPressed: _canConfirm ? _confirm : null,
-              ),
-            ],
-          ),
+        // 목록이 버튼 밑으로 흐려지며 사라진다 — 버튼을 목록 위에 띄운다
+        child: Stack(
+          children: [
+            _buildForm(context),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildConfirmBar(context),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-/// 고르기 한 줄: 그림 + 이름 + 누른 순서 번호(안 골랐으면 빈 원)
-class _PickRow extends StatelessWidget {
-  const _PickRow({
-    required this.routine,
-    required this.order,
-    required this.onTap,
-  });
-
-  final Routine routine;
-
-  /// 고른 순서(1부터). 안 골랐으면 null
-  final int? order;
-  final VoidCallback onTap;
-
-  /// 그림 한 변 · 순서 원 한 변
-  static const _thumbnailSize = 44.0;
-  static const _orderSize = 28.0;
-
-  @override
-  Widget build(BuildContext context) {
+  /// 제목 > (새 묶음이면) 이름 라벨·칸 > 고르기 안내 > 일과 목록
+  Widget _buildForm(BuildContext context) {
+    final l10n = context.l10n;
     final colors = context.colors;
-    final space = context.space;
-    final number = order;
-    return Semantics(
-      selected: number != null,
-      button: true,
-      child: AppPressable(
-        onTap: onTap,
-        scaleDown: AppPressable.scaleCard,
-        child: Container(
-          padding: EdgeInsets.all(space.xs.w),
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: BorderRadius.circular(space.sm.w),
+    final groupName = widget.groupName;
+    final labelStyle = context.typo.sheetFieldLabel.copyWith(
+      color: colors.sheetFieldLabelText,
+    );
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        _contentInset.w,
+        _titleTop.h,
+        _contentInset.w,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _inset(
+            Text(
+              groupName == null
+                  ? l10n.routineGroupNewTitle
+                  : l10n.routineGroupAddTitle(groupName),
+              style: context.typo.sheetTitle.copyWith(
+                color: colors.sheetTitleText,
+              ),
+            ),
           ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(space.xs.w),
-                child: SizedBox.square(
-                  dimension: _thumbnailSize.w,
-                  child: LibraryRoutineThumbnail(routine: routine),
-                ),
-              ),
-              SizedBox(width: space.sm.w),
-              Expanded(
-                child: ContentLocale(
-                  language: routine.language,
-                  child: Text(
-                    routine.displayTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.typo.tileLabel.copyWith(
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                width: _orderSize.w,
-                height: _orderSize.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: number == null ? null : colors.textPrimary,
-                  border: Border.all(
-                    color: number == null
-                        ? colors.navIconUnselected
-                        : colors.textPrimary,
-                    width: 2,
-                  ),
-                ),
-                child: number == null
-                    ? null
-                    : Text(
-                        '$number',
-                        style: context.typo.caption.copyWith(
-                          color: colors.surface,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-              ),
-            ],
+          if (_isNewGroup) ...[
+            SizedBox(height: _blockGap.h),
+            _inset(Text(l10n.routineGroupNameLabel, style: labelStyle)),
+            SizedBox(height: _labelToField.h),
+            ElumTextField(
+              controller: _nameController,
+              hintText: l10n.routineGroupNameHint,
+              maxLength: RoutineGroup.nameMaxLength,
+              inputStyle: context.typo.sheetFieldText,
+            ),
+          ],
+          SizedBox(height: _blockGap.h),
+          _inset(
+            Text(
+              _isNewGroup
+                  ? l10n.routineGroupPickHintNew
+                  : l10n.routineGroupPickHint,
+              style: labelStyle,
+            ),
           ),
-        ),
+          SizedBox(height: _hintToList.h),
+          Expanded(child: _buildCandidateList(context)),
+        ],
       ),
     );
   }
+
+  /// 고를 일과 목록. 맨 아래는 버튼 띠만큼 비워 마지막 줄도 버튼 위로 올릴 수 있게
+  Widget _buildCandidateList(BuildContext context) {
+    if (widget.candidates.isEmpty) {
+      return Center(
+        child: Text(
+          context.l10n.routineGroupPickEmpty,
+          textAlign: TextAlign.center,
+          style: context.typo.body.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: EdgeInsets.only(bottom: _confirmBarHeight(context)),
+      itemCount: widget.candidates.length,
+      separatorBuilder: (_, _) => SizedBox(height: _rowGap.h),
+      itemBuilder: (context, index) {
+        final routine = widget.candidates[index];
+        final order = _picked.indexOf(routine.id);
+        return RoutineGroupPickRow(
+          routine: routine,
+          order: order < 0 ? null : order + 1,
+          onTap: () => _toggle(routine.id),
+        );
+      },
+    );
+  }
+
+  /// 아래 버튼 띠: 위 투명 > 아래 시트 바탕색 그라데이션 + 묶기 버튼
+  Widget _buildConfirmBar(BuildContext context) {
+    final l10n = context.l10n;
+    final background = context.colors.background;
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        _contentInset.w,
+        _fadeAboveButton.h,
+        _contentInset.w,
+        _buttonBottomGap(context),
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [background.withValues(alpha: 0), background],
+        ),
+      ),
+      child: ElumButton(
+        label: _isNewGroup
+            ? l10n.routineGroupPickConfirmNew(_picked.length)
+            : l10n.routineGroupPickConfirmAdd(_picked.length),
+        onPressed: _canConfirm ? _confirm : null,
+      ),
+    );
+  }
+
+  /// 버튼 아래 여백 (홈 표시줄 포함, 시안 56)
+  double _buttonBottomGap(BuildContext context) =>
+      _buttonBottomExtra.h + MediaQuery.of(context).padding.bottom;
+
+  /// 버튼 띠 전체 높이 = 그라데이션 위 + 버튼 + 버튼 아래
+  double _confirmBarHeight(BuildContext context) =>
+      _fadeAboveButton.h + context.space.buttonH.h + _buttonBottomGap(context);
+
+  /// 글자 줄은 칸보다 8 안쪽에서 시작한다 (시안: 칸 x16, 글자 x24)
+  Widget _inset(Widget child) => Padding(
+    padding: EdgeInsets.symmetric(horizontal: _textInset.w),
+    child: child,
+  );
 }

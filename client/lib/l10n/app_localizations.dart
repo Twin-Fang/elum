@@ -4598,10 +4598,16 @@ abstract class AppLocalizations {
   /// **'새 묶음'**
   String get routineGroupDefaultName;
 
-  /// 일과 묶음 (#807)
+  /// 새 묶음 만들기 시트: 이름 칸 위 라벨 (#968, 시안 1877:9740)
   ///
   /// In ko, this message translates to:
-  /// **'묶음 이름 (예: 아침 준비)'**
+  /// **'묶음 이름'**
+  String get routineGroupNameLabel;
+
+  /// 새 묶음 만들기 시트: 이름 칸 안내 (#968, 시안 1877:9740)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시: 등교 전 준비'**
   String get routineGroupNameHint;
 
   /// 일과 묶음 (#807)

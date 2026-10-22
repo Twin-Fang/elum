@@ -2629,6 +2629,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineGroupDefaultName => 'New bundle';
 
   @override
+  String get routineGroupNameLabel => '묶음 이름';
+
+  @override
   String get routineGroupNameHint => 'Bundle name (e.g. Morning)';
 
   @override
