@@ -1,15 +1,40 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T00:07:33Z",
-    "currentVersion": "2.70.0",
+    "lastUpdated": "2026-10-22T01:32:32Z",
+    "currentVersion": "2.70.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 298
+    "totalReleases": 299
   },
   "releases": [
+    {
+      "version": "2.70.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-22",
+      "pr_number": 949,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이야기 글 올리기 화면을 더 보기 좋게 바꿨어요\n  * 이야기 댓글과 댓글 입력칸을 새 디자인으로 바꿨어요\n  * 신고·고치기·가져오기 화면을 깔끔하게 정리했어요\n  * 이용 규칙 안내를 읽기 쉽게 바꿨어요\n  * 일과를 가져온 뒤 알림을 새 모양으로 바꿨어요\n  * 숨긴 보호자 목록을 새 디자인으로 바꿨어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이야기 글 올리기 화면을 더 보기 좋게 바꿨어요",
+            "이야기 댓글과 댓글 입력칸을 새 디자인으로 바꿨어요",
+            "신고·고치기·가져오기 화면을 깔끔하게 정리했어요",
+            "이용 규칙 안내를 읽기 쉽게 바꿨어요",
+            "일과를 가져온 뒤 알림을 새 모양으로 바꿨어요",
+            "숨긴 보호자 목록을 새 디자인으로 바꿨어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.70.0",
       "project_type": "flutter",
