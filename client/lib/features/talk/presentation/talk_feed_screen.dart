@@ -25,7 +25,8 @@ import 'widgets/talk_popular_row.dart';
 import 'widgets/talk_post_card.dart';
 import 'widgets/talk_write_button.dart';
 
-/// 하단 바 이야기 칸 (시안 1783:6640): 제목 > 분류 칩 (고정) > 인기 줄 > 최신 글 무한 스크롤 + 아래 가운데 올리기
+/// 하단 바 이야기 칸 (시안 1783:6640): 제목 > 분류 칩 > 인기 줄 > 최신 글 무한 스크롤 + 아래 가운데 올리기
+/// 제목만 고정 (시안 빨간 영역), 칩은 목록과 함께 스크롤 (목록이 없는 받는 중·실패 상태에서는 칩을 위에 그대로 둠)
 /// 상태: 받는 중 / 0건 / 첫 쪽 실패(다시 하기 + 에러 코드) / 목록 (인기 줄은 실패해도 숨기기만 함)
 class TalkFeedScreen extends ConsumerStatefulWidget {
   const TalkFeedScreen({super.key});
@@ -48,11 +49,12 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
 
   /// 제목 > 칩 > 목록, 섹션 사이, 섹션 제목 > 카드, 카드 사이 (시안 23 · 32 · 32 · 16 · 8)
   /// 제목 > 칩 23 은 시안 실측 (제목 y87 h22 줄 높이 1.0 > 칩 y132)
-  static const _titleToChips = 23.0;
+  /// 23 = 고정 영역(제목) 아래 15 + 스크롤 영역 위 8 (시안 빨간 영역 끝 ~ 제목 아래 15, 칩 위 8 은 시안 이미지 실측 근사)
+  static const _titleToFixedEnd = 15.0;
+  static const _fixedEndToChips = 8.0;
 
-  /// 칩 > 목록 32 = 고정 머리 아래 8 (시안 상단 픽스 h174, 칩 끝 y166) + 목록 위 24 (스크롤과 함께 올라감)
-  static const _chipsToFixedHeaderEnd = 8.0;
-  static const _listTop = 24.0;
+  /// 칩 > 목록 32 (시안 칩 끝 y166 > 목록 y198)
+  static const _chipsToList = 32.0;
   static const _sectionGap = 32.0;
   static const _sectionTitleToCards = 16.0;
   static const _cardGap = 8.0;
@@ -136,7 +138,6 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final space = context.space;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -147,29 +148,40 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                space.screenH.w,
-                _titleTop.h,
-                space.screenH.w,
-                0,
-              ),
-              child: Text(
-                context.l10n.talkTitle,
-                style: context.typo.libraryTitle.copyWith(
-                  color: colors.talkTitleText,
-                ),
-              ),
-            ),
-            SizedBox(height: _titleToChips.h),
-            TalkCategoryChips(
-              selectedCategory: _selectedCategory,
-              onSelected: _onCategorySelected,
-            ),
-            SizedBox(height: _chipsToFixedHeaderEnd.h),
+            _fixedTitle(),
             Expanded(child: _body()),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 스크롤해도 남는 제목 (시안 빨간 영역)
+  Widget _fixedTitle() {
+    final space = context.space;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        space.screenH.w,
+        _titleTop.h,
+        space.screenH.w,
+        _titleToFixedEnd.h,
+      ),
+      child: Text(
+        context.l10n.talkTitle,
+        style: context.typo.libraryTitle.copyWith(
+          color: context.colors.talkTitleText,
+        ),
+      ),
+    );
+  }
+
+  /// 분류 칩 줄 (목록 안에서는 첫 요소로 함께 스크롤)
+  Widget _categoryChips() {
+    return Padding(
+      padding: EdgeInsets.only(top: _fixedEndToChips.h),
+      child: TalkCategoryChips(
+        selectedCategory: _selectedCategory,
+        onSelected: _onCategorySelected,
       ),
     );
   }
@@ -188,8 +200,10 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
         child: _list(state, controller),
       );
     }
+    // 목록이 없는 상태: 스크롤할 것이 없으니 칩을 위에 두고 아래를 상태로 채움
+    final Widget stateBody;
     if (feed.hasError) {
-      return ElumStateBody(
+      stateBody = ElumStateBody(
         child: ElumErrorView.failure(
           feed.error,
           fallback: context.l10n.talkFeedFailed,
@@ -198,8 +212,17 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
           isRetrying: _isRetrying,
         ),
       );
+    } else {
+      stateBody = const ElumStateBody.loading();
     }
-    return const ElumStateBody.loading();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _categoryChips(),
+        SizedBox(height: _chipsToList.h),
+        Expanded(child: stateBody),
+      ],
+    );
   }
 
   Widget _list(TalkFeedState state, TalkFeedController controller) {
@@ -213,11 +236,10 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
     return ListView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.only(
-        top: _listTop.h,
-        bottom: TalkWriteButton.scrollBottomSpace.h,
-      ),
+      padding: EdgeInsets.only(bottom: TalkWriteButton.scrollBottomSpace.h),
       children: [
+        _categoryChips(),
+        SizedBox(height: _chipsToList.h),
         if (popularPosts.isNotEmpty) ...[
           TalkPopularRow(posts: popularPosts, onPostTapped: _openPost),
           SizedBox(height: _sectionGap.h),
