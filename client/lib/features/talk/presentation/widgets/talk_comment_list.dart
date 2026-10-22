@@ -160,9 +160,12 @@ class _CommentRow extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
 
+    // 가린 댓글은 지우기·신고 메뉴가 의미 없어 ⋯ 와 길게 누르기를 뺀다
+    final isHidden = comment.isHidden;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: onMenuRequested,
+      onLongPress: isHidden ? null : onMenuRequested,
       child: Padding(
         padding: EdgeInsets.only(top: _padTop.h, bottom: _padBottom.h),
         child: Column(
@@ -195,16 +198,19 @@ class _CommentRow extends StatelessWidget {
                   ),
                 ),
                 // 누름 영역 44 중 아이콘(18) 오른쪽 끝을 본문 끝선에 맞춘다
-                Transform.translate(
-                  offset: Offset(_dotsOverhang.w, 0),
-                  child: TalkMoreDotsButton(onTap: onMenuRequested),
-                ),
+                if (!isHidden)
+                  Transform.translate(
+                    offset: Offset(_dotsOverhang.w, 0),
+                    child: TalkMoreDotsButton(onTap: onMenuRequested),
+                  ),
               ],
             ),
             SizedBox(height: _headerToBody.h),
             Text(
-              comment.body,
-              style: typo.talkCommentBody.copyWith(color: colors.textPrimary),
+              isHidden ? l10n.talkCommentHiddenNotice : comment.body,
+              style: typo.talkCommentBody.copyWith(
+                color: isHidden ? colors.talkMetaText : colors.textPrimary,
+              ),
             ),
           ],
         ),

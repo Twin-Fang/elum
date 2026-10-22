@@ -103,7 +103,7 @@ class TalkReactionSecurityTest {
     when(talkReactionService.comments(any(), eq("p1"), eq(null), eq(10)))
       .thenReturn(new TalkCommentPageResponse(List.of(), null));
     when(talkReactionService.addComment(any(), eq("p1"), any()))
-      .thenReturn(new TalkCommentResponse("c1", "이웃", true, "안녕", LocalDateTime.of(2026, 10, 20, 9, 0)));
+      .thenReturn(new TalkCommentResponse("c1", "이웃", true, "안녕", LocalDateTime.of(2026, 10, 20, 9, 0), false));
 
     mockMvc.perform(put("/api/talk/posts/p1/helpful").with(guardian)).andExpect(status().isNoContent());
     mockMvc.perform(delete("/api/talk/posts/p1/helpful").with(guardian)).andExpect(status().isNoContent());

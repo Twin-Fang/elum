@@ -371,7 +371,7 @@ class TalkReactionServiceTest {
     when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of(block));
     when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of("author-suspended"));
     when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of("author-ok", "이웃", "viewer-1", "나"));
-    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
       .thenReturn(List.of(
         comment("c1", "post-1", "author-blocked", BASE_TIME),
         comment("c2", "post-1", "author-suspended", BASE_TIME.plusMinutes(1)),
@@ -387,13 +387,29 @@ class TalkReactionServiceTest {
   }
 
   @Test
+  @DisplayName("관리자가 가린 내 댓글은 isHidden 으로 표시하고 본문은 비워서 준다")
+  void comments_hiddenOwnComment_marksHiddenAndBlanksBody() {
+    stubScanDependencies();
+    TalkComment hidden = comment("c1", "post-1", "viewer-1", BASE_TIME);
+    hidden.setStatus(TalkCommentStatus.HIDDEN_BY_ADMIN);
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), eq("viewer-1"), any(), anyString(), any()))
+      .thenReturn(List.of(hidden, comment("c2", "post-1", "author-ok", BASE_TIME.plusMinutes(1))));
+
+    TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, null);
+
+    assertThat(page.items()).extracting(TalkCommentResponse::isHidden).containsExactly(true, false);
+    assertThat(page.items().get(0).body()).isEmpty();
+    assertThat(page.items().get(1).body()).isEqualTo("내용 c2");
+  }
+
+  @Test
   @DisplayName("한 쪽보다 많으면 size 만큼 자르고 마지막 댓글 위치를 nextCursor 로 준다")
   void comments_overOnePage_returnsNextCursor() {
     stubVisiblePost("post-1");
     when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of());
     when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of());
     when(memberService.nicknamesOf(anyCollection())).thenReturn(Map.of());
-    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
       .thenReturn(List.of(
         comment("c1", "post-1", "author-ok", BASE_TIME),
         comment("c2", "post-1", "author-ok", BASE_TIME.plusMinutes(1)),
@@ -413,7 +429,7 @@ class TalkReactionServiceTest {
       comment("c1", "post-1", "author-blocked", BASE_TIME),
       comment("c2", "post-1", "author-blocked", BASE_TIME.plusMinutes(1)),
       comment("c3", "post-1", "author-blocked", BASE_TIME.plusMinutes(2)));
-    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
       .thenReturn(blockedBatch, List.of(comment("c4", "post-1", "author-ok", BASE_TIME.plusMinutes(3))));
 
     TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, 2);
@@ -421,7 +437,7 @@ class TalkReactionServiceTest {
     ArgumentCaptor<LocalDateTime> createdAts = ArgumentCaptor.forClass(LocalDateTime.class);
     ArgumentCaptor<String> ids = ArgumentCaptor.forClass(String.class);
     verify(talkCommentRepository, times(2))
-      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), createdAts.capture(), ids.capture(), any());
+      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), createdAts.capture(), ids.capture(), any());
     assertThat(createdAts.getAllValues().get(1)).isEqualTo(BASE_TIME.plusMinutes(2));
     assertThat(ids.getAllValues().get(1)).isEqualTo("c3");
     assertThat(page.items()).extracting(TalkCommentResponse::id).containsExactly("c4");
@@ -432,13 +448,13 @@ class TalkReactionServiceTest {
   @DisplayName("다섯 번 읽어도 전부 차단이면 빈 쪽과 함께 읽은 마지막 위치로 nextCursor 를 준다")
   void comments_maxScanRoundsReached_returnsCursorAtScanPosition() {
     stubScanDependencies();
-    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
       .thenReturn(blockedBatch(0), blockedBatch(3), blockedBatch(6), blockedBatch(9), blockedBatch(12));
 
     TalkCommentPageResponse page = talkReactionService.comments(VIEWER, "post-1", null, 2);
 
     verify(talkCommentRepository, times(5))
-      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any());
+      .findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any());
     assertThat(page.items()).isEmpty();
     assertThat(page.nextCursor()).isEqualTo(BASE_TIME.plusMinutes(14) + "|c14");
   }
@@ -447,14 +463,14 @@ class TalkReactionServiceTest {
   @DisplayName("형식이 틀린 cursor 는 첫 쪽으로 본다")
   void comments_malformedCursor_readsFirstPage() {
     stubScanDependencies();
-    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), any(), anyString(), any()))
+    when(talkCommentRepository.findCommentPage(eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), any(), anyString(), any()))
       .thenReturn(List.of());
 
     talkReactionService.comments(VIEWER, "post-1", "garbage", null);
 
     ArgumentCaptor<LocalDateTime> createdAt = ArgumentCaptor.forClass(LocalDateTime.class);
     verify(talkCommentRepository).findCommentPage(
-      eq("post-1"), eq(TalkCommentStatus.VISIBLE), createdAt.capture(), eq(""), any());
+      eq("post-1"), eq(TalkCommentStatus.VISIBLE), anyString(), createdAt.capture(), eq(""), any());
     assertThat(createdAt.getValue()).isEqualTo(LocalDateTime.of(1970, 1, 1, 0, 0));
   }
 

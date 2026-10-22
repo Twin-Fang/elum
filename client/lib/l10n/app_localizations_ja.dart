@@ -2935,6 +2935,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkCommentsEmpty => '아직 댓글이 없어요';
 
   @override
+  String get talkCommentHiddenNotice => '운영 정책에 따라 가렸어요';
+
+  @override
   String get talkCommentsFailed => '댓글을 불러오지 못했어요';
 
   @override

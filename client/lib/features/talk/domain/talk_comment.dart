@@ -11,6 +11,7 @@ class TalkComment {
     required this.isMine,
     required this.createdAt,
     this.authorNickname,
+    this.isHidden = false,
   });
 
   final String id;
@@ -18,8 +19,13 @@ class TalkComment {
   /// 닉네임이 없는 계정은 null
   final String? authorNickname;
   final bool isMine;
+
+  /// 가린 댓글은 빈 문자열
   final String body;
   final DateTime createdAt;
+
+  /// 운영 정책으로 가려진 내 댓글 (서버는 쓴 사람 본인에게만 내려준다)
+  final bool isHidden;
 
   /// id·내용·쓴 시각이 깨졌으면 null (그 댓글만 버린다)
   static TalkComment? fromJson(Map<String, dynamic> json) {
@@ -33,6 +39,7 @@ class TalkComment {
       isMine: TalkJson.flag(json['isMine']),
       body: body,
       createdAt: createdAt,
+      isHidden: TalkJson.flag(json['isHidden']),
     );
   }
 }

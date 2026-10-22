@@ -160,13 +160,33 @@ class TalkQueryIT {
     TalkComment deleted = addComment(post.getId(), "deleted", base.plusMinutes(3));
     talkCommentRepository.updateStatusIfVisible(deleted.getId(), TalkCommentStatus.DELETED, TalkCommentStatus.VISIBLE);
 
-    List<TalkComment> firstPage = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE,
+    List<TalkComment> firstPage = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE, "viewer",
       LocalDateTime.of(1970, 1, 1, 0, 0), "", PageRequest.of(0, 10));
-    List<TalkComment> afterFirst = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE,
+    List<TalkComment> afterFirst = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE, "viewer",
       base, first.getId(), PageRequest.of(0, 10));
 
     assertThat(firstPage).extracting(TalkComment::getId).containsExactly(first.getId(), second.getId(), third.getId());
     assertThat(afterFirst).extracting(TalkComment::getId).containsExactly(second.getId(), third.getId());
+  }
+
+  @Test
+  @DisplayName("댓글 한 쪽: 관리자가 가린 댓글은 쓴 사람 본인에게만 나오고 남에게는 안 나온다")
+  void findCommentPage_hiddenCommentOnlyForItsAuthor() {
+    TalkPost post = newPost("hidden", TalkCategory.SELF_CARE, AppLocale.KO, LocalDateTime.of(2026, 10, 20, 8, 0));
+    LocalDateTime base = LocalDateTime.of(2026, 10, 20, 9, 0);
+    TalkComment visible = addComment(post.getId(), "visible", base);
+    TalkComment hidden = addComment(post.getId(), "hidden", base.plusMinutes(1));
+    talkCommentRepository.updateStatusIfCurrent(
+      hidden.getId(), TalkCommentStatus.HIDDEN_BY_ADMIN, TalkCommentStatus.VISIBLE);
+    LocalDateTime noCursor = LocalDateTime.of(1970, 1, 1, 0, 0);
+
+    List<TalkComment> forAuthor = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE,
+      prefix + "commenter", noCursor, "", PageRequest.of(0, 10));
+    List<TalkComment> forOther = talkCommentRepository.findCommentPage(post.getId(), TalkCommentStatus.VISIBLE,
+      "someone-else", noCursor, "", PageRequest.of(0, 10));
+
+    assertThat(forAuthor).extracting(TalkComment::getId).containsExactly(visible.getId(), hidden.getId());
+    assertThat(forOther).extracting(TalkComment::getId).containsExactly(visible.getId());
   }
 
   @Test

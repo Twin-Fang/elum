@@ -11,10 +11,12 @@ public record TalkCommentResponse(
   String authorNickname,
   @Schema(description = "내가 쓴 댓글인가")
   boolean isMine,
-  @Schema(description = "댓글 내용")
+  @Schema(description = "댓글 내용. 관리자가 가린 댓글은 빈 문자열")
   String body,
   @Schema(description = "쓴 시각")
-  LocalDateTime createdAt
+  LocalDateTime createdAt,
+  @Schema(description = "관리자가 가린 내 댓글인가. 가린 댓글은 쓴 사람 본인에게만 내려간다")
+  boolean isHidden
 ) {
 
 }

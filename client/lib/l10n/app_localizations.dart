@@ -5282,6 +5282,12 @@ abstract class AppLocalizations {
   /// **'아직 댓글이 없어요'**
   String get talkCommentsEmpty;
 
+  /// 상세 화면: 운영 정책으로 가려진 내 댓글 자리에 보이는 안내 (작성자 본인에게만)
+  ///
+  /// In ko, this message translates to:
+  /// **'운영 정책에 따라 가렸어요'**
+  String get talkCommentHiddenNotice;
+
   /// 상세 화면: 댓글 첫 쪽 불러오기 실패 안내(다시 하기 버튼과 에러 코드가 아래에 붙는다)
   ///
   /// In ko, this message translates to:

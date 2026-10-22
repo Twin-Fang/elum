@@ -111,7 +111,7 @@ public class TalkReactionService {
     boolean isExhausted = false;
     for (int round = 0; round < MAX_COMMENT_SCAN_ROUNDS && collected.size() < fetchSize; round++) {
       List<TalkComment> batch = talkCommentRepository.findCommentPage(postId, TalkCommentStatus.VISIBLE,
-        position == null ? NO_CURSOR_CREATED_AT : position.createdAt(),
+        caller.memberId(), position == null ? NO_CURSOR_CREATED_AT : position.createdAt(),
         position == null ? "" : position.id(), PageRequest.of(0, fetchSize));
       if (batch.isEmpty()) {
         isExhausted = true;
@@ -223,8 +223,13 @@ public class TalkReactionService {
     Set<String> authorIds = comments.stream().map(TalkComment::getAuthorMemberId).collect(Collectors.toSet());
     Map<String, String> nicknameByMemberId = memberService.nicknamesOf(authorIds);
     return comments.stream()
-      .map(comment -> new TalkCommentResponse(comment.getId(), nicknameByMemberId.get(comment.getAuthorMemberId()),
-        comment.getAuthorMemberId().equals(caller.memberId()), comment.getBody(), comment.getCreatedAt()))
+      .map(comment -> {
+        // 가린 댓글은 본문을 다시 내려주지 않는다 (조회가 쓴 사람 본인 것만 주므로 isMine 도 true)
+        boolean isHidden = comment.getStatus() == TalkCommentStatus.HIDDEN_BY_ADMIN;
+        return new TalkCommentResponse(comment.getId(), nicknameByMemberId.get(comment.getAuthorMemberId()),
+          comment.getAuthorMemberId().equals(caller.memberId()), isHidden ? "" : comment.getBody(),
+          comment.getCreatedAt(), isHidden);
+      })
       .toList();
   }
 }

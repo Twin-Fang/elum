@@ -2436,6 +2436,8 @@
   "@talkCommentsTitle": { "description": "상세 화면: 댓글 목록 제목" },
   "talkCommentsEmpty": "아직 댓글이 없어요",
   "@talkCommentsEmpty": { "description": "상세 화면: 댓글 0건 안내" },
+  "talkCommentHiddenNotice": "운영 정책에 따라 가렸어요",
+  "@talkCommentHiddenNotice": { "description": "상세 화면: 운영 정책으로 가려진 내 댓글 자리에 보이는 안내 (작성자 본인에게만)" },
   "talkCommentsFailed": "댓글을 불러오지 못했어요",
   "@talkCommentsFailed": { "description": "상세 화면: 댓글 첫 쪽 불러오기 실패 안내(다시 하기 버튼과 에러 코드가 아래에 붙는다)" },
   "talkCommentHint": "댓글을 남겨 보세요",
