@@ -38,6 +38,7 @@ class TalkImportGroupGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSelected = this.onSelected;
     return Wrap(
       spacing: _columnGap.w,
       runSpacing: _rowGap.h,
@@ -50,7 +51,7 @@ class TalkImportGroupGrid extends StatelessWidget {
               isSelected: group.id == selectedGroupId,
               onTap: onSelected == null
                   ? null
-                  : () => onSelected!(
+                  : () => onSelected(
                       group.id == selectedGroupId ? null : group.id,
                     ),
             ),

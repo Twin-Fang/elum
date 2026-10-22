@@ -64,7 +64,7 @@ public class TalkReactionService {
    * 트랜잭션 밖에서 저장해야 동시에 눌려 유니크가 겹쳐도 잡고 넘어갈 수 있음 (그 경우 수는 올리지 않음)
    */
   public void markHelpful(Caller caller, String postId) {
-    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
+    talkPostAccess.requireReadablePost(caller, postId);
     if (talkHelpfulRepository.existsByPostIdAndMemberId(postId, caller.memberId())) {
       return;
     }

@@ -18,7 +18,7 @@ import '../../domain/talk_screen_codes.dart';
 import 'talk_empty_message.dart';
 import 'talk_page_heading.dart';
 
-/// 일과 고르기: 올릴 수 있는 일과를 일과관리 줄 모양(웜그레이 68 · 제목 · 카드 수 · 꺾쇠)으로, 누르면 그 일과로 다음 단계
+/// 일과 고르기: 올릴 수 있는 일과를 일과관리 줄 모양(웜그레이 68 · 그림 · 제목 · 카드 수 · 꺾쇠)으로, 누르면 그 일과로 다음 단계
 /// 상태: 받는 중 / 실패(다시 하기 + 에러 코드) / 없음 / 목록
 class TalkRoutinePicker extends ConsumerWidget {
   const TalkRoutinePicker({super.key, required this.onSelected});
