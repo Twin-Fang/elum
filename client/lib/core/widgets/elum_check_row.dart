@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
+import 'elum_check_circle.dart';
 
-/// 체크박스 한 줄. 줄 전체가 눌린다 (의견 보내기·이야기 이용 규칙 동의).
+/// 체크 한 줄 (민트 원형 체크 [ElumCheckCircle] + 글). 줄 전체가 눌린다 (의견 보내기).
 class ElumCheckRow extends StatelessWidget {
   const ElumCheckRow({
     super.key,
@@ -22,11 +23,13 @@ class ElumCheckRow extends StatelessWidget {
   /// null 이면 잠긴다(전송 중).
   final ValueChanged<bool>? onChanged;
 
+  /// 체크 > 글 (약관 줄 결 12)
+  static const _checkToLabel = 12.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final onTap = onChanged;
-    final box = 24.w;
 
     return Semantics(
       container: true,
@@ -43,25 +46,8 @@ class ElumCheckRow extends StatelessWidget {
           constraints: BoxConstraints(minHeight: 48.h),
           child: Row(
             children: [
-              Container(
-                width: box,
-                height: box,
-                decoration: BoxDecoration(
-                  color: checked ? colors.buttonEnabled : colors.surface,
-                  borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(
-                    color: checked ? colors.buttonEnabled : colors.border,
-                  ),
-                ),
-                child: checked
-                    ? Icon(
-                        Icons.check_rounded,
-                        size: 18.w,
-                        color: colors.buttonEnabledText,
-                      )
-                    : null,
-              ),
-              SizedBox(width: 12.w),
+              ElumCheckCircle(isChecked: checked),
+              SizedBox(width: _checkToLabel.w),
               Expanded(
                 child: Text(
                   label,

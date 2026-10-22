@@ -86,8 +86,9 @@ class LibraryGroupTile extends StatelessWidget {
                     height: size,
                     padding: EdgeInsets.all(_previewPadding.w),
                     decoration: BoxDecoration(
+                      // 끌어 놓을 자리 = 고름 결 (민트 연 면 + 1px 민트)
                       color: isDropTarget
-                          ? colors.navSelectedFill
+                          ? colors.goalSelectedFill
                           : colors.folderFill,
                       borderRadius: radius,
                     ),
@@ -95,7 +96,9 @@ class LibraryGroupTile extends StatelessWidget {
                     foregroundDecoration: BoxDecoration(
                       borderRadius: radius,
                       border: Border.all(
-                        color: colors.folderStroke,
+                        color: isDropTarget
+                            ? colors.checkDone
+                            : colors.folderStroke,
                         width: _strokeWidth,
                       ),
                     ),

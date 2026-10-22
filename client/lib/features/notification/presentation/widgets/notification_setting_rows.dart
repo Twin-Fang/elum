@@ -75,12 +75,10 @@ class NotificationSettingRows extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsGroup(
-          hasDividers: false,
           children: [_buildSwitchTile(context, ref, NotificationSettingField.all)],
         ),
         SizedBox(height: _groupGap.h),
         SettingsGroup(
-          hasDividers: false,
           children: [
             for (final type in NotificationSettingField.types)
               _buildSwitchTile(context, ref, type),

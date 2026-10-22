@@ -147,7 +147,7 @@ class _CommentRow extends StatelessWidget {
   final TalkComment comment;
   final VoidCallback onMenuRequested;
 
-  /// 칸 안쪽 · 아래 · 머리 > 내용 (시안 16 · 15 · 8)
+  /// 칸 안쪽 · 아래 · 머리 > 내용 (시안 16 · 15 · 8). 아래 15 는 1860:7944 실측 (내용 줄 17 > 칸 68)
   static const _padding = 16.0;
   static const _padBottom = 15.0;
   static const _headerToBody = 8.0;

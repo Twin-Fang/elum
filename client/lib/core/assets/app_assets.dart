@@ -397,6 +397,26 @@ abstract final class AppAssets {
   static const iconNotificationPaperPlane = '$_images/icon_notification_paper_plane.svg';
   static const iconNotificationUserAdd = '$_images/icon_notification_user_add.svg';
 
+  /// 시안 세트(`fi-br-*`)인데 Figma 파일에 없는 아이콘. Flaticon UIcons Bold Rounded 3.3.1 글꼴에서
+  /// 같은 글리프를 꺼냄 (24×24 · 남색, 쓰는 곳에서 colorFilter 로 칠한다). 꺼내는 법: docs/design-language.md §10
+  static const iconCamera = '$_images/icon_camera.svg';
+  static const iconPicture = '$_images/icon_picture.svg';
+  static const iconRefresh = '$_images/icon_refresh.svg';
+  static const iconFolder = '$_images/icon_folder.svg';
+  static const iconFolderAdd = '$_images/icon_folder_add.svg';
+  static const iconFolderMinus = '$_images/icon_folder_minus.svg';
+  static const iconCopy = '$_images/icon_copy.svg';
+  static const iconEnvelope = '$_images/icon_envelope.svg';
+  static const iconBook = '$_images/icon_book.svg';
+  static const iconBell = '$_images/icon_bell.svg';
+  static const iconBellSlash = '$_images/icon_bell_slash.svg';
+  static const iconMinusSmall = '$_images/icon_minus_small.svg';
+  static const iconComment = '$_images/icon_comment.svg';
+  static const iconComments = '$_images/icon_comments.svg';
+  static const iconCoins = '$_images/icon_coins.svg';
+  static const iconPaperPlane = '$_images/icon_paper_plane.svg';
+  static const iconApps = '$_images/icon_apps.svg';
+
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.
   static const starBadge = '$_images/star_badge.svg';

@@ -1,15 +1,15 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
-import '../../../../core/widgets/elum_text_field.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../../../shared/models/routine.dart';
 import '../../domain/routine_group.dart';
 import 'library_routine_tile.dart';
@@ -56,8 +56,8 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
   late final _nameController = TextEditingController();
   late final List<String> _picked = [...widget.preselectedIds];
 
-  /// 시트 높이 (화면 대비) — 목록이 길어도 이름 칸과 버튼이 늘 보이게
-  static const _heightRatio = 0.85;
+  /// 목록 최대 높이 (화면 대비)
+  static const _listHeightRatio = 0.4;
 
   bool get _isNewGroup => widget.groupName == null;
 
@@ -88,101 +88,75 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
     final l10n = context.l10n;
     final colors = context.colors;
     final space = context.space;
-    final media = MediaQuery.of(context);
     final groupName = widget.groupName;
+    // 목록 최대 높이 — 목록이 길어도 이름 칸과 버튼이 한 화면에 보이게
+    final listMaxHeight = MediaQuery.sizeOf(context).height * _listHeightRatio;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-      child: ElumSheetSurface(
-        // 키보드가 올라오면 남은 공간 안으로 줄여 상태바 밑으로 올라가지 않게
-        height: math.min(
-          media.size.height * _heightRatio,
-          media.size.height -
-              media.viewInsets.bottom -
-              media.padding.top -
-              space.md.h,
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            space.md.w,
-            space.lg.h,
-            space.md.w,
-            space.md.h + media.padding.bottom,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 제목
-              Text(
-                groupName == null
-                    ? l10n.routineGroupNewTitle
-                    : l10n.routineGroupAddTitle(groupName),
-                style: context.typo.sectionTitle.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              // 새 묶음이면 이름 칸
-              if (_isNewGroup) ...[
-                SizedBox(height: space.sm.h),
-                ElumTextField(
-                  controller: _nameController,
-                  hintText: l10n.routineGroupNameHint,
-                  maxLength: RoutineGroup.nameMaxLength,
-                ),
-              ],
-              SizedBox(height: space.xs.h),
-              Text(
-                _isNewGroup
-                    ? l10n.routineGroupPickHintNew
-                    : l10n.routineGroupPickHint,
-                style: context.typo.caption.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              SizedBox(height: space.sm.h),
-              // 고를 일과 목록
-              Expanded(
-                child: widget.candidates.isEmpty
-                    ? Center(
-                        child: Text(
-                          l10n.routineGroupPickEmpty,
-                          textAlign: TextAlign.center,
-                          style: context.typo.body.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: widget.candidates.length,
-                        separatorBuilder: (_, _) =>
-                            SizedBox(height: space.xs.h),
-                        itemBuilder: (context, index) {
-                          final routine = widget.candidates[index];
-                          final order = _picked.indexOf(routine.id);
-                          return _PickRow(
-                            routine: routine,
-                            order: order < 0 ? null : order + 1,
-                            onTap: () => _toggle(routine.id),
-                          );
-                        },
+    // 틀 (시안 1877:9740): 제목 > 안내 > 이름 칸 > 고를 일과 목록 > 버튼
+    return ElumSheetFrame(
+      title: groupName == null
+          ? l10n.routineGroupNewTitle
+          : l10n.routineGroupAddTitle(groupName),
+      description: _isNewGroup
+          ? l10n.routineGroupPickHintNew
+          : l10n.routineGroupPickHint,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 새 묶음이면 이름 칸 (안내는 칸 안 placeholder)
+          if (_isNewGroup) ...[
+            ElumSheetTextField(
+              controller: _nameController,
+              hintText: l10n.routineGroupNameHint,
+              maxLength: RoutineGroup.nameMaxLength,
+            ),
+            SizedBox(height: space.md.h),
+          ],
+          // 고를 일과 목록
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: listMaxHeight),
+            child: widget.candidates.isEmpty
+                ? Padding(
+                    padding: EdgeInsets.symmetric(vertical: space.lg.h),
+                    child: Text(
+                      l10n.routineGroupPickEmpty,
+                      textAlign: TextAlign.center,
+                      style: context.typo.body.copyWith(
+                        color: colors.textSecondary,
                       ),
-              ),
-              SizedBox(height: space.sm.h),
-              ElumButton(
-                label: _isNewGroup
-                    ? l10n.routineGroupPickConfirmNew(_picked.length)
-                    : l10n.routineGroupPickConfirmAdd(_picked.length),
-                onPressed: _canConfirm ? _confirm : null,
-              ),
-            ],
+                    ),
+                  )
+                : ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: widget.candidates.length,
+                    separatorBuilder: (_, _) => SizedBox(height: space.xs.h),
+                    itemBuilder: (context, index) {
+                      final routine = widget.candidates[index];
+                      final order = _picked.indexOf(routine.id);
+                      return _PickRow(
+                        routine: routine,
+                        order: order < 0 ? null : order + 1,
+                        onTap: () => _toggle(routine.id),
+                      );
+                    },
+                  ),
           ),
-        ),
+          SizedBox(height: space.lg.h),
+          ElumButton(
+            label: _isNewGroup
+                ? l10n.routineGroupPickConfirmNew(_picked.length)
+                : l10n.routineGroupPickConfirmAdd(_picked.length),
+            onPressed: _canConfirm ? _confirm : null,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// 고르기 한 줄: 그림 + 이름 + 누른 순서 번호(안 골랐으면 빈 원)
+/// 고르기 한 줄 (웜그레이 판 r20, 고름 = 민트 연 면 + 1px 민트): 그림 + 이름 + 누른 순서 번호(안 골랐으면 빈 원)
 class _PickRow extends StatelessWidget {
   const _PickRow({
     required this.routine,
@@ -205,22 +179,29 @@ class _PickRow extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
     final number = order;
+    final isPicked = number != null;
     return Semantics(
-      selected: number != null,
+      selected: isPicked,
       button: true,
       child: AppPressable(
         onTap: onTap,
         scaleDown: AppPressable.scaleCard,
-        child: Container(
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.standard,
           padding: EdgeInsets.all(space.xs.w),
           decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: BorderRadius.circular(space.sm.w),
+            color: isPicked ? colors.goalSelectedFill : colors.editChipBg,
+            borderRadius: BorderRadius.circular(space.cardRadius.r),
+            border: Border.all(
+              color: isPicked ? colors.checkDone : colors.editChipBg,
+              width: space.borderWidth,
+            ),
           ),
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(space.xs.w),
+                borderRadius: BorderRadius.circular(space.sm.r),
                 child: SizedBox.square(
                   dimension: _thumbnailSize.w,
                   child: LibraryRoutineThumbnail(routine: routine),
@@ -234,24 +215,26 @@ class _PickRow extends StatelessWidget {
                     routine.displayTitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.typo.tileLabel.copyWith(
-                      color: colors.textPrimary,
+                    style: context.typo.routineTileTitle.copyWith(
+                      color: colors.settingsCardLabel,
                     ),
                   ),
                 ),
               ),
+              SizedBox(width: space.sm.w),
+              // 순서 원: 안 고름 = 회색 테두리, 고름 = 민트 원 + 흰 번호 (체크 원과 같은 결)
               Container(
                 width: _orderSize.w,
                 height: _orderSize.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: number == null ? null : colors.textPrimary,
+                  color: isPicked ? colors.checkDone : null,
                   border: Border.all(
-                    color: number == null
-                        ? colors.navIconUnselected
-                        : colors.textPrimary,
-                    width: 2,
+                    color: isPicked
+                        ? colors.checkDone
+                        : colors.consentCheckIdle,
+                    width: space.borderWidth,
                   ),
                 ),
                 child: number == null

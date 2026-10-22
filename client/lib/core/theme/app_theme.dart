@@ -26,9 +26,21 @@ abstract final class AppTheme {
       // 위젯이 TextStyle(fontFamily:) 를 직접 넘겨도 이 값이 상속된다.
       fontFamilyFallback: fallback.isEmpty ? null : fallback,
       scaffoldBackgroundColor: colors.background,
+      // seed 는 시안 강조색(민트), 기본 부품 색은 남색. 주황 seed 면 스피너 · 커서가 주황 계열로 나온다
       colorScheme: ColorScheme.fromSeed(
-        seedColor: colors.brandOrange,
+        seedColor: colors.checkDone,
+        primary: colors.textPrimary,
         surface: colors.surface,
+      ),
+      // 로딩 동그라미 (시안에 없음): 남색 한 가지
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colors.textPrimary,
+      ),
+      // 입력 커서는 남색, 고른 글자 · 손잡이는 민트 (고름 = 민트 결)
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: colors.textPrimary,
+        selectionColor: colors.goalSelectedFill,
+        selectionHandleColor: colors.checkDone,
       ),
       textTheme: typo.toTextTheme(colors.textPrimary, colors.textSecondary),
       // 저장·변경 뒤 잠깐 뜨는 알림. **시안이 없는 임시 값이다.**

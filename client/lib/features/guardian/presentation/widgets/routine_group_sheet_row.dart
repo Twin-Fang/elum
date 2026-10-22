@@ -9,6 +9,7 @@ import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
 import 'arrange_remove_badge.dart';
 import 'library_routine_tile.dart';
@@ -73,6 +74,10 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
   static const _thumbnailSize = 44.0;
   static const _handleSize = 18.0;
 
+  /// 글 ↔ 오른쪽 끝 · ⊖ ↔ 손잡이
+  static const _textToTrailing = 4.0;
+  static const _removeToHandle = 10.0;
+
   void _onLiftStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_isAnnounced) {
       _isAnnounced = true;
@@ -116,6 +121,7 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
+    final space = context.space;
     final routine = widget.routine;
     return AnimatedBuilder(
       animation: _lift,
@@ -125,32 +131,32 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
           scale: 1 + _liftScale * progress,
           child: Container(
             height: RoutineGroupSheetRow.cardHeight.h,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            padding: EdgeInsets.symmetric(horizontal: space.sm.w),
             decoration: BoxDecoration(
               color: colors.editChipBg,
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(space.cardRadius.r),
               boxShadow: _shadow(progress),
             ),
-            // 잡힌 줄의 브랜드색 테두리: 손가락이 손잡이를 가려도 줄 가장자리는 보인다
+            // 잡힌 줄의 민트 테두리: 손가락이 손잡이를 가려도 줄 가장자리는 보인다
             foregroundDecoration: progress == 0
                 ? null
                 : BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.r),
+                    borderRadius: BorderRadius.circular(space.cardRadius.r),
                     border: Border.all(
-                      color: colors.brandOrange.withValues(alpha: progress),
-                      width: 2.w,
+                      color: colors.checkDone.withValues(alpha: progress),
+                      width: space.selectedBorderWidth.w,
                     ),
                   ),
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(space.sm.r),
                   child: SizedBox.square(
                     dimension: _thumbnailSize.w,
                     child: LibraryRoutineThumbnail(routine: routine),
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: space.sm.w),
                 // 글 자리를 누르면 상세. 손잡이는 이 바깥이라 끌기와 겹치지 않는다
                 Expanded(
                   child: GestureDetector(
@@ -171,7 +177,7 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
                             ),
                           ),
                           if (routine.steps.isNotEmpty) ...[
-                            SizedBox(height: 8.h),
+                            SizedBox(height: space.xs.h),
                             Text(
                               context.l10n.routineGroupRowCardCount(
                                 routine.steps.length,
@@ -188,15 +194,11 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
                     ),
                   ),
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: _textToTrailing.w),
                 if (widget.isEditing)
                   ..._editingTrailing(context, progress)
                 else
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 24.w,
-                    color: colors.navIconUnselected,
-                  ),
+                  const SettingsCardChevron(),
               ],
             ),
           ),
@@ -215,7 +217,7 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
           widget.routine.displayTitle,
         ),
       ),
-      SizedBox(width: 10.w),
+      SizedBox(width: _removeToHandle.w),
       // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는 Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다
       Listener(
         behavior: HitTestBehavior.opaque,
@@ -234,7 +236,7 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
                 width: _handleSize.w,
                 height: _handleSize.w,
               ),
-              // 잡히는 만큼 브랜드색이 위에 짙어진다 (에셋 색을 코드에 옮겨 적지 않으려고 겹친다)
+              // 잡히는 만큼 민트가 위에 짙어진다 (에셋 색을 코드에 옮겨 적지 않으려고 겹친다)
               if (progress > 0)
                 Opacity(
                   opacity: progress,
@@ -243,7 +245,7 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
                     width: _handleSize.w,
                     height: _handleSize.w,
                     colorFilter: ColorFilter.mode(
-                      colors.brandOrange,
+                      colors.checkDone,
                       BlendMode.srcIn,
                     ),
                   ),

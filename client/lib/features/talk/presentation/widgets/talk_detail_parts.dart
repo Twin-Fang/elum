@@ -186,8 +186,8 @@ class TalkDetailImportButton extends StatelessWidget {
   }
 }
 
-/// 도움돼요 칩 (시안 1813:7881): 누르면 켜지고 다시 누르면 꺼진다
-/// 꺼짐은 시안 값(웜그레이 판 · 연회색 아이콘), 켜짐은 시안에 없어 민트 판 · 테두리 · 아이콘으로 구분
+/// 도움돼요 칩 (꺼짐 1813:7881 · 켜짐 1860:7950): 누르면 켜지고 다시 누르면 꺼진다
+/// 꺼짐: 웜그레이 판 · 연회색 아이콘 · 회색 글자, 켜짐: 연민트 판 · 민트 테두리 1 · 민트 아이콘 · 검정 글자
 class TalkHelpfulButton extends StatelessWidget {
   const TalkHelpfulButton({
     super.key,
@@ -230,8 +230,8 @@ class TalkHelpfulButton extends StatelessWidget {
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(_radius.r),
                   border: Border.all(
-                    color: colors.goalSelectedBorder,
-                    width: space.selectedBorderWidth,
+                    color: colors.checkDone,
+                    width: space.borderWidth,
                   ),
                 )
               : null,
@@ -243,7 +243,7 @@ class TalkHelpfulButton extends StatelessWidget {
                 width: _iconSize.w,
                 height: _iconSize.w,
                 colorFilter: ColorFilter.mode(
-                  isSelected ? colors.goalSelectedBorder : colors.talkMetaIcon,
+                  isSelected ? colors.checkDone : colors.talkMetaIcon,
                   BlendMode.srcIn,
                 ),
               ),

@@ -22,7 +22,7 @@ class TalkStepCards extends StatelessWidget {
   static const _sideInset = 16.0;
   static const _largeGap = 10.0;
 
-  /// 격자 칸 사이 가로 · 세로 (시안 9 · 8)
+  /// 격자 칸 사이 가로 · 세로 (시안 9 · 8). 가로 9 는 1813:7718 실측 (칸 176 × 2 + 9 = 361)
   static const _gridGapH = 9.0;
   static const _gridGapV = 8.0;
   static const _gridColumnCount = 2;

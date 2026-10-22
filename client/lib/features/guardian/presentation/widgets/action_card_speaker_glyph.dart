@@ -9,7 +9,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 ///
 /// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다.
 /// 자리를 비우면 카드 비율이 무너진다.
-/// 스피커 아이콘. 읽는 중에는 주황 원 위로 파동이 퍼져 "지금 소리가 난다"가 한눈에 보인다.
+/// 스피커 아이콘. 읽는 중에는 민트 원(켜짐) 위로 파동이 퍼져 "지금 소리가 난다"가 한눈에 보인다.
 ///
 /// 동작 줄이기를 켰다면 파동은 빼고 색 원만 남긴다.
 class ActionCardSpeakerGlyph extends StatefulWidget {
@@ -60,7 +60,7 @@ class _SpeakerGlyphState extends State<ActionCardSpeakerGlyph>
   @override
   Widget build(BuildContext context) {
     final size = widget.size;
-    final orange = context.colors.brandOrange;
+    final speakingTint = context.colors.checkDone;
     final reduce = MediaQuery.disableAnimationsOf(context);
 
     return SizedBox(
@@ -78,11 +78,11 @@ class _SpeakerGlyphState extends State<ActionCardSpeakerGlyph>
                 height: size * (1 + _pulse.value * 0.9),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: orange.withValues(alpha: 0.28 * (1 - _pulse.value)),
+                  color: speakingTint.withValues(alpha: 0.28 * (1 - _pulse.value)),
                 ),
               ),
             ),
-          // 읽는 중에는 주황 원과 그림자를 깔아 눌린 채 켜져 있음을 보여 준다
+          // 읽는 중에는 민트 원과 그림자를 깔아 눌린 채 켜져 있음을 보여 준다
           AnimatedContainer(
             duration: AppMotion.fast,
             width: size * 1.35,
@@ -90,12 +90,12 @@ class _SpeakerGlyphState extends State<ActionCardSpeakerGlyph>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: widget.speaking
-                  ? orange.withValues(alpha: 0.18)
+                  ? speakingTint.withValues(alpha: 0.18)
                   : Colors.transparent,
               boxShadow: widget.speaking
                   ? [
                       BoxShadow(
-                        color: orange.withValues(alpha: 0.35),
+                        color: speakingTint.withValues(alpha: 0.35),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),

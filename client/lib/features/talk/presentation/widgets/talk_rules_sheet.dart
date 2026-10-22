@@ -12,7 +12,7 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../application/talk_rules_provider.dart';
 import '../../domain/talk_screen_codes.dart';
 import 'talk_choice_row.dart';
-import 'talk_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 
 /// 이야기 이용 규칙에 동의했는지 확인 > 안 했으면 규칙 시트로 동의받기
 /// 올리기 시작과 첫 댓글이 이 함수를 거친다. 동의했거나 이번에 동의하면 true
@@ -92,7 +92,7 @@ class _TalkRulesSheetState extends ConsumerState<TalkRulesSheet> {
       l10n.talkRulesNoDiagnosis,
     ];
 
-    return TalkSheetFrame(
+    return ElumSheetFrame(
       title: l10n.talkRulesTitle,
       description: l10n.talkRulesIntro,
       child: Column(
@@ -192,7 +192,7 @@ class _RuleLine extends StatelessWidget {
           ),
           child: Text(
             '$number',
-            style: typo.talkFormLabel.copyWith(color: colors.talkAccentText),
+            style: typo.talkFormLabel.copyWith(color: colors.textPrimary),
           ),
         ),
         SizedBox(width: _badgeToText.w),

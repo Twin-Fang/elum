@@ -52,7 +52,7 @@ class ImageStyleCreditBar extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(context.space.cardRadius.r),
           ),
           child: Row(
             children: [
@@ -61,8 +61,7 @@ class ImageStyleCreditBar extends StatelessWidget {
               Text(
                 label,
                 style: typo.imageStyleCreditBar.copyWith(
-                  color: colors.brandOrange,
-                  fontWeight: FontWeight.w800,
+                  color: colors.sheetTitleText,
                 ),
               ),
               SizedBox(width: 12.w),
@@ -96,7 +95,7 @@ class ImageStyleCreditBar extends StatelessWidget {
   }
 }
 
-/// `일과 1개` — 숫자와 단위(`1개`)만 주황으로 칠한다.
+/// `일과 1개` — 숫자와 단위(`1개`)만 크레딧 보라로 칠한다 (시안 1736:8780 크레딧 숫자 결).
 ///
 /// 문구는 언어마다 어순이 달라 통째로 받고, 숫자가 처음 나오는 자리부터 끝까지를 강조한다.
 /// 숫자가 없으면 전부 기본색이다.
@@ -122,7 +121,7 @@ class _Cost extends StatelessWidget {
           TextSpan(
             text: text.substring(at),
             style: base.copyWith(
-              color: colors.brandOrange,
+              color: colors.creditNumberText,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -132,7 +131,7 @@ class _Cost extends StatelessWidget {
   }
 }
 
-/// 크레딧 동전 — 주황 원 안에 흰 반짝임.
+/// 크레딧 표시 — 보라 반짝임 (시안 1736:8780 `✦ 90` 결, 원 없이).
 class _Coin extends StatelessWidget {
   const _Coin({required this.size});
 
@@ -141,21 +140,15 @@ class _Coin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final side = size.w;
-    return Container(
+    return SvgPicture.asset(
+      AppAssets.iconSparkles,
       width: side,
       height: side,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: context.colors.brandOrange,
-        shape: BoxShape.circle,
+      colorFilter: ColorFilter.mode(
+        context.colors.creditNumberText,
+        BlendMode.srcIn,
       ),
-      child: SvgPicture.asset(
-        AppAssets.iconSparkles,
-        width: side * 0.6,
-        height: side * 0.6,
-        colorFilter: ColorFilter.mode(context.colors.surface, BlendMode.srcIn),
-        excludeFromSemantics: true,
-      ),
+      excludeFromSemantics: true,
     );
   }
 }

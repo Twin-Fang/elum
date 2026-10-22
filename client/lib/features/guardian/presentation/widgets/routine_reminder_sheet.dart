@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -7,7 +6,10 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/elum_toast.dart';
+import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
@@ -99,72 +101,56 @@ class _RoutineReminderSheetState extends ConsumerState<RoutineReminderSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
     final space = context.space;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final l10n = context.l10n;
 
-    // 여백은 시트 면이 아니라 내용에 준다 (면에 주면 손잡이까지 밀려 제목과 겹친다)
-    return ElumSheetSurface(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          space.screenH.w,
-          (ElumSheetSurface.defaultHandleTop + space.lg).h,
-          space.screenH.w,
-          bottomInset + space.md,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              context.l10n.reminderSheetTitle,
-              style: typo.sheetTitle.copyWith(color: colors.textPrimary),
+    // 틀: 제목 > 설명 > 시각 바퀴 > 매일 반복 묶음 > 알림 켜기 > (켜져 있으면) 알림 끄기
+    return ElumSheetFrame(
+      title: l10n.reminderSheetTitle,
+      description: l10n.reminderSheetBody,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: RoutineReminderSheet.pickerHeight.h,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              initialDateTime: DateTime(2000, 1, 1, _hour, _minute),
+              onDateTimeChanged: (value) => setState(() {
+                _hour = value.hour;
+                _minute = value.minute;
+              }),
             ),
-            SizedBox(height: space.xs),
-            Text(
-              context.l10n.reminderSheetBody,
-              style: typo.promptBody.copyWith(color: colors.promptMuted),
-            ),
-            SizedBox(height: space.md),
-            SizedBox(
-              height: RoutineReminderSheet.pickerHeight.h,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                initialDateTime: DateTime(2000, 1, 1, _hour, _minute),
-                onDateTimeChanged: (value) => setState(() {
-                  _hour = value.hour;
-                  _minute = value.minute;
-                }),
-              ),
-            ),
-            SettingsSwitchTile(
-              label: context.l10n.reminderRepeatDaily,
-              value: _isDaily,
-              onChanged: (on) => setState(() => _isDaily = on),
-            ),
-            SizedBox(height: space.md),
-            ElumButton(
-              key: RoutineReminderSheet.saveButtonKey,
-              label: _existing == null
-                  ? context.l10n.reminderTurnOn
-                  : context.l10n.reminderUpdate,
-              loading: _isSaving,
-              onPressed: _isSaving ? null : _save,
-            ),
-            if (_existing != null) ...[
-              SizedBox(height: space.xs),
-              TextButton(
-                key: RoutineReminderSheet.clearButtonKey,
-                onPressed: _isSaving ? null : _clear,
-                child: Text(
-                  context.l10n.reminderTurnOff,
-                  style: typo.promptBody.copyWith(color: colors.promptMuted),
-                ),
+          ),
+          SizedBox(height: space.md.h),
+          SettingsGroup(
+            children: [
+              SettingsSwitchTile(
+                label: l10n.reminderRepeatDaily,
+                value: _isDaily,
+                onChanged: (on) => setState(() => _isDaily = on),
               ),
             ],
+          ),
+          SizedBox(height: space.lg.h),
+          ElumButton(
+            key: RoutineReminderSheet.saveButtonKey,
+            label: _existing == null
+                ? l10n.reminderTurnOn
+                : l10n.reminderUpdate,
+            loading: _isSaving,
+            onPressed: _isSaving ? null : _save,
+          ),
+          if (_existing != null) ...[
+            SizedBox(height: space.xs.h),
+            ElumTextLink(
+              key: RoutineReminderSheet.clearButtonKey,
+              label: l10n.reminderTurnOff,
+              onTap: _isSaving ? null : _clear,
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

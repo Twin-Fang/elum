@@ -6,6 +6,7 @@ import '../assets/app_assets.dart';
 import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_button.dart';
+import 'elum_text_link.dart';
 
 /// 실패를 실패로 보여주는 공통 화면.
 ///
@@ -125,14 +126,11 @@ class ElumErrorView extends StatelessWidget {
                 style: typo.promptBody.copyWith(color: colors.promptMuted),
               ),
             if (onRetry != null)
-              TextButton(
-                onPressed: onRetry,
-                child: Text(
-                  errorCode == null
-                      ? context.l10n.commonRetry
-                      : context.l10n.commonRetryWithCode(errorCode!),
-                  style: typo.promptBody.copyWith(color: colors.promptMuted),
-                ),
+              ElumTextLink(
+                label: errorCode == null
+                    ? context.l10n.commonRetry
+                    : context.l10n.commonRetryWithCode(errorCode!),
+                onTap: onRetry,
               )
             else if (errorCode != null)
               Text(
@@ -160,7 +158,8 @@ class ElumErrorView extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: typo.promptTitle.copyWith(color: colors.textPrimary),
+            // AI 흐름 질문(30)이 아니라 일반 화면 제목 크기 (Tmoney 800/20)
+            style: typo.subtitle.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: space.sm),
           Text(

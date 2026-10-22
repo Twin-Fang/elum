@@ -16,7 +16,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../application/talk_blocks_controller.dart';
 import '../domain/talk_block_entry.dart';
 import '../domain/talk_screen_codes.dart';
-import 'widgets/talk_empty_message.dart';
+import 'widgets/talk_empty_line.dart';
 
 /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자): 닉네임 + "다시 보기"로 숨김 풀기
 /// 상태: 받는 중 / 0건 / 실패(다시 하기 + 에러 코드) / 목록
@@ -39,8 +39,10 @@ class TalkBlockedGuardiansScreen extends ConsumerWidget {
       backTop: 67,
       horizontalPadding: 16,
       child: switch (blocks) {
-        AsyncData(value: final entries) when entries.isEmpty => ElumStateBody(
-          child: TalkEmptyMessage(title: l10n.talkBlockedGuardiansEmpty),
+        // 0명: 목록 첫 줄 자리에 웜그레이 글 줄
+        AsyncData(value: final entries) when entries.isEmpty => ListView(
+          padding: EdgeInsets.symmetric(vertical: _listPadV.h),
+          children: [TalkEmptyLine(title: l10n.talkBlockedGuardiansEmpty)],
         ),
         AsyncData(value: final entries) => ListView.separated(
           padding: EdgeInsets.symmetric(vertical: _listPadV.h),

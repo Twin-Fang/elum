@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../core/widgets/settings_tile.dart';
 import '../domain/routine_template.dart';
 import '../domain/routine_template_catalog.dart';
 
@@ -87,7 +88,7 @@ class _RoutineTemplateSheetState extends State<RoutineTemplateSheet> {
                       isSelected: category == _category,
                       onTap: () => setState(() => _category = category),
                     ),
-                    SizedBox(width: 6.w),
+                    SizedBox(width: space.sm.w),
                   ],
                 ],
               ),
@@ -218,11 +219,7 @@ class _TemplateRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 24.w,
-              color: colors.rewardEmptyLabel,
-            ),
+            const SettingsCardChevron(),
           ],
         ),
       ),

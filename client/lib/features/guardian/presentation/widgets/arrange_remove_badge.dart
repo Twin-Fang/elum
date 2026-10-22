@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
@@ -34,10 +36,13 @@ class ArrangeRemoveBadge extends StatelessWidget {
           shape: BoxShape.circle,
           color: colors.textSecondary,
         ),
-        child: Icon(
-          Icons.remove_rounded,
-          size: _iconSize.w,
-          color: colors.surface,
+        alignment: Alignment.center,
+        child: SvgPicture.asset(
+          AppAssets.iconMinusSmall,
+          width: _iconSize.w,
+          height: _iconSize.w,
+          excludeFromSemantics: true,
+          colorFilter: ColorFilter.mode(colors.surface, BlendMode.srcIn),
         ),
       ),
     );

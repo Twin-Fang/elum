@@ -59,10 +59,16 @@ class RoutineProgressRing extends StatelessWidget {
                         excludeFromSemantics: true,
                       ),
                     )
-                  : Icon(
-                      Icons.check_rounded,
-                      size: 22.w,
-                      color: colors.surface,
+                  : Center(
+                      child: SvgPicture.asset(
+                        AppAssets.iconCheckMark,
+                        width: 18.w,
+                        colorFilter: ColorFilter.mode(
+                          colors.surface,
+                          BlendMode.srcIn,
+                        ),
+                        excludeFromSemantics: true,
+                      ),
                     ),
             )
           : CustomPaint(

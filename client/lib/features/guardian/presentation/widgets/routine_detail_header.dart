@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -27,6 +29,9 @@ class RoutineDetailHeader extends StatelessWidget {
 
   /// 있으면 제목 오른쪽에 `⋯` 버튼을 둔다 (#834)
   final VoidCallback? onMoreTap;
+
+  /// ⋯ 아이콘 한 변
+  static const _moreIconSize = 24.0;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +73,15 @@ class RoutineDetailHeader extends StatelessWidget {
                   semanticLabel: context.l10n.routineDetailMore,
                   child: Padding(
                     padding: EdgeInsets.all(8.w),
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-                      size: 24.w,
-                      color: colors.sheetTitleText,
+                    child: SvgPicture.asset(
+                      AppAssets.iconMenuDots,
+                      width: _moreIconSize.w,
+                      height: _moreIconSize.w,
+                      excludeFromSemantics: true,
+                      colorFilter: ColorFilter.mode(
+                        colors.sheetTitleText,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ),

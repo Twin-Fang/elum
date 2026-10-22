@@ -8,7 +8,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_shake.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
-import '../../../../core/widgets/elum_text_field.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../member/application/guardian_nickname_editor.dart';
 import '../../../member/domain/guardian_nickname_policy.dart';
@@ -41,14 +42,12 @@ class _GuardianNicknameSheetState
     extends ConsumerState<_GuardianNicknameSheet> {
   late final _controller = TextEditingController(text: widget.currentNickname);
 
-  /// 시안 실측 (시트 윗변 기준): 제목 40 > 설명 +24 > 입력칸 +27 > 버튼 +40
-  static const _titleTop = 40.0;
-  static const _titleToDescription = 24.0;
-  static const _descriptionToField = 27.0;
+  /// 시안 1759:9649 실측: 입력칸 > 버튼 40 · 입력칸 > 거절 사유 8 (제목 · 설명 · 머리 > 본문은 [ElumSheetFrame])
   static const _fieldToButton = 40.0;
   static const _fieldToRejection = 8.0;
-  static const _textInsetH = 24.0;
-  static const _bottomGap = 22.0;
+
+  /// 거절 사유는 제목 · 설명과 같은 x=24 (본문 16 + 8)
+  static const _textInset = 8.0;
 
   bool _isSaving = false;
 
@@ -123,96 +122,59 @@ class _GuardianNicknameSheetState
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final typo = context.typo;
-    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     final rejection = _rejectionMessage;
 
-    return Padding(
-      // 키보드에 가리지 않게 시트를 올림
-      padding: EdgeInsets.only(bottom: keyboard),
-      child: ElumSheetSurface(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            context.space.md.w,
-            _titleTop.h,
-            context.space.md.w,
-            _bottomGap.h + MediaQuery.paddingOf(context).bottom,
+    // 공통 시트 틀: 제목 > 설명 > 입력칸 > 저장 (키보드 · 큰 글자 스크롤 포함)
+    return ElumSheetFrame(
+      title: context.l10n.guardianNicknameSheetTitle,
+      description: context.l10n.guardianNicknameSheetDescription,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppShake(
+            trigger: _rejectionCount,
+            child: ElumSheetTextField(
+              controller: _controller,
+              hintText: context.l10n.guardianNicknameSheetHint,
+              maxLength: GuardianNicknamePolicy.maxLength,
+              autofocus: true,
+              onChanged: _onChanged,
+              onSubmitted: (_) => _save(),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 제목 · 설명 (입력칸보다 8 안쪽에서 시작)
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: (_textInsetH - context.space.md).w,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.guardianNicknameSheetTitle,
-                      style: typo.sheetTitle.copyWith(
-                        color: colors.textPrimary,
-                      ),
+          // 거절 사유: 나타날 때 자리가 툭 생기지 않게 높이를 늘이며 보임
+          AnimatedSize(
+            duration: AppMotion.fast,
+            curve: AppMotion.decelerate,
+            alignment: Alignment.topCenter,
+            child: rejection == null
+                ? const SizedBox(width: double.infinity)
+                : Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      _textInset.w,
+                      _fieldToRejection.h,
+                      _textInset.w,
+                      0,
                     ),
-                    SizedBox(height: _titleToDescription.h),
-                    Text(
-                      context.l10n.guardianNicknameSheetDescription,
-                      style: typo.noticeBody.copyWith(
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: _descriptionToField.h),
-              AppShake(
-                trigger: _rejectionCount,
-                child: ElumTextField(
-                  controller: _controller,
-                  hintText: context.l10n.guardianNicknameSheetHint,
-                  maxLength: GuardianNicknamePolicy.maxLength,
-                  isAutofocused: true,
-                  onChanged: _onChanged,
-                  onSubmitted: (_) => _save(),
-                ),
-              ),
-              // 거절 사유: 나타날 때 자리가 툭 생기지 않게 높이를 늘이며 보임
-              AnimatedSize(
-                duration: AppMotion.fast,
-                curve: AppMotion.decelerate,
-                alignment: Alignment.topCenter,
-                child: rejection == null
-                    ? const SizedBox(width: double.infinity)
-                    : Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          (_textInsetH - context.space.md).w,
-                          _fieldToRejection.h,
-                          (_textInsetH - context.space.md).w,
-                          0,
-                        ),
-                        child: Semantics(
-                          liveRegion: true,
-                          child: Text(
-                            rejection,
-                            style: typo.myInfoMeta.copyWith(
-                              color: colors.textSecondary,
-                              height: 1.3,
-                            ),
-                          ),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        rejection,
+                        style: context.typo.myInfoMeta.copyWith(
+                          color: colors.textSecondary,
+                          height: 1.3,
                         ),
                       ),
-              ),
-              SizedBox(height: _fieldToButton.h),
-              ElumButton(
-                label: context.l10n.guardianNicknameSheetSave,
-                loading: _isSaving,
-                onPressed: _canSave ? _save : null,
-              ),
-            ],
+                    ),
+                  ),
           ),
-        ),
+          SizedBox(height: _fieldToButton.h),
+          ElumButton(
+            label: context.l10n.guardianNicknameSheetSave,
+            loading: _isSaving,
+            onPressed: _canSave ? _save : null,
+          ),
+        ],
       ),
     );
   }

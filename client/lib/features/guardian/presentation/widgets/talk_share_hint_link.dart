@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -93,10 +95,15 @@ class TalkShareHintLink extends ConsumerWidget {
             scaleDown: AppPressable.scaleIcon,
             semanticLabel: l10n.commonClose,
             child: MinTapTarget(
-              child: Icon(
-                Icons.close_rounded,
-                size: space.md.w,
-                color: colors.textSecondary,
+              child: SvgPicture.asset(
+                AppAssets.iconClose,
+                width: space.md.w,
+                height: space.md.w,
+                excludeFromSemantics: true,
+                colorFilter: ColorFilter.mode(
+                  colors.textSecondary,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),

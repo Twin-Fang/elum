@@ -188,13 +188,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         SizedBox(height: 16.h),
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
-          hasDividers: false,
           children: [_LinkTile(busy: busy)],
         ),
         _groupGap,
         // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
         SettingsGroup(
-          hasDividers: false,
           children: [
             SettingsTile(
               isInCard: true,
@@ -214,10 +212,14 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보
+        // 약관 및 정보 (시안 1532:7501 순서): 사용법 다시 보기 > 약관 > 의견 보내기 > 앱 정보
         SettingsGroup(
-          hasDividers: false,
           children: [
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsRoutineManageGuide,
+              onTap: busy ? null : _replayRoutineManageGuide,
+            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsTerms,
@@ -228,11 +230,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
                         builder: (_) => const ConsentDocumentListScreen(),
                       ),
                     ),
-            ),
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.guardianSettingsRoutineManageGuide,
-              onTap: busy ? null : _replayRoutineManageGuide,
             ),
             SettingsTile(
               isInCard: true,
@@ -247,7 +244,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         // `문의하기`는 일부러 뺐다: 애플이 요구하는 것은 스토어 페이지의 지원 주소이고 앱 안 문의하기는 필수가 아니다.
         // 시안 대조에서 '빠졌다'고 되살리지 않는다 (`AppConfig.supportEmail` 은 남겨 두었다).
         SettingsGroup(
-          hasDividers: false,
           children: [
             SettingsTile(
               isInCard: true,

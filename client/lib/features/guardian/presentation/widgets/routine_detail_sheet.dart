@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -402,14 +403,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                       isEditable: widget.routine.isEditableByMe,
                       isInGroup: widget.isInGroup,
                     )
-                  : FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colors.textPrimary,
-                        disabledBackgroundColor: colors.buttonDisabled,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-                      ),
+                  : ElumButton(
+                      label: widget.isPast
+                          ? context.l10n.routineDetailRerun
+                          : _finishedToday
+                          ? context.l10n.routineDetailFinishedToday
+                          : context.l10n.routineDetailEdit,
+                      labelStyle: typo.sheetActionLabel,
                       // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
                       onPressed: _finishedToday
                           ? null
@@ -418,18 +418,6 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                   ? RoutineSheetAction.rerun
                                   : RoutineSheetAction.edit,
                             ),
-                      child: Text(
-                        widget.isPast
-                            ? context.l10n.routineDetailRerun
-                            : _finishedToday
-                            ? context.l10n.routineDetailFinishedToday
-                            : context.l10n.routineDetailEdit,
-                        style: typo.sheetActionLabel.copyWith(
-                          color: _finishedToday
-                              ? colors.buttonDisabledText
-                              : colors.surface,
-                        ),
-                      ),
                     ),
             ),
           ],
@@ -456,7 +444,7 @@ class _StepItemKey extends GlobalObjectKey {
   int get hashCode => Object.hash(id, sheet);
 }
 
-/// 일과관리 원본의 아래 버튼 두 개: `카드 고치기`(보조) · `오늘 보내기`(주)
+/// 일과관리 원본의 아래 버튼 두 개: `카드 고치기`(보조, 웜그레이 + 남색 글) · 사이 4 · `오늘 보내기`(주)
 ///
 /// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
 class _LibraryActions extends StatelessWidget {
@@ -465,47 +453,34 @@ class _LibraryActions extends StatelessWidget {
   final bool isEditable;
   final bool isInGroup;
 
+  /// 두 버튼 사이 (시트 버튼 둘 결)
+  static const _buttonGap = 4.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final typo = context.typo;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18.r),
-    );
-    final sendButton = FilledButton(
-      style: FilledButton.styleFrom(
-        backgroundColor: colors.textPrimary,
-        shape: shape,
-      ),
+    final labelStyle = context.typo.sheetActionLabel;
+    final sendButton = ElumButton(
+      label: isInGroup
+          ? context.l10n.routineLibrarySendOnlyThis
+          : context.l10n.routineLibrarySendToday,
+      labelStyle: labelStyle,
       onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
-      child: Text(
-        isInGroup
-            ? context.l10n.routineLibrarySendOnlyThis
-            : context.l10n.routineLibrarySendToday,
-        style: typo.sheetActionLabel.copyWith(color: colors.surface),
-      ),
     );
-    if (!isEditable) return SizedBox.expand(child: sendButton);
+    if (!isEditable) return sendButton;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           flex: 2,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.buttonNeutral,
-              shape: shape,
-            ),
+          child: ElumButton(
+            label: context.l10n.routineLibraryEditCards,
+            labelStyle: labelStyle,
+            backgroundColor: colors.buttonNeutral,
+            labelColor: colors.buttonNeutralText,
             onPressed: () => Navigator.of(context).pop(RoutineSheetAction.edit),
-            child: Text(
-              context.l10n.routineLibraryEditCards,
-              style: typo.sheetActionLabel.copyWith(
-                color: colors.buttonNeutralText,
-              ),
-            ),
           ),
         ),
-        SizedBox(width: context.space.xs.w),
+        SizedBox(width: _buttonGap.w),
         Expanded(flex: 3, child: sendButton),
       ],
     );

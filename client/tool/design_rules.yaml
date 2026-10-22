@@ -1,0 +1,93 @@
+# 디자인 규칙 원본 — `tool/check_design_rules.dart` 가 코드를 여기에 대조한다.
+#
+# 값의 근거: Figma `238:1846`(이게 진짜 디자인) 폰 화면 116장 통계 (2026-10-22 덤프, #967)
+#   python3 tool/figma_design_stats.py <덤프.json>            # 표
+#   python3 tool/figma_design_stats.py <덤프.json> --palette  # UI 색 목록
+# 디자이너가 새 시안을 내면 덤프를 다시 받아 통계를 보고, **시안에 새로 생긴 값만** 여기에 더한다.
+# 코드에 맞춰 값을 늘리지 않는다 — 시안에 없는 값은 코드를 고치거나 `*_exceptions` 에 이유를 적는다.
+
+source:
+  figma_file: VSmGuv1iuOpLZmp6QeBHWr
+  figma_node: "238:1846"
+  dumped_at: "2026-10-22"
+  phone_frames: 116
+
+# UI 색 — 글자 · 판 · 선 · 그림자 · 그라데이션 (캐릭터 · 일러스트 벡터 색 제외)
+palette: ["#000000", "#0099FF", "#03C75A", "#0C0D1A", "#121215", "#1A242B", "#230D60", "#242634",
+  "#388E7C", "#3CFFFF", "#40BBA6", "#5176FC", "#55CFBA", "#5651FC", "#574D2B", "#6FC5FF", "#7061A3",
+  "#74757D", "#7BFFB0", "#7BFFE5", "#818393", "#898B98", "#9261A3", "#93DBCC", "#969696", "#9778FF",
+  "#9B97A4", "#9C7DE9", "#9CADF1", "#A2B1EB", "#A7AAFF", "#A97BFF", "#AC0064", "#AC6744", "#AEB0B7",
+  "#AEE4D9", "#B5EAEC", "#B7C2EC", "#BAA0F9", "#BDECAE", "#BFBDBD", "#C9D6D4", "#CACACA", "#CB51FC",
+  "#CB9500", "#CCBCF6", "#CDC8C3", "#CED8FF", "#D16FFF", "#D7D3D1", "#D9D3CF", "#D9D9D9", "#DA5050",
+  "#DADADA", "#DDD9D9", "#E7E7E7", "#EB9B73", "#ECE0AE", "#EEE9E6", "#EFEFEF", "#F3C500", "#F4BDA2",
+  "#F7F2EF", "#F8C905", "#F9C6AD", "#F9EAB4", "#FB8BD4", "#FCE551", "#FCF351", "#FEE500", "#FF3CA1",
+  "#FF6F93", "#FF6FB9", "#FFAA00", "#FFDAC7", "#FFDD00", "#FFFADB", "#FFFADC", "#FFFFFF"]
+
+# 그림 벡터에만 있는 색. 코드로 그림 일부를 그리는 토큰만 쓸 수 있다 (`illustration_tokens`)
+illustration_palette: ["#00FFD0", "#374957", "#40F07B", "#443E39", "#597FFC", "#86F7CB", "#86FCA3",
+  "#9AFFE9", "#A186FC", "#A3A0A4", "#B69FFF", "#BFE75C", "#BFFC86", "#C4C4C4", "#C8DD94", "#D0FF00",
+  "#EAD9BE", "#EFEEE8", "#F3F2E1", "#F44D4D", "#F4A753", "#F8A3A5", "#F970E0", "#FC86F2", "#FC9586",
+  "#FCD186", "#FF8B22", "#FF9827", "#FFA300", "#FFC800", "#FFC9BB", "#FFD629", "#FFDF00", "#FFDFBD",
+  "#FFF2BB"]
+
+# 그림 색을 써도 되는 토큰 (이름 접두사) — 스플래시 · 보상 별 · 캐릭터 고르기처럼 그림을 코드로 잇는 곳
+illustration_tokens: [splash, rewardStar, accentYellow, brandPeach, brandOrange, foxSelected]
+
+# 시안에 없지만 남기는 색. 이유를 반드시 적는다
+palette_exceptions:
+  loginKakaoLabel: "카카오 로그인 버튼 글자 — 카카오 디자인 가이드 고정색 (#191600 85%)"
+  stepStripGoalFill: "이룸이 태블릿 단계 띠 — 태블릿 시안 없음, 디자이너 확인 대기"
+  stepStripGoalBorder: "이룸이 태블릿 단계 띠 — 태블릿 시안 없음, 디자이너 확인 대기"
+  tabletScene: "태블릿 가로 장면 그림 — 태블릿 시안 없음, 디자이너 확인 대기"
+  homeCard: "쓰는 곳 없음 — 지울 후보"
+  homeHero: "쓰는 곳 없음 — 지울 후보"
+  completion: "쓰는 곳 없음 — 지울 후보"
+  rewardBannerBg: "쓰는 곳 없음 — 지울 후보"
+
+# 글자: 글꼴 · 굵기 · 크기 (시안에 나온 조합만, 축소된 부품 안 글자 13.4 · 10.7 은 뺌)
+typography:
+  Pretendard:
+    400: [12, 13, 14, 16, 20]
+    500: [12, 13, 14, 15, 16, 17, 18, 20]
+    600: [12, 14, 16, 18, 20, 30]
+    700: [18, 20, 32]
+    800: [22]
+  TmoneyRoundWind:
+    400: [14, 16, 20]
+    800: [12, 16, 18, 20, 22, 24, 25, 26, 28, 30, 40, 80]
+
+# 간격 · 여백 · 패딩 단계 (오토레이아웃 간격 · 패딩, 위아래 형제 사이 빈칸에서 반복된 값)
+# 8 이 압도적이고 4 · 12 · 16 · 24 · 32 · 40 이 뒤를 잇는다. 40 을 넘는 값은 화면 배치 좌표라 보지 않는다
+spacing: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 30, 32, 40]
+spacing_max_checked: 40
+
+# 모서리 단계 (20 > 16 > 12 > 4 > 8 > 18 > 알약). 100 이상은 알약으로 본다
+radius: [2, 4, 8, 10, 12, 16, 18, 20, 24]
+radius_pill_min: 100
+
+# Material 기본 부품 — 시안 모양이 아니다. 공통 위젯 파일 안에서 감싸 쓰는 것만 허용한다
+material_widgets: [TextButton, OutlinedButton, ElevatedButton, FilledButton, ListTile, Divider,
+  VerticalDivider, FloatingActionButton, Card, AlertDialog, SimpleDialog, showModalBottomSheet,
+  showDialog, showGeneralDialog, Switch, Checkbox, Radio, CircularProgressIndicator,
+  LinearProgressIndicator, Chip, FilterChip, ChoiceChip, AppBar, PopupMenuButton]
+
+# 위 부품을 감싸는 공통 위젯 (여기서만 써도 된다)
+material_wrappers:
+  lib/core/widgets/elum_bottom_sheet.dart: "시트 띄우기 단일 진입점 (showElumSheet)"
+  lib/core/widgets/elum_dialog.dart: "팝업 띄우기 단일 진입점 (showElumDialog)"
+  lib/core/widgets/elum_spinner.dart: "로딩 표시 단일 위젯"
+
+# 쓰는 곳을 묶어 둔 토큰 — 이 파일 밖에서 쓰면 위반 (그림 색이 UI 강조로 번지는 것을 막는다)
+restricted_tokens:
+  brandOrange:
+    allowed: [lib/core/theme/app_colors.dart]
+    reason: "포포 그림 주황 — 축하 색종이(AppColors.confetti)에만. UI 강조는 민트"
+
+# 단계 밖이지만 시안을 실측하면 정확히 그 값인 자리 (파일 · 규칙 · 값 · 근거 노드)
+measured_exceptions:
+  - {path: lib/core/widgets/elum_sheet_text_field.dart, rule: spacing, value: "9", reason: "1197:5923 라벨 y84 h16 > 칸 y109"}
+  - {path: lib/features/onboarding/presentation/character_screen.dart, rule: spacing, value: "9", reason: "204:1029 카드 176 × 2 + 9 = 361"}
+  - {path: lib/features/talk/presentation/widgets/talk_step_cards.dart, rule: spacing, value: "9", reason: "1813:7718 칸 176 × 2 + 9 = 361"}
+  - {path: lib/features/profile/presentation/guardians_screen.dart, rule: spacing, value: "17", reason: "1027:4617 초대 카드 끝 603 > 그만두기 620"}
+  - {path: lib/features/talk/presentation/talk_feed_screen.dart, rule: spacing, value: "23", reason: "1783:6640 제목 y87 h22 > 칩 y132"}
+  - {path: lib/features/talk/presentation/widgets/talk_comment_list.dart, rule: spacing, value: "15", reason: "1860:7944 내용 y36 h17 > 칸 68"}

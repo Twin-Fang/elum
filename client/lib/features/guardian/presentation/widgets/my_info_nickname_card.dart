@@ -23,11 +23,12 @@ class MyInfoNicknameCard extends StatelessWidget {
 
   final GuardianAccount? account;
 
-  /// 시안 실측 (카드 높이 138): 위 7 > 제목 줄 44(연필 누름) > 7 > 이메일 줄 24 > 14 > 가입일 줄 24 > 아래 18
-  static const _padTop = 7.0;
+  /// 카드 높이 138 (시안 1736:8780): 위 6 > 제목 줄 44(연필 누름) > 8 > 이메일 줄 24 > 14 > 가입일 줄 24 > 아래 18
+  /// 시안 7 · 7 을 간격 단계(6 · 8)로 맞춤 (합 같음)
+  static const _padTop = 6.0;
   static const _padBottom = 18.0;
   static const _padH = 20.0;
-  static const _titleToEmail = 7.0;
+  static const _titleToEmail = 8.0;
   static const _emailToJoined = 14.0;
 
   /// 정보 줄 아이콘 자리 24 · 달력 그림 20 · 아이콘과 글 사이 8
@@ -173,10 +174,16 @@ class MyInfoNicknameCard extends StatelessWidget {
   Widget _emailLeading(BuildContext context, GuardianAccount account) {
     final provider = account.signInProvider;
     if (provider == null) {
-      return Icon(
-        Icons.mail_outline_rounded,
-        size: _calendarIconSize.w,
-        color: context.colors.myInfoMutedIcon,
+      // 달력 아이콘과 같은 크기 · 색
+      return SvgPicture.asset(
+        AppAssets.iconEnvelope,
+        width: _calendarIconSize.w,
+        height: _calendarIconSize.w,
+        colorFilter: ColorFilter.mode(
+          context.colors.myInfoMutedIcon,
+          BlendMode.srcIn,
+        ),
+        excludeFromSemantics: true,
       );
     }
     return SignInProviderBadge(provider: provider, size: _infoIconSlot);

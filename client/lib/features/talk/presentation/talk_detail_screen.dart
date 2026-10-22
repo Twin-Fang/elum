@@ -13,6 +13,7 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/talk_comment_controller.dart';
 import '../application/talk_detail_controller.dart';
@@ -22,7 +23,7 @@ import 'talk_detail_actions.dart';
 import 'widgets/talk_comment_input.dart';
 import 'widgets/talk_comment_list.dart';
 import 'widgets/talk_detail_body.dart';
-import 'widgets/talk_empty_message.dart';
+import 'widgets/talk_empty_line.dart';
 import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_top_bar.dart';
 
@@ -43,10 +44,10 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   /// 끝까지 이만큼 남으면 다음 댓글 쪽을 받는다
   static const _loadMoreExtent = 320.0;
 
-  /// 도움돼요 칩 > 구분 띠 15 · 띠 높이 7 · 띠 > 댓글 머리 14 (시안 1830:7918)
-  static const _bodyToDivider = 15.0;
+  /// 도움돼요 칩 > 구분 띠 16 · 띠 높이 7 · 띠 > 댓글 머리 16 (시안 1813:7718 · 1783:7172 실측, 칩·머리 줄 높이 1.0)
+  static const _bodyToDivider = 16.0;
   static const _dividerHeight = 7.0;
-  static const _dividerToComments = 14.0;
+  static const _dividerToComments = 16.0;
 
   late final _actions = TalkDetailActions(
     context: context,
@@ -197,23 +198,41 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   }
 }
 
-/// 내려간 글: 안내 + 이야기로 돌아가기
+/// 내려간 글 (빈 상태 결): 본문 첫 줄 자리에 웜그레이 글 줄 > `이야기로 돌아가기` 글자 버튼
 class _GoneBody extends StatelessWidget {
   const _GoneBody({required this.onBackPressed});
 
   final VoidCallback onBackPressed;
 
+  /// 머리 줄 > 글 줄 (본문 머리 > 칩과 같은 20) · 글 줄 > 돌아가기
+  static const _headerToLine = 20.0;
+  static const _lineToLink = 16.0;
+
+  /// 글 줄 좌우 (판 x=16)
+  static const _lineInset = 16.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return ElumStateBody(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
-        child: TalkEmptyMessage(
-          title: l10n.talkPostGoneTitle,
-          actionLabel: l10n.talkPostGoneBack,
-          onActionPressed: onBackPressed,
-        ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        _lineInset.w,
+        _headerToLine.h,
+        _lineInset.w,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TalkEmptyLine(title: l10n.talkPostGoneTitle),
+          SizedBox(height: _lineToLink.h),
+          Center(
+            child: ElumTextLink(
+              label: l10n.talkPostGoneBack,
+              onTap: onBackPressed,
+            ),
+          ),
+        ],
       ),
     );
   }

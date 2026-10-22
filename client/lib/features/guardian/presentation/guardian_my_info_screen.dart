@@ -151,7 +151,6 @@ class GuardianMyInfoScreen extends ConsumerWidget {
   /// 바로가기 4줄: 함께하는 사람 · 임시저장 · 공지사항 · 숨긴 보호자
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
     return SettingsGroup(
-      hasDividers: false,
       children: [
         SettingsTile(
           isInCard: true,

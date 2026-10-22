@@ -74,14 +74,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkEmptyTitle,
     required this.talkEmptyBody,
     required this.talkRuleText,
-    required this.talkToastMessage,
-    required this.talkToastAction,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
     required this.starsCount,
     required this.stepBadgeNumber,
     required this.sheetTitle,
+    required this.sheetDescription,
+    required this.settingsGroupLabel,
+    required this.segmentedTabSelected,
+    required this.segmentedTabUnselected,
     required this.sheetStepTitle,
     required this.sheetStepBody,
     required this.sheetActionLabel,
@@ -386,11 +388,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 이용 규칙 한 줄 (Pretendard 500/15)
   final TextStyle talkRuleText;
 
-  /// 가져오기 완료 토스트 문구 (Pretendard 600/15)
-  final TextStyle talkToastMessage;
 
-  /// 가져오기 완료 토스트 `보러 가기` (Pretendard 600/13)
-  final TextStyle talkToastAction;
 
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
@@ -417,6 +415,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 바꾸면 손대지 않은 화면까지 딸려 바뀐다. 시안이 이 화면군만 Pretendard로
   /// 그렸기에 글꼴도 다르다.
   final TextStyle sheetTitle;
+
+  /// 시트 제목 아래 안내 (Pretendard 400/16 · 줄 1.2, 검정). 시안 1759:9649 · 1869:8838
+  final TextStyle sheetDescription;
+
+  /// 설정 묶음 머리 글 (Pretendard 600/14). 시안 1589:8359 · 1274:9315
+  final TextStyle settingsGroupLabel;
+
+  /// 상단 탭 고른 칸 (Pretendard 600/16). 시안 1724:8346
+  final TextStyle segmentedTabSelected;
+
+  /// 상단 탭 안 고른 칸 (Pretendard 500/16). 시안 1724:8346
+  final TextStyle segmentedTabUnselected;
 
   /// 일과 시트의 단계 제목 (Figma `963:4236` — Pretendard 16/600).
   /// `cardTitle`(Tmoney 17/800)과 다르다.
@@ -1006,18 +1016,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.4,
     ),
-    talkToastMessage: TextStyle(
-      fontFamily: promptFontFamily,
-      fontSize: 15,
-      fontWeight: FontWeight.w600,
-      height: 1.3,
-    ),
-    talkToastAction: TextStyle(
-      fontFamily: promptFontFamily,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      height: 1.0,
-    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -1054,6 +1052,31 @@ class AppTypography extends ThemeExtension<AppTypography> {
       // 시안(980:4892)은 700 이다. 600 으로 두면 제목이 눈에 띄게 얇다.
       fontWeight: FontWeight.w700,
       height: 1,
+    ),
+    sheetDescription: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    settingsGroupLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    segmentedTabSelected: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    segmentedTabUnselected: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
     ),
     sheetStepTitle: TextStyle(
       fontFamily: promptFontFamily,
@@ -1472,14 +1495,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkEmptyTitle,
     TextStyle? talkEmptyBody,
     TextStyle? talkRuleText,
-    TextStyle? talkToastMessage,
-    TextStyle? talkToastAction,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
     TextStyle? starsCount,
     TextStyle? stepBadgeNumber,
     TextStyle? sheetTitle,
+    TextStyle? sheetDescription,
+    TextStyle? settingsGroupLabel,
+    TextStyle? segmentedTabSelected,
+    TextStyle? segmentedTabUnselected,
     TextStyle? sheetStepTitle,
     TextStyle? sheetStepBody,
     TextStyle? sheetActionLabel,
@@ -1601,14 +1626,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyTitle: talkEmptyTitle ?? this.talkEmptyTitle,
       talkEmptyBody: talkEmptyBody ?? this.talkEmptyBody,
       talkRuleText: talkRuleText ?? this.talkRuleText,
-      talkToastMessage: talkToastMessage ?? this.talkToastMessage,
-      talkToastAction: talkToastAction ?? this.talkToastAction,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
       stepBadgeNumber: stepBadgeNumber ?? this.stepBadgeNumber,
       sheetTitle: sheetTitle ?? this.sheetTitle,
+      sheetDescription: sheetDescription ?? this.sheetDescription,
+      settingsGroupLabel: settingsGroupLabel ?? this.settingsGroupLabel,
+      segmentedTabSelected: segmentedTabSelected ?? this.segmentedTabSelected,
+      segmentedTabUnselected: segmentedTabUnselected ?? this.segmentedTabUnselected,
       sheetStepTitle: sheetStepTitle ?? this.sheetStepTitle,
       sheetStepBody: sheetStepBody ?? this.sheetStepBody,
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
@@ -1749,14 +1776,20 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyTitle: TextStyle.lerp(talkEmptyTitle, other.talkEmptyTitle, t)!,
       talkEmptyBody: TextStyle.lerp(talkEmptyBody, other.talkEmptyBody, t)!,
       talkRuleText: TextStyle.lerp(talkRuleText, other.talkRuleText, t)!,
-      talkToastMessage: TextStyle.lerp(talkToastMessage, other.talkToastMessage, t)!,
-      talkToastAction: TextStyle.lerp(talkToastAction, other.talkToastAction, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       stepBadgeNumber: TextStyle.lerp(stepBadgeNumber, other.stepBadgeNumber, t)!,
       sheetTitle: TextStyle.lerp(sheetTitle, other.sheetTitle, t)!,
+      sheetDescription: TextStyle.lerp(
+        sheetDescription,
+        other.sheetDescription,
+        t,
+      )!,
+      settingsGroupLabel: TextStyle.lerp(settingsGroupLabel, other.settingsGroupLabel, t)!,
+      segmentedTabSelected: TextStyle.lerp(segmentedTabSelected, other.segmentedTabSelected, t)!,
+      segmentedTabUnselected: TextStyle.lerp(segmentedTabUnselected, other.segmentedTabUnselected, t)!,
       sheetStepTitle: TextStyle.lerp(sheetStepTitle, other.sheetStepTitle, t)!,
       sheetStepBody: TextStyle.lerp(sheetStepBody, other.sheetStepBody, t)!,
       sheetActionLabel: TextStyle.lerp(

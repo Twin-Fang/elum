@@ -12,6 +12,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../guardian/domain/routine_template.dart';
 import '../application/talk_feed_controller.dart';
@@ -19,7 +20,7 @@ import '../application/talk_popular_provider.dart';
 import '../domain/talk_post.dart';
 import '../domain/talk_screen_codes.dart';
 import 'widgets/talk_category_chips.dart';
-import 'widgets/talk_empty_message.dart';
+import 'widgets/talk_empty_line.dart';
 import 'widgets/talk_popular_row.dart';
 import 'widgets/talk_post_card.dart';
 import 'widgets/talk_write_button.dart';
@@ -46,6 +47,7 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   static const _titleTop = 28.0;
 
   /// 제목 > 칩 > 목록, 섹션 사이, 섹션 제목 > 카드, 카드 사이 (시안 23 · 32 · 32 · 16 · 8)
+  /// 제목 > 칩 23 은 시안 실측 (제목 y87 h22 줄 높이 1.0 > 칩 y132)
   static const _titleToChips = 23.0;
   static const _chipsToList = 32.0;
   static const _sectionGap = 32.0;
@@ -175,29 +177,8 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
       talkFeedControllerProvider(_categoryValue).notifier,
     );
 
-    // 받아 둔 목록이 있으면 새로고침 중·실패여도 계속 그린다
+    // 받아 둔 목록이 있으면 새로고침 중·실패여도 계속 그린다 (0건이면 목록 자리에 빈 줄)
     final state = feed.value;
-    if (state != null && state.items.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _refresh,
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: _EmptyBody(
-                  isCategoryFiltered: _selectedCategory != null,
-                  onSharePressed: _openShare,
-                  onShowAllPressed: () => _onCategorySelected(null),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
     if (state != null) {
       return RefreshIndicator(
         onRefresh: _refresh,
@@ -245,6 +226,11 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
           ),
         ),
         SizedBox(height: _sectionTitleToCards.h),
+        if (state.items.isEmpty)
+          _EmptyLatest(
+            isCategoryFiltered: _selectedCategory != null,
+            onShowAllPressed: () => _onCategorySelected(null),
+          ),
         for (final post in state.items)
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -276,32 +262,45 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   }
 }
 
-/// 글이 0건일 때: 루미 그림 + 안내 + 버튼 (받는 중·실패와 다른 화면)
-/// 분류로 거른 0건이면 "전체 보기", 전체가 0건이면 "올리기"
-class _EmptyBody extends StatelessWidget {
-  const _EmptyBody({
+/// 글이 0건일 때 (홈 빈 상태 결): 글 카드 자리에 웜그레이 글 줄 > 분류로 거른 0건이면 `전체 보기` 글자 버튼
+/// 전체 0건의 올리기는 떠 있는 `+ 올리기` 하나로 둔다
+class _EmptyLatest extends StatelessWidget {
+  const _EmptyLatest({
     required this.isCategoryFiltered,
-    required this.onSharePressed,
     required this.onShowAllPressed,
   });
 
   final bool isCategoryFiltered;
-  final VoidCallback onSharePressed;
   final VoidCallback onShowAllPressed;
+
+  /// 빈 줄 > `전체 보기`
+  static const _lineToLink = 16.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
-      child: TalkEmptyMessage(
-        title: isCategoryFiltered
-            ? l10n.talkEmptyCategoryTitle
-            : l10n.talkEmptyTitle,
-        actionLabel: isCategoryFiltered
-            ? l10n.talkEmptyCategoryAction
-            : l10n.talkEmptyAction,
-        onActionPressed: isCategoryFiltered ? onShowAllPressed : onSharePressed,
+      padding: EdgeInsets.symmetric(
+        horizontal: _TalkFeedScreenState._postCardInset.w,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TalkEmptyLine(
+            title: isCategoryFiltered
+                ? l10n.talkEmptyCategoryTitle
+                : l10n.talkEmptyTitle,
+          ),
+          if (isCategoryFiltered) ...[
+            SizedBox(height: _lineToLink.h),
+            Center(
+              child: ElumTextLink(
+                label: l10n.talkEmptyCategoryAction,
+                onTap: onShowAllPressed,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

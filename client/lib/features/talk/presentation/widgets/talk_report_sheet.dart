@@ -12,7 +12,7 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../domain/talk_report_reason.dart';
 import '../../domain/talk_screen_codes.dart';
 import 'talk_choice_row.dart';
-import 'talk_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 
 /// 신고 시트: 사유 4개 중 하나 > 보내기. 신고가 접수되거나 이미 신고한 글이면 true
 /// [onSubmit] 이 실제 신고 요청 (글·댓글 구분은 호출한 쪽이 한다)
@@ -85,7 +85,7 @@ class _TalkReportSheetState extends State<_TalkReportSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return TalkSheetFrame(
+    return ElumSheetFrame(
       title: l10n.talkReportTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

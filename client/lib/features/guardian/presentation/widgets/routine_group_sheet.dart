@@ -4,18 +4,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
-import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_dialog.dart';
-import '../../../../core/widgets/elum_sheet_header.dart';
+import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
 import '../../application/routine_group_controller.dart';
-import '../../domain/routine_group.dart';
 import 'routine_detail_step_badge.dart';
+import 'routine_group_sheet_header.dart';
 import 'routine_group_sheet_row.dart';
 
 /// 묶음 시트가 닫히며 화면에 맡기는 동작 (토스트·다음 시트는 화면이 띄운다)
@@ -110,6 +108,16 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
 
   /// 시트 높이 (화면 대비)
   static const _heightRatio = 0.85;
+
+  /// 시트 윗변 > 제목 (`ElumSheetFrame` 과 같은 40)
+  static const _titleTop = 40.0;
+
+  /// 왼쪽 번호 칸 폭 · 번호 칸 ↔ 카드
+  static const _badgeWidth = 40.0;
+  static const _badgeToCard = 4.0;
+
+  /// 아래 두 버튼 사이 (시트 버튼 둘 결)
+  static const _buttonGap = 4.0;
 
   void _close(GroupSheetAction action, [Routine? routine]) =>
       Navigator.of(context).pop((action: action, routine: routine));
@@ -206,7 +214,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             context.space.md.w,
-            context.space.lg.h,
+            _titleTop.h,
             context.space.md.w,
             context.space.md.h + media.padding.bottom,
           ),
@@ -221,7 +229,6 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
 
   Widget _buildBody(BuildContext context, LibraryGroupEntry entry) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final space = context.space;
     final routines = _pendingOrder ?? entry.routines;
     // 서버 이름이 바뀌었고 지금 입력 중이 아니면 칸을 따라 맞춘다
@@ -232,60 +239,17 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 머리 한 줄: ✕ · 이름(그 자리에서 고침) · 편집/완료, 아래 일과 N개
-        ElumSheetHeader(
-          leading: AppPressable(
-            onTap: () => Navigator.of(context).pop(),
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: l10n.commonClose,
-            child: Padding(
-              padding: EdgeInsets.all(space.xs.w),
-              child: Icon(
-                Icons.close_rounded,
-                size: space.lg.w,
-                color: colors.textSecondary,
-              ),
-            ),
-          ),
-          title: TextField(
-            controller: _nameController,
-            focusNode: _nameFocus,
-            maxLength: RoutineGroup.nameMaxLength,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _nameFocus.unfocus(),
-            style: context.typo.sectionTitle.copyWith(
-              color: colors.textPrimary,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              counterText: '',
-              border: InputBorder.none,
-              hintText: l10n.routineGroupNameHint,
-            ),
-          ),
-          trailing: AppPressable(
-            onTap: _isSaving
-                ? null
-                : () => setState(() => _isEditing = !_isEditing),
-            scaleDown: AppPressable.scaleIcon,
-            child: Padding(
-              padding: EdgeInsets.all(space.xs.w),
-              child: Text(
-                _isEditing
-                    ? l10n.libraryArrangeDone
-                    : l10n.routineGroupEditOrder,
-                style: context.typo.tileLabel.copyWith(
-                  color: colors.textSecondary,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-          subtitle: l10n.routineGroupSheetCount(routines.length),
+        // 머리 (시트 제목 결, 왼쪽 x=24): 이름(그 자리에서 고침) · 편집/완료 · ✕, 아래 일과 N개
+        RoutineGroupSheetHeader(
+          nameController: _nameController,
+          nameFocus: _nameFocus,
+          routineCount: routines.length,
+          isEditing: _isEditing,
+          onEditToggle: _isSaving
+              ? null
+              : () => setState(() => _isEditing = !_isEditing),
         ),
-        SizedBox(height: space.sm.h),
+        SizedBox(height: space.lg.h),
         // 순서대로 일과: 번호 칸과 카드 칸을 나란히 따로 둔다 (행동카드 순서 변경과 같은 구조).
         // 한 줄로 묶으면 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를 뜻하므로
         // 제자리에 두고 카드만 순서 바꾸기에 올린다. 한 스크롤 안이라 가장자리 자동 스크롤도 하나로 돈다
@@ -298,11 +262,14 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
                   slivers: [
                     SliverConstrainedCrossAxis(
                       // 번호 칸 40 + 카드와의 틈 4
-                      maxExtent: 44.w,
+                      maxExtent: (_badgeWidth + _badgeToCard).w,
                       sliver: SliverList.builder(
                         itemCount: routines.length,
                         itemBuilder: (context, index) => Padding(
-                          padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
+                          padding: EdgeInsets.only(
+                            right: _badgeToCard.w,
+                            bottom: space.xs.h,
+                          ),
                           child: RoutineDetailStepBadge(index: index),
                         ),
                       ),
@@ -335,7 +302,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
                           child: KeyedSubtree(
                             key: _RowItemKey(routine.id, this),
                             child: Padding(
-                              padding: EdgeInsets.only(bottom: 8.h),
+                              padding: EdgeInsets.only(bottom: space.xs.h),
                               child: RoutineGroupSheetRow(
                                 index: index,
                                 routine: routine,
@@ -360,21 +327,21 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
           ),
         ),
         SizedBox(height: space.sm.h),
-        // 일과 넣기 · 오늘 보내기
+        // 일과 넣기(보조, 웜그레이 + 남색 글) · 사이 4 · 오늘 보내기
         Row(
           children: [
             Expanded(
               flex: 2,
               child: ElumButton(
                 label: l10n.routineGroupSheetAdd,
-                backgroundColor: colors.buttonNeutral,
-                labelColor: colors.buttonNeutralText,
+                backgroundColor: context.colors.buttonNeutral,
+                labelColor: context.colors.buttonNeutralText,
                 onPressed: _isSaving
                     ? null
                     : () => _close(GroupSheetAction.addRoutines),
               ),
             ),
-            SizedBox(width: space.xs.w),
+            SizedBox(width: _buttonGap.w),
             Expanded(
               flex: 3,
               child: ElumButton(

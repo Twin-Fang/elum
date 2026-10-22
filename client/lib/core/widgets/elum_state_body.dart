@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'elum_spinner.dart';
+
 /// 화면 본문 전체가 로딩·빈 상태·실패일 때 놓는 자리.
 ///
 /// 셋이 **같은 자리(남는 높이의 세로 가운데)**에 놓여야 로딩에서 실패로 바뀔 때
@@ -11,7 +13,10 @@ class ElumStateBody extends StatelessWidget {
   const ElumStateBody({super.key, required this.child});
 
   const ElumStateBody.loading({super.key})
-    : child = const CircularProgressIndicator();
+    : child = const ElumSpinner(strokeWidth: _loadingStrokeWidth);
+
+  /// 화면 한 장 로딩 동그라미 굵기
+  static const _loadingStrokeWidth = 4.0;
 
   final Widget child;
 

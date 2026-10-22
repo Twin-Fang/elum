@@ -23,7 +23,7 @@ class SettingsTile extends StatelessWidget {
     this.valueText,
     this.showChevronWithValue = false,
     this.loading = false,
-    this.isInCard = false,
+    this.isInCard = true,
   });
 
   final String label;
@@ -46,7 +46,8 @@ class SettingsTile extends StatelessWidget {
   final bool loading;
 
   /// 흰 묶음 카드 안의 줄이다 (Figma `1532:7501`: 높이 56, 안쪽 여백 왼쪽 20·오른쪽 16, 검정 글자, 얇은 화살표).
-  /// false 면 살색 배경 위 줄(`1022:4467`)이다. 다른 설정 목록이 새 시안을 받을 때까지 둘이 함께 있다.
+  /// false 는 옛 평면 줄(`1022:4467`, 높이 60)이다. 화살표는 둘 다 시안 `fi-br-angle-small` 이다.
+  /// 새 화면은 [SettingsGroup] 안에 기본값(true)으로 쓴다.
   final bool isInCard;
 
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
@@ -73,13 +74,7 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final value = valueText;
-    final chevron = isInCard
-        ? const SettingsCardChevron()
-        : Icon(
-            Icons.chevron_right_rounded,
-            size: 20.w,
-            color: colors.settingsChevron,
-          );
+    const chevron = SettingsCardChevron();
     final labelColor = destructive
         ? colors.settingsDestructive
         : (isInCard ? colors.settingsCardLabel : colors.textPrimary);

@@ -22,16 +22,16 @@ class DeviceNotificationPermissionBanner extends ConsumerStatefulWidget {
 class _DeviceNotificationPermissionBannerState
     extends ConsumerState<DeviceNotificationPermissionBanner>
     with WidgetsBindingObserver {
-  /// 띠 56 높이(최소) · 모서리 20 · 왼쪽 20 · 오른쪽 11
+  /// 띠 56 높이(최소) · 모서리 20 · 왼쪽 20 · 오른쪽 12 (시안 1732:8433 실측 11 > 간격 단계)
   static const _minHeight = 56.0;
   static const _radius = 20.0;
   static const _paddingLeft = 20.0;
-  static const _paddingRight = 11.0;
+  static const _paddingRight = 12.0;
 
-  /// 아이콘 22×20 · 아이콘 > 글 13
+  /// 아이콘 22×20 · 아이콘 > 글 12 (실측 글 시작 x=70, 글자 앞 여백 포함)
   static const _iconWidth = 22.0;
   static const _iconHeight = 20.0;
-  static const _iconToTextGap = 13.0;
+  static const _iconToTextGap = 12.0;
 
   /// `켜기` 버튼 (높이 34, 좌우 20, 모서리 8)
   static const _buttonHeight = 34.0;

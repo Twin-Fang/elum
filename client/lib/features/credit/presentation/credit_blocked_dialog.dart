@@ -80,11 +80,8 @@ Future<void> _watchAd(
   final stage = ValueNotifier(AdRewardStage.preparing);
   // 광고를 불러오고 서버 확인을 기다리는 동안 홈을 누를 수 없게 막는다.
   unawaited(
-    showDialog<void>(
+    showElumDialogContent<void>(
       context: context,
-      barrierDismissible: false,
-      barrierColor: context.colors.dialogScrim,
-      useSafeArea: false,
       builder: (_) => PopScope(canPop: false, child: _WaitDialog(stage: stage)),
     ),
   );
@@ -139,11 +136,8 @@ class _WaitDialog extends StatelessWidget {
           builder: (context, value, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ElumSpinner(
-                size: 32.w,
-                strokeWidth: 3,
-                color: colors.brandOrange,
-              ),
+              // 앱 기본 스피너 색 (남색) — 주황은 포포 그림 색이라 UI 에 쓰지 않음
+              ElumSpinner(size: 32.w, strokeWidth: 3),
               SizedBox(height: 20.h),
               Text(
                 switch (value) {

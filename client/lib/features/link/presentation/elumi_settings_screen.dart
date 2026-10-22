@@ -10,6 +10,7 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/sound/child_praise_sound.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -79,6 +80,12 @@ enum _Exit {
 // 같은 요청이 두 번 나가면 두 번째는 404 로 돌아오므로 진행 중엔 잠근다.
 class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
     with BusyStateMixin<ElumiSettingsScreen> {
+  /// 스크롤 영역 시작 > 첫 묶음 (보호자 설정 y=131 과 같음)
+  static const _listTopGap = 24.0;
+
+  /// 묶음 사이 (시안 1532:7501 gap 16)
+  static const _groupGap = 16.0;
+
   Future<void> _exit(_Exit kind) async {
     // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
     final l10n = context.l10n;
@@ -149,49 +156,61 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 보호자 설정과 같은 자리에서 첫 줄이 시작한다 (뒤로가기 상자 하단에서 28)
-            SizedBox(height: 40.h),
-            // 읽을거리와 되돌릴 수 없는 동작을 섞지 않는다 — 연결을 끊는 두 줄은 맨 아래다.
-            // 순서는 보호자 설정과 같다 (약관 → 앱 정보 → 로그아웃 → 회원탈퇴).
-            // 카드를 체크할 때 진동으로 알려줄지. 보호자 설정과 같은 값을 본다.
-            // 시안이 없어 **임시 시안**이다 — 읽을거리 위, 설정값을 맨 앞에 둔다.
-            SettingsSwitchTile(
-              label: context.l10n.elumiSettingsHapticLabel,
-              value: ref.watch(childHapticOnProvider),
-              onChanged: (on) =>
-                  ref.read(childHapticOnProvider.notifier).set(on),
+            // 보호자 설정과 같은 자리에서 첫 묶음이 시작한다 (스크롤 영역 위 8 + 16)
+            SizedBox(height: _listTopGap.h),
+            // 묶음 3개 (보호자 설정 1532:7501 결): 소리·진동 > 약관·앱 정보 > 로그아웃·회원탈퇴
+            // 읽을거리와 되돌릴 수 없는 동작을 섞지 않는다 — 연결을 끊는 두 줄은 맨 아래 묶음이다.
+            SettingsGroup(
+              children: [
+                // 카드를 체크할 때 진동 · 칭찬 소리 (#777). 보호자 설정과 같은 값
+                SettingsSwitchTile(
+                  label: context.l10n.elumiSettingsHapticLabel,
+                  value: ref.watch(childHapticOnProvider),
+                  onChanged: (on) =>
+                      ref.read(childHapticOnProvider.notifier).set(on),
+                ),
+                SettingsSwitchTile(
+                  label: context.l10n.elumiSettingsPraiseSoundLabel,
+                  value: ref.watch(childPraiseSoundOnProvider),
+                  onChanged: (on) =>
+                      ref.read(childPraiseSoundOnProvider.notifier).set(on),
+                ),
+              ],
             ),
-            // 카드를 체크할 때 칭찬 소리 (#777). 보호자 설정과 같은 값
-            SettingsSwitchTile(
-              label: context.l10n.elumiSettingsPraiseSoundLabel,
-              value: ref.watch(childPraiseSoundOnProvider),
-              onChanged: (on) =>
-                  ref.read(childPraiseSoundOnProvider.notifier).set(on),
+            SizedBox(height: _groupGap.h),
+            SettingsGroup(
+              children: [
+                SettingsTile(
+                  label: context.l10n.elumiSettingsTermsLabel,
+                  onTap: busy
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ConsentDocumentListScreen(),
+                          ),
+                        ),
+                ),
+                const AppInfoTile(),
+              ],
             ),
-            SettingsTile(
-              label: context.l10n.elumiSettingsTermsLabel,
-              onTap: busy
-                  ? null
-                  : () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ConsentDocumentListScreen(),
-                      ),
-                    ),
+            SizedBox(height: _groupGap.h),
+            SettingsGroup(
+              children: [
+                SettingsTile(
+                  label: context.l10n.elumiSettingsLogoutLabel,
+                  loading: isBusy(_Exit.logout),
+                  onTap: busy ? null : () => _exit(_Exit.logout),
+                ),
+                // 위험 줄은 글자만 빨강 (§4-2)
+                SettingsTile(
+                  label: context.l10n.elumiSettingsWithdrawLabel,
+                  destructive: true,
+                  loading: isBusy(_Exit.withdraw),
+                  onTap: busy ? null : () => _exit(_Exit.withdraw),
+                ),
+              ],
             ),
-            const AppInfoTile(),
-            SettingsTile(
-              label: context.l10n.elumiSettingsLogoutLabel,
-              loading: isBusy(_Exit.logout),
-              onTap: busy ? null : () => _exit(_Exit.logout),
-            ),
-            // 위험색이되 가장 약하게 (docs 5-3). 위 줄과 간격으로 떨어뜨린다.
-            SettingsTile(
-              label: context.l10n.elumiSettingsWithdrawLabel,
-              destructive: true,
-              loading: isBusy(_Exit.withdraw),
-              onTap: busy ? null : () => _exit(_Exit.withdraw),
-            ),
-            SizedBox(height: 24.h),
+            SizedBox(height: _listTopGap.h),
           ],
         ),
       ),
