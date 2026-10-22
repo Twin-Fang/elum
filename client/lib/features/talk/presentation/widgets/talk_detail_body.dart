@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/storage/local_storage.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/talk_post.dart';
@@ -12,8 +16,8 @@ import 'talk_step_cards.dart';
 
 /// 상세 본문 (시안 1783:7172 · 1813:7718): 분류 · 카드 수 칩 > 제목 > 작성 정보 > 한마디
 /// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자
-/// 보기 전환은 이 화면 안에서만 기억한다 (다시 들어오면 크게 보기)
-class TalkDetailBody extends StatefulWidget {
+/// 보기 전환은 기기에 기억한다 (다른 글·다시 들어와도 마지막 선택, #959)
+class TalkDetailBody extends ConsumerStatefulWidget {
   const TalkDetailBody({
     super.key,
     required this.post,
@@ -26,11 +30,11 @@ class TalkDetailBody extends StatefulWidget {
   final VoidCallback onImportPressed;
 
   @override
-  State<TalkDetailBody> createState() => _TalkDetailBodyState();
+  ConsumerState<TalkDetailBody> createState() => _TalkDetailBodyState();
 }
 
-class _TalkDetailBodyState extends State<TalkDetailBody> {
-  bool _isGridView = false;
+class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
+  late bool _isGridView = ref.read(localStorageProvider).isTalkGridView;
 
   /// 머리 줄 > 칩 > 제목 > 작성 정보 > 한마디 > 전환 칩 > 카드 > 버튼 간격 (시안 20 · 12 · 12 · 24 · 32 · 24 · 32)
   /// 제목 > 작성 정보는 8: 제목 줄 높이 1.2 가 시안(1.0)보다 4 높아 그만큼 뺀다
@@ -50,7 +54,11 @@ class _TalkDetailBodyState extends State<TalkDetailBody> {
   /// 가져오기 버튼 좌우 (시안 16)
   static const _buttonInset = 16.0;
 
-  void _toggleView() => setState(() => _isGridView = !_isGridView);
+  /// 보기 전환 > 기기에 저장 (저장 실패해도 화면 전환은 유지)
+  void _toggleView() {
+    setState(() => _isGridView = !_isGridView);
+    unawaited(ref.read(localStorageProvider).setTalkGridView(_isGridView));
+  }
 
   @override
   Widget build(BuildContext context) {
