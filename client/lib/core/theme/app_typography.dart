@@ -369,7 +369,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 상세 `도움돼요 13` 칩 · 가져감 숫자 (Pretendard 500/16, 시안 1813:7887)
   final TextStyle talkDetailStatLabel;
 
-  /// 상세 댓글 머리 `댓글  3` (Pretendard 600/20, 시안 1830:7916)
+  /// 상세 댓글 머리 `댓글  3` (Pretendard 600/16, 시안 1830:7916)
   final TextStyle talkCommentsHeader;
 
   /// 이야기 폼 · 시트 구역 이름 (Pretendard 600/14, 일과 구역 이름과 같은 결)
@@ -996,7 +996,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     ),
     talkCommentsHeader: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
