@@ -145,7 +145,8 @@ class _RoutineManageCoachStageState
         return CoachMarkStep(
           target: _createButtonKey,
           message: l10n.routineManageCoachCreateGroupMessage,
-          holeRadius: tileRadius,
+          // 알약 버튼: 높이 절반으로 깎아야 구멍 모서리가 버튼 밖으로 비치지 않음
+          holeRadius: CreateRoutineFab.height.h / 2,
           demoBuilder: createGroupDemo,
         );
     }
