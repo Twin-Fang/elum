@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-22T15:41:14Z",
-    "currentVersion": "2.75.5",
+    "lastUpdated": "2026-10-23T02:02:33Z",
+    "currentVersion": "2.76.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 312
+    "totalReleases": 313
   },
   "releases": [
+    {
+      "version": "2.76.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 986,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 관리자 이야기 관리에서 여러 글을 한 번에 가릴 수 있어요\n  * 글이나 댓글을 가리면 들어온 신고도 함께 처리돼요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "관리자 이야기 관리에서 여러 글을 한 번에 가릴 수 있어요",
+            "글이나 댓글을 가리면 들어온 신고도 함께 처리돼요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.75.5",
       "project_type": "flutter",
