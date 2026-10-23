@@ -121,6 +121,7 @@ class TalkAdminServiceTest {
 
     assertThat(change.isChanged()).isTrue();
     assertThat(change.postId()).isEqualTo("p1");
+    verify(talkReportRepository).markResolvedByPostIds(eq(List.of("p1")), any());
   }
 
   @Test
@@ -131,6 +132,7 @@ class TalkAdminServiceTest {
       .thenReturn(0);
 
     assertThat(talkAdminService.hidePost("p1").result()).isEqualTo(TalkAdminChange.Result.UNCHANGED);
+    verify(talkReportRepository, never()).markResolvedByPostIds(any(), any());
   }
 
   @Test
@@ -153,6 +155,8 @@ class TalkAdminServiceTest {
     assertThat(talkAdminService.hidePosts(List.of("p1", "p2", "p1"))).isEqualTo(1);
     verify(talkPostRepository, times(1))
       .updateStatusIfCurrent("p1", TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
+    // 실제로 가린 글(p1)의 신고만 처리
+    verify(talkReportRepository).markResolvedByPostIds(eq(List.of("p1")), any());
   }
 
   @Test
@@ -198,6 +202,8 @@ class TalkAdminServiceTest {
     assertThat(change.isChanged()).isTrue();
     assertThat(change.postId()).isEqualTo("p1");
     verify(talkPostRepository).decreaseCommentCount("p1");
+    // 가린 댓글에 들어온 미처리 신고도 함께 처리
+    verify(talkReportRepository).markResolvedByTarget(eq(TalkReportTargetType.COMMENT), eq("c1"), any());
   }
 
   @Test

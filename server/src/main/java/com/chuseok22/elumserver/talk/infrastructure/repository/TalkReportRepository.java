@@ -40,6 +40,20 @@ public interface TalkReportRepository extends JpaRepository<TalkReport, String> 
   @Query("update TalkReport r set r.resolvedAt = :resolvedAt where r.id = :reportId and r.resolvedAt is null")
   int markResolvedIfUnresolved(@Param("reportId") String reportId, @Param("resolvedAt") LocalDateTime resolvedAt);
 
+  // 글 가리기: 그 글과 그 글 댓글에 들어온 미처리 신고를 함께 처리 (바꾼 건수)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkReport r set r.resolvedAt = :resolvedAt where r.postId in :postIds and r.resolvedAt is null")
+  int markResolvedByPostIds(@Param("postIds") Collection<String> postIds, @Param("resolvedAt") LocalDateTime resolvedAt);
+
+  // 댓글 가리기: 그 댓글에 들어온 미처리 신고를 함께 처리 (바꾼 건수)
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("update TalkReport r set r.resolvedAt = :resolvedAt where r.targetType = :targetType "
+    + "and r.targetId = :targetId and r.resolvedAt is null")
+  int markResolvedByTarget(@Param("targetType") TalkReportTargetType targetType, @Param("targetId") String targetId,
+    @Param("resolvedAt") LocalDateTime resolvedAt);
+
   // 탈퇴 정리: 그 회원이 한 신고, 그 회원의 글(글·그 글의 댓글 신고 모두)에 대한 신고, 그 회원의 댓글에 대한 신고
   @Transactional
   @Modifying(flushAutomatically = true)

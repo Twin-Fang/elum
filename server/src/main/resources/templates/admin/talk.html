@@ -21,7 +21,7 @@
     <!-- 일괄 가리기: 표의 체크 칸(form 속성으로 연결)을 보냄, 고른 글이 없으면 버튼이 꺼져 있음 -->
     <form id="talk-bulk-hide-form" th:action="@{/admin/talk/posts/hide}" method="post"
           data-confirm-title="선택한 글 가리기" data-confirm-danger data-confirm-accept="가리기"
-          data-confirm-message="선택한 글을 가릴까요? 앱에서 더 이상 보이지 않아요. 글 상세에서 되돌릴 수 있어요.">
+          data-confirm-message="선택한 글을 가릴까요? 앱에서 더 이상 보이지 않고, 들어온 신고도 처리돼요. 글 상세에서 글을 되돌릴 수 있어요.">
       <button type="submit" class="btn btn-warning btn-sm" data-talk-bulk-hide-button disabled>
         선택한 글 가리기 <span data-talk-bulk-hide-count>0</span>
       </button>
