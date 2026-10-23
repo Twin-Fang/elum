@@ -33,5 +33,9 @@ class FcmPushSenderTest {
 
     assertThatCode(() -> sender.toFcmMessage(routineCompleted)).doesNotThrowAnyException();
     assertThatCode(() -> sender.toFcmMessage(coGuardianJoined)).doesNotThrowAnyException();
+    // 이룸이 기기 알림: 앱 기본 채널이 아닌 이룸이 채널
+    PushMessage elumiRoutineArrived = new PushMessage("token-2", "ELUM", "arrived",
+      Map.of("type", "ELUMI_ROUTINE_ARRIVED", "routineId", "r1"), "elumi-routine-r1", "elumi_routines");
+    assertThatCode(() -> sender.toFcmMessage(elumiRoutineArrived)).doesNotThrowAnyException();
   }
 }

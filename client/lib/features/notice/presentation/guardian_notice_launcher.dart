@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_status/update_suggestion.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../notification/application/push_permission_prompt.dart';
 import '../application/notice_log.dart';
 import '../application/notice_popup_controller.dart';
 import 'notice_popup.dart';
@@ -15,6 +16,8 @@ import 'notice_popup.dart';
 /// 그 안에 넣으면 전부 실제 서버를 부르게 된다.
 ///
 /// 홈의 **첫 프레임 뒤에** 묻는다. 공지를 기다리느라 홈이 늦게 뜨면 안 된다.
+///
+/// 공지가 하나도 없으면 알림이 꺼진 기기에 알림 켜기를 권한다 (7일마다).
 ///
 /// 공지가 여럿이면 **차례로** 띄운다. 하나를 닫으면(닫기·링크·바깥) 다음이
 /// 이어서 뜬다. 한 팝업 안에서 넘기지 않으므로 `보지 않기`도 공지마다 따로 고른다.
@@ -44,7 +47,11 @@ class _GuardianNoticeLauncherState
     final controller = ref.read(noticePopupControllerProvider);
     try {
       final feed = await controller.takeOnce();
-      if (feed == null) return;
+      // 공지가 뜬 실행에는 알림 다시 권하기를 띄우지 않음 (팝업이 줄줄이 이어지지 않게)
+      if (feed == null || feed.notices.isEmpty) {
+        if (mounted) await ref.read(pushPermissionPromptProvider).maybeNudge(context);
+        return;
+      }
 
       final total = feed.notices.length;
       for (final (i, notice) in feed.notices.indexed) {

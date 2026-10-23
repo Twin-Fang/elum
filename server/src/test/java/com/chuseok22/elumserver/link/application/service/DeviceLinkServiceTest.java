@@ -30,6 +30,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Pr
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.notification.application.service.PushDeviceService;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
@@ -67,6 +68,7 @@ class DeviceLinkServiceTest {
   @Mock private RefreshTokenService refreshTokenService;
   @Mock private JwtProvider jwtProvider;
   @Mock private JwtProperties jwtProperties;
+  @Mock private PushDeviceService pushDeviceService;
 
   @InjectMocks private DeviceLinkService service;
 
@@ -248,6 +250,8 @@ class DeviceLinkServiceTest {
 
     assertThat(l.getRevokedAt()).isNotNull();
     verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
+    // 끊긴 기기에 알림이 가면 안 된다 — 그 연결의 푸시 토큰도 지운다.
+    verify(pushDeviceService).removeLinkDevices("l1");
     // 계정 전체를 끊으면 보호자까지 로그아웃된다.
     verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any(), any());
   }

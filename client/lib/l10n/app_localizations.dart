@@ -4934,6 +4934,42 @@ abstract class AppLocalizations {
   /// **'보호자 알림'**
   String get pushChannelGuardianUpdates;
 
+  /// 알림이 꺼진 보호자 기기에 7일마다 다시 권하는 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림이 꺼져 있어요'**
+  String get pushPermissionNudgeTitle;
+
+  /// 보호자 다시 권하기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 두면 이룸이가 일과를 끝냈을 때 바로 알려 드려요'**
+  String get pushPermissionNudgeBody;
+
+  /// 이룸이 기기 알림 권한 안내 시트 제목 (연결 직후·7일마다)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과가 오면 알려 드릴까요?'**
+  String get pushPermissionElumiTitle;
+
+  /// 이룸이 기기 알림 권한 안내 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자가 일과를 보내면 이 기기에 알림이 와요'**
+  String get pushPermissionElumiBody;
+
+  /// 다시 권하기·이룸이 기기 시트의 허용 버튼 (안 물었으면 시스템 권한 창, 거부했으면 기기 설정)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 켜기'**
+  String get pushPermissionTurnOn;
+
+  /// 안드로이드 알림 채널 이름 — 이룸이 기기에 오는 새 일과 도착 푸시
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과 알림'**
+  String get pushChannelElumiRoutines;
+
   /// 가입한 소셜 제공자 배지의 화면 낭독 이름
   ///
   /// In ko, this message translates to:

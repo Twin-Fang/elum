@@ -52,6 +52,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
+  // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
+  static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
   static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
@@ -329,6 +331,19 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHasAskedPushPermission(bool v) async {
     AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
     await _prefs.setBool(_kHasAskedPushPermission, v);
+  }
+
+  @override
+  DateTime? get pushPermissionNudgedAt {
+    final raw = _prefs.getString(_kPushPermissionNudgedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setPushPermissionNudgedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kPushPermissionNudgedAt, raw);
+    await _prefs.setString(_kPushPermissionNudgedAt, raw);
   }
 
   @override

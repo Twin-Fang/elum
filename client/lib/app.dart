@@ -170,6 +170,16 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         : null;
   }
 
+  /// 이룸이 기기 푸시로 일과를 열어도 되는 때의 루트 네비게이터 컨텍스트 (이룸이 화면 안일 때만, 아니면 null)
+  BuildContext? _contextIfInElumiArea() {
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final isInElumiArea =
+        path == Routes.child || path.startsWith('${Routes.child}/');
+    return isInElumiArea
+        ? _router.routerDelegate.navigatorKey.currentContext
+        : null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -187,7 +197,10 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
       ref
           .read(pushMessageRouterProvider)
-          .start(readyContext: _contextIfInGuardianArea);
+          .start(
+            readyContext: _contextIfInGuardianArea,
+            readyElumiContext: _contextIfInElumiArea,
+          );
     });
   }
 

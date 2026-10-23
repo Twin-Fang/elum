@@ -59,6 +59,15 @@ public class FcmPushSender implements PushSender {
     }
   }
 
+  // 채널이 없으면 앱 매니페스트의 기본 채널로 감
+  private AndroidNotification androidNotification(String collapseKey, String channelId) {
+    AndroidNotification.Builder builder = AndroidNotification.builder().setTag(collapseKey);
+    if (channelId != null && !channelId.isBlank()) {
+      builder.setChannelId(channelId);
+    }
+    return builder.build();
+  }
+
   // 발송 없이 메시지만 조립 (테스트에서 직접 호출)
   Message toFcmMessage(PushMessage pushMessage) {
     // 길이 제한(APNs 64바이트)을 모든 플랫폼에 같은 키로 맞춤
@@ -69,7 +78,7 @@ public class FcmPushSender implements PushSender {
       .putAllData(nonBlankEntries(pushMessage.data()))
       .setAndroidConfig(AndroidConfig.builder()
         .setCollapseKey(collapseKey)
-        .setNotification(AndroidNotification.builder().setTag(collapseKey).build())
+        .setNotification(androidNotification(collapseKey, pushMessage.androidChannelId()))
         .build())
       .setApnsConfig(ApnsConfig.builder()
         .putHeader(APNS_COLLAPSE_ID_HEADER, collapseKey)

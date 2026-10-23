@@ -157,6 +157,9 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.PUT, "/api/routines/*/progress").hasAnyAuthority(ELUMI, GUARDIAN)
         // 이룸이 휴대폰이 자기 연결을 끊는다. 보호자 토큰도 컨트롤러까지 보내 코드가 있는 403 으로 답하게 한다.
         .requestMatchers(HttpMethod.DELETE, "/api/device-links/current").hasAnyAuthority(ELUMI, GUARDIAN)
+        // 이룸이 휴대폰도 푸시 토큰을 등록·해제한다. 이룸이 기기 구분은 서버가 토큰의 연결 ID 로 붙인다.
+        .requestMatchers(HttpMethod.PUT, "/api/push-devices").hasAnyAuthority(ELUMI, GUARDIAN)
+        .requestMatchers(HttpMethod.DELETE, "/api/push-devices/*").hasAnyAuthority(ELUMI, GUARDIAN)
         // 수동 검증용 창구는 아무도 못 부른다. anyRequest 보다 앞에 둬야 한다 —
         // 뒤에 두면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 로컬 LLM 을 돌릴 수 있다.
         .requestMatchers(SecurityPaths.API_INTERNAL_MATCHER).denyAll()

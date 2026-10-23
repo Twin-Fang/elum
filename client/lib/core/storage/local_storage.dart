@@ -177,6 +177,12 @@ abstract interface class LocalStorage {
   bool get hasAskedPushPermission;
   Future<void> setHasAskedPushPermission(bool v);
 
+  /// 알림 켜기 안내 시트를 마지막으로 띄운 시각. 없으면 null
+  ///
+  /// 알림이 꺼진 기기에 7일마다 다시 권하려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
+  DateTime? get pushPermissionNudgedAt;
+  Future<void> setPushPermissionNudgedAt(DateTime at);
+
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
   /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
