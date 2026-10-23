@@ -38,7 +38,7 @@ enum ServerErrorCode {
   routineInvalidStatus('ROUTINE_INVALID_STATUS'),
   // 일과관리 원본을 같은 날 두 번 보냈다 (#804)
   routineAlreadySentToday('ROUTINE_ALREADY_SENT_TODAY'),
-  // 일과 묶음 (#806): 없음 · 내 일과관리 원본이 아님 · 2개 미만
+  // 일과 묶음 (#806): 없음 · 내 일과관리 원본이 아님 · 일과 없음
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),

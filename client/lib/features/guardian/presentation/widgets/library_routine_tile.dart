@@ -80,7 +80,7 @@ class LibraryRoutineTile extends ConsumerWidget {
                       ? BoxDecoration(
                           borderRadius: BorderRadius.circular(iconRadius.w),
                           border: Border.all(
-                            color: colors.checkDone,
+                            color: colors.libraryNewOutline,
                             width: _newOutlineWidth.w,
                           ),
                         )
@@ -136,12 +136,13 @@ class LibraryRoutineTile extends ConsumerWidget {
   }
 }
 
-/// `새로` 배지 (민트 알약 + 흰 글자, 바탕색 테두리로 그림과 떨어뜨린다)
+/// `새 일과` 칩 (시안 1931:6929: 민트 알약 + 흰 글자 10)
 class _NewBadge extends StatelessWidget {
   const _NewBadge();
 
   static const _paddingH = 6.0;
-  static const _paddingV = 2.0;
+  static const _paddingV = 4.0;
+  static const _radius = 10.0;
 
   @override
   Widget build(BuildContext context) {
@@ -153,13 +154,12 @@ class _NewBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colors.checkDone,
-        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-        border: Border.all(color: colors.background, width: 2),
+        borderRadius: BorderRadius.circular(_radius.r),
       ),
       child: Text(
         context.l10n.routineLibraryNewBadge,
         maxLines: 1,
-        style: context.typo.caption.copyWith(color: colors.surface),
+        style: context.typo.libraryNewChipLabel.copyWith(color: colors.surface),
       ),
     );
   }

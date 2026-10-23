@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// 일과 묶음(폴더) — 서버 `RoutineGroupResponse` (#806)
 ///
-/// [routineIds] 순서가 곧 이룸이에게 보이는 순서다. 묶음은 늘 일과 2개 이상이다.
+/// [routineIds] 순서가 곧 이룸이에게 보이는 순서다. 묶음은 늘 일과 1개 이상이다.
 @immutable
 class RoutineGroup {
   const RoutineGroup({
@@ -20,8 +20,8 @@ class RoutineGroup {
   /// 묶음 이름 글자 수 상한. 서버 검증과 같은 값
   static const nameMaxLength = 12;
 
-  /// 묶음이 이루어지는 최소 일과 수 (1개가 되면 묶음이 풀린다)
-  static const minimumRoutineCount = 2;
+  /// 묶음이 이루어지는 최소 일과 수 (다 빠지면 묶음이 풀린다)
+  static const minimumRoutineCount = 1;
 
   /// 응답 모양이 어긋나도 목록이 죽지 않게 읽는다 (id 없으면 null)
   static RoutineGroup? tryFromJson(Object? json) {

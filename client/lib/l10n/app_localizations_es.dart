@@ -2453,7 +2453,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineLibraryFromTalk => '이야기에서';
 
   @override
-  String get routineLibraryNewBadge => '새로';
+  String get routineLibraryNewBadge => '새 일과';
 
   @override
   String get routineDetailTalkOriginBand => 'Traído de Historias';
@@ -2547,7 +2547,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)';
+  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요';
 
   @override
   String get routineGroupPickHint => '넣을 일과를 순서대로 눌러 주세요';
@@ -2603,7 +2603,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineGroupUngrouped => '묶음을 풀었어요';
 
   @override
-  String get routineGroupUngroupedLastOne => '일과가 하나만 남아 묶음을 풀었어요';
+  String get routineGroupUngroupedEmpty => '일과를 다 빼서 묶음을 풀었어요';
 
   @override
   String get routineGroupReordered => '순서를 바꿨어요';

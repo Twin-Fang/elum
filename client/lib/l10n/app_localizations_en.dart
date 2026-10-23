@@ -2559,7 +2559,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLibraryFromTalk => '이야기에서';
 
   @override
-  String get routineLibraryNewBadge => '새로';
+  String get routineLibraryNewBadge => '새 일과';
 
   @override
   String get routineDetailTalkOriginBand => 'Imported from Community';
@@ -2652,7 +2652,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineGroupPickHintNew =>
-      'Tap routines in the order to show them (2 or more)';
+      'Tap routines in the order to show them';
 
   @override
   String get routineGroupPickHint => 'Tap routines in order';
@@ -2708,8 +2708,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineGroupUngrouped => 'Bundle ungrouped';
 
   @override
-  String get routineGroupUngroupedLastOne =>
-      'Only one routine left, so the bundle was ungrouped';
+  String get routineGroupUngroupedEmpty =>
+      'All routines were taken out, so the bundle was ungrouped';
 
   @override
   String get routineGroupReordered => 'Order changed';

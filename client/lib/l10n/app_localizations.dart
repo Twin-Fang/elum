@@ -4475,7 +4475,7 @@ abstract class AppLocalizations {
   /// 격자 칸 배지: 이야기에서 가져온 뒤 아직 열어 보지 않은 일과
   ///
   /// In ko, this message translates to:
-  /// **'새로'**
+  /// **'새 일과'**
   String get routineLibraryNewBadge;
 
   /// 가져온 일과 상세 맨 위 띠의 왼쪽 문구
@@ -4637,7 +4637,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)'**
+  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요'**
   String get routineGroupPickHintNew;
 
   /// 일과 묶음 (#807)
@@ -4733,8 +4733,8 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과가 하나만 남아 묶음을 풀었어요'**
-  String get routineGroupUngroupedLastOne;
+  /// **'일과를 다 빼서 묶음을 풀었어요'**
+  String get routineGroupUngroupedEmpty;
 
   /// 일과 묶음 (#807)
   ///

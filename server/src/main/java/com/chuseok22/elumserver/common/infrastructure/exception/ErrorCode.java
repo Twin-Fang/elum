@@ -115,7 +115,7 @@ public enum ErrorCode {
   ROUTINE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND),
   // 묶음에는 일과관리 원본만 (보내기로 만든 일과 · 지운 원본 · 임시저장 · 다른 이룸이 일과 제외)
   ROUTINE_GROUP_INVALID_MEMBER(HttpStatus.BAD_REQUEST),
-  // 묶음은 일과 2개 이상. 하나만 남기려면 묶음을 푼다
+  // 묶음은 일과 1개 이상. 다 빼려면 묶음을 푼다
   ROUTINE_GROUP_TOO_SMALL(HttpStatus.BAD_REQUEST),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
