@@ -85,12 +85,10 @@ class LibraryRoutineTile extends ConsumerWidget {
                           ),
                         )
                       : null,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(iconRadius.w),
-                    child: SizedBox.square(
-                      dimension: iconSize.w,
-                      child: LibraryRoutineThumbnail(routine: routine),
-                    ),
+                  child: RoutineThumbnailBox(
+                    routine: routine,
+                    size: iconSize,
+                    radius: iconRadius,
                   ),
                 ),
                 if (isNew)
@@ -162,6 +160,33 @@ class _NewBadge extends StatelessWidget {
         context.l10n.routineLibraryNewBadge,
         maxLines: 1,
         style: context.typo.caption.copyWith(color: colors.surface),
+      ),
+    );
+  }
+}
+
+/// 둥근 정사각형 칸에 담은 일과 첫 카드 그림 (일과관리 격자, 묶음 시트 줄, 홈 일과 줄 공통)
+/// 크기·모서리는 시안 값 그대로 받아 폭 배율(.w)로 맞춤
+class RoutineThumbnailBox extends StatelessWidget {
+  const RoutineThumbnailBox({
+    super.key,
+    required this.routine,
+    required this.size,
+    required this.radius,
+  });
+
+  final Routine routine;
+  final double size;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    // 정사각형 — 가로세로 모두 .w
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius.w),
+      child: SizedBox.square(
+        dimension: size.w,
+        child: LibraryRoutineThumbnail(routine: routine),
       ),
     );
   }

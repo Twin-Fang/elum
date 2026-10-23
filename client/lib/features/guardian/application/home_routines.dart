@@ -56,3 +56,11 @@ double routineProgress(Routine routine, ChildRoutineState progress) {
       .length;
   return done / routine.steps.length;
 }
+
+/// 홈 일과 줄에 만든 사람 호칭을 붙일지: 오늘·지난 목록에 다른 보호자가 만든 일과가 하나라도 있으면 true
+/// 혼자 만든 목록이면 줄마다 같은 이름이라 붙이지 않음. 불러오는 중·실패한 목록은 받은 쪽만 본다
+final shouldShowRoutineCreatorProvider = Provider<bool>((ref) {
+  final today = ref.watch(homeRoutinesProvider);
+  final past = ref.watch(pastRoutinesProvider).value ?? const <Routine>[];
+  return [...today, ...past].any((routine) => routine.isMadeByOtherGuardian);
+});

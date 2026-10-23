@@ -149,12 +149,10 @@ class _RoutineGroupSheetRowState extends State<RoutineGroupSheetRow>
                   ),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(space.sm.r),
-                  child: SizedBox.square(
-                    dimension: _thumbnailSize.w,
-                    child: LibraryRoutineThumbnail(routine: routine),
-                  ),
+                RoutineThumbnailBox(
+                  routine: routine,
+                  size: _thumbnailSize,
+                  radius: space.sm,
                 ),
                 SizedBox(width: space.sm.w),
                 // 글 자리를 누르면 상세. 손잡이는 이 바깥이라 끌기와 겹치지 않는다

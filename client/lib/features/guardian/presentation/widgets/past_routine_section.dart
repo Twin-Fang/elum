@@ -16,6 +16,7 @@ import 'empty_past_label.dart';
 import 'routine_summary_tile.dart';
 import '../../../../core/widgets/elum_toast.dart';
 import '../../application/guardian_home_controller.dart';
+import '../../application/home_routines.dart';
 import '../../application/routine_providers.dart';
 
 /// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지).
@@ -98,6 +99,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     final routines = async.value ?? const <Routine>[];
     // 일과가 적으면 사이 광고를 끼우지 않는다 (하단 배너와 같은 기준)
     final shouldShowAds = ref.watch(shouldShowHomeAdsProvider);
+    final shouldShowCreator = ref.watch(shouldShowRoutineCreatorProvider);
 
     if (routines.isEmpty) {
       if (async.hasError) {
@@ -131,6 +133,9 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
                 routine: routine,
                 // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
                 progress: routine.progressPercent / 100,
+                creatorName: shouldShowCreator
+                    ? routine.creatorDisplayName
+                    : null,
                 // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
                 // 없었다. 로 목록 자체가 안 보이던 동안 아무도 열어 보지
                 // 못해 빠진 것이 드러나지 않았다.
