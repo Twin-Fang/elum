@@ -32,7 +32,7 @@ public interface RoutineGroupDocs {
     description = """
       이룸이의 일과관리 묶음을 묶음 순서(`displayOrder`) → 만든 차례로 돌려줍니다.
 
-      - `routineIds` 는 묶음 안 차례대로이고 이룸이가 보는 순서입니다. 항상 2개 이상입니다.
+      - `routineIds` 는 묶음 안 차례대로이고 이룸이가 보는 순서입니다. 항상 1개 이상입니다.
       - 묶음에 든 일과도 `GET /api/routines/library` 에 그대로 나옵니다. 앱이 이 목록으로 폴더를 짭니다.
       """
   )
@@ -45,23 +45,23 @@ public interface RoutineGroupDocs {
   @Operation(
     summary = "묶음 만들기",
     description = """
-      원본 일과 2개 이상을 받은 차례대로 새 묶음에 넣습니다. 새 묶음은 묶음 목록 맨 뒤에 붙습니다.
+      원본 일과 1개 이상을 받은 차례대로 새 묶음에 넣습니다. 새 묶음은 묶음 목록 맨 뒤에 붙습니다.
 
       - 이름은 앞뒤 공백을 지운 뒤 1~12자. 아니면 400(`INVALID_INPUT_VALUE`). 빈 ID·중복 ID도 400(`INVALID_INPUT_VALUE`).
-      - 일과가 2개 미만이면 400(`ROUTINE_GROUP_TOO_SMALL`).
+      - 일과가 없으면 400(`ROUTINE_GROUP_TOO_SMALL`).
       - 넣을 수 있는 일과는 이 이룸이의 **일과관리 원본**뿐입니다 — 보내기로 만든 일과, 일과관리에서 지운 일과,
         임시저장, 다른 이룸이 일과는 400(`ROUTINE_GROUP_INVALID_MEMBER`).
-      - 일과는 한 묶음에만 듭니다. 다른 묶음에 있던 일과는 옮겨 오고, 그 묶음이 2개 미만이 되면 풀립니다.
+      - 일과는 한 묶음에만 듭니다. 다른 묶음에 있던 일과는 옮겨 오고, 그 묶음이 비면 풀립니다.
       """
   )
   @SecurityRequirement(name = "bearerAuth")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "묶음을 만듦",
       content = @Content(schema = @Schema(implementation = RoutineGroupResponse.class))),
-    @ApiResponse(responseCode = "400", description = "이름이 맞지 않음 / 2개 미만 / 넣을 수 없는 일과",
+    @ApiResponse(responseCode = "400", description = "이름이 맞지 않음 / 일과 없음 / 넣을 수 없는 일과",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_GROUP_TOO_SMALL\",\"errorMessage\":\"묶음에는 일과를 2개 이상 넣어 주세요.\"}")))
+          value = "{\"errorCode\":\"ROUTINE_GROUP_TOO_SMALL\",\"errorMessage\":\"묶음에는 일과를 1개 이상 넣어 주세요.\"}")))
   })
   ResponseEntity<RoutineGroupResponse> create(
     Authentication authentication,
@@ -89,7 +89,7 @@ public interface RoutineGroupDocs {
       묶음의 구성과 차례를 한 번에 바꿉니다 (넣기·빼기·순서 바꾸기).
 
       - 목록에서 빠진 일과는 묶음에서 나갑니다 (일과는 그대로).
-      - 2개 미만이면 400(`ROUTINE_GROUP_TOO_SMALL`). 묶음을 풀려면 `DELETE` 를 부릅니다.
+      - 비어 있으면 400(`ROUTINE_GROUP_TOO_SMALL`). 묶음을 풀려면 `DELETE` 를 부릅니다.
       - 일과 조건과 다른 묶음에서 옮겨 오는 규칙은 묶음 만들기와 같습니다.
       """
   )

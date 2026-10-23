@@ -12,7 +12,7 @@ final routineGroupControllerProvider = Provider<RoutineGroupController>(
 
 /// 일과 묶음 동작 (#807): 만들기·넣기·빼기·순서·이름·복사·풀기·보내기 > 성공하면 목록 다시 받기
 ///
-/// 규칙 2개를 여기서 지킨다: 묶음은 일과 2개 이상(1개가 되면 풀기), 일과 하나는 한 묶음에만(서버가 옮긴다).
+/// 규칙 2개를 여기서 지킨다: 묶음은 일과 1개 이상(다 빠지면 풀기), 일과 하나는 한 묶음에만(서버가 옮긴다).
 class RoutineGroupController {
   RoutineGroupController(this._ref);
 
@@ -46,7 +46,7 @@ class RoutineGroupController {
     return _refreshAfter(_api.replaceRoutines(group.id, next));
   }
 
-  /// 묶음에서 일과 하나를 뺀다. 하나만 남으면 묶음을 푼다 → 풀렸으면 [RemoveOutcome.ungrouped]
+  /// 묶음에서 일과 하나를 뺀다. 다 빠지면 묶음을 푼다 → 풀렸으면 [RemoveOutcome.ungrouped]
   Future<({RemoveOutcome outcome, AppFailure? failure})> remove(
     RoutineGroup group,
     String routineId,

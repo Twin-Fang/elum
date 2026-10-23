@@ -47,7 +47,7 @@ public class RoutineGroupService {
   private final RoutineGroupMembership routineGroupMembership;
 
   /**
-   * 묶음 목록: 이룸이(헤더) > 묶음 순서대로 > 구성원 한 번에 조회 > 2개 미만으로 줄어든 묶음은 뺌
+   * 묶음 목록: 이룸이(헤더) > 묶음 순서대로 > 구성원 한 번에 조회 > 빈 묶음은 뺌
    * 일과가 다른 경로(보호자 나가기 등)로 지워져 줄어든 묶음은 목록에서만 빠짐 — 조회라 쓰지 않음
    */
   public List<RoutineGroupResponse> getGroups(Caller caller) {
@@ -117,7 +117,7 @@ public class RoutineGroupService {
   }
 
   /**
-   * 묶음 복사하기: 권한 > 구성원(2개 이상) > "이름 복사" 새 묶음(맨 뒤) > 구성원마다 일과관리 전용 복사본(제목 그대로) > 같은 차례로 넣기
+   * 묶음 복사하기: 권한 > 구성원(1개 이상) > "이름 복사" 새 묶음(맨 뒤) > 구성원마다 일과관리 전용 복사본(제목 그대로) > 같은 차례로 넣기
    */
   @Transactional
   public RoutineGroupResponse copy(Caller caller, String groupId) {
@@ -136,7 +136,7 @@ public class RoutineGroupService {
   }
 
   /**
-   * 묶음째 보내기: 권한 > 구성원(2개 이상) > 차례대로 오늘 일과 만들기(묶음 ID·이름·차례 스냅샷) > 오늘 이미 보낸 일과는 건너뜀
+   * 묶음째 보내기: 권한 > 구성원(1개 이상) > 차례대로 오늘 일과 만들기(묶음 ID·이름·차례 스냅샷) > 오늘 이미 보낸 일과는 건너뜀
    * 하나도 못 보냈으면 409 ROUTINE_ALREADY_SENT_TODAY
    */
   @Transactional
@@ -183,7 +183,7 @@ public class RoutineGroupService {
     return group;
   }
 
-  /// 지금 구성원 (2개 미만으로 줄어든 묶음은 목록에도 없으니 없는 묶음으로 봄)
+  /// 지금 구성원 (빈 묶음은 목록에도 없으니 없는 묶음으로 봄)
   private List<Routine> requireMembers(String groupId) {
     List<Routine> members = routineGroupMembership.membersOf(groupId);
     if (members.size() < RoutineGroupMembership.GROUP_MIN_ROUTINE_COUNT) {
@@ -202,7 +202,7 @@ public class RoutineGroupService {
   }
 
   /**
-   * 구성원 검증 > 받은 차례대로 일과: 빈 ID·중복(INVALID_INPUT_VALUE) > 2개 미만(TOO_SMALL) > 원본 조건(INVALID_MEMBER)
+   * 구성원 검증 > 받은 차례대로 일과: 빈 ID·중복(INVALID_INPUT_VALUE) > 0개(TOO_SMALL) > 원본 조건(INVALID_MEMBER)
    * 원본 조건 4개: 이 이룸이 일과, 보내기로 만든 일과 아님, 일과관리에서 지우지 않음, 보낸 상태(CONFIRMED·COMPLETED)
    */
   private List<Routine> loadMembers(String profileId, List<String> routineIds) {
