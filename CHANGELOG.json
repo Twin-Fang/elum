@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-23T02:25:41Z",
-    "currentVersion": "2.77.0",
+    "lastUpdated": "2026-10-23T05:39:08Z",
+    "currentVersion": "2.78.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 314
+    "totalReleases": 315
   },
   "releases": [
+    {
+      "version": "2.78.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 993,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 알림이 꺼진 기기에 홈에서 7일마다 알림 켜기를 권해요\n  * 이룸이 기기에도 \"새 일과가 도착했어요\" 알림이 와요\n  * 이룸이 기기에서 알림을 누르면 그 일과가 바로 열려요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "알림이 꺼진 기기에 홈에서 7일마다 알림 켜기를 권해요",
+            "이룸이 기기에도 \"새 일과가 도착했어요\" 알림이 와요",
+            "이룸이 기기에서 알림을 누르면 그 일과가 바로 열려요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.77.0",
       "project_type": "flutter",
