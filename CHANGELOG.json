@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-23T05:39:08Z",
-    "currentVersion": "2.78.0",
+    "lastUpdated": "2026-10-23T08:20:14Z",
+    "currentVersion": "2.78.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 315
+    "totalReleases": 316
   },
   "releases": [
+    {
+      "version": "2.78.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 996,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 홈 첫 안내가 뜰 때 알림 켜기 안내가 겹쳐 뜨지 않아요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "홈 첫 안내가 뜰 때 알림 켜기 안내가 겹쳐 뜨지 않아요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.78.0",
       "project_type": "flutter",
