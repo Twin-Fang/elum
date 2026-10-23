@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_status/update_suggestion.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import '../application/notice_log.dart';
 import '../application/notice_popup_controller.dart';
@@ -17,7 +18,7 @@ import 'notice_popup.dart';
 ///
 /// 홈의 **첫 프레임 뒤에** 묻는다. 공지를 기다리느라 홈이 늦게 뜨면 안 된다.
 ///
-/// 공지가 하나도 없으면 알림이 꺼진 기기에 알림 켜기를 권한다 (7일마다).
+/// 공지가 하나도 없고 홈 첫 안내를 본 뒤면 알림이 꺼진 기기에 알림 켜기를 권한다 (7일마다).
 ///
 /// 공지가 여럿이면 **차례로** 띄운다. 하나를 닫으면(닫기·링크·바깥) 다음이
 /// 이어서 뜬다. 한 팝업 안에서 넘기지 않으므로 `보지 않기`도 공지마다 따로 고른다.
@@ -48,8 +49,12 @@ class _GuardianNoticeLauncherState
     try {
       final feed = await controller.takeOnce();
       // 공지가 뜬 실행에는 알림 다시 권하기를 띄우지 않음 (팝업이 줄줄이 이어지지 않게)
+      // 홈 첫 안내(코치마크)를 아직 안 본 실행도 건너뜀 (안내 위에 시트가 겹침)
       if (feed == null || feed.notices.isEmpty) {
-        if (mounted) await ref.read(pushPermissionPromptProvider).maybeNudge(context);
+        final isHomeCoachSeen = ref.read(localStorageProvider).isHomeCoachSeen;
+        if (mounted && isHomeCoachSeen) {
+          await ref.read(pushPermissionPromptProvider).maybeNudge(context);
+        }
         return;
       }
 
