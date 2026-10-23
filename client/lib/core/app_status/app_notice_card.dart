@@ -14,6 +14,7 @@ class AppNoticeCard extends StatelessWidget {
     this.body,
     required this.actionLabel,
     required this.onAction,
+    this.footer,
   });
 
   /// 카드 최대 너비: 태블릿에서 카드가 화면 폭만큼 늘어나지 않게 한다
@@ -28,6 +29,9 @@ class AppNoticeCard extends StatelessWidget {
 
   /// 카드 안쪽 context 를 받는다: 실패 팝업을 이 화면의 Navigator 위에 띄워야 한다
   final void Function(BuildContext context) onAction;
+
+  /// 버튼 아래 덧붙임 (개발자 도구 빌드의 `그냥 계속하기`). 출시 빌드는 null
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +90,10 @@ class AppNoticeCard extends StatelessWidget {
                             onPressed: () => onAction(innerContext),
                           ),
                         ),
+                        if (footer != null) ...[
+                          SizedBox(height: 8.h),
+                          footer!,
+                        ],
                       ],
                     ),
                   ),

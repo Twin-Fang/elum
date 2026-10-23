@@ -7,6 +7,8 @@ import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import '../config/app_config.dart';
+import '../dev/dev_simulation.dart';
+import '../dev/dev_skip_notice_button.dart';
 import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
 import 'update_suggestion.dart';
@@ -52,7 +54,20 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
 
   @override
   Widget build(BuildContext context) {
+    // 테스트 빌드에서 `그냥 계속하기`를 누르면 막는 화면 대신 앱을 그림
+    return ValueListenableBuilder<bool>(
+      valueListenable: DevSimulation.isBlockingNoticeSkipped,
+      builder: (context, _, _) => DevSimulation.shouldSkipBlockingNotice
+          ? widget.child
+          : _buildGate(context),
+    );
+  }
+
+  Widget _buildGate(BuildContext context) {
     final async = ref.watch(appStatusProvider);
+    // 개발자 도구 빌드만 막는 화면 아래 `그냥 계속하기`
+    final skipButton =
+        DevSimulation.canSkipBlockingNotice ? const DevSkipNoticeButton() : null;
 
     return async.maybeWhen(
       // 다시 묻는 동안에는 **직전 화면을 그대로 둔다.** 그러지 않으면 점검 화면에서
@@ -74,6 +89,7 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                     : status.maintenanceMessage,
                 actionLabel: context.l10n.appStatusRecheck,
                 onAction: (_) => ref.invalidate(appStatusProvider),
+                footer: skipButton,
               ),
             ),
           );
@@ -102,6 +118,7 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                     ? (_) => ref.invalidate(appStatusProvider)
                     : (noticeContext) =>
                           openStoreOrShowFailure(noticeContext, ref, storeUrl),
+                footer: skipButton,
               ),
             ),
           );

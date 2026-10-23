@@ -48,6 +48,17 @@ abstract final class DevSimulation {
     };
   }
 
+  /// 강제 업데이트·점검 화면을 넘긴 상태 (개발자 도구 빌드만, 앱을 끄면 사라짐)
+  /// 운영 최소 버전보다 낮은 테스트 빌드가 막히지 않게 함. 흉내를 새로 고르면 다시 막음
+  static final isBlockingNoticeSkipped = ValueNotifier(false);
+
+  /// 막는 화면에 `그냥 계속하기`를 둘 빌드인가
+  static bool get canSkipBlockingNotice => AppConfig.showDevTools;
+
+  /// 게이트가 막는 화면 대신 앱을 그릴까
+  static bool get shouldSkipBlockingNotice =>
+      canSkipBlockingNotice && isBlockingNoticeSkipped.value;
+
   /// 업데이트 권유 흉내 중인가 (권유 판정이 스토어 확인을 건너뜀)
   static bool get isSuggestingUpdate =>
       AppConfig.showDevTools && appStatus.value == DevAppStatusSimulation.suggestUpdate;
