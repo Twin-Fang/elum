@@ -6,6 +6,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_meta_divider.dart';
 
 // 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼, 가져감 숫자. 배치는 talk_detail_body.dart
 
@@ -27,7 +28,6 @@ class TalkDetailPostedRow extends StatelessWidget {
   /// 세로선 앞뒤 · 높이 (시안 8 · 12)
   static const _dividerGap = 8.0;
   static const _dividerHeight = 12.0;
-  static const _dividerWidth = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +47,7 @@ class TalkDetailPostedRow extends StatelessWidget {
           ),
         ),
         SizedBox(width: _dividerGap.w),
-        Container(
-          width: _dividerWidth,
-          height: _dividerHeight.h,
-          color: colors.talkMetaDivider,
-        ),
+        const ElumMetaDivider(height: _dividerHeight),
         SizedBox(width: _dividerGap.w),
         Text(context.l10n.talkDetailPostedAt(local, local), style: style),
       ],

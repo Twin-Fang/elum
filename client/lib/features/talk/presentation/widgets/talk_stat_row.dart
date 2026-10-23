@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_meta_divider.dart';
 import '../../domain/talk_post.dart';
 
 /// 피드 카드 숫자 줄: 도움돼요 > 댓글 > 가져감 (아이콘 10 + 숫자 12, 시안 1783:6675)
@@ -19,7 +20,6 @@ class TalkStatRow extends StatelessWidget {
   static const _itemGap = 10.0;
   static const _dividerGap = 8.0;
   static const _dividerHeight = 12.0;
-  static const _dividerWidth = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +46,8 @@ class TalkStatRow extends StatelessWidget {
         ),
         if (authorName != null) ...[
           SizedBox(width: _dividerGap.w),
-          Container(
-            width: _dividerWidth,
-            height: _dividerHeight.h,
+          ElumMetaDivider(
+            height: _dividerHeight,
             color: context.colors.talkCardBorder,
           ),
           SizedBox(width: _dividerGap.w),
