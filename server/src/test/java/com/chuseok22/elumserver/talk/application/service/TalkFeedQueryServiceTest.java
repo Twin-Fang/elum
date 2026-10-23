@@ -388,6 +388,34 @@ class TalkFeedQueryServiceTest {
   }
 
   @Test
+  @DisplayName("내 글은 내 id 의 보이는 글만 조회하고 더 있으면 nextCursor 를 준다")
+  void myPosts_queriesOwnVisiblePostsOnly_andReturnsNextCursor() {
+    when(talkPostRepository.findMyPostsPage(eq("viewer-1"), eq(TalkPostStatus.VISIBLE), any(), anyString(), any()))
+      .thenReturn(List.of(
+        post("p1", "viewer-1", NOW.minusHours(1)),
+        post("p2", "viewer-1", NOW.minusHours(2)),
+        post("p3", "viewer-1", NOW.minusHours(3))));
+
+    TalkFeedPageResponse page = service.myPosts(GUARDIAN, null, 2);
+
+    assertThat(page.items()).extracting(TalkPostSummaryResponse::id).containsExactly("p1", "p2");
+    assertThat(page.items()).allMatch(TalkPostSummaryResponse::isMine);
+    assertThat(page.nextCursor()).isEqualTo(TalkCursor.encode(NOW.minusHours(2), "p2"));
+  }
+
+  @Test
+  @DisplayName("내 글이 한 쪽 안에 끝나면 nextCursor 는 없다")
+  void myPosts_lastPage_hasNoNextCursor() {
+    when(talkPostRepository.findMyPostsPage(eq("viewer-1"), eq(TalkPostStatus.VISIBLE), any(), anyString(), any()))
+      .thenReturn(List.of(post("p1", "viewer-1", NOW.minusHours(1))));
+
+    TalkFeedPageResponse page = service.myPosts(GUARDIAN, null, null);
+
+    assertThat(page.items()).hasSize(1);
+    assertThat(page.nextCursor()).isNull();
+  }
+
+  @Test
   @DisplayName("그림은 보이는 글의 카드 그림 열쇠로 읽는다")
   void stepImage_readsByStoredKey() {
     ImageContent content = new ImageContent(new byte[] {1, 2}, "image/jpeg");

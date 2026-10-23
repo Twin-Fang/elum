@@ -5768,6 +5768,30 @@ abstract class AppLocalizations {
   /// **'이야기에 공유하기'**
   String get talkMenuShare;
 
+  /// 내 정보 바로가기 줄 이름이자 내가 쓴 글 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글'**
+  String get talkMyPostsTitle;
+
+  /// 내가 쓴 글 화면 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 쓴 글이 없어요'**
+  String get talkMyPostsEmpty;
+
+  /// 내가 쓴 글 0건 버튼: 이야기 올리기로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 일과 나누기'**
+  String get talkMyPostsEmptyAction;
+
+  /// 내가 쓴 글 화면 첫 쪽 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글을 불러오지 못했어요'**
+  String get talkMyPostsFailed;
+
   /// 일과관리 ⋯ 메뉴 줄: 이미 이야기에 올린 일과면 그 글로 간다
   ///
   /// In ko, this message translates to:
