@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -139,6 +140,19 @@ class TalkAdminServiceTest {
 
     assertThatThrownBy(() -> talkAdminService.hidePost("nope")).isInstanceOf(CustomException.class)
       .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.TALK_POST_NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("hidePosts: 중복 id는 한 번만 가리고, 실제로 가린 글 수만 돌려준다")
+  void hidePosts_countsOnlyActuallyHidden() {
+    when(talkPostRepository.updateStatusIfCurrent("p1", TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE))
+      .thenReturn(1);
+    when(talkPostRepository.updateStatusIfCurrent("p2", TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE))
+      .thenReturn(0);
+
+    assertThat(talkAdminService.hidePosts(List.of("p1", "p2", "p1"))).isEqualTo(1);
+    verify(talkPostRepository, times(1))
+      .updateStatusIfCurrent("p1", TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
   }
 
   @Test

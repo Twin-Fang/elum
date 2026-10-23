@@ -24,7 +24,9 @@ import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -152,6 +154,18 @@ public class TalkAdminService {
       postId, TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
     return new TalkAdminChange(postId, changedCount > 0 ? TalkAdminChange.Result.CHANGED
       : TalkAdminChange.Result.UNCHANGED);
+  }
+
+  /**
+   * 글 여러 개 가리기: 중복 id 제거 > 보이는 글만 가림 상태로 (가린 건수 반환, 이미 가렸거나 지운 글·없는 글은 제외)
+   */
+  public int hidePosts(Collection<String> postIds) {
+    int hiddenCount = 0;
+    for (String postId : new LinkedHashSet<>(postIds)) {
+      hiddenCount += talkPostRepository.updateStatusIfCurrent(
+        postId, TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
+    }
+    return hiddenCount;
   }
 
   /**

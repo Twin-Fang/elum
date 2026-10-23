@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +64,27 @@ class AdminTalkControllerTest {
     assertThat(model.get("definition")).isSameAs(AdminTalkPostList.DEFINITION);
     assertThat(model.get("unresolvedReportCount")).isEqualTo(5L);
     assertThat(model.get("pagerBaseUrl")).isEqualTo("/admin/talk/posts?sort=createdAt,desc");
+  }
+
+  @Test
+  @DisplayName("hidePosts_noSelection: 하나도 안 골랐으면 서비스를 부르지 않고 안내만 한다")
+  void hidePosts_noSelection_onlyGuides() {
+    String view = controller.hidePosts(null, redirect);
+
+    assertThat(view).isEqualTo("redirect:/admin/talk/posts");
+    assertThat(redirect.getFlashAttributes().get("errorMessage")).isEqualTo("가릴 글을 먼저 골라 주세요.");
+    verify(talkAdminService, never()).hidePosts(any());
+  }
+
+  @Test
+  @DisplayName("hidePosts_reportsHiddenCount: 고른 글을 가리고 가린 개수를 알린다")
+  void hidePosts_reportsHiddenCount() {
+    when(talkAdminService.hidePosts(List.of("p1", "p2"))).thenReturn(2);
+
+    String view = controller.hidePosts(List.of("p1", "p2"), redirect);
+
+    assertThat(view).isEqualTo("redirect:/admin/talk/posts");
+    assertThat((String) redirect.getFlashAttributes().get("message")).contains("2개");
   }
 
   @Test
