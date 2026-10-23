@@ -111,6 +111,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptCaption,
     required this.lastLoginBadge,
     required this.appVersionTag,
+    required this.libraryNewChipLabel,
     required this.settingsTileLabel,
     required this.creditTitle,
     required this.creditNumber,
@@ -529,6 +530,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// **시안이 없는 개발 쪽 임시값이다.** 알고 찾아야 보일 만큼 작게 둔다 —
   /// caption(12)보다 작은 글자는 이것뿐이다.
   final TextStyle appVersionTag;
+
+  /// 일과 관리 격자 `새 일과` 칩 글자 (시안 1931:6929, Pretendard 10/w500)
+  final TextStyle libraryNewChipLabel;
 
   /// 설정 목록 한 줄의 라벨 (16/w400 Pretendard, Figma `1022:4467`).
   ///
@@ -1460,6 +1464,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    libraryNewChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 10,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     actionCardTitle: TextStyle(
       fontFamily: fontFamily,
       fontSize: 25,
@@ -1612,6 +1622,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
     TextStyle? appVersionTag,
+    TextStyle? libraryNewChipLabel,
     TextStyle? settingsTileLabel,
     TextStyle? creditTitle,
     TextStyle? creditNumber,
@@ -1751,6 +1762,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
       appVersionTag: appVersionTag ?? this.appVersionTag,
+      libraryNewChipLabel: libraryNewChipLabel ?? this.libraryNewChipLabel,
       settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
       creditTitle: creditTitle ?? this.creditTitle,
       creditNumber: creditNumber ?? this.creditNumber,
@@ -1924,6 +1936,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
       appVersionTag: TextStyle.lerp(appVersionTag, other.appVersionTag, t)!,
+      libraryNewChipLabel: TextStyle.lerp(
+        libraryNewChipLabel,
+        other.libraryNewChipLabel,
+        t,
+      )!,
       settingsTileLabel:
           TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
       creditTitle: TextStyle.lerp(creditTitle, other.creditTitle, t)!,

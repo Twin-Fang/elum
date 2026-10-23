@@ -126,6 +126,17 @@ abstract class Routine with _$Routine {
     return appL10n.routineForeignCreator(name, batchimOf(name));
   }
 
+  /// 남이 만든 것으로 확인된 일과인가 (예시 일과 제외). 모르면 false
+  bool get isMadeByOtherGuardian => createdByMe == false && !isExample;
+
+  /// 홈 줄 끝에 붙이는 만든 사람 호칭 (`엄마`, 이름 없으면 `보호자`). 만든 사람을 모르거나 예시 일과면 null
+  String? get creatorDisplayName {
+    if (createdByMe == null || isExample) return null;
+    final name = creatorName?.trim();
+    if (name == null || name.isEmpty) return appL10n.commonGuardianName;
+    return name;
+  }
+
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
   bool get isConfirmed => status == 'CONFIRMED';
 

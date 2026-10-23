@@ -9,10 +9,12 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/routine_progress_ring.dart';
 import '../../../../shared/models/routine.dart';
+import 'library_routine_tile.dart';
+import 'routine_tile_meta_line.dart';
 
 /// 일과 한 줄 (Figma 931:3896 — 361×68, r20, #EEE9E6).
 ///
-/// **제목·보상·진행률만 요약해 보여주고**, 카드를 보거나 고치는 일은 수정
+/// **첫 카드 그림·제목·보상·진행률만 요약해 보여주고**, 카드를 보거나 고치는 일은 수정
 /// 화면으로 넘긴다. 한 줄의 높이가 항상 같아 순서를 바꿀 때 자리가 튀지 않는다.
 ///
 /// 지난 일과는 날짜와 `일과 다시하기`가 붙어 105로 자란다 ([onRerun]).
@@ -26,6 +28,7 @@ class RoutineSummaryTile extends StatelessWidget {
     this.showDate = false,
     this.onRerun,
     this.highlighted = false,
+    this.creatorName,
   });
 
   final Routine routine;
@@ -48,12 +51,21 @@ class RoutineSummaryTile extends StatelessWidget {
   /// 밀려 있거나 들려 있는 중인가. 배경이 한 단계 어두워진다.
   final bool highlighted;
 
+  /// 보상 뒤 세로선과 함께 붙는 만든 사람 호칭 (`| 엄마`). null 이면 붙이지 않음
+  final String? creatorName;
+
   // --- Figma 실측 ---
   static const _shortHeight = 68.0;
   static const _tallHeight = 105.0;
 
-  /// 빈 상태·로딩 타일도 같은 자리에서 글이 시작해야 한 목록으로 읽힌다.
-  static const padLeft = 18.0;
+  /// 첫 카드 그림 52×52 · r12, 줄 왼쪽 위에서 8 · 그림 > 글 8 (글은 x68 에서 시작)
+  static const _thumbnailSize = 52.0;
+  static const _thumbnailRadius = 12.0;
+  static const _thumbnailInset = 8.0;
+  static const _thumbnailToText = 8.0;
+
+  /// 글 > 진행 링 최소 간격 (보상·이름이 길어도 링에 닿지 않게)
+  static const _textToRing = 8.0;
 
   /// 손잡이가 있으면 오른쪽 여백이 18, 없으면 링이 그만큼 바깥으로 나간다.
   static const _padRightWithHandle = 18.0;
@@ -99,8 +111,22 @@ class RoutineSummaryTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: padLeft.w),
+          // 첫 카드 그림 (글자가 커져 줄이 늘어나도 위에 고정)
+          Padding(
+            padding: EdgeInsets.only(
+              left: _thumbnailInset.w,
+              top: _thumbnailInset.w,
+              bottom: _thumbnailInset.w,
+            ),
+            child: RoutineThumbnailBox(
+              routine: routine,
+              size: _thumbnailSize,
+              radius: _thumbnailRadius,
+            ),
+          ),
+          SizedBox(width: _thumbnailToText.w),
           Expanded(child: _texts(context, minHeight)),
+          SizedBox(width: _textToRing.w),
           _trailing(context, hasRerun: hasRerun),
           if (dragHandle case final handle?) ...[
             SizedBox(width: _ringToHandle.w),
@@ -128,6 +154,7 @@ class RoutineSummaryTile extends StatelessWidget {
     final typo = context.typo;
     final dateLabel = routine.scheduledDateLabel;
     final showsDate = showDate && dateLabel.isNotEmpty;
+    final hasMetaLine = RoutineTileMetaLine.hasContent(routine, creatorName);
 
     final title = ContentLocale(
       language: routine.language,
@@ -139,8 +166,8 @@ class RoutineSummaryTile extends StatelessWidget {
       ),
     );
 
-    // 보상도 날짜도 없으면 제목 하나뿐이다. 위에서 16 띄우면 아래로 처져 보인다.
-    if (!routine.hasReward && !showsDate) {
+    // 보상·만든 사람·날짜가 다 없으면 제목 하나뿐이다. 위에서 16 띄우면 아래로 처져 보인다.
+    if (!hasMetaLine && !showsDate) {
       // 높이가 내용에 맞춰 늘어나므로 가운데 맞춤 기준(최소 높이)을 직접 준다.
       return ConstrainedBox(
         constraints: BoxConstraints(minHeight: minHeight),
@@ -154,12 +181,12 @@ class RoutineSummaryTile extends StatelessWidget {
       children: [
         SizedBox(height: _padTop.h),
         title,
-        if (routine.hasReward) ...[
+        if (hasMetaLine) ...[
           SizedBox(height: _titleToMeta.h),
-          _RewardLine(routine: routine),
+          RoutineTileMetaLine(routine: routine, creatorName: creatorName),
         ],
         if (showsDate) ...[
-          SizedBox(height: routine.hasReward ? _metaToDate.h : _titleToMeta.h),
+          SizedBox(height: hasMetaLine ? _metaToDate.h : _titleToMeta.h),
           Text(
             dateLabel,
             maxLines: 1,
@@ -188,48 +215,6 @@ class RoutineSummaryTile extends StatelessWidget {
           SizedBox(height: _ringToRerun.h),
           _RerunButton(onTap: onRerun!),
         ],
-      ],
-    );
-  }
-}
-
-/// `완료 시 · 유튜브 시청 20분` 한 줄.
-///
-/// 라벨과 값이 같은 크기라 굵기로만 갈린다 — 크기까지 다르면 한 문장으로
-/// 읽히지 않고 두 덩어리로 흩어진다.
-class _RewardLine extends StatelessWidget {
-  const _RewardLine({required this.routine});
-
-  final Routine routine;
-
-  /// Figma 실측 — `완료 시`(18~55)와 값(61~) 사이
-  static const _labelGap = 6.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-
-    return Row(
-      children: [
-        Text(
-          context.l10n.routineTileRewardLabel,
-          style: typo.routineTileMeta.copyWith(color: colors.routineTileLabel),
-        ),
-        SizedBox(width: _labelGap.w),
-        Flexible(
-          child: ContentLocale(
-            language: routine.language,
-            child: Text(
-              routine.rewardText.trim(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: typo.routineTileReward.copyWith(
-                color: colors.routineTileReward,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

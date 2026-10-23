@@ -18,7 +18,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 /**
- * 일과관리 묶음(폴더): 원본 일과 2개 이상을 차례대로 모음 (#806)
+ * 일과관리 묶음(폴더): 원본 일과 1개 이상을 차례대로 모음 (#806)
  * 구성원은 Routine.groupId · groupOrder 가 가리킴. 묶음을 지워도 일과는 지우지 않음
  */
 @Entity

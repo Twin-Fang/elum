@@ -48,7 +48,7 @@ palette_exceptions:
 typography:
   Pretendard:
     400: [12, 13, 14, 16, 20]
-    500: [12, 13, 14, 15, 16, 17, 18, 20]
+    500: [10, 12, 13, 14, 15, 16, 17, 18, 20]
     600: [12, 14, 16, 18, 20, 30]
     700: [18, 20, 32]
     800: [22]
@@ -88,6 +88,7 @@ measured_exceptions:
   - {path: lib/core/widgets/elum_sheet_text_field.dart, rule: spacing, value: "9", reason: "1197:5923 라벨 y84 h16 > 칸 y109"}
   - {path: lib/features/guardian/presentation/widgets/routine_group_picker_sheet.dart, rule: spacing, value: "9", reason: "1877:9740 묶음 이름 라벨 > 칸 (#968)"}
   - {path: lib/features/onboarding/presentation/character_screen.dart, rule: spacing, value: "9", reason: "204:1029 카드 176 × 2 + 9 = 361"}
+  - {path: lib/features/talk/presentation/talk_feed_screen.dart, rule: spacing, value: "15", reason: "1783:6640 제목 > 칩 23 = 고정 머리 15 + 스크롤 8 (#978)"}
   - {path: lib/features/talk/presentation/widgets/talk_step_cards.dart, rule: spacing, value: "9", reason: "1813:7718 칸 176 × 2 + 9 = 361"}
   - {path: lib/features/profile/presentation/guardians_screen.dart, rule: spacing, value: "17", reason: "1027:4617 초대 카드 끝 603 > 그만두기 620"}
   - {path: lib/features/talk/presentation/talk_feed_screen.dart, rule: spacing, value: "23", reason: "1783:6640 제목 y87 h22 > 칩 y132"}

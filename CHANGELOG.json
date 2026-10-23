@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-23T08:20:14Z",
-    "currentVersion": "2.78.1",
+    "lastUpdated": "2026-10-23T23:26:08Z",
+    "currentVersion": "2.79.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 316
+    "totalReleases": 317
   },
   "releases": [
+    {
+      "version": "2.79.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 1008,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈 일과 목록에 첫 카드 그림을 보여줘요\n  * 보호자가 여럿이면 일과마다 누가 만들었는지 이름이 보여요\n\n* **개선**\n  * 로그인 화면 글자가 기기 크기에 맞게 보여요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈 일과 목록에 첫 카드 그림을 보여줘요",
+            "보호자가 여럿이면 일과마다 누가 만들었는지 이름이 보여요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인 화면 글자가 기기 크기에 맞게 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.78.1",
       "project_type": "flutter",

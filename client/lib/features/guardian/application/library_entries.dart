@@ -73,7 +73,7 @@ bool doesLibraryEntryHoldRoutine(LibraryEntry entry, String routineId) =>
 ///
 /// 자리가 같거나 없으면 묶음 먼저, 그다음 서버가 준 원본 순서(최신순).
 /// 묶음 안 원본은 낱개 칸으로 다시 나오지 않는다 — 일과 하나는 한 곳에만 있다.
-/// 안의 원본이 2개 미만으로 보이는 묶음(다른 기기에서 지운 직후 등)은 낱개로 펼쳐 보여 준다.
+/// 안의 원본이 하나도 안 보이는 묶음(다른 기기에서 지운 직후 등)은 낱개로 펼쳐 보여 준다.
 List<LibraryEntry> composeLibraryEntries(
   List<Routine> routines,
   List<RoutineGroup> groups,

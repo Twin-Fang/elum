@@ -65,8 +65,8 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
         if (sheetResult.routine case final routine?) {
           await openRoutineDetail(routine, isInGroup: true);
         }
-      case GroupSheetAction.ungroupedLastOne:
-        showElumToast(context, context.l10n.routineGroupUngroupedLastOne);
+      case GroupSheetAction.ungroupedEmpty:
+        showElumToast(context, context.l10n.routineGroupUngroupedEmpty);
     }
   }
 
@@ -101,7 +101,7 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
 
   // --- 만들기 · 넣기 ---
 
-  /// `+ 일과 만들기`: 묶을 낱개가 2개 이상이면 새 일과/새 묶음 고르기, 아니면 바로 새 일과
+  /// `+ 일과 만들기`: 묶을 낱개가 있으면 새 일과/새 묶음 고르기, 아니면 바로 새 일과
   Future<void> onCreatePressed() async {
     if (_looseRoutines.length < RoutineGroup.minimumRoutineCount) {
       return startCreateRoutine();
@@ -130,7 +130,7 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
     return isNewGroup ? createGroupWithPicker() : startCreateRoutine();
   }
 
-  /// 새 묶음: 고르기 시트(이름 + 2개 이상) > 만들기. [preselectedIds] 는 먼저 골라 둔 일과
+  /// 새 묶음: 고르기 시트(이름 + 1개 이상) > 만들기. [preselectedIds] 는 먼저 골라 둔 일과
   Future<void> createGroupWithPicker({
     List<String> preselectedIds = const [],
   }) async {

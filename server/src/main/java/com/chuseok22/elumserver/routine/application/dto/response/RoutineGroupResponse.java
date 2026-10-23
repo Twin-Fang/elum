@@ -16,7 +16,7 @@ public record RoutineGroupResponse(
   @Schema(description = "일과관리에서 묶음끼리의 순서. 작을수록 앞", example = "0")
   int displayOrder,
 
-  @Schema(description = "묶음의 원본 일과 ID, 묶음 안 차례대로 (이룸이가 보는 순서). 항상 2개 이상",
+  @Schema(description = "묶음의 원본 일과 ID, 묶음 안 차례대로 (이룸이가 보는 순서). 항상 1개 이상",
     example = "[\"routine-1\", \"routine-2\"]")
   List<String> routineIds
 ) {

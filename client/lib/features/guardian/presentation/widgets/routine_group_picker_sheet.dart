@@ -18,7 +18,7 @@ typedef RoutinePickResult = ({String name, List<String> routineIds});
 /// 일과 고르기 시트 (#807): 끌기를 몰라도 묶음을 만들고 넣을 수 있는 길
 ///
 /// 누른 순서대로 1·2·3 번호가 붙고 그 순서가 묶음 순서가 된다.
-/// [groupName] 이 null 이면 새 묶음(이름 + 2개 이상), 있으면 그 묶음에 넣기(1개 이상).
+/// [groupName] 이 null 이면 새 묶음(이름 포함), 있으면 그 묶음에 넣기. 둘 다 1개 이상.
 Future<RoutinePickResult?> showRoutineGroupPicker(
   BuildContext context, {
   required List<Routine> candidates,
@@ -74,9 +74,7 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
 
   bool get _isNewGroup => widget.groupName == null;
 
-  bool get _canConfirm => _isNewGroup
-      ? _picked.length >= RoutineGroup.minimumRoutineCount
-      : _picked.isNotEmpty;
+  bool get _canConfirm => _picked.length >= RoutineGroup.minimumRoutineCount;
 
   @override
   void dispose() {
