@@ -12,4 +12,5 @@ class TalkScreenCodes {
   static const block = 'E-TALK-050';
   static const managePost = 'E-TALK-060';
   static const shareLink = 'E-TALK-070';
+  static const myPosts = 'E-TALK-080';
 }

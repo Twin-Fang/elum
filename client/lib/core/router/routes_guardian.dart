@@ -22,6 +22,7 @@ import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
 import '../../features/talk/presentation/talk_blocked_guardians_screen.dart';
+import '../../features/talk/presentation/talk_my_posts_screen.dart';
 import '../../features/talk/presentation/talk_detail_screen.dart';
 import '../../features/talk/presentation/talk_feed_screen.dart';
 import '../../features/talk/presentation/talk_share_screen.dart';
@@ -121,6 +122,10 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianTalkBlocks,
     pageBuilder: (context, state) =>
         slidePage(state, const TalkBlockedGuardiansScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianTalkMine,
+    pageBuilder: (context, state) => slidePage(state, const TalkMyPostsScreen()),
   ),
   // 설정은 내정보 칸 위에 열린다 (하단 바를 덮고 뒤로가기가 있다)
   GoRoute(

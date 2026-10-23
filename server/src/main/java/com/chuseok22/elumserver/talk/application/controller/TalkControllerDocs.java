@@ -79,6 +79,26 @@ public interface TalkControllerDocs {
     Authentication authentication, @Parameter(description = "분류. 비우면 전체") String category);
 
   @Operation(
+    summary = "내가 쓴 글 목록",
+    description = """
+      내가 올린 보이는 글을 최신순으로 한 쪽씩 돌려줍니다. 응답 모양은 피드와 같습니다.
+      `cursor` 는 이전 응답의 `nextCursor` (형식이 틀리면 첫 쪽), `size` 는 1~50 (기본 20).
+      내려간 글은 빠지고, 언어·숨긴 보호자 조건은 걸지 않습니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공 (없으면 빈 목록)"),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<TalkFeedPageResponse> getMyPosts(
+    Authentication authentication,
+    @Parameter(description = "이전 쪽의 nextCursor") String cursor,
+    @Parameter(description = "한 쪽 건수 1~50, 기본 20") Integer size
+  );
+
+  @Operation(
     summary = "내가 나눈 일과 매핑",
     description = """
       내가 올린 보이는 글을 `{ 원본 일과 id: 글 id }` 로 돌려줍니다.

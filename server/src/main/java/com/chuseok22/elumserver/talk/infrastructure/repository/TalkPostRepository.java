@@ -38,6 +38,18 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
     Pageable pageable);
 
   /**
+   * 내 글 한 쪽: 내가 쓴 글만 최신순 (올린 시각 내림, id 내림), cursor 위치보다 뒤
+   * 언어·분류는 거르지 않음, cursor 없음은 먼 미래 시각을 넘김
+   */
+  @Query("select p from TalkPost p where p.authorMemberId = :authorMemberId and p.status = :status "
+    + "and (p.createdAt < :cursorCreatedAt or (p.createdAt = :cursorCreatedAt and p.id < :cursorId)) "
+    + "order by p.createdAt desc, p.id desc")
+  List<TalkPost> findMyPostsPage(
+    @Param("authorMemberId") String authorMemberId, @Param("status") TalkPostStatus status,
+    @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt, @Param("cursorId") String cursorId,
+    Pageable pageable);
+
+  /**
    * 인기 글 id: since 이후 가져간 고유 보호자 수 내림차순 (같으면 최신순, 시각도 같으면 id 큰 순), 가져간 기록 없는 글은 빠짐
    */
   @Query("select p.id from TalkPost p, TalkImport i where i.postId = p.id and p.status = :status "
