@@ -26,13 +26,13 @@ import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
+import 'routine_rename_flow.dart';
 import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
-import '../../../core/widgets/routine_rename_sheet.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
@@ -190,30 +190,13 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     );
   }
 
-  Future<void> _rename(Routine routine) async {
-    final l10n = context.l10n;
-    final title = await showRoutineRenameSheet(
-      context,
-      currentTitle: routine.displayTitle,
-    );
-    if (title == null || !mounted) return;
-    final result = await runBusy(
-      () =>
-          ref.read(routineLibraryControllerProvider).rename(routine.id, title),
-    );
-    if (result == null || !mounted) return;
-    if (result.isOk) {
-      showElumToast(context, l10n.routineLibraryRenamed);
-      return;
-    }
-    await showFailure(
-      context,
-      result.failure,
-      title: l10n.routineLibraryRenameFailedTitle,
-      fallback: l10n.routineLibraryActionFailedFallback,
-      fallbackCode: 'E-LIB-RENAME',
-    );
-  }
+  Future<void> _rename(Routine routine) => renameRoutineWithSheet(
+    context,
+    ref,
+    routineId: routine.id,
+    currentTitle: routine.displayTitle,
+    runBusy: runBusy,
+  );
 
   /// 지우기: 확인 팝업 > 일과관리에서 뺀다 (이룸이가 한 기록은 서버가 남긴다)
   Future<void> _remove(Routine routine) async {

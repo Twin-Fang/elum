@@ -27,6 +27,9 @@ class ElumTextField extends StatelessWidget {
     this.maxLength,
     this.isAutofocused = false,
     this.inputStyle,
+    this.isEnabled = true,
+    this.fieldHeight,
+    this.horizontalInset,
   });
 
   final String hintText;
@@ -49,6 +52,13 @@ class ElumTextField extends StatelessWidget {
   /// 입력·안내 글자 모양. null 이면 input(20, 온보딩 시안). 시트 안 칸처럼 시안 글자가 다른 자리만 넘긴다
   final TextStyle? inputStyle;
 
+  /// false 면 입력을 잠근다 (보내는 중)
+  final bool isEnabled;
+
+  /// 칸 높이 · 좌우 안쪽. null 이면 68 · 16 (온보딩 시안). 시안 칸이 다른 자리만 넘긴다
+  final double? fieldHeight;
+  final double? horizontalInset;
+
   TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.start;
 
   @override
@@ -58,8 +68,9 @@ class ElumTextField extends StatelessWidget {
     final textStyle = inputStyle ?? context.typo.input;
 
     return SizedBox(
-      height: space.fieldH.h,
+      height: (fieldHeight ?? space.fieldH).h,
       child: TextField(
+        enabled: isEnabled,
         autofocus: isAutofocused,
         controller: controller,
         onChanged: onChanged,
@@ -100,9 +111,12 @@ class ElumTextField extends StatelessWidget {
           fillColor: colors.surface,
           // 세로 패딩을 주지 않는다 — expands + textAlignVertical.center가
           // 이미 Figma의 수직 중앙(상하 여백 각 24)을 만든다.
-          contentPadding: EdgeInsets.symmetric(horizontal: space.md.w),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: (horizontalInset ?? space.md).w,
+          ),
           border: _border(colors.border, space.fieldRadius.r),
           enabledBorder: _border(colors.border, space.fieldRadius.r),
+          disabledBorder: _border(colors.border, space.fieldRadius.r),
           focusedBorder: _border(
             colors.goalSelectedBorder,
             space.fieldRadius.r,

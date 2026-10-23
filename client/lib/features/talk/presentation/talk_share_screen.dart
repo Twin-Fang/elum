@@ -46,6 +46,7 @@ class TalkShareScreen extends ConsumerStatefulWidget {
 }
 
 class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
+  final _titleController = TextEditingController();
   final _noteController = TextEditingController();
   final _scrollController = ScrollController();
 
@@ -62,6 +63,7 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
 
   @override
   void dispose() {
+    _titleController.dispose();
     _noteController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -88,9 +90,17 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
   Future<void> _selectRoutine(String routineId) {
     setState(() => _isPhotoStepDone = false);
     _noteController.clear();
+    _titleController.clear();
     return ref
         .read(talkShareControllerProvider.notifier)
-        .selectRoutine(routineId, context.l10n);
+        .selectRoutine(routineId, context.l10n)
+        // 미리보기를 받은 뒤 정해진 제목으로 칸을 채운다 (받는 사이 칸을 건드리지 않았을 때만)
+        .then((_) {
+          final title = ref.read(talkShareControllerProvider).title;
+          if (mounted && _titleController.text.isEmpty) {
+            _titleController.text = title;
+          }
+        });
   }
 
   _ShareStage _stageOf(TalkShareState state) {
@@ -272,7 +282,10 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
       // 마지막 줄이 버튼 띠 위까지 올라오게 띠 높이만큼 비운다
       padding: EdgeInsets.fromLTRB(
         space.md.w,
-        TalkPageHeading.topSpacing.h,
+        (stage == _ShareStage.pickPhotos
+                ? TalkPageHeading.topSpacing
+                : TalkShareDetailsForm.topSpacing)
+            .h,
         space.md.w,
         TalkShareBottomButton.heightOf(context) + space.lg.h,
       ),
@@ -292,9 +305,11 @@ class _TalkShareScreenState extends ConsumerState<TalkShareScreen> {
               preview: preview,
               cardByStepId: cardByStepId,
               blurChoiceByStepId: state.blurChoiceByStepId,
+              titleController: _titleController,
               noteController: _noteController,
               category: state.category,
               isEnabled: !state.isSubmitting,
+              onTitleChanged: controller.setTitle,
               onNoteChanged: controller.setNote,
               onCategorySelected: controller.setCategory,
             ),

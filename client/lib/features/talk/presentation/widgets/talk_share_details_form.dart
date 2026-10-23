@@ -9,10 +9,10 @@ import '../../domain/talk_preview.dart';
 import 'talk_category_picker.dart';
 import 'talk_form_section.dart';
 import 'talk_note_field.dart';
-import 'talk_page_heading.dart';
 import 'talk_share_step_card.dart';
+import 'talk_title_field.dart';
 
-/// 올리기 마지막 단계: 일과 제목 > 내용(300자) > 분류 > 이렇게 올라가요(상세 한 눈에 보기와 같은 카드 격자)
+/// 올리기 마지막 단계 (시안 1870:9398): 일과 제목(고치면 일과 이름도 바뀜) > 내용(300자) > 분류 > 이렇게 보여요(상세와 같은 카드 격자)
 class TalkShareDetailsForm extends StatelessWidget {
   const TalkShareDetailsForm({
     super.key,
@@ -20,8 +20,10 @@ class TalkShareDetailsForm extends StatelessWidget {
     required this.preview,
     required this.cardByStepId,
     required this.blurChoiceByStepId,
+    required this.titleController,
     required this.noteController,
     required this.category,
+    required this.onTitleChanged,
     required this.onNoteChanged,
     required this.onCategorySelected,
     this.isEnabled = true,
@@ -33,16 +35,20 @@ class TalkShareDetailsForm extends StatelessWidget {
 
   /// 흐리게를 고른 카드는 미리보기에서도 흐리게 보인다
   final Map<String, bool?> blurChoiceByStepId;
+  final TextEditingController titleController;
   final TextEditingController noteController;
   final RoutineTemplateCategory? category;
+  final ValueChanged<String> onTitleChanged;
   final ValueChanged<String> onNoteChanged;
   final ValueChanged<RoutineTemplateCategory> onCategorySelected;
 
   /// false 면 입력을 잠근다 (올리는 중)
   final bool isEnabled;
 
-  /// 머리 > 첫 구역 · 구역 사이 (시안 1870:9398: 제목 끝 167 > 내용 199, 분류 칩 끝 529 > 이렇게 보여요 569)
-  static const _headingToSection = 32.0;
+  /// 머리 줄 끝(y119) > `일과 제목` 이름 (시안 y139)
+  static const topSpacing = 20.0;
+
+  /// 구역 사이 (시안 1870:9398: 제목 칸 끝 222 > 내용 262, 분류 칩 끝 529 > 이렇게 보여요 569)
   static const _sectionGap = 40.0;
 
   @override
@@ -53,8 +59,17 @@ class TalkShareDetailsForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TalkPageHeading(title: preview.title, isRoutineTitle: true),
-        SizedBox(height: _headingToSection.h),
+        TalkFormSection(
+          label: l10n.talkShareTitleLabel,
+          labelStyle: sectionLabelStyle,
+          labelToChildSpacing: TalkFormSection.labelToFieldSpacing,
+          child: TalkTitleField(
+            controller: titleController,
+            isEnabled: isEnabled,
+            onChanged: onTitleChanged,
+          ),
+        ),
+        SizedBox(height: _sectionGap.h),
         TalkFormSection(
           label: l10n.talkNoteLabel,
           labelStyle: sectionLabelStyle,
