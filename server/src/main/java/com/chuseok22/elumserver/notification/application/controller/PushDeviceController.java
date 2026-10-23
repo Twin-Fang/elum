@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/// 보호자 푸시 기기 등록·해제. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
+/// 푸시 기기 등록·해제 (보호자·이룸이 기기). 권한은 SecurityConfig 가 GUARDIAN·ELUMI 둘 다 연다
+/// 이룸이 기기 구분(linkId)은 토큰에서만 읽음 (요청 본문 값 안 믿음)
 @RequestMapping("/api/push-devices")
 @RestController
 @RequiredArgsConstructor
@@ -26,14 +27,16 @@ public class PushDeviceController implements PushDeviceControllerDocs {
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PutMapping
   public ResponseEntity<Void> register(Authentication authentication, @RequestBody PushDeviceRegisterRequest request) {
-    pushDeviceService.register(Caller.from(authentication).memberId(), request);
+    Caller caller = Caller.from(authentication);
+    pushDeviceService.register(caller.memberId(), caller.linkId(), request);
     return ResponseEntity.noContent().build();
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/{token}")
   public ResponseEntity<Void> unregister(Authentication authentication, @PathVariable String token) {
-    pushDeviceService.unregister(Caller.from(authentication).memberId(), token);
+    Caller caller = Caller.from(authentication);
+    pushDeviceService.unregister(caller.memberId(), caller.linkId(), token);
     return ResponseEntity.noContent().build();
   }
 }

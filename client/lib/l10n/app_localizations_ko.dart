@@ -2713,6 +2713,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pushChannelGuardianUpdates => '보호자 알림';
 
   @override
+  String get pushPermissionNudgeTitle => '알림이 꺼져 있어요';
+
+  @override
+  String get pushPermissionNudgeBody => '켜 두면 이룸이가 일과를 끝냈을 때 바로 알려 드려요';
+
+  @override
+  String get pushPermissionElumiTitle => '새 일과가 오면 알려 드릴까요?';
+
+  @override
+  String get pushPermissionElumiBody => '보호자가 일과를 보내면 이 기기에 알림이 와요';
+
+  @override
+  String get pushPermissionTurnOn => '알림 켜기';
+
+  @override
+  String get pushChannelElumiRoutines => '새 일과 알림';
+
+  @override
   String get signInProviderKakao => '카카오';
 
   @override

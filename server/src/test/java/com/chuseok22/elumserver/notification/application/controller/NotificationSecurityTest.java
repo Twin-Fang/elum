@@ -82,17 +82,17 @@ class NotificationSecurityTest {
     mockMvc.perform(put("/api/push-devices").contentType(MediaType.APPLICATION_JSON).content(DEVICE_BODY))
       .andExpect(status().isUnauthorized());
 
-    verify(pushDeviceService, never()).register(anyString(), any());
+    verify(pushDeviceService, never()).register(anyString(), any(), any());
   }
 
   @Test
-  @DisplayName("이룸이 기기 권한으로는 기기를 등록할 수 없다")
-  void elumiToken_registerDevice_403() throws Exception {
+  @DisplayName("이룸이 기기도 푸시 기기를 등록하고 204 를 받는다 (일과 도착 알림)")
+  void elumiToken_registerDevice_204() throws Exception {
     mockMvc.perform(put("/api/push-devices").with(user("e1").authorities(MEMBER, ELUMI))
         .contentType(MediaType.APPLICATION_JSON).content(DEVICE_BODY))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isNoContent());
 
-    verify(pushDeviceService, never()).register(anyString(), any());
+    verify(pushDeviceService).register(anyString(), any(), any());
   }
 
   @Test
@@ -102,7 +102,7 @@ class NotificationSecurityTest {
         .contentType(MediaType.APPLICATION_JSON).content(DEVICE_BODY))
       .andExpect(status().isNoContent());
 
-    verify(pushDeviceService).register(anyString(), any());
+    verify(pushDeviceService).register(anyString(), any(), any());
   }
 
   @Test
@@ -133,12 +133,12 @@ class NotificationSecurityTest {
   }
 
   @Test
-  @DisplayName("이룸이 기기 권한으로는 푸시 기기를 해제할 수 없다")
-  void elumiToken_unregisterDevice_403() throws Exception {
+  @DisplayName("이룸이 기기도 자기 푸시 기기를 해제하고 204 를 받는다")
+  void elumiToken_unregisterDevice_204() throws Exception {
     mockMvc.perform(delete("/api/push-devices/fcm-token").with(user("e1").authorities(MEMBER, ELUMI)))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isNoContent());
 
-    verify(pushDeviceService, never()).unregister(anyString(), anyString());
+    verify(pushDeviceService).unregister(anyString(), any(), anyString());
   }
 
   @Test

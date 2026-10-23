@@ -264,6 +264,7 @@ class InMemoryStorage implements LocalStorage {
   Future<void> clearNoticeHidden() async => _noticeHidden.clear();
 
   bool _hasAskedPushPermission = false;
+  DateTime? _pushPermissionNudgedAt;
   String? _updateSuggestionShownRecord;
 
   @override
@@ -275,6 +276,13 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   bool get hasAskedPushPermission => _hasAskedPushPermission;
+
+  @override
+  DateTime? get pushPermissionNudgedAt => _pushPermissionNudgedAt;
+
+  @override
+  Future<void> setPushPermissionNudgedAt(DateTime at) async =>
+      _pushPermissionNudgedAt = at;
 
   @override
   Future<void> setHasAskedPushPermission(bool v) async =>

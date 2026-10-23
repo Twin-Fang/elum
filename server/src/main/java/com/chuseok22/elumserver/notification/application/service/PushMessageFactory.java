@@ -30,6 +30,14 @@ public class PushMessageFactory {
   private static final String ROUTINE_COMPLETED_ONE_KEY = "push.routine_completed.one";
   private static final String ROUTINE_COMPLETED_MANY_KEY = "push.routine_completed.many";
 
+  // 이룸이 기기 알림: 알림 행 없이 보내므로 NotificationType 밖의 종류 (앱 push_message_router 와 같은 값)
+  public static final String ELUMI_ROUTINE_ARRIVED_TYPE = "ELUMI_ROUTINE_ARRIVED";
+  private static final String ELUMI_ROUTINE_ARRIVED_KEY = "push.elumi_routine_arrived";
+  // 같은 일과를 다시 보내면 알림창에서 한 줄로 덮어씀
+  private static final String ELUMI_ROUTINE_COLLAPSE_PREFIX = "elumi-routine-";
+  // 앱이 만드는 이룸이 알림 채널 id (앱 push_message_router 와 같은 값)
+  static final String ELUMI_ROUTINES_CHANNEL_ID = "elumi_routines";
+
   // 언어별 문구 캐시
   private final Map<AppLocale, Properties> bundleByLocale = new ConcurrentHashMap<>();
 
@@ -63,6 +71,17 @@ public class PushMessageFactory {
       case TALK_POST_IMPORTED -> MessageFormat.format(text(locale, "push.talk_post_imported"),
         subjectTitle == null ? "" : subjectTitle, count);
     };
+  }
+
+  /** 이룸이 기기 일과 도착: 일과 제목은 넣지 않음 (잠금 화면 노출) */
+  public PushMessage createElumiRoutineArrived(PushDevice device, String profileId, String routineId) {
+    AppLocale locale = device.getLocale() == null ? AppLocale.EN : device.getLocale();
+    Map<String, String> pushData = new HashMap<>();
+    pushData.put("type", ELUMI_ROUTINE_ARRIVED_TYPE);
+    putIfPresent(pushData, "profileId", profileId);
+    putIfPresent(pushData, "routineId", routineId);
+    return new PushMessage(device.getToken(), text(locale, TITLE_KEY), text(locale, ELUMI_ROUTINE_ARRIVED_KEY),
+      pushData, ELUMI_ROUTINE_COLLAPSE_PREFIX + routineId, ELUMI_ROUTINES_CHANNEL_ID);
   }
 
   // data: 앱이 눌렀을 때 화면을 정하는 id 만 (없는 값은 키째 뺌: FCM 이 null 값을 거부)

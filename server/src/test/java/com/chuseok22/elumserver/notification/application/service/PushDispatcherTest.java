@@ -65,7 +65,7 @@ class PushDispatcherTest {
     NotificationSetting setting = new NotificationSetting();
     setting.setAllEnabled(false);
     when(notificationSettingRepository.findById("m1")).thenReturn(Optional.of(setting));
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1")));
 
     dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED);
 
@@ -78,7 +78,7 @@ class PushDispatcherTest {
     NotificationSetting setting = new NotificationSetting();
     setting.setRoutineCompletedEnabled(false);
     when(notificationSettingRepository.findById("m1")).thenReturn(Optional.of(setting));
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1")));
 
     dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED);
 
@@ -93,7 +93,7 @@ class PushDispatcherTest {
     talkNotification.setType(NotificationType.TALK_POST_COMMENTED);
     talkNotification.setGroupKey("TALK_POST_COMMENTED:post-1");
     when(notificationRepository.findById("n2")).thenReturn(Optional.of(talkNotification));
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1")));
     RecordedNotification talkRecorded = new RecordedNotification("n2", "m1", 1, true);
     NotificationSetting setting = new NotificationSetting();
     setting.setTalkCommentedEnabled(false);
@@ -110,7 +110,7 @@ class PushDispatcherTest {
   @Test
   @DisplayName("설정 행이 없으면 모든 기기에 보낸다")
   void noSettingRow_sendsToAllDevices() {
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1"), device("t2")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1"), device("t2")));
 
     dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED);
 
@@ -120,7 +120,7 @@ class PushDispatcherTest {
   @Test
   @DisplayName("무효 토큰은 기기를 지우고 나머지 기기는 계속 보낸다")
   void invalidToken_deletesDevice_andContinuesOthers() {
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1"), device("t2")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1"), device("t2")));
     when(pushSender.send(any())).thenReturn(PushResult.INVALID_TOKEN, PushResult.SENT);
 
     dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED);
@@ -133,7 +133,7 @@ class PushDispatcherTest {
   @Test
   @DisplayName("발송기가 예외를 던져도 밖으로 전파하지 않는다")
   void senderThrows_doesNotPropagate() {
-    when(pushDeviceRepository.findAllByMemberId(any())).thenReturn(List.of(device("t1")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(any())).thenReturn(List.of(device("t1")));
     when(pushSender.send(any())).thenThrow(new IllegalStateException("boom"));
 
     assertThatCode(() -> dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED))

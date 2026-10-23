@@ -25,6 +25,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Pr
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.notification.application.service.PushDeviceService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -72,6 +73,7 @@ public class DeviceLinkService {
   private final RefreshTokenService refreshTokenService;
   private final JwtProvider jwtProvider;
   private final JwtProperties jwtProperties;
+  private final PushDeviceService pushDeviceService;
 
   /**
    * 새 연결 암호를 만든다.
@@ -318,6 +320,15 @@ public class DeviceLinkService {
     return profileAccessGuard.isGuardianOf(memberId, link.getProfileId());
   }
 
+  /** 이룸이 기기 푸시 대상: 이 이룸이의 살아 있는 연결(끊기지 않음 + 암호를 넣음) ID 전부 */
+  @Transactional(readOnly = true)
+  public List<String> liveLinkIdsOf(String profileId) {
+    return deviceLinkRepository.findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc(profileId).stream()
+      .filter(link -> link.getRedeemedAt() != null)
+      .map(DeviceLink::getId)
+      .toList();
+  }
+
   /** 연결을 끊고 그 기기의 세션만 폐기한다. 세션의 주인은 붙인 보호자(`link.memberId`)다. */
   private void terminate(DeviceLink link) {
     LocalDateTime now = LocalDateTime.now();
@@ -331,6 +342,8 @@ public class DeviceLinkService {
       link.getMemberId(), deviceId, now, RevokeReason.DEVICE_UNLINKED);
     log.info("이룸이 휴대폰 연결 끊음: memberId={}, deviceId={}, 끊은 세션={}",
       link.getMemberId(), deviceId, killed);
+    // 끊긴 기기에 알림이 가지 않게 그 기기 푸시 토큰도 지움
+    pushDeviceService.removeLinkDevices(link.getId());
   }
 
   private void countFailure(DeviceLink link, LocalDateTime now) {

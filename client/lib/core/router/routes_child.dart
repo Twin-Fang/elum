@@ -8,8 +8,8 @@ import '../../features/child/presentation/reward_screen.dart';
 import '../../features/child/presentation/routine_done_screen.dart';
 import '../../features/child/presentation/widgets/child_night_sky_backdrop.dart';
 import '../../features/link/presentation/elumi_settings_screen.dart';
+import '../../features/notification/presentation/elumi_home_launcher.dart';
 import '../../shared/models/routine.dart';
-import '../app_status/update_suggestion_launcher.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
@@ -24,7 +24,7 @@ List<RouteBase> childRoutes() => [
     // 업데이트 권유는 이 자리에서만 (일과 진행 화면에는 띄우지 않음)
     builder: (context, state) => const AdaptivePageFrame(
       kind: ScreenLayoutKind.adaptive,
-      child: UpdateSuggestionLauncher(child: ChildHomeScreen()),
+      child: ElumiHomeLauncher(child: ChildHomeScreen()),
     ),
   ),
   GoRoute(

@@ -4,7 +4,6 @@ import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
-import '../../../core/storage/local_storage.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../data/push_device_repository.dart';
 import '../data/push_messaging_client.dart';
@@ -14,7 +13,8 @@ final pushTokenRegistrarProvider = Provider<PushTokenRegistrar>(
   PushTokenRegistrar.new,
 );
 
-/// 기기 푸시 토큰 등록·해제: 보호자 기기이고 알림 권한이 있을 때만 서버에 등록
+/// 기기 푸시 토큰 등록·해제: 로그인 세션 + 알림 권한이 있을 때만 서버에 등록 (보호자·이룸이 기기 공통)
+/// 이룸이 기기 구분은 서버가 토큰의 연결 ID 로 붙임
 /// 토큰 갱신은 한 번만 구독하고, 모든 실패는 로그만 남기고 삼키지 않되 던지지도 않음 (앱 흐름을 막지 않음)
 class PushTokenRegistrar {
   PushTokenRegistrar(this._ref);
@@ -85,11 +85,10 @@ class PushTokenRegistrar {
     );
   }
 
-  // 등록할 조건: 로그인한 보호자 기기 + 알림 권한 (이룸이 기기는 알림을 받지 않음)
+  // 등록할 조건: 로그인 세션 + 알림 권한
   Future<bool> _canRegister() async {
     if (_isSuspended) return false;
     if (!_ref.read(authSessionControllerProvider).hasSession) return false;
-    if (_ref.read(localStorageProvider).isElumiDevice) return false;
     try {
       return (await _client.permissionStatus()).isGranted;
     } catch (e, st) {

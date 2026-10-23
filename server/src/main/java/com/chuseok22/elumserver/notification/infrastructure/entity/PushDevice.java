@@ -19,14 +19,17 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-/** 푸시를 받을 보호자 기기 한 대: 토큰 하나가 한 줄, member 에 외래키 없음 */
+/** 푸시를 받을 기기 한 대: 토큰 하나가 한 줄, member 에 외래키 없음. link_id 가 있으면 이룸이 기기 */
 @Entity
 @Getter
 @Setter
 @Table(
   name = "push_device",
   uniqueConstraints = @UniqueConstraint(name = "uk_push_device_token", columnNames = "token"),
-  indexes = @Index(name = "idx_push_device_member_id", columnList = "member_id")
+  indexes = {
+    @Index(name = "idx_push_device_member_id", columnList = "member_id"),
+    @Index(name = "idx_push_device_link_id", columnList = "link_id")
+  }
 )
 public class PushDevice extends BaseEntity {
 
@@ -38,6 +41,10 @@ public class PushDevice extends BaseEntity {
 
   @Column(name = "member_id", nullable = false)
   private String memberId;
+
+  // 이룸이 기기면 그 연결 ID, 보호자 기기면 null (이룸이 기기도 member_id 는 붙여 준 보호자)
+  @Column(name = "link_id")
+  private String linkId;
 
   @Column(nullable = false, length = TOKEN_MAX_LENGTH)
   private String token;

@@ -2830,6 +2830,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pushChannelGuardianUpdates => 'Guardian updates';
 
   @override
+  String get pushPermissionNudgeTitle => 'Notifications are off';
+
+  @override
+  String get pushPermissionNudgeBody =>
+      'Turn them on to hear right away when your ELUM user finishes a routine';
+
+  @override
+  String get pushPermissionElumiTitle =>
+      'Get notified when a new routine arrives?';
+
+  @override
+  String get pushPermissionElumiBody =>
+      'You\'ll get a notification on this device when a guardian sends a routine';
+
+  @override
+  String get pushPermissionTurnOn => 'Turn on notifications';
+
+  @override
+  String get pushChannelElumiRoutines => 'New routines';
+
+  @override
   String get signInProviderKakao => 'Kakao';
 
   @override
