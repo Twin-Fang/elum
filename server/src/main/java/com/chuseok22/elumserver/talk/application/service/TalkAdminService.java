@@ -24,7 +24,10 @@ import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,14 +147,36 @@ public class TalkAdminService {
   }
 
   /**
-   * 글 가리기: 글 확인 > 보이는 글만 가림 상태로 (이미 가렸거나 지운 글은 UNCHANGED)
+   * 글 가리기: 글 확인 > 보이는 글만 가림 상태로 > 가린 경우 그 글의 미처리 신고도 처리 (이미 가렸거나 지운 글은 UNCHANGED)
    */
   public TalkAdminChange hidePost(String postId) {
     requirePost(postId);
     int changedCount = talkPostRepository.updateStatusIfCurrent(
       postId, TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
-    return new TalkAdminChange(postId, changedCount > 0 ? TalkAdminChange.Result.CHANGED
-      : TalkAdminChange.Result.UNCHANGED);
+    if (changedCount == 0) {
+      return new TalkAdminChange(postId, TalkAdminChange.Result.UNCHANGED);
+    }
+    talkReportRepository.markResolvedByPostIds(List.of(postId), LocalDateTime.now(clock));
+    return new TalkAdminChange(postId, TalkAdminChange.Result.CHANGED);
+  }
+
+  /**
+   * 글 여러 개 가리기: 중복 id 제거 > 보이는 글만 가림 상태로 > 가린 글들의 미처리 신고도 한 번에 처리
+   * (가린 건수 반환, 이미 가렸거나 지운 글·없는 글은 제외)
+   */
+  public int hidePosts(Collection<String> postIds) {
+    List<String> hiddenPostIds = new ArrayList<>();
+    for (String postId : new LinkedHashSet<>(postIds)) {
+      int changedCount = talkPostRepository.updateStatusIfCurrent(
+        postId, TalkPostStatus.HIDDEN_BY_ADMIN, TalkPostStatus.VISIBLE);
+      if (changedCount > 0) {
+        hiddenPostIds.add(postId);
+      }
+    }
+    if (!hiddenPostIds.isEmpty()) {
+      talkReportRepository.markResolvedByPostIds(hiddenPostIds, LocalDateTime.now(clock));
+    }
+    return hiddenPostIds.size();
   }
 
   /**
@@ -183,6 +208,7 @@ public class TalkAdminService {
       return new TalkAdminChange(comment.getPostId(), TalkAdminChange.Result.UNCHANGED);
     }
     talkPostRepository.decreaseCommentCount(comment.getPostId());
+    talkReportRepository.markResolvedByTarget(TalkReportTargetType.COMMENT, commentId, LocalDateTime.now(clock));
     return new TalkAdminChange(comment.getPostId(), TalkAdminChange.Result.CHANGED);
   }
 

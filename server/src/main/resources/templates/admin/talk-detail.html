@@ -16,7 +16,7 @@
       <form th:if="${detail.post.status.name() == 'VISIBLE'}"
             th:action="@{/admin/talk/posts/{id}/hide(id=${detail.post.id})}" method="post"
             data-confirm-title="글 가리기" data-confirm-danger data-confirm-accept="가리기"
-            data-confirm-message="이 글을 가릴까요? 앱에서 더 이상 보이지 않아요.">
+            data-confirm-message="이 글을 가릴까요? 앱에서 더 이상 보이지 않고, 들어온 신고도 처리돼요.">
         <button type="submit" class="btn btn-warning btn-sm">글 가리기</button>
       </form>
       <form th:if="${detail.post.status.name() == 'HIDDEN_BY_ADMIN'}"

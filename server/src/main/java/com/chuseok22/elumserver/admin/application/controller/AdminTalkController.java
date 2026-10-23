@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkAdminPostRow;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkAdminReportRow;
 import com.chuseok22.elumserver.talk.application.service.TalkAdminService;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/// 이야기 관리: 글 목록·상세, 글·댓글 가리기와 되돌리기, 신고 목록과 처리. 자동으로 가리거나 지우지 않는다.
+/// 이야기 관리: 글 목록·상세, 글(여러 개 포함)·댓글 가리기와 되돌리기, 신고 목록과 처리. 자동으로 가리거나 지우지 않는다.
 @Controller
 @RequiredArgsConstructor
 public class AdminTalkController {
@@ -67,6 +68,26 @@ public class AdminTalkController {
   public String postDetail(@PathVariable("id") String id, Model model) {
     model.addAttribute("detail", talkAdminService.getPostDetail(id));
     return "admin/talk-detail";
+  }
+
+  /// 글 여러 개 가리기: 목록에서 고른 글(postIds) > 보이는 글만 가림. 하나도 안 골랐으면 안내만
+  @PostMapping(POSTS_PATH + "/hide")
+  public String hidePosts(
+    @RequestParam(name = "postIds", required = false) List<String> postIds,
+    RedirectAttributes redirectAttributes
+  ) {
+    if (postIds == null || postIds.isEmpty()) {
+      redirectAttributes.addFlashAttribute("errorMessage", "가릴 글을 먼저 골라 주세요.");
+      return "redirect:" + POSTS_PATH;
+    }
+    int hiddenCount = talkAdminService.hidePosts(postIds);
+    if (hiddenCount > 0) {
+      redirectAttributes.addFlashAttribute("message",
+        "글 " + hiddenCount + "개를 가렸어요. 앱에서는 더 이상 보이지 않아요.");
+    } else {
+      redirectAttributes.addFlashAttribute("errorMessage", "이미 가렸거나 글쓴이가 지운 글이라 바꾸지 않았어요.");
+    }
+    return "redirect:" + POSTS_PATH;
   }
 
   @PostMapping(POSTS_PATH + "/{id}/hide")
