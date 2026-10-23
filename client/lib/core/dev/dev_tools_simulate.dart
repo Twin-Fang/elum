@@ -29,6 +29,8 @@ class _AppStatusSimulationView extends ConsumerWidget {
 
   Future<void> _select(BuildContext context, WidgetRef ref, DevAppStatusSimulation simulation) async {
     DevSimulation.appStatus.value = simulation;
+    // 고른 흉내 화면이 바로 보이게 넘김 상태 해제
+    DevSimulation.isBlockingNoticeSkipped.value = false;
     AppLogger.info('[dev simulation] app status : ${simulation.name}');
     if (simulation == DevAppStatusSimulation.suggestUpdate) {
       // 하루 한 번 기록을 지우고 홈부터 다시 (권유는 홈 진입 때 판단)
