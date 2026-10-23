@@ -15,7 +15,7 @@ import 'card_image.dart';
 /// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
-/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새로` 배지 (민트 = 안 읽음).
+/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
 class LibraryRoutineTile extends ConsumerWidget {
   const LibraryRoutineTile({
     super.key,

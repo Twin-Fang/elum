@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
 
-/// 이야기에서 가져온 일과 중 상세를 연 적 있는 일과 id (일과관리 칸의 `새로` 표시를 끈다)
+/// 이야기에서 가져온 일과 중 상세를 연 적 있는 일과 id (일과관리 칸의 `새 일과` 칩을 끈다)
 ///
 /// 로컬에만 저장한다. 상세를 열 때 [markSeen] 으로 더한다.
 final talkImportedSeenRoutineIdsProvider =

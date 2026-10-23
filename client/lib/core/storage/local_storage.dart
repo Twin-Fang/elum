@@ -227,7 +227,7 @@ abstract interface class LocalStorage {
   bool get isChildScreenAwakeOn;
   Future<void> setChildScreenAwakeOn(bool v);
 
-  /// 이야기에서 가져온 일과 중 상세를 한 번이라도 연 일과 id. 목록 칸의 `새로` 표시를 끄는 근거
+  /// 이야기에서 가져온 일과 중 상세를 한 번이라도 연 일과 id. 목록 칸의 `새 일과` 칩을 끄는 근거
   ///
   /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다
   List<String> get talkImportedSeenRoutineIds;
