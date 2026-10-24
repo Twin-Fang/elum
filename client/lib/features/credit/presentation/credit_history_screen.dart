@@ -7,6 +7,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_spinner.dart';
@@ -138,6 +139,8 @@ class _EmptyBody extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        const ElumEmptyIllustration(),
+        SizedBox(height: context.space.lg),
         Text(
           context.l10n.creditHistoryEmptyTitle,
           textAlign: TextAlign.center,
