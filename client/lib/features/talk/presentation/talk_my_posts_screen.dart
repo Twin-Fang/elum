@@ -8,6 +8,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_spinner.dart';
@@ -74,10 +75,18 @@ class _TalkMyPostsScreenState extends ConsumerState<TalkMyPostsScreen> {
       child: switch (myPosts) {
         AsyncData(value: final state) when state.items.isEmpty =>
           ElumStateBody(
-            child: TalkEmptyMessage(
-              title: l10n.talkMyPostsEmpty,
-              actionLabel: l10n.talkMyPostsEmptyAction,
-              onActionPressed: () => context.push(Routes.guardianTalkShare),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ElumEmptyIllustration(),
+                SizedBox(height: context.space.lg),
+                TalkEmptyMessage(
+                  title: l10n.talkMyPostsEmpty,
+                  actionLabel: l10n.talkMyPostsEmptyAction,
+                  onActionPressed: () =>
+                      context.push(Routes.guardianTalkShare),
+                ),
+              ],
             ),
           ),
         AsyncData(value: final state) => _list(state),

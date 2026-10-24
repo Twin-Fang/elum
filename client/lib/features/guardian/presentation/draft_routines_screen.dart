@@ -10,6 +10,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -343,38 +344,46 @@ class _DraftTile extends StatelessWidget {
 }
 
 /// 0건. **로딩과 다른 화면이어야 한다.**
-/// 홈 빈 상태(217:2655)와 같은 글만 든 웜그레이 줄 — 제목 + 회색 안내 한 줄
+/// 루미 그림 아래 홈 빈 상태(217:2655)와 같은 웜그레이 줄 — 제목 + 회색 안내 한 줄
 class _Empty extends StatelessWidget {
   const _Empty();
 
-  /// 두 줄 사이 (홈 빈 상태와 같음)
+  /// 두 줄 사이 (홈 빈 상태와 같음) · 그림 > 줄
   static const _lineGap = 8.0;
+  static const _illustrationToTile = 16.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
 
-    return GreyTileShell(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.draftRoutinesEmptyTitle,
-            style: typo.routineEmptyTitle.copyWith(
-              color: colors.routineTileLabel,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Center(child: ElumEmptyIllustration()),
+        SizedBox(height: _illustrationToTile.h),
+        GreyTileShell(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.draftRoutinesEmptyTitle,
+                style: typo.routineEmptyTitle.copyWith(
+                  color: colors.routineTileLabel,
+                ),
+              ),
+              SizedBox(height: _lineGap.h),
+              Text(
+                context.l10n.draftRoutinesEmptyBody,
+                style: typo.routineTileMeta.copyWith(
+                  color: colors.routineEmptyHint,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: _lineGap.h),
-          Text(
-            context.l10n.draftRoutinesEmptyBody,
-            style: typo.routineTileMeta.copyWith(
-              color: colors.routineEmptyHint,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
