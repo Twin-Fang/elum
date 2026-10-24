@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-24T00:11:32Z",
-    "currentVersion": "2.81.0",
+    "lastUpdated": "2026-10-24T06:26:07Z",
+    "currentVersion": "2.82.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 319
+    "totalReleases": 320
   },
   "releases": [
+    {
+      "version": "2.82.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-24",
+      "pr_number": 1016,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 홈 일과 줄에서 첫 카드 그림이 없으면 글자나 회색 칸 없이 비워 둬요\n  * 밀어서 삭제·수정하는 상태에서도 만든 보호자 이름이 보여요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "홈 일과 줄에서 첫 카드 그림이 없으면 글자나 회색 칸 없이 비워 둬요",
+            "밀어서 삭제·수정하는 상태에서도 만든 보호자 이름이 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.81.0",
       "project_type": "flutter",
