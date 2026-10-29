@@ -1,0 +1,4 @@
+/* 권한 안내 문구 (일본어): 대기 중 — 언어를 열 때 Runner/ 로 옮긴다 (docs/store/locales/README.md) */
+"NSCameraUsageDescription" = "カードの絵に使う写真を撮るために、カメラを使います。";
+"NSPhotoLibraryUsageDescription" = "カードの絵に使う写真を選ぶために、写真ライブラリを使います。";
+"NSUserTrackingUsageDescription" = "保護者画面に合った広告を表示するために使います。Elumiの情報は使いません。";
