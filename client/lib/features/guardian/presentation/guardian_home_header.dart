@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/layout/app_text_scale.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -48,7 +49,10 @@ class GuardianHomeHeader extends StatelessWidget {
   /// 2배를 넘을 때만 막는다. 그 아래는 null 이라 시스템 값을 그대로 쓴다.
   static TextScaler? _greetingScaler(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
-    return scaler.scale(1) > 2.0 ? scaler.clamp(maxScaleFactor: 2.0) : null;
+    const maxScale = AppTextScale.maxSystemScaleFactor;
+    return scaler.scale(1) > maxScale
+        ? scaler.clamp(maxScaleFactor: maxScale)
+        : null;
   }
 
   @override

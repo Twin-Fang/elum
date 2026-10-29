@@ -3460,4 +3460,12 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String routineProgressRingPercentLabel(int percent) {
+    return '$percent% done';
+  }
+
+  @override
+  String get routineProgressRingDoneLabel => 'All done';
 }

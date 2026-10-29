@@ -49,6 +49,8 @@ class ElumCheckCircle extends StatelessWidget {
             isChecked ? colors.surface : colors.consentCheckIdle,
             BlendMode.srcIn,
           ),
+          // 켜짐 상태는 쓰는 쪽 Semantics(checked) 가 알린다. 빈 이름 그림 노드를 남기지 않는다
+          excludeFromSemantics: true,
         ),
       ),
     );

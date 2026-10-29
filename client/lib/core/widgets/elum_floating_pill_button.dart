@@ -52,8 +52,9 @@ class ElumFloatingPillButton extends StatelessWidget {
     final leadingWidget = leading;
     return AppPressable(
       onTap: onTap,
+      // 시안 높이는 최소값. 큰 글자에서는 글자만큼 늘어난다 (기본 크기에서는 44 그대로)
       child: Container(
-        height: scaledHeight,
+        constraints: BoxConstraints(minHeight: scaledHeight),
         padding: EdgeInsets.symmetric(horizontal: _horizontalPadding.w),
         decoration: BoxDecoration(
           color: colors.buttonEnabled,

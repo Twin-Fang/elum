@@ -201,5 +201,7 @@
   "timeAgoMinutes": "{count, plural, other{{count}分前}}",
   "timeAgoHours": "{count, plural, other{{count}時間前}}",
   "timeAgoDays": "{count, plural, other{{count}日前}}",
-  "guardianTabTalk": "トーク"
+  "guardianTabTalk": "トーク",
+  "routineProgressRingPercentLabel": "{percent}% できました",
+  "routineProgressRingDoneLabel": "ぜんぶできました"
 }

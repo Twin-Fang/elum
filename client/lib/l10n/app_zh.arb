@@ -201,5 +201,7 @@
   "timeAgoMinutes": "{count, plural, other{{count}分钟前}}",
   "timeAgoHours": "{count, plural, other{{count}小时前}}",
   "timeAgoDays": "{count, plural, other{{count}天前}}",
-  "guardianTabTalk": "故事区"
+  "guardianTabTalk": "故事区",
+  "routineProgressRingPercentLabel": "已完成 {percent}%",
+  "routineProgressRingDoneLabel": "全部完成"
 }

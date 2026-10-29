@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/content_locale.dart';
+import '../../../../core/layout/app_text_scale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -155,9 +156,7 @@ class ActionCardTabletView extends ConsumerWidget {
     final titleStyle = typo.actionCardTitle.copyWith(color: textColor);
     final descriptionStyle = typo.cardDescription.copyWith(color: textColor);
     // 글자 토큰은 그대로 두고 배율만 키운다 (사용자 글자 크기 설정 위에 곱한다)
-    final textScaler = TextScaler.linear(
-      MediaQuery.textScalerOf(context).scale(1) * _textScale,
-    );
+    final textScaler = AppTextScale.scaledBy(context, _textScale);
 
     final speaker = AppPressable(
       onTap: onSpeak,

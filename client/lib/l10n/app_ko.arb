@@ -2671,5 +2671,9 @@
   "@timeAgoDays": {
     "description": "일주일 안쪽 시각 표기",
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+  "routineProgressRingPercentLabel": "{percent}% 했어요",
+  "@routineProgressRingPercentLabel": { "description": "일과 진행 링(진행 중)을 화면 낭독기가 읽는 이름", "placeholders": { "percent": { "type": "int" } } },
+  "routineProgressRingDoneLabel": "다 했어요",
+  "@routineProgressRingDoneLabel": { "description": "일과 진행 링(다 한 일과, 체크 원)을 화면 낭독기가 읽는 이름" }
 }

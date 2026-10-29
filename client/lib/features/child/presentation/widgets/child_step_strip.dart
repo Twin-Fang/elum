@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/content_locale.dart';
+import '../../../../core/layout/app_text_scale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -178,9 +179,9 @@ class _StepChip extends StatelessWidget {
             : Text(
                 '$order',
                 // 배지 숫자 토큰을 칸 크기에 맞춰 줄인다 (지금 칸이 더 크다)
-                textScaler: TextScaler.linear(
-                  MediaQuery.textScalerOf(context).scale(1) *
-                      (isCurrent ? 0.8 : 0.6),
+                textScaler: AppTextScale.scaledBy(
+                  context,
+                  isCurrent ? 0.8 : 0.6,
                 ),
                 style: context.typo.cardHeadline.copyWith(
                   color: colors.textPrimary,
