@@ -11,6 +11,7 @@ plugins {
 import java.util.Properties
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
@@ -93,6 +94,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Crashlytics R8 매핑 업로드: 기본 끔, -PelumCrashlyticsMappingUpload=true 일 때만 (#659)
+            // 운영 수집이 꺼져 있고, 업로드 실패(네트워크·Firebase 설정 없음)로 배포 빌드가 깨지지 않게
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled =
+                    project.findProperty("elumCrashlyticsMappingUpload")?.toString() == "true"
+            }
         }
     }
 }

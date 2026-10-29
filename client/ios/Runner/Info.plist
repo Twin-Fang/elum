@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- 크래시 수집은 기본 꺼짐. 릴리스 빌드에서만 앱이 켠다 (CrashReporter.enableIfAllowed) -->
+	<!-- 크래시 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (CrashReporter, #659) -->
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<false/>
 	<key>CFBundleDevelopmentRegion</key>

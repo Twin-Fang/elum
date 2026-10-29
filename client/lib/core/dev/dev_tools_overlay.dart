@@ -21,6 +21,7 @@ import '../app_status/app_status_repository.dart';
 import '../config/app_config.dart';
 import '../l10n/app_locales.dart';
 import '../logger/app_logger.dart';
+import '../logger/crash_reporter.dart';
 import '../router/routes.dart';
 import '../storage/local_storage.dart';
 import 'dev_locale_override.dart';
@@ -40,6 +41,7 @@ part 'dev_tools_inspect.dart';
 part 'dev_tools_widgets.dart';
 part 'dev_tools_server.dart';
 part 'dev_tools_simulate.dart';
+part 'dev_tools_crash.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///
