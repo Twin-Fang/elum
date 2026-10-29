@@ -4,6 +4,13 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<!-- 설정 > 이룸 > 언어 목록: 연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527).
+	     언어를 열 때 여기·lproj·pbxproj·locales_config.xml 을 함께 더한다 (tool/check_native_locales.dart 가 검사) -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ko</string>
+	</array>
 	<!-- 홈 화면에 보이는 이름. 한국어만 지원하는 서비스라 한글로 둔다 (이슈 #289). -->
 	<key>CFBundleDisplayName</key>
 	<string>이룸</string>

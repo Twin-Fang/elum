@@ -8,8 +8,11 @@
     <!-- 일과 알림 (#777): 재부팅 뒤 예약 다시 걸기. 알림 권한(POST_NOTIFICATIONS)은 플러그인이 선언 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
+    <!-- 앱 이름은 res/values/strings.xml app_name. 앱별 언어 목록(Android 13+)은 res/xml/locales_config.xml:
+         연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527). Android 12 이하는 기기 언어를 따른다 -->
     <application
-        android:label="이룸"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- taskAffinity 를 두지 않는다 (네이버 로그인).
