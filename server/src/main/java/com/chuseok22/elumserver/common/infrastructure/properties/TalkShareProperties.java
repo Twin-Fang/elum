@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.common.infrastructure.properties;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -27,6 +29,8 @@ public record TalkShareProperties(
   private static final String DEFAULT_IOS_APP_ID = "CUK22HY6YC.kr.twinfang.elum";
   // client/android/app/build.gradle.kts applicationId
   private static final String DEFAULT_ANDROID_PACKAGE_NAME = "kr.twinfang.elum";
+  // App Store 주소의 앱 번호: …/app/id{숫자}
+  private static final Pattern APP_STORE_APP_ID_PATTERN = Pattern.compile("/id(\\d+)");
 
   public TalkShareProperties {
     publicBaseUrl = withoutTrailingSlash(orDefault(publicBaseUrl, DEFAULT_PUBLIC_BASE_URL));
@@ -40,6 +44,14 @@ public record TalkShareProperties(
       .filter(fingerprint -> fingerprint != null && !fingerprint.isBlank())
       .map(String::trim)
       .toList();
+  }
+
+  /**
+   * App Store 주소 > 앱 번호 (…/id6792970508 > 6792970508, 없으면 null). Safari 앱 배너용
+   */
+  public String appStoreAppId() {
+    Matcher matcher = APP_STORE_APP_ID_PATTERN.matcher(appStoreUrl);
+    return matcher.find() ? matcher.group(1) : null;
   }
 
   private static String orDefault(String value, String fallback) {

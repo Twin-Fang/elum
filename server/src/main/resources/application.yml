@@ -65,8 +65,9 @@ talk:
   # 앱 밖 공유 링크 (/s/{글id}). 미리보기 페이지·썸네일·앱 연결 검증 파일
   share:
     public-base-url: ${ELUM_TALK_SHARE_PUBLIC_BASE_URL:https://api.elum.chuseok22.com}
-    # Play Console 앱 서명 키 SHA-256 (쉼표 구분, 비면 Android 앱 링크 검증 안 됨 > 웹 페이지로 열림)
-    android-cert-sha256: ${ELUM_TALK_SHARE_ANDROID_CERT_SHA256:}
+    # 앱 서명 인증서 SHA-256 (쉼표 구분, 공개값). 기본: 업로드 키(client/android/app/keystore/key.jks, 직접 배포 APK)
+    # Play 로 받은 앱은 Play Console 앱 서명 키 지문을 쉼표 뒤에 더해야 검증됨 (#1041)
+    android-cert-sha256: ${ELUM_TALK_SHARE_ANDROID_CERT_SHA256:CC:2D:6F:FB:B0:8B:34:8C:2E:A7:51:28:D7:E1:32:A9:CD:D3:B4:11:D9:45:C9:B4:58:88:C7:B1:41:72:FF:49}
 
 elum:
   # 장애 알림 Discord 웹훅 (#648). 주소가 비면 알림만 꺼지고 서버는 그대로 뜬다 (경고 로그 1회)
