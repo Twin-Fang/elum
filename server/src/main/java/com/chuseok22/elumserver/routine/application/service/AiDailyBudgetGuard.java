@@ -1,6 +1,9 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
+import com.chuseok22.elumserver.common.application.alert.IncidentAlert;
+import com.chuseok22.elumserver.common.application.alert.IncidentAlertService;
+import com.chuseok22.elumserver.common.application.alert.IncidentAlertType;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -8,6 +11,8 @@ import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,22 +37,26 @@ public class AiDailyBudgetGuard {
 
   private final AiCallLogRepository aiCallLogRepository;
   private final SystemConfigService systemConfigService;
+  private final IncidentAlertService incidentAlertService;
   /// 하루 경계를 정하는 시계. 테스트가 자정 근처를 고정할 수 있게 밖에서 받는다.
   private final Clock clock;
 
   // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 빠뜨리면 서버가 뜨지 않는다.
   @Autowired
   public AiDailyBudgetGuard(
-    AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService
+    AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService,
+    IncidentAlertService incidentAlertService
   ) {
-    this(aiCallLogRepository, systemConfigService, Clock.systemDefaultZone());
+    this(aiCallLogRepository, systemConfigService, incidentAlertService, Clock.systemDefaultZone());
   }
 
   AiDailyBudgetGuard(
-    AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService, Clock clock
+    AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService,
+    IncidentAlertService incidentAlertService, Clock clock
   ) {
     this.aiCallLogRepository = aiCallLogRepository;
     this.systemConfigService = systemConfigService;
+    this.incidentAlertService = incidentAlertService;
     this.clock = clock;
   }
 
@@ -82,9 +91,25 @@ public class AiDailyBudgetGuard {
     }
     if (spent >= budget) {
       log.warn("AI 하루 비용 상한 도달 — 새 AI 생성을 멈춘다: spentUsd={}, budgetUsd={}", spent, budget);
+      notifyBudgetReached(spent, budget);
       return true;
     }
     return false;
+  }
+
+  // 장애 알림 (#648): 날짜가 원인 키라 하루 1회, 알림 실패는 판정에 영향 없음
+  private void notifyBudgetReached(double spentUsd, double budgetUsd) {
+    try {
+      incidentAlertService.notify(new IncidentAlert(
+        IncidentAlertType.AI_DAILY_BUDGET_REACHED, todayStart().toLocalDate().toString(), List.of(
+          new IncidentAlert.Detail("오늘 추정 비용",
+            String.format(Locale.ROOT, "$%.2f / 상한 $%.2f", spentUsd, budgetUsd)),
+          new IncidentAlert.Detail("대표 오류", ErrorCode.AI_DAILY_BUDGET_EXCEEDED.name()),
+          new IncidentAlert.Detail("영향", "자정까지 새 일과 AI 생성 거절, 추가 카드 그림·픽토그램은 기본값")
+        )));
+    } catch (RuntimeException e) {
+      log.warn("AI 하루 비용 상한 알림 실패 — 판정은 그대로: error={}", e.getClass().getSimpleName());
+    }
   }
 
   /// 오늘 0시. 계정 한도와 같은 시스템 시계다 — 운영은 컨테이너 TZ=Asia/Seoul 이라 한국 시각

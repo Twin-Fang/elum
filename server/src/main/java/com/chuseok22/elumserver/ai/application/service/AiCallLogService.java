@@ -27,15 +27,17 @@ public class AiCallLogService {
 
   private final AiCallLogRepository aiCallLogRepository;
   private final SystemConfigService systemConfigService;
+  private final AiProviderFailureAlerter aiProviderFailureAlerter;
   /// 기록 저장 전용 새 트랜잭션 (커밋 실패까지 try 안에서 잡힘)
   private final TransactionTemplate requiresNewTransaction;
 
   public AiCallLogService(
     AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService,
-    PlatformTransactionManager transactionManager
+    PlatformTransactionManager transactionManager, AiProviderFailureAlerter aiProviderFailureAlerter
   ) {
     this.aiCallLogRepository = aiCallLogRepository;
     this.systemConfigService = systemConfigService;
+    this.aiProviderFailureAlerter = aiProviderFailureAlerter;
     this.requiresNewTransaction = new TransactionTemplate(transactionManager);
     this.requiresNewTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   }
@@ -45,10 +47,25 @@ public class AiCallLogService {
     GeminiGenerateContentResponse.UsageMetadata usage
   ) {
     save(callType, model, true, null, latencyMs, usage);
+    trackProviderFailureStreak(callType, true, null);
   }
 
   public void recordFailure(AiCallType callType, String model, long latencyMs, String errorMessage) {
     save(callType, model, false, errorMessage, latencyMs, null);
+    trackProviderFailureStreak(callType, false, errorMessage);
+  }
+
+  // 제공자 연속 실패 알림 (#648). 기록과 같이 본 호출을 실패시키지 않음
+  private void trackProviderFailureStreak(AiCallType callType, boolean isSuccess, String errorMessage) {
+    try {
+      if (isSuccess) {
+        aiProviderFailureAlerter.onSuccess(callType);
+      } else {
+        aiProviderFailureAlerter.onFailure(callType, errorMessage);
+      }
+    } catch (Exception e) {
+      log.warn("[ai call log] failure streak tracking failed, main call unaffected : callType={}", callType, e);
+    }
   }
 
   private void save(
