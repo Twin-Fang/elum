@@ -250,6 +250,13 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
     return result.failure;
   }
 
+  /// 이름 바꾸기가 서버에 저장된 뒤 흐름의 일과 제목만 바꾼다 (고치던 카드·순서는 그대로)
+  void applyRenamedTitle(String title) {
+    final routine = state.routine;
+    if (routine == null) return;
+    state = state.copyWith(routine: routine.copyWith(title: title));
+  }
+
   /// 보상 없이 넘어간다. 정했던 것을 지운다 — 되돌아와 건너뛰면 그 뜻이다.
   void skipReward() => setReward('');
 

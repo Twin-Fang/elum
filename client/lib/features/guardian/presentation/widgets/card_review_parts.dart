@@ -10,6 +10,8 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_state_body.dart';
 import '../../../../core/theme/card_layout.dart';
+import '../../../../shared/models/routine.dart';
+import 'routine_title_edit_label.dart';
 
 /// 카드확인 화면의 부품 (시안 `1173:5541` 기본 / `1197:5798` 순서 변경).
 ///
@@ -35,6 +37,58 @@ class CardReviewHead extends StatelessWidget {
           style: context.typo.promptBody.copyWith(
             color: context.colors.promptMuted,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 카드확인 머리: 일과 제목 + 연필 (시안 없음 > 상세 시트 머리 1274:8186 결) > 8 > `카드 N개를 만들었어요`
+/// 순서 변경 모드는 둘 다 자리만 지킨다 (카드가 위아래로 뛰지 않게)
+class CardReviewHeading extends StatelessWidget {
+  const CardReviewHeading({
+    super.key,
+    required this.routine,
+    required this.isReorderMode,
+    required this.onTitleEditTap,
+  });
+
+  final Routine? routine;
+  final bool isReorderMode;
+  final VoidCallback onTitleEditTap;
+
+  /// 제목 > 개수 줄 · 개수 줄 높이 (개수 줄은 시안 1173:5592 의 22)
+  static const _titleToCount = 8.0;
+  static const _countLineHeight = 22.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final routine = this.routine;
+    return Column(
+      children: [
+        Visibility(
+          visible: !isReorderMode,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.space.lg.w),
+            child: RoutineTitleEditLabel(
+              title: routine?.displayTitle ?? '',
+              language: routine?.language ?? 'ko',
+              style: context.typo.sheetTitle.copyWith(
+                color: context.colors.sheetTitleText,
+              ),
+              onEditTap: onTitleEditTap,
+            ),
+          ),
+        ),
+        SizedBox(height: _titleToCount.h),
+        SizedBox(
+          height: _countLineHeight.h,
+          child: isReorderMode
+              ? null
+              : CardReviewHead(count: routine?.steps.length ?? 0),
         ),
       ],
     );

@@ -75,7 +75,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkEmptyBody,
     required this.talkRuleText,
     required this.talkShareStepTitle,
-    required this.talkShareRoutineTitle,
+    required this.talkShareTitleInput,
     required this.talkShareGuide,
     required this.talkShareSectionLabel,
     required this.talkCategoryPickerLabel,
@@ -400,8 +400,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 올리기 단계 제목 `어떤 일과를 나눌까요?` · `사진을 어떻게 올릴까요?` (Pretendard 600/18, 시안 1870:9066 · 1877:10504)
   final TextStyle talkShareStepTitle;
 
-  /// 올리기 내용 쓰기 맨 위 일과 제목 (Pretendard 700/20, 시안 1870:9441)
-  final TextStyle talkShareRoutineTitle;
+  /// 올리기 `일과 제목` 입력칸 글자 (Pretendard 600/18, 시안 1931:7183)
+  final TextStyle talkShareTitleInput;
 
   /// 올리기 단계 제목 아래 안내 (Pretendard 400/14 · 줄 높이 1.2, 시안 1877:10505)
   final TextStyle talkShareGuide;
@@ -1058,10 +1058,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
-    talkShareRoutineTitle: TextStyle(
+    talkShareTitleInput: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
       height: 1.0,
     ),
     talkShareGuide: TextStyle(
@@ -1586,7 +1586,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkEmptyBody,
     TextStyle? talkRuleText,
     TextStyle? talkShareStepTitle,
-    TextStyle? talkShareRoutineTitle,
+    TextStyle? talkShareTitleInput,
     TextStyle? talkShareGuide,
     TextStyle? talkShareSectionLabel,
     TextStyle? talkCategoryPickerLabel,
@@ -1726,7 +1726,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyBody: talkEmptyBody ?? this.talkEmptyBody,
       talkRuleText: talkRuleText ?? this.talkRuleText,
       talkShareStepTitle: talkShareStepTitle ?? this.talkShareStepTitle,
-      talkShareRoutineTitle: talkShareRoutineTitle ?? this.talkShareRoutineTitle,
+      talkShareTitleInput: talkShareTitleInput ?? this.talkShareTitleInput,
       talkShareGuide: talkShareGuide ?? this.talkShareGuide,
       talkShareSectionLabel: talkShareSectionLabel ?? this.talkShareSectionLabel,
       talkCategoryPickerLabel: talkCategoryPickerLabel ?? this.talkCategoryPickerLabel,
@@ -1885,7 +1885,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkEmptyBody: TextStyle.lerp(talkEmptyBody, other.talkEmptyBody, t)!,
       talkRuleText: TextStyle.lerp(talkRuleText, other.talkRuleText, t)!,
       talkShareStepTitle: TextStyle.lerp(talkShareStepTitle, other.talkShareStepTitle, t)!,
-      talkShareRoutineTitle: TextStyle.lerp(talkShareRoutineTitle, other.talkShareRoutineTitle, t)!,
+      talkShareTitleInput: TextStyle.lerp(talkShareTitleInput, other.talkShareTitleInput, t)!,
       talkShareGuide: TextStyle.lerp(talkShareGuide, other.talkShareGuide, t)!,
       talkShareSectionLabel: TextStyle.lerp(talkShareSectionLabel, other.talkShareSectionLabel, t)!,
       talkCategoryPickerLabel: TextStyle.lerp(talkCategoryPickerLabel, other.talkCategoryPickerLabel, t)!,

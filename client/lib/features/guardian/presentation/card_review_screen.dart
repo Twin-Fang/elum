@@ -17,6 +17,7 @@ import '../application/card_review_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
 import 'card_review_added_image.dart';
+import 'card_review_rename.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_review_coach_mark.dart';
@@ -60,7 +61,8 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     with
         BusyStateMixin<CardReviewScreen>,
-        CardReviewAddedImage<CardReviewScreen> {
+        CardReviewAddedImage<CardReviewScreen>,
+        CardReviewRename<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -418,9 +420,10 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
           ),
           // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
           SizedBox(height: 12.h),
-          SizedBox(
-            height: 22.h,
-            child: _reorderMode ? null : CardReviewHead(count: cards.length),
+          CardReviewHeading(
+            routine: routine,
+            isReorderMode: _reorderMode,
+            onTitleEditTap: renameRoutineInFlow,
           ),
           SizedBox(height: 16.h),
           Expanded(

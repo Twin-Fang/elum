@@ -18,6 +18,7 @@ import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/library_talk_import_state.dart';
+import '../routine_rename_flow.dart';
 import 'routine_reminder_row.dart';
 
 // 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
@@ -30,7 +31,7 @@ const _isReminderRowVisible = false;
 /// 것이지 문구를 고치는 것이 아니다. 그래서 확인은 시트에서 가볍게 하고, 고칠 때만
 /// 편집 화면으로 들어간다.
 ///
-/// **시트에서 할 수 있는 고치기는 순서 하나뿐이다.** 문구·그림·보상은 전부
+/// **시트에서 할 수 있는 고치기는 순서와 일과 이름뿐이다** (이름은 시안 1274:8038 연필). 문구·그림·보상은 전부
 /// `편집하기`로 보낸다. 여기서 이것저것 고칠 수 있게 하면 시트와 편집 화면의
 /// 경계가 사라져 둘 다 어중간해진다.
 /// 시트를 닫으며 부르는 쪽에 알리는 것.
@@ -148,6 +149,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 그림자가 한 번 꺼졌다 켜진다.
   int? _draggingIndex;
 
+  /// 시트에서 바꾼 이름 (닫기 전까지 시트가 새 이름을 보여 준다. 목록은 저장 성공 시 다시 받는다)
+  late String _title = widget.routine.title;
+
   /// 오늘 일과인데 이룸이가 다 끝냈다 — 하단 버튼을 막는다.
   bool get _finishedToday => !widget.isPast && widget.isFinished;
 
@@ -155,6 +159,18 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다.
   bool get _canEdit =>
       !widget.isPast && !widget.isFinished && widget.routine.isEditableByMe;
+
+  /// 제목 옆 연필: 이름 시트 > 저장 > 시트 제목 바꾸기
+  Future<void> _rename() async {
+    final renamed = await renameRoutineWithSheet(
+      context,
+      ref,
+      routineId: widget.routine.id,
+      currentTitle: widget.routine.copyWith(title: _title).displayTitle,
+    );
+    if (renamed == null || !mounted) return;
+    setState(() => _title = renamed.title);
+  }
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
     // ReorderableListView는 아래로 옮길 때 제거 전 위치를 준다.
@@ -216,7 +232,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
             children: [
               // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
               RoutineDetailHeader(
-                title: widget.routine.title,
+                title: _title,
                 language: widget.routine.language,
                 // 남이 만든 일과면 누가 만들었는지 먼저 말한다 — 왜 고칠 수 없는지의 답이다.
                 caption: widget.isPast
@@ -226,6 +242,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 onMoreTap: widget.isLibrary
                     ? () => Navigator.of(context).pop(RoutineSheetAction.more)
                     : null,
+                onTitleEditTap: _canEdit ? _rename : null,
               ),
 
               // --- 스크롤: 단계 + 보상 ---

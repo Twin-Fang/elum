@@ -2645,6 +2645,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get childHomeGroupAllDone => '다 했어요!';
 
   @override
+  String get routineTitleEdit => '일과 이름 바꾸기';
+
+  @override
   String get routineDetailMore => '더 보기';
 
   @override
@@ -2843,6 +2846,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get talkAuthorFallback => '보호자';
+
+  @override
+  String get talkShareTitleLabel => '일과 제목';
+
+  @override
+  String get talkShareTitleHint => '일과 제목을 적어 주세요';
 
   @override
   String get talkNoteLabel => '내용';
