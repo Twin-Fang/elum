@@ -373,8 +373,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
       state.step.name,
       'error',
     );
-    state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1002');
-    AppAnalytics.logRoutineGenerationFailed(errorCode: 'E-1002');
+    const timeoutErrorCode = 'E-1002';
+    state = state.copyWith(step: RoutineFlowStep.error, errorCode: timeoutErrorCode);
+    AppAnalytics.logRoutineGenerationFailed(errorCode: timeoutErrorCode);
   }
 
   /// 이미 만든 일과를 검토 화면에 올린다 (홈에서 `수정`).

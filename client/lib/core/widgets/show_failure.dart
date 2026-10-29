@@ -29,6 +29,8 @@ import 'elum_dialog.dart';
 ///
 /// 앱이 스스로 끊은 요청([NetworkFault.cancelled])이면 **아무것도 띄우지 않는다** —
 /// 사용자가 한 적 없는 실패를 보여주는 꼴이 된다.
+///
+/// 앱 쪽 실패(서버 업무 오류·연결 문제 제외)는 Crashlytics 비치명으로도 보낸다 (켜졌을 때, #659)
 Future<void> showFailure(
   BuildContext context,
   Object? error, {

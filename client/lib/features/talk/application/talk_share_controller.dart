@@ -193,10 +193,10 @@ class TalkShareController extends Notifier<TalkShareState> {
   /// 일과 이름 바꾸기 > 저장된 제목 갱신 (다시 올려도 두 번 바꾸지 않게)
   Future<void> _renameRoutine(String routineId) async {
     final trimmedTitle = state.title.trim();
-    final result = await ref
+    final renameAttempt = await ref
         .read(routineLibraryControllerProvider)
         .rename(routineId, trimmedTitle);
-    final failure = result.failure;
+    final failure = renameAttempt.failure;
     if (failure != null) throw failure;
     if (ref.mounted) state = state.copyWith(savedTitle: trimmedTitle);
   }

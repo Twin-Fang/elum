@@ -32,16 +32,16 @@ Future<Routine?> renameRoutineWithSheet(
 
   Future<Attempt<Routine>> rename() =>
       ref.read(routineLibraryControllerProvider).rename(routineId, title);
-  final result = runBusy == null ? await rename() : await runBusy(rename);
-  if (result == null || !context.mounted) return null;
+  final renameAttempt = runBusy == null ? await rename() : await runBusy(rename);
+  if (renameAttempt == null || !context.mounted) return null;
 
-  if (result.isOk) {
+  if (renameAttempt.isOk) {
     showElumToast(context, l10n.routineLibraryRenamed);
-    return result.value;
+    return renameAttempt.value;
   }
   await showFailure(
     context,
-    result.failure,
+    renameAttempt.failure,
     title: l10n.routineLibraryRenameFailedTitle,
     fallback: l10n.routineLibraryActionFailedFallback,
     fallbackCode: 'E-LIB-RENAME',

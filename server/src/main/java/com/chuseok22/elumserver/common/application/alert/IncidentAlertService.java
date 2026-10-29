@@ -57,7 +57,7 @@ public class IncidentAlertService {
     IncidentAlertProperties properties, IncidentAlertSender sender, Executor sendExecutor,
     InstanceInfo instanceInfo, Clock clock
   ) {
-    this.isEnabled = resolveEnabled(properties);
+    this.isEnabled = isWebhookUsable(properties);
     this.sender = sender;
     this.sendExecutor = sendExecutor;
     this.configuredCooldown = properties.cooldown();
@@ -106,7 +106,7 @@ public class IncidentAlertService {
   }
 
   // 켜짐 조건 2개: 주소 있음, https (꺼짐 사유는 기동 시 1회만 경고, 주소 값은 남기지 않음)
-  private static boolean resolveEnabled(IncidentAlertProperties properties) {
+  private static boolean isWebhookUsable(IncidentAlertProperties properties) {
     if (!properties.hasDiscordWebhookUrl()) {
       log.warn("[incident alert] disabled : discord webhook url is empty (elum.incident-alert.discord-webhook-url)");
       return false;

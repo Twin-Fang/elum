@@ -108,7 +108,7 @@ public class AiDailyBudgetGuard {
           new IncidentAlert.Detail("영향", "자정까지 새 일과 AI 생성 거절, 추가 카드 그림·픽토그램은 기본값")
         )));
     } catch (RuntimeException e) {
-      log.warn("AI 하루 비용 상한 알림 실패 — 판정은 그대로: error={}", e.getClass().getSimpleName());
+      log.warn("[ai budget] alert failed, decision unchanged : error={}", e.getClass().getSimpleName());
     }
   }
 

@@ -32,6 +32,9 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
   static const _cardGap = 12.0;
   static const _emptyIllustrationSize = 160.0;
 
+  /// 목록 실패·당겨서 새로고침 실패 공통 에러 코드
+  static const _screenErrorCode = 'E-NOTICE-HISTORY';
+
   @override
   void initState() {
     super.initState();
@@ -69,23 +72,20 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
     final controller = ref.read(noticeHistoryControllerProvider.notifier);
 
     return switch (async) {
-      AsyncData(value: final state) when state.items.isEmpty => ElumPullToRefresh(
-          onRefresh: controller.refresh,
-          failureMessage: context.l10n.notificationNoticeFailed,
-          failureCode: 'E-NOTICE-HISTORY',
-          child: ElumStateBody(child: _emptyBody(context)),
-        ),
+      // 0건(빈 상태)·목록 모두 당겨서 새로고침
       AsyncData(value: final state) => ElumPullToRefresh(
           onRefresh: controller.refresh,
           failureMessage: context.l10n.notificationNoticeFailed,
-          failureCode: 'E-NOTICE-HISTORY',
-          child: _list(state),
+          failureCode: _screenErrorCode,
+          child: state.items.isEmpty
+              ? ElumStateBody(child: _emptyBody(context))
+              : _list(state),
         ),
       AsyncError(:final error) => ElumStateBody(
           child: ElumErrorView.failure(
             error,
             fallback: context.l10n.notificationNoticeFailed,
-            fallbackCode: 'E-NOTICE-HISTORY',
+            fallbackCode: _screenErrorCode,
             onRetry: controller.refresh,
           ),
         ),

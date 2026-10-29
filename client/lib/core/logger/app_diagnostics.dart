@@ -42,7 +42,8 @@ abstract final class AppDiagnostics {
     AppLogConnectivity.install();
   }
 
-  /// 오류 종류·메시지·스택 상위 12줄을 남긴다. 기록 실패가 오류 처리를 막지 않게 삼킨다.
+  /// 처리 못 한 오류: 로컬 기록(종류·메시지·스택 상위 12줄) > Crashlytics 치명 전송(켜졌을 때)
+  /// 로컬 기록 실패는 삼킴 (오류 처리를 막지 않게)
   static void _recordUnhandled(String category, Object error, StackTrace? stack) {
     try {
       AppLogger.error(category, '${error.runtimeType}: $error', stack);

@@ -29,11 +29,11 @@ Set<String> readOpenedLocaleTags(String appLocalesSource) {
   }
   final body = block.group(1)!;
   return {
-    for (final m in RegExp(r"Locale\('(\w+)'\)").allMatches(body)) m.group(1)!,
-    for (final m in RegExp(
+    for (final match in RegExp(r"Locale\('(\w+)'\)").allMatches(body)) match.group(1)!,
+    for (final match in RegExp(
       r"languageCode:\s*'(\w+)'\s*,\s*scriptCode:\s*'(\w+)'",
     ).allMatches(body))
-      '${m.group(1)}-${m.group(2)}',
+      '${match.group(1)}-${match.group(2)}',
   };
 }
 
@@ -45,19 +45,19 @@ Set<String> readBundleLocalizations(String plist) {
   ).firstMatch(plist);
   if (block == null) return {};
   return {
-    for (final m in RegExp(
+    for (final match in RegExp(
       r'<string>([^<]+)</string>',
     ).allMatches(block.group(1)!))
-      m.group(1)!.trim(),
+      match.group(1)!.trim(),
   };
 }
 
 /// Info.plist 의 권한 문구 키 (NS…UsageDescription)
 Set<String> readUsageDescriptionKeys(String plist) => {
-  for (final m in RegExp(
+  for (final match in RegExp(
     r'<key>(NS\w+UsageDescription)</key>',
   ).allMatches(plist))
-    m.group(1)!,
+    match.group(1)!,
 };
 
 /// pbxproj knownRegions (Base 제외)
@@ -77,10 +77,10 @@ Set<String> readKnownRegions(String pbxproj) {
 
 /// pbxproj 에 등록된 InfoPlist.strings 언어 (`path = ko.lproj/InfoPlist.strings`)
 Set<String> readRegisteredInfoPlistStrings(String pbxproj) => {
-  for (final m in RegExp(
+  for (final match in RegExp(
     r'path = "?([\w-]+)\.lproj/InfoPlist\.strings"?;',
   ).allMatches(pbxproj))
-    m.group(1)!,
+    match.group(1)!,
 };
 
 /// 폴더 아래 `<언어>.lproj` 이름 (Base 제외)
@@ -90,7 +90,7 @@ Set<String> listLprojRegions(String directoryPath) {
   return directory
       .listSync()
       .whereType<Directory>()
-      .map((entry) => entry.uri.pathSegments.where((s) => s.isNotEmpty).last)
+      .map((entry) => entry.uri.pathSegments.where((segment) => segment.isNotEmpty).last)
       .where((name) => name.endsWith('.lproj'))
       .map((name) => name.substring(0, name.length - '.lproj'.length))
       .where((region) => region != _iosBaseRegion)
@@ -101,20 +101,20 @@ Set<String> listLprojRegions(String directoryPath) {
 Map<String, String> parseInfoPlistStrings(String text) {
   final body = text.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
   return {
-    for (final m in RegExp(
+    for (final match in RegExp(
       r'^\s*"(\w+)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;\s*$',
       multiLine: true,
     ).allMatches(body))
-      m.group(1)!: m.group(2)!,
+      match.group(1)!: match.group(2)!,
   };
 }
 
 /// locales_config.xml 의 locale 이름
 Set<String> readAndroidLocaleConfig(String xml) => {
-  for (final m in RegExp(
+  for (final match in RegExp(
     r'<locale\s+android:name="([^"]+)"',
   ).allMatches(xml.replaceAll(RegExp(r'<!--.*?-->', dotAll: true), '')))
-    m.group(1)!,
+    match.group(1)!,
 };
 
 /// 두 목록 비교 > 다르면 위반 문구 1줄

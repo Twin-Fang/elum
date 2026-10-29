@@ -39,6 +39,9 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
   /// 묶음 사이 24 = 마지막 줄 아래 _rowGap 8 + 16 (시안 1724:8346)
   static const _groupGap = 16.0;
 
+  /// 목록 실패·당겨서 새로고침 실패 공통 에러 코드
+  static const _screenErrorCode = 'E-NOTIF-LIST';
+
   @override
   void initState() {
     super.initState();
@@ -72,23 +75,20 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
     final controller = ref.read(notificationListControllerProvider.notifier);
 
     return switch (async) {
-      AsyncData(value: final state) when state.items.isEmpty => ElumPullToRefresh(
-          onRefresh: controller.refresh,
-          failureMessage: context.l10n.notificationListFailed,
-          failureCode: 'E-NOTIF-LIST',
-          child: const ElumStateBody(child: NotificationsEmptyBody()),
-        ),
+      // 0건(빈 상태)·목록 모두 당겨서 새로고침
       AsyncData(value: final state) => ElumPullToRefresh(
           onRefresh: controller.refresh,
           failureMessage: context.l10n.notificationListFailed,
-          failureCode: 'E-NOTIF-LIST',
-          child: _list(state),
+          failureCode: _screenErrorCode,
+          child: state.items.isEmpty
+              ? const ElumStateBody(child: NotificationsEmptyBody())
+              : _list(state),
         ),
       AsyncError(:final error) => ElumStateBody(
           child: ElumErrorView.failure(
             error,
             fallback: context.l10n.notificationListFailed,
-            fallbackCode: 'E-NOTIF-LIST',
+            fallbackCode: _screenErrorCode,
             onRetry: controller.refresh,
           ),
         ),
