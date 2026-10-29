@@ -176,7 +176,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       };
 }
 
-/// 기능 목록: 묶음 5개 (서버와 계정, 이 기기에서만 흉내, 화면과 언어, 기록, 위험)
+/// 기능 목록: 묶음 6개 (서버와 계정, 이 기기에서만 흉내, 화면과 언어, 기록, 크래시 보내기, 위험)
 class _DevMenu extends ConsumerStatefulWidget {
   const _DevMenu({required this.onSelect, required this.onRestartApp});
 
@@ -298,6 +298,8 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
           subtitle: '앱을 완전히 종료했다 켜면 다시 보인다',
           onTap: DevToolsVisibility.hide,
         ),
+        const _Section('크래시 보내기'),
+        const _CrashReportingTiles(),
         const _Section('위험'),
         _Tile(
           icon: Icons.person_remove_outlined,

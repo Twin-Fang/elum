@@ -50,3 +50,6 @@ app.*.map.json
 
 # 골든 테스트 실패 시 생성되는 diff 이미지 (일시적 산출물)
 test/failures/
+
+# 로컬 전용 의존성 오버라이드 (Xcode 26 미만 빌드용, CI·배포에 섞이면 안 됨)
+pubspec_overrides.yaml

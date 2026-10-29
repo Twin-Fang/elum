@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 홈 화면 앱 이름: 모든 언어 같은 값 (현지 표기 미정, #527). 언어별 값은 values-<언어>/ 에 둔다 -->
+    <string name="app_name">이룸</string>
+</resources>

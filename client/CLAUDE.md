@@ -542,6 +542,7 @@ context.typo.cardTitle.copyWith(color: ...)
 | 계층 import 방향 | `dart run tool/check_layer_imports.dart` (동결 목록 `tool/layer_imports_allowed.txt`) | 로컬 · Flutter CI |
 | 디자인 규칙 (시안 색 · 글자 조합 · 간격 · 모서리 · fi-br 아이콘 · Material 기본 부품) | `dart run tool/check_design_rules.dart` (원본 `tool/design_rules.yaml` · 동결 `tool/design_rules_allowed.txt` · 절차 `docs/design-language.md` §10) | 로컬 · Flutter CI |
 | 화면 문구 하드코딩 | `dart run tool/check_hangul_literals.dart lib` (0줄이어야 한다) | 로컬 · Flutter CI |
+| 네이티브 언어 등록 (OS 앱별 언어 목록 = 연 언어, iOS 권한 문구 키) | `dart run tool/check_native_locales.dart` (원본 `lib/core/l10n/app_locales.dart` `openedAppLocales` · 여는 순서 `docs/store/locales/README.md`) | 로컬 · Flutter CI |
 | 서버 계약 (에러 코드·공유 enum·연결 암호·의견 기록 표지) | 서버 `CrossStackContractTest` 가 앱 소스를 읽어 대조 | `cd server && ./gradlew test --tests '*CrossStackContractTest*'` |
 | 실제 동작 | 시뮬레이터·실기기에서 직접 띄워 확인 (`/pro-launch`) | 로컬 |
 

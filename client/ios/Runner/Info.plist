@@ -2,8 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- 크래시 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (CrashReporter, #659) -->
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<!-- 설정 > 이룸 > 언어 목록: 연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527).
+	     언어를 열 때 여기·lproj·pbxproj·locales_config.xml 을 함께 더한다 (tool/check_native_locales.dart 가 검사) -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ko</string>
+	</array>
 	<!-- 홈 화면에 보이는 이름. 한국어만 지원하는 서비스라 한글로 둔다 (이슈 #289). -->
 	<key>CFBundleDisplayName</key>
 	<string>이룸</string>
