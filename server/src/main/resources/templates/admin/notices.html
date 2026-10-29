@@ -56,6 +56,7 @@
             <td class="text-xs">
               <div><span class="badge badge-outline badge-xs font-mono" th:text="${n.locale.code()}">ko</span>
                 <span th:text="${n.platform.label}">전체</span></div>
+              <div class="font-mono" th:if="${n.targetCountries != null}" th:text="'국가 ' + ${n.targetCountries}">국가 KR</div>
               <div class="text-base-content/60" th:text="'우선순위 ' + ${n.priority}">우선순위 0</div>
             </td>
             <!-- 표 옆에 미리보기가 있어 폭이 좁다. 시각과 수정자가 두 줄로 접히게 한다. -->

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notice.application.controller;
 
+import com.chuseok22.elumserver.common.locale.CurrentRegion;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.notice.application.dto.response.NoticeHistoryPageResponse;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
@@ -28,7 +29,7 @@ public class NoticeHistoryController implements NoticeHistoryControllerDocs {
     @RequestParam(value = "cursor", required = false) String cursor,
     @RequestParam(value = "size", required = false) Integer size
   ) {
-    return ResponseEntity.ok(noticeHistoryService.history(platform, cursor, size));
+    return ResponseEntity.ok(noticeHistoryService.history(platform, cursor, size, CurrentRegion.get()));
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

@@ -170,13 +170,13 @@ class NotificationQueryServiceTest {
     assertThat(invalid.hasUnreadNotice()).isFalse();
     assertThat(invalid.hasUnreadNotification()).isTrue();
     assertThat(invalid.unreadNotificationCount()).isEqualTo(3L);
-    verify(noticeHistoryService, never()).hasUnseenNotice(anyString(), any(), any());
+    verify(noticeHistoryService, never()).hasUnseenNotice(anyString(), any(), any(), any());
   }
 
   @Test
   @DisplayName("platform 이 비었거나 null 이면 ALL 로 공지를 조회한다")
   void blankPlatform_resolvesToAll() {
-    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("ALL"), any(AppLocale.class))).thenReturn(true);
+    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("ALL"), any(AppLocale.class), any())).thenReturn(true);
 
     assertThat(notificationQueryService.unreadSummary(MEMBER_ID, null).hasUnreadNotice()).isTrue();
     assertThat(notificationQueryService.unreadSummary(MEMBER_ID, " ").hasUnreadNotice()).isTrue();
@@ -185,7 +185,7 @@ class NotificationQueryServiceTest {
   @Test
   @DisplayName("platform 이 맞으면 공지 조회 결과를 그대로 쓴다")
   void validPlatform_usesNoticeResult() {
-    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("IOS"), any(AppLocale.class))).thenReturn(true);
+    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("IOS"), any(AppLocale.class), any())).thenReturn(true);
 
     assertThat(notificationQueryService.unreadSummary(MEMBER_ID, "IOS").hasUnreadNotice()).isTrue();
   }

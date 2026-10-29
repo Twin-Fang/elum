@@ -8,6 +8,7 @@ package com.chuseok22.elumserver.notice.application.dto.request;
  * 검증은 {@code NoticeService} 한 곳에서 한다(저장소 규칙상 검증 어노테이션을 달지 않는다).
  *
  * @param locale   공지 언어 코드({@code ko en ja zh es}). 비우면 ko
+ * @param targetCountries 대상 국가 {@code KR, JP} (쉼표·공백 구분). 비우면 전체
  * @param startsAt 한국 시각 {@code 2026-09-23T09:00} (브라우저 {@code datetime-local} 값)
  * @param endsAt   비우면 끌 때까지
  */
@@ -18,6 +19,7 @@ public record NoticeInput(
   String buttonUrl,
   String platform,
   String locale,
+  String targetCountries,
   String priority,
   String startsAt,
   String endsAt,

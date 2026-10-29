@@ -72,7 +72,7 @@ class NoticeHistorySecurityTest {
     mockMvc.perform(get("/api/notices/history"))
       .andExpect(status().isUnauthorized());
 
-    verify(noticeHistoryService, never()).history(any(), any(), any());
+    verify(noticeHistoryService, never()).history(any(), any(), any(), any());
   }
 
   @Test
@@ -81,7 +81,7 @@ class NoticeHistorySecurityTest {
     mockMvc.perform(get("/api/notices/history").with(user("e1").authorities(MEMBER, ELUMI)))
       .andExpect(status().isForbidden());
 
-    verify(noticeHistoryService, never()).history(any(), any(), any());
+    verify(noticeHistoryService, never()).history(any(), any(), any(), any());
   }
 
   @Test
@@ -96,7 +96,7 @@ class NoticeHistorySecurityTest {
   @Test
   @DisplayName("보호자는 목록을 받는다")
   void guardianToken_history_200() throws Exception {
-    when(noticeHistoryService.history(any(), any(), any())).thenReturn(new NoticeHistoryPageResponse(List.of(), null));
+    when(noticeHistoryService.history(any(), any(), any(), any())).thenReturn(new NoticeHistoryPageResponse(List.of(), null));
 
     mockMvc.perform(get("/api/notices/history").param("platform", "IOS").with(user("g1").authorities(MEMBER, GUARDIAN)))
       .andExpect(status().isOk())

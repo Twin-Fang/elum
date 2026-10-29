@@ -83,25 +83,25 @@ class NoticeSaveTest {
   /** 통과하는 입력. 테스트마다 한 칸만 바꿔 그 칸의 검증을 본다. */
   private NoticeInput valid() {
     return new NoticeInput("베타 기간 안내", "하루 3개까지 만들 수 있어요", "", "",
-      "ALL", "ko", "0", "2026-09-23T09:00", "", true);
+      "ALL", "ko", "", "0", "2026-09-23T09:00", "", true);
   }
 
   private NoticeInput with(String title, String body) {
     NoticeInput base = valid();
     return new NoticeInput(title, body, base.buttonLabel(), base.buttonUrl(), base.platform(),
-      base.locale(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
+      base.locale(), base.targetCountries(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
   }
 
   private NoticeInput withButton(String label, String url) {
     NoticeInput base = valid();
     return new NoticeInput(base.title(), base.body(), label, url, base.platform(),
-      base.locale(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
+      base.locale(), base.targetCountries(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
   }
 
   private NoticeInput withPeriod(String startsAt, String endsAt) {
     NoticeInput base = valid();
     return new NoticeInput(base.title(), base.body(), base.buttonLabel(), base.buttonUrl(),
-      base.platform(), base.locale(), base.priority(), startsAt, endsAt, base.enabled());
+      base.platform(), base.locale(), base.targetCountries(), base.priority(), startsAt, endsAt, base.enabled());
   }
 
   private void assertRejected(NoticeInput input, ErrorCode expected) {
@@ -116,7 +116,7 @@ class NoticeSaveTest {
   @DisplayName("통과한 입력은 다듬어서 저장한다 — 판은 1, 만든 사람과 고친 사람을 남긴다")
   void create_savesNormalized() {
     AppNotice saved = service.create(new NoticeInput("  **하루 3개**까지  ", "첫 줄\r\n둘째 줄\r\n  ",
-      " 자세히 보기 ", " https://twin-fang.github.io/elum/ ", "ios", " en ", " 3 ",
+      " 자세히 보기 ", " https://twin-fang.github.io/elum/ ", "ios", " en ", "", " 3 ",
       "2026-09-23T09:00", "2026-09-30T18:00", true), null, "kimchi");
 
     assertThat(saved.getTitle()).isEqualTo("**하루 3개**까지");
@@ -238,7 +238,7 @@ class NoticeSaveTest {
   @DisplayName("우선순위가 숫자가 아니면 거부한다")
   void badPriority() {
     NoticeInput base = valid();
-    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "ko", "첫째",
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "ko", "", "첫째",
       base.startsAt(), "", true), ErrorCode.NOTICE_PRIORITY_INVALID);
   }
 
@@ -246,7 +246,7 @@ class NoticeSaveTest {
   @DisplayName("모르는 플랫폼은 거부한다")
   void badPlatform() {
     NoticeInput base = valid();
-    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "PC", "ko", "0",
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "PC", "ko", "", "0",
       base.startsAt(), "", true), ErrorCode.NOTICE_PLATFORM_INVALID);
   }
 
@@ -254,7 +254,7 @@ class NoticeSaveTest {
   @DisplayName("지원하지 않는 언어 코드는 거부한다 — ko 로 바꾸면 다른 언어 공지가 한국어 보호자에게 샌다")
   void badLocale() {
     NoticeInput base = valid();
-    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "fr", "0",
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "fr", "", "0",
       base.startsAt(), "", true), ErrorCode.NOTICE_LOCALE_INVALID);
   }
 
@@ -262,7 +262,7 @@ class NoticeSaveTest {
   @DisplayName("언어를 비워 저장하면 ko 다")
   void blankLocale_isKorean() {
     NoticeInput base = valid();
-    AppNotice saved = service.create(new NoticeInput(base.title(), base.body(), "", "", "ALL", " ", "0",
+    AppNotice saved = service.create(new NoticeInput(base.title(), base.body(), "", "", "ALL", " ", "", "0",
       base.startsAt(), "", true), null, "admin");
 
     assertThat(saved.getLocale()).isEqualTo(AppLocale.KO);
@@ -317,14 +317,14 @@ class NoticeSaveTest {
   @DisplayName("게시 중인 공지를 끄면 다음 조회부터 빠지고, 다시 켜면 돌아온다 (N17)")
   void toggle() {
     AppNotice saved = service.create(valid(), null, "admin");
-    assertThat(service.publishedFor("IOS").notices()).hasSize(1);
+    assertThat(service.publishedFor("IOS", "KR").notices()).hasSize(1);
 
     service.setEnabled(saved.getId(), false, "off-admin");
-    assertThat(service.publishedFor("IOS").notices()).isEmpty();
+    assertThat(service.publishedFor("IOS", "KR").notices()).isEmpty();
     assertThat(saved.getUpdatedBy()).isEqualTo("off-admin");
 
     service.setEnabled(saved.getId(), true, "admin");
-    assertThat(service.publishedFor("IOS").notices()).hasSize(1);
+    assertThat(service.publishedFor("IOS", "KR").notices()).hasSize(1);
   }
 
   @Test

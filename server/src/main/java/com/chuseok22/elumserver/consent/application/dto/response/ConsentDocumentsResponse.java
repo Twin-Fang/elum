@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.consent.application.dto.response;
 
+import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService.PublishedConsents;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -16,5 +17,21 @@ public record ConsentDocumentsResponse(
   String version,
 
   @Schema(description = "동의 항목 목록. 배열 순서가 화면에 보여줄 순서다")
-  List<ConsentDocumentResponse> documents
-) {}
+  List<ConsentDocumentResponse> documents,
+
+  @Schema(description = "실제로 준 약관 언어 코드 (ko en ja zh es)", example = "ko")
+  String locale,
+
+  @Schema(description = "요청 언어의 약관이 아직 없어 ko 로 대체했는가", example = "false")
+  boolean isFallbackLocale
+) {
+
+  public static ConsentDocumentsResponse from(PublishedConsents published) {
+    return new ConsentDocumentsResponse(
+      published.version(),
+      published.documents().stream().map(ConsentDocumentResponse::from).toList(),
+      published.locale().code(),
+      published.isFallbackLocale()
+    );
+  }
+}

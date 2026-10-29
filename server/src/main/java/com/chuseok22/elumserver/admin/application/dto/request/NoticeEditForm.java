@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
  * 체크박스는 체크하지 않으면 값이 오지 않아 {@code null} 이 된다.
  *
  * @param locale       공지 언어 코드(ko en ja zh es)
+ * @param targetCountries 대상 국가 {@code KR, JP}. 비우면 전체
  * @param bumpRevision "다시 보이게" — 켜고 저장하면 숨긴 사람에게도 다시 뜬다
  * @param removeImage  지금 이미지를 지운다
  */
@@ -24,6 +25,7 @@ public record NoticeEditForm(
   String buttonUrl,
   String platform,
   String locale,
+  String targetCountries,
   String priority,
   String startsAt,
   String endsAt,
@@ -40,7 +42,7 @@ public record NoticeEditForm(
    * 나가지 않게, 미리보기로 확인하고 켜게 한다.
    */
   public static NoticeEditForm blank(LocalDateTime now) {
-    return new NoticeEditForm("", "", "", "", "ALL", AppLocale.KO.code(), "0", now.format(INPUT_FORMAT), "",
+    return new NoticeEditForm("", "", "", "", "ALL", AppLocale.KO.code(), "", "0", now.format(INPUT_FORMAT), "",
       false, false, false);
   }
 
@@ -52,6 +54,7 @@ public record NoticeEditForm(
       nullToEmpty(notice.getButtonUrl()),
       notice.getPlatform().name(),
       notice.getLocale().code(),
+      nullToEmpty(notice.getTargetCountries()),
       String.valueOf(notice.getPriority()),
       notice.getStartsAt().format(INPUT_FORMAT),
       notice.getEndsAt() == null ? "" : notice.getEndsAt().format(INPUT_FORMAT),
@@ -74,8 +77,8 @@ public record NoticeEditForm(
   }
 
   public NoticeInput toInput() {
-    return new NoticeInput(title, body, buttonLabel, buttonUrl, platform, locale, priority, startsAt,
-      endsAt, isEnabled());
+    return new NoticeInput(title, body, buttonLabel, buttonUrl, platform, locale, targetCountries, priority,
+      startsAt, endsAt, isEnabled());
   }
 
   private static String nullToEmpty(String value) {

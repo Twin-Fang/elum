@@ -97,7 +97,7 @@ class NoticePublishTest {
     noticeIn("ko-notice", AppLocale.KO);
     noticeIn("en-notice", AppLocale.EN);
 
-    List<String> shown = CurrentLocale.callAs(AppLocale.EN, () -> ids(service.publishedFor("IOS")));
+    List<String> shown = CurrentLocale.callAs(AppLocale.EN, () -> ids(service.publishedFor("IOS", "KR")));
 
     assertThat(shown).containsExactly("en-notice");
   }
@@ -107,7 +107,7 @@ class NoticePublishTest {
   void noNoticeInRequestedLocale_isEmpty() {
     noticeIn("ko-notice", AppLocale.KO);
 
-    List<String> shown = CurrentLocale.callAs(AppLocale.JA, () -> ids(service.publishedFor("IOS")));
+    List<String> shown = CurrentLocale.callAs(AppLocale.JA, () -> ids(service.publishedFor("IOS", "KR")));
 
     assertThat(shown).isEmpty();
   }
@@ -119,7 +119,7 @@ class NoticePublishTest {
     notice("legacy", NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
     noticeIn("en-notice", AppLocale.EN);
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("legacy");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("legacy");
   }
 
   @Test
@@ -129,8 +129,8 @@ class NoticePublishTest {
     notice("ios", NoticePlatform.IOS, 0, NOW_KST.minusDays(2));
     notice("android", NoticePlatform.ANDROID, 0, NOW_KST.minusDays(3));
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("all", "ios");
-    assertThat(ids(service.publishedFor("android"))).containsExactly("all", "android");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("all", "ios");
+    assertThat(ids(service.publishedFor("android", "KR"))).containsExactly("all", "android");
   }
 
   @Test
@@ -139,13 +139,13 @@ class NoticePublishTest {
     notice("all", NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
     notice("ios", NoticePlatform.IOS, 0, NOW_KST.minusDays(1));
 
-    assertThat(ids(service.publishedFor(null))).containsExactly("all");
+    assertThat(ids(service.publishedFor(null, "KR"))).containsExactly("all");
   }
 
   @Test
   @DisplayName("모르는 플랫폼 값은 400 이다")
   void unknownPlatform_rejected() {
-    assertThatThrownBy(() -> service.publishedFor("WINDOWS"))
+    assertThatThrownBy(() -> service.publishedFor("WINDOWS", "KR"))
       .isInstanceOf(CustomException.class)
       .extracting("errorCode").isEqualTo(ErrorCode.NOTICE_PLATFORM_INVALID);
   }
@@ -160,7 +160,7 @@ class NoticePublishTest {
     // 한국 시각 12:00 에 끝남 — 종료 그 순간부터 빠진다
     notice("ended-12", NoticePlatform.ALL, 0, NOW_KST.minusDays(1)).setEndsAt(NOW_KST);
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("started-11");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("started-11");
   }
 
   @Test
@@ -169,7 +169,7 @@ class NoticePublishTest {
     notice("on", NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
     notice("off", NoticePlatform.ALL, 9, NOW_KST.minusDays(1)).setEnabled(false);
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("on");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("on");
   }
 
   @Test
@@ -179,7 +179,7 @@ class NoticePublishTest {
     notice("p0-new", NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
     notice("p5", NoticePlatform.ALL, 5, NOW_KST.minusDays(9));
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("p5", "p0-new", "p0-old");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("p5", "p0-new", "p0-old");
   }
 
   @Test
@@ -189,7 +189,7 @@ class NoticePublishTest {
       notice("n" + i, NoticePlatform.ALL, i, NOW_KST.minusDays(1));
     }
 
-    assertThat(ids(service.publishedFor("IOS"))).containsExactly("n7", "n6", "n5", "n4", "n3");
+    assertThat(ids(service.publishedFor("IOS", "KR"))).containsExactly("n7", "n6", "n5", "n4", "n3");
   }
 
   @Test
@@ -197,17 +197,17 @@ class NoticePublishTest {
   void hideDays_fromConfig() {
     when(systemConfigService.getInt(ConfigKey.NOTICE_HIDE_DAYS)).thenReturn(3);
 
-    assertThat(service.publishedFor("IOS").hideDays()).isEqualTo(3);
+    assertThat(service.publishedFor("IOS", "KR").hideDays()).isEqualTo(3);
   }
 
   @Test
   @DisplayName("설정 값이 1~30 밖이면(DB 를 손으로 고친 경우) 가까운 끝으로 맞춘다")
   void hideDays_clamped() {
     when(systemConfigService.getInt(ConfigKey.NOTICE_HIDE_DAYS)).thenReturn(0);
-    assertThat(service.publishedFor("IOS").hideDays()).isEqualTo(1);
+    assertThat(service.publishedFor("IOS", "KR").hideDays()).isEqualTo(1);
 
     when(systemConfigService.getInt(ConfigKey.NOTICE_HIDE_DAYS)).thenReturn(365);
-    assertThat(service.publishedFor("IOS").hideDays()).isEqualTo(30);
+    assertThat(service.publishedFor("IOS", "KR").hideDays()).isEqualTo(30);
   }
 
   @Test
@@ -217,7 +217,7 @@ class NoticePublishTest {
     notice.setTitle("**하루 3개**까지 만들 수 있어요");
     notice.setRevision(4);
 
-    AppNoticeResponse item = service.publishedFor("IOS").notices().getFirst();
+    AppNoticeResponse item = service.publishedFor("IOS", "KR").notices().getFirst();
 
     assertThat(item.id()).isEqualTo("plain");
     assertThat(item.revision()).isEqualTo(4);
@@ -235,9 +235,9 @@ class NoticePublishTest {
     notice.setButtonLabel("자세히 보기");
     notice.setButtonUrl("https://twin-fang.github.io/elum/");
 
-    AppNoticeResponse first = service.publishedFor("IOS").notices().getFirst();
+    AppNoticeResponse first = service.publishedFor("IOS", "KR").notices().getFirst();
     notice.setImageKey("img/bbb222.webp");
-    AppNoticeResponse second = service.publishedFor("IOS").notices().getFirst();
+    AppNoticeResponse second = service.publishedFor("IOS", "KR").notices().getFirst();
 
     assertThat(first.imageUrl()).startsWith("/api/app/notices/img/image?v=");
     assertThat(first.imageUrl()).isNotEqualTo(second.imageUrl());
