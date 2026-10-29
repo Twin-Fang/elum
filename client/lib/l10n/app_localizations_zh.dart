@@ -2691,9 +2691,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get coachHelpLabel => '사용법 보기';
 
   @override
-  String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
-
-  @override
   String get pushPermissionSheetTitle => '이룸이가 일과를 끝내면 알려 드릴까요?';
 
   @override

@@ -2806,9 +2806,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachHelpLabel => 'How to use';
 
   @override
-  String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
-
-  @override
   String get pushPermissionSheetTitle =>
       'Want a heads-up when your ELUM user finishes a routine?';
 

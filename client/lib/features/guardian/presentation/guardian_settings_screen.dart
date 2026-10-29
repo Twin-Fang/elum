@@ -24,7 +24,6 @@ import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
-import '../application/routine_manage_coach_notifier.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -48,12 +47,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 
   /// 뒤로가기 상자 하단(107) > 스크롤 고정 영역 끝(115)
   static const _fixedAreaExtraHeight = 8.0;
-
-  /// 일과관리 칸으로 가서 첫 사용 안내를 다시 띄운다 (요청만 남기면 그 화면이 목록을 받은 뒤 켠다)
-  void _replayRoutineManageGuide() {
-    ref.read(routineManageCoachProvider.notifier).requestReplay();
-    context.go(Routes.guardianManage);
-  }
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -214,14 +207,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보 (시안 1532:7501 순서): 사용법 다시 보기 > 약관 > 의견 보내기 > 앱 정보
+        // 약관 및 정보: 약관 > 의견 보내기 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.guardianSettingsRoutineManageGuide,
-              onTap: busy ? null : _replayRoutineManageGuide,
-            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsTerms,
