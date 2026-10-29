@@ -1,98 +1,260 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <!--
-  이야기 글 공유 페이지 (/s/{글id}). 메신저 미리보기(OG) + 앱 열기 + 스토어 안내.
-  링크 글(post.linkOnly)은 이야기에 오르지 않은 글이라 분류 칩·'이야기' 이름을 빼고 그린다.
-  글 값(제목·한마디)은 th:text·th:content 로만 넣는다 — 자동 이스케이프.
-  색은 docs/public-pages/invite/index.html 과 같은 팔레트.
+  이야기 글 공유 페이지 (/s/{글id}): 메신저 미리보기(OG) > 앱 있으면 그 글로 자동 열기 1회 > 없으면 앱 소개·스토어 (#1041)
+  자동 열기 주소는 서버가 기기별로 정함 (TalkShareAppLinks). 이 페이지는 body data-auto-open 을 한 번 부를 뿐
+  글 값(제목·한마디)은 th:text·th:content 로만 넣음 — 자동 이스케이프
+  로고·캐릭터·앱 화면은 소개 사이트(gh-pages)에 올라간 원본을 주소로 불러 씀. 색은 소개 사이트 site.css 팔레트
 -->
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <!-- 검색에 잡히지 않게 (메신저 미리보기는 robots 와 무관하게 OG 를 읽음) -->
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="referrer" content="no-referrer"/>
+  <meta name="theme-color" content="#F7F2EF" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#15161D" media="(prefers-color-scheme: dark)"/>
+  <!-- Safari 위 앱 배너: 앱 있으면 열기(그 글), 없으면 받기 -->
+  <meta name="apple-itunes-app" th:if="${appleAppBanner != null}" th:content="${appleAppBanner}"/>
 
-  <title th:text="${post != null} ? ${post.title} + (${post.linkOnly} ? ' · 이룸' : ' · 이룸 이야기') : '이룸 ELUM'">이룸 ELUM</title>
-  <meta name="description"
-        th:content="${post != null} ? (${post.notePreview} ?: '카드 ' + ${post.stepCount} + '장으로 만든 일과예요') : '하루 일과를 행동 카드로 한 장씩'"/>
+  <title th:text="${post != null} ? ${post.title} + ' · 이룸' : '이룸 ELUM'">이룸 ELUM</title>
+  <meta name="description" th:content="${post != null and post.notePreview != null} ? ${post.notePreview} : '보호자가 만들고 이룸이가 따라 하는 행동 카드 일과표'"/>
 
   <meta property="og:type" content="article"/>
   <meta property="og:site_name" content="이룸 ELUM"/>
   <meta property="og:locale" content="ko_KR"/>
   <meta property="og:url" th:content="${pageUrl}"/>
   <meta property="og:title" th:content="${post != null} ? ${post.title} : '이룸 ELUM'"/>
-  <meta property="og:description"
-        th:content="${post != null} ? (${post.notePreview} ?: '카드 ' + ${post.stepCount} + '장으로 만든 일과예요') : '하루 일과를 행동 카드로 한 장씩'"/>
+  <meta property="og:description" th:content="${post != null and post.notePreview != null} ? ${post.notePreview} : '보호자가 만들고 이룸이가 따라 하는 행동 카드 일과표'"/>
   <meta property="og:image" th:content="${imageUrl}"/>
   <meta name="twitter:card" content="summary_large_image"/>
 
+  <link rel="icon" href="https://twin-fang.github.io/elum/assets/lumi.svg"/>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+
   <style>
     :root {
-      --bg: #F7F2EF; --ink: #242634; --muted: #6B6C78; --line: rgba(36, 38, 52, .09);
-      --card: #fff; --accent: #FF8B26; --soft: #FFF7EE;
+      --bg: #F7F2EF; --surface: #fff; --ink: #242634; --muted: #6B6C78; --faint: rgba(36, 38, 52, .45);
+      --line: rgba(36, 38, 52, .08); --accent: #FF8B26; --accent-ink: #fff; --accent-soft: #FFF1E4;
+      --solid: #242634; --solid-ink: #fff; --glass: rgba(255, 255, 255, .82); --header: rgba(247, 242, 239, .82);
+      --shadow: 0 18px 40px rgba(36, 38, 52, .10); --shadow-accent: 0 12px 26px rgba(255, 139, 38, .32);
+      --stage: linear-gradient(160deg, #FFF4EC, #FFD9C4);
+      --step-1: #9CADF1; --step-2: #FF8B26; --step-3: #5BD6B0;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #15161D; --surface: #1F2029; --ink: #F4F1EE; --muted: #A6A7B2; --faint: rgba(244, 241, 238, .45);
+        --line: rgba(255, 255, 255, .08); --accent: #FF9A42; --accent-ink: #1A1206; --accent-soft: rgba(255, 139, 38, .14);
+        --solid: #F4F1EE; --solid-ink: #15161D; --glass: rgba(21, 22, 29, .72); --header: rgba(21, 22, 29, .82);
+        --shadow: 0 18px 40px rgba(0, 0, 0, .35); --shadow-accent: 0 12px 26px rgba(255, 139, 38, .22);
+        --stage: linear-gradient(160deg, #2A2230, #3A2A22);
+      }
     }
     * { box-sizing: border-box }
     html { -webkit-text-size-adjust: 100% }
-    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.62;
-      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.6; word-break: keep-all;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif;
       -webkit-font-smoothing: antialiased }
-    main { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px }
-    .brand { margin: 0; color: var(--muted); font-size: 14px; font-weight: 700; text-align: center }
-    .card { margin: 16px 0 0; background: var(--card); border-radius: 24px; border: 1px solid var(--line); overflow: hidden }
-    .thumb { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: var(--soft) }
-    .body { padding: 18px 20px 20px }
-    .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--soft); color: var(--accent);
-      font-size: 13px; font-weight: 800 }
-    h1 { margin: 10px 0 0; font-size: 22px; line-height: 1.35; letter-spacing: -.02em; font-weight: 800; word-break: keep-all }
-    .note { margin: 8px 0 0; color: var(--muted); font-size: 15px; white-space: pre-line; word-break: keep-all }
-    .count { margin: 12px 0 0; color: var(--muted); font-size: 13px }
-    .btn { display: block; width: 100%; margin: 12px 0 0; padding: 16px 20px; border-radius: 18px; border: 0;
-      font: inherit; font-size: 17px; font-weight: 800; text-align: center; text-decoration: none }
-    .btn-solid { background: var(--ink); color: #fff }
-    .btn-ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line) }
-    .hint { margin: 16px 0 0; color: var(--muted); font-size: 13px; text-align: center }
-    .gone { margin: 24px 0 0; padding: 24px 20px; background: var(--card); border-radius: 24px; border: 1px solid var(--line); text-align: center }
-    .gone b { display: block; font-size: 18px }
-    .gone span { display: block; margin-top: 6px; color: var(--muted); font-size: 14px }
-    .gone code { font-size: 12px }
-    footer { margin-top: 36px; color: var(--muted); font-size: 12px; text-align: center }
-    footer a { color: inherit }
+    a { color: inherit }
+    img { display: block; max-width: 100% }
+
+    /* 머리 (로고, 앱 받기) */
+    .top { position: sticky; top: 0; z-index: 10; background: var(--header); backdrop-filter: saturate(1.4) blur(14px);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line) }
+    .top-inner { max-width: 480px; margin: 0 auto; height: 56px; padding: 0 20px; display: flex; align-items: center }
+    .logo img { height: 22px; width: auto }
+    .pill { margin-left: auto; padding: 7px 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+      font-size: 14px; font-weight: 700; text-decoration: none }
+
+    main { max-width: 480px; margin: 0 auto; padding: 20px 20px calc(48px + env(safe-area-inset-bottom)) }
+    .rise { animation: rise .5s cubic-bezier(.2, .7, .2, 1) both }
+    .rise-2 { animation-delay: .08s } .rise-3 { animation-delay: .16s }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+    @media (prefers-reduced-motion: reduce) { .rise { animation: none } }
+
+    /* 받은 글 */
+    .from { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; color: var(--muted); font-size: 15px }
+    .from img { width: 32px; height: 32px; flex: none }
+    .from b { color: var(--ink); font-weight: 700 }
+    .post { background: var(--surface); border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line) }
+    .thumb { position: relative; aspect-ratio: 1 / 1; background: var(--accent-soft) }
+    .thumb img { width: 100%; height: 100%; object-fit: cover }
+    .count { position: absolute; left: 14px; bottom: 14px; padding: 6px 12px; border-radius: 999px; background: var(--glass);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13px; font-weight: 700 }
+    .post-body { padding: 18px 20px 22px }
+    .chip { display: inline-block; margin-bottom: 8px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft);
+      color: var(--accent); font-size: 13px; font-weight: 700 }
+    h1 { margin: 0; font-size: 24px; line-height: 1.32; letter-spacing: -.025em; font-weight: 800 }
+    .note { margin: 8px 0 0; color: var(--muted); font-size: 15px; white-space: pre-line;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden }
+
+    /* 버튼 */
+    .actions { margin-top: 18px }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; padding: 14px 20px;
+      border-radius: 18px; font-size: 17px; font-weight: 700; text-decoration: none; transition: transform .15s ease }
+    .btn:active { transform: scale(.98) }
+    .btn svg { width: 22px; height: 22px; flex: none }
+    .btn-accent { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow-accent) }
+    .btn-line { margin-top: 10px; background: transparent; color: var(--ink); border: 1px solid var(--line); font-size: 15px; min-height: 50px }
+    .btn-hint { margin: 10px 0 0; color: var(--faint); font-size: 13px; text-align: center }
+    .stores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+    .stores.single { grid-template-columns: 1fr }
+    .store { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 10px 14px; border-radius: 16px;
+      background: var(--solid); color: var(--solid-ink); font-size: 15px; font-weight: 700; text-decoration: none }
+    .store svg { width: 20px; height: 20px; flex: none }
+
+    /* 글 없음 */
+    .gone { padding: 32px 24px; background: var(--surface); border-radius: 28px; border: 1px solid var(--line); text-align: center }
+    .gone img { width: 64px; height: 64px; margin: 0 auto 12px }
+    .gone b { display: block; font-size: 19px }
+    .gone span { display: block; margin-top: 6px; color: var(--muted); font-size: 15px }
+    .gone code { display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 12px; color: var(--faint) }
+
+    /* 이룸 소개 */
+    .about { margin-top: 44px }
+    .tag { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint) }
+    h2 { margin: 10px 0 0; font-size: 28px; line-height: 1.22; letter-spacing: -.03em; font-weight: 800 }
+    h2 em { font-style: normal; color: var(--accent) }
+    .lede { margin: 12px 0 0; color: var(--muted); font-size: 16px }
+    .stage { position: relative; margin-top: 22px; height: 320px; border-radius: 28px; background: var(--stage); overflow: hidden }
+    .phone { position: absolute; left: 50%; top: 32px; width: 200px; transform: translateX(-50%);
+      background: #15161D; border-radius: 38px; padding: 8px; box-shadow: 0 24px 48px rgba(36, 38, 52, .25) }
+    .screen { border-radius: 31px; overflow: hidden; background: #000; aspect-ratio: 1320 / 2868 }
+    .screen img { width: 100%; height: 100%; object-fit: cover }
+    .steps { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px }
+    .steps li { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; background: var(--surface);
+      border-radius: 20px; border: 1px solid var(--line) }
+    .steps .num { flex: none; width: 30px; height: 30px; border-radius: 10px; color: #fff; font-family: var(--mono);
+      font-size: 13px; font-weight: 700; line-height: 30px; text-align: center }
+    .steps b { display: block; font-size: 16px }
+    .steps span { display: block; margin-top: 2px; color: var(--muted); font-size: 14px }
+
+    /* 마지막 받기 */
+    .final { margin-top: 36px; padding: 24px 20px; border-radius: 28px; background: var(--surface); border: 1px solid var(--line); text-align: center }
+    .final p { margin: 0 0 14px; font-size: 17px; font-weight: 700 }
+    .final .btn-hint { margin-top: 12px }
+    footer { margin-top: 28px; color: var(--faint); font-size: 12px; text-align: center }
+    footer a { text-decoration: none }
   </style>
 </head>
-<body>
-<main>
-  <p class="brand" th:text="${post != null and post.linkOnly} ? '이룸' : '이룸 이야기'">이룸 이야기</p>
+<body th:attr="data-auto-open=${links?.autoOpenUrl}">
 
+<header class="top">
+  <div class="top-inner">
+    <a class="logo" href="https://twin-fang.github.io/elum/" rel="noopener">
+      <img src="https://twin-fang.github.io/elum/assets/logo.svg" alt="이룸 ELUM" width="60" height="22"/>
+    </a>
+    <a class="pill" th:href="${platform == 'android'} ? ${playStoreUrl} : ${appStoreUrl}" rel="noopener">앱 받기</a>
+  </div>
+</header>
+
+<main>
   <!-- 볼 수 있는 글 -->
   <th:block th:if="${post != null}">
-    <article class="card">
-      <img class="thumb" th:src="${imageUrl}" alt=""/>
-      <div class="body">
+    <p class="from rise">
+      <img src="https://twin-fang.github.io/elum/assets/lumi.svg" alt=""/>
+      <span th:if="${post.linkOnly}"><b>이룸</b>에서 만든 일과를 보냈어요</span>
+      <span th:unless="${post.linkOnly}"><b>이룸 이야기</b>에 올라온 일과예요</span>
+    </p>
+
+    <article class="post rise rise-2">
+      <div class="thumb">
+        <img th:src="${imageUrl}" alt=""/>
+        <span class="count" th:text="'카드 ' + ${post.stepCount} + '장'">카드 3장</span>
+      </div>
+      <div class="post-body">
         <span class="chip" th:if="${post.categoryLabel != null}" th:text="${post.categoryLabel}">하루 순서</span>
         <h1 th:text="${post.title}">일과 제목</h1>
         <p class="note" th:if="${post.notePreview != null}" th:text="${post.notePreview}">한마디</p>
-        <p class="count" th:text="'카드 ' + ${post.stepCount} + '장'">카드 3장</p>
       </div>
     </article>
-    <!-- 앱 주소는 눌렀을 때만 연다 — 앱이 없는 기기에서 저절로 오류가 뜨지 않게 -->
-    <a class="btn btn-solid" th:href="${appUrl}">이룸 앱에서 보기</a>
+
+    <!-- 기기별 주 버튼: Android 앱 열기(없으면 Play) · iOS 받기 + 앱 열기 · PC 두 스토어 -->
+    <div class="actions rise rise-3">
+      <th:block th:if="${platform == 'android'}">
+        <a class="btn btn-accent" th:href="${links.androidIntentUrl}">이룸 앱에서 이 일과 보기</a>
+        <p class="btn-hint">앱이 없으면 Google Play 로 이어져요</p>
+      </th:block>
+      <th:block th:if="${platform == 'ios'}">
+        <a class="btn btn-accent" th:href="${appStoreUrl}" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48-.02.06-.36 1.24-1.19 2.45-.72 1.05-1.46 2.09-2.63 2.11-1.15.02-1.52-.68-2.83-.68-1.32 0-1.73.66-2.82.7-1.13.04-1.99-1.13-2.71-2.18-1.48-2.14-2.61-6.04-1.09-8.68.75-1.31 2.1-2.14 3.56-2.16 1.11-.02 2.16.75 2.84.75.68 0 1.95-.93 3.29-.79.56.02 2.13.23 3.14 1.71-.08.05-1.87 1.09-1.86 3.27M14.2 4.99c.6-.73 1.01-1.74.9-2.75-.87.03-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.07 1.96-.49 2.56-1.22"/></svg>
+          App Store 에서 무료로 받기
+        </a>
+        <a class="btn btn-line" th:href="${links.appUrl}">이미 앱이 있어요 · 앱에서 열기</a>
+      </th:block>
+      <th:block th:if="${platform == 'other'}">
+        <div class="stores">
+          <a class="store" th:href="${appStoreUrl}" rel="noopener">App Store</a>
+          <a class="store" th:href="${playStoreUrl}" rel="noopener">Google Play</a>
+        </div>
+        <p class="btn-hint">휴대폰이나 태블릿에서 이 링크를 열면 앱에서 바로 볼 수 있어요</p>
+      </th:block>
+    </div>
   </th:block>
 
   <!-- 없음·내려감·정지 회원 글·잘못된 주소 -->
-  <section class="gone" th:if="${post == null}">
+  <section class="gone rise" th:if="${post == null}">
+    <img src="https://twin-fang.github.io/elum/assets/lumi.svg" alt=""/>
     <b>글을 찾을 수 없어요</b>
     <span>글쓴이가 내렸거나 주소가 맞지 않아요</span>
-    <span><code>E-TALK-SHARE-GONE</code></span>
+    <code>E-TALK-SHARE-GONE</code>
   </section>
 
-  <!-- 스토어: 기기에 맞는 하나, 모르면 둘 다 -->
-  <a class="btn btn-ghost" th:if="${platform != 'ios'}" th:href="${playStoreUrl}">Google Play 에서 이룸 받기</a>
-  <a class="btn btn-ghost" th:if="${platform != 'android'}" th:href="${appStoreUrl}">App Store 에서 이룸 받기</a>
+  <!-- 이룸 소개 (소개 사이트 문구) -->
+  <section class="about">
+    <div class="tag">ELUM · 이룸</div>
+    <h2>하루 일과를<br/><em>행동 카드로 한 장씩.</em></h2>
+    <p class="lede">보호자가 말하듯 한 줄 적으면, 이룸이가 따라 하기 쉬운 그림 순서 카드로 만들어 줘요.</p>
+    <div class="stage" aria-hidden="true">
+      <div class="phone"><div class="screen">
+        <img src="https://twin-fang.github.io/elum/assets/promo/ko/child_card.webp" alt="" loading="lazy"/>
+      </div></div>
+    </div>
+    <ol class="steps">
+      <li><span class="num" style="background: var(--step-1)">01</span>
+        <div><b>보호자가 적어요</b><span>“내일 비 오는 날 등교 준비”처럼 상황을 말하듯 적어요</span></div></li>
+      <li><span class="num" style="background: var(--step-2)">02</span>
+        <div><b>카드로 나눠요</b><span>작은 행동 단계로 나눠 그림과 짧은 문장을 붙여요. 보호자가 고치고 확인해요</span></div></li>
+      <li><span class="num" style="background: var(--step-3)">03</span>
+        <div><b>이룸이가 따라 해요</b><span>한 장씩 보고 체크해요. 끝까지 하면 별과 약속한 보상이 기다려요</span></div></li>
+    </ol>
+  </section>
 
-  <p class="hint" th:if="${post != null}">앱을 받은 뒤 이 링크를 다시 누르면 글이 열려요</p>
+  <!-- 마지막 받기: 기기에 맞는 스토어 하나, 모르면 둘 다 -->
+  <section class="final">
+    <p>iOS · Android 무료</p>
+    <div class="stores" th:classappend="${platform != 'other'} ? 'single'">
+      <a class="store" th:if="${platform != 'android'}" th:href="${appStoreUrl}" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48-.02.06-.36 1.24-1.19 2.45-.72 1.05-1.46 2.09-2.63 2.11-1.15.02-1.52-.68-2.83-.68-1.32 0-1.73.66-2.82.7-1.13.04-1.99-1.13-2.71-2.18-1.48-2.14-2.61-6.04-1.09-8.68.75-1.31 2.1-2.14 3.56-2.16 1.11-.02 2.16.75 2.84.75.68 0 1.95-.93 3.29-.79.56.02 2.13.23 3.14 1.71-.08.05-1.87 1.09-1.86 3.27M14.2 4.99c.6-.73 1.01-1.74.9-2.75-.87.03-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.07 1.96-.49 2.56-1.22"/></svg>
+        App Store 에서 받기
+      </a>
+      <a class="store" th:if="${platform != 'ios'}" th:href="${playStoreUrl}" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34A853" d="M3.6 2.3 13.5 12l-9.9 9.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1z"/><path fill="#FBBC04" d="m16.9 15.4-3.4-3.4 3.4-3.4 3.8 2.2c1 .6 1 1.8 0 2.4z"/><path fill="#4285F4" d="M3.6 2.3c.3-.1.7-.1 1 .1l12.3 7.1-3.4 3.4z"/><path fill="#EA4335" d="m13.5 12 3.4 3.4-12.3 7.1c-.3.2-.7.2-1 .1z"/></svg>
+        Google Play 에서 받기
+      </a>
+    </div>
+    <p class="btn-hint" th:if="${post != null}">앱을 받은 뒤 이 링크를 다시 누르면 글이 열려요</p>
+  </section>
 
   <footer>이룸 ELUM · <a href="https://twin-fang.github.io/elum/privacy.html">개인정보처리방침</a></footer>
 </main>
+
+<!-- 앱 자동 열기 1회: 같은 탭에서 이미 불렀으면 다시 부르지 않음 (앱 없음 > Android 는 ?app=0 으로 돌아옴, iOS 는 페이지 그대로) -->
+<script>
+  (function () {
+    var autoOpenUrl = document.body.getAttribute('data-auto-open');
+    if (!autoOpenUrl) return;
+    var triedKey = 'elum-share-auto-open:' + location.pathname;
+    try {
+      if (sessionStorage.getItem(triedKey)) return;
+      sessionStorage.setItem(triedKey, '1');
+    } catch (storageBlocked) {
+      // 저장소가 막힌 브라우저: 서버의 ?app=0 표시만으로 반복을 막음
+    }
+    location.href = autoOpenUrl;
+  })();
+</script>
 </body>
 </html>

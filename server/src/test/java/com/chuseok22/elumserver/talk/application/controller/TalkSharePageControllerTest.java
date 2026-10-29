@@ -79,10 +79,56 @@ class TalkSharePageControllerTest {
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
     assertThat(html).contains("<meta property=\"og:image\" content=\"https://api.elum.chuseok22.com/s/" + POST_ID + "/thumbnail\"");
-    assertThat(html).contains("href=\"elum://talk?post=" + POST_ID + "\"");
     assertThat(html).contains("&lt;script&gt;alert(1)&lt;/script&gt;아침").doesNotContain("<script>alert(1)");
     // 안드로이드 기기는 Play 만
     assertThat(html).contains("play.google.com").doesNotContain("apps.apple.com");
+  }
+
+  @Test
+  @DisplayName("Android: 뜨자마자 intent 로 그 글을 열고, 앱이 없으면 같은 페이지 ?app=0 으로 돌아온다 (버튼은 Play 로)")
+  void page_android_autoOpensIntentWithReturnToPage() throws Exception {
+    when(talkSharePageService.page(POST_ID)).thenReturn(Optional.of(
+      new TalkSharePage(POST_ID, "하루 순서", "아침", null, 3, false)));
+
+    String html = pageHtml("/s/" + POST_ID, "Mozilla/5.0 (Linux; Android 14) KAKAOTALK");
+
+    String intentPrefix = "intent://talk?post=" + POST_ID + "#Intent;scheme=elum;package=kr.twinfang.elum;S.browser_fallback_url=";
+    assertThat(html).contains("<body data-auto-open=\"" + intentPrefix
+      + "https%3A%2F%2Fapi.elum.chuseok22.com%2Fs%2F" + POST_ID + "%3Fapp%3D0;end\"");
+    assertThat(html).contains("href=\"" + intentPrefix + "https%3A%2F%2Fplay.google.com");
+  }
+
+  @Test
+  @DisplayName("iOS: 카톡 안에서는 앱 주소를 자동으로 부르고, Safari 에서는 부르지 않고 앱 배너만 단다")
+  void page_ios_autoOpensOnlyInsideInAppBrowser() throws Exception {
+    when(talkSharePageService.page(POST_ID)).thenReturn(Optional.of(
+      new TalkSharePage(POST_ID, "하루 순서", "아침", null, 3, false)));
+    String appUrl = "elum://talk?post=" + POST_ID;
+
+    String kakao = pageHtml("/s/" + POST_ID, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) KAKAOTALK 10.8.0");
+    assertThat(kakao).contains("<body data-auto-open=\"" + appUrl + "\"");
+
+    String safari = pageHtml("/s/" + POST_ID, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Version/18.0 Mobile Safari/604.1");
+    assertThat(safari).doesNotContain("<body data-auto-open")
+      .contains("content=\"app-id=6792970508, app-argument=" + appUrl + "\"")
+      .contains("href=\"" + appUrl + "\"");
+  }
+
+  @Test
+  @DisplayName("?app=0 (자동 열기에서 돌아옴) 이면 다시 부르지 않는다 — 앱 없는 기기에서 무한 이동 방지")
+  void page_returnedFromAutoOpen_doesNotAutoOpenAgain() throws Exception {
+    when(talkSharePageService.page(POST_ID)).thenReturn(Optional.of(
+      new TalkSharePage(POST_ID, "하루 순서", "아침", null, 3, false)));
+
+    String html = pageHtml("/s/" + POST_ID + "?app=0", "Mozilla/5.0 (Linux; Android 14)");
+
+    assertThat(html).doesNotContain("<body data-auto-open").contains("intent://talk?post=" + POST_ID);
+  }
+
+  private String pageHtml(String path, String userAgent) throws Exception {
+    return mockMvc.perform(get(path).header(HttpHeaders.USER_AGENT, userAgent))
+      .andExpect(status().isOk())
+      .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
   }
 
   @Test
@@ -95,7 +141,7 @@ class TalkSharePageControllerTest {
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
     assertThat(html).contains("E-TALK-SHARE-GONE").contains("twin-fang.github.io/elum/assets/og.png")
-      .doesNotContain("elum://talk");
+      .doesNotContain("elum://talk").doesNotContain("<body data-auto-open");
   }
 
   @Test
@@ -117,7 +163,10 @@ class TalkSharePageControllerTest {
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
     assertThat(aasa).contains("CUK22HY6YC.kr.twinfang.elum").contains("/s/*");
 
-    mockMvc.perform(get("/.well-known/assetlinks.json"))
-      .andExpect(status().isOk());
+    // 업로드 키 지문이 기본값으로 실림 (비면 Android 앱 링크 검증 실패)
+    String assetLinks = mockMvc.perform(get("/.well-known/assetlinks.json"))
+      .andExpect(status().isOk())
+      .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+    assertThat(assetLinks).contains("kr.twinfang.elum").contains("CC:2D:6F:FB");
   }
 }
