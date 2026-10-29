@@ -21,6 +21,8 @@ class TalkPhotoBlurPicker extends StatelessWidget {
     required this.blurChoiceByStepId,
     required this.onChoose,
     this.isEnabled = true,
+    this.title,
+    this.guide,
   });
 
   final String routineId;
@@ -34,6 +36,10 @@ class TalkPhotoBlurPicker extends StatelessWidget {
   final void Function(String stepId, {required bool shouldBlur}) onChoose;
   final bool isEnabled;
 
+  /// 머리 질문·안내 (없으면 이야기 올리기 문구, 링크로 보내기는 링크 문구를 넘긴다)
+  final String? title;
+  final String? guide;
+
   /// 안내 > 격자 · 판 줄 사이 (시안 안내 끝 206.6 > 판 232 를 간격 단계 24 로, 판 486 > 510)
   static const _headingToGrid = 24.0;
   static const _panelRowSpacing = 24.0;
@@ -46,8 +52,8 @@ class TalkPhotoBlurPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TalkPageHeading(
-          title: l10n.talkSharePhotoTitle,
-          description: l10n.talkSharePhotoGuide,
+          title: title ?? l10n.talkSharePhotoTitle,
+          description: guide ?? l10n.talkSharePhotoGuide,
         ),
         SizedBox(height: _headingToGrid.h),
         TalkShareCardGrid(
@@ -63,7 +69,8 @@ class TalkPhotoBlurPicker extends StatelessWidget {
               panelWidth: cellWidth,
               shouldBlur: blurChoiceByStepId[step.stepId],
               onChoose: isEnabled
-                  ? (shouldBlur) => onChoose(step.stepId, shouldBlur: shouldBlur)
+                  ? (shouldBlur) =>
+                        onChoose(step.stepId, shouldBlur: shouldBlur)
                   : null,
             );
           },

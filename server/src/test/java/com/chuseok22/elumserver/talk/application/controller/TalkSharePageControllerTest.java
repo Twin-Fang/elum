@@ -72,7 +72,7 @@ class TalkSharePageControllerTest {
   @DisplayName("로그인 없이 공유 페이지가 열리고 OG·앱 주소가 실리며 글 값은 이스케이프된다")
   void page_visiblePost_rendersPreviewWithoutLogin() throws Exception {
     when(talkSharePageService.page(POST_ID)).thenReturn(Optional.of(
-      new TalkSharePage(POST_ID, "하루 순서", "<script>alert(1)</script>아침", "같이 해요", 3)));
+      new TalkSharePage(POST_ID, "하루 순서", "<script>alert(1)</script>아침", "같이 해요", 3, false)));
 
     String html = mockMvc.perform(get("/s/" + POST_ID).header(HttpHeaders.USER_AGENT, "KAKAOTALK Android"))
       .andExpect(status().isOk())

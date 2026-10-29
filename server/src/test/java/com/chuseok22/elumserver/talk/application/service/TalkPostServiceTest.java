@@ -34,6 +34,7 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResp
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
 import com.chuseok22.elumserver.talk.infrastructure.image.TalkImageBlurrer;
@@ -119,7 +120,7 @@ class TalkPostServiceTest {
   @DisplayName("가리기 중 예외가 나면 원문을 쓰지 않고 TALK_NICKNAME_MASK_FAILED 로 거절한다")
   void create_maskThrows_rejectsWithMaskFailed() {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "버스를 타요", "하늘이가 찍어요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
 
     try (MockedStatic<NicknamePlaceholder> placeholder = mockStatic(NicknamePlaceholder.class)) {
       placeholder.when(() -> NicknamePlaceholder.mask(any(), any(), any())).thenThrow(new IllegalStateException("boom"));
@@ -159,7 +160,7 @@ class TalkPostServiceTest {
   void create_nicknameRemainsAfterMask_rejects() {
     // "이하" 를 "이룸이" 로 바꾸면 뒤 글자와 이어져 다시 "이하" 가 생긴다
     stubAgreedAndSnapshot(snapshot("이하", "이하하 버스 타기", step("s1", 1, "버스", "버스를 타요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_NICKNAME_MASK_FAILED);
     verify(talkPostRepository, never()).saveAndFlush(any());
@@ -169,7 +170,7 @@ class TalkPostServiceTest {
   @DisplayName("동시에 같은 원본을 올려 유니크 인덱스에 걸리면 TALK_ALREADY_SHARED 로 바꾸고 카드는 저장하지 않는다")
   void create_concurrentDuplicate_mapsToAlreadyShared() {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
     when(talkPostRepository.saveAndFlush(any(TalkPost.class))).thenThrow(new DataIntegrityViolationException("uk"));
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_ALREADY_SHARED);
@@ -287,7 +288,7 @@ class TalkPostServiceTest {
   @DisplayName("같은 원본의 보이는 글이 이미 있으면 TALK_ALREADY_SHARED")
   void create_alreadyShared_throws() {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(true);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(true);
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_ALREADY_SHARED);
     verify(talkPostRepository, never()).saveAndFlush(any());
@@ -313,7 +314,7 @@ class TalkPostServiceTest {
   @DisplayName("한마디에 금칙어가 있으면 TALK_TEXT_NOT_ALLOWED")
   void create_blockedWordInNote_throwsNotAllowed() {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
 
     assertCreateFails(request("이거 개새끼 별로예요", "DAILY_FLOW", List.of()), ErrorCode.TALK_TEXT_NOT_ALLOWED);
     verify(talkPostRepository, never()).saveAndFlush(any());
@@ -323,7 +324,7 @@ class TalkPostServiceTest {
   @DisplayName("카드 글에 금칙어가 있으면 TALK_TEXT_NOT_ALLOWED")
   void create_blockedWordInStep_throwsNotAllowed() {
     stubAgreedAndSnapshot(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "개새끼 빨리 가요", null, false)));
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
 
     assertCreateFails(request(null, "DAILY_FLOW", List.of()), ErrorCode.TALK_TEXT_NOT_ALLOWED);
   }
@@ -516,7 +517,7 @@ class TalkPostServiceTest {
     when(talkPostRepository.findById("post-1")).thenReturn(Optional.of(post));
     talkPostService.delete(GUARDIAN, "post-1");
     // 저장소 흉내: 같은 원본의 VISIBLE 글은 이제 없다
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE))
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC))
       .thenReturn(post.getStatus() == TalkPostStatus.VISIBLE);
     stubCreatable(snapshot("하늘이", "버스 타기", step("s1", 1, "정류장", "정류장에 가요", null, false)));
 
@@ -551,7 +552,7 @@ class TalkPostServiceTest {
   // 동의함 + 스냅샷 + 중복 없음 + 저장 시 id 부여
   private void stubCreatable(RoutineShareSnapshot snapshot) {
     stubAgreedAndSnapshot(snapshot);
-    when(talkPostRepository.existsBySourceRoutineIdAndStatus("original-1", TalkPostStatus.VISIBLE)).thenReturn(false);
+    when(talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility("original-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)).thenReturn(false);
     when(talkPostRepository.saveAndFlush(any(TalkPost.class))).thenAnswer(invocation -> {
       TalkPost post = invocation.getArgument(0);
       post.setId("post-1");

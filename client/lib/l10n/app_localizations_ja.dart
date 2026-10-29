@@ -2885,7 +2885,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkDetailLoadFailed => '投稿を読み込めませんでした';
 
   @override
-  String get talkPostGoneTitle => '取り下げられた投稿です';
+  String get talkPostGoneTitle => 'もう見られない投稿です';
 
   @override
   String get talkPostGoneBack => 'トークに戻る';
@@ -3207,6 +3207,63 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get talkMenuViewMyPost => '自分の投稿を見る';
+
+  @override
+  String get talkLinkSend => 'リンクで送る';
+
+  @override
+  String get talkLinkTurnOff => 'リンクをオフにする';
+
+  @override
+  String get talkLinkConfirmTitle => 'このルーティンをリンクで送りますか?';
+
+  @override
+  String get talkLinkConfirmGuide =>
+      'リンクを受け取った人だけが見られます。トークには投稿されません。\n送ったあともルーティン管理でリンクをオフにできます';
+
+  @override
+  String get talkLinkResendGuide =>
+      'すでに送ったリンクがあります。最初に送った内容のまま同じリンクをもう一度送ります。\n変更を送るには、リンクをオフにしてから送り直してください';
+
+  @override
+  String get talkLinkPhotoTitle => '写真をどう送りますか?';
+
+  @override
+  String get talkLinkPhotoGuide =>
+      '顔、名前、住所が写っていたらぼかしてください。\nAIで作った絵はそのまま表示されます';
+
+  @override
+  String get talkLinkCreateButton => 'リンクを作る';
+
+  @override
+  String get talkLinkPreviewFailed => '送る内容を読み込めませんでした';
+
+  @override
+  String get talkLinkCreateFailedTitle => 'リンクを作れませんでした';
+
+  @override
+  String get talkLinkCreated => 'リンクを作りました';
+
+  @override
+  String talkLinkShareMessage(String title, String url) {
+    return '$title\nelumでこのルーティンを取り込んでみてください\n\n$url';
+  }
+
+  @override
+  String get talkLinkTurnOffTitle => 'リンクをオフにしますか?';
+
+  @override
+  String get talkLinkTurnOffMessage =>
+      'リンクを受け取った人はもう見られません。すでに取り込んだルーティンはそのまま残ります';
+
+  @override
+  String get talkLinkTurnOffDone => 'リンクをオフにしました';
+
+  @override
+  String get talkLinkTurnOffFailedTitle => 'リンクをオフにできませんでした';
+
+  @override
+  String get talkLinkReceivedTitle => '受け取ったルーティン';
 
   @override
   String get timeAgoJustNow => 'たった今';

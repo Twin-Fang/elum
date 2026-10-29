@@ -61,7 +61,7 @@
           <a th:href="@{/admin/members/{id}(id=${row.post.authorMemberId})}" class="link link-hover"
              th:text="${row.authorNickname != null ? row.authorNickname : '(닉네임 없음)'}">닉네임</a>
         </td>
-        <td class="text-xs" th:text="${row.post.category.label}">SELF_CARE</td>
+        <td class="text-xs" th:text="${row.post.category != null} ? ${row.post.category.label} : ${row.post.visibility.label}">SELF_CARE</td>
         <td>
           <span class="badge badge-sm"
                 th:classappend="${row.post.status.name() == 'VISIBLE'} ? 'badge-success' : (${row.post.status.name() == 'HIDDEN_BY_ADMIN'} ? 'badge-warning' : 'badge-ghost')"

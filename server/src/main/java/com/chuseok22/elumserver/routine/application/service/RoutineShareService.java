@@ -51,19 +51,39 @@ public class RoutineShareService {
    */
   @Transactional(readOnly = true)
   public RoutineShareSnapshot snapshotForShare(Caller caller, String routineId) {
-    Routine requested = RoutineRules.routineFor(
-      routineRepository, profileAccessGuard, caller, routineId, RoutineAction.VIEW);
-    Routine original = resolveOriginal(caller, requested);
-    if (!isShareable(original)) {
-      log.info("[talk share] rejected : routine is not shareable");
-      throw new CustomException(ErrorCode.TALK_ROUTINE_NOT_SHAREABLE);
+    Routine original = shareableOriginalOf(caller, routineId, ErrorCode.TALK_ROUTINE_NOT_SHAREABLE);
+    return toSnapshot(original);
+  }
+
+  /**
+   * 링크로 보낼 일과 스냅샷: 권한 확인 > 원본 찾기 > 만든 사람 확인 > 공유 불가 거절 > 카드 스냅샷
+   * 남이 만든 일과는 보내지 않음 (사용자 결정 2026-10-29)
+   *
+   * @throws CustomException 남이 만든 일과는 TALK_LINK_ROUTINE_NOT_MINE, 공유 불가는 TALK_LINK_ROUTINE_NOT_SHAREABLE
+   */
+  @Transactional(readOnly = true)
+  public RoutineShareSnapshot snapshotForLinkShare(Caller caller, String routineId) {
+    Routine original = shareableOriginalOf(caller, routineId, ErrorCode.TALK_LINK_ROUTINE_NOT_SHAREABLE);
+    if (!caller.memberId().equals(original.getCreatedBy())) {
+      log.info("[talk link] rejected 403 : routine is not created by caller");
+      throw new CustomException(ErrorCode.TALK_LINK_ROUTINE_NOT_MINE);
     }
-    return new RoutineShareSnapshot(
-      original.getId(),
-      original.getTitle(),
-      original.getLanguage(),
-      original.getProfile().getNickname(),
-      original.getSteps().stream().map(RoutineShareService::toStepSnapshot).toList());
+    return toSnapshot(original);
+  }
+
+  /**
+   * 링크의 원본이 아직 살아 있는가: 원본 있음 + 일과관리에서 안 지움 + 보낸 사람이 아직 그 이룸이의 보호자
+   * 끄는 입구가 일과관리 메뉴뿐이라, 끌 수 없게 된 링크는 꺼진 것으로 봄. 권한 오류를 던지지 않음
+   */
+  @Transactional(readOnly = true)
+  public boolean isLinkSourceAvailable(String sourceRoutineId, String senderMemberId) {
+    if (sourceRoutineId == null || senderMemberId == null) {
+      return false;
+    }
+    return routineRepository.findById(sourceRoutineId)
+      .filter(routine -> !routine.isLibraryHidden())
+      .filter(routine -> profileAccessGuard.isGuardianOf(senderMemberId, routine.getProfile().getId()))
+      .isPresent();
   }
 
   /**
@@ -178,14 +198,35 @@ public class RoutineShareService {
     }
   }
 
+  // 요청 일과 VIEW 권한 > 원본 찾기 > 공유 불가 거절 (거절 코드는 이야기·링크가 따로)
+  private Routine shareableOriginalOf(Caller caller, String routineId, ErrorCode notShareableCode) {
+    Routine requested = RoutineRules.routineFor(
+      routineRepository, profileAccessGuard, caller, routineId, RoutineAction.VIEW);
+    Routine original = resolveOriginal(caller, requested, notShareableCode);
+    if (!isShareable(original)) {
+      log.info("[talk share] rejected : routine is not shareable");
+      throw new CustomException(notShareableCode);
+    }
+    return original;
+  }
+
+  private static RoutineShareSnapshot toSnapshot(Routine original) {
+    return new RoutineShareSnapshot(
+      original.getId(),
+      original.getTitle(),
+      original.getLanguage(),
+      original.getProfile().getNickname(),
+      original.getSteps().stream().map(RoutineShareService::toStepSnapshot).toList());
+  }
+
   // 오늘 일과 복사본 > 원본 (원본을 못 찾으면 공유 불가, 원본에도 같은 권한 확인)
-  private Routine resolveOriginal(Caller caller, Routine requested) {
+  private Routine resolveOriginal(Caller caller, Routine requested, ErrorCode notShareableCode) {
     String sourceRoutineId = requested.getSourceRoutineId();
     if (sourceRoutineId == null) {
       return requested;
     }
     Routine original = routineRepository.findById(sourceRoutineId)
-      .orElseThrow(() -> new CustomException(ErrorCode.TALK_ROUTINE_NOT_SHAREABLE));
+      .orElseThrow(() -> new CustomException(notShareableCode));
     profileAccessGuard.checkRoutine(
       caller, original.getProfile().getId(), original.getCreatedBy(), RoutineAction.VIEW);
     return original;

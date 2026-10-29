@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkPostSummaryRes
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkCursor;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkHelpfulRepository;
@@ -200,7 +201,7 @@ public class TalkFeedQueryService {
       summary.category(), summary.stepCount(), summary.note(), summary.helpfulCount(), summary.commentCount(),
       summary.importCount(), summary.createdAt(), steps,
       talkHelpfulRepository.existsByPostIdAndMemberId(postId, caller.memberId()),
-      talkImportRepository.existsByPostIdAndMemberId(postId, caller.memberId()));
+      talkImportRepository.existsByPostIdAndMemberId(postId, caller.memberId()), post.isLinkOnly());
   }
 
   /**
@@ -215,11 +216,12 @@ public class TalkFeedQueryService {
   }
 
   /**
-   * 내가 나눈 보이는 글: 원본 일과 id > 글 id (원본이 없는 글은 빠짐)
+   * 내가 나눈 보이는 공개 글: 원본 일과 id > 글 id (원본이 없는 글·링크 글은 빠짐)
    */
   public Map<String, String> mySharedPosts(Caller caller) {
     Map<String, String> postIdBySourceRoutineId = new LinkedHashMap<>();
-    for (TalkPost post : talkPostRepository.findByAuthorMemberIdAndStatus(caller.memberId(), TalkPostStatus.VISIBLE)) {
+    for (TalkPost post : talkPostRepository.findByAuthorMemberIdAndStatusAndVisibility(
+      caller.memberId(), TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)) {
       if (post.getSourceRoutineId() != null) {
         postIdBySourceRoutineId.putIfAbsent(post.getSourceRoutineId(), post.getId());
       }
@@ -249,10 +251,15 @@ public class TalkFeedQueryService {
     Map<String, List<StepThumb>> thumbsByPostId = shouldIncludePreviewSteps ? previewStepsByPostId(posts) : Map.of();
     return posts.stream()
       .map(post -> new TalkPostSummaryResponse(post.getId(), nicknameByMemberId.get(post.getAuthorMemberId()),
-        post.getAuthorMemberId().equals(caller.memberId()), post.getTitle(), post.getCategory().name(),
+        post.getAuthorMemberId().equals(caller.memberId()), post.getTitle(), categoryNameOf(post),
         post.getStepCount(), thumbsByPostId.getOrDefault(post.getId(), List.of()), post.getNote(),
         post.getHelpfulCount(), post.getCommentCount(), post.getImportCount(), post.getCreatedAt()))
       .toList();
+  }
+
+  // 분류 이름 (링크 글은 분류가 없어 null)
+  private static String categoryNameOf(TalkPost post) {
+    return post.getCategory() == null ? null : post.getCategory().name();
   }
 
   private Map<String, List<StepThumb>> previewStepsByPostId(List<TalkPost> posts) {

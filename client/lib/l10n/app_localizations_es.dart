@@ -2923,7 +2923,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get talkDetailLoadFailed => 'No se pudo cargar la publicación';
 
   @override
-  String get talkPostGoneTitle => 'Esta publicación se retiró';
+  String get talkPostGoneTitle => 'Esta publicación ya no está disponible';
 
   @override
   String get talkPostGoneBack => 'Volver a Historias';
@@ -3258,6 +3258,63 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get talkMenuViewMyPost => 'Ver mi publicación';
+
+  @override
+  String get talkLinkSend => 'Enviar por enlace';
+
+  @override
+  String get talkLinkTurnOff => 'Desactivar enlace';
+
+  @override
+  String get talkLinkConfirmTitle => '¿Enviar esta rutina por enlace?';
+
+  @override
+  String get talkLinkConfirmGuide =>
+      'Solo quien reciba el enlace podrá verlo. No se publica en Historias.\nPuedes desactivar el enlace en Rutinas cuando quieras';
+
+  @override
+  String get talkLinkResendGuide =>
+      'Ya enviaste un enlace. Se vuelve a enviar el mismo enlace, tal como estaba la primera vez.\nPara enviar los cambios, desactiva el enlace y vuelve a enviarlo';
+
+  @override
+  String get talkLinkPhotoTitle => '¿Cómo quieres enviar las fotos?';
+
+  @override
+  String get talkLinkPhotoGuide =>
+      'Difumina las fotos donde se vean caras, nombres o direcciones.\nLas imágenes hechas con IA se muestran tal cual';
+
+  @override
+  String get talkLinkCreateButton => 'Crear enlace';
+
+  @override
+  String get talkLinkPreviewFailed => 'No se pudo cargar lo que vas a enviar';
+
+  @override
+  String get talkLinkCreateFailedTitle => 'No se pudo crear el enlace';
+
+  @override
+  String get talkLinkCreated => 'Enlace creado';
+
+  @override
+  String talkLinkShareMessage(String title, String url) {
+    return '$title\nLlévate esta rutina a tu elum\n\n$url';
+  }
+
+  @override
+  String get talkLinkTurnOffTitle => '¿Desactivar el enlace?';
+
+  @override
+  String get talkLinkTurnOffMessage =>
+      'Quien tenga el enlace ya no podrá verlo. Las rutinas que ya se llevaron se mantienen';
+
+  @override
+  String get talkLinkTurnOffDone => 'Enlace desactivado';
+
+  @override
+  String get talkLinkTurnOffFailedTitle => 'No se pudo desactivar el enlace';
+
+  @override
+  String get talkLinkReceivedTitle => 'Rutina recibida';
 
   @override
   String get timeAgoJustNow => 'Ahora mismo';

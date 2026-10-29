@@ -5216,10 +5216,10 @@ abstract class AppLocalizations {
   /// **'글을 불러오지 못했어요'**
   String get talkDetailLoadFailed;
 
-  /// 상세 화면: 글이 내려갔거나 없을 때 안내
+  /// 상세 화면: 글이 내려갔거나, 보낸 링크가 꺼졌거나, 없을 때 안내
   ///
   /// In ko, this message translates to:
-  /// **'내려간 글이에요'**
+  /// **'더 볼 수 없는 글이에요'**
   String get talkPostGoneTitle;
 
   /// 상세 화면: 내려간 글 안내의 버튼
@@ -5809,6 +5809,108 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내 글 보기'**
   String get talkMenuViewMyPost;
+
+  /// 일과관리 메뉴 줄·링크로 보내기 화면 제목: 이 일과를 아는 사람에게 링크로 보낸다 (이야기에는 안 올라감)
+  ///
+  /// In ko, this message translates to:
+  /// **'링크로 보내기'**
+  String get talkLinkSend;
+
+  /// 일과관리 메뉴 줄·끄기 확인 버튼: 보낸 링크를 끈다 (끈 링크로는 더 볼 수 없다)
+  ///
+  /// In ko, this message translates to:
+  /// **'링크 끄기'**
+  String get talkLinkTurnOff;
+
+  /// 링크로 보내기 화면: 사진 카드가 없을 때의 질문
+  ///
+  /// In ko, this message translates to:
+  /// **'이 일과를 링크로 보낼까요?'**
+  String get talkLinkConfirmTitle;
+
+  /// 링크로 보내기 화면 안내: 링크를 받은 사람만 보고, 이야기에 안 올라가고, 나중에 끌 수 있다
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과관리에서 링크를 끌 수 있어요'**
+  String get talkLinkConfirmGuide;
+
+  /// 링크로 보내기 화면 안내: 이미 켜진 링크가 있어 같은 링크를 다시 보낼 때 (처음 보낸 모습 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 보낸 링크가 있어요. 처음 보낸 모습 그대로 같은 링크를 다시 보내요.\n바꾼 내용을 보내려면 링크를 끄고 다시 보내 주세요'**
+  String get talkLinkResendGuide;
+
+  /// 링크로 보내기 화면: 보호자 사진 카드를 흐리게 할지 묻는 질문
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 어떻게 보낼까요?'**
+  String get talkLinkPhotoTitle;
+
+  /// 링크로 보내기 화면: 사진 흐리게 안내 (AI 그림은 그대로 보인다)
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 보여요'**
+  String get talkLinkPhotoGuide;
+
+  /// 링크로 보내기 화면 아래 버튼: 링크를 만들고 공유 시트를 연다
+  ///
+  /// In ko, this message translates to:
+  /// **'링크 만들기'**
+  String get talkLinkCreateButton;
+
+  /// 링크로 보내기 화면: 보낼 내용을 못 받았을 때 (다시 하기와 함께)
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 내용을 불러오지 못했어요'**
+  String get talkLinkPreviewFailed;
+
+  /// 링크 만들기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 만들지 못했어요'**
+  String get talkLinkCreateFailedTitle;
+
+  /// 링크를 만들고 공유 시트를 닫은 뒤 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 만들었어요'**
+  String get talkLinkCreated;
+
+  /// 일과 링크를 메신저로 보낼 때의 글. title 은 이름을 가린 일과 제목, url 은 링크(번역하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title}\n이룸에서 이 일과를 가져가 보세요\n\n{url}'**
+  String talkLinkShareMessage(String title, String url);
+
+  /// 링크 끄기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 끌까요?'**
+  String get talkLinkTurnOffTitle;
+
+  /// 링크 끄기 확인 팝업 안내: 받은 사람은 더 못 보고, 이미 가져간 일과는 남는다
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 받은 사람은 더 볼 수 없어요. 이미 가져간 일과는 그대로 남아요'**
+  String get talkLinkTurnOffMessage;
+
+  /// 링크를 끈 뒤 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 껐어요'**
+  String get talkLinkTurnOffDone;
+
+  /// 링크 끄기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 끄지 못했어요'**
+  String get talkLinkTurnOffFailedTitle;
+
+  /// 링크로 받은 일과 상세 화면의 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 일과'**
+  String get talkLinkReceivedTitle;
 
   /// 1분이 안 지난 시각 표기
   ///

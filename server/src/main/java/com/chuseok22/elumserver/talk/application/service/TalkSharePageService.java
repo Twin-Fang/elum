@@ -39,11 +39,12 @@ public class TalkSharePageService {
   private final TalkImageStorage talkImageStorage;
 
   /**
-   * 공유 페이지 정보: 모양 확인 > 공개 글 확인 > 분류·제목·한마디 앞부분 (볼 수 없으면 빈 결과)
+   * 공유 페이지 정보: 모양 확인 > 공개로 볼 수 있는 글 확인(링크 글은 원본이 살아 있을 때만) > 분류·제목·한마디 앞부분 (볼 수 없으면 빈 결과)
    */
   public Optional<TalkSharePage> page(String postId) {
     return findPublicPost(postId).map(post -> new TalkSharePage(
-      post.getId(), post.getCategory().getLabel(), post.getTitle(), notePreviewOf(post.getNote()), post.getStepCount()));
+      post.getId(), post.getCategory() == null ? null : post.getCategory().getLabel(), post.getTitle(),
+      notePreviewOf(post.getNote()), post.getStepCount(), post.isLinkOnly()));
   }
 
   /**

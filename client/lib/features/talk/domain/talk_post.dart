@@ -129,6 +129,7 @@ class TalkPostDetail {
     this.authorNickname,
     this.category,
     this.note,
+    this.isLinkOnly = false,
   });
 
   final String id;
@@ -152,6 +153,9 @@ class TalkPostDetail {
   /// 내가 일과관리로 가져갔는가
   final bool isImportedByMe;
 
+  /// 링크로만 보이는 글인가 (일과관리 `링크로 보내기`로 만든 글: 분류·한마디·도움돼요·댓글 없음)
+  final bool isLinkOnly;
+
   /// 값을 바꾼 복사본: 도움이 됐어요 토글·댓글 수·가져옴 표시 갱신용
   TalkPostDetail copyWith({
     bool? isHelpfulByMe,
@@ -174,6 +178,7 @@ class TalkPostDetail {
     steps: steps,
     isHelpfulByMe: isHelpfulByMe ?? this.isHelpfulByMe,
     isImportedByMe: isImportedByMe ?? this.isImportedByMe,
+    isLinkOnly: isLinkOnly,
   );
 
   /// 목록 요약 형태로 변환: 가져오기 시트처럼 요약을 받는 곳에 넘길 때
@@ -215,6 +220,7 @@ class TalkPostDetail {
       steps: TalkJson.list(json['steps'], TalkStep.fromJson),
       isHelpfulByMe: TalkJson.flag(json['isHelpfulByMe']),
       isImportedByMe: TalkJson.flag(json['isImportedByMe']),
+      isLinkOnly: TalkJson.flag(json['isLinkOnly']),
     );
   }
 }

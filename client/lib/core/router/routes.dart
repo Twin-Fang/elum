@@ -41,6 +41,9 @@ abstract final class Routes {
   /// 이야기 올리기 (일과 고르기 > 사진 > 한마디·분류)
   static const guardianTalkShare = '/guardian/talk/share';
 
+  /// 일과를 링크로 보내기 (사진 > 링크 만들기 > 공유 시트). extra 는 [TalkLinkShareRouteArgs]
+  static const guardianTalkLinkShare = '/guardian/talk/link';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 
@@ -65,7 +68,8 @@ abstract final class Routes {
       '$guardianNotifications?$notificationsTabQuery=$notificationsNoticeTabValue';
 
   /// 알림 설정. 알림 화면 오른쪽 위에서 들어간다.
-  static const guardianNotificationSettings = '/guardian/settings/notifications';
+  static const guardianNotificationSettings =
+      '/guardian/settings/notifications';
 
   /// 임시저장 — 만들다 만 일과.
   static const guardianDrafts = '/guardian/settings/drafts';
@@ -156,3 +160,6 @@ abstract final class Routes {
   /// 모드 전환 PIN. `?to=child|guardian`으로 방향을 준다.
   static const modeSwitch = '/mode-switch';
 }
+
+/// [Routes.guardianTalkLinkShare] 의 extra: 보낼 일과 id, 이미 켜진 링크가 있는가
+typedef TalkLinkShareRouteArgs = ({String routineId, bool hasActiveLink});

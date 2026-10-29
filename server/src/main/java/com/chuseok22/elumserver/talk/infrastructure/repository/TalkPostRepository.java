@@ -3,10 +3,12 @@ package com.chuseok22.elumserver.talk.infrastructure.repository;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,18 +19,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
 
-  // 같은 원본으로 올린 글이 이미 있는가 (원본 하나당 보이는 글은 하나)
-  boolean existsBySourceRoutineIdAndStatus(String sourceRoutineId, TalkPostStatus status);
+  // 같은 원본으로 올린 글이 이미 있는가 (원본·공개 범위 하나당 보이는 글은 하나)
+  boolean existsBySourceRoutineIdAndStatusAndVisibility(String sourceRoutineId, TalkPostStatus status,
+    TalkPostVisibility visibility);
 
-  // 내가 올린 보이는 글 (원본 일과 > 글 매핑용)
-  List<TalkPost> findByAuthorMemberIdAndStatus(String authorMemberId, TalkPostStatus status);
+  // 같은 원본의 켜진 글 (링크 다시 보내기용)
+  Optional<TalkPost> findFirstBySourceRoutineIdAndStatusAndVisibility(String sourceRoutineId, TalkPostStatus status,
+    TalkPostVisibility visibility);
+
+  // 내가 올린 보이는 글 (원본 일과 > 글 매핑용, 공개 글·링크 글 따로)
+  List<TalkPost> findByAuthorMemberIdAndStatusAndVisibility(String authorMemberId, TalkPostStatus status,
+    TalkPostVisibility visibility);
 
   /**
-   * 피드 한 쪽: 최신순 (올린 시각 내림, id 내림), cursor 위치보다 뒤
+   * 피드 한 쪽: 공개 글만 최신순 (올린 시각 내림, id 내림), cursor 위치보다 뒤
    * 분류 전체는 호출부가 6개를 모두 넘김, cursor 없음은 먼 미래 시각을 넘김
    */
   @Query("select p from TalkPost p where p.status = :status and p.language = :language "
     + "and p.category in :categories "
+    + "and p.visibility = com.chuseok22.elumserver.talk.core.TalkPostVisibility.PUBLIC "
     + "and (p.createdAt < :cursorCreatedAt or (p.createdAt = :cursorCreatedAt and p.id < :cursorId)) "
     + "order by p.createdAt desc, p.id desc")
   List<TalkPost> findFeedPage(
@@ -38,10 +47,11 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
     Pageable pageable);
 
   /**
-   * 내 글 한 쪽: 내가 쓴 글만 최신순 (올린 시각 내림, id 내림), cursor 위치보다 뒤
+   * 내 글 한 쪽: 내가 쓴 공개 글만 최신순 (올린 시각 내림, id 내림), cursor 위치보다 뒤
    * 언어·분류는 거르지 않음, cursor 없음은 먼 미래 시각을 넘김
    */
   @Query("select p from TalkPost p where p.authorMemberId = :authorMemberId and p.status = :status "
+    + "and p.visibility = com.chuseok22.elumserver.talk.core.TalkPostVisibility.PUBLIC "
     + "and (p.createdAt < :cursorCreatedAt or (p.createdAt = :cursorCreatedAt and p.id < :cursorId)) "
     + "order by p.createdAt desc, p.id desc")
   List<TalkPost> findMyPostsPage(
@@ -50,10 +60,11 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
     Pageable pageable);
 
   /**
-   * 인기 글 id: since 이후 가져간 고유 보호자 수 내림차순 (같으면 최신순, 시각도 같으면 id 큰 순), 가져간 기록 없는 글은 빠짐
+   * 인기 글 id: 공개 글만, since 이후 가져간 고유 보호자 수 내림차순 (같으면 최신순, 시각도 같으면 id 큰 순), 가져간 기록 없는 글은 빠짐
    */
   @Query("select p.id from TalkPost p, TalkImport i where i.postId = p.id and p.status = :status "
     + "and p.language = :language and p.category in :categories and i.createdAt >= :since "
+    + "and p.visibility = com.chuseok22.elumserver.talk.core.TalkPostVisibility.PUBLIC "
     + "group by p.id, p.createdAt order by count(distinct i.memberId) desc, p.createdAt desc, p.id desc")
   List<String> findPopularPostIds(
     @Param("status") TalkPostStatus status, @Param("language") AppLocale language,

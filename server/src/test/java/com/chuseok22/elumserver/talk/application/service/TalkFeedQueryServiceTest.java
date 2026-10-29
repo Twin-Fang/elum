@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkFeedPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPostDetailResponse;
@@ -23,6 +24,7 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkPostSummaryRes
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkCursor;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkBlock;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
@@ -61,6 +63,8 @@ class TalkFeedQueryServiceTest {
   private static final LocalDateTime NOW = LocalDateTime.of(2026, 10, 20, 12, 0);
 
   @Mock
+  private RoutineShareService routineShareService;
+  @Mock
   private TalkPostRepository talkPostRepository;
   @Mock
   private TalkPostStepRepository talkPostStepRepository;
@@ -80,7 +84,8 @@ class TalkFeedQueryServiceTest {
   @BeforeEach
   void setUp() {
     Clock clock = Clock.fixed(NOW.atZone(ZONE).toInstant(), ZONE);
-    TalkPostAccess talkPostAccess = new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService);
+    TalkPostAccess talkPostAccess =
+      new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService, routineShareService);
     service = new TalkFeedQueryService(talkPostRepository, talkPostStepRepository, talkHelpfulRepository,
       talkImportRepository, talkImageStorage, memberService, talkPostAccess, clock);
   }
@@ -381,7 +386,7 @@ class TalkFeedQueryServiceTest {
     shared.setSourceRoutineId("routine-1");
     TalkPost orphan = post("p2", "viewer-1", NOW);
     orphan.setSourceRoutineId(null);
-    when(talkPostRepository.findByAuthorMemberIdAndStatus("viewer-1", TalkPostStatus.VISIBLE))
+    when(talkPostRepository.findByAuthorMemberIdAndStatusAndVisibility("viewer-1", TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC))
       .thenReturn(List.of(shared, orphan));
 
     assertThat(service.mySharedPosts(GUARDIAN)).containsExactly(Map.entry("routine-1", "p1"));

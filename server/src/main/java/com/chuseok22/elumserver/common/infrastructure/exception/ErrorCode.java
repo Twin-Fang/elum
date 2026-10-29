@@ -260,6 +260,9 @@ public enum ErrorCode {
   TALK_REPORT_DUPLICATED(HttpStatus.CONFLICT),
   TALK_CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST),
   TALK_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND),
+  // 링크로 보내기: 남이 만든 일과 403, 공유 불가 일과(예시·지움·가져온 일과·승인 전) 400
+  TALK_LINK_ROUTINE_NOT_MINE(HttpStatus.FORBIDDEN),
+  TALK_LINK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
 
   ;
 

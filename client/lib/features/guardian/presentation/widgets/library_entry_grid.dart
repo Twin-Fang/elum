@@ -49,6 +49,7 @@ class LibraryEntryGrid extends StatefulWidget {
     this.scrollTargetRoutineId,
     this.onScrollTargetHandled,
     this.sharedPostIdBySourceRoutineId = const {},
+    this.linkPostIdBySourceRoutineId = const {},
   });
 
   final List<LibraryEntry> entries;
@@ -95,6 +96,9 @@ class LibraryEntryGrid extends StatefulWidget {
 
   /// 이야기에 올린 글(원본 일과 id > 글 id): 길게 누를 때 미리보기 메뉴의 `내 글 보기` 줄 판단
   final Map<String, String> sharedPostIdBySourceRoutineId;
+
+  /// 켜진 링크(원본 일과 id > 링크 글 id): 미리보기 메뉴의 `링크 끄기` 줄 판단
+  final Map<String, String> linkPostIdBySourceRoutineId;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();

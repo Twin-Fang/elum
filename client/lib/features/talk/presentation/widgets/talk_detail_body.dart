@@ -15,7 +15,7 @@ import 'talk_detail_parts.dart';
 import 'talk_step_cards.dart';
 
 /// 상세 본문 (시안 1783:7172 · 1813:7718): 분류 · 카드 수 칩 > 제목 > 작성 정보 > 한마디
-/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자
+/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자 (링크 글은 가져오기까지)
 /// 보기 전환은 기기에 기억한다 (다른 글·다시 들어와도 마지막 선택, #959)
 class TalkDetailBody extends ConsumerStatefulWidget {
   const TalkDetailBody({
@@ -148,22 +148,24 @@ class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
             onPressed: widget.onImportPressed,
           ),
         ),
-        SizedBox(height: _importToHelpful.h),
-        // 도움돼요 칩 · 가져감 숫자 (댓글 수는 아래 댓글 머리에)
-        Padding(
-          padding: textInset,
-          child: Row(
-            children: [
-              TalkHelpfulButton(
-                count: post.helpfulCount,
-                isSelected: post.isHelpfulByMe,
-                onPressed: widget.onHelpfulPressed,
-              ),
-              SizedBox(width: _helpfulToImportCount.w),
-              TalkImportCountLabel(count: post.importCount),
-            ],
+        // 도움돼요 칩 · 가져감 숫자 (댓글 수는 아래 댓글 머리에, 링크 글은 반응이 없어 뺀다)
+        if (!post.isLinkOnly) ...[
+          SizedBox(height: _importToHelpful.h),
+          Padding(
+            padding: textInset,
+            child: Row(
+              children: [
+                TalkHelpfulButton(
+                  count: post.helpfulCount,
+                  isSelected: post.isHelpfulByMe,
+                  onPressed: widget.onHelpfulPressed,
+                ),
+                SizedBox(width: _helpfulToImportCount.w),
+                TalkImportCountLabel(count: post.importCount),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

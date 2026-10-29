@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.core.NicknamePolicy;
 import com.chuseok22.elumserver.notification.core.event.TalkPostCommentedEvent;
+import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.talk.application.dto.request.TalkCommentRequest;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentPageResponse;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkCommentResponse;
@@ -54,6 +55,8 @@ class TalkReactionServiceTest {
   private static final Caller VIEWER = Caller.guardian("viewer-1");
   private static final LocalDateTime BASE_TIME = LocalDateTime.of(2026, 10, 20, 9, 0);
 
+  @Mock
+  private RoutineShareService routineShareService;
   @Mock
   private TalkPostRepository talkPostRepository;
   @Mock
@@ -532,7 +535,7 @@ class TalkReactionServiceTest {
 
   // 같은 목 저장소로 만든 실제 접근 규칙
   private TalkPostAccess postAccess() {
-    return new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService);
+    return new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService, routineShareService);
   }
 
   private void stubVisiblePost(String postId) {

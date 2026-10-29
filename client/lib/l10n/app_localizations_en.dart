@@ -3035,7 +3035,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkDetailLoadFailed => 'Couldn\'t load the post';
 
   @override
-  String get talkPostGoneTitle => 'This post was taken down';
+  String get talkPostGoneTitle => 'This post is no longer available';
 
   @override
   String get talkPostGoneBack => 'Back to Community';
@@ -3367,6 +3367,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get talkMenuViewMyPost => 'See my post';
+
+  @override
+  String get talkLinkSend => 'Send as link';
+
+  @override
+  String get talkLinkTurnOff => 'Turn off link';
+
+  @override
+  String get talkLinkConfirmTitle => 'Send this routine as a link?';
+
+  @override
+  String get talkLinkConfirmGuide =>
+      'Only people with the link can see it. It won\'t be posted to Community.\nYou can turn off the link in Routines anytime';
+
+  @override
+  String get talkLinkResendGuide =>
+      'You already sent a link. The same link is sent again, as it was first sent.\nTo send your changes, turn off the link and send it again';
+
+  @override
+  String get talkLinkPhotoTitle => 'How should photos be sent?';
+
+  @override
+  String get talkLinkPhotoGuide =>
+      'Blur photos that show faces, names, or home addresses.\nAI pictures are shown as they are';
+
+  @override
+  String get talkLinkCreateButton => 'Create link';
+
+  @override
+  String get talkLinkPreviewFailed => 'Couldn\'t load what to send';
+
+  @override
+  String get talkLinkCreateFailedTitle => 'Couldn\'t create the link';
+
+  @override
+  String get talkLinkCreated => 'Link created';
+
+  @override
+  String talkLinkShareMessage(String title, String url) {
+    return '$title\nTake this routine into your elum\n\n$url';
+  }
+
+  @override
+  String get talkLinkTurnOffTitle => 'Turn off the link?';
+
+  @override
+  String get talkLinkTurnOffMessage =>
+      'People with the link can\'t see it anymore. Routines they already took stay';
+
+  @override
+  String get talkLinkTurnOffDone => 'Link turned off';
+
+  @override
+  String get talkLinkTurnOffFailedTitle => 'Couldn\'t turn off the link';
+
+  @override
+  String get talkLinkReceivedTitle => 'Shared routine';
 
   @override
   String get timeAgoJustNow => 'Just now';
