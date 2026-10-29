@@ -25,7 +25,9 @@ class ProfileOwnerColumnReadsTest {
 
   private static final Pattern OWNER_READ = Pattern.compile(
     "getProfile\\(\\)\\.getMember\\(\\)|\\bp\\.member\\b|\\br\\.profile\\.member\\b"
-      + "|ProfileMemberId|findFirstByMemberIdOrderByCreatedAtAsc|findAllByMemberIdIn\\("
+      + "|ProfileMemberId|findFirstByMemberIdOrderByCreatedAtAsc"
+      // 옛 ProfileRepository.findAllByMemberIdIn 만 (선언·호출). 다른 엔티티의 같은 이름 조회는 제외 (#994)
+      + "|List<Profile>\\s+findAllByMemberIdIn\\(|\\bprofileRepository\\s*\\.\\s*findAllByMemberIdIn\\("
       + "|\\bp\\.member_id\\b|profile\\.member_id");
 
   /** 허용 목록은 비었다 — 마지막 두 곳(관리자 일과 화면)은 created_by 로 옮겼다. */
@@ -50,5 +52,16 @@ class ProfileOwnerColumnReadsTest {
       }
     }
     assertThat(offenders).as("관계(profile_guardian)나 created_by 로 읽는다").isEmpty();
+  }
+
+  @Test
+  @DisplayName("옛 프로필 저장소 조회는 잡고, 같은 이름의 다른 저장소 조회는 통과시킨다")
+  void ownerReadPatternTargetsOnlyProfileRepository() {
+    // 잡아야 함: 옛 ProfileRepository 선언·호출
+    assertThat(OWNER_READ.matcher("List<Profile> findAllByMemberIdIn(Collection<String> memberIds);").find()).isTrue();
+    assertThat(OWNER_READ.matcher("profileRepository.findAllByMemberIdIn(memberIds)").find()).isTrue();
+    // 통과해야 함: auth_identity.member_id 조회 (#908)
+    assertThat(OWNER_READ.matcher("List<AuthIdentity> findAllByMemberIdIn(Collection<String> memberIds);").find()).isFalse();
+    assertThat(OWNER_READ.matcher("authIdentityRepository.findAllByMemberIdIn(memberIds)").find()).isFalse();
   }
 }
