@@ -14,6 +14,7 @@ import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../guardian/application/library_entries.dart';
 import '../../../guardian/application/library_talk_import_state.dart';
+import '../../../guardian/application/routine_manage_entry.dart';
 import '../../../member/application/member_providers.dart';
 import '../../../profile/application/profile_session.dart';
 import '../../../profile/domain/profile_summary.dart';
@@ -72,6 +73,8 @@ Future<void> _showImportedRoutine(
     // 이룸이를 못 바꿔도 일과관리 칸으로는 간다
     AppLogger.error('talk', e, stack, {'step': 'importSelectProfile'});
   }
+  // 이룸이 바꾸기로 무효화된 목록을 build 밖에서 먼저 계산 (#987)
+  readRoutineManageSourcesBeforeEntering(container);
   router.go(Routes.guardianManage);
 }
 

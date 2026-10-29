@@ -103,6 +103,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     ),
   );
 
+  /// 격자가 그 칸으로 스크롤한 뒤 대상 비우기 (부를 때 notifier 를 읽음, build 에서 읽지 않음)
+  void _clearScrollTarget() =>
+      ref.read(libraryScrollTargetRoutineIdProvider.notifier).clear();
+
   /// 이야기에 올린 글(원본 일과 id > 글 id). 불러오는 중이거나 실패하면 빈 맵으로 본다
   Map<String, String> get _sharedPostIdBySourceRoutineId =>
       ref.read(talkMySharedPostsProvider).value ?? const {};
@@ -336,9 +340,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
         scrollTargetRoutineId: scrollTargetRoutineId,
         sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
-        onScrollTargetHandled: ref
-            .read(libraryScrollTargetRoutineIdProvider.notifier)
-            .clear,
+        onScrollTargetHandled: _clearScrollTarget,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,
