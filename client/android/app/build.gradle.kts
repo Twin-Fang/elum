@@ -12,6 +12,7 @@ import java.util.Properties
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
@@ -32,6 +33,13 @@ if (envFile.exists()) {
 }
 fun env(key: String): String = envProps.getProperty(key)?.trim() ?: ""
 
+
+// Kotlin 2.3 부터 kotlinOptions.jvmTarget 문자열 지정이 오류 > compilerOptions DSL (#1038)
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
 
 android {
 
@@ -54,10 +62,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
