@@ -101,8 +101,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
       post != null && (!post.isMine || !post.isLinkOnly);
 
   /// 공유 아이콘: 공개 글은 늘, 링크 글은 보낸 사람만 (받은 사람이 다시 퍼뜨리지 않게)
-  bool _isShareVisible(TalkPostDetail? post) =>
-      post != null && (!post.isLinkOnly || post.isMine);
+  bool _isShareVisible(TalkPostDetail post) => !post.isLinkOnly || post.isMine;
 
   /// 글이 내려갔는가 (없는 글·내가 내린 글·꺼진 링크)
   bool _isPostGone(Object error) =>
@@ -132,8 +131,8 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
               onMorePressed: post == null
                   ? null
                   : () => _actions.openPostMenu(post),
-              onSharePressed: _isShareVisible(post)
-                  ? (origin) => _actions.shareLink(post!, origin)
+              onSharePressed: post != null && _isShareVisible(post)
+                  ? (origin) => _actions.shareLink(post, origin)
                   : null,
             ),
             Expanded(

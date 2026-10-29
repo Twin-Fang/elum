@@ -10,10 +10,13 @@ import 'app_logger.dart';
 /// 보내는 것: 오류 종류(타입 이름), 스택, 에러 코드, 앱 버전·OS·기기 모델(SDK 기본)
 /// 보내지 않는 것: 오류 메시지, 입력값·원문, 아이 이름, 토큰, 사용자 식별자(setUserIdentifier 안 부름)
 abstract final class CrashReporter {
+  // 실패 로그 분류 (스위치 저장·수집 반영 공통)
+  static const _logCategory = 'crash report';
+
   // 개발자 도구 스위치: 크래시 보내기를 켰는가 (기본 꺼짐)
   static const _developerOptIn = DeveloperCollectionOptIn(
     storageKey: 'dev.isCrashReportingEnabled',
-    logCategory: 'crash report',
+    logCategory: _logCategory,
   );
 
   // 비치명 테스트 오류의 에러 코드 (콘솔에서 테스트 건을 거르는 용도)
@@ -72,7 +75,7 @@ abstract final class CrashReporter {
     } catch (error, stack) {
       // 전송 도구 실패가 앱 동작을 막지 않음 (수집만 꺼짐)
       _isEnabled = false;
-      AppLogger.error('crash report', error, stack, {'step': 'applyCollection'});
+      AppLogger.error(_logCategory, error, stack, {'step': 'applyCollection'});
     }
   }
 

@@ -10,10 +10,13 @@ import 'analytics_events.dart';
 /// 보내는 것: 화면 경로 패턴, 이벤트 이름, 숫자·에러 코드 파라미터, SDK 기본(앱 버전·OS·기기 모델·무작위 앱 인스턴스 id)
 /// 보내지 않는 것: 진단명·장애 유형, 원문(카드 글·일과 제목), 아이 이름, 토큰, 사용자 id(setUserId 안 부름), 광고 식별자(네이티브 설정으로 끔)
 abstract final class AppAnalytics {
+  // 실패 로그 분류 (스위치 저장·수집 반영 공통)
+  static const _logCategory = 'analytics';
+
   // 개발자 도구 스위치: 분석 보내기를 켰는가 (기본 꺼짐)
   static const _developerOptIn = DeveloperCollectionOptIn(
     storageKey: 'dev.isAnalyticsEnabled',
-    logCategory: 'analytics',
+    logCategory: _logCategory,
   );
 
   static bool _isEnabled = false;
@@ -82,7 +85,7 @@ abstract final class AppAnalytics {
 
   static void logCreditBlocked({required bool isGeneratingRoutine}) =>
       _logEvent(AnalyticsEvents.creditBlocked, {
-        AnalyticsParameters.reason: isGeneratingRoutine
+        AnalyticsParameters.creditBlockedReason: isGeneratingRoutine
             ? AnalyticsParameters.creditBlockedGenerating
             : AnalyticsParameters.creditBlockedExhausted,
       });
@@ -110,7 +113,7 @@ abstract final class AppAnalytics {
     } catch (error, stack) {
       // 전송 도구 실패가 앱 동작을 막지 않음 (수집만 꺼짐)
       _isEnabled = false;
-      AppLogger.error('analytics', error, stack, {'step': 'applyCollection'});
+      AppLogger.error(_logCategory, error, stack, {'step': 'applyCollection'});
     }
   }
 
@@ -119,7 +122,7 @@ abstract final class AppAnalytics {
     try {
       await FirebaseAnalytics.instance.resetAnalyticsData();
     } catch (error, stack) {
-      AppLogger.error('analytics', error, stack, {'step': 'resetData'});
+      AppLogger.error(_logCategory, error, stack, {'step': 'resetData'});
     }
   }
 
@@ -139,5 +142,5 @@ abstract final class AppAnalytics {
   }
 
   // Firebase 파라미터는 bool 을 받지 않아 1·0 으로
-  static int _toFlag(bool value) => value ? 1 : 0;
+  static int _toFlag(bool isSet) => isSet ? 1 : 0;
 }

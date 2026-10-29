@@ -31,7 +31,6 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -236,10 +235,7 @@ public class MemberService {
     if (code == null) {
       return Optional.empty();
     }
-    String trimmed = code.strip();
-    return Arrays.stream(AppLocale.values())
-      .filter(locale -> locale.code().equals(trimmed))
-      .findFirst();
+    return AppLocale.findByCode(code.strip());
   }
 
   /**

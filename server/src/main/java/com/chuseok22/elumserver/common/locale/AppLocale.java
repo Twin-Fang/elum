@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.common.locale;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * 서버가 다루는 언어 다섯.
@@ -40,12 +41,18 @@ public enum AppLocale {
 
   /** 정확히 일치하는 코드만 받는다. 저장된 값을 읽을 때 쓰므로 모르는 값은 조용히 넘기지 않는다. */
   public static AppLocale fromCode(String code) {
+    return findByCode(code)
+      .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 언어 코드: " + code));
+  }
+
+  /** 코드 정확 일치 > 언어. null·모르는 값은 empty (다듬기는 부르는 쪽) */
+  public static Optional<AppLocale> findByCode(String code) {
     for (AppLocale locale : values()) {
       if (locale.code.equals(code)) {
-        return locale;
+        return Optional.of(locale);
       }
     }
-    throw new IllegalArgumentException("지원하지 않는 언어 코드: " + code);
+    return Optional.empty();
   }
 
   /**

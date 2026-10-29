@@ -45,7 +45,7 @@ abstract final class AnalyticsParameters {
   static const errorCode = 'error_code';
 
   /// 크레딧 안내 사유: [creditBlockedExhausted], [creditBlockedGenerating]
-  static const reason = 'reason';
+  static const creditBlockedReason = 'reason';
   static const creditBlockedExhausted = 'exhausted';
   static const creditBlockedGenerating = 'generating';
 
