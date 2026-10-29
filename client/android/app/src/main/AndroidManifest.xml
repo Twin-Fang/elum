@@ -90,6 +90,25 @@
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false"/>
+        <!-- 분석 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (AppAnalytics, #650)
+             deactivated 가 아니라 enabled=false: 런타임 setAnalyticsCollectionEnabled 로 켤 수 있어야 함 -->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false"/>
+        <!-- 화면 추적은 라우터 한 곳(AnalyticsScreenTracker)만. Activity 자동 기록 끔 -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false"/>
+        <!-- 분석의 광고 식별자 3종 끔: 광고 ID, SSAID, 광고 맞춤 신호 (AD_ID 권한은 광고 SDK 용으로 남음) -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false"/>
+        <meta-data
+            android:name="google_analytics_ssaid_collection_enabled"
+            android:value="false"/>
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false"/>
         <!-- 네이버 로그인 SDK 설정. 값은 build.gradle.kts가 .env에서 리소스로 만든다. -->
         <meta-data
             android:name="com.naver.sdk.clientId"

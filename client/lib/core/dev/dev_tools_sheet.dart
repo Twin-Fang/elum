@@ -176,7 +176,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       };
 }
 
-/// 기능 목록: 묶음 6개 (서버와 계정, 이 기기에서만 흉내, 화면과 언어, 기록, 크래시 보내기, 위험)
+/// 기능 목록: 묶음 7개 (서버와 계정, 이 기기에서만 흉내, 화면과 언어, 기록, 크래시 보내기, 분석 보내기, 위험)
 class _DevMenu extends ConsumerStatefulWidget {
   const _DevMenu({required this.onSelect, required this.onRestartApp});
 
@@ -259,20 +259,12 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
           subtitle: '기기 언어와 무관하게 앱 언어를 고른다',
           onTap: () => widget.onSelect(_DevView.locale),
         ),
-        // 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다
-        MergeSemantics(
-          child: ListTile(
-            leading: const Icon(Icons.speed),
-            title: const Text('온보딩 건너뛰기'),
-            subtitle: const Text(
-              '이번 실행만 (앱을 끄면 .env 값으로 돌아감)',
-              style: TextStyle(fontSize: 12),
-            ),
-            trailing: Switch(
-              value: AppConfig.skipOnboarding,
-              onChanged: (value) => setState(() => AppConfig.skipOnboarding = value),
-            ),
-          ),
+        _SwitchTile(
+          icon: Icons.speed,
+          label: '온보딩 건너뛰기',
+          subtitle: '이번 실행만 (앱을 끄면 .env 값으로 돌아감)',
+          isOn: AppConfig.skipOnboarding,
+          onChanged: (value) => setState(() => AppConfig.skipOnboarding = value),
         ),
         const _Section('기록'),
         _Tile(
@@ -300,6 +292,8 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
         ),
         const _Section('크래시 보내기'),
         const _CrashReportingTiles(),
+        const _Section('분석 보내기'),
+        const _AnalyticsTiles(),
         const _Section('위험'),
         _Tile(
           icon: Icons.person_remove_outlined,

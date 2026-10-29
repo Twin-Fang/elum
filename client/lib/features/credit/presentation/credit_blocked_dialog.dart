@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -32,6 +33,7 @@ Future<void> showCreditBlockedDialog(
   final l10n = context.l10n; // await 뒤에서 context 를 읽지 않으려고 미리 잡는다
   // 다 쓴 것이 먼저다 — 진행 중인 것이 끝나도 새로 만들 수 없기 때문이다.
   final generating = blocked.canStartRoutine && blocked.isGeneratingRoutine;
+  AppAnalytics.logCreditBlocked(isGeneratingRoutine: generating);
   final flow = ref.read(adRewardFlowProvider);
   final offer = generating ? null : await flow.offer();
   if (!context.mounted) return;

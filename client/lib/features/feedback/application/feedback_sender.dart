@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/logger/app_log_buffer.dart';
 import '../../../core/logger/app_log_header.dart';
@@ -29,12 +30,19 @@ class FeedbackSender {
     final log = includeLog && !AppLogBuffer.isEmpty
         ? AppLogBuffer.asText(header: await buildAppLogHeader(storage: _storage))
         : '';
-    return _repo.send(
+    final attempt = await _repo.send(
       message: message.trim(),
       appLog: log.isEmpty ? null : log,
       appVersion: await AppStatusRepository.currentVersion(),
       os: '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
     );
+    // 글 내용은 싣지 않음 (성공 여부·기록 첨부 여부·에러 코드만)
+    AppAnalytics.logFeedbackSent(
+      isSent: attempt.isOk,
+      hasAppLog: log.isNotEmpty,
+      errorCode: attempt.failure?.badgeOr(FeedbackRepository.failureCode),
+    );
+    return attempt;
   }
 }
 

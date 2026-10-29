@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/idempotency_key.dart';
@@ -270,6 +271,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
 
     final repo = ref.read(routineRepositoryProvider);
     final goals = ref.read(onboardingProvider).supportGoals;
+    AppAnalytics.logRoutineGenerationStarted();
 
     try {
       AppLogger.notifierStateChange(
@@ -298,6 +300,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
         routine: routine,
         creditUsage: routine.creditUsage,
       );
+      AppAnalytics.logRoutineGenerationCompleted(cardCount: routine.steps.length);
       // 잔액이 바뀌었다 — 설정 카드·직전 안내가 이전 숫자를 보이지 않게 한다.
       ref.invalidate(creditSummaryProvider);
       // 이 순간 서버에 임시저장(`PENDING_REVIEW`)으로 남았다. 목록을 다시 받지 않으면
@@ -315,12 +318,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
       // 판정은 전역 [AppFailure] 하나가 한다 — 여기서 본문을 다시 파싱하지 않고,
       // 연결 실패·타임아웃도 같은 통로로 들어온다.
       final failure = AppFailure.of(e);
+      final errorCode = failure.badgeOr('E-1001');
       state = state.copyWith(
         step: RoutineFlowStep.error,
-        errorCode: failure.badgeOr('E-1001'),
+        errorCode: errorCode,
         errorMessage: failure.serverMessage,
         errorFault: failure.fault,
       );
+      AppAnalytics.logRoutineGenerationFailed(errorCode: errorCode);
       // 실패해도 예약이 풀렸거나(반환) 부족이 드러났다 — 다음에 볼 숫자를 새로 받는다.
       ref.invalidate(creditSummaryProvider);
     }
@@ -369,6 +374,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
       'error',
     );
     state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1002');
+    AppAnalytics.logRoutineGenerationFailed(errorCode: 'E-1002');
   }
 
   /// 이미 만든 일과를 검토 화면에 올린다 (홈에서 `수정`).

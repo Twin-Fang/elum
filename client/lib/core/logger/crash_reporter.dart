@@ -1,8 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../config/app_config.dart';
+import '../config/developer_collection_opt_in.dart';
 import 'app_logger.dart';
 
 /// 크래시·오류 전송 (Firebase Crashlytics): 처리 못 한 오류(치명), 화면이 잡아 보여 준 실패(비치명) (#659)
@@ -11,9 +10,11 @@ import 'app_logger.dart';
 /// 보내는 것: 오류 종류(타입 이름), 스택, 에러 코드, 앱 버전·OS·기기 모델(SDK 기본)
 /// 보내지 않는 것: 오류 메시지, 입력값·원문, 아이 이름, 토큰, 사용자 식별자(setUserIdentifier 안 부름)
 abstract final class CrashReporter {
-  // SharedPreferences: 개발자 도구에서 크래시 보내기를 켰는가 (기본 꺼짐)
-  // `dev.` 접두사라 로그아웃·회원삭제(LocalStorage.clearAll)가 지우지 않음
-  static const _developerOptInKey = 'dev.isCrashReportingEnabled';
+  // 개발자 도구 스위치: 크래시 보내기를 켰는가 (기본 꺼짐)
+  static const _developerOptIn = DeveloperCollectionOptIn(
+    storageKey: 'dev.isCrashReportingEnabled',
+    logCategory: 'crash report',
+  );
 
   // 비치명 테스트 오류의 에러 코드 (콘솔에서 테스트 건을 거르는 용도)
   static const testErrorCode = 'E-DEV-CRASH-TEST';
@@ -24,22 +25,17 @@ abstract final class CrashReporter {
   static bool get isEnabled => _isEnabled;
 
   /// 수집을 켤 수 있는 빌드인가 (개발자 도구 빌드만, 운영 빌드는 false)
-  static bool get canEnable => AppConfig.showDevTools;
+  static bool get canEnable => DeveloperCollectionOptIn.canEnable;
 
   /// Firebase 초기화 성공 뒤 한 번: 저장한 스위치 값 > 수집 설정 반영 (운영 빌드는 끔)
   static Future<void> applySavedSetting() async {
-    await _applyCollection(shouldCollect: await _readDeveloperOptIn());
+    await _applyCollection(shouldCollect: await _developerOptIn.readIsOptedIn());
   }
 
   /// 개발자 도구 스위치: 저장 > 반영. 반영에 실패하면 false (Firebase 설정 없음 등)
   static Future<bool> setEnabledByDeveloper(bool isEnabledByDeveloper) async {
     if (!canEnable) return false;
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      await preferences.setBool(_developerOptInKey, isEnabledByDeveloper);
-    } catch (error, stack) {
-      AppLogger.error('crash report', error, stack, {'step': 'saveOptIn'});
-    }
+    await _developerOptIn.saveIsOptedIn(isEnabledByDeveloper);
     await _applyCollection(shouldCollect: isEnabledByDeveloper);
     return _isEnabled == isEnabledByDeveloper;
   }
@@ -63,18 +59,6 @@ abstract final class CrashReporter {
   static void sendTestCrash() {
     if (!_isEnabled) return;
     FirebaseCrashlytics.instance.crash();
-  }
-
-  // 개발자 도구 빌드에서만 저장값을 읽음 (운영 빌드는 저장값과 무관하게 false)
-  static Future<bool> _readDeveloperOptIn() async {
-    if (!canEnable) return false;
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      return preferences.getBool(_developerOptInKey) ?? false;
-    } catch (error, stack) {
-      AppLogger.error('crash report', error, stack, {'step': 'readOptIn'});
-      return false;
-    }
   }
 
   // 수집 설정 반영 (네이티브가 값을 기억하므로 꺼짐도 매번 명시)

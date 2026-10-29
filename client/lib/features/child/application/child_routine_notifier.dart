@@ -9,6 +9,7 @@ import '../data/progress_store.dart';
 import '../data/step_progress_repository.dart';
 import '../domain/routine_progress_record.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/logger/app_logger.dart';
 
 /// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트).
@@ -116,9 +117,17 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
     // 저장은 기다리지 않는다 — 아동이 누르는 즉시 화면이 바뀌어야 한다
     unawaited(_persist(routine.id, record));
     if (isServerRoutine) _enqueue(routine.id);
+    // 처음 체크한 카드로 전부 끝났을 때 한 번 (해제 후 다시 체크는 보상처럼 세지 않음)
+    if (shouldReward && _isEveryCardCompleted(routine, completed)) {
+      AppAnalytics.logChildRoutineCompleted(cardCount: routine.steps.length);
+    }
 
     return shouldReward;
   }
+
+  bool _isEveryCardCompleted(Routine routine, Set<String> completedCardIds) =>
+      routine.steps.isNotEmpty &&
+      routine.steps.every((card) => completedCardIds.contains(card.id));
 
   /// 대기열 전체를 다시 전송한다. 앱 시작·복귀·온라인 전환 시 호출된다.
   void syncPending() {

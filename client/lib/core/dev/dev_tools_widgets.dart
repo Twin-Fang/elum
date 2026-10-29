@@ -29,6 +29,38 @@ class _Tile extends StatelessWidget {
   }
 }
 
+/// 켜고 끄는 행 (온보딩 건너뛰기·크래시 보내기·분석 보내기)
+/// 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다
+class _SwitchTile extends StatelessWidget {
+  const _SwitchTile({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.isOn,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final bool isOn;
+
+  /// null 이면 잠김 (반영 중 등)
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return MergeSemantics(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        trailing: Switch(value: isOn, onChanged: onChanged),
+      ),
+    );
+  }
+}
+
 /// 메뉴 묶음 제목
 class _Section extends StatelessWidget {
   const _Section(this.title);
