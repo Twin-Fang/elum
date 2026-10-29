@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/layout/tablet_two_pane.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/tablet_hero_scene.dart';
 import '../../../shared/models/character.dart';
 
@@ -16,6 +17,7 @@ class ChildHomeLandscapeBody extends StatelessWidget {
     required this.greeting,
     required this.character,
     required this.routineList,
+    required this.listScrollWrapper,
   });
 
   final Widget greeting;
@@ -23,6 +25,9 @@ class ChildHomeLandscapeBody extends StatelessWidget {
   /// 온보딩에서 고른 캐릭터 (장면 속 그림)
   final CardCharacter character;
   final Widget routineList;
+
+  /// 오른쪽 목록 스크롤을 감싸는 것 (당겨서 새로고침 — 동그라미가 목록 칸 위에 나옴)
+  final Widget Function(Widget listScroll) listScrollWrapper;
 
   /// 인사말 > 장면 간격 (393 기준)
   static const _greetingToScene = 20.0;
@@ -48,9 +53,12 @@ class ChildHomeLandscapeBody extends StatelessWidget {
           ],
         ),
       ),
-      trailingPane: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 8.h, bottom: 32.h),
-        child: routineList,
+      trailingPane: listScrollWrapper(
+        SingleChildScrollView(
+          physics: ElumPullToRefresh.calmPhysics,
+          padding: EdgeInsets.only(top: 8.h, bottom: 32.h),
+          child: routineList,
+        ),
       ),
     );
   }

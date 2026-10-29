@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
@@ -71,12 +72,16 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
     final controller = ref.read(notificationListControllerProvider.notifier);
 
     return switch (async) {
-      AsyncData(value: final state) when state.items.isEmpty => RefreshIndicator(
+      AsyncData(value: final state) when state.items.isEmpty => ElumPullToRefresh(
           onRefresh: controller.refresh,
+          failureMessage: context.l10n.notificationListFailed,
+          failureCode: 'E-NOTIF-LIST',
           child: const ElumStateBody(child: NotificationsEmptyBody()),
         ),
-      AsyncData(value: final state) => RefreshIndicator(
+      AsyncData(value: final state) => ElumPullToRefresh(
           onRefresh: controller.refresh,
+          failureMessage: context.l10n.notificationListFailed,
+          failureCode: 'E-NOTIF-LIST',
           child: _list(state),
         ),
       AsyncError(:final error) => ElumStateBody(

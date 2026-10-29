@@ -69,13 +69,14 @@ radius_pill_min: 100
 material_widgets: [TextButton, OutlinedButton, ElevatedButton, FilledButton, ListTile, Divider,
   VerticalDivider, FloatingActionButton, Card, AlertDialog, SimpleDialog, showModalBottomSheet,
   showDialog, showGeneralDialog, Switch, Checkbox, Radio, CircularProgressIndicator,
-  LinearProgressIndicator, Chip, FilterChip, ChoiceChip, AppBar, PopupMenuButton]
+  LinearProgressIndicator, Chip, FilterChip, ChoiceChip, AppBar, PopupMenuButton, RefreshIndicator]
 
 # 위 부품을 감싸는 공통 위젯 (여기서만 써도 된다)
 material_wrappers:
   lib/core/widgets/elum_bottom_sheet.dart: "시트 띄우기 단일 진입점 (showElumSheet)"
   lib/core/widgets/elum_dialog.dart: "팝업 띄우기 단일 진입점 (showElumDialog)"
   lib/core/widgets/elum_spinner.dart: "로딩 표시 단일 위젯"
+  lib/core/widgets/elum_pull_to_refresh.dart: "당겨서 새로고침 단일 위젯 (실패 팝업 · 색 토큰 · 당김 물리값)"
 
 # 쓰는 곳을 묶어 둔 토큰 — 이 파일 밖에서 쓰면 위반 (그림 색이 UI 강조로 번지는 것을 막는다)
 restricted_tokens:

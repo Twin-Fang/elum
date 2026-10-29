@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/character.dart';
 
@@ -50,7 +51,9 @@ class ChildNoRoutine extends StatelessWidget {
     // **`Center`가 아니다.** 세로 가운데에 두면 화면 높이에 따라 글자가 오르내려
     // 시안과 어긋난다 — 실제로 81 아래에 있었다. 시안(343:4543)은 제목이 234 에서
     // 시작하므로 위 여백을 고정한다.
+    // 일과가 0건이어도 당겨서 새로고침이 되게 항상 스크롤 가능 (튕김 없음)
     return SingleChildScrollView(
+      physics: ElumPullToRefresh.calmPhysics,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
