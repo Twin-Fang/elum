@@ -6,6 +6,7 @@ import 'app_log_connectivity.dart';
 import 'app_log_diagnostics.dart';
 import 'app_log_lifecycle_observer.dart';
 import 'app_logger.dart';
+import 'crash_reporter.dart';
 
 /// 문제 추적용 기록(처리 못 한 오류·생명주기·연결 상태)의 설치 진입점.
 ///
@@ -46,5 +47,6 @@ abstract final class AppDiagnostics {
     try {
       AppLogger.error(category, '${error.runtimeType}: $error', stack);
     } catch (_) {}
+    CrashReporter.recordFatal(error, stack);
   }
 }

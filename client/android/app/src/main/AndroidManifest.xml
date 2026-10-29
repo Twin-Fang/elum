@@ -86,6 +86,10 @@
             </intent-filter>
         </activity>
 
+        <!-- 크래시 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (CrashReporter, #659) -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false"/>
         <!-- 네이버 로그인 SDK 설정. 값은 build.gradle.kts가 .env에서 리소스로 만든다. -->
         <meta-data
             android:name="com.naver.sdk.clientId"
