@@ -5935,6 +5935,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}일 전}}'**
   String timeAgoDays(int count);
+
+  /// 일과 진행 링(진행 중)을 화면 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}% 했어요'**
+  String routineProgressRingPercentLabel(int percent);
+
+  /// 일과 진행 링(다 한 일과, 체크 원)을 화면 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다 했어요'**
+  String get routineProgressRingDoneLabel;
 }
 
 class _AppLocalizationsDelegate

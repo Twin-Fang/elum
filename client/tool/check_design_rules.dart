@@ -1,7 +1,7 @@
 // 디자인 규칙 검사기. `dart run tool/check_design_rules.dart` 로 돌리고, CI 는 Flutter CI 의 규칙 검사 단계가 돌린다.
 //
 // 규칙 원본은 `tool/design_rules.yaml` (Figma 화면 통계에서 뽑은 허용 값) 한 곳이다.
-// 규칙 9개
+// 규칙 10개
 // - palette: 색 토큰 값이 시안 색에 있다
 // - type-token: 글자 토큰의 글꼴 · 굵기 · 크기 조합이 시안에 있다
 // - color-literal · material-color: 화면 코드는 색을 토큰으로만 쓴다
@@ -10,6 +10,7 @@
 // - material-widget: 테두리 버튼 · ListTile · Divider 같은 Material 기본 부품 금지 (공통 위젯 안 감싸기만 허용)
 // - spacing · radius: 숫자로 쓴 간격 · 모서리가 시안 단계 안에 있다
 // - restricted-token: 쓰는 곳을 묶어 둔 토큰(그림 색)을 화면에서 쓰지 않는다
+// - text-scale: 글자 배율은 AppTextScale 한 곳 (`.sp` · noScaling · 숫자 배율 · 옛 textScaleFactor 금지, yaml `text_scale_owners` 만 예외)
 // 시안 실측으로 확인한 단계 밖 값은 yaml `measured_exceptions` 에 근거 노드와 함께 둔다
 //
 // 이미 있는 위반은 `tool/design_rules_allowed.txt` 에 동결한다. 줄을 지울 수는 있어도 더하지 않는다.
@@ -76,6 +77,9 @@ class DesignRules {
       materialWrappers = Set<String>.from(
         (yaml['material_wrappers'] as YamlMap).keys,
       ),
+      textScaleOwners = Set<String>.from(
+        ((yaml['text_scale_owners'] as YamlMap?) ?? YamlMap()).keys,
+      ),
       restrictedTokens = {
         for (final entry in ((yaml['restricted_tokens'] as YamlMap?) ?? YamlMap()).entries)
           entry.key as String: Set<String>.from((entry.value as YamlMap)['allowed'] as YamlList),
@@ -96,6 +100,9 @@ class DesignRules {
   final double radiusPillMin;
   final List<String> materialWidgets;
   final Set<String> materialWrappers;
+
+  /// 글자 배율을 직접 다뤄도 되는 파일 (배율 원본 · 진단 기록)
+  final Set<String> textScaleOwners;
 
   /// 토큰 이름 > 써도 되는 파일
   final Map<String, Set<String>> restrictedTokens;
@@ -133,8 +140,11 @@ final _colorLiteral = RegExp(r'Color\(0x[0-9A-Fa-f]{8}\)|Color\.from(ARGB|RGBO)\
 final _materialColor = RegExp(r'\bColors\.(\w+)');
 final _fontLiteral = RegExp(r'\b(fontSize|fontFamily)\s*:');
 final _materialIcon = RegExp(r'\bIcons\.(\w+)');
-// 글자 배율은 AppTextScale 한 곳 (.sp 는 폭 배율을 한 번 더 곱하고, noScaling 은 배율을 지운다)
-final _textScaleOverride = RegExp(r'\.sp\b|TextScaler\.noScaling|MediaQuery\.withNoTextScaling');
+// 글자 배율은 AppTextScale 한 곳 (.sp 는 폭 배율을 한 번 더 곱하고, noScaling 은 배율을 지운다,
+// TextScaler.linear 는 상한·비선형 배율을 버린다 > AppTextScale.scaledBy, textScaleFactor 는 옛 선형 값)
+final _textScaleOverride = RegExp(
+  r'\.sp\b|TextScaler\.noScaling|MediaQuery\.withNoTextScaling|TextScaler\.linear\(|\btextScaleFactor(?:Of)?\b',
+);
 final _edgeInsets = RegExp(
   r'EdgeInsets(?:Directional)?\.(?:all|symmetric|only|fromLTRB|fromSTEB)\(([^;]*?)\)',
 );
@@ -154,6 +164,7 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
   final hits = <Violation>[];
   final isTheme = path.startsWith(_themeDir);
   final isMaterialWrapper = rules.materialWrappers.contains(path);
+  final isTextScaleOwner = rules.textScaleOwners.contains(path);
   final materialWidget = RegExp(
     r'(?<![\w.])(' + rules.materialWidgets.join('|') + r')(?:\.\w+)?\(',
   );
@@ -175,8 +186,10 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
         add('font-literal', match.group(1)!);
       }
     }
-    for (final match in _textScaleOverride.allMatches(line)) {
-      add('text-scale', match.group(0)!);
+    if (!isTextScaleOwner) {
+      for (final match in _textScaleOverride.allMatches(line)) {
+        add('text-scale', match.group(0)!);
+      }
     }
     for (final match in _materialIcon.allMatches(line)) {
       add('material-icon', match.group(0)!);

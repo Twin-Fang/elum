@@ -201,5 +201,7 @@
   "timeAgoMinutes": "{count, plural, one{hace {count} minuto} other{hace {count} minutos}}",
   "timeAgoHours": "{count, plural, one{hace {count} hora} other{hace {count} horas}}",
   "timeAgoDays": "{count, plural, one{hace {count} día} other{hace {count} días}}",
-  "guardianTabTalk": "Historias"
+  "guardianTabTalk": "Historias",
+  "routineProgressRingPercentLabel": "{percent}% hecho",
+  "routineProgressRingDoneLabel": "Todo hecho"
 }

@@ -70,33 +70,40 @@ class ConsentRow extends StatelessWidget {
       child: Row(
         children: [
           // 체크 + 배지를 한 덩어리로 누른다 (88×50). 체크(20)만 받으면 좁다.
-          AppPressable(
-            onTap: onToggle,
-            child: SizedBox(
-              width: (_checkLeft + _checkSize + _checkToBadge + _badgeSlot).w,
-              height: double.infinity,
-              child: Row(
-                children: [
-                  SizedBox(width: _checkLeft.w),
-                  ElumCheckCircle(isChecked: isChecked, size: _checkSize),
-                  SizedBox(width: _checkToBadge.w),
-                  SizedBox(
-                    width: _badgeSlot.w,
-                    child: Text(
-                      item.required
-                          ? context.l10n.consentRequiredTag
-                          : context.l10n.consentOptionalTag,
-                      maxLines: 1,
-                      softWrap: false,
-                      // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다
-                      style: context.typo.consentBadge.copyWith(
-                        color: item.required
-                            ? colors.checkDone
-                            : colors.textSecondary,
+          // 낭독기: 약관 이름 + 배지(필수·선택) + 켜짐 상태. 없으면 "필수"만 들려 어느 약관인지 모른다
+          Semantics(
+            container: true,
+            button: true,
+            checked: isChecked,
+            label: item.label,
+            child: AppPressable(
+              onTap: onToggle,
+              child: SizedBox(
+                width: (_checkLeft + _checkSize + _checkToBadge + _badgeSlot).w,
+                height: double.infinity,
+                child: Row(
+                  children: [
+                    SizedBox(width: _checkLeft.w),
+                    ElumCheckCircle(isChecked: isChecked, size: _checkSize),
+                    SizedBox(width: _checkToBadge.w),
+                    SizedBox(
+                      width: _badgeSlot.w,
+                      child: Text(
+                        item.required
+                            ? context.l10n.consentRequiredTag
+                            : context.l10n.consentOptionalTag,
+                        maxLines: 1,
+                        softWrap: false,
+                        // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다
+                        style: context.typo.consentBadge.copyWith(
+                          color: item.required
+                              ? colors.checkDone
+                              : colors.textSecondary,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -113,8 +120,10 @@ class ConsentRow extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         // Figma가 #000000이다. textPrimary(#242634)가 아니다.
-                        style: context.typo.consentLabel
-                            .copyWith(color: colors.chipLabel, height: 1.3),
+                        style: context.typo.consentLabel.copyWith(
+                          color: colors.chipLabel,
+                          height: 1.3,
+                        ),
                       ),
                     ),
                     // Material 아이콘은 형태가 다르다 — 시안과 같은 SVG를 쓴다

@@ -3291,4 +3291,12 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String routineProgressRingPercentLabel(int percent) {
+    return '已完成 $percent%';
+  }
+
+  @override
+  String get routineProgressRingDoneLabel => '全部完成';
 }

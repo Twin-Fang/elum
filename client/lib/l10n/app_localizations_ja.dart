@@ -3297,4 +3297,12 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String routineProgressRingPercentLabel(int percent) {
+    return '$percent% できました';
+  }
+
+  @override
+  String get routineProgressRingDoneLabel => 'ぜんぶできました';
 }

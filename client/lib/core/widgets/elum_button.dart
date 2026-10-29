@@ -48,24 +48,35 @@ class ElumButton extends StatelessWidget {
 
     // 눌림 반응은 AppPressable이 담당한다 (docs/motion.md).
     // ripple 대신 scale로 통일해 앱 전체 터치 피드백을 맞춘다.
-    final button = AppPressable(
-      onTap: loading ? null : onPressed,
-      child: Container(
-        width: double.infinity,
-        height: space.buttonH.h,
-        decoration: BoxDecoration(
-          color: backgroundColor ??
-              (isEnabled ? colors.buttonEnabled : colors.buttonDisabled),
-          borderRadius: BorderRadius.circular(space.buttonRadius.r),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: (labelStyle ?? context.typo.button).copyWith(
-            color: labelColor ??
-                (isEnabled
-                    ? colors.buttonEnabledText
-                    : colors.buttonDisabledText),
+    // 시안 높이는 최소값. 큰 글자로 문구가 줄바꿈되면 버튼이 늘어난다 (기본 크기에서는 66 그대로)
+    // 낭독기: 버튼 역할 · 누를 수 있는지 (container 로 아래 탭 동작을 이 노드에 모은다)
+    final button = Semantics(
+      container: true,
+      button: true,
+      enabled: isEnabled,
+      child: AppPressable(
+        onTap: loading ? null : onPressed,
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(minHeight: space.buttonH.h),
+          padding: EdgeInsets.symmetric(vertical: space.xs.h),
+          decoration: BoxDecoration(
+            color:
+                backgroundColor ??
+                (isEnabled ? colors.buttonEnabled : colors.buttonDisabled),
+            borderRadius: BorderRadius.circular(space.buttonRadius.r),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: (labelStyle ?? context.typo.button).copyWith(
+              color:
+                  labelColor ??
+                  (isEnabled
+                      ? colors.buttonEnabledText
+                      : colors.buttonDisabledText),
+            ),
           ),
         ),
       ),

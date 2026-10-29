@@ -78,6 +78,11 @@ material_wrappers:
   lib/core/widgets/elum_spinner.dart: "로딩 표시 단일 위젯"
   lib/core/widgets/elum_pull_to_refresh.dart: "당겨서 새로고침 단일 위젯 (실패 팝업 · 색 토큰 · 당김 물리값)"
 
+# 글자 배율을 직접 다뤄도 되는 파일 (그 밖은 text-scale 위반 · 화면은 AppTextScale.scaledBy 를 쓴다)
+text_scale_owners:
+  lib/core/layout/app_text_scale.dart: "앱 글자 배율 원본 (시스템 1.0~2.0 × 폭 배율)"
+  lib/core/logger/app_log_header.dart: "의견 보내기 진단에 기기 글자 배율 값을 적기만 한다"
+
 # 쓰는 곳을 묶어 둔 토큰 — 이 파일 밖에서 쓰면 위반 (그림 색이 UI 강조로 번지는 것을 막는다)
 restricted_tokens:
   brandOrange:

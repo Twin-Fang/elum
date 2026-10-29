@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
 
 /// 일과 진행률 링 (Figma 356:4688 / 356:5079 — 40×40, stroke 4).
@@ -32,10 +33,28 @@ class RoutineProgressRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final value = progress.clamp(0.0, 1.0);
     final isDone = value >= 1.0;
+    final percent = (value * 100).round();
 
+    // 낭독 이름 (진행 중 `N% 했어요`, 다 함 `다 했어요`). 다 한 링은 그림뿐이라 이름이 없으면 아무것도 안 읽힌다
+    return Semantics(
+      label: isDone
+          ? context.l10n.routineProgressRingDoneLabel
+          : context.l10n.routineProgressRingPercentLabel(percent),
+      child: ExcludeSemantics(
+        child: _buildRing(context, value, isDone, percent),
+      ),
+    );
+  }
+
+  Widget _buildRing(
+    BuildContext context,
+    double value,
+    bool isDone,
+    int percent,
+  ) {
+    final colors = context.colors;
     // 원형이라 가로세로 모두 .w — 화면비가 달라도 원은 원이어야 한다
     return SizedBox(
       width: _size.w,
@@ -86,7 +105,7 @@ class RoutineProgressRing extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      '${(value * 100).round()}%',
+                      '$percent%',
                       maxLines: 1,
                       softWrap: false,
                       style: context.typo.ringPercent.copyWith(
