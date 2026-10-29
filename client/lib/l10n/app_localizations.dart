@@ -5678,10 +5678,10 @@ abstract class AppLocalizations {
   /// **'올릴 수 있는 일과가 없어요'**
   String get talkSharePickEmpty;
 
-  /// 올릴 일과가 없을 때 설명
+  /// 올릴 일과가 없을 때 설명. 예시는 고치면 올릴 수 있다 (#983)
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 예시, 이야기에서 가져온 일과는 빠져요.'**
+  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
   String get talkSharePickEmptyHint;
 
   /// 올릴 일과 목록 실패 안내

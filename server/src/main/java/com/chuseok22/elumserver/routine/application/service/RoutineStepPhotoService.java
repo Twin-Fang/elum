@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <p><b>AI 를 부르지 않고 크레딧도 쓰지 않는다.</b> 그래서 크레딧 서비스를 주입받지 않는다 — 쓸 수 없게
  * 두는 것이 "타지 않는다"를 가장 확실하게 지킨다.
  *
- * <p>순서: 권한·카드 확인 → 검증·재인코딩 → 새 파일 저장 → DB 경로 갱신 → (롤백이면 새 파일 삭제 /
+ * <p>순서: 권한·카드 확인 → 검증·재인코딩 → 새 파일 저장 → DB 경로 갱신·예시 표시 지움 → (롤백이면 새 파일 삭제 /
  * 커밋이면 옛 파일 삭제). 파일을 먼저 쓰고 DB 를 나중에 고치므로, 어느 단계가 실패해도 카드는 옛 그림을
  * 그대로 가리킨다.
  */
@@ -60,6 +60,8 @@ public class RoutineStepPhotoService {
 
     String oldKey = step.getImagePath();
     step.setImagePath(newKey);
+    // 보호자가 그림을 바꿈 > 예시 표시 지움 (#983, 롤백이면 그대로)
+    RoutineRules.clearExampleMark(routine);
     deleteOldAfterCommit(oldKey, stepId);
 
     return RoutineStepResponse.from(step);

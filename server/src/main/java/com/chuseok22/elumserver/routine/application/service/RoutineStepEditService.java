@@ -78,8 +78,9 @@ public class RoutineStepEditService {
     if (request.stepOrder() != null) {
       moveStep(steps, targetStep, request.stepOrder());
     }
-    // 읽을 문장이 바뀌면 옛 음성 버리고 다시 만듦 (순서만 바꾸면 그대로)
+    // 읽을 문장이 바뀌면 옛 음성 버리고 다시 만듦 + 예시 표시 지움 (순서만 바꾸면 그대로, #983)
     if (!speechTextBefore.equals(RoutineStepSpeechText.of(targetStep.getTitle(), targetStep.getDescription()))) {
+      RoutineRules.clearExampleMark(routine);
       routineStepSpeechQueue.deleteSpeechAfterCommit(targetStep.getSpeechPath());
       targetStep.setSpeechPath(null);
       routineStepSpeechQueue.enqueueAfterCommit(targetStep.getId());
@@ -207,6 +208,8 @@ public class RoutineStepEditService {
     step.setCompleted(false);
     steps.add(step);
     renumberSteps(steps);
+    // 보호자가 쓴 새 카드 문장이 생김 > 예시 표시 지움 (#983)
+    RoutineRules.clearExampleMark(routine);
 
     // 카드가 늘면 "전부 완료" 상태가 깨진다 — COMPLETED였다면 CONFIRMED로 되돌린다.
     refreshCompletionStatus(routine);

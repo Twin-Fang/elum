@@ -86,7 +86,8 @@ public record RoutineResponse(
     nullable = true)
   String sourceRoutineId,
 
-  @Schema(description = "온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 '예시' 표시", example = "false")
+  @Schema(description = "온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 '예시' 표시. "
+    + "true 면 이야기에 올릴 수 없음. 보호자가 제목·카드 글·그림을 고치거나 카드를 더하면 false (#983)", example = "false")
   boolean isExample,
 
   @Schema(description = "이 원본이 속한 일과관리 묶음 ID (#806). 묶음 밖이면 null", nullable = true)

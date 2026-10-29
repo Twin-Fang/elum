@@ -12,8 +12,10 @@ import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineReposit
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /// 일과 서비스들이 함께 쓰는 규칙. 상태가 없어 정적 메서드로 둔다.
+@Slf4j
 final class RoutineRules {
 
   private RoutineRules() {
@@ -95,6 +97,18 @@ final class RoutineRules {
     List<String> stepIds = routine.getSteps().stream().map(RoutineStep::getId).toList();
     routineRepository.delete(routine);
     routineStepSpeechQueue.deleteStepsAfterCommit(stepIds);
+  }
+
+  /**
+   * 보호자가 예시 일과의 글·그림을 고침 > 예시 표시 지움 (#983). 이후 일반 일과처럼 이야기에 올릴 수 있음
+   * 고침 4개: 일과 제목, 카드 제목·설명, 카드 사진, 카드 추가. 카드 삭제·순서·보상은 예시 글 그대로라 제외
+   */
+  static void clearExampleMark(Routine routine) {
+    if (!Boolean.TRUE.equals(routine.getIsExample())) {
+      return;
+    }
+    routine.setIsExample(false);
+    log.info("[routine example] edited : example mark cleared, routineId={}", routine.getId());
   }
 
   static int countCompleted(List<RoutineStep> steps) {
