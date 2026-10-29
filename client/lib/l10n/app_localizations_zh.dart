@@ -2883,7 +2883,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkDetailLoadFailed => '没能加载帖子';
 
   @override
-  String get talkPostGoneTitle => '这个帖子已下架';
+  String get talkPostGoneTitle => '这个帖子已无法查看';
 
   @override
   String get talkPostGoneBack => '返回故事区';
@@ -3204,6 +3204,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get talkMenuViewMyPost => '查看我的帖子';
+
+  @override
+  String get talkLinkSend => '用链接发送';
+
+  @override
+  String get talkLinkTurnOff => '关闭链接';
+
+  @override
+  String get talkLinkConfirmTitle => '要用链接发送这个日程吗?';
+
+  @override
+  String get talkLinkConfirmGuide => '只有收到链接的人才能看到，不会发到故事区。\n发送后也可以在日程管理里关闭链接';
+
+  @override
+  String get talkLinkResendGuide =>
+      '已经发送过链接。会按第一次发送时的样子再次发送同一个链接。\n要发送修改后的内容，请先关闭链接再重新发送';
+
+  @override
+  String get talkLinkPhotoTitle => '照片要怎么发送?';
+
+  @override
+  String get talkLinkPhotoGuide => '如果能看到脸、名字或住址，请模糊处理。\nAI生成的图片会原样显示';
+
+  @override
+  String get talkLinkCreateButton => '生成链接';
+
+  @override
+  String get talkLinkPreviewFailed => '无法加载要发送的内容';
+
+  @override
+  String get talkLinkCreateFailedTitle => '无法生成链接';
+
+  @override
+  String get talkLinkCreated => '已生成链接';
+
+  @override
+  String talkLinkShareMessage(String title, String url) {
+    return '$title\n在elum里把这个日程拿去用吧\n\n$url';
+  }
+
+  @override
+  String get talkLinkTurnOffTitle => '要关闭链接吗?';
+
+  @override
+  String get talkLinkTurnOffMessage => '收到链接的人将无法再查看。已经拿去的日程会保留';
+
+  @override
+  String get talkLinkTurnOffDone => '已关闭链接';
+
+  @override
+  String get talkLinkTurnOffFailedTitle => '无法关闭链接';
+
+  @override
+  String get talkLinkReceivedTitle => '收到的日程';
 
   @override
   String get timeAgoJustNow => '刚刚';

@@ -20,6 +20,7 @@ import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewRespons
 import com.chuseok22.elumserver.talk.application.dto.response.TalkPreviewResponse.PreviewStep;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.core.TalkTextRules;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
@@ -80,7 +81,7 @@ public class TalkPostService {
   }
 
   /**
-   * 올리기: 규칙 동의 > 분류·한마디 정리 > 스냅샷 > 중복 확인 > 이름 가리기 > 금칙어 > 글 저장 > 카드·그림 저장
+   * 올리기: 규칙 동의 > 분류·한마디 정리 > 스냅샷 > 중복 확인 > 스냅샷 글 저장
    */
   @Transactional
   public TalkPostCreatedResponse create(Caller caller, TalkPostCreateRequest request) {
@@ -91,27 +92,46 @@ public class TalkPostService {
     TalkCategory category = TalkCategory.parse(request.category());
     String note = TalkTextRules.normalizeNote(request.note());
 
-    // 올릴 수 있는 일과인지 (스냅샷, 같은 원본 중복)
+    // 올릴 수 있는 일과인지 (스냅샷, 같은 원본의 공개 글 중복)
     RoutineShareSnapshot snapshot = snapshotOf(caller, request.routineId());
-    if (talkPostRepository.existsBySourceRoutineIdAndStatus(snapshot.originalRoutineId(), TalkPostStatus.VISIBLE)) {
+    if (talkPostRepository.existsBySourceRoutineIdAndStatusAndVisibility(
+      snapshot.originalRoutineId(), TalkPostStatus.VISIBLE, TalkPostVisibility.PUBLIC)) {
       throw new CustomException(ErrorCode.TALK_ALREADY_SHARED);
     }
 
+    TalkPost post = saveSnapshotPost(caller, snapshot,
+      new SnapshotPostOptions(category, note, TalkPostVisibility.PUBLIC, request.blurredStepIds()));
+    log.info("[talk post] created : stepCount={}", post.getStepCount());
+    return new TalkPostCreatedResponse(post.getId());
+  }
+
+  /**
+   * 스냅샷 글 저장 (공개 글·링크 글 공통): 이름 가리기 > 금칙어 > 글 저장 > 카드·그림 저장
+   * 호출부가 권한·중복을 확인한 뒤 부름, 호출부 트랜잭션 안에서 돎 (그림 단계 실패 시 쓴 파일 정리 후 예외)
+   */
+  public TalkPost saveSnapshotPost(Caller caller, RoutineShareSnapshot snapshot, SnapshotPostOptions options) {
     // 이름 가리기 > 금칙어 (가린 뒤 글 기준)
-    MaskedPost masked = maskNames(snapshot, note);
+    MaskedPost masked = maskNames(snapshot, options.note());
     rejectBlockedWords(masked);
 
-    // 글 저장 > 카드·그림 저장 (그림 단계 실패 시 쓴 파일 정리 후 롤백)
-    TalkPost post = saveNewPost(newPost(caller, snapshot, masked, category));
-    Set<String> blurredStepIds = request.blurredStepIds() == null ? Set.of() : new HashSet<>(request.blurredStepIds());
+    // 글 저장 > 카드·그림 저장
+    TalkPost post = saveNewPost(newPost(caller, snapshot, masked, options));
+    Set<String> blurredStepIds = options.blurredStepIds() == null ? Set.of() : new HashSet<>(options.blurredStepIds());
     try {
       talkPostStepRepository.saveAll(newSteps(post.getId(), masked.steps(), blurredStepIds));
     } catch (RuntimeException e) {
       deleteWrittenImagesQuietly(post.getId());
       throw e;
     }
-    log.info("[talk post] created : stepCount={}", post.getStepCount());
-    return new TalkPostCreatedResponse(post.getId());
+    return post;
+  }
+
+  /**
+   * 스냅샷 글 선택값: 분류(링크 글은 null), 한마디(없으면 null), 공개 범위, 흐리게 고른 카드 id(없으면 null)
+   */
+  public record SnapshotPostOptions(
+    TalkCategory category, String note, TalkPostVisibility visibility, List<String> blurredStepIds) {
+
   }
 
   /**
@@ -209,7 +229,7 @@ public class TalkPostService {
     return routineShareService.snapshotForShare(caller, routineId);
   }
 
-  // 저장 + 즉시 반영: 같은 원본의 보이는 글이 동시에 올라오면 V52 부분 유니크 인덱스가 막음 > TALK_ALREADY_SHARED
+  // 저장 + 즉시 반영: 같은 원본·공개 범위의 보이는 글이 동시에 올라오면 V59 부분 유니크 인덱스가 막음 > TALK_ALREADY_SHARED
   private TalkPost saveNewPost(TalkPost post) {
     try {
       return talkPostRepository.saveAndFlush(post);
@@ -301,16 +321,17 @@ public class TalkPostService {
   }
 
   private static TalkPost newPost(Caller caller, RoutineShareSnapshot snapshot, MaskedPost masked,
-    TalkCategory category) {
+    SnapshotPostOptions options) {
     TalkPost post = new TalkPost();
     post.setAuthorMemberId(caller.memberId());
     post.setSourceRoutineId(snapshot.originalRoutineId());
     post.setTitle(masked.title());
     post.setNote(masked.note());
-    post.setCategory(category);
+    post.setCategory(options.category());
     post.setLanguage(snapshot.language());
     post.setStepCount(masked.steps().size());
     post.setStatus(TalkPostStatus.VISIBLE);
+    post.setVisibility(options.visibility());
     return post;
   }
 

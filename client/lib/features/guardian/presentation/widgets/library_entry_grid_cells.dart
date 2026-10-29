@@ -273,6 +273,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
             context,
             routine,
             sharedPostIdBySourceRoutineId: widget.sharedPostIdBySourceRoutineId,
+            linkPostIdBySourceRoutineId: widget.linkPostIdBySourceRoutineId,
           ),
         ),
       final LibraryGroupEntry group => AnchoredQuickMenuView<GroupMenuAction>(

@@ -2,6 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <!--
   이야기 글 공유 페이지 (/s/{글id}). 메신저 미리보기(OG) + 앱 열기 + 스토어 안내.
+  링크 글(post.linkOnly)은 이야기에 오르지 않은 글이라 분류 칩·'이야기' 이름을 빼고 그린다.
   글 값(제목·한마디)은 th:text·th:content 로만 넣는다 — 자동 이스케이프.
   색은 docs/public-pages/invite/index.html 과 같은 팔레트.
 -->
@@ -12,7 +13,7 @@
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="referrer" content="no-referrer"/>
 
-  <title th:text="${post != null} ? ${post.title} + ' · 이룸 이야기' : '이룸 ELUM'">이룸 ELUM</title>
+  <title th:text="${post != null} ? ${post.title} + (${post.linkOnly} ? ' · 이룸' : ' · 이룸 이야기') : '이룸 ELUM'">이룸 ELUM</title>
   <meta name="description"
         th:content="${post != null} ? (${post.notePreview} ?: '카드 ' + ${post.stepCount} + '장으로 만든 일과예요') : '하루 일과를 행동 카드로 한 장씩'"/>
 
@@ -61,14 +62,14 @@
 </head>
 <body>
 <main>
-  <p class="brand">이룸 이야기</p>
+  <p class="brand" th:text="${post != null and post.linkOnly} ? '이룸' : '이룸 이야기'">이룸 이야기</p>
 
   <!-- 볼 수 있는 글 -->
   <th:block th:if="${post != null}">
     <article class="card">
       <img class="thumb" th:src="${imageUrl}" alt=""/>
       <div class="body">
-        <span class="chip" th:text="${post.categoryLabel}">하루 순서</span>
+        <span class="chip" th:if="${post.categoryLabel != null}" th:text="${post.categoryLabel}">하루 순서</span>
         <h1 th:text="${post.title}">일과 제목</h1>
         <p class="note" th:if="${post.notePreview != null}" th:text="${post.notePreview}">한마디</p>
         <p class="count" th:text="'카드 ' + ${post.stepCount} + '장'">카드 3장</p>

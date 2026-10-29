@@ -9,6 +9,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
+import '../../talk/application/talk_my_links_provider.dart';
 import '../../talk/application/talk_my_shared_posts_provider.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -26,6 +27,7 @@ import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
+import 'routine_link_flow.dart';
 import 'routine_rename_flow.dart';
 import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
@@ -89,6 +91,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       anchor: anchor.rect,
       highlight: anchor.tile,
       sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
+      linkPostIdBySourceRoutineId: _linkPostIdBySourceRoutineId,
     );
     await _runMenuAction(routine, action);
   }
@@ -100,6 +103,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       context,
       routine,
       sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
+      linkPostIdBySourceRoutineId: _linkPostIdBySourceRoutineId,
     ),
   );
 
@@ -110,6 +114,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 이야기에 올린 글(원본 일과 id > 글 id). 불러오는 중이거나 실패하면 빈 맵으로 본다
   Map<String, String> get _sharedPostIdBySourceRoutineId =>
       ref.read(talkMySharedPostsProvider).value ?? const {};
+
+  /// 켜진 링크(원본 일과 id > 링크 글 id). 불러오는 중이거나 실패하면 빈 맵 (보내기는 서버가 있는 링크를 돌려준다)
+  Map<String, String> get _linkPostIdBySourceRoutineId =>
+      ref.read(talkMyLinksProvider).value ?? const {};
 
   /// 이야기로: 이미 올린 일과면 내 글 상세, 아니면 올리기 (올리기 중복은 서버도 막는다)
   void _shareToTalk(Routine routine) {
@@ -137,6 +145,17 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await _copy(routine);
       case LibraryMenuAction.shareToTalk:
         _shareToTalk(routine);
+      case LibraryMenuAction.sendLink:
+        openRoutineLinkShare(
+          context,
+          routine,
+          hasActiveLink: _linkPostIdBySourceRoutineId.containsKey(routine.id),
+        );
+      case LibraryMenuAction.turnOffLink:
+        final linkPostId = _linkPostIdBySourceRoutineId[routine.id];
+        if (linkPostId != null) {
+          await turnOffRoutineLink(context, ref, linkPostId: linkPostId);
+        }
       case LibraryMenuAction.remove:
         await _remove(routine);
     }
@@ -309,9 +328,11 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
-    // 메뉴가 열릴 때 올린 글을 알도록 미리 받아 둔다 (autoDispose 라 보는 동안만 유지)
+    // 메뉴가 열릴 때 올린 글·켜진 링크를 알도록 미리 받아 둔다 (autoDispose 라 보는 동안만 유지)
     final sharedPostIdBySourceRoutineId =
         ref.watch(talkMySharedPostsProvider).value ?? const <String, String>{};
+    final linkPostIdBySourceRoutineId =
+        ref.watch(talkMyLinksProvider).value ?? const <String, String>{};
     final scrollTargetRoutineId = ref.watch(
       libraryScrollTargetRoutineIdProvider,
     );
@@ -340,6 +361,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
         scrollTargetRoutineId: scrollTargetRoutineId,
         sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+        linkPostIdBySourceRoutineId: linkPostIdBySourceRoutineId,
         onScrollTargetHandled: _clearScrollTarget,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(

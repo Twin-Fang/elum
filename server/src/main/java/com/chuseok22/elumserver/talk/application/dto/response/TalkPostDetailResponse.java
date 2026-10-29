@@ -14,7 +14,7 @@ public record TalkPostDetailResponse(
   boolean isMine,
   @Schema(description = "글 제목(이룸이 이름을 가린 뒤)")
   String title,
-  @Schema(description = "분류 6개: SELF_CARE, DAILY_FLOW, HOUSEHOLD, COMMUNITY, LEARNING, FEELINGS")
+  @Schema(description = "분류 6개: SELF_CARE, DAILY_FLOW, HOUSEHOLD, COMMUNITY, LEARNING, FEELINGS. 링크 글은 null")
   String category,
   @Schema(description = "카드 수")
   int stepCount,
@@ -33,7 +33,9 @@ public record TalkPostDetailResponse(
   @Schema(description = "내가 도움이 됐어요를 눌렀는가")
   boolean isHelpfulByMe,
   @Schema(description = "내가 일과관리로 가져갔는가")
-  boolean isImportedByMe
+  boolean isImportedByMe,
+  @Schema(description = "링크로만 보이는 글인가. true 면 도움이 됐어요·댓글이 없다")
+  boolean isLinkOnly
 ) {
 
   @Schema(description = "상세의 카드 1장")

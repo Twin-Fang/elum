@@ -60,11 +60,11 @@ public class TalkReactionService {
   private final ApplicationEventPublisher eventPublisher;
 
   /**
-   * 도움이 됐어요 누르기: 읽을 수 있는 글 확인(차단·정지 글쓴이 제외) > 이미 눌렀으면 그대로 끝 > 기록 저장 > 수 +1
+   * 도움이 됐어요 누르기: 읽을 수 있는 공개 글 확인(차단·정지 글쓴이·링크 글 제외) > 이미 눌렀으면 그대로 끝 > 기록 저장 > 수 +1
    * 트랜잭션 밖에서 저장해야 동시에 눌려 유니크가 겹쳐도 잡고 넘어갈 수 있음 (그 경우 수는 올리지 않음)
    */
   public void markHelpful(Caller caller, String postId) {
-    talkPostAccess.requireReadablePost(caller, postId);
+    talkPostAccess.requireReadablePublicPost(caller, postId);
     if (talkHelpfulRepository.existsByPostIdAndMemberId(postId, caller.memberId())) {
       return;
     }
@@ -143,7 +143,7 @@ public class TalkReactionService {
   }
 
   /**
-   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 읽을 수 있는 글 확인 > 저장 > 댓글 수 +1 > 글쓴이 알림 이벤트
+   * 댓글 쓰기: 이용 규칙 동의 > 정리(빈 값, 300자) > 금칙어 > 읽을 수 있는 공개 글 확인 > 저장 > 댓글 수 +1 > 글쓴이 알림 이벤트
    * 이룸이 호칭은 가리지 않음
    */
   @Transactional
@@ -157,7 +157,7 @@ public class TalkReactionService {
       log.warn("[talk comment] rejected 400 : blocked word in text");
       throw new CustomException(ErrorCode.TALK_TEXT_NOT_ALLOWED);
     }
-    TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
+    TalkPost post = talkPostAccess.requireReadablePublicPost(caller, postId);
 
     // 저장 > 댓글 수
     TalkComment comment = new TalkComment();

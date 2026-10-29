@@ -245,6 +245,8 @@ enum ServerErrorCode {
   talkReportDuplicated('TALK_REPORT_DUPLICATED'),
   talkCannotBlockSelf('TALK_CANNOT_BLOCK_SELF'),
   talkImageNotFound('TALK_IMAGE_NOT_FOUND'),
+  talkLinkRoutineNotMine('TALK_LINK_ROUTINE_NOT_MINE'),
+  talkLinkRoutineNotShareable('TALK_LINK_ROUTINE_NOT_SHAREABLE'),
 
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.

@@ -13,7 +13,16 @@ import '../../../../shared/models/routine.dart';
 import 'anchored_quick_menu.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
-enum LibraryMenuAction { send, rename, addToGroup, copy, shareToTalk, remove }
+enum LibraryMenuAction {
+  send,
+  rename,
+  addToGroup,
+  copy,
+  shareToTalk,
+  sendLink,
+  turnOffLink,
+  remove,
+}
 
 /// 일과관리 묶음(폴더)을 길게 눌렀을 때 고르는 동작 (#807)
 enum GroupMenuAction { send, rename, reorder, copy, ungroup }
@@ -22,12 +31,14 @@ enum GroupMenuAction { send, rename, reorder, copy, ungroup }
 ///
 /// 이름 바꾸기·지우기는 만든 사람만 할 수 있어 서버도 막지만, 누를 수 없는 줄은 처음부터 보이지 않는다.
 /// [sharedPostIdBySourceRoutineId] 는 이야기에 올린 글(원본 일과 id > 글 id), 올린 일과면 `내 글 보기` 줄이 된다.
+/// [linkPostIdBySourceRoutineId] 는 켜진 링크(원본 일과 id > 링크 글 id), 있으면 `링크 끄기` 줄이 붙는다.
 Future<LibraryMenuAction?> showLibraryQuickMenu(
   BuildContext context,
   Routine routine, {
   required Rect anchor,
   required Widget highlight,
   Map<String, String> sharedPostIdBySourceRoutineId = const {},
+  Map<String, String> linkPostIdBySourceRoutineId = const {},
 }) => showAnchoredQuickMenu(
   context,
   anchor: anchor,
@@ -36,6 +47,7 @@ Future<LibraryMenuAction?> showLibraryQuickMenu(
     context,
     routine,
     sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+    linkPostIdBySourceRoutineId: linkPostIdBySourceRoutineId,
   ),
 );
 
@@ -44,6 +56,7 @@ Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
   BuildContext context,
   Routine routine, {
   Map<String, String> sharedPostIdBySourceRoutineId = const {},
+  Map<String, String> linkPostIdBySourceRoutineId = const {},
 }) => showQuickMenuSheet(
   context,
   title: routine.displayTitle,
@@ -51,6 +64,7 @@ Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
     context,
     routine,
     sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+    linkPostIdBySourceRoutineId: linkPostIdBySourceRoutineId,
   ),
 );
 
@@ -59,12 +73,16 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
   BuildContext context,
   Routine routine, {
   Map<String, String> sharedPostIdBySourceRoutineId = const {},
+  Map<String, String> linkPostIdBySourceRoutineId = const {},
 }) {
   final l10n = context.l10n;
   final isMine = routine.isEditableByMe;
-  // 예시 일과 · 이야기에서 가져온 일과는 올릴 수 없다
+  // 예시 일과 · 이야기·링크에서 가져온 일과는 올릴 수 없다
   final canShareToTalk = !routine.isExample && routine.talkPostId == null;
   final hasSharedPost = sharedPostIdBySourceRoutineId.containsKey(routine.id);
+  // 링크는 내가 만든 일과만 보낸다 (공유 불가 조건은 이야기와 같다, 서버도 막음)
+  final canSendLink = isMine && canShareToTalk;
+  final hasActiveLink = linkPostIdBySourceRoutineId.containsKey(routine.id);
   return [
     (
       value: LibraryMenuAction.send,
@@ -97,6 +115,21 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
         icon: AppAssets.iconBook,
         label: hasSharedPost ? l10n.talkMenuViewMyPost : l10n.talkMenuShare,
         isDanger: false,
+      ),
+    if (canSendLink)
+      (
+        value: LibraryMenuAction.sendLink,
+        icon: AppAssets.iconShare,
+        label: l10n.talkLinkSend,
+        isDanger: false,
+      ),
+    // 켜진 링크는 보내기 줄과 따로 본다 (보낼 수 없는 상태가 되어도 끌 수 있게)
+    if (isMine && hasActiveLink)
+      (
+        value: LibraryMenuAction.turnOffLink,
+        icon: AppAssets.iconEyeCrossed,
+        label: l10n.talkLinkTurnOff,
+        isDanger: true,
       ),
     if (isMine)
       (

@@ -69,7 +69,8 @@ class TalkImportServiceTest {
   @BeforeEach
   void setUp() {
     talkImportService = new TalkImportService(
-      new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService), talkPostRepository, talkPostStepRepository, talkImportRepository, talkBlockRepository, talkImageStorage,
+      new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService, routineShareService),
+      talkPostRepository, talkPostStepRepository, talkImportRepository, talkBlockRepository, talkImageStorage,
       routineShareService, eventPublisher);
   }
 

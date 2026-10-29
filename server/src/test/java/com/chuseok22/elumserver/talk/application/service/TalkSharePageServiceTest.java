@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
 import com.chuseok22.elumserver.talk.application.dto.response.TalkSharePage;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import com.chuseok22.elumserver.talk.core.TalkPostStatus;
+import com.chuseok22.elumserver.talk.core.TalkPostVisibility;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPost;
 import com.chuseok22.elumserver.talk.infrastructure.entity.TalkPostStep;
 import com.chuseok22.elumserver.talk.infrastructure.repository.TalkBlockRepository;
@@ -35,7 +37,10 @@ class TalkSharePageServiceTest {
 
   private static final String POST_ID = "0b6f6b1e-3c1a-4f7e-9d7a-2a4c5e6f7a8b";
   private static final String AUTHOR_ID = "author-1";
+  private static final String SOURCE_ROUTINE_ID = "routine-1";
 
+  @Mock
+  private RoutineShareService routineShareService;
   @Mock
   private TalkPostRepository talkPostRepository;
   @Mock
@@ -51,7 +56,8 @@ class TalkSharePageServiceTest {
 
   @BeforeEach
   void setUp() {
-    TalkPostAccess talkPostAccess = new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService);
+    TalkPostAccess talkPostAccess =
+      new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService, routineShareService);
     service = new TalkSharePageService(talkPostAccess, talkPostStepRepository, talkImageStorage);
   }
 
@@ -88,6 +94,29 @@ class TalkSharePageServiceTest {
   }
 
   @Test
+  @DisplayName("보낸 사람이 끈 링크(내린 글)는 빈 결과 — 끈 링크로 일과를 계속 볼 수 없다")
+  void page_turnedOffLink_returnsEmpty() {
+    when(talkPostRepository.findById(POST_ID)).thenReturn(Optional.of(linkPost(TalkPostStatus.DELETED)));
+
+    assertThat(service.page(POST_ID)).isEmpty();
+    assertThat(service.thumbnail(POST_ID)).isEmpty();
+  }
+
+  @Test
+  @DisplayName("원본 일과를 지웠거나 보낸 사람 연결이 끊긴 링크는 빈 결과, 살아 있으면 분류 없이 링크 글로 싣는다")
+  void page_linkWithUnavailableSource_returnsEmpty() {
+    when(talkPostRepository.findById(POST_ID)).thenReturn(Optional.of(linkPost(TalkPostStatus.VISIBLE)));
+    when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of());
+    when(routineShareService.isLinkSourceAvailable(SOURCE_ROUTINE_ID, AUTHOR_ID)).thenReturn(false, true);
+
+    assertThat(service.page(POST_ID)).isEmpty();
+    Optional<TalkSharePage> alive = service.page(POST_ID);
+    assertThat(alive).isPresent();
+    assertThat(alive.get().linkOnly()).isTrue();
+    assertThat(alive.get().categoryLabel()).isNull();
+  }
+
+  @Test
   @DisplayName("UUID 모양이 아닌 id 는 DB 를 보지 않고 빈 결과")
   void page_malformedId_skipsLookup() {
     assertThat(service.page("../../etc/passwd")).isEmpty();
@@ -116,6 +145,15 @@ class TalkSharePageServiceTest {
     when(talkImageStorage.read(POST_ID + "/1.jpg")).thenThrow(new CustomException(ErrorCode.TALK_IMAGE_NOT_FOUND));
 
     assertThat(service.thumbnail(POST_ID)).isEmpty();
+  }
+
+  // 링크 글: 분류·한마디 없음, 원본 일과 있음
+  private static TalkPost linkPost(TalkPostStatus status) {
+    TalkPost post = post(status, null);
+    post.setCategory(null);
+    post.setVisibility(TalkPostVisibility.LINK_ONLY);
+    post.setSourceRoutineId(SOURCE_ROUTINE_ID);
+    return post;
   }
 
   private static TalkPost post(TalkPostStatus status, String note) {

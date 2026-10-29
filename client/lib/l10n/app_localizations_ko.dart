@@ -2886,7 +2886,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get talkDetailLoadFailed => '글을 불러오지 못했어요';
 
   @override
-  String get talkPostGoneTitle => '내려간 글이에요';
+  String get talkPostGoneTitle => '더 볼 수 없는 글이에요';
 
   @override
   String get talkPostGoneBack => '이야기로 돌아가기';
@@ -3208,6 +3208,63 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get talkMenuViewMyPost => '내 글 보기';
+
+  @override
+  String get talkLinkSend => '링크로 보내기';
+
+  @override
+  String get talkLinkTurnOff => '링크 끄기';
+
+  @override
+  String get talkLinkConfirmTitle => '이 일과를 링크로 보낼까요?';
+
+  @override
+  String get talkLinkConfirmGuide =>
+      '링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과관리에서 링크를 끌 수 있어요';
+
+  @override
+  String get talkLinkResendGuide =>
+      '이미 보낸 링크가 있어요. 처음 보낸 모습 그대로 같은 링크를 다시 보내요.\n바꾼 내용을 보내려면 링크를 끄고 다시 보내 주세요';
+
+  @override
+  String get talkLinkPhotoTitle => '사진을 어떻게 보낼까요?';
+
+  @override
+  String get talkLinkPhotoGuide =>
+      '얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 보여요';
+
+  @override
+  String get talkLinkCreateButton => '링크 만들기';
+
+  @override
+  String get talkLinkPreviewFailed => '보낼 내용을 불러오지 못했어요';
+
+  @override
+  String get talkLinkCreateFailedTitle => '링크를 만들지 못했어요';
+
+  @override
+  String get talkLinkCreated => '링크를 만들었어요';
+
+  @override
+  String talkLinkShareMessage(String title, String url) {
+    return '$title\n이룸에서 이 일과를 가져가 보세요\n\n$url';
+  }
+
+  @override
+  String get talkLinkTurnOffTitle => '링크를 끌까요?';
+
+  @override
+  String get talkLinkTurnOffMessage =>
+      '링크를 받은 사람은 더 볼 수 없어요. 이미 가져간 일과는 그대로 남아요';
+
+  @override
+  String get talkLinkTurnOffDone => '링크를 껐어요';
+
+  @override
+  String get talkLinkTurnOffFailedTitle => '링크를 끄지 못했어요';
+
+  @override
+  String get talkLinkReceivedTitle => '받은 일과';
 
   @override
   String get timeAgoJustNow => '방금 전';

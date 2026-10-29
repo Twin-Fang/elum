@@ -148,6 +148,49 @@ class RoutineShareServiceTest {
   }
 
   @Test
+  @DisplayName("링크로 보내기: 같은 이룸이의 다른 보호자가 만든 일과는 TALK_LINK_ROUTINE_NOT_MINE (볼 수는 있어도 보낼 수 없다)")
+  void snapshotForLinkShare_otherGuardiansRoutine_rejected() {
+    Routine othersRoutine = routine("original-1", "버스 타기");
+    othersRoutine.setCreatedBy("member-2");
+    when(routineRepository.findById("original-1")).thenReturn(Optional.of(othersRoutine));
+
+    assertThatThrownBy(() -> routineShareService.snapshotForLinkShare(GUARDIAN, "original-1"))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_LINK_ROUTINE_NOT_MINE));
+  }
+
+  @Test
+  @DisplayName("링크 원본: 일과관리에서 지웠거나 보낸 사람이 이룸이 연결에서 빠지면 꺼진 것으로 본다")
+  void isLinkSourceAvailable_hiddenOrDisconnected_false() {
+    Routine hidden = routine("hidden-1", "지운 일과");
+    hidden.setLibraryHidden(true);
+    when(routineRepository.findById("hidden-1")).thenReturn(Optional.of(hidden));
+    when(routineRepository.findById("original-1")).thenReturn(Optional.of(routine("original-1", "버스 타기")));
+    when(profileAccessGuard.isGuardianOf("member-1", "profile-1")).thenReturn(false, true);
+
+    assertThat(routineShareService.isLinkSourceAvailable("hidden-1", "member-1")).isFalse();
+    assertThat(routineShareService.isLinkSourceAvailable("original-1", "member-1")).isFalse();
+    assertThat(routineShareService.isLinkSourceAvailable("original-1", "member-1")).isTrue();
+  }
+
+  @Test
+  @DisplayName("링크로 받은 일과는 받은 보호자가 만든 사람이 되고, 그 일과는 다시 링크로 보낼 수 없다")
+  void importToLibrary_fromLink_ownedByReceiverAndNotResendable() {
+    Caller receiver = Caller.guardian("receiver-1");
+    stubProfileAccess();
+    stubSaveAssigningStepIds();
+
+    routineShareService.importToLibrary(receiver, "profile-1", null, draft(step(0, null)));
+
+    Routine saved = savedRoutine();
+    assertThat(saved.getCreatedBy()).isEqualTo("receiver-1");
+    when(routineRepository.findById("saved-routine")).thenReturn(Optional.of(saved));
+    assertThatThrownBy(() -> routineShareService.snapshotForLinkShare(receiver, "saved-routine"))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_LINK_ROUTINE_NOT_SHAREABLE));
+  }
+
+  @Test
   @DisplayName("일과의 이룸이 호칭을 돌려주고, 지워진 일과·null id 는 null")
   void findProfileNickname_returnsNicknameOrNull() {
     when(routineRepository.findById("original-1")).thenReturn(Optional.of(routine("original-1", "버스 타기")));

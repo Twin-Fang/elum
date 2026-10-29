@@ -25,6 +25,7 @@ import '../../features/talk/presentation/talk_blocked_guardians_screen.dart';
 import '../../features/talk/presentation/talk_my_posts_screen.dart';
 import '../../features/talk/presentation/talk_detail_screen.dart';
 import '../../features/talk/presentation/talk_feed_screen.dart';
+import '../../features/talk/presentation/talk_link_share_screen.dart';
 import '../../features/talk/presentation/talk_share_screen.dart';
 import '../config/ad_ids.dart';
 import '../layout/adaptive_page_frame.dart';
@@ -118,6 +119,23 @@ List<RouteBase> guardianRoutes() => [
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),
+  // 링크로 보내기: extra 가 없으면 빈 id 로 열려 미리보기 실패 화면(다시 하기 + 에러 코드)이 뜬다
+  GoRoute(
+    path: Routes.guardianTalkLinkShare,
+    pageBuilder: (context, state) {
+      final args = state.extra is TalkLinkShareRouteArgs
+          ? state.extra as TalkLinkShareRouteArgs
+          : null;
+      return slidePage(
+        state,
+        TalkLinkShareScreen(
+          routineId: args?.routineId ?? '',
+          hasActiveLink: args?.hasActiveLink ?? false,
+        ),
+        layoutKind: ScreenLayoutKind.contentColumn,
+      );
+    },
+  ),
   GoRoute(
     path: Routes.guardianTalkBlocks,
     pageBuilder: (context, state) =>
@@ -125,7 +143,8 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianTalkMine,
-    pageBuilder: (context, state) => slidePage(state, const TalkMyPostsScreen()),
+    pageBuilder: (context, state) =>
+        slidePage(state, const TalkMyPostsScreen()),
   ),
   // 설정은 내정보 칸 위에 열린다 (하단 바를 덮고 뒤로가기가 있다)
   GoRoute(
