@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../application/routine_manage_entry.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_side_nav.dart';
 import 'guardian_tab.dart';
@@ -28,7 +30,13 @@ class GuardianShell extends StatelessWidget {
       GuardianTab.values[navigationShell.currentIndex];
 
   /// 칸 이동: 지금 칸을 다시 누르면 그 칸의 첫 화면으로 돌아간다
-  void _selectTab(GuardianTab tab) {
+  void _selectTab(BuildContext context, GuardianTab tab) {
+    // 일과관리: 멈춘 목록을 build 밖(누르는 지금) 먼저 계산 (#987)
+    if (tab == GuardianTab.manage) {
+      readRoutineManageSourcesBeforeEntering(
+        ProviderScope.containerOf(context, listen: false),
+      );
+    }
     navigationShell.goBranch(
       tab.index,
       initialLocation: tab.index == navigationShell.currentIndex,
@@ -63,7 +71,7 @@ class GuardianShell extends StatelessWidget {
           ),
           GuardianBottomNav(
             selectedTab: _currentTab,
-            onTabSelected: _selectTab,
+            onTabSelected: (tab) => _selectTab(context, tab),
           ),
           adStrip,
           ColoredBox(
@@ -87,7 +95,10 @@ class GuardianShell extends StatelessWidget {
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GuardianSideNav(selectedTab: _currentTab, onTabSelected: _selectTab),
+          GuardianSideNav(
+            selectedTab: _currentTab,
+            onTabSelected: (tab) => _selectTab(context, tab),
+          ),
           Expanded(
             child: Column(
               children: [
