@@ -60,7 +60,7 @@ class NoticeHistoryServiceTest {
     ended.setEndsAt(NOW_KST.minusDays(10));
     stored.add(ended);
 
-    assertThat(service.history("IOS", null, null).items()).extracting(NoticeHistoryItemResponse::id)
+    assertThat(service.history("IOS", null, null, "KR").items()).extracting(NoticeHistoryItemResponse::id)
       .containsExactly("ended");
   }
 
@@ -69,7 +69,7 @@ class NoticeHistoryServiceTest {
   void excludesOlderThan90Days() {
     stored.add(notice("old", NOW_KST.minusDays(91)));
 
-    assertThat(service.history("IOS", null, null).items()).isEmpty();
+    assertThat(service.history("IOS", null, null, "KR").items()).isEmpty();
   }
 
   @Test
@@ -77,7 +77,7 @@ class NoticeHistoryServiceTest {
   void includesExactly90DaysBoundary() {
     stored.add(notice("edge", NOW_KST.minusDays(90)));
 
-    assertThat(service.history("IOS", null, null).items()).extracting(NoticeHistoryItemResponse::id)
+    assertThat(service.history("IOS", null, null, "KR").items()).extracting(NoticeHistoryItemResponse::id)
       .containsExactly("edge");
   }
 
@@ -88,7 +88,21 @@ class NoticeHistoryServiceTest {
     english.setLocale(AppLocale.EN);
     stored.add(english);
 
-    assertThat(service.history("IOS", null, null).items()).isEmpty();
+    assertThat(service.history("IOS", null, null, "KR").items()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("다른 나라 대상 공지는 공지 탭·안 읽음 표시에 나오지 않는다 (#531) — 팝업과 같은 판정")
+  void excludesOtherCountryNotice_inHistoryAndUnseen() {
+    AppNotice japanOnly = notice("jp", NOW_KST.minusDays(1));
+    japanOnly.setTargetCountries("JP");
+    stored.add(japanOnly);
+
+    assertThat(service.history("IOS", null, null, "KR").items()).isEmpty();
+    assertThat(service.history("IOS", null, null, null).items()).isEmpty();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO, "KR")).isFalse();
+    assertThat(service.history("IOS", null, null, "JP").items()).extracting(NoticeHistoryItemResponse::id)
+      .containsExactly("jp");
   }
 
   @Test
@@ -98,7 +112,7 @@ class NoticeHistoryServiceTest {
     disabled.setEnabled(false);
     stored.add(disabled);
 
-    assertThat(service.history("IOS", null, null).items()).isEmpty();
+    assertThat(service.history("IOS", null, null, "KR").items()).isEmpty();
   }
 
   @Test
@@ -109,7 +123,7 @@ class NoticeHistoryServiceTest {
     stored.add(republished);
     when(noticeSeenService.findSeenAt(MEMBER_ID)).thenReturn(Optional.of(NOW_KST.minusDays(5)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isTrue();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO, "KR")).isTrue();
   }
 
   @Test
@@ -118,7 +132,7 @@ class NoticeHistoryServiceTest {
     stored.add(notice("a", NOW_KST.minusDays(20)));
     when(noticeSeenService.findSeenAt(MEMBER_ID)).thenReturn(Optional.of(NOW_KST.minusDays(5)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isFalse();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO, "KR")).isFalse();
   }
 
   @Test
@@ -126,7 +140,7 @@ class NoticeHistoryServiceTest {
   void noSeenRow_anyNotice_isUnseen() {
     stored.add(notice("a", NOW_KST.minusDays(60)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isTrue();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO, "KR")).isTrue();
   }
 
   @Test
@@ -136,8 +150,8 @@ class NoticeHistoryServiceTest {
     stored.add(notice("b", NOW_KST.minusDays(2)));
     stored.add(notice("c", NOW_KST.minusDays(3)));
 
-    var first = service.history("IOS", null, 2);
-    var second = service.history("IOS", first.nextCursor(), 2);
+    var first = service.history("IOS", null, 2, "KR");
+    var second = service.history("IOS", first.nextCursor(), 2, "KR");
 
     assertThat(first.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("a", "b");
     assertThat(first.nextCursor()).isEqualTo(NOW_KST.minusDays(2) + "|b");
@@ -152,7 +166,7 @@ class NoticeHistoryServiceTest {
     stored.add(notice("c", NOW_KST.minusDays(3)));
     String cursorOfMissingNotice = NOW_KST.minusDays(2) + "|b";
 
-    assertThat(service.history("IOS", cursorOfMissingNotice, 20).items())
+    assertThat(service.history("IOS", cursorOfMissingNotice, 20, "KR").items())
       .extracting(NoticeHistoryItemResponse::id).containsExactly("c");
   }
 
@@ -162,8 +176,8 @@ class NoticeHistoryServiceTest {
     stored.add(notice("a", NOW_KST.minusDays(1)));
     stored.add(notice("b", NOW_KST.minusDays(1)));
 
-    var first = service.history("IOS", null, 1);
-    var second = service.history("IOS", first.nextCursor(), 1);
+    var first = service.history("IOS", null, 1, "KR");
+    var second = service.history("IOS", first.nextCursor(), 1, "KR");
 
     assertThat(first.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("b");
     assertThat(second.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("a");
@@ -174,8 +188,8 @@ class NoticeHistoryServiceTest {
   void invalidCursor_isTreatedAsNoCursor() {
     stored.add(notice("a", NOW_KST.minusDays(1)));
 
-    assertThat(service.history("IOS", "garbage", 20).items()).hasSize(1);
-    assertThat(service.history("IOS", "not-a-time|a", 20).items()).hasSize(1);
+    assertThat(service.history("IOS", "garbage", 20, "KR").items()).hasSize(1);
+    assertThat(service.history("IOS", "not-a-time|a", 20, "KR").items()).hasSize(1);
   }
 
   @Test
@@ -185,8 +199,8 @@ class NoticeHistoryServiceTest {
       stored.add(notice(String.format("n%02d", index), NOW_KST.minusHours(index + 1)));
     }
 
-    assertThat(service.history("IOS", null, 0).items()).hasSize(1);
-    assertThat(service.history("IOS", null, 100).items()).hasSize(50);
+    assertThat(service.history("IOS", null, 0, "KR").items()).hasSize(1);
+    assertThat(service.history("IOS", null, 100, "KR").items()).hasSize(50);
   }
 
   @Test

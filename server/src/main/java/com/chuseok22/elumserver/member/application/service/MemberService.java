@@ -6,6 +6,9 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepos
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
@@ -23,11 +26,20 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Pr
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
+import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -53,8 +65,11 @@ public class MemberService {
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
+  private final TalkCleanupService talkCleanupService;
+  private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
+  private final ConsentDocumentService consentDocumentService;
 
   /**
    * 내 정보. 헤더로 이룸이를 짚었으면 그 이룸이(연결 안 됐으면 403), 아니면 가장 먼저 연결된 이룸이.
@@ -202,8 +217,71 @@ public class MemberService {
     member.setMarketingAgreed(request.marketingAgreed());
     member.setConsentedAt(LocalDateTime.now());
     member.setConsentVersion(request.consentVersion());
+    member.setConsentLocale(resolveConsentLocale(request.consentLocale()).code());
 
     return MemberConsentResponse.from(member);
+  }
+
+  /**
+   * 동의 기록 언어: 요청 언어(본문 consentLocale > Accept-Language) > 그 언어로 실제로 내준 약관 언어
+   * 게시본이 없는 언어를 보내도 사용자가 본 것은 ko 대체본이라 ko 로 남김. 모르는 값은 헤더로 (가입은 막지 않음)
+   */
+  private AppLocale resolveConsentLocale(String claimedLocaleCode) {
+    AppLocale requested = findAppLocale(claimedLocaleCode).orElseGet(CurrentLocale::get);
+    return consentDocumentService.resolvePublishedLocale(requested);
+  }
+
+  /** 언어 코드(앞뒤 공백 허용, 소문자 정확 일치) > AppLocale. 없거나 모르는 값은 empty */
+  private static Optional<AppLocale> findAppLocale(String code) {
+    if (code == null) {
+      return Optional.empty();
+    }
+    String trimmed = code.strip();
+    return Arrays.stream(AppLocale.values())
+      .filter(locale -> locale.code().equals(trimmed))
+      .findFirst();
+  }
+
+  /**
+   * 이야기 이용 규칙 동의 기록 (처음 동의한 시각을 유지, 다시 불러도 덮어쓰지 않음)
+   */
+  @Transactional
+  public void agreeTalkRules(String memberId) {
+    Member member = requireMember(memberId);
+    if (member.getTalkRulesAgreedAt() == null) {
+      member.setTalkRulesAgreedAt(LocalDateTime.now());
+    }
+  }
+
+  public boolean hasAgreedTalkRules(String memberId) {
+    return requireMember(memberId).getTalkRulesAgreedAt() != null;
+  }
+
+  /**
+   * 보호자 id > 보호자 닉네임 (이야기 글쓴이 표시용, 닉네임 없는 계정은 빠짐)
+   */
+  public Map<String, String> nicknamesOf(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<String, String> nicknameByMemberId = new HashMap<>();
+    memberRepository.findAllById(memberIds).stream()
+      .filter(member -> member.getNickname() != null)
+      .forEach(member -> nicknameByMemberId.put(member.getId(), member.getNickname()));
+    return nicknameByMemberId;
+  }
+
+  /**
+   * 주어진 보호자 중 정지된 계정 id (이야기 피드에서 글·댓글을 숨길 때 사용)
+   */
+  public Set<String> suspendedAmong(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Set.of();
+    }
+    return memberRepository.findAllById(memberIds).stream()
+      .filter(member -> member.getStatus() == MemberStatus.SUSPENDED)
+      .map(Member::getId)
+      .collect(Collectors.toSet());
   }
 
   /**
@@ -236,6 +314,10 @@ public class MemberService {
     feedbackService.deleteAllOf(memberId);
     // 알림 기록·푸시 기기·알림 설정·공지 확인. 푸시 토큰이 남으면 탈퇴한 사람에게 푸시가 간다.
     notificationCleanupService.deleteAllOf(memberId);
+    // 이야기 글·댓글·반응·신고·차단·가져가기 기록. 남의 글 집계는 다시 센다.
+    talkCleanupService.deleteAllOf(memberId);
+    // 하루 방문 기록. 방침의 보관 항목이 아니라 남기지 않는다 (지난 방문 수에서도 빠짐).
+    memberDailyVisitRepository.deleteAllByMemberId(memberId);
 
     // ── 남긴다 (보관 기간 동안) ──
     // 소셜 신원: 같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다. 이메일은 비운다 —
@@ -258,6 +340,8 @@ public class MemberService {
     member.setLastLoginAt(null);
     member.setLastActivityAt(null);
     member.setLoginCount(0);
+    // 관리자 운영 메모도 보관 항목이 아니라 비운다 (#656)
+    member.clearAdminMemo();
     // 남기는 값: 아이디·비밀번호 변환값(1년 안 같은 아이디로 복원), 동의 기록(값·시각·버전 — 동의 증빙).
     // 둘 다 방침 4조 보관 항목이다. 여기서 남기는 값을 늘리면 방침도 함께 고친다.
   }

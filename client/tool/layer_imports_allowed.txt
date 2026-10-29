@@ -12,8 +12,6 @@ features/guardian/presentation/draft_routines_screen.dart -> features/ads/presen
 features/guardian/presentation/guardian_home_screen.dart -> features/credit/presentation/credit_blocked_dialog.dart
 features/guardian/presentation/guardian_settings_screen.dart -> features/auth/presentation/consent_document_list_screen.dart
 features/guardian/presentation/guardian_settings_screen.dart -> features/link/data/device_link_repository.dart
-features/guardian/presentation/image_style_settings_screen.dart -> features/onboarding/presentation/widgets/image_style_credit_bar.dart
-features/guardian/presentation/image_style_settings_screen.dart -> features/onboarding/presentation/widgets/image_style_option_card.dart
 features/guardian/presentation/pin_change_screen.dart -> features/onboarding/presentation/widgets/pin_keypad.dart
 features/guardian/presentation/widgets/ai_credit_card.dart -> features/credit/data/credit_repository.dart
 features/guardian/presentation/widgets/step_card_viewer.dart -> features/child/data/speech_service.dart

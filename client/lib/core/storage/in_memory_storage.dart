@@ -13,12 +13,14 @@ class InMemoryStorage implements LocalStorage {
     bool homeCoachSeen = true,
     bool isManageCoachSeen = true,
     bool isGroupCoachSeen = true,
+    bool isCardReviewCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
        _isManageCoachSeen = isManageCoachSeen,
        _isGroupCoachSeen = isGroupCoachSeen,
+       _isCardReviewCoachSeen = isCardReviewCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -37,6 +39,9 @@ class InMemoryStorage implements LocalStorage {
   bool _homeCoachSeen;
   bool _isManageCoachSeen;
   bool _isGroupCoachSeen;
+  bool _isCardReviewCoachSeen;
+  List<String> _talkImportedSeenRoutineIds = const [];
+  List<String> _talkShareHintDismissedRoutineIds = const [];
 
   String? _nickname;
   List<String> _goals = const [];
@@ -136,6 +141,14 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setChildPraiseSoundOn(bool v) async => _childPraiseSoundOn = v;
+
+  bool _childScreenAwakeOn = true;
+
+  @override
+  bool get isChildScreenAwakeOn => _childScreenAwakeOn;
+
+  @override
+  Future<void> setChildScreenAwakeOn(bool v) async => _childScreenAwakeOn = v;
 
   String? _routineRemindersJson;
 
@@ -247,10 +260,29 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
       _noticeHidden[noticeId] = json;
 
+  @override
+  Future<void> clearNoticeHidden() async => _noticeHidden.clear();
+
   bool _hasAskedPushPermission = false;
+  DateTime? _pushPermissionNudgedAt;
+  String? _updateSuggestionShownRecord;
+
+  @override
+  String? get updateSuggestionShownRecord => _updateSuggestionShownRecord;
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async =>
+      _updateSuggestionShownRecord = record;
 
   @override
   bool get hasAskedPushPermission => _hasAskedPushPermission;
+
+  @override
+  DateTime? get pushPermissionNudgedAt => _pushPermissionNudgedAt;
+
+  @override
+  Future<void> setPushPermissionNudgedAt(DateTime at) async =>
+      _pushPermissionNudgedAt = at;
 
   @override
   Future<void> setHasAskedPushPermission(bool v) async =>
@@ -270,6 +302,31 @@ class InMemoryStorage implements LocalStorage {
       _isManageCoachSeen = isSeen;
 
   @override
+  List<String> get talkImportedSeenRoutineIds => _talkImportedSeenRoutineIds;
+
+  @override
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) async =>
+      _talkImportedSeenRoutineIds = routineIds;
+
+  @override
+  List<String> get talkShareHintDismissedRoutineIds =>
+      _talkShareHintDismissedRoutineIds;
+
+  @override
+  Future<void> setTalkShareHintDismissedRoutineIds(
+    List<String> routineIds,
+  ) async => _talkShareHintDismissedRoutineIds = routineIds;
+
+  bool _isTalkGridView = false;
+
+  @override
+  bool get isTalkGridView => _isTalkGridView;
+
+  @override
+  Future<void> setTalkGridView(bool isGridView) async =>
+      _isTalkGridView = isGridView;
+
+  @override
   bool get isGroupCoachSeen => _isGroupCoachSeen;
 
   @override
@@ -277,10 +334,18 @@ class InMemoryStorage implements LocalStorage {
       _isGroupCoachSeen = isSeen;
 
   @override
+  bool get isCardReviewCoachSeen => _isCardReviewCoachSeen;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async =>
+      _isCardReviewCoachSeen = isSeen;
+
+  @override
   Future<void> resetCoachMarks() async {
     _homeCoachSeen = false;
     _isManageCoachSeen = false;
     _isGroupCoachSeen = false;
+    _isCardReviewCoachSeen = false;
   }
 
   @override

@@ -38,6 +38,9 @@ class GuardianHomeHeader extends StatelessWidget {
   static const _logoW = 80.0;
   static const _logoH = 30.0;
 
+  /// 종 그림 ↔ 캐릭터 배지 (Figma 265+24 → 313)
+  static const _bellToBadgeGap = 24.0;
+
   /// 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
   static const _rowToGreeting = 11.0;
   static const _greetingToSubtitle = 12.0;
@@ -69,6 +72,10 @@ class GuardianHomeHeader extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const NotificationBellButton(),
+              // 종 그림 끝 ↔ 배지 24 (누르는 영역 여백만큼 뺌)
+              SizedBox(
+                width: (_bellToBadgeGap - NotificationBellButton.iconInset).w,
+              ),
               // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
               // (이룸이→보호자 방향만 PIN으로 막는다)
               AppPressable(

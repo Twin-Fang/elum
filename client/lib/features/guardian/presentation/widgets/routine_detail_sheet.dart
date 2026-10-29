@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -12,9 +13,12 @@ import '../../../../shared/models/routine.dart';
 import 'routine_detail_header.dart';
 import 'routine_detail_reward_row.dart';
 import 'routine_detail_step_badge.dart';
+import 'routine_detail_talk_banner.dart';
 import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
+import '../../application/library_talk_import_state.dart';
+import '../routine_rename_flow.dart';
 import 'routine_reminder_row.dart';
 
 // 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
@@ -27,7 +31,7 @@ const _isReminderRowVisible = false;
 /// 것이지 문구를 고치는 것이 아니다. 그래서 확인은 시트에서 가볍게 하고, 고칠 때만
 /// 편집 화면으로 들어간다.
 ///
-/// **시트에서 할 수 있는 고치기는 순서 하나뿐이다.** 문구·그림·보상은 전부
+/// **시트에서 할 수 있는 고치기는 순서와 일과 이름뿐이다** (이름은 시안 1274:8038 연필). 문구·그림·보상은 전부
 /// `편집하기`로 보낸다. 여기서 이것저것 고칠 수 있게 하면 시트와 편집 화면의
 /// 경계가 사라져 둘 다 어중간해진다.
 /// 시트를 닫으며 부르는 쪽에 알리는 것.
@@ -114,6 +118,20 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
       widget.isLibrary ? step.copyWith(completed: false) : step,
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // 이야기에서 가져온 일과를 열어 봤다 > 목록 칸의 `새 일과` 칩 끄기 (빌드 중 상태 변경을 피해 프레임 뒤에)
+    if (widget.isLibrary && widget.routine.talkPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(talkImportedSeenRoutineIdsProvider.notifier)
+            .markSeen(widget.routine.id);
+      });
+    }
+  }
+
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///
   /// **내용과 무관하게 이 높이를 지킨다**. 최대치로만 두면 단계가
@@ -131,6 +149,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 그림자가 한 번 꺼졌다 켜진다.
   int? _draggingIndex;
 
+  /// 시트에서 바꾼 이름 (닫기 전까지 시트가 새 이름을 보여 준다. 목록은 저장 성공 시 다시 받는다)
+  late String _title = widget.routine.title;
+
   /// 오늘 일과인데 이룸이가 다 끝냈다 — 하단 버튼을 막는다.
   bool get _finishedToday => !widget.isPast && widget.isFinished;
 
@@ -138,6 +159,18 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다.
   bool get _canEdit =>
       !widget.isPast && !widget.isFinished && widget.routine.isEditableByMe;
+
+  /// 제목 옆 연필: 이름 시트 > 저장 > 시트 제목 바꾸기
+  Future<void> _rename() async {
+    final renamed = await renameRoutineWithSheet(
+      context,
+      ref,
+      routineId: widget.routine.id,
+      currentTitle: widget.routine.copyWith(title: _title).displayTitle,
+    );
+    if (renamed == null || !mounted) return;
+    setState(() => _title = renamed.title);
+  }
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
     // ReorderableListView는 아래로 옮길 때 제거 전 위치를 준다.
@@ -199,7 +232,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
             children: [
               // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
               RoutineDetailHeader(
-                title: widget.routine.title,
+                title: _title,
                 language: widget.routine.language,
                 // 남이 만든 일과면 누가 만들었는지 먼저 말한다 — 왜 고칠 수 없는지의 답이다.
                 caption: widget.isPast
@@ -209,6 +242,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 onMoreTap: widget.isLibrary
                     ? () => Navigator.of(context).pop(RoutineSheetAction.more)
                     : null,
+                onTitleEditTap: _canEdit ? _rename : null,
               ),
 
               // --- 스크롤: 단계 + 보상 ---
@@ -217,6 +251,20 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 child: ReorderFingerFollow(
                   builder: (context, follow) => CustomScrollView(
                     slivers: [
+                      // 이야기에서 가져온 일과면 맨 위에 원래 글 안내
+                      // 위는 제목 영역 여백(약 22) 그대로, 아래는 카드 목록 위 여백(8)과 합쳐 16
+                      if (widget.routine.talkPostId case final talkPostId?)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            16.w,
+                            0,
+                            16.w,
+                            context.space.xs.h,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: RoutineDetailTalkBanner(postId: talkPostId),
+                          ),
+                        ),
                       SliverPadding(
                         // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
                         padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
@@ -372,14 +420,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                       isEditable: widget.routine.isEditableByMe,
                       isInGroup: widget.isInGroup,
                     )
-                  : FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colors.textPrimary,
-                        disabledBackgroundColor: colors.buttonDisabled,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-                      ),
+                  : ElumButton(
+                      label: widget.isPast
+                          ? context.l10n.routineDetailRerun
+                          : _finishedToday
+                          ? context.l10n.routineDetailFinishedToday
+                          : context.l10n.routineDetailEdit,
+                      labelStyle: typo.sheetActionLabel,
                       // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
                       onPressed: _finishedToday
                           ? null
@@ -388,18 +435,6 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                   ? RoutineSheetAction.rerun
                                   : RoutineSheetAction.edit,
                             ),
-                      child: Text(
-                        widget.isPast
-                            ? context.l10n.routineDetailRerun
-                            : _finishedToday
-                            ? context.l10n.routineDetailFinishedToday
-                            : context.l10n.routineDetailEdit,
-                        style: typo.sheetActionLabel.copyWith(
-                          color: _finishedToday
-                              ? colors.buttonDisabledText
-                              : colors.surface,
-                        ),
-                      ),
                     ),
             ),
           ],
@@ -426,7 +461,7 @@ class _StepItemKey extends GlobalObjectKey {
   int get hashCode => Object.hash(id, sheet);
 }
 
-/// 일과관리 원본의 아래 버튼 두 개: `카드 고치기`(보조) · `오늘 보내기`(주)
+/// 일과관리 원본의 아래 버튼 두 개: `카드 고치기`(보조, 웜그레이 + 남색 글) · 사이 4 · `오늘 보내기`(주)
 ///
 /// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
 class _LibraryActions extends StatelessWidget {
@@ -435,47 +470,34 @@ class _LibraryActions extends StatelessWidget {
   final bool isEditable;
   final bool isInGroup;
 
+  /// 두 버튼 사이 (시트 버튼 둘 결)
+  static const _buttonGap = 4.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final typo = context.typo;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18.r),
-    );
-    final sendButton = FilledButton(
-      style: FilledButton.styleFrom(
-        backgroundColor: colors.textPrimary,
-        shape: shape,
-      ),
+    final labelStyle = context.typo.sheetActionLabel;
+    final sendButton = ElumButton(
+      label: isInGroup
+          ? context.l10n.routineLibrarySendOnlyThis
+          : context.l10n.routineLibrarySendToday,
+      labelStyle: labelStyle,
       onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
-      child: Text(
-        isInGroup
-            ? context.l10n.routineLibrarySendOnlyThis
-            : context.l10n.routineLibrarySendToday,
-        style: typo.sheetActionLabel.copyWith(color: colors.surface),
-      ),
     );
-    if (!isEditable) return SizedBox.expand(child: sendButton);
+    if (!isEditable) return sendButton;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           flex: 2,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.buttonNeutral,
-              shape: shape,
-            ),
+          child: ElumButton(
+            label: context.l10n.routineLibraryEditCards,
+            labelStyle: labelStyle,
+            backgroundColor: colors.buttonNeutral,
+            labelColor: colors.buttonNeutralText,
             onPressed: () => Navigator.of(context).pop(RoutineSheetAction.edit),
-            child: Text(
-              context.l10n.routineLibraryEditCards,
-              style: typo.sheetActionLabel.copyWith(
-                color: colors.buttonNeutralText,
-              ),
-            ),
           ),
         ),
-        SizedBox(width: context.space.xs.w),
+        SizedBox(width: _buttonGap.w),
         Expanded(flex: 3, child: sendButton),
       ],
     );

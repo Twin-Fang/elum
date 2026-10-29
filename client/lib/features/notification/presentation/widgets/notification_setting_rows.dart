@@ -9,26 +9,32 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../application/notification_settings_controller.dart';
 import '../../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 묶음: 모든 알림 받기 + 종류별 5개 (all 이 꺼지면 종류별은 회색, 값 유지)
+/// 알림 설정 스위치 묶음 2개: 모든 알림 받기 카드 + 종류별 7개 카드 (시안 1732:8563)
 class NotificationSettingRows extends ConsumerWidget {
-  const NotificationSettingRows({super.key, required this.settings});
+  const NotificationSettingRows({
+    super.key,
+    required this.settings,
+    this.isShownAllOff = false,
+  });
 
   final NotificationSettings settings;
 
+  /// 저장값과 무관하게 전부 꺼진 모양으로 그림 (기기 알림 꺼짐)
+  final bool isShownAllOff;
+
+  /// 두 카드 사이 간격
   static const _groupGap = 16.0;
 
-  /// 비활성 스위치 투명도
-  static const _disabledOpacity = 0.4;
-
-  Future<void> _onToggled(
+  /// 스위치 하나 > 저장, 실패하면 팝업 (값은 컨트롤러가 되돌림)
+  Future<void> _onSettingToggled(
     BuildContext context,
     WidgetRef ref,
     NotificationSettingField field,
-    bool value,
+    bool isOn,
   ) async {
     final error = await ref
         .read(notificationSettingsControllerProvider.notifier)
-        .toggle(field, value);
+        .toggle(field, isOn);
     if (error == null || !context.mounted) return;
     await showFailure(
       context,
@@ -38,49 +44,44 @@ class NotificationSettingRows extends ConsumerWidget {
     );
   }
 
+  Widget _buildSwitchTile(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationSettingField field,
+  ) =>
+      SettingsSwitchTile(
+        isInCard: true,
+        label: _labelOf(context.l10n, field),
+        value: !isShownAllOff && settings.valueOf(field),
+        onChanged: (isOn) => _onSettingToggled(context, ref, field, isOn),
+      );
+
+  /// 스위치 > 줄 이름
+  static String _labelOf(AppLocalizations l10n, NotificationSettingField field) =>
+      switch (field) {
+        NotificationSettingField.all => l10n.notificationSettingAll,
+        NotificationSettingField.routineCompleted => l10n.notificationSettingRoutineCompleted,
+        NotificationSettingField.routineSent => l10n.notificationSettingRoutineSent,
+        NotificationSettingField.coGuardianJoined => l10n.notificationSettingCoGuardianJoined,
+        NotificationSettingField.creditRefilled => l10n.notificationSettingCreditRefilled,
+        NotificationSettingField.feedbackResolved => l10n.notificationSettingFeedbackResolved,
+        NotificationSettingField.talkCommented => l10n.notificationSettingTalkCommented,
+        NotificationSettingField.talkImported => l10n.notificationSettingTalkImported,
+      };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final typeLabels = {
-      NotificationSettingField.routineCompleted: l10n.notificationSettingRoutineCompleted,
-      NotificationSettingField.routineSent: l10n.notificationSettingRoutineSent,
-      NotificationSettingField.coGuardianJoined: l10n.notificationSettingCoGuardianJoined,
-      NotificationSettingField.creditRefilled: l10n.notificationSettingCreditRefilled,
-      NotificationSettingField.feedbackResolved: l10n.notificationSettingFeedbackResolved,
-    };
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsGroup(
-          hasDividers: false,
-          children: [
-            SettingsSwitchTile(
-              isInCard: true,
-              label: l10n.notificationSettingAll,
-              value: settings.isAllEnabled,
-              onChanged: (on) =>
-                  _onToggled(context, ref, NotificationSettingField.all, on),
-            ),
-          ],
+          children: [_buildSwitchTile(context, ref, NotificationSettingField.all)],
         ),
         SizedBox(height: _groupGap.h),
         SettingsGroup(
-          hasDividers: false,
           children: [
-            for (final entry in typeLabels.entries)
-              Opacity(
-                opacity: settings.isAllEnabled ? 1 : _disabledOpacity,
-                child: IgnorePointer(
-                  ignoring: !settings.isAllEnabled,
-                  child: SettingsSwitchTile(
-                    isInCard: true,
-                    label: entry.value,
-                    value: settings.valueOf(entry.key),
-                    onChanged: (on) => _onToggled(context, ref, entry.key, on),
-                  ),
-                ),
-              ),
+            for (final type in NotificationSettingField.types)
+              _buildSwitchTile(context, ref, type),
           ],
         ),
       ],

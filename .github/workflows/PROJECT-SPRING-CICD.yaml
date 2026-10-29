@@ -139,8 +139,9 @@ jobs:
             echo "이미지=${IMAGE}"
             echo "도메인=${DOMAIN} | BLUE_PORT=${BLUE_PORT} GREEN_PORT=${GREEN_PORT}"
 
-            if [ "${BRANCH}" != "main" ]; then
-              echo "지원하지 않는 브랜치: ${BRANCH}"
+            # 허용 브랜치: main(자동 배포), develop(손으로 실행할 때만, 앱 심사 없이 서버를 먼저 올림)
+            if [ "${BRANCH}" != "main" ] && ! { [ "${BRANCH}" = "develop" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; }; then
+              echo "지원하지 않는 브랜치: ${BRANCH} (${{ github.event_name }})"
               exit 1
             fi
 
@@ -232,6 +233,7 @@ jobs:
             fi
 
             echo "[main] 새로운 컨테이너 ${CONTAINER_NAME} 실행 중..."
+            # 장애 알림 웹훅(#648): Secret DISCORD_INCIDENT_WEBHOOK_URL 이 비면 빈 값 > 서버는 알림만 끄고 뜬다
             # 두 컨테이너가 같은 NAS 폴더를 /app 으로 쓴다. 로그를 색(blue|green)별 폴더로 나누고
             # 관리자 화면이 지금 응답 중인 서버를 알아보도록 색과 포트를 넘긴다 (logback-spring.xml).
             INSTANCE_COLOR="${CONTAINER_NAME##*-}"
@@ -240,6 +242,7 @@ jobs:
               -e "SPRING_PROFILES_ACTIVE=${PROFILE_MAIN}" \
               -e "ELUM_INSTANCE=${INSTANCE_COLOR}" \
               -e "ELUM_PORT=${PORT}" \
+              -e "ELUM_INCIDENT_ALERT_DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_INCIDENT_WEBHOOK_URL }}" \
               -v /etc/localtime:/etc/localtime:ro \
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"
@@ -370,3 +373,31 @@ jobs:
             echo "$PW" | sudo -S /bin/bash -c "ls -1t '${BACKUP_DIR}'/server.ReverseProxy.conf.*.bak 2>/dev/null | tail -n +11 | xargs -r rm -f"
 
             echo "✅ main 서버 배포가 성공적으로 완료되었습니다."
+
+  # 배포 실패 알림 (#648): build·deploy 중 하나라도 실패하면 Discord 로 1회
+  # Secret DISCORD_INCIDENT_WEBHOOK_URL 이 없으면 건너뛴다. 알림 실패는 경고만 남기고 결과(실패)를 바꾸지 않는다
+  notify-deploy-failure:
+    needs: [build, deploy]
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 배포 실패 Discord 알림
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_INCIDENT_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
+            echo "DISCORD_INCIDENT_WEBHOOK_URL 미등록 -> 배포 실패 알림 건너뜀"
+            exit 0
+          fi
+          NOW_KST="$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S')"
+          MESSAGE="$(printf '**[ELUM 장애] 서버 배포 실패**\n시각: %s (KST)\n브랜치: %s\n결과: build=%s, deploy=%s\n실행 기록: %s' \
+            "${NOW_KST}" "${BRANCH}" "${BUILD_RESULT}" "${DEPLOY_RESULT}" "${RUN_URL}")"
+          # allowed_mentions 비움 > 멘션 없음. 웹훅 주소는 출력하지 않는다
+          jq -n --arg content "${MESSAGE}" '{content: $content, allowed_mentions: {parse: []}}' \
+            | curl -fsS --max-time 15 -o /dev/null -w '%{http_code}\n' \
+                -H 'Content-Type: application/json' --data @- "${DISCORD_WEBHOOK_URL}" \
+            || echo "::warning::배포 실패 Discord 알림 발송 실패"

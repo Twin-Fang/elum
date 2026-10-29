@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notice.application.controller;
 
+import com.chuseok22.elumserver.common.locale.CurrentRegion;
 import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesResponse;
 import com.chuseok22.elumserver.notice.application.service.NoticeService;
 import com.chuseok22.elumserver.notice.infrastructure.storage.NoticeImageStorage.ImageContent;
@@ -35,8 +36,9 @@ public class NoticeController implements NoticeControllerDocs {
   public ResponseEntity<AppNoticesResponse> notices(
     @RequestParam(value = "platform", required = false) String platform
   ) {
-    // 요청 언어별로 응답이 달라 캐시 키에 Accept-Language 를 넣는다
-    return ResponseEntity.ok().cacheControl(CACHE).varyBy(HttpHeaders.ACCEPT_LANGUAGE).body(noticeService.publishedFor(platform));
+    // 요청 언어·국가별로 응답이 달라 캐시 키에 Accept-Language, X-Elum-Region 을 넣는다
+    return ResponseEntity.ok().cacheControl(CACHE).varyBy(HttpHeaders.ACCEPT_LANGUAGE, CurrentRegion.HEADER)
+      .body(noticeService.publishedFor(platform, CurrentRegion.get()));
   }
 
   @Override

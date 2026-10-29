@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.consent.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
 import com.chuseok22.elumserver.consent.infrastructure.entity.ConsentDocument;
 import com.chuseok22.elumserver.consent.infrastructure.entity.ConsentDocumentHistory;
@@ -10,9 +11,13 @@ import com.chuseok22.elumserver.consent.infrastructure.repository.ConsentDocumen
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,20 +46,64 @@ public class ConsentDocumentService {
     SAVED_AND_BUMPED,
   }
 
-  /** ConsentKey 선언 순서대로 준다. 앱 동의 화면의 항목 순서가 이 순서다. */
-  public List<ConsentDocument> getAll() {
-    return consentDocumentRepository.findAll().stream()
+  /** 게시 판정에 필요한 필수 약관 4종 (ConsentKey.required 기준) */
+  private static final Set<ConsentKey> REQUIRED_KEYS = Arrays.stream(ConsentKey.values())
+    .filter(ConsentKey::isRequired)
+    .collect(Collectors.toCollection(() -> EnumSet.noneOf(ConsentKey.class)));
+
+  /**
+   * 앱에 내줄 약관 한 묶음
+   *
+   * @param locale           실제로 준 약관 언어
+   * @param isFallbackLocale 요청 언어 게시본이 없어 ko 로 대체했는가
+   * @param version          동의 기록용 묶음 버전 ({@link #bundleVersion(AppLocale)})
+   */
+  public record PublishedConsents(
+    AppLocale locale, boolean isFallbackLocale, String version, List<ConsentDocument> documents
+  ) {
+
+  }
+
+  /** 요청 언어 > 게시 언어 판정 > 그 언어 약관 묶음 */
+  public PublishedConsents getPublished(AppLocale requested) {
+    AppLocale served = resolvePublishedLocale(requested);
+    List<ConsentDocument> documents = getAll(served);
+    return new PublishedConsents(served, served != requested, bundleVersionOf(documents), documents);
+  }
+
+  /**
+   * 요청 언어 > 실제로 내줄 약관 언어: 게시본(필수 4종 모두 있음)이 있으면 그 언어, 없으면 ko
+   * en 으로 대체하지 않음 (법무 확인 안 된 번역으로 동의받지 않음, #521·#528). ko 는 원본이라 그대로
+   */
+  public AppLocale resolvePublishedLocale(AppLocale requested) {
+    if (requested == null || requested == AppLocale.KO) {
+      return AppLocale.KO;
+    }
+    return hasAllRequired(getAll(requested)) ? requested : AppLocale.KO;
+  }
+
+  /** 필수 4종이 다 있는가. 일부만 있으면 필수가 빠진 동의 화면이 떠 가입이 영영 안 됨 */
+  private static boolean hasAllRequired(List<ConsentDocument> documents) {
+    Set<ConsentKey> present = documents.stream()
+      .map(ConsentDocument::getConsentKey)
+      .collect(Collectors.toCollection(() -> EnumSet.noneOf(ConsentKey.class)));
+    return present.containsAll(REQUIRED_KEYS);
+  }
+
+  /** 한 언어의 약관을 ConsentKey 선언 순서대로 준다. 앱 동의 화면의 항목 순서가 이 순서다. */
+  public List<ConsentDocument> getAll(AppLocale locale) {
+    return consentDocumentRepository.findAllByLocale(locale.code()).stream()
       .sorted(Comparator.comparing(document -> document.getConsentKey().ordinal()))
       .toList();
   }
 
-  public ConsentDocument get(ConsentKey key) {
-    return consentDocumentRepository.findByConsentKey(key)
+  public ConsentDocument get(ConsentKey key, AppLocale locale) {
+    return consentDocumentRepository.findByConsentKeyAndLocale(key, locale.code())
       .orElseThrow(() -> new CustomException(ErrorCode.CONSENT_DOCUMENT_NOT_FOUND));
   }
 
-  public List<ConsentDocumentHistory> getHistory(ConsentKey key) {
-    return consentDocumentHistoryRepository.findTop50ByConsentKeyOrderByCreatedAtDesc(key);
+  public List<ConsentDocumentHistory> getHistory(ConsentKey key, AppLocale locale) {
+    return consentDocumentHistoryRepository.findTop50ByConsentKeyAndLocaleOrderByCreatedAtDesc(key, locale.code());
   }
 
   /**
@@ -70,8 +119,12 @@ public class ConsentDocumentService {
    * <p>⚠️ 지금은 기록에만 쓴다. 재동의 판정({@code Member#hasRequiredConsents})은
    * 아직 버전을 보지 않는다.
    */
-  public String bundleVersion() {
-    return getAll().stream()
+  public String bundleVersion(AppLocale locale) {
+    return bundleVersionOf(getAll(locale));
+  }
+
+  private static String bundleVersionOf(List<ConsentDocument> documents) {
+    return documents.stream()
       .filter(document -> document.getConsentKey().isRequired())
       .map(ConsentDocument::getVersion)
       .max(Comparator.naturalOrder())
@@ -84,6 +137,8 @@ public class ConsentDocumentService {
    * 이력 없는 덮어쓰기가 생길 수 없다.
    *
    * <p>필수 여부는 받지 않는다. 법이 정한 값이라 {@link ConsentKey#isRequired()} 를 따른다.
+   *
+   * <p>편집 대상은 ko 원본만 (다른 언어 본문은 #528 법무 확인 후 연다).
    *
    * @param bumpVersion 켰을 때만 버전을 올린다. 오타를 고칠 때마다 올리면 회원마다 어떤
    *                    문구에 동의했는지 가리기 어려워지므로 관리자가 고르게 둔다.
@@ -123,7 +178,7 @@ public class ConsentDocumentService {
       throw new CustomException(ErrorCode.CONSENT_FIELD_TOO_LONG);
     }
 
-    ConsentDocument document = get(key);
+    ConsentDocument document = get(key, AppLocale.KO);
     String bumpTo = bumpVersion ? validateNewVersion(document.getVersion(), newVersion) : null;
 
     boolean contentChanged = !normalizedBody.equals(document.getBody())
@@ -180,6 +235,7 @@ public class ConsentDocumentService {
   ) {
     ConsentDocumentHistory history = new ConsentDocumentHistory();
     history.setConsentKey(document.getConsentKey());
+    history.setLocale(document.getLocale());
     history.setVersion(document.getVersion());
     history.setLabel(document.getLabel());
     history.setSummary(document.getSummary());

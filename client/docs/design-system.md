@@ -217,6 +217,13 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 시트 예시 글 `peopleEditPlaceholder`(검정 20%)·고르지 않은 칩 글 `peopleEditChipIdleText`(검정 30%).
 글자는 `people*` 타이포 토큰(Pretendard, 자간 0 고정).
 
+### 알림 · 알림 설정 (`1724:8346` · `1732:8563` · `1732:8433`, 2026-10-21 덤프)
+
+알림 줄: 아이콘 상자 `notificationIconBackground`(#AEE4D9) · 그림 `notificationIconForeground`(#FFF) · 안 읽음 점 `notificationUnreadDot`(#55CFBA) ·
+문장 `notificationRowText`(#000) · 시각·날짜 머리글·톱니 `notificationMutedText`(#74757D). 글자는 `notificationRowText`(14/w400) · `notificationRowTime`(12/w400).
+기기 알림 꺼짐 띠: 바탕 `notificationPermissionBannerBg`(#EEE9E6) · `켜기` 글자 `notificationBannerButton`(14/w600).
+설정 묶음 카드 토글: 켜짐 `settingsToggleOn`(#55CFBA) · 꺼짐 `settingsToggleOff`(#D7D3D1).
+
 ### 캐릭터 / 일러스트 팔레트
 
 `#FFFADB` `#FFDFBD` `#FFDAC7` `#F4A753` `#EB9B73` `#F3F2E1` `#CED8FF` `#C8DD94` `#B5EAEC` `#CDC8C3`

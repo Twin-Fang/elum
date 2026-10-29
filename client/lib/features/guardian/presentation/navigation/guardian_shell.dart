@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../application/routine_providers.dart';
+import '../../application/routine_manage_entry.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_side_nav.dart';
 import 'guardian_tab.dart';
@@ -23,14 +23,20 @@ class GuardianShell extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  /// 맨 아래 광고 띠. 다른 기능(광고)의 화면이라 라우터가 넣어 준다
+  /// 맨 아래 광고 띠. 칸 4개 모두 늘 둔다 (로드 전·실패 시 높이 0). 다른 기능(광고)의 화면이라 라우터가 넣어 준다
   final Widget adStrip;
 
   GuardianTab get _currentTab =>
       GuardianTab.values[navigationShell.currentIndex];
 
   /// 칸 이동: 지금 칸을 다시 누르면 그 칸의 첫 화면으로 돌아간다
-  void _selectTab(GuardianTab tab) {
+  void _selectTab(BuildContext context, GuardianTab tab) {
+    // 일과관리: 멈춘 목록을 build 밖(누르는 지금) 먼저 계산 (#987)
+    if (tab == GuardianTab.manage) {
+      readRoutineManageSourcesBeforeEntering(
+        ProviderScope.containerOf(context, listen: false),
+      );
+    }
     navigationShell.goBranch(
       tab.index,
       initialLocation: tab.index == navigationShell.currentIndex,
@@ -39,14 +45,13 @@ class GuardianShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final adStripGate = _AdStripGate(tab: _currentTab, adStrip: adStrip);
     return context.sizeClass == WindowSizeClass.compact
-        ? _buildPhone(context, adStripGate)
-        : _buildTablet(context, adStripGate);
+        ? _buildPhone(context)
+        : _buildTablet(context);
   }
 
   /// 폰: 본문 > 하단 바 > 광고 띠 > 홈 표시줄 여백
-  Widget _buildPhone(BuildContext context, Widget adStripGate) {
+  Widget _buildPhone(BuildContext context) {
     final colors = context.colors;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
@@ -66,9 +71,9 @@ class GuardianShell extends StatelessWidget {
           ),
           GuardianBottomNav(
             selectedTab: _currentTab,
-            onTabSelected: _selectTab,
+            onTabSelected: (tab) => _selectTab(context, tab),
           ),
-          adStripGate,
+          adStrip,
           ColoredBox(
             color: colors.navBackground,
             child: SizedBox(height: bottomInset, width: double.infinity),
@@ -79,7 +84,7 @@ class GuardianShell extends StatelessWidget {
   }
 
   /// 태블릿: 옆 메뉴 | (본문 > 광고 띠 > 홈 표시줄 여백)
-  Widget _buildTablet(BuildContext context, Widget adStripGate) {
+  Widget _buildTablet(BuildContext context) {
     final colors = context.colors;
     final media = MediaQuery.of(context);
     return Scaffold(
@@ -90,7 +95,10 @@ class GuardianShell extends StatelessWidget {
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GuardianSideNav(selectedTab: _currentTab, onTabSelected: _selectTab),
+          GuardianSideNav(
+            selectedTab: _currentTab,
+            onTabSelected: (tab) => _selectTab(context, tab),
+          ),
           Expanded(
             child: Column(
               children: [
@@ -111,7 +119,7 @@ class GuardianShell extends StatelessWidget {
                     ),
                   ),
                 ),
-                adStripGate,
+                adStrip,
                 SizedBox(height: media.padding.bottom),
               ],
             ),
@@ -119,42 +127,6 @@ class GuardianShell extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-/// 광고 띠를 둘지 정하는 자리: 일과가 충분할 때만, 내정보 칸은 제외 (로드 전·실패 시 높이 0)
-///
-/// 값이 바뀌면 **다음 프레임에** 다시 그린다. 흐름 화면에서 돌아와 목록을 다시 받는 순간 값이 빌드 도중에
-/// 바뀌면 `markNeedsBuild() called during build` 가 나기 때문이다.
-class _AdStripGate extends ConsumerStatefulWidget {
-  const _AdStripGate({required this.tab, required this.adStrip});
-
-  final GuardianTab tab;
-  final Widget adStrip;
-
-  @override
-  ConsumerState<_AdStripGate> createState() => _AdStripGateState();
-}
-
-class _AdStripGateState extends ConsumerState<_AdStripGate> {
-  late bool _isEnoughRoutines = ref.read(shouldShowHomeAdsProvider);
-
-  @override
-  void initState() {
-    super.initState();
-    ref.listenManual<bool>(shouldShowHomeAdsProvider, (_, next) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && next != _isEnoughRoutines) {
-          setState(() => _isEnoughRoutines = next);
-        }
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isVisible = widget.tab.isAdStripAllowed && _isEnoughRoutines;
-    return isVisible ? widget.adStrip : const SizedBox.shrink();
   }
 }
 

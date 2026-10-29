@@ -14,6 +14,10 @@ public record AdminListQuery(String q, Map<String, String> filters, String sort,
 
   /** 검색어 최대 길이 */
   public static final int MAX_KEYWORD_LENGTH = 100;
+  /// 요청 파라미터 이름: 검색어, 정렬, 페이지 (필터는 정의의 키)
+  public static final String PARAMETER_KEYWORD = "q";
+  public static final String PARAMETER_SORT = "sort";
+  public static final String PARAMETER_PAGE = "page";
   private static final String LIKE_ESCAPE = "\\";
 
   public AdminListQuery {
@@ -25,6 +29,13 @@ public record AdminListQuery(String q, Map<String, String> filters, String sort,
   ) {
     String sortOrDefault = sort != null && definition.isValidSort(sort.trim()) ? sort.trim() : definition.defaultSort();
     return new AdminListQuery(normalizeKeyword(q), normalizeFilters(filters, definition), sortOrDefault, parsePage(page));
+  }
+
+  /// 요청 파라미터 전체(@RequestParam Map) > 보정된 쿼리. 필터는 정의에 있는 키만 읽음 (새 필터를 더해도 컨트롤러는 그대로)
+  public static AdminListQuery fromParameters(Map<String, String> parameters, AdminListDefinition definition) {
+    Map<String, String> safeParameters = parameters == null ? Map.of() : parameters;
+    return of(safeParameters.get(PARAMETER_KEYWORD), safeParameters, safeParameters.get(PARAMETER_SORT),
+      safeParameters.get(PARAMETER_PAGE), definition);
   }
 
   /** 전체 페이지 수를 안 뒤 범위 밖 페이지를 마지막 페이지로 맞춘다 (결과 0건이면 1) */
@@ -42,6 +53,21 @@ public record AdminListQuery(String q, Map<String, String> filters, String sort,
       changed.put(key, value);
     }
     return new AdminListQuery(q, changed, sort, page);
+  }
+
+  /// 검색어만 바꾼 쿼리 (null 이면 검색어 해제)
+  public AdminListQuery withKeyword(String keyword) {
+    return new AdminListQuery(normalizeKeyword(keyword), filters, sort, page);
+  }
+
+  /// 검색어·필터를 모두 뺀 쿼리 (정렬은 유지, 1페이지): 필터 초기화 링크
+  public AdminListQuery withoutConditions() {
+    return new AdminListQuery(null, Map.of(), sort, 1);
+  }
+
+  /// 검색어나 필터가 하나라도 적용됐는가 (적용된 조건 칩·빈 상태 문구 판단)
+  public boolean hasConditions() {
+    return q != null || !filters.isEmpty();
   }
 
   /** Spring Data 용 0부터 시작하는 페이지 번호 */
@@ -69,23 +95,39 @@ public record AdminListQuery(String q, Map<String, String> filters, String sort,
 
   /** LIKE 검색 패턴: %, _, \ 이스케이프 (쿼리에 ESCAPE '\' 필요), 검색어 없으면 null */
   public String likePattern() {
-    if (q == null) {
+    return toLikePattern(q);
+  }
+
+  /// 아무 글자 > 포함 검색 LIKE 패턴 (%, _, \ 이스케이프, 비었으면 null): 필터 값(보호자·모델명 등) 검색용
+  public static String toLikePattern(String text) {
+    if (text == null || text.isBlank()) {
       return null;
     }
-    String escaped = q.replace(LIKE_ESCAPE, LIKE_ESCAPE + LIKE_ESCAPE)
+    return "%" + escapeLike(text.trim()) + "%";
+  }
+
+  /// 아무 글자 > 앞부분 일치 LIKE 패턴 (앱 버전처럼 "1.0" 으로 1.0.x 를 찾을 때, 비었으면 null)
+  public static String toPrefixLikePattern(String text) {
+    if (text == null || text.isBlank()) {
+      return null;
+    }
+    return escapeLike(text.trim()) + "%";
+  }
+
+  private static String escapeLike(String text) {
+    return text.replace(LIKE_ESCAPE, LIKE_ESCAPE + LIKE_ESCAPE)
       .replace("%", LIKE_ESCAPE + "%")
       .replace("_", LIKE_ESCAPE + "_");
-    return "%" + escaped + "%";
   }
 
   /** 현재 검색·필터를 유지한 "?q=..&필터=..&sort=..&page=.." (page 1 은 생략, 값은 URL 인코딩) */
   public String toQueryString(String sortToUse, int pageToUse) {
     StringBuilder builder = new StringBuilder();
-    appendParam(builder, "q", q);
+    appendParam(builder, PARAMETER_KEYWORD, q);
     filters.forEach((key, value) -> appendParam(builder, key, value));
-    appendParam(builder, "sort", sortToUse);
+    appendParam(builder, PARAMETER_SORT, sortToUse);
     if (pageToUse > 1) {
-      appendParam(builder, "page", String.valueOf(pageToUse));
+      appendParam(builder, PARAMETER_PAGE, String.valueOf(pageToUse));
     }
     return builder.toString();
   }
@@ -95,8 +137,9 @@ public record AdminListQuery(String q, Map<String, String> filters, String sort,
       return;
     }
     builder.append(builder.length() == 0 ? '?' : '&').append(key).append('=');
-    // 정렬 값의 콤마는 읽기 쉽게 그대로 둔다
-    builder.append(UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8).replace("%2C", ","));
+    // 정렬 값의 콤마는 읽기 쉽게 그대로 둔다. + 는 받는 쪽에서 공백으로 읽혀 %2B 로 바꾼다
+    builder.append(UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8)
+      .replace("%2C", ",").replace("+", "%2B"));
   }
 
   private static String normalizeKeyword(String raw) {

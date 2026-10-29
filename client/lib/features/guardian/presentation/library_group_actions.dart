@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
@@ -18,7 +18,7 @@ import 'widgets/library_entry_grid.dart' show LibraryMenuAnchor;
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_group_picker_sheet.dart';
 import 'widgets/routine_group_sheet.dart';
-import 'widgets/routine_rename_sheet.dart';
+import '../../../core/widgets/routine_rename_sheet.dart';
 
 /// 일과관리 칸의 묶음 동작 (#807): 열기 · 메뉴 · 만들기 · 넣기 · 끌어 묶기 · 보내기 · 이름 · 복사 · 풀기
 ///
@@ -65,8 +65,8 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
         if (sheetResult.routine case final routine?) {
           await openRoutineDetail(routine, isInGroup: true);
         }
-      case GroupSheetAction.ungroupedLastOne:
-        showElumToast(context, context.l10n.routineGroupUngroupedLastOne);
+      case GroupSheetAction.ungroupedEmpty:
+        showElumToast(context, context.l10n.routineGroupUngroupedEmpty);
     }
   }
 
@@ -101,7 +101,7 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
 
   // --- 만들기 · 넣기 ---
 
-  /// `+ 일과 만들기`: 묶을 낱개가 2개 이상이면 새 일과/새 묶음 고르기, 아니면 바로 새 일과
+  /// `+ 일과 만들기`: 묶을 낱개가 있으면 새 일과/새 묶음 고르기, 아니면 바로 새 일과
   Future<void> onCreatePressed() async {
     if (_looseRoutines.length < RoutineGroup.minimumRoutineCount) {
       return startCreateRoutine();
@@ -114,13 +114,13 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
       rows: [
         (
           value: false,
-          icon: Icons.add_rounded,
+          icon: AppAssets.iconPlus,
           label: l10n.routineGroupCreateRoutine,
           isDanger: false,
         ),
         (
           value: true,
-          icon: Icons.create_new_folder_outlined,
+          icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
           isDanger: false,
         ),
@@ -130,7 +130,7 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
     return isNewGroup ? createGroupWithPicker() : startCreateRoutine();
   }
 
-  /// 새 묶음: 고르기 시트(이름 + 2개 이상) > 만들기. [preselectedIds] 는 먼저 골라 둔 일과
+  /// 새 묶음: 고르기 시트(이름 + 1개 이상) > 만들기. [preselectedIds] 는 먼저 골라 둔 일과
   Future<void> createGroupWithPicker({
     List<String> preselectedIds = const [],
   }) async {
@@ -162,13 +162,13 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
         for (final entry in groups)
           (
             value: (group: entry.group),
-            icon: Icons.folder_rounded,
+            icon: AppAssets.iconFolder,
             label: entry.group.name,
             isDanger: false,
           ),
         (
           value: (group: null),
-          icon: Icons.create_new_folder_outlined,
+          icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
           isDanger: false,
         ),

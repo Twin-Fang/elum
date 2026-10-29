@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.common.locale.CurrentRegion;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
@@ -77,8 +78,9 @@ public class NotificationQueryService {
       log.warn("[notification summary] notice skipped : platform is invalid");
       return false;
     }
-    // 언어는 요청 스레드에서 정한다. 비어 있으면 ALL (공지 목록과 같은 규칙)
-    return noticeHistoryService.hasUnseenNotice(memberId, NoticePlatform.parse(platform).name(), CurrentLocale.get());
+    // 언어·국가는 요청 스레드에서 정한다. 비어 있으면 ALL (공지 목록과 같은 규칙)
+    return noticeHistoryService.hasUnseenNotice(
+      memberId, NoticePlatform.parse(platform).name(), CurrentLocale.get(), CurrentRegion.get());
   }
 
   /** 비었으면 ALL 로 보고 true, 모르는 값이면 false. 프록시가 아닌 정적 메서드를 직접 부른다 */

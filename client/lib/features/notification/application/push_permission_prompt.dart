@@ -6,6 +6,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/push_permission_sheet.dart';
+import '../data/notification_permission_gate.dart';
 import '../data/push_messaging_client.dart';
 import '../domain/push_permission_status.dart';
 import 'push_token_registrar.dart';
@@ -14,12 +15,15 @@ final pushPermissionPromptProvider = Provider<PushPermissionPrompt>(
   PushPermissionPrompt.new,
 );
 
-/// 알림 권한 요청 한 곳: 안내 시트(첫 일과를 보낸 뒤 한 번) + 설정 화면의 직접 요청
+/// 알림 권한 요청 한 곳: 안내 시트(첫 일과를 보낸 뒤 한 번) + 꺼진 기기에 다시 권하기(7일마다) + 설정 화면의 직접 요청
 /// 요청은 모두 [PushMessagingClient] 한 경로 (iOS APNs 등록이 함께 일어남)
 class PushPermissionPrompt {
   PushPermissionPrompt(this._ref);
 
   final Ref _ref;
+
+  /// 꺼진 기기에 다시 권하는 간격 (일)
+  static const nudgeIntervalDays = 7;
 
   /// 안내 시트가 떠 있는 동안 두 번째 호출 무시
   bool _isAsking = false;
@@ -53,6 +57,8 @@ class PushPermissionPrompt {
       if (!context.mounted) return;
       final isAllowed = await showPushPermissionSheet(context);
       await _storage.setHasAskedPushPermission(true);
+      // 다시 권하기가 7일 안에 또 뜨지 않게
+      await _storage.setPushPermissionNudgedAt(DateTime.now());
       if (isAllowed != true) return; // 나중에·닫기: 플래그만
       final isGranted = await _requestAndRegister();
       if (isGranted == false && context.mounted) {
@@ -65,6 +71,69 @@ class PushPermissionPrompt {
     } finally {
       _isAsking = false;
     }
+  }
+
+  /// 홈 진입 시: 허용이면 토큰 등록만, 꺼져 있고 마지막 안내 뒤 7일 지났으면 안내 시트 > 켜기
+  /// 보호자 기기가 이룸이 화면을 보여 주는 중이거나 다른 시트가 떠 있으면 띄우지 않음
+  Future<void> maybeNudge(BuildContext context) async {
+    if (_isAsking) return;
+    _isAsking = true;
+    try {
+      final status = await _readStatus();
+      if (status == null) return; // 확인 실패: 다음 진입 때
+      if (status.isGranted) {
+        await _ref.read(pushTokenRegistrarProvider).syncRegistration();
+        return;
+      }
+      if (!_isNudgeDue()) return;
+      if (!context.mounted || ModalRoute.of(context)?.isCurrent == false) return;
+      final isElumiDevice = _storage.isElumiDevice;
+      final l10n = context.l10n;
+      await _storage.setPushPermissionNudgedAt(DateTime.now());
+      if (!context.mounted) return;
+      AppLogger.info('[push] nudge shown : elumi=$isElumiDevice status=${status.name}');
+      final isAllowed = await showPushPermissionSheet(
+        context,
+        title: isElumiDevice ? l10n.pushPermissionElumiTitle : l10n.pushPermissionNudgeTitle,
+        description: isElumiDevice ? l10n.pushPermissionElumiBody : l10n.pushPermissionNudgeBody,
+        allowLabel: l10n.pushPermissionTurnOn,
+      );
+      if (isAllowed != true) return; // 나중에·닫기: 7일 뒤 다시
+      await _turnOn(status);
+    } catch (e, st) {
+      AppLogger.error('push', e, st, {'step': 'maybeNudge'});
+    } finally {
+      _isAsking = false;
+    }
+  }
+
+  // 마지막 안내(첫 일과 안내 포함) 뒤 7일 지났는가. 기록 없으면 바로
+  bool _isNudgeDue() {
+    final lastNudgedAt = _storage.pushPermissionNudgedAt;
+    if (lastNudgedAt == null) return true;
+    return DateTime.now().difference(lastNudgedAt) >= const Duration(days: nudgeIntervalDays);
+  }
+
+  // 켜기: 한 번도 안 물었으면 시스템 권한 창, 이미 거부했으면 기기 설정 (돌아오면 토큰 등록)
+  Future<void> _turnOn(PushPermissionStatus status) async {
+    if (status == PushPermissionStatus.notDetermined) {
+      await _storage.setHasAskedPushPermission(true);
+      await _requestAndRegister();
+      return;
+    }
+    _registerOnNextResume();
+    await _ref.read(notificationPermissionGateProvider).openDeviceSettings();
+  }
+
+  // 기기 설정에서 돌아오면 한 번만 토큰 등록 (권한 조건은 registrar 가 확인)
+  void _registerOnNextResume() {
+    late final AppLifecycleListener listener;
+    listener = AppLifecycleListener(
+      onResume: () {
+        listener.dispose();
+        _ref.read(pushTokenRegistrarProvider).syncRegistration();
+      },
+    );
   }
 
   /// 알림 설정 화면의 안내 줄 버튼: 아직 한 번도 안 물은 기기면 시스템 창을 띄움

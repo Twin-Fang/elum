@@ -103,7 +103,7 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
     return [
       BoxShadow(
         // 카드가 옅은 회색이라 알파가 낮으면 배경에 묻힌다
-        color: Colors.black.withValues(alpha: 0.26 * t),
+        color: context.colors.textPrimary.withValues(alpha: 0.26 * t),
         blurRadius: 22 * t,
         offset: Offset(0, 8 * t),
       ),
@@ -151,7 +151,7 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                     borderRadius: BorderRadius.circular(20.r),
                     boxShadow: shadow,
                   ),
-                  foregroundDecoration: _outline(t, colors.brandOrange),
+                  foregroundDecoration: _outline(t, colors.checkDone),
                   child: Row(
                     children: [
                       Expanded(
@@ -230,7 +230,7 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                                   width: 18.w,
                                   height: 18.w,
                                 ),
-                                // 잡히는 만큼 브랜드색이 위에 짙어진다. 에셋 색을
+                                // 잡히는 만큼 민트가 위에 짙어진다. 에셋 색을
                                 // 코드에 옮겨 적지 않으려고 값을 섞지 않고 겹친다.
                                 if (t > 0)
                                   Opacity(
@@ -240,7 +240,7 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                                       width: 18.w,
                                       height: 18.w,
                                       colorFilter: ColorFilter.mode(
-                                        colors.brandOrange,
+                                        colors.checkDone,
                                         BlendMode.srcIn,
                                       ),
                                     ),

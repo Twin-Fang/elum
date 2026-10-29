@@ -5,7 +5,7 @@ import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../shared/utils/open_notice_link.dart';
 import '../../../notice/domain/app_notice.dart';
 
@@ -25,8 +25,7 @@ class _NoticeHistoryCardState extends State<NoticeHistoryCard> {
   static const _imageToTitle = 12.0;
   static const _titleToBody = 8.0;
   static const _bodyToButton = 14.0;
-  static const _buttonHeight = 44.0;
-  static const _buttonRadius = 8.0;
+  static const _imageRadius = 8.0;
   static const _dateTopGap = 12.0;
 
   bool _isImageFailed = false;
@@ -75,7 +74,7 @@ class _NoticeHistoryCardState extends State<NoticeHistoryCard> {
           children: [
             if (imageUrl != null && !_isImageFailed) ...[
               ClipRRect(
-                borderRadius: BorderRadius.circular(_buttonRadius.r),
+                borderRadius: BorderRadius.circular(_imageRadius.r),
                 child: AspectRatio(
                   aspectRatio: _imageRatio,
                   child: Image(
@@ -118,20 +117,12 @@ class _NoticeHistoryCardState extends State<NoticeHistoryCard> {
             ),
             if (button != null) ...[
               SizedBox(height: _bodyToButton.h),
-              AppPressable(
+              // 공지 팝업의 링크 버튼과 같은 버튼 (민트 54 · r8, 관리자 문구라 어절에서 꺾음)
+              ElumDialogButton(
+                label: keepWords(button.label, locale: context.appLocale),
+                semanticsLabel: button.label,
+                centerLines: true,
                 onTap: () => _onButtonPressed(button.url),
-                child: Container(
-                  height: _buttonHeight.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: colors.buttonEnabled,
-                    borderRadius: BorderRadius.circular(_buttonRadius.r),
-                  ),
-                  child: Text(
-                    button.label,
-                    style: typo.button.copyWith(color: colors.buttonEnabledText),
-                  ),
-                ),
               ),
             ],
             SizedBox(height: _dateTopGap.h),

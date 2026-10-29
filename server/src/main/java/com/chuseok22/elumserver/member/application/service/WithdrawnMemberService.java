@@ -13,11 +13,13 @@ import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRe
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.routine.application.service.RoutineGroupService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +60,9 @@ public class WithdrawnMemberService {
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
+  private final TalkCleanupService talkCleanupService;
   private final RoutineGroupService routineGroupService;
+  private final MemberDailyVisitRepository memberDailyVisitRepository;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -141,6 +145,9 @@ public class WithdrawnMemberService {
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     feedbackService.deleteAllOf(memberId);
     notificationCleanupService.deleteAllOf(memberId);
+    // 이야기 데이터도 한 번 더 지운다 (탈퇴 때 이미 지운 것)
+    talkCleanupService.deleteAllOf(memberId);
+    memberDailyVisitRepository.deleteAllByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);
 

@@ -60,11 +60,20 @@ class LibraryGroupEntry extends LibraryEntry {
   int? get order => group.displayOrder;
 }
 
+/// 이 칸이 그 일과를 담고 있는가 (낱개 칸이거나 묶음 안)
+bool doesLibraryEntryHoldRoutine(LibraryEntry entry, String routineId) =>
+    switch (entry) {
+      LibraryRoutineEntry(:final routine) => routine.id == routineId,
+      LibraryGroupEntry(:final routines) => routines.any(
+        (routine) => routine.id == routineId,
+      ),
+    };
+
 /// 원본 목록 + 묶음 목록 > 격자 칸: 서버에 저장된 자리 순서(묶음·일과 한 줄), 자리가 없는 칸은 그 뒤
 ///
 /// 자리가 같거나 없으면 묶음 먼저, 그다음 서버가 준 원본 순서(최신순).
 /// 묶음 안 원본은 낱개 칸으로 다시 나오지 않는다 — 일과 하나는 한 곳에만 있다.
-/// 안의 원본이 2개 미만으로 보이는 묶음(다른 기기에서 지운 직후 등)은 낱개로 펼쳐 보여 준다.
+/// 안의 원본이 하나도 안 보이는 묶음(다른 기기에서 지운 직후 등)은 낱개로 펼쳐 보여 준다.
 List<LibraryEntry> composeLibraryEntries(
   List<Routine> routines,
   List<RoutineGroup> groups,

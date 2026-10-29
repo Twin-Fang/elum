@@ -10,7 +10,10 @@ import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -168,5 +171,48 @@ class NotificationRecorderTest {
     recorder.record(NotificationDraft.feedbackResolved("f1", FIRST_AT), List.of("A"));
 
     verify(notificationRepository).findForUpdateByRecipientMemberIdAndGroupKey("A", "FEEDBACK_RESOLVED:f1");
+  }
+
+  @Test
+  @DisplayName("같은 글에 댓글이 세 번 달리면 한 줄이 count 3 으로 오르고 매번 푸시한다")
+  void talkCommentPush_groupsByPost() {
+    Map<String, Notification> rowByGroupKey = new HashMap<>();
+    when(notificationRepository.findForUpdateByRecipientMemberIdAndGroupKey(any(), any()))
+      .thenAnswer(call -> Optional.ofNullable(rowByGroupKey.get(call.<String>getArgument(1))));
+    when(notificationRepository.saveAndFlush(any(Notification.class))).thenAnswer(call -> {
+      Notification row = call.getArgument(0);
+      row.setId("n1");
+      rowByGroupKey.put(row.getGroupKey(), row);
+      return row;
+    });
+
+    List<RecordedNotification> results = new ArrayList<>();
+    for (int index = 0; index < 3; index++) {
+      results.add(recorder.record(NotificationDraft.talkPostCommented("post-1", SECOND_AT), List.of("A")).get(0));
+    }
+
+    assertThat(rowByGroupKey).hasSize(1);
+    assertThat(results).extracting(RecordedNotification::count).containsExactly(1, 2, 3);
+    assertThat(results).allMatch(RecordedNotification::shouldPush);
+  }
+
+  @Test
+  @DisplayName("가져감 알림도 같은 글이면 한 줄로 모여 count 가 오르고 다시 안 읽음으로 돌린다")
+  void talkImportPush_groupsByPost_unreadAgain() {
+    Notification row = new Notification();
+    row.setId("n1");
+    row.setRecipientMemberId("A");
+    row.setGroupKey("TALK_POST_IMPORTED:post-1");
+    row.setCount(1);
+    row.setReadAt(FIRST_AT);
+    when(notificationRepository.findForUpdateByRecipientMemberIdAndGroupKey("A", "TALK_POST_IMPORTED:post-1"))
+      .thenReturn(Optional.of(row));
+
+    RecordedNotification result =
+      recorder.record(NotificationDraft.talkPostImported("post-1", SECOND_AT), List.of("A")).get(0);
+
+    assertThat(result.count()).isEqualTo(2);
+    assertThat(result.shouldPush()).isTrue();
+    assertThat(row.getReadAt()).isNull();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/dio_provider.dart';
+import '../../../core/state/refresh_joining_in_flight.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
 import '../../../core/network/app_failure.dart';
@@ -108,6 +109,21 @@ extension RoutineListRefresh on WidgetRef {
     invalidate(routineLibraryProvider);
     invalidate(routineGroupsProvider);
   }
+}
+
+/// 홈 당겨서 새로고침: 화면에 보이는 목록만 다시 받기 (주기 갱신과 겹치면 요청 1번, 실패면 던짐)
+///
+/// 일과관리 · 묶음 · 전체 목록은 건드리지 않음 — 홈에 안 보이고 일과관리에 들어갈 때 다시 계산된다.
+extension HomeRoutinesPullRefresh on WidgetRef {
+  /// 이룸이 홈: 오늘 일과
+  Future<void> refreshTodayRoutinesNow() =>
+      refreshJoiningInFlight(this, todayRoutinesProvider);
+
+  /// 보호자 홈: 오늘 + 지난 일과 (둘 다 끝난 뒤 첫 실패를 던짐)
+  Future<void> refreshTodayAndPastRoutinesNow() => Future.wait([
+    refreshJoiningInFlight(this, todayRoutinesProvider),
+    refreshJoiningInFlight(this, pastRoutinesProvider),
+  ]);
 }
 
 /// 화면을 떠난 뒤(위젯이 사라진 뒤)에 부를 때 쓰는 같은 것 — 컨테이너를 붙잡아 둔다.

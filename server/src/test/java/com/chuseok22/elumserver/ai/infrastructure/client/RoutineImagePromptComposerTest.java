@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.CardScene;
+import com.chuseok22.elumserver.ai.core.ImageCardLayoutRules;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -47,7 +49,7 @@ class RoutineImagePromptComposerTest {
 
     String prompt = composer.compose("옷을 입어요.", CharacterType.LULU, false);
 
-    assertThat(prompt).startsWith("한국어 지시문\n\n장면 정보:\n");
+    assertThat(prompt).startsWith("한국어 지시문\n\n" + ImageCardLayoutRules.KO + "\n\n장면 정보:\n");
     assertThat(prompt).contains(CharacterType.LULU.getAppearance());
   }
 
@@ -58,7 +60,7 @@ class RoutineImagePromptComposerTest {
 
     String prompt = composer.compose("옷을 입어요.", CharacterType.LULU, true);
 
-    assertThat(prompt).startsWith("English rules\n\nScene info:\n");
+    assertThat(prompt).startsWith("English rules\n\n" + ImageCardLayoutRules.EN + "\n\nScene info:\n");
     assertThat(prompt).contains(CharacterType.LULU.getAppearanceEn());
     assertThat(prompt).contains("\"referenceImageProvided\":true");
   }
@@ -93,6 +95,29 @@ class RoutineImagePromptComposerTest {
   void cartoon_stillUsesKoreanKey() {
     language("KO");
 
-    assertThat(composer.compose("옷을 입어요.", CharacterType.LULU, false)).startsWith("한국어 지시문\n\n장면 정보:\n");
+    assertThat(composer.compose("옷을 입어요.", CharacterType.LULU, false)).startsWith("한국어 지시문\n\n[화면 규격");
+  }
+
+  @Test
+  @DisplayName("캐릭터가 없으면 화면 규격을 붙이지 않는다 — 캐릭터 그림 전제 규칙이라")
+  void noCharacter_hasNoLayoutRules() {
+    language("KO");
+
+    assertThat(composer.compose("옷을 입어요.", null, false)).doesNotContain("[화면 규격");
+  }
+
+  @Test
+  @DisplayName("제목과 영어 장면이 있으면 장면 JSON 에 싣고, 없는 필드는 생략한다")
+  void scene_carriesTitlesAndSceneDetail() {
+    language("KO");
+
+    String full = composer.compose(
+      new CardScene("병원에 가요", "진찰을 받아요", "가슴에 청진기를 대요", "The character holds a stethoscope."),
+      CharacterType.LULU, true);
+    String descriptionOnly = composer.compose("옷을 입어요.", CharacterType.LULU, true);
+
+    assertThat(full).contains("\"routineTitle\":\"병원에 가요\"").contains("\"stepTitle\":\"진찰을 받아요\"")
+      .contains("\"sceneDetail\":\"The character holds a stethoscope.\"");
+    assertThat(descriptionOnly).contains("\"scene\":{\"stepDescription\":\"옷을 입어요.\"}");
   }
 }

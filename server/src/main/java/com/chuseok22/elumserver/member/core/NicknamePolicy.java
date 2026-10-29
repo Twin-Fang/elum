@@ -32,6 +32,9 @@ public class NicknamePolicy {
   private static final List<String> PROFANITY_RESOURCES = List.of(
     "nickname/profanity-ko.txt", "nickname/profanity-en.txt", "nickname/profanity-ja.txt",
     "nickname/profanity-zh.txt", "nickname/profanity-es.txt");
+  private static final String KOREAN_PROFANITY_RESOURCE = "nickname/profanity-ko.txt";
+  // 글 검사에서 뺄 한국어 욕설의 최대 길이 (코드포인트). "보지"·"자지" 같은 짧은 낱말이 "보지 않아요" 에 걸림
+  private static final int MAX_TEXT_EXCLUDED_KOREAN_WORD_LENGTH = 2;
   private static final String RESERVED_RESOURCE = "nickname/reserved.txt";
   private static final String ALLOW_RESOURCE = "nickname/profanity-allow.txt";
 
@@ -39,14 +42,19 @@ public class NicknamePolicy {
   private static final String LEET_DIGITS = "013457";
   private static final String LEET_LETTERS = "oieast";
 
+  // 닉네임 판정용: 욕설 + 예약어
   private final List<String> blockedKeys;
+  // 글 검사용: 욕설만 (예약어 "관리자"·"elum" 등은 글에서는 정상 낱말), 2자 이하 한국어 욕설도 뺌
+  private final List<String> profanityKeys;
   private final List<String> allowedKeys;
 
   public NicknamePolicy() {
-    List<String> blocked = new ArrayList<>();
-    PROFANITY_RESOURCES.forEach(resource -> blocked.addAll(readRequiredWords(resource)));
+    List<String> profanity = new ArrayList<>();
+    PROFANITY_RESOURCES.forEach(resource -> profanity.addAll(readRequiredWords(resource)));
+    List<String> blocked = new ArrayList<>(profanity);
     blocked.addAll(readRequiredWords(RESERVED_RESOURCE));
-    this.blockedKeys = blocked.stream().map(NicknamePolicy::toComparisonKey).filter(key -> !key.isEmpty()).toList();
+    this.profanityKeys = toNonEmptyKeys(profanityForText());
+    this.blockedKeys = toNonEmptyKeys(blocked);
     this.allowedKeys = readRequiredWords(ALLOW_RESOURCE).stream().map(NicknamePolicy::toComparisonKey).toList();
   }
 
@@ -67,16 +75,52 @@ public class NicknamePolicy {
     if (!isValidFormat(normalizedNickname)) {
       return NicknameVerdict.INVALID_FORMAT;
     }
-    String comparisonKey = toComparisonKey(normalizedNickname);
+    return containsAnyKey(comparisonKeyWithoutAllowedWords(normalizedNickname), blockedKeys)
+      ? NicknameVerdict.NOT_ALLOWED : NicknameVerdict.ALLOWED;
+  }
+
+  /**
+   * 글(문장)에 욕설이 들어 있는지: 공백 기준 낱말마다 비교용 문자열 > 허용 예외 제거 > 욕설 목록 포함 검사
+   * 형식 검사·예약어 검사 없음, 낱말을 넘나드는 우연한 일치(공백 제거로 생김)는 보지 않음
+   */
+  public boolean containsBlockedWord(String text) {
+    if (text == null || text.isBlank()) {
+      return false;
+    }
+    for (String word : text.strip().split("\\s+")) {
+      if (containsAnyKey(comparisonKeyWithoutAllowedWords(word), profanityKeys)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private String comparisonKeyWithoutAllowedWords(String word) {
+    String comparisonKey = toComparisonKey(word);
     for (String allowedKey : allowedKeys) {
       comparisonKey = comparisonKey.replace(allowedKey, ALLOWED_WORD_MASK);
     }
-    for (String blockedKey : blockedKeys) {
-      if (comparisonKey.contains(blockedKey)) {
-        return NicknameVerdict.NOT_ALLOWED;
-      }
+    return comparisonKey;
+  }
+
+  private static boolean containsAnyKey(String comparisonKey, List<String> keys) {
+    return keys.stream().anyMatch(comparisonKey::contains);
+  }
+
+  // 글 검사용 욕설 단어: 5개 언어 목록에서 2자 이하 한국어 단어만 제외
+  private static List<String> profanityForText() {
+    List<String> words = new ArrayList<>();
+    for (String resource : PROFANITY_RESOURCES) {
+      boolean isKorean = KOREAN_PROFANITY_RESOURCE.equals(resource);
+      readRequiredWords(resource).stream()
+        .filter(word -> !isKorean || word.codePointCount(0, word.length()) > MAX_TEXT_EXCLUDED_KOREAN_WORD_LENGTH)
+        .forEach(words::add);
     }
-    return NicknameVerdict.ALLOWED;
+    return words;
+  }
+
+  private static List<String> toNonEmptyKeys(List<String> words) {
+    return words.stream().map(NicknamePolicy::toComparisonKey).filter(key -> !key.isEmpty()).toList();
   }
 
   private boolean isValidFormat(String nickname) {

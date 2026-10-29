@@ -1,10 +1,12 @@
-/// 알림 종류: 서버 `NotificationType` 5개와 1:1
+/// 알림 종류: 서버 `NotificationType`과 1:1
 enum NotificationType {
   routineCompleted('ROUTINE_COMPLETED'),
   routineSentByCoGuardian('ROUTINE_SENT_BY_CO_GUARDIAN'),
   coGuardianJoined('CO_GUARDIAN_JOINED'),
   creditRefilled('CREDIT_REFILLED'),
-  feedbackResolved('FEEDBACK_RESOLVED');
+  feedbackResolved('FEEDBACK_RESOLVED'),
+  talkPostCommented('TALK_POST_COMMENTED'),
+  talkPostImported('TALK_POST_IMPORTED');
 
   const NotificationType(this.wire);
 

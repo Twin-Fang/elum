@@ -63,6 +63,17 @@ public class Feedback extends BaseEntity {
   @Column(name = "status_changed_by")
   private String statusChangedBy;
 
+  // 관리자 메모 (V53). 관리자끼리만 보고 보낸 사람에게는 안 감. 없으면 null
+  @Column(name = "admin_note", columnDefinition = "TEXT")
+  private String adminNote;
+
+  // 메모를 마지막으로 저장·지운 시각과 관리자. 한 번도 안 건드렸으면 null
+  @Column(name = "admin_note_changed_at")
+  private LocalDateTime adminNoteChangedAt;
+
+  @Column(name = "admin_note_changed_by")
+  private String adminNoteChangedBy;
+
   // 앱이 기록 맨 앞에 두는 구역 표지. 앱의 AppLogBuffer 와 같은 글자여야 한다.
   private static final String ERROR_SECTION = "== 최근 오류 ==";
   private static final String LOG_SECTION = "== 기록 ==";
@@ -70,6 +81,10 @@ public class Feedback extends BaseEntity {
 
   public boolean hasAppLog() {
     return appLog != null && !appLog.isEmpty();
+  }
+
+  public boolean hasAdminNote() {
+    return adminNote != null && !adminNote.isBlank();
   }
 
   /// 앱 상태 기록의 "최근 오류" 구역에 적힌 오류 건수. 구역이 없으면 0.

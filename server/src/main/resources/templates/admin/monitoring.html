@@ -7,8 +7,10 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">AI 모니터링</h1>
-      <p class="text-base-content/60">AI 호출 현황과 토큰 사용량, 추정 비용을 확인합니다.</p>
+      <p class="text-base-content/60">AI 호출 현황과 토큰 사용량, 추정 비용을 확인합니다. 회원·모델·오류 메시지로 호출을 찾아요.</p>
     </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       <div class="stat bg-base-200 rounded-box shadow p-4">
@@ -19,6 +21,14 @@
         <div class="stat-title text-sm">오늘 성공률</div>
         <div class="stat-value text-primary text-2xl"
              th:text="${todayStats.totalCount == 0 ? '-' : #numbers.formatDecimal(todayStats.successCount * 100.0 / todayStats.totalCount, 1, 1) + '%'}">-</div>
+        <!-- 실패 원인 분류는 아래 '최근 24시간 실패 원인' 표 (AiFailureKind) -->
+        <div class="stat-desc" data-today-failure-count>
+          실패 <span th:classappend="${todayStats.totalCount - todayStats.successCount > 0} ? 'text-error'"
+                   th:text="${todayStats.totalCount - todayStats.successCount}">0</span>건
+          <a th:if="${todayStats.totalCount - todayStats.successCount > 0}"
+             th:href="@{/admin/monitoring(success='false', from=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+             class="link link-hover ml-1">보기</a>
+        </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow p-4">
         <div class="stat-title text-sm">오늘 평균 지연</div>
@@ -49,6 +59,85 @@
       </div>
     </div>
 
+    <!-- 지금 AI 상태: 대시보드와 같은 판정 -->
+    <div class="card bg-base-200 shadow">
+      <div class="card-body p-4 gap-3">
+        <h2 class="font-semibold">AI 상태</h2>
+        <div th:replace="~{admin/fragments/admin-ai-health :: providerCards(${aiHealth})}"></div>
+      </div>
+    </div>
+
+    <!-- 사용량 추이: 용도별로 쌓은 막대 (실패율은 용도별 선) -->
+    <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/ai-usage" data-days="30"
+         data-type="stacked" data-metric="count">
+      <div class="card-body p-4 gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="font-semibold">사용량 추이</h2>
+          <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별 (30일)', '월별 (12달)')}"></div></div>
+          <select data-trend-metric class="select select-bordered select-xs" aria-label="지표">
+            <option value="count" selected>호출 수</option>
+            <option value="cost">비용 (원)</option>
+            <option value="failure">실패율 (%)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" data-month-summary>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 호출</div>
+            <div class="text-xl font-bold" th:text="${#numbers.formatInteger(monthSummary.callCount(), 1, 'COMMA')}">0</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 비용</div>
+            <div class="text-xl font-bold" th:text="'$' + ${#numbers.formatDecimal(monthSummary.costUsd(), 1, 2)}">$0</div>
+            <div class="text-xs text-base-content/60" th:if="${monthSummary.costKrw() > 0}"
+                 th:text="'약 ' + ${#numbers.formatInteger(monthSummary.costKrw(), 1, 'COMMA')} + '원'">약 0원</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">일과 1개 평균 비용</div>
+            <div class="text-xl font-bold"
+                 th:text="${monthSummary.averageCostKrwPerRoutine() == null ? '-' : '약 ' + #numbers.formatInteger(monthSummary.averageCostKrwPerRoutine(), 1, 'COMMA') + '원'}">-</div>
+            <div class="text-xs text-base-content/60">이번 달 비용 ÷ 성공한 일과 생성</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 실패율</div>
+            <div class="text-xl font-bold" th:text="${#numbers.formatDecimal(monthSummary.failurePercent(), 1, 1)} + '%'">0%</div>
+          </div>
+        </div>
+        <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-72')}"></th:block>
+        <p class="text-xs text-base-content/60">원화는 시스템 설정의 환율로 바꾼 추정값이에요</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- 제공자별 비용: 몇 개뿐이라 그래프 대신 막대 줄 -->
+      <div class="card bg-base-200 shadow">
+        <div class="card-body p-4 gap-2" data-provider-costs>
+          <h2 class="font-semibold">제공자별 비용 (이번 달)</h2>
+          <p th:if="${monthSummary.providerCosts().isEmpty()}" class="text-sm text-base-content/60">이번 달 비용 기록이 없어요</p>
+          <div th:each="providerCost : ${monthSummary.providerCosts()}" class="space-y-1">
+            <div class="flex justify-between text-sm">
+              <span th:text="${providerCost.laneLabel()}">제공자</span>
+              <span>
+                <b th:text="'$' + ${#numbers.formatDecimal(providerCost.costUsd(), 1, 2)}">$0</b>
+                <span class="text-base-content/60"
+                      th:text="'(' + ${monthSummary.costPercentOf(providerCost)} + '%)'">(0%)</span>
+              </span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-base-300 overflow-hidden">
+              <div class="h-2 rounded-full bg-primary"
+                   th:style="'width:' + ${monthSummary.costPercentOf(providerCost)} + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow">
+        <div class="card-body p-4 gap-2">
+          <h2 class="font-semibold">최근 24시간 실패 원인</h2>
+          <div th:replace="~{admin/fragments/admin-ai-health :: failureTable(${aiHealth})}"></div>
+          <a th:href="@{/admin/monitoring(success='false')}" class="link link-hover text-sm">실패한 호출만 보기</a>
+        </div>
+      </div>
+    </div>
+
     <!-- 기간 기본은 최근 7일. 값이 틀리면 서버가 보정해서 다시 채운다 -->
     <form method="get" th:action="@{/admin/monitoring}" class="flex flex-wrap items-end gap-2" data-admin-filter-bar>
       <label class="form-control">
@@ -76,27 +165,45 @@
         </select>
       </label>
       <label class="form-control">
-        <span class="label-text text-xs">회원 ID</span>
-        <input type="text" name="memberId" th:value="${query.filters.get('memberId')}" maxlength="100"
-               placeholder="회원 ID 전체" class="input input-bordered input-sm w-full sm:w-72"/>
+        <span class="label-text text-xs">회원</span>
+        <input type="text" name="member" th:value="${query.filters.get('member')}" maxlength="100"
+               placeholder="아이디·닉네임·이메일·회원 ID" class="input input-bordered input-sm w-full sm:w-56"/>
       </label>
+      <label class="form-control">
+        <span class="label-text text-xs">모델</span>
+        <input type="text" name="model" th:value="${query.filters.get('model')}" maxlength="100"
+               placeholder="예: gemini" class="input input-bordered input-sm w-full sm:w-40"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">오류 메시지</span>
+        <input type="text" name="error" th:value="${query.filters.get('error')}" maxlength="100"
+               placeholder="예: timeout" class="input input-bordered input-sm w-full sm:w-48"/>
+      </label>
+      <!-- 회원 상세에서 넘어온 회원 ID 는 칸 없이 유지하고, 적용된 조건 칩의 x 로 뺀다 -->
+      <input th:if="${query.filters.get('memberId') != null}" type="hidden" name="memberId"
+             th:value="${query.filters.get('memberId')}"/>
       <input type="hidden" name="sort" th:value="${query.sort}"/>
       <button type="submit" class="btn btn-primary btn-sm">필터</button>
-      <a th:href="@{/admin/monitoring}" class="btn btn-ghost btn-sm">기간 초기화</a>
+      <div th:replace="~{admin/fragments/admin-list :: activeFilters(${definition}, ${query})}"></div>
     </form>
+
+    <div class="flex items-center gap-3 flex-wrap">
+      <div th:replace="~{admin/fragments/admin-list :: csvExport(${csvExport})}"></div>
+      <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${#numbers.formatInteger(calls.totalElements, 1, 'COMMA')}">0</span>건</span>
+    </div>
 
     <div class="overflow-x-auto">
       <table class="table table-sm">
         <thead>
         <tr>
-          <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
+          <th th:replace="~{admin/fragments/admin-list :: sortHeader(${definition.columnOf('createdAt')}, ${query})}"></th>
           <th>유형</th>
           <th>모델</th>
           <th>회원</th>
           <th>결과</th>
-          <th>지연</th>
-          <th>토큰(입력/출력)</th>
-          <th>추정 비용</th>
+          <th class="text-right">지연</th>
+          <th class="text-right">토큰(입력/출력)</th>
+          <th th:replace="~{admin/fragments/admin-list :: sortHeader(${definition.columnOf('estimatedCostUsd')}, ${query})}"></th>
         </tr>
         </thead>
         <tbody>
@@ -106,29 +213,41 @@
           <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(8, '조건에 맞는 AI 호출이 없어요')}"></tr>
         </th:block>
         <tr th:each="call : ${calls.content}">
-          <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
-          <td th:text="${call.callType.label}">유형</td>
+          <td th:text="${@adminDate.format(call.createdAt)}">시각</td>
+          <!-- 유형 + 크레딧 작업 링크 (작업 탐색은 작업 id 정확히 일치로 찾음, 작업에 묶인 호출만) -->
+          <td>
+            <span th:text="${call.callType.label}">유형</span>
+            <a th:if="${call.creditJobId != null}" th:href="@{/admin/credits/jobs(q=${call.creditJobId})}"
+               class="link link-hover text-xs ml-1" data-ai-call-credit-job-link>작업</a>
+          </td>
           <td class="text-xs" th:text="${call.model}">모델</td>
           <td>
             <!-- substring은 ID가 8자보다 짧으면 예외를 던져 화면이 통째로 죽는다.
                  abbreviate는 짧으면 자르지 않고 그대로 둔다. -->
+            <!-- 닉네임이 있으면 닉네임, 없으면 ID 앞부분. 전체 ID 는 툴팁 -->
             <a th:if="${call.memberId != null}" th:href="@{/admin/members/{id}(id=${call.memberId})}"
-               class="link link-hover text-xs" th:text="${#strings.abbreviate(call.memberId, 10)}">회원</a>
+               class="link link-hover text-xs" th:title="${call.memberId}"
+               th:text="${memberNicknames != null and memberNicknames.get(call.memberId) != null}
+                        ? ${#strings.abbreviate(memberNicknames.get(call.memberId), 16)}
+                        : ${#strings.abbreviate(call.memberId, 10)}">회원</a>
             <span th:if="${call.memberId == null}" class="text-base-content/40 text-xs">-</span>
           </td>
           <td>
             <span th:if="${call.success}" class="badge badge-success badge-sm">성공</span>
             <span th:unless="${call.success}" class="badge badge-error badge-sm" th:title="${call.errorMessage}">실패</span>
+            <div th:if="${!call.success and call.errorMessage != null}" class="text-xs text-error truncate max-w-xs"
+                 th:title="${call.errorMessage}" th:text="${call.errorMessage}">오류</div>
           </td>
-          <td th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
-          <td th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
-          <td th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
+          <td class="text-right" th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
+          <td class="text-right" th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
+          <td class="text-right" th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
         </tr>
         </tbody>
       </table>
     </div>
 
     <div th:replace="~{admin/fragments/admin-list :: pager(${calls}, @{${pagerBaseUrl}})}"></div>
+    <th:block th:replace="~{admin/fragments/admin-chart :: scripts}"></th:block>
   </main>
 </body>
 </html>

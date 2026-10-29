@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,18 +7,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../features/auth/application/login_controller.dart';
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/notice/domain/app_notice.dart';
+import '../../features/notice/presentation/show_notice_popup.dart';
+import '../../features/notification/application/push_message_router.dart';
+import '../../features/notification/domain/notification_type.dart';
+import '../../features/notification/domain/push_message.dart';
 import '../../features/guardian/application/routine_notifier.dart';
 import '../../features/guardian/application/routine_providers.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
+import '../app_status/app_status_repository.dart';
 import '../config/app_config.dart';
 import '../l10n/app_locales.dart';
+import '../logger/app_logger.dart';
 import '../router/routes.dart';
 import '../storage/local_storage.dart';
 import 'dev_locale_override.dart';
 import '../layout/share_origin.dart';
+import '../network/app_failure.dart';
+import 'app_restart.dart';
 import 'dev_log_buffer.dart';
 import 'dev_log_file.dart';
+import 'dev_server_store.dart';
+import 'dev_simulation.dart';
 import 'dev_state_dump.dart';
 import 'dev_tools_visibility.dart';
 
@@ -25,6 +38,8 @@ part 'dev_tools_sheet.dart';
 part 'dev_tools_actions.dart';
 part 'dev_tools_inspect.dart';
 part 'dev_tools_widgets.dart';
+part 'dev_tools_server.dart';
+part 'dev_tools_simulate.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///
@@ -39,7 +54,12 @@ part 'dev_tools_widgets.dart';
 /// `.env`의 `ELUM_SHOW_DEV_TOOLS=false`로 끄거나,
 /// `core/dev/`를 통째로 지우고 `app.dart`의 builder 한 줄을 제거한다.
 class DevToolsOverlay extends StatefulWidget {
-  const DevToolsOverlay({super.key, required this.child, required this.onNavigate});
+  const DevToolsOverlay({
+    super.key,
+    required this.child,
+    required this.onNavigate,
+    required this.navigatorContext,
+  });
 
   final Widget child;
 
@@ -48,6 +68,9 @@ class DevToolsOverlay extends StatefulWidget {
   /// `context`로 라우터를 찾지 못하기 때문이다(No GoRouter found in context).
   /// 라우터를 가진 `app.dart`가 이동 방법을 넘겨준다.
   final void Function(String route) onNavigate;
+
+  /// 라우터 Navigator 의 context (견본 공지 팝업용). 아직 없으면 null
+  final BuildContext? Function() navigatorContext;
 
   @override
   State<DevToolsOverlay> createState() => _DevToolsOverlayState();
@@ -132,6 +155,7 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
                         child: _DevToolsSheet(
                           onClose: () => setState(() => _panelOpen = false),
                           onNavigate: widget.onNavigate,
+                          navigatorContext: widget.navigatorContext,
                         ),
                       ),
                     ),
@@ -171,23 +195,69 @@ class _DraggableButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         onPanUpdate: (details) => onDrag(details.delta),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.55),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.bug_report, color: Colors.white, size: 24),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _buildCircle(),
+            // 운영이 아닌 서버·켜진 흉내 표시 (잊고 테스트하지 않게)
+            Positioned(
+              top: size + 2,
+              right: 0,
+              child: const _ActiveStateBadge(),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCircle() => Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(Icons.bug_report, color: Colors.white, size: 24),
+    );
+}
+
+/// 버튼 아래 작은 표시: 운영이 아닌 서버 호스트, 켜진 흉내. 없으면 그리지 않음
+class _ActiveStateBadge extends StatelessWidget {
+  const _ActiveStateBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([DevSimulation.appStatus, DevSimulation.networkFault]),
+      builder: (context, _) {
+        final lines = [
+          if (!AppConfig.isProductionApiServer) Uri.tryParse(AppConfig.apiBaseUrl)?.authority ?? AppConfig.apiBaseUrl,
+          ...DevSimulation.activeLabels(),
+        ];
+        if (lines.isEmpty) return const SizedBox.shrink();
+        return IgnorePointer(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.deepOrange.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              lines.join('\n'),
+              textAlign: TextAlign.right,
+              style: const TextStyle(color: Colors.white, fontSize: 9, height: 1.2),
+            ),
+          ),
+        );
+      },
     );
   }
 }

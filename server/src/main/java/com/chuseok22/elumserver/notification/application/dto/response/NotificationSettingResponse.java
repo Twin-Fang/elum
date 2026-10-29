@@ -10,17 +10,19 @@ public record NotificationSettingResponse(
   @Schema(description = "일과 보냄") boolean routineSent,
   @Schema(description = "보호자 합류") boolean coGuardianJoined,
   @Schema(description = "크레딧 채움") boolean creditRefilled,
-  @Schema(description = "의견 답변") boolean feedbackResolved
+  @Schema(description = "의견 답변") boolean feedbackResolved,
+  @Schema(description = "내 이야기 글에 댓글") boolean talkCommented,
+  @Schema(description = "내 이야기 글을 가져감") boolean talkImported
 ) {
 
   /// 행이 없는 보호자의 기본값: 모두 켜짐
   public static NotificationSettingResponse allEnabledDefault() {
-    return new NotificationSettingResponse(true, true, true, true, true, true);
+    return new NotificationSettingResponse(true, true, true, true, true, true, true, true);
   }
 
   public static NotificationSettingResponse from(NotificationSetting setting) {
     return new NotificationSettingResponse(setting.isAllEnabled(), setting.isRoutineCompletedEnabled(),
       setting.isRoutineSentEnabled(), setting.isCoGuardianJoinedEnabled(), setting.isCreditRefilledEnabled(),
-      setting.isFeedbackResolvedEnabled());
+      setting.isFeedbackResolvedEnabled(), setting.isTalkCommentedEnabled(), setting.isTalkImportedEnabled());
   }
 }

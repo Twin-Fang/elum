@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.feedback.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,10 +12,12 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
+import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
 import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -48,7 +51,7 @@ class FeedbackServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new FeedbackService(repository, CLOCK, eventPublisher);
+    service = new FeedbackService(repository, CLOCK, eventPublisher, UsageLimitSettings.fromDefaults());
   }
 
   private static FeedbackRequest request(String message, String appLog, String version, String os) {
@@ -272,26 +275,29 @@ class FeedbackServiceTest {
   }
 
   @Test
-  @DisplayName("상태 필터가 없으면 모든 상태를, 있으면 그 상태만 조회하고 검색어 없으면 빈 패턴을 넘긴다")
-  void search_translatesFilter() {
-    when(repository.searchForAdmin(org.mockito.ArgumentMatchers.anyBoolean(), any(), any(), any(Pageable.class)))
-      .thenReturn(new PageImpl<>(List.of()));
+  @DisplayName("관리자 검색: 조건이 없으면 전체 상태·빈 패턴·끝값 기간으로, 있으면 그 조건 그대로 묻고 음수 페이지는 0으로")
+  void search_translatesConditions() {
+    when(repository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), anyBoolean(), any(), anyBoolean(), any(),
+      any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
     ArgumentCaptor<Collection<FeedbackStatus>> statuses = ArgumentCaptor.forClass(Collection.class);
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    ArgumentCaptor<String> pattern = ArgumentCaptor.forClass(String.class);
 
-    service.search(null, null, Sort.by("createdAt"), 2);
-    verify(repository).searchForAdmin(eq(false), pattern.capture(), statuses.capture(), pageable.capture());
+    service.search(FeedbackAdminSearch.none(), Sort.by("createdAt"), 2);
+    verify(repository).searchForAdmin(eq(false), eq(""), statuses.capture(),
+      eq(LocalDateTime.of(2000, 1, 1, 0, 0)), eq(LocalDateTime.of(9999, 1, 1, 0, 0)),
+      eq(false), eq(""), eq(false), eq(""), pageable.capture());
     assertThat(statuses.getValue()).containsExactlyInAnyOrder(FeedbackStatus.values());
-    assertThat(pattern.getValue()).isEmpty();
     assertThat(pageable.getValue().getPageNumber()).isEqualTo(2);
     assertThat(pageable.getValue().getPageSize()).isEqualTo(FeedbackService.ADMIN_PAGE_SIZE);
 
     org.mockito.Mockito.clearInvocations(repository);
-    service.search("%느림\\%", FeedbackStatus.DONE, Sort.by("createdAt"), -3);
-    verify(repository).searchForAdmin(eq(true), pattern.capture(), statuses.capture(), pageable.capture());
+    LocalDateTime from = LocalDateTime.of(2026, 10, 1, 0, 0);
+    LocalDateTime to = LocalDateTime.of(2026, 10, 3, 0, 0);
+    service.search(new FeedbackAdminSearch("%느림\\%", FeedbackStatus.DONE, from, to, "1.0%", "ios%"),
+      Sort.by("createdAt"), -3);
+    verify(repository).searchForAdmin(eq(true), eq("%느림\\%"), statuses.capture(), eq(from), eq(to),
+      eq(true), eq("1.0%"), eq(true), eq("ios%"), pageable.capture());
     assertThat(statuses.getValue()).containsExactly(FeedbackStatus.DONE);
-    assertThat(pattern.getValue()).isEqualTo("%느림\\%");
     // 음수 페이지는 0으로 보정
     assertThat(pageable.getValue().getPageNumber()).isZero();
   }
@@ -304,5 +310,35 @@ class FeedbackServiceTest {
     assertThat(FeedbackStatus.fromName("done")).isEmpty();
     assertThat(FeedbackStatus.fromName(null)).isEmpty();
     assertThat(FeedbackStatus.fromName("")).isEmpty();
+  }
+
+  @Test
+  @DisplayName("메모가 최대 길이를 넘으면 저장하지 않고 기존 메모를 그대로 둔다 (CRLF 는 한 글자로 센다)")
+  void saveAdminNote_tooLong_keepsPreviousNote() {
+    String tooLong = "가".repeat(FeedbackService.MAX_ADMIN_NOTE_LENGTH + 1);
+
+    assertThat(service.saveAdminNote("f1", tooLong, "kimchi"))
+      .isEqualTo(FeedbackAdminNoteSaveResult.REJECTED_TOO_LONG);
+    verify(repository, never()).findById(any());
+
+    // 줄바꿈이 CRLF 로 와도 LF 기준 길이가 상한 이내면 저장
+    Feedback feedback = storedFeedback("f2");
+    String withCrlf = "가".repeat(FeedbackService.MAX_ADMIN_NOTE_LENGTH - 2) + "\r\n가";
+    assertThat(service.saveAdminNote("f2", withCrlf, "kimchi")).isEqualTo(FeedbackAdminNoteSaveResult.SAVED);
+    assertThat(feedback.getAdminNote()).hasSize(FeedbackService.MAX_ADMIN_NOTE_LENGTH);
+  }
+
+  @Test
+  @DisplayName("빈 메모로 저장하면 메모를 지우고(null) 지운 관리자·시각은 남긴다")
+  void saveAdminNote_blank_clearsNote() {
+    Feedback feedback = storedFeedback("f1");
+    feedback.setAdminNote("이전 메모");
+
+    assertThat(service.saveAdminNote("f1", "  \n ", "kimchi")).isEqualTo(FeedbackAdminNoteSaveResult.CLEARED);
+
+    assertThat(feedback.getAdminNote()).isNull();
+    assertThat(feedback.hasAdminNote()).isFalse();
+    assertThat(feedback.getAdminNoteChangedBy()).isEqualTo("kimchi");
+    assertThat(feedback.getAdminNoteChangedAt()).isEqualTo(NOW);
   }
 }

@@ -368,8 +368,14 @@ class _CustomOptionField extends StatelessWidget {
                 semanticLabel: context.l10n.questionCustomClose,
                 child: Padding(
                   padding: EdgeInsets.only(right: space.md),
-                  child: Icon(Icons.close_rounded,
-                      size: 20, color: colors.chipLabel),
+                  child: SvgPicture.asset(
+                    AppAssets.iconClose,
+                    width: 20.w,
+                    height: 20.w,
+                    excludeFromSemantics: true,
+                    colorFilter:
+                        ColorFilter.mode(colors.chipLabel, BlendMode.srcIn),
+                  ),
                 ),
               ),
             ],
@@ -446,10 +452,13 @@ class _OptionChip extends StatelessWidget {
                       onTap: onRemove,
                       // 아이콘만으로는 터치 영역이 좁아 누르기 어렵다
                       behavior: HitTestBehavior.opaque,
-                      child: Icon(
-                        Icons.close_rounded,
-                        size: 16.w,
-                        color: labelColor,
+                      child: SvgPicture.asset(
+                        AppAssets.iconClose,
+                        width: 16.w,
+                        height: 16.w,
+                        excludeFromSemantics: true,
+                        colorFilter:
+                            ColorFilter.mode(labelColor, BlendMode.srcIn),
                       ),
                     ),
                   ),

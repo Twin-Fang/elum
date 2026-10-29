@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
+import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
+import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
@@ -37,7 +39,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   Optional<Member> findByUsername(String username);
 
   /**
-   * 관리자 회원 목록: 상태 · 검색어(아이디 또는 이룸이 호칭) · 지금 유효한 요금제로 거른다.
+   * 관리자 회원 목록: 상태 · 검색어(회원 id 조각 · 아이디 · 보호자 닉네임 · 이룸이 호칭) · 지금 유효한 요금제로 거른다.
    *
    * <p>요금제는 {@code Subscription.effectivePlan} 과 같은 기준(ACTIVE · 만료 전 PRO)이다. 구독을 그 조건으로
    * left join 하므로 s 가 있으면 지금 PRO, 없으면 FREE(구독 행이 없는 회원 포함)이고 정렬 "s.plan" 도 같은 기준이 된다
@@ -47,6 +49,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
    *
    * @param hasKeyword  false 면 pattern 을 보지 않는다 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
    * @param planFilter  ALL, PRO, FREE
+   * @param joinedFrom  가입일 기간 시작(포함). 필터가 없으면 아주 이른 날 (null 바인딩을 피하려고 늘 값을 넣음)
+   * @param hasLastActivePeriod false 면 최근 활동 기간을 보지 않음 (활동 기록 없는 회원도 나옴)
+   * @param hasProvider false 면 로그인 제공자를 보지 않음. providers 는 늘 1개 이상 (빈 in 을 피함)
    */
   @Query("""
     select m from Member m
@@ -55,8 +60,18 @@ public interface MemberRepository extends JpaRepository<Member, String> {
       and s.status = com.chuseok22.elumserver.license.core.SubscriptionStatus.ACTIVE
       and (s.expiresAt is null or s.expiresAt >= :now)
     where m.status in :statuses
+      and m.createdAt >= :joinedFrom and m.createdAt < :joinedToExclusive
+      and (:hasLastActivePeriod = false
+        or (m.lastActivityAt >= :lastActiveFrom and m.lastActivityAt < :lastActiveToExclusive))
+      and (:hasProvider = false
+        or exists (
+          select 1 from AuthIdentity a
+          where a.memberId = m.id and a.provider in :providers
+        ))
       and (:hasKeyword = false
+        or lower(m.id) like lower(:pattern) escape '\\'
         or lower(m.username) like lower(:pattern) escape '\\'
+        or lower(m.nickname) like lower(:pattern) escape '\\'
         or exists (
           select 1 from ProfileGuardian g
           where g.member = m
@@ -69,7 +84,12 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   Page<Member> searchForAdmin(
     @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
     @Param("statuses") Collection<MemberStatus> statuses, @Param("planFilter") String planFilter,
-    @Param("now") LocalDateTime now, Pageable pageable
+    @Param("now") LocalDateTime now, @Param("joinedFrom") LocalDateTime joinedFrom,
+    @Param("joinedToExclusive") LocalDateTime joinedToExclusive,
+    @Param("hasLastActivePeriod") boolean hasLastActivePeriod, @Param("lastActiveFrom") LocalDateTime lastActiveFrom,
+    @Param("lastActiveToExclusive") LocalDateTime lastActiveToExclusive,
+    @Param("hasProvider") boolean hasProvider, @Param("providers") Collection<OAuthProvider> providers,
+    Pageable pageable
   );
 
   long countByStatus(MemberStatus status);
@@ -115,4 +135,59 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   // 최근 활동 회원수(대시보드) — lastActivityAt 기준.
   long countByLastActivityAtAfter(LocalDateTime after);
+
+  /// 기간[from, to) 가입 수 (탈퇴 회원 포함 — 그날 가입한 사실은 남음)
+  long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime from, LocalDateTime to);
+
+  /// 기간[from, to) 칸별 가입 수 (unit: day, month)
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), created_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member
+    where created_at >= :from and created_at < :to
+    group by 1
+    """, nativeQuery = true)
+  List<StatsBucketCount> countJoinedByBucket(
+    @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  /// 기간[from, to) 칸별 탈퇴 수 (되살린 계정은 탈퇴 시각이 비어 빠짐)
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), withdrawn_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member
+    where withdrawn_at >= :from and withdrawn_at < :to
+    group by 1
+    """, nativeQuery = true)
+  List<StatsBucketCount> countWithdrawnByBucket(
+    @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  /**
+   * 관리자 설정 회원 고르기: 회원 id 그대로 · 아이디 일부 · 보호자 닉네임 일부 (최근 가입순, 호출부가 건수 제한)
+   * pattern 은 호출부가 %·_ 를 이스케이프해 앞뒤에 % 를 붙여 넘김
+   */
+  @Query("""
+    select m from Member m
+    where m.id = :keyword
+       or lower(m.username) like lower(:pattern) escape '\\'
+       or lower(m.nickname) like lower(:pattern) escape '\\'
+    order by m.createdAt desc
+    """)
+  List<Member> findForAdminPicker(
+    @Param("keyword") String keyword, @Param("pattern") String pattern, Pageable pageable);
+
+  /**
+   * 관리자 목록 회원 조건: 회원 id 그대로 · 아이디 일부 · 이룸이 호칭 일부 > 회원 id (호출부가 건수 제한)
+   * pattern 은 호출부가 %·_ 를 이스케이프해 앞뒤에 % 를 붙여 넘김
+   */
+  @Query("""
+    select m.id from Member m
+    where m.id = :keyword
+       or lower(m.username) like lower(:pattern) escape '\\'
+       or exists (
+         select 1 from ProfileGuardian g
+         where g.member = m
+           and lower(g.profile.nickname) like lower(:pattern) escape '\\'
+       )
+    order by m.createdAt desc
+    """)
+  List<String> findIdsByKeywordPattern(
+    @Param("keyword") String keyword, @Param("pattern") String pattern, Pageable pageable);
 }

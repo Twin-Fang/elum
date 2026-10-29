@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.link.infrastructure.repository;
 
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,7 @@ public interface DeviceLinkRepository extends JpaRepository<DeviceLink, String> 
 
   /** 이 이룸이에 붙은 휴대폰 전부. 마지막 보호자가 나가 이룸이를 지울 때 함께 치운다. */
   List<DeviceLink> findAllByProfileId(String profileId);
+
+  /** 관리자 회원 상세: 이룸이들의 연결·발급 기록 전부 (최신순) */
+  List<DeviceLink> findAllByProfileIdInOrderByCreatedAtDesc(Collection<String> profileIds);
 }

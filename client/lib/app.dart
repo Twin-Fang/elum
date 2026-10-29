@@ -13,6 +13,7 @@ import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/l10n/current_l10n.dart';
 import 'core/layout/adaptive_screen_scale.dart';
+import 'core/layout/app_text_scale.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -26,6 +27,7 @@ import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
+import 'features/talk/application/talk_post_link_intake.dart';
 import 'core/storage/local_storage.dart';
 import 'app/dio_provider.dart';
 import 'core/router/routes.dart';
@@ -56,6 +58,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     onInviteLink: (link) => _inviteIntake.accept(link),
     // 같은 경우의 이룸이 휴대폰 연결 암호 링크
     onLinkCodeLink: (link) => _linkCodeIntake.accept(link),
+    // 같은 경우의 이야기 글 링크
+    onTalkPostLink: (link) => _talkPostIntake.accept(link),
   );
 
   // 연결 암호 링크의 코드를 로그인·역할 선택 뒤 암호 넣기 화면까지 맡겨 둔다.
@@ -69,13 +73,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     onNotice: (notice) {
       WidgetsBinding.instance
         ..addPostFrameCallback(
-          (_) => showElumToastOn(
-            _messengerKey.currentState,
-            switch (notice) {
-              LinkCodeNotice.alreadyLinked => appL10n.linkRejectedAlreadyLinked,
-              LinkCodeNotice.openOnElumiPhone => appL10n.linkRejectedOnGuardianPhone,
-            },
-          ),
+          (_) => showElumToastOn(_messengerKey.currentState, switch (notice) {
+            LinkCodeNotice.alreadyLinked => appL10n.linkRejectedAlreadyLinked,
+            LinkCodeNotice.openOnElumiPhone =>
+              appL10n.linkRejectedOnGuardianPhone,
+          }),
         )
         ..ensureVisualUpdate();
     },
@@ -98,6 +100,26 @@ class _ElumAppState extends ConsumerState<ElumApp> {
           (_) => showElumToastOn(
             _messengerKey.currentState,
             appL10n.inviteRejectedOnElumiDevice,
+          ),
+        )
+        ..ensureVisualUpdate();
+    },
+  );
+
+  // 이야기 글 링크를 보호자 홈·이야기에 닿았을 때 글 상세로 이어 준다.
+  late final TalkPostLinkIntake _talkPostIntake = TalkPostLinkIntake(
+    isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+    hasSession: () => ref.read(authRepositoryProvider).hasSession,
+    topLocation: () =>
+        _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
+    open: (postId) => _router.push(Routes.guardianTalkPostOf(postId)),
+    // 초대 링크 안내와 같은 이유로 다음 프레임에 띄우고 프레임을 요청한다
+    onElumiDeviceRejected: () {
+      WidgetsBinding.instance
+        ..addPostFrameCallback(
+          (_) => showElumToastOn(
+            _messengerKey.currentState,
+            appL10n.talkPostLinkRejectedOnElumiDevice,
           ),
         )
         ..ensureVisualUpdate();
@@ -143,7 +165,19 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     final path = _router.routerDelegate.currentConfiguration.uri.path;
     final isInGuardianArea =
         path == Routes.guardian || path.startsWith('${Routes.guardian}/');
-    return isInGuardianArea ? _router.routerDelegate.navigatorKey.currentContext : null;
+    return isInGuardianArea
+        ? _router.routerDelegate.navigatorKey.currentContext
+        : null;
+  }
+
+  /// 이룸이 기기 푸시로 일과를 열어도 되는 때의 루트 네비게이터 컨텍스트 (이룸이 화면 안일 때만, 아니면 null)
+  BuildContext? _contextIfInElumiArea() {
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final isInElumiArea =
+        path == Routes.child || path.startsWith('${Routes.child}/');
+    return isInElumiArea
+        ? _router.routerDelegate.navigatorKey.currentContext
+        : null;
   }
 
   @override
@@ -161,7 +195,12 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
-      ref.read(pushMessageRouterProvider).start(readyContext: _contextIfInGuardianArea);
+      ref
+          .read(pushMessageRouterProvider)
+          .start(
+            readyContext: _contextIfInGuardianArea,
+            readyElumiContext: _contextIfInElumiArea,
+          );
     });
   }
 
@@ -203,6 +242,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       router: _router,
       intake: _inviteIntake,
       linkIntake: _linkCodeIntake,
+      talkPostIntake: _talkPostIntake,
       child: _buildApp(),
     );
   }
@@ -213,13 +253,17 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       forcedLocale: ref.watch(devLocaleOverrideProvider),
       inner: (context, child) => SyncTriggers(
         // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다
-        child: AppStatusGate(
-          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
-          // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
-          child: DevToolsOverlay(
-            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-            onNavigate: _router.go,
+        // 개발자 도구는 앱 상태 게이트 바깥 (점검·강제 업데이트 화면에서도 흉내를 끌 수 있게)
+        child: DevToolsOverlay(
+          // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+          // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+          onNavigate: _router.go,
+          // 견본 공지 팝업을 띄울 화면 (라우터 Navigator)
+          navigatorContext: () =>
+              _router.routerDelegate.navigatorKey.currentContext,
+          child: AppStatusGate(
+            // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
+            // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
             child: child ?? const SizedBox.shrink(),
           ),
         ),
@@ -243,7 +287,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         scaffoldMessengerKey: _messengerKey,
         debugShowCheckedModeBanner: false,
         // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
-        builder: l10n.builder,
+        // 글자 배율: 시스템 글자 크기(시안보다 작게는 안 줄임) × 폰 폭 비례 (AppTextScale)
+        builder: (context, child) =>
+            AppTextScale(child: l10n.builder(context, child)),
       ),
     );
   }

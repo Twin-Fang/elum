@@ -132,7 +132,6 @@ class _ConsentGroup extends StatelessWidget {
         ),
         SizedBox(height: _titleToCardGap.h),
         SettingsGroup(
-          hasDividers: false,
           children: [
             for (final item in items)
               SettingsTile(

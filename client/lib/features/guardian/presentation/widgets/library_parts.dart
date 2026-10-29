@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
@@ -11,8 +10,12 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
+import '../../../../core/widgets/elum_floating_pill_button.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../application/guardian_child_identity.dart';
+import '../../application/routine_manage_coach_notifier.dart';
+import 'coach_help_button.dart';
+import 'grey_tile_shell.dart';
 
 // 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
@@ -34,12 +37,25 @@ class LibraryManageHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
+          // 제목 + 사용법(코치마크) 다시 보기 `?` — 배지는 오른쪽 끝에 붙는다
           Expanded(
-            child: Text(
-              context.l10n.guardianTabManage,
-              style: context.typo.greeting.copyWith(
-                color: context.colors.textPrimary,
-              ),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    context.l10n.guardianTabManage,
+                    style: context.typo.libraryTitle.copyWith(
+                      color: context.colors.textPrimary,
+                    ),
+                  ),
+                ),
+                SizedBox(width: space.xs.w),
+                CoachHelpButton(
+                  onTap: () => ref
+                      .read(routineManageCoachProvider.notifier)
+                      .requestReplay(),
+                ),
+              ],
             ),
           ),
           if (isPhone)
@@ -55,49 +71,48 @@ class LibraryManageHeader extends ConsumerWidget {
   }
 }
 
-/// 원본이 하나도 없을 때 (불러오는 중·실패와 구분되는 빈 상태)
+/// 원본이 하나도 없을 때 (시안 217:2655): 목록 첫 줄 자리에 글만 든 웜그레이 줄
+/// 보호자 화면 빈 상태는 그림 없이 홈 `EmptyRoutines` 와 같은 칸을 쓴다
 class LibraryEmptyState extends StatelessWidget {
   const LibraryEmptyState({required this.bottomSpace});
 
   final double bottomSpace;
 
-  /// 루미 일러스트 한 변 (정사각형, 여백 포함)
-  static const _illustrationSize = 220.0;
+  /// 빈 상태 두 줄 사이 (홈 `EmptyRoutines` 와 같다)
+  static const _lineGap = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final typo = context.typo;
     final space = context.space;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: space.screenH.w,
-        right: space.screenH.w,
-        bottom: bottomSpace,
+    // 격자 첫 칸과 같은 자리 (판 x=16 · 위 12)
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        space.md.w,
+        space.sm.h,
+        space.md.w,
+        bottomSpace,
       ),
-      child: Center(
+      child: GreyTileShell(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              AppAssets.routinesEmptyLumi,
-              width: _illustrationSize.w,
-              height: _illustrationSize.w,
-              // 장식 그림 (제목이 뜻을 전한다)
-              excludeFromSemantics: true,
-            ),
-            SizedBox(height: space.md.h),
             Text(
               context.l10n.routineLibraryEmptyTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.sectionTitle.copyWith(
-                color: colors.textPrimary,
+              style: typo.routineEmptyTitle.copyWith(
+                color: colors.routineTileLabel,
               ),
             ),
-            SizedBox(height: space.xs.h),
+            SizedBox(height: _lineGap.h),
             Text(
               context.l10n.routineLibraryEmptyBody,
-              textAlign: TextAlign.center,
-              style: context.typo.body.copyWith(color: colors.textSecondary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: typo.routineTileMeta.copyWith(
+                color: colors.routineEmptyHint,
+              ),
             ),
           ],
         ),
@@ -106,64 +121,39 @@ class LibraryEmptyState extends StatelessWidget {
   }
 }
 
-/// 가운데 아래 `+ 일과 만들기` (글자가 있는 둥근 버튼 — 무엇을 하는지 바로 보이게)
+/// 가운데 아래 `+ 새로 만들기` (글자가 있는 둥근 버튼 — 무엇을 하는지 바로 보이게, 시안 1664:6876)
 class CreateRoutineFab extends StatelessWidget {
   const CreateRoutineFab({
-    required this.height,
     required this.isBusy,
     required this.onTap,
     this.isArranging = false,
   });
 
-  final double height;
   final bool isBusy;
   final VoidCallback onTap;
 
-  /// 정리 상태면 `+ 일과 만들기` 대신 `완료`가 된다 (#837)
+  /// 정리 상태면 `+ 새로 만들기` 대신 `완료`가 된다 (#837)
   final bool isArranging;
 
-  /// 더하기 아이콘 한 변
-  static const _iconSize = 20.0;
+  /// 버튼 높이 · 아래 여백 · 자리: 이야기 `+ 올리기` 와 같은 알약 (#964)
+  static const height = ElumFloatingPillButton.height;
+  static const scrollBottomSpace = ElumFloatingPillButton.scrollBottomSpace;
+  static const FloatingActionButtonLocation location =
+      ElumFloatingPillButton.location;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    return AppPressable(
+    final iconSize = ElumFloatingPillButton.iconSize.w;
+    return ElumFloatingPillButton(
+      label: isArranging
+          ? context.l10n.libraryArrangeDone
+          : context.l10n.routineLibraryCreate,
       onTap: isBusy ? null : onTap,
-      child: Container(
-        height: height,
-        padding: EdgeInsets.symmetric(horizontal: space.lg.w),
-        decoration: BoxDecoration(
-          color: colors.textPrimary,
-          borderRadius: BorderRadius.circular(height / 2),
-          boxShadow: [
-            BoxShadow(
-              color: colors.textPrimary.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isBusy)
-              ElumSpinner(size: _iconSize.w, color: colors.surface)
-            else if (!isArranging)
-              Icon(Icons.add_rounded, size: _iconSize.w, color: colors.surface),
-            if (!isArranging) SizedBox(width: space.xs.w),
-            Text(
-              isArranging
-                  ? context.l10n.libraryArrangeDone
-                  : context.l10n.routineLibraryCreate,
-              style: context.typo.floatingActionLabel.copyWith(
-                color: colors.surface,
-              ),
-            ),
-          ],
-        ),
-      ),
+      leading: isBusy
+          ? ElumSpinner(size: iconSize, color: context.colors.buttonEnabledText)
+          : isArranging
+          ? null
+          : const ElumFloatingPillPlusIcon(),
     );
   }
 }

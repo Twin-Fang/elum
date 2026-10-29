@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesRespon
 import com.chuseok22.elumserver.notice.core.NoticeEmphasis;
 import com.chuseok22.elumserver.notice.core.NoticeImageType;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
+import com.chuseok22.elumserver.notice.core.NoticeTargetCountries;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import com.chuseok22.elumserver.notice.infrastructure.repository.AppNoticeRepository;
@@ -27,6 +28,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,9 @@ public class NoticeService {
   private static final int HIDE_DAYS_MIN = 1;
   private static final int HIDE_DAYS_MAX = 30;
   private static final String HTTPS_PREFIX = "https://";
+  /// 관리자 검색에 기간이 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
+  private static final LocalDateTime UNBOUNDED_PERIOD_FROM = LocalDateTime.of(2000, 1, 1, 0, 0);
+  private static final LocalDateTime UNBOUNDED_PERIOD_TO = LocalDateTime.of(9999, 1, 1, 0, 0);
 
   /** 슬라이드 순서 — 우선순위가 큰 것 먼저, 같으면 시작이 늦은 것 먼저. 마지막은 순서를 고정하려는 것이다. */
   static final Comparator<AppNotice> SLIDE_ORDER = Comparator
@@ -101,18 +106,22 @@ public class NoticeService {
   }
 
   /**
-   * 앱에 줄 공지. 게시 중이고 이 플랫폼에 닿고 요청 언어와 같은 언어인 것을 순서대로 최대 5개.
+   * 앱에 줄 공지. 게시 중이고 요청 언어와 같고 이 플랫폼·국가에 닿는 것을 순서대로 최대 5개.
+   * 다른 나라 공지가 5장 자리를 차지하지 않게 자르기 전에 거른다.
    *
    * <p>그 언어 공지가 없으면 빈 목록이다 — 한국어 공지를 대신 보내지 않는다.
    *
+   * @param region 요청 국가 ({@code CurrentRegion.get()}, 국가 미상이면 null)
+   *
    * <p>숨김은 기기에 있으므로 서버는 거르지 않는다 — 앱이 숨긴 것을 빼고 남은 것을 보여준다.
    */
-  public AppNoticesResponse publishedFor(String platform) {
+  public AppNoticesResponse publishedFor(String platform, String region) {
     NoticePlatform requested = NoticePlatform.parse(platform);
     AppLocale requestedLocale = CurrentLocale.get();
     List<AppNoticeResponse> notices = liveInSlideOrder().stream()
       .filter(notice -> notice.getLocale() == requestedLocale)
       .filter(notice -> notice.getPlatform().reaches(requested))
+      .filter(notice -> notice.isVisibleInRegion(region))
       .limit(MAX_SLIDES)
       .map(AppNoticeResponse::from)
       .toList();
@@ -155,13 +164,32 @@ public class NoticeService {
   // ── 관리자 ──────────────────────────────────────────
 
   /**
-   * 관리자 목록: 제목·본문 검색(이스케이프된 LIKE 패턴, null 이면 전체) + 정렬·페이지는 호출부 Pageable
-   * 게시 판단은 목록 쿼리가 아니라 statusOf 가 한다 (앱 API 와 같은 판단)
+   * 관리자 목록: 검색·플랫폼·기간은 쿼리, 상태는 statusAt(앱 API 와 같은 판단) + 정렬·페이지는 호출부 Pageable
+   * 상태 필터가 있으면 조건에 맞는 공지를 전부 읽어 자바에서 거른 뒤 쪽을 자름 (공지는 손으로 올리는 몇십 건)
    */
-  public Page<AppNotice> search(String likePattern, Pageable pageable) {
-    boolean hasKeyword = likePattern != null;
-    // 검색어가 없을 때도 파라미터 타입이 흔들리지 않게 빈 문자열을 넘긴다 (hasKeyword 가 false 면 쓰이지 않음)
-    return appNoticeRepository.searchForAdmin(hasKeyword, hasKeyword ? likePattern : "", pageable);
+  public Page<AppNotice> search(NoticeAdminSearch condition, Pageable pageable) {
+    if (condition.status() == null) {
+      return searchByQuery(condition, pageable);
+    }
+    LocalDateTime now = now();
+    List<AppNotice> matched = searchByQuery(condition, Pageable.unpaged(pageable.getSort())).getContent().stream()
+      .filter(notice -> notice.statusAt(now) == condition.status())
+      .toList();
+    int fromIndex = (int) Math.min(pageable.getOffset(), matched.size());
+    int toIndex = Math.min(fromIndex + pageable.getPageSize(), matched.size());
+    return new PageImpl<>(matched.subList(fromIndex, toIndex), pageable, matched.size());
+  }
+
+  // 조건 > 쿼리 파라미터: 없는 조건은 플래그 false·전체 플랫폼·끝값 (null 바인딩 타입 문제를 피함)
+  private Page<AppNotice> searchByQuery(NoticeAdminSearch condition, Pageable pageable) {
+    boolean hasKeyword = condition.likePattern() != null;
+    List<NoticePlatform> platforms = condition.platform() == null
+      ? List.of(NoticePlatform.values())
+      : List.of(condition.platform());
+    return appNoticeRepository.searchForAdmin(hasKeyword, hasKeyword ? condition.likePattern() : "", platforms,
+      condition.periodFrom() == null ? UNBOUNDED_PERIOD_FROM : condition.periodFrom(),
+      condition.periodToExclusive() == null ? UNBOUNDED_PERIOD_TO : condition.periodToExclusive(),
+      pageable);
   }
 
   public NoticeStatus statusOf(AppNotice notice) {
@@ -260,7 +288,8 @@ public class NoticeService {
   /** 검증을 통과한, 다듬은 값. 이것만 엔티티에 들어간다. */
   private record Draft(
     String title, String body, String buttonLabel, String buttonUrl, NoticePlatform platform,
-    AppLocale locale, int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled
+    AppLocale locale, String targetCountries, int priority, LocalDateTime startsAt, LocalDateTime endsAt,
+    boolean enabled
   ) {
 
     void applyTo(AppNotice notice) {
@@ -270,6 +299,7 @@ public class NoticeService {
       notice.setButtonUrl(buttonUrl);
       notice.setPlatform(platform);
       notice.setLocale(locale);
+      notice.setTargetCountries(targetCountries);
       notice.setPriority(priority);
       notice.setStartsAt(startsAt);
       notice.setEndsAt(endsAt);
@@ -315,6 +345,7 @@ public class NoticeService {
 
     NoticePlatform platform = NoticePlatform.parse(input.platform());
     AppLocale locale = parseLocale(input.locale());
+    String targetCountries = NoticeTargetCountries.normalize(input.targetCountries()).orElse(null);
     int priority = parsePriority(input.priority());
     LocalDateTime startsAt = parseDateTime(input.startsAt());
     if (startsAt == null) {
@@ -326,7 +357,7 @@ public class NoticeService {
     }
 
     return new Draft(title, body, emptyToNull(buttonLabel), emptyToNull(buttonUrl), platform,
-      locale, priority, startsAt, endsAt, input.enabled());
+      locale, targetCountries, priority, startsAt, endsAt, input.enabled());
   }
 
   /**

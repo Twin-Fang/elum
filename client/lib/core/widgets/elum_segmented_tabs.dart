@@ -34,12 +34,12 @@ class ElumSegmentedTabs extends StatelessWidget {
   static const _compactHeight = 48.0;
   static const _wideHeight = 56.0;
 
-  /// 점 지름과 글자와의 간격
+  /// 점 지름과 글자와의 간격 (시안 1724:8346: 점 8 · 글자 > 점 4)
   static const _dotSize = 8.0;
-  static const _dotGap = 6.0;
+  static const _dotGap = 4.0;
 
-  /// 밑줄 두께 (고른 칸 2, 나머지 칸 아래는 구분선 1)
-  static const _selectedUnderlineThickness = 2.0;
+  /// 밑줄 두께 (고른 칸 민트 3, 나머지 칸 아래는 웜그레이 구분선 1)
+  static const _selectedUnderlineThickness = 3.0;
   static const _dividerThickness = 1.0;
 
   @override
@@ -53,7 +53,7 @@ class ElumSegmentedTabs extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: colors.border, width: _dividerThickness),
+          bottom: BorderSide(color: colors.navDivider, width: _dividerThickness),
         ),
       ),
       child: Row(
@@ -89,7 +89,12 @@ class _TabCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final labelColor = isSelected ? colors.textPrimary : colors.textSecondary;
+    final typo = context.typo;
+    final labelStyle = isSelected
+        ? typo.segmentedTabSelected.copyWith(color: colors.sheetTitleText)
+        : typo.segmentedTabUnselected.copyWith(
+            color: colors.segmentedTabUnselectedLabel,
+          );
 
     return Semantics(
       selected: isSelected,
@@ -109,7 +114,7 @@ class _TabCell extends StatelessWidget {
                       tab.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: context.typo.navTitle.copyWith(color: labelColor),
+                      style: labelStyle,
                     ),
                   ),
                   if (tab.hasDot) ...[
@@ -118,7 +123,7 @@ class _TabCell extends StatelessWidget {
                       width: ElumSegmentedTabs._dotSize.w,
                       height: ElumSegmentedTabs._dotSize.w,
                       decoration: BoxDecoration(
-                        color: colors.danger,
+                        color: colors.segmentedTabAccent,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -132,7 +137,7 @@ class _TabCell extends StatelessWidget {
                   bottom: 0,
                   child: Container(
                     height: ElumSegmentedTabs._selectedUnderlineThickness,
-                    color: colors.textPrimary,
+                    color: colors.segmentedTabAccent,
                   ),
                 ),
             ],

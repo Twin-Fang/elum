@@ -7,15 +7,15 @@ import 'settings_tile.dart';
 
 /// 설정 목록의 켜고 끄는 한 줄.
 ///
-/// 줄 높이·안쪽 여백·글자는 [SettingsTile] 과 같다. 시안에 켜고 끄는 줄이 없어 **임시 시안**이다 —
-/// 디자인이 나오면 모양만 바꾼다. 줄 어디를 눌러도 바뀐다 (스위치만 눌러야 하면 작다).
+/// 줄 높이·안쪽 여백·글자는 [SettingsTile] 과 같고 토글은 시안 알림 설정(1732:8563) 모양이다.
+/// 줄 어디를 눌러도 바뀐다 (스위치만 눌러야 하면 작다).
 class SettingsSwitchTile extends StatelessWidget {
   const SettingsSwitchTile({
     super.key,
     required this.label,
     required this.value,
     required this.onChanged,
-    this.isInCard = false,
+    this.isInCard = true,
   });
 
   final String label;
@@ -62,16 +62,7 @@ class SettingsSwitchTile extends StatelessWidget {
                     ),
                   ),
                   // 눌림은 줄 전체가 받는다 — 스위치는 상태만 그린다
-                  IgnorePointer(
-                    child: isInCard
-                        ? SettingsToggle(isOn: value)
-                        : Switch(
-                            value: value,
-                            onChanged: (_) {},
-                            activeThumbColor: Colors.white,
-                            activeTrackColor: colors.brandOrange,
-                          ),
-                  ),
+                  IgnorePointer(child: SettingsToggle(isOn: value)),
                 ],
               ),
             ),
@@ -104,8 +95,7 @@ class SettingsToggle extends StatelessWidget {
       height: height.h,
       padding: EdgeInsets.all(_inset.w),
       decoration: BoxDecoration(
-        // 꺼짐 색은 시안에 없다 - 빈 칸 색(`textPlaceholder`)을 쓴다
-        color: isOn ? colors.settingsToggleOn : colors.textPlaceholder,
+        color: isOn ? colors.settingsToggleOn : colors.settingsToggleOff,
         borderRadius: BorderRadius.circular((height / 2).r),
       ),
       child: AnimatedAlign(
@@ -114,7 +104,7 @@ class SettingsToggle extends StatelessWidget {
         child: Container(
           width: _thumb.w,
           height: _thumb.w,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          decoration: BoxDecoration(color: colors.surface, shape: BoxShape.circle),
         ),
       ),
     );

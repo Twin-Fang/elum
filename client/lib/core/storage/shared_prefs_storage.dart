@@ -52,13 +52,25 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
+  // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
+  static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
+  // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
+  static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
+  static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
+  static const _kChildScreenAwakeOn = 'screen.childAwakeOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
   static const _kRoutineReminders = 'reminder.routines';
+  // 이야기에서 가져온 일과 중 상세를 연 일과 id 목록
+  static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
+  static const _kTalkShareHintDismissedRoutineIds =
+      'talkShareHintDismissedRoutineIds';
+  // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
+  static const _kTalkGridView = 'talk.isGridView';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -305,6 +317,13 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> clearNoticeHidden() async {
+    for (final key in _prefs.getKeys().where((k) => k.startsWith(_kNoticeHiddenPrefix)).toList()) {
+      await _prefs.remove(key);
+    }
+  }
+
+  @override
   bool get hasAskedPushPermission =>
       _prefs.getBool(_kHasAskedPushPermission) ?? false;
 
@@ -312,6 +331,29 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHasAskedPushPermission(bool v) async {
     AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
     await _prefs.setBool(_kHasAskedPushPermission, v);
+  }
+
+  @override
+  DateTime? get pushPermissionNudgedAt {
+    final raw = _prefs.getString(_kPushPermissionNudgedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setPushPermissionNudgedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kPushPermissionNudgedAt, raw);
+    await _prefs.setString(_kPushPermissionNudgedAt, raw);
+  }
+
+  @override
+  String? get updateSuggestionShownRecord =>
+      _prefs.getString(_kUpdateSuggestionShown);
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async {
+    AppLogger.storageWrite(_kUpdateSuggestionShown, record);
+    await _prefs.setString(_kUpdateSuggestionShown, record);
   }
 
   @override
@@ -333,6 +375,38 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  List<String> get talkImportedSeenRoutineIds =>
+      _prefs.getStringList(_kTalkImportedSeenRoutineIds) ?? const [];
+
+  @override
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds) {
+    AppLogger.storageWrite(_kTalkImportedSeenRoutineIds, routineIds);
+    return _prefs.setStringList(_kTalkImportedSeenRoutineIds, routineIds);
+  }
+
+  @override
+  List<String> get talkShareHintDismissedRoutineIds =>
+      _prefs.getStringList(_kTalkShareHintDismissedRoutineIds) ?? const [];
+
+  @override
+  Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds) {
+    AppLogger.storageWrite(_kTalkShareHintDismissedRoutineIds, routineIds);
+    return _prefs.setStringList(
+      _kTalkShareHintDismissedRoutineIds,
+      routineIds,
+    );
+  }
+
+  @override
+  bool get isTalkGridView => _prefs.getBool(_kTalkGridView) ?? false;
+
+  @override
+  Future<void> setTalkGridView(bool isGridView) async {
+    AppLogger.storageWrite(_kTalkGridView, '$isGridView');
+    await _prefs.setBool(_kTalkGridView, isGridView);
+  }
+
+  @override
   bool get isGroupCoachSeen => _prefs.getBool(_kGroupCoachSeen) ?? false;
 
   @override
@@ -342,8 +416,23 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isCardReviewCoachSeen =>
+      _prefs.getBool(_kCardReviewCoachSeen) ?? false;
+
+  @override
+  Future<void> setCardReviewCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kCardReviewCoachSeen, '$isSeen');
+    await _prefs.setBool(_kCardReviewCoachSeen, isSeen);
+  }
+
+  @override
   Future<void> resetCoachMarks() async {
-    for (final key in [_kHomeCoachSeen, _kManageCoachSeen, _kGroupCoachSeen]) {
+    for (final key in [
+      _kHomeCoachSeen,
+      _kManageCoachSeen,
+      _kGroupCoachSeen,
+      _kCardReviewCoachSeen,
+    ]) {
       AppLogger.storageWrite(key, 'reset');
       await _prefs.remove(key);
     }
@@ -365,6 +454,16 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setChildPraiseSoundOn(bool v) async {
     AppLogger.storageWrite(_kChildPraiseSoundOn, '$v');
     await _prefs.setBool(_kChildPraiseSoundOn, v);
+  }
+
+  @override
+  bool get isChildScreenAwakeOn =>
+      _prefs.getBool(_kChildScreenAwakeOn) ?? true;
+
+  @override
+  Future<void> setChildScreenAwakeOn(bool v) async {
+    AppLogger.storageWrite(_kChildScreenAwakeOn, '$v');
+    await _prefs.setBool(_kChildScreenAwakeOn, v);
   }
 
   @override

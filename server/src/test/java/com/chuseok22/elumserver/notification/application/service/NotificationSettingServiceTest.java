@@ -29,24 +29,41 @@ class NotificationSettingServiceTest {
   private NotificationSettingService notificationSettingService;
 
   @Test
-  @DisplayName("행이 없으면 여섯 값이 모두 true 다")
+  @DisplayName("행이 없으면 여덟 값이 모두 true 다")
   void noRow_returnsAllTrue() {
     when(notificationSettingRepository.findById("m1")).thenReturn(Optional.empty());
 
     NotificationSettingResponse response = notificationSettingService.get("m1");
 
-    assertThat(response).isEqualTo(new NotificationSettingResponse(true, true, true, true, true, true));
+    assertThat(response).isEqualTo(new NotificationSettingResponse(true, true, true, true, true, true, true, true));
   }
 
   @Test
-  @DisplayName("저장하면 여섯 값이 모두 반영되고 같은 상태를 돌려준다")
-  void update_persistsAllSixFlags() {
+  @DisplayName("저장하면 여덟 값이 모두 반영되고 같은 상태를 돌려준다")
+  void update_persistsAllEightFlags() {
     when(notificationSettingRepository.findById("m1")).thenReturn(Optional.empty());
     when(notificationSettingRepository.save(any(NotificationSetting.class))).thenAnswer(call -> call.getArgument(0));
 
     NotificationSettingResponse response = notificationSettingService.update("m1",
-      new NotificationSettingRequest(true, false, true, false, true, false));
+      new NotificationSettingRequest(true, false, true, false, true, false, false, true));
 
-    assertThat(response).isEqualTo(new NotificationSettingResponse(true, false, true, false, true, false));
+    assertThat(response).isEqualTo(new NotificationSettingResponse(true, false, true, false, true, false, false, true));
+  }
+
+  @Test
+  @DisplayName("옛 앱이 이야기 두 값을 안 보내면(null) 저장된 값을 그대로 둔다")
+  void update_nullTalkFlags_keepsStoredValues() {
+    NotificationSetting stored = new NotificationSetting();
+    stored.setMemberId("m1");
+    stored.setTalkCommentedEnabled(false);
+    stored.setTalkImportedEnabled(false);
+    when(notificationSettingRepository.findById("m1")).thenReturn(Optional.of(stored));
+    when(notificationSettingRepository.save(any(NotificationSetting.class))).thenAnswer(call -> call.getArgument(0));
+
+    NotificationSettingResponse response = notificationSettingService.update("m1",
+      new NotificationSettingRequest(true, true, true, true, true, true, null, null));
+
+    assertThat(response.talkCommented()).isFalse();
+    assertThat(response.talkImported()).isFalse();
   }
 }

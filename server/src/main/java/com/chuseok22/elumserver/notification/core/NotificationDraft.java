@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 알림 한 건의 발생 내용: 종류, 이룸이, 눌렀을 때 갈 대상, 묶음 키, 묶음에 모을 대상 id, 발생 시각
- * 묶음 키 규칙은 정적 팩토리 5개에 고정 (같은 키 = 같은 줄)
+ * 묶음 키 규칙은 정적 팩토리 7개에 고정 (같은 키 = 같은 줄)
  */
 public record NotificationDraft(
   NotificationType type,
@@ -48,5 +48,17 @@ public record NotificationDraft(
   public static NotificationDraft feedbackResolved(String feedbackId, LocalDateTime now) {
     return new NotificationDraft(NotificationType.FEEDBACK_RESOLVED, null, feedbackId,
       "FEEDBACK_RESOLVED:" + feedbackId, null, now);
+  }
+
+  /** 이야기 댓글: 글마다 한 줄, 댓글이 달릴 때마다 횟수 +1 (TALK_POST_COMMENTED:{postId}) */
+  public static NotificationDraft talkPostCommented(String postId, LocalDateTime now) {
+    return new NotificationDraft(NotificationType.TALK_POST_COMMENTED, null, postId,
+      "TALK_POST_COMMENTED:" + postId, null, now);
+  }
+
+  /** 이야기 가져감: 글마다 한 줄, 보호자의 첫 가져가기마다 횟수 +1 (TALK_POST_IMPORTED:{postId}) */
+  public static NotificationDraft talkPostImported(String postId, LocalDateTime now) {
+    return new NotificationDraft(NotificationType.TALK_POST_IMPORTED, null, postId,
+      "TALK_POST_IMPORTED:" + postId, null, now);
   }
 }

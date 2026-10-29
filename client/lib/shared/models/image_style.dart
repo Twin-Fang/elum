@@ -1,0 +1,62 @@
+import '../../core/l10n/current_l10n.dart';
+
+/// 카드 그림을 어떤 방식으로 만들지.
+///
+/// 현장 피드백 — 만화풍 그림은 발달장애인에게 추상적이라 옷장 그림을 옷장으로
+/// 알아보지 못할 수 있다. 실제 물건 사진 같은 그림, 또는 보호자가 직접 찍은 사진이
+/// 필요해 방식을 고르게 한다. **글(카드 문장)은 어느 방식이든 계속 만든다.**
+enum ImageStyle {
+  // 순서가 화면 배치다 — 기본 그림(새 이룸이의 기본값)이 맨 위. 바꾸면 화면이 조용히
+  // 뒤집히므로 테스트로 고정해 뒀다.
+  //
+  // apiValue 는 서버 `ImageStyle` enum name 과 같아야 한다. 어긋나면
+  // PATCH /api/member/image-style 이 역직렬화에 실패한다.
+
+  /// 화면 이름은 `기본 그림`이다. AI 그림을 그리지 않아 크레딧을 덜 쓰고, 그림 자리는
+  /// 서버가 고른 픽토그램이 채운다. 사진은 카드 수정에서 넣는다.
+  photoOnly('PHOTO_ONLY'),
+  cartoon('CARTOON'),
+  realistic('REALISTIC');
+
+  /// 새 이룸이를 만들 때 처음 골라져 있는 방식.
+  ///
+  /// [fromApiValue]의 기본값(만화)과 다르다 — 그쪽은 서버가 값을 안 준 **기존** 이룸이를
+  /// 서버 DB 기본값(CARTOON)과 맞춰 읽는 것이다.
+  static const onboardingDefault = ImageStyle.photoOnly;
+
+  const ImageStyle(this.apiValue);
+
+  /// 화면 이름 (선택 카드 제목·설정 줄의 값). 호출 시점의 언어로 읽는다.
+  String get label => switch (this) {
+    ImageStyle.cartoon => appL10n.imageStyleCartoonLabel,
+    ImageStyle.realistic => appL10n.imageStyleRealisticLabel,
+    ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyLabel,
+  };
+
+  /// 서버 enum 값
+  final String apiValue;
+
+  /// 선택 카드의 한 줄 설명
+  String get description => switch (this) {
+    ImageStyle.cartoon => appL10n.imageStyleCartoonDescription,
+    ImageStyle.realistic => appL10n.imageStyleRealisticDescription,
+    ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyDescription,
+  };
+
+  /// 카드 한 장마다 AI 그림을 그리는 방식인가. 그리면 그림 한 장마다 크레딧이 더 든다 —
+  /// 기본 그림은 그림 기호를 넣어 일과 만들기 크레딧만 쓴다.
+  bool get drawsCardImages => this != ImageStyle.photoOnly;
+
+  /// 저장소·서버에 남은 문자열을 되돌린다.
+  ///
+  /// **없거나 모르는 값이면 [cartoon]이다.** 필드가 없거나 서버가 새 값을
+  /// 먼저 배포한 경우에도 화면이 죽지 않고 기본 방식으로 산다. 캐릭터
+  /// (`CardCharacter.fromApiValue`)처럼 null 을 돌려 호출부가 정하게 하지 않는 것은,
+  /// 이 값이 "고르지 않아도 되는 설정"이라 기본값이 곧 정답이기 때문이다.
+  static ImageStyle fromApiValue(String? value) {
+    for (final s in ImageStyle.values) {
+      if (s.apiValue == value) return s;
+    }
+    return ImageStyle.cartoon;
+  }
+}

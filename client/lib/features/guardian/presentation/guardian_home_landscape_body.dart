@@ -16,6 +16,7 @@ class GuardianHomeLandscapeBody extends StatelessWidget {
     required this.sections,
     required this.listController,
     required this.listPhysics,
+    required this.listScrollWrapper,
   });
 
   final Widget greeting;
@@ -25,6 +26,9 @@ class GuardianHomeLandscapeBody extends StatelessWidget {
   /// 오른쪽 칸 스크롤 컨트롤러 (코치마크가 맨 위로 되돌릴 때 쓴다)
   final ScrollController listController;
   final ScrollPhysics? listPhysics;
+
+  /// 오른쪽 목록 스크롤을 감싸는 것 (당겨서 새로고침 — 동그라미가 목록 칸 위에 나옴)
+  final Widget Function(Widget listScroll) listScrollWrapper;
 
   /// 인사말 > 버튼 간격 (393 기준)
   static const _greetingToButton = 28.0;
@@ -61,11 +65,13 @@ class GuardianHomeLandscapeBody extends StatelessWidget {
                 ],
               ),
             ),
-            trailingPane: SingleChildScrollView(
-              controller: listController,
-              physics: listPhysics,
-              padding: EdgeInsets.only(top: 24.h, bottom: space.xl),
-              child: sections,
+            trailingPane: listScrollWrapper(
+              SingleChildScrollView(
+                controller: listController,
+                physics: listPhysics,
+                padding: EdgeInsets.only(top: 24.h, bottom: space.xl),
+                child: sections,
+              ),
             ),
           ),
         ),

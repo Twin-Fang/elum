@@ -14,6 +14,10 @@ import 'package:flutter/foundation.dart';
 /// - 이룸이 휴대폰 — [profileId] 콜백이 null 을 준다. 서버는 이룸이 휴대폰이 연결된 이룸이
 ///   말고 다른 이룸이를 지정하면 403 을 준다.
 ///
+/// ## 고른 이룸이 대신 다른 이룸이를 싣는 자리
+///
+/// - [targetProfileKey] 를 단 요청 — 내정보에서 고르지 않은 이룸이의 정보를 고칠 때다 (#660).
+///
 /// ## 실패를 두 갈래로 알린다
 ///
 /// - 실은 이룸이가 `403 PROFILE_ACCESS_DENIED` → [onProfileLost]. 다른 휴대폰에서 그 이룸이를
@@ -33,6 +37,9 @@ class ProfileHeaderInterceptor extends Interceptor {
   /// 요청에 이 키가 true 면 헤더를 싣지 않는다.
   static const skipKey = 'skipProfileHeader';
 
+  /// 요청에 이 키로 이룸이 id 를 담으면 고른 이룸이 대신 그 이룸이를 싣는다.
+  static const targetProfileKey = 'targetProfileId';
+
   /// 이 요청이 실제로 어느 이룸이를 달고 나갔는지. 실패했을 때 "무엇을 잃었는지" 알려면
   /// 요청 시점의 값이 필요하다 — 실패가 돌아올 때 선택이 이미 바뀌었을 수 있다.
   static const _sentKey = 'profileHeaderSent';
@@ -48,7 +55,9 @@ class ProfileHeaderInterceptor extends Interceptor {
     final skip =
         options.path.startsWith('/api/auth') || options.extra[skipKey] == true;
     if (!skip) {
-      final id = profileId();
+      // 지정한 이룸이 우선 > 고른 이룸이
+      final target = options.extra[targetProfileKey];
+      final id = target is String ? target : profileId();
       if (id != null && id.isNotEmpty) {
         options.headers[headerName] = id;
         options.extra[_sentKey] = id;

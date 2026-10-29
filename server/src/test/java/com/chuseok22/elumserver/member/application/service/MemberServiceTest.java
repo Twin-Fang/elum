@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
@@ -71,6 +72,8 @@ class MemberServiceTest {
 
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+  @Mock
+  private com.chuseok22.elumserver.talk.application.service.TalkCleanupService talkCleanupService;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -83,6 +86,9 @@ class MemberServiceTest {
 
   @Mock
   private EntitlementService entitlementService;
+
+  @Mock
+  private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @InjectMocks
   private MemberService memberService;
@@ -154,6 +160,17 @@ class MemberServiceTest {
     // 광고 보상 세션은 회원을 가리키는 운영 기록이라 탈퇴 즉시 지운다 (#463).
     verify(adRewardSessionRepository).deleteAllByMemberId("member-1");
     verify(feedbackService).deleteAllOf("member-1");
+  }
+
+  @Test
+  @DisplayName("탈퇴하면 이야기 글·댓글·반응·신고·차단을 지운다")
+  void withdraw_callsTalkCleanup() {
+    Member member = activeMember("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+
+    memberService.withdraw("member-1");
+
+    verify(talkCleanupService).deleteAllOf("member-1");
   }
 
   @Test

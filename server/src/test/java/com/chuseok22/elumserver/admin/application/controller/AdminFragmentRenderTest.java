@@ -2,11 +2,13 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Column;
@@ -110,6 +112,37 @@ class AdminFragmentRenderTest {
       .contains("href=\"/admin/test?q=a%26b&amp;page=3\"");
     // 마지막 변경
     assertThat(html).contains("2026-10-18 09:05").contains("· admin").contains("변경 이력 없음");
+  }
+
+  @Test
+  @DisplayName("필터 바: 날짜·글자 필터는 입력 칸으로, 적용된 조건은 x 링크 칩과 필터 초기화로, CSV 는 상한을 넘으면 막힌다")
+  void filterBar_rendersInputsChipsAndCsvLimit() {
+    AdminListDefinition definition = new AdminListDefinition(DEFINITION.columns(), List.of("name"),
+      List.of(DEFINITION.filters().get(0), Filter.date("from", "시작일"), Filter.text("guardian", "보호자")),
+      "name,asc");
+    AdminListQuery query = AdminListQuery.of("하늘", Map.of("status", "ACTIVE", "from", "2026-10-01"), null, null,
+      definition);
+    java.util.Map<String, Object> model = new java.util.HashMap<>();
+    model.put("definition", definition);
+    model.put("query", query);
+    model.put("page", pageOf(1, 0));
+    model.put("rows", List.<AdminListRow>of());
+    model.put("csvExport", AdminCsvExporter.linkOf("/admin/test", query, AdminCsvExporter.MAX_ROWS + 1L));
+
+    String html = engine.process("test/admin-list-smoke", contextWith(model));
+
+    // 입력 칸: 날짜 필터는 값이 채워진 date, 글자 필터는 text. 입력 칸 필터는 숨은 값으로 겹쳐 싣지 않는다
+    assertThat(html).containsPattern("type=\"date\" name=\"from\"\\s+value=\"2026-10-01\"")
+      .containsPattern("type=\"text\" name=\"guardian\"");
+    assertThat(html).doesNotContainPattern("type=\"hidden\"\\s+name=\"from\"")
+      .containsPattern("type=\"hidden\"\\s+name=\"status\" value=\"ACTIVE\"");
+    // 칩: 선택지 이름으로 보이고 x 링크는 그 조건만 뺀다. 초기화는 정렬만 남긴다
+    assertThat(html).contains("data-admin-active-filters").contains("상태: 활성").contains("시작일: 2026-10-01")
+      .contains("href=\"?q=%ED%95%98%EB%8A%98&amp;from=2026-10-01&amp;sort=name,asc\"")
+      .contains("href=\"?sort=name,asc\"").contains("필터 초기화");
+    // CSV: 상한을 넘으면 링크 대신 막힌 버튼과 이유
+    assertThat(html).contains("data-admin-csv-export").contains("disabled").contains("10,000건 이하로 좁히면")
+      .doesNotContain("href=\"/admin/test/export.csv");
   }
 
   @Test
@@ -243,5 +276,52 @@ class AdminFragmentRenderTest {
         AdminSubscriptionSummary.none(), List.of(), null))));
     assertThat(freeHtml).doesNotContain("data-revoke-pro-form").contains("아직 요금제를 바꾼 기록이 없어요")
       .contains("변경 이력 없음");
+  }
+
+  @Test
+  @DisplayName("회원 상세 크레딧 요약 카드: 잔액·동결이 그려지고, 조회 실패면 안내와 에러 코드만 나온다 (#651)")
+  void memberDetail_rendersCreditSummaryStates() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    AdminMemberDetailResponse detail = AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+      AdminSubscriptionSummary.none(), List.of(), null);
+
+    String loadedHtml = engine.process("admin/member-detail", contextWith(Map.of("member", detail,
+      "creditSummary", new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, true))));
+    assertThat(loadedHtml).contains("data-member-credit-summary").contains("1,234").contains("동결")
+      .contains("data-member-actions-menu").contains("크레딧 지급");
+
+    String failedHtml = engine.process("admin/member-detail", contextWith(Map.of("member", detail,
+      "creditSummary", AdminMemberCreditSummary.loadFailed())));
+    assertThat(failedHtml).contains("크레딧 정보를 불러오지 못했어요").contains("E-ADM-CREDIT-001")
+      .doesNotContain("아직 크레딧 기록이 없어요");
+  }
+
+  @Test
+  @DisplayName("회원 상세: 공통 확인창이 한 번 그려지고 위험 동작은 data-confirm 으로 거치며, 완전 삭제는 이름 입력을 요구한다 (#657)")
+  void memberDetail_routesDangerousActionsThroughSharedConfirmDialog() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    String activeHtml = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.none(), List.of(), null))));
+
+    // 확인창 조각은 레이아웃이 한 번만 넣는다 (두 번이면 스크립트가 다른 dialog 를 붙잡는다)
+    assertThat(activeHtml.split("<dialog", -1)).hasSize(2);
+    assertThat(activeHtml).contains("window.ElumAdminConfirm").doesNotContain("onsubmit=");
+    assertThat(activeHtml).containsPattern("/suspend\"[^>]*data-confirm-danger[^>]*data-confirm-message=\"이 계정을 정지할까요?");
+    // 이 회원의 기록: 각 화면이 받는 필터 이름으로 회원 id 를 싣는다
+    assertThat(activeHtml).contains("href=\"/admin/feedback?q=m1\"").contains("href=\"/admin/routines?guardian=m1\"")
+      .contains("href=\"/admin/monitoring?memberId=m1\"").contains("href=\"/admin/credits/members/m1#ledger\"");
+
+    member.setStatus(MemberStatus.WITHDRAWN);
+    String withdrawnHtml = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.none(), List.of(), null))));
+    assertThat(withdrawnHtml).containsPattern("/purge\"[^>]*data-confirm-typed-name=\"parent1\"");
   }
 }

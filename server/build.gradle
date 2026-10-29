@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.chuseok22'
-version = '2.61.0'
+version = '2.82.0'
 description = 'elum-server'
 
 java {
@@ -36,6 +36,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // 이야기 신고 알림 메일
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     compileOnly 'org.projectlombok:lombok'

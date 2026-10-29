@@ -2,7 +2,7 @@ package com.chuseok22.elumserver.notification.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/// 검증 어노테이션을 쓰지 않는다. 여섯 값 모두 그대로 저장한다.
+/// 검증 어노테이션을 쓰지 않는다. 앞 여섯 값은 그대로 저장하고, 이야기 두 값은 null 이면 저장된 값을 그대로 둔다.
 @Schema(description = "알림 설정 저장 요청 (푸시 여부만, 알림 목록은 항상 쌓임)")
 public record NotificationSettingRequest(
   @Schema(description = "전체 푸시. false 면 종류별 값과 무관하게 푸시 없음")
@@ -16,6 +16,10 @@ public record NotificationSettingRequest(
   @Schema(description = "크레딧이 채워졌을 때")
   boolean creditRefilled,
   @Schema(description = "보낸 의견에 답이 왔을 때")
-  boolean feedbackResolved
+  boolean feedbackResolved,
+  @Schema(description = "내 이야기 글에 댓글이 달렸을 때. 옛 앱은 안 보냄(null = 그대로)")
+  Boolean talkCommented,
+  @Schema(description = "내 이야기 글을 다른 보호자가 가져갔을 때. 옛 앱은 안 보냄(null = 그대로)")
+  Boolean talkImported
 ) {
 }

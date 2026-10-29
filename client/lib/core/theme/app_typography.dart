@@ -52,12 +52,46 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineTileReward,
     required this.routineSectionLabel,
     required this.routineCreateLabel,
+    required this.libraryTitle,
+    required this.libraryTileLabel,
+    required this.talkSectionTitle,
+    required this.talkPopularTitle,
+    required this.talkPostTitle,
+    required this.talkPostNote,
+    required this.talkMeta,
+    required this.talkCategoryLabel,
+    required this.floatingPillLabel,
+    required this.talkDetailTitle,
+    required this.talkDetailNote,
+    required this.talkImportLabel,
+    required this.talkDetailStatLabel,
+    required this.talkCommentsHeader,
+    required this.talkFormLabel,
+    required this.talkGuide,
+    required this.talkChoiceLabel,
+    required this.talkCommentBody,
+    required this.talkCommentField,
+    required this.talkEmptyTitle,
+    required this.talkEmptyBody,
+    required this.talkRuleText,
+    required this.talkShareStepTitle,
+    required this.talkShareTitleInput,
+    required this.talkShareGuide,
+    required this.talkShareSectionLabel,
+    required this.talkCategoryPickerLabel,
+    required this.talkNoteInput,
+    required this.talkNoteCounter,
+    required this.talkBlurChoiceLabel,
     required this.routineEmptyTitle,
     required this.coachMessage,
     required this.routineEmptyPast,
     required this.starsCount,
     required this.stepBadgeNumber,
     required this.sheetTitle,
+    required this.sheetDescription,
+    required this.settingsGroupLabel,
+    required this.segmentedTabSelected,
+    required this.segmentedTabUnselected,
     required this.sheetStepTitle,
     required this.sheetStepBody,
     required this.sheetActionLabel,
@@ -77,6 +111,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptCaption,
     required this.lastLoginBadge,
     required this.appVersionTag,
+    required this.libraryNewChipLabel,
     required this.settingsTileLabel,
     required this.creditTitle,
     required this.creditNumber,
@@ -87,11 +122,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.creditHistoryDate,
     required this.creditHistoryRowTitle,
     required this.creditHistoryRowDetail,
+    required this.notificationRowText,
+    required this.notificationRowTime,
+    required this.notificationBannerButton,
     required this.peopleHeading,
     required this.peopleCaption,
     required this.peopleSectionLabel,
     required this.peopleRowName,
     required this.peopleChipLabel,
+    required this.myInfoNickname,
+    required this.myInfoElumiName,
+    required this.myInfoMeta,
     required this.peopleRenameLabel,
     required this.peopleEditDescription,
     required this.peopleEditChipLabel,
@@ -290,6 +331,98 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// `새로운 일과 만들기` 버튼 문구 (Pretendard 500/17).
   final TextStyle routineCreateLabel;
 
+  /// 일과관리 화면 제목 (Tmoney 800/22, 시안 1664:6876)
+  final TextStyle libraryTitle;
+
+  /// 일과관리 칸 이름 (Pretendard 400/12, 줄 높이 12 — 두 줄 24, 시안 1664:6876)
+  final TextStyle libraryTileLabel;
+
+  /// 섹션 제목 `이번 주에 많이 가져간 일과에요` (Pretendard 600/16, 시안 1783:6663)
+  final TextStyle talkSectionTitle;
+
+  /// 인기 카드 제목, 두 줄 (Pretendard 500/14 · 줄 높이 1.2, 시안 1783:6671)
+  final TextStyle talkPopularTitle;
+
+  /// 최신 글 카드 제목 (Pretendard 500/16, 시안 1783:6728)
+  final TextStyle talkPostTitle;
+
+  /// 최신 글 카드 한마디 (Pretendard 400/13, 시안 1783:6729)
+  final TextStyle talkPostNote;
+
+  /// 시간·숫자·작성자 (Pretendard 400/12, 시안 1783:6725)
+  final TextStyle talkMeta;
+
+  /// 최신 글 카드 분류 칩 (Pretendard 500/12, 시안 1783:6727)
+  final TextStyle talkCategoryLabel;
+
+  /// 떠 있는 알약 버튼 `+ 새로 만들기` · `+ 올리기` (Pretendard 500/16, 시안 1783:6846)
+  final TextStyle floatingPillLabel;
+
+  /// 상세 글 제목 (Pretendard 700/20, 시안 1806:7483)
+  final TextStyle talkDetailTitle;
+
+  /// 상세 한마디 (Pretendard 400/14, 시안 1813:7495). 여러 줄이라 줄 높이를 띄운다
+  final TextStyle talkDetailNote;
+
+  /// 상세 `일과로 가져오기` 버튼 (Pretendard 800/22, 시안 1813:7660 — 기본 버튼은 Tmoney)
+  final TextStyle talkImportLabel;
+
+  /// 상세 `도움돼요 13` 칩 · 가져감 숫자 (Pretendard 500/16, 시안 1813:7887)
+  final TextStyle talkDetailStatLabel;
+
+  /// 상세 댓글 머리 `댓글  3` (Pretendard 600/16, 시안 1830:7916)
+  final TextStyle talkCommentsHeader;
+
+  /// 이야기 폼 · 시트 구역 이름 (Pretendard 600/14, 일과 구역 이름과 같은 결)
+  final TextStyle talkFormLabel;
+
+  /// 이야기 안내 한 줄 · 글자 수 (Pretendard 400/13)
+  final TextStyle talkGuide;
+
+  /// 이야기 고르기 줄 이름 (Pretendard 500/16)
+  final TextStyle talkChoiceLabel;
+
+  /// 댓글 본문 (Pretendard 400/14, 시안 1860:7925)
+  final TextStyle talkCommentBody;
+
+  /// 댓글 입력 글자 (Pretendard 400/16, 시안 1806:7486)
+  final TextStyle talkCommentField;
+
+  /// 이야기 빈 상태 · 안내 제목 (Pretendard 600/16)
+  final TextStyle talkEmptyTitle;
+
+  /// 이야기 빈 상태 · 안내 설명 (Pretendard 400/14)
+  final TextStyle talkEmptyBody;
+
+  /// 이용 규칙 한 줄 (Pretendard 500/15)
+  final TextStyle talkRuleText;
+
+  /// 올리기 단계 제목 `어떤 일과를 나눌까요?` · `사진을 어떻게 올릴까요?` (Pretendard 600/18, 시안 1870:9066 · 1877:10504)
+  final TextStyle talkShareStepTitle;
+
+  /// 올리기 `일과 제목` 입력칸 글자 (Pretendard 600/18, 시안 1931:7183)
+  final TextStyle talkShareTitleInput;
+
+  /// 올리기 단계 제목 아래 안내 (Pretendard 400/14 · 줄 높이 1.2, 시안 1877:10505)
+  final TextStyle talkShareGuide;
+
+  /// 올리기 · 고치기 구역 이름 `내용` · `분류` · `이렇게 보여요` (Pretendard 500/16, 시안 1870:9448)
+  final TextStyle talkShareSectionLabel;
+
+  /// 분류 고르기 칩 글자 (Pretendard 500/16, 시안 1870:9476). 목록 분류 칩(14)보다 크다
+  final TextStyle talkCategoryPickerLabel;
+
+  /// 한마디 입력 · 안내 글자 (Pretendard 400/14 · 줄 높이 1.2, 시안 1870:9451)
+  final TextStyle talkNoteInput;
+
+  /// 한마디 글자 수 `0/300` (Pretendard 400/13, 시안 1870:9456)
+  final TextStyle talkNoteCounter;
+
+  /// 사진 `흐리게` · `그대로` 버튼 글자 (Pretendard 500/14, 시안 1877:10590)
+  final TextStyle talkBlurChoiceLabel;
+
+
+
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
   final TextStyle routineEmptyTitle;
@@ -315,6 +448,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 바꾸면 손대지 않은 화면까지 딸려 바뀐다. 시안이 이 화면군만 Pretendard로
   /// 그렸기에 글꼴도 다르다.
   final TextStyle sheetTitle;
+
+  /// 시트 제목 아래 안내 (Pretendard 400/16 · 줄 1.2, 검정). 시안 1759:9649 · 1869:8838
+  final TextStyle sheetDescription;
+
+  /// 설정 묶음 머리 글 (Pretendard 600/14). 시안 1589:8359 · 1274:9315
+  final TextStyle settingsGroupLabel;
+
+  /// 상단 탭 고른 칸 (Pretendard 600/16). 시안 1724:8346
+  final TextStyle segmentedTabSelected;
+
+  /// 상단 탭 안 고른 칸 (Pretendard 500/16). 시안 1724:8346
+  final TextStyle segmentedTabUnselected;
 
   /// 일과 시트의 단계 제목 (Figma `963:4236` — Pretendard 16/600).
   /// `cardTitle`(Tmoney 17/800)과 다르다.
@@ -386,6 +531,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// caption(12)보다 작은 글자는 이것뿐이다.
   final TextStyle appVersionTag;
 
+  /// 일과 관리 격자 `새 일과` 칩 글자 (시안 1931:6929, Pretendard 10/w500)
+  final TextStyle libraryNewChipLabel;
+
   /// 설정 목록 한 줄의 라벨 (16/w400 Pretendard, Figma `1022:4467`).
   ///
   /// `tileLabel`(13/w400 TmoneyRoundWind)과 크기·폰트가 모두 다르다.
@@ -418,6 +566,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 크레딧 사용 내역 줄의 부제 `카드 그림 4장・오전 11:23` (13/w400).
   final TextStyle creditHistoryRowDetail;
+
+  /// 알림 줄 문장 (14/w400 Pretendard, 두 줄일 때 줄 높이 1.2 — 시안 1724:8346).
+  final TextStyle notificationRowText;
+
+  /// 알림 줄 시각 `오전 11:23` (12/w400 Pretendard, 시안 1724:8346).
+  final TextStyle notificationRowTime;
+
+  /// 기기 알림 꺼짐 띠의 `켜기` 버튼 글자 (14/w600 Pretendard, 시안 1732:8433).
+  final TextStyle notificationBannerButton;
   /// 함께하는 사람 머리 제목 `함께 돌보는 사람 N명` (18/w600 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleHeading;
 
@@ -432,6 +589,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `나` 배지 · 구분 칩 글자 (12/w500 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleChipLabel;
+
+  /// 내 정보 닉네임 (18/w600 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoNickname;
+
+  /// 내 정보 이룸이 카드 이름 (16/w600 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoElumiName;
+
+  /// 내 정보 이메일·가입일 (13/w400 Pretendard, 시안 1736:8780).
+  final TextStyle myInfoMeta;
 
   /// `이름 변경` 버튼 글자 (14/w600 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleRenameLabel;
@@ -754,6 +920,186 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    libraryTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    libraryTileLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    talkSectionTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkPopularTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
+    talkPostTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkPostNote: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    talkMeta: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    talkCategoryLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    floatingPillLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkDetailTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+    ),
+    talkDetailNote: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkImportLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    talkDetailStatLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkCommentsHeader: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkFormLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkGuide: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkChoiceLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
+    talkCommentBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    talkCommentField: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.3,
+    ),
+    talkEmptyTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.3,
+    ),
+    talkEmptyBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    talkRuleText: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      height: 1.4,
+    ),
+    talkShareStepTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkShareTitleInput: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    talkShareGuide: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    talkShareSectionLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkCategoryPickerLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    talkNoteInput: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    talkNoteCounter: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    talkBlurChoiceLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     coachMessage: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -790,6 +1136,31 @@ class AppTypography extends ThemeExtension<AppTypography> {
       // 시안(980:4892)은 700 이다. 600 으로 두면 제목이 눈에 띄게 얇다.
       fontWeight: FontWeight.w700,
       height: 1,
+    ),
+    sheetDescription: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    settingsGroupLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    segmentedTabSelected: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    segmentedTabUnselected: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
     ),
     sheetStepTitle: TextStyle(
       fontFamily: promptFontFamily,
@@ -959,6 +1330,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    notificationRowText: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    notificationRowTime: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    notificationBannerButton: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     creditUnit: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1012,6 +1401,27 @@ class AppTypography extends ThemeExtension<AppTypography> {
       letterSpacing: 0,
       height: 1.0,
     ),
+    myInfoNickname: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    myInfoElumiName: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    myInfoMeta: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0,
+      height: 1.0,
+    ),
     peopleRenameLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1052,6 +1462,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontFamily: promptFontFamily,
       fontSize: 10,
       fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    libraryNewChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 10,
+      fontWeight: FontWeight.w500,
       height: 1.0,
     ),
     actionCardTitle: TextStyle(
@@ -1147,12 +1563,46 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineTileReward,
     TextStyle? routineSectionLabel,
     TextStyle? routineCreateLabel,
+    TextStyle? libraryTitle,
+    TextStyle? libraryTileLabel,
+    TextStyle? talkSectionTitle,
+    TextStyle? talkPopularTitle,
+    TextStyle? talkPostTitle,
+    TextStyle? talkPostNote,
+    TextStyle? talkMeta,
+    TextStyle? talkCategoryLabel,
+    TextStyle? floatingPillLabel,
+    TextStyle? talkDetailTitle,
+    TextStyle? talkDetailNote,
+    TextStyle? talkImportLabel,
+    TextStyle? talkDetailStatLabel,
+    TextStyle? talkCommentsHeader,
+    TextStyle? talkFormLabel,
+    TextStyle? talkGuide,
+    TextStyle? talkChoiceLabel,
+    TextStyle? talkCommentBody,
+    TextStyle? talkCommentField,
+    TextStyle? talkEmptyTitle,
+    TextStyle? talkEmptyBody,
+    TextStyle? talkRuleText,
+    TextStyle? talkShareStepTitle,
+    TextStyle? talkShareTitleInput,
+    TextStyle? talkShareGuide,
+    TextStyle? talkShareSectionLabel,
+    TextStyle? talkCategoryPickerLabel,
+    TextStyle? talkNoteInput,
+    TextStyle? talkNoteCounter,
+    TextStyle? talkBlurChoiceLabel,
     TextStyle? routineEmptyTitle,
     TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
     TextStyle? starsCount,
     TextStyle? stepBadgeNumber,
     TextStyle? sheetTitle,
+    TextStyle? sheetDescription,
+    TextStyle? settingsGroupLabel,
+    TextStyle? segmentedTabSelected,
+    TextStyle? segmentedTabUnselected,
     TextStyle? sheetStepTitle,
     TextStyle? sheetStepBody,
     TextStyle? sheetActionLabel,
@@ -1172,6 +1622,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
     TextStyle? appVersionTag,
+    TextStyle? libraryNewChipLabel,
     TextStyle? settingsTileLabel,
     TextStyle? creditTitle,
     TextStyle? creditNumber,
@@ -1182,11 +1633,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? creditHistoryDate,
     TextStyle? creditHistoryRowTitle,
     TextStyle? creditHistoryRowDetail,
+    TextStyle? notificationRowText,
+    TextStyle? notificationRowTime,
+    TextStyle? notificationBannerButton,
     TextStyle? peopleHeading,
     TextStyle? peopleCaption,
     TextStyle? peopleSectionLabel,
     TextStyle? peopleRowName,
     TextStyle? peopleChipLabel,
+    TextStyle? myInfoNickname,
+    TextStyle? myInfoElumiName,
+    TextStyle? myInfoMeta,
     TextStyle? peopleRenameLabel,
     TextStyle? peopleEditDescription,
     TextStyle? peopleEditChipLabel,
@@ -1246,12 +1703,46 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: routineTileReward ?? this.routineTileReward,
       routineSectionLabel: routineSectionLabel ?? this.routineSectionLabel,
       routineCreateLabel: routineCreateLabel ?? this.routineCreateLabel,
+      libraryTitle: libraryTitle ?? this.libraryTitle,
+      libraryTileLabel: libraryTileLabel ?? this.libraryTileLabel,
+      talkSectionTitle: talkSectionTitle ?? this.talkSectionTitle,
+      talkPopularTitle: talkPopularTitle ?? this.talkPopularTitle,
+      talkPostTitle: talkPostTitle ?? this.talkPostTitle,
+      talkPostNote: talkPostNote ?? this.talkPostNote,
+      talkMeta: talkMeta ?? this.talkMeta,
+      talkCategoryLabel: talkCategoryLabel ?? this.talkCategoryLabel,
+      floatingPillLabel: floatingPillLabel ?? this.floatingPillLabel,
+      talkDetailTitle: talkDetailTitle ?? this.talkDetailTitle,
+      talkDetailNote: talkDetailNote ?? this.talkDetailNote,
+      talkImportLabel: talkImportLabel ?? this.talkImportLabel,
+      talkDetailStatLabel: talkDetailStatLabel ?? this.talkDetailStatLabel,
+      talkCommentsHeader: talkCommentsHeader ?? this.talkCommentsHeader,
+      talkFormLabel: talkFormLabel ?? this.talkFormLabel,
+      talkGuide: talkGuide ?? this.talkGuide,
+      talkChoiceLabel: talkChoiceLabel ?? this.talkChoiceLabel,
+      talkCommentBody: talkCommentBody ?? this.talkCommentBody,
+      talkCommentField: talkCommentField ?? this.talkCommentField,
+      talkEmptyTitle: talkEmptyTitle ?? this.talkEmptyTitle,
+      talkEmptyBody: talkEmptyBody ?? this.talkEmptyBody,
+      talkRuleText: talkRuleText ?? this.talkRuleText,
+      talkShareStepTitle: talkShareStepTitle ?? this.talkShareStepTitle,
+      talkShareTitleInput: talkShareTitleInput ?? this.talkShareTitleInput,
+      talkShareGuide: talkShareGuide ?? this.talkShareGuide,
+      talkShareSectionLabel: talkShareSectionLabel ?? this.talkShareSectionLabel,
+      talkCategoryPickerLabel: talkCategoryPickerLabel ?? this.talkCategoryPickerLabel,
+      talkNoteInput: talkNoteInput ?? this.talkNoteInput,
+      talkNoteCounter: talkNoteCounter ?? this.talkNoteCounter,
+      talkBlurChoiceLabel: talkBlurChoiceLabel ?? this.talkBlurChoiceLabel,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
       stepBadgeNumber: stepBadgeNumber ?? this.stepBadgeNumber,
       sheetTitle: sheetTitle ?? this.sheetTitle,
+      sheetDescription: sheetDescription ?? this.sheetDescription,
+      settingsGroupLabel: settingsGroupLabel ?? this.settingsGroupLabel,
+      segmentedTabSelected: segmentedTabSelected ?? this.segmentedTabSelected,
+      segmentedTabUnselected: segmentedTabUnselected ?? this.segmentedTabUnselected,
       sheetStepTitle: sheetStepTitle ?? this.sheetStepTitle,
       sheetStepBody: sheetStepBody ?? this.sheetStepBody,
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
@@ -1271,6 +1762,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
       appVersionTag: appVersionTag ?? this.appVersionTag,
+      libraryNewChipLabel: libraryNewChipLabel ?? this.libraryNewChipLabel,
       settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
       creditTitle: creditTitle ?? this.creditTitle,
       creditNumber: creditNumber ?? this.creditNumber,
@@ -1281,11 +1773,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditHistoryDate: creditHistoryDate ?? this.creditHistoryDate,
       creditHistoryRowTitle: creditHistoryRowTitle ?? this.creditHistoryRowTitle,
       creditHistoryRowDetail: creditHistoryRowDetail ?? this.creditHistoryRowDetail,
+      notificationRowText: notificationRowText ?? this.notificationRowText,
+      notificationRowTime: notificationRowTime ?? this.notificationRowTime,
+      notificationBannerButton: notificationBannerButton ?? this.notificationBannerButton,
       peopleHeading: peopleHeading ?? this.peopleHeading,
       peopleCaption: peopleCaption ?? this.peopleCaption,
       peopleSectionLabel: peopleSectionLabel ?? this.peopleSectionLabel,
       peopleRowName: peopleRowName ?? this.peopleRowName,
       peopleChipLabel: peopleChipLabel ?? this.peopleChipLabel,
+      myInfoNickname: myInfoNickname ?? this.myInfoNickname,
+      myInfoElumiName: myInfoElumiName ?? this.myInfoElumiName,
+      myInfoMeta: myInfoMeta ?? this.myInfoMeta,
       peopleRenameLabel: peopleRenameLabel ?? this.peopleRenameLabel,
       peopleEditDescription: peopleEditDescription ?? this.peopleEditDescription,
       peopleEditChipLabel: peopleEditChipLabel ?? this.peopleEditChipLabel,
@@ -1364,12 +1862,50 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: TextStyle.lerp(routineTileReward, other.routineTileReward, t)!,
       routineSectionLabel: TextStyle.lerp(routineSectionLabel, other.routineSectionLabel, t)!,
       routineCreateLabel: TextStyle.lerp(routineCreateLabel, other.routineCreateLabel, t)!,
+      libraryTitle: TextStyle.lerp(libraryTitle, other.libraryTitle, t)!,
+      libraryTileLabel: TextStyle.lerp(libraryTileLabel, other.libraryTileLabel, t)!,
+      talkSectionTitle: TextStyle.lerp(talkSectionTitle, other.talkSectionTitle, t)!,
+      talkPopularTitle: TextStyle.lerp(talkPopularTitle, other.talkPopularTitle, t)!,
+      talkPostTitle: TextStyle.lerp(talkPostTitle, other.talkPostTitle, t)!,
+      talkPostNote: TextStyle.lerp(talkPostNote, other.talkPostNote, t)!,
+      talkMeta: TextStyle.lerp(talkMeta, other.talkMeta, t)!,
+      talkCategoryLabel: TextStyle.lerp(talkCategoryLabel, other.talkCategoryLabel, t)!,
+      floatingPillLabel: TextStyle.lerp(floatingPillLabel, other.floatingPillLabel, t)!,
+      talkDetailTitle: TextStyle.lerp(talkDetailTitle, other.talkDetailTitle, t)!,
+      talkDetailNote: TextStyle.lerp(talkDetailNote, other.talkDetailNote, t)!,
+      talkImportLabel: TextStyle.lerp(talkImportLabel, other.talkImportLabel, t)!,
+      talkDetailStatLabel: TextStyle.lerp(talkDetailStatLabel, other.talkDetailStatLabel, t)!,
+      talkCommentsHeader: TextStyle.lerp(talkCommentsHeader, other.talkCommentsHeader, t)!,
+      talkFormLabel: TextStyle.lerp(talkFormLabel, other.talkFormLabel, t)!,
+      talkGuide: TextStyle.lerp(talkGuide, other.talkGuide, t)!,
+      talkChoiceLabel: TextStyle.lerp(talkChoiceLabel, other.talkChoiceLabel, t)!,
+      talkCommentBody: TextStyle.lerp(talkCommentBody, other.talkCommentBody, t)!,
+      talkCommentField: TextStyle.lerp(talkCommentField, other.talkCommentField, t)!,
+      talkEmptyTitle: TextStyle.lerp(talkEmptyTitle, other.talkEmptyTitle, t)!,
+      talkEmptyBody: TextStyle.lerp(talkEmptyBody, other.talkEmptyBody, t)!,
+      talkRuleText: TextStyle.lerp(talkRuleText, other.talkRuleText, t)!,
+      talkShareStepTitle: TextStyle.lerp(talkShareStepTitle, other.talkShareStepTitle, t)!,
+      talkShareTitleInput: TextStyle.lerp(talkShareTitleInput, other.talkShareTitleInput, t)!,
+      talkShareGuide: TextStyle.lerp(talkShareGuide, other.talkShareGuide, t)!,
+      talkShareSectionLabel: TextStyle.lerp(talkShareSectionLabel, other.talkShareSectionLabel, t)!,
+      talkCategoryPickerLabel: TextStyle.lerp(talkCategoryPickerLabel, other.talkCategoryPickerLabel, t)!,
+      talkNoteInput: TextStyle.lerp(talkNoteInput, other.talkNoteInput, t)!,
+      talkNoteCounter: TextStyle.lerp(talkNoteCounter, other.talkNoteCounter, t)!,
+      talkBlurChoiceLabel: TextStyle.lerp(talkBlurChoiceLabel, other.talkBlurChoiceLabel, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       stepBadgeNumber: TextStyle.lerp(stepBadgeNumber, other.stepBadgeNumber, t)!,
       sheetTitle: TextStyle.lerp(sheetTitle, other.sheetTitle, t)!,
+      sheetDescription: TextStyle.lerp(
+        sheetDescription,
+        other.sheetDescription,
+        t,
+      )!,
+      settingsGroupLabel: TextStyle.lerp(settingsGroupLabel, other.settingsGroupLabel, t)!,
+      segmentedTabSelected: TextStyle.lerp(segmentedTabSelected, other.segmentedTabSelected, t)!,
+      segmentedTabUnselected: TextStyle.lerp(segmentedTabUnselected, other.segmentedTabUnselected, t)!,
       sheetStepTitle: TextStyle.lerp(sheetStepTitle, other.sheetStepTitle, t)!,
       sheetStepBody: TextStyle.lerp(sheetStepBody, other.sheetStepBody, t)!,
       sheetActionLabel: TextStyle.lerp(
@@ -1400,6 +1936,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
       appVersionTag: TextStyle.lerp(appVersionTag, other.appVersionTag, t)!,
+      libraryNewChipLabel: TextStyle.lerp(
+        libraryNewChipLabel,
+        other.libraryNewChipLabel,
+        t,
+      )!,
       settingsTileLabel:
           TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
       creditTitle: TextStyle.lerp(creditTitle, other.creditTitle, t)!,
@@ -1411,11 +1952,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditHistoryDate: TextStyle.lerp(creditHistoryDate, other.creditHistoryDate, t)!,
       creditHistoryRowTitle: TextStyle.lerp(creditHistoryRowTitle, other.creditHistoryRowTitle, t)!,
       creditHistoryRowDetail: TextStyle.lerp(creditHistoryRowDetail, other.creditHistoryRowDetail, t)!,
+      notificationRowText: TextStyle.lerp(notificationRowText, other.notificationRowText, t)!,
+      notificationRowTime: TextStyle.lerp(notificationRowTime, other.notificationRowTime, t)!,
+      notificationBannerButton: TextStyle.lerp(notificationBannerButton, other.notificationBannerButton, t)!,
       peopleHeading: TextStyle.lerp(peopleHeading, other.peopleHeading, t)!,
       peopleCaption: TextStyle.lerp(peopleCaption, other.peopleCaption, t)!,
       peopleSectionLabel: TextStyle.lerp(peopleSectionLabel, other.peopleSectionLabel, t)!,
       peopleRowName: TextStyle.lerp(peopleRowName, other.peopleRowName, t)!,
       peopleChipLabel: TextStyle.lerp(peopleChipLabel, other.peopleChipLabel, t)!,
+      myInfoNickname: TextStyle.lerp(myInfoNickname, other.myInfoNickname, t)!,
+      myInfoElumiName: TextStyle.lerp(myInfoElumiName, other.myInfoElumiName, t)!,
+      myInfoMeta: TextStyle.lerp(myInfoMeta, other.myInfoMeta, t)!,
       peopleRenameLabel: TextStyle.lerp(peopleRenameLabel, other.peopleRenameLabel, t)!,
       peopleEditDescription: TextStyle.lerp(peopleEditDescription, other.peopleEditDescription, t)!,
       peopleEditChipLabel: TextStyle.lerp(peopleEditChipLabel, other.peopleEditChipLabel, t)!,

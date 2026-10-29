@@ -103,6 +103,9 @@ abstract class Routine with _$Routine {
 
     /// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
     @Default(false) bool isExample,
+
+    /// 이야기에서 가져온 일과면 그 글 id, 아니면 null. 서버 `talkPostId`.
+    String? talkPostId,
   }) = _Routine;
 
   const Routine._();
@@ -121,6 +124,17 @@ abstract class Routine with _$Routine {
     if (name == null || name.isEmpty) return appL10n.routineForeignCreatorUnknown;
     // 조사 글자는 문구가 정한다 — 코드는 받침 판정값만 넘긴다
     return appL10n.routineForeignCreator(name, batchimOf(name));
+  }
+
+  /// 남이 만든 것으로 확인된 일과인가 (예시 일과 제외). 모르면 false
+  bool get isMadeByOtherGuardian => createdByMe == false && !isExample;
+
+  /// 홈 줄 끝에 붙이는 만든 사람 호칭 (`엄마`, 이름 없으면 `보호자`). 만든 사람을 모르거나 예시 일과면 null
+  String? get creatorDisplayName {
+    if (createdByMe == null || isExample) return null;
+    final name = creatorName?.trim();
+    if (name == null || name.isEmpty) return appL10n.commonGuardianName;
+    return name;
   }
 
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
@@ -211,6 +225,7 @@ abstract class Routine with _$Routine {
     if (sentGroupName != null) 'sentGroupName': sentGroupName,
     if (sentGroupOrder != null) 'sentGroupOrder': sentGroupOrder,
     'isExample': isExample,
+    if (talkPostId != null) 'talkPostId': talkPostId,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -253,6 +268,7 @@ abstract class Routine with _$Routine {
       sentGroupOrder: _optionalInt(json['sentGroupOrder']),
       // bool 이 아니면 예시 아님 — 옛 응답·캐시에 배지가 붙지 않게
       isExample: json['isExample'] == true,
+      talkPostId: _optionalId(json['talkPostId']),
     );
   }
 

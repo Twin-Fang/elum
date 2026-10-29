@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.guard;
 
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Duration;
 import org.springframework.stereotype.Component;
 
@@ -18,19 +19,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class RoutineStepImageThrottle {
 
+  // 창 길이: 설정 키 ROUTINE_STEP_IMAGE_LIMIT_PER_10_MINUTES 의 "10분"과 함께 바꾼다
   static final Duration WINDOW = Duration.ofMinutes(10);
-  static final int MAX_IMAGES_PER_WINDOW = 10;
   private static final String KEY_PREFIX = "routine-step-image:";
 
   private final SharedStateStore sharedStateStore;
+  private final UsageLimitSettings usageLimitSettings;
 
-  public RoutineStepImageThrottle(SharedStateStore sharedStateStore) {
+  public RoutineStepImageThrottle(SharedStateStore sharedStateStore, UsageLimitSettings usageLimitSettings) {
     this.sharedStateStore = sharedStateStore;
+    this.usageLimitSettings = usageLimitSettings;
   }
 
   /// 이 회원에게 그림을 한 장 더 만들어도 되는가. 되면 그 한 장을 센다.
   public boolean tryAcquire(String memberId) {
     return sharedStateStore.tryRecordInWindow(
-      KEY_PREFIX + memberId, WINDOW, MAX_IMAGES_PER_WINDOW, System.currentTimeMillis());
+      KEY_PREFIX + memberId, WINDOW, usageLimitSettings.routineStepImageLimitPerTenMinutes(),
+      System.currentTimeMillis());
   }
 }

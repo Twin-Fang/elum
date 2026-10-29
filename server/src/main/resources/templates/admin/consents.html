@@ -22,6 +22,11 @@
         앱은 받은 내용을 저장해 두고 평소엔 그것을 읽습니다.
         서버를 못 봐도 앱에 담긴 기본값으로 화면이 뜨므로 가입이 막히지 않습니다.
       </p>
+      <!-- 약관 언어 (#531): 지금은 ko 원본만 편집. 다른 언어 본문은 법무 확인(#528) 후 연다 -->
+      <p class="text-base-content/60">
+        이 화면의 약관은 <b>한국어(ko)</b> 원본입니다. 다른 언어 휴대폰에도 그 언어 약관이 생길 때까지 이 한국어 약관이 나갑니다.
+        다른 언어 본문은 법무 확인 뒤에 엽니다.
+      </p>
     </div>
   </div>
 
@@ -45,7 +50,8 @@
       </th:block>
       <tr th:each="doc : ${documents}">
         <td>
-          <div class="font-semibold whitespace-nowrap" th:text="${doc.label}">항목</div>
+          <div class="font-semibold whitespace-nowrap"><span th:text="${doc.label}">항목</span>
+            <span class="badge badge-outline badge-xs font-mono" th:text="${doc.locale}">ko</span></div>
           <div class="text-xs text-base-content/60" th:text="${doc.summary}">요약</div>
         </td>
         <td>

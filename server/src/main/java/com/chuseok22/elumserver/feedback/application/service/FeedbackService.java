@@ -3,14 +3,18 @@ package com.chuseok22.elumserver.feedback.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
+import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
+import com.chuseok22.elumserver.feedback.core.FeedbackAppReport;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
 import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -29,24 +33,37 @@ public class FeedbackService {
   static final int MAX_LOG_BYTES = 256 * 1024;
   static final int MAX_VERSION_LENGTH = 32;
   static final int MAX_OS_LENGTH = 64;
-  static final int DAILY_LIMIT = 20;
+  /// 관리자 메모 최대 글자 수 (앞뒤 공백 뺀 길이, 화면 textarea maxlength 와 같은 값)
+  public static final int MAX_ADMIN_NOTE_LENGTH = 2000;
   // 관리자 목록 한 쪽 건수: admin 이 이 패키지를 부르므로 AdminListDefaults.PAGE_SIZE 를 못 읽는다. 같은 값인지는 시험이 지킨다
   public static final int ADMIN_PAGE_SIZE = 20;
+  /// 관리자 검색에 보낸 기간이 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
+  private static final LocalDateTime UNBOUNDED_CREATED_FROM = LocalDateTime.of(2000, 1, 1, 0, 0);
+  private static final LocalDateTime UNBOUNDED_CREATED_TO = LocalDateTime.of(9999, 1, 1, 0, 0);
 
   private final FeedbackRepository feedbackRepository;
   private final Clock clock;
   private final ApplicationEventPublisher eventPublisher;
+  // 하루 한도: 설정 FEEDBACK_DAILY_LIMIT (기본 20건)
+  private final UsageLimitSettings usageLimitSettings;
 
   // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 이 앱에는 Clock 빈이 없다.
   @Autowired
-  public FeedbackService(FeedbackRepository feedbackRepository, ApplicationEventPublisher eventPublisher) {
-    this(feedbackRepository, Clock.systemDefaultZone(), eventPublisher);
+  public FeedbackService(
+    FeedbackRepository feedbackRepository, ApplicationEventPublisher eventPublisher,
+    UsageLimitSettings usageLimitSettings
+  ) {
+    this(feedbackRepository, Clock.systemDefaultZone(), eventPublisher, usageLimitSettings);
   }
 
-  FeedbackService(FeedbackRepository feedbackRepository, Clock clock, ApplicationEventPublisher eventPublisher) {
+  FeedbackService(
+    FeedbackRepository feedbackRepository, Clock clock, ApplicationEventPublisher eventPublisher,
+    UsageLimitSettings usageLimitSettings
+  ) {
     this.feedbackRepository = feedbackRepository;
     this.clock = clock;
     this.eventPublisher = eventPublisher;
+    this.usageLimitSettings = usageLimitSettings;
   }
 
   /// 의견을 저장하고 id 를 돌려준다. 앱 버전·OS 는 길면 거절하지 않고 잘라 저장한다.
@@ -66,7 +83,8 @@ public class FeedbackService {
 
     // 하루는 서버 기본 시간대의 0시부터다. 다른 기능의 일일 상한(광고 보상)과 같은 기준이다.
     LocalDateTime todayStart = LocalDateTime.now(clock).toLocalDate().atStartOfDay();
-    if (feedbackRepository.countByMemberIdAndCreatedAtGreaterThanEqual(memberId, todayStart) >= DAILY_LIMIT) {
+    if (feedbackRepository.countByMemberIdAndCreatedAtGreaterThanEqual(memberId, todayStart)
+      >= usageLimitSettings.feedbackDailyLimit()) {
       throw new CustomException(ErrorCode.FEEDBACK_RATE_LIMITED);
     }
 
@@ -81,16 +99,36 @@ public class FeedbackService {
   }
 
   /**
-   * 관리자 목록: 상태 필터(null 이면 전체), 검색(이스케이프된 LIKE 패턴, null 이면 전체), 정렬, 페이지(0부터)
+   * 관리자 목록: 조건(FeedbackAdminSearch, 비어 있는 조건은 빠짐), 정렬, 페이지(0부터, 한 쪽 ADMIN_PAGE_SIZE)
    * 의견은 연관 엔티티가 없어 목록 쿼리 1회
    */
   @Transactional(readOnly = true)
-  public Page<Feedback> search(String likePattern, FeedbackStatus statusFilter, Sort sort, int pageIndex) {
-    List<FeedbackStatus> statuses = statusFilter == null ? List.of(FeedbackStatus.values()) : List.of(statusFilter);
-    boolean hasKeyword = likePattern != null;
-    // 검색어가 없을 때도 파라미터 타입이 흔들리지 않게 빈 문자열을 넘긴다 (hasKeyword 가 false 면 쓰이지 않음)
-    return feedbackRepository.searchForAdmin(hasKeyword, hasKeyword ? likePattern : "", statuses,
-      PageRequest.of(Math.max(pageIndex, 0), ADMIN_PAGE_SIZE, sort));
+  public Page<Feedback> search(FeedbackAdminSearch condition, Sort sort, int pageIndex) {
+    return searchPage(condition, PageRequest.of(Math.max(pageIndex, 0), ADMIN_PAGE_SIZE, sort));
+  }
+
+  /// 관리자 CSV: 목록과 같은 조건·정렬로 첫 쪽(크기 maxRows) 조회. 전체 건수로 상한 초과를 판단
+  @Transactional(readOnly = true)
+  public Page<Feedback> searchFirstRows(FeedbackAdminSearch condition, Sort sort, int maxRows) {
+    return searchPage(condition, PageRequest.of(0, maxRows, sort));
+  }
+
+  // 조건 > 쿼리 파라미터: 없는 조건은 플래그 false + 빈 문자열·끝값 (null 바인딩 타입 문제를 피함)
+  private Page<Feedback> searchPage(FeedbackAdminSearch condition, PageRequest pageRequest) {
+    List<FeedbackStatus> statuses = condition.status() == null
+      ? List.of(FeedbackStatus.values())
+      : List.of(condition.status());
+    return feedbackRepository.searchForAdmin(
+      condition.likePattern() != null, valueOrEmpty(condition.likePattern()), statuses,
+      condition.createdFrom() == null ? UNBOUNDED_CREATED_FROM : condition.createdFrom(),
+      condition.createdToExclusive() == null ? UNBOUNDED_CREATED_TO : condition.createdToExclusive(),
+      condition.appVersionPattern() != null, valueOrEmpty(condition.appVersionPattern()),
+      condition.osPattern() != null, valueOrEmpty(condition.osPattern()),
+      pageRequest);
+  }
+
+  private static String valueOrEmpty(String value) {
+    return value == null ? "" : value;
   }
 
   /**
@@ -116,6 +154,37 @@ public class FeedbackService {
     return feedback;
   }
 
+  /**
+   * 관리자 메모 저장: 줄바꿈(CRLF > LF)·앞뒤 공백 정리 > 길이 검사(초과면 저장 안 함) > 메모·변경자·변경 시각 기록
+   * 빈 값이면 메모를 지움(null). 지울 때도 변경자·시각은 남김
+   */
+  @Transactional
+  public FeedbackAdminNoteSaveResult saveAdminNote(String id, String note, String actor) {
+    // 폼 전송은 줄바꿈을 CRLF 로 보내 브라우저 maxlength 보다 길어짐 > LF 로 맞춘 뒤 셈
+    String trimmedNote = note == null ? "" : note.replace("\r\n", "\n").strip();
+    if (trimmedNote.length() > MAX_ADMIN_NOTE_LENGTH) {
+      return FeedbackAdminNoteSaveResult.REJECTED_TOO_LONG;
+    }
+    Feedback feedback = get(id);
+    feedback.setAdminNote(trimmedNote.isEmpty() ? null : trimmedNote);
+    feedback.setAdminNoteChangedAt(LocalDateTime.now(clock));
+    feedback.setAdminNoteChangedBy(actor);
+    return trimmedNote.isEmpty() ? FeedbackAdminNoteSaveResult.CLEARED : FeedbackAdminNoteSaveResult.SAVED;
+  }
+
+  /// 회원의 가장 최근 의견에 실린 앱 버전·OS (의견이 없으면 빈 값)
+  @Transactional(readOnly = true)
+  public Optional<FeedbackAppReport> findLatestAppReport(String memberId) {
+    return feedbackRepository.findFirstByMemberIdOrderByCreatedAtDesc(memberId)
+      .map(feedback -> new FeedbackAppReport(feedback.getAppVersion(), feedback.getOs(), feedback.getCreatedAt()));
+  }
+
+  /** 아직 확인하지 않은 의견 수 (상태 새 의견) */
+  @Transactional(readOnly = true)
+  public long countNew() {
+    return feedbackRepository.countByStatus(FeedbackStatus.NEW);
+  }
+
   @Transactional(readOnly = true)
   public Feedback get(String id) {
     return feedbackRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.FEEDBACK_NOT_FOUND));
@@ -127,9 +196,12 @@ public class FeedbackService {
     feedbackRepository.deleteAllByMemberId(memberId);
   }
 
+  /// 의견 1건 삭제 > 보낸 회원 id (관리자 기록용)
   @Transactional
-  public void delete(String id) {
-    feedbackRepository.delete(get(id));
+  public String delete(String id) {
+    Feedback feedback = get(id);
+    feedbackRepository.delete(feedback);
+    return feedback.getMemberId();
   }
 
   private static String truncate(String value, int max) {

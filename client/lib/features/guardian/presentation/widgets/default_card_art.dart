@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -48,15 +50,22 @@ class DefaultCardPhotoSlot extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.photo_camera_outlined,
-                  size: _iconSize.w,
-                  color: colors.textSecondary,
+                SvgPicture.asset(
+                  AppAssets.iconCamera,
+                  width: _iconSize.w,
+                  height: _iconSize.w,
+                  excludeFromSemantics: true,
+                  colorFilter: ColorFilter.mode(
+                    colors.textSecondary,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 SizedBox(height: space.xs.h),
                 Text(
                   context.l10n.cardAddPhoto,
-                  style: context.typo.body.copyWith(color: colors.textSecondary),
+                  style: context.typo.body.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -86,7 +95,11 @@ class DefaultCardPhotoSlot extends StatelessWidget {
 /// 선택이다. 그림이 없을 때 보여줄 것이 제목뿐이라 **아주 크게** 둔다. 디자이너에게
 /// 큰 글자·픽토그램 중 무엇이 나은지 묻고 있다 (design-brief 질문 1).
 class DefaultCardTitleArt extends StatelessWidget {
-  const DefaultCardTitleArt({super.key, required this.title, required this.color});
+  const DefaultCardTitleArt({
+    super.key,
+    required this.title,
+    required this.color,
+  });
 
   final String title;
 
@@ -160,7 +173,8 @@ class _DashedBorderPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
     // 선 두께의 절반만큼 안쪽으로 그려 가장자리에서 잘리지 않게 한다
     final rect = (Offset.zero & size).deflate(strokeWidth / 2);
-    final path = Path()..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
     for (final metric in path.computeMetrics()) {
       for (var d = 0.0; d < metric.length; d += _dash + _gap) {
         canvas.drawPath(metric.extractPath(d, d + _dash), paint);
@@ -170,5 +184,7 @@ class _DashedBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DashedBorderPainter old) =>
-      old.color != color || old.radius != radius || old.strokeWidth != strokeWidth;
+      old.color != color ||
+      old.radius != radius ||
+      old.strokeWidth != strokeWidth;
 }

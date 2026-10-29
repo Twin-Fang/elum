@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/link/domain/link_code_link.dart';
 import '../../features/profile/domain/invite_link.dart';
+import '../../features/talk/domain/talk_post_link.dart';
 import '../config/app_config.dart';
 import '../logger/app_log_route_observer.dart';
 import '../l10n/l10n_context.dart';
@@ -54,6 +55,9 @@ String resolveInviteLinkLocation({String? currentLocation}) =>
 ///
 /// [onLinkCodeLink] — 이룸이 휴대폰 연결 암호 링크(`elum://link`)가 열렸을 때 불린다.
 /// 받을 수 있는 휴대폰인지는 부른 쪽([LinkCodeIntake])이 판단한다.
+///
+/// [onTalkPostLink] — 이야기 글 링크(`elum://talk`·`{API 주소}/s/{글id}`)가 열렸을 때 불린다.
+/// 열 자리·이룸이 기기 여부는 부른 쪽(`TalkPostLinkIntake`)이 판단한다.
 GoRouter createRouter({
   bool Function()? isOnboardingCompleted,
   bool Function()? hasToken,
@@ -62,6 +66,7 @@ GoRouter createRouter({
   bool Function()? requiresGuardianPinSetup,
   void Function(InviteLink link)? onInviteLink,
   void Function(InviteLink link)? onLinkCodeLink,
+  void Function(TalkPostLink link)? onTalkPostLink,
 }) {
   // 리다이렉트가 라우터 자신의 현재 위치를 알아야 한다 — 만들어진 뒤에 채운다.
   late final GoRouter router;
@@ -77,7 +82,20 @@ GoRouter createRouter({
       if (codeLink != null) {
         onLinkCodeLink?.call(codeLink);
         return resolveInviteLinkLocation(
-          currentLocation: router.routerDelegate.currentConfiguration.uri.toString(),
+          currentLocation: router.routerDelegate.currentConfiguration.uri
+              .toString(),
+        );
+      }
+      // 이야기 글 링크도 같은 방식이다
+      final talkLink = TalkPostLink.parse(
+        state.uri,
+        webHosts: TalkPostLink.webHostsOf(AppConfig.apiBaseUrl),
+      );
+      if (talkLink != null) {
+        onTalkPostLink?.call(talkLink);
+        return resolveInviteLinkLocation(
+          currentLocation: router.routerDelegate.currentConfiguration.uri
+              .toString(),
         );
       }
       final link = InviteLink.parse(state.uri);
@@ -85,7 +103,8 @@ GoRouter createRouter({
         if (!(isElumiDevice?.call() ?? false)) onInviteLink?.call(link);
         // 막 켜졌다면 아직 위치가 없어 빈 문자열이다
         return resolveInviteLinkLocation(
-          currentLocation: router.routerDelegate.currentConfiguration.uri.toString(),
+          currentLocation: router.routerDelegate.currentConfiguration.uri
+              .toString(),
         );
       }
       return resolveRedirect(

@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmPropert
 import com.chuseok22.elumserver.common.infrastructure.properties.SecretProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.chuseok22.elumserver.systemconfig.infrastructure.entity.ConfigKeyConverter;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
@@ -55,6 +56,19 @@ class SystemConfigServiceTest {
     config.setConfigKey(key);
     config.setConfigValue(value);
     return config;
+  }
+
+  @Test
+  @DisplayName("이 버전이 모르는 키가 DB 에 섞여 있어도 나머지 저장값은 읽힌다")
+  void getString_unknownKeyRowMixed_stillReadsKnownValues() {
+    // 모르는 키 행은 ConfigKeyConverter 가 null 키로 읽는다
+    SystemConfig unknownKeyRow = config(
+      new ConfigKeyConverter().convertToEntityAttribute("KEY_FROM_OTHER_SERVER_VERSION"), "true");
+    when(systemConfigRepository.findAll())
+      .thenReturn(List.of(unknownKeyRow, config(ConfigKey.GEMINI_TEXT_MODEL, "gemini-custom")));
+
+    assertThat(unknownKeyRow.getConfigKey()).isNull();
+    assertThat(systemConfigService.getString(ConfigKey.GEMINI_TEXT_MODEL)).isEqualTo("gemini-custom");
   }
 
   @Test
@@ -279,5 +293,68 @@ class SystemConfigServiceTest {
   void storeUrl_defaultIsEmpty() {
     assertThat(ConfigKey.IOS_STORE_URL.getDefaultValue()).isEmpty();
     assertThat(ConfigKey.ANDROID_STORE_URL.getDefaultValue()).isEmpty();
+  }
+
+  // ── 사용 한도·형식 검사 (#909, #912) ──
+
+  @Test
+  @DisplayName("범위 밖으로 저장된 한도는 읽을 때 기본값으로 대신한다 — DB 에 0 이 들어가도 기능이 멈추지 않는다")
+  void getInt_outOfRangeStoredValue_fallsBackToDefault() {
+    when(systemConfigRepository.findAll())
+      .thenReturn(List.of(config(ConfigKey.TTS_ON_DEMAND_MAX_CONCURRENT, "0")));
+
+    assertThat(systemConfigService.getInt(ConfigKey.TTS_ON_DEMAND_MAX_CONCURRENT)).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("형식에 어긋난 값은 저장하지 않고 이유를 함께 돌려준다 — 관리자가 무엇을 고칠지 안다")
+  void update_badFormat_rejectedWithReason() {
+    assertThatThrownBy(() -> systemConfigService.update(ConfigKey.MIN_APP_VERSION_IOS, "v1.0.0"))
+      .isInstanceOfSatisfying(CustomException.class, e -> {
+        assertThat(e.getErrorCode()).isEqualTo(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+        assertThat(e.getDetail()).contains("2.69.1");
+      });
+    verify(systemConfigRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("옛 규칙으로 저장된 값이 지금 규칙에 어긋나도 화면 조회는 그대로 되고 경고만 붙는다")
+  void getAllViews_storedValueBreakingRule_showsWarning() {
+    when(systemConfigRepository.findAll())
+      .thenReturn(List.of(config(ConfigKey.MIN_APP_VERSION_IOS, "v1.0")));
+
+    SystemConfigView view = systemConfigService.getAllViews().stream()
+      .filter(candidate -> candidate.key().equals(ConfigKey.MIN_APP_VERSION_IOS.name())).findFirst().orElseThrow();
+
+    assertThat(view.value()).isEqualTo("v1.0");
+    assertThat(view.validationWarning()).contains("2.69.1");
+    assertThat(view.valueSource()).isEqualTo(ConfigValueSource.STORED);
+  }
+
+  @Test
+  @DisplayName("모델명은 DB 값이 yml 값보다 우선하고 화면이 출처와 yml 값을 함께 알린다")
+  void getAllViews_modelKey_reportsSourceAndDeployValue() {
+    when(systemConfigRepository.findAll())
+      .thenReturn(List.of(config(ConfigKey.GEMINI_TEXT_MODEL, "gemini-db-model")));
+
+    SystemConfigView view = systemConfigService.getAllViews().stream()
+      .filter(candidate -> candidate.key().equals(ConfigKey.GEMINI_TEXT_MODEL.name())).findFirst().orElseThrow();
+
+    assertThat(systemConfigService.getString(ConfigKey.GEMINI_TEXT_MODEL)).isEqualTo("gemini-db-model");
+    assertThat(view.valueSource()).isEqualTo(ConfigValueSource.STORED);
+    assertThat(view.deployPropertyValue()).isEqualTo("yml-text-model");
+  }
+
+  @Test
+  @DisplayName("비울 수 있는 설정은 기본값(빈 값)으로 복원된다 — 광고 시험 회원·최소 버전을 화면에서 지울 수 있다")
+  void resetToDefault_blankAllowedKey_savesEmpty() {
+    when(systemConfigRepository.findByConfigKey(ConfigKey.ADS_ALWAYS_SHOWN_MEMBER_IDS)).thenReturn(Optional.empty());
+    when(systemConfigRepository.findAll()).thenReturn(List.of());
+
+    systemConfigService.resetToDefault(ConfigKey.ADS_ALWAYS_SHOWN_MEMBER_IDS);
+
+    ArgumentCaptor<SystemConfig> captor = ArgumentCaptor.forClass(SystemConfig.class);
+    verify(systemConfigRepository).save(captor.capture());
+    assertThat(captor.getValue().getConfigValue()).isEmpty();
   }
 }

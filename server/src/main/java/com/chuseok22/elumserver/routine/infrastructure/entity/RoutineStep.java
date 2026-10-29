@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
-// description 단독 수정(PATCH .../steps/{stepId})과 completed 단독 수정(complete/cancel)이
+// description 단독 수정(PATCH .../steps/{stepId})과 completed 단독 수정(PUT .../progress)이
 // 동시에 들어올 때, DynamicUpdate 없이는 Hibernate가 전체 컬럼을 UPDATE해서 한쪽이 다른
 // 쪽의 변경을 덮어쓸 수 있다. 변경된 컬럼만 UPDATE하도록 강제한다.
 @DynamicUpdate

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -56,7 +57,7 @@ class CardImageGeneratorTest {
     lenient().when(fluxImageClient.available()).thenReturn(true);
     lenient().when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(Optional.of(openAiClient));
     lenient().when(openAiClient.available()).thenReturn(true);
-    lenient().when(openAiClient.generateImage(anyString(), any())).thenReturn(OPENAI_IMAGE);
+    lenient().when(openAiClient.generateCardImage(any(), any())).thenReturn(OPENAI_IMAGE);
   }
 
   private CardImageGenerator.CardImageRequest request(String imagePromptEn) {
@@ -72,8 +73,67 @@ class CardImageGeneratorTest {
     GeneratedImage image = generator.generate(request("The character picks up a red umbrella."));
 
     assertThat(image).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
     verifyNoInteractions(fluxImageClient, translator);
+  }
+
+  private static RuntimeException safetyRejected() {
+    return new RuntimeException("400 Bad Request: Your request was rejected by the safety system. safety_violations=[self-harm].");
+  }
+
+  private CardImageGenerator.CardImageRequest requestWithTitle(String stepTitle) {
+    return new CardImageGenerator.CardImageRequest(
+      "귀에 체온계를 대요", "The character holds a thermometer near the ear.", CharacterType.LULU, SEED_KEY,
+      ImageStyle.CARTOON, "병원에 가요", stepTitle);
+  }
+
+  @Test
+  @DisplayName("안전 거절이면 장면 문장을 빼고 카드 제목만으로 한 번 더 시도해 그림을 얻는다 (#895)")
+  void safetyRejection_retriesWithTitleOnly() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(argThat(scene -> scene != null && "귀에 체온계를 대요".equals(scene.stepDescription())), any()))
+      .thenThrow(safetyRejected());
+    when(openAiClient.generateCardImage(argThat(scene -> scene != null && "체온을 재요".equals(scene.stepDescription())
+      && scene.sceneDetail() == null), any())).thenReturn(OPENAI_IMAGE);
+
+    GeneratedImage image = generator.generate(requestWithTitle("체온을 재요"));
+
+    assertThat(image).isSameAs(OPENAI_IMAGE);
+  }
+
+  @Test
+  @DisplayName("제목으로 다시 시도해도 거절이면 그대로 던진다 — 부르는 쪽이 기본 그림으로 대체 (#895)")
+  void safetyRejection_retryAlsoRejected_throws() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(safetyRejected());
+
+    assertThatThrownBy(() -> generator.generate(requestWithTitle("체온을 재요")))
+      .hasMessageContaining("safety system");
+    verify(openAiClient, org.mockito.Mockito.times(2)).generateCardImage(any(), any());
+  }
+
+  @Test
+  @DisplayName("제목이 없는 카드(직접 추가)는 안전 거절을 다시 시도하지 않는다 — 바꿀 문장이 없다 (#895)")
+  void safetyRejection_withoutTitle_doesNotRetry() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(safetyRejected());
+
+    assertThatThrownBy(() -> generator.generate(request(null))).hasMessageContaining("safety system");
+    verify(openAiClient, org.mockito.Mockito.times(1)).generateCardImage(any(), any());
+  }
+
+  @Test
+  @DisplayName("안전 거절이 아닌 오류는 이 단계에서 다시 시도하지 않는다 (429 는 호출부 대기 로직 몫) (#895)")
+  void otherError_doesNotRetryHere() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateCardImage(any(), any())).thenThrow(new RuntimeException("429 Too Many Requests"));
+
+    assertThatThrownBy(() -> generator.generate(requestWithTitle("체온을 재요"))).hasMessageContaining("429");
+    verify(openAiClient, org.mockito.Mockito.times(1)).generateCardImage(any(), any());
   }
 
   @Test
@@ -87,7 +147,7 @@ class CardImageGeneratorTest {
     verify(fluxImageClient).generate(
       "The character picks up a red umbrella.", CharacterType.LULU, FluxSeed.of(SEED_KEY));
     verifyNoInteractions(translator);
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
   }
 
   @Test
@@ -118,7 +178,7 @@ class CardImageGeneratorTest {
     when(translator.translateImagePrompt(anyString())).thenThrow(new IllegalStateException("번역 실패"));
 
     assertThat(generator.generate(request(null))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
     verify(fluxImageClient, never()).generate(any(), any(), any());
   }
 
@@ -130,7 +190,7 @@ class CardImageGeneratorTest {
         "Payment Required", null, null, null));
 
     assertThat(generator.generate(request("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
   }
 
   @Test
@@ -177,7 +237,7 @@ class CardImageGeneratorTest {
 
     assertThat(generator.generate(realistic("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
 
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
     verifyNoInteractions(fluxImageClient, translator);
   }
 
@@ -203,7 +263,7 @@ class CardImageGeneratorTest {
 
     assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
 
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
     verify(fluxImageClient, never()).generateRealistic(any(), any());
   }
 
@@ -215,7 +275,7 @@ class CardImageGeneratorTest {
     when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
 
     assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
   }
 
   @Test

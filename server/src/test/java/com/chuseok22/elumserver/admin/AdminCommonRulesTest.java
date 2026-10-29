@@ -19,7 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * 관리자 화면 공통 규칙 봉인 (#760): 목록은 AdminListQuery/Definition, 표는 가로 스크롤, 페이지 크기는 한 곳
+ * 관리자 화면 공통 규칙 봉인 (#760, #657): 목록은 AdminListQuery/Definition, 표는 가로 스크롤, 페이지 크기는 한 곳, 확인창은 공통 모달
  * 소스와 템플릿을 글로 훑는다 (스프링을 띄우지 않음). 예외는 아래 목록에 이유와 함께만 둔다
  */
 class AdminCommonRulesTest {
@@ -27,6 +27,7 @@ class AdminCommonRulesTest {
   private static final Path ADMIN_JAVA_ROOT = Path.of("src/main/java/com/chuseok22/elumserver/admin");
   private static final Path CONTROLLER_ROOT = ADMIN_JAVA_ROOT.resolve("application/controller");
   private static final Path TEMPLATE_ROOT = Path.of("src/main/resources/templates/admin");
+  private static final Path ADMIN_SCRIPT_ROOT = Path.of("src/main/resources/static/admin/js");
 
   /// 목록 조회 파라미터로 보는 이름: 검색, 정렬, 페이지, 개수 제한
   private static final Pattern LIST_PARAMETER_NAME = Pattern.compile(
@@ -39,7 +40,8 @@ class AdminCommonRulesTest {
   /// 공통 목록(AdminListQuery) 없이 자체 목록 파라미터를 받아도 되는 컨트롤러와 이유
   private static final Map<String, String> OWN_LIST_PARAMETER_ALLOWED = Map.of(
     "AdminCreditController.java", "크레딧 4탭(회원별, 작업 탐색, 회원 상세의 작업·원장)은 탭마다 집계 조인이 달라 정의 하나로 못 담는다",
-    "AdminLogApiController.java", "서버 로그는 DB 목록이 아니라 파일 tail·검색(offset, limit)이다"
+    "AdminLogApiController.java", "서버 로그는 DB 목록이 아니라 파일 tail·검색(offset, limit)이다",
+    "AdminConfigMemberApiController.java", "설정 회원 고르기 자동완성(keyword)이라 쪽·정렬이 있는 목록이 아니다 (#912)"
   );
 
   private static final Set<String> VOID_TAGS = Set.of(
@@ -52,6 +54,13 @@ class AdminCommonRulesTest {
 
   /// 가로 스크롤 감싸개 없이 표를 둬도 되는 템플릿과 이유 (현재 없음)
   private static final Map<String, String> TABLE_WITHOUT_SCROLL_ALLOWED = Map.of();
+
+  /// 브라우저 기본 확인창 호출 (confirm(, window.confirm(, onsubmit 속성 안 포함)
+  private static final Pattern BROWSER_CONFIRM_CALL = Pattern.compile("\\bconfirm\\s*\\(");
+  /// 기본 확인창을 직접 불러도 되는 파일(관리자 템플릿 기준 경로)과 이유
+  private static final Map<String, String> BROWSER_CONFIRM_ALLOWED = Map.of(
+    "fragments/admin-confirm.html", "공통 확인창: 모달을 못 쓸 때(구형 브라우저·스크립트 오류) 기본 확인창으로 대신 묻는 마지막 수단"
+  );
 
   @Test
   @DisplayName("admin 컨트롤러가 검색·정렬·페이지 파라미터를 받으면 AdminListQuery 를 쓴다 (예외는 이유와 함께 명시)")
@@ -105,6 +114,35 @@ class AdminCommonRulesTest {
     assertThat(tableLinesOutsideScroll("<div><table><tr></tr></table></div>")).containsExactly(1);
     assertThat(tableLinesOutsideScroll("<div class=\"card overflow-x-auto\"><div><table></table></div></div>")).isEmpty();
     assertThat(tableLinesOutsideScroll("<div class=\"overflow-x-auto\"></div>\n<table></table>")).containsExactly(2);
+  }
+
+  @Test
+  @DisplayName("admin 템플릿·스크립트는 confirm( 을 직접 부르지 않고 공통 확인창(data-confirm-*, ElumAdminConfirm.ask)을 쓴다")
+  void browserConfirmOnlyInSharedDialog() throws IOException {
+    // 검사기 자체: 직접 호출은 잡고, 공통 확인창 사용·비슷한 이름은 통과
+    assertThat(BROWSER_CONFIRM_CALL.matcher("onsubmit=\"return confirm('지울까요?');\"").find()).isTrue();
+    assertThat(BROWSER_CONFIRM_CALL.matcher("if (!window.confirm (text)) return;").find()).isTrue();
+    assertThat(BROWSER_CONFIRM_CALL.matcher("ElumAdminConfirm.ask({}); stats.confirmed()").find()).isFalse();
+
+    List<String> violations = new ArrayList<>();
+    for (Path file : filesUnder(TEMPLATE_ROOT, ".html")) {
+      String name = TEMPLATE_ROOT.relativize(file).toString();
+      if (!BROWSER_CONFIRM_ALLOWED.containsKey(name)) {
+        violations.addAll(browserConfirmLines(name, Files.readString(file, StandardCharsets.UTF_8)));
+      }
+    }
+    for (Path file : filesUnder(ADMIN_SCRIPT_ROOT, ".js")) {
+      violations.addAll(browserConfirmLines("js/" + ADMIN_SCRIPT_ROOT.relativize(file), Files.readString(file)));
+    }
+    assertThat(violations)
+      .as("기본 확인창은 위험도 구분이 없고 Enter 한 번에 지나간다. 폼은 data-confirm-message 를, 스크립트는 ElumAdminConfirm.ask 를 쓴다")
+      .isEmpty();
+
+    // 낡은 예외 제거: 예외 파일이 더는 confirm( 을 쓰지 않으면 목록에서 뺀다
+    for (String name : BROWSER_CONFIRM_ALLOWED.keySet()) {
+      assertThat(BROWSER_CONFIRM_CALL.matcher(Files.readString(TEMPLATE_ROOT.resolve(name))).find())
+        .as(name + " 예외가 더는 필요 없으면 목록에서 뺀다").isTrue();
+    }
   }
 
   @Test
@@ -192,6 +230,16 @@ class AdminCommonRulesTest {
       }
     }
     return arguments;
+  }
+
+  /// 기본 확인창 직접 호출 위치 "이름:줄"
+  private static List<String> browserConfirmLines(String name, String source) {
+    List<String> lines = new ArrayList<>();
+    Matcher matcher = BROWSER_CONFIRM_CALL.matcher(source);
+    while (matcher.find()) {
+      lines.add(name + ":" + lineOf(source, matcher.start()));
+    }
+    return lines;
   }
 
   private static String markupOnly(String source) {

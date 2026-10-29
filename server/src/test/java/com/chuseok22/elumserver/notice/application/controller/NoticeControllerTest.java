@@ -30,7 +30,7 @@ class NoticeControllerTest {
   void notices_cacheable() {
     AppNoticesResponse body = new AppNoticesResponse(7, List.of(
       new AppNoticeResponse("n1", 1, "**하루 3개**까지", "본문", null, null)));
-    when(noticeService.publishedFor("IOS")).thenReturn(body);
+    when(noticeService.publishedFor("IOS", "KR")).thenReturn(body);
 
     ResponseEntity<AppNoticesResponse> response = controller.notices("IOS");
 
@@ -39,6 +39,8 @@ class NoticeControllerTest {
     assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo("max-age=60");
     // 언어별 응답이라 캐시가 언어를 섞지 않게
     assertThat(response.getHeaders().getVary()).contains(HttpHeaders.ACCEPT_LANGUAGE);
+    // 국가별 응답(#531)이라 60초 캐시가 한국 응답을 다른 나라 요청에 주지 않게
+    assertThat(response.getHeaders().getVary()).contains("X-Elum-Region");
   }
 
   @Test

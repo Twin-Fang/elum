@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.TtsProperties;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService.StepSpeech;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechFiller.FilledSpeech;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
@@ -15,9 +16,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntSupplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +33,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoutineStepSpeechProvider {
 
-  // 동시 합성 상한 (AI 서버가 하나씩 처리 > 더 보내면 대기만 쌓여 앱 대기 8초를 넘김)
-  static final int MAX_CONCURRENT_SYNTHESES = 2;
+  // 합성 스레드 수 = 동시 합성 설정(TTS_ON_DEMAND_MAX_CONCURRENT) 최대값 4 (올려도 줄 서지 않게, 스레드는 쓸 때 생성)
+  static final int SYNTHESIS_THREAD_COUNT = 4;
   // 요청이 합성을 기다리는 상한: 합성 읽기 제한 6초 + 저장 여유 1초 (앱 받기 대기 상한 8초 미만)
   static final Duration MAX_WAIT = SupertonicTtsClient.ON_DEMAND_READ_TIMEOUT.plusSeconds(1);
 
@@ -41,7 +43,10 @@ public class RoutineStepSpeechProvider {
   private final TtsProperties ttsProperties;
   private final SupertonicTtsClient supertonicTtsClient;
   private final ExecutorService executor;
-  private final Semaphore synthesisPermits;
+  // 동시 합성 상한: 요청마다 설정에서 읽음 (AI 서버가 하나씩 처리 > 더 보내면 대기만 쌓여 앱 대기 8초를 넘김)
+  private final IntSupplier maxConcurrentSynthesesSupplier;
+  // 진행 중 합성 수 (상한과 비교해 자리 잡기, 끝나면 반납)
+  private final AtomicInteger runningSynthesisCount = new AtomicInteger();
   private final Duration maxWait;
 
   /// 진행 중인 즉석 합성 by stepId (같은 단계 동시 요청은 이 결과를 함께 기다림)
@@ -50,12 +55,12 @@ public class RoutineStepSpeechProvider {
   @Autowired
   public RoutineStepSpeechProvider(
     RoutineQueryService routineQueryService, RoutineStepSpeechFiller routineStepSpeechFiller,
-    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient
+    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient, UsageLimitSettings usageLimitSettings
   ) {
     this(routineQueryService, routineStepSpeechFiller, ttsProperties, supertonicTtsClient,
-      Executors.newFixedThreadPool(MAX_CONCURRENT_SYNTHESES,
+      Executors.newFixedThreadPool(SYNTHESIS_THREAD_COUNT,
         Thread.ofPlatform().name("routine-speech-on-demand-", 0).daemon(true).factory()),
-      MAX_CONCURRENT_SYNTHESES, MAX_WAIT);
+      usageLimitSettings::ttsOnDemandMaxConcurrent, MAX_WAIT);
   }
 
   RoutineStepSpeechProvider(
@@ -63,12 +68,21 @@ public class RoutineStepSpeechProvider {
     TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient,
     ExecutorService executor, int maxConcurrentSyntheses, Duration maxWait
   ) {
+    this(routineQueryService, routineStepSpeechFiller, ttsProperties, supertonicTtsClient,
+      executor, () -> maxConcurrentSyntheses, maxWait);
+  }
+
+  private RoutineStepSpeechProvider(
+    RoutineQueryService routineQueryService, RoutineStepSpeechFiller routineStepSpeechFiller,
+    TtsProperties ttsProperties, SupertonicTtsClient supertonicTtsClient,
+    ExecutorService executor, IntSupplier maxConcurrentSynthesesSupplier, Duration maxWait
+  ) {
     this.routineQueryService = routineQueryService;
     this.routineStepSpeechFiller = routineStepSpeechFiller;
     this.ttsProperties = ttsProperties;
     this.supertonicTtsClient = supertonicTtsClient;
     this.executor = executor;
-    this.synthesisPermits = new Semaphore(maxConcurrentSyntheses);
+    this.maxConcurrentSynthesesSupplier = maxConcurrentSynthesesSupplier;
     this.maxWait = maxWait;
   }
 
@@ -103,7 +117,7 @@ public class RoutineStepSpeechProvider {
 
   /// 상한 안이면 합성 작업 시작. 상한 초과·거부면 false (진행 표식 정리, 기다리던 요청에 빈 값)
   private boolean startSynthesis(String stepId, CompletableFuture<Optional<FilledSpeech>> future) {
-    if (!synthesisPermits.tryAcquire()) {
+    if (!tryReserveSynthesisSlot()) {
       log.warn("[routine speech] on-demand skipped : stepId={}, reason=concurrency limit", stepId);
       abandon(stepId, future);
       return false;
@@ -116,16 +130,30 @@ public class RoutineStepSpeechProvider {
           future.complete(Optional.empty());
         } finally {
           // 작업 끝 (성공·실패·시간 초과 후 공통)
-          synthesisPermits.release();
+          runningSynthesisCount.decrementAndGet();
           inFlightByStepId.remove(stepId, future);
         }
       });
       return true;
     } catch (RejectedExecutionException e) {
-      synthesisPermits.release();
+      runningSynthesisCount.decrementAndGet();
       log.warn("[routine speech] on-demand skipped : stepId={}, reason=executor rejected", stepId);
       abandon(stepId, future);
       return false;
+    }
+  }
+
+  /// 진행 중 수가 지금 상한 미만이면 한 자리 잡기 (상한을 낮추면 진행 중인 것은 두고 새 합성만 막음)
+  private boolean tryReserveSynthesisSlot() {
+    int maxConcurrentSyntheses = maxConcurrentSynthesesSupplier.getAsInt();
+    while (true) {
+      int running = runningSynthesisCount.get();
+      if (running >= maxConcurrentSyntheses) {
+        return false;
+      }
+      if (runningSynthesisCount.compareAndSet(running, running + 1)) {
+        return true;
+      }
     }
   }
 

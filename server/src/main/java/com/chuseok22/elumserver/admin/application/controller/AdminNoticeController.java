@@ -56,17 +56,12 @@ public class AdminNoticeController {
 
   private final NoticeService noticeService;
 
-  /// 공지 목록: 검색어(q), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
+  /// 공지 목록: 검색어(q), 필터(AdminNoticeList 정의 4개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/notices")
-  public String list(
-    @RequestParam(name = "q", required = false) String q,
-    @RequestParam(name = "sort", required = false) String sort,
-    @RequestParam(name = "page", required = false) String page,
-    Model model
-  ) {
-    AdminListQuery query = AdminListQuery.of(q, Map.of(), sort, page, AdminNoticeList.DEFINITION);
+  public String list(@RequestParam Map<String, String> parameters, Model model) {
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, AdminNoticeList.DEFINITION);
     Page<AppNotice> notices = AdminListPaging.fetchWithPageCorrection(query,
-      condition -> noticeService.search(condition.likePattern(), AdminNoticeList.pageableOf(condition)));
+      condition -> noticeService.search(AdminNoticeList.searchOf(condition), AdminNoticeList.pageableOf(condition)));
 
     // 상태는 서버 시계로 한 번 판단해 넘긴다 (행마다 같은 시각 기준)
     LocalDateTime now = noticeService.now();
@@ -78,7 +73,7 @@ public class AdminNoticeController {
     model.addAttribute("rows", rows);
     model.addAttribute("definition", AdminNoticeList.DEFINITION);
     model.addAttribute("query", query);
-    // 페이저 링크가 검색·정렬을 유지하도록 (page 는 페이저가 붙임)
+    // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
     model.addAttribute("pagerBaseUrl", "/admin/notices" + query.toQueryString(query.sort(), 1));
     addPreview(model, null);
     return "admin/notices";
@@ -268,6 +263,8 @@ public class AdminNoticeController {
       case NOTICE_PRIORITY_INVALID -> "우선순위는 숫자로 적어 주세요. 클수록 먼저 보여요. (E-NTC-010)";
       case NOTICE_PLATFORM_INVALID -> "플랫폼은 전체, iOS, Android 중에서 골라 주세요. (E-NTC-011)";
       case NOTICE_LOCALE_INVALID -> "공지 언어는 ko, en, ja, zh, es 중에서 골라 주세요. (E-NTC-016)";
+      case NOTICE_TARGET_COUNTRIES_INVALID ->
+        "대상 국가는 KR, JP 처럼 두 글자 대문자로 쉼표를 넣어 적어 주세요. 비우면 모든 나라에 나가요. (E-NTC-017)";
       case NOTICE_IMAGE_INVALID_TYPE -> "이미지는 png, jpg, webp 만 올릴 수 있어요. (E-NTC-012)";
       case NOTICE_IMAGE_TOO_LARGE -> "이미지는 2MB 까지예요. 크기를 줄여 주세요. (E-NTC-013)";
       case NOTICE_IMAGE_SAVE_FAILED -> "이미지를 저장하지 못했어요. 잠시 뒤 다시 해 주세요. (E-NTC-014)";

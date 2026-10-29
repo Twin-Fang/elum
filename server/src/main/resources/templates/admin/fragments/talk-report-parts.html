@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  이야기 신고 처리 표시와 처리 폼 (신고 목록, 글 상세 공용).
+  returnTo 가 'detail' 이면 그 글 상세로, 아니면 필터·정렬·페이지를 유지한 신고 목록으로 돌아간다.
+-->
+<body>
+
+<span th:fragment="resolvedState(report)" data-talk-report-state>
+  <span th:if="${report.resolvedAt == null}" class="badge badge-warning badge-sm">미처리</span>
+  <span th:if="${report.resolvedAt != null}" class="text-xs text-base-content/60"
+        th:text="'처리 ' + ${@adminDate.format(report.resolvedAt)}">처리 2026-10-20 10:00</span>
+</span>
+
+<form th:fragment="resolveForm(report, returnTo, query)" th:if="${report.resolvedAt == null}"
+      th:action="@{/admin/talk/reports/{id}/resolve(id=${report.id})}" method="post"
+      class="flex items-center gap-1" data-talk-resolve-form>
+  <input type="hidden" name="returnTo" th:value="${returnTo}"/>
+  <th:block th:if="${query != null}">
+    <input type="hidden" name="returnResolved" th:value="${query.filters.get('resolved')}"/>
+    <input type="hidden" name="returnSort" th:value="${query.sort}"/>
+    <input type="hidden" name="returnPage" th:value="${query.page}"/>
+  </th:block>
+  <button type="submit" class="btn btn-outline btn-xs">처리했어요</button>
+</form>
+
+</body>
+</html>

@@ -52,7 +52,8 @@ mixin _$Routine {
  String? get groupId; int? get groupOrder;/// 일과관리 격자 안 자리 (묶음과 같은 순서열, 0부터). 정한 적 없으면 null (#844)
  int? get libraryOrder;/// 묶음째 보내 만든 오늘 일과의 묶음 id · 보낼 때의 묶음 이름 · 묶음 안 순서. 낱개로 보냈으면 null
  String? get sentGroupId; String? get sentGroupName; int? get sentGroupOrder;/// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
- bool get isExample;
+ bool get isExample;/// 이야기에서 가져온 일과면 그 글 id, 아니면 null. 서버 `talkPostId`.
+ String? get talkPostId;
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -63,16 +64,16 @@ $RoutineCopyWith<Routine> get copyWith => _$RoutineCopyWithImpl<Routine>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.steps, steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language)&&(identical(other.sourceRoutineId, sourceRoutineId) || other.sourceRoutineId == sourceRoutineId)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.groupOrder, groupOrder) || other.groupOrder == groupOrder)&&(identical(other.libraryOrder, libraryOrder) || other.libraryOrder == libraryOrder)&&(identical(other.sentGroupId, sentGroupId) || other.sentGroupId == sentGroupId)&&(identical(other.sentGroupName, sentGroupName) || other.sentGroupName == sentGroupName)&&(identical(other.sentGroupOrder, sentGroupOrder) || other.sentGroupOrder == sentGroupOrder)&&(identical(other.isExample, isExample) || other.isExample == isExample));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.steps, steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language)&&(identical(other.sourceRoutineId, sourceRoutineId) || other.sourceRoutineId == sourceRoutineId)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.groupOrder, groupOrder) || other.groupOrder == groupOrder)&&(identical(other.libraryOrder, libraryOrder) || other.libraryOrder == libraryOrder)&&(identical(other.sentGroupId, sentGroupId) || other.sentGroupId == sentGroupId)&&(identical(other.sentGroupName, sentGroupName) || other.sentGroupName == sentGroupName)&&(identical(other.sentGroupOrder, sentGroupOrder) || other.sentGroupOrder == sentGroupOrder)&&(identical(other.isExample, isExample) || other.isExample == isExample)&&(identical(other.talkPostId, talkPostId) || other.talkPostId == talkPostId));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language,sourceRoutineId,groupId,groupOrder,libraryOrder,sentGroupId,sentGroupName,sentGroupOrder,isExample]);
+int get hashCode => Object.hashAll([runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language,sourceRoutineId,groupId,groupOrder,libraryOrder,sentGroupId,sentGroupName,sentGroupOrder,isExample,talkPostId]);
 
 @override
 String toString() {
-  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language, sourceRoutineId: $sourceRoutineId, groupId: $groupId, groupOrder: $groupOrder, libraryOrder: $libraryOrder, sentGroupId: $sentGroupId, sentGroupName: $sentGroupName, sentGroupOrder: $sentGroupOrder, isExample: $isExample)';
+  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language, sourceRoutineId: $sourceRoutineId, groupId: $groupId, groupOrder: $groupOrder, libraryOrder: $libraryOrder, sentGroupId: $sentGroupId, sentGroupName: $sentGroupName, sentGroupOrder: $sentGroupOrder, isExample: $isExample, talkPostId: $talkPostId)';
 }
 
 
@@ -83,7 +84,7 @@ abstract mixin class $RoutineCopyWith<$Res>  {
   factory $RoutineCopyWith(Routine value, $Res Function(Routine) _then) = _$RoutineCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language, String? sourceRoutineId, String? groupId, int? groupOrder, int? libraryOrder, String? sentGroupId, String? sentGroupName, int? sentGroupOrder, bool isExample
+ String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language, String? sourceRoutineId, String? groupId, int? groupOrder, int? libraryOrder, String? sentGroupId, String? sentGroupName, int? sentGroupOrder, bool isExample, String? talkPostId
 });
 
 
@@ -100,7 +101,7 @@ class _$RoutineCopyWithImpl<$Res>
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,Object? sourceRoutineId = freezed,Object? groupId = freezed,Object? groupOrder = freezed,Object? libraryOrder = freezed,Object? sentGroupId = freezed,Object? sentGroupName = freezed,Object? sentGroupOrder = freezed,Object? isExample = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,Object? sourceRoutineId = freezed,Object? groupId = freezed,Object? groupOrder = freezed,Object? libraryOrder = freezed,Object? sentGroupId = freezed,Object? sentGroupName = freezed,Object? sentGroupOrder = freezed,Object? isExample = null,Object? talkPostId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -126,7 +127,8 @@ as int?,sentGroupId: freezed == sentGroupId ? _self.sentGroupId : sentGroupId //
 as String?,sentGroupName: freezed == sentGroupName ? _self.sentGroupName : sentGroupName // ignore: cast_nullable_to_non_nullable
 as String?,sentGroupOrder: freezed == sentGroupOrder ? _self.sentGroupOrder : sentGroupOrder // ignore: cast_nullable_to_non_nullable
 as int?,isExample: null == isExample ? _self.isExample : isExample // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,talkPostId: freezed == talkPostId ? _self.talkPostId : talkPostId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -211,10 +213,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample,  String? talkPostId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Routine() when $default != null:
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample,_that.talkPostId);case _:
   return orElse();
 
 }
@@ -232,10 +234,10 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample,  String? talkPostId)  $default,) {final _that = this;
 switch (_that) {
 case _Routine():
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample,_that.talkPostId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -252,10 +254,10 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language,  String? sourceRoutineId,  String? groupId,  int? groupOrder,  int? libraryOrder,  String? sentGroupId,  String? sentGroupName,  int? sentGroupOrder,  bool isExample,  String? talkPostId)?  $default,) {final _that = this;
 switch (_that) {
 case _Routine() when $default != null:
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language,_that.sourceRoutineId,_that.groupId,_that.groupOrder,_that.libraryOrder,_that.sentGroupId,_that.sentGroupName,_that.sentGroupOrder,_that.isExample,_that.talkPostId);case _:
   return null;
 
 }
@@ -267,7 +269,7 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 
 
 class _Routine extends Routine {
-  const _Routine({required this.id, this.title = '', this.rawInputText = '', this.sanitizedInputText = '', this.status = '', final  List<ActionCard> steps = const <ActionCard>[], this.completedStepCount = 0, this.totalStepCount = 0, this.progressPercent = 0, this.scheduledAt, this.rewardText = '', this.rewardPresetKey = '', this.creditUsage, this.createdByMe, this.creatorName, this.language = 'ko', this.sourceRoutineId, this.groupId, this.groupOrder, this.libraryOrder, this.sentGroupId, this.sentGroupName, this.sentGroupOrder, this.isExample = false}): _steps = steps,super._();
+  const _Routine({required this.id, this.title = '', this.rawInputText = '', this.sanitizedInputText = '', this.status = '', final  List<ActionCard> steps = const <ActionCard>[], this.completedStepCount = 0, this.totalStepCount = 0, this.progressPercent = 0, this.scheduledAt, this.rewardText = '', this.rewardPresetKey = '', this.creditUsage, this.createdByMe, this.creatorName, this.language = 'ko', this.sourceRoutineId, this.groupId, this.groupOrder, this.libraryOrder, this.sentGroupId, this.sentGroupName, this.sentGroupOrder, this.isExample = false, this.talkPostId}): _steps = steps,super._();
   
 
 @override final  String id;
@@ -338,6 +340,8 @@ class _Routine extends Routine {
 @override final  int? sentGroupOrder;
 /// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
 @override@JsonKey() final  bool isExample;
+/// 이야기에서 가져온 일과면 그 글 id, 아니면 null. 서버 `talkPostId`.
+@override final  String? talkPostId;
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
@@ -349,16 +353,16 @@ _$RoutineCopyWith<_Routine> get copyWith => __$RoutineCopyWithImpl<_Routine>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._steps, _steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language)&&(identical(other.sourceRoutineId, sourceRoutineId) || other.sourceRoutineId == sourceRoutineId)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.groupOrder, groupOrder) || other.groupOrder == groupOrder)&&(identical(other.libraryOrder, libraryOrder) || other.libraryOrder == libraryOrder)&&(identical(other.sentGroupId, sentGroupId) || other.sentGroupId == sentGroupId)&&(identical(other.sentGroupName, sentGroupName) || other.sentGroupName == sentGroupName)&&(identical(other.sentGroupOrder, sentGroupOrder) || other.sentGroupOrder == sentGroupOrder)&&(identical(other.isExample, isExample) || other.isExample == isExample));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._steps, _steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language)&&(identical(other.sourceRoutineId, sourceRoutineId) || other.sourceRoutineId == sourceRoutineId)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.groupOrder, groupOrder) || other.groupOrder == groupOrder)&&(identical(other.libraryOrder, libraryOrder) || other.libraryOrder == libraryOrder)&&(identical(other.sentGroupId, sentGroupId) || other.sentGroupId == sentGroupId)&&(identical(other.sentGroupName, sentGroupName) || other.sentGroupName == sentGroupName)&&(identical(other.sentGroupOrder, sentGroupOrder) || other.sentGroupOrder == sentGroupOrder)&&(identical(other.isExample, isExample) || other.isExample == isExample)&&(identical(other.talkPostId, talkPostId) || other.talkPostId == talkPostId));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(_steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language,sourceRoutineId,groupId,groupOrder,libraryOrder,sentGroupId,sentGroupName,sentGroupOrder,isExample]);
+int get hashCode => Object.hashAll([runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(_steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language,sourceRoutineId,groupId,groupOrder,libraryOrder,sentGroupId,sentGroupName,sentGroupOrder,isExample,talkPostId]);
 
 @override
 String toString() {
-  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language, sourceRoutineId: $sourceRoutineId, groupId: $groupId, groupOrder: $groupOrder, libraryOrder: $libraryOrder, sentGroupId: $sentGroupId, sentGroupName: $sentGroupName, sentGroupOrder: $sentGroupOrder, isExample: $isExample)';
+  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language, sourceRoutineId: $sourceRoutineId, groupId: $groupId, groupOrder: $groupOrder, libraryOrder: $libraryOrder, sentGroupId: $sentGroupId, sentGroupName: $sentGroupName, sentGroupOrder: $sentGroupOrder, isExample: $isExample, talkPostId: $talkPostId)';
 }
 
 
@@ -369,7 +373,7 @@ abstract mixin class _$RoutineCopyWith<$Res> implements $RoutineCopyWith<$Res> {
   factory _$RoutineCopyWith(_Routine value, $Res Function(_Routine) _then) = __$RoutineCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language, String? sourceRoutineId, String? groupId, int? groupOrder, int? libraryOrder, String? sentGroupId, String? sentGroupName, int? sentGroupOrder, bool isExample
+ String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language, String? sourceRoutineId, String? groupId, int? groupOrder, int? libraryOrder, String? sentGroupId, String? sentGroupName, int? sentGroupOrder, bool isExample, String? talkPostId
 });
 
 
@@ -386,7 +390,7 @@ class __$RoutineCopyWithImpl<$Res>
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,Object? sourceRoutineId = freezed,Object? groupId = freezed,Object? groupOrder = freezed,Object? libraryOrder = freezed,Object? sentGroupId = freezed,Object? sentGroupName = freezed,Object? sentGroupOrder = freezed,Object? isExample = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,Object? sourceRoutineId = freezed,Object? groupId = freezed,Object? groupOrder = freezed,Object? libraryOrder = freezed,Object? sentGroupId = freezed,Object? sentGroupName = freezed,Object? sentGroupOrder = freezed,Object? isExample = null,Object? talkPostId = freezed,}) {
   return _then(_Routine(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -412,7 +416,8 @@ as int?,sentGroupId: freezed == sentGroupId ? _self.sentGroupId : sentGroupId //
 as String?,sentGroupName: freezed == sentGroupName ? _self.sentGroupName : sentGroupName // ignore: cast_nullable_to_non_nullable
 as String?,sentGroupOrder: freezed == sentGroupOrder ? _self.sentGroupOrder : sentGroupOrder // ignore: cast_nullable_to_non_nullable
 as int?,isExample: null == isExample ? _self.isExample : isExample // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,talkPostId: freezed == talkPostId ? _self.talkPostId : talkPostId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

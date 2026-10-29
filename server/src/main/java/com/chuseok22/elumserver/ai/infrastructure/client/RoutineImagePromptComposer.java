@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.CardScene;
+import com.chuseok22.elumserver.ai.core.ImageCardLayoutRules;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -27,9 +29,20 @@ public class RoutineImagePromptComposer {
   }
 
   public String compose(String stepDescription, CharacterType characterType, boolean referenceImageProvided) {
+    return compose(CardScene.descriptionOnly(stepDescription), characterType, referenceImageProvided);
+  }
+
+  /**
+   * 만화 카드 그림 프롬프트: DB 지시문 + 화면 규격(코드) + 장면 정보
+   * 캐릭터가 없으면 규격을 붙이지 않음 (캐릭터 전제 규칙)
+   */
+  public String compose(CardScene scene, CharacterType characterType, boolean referenceImageProvided) {
     ImagePromptLanguage language = language();
     String prefix = promptTemplateService.getContent(language.getPrefixKey());
-    return imagePromptBuilder.build(prefix, stepDescription, characterType, referenceImageProvided, language);
+    if (characterType != null) {
+      prefix = prefix + "\n\n" + ImageCardLayoutRules.of(language);
+    }
+    return imagePromptBuilder.build(prefix, scene, characterType, referenceImageProvided, language);
   }
 
   /**

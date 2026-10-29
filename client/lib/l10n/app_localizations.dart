@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'카드 체크 칭찬 소리'**
   String get elumiSettingsPraiseSoundLabel;
 
+  /// 이룸이 설정의 스위치 줄 — 일과 진행(카드) 화면이 떠 있는 동안 기기 화면이 꺼지지 않게 한다 (#970)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 볼 때 화면 켜 두기'**
+  String get elumiSettingsScreenAwakeLabel;
+
   /// 이룸이 설정의 약관 줄
   ///
   /// In ko, this message translates to:
@@ -1934,17 +1940,29 @@ abstract class AppLocalizations {
   /// **'의견을 처리했을 때'**
   String get notificationSettingFeedbackResolved;
 
+  /// 알림 설정: 이야기 글 댓글 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기: 내 글에 댓글이 달렸을 때'**
+  String get notificationSettingTalkCommented;
+
+  /// 알림 설정: 이야기 글 가져감 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기: 내 글을 가져갔을 때'**
+  String get notificationSettingTalkImported;
+
   /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
   ///
   /// In ko, this message translates to:
-  /// **'기기 알림이 꺼져 있어 알림을 받을 수 없어요'**
+  /// **'기기 알림이 꺼져 있어요'**
   String get notificationPermissionOff;
 
-  /// 기기 알림 권한 안내 줄의 버튼
+  /// 기기 알림 꺼짐 안내 띠의 버튼 (안 물었으면 권한 창, 거부했으면 기기 설정)
   ///
   /// In ko, this message translates to:
-  /// **'기기 설정 열기'**
-  String get notificationOpenDeviceSettings;
+  /// **'켜기'**
+  String get notificationTurnOnDeviceNotification;
 
   /// 알림 설정 저장 실패 팝업 문구
   ///
@@ -2017,6 +2035,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보내 주신 의견을 확인하고 처리했어요'**
   String get notificationFeedbackResolved;
+
+  /// 알림 줄: 내 이야기 글에 댓글이 달림(묶음). count 는 댓글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'내 글에 댓글이 {count}개 달렸어요'**
+  String notificationTalkPostCommented(int count);
+
+  /// 알림 줄: 내 이야기 글을 다른 보호자가 가져감(묶음). count 는 가져간 사람 수
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 {count}명이 내 글을 가져갔어요'**
+  String notificationTalkPostImported(int count);
 
   /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
   ///
@@ -2587,6 +2617,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'카드 체크 칭찬 소리'**
   String get guardianSettingsPraiseSound;
+
+  /// 설정 줄 — 이룸이 일과 진행(카드) 화면이 떠 있는 동안 기기 화면 꺼짐 막기 켜기/끄기 (#970)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 볼 때 화면 켜 두기'**
+  String get guardianSettingsScreenAwake;
 
   /// 추가 질문 화면 하단 버튼
   ///
@@ -3785,25 +3821,25 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'몸 돌보기'**
+  /// **'생활 습관'**
   String get routineTemplateCategorySelfCare;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'씻기·옷 입기·밥 먹기처럼 매일 하는 일'**
+  /// **'양치 · 세수 · 옷 입기'**
   String get routineTemplateCategorySelfCareHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'하루 흐름'**
+  /// **'하루 순서'**
   String get routineTemplateCategoryDailyFlow;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'아침부터 잠들 때까지 큰 순서'**
+  /// **'아침 준비 · 하교 후 · 잠자리 (여러 일을 차례로)'**
   String get routineTemplateCategoryDailyFlowHint;
 
   /// 예시 일과 카테고리 이름
@@ -3815,19 +3851,19 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'내 물건과 자리를 스스로 정리하기'**
+  /// **'방 정리 · 그릇 치우기 · 빨래 개기'**
   String get routineTemplateCategoryHouseholdHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'밖에서 해 보기'**
+  /// **'바깥 활동'**
   String get routineTemplateCategoryCommunity;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'버스 타기·물건 사기처럼 혼자 해 보는 연습'**
+  /// **'버스 타기 · 물건 사기 · 병원 가기'**
   String get routineTemplateCategoryCommunityHint;
 
   /// 예시 일과 카테고리 이름
@@ -3839,19 +3875,19 @@ abstract class AppLocalizations {
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'공부를 시작하고 끝까지 하는 순서'**
+  /// **'숙제 시작 · 이름 쓰기 · 책 읽기'**
   String get routineTemplateCategoryLearningHint;
 
   /// 예시 일과 카테고리 이름
   ///
   /// In ko, this message translates to:
-  /// **'마음과 관계'**
+  /// **'감정·관계'**
   String get routineTemplateCategoryFeelings;
 
   /// 예시 일과 카테고리 한 줄 설명
   ///
   /// In ko, this message translates to:
-  /// **'감정 표현·인사·차례 기다리기'**
+  /// **'감정 카드 · 인사 · 차례 기다리기'**
   String get routineTemplateCategoryFeelingsHint;
 
   /// 예시 일과 이름 (selfCare)
@@ -4202,7 +4238,7 @@ abstract class AppLocalizations {
   /// **'이메일 비공개'**
   String get guardianMyInfoEmailPrivate;
 
-  /// 내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)
+  /// 내정보 닉네임 카드: 가입일 (예: 2026. 10. 19 가입, 시안 1736:8780)
   ///
   /// In ko, this message translates to:
   /// **'{date} 가입'**
@@ -4220,6 +4256,60 @@ abstract class AppLocalizations {
   /// **'보는 중'**
   String get guardianMyInfoActiveBadge;
 
+  /// 내정보 닉네임 카드: 연필 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임 바꾸기'**
+  String get guardianNicknameEditLabel;
+
+  /// 보호자 닉네임 변경 시트 제목 (시안 1759:9649 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'내 이름 변경하기'**
+  String get guardianNicknameSheetTitle;
+
+  /// 보호자 닉네임 변경 시트 설명 2줄. 둘째 줄은 서버 7일 제한 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기를 작성할 때 보이는 이름이에요.\n이름은 7일에 한 번 바꿀 수 있어요'**
+  String get guardianNicknameSheetDescription;
+
+  /// 보호자 닉네임 변경 시트 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요'**
+  String get guardianNicknameSheetHint;
+
+  /// 보호자 닉네임 변경 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get guardianNicknameSheetSave;
+
+  /// 보호자 닉네임 형식이 맞지 않을 때 입력칸 아래 안내 (서버 NICKNAME_INVALID_FORMAT 과 같은 규칙)
+  ///
+  /// In ko, this message translates to:
+  /// **'한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요'**
+  String get guardianNicknameInvalidFormat;
+
+  /// 7일 제한 중 연필을 눌렀을 때 안내. since 는 dateMonthDaySince 결과(예: 10월 27일부터)
+  ///
+  /// In ko, this message translates to:
+  /// **'{since} 바꿀 수 있어요'**
+  String guardianNicknameChangeableFrom(String since);
+
+  /// 보호자 닉네임 저장 성공 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임을 바꿨어요'**
+  String get guardianNicknameChanged;
+
+  /// 보호자 닉네임 저장이 네트워크·서버 오류로 실패했을 때 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임을 바꾸지 못했어요'**
+  String get guardianNicknameSaveFailed;
+
   /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
   ///
   /// In ko, this message translates to:
@@ -4231,18 +4321,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이 화면'**
   String get guardianSideNavChildScreen;
-
-  /// 이야기 칸 준비 중 안내 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'이야기를 준비하고 있어요'**
-  String get guardianTalkComingSoonTitle;
-
-  /// 이야기 칸 준비 중 안내 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요'**
-  String get guardianTalkComingSoonBody;
 
   /// 일과관리 칸 빈 상태 제목
   ///
@@ -4265,7 +4343,7 @@ abstract class AppLocalizations {
   /// 일과관리 칸 가운데 아래 떠 있는 버튼 글자 (앞에 + 아이콘)
   ///
   /// In ko, this message translates to:
-  /// **'일과 만들기'**
+  /// **'새로 만들기'**
   String get routineLibraryCreate;
 
   /// 일과관리 상세 시트·빠른 메뉴의 오늘 이룸이에게 보내기
@@ -4388,6 +4466,42 @@ abstract class AppLocalizations {
   /// **'길게 누르면 메뉴가 열려요'**
   String get routineLibraryTileHint;
 
+  /// 격자 칸 이름 아래: 이야기에서 가져온 일과 표시 (계속 남는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서'**
+  String get routineLibraryFromTalk;
+
+  /// 격자 칸 배지: 이야기에서 가져온 뒤 아직 열어 보지 않은 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과'**
+  String get routineLibraryNewBadge;
+
+  /// 가져온 일과 상세 맨 위 띠의 왼쪽 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서 가져왔어요'**
+  String get routineDetailTalkOriginBand;
+
+  /// 가져온 일과 상세 띠의 오른쪽 버튼: 이야기 글 상세로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'원래 글'**
+  String get routineDetailTalkOriginOpenPost;
+
+  /// 가져온 일과 상세 띠의 오른쪽 표시: 원래 글이 내려갔거나 못 받았을 때 (누를 수 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'내려간 글'**
+  String get routineDetailTalkOriginPostGone;
+
+  /// 가져온 일과 상세 띠 전체의 화면 낭독 이름 (버튼)
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에서 가져왔어요, 원래 글 보기'**
+  String get routineDetailTalkOriginBandOpenLabel;
+
   /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
   ///
   /// In ko, this message translates to:
@@ -4496,10 +4610,16 @@ abstract class AppLocalizations {
   /// **'새 묶음'**
   String get routineGroupDefaultName;
 
-  /// 일과 묶음 (#807)
+  /// 새 묶음 만들기 시트: 이름 칸 위 라벨 (#968, 시안 1877:9740)
   ///
   /// In ko, this message translates to:
-  /// **'묶음 이름 (예: 아침 준비)'**
+  /// **'묶음 이름'**
+  String get routineGroupNameLabel;
+
+  /// 새 묶음 만들기 시트: 이름 칸 안내 (#968, 시안 1877:9740)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시: 등교 전 준비'**
   String get routineGroupNameHint;
 
   /// 일과 묶음 (#807)
@@ -4517,7 +4637,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)'**
+  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요'**
   String get routineGroupPickHintNew;
 
   /// 일과 묶음 (#807)
@@ -4571,7 +4691,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과 {count}개 · 이 순서대로 보여요'**
+  /// **'일과 {count}개'**
   String routineGroupSheetCount(int count);
 
   /// 일과 묶음 (#807)
@@ -4585,12 +4705,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title} 묶음에서 빼기'**
   String routineGroupSheetRemove(String title);
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'길게 눌러 끌면 순서를 바꿀 수 있어요'**
-  String get routineGroupSheetDragHint;
 
   /// 일과 묶음 (#807)
   ///
@@ -4619,8 +4733,8 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과가 하나만 남아 묶음을 풀었어요'**
-  String get routineGroupUngroupedLastOne;
+  /// **'일과를 다 빼서 묶음을 풀었어요'**
+  String get routineGroupUngroupedEmpty;
 
   /// 일과 묶음 (#807)
   ///
@@ -4688,6 +4802,12 @@ abstract class AppLocalizations {
   /// **'다 했어요!'**
   String get childHomeGroupAllDone;
 
+  /// 일과 제목 옆 연필 (화면 낭독기 이름)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 이름 바꾸기'**
+  String get routineTitleEdit;
+
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
@@ -4709,7 +4829,7 @@ abstract class AppLocalizations {
   /// 일과관리 묶음 열기 (#837)
   ///
   /// In ko, this message translates to:
-  /// **'순서 편집'**
+  /// **'편집'**
   String get routineGroupEditOrder;
 
   /// 일과관리 묶음 열기 (#837)
@@ -4727,13 +4847,13 @@ abstract class AppLocalizations {
   /// 일과관리 코치마크 1단계. *로 감싼 부분이 강조된다 (#832)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요'**
+  /// **'일과를 *누르면* 카드를 볼 수 있어요'**
   String get routineManageCoachTapMessage;
 
   /// 일과관리 코치마크 2단계 (#832)
   ///
   /// In ko, this message translates to:
-  /// **'길게 눌렀다 *떼면* 칸 옆에 메뉴가 떠요\n오늘 보내기 · 이름 바꾸기\n묶음에 넣기 · 복사하기 · 지우기'**
+  /// **'길게 눌렀다 *떼면* 메뉴가 열려요'**
   String get routineManageCoachLongPressMessage;
 
   /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)
@@ -4754,11 +4874,29 @@ abstract class AppLocalizations {
   /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
   String get routineManageCoachCreateGroupMessage;
 
-  /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
+  /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'일과관리 사용법 다시 보기'**
-  String get guardianSettingsRoutineManageGuide;
+  /// **'보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요'**
+  String get cardReviewCoachEditMessage;
+
+  /// 카드 검토 코치마크 — 카드 순서 변경 버튼. 카드 1장이면 나오지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요'**
+  String get cardReviewCoachReorderMessage;
+
+  /// 카드 검토 코치마크 마지막 단계 — 저장 버튼. 버튼 이름은 cardReviewSave 와 같아야 한다
+  ///
+  /// In ko, this message translates to:
+  /// **'다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요'**
+  String get cardReviewCoachSaveMessage;
+
+  /// ? 버튼의 낭독 이름 (카드 검토 상단바, 일과관리 머리). 누르면 그 화면의 코치마크를 다시 띄운다
+  ///
+  /// In ko, this message translates to:
+  /// **'사용법 보기'**
+  String get coachHelpLabel;
 
   /// 첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)
   ///
@@ -4795,6 +4933,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보호자 알림'**
   String get pushChannelGuardianUpdates;
+
+  /// 알림이 꺼진 보호자 기기에 7일마다 다시 권하는 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림이 꺼져 있어요'**
+  String get pushPermissionNudgeTitle;
+
+  /// 보호자 다시 권하기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 두면 이룸이가 일과를 끝냈을 때 바로 알려 드려요'**
+  String get pushPermissionNudgeBody;
+
+  /// 이룸이 기기 알림 권한 안내 시트 제목 (연결 직후·7일마다)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과가 오면 알려 드릴까요?'**
+  String get pushPermissionElumiTitle;
+
+  /// 이룸이 기기 알림 권한 안내 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자가 일과를 보내면 이 기기에 알림이 와요'**
+  String get pushPermissionElumiBody;
+
+  /// 다시 권하기·이룸이 기기 시트의 허용 버튼 (안 물었으면 시스템 권한 창, 거부했으면 기기 설정)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 켜기'**
+  String get pushPermissionTurnOn;
+
+  /// 안드로이드 알림 채널 이름 — 이룸이 기기에 오는 새 일과 도착 푸시
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과 알림'**
+  String get pushChannelElumiRoutines;
 
   /// 가입한 소셜 제공자 배지의 화면 낭독 이름
   ///
@@ -4837,6 +5011,828 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'가방 챙기기'**
   String get routineManageCoachSampleBag;
+
+  /// 보호자 홈에서 하루 한 번 뜨는 업데이트 권유 팝업 제목 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 버전이 나왔어요'**
+  String get updateSuggestionTitle;
+
+  /// 업데이트 권유 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요'**
+  String get updateSuggestionBody;
+
+  /// 업데이트 권유 팝업의 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get updateSuggestionLater;
+
+  /// 이룸이 정보 화면 제목. name 은 이룸이 호칭 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보'**
+  String elumiInfoTitle(String name);
+
+  /// 내정보 이룸이 줄의 연필 버튼을 낭독기가 읽는 이름. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보 고치기'**
+  String elumiInfoEditLabel(String name);
+
+  /// 이룸이 정보 화면: 이름 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이름'**
+  String get elumiInfoName;
+
+  /// 이룸이 정보 화면: 캐릭터 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터'**
+  String get elumiInfoCharacter;
+
+  /// 이룸이 정보 화면: 캐릭터 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 바꾸기'**
+  String get elumiInfoCharacterSheetTitle;
+
+  /// 이룸이 정보 화면: 그림 방식 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식 바꾸기'**
+  String get elumiInfoImageStyleSheetTitle;
+
+  /// 이룸이 정보 시트의 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get elumiInfoSave;
+
+  /// 이룸이 정보를 저장한 뒤 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'저장했어요'**
+  String get elumiInfoSaved;
+
+  /// 이룸이 정보 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요'**
+  String get elumiInfoSaveFailedTitle;
+
+  /// 이룸이 정보 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get elumiInfoSaveFailedFallback;
+
+  /// 이룸이 정보 화면: 회원 정보를 못 받았거나 그 이룸이가 목록에 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 정보를 불러오지 못했어요'**
+  String get elumiInfoNotFound;
+
+  /// 이야기 칸 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기'**
+  String get talkTitle;
+
+  /// 이야기 칸 아래 가운데 떠 있는 버튼: 내 일과를 올리러 간다 (앞의 + 는 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기'**
+  String get talkWriteButton;
+
+  /// 이야기 분류 칩: 분류 없이 전체 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get talkCategoryAll;
+
+  /// 이야기 칸 인기 줄 제목 (최근 7일)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주에 많이 가져간 일과에요'**
+  String get talkPopularTitle;
+
+  /// 피드 카드 가져감 아이콘 숫자의 읽기 프로그램 문구: 일과관리로 가져간 보호자 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}명 가져감}}'**
+  String talkPopularImportCount(int count);
+
+  /// 이야기 칸 최신 글 목록 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새로 올라왔어요'**
+  String get talkLatestTitle;
+
+  /// 이야기 칸 글이 0건일 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 나눈 일과가 없어요'**
+  String get talkEmptyTitle;
+
+  /// 이야기 칸 빈 상태 버튼: 올리기로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 일과를 나눠 보세요'**
+  String get talkEmptyAction;
+
+  /// 이야기 칸 분류 칩으로 거른 결과가 0건일 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 분류에는 아직 나눈 일과가 없어요'**
+  String get talkEmptyCategoryTitle;
+
+  /// 이야기 칸 분류 빈 상태 버튼: 전체 칩으로 되돌림
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 보기'**
+  String get talkEmptyCategoryAction;
+
+  /// 이야기 칸 첫 쪽 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기를 불러오지 못했어요'**
+  String get talkFeedFailed;
+
+  /// 닉네임이 없는 글쓴이를 부르는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get talkAuthorFallback;
+
+  /// 이야기 올리기 맨 위 일과 제목 칸 이름. 고치면 일과관리의 일과 이름도 바뀐다
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 제목'**
+  String get talkShareTitleLabel;
+
+  /// 이야기 올리기 일과 제목 칸을 비웠을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 제목을 적어 주세요'**
+  String get talkShareTitleHint;
+
+  /// 글쓴이 한마디 칸 이름 (올리기·고치기·상세)
+  ///
+  /// In ko, this message translates to:
+  /// **'내용'**
+  String get talkNoteLabel;
+
+  /// 글 카드: 도움이 됐어요 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{도움돼요 {count}}}'**
+  String talkHelpfulCount(int count);
+
+  /// 글 카드: 댓글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{댓글 {count}}}'**
+  String talkCommentCount(int count);
+
+  /// 이야기 목록 끝: 다음 쪽 불러오기 실패 시 다시 시도 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'더 불러오지 못했어요. 눌러서 다시 해 보세요'**
+  String get talkLoadMoreRetry;
+
+  /// 상세 머리: 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{카드 {count}장}}'**
+  String talkDetailStepCount(int count);
+
+  /// 상세 화면: 글 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 불러오지 못했어요'**
+  String get talkDetailLoadFailed;
+
+  /// 상세 화면: 글이 내려갔거나 없을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'내려간 글이에요'**
+  String get talkPostGoneTitle;
+
+  /// 상세 화면: 내려간 글 안내의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기로 돌아가기'**
+  String get talkPostGoneBack;
+
+  /// 상세 머리 칩: 카드 아이콘 뒤 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}장}}'**
+  String talkDetailCardCountChip(int count);
+
+  /// 상세 작성 시각 (예: 10/21 오후 11:42)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} {time}'**
+  String talkDetailPostedAt(DateTime date, DateTime time);
+
+  /// 상세 보기 전환 칩: 카드를 2열 격자로 모아 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'한 눈에 보기'**
+  String get talkViewGrid;
+
+  /// 상세 보기 전환 칩: 카드를 한 장씩 크게 넘겨 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'크게 보기'**
+  String get talkViewLarge;
+
+  /// 상세 화면: 도움돼요 누르기 실패 안내(팝업)
+  ///
+  /// In ko, this message translates to:
+  /// **'도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요'**
+  String get talkHelpfulFailed;
+
+  /// 상세 카드 아래 버튼: 이 일과를 내 일과관리로 가져오기 (앞의 내려받기는 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과로 가져오기'**
+  String get talkImportButton;
+
+  /// 상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ 일과관리에 넣었어요'**
+  String get talkImportedButton;
+
+  /// 상세 머리 줄 오른쪽 공유 아이콘의 읽기 이름: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
+  ///
+  /// In ko, this message translates to:
+  /// **'공유하기'**
+  String get talkShareLinkButton;
+
+  /// 이야기 글 링크를 메신저로 보낼 때의 글. title 은 글 제목, url 은 링크(번역하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title}\n이룸 이야기에서 같이 봐요\n\n{url}'**
+  String talkShareLinkMessage(String title, String url);
+
+  /// 상세 화면: 공유 시트를 띄우지 못했을 때 안내(팝업)
+  ///
+  /// In ko, this message translates to:
+  /// **'공유하지 못했어요. 잠시 뒤에 다시 해 주세요'**
+  String get talkShareLinkFailed;
+
+  /// 이룸이 전용 기기에서 이야기 글 링크를 열었을 때의 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기 글은 보호자 기기에서 볼 수 있어요'**
+  String get talkPostLinkRejectedOnElumiDevice;
+
+  /// 가져오기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과로 가져오기'**
+  String get talkImportSheetTitle;
+
+  /// 가져오기 시트 안내: 일과관리에만 들어가고 이룸이에게는 보호자가 보내야 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'일과에 추가한 뒤 이룸이에게 맞게 고칠 수 있어요'**
+  String get talkImportSheetHint;
+
+  /// 가져오기 시트: 어느 이룸이의 일과관리에 넣을지 고르는 줄 이름 (연결된 이룸이가 2명 이상일 때만)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get talkImportElumiLabel;
+
+  /// 가져오기 시트 확인 버튼 (묶음을 안 고르면 묶음 없이 넣는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get talkImportConfirm;
+
+  /// 가져오기 시트: 연결된 이룸이가 한 명도 없을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 먼저 연결해 주세요'**
+  String get talkImportNoElumiTitle;
+
+  /// 가져오기 시트: 이룸이 연결 화면으로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 연결하기'**
+  String get talkImportNoElumiAction;
+
+  /// 가져온 직후 토스트. elumiName 은 고른 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{elumiName} 일과관리에 넣었어요'**
+  String talkImportDone(String elumiName);
+
+  /// 가져온 직후 토스트의 버튼: 일과관리 칸으로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'보러 가기'**
+  String get talkImportGoToLibrary;
+
+  /// 가져오기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 넣지 못했어요'**
+  String get talkImportFailedTitle;
+
+  /// 상세 화면: 댓글 목록 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글'**
+  String get talkCommentsTitle;
+
+  /// 상세 화면: 댓글 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 댓글이 없어요'**
+  String get talkCommentsEmpty;
+
+  /// 댓글 칸 이름: 내가 쓴 댓글 (이름은 민트색)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}(나)'**
+  String talkCommentAuthorMine(String name);
+
+  /// 댓글 칸 이름: 이 글을 올린 보호자가 쓴 댓글
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}(글쓴이)'**
+  String talkCommentAuthorPostWriter(String name);
+
+  /// 상세 화면: 운영 정책으로 가려진 내 댓글 자리에 보이는 안내 (작성자 본인에게만)
+  ///
+  /// In ko, this message translates to:
+  /// **'운영 정책에 따라 가렸어요'**
+  String get talkCommentHiddenNotice;
+
+  /// 상세 화면: 댓글 첫 쪽 불러오기 실패 안내(다시 하기 버튼과 에러 코드가 아래에 붙는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 불러오지 못했어요'**
+  String get talkCommentsFailed;
+
+  /// 상세 화면 댓글 입력창 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 남겨 보세요'**
+  String get talkCommentHint;
+
+  /// 상세 화면 댓글 보내기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get talkCommentSend;
+
+  /// 댓글 보내기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 보내지 못했어요'**
+  String get talkCommentSendFailedTitle;
+
+  /// 이야기 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤에 다시 해 주세요'**
+  String get talkFailedFallback;
+
+  /// 내 댓글 지우기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 지울까요?'**
+  String get talkCommentDeleteTitle;
+
+  /// 내 댓글 지우기 확인 대화상자·메뉴의 지우기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기'**
+  String get talkCommentDeleteAction;
+
+  /// 댓글 지우기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'댓글을 지우지 못했어요'**
+  String get talkCommentDeleteFailedTitle;
+
+  /// 글·댓글 더보기 메뉴: 신고
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkMenuReport;
+
+  /// 글·댓글 더보기 메뉴: 글쓴이 숨기기
+  ///
+  /// In ko, this message translates to:
+  /// **'이 보호자 글 숨기기'**
+  String get talkMenuBlock;
+
+  /// 내 글 더보기 메뉴: 한마디와 분류 고치기
+  ///
+  /// In ko, this message translates to:
+  /// **'고치기'**
+  String get talkMenuEdit;
+
+  /// 내 글 더보기 메뉴: 글 내리기
+  ///
+  /// In ko, this message translates to:
+  /// **'내리기'**
+  String get talkMenuTakeDown;
+
+  /// 상세 화면 오른쪽 위 점 세 개 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'더보기'**
+  String get talkMoreLabel;
+
+  /// 내 글 내리기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이 글을 내릴까요?'**
+  String get talkTakeDownTitle;
+
+  /// 내 글 내리기 확인 대화상자 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'내린 글은 다른 보호자에게 더 이상 보이지 않아요.'**
+  String get talkTakeDownMessage;
+
+  /// 글 내리기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 내렸어요'**
+  String get talkTakeDownDone;
+
+  /// 글 내리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 내리지 못했어요'**
+  String get talkTakeDownFailedTitle;
+
+  /// 내 글 고치기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글 고치기'**
+  String get talkEditTitle;
+
+  /// 내 글 고치기 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get talkEditSave;
+
+  /// 글 고치기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'고쳤어요'**
+  String get talkEditSaved;
+
+  /// 글 고치기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 고치지 못했어요'**
+  String get talkEditFailedTitle;
+
+  /// 한마디 입력창 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 사람 이름, 연락처 등 개인정보는 적지 말아 주세요'**
+  String get talkNoteGuide;
+
+  /// 분류 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'분류'**
+  String get talkCategoryTitle;
+
+  /// 신고 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkReportTitle;
+
+  /// 신고 시트 보내기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하기'**
+  String get talkReportSubmit;
+
+  /// 신고 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'신고했어요'**
+  String get talkReportDone;
+
+  /// 신고 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'신고하지 못했어요'**
+  String get talkReportFailedTitle;
+
+  /// 신고 사유 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이나 가족 정보가 보여요'**
+  String get talkReportReasonPersonalInfo;
+
+  /// 신고 사유 2
+  ///
+  /// In ko, this message translates to:
+  /// **'기분 나쁜 말이 있어요'**
+  String get talkReportReasonOffensive;
+
+  /// 신고 사유 3
+  ///
+  /// In ko, this message translates to:
+  /// **'광고나 홍보예요'**
+  String get talkReportReasonAdvertising;
+
+  /// 신고 사유 4
+  ///
+  /// In ko, this message translates to:
+  /// **'그 밖의 이유'**
+  String get talkReportReasonOther;
+
+  /// 글쓴이 숨기기 확인 대화상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'{nickname}님 글을 숨길까요?'**
+  String talkBlockTitle(String nickname);
+
+  /// 글쓴이 숨기기 확인 대화상자 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 보호자의 글과 댓글이 나에게 안 보여요. 상대방은 알 수 없어요. 내 정보 › 숨긴 보호자에서 다시 볼 수 있어요.'**
+  String get talkBlockMessage;
+
+  /// 글쓴이 숨기기 확인 대화상자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'숨기기'**
+  String get talkBlockAction;
+
+  /// 글쓴이 숨기기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'숨겼어요'**
+  String get talkBlockDone;
+
+  /// 글쓴이 숨기기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨기지 못했어요'**
+  String get talkBlockFailedTitle;
+
+  /// 내 정보 줄 이름이자 숨긴 보호자 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자'**
+  String get talkBlockedGuardiansTitle;
+
+  /// 숨긴 보호자 화면 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자가 없어요'**
+  String get talkBlockedGuardiansEmpty;
+
+  /// 숨긴 보호자 화면 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'숨긴 보호자를 불러오지 못했어요'**
+  String get talkBlockedGuardiansFailed;
+
+  /// 숨긴 보호자 줄 버튼: 숨김 풀기
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 보기'**
+  String get talkUnblockAction;
+
+  /// 숨김 풀기 성공 안내(토스트)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 볼 수 있어요'**
+  String get talkUnblockDone;
+
+  /// 숨김 풀기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'숨김을 풀지 못했어요'**
+  String get talkUnblockFailedTitle;
+
+  /// 이용 규칙 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기 이용 규칙'**
+  String get talkRulesTitle;
+
+  /// 이용 규칙 시트 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자끼리 안전하게 나누려고 이 세 가지를 지켜 주세요.'**
+  String get talkRulesIntro;
+
+  /// 이용 규칙 1
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴·이름·학교·집 주소가 보이지 않게 해 주세요'**
+  String get talkRulesPrivacy;
+
+  /// 이용 규칙 2
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자를 존중해 주세요. 비난·광고·홍보는 안 돼요'**
+  String get talkRulesRespect;
+
+  /// 이용 규칙 3
+  ///
+  /// In ko, this message translates to:
+  /// **'진단명·병원 정보는 적지 말아 주세요'**
+  String get talkRulesNoDiagnosis;
+
+  /// 이용 규칙 동의 체크 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'위 규칙을 읽었고 지킬게요'**
+  String get talkRulesAgreeCheck;
+
+  /// 이용 규칙 동의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'동의하고 계속하기'**
+  String get talkRulesAgreeButton;
+
+  /// 이용 규칙 동의 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'동의를 저장하지 못했어요'**
+  String get talkRulesFailedTitle;
+
+  /// 올리기 화면 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올리기'**
+  String get talkShareTitle;
+
+  /// 올리기 1단계 일과 고르기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 일과를 나눌까요?'**
+  String get talkSharePickTitle;
+
+  /// 올릴 일과가 하나도 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'올릴 수 있는 일과가 없어요'**
+  String get talkSharePickEmpty;
+
+  /// 올릴 일과가 없을 때 설명. 예시는 고치면 올릴 수 있다 (#983)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
+  String get talkSharePickEmptyHint;
+
+  /// 올릴 일과 목록 실패 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 불러오지 못했어요'**
+  String get talkSharePickFailed;
+
+  /// 올리기 미리보기 받기 실패 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'올릴 내용을 불러오지 못했어요'**
+  String get talkSharePreviewFailed;
+
+  /// 올리기 2단계 사진 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 어떻게 올릴까요?'**
+  String get talkSharePhotoTitle;
+
+  /// 올리기 2단계 사진 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 올라가요'**
+  String get talkSharePhotoGuide;
+
+  /// 사진을 흐리게 올리는 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'흐리게'**
+  String get talkSharePhotoBlur;
+
+  /// 사진을 그대로 올리는 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'그대로'**
+  String get talkSharePhotoKeep;
+
+  /// 사진 고르기를 마치고 넘어가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다음'**
+  String get talkSharePhotoNext;
+
+  /// 올리기 3단계 카드 미리보기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 보여요'**
+  String get talkSharePreviewTitle;
+
+  /// 올리기 3단계 완료 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기'**
+  String get talkShareSubmit;
+
+  /// 올리기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올렸어요'**
+  String get talkShareDone;
+
+  /// 올리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'올리지 못했어요'**
+  String get talkShareFailedTitle;
+
+  /// 홈: 끝낸 일과 카드 아래 링크, 누르면 이야기 올리기로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'📖 이야기에 공유해 보기 ›'**
+  String get talkShareHint;
+
+  /// 일과관리 ⋯ 메뉴 줄: 이 일과를 이야기에 올리러 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 공유하기'**
+  String get talkMenuShare;
+
+  /// 내 정보 바로가기 줄 이름이자 내가 쓴 글 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글'**
+  String get talkMyPostsTitle;
+
+  /// 내가 쓴 글 화면 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 쓴 글이 없어요'**
+  String get talkMyPostsEmpty;
+
+  /// 내가 쓴 글 0건 버튼: 이야기 올리기로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 일과 나누기'**
+  String get talkMyPostsEmptyAction;
+
+  /// 내가 쓴 글 화면 첫 쪽 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글을 불러오지 못했어요'**
+  String get talkMyPostsFailed;
+
+  /// 일과관리 ⋯ 메뉴 줄: 이미 이야기에 올린 일과면 그 글로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'내 글 보기'**
+  String get talkMenuViewMyPost;
+
+  /// 1분이 안 지난 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'방금 전'**
+  String get timeAgoJustNow;
+
+  /// 1시간 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}분 전}}'**
+  String timeAgoMinutes(int count);
+
+  /// 하루 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}시간 전}}'**
+  String timeAgoHours(int count);
+
+  /// 일주일 안쪽 시각 표기
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 전}}'**
+  String timeAgoDays(int count);
 }
 
 class _AppLocalizationsDelegate

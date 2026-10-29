@@ -25,8 +25,10 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Pr
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.notification.application.service.PushDeviceService;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +73,7 @@ public class DeviceLinkService {
   private final RefreshTokenService refreshTokenService;
   private final JwtProvider jwtProvider;
   private final JwtProperties jwtProperties;
+  private final PushDeviceService pushDeviceService;
 
   /**
    * 새 연결 암호를 만든다.
@@ -143,6 +146,44 @@ public class DeviceLinkService {
       .orElse(null);
 
     return new LinkStatusResponse(devices, pending);
+  }
+
+  /** 관리자 회원 상세: 이룸이들의 연결·발급 기록 전부 (최신순, 끊긴 것 포함) */
+  @Transactional(readOnly = true)
+  public List<DeviceLink> linksOf(Collection<String> profileIds) {
+    if (profileIds == null || profileIds.isEmpty()) {
+      return List.of();
+    }
+    return deviceLinkRepository.findAllByProfileIdInOrderByCreatedAtDesc(profileIds);
+  }
+
+  /**
+   * 연결된 기기별 마지막 토큰 발급 시각 (linkId > 시각). 관리자 회원 상세의 마지막 사용 표시용
+   * 연결 안 된 행·세션 기록이 지워진 기기는 담지 않음
+   */
+  @Transactional(readOnly = true)
+  public Map<String, LocalDateTime> lastSessionAtByLinkId(Collection<DeviceLink> links) {
+    // 기기 값 > linkId (기기 값은 연결할 때 서버가 만든 값, 없으면 같은 규칙으로 계산)
+    Map<String, String> linkIdByDeviceId = new HashMap<>();
+    Set<String> memberIds = new HashSet<>();
+    for (DeviceLink link : links) {
+      if (link.getRedeemedAt() == null) {
+        continue;
+      }
+      String deviceId = link.getLinkedDeviceId() != null
+        ? link.getLinkedDeviceId() : ElumiDeviceId.of(link.getId());
+      linkIdByDeviceId.put(deviceId, link.getId());
+      memberIds.add(link.getMemberId());
+    }
+    if (linkIdByDeviceId.isEmpty()) {
+      return Map.of();
+    }
+    Map<String, LocalDateTime> lastSessionAtByLinkId = new HashMap<>();
+    for (RefreshTokenRepository.DeviceLastIssued lastIssued : refreshTokenRepository
+      .findLastIssuedAtByMemberIdInAndDeviceIdIn(memberIds, linkIdByDeviceId.keySet())) {
+      lastSessionAtByLinkId.put(linkIdByDeviceId.get(lastIssued.getDeviceId()), lastIssued.getLastIssuedAt());
+    }
+    return lastSessionAtByLinkId;
   }
 
   /** 이룸이별로 한 번씩만 묻는다 — 연결마다 묻지 않는다(N+1 방지). */
@@ -279,6 +320,15 @@ public class DeviceLinkService {
     return profileAccessGuard.isGuardianOf(memberId, link.getProfileId());
   }
 
+  /** 이룸이 기기 푸시 대상: 이 이룸이의 살아 있는 연결(끊기지 않음 + 암호를 넣음) ID 전부 */
+  @Transactional(readOnly = true)
+  public List<String> liveLinkIdsOf(String profileId) {
+    return deviceLinkRepository.findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc(profileId).stream()
+      .filter(link -> link.getRedeemedAt() != null)
+      .map(DeviceLink::getId)
+      .toList();
+  }
+
   /** 연결을 끊고 그 기기의 세션만 폐기한다. 세션의 주인은 붙인 보호자(`link.memberId`)다. */
   private void terminate(DeviceLink link) {
     LocalDateTime now = LocalDateTime.now();
@@ -292,6 +342,8 @@ public class DeviceLinkService {
       link.getMemberId(), deviceId, now, RevokeReason.DEVICE_UNLINKED);
     log.info("이룸이 휴대폰 연결 끊음: memberId={}, deviceId={}, 끊은 세션={}",
       link.getMemberId(), deviceId, killed);
+    // 끊긴 기기에 알림이 가지 않게 그 기기 푸시 토큰도 지움
+    pushDeviceService.removeLinkDevices(link.getId());
   }
 
   private void countFailure(DeviceLink link, LocalDateTime now) {

@@ -107,4 +107,29 @@ class PushDeviceServiceTest {
 
     verify(pushDeviceRepository).delete(existing);
   }
+
+  @Test
+  @DisplayName("이룸이 기기로 등록하면 연결 ID 가 붙고, 같은 기기를 보호자로 다시 등록하면 지워진다")
+  void register_elumiThenGuardian_switchesLinkId() {
+    PushDevice existing = new PushDevice();
+    when(pushDeviceRepository.findByToken("token-1")).thenReturn(Optional.of(existing));
+
+    pushDeviceService.register("m1", "link-1", new PushDeviceRegisterRequest("token-1", PushPlatform.IOS));
+    assertThat(existing.getLinkId()).isEqualTo("link-1");
+
+    pushDeviceService.register("m1", new PushDeviceRegisterRequest("token-1", PushPlatform.IOS));
+    assertThat(existing.getLinkId()).isNull();
+  }
+
+  @Test
+  @DisplayName("이룸이 기기는 같은 회원의 보호자 토큰을 해제하지 못한다")
+  void unregister_elumiCaller_cannotDeleteGuardianToken() {
+    PushDevice guardianDevice = new PushDevice();
+    guardianDevice.setMemberId("m1");
+    when(pushDeviceRepository.findByToken("token-1")).thenReturn(Optional.of(guardianDevice));
+
+    pushDeviceService.unregister("m1", "link-1", "token-1");
+
+    verify(pushDeviceRepository, never()).delete(any());
+  }
 }

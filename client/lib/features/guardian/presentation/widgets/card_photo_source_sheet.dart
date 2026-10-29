@@ -1,108 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../data/card_photo.dart';
+import 'library_quick_menu.dart';
 
-/// 사진을 어디서 가져올지 고르는 시트.
+/// 사진을 어디서 가져올지 고르는 시트: 흰 묶음 판 안 `사진 찍기` · `갤러리에서 고르기`
 ///
-/// **임시 시안이다** — 디자이너 확정 전 제시용 목업(`sheet_pick`)을 그대로 옮겼다.
-/// 확정되면 문구·간격·아이콘을 시안에 맞춘다. 아이콘은 에셋이 나오기 전이라 Material
-/// 글리프를 임시로 쓴다.
-///
-/// `사진 찍기` / `갤러리에서 고르기` 는 고른 출처를, `닫기`·밖을 누르면 null 을 돌려준다.
-/// 아래 안내는 **찍기 전에** 말한다 — 얼굴·개인정보가 사진에 실려 서버로 가면
-/// 되돌릴 수 없다(서비스 원칙 2).
+/// 고른 출처를 돌려주고, 손잡이로 내리거나 뒤 막을 누르면 null 을 돌려준다.
+/// 제목에 맞는 문구가 없어 제목 없는 메뉴 시트로 둔다 (빠른 메뉴 시트와 같은 줄).
 class CardPhotoSourceSheet extends StatelessWidget {
   const CardPhotoSourceSheet({super.key});
 
   static Future<PhotoSource?> show(BuildContext context) {
     return showElumSheet<PhotoSource>(
       context: context,
-      barrierColor: context.colors.sheetScrim,
       builder: (_) => const CardPhotoSourceSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 손잡이가 내용과 함께 스크롤되므로 시트 면의 겹침 손잡이는 끄고 직접 놓는다
-    return ElumSheetSurface(
-      showHandle: false,
-      // 글자를 키우면 시트가 화면을 넘을 수 있어 스크롤로 받는다
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 14.h),
-              const Center(child: ElumSheetHandle()),
-              SizedBox(height: 12.h),
-              _Row(
-                icon: Icons.photo_camera_outlined,
-                label: context.l10n.cardPhotoSourceTake,
-                onTap: () => Navigator.of(context).pop(PhotoSource.camera),
-              ),
-              _Row(
-                icon: Icons.photo_library_outlined,
-                label: context.l10n.cardPhotoSourceGallery,
-                onTap: () => Navigator.of(context).pop(PhotoSource.gallery),
-              ),
-              _Row(
-                icon: Icons.close_rounded,
-                label: context.l10n.commonClose,
-                onTap: () => Navigator.of(context).pop(),
-              ),
-              SizedBox(height: 24.h),
-            ],
+    final l10n = context.l10n;
+    return ElumSheetFrame(
+      child: QuickMenuGroup<PhotoSource>(
+        rows: [
+          (
+            value: PhotoSource.camera,
+            icon: AppAssets.iconCamera,
+            label: l10n.cardPhotoSourceTake,
+            isDanger: false,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row({required this.icon, required this.label, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      // 아이콘만 있는 줄이 아니지만 이름을 한 덩어리로 못 박아 읽히게 한다
-      semanticLabel: label,
-      child: ConstrainedBox(
-        // 누름 영역 최소 48 — 글자를 키우면 줄이 함께 자란다
-        constraints: BoxConstraints(minHeight: 60.h),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-          child: Row(
-            children: [
-              Icon(icon, size: 24.w, color: colors.textPrimary),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Text(
-                  label,
-                  style: context.typo.body.copyWith(
-                    color: colors.textPrimary,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-            ],
+          (
+            value: PhotoSource.gallery,
+            icon: AppAssets.iconPicture,
+            label: l10n.cardPhotoSourceGallery,
+            isDanger: false,
           ),
-        ),
+        ],
       ),
     );
   }

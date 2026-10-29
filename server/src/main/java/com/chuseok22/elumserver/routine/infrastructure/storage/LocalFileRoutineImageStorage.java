@@ -82,7 +82,20 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
 
   @Override
   public String saveUploaded(String stepId, byte[] bytes) {
-    String key = stepId + "/" + UUID.randomUUID() + ".jpg";
+    return writeNewKey(stepId, UUID.randomUUID() + ".jpg", bytes);
+  }
+
+  @Override
+  public String saveImported(String stepId, ImageContent content) {
+    String extension = extensionOf(content.contentType());
+    return writeNewKey(stepId, "talk-" + UUID.randomUUID() + "." + extension, content.bytes());
+  }
+
+  /**
+   * 새 열쇠 파일 쓰기: 임시 파일 > 옮기기 (실패 시 임시 파일 정리)
+   */
+  private String writeNewKey(String stepId, String fileName, byte[] bytes) {
+    String key = stepId + "/" + fileName;
     Path temp = null;
     try {
       Path file = resolve(key);
@@ -107,6 +120,18 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
       }
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED);
     }
+  }
+
+  // 형식 > 확장자 (모르면 jpg)
+  private static String extensionOf(String contentType) {
+    if (contentType == null) {
+      return "jpg";
+    }
+    return switch (contentType.toLowerCase(Locale.ROOT)) {
+      case "image/png" -> "png";
+      case "image/webp" -> "webp";
+      default -> "jpg";
+    };
   }
 
   @Override

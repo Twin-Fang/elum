@@ -29,14 +29,20 @@ final class GeminiRoutineSchemas {
   static final String STEP_DESCRIPTION_HINT = ContentLanguageSpec.KO_STEP_DESCRIPTION_HINT;
 
   /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
-  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다.
+  /// 배포로 바로 바뀌고, 만화 그림이 아니면 통째로 빠져 토큰도 들지 않는다.
   private static final String IMAGE_PROMPT_EN_DESCRIPTION =
-    "One English sentence (under 30 words) describing this step's picture for an illustrator. "
-      + "Start with 'The character'. Show the one action and name the concrete objects and their state "
-      + "(e.g. 'The character pulls the bottom drawer of a small wooden dresser half open.'). "
-      + "Never mention text, letters, signs, cards, or disabilities.";
+    "One English sentence (under 25 words) telling the illustrator what to draw. Start with 'The character'. "
+      + "Show one visible pose and the 1-2 objects held or used, placed where they are "
+      + "(e.g. 'The character stands at a sink and rubs a bar of soap between both hands.'). "
+      + "Always include one prop that identifies the activity (stethoscope for a check-up, pill and cup for medicine, "
+      + "wallet and coins for paying). "
+      + "Turn invisible actions (rest, wait, meet, arrive) into a visible pose (sits on a bench with hands on knees). "
+      + "Draw only the character: never other people or animals (grandmother, friend, doctor are shown by objects only). "
+      + "No background places, weather, traffic. "
+      + "Describe packaged goods and appliances (milk, medicine, snacks, registers) as plain and unmarked, with nothing printed on them. "
+      + "Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number.";
 
-  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
+  /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
   static Map<String, Object> responseSchema(boolean includeImagePromptEn, boolean hasPictogramCatalog) {
     // 설명 문구는 일과 언어의 사양에서 읽는다 (ko 는 사양이 기존 문장 그대로)
     ContentLanguageSpec spec = ContentLanguageSpec.of(AiCallContext.currentContentLocale());
@@ -114,12 +120,17 @@ final class GeminiRoutineSchemas {
     );
   }
 
+  // 되묻기 질문 스키마 설명: 코드라 배포하면 바로 적용 (지시문은 운영 DB)
+  private static final String QUESTION_HINT = "질문 한 문장, 20자 안팎, 이름 없이";
+  private static final String OPTION_LABEL_HINT = "10자 이내의 짧은 말 (문장 금지)";
+  private static final String OPTION_EMOJI_HINT = "그 선택지를 나타내는 이모지 하나";
+
   private static Map<String, Object> questionItemSchema() {
     return Map.of(
       "type", "object",
       "properties", Map.of(
         "supportGoal", Map.of("type", "string", "enum", List.of("PREPARE_ITEMS", "PREPARE_NEW")),
-        "question", Map.of("type", "string"),
+        "question", Map.of("type", "string", "description", QUESTION_HINT),
         "options", Map.of(
           "type", "array",
           "minItems", 3,
@@ -127,8 +138,8 @@ final class GeminiRoutineSchemas {
           "items", Map.of(
             "type", "object",
             "properties", Map.of(
-              "emoji", Map.of("type", "string"),
-              "label", Map.of("type", "string")
+              "emoji", Map.of("type", "string", "description", OPTION_EMOJI_HINT),
+              "label", Map.of("type", "string", "description", OPTION_LABEL_HINT)
             ),
             "required", List.of("emoji", "label")
           )

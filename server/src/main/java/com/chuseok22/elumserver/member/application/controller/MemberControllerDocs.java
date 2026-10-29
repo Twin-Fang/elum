@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoal
 import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.dto.response.TalkRulesAgreementResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -400,4 +401,36 @@ public interface MemberControllerDocs {
   )
   ResponseEntity<MemberConsentResponse> agreeConsents(
     Authentication authentication, MemberConsentRequest request);
+
+  @Operation(
+    summary = "이야기 이용 규칙 동의",
+    description = """
+      이야기 이용 규칙에 동의했다고 기록합니다. 이미 동의했으면 처음 시각을 그대로 두고 204 로 답합니다.
+      동의하지 않으면 이야기 올리기가 403 `TALK_RULES_NOT_AGREED` 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "동의 기록 완료"),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "회원 없음(MEMBER_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<Void> agreeTalkRules(Authentication authentication);
+
+  @Operation(
+    summary = "이야기 이용 규칙 동의 여부 조회",
+    description = "이야기 이용 규칙에 동의했는지 `{ \"hasAgreed\": bool }` 로 돌려줍니다. 앱은 false 면 규칙 화면을 먼저 보여줍니다."
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+      content = @Content(schema = @Schema(implementation = TalkRulesAgreementResponse.class))),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "회원 없음(MEMBER_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<TalkRulesAgreementResponse> getTalkRulesAgreement(Authentication authentication);
 }

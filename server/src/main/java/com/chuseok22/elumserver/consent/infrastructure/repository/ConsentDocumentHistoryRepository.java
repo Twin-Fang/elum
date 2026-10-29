@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ConsentDocumentHistoryRepository
   extends JpaRepository<ConsentDocumentHistory, String> {
 
-  List<ConsentDocumentHistory> findTop50ByConsentKeyOrderByCreatedAtDesc(ConsentKey consentKey);
+  List<ConsentDocumentHistory> findTop50ByConsentKeyAndLocaleOrderByCreatedAtDesc(
+    ConsentKey consentKey, String locale);
 }

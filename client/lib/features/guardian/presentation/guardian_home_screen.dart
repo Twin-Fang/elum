@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../ads/application/tracking_prompt_gate.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
 import '../../../core/layout/layout_context_ext.dart';
@@ -27,6 +27,7 @@ import '../application/routine_notifier.dart';
 import 'guardian_home_header.dart';
 import 'guardian_home_landscape_body.dart';
 import 'widgets/create_routine_button.dart';
+import 'widgets/coach_mark_start_gate.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/past_routine_section.dart';
@@ -49,7 +50,8 @@ class GuardianHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<GuardianHomeScreen> createState() => _GuardianHomeScreenState();
 }
 
-class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
+class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
+    with CoachMarkStartGate<GuardianHomeScreen> {
   /// 코치마크가 가리킬 자리. 화면마다 따로 둔다 — 전환 중 홈이 둘 겹쳐도 키가 부딪히지 않는다.
   final _createKey = GlobalKey(debugLabel: 'coach.create');
   final _swipeKey = GlobalKey(debugLabel: 'coach.swipe');
@@ -57,9 +59,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
   /// 홈 목록 스크롤. 코치마크가 켜질 때 맨 위로 되돌리고, 떠 있는 동안 잠그는 데 쓴다.
   final _scroll = ScrollController();
-
-  /// 화면 전환이 끝나길 기다리는 중인가. 전환 도중에 띄우면 대상이 움직이는 중이라 위치가 어긋난다.
-  bool _waitingRoute = false;
 
   /// Figma 실측 — 카드·버튼은 화면 끝에서 16, 글은 24
   static const _listInset = 16.0;
@@ -71,25 +70,13 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
   static const _titleToList = 8.0;
 
-  /// 홈이 맨 앞이 아닐 때(공지 팝업 등) 다시 확인할 타이머와 횟수.
-  Timer? _coachRetry;
-  var _coachRetries = 0;
-
-  /// 홈이 맨 앞에서 가만히 있는지 지켜보는 타이머.
-  Timer? _coachSettle;
-
-  /// 추적 허용 팝업이 끝났는가. 팝업과 코치마크가 겹치면 팝업에 가려 안내가 보이지 않는다
-  bool _isTrackingPromptDone = false;
-
-  /// 다시 확인하는 간격과 최대 횟수(0.5초 × 60 = 30초). 팝업은 닫혀도 홈이 다시 그려지지
-  /// 않아서, 기다렸다 물어보지 않으면 코치마크가 그 실행에서 영영 시작하지 못한다.
-  static const _coachRetryEvery = Duration(milliseconds: 500);
-  static const _coachMaxRetries = 60;
-
   /// 홈이 이만큼 맨 앞에 머물러야 시작한다. 공지 팝업이 연달아 뜰 때 앞 팝업이 닫히고
   /// 다음 팝업이 올라오는 찰나에 홈이 잠깐 맨 앞이 된다 — 그때 시작하면 다음 팝업이
   /// 코치마크 위에 겹친다 (실기기에서 확인).
   static const _coachSettleFor = Duration(milliseconds: 1200);
+
+  @override
+  Duration get coachMarkSettleDuration => _coachSettleFor;
 
   @override
   void initState() {
@@ -111,10 +98,11 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   /// 예시 일과 생성 실패 안내에 붙는 코드
   static const _exampleSeedErrorCode = 'E-EXAMPLE';
 
+  /// 당겨서 새로고침(오늘 + 지난 일과) 실패 팝업에 붙는 코드
+  static const _pullRefreshErrorCode = 'E-HOME';
+
   @override
   void dispose() {
-    _coachRetry?.cancel();
-    _coachSettle?.cancel();
     _scroll.dispose();
     super.dispose();
   }
@@ -122,57 +110,16 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   /// 코치마크를 띄워도 되는 때인지 보고, 맞으면 켠다.
   ///
   /// - 일과 목록을 **받아 온 뒤**여야 한다. 불러오는 중이거나 실패했으면 가리킬 줄이 있는지 모른다.
-  /// - 홈이 맨 위에 있고 화면 전환이 끝난 뒤, [_coachSettleFor] 동안 그대로여야 한다.
-  ///   다른 화면 위에 막만 덮이면 안 된다.
+  /// - 홈이 맨 위에 있고 화면 전환이 끝난 뒤, [_coachSettleFor] 동안 그대로여야 한다 ([CoachMarkStartGate]).
   void _maybeStartCoach() {
     if (!mounted) return;
     // 호출 시점의 값으로 다시 판단한다 — 기다리는 사이 목록이 바뀌었을 수 있다.
     if (!ref.read(todayRoutinesProvider).hasValue) return;
-
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) {
-      _coachSettle?.cancel();
-      _coachSettle = null;
-      _retryCoachLater();
-      return;
-    }
-
-    final animation = route?.animation;
-    if (animation != null && animation.status != AnimationStatus.completed) {
-      if (_waitingRoute) return;
-      _waitingRoute = true;
-      void onStatus(AnimationStatus status) {
-        if (status != AnimationStatus.completed) return;
-        animation.removeStatusListener(onStatus);
-        _waitingRoute = false;
-        _maybeStartCoach();
-      }
-
-      animation.addStatusListener(onStatus);
-      return;
-    }
-
-    // 맨 앞이다. 바로 켜지 않고 잠시 지켜본다 — 그 사이 다시 가려지면 타이머가 취소된다.
-    if (_coachSettle?.isActive ?? false) return;
-    _coachSettle = Timer(_coachSettleFor, _startCoachNow);
+    checkCoachMarkStart();
   }
 
-  void _startCoachNow() {
-    _coachSettle = null;
-    if (!mounted) return;
-    if (!_isTrackingPromptDone) {
-      waitForTrackingPrompt().whenComplete(() {
-        _isTrackingPromptDone = true;
-        // 기다리는 사이 화면이 바뀌었을 수 있어 처음부터 다시 따진다
-        if (mounted) _maybeStartCoach();
-      });
-      return;
-    }
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) {
-      _retryCoachLater();
-      return;
-    }
+  @override
+  void onCoachMarkStartReady() {
     final hasSwipeTarget = ref
         .read(homeRoutinesProvider)
         .any((r) => r.isEditableByMe);
@@ -187,12 +134,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     // 되돌린다 — 이미 본 사람의 스크롤까지 끌어올리면 안 된다. jumpTo 는 진행 중인 관성도 끊는다.
     // 구멍은 다음 프레임 이후에 재므로 이 이동이 먼저 반영된다.
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
-  }
-
-  void _retryCoachLater() {
-    if (_coachRetry?.isActive ?? false) return;
-    if (_coachRetries++ >= _coachMaxRetries) return;
-    _coachRetry = Timer(_coachRetryEvery, _maybeStartCoach);
   }
 
   @override
@@ -270,9 +211,18 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
     // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
     // 스크롤되면 대상과 어긋난다.
+    // 평소엔 목록이 짧아도 당겨서 새로고침이 되게 항상 스크롤 가능
     final listPhysics = coachActive
         ? const NeverScrollableScrollPhysics()
-        : null;
+        : ElumPullToRefresh.physics;
+
+    // 당겨서 새로고침: 화면의 두 칸(오늘 · 지난)만 다시 받기. 실패면 보이던 목록 그대로 + 실패 팝업
+    Widget withPullToRefresh(Widget listScroll) => ElumPullToRefresh(
+      onRefresh: ref.refreshTodayAndPastRoutinesNow,
+      failureMessage: context.l10n.todayRoutineLoadFailedFallback,
+      failureCode: _pullRefreshErrorCode,
+      child: listScroll,
+    );
 
     // 가로 태블릿은 왼쪽 머리말·만들기, 오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열로 접는다
     final metrics = context.layoutMetrics;
@@ -299,20 +249,23 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
                       sections: sections,
                       listController: _scroll,
                       listPhysics: listPhysics,
+                      listScrollWrapper: withPullToRefresh,
                     )
-                  : SingleChildScrollView(
-                      controller: _scroll,
-                      physics: listPhysics,
-                      padding: EdgeInsets.only(bottom: space.xl),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          header,
-                          SizedBox(height: _toCreateButton.h),
-                          createButton,
-                          SizedBox(height: _toSections.h),
-                          sections,
-                        ],
+                  : withPullToRefresh(
+                      SingleChildScrollView(
+                        controller: _scroll,
+                        physics: listPhysics,
+                        padding: EdgeInsets.only(bottom: space.xl),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            header,
+                            SizedBox(height: _toCreateButton.h),
+                            createButton,
+                            SizedBox(height: _toSections.h),
+                            sections,
+                          ],
+                        ),
                       ),
                     ),
             ),

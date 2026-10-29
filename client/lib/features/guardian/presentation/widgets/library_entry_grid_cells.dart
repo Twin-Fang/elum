@@ -106,6 +106,35 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     ];
   }
 
+  /// 다음 프레임(칸 자리가 잡힌 뒤)에 스크롤 대상 칸을 찾아 보여 준다
+  void _scheduleScrollToTarget() {
+    if (widget.scrollTargetRoutineId == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToTarget());
+  }
+
+  /// 대상 일과가 든 칸을 맨 위로 스크롤. 아직 목록에 없으면 다음 갱신을 기다린다
+  void _scrollToTarget() {
+    final targetId = widget.scrollTargetRoutineId;
+    final geometry = _geometry;
+    if (!mounted || targetId == null || geometry == null) return;
+    if (!_scroll.hasClients) return;
+    final index = widget.entries.indexWhere(
+      (entry) => doesLibraryEntryHoldRoutine(entry, targetId),
+    );
+    if (index < 0) return;
+    widget.onScrollTargetHandled?.call();
+    final position = _scroll.position;
+    final offset = (geometry.slotRect(index).top - geometry.paddingTop).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    _scroll.animateTo(
+      offset,
+      duration: AppMotion.normal,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   /// 끄는 칸을 뺀 나머지 칸
   List<LibraryEntry> _othersOf(List<LibraryEntry> shown) => [
     for (final entry in shown)
@@ -132,16 +161,16 @@ extension _LibraryGridCells on _LibraryEntryGridState {
       spacingX: spacingX,
       spacingY: space.md.h,
       paddingLeft: paddingX,
-      paddingTop: space.xs.h,
+      paddingTop: space.sm.h,
     );
   }
 
-  /// 칸 이름 두 줄 높이: 굵은 캡션 기준 실제 측정 (글자 배율 반영). 기본 크기에서는 기존 높이 이상
+  /// 칸 이름 두 줄 높이: 칸 이름 글자 기준 실제 측정 (글자 배율 반영, 기본 크기면 시안 24)
   double _twoLineLabelHeight(BuildContext context) {
     final painter = TextPainter(
       text: TextSpan(
         text: _twoLineSample,
-        style: context.typo.caption.copyWith(fontWeight: FontWeight.w700),
+        style: context.typo.libraryTileLabel,
       ),
       textScaler: MediaQuery.textScalerOf(context),
       textDirection: TextDirection.ltr,
@@ -149,8 +178,7 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     )..layout();
     final measured = painter.height;
     painter.dispose();
-    final minimum = context.space.xl.h * 1.4;
-    return measured > minimum ? measured : minimum;
+    return measured;
   }
 
   /// 낱개 일과 칸 중 첫째 · 둘째에 코치마크 키를 붙인다 (일과 id > 키)
@@ -201,13 +229,11 @@ extension _LibraryGridCells on _LibraryEntryGridState {
                 child: Opacity(
                   // 끄는 칸의 제자리는 비워 둔다 (손가락 밑의 들린 칸이 그 칸이다)
                   opacity: entry.id == _dragId ? 0 : 1,
-                  child: KeyedSubtree(
-                    key: coachKeys[entry.id],
-                    child: _buildCell(
-                      entry,
-                      slot,
-                      isMergeTarget: entry.id == mergeTargetId,
-                    ),
+                  child: _buildCell(
+                    entry,
+                    slot,
+                    isMergeTarget: entry.id == mergeTargetId,
+                    coachKey: coachKeys[entry.id],
                   ),
                 ),
               ),
@@ -243,7 +269,11 @@ extension _LibraryGridCells on _LibraryEntryGridState {
         AnchoredQuickMenuView<LibraryMenuAction>(
           anchor: target.rect,
           highlight: _routineTile(routine),
-          rows: libraryMenuRows(context, routine),
+          rows: libraryMenuRows(
+            context,
+            routine,
+            sharedPostIdBySourceRoutineId: widget.sharedPostIdBySourceRoutineId,
+          ),
         ),
       final LibraryGroupEntry group => AnchoredQuickMenuView<GroupMenuAction>(
         anchor: target.rect,
@@ -267,15 +297,22 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     LibraryEntry entry,
     int slot, {
     required bool isMergeTarget,
+    GlobalKey? coachKey,
   }) {
     final isArranging = widget.isArranging;
     final Widget tile = switch (entry) {
-      LibraryRoutineEntry(:final routine) => AnimatedScale(
-        scale: isMergeTarget ? _mergeTargetScale : 1,
-        duration: AppMotion.fast,
-        child: _routineTile(
-          routine,
-          onTap: isArranging ? null : () => widget.onRoutineTap?.call(routine),
+      // 코치마크 키는 칸 자리가 아니라 그려진 칸(그림 + 이름)에 단다 — 칸은 자리 왼쪽 위에 붙어 자리보다 좁다
+      LibraryRoutineEntry(:final routine) => KeyedSubtree(
+        key: coachKey,
+        child: AnimatedScale(
+          scale: isMergeTarget ? _mergeTargetScale : 1,
+          duration: AppMotion.fast,
+          child: _routineTile(
+            routine,
+            onTap: isArranging
+                ? null
+                : () => widget.onRoutineTap?.call(routine),
+          ),
         ),
       ),
       final LibraryGroupEntry group => _groupTile(

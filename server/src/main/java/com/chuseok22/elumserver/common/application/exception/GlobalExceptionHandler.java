@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.common.application.exception;
 
+import com.chuseok22.elumserver.common.infrastructure.alert.ServerErrorSurgeFilter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
@@ -36,7 +37,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
     "com.chuseok22.elumserver.notice",
     "com.chuseok22.elumserver.notification",
     "com.chuseok22.elumserver.routine",
-    "com.chuseok22.elumserver.systemconfig"
+    "com.chuseok22.elumserver.systemconfig",
+    "com.chuseok22.elumserver.talk"
   },
   annotations = JsonErrorResponse.class
 )
@@ -50,6 +52,8 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
     log.warn("[CustomException] 발생: {}", e.getMessage());
     ErrorCode errorCode = e.getErrorCode();
+    // 5xx 급증 알림의 대표 에러 코드
+    ServerErrorSurgeFilter.markErrorCode(errorCode);
     return ResponseEntity
       .status(errorCode.getStatus())
       .body(new ErrorResponse(errorCode, messages.of(errorCode)));
@@ -127,6 +131,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
     log.error("[UnhandledException] 발생", e);
     ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    ServerErrorSurgeFilter.markErrorCode(errorCode);
     return ResponseEntity
       .status(errorCode.getStatus())
       .body(new ErrorResponse(errorCode, messages.of(errorCode)));

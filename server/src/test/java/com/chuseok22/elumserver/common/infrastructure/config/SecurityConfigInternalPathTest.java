@@ -10,9 +10,6 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntry
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
-import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
-import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.member.application.controller.MemberController;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.member.application.service.OnboardingService;
@@ -49,7 +46,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class, SecurityConfigInternalPathTest.InternalProbeController.class})
 class SecurityConfigInternalPathTest {
 
-  static final String SENSITIVE_CHECK = "/api/internal/sensitive-check";
+  // 실제 내부 엔드포인트는 없다 — /api/internal/** 규칙만 보는 시험용 경로
+  static final String INTERNAL_PROBE_PATH = "/api/internal/probe";
   private static final String BODY = "{\"text\":\"hello\"}";
 
   @Autowired
@@ -60,7 +58,7 @@ class SecurityConfigInternalPathTest {
 
   @RestController
   static class InternalProbeController {
-    @PostMapping(SENSITIVE_CHECK)
+    @PostMapping(INTERNAL_PROBE_PATH)
     String probe() {
       INTERNAL_PROBE_CALL_COUNT.incrementAndGet();
       return "ok";
@@ -94,14 +92,6 @@ class SecurityConfigInternalPathTest {
   @MockitoBean
   private SharedStateStore sharedStateStore;
 
-  // AidlpDecryptionFilter(@Component Filter)는 슬라이스에 자동으로 들어온다. 평문 본문은 그대로 통과시킨다.
-  @MockitoBean
-  private AidlpCryptoService aidlpCryptoService;
-  @MockitoBean
-  private NonceStore nonceStore;
-  @MockitoBean
-  private AidlpProperties aidlpProperties;
-
   // 메인 클래스의 @EnableJpaAuditing 이 웹 슬라이스에서도 JPA 메타모델을 찾는다
   @MockitoBean
   private JpaMetamodelMappingContext jpaMetamodelMappingContext;
@@ -109,7 +99,7 @@ class SecurityConfigInternalPathTest {
   @Test
   @DisplayName("보호자 토큰으로 내부 경로를 부르면 403 이고 컨트롤러는 실행되지 않는다")
   void guardian_isForbidden_onInternalPath() throws Exception {
-    mockMvc.perform(post(SENSITIVE_CHECK)
+    mockMvc.perform(post(INTERNAL_PROBE_PATH)
         .with(user("guardian-1").authorities(
           new SimpleGrantedAuthority("ROLE_MEMBER"),
           new SimpleGrantedAuthority("ROLE_GUARDIAN")))
@@ -123,7 +113,7 @@ class SecurityConfigInternalPathTest {
   @Test
   @DisplayName("토큰 없이 부르면 여전히 401 이다")
   void anonymous_isUnauthorized_onInternalPath() throws Exception {
-    mockMvc.perform(post(SENSITIVE_CHECK)
+    mockMvc.perform(post(INTERNAL_PROBE_PATH)
         .contentType(MediaType.APPLICATION_JSON)
         .content(BODY))
       .andExpect(status().isUnauthorized());

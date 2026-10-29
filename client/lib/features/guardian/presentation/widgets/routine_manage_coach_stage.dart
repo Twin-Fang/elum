@@ -41,10 +41,6 @@ class RoutineManageCoachStage extends ConsumerStatefulWidget {
 
 class _RoutineManageCoachStageState
     extends ConsumerState<RoutineManageCoachStage> {
-  /// `+ 일과 만들기` 버튼 높이 · 아래 여백 (실제 일과관리 화면과 같다)
-  static const _createButtonHeight = 54.0;
-  static const _createButtonMargin = 16.0;
-
   /// 코치마크 ✕ 가 차지하는 위쪽 높이 (안전영역 아래 8 + 버튼 40)
   static const _closeButtonSpace = 48.0;
 
@@ -149,7 +145,8 @@ class _RoutineManageCoachStageState
         return CoachMarkStep(
           target: _createButtonKey,
           message: l10n.routineManageCoachCreateGroupMessage,
-          holeRadius: tileRadius,
+          // 알약 버튼: 높이 절반으로 깎아야 구멍 모서리가 버튼 밖으로 비치지 않음
+          holeRadius: CreateRoutineFab.height.h / 2,
           demoBuilder: createGroupDemo,
         );
     }
@@ -196,7 +193,7 @@ class _RoutineManageCoachStageState
       LibraryEntryGrid(
         entries: [for (final routine in samples) LibraryRoutineEntry(routine)],
         sentIds: const {},
-        bottomSpace: (_createButtonHeight + _createButtonMargin * 2).h,
+        bottomSpace: CreateRoutineFab.scrollBottomSpace.h,
         isArranging: isArranging,
         onRoutineTap: null,
         onRoutineMenu: null,
@@ -235,12 +232,10 @@ class _RoutineManageCoachStageState
       children: [
         Scaffold(
           backgroundColor: colors.background,
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
+          floatingActionButtonLocation: CreateRoutineFab.location,
           floatingActionButton: KeyedSubtree(
             key: _createButtonKey,
             child: CreateRoutineFab(
-              height: _createButtonHeight.h,
               isBusy: false,
               isArranging: isArrangingDemo,
               onTap: () {},

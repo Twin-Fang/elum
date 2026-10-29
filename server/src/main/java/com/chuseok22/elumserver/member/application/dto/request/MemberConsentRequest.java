@@ -29,7 +29,11 @@ public record MemberConsentRequest(
 
   @Schema(description = "동의한 약관 버전. 약관 개정 시 재동의 대상을 가리는 데 쓴다.",
     example = "2026-09-17")
-  String consentVersion
+  String consentVersion,
+
+  @Schema(description = "화면에 보여준 약관 언어 코드 (선택, ko en ja zh es). 없거나 모르는 값이면 Accept-Language. "
+    + "기록은 그 언어로 서버가 실제로 내주는 게시본 언어로 남는다 (게시본이 없으면 ko)", example = "ko", nullable = true)
+  String consentLocale
 ) {
 
 }

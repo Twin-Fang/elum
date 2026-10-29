@@ -105,13 +105,13 @@ public class RoutineService {
     if (!isDeletable(routine)) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
-    // 묶음 구성원이면 묶음에서 빼고 2개 미만이면 묶음 풀기 (#806)
+    // 묶음 구성원이면 묶음에서 빼고 비면 묶음 풀기 (#806)
     routineGroupMembership.leaveGroup(routine);
     RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
   }
 
   /**
-   * 일과 제목 고치기: 권한(만든 사람) > 검증(공백 · 30자) > 이 일과 제목만 교체 (#804)
+   * 일과 제목 고치기: 권한(만든 사람) > 검증(공백 · 30자) > 예시 표시 지움 > 이 일과 제목만 교체 (#804, #983)
    * 이 원본으로 보낸 일과의 제목은 그대로 둔다
    */
   @Transactional
@@ -120,6 +120,10 @@ public class RoutineService {
     String trimmedTitle = title == null ? "" : title.trim();
     if (trimmedTitle.isEmpty() || trimmedTitle.length() > RoutineRules.ROUTINE_TITLE_MAX_LENGTH) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    // 제목이 실제로 바뀔 때만 예시 표시 지움 (#983)
+    if (!trimmedTitle.equals(routine.getTitle())) {
+      RoutineRules.clearExampleMark(routine);
     }
     routine.setTitle(trimmedTitle);
     return RoutineResponse.from(routine);

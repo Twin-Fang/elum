@@ -4,8 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.Convert;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +20,8 @@ public class SystemConfig extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  @Enumerated(EnumType.STRING)
+  // 이 버전이 모르는 키는 null 로 읽힘 (ConfigKeyConverter, 캐시 로드에서 건너뜀)
+  @Convert(converter = ConfigKeyConverter.class)
   @Column(nullable = false, unique = true)
   private ConfigKey configKey;
 

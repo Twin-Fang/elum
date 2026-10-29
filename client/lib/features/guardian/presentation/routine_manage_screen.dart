@@ -9,6 +9,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
+import '../../talk/application/talk_my_shared_posts_provider.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -19,17 +20,19 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../application/library_entries.dart';
+import '../application/library_talk_import_state.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
+import 'routine_rename_flow.dart';
+import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
-import 'widgets/routine_rename_sheet.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
@@ -47,14 +50,12 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     with
         BusyStateMixin<RoutineManageScreen>,
         LibraryGroupActions<RoutineManageScreen> {
-  /// `+ 일과 만들기` 버튼 높이 · 버튼 둘레 여백 (목록 끝이 버튼에 가리지 않게 그만큼 비운다)
-  static const _createButtonHeight = 54.0;
-  static const _createButtonMargin = 16.0;
-
   /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
   bool _isArranging = false;
 
   // --- 동작 ---
+
+  void _endArranging() => setState(() => _isArranging = false);
 
   @override
   Future<void> openRoutineDetail(
@@ -87,6 +88,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       routine,
       anchor: anchor.rect,
       highlight: anchor.tile,
+      sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
     );
     await _runMenuAction(routine, action);
   }
@@ -94,8 +96,30 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 상세 시트 ⋯ 로 연 같은 메뉴 (눌린 칸이 없어 아래 시트)
   Future<void> _openMenuSheet(Routine routine) async => _runMenuAction(
     routine,
-    await showLibraryQuickMenuSheet(context, routine),
+    await showLibraryQuickMenuSheet(
+      context,
+      routine,
+      sharedPostIdBySourceRoutineId: _sharedPostIdBySourceRoutineId,
+    ),
   );
+
+  /// 격자가 그 칸으로 스크롤한 뒤 대상 비우기 (부를 때 notifier 를 읽음, build 에서 읽지 않음)
+  void _clearScrollTarget() =>
+      ref.read(libraryScrollTargetRoutineIdProvider.notifier).clear();
+
+  /// 이야기에 올린 글(원본 일과 id > 글 id). 불러오는 중이거나 실패하면 빈 맵으로 본다
+  Map<String, String> get _sharedPostIdBySourceRoutineId =>
+      ref.read(talkMySharedPostsProvider).value ?? const {};
+
+  /// 이야기로: 이미 올린 일과면 내 글 상세, 아니면 올리기 (올리기 중복은 서버도 막는다)
+  void _shareToTalk(Routine routine) {
+    final postId = _sharedPostIdBySourceRoutineId[routine.id];
+    if (postId != null) {
+      context.push(Routes.guardianTalkPostOf(postId));
+      return;
+    }
+    context.push(Routes.guardianTalkShare, extra: routine.id);
+  }
 
   Future<void> _runMenuAction(
     Routine routine,
@@ -111,6 +135,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await chooseGroupFor(routine);
       case LibraryMenuAction.copy:
         await _copy(routine);
+      case LibraryMenuAction.shareToTalk:
+        _shareToTalk(routine);
       case LibraryMenuAction.remove:
         await _remove(routine);
     }
@@ -168,30 +194,13 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     );
   }
 
-  Future<void> _rename(Routine routine) async {
-    final l10n = context.l10n;
-    final title = await showRoutineRenameSheet(
-      context,
-      currentTitle: routine.displayTitle,
-    );
-    if (title == null || !mounted) return;
-    final result = await runBusy(
-      () =>
-          ref.read(routineLibraryControllerProvider).rename(routine.id, title),
-    );
-    if (result == null || !mounted) return;
-    if (result.isOk) {
-      showElumToast(context, l10n.routineLibraryRenamed);
-      return;
-    }
-    await showFailure(
-      context,
-      result.failure,
-      title: l10n.routineLibraryRenameFailedTitle,
-      fallback: l10n.routineLibraryActionFailedFallback,
-      fallbackCode: 'E-LIB-RENAME',
-    );
-  }
+  Future<void> _rename(Routine routine) => renameRoutineWithSheet(
+    context,
+    ref,
+    routineId: routine.id,
+    currentTitle: routine.displayTitle,
+    runBusy: runBusy,
+  );
 
   /// 지우기: 확인 팝업 > 일과관리에서 뺀다 (이룸이가 한 기록은 서버가 남긴다)
   Future<void> _remove(Routine routine) async {
@@ -300,7 +309,13 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
-    final bottomSpace = (_createButtonHeight + _createButtonMargin * 2).h;
+    // 메뉴가 열릴 때 올린 글을 알도록 미리 받아 둔다 (autoDispose 라 보는 동안만 유지)
+    final sharedPostIdBySourceRoutineId =
+        ref.watch(talkMySharedPostsProvider).value ?? const <String, String>{};
+    final scrollTargetRoutineId = ref.watch(
+      libraryScrollTargetRoutineIdProvider,
+    );
+    final bottomSpace = CreateRoutineFab.scrollBottomSpace.h;
 
     final Widget body = switch (async) {
       AsyncValue(:final value?) when value.isNotEmpty => LibraryEntryGrid(
@@ -323,6 +338,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         onDropOnGroup: busy
             ? null
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
+        scrollTargetRoutineId: scrollTargetRoutineId,
+        sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
+        onScrollTargetHandled: _clearScrollTarget,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,
@@ -341,24 +359,25 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: CreateRoutineFab.location,
       floatingActionButton: CreateRoutineFab(
-        height: _createButtonHeight.h,
         isBusy: busy,
         isArranging: _isArranging,
         // 정리 상태에서는 가운데 버튼이 `완료`
-        onTap: _isArranging
-            ? () => setState(() => _isArranging = false)
-            : onCreatePressed,
+        onTap: _isArranging ? _endArranging : onCreatePressed,
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const LibraryManageHeader(),
-            SizedBox(height: space.md.h),
-            Expanded(child: body),
-          ],
+      body: LibraryArrangeExitScope(
+        isArranging: _isArranging,
+        onExit: _endArranging,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const LibraryManageHeader(),
+              SizedBox(height: space.md.h),
+              Expanded(child: body),
+            ],
+          ),
         ),
       ),
     );

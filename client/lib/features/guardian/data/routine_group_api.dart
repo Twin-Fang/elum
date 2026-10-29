@@ -25,7 +25,7 @@ class RoutineGroupApi {
         ];
       }, describe: (groups) => 'count=${groups.length}');
 
-  /// 묶음 만들기. [routineIds] 순서가 묶음 순서다 (2개 이상). 이름은 보호자가 쓴 글이라 로그에 남기지 않는다
+  /// 묶음 만들기. [routineIds] 순서가 묶음 순서다 (1개 이상). 이름은 보호자가 쓴 글이라 로그에 남기지 않는다
   Future<Attempt<RoutineGroup>> create(String name, List<String> routineIds) =>
       _group(
         'create',

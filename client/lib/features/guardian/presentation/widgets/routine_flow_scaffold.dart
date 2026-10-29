@@ -38,6 +38,8 @@ class RoutineFlowScaffold extends ConsumerWidget {
     this.topBar,
     this.showDraftAction = false,
     this.bottomFigmaInset,
+    this.onHelp,
+    this.shouldIgnoreSystemBack = false,
   });
 
   final Widget child;
@@ -91,6 +93,13 @@ class RoutineFlowScaffold extends ConsumerWidget {
   /// [pinCtaToFigmaY]와 함께 쓰면 CTA는 시안 자리(y=675)에 그대로 서고, 이 줄이
   /// 그 아래 24(y=765)에 붙는다.
   final Widget? belowButton;
+
+  /// 상단바 `?` (사용법 다시 보기). null 이면 없다
+  final VoidCallback? onHelp;
+
+  /// 시스템 뒤로가기를 이 뼈대가 무시하는가 (나가기 확인도 띄우지 않음).
+  /// 코치마크가 떠 있을 때: 뒤로가기는 코치마크의 PopScope 가 받아 안내만 닫는다
+  final bool shouldIgnoreSystemBack;
 
   /// CTA 하단(741) ↔ 보조 동작(765) 간격. 시안 실측 (`ElumScaffold`와 같다).
   static const _belowGap = 24.0;
@@ -154,7 +163,7 @@ class RoutineFlowScaffold extends ConsumerWidget {
       // 보내고, 흐름을 떠나는 뒤로만 붙잡아 화살표와 같은 길([onBack])로 보낸다.
       canPop: !backLeavesFlow,
       onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
+        if (didPop || shouldIgnoreSystemBack) return;
         final ok = await _mayLeave(context, ref, back: true);
         if (!ok || !context.mounted) return;
         dismissKeyboard();
@@ -185,6 +194,7 @@ class RoutineFlowScaffold extends ConsumerWidget {
                 topBar ??
                     RoutineFlowTopBar(
                       showDraft: showDraftAction,
+                      onHelp: onHelp,
                       onDraft: () async {
                         final ok = await _mayLeave(context, ref, back: false);
                         if (ok && context.mounted) context.go(Routes.guardian);

@@ -7,20 +7,60 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">회원 관리</h1>
-      <p class="text-base-content/60">검색·요금제·상태 필터와 회원별 AI 사용량을 확인합니다. 열 이름을 누르면 정렬해요.</p>
+      <p class="text-base-content/60">가입·방문 추이와 요금제·상태·로그인·가입일·최근 활동 필터, 회원별 이룸이·보호자 수와 AI 사용량·이번 주 남은 크레딧을 확인해요. 검색은 회원 id 일부·아이디·보호자 닉네임·이룸이 호칭으로 돼요. 열 이름을 누르면 정렬하고, 크레딧 칸을 누르면 그 회원 크레딧 화면으로 가요.</p>
     </div>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
 
+    <!-- 추이: 가입·탈퇴와 방문은 따로 (막대를 누르면 그 기간 가입자로 목록을 거른다) -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/signups" data-days="90"
+           data-click-link="/admin/members?joinedFrom={from}&amp;joinedTo={to}">
+        <div class="card-body p-4 gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-semibold">가입 추이</h2>
+            <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별', '월별')}"></div></div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <input type="date" data-trend-from class="input input-bordered input-xs" aria-label="시작일"/>
+            <span>~</span>
+            <input type="date" data-trend-to class="input input-bordered input-xs" aria-label="종료일"/>
+            <span class="text-xs text-base-content/60">비우면 일별 90일 · 월별 12달</span>
+          </div>
+          <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-64')}"></th:block>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/visits" data-days="90" data-type="line">
+        <div class="card-body p-4 gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-semibold">방문 추이</h2>
+            <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별', '월별')}"></div></div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <input type="date" data-trend-from class="input input-bordered input-xs" aria-label="시작일"/>
+            <span>~</span>
+            <input type="date" data-trend-to class="input input-bordered input-xs" aria-label="종료일"/>
+          </div>
+          <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-64')}"></th:block>
+          <p class="text-xs text-base-content/60">하루 한 번이라도 앱을 쓴 회원 수. 방문 기록을 시작한 날부터 그려져요</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 검색·필터(가입일·최근 활동 기간은 필터 바의 날짜 칸) + 적용된 조건 칩 + CSV (현재 조건 그대로) -->
     <div class="flex items-center gap-3 flex-wrap">
       <div th:replace="~{admin/fragments/admin-list :: filterBar(${definition}, ${query})}"></div>
-      <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">초기화</a>
+    </div>
+    <div class="flex items-center gap-3 flex-wrap">
+      <div th:replace="~{admin/fragments/admin-list :: csvExport(${csvExport})}"></div>
       <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${members.totalElements}">0</span>명</span>
     </div>
 
     <div th:replace="~{admin/fragments/admin-list :: table(${definition}, ${query}, ${rows})}"></div>
 
     <div th:replace="~{admin/fragments/admin-list :: pager(${members}, @{${pagerBaseUrl}})}"></div>
+    <th:block th:replace="~{admin/fragments/admin-chart :: scripts}"></th:block>
   </main>
 </body>
 </html>

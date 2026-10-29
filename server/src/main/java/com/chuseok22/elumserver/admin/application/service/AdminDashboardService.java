@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminDashboardSummary;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminDashboardSummary.TodayAiStats;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStatusCounts;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 대시보드 집계: 회원·요금제 분포·일과·오늘 AI 호출·지금 적용 중 설정 요약
+ * 대시보드 집계: 회원·요금제 분포·일과·오늘 AI 호출·지금 적용 중 설정 요약·지금 숫자·확인할 일
  * 60초 메모리 캐시 (SystemConfigService 와 같은 방식, 인스턴스별). 새로 집계하다 실패하면 이전 집계 유지
  */
 @Slf4j
@@ -26,6 +28,8 @@ public class AdminDashboardService {
   private final AdminRoutineService adminRoutineService;
   private final AdminMonitoringService adminMonitoringService;
   private final SystemConfigOverviewService systemConfigOverviewService;
+  private final AdminAttentionService adminAttentionService;
+  private final AdminStatsService adminStatsService;
   private final LongSupplier currentMilliseconds;
 
   private volatile AdminDashboardSummary cachedSummary;
@@ -36,10 +40,12 @@ public class AdminDashboardService {
     AdminMemberService adminMemberService,
     AdminRoutineService adminRoutineService,
     AdminMonitoringService adminMonitoringService,
-    SystemConfigOverviewService systemConfigOverviewService
+    SystemConfigOverviewService systemConfigOverviewService,
+    AdminAttentionService adminAttentionService,
+    AdminStatsService adminStatsService
   ) {
     this(adminMemberService, adminRoutineService, adminMonitoringService, systemConfigOverviewService,
-      System::currentTimeMillis);
+      adminAttentionService, adminStatsService, System::currentTimeMillis);
   }
 
   /// 시험에서 시계를 바꿔 끼우려고 열어 둔 생성자
@@ -48,12 +54,16 @@ public class AdminDashboardService {
     AdminRoutineService adminRoutineService,
     AdminMonitoringService adminMonitoringService,
     SystemConfigOverviewService systemConfigOverviewService,
+    AdminAttentionService adminAttentionService,
+    AdminStatsService adminStatsService,
     LongSupplier currentMilliseconds
   ) {
     this.adminMemberService = adminMemberService;
     this.adminRoutineService = adminRoutineService;
     this.adminMonitoringService = adminMonitoringService;
     this.systemConfigOverviewService = systemConfigOverviewService;
+    this.adminAttentionService = adminAttentionService;
+    this.adminStatsService = adminStatsService;
     this.currentMilliseconds = currentMilliseconds;
   }
 
@@ -94,15 +104,20 @@ public class AdminDashboardService {
     long proMemberCount = adminMemberService.countEffectivePro();
     LocalDateTime now = LocalDateTime.now();
     List<SettingRow> settingRows = systemConfigOverviewService.buildRows();
+    AdminRoutineStatusCounts routineStats = adminRoutineService.getStatusCounts();
+    TodayAiStats todayAiStats = adminMonitoringService.getTodayStatsSummary();
     return new AdminDashboardSummary(
       memberCount,
       adminMemberService.countActiveWithinDays(ACTIVE_MEMBER_WITHIN_DAYS),
       adminMemberService.countSuspended(),
       proMemberCount,
       Math.max(memberCount - proMemberCount, 0),
-      adminRoutineService.getStatusCounts(),
-      adminMonitoringService.getTodayStatsSummary(),
+      routineStats,
+      todayAiStats,
       systemConfigOverviewService.buildOverview(settingRows, now),
+      adminAttentionService.loadActivity(now),
+      adminAttentionService.loadAttention(now, routineStats, todayAiStats),
+      adminStatsService.loadUsdToKrwRate(),
       now
     );
   }

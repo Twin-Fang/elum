@@ -12,6 +12,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/device/screen_awake.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/sound/child_praise_sound.dart';
 import '../../../core/widgets/settings_group.dart';
@@ -23,7 +24,6 @@ import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
-import '../application/routine_manage_coach_notifier.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -47,12 +47,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 
   /// 뒤로가기 상자 하단(107) > 스크롤 고정 영역 끝(115)
   static const _fixedAreaExtraHeight = 8.0;
-
-  /// 일과관리 칸으로 가서 첫 사용 안내를 다시 띄운다 (요청만 남기면 그 화면이 목록을 받은 뒤 켠다)
-  void _replayRoutineManageGuide() {
-    ref.read(routineManageCoachProvider.notifier).requestReplay();
-    context.go(Routes.guardianManage);
-  }
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -188,13 +182,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         SizedBox(height: 16.h),
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
-          hasDividers: false,
           children: [_LinkTile(busy: busy)],
         ),
         _groupGap,
         // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
         SettingsGroup(
-          hasDividers: false,
           children: [
             SettingsTile(
               isInCard: true,
@@ -211,12 +203,12 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
             _ImageStyleTile(busy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
+            const _ScreenAwakeTile(),
           ],
         ),
         _groupGap,
-        // 약관 및 정보
+        // 약관 및 정보: 약관 > 의견 보내기 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
-          hasDividers: false,
           children: [
             SettingsTile(
               isInCard: true,
@@ -231,11 +223,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
             ),
             SettingsTile(
               isInCard: true,
-              label: context.l10n.guardianSettingsRoutineManageGuide,
-              onTap: busy ? null : _replayRoutineManageGuide,
-            ),
-            SettingsTile(
-              isInCard: true,
               label: context.l10n.guardianSettingsFeedback,
               onTap: busy ? null : () => context.push(Routes.guardianFeedback),
             ),
@@ -247,7 +234,6 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         // `문의하기`는 일부러 뺐다: 애플이 요구하는 것은 스토어 페이지의 지원 주소이고 앱 안 문의하기는 필수가 아니다.
         // 시안 대조에서 '빠졌다'고 되살리지 않는다 (`AppConfig.supportEmail` 은 남겨 두었다).
         SettingsGroup(
-          hasDividers: false,
           children: [
             SettingsTile(
               isInCard: true,
@@ -359,6 +345,21 @@ class _HapticTile extends ConsumerWidget {
       label: context.l10n.guardianSettingsHaptic,
       value: ref.watch(childHapticOnProvider),
       onChanged: (on) => ref.read(childHapticOnProvider.notifier).set(on),
+    );
+  }
+}
+
+/// 이룸이 일과 진행 화면 켜 두기 켜기/끄기 줄 (#970).
+class _ScreenAwakeTile extends ConsumerWidget {
+  const _ScreenAwakeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsSwitchTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsScreenAwake,
+      value: ref.watch(childScreenAwakeOnProvider),
+      onChanged: (on) => ref.read(childScreenAwakeOnProvider.notifier).set(on),
     );
   }
 }

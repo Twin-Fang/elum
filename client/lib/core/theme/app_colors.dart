@@ -63,6 +63,32 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.highlightBorder,
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
+    required this.libraryNewOutline,
+    required this.talkOriginBandFill,
+    required this.talkOriginBandAction,
+    required this.talkCardBorder,
+    required this.talkTitleText,
+    required this.talkMetaText,
+    required this.talkMetaIcon,
+    required this.talkPopularCardFill,
+    required this.metaDivider,
+    required this.talkSectionDivider,
+    required this.talkChoiceSelectedFill,
+    required this.talkChoiceSelectedBorder,
+    required this.talkChoiceRadioBorder,
+    required this.talkAccentText,
+    required this.talkPanelFill,
+    required this.talkCommentFill,
+    required this.talkCommentMineName,
+    required this.talkImportGroupSelectedFill,
+    required this.talkImportGroupSelectedStroke,
+    required this.talkCommentFieldFill,
+    required this.talkBlurChoicePanelFill,
+    required this.talkBlurChoiceSelectedFill,
+    required this.talkBlurChoiceFill,
+    required this.talkBlurChoiceLabel,
+    required this.talkNoteText,
+    required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
     required this.catSelectedFill,
@@ -88,6 +114,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navSelectedFill,
     required this.navItemUnselected,
     required this.folderFill,
+    required this.folderStroke,
+    required this.libraryTileLabel,
     required this.homeCardShadow,
     required this.homeCardIconBg,
     required this.glassSurface,
@@ -190,9 +218,20 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsChevron,
     required this.settingsCardLabel,
     required this.settingsCardValue,
+    required this.myInfoMetaText,
+    required this.myInfoMutedIcon,
+    required this.routineTitleEditIcon,
+    required this.toastBackground,
+    required this.toastBorder,
+    required this.toastText,
+    required this.toastAction,
     required this.settingsToggleOn,
+    required this.settingsToggleOff,
     required this.settingsGroupBg,
     required this.settingsGroupDivider,
+    required this.settingsGroupLabel,
+    required this.segmentedTabAccent,
+    required this.segmentedTabUnselectedLabel,
     required this.peopleMeBadgeBg,
     required this.peopleMeBadgeText,
     required this.peopleGuardianChipBg,
@@ -218,7 +257,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditMutedText,
     required this.creditHistoryMutedText,
     required this.notificationIconBackground,
-    required this.notificationUnreadBackground,
+    required this.notificationIconForeground,
+    required this.notificationUnreadDot,
+    required this.notificationRowText,
+    required this.notificationMutedText,
+    required this.notificationPermissionBannerBg,
+    required this.notificationBellIcon,
+    required this.notificationBellUnreadDot,
+    required this.notificationBellUnreadDotBorder,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -293,7 +339,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
   // 되돌릴 수 없는 동작. 흐리게가 아니라 이 색으로 알린다 —
   // 흐린 색은 위험이 아니라 비활성으로 읽힌다.
-  // 13sp 본문에도 쓰이므로 배경(#F7F2EF) 대비 4.5:1을 넘겨야 한다.
+  // 시안 위험색 #DA5050 하나 (회원탈퇴 글자 · 삭제 팝업 버튼 · 실패 팝업). 바탕 대비 3.9:1 이라 13 이하 글자에는 쓰지 않는다
   final Color danger;
   final Color dangerText;
 
@@ -307,6 +353,78 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color goalSelectedFill;
   final Color goalSelectedBorder;
 
+  // 일과 관리 격자의 `새 일과` 칸 테두리 (시안 1931:6923, #93DBCC 2px). 값이 goalSelectedBorder 와 같아도 쓰임이 달라 따로 둔다
+  final Color libraryNewOutline;
+
+  // 가져온 일과 상세의 출처 띠 — 웜그레이 판 + 남색 글자 (안내 판 결)
+  // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
+  final Color talkOriginBandFill;
+  final Color talkOriginBandAction;
+
+  // 이야기 피드 카드 (시안 1783:6640)
+  /// 흰 카드·그림 칸 1px 테두리 (#EEE9E6)
+  final Color talkCardBorder;
+  /// 섹션 제목·카드 제목·분류 글자 (#000000 — 본문색 #242634 와 다르다)
+  final Color talkTitleText;
+  /// 시간·한마디·숫자·작성자 (#74757D)
+  final Color talkMetaText;
+  /// 도움돼요·댓글·가져감 10px 아이콘 (#CACACA)
+  final Color talkMetaIcon;
+  /// 인기 카드 판 (#EEE9E6, 테두리 없음 — 시안 1783:6666)
+  final Color talkPopularCardFill;
+  /// 글 정보 사이 세로선 (#D9D3CF): 이야기 상세 작성자 | 시각 (시안 1813:7491), 홈 일과 줄 보상 | 만든 사람 (931:3896)
+  final Color metaDivider;
+  /// 상세 본문 | 댓글 사이 화면 폭 띠 (#EEE9E6 · 높이 7, 시안 1830:7918)
+  final Color talkSectionDivider;
+
+  /// 고르기 줄 · 칩을 고른 판 (민트 연 #B5EAEC, 시안 1869:8959 고름 결)
+  final Color talkChoiceSelectedFill;
+
+  /// 고르기 줄을 고른 테두리 (민트 1px, 시안 1869:8959)
+  final Color talkChoiceSelectedBorder;
+
+  /// 고르기 줄 빈 동그라미 테두리 (웜그레이 선)
+  final Color talkChoiceRadioBorder;
+
+  /// 고른 점 · 켠 체크 · 댓글 보내기 · 커서 (민트 #55CFBA, 시안 1860:8085)
+  final Color talkAccentText;
+
+  /// 규칙 · 빈 상태 안내를 담는 웜그레이 판
+  final Color talkPanelFill;
+
+  /// 이야기 댓글 칸 바탕 (시안 1860:7944)
+  final Color talkCommentFill;
+
+  /// 내가 쓴 댓글의 이름 (시안 1860:7930)
+  final Color talkCommentMineName;
+
+  /// 가져오기 시트에서 고른 묶음 칸 바탕 · 테두리 (시안 1869:8959)
+  final Color talkImportGroupSelectedFill;
+  final Color talkImportGroupSelectedStroke;
+
+  /// 댓글 입력칸 판 (흰색 60%, 시안 1806:7485)
+  final Color talkCommentFieldFill;
+
+  /// 사진 고르기 칸 판 (#EEE9E6, 시안 1877:10569)
+  final Color talkBlurChoicePanelFill;
+
+  /// `흐리게` · `그대로` 고른 버튼 (#242634, 시안 1877:10589)
+  final Color talkBlurChoiceSelectedFill;
+
+  /// `흐리게` · `그대로` 안 고른 버튼 (#D7D3D1, 시안 1877:10591)
+  final Color talkBlurChoiceFill;
+
+  /// `흐리게` · `그대로` 버튼 글자 (고름 · 안 고름 모두 흰색)
+  final Color talkBlurChoiceLabel;
+
+  /// 한마디 입력 글자 (#000000, 시안 1870:9545)
+  final Color talkNoteText;
+
+  /// 한마디 입력칸 안내 글자 (#242634 40%, 시안 1870:9451)
+  final Color talkNoteHint;
+
+
+
   // 캐릭터 카드는 캐릭터마다 다르다
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
@@ -315,6 +433,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color catSelectedBorder;
 
   final Color brandPeach;
+
+  /// 포포(여우) 그림 주황 — 축하 색종이(confetti)에만. UI 강조 · 선택 · 크레딧에 쓰지 않는다 (시안 UI 에 없는 색)
   final Color brandOrange;
 
   /// 별 보상
@@ -369,17 +489,23 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 고른 칸 아이콘·글자 (#798)
   final Color navIconSelected;
 
-  /// 고르지 않은 칸 아이콘·글자 (#798)
+  /// 고르지 않은 칸 아이콘·글자 (남색 20%, 하단 바 시안 1666:7082와 같은 값) (#798)
   final Color navIconUnselected;
 
-  /// 옆 메뉴 고른 칸 바탕(연한 보라) (#798)
+  /// 옆 메뉴 고른 칸 바탕 (웜그레이 판 #EEE9E6 — 시안 판 색) (#798)
   final Color navSelectedFill;
 
   /// 하단 바 · 옆 메뉴 고르지 않은 칸 아이콘·글자 (#242634 20%, 시안 1666:7082, #835). 고른 칸은 navIconSelected
   final Color navItemUnselected;
 
-  /// 일과관리 묶음(폴더) 칸 바탕 — 진한 남색 10% (#807)
+  /// 일과관리 묶음(폴더) 칸 바탕 (#DDD9D9, 시안 1664:6876 회색 2x2 폴더)
   final Color folderFill;
+
+  /// 일과관리 묶음 칸 테두리 1px 안쪽 (#BFBDBD, 시안 1664:6876)
+  final Color folderStroke;
+
+  /// 일과관리 칸 이름 (#000000, 시안 1664:6876 — 본문색 #242634 와 다르다)
+  final Color libraryTileLabel;
 
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
@@ -702,8 +828,8 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 연결 암호 남은 시간 (#DA5050).
   ///
-  /// `danger`(#BB3F38)와 **다른 색이다.** 저쪽은 되돌릴 수 없는 동작을 막는
-  /// 붉은색이고, 이건 "시간이 간다"를 알리는 표시다. 합치면 한쪽만 못 바꾼다.
+  /// `danger` 와 값은 같지만 쓰임이 다르다. 저쪽은 되돌릴 수 없는 동작,
+  /// 이건 "시간이 간다"를 알리는 표시다. 합치면 한쪽만 못 바꾼다.
   final Color linkTimer;
 
   /// `코드 다시 만들기` 칩 배경 (#EEE9E6).
@@ -725,12 +851,10 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 설정의 `회원탈퇴` 글자 (Figma `1022:4467` — #DA5050).
   ///
-  /// `danger`(#BB3F38)와 **값이 다르다.** danger 는 팝업 버튼처럼 넓은 면을 채울 때
-  /// 쓰는 짙은 붉은색이고, 이건 글자 하나에 쓰는 밝은 쪽이다. 같은 값으로 합치면
-  /// 목록에서 혼자 너무 어둡게 보인다.
+  /// `danger` 와 값은 같지만(시안 위험색은 #DA5050 하나) 글자 쪽 쓰임이라 나눈다.
   final Color settingsDestructive;
 
-  /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
+  /// 설정 목록의 오른쪽 화살표 (Figma `fi-br-angle-small` #CACACA).
   final Color settingsChevron;
 
   /// 묶음 카드 설정 줄 글자 (Figma `1532:7501` — #000000). 본문색(`textPrimary`)과 값이 달라 나눈다.
@@ -739,8 +863,32 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 묶음 카드 설정 줄 오른쪽 값 글자 (`그림 방식  실사`, `앱 정보  버전`).
   final Color settingsCardValue;
 
+  /// 내 정보 닉네임 카드의 이메일·가입일 글자와 제목 줄 톱니 (Figma `1736:8780` #74757D).
+  final Color myInfoMetaText;
+
+  /// 내 정보 닉네임 카드의 연필·달력 아이콘 (Figma `1736:8780` #CACACA).
+  final Color myInfoMutedIcon;
+
+  /// 일과 제목 옆 연필 (Figma `1931:7372` fi-br-pencil #CACACA, 상세 시트 · 카드 확인)
+  final Color routineTitleEditIcon;
+
+  /// 토스트 판 (시안 없음 > 팝업 결: 흰 판 · design-language §4-6)
+  final Color toastBackground;
+
+  /// 토스트 테두리 1px (아이보리 바탕 위 흰 판 경계, design-language §3-4)
+  final Color toastBorder;
+
+  /// 토스트 문구
+  final Color toastText;
+
+  /// 토스트 오른쪽 누르는 글자 (`보러 가기`) — 문구보다 굵게
+  final Color toastAction;
+
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
   final Color settingsToggleOn;
+
+  /// 묶음 카드 설정 줄의 꺼짐 토글 바탕 (#D7D3D1, 시안 1732:8563).
+  final Color settingsToggleOff;
 
   // --- 설정 묶음 카드 (iOS inset grouped, 임시 시안 #645) ---
 
@@ -749,6 +897,15 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 묶음 카드 안 줄 사이 가는 선.
   final Color settingsGroupDivider;
+
+  /// 설정 묶음 머리 · 꼬리 글 (회색 #74757D, 시안 1589:8359 날짜 라벨 결)
+  final Color settingsGroupLabel;
+
+  /// 상단 탭 밑줄 · 안 읽음 점 (민트, 시안 1724:8346)
+  final Color segmentedTabAccent;
+
+  /// 상단 탭 안 고른 칸 글자 (회색, 시안 1724:8346)
+  final Color segmentedTabUnselectedLabel;
 
   // --- 함께하는 사람 (시안 1027:4617 · 1532:6877 · 1532:7013) ---
 
@@ -811,10 +968,10 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 크레딧 카드 안 구분선. 막대 빈 쪽과 값이 같지만 쓰임이 달라 나눈다.
   final Color creditDivider;
 
-  /// 크레딧 강조 글자(`+ 추가 N`·직전 안내). #FF8B22 는 흰 바탕 글자로 대비가 모자라 짙게 둔다.
+  /// 크레딧 카드 `다시 하기` 칩 글자 (남색, 웜그레이 칩 위)
   final Color creditAccentText;
 
-  /// 생성 직전 크레딧 안내 띠의 면.
+  /// 크레딧 카드 `다시 하기` 칩 면 (웜그레이 #EEE9E6, `코드 다시 만들기` 칩과 같은 결)
   final Color creditNoticeBg;
 
   /// 크레딧 큰 숫자와 반짝임 (Figma `1532:7501` — #BAA0F9).
@@ -826,11 +983,32 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 크레딧 사용 내역의 날짜·부제·줄어든 값 (Figma `1589:8359` `#74757D`).
   final Color creditHistoryMutedText;
 
-  /// 알림 줄 왼쪽 원형 아이콘의 바탕
+  /// 알림 줄 왼쪽 둥근 네모 아이콘 바탕 (#AEE4D9, 시안 1724:8346)
   final Color notificationIconBackground;
 
-  /// 알림 목록에서 안 읽은 줄의 연한 민트 바탕 (시안 알림 탭)
-  final Color notificationUnreadBackground;
+  /// 알림 줄 아이콘 상자 안 그림 (#FFFFFF, 시안 1724:8346)
+  final Color notificationIconForeground;
+
+  /// 알림 줄 오른쪽 안 읽음 점 (#55CFBA, 시안 1724:8346)
+  final Color notificationUnreadDot;
+
+  /// 알림 줄 문장 (#000000, 시안 1724:8346). 본문색(`textPrimary`)과 값이 달라 나눈다.
+  final Color notificationRowText;
+
+  /// 알림 화면의 회색 글자·아이콘: 날짜 머리글, 시각, 톱니, 기기 알림 꺼짐 띠 (#74757D)
+  final Color notificationMutedText;
+
+  /// 알림 설정 맨 위 기기 알림 꺼짐 띠 바탕 (#EEE9E6, 시안 1732:8433)
+  final Color notificationPermissionBannerBg;
+
+  /// 머리 줄 종 아이콘 (Figma `alarm` 1724:7739 `#74757D`)
+  final Color notificationBellIcon;
+
+  /// 종 아이콘의 안 읽음 원 (Figma `alarm` `#55CFBA`)
+  final Color notificationBellUnreadDot;
+
+  /// 안 읽음 원 테두리 2. 종과 겹친 자리를 바탕색으로 끊어 보임 (Figma `#F7F2EF`)
+  final Color notificationBellUnreadDotBorder;
 
   // --- 약관 동의 선택 상태 ---
   //
@@ -895,7 +1073,7 @@ class AppColors extends ThemeExtension<AppColors> {
     buttonEnabledText: Color(0xFFFFFFFF),
     buttonDisabled: Color(0xFF818393),
     buttonDisabledText: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
-    buttonNeutral: Color(0xFFEFEDEA),
+    buttonNeutral: Color(0xFFEEE9E6),
     buttonNeutralText: Color(0xFF242634),
     // Figma 980:5146 `Frame 34` (시트 상단) 실측
     sheetHandle: Color(0xFFCACACA),
@@ -907,12 +1085,38 @@ class AppColors extends ThemeExtension<AppColors> {
     dialogDanger: Color(0xFFDA5050),
     // 팔레트의 코랄(#EB9B73)과 같은 난색 계열로 낮춰 잡았다. 배경 대비 4.7:1,
     // 흰 글씨 대비 5.4:1 — 작은 글씨에도 읽히면서 경고로 보인다.
-    danger: Color(0xFFBB3F38),
+    danger: Color(0xFFDA5050),
     dangerText: Color(0xFFFFFFFF),
     highlightFill: Color(0xFFFFDAC7),
     highlightBorder: Color(0xFFEB9B73),
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
+    libraryNewOutline: Color(0xFF93DBCC),
+    talkOriginBandFill: Color(0xFFEEE9E6),
+    talkOriginBandAction: Color(0xFF242634),
+    talkCardBorder: Color(0xFFEEE9E6),
+    talkTitleText: Color(0xFF000000),
+    talkMetaText: Color(0xFF74757D),
+    talkMetaIcon: Color(0xFFCACACA),
+    talkPopularCardFill: Color(0xFFEEE9E6),
+    metaDivider: Color(0xFFD9D3CF),
+    talkSectionDivider: Color(0xFFEEE9E6),
+    talkChoiceSelectedFill: Color(0xFFB5EAEC),
+    talkChoiceSelectedBorder: Color(0xFF55CFBA),
+    talkChoiceRadioBorder: Color(0xFFD9D3CF),
+    talkAccentText: Color(0xFF55CFBA),
+    talkPanelFill: Color(0xFFEEE9E6),
+    talkCommentFill: Color(0xFFEEE9E6),
+    talkCommentMineName: Color(0xFF55CFBA),
+    talkImportGroupSelectedFill: Color(0xFFB5EAEC),
+    talkImportGroupSelectedStroke: Color(0xFF55CFBA),
+    talkCommentFieldFill: Color(0x99FFFFFF),
+    talkBlurChoicePanelFill: Color(0xFFEEE9E6),
+    talkBlurChoiceSelectedFill: Color(0xFF242634),
+    talkBlurChoiceFill: Color(0xFFD7D3D1),
+    talkBlurChoiceLabel: Color(0xFFFFFFFF),
+    talkNoteText: Color(0xFF000000),
+    talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
     catSelectedFill: Color(0xFFCED8FF),
@@ -934,10 +1138,12 @@ class AppColors extends ThemeExtension<AppColors> {
     navBackground: Color(0xFFF7F2EF),
     navDivider: Color(0xFFEEE9E6),
     navIconSelected: Color(0xFF242634),
-    navIconUnselected: Color(0xFFA6A8B4),
-    navSelectedFill: Color(0xFFEEF1FD),
+    navIconUnselected: Color(0x33242634),
+    navSelectedFill: Color(0xFFEEE9E6),
     navItemUnselected: Color(0x33242634),
-    folderFill: Color(0x1A242634),
+    folderFill: Color(0xFFDDD9D9),
+    folderStroke: Color(0xFFBFBDBD),
+    libraryTileLabel: Color(0xFF000000),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
@@ -1038,12 +1244,23 @@ class AppColors extends ThemeExtension<AppColors> {
     loginAppleLabel: Color(0xFFFFFFFF),
     loginLastUsedBg: Color(0x80FFFADC),
     settingsDestructive: Color(0xFFDA5050),
-    settingsChevron: Color(0xFFCDCDCD),
+    settingsChevron: Color(0xFFCACACA),
     settingsCardLabel: Color(0xFF000000),
     settingsCardValue: Color(0xFF74757D),
+    myInfoMetaText: Color(0xFF74757D),
+    myInfoMutedIcon: Color(0xFFCACACA),
+    routineTitleEditIcon: Color(0xFFCACACA),
+    toastBackground: Color(0xFFFFFFFF),
+    toastBorder: Color(0xFFEFEFEF),
+    toastText: Color(0xFF242634),
+    toastAction: Color(0xFF242634),
     settingsToggleOn: Color(0xFF55CFBA),
+    settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
     settingsGroupDivider: Color(0xFFEFEFEF),
+    settingsGroupLabel: Color(0xFF74757D),
+    segmentedTabAccent: Color(0xFF55CFBA),
+    segmentedTabUnselectedLabel: Color(0xFF74757D),
     peopleMeBadgeBg: Color(0xFFD7D3D1),
     peopleMeBadgeText: Color(0xFFFFFFFF),
     // 녹색 계열 연한 배지 — 상태(완료·진행)와 겹치지 않는 보조 표시
@@ -1064,13 +1281,20 @@ class AppColors extends ThemeExtension<AppColors> {
     creditBarTrack: Color(0xFFEEE9E6),
     creditBarFill: Color(0xFFBAA0F9),
     creditDivider: Color(0xFFEFEFEF),
-    creditAccentText: Color(0xFFB85A0B),
-    creditNoticeBg: Color(0xFFFFF0E2),
+    creditAccentText: Color(0xFF242634),
+    creditNoticeBg: Color(0xFFEEE9E6),
     creditNumberText: Color(0xFFBAA0F9),
     creditMutedText: Color(0xFF9B97A4),
     creditHistoryMutedText: Color(0xFF74757D),
-    notificationIconBackground: Color(0xFFE7DEFB),
-    notificationUnreadBackground: Color(0xFFEAF7F5),
+    notificationIconBackground: Color(0xFFAEE4D9),
+    notificationIconForeground: Color(0xFFFFFFFF),
+    notificationUnreadDot: Color(0xFF55CFBA),
+    notificationRowText: Color(0xFF000000),
+    notificationMutedText: Color(0xFF74757D),
+    notificationPermissionBannerBg: Color(0xFFEEE9E6),
+    notificationBellIcon: Color(0xFF74757D),
+    notificationBellUnreadDot: Color(0xFF55CFBA),
+    notificationBellUnreadDotBorder: Color(0xFFF7F2EF),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1125,6 +1349,32 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? highlightBorder,
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
+    Color? libraryNewOutline,
+    Color? talkOriginBandFill,
+    Color? talkOriginBandAction,
+    Color? talkCardBorder,
+    Color? talkTitleText,
+    Color? talkMetaText,
+    Color? talkMetaIcon,
+    Color? talkPopularCardFill,
+    Color? metaDivider,
+    Color? talkSectionDivider,
+    Color? talkChoiceSelectedFill,
+    Color? talkChoiceSelectedBorder,
+    Color? talkChoiceRadioBorder,
+    Color? talkAccentText,
+    Color? talkPanelFill,
+    Color? talkCommentFill,
+    Color? talkCommentMineName,
+    Color? talkImportGroupSelectedFill,
+    Color? talkImportGroupSelectedStroke,
+    Color? talkCommentFieldFill,
+    Color? talkBlurChoicePanelFill,
+    Color? talkBlurChoiceSelectedFill,
+    Color? talkBlurChoiceFill,
+    Color? talkBlurChoiceLabel,
+    Color? talkNoteText,
+    Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
     Color? catSelectedFill,
@@ -1150,6 +1400,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navSelectedFill,
     Color? navItemUnselected,
     Color? folderFill,
+    Color? folderStroke,
+    Color? libraryTileLabel,
     Color? homeCardShadow,
     Color? homeCardIconBg,
     Color? glassSurface,
@@ -1240,9 +1492,20 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsChevron,
     Color? settingsCardLabel,
     Color? settingsCardValue,
+    Color? myInfoMetaText,
+    Color? myInfoMutedIcon,
+    Color? routineTitleEditIcon,
+    Color? toastBackground,
+    Color? toastBorder,
+    Color? toastText,
+    Color? toastAction,
     Color? settingsToggleOn,
+    Color? settingsToggleOff,
     Color? settingsGroupBg,
     Color? settingsGroupDivider,
+    Color? settingsGroupLabel,
+    Color? segmentedTabAccent,
+    Color? segmentedTabUnselectedLabel,
     Color? peopleMeBadgeBg,
     Color? peopleMeBadgeText,
     Color? peopleGuardianChipBg,
@@ -1268,7 +1531,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditMutedText,
     Color? creditHistoryMutedText,
     Color? notificationIconBackground,
-    Color? notificationUnreadBackground,
+    Color? notificationIconForeground,
+    Color? notificationUnreadDot,
+    Color? notificationRowText,
+    Color? notificationMutedText,
+    Color? notificationPermissionBannerBg,
+    Color? notificationBellIcon,
+    Color? notificationBellUnreadDot,
+    Color? notificationBellUnreadDotBorder,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1325,6 +1595,32 @@ class AppColors extends ThemeExtension<AppColors> {
       highlightBorder: highlightBorder ?? this.highlightBorder,
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
+      libraryNewOutline: libraryNewOutline ?? this.libraryNewOutline,
+      talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
+      talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
+      talkCardBorder: talkCardBorder ?? this.talkCardBorder,
+      talkTitleText: talkTitleText ?? this.talkTitleText,
+      talkMetaText: talkMetaText ?? this.talkMetaText,
+      talkMetaIcon: talkMetaIcon ?? this.talkMetaIcon,
+      talkPopularCardFill: talkPopularCardFill ?? this.talkPopularCardFill,
+      metaDivider: metaDivider ?? this.metaDivider,
+      talkSectionDivider: talkSectionDivider ?? this.talkSectionDivider,
+      talkChoiceSelectedFill: talkChoiceSelectedFill ?? this.talkChoiceSelectedFill,
+      talkChoiceSelectedBorder: talkChoiceSelectedBorder ?? this.talkChoiceSelectedBorder,
+      talkChoiceRadioBorder: talkChoiceRadioBorder ?? this.talkChoiceRadioBorder,
+      talkAccentText: talkAccentText ?? this.talkAccentText,
+      talkPanelFill: talkPanelFill ?? this.talkPanelFill,
+      talkCommentFill: talkCommentFill ?? this.talkCommentFill,
+      talkCommentMineName: talkCommentMineName ?? this.talkCommentMineName,
+      talkImportGroupSelectedFill: talkImportGroupSelectedFill ?? this.talkImportGroupSelectedFill,
+      talkImportGroupSelectedStroke: talkImportGroupSelectedStroke ?? this.talkImportGroupSelectedStroke,
+      talkCommentFieldFill: talkCommentFieldFill ?? this.talkCommentFieldFill,
+      talkBlurChoicePanelFill: talkBlurChoicePanelFill ?? this.talkBlurChoicePanelFill,
+      talkBlurChoiceSelectedFill: talkBlurChoiceSelectedFill ?? this.talkBlurChoiceSelectedFill,
+      talkBlurChoiceFill: talkBlurChoiceFill ?? this.talkBlurChoiceFill,
+      talkBlurChoiceLabel: talkBlurChoiceLabel ?? this.talkBlurChoiceLabel,
+      talkNoteText: talkNoteText ?? this.talkNoteText,
+      talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -1351,6 +1647,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: navSelectedFill ?? this.navSelectedFill,
       navItemUnselected: navItemUnselected ?? this.navItemUnselected,
       folderFill: folderFill ?? this.folderFill,
+      folderStroke: folderStroke ?? this.folderStroke,
+      libraryTileLabel: libraryTileLabel ?? this.libraryTileLabel,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
@@ -1442,9 +1740,20 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsChevron: settingsChevron ?? this.settingsChevron,
       settingsCardLabel: settingsCardLabel ?? this.settingsCardLabel,
       settingsCardValue: settingsCardValue ?? this.settingsCardValue,
+      myInfoMetaText: myInfoMetaText ?? this.myInfoMetaText,
+      myInfoMutedIcon: myInfoMutedIcon ?? this.myInfoMutedIcon,
+      routineTitleEditIcon: routineTitleEditIcon ?? this.routineTitleEditIcon,
+      toastBackground: toastBackground ?? this.toastBackground,
+      toastBorder: toastBorder ?? this.toastBorder,
+      toastText: toastText ?? this.toastText,
+      toastAction: toastAction ?? this.toastAction,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
+      settingsToggleOff: settingsToggleOff ?? this.settingsToggleOff,
       settingsGroupBg: settingsGroupBg ?? this.settingsGroupBg,
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
+      settingsGroupLabel: settingsGroupLabel ?? this.settingsGroupLabel,
+      segmentedTabAccent: segmentedTabAccent ?? this.segmentedTabAccent,
+      segmentedTabUnselectedLabel: segmentedTabUnselectedLabel ?? this.segmentedTabUnselectedLabel,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
       peopleMeBadgeText: peopleMeBadgeText ?? this.peopleMeBadgeText,
       peopleGuardianChipBg: peopleGuardianChipBg ?? this.peopleGuardianChipBg,
@@ -1470,7 +1779,14 @@ class AppColors extends ThemeExtension<AppColors> {
       creditMutedText: creditMutedText ?? this.creditMutedText,
       creditHistoryMutedText: creditHistoryMutedText ?? this.creditHistoryMutedText,
       notificationIconBackground: notificationIconBackground ?? this.notificationIconBackground,
-      notificationUnreadBackground: notificationUnreadBackground ?? this.notificationUnreadBackground,
+      notificationIconForeground: notificationIconForeground ?? this.notificationIconForeground,
+      notificationUnreadDot: notificationUnreadDot ?? this.notificationUnreadDot,
+      notificationRowText: notificationRowText ?? this.notificationRowText,
+      notificationMutedText: notificationMutedText ?? this.notificationMutedText,
+      notificationPermissionBannerBg: notificationPermissionBannerBg ?? this.notificationPermissionBannerBg,
+      notificationBellIcon: notificationBellIcon ?? this.notificationBellIcon,
+      notificationBellUnreadDot: notificationBellUnreadDot ?? this.notificationBellUnreadDot,
+      notificationBellUnreadDotBorder: notificationBellUnreadDotBorder ?? this.notificationBellUnreadDotBorder,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1557,6 +1873,44 @@ class AppColors extends ThemeExtension<AppColors> {
         other.goalSelectedBorder,
         t,
       )!,
+      libraryNewOutline: Color.lerp(
+        libraryNewOutline,
+        other.libraryNewOutline,
+        t,
+      )!,
+      talkOriginBandFill: Color.lerp(
+        talkOriginBandFill,
+        other.talkOriginBandFill,
+        t,
+      )!,
+      talkOriginBandAction: Color.lerp(
+        talkOriginBandAction,
+        other.talkOriginBandAction,
+        t,
+      )!,
+      talkCardBorder: Color.lerp(talkCardBorder, other.talkCardBorder, t)!,
+      talkTitleText: Color.lerp(talkTitleText, other.talkTitleText, t)!,
+      talkMetaText: Color.lerp(talkMetaText, other.talkMetaText, t)!,
+      talkMetaIcon: Color.lerp(talkMetaIcon, other.talkMetaIcon, t)!,
+      talkPopularCardFill: Color.lerp(talkPopularCardFill, other.talkPopularCardFill, t)!,
+      metaDivider: Color.lerp(metaDivider, other.metaDivider, t)!,
+      talkSectionDivider: Color.lerp(talkSectionDivider, other.talkSectionDivider, t)!,
+      talkChoiceSelectedFill: Color.lerp(talkChoiceSelectedFill, other.talkChoiceSelectedFill, t)!,
+      talkChoiceSelectedBorder: Color.lerp(talkChoiceSelectedBorder, other.talkChoiceSelectedBorder, t)!,
+      talkChoiceRadioBorder: Color.lerp(talkChoiceRadioBorder, other.talkChoiceRadioBorder, t)!,
+      talkAccentText: Color.lerp(talkAccentText, other.talkAccentText, t)!,
+      talkPanelFill: Color.lerp(talkPanelFill, other.talkPanelFill, t)!,
+      talkCommentFill: Color.lerp(talkCommentFill, other.talkCommentFill, t)!,
+      talkCommentMineName: Color.lerp(talkCommentMineName, other.talkCommentMineName, t)!,
+      talkImportGroupSelectedFill: Color.lerp(talkImportGroupSelectedFill, other.talkImportGroupSelectedFill, t)!,
+      talkImportGroupSelectedStroke: Color.lerp(talkImportGroupSelectedStroke, other.talkImportGroupSelectedStroke, t)!,
+      talkCommentFieldFill: Color.lerp(talkCommentFieldFill, other.talkCommentFieldFill, t)!,
+      talkBlurChoicePanelFill: Color.lerp(talkBlurChoicePanelFill, other.talkBlurChoicePanelFill, t)!,
+      talkBlurChoiceSelectedFill: Color.lerp(talkBlurChoiceSelectedFill, other.talkBlurChoiceSelectedFill, t)!,
+      talkBlurChoiceFill: Color.lerp(talkBlurChoiceFill, other.talkBlurChoiceFill, t)!,
+      talkBlurChoiceLabel: Color.lerp(talkBlurChoiceLabel, other.talkBlurChoiceLabel, t)!,
+      talkNoteText: Color.lerp(talkNoteText, other.talkNoteText, t)!,
+      talkNoteHint: Color.lerp(talkNoteHint, other.talkNoteHint, t)!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
       foxSelectedBorder: Color.lerp(
         foxSelectedBorder,
@@ -1606,6 +1960,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
       navItemUnselected: Color.lerp(navItemUnselected, other.navItemUnselected, t)!,
       folderFill: Color.lerp(folderFill, other.folderFill, t)!,
+      folderStroke: Color.lerp(folderStroke, other.folderStroke, t)!,
+      libraryTileLabel: Color.lerp(libraryTileLabel, other.libraryTileLabel, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
@@ -1806,9 +2162,24 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
       settingsCardLabel: Color.lerp(settingsCardLabel, other.settingsCardLabel, t)!,
       settingsCardValue: Color.lerp(settingsCardValue, other.settingsCardValue, t)!,
+      myInfoMetaText: Color.lerp(myInfoMetaText, other.myInfoMetaText, t)!,
+      myInfoMutedIcon: Color.lerp(myInfoMutedIcon, other.myInfoMutedIcon, t)!,
+      routineTitleEditIcon: Color.lerp(
+        routineTitleEditIcon,
+        other.routineTitleEditIcon,
+        t,
+      )!,
+      toastBackground: Color.lerp(toastBackground, other.toastBackground, t)!,
+      toastBorder: Color.lerp(toastBorder, other.toastBorder, t)!,
+      toastText: Color.lerp(toastText, other.toastText, t)!,
+      toastAction: Color.lerp(toastAction, other.toastAction, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,
+      settingsToggleOff: Color.lerp(settingsToggleOff, other.settingsToggleOff, t)!,
       settingsGroupBg: Color.lerp(settingsGroupBg, other.settingsGroupBg, t)!,
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
+      settingsGroupLabel: Color.lerp(settingsGroupLabel, other.settingsGroupLabel, t)!,
+      segmentedTabAccent: Color.lerp(segmentedTabAccent, other.segmentedTabAccent, t)!,
+      segmentedTabUnselectedLabel: Color.lerp(segmentedTabUnselectedLabel, other.segmentedTabUnselectedLabel, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
       peopleMeBadgeText: Color.lerp(peopleMeBadgeText, other.peopleMeBadgeText, t)!,
       peopleGuardianChipBg: Color.lerp(peopleGuardianChipBg, other.peopleGuardianChipBg, t)!,
@@ -1835,7 +2206,14 @@ class AppColors extends ThemeExtension<AppColors> {
       creditMutedText: Color.lerp(creditMutedText, other.creditMutedText, t)!,
       creditHistoryMutedText: Color.lerp(creditHistoryMutedText, other.creditHistoryMutedText, t)!,
       notificationIconBackground: Color.lerp(notificationIconBackground, other.notificationIconBackground, t)!,
-      notificationUnreadBackground: Color.lerp(notificationUnreadBackground, other.notificationUnreadBackground, t)!,
+      notificationIconForeground: Color.lerp(notificationIconForeground, other.notificationIconForeground, t)!,
+      notificationUnreadDot: Color.lerp(notificationUnreadDot, other.notificationUnreadDot, t)!,
+      notificationRowText: Color.lerp(notificationRowText, other.notificationRowText, t)!,
+      notificationMutedText: Color.lerp(notificationMutedText, other.notificationMutedText, t)!,
+      notificationPermissionBannerBg: Color.lerp(notificationPermissionBannerBg, other.notificationPermissionBannerBg, t)!,
+      notificationBellIcon: Color.lerp(notificationBellIcon, other.notificationBellIcon, t)!,
+      notificationBellUnreadDot: Color.lerp(notificationBellUnreadDot, other.notificationBellUnreadDot, t)!,
+      notificationBellUnreadDotBorder: Color.lerp(notificationBellUnreadDotBorder, other.notificationBellUnreadDotBorder, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -59,9 +60,9 @@ class RoutineStepImageFillerLocaleTest {
     filler = new RoutineStepImageFiller(
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
-      new RoutineStepImageThrottle(new InMemorySharedStateStore()), creditReservationService);
+      new RoutineStepImageThrottle(new InMemorySharedStateStore(), UsageLimitSettings.fromDefaults()), creditReservationService);
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
-    lenient().when(imageClient.generateImage(anyString(), any())).thenReturn(IMAGE);
+    lenient().when(imageClient.generateCardImage(any(), any())).thenReturn(IMAGE);
     lenient().when(routineImageStorage.save(anyString(), anyInt(), any())).thenReturn("images/step-1/1.png");
     lenient().when(routineStepRepository.existsById(anyString())).thenReturn(true);
     lenient().when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(1);
@@ -79,7 +80,7 @@ class RoutineStepImageFillerLocaleTest {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     AtomicReference<AppLocale> seen = new AtomicReference<>();
     CountDownLatch called = new CountDownLatch(1);
-    when(imageClient.generateImage(anyString(), any())).thenAnswer(invocation -> {
+    when(imageClient.generateCardImage(any(), any())).thenAnswer(invocation -> {
       seen.set(AiCallContext.currentContentLocale());
       called.countDown();
       return IMAGE;

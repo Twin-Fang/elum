@@ -29,8 +29,25 @@ abstract final class AppConfig {
 
   // --- 서버 ---
 
-  static String get apiBaseUrl =>
-      _string('ELUM_API_BASE_URL', 'https://api.elum.chuseok22.com');
+  /// 지금 쓰는 API 주소: 개발자 도구 지정 주소 > `.env` 기본 주소
+  static String get apiBaseUrl => _apiBaseUrlOverride ?? defaultApiBaseUrl;
+
+  /// 운영 API 주소
+  static const productionApiBaseUrl = 'https://api.elum.chuseok22.com';
+
+  /// 빌드에 넣은 기본 주소 (`.env`, 없으면 운영)
+  static String get defaultApiBaseUrl => _string('ELUM_API_BASE_URL', productionApiBaseUrl);
+
+  /// 운영 서버를 보고 있는가 (개발자 도구 테스트 계정·서버 표시 판단)
+  static bool get isProductionApiServer => apiBaseUrl == productionApiBaseUrl;
+
+  // 개발자 도구에서 고른 주소 (개발자 도구 빌드만, main 이 시작 때 넣음)
+  static String? _apiBaseUrlOverride;
+
+  /// 개발자 도구 주소 지정. 개발자 도구가 꺼진 빌드에서는 무시하고 null 로 둔다
+  static void overrideApiBaseUrl(String? url) {
+    _apiBaseUrlOverride = showDevTools && url != null && url.isNotEmpty ? url : null;
+  }
 
   // --- 대기·연출 시간값 ---
   // `.env` 에서 읽지 않는다. 서버가 주고 관리자 화면에서 고친다 ([ClientTuning]).
@@ -48,8 +65,7 @@ abstract final class AppConfig {
     _tuningSource = source;
   }
 
-  /// 테스트가 끝나면 기본값으로 되돌린다. 정적 값이라 테스트끼리 새어 나간다.
-  @visibleForTesting
+  /// 시간값을 코드 기본값으로 되돌린다 (테스트 정리, 서버를 바꿀 때)
   static void resetTuning() => applyTuning(ClientTuning.defaults, source: TuningSource.defaults);
 
   static Duration get connectTimeout => _tuning.connectTimeout;

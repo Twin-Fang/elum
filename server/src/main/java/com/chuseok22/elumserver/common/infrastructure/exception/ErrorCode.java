@@ -115,7 +115,7 @@ public enum ErrorCode {
   ROUTINE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND),
   // 묶음에는 일과관리 원본만 (보내기로 만든 일과 · 지운 원본 · 임시저장 · 다른 이룸이 일과 제외)
   ROUTINE_GROUP_INVALID_MEMBER(HttpStatus.BAD_REQUEST),
-  // 묶음은 일과 2개 이상. 하나만 남기려면 묶음을 푼다
+  // 묶음은 일과 1개 이상. 다 빼려면 묶음을 푼다
   ROUTINE_GROUP_TOO_SMALL(HttpStatus.BAD_REQUEST),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
@@ -197,6 +197,7 @@ public enum ErrorCode {
   NOTICE_PRIORITY_INVALID(HttpStatus.BAD_REQUEST),
   NOTICE_PLATFORM_INVALID(HttpStatus.BAD_REQUEST),
   NOTICE_LOCALE_INVALID(HttpStatus.BAD_REQUEST),
+  NOTICE_TARGET_COUNTRIES_INVALID(HttpStatus.BAD_REQUEST),
   NOTICE_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST),
   NOTICE_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST),
   NOTICE_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
@@ -244,6 +245,21 @@ public enum ErrorCode {
   ADMIN_CREDIT_POLICY_TTL_TOO_SHORT(HttpStatus.BAD_REQUEST),
   ADMIN_CREDIT_POLICY_APPLY_INVALID(HttpStatus.BAD_REQUEST),
   ADMIN_CREDIT_POLICY_VALUE_NEGATIVE(HttpStatus.BAD_REQUEST),
+
+  // TALK. 보호자끼리 일과를 나누는 이야기. 내려간 글·지워진 댓글은 404, 이용 규칙 미동의·남의 글 수정은 403,
+  // 중복(이미 나눔·이미 신고)은 409 다. 별명 가림 실패(500)는 앱이 잠시 뒤 다시 시도하게 하는 신호다.
+  TALK_POST_NOT_FOUND(HttpStatus.NOT_FOUND),
+  TALK_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND),
+  TALK_RULES_NOT_AGREED(HttpStatus.FORBIDDEN),
+  TALK_NOT_AUTHOR(HttpStatus.FORBIDDEN),
+  TALK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
+  TALK_ALREADY_SHARED(HttpStatus.CONFLICT),
+  TALK_TEXT_TOO_LONG(HttpStatus.BAD_REQUEST),
+  TALK_TEXT_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  TALK_NICKNAME_MASK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
+  TALK_REPORT_DUPLICATED(HttpStatus.CONFLICT),
+  TALK_CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST),
+  TALK_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND),
 
   ;
 

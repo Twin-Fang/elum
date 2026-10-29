@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService.UpdateResult;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
 import com.chuseok22.elumserver.consent.infrastructure.entity.ConsentDocument;
@@ -52,7 +53,7 @@ class ConsentDocumentServiceTest {
   void setUp() {
     service = new ConsentDocumentService(documentRepository, historyRepository);
     terms = document(ConsentKey.TERMS, "2026-09-18");
-    when(documentRepository.findByConsentKey(ConsentKey.TERMS)).thenReturn(Optional.of(terms));
+    when(documentRepository.findByConsentKeyAndLocale(ConsentKey.TERMS, "ko")).thenReturn(Optional.of(terms));
   }
 
   private ConsentDocument document(ConsentKey key, String version) {
@@ -184,8 +185,8 @@ class ConsentDocumentServiceTest {
   void bundleVersion_countsRequiredOnly() {
     ConsentDocument marketing = document(ConsentKey.MARKETING, "2027-01-01");
     ConsentDocument privacy = document(ConsentKey.PRIVACY, "2026-10-01");
-    when(documentRepository.findAll()).thenReturn(List.of(terms, privacy, marketing));
+    when(documentRepository.findAllByLocale("ko")).thenReturn(List.of(terms, privacy, marketing));
 
-    assertThat(service.bundleVersion()).isEqualTo("2026-10-01");
+    assertThat(service.bundleVersion(AppLocale.KO)).isEqualTo("2026-10-01");
   }
 }

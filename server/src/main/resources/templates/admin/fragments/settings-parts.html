@@ -83,16 +83,32 @@
     th:data-current="${row.currentValue()}"
     th:data-default="${row.defaultValue()}"
     th:data-default-display="${row.defaultDisplayValue()}"
-    th:data-secret="${row.isSecret()}">
+    th:data-secret="${row.isSecret()}"
+    th:data-format="${row.formatName()}"
+    th:data-format-hint="${row.formatHint()}"
+    th:data-warning="${row.hasValidationWarning()}"
+    th:data-warning-text="${row.validationWarning()}"
+    th:data-source="${row.valueSourceLabel()}"
+    th:data-deploy-value="${row.deployPropertyValue()}">
   <td class="min-w-48">
     <div class="font-medium">
       <span th:text="${row.label()}">설정명</span>
       <span th:if="${row.isDifferent()}" class="badge badge-warning badge-sm ml-1">기본값과 다름</span>
       <span th:if="${row.isSecret() and row.displayValue() == '설정됨'}" class="badge badge-success badge-sm ml-1">설정됨</span>
+      <!-- 저장 뒤 규칙이 바뀌어 지금 규칙에 맞지 않는 값: 읽기는 그대로, 고치라고 알림 -->
+      <span th:if="${row.hasValidationWarning()}" class="badge badge-error badge-sm ml-1"
+            th:title="${row.validationWarning()}">규칙에 어긋남</span>
     </div>
     <div class="font-mono text-xs text-base-content/50" th:text="${row.key()}">KEY</div>
   </td>
-  <td class="max-w-xs"><div class="truncate" th:title="${row.displayValue()}" th:text="${row.displayValue()}">값</div></td>
+  <td class="max-w-xs">
+    <div class="truncate" th:title="${row.displayValue()}" th:text="${row.displayValue()}">값</div>
+    <!-- yml 에 묶인 모델명 키: 지금 값이 어디서 왔는지 (DB 값이 있으면 yml 은 쓰지 않음) -->
+    <div th:if="${row.hasDeployProperty()}" class="text-xs text-base-content/50"
+         th:text="'출처: ' + ${row.valueSourceLabel()}">출처</div>
+    <div th:if="${row.hasValidationWarning()}" class="max-w-xs truncate text-xs text-error"
+         th:title="${row.validationWarning()}" th:text="${row.validationWarning()}">경고</div>
+  </td>
   <td class="max-w-xs text-base-content/60">
     <div class="truncate" th:title="${row.defaultDisplayValue()}"
          th:text="${row.isSecret() ? '-' : row.defaultDisplayValue()}">기본값</div>

@@ -19,6 +19,11 @@ enum ServerErrorCode {
   // 탈퇴 계정. 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
   memberWithdrawn('MEMBER_WITHDRAWN'),
   memberNotWithdrawn('MEMBER_NOT_WITHDRAWN'),
+  // 보호자 닉네임 변경. 욕설·예약어는 걸린 이유를 알리지 않고 NOT_ALLOWED 하나로 돌려준다.
+  nicknameInvalidFormat('NICKNAME_INVALID_FORMAT'),
+  nicknameNotAllowed('NICKNAME_NOT_ALLOWED'),
+  nicknameDuplicated('NICKNAME_DUPLICATED'),
+  nicknameChangeTooSoon('NICKNAME_CHANGE_TOO_SOON'),
 
   // AUTH
   invalidCredentials('INVALID_CREDENTIALS'),
@@ -33,7 +38,7 @@ enum ServerErrorCode {
   routineInvalidStatus('ROUTINE_INVALID_STATUS'),
   // 일과관리 원본을 같은 날 두 번 보냈다 (#804)
   routineAlreadySentToday('ROUTINE_ALREADY_SENT_TODAY'),
-  // 일과 묶음 (#806): 없음 · 내 일과관리 원본이 아님 · 2개 미만
+  // 일과 묶음 (#806): 없음 · 내 일과관리 원본이 아님 · 일과 없음
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),
@@ -182,6 +187,7 @@ enum ServerErrorCode {
   noticePriorityInvalid('NOTICE_PRIORITY_INVALID'),
   noticePlatformInvalid('NOTICE_PLATFORM_INVALID'),
   noticeLocaleInvalid('NOTICE_LOCALE_INVALID'),
+  noticeTargetCountriesInvalid('NOTICE_TARGET_COUNTRIES_INVALID'),
   noticeImageInvalidType('NOTICE_IMAGE_INVALID_TYPE'),
   noticeImageTooLarge('NOTICE_IMAGE_TOO_LARGE'),
   noticeImageSaveFailed('NOTICE_IMAGE_SAVE_FAILED'),
@@ -225,6 +231,20 @@ enum ServerErrorCode {
   adminCreditPolicyTtlTooShort('ADMIN_CREDIT_POLICY_TTL_TOO_SHORT'),
   adminCreditPolicyApplyInvalid('ADMIN_CREDIT_POLICY_APPLY_INVALID'),
   adminCreditPolicyValueNegative('ADMIN_CREDIT_POLICY_VALUE_NEGATIVE'),
+
+  // 이야기. 내려간 글·지워진 댓글, 이용 규칙 미동의, 남의 글 수정, 중복 나눔·신고에서 난다.
+  talkPostNotFound('TALK_POST_NOT_FOUND'),
+  talkCommentNotFound('TALK_COMMENT_NOT_FOUND'),
+  talkRulesNotAgreed('TALK_RULES_NOT_AGREED'),
+  talkNotAuthor('TALK_NOT_AUTHOR'),
+  talkRoutineNotShareable('TALK_ROUTINE_NOT_SHAREABLE'),
+  talkAlreadyShared('TALK_ALREADY_SHARED'),
+  talkTextTooLong('TALK_TEXT_TOO_LONG'),
+  talkTextNotAllowed('TALK_TEXT_NOT_ALLOWED'),
+  talkNicknameMaskFailed('TALK_NICKNAME_MASK_FAILED'),
+  talkReportDuplicated('TALK_REPORT_DUPLICATED'),
+  talkCannotBlockSelf('TALK_CANNOT_BLOCK_SELF'),
+  talkImageNotFound('TALK_IMAGE_NOT_FOUND'),
 
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.

@@ -11,6 +11,7 @@
 | 문서 | 내용 |
 | --- | --- |
 | [docs/figma-frames.md](./docs/figma-frames.md) | **화면 지도** — 전체 프레임 노드 ID + 대조 현황. 화면을 건드리기 전에 |
+| [docs/design-language.md](./docs/design-language.md) | **디자인 입맛** — 철학·반복 패턴·하지 않는 것·체크리스트. **시안 없이 새 화면을 만들기 전에** (AI 브레인스토밍 프롬프트에도 붙인다) |
 | [docs/design-system.md](./docs/design-system.md) | 색·타이포·간격·컴포넌트 토큰 (Figma 추출값) |
 | [docs/motion.md](./docs/motion.md) | **애니메이션 duration·curve·눌림 반응** — 화면에 모션을 넣기 전 |
 | [docs/onboarding-flow.md](./docs/onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 + **프레임 노드 ID 표** |
@@ -133,6 +134,7 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
   // ❌ Color(0xFF443E39), fontSize: 28
   // ✅ AppColors.textPrimary, AppTypography.title
   ```
+- **글자 배율은 `core/layout/app_text_scale.dart`(`AppTextScale`) 한 곳에서 정한다.** 시스템 글자 크기(1.0 미만은 1.0) × 폰 폭 배율(창 폭/393)이라 글자 토큰은 고정 pt 로 두고 `.sp` 를 쓰지 않는다. 화면에서 `TextScaler.noScaling`·숫자 `TextScaler.linear(…)` 로 덮지 않고, `TextPainter` 로 글자를 잴 때는 `MediaQuery.textScalerOf(context)` 를 넘긴다. 글자가 기기마다 커질 수 있으니 글자가 든 칸 높이를 고정하지 않는다. 시뮬레이터(393 · 1.0)만 보면 안 드러난다 — 원인과 실측은 #940.
 - **창 크기·방향은 `context.sizeClass` / `context.isLandscape` / `context.layout` 으로만 읽는다.** 화면에서 `600`·`840` 같은 breakpoint 를 직접 비교하거나 `1.sw`·`ScreenUtil()` 을 부르지 않는다. 시트·팝업은 `showElumSheet`·`showElumDialog` 로만 띄운다. 태블릿 설계는 `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
 - **화면 위젯은 `ConsumerWidget` 우선.** `StatefulWidget`은 애니메이션 컨트롤러가 필요할 때만.
 - **`build()` 안에서 비즈니스 로직 금지.** provider 또는 notifier로 뺀다.
@@ -538,7 +540,9 @@ context.typo.cardTitle.copyWith(color: ...)
 | --- | --- | --- |
 | 정적 분석 | `flutter analyze --no-fatal-infos` | 로컬 · Flutter CI |
 | 계층 import 방향 | `dart run tool/check_layer_imports.dart` (동결 목록 `tool/layer_imports_allowed.txt`) | 로컬 · Flutter CI |
+| 디자인 규칙 (시안 색 · 글자 조합 · 간격 · 모서리 · fi-br 아이콘 · Material 기본 부품) | `dart run tool/check_design_rules.dart` (원본 `tool/design_rules.yaml` · 동결 `tool/design_rules_allowed.txt` · 절차 `docs/design-language.md` §10) | 로컬 · Flutter CI |
 | 화면 문구 하드코딩 | `dart run tool/check_hangul_literals.dart lib` (0줄이어야 한다) | 로컬 · Flutter CI |
+| 네이티브 언어 등록 (OS 앱별 언어 목록 = 연 언어, iOS 권한 문구 키) | `dart run tool/check_native_locales.dart` (원본 `lib/core/l10n/app_locales.dart` `openedAppLocales` · 여는 순서 `docs/store/locales/README.md`) | 로컬 · Flutter CI |
 | 서버 계약 (에러 코드·공유 enum·연결 암호·의견 기록 표지) | 서버 `CrossStackContractTest` 가 앱 소스를 읽어 대조 | `cd server && ./gradlew test --tests '*CrossStackContractTest*'` |
 | 실제 동작 | 시뮬레이터·실기기에서 직접 띄워 확인 (`/pro-launch`) | 로컬 |
 

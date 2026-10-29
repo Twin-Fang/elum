@@ -7,11 +7,11 @@ import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import '../config/app_config.dart';
-import '../logger/app_logger.dart';
-import '../widgets/show_failure.dart';
+import '../dev/dev_simulation.dart';
+import '../dev/dev_skip_notice_button.dart';
 import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
-import 'store_launcher.dart';
+import 'update_suggestion.dart';
 import 'app_notice_card.dart';
 
 /// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다.
@@ -33,9 +33,6 @@ class AppStatusGate extends ConsumerStatefulWidget {
 
 class _AppStatusGateState extends ConsumerState<AppStatusGate>
     with WidgetsBindingObserver {
-  /// 스토어를 못 열었을 때 붙는 식별자.
-  static const storeFailureCode = 'E-UPDATE-STORE';
-
   @override
   void initState() {
     super.initState();
@@ -55,32 +52,22 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
     }
   }
 
-  /// 스토어를 연다. 못 열면 에러 코드와 함께 알리고 이 화면에 남는다 —
-  /// 사용자는 다시 누르거나 스토어를 직접 찾아갈 수 있다.
-  Future<void> _openStore(BuildContext noticeContext, Uri url) async {
-    // await 뒤에서 context 를 쓰지 않도록 문구를 먼저 잡는다.
-    final l10n = noticeContext.l10n;
-    Object? error;
-    var opened = false;
-    try {
-      opened = await ref.read(storeLauncherProvider)(url);
-    } catch (e, st) {
-      error = e;
-      AppLogger.error('app-status', e, st, {'step': 'openStore'});
-    }
-    if (opened || !noticeContext.mounted) return;
-    await showFailure(
-      noticeContext,
-      error,
-      title: l10n.appStatusStoreOpenFailedTitle,
-      fallback: l10n.appStatusStoreOpenFailedFallback,
-      fallbackCode: storeFailureCode,
+  @override
+  Widget build(BuildContext context) {
+    // 테스트 빌드에서 `그냥 계속하기`를 누르면 막는 화면 대신 앱을 그림
+    return ValueListenableBuilder<bool>(
+      valueListenable: DevSimulation.isBlockingNoticeSkipped,
+      builder: (context, _, _) => DevSimulation.shouldSkipBlockingNotice
+          ? widget.child
+          : _buildGate(context),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildGate(BuildContext context) {
     final async = ref.watch(appStatusProvider);
+    // 개발자 도구 빌드만 막는 화면 아래 `그냥 계속하기`
+    final skipButton =
+        DevSimulation.canSkipBlockingNotice ? const DevSkipNoticeButton() : null;
 
     return async.maybeWhen(
       // 다시 묻는 동안에는 **직전 화면을 그대로 둔다.** 그러지 않으면 점검 화면에서
@@ -102,6 +89,7 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                     : status.maintenanceMessage,
                 actionLabel: context.l10n.appStatusRecheck,
                 onAction: (_) => ref.invalidate(appStatusProvider),
+                footer: skipButton,
               ),
             ),
           );
@@ -128,7 +116,9 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                     : context.l10n.appStatusGoUpdate,
                 onAction: storeUrl == null
                     ? (_) => ref.invalidate(appStatusProvider)
-                    : (noticeContext) => _openStore(noticeContext, storeUrl),
+                    : (noticeContext) =>
+                          openStoreOrShowFailure(noticeContext, ref, storeUrl),
+                footer: skipButton,
               ),
             ),
           );

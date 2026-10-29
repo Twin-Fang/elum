@@ -338,26 +338,6 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
-  // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PatchMapping("/{routineId}/steps/{stepId}/complete")
-  public ResponseEntity<RoutineResponse> completeStep(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
-  ) {
-    Caller caller = Caller.from(authentication);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineProgressService.completeStep(caller, routineId, stepId)));
-  }
-
-  // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PatchMapping("/{routineId}/steps/{stepId}/cancel")
-  public ResponseEntity<RoutineResponse> cancelStep(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
-  ) {
-    Caller caller = Caller.from(authentication);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineProgressService.cancelStep(caller, routineId, stepId)));
-  }
-
   // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다.
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

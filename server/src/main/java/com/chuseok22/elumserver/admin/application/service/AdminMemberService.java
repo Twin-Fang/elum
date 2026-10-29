@@ -1,16 +1,21 @@
 package com.chuseok22.elumserver.admin.application.service;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberConnections;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.ExportRows;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.auth.application.service.AuthIdentityQueryService;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
+import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionHistoryService;
@@ -24,6 +29,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository.MemberGuardianshipCount;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
@@ -61,12 +67,14 @@ public class AdminMemberService {
   private final ProfileGuardianRepository profileGuardianRepository;
   private final AiCallLogRepository aiCallLogRepository;
   private final RefreshTokenService refreshTokenService;
+  private final AuthIdentityQueryService authIdentityQueryService;
   private final SubscriptionService subscriptionService;
   private final SubscriptionHistoryService subscriptionHistoryService;
   private final WithdrawnMemberService withdrawnMemberService;
+  private final AdminMemberConnectionService adminMemberConnectionService;
 
   /**
-   * 회원 목록: 조건 쿼리 1회 > 페이지 회원의 집계 보강(루틴수, AI 사용량, 이룸이, 구독, 마지막 변경 각 1회)
+   * 회원 목록: 조건 쿼리 1회 > 페이지 회원의 집계 보강(루틴수, AI 사용량, 이룸이, 구독, 마지막 변경, 이룸이·보호자 수, 로그인 제공자 각 1회)
    * 회원 수만큼 쿼리하지 않음. 범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회
    */
   public Page<AdminMemberResponse> search(AdminListQuery query) {
@@ -74,7 +82,23 @@ public class AdminMemberService {
     if (members.getTotalPages() > 0 && query.page() > members.getTotalPages()) {
       members = findMembers(query.withTotalPages(members.getTotalPages()));
     }
+    return withListDetails(members);
+  }
 
+  /**
+   * 회원 CSV: 목록과 같은 조건·정렬로 첫 쪽(상한 크기) 조회 > 상한 이내일 때만 목록과 같은 집계 보강
+   * 상한을 넘으면 보강 쿼리 없이 건수만 돌려줌
+   */
+  public ExportRows<AdminMemberResponse> searchForExport(AdminListQuery query) {
+    Page<Member> members = findMembers(query, AdminCsvExporter.exportPageable(sortOf(query)));
+    if (AdminCsvExporter.isOverLimit(members.getTotalElements())) {
+      return ExportRows.overLimit(members.getTotalElements());
+    }
+    return ExportRows.fromPage(withListDetails(members));
+  }
+
+  // 회원 페이지 > 목록 한 줄 응답 (보강 쿼리는 회원 수와 상관없이 종류마다 1회)
+  private Page<AdminMemberResponse> withListDetails(Page<Member> members) {
     List<String> memberIds = members.getContent().stream().map(Member::getId).toList();
     Map<String, Long> routineCounts = memberIds.isEmpty() ? Map.of()
       : routineRepository.countByMemberIds(memberIds).stream()
@@ -89,27 +113,45 @@ public class AdminMemberService {
         .collect(Collectors.toMap(g -> g.getMember().getId(), ProfileGuardian::getProfile, (first, later) -> first));
     Map<String, Subscription> subscriptions = subscriptionService.findAllByMemberIds(memberIds);
     Map<String, SubscriptionHistory> lastPlanChanges = subscriptionHistoryService.latestByMemberIds(memberIds);
+    Map<String, MemberGuardianshipCount> guardianshipCounts = memberIds.isEmpty() ? Map.of()
+      : profileGuardianRepository.countGuardianshipByMemberIds(memberIds).stream()
+        .collect(Collectors.toMap(MemberGuardianshipCount::getMemberId, Function.identity()));
+    Map<String, List<OAuthProvider>> loginProviders = authIdentityQueryService.providersByMemberIds(memberIds);
 
-    return members.map(member -> AdminMemberResponse.of(
-      member,
-      profiles.get(member.getId()),
-      routineCounts.getOrDefault(member.getId(), 0L),
-      aiUsages.get(member.getId()),
-      withdrawnMemberService.retentionExpiresAt(member),
-      subscriptions.get(member.getId()),
-      lastPlanChanges.get(member.getId())
-    ));
+    return members.map(member -> {
+      MemberGuardianshipCount guardianship = guardianshipCounts.get(member.getId());
+      return AdminMemberResponse.of(
+        member,
+        profiles.get(member.getId()),
+        routineCounts.getOrDefault(member.getId(), 0L),
+        aiUsages.get(member.getId()),
+        withdrawnMemberService.retentionExpiresAt(member),
+        subscriptions.get(member.getId()),
+        lastPlanChanges.get(member.getId())
+      ).withGuardianshipAndProviders(
+        guardianship == null ? 0 : countOrZero(guardianship.getProfileCount()),
+        guardianship == null ? 0 : countOrZero(guardianship.getGuardianCount()),
+        loginProviders.getOrDefault(member.getId(), List.of()));
+    });
   }
 
+  private static long countOrZero(Long count) {
+    return count == null ? 0 : count;
+  }
+
+  /**
+   * 회원 상세: 계정·일과·AI 사용량·요금제 > 연결 정보(이룸이 전부의 보호자·초대 코드·기기, 푸시 기기)
+   * 머리글 이름은 기본 이룸이(가장 먼저 합류) 기준. 이룸이 전부는 연결 정보의 카드로 보여줌
+   */
   public AdminMemberDetailResponse getDetail(String memberId) {
     Member member = findOrThrow(memberId);
     // 이 사람이 만든 일과 — 이룸이를 함께 돌보면 다른 사람의 일과는 그 사람 화면에 있다.
     List<Routine> routines = routineRepository.findAllByCreatedBy(memberId);
-    Profile profile = profileRepository.findAllGuardedBy(memberId).stream().findFirst().orElse(null);
+    Profile defaultProfile = profileRepository.findAllGuardedBy(memberId).stream().findFirst().orElse(null);
     MemberAiUsage aiUsage = aiCallLogRepository.aggregateUsageByMemberIds(List.of(memberId)).stream()
       .findFirst().orElse(null);
-    return AdminMemberDetailResponse.of(
-      member, profile, routines, aiUsage,
+    AdminMemberDetailResponse detail = AdminMemberDetailResponse.of(
+      member, defaultProfile, routines, aiUsage,
       aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId),
       subscriptionService.find(memberId)
         .map(AdminSubscriptionSummary::from)
@@ -119,6 +161,23 @@ public class AdminMemberService {
         .toList(),
       withdrawnMemberService.retentionExpiresAt(member)
     );
+    return detail.withConnections(findConnectionsOrFailed(memberId));
+  }
+
+  /// 이룸이 기기 연결 해제 (확인·세션 폐기·감사 로그는 연결 정보 서비스가 처리)
+  @Transactional
+  public void unlinkDevice(String memberId, String linkId, String adminUsername) {
+    adminMemberConnectionService.unlinkDevice(memberId, linkId, adminUsername);
+  }
+
+  // 연결 정보 조회 (다른 트랜잭션). 실패해도 상세 본문은 그대로 열고 그 영역에 오류 코드 표시
+  private AdminMemberConnections findConnectionsOrFailed(String memberId) {
+    try {
+      return adminMemberConnectionService.getConnections(memberId);
+    } catch (RuntimeException e) {
+      log.warn("[admin member detail] connections load failed : memberId={}", memberId, e);
+      return AdminMemberConnections.failed();
+    }
   }
 
   /**
@@ -207,14 +266,23 @@ public class AdminMemberService {
 
   // 상태 필터가 없으면 탈퇴 계정을 뺀다. 탈퇴 계정은 "탈퇴" 필터로만 본다.
   private Page<Member> findMembers(AdminListQuery query) {
+    return findMembers(query, PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query)));
+  }
+
+  // 조건 > 회원 페이지 (목록·CSV 공통). 제공자 필터가 없으면 in 이 비지 않게 전체 제공자를 넘김
+  private Page<Member> findMembers(AdminListQuery query, Pageable pageable) {
     String statusFilter = query.filters().get(AdminMemberList.FILTER_STATUS);
     List<MemberStatus> statuses = statusFilter == null
       ? Arrays.stream(MemberStatus.values()).filter(status -> status != MemberStatus.WITHDRAWN).toList()
       : List.of(MemberStatus.valueOf(statusFilter));
     String planFilter = query.filters().getOrDefault(AdminMemberList.FILTER_PLAN, PLAN_FILTER_ALL);
-    Pageable pageable = PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query));
+    OAuthProvider provider = AdminMemberList.providerOf(query);
+    List<OAuthProvider> providers = provider == null ? List.of(OAuthProvider.values()) : List.of(provider);
     return memberRepository.searchForAdmin(
-      query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(), pageable);
+      query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(),
+      AdminMemberList.joinedFromOf(query), AdminMemberList.joinedToExclusiveOf(query),
+      AdminMemberList.hasLastActivePeriod(query), AdminMemberList.lastActiveFromOf(query),
+      AdminMemberList.lastActiveToExclusiveOf(query), provider != null, providers, pageable);
   }
 
   // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다

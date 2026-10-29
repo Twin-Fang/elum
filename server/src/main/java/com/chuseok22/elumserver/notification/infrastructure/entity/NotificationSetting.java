@@ -37,4 +37,12 @@ public class NotificationSetting extends BaseEntity {
 
   @Column(name = "feedback_resolved_enabled", nullable = false, columnDefinition = "boolean not null default true")
   private boolean isFeedbackResolvedEnabled = true;
+
+  // 이야기: 내 글에 댓글이 달렸을 때
+  @Column(name = "talk_commented_enabled", nullable = false, columnDefinition = "boolean not null default true")
+  private boolean isTalkCommentedEnabled = true;
+
+  // 이야기: 내 글을 누가 일과관리로 가져갔을 때
+  @Column(name = "talk_imported_enabled", nullable = false, columnDefinition = "boolean not null default true")
+  private boolean isTalkImportedEnabled = true;
 }

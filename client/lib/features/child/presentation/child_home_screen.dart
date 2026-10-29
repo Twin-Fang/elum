@@ -14,6 +14,7 @@ import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/tablet_hero_scene.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
@@ -63,6 +64,9 @@ class ChildHomeScreen extends ConsumerWidget {
   /// 세로 태블릿 장면 띠 높이 (393 기준)
   static const _portraitSceneHeight = 220.0;
 
+  /// 오늘 일과 받기 실패 코드 (빈 화면 표시 · 당겨서 새로고침 팝업 공통)
+  static const _routineListErrorCode = 'E-CHLIST';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
@@ -91,6 +95,14 @@ class ChildHomeScreen extends ConsumerWidget {
       ),
     );
 
+    // 당겨서 새로고침: 오늘 일과만 다시 받기. 실패면 보이던 목록 그대로 + 실패 팝업
+    Widget withPullToRefresh(Widget listScroll) => ElumPullToRefresh(
+      onRefresh: ref.refreshTodayRoutinesNow,
+      failureMessage: context.l10n.todayRoutineLoadFailedFallback,
+      failureCode: _routineListErrorCode,
+      child: listScroll,
+    );
+
     // 가로 태블릿은 왼쪽 인사말·오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열 스크롤로 접는다
     final metrics = context.layoutMetrics;
     final hasTwoPanes =
@@ -113,19 +125,21 @@ class ChildHomeScreen extends ConsumerWidget {
                     children: [
                       const ChildHomeTopBar(),
                       Expanded(
-                        child: ChildNoRoutine(
-                          childName: childName,
-                          character: character,
-                          isElumiDevice: isElumiDevice,
-                          // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
-                          // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
-                          // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
-                          // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다.
-                          errorCode: routinesAsync.hasError
-                              ? AppFailure.of(
-                                  routinesAsync.error,
-                                ).badgeOr('E-CHLIST')
-                              : null,
+                        child: withPullToRefresh(
+                          ChildNoRoutine(
+                            childName: childName,
+                            character: character,
+                            isElumiDevice: isElumiDevice,
+                            // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
+                            // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
+                            // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
+                            // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다.
+                            errorCode: routinesAsync.hasError
+                                ? AppFailure.of(
+                                    routinesAsync.error,
+                                  ).badgeOr(_routineListErrorCode)
+                                : null,
+                          ),
                         ),
                       ),
                     ],
@@ -139,45 +153,53 @@ class ChildHomeScreen extends ConsumerWidget {
                           greeting: greetingText,
                           character: character,
                           routineList: _RoutineList(routines: routines),
+                          listScrollWrapper: withPullToRefresh,
                         ),
                       ),
                     ],
                   )
-                : SingleChildScrollView(
-                    padding: EdgeInsets.only(bottom: space.xl),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ChildHomeTopBar(),
-                        // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
-                        SizedBox(height: 28.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: space.screenH,
-                          ),
-                          child: greetingText,
-                        ),
-                        // 세로 태블릿: 인사말 아래 장면 띠 (폰은 없음)
-                        if (metrics.isScaleOverridden) ...[
-                          SizedBox(height: space.lg),
+                : withPullToRefresh(
+                    SingleChildScrollView(
+                      physics: ElumPullToRefresh.calmPhysics,
+                      padding: EdgeInsets.only(bottom: space.xl),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ChildHomeTopBar(),
+                          // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
+                          SizedBox(height: 28.h),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: space.md),
-                            child: SizedBox(
-                              height: _portraitSceneHeight.h,
-                              child: TabletHeroScene(
-                                characterAsset: AppAssets.character(character),
-                                characterHeightRatio: 0.62,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: space.screenH,
+                            ),
+                            child: greetingText,
+                          ),
+                          // 세로 태블릿: 인사말 아래 장면 띠 (폰은 없음)
+                          if (metrics.isScaleOverridden) ...[
+                            SizedBox(height: space.lg),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: space.md,
+                              ),
+                              child: SizedBox(
+                                height: _portraitSceneHeight.h,
+                                child: TabletHeroScene(
+                                  characterAsset: AppAssets.character(
+                                    character,
+                                  ),
+                                  characterHeightRatio: 0.62,
+                                ),
                               ),
                             ),
+                          ],
+                          // 인사말 아래(202) → 첫 타일(242)
+                          SizedBox(height: 40.h),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: space.md),
+                            child: _RoutineList(routines: routines),
                           ),
                         ],
-                        // 인사말 아래(202) → 첫 타일(242)
-                        SizedBox(height: 40.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: space.md),
-                          child: _RoutineList(routines: routines),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
           ),

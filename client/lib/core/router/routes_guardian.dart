@@ -8,9 +8,7 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
-import '../../features/guardian/presentation/navigation/guardian_coming_soon_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
-import '../../features/guardian/presentation/navigation/guardian_tab.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
@@ -19,9 +17,15 @@ import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import '../../features/notification/presentation/notification_settings_screen.dart';
 import '../../features/notification/presentation/notifications_screen.dart';
+import '../../features/profile/presentation/elumi_info_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
+import '../../features/talk/presentation/talk_blocked_guardians_screen.dart';
+import '../../features/talk/presentation/talk_my_posts_screen.dart';
+import '../../features/talk/presentation/talk_detail_screen.dart';
+import '../../features/talk/presentation/talk_feed_screen.dart';
+import '../../features/talk/presentation/talk_share_screen.dart';
 import '../config/ad_ids.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
@@ -74,7 +78,7 @@ List<RouteBase> guardianRoutes() => [
             path: Routes.guardianTalk,
             pageBuilder: (context, state) => fadePage(
               state,
-              const GuardianComingSoonScreen(tab: GuardianTab.talk),
+              const TalkFeedScreen(),
               layoutKind: ScreenLayoutKind.contentColumn,
             ),
           ),
@@ -93,6 +97,35 @@ List<RouteBase> guardianRoutes() => [
         ],
       ),
     ],
+  ),
+  // 이야기 글 상세·올리기·숨긴 보호자: 하단 바를 덮는 화면이라 셸 밖에 둔다
+  GoRoute(
+    path: Routes.guardianTalkPost,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      TalkDetailScreen(postId: state.pathParameters['postId'] ?? ''),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 이야기 올리기: extra 는 입구가 정한 일과 id (없으면 일과 고르기부터)
+  GoRoute(
+    path: Routes.guardianTalkShare,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      TalkShareScreen(
+        initialRoutineId: state.extra is String ? state.extra as String : null,
+      ),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  GoRoute(
+    path: Routes.guardianTalkBlocks,
+    pageBuilder: (context, state) =>
+        slidePage(state, const TalkBlockedGuardiansScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianTalkMine,
+    pageBuilder: (context, state) => slidePage(state, const TalkMyPostsScreen()),
   ),
   // 설정은 내정보 칸 위에 열린다 (하단 바를 덮고 뒤로가기가 있다)
   GoRoute(
@@ -132,8 +165,14 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianNotifications,
-    pageBuilder: (context, state) =>
-        slidePage(state, const NotificationsScreen()),
+    pageBuilder: (context, state) => slidePage(
+      state,
+      NotificationsScreen(
+        isNoticeTabInitiallySelected:
+            state.uri.queryParameters[Routes.notificationsTabQuery] ==
+            Routes.notificationsNoticeTabValue,
+      ),
+    ),
   ),
   GoRoute(
     path: Routes.guardianNotificationSettings,
@@ -158,6 +197,17 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianProfileSwitch,
     pageBuilder: (context, state) =>
         slidePage(state, const ProfileSwitchScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianElumiInfo,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      ElumiInfoScreen(
+        profileId:
+            state.uri.queryParameters[Routes.elumiInfoProfileIdQuery] ?? '',
+      ),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
   ),
   GoRoute(
     path: Routes.guardianLinkStatus,

@@ -45,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-/// 일과관리 묶음(#806): 구성원 규칙(원본만 · 한 묶음 · 2개 이상) · 풀기 · 복사 · 묶음째 보내기 · 권한
+/// 일과관리 묶음(#806): 구성원 규칙(원본만 · 한 묶음 · 1개 이상) · 풀기 · 복사 · 묶음째 보내기 · 권한
 /// 저장소는 메모리 목록으로 흉내 내 묶음 구성 변화를 결과로 확인한다
 @ExtendWith(MockitoExtension.class)
 class RoutineGroupServiceTest {
@@ -104,12 +104,11 @@ class RoutineGroupServiceTest {
   }
 
   @Test
-  @DisplayName("묶음 만들기는 받은 차례를 지키고, 옮겨 온 일과의 옛 묶음이 1개만 남으면 그 묶음을 푼다")
-  void create_keepsOrder_andDissolvesPreviousGroupBelowTwo() {
+  @DisplayName("묶음 만들기는 받은 차례를 지키고, 일과를 다 옮겨 온 옛 묶음은 푼다")
+  void create_keepsOrder_andDissolvesEmptiedPreviousGroup() {
     Routine first = original("routine-a");
-    Routine second = original("routine-b");
     Routine third = original("routine-c");
-    putInGroup("group-old", first, second);
+    putInGroup("group-old", first);
 
     RoutineGroupResponse response = routineGroupService.create(GUARDIAN, "  아침 묶음 ", List.of("routine-c", "routine-a"));
 
@@ -118,14 +117,13 @@ class RoutineGroupServiceTest {
     assertThat(third.getGroupOrder()).isZero();
     assertThat(first.getGroupId()).isEqualTo(response.id());
     assertThat(first.getGroupOrder()).isEqualTo(1);
-    // 옛 묶음에 하나만 남아 풀림 — 일과는 지우지 않는다
-    assertThat(second.getGroupId()).isNull();
+    // 옛 묶음이 비어 풀림 — 일과는 지우지 않는다
     verify(routineGroupRepository).deleteById("group-old");
     verify(routineRepository, never()).delete(any());
   }
 
   @Test
-  @DisplayName("묶음 만들기 거절: 2개 미만 TOO_SMALL · 보낸 일과/임시저장/다른 이룸이 일과 INVALID_MEMBER · 이름 13자 INVALID_INPUT_VALUE")
+  @DisplayName("묶음 만들기 거절: 0개 TOO_SMALL · 보낸 일과/임시저장/다른 이룸이 일과 INVALID_MEMBER · 이름 13자 INVALID_INPUT_VALUE")
   void create_rejectsTooSmall_invalidMembers_andBadName() {
     original("routine-a");
     original("routine-b").setSourceRoutineId("routine-a");
@@ -133,7 +131,7 @@ class RoutineGroupServiceTest {
     original("routine-d").setProfile(profileOf("profile-2"));
     original("routine-e");
 
-    assertCreateFails(List.of("routine-a"), ErrorCode.ROUTINE_GROUP_TOO_SMALL);
+    assertCreateFails(List.of(), ErrorCode.ROUTINE_GROUP_TOO_SMALL);
     assertCreateFails(List.of("routine-a", "routine-b"), ErrorCode.ROUTINE_GROUP_INVALID_MEMBER);
     assertCreateFails(List.of("routine-a", "routine-c"), ErrorCode.ROUTINE_GROUP_INVALID_MEMBER);
     assertCreateFails(List.of("routine-a", "routine-d"), ErrorCode.ROUTINE_GROUP_INVALID_MEMBER);
@@ -144,7 +142,18 @@ class RoutineGroupServiceTest {
   }
 
   @Test
-  @DisplayName("구성 바꾸기는 빠진 일과를 내보내고 새 차례로 줄 세운다 — 1개로 줄이면 TOO_SMALL")
+  @DisplayName("일과 1개로도 묶음을 만든다")
+  void create_acceptsSingleRoutine() {
+    Routine only = original("routine-a");
+
+    createdGroupOf(List.of("routine-a"));
+
+    assertThat(only.getGroupId()).isNotNull();
+    assertThat(only.getGroupOrder()).isZero();
+  }
+
+  @Test
+  @DisplayName("구성 바꾸기는 빠진 일과를 내보내고 새 차례로 줄 세운다 — 비우면 TOO_SMALL")
   void replaceRoutines_reordersAndRemoves_rejectsTooSmall() {
     Routine first = original("routine-a");
     Routine second = original("routine-b");
@@ -159,7 +168,7 @@ class RoutineGroupServiceTest {
     assertThat(third.getGroupOrder()).isZero();
     assertThat(first.getGroupOrder()).isEqualTo(1);
     assertThat(second.getGroupId()).isNull();
-    assertThatThrownBy(() -> routineGroupService.replaceRoutines(GUARDIAN, "group-1", List.of("routine-c")))
+    assertThatThrownBy(() -> routineGroupService.replaceRoutines(GUARDIAN, "group-1", List.of()))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_GROUP_TOO_SMALL);
     assertThat(third.getGroupId()).isEqualTo("group-1");
   }
@@ -205,18 +214,15 @@ class RoutineGroupServiceTest {
   }
 
   @Test
-  @DisplayName("묶음 풀기는 풀린 일과가 묶음이 있던 칸 자리를 이어받는다 — 1개만 남아 풀릴 때도 같다")
-  void delete_andDissolveBelowTwo_freedRoutinesTakeGroupPosition() {
+  @DisplayName("묶음 풀기는 풀린 일과가 묶음이 있던 칸 자리를 이어받는다 — 빼서 1개만 남은 묶음은 풀리지 않는다")
+  void delete_freedRoutinesTakeGroupPosition_singleRemainingKeepsGroup() {
     Routine first = original("routine-a");
     Routine second = original("routine-b");
     Routine lonelyRemaining = original("routine-c");
     Routine leaving = original("routine-d");
     RoutineGroup folder = group("group-1", "아침");
     folder.setDisplayOrder(4);
-    RoutineGroup shrinking = group("group-2", "저녁");
-    shrinking.setDisplayOrder(6);
     when(routineGroupRepository.findById("group-1")).thenReturn(Optional.of(folder));
-    when(routineGroupRepository.findById("group-2")).thenReturn(Optional.of(shrinking));
     putInGroup("group-1", first, second);
     putInGroup("group-2", lonelyRemaining, leaving);
     when(routineRepository.findById("routine-d")).thenReturn(Optional.of(leaving));
@@ -226,7 +232,9 @@ class RoutineGroupServiceTest {
 
     assertThat(first.getLibraryOrder()).isEqualTo(4);
     assertThat(second.getLibraryOrder()).isEqualTo(4);
-    assertThat(lonelyRemaining.getLibraryOrder()).isEqualTo(6);
+    assertThat(lonelyRemaining.getGroupId()).isEqualTo("group-2");
+    assertThat(lonelyRemaining.getGroupOrder()).isZero();
+    verify(routineGroupRepository, never()).deleteById("group-2");
   }
 
   @Test
@@ -298,19 +306,26 @@ class RoutineGroupServiceTest {
   }
 
   @Test
-  @DisplayName("일과관리에서 지운 일과는 묶음에서 빠지고, 1개만 남은 묶음은 풀린다")
-  void removeFromLibrary_dissolvesGroupBelowTwo() {
+  @DisplayName("일과관리에서 지운 일과는 묶음에서 빠지고, 1개 남은 묶음은 유지되며 비는 묶음은 풀린다")
+  void removeFromLibrary_keepsSingleRemaining_dissolvesEmptied() {
     Routine first = original("routine-a");
     Routine second = original("routine-b");
+    Routine alone = original("routine-c");
     putInGroup("group-1", first, second);
+    putInGroup("group-2", alone);
     when(routineRepository.findById("routine-a")).thenReturn(Optional.of(first));
+    when(routineRepository.findById("routine-c")).thenReturn(Optional.of(alone));
 
     routineLibraryService.removeFromLibrary(GUARDIAN, "routine-a");
+    routineLibraryService.removeFromLibrary(GUARDIAN, "routine-c");
 
     assertThat(first.isLibraryHidden()).isTrue();
     assertThat(first.getGroupId()).isNull();
-    assertThat(second.getGroupId()).isNull();
-    verify(routineGroupRepository).deleteById("group-1");
+    assertThat(second.getGroupId()).isEqualTo("group-1");
+    assertThat(second.getGroupOrder()).isZero();
+    verify(routineGroupRepository, never()).deleteById("group-1");
+    assertThat(alone.getGroupId()).isNull();
+    verify(routineGroupRepository).deleteById("group-2");
   }
 
   @Test
@@ -334,15 +349,15 @@ class RoutineGroupServiceTest {
   }
 
   @Test
-  @DisplayName("묶음 목록은 구성원을 차례대로 싣고, 다른 경로로 1개까지 줄어든 묶음은 뺀다")
-  void getGroups_listsMembersInOrder_skipsShrunkGroups() {
+  @DisplayName("묶음 목록은 구성원을 차례대로 싣고, 1개짜리 묶음은 싣고 빈 묶음은 뺀다")
+  void getGroups_listsMembersInOrder_skipsEmptyGroups() {
     Routine first = original("routine-a");
     Routine second = original("routine-b");
     Routine lonely = original("routine-c");
     putInGroup("group-1", second, first);
     putInGroup("group-2", lonely);
     when(routineGroupRepository.findAllByProfileIdOrderByDisplayOrderAscCreatedAtAsc("profile-1"))
-      .thenReturn(List.of(group("group-1", "아침"), group("group-2", "저녁")));
+      .thenReturn(List.of(group("group-1", "아침"), group("group-2", "저녁"), group("group-3", "빈 묶음")));
     when(routineRepository.findAllByGroupIdInOrderByGroupOrderAsc(anyCollection())).thenAnswer(invocation -> {
       Collection<String> groupIds = invocation.getArgument(0);
       return storedRoutines.stream().filter(routine -> groupIds.contains(routine.getGroupId()))
@@ -351,8 +366,9 @@ class RoutineGroupServiceTest {
 
     List<RoutineGroupResponse> groups = routineGroupService.getGroups(GUARDIAN);
 
-    assertThat(groups).extracting(RoutineGroupResponse::id).containsExactly("group-1");
+    assertThat(groups).extracting(RoutineGroupResponse::id).containsExactly("group-1", "group-2");
     assertThat(groups.get(0).routineIds()).containsExactly("routine-b", "routine-a");
+    assertThat(groups.get(1).routineIds()).containsExactly("routine-c");
   }
 
   private RoutineGroup createdGroupOf(List<String> routineIds) {

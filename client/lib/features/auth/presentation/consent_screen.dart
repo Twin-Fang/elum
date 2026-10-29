@@ -41,8 +41,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen>
   /// 세우므로 여기서 남은 30만 띄운다. `headerToContent`(52)를 쓰면 22가 밀린다.
   static const _headerToAllAgree = 30.0;
 
-  /// 전체 동의 버튼 하단(291) → 첫 항목(308)
-  static const _allAgreeToItems = 17.0;
+  /// 전체 동의 버튼 하단(291) → 첫 항목(307, 시안 726:5056 체크 원 가운데 332 - 줄 절반 25)
+  static const _allAgreeToItems = 16.0;
 
   final _checked = <String>{};
 

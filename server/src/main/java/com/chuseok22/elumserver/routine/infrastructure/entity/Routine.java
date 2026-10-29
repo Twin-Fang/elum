@@ -109,8 +109,8 @@ public class Routine extends BaseEntity {
   private Integer displayOrder = 0;
 
   /**
-   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외.
-   * 고쳐도 예시 표시는 그대로 둔다.
+   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외, 이야기 올리기 금지.
+   * 보호자가 글·그림을 고치면 지움 (#983, RoutineRules.clearExampleMark)
    */
   @Column(name = "is_example", nullable = false, columnDefinition = "boolean not null default false")
   private Boolean isExample = false;
@@ -169,6 +169,10 @@ public class Routine extends BaseEntity {
   /// 묶음 안 차례 (0부터). 이룸이가 보는 순서. 묶음 밖이면 null
   @Column(name = "group_order")
   private Integer groupOrder;
+
+  /// 이야기에서 가져와 만든 일과면 그 글 ID. 가져오지 않은 일과는 null. 외래키 없는 문자열 (글이 지워져도 일과는 남음)
+  @Column(name = "talk_post_id")
+  private String talkPostId;
 
   /// 일과관리 칸 순서 (#844). 묶음 밖 낱개 원본의 자리. 묶음의 displayOrder 와 같은 번호 공간(0부터), 없으면 null(맨 뒤)
   @Column(name = "library_order")

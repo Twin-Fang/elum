@@ -21,7 +21,10 @@ public record MemberConsentResponse(
   LocalDateTime consentedAt,
 
   @Schema(description = "동의한 약관 버전", example = "2026-09-17")
-  String consentVersion
+  String consentVersion,
+
+  @Schema(description = "동의한 약관 언어 코드. 동의 전이면 null", example = "ko", nullable = true)
+  String consentLocale
 ) {
 
   public static MemberConsentResponse from(Member member) {
@@ -33,7 +36,8 @@ public record MemberConsentResponse(
       Boolean.TRUE.equals(member.getGuardianConfirmed()),
       Boolean.TRUE.equals(member.getMarketingAgreed()),
       member.getConsentedAt(),
-      member.getConsentVersion()
+      member.getConsentVersion(),
+      member.getConsentLocale()
     );
   }
 }

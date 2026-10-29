@@ -5,7 +5,7 @@ import java.util.List;
 public record RoutineStepDraft(String title, List<StepDraft> steps) {
 
   /**
-   * @param imagePromptEn FLUX 용 영어 장면 한 줄. 이미지 제공자가 FLUX 일 때만 스키마로 요청하므로
+   * @param imagePromptEn 영어 장면 한 줄(자세·손에 든 물건). 만화 그림일 때만 스키마로 요청하므로
    *                      그 밖에는 null 이다. 저장하지 않는다 — 그림은 같은 요청 안에서
    *                      바로 그리고, 카드 수정은 그림을 다시 그리지 않는다.
    * @param pictogramId 무료 픽토그램 id. 요청에 실은 pictogramCatalog 안에서 AI 가 고른 값이며 선택 필드다 —

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -56,8 +57,13 @@ public class GeminiImageClient implements ImageGenerationClient {
 
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
+    return generateCardImage(CardScene.descriptionOnly(stepDescription), characterType);
+  }
+
+  @Override
+  public GeneratedImage generateCardImage(CardScene scene, CharacterType characterType) {
     // 참조 이미지는 캐릭터가 있을 때만 보낸다 — 프롬프트에도 사실대로 적는다.
-    String promptText = promptComposer.compose(stepDescription, characterType, characterType != null);
+    String promptText = promptComposer.compose(scene, characterType, characterType != null);
     return callGenerateImage(promptText, characterType);
   }
 

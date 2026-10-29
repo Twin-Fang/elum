@@ -10,7 +10,7 @@ import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
 import '../../../core/storage/card_image_disk_cache.dart';
-import '../../onboarding/domain/image_style.dart';
+import '../../../shared/models/image_style.dart';
 import '../../auth/data/auth_repository.dart';
 import '../domain/link_status.dart';
 import '../../../core/storage/account_wipe.dart';

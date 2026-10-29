@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.consent.infrastructure.config;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
 import com.chuseok22.elumserver.consent.infrastructure.entity.ConsentDocument;
 import com.chuseok22.elumserver.consent.infrastructure.repository.ConsentDocumentRepository;
@@ -24,6 +25,8 @@ import org.springframework.util.StreamUtils;
  *
  * <p><b>이미 있는 문서는 건드리지 않는다.</b> 관리자가 고쳐 둔 내용을 배포할 때마다
  * 되돌리면 관리자 화면이 무의미해진다.
+ *
+ * <p>ko 만 시딩 (다른 언어 본문이 폴더에 들어와도 배포 한 번에 자동 게시되면 법무 확인을 우회, #531)
  */
 @Slf4j
 @Component
@@ -33,13 +36,16 @@ public class ConsentDocumentInitializer implements ApplicationRunner {
   /** 앱 번들이 들고 있는 버전과 같다. 첫 시딩에만 쓴다. */
   private static final String INITIAL_VERSION = "2026-09-21";
 
+  /** 시딩 언어: ko 원본 1개 */
+  private static final AppLocale SEEDED_LOCALE = AppLocale.KO;
+
   private final ConsentDocumentRepository consentDocumentRepository;
 
   @Override
   @Transactional
   public void run(ApplicationArguments args) {
     for (ConsentKey key : ConsentKey.values()) {
-      var existing = consentDocumentRepository.findByConsentKey(key);
+      var existing = consentDocumentRepository.findByConsentKeyAndLocale(key, SEEDED_LOCALE.code());
       if (existing.isPresent()) {
         syncRequired(existing.get());
         continue;
@@ -53,6 +59,7 @@ public class ConsentDocumentInitializer implements ApplicationRunner {
       }
       ConsentDocument document = new ConsentDocument();
       document.setConsentKey(key);
+      document.setLocale(SEEDED_LOCALE.code());
       document.setVersion(INITIAL_VERSION);
       document.setLabel(key.getLabel());
       document.setSummary(key.getSummary());

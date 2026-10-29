@@ -49,6 +49,9 @@ class WithdrawCoversMemberReferencesTest {
   /// 탈퇴는 알림 기록·푸시 기기·알림 설정·공지 확인 삭제를 알림 정리 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다 (#827).
   private static final Path NOTIFICATION_CLEANUP_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/notification/application/service/NotificationCleanupService.java");
+  /// 탈퇴와 완전 삭제는 이야기 글·댓글·반응·신고·차단 삭제를 이야기 정리 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다.
+  private static final Path TALK_CLEANUP_SERVICE = SOURCE_ROOT.resolve(
+    "com/chuseok22/elumserver/talk/application/service/TalkCleanupService.java");
   private static final Path ROUTINE_GROUP_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/routine/application/service/RoutineGroupService.java");
 
@@ -120,8 +123,9 @@ class WithdrawCoversMemberReferencesTest {
     assertThat(purge).as("완전 삭제도 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
     assertThat(purge).as("완전 삭제도 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
     assertThat(purge).as("완전 삭제는 묶음의 만든 사람을 뗀다").contains("routineGroupService.detachCreatorOf(");
+    assertThat(purge).as("완전 삭제도 이야기 데이터를 지운다").contains("talkCleanupService.deleteAllOf(");
     purge = purge + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE)
-      + serviceSource(ROUTINE_GROUP_SERVICE);
+      + serviceSource(ROUTINE_GROUP_SERVICE) + serviceSource(TALK_CLEANUP_SERVICE);
     List<String> uncovered = new ArrayList<>();
 
     for (String entity : entitiesReferencingMember()) {
@@ -167,7 +171,9 @@ class WithdrawCoversMemberReferencesTest {
     assertThat(withdraw).as("탈퇴는 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
     assertThat(withdraw).as("탈퇴는 의견을 지운다").contains("feedbackService.deleteAllOf(");
     assertThat(withdraw).as("탈퇴는 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
-    return withdraw + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE);
+    assertThat(withdraw).as("탈퇴는 이야기 데이터를 지운다").contains("talkCleanupService.deleteAllOf(");
+    return withdraw + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE)
+      + serviceSource(TALK_CLEANUP_SERVICE);
   }
 
   /// 나가기 서비스 전체(주석 뺀). 나가기·마지막 보호자 정리가 private 도우미에 나뉘어 있어 파일로 본다.

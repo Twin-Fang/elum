@@ -35,6 +35,9 @@ public interface AiCreditJobRepository extends JpaRepository<AiCreditJob, String
 
   Page<AiCreditJob> findByAccountIdOrderByStartedAtDesc(String accountId, Pageable pageable);
 
+  /// 일과 하나로 만든 작업 최근 50건 (관리자 일과 상세). routine_id 인덱스 없음 > 행이 많아지면 인덱스 검토
+  List<AiCreditJob> findTop50ByRoutineIdOrderByStartedAtDesc(String routineId);
+
   /// 이 상태 작업의 계정별 예약 합. 진행 중 예약(RESERVED)만 뜻이 있다.
   @Query("""
     select j.accountId as accountId, coalesce(sum(j.reserved), 0) as total

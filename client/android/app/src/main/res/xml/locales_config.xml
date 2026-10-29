@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 설정 > 앱 > 이룸 > 언어 목록 (Android 13+): 연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527).
+     언어를 열 때 iOS CFBundleLocalizations 와 함께 더한다 (tool/check_native_locales.dart 가 검사) -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ko"/>
+    <locale android:name="en"/>
+</locale-config>

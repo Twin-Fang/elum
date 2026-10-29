@@ -67,6 +67,9 @@ abstract final class AppAssets {
   static const navComment = '$_navIcons/nav_comment.svg';
   static const navUser = '$_navIcons/nav_user.svg';
 
+  /// 일과 관리 칸을 고를 때 폴더 안에 그려졌다 사라지는 체크. 폴더(24×22)와 같은 viewBox라 그대로 겹친다
+  static const navFolderCheck = '$_navIcons/nav_folder_check.svg';
+
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
   /// 전용 그림 2종이 아직 없다. 도형을 코드로
@@ -198,14 +201,17 @@ abstract final class AppAssets {
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
 
+  /// 업데이트 권유 안내의 루미 (윙크하며 손 흔듦, 768×768, 투명 배경).
+  static const updateSuggestionLumi = '$_images/update_suggestion_lumi.png';
+
   /// 점검 안내 카드의 루미 + 톱니바퀴·렌치 (1536×1024, 투명 배경).
   static const maintenanceLumi = '$_images/maintenance_lumi.png';
 
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
 
-  /// 홈 머리 줄의 종 아이콘 (96×96, 투명 배경). 빨간 점은 코드로 그린다.
-  static const notificationBell = '$_images/notification_bell.png';
+  /// 홈 머리 줄의 종 아이콘 (Figma `alarm` 1724:7739, 24×24). 색과 안 읽음 원은 코드에서 입힌다
+  static const notificationBell = 'assets/icon/notification/notification_bell.svg';
 
   /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
   static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
@@ -352,6 +358,67 @@ abstract final class AppAssets {
   /// **Material 아이콘으로 대신하지 않는다.** 시안의 톱니는 날이 8개고
   /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
   static const iconSettings = '$_images/icon_settings.svg';
+
+  /// 이야기 카드 도움돼요 숫자 앞 (10×10 #CACACA). Figma `fi-br-thumbs-up`(1783:6318).
+  /// 댓글 숫자 앞은 [navComment] 를 같은 크기·색으로 줄여 쓴다 (같은 `fi-br-comment`)
+  static const iconThumbsUp = '$_images/icon_thumbs_up.svg';
+
+  /// 이야기 카드 가져간 수 앞 (10×10 #CACACA). Figma `fi-br-download`(1783:6306).
+  static const iconDownload = '$_images/icon_download.svg';
+
+  /// 이야기 상세 머리 줄 공유하기 (20×20 #74757D). Figma `fi-br-upload`(1877:9863).
+  static const iconShare = '$_images/icon_share.svg';
+
+  /// 이야기 상세 카드 수 칩 (10×10). Figma `fi-br-playing-cards`(1813:7668).
+  static const iconPlayingCards = '$_images/icon_playing_cards.svg';
+
+  /// 이야기 상세 보기 전환 칩: 한 눈에 보기 격자 (12×12, 시안 1813:7717 을 단순 사각형으로 다시 그림)
+  static const iconViewGrid = '$_images/icon_view_grid.svg';
+
+  /// 이야기 상세 보기 전환 칩: 크게 보기 겹친 카드 (10×12, 시안 1813:7839).
+  /// 앞 카드 속이 바탕색(#F7F2EF)이라 색을 덧칠하지 않는다
+  static const iconViewLarge = '$_images/icon_view_large.svg';
+
+  /// 이야기 ⋯ 더보기 (글 머리 · 댓글). 시안 세트 `fi-br-menu-dots` — Figma 파일에 없어
+  /// Flaticon UIcons Bold Rounded 3.3.1 글꼴에서 같은 글리프를 꺼냄 (#948)
+  static const iconMenuDots = '$_images/icon_menu_dots.svg';
+
+  /// 이야기 메뉴 신고하기. `fi-br-flag` (꺼낸 경로는 [iconMenuDots] 와 같다)
+  static const iconFlag = '$_images/icon_flag.svg';
+
+  /// 이야기 메뉴 이 보호자 글 숨기기. `fi-br-eye-crossed` (꺼낸 경로는 [iconMenuDots] 와 같다)
+  static const iconEyeCrossed = '$_images/icon_eye_crossed.svg';
+
+  /// 내 정보 가입일 달력 (20×20 #CACACA). Figma `fi-br-calendar`(1759:9582).
+  static const iconCalendar = '$_images/icon_calendar.svg';
+
+  /// 기기 알림 꺼짐 띠의 종+사선 (22×20 #74757D). Figma `1732:8559`.
+  static const iconNotificationOff = '$_images/icon_notification_off.svg';
+
+  /// 알림 줄 종류 아이콘 3개 (16×16, 흰색). Figma `1724:8346` 의 체크 · 종이비행기 · 사람 더하기.
+  static const iconNotificationCheck = '$_images/icon_notification_check.svg';
+  static const iconNotificationPaperPlane = '$_images/icon_notification_paper_plane.svg';
+  static const iconNotificationUserAdd = '$_images/icon_notification_user_add.svg';
+
+  /// 시안 세트(`fi-br-*`)인데 Figma 파일에 없는 아이콘. Flaticon UIcons Bold Rounded 3.3.1 글꼴에서
+  /// 같은 글리프를 꺼냄 (24×24 · 남색, 쓰는 곳에서 colorFilter 로 칠한다). 꺼내는 법: docs/design-language.md §10
+  static const iconCamera = '$_images/icon_camera.svg';
+  static const iconPicture = '$_images/icon_picture.svg';
+  static const iconRefresh = '$_images/icon_refresh.svg';
+  static const iconFolder = '$_images/icon_folder.svg';
+  static const iconFolderAdd = '$_images/icon_folder_add.svg';
+  static const iconFolderMinus = '$_images/icon_folder_minus.svg';
+  static const iconCopy = '$_images/icon_copy.svg';
+  static const iconEnvelope = '$_images/icon_envelope.svg';
+  static const iconBook = '$_images/icon_book.svg';
+  static const iconBell = '$_images/icon_bell.svg';
+  static const iconBellSlash = '$_images/icon_bell_slash.svg';
+  static const iconMinusSmall = '$_images/icon_minus_small.svg';
+  static const iconComment = '$_images/icon_comment.svg';
+  static const iconComments = '$_images/icon_comments.svg';
+  static const iconCoins = '$_images/icon_coins.svg';
+  static const iconPaperPlane = '$_images/icon_paper_plane.svg';
+  static const iconApps = '$_images/icon_apps.svg';
 
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.

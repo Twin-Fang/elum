@@ -84,6 +84,20 @@ public class RoutineLibraryOrderService {
     }
   }
 
+  /**
+   * 맨 앞 자리 만들기: 번호 있는 낱개·묶음을 한 칸씩 뒤로 (0번이 비어 새 일과가 앞에 옴)
+   * 번호 없는 칸은 원래 맨 뒤라 그대로, 묶음 안 일과는 낱개 칸이 아니라 건드리지 않음
+   */
+  @Transactional
+  public void makeRoomAtFront(String profileId) {
+    routineRepository.findLibraryOriginals(profileId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED))
+      .stream()
+      .filter(routine -> routine.getGroupId() == null && routine.getLibraryOrder() != null)
+      .forEach(routine -> routine.setLibraryOrder(routine.getLibraryOrder() + 1));
+    routineGroupRepository.findAllByProfileIdOrderByDisplayOrderAscCreatedAtAsc(profileId)
+      .forEach(group -> group.setDisplayOrder(group.getDisplayOrder() + 1));
+  }
+
   /// 형태 검증: 종류·ID 비어 있음, 같은 칸 두 번 (INVALID_INPUT_VALUE)
   private void validateShape(List<Cell> cells) {
     Set<String> seenKeys = new HashSet<>();

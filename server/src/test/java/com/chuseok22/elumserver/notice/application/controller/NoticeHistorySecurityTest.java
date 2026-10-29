@@ -17,9 +17,6 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntry
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
-import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
-import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
-import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.notice.application.dto.response.NoticeHistoryPageResponse;
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
@@ -67,12 +64,6 @@ class NoticeHistorySecurityTest {
   @MockitoBean
   private SharedStateStore sharedStateStore;
   @MockitoBean
-  private AidlpCryptoService aidlpCryptoService;
-  @MockitoBean
-  private NonceStore nonceStore;
-  @MockitoBean
-  private AidlpProperties aidlpProperties;
-  @MockitoBean
   private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
   @Test
@@ -81,7 +72,7 @@ class NoticeHistorySecurityTest {
     mockMvc.perform(get("/api/notices/history"))
       .andExpect(status().isUnauthorized());
 
-    verify(noticeHistoryService, never()).history(any(), any(), any());
+    verify(noticeHistoryService, never()).history(any(), any(), any(), any());
   }
 
   @Test
@@ -90,7 +81,7 @@ class NoticeHistorySecurityTest {
     mockMvc.perform(get("/api/notices/history").with(user("e1").authorities(MEMBER, ELUMI)))
       .andExpect(status().isForbidden());
 
-    verify(noticeHistoryService, never()).history(any(), any(), any());
+    verify(noticeHistoryService, never()).history(any(), any(), any(), any());
   }
 
   @Test
@@ -105,7 +96,7 @@ class NoticeHistorySecurityTest {
   @Test
   @DisplayName("보호자는 목록을 받는다")
   void guardianToken_history_200() throws Exception {
-    when(noticeHistoryService.history(any(), any(), any())).thenReturn(new NoticeHistoryPageResponse(List.of(), null));
+    when(noticeHistoryService.history(any(), any(), any(), any())).thenReturn(new NoticeHistoryPageResponse(List.of(), null));
 
     mockMvc.perform(get("/api/notices/history").param("platform", "IOS").with(user("g1").authorities(MEMBER, GUARDIAN)))
       .andExpect(status().isOk())

@@ -3,24 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/elum_spinner.dart';
+import '../../../core/widgets/settings_group.dart';
+import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/link_status_controller.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
+import 'widgets/link_device_group.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/theme/app_typography.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5).
 ///
@@ -143,7 +142,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
           final status? when attempt.isOk && status.hasDevice => _loaded(
             status,
           ),
-          final _? when attempt.isOk => ElumStateBody(child: _empty()),
+          final _? when attempt.isOk => _empty(),
           _ => _failed(attempt.failure),
         },
       ),
@@ -162,225 +161,87 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
     );
   }
 
+  /// 설정 묶음 결 (§4-2): 기기마다 흰 묶음 카드 > 마지막 카드 아래 회색 안내 > `다른 기기 연결하기` 한 줄
   Widget _loaded(LinkStatus status) {
-    final many = status.devices.length > 1;
+    final l10n = context.l10n;
+    final devices = status.devices;
+    final isMany = devices.length > 1;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 40.h),
-          for (final (i, device) in status.devices.indexed) ...[
-            if (i > 0) SizedBox(height: 32.h),
-            _DeviceBlock(
+          SizedBox(height: _listTopGap.h),
+          for (final (index, device) in devices.indexed) ...[
+            LinkDeviceGroup(
               device: device,
-              // 여러 대면 구분할 이름을 붙인다. 한 대면 시안 그대로 `연결됨`이다.
-              title: many ? context.l10n.linkDeviceNumbered(i + 1) : null,
+              // 여러 대면 이름 모르는 기기에 번호를 붙여 구분
+              fallbackTitle: isMany ? l10n.linkDeviceNumbered(index + 1) : null,
+              // 끊으면 어떻게 되는지 — 마지막 카드 아래 한 번만 (명세 §8-5)
+              footer: index == devices.length - 1
+                  ? l10n.linkStatusRevokeHint
+                  : null,
               onDisconnect: busy ? null : () => _confirmAndRevoke(device),
-              loading: isBusy(device.linkId),
+              isLoading: isBusy(device.linkId),
             ),
+            SizedBox(height: _groupGap.h),
           ],
-          SizedBox(height: 16.h),
-          // 끊으면 어떻게 되는지 — 버튼 아래 한 줄 (명세 §8-5)
-          Text(
-            context.l10n.linkStatusRevokeHint,
-            textAlign: TextAlign.center,
-            style: context.typo.promptBody.paragraph.copyWith(
-              color: context.colors.textSecondary,
-            ),
+          // 연결된 기기가 있어도 태블릿 등을 더 붙일 수 있다. 돌아오면 이 화면이 그대로 남는다.
+          SettingsGroup(
+            children: [
+              SettingsTile(
+                label: l10n.linkStatusAddAction,
+                onTap: busy ? null : () => context.push(Routes.linkCode),
+              ),
+            ],
           ),
-          // 연결된 휴대폰이 있어도 태블릿 등을 더 붙일 수 있다. 돌아오면 이 화면이 그대로 남는다.
-          SizedBox(height: 32.h),
-          Center(
-            child: _ConnectChip(
-              label: context.l10n.linkStatusAddAction,
-              onTap: busy ? null : () => context.push(Routes.linkCode),
-            ),
-          ),
-          SizedBox(height: 24.h),
+          SizedBox(height: _groupGap.h),
         ],
       ),
     );
   }
 
-  /// 연결이 없다 — 다른 보호자가 먼저 끊었거나 이룸이 휴대폰이 스스로 끊었다.
+  /// 연결이 없다 — 다른 보호자가 먼저 끊었거나 이룸이 기기가 스스로 끊었다.
+  /// 보호자 빈 상태 결: 목록 첫 줄 자리에 글만 든 웜그레이 줄 > 연결하기 한 줄
   Widget _empty() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          context.l10n.linkStatusEmpty,
-          textAlign: TextAlign.center,
-          style: context.typo.subtitle.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-        SizedBox(height: 24.h),
-        _ConnectChip(
-          label: context.l10n.linkStatusConnectAction,
-          onTap: () => context.pushReplacement(Routes.linkCode),
-        ),
-      ],
-    );
-  }
-}
-
-/// 연결 암호 만들기로 가는 칩 버튼 — 연결 없음 상태와 목록 아래 입구가 함께 쓴다.
-class _ConnectChip extends StatelessWidget {
-  const _ConnectChip({required this.label, required this.onTap});
-
-  final String label;
-
-  /// null 이면 다른 요청을 기다리는 중이라 누를 수 없다.
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
-        decoration: BoxDecoration(
-          color: context.colors.linkRetryChipBg,
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Text(
-          label,
-          style: context.typo.settingsTileLabel.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 연결된 휴대폰 한 대 — 기기 이름·상태·누가 언제부터·`연결 끊기`.
-class _DeviceBlock extends StatelessWidget {
-  const _DeviceBlock({
-    required this.device,
-    required this.onDisconnect,
-    this.title,
-    this.loading = false,
-  });
-
-  final LinkedDevice device;
-  final String? title;
-
-  /// null 이면 끊는 중이라 누를 수 없다.
-  final VoidCallback? onDisconnect;
-
-  /// 이 휴대폰을 끊는 요청을 기다리는 중 — 글자 옆에 스피너를 돌린다.
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
     final colors = context.colors;
-    final typo = context.typo;
-    final l10n = context.l10n;
-    final deviceName = device.deviceName;
-    // 연결한 사람 + 날짜를 한 줄로. 날짜를 모르면 사람만, 이름이 없으면 '보호자'로 부른다.
-    final by = device.linkedByMe
-        ? l10n.linkStatusConnectedByMe
-        : () {
-            final name = device.linkedByName ?? l10n.commonGuardianName;
-            return l10n.linkStatusConnectedBy(name, batchimOf(name));
-          }();
-    final sinceLabel = device.sinceLabel;
-    final since = sinceLabel == null
-        ? by
-        : l10n.linkStatusConnectedByAndSince(by, sinceLabel);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (deviceName != null)
-                // 기기 이름이 있으면 이름과 상태를 한 줄에 둔다 (이름 · 연결됨)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        deviceName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: typo.subtitle.copyWith(
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Text(
-                      l10n.linkStatusConnected,
-                      style: typo.promptBody.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                )
-              else ...[
-                // 이름을 모르면(옛 앱이 연결) 기존처럼 `이룸이 휴대폰` 번호 제목과 `연결됨`
-                if (title != null) ...[
-                  Text(
-                    title!,
-                    style:
-                        typo.promptBody.copyWith(color: colors.textSecondary),
-                  ),
-                  SizedBox(height: 8.h),
-                ],
-                Text(
-                  l10n.linkStatusConnected,
-                  style: typo.subtitle.copyWith(color: colors.textPrimary),
-                ),
-              ],
-              SizedBox(height: 8.h),
-              Text(
-                since,
-                style: typo.promptBody.copyWith(color: colors.textSecondary),
-              ),
-            ],
+        SizedBox(height: _listTopGap.h),
+        Container(
+          constraints: BoxConstraints(minHeight: _emptyTileHeight.h),
+          padding: EdgeInsets.symmetric(horizontal: SettingsTile.cardPadLeft.w),
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+            color: colors.routineTileBg,
+            borderRadius: BorderRadius.circular(context.space.cardRadius.r),
+          ),
+          child: Text(
+            context.l10n.linkStatusEmpty,
+            style: context.typo.routineEmptyTitle.copyWith(
+              color: colors.routineTileLabel,
+            ),
           ),
         ),
-        // 위험한 일은 다른 것과 떨어뜨린다 (docs 7-1). 주 버튼이 아니라 테두리만 있는 버튼이다 (docs 5-3).
-        SizedBox(height: 40.h),
-        AppPressable(
-          onTap: onDisconnect,
-          child: Container(
-            height: 56.h,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18.r),
-              border: Border.all(
-                color: onDisconnect == null
-                    ? colors.settingsChevron
-                    : colors.settingsDestructive,
-                width: 1.5,
-              ),
+        SizedBox(height: _groupGap.h),
+        SettingsGroup(
+          children: [
+            SettingsTile(
+              label: context.l10n.linkStatusConnectAction,
+              onTap: () => context.pushReplacement(Routes.linkCode),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n.linkStatusRevokeButton,
-                  style: typo.settingsTileLabel.copyWith(
-                    color: onDisconnect == null
-                        ? colors.settingsChevron
-                        : colors.settingsDestructive,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (loading) ...[
-                  SizedBox(width: 8.w),
-                  ElumSpinner(size: 18.w, color: colors.settingsChevron),
-                ],
-              ],
-            ),
-          ),
+          ],
         ),
       ],
     );
   }
+
+  /// 스크롤 고정 머리 아래 첫 카드까지 (설정 화면 y=131 과 같음)
+  static const _listTopGap = 24.0;
+
+  /// 묶음 사이 (시안 1532:7501 gap 16)
+  static const _groupGap = 16.0;
+
+  /// 빈 상태 줄 높이 (홈 빈 상태 361×68)
+  static const _emptyTileHeight = 68.0;
 }

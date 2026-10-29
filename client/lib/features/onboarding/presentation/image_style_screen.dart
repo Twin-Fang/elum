@@ -11,11 +11,12 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
-import '../domain/image_style.dart';
-import 'widgets/image_style_credit_bar.dart';
-import 'widgets/image_style_option_card.dart';
+import '../../../shared/models/image_style.dart';
+import '../../../core/widgets/image_style_credit_bar.dart';
+import '../../../core/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import '../../credit/application/credit_costs.dart';
 
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞.
 ///
@@ -81,7 +82,10 @@ class ImageStyleScreen extends ConsumerWidget {
               hasBackButton: true,
             ),
             SizedBox(height: space.headerToContent),
-            ImageStyleCreditBar(style: profile.imageStyle),
+            ImageStyleCreditBar(
+              style: profile.imageStyle,
+              costs: ref.watch(creditCostsProvider),
+            ),
             SizedBox(height: _cardGap.h),
             group,
             SizedBox(height: 24.h),

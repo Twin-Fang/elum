@@ -11,12 +11,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberConnections;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.auth.application.service.AuthIdentityQueryService;
+import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository.MemberGuardianshipCount;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -84,6 +88,12 @@ class AdminMemberServiceTest {
   @Mock
   private WithdrawnMemberService withdrawnMemberService;
 
+  @Mock
+  private AdminMemberConnectionService adminMemberConnectionService;
+
+  @Mock
+  private AuthIdentityQueryService authIdentityQueryService;
+
   @InjectMocks
   private AdminMemberService adminMemberService;
 
@@ -105,22 +115,32 @@ class AdminMemberServiceTest {
 
   /// searchForAdmin 에 실제로 넘어간 인자를 잡는다
   private record SearchCall(boolean hasKeyword, String pattern, Collection<MemberStatus> statuses,
-                            String planFilter, Pageable pageable) {
+                            String planFilter, boolean hasLastActivePeriod, LocalDateTime lastActiveFrom,
+                            LocalDateTime lastActiveToExclusive, boolean hasProvider,
+                            Collection<OAuthProvider> providers, Pageable pageable) {
   }
 
   private SearchCall stubSearchAndCapture(Page<Member> result, Runnable search) {
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(result);
     search.run();
     ArgumentCaptor<Boolean> hasKeyword = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<String> pattern = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<Collection<MemberStatus>> statuses = ArgumentCaptor.forClass(Collection.class);
     ArgumentCaptor<String> planFilter = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Boolean> hasLastActivePeriod = ArgumentCaptor.forClass(Boolean.class);
+    ArgumentCaptor<LocalDateTime> lastActiveFrom = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<LocalDateTime> lastActiveTo = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<Boolean> hasProvider = ArgumentCaptor.forClass(Boolean.class);
+    ArgumentCaptor<Collection<OAuthProvider>> providers = ArgumentCaptor.forClass(Collection.class);
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
     verify(memberRepository).searchForAdmin(hasKeyword.capture(), pattern.capture(), statuses.capture(),
-      planFilter.capture(), any(), pageable.capture());
+      planFilter.capture(), any(), any(), any(), hasLastActivePeriod.capture(), lastActiveFrom.capture(),
+      lastActiveTo.capture(), hasProvider.capture(), providers.capture(), pageable.capture());
     return new SearchCall(hasKeyword.getValue(), pattern.getValue(), statuses.getValue(),
-      planFilter.getValue(), pageable.getValue());
+      planFilter.getValue(), hasLastActivePeriod.getValue(), lastActiveFrom.getValue(), lastActiveTo.getValue(),
+      hasProvider.getValue(), providers.getValue(), pageable.getValue());
   }
 
   private MemberRoutineCount routineCount(String memberId, long count) {
@@ -165,7 +185,8 @@ class AdminMemberServiceTest {
   @DisplayName("search는 회원별 루틴수와 AI 사용량을 집계 쿼리로 붙여 반환한다")
   void search_attachesAggregates() {
     Member member = member("m1", "parent1");
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(routineRepository.countByMemberIds(List.of("m1")))
       .thenReturn(List.of(routineCount("m1", 3)));
@@ -179,6 +200,64 @@ class AdminMemberServiceTest {
     assertThat(response.aiCallCount()).isEqualTo(12);
     assertThat(response.totalTokens()).isEqualTo(34567);
     assertThat(response.estimatedCostUsd()).isEqualTo(0.12);
+  }
+
+  @Test
+  @DisplayName("최근 활동 기간·로그인 제공자 필터는 플래그와 함께 넘기고, 없으면 조건을 건너뛰되 제공자 목록은 비우지 않는다")
+  void search_lastActiveAndProviderFilters() {
+    SearchCall filtered = stubSearchAndCapture(new PageImpl<>(List.of()), () -> adminMemberService.search(
+      query(null, Map.of("activeFrom", "2026-10-01", "activeTo", "2026-10-02", "provider", "KAKAO"), null, null)));
+    assertThat(filtered.hasLastActivePeriod()).isTrue();
+    assertThat(filtered.lastActiveFrom()).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
+    assertThat(filtered.lastActiveToExclusive()).isEqualTo(LocalDateTime.of(2026, 10, 3, 0, 0));
+    assertThat(filtered.hasProvider()).isTrue();
+    assertThat(filtered.providers()).containsExactly(OAuthProvider.KAKAO);
+
+    Mockito.clearInvocations(memberRepository);
+    SearchCall none = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of("provider", "FACEBOOK"), null, null)));
+    assertThat(none.hasLastActivePeriod()).isFalse();
+    assertThat(none.hasProvider()).isFalse();
+    assertThat(none.providers()).containsExactlyInAnyOrder(OAuthProvider.values());
+  }
+
+  @Test
+  @DisplayName("이룸이·보호자 수와 로그인 제공자를 집계 1회씩으로 붙이고, 이룸이가 없는 회원은 0 으로 둔다")
+  void search_attachesGuardianshipAndProviders() {
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(List.of(member("m1", "parent1"), member("m2", "parent2"))));
+    when(profileGuardianRepository.countGuardianshipByMemberIds(List.of("m1", "m2")))
+      .thenReturn(List.of(guardianshipCount("m1", 2, 3)));
+    when(authIdentityQueryService.providersByMemberIds(List.of("m1", "m2")))
+      .thenReturn(Map.of("m1", List.of(OAuthProvider.KAKAO, OAuthProvider.APPLE)));
+
+    List<AdminMemberResponse> rows = adminMemberService.search(defaultQuery()).getContent();
+
+    assertThat(rows.get(0).profileCount()).isEqualTo(2);
+    assertThat(rows.get(0).guardianCount()).isEqualTo(3);
+    assertThat(rows.get(0).loginProviders()).containsExactly(OAuthProvider.KAKAO, OAuthProvider.APPLE);
+    assertThat(rows.get(1).profileCount()).isZero();
+    assertThat(rows.get(1).loginProviders()).isEmpty();
+  }
+
+  private MemberGuardianshipCount guardianshipCount(String memberId, long profiles, long guardians) {
+    return new MemberGuardianshipCount() {
+      @Override
+      public String getMemberId() {
+        return memberId;
+      }
+
+      @Override
+      public Long getProfileCount() {
+        return profiles;
+      }
+
+      @Override
+      public Long getGuardianCount() {
+        return guardians;
+      }
+    };
   }
 
   @Test
@@ -246,7 +325,8 @@ class AdminMemberServiceTest {
   void search_pageBeyondLast_requeriesLastPage() {
     Page<Member> empty = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(8, 20), 41);
     Page<Member> last = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(2, 20), 41);
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(empty, last);
 
     Page<AdminMemberResponse> result = adminMemberService.search(query(null, Map.of(), null, "9"));
@@ -254,7 +334,8 @@ class AdminMemberServiceTest {
     assertThat(result.getNumber()).isEqualTo(2);
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
     verify(memberRepository, org.mockito.Mockito.times(2))
-      .searchForAdmin(anyBoolean(), any(), any(), any(), any(), pageable.capture());
+      .searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(), any(),
+        anyBoolean(), any(), pageable.capture());
     assertThat(pageable.getAllValues().get(1).getPageNumber()).isEqualTo(2);
   }
 
@@ -275,7 +356,8 @@ class AdminMemberServiceTest {
     change.setMemberId("m1");
     change.setChangedAt(LocalDateTime.of(2026, 10, 18, 9, 0));
     change.setChangedBy("admin1");
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(proMember, freeMember)));
     when(subscriptionService.findAllByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", pro, "m2", expiredPro));
     when(subscriptionHistoryService.latestByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", change));
@@ -335,6 +417,24 @@ class AdminMemberServiceTest {
     assertThat(detail.totalTokens()).isEqualTo(1000);
     assertThat(detail.recentAiCalls()).isEmpty();
   }
+
+  @Test
+  @DisplayName("연결 정보 조회가 실패해도 회원 상세는 열리고 연결 영역만 실패로 표시된다")
+  void getDetail_connectionsFail_detailStillOpens() {
+    Member member = member("m1", "parent1");
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByCreatedBy("m1")).thenReturn(List.of());
+    when(aiCallLogRepository.aggregateUsageByMemberIds(anyList())).thenReturn(List.of());
+    when(aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc("m1")).thenReturn(List.of());
+    when(adminMemberConnectionService.getConnections("m1")).thenThrow(new IllegalStateException("db down"));
+
+    AdminMemberDetailResponse detail = adminMemberService.getDetail("m1");
+
+    // 깨지면 초대·기기 조회 하나 실패로 정지·Pro 발급까지 못 하는 500 화면이 된다
+    assertThat(detail.username()).isEqualTo("parent1");
+    assertThat(detail.connections().isLoadFailed()).isTrue();
+    assertThat(detail.connections().loadFailedErrorCode()).isEqualTo(AdminMemberConnections.LOAD_FAILED_ERROR_CODE);
+  }
   private Member withdrawnMember(String id, LocalDateTime withdrawnAt) {
     Member member = member(id, "kakao_" + id);
     member.setStatus(MemberStatus.WITHDRAWN);
@@ -357,7 +457,8 @@ class AdminMemberServiceTest {
   void search_withdrawnFilter_showsRetentionExpiry() {
     LocalDateTime withdrawnAt = LocalDateTime.of(2026, 9, 23, 10, 0);
     Member member = withdrawnMember("m9", withdrawnAt);
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(withdrawnMemberService.retentionExpiresAt(member)).thenReturn(withdrawnAt.plusDays(365));
 
@@ -462,7 +563,8 @@ class AdminMemberServiceTest {
     ProfileGuardian g2 = new ProfileGuardian();
     g2.setMember(member);
     g2.setProfile(later);
-    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
+      any(), anyBoolean(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(profileGuardianRepository.findAllWithProfileByMemberIdIn(List.of("m1"))).thenReturn(List.of(g1, g2));
 

@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.chuseok22.elumserver.admin.application.dto.response.LogSearchResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.LogSearchResponse.Entry;
+import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.CsvColumn;
+import com.chuseok22.elumserver.admin.application.list.AdminLogSearchCsv;
+import java.util.List;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -51,6 +54,34 @@ class AdminLogSearchServiceTest {
     assertThat(response.entries()).extracting(Entry::level).containsExactly("INFO", "WARN", "ERROR", "DEBUG", "INFO");
     assertThat(response.entries().get(2).text()).contains("IllegalStateException").contains("Foo.java:10");
     assertThat(response.entries().get(0).text()).contains("authorization");
+  }
+
+  @Test
+  @DisplayName("요청 id·회원 id 가 붙은 새 형식 줄도 한 항목으로 읽고, 요청 id 로 찾고, CSV 열로 꺼낸다 (옛 형식은 빈 칸)")
+  void readsRequestContextLines() throws IOException {
+    // logback-spring.xml FILE_LOG_PATTERN: --- [인스턴스] [요청 id] [회원 id] [스레드]
+    Files.writeString(tempDir.resolve("green/elum.log"), LOG
+      + "2026-10-08T09:05:00.000+09:00 ERROR 1 --- [green] [a1b2c3d4e5f6] [m-123] [exec-5] c.c.e.Handler : 실패\n"
+      + "java.lang.IllegalStateException: boom2\n"
+      + "2026-10-08T09:06:00.000+09:00  INFO 1 --- [green] [] [] [scheduling-1] c.c.e.Job : 정리 끝\n",
+      StandardCharsets.UTF_8);
+
+    LogSearchResponse all = service.search(null, null, null, null, null);
+    assertThat(all.scanned()).isEqualTo(7);
+
+    LogSearchResponse byRequestId = service.search(null, null, "a1b2c3d4e5f6", null, null);
+    assertThat(byRequestId.entries()).hasSize(1);
+    Entry requestEntry = byRequestId.entries().get(0);
+    assertThat(requestEntry.level()).isEqualTo("ERROR");
+    assertThat(requestEntry.text()).contains("boom2");
+
+    List<CsvColumn<Entry>> columns = AdminLogSearchCsv.csvColumns();
+    assertThat(columns.get(2).header()).isEqualTo("요청 id");
+    assertThat(columns.get(2).valueOf().apply(requestEntry)).isEqualTo("a1b2c3d4e5f6");
+    assertThat(columns.get(3).valueOf().apply(requestEntry)).isEqualTo("m-123");
+    // 요청 밖 줄([] [])과 옛 형식 줄은 빈 칸
+    assertThat(columns.get(2).valueOf().apply(all.entries().get(0))).isEmpty();
+    assertThat(columns.get(2).valueOf().apply(all.entries().get(2))).isEmpty();
   }
 
   @Test

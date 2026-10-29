@@ -166,6 +166,12 @@ public enum ConfigKey {
     "FLUX 이미지 1장 생성 요금. 비용 추정에 사용. fal 은 1MP 미만도 1MP 로 청구한다 (schnell $0.003/MP)",
     ConfigValueType.DECIMAL, List.of(), "0.003"
   ),
+  // 관리자 화면 비용 원화 환산 전용. 청구·한도 계산에는 쓰지 않는다.
+  USD_TO_KRW_RATE(
+    ConfigGroup.PRICING, "원화 환산 환율 (원/USD)",
+    "관리자 대시보드·AI 모니터링에서 추정 비용(USD)을 원화로 함께 보여 줄 때 쓰는 환율. 표시용이라 한도·크레딧 계산에는 영향 없다",
+    ConfigValueType.DECIMAL, List.of(), "1400"
+  ),
 
   // 탈퇴 계정 보관 기간.
   //
@@ -264,8 +270,8 @@ public enum ConfigKey {
   ),
   ADS_ALWAYS_SHOWN_MEMBER_IDS(
     ConfigGroup.PLAN_PRO, "광고 항상 노출 회원",
-    "여기 적은 회원은 Pro여도 광고를 숨기지 않는다 (광고 시험용). 회원 ID를 쉼표로 구분, 비어 있으면 없음",
-    ConfigValueType.STRING, List.of(), ""
+    "여기 적은 회원은 Pro여도 광고를 숨기지 않는다 (광고 시험용). 회원 검색으로 골라 넣는다. 없는 회원 ID는 저장되지 않는다. 비어 있으면 없음",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.MEMBER_ID_LIST
   ),
   PRO_ROUTINE_CREATE_PER_DAY(
     ConfigGroup.PLAN_PRO, "하루 일과 생성 횟수",
@@ -304,6 +310,61 @@ public enum ConfigKey {
     ConfigValueType.DECIMAL, List.of(), "-1"
   ),
 
+  // --- 사용 한도·남용 방지 ---
+  //
+  // 호출 비용·남용 방지 값. 기본값은 코드에 있던 값 그대로라 배포만으로는 동작이 바뀌지 않는다.
+  // 부르는 쪽이 요청마다 UsageLimitSettings 로 읽음 > 설정 캐시(30초) 거쳐 재시작 없이 반영.
+  // 창 길이(10분·1분)는 키 이름에 박힌 값이라 코드에 둔다. 범위를 벗어난 저장값은 읽을 때 기본값으로 대신한다.
+  ROUTINE_REQUEST_COOLDOWN_SECONDS(
+    ConfigGroup.USAGE_LIMIT, "일과 만들기 최소 간격 (초)",
+    "같은 회원이 일과 만들기·다시 만들기를 다시 부르기까지 기다려야 하는 시간. 일과 하나가 카드 수만큼 그림을 "
+      + "그려 비용이 크다. 다음 요청부터 반영. 1~600",
+    ConfigValueType.INTEGER, List.of(), "30", 1, 600
+  ),
+  ROUTINE_STEP_IMAGE_LIMIT_PER_10_MINUTES(
+    ConfigGroup.USAGE_LIMIT, "카드 그림 생성 한도 (10분당 장)",
+    "보호자가 직접 추가한 카드의 그림을 회원별로 10분에 몇 장까지 그릴지. 넘으면 카드는 두고 그림만 건너뛴다. "
+      + "다음 요청부터 반영. 1~100",
+    ConfigValueType.INTEGER, List.of(), "10", 1, 100
+  ),
+  FEEDBACK_DAILY_LIMIT(
+    ConfigGroup.USAGE_LIMIT, "의견 보내기 하루 한도 (건)",
+    "한 회원이 하루(서버 시각 0시 시작)에 보낼 수 있는 의견 수. 넘으면 거절한다. 다음 요청부터 반영. 1~200",
+    ConfigValueType.INTEGER, List.of(), "20", 1, 200
+  ),
+  PROFILE_INVITE_ISSUE_LIMIT_PER_10_MINUTES(
+    ConfigGroup.USAGE_LIMIT, "초대 코드 발급 한도 (10분당 회)",
+    "한 계정이 10분에 초대 코드를 새로 만들 수 있는 횟수. 다음 요청부터 반영. 1~100",
+    ConfigValueType.INTEGER, List.of(), "10", 1, 100
+  ),
+  // 무작위 추측(6글자 7억 가지)을 막는 사실상 유일한 장치라 상한을 낮게 둔다.
+  PROFILE_INVITE_REDEEM_LIMIT_PER_10_MINUTES(
+    ConfigGroup.USAGE_LIMIT, "초대 코드 입력 한도 (10분당 회)",
+    "한 계정이 10분에 초대 코드를 넣어 볼 수 있는 횟수(성공·실패 모두 셈). 무작위 추측을 막는 장치라 크게 올리지 "
+      + "않는다. 다음 요청부터 반영. 1~30",
+    ConfigValueType.INTEGER, List.of(), "10", 1, 30
+  ),
+  LINK_REDEEM_LIMIT_PER_MINUTE(
+    ConfigGroup.USAGE_LIMIT, "연결 암호 입력 한도 (분당 회)",
+    "같은 호출자(IP)가 1분에 연결 암호를 넣어 볼 수 있는 횟수. 무작위 추측을 막는 장치라 크게 올리지 않는다. "
+      + "다음 요청부터 반영. 1~30",
+    ConfigValueType.INTEGER, List.of(), "10", 1, 30
+  ),
+  // 상한 4 = RoutineStepSpeechProvider 합성 스레드 수. 더 올리려면 그 스레드 수도 함께 올린다.
+  TTS_ON_DEMAND_MAX_CONCURRENT(
+    ConfigGroup.USAGE_LIMIT, "음성 즉석 합성 동시 실행 (건)",
+    "저장된 음성이 없을 때 요청 중에 바로 만드는 합성을 서버 한 대가 동시에 몇 건까지 돌릴지. AI 서버가 하나씩 "
+      + "처리해 늘리면 대기만 쌓일 수 있다. 넘는 요청은 음성 없이 돌려주고 앱은 다음 음성 엔진을 쓴다. "
+      + "다음 요청부터 반영. 1~4",
+    ConfigValueType.INTEGER, List.of(), "2", 1, 4
+  ),
+  TTS_FAILURE_COOLDOWN_MINUTES(
+    ConfigGroup.USAGE_LIMIT, "음성 합성 실패 후 쉬는 시간 (분)",
+    "합성에 실패한 카드를 주기 작업이 다시 넣기까지 쉬는 시간. 같은 실패 카드가 매번 자리를 차지하지 않게 한다. "
+      + "다음 확인부터 반영. 1~1440",
+    ConfigValueType.INTEGER, List.of(), "30", 1, 1440
+  ),
+
   // 앱을 세우거나 업데이트를 요구하는 값들.
   //
   // ⚠️ 심사 기간에는 점검 모드를 켜지 않는다. 리뷰어가 점검 화면만 보고
@@ -321,23 +382,23 @@ public enum ConfigKey {
   // 버전 비교는 semver다. 1.10.0이 1.9.0보다 높다.
   MIN_APP_VERSION_IOS(
     ConfigGroup.APP_CONTROL, "iOS 최소 버전",
-    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 비우면 막지 않는다",
-    ConfigValueType.STRING, List.of(), ""
+    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 형식 2.69.1 (v·빌드번호 없이). 비우면 막지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.APP_VERSION
   ),
   MIN_APP_VERSION_ANDROID(
     ConfigGroup.APP_CONTROL, "Android 최소 버전",
-    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 비우면 막지 않는다",
-    ConfigValueType.STRING, List.of(), ""
+    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 형식 2.69.1 (v·빌드번호 없이). 비우면 막지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.APP_VERSION
   ),
   LATEST_APP_VERSION_IOS(
     ConfigGroup.APP_CONTROL, "iOS 최신 버전",
-    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
-    ConfigValueType.STRING, List.of(), ""
+    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다. 형식 2.69.1 (v·빌드번호 없이). 비우면 권하지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.APP_VERSION
   ),
   LATEST_APP_VERSION_ANDROID(
     ConfigGroup.APP_CONTROL, "Android 최신 버전",
-    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
-    ConfigValueType.STRING, List.of(), ""
+    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다. 형식 2.69.1 (v·빌드번호 없이). 비우면 권하지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.APP_VERSION
   ),
   // 강제 업데이트 화면이 보내는 곳. 그 화면은 옛 버전 앱에서 뜨므로, 앱에 박힌 주소는
   // 앱을 다시 내지 않으면 못 고친다. 비워 두면 앱에 넣어 둔 주소를 쓴다(기본값으로 되돌리기).
@@ -346,13 +407,13 @@ public enum ConfigKey {
     ConfigGroup.APP_CONTROL, "iOS 스토어 주소",
     "강제 업데이트 화면의 업데이트하러 가기 버튼이 여는 주소. https://apps.apple.com/... 또는 "
       + "itms-apps://apps.apple.com/... 만 받는다. 비우면 앱에 넣어 둔 주소를 쓴다",
-    ConfigValueType.STRING, List.of(), ""
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_URL
   ),
   ANDROID_STORE_URL(
     ConfigGroup.APP_CONTROL, "Android 스토어 주소",
     "강제 업데이트 화면의 업데이트하러 가기 버튼이 여는 주소. https://play.google.com/store/apps/details?id=... 또는 "
       + "market://details?id=... 만 받는다. 비우면 앱에 넣어 둔 주소를 쓴다",
-    ConfigValueType.STRING, List.of(), ""
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_URL
   ),
   // ── 앱이 서버에서 받아 쓰는 시간값 (앱 .env 에서 옮겨 왔다) ──
   // 앱은 시작할 때 /api/app/status 로 받아 저장해 두고, 못 받으면 코드 기본값을 쓴다.
@@ -421,7 +482,7 @@ public enum ConfigKey {
     ConfigGroup.AD_REWARD, "보상형 광고 단위(허용 목록)",
     "쉼표로 나눈 광고 단위. 전체 ID(ca-app-pub-…/숫자)나 뒤의 숫자만 적는다. 콜백의 광고 단위가 여기 없으면 "
       + "지급하지 않는다. 비면 아무것도 지급하지 않는다. 기본값은 이룸 보상형 광고 단위(iOS·Android)다",
-    ConfigValueType.STRING, List.of(), "8857966475,6517734434"
+    ConfigValueType.STRING, List.of(), "8857966475,6517734434", ConfigFormat.AD_UNIT_LIST
   ),
 
   // --- 언어 ---
@@ -436,7 +497,43 @@ public enum ConfigKey {
       + "켜기 전에 확인한다: 앱 번역 파일 완성, 그 언어 약관 게시, AI 프롬프트 행 검증, 서버 문구 파일(폴백 질문·추천) 완성. "
       + "AI 출력 언어가 일과 언어를 따르는 작업이 배포되기 전에는 ko 외 언어를 켜지 않는다. "
       + "서버 문구 파일이 비어 있으면 저장되지 않는다",
-    ConfigValueType.STRING, List.of(), "ko"
+    ConfigValueType.STRING, List.of(), "ko", ConfigFormat.CONTENT_LOCALE_LIST
+  ),
+
+  // --- 신고 메일 ---
+  //
+  // 이야기 신고가 들어오면 운영자에게 메일을 보낸다. 재시작 없이 바꾸도록 환경 변수 대신 여기에 둔다.
+  // 기본값 꺼짐이라 배포만으로는 메일이 나가지 않는다. 보내는 주소는 SMTP 계정(MAIL_SMTP_USERNAME)을 쓴다.
+  // 주소·호스트·계정은 한번 채우면 화면에서 비울 수 없다 — 끄려면 이것만 끈다.
+  TALK_REPORT_MAIL_ENABLED(
+    ConfigGroup.MAIL, "신고 메일 켜기",
+    "켜면 이야기 신고가 들어올 때 아래 주소로 메일을 보낸다. 받는 주소·호스트·계정·비밀번호 중 하나라도 비면 보내지 않는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  TALK_REPORT_MAIL_TO(
+    ConfigGroup.MAIL, "받는 주소",
+    "신고 메일을 받을 주소. 쉼표로 여러 개를 적을 수 있다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_HOST(
+    ConfigGroup.MAIL, "SMTP 호스트",
+    "메일 서버 주소. 예: smtp.gmail.com",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_PORT(
+    ConfigGroup.MAIL, "SMTP 포트",
+    "STARTTLS 접속 포트. 보통 587. 1~65535",
+    ConfigValueType.INTEGER, List.of(), "587", 1, 65_535
+  ),
+  MAIL_SMTP_USERNAME(
+    ConfigGroup.MAIL, "SMTP 계정",
+    "메일 서버 로그인 계정이자 보내는 주소",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MAIL_SMTP_PASSWORD(
+    ConfigGroup.MAIL, "SMTP 비밀번호",
+    "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
   ),
   ;
 
@@ -450,18 +547,36 @@ public enum ConfigKey {
   /** INTEGER 의 허용 범위. 없으면(null) 범위를 보지 않는다 — 플랜 한도의 -1(무제한)처럼. */
   private final Integer minValue;
   private final Integer maxValue;
+  /** 문자열 형식 규칙 (검사는 SystemConfigValueValidator). 형식이 없으면 FREE_TEXT */
+  private final ConfigFormat format;
 
   ConfigKey(
     ConfigGroup group, String label, String description,
     ConfigValueType valueType, List<String> allowedValues, String defaultValue
   ) {
-    this(group, label, description, valueType, allowedValues, defaultValue, null, null);
+    this(group, label, description, valueType, allowedValues, defaultValue, null, null, ConfigFormat.FREE_TEXT);
+  }
+
+  ConfigKey(
+    ConfigGroup group, String label, String description,
+    ConfigValueType valueType, List<String> allowedValues, String defaultValue,
+    ConfigFormat format
+  ) {
+    this(group, label, description, valueType, allowedValues, defaultValue, null, null, format);
   }
 
   ConfigKey(
     ConfigGroup group, String label, String description,
     ConfigValueType valueType, List<String> allowedValues, String defaultValue,
     Integer minValue, Integer maxValue
+  ) {
+    this(group, label, description, valueType, allowedValues, defaultValue, minValue, maxValue, ConfigFormat.FREE_TEXT);
+  }
+
+  ConfigKey(
+    ConfigGroup group, String label, String description,
+    ConfigValueType valueType, List<String> allowedValues, String defaultValue,
+    Integer minValue, Integer maxValue, ConfigFormat format
   ) {
     this.group = group;
     this.label = label;
@@ -471,5 +586,11 @@ public enum ConfigKey {
     this.defaultValue = defaultValue;
     this.minValue = minValue;
     this.maxValue = maxValue;
+    this.format = format;
+  }
+
+  /// 범위가 있는 정수인데 값이 범위 밖인가 (범위 없는 키는 늘 false)
+  public boolean isOutOfRange(int number) {
+    return (minValue != null && number < minValue) || (maxValue != null && number > maxValue);
   }
 }

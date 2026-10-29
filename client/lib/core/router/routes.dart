@@ -31,6 +31,22 @@ abstract final class Routes {
   /// 이야기 칸. 보호자 커뮤니티(#786)가 들어올 자리
   static const guardianTalk = '/guardian/talk';
 
+  /// 이야기 글 상세. 탭 바를 덮는 화면이라 셸 밖에 둔다
+  static const guardianTalkPost = '/guardian/talk/posts/:postId';
+
+  /// 이야기 글 상세 경로: `/guardian/talk/posts/{postId}`
+  static String guardianTalkPostOf(String postId) =>
+      '/guardian/talk/posts/${Uri.encodeComponent(postId)}';
+
+  /// 이야기 올리기 (일과 고르기 > 사진 > 한마디·분류)
+  static const guardianTalkShare = '/guardian/talk/share';
+
+  /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
+  static const guardianTalkBlocks = '/guardian/talk/blocks';
+
+  /// 내가 쓴 글 목록 (내 정보 > 내가 쓴 글)
+  static const guardianTalkMine = '/guardian/talk/mine';
+
   /// 내정보 칸 = 보호자 프로필 (#817). 오른쪽 위 설정 아이콘으로 [guardianSettings] 에 들어간다.
   static const guardianMyInfo = '/guardian/me';
 
@@ -39,6 +55,14 @@ abstract final class Routes {
 
   /// 알림·공지사항 화면. 홈 종 아이콘이 연다.
   static const guardianNotifications = '/guardian/notifications';
+
+  /// [guardianNotifications] 의 처음 고를 탭 쿼리: `tab=notice` 면 공지사항 탭 (#660)
+  static const notificationsTabQuery = 'tab';
+  static const notificationsNoticeTabValue = 'notice';
+
+  /// 알림 화면을 공지사항 탭으로 연다. 내정보 `공지사항` 줄이 연다 (#660)
+  static const guardianNotices =
+      '$guardianNotifications?$notificationsTabQuery=$notificationsNoticeTabValue';
 
   /// 알림 설정. 알림 화면 오른쪽 위에서 들어간다.
   static const guardianNotificationSettings = '/guardian/settings/notifications';
@@ -66,6 +90,19 @@ abstract final class Routes {
 
   /// 이룸이 바꾸기. 연결된 이룸이가 둘 이상일 때만 설정에 보인다. 임시 화면이다.
   static const guardianProfileSwitch = '/guardian/settings/profile';
+
+  /// 이룸이 정보 고치기 (이름·캐릭터·그림 방식). 내정보 이룸이 줄의 연필에서 들어온다 (#660)
+  /// 어느 이룸이인지는 `?id={profileId}` 로 넘긴다 — [guardianElumiInfoOf]
+  static const guardianElumiInfo = '/guardian/settings/elumi';
+
+  /// 이룸이 정보 고치기 경로: `/guardian/settings/elumi?id={profileId}`
+  static String guardianElumiInfoOf(String profileId) => Uri(
+    path: guardianElumiInfo,
+    queryParameters: {'id': profileId},
+  ).toString();
+
+  /// [guardianElumiInfo] 의 이룸이 id 쿼리 이름
+  static const elumiInfoProfileIdQuery = 'id';
 
   /// 초대 코드 넣기. **온보딩 아래에 둔 이유** — 새로 가입한 보호자는 이룸이 등록
   /// (온보딩)을 건너뛰고 들어오므로 온보딩을 마치기 전에도 열려야 한다. 이미 쓰는 보호자는

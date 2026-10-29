@@ -7,9 +7,9 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../auth/domain/oauth_provider.dart';
 
-/// 가입한 소셜 제공자 배지: 브랜드 색 원 + 로고 (#849)
+/// 가입한 소셜 제공자 배지: 브랜드 색 둥근 네모 + 로고 (시안 1759:9604)
 ///
-/// 로고 파일은 각 사 브랜드 자산이라 색을 바꾸지 않고 배경 원만 깐다.
+/// 로고 파일은 각 사 브랜드 자산이라 색을 바꾸지 않고 배경만 깐다.
 class SignInProviderBadge extends StatelessWidget {
   const SignInProviderBadge({
     super.key,
@@ -19,13 +19,14 @@ class SignInProviderBadge extends StatelessWidget {
 
   final OAuthProvider provider;
 
-  /// 원 지름 (논리 px, .w 적용 전)
+  /// 배지 한 변 (논리 px, .w 적용 전)
   final double size;
 
-  static const defaultSize = 18.0;
+  static const defaultSize = 24.0;
 
-  // 로고가 원 안에서 차지하는 비율
-  static const _logoRatio = 0.56;
+  /// 시안 24 기준 모서리 4, 로고 14 > 크기가 바뀌어도 같은 비율
+  static const _radiusRatio = 4 / 24;
+  static const _logoRatio = 14 / 24;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class SignInProviderBadge extends StatelessWidget {
       OAuthProvider.kakao => (AppAssets.loginKakao, colors.loginKakaoBg, l10n.signInProviderKakao),
       OAuthProvider.naver => (AppAssets.loginNaver, colors.loginNaverBg, l10n.signInProviderNaver),
       OAuthProvider.apple => (AppAssets.loginApple, colors.loginAppleBg, l10n.signInProviderApple),
-      // 구글은 흰 바탕 G — 흰 카드 위에서 묻히지 않게 화면 바탕색 원
+      // 구글은 시안에 없음 > 흰 바탕 G 가 흰 카드 위에서 묻히지 않게 화면 바탕색
       OAuthProvider.google => (AppAssets.loginGoogle, colors.background, l10n.signInProviderGoogle),
     };
 
@@ -45,7 +46,10 @@ class SignInProviderBadge extends StatelessWidget {
         width: size.w,
         height: size.w,
         child: DecoratedBox(
-          decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular((size * _radiusRatio).r),
+          ),
           child: Center(
             child: SvgPicture.asset(
               asset,

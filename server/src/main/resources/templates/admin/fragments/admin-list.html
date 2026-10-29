@@ -17,14 +17,29 @@
      th:href="@{${baseUrl}(page=${page.number + 2})}">다음</a>
 </nav>
 
-<!-- 필터 바: 검색어 + 필터 칩. 칩은 링크라 JS 없이 동작하고, 조건이 바뀌면 1페이지부터 다시 본다 -->
+<!-- 필터 바: 검색어 + 입력 필터(글자·날짜) + 필터 칩 + 적용된 조건. 칩은 링크라 JS 없이 동작하고, 조건이 바뀌면 1페이지부터 다시 본다 -->
 <div th:fragment="filterBar(definition, query)" class="flex flex-wrap items-center gap-2" data-admin-filter-bar>
-  <form method="get" action="" class="flex items-center gap-2">
+  <form method="get" action="" class="flex flex-wrap items-center gap-2">
     <input type="text" name="q" th:value="${query.q}" maxlength="100" placeholder="검색"
            class="input input-bordered input-sm w-full sm:w-64"/>
+    <!-- 입력 필터: 정의에 TEXT·DATE 로 선언한 것만 칸을 그린다 -->
+    <label th:each="filter : ${definition.filters}" th:if="${filter.hasInputField()}"
+           class="flex items-center gap-1 text-sm" data-admin-filter-input>
+      <span class="text-base-content/70 whitespace-nowrap" th:text="${filter.label}">필터</span>
+      <input th:if="${filter.isDateInput()}" type="date" th:name="${filter.key}"
+             th:value="${query.filters.get(filter.key)}" th:attr="aria-label=${filter.label}"
+             class="input input-bordered input-sm"/>
+      <input th:unless="${filter.isDateInput()}" type="text" th:name="${filter.key}" maxlength="100"
+             th:value="${query.filters.get(filter.key)}" th:attr="aria-label=${filter.label}"
+             class="input input-bordered input-sm w-40"/>
+    </label>
     <input type="hidden" name="sort" th:value="${query.sort}"/>
-    <input th:each="activeFilter : ${query.filters}" type="hidden"
-           th:name="${activeFilter.key}" th:value="${activeFilter.value}"/>
+    <!-- 칩·숨은 필터는 값만 실어 유지한다 (입력 칸이 있는 필터는 위 칸이 실음) -->
+    <th:block th:each="activeFilter : ${query.filters}"
+              th:with="activeDefinition=${definition.filterOf(activeFilter.key)}">
+      <input th:unless="${activeDefinition != null and activeDefinition.hasInputField()}" type="hidden"
+             th:name="${activeFilter.key}" th:value="${activeFilter.value}"/>
+    </th:block>
     <button type="submit" class="btn btn-outline btn-sm">검색</button>
   </form>
   <div th:each="filter : ${definition.filters}" th:unless="${filter.options.isEmpty()}"
@@ -37,20 +52,62 @@
        th:classappend="${option.value == query.filters.get(filter.key)} ? 'btn-primary'"
        class="btn btn-sm join-item" th:text="${option.label}">옵션</a>
   </div>
+  <div th:replace="~{admin/fragments/admin-list :: activeFilters(${definition}, ${query})}"></div>
+</div>
+
+<!-- 적용된 조건 칩: 검색어·필터마다 x 로 하나씩 빼고, 필터 초기화로 전부 뺀다 (정렬은 유지). 조건이 없으면 그리지 않는다 -->
+<div th:fragment="activeFilters(definition, query)" th:if="${query.hasConditions()}"
+     class="w-full flex flex-wrap items-center gap-1 text-sm" data-admin-active-filters>
+  <span class="text-base-content/60">적용된 조건</span>
+  <a th:if="${query.q != null}" th:href="${query.withKeyword(null).toQueryString(query.sort, 1)}"
+     class="badge badge-outline gap-1 max-w-xs" th:title="'검색어 빼기: ' + ${query.q}">
+    <span class="truncate" th:text="'검색어: ' + ${query.q}">검색어: 값</span><span aria-hidden="true">✕</span>
+  </a>
+  <th:block th:each="activeFilter : ${query.filters}"
+            th:with="activeDefinition=${definition.filterOf(activeFilter.key)}">
+    <a th:href="${query.withFilter(activeFilter.key, null).toQueryString(query.sort, 1)}"
+       class="badge badge-outline gap-1 max-w-xs" data-admin-active-filter
+       th:title="(${activeDefinition != null} ? ${activeDefinition.label} : ${activeFilter.key}) + ' 빼기'">
+      <span class="truncate"
+            th:text="(${activeDefinition != null} ? ${activeDefinition.label} : ${activeFilter.key}) + ': '
+                     + (${activeDefinition != null} ? ${activeDefinition.displayValueOf(activeFilter.value)} : ${activeFilter.value})">필터: 값</span>
+      <span aria-hidden="true">✕</span>
+    </a>
+  </th:block>
+  <a th:href="${query.withoutConditions().toQueryString(query.sort, 1)}" class="btn btn-ghost btn-xs"
+     data-admin-filter-reset>필터 초기화</a>
+</div>
+
+<!-- CSV 내보내기: link 는 AdminCsvExporter.ExportLink (현재 검색·필터·정렬 그대로).
+     전체 건수가 상한을 넘으면 누르지 못하게 하고 이유를 보인다 (서버도 다시 막음) -->
+<div th:fragment="csvExport(link)" th:if="${link != null}" class="flex items-center gap-2" data-admin-csv-export
+     th:with="maxRowsText=${#numbers.formatInteger(link.maxRows(), 1, 'COMMA')}">
+  <a th:unless="${link.isOverLimit()}" th:href="${link.url}" class="btn btn-outline btn-sm">CSV 내보내기</a>
+  <span th:if="${link.isOverLimit()}" class="tooltip tooltip-left"
+        th:attr="data-tip=${maxRowsText} + '건 이하로 좁히면 내보낼 수 있어요'">
+    <button type="button" class="btn btn-outline btn-sm" disabled>CSV 내보내기</button>
+  </span>
+  <span class="text-xs text-base-content/60"
+        th:text="'지금 조건 그대로 · 최대 ' + ${maxRowsText} + '건'">지금 조건 그대로 · 최대 10,000건</span>
 </div>
 
 <!-- 표 머리 칸들: 정렬 가능한 열은 헤더 링크 (표를 직접 그리는 화면도 같은 헤더를 쓴다) -->
 <th:block th:fragment="sortHeaders(definition, query)">
-  <th th:each="column : ${definition.columns}">
-    <a th:if="${column.isSortable()}" th:href="${query.toQueryString(query.nextSortFor(column.key), 1)}"
-       class="link link-hover" th:text="${column.label} + (${query.sortKey() == column.key} ? (${query.isAscending()} ? ' ▲' : ' ▼') : '')">열</a>
-    <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
-  </th>
+  <th:block th:each="column : ${definition.columns}">
+    <th th:replace="~{admin/fragments/admin-list :: sortHeader(${column}, ${query})}"></th>
+  </th:block>
 </th:block>
 
-<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크. rows 는 AdminListRow 목록 -->
+<!-- 머리 칸 1개: 정의에 없는 열 사이에 정렬 열을 끼워 넣는 화면용 (column 은 definition.columnOf(키)) -->
+<th th:fragment="sortHeader(column, query)" th:classappend="${column.isNumeric()} ? 'text-right'">
+  <a th:if="${column.isSortable()}" th:href="${query.toQueryString(query.nextSortFor(column.key), 1)}"
+     class="link link-hover" th:text="${column.label} + (${query.sortKey() == column.key} ? (${query.isAscending()} ? ' ▲' : ' ▼') : '')">열</a>
+  <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
+</th>
+
+<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크, 숫자 열은 우측 정렬. rows 는 AdminListRow 목록 -->
 <div th:fragment="table(definition, query, rows)" class="overflow-x-auto">
-  <table class="table">
+  <table class="table table-sm">
     <thead>
     <tr>
       <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
@@ -58,7 +115,7 @@
     </thead>
     <tbody>
     <tr th:each="row : ${rows}" class="hover">
-      <td th:each="column, columnStat : ${definition.columns}">
+      <td th:each="column, columnStat : ${definition.columns}" th:classappend="${column.isNumeric()} ? 'text-right'">
         <th:block th:with="cellLink=${columnStat.first and row.linkUrl != null ? row.linkUrl : row.cellLinks.get(column.key)}">
           <a th:if="${cellLink != null}" th:href="${cellLink}" class="link link-hover"
              th:text="${row.cells.get(column.key)}">값</a>

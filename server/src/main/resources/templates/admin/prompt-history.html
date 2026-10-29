@@ -42,7 +42,7 @@
             <pre class="bg-base-200 rounded p-3 text-xs whitespace-pre-wrap" th:text="${history.content}"></pre>
             <!-- 복원은 기존 저장 엔드포인트를 그대로 재사용한다. 복원 자체도 이력으로 남는다. -->
             <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey},locale=${selectedLocale ?: prompt.locale})}" method="post"
-                  onsubmit="return confirm('이 버전으로 복원할까요? 현재 적용본은 이력으로 보관됩니다.');">
+                  data-confirm-title="프롬프트 복원" data-confirm-message="이 버전으로 복원할까요? 지금 적용본은 이력으로 남아요.">
               <textarea name="content" class="hidden" th:text="${history.content}"></textarea>
               <button type="submit" class="btn btn-outline btn-sm">이 버전으로 복원</button>
             </form>

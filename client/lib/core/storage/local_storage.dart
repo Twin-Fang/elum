@@ -168,11 +168,26 @@ abstract interface class LocalStorage {
   String? getNoticeHiddenJson(String noticeId);
   Future<void> setNoticeHiddenJson(String noticeId, String json);
 
+  /// 공지 숨김 기록 전부 지우기 (개발자 도구: 숨긴 공지 다시 보기)
+  Future<void> clearNoticeHidden();
+
   /// 알림 권한 안내 시트를 이 휴대폰에서 이미 보여 줬는가 (첫 일과를 보낸 뒤 한 번만).
   ///
   /// 시스템 권한이 휴대폰 단위라 [clearAll] 이 지우지 않는다.
   bool get hasAskedPushPermission;
   Future<void> setHasAskedPushPermission(bool v);
+
+  /// 알림 켜기 안내 시트를 마지막으로 띄운 시각. 없으면 null
+  ///
+  /// 알림이 꺼진 기기에 7일마다 다시 권하려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
+  DateTime? get pushPermissionNudgedAt;
+  Future<void> setPushPermissionNudgedAt(DateTime at);
+
+  /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
+  ///
+  /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
+  String? get updateSuggestionShownRecord;
+  Future<void> setUpdateSuggestionShownRecord(String record);
 
   /// 보호자 홈 코치마크를 이 휴대폰에서 이미 봤는가.
   ///
@@ -189,7 +204,11 @@ abstract interface class LocalStorage {
   bool get isGroupCoachSeen;
   Future<void> setGroupCoachSeen(bool isSeen);
 
-  /// 코치마크 3종(홈·일과관리·묶음)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
+  /// 카드 검토 코치마크(수정·순서 변경·저장)를 봤는가
+  bool get isCardReviewCoachSeen;
+  Future<void> setCardReviewCoachSeen(bool isSeen);
+
+  /// 코치마크 4종(홈·일과관리·묶음·카드 검토)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
   Future<void> resetCoachMarks();
 
 
@@ -203,6 +222,28 @@ abstract interface class LocalStorage {
   /// 이룸이가 카드를 체크할 때 칭찬 소리를 낼지. 진동과 같은 이유로 휴대폰에 속하고 기본은 켜짐 (#777)
   bool get isChildPraiseSoundOn;
   Future<void> setChildPraiseSoundOn(bool v);
+
+  /// 일과 진행(카드) 화면이 떠 있는 동안 기기 화면을 켜 둘지. 진동과 같은 이유로 기기에 속하고 기본은 켜짐 (#970)
+  bool get isChildScreenAwakeOn;
+  Future<void> setChildScreenAwakeOn(bool v);
+
+  /// 이야기에서 가져온 일과 중 상세를 한 번이라도 연 일과 id. 목록 칸의 `새 일과` 칩을 끄는 근거
+  ///
+  /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다
+  List<String> get talkImportedSeenRoutineIds;
+  Future<void> setTalkImportedSeenRoutineIds(List<String> routineIds);
+
+  /// 홈 `이야기에 공유해 보기` 링크를 닫은 원본 일과 id. 닫은 일과에는 다시 띄우지 않는다
+  ///
+  /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다
+  List<String> get talkShareHintDismissedRoutineIds;
+  Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
+
+  /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
+  ///
+  /// 보기 취향이라 휴대폰에 속하고 [clearAll] 이 지우지 않는다
+  bool get isTalkGridView;
+  Future<void> setTalkGridView(bool isGridView);
 
   /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
   String? get routineRemindersJson;

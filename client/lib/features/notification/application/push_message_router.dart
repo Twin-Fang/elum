@@ -15,6 +15,7 @@ import '../../auth/application/auth_session_controller.dart';
 import '../data/notification_repository.dart';
 import '../data/push_messaging_client.dart';
 import '../domain/push_message.dart';
+import 'elumi_push_opener.dart';
 import 'notification_navigator.dart';
 import 'notification_target.dart';
 import 'pending_push_open.dart';
@@ -30,6 +31,7 @@ typedef ReadyNavigatorContext = BuildContext? Function();
 
 /// 푸시 수신 > 화면 반영: 전경 수신(안 읽음 갱신 + 배너), 알림 누름(앱 열기·로컬 배너) > 해당 화면 이동
 /// 이동은 보호자로 로그인했고 화면이 준비된 뒤 한 번만, 로그인 전에 누른 알림은 버림
+/// 이룸이 기기 푸시(일과 도착)는 [ElumiPushOpener] 로 넘김
 class PushMessageRouter {
   PushMessageRouter(this._ref);
 
@@ -49,6 +51,7 @@ class PushMessageRouter {
 
   bool _isStarted = false;
   ReadyNavigatorContext? _readyContext;
+  ReadyNavigatorContext? _readyElumiContext;
   final _subscriptions = <StreamSubscription<Object?>>[];
 
   PendingPushOpen? _pendingOpen;
@@ -61,20 +64,33 @@ class PushMessageRouter {
 
   PushMessagingClient get _client => _ref.read(pushMessagingClientProvider);
 
+  ElumiPushOpener get _elumiOpener => _ref.read(elumiPushOpenerProvider);
+
   LocalNotificationsPlugin get _localNotifications =>
       _ref.read(localNotificationsPluginProvider);
 
   /// 앱 시작 후 한 번: 전경 수신·누름 구독 + 종료 상태에서 눌러 열린 알림 처리 (두 번째 호출은 무시)
-  void start({required ReadyNavigatorContext readyContext}) {
+  /// [readyElumiContext] 는 이룸이 화면 안일 때만 컨텍스트를 돌려줌 (이룸이 기기 푸시 이동용)
+  void start({
+    required ReadyNavigatorContext readyContext,
+    required ReadyNavigatorContext readyElumiContext,
+  }) {
     if (_isStarted) return;
     _isStarted = true;
     _readyContext = readyContext;
+    _readyElumiContext = readyElumiContext;
     _ref.onDispose(_stop);
     unawaited(_startListening());
   }
 
   /// 화면이 바뀔 때마다 부름: 기다리던 이동이 있으면 이제 열 수 있는지 확인
   void onRouteChanged() {
+    final readyElumiContext = _readyElumiContext;
+    if (readyElumiContext != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(_elumiOpener.openPending(readyElumiContext)),
+      );
+    }
     if (_pendingOpen == null) return;
     // 라우터가 알리는 도중에 다시 이동하지 않도록 프레임이 끝난 뒤에 확인
     WidgetsBinding.instance.addPostFrameCallback(
@@ -86,6 +102,9 @@ class PushMessageRouter {
     try {
       await _localNotifications.ensureInitialized();
       await _localNotifications.createAndroidChannel(_guardianChannel());
+      await _localNotifications.createAndroidChannel(
+        _elumiOpener.routinesChannel(),
+      );
     } catch (e, st) {
       // 배너만 못 띄움 (푸시 수신·이동은 계속)
       AppLogger.error('push', e, st, {'step': 'initLocalNotifications'});
@@ -145,6 +164,10 @@ class PushMessageRouter {
   // 전경 수신
 
   void _onForegroundMessage(PushMessage message) {
+    if (ElumiPushOpener.isElumiPush(message.data)) {
+      _elumiOpener.onForegroundMessage(message.data);
+      return;
+    }
     if (!_isGuardianSignedIn) return;
     unawaited(_refreshUnreadSummary());
     // 이룸이 화면을 보여 주는 중에는 배너로 방해하지 않음
@@ -195,6 +218,14 @@ class PushMessageRouter {
     return _nextFallbackBannerId--;
   }
 
+  // 개발자 도구 흉내 (서버 발송 없이 이 기기에서만)
+
+  /// 받은 것처럼 배너 띄우기: 실제 배너와 같은 채널·payload > 누르면 실제 이동 경로
+  Future<void> showBannerAsReceived(PushMessage message) => _showBanner(message);
+
+  /// 배너를 누른 것처럼 바로 이동
+  void openAsTapped(PushMessage message) => _onTapped(message.data);
+
   // 누름 > 이동
 
   void _onMessageOpened(PushMessage message) => _onTapped(message.data);
@@ -221,6 +252,13 @@ class PushMessageRouter {
   }
 
   void _onTapped(Map<String, String> data) {
+    final readyElumiContext = _readyElumiContext;
+    if (ElumiPushOpener.isElumiPush(data)) {
+      if (readyElumiContext != null) {
+        _elumiOpener.onTapped(data, readyElumiContext);
+      }
+      return;
+    }
     if (!_isGuardianSignedIn) {
       AppLogger.info('[push] tap dropped : not signed in as guardian');
       return;

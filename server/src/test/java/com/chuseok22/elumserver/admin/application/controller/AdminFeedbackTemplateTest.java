@@ -2,10 +2,16 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminFeedbackSenderPanel;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
+import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,7 +35,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 class AdminFeedbackTemplateTest {
 
   private static final List<String> TAGS = List.of(
-    "div", "form", "table", "thead", "tbody", "tr", "section", "main", "button", "a", "span", "p", "pre", "select");
+    "div", "form", "table", "thead", "tbody", "tr", "section", "main", "button", "a", "span", "p", "pre", "select",
+    "textarea", "h3");
 
   private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
 
@@ -48,6 +55,29 @@ class AdminFeedbackTemplateTest {
 
   private String renderDetail(Feedback feedback) {
     return renderer.render("admin/feedback-detail", Map.of("feedback", feedback, "statuses", FeedbackStatus.values()));
+  }
+
+  private String renderDetail(Feedback feedback, AdminFeedbackSenderPanel senderPanel) {
+    return renderer.render("admin/feedback-detail", Map.of("feedback", feedback, "statuses", FeedbackStatus.values(),
+      "adminNoteMaxLength", 2000, "senderPanel", senderPanel));
+  }
+
+  /// 불러온 패널: 프로·활성, 크레딧 계정 있음, 실패 호출 1건(긴 오류 문구에 태그 포함) + 성공 1건
+  private static AdminFeedbackSenderPanel loadedSenderPanel(String memberId) {
+    AiCallLog failedCall = new AiCallLog();
+    failedCall.setCallType(AiCallType.values()[0]);
+    failedCall.setModel("gpt-image-1-mini");
+    failedCall.setSuccess(false);
+    failedCall.setErrorMessage("<b>quota</b> exceeded " + "x".repeat(120));
+    ReflectionTestUtils.setField(failedCall, "createdAt", LocalDateTime.of(2026, 10, 8, 17, 20, 1));
+    AiCallLog succeededCall = new AiCallLog();
+    succeededCall.setCallType(AiCallType.values()[0]);
+    succeededCall.setModel("gemini-2.5-flash");
+    succeededCall.setSuccess(true);
+    succeededCall.setEstimatedCostUsd(0.0012);
+    return new AdminFeedbackSenderPanel(false, true, memberId, "하늘보호자", MemberStatus.ACTIVE, PlanType.PRO,
+      new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, false),
+      List.of(failedCall, succeededCall), LocalDateTime.of(2026, 10, 8, 17, 54, 44));
   }
 
   private String renderList(List<Feedback> rows) {
@@ -146,8 +176,8 @@ class AdminFeedbackTemplateTest {
 
     assertThat(html).contains("data-admin-filter-bar").contains("value=\"느림\"").contains("처리 상태")
       .contains("처리 상태 ▲");
-    assertThat(html).contains("name=\"returnQ\" value=\"느림\"").contains("name=\"returnStatus\" value=\"NEW\"")
-      .contains("name=\"returnSort\" value=\"status,asc\"").contains("name=\"returnPage\" value=\"2\"");
+    assertThat(html).contains("name=\"return.q\" value=\"느림\"").contains("name=\"return.status\" value=\"NEW\"")
+      .contains("name=\"return.sort\" value=\"status,asc\"").contains("name=\"return.page\" value=\"2\"");
   }
 
   @Test
@@ -170,7 +200,44 @@ class AdminFeedbackTemplateTest {
 
     assertThat(html).contains("처리 상태").contains("처리 완료").contains("2026-10-09 08:30").contains("· kimchi")
       .contains("action=\"/admin/feedback/f1/status\"").contains("name=\"returnTo\" value=\"detail\"")
-      .doesNotContain("name=\"returnQ\"");
+      .doesNotContain("name=\"return.q\"");
+  }
+
+  @Test
+  @DisplayName("상세의 관리자 메모(이스케이프)·보낸 회원 패널(요금제·크레딧·AI 호출, 오류 80자 자름·이스케이프)이 그려진다")
+  void detail_rendersAdminNoteAndSenderPanel() {
+    Feedback feedback = feedback("f1", "의견", null);
+    feedback.setAdminNote("<script>alert(3)</script> 다시 연락");
+    feedback.setAdminNoteChangedBy("kimchi");
+    feedback.setAdminNoteChangedAt(LocalDateTime.of(2026, 10, 9, 9, 0));
+
+    String html = renderDetail(feedback, loadedSenderPanel(feedback.getMemberId()));
+
+    assertThat(html).contains("action=\"/admin/feedback/f1/note\"").contains("maxlength=\"2000\"")
+      .contains("&lt;script&gt;alert(3)&lt;/script&gt; 다시 연락").doesNotContain("<script>alert(3)")
+      .contains("2026-10-09 09:00").contains("· kimchi");
+    assertThat(html).contains("보낸 회원").contains("하늘보호자").contains("프로").contains("활성")
+      .contains("data-member-credit-summary").contains("1,234")
+      .contains("gpt-image-1-mini").contains("&lt;b&gt;quota&lt;/b&gt;").doesNotContain("<b>quota")
+      // 칸에는 앞 77자 + ... (전체 문구는 title)
+      .contains(">&lt;b&gt;quota&lt;/b&gt; exceeded " + "x".repeat(55) + "...<").contains("$0.001200")
+      .contains("/admin/monitoring?memberId=ae9b68f4-66ed-44c5-9dd3-4972e737d1fc&amp;from=2026-10-02&amp;to=2026-10-08")
+      .contains("/admin/members/ae9b68f4-66ed-44c5-9dd3-4972e737d1fc");
+  }
+
+  @Test
+  @DisplayName("보낸 회원 패널이 실패·회원 없음이어도 의견 본문은 그려지고 안내만 바뀐다")
+  void detail_senderPanelFailedOrMissing_stillRendersFeedback() {
+    Feedback feedback = feedback("f1", "본문은 보여야 해요", null);
+
+    String failed = renderDetail(feedback, AdminFeedbackSenderPanel.loadFailed(feedback.getMemberId()));
+    assertThat(failed).contains("본문은 보여야 해요").contains("E-ADM-FEEDBACK-001")
+      .contains("/admin/members/ae9b68f4-66ed-44c5-9dd3-4972e737d1fc").doesNotContain("data-member-credit-summary");
+
+    String missing = renderDetail(feedback, AdminFeedbackSenderPanel.memberNotFound(feedback.getMemberId()));
+    assertThat(missing).contains("본문은 보여야 해요").contains("탈퇴했거나 찾을 수 없는 회원이에요")
+      .contains("ae9b68f4-66ed-44c5-9dd3-4972e737d1fc").doesNotContain("/admin/members/ae9b68f4")
+      .doesNotContain("E-ADM-FEEDBACK-001");
   }
 
   @Test
@@ -179,6 +246,7 @@ class AdminFeedbackTemplateTest {
     for (String html : List.of(
       renderDetail(feedback("f1", "의견", "기록")),
       renderDetail(feedback("f2", "의견", null)),
+      renderDetail(feedback("f3", "의견", null), loadedSenderPanel("m3")),
       renderList(List.of(feedback("f1", "의견", "기록"))),
       renderList(List.of()))) {
       for (String tag : TAGS) {

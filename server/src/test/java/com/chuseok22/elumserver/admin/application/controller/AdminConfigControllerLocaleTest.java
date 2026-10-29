@@ -38,7 +38,8 @@ class AdminConfigControllerLocaleTest {
   @BeforeEach
   void setUp() {
     controller = new AdminConfigController(systemConfigService, imageClientRouter, textClientRouter, promptLocaleGate,
-      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class));
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class),
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.member.application.service.MemberPickerService.class));
   }
 
   @Test
