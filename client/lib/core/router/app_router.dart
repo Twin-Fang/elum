@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/link/domain/link_code_link.dart';
 import '../../features/profile/domain/invite_link.dart';
 import '../../features/talk/domain/talk_post_link.dart';
+import '../analytics/analytics_screen_tracker.dart';
 import '../config/app_config.dart';
 import '../logger/app_log_route_observer.dart';
 import '../l10n/l10n_context.dart';
@@ -128,6 +129,8 @@ GoRouter createRouter({
     errorBuilder: (context, state) =>
         _Placeholder(context.l10n.commonScreenNotFound),
   );
+  // 화면 추적 한 곳 (분석 꺼져 있으면 아무것도 안 보냄, #650)
+  AnalyticsScreenTracker.attachTo(router);
   return router;
 }
 

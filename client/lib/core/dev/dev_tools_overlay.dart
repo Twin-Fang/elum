@@ -17,6 +17,8 @@ import '../../features/notification/domain/push_message.dart';
 import '../../features/guardian/application/routine_notifier.dart';
 import '../../features/guardian/application/routine_providers.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
+import '../analytics/analytics_events.dart';
+import '../analytics/app_analytics.dart';
 import '../app_status/app_status_repository.dart';
 import '../config/app_config.dart';
 import '../l10n/app_locales.dart';
@@ -42,6 +44,7 @@ part 'dev_tools_widgets.dart';
 part 'dev_tools_server.dart';
 part 'dev_tools_simulate.dart';
 part 'dev_tools_crash.dart';
+part 'dev_tools_analytics.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///

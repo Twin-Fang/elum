@@ -20,21 +20,13 @@ class _CrashReportingTilesState extends State<_CrashReportingTiles> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다
-        MergeSemantics(
-          child: ListTile(
-            leading: const Icon(Icons.bug_report_outlined),
-            title: const Text('크래시 보내기 (Crashlytics)'),
-            subtitle: Text(
-              _lastResultMessage ??
-                  '오류 종류·스택·에러 코드만 보냄 (메시지·입력값·사용자 식별자 없음). 앱을 꺼도 유지',
-              style: const TextStyle(fontSize: 12),
-            ),
-            trailing: Switch(
-              value: isEnabled,
-              onChanged: _isApplying ? null : _onCrashReportingSwitched,
-            ),
-          ),
+        _SwitchTile(
+          icon: Icons.bug_report_outlined,
+          label: '크래시 보내기 (Crashlytics)',
+          subtitle: _lastResultMessage ??
+              '오류 종류·스택·에러 코드만 보냄 (메시지·입력값·사용자 식별자 없음). 앱을 꺼도 유지',
+          isOn: isEnabled,
+          onChanged: _isApplying ? null : _onCrashReportingSwitched,
         ),
         _Tile(
           icon: Icons.report_gmailerrorred_outlined,

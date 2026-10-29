@@ -11,6 +11,7 @@ import '../../../shared/models/image_style.dart';
 import '../domain/onboarding_profile.dart';
 import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/logger/app_logger.dart';
 
 final onboardingProvider =
@@ -181,6 +182,19 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
   /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다.
   Future<AppFailure?> complete() async {
+    // await 뒤 state 를 읽지 않게 먼저 잡음 (화면을 떠나 notifier 가 사라질 수 있음)
+    final exampleCategoryCount = state.exampleCategories.length;
+    final failure = await _saveCompletedOnboarding();
+    // 저장 실패여도 화면은 홈으로 넘어가므로 완료로 셈 (서버 저장 여부만 구분)
+    AppAnalytics.logOnboardingCompleted(
+      isServerSaved: failure == null,
+      exampleCategoryCount: exampleCategoryCount,
+    );
+    return failure;
+  }
+
+  /// 로컬 저장 > 코치마크 초기화 > 서버 저장. null 이면 셋 다 저장됨
+  Future<AppFailure?> _saveCompletedOnboarding() async {
     // 저장하는 사이 서버 응답이 상태를 덮어도 사용자가 입력한 값이 나가도록 시작 시점 값을 고정한다.
     // 아니면 그림 방식이 기본값(만화)으로 저장돼 AI 그림 비용이 나간다.
     final input = state;

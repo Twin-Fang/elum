@@ -5,6 +5,18 @@
 	<!-- 크래시 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (CrashReporter, #659) -->
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<false/>
+	<!-- 분석 수집 기본 꺼짐. 개발자 도구 스위치로만 켬, 운영 빌드는 항상 꺼짐 (AppAnalytics, #650)
+	     DEACTIVATED 가 아니라 ENABLED=false: 런타임 setAnalyticsCollectionEnabled 로 켤 수 있어야 함 -->
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<!-- 화면 추적은 라우터 한 곳(AnalyticsScreenTracker)만. UIViewController 자동 기록 끔 -->
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
+	<!-- 광고 식별자 3종 끔: IDFV 수집, 광고 맞춤 신호. IDFA 는 Podfile $FirebaseAnalyticsWithoutAdIdSupport -->
+	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<!-- 설정 > 이룸 > 언어 목록: 연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527).

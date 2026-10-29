@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/app_analytics.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
@@ -363,6 +364,7 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     try {
       final confirmed = await repo.confirm(routine);
       state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
+      AppAnalytics.logRoutineConfirmed(cardCount: confirmed.steps.length);
     } catch (e) {
       AppLogger.error('RoutineFlowNotifier', e);
       return AppFailure.of(e);
