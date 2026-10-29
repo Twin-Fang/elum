@@ -3189,6 +3189,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get talkMenuShare => '이야기에 공유하기';
 
   @override
+  String get talkMyPostsTitle => '내가 쓴 글';
+
+  @override
+  String get talkMyPostsEmpty => '아직 쓴 글이 없어요';
+
+  @override
+  String get talkMyPostsEmptyAction => '이야기에 일과 나누기';
+
+  @override
+  String get talkMyPostsFailed => '내가 쓴 글을 불러오지 못했어요';
+
+  @override
   String get talkMenuViewMyPost => '내 글 보기';
 
   @override

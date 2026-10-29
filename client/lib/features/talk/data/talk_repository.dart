@@ -35,6 +35,17 @@ class TalkRepository {
         return TalkFeedPage.fromJson(_mapBodyOf(response));
       });
 
+  /// 내가 쓴 글 한 쪽 (최신순, 내린 글 제외). cursor 는 queryParameters 로만 넘김
+  Future<TalkFeedPage> fetchMyPosts({String? cursor}) =>
+      _call('fetchMyPosts', () async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/api/talk/posts/mine',
+          queryParameters: {'cursor': ?cursor},
+          options: _accountLevelOptions,
+        );
+        return TalkFeedPage.fromJson(_mapBodyOf(response));
+      });
+
   Future<List<TalkPostSummary>> fetchPopular({String? category}) =>
       _call('fetchPopular', () async {
         final response = await _dio.get<List<dynamic>>(

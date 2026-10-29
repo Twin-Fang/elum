@@ -44,6 +44,9 @@ abstract final class Routes {
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 
+  /// 내가 쓴 글 목록 (내 정보 > 내가 쓴 글)
+  static const guardianTalkMine = '/guardian/talk/mine';
+
   /// 내정보 칸 = 보호자 프로필 (#817). 오른쪽 위 설정 아이콘으로 [guardianSettings] 에 들어간다.
   static const guardianMyInfo = '/guardian/me';
 

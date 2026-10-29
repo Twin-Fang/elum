@@ -15,7 +15,7 @@ import 'card_image.dart';
 /// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
-/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새로` 배지 (민트 = 안 읽음).
+/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
 class LibraryRoutineTile extends ConsumerWidget {
   const LibraryRoutineTile({
     super.key,
@@ -192,7 +192,7 @@ class RoutineThumbnailBox extends StatelessWidget {
   }
 }
 
-/// 일과 첫 카드 그림. 카드가 없거나 그림이 없으면 제목 첫 글자 (격자 칸 · 폴더 미리보기 · 묶음 목록 공통)
+/// 일과 첫 카드 그림. 카드가 없거나 그림이 없으면 아무것도 그리지 않음 (격자 칸 · 폴더 미리보기 · 묶음 목록 · 홈 일과 줄 공통)
 class LibraryRoutineThumbnail extends StatelessWidget {
   const LibraryRoutineThumbnail({super.key, required this.routine});
 
@@ -201,44 +201,16 @@ class LibraryRoutineThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = routine.steps;
-    final placeholder = _LetterThumbnail(title: routine.displayTitle);
-    if (steps.isEmpty) return placeholder;
+    if (steps.isEmpty) return const SizedBox.shrink();
     final first = steps.first;
-    // 그림을 받는 동안에도 칸 모양이 보이게 흰 바탕을 깔아 둔다 (비어 보이면 빠진 칸 같다)
-    return ColoredBox(
-      color: context.colors.surface,
-      child: CardImage(
-        routineId: routine.id,
-        stepId: first.id,
-        imagePath: first.imagePath,
-        pictogramId: first.pictogramId,
-        exampleImageId: first.exampleImageId,
-        pictogramLabel: first.title,
-        emptyBuilder: (_) => placeholder,
-      ),
-    );
-  }
-}
-
-class _LetterThumbnail extends StatelessWidget {
-  const _LetterThumbnail({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final letter = title.characters.isEmpty ? '' : title.characters.first;
-    return ColoredBox(
-      color: colors.surface,
-      child: Center(
-        child: Text(
-          letter,
-          style: context.typo.sectionTitle.copyWith(
-            color: colors.textSecondary,
-          ),
-        ),
-      ),
+    return CardImage(
+      routineId: routine.id,
+      stepId: first.id,
+      imagePath: first.imagePath,
+      pictogramId: first.pictogramId,
+      exampleImageId: first.exampleImageId,
+      pictogramLabel: first.title,
+      emptyBuilder: (_) => const SizedBox.shrink(),
     );
   }
 }

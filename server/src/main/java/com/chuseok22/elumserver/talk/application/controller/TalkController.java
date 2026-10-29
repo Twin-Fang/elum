@@ -70,6 +70,16 @@ public class TalkController implements TalkControllerDocs {
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @GetMapping("/posts/mine")
+  public ResponseEntity<TalkFeedPageResponse> getMyPosts(
+    Authentication authentication,
+    @RequestParam(required = false) String cursor,
+    @RequestParam(required = false) Integer size
+  ) {
+    return ResponseEntity.ok(talkFeedQueryService.myPosts(Caller.from(authentication), cursor, size));
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/posts/mine/by-source-routine")
   public ResponseEntity<Map<String, String>> getMySharedPosts(Authentication authentication) {
     return ResponseEntity.ok(talkFeedQueryService.mySharedPosts(Caller.from(authentication)));

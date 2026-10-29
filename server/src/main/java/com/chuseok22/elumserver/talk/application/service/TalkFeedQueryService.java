@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 이야기 읽기: 피드, 인기, 상세, 카드 그림, 내가 나눈 일과 매핑
+ * 이야기 읽기: 피드, 인기, 내 글 목록, 상세, 카드 그림, 내가 나눈 일과 매핑
  * 보이는 글만, 차단한 보호자·정지 회원 글 제외, 응답에 회원 id·이메일 없음
  */
 @Service
@@ -161,6 +161,28 @@ public class TalkFeedQueryService {
     List<TalkPost> page = talkPostAccess.readablePosts(caller, rankedPosts, blockedAuthorIds).stream()
       .limit(POPULAR_MAX_COUNT).toList();
     return toSummaries(caller, page);
+  }
+
+  /**
+   * 내 글 한 쪽: 내가 쓴 보이는 글 최신순 읽기 > size 만큼 자르고 nextCursor
+   * 내려간 글 제외, 언어·차단 거름 없음 (내 글), cursor 형식이 틀리면 첫 쪽, size 는 1~50 (기본 20)
+   */
+  public TalkFeedPageResponse myPosts(Caller caller, String cursor, Integer size) {
+    int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
+    TalkCursor position = TalkCursor.decode(cursor).orElse(null);
+    List<TalkPost> fetched = talkPostRepository.findMyPostsPage(caller.memberId(), TalkPostStatus.VISIBLE,
+      position == null ? NO_CURSOR_CREATED_AT : position.createdAt(),
+      position == null ? "" : position.id(), PageRequest.of(0, pageSize + 1));
+
+    // 한 건 더 읽혔으면 다음 쪽이 있음
+    boolean hasNextPage = fetched.size() > pageSize;
+    List<TalkPost> page = hasNextPage ? fetched.subList(0, pageSize) : fetched;
+    String nextCursor = null;
+    if (hasNextPage) {
+      TalkPost last = page.get(page.size() - 1);
+      nextCursor = TalkCursor.encode(last.getCreatedAt(), last.getId());
+    }
+    return new TalkFeedPageResponse(toSummaries(caller, page), nextCursor);
   }
 
   /**
