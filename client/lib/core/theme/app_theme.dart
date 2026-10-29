@@ -51,15 +51,21 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         // 바닥에 붙이지 않고 띄운다. 하단 광고·홈 인디케이터와 붙어 보이지 않게.
         behavior: SnackBarBehavior.floating,
-        // 배경은 본문색(#242634). 화면 배경(#F7F2EF) 위에서 가장 또렷하고, 새 색을 만들지 않는다.
-        backgroundColor: colors.textPrimary,
+        // 흰 판 + 1px 테두리 (시안 없음 > 팝업 결, design-language §4-6). 어두운 덩어리로 튀지 않게
+        backgroundColor: colors.toastBackground,
         // body 는 줄 높이 1.0 이라 이름이 길어 두 줄이 되면 위아래 줄이 붙는다.
-        contentTextStyle: typo.body.copyWith(color: colors.surface, height: 1.4),
-        // 문구 옆 누르는 글자(`보러 가기`): 본문과 같은 색
-        actionTextColor: colors.surface,
+        contentTextStyle: typo.body.copyWith(color: colors.toastText, height: 1.4),
+        // 문구 옆 누르는 글자(`보러 가기`)
+        actionTextColor: colors.toastAction,
+        // `보러 가기` 가 폭의 25% 를 넘으면 Flutter 가 아랫줄로 내려 토스트가 두 배로 커진다 > 한 줄에 둔다
+        actionOverflowThreshold: 0.4,
         insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: colors.toastBorder),
+        ),
+        // 떠 있는 판의 옅은 그림자 (팝업 `4 4 6` 5% 에 가장 가까운 Material 높이)
+        elevation: 2,
       ),
       extensions: const [colors, typo, AppSpacing.standard, AppLayout.standard],
     );

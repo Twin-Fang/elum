@@ -4802,6 +4802,12 @@ abstract class AppLocalizations {
   /// **'다 했어요!'**
   String get childHomeGroupAllDone;
 
+  /// 일과 제목 옆 연필 (화면 낭독기 이름)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 이름 바꾸기'**
+  String get routineTitleEdit;
+
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
@@ -5161,6 +5167,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보호자'**
   String get talkAuthorFallback;
+
+  /// 이야기 올리기 맨 위 일과 제목 칸 이름. 고치면 일과관리의 일과 이름도 바뀐다
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 제목'**
+  String get talkShareTitleLabel;
+
+  /// 이야기 올리기 일과 제목 칸을 비웠을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 제목을 적어 주세요'**
+  String get talkShareTitleHint;
 
   /// 글쓴이 한마디 칸 이름 (올리기·고치기·상세)
   ///

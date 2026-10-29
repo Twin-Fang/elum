@@ -3,11 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
-import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import 'routine_title_edit_label.dart';
 
 /// 스크롤해도 남는 머리 부분.
 class RoutineDetailHeader extends StatelessWidget {
@@ -17,6 +17,7 @@ class RoutineDetailHeader extends StatelessWidget {
     required this.language,
     this.caption,
     this.onMoreTap,
+    this.onTitleEditTap,
   });
 
   final String title;
@@ -29,6 +30,9 @@ class RoutineDetailHeader extends StatelessWidget {
 
   /// 있으면 제목 오른쪽에 `⋯` 버튼을 둔다 (#834)
   final VoidCallback? onMoreTap;
+
+  /// 있으면 제목 옆 연필 > 이름 바꾸기 (고칠 수 있는 일과만)
+  final VoidCallback? onTitleEditTap;
 
   /// ⋯ 아이콘 한 변
   static const _moreIconSize = 24.0;
@@ -56,13 +60,15 @@ class RoutineDetailHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: ContentLocale(
-                  language: language,
-                  child: Text(
-                    title,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: RoutineTitleEditLabel(
+                    title: title,
+                    language: language,
                     style: context.typo.sheetTitle.copyWith(
                       color: colors.sheetTitleText,
                     ),
+                    onEditTap: onTitleEditTap,
                   ),
                 ),
               ),

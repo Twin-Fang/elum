@@ -6,21 +6,17 @@ import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_fade_slide_in.dart';
 
-/// 올리기 단계 머리: 제목(단계 질문 600/18 · 일과 제목 700/20) > 안내
+/// 올리기 단계 머리: 단계 질문(600/18) > 안내
 /// 본문이 좌우 16 을 쓰므로 글은 8 더 들어가 x=24 에서 시작한다 (시트 머리와 같은 줄)
 class TalkPageHeading extends StatelessWidget {
   const TalkPageHeading({
     super.key,
     required this.title,
     this.description,
-    this.isRoutineTitle = false,
   });
 
   final String title;
   final String? description;
-
-  /// true 면 일과 제목 글자(700/20, 내용 쓰기 단계)
-  final bool isRoutineTitle;
 
   /// 머리 줄 끝(y119) > 제목 (시안 제목 y147)
   static const topSpacing = 28.0;
@@ -42,11 +38,9 @@ class TalkPageHeading extends StatelessWidget {
           children: [
             Text(
               title,
-              style:
-                  (isRoutineTitle
-                          ? typo.talkShareRoutineTitle
-                          : typo.talkShareStepTitle)
-                      .copyWith(color: colors.talkTitleText),
+              style: typo.talkShareStepTitle.copyWith(
+                color: colors.talkTitleText,
+              ),
             ),
             if (description != null) ...[
               SizedBox(height: _titleToDescription.h),
