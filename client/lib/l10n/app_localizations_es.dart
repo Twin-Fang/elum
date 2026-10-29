@@ -1047,10 +1047,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
 
   @override
-  String get notificationSettingTalkCommented => '이야기: 내 글에 댓글이 달렸을 때';
+  String get notificationSettingTalkCommented =>
+      'Historias: cuando comentan mi publicación';
 
   @override
-  String get notificationSettingTalkImported => '이야기: 내 글을 가져갔을 때';
+  String get notificationSettingTalkImported =>
+      'Historias: cuando alguien se lleva mi publicación';
 
   @override
   String get notificationPermissionOff => '기기 알림이 꺼져 있어요';
@@ -1102,12 +1104,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String notificationTalkPostCommented(int count) {
-    return '내 글에 댓글이 $count개 달렸어요';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tu publicación recibió $count comentarios',
+      one: 'Tu publicación recibió $count comentario',
+    );
+    return '$_temp0';
   }
 
   @override
   String notificationTalkPostImported(int count) {
-    return '보호자 $count명이 내 글을 가져갔어요';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tutores se llevaron tu publicación',
+      one: '$count tutor se llevó tu publicación',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1293,13 +1307,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardReviewAddFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String get cardImageGeneratingLabel => '그림을 만들고 있어요';
+  String get cardImageGeneratingLabel => 'Creando la imagen';
 
   @override
-  String get cardImageNoCreditToast => '크레딧이 모자라 기본 그림을 넣었어요';
+  String get cardImageNoCreditToast =>
+      'No hay suficientes créditos, así que pusimos una imagen básica';
 
   @override
-  String get cardImageUnavailableToast => '그림을 만들지 못해 기본 그림을 넣었어요';
+  String get cardImageUnavailableToast =>
+      'No se pudo crear la imagen, así que pusimos una imagen básica';
 
   @override
   String get cardReviewReorderDone => '완료';
@@ -2311,7 +2327,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianTabManage => '일과 관리';
 
   @override
-  String get guardianTabTalk => '이야기';
+  String get guardianTabTalk => 'Historias';
 
   @override
   String get guardianTabMe => '내 정보';
@@ -2340,35 +2356,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianMyInfoActiveBadge => '보는 중';
 
   @override
-  String get guardianNicknameEditLabel => '닉네임 바꾸기';
+  String get guardianNicknameEditLabel => 'Cambiar apodo';
 
   @override
-  String get guardianNicknameSheetTitle => '내 이름 변경하기';
+  String get guardianNicknameSheetTitle => 'Cambiar mi nombre';
 
   @override
   String get guardianNicknameSheetDescription =>
-      '이야기를 작성할 때 보이는 이름이에요.\n이름은 7일에 한 번 바꿀 수 있어요';
+      'Es el nombre que se ve cuando escribes en Historias.\nPuedes cambiarlo una vez cada 7 días';
 
   @override
-  String get guardianNicknameSheetHint => '이름을 입력해주세요';
+  String get guardianNicknameSheetHint => 'Escribe un nombre';
 
   @override
-  String get guardianNicknameSheetSave => '저장하기';
+  String get guardianNicknameSheetSave => 'Guardar';
 
   @override
   String get guardianNicknameInvalidFormat =>
-      '한글, 영문, 숫자, 하이픈으로 2~16자까지 쓸 수 있어요';
+      'Usa de 2 a 16 letras coreanas o inglesas, números o guiones';
 
   @override
   String guardianNicknameChangeableFrom(String since) {
-    return '$since 바꿀 수 있어요';
+    return '$since podrás cambiarlo';
   }
 
   @override
-  String get guardianNicknameChanged => '닉네임을 바꿨어요';
+  String get guardianNicknameChanged => 'Cambiaste tu apodo';
 
   @override
-  String get guardianNicknameSaveFailed => '닉네임을 바꾸지 못했어요';
+  String get guardianNicknameSaveFailed => 'No se pudo cambiar tu apodo';
 
   @override
   String get guardianSideNavCaption => '보호자 화면';
@@ -2450,10 +2466,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineLibraryTileHint => '길게 누르면 메뉴가 열려요';
 
   @override
-  String get routineLibraryFromTalk => '이야기에서';
+  String get routineLibraryFromTalk => 'De Historias';
 
   @override
-  String get routineLibraryNewBadge => '새 일과';
+  String get routineLibraryNewBadge => 'Nueva';
 
   @override
   String get routineDetailTalkOriginBand => 'Traído de Historias';
@@ -2533,7 +2549,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineGroupDefaultName => '새 묶음';
 
   @override
-  String get routineGroupNameLabel => '묶음 이름';
+  String get routineGroupNameLabel => 'Nombre del grupo';
 
   @override
   String get routineGroupNameHint => '예시: 등교 전 준비';
@@ -2627,14 +2643,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String routineGroupRemoveConfirmTitle(String title) {
-    return '$title 일과를 묶음에서 뺄까요?';
+    return '¿Sacar $title del grupo?';
   }
 
   @override
-  String get routineGroupRemoveConfirmMessage => '일과는 일과 관리에 그대로 남아요';
+  String get routineGroupRemoveConfirmMessage =>
+      'La rutina se queda en Rutinas';
 
   @override
-  String get routineGroupRemoveConfirmAction => '빼기';
+  String get routineGroupRemoveConfirmAction => 'Sacar';
 
   @override
   String childHomeGroupProgress(int done, int total) {
@@ -2645,7 +2662,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get childHomeGroupAllDone => '다 했어요!';
 
   @override
-  String get routineTitleEdit => '일과 이름 바꾸기';
+  String get routineTitleEdit => 'Cambiar el nombre de la rutina';
 
   @override
   String get routineDetailMore => '더 보기';
@@ -2664,26 +2681,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String routineGroupRowCardCount(int count) {
-    return '카드 $count장';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tarjetas',
+      one: '$count tarjeta',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get routineManageCoachTapMessage => '일과를 *누르면* 카드를 볼 수 있어요';
+  String get routineManageCoachTapMessage =>
+      '*Toca* una rutina para ver sus tarjetas';
 
   @override
-  String get routineManageCoachLongPressMessage => '길게 눌렀다 *떼면* 메뉴가 열려요';
+  String get routineManageCoachLongPressMessage =>
+      'Mantén pulsado y *suelta* para abrir el menú';
 
   @override
   String get routineManageCoachSentMessage =>
-      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요';
+      'Las rutinas enviadas hoy llevan *✓*\nEntran en las rutinas de hoy en Inicio\ny aquí se quedan igual';
 
   @override
   String get routineManageCoachDragMessage =>
-      '길게 누른 채 *움직이면* 정리 상태가 돼요\n다른 일과 위에 놓으면 *묶음*이 되고\n사이에 놓으면 자리를 옮겨요';
+      'Mantén pulsado y *mueve* para ordenar\nSuéltala sobre otra rutina para hacer un *grupo*\nSuéltala entre dos para cambiarla de lugar';
 
   @override
   String get routineManageCoachCreateGroupMessage =>
-      '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
+      'Si arrastrar es difícil, usa *+ Nueva rutina*\ny elige *Nuevo grupo* para agruparlas';
 
   @override
   String get cardReviewCoachEditMessage =>
@@ -2749,13 +2774,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signInProviderApple => 'Apple';
 
   @override
-  String get routineManageCoachSampleMorning => '아침 준비';
+  String get routineManageCoachSampleMorning => 'Preparar la mañana';
 
   @override
-  String get routineManageCoachSampleBrush => '양치하기';
+  String get routineManageCoachSampleBrush => 'Lavarse los dientes';
 
   @override
-  String get routineManageCoachSampleBag => '가방 챙기기';
+  String get routineManageCoachSampleBag => 'Preparar la mochila';
 
   @override
   String get updateSuggestionTitle => 'Hay una nueva versión';
@@ -2805,63 +2830,65 @@ class AppLocalizationsEs extends AppLocalizations {
   String get elumiInfoNotFound => '이룸이 정보를 불러오지 못했어요';
 
   @override
-  String get talkTitle => '이야기';
+  String get talkTitle => 'Historias';
 
   @override
-  String get talkWriteButton => '올리기';
+  String get talkWriteButton => 'Publicar';
 
   @override
-  String get talkCategoryAll => '전체';
+  String get talkCategoryAll => 'Todo';
 
   @override
-  String get talkPopularTitle => '이번 주에 많이 가져간 일과에요';
+  String get talkPopularTitle => 'Rutinas más llevadas esta semana';
 
   @override
   String talkPopularImportCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count명 가져감',
+      other: '$count se la llevaron',
+      one: '$count se la llevó',
     );
     return '$_temp0';
   }
 
   @override
-  String get talkLatestTitle => '새로 올라왔어요';
+  String get talkLatestTitle => 'Recién publicadas';
 
   @override
-  String get talkEmptyTitle => '아직 나눈 일과가 없어요';
+  String get talkEmptyTitle => 'Aún no hay rutinas compartidas';
 
   @override
-  String get talkEmptyAction => '첫 일과를 나눠 보세요';
+  String get talkEmptyAction => 'Comparte tu primera rutina';
 
   @override
-  String get talkEmptyCategoryTitle => '이 분류에는 아직 나눈 일과가 없어요';
+  String get talkEmptyCategoryTitle =>
+      'Aún no hay rutinas compartidas en esta categoría';
 
   @override
-  String get talkEmptyCategoryAction => '전체 보기';
+  String get talkEmptyCategoryAction => 'Ver todo';
 
   @override
-  String get talkFeedFailed => '이야기를 불러오지 못했어요';
+  String get talkFeedFailed => 'No se pudo cargar Historias';
 
   @override
-  String get talkAuthorFallback => '보호자';
+  String get talkAuthorFallback => 'Tutor';
 
   @override
-  String get talkShareTitleLabel => '일과 제목';
+  String get talkShareTitleLabel => 'Título de la rutina';
 
   @override
-  String get talkShareTitleHint => '일과 제목을 적어 주세요';
+  String get talkShareTitleHint => 'Escribe el título de la rutina';
 
   @override
-  String get talkNoteLabel => '내용';
+  String get talkNoteLabel => 'Contenido';
 
   @override
   String talkHelpfulCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '도움돼요 $count',
+      other: 'Útil $count',
     );
     return '$_temp0';
   }
@@ -2871,39 +2898,42 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '댓글 $count',
+      other: 'Comentarios $count',
+      one: 'Comentario $count',
     );
     return '$_temp0';
   }
 
   @override
-  String get talkLoadMoreRetry => '더 불러오지 못했어요. 눌러서 다시 해 보세요';
+  String get talkLoadMoreRetry =>
+      'No se pudo cargar más. Toca para intentarlo de nuevo';
 
   @override
   String talkDetailStepCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '카드 $count장',
+      other: '$count tarjetas',
+      one: '$count tarjeta',
     );
     return '$_temp0';
   }
 
   @override
-  String get talkDetailLoadFailed => '글을 불러오지 못했어요';
+  String get talkDetailLoadFailed => 'No se pudo cargar la publicación';
 
   @override
-  String get talkPostGoneTitle => '내려간 글이에요';
+  String get talkPostGoneTitle => 'Esta publicación se retiró';
 
   @override
-  String get talkPostGoneBack => '이야기로 돌아가기';
+  String get talkPostGoneBack => 'Volver a Historias';
 
   @override
   String talkDetailCardCountChip(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count장',
+      other: '$count',
     );
     return '$_temp0';
   }
@@ -2919,312 +2949,326 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get talkViewGrid => '한 눈에 보기';
+  String get talkViewGrid => 'Ver todo junto';
 
   @override
-  String get talkViewLarge => '크게 보기';
+  String get talkViewLarge => 'Ver en grande';
 
   @override
-  String get talkHelpfulFailed => '도움돼요를 바꾸지 못했어요. 잠시 뒤에 다시 해 주세요';
+  String get talkHelpfulFailed =>
+      'No se pudo cambiar Útil. Inténtalo de nuevo en un momento';
 
   @override
-  String get talkImportButton => '일과로 가져오기';
+  String get talkImportButton => 'Llevar a mis rutinas';
 
   @override
-  String get talkImportedButton => '✓ 일과관리에 넣었어요';
+  String get talkImportedButton => '✓ Añadida a Rutinas';
 
   @override
-  String get talkShareLinkButton => '공유하기';
+  String get talkShareLinkButton => 'Compartir';
 
   @override
   String talkShareLinkMessage(String title, String url) {
-    return '$title\n이룸 이야기에서 같이 봐요\n\n$url';
+    return '$title\nVamos a verlo juntos en Historias de elum\n\n$url';
   }
 
   @override
-  String get talkShareLinkFailed => '공유하지 못했어요. 잠시 뒤에 다시 해 주세요';
+  String get talkShareLinkFailed =>
+      'No se pudo compartir. Inténtalo de nuevo en un momento';
 
   @override
-  String get talkPostLinkRejectedOnElumiDevice => '이야기 글은 보호자 기기에서 볼 수 있어요';
+  String get talkPostLinkRejectedOnElumiDevice =>
+      'Las publicaciones de Historias se ven en el dispositivo del tutor';
 
   @override
-  String get talkImportSheetTitle => '일과로 가져오기';
+  String get talkImportSheetTitle => 'Llevar a mis rutinas';
 
   @override
-  String get talkImportSheetHint => '일과에 추가한 뒤 이룸이에게 맞게 고칠 수 있어요';
+  String get talkImportSheetHint =>
+      'Después de añadirla, puedes ajustarla para tu Elumi';
 
   @override
-  String get talkImportElumiLabel => '이룸이';
+  String get talkImportElumiLabel => 'Elumi';
 
   @override
-  String get talkImportConfirm => '완료';
+  String get talkImportConfirm => 'Listo';
 
   @override
-  String get talkImportNoElumiTitle => '이룸이를 먼저 연결해 주세요';
+  String get talkImportNoElumiTitle => 'Conecta primero a tu Elumi';
 
   @override
-  String get talkImportNoElumiAction => '이룸이 연결하기';
+  String get talkImportNoElumiAction => 'Conectar a Elumi';
 
   @override
   String talkImportDone(String elumiName) {
-    return '$elumiName 일과관리에 넣었어요';
+    return 'Añadida a las rutinas de $elumiName';
   }
 
   @override
-  String get talkImportGoToLibrary => '보러 가기';
+  String get talkImportGoToLibrary => 'Ver';
 
   @override
-  String get talkImportFailedTitle => '일과관리에 넣지 못했어요';
+  String get talkImportFailedTitle => 'No se pudo añadir a Rutinas';
 
   @override
-  String get talkCommentsTitle => '댓글';
+  String get talkCommentsTitle => 'Comentarios';
 
   @override
-  String get talkCommentsEmpty => '아직 댓글이 없어요';
+  String get talkCommentsEmpty => 'Aún no hay comentarios';
 
   @override
   String talkCommentAuthorMine(String name) {
-    return '$name(나)';
+    return '$name (yo)';
   }
 
   @override
   String talkCommentAuthorPostWriter(String name) {
-    return '$name(글쓴이)';
+    return '$name (autor)';
   }
 
   @override
-  String get talkCommentHiddenNotice => '운영 정책에 따라 가렸어요';
+  String get talkCommentHiddenNotice => 'Se ocultó según nuestras normas';
 
   @override
-  String get talkCommentsFailed => '댓글을 불러오지 못했어요';
+  String get talkCommentsFailed => 'No se pudieron cargar los comentarios';
 
   @override
-  String get talkCommentHint => '댓글을 남겨 보세요';
+  String get talkCommentHint => 'Deja un comentario';
 
   @override
-  String get talkCommentSend => '보내기';
+  String get talkCommentSend => 'Enviar';
 
   @override
-  String get talkCommentSendFailedTitle => '댓글을 보내지 못했어요';
+  String get talkCommentSendFailedTitle => 'No se pudo enviar el comentario';
 
   @override
-  String get talkFailedFallback => '잠시 뒤에 다시 해 주세요';
+  String get talkFailedFallback => 'Inténtalo de nuevo en un momento';
 
   @override
-  String get talkCommentDeleteTitle => '댓글을 지울까요?';
+  String get talkCommentDeleteTitle => '¿Borrar el comentario?';
 
   @override
-  String get talkCommentDeleteAction => '지우기';
+  String get talkCommentDeleteAction => 'Borrar';
 
   @override
-  String get talkCommentDeleteFailedTitle => '댓글을 지우지 못했어요';
+  String get talkCommentDeleteFailedTitle => 'No se pudo borrar el comentario';
 
   @override
-  String get talkMenuReport => '신고하기';
+  String get talkMenuReport => 'Denunciar';
 
   @override
-  String get talkMenuBlock => '이 보호자 글 숨기기';
+  String get talkMenuBlock => 'Ocultar las publicaciones de este tutor';
 
   @override
-  String get talkMenuEdit => '고치기';
+  String get talkMenuEdit => 'Editar';
 
   @override
-  String get talkMenuTakeDown => '내리기';
+  String get talkMenuTakeDown => 'Retirar';
 
   @override
-  String get talkMoreLabel => '더보기';
+  String get talkMoreLabel => 'Más';
 
   @override
-  String get talkTakeDownTitle => '이 글을 내릴까요?';
+  String get talkTakeDownTitle => '¿Retirar esta publicación?';
 
   @override
-  String get talkTakeDownMessage => '내린 글은 다른 보호자에게 더 이상 보이지 않아요.';
+  String get talkTakeDownMessage =>
+      'Cuando la retires, los demás tutores ya no la verán.';
 
   @override
-  String get talkTakeDownDone => '글을 내렸어요';
+  String get talkTakeDownDone => 'Retiraste la publicación';
 
   @override
-  String get talkTakeDownFailedTitle => '글을 내리지 못했어요';
+  String get talkTakeDownFailedTitle => 'No se pudo retirar la publicación';
 
   @override
-  String get talkEditTitle => '글 고치기';
+  String get talkEditTitle => 'Editar publicación';
 
   @override
-  String get talkEditSave => '저장하기';
+  String get talkEditSave => 'Guardar';
 
   @override
-  String get talkEditSaved => '고쳤어요';
+  String get talkEditSaved => 'Editado';
 
   @override
-  String get talkEditFailedTitle => '글을 고치지 못했어요';
+  String get talkEditFailedTitle => 'No se pudo editar la publicación';
 
   @override
-  String get talkNoteGuide => '다른 사람 이름, 연락처 등 개인정보는 적지 말아 주세요';
+  String get talkNoteGuide =>
+      'No escribas datos personales, como nombres o contactos de otras personas';
 
   @override
-  String get talkCategoryTitle => '분류';
+  String get talkCategoryTitle => 'Categoría';
 
   @override
-  String get talkReportTitle => '신고하기';
+  String get talkReportTitle => 'Denunciar';
 
   @override
-  String get talkReportSubmit => '신고하기';
+  String get talkReportSubmit => 'Denunciar';
 
   @override
-  String get talkReportDone => '신고했어요';
+  String get talkReportDone => 'Denuncia enviada';
 
   @override
-  String get talkReportFailedTitle => '신고하지 못했어요';
+  String get talkReportFailedTitle => 'No se pudo denunciar';
 
   @override
-  String get talkReportReasonPersonalInfo => '이룸이나 가족 정보가 보여요';
+  String get talkReportReasonPersonalInfo =>
+      'Se ven datos de Elumi o de la familia';
 
   @override
-  String get talkReportReasonOffensive => '기분 나쁜 말이 있어요';
+  String get talkReportReasonOffensive => 'Tiene palabras ofensivas';
 
   @override
-  String get talkReportReasonAdvertising => '광고나 홍보예요';
+  String get talkReportReasonAdvertising => 'Es publicidad o promoción';
 
   @override
-  String get talkReportReasonOther => '그 밖의 이유';
+  String get talkReportReasonOther => 'Otro motivo';
 
   @override
   String talkBlockTitle(String nickname) {
-    return '$nickname님 글을 숨길까요?';
+    return '¿Ocultar las publicaciones de $nickname?';
   }
 
   @override
   String get talkBlockMessage =>
-      '이 보호자의 글과 댓글이 나에게 안 보여요. 상대방은 알 수 없어요. 내 정보 › 숨긴 보호자에서 다시 볼 수 있어요.';
+      'No verás las publicaciones ni los comentarios de este tutor. Esa persona no lo sabrá. Puedes volver a verlos en Mi información › Tutores ocultos.';
 
   @override
-  String get talkBlockAction => '숨기기';
+  String get talkBlockAction => 'Ocultar';
 
   @override
-  String get talkBlockDone => '숨겼어요';
+  String get talkBlockDone => 'Ocultado';
 
   @override
-  String get talkBlockFailedTitle => '숨기지 못했어요';
+  String get talkBlockFailedTitle => 'No se pudo ocultar';
 
   @override
-  String get talkBlockedGuardiansTitle => '숨긴 보호자';
+  String get talkBlockedGuardiansTitle => 'Tutores ocultos';
 
   @override
-  String get talkBlockedGuardiansEmpty => '숨긴 보호자가 없어요';
+  String get talkBlockedGuardiansEmpty => 'No hay tutores ocultos';
 
   @override
-  String get talkBlockedGuardiansFailed => '숨긴 보호자를 불러오지 못했어요';
+  String get talkBlockedGuardiansFailed =>
+      'No se pudieron cargar los tutores ocultos';
 
   @override
-  String get talkUnblockAction => '다시 보기';
+  String get talkUnblockAction => 'Volver a ver';
 
   @override
-  String get talkUnblockDone => '다시 볼 수 있어요';
+  String get talkUnblockDone => 'Ya puedes volver a verlos';
 
   @override
-  String get talkUnblockFailedTitle => '숨김을 풀지 못했어요';
+  String get talkUnblockFailedTitle => 'No se pudo dejar de ocultar';
 
   @override
-  String get talkRulesTitle => '이야기 이용 규칙';
+  String get talkRulesTitle => 'Normas de Historias';
 
   @override
-  String get talkRulesIntro => '보호자끼리 안전하게 나누려고 이 세 가지를 지켜 주세요.';
+  String get talkRulesIntro =>
+      'Para compartir de forma segura entre tutores, sigue estas tres normas.';
 
   @override
-  String get talkRulesPrivacy => '얼굴·이름·학교·집 주소가 보이지 않게 해 주세요';
+  String get talkRulesPrivacy =>
+      'No muestres caras, nombres, escuelas ni direcciones de casa';
 
   @override
-  String get talkRulesRespect => '다른 보호자를 존중해 주세요. 비난·광고·홍보는 안 돼요';
+  String get talkRulesRespect =>
+      'Respeta a los demás tutores. No se permiten críticas, anuncios ni promociones';
 
   @override
-  String get talkRulesNoDiagnosis => '진단명·병원 정보는 적지 말아 주세요';
+  String get talkRulesNoDiagnosis =>
+      'No escribas diagnósticos ni datos de hospitales';
 
   @override
-  String get talkRulesAgreeCheck => '위 규칙을 읽었고 지킬게요';
+  String get talkRulesAgreeCheck => 'Leí las normas de arriba y las cumpliré';
 
   @override
-  String get talkRulesAgreeButton => '동의하고 계속하기';
+  String get talkRulesAgreeButton => 'Aceptar y continuar';
 
   @override
-  String get talkRulesFailedTitle => '동의를 저장하지 못했어요';
+  String get talkRulesFailedTitle => 'No se pudo guardar tu aceptación';
 
   @override
-  String get talkShareTitle => '이야기에 올리기';
+  String get talkShareTitle => 'Publicar en Historias';
 
   @override
-  String get talkSharePickTitle => '어떤 일과를 나눌까요?';
+  String get talkSharePickTitle => '¿Qué rutina quieres compartir?';
 
   @override
-  String get talkSharePickEmpty => '올릴 수 있는 일과가 없어요';
+  String get talkSharePickEmpty => 'No hay rutinas para publicar';
 
   @override
   String get talkSharePickEmptyHint =>
-      '일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.';
+      'Solo puedes publicar tus propias rutinas de Rutinas. Las que ya publicaste o te llevaste de Historias no aparecen. Puedes publicar una rutina de ejemplo después de cambiar su título o sus tarjetas.';
 
   @override
-  String get talkSharePickFailed => '일과를 불러오지 못했어요';
+  String get talkSharePickFailed => 'No se pudieron cargar las rutinas';
 
   @override
-  String get talkSharePreviewFailed => '올릴 내용을 불러오지 못했어요';
+  String get talkSharePreviewFailed =>
+      'No se pudo cargar lo que vas a publicar';
 
   @override
-  String get talkSharePhotoTitle => '사진을 어떻게 올릴까요?';
+  String get talkSharePhotoTitle => '¿Cómo quieres publicar las fotos?';
 
   @override
   String get talkSharePhotoGuide =>
-      '얼굴, 이름, 집 주소가 보이면 흐리게 해 주세요.\nAI로 만든 그림은 그대로 올라가요';
+      'Difumina caras, nombres y direcciones de casa si se ven.\nLas imágenes hechas con IA se publican tal cual';
 
   @override
-  String get talkSharePhotoBlur => '흐리게';
+  String get talkSharePhotoBlur => 'Difuminar';
 
   @override
-  String get talkSharePhotoKeep => '그대로';
+  String get talkSharePhotoKeep => 'Tal cual';
 
   @override
-  String get talkSharePhotoNext => '다음';
+  String get talkSharePhotoNext => 'Siguiente';
 
   @override
-  String get talkSharePreviewTitle => '이렇게 보여요';
+  String get talkSharePreviewTitle => 'Así se verá';
 
   @override
-  String get talkShareSubmit => '올리기';
+  String get talkShareSubmit => 'Publicar';
 
   @override
-  String get talkShareDone => '이야기에 올렸어요';
+  String get talkShareDone => 'Publicaste en Historias';
 
   @override
-  String get talkShareFailedTitle => '올리지 못했어요';
+  String get talkShareFailedTitle => 'No se pudo publicar';
 
   @override
-  String get talkShareHint => '📖 이야기에 공유해 보기 ›';
+  String get talkShareHint => '📖 Compártela en Historias ›';
 
   @override
-  String get talkMenuShare => '이야기에 공유하기';
+  String get talkMenuShare => 'Compartir en Historias';
 
   @override
-  String get talkMyPostsTitle => '내가 쓴 글';
+  String get talkMyPostsTitle => 'Mis publicaciones';
 
   @override
-  String get talkMyPostsEmpty => '아직 쓴 글이 없어요';
+  String get talkMyPostsEmpty => 'Aún no tienes publicaciones';
 
   @override
-  String get talkMyPostsEmptyAction => '이야기에 일과 나누기';
+  String get talkMyPostsEmptyAction => 'Comparte una rutina en Historias';
 
   @override
-  String get talkMyPostsFailed => '내가 쓴 글을 불러오지 못했어요';
+  String get talkMyPostsFailed => 'No se pudieron cargar tus publicaciones';
 
   @override
-  String get talkMenuViewMyPost => '내 글 보기';
+  String get talkMenuViewMyPost => 'Ver mi publicación';
 
   @override
-  String get timeAgoJustNow => '방금 전';
+  String get timeAgoJustNow => 'Ahora mismo';
 
   @override
   String timeAgoMinutes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count분 전',
+      other: 'hace $count minutos',
+      one: 'hace $count minuto',
     );
     return '$_temp0';
   }
@@ -3234,7 +3278,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count시간 전',
+      other: 'hace $count horas',
+      one: 'hace $count hora',
     );
     return '$_temp0';
   }
@@ -3244,7 +3289,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count일 전',
+      other: 'hace $count días',
+      one: 'hace $count día',
     );
     return '$_temp0';
   }
