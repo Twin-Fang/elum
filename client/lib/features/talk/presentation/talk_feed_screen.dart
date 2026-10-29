@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,7 +11,7 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_text_link.dart';
-import '../../../core/widgets/show_failure.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../guardian/domain/routine_template.dart';
 import '../application/talk_feed_controller.dart';
 import '../application/talk_popular_provider.dart';
@@ -103,21 +101,9 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   /// 실패하면 보던 목록은 두고 실패 팝업만 띄운다 (스피너가 팝업을 기다리지 않게 await 하지 않음)
   Future<void> _refresh() async {
     ref.invalidate(talkPopularProvider(_categoryValue));
-    try {
-      await ref
-          .read(talkFeedControllerProvider(_categoryValue).notifier)
-          .refresh();
-    } catch (e) {
-      if (!mounted) return;
-      unawaited(
-        showFailure(
-          context,
-          e,
-          fallback: context.l10n.talkFeedFailed,
-          fallbackCode: TalkScreenCodes.feed,
-        ),
-      );
-    }
+    await ref
+        .read(talkFeedControllerProvider(_categoryValue).notifier)
+        .refresh();
   }
 
   /// 첫 쪽 실패 화면의 다시 하기: 받는 동안 버튼에 진행 표시
@@ -195,8 +181,10 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
     // 받아 둔 목록이 있으면 새로고침 중·실패여도 계속 그린다 (0건이면 목록 자리에 빈 줄)
     final state = feed.value;
     if (state != null) {
-      return RefreshIndicator(
+      return ElumPullToRefresh(
         onRefresh: _refresh,
+        failureMessage: context.l10n.talkFeedFailed,
+        failureCode: TalkScreenCodes.feed,
         child: _list(state, controller),
       );
     }

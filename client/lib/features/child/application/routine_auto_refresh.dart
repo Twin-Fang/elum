@@ -40,6 +40,7 @@ class _RoutineAutoRefreshState extends ConsumerState<RoutineAutoRefresh> {
   void _refresh() {
     if (!mounted) return;
     // 응답이 주기보다 느리면 요청이 쌓이고 먼저 보낸 것은 버려진다 — 받는 중이면 건너뛴다.
+    // 홈 당겨서 새로고침(`refreshJoiningInFlight`)도 같은 기준 — 겹쳐도 요청 1번
     if (!ref.read(todayRoutinesProvider).isLoading) {
       ref.invalidate(todayRoutinesProvider);
     }

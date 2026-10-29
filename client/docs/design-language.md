@@ -287,6 +287,8 @@ y=131~  흰 묶음 카드 r20 (x=16, 폭 361, 묶음 사이 16)
 
 코드: `ElumStateBody` (로딩·빈 상태·실패를 같은 자리에) · `ElumErrorView` · `ElumSpinner`.
 
+목록을 다시 받는 화면은 `ElumPullToRefresh` 로 당겨서 새로고침을 단다 — 실패면 보이던 목록을 두고 실패 팝업(코드). 짧은 목록도 당겨지게 `ElumPullToRefresh.physics`, 이룸이 화면은 튕김 없는 `calmPhysics` (#998).
+
 ### 4-8. 숫자 · 메타 정보
 
 - 메타는 **회색 아이콘 10(`#CACACA`) + 숫자 12/400(`#74757D`)**를 2 간격으로 붙이고 묶음 사이 10 (`1783:6640` 👍13 💬3 ⬇13). 코드: `TalkStatRow`

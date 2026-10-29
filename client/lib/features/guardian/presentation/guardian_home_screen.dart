@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
 import '../../../core/layout/layout_context_ext.dart';
@@ -96,6 +97,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
 
   /// 예시 일과 생성 실패 안내에 붙는 코드
   static const _exampleSeedErrorCode = 'E-EXAMPLE';
+
+  /// 당겨서 새로고침(오늘 + 지난 일과) 실패 팝업에 붙는 코드
+  static const _pullRefreshErrorCode = 'E-HOME';
 
   @override
   void dispose() {
@@ -207,9 +211,18 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
 
     // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
     // 스크롤되면 대상과 어긋난다.
+    // 평소엔 목록이 짧아도 당겨서 새로고침이 되게 항상 스크롤 가능
     final listPhysics = coachActive
         ? const NeverScrollableScrollPhysics()
-        : null;
+        : ElumPullToRefresh.physics;
+
+    // 당겨서 새로고침: 화면의 두 칸(오늘 · 지난)만 다시 받기. 실패면 보이던 목록 그대로 + 실패 팝업
+    Widget withPullToRefresh(Widget listScroll) => ElumPullToRefresh(
+      onRefresh: ref.refreshTodayAndPastRoutinesNow,
+      failureMessage: context.l10n.todayRoutineLoadFailedFallback,
+      failureCode: _pullRefreshErrorCode,
+      child: listScroll,
+    );
 
     // 가로 태블릿은 왼쪽 머리말·만들기, 오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열로 접는다
     final metrics = context.layoutMetrics;
@@ -236,20 +249,23 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
                       sections: sections,
                       listController: _scroll,
                       listPhysics: listPhysics,
+                      listScrollWrapper: withPullToRefresh,
                     )
-                  : SingleChildScrollView(
-                      controller: _scroll,
-                      physics: listPhysics,
-                      padding: EdgeInsets.only(bottom: space.xl),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          header,
-                          SizedBox(height: _toCreateButton.h),
-                          createButton,
-                          SizedBox(height: _toSections.h),
-                          sections,
-                        ],
+                  : withPullToRefresh(
+                      SingleChildScrollView(
+                        controller: _scroll,
+                        physics: listPhysics,
+                        padding: EdgeInsets.only(bottom: space.xl),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            header,
+                            SizedBox(height: _toCreateButton.h),
+                            createButton,
+                            SizedBox(height: _toSections.h),
+                            sections,
+                          ],
+                        ),
                       ),
                     ),
             ),

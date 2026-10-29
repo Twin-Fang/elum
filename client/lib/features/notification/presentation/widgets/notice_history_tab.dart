@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
@@ -68,12 +69,16 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
     final controller = ref.read(noticeHistoryControllerProvider.notifier);
 
     return switch (async) {
-      AsyncData(value: final state) when state.items.isEmpty => RefreshIndicator(
+      AsyncData(value: final state) when state.items.isEmpty => ElumPullToRefresh(
           onRefresh: controller.refresh,
+          failureMessage: context.l10n.notificationNoticeFailed,
+          failureCode: 'E-NOTICE-HISTORY',
           child: ElumStateBody(child: _emptyBody(context)),
         ),
-      AsyncData(value: final state) => RefreshIndicator(
+      AsyncData(value: final state) => ElumPullToRefresh(
           onRefresh: controller.refresh,
+          failureMessage: context.l10n.notificationNoticeFailed,
+          failureCode: 'E-NOTICE-HISTORY',
           child: _list(state),
         ),
       AsyncError(:final error) => ElumStateBody(
