@@ -4892,12 +4892,6 @@ abstract class AppLocalizations {
   /// **'사용법 보기'**
   String get coachHelpLabel;
 
-  /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과관리 사용법 다시 보기'**
-  String get guardianSettingsRoutineManageGuide;
-
   /// 첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)
   ///
   /// In ko, this message translates to:

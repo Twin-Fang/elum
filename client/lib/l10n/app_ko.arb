@@ -2280,8 +2280,6 @@
   "@cardReviewCoachSaveMessage": {"description": "카드 검토 코치마크 마지막 단계 — 저장 버튼. 버튼 이름은 cardReviewSave 와 같아야 한다"},
   "coachHelpLabel": "사용법 보기",
   "@coachHelpLabel": {"description": "? 버튼의 낭독 이름 (카드 검토 상단바, 일과관리 머리). 누르면 그 화면의 코치마크를 다시 띄운다"},
-  "guardianSettingsRoutineManageGuide": "일과관리 사용법 다시 보기",
-  "@guardianSettingsRoutineManageGuide": {"description": "설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)"},
   "pushPermissionSheetTitle": "이룸이가 일과를 끝내면 알려 드릴까요?",
   "@pushPermissionSheetTitle": {"description": "첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)"},
   "pushPermissionSheetBody": "다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요",
