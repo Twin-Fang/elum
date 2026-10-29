@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 공지 탭: 지난 공지 목록, 공지 읽음 기록, 안 읽은 공지 여부
- * 목록 조건 6개(켜짐, 시작됨, 최근 90일, 언어, 플랫폼, 종료된 것 포함) > 올라온 시각 최신순
+ * 목록 조건 7개(켜짐, 시작됨, 최근 90일, 언어, 플랫폼, 대상 국가, 종료된 것 포함) > 올라온 시각 최신순
  */
 @Service
 @Transactional(readOnly = true)
@@ -59,10 +59,11 @@ public class NoticeHistoryService {
   /**
    * 공지 탭 한 쪽: 조건 확인 > 최신순 정렬 > cursor 위치 뒤에서 size 개
    * cursor 는 (올라온 시각, id) 위치라 그 공지가 사라져도 이어서 준다. 형식이 틀리면 cursor 없음으로 본다
+   * region: 요청 국가 (CurrentRegion.get(), 국가 미상이면 null)
    */
-  public NoticeHistoryPageResponse history(String platform, String cursor, Integer size) {
+  public NoticeHistoryPageResponse history(String platform, String cursor, Integer size, String region) {
     int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
-    List<AppNotice> sorted = historyNotices(NoticePlatform.parse(platform), CurrentLocale.get());
+    List<AppNotice> sorted = historyNotices(NoticePlatform.parse(platform), CurrentLocale.get(), region);
 
     CursorPosition position = parseCursor(cursor);
     List<AppNotice> remaining = position == null
@@ -83,10 +84,10 @@ public class NoticeHistoryService {
 
   /**
    * 마지막으로 본 뒤에 올라오거나 고친 공지가 있는가 (본 기록이 없으면 공지가 하나라도 있으면 true)
-   * 언어는 호출부가 요청 스레드에서 CurrentLocale 로 정해 넘김 (비동기 스레드에서 부르면 KO 로 흐름)
+   * 언어·국가는 호출부가 요청 스레드에서 CurrentLocale·CurrentRegion 으로 정해 넘김 (비동기 스레드에서 부르면 KO·KR 로 흐름)
    */
-  public boolean hasUnseenNotice(String memberId, String platform, AppLocale locale) {
-    List<AppNotice> notices = historyNotices(NoticePlatform.parse(platform), locale);
+  public boolean hasUnseenNotice(String memberId, String platform, AppLocale locale, String region) {
+    List<AppNotice> notices = historyNotices(NoticePlatform.parse(platform), locale, region);
     LocalDateTime seenAt = noticeSeenService.findSeenAt(memberId).orElse(null);
     return notices.stream().anyMatch(notice -> seenAt == null || notice.visibleSince().isAfter(seenAt));
   }
@@ -123,7 +124,7 @@ public class NoticeHistoryService {
   }
 
   // 공지 표는 관리자가 손으로 올리는 수십 건 규모라 NoticeService 처럼 전부 읽어 자바에서 거른다 (수천 건이 되면 쿼리로 옮김)
-  private List<AppNotice> historyNotices(NoticePlatform requested, AppLocale requestedLocale) {
+  private List<AppNotice> historyNotices(NoticePlatform requested, AppLocale requestedLocale, String region) {
     LocalDateTime now = now();
     LocalDateTime oldestVisibleSince = now.minusDays(HISTORY_DAYS);
     return appNoticeRepository.findAll().stream()
@@ -132,6 +133,7 @@ public class NoticeHistoryService {
       .filter(notice -> !notice.visibleSince().isBefore(oldestVisibleSince))
       .filter(notice -> notice.getLocale() == requestedLocale)
       .filter(notice -> notice.getPlatform().reaches(requested))
+      .filter(notice -> notice.isVisibleInRegion(region))
       .sorted(HISTORY_ORDER)
       .toList();
   }

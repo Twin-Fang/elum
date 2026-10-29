@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.consent.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,8 +30,8 @@ import lombok.Setter;
 @Setter
 @Table(
   name = "consent_document_history",
-  indexes = @Index(name = "idx_consent_document_history_key_created",
-    columnList = "consent_key, created_at")
+  indexes = @Index(name = "idx_consent_document_history_key_locale_created",
+    columnList = "consent_key, locale, created_at")
 )
 public class ConsentDocumentHistory extends BaseEntity {
 
@@ -41,6 +42,10 @@ public class ConsentDocumentHistory extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ConsentKey consentKey;
+
+  /** 스냅샷을 뜬 약관의 언어 코드 (V58, 기존 행 ko) */
+  @Column(nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
+  private String locale = AppLocale.KO.code();
 
   @Column(nullable = false)
   private String version;

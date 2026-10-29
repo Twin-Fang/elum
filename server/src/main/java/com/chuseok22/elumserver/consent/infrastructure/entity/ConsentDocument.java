@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.consent.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +25,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(
+  name = "consent_document",
+  uniqueConstraints = @UniqueConstraint(name = "ux_consent_document_key_locale", columnNames = {"consent_key", "locale"})
+)
 public class ConsentDocument extends BaseEntity {
 
   @Id
@@ -29,8 +36,12 @@ public class ConsentDocument extends BaseEntity {
   private String id;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private ConsentKey consentKey;
+
+  /** 언어 코드(AppLocale.code()). 키 하나에 언어마다 한 행 (V58, 기존 행 ko) */
+  @Column(nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
+  private String locale = AppLocale.KO.code();
 
   /**
    * 이 문서의 버전. 날짜 문자열({@code 2026-09-18})을 쓴다.

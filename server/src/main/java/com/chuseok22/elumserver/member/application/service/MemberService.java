@@ -6,6 +6,9 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepos
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
@@ -28,11 +31,13 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +69,7 @@ public class MemberService {
   private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
+  private final ConsentDocumentService consentDocumentService;
 
   /**
    * 내 정보. 헤더로 이룸이를 짚었으면 그 이룸이(연결 안 됐으면 403), 아니면 가장 먼저 연결된 이룸이.
@@ -211,8 +217,29 @@ public class MemberService {
     member.setMarketingAgreed(request.marketingAgreed());
     member.setConsentedAt(LocalDateTime.now());
     member.setConsentVersion(request.consentVersion());
+    member.setConsentLocale(resolveConsentLocale(request.consentLocale()).code());
 
     return MemberConsentResponse.from(member);
+  }
+
+  /**
+   * 동의 기록 언어: 요청 언어(본문 consentLocale > Accept-Language) > 그 언어로 실제로 내준 약관 언어
+   * 게시본이 없는 언어를 보내도 사용자가 본 것은 ko 대체본이라 ko 로 남김. 모르는 값은 헤더로 (가입은 막지 않음)
+   */
+  private AppLocale resolveConsentLocale(String claimedLocaleCode) {
+    AppLocale requested = findAppLocale(claimedLocaleCode).orElseGet(CurrentLocale::get);
+    return consentDocumentService.resolvePublishedLocale(requested);
+  }
+
+  /** 언어 코드(앞뒤 공백 허용, 소문자 정확 일치) > AppLocale. 없거나 모르는 값은 empty */
+  private static Optional<AppLocale> findAppLocale(String code) {
+    if (code == null) {
+      return Optional.empty();
+    }
+    String trimmed = code.strip();
+    return Arrays.stream(AppLocale.values())
+      .filter(locale -> locale.code().equals(trimmed))
+      .findFirst();
   }
 
   /**

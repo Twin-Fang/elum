@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesRespon
 import com.chuseok22.elumserver.notice.core.NoticeEmphasis;
 import com.chuseok22.elumserver.notice.core.NoticeImageType;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
+import com.chuseok22.elumserver.notice.core.NoticeTargetCountries;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import com.chuseok22.elumserver.notice.infrastructure.repository.AppNoticeRepository;
@@ -105,18 +106,22 @@ public class NoticeService {
   }
 
   /**
-   * 앱에 줄 공지. 게시 중이고 이 플랫폼에 닿고 요청 언어와 같은 언어인 것을 순서대로 최대 5개.
+   * 앱에 줄 공지. 게시 중이고 요청 언어와 같고 이 플랫폼·국가에 닿는 것을 순서대로 최대 5개.
+   * 다른 나라 공지가 5장 자리를 차지하지 않게 자르기 전에 거른다.
    *
    * <p>그 언어 공지가 없으면 빈 목록이다 — 한국어 공지를 대신 보내지 않는다.
    *
+   * @param region 요청 국가 ({@code CurrentRegion.get()}, 국가 미상이면 null)
+   *
    * <p>숨김은 기기에 있으므로 서버는 거르지 않는다 — 앱이 숨긴 것을 빼고 남은 것을 보여준다.
    */
-  public AppNoticesResponse publishedFor(String platform) {
+  public AppNoticesResponse publishedFor(String platform, String region) {
     NoticePlatform requested = NoticePlatform.parse(platform);
     AppLocale requestedLocale = CurrentLocale.get();
     List<AppNoticeResponse> notices = liveInSlideOrder().stream()
       .filter(notice -> notice.getLocale() == requestedLocale)
       .filter(notice -> notice.getPlatform().reaches(requested))
+      .filter(notice -> notice.isVisibleInRegion(region))
       .limit(MAX_SLIDES)
       .map(AppNoticeResponse::from)
       .toList();
@@ -283,7 +288,8 @@ public class NoticeService {
   /** 검증을 통과한, 다듬은 값. 이것만 엔티티에 들어간다. */
   private record Draft(
     String title, String body, String buttonLabel, String buttonUrl, NoticePlatform platform,
-    AppLocale locale, int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled
+    AppLocale locale, String targetCountries, int priority, LocalDateTime startsAt, LocalDateTime endsAt,
+    boolean enabled
   ) {
 
     void applyTo(AppNotice notice) {
@@ -293,6 +299,7 @@ public class NoticeService {
       notice.setButtonUrl(buttonUrl);
       notice.setPlatform(platform);
       notice.setLocale(locale);
+      notice.setTargetCountries(targetCountries);
       notice.setPriority(priority);
       notice.setStartsAt(startsAt);
       notice.setEndsAt(endsAt);
@@ -338,6 +345,7 @@ public class NoticeService {
 
     NoticePlatform platform = NoticePlatform.parse(input.platform());
     AppLocale locale = parseLocale(input.locale());
+    String targetCountries = NoticeTargetCountries.normalize(input.targetCountries()).orElse(null);
     int priority = parsePriority(input.priority());
     LocalDateTime startsAt = parseDateTime(input.startsAt());
     if (startsAt == null) {
@@ -349,7 +357,7 @@ public class NoticeService {
     }
 
     return new Draft(title, body, emptyToNull(buttonLabel), emptyToNull(buttonUrl), platform,
-      locale, priority, startsAt, endsAt, input.enabled());
+      locale, targetCountries, priority, startsAt, endsAt, input.enabled());
   }
 
   /**

@@ -65,7 +65,7 @@ class AdminNoticeControllerTest {
   }
 
   private NoticeEditForm form(String title) {
-    return new NoticeEditForm(title, "본문", "", "", "ALL", "ko", "0", "2026-09-23T09:00", "", true, false, false);
+    return new NoticeEditForm(title, "본문", "", "", "ALL", "ko", "", "0", "2026-09-23T09:00", "", true, false, false);
   }
 
   private AppNotice stored(String id) {
@@ -218,7 +218,7 @@ class AdminNoticeControllerTest {
   void update_passesFlags() {
     when(noticeService.update(eq("n1"), any(NoticeInput.class), eq(true), any(), eq(true), eq("kimchi")))
       .thenReturn(stored("n1"));
-    NoticeEditForm form = new NoticeEditForm("공지", "본문", "", "", "ALL", "ko", "0", "2026-09-23T09:00", "",
+    NoticeEditForm form = new NoticeEditForm("공지", "본문", "", "", "ALL", "ko", "", "0", "2026-09-23T09:00", "",
       true, true, true);
 
     assertThat(controller.update("n1", form, null, admin, model, response, redirect))

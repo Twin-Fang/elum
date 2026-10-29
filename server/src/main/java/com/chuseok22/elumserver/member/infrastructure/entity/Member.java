@@ -99,6 +99,10 @@ public class Member extends BaseEntity {
   /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
   private String consentVersion;
 
+  /// 동의한 약관 언어 코드 (서버가 실제로 내준 게시본 언어, #531). 동의 전이면 null, V58 이전 동의는 ko
+  @Column(name = "consent_locale", length = 8)
+  private String consentLocale;
+
   /// 이야기 이용 규칙에 동의한 시각. 동의 전이면 null (글쓰기·댓글 전에 한 번 받음)
   private LocalDateTime talkRulesAgreedAt;
 
@@ -124,6 +128,7 @@ public class Member extends BaseEntity {
     marketingAgreed = false;
     consentedAt = null;
     consentVersion = null;
+    consentLocale = null;
     talkRulesAgreedAt = null;
   }
 

@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.AppLocaleConverter;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
+import com.chuseok22.elumserver.notice.core.NoticeTargetCountries;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -63,6 +64,10 @@ public class AppNotice extends BaseEntity {
   @Column(name = "locale", nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
   private AppLocale locale = AppLocale.KO;
 
+  /** 대상 국가: 쉼표 구분 ISO 두 글자 대문자("KR,JP"), null = 전체 (V58). 판정은 NoticeTargetCountries */
+  @Column(name = "target_countries", length = NoticeTargetCountries.MAX_LENGTH)
+  private String targetCountries;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private NoticePlatform platform = NoticePlatform.ALL;
@@ -105,6 +110,11 @@ public class AppNotice extends BaseEntity {
   /** 공지 탭에 올라온 시각: 시작 시각 <-> 다시 보이게 한 시각 중 늦은 쪽 */
   public LocalDateTime visibleSince() {
     return revisedAt != null && revisedAt.isAfter(startsAt) ? revisedAt : startsAt;
+  }
+
+  /** 이 국가(null = 국가 미상)에게 보이는가 */
+  public boolean isVisibleInRegion(String region) {
+    return NoticeTargetCountries.isVisibleTo(targetCountries, region);
   }
 
   public boolean hasButton() {

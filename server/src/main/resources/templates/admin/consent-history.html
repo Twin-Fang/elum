@@ -44,6 +44,7 @@
         <summary class="collapse-title">
           <div class="flex flex-wrap items-center gap-2">
             <span class="badge badge-outline font-mono" th:text="${h.version}">버전</span>
+            <span class="badge badge-ghost badge-sm font-mono" th:text="${h.locale}">ko</span>
             <span class="text-sm font-semibold" th:text="${h.label}">이름</span>
             <span th:if="${h.required}" class="badge badge-sm">필수</span>
             <span th:unless="${h.required}" class="badge badge-ghost badge-sm">선택</span>

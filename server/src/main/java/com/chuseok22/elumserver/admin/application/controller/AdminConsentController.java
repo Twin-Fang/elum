@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.request.ConsentEditForm;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService.UpdateResult;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
@@ -31,14 +32,15 @@ public class AdminConsentController {
 
   @GetMapping("/admin/consents")
   public String list(Model model) {
-    model.addAttribute("documents", consentDocumentService.getAll());
-    model.addAttribute("bundleVersion", consentDocumentService.bundleVersion());
+    // 편집은 ko 원본만 (다른 언어 본문은 #528 법무 확인 후)
+    model.addAttribute("documents", consentDocumentService.getAll(AppLocale.KO));
+    model.addAttribute("bundleVersion", consentDocumentService.bundleVersion(AppLocale.KO));
     return "admin/consents";
   }
 
   @GetMapping("/admin/consents/{key}")
   public String edit(@PathVariable ConsentKey key, Model model) {
-    var document = consentDocumentService.get(key);
+    var document = consentDocumentService.get(key, AppLocale.KO);
     model.addAttribute("document", document);
     model.addAttribute("form", ConsentEditForm.of(document, LocalDate.now().toString()));
     return "admin/consent-edit";
@@ -46,8 +48,8 @@ public class AdminConsentController {
 
   @GetMapping("/admin/consents/{key}/history")
   public String history(@PathVariable ConsentKey key, Model model) {
-    model.addAttribute("document", consentDocumentService.get(key));
-    model.addAttribute("histories", consentDocumentService.getHistory(key));
+    model.addAttribute("document", consentDocumentService.get(key, AppLocale.KO));
+    model.addAttribute("histories", consentDocumentService.getHistory(key, AppLocale.KO));
     return "admin/consent-history";
   }
 
@@ -77,7 +79,7 @@ public class AdminConsentController {
         key, label, summary, body, bumpVersion, newVersion,
         principal == null ? null : principal.getName(), reason);
     } catch (CustomException e) {
-      var document = consentDocumentService.get(key);
+      var document = consentDocumentService.get(key, AppLocale.KO);
       model.addAttribute("document", document);
       model.addAttribute("form",
         new ConsentEditForm(label, summary, body, bumpVersion, newVersion, reason));
@@ -92,7 +94,7 @@ public class AdminConsentController {
       case UNCHANGED -> "바뀐 내용이 없어 저장하지 않았습니다.";
       case SAVED -> name + objectParticle(name) + " 저장했습니다.";
       case SAVED_AND_BUMPED -> name + objectParticle(name) + " 저장하고 버전을 올렸습니다. 새 버전 "
-        + consentDocumentService.get(key).getVersion();
+        + consentDocumentService.get(key, AppLocale.KO).getVersion();
     };
     redirectAttributes.addFlashAttribute("message", message);
     return "redirect:/admin/consents";

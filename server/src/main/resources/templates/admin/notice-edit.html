@@ -142,6 +142,12 @@
               <div class="label"><span class="label-text-alt">휴대폰 언어가 같은 보호자에게만 나가요. 다른 언어는 따로 한 건 더 써요</span></div>
             </label>
             <label class="form-control">
+              <div class="label"><span class="label-text">대상 국가</span></div>
+              <input id="notice-target-countries" type="text" name="targetCountries" class="input input-bordered font-mono"
+                     th:value="${form.targetCountries}" placeholder="비우면 전체 (예: KR, JP)" maxlength="255"/>
+              <div class="label"><span class="label-text-alt">휴대폰 지역 설정이 이 나라인 보호자에게만 나가요. 비우면 모든 나라예요. 지역을 알 수 없는 보호자에게는 비운 공지만 나가요</span></div>
+            </label>
+            <label class="form-control">
               <div class="label"><span class="label-text">우선순위</span></div>
               <input id="notice-priority" type="number" name="priority" class="input input-bordered font-mono"
                      th:value="${form.priority}" step="1"/>

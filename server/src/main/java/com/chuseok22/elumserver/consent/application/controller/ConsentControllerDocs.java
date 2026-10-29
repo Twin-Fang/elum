@@ -34,6 +34,13 @@ public interface ConsentControllerDocs {
 
       `version` 은 **필수 항목 중 가장 최근 버전**입니다. 선택 항목(소식 받기)이
       바뀌었다고 전원에게 재동의를 요구하지 않기 위해 선택 항목은 세지 않습니다.
+
+      **언어 (#531)**
+
+      - `Accept-Language` 언어의 **게시본**(필수 4종이 모두 있음)을 줍니다. 헤더가 없으면 `ko` 입니다
+      - 그 언어 게시본이 없으면 **`ko` 로 대체**하고 `isFallbackLocale: true` 를 붙입니다.
+        영어로는 대체하지 않습니다 (법무 확인 안 된 번역으로 동의받지 않음)
+      - `locale` 과 `Content-Language` 헤더가 실제로 준 언어입니다
       """
   )
   @ApiResponses(@ApiResponse(
@@ -51,7 +58,9 @@ public interface ConsentControllerDocs {
               "body": "제1조 (목적)\\n이 약관은 ...",
               "version": "2026-09-18"
             }
-          ]
+          ],
+          "locale": "ko",
+          "isFallbackLocale": false
         }
         """))
   ))
