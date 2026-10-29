@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.AiCallStats;
+import com.chuseok22.elumserver.common.application.alert.IncidentAlertService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -43,6 +44,9 @@ class AiDailyBudgetGuardTest {
   @Mock
   private SystemConfigService systemConfigService;
 
+  @Mock
+  private IncidentAlertService incidentAlertService;
+
   private AiDailyBudgetGuard guard;
 
   /// 가드가 합계를 물은 시작 시각.
@@ -50,7 +54,8 @@ class AiDailyBudgetGuardTest {
 
   @BeforeEach
   void setUp() {
-    guard = new AiDailyBudgetGuard(aiCallLogRepository, systemConfigService, JUST_AFTER_MIDNIGHT_KST);
+    guard = new AiDailyBudgetGuard(
+      aiCallLogRepository, systemConfigService, incidentAlertService, JUST_AFTER_MIDNIGHT_KST);
   }
 
   private void budget(double usd) {

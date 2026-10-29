@@ -37,6 +37,9 @@ class AiCallLogServiceTest {
   @Mock
   private PlatformTransactionManager transactionManager;
 
+  @Mock
+  private AiProviderFailureAlerter aiProviderFailureAlerter;
+
   @InjectMocks
   private AiCallLogService aiCallLogService;
 

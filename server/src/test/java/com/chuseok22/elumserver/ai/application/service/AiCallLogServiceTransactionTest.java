@@ -24,12 +24,14 @@ class AiCallLogServiceTransactionTest {
 
   private final AiCallLogRepository aiCallLogRepository = mock(AiCallLogRepository.class);
   private final SystemConfigService systemConfigService = mock(SystemConfigService.class);
+  private final AiProviderFailureAlerter aiProviderFailureAlerter = mock(AiProviderFailureAlerter.class);
 
   @Test
   @DisplayName("저장이 예외를 던지면 기록 트랜잭션만 롤백하고 호출자에게 예외를 넘기지 않는다")
   void recordSuccess_repositoryThrows_rollsBackWithoutPropagating() {
     RecordingTransactionManager transactionManager = new RecordingTransactionManager(false);
-    AiCallLogService aiCallLogService = new AiCallLogService(aiCallLogRepository, systemConfigService, transactionManager);
+    AiCallLogService aiCallLogService = new AiCallLogService(
+      aiCallLogRepository, systemConfigService, transactionManager, aiProviderFailureAlerter);
     when(aiCallLogRepository.save(any())).thenThrow(new IllegalStateException("DB down"));
 
     assertThatCode(() -> aiCallLogService.recordSuccess(AiCallType.LOCAL_LLM_DLP, "exaone", 100, null))
@@ -42,7 +44,8 @@ class AiCallLogServiceTransactionTest {
   @DisplayName("커밋이 UnexpectedRollbackException 으로 실패해도 기록 메서드는 예외를 넘기지 않는다")
   void recordFailure_commitFails_doesNotPropagate() {
     RecordingTransactionManager transactionManager = new RecordingTransactionManager(true);
-    AiCallLogService aiCallLogService = new AiCallLogService(aiCallLogRepository, systemConfigService, transactionManager);
+    AiCallLogService aiCallLogService = new AiCallLogService(
+      aiCallLogRepository, systemConfigService, transactionManager, aiProviderFailureAlerter);
 
     assertThatCode(() -> aiCallLogService.recordFailure(AiCallType.GEMINI_TEXT_CREATE, "gemini", 10, "timeout"))
       .doesNotThrowAnyException();
@@ -53,7 +56,8 @@ class AiCallLogServiceTransactionTest {
   @DisplayName("기록은 항상 새 트랜잭션(REQUIRES_NEW)으로 연다 — 호출자 트랜잭션 롤백과 무관하게 남는다")
   void record_opensRequiresNewTransaction() {
     RecordingTransactionManager transactionManager = new RecordingTransactionManager(false);
-    AiCallLogService aiCallLogService = new AiCallLogService(aiCallLogRepository, systemConfigService, transactionManager);
+    AiCallLogService aiCallLogService = new AiCallLogService(
+      aiCallLogRepository, systemConfigService, transactionManager, aiProviderFailureAlerter);
 
     aiCallLogService.recordFailure(AiCallType.GEMINI_TEXT_CREATE, "gemini", 10, "timeout");
 
