@@ -4475,7 +4475,7 @@ abstract class AppLocalizations {
   /// 격자 칸 배지: 이야기에서 가져온 뒤 아직 열어 보지 않은 일과
   ///
   /// In ko, this message translates to:
-  /// **'새로'**
+  /// **'새 일과'**
   String get routineLibraryNewBadge;
 
   /// 가져온 일과 상세 맨 위 띠의 왼쪽 문구
@@ -4637,7 +4637,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)'**
+  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요'**
   String get routineGroupPickHintNew;
 
   /// 일과 묶음 (#807)
@@ -4733,8 +4733,8 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'일과가 하나만 남아 묶음을 풀었어요'**
-  String get routineGroupUngroupedLastOne;
+  /// **'일과를 다 빼서 묶음을 풀었어요'**
+  String get routineGroupUngroupedEmpty;
 
   /// 일과 묶음 (#807)
   ///
@@ -4897,12 +4897,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'사용법 보기'**
   String get coachHelpLabel;
-
-  /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과관리 사용법 다시 보기'**
-  String get guardianSettingsRoutineManageGuide;
 
   /// 첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)
   ///
@@ -5785,6 +5779,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이야기에 공유하기'**
   String get talkMenuShare;
+
+  /// 내 정보 바로가기 줄 이름이자 내가 쓴 글 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글'**
+  String get talkMyPostsTitle;
+
+  /// 내가 쓴 글 화면 0건 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 쓴 글이 없어요'**
+  String get talkMyPostsEmpty;
+
+  /// 내가 쓴 글 0건 버튼: 이야기 올리기로 이동
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 일과 나누기'**
+  String get talkMyPostsEmptyAction;
+
+  /// 내가 쓴 글 화면 첫 쪽 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 쓴 글을 불러오지 못했어요'**
+  String get talkMyPostsFailed;
 
   /// 일과관리 ⋯ 메뉴 줄: 이미 이야기에 올린 일과면 그 글로 간다
   ///

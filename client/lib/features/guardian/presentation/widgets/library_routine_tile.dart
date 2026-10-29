@@ -15,7 +15,7 @@ import 'card_image.dart';
 /// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
-/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새로` 배지 (민트 = 안 읽음).
+/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
 class LibraryRoutineTile extends ConsumerWidget {
   const LibraryRoutineTile({
     super.key,
@@ -80,17 +80,15 @@ class LibraryRoutineTile extends ConsumerWidget {
                       ? BoxDecoration(
                           borderRadius: BorderRadius.circular(iconRadius.w),
                           border: Border.all(
-                            color: colors.checkDone,
+                            color: colors.libraryNewOutline,
                             width: _newOutlineWidth.w,
                           ),
                         )
                       : null,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(iconRadius.w),
-                    child: SizedBox.square(
-                      dimension: iconSize.w,
-                      child: LibraryRoutineThumbnail(routine: routine),
-                    ),
+                  child: RoutineThumbnailBox(
+                    routine: routine,
+                    size: iconSize,
+                    radius: iconRadius,
                   ),
                 ),
                 if (isNew)
@@ -138,12 +136,13 @@ class LibraryRoutineTile extends ConsumerWidget {
   }
 }
 
-/// `새로` 배지 (민트 알약 + 흰 글자, 바탕색 테두리로 그림과 떨어뜨린다)
+/// `새 일과` 칩 (시안 1931:6929: 민트 알약 + 흰 글자 10)
 class _NewBadge extends StatelessWidget {
   const _NewBadge();
 
   static const _paddingH = 6.0;
-  static const _paddingV = 2.0;
+  static const _paddingV = 4.0;
+  static const _radius = 10.0;
 
   @override
   Widget build(BuildContext context) {
@@ -155,19 +154,45 @@ class _NewBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colors.checkDone,
-        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-        border: Border.all(color: colors.background, width: 2),
+        borderRadius: BorderRadius.circular(_radius.r),
       ),
       child: Text(
         context.l10n.routineLibraryNewBadge,
         maxLines: 1,
-        style: context.typo.caption.copyWith(color: colors.surface),
+        style: context.typo.libraryNewChipLabel.copyWith(color: colors.surface),
       ),
     );
   }
 }
 
-/// 일과 첫 카드 그림. 카드가 없거나 그림이 없으면 제목 첫 글자 (격자 칸 · 폴더 미리보기 · 묶음 목록 공통)
+/// 둥근 정사각형 칸에 담은 일과 첫 카드 그림 (일과관리 격자, 묶음 시트 줄, 홈 일과 줄 공통)
+/// 크기·모서리는 시안 값 그대로 받아 폭 배율(.w)로 맞춤
+class RoutineThumbnailBox extends StatelessWidget {
+  const RoutineThumbnailBox({
+    super.key,
+    required this.routine,
+    required this.size,
+    required this.radius,
+  });
+
+  final Routine routine;
+  final double size;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    // 정사각형 — 가로세로 모두 .w
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius.w),
+      child: SizedBox.square(
+        dimension: size.w,
+        child: LibraryRoutineThumbnail(routine: routine),
+      ),
+    );
+  }
+}
+
+/// 일과 첫 카드 그림. 카드가 없거나 그림이 없으면 아무것도 그리지 않음 (격자 칸 · 폴더 미리보기 · 묶음 목록 · 홈 일과 줄 공통)
 class LibraryRoutineThumbnail extends StatelessWidget {
   const LibraryRoutineThumbnail({super.key, required this.routine});
 
@@ -176,44 +201,16 @@ class LibraryRoutineThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = routine.steps;
-    final placeholder = _LetterThumbnail(title: routine.displayTitle);
-    if (steps.isEmpty) return placeholder;
+    if (steps.isEmpty) return const SizedBox.shrink();
     final first = steps.first;
-    // 그림을 받는 동안에도 칸 모양이 보이게 흰 바탕을 깔아 둔다 (비어 보이면 빠진 칸 같다)
-    return ColoredBox(
-      color: context.colors.surface,
-      child: CardImage(
-        routineId: routine.id,
-        stepId: first.id,
-        imagePath: first.imagePath,
-        pictogramId: first.pictogramId,
-        exampleImageId: first.exampleImageId,
-        pictogramLabel: first.title,
-        emptyBuilder: (_) => placeholder,
-      ),
-    );
-  }
-}
-
-class _LetterThumbnail extends StatelessWidget {
-  const _LetterThumbnail({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final letter = title.characters.isEmpty ? '' : title.characters.first;
-    return ColoredBox(
-      color: colors.surface,
-      child: Center(
-        child: Text(
-          letter,
-          style: context.typo.sectionTitle.copyWith(
-            color: colors.textSecondary,
-          ),
-        ),
-      ),
+    return CardImage(
+      routineId: routine.id,
+      stepId: first.id,
+      imagePath: first.imagePath,
+      pictogramId: first.pictogramId,
+      exampleImageId: first.exampleImageId,
+      pictogramLabel: first.title,
+      emptyBuilder: (_) => const SizedBox.shrink(),
     );
   }
 }

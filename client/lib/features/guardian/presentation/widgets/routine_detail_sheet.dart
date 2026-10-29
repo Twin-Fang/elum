@@ -121,7 +121,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   @override
   void initState() {
     super.initState();
-    // 이야기에서 가져온 일과를 열어 봤다 > 목록 칸의 `새로` 표시 끄기 (빌드 중 상태 변경을 피해 프레임 뒤에)
+    // 이야기에서 가져온 일과를 열어 봤다 > 목록 칸의 `새 일과` 칩 끄기 (빌드 중 상태 변경을 피해 프레임 뒤에)
     if (widget.isLibrary && widget.routine.talkPostId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;

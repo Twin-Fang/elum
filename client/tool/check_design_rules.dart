@@ -133,6 +133,8 @@ final _colorLiteral = RegExp(r'Color\(0x[0-9A-Fa-f]{8}\)|Color\.from(ARGB|RGBO)\
 final _materialColor = RegExp(r'\bColors\.(\w+)');
 final _fontLiteral = RegExp(r'\b(fontSize|fontFamily)\s*:');
 final _materialIcon = RegExp(r'\bIcons\.(\w+)');
+// 글자 배율은 AppTextScale 한 곳 (.sp 는 폭 배율을 한 번 더 곱하고, noScaling 은 배율을 지운다)
+final _textScaleOverride = RegExp(r'\.sp\b|TextScaler\.noScaling|MediaQuery\.withNoTextScaling');
 final _edgeInsets = RegExp(
   r'EdgeInsets(?:Directional)?\.(?:all|symmetric|only|fromLTRB|fromSTEB)\(([^;]*?)\)',
 );
@@ -172,6 +174,9 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
       for (final match in _fontLiteral.allMatches(line)) {
         add('font-literal', match.group(1)!);
       }
+    }
+    for (final match in _textScaleOverride.allMatches(line)) {
+      add('text-scale', match.group(0)!);
     }
     for (final match in _materialIcon.allMatches(line)) {
       add('material-icon', match.group(0)!);

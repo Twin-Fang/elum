@@ -128,7 +128,7 @@ class LoginSceneFace {
 
 /// 로그인 화면의 그림 한 벌.
 ///
-/// 좌표·크기는 Figma 값(393×852 기준)을 그대로 쓰되 `.w`/`.h`/`.sp`로 감싼다.
+/// 좌표·크기는 Figma 값(393×852 기준)을 그대로 쓰되 `.w`/`.h`로 감싼다. 글자는 고정 pt (배율은 AppTextScale)
 /// ScreenUtil이 실제 화면 크기에 맞춰 비례 변환하므로 기기가 달라져도 구도가 유지된다.
 ///
 /// ## 연출 (설계: docs/superpowers/specs/2026-07-22-onboarding-animation-design.md)
@@ -348,7 +348,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                       context.l10n.loginSceneEyebrow,
                       context.typo.subtitle.copyWith(
                         color: colors.textSecondary,
-                        fontSize: 20.sp,
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -363,7 +363,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                       context.l10n.loginSceneTitle,
                       context.typo.headline.copyWith(
                         color: colors.splashTitle,
-                        fontSize: 26.sp,
+                        fontSize: 26,
                       ),
                     ),
                   ),

@@ -8,6 +8,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_fade_slide_in.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
+import '../../../../core/widgets/elum_empty_illustration.dart';
 import '../../../../core/widgets/elum_state_body.dart';
 import '../../../../core/widgets/routine_preview_hook.dart';
 import '../../../../core/widgets/settings_tile.dart';
@@ -40,9 +41,16 @@ class TalkRoutinePicker extends ConsumerWidget {
       AsyncData(value: final routines) when routines.isEmpty => ElumStateBody(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
-          child: TalkEmptyMessage(
-            title: l10n.talkSharePickEmpty,
-            body: l10n.talkSharePickEmptyHint,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const ElumEmptyIllustration(),
+              SizedBox(height: context.space.lg),
+              TalkEmptyMessage(
+                title: l10n.talkSharePickEmpty,
+                body: l10n.talkSharePickEmptyHint,
+              ),
+            ],
           ),
         ),
       ),

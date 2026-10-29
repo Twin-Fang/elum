@@ -17,7 +17,7 @@ import 'routine_group_sheet_header.dart';
 import 'routine_group_sheet_row.dart';
 
 /// 묶음 시트가 닫히며 화면에 맡기는 동작 (토스트·다음 시트는 화면이 띄운다)
-enum GroupSheetAction { send, addRoutines, openRoutine, ungroupedLastOne }
+enum GroupSheetAction { send, addRoutines, openRoutine, ungroupedEmpty }
 
 typedef GroupSheetResult = ({GroupSheetAction action, Routine? routine});
 
@@ -144,7 +144,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     await _showFailure(reordered.failure, 'E-GRP-ORDER');
   }
 
-  /// 빼기: 확인 > 묶음에서 빼기, 하나만 남으면 묶음이 풀려 시트를 닫는다
+  /// 빼기: 확인 > 묶음에서 빼기, 다 빼면 묶음이 풀려 시트를 닫는다
   Future<void> _remove(LibraryGroupEntry entry, Routine routine) async {
     if (!await _confirmRemove(routine) || !mounted) return;
     setState(() => _isSaving = true);
@@ -158,7 +158,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
       return;
     }
     if (removal.outcome == RemoveOutcome.ungrouped) {
-      _close(GroupSheetAction.ungroupedLastOne);
+      _close(GroupSheetAction.ungroupedEmpty);
     }
   }
 

@@ -148,7 +148,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
     );
   }
 
-  /// 바로가기 4줄: 함께하는 사람 · 임시저장 · 공지사항 · 숨긴 보호자
+  /// 바로가기 5줄: 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
     return SettingsGroup(
       children: [
@@ -161,6 +161,11 @@ class GuardianMyInfoScreen extends ConsumerWidget {
           isInCard: true,
           label: context.l10n.guardianSettingsDrafts,
           onTap: () => context.push(Routes.guardianDrafts),
+        ),
+        SettingsTile(
+          isInCard: true,
+          label: context.l10n.talkMyPostsTitle,
+          onTap: () => context.push(Routes.guardianTalkMine),
         ),
         SettingsTile(
           isInCard: true,

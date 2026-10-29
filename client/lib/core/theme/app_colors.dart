@@ -63,6 +63,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.highlightBorder,
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
+    required this.libraryNewOutline,
     required this.talkOriginBandFill,
     required this.talkOriginBandAction,
     required this.talkCardBorder,
@@ -70,7 +71,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkMetaText,
     required this.talkMetaIcon,
     required this.talkPopularCardFill,
-    required this.talkMetaDivider,
+    required this.metaDivider,
     required this.talkSectionDivider,
     required this.talkChoiceSelectedFill,
     required this.talkChoiceSelectedBorder,
@@ -352,6 +353,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color goalSelectedFill;
   final Color goalSelectedBorder;
 
+  // 일과 관리 격자의 `새 일과` 칸 테두리 (시안 1931:6923, #93DBCC 2px). 값이 goalSelectedBorder 와 같아도 쓰임이 달라 따로 둔다
+  final Color libraryNewOutline;
+
   // 가져온 일과 상세의 출처 띠 — 웜그레이 판 + 남색 글자 (안내 판 결)
   // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
   final Color talkOriginBandFill;
@@ -368,8 +372,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color talkMetaIcon;
   /// 인기 카드 판 (#EEE9E6, 테두리 없음 — 시안 1783:6666)
   final Color talkPopularCardFill;
-  /// 상세 작성자 | 작성 시각 사이 세로선 (#D9D3CF, 시안 1813:7491)
-  final Color talkMetaDivider;
+  /// 글 정보 사이 세로선 (#D9D3CF): 이야기 상세 작성자 | 시각 (시안 1813:7491), 홈 일과 줄 보상 | 만든 사람 (931:3896)
+  final Color metaDivider;
   /// 상세 본문 | 댓글 사이 화면 폭 띠 (#EEE9E6 · 높이 7, 시안 1830:7918)
   final Color talkSectionDivider;
 
@@ -1087,6 +1091,7 @@ class AppColors extends ThemeExtension<AppColors> {
     highlightBorder: Color(0xFFEB9B73),
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
+    libraryNewOutline: Color(0xFF93DBCC),
     talkOriginBandFill: Color(0xFFEEE9E6),
     talkOriginBandAction: Color(0xFF242634),
     talkCardBorder: Color(0xFFEEE9E6),
@@ -1094,7 +1099,7 @@ class AppColors extends ThemeExtension<AppColors> {
     talkMetaText: Color(0xFF74757D),
     talkMetaIcon: Color(0xFFCACACA),
     talkPopularCardFill: Color(0xFFEEE9E6),
-    talkMetaDivider: Color(0xFFD9D3CF),
+    metaDivider: Color(0xFFD9D3CF),
     talkSectionDivider: Color(0xFFEEE9E6),
     talkChoiceSelectedFill: Color(0xFFB5EAEC),
     talkChoiceSelectedBorder: Color(0xFF55CFBA),
@@ -1344,6 +1349,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? highlightBorder,
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
+    Color? libraryNewOutline,
     Color? talkOriginBandFill,
     Color? talkOriginBandAction,
     Color? talkCardBorder,
@@ -1351,7 +1357,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkMetaText,
     Color? talkMetaIcon,
     Color? talkPopularCardFill,
-    Color? talkMetaDivider,
+    Color? metaDivider,
     Color? talkSectionDivider,
     Color? talkChoiceSelectedFill,
     Color? talkChoiceSelectedBorder,
@@ -1589,6 +1595,7 @@ class AppColors extends ThemeExtension<AppColors> {
       highlightBorder: highlightBorder ?? this.highlightBorder,
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
+      libraryNewOutline: libraryNewOutline ?? this.libraryNewOutline,
       talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
       talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
       talkCardBorder: talkCardBorder ?? this.talkCardBorder,
@@ -1596,7 +1603,7 @@ class AppColors extends ThemeExtension<AppColors> {
       talkMetaText: talkMetaText ?? this.talkMetaText,
       talkMetaIcon: talkMetaIcon ?? this.talkMetaIcon,
       talkPopularCardFill: talkPopularCardFill ?? this.talkPopularCardFill,
-      talkMetaDivider: talkMetaDivider ?? this.talkMetaDivider,
+      metaDivider: metaDivider ?? this.metaDivider,
       talkSectionDivider: talkSectionDivider ?? this.talkSectionDivider,
       talkChoiceSelectedFill: talkChoiceSelectedFill ?? this.talkChoiceSelectedFill,
       talkChoiceSelectedBorder: talkChoiceSelectedBorder ?? this.talkChoiceSelectedBorder,
@@ -1866,6 +1873,11 @@ class AppColors extends ThemeExtension<AppColors> {
         other.goalSelectedBorder,
         t,
       )!,
+      libraryNewOutline: Color.lerp(
+        libraryNewOutline,
+        other.libraryNewOutline,
+        t,
+      )!,
       talkOriginBandFill: Color.lerp(
         talkOriginBandFill,
         other.talkOriginBandFill,
@@ -1881,7 +1893,7 @@ class AppColors extends ThemeExtension<AppColors> {
       talkMetaText: Color.lerp(talkMetaText, other.talkMetaText, t)!,
       talkMetaIcon: Color.lerp(talkMetaIcon, other.talkMetaIcon, t)!,
       talkPopularCardFill: Color.lerp(talkPopularCardFill, other.talkPopularCardFill, t)!,
-      talkMetaDivider: Color.lerp(talkMetaDivider, other.talkMetaDivider, t)!,
+      metaDivider: Color.lerp(metaDivider, other.metaDivider, t)!,
       talkSectionDivider: Color.lerp(talkSectionDivider, other.talkSectionDivider, t)!,
       talkChoiceSelectedFill: Color.lerp(talkChoiceSelectedFill, other.talkChoiceSelectedFill, t)!,
       talkChoiceSelectedBorder: Color.lerp(talkChoiceSelectedBorder, other.talkChoiceSelectedBorder, t)!,

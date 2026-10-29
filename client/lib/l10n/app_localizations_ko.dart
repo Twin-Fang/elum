@@ -2451,7 +2451,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineLibraryFromTalk => '이야기에서';
 
   @override
-  String get routineLibraryNewBadge => '새로';
+  String get routineLibraryNewBadge => '새 일과';
 
   @override
   String get routineDetailTalkOriginBand => '이야기에서 가져왔어요';
@@ -2541,7 +2541,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)';
+  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요';
 
   @override
   String get routineGroupPickHint => '넣을 일과를 순서대로 눌러 주세요';
@@ -2597,7 +2597,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineGroupUngrouped => '묶음을 풀었어요';
 
   @override
-  String get routineGroupUngroupedLastOne => '일과가 하나만 남아 묶음을 풀었어요';
+  String get routineGroupUngroupedEmpty => '일과를 다 빼서 묶음을 풀었어요';
 
   @override
   String get routineGroupReordered => '순서를 바꿨어요';
@@ -2693,9 +2693,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get coachHelpLabel => '사용법 보기';
-
-  @override
-  String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
 
   @override
   String get pushPermissionSheetTitle => '이룸이가 일과를 끝내면 알려 드릴까요?';
@@ -3196,6 +3193,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get talkMenuShare => '이야기에 공유하기';
+
+  @override
+  String get talkMyPostsTitle => '내가 쓴 글';
+
+  @override
+  String get talkMyPostsEmpty => '아직 쓴 글이 없어요';
+
+  @override
+  String get talkMyPostsEmptyAction => '이야기에 일과 나누기';
+
+  @override
+  String get talkMyPostsFailed => '내가 쓴 글을 불러오지 못했어요';
 
   @override
   String get talkMenuViewMyPost => '내 글 보기';

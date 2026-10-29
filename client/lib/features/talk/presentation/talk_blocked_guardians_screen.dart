@@ -8,6 +8,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -28,6 +29,9 @@ class TalkBlockedGuardiansScreen extends ConsumerWidget {
   static const _rowGap = 8.0;
   static const _maxStaggerCount = 8;
 
+  /// 빈 화면: 루미 그림 > 글 줄
+  static const _illustrationToLine = 16.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -42,7 +46,11 @@ class TalkBlockedGuardiansScreen extends ConsumerWidget {
         // 0명: 목록 첫 줄 자리에 웜그레이 글 줄
         AsyncData(value: final entries) when entries.isEmpty => ListView(
           padding: EdgeInsets.symmetric(vertical: _listPadV.h),
-          children: [TalkEmptyLine(title: l10n.talkBlockedGuardiansEmpty)],
+          children: [
+            const Center(child: ElumEmptyIllustration()),
+            SizedBox(height: _illustrationToLine.h),
+            TalkEmptyLine(title: l10n.talkBlockedGuardiansEmpty),
+          ],
         ),
         AsyncData(value: final entries) => ListView.separated(
           padding: EdgeInsets.symmetric(vertical: _listPadV.h),

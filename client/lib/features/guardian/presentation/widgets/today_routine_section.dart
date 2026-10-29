@@ -265,6 +265,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
     }
 
     final progress = ref.watch(childRoutineProvider);
+    final shouldShowCreator = ref.watch(shouldShowRoutineCreatorProvider);
 
     // 코치마크가 "밀어 보세요"를 말하는 동안, 밀 수 있는 첫 줄을 실제로 열어 보여준다.
     // 말로만 하면 밀면 뭐가 나오는지 알 수 없다. 열고 닫는 것은 줄이 스스로 미끄러진다.
@@ -282,6 +283,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
         progress: progress,
         isDemoSwipeOpen: demoOpen,
         coachId: coachId,
+        shouldShowCreator: shouldShowCreator,
         follow: follow,
       ),
     );
@@ -293,6 +295,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
     required ChildRoutineState progress,
     required bool isDemoSwipeOpen,
     required String? coachId,
+    required bool shouldShowCreator,
     required ReorderFingerFollowState follow,
   }) {
     return ReorderableListView.builder(
@@ -365,6 +368,9 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
                   child: RoutineSummaryTile(
                     routine: routine,
                     progress: routineProgress(routine, progress),
+                    creatorName: shouldShowCreator
+                        ? routine.creatorDisplayName
+                        : null,
                     highlighted:
                         _openId == routine.id ||
                         _draggingId == routine.id ||

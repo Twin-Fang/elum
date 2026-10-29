@@ -2559,7 +2559,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLibraryFromTalk => '이야기에서';
 
   @override
-  String get routineLibraryNewBadge => '새로';
+  String get routineLibraryNewBadge => '새 일과';
 
   @override
   String get routineDetailTalkOriginBand => 'Imported from Community';
@@ -2652,7 +2652,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineGroupPickHintNew =>
-      'Tap routines in the order to show them (2 or more)';
+      'Tap routines in the order to show them';
 
   @override
   String get routineGroupPickHint => 'Tap routines in order';
@@ -2708,8 +2708,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineGroupUngrouped => 'Bundle ungrouped';
 
   @override
-  String get routineGroupUngroupedLastOne =>
-      'Only one routine left, so the bundle was ungrouped';
+  String get routineGroupUngroupedEmpty =>
+      'All routines were taken out, so the bundle was ungrouped';
 
   @override
   String get routineGroupReordered => 'Order changed';
@@ -2807,9 +2807,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachHelpLabel => 'How to use';
-
-  @override
-  String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
 
   @override
   String get pushPermissionSheetTitle =>
@@ -3317,6 +3314,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get talkMenuShare => '이야기에 공유하기';
+
+  @override
+  String get talkMyPostsTitle => '내가 쓴 글';
+
+  @override
+  String get talkMyPostsEmpty => '아직 쓴 글이 없어요';
+
+  @override
+  String get talkMyPostsEmptyAction => '이야기에 일과 나누기';
+
+  @override
+  String get talkMyPostsFailed => '내가 쓴 글을 불러오지 못했어요';
 
   @override
   String get talkMenuViewMyPost => '내 글 보기';

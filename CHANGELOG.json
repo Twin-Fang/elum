@@ -1,15 +1,103 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-23T08:20:14Z",
-    "currentVersion": "2.78.1",
+    "lastUpdated": "2026-10-24T06:26:07Z",
+    "currentVersion": "2.82.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 316
+    "totalReleases": 320
   },
   "releases": [
+    {
+      "version": "2.82.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-24",
+      "pr_number": 1016,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 홈 일과 줄에서 첫 카드 그림이 없으면 글자나 회색 칸 없이 비워 둬요\n  * 밀어서 삭제·수정하는 상태에서도 만든 보호자 이름이 보여요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "홈 일과 줄에서 첫 카드 그림이 없으면 글자나 회색 칸 없이 비워 둬요",
+            "밀어서 삭제·수정하는 상태에서도 만든 보호자 이름이 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.81.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-24",
+      "pr_number": 1014,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 내가 쓴 글, 임시저장, 숨긴 보호자, 크레딧 사용 내역, 이야기 올릴 일과 고르기의 빈 화면에 루미 그림을 붙였어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "내가 쓴 글, 임시저장, 숨긴 보호자, 크레딧 사용 내역, 이야기 올릴 일과 고르기의 빈 화면에 루미 그림을 붙였어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.80.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 1011,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 내 정보에서 \"내가 쓴 글\"을 눌러 이야기에 올린 내 글을 모아 볼 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "내 정보에서 \"내가 쓴 글\"을 눌러 이야기에 올린 내 글을 모아 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.79.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-23",
+      "pr_number": 1008,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈 일과 목록에 첫 카드 그림을 보여줘요\n  * 보호자가 여럿이면 일과마다 누가 만들었는지 이름이 보여요\n\n* **개선**\n  * 로그인 화면 글자가 기기 크기에 맞게 보여요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈 일과 목록에 첫 카드 그림을 보여줘요",
+            "보호자가 여럿이면 일과마다 누가 만들었는지 이름이 보여요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인 화면 글자가 기기 크기에 맞게 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.78.1",
       "project_type": "flutter",
