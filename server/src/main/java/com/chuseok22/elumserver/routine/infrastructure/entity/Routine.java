@@ -109,8 +109,8 @@ public class Routine extends BaseEntity {
   private Integer displayOrder = 0;
 
   /**
-   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외.
-   * 고쳐도 예시 표시는 그대로 둔다.
+   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외, 이야기 올리기 금지.
+   * 보호자가 글·그림을 고치면 지움 (#983, RoutineRules.clearExampleMark)
    */
   @Column(name = "is_example", nullable = false, columnDefinition = "boolean not null default false")
   private Boolean isExample = false;

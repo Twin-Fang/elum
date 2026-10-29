@@ -3273,7 +3273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get talkSharePickEmptyHint =>
-      '일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 예시, 이야기에서 가져온 일과는 빠져요.';
+      '일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.';
 
   @override
   String get talkSharePickFailed => '일과를 불러오지 못했어요';
