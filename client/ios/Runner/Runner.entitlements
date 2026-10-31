@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- 공유 링크 https://api.elum.chuseok22.com/s/{글id} > 앱에서 그 글 (서버 AASA · 배포 프로필 Associated Domains 와 같이, #1041) -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:api.elum.chuseok22.com</string>
+	</array>
 	<key>aps-environment</key>
 	<string>development</string>
 	<key>com.apple.developer.applesignin</key>
