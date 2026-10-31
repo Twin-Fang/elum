@@ -163,10 +163,10 @@ class TalkSharePageControllerTest {
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
     assertThat(aasa).contains("CUK22HY6YC.kr.twinfang.elum").contains("/s/*");
 
-    // 업로드 키 지문이 기본값으로 실림 (비면 Android 앱 링크 검증 실패)
+    // 지문 2개가 기본값으로 실림: 업로드 키(직접 배포 APK), Play 앱 서명 키(Play 설치본). 빠지면 그 설치본에서 앱 링크 검증 실패
     String assetLinks = mockMvc.perform(get("/.well-known/assetlinks.json"))
       .andExpect(status().isOk())
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
-    assertThat(assetLinks).contains("kr.twinfang.elum").contains("CC:2D:6F:FB");
+    assertThat(assetLinks).contains("kr.twinfang.elum").contains("CC:2D:6F:FB").contains("F7:A8:97:83");
   }
 }
