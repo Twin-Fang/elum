@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-29T15:13:00Z",
-    "currentVersion": "2.83.0",
+    "lastUpdated": "2026-10-31T10:30:05Z",
+    "currentVersion": "2.84.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 321
+    "totalReleases": 322
   },
   "releases": [
+    {
+      "version": "2.84.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-31",
+      "pr_number": 1043,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 이야기 글 공유 링크를 누르면 앱이 있을 때 바로 그 글이 열려요\n  * 앱이 없으면 이룸을 소개하는 새 화면과 스토어 버튼을 보여 줘요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "이야기 글 공유 링크를 누르면 앱이 있을 때 바로 그 글이 열려요",
+            "앱이 없으면 이룸을 소개하는 새 화면과 스토어 버튼을 보여 줘요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.83.0",
       "project_type": "flutter",
