@@ -117,7 +117,7 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
                 onAction: storeUrl == null
                     ? (_) => ref.invalidate(appStatusProvider)
                     : (noticeContext) =>
-                          openStoreOrShowFailure(noticeContext, ref, storeUrl),
+                          startUpdateOrOpenStore(noticeContext, ref, storeUrl),
                 footer: skipButton,
               ),
             ),
