@@ -180,6 +180,8 @@ flutter:
     - assets/images/example_routines/
     # 이룸이 칭찬 소리 (#777)
     - assets/sounds/
+    # 글꼴 라이선스 전문 (#1046)
+    - assets/licenses/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -44,6 +44,9 @@ abstract final class Routes {
   /// 일과를 링크로 보내기 (사진 > 링크 만들기 > 공유 시트). extra 는 [TalkLinkShareRouteArgs]
   static const guardianTalkLinkShare = '/guardian/talk/link';
 
+  /// 오픈소스 라이선스 (설정 > 약관 및 정보)
+  static const guardianLicenses = '/guardian/licenses';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 

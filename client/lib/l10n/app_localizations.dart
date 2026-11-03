@@ -5947,6 +5947,60 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다 했어요'**
   String get routineProgressRingDoneLabel;
+
+  /// 보호자 설정의 라이선스 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'오픈소스 라이선스'**
+  String get guardianSettingsLicenses;
+
+  /// 라이선스 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오픈소스 라이선스'**
+  String get licenseScreenTitle;
+
+  /// 라이선스 화면 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸은 아래 그림, 글꼴, 프로그램을 사용해 만들었어요. 항목을 누르면 라이선스 전문을 볼 수 있어요.'**
+  String get licenseScreenGuide;
+
+  /// 라이선스 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림'**
+  String get licenseGroupArtwork;
+
+  /// 라이선스 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'글꼴'**
+  String get licenseGroupFonts;
+
+  /// 라이선스 묶음 제목, 프로그램 목록 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'프로그램'**
+  String get licenseGroupSoftware;
+
+  /// 프로그램 라이선스 목록으로 가는 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'프로그램 목록 보기'**
+  String get licenseSoftwareListRow;
+
+  /// 글꼴 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'티머니 둥근바람'**
+  String get licenseFontTmoneyName;
+
+  /// 라이선스를 못 읽었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'목록을 불러오지 못했어요'**
+  String get licenseLoadFailedMessage;
 }
 
 class _AppLocalizationsDelegate

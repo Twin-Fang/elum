@@ -26,6 +26,11 @@ abstract final class AppAssets {
   /// 허용 id 는 `PictogramCatalog` 가 걸러 준다.
   static String pictogram(String id) => 'assets/pictograms/$id.svg';
 
+  /// 오픈소스 라이선스 전문 (#1046). Mulberry 는 그림과 같이 받은 원문을 그대로 씀
+  static const licenseMulberrySymbols = 'assets/pictograms/LICENSE.txt';
+  static const licensePretendard = 'assets/licenses/pretendard_ofl.txt';
+  static const licenseTmoneyRoundWind = 'assets/licenses/tmoney_round_wind.txt';
+
   /// 온보딩 예시 일과 카드 이미지 (루미, 512×512 투명 배경 WebP).
   ///
   /// [id] 는 서버가 내려주는 `exampleImageId` (파일명 stem, 예 `fold_blanket`).

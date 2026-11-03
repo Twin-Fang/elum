@@ -10,6 +10,7 @@ import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
+import '../../features/license/presentation/open_source_licenses_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
@@ -135,6 +136,11 @@ List<RouteBase> guardianRoutes() => [
         layoutKind: ScreenLayoutKind.contentColumn,
       );
     },
+  ),
+  GoRoute(
+    path: Routes.guardianLicenses,
+    pageBuilder: (context, state) =>
+        slidePage(state, const OpenSourceLicensesScreen()),
   ),
   GoRoute(
     path: Routes.guardianTalkBlocks,

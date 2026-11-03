@@ -207,7 +207,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보: 약관 > 의견 보내기 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
+        // 약관 및 정보: 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
           children: [
             SettingsTile(
@@ -225,6 +225,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
               isInCard: true,
               label: context.l10n.guardianSettingsFeedback,
               onTap: busy ? null : () => context.push(Routes.guardianFeedback),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsLicenses,
+              onTap: busy ? null : () => context.push(Routes.guardianLicenses),
             ),
             // 앱 버전은 목록의 한 줄로 둔다: 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
             const AppInfoTile(isInCard: true),
