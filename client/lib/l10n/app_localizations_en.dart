@@ -3468,4 +3468,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineProgressRingDoneLabel => 'All done';
+
+  @override
+  String get guardianSettingsLicenses => 'Open source licenses';
+
+  @override
+  String get licenseScreenTitle => 'Open source licenses';
+
+  @override
+  String get licenseScreenGuide =>
+      'Elum is built with the artwork, fonts, and software below. Tap an item to read its full license.';
+
+  @override
+  String get licenseGroupArtwork => 'Artwork';
+
+  @override
+  String get licenseGroupFonts => 'Fonts';
+
+  @override
+  String get licenseGroupSoftware => 'Software';
+
+  @override
+  String get licenseSoftwareListRow => 'View software list';
+
+  @override
+  String get licenseFontTmoneyName => 'Tmoney RoundWind';
+
+  @override
+  String get licenseLoadFailedMessage => 'We couldn\'t load the list';
 }

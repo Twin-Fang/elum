@@ -975,5 +975,14 @@
   "timeAgoHours": "{count, plural, one{{count} hour ago} other{{count} hours ago}}",
   "timeAgoDays": "{count, plural, one{{count} day ago} other{{count} days ago}}",
   "routineProgressRingPercentLabel": "{percent}% done",
-  "routineProgressRingDoneLabel": "All done"
+  "routineProgressRingDoneLabel": "All done",
+  "guardianSettingsLicenses": "Open source licenses",
+  "licenseScreenTitle": "Open source licenses",
+  "licenseScreenGuide": "Elum is built with the artwork, fonts, and software below. Tap an item to read its full license.",
+  "licenseGroupArtwork": "Artwork",
+  "licenseGroupFonts": "Fonts",
+  "licenseGroupSoftware": "Software",
+  "licenseSoftwareListRow": "View software list",
+  "licenseFontTmoneyName": "Tmoney RoundWind",
+  "licenseLoadFailedMessage": "We couldn't load the list"
 }

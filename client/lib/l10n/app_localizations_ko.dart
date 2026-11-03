@@ -3306,4 +3306,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineProgressRingDoneLabel => '다 했어요';
+
+  @override
+  String get guardianSettingsLicenses => '오픈소스 라이선스';
+
+  @override
+  String get licenseScreenTitle => '오픈소스 라이선스';
+
+  @override
+  String get licenseScreenGuide =>
+      '이룸은 아래 그림, 글꼴, 프로그램을 사용해 만들었어요. 항목을 누르면 라이선스 전문을 볼 수 있어요.';
+
+  @override
+  String get licenseGroupArtwork => '그림';
+
+  @override
+  String get licenseGroupFonts => '글꼴';
+
+  @override
+  String get licenseGroupSoftware => '프로그램';
+
+  @override
+  String get licenseSoftwareListRow => '프로그램 목록 보기';
+
+  @override
+  String get licenseFontTmoneyName => '티머니 둥근바람';
+
+  @override
+  String get licenseLoadFailedMessage => '목록을 불러오지 못했어요';
 }
