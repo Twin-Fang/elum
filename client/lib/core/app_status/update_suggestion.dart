@@ -10,6 +10,7 @@ import '../storage/local_storage.dart';
 import '../widgets/show_failure.dart';
 import 'app_status.dart';
 import 'app_status_repository.dart';
+import 'play_in_app_update.dart';
 import 'store_launcher.dart';
 import 'store_update_check.dart';
 import 'update_suggestion_prompt.dart';
@@ -94,13 +95,16 @@ Future<void> showUpdateSuggestionIfNeeded(BuildContext context, WidgetRef ref) a
 
   final shouldOpenStore = await showUpdateSuggestionPrompt(context);
   if (!shouldOpenStore || !context.mounted) return;
-  await openStoreOrShowFailure(context, ref, storeUrl);
+  await startUpdateOrOpenStore(context, ref, storeUrl);
 }
 
-/// 스토어 열기 > 못 열면 에러 코드와 함께 알림 (강제 업데이트 화면과 권유 팝업 공통)
-Future<void> openStoreOrShowFailure(BuildContext context, WidgetRef ref, Uri storeUrl) async {
+/// 업데이트 버튼 공통 (강제 업데이트 화면, 권유 팝업): Play 앱 내 업데이트 > 안 되면 스토어 열기 > 못 열면 에러 코드와 함께 알림
+/// 사용자가 Play 화면에서 취소하면 스토어로 보내지 않음
+Future<void> startUpdateOrOpenStore(BuildContext context, WidgetRef ref, Uri storeUrl) async {
   // await 뒤에서 context 를 쓰지 않도록 문구를 먼저 잡음
   final l10n = context.l10n;
+  final inAppUpdateOutcome = await ref.read(playInAppUpdateStarterProvider)();
+  if (inAppUpdateOutcome == PlayInAppUpdateOutcome.handled) return;
   Object? error;
   var isOpened = false;
   try {
