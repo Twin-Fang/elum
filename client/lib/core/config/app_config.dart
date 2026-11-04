@@ -42,7 +42,7 @@ abstract final class AppConfig {
   }
 
   /// 운영 API 주소
-  static const productionApiBaseUrl = 'https://api.elum.chuseok22.com';
+  static const productionApiBaseUrl = 'https://api.elum.suhsaechan.kr';
 
   /// 빌드에 넣은 기본 주소 (`.env`, 없으면 운영)
   static String get defaultApiBaseUrl => _string('ELUM_API_BASE_URL', productionApiBaseUrl);

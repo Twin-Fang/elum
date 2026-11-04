@@ -37,10 +37,11 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - name: "운영 (친구 서버)"
-            url: "https://api.elum.chuseok22.com/healthz"
-          - name: "새 서버 (내 NAS)"
+          - name: "운영 (내 NAS)"
             url: "https://api.elum.suhsaechan.kr/healthz"
+          # 옛 앱에 업데이트·새 주소를 안내하는 서버 (2026-11-05 전환 뒤, #1104)
+          - name: "옛 서버 (업데이트 안내)"
+            url: "https://api.elum.chuseok22.com/healthz"
     steps:
       - name: 헬스체크
         id: health
