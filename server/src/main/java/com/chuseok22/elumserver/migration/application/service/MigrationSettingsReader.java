@@ -1,5 +1,8 @@
 package com.chuseok22.elumserver.migration.application.service;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.migration.application.dto.response.MigrationSettingsView;
 import com.chuseok22.elumserver.migration.application.dto.response.MigrationSettingsView.Row;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -18,8 +21,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MigrationSettingsReader {
 
-  // 설정을 못 읽었을 때 칸 대신 보일 문구 (DB 문제라 오류 코드는 서버 로그로 추적)
-  static final String SETTINGS_UNREADABLE_MESSAGE = "이전 설정을 읽지 못했어요. 시스템 설정 화면에서 확인해 주세요.";
   private static final String ENABLED_TEXT = "켜짐";
   private static final String DISABLED_TEXT = "꺼짐";
   private static final String EMPTY_ADDRESS_TEXT = "비어 있음 (앱은 지금 주소를 써요)";
@@ -41,7 +42,8 @@ public class MigrationSettingsReader {
       ), null);
     } catch (RuntimeException e) {
       log.warn("[migration status] settings read failed", e);
-      return new MigrationSettingsView(List.of(), SETTINGS_UNREADABLE_MESSAGE);
+      // 칸 대신 안내 문구 + 오류 코드 (E-MIG-008)
+      return new MigrationSettingsView(List.of(), ErrorMessages.standard().of(ErrorCode.MIGRATION_SETTINGS_UNREADABLE, AppLocale.KO));
     }
   }
 

@@ -24,6 +24,9 @@ APP_CONTAINER="elum-back-mirror"
 APP_CONTAINER_PREFIX="elum-back"
 # 이 NAS 서버 자신의 주소: 전환 뒤 새 서버 주소 설정에 자기 자신을 넣는다 (비우면 앱이 옛 서버로 되돌아감, #831)
 SELF_API_BASE_URL="https://api.elum.suhsaechan.kr"
+# 관리자 "서버 이전" 페이지와 주고받는 폴더 (컨테이너 /app/migration-sync, #1062)
+# 결과: sync-status.json · verify-status.json / 요청·표식: SYNC_REQUESTED · VERIFY_REQUESTED · SYNC_PAUSED
+SYNC_STATE_DIR="${APP_DIR}/migration-sync"
 
 # 원본 DB 가 PostgreSQL 17 이라 덤프·복원 도구도 17
 POSTGRES_IMAGE="postgres:17"
@@ -57,5 +60,15 @@ is_container_running() {
 # 지금 떠 있는 서버 컨테이너 이름들 (미러·blue·green)
 running_app_containers() {
   "$DOCKER" ps --filter "name=^${APP_CONTAINER_PREFIX}-(blue|green|mirror)$" --format '{{.Names}}'
+}
+
+# JSON 파일 쓰기 (임시 파일 > 이름 바꾸기, 페이지가 반쯤 쓴 파일을 읽지 않게). 사용: write_json_file <경로> <python 식>
+write_json_file() {
+  local target_path="$1" python_expression="$2" temporary_path
+  mkdir -p "$(dirname "$target_path")"
+  temporary_path="$(mktemp "${target_path}.XXXXXX")"
+  python3 -c "import json,sys,os; json.dump(${python_expression}, open(sys.argv[1],'w'), ensure_ascii=False, indent=2)" "$temporary_path" || { rm -f "$temporary_path"; return 1; }
+  chmod 644 "$temporary_path"
+  mv -f "$temporary_path" "$target_path"
 }
 
