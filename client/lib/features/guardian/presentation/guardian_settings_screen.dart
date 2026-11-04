@@ -331,7 +331,7 @@ class _ImageStyleTile extends ConsumerWidget {
 }
 
 /// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
-/// Free 는 줄을 숨긴다 — 앱에서 Pro 를 살 수 없는 동안(PlanAccess.canPurchasePro) 잠긴 줄은 막힌 기능으로 읽힌다
+/// Free 는 판매 중일 때만 줄이 보이고 들어가면 흐린 견본 — 살 수 없는 동안 잠긴 줄은 막힌 기능으로 읽혀 숨긴다
 class _RoutineMemoryTile extends ConsumerWidget {
   const _RoutineMemoryTile({required this.busy});
 
@@ -339,7 +339,10 @@ class _RoutineMemoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(planAccessProvider.select((access) => access.canUseRoutineMemory))) {
+    final isVisible = ref.watch(
+      planAccessProvider.select((access) => access.canUseRoutineMemory || access.shouldShowProTeaser),
+    );
+    if (!isVisible) {
       return const SizedBox.shrink();
     }
     return SettingsTile(

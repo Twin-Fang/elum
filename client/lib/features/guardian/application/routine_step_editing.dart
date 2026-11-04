@@ -143,12 +143,12 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
         .fetchStepImagePath(routineId, stepId);
   }
 
-  /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다.
+  /// 카드 그림을 바꾼 뒤(사진·AI 다시 그리기·추가 카드 그림) 새 `imagePath` 와 AI 그림 여부를 반영한다.
   ///
   /// 서버 응답 전체를 쓰지 않고 **`imagePath` 만** 바꾼다 — 응답에는 카드 제목이 없어
   /// 통째로 덮으면 로컬 제목이 지워진다([updateStep] 과 같은 사정). 그 사이 지워진 카드면
   /// 아무것도 하지 않는다. 목록 캐시도 버려, 홈·이룸이 쪽이 새 열쇠를 받게 한다.
-  void applyStepImage(String stepId, String imagePath) {
+  void applyStepImage(String stepId, String imagePath, {required bool isAiPicture}) {
     final routine = state.routine;
     if (routine == null || !routine.steps.any((s) => s.id == stepId)) return;
 
@@ -156,7 +156,7 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
       routine: routine.copyWith(
         steps: [
           for (final s in routine.steps)
-            if (s.id == stepId) s.copyWith(imagePath: imagePath) else s,
+            if (s.id == stepId) s.copyWith(imagePath: imagePath, isAiPicture: isAiPicture) else s,
         ],
       ),
     );

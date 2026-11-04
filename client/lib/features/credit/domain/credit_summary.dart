@@ -37,6 +37,8 @@ class CreditSummary {
     this.nextResetAt,
     this.routineTextCost = 1,
     this.cardImageCost = 1,
+    this.imageRegenerateCost = 1,
+    this.freeImageRegeneratesLeftToday = 0,
     this.maxCardsPerRoutine = 10,
     this.inProgress = const [],
     this.canStartRoutine = true,
@@ -58,6 +60,12 @@ class CreditSummary {
   final DateTime? nextResetAt;
   final int routineTextCost;
   final int cardImageCost;
+
+  /// 카드 그림 다시 그리기 1장 단가 (무료 횟수가 남았으면 서버가 0 으로 예약)
+  final int imageRegenerateCost;
+
+  /// 오늘 남은 무료 다시 그리기 횟수 (Pro 권한, 하루 한도). 0 이면 [imageRegenerateCost] 만큼 듦
+  final int freeImageRegeneratesLeftToday;
   final int maxCardsPerRoutine;
   final List<CreditJob> inProgress;
   final bool canStartRoutine;
@@ -90,6 +98,14 @@ class CreditSummary {
         1,
       ),
       cardImageCost: _optionalInt(costs is Map ? costs['cardImage'] : null, 1),
+      imageRegenerateCost: _optionalInt(
+        costs is Map ? costs['imageRegenerate'] : null,
+        1,
+      ),
+      freeImageRegeneratesLeftToday: _optionalInt(
+        json['freeImageRegeneratesLeftToday'],
+        0,
+      ),
       maxCardsPerRoutine: _optionalInt(json['maxCardsPerRoutine'], 10),
       inProgress: switch (json['inProgress']) {
         final List<dynamic> list => [

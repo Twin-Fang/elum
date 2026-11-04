@@ -49,3 +49,22 @@ final devPlanStoreForcedProvider =
     NotifierProvider<DevPlanStoreForcedNotifier, bool>(
       DevPlanStoreForcedNotifier.new,
     );
+
+/// Pro 미리 보기 강제 켜기: 스토어 상품을 못 불러와도 `canPurchasePro` 를 참으로 (흐린 미리 보기 확인용)
+///
+/// `Pro로 보기` 로 요금제 화면까지 열려면 `결제 화면 켜기` 도 켠다 (상품이 없으면 가격 실패 화면).
+/// 메모리에만 둔다 (앱을 다시 켜면 꺼짐)
+class DevProTeaserForcedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  /// 릴리스 빌드(개발자 도구 꺼짐)에서는 켜지지 않는다
+  void set(bool isForced) {
+    state = AppConfig.showDevTools && isForced;
+  }
+}
+
+final devProTeaserForcedProvider =
+    NotifierProvider<DevProTeaserForcedNotifier, bool>(
+      DevProTeaserForcedNotifier.new,
+    );

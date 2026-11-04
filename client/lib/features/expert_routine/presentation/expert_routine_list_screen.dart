@@ -10,7 +10,10 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/pro_teaser.dart';
 import '../../guardian/domain/routine_template.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/expert_routine_providers.dart';
 import '../domain/expert_routine.dart';
 import 'widgets/expert_routine_category_chips.dart';
@@ -18,6 +21,7 @@ import 'widgets/expert_routine_tile.dart';
 
 /// 전문가 일과 목록 (일과관리 > 전문가 일과, Pro): 안내 한 줄 > 분류 칩 > 목록, 누르면 미리 보기
 /// 상태: 받는 중 / 0건(글만 든 웜그레이 줄) / 실패(다시 하기 + 에러 코드) / 목록
+/// Free · 판매 중: 목록을 받지 않고 흐린 견본 목록 + `Pro로 보기`
 class ExpertRoutineListScreen extends ConsumerStatefulWidget {
   const ExpertRoutineListScreen({super.key});
 
@@ -45,6 +49,10 @@ class _ExpertRoutineListScreenState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
+    final access = ref.watch(planAccessProvider);
+    if (!access.canImportExpertRoutines && access.shouldShowProTeaser) {
+      return _proTeaserScaffold(context);
+    }
     final routines = ref.watch(expertRoutineListProvider(_category));
 
     return ElumScaffold(
@@ -90,6 +98,53 @@ class _ExpertRoutineListScreenState
               ),
               _ => const ElumStateBody.loading(),
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+extension on _ExpertRoutineListScreenState {
+  /// Free 견본: 안내 한 줄 > 흐린 견본 줄 3개 (실제 전문가 일과를 받지 않음)
+  Widget _proTeaserScaffold(BuildContext context) {
+    final l10n = context.l10n;
+    final samples = [
+      (id: 'sample-morning', title: l10n.proTeaserSampleRoutineMorning, stepCount: 5),
+      (id: 'sample-brush', title: l10n.proTeaserSampleRoutineBrush, stepCount: 4),
+      (id: 'sample-bag', title: l10n.proTeaserSampleRoutineBag, stepCount: 3),
+    ];
+    return ElumScaffold(
+      onBack: context.popOrHome,
+      title: l10n.expertRoutineListTitle,
+      backTop: 67,
+      horizontalPadding: 16,
+      child: ListView(
+        padding: EdgeInsets.only(
+          top: _ExpertRoutineListScreenState._headerToHint.h,
+          bottom: _ExpertRoutineListScreenState._listBottom.h,
+        ),
+        children: [
+          ProTeaser(
+            benefit: l10n.proTeaserExpertRoutineBenefit,
+            onUnlock: () => openPlanPaywall(context, ref),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final sample in samples) ...[
+                  ExpertRoutineTile(
+                    routine: ExpertRoutineSummary(
+                      id: sample.id,
+                      title: sample.title,
+                      stepCount: sample.stepCount,
+                      summary: l10n.proTeaserSampleExpertSummary,
+                    ),
+                    onTap: () {},
+                  ),
+                  SizedBox(height: _ExpertRoutineListScreenState._tileGap.h),
+                ],
+              ],
+            ),
           ),
         ],
       ),

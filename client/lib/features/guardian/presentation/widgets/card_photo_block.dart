@@ -8,6 +8,8 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/elum_toast.dart';
+import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../application/routine_notifier.dart';
 import '../../application/card_photo_controller.dart';
@@ -16,16 +18,21 @@ import '../../data/card_photo_picker.dart';
 import 'card_image.dart';
 import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
+import 'card_regenerate_sheet.dart';
 import 'default_card_art.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 
-/// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` 칩과 그 뒤의 모든 상태.
+part 'card_photo_block_parts.dart';
+
+/// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` · (AI 그림이면) `다시 그리기` 칩과 그 뒤의 모든 상태.
 ///
 /// **임시 시안이다.** 디자이너 확정 전 제시용 목업(`opt2_A`)을 그대로 옮겼다.
 ///
 /// 흐름: 칩 → 고르기 시트 → (카메라·갤러리) → 올리는 중 → 성공(그림 갈아 끼움) / 실패.
 /// 취소는 아무 일도 없고, 권한 거부는 우회 안내, 올리는 중은 칩을 감춰 두 번 못 누르며,
 /// 실패는 문구 + **에러 코드** + `다시 하기`다.
+///
+/// 다시 그리기: 칩 → 비용 확인 시트 → 그리는 중 → 성공(그림 갈아 끼움 + 토스트) / 실패(에러 코드 팝업, 그림 그대로).
 ///
 /// **서버 id 가 있는 카드에서만 쓴다.** 호출부가 [routineId]·[stepId] 가 서버 것일 때만
 /// 이 위젯을 놓는다 — 서버에 없는 카드는 올릴 곳이 없다.
@@ -42,6 +49,9 @@ class CardPhotoBlock extends ConsumerStatefulWidget {
   /// 칩의 누름 영역 — 테스트가 48×48 을 재는 데 쓴다.
   static const chipTapKey = ValueKey('card-photo-chip-tap');
 
+  /// 다시 그리기 실패 팝업의 에러 코드 (서버 코드가 없을 때)
+  static const regenerateErrorCode = 'E-CARD-REGENERATE';
+
   /// 그림 칸 높이 (목업 150).
   static const height = 150.0;
 
@@ -52,7 +62,7 @@ class CardPhotoBlock extends ConsumerStatefulWidget {
   ConsumerState<CardPhotoBlock> createState() => _CardPhotoBlockState();
 }
 
-enum _Phase { idle, uploading, failed }
+enum _Phase { idle, uploading, regenerating, failed }
 
 class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   var _phase = _Phase.idle;
@@ -142,7 +152,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     final card = result.card;
     if (card != null) {
       // 새 imagePath 가 오면 이미지 캐시 열쇠가 달라져 그림이 바뀐다
-      notifier.applyStepImage(widget.stepId, card.imagePath!);
+      notifier.applyStepImage(widget.stepId, card.imagePath!, isAiPicture: false);
       if (mounted) {
         setState(() {
           _phase = _Phase.idle;
@@ -179,6 +189,51 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
         ],
       );
     }
+  }
+
+  /// 다시 그리기: 확인 시트 > 그리는 중 > 성공이면 새 열쇠로 교체, 실패면 에러 코드 팝업 (그림 그대로)
+  Future<void> _regenerate() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final isConfirmed = await CardRegenerateSheet.show(context);
+      if (!isConfirmed || !mounted) return;
+      await _runRegenerate();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _runRegenerate() async {
+    // await 뒤 시트가 사라져도 끝까지 반영하고 알릴 수 있게 미리 잡아 둠 (사진 올리기와 같은 이유)
+    final notifier = ref.read(routineFlowProvider.notifier);
+    final controller = ref.read(cardPhotoControllerProvider);
+    final rootContext = Overlay.of(context, rootOverlay: true).context;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    setState(() {
+      _phase = _Phase.regenerating;
+      _failure = null;
+    });
+
+    final regenerateResult = await controller.regenerateImage(routineId: widget.routineId, stepId: widget.stepId);
+    if (mounted) setState(() => _phase = _Phase.idle);
+
+    final card = regenerateResult.card;
+    if (card != null) {
+      // 새 imagePath 가 오면 이미지 캐시 열쇠가 달라져 그림이 바뀐다
+      notifier.applyStepImage(widget.stepId, card.imagePath!, isAiPicture: true);
+      if (rootContext.mounted) showElumToastOn(messenger, rootContext.l10n.cardRegenerateDoneToast);
+      return;
+    }
+    final targetContext = mounted ? context : rootContext;
+    if (!targetContext.mounted) return;
+    await showFailure(
+      targetContext,
+      regenerateResult.failure,
+      title: targetContext.l10n.cardRegenerateFailedTitle,
+      fallback: targetContext.l10n.cardRegenerateFailedFallback,
+      fallbackCode: CardPhotoBlock.regenerateErrorCode,
+    );
   }
 
   void _onFailureButton() {
@@ -252,227 +307,37 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                         ),
                       ),
                     ),
+                    if (_phase == _Phase.idle && (step?.isAiPicture ?? false))
+                      Positioned(
+                        left: 4.w,
+                        bottom: 0,
+                        child: _Chip(
+                          asset: AppAssets.iconRefresh,
+                          label: context.l10n.cardRegenerateChip,
+                          onTap: _busy ? null : _regenerate,
+                        ),
+                      ),
                     if (_phase == _Phase.idle)
                       Positioned(
                         right: 4.w,
                         bottom: 0,
-                        child: _Chip(onTap: _busy ? null : _start),
+                        child: _Chip(
+                          key: CardPhotoBlock.chipTapKey,
+                          asset: AppAssets.iconCamera,
+                          label: context.l10n.cardPhotoChange,
+                          onTap: _busy ? null : _start,
+                        ),
                       ),
                   ],
                 ),
               ),
             ),
           ),
-          if (_phase == _Phase.uploading) const _UploadingOverlay(),
+          if (_phase == _Phase.uploading) _ProgressOverlay(message: context.l10n.cardPhotoUploading),
+          if (_phase == _Phase.regenerating) _ProgressOverlay(message: context.l10n.cardRegenerateInProgress),
           if (_phase == _Phase.failed && _failure != null)
             _FailureOverlay(failure: _failure!, onButton: _onFailureButton),
         ],
-      ),
-    );
-  }
-}
-
-/// 칩 모양: 알약 (시안 모서리 100)
-const _chipPillRadius = 100.0;
-
-/// 칩 앞 아이콘 (`fi-br` 16, 남색)
-class _ChipIcon extends StatelessWidget {
-  const _ChipIcon({required this.asset});
-
-  final String asset;
-
-  static const _size = 16.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      asset,
-      width: _size.w,
-      height: _size.w,
-      excludeFromSemantics: true,
-      colorFilter: ColorFilter.mode(
-        context.colors.textPrimary,
-        BlendMode.srcIn,
-      ),
-    );
-  }
-}
-
-/// `사진 바꾸기` 칩 — 보이는 알약은 작아도 누름 영역은 48 이상이다.
-class _Chip extends StatelessWidget {
-  const _Chip({required this.onTap});
-
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      semanticLabel: context.l10n.cardPhotoChange,
-      child: SizedBox(
-        key: CardPhotoBlock.chipTapKey,
-        height: 48.h < 48 ? 48 : 48.h,
-        child: Align(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: colors.editChipBg,
-              borderRadius: BorderRadius.circular(_chipPillRadius),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const _ChipIcon(asset: AppAssets.iconCamera),
-                SizedBox(width: 6.w),
-                Text(
-                  context.l10n.cardPhotoChange,
-                  style: context.typo.editChipLabel.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 그림 위를 덮는 반투명 판 — 뒤 그림은 흐릿하게 비친다(목업 `upload_loading`).
-class _Overlay extends StatelessWidget {
-  const _Overlay({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return Positioned.fill(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.colors.surface.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(space.xs),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(12.w),
-          // 글자를 키워도 판 밖으로 넘치지 않게 줄인다
-          child: FittedBox(fit: BoxFit.scaleDown, child: child),
-        ),
-      ),
-    );
-  }
-}
-
-class _UploadingOverlay extends StatelessWidget {
-  const _UploadingOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return _Overlay(
-      child: Semantics(
-        // 낭독기가 진행 상황을 바로 읽는다
-        liveRegion: true,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElumSpinner(size: 36.w, strokeWidth: 3, color: colors.textPrimary),
-            SizedBox(height: 12.h),
-            Text(
-              context.l10n.cardPhotoUploading,
-              style: context.typo.body.copyWith(color: colors.textPrimary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FailureOverlay extends StatelessWidget {
-  const _FailureOverlay({required this.failure, required this.onButton});
-
-  final PhotoFailure failure;
-  final VoidCallback onButton;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-    final dismiss = failure.kind == PhotoFailureKind.dismissOnly;
-
-    return _Overlay(
-      child: Semantics(
-        liveRegion: true,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.l10n.cardPhotoUploadFailed,
-              style: typo.body.copyWith(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              failure.message,
-              textAlign: TextAlign.center,
-              style: typo.bodySmall.copyWith(color: colors.textSecondary),
-            ),
-            SizedBox(height: 2.h),
-            // 제보를 받았을 때 어디서 터졌는지 찾는 식별자
-            Text(
-              failure.code,
-              style: typo.bodySmall.copyWith(color: colors.textSecondary),
-            ),
-            SizedBox(height: 8.h),
-            AppPressable(
-              onTap: onButton,
-              semanticLabel: dismiss
-                  ? context.l10n.commonConfirm
-                  : context.l10n.cardPhotoRetry,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.editChipBg,
-                    borderRadius: BorderRadius.circular(_chipPillRadius),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!dismiss) ...[
-                        const _ChipIcon(asset: AppAssets.iconRefresh),
-                        SizedBox(width: 6.w),
-                      ],
-                      Text(
-                        dismiss
-                            ? context.l10n.commonConfirm
-                            : context.l10n.cardPhotoRetry,
-                        style: typo.editChipLabel.copyWith(
-                          color: colors.textPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

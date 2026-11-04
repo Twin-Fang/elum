@@ -25,6 +25,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService;
@@ -69,6 +70,7 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineStepSpeechProvider routineStepSpeechProvider;
   private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
+  private final RoutineStepImageRegenerateService routineStepImageRegenerateService;
   private final RoutineStepVoiceService routineStepVoiceService;
   private final RoutineLibraryService routineLibraryService;
   private final RoutineLibraryOrderService routineLibraryOrderService;
@@ -404,6 +406,18 @@ public class RoutineController implements RoutineControllerDocs {
     RoutineStepResponse response =
       routineStepPhotoService.replaceStepImage(Caller.from(authentication), routineId, stepId, image);
     return ResponseEntity.ok(response);
+  }
+
+  // 카드 AI 그림 다시 그리기. 크레딧 IMAGE_REGENERATE (Pro 하루 무료 한도 안이면 0). 응답에 카드 문장이 있어 결과를 로그에서 뺀다
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/{routineId}/steps/{stepId}/image/regenerate")
+  public ResponseEntity<RoutineStepResponse> regenerateStepImage(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @PathVariable String stepId
+  ) {
+    return ResponseEntity.ok(
+      routineStepImageRegenerateService.regenerate(Caller.from(authentication), routineId, stepId));
   }
 
   // 보호자 목소리 녹음 올리기 (Pro, #787). 녹음은 개인정보라 파라미터·결과를 로그에 남기지 않는다.

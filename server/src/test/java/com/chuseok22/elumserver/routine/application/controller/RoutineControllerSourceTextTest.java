@@ -44,7 +44,7 @@ class RoutineControllerSourceTextTest {
   private final RoutineCreateService createService = mock(RoutineCreateService.class);
   private final RoutineQueryService queryService = mock(RoutineQueryService.class);
   private final RoutineProgressService progressService = mock(RoutineProgressService.class);
-  private final RoutineController controller = new RoutineController(service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class),
+  private final RoutineController controller = new RoutineController(service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class),
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   private final Authentication elumi = elumiAuth();

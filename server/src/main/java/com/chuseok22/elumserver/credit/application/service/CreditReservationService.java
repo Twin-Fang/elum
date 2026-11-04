@@ -386,27 +386,38 @@ public class CreditReservationService {
   }
 
   /**
-   * 무료 다시 그리기 가능 여부: 권한(IMAGE_REGENERATE_FREE) > 하루 한도 > 오늘 쓴 무료 횟수
-   * 계정 행 잠금 안에서 세므로 동시 요청이 한도를 넘지 않음. 반환·만료된 작업은 세지 않음
+   * 무료 다시 그리기 가능 여부: 오늘 남은 무료 횟수 > 0
+   * 계정 행 잠금 안에서 세므로 동시 요청이 한도를 넘지 않음
    */
   private boolean isFreeRegenerateAvailable(AiCreditAccount account, LocalDateTime now) {
-    String memberId = account.getMemberId();
-    if (memberId == null || !entitlementService.isAllowed(memberId, Entitlement.IMAGE_REGENERATE_FREE)) {
-      return false;
+    boolean isAvailable = freeRegeneratesLeftToday(account, now) > 0;
+    if (!isAvailable && hasFreeRegenerateEntitlement(account)) {
+      log.info("[credit free regenerate] daily cap reached, normal cost applies: accountId={}", account.getId());
+    }
+    return isAvailable;
+  }
+
+  /**
+   * 오늘 남은 무료 다시 그리기 횟수: 권한(IMAGE_REGENERATE_FREE) 없음·한도 0 이면 0, 아니면 한도 − 오늘 쓴 무료 횟수
+   * 반환·만료된 작업은 세지 않음. 크레딧 요약(앱 확인 시트)과 예약이 같은 계산을 씀
+   */
+  public int freeRegeneratesLeftToday(AiCreditAccount account, LocalDateTime now) {
+    if (!hasFreeRegenerateEntitlement(account)) {
+      return 0;
     }
     int dailyCap = usageLimitSettings.imageRegenerateFreeDailyCap();
     if (dailyCap <= 0) {
-      return false;
+      return 0;
     }
     long usedToday = jobRepository.countByAccountIdAndKindAndReservedAndStatusInAndStartedAtGreaterThanEqual(
       account.getId(), CreditJobKind.IMAGE_REGENERATE, 0, FREE_REGENERATE_COUNTED_STATUSES,
       now.toLocalDate().atStartOfDay());
-    if (usedToday >= dailyCap) {
-      log.info("[credit free regenerate] daily cap reached, normal cost applies: accountId={}, used={}, cap={}",
-        account.getId(), usedToday, dailyCap);
-      return false;
-    }
-    return true;
+    return (int) Math.max(0, dailyCap - usedToday);
+  }
+
+  private boolean hasFreeRegenerateEntitlement(AiCreditAccount account) {
+    String memberId = account.getMemberId();
+    return memberId != null && entitlementService.isAllowed(memberId, Entitlement.IMAGE_REGENERATE_FREE);
   }
 
   /// 시작 때 다시 그리기 단가가 0 이고 그림을 실제로 그린 다시 그리기 작업인가

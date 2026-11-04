@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import java.time.Clock;
 import java.time.Instant;
@@ -109,7 +110,7 @@ class CreditQueryServiceTest {
     // 기기가 자기 시각으로 읽고 날짜를 틀리게 보였다. 같은 순간에 서버 시간대 오프셋을 붙인다.
     assertThat(summary.nextResetAtOffset()).isEqualTo(
       OffsetDateTime.parse("2026-09-28T00:00:00+09:00"));
-    assertThat(summary.costs()).isEqualTo(new CreditSummaryResponse.Costs(1, 2));
+    assertThat(summary.costs()).isEqualTo(new CreditSummaryResponse.Costs(1, 2, 1));
     assertThat(summary.maxCardsPerRoutine()).isEqualTo(10);
     assertThat(summary.inProgress()).singleElement().satisfies(job -> {
       assertThat(job.kind()).isEqualTo("ROUTINE_CREATE");
@@ -151,6 +152,29 @@ class CreditQueryServiceTest {
 
     assertThat(summary.canStartRoutine()).isTrue();
     assertThat(summary.canGenerateImage()).as("그림 단가 2 > 사용 가능 1").isFalse();
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기 권한이 있으면 오늘 남은 무료 횟수 = 하루 한도 30 − 오늘 쓴 무료 횟수 (확인 시트의 'N회 남음')")
+  void getMine_freeRegeneratesLeft_whenEntitled() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 50);
+    when(entitlementService.isAllowed(MEMBER_ID, Entitlement.IMAGE_REGENERATE_FREE)).thenReturn(true);
+    store.reservedJob(ACCOUNT_ID, "regen-1", CreditJobKind.IMAGE_REGENERATE, 0, NOW.minusMinutes(1));
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.freeImageRegeneratesLeftToday()).isEqualTo(29);
+    assertThat(summary.costs().imageRegenerate()).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기 권한이 없으면(Free) 남은 무료 횟수 0 — 앱은 크레딧 단가를 보인다")
+  void getMine_freeRegeneratesLeft_zeroWithoutEntitlement() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 50);
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.freeImageRegeneratesLeftToday()).isZero();
   }
 
   @Test

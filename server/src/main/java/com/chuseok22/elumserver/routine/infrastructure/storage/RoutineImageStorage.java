@@ -29,6 +29,16 @@ public interface RoutineImageStorage {
     return key != null && GUARDIAN_UPLOADED_PHOTO_KEY.matcher(key).matches();
   }
 
+  // 이야기에서 가져온 그림 열쇠의 파일 이름 앞부분: {stepId}/talk-{UUID}.{확장자} (saveImported)
+  String IMPORTED_FILE_PREFIX = "/talk-";
+
+  /**
+   * 열쇠가 AI 가 그린 그림인지 판정 (그림 없음·보호자 사진·가져온 그림은 false) — 다시 그리기 대상
+   */
+  static boolean isAiDrawn(String key) {
+    return key != null && !key.isBlank() && !isGuardianUploadedPhoto(key) && !key.contains(IMPORTED_FILE_PREFIX);
+  }
+
   /**
    * 그림을 담고 <b>열쇠</b>를 돌려준다.
    *
@@ -69,6 +79,17 @@ public interface RoutineImageStorage {
    *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
    */
   String saveImported(String stepId, ImageContent content);
+
+  /**
+   * 다시 그린 AI 그림 한 장을 담고 <b>새 열쇠</b>를 돌려준다.
+   *
+   * <p>열쇠는 {@code {stepId}/ai-{UUID}.{확장자}} — 매번 바뀌어 앱 이미지 캐시가 새 그림을 받는다.
+   * {@code ai-} 접두라 보호자 사진 판정에 걸리지 않는다.
+   *
+   * @throws com.chuseok22.elumserver.common.infrastructure.exception.CustomException 쓰기에 실패하면
+   *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
+   */
+  String saveRegenerated(String stepId, GeneratedImage image);
 
   /**
    * 열쇠 하나의 파일을 지운다.

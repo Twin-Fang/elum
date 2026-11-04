@@ -11,13 +11,16 @@ import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/widgets/pro_teaser.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/guardian_child_identity.dart';
 import '../../application/weekly_report_providers.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/weekly_report.dart';
 import '../card_export/print_page.dart';
+import '../pro_teaser_samples.dart';
 import 'weekly_report_sections.dart';
 import 'weekly_report_share_page.dart';
 import 'weekly_report_week_picker.dart';
@@ -31,7 +34,7 @@ abstract final class WeeklyReportErrorCode {
 /// 주간 리포트 (#1074, Pro): 주 고르기 > 요약·기록 > 보낼 한 장 미리 보기 > 이미지·PDF 로 보내기
 ///
 /// 상태 4개: 불러오는 중 / 보낸 일과 0건(빈 상태) / 실패(에러 코드 + 다시 하기) / 리포트.
-/// Free 는 입구가 없다 — 그래도 들어오면(개발자 도구 이동 등) 안내만 보인다.
+/// Free: 판매 중이면 흐린 견본 리포트 + `Pro로 보기`, 아니면 입구가 없다 (그래도 들어오면 안내만).
 class WeeklyReportScreen extends ConsumerStatefulWidget {
   const WeeklyReportScreen({super.key});
 
@@ -97,6 +100,15 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
   Widget _body(BuildContext context, AsyncValue<WeeklyReport>? reportAsync, DateTime weekStart) {
     final l10n = context.l10n;
     if (reportAsync == null) {
+      if (ref.watch(planAccessProvider).shouldShowProTeaser) {
+        return SingleChildScrollView(
+          child: ProTeaser(
+            benefit: l10n.proTeaserWeeklyReportBenefit,
+            onUnlock: () => openPlanPaywall(context, ref),
+            child: ProTeaserSamples.weeklyReportSections(context),
+          ),
+        );
+      }
       return ElumStateBody(child: ElumErrorView(message: l10n.weeklyReportNotIncluded, compact: true));
     }
     return switch (reportAsync) {
