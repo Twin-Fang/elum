@@ -22,6 +22,10 @@ extension DateLabels on AppLocalizations {
       ? creditResetAt(d.month, d.day, weekdayShortOf(d), d.hour)
       : creditResetAtMinute(d.month, d.day, weekdayShortOf(d), d.hour, d.minute);
 
+  /// `11월 2일 ~ 11월 8일` (주간 리포트 주 범위)
+  String weekRangeOf(DateTime start, DateTime end) =>
+      weeklyReportWeekRange(start.month, start.day, end.month, end.day);
+
   /// 방금 전 > 분 전 > 시간 전 > 일 전, 7일 넘으면 날짜 (시계가 어긋나 미래여도 방금 전)
   String timeAgoOf(DateTime time, DateTime now) {
     final elapsed = now.difference(time);

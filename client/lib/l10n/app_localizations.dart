@@ -6523,6 +6523,209 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro 알아보기'**
   String get planLearnPro;
+
+  /// 주간 리포트 화면 제목 · 내 정보 바로가기 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트'**
+  String get weeklyReportTitle;
+
+  /// 주간 리포트 주 범위. 예: 11월 2일 ~ 11월 8일
+  ///
+  /// In ko, this message translates to:
+  /// **'{startMonth}월 {startDay}일 ~ {endMonth}월 {endDay}일'**
+  String weeklyReportWeekRange(
+    int startMonth,
+    int startDay,
+    int endMonth,
+    int endDay,
+  );
+
+  /// 주 고르기 줄 · 이번 주일 때. range 는 weeklyReportWeekRange
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 · {range}'**
+  String weeklyReportThisWeekRange(String range);
+
+  /// 주 고르기 왼쪽 화살표 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 보기'**
+  String get weeklyReportPreviousWeek;
+
+  /// 주 고르기 오른쪽 화살표 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 주 보기'**
+  String get weeklyReportNextWeek;
+
+  /// 요약 카드 큰 숫자 옆 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 완료율'**
+  String get weeklyReportCompletionLabel;
+
+  /// 완료율 숫자
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}%'**
+  String weeklyReportPercent(int percent);
+
+  /// 요약 카드 한 줄 (사실만, 평가 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{보낸 일과 {sent}개 중 {completed}개를 마쳤어요}}'**
+  String weeklyReportCompletionSummary(int sent, int completed);
+
+  /// 하루 칸 · 그 날 보낸 일과가 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'-'**
+  String get weeklyReportDayNone;
+
+  /// 한 장 하루 칸 · 마친 일과/보낸 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'{completed}/{sent}'**
+  String weeklyReportDayCount(int completed, int sent);
+
+  /// 별·보상·연속 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 기록'**
+  String get weeklyReportFactsSection;
+
+  /// 줄 이름 · 이 주에 마친 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 별'**
+  String get weeklyReportStars;
+
+  /// 줄 이름 · 보상을 정해 둔 일과 중 끝까지 마친 수
+  ///
+  /// In ko, this message translates to:
+  /// **'보상까지 간 일과'**
+  String get weeklyReportRewards;
+
+  /// 줄 이름 · 일과를 하나 이상 마친 날이 이어진 가장 긴 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'연속으로 마친 날'**
+  String get weeklyReportStreak;
+
+  /// 개수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개}}'**
+  String weeklyReportCount(int count);
+
+  /// 날 수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일}}'**
+  String weeklyReportDays(int count);
+
+  /// 일과별 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과별 기록'**
+  String get weeklyReportRoutinesSection;
+
+  /// 일과 줄 값 · 보낸 횟수 중 마친 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{sent}번 중 {completed}번 마침}}'**
+  String weeklyReportRoutineValue(int sent, int completed);
+
+  /// 지난 날 마치지 않고 남은 카드 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'남아 있던 카드'**
+  String get weeklyReportRemainingSection;
+
+  /// 남은 카드 묶음 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 날 일과에서 마치지 않고 남은 카드예요. 오늘 일과는 세지 않아요'**
+  String get weeklyReportRemainingFooter;
+
+  /// 남은 카드 줄 이름 · 일과 이름 · 카드 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine} · {step}'**
+  String weeklyReportRemainingLabel(String routine, String step);
+
+  /// 남은 카드 횟수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}번}}'**
+  String weeklyReportTimes(int count);
+
+  /// 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이 주에는 보낸 일과가 없어요'**
+  String get weeklyReportEmptyTitle;
+
+  /// 빈 상태 안내 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 보내면 이룸이가 마친 기록이 여기에 모여요'**
+  String get weeklyReportEmptyBody;
+
+  /// 불러오기 실패 문구 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트를 불러오지 못했어요'**
+  String get weeklyReportLoadFailed;
+
+  /// Pro 가 아닌 계정이 화면에 들어왔을 때 (입구는 숨김)
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트는 Pro에서 볼 수 있어요'**
+  String get weeklyReportNotIncluded;
+
+  /// 선생님·치료사에게 보낼 한 장 미리 보기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 한 장'**
+  String get weeklyReportSharePreview;
+
+  /// 미리 보기 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기 그대로 이미지나 PDF로 보내요'**
+  String get weeklyReportSharePreviewCaption;
+
+  /// 한 장을 PNG 로 공유 시트에
+  ///
+  /// In ko, this message translates to:
+  /// **'이미지'**
+  String get weeklyReportShareImage;
+
+  /// 한 장을 A4 PDF 로 공유 시트에
+  ///
+  /// In ko, this message translates to:
+  /// **'PDF로 보내기'**
+  String get weeklyReportSharePdf;
+
+  /// 한 장 굽기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 한 장을 만들지 못했어요'**
+  String get weeklyReportShareFailed;
+
+  /// 보낼 한 장 제목 · 이룸이 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 한 주'**
+  String weeklyReportShareTitle(String name);
+
+  /// 보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸 앱에 남은 완료 기록을 센 내용이에요'**
+  String get weeklyReportShareNote;
 }
 
 class _AppLocalizationsDelegate

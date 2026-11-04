@@ -292,6 +292,20 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.cardExportAllThemes()).isTrue();
   }
 
+  @Test
+  @DisplayName("스냅샷의 주간 리포트 권한은 그 플랜 키를 읽는다 (관리자가 Free 키를 켜면 Free 도 보인다)")
+  void snapshot_weeklyReportReadsPlanKey() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.FREE_WEEKLY_REPORT)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.plan()).isEqualTo(PlanType.FREE);
+    assertThat(snapshot.weeklyReport()).isTrue();
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

@@ -13,6 +13,7 @@ import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/card_export/card_export_screen.dart';
+import '../../features/guardian/presentation/weekly_report/weekly_report_screen.dart';
 import '../../shared/models/routine.dart';
 import '../../features/license/presentation/open_source_licenses_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
@@ -164,6 +165,14 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianTerms,
     pageBuilder: (context, state) =>
         slidePage(state, const ConsentDocumentListScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianWeeklyReport,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      const WeeklyReportScreen(),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
   ),
   GoRoute(
     path: Routes.guardianLicenses,

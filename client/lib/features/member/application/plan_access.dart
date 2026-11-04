@@ -14,14 +14,16 @@ class PlanAccess {
     required this.isPro,
     required this.canExportCardsWithoutWatermark,
     required this.canUseAllCardDesignThemes,
+    required this.canViewWeeklyReport,
     this.canPurchasePro = false,
   });
 
-  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만)
+  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 주간 리포트 없음)
   static const free = PlanAccess(
     isPro: false,
     canExportCardsWithoutWatermark: false,
     canUseAllCardDesignThemes: false,
+    canViewWeeklyReport: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -29,6 +31,7 @@ class PlanAccess {
     isPro: true,
     canExportCardsWithoutWatermark: true,
     canUseAllCardDesignThemes: true,
+    canViewWeeklyReport: true,
   );
 
   final bool isPro;
@@ -42,6 +45,9 @@ class PlanAccess {
 
   /// 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는가
   final bool canUseAllCardDesignThemes;
+
+  /// 주간 리포트를 볼 수 있는가
+  final bool canViewWeeklyReport;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -51,6 +57,7 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     isPro: access.isPro,
     canExportCardsWithoutWatermark: access.canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes: access.canUseAllCardDesignThemes,
+    canViewWeeklyReport: access.canViewWeeklyReport,
     canPurchasePro: ref.watch(canPurchaseProProvider),
   );
 });
@@ -71,5 +78,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     isPro: member.isPro,
     canExportCardsWithoutWatermark: member.canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes: member.canUseAllCardDesignThemes,
+    canViewWeeklyReport: member.canViewWeeklyReport,
   );
 }

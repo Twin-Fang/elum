@@ -223,6 +223,8 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · PIN', Routes.onboardingPin),
     ('일과 · 보상 정하기', Routes.routineReward),
     ('보호자 홈', Routes.guardian),
+    // 주간 리포트(Pro). Free 는 입구가 없어 요금제 흉내와 함께 바로 띄워 본다
+    ('보호자 · 주간 리포트', Routes.guardianWeeklyReport),
     // 역할 선택. 정식 경로는 로그인 → 약관 → 여기다.
     // 실기기 검수에서 매번 소셜 로그인을 다시 하지 않도록 지름길을 둔다.
     ('역할 선택', Routes.roleSelect),
