@@ -46,7 +46,7 @@ class ErrorMessageParityTest {
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
-      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1);
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1 + ADDED_ROUTINE_MEMORY_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -106,6 +106,21 @@ class ErrorMessageParityTest {
   }
 
   // 알림·푸시(#827)가 더한 코드
+  private static final java.util.List<ErrorCode> ADDED_ROUTINE_MEMORY_CODES = java.util.List.of(
+    ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED, ErrorCode.ROUTINE_MEMORY_LINE_NOT_ALLOWED);
+
+  @Test
+  @DisplayName("AI 메모 코드(#1082)는 golden 밖에서 상태와 문구를 단언한다")
+  void routineMemoryCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED.getStatus().name()).isEqualTo("FORBIDDEN");
+    assertThat(ErrorCode.ROUTINE_MEMORY_LINE_NOT_ALLOWED.getStatus().name()).isEqualTo("BAD_REQUEST");
+    for (ErrorCode code : ADDED_ROUTINE_MEMORY_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
   private static final java.util.List<ErrorCode> ADDED_NOTIFICATION_CODES = java.util.List.of(
     ErrorCode.PUSH_TOKEN_INVALID, ErrorCode.NOTIFICATION_NOT_FOUND);
 

@@ -49,4 +49,8 @@ public interface TextGenerationClient {
   /// 직접 추가한 카드에 붙일 무료 픽토그램 고르기. 반환값은 {"pictogramId": "..."|null} JSON 문자열.
   /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
   String pickPictogramJson(String stepTitle, String stepDescription);
+
+  /// AI 메모 갱신 (#1082). 입력은 처음 카드 <-> 확정 카드 비교 JSON(원문 없음), 반환값은 {"lines": [...]} JSON 문자열.
+  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 거르기·저장은 부르는 쪽(RoutineMemoryAi) 몫
+  String buildRoutineMemoryJson(String memoryUserContent);
 }

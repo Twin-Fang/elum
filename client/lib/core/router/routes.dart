@@ -89,6 +89,9 @@ abstract final class Routes {
   /// 그림 방식 선택. 시안이 없어 임시 화면이다.
   static const guardianImageStyle = '/guardian/settings/image-style';
 
+  /// 이룸이별 AI 메모 (Pro). 시안이 없어 설정 묶음 카드 모양을 따른다.
+  static const guardianRoutineMemory = '/guardian/settings/routine-memory';
+
   /// 크레딧 사용 내역 (Figma `1589:8359`). 설정 크레딧 카드에서 들어온다.
   static const guardianCreditHistory = '/guardian/settings/credit-history';
 

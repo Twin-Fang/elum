@@ -21,6 +21,7 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
+import '../../member/application/plan_access.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
@@ -185,7 +186,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [_LinkTile(busy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
             SettingsTile(
@@ -201,6 +202,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),
             _ImageStyleTile(busy: busy),
+            _RoutineMemoryTile(busy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
             const _ScreenAwakeTile(),
@@ -320,6 +322,26 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
+/// Free 는 줄을 숨긴다 — 앱에서 Pro 를 살 수 없는 동안(PlanAccess.canPurchasePro) 잠긴 줄은 막힌 기능으로 읽힌다
+class _RoutineMemoryTile extends ConsumerWidget {
+  const _RoutineMemoryTile({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(planAccessProvider.select((access) => access.canUseRoutineMemory))) {
+      return const SizedBox.shrink();
+    }
+    return SettingsTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsRoutineMemory,
+      onTap: busy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }
 }

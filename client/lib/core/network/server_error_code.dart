@@ -42,6 +42,9 @@ enum ServerErrorCode {
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),
+  // AI 메모 (#1082): Pro 아님 · 진단·장애·정도가 든 줄
+  routineMemoryProRequired('ROUTINE_MEMORY_PRO_REQUIRED'),
+  routineMemoryLineNotAllowed('ROUTINE_MEMORY_LINE_NOT_ALLOWED'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),

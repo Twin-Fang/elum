@@ -97,6 +97,13 @@ public class GeminiTextClient implements TextGenerationClient {
       GeminiPictogramPickSpec.pictogramPickSchema(locale), AiCallType.GEMINI_TEXT_PICTOGRAM));
   }
 
+  @Override
+  public String buildRoutineMemoryJson(String memoryUserContent) {
+    return firstText(callGenerateContent(
+      RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
+      AiCallType.GEMINI_TEXT_MEMORY));
+  }
+
   // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.
   String buildPictogramPickUserContent(String stepTitle, String stepDescription) {
     Map<String, Object> input = new LinkedHashMap<>();
@@ -202,7 +209,9 @@ public class GeminiTextClient implements TextGenerationClient {
       new ChildProfileInput(
         NicknamePlaceholder.forAi(nickname, locale), supportGoals == null ? Set.of() : supportGoals),
       maskedAnswers,
-      pictogramCatalog.ids()
+      pictogramCatalog.ids(),
+      // Pro AI 메모·확정 예시 (#1082). 요청 스레드에 실린 것만, 없으면 필드째 빠짐 (세 제공자 공용 조립)
+      AiCallContext.currentRoutinePersonalization()
     );
     return toJson(input);
   }

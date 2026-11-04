@@ -134,6 +134,18 @@ class RoutineServiceTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
+  // AI 메모 (#1082) — 기본은 꺼짐 (지금 하네스 그대로)
+  @Mock private RoutinePersonalizationProvider routinePersonalizationProvider;
+
+  @org.junit.jupiter.api.BeforeEach
+  void personalizationInactiveByDefault() {
+    org.mockito.Mockito.lenient()
+      .when(routinePersonalizationProvider.planFor(
+        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(),
+        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+      .thenReturn(RoutinePersonalizationProvider.Plan.INACTIVE);
+  }
+
   @InjectMocks
   private RoutineService routineService;
 

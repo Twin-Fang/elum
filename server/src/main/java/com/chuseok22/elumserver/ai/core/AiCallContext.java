@@ -77,5 +77,24 @@ public final class AiCallContext {
     MEMBER_ID.remove();
     CREDIT_JOB_ID.remove();
     CONTENT_LOCALE.remove();
+    ROUTINE_PERSONALIZATION.remove();
+  }
+
+  /// 일과 만들기 맞춤 정보 (#1082, Pro + AI 메모 켜짐). 언어와 같은 이유로 인자 대신 여기 실음. 비어 있으면 넣지 않음
+  private static final InheritableThreadLocal<RoutinePersonalization> ROUTINE_PERSONALIZATION =
+    new InheritableThreadLocal<>();
+
+  /// null 이나 빈 값을 넣으면 비움
+  public static void setRoutinePersonalization(RoutinePersonalization personalization) {
+    if (personalization == null || personalization.isEmpty()) {
+      ROUTINE_PERSONALIZATION.remove();
+    } else {
+      ROUTINE_PERSONALIZATION.set(personalization);
+    }
+  }
+
+  /// 없으면 null
+  public static RoutinePersonalization currentRoutinePersonalization() {
+    return ROUTINE_PERSONALIZATION.get();
   }
 }

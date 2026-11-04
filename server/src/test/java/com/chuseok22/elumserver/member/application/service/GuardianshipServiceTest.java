@@ -72,6 +72,9 @@ class GuardianshipServiceTest {
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
 
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.RoutineMemoryService routineMemoryService;
+
   @InjectMocks
   private GuardianshipService guardianshipService;
 
@@ -162,6 +165,8 @@ class GuardianshipServiceTest {
     verify(routineRepository).deleteAll(List.of(mineConfirmed, mineDraft));
     verify(routineRepository, never()).findAllByProfileId("p1");
     verify(profileRepository, never()).delete(p1);
+    // 나간 보호자가 고친 카드에서 배운 AI 메모가 남은 보호자 메모에 섞여 남지 않게 (#1082)
+    verify(routineMemoryService).forgetProfile("p1");
   }
 
   @Test

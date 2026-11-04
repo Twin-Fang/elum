@@ -3442,4 +3442,75 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get guardianSettingsRoutineMemory => 'AI 메모';
+
+  @override
+  String get routineMemoryTitle => 'AI 메모';
+
+  @override
+  String get routineMemoryEnabledLabel => '내가 고친 일과처럼 만들기';
+
+  @override
+  String get routineMemoryEnabledFooter =>
+      '카드를 고쳐서 보내면 AI가 이룸이에게 맞는 카드 만들기 방법을 짧게 적어 둬요. 다음 일과를 만들 때 이 메모와 고친 일과를 참고해요.';
+
+  @override
+  String routineMemoryLinesHeader(int count, int max) {
+    return '메모 $count/$max';
+  }
+
+  @override
+  String get routineMemoryLinesFooter =>
+      '줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.';
+
+  @override
+  String get routineMemoryEmpty => '아직 메모가 없어요';
+
+  @override
+  String get routineMemoryEmptyFooter => '카드를 고쳐서 보내면 하루에 한 번 정리해요. 직접 적어도 돼요.';
+
+  @override
+  String get routineMemoryWrittenByMe => '내가 씀';
+
+  @override
+  String get routineMemoryAddLine => '메모 더하기';
+
+  @override
+  String get routineMemoryAddSheetTitle => '메모 더하기';
+
+  @override
+  String get routineMemoryEditSheetTitle => '메모 고치기';
+
+  @override
+  String get routineMemoryLineHint => '예: \'씻기\' 대신 \'손 닦기\'라고 써요';
+
+  @override
+  String get routineMemorySave => '저장하기';
+
+  @override
+  String get routineMemoryDeleteLine => '이 줄 지우기';
+
+  @override
+  String get routineMemoryClearAll => '메모 모두 지우기';
+
+  @override
+  String get routineMemoryClearFooter =>
+      '지난 일과에서 배운 것도 함께 지워요. 그다음 보낸 일과부터 다시 배워요.';
+
+  @override
+  String get routineMemoryClearConfirmTitle => '메모를 모두 지울까요?';
+
+  @override
+  String get routineMemoryClearConfirmMessage => '지운 메모는 되돌릴 수 없어요.';
+
+  @override
+  String get routineMemoryLoadFailed => '메모를 불러오지 못했어요';
+
+  @override
+  String get routineMemorySaveFailedTitle => '메모를 저장하지 못했어요';
+
+  @override
+  String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
 }
