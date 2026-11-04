@@ -59,6 +59,7 @@ bash run-mirror.sh          # 데이터 그대로 미러만 다시 띄우기 (�
 
 ## Traefik 배포로 옮긴 뒤 (#1054)
 
+- 실행 설정은 `/volume1/project/elum/runtime-config` (컨테이너 `/app/config` 읽기 전용): 배포가 운영 설정(`APPLICATION_PROD_YML`)을 쓰고, `setup-mirror.sh` 가 DB 주소 덮어쓰기 `application-nas.yml` 을 만든다 (프로필 `prod,nas`). 미러용 `server/config` 와 따로 두는 이유: 같은 파일에 운영 설정을 쓰면 미러가 친구 서버 DB 에 붙는다
 - 서버는 GitHub Actions `PROJECT-SPRING-ELUM-NAS-CICD` 가 `elum-back-blue|green` 으로 띄운다 (`mode=mirror` 는 푸시 끔). `run-mirror.sh` 의 `elum-back-mirror` 는 DSM 프록시를 8079 로 옮긴 뒤 지운다
 - 파일은 `pull_files.py` 가 원본 관리자 API 로 받는다 (음성 포함, 해시 확인). 원본 `이전 파일 내보내기` 를 켜야 한다
 - 전환 절차: `CUTOVER.md`

@@ -13,6 +13,8 @@ MIRROR_DIR="${ELUM_ROOT}/mirror"
 DUMP_DIR="${MIRROR_DIR}/dumps"
 # 비밀값: DB·Redis 비밀번호, 원본(친구 서버) DB·SSH 접속 정보 (root 만 읽기)
 MIRROR_ENV_FILE="${MIRROR_DIR}/mirror.env"
+# 내 NAS Traefik 배포의 실행 설정 (컨테이너 /app/config 읽기 전용). 미러용 server/config 와 따로 둔다
+RUNTIME_CONFIG_DIR="${ELUM_ROOT}/runtime-config"
 
 NETWORK_NAME="elum-net"
 POSTGRES_CONTAINER="elum-postgres"
