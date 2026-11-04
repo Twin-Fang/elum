@@ -3387,4 +3387,113 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get licenseLoadFailedMessage => '목록을 불러오지 못했어요';
+
+  @override
+  String get cardExportOpen => '인쇄용으로 받기';
+
+  @override
+  String get cardExportFormatSection => '어떻게 받을까요?';
+
+  @override
+  String get cardExportFormatRoutineSheet => '일과 한 장';
+
+  @override
+  String get cardExportFormatRoutineSheetCaption => 'A4 한 장에 순서대로';
+
+  @override
+  String get cardExportFormatCutCards => '오려 쓰는 카드';
+
+  @override
+  String get cardExportFormatCutCardsCaption => 'A4에 자를 선과 함께';
+
+  @override
+  String get cardExportFormatCardImages => '카드 한 장씩';
+
+  @override
+  String get cardExportFormatCardImagesCaption => '카드마다 이미지 한 장';
+
+  @override
+  String get cardExportPerPageSection => '한 쪽에 몇 장 넣을까요?';
+
+  @override
+  String get cardExportIncludeText => '카드 문장 넣기';
+
+  @override
+  String get cardExportThemeSection => '카드 디자인';
+
+  @override
+  String get cardExportThemeBasic => '기본';
+
+  @override
+  String get cardExportThemeSimple => '단순';
+
+  @override
+  String get cardExportThemeInkSaver => '잉크 절약';
+
+  @override
+  String get cardExportThemeMonochrome => '흑백';
+
+  @override
+  String get cardExportThemeLargeText => '큰 글자';
+
+  @override
+  String get cardExportProBadge => 'Pro';
+
+  @override
+  String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
+
+  @override
+  String get cardExportWatermarkNotice => 'Free는 이룸 로고와 워터마크가 들어가요';
+
+  @override
+  String get cardExportPreviewSection => '미리 보기';
+
+  @override
+  String get cardExportMissingPicture => '그림이 아직 없는 카드는 제목만 들어가요';
+
+  @override
+  String get cardExportActualSizeHint => '다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요';
+
+  @override
+  String get cardExportPrint => '인쇄하기';
+
+  @override
+  String get cardExportShare => '보내기';
+
+  @override
+  String get cardExportPreparing => '카드를 준비하고 있어요';
+
+  @override
+  String get cardExportImageFailed => '카드 그림을 불러오지 못했어요';
+
+  @override
+  String get cardExportRenderFailed => '인쇄용 파일을 만들지 못했어요';
+
+  @override
+  String get cardExportPrintFailed => '이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요';
+
+  @override
+  String get cardExportNoCards => '카드가 없는 일과예요';
+
+  @override
+  String get cardExportNoneSelected => '보낼 카드를 하나 이상 골라 주세요';
+
+  @override
+  String get cardExportFooterMadeWith => '이룸 앱으로 만들었어요';
+
+  @override
+  String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
+
+  @override
+  String get cardExportWatermarkText => '이룸';
+
+  @override
+  String cardExportPerPage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count장',
+    );
+    return '$_temp0';
+  }
 }

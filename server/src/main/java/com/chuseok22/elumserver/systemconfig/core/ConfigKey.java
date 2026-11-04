@@ -233,6 +233,16 @@ public enum ConfigKey {
     "Free가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
+  FREE_CARD_EXPORT_WITHOUT_WATERMARK(
+    ConfigGroup.PLAN_FREE, "카드 내보내기 워터마크 없음",
+    "Free가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지. 꺼두면 워터마크가 들어간다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_CARD_EXPORT_ALL_THEMES(
+    ConfigGroup.PLAN_FREE, "카드 내보내기 디자인 테마",
+    "Free가 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -297,6 +307,16 @@ public enum ConfigKey {
     ConfigGroup.PLAN_PRO, "기록 보관 일수",
     "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  PRO_CARD_EXPORT_WITHOUT_WATERMARK(
+    ConfigGroup.PLAN_PRO, "카드 내보내기 워터마크 없음",
+    "Pro가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_CARD_EXPORT_ALL_THEMES(
+    ConfigGroup.PLAN_PRO, "카드 내보내기 디자인 테마",
+    "Pro가 카드 내보내기에서 모든 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 
   // 서비스 전체 하루 AI 비용 상한.
