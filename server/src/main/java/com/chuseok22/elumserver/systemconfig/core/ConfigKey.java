@@ -554,6 +554,82 @@ public enum ConfigKey {
     "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
     ConfigValueType.SECRET, List.of(), ""
   ),
+
+  // --- 스토어 구독 결제 (#1071) ---
+  //
+  // 켜기 전까지 검증 API 는 SUBSCRIPTION_STORE_DISABLED 로 거절하고 알림은 503 으로 스토어가 다시 보내게 한다.
+  // 상품 목록이 비면 어떤 상품도 받지 않는다. 테스트 결제 허용은 앱 심사 기간에만 켠다(심사관은 Sandbox 로 산다).
+
+  SUBSCRIPTION_APPLE_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 구독 켜기",
+    "켜면 앱의 App Store 구독 검증과 App Store 결제 알림을 받는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_APPLE_BUNDLE_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 번들 ID",
+    "다른 앱의 결제를 거르는 기준. iOS 앱 PRODUCT_BUNDLE_IDENTIFIER 와 같아야 한다",
+    ConfigValueType.STRING, List.of(), "kr.twinfang.elum"
+  ),
+  SUBSCRIPTION_APPLE_APP_APPLE_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 앱 ID (숫자)",
+    "App Store Connect 의 Apple ID. 실제 결제 알림 검증에 쓴다 (스토어 주소의 id 뒤 숫자)",
+    ConfigValueType.STRING, List.of(), "6792970508"
+  ),
+  SUBSCRIPTION_APPLE_PRODUCT_IDS(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 구독 상품 ID",
+    "Pro 를 주는 상품 ID, 쉼표로 나눈다. 비우면 어떤 상품도 받지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_PRODUCT_ID_LIST
+  ),
+  SUBSCRIPTION_APPLE_ALLOW_SANDBOX(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 테스트 결제 허용",
+    "Sandbox·TestFlight 결제로도 Pro 를 준다. 앱 심사관은 Sandbox 로 사므로 심사 제출 전에 켠다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_APPLE_ISSUER_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API Issuer ID",
+    "App Store Connect > 사용자 및 액세스 > 통합 > 앱 내 구입 키의 Issuer ID. 셋 다 있으면 검증 때 최신 상태를 Apple 에 다시 묻는다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  SUBSCRIPTION_APPLE_KEY_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API Key ID",
+    "앱 내 구입 키의 Key ID",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  SUBSCRIPTION_APPLE_PRIVATE_KEY(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API 개인 키 (.p8)",
+    "내려받은 .p8 파일 내용 전체 (BEGIN/END 줄 포함). 줄바꿈이 빠져도 된다",
+    ConfigValueType.SECRET, List.of(), "", ConfigFormat.SECRET_DOCUMENT
+  ),
+  SUBSCRIPTION_GOOGLE_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 구독 켜기",
+    "켜면 앱의 Google Play 구독 검증과 Play 실시간 결제 알림(RTDN)을 받는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_GOOGLE_PACKAGE_NAME(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 패키지명",
+    "Android applicationId 와 같아야 한다",
+    ConfigValueType.STRING, List.of(), "kr.twinfang.elum"
+  ),
+  SUBSCRIPTION_GOOGLE_PRODUCT_IDS(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 구독 상품 ID",
+    "Pro 를 주는 구독 상품 ID, 쉼표로 나눈다. 비우면 어떤 상품도 받지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_PRODUCT_ID_LIST
+  ),
+  SUBSCRIPTION_GOOGLE_ALLOW_TEST_PURCHASES(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 테스트 결제 허용",
+    "라이선스 테스터 결제로도 Pro 를 준다. 심사·내부 시험 기간에만 켠다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_GOOGLE_SERVICE_ACCOUNT_JSON(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 서비스 계정 키 (JSON)",
+    "Play Console 에 권한을 준 서비스 계정의 JSON 키 전체. 없으면 Google 구독을 확인할 수 없다",
+    ConfigValueType.SECRET, List.of(), "", ConfigFormat.SECRET_DOCUMENT
+  ),
+  SUBSCRIPTION_GOOGLE_RTDN_PUSH_TOKEN(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 알림 토큰",
+    "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
   ;
 
 

@@ -11,11 +11,13 @@ import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistor
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionHistoryRepository;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 구독 행을 만들고 바꾼다. 권한을 <b>묻는</b> 것은 {@link EntitlementService}가 한다.
  *
- * <p>결제는 아직 붙이지 않는다 — 앱 스토어 심사 전이라 인앱결제를 쓸 수 없다. 지금은
- * 가입 시 Free를 만들고, 관리자가 Pro를 직접 켜고 끄는 것까지다. 결제가 생기면
- * 영수증 검증 서비스가 {@code source}와 {@code externalRef}를 채워 같은 표에 쓰면 된다.
+ * <p>가입 시 Free 생성, 관리자 Pro 발급·회수, 스토어 결제 반영({@link #syncStoreEntitlement}, #1071).
+ * 스토어 결제는 {@code source}(APPLE_IAP·GOOGLE_IAP)와 {@code externalRef}(store_purchase.id)를 채운다.
  */
 @Slf4j
 @Service
@@ -39,6 +40,10 @@ public class SubscriptionService {
   public static final String DEFAULT_REVOKE_REASON = "관리자 회수";
   /// 변경자를 알 수 없을 때 이력에 남기는 값 (이력 자체는 빠뜨리지 않음)
   public static final String UNKNOWN_ACTOR = "unknown";
+  /// 스토어 결제가 만든 구독 출처 2개
+  private static final Set<SubscriptionSource> STORE_SOURCES = Set.of(SubscriptionSource.APPLE_IAP, SubscriptionSource.GOOGLE_IAP);
+  /// 스토어 구독이 끝나 Free 로 돌릴 때 메모·이력 사유
+  static final String STORE_END_REASON = "스토어 구독 종료";
 
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionHistoryRepository subscriptionHistoryRepository;
@@ -146,6 +151,99 @@ public class SubscriptionService {
         null, beforeExpiresAt, null, reasonOrDefault, actor, now);
       log.info("관리자가 Pro를 회수했습니다: memberId={}, actor={}", memberId, actor);
     });
+  }
+
+  /**
+   * 스토어 결제 반영: 회원 확인 > 구독 행 잠금 > Pro 반영 또는 스토어발 Pro 종료 > 이력 (같은 트랜잭션)
+   * 관리자·프로모션 Pro 가 스토어보다 오래가면 덮지 않음. 탈퇴 회원은 건드리지 않음. 바뀐 게 없으면 이력 없음
+   *
+   * @param entitlement Pro 를 주는 스토어 구매, 없으면 null (스토어발 Pro 를 Free 로)
+   * @return 구독 행이 바뀌었는가
+   */
+  @Transactional
+  public boolean syncStoreEntitlement(String memberId, StoreEntitlement entitlement, LocalDateTime now) {
+    Member member = memberRepository.findById(memberId).orElse(null);
+    if (member == null || member.getStatus() == MemberStatus.WITHDRAWN) {
+      return false;
+    }
+    Subscription subscription = subscriptionRepository.findByMemberIdForUpdate(memberId).orElseGet(() -> {
+      Subscription created = new Subscription();
+      created.setMember(member);
+      created.setStartedAt(now);
+      return created;
+    });
+    return entitlement == null
+      ? endStoreEntitlement(memberId, subscription, now)
+      : applyStoreEntitlement(memberId, subscription, entitlement, now);
+  }
+
+  /// 스토어 반영 이력의 변경자: app-store, google-play
+  public static String storeActorOf(SubscriptionSource store) {
+    return store == SubscriptionSource.APPLE_IAP ? "app-store" : "google-play";
+  }
+
+  /// 탈퇴하지 않은 회원인가 (스토어 구매 주인 판정, 없는 회원은 false)
+  @Transactional(readOnly = true)
+  public boolean isActiveMember(String memberId) {
+    if (memberId == null || memberId.isBlank()) {
+      return false;
+    }
+    return memberRepository.findById(memberId).map(member -> member.getStatus() != MemberStatus.WITHDRAWN).orElse(false);
+  }
+
+  private boolean applyStoreEntitlement(
+    String memberId, Subscription subscription, StoreEntitlement entitlement, LocalDateTime now
+  ) {
+    PlanType beforePlan = subscription.effectivePlan(now);
+    LocalDateTime beforeExpiresAt = subscription.getExpiresAt();
+    // 관리자·프로모션 Pro 가 스토어 구독보다 오래가면 그대로 (스토어가 끝날 때 함께 사라지지 않게)
+    boolean isStoreOwned = STORE_SOURCES.contains(subscription.getSource());
+    boolean isLongerNonStorePro = !isStoreOwned && beforePlan == PlanType.PRO
+      && (beforeExpiresAt == null || !beforeExpiresAt.isBefore(entitlement.entitledUntil()));
+    if (isLongerNonStorePro) {
+      return false;
+    }
+    boolean isUnchanged = isStoreOwned && beforePlan == PlanType.PRO
+      && subscription.getSource() == entitlement.store()
+      && entitlement.purchaseId().equals(subscription.getExternalRef())
+      && entitlement.entitledUntil().equals(beforeExpiresAt);
+    if (isUnchanged) {
+      return false;
+    }
+    if (beforePlan != PlanType.PRO || !isStoreOwned) {
+      subscription.setStartedAt(now);
+    }
+    String reason = entitlement.store().getLabel() + " (" + entitlement.productId() + ")";
+    subscription.setPlan(PlanType.PRO);
+    subscription.setStatus(SubscriptionStatus.ACTIVE);
+    subscription.setSource(entitlement.store());
+    subscription.setExpiresAt(entitlement.entitledUntil());
+    subscription.setExternalRef(entitlement.purchaseId());
+    subscription.setMemo(reason);
+    subscriptionRepository.save(subscription);
+    recordHistory(memberId, SubscriptionHistoryAction.STORE_SYNC, beforePlan, PlanType.PRO,
+      null, beforeExpiresAt, entitlement.entitledUntil(), reason, storeActorOf(entitlement.store()), now);
+    return true;
+  }
+
+  // 스토어가 만든 Pro 만 Free 로 (관리자·가입 구독은 그대로)
+  private boolean endStoreEntitlement(String memberId, Subscription subscription, LocalDateTime now) {
+    boolean isStoreOwnedPro = STORE_SOURCES.contains(subscription.getSource()) && subscription.getPlan() == PlanType.PRO;
+    if (!isStoreOwnedPro) {
+      return false;
+    }
+    PlanType beforePlan = subscription.effectivePlan(now);
+    LocalDateTime beforeExpiresAt = subscription.getExpiresAt();
+    String actor = storeActorOf(subscription.getSource());
+    subscription.setPlan(PlanType.FREE);
+    subscription.setStatus(SubscriptionStatus.ACTIVE);
+    subscription.setExpiresAt(null);
+    subscription.setExternalRef(null);
+    subscription.setMemo(STORE_END_REASON);
+    subscriptionRepository.save(subscription);
+    recordHistory(memberId, SubscriptionHistoryAction.STORE_END, beforePlan, PlanType.FREE,
+      null, beforeExpiresAt, null, STORE_END_REASON, actor, now);
+    return true;
   }
 
   /// 탈퇴 계정을 완전히 지울 때 요금제 이력도 함께 지운다

@@ -23,6 +23,8 @@ public final class SystemConfigValueValidator {
   static final int MAX_VALUE_LENGTH = 500;
   // 비밀값 평문 최대 길이: 암호문이 Base64로 부풀어도 MAX_VALUE_LENGTH 안에 들어오게
   static final int SECRET_MAX_LENGTH = 300;
+  // 파일 통째 비밀값(서비스 계정 JSON 약 2.4KB, .p8 약 0.3KB) 평문 최대 길이. 컬럼은 TEXT
+  static final int SECRET_DOCUMENT_MAX_LENGTH = 8_000;
   // 쉼표 목록 구분자
   static final String LIST_DELIMITER = ",";
   // 거부 사유에 넣는 입력값 일부 최대 길이 (긴 값이 메시지를 덮지 않게)
@@ -35,6 +37,8 @@ public final class SystemConfigValueValidator {
   // 회원 ID: UUID (Member.id 생성 방식)
   private static final Pattern MEMBER_ID_PATTERN =
     Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+  // 스토어 상품 ID: App Store·Google Play 공통 허용 문자
+  private static final Pattern STORE_PRODUCT_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{1,150}$");
 
   private SystemConfigValueValidator() {
   }
@@ -46,8 +50,9 @@ public final class SystemConfigValueValidator {
     // 비밀값: 빈 값은 "그대로 두기"라 통과, 길이만 봄
     if (key.getValueType() == ConfigValueType.SECRET) {
       String secret = rawValue == null ? "" : rawValue.trim();
-      return secret.length() > SECRET_MAX_LENGTH
-        ? ConfigValueCheck.rejected(SECRET_MAX_LENGTH + "자 이하로 입력해요")
+      int maxLength = key.getFormat() == ConfigFormat.SECRET_DOCUMENT ? SECRET_DOCUMENT_MAX_LENGTH : SECRET_MAX_LENGTH;
+      return secret.length() > maxLength
+        ? ConfigValueCheck.rejected(maxLength + "자 이하로 입력해요")
         : ConfigValueCheck.accepted(secret);
     }
     // 빈 값: 날짜시간·비울 수 있는 형식만 통과 (비면 그 기능 꺼짐·앱 기본값)
@@ -138,6 +143,9 @@ public final class SystemConfigValueValidator {
       case AD_UNIT_LIST -> checkListItems(value, AD_UNIT_PATTERN, "광고 단위 형식이 아니에요", false);
       case MEMBER_ID_LIST -> checkListItems(value, MEMBER_ID_PATTERN, "회원 ID 형식이 아니에요", true);
       case CONTENT_LOCALE_LIST -> checkContentLocales(value);
+      case STORE_PRODUCT_ID_LIST -> checkListItems(value, STORE_PRODUCT_ID_PATTERN, "상품 ID 형식이 아니에요", true);
+      // 비밀값은 위에서 처리 (STRING 에는 쓰지 않음)
+      case SECRET_DOCUMENT -> ConfigValueCheck.accepted(value);
       // 앱 토큰이 따라가는 주소라 허용 도메인만
       case SERVER_BASE_URL -> ServerAddressPolicy.isAllowed(value)
         ? ConfigValueCheck.accepted(value.trim())

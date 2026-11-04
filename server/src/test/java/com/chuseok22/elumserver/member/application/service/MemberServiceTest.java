@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
@@ -86,6 +87,9 @@ class MemberServiceTest {
 
   @Mock
   private EntitlementService entitlementService;
+
+  @Mock
+  private SubscriptionStatusService subscriptionStatusService;
 
   @Mock
   private MemberDailyVisitRepository memberDailyVisitRepository;
