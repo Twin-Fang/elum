@@ -18,6 +18,8 @@ NETWORK_NAME="elum-net"
 POSTGRES_CONTAINER="elum-postgres"
 REDIS_CONTAINER="elum-redis"
 APP_CONTAINER="elum-back-mirror"
+# 내 NAS Traefik 배포(PROJECT-SPRING-ELUM-NAS-CICD.yaml)의 색 컨테이너: elum-back-blue | elum-back-green
+APP_CONTAINER_PREFIX="elum-back"
 
 # 원본 DB 가 PostgreSQL 17 이라 덤프·복원 도구도 17
 POSTGRES_IMAGE="postgres:17"
@@ -47,3 +49,9 @@ load_mirror_env() {
 is_container_running() {
   [ "$("$DOCKER" inspect -f '{{.State.Running}}' "$1" 2>/dev/null)" = "true" ]
 }
+
+# 지금 떠 있는 서버 컨테이너 이름들 (미러·blue·green)
+running_app_containers() {
+  "$DOCKER" ps --filter "name=^${APP_CONTAINER_PREFIX}-(blue|green|mirror)$" --format '{{.Names}}'
+}
+

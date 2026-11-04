@@ -1,0 +1,350 @@
+# ===================================================================
+# 이룸 서버 내 NAS 배포 — Traefik Blue/Green (#1054)
+# ===================================================================
+#
+# 설계: docs/superpowers/specs/2026-11-04-elum-server-cutover-design.md [D] 절
+# 바탕: Twin-Fang/passQL PROJECT-SPRING-SYNOLOGY-PASSQL-CICD.yaml (같은 NAS 에서 운영 중인 방식)
+#
+# 친구 서버 배포(PROJECT-SPRING-CICD.yaml)와 다른 점
+# - DSM 역방향 프록시는 api.elum.suhsaechan.kr > localhost:8079(Traefik) 고정. 배포가 DSM 설정 파일을 건드리지 않는다
+# - 지금 서비스 중인 색은 실행 중 컨테이너로 판단. 새 색이 healthy 가 되기 전에는 옛 색을 건드리지 않는다
+# - 운영 설정·FCM 키를 이미지에 넣지 않는다. NAS 설정 폴더(/app/config)에서 읽는다
+#
+# 언제 도는가: 전환 전까지 손으로만 (main 푸시로 돌지 않음)
+# - mode=mirror     : 푸시 끔(없는 키 경로), 장애 알림 끔. 기동 뒤 푸시가 켜져 있으면 새 컨테이너를 멈추고 실패
+# - mode=production : FCM 키·장애 알림을 붙인다 (전환 날 7단계)
+#
+# Secret (친구 서버용 Secret 은 건드리지 않는다)
+# - NAS_SERVER_HOST · NAS_SERVER_USER · NAS_SERVER_PASSWORD · NAS_SERVER_PORT : 내 NAS SSH
+# - NAS_DOCKERHUB_USERNAME · NAS_DOCKERHUB_TOKEN : 이미지 저장소
+# - NAS_APPLICATION_PROD_YML : 내 NAS 용 운영 설정 전체 (DB 는 elum-net 안 elum-postgres, 키는 운영과 같은 값)
+# - NAS_FIREBASE_ADMINSDK_JSON : FCM 키 (production 모드에서만 씀)
+# ===================================================================
+
+name: PROJECT-SPRING-ELUM-NAS-CICD
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "mirror: 푸시 끔(전환 전) / production: 운영 (전환 날)"
+        required: true
+        type: choice
+        options:
+          - mirror
+          - production
+        default: mirror
+      # 비우면 빌드 > 배포, 값이 있으면 빌드 생략 > 그 태그로 배포
+      rollback_image_tag:
+        description: "되돌릴 이미지 태그 (예: sha-1a2b3c4). 비우면 새로 빌드"
+        required: false
+        type: string
+        default: ""
+
+# 배포는 한 번에 하나. 뒤 실행은 기다린다
+concurrency:
+  group: elum-nas-deploy
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: "elum-back"
+  CONTAINER_PREFIX: "elum-back"
+  SERVICE_DOMAIN: "api.elum.suhsaechan.kr"
+  CONTAINER_INTERNAL_PORT: "8080"
+  TRAEFIK_NETWORK: "traefik-network"
+  TRAEFIK_ENTRYPOINT: "web"
+  TRAEFIK_INTERNAL_PORT: "8079"
+  # DB 가 있는 네트워크 (server/tool/nas-mirror/setup-mirror.sh 가 만든다)
+  APP_NETWORK: "elum-net"
+  # 컨테이너 /app (로그·그림·음성·config)
+  VOLUME_HOST_PATH: "/volume1/project/elum/server"
+  HEALTHCHECK_PATH: "/healthz"
+  # 최대 180초 (60회 x 3초)
+  HEALTHCHECK_MAX_RETRIES: "60"
+  HEALTHCHECK_RETRY_INTERVAL: "3"
+  # 옛 색이 처리 중인 요청을 끝낼 시간 (Spring graceful shutdown 30초보다 길게)
+  IN_FLIGHT_WAIT: "40"
+  CONTAINER_LOG_MAX_SIZE: "50m"
+  CONTAINER_LOG_MAX_FILE: "5"
+  # 미러 모드 푸시 끔: 없는 파일 경로 (빈 값은 기본 파일명으로 바뀐다)
+  MIRROR_FIREBASE_KEY_PATH: "/app/config/push-disabled-no-such-key.json"
+  PRODUCTION_FIREBASE_KEY_PATH: "/app/config/firebase-adminsdk.json"
+
+jobs:
+  build:
+    if: ${{ inputs.rollback_image_tag == '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JDK 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Gradle 빌드 (운영 설정을 넣지 않음)
+        run: |
+          chmod +x gradlew
+          ./gradlew clean build -x test
+
+      # 비밀 파일이 jar 에 들어가면 이미지 저장소로 새어 나간다
+      - name: jar 안 비밀 파일 검사
+        run: |
+          JAR=""
+          for candidate in build/libs/elum-server-*.jar; do
+            case "${candidate}" in *-plain.jar) ;; *) JAR="${candidate}"; break ;; esac
+          done
+          if [ -z "${JAR}" ]; then echo "::error::실행 jar 없음"; exit 1; fi
+          if unzip -l "${JAR}" | grep -E 'application-(prod|dev)\.yml|firebase-adminsdk\.json'; then
+            echo "::error::jar 에 비밀 설정 파일이 들어 있음 -> 중단"
+            exit 1
+          fi
+          echo "jar 비밀 파일 없음: ${JAR}"
+
+      - name: 이미지 태그
+        id: tag
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Docker 빌드환경 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.NAS_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.NAS_DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.NAS_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+            ${{ secrets.NAS_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:nas
+
+  deploy:
+    needs: build
+    # 되돌리기(build 생략)여도 배포한다
+    if: ${{ always() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 배포할 태그
+        id: deploy_tag
+        env:
+          ROLLBACK_TAG: ${{ inputs.rollback_image_tag }}
+          BUILD_TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          if [ -n "${ROLLBACK_TAG}" ]; then echo "tag=${ROLLBACK_TAG}" >> "$GITHUB_OUTPUT"; else echo "tag=${BUILD_TAG}" >> "$GITHUB_OUTPUT"; fi
+
+      - name: 실행용 비밀 설정 준비 (base64 로 넘겨 쉘 쿼팅이 깨지지 않게)
+        id: runtime_config
+        env:
+          APPLICATION_PROD_YML: ${{ secrets.NAS_APPLICATION_PROD_YML }}
+          FIREBASE_ADMINSDK_JSON: ${{ secrets.NAS_FIREBASE_ADMINSDK_JSON }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ -z "${APPLICATION_PROD_YML}" ]; then echo "::error::NAS_APPLICATION_PROD_YML 미등록"; exit 1; fi
+          if [ "${MODE}" = "production" ] && [ -z "${FIREBASE_ADMINSDK_JSON}" ]; then echo "::error::production 모드인데 NAS_FIREBASE_ADMINSDK_JSON 미등록"; exit 1; fi
+          {
+            echo "APPLICATION_PROD_YML_BASE64=$(printf '%s' "${APPLICATION_PROD_YML}" | base64 -w0)"
+            echo "FIREBASE_ADMINSDK_JSON_BASE64=$(printf '%s' "${FIREBASE_ADMINSDK_JSON}" | base64 -w0)"
+          } >> "$GITHUB_ENV"
+
+      - name: 내 NAS Blue/Green 배포
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE: ${{ secrets.NAS_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.deploy_tag.outputs.tag }}
+          MODE: ${{ inputs.mode }}
+          CONTAINER_PREFIX: ${{ env.CONTAINER_PREFIX }}
+          SERVICE_DOMAIN: ${{ env.SERVICE_DOMAIN }}
+          CONTAINER_INTERNAL_PORT: ${{ env.CONTAINER_INTERNAL_PORT }}
+          TRAEFIK_NETWORK: ${{ env.TRAEFIK_NETWORK }}
+          TRAEFIK_ENTRYPOINT: ${{ env.TRAEFIK_ENTRYPOINT }}
+          TRAEFIK_INTERNAL_PORT: ${{ env.TRAEFIK_INTERNAL_PORT }}
+          APP_NETWORK: ${{ env.APP_NETWORK }}
+          VOLUME_HOST_PATH: ${{ env.VOLUME_HOST_PATH }}
+          HEALTHCHECK_PATH: ${{ env.HEALTHCHECK_PATH }}
+          HEALTHCHECK_MAX_RETRIES: ${{ env.HEALTHCHECK_MAX_RETRIES }}
+          HEALTHCHECK_RETRY_INTERVAL: ${{ env.HEALTHCHECK_RETRY_INTERVAL }}
+          IN_FLIGHT_WAIT: ${{ env.IN_FLIGHT_WAIT }}
+          CONTAINER_LOG_MAX_SIZE: ${{ env.CONTAINER_LOG_MAX_SIZE }}
+          CONTAINER_LOG_MAX_FILE: ${{ env.CONTAINER_LOG_MAX_FILE }}
+          MIRROR_FIREBASE_KEY_PATH: ${{ env.MIRROR_FIREBASE_KEY_PATH }}
+          PRODUCTION_FIREBASE_KEY_PATH: ${{ env.PRODUCTION_FIREBASE_KEY_PATH }}
+          INCIDENT_WEBHOOK_URL: ${{ secrets.DISCORD_INCIDENT_WEBHOOK_URL }}
+          APPLICATION_PROD_YML_BASE64: ${{ env.APPLICATION_PROD_YML_BASE64 }}
+          FIREBASE_ADMINSDK_JSON_BASE64: ${{ env.FIREBASE_ADMINSDK_JSON_BASE64 }}
+          SERVER_PASSWORD: ${{ secrets.NAS_SERVER_PASSWORD }}
+        with:
+          host: ${{ secrets.NAS_SERVER_HOST }}
+          username: ${{ secrets.NAS_SERVER_USER }}
+          password: ${{ secrets.NAS_SERVER_PASSWORD }}
+          port: ${{ secrets.NAS_SERVER_PORT }}
+          command_timeout: 600s
+          timeout: 60s
+          envs: IMAGE,MODE,CONTAINER_PREFIX,SERVICE_DOMAIN,CONTAINER_INTERNAL_PORT,TRAEFIK_NETWORK,TRAEFIK_ENTRYPOINT,TRAEFIK_INTERNAL_PORT,APP_NETWORK,VOLUME_HOST_PATH,HEALTHCHECK_PATH,HEALTHCHECK_MAX_RETRIES,HEALTHCHECK_RETRY_INTERVAL,IN_FLIGHT_WAIT,CONTAINER_LOG_MAX_SIZE,CONTAINER_LOG_MAX_FILE,MIRROR_FIREBASE_KEY_PATH,PRODUCTION_FIREBASE_KEY_PATH,INCIDENT_WEBHOOK_URL,APPLICATION_PROD_YML_BASE64,FIREBASE_ADMINSDK_JSON_BASE64,SERVER_PASSWORD
+          script: |
+            set -e
+            export PATH=$PATH:/usr/local/bin
+            SUDO() { echo "$SERVER_PASSWORD" | sudo -S "$@"; }
+            ROUTER="${CONTAINER_PREFIX}"
+            # 옛 색 로그 보관: {VOLUME_HOST_PATH}/logs/containers/{컨테이너}-{yyyyMMdd-HHmmss}.log.gz, 30일 지난 것 정리
+            ARCHIVE_DIR="${VOLUME_HOST_PATH}/logs/containers"
+            archive_logs() {
+              SUDO mkdir -p "${ARCHIVE_DIR}"
+              F="${ARCHIVE_DIR}/$1-$(date +%Y%m%d-%H%M%S).log.gz"
+              SUDO sh -c "docker logs --timestamps '$1' 2>&1 | gzip > '${F}'" && echo "옛 색 로그 보관: ${F}" || echo "[경고] $1 로그 보관 실패 (배포는 계속)"
+              SUDO find "${ARCHIVE_DIR}" -name '*.log.gz' -mtime +30 -delete 2>/dev/null || true
+            }
+
+            echo "[상태] 모드=${MODE} 이미지=${IMAGE}"
+            SUDO docker network inspect "${APP_NETWORK}" >/dev/null 2>&1 || { echo "[오류] ${APP_NETWORK} 없음 -> setup-mirror.sh 먼저"; exit 1; }
+            SUDO docker pull "${IMAGE}"
+
+            # 지금 서비스 중인 색 (실행 중 컨테이너 기준)
+            ACTIVE=$(SUDO docker ps --filter "name=^${CONTAINER_PREFIX}-(blue|green)$" --format '{{.Names}}' | head -1 || true)
+            if [ "${ACTIVE}" = "${CONTAINER_PREFIX}-blue" ]; then NEW=green; OLD=blue; else NEW=blue; OLD=green; fi
+            NEW_NAME="${CONTAINER_PREFIX}-${NEW}"; OLD_NAME="${CONTAINER_PREFIX}-${OLD}"
+            echo "[상태] active=${ACTIVE:-none} > new=${NEW_NAME}"
+            SUDO docker rm -f "${NEW_NAME}" 2>/dev/null || true
+
+            # 실행용 비밀 설정: {VOLUME_HOST_PATH}/config (root 전용 600, .new 작성 후 교체)
+            CONFIG_HOST_DIR="${VOLUME_HOST_PATH}/config"
+            SUDO mkdir -p "${CONFIG_HOST_DIR}"
+            SUDO chmod 700 "${CONFIG_HOST_DIR}"
+            write_runtime_config() {
+              TMP_FILE=$(mktemp)
+              printf '%s' "$2" | base64 -d > "${TMP_FILE}"
+              if [ ! -s "${TMP_FILE}" ]; then rm -f "${TMP_FILE}"; echo "[오류] $1 내용 없음"; exit 1; fi
+              SUDO cp "${TMP_FILE}" "${CONFIG_HOST_DIR}/$1.new"
+              rm -f "${TMP_FILE}"
+              SUDO chmod 600 "${CONFIG_HOST_DIR}/$1.new"
+              SUDO mv -f "${CONFIG_HOST_DIR}/$1.new" "${CONFIG_HOST_DIR}/$1"
+              echo "설정 기록: $1"
+            }
+            write_runtime_config application-prod.yml "${APPLICATION_PROD_YML_BASE64}"
+
+            # 모드별: mirror 는 푸시·장애 알림 끔, production 은 FCM 키·장애 알림
+            if [ "${MODE}" = "production" ]; then
+              write_runtime_config firebase-adminsdk.json "${FIREBASE_ADMINSDK_JSON_BASE64}"
+              FIREBASE_KEY_PATH="${PRODUCTION_FIREBASE_KEY_PATH}"
+              ALERT_WEBHOOK="${INCIDENT_WEBHOOK_URL}"
+            else
+              FIREBASE_KEY_PATH="${MIRROR_FIREBASE_KEY_PATH}"
+              ALERT_WEBHOOK=""
+            fi
+
+            # drain 표식이 있으면 unhealthy > Traefik 이 새 요청을 보내지 않는다
+            HEALTH_URL="http://127.0.0.1:${CONTAINER_INTERNAL_PORT}${HEALTHCHECK_PATH}"
+            HEALTH_CMD="[ -f /tmp/.elum-drain ] && exit 1; curl -fsS -o /dev/null ${HEALTH_URL}"
+
+            # 새 컨테이너: 만들기 > DB 네트워크 연결 > 시작 (시작 전에 연결해야 기동 때 DB 를 찾는다)
+            # FIREBASE_SERVICEACCOUNTKEYPATH = firebase.service-account-key-path (Spring 환경변수 이름 규칙)
+            echo "새 컨테이너 만들기: ${NEW_NAME}"
+            SUDO docker create \
+              --name "${NEW_NAME}" \
+              --restart unless-stopped \
+              --log-driver json-file \
+              --log-opt "max-size=${CONTAINER_LOG_MAX_SIZE}" \
+              --log-opt "max-file=${CONTAINER_LOG_MAX_FILE}" \
+              --health-cmd "${HEALTH_CMD}" \
+              --health-interval 5s \
+              --health-timeout 3s \
+              --health-retries 3 \
+              --health-start-period 120s \
+              --network "${TRAEFIK_NETWORK}" \
+              --label "traefik.enable=true" \
+              --label "traefik.docker.network=${TRAEFIK_NETWORK}" \
+              --label "traefik.http.routers.${ROUTER}.rule=Host(\`${SERVICE_DOMAIN}\`)" \
+              --label "traefik.http.routers.${ROUTER}.entrypoints=${TRAEFIK_ENTRYPOINT}" \
+              --label "traefik.http.services.${ROUTER}.loadbalancer.server.port=${CONTAINER_INTERNAL_PORT}" \
+              -e TZ=Asia/Seoul \
+              -e "SPRING_PROFILES_ACTIVE=prod" \
+              -e "ELUM_INSTANCE=${NEW}" \
+              -e "ELUM_PORT=${CONTAINER_INTERNAL_PORT}" \
+              -e "FIREBASE_SERVICEACCOUNTKEYPATH=${FIREBASE_KEY_PATH}" \
+              -e "ELUM_INCIDENT_ALERT_DISCORD_WEBHOOK_URL=${ALERT_WEBHOOK}" \
+              -v /etc/localtime:/etc/localtime:ro \
+              -v "${VOLUME_HOST_PATH}:/app" \
+              "${IMAGE}" >/dev/null
+            SUDO docker network connect "${APP_NETWORK}" "${NEW_NAME}"
+            SUDO docker start "${NEW_NAME}" >/dev/null
+
+            # 통과 조건: 컨테이너 healthy + Traefik 경유 200 (실제 HTTPS 트래픽과 같은 헤더)
+            OK=false
+            for i in $(seq 1 ${HEALTHCHECK_MAX_RETRIES}); do
+              sleep ${HEALTHCHECK_RETRY_INTERVAL}
+              STATE=$(SUDO docker inspect --format '{{.State.Status}}/{{if .State.Health}}{{.State.Health.Status}}{{end}}' "${NEW_NAME}" 2>/dev/null || echo "missing/")
+              if [ "${STATE%%/*}" = "exited" ]; then
+                echo "[오류] ${NEW_NAME} 종료됨 — 로그:"; SUDO docker logs --tail 200 "${NEW_NAME}"; exit 1
+              fi
+              CODE=$(curl -s -m 5 -o /dev/null -w '%{http_code}' -H "Host: ${SERVICE_DOMAIN}" -H "X-Forwarded-Proto: https" "http://localhost:${TRAEFIK_INTERNAL_PORT}${HEALTHCHECK_PATH}" || true)
+              if [ "${STATE#*/}" = "healthy" ] && [ "${CODE}" = "200" ]; then
+                echo "헬스체크 통과 (${i}회) state=${STATE} http=${CODE}"; OK=true; break
+              fi
+              echo "헬스체크 진행중 ${i}/${HEALTHCHECK_MAX_RETRIES} state=${STATE} http=${CODE}"
+            done
+            if [ "${OK}" != "true" ]; then
+              echo "[오류] 헬스체크 시간 초과 — ${NEW_NAME} 로그 (옛 색은 그대로 서비스 중):"
+              SUDO docker logs --tail 200 "${NEW_NAME}"
+              SUDO docker rm -f "${NEW_NAME}" || true
+              exit 1
+            fi
+
+            # 미러 모드 안전장치: DB 사본에 실사용자 푸시 토큰이 있다. 푸시가 켜졌으면 새 컨테이너를 내리고 실패
+            if [ "${MODE}" != "production" ] && SUDO docker logs "${NEW_NAME}" 2>&1 | grep -q '\[notification push\] enabled'; then
+              echo "[오류] mirror 모드인데 푸시가 켜짐 -> ${NEW_NAME} 제거 (옛 색 유지)"
+              SUDO docker rm -f "${NEW_NAME}" || true
+              exit 1
+            fi
+
+            # 옛 색 정리: drain 표식 > 처리 중 요청 대기 > 로그 보관 > 제거
+            if SUDO docker ps -a --format '{{.Names}}' | grep -qx "${OLD_NAME}"; then
+              SUDO docker exec "${OLD_NAME}" touch /tmp/.elum-drain >/dev/null 2>&1 || true
+              echo "처리 중 요청 대기 ${IN_FLIGHT_WAIT}초"; sleep ${IN_FLIGHT_WAIT}
+              archive_logs "${OLD_NAME}"
+              SUDO docker rm -f "${OLD_NAME}"
+              echo "옛 색 제거: ${OLD_NAME}"
+            fi
+
+            # 1단계 미러(DSM > 8085 직결)는 DSM 프록시를 8079 로 옮긴 뒤 손으로 지운다 — 자동으로 지우면 전환 전 장애
+            if SUDO docker ps -a --format '{{.Names}}' | grep -qx "${CONTAINER_PREFIX}-mirror"; then
+              echo "[경고] ${CONTAINER_PREFIX}-mirror(8085) 남아 있음 — DSM 프록시 8079 전환 확인 뒤 손으로 지운다"
+            fi
+            echo "[상태] active=${NEW_NAME} 모드=${MODE} (https://${SERVICE_DOMAIN})"
+
+  # 배포 실패 알림: 친구 서버 워크플로와 같은 형식, 웹훅이 없으면 건너뜀
+  notify-deploy-failure:
+    needs: [build, deploy]
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 배포 실패 Discord 알림
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_INCIDENT_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MODE: ${{ inputs.mode }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
+            echo "DISCORD_INCIDENT_WEBHOOK_URL 미등록 -> 배포 실패 알림 건너뜀"
+            exit 0
+          fi
+          NOW_KST="$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S')"
+          MESSAGE="$(printf '**[ELUM 장애] 내 NAS 배포 실패**\n시각: %s (KST)\n모드: %s\n결과: build=%s, deploy=%s\n실행 기록: %s' \
+            "${NOW_KST}" "${MODE}" "${BUILD_RESULT}" "${DEPLOY_RESULT}" "${RUN_URL}")"
+          jq -n --arg content "${MESSAGE}" '{content: $content, allowed_mentions: {parse: []}}' \
+            | curl -fsS --max-time 15 -o /dev/null -w '%{http_code}\n' \
+                -H 'Content-Type: application/json' --data @- "${DISCORD_WEBHOOK_URL}" \
+            || echo "::warning::배포 실패 Discord 알림 발송 실패"
