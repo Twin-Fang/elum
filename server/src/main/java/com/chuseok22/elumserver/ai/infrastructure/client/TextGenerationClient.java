@@ -55,4 +55,8 @@ public interface TextGenerationClient {
   /// 만든 일과의 글(제목·보상·카드 글)을 다른 언어로 (#1077). 반환값은 {"title","rewardText","steps":[{title,description}]} JSON 문자열.
   /// 지시문·스키마는 RoutineTranslateSpec 한 벌. 단계 수·빈 글 검증은 부르는 쪽(RoutineTranslationAi) 몫이다.
   String translateRoutineJson(RoutineTranslationDraft draft, AppLocale sourceLanguage, AppLocale targetLanguage);
+
+  /// AI 메모 갱신 (#1082). 입력은 처음 카드 <-> 확정 카드 비교 JSON(원문 없음), 반환값은 {"lines": [...]} JSON 문자열.
+  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 거르기·저장은 부르는 쪽(RoutineMemoryAi) 몫
+  String buildRoutineMemoryJson(String memoryUserContent);
 }

@@ -80,6 +80,11 @@ public enum Entitlement {
     Kind.FLAG, "전문가 일과 가져오기",
     ConfigKey.FREE_ROUTINE_TEMPLATES, ConfigKey.PRO_ROUTINE_TEMPLATES
   ),
+  // 이룸이별 AI 메모 + 확정 예시로 맞춤 쪼개기 (#1082). 서버가 일과 만들기에 넣고, 앱은 메모 화면을 연다
+  ROUTINE_MEMORY(
+    Kind.FLAG, "AI 메모 (내가 고친 일과처럼 만들기)",
+    ConfigKey.FREE_ROUTINE_MEMORY, ConfigKey.PRO_ROUTINE_MEMORY
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

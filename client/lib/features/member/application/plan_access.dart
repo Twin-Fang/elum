@@ -18,6 +18,7 @@ class PlanAccess {
     required this.canTranslateRoutines,
     required this.canScheduleRoutines,
     required this.canUseGuardianVoice,
+    required this.canUseRoutineMemory,
   });
 
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 주간 리포트 없음)
@@ -35,6 +36,7 @@ class PlanAccess {
     canScheduleRoutines: false,
     canUseGuardianVoice: false,
     canImportExpertRoutines: false,
+    canUseRoutineMemory: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -47,6 +49,7 @@ class PlanAccess {
     canScheduleRoutines: true,
     canUseGuardianVoice: true,
     canImportExpertRoutines: true,
+    canUseRoutineMemory: true,
   );
 
   final bool isPro;
@@ -78,6 +81,8 @@ class PlanAccess {
 
   /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
   bool get shouldShowExpertRoutines => canImportExpertRoutines || canPurchasePro;
+  /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가
+  final bool canUseRoutineMemory;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -92,6 +97,7 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     canScheduleRoutines: access.canScheduleRoutines,
     canUseGuardianVoice: access.canUseGuardianVoice,
     canImportExpertRoutines: access.canImportExpertRoutines,
+    canUseRoutineMemory: access.canUseRoutineMemory,
     canPurchasePro: ref.watch(canPurchaseProProvider),
   );
 });
@@ -117,5 +123,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canScheduleRoutines: member.canScheduleRoutines,
     canUseGuardianVoice: member.canUseGuardianVoice,
     canImportExpertRoutines: member.canImportExpertRoutines,
+    canUseRoutineMemory: member.canUseRoutineMemory,
   );
 }

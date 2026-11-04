@@ -27,7 +27,8 @@
     SENSITIVE_INFO_CHECK: ['#eda100', '#c98500'],
     IMAGE_PROMPT_TRANSLATE: ['#e87ba4', '#d55181'],
     PICTOGRAM_PICK: ['#008300', '#008300'],
-    ROUTINE_TRANSLATE: ['#7a5af5', '#8f74f7']
+    ROUTINE_TRANSLATE: ['#7a5af5', '#8f74f7'],
+    ROUTINE_MEMORY: ['#8a63d2', '#9d7ae0']
   };
   var FALLBACK_COLOR = ['#898781', '#898781'];
   // 축·격자 잉크 [라이트, 다크]

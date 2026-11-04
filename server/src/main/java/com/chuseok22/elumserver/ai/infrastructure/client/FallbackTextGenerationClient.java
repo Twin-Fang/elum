@@ -24,6 +24,7 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   private static final String ROUTINE_TITLE_FIELD = "title";
   private static final String ROUTINE_STEPS_FIELD = "steps";
   private static final String QUESTIONS_FIELD = "questions";
+  private static final String MEMORY_LINES_FIELD = "lines";
 
   private final List<TextGenerationClient> chain;
 
@@ -72,6 +73,12 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   ) {
     return tryInOrder("translate", FallbackTextGenerationClient::isUsableRoutine,
       client -> client.translateRoutineJson(draft, sourceLanguage, targetLanguage));
+  }
+
+  @Override
+  public String buildRoutineMemoryJson(String memoryUserContent) {
+    return tryInOrder("memory", node -> node.path(MEMORY_LINES_FIELD).isArray(),
+      client -> client.buildRoutineMemoryJson(memoryUserContent));
   }
 
   @Override

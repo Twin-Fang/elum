@@ -30,6 +30,8 @@ public enum AiCallPurpose {
   PICTOGRAM_PICK("픽토그램 선택"),
   /// 만든 일과의 글을 다른 언어로 옮기는 호출 (#1077). 일과 생성으로 세면 번역 한 번이 일과 한 개로 잡혀 한도를 깎음
   ROUTINE_TRANSLATE("일과 번역"),
+  /// 이룸이별 AI 메모 갱신 (#1082, Pro). 하루 1번 묶어 부름. 일과 생성으로 세면 한도를 깎는다.
+  ROUTINE_MEMORY("AI 메모 갱신"),
   ;
 
   /// 관리자 그래프 범례 이름

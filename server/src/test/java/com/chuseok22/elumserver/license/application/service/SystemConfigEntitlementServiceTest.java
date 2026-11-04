@@ -347,6 +347,13 @@ class SystemConfigEntitlementServiceTest {
     assertThat(entitlementService.snapshot(MEMBER_ID).guardianVoice()).isTrue();
   }
 
+  @Test
+  @DisplayName("AI 메모 권한은 Free·Pro 모두 기본 꺼짐 — 개인정보처리방침(#1079) 시행 전 배포만으로 메모가 만들어지면 안 된다 (#1082)")
+  void routineMemory_isOffByDefaultForBothPlans() {
+    assertThat(ConfigKey.FREE_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

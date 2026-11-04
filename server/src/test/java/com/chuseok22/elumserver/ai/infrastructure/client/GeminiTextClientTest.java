@@ -151,4 +151,21 @@ class GeminiTextClientTest {
     assertThat(questionsSchema.get("minItems")).isEqualTo(1);
     assertThat(questionsSchema.get("maxItems")).isEqualTo(1);
   }
+  @Test
+  @DisplayName("Pro 맞춤 정보가 요청 스레드에 있을 때만 guardianStyle 이 실린다 — 없으면 지금 요청 모양 그대로 (#1082)")
+  void buildCreateRoutineUserContent_guardianStyleOnlyWhenPersonalized() throws Exception {
+    String withoutPersonalization = geminiTextClient.buildCreateRoutineUserContent("손 씻기", null, Set.of(), List.of());
+    com.chuseok22.elumserver.ai.core.AiCallContext.setRoutinePersonalization(
+      com.chuseok22.elumserver.ai.core.RoutinePersonalization.of(List.of("카드를 잘게 나눠요"), List.of()));
+    try {
+      JsonNode personalized = objectMapper.readTree(
+        geminiTextClient.buildCreateRoutineUserContent("손 씻기", null, Set.of(), List.of()));
+
+      assertThat(objectMapper.readTree(withoutPersonalization).has("guardianStyle")).isFalse();
+      assertThat(personalized.get("guardianStyle").get("memoryNotes").get(0).asText()).isEqualTo("카드를 잘게 나눠요");
+      assertThat(personalized.get("guardianStyle").get("instruction").asText()).contains("routineText");
+    } finally {
+      com.chuseok22.elumserver.ai.core.AiCallContext.clear();
+    }
+  }
 }

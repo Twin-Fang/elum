@@ -310,6 +310,11 @@ public enum ConfigKey {
     "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_ROUTINE_MEMORY(
+    ConfigGroup.PLAN_FREE, "AI 메모 (내가 고친 일과처럼 만들기)",
+    "Free가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 켜면 메모 갱신 AI 호출 비용이 든다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -409,6 +414,12 @@ public enum ConfigKey {
     ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
     "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_MEMORY(
+    ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",
+    "Pro가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 메모를 넣지도 갱신하지도 않는다 (메모는 남음)",
+    // 기본 꺼짐: 개인정보처리방침 개정(#1079) 시행 전이라 관리자가 켜기 전까지 메모를 만들지 않음
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
   // 서비스 전체 하루 AI 비용 상한.

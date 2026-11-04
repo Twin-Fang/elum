@@ -7224,6 +7224,138 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이를 먼저 연결해 주세요'**
   String get expertRoutineNoElumi;
+
+  /// 설정 줄 — 이룸이별 AI 메모 화면으로 (Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모'**
+  String get guardianSettingsRoutineMemory;
+
+  /// AI 메모 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모'**
+  String get routineMemoryTitle;
+
+  /// AI 메모 켜기/끄기 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 일과처럼 만들기'**
+  String get routineMemoryEnabledLabel;
+
+  /// 스위치 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 고쳐서 보내면 AI가 이룸이에게 맞는 카드 만들기 방법을 짧게 적어 둬요. 다음 일과를 만들 때 이 메모와 고친 일과를 참고해요.'**
+  String get routineMemoryEnabledFooter;
+
+  /// 메모 묶음 머리 글 (지금 줄 수/최대)
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 {count}/{max}'**
+  String routineMemoryLinesHeader(int count, int max);
+
+  /// 메모 묶음 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.'**
+  String get routineMemoryLinesFooter;
+
+  /// 메모가 0줄일 때 줄 자리
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 메모가 없어요'**
+  String get routineMemoryEmpty;
+
+  /// 메모가 0줄일 때 묶음 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 고쳐서 보내면 하루에 한 번 정리해요. 직접 적어도 돼요.'**
+  String get routineMemoryEmptyFooter;
+
+  /// 보호자가 쓰거나 고친 줄 오른쪽 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 씀'**
+  String get routineMemoryWrittenByMe;
+
+  /// 메모 줄 더하기 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 더하기'**
+  String get routineMemoryAddLine;
+
+  /// 메모 더하기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 더하기'**
+  String get routineMemoryAddSheetTitle;
+
+  /// 메모 고치기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 고치기'**
+  String get routineMemoryEditSheetTitle;
+
+  /// 메모 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'예: \'씻기\' 대신 \'손 닦기\'라고 써요'**
+  String get routineMemoryLineHint;
+
+  /// 메모 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get routineMemorySave;
+
+  /// 메모 고치기 시트의 지우기 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이 줄 지우기'**
+  String get routineMemoryDeleteLine;
+
+  /// 메모 모두 지우기 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 모두 지우기'**
+  String get routineMemoryClearAll;
+
+  /// 모두 지우기 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 일과에서 배운 것도 함께 지워요. 그다음 보낸 일과부터 다시 배워요.'**
+  String get routineMemoryClearFooter;
+
+  /// 모두 지우기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 모두 지울까요?'**
+  String get routineMemoryClearConfirmTitle;
+
+  /// 모두 지우기 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 메모는 되돌릴 수 없어요.'**
+  String get routineMemoryClearConfirmMessage;
+
+  /// AI 메모 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 불러오지 못했어요'**
+  String get routineMemoryLoadFailed;
+
+  /// AI 메모 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 저장하지 못했어요'**
+  String get routineMemorySaveFailedTitle;
+
+  /// AI 메모 저장 실패 기본 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요.'**
+  String get routineMemorySaveFailedFallback;
 }
 
 class _AppLocalizationsDelegate

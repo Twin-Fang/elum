@@ -10,6 +10,7 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
+import '../../features/guardian/presentation/routine_memory_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/card_export/card_export_screen.dart';
@@ -251,6 +252,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianImageStyle,
     pageBuilder: (context, state) =>
         slidePage(state, const ImageStyleSettingsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianRoutineMemory,
+    pageBuilder: (context, state) =>
+        slidePage(state, const RoutineMemoryScreen()),
   ),
   GoRoute(
     path: Routes.guardianFeedback,

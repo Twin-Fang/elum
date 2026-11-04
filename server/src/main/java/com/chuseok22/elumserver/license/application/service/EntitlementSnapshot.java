@@ -22,7 +22,8 @@ public record EntitlementSnapshot(
   boolean routineTranslate,
   boolean routineSchedule,
   boolean guardianVoice,
-  boolean routineTemplates
+  boolean routineTemplates,
+  boolean routineMemory
 ) {
 
 }

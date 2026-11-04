@@ -37,6 +37,10 @@ class AiCallTypeTest {
     Map.entry(AiCallType.GEMINI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
     Map.entry(AiCallType.OPENAI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
     Map.entry(AiCallType.CLAUDE_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
+    // AI 메모 갱신 (#1082). 일과 생성으로 세면 메모 갱신 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    Map.entry(AiCallType.OPENAI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    Map.entry(AiCallType.CLAUDE_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
     Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 

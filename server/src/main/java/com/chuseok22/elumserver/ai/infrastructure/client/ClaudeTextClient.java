@@ -149,6 +149,14 @@ public class ClaudeTextClient implements TextGenerationClient {
     );
   }
 
+  @Override
+  public String buildRoutineMemoryJson(String memoryUserContent) {
+    return call(
+      RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
+      AiCallType.CLAUDE_TEXT_MEMORY
+    );
+  }
+
   /**
    * 키 순서대로 1번 호출: 쉬는 키 뒤로 > 키 문제(401·403·402·429·529·5xx·시간 초과·크레딧)면 다음 키 > 그 밖의 실패는 바로 던짐
    * 다른 키로도 안 고쳐지는 실패(요청 형식 400·모델 없음 404·잘린 응답)는 키를 넘기지 않음 > 제공자 사슬이 다음 제공자로
