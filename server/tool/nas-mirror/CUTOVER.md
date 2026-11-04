@@ -30,6 +30,7 @@ bash verify-consistency.sh --allow-live       # 차이는 정보로만 (원본�
 
 | 순서 | 할 일 | 실패하면 |
 |---|---|---|
+| 0 | 내 NAS 주기 동기화 멈춤: `touch /volume1/project/elum/mirror/SYNC_PAUSED` (DSM 작업 `elum-mirror-sync`) | — |
 | 1 | 친구 서버 `점검 모드` 켬 | — |
 | 2 | 2분 대기 (진행 중 요청·작업) | — |
 | 3 | 친구 서버 `이전 잠금` 켬 (토큰 갱신·예약 작업·발송 멈춤) + `이전 파일 내보내기` 켬 | 잠금·점검 끔 = 원래대로 |
@@ -50,4 +51,4 @@ bash verify-consistency.sh --allow-live       # 차이는 정보로만 (원본�
 - 내 NAS 배포 워크플로를 `main` 푸시로 돌게 바꾸고, 친구 서버 워크플로는 푸시 실행을 끈다 (친구 서버는 잠금 그대로)
 - 다음 앱 릴리스에서 `.env` 기본 주소를 새 도메인으로
 - 친구 서버 `이전 파일 내보내기` 끔, 파일 내보내기 API 제거 이슈
-- `sync-from-source.sh` 는 더 쓰지 않는다 (내 NAS 가 원본이 됨)
+- `sync-from-source.sh` 는 더 쓰지 않는다 (내 NAS 가 원본이 됨). DSM 작업 스케줄러 `elum-mirror-sync` 를 삭제한다 (`SYNC_PAUSED` 는 그때까지 둔다)

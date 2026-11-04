@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 원본(친구 서버) > 내 NAS 덮어쓰기: DB 덤프 > 서버 멈춤 > DB 복원 > 이전용 설정 되돌림 > (미러만) 안전 처리 > 파일 > 서버 다시 시작
+# 원본(친구 서버) > 내 NAS 덮어쓰기: DB 덤프 > 파일 미리 받기 > 서버 멈춤 > DB 복원 > 이전용 설정 되돌림 > (미러만) 안전 처리 > 파일 차이분 > 서버 다시 시작
 # 미러를 아무도 운영으로 쓰지 않는 동안만 쓴다 (내 NAS 에 쓴 데이터는 지워진다)
 # 사용:
 #   sync-from-source.sh [이미지 태그]   # 미러 갱신 (신고 메일 끔, 끝나면 서버 다시 시작)
@@ -31,8 +31,23 @@ mv "${dump_file}.partial" "$dump_file"
 chmod 600 "$dump_file"
 log "dump done : ${dump_file} ($(du -h "$dump_file" | cut -f1))"
 
+# 1-1) 파일 미리 받기 (서버가 도는 동안, 멈춤 시간을 줄임): 원본 관리자 API 가 있을 때만. 실패해도 6) 에서 다시 받는다
+if [ -n "${SOURCE_ADMIN_BASE_URL:-}" ]; then
+  APP_DATA_DIR="${APP_DIR}/data" python3 "$(dirname "$0")/pull_files.py" || log "file pre-pull failed : retry after restore"
+fi
+
 # 2) 서버 멈춤 (복원 중 접속 차단, 떠 있던 것을 기억해 끝나고 다시 시작)
 stopped_containers="$(running_app_containers || true)"
+# 미러는 중간에 실패해도 멈춘 서버를 다시 켠다 (성공·실패 공통). 전환은 검사 전까지 멈춘 채로 둔다
+restart_stopped_containers() {
+  local container_name
+  for container_name in $stopped_containers; do
+    "$DOCKER" start "$container_name" >/dev/null && log "started : ${container_name}"
+  done
+}
+if [ "$is_cutover" = "false" ]; then
+  trap restart_stopped_containers EXIT
+fi
 for container_name in $stopped_containers; do
   "$DOCKER" stop -t 40 "$container_name" >/dev/null
   log "stopped : ${container_name}"
@@ -61,7 +76,7 @@ if [ "$is_cutover" = "false" ]; then
   log "mirror safety applied : report mail off"
 fi
 
-# 6) 파일: 원본 관리자 API(pull_files.py, 음성 포함) > 원본 SSH(rsync, 그림만) > 없음
+# 6) 파일: 원본 관리자 API(pull_files.py, 음성 포함, 미리 받았으면 차이분만) > 원본 SSH(rsync, 그림만) > 없음
 is_speech_copied=false
 if [ -n "${SOURCE_ADMIN_BASE_URL:-}" ]; then
   APP_DATA_DIR="${APP_DIR}/data" python3 "$(dirname "$0")/pull_files.py" \
@@ -93,12 +108,7 @@ if [ "$is_cutover" = "true" ]; then
   exit 0
 fi
 
-# 10) 미러: 멈췄던 서버 다시 시작 (없었으면 1단계 미러를 새로 띄움)
-if [ -n "$stopped_containers" ]; then
-  for container_name in $stopped_containers; do
-    "$DOCKER" start "$container_name" >/dev/null
-    log "started : ${container_name}"
-  done
-else
+# 10) 미러: 멈췄던 서버는 종료 시 trap 이 다시 켠다. 떠 있던 게 없었으면 1단계 미러를 새로 띄움
+if [ -z "$stopped_containers" ]; then
   bash "$(dirname "$0")/run-mirror.sh" "$image_tag"
 fi

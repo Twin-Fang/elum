@@ -16,6 +16,7 @@
 """
 import argparse
 import hashlib
+import http.client
 import http.cookiejar
 import json
 import os
@@ -32,6 +33,8 @@ DOWNLOAD_PATH = "/admin/migration/api/files/download"
 # 로그인 폼의 CSRF 숨은 칸 (Spring Security 기본 이름)
 CSRF_INPUT_PATTERN = re.compile(r'name="_csrf"\s+value="([^"]+)"|value="([^"]+)"\s+name="_csrf"')
 REQUEST_TIMEOUT_SECONDS = 60
+# 파일 하나 받기 재시도 (긴 전송 중 끊김 대비)
+DOWNLOAD_ATTEMPT_COUNT = 3
 READ_CHUNK_BYTES = 1024 * 1024
 DEFAULT_DATA_DIR = "/volume1/project/elum/server/data"
 
@@ -105,17 +108,26 @@ def safe_local_path(area_dir, relative_path):
 
 
 def download(opener, base_url, area, entry, target):
-    """.part 로 받기 > 크기·해시 확인 > 이름 바꾸기 (중간에 끊겨도 옛 파일이 깨지지 않음)"""
+    """.part 로 받기 > 크기·해시 확인 > 이름 바꾸기, 끊기거나 다르면 최대 3번 (옛 파일은 깨지지 않음)"""
     url = base_url + DOWNLOAD_PATH + "?" + urllib.parse.urlencode({"area": area, "path": entry["path"]})
     os.makedirs(os.path.dirname(target), exist_ok=True)
     partial = target + ".part"
-    with opener.open(url, timeout=REQUEST_TIMEOUT_SECONDS) as response, open(partial, "wb") as file:
-        for chunk in iter(lambda: response.read(READ_CHUNK_BYTES), b""):
-            file.write(chunk)
-    if not is_same_file(partial, entry["size"], entry["sha256"]):
-        os.remove(partial)
-        fail("hash mismatch after download : " + area + "/" + entry["path"])
-    os.replace(partial, target)
+    for attempt in range(1, DOWNLOAD_ATTEMPT_COUNT + 1):
+        try:
+            with opener.open(url, timeout=REQUEST_TIMEOUT_SECONDS) as response, open(partial, "wb") as file:
+                content_type = response.headers.get("Content-Type", "")
+                for chunk in iter(lambda: response.read(READ_CHUNK_BYTES), b""):
+                    file.write(chunk)
+            if is_same_file(partial, entry["size"], entry["sha256"]):
+                os.replace(partial, target)
+                return
+            reason = "got {} bytes ({}), expected {}".format(os.path.getsize(partial), content_type, entry["size"])
+        except (OSError, http.client.HTTPException) as error:
+            reason = error.__class__.__name__
+        if os.path.exists(partial):
+            os.remove(partial)
+        log("retry {}/{} : {}/{} ({})".format(attempt, DOWNLOAD_ATTEMPT_COUNT, area, entry["path"], reason))
+    fail("download failed after {} attempts : {}/{}".format(DOWNLOAD_ATTEMPT_COUNT, area, entry["path"]))
 
 
 def local_files(area_dir):
