@@ -2,10 +2,13 @@ package com.chuseok22.elumserver.adreward.application.controller;
 
 import com.chuseok22.elumserver.adreward.application.service.AdRewardGrantService;
 import com.chuseok22.elumserver.adreward.application.service.AdRewardResult;
+import com.chuseok22.elumserver.adreward.application.service.AdSsvRelayService;
+import com.chuseok22.elumserver.adreward.infrastructure.client.AdSsvRelayClient;
 import com.chuseok22.elumserver.adreward.application.service.SsvCallback;
 import com.chuseok22.elumserver.adreward.application.service.SsvCallbackVerifier;
 import com.chuseok22.elumserver.adreward.application.service.SsvInvalidException;
 import com.chuseok22.elumserver.adreward.application.service.SsvKeysUnavailableException;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +34,17 @@ public class AdSsvCallbackController implements AdSsvCallbackControllerDocs {
 
   private final SsvCallbackVerifier verifier;
   private final AdRewardGrantService grantService;
+  private final MigrationLock migrationLock;
+  private final AdSsvRelayService adSsvRelayService;
 
   // 쿼리에 nonce·서명이 들어 있어 파라미터를 남기지 않는다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/ssv")
   public ResponseEntity<String> receive(HttpServletRequest request) {
+    // 이전 잠금 중에는 이 서버가 지급하지 않고 새 서버로 넘긴다 (#1053)
+    if (migrationLock.isLocked()) {
+      return adSsvRelayService.relay(request.getQueryString(), request.getHeader(AdSsvRelayClient.RELAYED_HEADER) != null);
+    }
     SsvCallback callback;
     try {
       // 디코딩 전 원문이 필요하다 — 서명은 원문 쿼리에 대한 것이다.

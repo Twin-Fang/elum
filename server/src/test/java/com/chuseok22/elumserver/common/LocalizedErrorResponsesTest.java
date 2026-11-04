@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.common;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -120,7 +121,7 @@ class LocalizedErrorResponsesTest {
     MockHttpServletResponse response = new MockHttpServletResponse();
     CurrentLocale.runAs(locale, () -> {
       try {
-        new MaintenanceModeFilter(config).doFilter(
+        new MaintenanceModeFilter(config, new MigrationLock(config)).doFilter(
           new MockHttpServletRequest("GET", "/api/member/me"), response, new MockFilterChain());
       } catch (Exception e) {
         throw new IllegalStateException(e);

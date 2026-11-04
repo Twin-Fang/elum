@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.systemconfig.infrastructure.security;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +35,7 @@ class MaintenanceModeFilterTest {
     MockHttpServletRequest request = new MockHttpServletRequest(method, path);
     MockHttpServletResponse response = new MockHttpServletResponse();
     MockFilterChain chain = new MockFilterChain();
-    new MaintenanceModeFilter(systemConfigService).doFilter(request, response, chain);
+    new MaintenanceModeFilter(systemConfigService, new MigrationLock(systemConfigService)).doFilter(request, response, chain);
     // 체인이 불렸으면 통과, 아니면 막힌 것
     response.setHeader("X-Passed", String.valueOf(chain.getRequest() != null));
     return response;
@@ -115,4 +116,60 @@ class MaintenanceModeFilterTest {
     when(systemConfigService.getBoolean(ConfigKey.MAINTENANCE_MODE)).thenThrow(new IllegalStateException("DB"));
     assertThat(run("GET", "/api/member/me").getHeader("X-Passed")).isEqualTo("true");
   }
+
+  // --- 이전 잠금 (#1053) ---
+
+  private void migrationLock(boolean on) {
+    when(systemConfigService.getBoolean(ConfigKey.MIGRATION_LOCK)).thenReturn(on);
+  }
+
+  @Test
+  @DisplayName("이전 잠금 중에는 토큰 갱신도 503 — 덤프 뒤 회전되면 새 서버에서 로그아웃된다")
+  void locked_blocksRefresh() throws Exception {
+    migrationLock(true);
+    MockHttpServletResponse response = run("POST", "/api/auth/refresh");
+
+    assertThat(response.getStatus()).isEqualTo(503);
+    assertThat(response.getHeader("X-Passed")).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("이전 잠금 중에도 앱 상태·약관 읽기는 연다 — 앱이 새 주소를 받아야 한다")
+  void locked_passesAppStatusAndConsents() throws Exception {
+    migrationLock(true);
+    assertThat(run("GET", "/api/app/status").getHeader("X-Passed")).isEqualTo("true");
+    assertThat(run("GET", "/api/consents/documents").getHeader("X-Passed")).isEqualTo("true");
+  }
+
+  @Test
+  @DisplayName("이전 잠금 중 광고 보상 콜백은 컨트롤러까지 간다 — 새 서버로 넘긴다")
+  void locked_passesAdSsv() throws Exception {
+    migrationLock(true);
+    assertThat(run("GET", "/api/ads/ssv").getHeader("X-Passed")).isEqualTo("true");
+  }
+
+  @Test
+  @DisplayName("이전 잠금은 점검 모드가 꺼져 있어도 쓰기를 막는다")
+  void locked_blocksWriteEvenWhenMaintenanceOff() throws Exception {
+    maintenance(false);
+    migrationLock(true);
+    assertThat(run("POST", "/api/member/consents").getStatus()).isEqualTo(503);
+  }
+
+  @Test
+  @DisplayName("잠금이 꺼져 있으면 점검 중 토큰 갱신은 기존대로 연다")
+  void unlocked_maintenanceOn_refreshStillOpen() throws Exception {
+    maintenance(true);
+    migrationLock(false);
+    assertThat(run("POST", "/api/auth/refresh").getHeader("X-Passed")).isEqualTo("true");
+  }
+
+  @Test
+  @DisplayName("점검 중 광고 보상 콜백은 기존대로 막는다 (잠금이 아닐 때)")
+  void unlocked_maintenanceOn_blocksAdSsv() throws Exception {
+    maintenance(true);
+    migrationLock(false);
+    assertThat(run("GET", "/api/ads/ssv").getStatus()).isEqualTo(503);
+  }
 }
+

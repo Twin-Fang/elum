@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.infrastructure.scheduler;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,15 @@ import org.springframework.stereotype.Component;
 public class WithdrawnMemberPurgeScheduler {
 
   private final WithdrawnMemberService withdrawnMemberService;
+  private final MigrationLock migrationLock;
 
   // 새벽 4시 반(한국 시각). 사용이 가장 적은 때라 지우는 동안 로그인과 겹칠 일이 적다.
   // 설정으로 바꿀 수 있게 열어 둔다 — 로컬에서 짧게 돌려 실제 DB 로 확인할 때 쓴다.
   @Scheduled(cron = "${elum.member.withdrawn-purge-cron:0 30 4 * * *}", zone = "Asia/Seoul")
   public void run() {
+    if (migrationLock.isBlockingScheduledJob("WithdrawnMemberPurgeScheduler")) {
+      return;
+    }
     purgeExpired();
   }
 

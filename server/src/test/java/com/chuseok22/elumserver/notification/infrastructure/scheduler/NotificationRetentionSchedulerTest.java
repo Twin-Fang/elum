@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import static org.mockito.Mockito.mock;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.mockito.Mockito.verify;
 
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
@@ -26,7 +28,7 @@ class NotificationRetentionSchedulerTest {
   @Test
   @DisplayName("deletesOlderThan90Days")
   void deletesOlderThan90Days() {
-    new NotificationRetentionScheduler(notificationRepository, CLOCK).run();
+    new NotificationRetentionScheduler(notificationRepository, CLOCK, mock(MigrationLock.class)).run();
 
     // 2026-10-21 05:00 KST - 90일
     verify(notificationRepository).deleteAllByLastOccurredAtBefore(LocalDateTime.of(2026, 10, 21, 5, 0).minusDays(90));

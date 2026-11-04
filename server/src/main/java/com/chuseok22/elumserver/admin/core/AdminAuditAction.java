@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 동작 12개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
+ * 관리자 기록 동작 13개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
  * 크레딧 조정·예약 반환은 원장(actor·사유)에, 시스템 설정은 설정 변경 이력에 남아 여기서 기록하지 않음
  */
 @Getter
@@ -23,6 +23,8 @@ public enum AdminAuditAction {
   FEEDBACK_NOTE_SAVED("의견 메모 저장", AdminAuditTargetType.FEEDBACK, false),
   FEEDBACK_DELETED("의견 삭제", AdminAuditTargetType.FEEDBACK, true),
   LOG_FILE_DELETED("로그 파일 삭제", AdminAuditTargetType.LOG_FILE, true),
+  // 서버 이전 파일 목록 조회 (#1053). 대상 id = 파일 종류 코드
+  MIGRATION_FILES_LISTED("이전 파일 목록 조회", AdminAuditTargetType.MIGRATION_FILE, false),
   ;
 
   private final String label;

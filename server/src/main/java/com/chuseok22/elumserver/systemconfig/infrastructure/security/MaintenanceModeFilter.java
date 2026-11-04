@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.FilterErrorResponseWriter;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import jakarta.servlet.FilterChain;
@@ -31,6 +32,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *   <li>약관 읽기 — 읽기 전용이고 가입 화면이 떠 있을 수 있다</li>
  *   <li>토큰 갱신 — 막으면 점검 한 번에 로그아웃될 수 있다</li>
  * </ul>
+ *
+ * <p>이전 잠금(#1053)은 점검보다 먼저 본다. 잠금 중 여는 곳: 앱 상태, 약관 읽기, 광고 보상 콜백(새 서버로 전달).
+ * 토큰 갱신도 막는다 — 덤프 뒤 토큰이 회전되면 새 서버에서 401 > 로그아웃. 503 이면 앱이 토큰을 지키고 기다린다.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -41,24 +45,36 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
     SecurityPaths.API_CONSENT_DOCUMENTS,
     SecurityPaths.API_AUTH_REFRESH
   );
+  private static final Set<String> MIGRATION_LOCK_OPEN_PATHS = Set.of(
+    SecurityPaths.API_APP_STATUS,
+    SecurityPaths.API_CONSENT_DOCUMENTS,
+    SecurityPaths.API_ADS_SSV
+  );
 
   private final SystemConfigService systemConfigService;
+  private final MigrationLock migrationLock;
   private final ErrorMessages messages = ErrorMessages.standard();
 
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    return OPEN_PATHS.contains(request.getRequestURI());
-  }
-
+  // 판정 순서: 이전 잠금 > 점검 모드 > 통과
   @Override
   protected void doFilterInternal(
     HttpServletRequest request, HttpServletResponse response, FilterChain chain
   ) throws ServletException, IOException {
-    if (!isMaintenance()) {
+    String path = request.getRequestURI();
+    if (migrationLock.isLocked()) {
+      if (MIGRATION_LOCK_OPEN_PATHS.contains(path)) {
+        chain.doFilter(request, response);
+        return;
+      }
+      log.info("[이전 잠금] 요청을 막았습니다 — {} {}", request.getMethod(), path);
+      FilterErrorResponseWriter.write(response, ErrorCode.MAINTENANCE_MODE, message());
+      return;
+    }
+    if (OPEN_PATHS.contains(path) || !isMaintenance()) {
       chain.doFilter(request, response);
       return;
     }
-    log.info("[점검 모드] 요청을 막았습니다 — {} {}", request.getMethod(), request.getRequestURI());
+    log.info("[점검 모드] 요청을 막았습니다 — {} {}", request.getMethod(), path);
     FilterErrorResponseWriter.write(response, ErrorCode.MAINTENANCE_MODE, message());
   }
 

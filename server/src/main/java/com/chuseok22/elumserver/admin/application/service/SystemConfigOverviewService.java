@@ -135,6 +135,7 @@ public class SystemConfigOverviewService {
     List<Highlight> highlights = new ArrayList<>();
     highlights.add(signupProEventHighlight(rowByKey, now));
     highlights.add(toggleHighlight(rowByKey.get(ConfigKey.MAINTENANCE_MODE.name()), "점검 모드"));
+    highlights.add(toggleHighlight(rowByKey.get(ConfigKey.MIGRATION_LOCK.name()), "이전 잠금"));
     highlights.add(toggleHighlight(rowByKey.get(ConfigKey.FREE_ADS_REMOVED.name()), "Free 광고 제거"));
     highlights.add(toggleHighlight(rowByKey.get(ConfigKey.AD_REWARD_ENABLED.name()), "광고 보상"));
     highlights.add(valueHighlight(rowByKey.get(ConfigKey.TEXT_PROVIDER_SELECTED.name()), "텍스트 제공자"));

@@ -379,6 +379,25 @@ public enum ConfigKey {
     "점검 화면에 보여줄 말. 언제 끝나는지를 적어 준다",
     ConfigValueType.STRING, List.of(), "잠시 점검하고 있어요. 조금 뒤에 다시 열어주세요"
   ),
+
+  // 서버 이전 (#1053, 설계 docs/superpowers/specs/2026-11-04-elum-server-cutover-design.md)
+  // 3개 모두 DB 복사로 새 서버에도 넘어간다 > 복원 직후 새 서버 DB 에서 기본값으로 되돌린다
+  MIGRATION_LOCK(
+    ConfigGroup.APP_CONTROL, "이전 잠금",
+    "서버를 옮기는 순간 켠다. 앱 상태·약관 읽기·광고 보상 콜백 말고는 API 를 막고(토큰 갱신 포함 503), 예약 작업·푸시·신고 메일을 멈춘다. "
+      + "광고 보상 콜백과 공유 링크는 새 서버 주소로 넘긴다. 한 번 켜면 이 서버는 끝까지 이 상태로 둔다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  MIGRATION_FILE_EXPORT_ENABLED(
+    ConfigGroup.APP_CONTROL, "이전 파일 내보내기",
+    "켜면 관리자 API 로 그림·음성 파일 목록과 파일을 받을 수 있다. 이전이 끝나면 끈다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  APP_API_BASE_URL(
+    ConfigGroup.APP_CONTROL, "새 서버 주소",
+    "비우면 앱은 지금 주소를 쓴다. 적으면 앱이 이 주소를 확인한 뒤 옮겨 가고, 이전 잠금 중 광고 보상 콜백·공유 링크를 이 주소로 넘긴다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.SERVER_BASE_URL
+  ),
   // 버전 비교는 semver다. 1.10.0이 1.9.0보다 높다.
   MIN_APP_VERSION_IOS(
     ConfigGroup.APP_CONTROL, "iOS 최소 버전",

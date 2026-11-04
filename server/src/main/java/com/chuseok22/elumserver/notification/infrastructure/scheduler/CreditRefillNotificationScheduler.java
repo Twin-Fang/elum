@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
@@ -34,26 +35,31 @@ public class CreditRefillNotificationScheduler {
   private final PushDispatcher pushDispatcher;
   private final Clock clock;
   private final int recipientChunkSize;
+  private final MigrationLock migrationLock;
 
   @Autowired
   public CreditRefillNotificationScheduler(CreditQueryService creditQueryService,
-    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher) {
+    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher, MigrationLock migrationLock) {
     this(creditQueryService, notificationRecorder, pushDispatcher, Clock.system(NOTIFICATION_ZONE),
-      RECIPIENT_CHUNK_SIZE);
+      RECIPIENT_CHUNK_SIZE, migrationLock);
   }
 
   CreditRefillNotificationScheduler(CreditQueryService creditQueryService, NotificationRecorder notificationRecorder,
-    PushDispatcher pushDispatcher, Clock clock, int recipientChunkSize) {
+    PushDispatcher pushDispatcher, Clock clock, int recipientChunkSize, MigrationLock migrationLock) {
     this.creditQueryService = creditQueryService;
     this.notificationRecorder = notificationRecorder;
     this.pushDispatcher = pushDispatcher;
     this.clock = clock;
     this.recipientChunkSize = recipientChunkSize;
+    this.migrationLock = migrationLock;
   }
 
   // 월요일 오전 9시(한국 시각): 새 주기 지급이 이미 시작된 뒤
   @Scheduled(cron = "${elum.notification.credit-refill-cron:0 0 9 * * MON}", zone = NotificationTime.ZONE_ID_NAME)
   public void run() {
+    if (migrationLock.isBlockingScheduledJob("CreditRefillNotificationScheduler")) {
+      return;
+    }
     try {
       notifyDepletedMembers();
     } catch (RuntimeException exception) {

@@ -71,6 +71,13 @@ enum ServerErrorCode {
   logFileDeleteFailed('LOG_FILE_DELETE_FAILED'),
   invalidLogLevel('INVALID_LOG_LEVEL'),
 
+  // ADMIN MIGRATION (#1053) 관리자 이전 파일 내보내기. 앱에서는 나지 않는다
+  migrationFileExportDisabled('MIGRATION_FILE_EXPORT_DISABLED'),
+  invalidMigrationFileArea('INVALID_MIGRATION_FILE_AREA'),
+  invalidMigrationFilePath('INVALID_MIGRATION_FILE_PATH'),
+  migrationFileNotFound('MIGRATION_FILE_NOT_FOUND'),
+  migrationFileReadFailed('MIGRATION_FILE_READ_FAILED'),
+
   // SYSTEM CONFIG
   systemConfigInvalidValue('SYSTEM_CONFIG_INVALID_VALUE'),
 

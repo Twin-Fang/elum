@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.talk.application.listener;
 
+import static org.mockito.Mockito.mock;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +49,7 @@ class TalkReportMailListenerTest {
   @BeforeEach
   void setUp() {
     talkReportMailListener = new TalkReportMailListener(talkReportRepository, talkPostRepository,
-      talkCommentRepository, talkReportMailer, new TalkProperties(null, "https://api.example.com/"));
+      talkCommentRepository, talkReportMailer, new TalkProperties(null, "https://api.example.com/"), mock(MigrationLock.class));
   }
 
   @Test

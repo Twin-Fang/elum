@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.adreward.application.controller;
 
+import com.chuseok22.elumserver.adreward.application.service.AdSsvRelayService;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,6 +67,10 @@ class AdRewardSecurityTest {
   private SsvCallbackVerifier verifier;
   @MockitoBean
   private AdRewardGrantService grantService;
+  @MockitoBean
+  private MigrationLock migrationLock;
+  @MockitoBean
+  private AdSsvRelayService adSsvRelayService;
 
   // SecurityConfig 생성자가 요구하는 빈들
   @MockitoBean(name = "memberUserDetailsService")

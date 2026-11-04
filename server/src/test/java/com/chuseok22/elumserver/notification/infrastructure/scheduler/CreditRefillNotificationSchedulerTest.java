@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import static org.mockito.Mockito.mock;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -48,7 +50,7 @@ class CreditRefillNotificationSchedulerTest {
 
   @BeforeEach
   void setUp() {
-    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 200);
+    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 200, mock(MigrationLock.class));
   }
 
   @Test
@@ -119,7 +121,7 @@ class CreditRefillNotificationSchedulerTest {
   @Test
   @DisplayName("chunkFails_nextChunksStillProcessed")
   void chunkFails_nextChunksStillProcessed() {
-    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 2);
+    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 2, mock(MigrationLock.class));
     when(creditQueryService.memberIdsDepletedIn(any(CreditPeriod.class)))
       .thenReturn(List.of("m1", "m2", "m3", "m4", "m5"));
     when(notificationRecorder.record(any(NotificationDraft.class), eq(List.of("m1", "m2")))).thenReturn(List.of());

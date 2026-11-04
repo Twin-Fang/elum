@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.systemconfig.core.ConfigFormat;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
+import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
@@ -137,6 +138,10 @@ public final class SystemConfigValueValidator {
       case AD_UNIT_LIST -> checkListItems(value, AD_UNIT_PATTERN, "광고 단위 형식이 아니에요", false);
       case MEMBER_ID_LIST -> checkListItems(value, MEMBER_ID_PATTERN, "회원 ID 형식이 아니에요", true);
       case CONTENT_LOCALE_LIST -> checkContentLocales(value);
+      // 앱 토큰이 따라가는 주소라 허용 도메인만
+      case SERVER_BASE_URL -> ServerAddressPolicy.isAllowed(value)
+        ? ConfigValueCheck.accepted(value.trim())
+        : ConfigValueCheck.rejected("허용된 서버 주소만 받아요: " + String.join(", ", ServerAddressPolicy.ALLOWED_API_HOSTS) + " (https, 경로 없이)");
     };
   }
 

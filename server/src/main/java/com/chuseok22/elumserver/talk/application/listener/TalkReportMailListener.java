@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.talk.application.listener;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.common.infrastructure.config.AsyncConfig;
 import com.chuseok22.elumserver.common.infrastructure.properties.TalkProperties;
 import com.chuseok22.elumserver.talk.core.event.TalkReportedEvent;
@@ -34,10 +35,16 @@ public class TalkReportMailListener {
   private final TalkCommentRepository talkCommentRepository;
   private final TalkReportMailer talkReportMailer;
   private final TalkProperties talkProperties;
+  private final MigrationLock migrationLock;
 
   @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onReported(TalkReportedEvent event) {
+    // 이전 잠금 중에는 보내지 않음 (잠금 전에 쌓인 신고도, 새 서버와 중복 방지)
+    if (migrationLock.isLocked()) {
+      log.info("[talk report mail] skipped : migration lock {}", event.reportId());
+      return;
+    }
     try {
       TalkReport report = talkReportRepository.findById(event.reportId()).orElse(null);
       if (report == null) {
