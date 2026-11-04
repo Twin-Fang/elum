@@ -23,6 +23,8 @@ is_container_running "$POSTGRES_CONTAINER" || fail "${POSTGRES_CONTAINER} not ru
 
 # 비교에서 빼는 설정 키: 이전용 3개는 복원 직후 내 NAS 에서 기본값으로 되돌린다 (sync-from-source.sh)
 EXCLUDED_CONFIG_KEYS_SQL="'MIGRATION_LOCK','MIGRATION_FILE_EXPORT_ENABLED','APP_API_BASE_URL'"
+# 비교에서 빼는 관리자 기록: 파일 받기 도구가 목록을 볼 때마다 원본에 남기는 기록 (덤프 뒤에도 생겨 0 차이에 닿지 못함)
+EXCLUDED_AUDIT_ACTIONS_SQL="'MIGRATION_FILES_LISTED'"
 
 query_source() {
   "$DOCKER" exec -e PGPASSWORD="$SOURCE_DB_PASSWORD" "$POSTGRES_CONTAINER" \
@@ -37,6 +39,7 @@ table_fingerprint_sql() {
   local table_name="$1" where_clause=""
   case "$table_name" in
     system_config|system_config_history) where_clause="WHERE t.config_key NOT IN (${EXCLUDED_CONFIG_KEYS_SQL})" ;;
+    admin_audit_log) where_clause="WHERE t.action NOT IN (${EXCLUDED_AUDIT_ACTIONS_SQL})" ;;
   esac
   echo "SELECT count(*) || ' ' || md5(coalesce(string_agg(t::text, E'\\n' ORDER BY t::text), '')) FROM public.\"${table_name}\" t ${where_clause}"
 }
@@ -65,8 +68,9 @@ source_tables="$(query_source "$TABLES_SQL")"
 target_tables="$(query_target "$TABLES_SQL")"
 for table_name in $(printf '%s\n%s\n' "$source_tables" "$target_tables" | sort -u); do
   [ "$table_name" = "flyway_schema_history" ] && continue
-  if ! printf '%s\n' "$source_tables" | grep -qx "$table_name"; then report "$table_name" "(none)" "exists"; continue; fi
-  if ! printf '%s\n' "$target_tables" | grep -qx "$table_name"; then report "$table_name" "exists" "(none)"; continue; fi
+  # here-string 으로 찾는다 (printf | grep -q 는 pipefail 에서 SIGPIPE 로 가끔 "없음"이 됨)
+  if ! grep -qx "$table_name" <<< "$source_tables"; then report "$table_name" "(none)" "exists"; continue; fi
+  if ! grep -qx "$table_name" <<< "$target_tables"; then report "$table_name" "exists" "(none)"; continue; fi
   fingerprint_sql="$(table_fingerprint_sql "$table_name")"
   report "$table_name" "$(query_source "$fingerprint_sql")" "$(query_target "$fingerprint_sql")"
 done

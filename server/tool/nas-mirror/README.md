@@ -63,4 +63,5 @@ bash run-mirror.sh          # 데이터 그대로 미러만 다시 띄우기 (�
 - 서버는 GitHub Actions `PROJECT-SPRING-ELUM-NAS-CICD` 가 `elum-back-blue|green` 으로 띄운다 (`mode=mirror` 는 푸시 끔). `run-mirror.sh` 의 `elum-back-mirror` 는 DSM 프록시를 8079 로 옮긴 뒤 지운다
 - 파일은 `pull_files.py` 가 원본 관리자 API 로 받는다 (음성 포함, 해시 확인). 원본 `이전 파일 내보내기` 를 켜야 한다
 - 전환 절차: `CUTOVER.md`
+- 주기 동기화: DSM 작업 스케줄러 `elum-mirror-sync`(root, 매 30분)가 `scheduled-sync.sh` 를 부른다. 겹침 방지(`sync.lock`), 멈춤 표식 `SYNC_PAUSED`, 기록 `mirror/logs/scheduled-sync.log`
 
