@@ -23,7 +23,7 @@ import 'weekly_plan_entry_pill.dart';
 
 // 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
-/// 제목 + 오른쪽 `전문가 일과` 알약(Pro) + (폰만) 오른쪽 위 이룸이 화면 배지. 태블릿은 옆 메뉴에 입구가 있다
+/// 제목 + 오른쪽 `주간 계획`·`전문가 일과` 입구(Pro) + (폰만) 오른쪽 위 이룸이 화면 배지. 태블릿은 옆 메뉴에 입구가 있다
 class LibraryManageHeader extends ConsumerWidget {
   const LibraryManageHeader();
 
