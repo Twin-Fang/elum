@@ -4,6 +4,13 @@ part of 'dev_tools_overlay.dart';
 const _localSimulatorApiBaseUrl = 'http://localhost:8080';
 const _localEmulatorApiBaseUrl = 'http://10.0.2.2:8080';
 
+/// 지금 주소 출처 > 표시 이름 (#831)
+String _apiBaseUrlSourceLabel(ApiBaseUrlSource source) => switch (source) {
+      ApiBaseUrlSource.devTools => '개발자 도구 지정',
+      ApiBaseUrlSource.serverAssigned => '서버 지정',
+      ApiBaseUrlSource.defaults => '빌드 기본값',
+    };
+
 /// 서버 바꾸기: 운영·로컬·최근·직접 입력 > 지금 서버 로그아웃 > 서버 캐시 비움 > 저장 > 앱 다시 띄우기
 class _ServerView extends ConsumerStatefulWidget {
   const _ServerView({required this.onRestartApp});
@@ -52,8 +59,9 @@ class _ServerViewState extends ConsumerState<_ServerView> {
     return ListView(
       shrinkWrap: true,
       children: [
-        _Message('지금: $current\n'
-            '바꾸면 지금 서버에서 로그아웃하고 앱을 처음 화면부터 다시 띄웁니다.'),
+        _Message('지금: $current (${_apiBaseUrlSourceLabel(AppConfig.apiBaseUrlSource)})\n'
+            '바꾸면 지금 서버에서 로그아웃하고 앱을 처음 화면부터 다시 띄웁니다.\n'
+            '개발자 도구 지정 중에는 서버가 주는 새 주소로 옮겨 가지 않습니다.'),
         for (final (label, url) in presets)
           _ChoiceTile(
             label: label,

@@ -2,10 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- 공유 링크 https://api.elum.chuseok22.com/s/{글id} > 앱에서 그 글 (서버 AASA · 배포 프로필 Associated Domains 와 같이, #1041) -->
+	<!-- 공유 링크 https://{운영 도메인}/s/{글id} > 앱에서 그 글 (서버 AASA · 배포 프로필 Associated Domains 와 같이, #1041)
+	     운영 도메인 2개: 기존 서버, 새 서버 (#831, 앱 허용 목록 lib/core/config/server_address_policy.dart 와 같이) -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:api.elum.chuseok22.com</string>
+		<string>applinks:api.elum.suhsaechan.kr</string>
 	</array>
 	<key>aps-environment</key>
 	<string>development</string>

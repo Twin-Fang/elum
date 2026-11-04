@@ -12,6 +12,7 @@ import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
 import 'core/push/push_unregister_hook.dart';
 import 'core/push/firebase_bootstrap.dart';
+import 'core/server_address/assigned_server_address_store.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
@@ -57,6 +58,8 @@ Future<void> main() async {
     // 개발자 도구에서 고른 서버 주소 (첫 Dio 생성 전)
     await DevServerStore.applySavedApiBaseUrl();
   }
+  // 서버가 지정해 저장해 둔 주소 (첫 Dio 생성 전, 개발자 도구 지정이 있으면 그쪽이 먼저, #831)
+  await AssignedServerAddressStore.applySavedApiBaseUrl();
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
   final storage = await SharedPrefsStorage.create();
@@ -126,7 +129,7 @@ Future<void> main() async {
   await OAuthSdk.initialize();
 
   runApp(
-    // 개발자 도구가 서버를 바꾸면 이 아래를 통째로 다시 만든다
+    // 개발자 도구가 서버를 바꾸거나 서버가 새 주소를 주면 이 아래를 통째로 다시 만든다
     AppRestart(
       builder: (_) => ProviderScope(
         // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다.

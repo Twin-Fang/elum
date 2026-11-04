@@ -13,6 +13,7 @@ class AppStatus {
     this.latestVersion = '',
     this.storeUrl = '',
     this.tuning,
+    this.serverAddress,
   });
 
   final bool maintenance;
@@ -30,6 +31,9 @@ class AppStatus {
 
   /// 서버가 준 대기·연출 시간값. 구버전 서버라 없으면 null 이고, 그때는 지금 값을 그대로 쓴다.
   final ClientTuning? tuning;
+
+  /// 서버 이전 안내 (#831). 구버전 서버라 없거나 형식이 다르면 null — 그때는 지금 주소를 그대로 쓴다
+  final AppStatusServerAddress? serverAddress;
 
   /// 서버가 못 오거나 형식이 다를 때 쓰는 값.
   ///
@@ -56,6 +60,7 @@ class AppStatus {
           ? (version['storeUrl'] as String).trim()
           : '',
       tuning: ClientTuning.tryParse(json['client']),
+      serverAddress: AppStatusServerAddress.tryParse(json['server']),
     );
   }
 
@@ -97,5 +102,23 @@ class AppStatus {
       out.add(n);
     }
     return out;
+  }
+}
+
+/// 상태 응답의 `server`: 앱이 옮겨 갈 API 주소 (#831)
+class AppStatusServerAddress {
+  const AppStatusServerAddress({this.apiBaseUrl});
+
+  /// 새 API 주소. null 이면 서버가 옮기지 말라는 것 (저장해 둔 서버 지정 주소도 지움)
+  final String? apiBaseUrl;
+
+  /// `{apiBaseUrl: 문자열|null}` > 값, 그 밖의 모양은 null (무시). 던지지 않음
+  static AppStatusServerAddress? tryParse(Object? json) {
+    if (json is! Map || !json.containsKey('apiBaseUrl')) return null;
+    final apiBaseUrl = json['apiBaseUrl'];
+    if (apiBaseUrl == null) return const AppStatusServerAddress();
+    if (apiBaseUrl is! String) return null;
+    final trimmed = apiBaseUrl.trim();
+    return AppStatusServerAddress(apiBaseUrl: trimmed.isEmpty ? null : trimmed);
   }
 }

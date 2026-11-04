@@ -81,7 +81,7 @@ class _InviteLinkHostState extends State<InviteLinkHost>
     }
     final talkLink = TalkPostLink.parse(
       routeInformation.uri,
-      webHosts: TalkPostLink.webHostsOf(AppConfig.apiBaseUrl),
+      webHosts: AppConfig.acceptedWebLinkHosts,
     );
     final talkIntake = widget.talkPostIntake;
     if (talkLink != null && talkIntake != null) {

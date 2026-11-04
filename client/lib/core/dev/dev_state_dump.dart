@@ -94,6 +94,7 @@ abstract final class DevStateDump {
 
   static Map<String, String> _config() => {
     'API 주소': AppConfig.apiBaseUrl,
+    'API 주소 출처': AppConfig.apiBaseUrlSource.name,
     '시간값 출처': AppConfig.tuningSource.name,
     '연결 타임아웃': '${AppConfig.connectTimeout.inMilliseconds}ms',
     '수신 타임아웃': '${AppConfig.receiveTimeout.inMilliseconds}ms',

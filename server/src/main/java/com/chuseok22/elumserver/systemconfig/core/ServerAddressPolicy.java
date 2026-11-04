@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * 앱이 옮겨 갈 수 있는 서버 주소 규칙: https, 허용 도메인 2개, 경로·쿼리 없음
- * 앱 허용 목록(client/lib/core/config)과 같은 목록이어야 한다 — 관리자가 오타를 내도 사용자 토큰이 엉뚱한 곳으로 가지 않게
+ * 앱 허용 목록(client/lib/core/config/server_address_policy.dart, CrossStackContractTest 가 대조)과 같은 목록이어야 한다 — 관리자가 오타를 내도 사용자 토큰이 엉뚱한 곳으로 가지 않게
  */
 public final class ServerAddressPolicy {
 

@@ -53,20 +53,22 @@ String updateSuggestionRecord(String latestVersion, DateTime now) {
 /// 보호자 홈·이룸이 홈 진입 시 업데이트 권유 (하루 한 번, 닫을 수 있음)
 /// 앱 상태 > 스토어 확인 > 판정 > 기록 > 안내. 어느 단계 실패도 홈을 막지 않음 (스토어 열기 실패만 에러 코드로 알림)
 Future<void> showUpdateSuggestionIfNeeded(BuildContext context, WidgetRef ref) async {
-  final ({AppStatus status, String version}) result;
+  final AppStatusCheck appStatusCheck;
   try {
-    result = await ref.read(appStatusProvider.future);
+    appStatusCheck = await ref.read(appStatusProvider.future);
   } catch (_) {
     return;
   }
+  // 새 서버로 다시 띄우는 중 > 권유 안 함 (다시 뜬 뒤 새 서버 값으로 판단)
+  if (appStatusCheck.isServerSwitchReady) return;
   // 확인 실패는 checker 안에서 null 로 바뀜 (서버 값으로 판단)
   // 개발자 도구 권유 흉내는 스토어 확인을 건너뜀 (스토어에 새 버전이 없어도 띄움)
   final storeCheck = DevSimulation.isSuggestingUpdate
       ? null
-      : await ref.read(storeUpdateCheckerProvider)(result.version);
+      : await ref.read(storeUpdateCheckerProvider)(appStatusCheck.version);
   final target = updateSuggestionTarget(
-    status: result.status,
-    currentVersion: result.version,
+    status: appStatusCheck.status,
+    currentVersion: appStatusCheck.version,
     storeCheck: storeCheck,
   );
   final storage = ref.read(localStorageProvider);
@@ -80,7 +82,7 @@ Future<void> showUpdateSuggestionIfNeeded(BuildContext context, WidgetRef ref) a
   // 스토어를 기다리는 사이 다른 화면·팝업으로 넘어갔으면 그 위에 띄우지 않음 (다음 진입에 다시 판단)
   if (ModalRoute.of(context)?.isCurrent == false) return;
 
-  final storeUrl = AppConfig.storeUrl(defaultTargetPlatform, serverUrl: result.status.storeUrl);
+  final storeUrl = AppConfig.storeUrl(defaultTargetPlatform, serverUrl: appStatusCheck.status.storeUrl);
   if (storeUrl == null) return;
 
   // 띄우기 전에 기록 (닫는 방법과 상관없이 오늘은 한 번)

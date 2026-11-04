@@ -6,6 +6,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  *
  * <p>강제 업데이트 화면은 옛 버전 앱에서 뜬다. 주소를 서버가 주면 이미 깔린 앱도
  * 앱을 다시 내지 않고 보낼 곳을 바꿀 수 있다.
+ * 새 서버 주소: 빈 설정 > null, 허용 주소 > 그대로 (#831)
  */
 @ExtendWith(MockitoExtension.class)
 class AppStatusControllerTest {
@@ -31,7 +33,7 @@ class AppStatusControllerTest {
 
   @BeforeEach
   void setUp() {
-    controller = new AppStatusController(systemConfigService);
+    controller = new AppStatusController(systemConfigService, new MigrationLock(systemConfigService));
     // 이 테스트가 보지 않는 값은 기본값처럼 채운다
     lenient().when(systemConfigService.getString(any())).thenReturn("");
     lenient().when(systemConfigService.getInt(any())).thenReturn(1000);
@@ -61,5 +63,39 @@ class AppStatusControllerTest {
     assertThat(body).isNotNull();
     assertThat(body.ios().storeUrl()).isEmpty();
     assertThat(body.android().storeUrl()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("새 서버 주소가 비어 있으면 null — 앱이 지금 주소를 유지한다")
+  void status_blankServerAddress_sendsNull() {
+    when(systemConfigService.getString(ConfigKey.APP_API_BASE_URL)).thenReturn("  ");
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.server()).isNotNull();
+    assertThat(body.server().apiBaseUrl()).isNull();
+  }
+
+  @Test
+  @DisplayName("새 서버 주소가 있으면 끝 / 를 뗀 값을 보낸다 — 앱이 확인 후 옮겨 간다")
+  void status_serverAddressSet_sendsValue() {
+    when(systemConfigService.getString(ConfigKey.APP_API_BASE_URL)).thenReturn("https://api.elum.suhsaechan.kr/");
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.server().apiBaseUrl()).isEqualTo("https://api.elum.suhsaechan.kr");
+  }
+
+  @Test
+  @DisplayName("허용 도메인 밖 주소는 null — DB 를 직접 고쳐도 사용자 토큰이 엉뚱한 곳으로 가지 않는다")
+  void status_notAllowedServerAddress_sendsNull() {
+    when(systemConfigService.getString(ConfigKey.APP_API_BASE_URL)).thenReturn("https://evil.example.com");
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.server().apiBaseUrl()).isNull();
   }
 }

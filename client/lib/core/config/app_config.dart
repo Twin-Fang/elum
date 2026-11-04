@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'ad_ids.dart';
 import 'client_tuning.dart';
+import 'server_address_policy.dart';
 
 /// 환경변수 접근 단일 창구.
 ///
@@ -29,8 +30,16 @@ abstract final class AppConfig {
 
   // --- 서버 ---
 
-  /// 지금 쓰는 API 주소: 개발자 도구 지정 주소 > `.env` 기본 주소
-  static String get apiBaseUrl => _apiBaseUrlOverride ?? defaultApiBaseUrl;
+  /// 지금 쓰는 API 주소: 개발자 도구 지정 주소 > 서버가 지정해 저장한 주소 > `.env` 기본 주소 (#831)
+  static String get apiBaseUrl =>
+      _apiBaseUrlOverride ?? _assignedApiBaseUrl ?? defaultApiBaseUrl;
+
+  /// 지금 주소의 출처 (개발자 도구 표시, 되돌리기 판단)
+  static ApiBaseUrlSource get apiBaseUrlSource {
+    if (_apiBaseUrlOverride != null) return ApiBaseUrlSource.devTools;
+    if (_assignedApiBaseUrl != null) return ApiBaseUrlSource.serverAssigned;
+    return ApiBaseUrlSource.defaults;
+  }
 
   /// 운영 API 주소
   static const productionApiBaseUrl = 'https://api.elum.chuseok22.com';
@@ -38,15 +47,33 @@ abstract final class AppConfig {
   /// 빌드에 넣은 기본 주소 (`.env`, 없으면 운영)
   static String get defaultApiBaseUrl => _string('ELUM_API_BASE_URL', productionApiBaseUrl);
 
-  /// 운영 서버를 보고 있는가 (개발자 도구 테스트 계정·서버 표시 판단)
-  static bool get isProductionApiServer => apiBaseUrl == productionApiBaseUrl;
+  /// 운영 서버를 보고 있는가: 지금 주소가 운영 도메인 2개 중 하나 (개발자 도구 테스트 계정·서버 표시 판단)
+  static bool get isProductionApiServer =>
+      ServerAddressPolicy.toAllowedApiBaseUrl(apiBaseUrl) != null;
+
+  /// 앱이 받는 이야기 공유 웹 링크 호스트: 운영 도메인 2개 + 지금 주소 호스트 (옛·새 도메인 링크 모두)
+  static Set<String> get acceptedWebLinkHosts {
+    final currentHost = Uri.tryParse(apiBaseUrl)?.host.toLowerCase() ?? '';
+    return {
+      ...ServerAddressPolicy.allowedApiHosts,
+      if (currentHost.isNotEmpty) currentHost,
+    };
+  }
 
   // 개발자 도구에서 고른 주소 (개발자 도구 빌드만, main 이 시작 때 넣음)
   static String? _apiBaseUrlOverride;
 
+  // 서버가 지정해 저장한 주소 (허용 목록 통과분만, main 이 시작 때·전환 확인 뒤 넣음)
+  static String? _assignedApiBaseUrl;
+
   /// 개발자 도구 주소 지정. 개발자 도구가 꺼진 빌드에서는 무시하고 null 로 둔다
   static void overrideApiBaseUrl(String? url) {
     _apiBaseUrlOverride = showDevTools && url != null && url.isNotEmpty ? url : null;
+  }
+
+  /// 서버 지정 주소 적용. 허용 목록 밖이면 null (기본 주소로)
+  static void applyAssignedApiBaseUrl(String? url) {
+    _assignedApiBaseUrl = ServerAddressPolicy.toAllowedApiBaseUrl(url);
   }
 
   // --- 대기·연출 시간값 ---
@@ -320,3 +347,6 @@ abstract final class AppConfig {
     };
   }
 }
+
+/// API 주소 출처 3개: 개발자 도구 지정, 서버 지정(저장값), 빌드 기본값(`.env`)
+enum ApiBaseUrlSource { devTools, serverAssigned, defaults }

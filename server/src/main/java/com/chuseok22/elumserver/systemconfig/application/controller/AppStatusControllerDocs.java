@@ -35,6 +35,8 @@ public interface AppStatusControllerDocs {
       - 현재 버전 < `latestVersion` 이면 업데이트를 권하되 건너뛸 수 있습니다
       - 업데이트 화면의 버튼은 `storeUrl`을 엽니다. 비어 있거나 스토어 주소가 아니면
         앱에 넣어 둔 주소를 씁니다 (#416)
+      - `server.apiBaseUrl`이 지금 주소와 다르고 앱의 허용 도메인이면, 새 주소의 이 엔드포인트를
+        확인한 뒤 그 주소로 옮겨 다시 시작합니다. null 이면 옮기지 않습니다 (#831)
       - **이 요청이 실패하면 그냥 진행합니다** — 서버를 못 봤다는 이유로 앱을 막으면
         서버가 죽었을 때 아무도 앱을 열지 못합니다
       """
@@ -52,7 +54,8 @@ public interface AppStatusControllerDocs {
           "client": {
             "connectTimeoutMs": 10000, "receiveTimeoutMs": 60000, "loadingMaxWaitMs": 45000,
             "consentFetchTimeoutMs": 3000, "dlpMinDelayMs": 1500
-          }
+          },
+          "server": { "apiBaseUrl": null }
         }
         """))
   ))

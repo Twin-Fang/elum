@@ -4,9 +4,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../dev/dev_simulation.dart';
+import '../server_address/server_address_switch.dart';
 import 'app_status.dart';
 import 'app_status_recheck.dart';
 import '../../app/dio_provider.dart';
+
+/// 앱 상태 조회 결과: 상태, 서버에 닿지 못했나 (서버 지정 주소 되돌리기 판단, #831)
+typedef AppStatusFetchResult = ({AppStatus status, bool isServerUnreachable});
+
+/// 앱 상태 판정 재료: 상태, 지금 앱 버전, 새 서버로 바로 다시 띄워야 하나 (#831)
+typedef AppStatusCheck = ({AppStatus status, String version, bool isServerSwitchReady});
+
+// 서버 앞단(프록시)이 뒤 서버에 못 닿을 때 주는 코드 3개: 502, 503, 504 (앱 상태는 점검 중에도 200)
+const _gatewayFailureStatusCodes = {502, 503, 504};
+
+/// 서버에 닿지 못한 실패인가: 연결 실패·연결 대기 초과·응답 대기 초과·게이트웨이 실패
+bool isServerUnreachableError(Object error) {
+  if (error is! DioException) return false;
+  return switch (error.type) {
+    DioExceptionType.connectionError ||
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.receiveTimeout => true,
+    DioExceptionType.badResponse =>
+      _gatewayFailureStatusCodes.contains(error.response?.statusCode),
+    _ => false,
+  };
+}
 
 /// 앱 상태를 서버에 묻는다.
 ///
@@ -18,15 +41,15 @@ class AppStatusRepository {
 
   final Dio _dio;
 
-  Future<AppStatus> fetch() async {
+  Future<AppStatusFetchResult> fetch() async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/api/app/status');
       final data = res.data;
-      if (data == null) return AppStatus.unknown;
-      return AppStatus.fromJson(data);
+      if (data == null) return (status: AppStatus.unknown, isServerUnreachable: false);
+      return (status: AppStatus.fromJson(data), isServerUnreachable: false);
     } catch (e) {
       debugPrint('[app-status] 확인하지 못했다 — 그대로 진행한다: $e');
-      return AppStatus.unknown;
+      return (status: AppStatus.unknown, isServerUnreachable: isServerUnreachableError(e));
     }
   }
 
@@ -56,19 +79,34 @@ final appVersionProvider = FutureProvider<String>(
 
 /// 앱이 뜰 때 한 번, 그리고 [appStatusRecheckProvider] 가 올라갈 때마다 다시 묻는다.
 /// 화면을 옮길 때마다 묻지는 않는다.
-final appStatusProvider = FutureProvider<({AppStatus status, String version})>(
+final appStatusProvider = FutureProvider<AppStatusCheck>(
   (ref) async {
     ref.watch(appStatusRecheckProvider);
     // 개발자 도구 앱 상태 흉내 (서버에 묻지 않음)
     final simulated = DevSimulation.simulatedAppStatus();
     if (simulated != null) {
-      return (status: simulated, version: await AppStatusRepository.currentVersion());
+      return (
+        status: simulated,
+        version: await AppStatusRepository.currentVersion(),
+        isServerSwitchReady: false,
+      );
     }
     final repo = ref.watch(appStatusRepositoryProvider);
-    final results = await Future.wait([
+    final results = await Future.wait<Object>([
       repo.fetch(),
       AppStatusRepository.currentVersion(),
     ]);
-    return (status: results[0] as AppStatus, version: results[1] as String);
+    final fetched = results[0] as AppStatusFetchResult;
+    // 서버 주소 확인을 점검·업데이트 판정보다 먼저 (점검 중인 옛 서버에서도 새 주소로 넘어감)
+    final serverAddressSwitch = ref.read(serverAddressSwitchProvider);
+    await serverAddressSwitch.recordLaunchOutcome(
+      isServerUnreachable: fetched.isServerUnreachable,
+    );
+    final isServerSwitchReady = await serverAddressSwitch.prepareSwitch(fetched.status);
+    return (
+      status: fetched.status,
+      version: results[1] as String,
+      isServerSwitchReady: isServerSwitchReady,
+    );
   },
 );
