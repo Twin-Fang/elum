@@ -9,7 +9,7 @@ public enum CreditJobKind {
   ROUTINE_CREATE("일과 생성", true),
   /// 수동 카드 한 장의 그림.
   CARD_IMAGE("카드 그림", false),
-  /// 그림 다시 만들기. 엔드포인트는 아직 없다(범위 밖) — 단가 키만 맞춰 둔다.
+  /// 카드 AI 그림 다시 그리기 (POST .../image/regenerate) — 그림 한 장, 청구 = 예약
   IMAGE_REGENERATE("그림 다시 만들기", false),
   /// 만든 일과를 다른 언어 사본으로 (#1077) — 글 단가 1번, 그림은 재사용이라 청구 = 예약
   ROUTINE_TRANSLATE("일과 다른 언어로", false);
