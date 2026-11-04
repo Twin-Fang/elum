@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
  * 서버 재시작·배포 시 비워짐 (호출 기록 ai_call_log 에 키 별명이 남아 이력은 그쪽에서 봄)
  */
 @Component
-@RequiredArgsConstructor
 public class ClaudeKeyHealthTracker {
 
   // 실패한 키를 뒤로 미루는 시간
@@ -26,6 +25,17 @@ public class ClaudeKeyHealthTracker {
   private final Clock clock;
   private final Map<String, KeyHealth> healthByKeyId = new ConcurrentHashMap<>();
   private final AtomicReference<String> lastServedKeyId = new AtomicReference<>();
+
+  // 생성자가 둘이라 스프링이 쓸 것을 명시 (이 앱에는 Clock 빈이 없음)
+  @Autowired
+  public ClaudeKeyHealthTracker() {
+    this(Clock.systemDefaultZone());
+  }
+
+  // 시험용: 시계를 바꿔 쉬는 시간(5분)을 확인
+  public ClaudeKeyHealthTracker(Clock clock) {
+    this.clock = clock;
+  }
 
   public void onSuccess(String keyId) {
     LocalDateTime now = LocalDateTime.now(clock);
