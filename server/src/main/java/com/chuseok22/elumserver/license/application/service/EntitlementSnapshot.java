@@ -15,7 +15,9 @@ public record EntitlementSnapshot(
   int routineCreatePerWeek,
   int routineMaxCount,
   int profileMaxCount,
-  int historyRetentionDays
+  int historyRetentionDays,
+  boolean cardExportWithoutWatermark,
+  boolean cardExportAllThemes
 ) {
 
 }
