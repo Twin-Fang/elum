@@ -60,4 +60,8 @@ public class AiCallLog extends BaseEntity {
   // 이 호출이 속한 크레딧 작업. 작업 하나에 실제로 든 USD 를 대조한다. 크레딧 밖 호출(질문·관리자 테스트)은 null.
   @Column(name = "credit_job_id")
   private String creditJobId;
+
+  // 응답·실패한 키 별명 (Claude 키가 여러 개일 때만, 키 값은 넣지 않음). 키가 하나인 제공자는 null (#1083)
+  @Column(name = "key_label", length = 100)
+  private String keyLabel;
 }

@@ -127,6 +127,18 @@
                    th:style="'width:' + ${monthSummary.costPercentOf(providerCost)} + '%'"></div>
             </div>
           </div>
+          <!-- Claude 키 별명별 (#1083): 어느 키가 얼마나 썼는지 (키 값은 기록에 없음) -->
+          <th:block th:if="${keyUsages != null and !keyUsages.isEmpty()}">
+            <h3 class="mt-2 text-sm font-semibold">키별 (이번 달)</h3>
+            <div th:each="keyUsage : ${keyUsages}" class="flex justify-between text-sm" data-key-usage>
+              <span th:text="${keyUsage.keyLabel()}">키 별명</span>
+              <span>
+                <b th:text="'$' + ${#numbers.formatDecimal(keyUsage.costUsd(), 1, 4)}">$0</b>
+                <span class="text-base-content/60"
+                      th:text="'· ' + ${keyUsage.totalCount()} + '건 (실패 ' + ${keyUsage.totalCount() - keyUsage.successCount()} + ')'">· 0건</span>
+              </span>
+            </div>
+          </th:block>
         </div>
       </div>
       <div class="card bg-base-200 shadow">
@@ -220,7 +232,10 @@
             <a th:if="${call.creditJobId != null}" th:href="@{/admin/credits/jobs(q=${call.creditJobId})}"
                class="link link-hover text-xs ml-1" data-ai-call-credit-job-link>작업</a>
           </td>
-          <td class="text-xs" th:text="${call.model}">모델</td>
+          <td class="text-xs">
+            <span th:text="${call.model}">모델</span>
+            <span th:if="${call.keyLabel != null}" class="badge badge-ghost badge-xs ml-1" th:text="${call.keyLabel}">키</span>
+          </td>
           <td>
             <!-- substring은 ID가 8자보다 짧으면 예외를 던져 화면이 통째로 죽는다.
                  abbreviate는 짧으면 자르지 않고 그대로 둔다. -->

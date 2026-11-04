@@ -165,4 +165,26 @@ class AdminSettingsTemplateTest {
     assertThat(html).contains("data-admin-pager").contains("2 / 5").contains("page=1").contains("page=3")
       .contains("key=FREE_ADS_REMOVED");
   }
+
+  @Test
+  @DisplayName("텍스트 제공자 순서·Claude 키 카드가 그려지고 키 값 대신 끝 4자리만 보인다 (#1083)")
+  void settingsPage_textChainAndClaudeKeys() {
+    Map<String, Object> model = settingsModel(List.of());
+    model.put("textProviders", List.of(
+      new com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView(
+        "CLAUDE", "Claude", true, true, 0.10, 0.50, 1, false),
+      new com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView(
+        "GEMINI", "Gemini", false, true, 0.30, 2.50, 2, true),
+      new com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView(
+        "OPENAI", "OpenAI", false, false, 0.40, 1.60, 0, false)));
+    model.put("claudeKeys", List.of(new com.chuseok22.elumserver.admin.application.dto.response.AdminClaudeKeyView(
+      "k1", 1, "회사 키", "••••abcd", true, true, true, LocalDateTime.of(2026, 11, 5, 9, 0),
+      LocalDateTime.of(2026, 11, 5, 9, 1), "한도 초과", LocalDateTime.of(2026, 11, 5, 9, 6), true, true)));
+
+    String html = render("admin/settings", model);
+
+    assertThat(html).contains("1번").contains("2번").contains("먼저 씀").contains("안 씀").contains("키를 먼저 넣으세요");
+    assertThat(html).contains("data-claude-keys").contains("1순위").contains("회사 키").contains("••••abcd")
+      .contains("지금 쓰는 키").contains("쉬는 중 ~09:06").contains("한도 초과").doesNotContain("sk-ant-api");
+  }
 }

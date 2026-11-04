@@ -72,6 +72,12 @@
         window.elumSettingsMemberPicker.build(widget, current);
         return;
       }
+      // Claude 키 목록: 글로 넣지 않고 'AI 제공자 전환'의 Claude 키 카드에서 관리 (서버도 거부)
+      if (row.getAttribute('data-format') === 'CLAUDE_KEY_LIST') {
+        widget.appendChild(element('p', 'text-sm text-base-content/70',
+          "아래 'AI 제공자 전환 > Claude API 키' 카드에서 키를 추가·삭제하고 순서를 바꿔요."));
+        return;
+      }
       if (type === 'BOOLEAN') {
         // 토글: 체크 상태를 숨은 값(true/false)으로 보냄
         var hidden = element('input');

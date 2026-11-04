@@ -5,8 +5,12 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigValueValidator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,18 +30,40 @@ public class TextClientRouter {
   private final SystemConfigService systemConfigService;
 
   /**
-   * 지금 써야 할 제공자.
+   * 지금 써야 할 제공자: 사슬(첫 제공자 + 실패 시 다음 제공자) 중 쓸 수 있는 것
+   * 1개면 그 제공자 그대로 (대체 설정이 비어 있으면 #1083 이전과 같은 동작), 2개 이상이면 실패 시 넘기는 묶음
    *
-   * @throws CustomException 고른 제공자를 쓸 수 없을 때(키 없음 등)
+   * @throws CustomException 사슬에 쓸 수 있는 제공자가 하나도 없을 때(키 없음 등)
    */
   public TextGenerationClient current() {
-    TextProvider selected = selected();
-    return of(selected)
+    List<TextGenerationClient> usableChain = chain().stream()
+      .map(this::of)
+      .flatMap(Optional::stream)
       .filter(TextGenerationClient::available)
-      .orElseThrow(() -> {
-        log.error("텍스트 제공자를 쓸 수 없습니다. 키가 설정되지 않았습니다: provider={}", selected);
-        return new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE);
-      });
+      .toList();
+    if (usableChain.isEmpty()) {
+      log.error("텍스트 제공자를 쓸 수 없습니다. 키가 설정되지 않았습니다: chain={}", chain());
+      throw new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE);
+    }
+    return usableChain.size() == 1 ? usableChain.get(0) : new FallbackTextGenerationClient(usableChain);
+  }
+
+  /**
+   * 시도 순서: 첫 제공자(TEXT_PROVIDER_SELECTED) > 실패 시 다음 제공자(TEXT_PROVIDER_FALLBACKS) 순 (중복 제거)
+   * 모르는 이름은 건너뜀 (설정 하나 때문에 일과 생성이 멈추지 않게)
+   */
+  public List<TextProvider> chain() {
+    Set<TextProvider> ordered = new LinkedHashSet<>();
+    ordered.add(selected());
+    String fallbacks = systemConfigService.getString(ConfigKey.TEXT_PROVIDER_FALLBACKS);
+    for (String name : SystemConfigValueValidator.splitListItems(fallbacks)) {
+      try {
+        ordered.add(TextProvider.valueOf(name.toUpperCase(Locale.ROOT)));
+      } catch (IllegalArgumentException e) {
+        log.warn("알 수 없는 대체 텍스트 제공자 설정, 건너뛴다: value={}", name);
+      }
+    }
+    return List.copyOf(ordered);
   }
 
   public Optional<TextGenerationClient> of(TextProvider provider) {

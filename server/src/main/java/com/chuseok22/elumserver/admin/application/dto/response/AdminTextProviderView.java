@@ -1,6 +1,5 @@
 package com.chuseok22.elumserver.admin.application.dto.response;
 
-import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextGenerationClient;
 
 /**
@@ -10,7 +9,9 @@ import com.chuseok22.elumserver.ai.infrastructure.client.TextGenerationClient;
  * 아니라 입력·출력 토큰을 따로 셈하기 때문이다. 그래서 "장당 얼마"처럼 한 줄로
  * 비교되지 않고, 두 값을 나란히 보여준 뒤 판단은 관리자에게 맡긴다.
  *
- * @param available 키가 있어 지금 쓸 수 있는가. false면 전환 버튼을 막는다
+ * @param chainPosition 시도 순서 (1 = 첫 제공자, 0 = 사슬 밖) (#1083)
+ * @param isLastInChain 사슬의 마지막 제공자인가 (내리기 버튼 숨김)
+ * @param available     키가 있어 지금 쓸 수 있는가. false면 전환·추가 버튼을 막는다
  */
 public record AdminTextProviderView(
   String name,
@@ -18,19 +19,27 @@ public record AdminTextProviderView(
   boolean selected,
   boolean available,
   double inputPricePer1M,
-  double outputPricePer1M
+  double outputPricePer1M,
+  int chainPosition,
+  boolean isLastInChain
 ) {
 
   public static AdminTextProviderView of(
-    TextGenerationClient client, TextProvider current, double inputPrice, double outputPrice
+    TextGenerationClient client, int chainPosition, boolean isLastInChain, double inputPrice, double outputPrice
   ) {
     return new AdminTextProviderView(
       client.provider().name(),
       client.provider().getLabel(),
-      client.provider() == current,
+      chainPosition == 1,
       client.available(),
       inputPrice,
-      outputPrice
+      outputPrice,
+      chainPosition,
+      isLastInChain
     );
+  }
+
+  public boolean isInChain() {
+    return chainPosition > 0;
   }
 }
