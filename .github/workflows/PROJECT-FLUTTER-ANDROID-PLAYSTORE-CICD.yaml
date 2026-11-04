@@ -571,7 +571,8 @@ jobs:
 
   deploy-playstore:
     name: Play Store 내부 테스트 배포
-    runs-on: ubuntu-latest
+    # ubuntu-latest(26.04)에는 ruby/setup-ruby 의 Ruby 3.4.1 이 없어 업로드 전에 멈춘다 (#1068). 26.04 지원 뒤 latest 로 되돌린다
+    runs-on: ubuntu-24.04
     needs: [prepare-build, build-android]
     defaults:
       run:
