@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +25,7 @@ class MemberServiceTalkRulesTest {
   @Mock
   private MemberRepository memberRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private MemberService memberService;
 

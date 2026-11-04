@@ -10,6 +10,7 @@ import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../data/card_photo.dart';
 import 'card_photo_block.dart';
+import 'card_voice_block.dart';
 import 'routine_flow_scaffold.dart' show dismissKeyboard;
 
 /// 시트가 카드를 고치는지, 새로 넣는지.
@@ -33,6 +34,7 @@ class CardEditSheet extends StatefulWidget {
     this.initialDescription = '',
     this.onSubmit,
     this.photo,
+    this.voice,
   });
 
   final CardSheetMode mode;
@@ -40,6 +42,9 @@ class CardEditSheet extends StatefulWidget {
   /// 그림을 사진으로 바꿀 카드. **서버 id 가 있는 수정 시트에서만** 준다 —
   /// null 이면 그림 칸도 `사진 바꾸기` 칩도 없다(추가 시트·서버에 없는 카드).
   final CardPhotoTarget? photo;
+
+  /// 보호자 목소리를 녹음할 카드 (Pro 이거나 녹음이 남은 서버 카드만). null 이면 녹음 칸이 없다
+  final CardPhotoTarget? voice;
 
   /// 값을 받아 서버에 넣는다. true 면 시트가 닫히고, false 면 **열린 채 입력을 남긴다.**
   ///
@@ -72,12 +77,17 @@ class CardEditSheet extends StatefulWidget {
   /// **임시 시안**(디자이너 확정 전) 값이다.
   static const _photoOffset = CardPhotoBlock.height + 16;
 
+  /// 녹음 칸이 들어오면 제목 줄부터 아래가 이만큼 더 밀린다 — 칸 76 + 사이 12 (임시 시안)
+  static const _voiceGap = 12.0;
+  static const _voiceOffset = CardVoiceBlock.height + _voiceGap;
+
   /// 수정 결과. 완료를 눌러야만 값이 돌아오고, 밖을 탭해 닫으면 null이다.
   static Future<({String title, String description})?> show(
     BuildContext context, {
     required String title,
     required String description,
     CardPhotoTarget? photo,
+    CardPhotoTarget? voice,
   }) {
     return _open(
       context,
@@ -86,6 +96,7 @@ class CardEditSheet extends StatefulWidget {
         initialTitle: title,
         initialDescription: description,
         photo: photo,
+        voice: voice,
       ),
     );
   }
@@ -166,15 +177,16 @@ class _CardEditSheetState extends State<CardEditSheet>
     // 그림 칸은 키보드가 올라오면 접는다 — 밀린 입력칸이 키보드 뒤로 들어간다
     final photo = widget.photo;
     final showPhoto = photo != null && !_isAdd && !keyboardOpen;
-    final off =
-        (_isAdd ? CardEditSheet._addOffset : 0.0) +
-        (showPhoto ? CardEditSheet._photoOffset : 0.0);
+    // 녹음 칸도 키보드가 올라오면 접는다 (녹음·올리는 중 상태는 지킨다)
+    final voice = widget.voice;
+    final showVoice = voice != null && !_isAdd && !keyboardOpen;
+    final photoOff = showPhoto ? CardEditSheet._photoOffset : 0.0;
+    final voiceOff = showVoice ? CardEditSheet._voiceOffset : 0.0;
+    final off = (_isAdd ? CardEditSheet._addOffset : 0.0) + photoOff + voiceOff;
 
     final height = keyboardOpen
         ? (852 - CardEditSheet._keyboardTop).h
-        : ((_isAdd ? CardEditSheet._heightAdd : CardEditSheet._heightEdit) +
-                  (showPhoto ? CardEditSheet._photoOffset : 0.0))
-              .h;
+        : ((_isAdd ? CardEditSheet._heightAdd : CardEditSheet._heightEdit) + photoOff + voiceOff).h;
 
     return GestureDetector(
       // 빈 곳을 누르면 키보드가 내려간다 — 버튼이 키보드 뒤에 있어 내려야 누를 수 있다
@@ -211,6 +223,17 @@ class _CardEditSheetState extends State<CardEditSheet>
                     routineId: photo.routineId,
                     stepId: photo.stepId,
                   ),
+                ),
+              ),
+            if (voice != null && !_isAdd)
+              Positioned(
+                left: 16.w,
+                right: 16.w,
+                top: (CardEditSheet._titleLabelY + photoOff).h,
+                child: Visibility(
+                  visible: showVoice,
+                  maintainState: true,
+                  child: CardVoiceBlock(routineId: voice.routineId, stepId: voice.stepId),
                 ),
               ),
             Positioned(

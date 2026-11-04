@@ -42,6 +42,9 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
    */
   boolean existsByImagePathAndIdNot(String imagePath, String id);
 
+  // 보호자 목소리 열쇠를 아직 가리키는 카드가 있는가 (일과 복제는 같은 열쇠를 공유, #787)
+  boolean existsByGuardianVoicePath(String guardianVoicePath);
+
   /**
    * 음성 열쇠 저장 (트랜잭션 없는 대기열 스레드용 한 줄 UPDATE). 0 이면 그새 단계가 지워짐
    */

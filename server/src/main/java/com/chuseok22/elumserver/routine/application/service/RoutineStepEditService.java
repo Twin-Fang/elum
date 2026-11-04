@@ -53,6 +53,7 @@ public class RoutineStepEditService {
   private final CreditReservationService creditReservationService;
   private final PictogramPicker pictogramPicker;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final GuardianVoiceFiles guardianVoiceFiles;
 
   @Transactional
   public RoutineResponse updateStep(
@@ -151,6 +152,7 @@ public class RoutineStepEditService {
 
     steps.remove(targetStep);
     routineStepSpeechQueue.deleteStepsAfterCommit(List.of(targetStep.getId()));
+    guardianVoiceFiles.deleteUnreferencedAfterCommit(GuardianVoiceFiles.voiceKeysOf(List.of(targetStep)));
     renumberSteps(steps);
     refreshCompletionStatus(routine);
 

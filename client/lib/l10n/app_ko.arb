@@ -2761,5 +2761,80 @@
   "cardExportWatermarkText": "이룸",
   "@cardExportWatermarkText": { "description": "Free 인쇄물 바탕 워터마크 글자" },
   "cardExportPerPage": "{count, plural, other{{count}장}}",
-  "@cardExportPerPage": { "description": "오려 쓰는 카드 한 쪽 장수 칩", "placeholders": { "count": { "type": "int" } } }
+  "@cardExportPerPage": { "description": "오려 쓰는 카드 한 쪽 장수 칩", "placeholders": { "count": { "type": "int" } } },
+
+  "guardianVoiceRecordAction": "내 목소리로 녹음하기",
+  "@guardianVoiceRecordAction": {"description": "카드 수정 시트의 보호자 목소리 칸 — 녹음 전 버튼 글자와 낭독 이름"},
+
+  "guardianVoiceRecordHint": "카드를 누르면 이 목소리가 들려요",
+  "@guardianVoiceRecordHint": {"description": "카드 수정 시트의 보호자 목소리 칸 — 녹음 전 설명"},
+
+  "guardianVoiceRecording": "녹음하고 있어요 {seconds}초",
+  "@guardianVoiceRecording": {"description": "보호자 목소리를 녹음하는 동안 칸 글자. seconds 는 지난 초", "placeholders": {"seconds": {"type": "int"}}},
+
+  "guardianVoiceRecordingLimit": "{seconds}초까지 녹음돼요",
+  "@guardianVoiceRecordingLimit": {"description": "녹음하는 동안 칸 아래 줄 — 최대 길이 안내. seconds 는 최대 초", "placeholders": {"seconds": {"type": "int"}}},
+
+  "guardianVoiceStop": "멈추기",
+  "@guardianVoiceStop": {"description": "녹음·미리 듣기를 멈추는 버튼 글자와 낭독 이름"},
+
+  "guardianVoiceSaving": "녹음을 저장하고 있어요",
+  "@guardianVoiceSaving": {"description": "보호자 목소리를 올리는 동안 칸 글자"},
+
+  "guardianVoiceSaved": "녹음했어요",
+  "@guardianVoiceSaved": {"description": "녹음이 있을 때 칸 글자 — 이룸이 화면에서 이 녹음이 나온다는 뜻"},
+
+  "guardianVoicePlay": "듣기",
+  "@guardianVoicePlay": {"description": "녹음 미리 듣기 버튼 글자와 낭독 이름"},
+
+  "guardianVoiceRerecord": "다시 녹음",
+  "@guardianVoiceRerecord": {"description": "녹음을 새로 하는 버튼 글자와 낭독 이름"},
+
+  "guardianVoiceDelete": "지우기",
+  "@guardianVoiceDelete": {"description": "녹음 지우기 버튼 글자와 낭독 이름"},
+
+  "guardianVoiceDeleteConfirmTitle": "녹음을 지울까요?",
+  "@guardianVoiceDeleteConfirmTitle": {"description": "녹음 지우기 확인 팝업 제목"},
+
+  "guardianVoiceDeleteConfirmMessage": "지우면 기본 목소리로 읽어 줘요",
+  "@guardianVoiceDeleteConfirmMessage": {"description": "녹음 지우기 확인 팝업 설명"},
+
+  "guardianVoicePlanEnded": "기본 목소리로 읽어요",
+  "@guardianVoicePlanEnded": {"description": "Pro 가 끝났는데 녹음이 남아 있을 때 칸 제목 — 녹음은 남아 있고 듣기·지우기만 된다"},
+
+  "guardianVoiceMicDeniedTitle": "마이크가 꺼져 있어요",
+  "@guardianVoiceMicDeniedTitle": {"description": "마이크 권한이 막혔을 때 칸 제목"},
+
+  "guardianVoiceMicDeniedBody": "켜기 전까지 기본 목소리로 읽어요",
+  "@guardianVoiceMicDeniedBody": {"description": "마이크 권한이 막혔을 때 칸 설명 — 앱은 계속 쓸 수 있다"},
+
+  "guardianVoiceOpenSettings": "설정 열기",
+  "@guardianVoiceOpenSettings": {"description": "마이크 권한이 막혔을 때 기기 설정을 여는 버튼"},
+
+  "guardianVoiceFailedTitle": "녹음을 저장하지 못했어요",
+  "@guardianVoiceFailedTitle": {"description": "녹음 올리기·지우기·듣기 실패 때 칸 제목"},
+
+  "guardianVoiceRetry": "다시 하기",
+  "@guardianVoiceRetry": {"description": "녹음 실패 안내의 다시 하기 버튼"},
+
+  "guardianVoiceTooShort": "너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요",
+  "@guardianVoiceTooShort": {"description": "녹음이 너무 짧을 때 실패 사유"},
+
+  "guardianVoiceRecordFailed": "녹음하지 못했어요. 다시 해 주세요",
+  "@guardianVoiceRecordFailed": {"description": "녹음 시작·멈춤 실패 사유"},
+
+  "guardianVoiceTooLarge": "녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요",
+  "@guardianVoiceTooLarge": {"description": "녹음 파일이 1MB 를 넘을 때 실패 사유"},
+
+  "guardianVoicePlayFailed": "녹음을 틀지 못했어요",
+  "@guardianVoicePlayFailed": {"description": "녹음 미리 듣기 실패 사유"},
+
+  "guardianVoiceDeleteFailed": "녹음을 지우지 못했어요",
+  "@guardianVoiceDeleteFailed": {"description": "녹음 지우기 실패 사유"},
+
+  "guardianVoiceRecordChip": "녹음",
+  "@guardianVoiceRecordChip": {"description": "녹음 전 보호자 목소리 칸의 녹음 시작 버튼 글자와 낭독 이름"},
+
+  "guardianVoicePlanEndedHint": "Pro 가 끝나도 녹음은 남겨 뒀어요",
+  "@guardianVoicePlanEndedHint": {"description": "Pro 가 끝났는데 녹음이 남아 있을 때 칸 설명"}
 }

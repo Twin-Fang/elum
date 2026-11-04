@@ -292,6 +292,18 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.cardExportAllThemes()).isTrue();
   }
 
+  @Test
+  @DisplayName("스냅샷의 보호자 목소리 권한은 요금제 키를 읽는다 (Free 는 꺼짐, 앱이 녹음 칸을 숨긴다)")
+  void snapshot_guardianVoiceReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_GUARDIAN_VOICE)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).guardianVoice()).isTrue();
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

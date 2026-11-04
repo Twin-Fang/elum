@@ -46,7 +46,7 @@ class ErrorMessageParityTest {
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
-      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1);
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1 + ADDED_GUARDIAN_VOICE_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -163,6 +163,30 @@ class ErrorMessageParityTest {
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
         .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
+      for (AppLocale locale : AppLocale.values()) {
+        assertThat(ErrorMessages.standard().of(code, locale)).as("%s %s", locale.code(), code)
+          .isNotBlank().isNotEqualTo(code.name());
+      }
+    });
+  }
+
+  // 보호자 목소리 녹음(#787)이 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_GUARDIAN_VOICE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED, "FORBIDDEN"),
+    Map.entry(ErrorCode.GUARDIAN_VOICE_INVALID_TYPE, "BAD_REQUEST"),
+    Map.entry(ErrorCode.GUARDIAN_VOICE_TOO_LARGE, "BAD_REQUEST"),
+    Map.entry(ErrorCode.GUARDIAN_VOICE_TOO_LONG, "BAD_REQUEST"),
+    Map.entry(ErrorCode.GUARDIAN_VOICE_SAVE_FAILED, "INTERNAL_SERVER_ERROR")));
+
+  @Test
+  @DisplayName("보호자 목소리 코드 5개는 golden 밖에서 상태와 모든 언어 문구를 단언한다")
+  void guardianVoiceCodes_haveMessagesInAllLocales() {
+    assertThat(ADDED_GUARDIAN_VOICE_CODES).hasSize(5);
+    ADDED_GUARDIAN_VOICE_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name()).endsWith("요.");
       for (AppLocale locale : AppLocale.values()) {
         assertThat(ErrorMessages.standard().of(code, locale)).as("%s %s", locale.code(), code)
           .isNotBlank().isNotEqualTo(code.name());

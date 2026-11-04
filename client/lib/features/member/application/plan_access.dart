@@ -13,6 +13,7 @@ class PlanAccess {
     required this.isPro,
     required this.canExportCardsWithoutWatermark,
     required this.canUseAllCardDesignThemes,
+    required this.canUseGuardianVoice,
   });
 
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만)
@@ -20,6 +21,7 @@ class PlanAccess {
     isPro: false,
     canExportCardsWithoutWatermark: false,
     canUseAllCardDesignThemes: false,
+    canUseGuardianVoice: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -27,6 +29,7 @@ class PlanAccess {
     isPro: true,
     canExportCardsWithoutWatermark: true,
     canUseAllCardDesignThemes: true,
+    canUseGuardianVoice: true,
   );
 
   final bool isPro;
@@ -40,6 +43,9 @@ class PlanAccess {
 
   /// 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는가
   final bool canUseAllCardDesignThemes;
+
+  /// 카드마다 보호자 목소리를 녹음할 수 있는가. 꺼져도 이미 한 녹음은 남고(듣기·지우기 가능) 이룸이는 기본 음성으로 듣는다
+  final bool canUseGuardianVoice;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -58,5 +64,6 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     isPro: member.isPro,
     canExportCardsWithoutWatermark: member.canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes: member.canUseAllCardDesignThemes,
+    canUseGuardianVoice: member.canUseGuardianVoice,
   );
 });

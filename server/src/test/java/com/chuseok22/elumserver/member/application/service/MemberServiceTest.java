@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
@@ -90,6 +91,7 @@ class MemberServiceTest {
   @Mock
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private MemberService memberService;
 

@@ -13,6 +13,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
+import '../../member/application/plan_access.dart';
 import '../application/card_review_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
@@ -20,6 +21,7 @@ import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
+import 'widgets/card_voice_block.dart';
 import 'widgets/card_review_coach_mark.dart';
 import 'widgets/card_review_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
@@ -143,11 +145,12 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   }
 
   /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
-  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
-    final routineId = ref.read(routineFlowProvider).routine?.id;
-    if (routineId == null || routineId.isEmpty) return null;
-    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
-  }
+  // 보호자 목소리는 Pro 일 때만 (이룸이가 듣는 것과 맞춤)
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
+    ref.read(routineFlowProvider).routine?.id,
+    card,
+    includeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+  );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
   ///
@@ -224,6 +227,10 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
   Future<void> _edit(ActionCard card) async {
+    final serverCard = CardPhotoTarget.of(
+      routineId: ref.read(routineFlowProvider).routine?.id ?? '',
+      stepId: card.id,
+    );
     final edited = await CardEditSheet.show(
       context,
       // displayTitle이 아니라 실제 title을 넘긴다. title이 없는 카드는
@@ -233,10 +240,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       title: card.title,
       description: card.description,
       // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다. 아니면 칩이 없다.
-      photo: CardPhotoTarget.of(
-        routineId: ref.read(routineFlowProvider).routine?.id ?? '',
-        stepId: card.id,
-      ),
+      photo: serverCard,
+      // 녹음 칸: 서버 카드이고 Pro 이거나 녹음이 남아 있을 때만 (Free 에게는 녹음 전 칸을 보이지 않음)
+      voice: CardVoiceBlock.isShownFor(
+        canUseGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+        guardianVoicePath: card.guardianVoicePath,
+      )
+          ? serverCard
+          : null,
     );
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
     if (edited == null || !mounted) return;

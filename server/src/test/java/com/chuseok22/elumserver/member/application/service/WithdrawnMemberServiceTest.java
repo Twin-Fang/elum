@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -89,6 +90,7 @@ class WithdrawnMemberServiceTest {
   @Mock
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private WithdrawnMemberService withdrawnMemberService;
 

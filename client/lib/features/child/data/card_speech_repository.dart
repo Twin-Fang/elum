@@ -13,8 +13,30 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/card_image_disk_cache.dart';
 import '../../../shared/models/action_card.dart';
 
-/// 미리 만든 단계 음성 한 건의 위치: 일과, 단계, 음성 열쇠(서버 `speechPath`, 없으면 null)
-typedef StoredSpeechSource = ({String routineId, String stepId, String? speechPath});
+/// 카드 한 장의 저장 음성 위치: 일과, 단계, 서버 음성 열쇠(`speechPath`), 보호자 목소리 열쇠(`guardianVoicePath`). 없으면 null
+typedef StoredSpeechSource = ({
+  String routineId,
+  String stepId,
+  String? speechPath,
+  String? guardianVoicePath,
+});
+
+/// 카드 > 저장 음성 위치. 서버에 없는 일과(id 빈 값)는 null
+///
+/// [includeGuardianVoice] false 면 보호자 목소리를 빼고 기본 음성만 (보호자 화면에서 Pro 가 아닐 때 — 이룸이가 듣는 것과 맞춤)
+StoredSpeechSource? storedSpeechOf(
+  String? routineId,
+  ActionCard card, {
+  bool includeGuardianVoice = true,
+}) {
+  if (routineId == null || routineId.isEmpty) return null;
+  return (
+    routineId: routineId,
+    stepId: card.id,
+    speechPath: card.speechPath,
+    guardianVoicePath: includeGuardianVoice ? card.guardianVoicePath : null,
+  );
+}
 
 /// 단계 음성 받기·파일 캐시 (#675): 캐시 확인 > 받기 > 검증 > 저장 > 같은 단계 옛 파일 삭제
 ///
@@ -75,7 +97,12 @@ class CardSpeechRepository {
           await _deleteStepDirectory(card.id);
           continue;
         }
-        await fileFor((routineId: routineId, stepId: card.id, speechPath: speechPath));
+        await fileFor((
+          routineId: routineId,
+          stepId: card.id,
+          speechPath: speechPath,
+          guardianVoicePath: null,
+        ));
       } catch (e) {
         AppLogger.error('speech-cache', '미리 받기 실패(무시): $e');
       }

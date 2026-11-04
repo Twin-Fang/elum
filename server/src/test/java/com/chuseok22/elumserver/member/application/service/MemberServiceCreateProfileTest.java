@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +52,7 @@ class MemberServiceCreateProfileTest {
   @Mock private com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository adRewardSessionRepository;
   @Mock private com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository aiCallLogRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks private MemberService memberService;
 
   private final Caller guardian = Caller.guardian("member-1");
