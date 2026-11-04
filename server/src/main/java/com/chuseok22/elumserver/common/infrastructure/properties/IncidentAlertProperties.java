@@ -29,7 +29,7 @@ public record IncidentAlertProperties(
 
   public IncidentAlertProperties {
     discordWebhookUrl = discordWebhookUrl == null ? "" : discordWebhookUrl.trim();
-    adminBaseUrl = adminBaseUrl == null ? "" : withoutTrailingSlash(adminBaseUrl.trim());
+    adminBaseUrl = adminBaseUrl == null ? "" : BaseUrls.withoutTrailingSlash(adminBaseUrl.trim());
     serverErrorThreshold = positiveOrDefault(serverErrorThreshold, DEFAULT_SERVER_ERROR_THRESHOLD);
     serverErrorWindowSeconds = positiveOrDefault(serverErrorWindowSeconds, DEFAULT_SERVER_ERROR_WINDOW_SECONDS);
     cooldownSeconds = positiveOrDefault(cooldownSeconds, DEFAULT_COOLDOWN_SECONDS);
@@ -56,9 +56,5 @@ public record IncidentAlertProperties(
   // 0·음수·미설정 > 기본값 (잘못 넣은 값 하나로 알림이 폭주하거나 꺼지지 않게)
   private static int positiveOrDefault(Integer value, int fallback) {
     return value == null || value <= 0 ? fallback : value;
-  }
-
-  private static String withoutTrailingSlash(String url) {
-    return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 }

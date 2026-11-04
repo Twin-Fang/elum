@@ -29,6 +29,12 @@
   <span th:text="${message}">아직 아무것도 없어요</span>
 </div>
 
+<!-- 색 이름 배지 (#1062): tone 5개 success·error·warning·info·ghost(그 외) > daisyUI 클래스
+     클래스를 글자 그대로 적어 둔다 (build-admin-css.sh 가 템플릿 글자만 훑어 조립한 이름은 빠진다) -->
+<span th:fragment="toneBadge(tone, label)" class="badge"
+      th:classappend="${tone == 'success'} ? 'badge-success' : (${tone == 'error'} ? 'badge-error' : (${tone == 'warning'} ? 'badge-warning' : (${tone == 'info'} ? 'badge-info' : 'badge-ghost')))"
+      th:text="${label}">상태</span>
+
 <div th:fragment="statCard(title, value, desc)" class="stat rounded-box bg-base-200 shadow">
   <div class="stat-title" th:text="${title}">제목</div>
   <div class="stat-value text-primary" th:text="${value}">0</div>

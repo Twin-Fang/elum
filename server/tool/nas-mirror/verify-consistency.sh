@@ -5,18 +5,40 @@
 #   verify-consistency.sh               # 전환용: 차이 = 실패
 #   verify-consistency.sh --allow-live  # 리허설용: 원본이 살아 있어 생기는 차이는 정보로만
 #   verify-consistency.sh --skip-files  # DB 만
+#   verify-consistency.sh --status-file <경로>  # 결과를 JSON 으로도 남김 (관리자 "서버 이전" 페이지, #1062)
 set -euo pipefail
 . "$(dirname "$0")/mirror-common.sh"
 
 is_live_allowed=false
 is_files_skipped=false
-for argument in "$@"; do
-  case "$argument" in
+status_file=""
+while [ $# -gt 0 ]; do
+  case "$1" in
     --allow-live) is_live_allowed=true ;;
     --skip-files) is_files_skipped=true ;;
-    *) fail "unknown option : ${argument}" ;;
+    --status-file) status_file="${2:-}"; shift ;;
+    *) fail "unknown option : $1" ;;
   esac
+  shift
 done
+# 차이 목록 (항목 탭 원본 탭 내 NAS), 결과 JSON 용
+differences_file="$(mktemp)"
+is_status_written=false
+
+# 결과 JSON: consistent | different | failed. 실패로 끝나도 남긴다 (fail 이 부름)
+write_verify_status() {
+  [ -n "$status_file" ] || return 0
+  is_status_written=true
+  VERIFY_RESULT="$1" VERIFY_FILES="${file_result:-skipped}" VERIFY_COUNT="${difference_count:-0}" \
+  VERIFY_LIVE="$is_live_allowed" VERIFY_AT="$(date -Iseconds)" VERIFY_DIFFS="$differences_file" write_json_file "$status_file" \
+    "{'checkedAt': os.environ['VERIFY_AT'], 'result': os.environ['VERIFY_RESULT'], 'differenceCount': int(os.environ['VERIFY_COUNT']), 'differences': [dict(zip(('item','source','target'), line.rstrip('\\n').split('\\t'))) for line in open(os.environ['VERIFY_DIFFS'])], 'files': os.environ['VERIFY_FILES'], 'isLiveAllowed': os.environ['VERIFY_LIVE'] == 'true'}" || true
+}
+# 끝날 때: 결과를 못 남기고 끝났으면(질의 실패 등) failed 로 남김 > 임시 파일 정리 (성공·실패 공통)
+finish_verify() {
+  [ "$is_status_written" = "false" ] && write_verify_status failed
+  rm -f "$differences_file"
+}
+trap finish_verify EXIT
 
 load_mirror_env
 is_container_running "$POSTGRES_CONTAINER" || fail "${POSTGRES_CONTAINER} not running"
@@ -53,6 +75,7 @@ report() {
   else
     difference_count=$((difference_count + 1))
     printf '  %-34s DIFF  source=%s  target=%s\n' "$item" "$source_value" "$target_value"
+    printf '%s\t%s\t%s\n' "$item" "$source_value" "$target_value" >> "$differences_file"
   fi
 }
 
@@ -84,15 +107,18 @@ if [ "$is_files_skipped" = "false" ]; then
   else
     file_result="DIFF"
     difference_count=$((difference_count + 1))
+    printf '%s\t%s\t%s\n' "files" "source" "differs" >> "$differences_file"
   fi
 fi
 
 log "result : differences=${difference_count} files=${file_result}"
 if [ "$difference_count" -gt 0 ]; then
+  write_verify_status different
   if [ "$is_live_allowed" = "true" ]; then
     log "allow-live : differences reported only (source is still serving)"
     exit 0
   fi
   fail "not consistent : ${difference_count} difference(s) — do not switch"
 fi
+write_verify_status consistent
 log "consistent : ok to switch"
