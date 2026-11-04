@@ -101,4 +101,25 @@ class SystemConfigValueValidatorTest {
       assertThat(check.isValid()).as(key.name() + " : " + check.rejectReason()).isTrue();
     }
   }
+
+  @Test
+  @DisplayName("대체 텍스트 제공자는 아는 이름만 대문자로 정리해 받는다 — 오타가 저장되면 사슬에서 조용히 빠진다 (#1083)")
+  void textProviderFallbacks_acceptsKnownNamesOnly() {
+    assertThat(SystemConfigValueValidator.check(ConfigKey.TEXT_PROVIDER_FALLBACKS, " gemini , OPENAI,gemini ")
+      .normalizedValue()).isEqualTo("GEMINI,OPENAI");
+    assertThat(SystemConfigValueValidator.check(ConfigKey.TEXT_PROVIDER_FALLBACKS, "").isValid()).isTrue();
+    ConfigValueCheck rejected = SystemConfigValueValidator.check(ConfigKey.TEXT_PROVIDER_FALLBACKS, "GEMINI,GPT");
+    assertThat(rejected.isValid()).isFalse();
+    assertThat(rejected.rejectReason()).contains("GPT");
+  }
+
+  @Test
+  @DisplayName("Claude 키 목록은 별명·키가 있는 JSON 배열만 받는다 — 글로 넣은 값이 저장되면 키를 하나도 못 읽는다")
+  void claudeKeyList_requiresStructuredJson() {
+    assertThat(SystemConfigValueValidator.check(ConfigKey.CLAUDE_API_KEYS,
+      "[{\"id\":\"a\",\"nickname\":\"회사 키\",\"apiKey\":\"sk-ant-x\",\"enabled\":true}]").isValid()).isTrue();
+    assertThat(SystemConfigValueValidator.check(ConfigKey.CLAUDE_API_KEYS, "sk-ant-plain-key").isValid()).isFalse();
+    assertThat(SystemConfigValueValidator.check(ConfigKey.CLAUDE_API_KEYS,
+      "[{\"nickname\":\"\",\"apiKey\":\"sk-ant-x\"}]").isValid()).isFalse();
+  }
 }

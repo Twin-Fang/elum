@@ -51,6 +51,9 @@ public class AdminMonitoringController {
     LocalDateTime now = LocalDateTime.now();
     model.addAttribute("monthSummary", adminStatsService.loadAiMonthSummary(now));
     model.addAttribute("aiHealth", aiCallStatsService.loadHealthSnapshot(now));
+    // Claude 키 별명별 이번 달 호출·비용 (#1083)
+    model.addAttribute("keyUsages", aiCallStatsService.sumUsageByKeyLabel(
+      now.toLocalDate().withDayOfMonth(1).atStartOfDay(), now.plusSeconds(1)));
     model.addAttribute("calls", calls);
     model.addAttribute("memberNicknames", memberNicknamesOrEmpty(calls));
     model.addAttribute("csvExport", AdminCsvExporter.linkOf(LIST_PATH, query, calls.getTotalElements()));

@@ -46,12 +46,26 @@ public class AiCallLogService {
     AiCallType callType, String model, long latencyMs,
     GeminiGenerateContentResponse.UsageMetadata usage
   ) {
-    save(callType, model, true, null, latencyMs, usage);
+    recordSuccess(callType, model, latencyMs, usage, null);
+  }
+
+  /// @param keyLabel 응답한 키 별명 (키가 여럿인 제공자만, 키 값 금지)
+  public void recordSuccess(
+    AiCallType callType, String model, long latencyMs,
+    GeminiGenerateContentResponse.UsageMetadata usage, String keyLabel
+  ) {
+    save(callType, model, true, null, latencyMs, usage, keyLabel);
     trackProviderFailureStreak(callType, true, null);
   }
 
   public void recordFailure(AiCallType callType, String model, long latencyMs, String errorMessage) {
-    save(callType, model, false, errorMessage, latencyMs, null);
+    recordFailure(callType, model, latencyMs, errorMessage, null);
+  }
+
+  public void recordFailure(
+    AiCallType callType, String model, long latencyMs, String errorMessage, String keyLabel
+  ) {
+    save(callType, model, false, errorMessage, latencyMs, null, keyLabel);
     trackProviderFailureStreak(callType, false, errorMessage);
   }
 
@@ -70,11 +84,11 @@ public class AiCallLogService {
 
   private void save(
     AiCallType callType, String model, boolean success, String errorMessage,
-    long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage
+    long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage, String keyLabel
   ) {
     try {
       requiresNewTransaction.executeWithoutResult(status -> aiCallLogRepository.save(
-        toCallLog(callType, model, success, errorMessage, latencyMs, usage)));
+        toCallLog(callType, model, success, errorMessage, latencyMs, usage, keyLabel)));
     } catch (Exception e) {
       log.warn("[ai call log] save failed, main call unaffected : callType={}, model={}", callType, model, e);
     }
@@ -82,9 +96,10 @@ public class AiCallLogService {
 
   private AiCallLog toCallLog(
     AiCallType callType, String model, boolean success, String errorMessage,
-    long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage
+    long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage, String keyLabel
   ) {
     AiCallLog callLog = new AiCallLog();
+    callLog.setKeyLabel(keyLabel);
     callLog.setMemberId(AiCallContext.currentMemberId());
     // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다.
     callLog.setCreditJobId(AiCallContext.currentCreditJobId());
@@ -116,6 +131,12 @@ public class AiCallLogService {
         usage,
         ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
         ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
+      );
+      // 입력에는 캐시 읽기·쓰기 토큰도 더해 온다 (ClaudeTextClient). 캐시 할인은 반영하지 않아 약간 높게 잡힘
+      case CLAUDE_TEXT_CREATE, CLAUDE_TEXT_QUESTION, CLAUDE_TEXT_PICTOGRAM -> textCostUsd(
+        usage,
+        ConfigKey.PRICE_CLAUDE_TEXT_INPUT_PER_1M,
+        ConfigKey.PRICE_CLAUDE_TEXT_OUTPUT_PER_1M
       );
       // 번역도 같은 Gemini 글 모델이다. 돈이 드는 호출은 전부 하루 비용 상한 합계에 잡혀야 한다.
       case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION, GEMINI_TEXT_IMAGE_PROMPT, GEMINI_TEXT_PICTOGRAM -> {

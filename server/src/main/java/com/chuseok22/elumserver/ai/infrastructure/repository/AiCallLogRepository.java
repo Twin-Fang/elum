@@ -113,6 +113,28 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
     double getTotalCostUsd();
   }
 
+  /// 기간 [from, to) 의 키 별명별 호출 수·성공 수·비용 (키가 여럿인 제공자만 별명이 있음, #1083)
+  @Query("""
+    select l.keyLabel as keyLabel, count(l) as totalCount,
+      sum(case when l.success = true then 1 else 0 end) as successCount,
+      coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
+    from AiCallLog l
+    where l.createdAt >= :from and l.createdAt < :to and l.keyLabel is not null
+    group by l.keyLabel
+    """)
+  List<KeyLabelUsage> sumUsageByKeyLabelBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  interface KeyLabelUsage {
+
+    String getKeyLabel();
+
+    long getTotalCount();
+
+    long getSuccessCount();
+
+    double getTotalCostUsd();
+  }
+
   /// 크레딧 작업별로 연결된 호출 수·성공 수·비용. 작업 목록 한 페이지를 한 번에 대조한다.
   @Query("""
     select l.creditJobId as creditJobId, count(l) as callCount,

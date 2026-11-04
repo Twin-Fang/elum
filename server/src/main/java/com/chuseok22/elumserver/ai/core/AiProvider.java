@@ -12,6 +12,7 @@ public enum AiProvider {
 
   GEMINI("Gemini"),
   OPENAI("OpenAI"),
+  CLAUDE("Claude"),
   FLUX("FLUX"),
   LOCAL_LLM("로컬 LLM"),
   ;

@@ -39,7 +39,8 @@ class AdminConfigControllerPromptGateTest {
     controller = new AdminConfigController(
       systemConfigService, mock(ImageClientRouter.class), mock(TextClientRouter.class), promptLocaleGate,
       mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class),
-      mock(com.chuseok22.elumserver.member.application.service.MemberPickerService.class));
+      mock(com.chuseok22.elumserver.member.application.service.MemberPickerService.class),
+      mock(com.chuseok22.elumserver.admin.application.service.AdminTextProviderService.class));
     redirect = new RedirectAttributesModelMap();
   }
 

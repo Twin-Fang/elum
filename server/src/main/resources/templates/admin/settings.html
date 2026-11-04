@@ -118,13 +118,21 @@
           듣는 말이라, 싼 모델로 바꿀 때는 문장이 어색해지지 않는지 먼저 확인하세요.
         </p>
 
+        <p class="text-sm text-base-content/60">
+          위에서부터 차례로 써요. 앞 제공자가 오류·시간 초과·크레딧 소진·형식이 틀린 답을 주면 같은 요청을
+          다음 제공자로 다시 보내요. Claude 는 아래 키 순서대로 먼저 시도해요. 순서에서 뺀 제공자는 쓰지 않아요.
+        </p>
+
         <div th:each="provider : ${textProviders}"
              class="border border-base-300 rounded-box p-3 flex items-center justify-between gap-3 flex-wrap"
-             th:classappend="${provider.selected()} ? 'border-primary bg-primary/5' : ''">
+             th:classappend="${provider.selected()} ? 'border-primary bg-primary/5' : (${provider.isInChain()} ? '' : 'opacity-70')">
           <div>
             <div class="font-medium">
+              <span th:if="${provider.isInChain()}" class="badge badge-outline badge-sm mr-1"
+                    th:text="${provider.chainPosition()} + '번'">1번</span>
               <span th:text="${provider.label()}">제공자</span>
-              <span th:if="${provider.selected()}" class="badge badge-primary badge-sm ml-1">사용 중</span>
+              <span th:if="${provider.selected()}" class="badge badge-primary badge-sm ml-1">먼저 씀</span>
+              <span th:unless="${provider.isInChain()}" class="badge badge-ghost badge-sm ml-1">안 씀</span>
             </div>
             <div class="text-sm text-base-content/70">
               <span th:text="'입력 $' + ${#numbers.formatDecimal(provider.inputPricePer1M(), 1, 2)}
@@ -134,18 +142,110 @@
               <span th:unless="${provider.available()}" class="text-error">· 키 없음</span>
             </div>
           </div>
-          <form th:unless="${provider.selected()}"
-                th:action="@{/admin/settings/{key}(key='TEXT_PROVIDER_SELECTED')}" method="post"
-                data-confirm-title="글 제공자 바꾸기" data-confirm-message="이 제공자로 바꿀까요? 다음 일과 생성부터 반영돼요.">
-            <input type="hidden" name="value" th:value="${provider.name()}"/>
-            <!-- 키가 없는 제공자로 바꾸면 일과 생성이 전부 실패한다. 버튼에서 먼저 막고
-                 서버에서도 한 번 더 막는다. -->
-            <button type="submit" class="btn btn-sm"
-                    th:classappend="${provider.available()} ? 'btn-primary' : 'btn-disabled'"
-                    th:disabled="${!provider.available()}"
-                    th:text="${provider.available()} ? '이것으로 전환' : '키를 먼저 넣으세요'">전환</button>
-          </form>
+          <!-- 순서 편집: 키가 없는 제공자는 넣거나 1번으로 올릴 수 없다 (서버에서도 한 번 더 막음) -->
+          <div class="flex flex-wrap gap-1">
+            <th:block th:if="${provider.isInChain()}">
+              <form th:if="${provider.chainPosition() > 1}" th:action="@{/admin/settings/text-chain/move}" method="post">
+                <input type="hidden" name="provider" th:value="${provider.name()}"/>
+                <input type="hidden" name="direction" value="up"/>
+                <button type="submit" class="btn btn-xs" aria-label="위로">▲ 위로</button>
+              </form>
+              <form th:unless="${provider.isLastInChain()}" th:action="@{/admin/settings/text-chain/move}" method="post">
+                <input type="hidden" name="provider" th:value="${provider.name()}"/>
+                <input type="hidden" name="direction" value="down"/>
+                <button type="submit" class="btn btn-xs" aria-label="아래로">▼ 아래로</button>
+              </form>
+              <form th:unless="${provider.chainPosition() == 1 and provider.isLastInChain()}"
+                    th:action="@{/admin/settings/text-chain/remove}" method="post"
+                    data-confirm-title="제공자 빼기" data-confirm-message="이 제공자를 순서에서 뺄까요? 다음 요청부터 쓰지 않아요.">
+                <input type="hidden" name="provider" th:value="${provider.name()}"/>
+                <button type="submit" class="btn btn-xs btn-ghost">빼기</button>
+              </form>
+            </th:block>
+            <form th:unless="${provider.isInChain()}" th:action="@{/admin/settings/text-chain/add}" method="post">
+              <input type="hidden" name="provider" th:value="${provider.name()}"/>
+              <button type="submit" class="btn btn-xs"
+                      th:classappend="${provider.available()} ? 'btn-primary' : 'btn-disabled'"
+                      th:disabled="${!provider.available()}"
+                      th:text="${provider.available()} ? '순서 끝에 넣기' : '키를 먼저 넣으세요'">넣기</button>
+            </form>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Claude 키 카드 (#1083): 별명·끝 4자리·우선순위·상태. 키 값은 다시 보여주지 않는다 -->
+    <div class="card bg-base-100 shadow-md" data-claude-keys>
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">Claude API 키</h2>
+        <p class="text-sm text-base-content/60">
+          1순위 키를 쓰다가 오류·한도·크레딧 소진이면 다음 키로 넘어가요. 실패한 키는 5분 동안 뒤로 미뤄요.
+          상태(마지막 성공·실패)는 서버를 다시 켜면 비워져요. 호출 기록에는 키 별명이 남아요.
+        </p>
+        <p th:if="${#lists.isEmpty(claudeKeys)}" class="text-sm text-base-content/50">등록한 키가 없어요.</p>
+
+        <div th:each="claudeKey : ${claudeKeys}"
+             class="border border-base-300 rounded-box p-3 flex items-center justify-between gap-3 flex-wrap"
+             th:classappend="${claudeKey.isLastServed()} ? 'border-primary bg-primary/5' : (${claudeKey.enabled()} ? '' : 'opacity-60')">
+          <div class="space-y-1">
+            <div class="font-medium">
+              <span class="badge badge-outline badge-sm mr-1" th:text="${claudeKey.priority()} + '순위'">1순위</span>
+              <span th:text="${claudeKey.nickname()}">별명</span>
+              <span class="font-mono text-xs text-base-content/60" th:text="${claudeKey.maskedKey()}">••••abcd</span>
+              <span th:if="${claudeKey.isLastServed()}" class="badge badge-primary badge-sm ml-1">지금 쓰는 키</span>
+              <span th:unless="${claudeKey.enabled()}" class="badge badge-ghost badge-sm ml-1">꺼짐</span>
+              <span th:if="${claudeKey.isCoolingDown()}" class="badge badge-warning badge-sm ml-1"
+                    th:text="'쉬는 중 ~' + ${#temporals.format(claudeKey.cooldownUntil(), 'HH:mm')}">쉬는 중</span>
+            </div>
+            <div class="text-xs text-base-content/60">
+              <span th:text="'마지막 성공 ' + (${claudeKey.lastSuccessAt()} != null ? ${#temporals.format(claudeKey.lastSuccessAt(), 'MM-dd HH:mm')} : '-')">마지막 성공 -</span>
+              <span th:if="${claudeKey.lastFailureAt() != null}" class="text-error"
+                    th:text="' · 마지막 실패 ' + ${#temporals.format(claudeKey.lastFailureAt(), 'MM-dd HH:mm')} + ' (' + ${claudeKey.lastFailureLabel()} + ')'"> · 마지막 실패</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <form th:unless="${claudeKey.isFirst()}" th:action="@{/admin/settings/claude-keys/{id}/move(id=${claudeKey.id()})}" method="post">
+              <input type="hidden" name="direction" value="up"/>
+              <button type="submit" class="btn btn-xs">▲ 위로</button>
+            </form>
+            <form th:unless="${claudeKey.isLast()}" th:action="@{/admin/settings/claude-keys/{id}/move(id=${claudeKey.id()})}" method="post">
+              <input type="hidden" name="direction" value="down"/>
+              <button type="submit" class="btn btn-xs">▼ 아래로</button>
+            </form>
+            <form th:action="@{/admin/settings/claude-keys/{id}/enabled(id=${claudeKey.id()})}" method="post">
+              <input type="hidden" name="enabled" th:value="${!claudeKey.enabled()}"/>
+              <button type="submit" class="btn btn-xs" th:text="${claudeKey.enabled()} ? '끄기' : '켜기'">끄기</button>
+            </form>
+            <details class="dropdown dropdown-end">
+              <summary class="btn btn-xs btn-ghost">고치기</summary>
+              <div class="dropdown-content z-10 mt-1 w-72 space-y-2 rounded-box bg-base-100 p-3 shadow">
+                <form th:action="@{/admin/settings/claude-keys/{id}/rename(id=${claudeKey.id()})}" method="post" class="flex gap-1">
+                  <input type="text" name="nickname" maxlength="30" th:value="${claudeKey.nickname()}"
+                         class="input input-bordered input-xs flex-1" aria-label="별명"/>
+                  <button type="submit" class="btn btn-xs">별명 저장</button>
+                </form>
+                <form th:action="@{/admin/settings/claude-keys/{id}/replace(id=${claudeKey.id()})}" method="post" class="flex gap-1">
+                  <input type="password" name="apiKey" autocomplete="off" placeholder="새 키 값"
+                         class="input input-bordered input-xs flex-1" aria-label="새 키 값"/>
+                  <button type="submit" class="btn btn-xs">키 교체</button>
+                </form>
+                <form th:action="@{/admin/settings/claude-keys/{id}/delete(id=${claudeKey.id()})}" method="post"
+                      data-confirm-title="Claude 키 지우기" data-confirm-message="이 키를 지울까요? 되돌릴 수 없어요.">
+                  <button type="submit" class="btn btn-xs btn-error btn-outline w-full">키 지우기</button>
+                </form>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- 새 키는 맨 뒤(가장 낮은 순위)에 붙는다 -->
+        <form th:action="@{/admin/settings/claude-keys/add}" method="post" class="flex flex-wrap items-center gap-2">
+          <input type="text" name="nickname" maxlength="30" placeholder="별명 (예: 회사 키)" required
+                 class="input input-bordered input-sm w-40"/>
+          <input type="password" name="apiKey" autocomplete="off" placeholder="sk-ant-… 키 값" required
+                 class="input input-bordered input-sm flex-1 min-w-48"/>
+          <button type="submit" class="btn btn-primary btn-sm">키 추가</button>
+        </form>
       </div>
     </div>
 

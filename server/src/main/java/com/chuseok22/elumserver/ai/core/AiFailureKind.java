@@ -19,7 +19,8 @@ public enum AiFailureKind {
   KEY("키·권한", List.of("401", "403")),
   RATE_LIMIT("한도 초과", List.of("429", "rate limit", "resource_exhausted")),
   SAFETY("안전 필터 거절", List.of("safety")),
-  PROVIDER_DOWN("제공자 장애", List.of("500", "502", "503", "504", "unavailable")),
+  // 529 overloaded: Claude 과부하
+  PROVIDER_DOWN("제공자 장애", List.of("500", "502", "503", "504", "529", "overloaded", "unavailable")),
   TIMEOUT("시간 초과", List.of("timeout", "timed out")),
   OTHER("기타", List.of()),
   ;
