@@ -292,6 +292,24 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.cardExportAllThemes()).isTrue();
   }
 
+  @Test
+  @DisplayName("스냅샷의 그림 권한은 플랜 키를 읽고, 기본값은 다시 그리기 무료만 Pro 켜짐이다 (#1075)")
+  void snapshot_imageEntitlementsReadPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_IMAGE_REGENERATE_FREE)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.imageRegenerateFree()).isTrue();
+    assertThat(snapshot.imageHighQuality()).isFalse();
+    assertThat(ConfigKey.FREE_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("true");
+    assertThat(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP.getDefaultValue()).isEqualTo("30");
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

@@ -17,7 +17,9 @@ public record EntitlementSnapshot(
   int profileMaxCount,
   int historyRetentionDays,
   boolean cardExportWithoutWatermark,
-  boolean cardExportAllThemes
+  boolean cardExportAllThemes,
+  boolean imageRegenerateFree,
+  boolean imageHighQuality
 ) {
 
 }

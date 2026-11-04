@@ -138,6 +138,23 @@ class CreditHistoryServiceTest {
   }
 
   @Test
+  @DisplayName("무료 다시 그리기 0 사용 줄은 숨기지 않고 증감 0 으로 보인다 — 앱이 '무료'로 보여 준다 (#1075)")
+  void showsFreeRegenerateLineWithZeroDelta() {
+    AiCreditLedger free = consumeLine("f1", "job1", 0);
+    free.setAction(CreditAction.IMAGE_REGENERATE);
+    stubPage(free);
+    stubJob("job1", CreditJobKind.IMAGE_REGENERATE, 1, "r1");
+    stubRoutineTitle("r1", "양치하기");
+
+    List<Entry> entries = service.getMine(MEMBER_ID, 0, 30).entries();
+
+    assertThat(entries).singleElement().satisfies(entry -> {
+      assertThat(entry.kind()).isEqualTo(CreditHistoryKind.IMAGE_REGENERATE);
+      assertThat(entry.delta()).isZero();
+    });
+  }
+
+  @Test
   @DisplayName("계정이 아직 없으면 원장을 읽지 않고 빈 쪽을 돌려준다")
   void returnsEmptyPageWithoutAccount() {
     when(accountService.findAccount("nobody")).thenReturn(Optional.empty());

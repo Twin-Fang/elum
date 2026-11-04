@@ -55,6 +55,16 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 그림 다시 그리기 0크레딧 (하루 한도는 IMAGE_REGENERATE_FREE_DAILY_CAP) (#1075)
+  IMAGE_REGENERATE_FREE(
+    Kind.FLAG, "그림 다시 그리기 무료",
+    ConfigKey.FREE_IMAGE_REGENERATE_FREE, ConfigKey.PRO_IMAGE_REGENERATE_FREE
+  ),
+  // OpenAI 그림 품질을 OPENAI_IMAGE_QUALITY_PRO 로 올림. Free·Pro 모두 기본 꺼짐 (#1075)
+  IMAGE_HIGH_QUALITY(
+    Kind.FLAG, "고품질 그림",
+    ConfigKey.FREE_IMAGE_HIGH_QUALITY, ConfigKey.PRO_IMAGE_HIGH_QUALITY
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

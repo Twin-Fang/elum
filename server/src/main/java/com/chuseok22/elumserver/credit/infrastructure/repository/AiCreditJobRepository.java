@@ -22,6 +22,11 @@ public interface AiCreditJobRepository extends JpaRepository<AiCreditJob, String
 
   List<AiCreditJob> findByAccountIdAndStatus(String accountId, CreditJobStatus status);
 
+  /// 무료 다시 그리기 하루 횟수: 이 종류·예약 0·진행 중 또는 정산(반환·만료 제외) 작업 중 from 이후 시작한 수
+  long countByAccountIdAndKindAndReservedAndStatusInAndStartedAtGreaterThanEqual(
+    String accountId, CreditJobKind kind, int reserved, Collection<CreditJobStatus> statuses, LocalDateTime from
+  );
+
   /**
    * 작업이 속한 계정 id 만 읽는다. 작업 행을 영속성 컨텍스트에 올리지 않는다.
    *

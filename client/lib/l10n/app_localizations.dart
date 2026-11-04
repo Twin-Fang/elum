@@ -3614,6 +3614,12 @@ abstract class AppLocalizations {
   /// **'카드 그림 다시 만들기'**
   String get creditHistoryKindImageRegenerate;
 
+  /// 사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기(요금제 혜택)
+  ///
+  /// In ko, this message translates to:
+  /// **'무료'**
+  String get creditHistoryFree;
+
   /// 사용 내역 종류: 주간 지급 (Figma 1589:8444)
   ///
   /// In ko, this message translates to:

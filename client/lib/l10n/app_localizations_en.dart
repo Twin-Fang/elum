@@ -2087,6 +2087,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditHistoryKindImageRegenerate => 'Remaking a card picture';
 
   @override
+  String get creditHistoryFree => '무료';
+
+  @override
   String get creditHistoryKindWeeklyGrant =>
       'Your credits were refilled this week';
 

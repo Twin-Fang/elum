@@ -26,12 +26,16 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +53,8 @@ class CreditReservationServiceTest {
   /// 2026-09-23(수) 15:00 한국 시각 — 2026-W39.
   private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-09-23T06:00:00Z"), ZoneId.of("Asia/Seoul"));
   private static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 23, 15, 0);
+  /// 무료 다시 그리기 하루 한도 (시험값 — 한도 도달을 짧게 보기 위해 작게)
+  private static final int FREE_REGENERATE_DAILY_CAP = 2;
 
   @Mock
   private AiCreditAccountRepository accountRepository;
@@ -76,7 +82,8 @@ class CreditReservationServiceTest {
       accountRepository, grantRepository, jobRepository, ledgerRepository, mock(EntityManager.class));
     // 트랜잭션 관리자는 목 — 트랜잭션 경계는 단위 테스트가 볼 수 없고, 안의 계산만 본다.
     service = new CreditReservationService(policyService, accountService, entitlementService,
-      jobRepository, ledgerRepository, mock(PlatformTransactionManager.class), CLOCK);
+      jobRepository, ledgerRepository, UsageLimitSettings.fromValues(Map.of(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP, FREE_REGENERATE_DAILY_CAP)),
+      mock(PlatformTransactionManager.class), CLOCK);
 
     policy = AiCreditPolicy.disabledDefault();
     policy.setVersion(1);
@@ -528,5 +535,88 @@ class CreditReservationServiceTest {
     CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
 
     assertThat(reservation.outcome()).isEqualTo(CreditReservation.Outcome.RESERVED);
+  }
+
+  // --- 무료 다시 그리기 (#1075) ---
+
+  private void givenFreeRegenerateAllowed(boolean isAllowed) {
+    lenient().when(entitlementService.isAllowed(MEMBER_ID, Entitlement.IMAGE_REGENERATE_FREE)).thenReturn(isAllowed);
+  }
+
+  private CreditReservation reserveRegenerate(String requestKey) {
+    return service.reserve(MEMBER_ID, CreditJobKind.IMAGE_REGENERATE, requestKey, false);
+  }
+
+  @Test
+  @DisplayName("다시 그리기 무료 권한이 있으면 다시 그리기가 0 크레딧이고 내역용 0 사용 줄이 남는다")
+  void regenerate_isFreeWhenEntitled() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    CreditReservation reservation = reserveRegenerate("regen-1");
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isZero();
+    assertThat(available()).isEqualTo(5);
+    assertThat(store.ledgerOf(CreditLedgerType.CONSUME)).singleElement().satisfies(line -> {
+      assertThat(line.getDelta()).isZero();
+      assertThat(line.getAction()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditAction.IMAGE_REGENERATE);
+    });
+  }
+
+  @Test
+  @DisplayName("다시 그리기 무료 권한이 없으면(Free 기본) 원래 단가로 차감한다")
+  void regenerate_chargesNormallyWithoutEntitlement() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(false);
+
+    CreditReservation reservation = reserveRegenerate("regen-1");
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
+    assertThat(available()).isEqualTo(4);
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기는 하루 한도까지만 — 넘으면 원래 단가로 차감한다")
+  void regenerate_chargesNormallyAfterDailyCap() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    for (int i = 0; i < FREE_REGENERATE_DAILY_CAP; i++) {
+      CreditReservation free = reserveRegenerate("regen-" + i);
+      assertThat(service.settle(free.jobId(), 0, 1, "routine-1", "step-1").charged()).isZero();
+    }
+    CreditReservation overCap = reserveRegenerate("regen-over");
+    CreditSettlement settlement = service.settle(overCap.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
+    assertThat(available()).isEqualTo(4);
+  }
+
+  @Test
+  @DisplayName("반환된 무료 다시 그리기는 하루 한도에 세지 않는다 — 그림을 못 받았으니")
+  void regenerate_releasedJobDoesNotCountTowardCap() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    for (int i = 0; i < FREE_REGENERATE_DAILY_CAP; i++) {
+      service.release(reserveRegenerate("regen-" + i).jobId(), "그림 실패");
+    }
+    CreditReservation reservation = reserveRegenerate("regen-after-failures");
+
+    assertThat(store.job(reservation.jobId()).orElseThrow().getReserved()).isZero();
+  }
+
+  @Test
+  @DisplayName("무료 권한은 다시 그리기만 — 카드 그림 직접 만들기는 원래 단가로 차감한다")
+  void freeRegenerate_doesNotApplyToCardImage() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.CARD_IMAGE, "card-1", false);
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
   }
 }

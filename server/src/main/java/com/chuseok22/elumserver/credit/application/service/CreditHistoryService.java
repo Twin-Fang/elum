@@ -135,7 +135,8 @@ public class CreditHistoryService {
 
   /// 원장 한 줄 > 보이는 줄 0~2개 (일과 사용은 글·그림 두 줄로 나뉜다)
   private List<Entry> toEntries(AiCreditLedger line, Lookup lookup) {
-    if (line.getDelta() == 0) {
+    // 증감 0 은 숨김 (무료 다시 그리기 사용 줄만 예외 — 앱이 "무료"로 보임)
+    if (line.getDelta() == 0 && !isFreeRegenerateLine(line)) {
       return List.of();
     }
     return switch (line.getType()) {
@@ -148,6 +149,10 @@ public class CreditHistoryService {
         line.getCreatedAt()));
       default -> List.of();
     };
+  }
+
+  private static boolean isFreeRegenerateLine(AiCreditLedger line) {
+    return line.getType() == CreditLedgerType.CONSUME && line.getAction() == CreditAction.IMAGE_REGENERATE;
   }
 
   private static CreditHistoryKind grantKind(AiCreditLedger line, Lookup lookup) {
