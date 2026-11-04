@@ -10,6 +10,11 @@ on:
   # 그럴 때 손으로 한 번 돌려 반영·검증할 수 있게 열어 둔다.
   workflow_dispatch:
 
+# 배포는 한 번에 하나 (#1052). 겹치면 두 실행이 같은 활성 포트를 읽고 같은 색에 배포한다. 뒤 실행은 기다린다
+concurrency:
+  group: elum-server-deploy
+  cancel-in-progress: false
+
 env:
   PROJECT_NAME: elum # 프로젝트 명
   DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -203,14 +208,41 @@ jobs:
             fi
             echo "현재 활성 포트: ${ACTIVE_PORT}"
 
-            if [ "${ACTIVE_PORT}" = "${BLUE_PORT}" ]; then
-              PORT="${GREEN_PORT}"
-              CONTAINER_NAME="${GREEN_CONTAINER_NAME}"
-              OLD_CONTAINER_NAME="${BLUE_CONTAINER_NAME}"
-            else
-              PORT="${BLUE_PORT}"
-              CONTAINER_NAME="${BLUE_CONTAINER_NAME}"
-              OLD_CONTAINER_NAME="${GREEN_CONTAINER_NAME}"
+            # >>> decide-new-color
+            # 새 색 고르기: nginx 포트 색이 실행 중이면 반대 색, 아니면 nginx 포트 색을 다시 띄움 (#1052)
+            # 입력 nginx포트 blue포트 green포트 blue실행(1/0) green실행(1/0) > 출력 "새포트 새색 옛색 상태"
+            # 상태: normal 정상 / drift nginx 가 멈춘 색을 가리킴 / none-running 둘 다 멈춤
+            decide_new_color() {
+              active_port="$1"; blue_port="$2"; green_port="$3"; is_blue_running="$4"; is_green_running="$5"
+              if [ "${active_port}" = "${blue_port}" ]; then
+                conf_color=blue; conf_port="${blue_port}"; conf_running="${is_blue_running}"
+                other_color=green; other_port="${green_port}"; other_running="${is_green_running}"
+              else
+                conf_color=green; conf_port="${green_port}"; conf_running="${is_green_running}"
+                other_color=blue; other_port="${blue_port}"; other_running="${is_blue_running}"
+              fi
+              if [ "${conf_running}" = "1" ]; then
+                echo "${other_port} ${other_color} ${conf_color} normal"
+              elif [ "${other_running}" = "1" ]; then
+                echo "${conf_port} ${conf_color} ${other_color} drift"
+              else
+                echo "${conf_port} ${conf_color} ${other_color} none-running"
+              fi
+            }
+            # <<< decide-new-color
+
+            # 실행 중 컨테이너 (멈춘 컨테이너는 실행 중이 아님, docker ps -a 쓰지 않음)
+            IS_BLUE_RUNNING=$(echo "$PW" | sudo -S docker ps --format '{{.Names}}' | grep -qx "${BLUE_CONTAINER_NAME}" && echo 1 || echo 0)
+            IS_GREEN_RUNNING=$(echo "$PW" | sudo -S docker ps --format '{{.Names}}' | grep -qx "${GREEN_CONTAINER_NAME}" && echo 1 || echo 0)
+
+            DECISION="$(decide_new_color "${ACTIVE_PORT}" "${BLUE_PORT}" "${GREEN_PORT}" "${IS_BLUE_RUNNING}" "${IS_GREEN_RUNNING}")"
+            set -- ${DECISION}
+            PORT="$1"; NEW_COLOR="$2"; OLD_COLOR="$3"; DEPLOY_STATE="$4"
+            CONTAINER_NAME="${PROJECT}${IMG_SUFFIX}-${NEW_COLOR}"
+            OLD_CONTAINER_NAME="${PROJECT}${IMG_SUFFIX}-${OLD_COLOR}"
+            echo "[상태] nginx=${ACTIVE_PORT} 실행중 blue=${IS_BLUE_RUNNING} green=${IS_GREEN_RUNNING} > 새 색 ${NEW_COLOR}(${PORT}) 판단=${DEPLOY_STATE}"
+            if [ "${DEPLOY_STATE}" = "drift" ]; then
+              echo "[경고] nginx(${ACTIVE_PORT}) 가 멈춘 색을 가리킴 -> 그 색을 다시 띄워 복구, 실행 중인 ${OLD_CONTAINER_NAME} 은 검증 뒤 정리"
             fi
 
             echo "[main] nginx 백업 디렉터리 생성: ${BACKUP_DIR}"
@@ -337,10 +369,13 @@ jobs:
               fi
             fi
 
-            # nginx 재시작 후 도메인 접근 검증
+            # nginx 재시작 후 도메인 접근 검증 (NAS 안 nginx 경로 또는 공인 주소, 하나만 통과하면 성공)
+            # NAS 에서 자기 공인 주소로 되돌아오는 연결(hairpin)이 막혀도 nginx 경로로 확인한다
             echo "[main] nginx 재시작 후 도메인 접근 검증..."
+            DOMAIN_OK=0
             for i in $(seq 1 10); do
-              if curl -fsS "https://${DOMAIN}/healthz" >/dev/null 2>&1 ; then
+              if curl -fsS --max-time 5 --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/healthz" >/dev/null 2>&1 \
+                || curl -fsS --max-time 5 "https://${DOMAIN}/healthz" >/dev/null 2>&1 ; then
                 echo "도메인 접근 검증 성공 (시도 ${i})"
                 DOMAIN_OK=1
                 break
@@ -349,8 +384,17 @@ jobs:
               sleep 2
             done
 
-            if [ "${DOMAIN_OK:-0}" != "1" ]; then
-              echo "[경고] 도메인 접근 검증 실패: 배포 진행 (DNS 전파 지연 가능성)"
+            # 검증 실패: nginx 되돌림 > 새 컨테이너 제거 > 옛 컨테이너 유지 > 실패 (장애 알림 job 이 알림)
+            if [ "${DOMAIN_OK}" != "1" ]; then
+              echo "[오류] 전환 뒤 도메인 검증 실패 -> nginx 되돌림, 새 컨테이너 제거, ${OLD_CONTAINER_NAME} 유지"
+              echo "$PW" | sudo -S cp "${BACKUP_FILE}" "${NGINX_RP_CONF}"
+              if (echo "$PW" | sudo -S nginx -t); then
+                (echo "$PW" | sudo -S systemctl reload nginx) || (echo "$PW" | sudo -S systemctl restart nginx) || true
+              else
+                echo "[오류] 백업 설정도 nginx -t 실패 -> 수동 확인 필요 (${BACKUP_FILE})"
+              fi
+              echo "$PW" | sudo -S docker rm -f "${CONTAINER_NAME}" || true
+              exit 1
             fi
 
             # nginx 의 옛 worker 가 처리 중인 요청을 마치도록 잠시 둔 뒤, 옛 컨테이너가 남은 요청을 끝내고 내려가게 한다.
@@ -372,6 +416,8 @@ jobs:
             echo "[main] 배포 성공 - 백업 파일 최신 10개 보존 ${BACKUP_FILE}"
             echo "$PW" | sudo -S /bin/bash -c "ls -1t '${BACKUP_DIR}'/server.ReverseProxy.conf.*.bak 2>/dev/null | tail -n +11 | xargs -r rm -f"
 
+            RUNNING_COLORS="$(echo "$PW" | sudo -S docker ps --format '{{.Names}}' | grep -E "^${PROJECT}${IMG_SUFFIX}-(blue|green)\$" | tr '\n' ' ')"
+            echo "[상태] nginx=${PORT} 실행중=${RUNNING_COLORS}"
             echo "✅ main 서버 배포가 성공적으로 완료되었습니다."
 
   # 배포 실패 알림 (#648): build·deploy 중 하나라도 실패하면 Discord 로 1회
