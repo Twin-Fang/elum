@@ -47,7 +47,7 @@ class ErrorMessageParityTest {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
       + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1
-      + ADDED_MIGRATION_AND_LINK_CODES.size());
+      + ADDED_MIGRATION_AND_LINK_CODES.size() + ADDED_EXPERT_ROUTINE_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -163,6 +163,26 @@ class ErrorMessageParityTest {
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
         .isNotBlank().isNotEqualTo(code.name());
+    });
+  }
+
+  // 전문가 일과(#1076)가 더한 코드와 HTTP 상태
+  private static final Map<ErrorCode, String> ADDED_EXPERT_ROUTINE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.EXPERT_ROUTINE_NOT_FOUND, "NOT_FOUND"),
+    Map.entry(ErrorCode.EXPERT_ROUTINE_PRO_ONLY, "FORBIDDEN"),
+    Map.entry(ErrorCode.EXPERT_ROUTINE_INVALID, "BAD_REQUEST")));
+
+  @Test
+  @DisplayName("전문가 일과 코드 3개는 golden 밖에서 상태와 ko·en 문구를 단언한다")
+  void expertRoutineCodes_haveStatusAndMessages() {
+    assertThat(ADDED_EXPERT_ROUTINE_CODES).hasSize(3);
+    ADDED_EXPERT_ROUTINE_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
+        .isNotBlank().isNotEqualTo(code.name()).isNotEqualTo(ErrorMessages.standard().of(code, AppLocale.KO));
     });
   }
 

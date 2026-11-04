@@ -50,6 +50,16 @@ abstract final class Routes {
   /// 카드 인쇄용으로 받기 (#1073). extra 로 Routine 을 넘긴다
   static const guardianCardExport = '/guardian/card-export';
 
+  /// 전문가 일과 목록 (일과관리 > 전문가 일과, Pro). 탭 바를 덮는 화면이라 셸 밖에 둔다
+  static const guardianExpertRoutines = '/guardian/expert-routines';
+
+  /// 전문가 일과 미리 보기
+  static const guardianExpertRoutine = '/guardian/expert-routines/:expertRoutineId';
+
+  /// 전문가 일과 미리 보기 경로: `/guardian/expert-routines/{id}`
+  static String guardianExpertRoutineOf(String expertRoutineId) =>
+      '/guardian/expert-routines/${Uri.encodeComponent(expertRoutineId)}';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 

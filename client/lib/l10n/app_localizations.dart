@@ -6205,6 +6205,90 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
+
+  /// 일과관리 제목 줄 오른쪽 알약 버튼: 전문가 일과 목록 열기 (Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가 일과'**
+  String get expertRoutineEntry;
+
+  /// 전문가 일과 목록 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가 일과'**
+  String get expertRoutineListTitle;
+
+  /// 전문가 일과 목록 위 한 줄 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가가 살펴본 일과를 크레딧 없이 가져와요'**
+  String get expertRoutineListHint;
+
+  /// 분류 칩: 전체
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get expertRoutineCategoryAll;
+
+  /// 목록 0건 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 준비된 전문가 일과가 없어요'**
+  String get expertRoutineEmpty;
+
+  /// 목록 0건 안내 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'검수를 마친 일과부터 차례로 올라와요'**
+  String get expertRoutineEmptyHint;
+
+  /// 목록·미리 보기 받기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가 일과를 불러오지 못했어요'**
+  String get expertRoutineLoadFailed;
+
+  /// 목록 칸 메타: 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{카드 {count}장}}'**
+  String expertRoutineStepCount(int count);
+
+  /// 미리 보기: 보상 제안 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'보상 · {reward}'**
+  String expertRoutineReward(String reward);
+
+  /// 미리 보기: 카드 목록 섹션 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드'**
+  String get expertRoutineCardsSection;
+
+  /// 미리 보기 아래 주 버튼: 지금 보는 이룸이 일과관리 맨 앞에 넣는다 (크레딧 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 넣기'**
+  String get expertRoutineImport;
+
+  /// 가져온 직후 토스트. elumiName 은 지금 보는 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{elumiName} 일과관리에 넣었어요'**
+  String expertRoutineImportDone(String elumiName);
+
+  /// 가져오기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에 넣지 못했어요'**
+  String get expertRoutineImportFailedTitle;
+
+  /// 연결된 이룸이가 없어 가져올 곳이 없을 때 실패 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 먼저 연결해 주세요'**
+  String get expertRoutineNoElumi;
 }
 
 class _AppLocalizationsDelegate

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../shared/example_card_image/example_card_art.dart';
-import '../../../../shared/example_card_image/example_card_image_catalog.dart';
-import '../../../../shared/pictogram/pictogram_art.dart';
-import '../../../../shared/pictogram/pictogram_catalog.dart';
+import '../../core/theme/theme_context_ext.dart';
+import 'example_card_art.dart';
+import 'example_card_image_catalog.dart';
+import '../pictogram/pictogram_art.dart';
+import '../pictogram/pictogram_catalog.dart';
 
-/// 올린 그림이 없는 카드의 번들 그림: 예시 이미지 > 픽토그램 > 빈 칸
+/// 올린 그림이 없는 카드의 번들 그림: 예시 이미지 > 픽토그램 > 빈 칸 (이야기 카드 · 전문가 일과 카드)
 /// 칸을 꽉 채우므로 부모가 크기를 정한다
-class TalkBundledCardArt extends StatelessWidget {
-  const TalkBundledCardArt({
+class BundledCardArt extends StatelessWidget {
+  const BundledCardArt({
     super.key,
     required this.label,
     this.pictogramId,

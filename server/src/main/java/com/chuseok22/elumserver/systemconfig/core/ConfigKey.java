@@ -285,6 +285,11 @@ public enum ConfigKey {
     "Free가 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_FREE, "전문가 일과 가져오기",
+    "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -358,6 +363,11 @@ public enum ConfigKey {
   PRO_CARD_EXPORT_ALL_THEMES(
     ConfigGroup.PLAN_PRO, "카드 내보내기 디자인 테마",
     "Pro가 카드 내보내기에서 모든 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
+    "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 

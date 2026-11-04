@@ -55,6 +55,11 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 전문가 일과 가져오기. 목록·미리 보기는 열고 가져오기만 막는다 (#1076)
+  ROUTINE_TEMPLATES(
+    Kind.FLAG, "전문가 일과 가져오기",
+    ConfigKey.FREE_ROUTINE_TEMPLATES, ConfigKey.PRO_ROUTINE_TEMPLATES
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

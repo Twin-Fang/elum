@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../guardian/domain/routine_template.dart';
-import 'talk_category_chips.dart';
+import '../../../../core/widgets/elum_choice_chip.dart';
 
 /// 분류 고르기: 6개를 3×2 알약 칩으로 (피드 분류 칩과 같은 모양, 올리기 · 고치기가 함께 쓴다)
 class TalkCategoryPicker extends StatelessWidget {
@@ -48,7 +48,7 @@ class TalkCategoryPicker extends StatelessWidget {
                     if (column > 0) SizedBox(width: _gap.w),
                     Expanded(
                       child: start + column < categories.length
-                          ? TalkCategoryChip(
+                          ? ElumChoiceChip(
                               label: categories[start + column].labelOf(l10n),
                               isSelected:
                                   categories[start + column] ==
