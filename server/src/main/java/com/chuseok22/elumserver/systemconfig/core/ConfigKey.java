@@ -118,13 +118,43 @@ public enum ConfigKey {
   // 수단이 필요하다. API 키는 이미지와 같은 OPENAI_API_KEY를 함께 쓴다.
   TEXT_PROVIDER_SELECTED(
     ConfigGroup.TEXT_PROVIDER, "사용할 제공자",
-    "일과·추가 질문 텍스트를 생성할 제공자. 키가 없는 제공자는 고를 수 없다",
-    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI"), "GEMINI"
+    "일과·추가 질문 텍스트를 생성할 첫 제공자. 키가 없는 제공자는 고를 수 없다. "
+      + "실패하면 '실패 시 다음 제공자' 순서대로 넘어간다 (#1083)",
+    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI", "CLAUDE"), "GEMINI"
+  ),
+  // 첫 제공자 실패 시 이어서 쓸 제공자 순서 (#1083). 비우면 지금처럼 첫 제공자 하나만 쓴다.
+  // 허용 이름은 TEXT_PROVIDER_SELECTED 의 선택지 한 곳에서 읽는다.
+  TEXT_PROVIDER_FALLBACKS(
+    ConfigGroup.TEXT_PROVIDER, "실패 시 다음 제공자",
+    "첫 제공자가 오류·시간 초과·크레딧 소진·형식이 틀린 응답이면 같은 요청을 이 순서로 다시 보낸다. "
+      + "쉼표로 나눈 제공자 이름 (예: GEMINI,OPENAI). 비우면 첫 제공자 하나만 쓴다. "
+      + "키가 없는 제공자는 건너뛴다. 관리자 화면 'AI 제공자 전환' 의 순서 편집으로 바꾸는 것을 권한다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.TEXT_PROVIDER_LIST
   ),
   OPENAI_TEXT_MODEL(
     ConfigGroup.TEXT_PROVIDER, "OpenAI 텍스트 모델",
     "예: gpt-4.1-mini. nano급은 한국어 문장이 깨져 권장하지 않는다",
     ConfigValueType.STRING, List.of(), "gpt-4.1-mini"
+  ),
+  // Claude 키는 여러 개를 우선순위대로 둔다 (#1083). 값은 JSON 배열 하나를 통째로 암호화:
+  // [{"id":"…","nickname":"회사 키","apiKey":"sk-ant-…","enabled":true}, …] — 배열 순서가 우선순위
+  CLAUDE_API_KEYS(
+    ConfigGroup.TEXT_PROVIDER, "Claude API 키 목록",
+    "암호화해 저장한다. 키마다 별명·우선순위·사용 여부를 둔다. 1번 키를 쓰다가 오류·한도·크레딧 소진이면 "
+      + "다음 키로 넘어가고, 실패한 키는 5분 동안 뒤로 미룬다. 'AI 제공자 전환'의 Claude 키 카드에서 "
+      + "추가·삭제·순서를 바꾼다(저장한 키는 다시 볼 수 없고 끝 4자리만 보인다)",
+    ConfigValueType.SECRET, List.of(), "", ConfigFormat.CLAUDE_KEY_LIST
+  ),
+  CLAUDE_TEXT_MODEL(
+    ConfigGroup.TEXT_PROVIDER, "Claude 텍스트 모델",
+    "예: claude-haiku-5-5. 바꾼 뒤 관리자 프롬프트 시험으로 한 번 확인한다",
+    ConfigValueType.STRING, List.of(), "claude-haiku-5-5"
+  ),
+  // UNSET 은 요청에 effort 를 싣지 않는다(모델 기본값, Haiku 5.5 는 medium)
+  CLAUDE_TEXT_EFFORT(
+    ConfigGroup.TEXT_PROVIDER, "Claude 생각 정도 (effort)",
+    "UNSET 이면 보내지 않는다(모델 기본값). low 일수록 빠르고 싸다. 생각 토큰은 출력 단가로 청구된다",
+    ConfigValueType.SELECT, List.of("UNSET", "low", "medium", "high"), "UNSET"
   ),
   PRICE_OPENAI_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "OpenAI 이미지 단가 (USD/장)",
@@ -142,6 +172,18 @@ public enum ConfigKey {
     ConfigGroup.PRICING, "OpenAI 텍스트 출력 단가 (USD/1M 토큰)",
     "OpenAI 텍스트 출력 토큰 100만 개당 요금. 비용 추정에 사용",
     ConfigValueType.DECIMAL, List.of(), "1.60"
+  ),
+  // Claude Haiku 5.5 공식 단가 (platform.claude.com 가격표 2026-11-05 확인, 입력 10만 토큰 이하 요금).
+  // 10만 초과 요청은 0.50/2.50 이라 낮게 잡힌다 — 이룸 요청은 1만 토큰 안팎이라 해당 없음
+  PRICE_CLAUDE_TEXT_INPUT_PER_1M(
+    ConfigGroup.PRICING, "Claude 텍스트 입력 단가 (USD/1M 토큰)",
+    "Claude 텍스트 입력 토큰 100만 개당 요금. 비용 추정에 사용 (Haiku 5.5 기준값)",
+    ConfigValueType.DECIMAL, List.of(), "0.10"
+  ),
+  PRICE_CLAUDE_TEXT_OUTPUT_PER_1M(
+    ConfigGroup.PRICING, "Claude 텍스트 출력 단가 (USD/1M 토큰)",
+    "Claude 텍스트 출력 토큰 100만 개당 요금. 생각 토큰도 출력으로 센다. 비용 추정에 사용 (Haiku 5.5 기준값)",
+    ConfigValueType.DECIMAL, List.of(), "0.50"
   ),
   // 이미지도 토큰으로 과금된다. 장당 고정값만 두면 품질을 바꿔 출력 토큰이
   // 네 배가 되어도(low 272 → medium 1056) 기록된 비용은 그대로라 실제와 멀어진다.

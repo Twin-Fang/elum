@@ -44,7 +44,8 @@ class AdminConfigControllerMemberIdsTest {
     memberPickerService = mock(MemberPickerService.class);
     controller = new AdminConfigController(systemConfigService, mock(ImageClientRouter.class),
       mock(TextClientRouter.class), mock(PromptLocaleGate.class), mock(SystemConfigOverviewService.class),
-      memberPickerService);
+      memberPickerService,
+      mock(com.chuseok22.elumserver.admin.application.service.AdminTextProviderService.class));
     when(memberPickerService.findExisting(any())).thenReturn(List.of(
       new MemberPickerItem(EXISTING_MEMBER_ID, "tester", "시험", "ACTIVE", "활성")));
   }

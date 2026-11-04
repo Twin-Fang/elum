@@ -26,6 +26,11 @@ public enum TextProvider {
     ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
     ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
   ),
+  CLAUDE(
+    "Claude",
+    ConfigKey.PRICE_CLAUDE_TEXT_INPUT_PER_1M,
+    ConfigKey.PRICE_CLAUDE_TEXT_OUTPUT_PER_1M
+  ),
   ;
 
   private final String label;

@@ -29,10 +29,18 @@ class TextClientRouterTest {
   @Mock
   private TextGenerationClient openAiClient;
 
+  @Mock
+  private TextGenerationClient claudeClient;
+
   private TextClientRouter router() {
     lenient().when(geminiClient.provider()).thenReturn(TextProvider.GEMINI);
     lenient().when(openAiClient.provider()).thenReturn(TextProvider.OPENAI);
-    return new TextClientRouter(List.of(geminiClient, openAiClient), systemConfigService);
+    lenient().when(claudeClient.provider()).thenReturn(TextProvider.CLAUDE);
+    return new TextClientRouter(List.of(geminiClient, openAiClient, claudeClient), systemConfigService);
+  }
+
+  private void fallbacks(String value) {
+    when(systemConfigService.getString(ConfigKey.TEXT_PROVIDER_FALLBACKS)).thenReturn(value);
   }
 
   private void selected(String value) {
@@ -77,5 +85,70 @@ class TextClientRouterTest {
     selected("  OPENAI  ");
 
     assertThat(router.selected()).isEqualTo(TextProvider.OPENAI);
+  }
+
+  @Test
+  @DisplayName("대체 순서가 비어 있으면 고른 제공자 그대로 — 배포만으로 운영 동작이 바뀌지 않는다 (#1083)")
+  void emptyFallbacks_returnsSelectedClientItself() {
+    TextClientRouter router = router();
+    selected("GEMINI");
+    fallbacks("");
+    when(geminiClient.available()).thenReturn(true);
+
+    assertThat(router.current()).isSameAs(geminiClient);
+    assertThat(router.chain()).containsExactly(TextProvider.GEMINI);
+  }
+
+  @Test
+  @DisplayName("Claude 를 고를 수 있고, 대체 순서는 첫 제공자 뒤에 중복 없이 붙는다")
+  void chain_selectedFirstThenFallbacksWithoutDuplicates() {
+    TextClientRouter router = router();
+    selected("CLAUDE");
+    fallbacks("gemini,CLAUDE,OPENAI,NOT_A_PROVIDER");
+
+    assertThat(router.chain()).containsExactly(TextProvider.CLAUDE, TextProvider.GEMINI, TextProvider.OPENAI);
+  }
+
+  @Test
+  @DisplayName("키 없는 제공자는 사슬에서 건너뛰고, 하나만 남으면 그 제공자 그대로 쓴다")
+  void unavailableStepSkipped() {
+    TextClientRouter router = router();
+    selected("CLAUDE");
+    fallbacks("GEMINI");
+    when(claudeClient.available()).thenReturn(false);
+    when(geminiClient.available()).thenReturn(true);
+
+    assertThat(router.current()).isSameAs(geminiClient);
+  }
+
+  @Test
+  @DisplayName("쓸 수 있는 제공자가 둘 이상이면 실패 시 넘기는 묶음을 준다 — 1번이 실패하면 2번 결과가 나간다")
+  void multipleUsableSteps_fallsBackOnFailure() {
+    TextClientRouter router = router();
+    selected("CLAUDE");
+    fallbacks("GEMINI");
+    when(claudeClient.available()).thenReturn(true);
+    when(geminiClient.available()).thenReturn(true);
+    when(claudeClient.pickPictogramJson("t", "d")).thenThrow(new IllegalStateException("429"));
+    when(geminiClient.pickPictogramJson("t", "d")).thenReturn("{\"pictogramId\":\"toothbrush\"}");
+
+    TextGenerationClient current = router.current();
+
+    assertThat(current.provider()).isEqualTo(TextProvider.CLAUDE);
+    assertThat(current.pickPictogramJson("t", "d")).isEqualTo("{\"pictogramId\":\"toothbrush\"}");
+  }
+
+  @Test
+  @DisplayName("사슬 전부 키가 없으면 TEXT_PROVIDER_UNAVAILABLE")
+  void allStepsUnavailable_throws() {
+    TextClientRouter router = router();
+    selected("CLAUDE");
+    fallbacks("OPENAI");
+    when(claudeClient.available()).thenReturn(false);
+    when(openAiClient.available()).thenReturn(false);
+
+    assertThatThrownBy(router::current)
+      .isInstanceOf(CustomException.class)
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TEXT_PROVIDER_UNAVAILABLE);
   }
 }

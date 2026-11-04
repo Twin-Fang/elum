@@ -25,6 +25,10 @@ public enum ConfigFormat {
   CONTENT_LOCALE_LIST(false, "쉼표로 나눈 언어 코드 (ko,en,ja,zh,es)"),
   // 이룸 서버 주소 (ServerAddressPolicy). 비우면 전환 안 함
   SERVER_BASE_URL(true, "https://api.elum.suhsaechan.kr 처럼 경로 없는 https 주소"),
+  // 쉼표 목록: 텍스트 제공자 이름 (TEXT_PROVIDER_SELECTED 선택지). 비우면 대체 없음
+  TEXT_PROVIDER_LIST(true, "쉼표로 나눈 제공자 이름 (GEMINI,OPENAI,CLAUDE)"),
+  // Claude 키 목록 JSON (관리자 Claude 키 카드가 만든다). 직접 입력하지 않는다
+  CLAUDE_KEY_LIST(true, "Claude 키 카드에서 관리"),
   ;
 
   private final boolean isBlankAllowed;

@@ -1,15 +1,19 @@
 package com.chuseok22.elumserver.systemconfig.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import com.chuseok22.elumserver.systemconfig.core.ConfigFormat;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -23,6 +27,8 @@ public final class SystemConfigValueValidator {
   static final int MAX_VALUE_LENGTH = 500;
   // 비밀값 평문 최대 길이: 암호문이 Base64로 부풀어도 MAX_VALUE_LENGTH 안에 들어오게
   static final int SECRET_MAX_LENGTH = 300;
+  // Claude 키 목록 JSON 평문 최대 길이 (키 약 110자 + 별명, 10개 안팎). 컬럼이 TEXT 라 따로 둔다
+  static final int KEY_LIST_SECRET_MAX_LENGTH = 4000;
   // 쉼표 목록 구분자
   static final String LIST_DELIMITER = ",";
   // 거부 사유에 넣는 입력값 일부 최대 길이 (긴 값이 메시지를 덮지 않게)
@@ -46,6 +52,9 @@ public final class SystemConfigValueValidator {
     // 비밀값: 빈 값은 "그대로 두기"라 통과, 길이만 봄
     if (key.getValueType() == ConfigValueType.SECRET) {
       String secret = rawValue == null ? "" : rawValue.trim();
+      if (key.getFormat() == ConfigFormat.CLAUDE_KEY_LIST) {
+        return checkKeyList(secret);
+      }
       return secret.length() > SECRET_MAX_LENGTH
         ? ConfigValueCheck.rejected(SECRET_MAX_LENGTH + "자 이하로 입력해요")
         : ConfigValueCheck.accepted(secret);
@@ -139,6 +148,9 @@ public final class SystemConfigValueValidator {
       case MEMBER_ID_LIST -> checkListItems(value, MEMBER_ID_PATTERN, "회원 ID 형식이 아니에요", true);
       case CONTENT_LOCALE_LIST -> checkContentLocales(value);
       // 앱 토큰이 따라가는 주소라 허용 도메인만
+      case TEXT_PROVIDER_LIST -> checkTextProviders(value);
+      // 비밀값이라 위에서 처리 (STRING 으로 선언되면 형식 검사 없이 받지 않음)
+      case CLAUDE_KEY_LIST -> ConfigValueCheck.rejected("Claude 키 카드에서만 바꿀 수 있어요");
       case SERVER_BASE_URL -> ServerAddressPolicy.isAllowed(value)
         ? ConfigValueCheck.accepted(value.trim())
         : ConfigValueCheck.rejected("허용된 서버 주소만 받아요: " + String.join(", ", ServerAddressPolicy.ALLOWED_API_HOSTS) + " (https, 경로 없이)");
@@ -159,6 +171,44 @@ public final class SystemConfigValueValidator {
       }
     }
     return ConfigValueCheck.accepted(String.join(LIST_DELIMITER, items));
+  }
+
+  /// 대체 제공자 목록: 이름은 TEXT_PROVIDER_SELECTED 선택지 (대소문자 무시 > 대문자로 정리, 중복 제거)
+  private static ConfigValueCheck checkTextProviders(String value) {
+    List<String> allowedProviders = ConfigKey.TEXT_PROVIDER_SELECTED.getAllowedValues();
+    List<String> providers = splitListItems(value.toUpperCase(Locale.ROOT));
+    for (String provider : providers) {
+      if (!allowedProviders.contains(provider)) {
+        return ConfigValueCheck.rejected("모르는 제공자예요: " + shorten(provider)
+          + " (" + String.join(", ", allowedProviders) + " 중에서)");
+      }
+    }
+    return ConfigValueCheck.accepted(String.join(LIST_DELIMITER, providers));
+  }
+
+  /// Claude 키 목록: JSON 배열, 항목마다 nickname·apiKey 필수 (빈 값은 "그대로 두기")
+  private static ConfigValueCheck checkKeyList(String secret) {
+    if (secret.isEmpty()) {
+      return ConfigValueCheck.accepted(secret);
+    }
+    if (secret.length() > KEY_LIST_SECRET_MAX_LENGTH) {
+      return ConfigValueCheck.rejected("키가 너무 많아요. 안 쓰는 키를 지워요");
+    }
+    try {
+      JsonNode keys =
+        DefaultJsonMapper.SHARED.readTree(secret);
+      if (keys == null || !keys.isArray()) {
+        return ConfigValueCheck.rejected("Claude 키 카드에서만 바꿀 수 있어요");
+      }
+      for (JsonNode entry : keys) {
+        if (entry.path("nickname").asText("").isBlank() || entry.path("apiKey").asText("").isBlank()) {
+          return ConfigValueCheck.rejected("키마다 별명과 키 값이 있어야 해요");
+        }
+      }
+      return ConfigValueCheck.accepted(secret);
+    } catch (JsonProcessingException e) {
+      return ConfigValueCheck.rejected("Claude 키 카드에서만 바꿀 수 있어요");
+    }
   }
 
   // 모르는 코드는 저장하지 않음. ko 는 늘 켜 두므로 앞에 붙여 정규화

@@ -1,8 +1,8 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
-import com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
+import com.chuseok22.elumserver.admin.application.service.AdminTextProviderService;
 import com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService;
 import com.chuseok22.elumserver.admin.application.service.PromptLocaleGate;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -50,6 +50,7 @@ public class AdminConfigController {
   private final PromptLocaleGate promptLocaleGate;
   private final SystemConfigOverviewService overviewService;
   private final MemberPickerService memberPickerService;
+  private final AdminTextProviderService adminTextProviderService;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
@@ -68,7 +69,9 @@ public class AdminConfigController {
     // "규칙에 어긋난 값" 칩: 저장 뒤 규칙이 바뀌어 지금 규칙에 맞지 않는 저장값 수
     model.addAttribute("ruleWarningCount", rows.stream().filter(SettingRow::hasValidationWarning).count());
     model.addAttribute("imageProviders", imageProviderViews());
-    model.addAttribute("textProviders", textProviderViews());
+    // 텍스트: 시도 순서대로 + Claude 키 카드 (#1083)
+    model.addAttribute("textProviders", adminTextProviderService.providerViews());
+    model.addAttribute("claudeKeys", adminTextProviderService.claudeKeyViews());
     return "admin/settings";
   }
 
@@ -146,6 +149,10 @@ public class AdminConfigController {
     switch (key) {
       case IMAGE_PROVIDER_SELECTED -> rejectUnavailableImageProvider(value);
       case TEXT_PROVIDER_SELECTED -> rejectUnavailableTextProvider(value);
+      case TEXT_PROVIDER_FALLBACKS -> adminTextProviderService.requireFallbacksAvailable(value);
+      // 목록 JSON 은 Claude 키 카드가 만든다 (설정 표에서 글로 넣으면 별명·순서가 깨짐). 지우기는 복원 버튼으로
+      case CLAUDE_API_KEYS -> throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE,
+        "Claude 키는 'AI 제공자 전환'의 Claude 키 카드에서 추가·삭제해요");
       case ENABLED_CONTENT_LOCALES -> rejectIncompleteLocales(value);
       case ADS_ALWAYS_SHOWN_MEMBER_IDS -> rejectUnknownMembers(value);
       default -> {
@@ -220,19 +227,6 @@ public class AdminConfigController {
     if (!usable) {
       throw new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE);
     }
-  }
-
-  // 단가가 둘이라 이미지처럼 한 값으로 정렬할 수 없다. 선언 순서를 그대로 보여준다.
-  private List<AdminTextProviderView> textProviderViews() {
-    TextProvider current = textClientRouter.selected();
-    return textClientRouter.all().stream()
-      .map(client -> AdminTextProviderView.of(
-        client, current,
-        systemConfigService.getDouble(client.provider().getInputPriceKey()),
-        systemConfigService.getDouble(client.provider().getOutputPriceKey())
-      ))
-      .sorted(java.util.Comparator.comparing(AdminTextProviderView::name))
-      .toList();
   }
 
   private List<AdminImageProviderView> imageProviderViews() {

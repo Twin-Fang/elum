@@ -73,6 +73,19 @@ public class AiCallStatsService {
       .toList();
   }
 
+  /** 기간[from, to) 키 별명별 호출·성공·비용, 비용 큰 순 (Claude 키 여러 개, #1083) */
+  public List<KeyLabelUsage> sumUsageByKeyLabel(LocalDateTime from, LocalDateTime to) {
+    return aiCallLogRepository.sumUsageByKeyLabelBetween(from, to).stream()
+      .map(usage -> new KeyLabelUsage(
+        usage.getKeyLabel(), usage.getTotalCount(), usage.getSuccessCount(), usage.getTotalCostUsd()))
+      .sorted(java.util.Comparator.comparingDouble(KeyLabelUsage::costUsd).reversed())
+      .toList();
+  }
+
+  /** 키 별명 1개의 합계 (키 값 없음) */
+  public record KeyLabelUsage(String keyLabel, long totalCount, long successCount, double costUsd) {
+  }
+
   private static AiCallType toCallTypeOrNull(String name) {
     try {
       return name == null ? null : AiCallType.valueOf(name);
