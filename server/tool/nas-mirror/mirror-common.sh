@@ -20,6 +20,8 @@ REDIS_CONTAINER="elum-redis"
 APP_CONTAINER="elum-back-mirror"
 # 내 NAS Traefik 배포(PROJECT-SPRING-ELUM-NAS-CICD.yaml)의 색 컨테이너: elum-back-blue | elum-back-green
 APP_CONTAINER_PREFIX="elum-back"
+# 이 NAS 서버 자신의 주소: 전환 뒤 새 서버 주소 설정에 자기 자신을 넣는다 (비우면 앱이 옛 서버로 되돌아감, #831)
+SELF_API_BASE_URL="https://api.elum.suhsaechan.kr"
 
 # 원본 DB 가 PostgreSQL 17 이라 덤프·복원 도구도 17
 POSTGRES_IMAGE="postgres:17"

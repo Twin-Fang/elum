@@ -11,6 +11,7 @@
 - [ ] #831 앱 버전이 두 스토어에 출시됨, 친구 서버 `최소 버전`을 그 버전으로 올려 사용자가 업데이트함
 - [ ] 내 NAS: `PROJECT-SPRING-ELUM-NAS-CICD` 를 `mode=mirror` 로 배포, 친구 서버와 **같은 커밋**
 - [ ] DSM 역방향 프록시 `api.elum.suhsaechan.kr` > `localhost:8079`, `elum-back-mirror` 정리
+- [ ] 내 NAS 에서 `https://api.elum.suhsaechan.kr/.well-known/apple-app-site-association` · `/.well-known/assetlinks.json` 응답 확인 (#831 앱이 새 도메인을 앱 링크로 등록하므로, 앱 출시 전에 필요)
 - [ ] `mirror.env` 에 `SOURCE_ADMIN_BASE_URL` · `SOURCE_ADMIN_USERNAME` · `SOURCE_ADMIN_PASSWORD`
 - [ ] 리허설 통과 (아래), 걸린 시간 기록
 
@@ -37,7 +38,7 @@ bash verify-consistency.sh --allow-live       # 차이는 정보로만 (원본�
 | 5 | (4 에 포함) 파일 차이분 받기 | 잠금·점검 끔 |
 | 6 | `bash verify-consistency.sh` **차이 0** | 다르면 4 다시, 2번 연속 다르면 취소 |
 | 7 | GitHub Actions `PROJECT-SPRING-ELUM-NAS-CICD` 를 `mode=production` 으로 실행 (FCM 켬) | 취소 |
-| 8 | 내 서버 관리자에서 `점검 모드` 끔 (DB 복사로 켜진 채 넘어옴), `/healthz` · `/api/app/status` 확인 | 취소 |
+| 8 | 내 서버 관리자에서 `점검 모드` 끔 (DB 복사로 켜진 채 넘어옴), `/healthz` · `/api/app/status` 확인. `새 서버 주소`가 자기 자신(`https://api.elum.suhsaechan.kr`)인지 확인 (4 가 넣음, 비어 있으면 앱이 옛 서버로 되돌아감) | 취소 |
 | 9 | 친구 서버 `새 서버 주소` = `https://api.elum.suhsaechan.kr`, 친구 서버 `점검 모드` 끔 (잠금은 유지) | 잠금 끔 + 주소 비움 = 원래대로 |
 | 10 | AdMob 콘솔 보상 콜백 주소를 새 도메인으로 (사람) | — |
 | 11 | 내 서버 로그·관리자 화면으로 사용자 유입 확인 | — |

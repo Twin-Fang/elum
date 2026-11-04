@@ -45,11 +45,14 @@ done
   < "$dump_file" || fail "restore failed : ${dump_file}"
 log "restore done"
 
-# 4) 이전용 설정 3개 되돌림 (원본이 켜 둔 이전 잠금·내보내기·새 주소가 내 NAS 까지 따라오지 않게, 미러·전환 공통)
+# 4) 이전용 설정 3개 되돌림 (원본이 켜 둔 이전 잠금·내보내기·새 주소가 내 NAS 까지 따라오지 않게)
+# 새 서버 주소: 미러는 비움, 전환은 자기 자신 (비우면 옮겨 온 앱이 저장값을 지우고 옛 서버로 되돌아감)
+self_base_url=""
+[ "$is_cutover" = "true" ] && self_base_url="$SELF_API_BASE_URL"
 "$DOCKER" exec "$POSTGRES_CONTAINER" psql -v ON_ERROR_STOP=1 -U "$DB_USER" -d "$DB_NAME" \
   -c "UPDATE system_config SET config_value = 'false' WHERE config_key IN ('MIGRATION_LOCK', 'MIGRATION_FILE_EXPORT_ENABLED');" \
-  -c "UPDATE system_config SET config_value = '' WHERE config_key = 'APP_API_BASE_URL';" >/dev/null
-log "migration settings reset : lock off, export off, new server url empty"
+  -c "UPDATE system_config SET config_value = '${self_base_url}' WHERE config_key = 'APP_API_BASE_URL';" >/dev/null
+log "migration settings reset : lock off, export off, new server url '${self_base_url}'"
 
 # 5) 미러만: 신고 메일 끔 (푸시는 배포 mirror 모드가 끔). 전환은 운영 값 그대로
 if [ "$is_cutover" = "false" ]; then
