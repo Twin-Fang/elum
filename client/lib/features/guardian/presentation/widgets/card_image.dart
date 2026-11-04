@@ -20,11 +20,6 @@ enum CardImageState {
   none,
 }
 
-/// 서버에 그림을 물어볼 수 있는 카드인가.
-///
-/// 아직 서버에 저장되지 않은 카드는 이미지도 없다. 요청 자체를 하지 않는다.
-bool canFetchCardImage(String routineId, String stepId) =>
-    routineId.isNotEmpty && routineId != 'local' && stepId.isNotEmpty;
 
 /// 카드 한 장의 그림 상태를 구독한다. [CardImage]와 카드 안 배치가 **같은 값**을 본다 —
 /// 각자 판정하면 그림 자리는 기본 카드인데 제목 줄은 그림이 있는 것처럼 어긋난다.
