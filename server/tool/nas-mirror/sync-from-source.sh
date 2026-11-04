@@ -16,6 +16,11 @@ for argument in "$@"; do
   esac
 done
 
+# 전환 뒤에는 운영 DB 를 옛 서버 DB 로 덮어쓰게 되므로 거부 (표식은 손으로 지우지 않는다)
+if [ -f "$CUTOVER_DONE_FILE" ]; then
+  fail "cutover already done (${CUTOVER_DONE_FILE}) : this NAS is production, refusing to overwrite from source"
+fi
+
 load_mirror_env
 dump_file="${DUMP_DIR}/elum_$(date +%Y%m%d%H%M%S).dump"
 

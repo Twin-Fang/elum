@@ -27,6 +27,8 @@ SELF_API_BASE_URL="https://api.elum.suhsaechan.kr"
 # 관리자 "서버 이전" 페이지와 주고받는 폴더 (컨테이너 /app/migration-sync, #1062)
 # 결과: sync-status.json · verify-status.json / 요청·표식: SYNC_REQUESTED · VERIFY_REQUESTED · SYNC_PAUSED
 SYNC_STATE_DIR="${APP_DIR}/migration-sync"
+# 전환 완료 표식: 있으면 덮어쓰기(sync-from-source.sh)를 거부 — 내 NAS 가 운영 원본 (2026-11-05, #1104)
+CUTOVER_DONE_FILE="${MIRROR_DIR}/CUTOVER_DONE"
 
 # 원본 DB 가 PostgreSQL 17 이라 덤프·복원 도구도 17
 POSTGRES_IMAGE="postgres:17"

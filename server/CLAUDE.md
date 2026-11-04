@@ -30,25 +30,21 @@
 
 ## 배포 서버 로그 확인
 
-배포된 백엔드는 Blue/Green 무중단 배포라 컨테이너가 `elum-back-blue`(8085) · `elum-back-green`(8086)
-둘 중 하나로 떠 있다. 배포할 때마다 서로 바뀌므로 **둘 중 지금 떠 있는 쪽**으로 조회한다.
-한쪽에서 로그가 안 나오면 다른 쪽을 조회한다.
+배포된 백엔드는 내 NAS(SUH-PROJECT, `api.elum.suhsaechan.kr`)의 Traefik Blue/Green 무중단 배포라 컨테이너가 `elum-back-blue` · `elum-back-green`
+둘 중 하나로 떠 있다 (2026-11-05 전환, #1104). 배포할 때마다 서로 바뀌므로 **둘 중 지금 떠 있는 쪽**으로 조회한다.
 
 ```bash
-# 전체 로그를 실시간으로 따라간다 (blue 또는 green)
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=all&follow=true"
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=all&follow=true"
+# 내 NAS 에서 (/pro-ssh 저장 이름 synology-nas, sudo 필요). 지금 떠 있는 쪽 확인 > 최근 로그
+sudo docker ps --format '{{.Names}} {{.Status}}' | grep elum-back
+sudo docker logs --tail 500 elum-back-blue 2>&1 | tail -50
+sudo docker logs --since 10m elum-back-green 2>&1 | grep -E 'ERROR|WARN'
 
-# 최근 로그만 보고 끝낸다 (follow 없이)
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=500" | tail -50
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=500" | tail -50
+# 실시간으로 따라가며 재현 (스스로 끝나지 않는다: timeout 이나 grep -m 1 로 끊는다)
+sudo docker logs -f --since 1m elum-back-blue 2>&1
 ```
 
-**`lines`는 `500` · `1000` · `all` · 빈 값만 받는다.** 그 외 숫자를 넣으면
-로그 대신 `잘못된 'lines' 파라미터 요청입니다`가 돌아온다.
-
-`follow=true`는 스트림이라 스스로 끝나지 않는다. 특정 문구가 나올 때까지만 볼 거라면
-`--max-time`으로 상한을 두거나 `grep -m 1`로 끊는다.
+관리자 화면 `https://api.elum.suhsaechan.kr/admin/logs` (서버 로그) 에서도 볼 수 있다.
+옛 서버(친구 NAS, `api.elum.chuseok22.com`)는 이전 잠금을 켠 채 옛 앱에 업데이트·새 주소만 안내한다. 사용자 요청은 오지 않는다.
 
 > 클라이언트에서 API가 실패할 때(4xx/5xx) **서버 코드를 추측하기 전에 이 로그를 먼저 본다.**
 > 요청이 서버까지 왔는지, 어느 계층에서 터졌는지가 로그에 남는다.

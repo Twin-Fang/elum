@@ -1,5 +1,11 @@
 # 전환 절차서 (친구 서버 > 내 NAS)
 
+> ⚠️ **2026-11-05 07:56 전환 완료 (#831 · #1104).** 내 NAS 가 운영 원본이다. 이 폴더의 동기화·검사 스크립트는 **다시 돌리지 않는다** —
+> `sync-from-source.sh` 는 운영 DB 를 옛 서버 DB 로 덮어쓴다. DSM 예약 작업은 지웠고, `mirror/CUTOVER_DONE` 표식이 있으면 `sync-from-source.sh` 가 실행을 거부한다 (`SYNC_PAUSED` 도 남겨 둠).
+> 운영 배포는 `PROJECT-SPRING-ELUM-NAS-CICD.yaml` (main 푸시 = production).
+
+> 실제 진행 기록(단계별 시각·명령·응답·캡처): #831 댓글. 점검 07:48:27~07:56:07 (약 7분 40초), 정합성 차이 0.
+
 설계: `docs/superpowers/specs/2026-11-04-elum-server-cutover-design.md` [E] 절 (#1054)
 
 스크립트는 내 NAS `/volume1/project/elum/mirror/bin` 에서 root 로 돌린다 (`sudo bash <스크립트>`).
@@ -48,8 +54,9 @@ bash verify-consistency.sh --allow-live       # 차이는 정보로만 (원본�
 
 ## 전환 뒤
 
-- 내 NAS 배포 워크플로를 `main` 푸시로 돌게 바꾸고, 친구 서버 워크플로는 푸시 실행을 끈다 (친구 서버는 잠금 그대로)
-- 다음 앱 릴리스에서 `.env` 기본 주소를 새 도메인으로
-- 친구 서버 `이전 파일 내보내기` 끔, 파일 내보내기 API 제거 이슈
-- `sync-from-source.sh` 는 더 쓰지 않는다 (내 NAS 가 원본이 됨). DSM 작업 스케줄러 `elum-mirror-sync` · `elum-mirror-requests` 를 삭제한다 (`SYNC_PAUSED` 는 그때까지 둔다)
+- [x] 내 NAS 배포 워크플로를 `main` 푸시로 돌게 바꾸고, 친구 서버 워크플로는 푸시 실행을 끈다 (친구 서버는 잠금 그대로) — #1104
+- [x] `.env` 기본 주소를 새 도메인으로 (`AppConfig.productionApiBaseUrl`, `.env.example`) — #1104, 다음 앱 릴리스부터. 비밀값 `CLIENT_ENV_FILE` 은 따로 확인
+- [x] 친구 서버 `이전 파일 내보내기` 끔 (2026-11-05 08:09). 파일 내보내기 API 제거는 옛 서버를 내릴 때
+- [x] DSM 작업 스케줄러 `elum-mirror-sync` · `elum-mirror-requests` 삭제 (2026-11-05 08:11). `sync-from-source.sh` 는 더 쓰지 않는다, `SYNC_PAUSED` 는 그대로 둔다
+- [x] AdMob 보상형 광고 단위 2개 서버 측 확인 URL > 새 도메인 (2026-11-05 08:04)
 - 옛 서버 안내 상태는 내 서버 관리자 > 서버 이전 > 옛 서버 칸에서 본다 (응답·점검·새 주소 안내)
