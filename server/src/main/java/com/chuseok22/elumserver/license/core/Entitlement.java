@@ -55,6 +55,11 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 만든 일과를 다른 언어 사본으로 (#1077). 꺼진 플랜은 번역 API 가 ROUTINE_TRANSLATE_NOT_ALLOWED 로 막음
+  ROUTINE_TRANSLATE(
+    Kind.FLAG, "일과 다른 언어로 만들기",
+    ConfigKey.FREE_ROUTINE_TRANSLATE, ConfigKey.PRO_ROUTINE_TRANSLATE
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

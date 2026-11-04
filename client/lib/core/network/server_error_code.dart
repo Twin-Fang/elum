@@ -140,6 +140,9 @@ enum ServerErrorCode {
   routineCreateDailyLimitExceeded('ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED'),
   routineCountLimitExceeded('ROUTINE_COUNT_LIMIT_EXCEEDED'),
   profileCountLimitExceeded('PROFILE_COUNT_LIMIT_EXCEEDED'),
+  // 일과 다른 언어로 만들기 (#1077). 앱은 Free 에게 입구를 숨겨 403 은 오래된 앱·직접 호출에서만 남
+  routineTranslateNotAllowed('ROUTINE_TRANSLATE_NOT_ALLOWED'),
+  routineTranslateFailed('ROUTINE_TRANSLATE_FAILED'),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.

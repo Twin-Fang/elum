@@ -23,6 +23,8 @@ public enum AiCallType {
   GEMINI_TEXT_IMAGE_PROMPT("Gemini 그림 문장 번역", AiCallPurpose.IMAGE_PROMPT_TRANSLATE, AiProvider.GEMINI),
   GEMINI_TEXT_PICTOGRAM("Gemini 픽토그램 선택", AiCallPurpose.PICTOGRAM_PICK, AiProvider.GEMINI),
   OPENAI_TEXT_PICTOGRAM("OpenAI 픽토그램 선택", AiCallPurpose.PICTOGRAM_PICK, AiProvider.OPENAI),
+  GEMINI_TEXT_TRANSLATE("Gemini 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.GEMINI),
+  OPENAI_TEXT_TRANSLATE("OpenAI 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.OPENAI),
   ;
 
   private final String label;

@@ -148,6 +148,9 @@ public enum ErrorCode {
   ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
+  // 일과 다른 언어로 만들기 (#1077). 요금제에 없음 403 (앱은 Free 에게 입구를 숨김), AI 번역 실패 502 (사본을 만들지 않음)
+  ROUTINE_TRANSLATE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  ROUTINE_TRANSLATE_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.

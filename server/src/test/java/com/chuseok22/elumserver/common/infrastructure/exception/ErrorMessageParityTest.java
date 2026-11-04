@@ -46,7 +46,7 @@ class ErrorMessageParityTest {
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
-      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1);
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1 + ADDED_ROUTINE_TRANSLATE_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -137,6 +137,24 @@ class ErrorMessageParityTest {
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이").endsWith("요.");
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
     }
+  }
+
+  // 다른 언어로 만들기(#1077)가 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_ROUTINE_TRANSLATE_CODES = Map.of(
+    ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED, "FORBIDDEN",
+    ErrorCode.ROUTINE_TRANSLATE_FAILED, "BAD_GATEWAY");
+
+  @Test
+  @DisplayName("다른 언어로 만들기 코드(#1077)는 golden 밖에서 상태와 ko·en 문구를 단언한다")
+  void routineTranslateCodes_areAssertedSeparately() {
+    ADDED_ROUTINE_TRANSLATE_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
+    });
   }
 
   // 이야기(보호자끼리 일과 나누기)가 더한 코드와 HTTP 상태.

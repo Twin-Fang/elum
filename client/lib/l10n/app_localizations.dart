@@ -4400,6 +4400,66 @@ abstract class AppLocalizations {
   /// **'복사하기'**
   String get routineLibraryMenuCopy;
 
+  /// 일과관리 빠른 메뉴 줄 (Pro). 글만 다른 언어로 바꾼 새 일과를 만든다
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 언어로 만들기'**
+  String get routineTranslateMenu;
+
+  /// 언어 고르는 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 언어로 만들기'**
+  String get routineTranslateSheetTitle;
+
+  /// 언어 고르는 시트 설명. 원래 일과는 그대로 남는다
+  ///
+  /// In ko, this message translates to:
+  /// **'글만 바꾼 새 일과를 일과관리에 만들어요. 그림은 그대로 써요.'**
+  String get routineTranslateSheetDescription;
+
+  /// 고를 언어 줄: 한국어
+  ///
+  /// In ko, this message translates to:
+  /// **'한국어'**
+  String get routineTranslateLanguageKo;
+
+  /// 고를 언어 줄: 영어. 괄호 안은 그 언어로 쓴 이름이라 번역하지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'영어 (English)'**
+  String get routineTranslateLanguageEn;
+
+  /// 언어 시트 아래 안내. count 는 글 만들기 한 번의 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 {count}개를 써요'**
+  String routineTranslateCreditNote(int count);
+
+  /// 언어를 고른 뒤 만드는 동안 시트 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'글을 바꾸고 있어요. 잠시만 기다려 주세요'**
+  String get routineTranslateInProgress;
+
+  /// 다른 언어로 만들기 성공 알림. language 는 고른 언어 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{language} 일과를 만들었어요'**
+  String routineTranslateDone(String language);
+
+  /// 다른 언어로 만들기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 언어로 만들지 못했어요'**
+  String get routineTranslateFailedTitle;
+
+  /// 다른 언어로 만들기 실패 팝업 본문 (서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요. 원래 일과는 그대로예요.'**
+  String get routineTranslateFailedFallback;
+
   /// 빠른 메뉴 줄 · 지우기 확인 버튼
   ///
   /// In ko, this message translates to:

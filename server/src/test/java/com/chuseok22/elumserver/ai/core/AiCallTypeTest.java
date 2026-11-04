@@ -30,6 +30,9 @@ class AiCallTypeTest {
     // 카드 직접 추가 시 픽토그램 고르기 (#247). 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다.
     Map.entry(AiCallType.GEMINI_TEXT_PICTOGRAM, AiCallPurpose.PICTOGRAM_PICK),
     Map.entry(AiCallType.OPENAI_TEXT_PICTOGRAM, AiCallPurpose.PICTOGRAM_PICK),
+    // 만든 일과를 다른 언어로 (#1077). 일과 생성으로 세면 번역 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
+    Map.entry(AiCallType.OPENAI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
     Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 

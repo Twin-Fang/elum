@@ -2413,6 +2413,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineLibraryMenuCopy => '복사하기';
 
   @override
+  String get routineTranslateMenu => '다른 언어로 만들기';
+
+  @override
+  String get routineTranslateSheetTitle => '다른 언어로 만들기';
+
+  @override
+  String get routineTranslateSheetDescription =>
+      '글만 바꾼 새 일과를 일과관리에 만들어요. 그림은 그대로 써요.';
+
+  @override
+  String get routineTranslateLanguageKo => '한국어';
+
+  @override
+  String get routineTranslateLanguageEn => '영어 (English)';
+
+  @override
+  String routineTranslateCreditNote(int count) {
+    return '크레딧 $count개를 써요';
+  }
+
+  @override
+  String get routineTranslateInProgress => '글을 바꾸고 있어요. 잠시만 기다려 주세요';
+
+  @override
+  String routineTranslateDone(String language) {
+    return '$language 일과를 만들었어요';
+  }
+
+  @override
+  String get routineTranslateFailedTitle => '다른 언어로 만들지 못했어요';
+
+  @override
+  String get routineTranslateFailedFallback => '잠시 뒤 다시 해 주세요. 원래 일과는 그대로예요.';
+
+  @override
   String get routineLibraryMenuRemove => '지우기';
 
   @override

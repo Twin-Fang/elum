@@ -26,7 +26,8 @@
     CARD_IMAGE: ['#1baf7a', '#199e70'],
     SENSITIVE_INFO_CHECK: ['#eda100', '#c98500'],
     IMAGE_PROMPT_TRANSLATE: ['#e87ba4', '#d55181'],
-    PICTOGRAM_PICK: ['#008300', '#008300']
+    PICTOGRAM_PICK: ['#008300', '#008300'],
+    ROUTINE_TRANSLATE: ['#7a5af5', '#8f74f7']
   };
   var FALLBACK_COLOR = ['#898781', '#898781'];
   // 축·격자 잉크 [라이트, 다크]
