@@ -38,7 +38,7 @@ public class RoutineScheduleController implements RoutineScheduleDocs {
     return ResponseEntity.ok(routineScheduleService.list(Caller.from(authentication, profileId)));
   }
 
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PutMapping("/{routineId}")
   public ResponseEntity<RoutineScheduleResponse> save(
     Authentication authentication, @PathVariable String routineId, @RequestBody RoutineScheduleSaveRequest request
@@ -46,7 +46,7 @@ public class RoutineScheduleController implements RoutineScheduleDocs {
     return ResponseEntity.ok(routineScheduleService.save(Caller.from(authentication), routineId, request));
   }
 
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/{routineId}")
   public ResponseEntity<Void> delete(Authentication authentication, @PathVariable String routineId) {
     routineScheduleService.delete(Caller.from(authentication), routineId);

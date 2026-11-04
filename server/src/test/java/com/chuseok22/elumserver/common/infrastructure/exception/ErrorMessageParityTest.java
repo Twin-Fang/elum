@@ -51,7 +51,8 @@ class ErrorMessageParityTest {
       + ADDED_ROUTINE_SCHEDULE_CODES.size()
       + ADDED_GUARDIAN_VOICE_CODES.size()
       + ADDED_EXPERT_ROUTINE_CODES.size()
-      + ADDED_ROUTINE_MEMORY_CODES.size());
+      + ADDED_ROUTINE_MEMORY_CODES.size()
+      + ADDED_PLAN_STORE_AND_REPORT_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -266,6 +267,30 @@ class ErrorMessageParityTest {
         assertThat(ErrorMessages.standard().of(code, locale)).as("%s %s", locale.code(), code)
           .isNotBlank().isNotEqualTo(code.name());
       }
+    });
+  }
+
+  // 스토어 구독(#1071) 6개 + 주간 리포트(#1074) 1개가 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_PLAN_STORE_AND_REPORT_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.SUBSCRIPTION_STORE_DISABLED, "FORBIDDEN"),
+    Map.entry(ErrorCode.SUBSCRIPTION_RECEIPT_INVALID, "BAD_REQUEST"),
+    Map.entry(ErrorCode.SUBSCRIPTION_ENVIRONMENT_NOT_ALLOWED, "BAD_REQUEST"),
+    Map.entry(ErrorCode.SUBSCRIPTION_PRODUCT_NOT_ALLOWED, "BAD_REQUEST"),
+    Map.entry(ErrorCode.SUBSCRIPTION_OWNED_BY_OTHER_MEMBER, "BAD_REQUEST"),
+    Map.entry(ErrorCode.SUBSCRIPTION_STORE_NOT_CONFIGURED, "SERVICE_UNAVAILABLE"),
+    Map.entry(ErrorCode.WEEKLY_REPORT_NOT_ALLOWED, "FORBIDDEN")));
+
+  @Test
+  @DisplayName("스토어 구독 · 주간 리포트 코드 7개는 golden 밖에서 상태와 ko·en 문구를 단언한다")
+  void planStoreAndReportCodes_haveStatusAndMessages() {
+    assertThat(ADDED_PLAN_STORE_AND_REPORT_CODES).hasSize(7);
+    ADDED_PLAN_STORE_AND_REPORT_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
     });
   }
 
