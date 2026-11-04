@@ -3991,4 +3991,57 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guardianVoicePlanEndedHint => 'Pro 가 끝나도 녹음은 남겨 뒀어요';
+
+  @override
+  String get expertRoutineEntry => '전문가 일과';
+
+  @override
+  String get expertRoutineListTitle => '전문가 일과';
+
+  @override
+  String get expertRoutineListHint => '전문가가 살펴본 일과를 크레딧 없이 가져와요';
+
+  @override
+  String get expertRoutineCategoryAll => '전체';
+
+  @override
+  String get expertRoutineEmpty => '아직 준비된 전문가 일과가 없어요';
+
+  @override
+  String get expertRoutineEmptyHint => '검수를 마친 일과부터 차례로 올라와요';
+
+  @override
+  String get expertRoutineLoadFailed => '전문가 일과를 불러오지 못했어요';
+
+  @override
+  String expertRoutineStepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '카드 $count장',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expertRoutineReward(String reward) {
+    return '보상 · $reward';
+  }
+
+  @override
+  String get expertRoutineCardsSection => '카드';
+
+  @override
+  String get expertRoutineImport => '일과관리에 넣기';
+
+  @override
+  String expertRoutineImportDone(String elumiName) {
+    return '$elumiName 일과관리에 넣었어요';
+  }
+
+  @override
+  String get expertRoutineImportFailedTitle => '일과관리에 넣지 못했어요';
+
+  @override
+  String get expertRoutineNoElumi => '이룸이를 먼저 연결해 주세요';
 }

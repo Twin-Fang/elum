@@ -18,10 +18,14 @@ class PlanAccess {
     required this.canTranslateRoutines,
     required this.canScheduleRoutines,
     required this.canUseGuardianVoice,
-    this.canPurchasePro = false,
   });
 
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 주간 리포트 없음)
+    required this.canImportExpertRoutines,
+  });
+
+  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 전문가 일과 못 가져옴)
+    this.canPurchasePro = false,
   static const free = PlanAccess(
     isPro: false,
     canExportCardsWithoutWatermark: false,
@@ -30,6 +34,7 @@ class PlanAccess {
     canTranslateRoutines: false,
     canScheduleRoutines: false,
     canUseGuardianVoice: false,
+    canImportExpertRoutines: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -41,6 +46,7 @@ class PlanAccess {
     canTranslateRoutines: true,
     canScheduleRoutines: true,
     canUseGuardianVoice: true,
+    canImportExpertRoutines: true,
   );
 
   final bool isPro;
@@ -66,6 +72,12 @@ class PlanAccess {
 
   /// 카드마다 보호자 목소리를 녹음할 수 있는가. 꺼져도 이미 한 녹음은 남고(듣기·지우기 가능) 이룸이는 기본 음성으로 듣는다
   final bool canUseGuardianVoice;
+
+  /// 전문가 일과를 일과관리로 가져올 수 있는가
+  final bool canImportExpertRoutines;
+
+  /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
+  bool get shouldShowExpertRoutines => canImportExpertRoutines || canPurchasePro;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -79,6 +91,7 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     canTranslateRoutines: access.canTranslateRoutines,
     canScheduleRoutines: access.canScheduleRoutines,
     canUseGuardianVoice: access.canUseGuardianVoice,
+    canImportExpertRoutines: access.canImportExpertRoutines,
     canPurchasePro: ref.watch(canPurchaseProProvider),
   );
 });
@@ -103,5 +116,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canTranslateRoutines: member.canTranslateRoutines,
     canScheduleRoutines: member.canScheduleRoutines,
     canUseGuardianVoice: member.canUseGuardianVoice,
+    canImportExpertRoutines: member.canImportExpertRoutines,
   );
 }

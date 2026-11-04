@@ -75,6 +75,11 @@ public enum Entitlement {
     Kind.FLAG, "보호자 목소리 녹음",
     ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
   ),
+  // 전문가 일과 가져오기. 목록·미리 보기는 열고 가져오기만 막는다 (#1076)
+  ROUTINE_TEMPLATES(
+    Kind.FLAG, "전문가 일과 가져오기",
+    ConfigKey.FREE_ROUTINE_TEMPLATES, ConfigKey.PRO_ROUTINE_TEMPLATES
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

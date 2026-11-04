@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft;
 import com.chuseok22.elumserver.routine.application.dto.RoutineImportDraft.DraftStep;
 import com.chuseok22.elumserver.routine.application.dto.RoutineShareSnapshot;
 import com.chuseok22.elumserver.routine.application.dto.RoutineShareSnapshot.StepSnapshot;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineGroup;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -69,6 +70,18 @@ public class RoutineShareService {
       throw new CustomException(ErrorCode.TALK_LINK_ROUTINE_NOT_MINE);
     }
     return toSnapshot(original);
+  }
+
+  /**
+   * 관리자 전문가 일과 만들기용 스냅샷: 권한 확인 없음(관리자 세션), 이름 가리기 전 값이라 호출부가 가림
+   *
+   * @throws CustomException 없는 일과는 ROUTINE_NOT_FOUND
+   */
+  @Transactional(readOnly = true)
+  public RoutineShareSnapshot snapshotForCatalog(String routineId) {
+    Routine routine = routineRepository.findById(routineId == null ? "" : routineId.trim())
+      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
+    return toSnapshot(routine);
   }
 
   /**
@@ -166,6 +179,8 @@ public class RoutineShareService {
     routine.setLibraryOnly(true);
     routine.setSourceRoutineId(null);
     routine.setTalkPostId(draft.talkPostId());
+    routine.setRewardText(draft.rewardText());
+    routine.setRewardPresetKey(RewardPreset.normalize(draft.rewardPresetKey()));
     List<RoutineStep> steps = new ArrayList<>();
     for (DraftStep draftStep : draft.steps()) {
       RoutineStep step = new RoutineStep();

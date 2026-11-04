@@ -297,6 +297,11 @@ public enum ErrorCode {
   TALK_LINK_ROUTINE_NOT_MINE(HttpStatus.FORBIDDEN),
   TALK_LINK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
 
+  // 전문가 일과(#1076): 내렸거나 없는 일과 404, Free 가져오기 403, 관리자 입력 오류 400 (이유는 detail)
+  EXPERT_ROUTINE_NOT_FOUND(HttpStatus.NOT_FOUND),
+  EXPERT_ROUTINE_PRO_ONLY(HttpStatus.FORBIDDEN),
+  EXPERT_ROUTINE_INVALID(HttpStatus.BAD_REQUEST),
+
   ;
 
 

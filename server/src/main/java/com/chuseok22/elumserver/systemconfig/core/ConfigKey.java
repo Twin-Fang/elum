@@ -305,6 +305,11 @@ public enum ConfigKey {
     "Free가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_FREE, "전문가 일과 가져오기",
+    "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -398,6 +403,11 @@ public enum ConfigKey {
   PRO_GUARDIAN_VOICE(
     ConfigGroup.PLAN_PRO, "보호자 목소리 녹음",
     "Pro가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지. 끄면 녹음은 남고 이룸이는 기본 음성으로 듣는다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
+    "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 

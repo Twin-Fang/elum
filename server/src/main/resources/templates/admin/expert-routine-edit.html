@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page(${routine == null} ? '새 전문가 일과' : '전문가 일과 고치기', 'expert-routines', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <a th:href="@{/admin/expert-routines}" class="btn btn-ghost btn-sm">← 목록</a>
+    <h1 class="text-2xl font-bold" th:text="${routine == null} ? '새 전문가 일과' : '전문가 일과 고치기'">전문가 일과</h1>
+    <th:block th:if="${routine != null}">
+      <span class="badge" th:classappend="${routine.visibleInApp} ? 'badge-success' : 'badge-ghost'"
+            th:text="${routine.visibleInApp} ? '앱에 나감' : '숨김'">숨김</span>
+      <span class="badge" th:classappend="${routine.reviewStatus.name() == 'REVIEWED'} ? 'badge-info' : 'badge-warning'"
+            th:text="${routine.reviewStatus.label}">초안, 전문가 검수 필요</span>
+      <span class="badge badge-outline" th:text="'가져감 ' + ${routine.importCount}">가져감 0</span>
+    </th:block>
+  </div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <!-- 검증에 걸리면 이 화면을 입력값 그대로 다시 그린다. 리다이렉트하면 쓰던 카드가 사라진다. -->
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <form class="space-y-6" method="post"
+        th:action="${routine == null} ? @{/admin/expert-routines} : @{/admin/expert-routines/{id}(id=${routine.id})}">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-4">
+        <h2 class="card-title text-base">무엇을 보여 줄까요</h2>
+
+        <label class="form-control">
+          <div class="label"><span class="label-text">제목 <span class="text-error">*</span></span></div>
+          <input type="text" name="title" class="input input-bordered" maxlength="100" th:value="${form.title}" required/>
+        </label>
+
+        <label class="form-control">
+          <div class="label"><span class="label-text">한 줄 설명 (선택)</span></div>
+          <input type="text" name="summary" class="input input-bordered" maxlength="200" th:value="${form.summary}"
+                 placeholder="예: 처음 가는 병원도 순서를 알면 덜 무서워요"/>
+        </label>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="form-control">
+            <div class="label"><span class="label-text">분류</span></div>
+            <select name="category" class="select select-bordered">
+              <option th:each="c : ${categories}" th:value="${c.name()}" th:text="${c.label}"
+                      th:selected="${c.name() == form.category}">하루 순서</option>
+            </select>
+          </label>
+          <label class="form-control">
+            <div class="label"><span class="label-text">카드 언어</span></div>
+            <select name="language" class="select select-bordered">
+              <option th:each="l : ${languages}" th:value="${l.code()}" th:text="${l.code()}"
+                      th:selected="${l.code() == form.language}">ko</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="form-control">
+          <div class="label">
+            <span class="label-text">카드 <span class="text-error">*</span></span>
+            <span class="label-text-alt">한 줄에 한 장 · 10장까지</span>
+          </div>
+          <textarea name="stepsText" class="textarea textarea-bordered h-64 font-mono text-sm leading-relaxed"
+                    th:text="${form.stepsText}" required></textarea>
+          <div class="label">
+            <span class="label-text-alt">
+              <code class="font-mono">문장 | 픽토그램 id | 예시 이미지 id</code> — 뒤 둘은 비워도 돼요.
+              픽토그램 id 는 pictograms/catalog.json 의 id 그대로예요 (예: <code class="font-mono">wash_hands_,_to</code>).
+              그림이 없으면 앱에서 기본 카드로 보여요.
+            </span>
+          </div>
+        </label>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="form-control">
+            <div class="label"><span class="label-text">보상 제안 (선택)</span></div>
+            <input type="text" name="rewardText" class="input input-bordered" maxlength="100" th:value="${form.rewardText}"
+                   placeholder="예: 칭찬 스티커"/>
+          </label>
+          <label class="form-control">
+            <div class="label"><span class="label-text">보상 그림</span></div>
+            <select name="rewardPresetKey" class="select select-bordered">
+              <option value="" th:selected="${form.rewardPresetKey == null or form.rewardPresetKey.isEmpty()}">직접 입력 (그림 없음)</option>
+              <option th:each="p : ${rewardPresets}" th:if="${p.name() != 'CUSTOM'}" th:value="${p.name()}"
+                      th:text="${p.label}" th:selected="${p.name() == form.rewardPresetKey}">좋아하는 간식</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-4">
+        <h2 class="card-title text-base">검수와 순서</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="form-control">
+            <div class="label"><span class="label-text">검수 상태</span></div>
+            <select name="reviewStatus" class="select select-bordered">
+              <option th:each="s : ${reviewStatuses}" th:value="${s.name()}" th:text="${s.label}"
+                      th:selected="${s.name() == form.reviewStatus}">초안, 전문가 검수 필요</option>
+            </select>
+          </label>
+          <label class="form-control">
+            <div class="label"><span class="label-text">순서 (작을수록 위)</span></div>
+            <input type="text" name="sortOrder" class="input input-bordered font-mono" th:value="${form.sortOrder}"/>
+          </label>
+        </div>
+        <label class="form-control">
+          <div class="label"><span class="label-text">검수 메모 (앱에 안 나가요)</span></div>
+          <textarea name="reviewNote" class="textarea textarea-bordered h-40 text-sm" th:text="${form.reviewNote}"
+                    placeholder="누가 언제 검수했는지 적어 주세요. 예: 2026-11 OO 센터 특수교사 검수"></textarea>
+        </label>
+        <p class="rounded-box bg-base-200 p-3 text-sm">
+          초안으로 저장하면 앱 목록에서 내려가요. 공개는 목록 화면에서 해요.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <a th:href="@{/admin/expert-routines}" class="btn btn-ghost">취소</a>
+      <button type="submit" class="btn btn-primary">저장</button>
+    </div>
+  </form>
+
+  <!-- 지우기는 저장 폼 밖에 둔다. 폼 안에 폼을 넣으면 브라우저가 안쪽 폼을 버린다. -->
+  <form th:if="${routine != null}" th:action="@{/admin/expert-routines/{id}/delete(id=${routine.id})}" method="post"
+        class="flex justify-end"
+        data-confirm-title="전문가 일과 지우기" data-confirm-danger data-confirm-accept="지우기"
+        data-confirm-message="이 전문가 일과를 지울까요? 이미 가져간 일과는 그대로 남고, 되돌릴 수 없어요.">
+    <button type="submit" class="btn btn-outline btn-error btn-sm">이 전문가 일과 지우기</button>
+  </form>
+</main>
+</body>
+</html>
