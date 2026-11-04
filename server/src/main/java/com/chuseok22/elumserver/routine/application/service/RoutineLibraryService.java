@@ -37,6 +37,7 @@ public class RoutineLibraryService {
   private final RoutineRepository routineRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final RoutineGroupMembership routineGroupMembership;
   private final ApplicationEventPublisher eventPublisher;
 
@@ -83,7 +84,7 @@ public class RoutineLibraryService {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     routineGroupMembership.leaveGroup(routine);
     if (isDeletableLibraryCopy(routine)) {
-      RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
+      RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, guardianVoiceFiles, routine);
       return;
     }
     routine.setLibraryHidden(true);

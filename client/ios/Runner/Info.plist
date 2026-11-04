@@ -80,6 +80,9 @@
 	<string>Elum uses the camera to take a photo to use as a card picture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Elum uses your photo library to choose a photo to use as a card picture.</string>
+	<!-- 보호자가 카드를 자기 목소리로 녹음한다 (Pro). 거부해도 카드는 기본 목소리로 읽힌다 -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Elum uses the microphone to record your voice reading a card.</string>
 	<!-- 소셜 로그인. 값은 ios/Flutter/Secrets.xcconfig가 채운다
 	     (tool/gen_ios_secrets.sh가 .env로 생성, 커밋 제외). -->
 	<key>CFBundleURLTypes</key>

@@ -57,6 +57,12 @@ enum ServerErrorCode {
   routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
   routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
   routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
+  // 보호자 목소리 녹음: Pro 아님, 형식, 크기, 길이, 저장 실패
+  guardianVoiceNotAllowed('GUARDIAN_VOICE_NOT_ALLOWED'),
+  guardianVoiceInvalidType('GUARDIAN_VOICE_INVALID_TYPE'),
+  guardianVoiceTooLarge('GUARDIAN_VOICE_TOO_LARGE'),
+  guardianVoiceTooLong('GUARDIAN_VOICE_TOO_LONG'),
+  guardianVoiceSaveFailed('GUARDIAN_VOICE_SAVE_FAILED'),
   routineRequestTooFrequent('ROUTINE_REQUEST_TOO_FREQUENT'),
 
   // PROMPT

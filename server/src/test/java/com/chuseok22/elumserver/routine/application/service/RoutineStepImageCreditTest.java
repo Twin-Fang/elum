@@ -86,6 +86,7 @@ class RoutineStepImageCreditTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks private RoutineStepEditService routineService;
 
   // --- 그림 채우기(RoutineStepImageFiller) 쪽 — 실물을 목 의존으로 만든다 ---

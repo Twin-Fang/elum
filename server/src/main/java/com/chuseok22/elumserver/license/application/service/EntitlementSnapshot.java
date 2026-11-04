@@ -20,7 +20,8 @@ public record EntitlementSnapshot(
   boolean cardExportAllThemes,
   boolean weeklyReport,
   boolean routineTranslate,
-  boolean routineSchedule
+  boolean routineSchedule,
+  boolean guardianVoice
 ) {
 
 }

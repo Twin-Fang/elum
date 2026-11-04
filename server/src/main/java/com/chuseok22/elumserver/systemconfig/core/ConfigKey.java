@@ -300,6 +300,11 @@ public enum ConfigKey {
     "Free가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_GUARDIAN_VOICE(
+    ConfigGroup.PLAN_FREE, "보호자 목소리 녹음",
+    "Free가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -388,6 +393,11 @@ public enum ConfigKey {
   PRO_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_PRO, "요일별 반복 일과",
     "Pro가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지. 꺼도 정해 둔 요일·시각은 지우지 않고 멈춘다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_GUARDIAN_VOICE(
+    ConfigGroup.PLAN_PRO, "보호자 목소리 녹음",
+    "Pro가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지. 끄면 녹음은 남고 이룸이는 기본 음성으로 듣는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 

@@ -89,6 +89,8 @@ dependencies:
   printing: ^5.14.3
   in_app_purchase: ^3.3.1
   in_app_purchase_android: ^0.5.0
+  # 보호자 목소리 녹음 (AAC m4a, 마이크 권한 요청 포함). 재생은 audioplayers 그대로
+  record: ^6.2.1
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").

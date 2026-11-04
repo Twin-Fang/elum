@@ -41,6 +41,7 @@ public class RoutineService {
   private final RoutineRepository routineRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final RoutineGroupMembership routineGroupMembership;
   private final ApplicationEventPublisher eventPublisher;
 
@@ -107,7 +108,7 @@ public class RoutineService {
     }
     // 묶음 구성원이면 묶음에서 빼고 비면 묶음 풀기 (#806)
     routineGroupMembership.leaveGroup(routine);
-    RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
+    RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, guardianVoiceFiles, routine);
   }
 
   /**

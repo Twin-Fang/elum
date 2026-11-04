@@ -134,6 +134,7 @@ class RoutineServiceTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private RoutineService routineService;
 

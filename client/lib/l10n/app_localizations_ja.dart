@@ -3911,4 +3911,83 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get weeklyPlanMetaSeparator => ' · ';
+
+  @override
+  String get guardianVoiceRecordAction => '내 목소리로 녹음하기';
+
+  @override
+  String get guardianVoiceRecordHint => '카드를 누르면 이 목소리가 들려요';
+
+  @override
+  String guardianVoiceRecording(int seconds) {
+    return '녹음하고 있어요 $seconds초';
+  }
+
+  @override
+  String guardianVoiceRecordingLimit(int seconds) {
+    return '$seconds초까지 녹음돼요';
+  }
+
+  @override
+  String get guardianVoiceStop => '멈추기';
+
+  @override
+  String get guardianVoiceSaving => '녹음을 저장하고 있어요';
+
+  @override
+  String get guardianVoiceSaved => '녹음했어요';
+
+  @override
+  String get guardianVoicePlay => '듣기';
+
+  @override
+  String get guardianVoiceRerecord => '다시 녹음';
+
+  @override
+  String get guardianVoiceDelete => '지우기';
+
+  @override
+  String get guardianVoiceDeleteConfirmTitle => '녹음을 지울까요?';
+
+  @override
+  String get guardianVoiceDeleteConfirmMessage => '지우면 기본 목소리로 읽어 줘요';
+
+  @override
+  String get guardianVoicePlanEnded => '기본 목소리로 읽어요';
+
+  @override
+  String get guardianVoiceMicDeniedTitle => '마이크가 꺼져 있어요';
+
+  @override
+  String get guardianVoiceMicDeniedBody => '켜기 전까지 기본 목소리로 읽어요';
+
+  @override
+  String get guardianVoiceOpenSettings => '설정 열기';
+
+  @override
+  String get guardianVoiceFailedTitle => '녹음을 저장하지 못했어요';
+
+  @override
+  String get guardianVoiceRetry => '다시 하기';
+
+  @override
+  String get guardianVoiceTooShort => '너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요';
+
+  @override
+  String get guardianVoiceRecordFailed => '녹음하지 못했어요. 다시 해 주세요';
+
+  @override
+  String get guardianVoiceTooLarge => '녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요';
+
+  @override
+  String get guardianVoicePlayFailed => '녹음을 틀지 못했어요';
+
+  @override
+  String get guardianVoiceDeleteFailed => '녹음을 지우지 못했어요';
+
+  @override
+  String get guardianVoiceRecordChip => '녹음';
+
+  @override
+  String get guardianVoicePlanEndedHint => 'Pro 가 끝나도 녹음은 남겨 뒀어요';
 }

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +28,7 @@ class MemberServiceGuardianNicknameTest {
   @Mock private ProfileAccessGuard profileAccessGuard;
   @Mock private GuardianshipService guardianshipService;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks private MemberService memberService;
 
   // 깨지면: 두 보호자가 같은 이름을 동시에 저장할 때 500 이 나고 오류 코드가 사라짐

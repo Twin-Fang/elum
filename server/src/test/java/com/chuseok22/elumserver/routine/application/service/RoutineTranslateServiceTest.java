@@ -58,7 +58,7 @@ class RoutineTranslateServiceTest {
   @BeforeEach
   void setUp() {
     RoutineLibraryService routineLibraryService = new RoutineLibraryService(routineRepository, profileAccessGuard,
-      mock(RoutineStepSpeechQueue.class), mock(RoutineGroupMembership.class), mock(ApplicationEventPublisher.class));
+      mock(RoutineStepSpeechQueue.class), mock(GuardianVoiceFiles.class), mock(RoutineGroupMembership.class), mock(ApplicationEventPublisher.class));
     service = new RoutineTranslateService(routineRepository, profileAccessGuard, entitlementService,
       aiDailyBudgetGuard, creditReservationService, routineCreationWriter, routineLibraryService,
       routineTranslationAi, mock(PlatformTransactionManager.class));

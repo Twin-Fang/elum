@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,7 @@ class MemberServiceConsentLocaleTest {
   @Mock
   private ConsentDocumentHistoryRepository consentDocumentHistoryRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private MemberService memberService;
 

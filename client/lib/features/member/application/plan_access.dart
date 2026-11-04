@@ -17,6 +17,7 @@ class PlanAccess {
     required this.canViewWeeklyReport,
     required this.canTranslateRoutines,
     required this.canScheduleRoutines,
+    required this.canUseGuardianVoice,
     this.canPurchasePro = false,
   });
 
@@ -28,6 +29,7 @@ class PlanAccess {
     canViewWeeklyReport: false,
     canTranslateRoutines: false,
     canScheduleRoutines: false,
+    canUseGuardianVoice: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -38,6 +40,7 @@ class PlanAccess {
     canViewWeeklyReport: true,
     canTranslateRoutines: true,
     canScheduleRoutines: true,
+    canUseGuardianVoice: true,
   );
 
   final bool isPro;
@@ -60,6 +63,9 @@ class PlanAccess {
 
   /// 일과에 요일·시각을 정할 수 있는가 (반복 일과 · 주간 계획 · 이룸이 기기 알림). 보호자 화면에서만 본다
   final bool canScheduleRoutines;
+
+  /// 카드마다 보호자 목소리를 녹음할 수 있는가. 꺼져도 이미 한 녹음은 남고(듣기·지우기 가능) 이룸이는 기본 음성으로 듣는다
+  final bool canUseGuardianVoice;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -72,6 +78,7 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     canViewWeeklyReport: access.canViewWeeklyReport,
     canTranslateRoutines: access.canTranslateRoutines,
     canScheduleRoutines: access.canScheduleRoutines,
+    canUseGuardianVoice: access.canUseGuardianVoice,
     canPurchasePro: ref.watch(canPurchaseProProvider),
   );
 });
@@ -95,5 +102,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canViewWeeklyReport: member.canViewWeeklyReport,
     canTranslateRoutines: member.canTranslateRoutines,
     canScheduleRoutines: member.canScheduleRoutines,
+    canUseGuardianVoice: member.canUseGuardianVoice,
   );
 }

@@ -150,7 +150,8 @@ class OAuthLoginServiceTest {
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
       adRewardSessionRepository, feedbackService, notificationCleanupService,
-      mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class), routineGroupService,
+      mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class),
+      mock(com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles.class), routineGroupService,
       mock(MemberDailyVisitRepository.class));
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,

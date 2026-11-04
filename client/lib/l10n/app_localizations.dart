@@ -6990,6 +6990,156 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **' · '**
   String get weeklyPlanMetaSeparator;
+
+  /// 카드 수정 시트의 보호자 목소리 칸 — 녹음 전 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 목소리로 녹음하기'**
+  String get guardianVoiceRecordAction;
+
+  /// 카드 수정 시트의 보호자 목소리 칸 — 녹음 전 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 누르면 이 목소리가 들려요'**
+  String get guardianVoiceRecordHint;
+
+  /// 보호자 목소리를 녹음하는 동안 칸 글자. seconds 는 지난 초
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음하고 있어요 {seconds}초'**
+  String guardianVoiceRecording(int seconds);
+
+  /// 녹음하는 동안 칸 아래 줄 — 최대 길이 안내. seconds 는 최대 초
+  ///
+  /// In ko, this message translates to:
+  /// **'{seconds}초까지 녹음돼요'**
+  String guardianVoiceRecordingLimit(int seconds);
+
+  /// 녹음·미리 듣기를 멈추는 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'멈추기'**
+  String get guardianVoiceStop;
+
+  /// 보호자 목소리를 올리는 동안 칸 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 저장하고 있어요'**
+  String get guardianVoiceSaving;
+
+  /// 녹음이 있을 때 칸 글자 — 이룸이 화면에서 이 녹음이 나온다는 뜻
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음했어요'**
+  String get guardianVoiceSaved;
+
+  /// 녹음 미리 듣기 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'듣기'**
+  String get guardianVoicePlay;
+
+  /// 녹음을 새로 하는 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 녹음'**
+  String get guardianVoiceRerecord;
+
+  /// 녹음 지우기 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기'**
+  String get guardianVoiceDelete;
+
+  /// 녹음 지우기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 지울까요?'**
+  String get guardianVoiceDeleteConfirmTitle;
+
+  /// 녹음 지우기 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지우면 기본 목소리로 읽어 줘요'**
+  String get guardianVoiceDeleteConfirmMessage;
+
+  /// Pro 가 끝났는데 녹음이 남아 있을 때 칸 제목 — 녹음은 남아 있고 듣기·지우기만 된다
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 목소리로 읽어요'**
+  String get guardianVoicePlanEnded;
+
+  /// 마이크 권한이 막혔을 때 칸 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'마이크가 꺼져 있어요'**
+  String get guardianVoiceMicDeniedTitle;
+
+  /// 마이크 권한이 막혔을 때 칸 설명 — 앱은 계속 쓸 수 있다
+  ///
+  /// In ko, this message translates to:
+  /// **'켜기 전까지 기본 목소리로 읽어요'**
+  String get guardianVoiceMicDeniedBody;
+
+  /// 마이크 권한이 막혔을 때 기기 설정을 여는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get guardianVoiceOpenSettings;
+
+  /// 녹음 올리기·지우기·듣기 실패 때 칸 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 저장하지 못했어요'**
+  String get guardianVoiceFailedTitle;
+
+  /// 녹음 실패 안내의 다시 하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get guardianVoiceRetry;
+
+  /// 녹음이 너무 짧을 때 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요'**
+  String get guardianVoiceTooShort;
+
+  /// 녹음 시작·멈춤 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음하지 못했어요. 다시 해 주세요'**
+  String get guardianVoiceRecordFailed;
+
+  /// 녹음 파일이 1MB 를 넘을 때 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요'**
+  String get guardianVoiceTooLarge;
+
+  /// 녹음 미리 듣기 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 틀지 못했어요'**
+  String get guardianVoicePlayFailed;
+
+  /// 녹음 지우기 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 지우지 못했어요'**
+  String get guardianVoiceDeleteFailed;
+
+  /// 녹음 전 보호자 목소리 칸의 녹음 시작 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음'**
+  String get guardianVoiceRecordChip;
+
+  /// Pro 가 끝났는데 녹음이 남아 있을 때 칸 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 가 끝나도 녹음은 남겨 뒀어요'**
+  String get guardianVoicePlanEndedHint;
 }
 
 class _AppLocalizationsDelegate

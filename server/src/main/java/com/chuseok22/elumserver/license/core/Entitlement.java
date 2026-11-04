@@ -70,6 +70,11 @@ public enum Entitlement {
     Kind.FLAG, "요일별 반복 일과·이룸이 기기 알림",
     ConfigKey.FREE_ROUTINE_SCHEDULE, ConfigKey.PRO_ROUTINE_SCHEDULE
   ),
+  // 보호자 목소리로 카드 읽기 (#787): 녹음 올리기 + 이룸이 기기 재생. 꺼지면 이룸이는 기본 음성, 녹음은 남김
+  GUARDIAN_VOICE(
+    Kind.FLAG, "보호자 목소리 녹음",
+    ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.
