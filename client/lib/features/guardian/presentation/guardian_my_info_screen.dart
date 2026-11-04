@@ -154,7 +154,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
   /// 주간 리포트는 Pro 만, 결제를 붙이기 전(canPurchasePro false)에는 Free 에게 줄 자체가 없다
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
-    final showsWeeklyReport = access.canViewWeeklyReport || PlanAccess.canPurchasePro;
+    final showsWeeklyReport = access.canViewWeeklyReport || access.canPurchasePro;
     return SettingsGroup(
       children: [
         if (showsWeeklyReport)

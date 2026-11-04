@@ -28,7 +28,7 @@ final routineSchedulePlanProvider = FutureProvider<RoutineSchedulePlan>((
 /// 결제(#1072) 전에는 Free 에게 잠긴 입구를 보이지 않는다 ([PlanAccess.canPurchasePro]).
 final canShowRoutineScheduleProvider = Provider<bool>((ref) {
   final access = ref.watch(planAccessProvider);
-  if (access.canScheduleRoutines || PlanAccess.canPurchasePro) return true;
+  if (access.canScheduleRoutines || access.canPurchasePro) return true;
   final plan = ref.watch(routineSchedulePlanProvider).value;
   return plan != null && plan.schedules.isNotEmpty;
 });

@@ -93,7 +93,7 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
     listen: false,
   ).read(planAccessProvider);
   final canTranslate =
-      (planAccess.canTranslateRoutines || PlanAccess.canPurchasePro) &&
+      (planAccess.canTranslateRoutines || planAccess.canPurchasePro) &&
       routine.isVisibleToChild &&
       routine.steps.isNotEmpty &&
       routineTranslateTargetsOf(routine).isNotEmpty;
