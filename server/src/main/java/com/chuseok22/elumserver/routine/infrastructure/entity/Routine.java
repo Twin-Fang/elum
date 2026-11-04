@@ -192,6 +192,14 @@ public class Routine extends BaseEntity {
 
   private LocalDateTime completedAt;
 
+  /// AI 가 처음 만든 카드 글 스냅샷 JSON [{"title","description"}] (#1082, V63). Pro + AI 메모 켜짐일 때만. 원문 없음
+  @Column(name = "ai_draft_cards", columnDefinition = "TEXT")
+  private String aiDraftCards;
+
+  /// 처음 > 확정 차이를 AI 메모에 반영(또는 건너뜀)한 시각. null 이면 아직 (#1082)
+  @Column(name = "memory_reflected_at")
+  private LocalDateTime memoryReflectedAt;
+
   @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderBy("stepOrder ASC")
   private List<RoutineStep> steps = new ArrayList<>();

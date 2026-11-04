@@ -22,10 +22,12 @@ import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderS
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
+import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
@@ -57,6 +59,8 @@ public class RoutineController implements RoutineControllerDocs {
 
   // 단계 음성 응답 형식 (#675)
   private static final MediaType SPEECH_MEDIA_TYPE = MediaType.parseMediaType("audio/wav");
+  // 보호자 목소리 응답 형식 (m4a, #787)
+  private static final MediaType VOICE_MEDIA_TYPE = MediaType.parseMediaType("audio/mp4");
 
   private final RoutineService routineService;
   private final RoutineStepEditService routineStepEditService;
@@ -65,8 +69,10 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineStepSpeechProvider routineStepSpeechProvider;
   private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
+  private final RoutineStepVoiceService routineStepVoiceService;
   private final RoutineLibraryService routineLibraryService;
   private final RoutineLibraryOrderService routineLibraryOrderService;
+  private final RoutineScheduleRunner routineScheduleRunner;
   // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
 
@@ -127,6 +133,8 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
+    // 오늘 요일 반복 일과를 먼저 오늘 일과로 만든다 (#782, 이미 만들었으면 건너뜀 · 실패해도 조회는 그대로)
+    routineScheduleRunner.materializeTodayFor(caller);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getTodayRoutines(caller)));
   }
 
@@ -396,6 +404,51 @@ public class RoutineController implements RoutineControllerDocs {
     RoutineStepResponse response =
       routineStepPhotoService.replaceStepImage(Caller.from(authentication), routineId, stepId, image);
     return ResponseEntity.ok(response);
+  }
+
+  // 보호자 목소리 녹음 올리기 (Pro, #787). 녹음은 개인정보라 파라미터·결과를 로그에 남기지 않는다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PutMapping(value = "/{routineId}/steps/{stepId}/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<RoutineStepResponse> uploadStepVoice(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @PathVariable String stepId,
+    @RequestPart("voice") MultipartFile voice
+  ) {
+    return ResponseEntity.ok(routineStepVoiceService.upload(Caller.from(authentication), routineId, stepId, voice));
+  }
+
+  // 보호자 목소리 녹음 지우기. 요금제와 상관없이 언제나 (#787)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @DeleteMapping("/{routineId}/steps/{stepId}/voice")
+  public ResponseEntity<RoutineStepResponse> deleteStepVoice(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
+  ) {
+    return ResponseEntity.ok(routineStepVoiceService.delete(Caller.from(authentication), routineId, stepId));
+  }
+
+  // 보호자 목소리 받기 (#787). 없거나 이룸이 기기에서 재생 불가면 404 — 앱은 기본 음성으로 읽음
+  // ETag = 녹음 열쇠. 앱이 가진 열쇠와 같으면 304
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @GetMapping("/{routineId}/steps/{stepId}/voice")
+  public ResponseEntity<byte[]> getStepVoice(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
+    @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
+  ) {
+    return routineStepVoiceService.read(Caller.from(authentication), routineId, stepId)
+      .map(voice -> toVoiceResponse(voice, ifNoneMatch))
+      .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  private static ResponseEntity<byte[]> toVoiceResponse(RoutineStepVoiceService.StepVoice voice, String ifNoneMatch) {
+    String etag = "\"" + voice.voiceKey() + "\"";
+    if (etag.equals(ifNoneMatch)) {
+      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
+    }
+    return ResponseEntity.ok()
+      .contentType(VOICE_MEDIA_TYPE)
+      .eTag(etag)
+      .body(voice.audio());
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.

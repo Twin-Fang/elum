@@ -53,6 +53,9 @@ abstract class ActionCard with _$ActionCard {
 
     /// 서버가 미리 만든 음성 열쇠 (#675). 아직 없으면 null. 글이 바뀌면 값도 바뀐다.
     String? speechPath,
+
+    /// 보호자 목소리 녹음 열쇠 (Pro). 녹음이 없으면 null. 다시 녹음하면 값도 바뀐다.
+    String? guardianVoicePath,
   }) = _ActionCard;
 
   const ActionCard._();
@@ -83,6 +86,10 @@ abstract class ActionCard with _$ActionCard {
         final String v when v.isNotEmpty => v,
         _ => null,
       },
+      guardianVoicePath: switch (json['guardianVoicePath']) {
+        final String v when v.isNotEmpty => v,
+        _ => null,
+      },
     );
   }
 
@@ -96,5 +103,6 @@ abstract class ActionCard with _$ActionCard {
         'pictogramId': pictogramId,
         'exampleImageId': exampleImageId,
         'speechPath': speechPath,
+        'guardianVoicePath': guardianVoicePath,
       };
 }

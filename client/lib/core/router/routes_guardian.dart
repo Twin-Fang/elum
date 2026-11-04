@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/ads/presentation/ad_bottom_strip_slot.dart';
+import '../../features/auth/presentation/consent_document_list_screen.dart';
+import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/credit/presentation/credit_history_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
@@ -8,8 +10,15 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
+import '../../features/guardian/presentation/routine_memory_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
+import '../../features/guardian/presentation/card_export/card_export_screen.dart';
+import '../../features/guardian/presentation/weekly_report/weekly_report_screen.dart';
+import '../../features/guardian/presentation/weekly_plan_screen.dart';
+import '../../features/expert_routine/presentation/expert_routine_detail_screen.dart';
+import '../../features/expert_routine/presentation/expert_routine_list_screen.dart';
+import '../../shared/models/routine.dart';
 import '../../features/license/presentation/open_source_licenses_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
@@ -137,6 +146,66 @@ List<RouteBase> guardianRoutes() => [
       );
     },
   ),
+  // 전문가 일과 목록·미리 보기: 하단 바를 덮는 화면
+  GoRoute(
+    path: Routes.guardianExpertRoutines,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      const ExpertRoutineListScreen(),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  GoRoute(
+    path: Routes.guardianExpertRoutine,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      ExpertRoutineDetailScreen(
+        expertRoutineId: state.pathParameters['expertRoutineId'] ?? '',
+      ),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 인쇄용으로 받기: extra 가 일과가 아니면 카드 없는 일과 화면(안내)이 뜬다
+  GoRoute(
+    path: Routes.guardianCardExport,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      CardExportScreen(
+        routine: state.extra is Routine ? state.extra as Routine : const Routine(id: ''),
+      ),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 결제 직전 보호자 확인: 화면 전환 암호 화면을 그대로 쓰고 맞으면 true 로 닫힌다
+  GoRoute(
+    path: Routes.guardianPlanPin,
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: ModeSwitchScreen(target: ModeSwitchTarget.purchase),
+    ),
+  ),
+  GoRoute(
+    path: Routes.guardianTerms,
+    pageBuilder: (context, state) =>
+        slidePage(state, const ConsentDocumentListScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianWeeklyReport,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      const WeeklyReportScreen(),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 주간 계획 (#782): 요일마다 반복 일과
+  GoRoute(
+    path: Routes.guardianWeeklyPlan,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      const WeeklyPlanScreen(),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
   GoRoute(
     path: Routes.guardianLicenses,
     pageBuilder: (context, state) =>
@@ -183,6 +252,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianImageStyle,
     pageBuilder: (context, state) =>
         slidePage(state, const ImageStyleSettingsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianRoutineMemory,
+    pageBuilder: (context, state) =>
+        slidePage(state, const RoutineMemoryScreen()),
   ),
   GoRoute(
     path: Routes.guardianFeedback,

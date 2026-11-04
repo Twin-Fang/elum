@@ -133,7 +133,17 @@ public class SystemConfigEntitlementService implements EntitlementService {
       systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_WEEK.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_MAX_COUNT.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.PROFILE_MAX_COUNT.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan))
+      systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.CARD_EXPORT_WITHOUT_WATERMARK.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.CARD_EXPORT_ALL_THEMES.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.WEEKLY_REPORT.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.ROUTINE_TRANSLATE.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.ROUTINE_SCHEDULE.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.GUARDIAN_VOICE.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.ROUTINE_TEMPLATES.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.ROUTINE_MEMORY.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.IMAGE_REGENERATE_FREE.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.IMAGE_HIGH_QUALITY.configKeyFor(plan))
     );
   }
 

@@ -145,12 +145,14 @@ class OAuthLoginServiceTest {
     // 가입·되살리기가 이룸이를 관계와 함께 만드는지까지 보려고 목이 아니라 실제 서비스를 쓴다.
     GuardianshipService guardianshipService = new GuardianshipService(
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository,
-      profileInviteRepository, notificationCleanupService);
+      profileInviteRepository, notificationCleanupService,
+      mock(com.chuseok22.elumserver.routine.application.service.RoutineMemoryService.class));
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
       adRewardSessionRepository, feedbackService, notificationCleanupService,
-      mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class), routineGroupService,
+      mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class),
+      mock(com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles.class), routineGroupService,
       mock(MemberDailyVisitRepository.class));
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,

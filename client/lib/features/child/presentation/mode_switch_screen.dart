@@ -98,7 +98,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       context.popOrHome();
       return;
     }
-    if (read.hasPin || widget.target == ModeSwitchTarget.child) {
+    if (read.hasPin || !widget.target.isGuardianEntry) {
       setState(() => _ready = true);
       return;
     }
@@ -139,7 +139,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       final controller = ref.read(modeSwitchControllerProvider);
       final hasPin = await controller.hasPin();
       if (!mounted) return;
-      if (!hasPin && widget.target == ModeSwitchTarget.guardian) {
+      if (!hasPin && widget.target.isGuardianEntry) {
         _ready = false;
         await _guardGuardianEntry();
         return;
@@ -162,7 +162,13 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
 
     if (isValid) {
       playChildHaptic(context, ChildHapticKind.unlock);
-      context.go(widget.target.route);
+      final route = widget.target.route;
+      // 결제 확인은 화면을 옮기지 않고 연 쪽에 "맞음"을 돌려준다
+      if (route == null) {
+        Navigator.of(context).pop(true);
+      } else {
+        context.go(route);
+      }
       return;
     }
 
@@ -266,22 +272,31 @@ enum ModeSwitchTarget {
   // `입력하면`은 시안을 따르고, 끝은 **능동형**으로 둔다 — 피동형(`전환돼요`)은
   // 루트 CLAUDE.md 말투 규칙이 금지한다.
   child(Routes.child),
-  guardian(Routes.guardian);
+  guardian(Routes.guardian),
+
+  /// 결제 직전 보호자 확인 (`Routes.guardianPlanPin`). 화면을 옮기지 않고 true 로 닫힌다
+  purchase(null);
 
   const ModeSwitchTarget(this.route);
 
-  final String route;
+  /// 맞으면 갈 곳. null 이면 연 쪽으로 돌아간다
+  final String? route;
+
+  /// 보호자 쪽으로 들어가는 확인인가 (암호가 없으면 통과시키지 않는다)
+  bool get isGuardianEntry => this != child;
 
   /// 암호 안내 문구. 읽을 때 푼다 — 값으로 들고 있으면 앱 언어가 바뀐 뒤에도 옛 언어가 남는다.
   String get description => switch (this) {
     ModeSwitchTarget.child => appL10n.modeSwitchToChild,
     ModeSwitchTarget.guardian => appL10n.modeSwitchToGuardian,
+    ModeSwitchTarget.purchase => appL10n.modeSwitchToPurchase,
   };
 
   /// 쿼리 파라미터에서 복원한다. 모르는 값이면 아이 화면으로 본다.
+  /// 결제 확인은 쿼리로 열지 않는다 (보호자 경로 `Routes.guardianPlanPin` 으로만 연다)
   static ModeSwitchTarget fromName(String? name) {
     for (final t in values) {
-      if (t.name == name) return t;
+      if (t != purchase && t.name == name) return t;
     }
     return child;
   }

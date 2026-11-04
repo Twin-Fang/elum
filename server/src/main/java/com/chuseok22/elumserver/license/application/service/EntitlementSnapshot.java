@@ -15,7 +15,17 @@ public record EntitlementSnapshot(
   int routineCreatePerWeek,
   int routineMaxCount,
   int profileMaxCount,
-  int historyRetentionDays
+  int historyRetentionDays,
+  boolean cardExportWithoutWatermark,
+  boolean cardExportAllThemes,
+  boolean weeklyReport,
+  boolean routineTranslate,
+  boolean routineSchedule,
+  boolean guardianVoice,
+  boolean routineTemplates,
+  boolean routineMemory,
+  boolean imageRegenerateFree,
+  boolean imageHighQuality
 ) {
 
 }

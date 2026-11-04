@@ -19,6 +19,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateReq
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.core.RoutineCardText;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -61,6 +62,7 @@ public class RoutineCreateService {
   private final CreditReservationService creditReservationService;
   private final CreditQueryService creditQueryService;
   private final EnabledLocales enabledLocales;
+  private final RoutinePersonalizationProvider routinePersonalizationProvider;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -158,6 +160,10 @@ public class RoutineCreateService {
     AiCallContext.setContentLocale(contentLocale);
     // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
     AiCallContext.setCreditJobId(creditJobId);
+    // Pro AI 메모·확정 예시 (#1082). 준비 실패는 빈 계획 = 지금 하네스 그대로 (던지지 않음)
+    RoutinePersonalizationProvider.Plan personalizationPlan = routinePersonalizationProvider.planFor(
+      caller.memberId(), profile.getId(), profile.getNickname(), contentLocale);
+    AiCallContext.setRoutinePersonalization(personalizationPlan.personalization());
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
@@ -189,6 +195,12 @@ public class RoutineCreateService {
     routine.setRewardText(RoutineRules.trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
+    // AI 처음 카드 스냅샷 (Pro + 메모 켜짐만, 카드 글만 — 원문 없음). 확정 뒤 메모 갱신이 비교에 씀 (#1082)
+    if (personalizationPlan.isMemoryActive()) {
+      routine.setAiDraftCards(RoutineMemoryJson.writeCards(generation.steps().stream()
+        .map(step -> new RoutineCardText(step.title(), step.description()))
+        .toList()));
+    }
 
     // 청구할 그림 수 = 카드에 실제로 붙은 그림. 실패해 비어 있는 카드는 세지 않는다.
     int imageCount = (int) routine.getSteps().stream().filter(step -> step.getImagePath() != null).count();

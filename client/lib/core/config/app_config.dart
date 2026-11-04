@@ -183,6 +183,45 @@ abstract final class AppConfig {
         _ => null,
       };
 
+  // --- 인앱 구독 결제 ---
+
+  /// 앱에서 Pro 를 팔아도 되는가 (스토어 상품·서버 설정을 마친 뒤 켬). 꺼져 있으면 결제 화면·진입점이 없음
+  static bool get isInAppPurchaseEnabled => _bool('ELUM_IAP_ENABLED', false);
+
+  /// Pro 1개월 구독 상품 id. App Store Connect · Play Console · 서버 `SUBSCRIPTION_*_PRODUCT_IDS` 와 같아야 함
+  static String get iapProductMonthly =>
+      _string('ELUM_IAP_PRODUCT_MONTHLY', 'elum_pro_monthly');
+
+  /// Pro 1년 구독 상품 id
+  static String get iapProductYearly =>
+      _string('ELUM_IAP_PRODUCT_YEARLY', 'elum_pro_yearly');
+
+  /// 이용약관 주소. 비면 앱 안 약관 화면을 연다 (유료 약관 게시 전)
+  static String get termsOfUseUrl => _string('ELUM_TERMS_OF_USE_URL', '');
+
+  /// 개인정보처리방침 게시 주소 (consent_documents 본문과 같은 내용)
+  static String get privacyPolicyUrl => _string(
+    'ELUM_PRIVACY_POLICY_URL',
+    'https://twin-fang.github.io/elum/privacy.html',
+  );
+
+  /// 스토어 구독 관리 화면 주소. [productId] 가 있으면 Play 는 그 구독을 바로 연다
+  static Uri? subscriptionManagementUrl(
+    TargetPlatform platform, {
+    String? productId,
+  }) => switch (platform) {
+    TargetPlatform.iOS => Uri.https('apps.apple.com', '/account/subscriptions'),
+    TargetPlatform.android => Uri.https(
+      'play.google.com',
+      '/store/account/subscriptions',
+      {
+        'package': androidPackageId,
+        if (productId != null && productId.isNotEmpty) 'sku': productId,
+      },
+    ),
+    _ => null,
+  };
+
   // --- 소셜 로그인 ---
   // 콘솔에서 앱을 등록하고 받은 값이다. 받는 절차는
   // docs/setup/소셜로그인_설정가이드.md 참조.

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -43,6 +45,7 @@ class MemberServiceCreateProfileTest {
   @Mock private ProfileAccessGuard profileAccessGuard;
   @Mock private GuardianshipService guardianshipService;
   @Mock private EntitlementService entitlementService;
+  @Mock private SubscriptionStatusService subscriptionStatusService;
   // 쓰지 않는 의존성 — InjectMocks 가 생성자를 채우게 목으로 둔다.
   @Mock private com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository authIdentityRepository;
   @Mock private com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository refreshTokenRepository;
@@ -51,6 +54,7 @@ class MemberServiceCreateProfileTest {
   @Mock private com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository adRewardSessionRepository;
   @Mock private com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository aiCallLogRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks private MemberService memberService;
 
   private final Caller guardian = Caller.guardian("member-1");

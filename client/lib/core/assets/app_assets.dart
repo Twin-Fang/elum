@@ -413,7 +413,12 @@ abstract final class AppAssets {
   static const iconFolder = '$_images/icon_folder.svg';
   static const iconFolderAdd = '$_images/icon_folder_add.svg';
   static const iconFolderMinus = '$_images/icon_folder_minus.svg';
+  // 보호자 목소리 녹음 칸: 녹음 시작, 녹음 멈춤, 미리 듣기 (fi-br-microphone · stop · play)
+  static const iconMicrophone = '$_images/icon_microphone.svg';
+  static const iconStop = '$_images/icon_stop.svg';
+  static const iconPlay = '$_images/icon_play.svg';
   static const iconCopy = '$_images/icon_copy.svg';
+  static const iconLanguage = '$_images/icon_language.svg';
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';
   static const iconBell = '$_images/icon_bell.svg';

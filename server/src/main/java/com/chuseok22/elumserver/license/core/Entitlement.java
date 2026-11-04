@@ -46,6 +46,55 @@ public enum Entitlement {
     Kind.LIMIT, "기록 보관 일수",
     ConfigKey.FREE_HISTORY_RETENTION_DAYS, ConfigKey.PRO_HISTORY_RETENTION_DAYS
   ),
+  // 카드 내보내기(이미지·인쇄)는 앱이 만든다 — 서버는 판정 값만 내려준다 (#1073)
+  CARD_EXPORT_WITHOUT_WATERMARK(
+    Kind.FLAG, "카드 내보내기 워터마크 없음",
+    ConfigKey.FREE_CARD_EXPORT_WITHOUT_WATERMARK, ConfigKey.PRO_CARD_EXPORT_WITHOUT_WATERMARK
+  ),
+  CARD_EXPORT_ALL_THEMES(
+    Kind.FLAG, "카드 내보내기 디자인 테마 전부",
+    ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
+  ),
+  // 주간 리포트 조회 (#1074). 꺼진 플랜은 집계 API 가 WEEKLY_REPORT_NOT_ALLOWED 로 막는다
+  WEEKLY_REPORT(
+    Kind.FLAG, "주간 리포트",
+    ConfigKey.FREE_WEEKLY_REPORT, ConfigKey.PRO_WEEKLY_REPORT
+  ),
+  // 만든 일과를 다른 언어 사본으로 (#1077). 꺼진 플랜은 번역 API 가 ROUTINE_TRANSLATE_NOT_ALLOWED 로 막음
+  ROUTINE_TRANSLATE(
+    Kind.FLAG, "일과 다른 언어로 만들기",
+    ConfigKey.FREE_ROUTINE_TRANSLATE, ConfigKey.PRO_ROUTINE_TRANSLATE
+  ),
+  // 요일·시각 반복 일과 + 이룸이 기기 일과 시간 알림 (#782, #1080). 꺼지면 예약만 멈추고 지우지 않음
+  ROUTINE_SCHEDULE(
+    Kind.FLAG, "요일별 반복 일과·이룸이 기기 알림",
+    ConfigKey.FREE_ROUTINE_SCHEDULE, ConfigKey.PRO_ROUTINE_SCHEDULE
+  ),
+  // 보호자 목소리로 카드 읽기 (#787): 녹음 올리기 + 이룸이 기기 재생. 꺼지면 이룸이는 기본 음성, 녹음은 남김
+  GUARDIAN_VOICE(
+    Kind.FLAG, "보호자 목소리 녹음",
+    ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
+  ),
+  // 전문가 일과 가져오기. 목록·미리 보기는 열고 가져오기만 막는다 (#1076)
+  ROUTINE_TEMPLATES(
+    Kind.FLAG, "전문가 일과 가져오기",
+    ConfigKey.FREE_ROUTINE_TEMPLATES, ConfigKey.PRO_ROUTINE_TEMPLATES
+  ),
+  // 이룸이별 AI 메모 + 확정 예시로 맞춤 쪼개기 (#1082). 서버가 일과 만들기에 넣고, 앱은 메모 화면을 연다
+  ROUTINE_MEMORY(
+    Kind.FLAG, "AI 메모 (내가 고친 일과처럼 만들기)",
+    ConfigKey.FREE_ROUTINE_MEMORY, ConfigKey.PRO_ROUTINE_MEMORY
+  ),
+  // 그림 다시 그리기 0크레딧 (하루 한도는 IMAGE_REGENERATE_FREE_DAILY_CAP) (#1075)
+  IMAGE_REGENERATE_FREE(
+    Kind.FLAG, "그림 다시 그리기 무료",
+    ConfigKey.FREE_IMAGE_REGENERATE_FREE, ConfigKey.PRO_IMAGE_REGENERATE_FREE
+  ),
+  // OpenAI 그림 품질을 OPENAI_IMAGE_QUALITY_PRO 로 올림. Free·Pro 모두 기본 꺼짐 (#1075)
+  IMAGE_HIGH_QUALITY(
+    Kind.FLAG, "고품질 그림",
+    ConfigKey.FREE_IMAGE_HIGH_QUALITY, ConfigKey.PRO_IMAGE_HIGH_QUALITY
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

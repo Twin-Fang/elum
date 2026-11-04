@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
@@ -22,6 +23,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
@@ -88,8 +90,12 @@ class MemberServiceTest {
   private EntitlementService entitlementService;
 
   @Mock
+  private SubscriptionStatusService subscriptionStatusService;
+
+  @Mock
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private MemberService memberService;
 

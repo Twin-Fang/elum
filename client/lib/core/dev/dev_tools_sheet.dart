@@ -19,7 +19,7 @@ class _DevToolsSheet extends StatefulWidget {
   State<_DevToolsSheet> createState() => _DevToolsSheetState();
 }
 
-/// 시트 화면: 메뉴 + 하위 화면 12개 (제목은 [title])
+/// 시트 화면: 메뉴 + 하위 화면 13개 (제목은 [title])
 enum _DevView {
   menu('개발자 도구'),
   server('서버 바꾸기'),
@@ -30,6 +30,7 @@ enum _DevView {
   networkFault('실패 흉내'),
   navigate('화면 이동'),
   locale('언어 강제'),
+  plan('요금제 흉내'),
   logs('로그'),
   dump('상태 덤프'),
   confirmReset('회원을 삭제할까요?'),
@@ -161,6 +162,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             onNavigate: widget.onNavigate,
           ),
         _DevView.locale => const _LocaleView(),
+        _DevView.plan => const _PlanOverrideView(),
         _DevView.logs => const _LogViewer(),
         _DevView.dump => const _DumpView(),
         _DevView.confirmReset => _ConfirmResetView(
@@ -242,6 +244,12 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
           label: '실패',
           subtitle: '네트워크 끊김·지연·서버 오류 — 지금: ${DevSimulation.networkFault.value.label}',
           onTap: () => widget.onSelect(_DevView.networkFault),
+        ),
+        _Tile(
+          icon: Icons.workspace_premium_outlined,
+          label: '요금제 흉내',
+          subtitle: 'Free·Pro 화면 확인 — 지금: ${ref.watch(devPlanOverrideProvider).label}',
+          onTap: () => widget.onSelect(_DevView.plan),
         ),
         _Tile(
           icon: Icons.restart_alt,

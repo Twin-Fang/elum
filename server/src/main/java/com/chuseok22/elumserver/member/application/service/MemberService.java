@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
@@ -30,6 +31,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisi
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -65,8 +67,10 @@ public class MemberService {
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
   private final TalkCleanupService talkCleanupService;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
+  private final SubscriptionStatusService subscriptionStatusService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
   private final ConsentDocumentService consentDocumentService;
 
@@ -173,11 +177,12 @@ public class MemberService {
   }
 
   /**
-   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보
+   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보 + 요금제 상태
    */
   private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
-      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member));
+      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member),
+      subscriptionStatusService.statusOf(member.getId()));
   }
 
   /**
@@ -312,6 +317,8 @@ public class MemberService {
     notificationCleanupService.deleteAllOf(memberId);
     // 이야기 글·댓글·반응·신고·차단·가져가기 기록. 남의 글 집계는 다시 센다.
     talkCleanupService.deleteAllOf(memberId);
+    // 보호자 목소리 녹음 파일 (개인정보). 카드 행은 위 나가기에서 지워지고 파일은 커밋 뒤 보호자 폴더째 삭제
+    guardianVoiceFiles.deleteAllOfAfterCommit(memberId);
     // 하루 방문 기록. 방침의 보관 항목이 아니라 남기지 않는다 (지난 방문 수에서도 빠짐).
     memberDailyVisitRepository.deleteAllByMemberId(memberId);
 

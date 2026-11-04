@@ -11,6 +11,7 @@ import '../../features/auth/application/login_controller.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/notice/domain/app_notice.dart';
 import '../../features/notice/presentation/show_notice_popup.dart';
+import '../../features/notification/application/elumi_push_opener.dart';
 import '../../features/notification/application/push_message_router.dart';
 import '../../features/notification/domain/notification_type.dart';
 import '../../features/notification/domain/push_message.dart';
@@ -27,6 +28,7 @@ import '../logger/crash_reporter.dart';
 import '../router/routes.dart';
 import '../storage/local_storage.dart';
 import 'dev_locale_override.dart';
+import 'dev_plan_override.dart';
 import '../layout/share_origin.dart';
 import '../network/app_failure.dart';
 import 'app_restart.dart';
@@ -45,6 +47,7 @@ part 'dev_tools_server.dart';
 part 'dev_tools_simulate.dart';
 part 'dev_tools_crash.dart';
 part 'dev_tools_analytics.dart';
+part 'dev_tools_plan.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///

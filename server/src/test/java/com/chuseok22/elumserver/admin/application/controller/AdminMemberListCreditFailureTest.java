@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberAccessService;
+import com.chuseok22.elumserver.license.application.service.StorePurchaseHistoryService;
 import com.chuseok22.elumserver.member.application.service.MemberAdminMemoService;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
@@ -50,7 +51,8 @@ class AdminMemberListCreditFailureTest {
       .thenThrow(new IllegalStateException("db down"));
     MockMvc mockMvc = MockMvcBuilders.standaloneSetup(
       new AdminMemberController(adminMemberService, new AdminDateFormatter(), adminCreditQueryService,
-        mock(AdminMemberAccessService.class), mock(MemberAdminMemoService.class), mock(AdminAuditService.class))).build();
+        mock(AdminMemberAccessService.class), mock(MemberAdminMemoService.class), mock(AdminAuditService.class),
+        mock(StorePurchaseHistoryService.class))).build();
 
     MvcResult result = mockMvc.perform(get("/admin/members")).andExpect(status().isOk()).andReturn();
 

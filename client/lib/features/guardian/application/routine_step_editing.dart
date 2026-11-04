@@ -163,6 +163,22 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
     ref.refreshRoutines();
   }
 
+  /// 보호자 목소리 열쇠 갈아 끼우기 (올림 > 새 열쇠, 지움 > null). 같은 카드의 다른 값은 그대로
+  void applyStepVoice(String stepId, String? guardianVoicePath) {
+    final routine = state.routine;
+    if (routine == null || !routine.steps.any((s) => s.id == stepId)) return;
+
+    state = state.copyWith(
+      routine: routine.copyWith(
+        steps: [
+          for (final step in routine.steps)
+            if (step.id == stepId) step.copyWith(guardianVoicePath: guardianVoicePath) else step,
+        ],
+      ),
+    );
+    ref.refreshRoutines();
+  }
+
   /// 순서 변경 모드에 들어가는 순간의 순서. `✕` 로 나올 때 되돌린다.
   ({List<ActionCard> steps, bool dirty}) snapshotOrder() => (
     steps: List.of(state.routine?.steps ?? const <ActionCard>[]),

@@ -148,6 +148,9 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
         // Google 보상형 광고 콜백 — 인증은 서명이다
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_ADS_SSV).permitAll()
+        // 스토어 결제 알림 — 인증은 Apple 서명·Google 푸시 토큰이다 (#1071)
+        .requestMatchers(HttpMethod.POST, SecurityPaths.API_SUBSCRIPTION_APPLE_NOTIFICATIONS,
+          SecurityPaths.API_SUBSCRIPTION_GOOGLE_NOTIFICATIONS).permitAll()
         // 공지 팝업 — 읽기 전용, 인증 없음
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_NOTICES, SecurityPaths.API_APP_NOTICE_IMAGE).permitAll()
         // ── 이룸이 휴대폰이 할 수 있는 것 ──

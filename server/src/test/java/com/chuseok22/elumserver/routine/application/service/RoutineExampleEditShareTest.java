@@ -55,6 +55,7 @@ class RoutineExampleEditShareTest {
   @Mock private RoutineGroupRepository routineGroupRepository;
   @Mock private RoutineLibraryOrderService routineLibraryOrderService;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks private RoutineService routineService;
   @InjectMocks private RoutineStepEditService routineStepEditService;
   @InjectMocks private RoutineShareService routineShareService;

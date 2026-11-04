@@ -10,6 +10,8 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,7 @@ final class RoutineRules {
   static final int ROUTINE_TITLE_MAX_LENGTH = 30;
 
   /**
-   * 카드 복사: 제목·언어·보상·단계(글·그림·픽토그램·예시 이미지) > 저장 전 새 일과 (오늘 09:00, CONFIRMED)
+   * 카드 복사: 제목·언어·보상·단계(글·그림·픽토그램·예시 이미지·보호자 목소리) > 저장 전 새 일과 (오늘 09:00, CONFIRMED)
    * 복제·보내기·복사하기가 함께 쓴다. AI 를 부르지 않고 원문은 복사하지 않음 (서비스 원칙 5)
    */
   static Routine copyCardsOf(Routine origin, String createdBy) {
@@ -75,6 +77,8 @@ final class RoutineRules {
       // 픽토그램·예시 이미지도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
       copied.setPictogramId(step.getPictogramId());
       copied.setExampleImageId(step.getExampleImageId());
+      // 보호자 목소리도 같은 열쇠 공유 (일과관리 원본 > 오늘 일과 보내기에서도 녹음이 들려야 함)
+      copied.setGuardianVoicePath(step.getGuardianVoicePath());
       copied.setCompleted(false);
       copiedSteps.add(copied);
     }
@@ -90,13 +94,15 @@ final class RoutineRules {
     return savedCopy;
   }
 
-  /// 일과 행 삭제 > 커밋 뒤 단계 음성 삭제. 일과 삭제·일과관리 지우기가 함께 쓴다 (#804)
+  /// 일과 행 삭제 > 커밋 뒤 단계 음성 삭제 > 커밋 뒤 아무 카드도 안 가리키는 보호자 녹음 삭제. 일과 삭제·일과관리 지우기가 함께 쓴다 (#804)
   /// 그림은 다른 일과와 공유될 수 있어 지우지 않음
   static void deleteWithSpeech(RoutineRepository routineRepository, RoutineStepSpeechQueue routineStepSpeechQueue,
-    Routine routine) {
+    GuardianVoiceFiles guardianVoiceFiles, Routine routine) {
     List<String> stepIds = routine.getSteps().stream().map(RoutineStep::getId).toList();
+    List<String> voiceKeys = GuardianVoiceFiles.voiceKeysOf(routine);
     routineRepository.delete(routine);
     routineStepSpeechQueue.deleteStepsAfterCommit(stepIds);
+    guardianVoiceFiles.deleteUnreferencedAfterCommit(voiceKeys);
   }
 
   /**
@@ -109,6 +115,26 @@ final class RoutineRules {
     }
     routine.setIsExample(false);
     log.info("[routine example] edited : example mark cleared, routineId={}", routine.getId());
+  }
+
+  /// 보낼 수 있는 일과관리 원본인가 2개: 보내기로 만든 일과가 아님, 보낸 상태(임시저장은 승인 전)
+  static boolean isSendableOriginal(Routine routine) {
+    return routine.getSourceRoutineId() == null && routine.getStatus() != RoutineStatus.PENDING_REVIEW;
+  }
+
+  /// 그날 이미 보냈는가: 원본 자체가 그날 홈 일과이거나(복사본 제외), 이 원본으로 보낸 일과가 그날 있음
+  static boolean isSentOn(RoutineRepository routineRepository, Routine original, LocalDate date) {
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+    return isOriginalOnHomeOn(original, date)
+      || routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(original.getId(), startOfDay, endOfDay);
+  }
+
+  /// 원본 자체가 그날 홈에 뜨는 일과인가 (일과관리 복사본은 홈에 안 뜸)
+  static boolean isOriginalOnHomeOn(Routine original, LocalDate date) {
+    return !original.isLibraryOnly()
+      && original.getScheduledAt() != null
+      && original.getScheduledAt().toLocalDate().equals(date);
   }
 
   static int countCompleted(List<RoutineStep> steps) {

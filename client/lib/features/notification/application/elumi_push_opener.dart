@@ -16,7 +16,7 @@ final elumiPushOpenerProvider = Provider<ElumiPushOpener>(
   ElumiPushOpener.new,
 );
 
-/// 이룸이 기기 푸시 처리: 전경 수신(일과 목록 새로 받기), 누름 > 이룸이 화면 준비 대기 > 그 일과 상세
+/// 이룸이 기기 푸시 처리 (일과 도착 · 일과 시간): 전경 수신(일과 목록 새로 받기), 누름 > 이룸이 화면 준비 대기 > 그 일과 상세
 /// 보호자 알림과 따로 둠 (이룸이 기기는 알림 목록·읽음 처리가 없음)
 class ElumiPushOpener {
   ElumiPushOpener(this._ref);
@@ -25,6 +25,9 @@ class ElumiPushOpener {
 
   /// 서버 PushMessageFactory.ELUMI_ROUTINE_ARRIVED_TYPE 과 같은 값
   static const routineArrivedType = 'ELUMI_ROUTINE_ARRIVED';
+
+  /// 서버 PushMessageFactory.ELUMI_ROUTINE_TIME_TYPE 과 같은 값 (반복 일과의 정한 시각)
+  static const routineTimeType = 'ELUMI_ROUTINE_TIME';
 
   /// 서버 PushMessageFactory.ELUMI_ROUTINES_CHANNEL_ID 와 같은 값
   static const routinesChannelId = 'elumi_routines';
@@ -36,8 +39,9 @@ class ElumiPushOpener {
   DateTime? _pendingTappedAt;
   bool _isOpening = false;
 
+  /// 이룸이 기기 푸시 2종(일과 도착 · 일과 시간): 눌렀을 때 하는 일이 같다 (그 일과 상세)
   static bool isElumiPush(Map<String, String> data) =>
-      data['type'] == routineArrivedType;
+      data['type'] == routineArrivedType || data['type'] == routineTimeType;
 
   AndroidNotificationChannel routinesChannel() => AndroidNotificationChannel(
     routinesChannelId,

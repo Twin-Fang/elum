@@ -31,7 +31,7 @@ typedef ReadyNavigatorContext = BuildContext? Function();
 
 /// 푸시 수신 > 화면 반영: 전경 수신(안 읽음 갱신 + 배너), 알림 누름(앱 열기·로컬 배너) > 해당 화면 이동
 /// 이동은 보호자로 로그인했고 화면이 준비된 뒤 한 번만, 로그인 전에 누른 알림은 버림
-/// 이룸이 기기 푸시(일과 도착)는 [ElumiPushOpener] 로 넘김
+/// 이룸이 기기 푸시(일과 도착 · 일과 시간)는 [ElumiPushOpener] 로 넘김
 class PushMessageRouter {
   PushMessageRouter(this._ref);
 

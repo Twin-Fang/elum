@@ -91,6 +91,12 @@ public enum ConfigKey {
     "낮출수록 싸다",
     ConfigValueType.SELECT, List.of("low", "medium", "high"), "low"
   ),
+  // 고품질 그림 권한(IMAGE_HIGH_QUALITY)이 켜진 회원만 쓴다. 출력 토큰 low 272 > medium 1056 (약 4배)
+  OPENAI_IMAGE_QUALITY_PRO(
+    ConfigGroup.IMAGE_PROVIDER, "OpenAI 이미지 품질 (고품질 권한)",
+    "요금제 '고품질 그림' 권한이 켜진 회원의 그림 품질. 권한이 꺼져 있으면 위 'OpenAI 이미지 품질'을 쓴다",
+    ConfigValueType.SELECT, List.of("low", "medium", "high"), "medium"
+  ),
   FLUX_API_KEY(
     ConfigGroup.IMAGE_PROVIDER, "FLUX(fal.ai) API 키",
     "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
@@ -275,6 +281,58 @@ public enum ConfigKey {
     "Free가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
+  FREE_CARD_EXPORT_WITHOUT_WATERMARK(
+    ConfigGroup.PLAN_FREE, "카드 내보내기 워터마크 없음",
+    "Free가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지. 꺼두면 워터마크가 들어간다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_CARD_EXPORT_ALL_THEMES(
+    ConfigGroup.PLAN_FREE, "카드 내보내기 디자인 테마",
+    "Free가 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_WEEKLY_REPORT(
+    ConfigGroup.PLAN_FREE, "주간 리포트",
+    "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_ROUTINE_TRANSLATE(
+    ConfigGroup.PLAN_FREE, "일과 다른 언어로 만들기",
+    "Free가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_ROUTINE_SCHEDULE(
+    ConfigGroup.PLAN_FREE, "요일별 반복 일과",
+    "Free가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_GUARDIAN_VOICE(
+    ConfigGroup.PLAN_FREE, "보호자 목소리 녹음",
+    "Free가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_FREE, "전문가 일과 가져오기",
+    "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_ROUTINE_MEMORY(
+    ConfigGroup.PLAN_FREE, "AI 메모 (내가 고친 일과처럼 만들기)",
+    "Free가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 켜면 메모 갱신 AI 호출 비용이 든다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  // 다시 그리기 무료: 켜면 IMAGE_REGENERATE 단가 0 (하루 무료 횟수 IMAGE_REGENERATE_FREE_DAILY_CAP 까지) (#1075)
+  FREE_IMAGE_REGENERATE_FREE(
+    ConfigGroup.PLAN_FREE, "그림 다시 그리기 무료",
+    "Free가 카드 그림 다시 그리기를 크레딧 없이 할 수 있는지. 하루 무료 횟수를 넘으면 원래 단가를 쓴다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  // 고품질 그림: 켜면 OpenAI 품질을 OPENAI_IMAGE_QUALITY_PRO 로 그린다 (그림 원가가 올라 기본 꺼짐)
+  FREE_IMAGE_HIGH_QUALITY(
+    ConfigGroup.PLAN_FREE, "고품질 그림",
+    "Free 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라간다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -340,6 +398,58 @@ public enum ConfigKey {
     "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
+  PRO_CARD_EXPORT_WITHOUT_WATERMARK(
+    ConfigGroup.PLAN_PRO, "카드 내보내기 워터마크 없음",
+    "Pro가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_CARD_EXPORT_ALL_THEMES(
+    ConfigGroup.PLAN_PRO, "카드 내보내기 디자인 테마",
+    "Pro가 카드 내보내기에서 모든 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_WEEKLY_REPORT(
+    ConfigGroup.PLAN_PRO, "주간 리포트",
+    "Pro가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_TRANSLATE(
+    ConfigGroup.PLAN_PRO, "일과 다른 언어로 만들기",
+    "Pro가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_SCHEDULE(
+    ConfigGroup.PLAN_PRO, "요일별 반복 일과",
+    "Pro가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지. 꺼도 정해 둔 요일·시각은 지우지 않고 멈춘다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_GUARDIAN_VOICE(
+    ConfigGroup.PLAN_PRO, "보호자 목소리 녹음",
+    "Pro가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지. 끄면 녹음은 남고 이룸이는 기본 음성으로 듣는다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_TEMPLATES(
+    ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
+    "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_MEMORY(
+    ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",
+    "Pro가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 메모를 넣지도 갱신하지도 않는다 (메모는 남음)",
+    // 기본 꺼짐: 개인정보처리방침 개정(#1079) 시행 전이라 관리자가 켜기 전까지 메모를 만들지 않음
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  PRO_IMAGE_REGENERATE_FREE(
+    ConfigGroup.PLAN_PRO, "그림 다시 그리기 무료",
+    "Pro가 카드 그림 다시 그리기를 크레딧 없이 할 수 있는지. 하루 무료 횟수를 넘으면 원래 단가를 쓴다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  // 그림이 비싸 Pro 도 기본 꺼짐 — 원가 실측 뒤 관리자 화면에서 켠다
+  PRO_IMAGE_HIGH_QUALITY(
+    ConfigGroup.PLAN_PRO, "고품질 그림",
+    "Pro 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라가 기본은 꺼 둔다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // 서비스 전체 하루 AI 비용 상한.
   //
@@ -368,6 +478,13 @@ public enum ConfigKey {
     "보호자가 직접 추가한 카드의 그림을 회원별로 10분에 몇 장까지 그릴지. 넘으면 카드는 두고 그림만 건너뛴다. "
       + "다음 요청부터 반영. 1~100",
     ConfigValueType.INTEGER, List.of(), "10", 1, 100
+  ),
+  // 0 이면 무료 다시 그리기 없음 (모두 원래 단가)
+  IMAGE_REGENERATE_FREE_DAILY_CAP(
+    ConfigGroup.USAGE_LIMIT, "무료 다시 그리기 하루 한도 (회)",
+    "'그림 다시 그리기 무료' 권한이 있는 회원이 하루(서버 시각 0시 시작)에 크레딧 없이 다시 그릴 수 있는 횟수. "
+      + "넘으면 원래 단가로 크레딧을 쓴다. 다음 요청부터 반영. 0~500",
+    ConfigValueType.INTEGER, List.of(), "30", 0, 500
   ),
   FEEDBACK_DAILY_LIMIT(
     ConfigGroup.USAGE_LIMIT, "의견 보내기 하루 한도 (건)",
@@ -594,6 +711,82 @@ public enum ConfigKey {
   MAIL_SMTP_PASSWORD(
     ConfigGroup.MAIL, "SMTP 비밀번호",
     "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+
+  // --- 스토어 구독 결제 (#1071) ---
+  //
+  // 켜기 전까지 검증 API 는 SUBSCRIPTION_STORE_DISABLED 로 거절하고 알림은 503 으로 스토어가 다시 보내게 한다.
+  // 상품 목록이 비면 어떤 상품도 받지 않는다. 테스트 결제 허용은 앱 심사 기간에만 켠다(심사관은 Sandbox 로 산다).
+
+  SUBSCRIPTION_APPLE_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 구독 켜기",
+    "켜면 앱의 App Store 구독 검증과 App Store 결제 알림을 받는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_APPLE_BUNDLE_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 번들 ID",
+    "다른 앱의 결제를 거르는 기준. iOS 앱 PRODUCT_BUNDLE_IDENTIFIER 와 같아야 한다",
+    ConfigValueType.STRING, List.of(), "kr.twinfang.elum"
+  ),
+  SUBSCRIPTION_APPLE_APP_APPLE_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 앱 ID (숫자)",
+    "App Store Connect 의 Apple ID. 실제 결제 알림 검증에 쓴다 (스토어 주소의 id 뒤 숫자)",
+    ConfigValueType.STRING, List.of(), "6792970508"
+  ),
+  SUBSCRIPTION_APPLE_PRODUCT_IDS(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 구독 상품 ID",
+    "Pro 를 주는 상품 ID, 쉼표로 나눈다. 비우면 어떤 상품도 받지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_PRODUCT_ID_LIST
+  ),
+  SUBSCRIPTION_APPLE_ALLOW_SANDBOX(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 테스트 결제 허용",
+    "Sandbox·TestFlight 결제로도 Pro 를 준다. 앱 심사관은 Sandbox 로 사므로 심사 제출 전에 켠다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_APPLE_ISSUER_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API Issuer ID",
+    "App Store Connect > 사용자 및 액세스 > 통합 > 앱 내 구입 키의 Issuer ID. 셋 다 있으면 검증 때 최신 상태를 Apple 에 다시 묻는다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  SUBSCRIPTION_APPLE_KEY_ID(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API Key ID",
+    "앱 내 구입 키의 Key ID",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  SUBSCRIPTION_APPLE_PRIVATE_KEY(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store Server API 개인 키 (.p8)",
+    "내려받은 .p8 파일 내용 전체 (BEGIN/END 줄 포함). 줄바꿈이 빠져도 된다",
+    ConfigValueType.SECRET, List.of(), "", ConfigFormat.SECRET_DOCUMENT
+  ),
+  SUBSCRIPTION_GOOGLE_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 구독 켜기",
+    "켜면 앱의 Google Play 구독 검증과 Play 실시간 결제 알림(RTDN)을 받는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_GOOGLE_PACKAGE_NAME(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 패키지명",
+    "Android applicationId 와 같아야 한다",
+    ConfigValueType.STRING, List.of(), "kr.twinfang.elum"
+  ),
+  SUBSCRIPTION_GOOGLE_PRODUCT_IDS(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 구독 상품 ID",
+    "Pro 를 주는 구독 상품 ID, 쉼표로 나눈다. 비우면 어떤 상품도 받지 않는다",
+    ConfigValueType.STRING, List.of(), "", ConfigFormat.STORE_PRODUCT_ID_LIST
+  ),
+  SUBSCRIPTION_GOOGLE_ALLOW_TEST_PURCHASES(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 테스트 결제 허용",
+    "라이선스 테스터 결제로도 Pro 를 준다. 심사·내부 시험 기간에만 켠다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SUBSCRIPTION_GOOGLE_SERVICE_ACCOUNT_JSON(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 서비스 계정 키 (JSON)",
+    "Play Console 에 권한을 준 서비스 계정의 JSON 키 전체. 없으면 Google 구독을 확인할 수 없다",
+    ConfigValueType.SECRET, List.of(), "", ConfigFormat.SECRET_DOCUMENT
+  ),
+  SUBSCRIPTION_GOOGLE_RTDN_PUSH_TOKEN(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 알림 토큰",
+    "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
   ),
   ;

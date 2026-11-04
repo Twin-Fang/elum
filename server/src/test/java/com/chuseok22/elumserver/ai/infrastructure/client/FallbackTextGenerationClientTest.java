@@ -56,6 +56,18 @@ class FallbackTextGenerationClientTest {
   }
 
   @Test
+  @DisplayName("일과 번역(#1077)도 1번이 실패하면 2번으로 넘긴다 — 안 넘기면 Claude 크레딧이 떨어진 날 번역만 실패함")
+  void translate_movesOnWhenFirstFails() {
+    var draft = new com.chuseok22.elumserver.ai.core.RoutineTranslationDraft("아침", null, List.of());
+    var ko = com.chuseok22.elumserver.common.locale.AppLocale.KO;
+    var en = com.chuseok22.elumserver.common.locale.AppLocale.EN;
+    when(first.translateRoutineJson(draft, ko, en)).thenThrow(new IllegalStateException("529"));
+    when(second.translateRoutineJson(draft, ko, en)).thenReturn(VALID_ROUTINE);
+
+    assertThat(chain.translateRoutineJson(draft, ko, en)).isEqualTo(VALID_ROUTINE);
+  }
+
+  @Test
   @DisplayName("관리자 시험은 1번 제공자만 부른다 — 다른 제공자 답이 섞이면 시험 결과를 믿을 수 없다")
   void adminTest_usesFirstOnly() {
     when(first.generateRoutineJsonForTest("prompt", "sample")).thenThrow(new IllegalStateException("fail"));

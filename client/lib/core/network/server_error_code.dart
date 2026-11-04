@@ -42,6 +42,12 @@ enum ServerErrorCode {
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),
+  // 요일별 반복 일과 (#782): 요금제 권한 없음 · 요일·시각 틀림
+  routineScheduleNotAllowed('ROUTINE_SCHEDULE_NOT_ALLOWED'),
+  routineScheduleInvalid('ROUTINE_SCHEDULE_INVALID'),
+  // AI 메모 (#1082): Pro 아님 · 진단·장애·정도가 든 줄
+  routineMemoryProRequired('ROUTINE_MEMORY_PRO_REQUIRED'),
+  routineMemoryLineNotAllowed('ROUTINE_MEMORY_LINE_NOT_ALLOWED'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),
@@ -54,6 +60,12 @@ enum ServerErrorCode {
   routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
   routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
   routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
+  // 보호자 목소리 녹음: Pro 아님, 형식, 크기, 길이, 저장 실패
+  guardianVoiceNotAllowed('GUARDIAN_VOICE_NOT_ALLOWED'),
+  guardianVoiceInvalidType('GUARDIAN_VOICE_INVALID_TYPE'),
+  guardianVoiceTooLarge('GUARDIAN_VOICE_TOO_LARGE'),
+  guardianVoiceTooLong('GUARDIAN_VOICE_TOO_LONG'),
+  guardianVoiceSaveFailed('GUARDIAN_VOICE_SAVE_FAILED'),
   routineRequestTooFrequent('ROUTINE_REQUEST_TOO_FREQUENT'),
 
   // PROMPT
@@ -140,6 +152,11 @@ enum ServerErrorCode {
   routineCreateDailyLimitExceeded('ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED'),
   routineCountLimitExceeded('ROUTINE_COUNT_LIMIT_EXCEEDED'),
   profileCountLimitExceeded('PROFILE_COUNT_LIMIT_EXCEEDED'),
+  // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
+  weeklyReportNotAllowed('WEEKLY_REPORT_NOT_ALLOWED'),
+  // 일과 다른 언어로 만들기 (#1077). 앱은 Free 에게 입구를 숨겨 403 은 오래된 앱·직접 호출에서만 남
+  routineTranslateNotAllowed('ROUTINE_TRANSLATE_NOT_ALLOWED'),
+  routineTranslateFailed('ROUTINE_TRANSLATE_FAILED'),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -158,6 +175,14 @@ enum ServerErrorCode {
   adRewardAccountFrozen('AD_REWARD_ACCOUNT_FROZEN'),
   adRewardSessionNotFound('AD_REWARD_SESSION_NOT_FOUND'),
   adRewardUnavailable('AD_REWARD_UNAVAILABLE'),
+
+  // 스토어 구독 결제 (#1071). 꺼짐·설정 없음은 잠시 뒤 다시, 다른 계정에 묶인 구독은 그 계정으로 로그인 안내.
+  subscriptionStoreDisabled('SUBSCRIPTION_STORE_DISABLED'),
+  subscriptionReceiptInvalid('SUBSCRIPTION_RECEIPT_INVALID'),
+  subscriptionEnvironmentNotAllowed('SUBSCRIPTION_ENVIRONMENT_NOT_ALLOWED'),
+  subscriptionProductNotAllowed('SUBSCRIPTION_PRODUCT_NOT_ALLOWED'),
+  subscriptionOwnedByOtherMember('SUBSCRIPTION_OWNED_BY_OTHER_MEMBER'),
+  subscriptionStoreNotConfigured('SUBSCRIPTION_STORE_NOT_CONFIGURED'),
 
   // 비밀값(외부 API 키) 저장.
   secretMasterKeyMissing('SECRET_MASTER_KEY_MISSING'),
@@ -257,6 +282,11 @@ enum ServerErrorCode {
   talkImageNotFound('TALK_IMAGE_NOT_FOUND'),
   talkLinkRoutineNotMine('TALK_LINK_ROUTINE_NOT_MINE'),
   talkLinkRoutineNotShareable('TALK_LINK_ROUTINE_NOT_SHAREABLE'),
+
+  // 전문가 일과: 내렸거나 없는 일과 404, Free 가져오기 403, 관리자 입력 오류 400
+  expertRoutineNotFound('EXPERT_ROUTINE_NOT_FOUND'),
+  expertRoutineProOnly('EXPERT_ROUTINE_PRO_ONLY'),
+  expertRoutineInvalid('EXPERT_ROUTINE_INVALID'),
 
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.

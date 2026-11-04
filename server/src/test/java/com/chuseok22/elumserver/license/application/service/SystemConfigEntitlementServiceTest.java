@@ -276,6 +276,102 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.routineCreatePerWeek()).isEqualTo(3);
   }
 
+  @Test
+  @DisplayName("스냅샷의 카드 내보내기 권한은 Pro 키를 읽는다 (Free 는 워터마크가 남는다)")
+  void snapshot_cardExportReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_EXPORT_WITHOUT_WATERMARK)).thenReturn(true);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_EXPORT_ALL_THEMES)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.cardExportWithoutWatermark()).isTrue();
+    assertThat(snapshot.cardExportAllThemes()).isTrue();
+  }
+
+  @Test
+  @DisplayName("스냅샷의 주간 리포트 권한은 그 플랜 키를 읽는다 (관리자가 Free 키를 켜면 Free 도 보인다)")
+  void snapshot_weeklyReportReadsPlanKey() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.FREE_WEEKLY_REPORT)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.plan()).isEqualTo(PlanType.FREE);
+    assertThat(snapshot.weeklyReport()).isTrue();
+  }
+
+  @Test
+  @DisplayName("다른 언어로 만들기 권한은 플랜 키를 읽는다 — 다른 키를 읽으면 Pro 가 못 쓰거나 Free 가 쓴다 (#1077)")
+  void snapshot_routineTranslateReadsPlanKey() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_TRANSLATE)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.routineTranslate()).isTrue();
+    assertThat(Entitlement.ROUTINE_TRANSLATE.configKeyFor(PlanType.FREE)).isEqualTo(ConfigKey.FREE_ROUTINE_TRANSLATE);
+  }
+
+  @Test
+  @DisplayName("스냅샷의 요일별 반복 일과 권한은 플랜 키를 읽는다 (Free 기본 꺼짐 · Pro 켜짐)")
+  void snapshot_routineScheduleReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_SCHEDULE)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).routineSchedule()).isTrue();
+    assertThat(ConfigKey.FREE_ROUTINE_SCHEDULE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_SCHEDULE.getDefaultValue()).isEqualTo("true");
+  }
+
+  @Test
+  @DisplayName("스냅샷의 보호자 목소리 권한은 요금제 키를 읽는다 (Free 는 꺼짐, 앱이 녹음 칸을 숨긴다)")
+  void snapshot_guardianVoiceReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_GUARDIAN_VOICE)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).guardianVoice()).isTrue();
+  }
+
+  @Test
+  @DisplayName("AI 메모 권한은 Free·Pro 모두 기본 꺼짐 — 개인정보처리방침(#1079) 시행 전 배포만으로 메모가 만들어지면 안 된다 (#1082)")
+  void routineMemory_isOffByDefaultForBothPlans() {
+    assertThat(ConfigKey.FREE_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("스냅샷의 그림 권한은 플랜 키를 읽고, 기본값은 다시 그리기 무료만 Pro 켜짐이다 (#1075)")
+  void snapshot_imageEntitlementsReadPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_IMAGE_REGENERATE_FREE)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.imageRegenerateFree()).isTrue();
+    assertThat(snapshot.imageHighQuality()).isFalse();
+    assertThat(ConfigKey.FREE_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("true");
+    assertThat(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP.getDefaultValue()).isEqualTo("30");
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

@@ -64,6 +64,10 @@ public class RoutineStep extends BaseEntity {
   // 단계 음성 저장 열쇠 {stepId}/{문장 해시}.wav (#675). 아직 없거나 실패, 한국어 아닌 일과는 null
   private String speechPath;
 
+  // 보호자 목소리 녹음 열쇠 {녹음한 보호자 memberId}/{UUID}.m4a (#787). 녹음이 없으면 null
+  // 글을 고쳐도 지우지 않음 (보호자가 다시 녹음·삭제). 이룸이 재생은 녹음한 보호자가 Pro 일 때만
+  private String guardianVoicePath;
+
   @Column(nullable = false, columnDefinition = "boolean not null default false")
   private Boolean completed = false;
 

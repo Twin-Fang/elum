@@ -26,6 +26,12 @@ public enum AiCallType {
   CLAUDE_TEXT_CREATE("Claude 루틴 생성", AiCallPurpose.ROUTINE_CREATE, AiProvider.CLAUDE),
   CLAUDE_TEXT_QUESTION("Claude 추가 질문", AiCallPurpose.ROUTINE_QUESTION, AiProvider.CLAUDE),
   CLAUDE_TEXT_PICTOGRAM("Claude 픽토그램 선택", AiCallPurpose.PICTOGRAM_PICK, AiProvider.CLAUDE),
+  GEMINI_TEXT_TRANSLATE("Gemini 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.GEMINI),
+  OPENAI_TEXT_TRANSLATE("OpenAI 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.OPENAI),
+  CLAUDE_TEXT_TRANSLATE("Claude 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.CLAUDE),
+  GEMINI_TEXT_MEMORY("Gemini AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.GEMINI),
+  OPENAI_TEXT_MEMORY("OpenAI AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.OPENAI),
+  CLAUDE_TEXT_MEMORY("Claude AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.CLAUDE),
   ;
 
   private final String label;

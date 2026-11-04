@@ -21,9 +21,11 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
+import '../../member/application/plan_access.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import 'widgets/plan_settings_group.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -172,20 +174,23 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     );
   }
 
-  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16.
-  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 연결 / 앱 사용 / 약관 및 정보 / 계정.
+  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16. 맨 위 요금제 묶음은 시안 #1070.
+  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 요금제 / 연결 / 앱 사용 / 약관 및 정보 / 계정.
   Widget _list(AppSpacing space) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
         SizedBox(height: 16.h),
+        // 요금제: 내 요금제 · 구매 복원 (설정 맨 위, 시안 #1070)
+        PlanSettingsGroup(isBusy: busy),
+        _groupGap,
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
           children: [_LinkTile(busy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
             SettingsTile(
@@ -201,6 +206,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),
             _ImageStyleTile(busy: busy),
+            _RoutineMemoryTile(busy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
             const _ScreenAwakeTile(),
@@ -320,6 +326,26 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
+/// Free 는 줄을 숨긴다 — 앱에서 Pro 를 살 수 없는 동안(PlanAccess.canPurchasePro) 잠긴 줄은 막힌 기능으로 읽힌다
+class _RoutineMemoryTile extends ConsumerWidget {
+  const _RoutineMemoryTile({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(planAccessProvider.select((access) => access.canUseRoutineMemory))) {
+      return const SizedBox.shrink();
+    }
+    return SettingsTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsRoutineMemory,
+      onTap: busy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }
 }

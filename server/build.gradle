@@ -71,8 +71,11 @@ dependencies {
     // Chuseok22 API Change Log
     implementation 'com.chuseok22:ApiChangeLog:1.0.1'
 
-    // Firebase Admin (FCM)
+    // Firebase Admin (FCM). 함께 오는 google-auth-library 로 Play Developer API 토큰도 받는다 (#1071)
     implementation 'com.google.firebase:firebase-admin:9.4.3'
+
+    // App Store 구독 서명 검증(x5c 체인·ES256·번들·환경)과 App Store Server API (#1071)
+    implementation 'com.apple.itunes.storekit:app-store-server-library:5.2.0'
 
     // Chuseok22 Method Logging
     implementation 'com.chuseok22:logging:0.0.9'

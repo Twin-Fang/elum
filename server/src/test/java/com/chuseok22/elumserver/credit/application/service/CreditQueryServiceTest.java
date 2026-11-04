@@ -71,7 +71,8 @@ class CreditQueryServiceTest {
         org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
     PlatformTransactionManager tx = mock(PlatformTransactionManager.class);
     CreditReservationService reservationService = new CreditReservationService(
-      policyService, accountService, entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
+      policyService, accountService, entitlementService, jobRepository, ledgerRepository,
+      com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
     service = new CreditQueryService(policyService, accountService, reservationService, entitlementService,
       jobRepository, ledgerRepository, tx, CLOCK);
 

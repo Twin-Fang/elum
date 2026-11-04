@@ -1,0 +1,342 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/layout/share_origin.dart';
+import '../../../../core/logger/app_logger.dart';
+import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_check_circle.dart';
+import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/elum_error_view.dart';
+import '../../../../core/widgets/elum_scaffold.dart';
+import '../../../../core/widgets/elum_sheet_action_row.dart';
+import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/show_failure.dart';
+import '../../../../shared/models/routine.dart';
+import '../../../../shared/pictogram/pictogram_svg_loader.dart';
+import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../application/card_export_pictures.dart';
+import '../../data/card_export_files.dart';
+import '../../domain/card_export_options.dart';
+import 'card_export_options_panel.dart';
+import 'print_sheets.dart';
+
+/// 인쇄용으로 받기: 설정 > 미리 보기(= 파일 그대로) > 보내기 · 인쇄하기 (#1073)
+///
+/// Free 는 이룸 로고·워터마크가 들어가고, Pro 는 워터마크 없음 + 디자인 테마 전부.
+class CardExportScreen extends ConsumerStatefulWidget {
+  const CardExportScreen({super.key, required this.routine});
+
+  final Routine routine;
+
+  @override
+  ConsumerState<CardExportScreen> createState() => _CardExportScreenState();
+}
+
+class _CardExportScreenState extends ConsumerState<CardExportScreen> {
+  static const _backTop = 67.0;
+  static const _horizontalPadding = 16.0;
+  static const _sectionGap = 24.0;
+  static const _pageGap = 16.0;
+  static const _files = CardExportFiles();
+
+  CardExportOptions _options = const CardExportOptions();
+  bool _isBusy = false;
+  bool _isArtReady = false;
+  CardExportPictures? _precached;
+  final _sheetKeys = <GlobalKey>[];
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final access = ref.watch(planAccessProvider);
+    final picturesAsync = ref.watch(cardExportPicturesProvider(widget.routine));
+    final pictures = picturesAsync.value;
+    if (pictures != null && !identical(pictures, _precached)) {
+      _precached = pictures;
+      _precacheArt(pictures);
+    }
+    final canExport = pictures != null && pictures.failedCount == 0 && _isArtReady && !_isBusy;
+    return ElumScaffold(
+      onBack: () => Navigator.of(context).pop(),
+      title: l10n.cardExportOpen,
+      backTop: _backTop,
+      horizontalPadding: _horizontalPadding,
+      bottomButton: widget.routine.steps.isEmpty
+          ? null
+          : ElumSheetActionRow(
+              // 카드 한 장씩은 이미지라 인쇄 대신 보내기만
+              cancelLabel: _options.format == CardExportFormat.cardImages ? null : l10n.cardExportPrint,
+              onCancel: canExport ? () => _export(shouldPrint: true) : null,
+              confirmLabel: l10n.cardExportShare,
+              onConfirm: canExport ? () => _export(shouldPrint: false) : () {},
+              isLoading: _isBusy || (pictures == null && !picturesAsync.hasError),
+            ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: _sectionGap.h),
+            if (widget.routine.steps.isEmpty)
+              ElumErrorView(message: l10n.cardExportNoCards, compact: true)
+            else ...[
+              CardExportOptionsPanel(
+                options: _options,
+                onChanged: (next) => setState(() => _options = next),
+                canUseAllThemes: access.canUseAllCardDesignThemes,
+                showsProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
+                // 살 수 있으면 요금제 화면, 아니면 안내만
+                onLockedThemeTap: access.canPurchasePro
+                    ? () => openPlanPaywall(context, ref)
+                    : () => showElumDialog<void>(
+                        context: context,
+                        title: l10n.cardExportProThemeLocked,
+                        actions: [ElumDialogAction(label: l10n.commonConfirm)],
+                      ),
+              ),
+              SizedBox(height: _sectionGap.h),
+              _preview(
+                context,
+                picturesAsync,
+                hasWatermark: !access.canExportCardsWithoutWatermark,
+                canPurchasePro: access.canPurchasePro,
+              ),
+            ],
+            SizedBox(height: _sectionGap.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _preview(
+    BuildContext context,
+    AsyncValue<CardExportPictures> picturesAsync, {
+    required bool hasWatermark,
+    required bool canPurchasePro,
+  }) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final pictures = picturesAsync.value;
+    if (pictures == null && !picturesAsync.hasError) {
+      return Column(children: [
+        ElumSpinner(size: 32.w, strokeWidth: 3),
+        SizedBox(height: 12.h),
+        Text(l10n.cardExportPreparing, style: context.typo.body.copyWith(color: colors.textSecondary)),
+      ]);
+    }
+    if (pictures == null || pictures.failedCount > 0) {
+      return ElumErrorView(
+        message: l10n.cardExportImageFailed,
+        errorCode: CardExportErrorCode.image,
+        onRetry: () => ref.invalidate(cardExportPicturesProvider(widget.routine)),
+        compact: true,
+      );
+    }
+    final sheets = buildPrintSheets(
+      routine: widget.routine,
+      options: _options,
+      pictures: pictures,
+      hasWatermark: hasWatermark,
+    );
+    while (_sheetKeys.length < sheets.length) {
+      _sheetKeys.add(GlobalKey());
+    }
+    final caption = context.typo.caption.copyWith(color: colors.textSecondary);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.cardExportPreviewSection,
+          style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel),
+        ),
+        // 안내는 종이 밖에만 (미리 보기의 종이 = 파일 그대로)
+        if (pictures.hasMissingPicture) ...[
+          SizedBox(height: 6.h),
+          Text(l10n.cardExportMissingPicture, style: caption),
+        ],
+        if (hasWatermark && canPurchasePro) ...[
+          SizedBox(height: 6.h),
+          Text(l10n.cardExportWatermarkNotice, style: caption),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ElumTextLink(
+              label: l10n.planLearnPro,
+              onTap: () => openPlanPaywall(context, ref),
+            ),
+          ),
+        ],
+        if (_options.format != CardExportFormat.cardImages) ...[
+          SizedBox(height: 6.h),
+          Text(l10n.cardExportActualSizeHint, style: caption),
+        ],
+        SizedBox(height: 12.h),
+        for (final (index, sheet) in sheets.indexed) ...[
+          if (index > 0) SizedBox(height: _pageGap.h),
+          _PreviewSheet(
+            sheet: sheet,
+            boundaryKey: _sheetKeys[index],
+            isExcluded: sheet.cardId != null && _options.excludedCardIds.contains(sheet.cardId),
+            onToggle: sheet.cardId == null ? null : () => _toggleCard(sheet.cardId!),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _toggleCard(String cardId) {
+    final excluded = {..._options.excludedCardIds};
+    excluded.contains(cardId) ? excluded.remove(cardId) : excluded.add(cardId);
+    setState(() => _options = _options.copyWith(excludedCardIds: excluded));
+  }
+
+  // 번들 그림(예시 이미지 · 픽토그램)을 미리 읽어 둔다 — 덜 읽힌 채 구우면 빈 칸이 찍힘
+  Future<void> _precacheArt(CardExportPictures pictures) async {
+    setState(() => _isArtReady = false);
+    try {
+      for (final picture in pictures.byCardId.values) {
+        if (picture.bytes case final bytes?) {
+          await precacheImage(MemoryImage(bytes), context);
+        } else if (picture.exampleImageId case final id?) {
+          await precacheImage(AssetImage(AppAssets.exampleRoutineImage(id)), context);
+        } else if (picture.pictogramId case final id?) {
+          final loader = PictogramSvgLoader(id);
+          await svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+        }
+        if (!mounted) return;
+      }
+    } on Object catch (error) {
+      // 미리 읽기 실패는 막지 않는다 — 그 그림은 그릴 때 대체 그림(제목)으로 내려감
+      AppLogger.error('card export precache failed', error);
+    }
+    if (mounted) setState(() => _isArtReady = true);
+  }
+
+  // 미리 보기 지면 굽기 > PNG(카드 한 장씩) 또는 PDF > 보내기 · 인쇄
+  Future<void> _export({required bool shouldPrint}) async {
+    final l10n = context.l10n;
+    final origin = shareOriginOf(context);
+    final pictures = _precached;
+    if (pictures == null) return;
+    final sheets = buildPrintSheets(
+      routine: widget.routine,
+      options: _options,
+      pictures: pictures,
+      hasWatermark: !ref.read(planAccessProvider).canExportCardsWithoutWatermark,
+    );
+    final included = [
+      for (final (index, sheet) in sheets.indexed)
+        if (sheet.cardId == null || !_options.excludedCardIds.contains(sheet.cardId)) (index, sheet),
+    ];
+    if (included.isEmpty) {
+      await showElumDialog<void>(
+        context: context,
+        title: l10n.cardExportNoneSelected,
+        actions: [ElumDialogAction(label: l10n.commonConfirm)],
+      );
+      return;
+    }
+    setState(() => _isBusy = true);
+    try {
+      await WidgetsBinding.instance.endOfFrame;
+      final pngs = <Uint8List>[];
+      for (final (index, sheet) in included) {
+        final boundary = _sheetKeys[index].currentContext?.findRenderObject();
+        if (boundary is! RenderRepaintBoundary) throw StateError('sheet $index not painted');
+        pngs.add(await _files.capturePng(boundary, sheet.pixelRatio));
+      }
+      final stem = exportFileStem(widget.routine.title);
+      if (_options.format == CardExportFormat.cardImages) {
+        await _files.share(
+          files: [
+            for (final (index, png) in pngs.indexed)
+              (fileName: '${stem}_${(index + 1).toString().padLeft(2, '0')}.png', bytes: png, mimeType: 'image/png'),
+          ],
+          sharePositionOrigin: origin,
+        );
+        return;
+      }
+      final pdf = await _files.buildA4Pdf(pngs);
+      if (shouldPrint) {
+        final canPrint = await _files.printPdf(pdf: pdf, jobName: stem);
+        if (!canPrint && mounted) {
+          await showElumDialog<void>(
+            context: context,
+            icon: ElumDialogIcon.alert,
+            title: l10n.cardExportPrintFailed,
+            code: CardExportErrorCode.print,
+            actions: [ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger)],
+          );
+        }
+        return;
+      }
+      await _files.share(
+        files: [(fileName: '$stem.pdf', bytes: pdf, mimeType: 'application/pdf')],
+        sharePositionOrigin: origin,
+      );
+    } on Object catch (error) {
+      if (!mounted) return;
+      await showFailure(
+        context,
+        error,
+        fallback: l10n.cardExportRenderFailed,
+        fallbackCode: CardExportErrorCode.render,
+      );
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
+}
+
+/// 미리 보기 한 장: 화면 폭에 맞춰 줄여 보이되, 굽는 것은 원래 크기 지면
+class _PreviewSheet extends StatelessWidget {
+  const _PreviewSheet({
+    required this.sheet,
+    required this.boundaryKey,
+    required this.isExcluded,
+    this.onToggle,
+  });
+
+  final PrintSheet sheet;
+  final GlobalKey boundaryKey;
+  final bool isExcluded;
+
+  /// 카드 한 장씩: 눌러서 빼고 넣기
+  final VoidCallback? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final page = DecoratedBox(
+      decoration: BoxDecoration(border: Border.all(color: context.colors.border)),
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: RepaintBoundary(
+          key: boundaryKey,
+          child: SizedBox.fromSize(size: sheet.size, child: sheet.page),
+        ),
+      ),
+    );
+    if (onToggle == null) return page;
+    return GestureDetector(
+      onTap: onToggle,
+      child: Stack(
+        children: [
+          Opacity(opacity: isExcluded ? 0.4 : 1, child: page),
+          Positioned(
+            top: 8.w,
+            right: 8.w,
+            child: ElumCheckCircle(isChecked: !isExcluded),
+          ),
+        ],
+      ),
+    );
+  }
+}

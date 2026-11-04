@@ -5,9 +5,11 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -178,6 +180,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   /// 이 원본으로 보낸 일과가 기간 안에 있는가. 하루 한 번 보내기 확인 (#804)
   boolean existsBySourceRoutineIdAndScheduledAtBetween(String sourceRoutineId, LocalDateTime from, LocalDateTime to);
 
+  /// 이 원본으로 보낸 그날 일과 중 가장 최근 것. 반복 일과 알림이 가리킬 오늘 일과 (#1080)
+  Optional<Routine> findFirstBySourceRoutineIdAndScheduledAtBetweenOrderByCreatedAtDesc(String sourceRoutineId,
+    LocalDateTime from, LocalDateTime to);
+
   /// 이 원본으로 보낸 일과가 하나라도 있는가. 있으면 원본을 지우지 않고 숨긴다 (#804)
   boolean existsBySourceRoutineId(String sourceRoutineId);
 
@@ -186,4 +192,28 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 여러 묶음의 구성원을 한 번에 (묶음 목록, 묶음마다 따로 묻지 않음) (#806)
   List<Routine> findAllByGroupIdInOrderByGroupOrderAsc(Collection<String> groupIds);
+  // --- AI 메모 (#1082) ---
+
+  /// 메모 갱신을 기다리는 이룸이: AI 처음 카드가 있고 아직 반영 안 한 확정·완료 일과가 있는 이룸이
+  @Query("""
+    select distinct r.profile.id from Routine r
+    where r.aiDraftCards is not null and r.memoryReflectedAt is null and r.status in :statuses
+    """)
+  List<String> findProfileIdsWithPendingMemoryEdits(@Param("statuses") Collection<RoutineStatus> statuses);
+
+  /// 한 이룸이의 반영 대기 일과 (최신순)
+  List<Routine> findAllByProfileIdAndAiDraftCardsIsNotNullAndMemoryReflectedAtIsNullAndStatusInOrderByCreatedAtDesc(
+    String profileId, Collection<RoutineStatus> statuses);
+
+  /// 예시 후보: AI 처음 카드가 있는 확정·완료 일과 최근 10개 (반영 여부 무관)
+  List<Routine> findTop10ByProfileIdAndAiDraftCardsIsNotNullAndStatusInOrderByCreatedAtDesc(
+    String profileId, Collection<RoutineStatus> statuses);
+
+  /// 메모 모두 지우기: 이 이룸이 일과의 AI 처음 카드 스냅샷을 비움 (예시·다음 갱신에 다시 쓰이지 않게). 바뀐 행 수
+  @Modifying
+  @Query("""
+    update Routine r set r.aiDraftCards = null, r.memoryReflectedAt = :now
+    where r.profile.id = :profileId and r.aiDraftCards is not null
+    """)
+  int clearAiDraftCardsOfProfile(@Param("profileId") String profileId, @Param("now") LocalDateTime now);
 }

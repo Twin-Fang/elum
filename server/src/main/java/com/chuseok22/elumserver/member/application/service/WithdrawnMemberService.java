@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.routine.application.service.RoutineGroupService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -61,6 +62,7 @@ public class WithdrawnMemberService {
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
   private final TalkCleanupService talkCleanupService;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final RoutineGroupService routineGroupService;
   private final MemberDailyVisitRepository memberDailyVisitRepository;
 
@@ -147,6 +149,8 @@ public class WithdrawnMemberService {
     notificationCleanupService.deleteAllOf(memberId);
     // 이야기 데이터도 한 번 더 지운다 (탈퇴 때 이미 지운 것)
     talkCleanupService.deleteAllOf(memberId);
+    // 보호자 목소리 녹음 파일도 한 번 더 (탈퇴 때 이미 지운 것)
+    guardianVoiceFiles.deleteAllOfAfterCommit(memberId);
     memberDailyVisitRepository.deleteAllByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);

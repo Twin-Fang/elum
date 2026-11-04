@@ -61,6 +61,7 @@ class RoutineLibraryServiceTest {
   @Mock
   private RoutineStepSpeechStorage routineStepSpeechStorage;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
   @InjectMocks
   private RoutineLibraryService routineLibraryService;
   @InjectMocks

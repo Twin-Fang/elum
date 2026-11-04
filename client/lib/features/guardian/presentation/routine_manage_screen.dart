@@ -29,16 +29,18 @@ import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
 import 'routine_link_flow.dart';
 import 'routine_rename_flow.dart';
+import 'routine_translate_flow.dart';
 import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
+import 'card_export/open_card_export.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
-/// 누르면 상세 시트(오늘 보내기 · 카드 고치기), 길게 누르면 빠른 메뉴(보내기 · 이름 · 묶음에 넣기 · 복사 · 지우기).
+/// 누르면 상세 시트(오늘 보내기 · 카드 고치기), 길게 누르면 빠른 메뉴(보내기 · 이름 · 묶음에 넣기 · 복사 · 다른 언어 · 지우기).
 /// 묶음(폴더, #807)은 격자 앞에 오고, 낱개를 끌어 다른 일과·묶음 위에 놓으면 묶인다. 묶음 동작은 [LibraryGroupActions].
 class RoutineManageScreen extends ConsumerStatefulWidget {
   const RoutineManageScreen({super.key});
@@ -78,6 +80,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         _editCards(routine);
       case RoutineSheetAction.more:
         await _openMenuSheet(routine);
+      case RoutineSheetAction.export:
+        openCardExport(context, routine);
       case RoutineSheetAction.rerun || null:
         return;
     }
@@ -143,6 +147,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await chooseGroupFor(routine);
       case LibraryMenuAction.copy:
         await _copy(routine);
+      case LibraryMenuAction.translate:
+        await _translate(routine);
       case LibraryMenuAction.shareToTalk:
         _shareToTalk(routine);
       case LibraryMenuAction.sendLink:
@@ -211,6 +217,14 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       fallback: l10n.routineLibraryActionFailedFallback,
       fallbackCode: 'E-LIB-COPY',
     );
+  }
+
+  /// 다른 언어로 만들기: 언어 시트 > 새 일과 > 격자를 그 칸으로 옮기고 상세를 연다 (실패는 흐름이 팝업)
+  Future<void> _translate(Routine routine) async {
+    final created = await translateRoutineWithSheet(context, routine);
+    if (created == null || !mounted) return;
+    ref.read(libraryScrollTargetRoutineIdProvider.notifier).request(created.id);
+    await openRoutineDetail(created);
   }
 
   Future<void> _rename(Routine routine) => renameRoutineWithSheet(

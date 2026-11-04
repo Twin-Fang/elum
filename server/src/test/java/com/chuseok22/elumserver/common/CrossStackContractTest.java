@@ -8,6 +8,8 @@ import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.routine.core.RoutineTranslationLanguages;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineExampleCategory;
 import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
@@ -45,6 +47,9 @@ class CrossStackContractTest {
   // 다트 허용 도메인 집합: allowedApiHosts = <String>{ '...', '...' };
   private static final Pattern DART_ALLOWED_API_HOSTS = Pattern.compile("allowedApiHosts\\s*=\\s*(?:<String>)?\\{([^}]*)}");
   private static final Pattern DART_STRING_LITERAL = Pattern.compile("'([^']+)'");
+  // 다트 연 언어 목록: openedAppLocales = <Locale>[ Locale('ko'), Locale.fromSubtags(languageCode: 'zh', ...) ];
+  private static final Pattern DART_OPENED_APP_LOCALES = Pattern.compile("openedAppLocales\\s*=\\s*(?:<Locale>)?\\[([^;]*)];");
+  private static final Pattern DART_LOCALE_LANGUAGE = Pattern.compile("Locale\\('([a-z]+)'|languageCode:\\s*'([a-z]+)'");
 
   @Test
   @DisplayName("마이그레이션 버전이 겹치지 않는다 — 같은 번호 둘이면 운영 서버가 기동하지 못한다")
@@ -110,6 +115,23 @@ class CrossStackContractTest {
       client.add(literal.group(1));
     }
     assertThat(client).isEqualTo(new TreeSet<>(ServerAddressPolicy.ALLOWED_API_HOSTS));
+  }
+
+  @Test
+  @DisplayName("다른 언어로 만들기 대상 언어가 앱이 여는 언어와 같다 — 다르면 앱이 열지 않은 언어의 일과가 생기거나 연 언어를 못 고른다")
+  void routineTranslationTargetsMatchOpenedAppLocales() throws IOException {
+    String dart = readClient("core/l10n/app_locales.dart");
+    Matcher block = DART_OPENED_APP_LOCALES.matcher(dart);
+    assertThat(block.find()).as("openedAppLocales 선언").isTrue();
+
+    Set<String> client = new TreeSet<>();
+    Matcher locale = DART_LOCALE_LANGUAGE.matcher(block.group(1));
+    while (locale.find()) {
+      client.add(locale.group(1) != null ? locale.group(1) : locale.group(2));
+    }
+    Set<String> server = RoutineTranslationLanguages.TARGETS.stream().map(AppLocale::code)
+      .collect(Collectors.toCollection(TreeSet::new));
+    assertThat(client).isEqualTo(server);
   }
 
   /**
