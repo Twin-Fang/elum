@@ -326,7 +326,8 @@ jobs:
 
   build-android-test:
     name: Android 테스트 APK 빌드
-    runs-on: ubuntu-latest
+    # ubuntu-latest(26.04)에는 ruby/setup-ruby 의 Ruby 3.4.1 이 없어 Ruby 설치에서 멈춘다 (#1085, #1068). 26.04 지원 뒤 latest 로 되돌린다
+    runs-on: ubuntu-24.04
     needs: prepare-test-build
 
     defaults:
