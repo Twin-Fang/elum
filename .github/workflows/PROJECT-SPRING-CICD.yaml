@@ -238,6 +238,7 @@ jobs:
             # 관리자 화면이 지금 응답 중인 서버를 알아보도록 색과 포트를 넘긴다 (logback-spring.xml).
             INSTANCE_COLOR="${CONTAINER_NAME##*-}"
             echo "$PW" | sudo -S docker run -d -p ${PORT}:${APP_PORT} --name ${CONTAINER_NAME} \
+              --restart unless-stopped \
               -e TZ=Asia/Seoul \
               -e "SPRING_PROFILES_ACTIVE=${PROFILE_MAIN}" \
               -e "ELUM_INSTANCE=${INSTANCE_COLOR}" \
