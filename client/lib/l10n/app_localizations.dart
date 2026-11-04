@@ -6205,6 +6205,210 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
+
+  /// 일과 상세 시트(일과관리) 반복 줄 — 아직 정하지 않았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'요일·시각 정하기'**
+  String get routineScheduleRowOff;
+
+  /// 반복 줄 접근성 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 요일과 시각'**
+  String get routineScheduleRowLabel;
+
+  /// 반복 줄 요약. days 는 요일 목록(예: 월·수·금) 또는 매일·평일·주말, time 은 기기 형식 시각 (예: 오전 8:00)
+  ///
+  /// In ko, this message translates to:
+  /// **'{days} {time}'**
+  String routineScheduleSummary(String days, String time);
+
+  /// 일곱 요일 모두 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'매일'**
+  String get routineScheduleEveryDay;
+
+  /// 월~금만 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'평일'**
+  String get routineScheduleWeekdaysOnly;
+
+  /// 토·일만 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'주말'**
+  String get routineScheduleWeekendOnly;
+
+  /// 요일 목록 사이 구분 (예: 월·수·금)
+  ///
+  /// In ko, this message translates to:
+  /// **'·'**
+  String get routineScheduleDaySeparator;
+
+  /// 반복 줄·주간 계획 — 저장한 보호자의 Pro 가 끝나 반복이 멈춤 (예약은 남아 있음)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나 멈췄어요'**
+  String get routineSchedulePaused;
+
+  /// 주간 계획·반복 시트 — 멈춘 예약 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요'**
+  String get routineSchedulePausedNote;
+
+  /// 반복 요일·시각 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'언제 할까요?'**
+  String get routineScheduleSheetTitle;
+
+  /// 반복 요일·시각 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 요일마다 이 일과가 오늘 일과로 가요'**
+  String get routineScheduleSheetBody;
+
+  /// 반복 시트 — 요일 고르기 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'요일'**
+  String get routineScheduleDaysLabel;
+
+  /// 반복 시트 — 시각 바퀴 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'시각'**
+  String get routineScheduleTimeLabel;
+
+  /// 반복 시트 — 이룸이 기기 알림 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'그 시각에 이룸이 기기에 알리기'**
+  String get routineScheduleNotifyElumi;
+
+  /// 반복 시트·주간 계획 — 연결된 이룸이 기기에 알림 권한이 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기 알림이 꺼져 있어요'**
+  String get routineScheduleElumiNotificationOff;
+
+  /// 알림 꺼짐 안내 둘째 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기의 설정에서 이룸 알림을 켜 주세요'**
+  String get routineScheduleElumiNotificationOffHint;
+
+  /// 반복 시트·주간 계획 — 연결된 이룸이 기기가 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결하면 그 시각에 알림이 가요'**
+  String get routineScheduleElumiNoDevice;
+
+  /// 반복 시트 — 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get routineScheduleSave;
+
+  /// 반복 시트 — 끄기 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 끄기'**
+  String get routineScheduleTurnOff;
+
+  /// 반복 저장 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 저장했어요'**
+  String get routineScheduleSavedToast;
+
+  /// 반복 끄기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'반복을 껐어요'**
+  String get routineScheduleTurnedOffToast;
+
+  /// 반복 저장·끄기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요'**
+  String get routineScheduleSaveFailedTitle;
+
+  /// 반복 저장·끄기 실패 팝업 기본 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요'**
+  String get routineScheduleSaveFailedFallback;
+
+  /// 반복 시트 — 요일을 하나도 안 골랐을 때 저장 버튼 위 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'요일을 하나 이상 골라 주세요'**
+  String get routineSchedulePickDayHint;
+
+  /// 일과관리 머리 — 주간 계획 화면 입구 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획'**
+  String get weeklyPlanEntry;
+
+  /// 주간 계획 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획'**
+  String get weeklyPlanTitle;
+
+  /// 주간 계획 요일 묶음 제목. weekday 는 weekdayShort 결과
+  ///
+  /// In ko, this message translates to:
+  /// **'{weekday}요일'**
+  String weeklyPlanDayTitle(String weekday);
+
+  /// 주간 계획 — 오늘 요일 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get weeklyPlanToday;
+
+  /// 주간 계획 — 그 요일에 반복 일과가 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'정한 일과가 없어요'**
+  String get weeklyPlanEmptyDay;
+
+  /// 주간 계획 — 반복 일과가 하나도 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 요일을 정한 일과가 없어요'**
+  String get weeklyPlanEmptyTitle;
+
+  /// 주간 계획 빈 상태 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에서 일과를 누르고 요일·시각을 정해 보세요'**
+  String get weeklyPlanEmptyBody;
+
+  /// 주간 계획 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획을 불러오지 못했어요'**
+  String get weeklyPlanLoadFailed;
+
+  /// 주간 계획 줄 — 이룸이 기기 알림을 끈 반복 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 없음'**
+  String get weeklyPlanNotifyOff;
+
+  /// 주간 계획 줄 메타 사이 구분 (예: 오후 3:00 · 알림 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **' · '**
+  String get weeklyPlanMetaSeparator;
 }
 
 class _AppLocalizationsDelegate

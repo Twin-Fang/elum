@@ -12,6 +12,7 @@ import '../data/routine_repository.dart';
 import '../data/routine_example_repository.dart';
 import '../data/routine_repository_impl.dart';
 import '../domain/routine_suggestion.dart';
+import 'routine_schedule_controller.dart';
 
 /// 일과 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다 —
 /// 직접 `DioClient.create()`를 부르면 토큰이 빠져 401이 그대로 터진다.
@@ -108,6 +109,8 @@ extension RoutineListRefresh on WidgetRef {
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
     invalidate(routineGroupsProvider);
+    // 이룸이를 바꾸거나 일과가 바뀌면 주간 계획도 다시 (#782)
+    invalidate(routineSchedulePlanProvider);
   }
 }
 
@@ -134,6 +137,8 @@ extension RoutineListRefreshContainer on ProviderContainer {
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
     invalidate(routineGroupsProvider);
+    // 이룸이를 바꾸거나 일과가 바뀌면 주간 계획도 다시 (#782)
+    invalidate(routineSchedulePlanProvider);
   }
 }
 
@@ -145,6 +150,8 @@ extension RoutineListRefreshRef on Ref {
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
     invalidate(routineGroupsProvider);
+    // 이룸이를 바꾸거나 일과가 바뀌면 주간 계획도 다시 (#782)
+    invalidate(routineSchedulePlanProvider);
   }
 }
 

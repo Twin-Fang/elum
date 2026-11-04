@@ -128,6 +128,9 @@ public enum ErrorCode {
   ROUTINE_GROUP_INVALID_MEMBER(HttpStatus.BAD_REQUEST),
   // 묶음은 일과 1개 이상. 다 빼려면 묶음을 푼다
   ROUTINE_GROUP_TOO_SMALL(HttpStatus.BAD_REQUEST),
+  // 요일별 반복 일과 (#782, #1080): 요금제 권한 없음 403, 요일 0개·시각 형식 틀림 400
+  ROUTINE_SCHEDULE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  ROUTINE_SCHEDULE_INVALID(HttpStatus.BAD_REQUEST),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.

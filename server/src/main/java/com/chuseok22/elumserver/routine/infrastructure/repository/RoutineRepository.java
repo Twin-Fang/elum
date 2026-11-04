@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -177,6 +178,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 이 원본으로 보낸 일과가 기간 안에 있는가. 하루 한 번 보내기 확인 (#804)
   boolean existsBySourceRoutineIdAndScheduledAtBetween(String sourceRoutineId, LocalDateTime from, LocalDateTime to);
+
+  /// 이 원본으로 보낸 그날 일과 중 가장 최근 것. 반복 일과 알림이 가리킬 오늘 일과 (#1080)
+  Optional<Routine> findFirstBySourceRoutineIdAndScheduledAtBetweenOrderByCreatedAtDesc(String sourceRoutineId,
+    LocalDateTime from, LocalDateTime to);
 
   /// 이 원본으로 보낸 일과가 하나라도 있는가. 있으면 원본을 지우지 않고 숨긴다 (#804)
   boolean existsBySourceRoutineId(String sourceRoutineId);

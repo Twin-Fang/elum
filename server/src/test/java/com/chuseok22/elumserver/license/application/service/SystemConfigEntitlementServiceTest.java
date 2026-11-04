@@ -292,6 +292,20 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.cardExportAllThemes()).isTrue();
   }
 
+  @Test
+  @DisplayName("스냅샷의 요일별 반복 일과 권한은 플랜 키를 읽는다 (Free 기본 꺼짐 · Pro 켜짐)")
+  void snapshot_routineScheduleReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_SCHEDULE)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).routineSchedule()).isTrue();
+    assertThat(ConfigKey.FREE_ROUTINE_SCHEDULE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_SCHEDULE.getDefaultValue()).isEqualTo("true");
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

@@ -55,6 +55,11 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 요일·시각 반복 일과 + 이룸이 기기 일과 시간 알림 (#782, #1080). 꺼지면 예약만 멈추고 지우지 않음
+  ROUTINE_SCHEDULE(
+    Kind.FLAG, "요일별 반복 일과·이룸이 기기 알림",
+    ConfigKey.FREE_ROUTINE_SCHEDULE, ConfigKey.PRO_ROUTINE_SCHEDULE
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

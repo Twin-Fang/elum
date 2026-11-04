@@ -9,7 +9,10 @@ const _maxTimeAgoDays = 7;
 /// 날짜·요일 문구. 순서·단위·요일 이름은 언어마다 ARB 가 정한다 — 코드가 `월`·`일` 을 붙이지 않는다.
 extension DateLabels on AppLocalizations {
   /// `월` 같은 짧은 요일.
-  String weekdayShortOf(DateTime d) => weekdayShort(_weekdayKeys[d.weekday - 1]);
+  String weekdayShortOf(DateTime d) => weekdayShortOfNumber(d.weekday);
+
+  /// `DateTime.weekday` 값(1=월 … 7=일) > `월` 같은 짧은 요일 (날짜 없이 요일만 다룰 때)
+  String weekdayShortOfNumber(int weekday) => weekdayShort(_weekdayKeys[weekday - 1]);
 
   /// `2026년 9월 20일`
   String yearMonthDay(DateTime d) => dateYearMonthDay(d.year, d.month, d.day);

@@ -33,6 +33,9 @@ public class PushMessageFactory {
   // 이룸이 기기 알림: 알림 행 없이 보내므로 NotificationType 밖의 종류 (앱 push_message_router 와 같은 값)
   public static final String ELUMI_ROUTINE_ARRIVED_TYPE = "ELUMI_ROUTINE_ARRIVED";
   private static final String ELUMI_ROUTINE_ARRIVED_KEY = "push.elumi_routine_arrived";
+  // 반복 일과의 정한 시각 (#1080, 앱 elumi_push_opener 와 같은 값)
+  public static final String ELUMI_ROUTINE_TIME_TYPE = "ELUMI_ROUTINE_TIME";
+  private static final String ELUMI_ROUTINE_TIME_KEY = "push.elumi_routine_time";
   // 같은 일과를 다시 보내면 알림창에서 한 줄로 덮어씀
   private static final String ELUMI_ROUTINE_COLLAPSE_PREFIX = "elumi-routine-";
   // 앱이 만드는 이룸이 알림 채널 id (앱 push_message_router 와 같은 값)
@@ -75,12 +78,23 @@ public class PushMessageFactory {
 
   /** 이룸이 기기 일과 도착: 일과 제목은 넣지 않음 (잠금 화면 노출) */
   public PushMessage createElumiRoutineArrived(PushDevice device, String profileId, String routineId) {
+    return createElumiRoutineMessage(device, profileId, routineId, ELUMI_ROUTINE_ARRIVED_TYPE,
+      ELUMI_ROUTINE_ARRIVED_KEY);
+  }
+
+  /** 이룸이 기기 일과 시간 (#1080): 도착 알림과 같은 채널·묶음 키 (같은 일과면 한 줄로 덮어씀) */
+  public PushMessage createElumiRoutineTime(PushDevice device, String profileId, String routineId) {
+    return createElumiRoutineMessage(device, profileId, routineId, ELUMI_ROUTINE_TIME_TYPE, ELUMI_ROUTINE_TIME_KEY);
+  }
+
+  private PushMessage createElumiRoutineMessage(PushDevice device, String profileId, String routineId, String type,
+    String bodyKey) {
     AppLocale locale = device.getLocale() == null ? AppLocale.EN : device.getLocale();
     Map<String, String> pushData = new HashMap<>();
-    pushData.put("type", ELUMI_ROUTINE_ARRIVED_TYPE);
+    pushData.put("type", type);
     putIfPresent(pushData, "profileId", profileId);
     putIfPresent(pushData, "routineId", routineId);
-    return new PushMessage(device.getToken(), text(locale, TITLE_KEY), text(locale, ELUMI_ROUTINE_ARRIVED_KEY),
+    return new PushMessage(device.getToken(), text(locale, TITLE_KEY), text(locale, bodyKey),
       pushData, ELUMI_ROUTINE_COLLAPSE_PREFIX + routineId, ELUMI_ROUTINES_CHANNEL_ID);
   }
 

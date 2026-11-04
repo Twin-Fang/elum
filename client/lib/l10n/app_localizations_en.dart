@@ -3605,4 +3605,112 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get routineScheduleRowOff => '요일·시각 정하기';
+
+  @override
+  String get routineScheduleRowLabel => '반복 요일과 시각';
+
+  @override
+  String routineScheduleSummary(String days, String time) {
+    return '$days $time';
+  }
+
+  @override
+  String get routineScheduleEveryDay => '매일';
+
+  @override
+  String get routineScheduleWeekdaysOnly => '평일';
+
+  @override
+  String get routineScheduleWeekendOnly => '주말';
+
+  @override
+  String get routineScheduleDaySeparator => '·';
+
+  @override
+  String get routineSchedulePaused => 'Pro가 끝나 멈췄어요';
+
+  @override
+  String get routineSchedulePausedNote =>
+      'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요';
+
+  @override
+  String get routineScheduleSheetTitle => '언제 할까요?';
+
+  @override
+  String get routineScheduleSheetBody => '고른 요일마다 이 일과가 오늘 일과로 가요';
+
+  @override
+  String get routineScheduleDaysLabel => '요일';
+
+  @override
+  String get routineScheduleTimeLabel => '시각';
+
+  @override
+  String get routineScheduleNotifyElumi => '그 시각에 이룸이 기기에 알리기';
+
+  @override
+  String get routineScheduleElumiNotificationOff => '이룸이 기기 알림이 꺼져 있어요';
+
+  @override
+  String get routineScheduleElumiNotificationOffHint =>
+      '이룸이 기기의 설정에서 이룸 알림을 켜 주세요';
+
+  @override
+  String get routineScheduleElumiNoDevice => '이룸이 기기를 연결하면 그 시각에 알림이 가요';
+
+  @override
+  String get routineScheduleSave => '저장하기';
+
+  @override
+  String get routineScheduleTurnOff => '반복 끄기';
+
+  @override
+  String get routineScheduleSavedToast => '요일과 시각을 저장했어요';
+
+  @override
+  String get routineScheduleTurnedOffToast => '반복을 껐어요';
+
+  @override
+  String get routineScheduleSaveFailedTitle => '저장하지 못했어요';
+
+  @override
+  String get routineScheduleSaveFailedFallback => '잠시 뒤 다시 해 주세요';
+
+  @override
+  String get routineSchedulePickDayHint => '요일을 하나 이상 골라 주세요';
+
+  @override
+  String get weeklyPlanEntry => '주간 계획';
+
+  @override
+  String get weeklyPlanTitle => '주간 계획';
+
+  @override
+  String weeklyPlanDayTitle(String weekday) {
+    return '$weekday요일';
+  }
+
+  @override
+  String get weeklyPlanToday => '오늘';
+
+  @override
+  String get weeklyPlanEmptyDay => '정한 일과가 없어요';
+
+  @override
+  String get weeklyPlanEmptyTitle => '아직 요일을 정한 일과가 없어요';
+
+  @override
+  String get weeklyPlanEmptyBody => '일과관리에서 일과를 누르고 요일·시각을 정해 보세요';
+
+  @override
+  String get weeklyPlanLoadFailed => '주간 계획을 불러오지 못했어요';
+
+  @override
+  String get weeklyPlanNotifyOff => '알림 없음';
+
+  @override
+  String get weeklyPlanMetaSeparator => ' · ';
 }

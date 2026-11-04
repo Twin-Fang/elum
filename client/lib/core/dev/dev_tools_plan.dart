@@ -22,8 +22,8 @@ class _PlanOverrideView extends ConsumerWidget {
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Text(
-            '화면 판정만 바뀐다 (카드 내보내기 워터마크·테마 등). '
-            '서버 크레딧·결제·권한은 그대로다.',
+            '화면 판정만 바뀐다 (카드 내보내기 워터마크·테마, 요일별 반복 일과 입구 등). '
+            '서버 크레딧·결제·권한은 그대로다 — 반복 일과 저장은 서버 권한(ROUTINE_SCHEDULE)이 있어야 된다.',
             style: TextStyle(fontSize: 12),
           ),
         ),

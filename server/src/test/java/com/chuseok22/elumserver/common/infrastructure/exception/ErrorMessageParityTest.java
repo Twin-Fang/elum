@@ -46,7 +46,7 @@ class ErrorMessageParityTest {
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
-      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1);
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1 + ADDED_ROUTINE_SCHEDULE_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -99,6 +99,22 @@ class ErrorMessageParityTest {
     assertThat(ErrorCode.ROUTINE_GROUP_INVALID_MEMBER.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorCode.ROUTINE_GROUP_TOO_SMALL.getStatus().name()).isEqualTo("BAD_REQUEST");
     for (ErrorCode code : ADDED_ROUTINE_GROUP_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
+  // 요일별 반복 일과(#782, #1080)가 더한 코드
+  private static final java.util.List<ErrorCode> ADDED_ROUTINE_SCHEDULE_CODES = java.util.List.of(
+    ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED, ErrorCode.ROUTINE_SCHEDULE_INVALID);
+
+  @Test
+  @DisplayName("요일별 반복 일과 코드(#782)는 golden 밖에서 상태와 문구를 단언한다")
+  void routineScheduleCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED.getStatus().name()).isEqualTo("FORBIDDEN");
+    assertThat(ErrorCode.ROUTINE_SCHEDULE_INVALID.getStatus().name()).isEqualTo("BAD_REQUEST");
+    for (ErrorCode code : ADDED_ROUTINE_SCHEDULE_CODES) {
       assertThat(GOLDEN).doesNotContainKey(code.name());
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
