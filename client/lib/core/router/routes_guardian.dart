@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/ads/presentation/ad_bottom_strip_slot.dart';
+import '../../features/auth/presentation/consent_document_list_screen.dart';
+import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/credit/presentation/credit_history_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
@@ -149,6 +151,19 @@ List<RouteBase> guardianRoutes() => [
       ),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
+  ),
+  // 결제 직전 보호자 확인: 화면 전환 암호 화면을 그대로 쓰고 맞으면 true 로 닫힌다
+  GoRoute(
+    path: Routes.guardianPlanPin,
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: ModeSwitchScreen(target: ModeSwitchTarget.purchase),
+    ),
+  ),
+  GoRoute(
+    path: Routes.guardianTerms,
+    pageBuilder: (context, state) =>
+        slidePage(state, const ConsentDocumentListScreen()),
   ),
   GoRoute(
     path: Routes.guardianLicenses,

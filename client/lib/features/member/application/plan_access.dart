@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/dev/dev_plan_override.dart';
+import '../../subscription/application/plan_store_catalog.dart';
 import 'member_providers.dart';
 
 /// 화면이 묻는 Free·Pro 판정 한 벌. 새 Pro 기능은 여기에 값을 더하고 화면은 이것만 본다
@@ -13,6 +14,7 @@ class PlanAccess {
     required this.isPro,
     required this.canExportCardsWithoutWatermark,
     required this.canUseAllCardDesignThemes,
+    this.canPurchasePro = false,
   });
 
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만)
@@ -31,9 +33,9 @@ class PlanAccess {
 
   final bool isPro;
 
-  /// 앱에서 Pro 를 살 수 있는가. 인앱 결제(#1072)가 붙기 전에는 false —
-  /// 살 방법이 없는데 Pro 잠금만 보이면 막힌 기능처럼 느껴져, 그동안은 Pro 전용 선택지를 숨긴다
-  static const canPurchasePro = false;
+  /// 앱에서 Pro 를 살 수 있는가 (판매 스위치 + 스토어 연결 + 상품 불러옴, [canPurchaseProProvider]).
+  /// false 면 Pro 전용 선택지·`Pro 알아보기` 를 숨긴다 — 살 방법이 없는데 잠금만 보이면 막힌 기능처럼 느껴짐
+  final bool canPurchasePro;
 
   /// 카드 내보내기에서 로고·워터마크를 뺄 수 있는가
   final bool canExportCardsWithoutWatermark;
@@ -44,6 +46,17 @@ class PlanAccess {
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
 final planAccessProvider = Provider<PlanAccess>((ref) {
+  final access = _readPlanAccess(ref);
+  return PlanAccess(
+    isPro: access.isPro,
+    canExportCardsWithoutWatermark: access.canExportCardsWithoutWatermark,
+    canUseAllCardDesignThemes: access.canUseAllCardDesignThemes,
+    canPurchasePro: ref.watch(canPurchaseProProvider),
+  );
+});
+
+/// 권한 원본: 개발자 도구 흉내 > 서버 권한 > (모르면) Free
+PlanAccess _readPlanAccess(Ref ref) {
   switch (ref.watch(devPlanOverrideProvider)) {
     case DevPlanOverride.free:
       return PlanAccess.free;
@@ -59,4 +72,4 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     canExportCardsWithoutWatermark: member.canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes: member.canUseAllCardDesignThemes,
   );
-});
+}

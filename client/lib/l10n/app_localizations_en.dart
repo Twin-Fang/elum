@@ -3605,4 +3605,178 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
+
+  @override
+  String get planPaywallTitle => '이룸 Pro';
+
+  @override
+  String get planPaywallDescription => '더 많이 만들고, 인쇄용 카드를 깔끔하게 받아요';
+
+  @override
+  String get planBenefitsSection => 'Pro로 할 수 있는 것';
+
+  @override
+  String get planBenefitMoreWeeklyCredits => '매주 AI 크레딧을 더 많이 받아요';
+
+  @override
+  String get planBenefitCardExportWithoutWatermark => '인쇄용 카드에 로고와 워터마크가 없어요';
+
+  @override
+  String get planBenefitCardExportAllThemes => '인쇄용 카드 디자인을 골라요';
+
+  @override
+  String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
+
+  @override
+  String get planOffersSection => '기간 고르기';
+
+  @override
+  String get planPeriodMonthly => '1개월';
+
+  @override
+  String get planPeriodYearly => '1년';
+
+  @override
+  String planPricePerMonth(String price) {
+    return '$price / 1개월마다 자동 갱신';
+  }
+
+  @override
+  String planPricePerYear(String price) {
+    return '$price / 1년마다 자동 갱신';
+  }
+
+  @override
+  String get planSubscribe => '구독 시작하기';
+
+  @override
+  String get planPriceLoading => '가격을 불러오고 있어요';
+
+  @override
+  String get planPriceFailed => '가격을 불러오지 못했어요';
+
+  @override
+  String get planRestore => '구매 복원';
+
+  @override
+  String get planTermsOfUse => '이용약관';
+
+  @override
+  String get planPrivacyPolicy => '개인정보처리방침';
+
+  @override
+  String get planManageSubscription => '구독 관리';
+
+  @override
+  String get planLegalBillingAppStore =>
+      '결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신되고, 기간이 끝나기 전 24시간 안에 다음 요금이 청구돼요.';
+
+  @override
+  String get planLegalCancelAppStore =>
+      '구독 관리와 해지는 기기 설정의 Apple ID > 구독에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+
+  @override
+  String get planLegalBillingPlayStore =>
+      '결제는 구매를 확인할 때 Google Play 계정으로 청구돼요. 해지하기 전까지 같은 기간과 가격으로 자동 갱신돼요.';
+
+  @override
+  String get planLegalCancelPlayStore =>
+      '구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+
+  @override
+  String get planPurchasing => '결제를 진행하고 있어요';
+
+  @override
+  String get planVerifying => '결제를 확인하고 있어요';
+
+  @override
+  String get planStorePendingTitle => '구매 요청을 보냈어요';
+
+  @override
+  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요';
+
+  @override
+  String get planVerificationPendingTitle => '결제를 확인하고 있어요';
+
+  @override
+  String get planVerificationPendingBody =>
+      '다시 결제하지 않아도 돼요. 앱을 다시 열면 한 번 더 확인해요';
+
+  @override
+  String get planVerificationRetry => '다시 확인하기';
+
+  @override
+  String get planActivatedTitle => 'Pro를 시작했어요';
+
+  @override
+  String get planNotActivatedTitle => 'Pro가 켜지지 않았어요';
+
+  @override
+  String get planNotActivatedBody => '스토어의 구독 상태를 확인해 주세요';
+
+  @override
+  String get planAlreadyProTitle => 'Pro를 쓰고 있어요';
+
+  @override
+  String get planPurchaseFailedTitle => '결제하지 못했어요';
+
+  @override
+  String get planVerifyFailedTitle => '결제를 이 계정에 연결하지 못했어요';
+
+  @override
+  String get planAccountFailedTitle => '계정 정보를 확인하지 못했어요';
+
+  @override
+  String get planFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get planRestoreDone => 'Pro를 되찾았어요';
+
+  @override
+  String get planRestoreNothing => '되찾을 구독이 없어요';
+
+  @override
+  String get planRestoreFailedTitle => '구매를 복원하지 못했어요';
+
+  @override
+  String get planRestoring => '구매 내역을 확인하고 있어요';
+
+  @override
+  String get planManageFailed => '구독 관리 화면을 열지 못했어요';
+
+  @override
+  String get planLinkFailed => '링크를 열지 못했어요';
+
+  @override
+  String get planSettingsLabel => '내 요금제';
+
+  @override
+  String get planStatusFree => 'Free';
+
+  @override
+  String get planStatusPro => 'Pro';
+
+  @override
+  String planStatusRenewing(String date) {
+    return 'Pro · $date 갱신';
+  }
+
+  @override
+  String planStatusUntil(String date) {
+    return 'Pro · $date까지';
+  }
+
+  @override
+  String planStatusCancelScheduled(String date) {
+    return 'Pro · $date에 끝나요';
+  }
+
+  @override
+  String get planStatusGracePeriod => 'Pro · 결제 확인 필요';
+
+  @override
+  String get planLearnPro => 'Pro 알아보기';
 }

@@ -9,12 +9,14 @@ import '../../../core/analytics/app_analytics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_summary.dart';
 import '../../../core/widgets/elum_spinner.dart';
 
-/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기.
+/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기 + (살 수 있으면) `Pro 알아보기`.
 ///
 /// **광고를 제안하는 곳은 여기 하나다.** 일과 만들기 흐름 안·이룸이 화면·보상 연출에는
 /// 광고를 두지 않는다(설계 §2) — 이 안내는 흐름에 들어가기 **전**이라 허용된 자리다.
@@ -37,8 +39,14 @@ Future<void> showCreditBlockedDialog(
   final flow = ref.read(adRewardFlowProvider);
   final offer = generating ? null : await flow.offer();
   if (!context.mounted) return;
+  // 다 써서 막혔을 때만 Pro 를 권함 (진행 중이라 막힌 것은 Pro 로도 안 풀림). 살 수 없으면 버튼 없음
+  final canSuggestPro = !generating && ref.read(planAccessProvider).canPurchasePro;
+  final proAction = ElumDialogAction<_CreditBlockedChoice>(
+    label: l10n.planLearnPro,
+    value: _CreditBlockedChoice.learnPro,
+  );
 
-  final wantsAd = await showElumDialog<bool>(
+  final choice = await showElumDialog<_CreditBlockedChoice>(
     context: context,
     // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인.
     icon: ElumDialogIcon.alert,
@@ -48,28 +56,38 @@ Future<void> showCreditBlockedDialog(
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
     actions: offer == null
         ? [
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonConfirm,
-              tone: ElumDialogTone.danger,
+              tone: canSuggestPro ? ElumDialogTone.neutral : ElumDialogTone.danger,
             ),
+            if (canSuggestPro) proAction,
           ]
         : [
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonClose,
-              value: false,
               tone: ElumDialogTone.neutral,
             ),
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.creditAdWatchMore,
-              value: true,
+              value: _CreditBlockedChoice.watchAd,
               centerLines: true,
             ),
+            if (canSuggestPro) proAction,
           ],
   );
-  if (wantsAd != true || !context.mounted) return;
-
-  await _watchAd(context, ref, flow);
+  if (!context.mounted) return;
+  switch (choice) {
+    case _CreditBlockedChoice.watchAd:
+      await _watchAd(context, ref, flow);
+    case _CreditBlockedChoice.learnPro:
+      await openPlanPaywall(context, ref);
+    case null:
+      return;
+  }
 }
+
+/// 크레딧 부족 팝업에서 고른 것 (닫기·확인은 null)
+enum _CreditBlockedChoice { watchAd, learnPro }
 
 /// 광고를 보여 주고 서버가 지급했는지 확인한다. 끝나면 결과를 알리고 **홈에 남는다** —
 /// 일과 만들기로 자동으로 넘기지 않는다(받은 크레딧을 보고 보호자가 정한다).

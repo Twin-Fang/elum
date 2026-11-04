@@ -27,6 +27,7 @@ import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
+import 'features/subscription/application/plan_paywall_entry.dart';
 import 'features/talk/application/talk_post_link_intake.dart';
 import 'core/storage/local_storage.dart';
 import 'app/dio_provider.dart';
@@ -190,6 +191,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
+      // 끝나지 않은 스토어 결제를 서버에 다시 확인 (판매 스위치·로그인 조건은 안에서 봄)
+      startStorePurchaseSync(ref);
     });
     // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
     WidgetsBinding.instance.addPostFrameCallback((_) {
