@@ -46,7 +46,8 @@ class ErrorMessageParityTest {
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
-      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1 + ADDED_ROUTINE_MEMORY_CODES.size());
+      + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1
+      + ADDED_MIGRATION_AND_LINK_CODES.size() + ADDED_ROUTINE_MEMORY_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -155,6 +156,31 @@ class ErrorMessageParityTest {
   }
 
   // 이야기(보호자끼리 일과 나누기)가 더한 코드와 HTTP 상태.
+  // 서버 이전(#1053 · #1062) 8개 + 일과 링크 보내기(#1002) 2개
+  private static final Map<ErrorCode, String> ADDED_MIGRATION_AND_LINK_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.MIGRATION_FILE_EXPORT_DISABLED, "NOT_FOUND"),
+    Map.entry(ErrorCode.INVALID_MIGRATION_FILE_AREA, "BAD_REQUEST"),
+    Map.entry(ErrorCode.INVALID_MIGRATION_FILE_PATH, "BAD_REQUEST"),
+    Map.entry(ErrorCode.MIGRATION_FILE_NOT_FOUND, "NOT_FOUND"),
+    Map.entry(ErrorCode.MIGRATION_FILE_READ_FAILED, "INTERNAL_SERVER_ERROR"),
+    Map.entry(ErrorCode.MIGRATION_STATUS_UNREADABLE, "INTERNAL_SERVER_ERROR"),
+    Map.entry(ErrorCode.MIGRATION_SYNC_REQUEST_FAILED, "INTERNAL_SERVER_ERROR"),
+    Map.entry(ErrorCode.MIGRATION_SETTINGS_UNREADABLE, "INTERNAL_SERVER_ERROR"),
+    Map.entry(ErrorCode.TALK_LINK_ROUTINE_NOT_MINE, "FORBIDDEN"),
+    Map.entry(ErrorCode.TALK_LINK_ROUTINE_NOT_SHAREABLE, "BAD_REQUEST")));
+
+  @Test
+  @DisplayName("서버 이전 · 링크 보내기 코드 10개는 golden 밖에서 상태와 ko 문구를 단언한다")
+  void migrationAndLinkCodes_haveStatusAndKoMessage() {
+    assertThat(ADDED_MIGRATION_AND_LINK_CODES).hasSize(10);
+    ADDED_MIGRATION_AND_LINK_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
+    });
+  }
+
   private static final Map<ErrorCode, String> ADDED_TALK_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
     Map.entry(ErrorCode.TALK_POST_NOT_FOUND, "NOT_FOUND"),
     Map.entry(ErrorCode.TALK_COMMENT_NOT_FOUND, "NOT_FOUND"),
