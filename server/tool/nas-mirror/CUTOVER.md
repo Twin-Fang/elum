@@ -9,7 +9,7 @@
 
 - [ ] 친구 서버에 #1053(이전 잠금·파일 내보내기)과 #831 서버 쪽이 배포됨 (설정은 전부 꺼짐)
 - [ ] #831 앱 버전이 두 스토어에 출시됨, 친구 서버 `최소 버전`을 그 버전으로 올려 사용자가 업데이트함
-- [ ] 내 NAS: `PROJECT-SPRING-ELUM-NAS-CICD` 를 `mode=mirror` 로 배포, 친구 서버와 **같은 커밋**
+- [ ] 내 NAS: `PROJECT-SPRING-ELUM-NAS-CICD` 를 mirror 모드로 배포 (`git push origin <친구 서버와 같은 커밋>:deploy-nas`, 워크플로가 main 에 있으면 수동 실행도 가능), 친구 서버와 **같은 커밋**
 - [ ] DSM 역방향 프록시 `api.elum.suhsaechan.kr` > `localhost:8079`, `elum-back-mirror` 정리
 - [ ] 내 NAS 에서 `https://api.elum.suhsaechan.kr/.well-known/apple-app-site-association` · `/.well-known/assetlinks.json` 응답 확인 (#831 앱이 새 도메인을 앱 링크로 등록하므로, 앱 출시 전에 필요)
 - [ ] `mirror.env` 에 `SOURCE_ADMIN_BASE_URL` · `SOURCE_ADMIN_USERNAME` · `SOURCE_ADMIN_PASSWORD`
