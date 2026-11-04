@@ -40,13 +40,17 @@ public record CreditSummaryResponse(
   @Schema(description = "지금 AI 일과를 시작할 수 있는가", example = "true")
   boolean canStartRoutine,
   @Schema(description = "지금 수동 카드 그림을 만들 수 있는가", example = "true")
-  boolean canGenerateImage
+  boolean canGenerateImage,
+  @Schema(description = "오늘 남은 무료 그림 다시 그리기 횟수 (요금제 권한 IMAGE_REGENERATE_FREE). "
+    + "0 이면 다시 그리기는 costs.imageRegenerate 만큼 든다", example = "30")
+  int freeImageRegeneratesLeftToday
 ) {
 
   @Schema(description = "행동별 단가")
   public record Costs(
     @Schema(description = "일과 글 1건", example = "1") int routineText,
-    @Schema(description = "AI 그림 1장", example = "1") int cardImage
+    @Schema(description = "AI 그림 1장", example = "1") int cardImage,
+    @Schema(description = "카드 그림 다시 그리기 1장 (무료 횟수가 남았으면 0 으로 예약)", example = "1") int imageRegenerate
   ) {
 
   }
@@ -62,7 +66,7 @@ public record CreditSummaryResponse(
 
   /// 정책이 꺼져 있을 때. 앱은 카드를 숨기고 아무것도 막지 않는다.
   public static CreditSummaryResponse disabled(int maxCardsPerRoutine) {
-    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0),
-      maxCardsPerRoutine, List.of(), true, true);
+    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0, 0),
+      maxCardsPerRoutine, List.of(), true, true, 0);
   }
 }

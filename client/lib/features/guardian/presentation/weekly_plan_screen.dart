@@ -10,16 +10,21 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_label_chip.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/pro_teaser.dart';
 import '../../../shared/models/routine.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/routine_providers.dart';
 import '../application/routine_schedule_controller.dart';
 import '../domain/routine_schedule.dart';
+import 'pro_teaser_samples.dart';
 import 'widgets/weekly_plan_parts.dart';
 
 /// 주간 계획 (#782): 월 ~ 일 요일마다 반복 일과를 시각 순으로. 누르면 그 일과의 반복 시트
 ///
 /// 상태: 불러오는 중 / 실패(다시 하기 + 코드) / 예약 0건(글만 든 웜그레이 줄) / 요일 묶음.
 /// 위에는 이룸이 기기 알림 상태와 Pro 끝남 멈춤 안내를 한 줄씩 (해당할 때만)
+/// Free · 판매 중 · 예약 0건이면 흐린 견본 주간 계획 + `Pro로 보기` (멈춘 예약이 있으면 실제 계획을 보임)
 class WeeklyPlanScreen extends ConsumerWidget {
   const WeeklyPlanScreen({super.key});
 
@@ -36,7 +41,19 @@ class WeeklyPlanScreen extends ConsumerWidget {
         routine.id: routine,
     };
 
+    final access = ref.watch(planAccessProvider);
     final body = switch (planAsync) {
+      AsyncValue(:final value?) when value.schedules.isEmpty && !access.canScheduleRoutines && access.shouldShowProTeaser =>
+        ListView(
+          padding: EdgeInsets.only(top: WeeklyPlanScreen._topGap.h),
+          children: [
+            ProTeaser(
+              benefit: context.l10n.proTeaserWeeklyPlanBenefit,
+              onUnlock: () => openPlanPaywall(context, ref),
+              child: ProTeaserSamples.weeklyPlan(context),
+            ),
+          ],
+        ),
       AsyncValue(:final value?) => _PlanBody(plan: value, routineById: routineById),
       AsyncValue(:final error?) => ElumStateBody(
         child: ElumErrorView.failure(

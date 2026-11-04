@@ -92,6 +92,7 @@ public class CreditQueryService {
     CreditBalance balance = snapshot.balance();
     int routineText = policy.costOf(CreditAction.ROUTINE_TEXT);
     int cardImage = policy.costOf(CreditAction.CARD_IMAGE);
+    int imageRegenerate = policy.costOf(CreditAction.IMAGE_REGENERATE);
     List<CreditSummaryResponse.InProgress> inProgress = snapshot.reservedJobs().stream()
       .sorted(Comparator.comparing(AiCreditJob::getStartedAt, Comparator.nullsLast(Comparator.naturalOrder())))
       .map(job -> new CreditSummaryResponse.InProgress(job.getId(), job.getKind().name(), job.getStartedAt()))
@@ -107,11 +108,12 @@ public class CreditQueryService {
       balance.period().end(),
       // 주기를 잰 시계와 같은 시간대로 오프셋을 붙인다 (운영 TZ=Asia/Seoul → +09:00).
       balance.period().end().atZone(clock.getZone()).toOffsetDateTime(),
-      new CreditSummaryResponse.Costs(routineText, cardImage),
+      new CreditSummaryResponse.Costs(routineText, cardImage, imageRegenerate),
       MAX_CARDS_PER_ROUTINE,
       inProgress,
       !snapshot.frozen() && balance.available() >= routineText,
-      !snapshot.frozen() && balance.available() >= cardImage
+      !snapshot.frozen() && balance.available() >= cardImage,
+      snapshot.freeImageRegeneratesLeftToday()
     );
   }
 
@@ -164,7 +166,8 @@ public class CreditQueryService {
         accountService.ensureWeeklyGrant(account, policyService::grantPolicyFor, entitlementService.planOf(memberId), now);
         CreditBalance balance = accountService.balance(account, now);
         List<AiCreditJob> reserved = jobRepository.findByAccountIdAndStatus(account.getId(), CreditJobStatus.RESERVED);
-        return new Snapshot(balance, reserved, account.isFrozen());
+        int freeRegeneratesLeft = reservationService.freeRegeneratesLeftToday(account, now);
+        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft);
       });
     } catch (CustomException e) {
       throw e;
@@ -179,7 +182,9 @@ public class CreditQueryService {
     return snapshot;
   }
 
-  private record Snapshot(CreditBalance balance, List<AiCreditJob> reservedJobs, boolean frozen) {
+  private record Snapshot(
+    CreditBalance balance, List<AiCreditJob> reservedJobs, boolean frozen, int freeImageRegeneratesLeftToday
+  ) {
 
   }
 }

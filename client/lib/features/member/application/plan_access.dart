@@ -85,8 +85,12 @@ class PlanAccess {
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
 
+  /// Pro 기능 자리에 흐린 미리 보기(`ProTeaser`)를 보이는가: Free + 앱에서 Pro 를 살 수 있음
+  /// Pro 인데 권한이 꺼진 기능(운영이 막아 둔 것)에는 권유하지 않는다
+  bool get shouldShowProTeaser => !isPro && canPurchasePro;
+
   /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
-  bool get shouldShowExpertRoutines => canImportExpertRoutines || canPurchasePro;
+  bool get shouldShowExpertRoutines => canImportExpertRoutines || shouldShowProTeaser;
 
   /// 같은 권한 판정 + 구매 가능 여부만 바꾼 사본 (필드를 더하면 여기 한 곳만 고친다)
   PlanAccess withCanPurchasePro(bool canPurchasePro) => PlanAccess(

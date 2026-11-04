@@ -27,6 +27,7 @@ import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
 import 'card_export_options_panel.dart';
+import 'card_export_theme_teaser.dart';
 import 'print_sheets.dart';
 
 /// 인쇄용으로 받기: 설정 > 미리 보기(= 파일 그대로) > 보내기 · 인쇄하기 (#1073)
@@ -49,6 +50,9 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
   static const _files = CardExportFiles();
 
   CardExportOptions _options = const CardExportOptions();
+
+  /// Free 가 흐리게 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
+  CardDesignTheme? _teaserTheme;
   bool _isBusy = false;
   bool _isArtReady = false;
   CardExportPictures? _precached;
@@ -90,17 +94,15 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
             else ...[
               CardExportOptionsPanel(
                 options: _options,
-                onChanged: (next) => setState(() => _options = next),
+                onChanged: (next) => setState(() {
+                  _options = next;
+                  _teaserTheme = null;
+                }),
                 canUseAllThemes: access.canUseAllCardDesignThemes,
                 showsProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
-                // 살 수 있으면 요금제 화면, 아니면 안내만
-                onLockedThemeTap: access.canPurchasePro
-                    ? () => openPlanPaywall(context, ref)
-                    : () => showElumDialog<void>(
-                        context: context,
-                        title: l10n.cardExportProThemeLocked,
-                        actions: [ElumDialogAction(label: l10n.commonConfirm)],
-                      ),
+                teaserTheme: _teaserTheme,
+                // Free · 판매 중이면 흐린 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
+                onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
               ),
               SizedBox(height: _sectionGap.h),
               _preview(
@@ -151,9 +153,25 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       _sheetKeys.add(GlobalKey());
     }
     final caption = context.typo.caption.copyWith(color: colors.textSecondary);
+    final teaserTheme = _teaserTheme;
+    final teaserSheets = teaserTheme == null
+        ? const <PrintSheet>[]
+        : buildPrintSheets(
+            routine: widget.routine,
+            options: _options.copyWith(theme: teaserTheme),
+            pictures: pictures,
+            hasWatermark: hasWatermark,
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (teaserSheets.isNotEmpty) ...[
+          CardExportThemeTeaser(
+            sheet: teaserSheets.first,
+            onUnlock: () => openPlanPaywall(context, ref),
+          ),
+          SizedBox(height: _sectionGap.h),
+        ],
         Text(
           l10n.cardExportPreviewSection,
           style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel),
@@ -189,6 +207,23 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
           ),
         ],
       ],
+    );
+  }
+
+  void _onLockedThemeTap(PlanAccess access, CardDesignTheme theme) {
+    if (access.shouldShowProTeaser) {
+      // 같은 칩을 다시 누르면 미리 보기를 닫음
+      setState(() => _teaserTheme = _teaserTheme == theme ? null : theme);
+      return;
+    }
+    if (access.canPurchasePro) {
+      openPlanPaywall(context, ref);
+      return;
+    }
+    showElumDialog<void>(
+      context: context,
+      title: context.l10n.cardExportProThemeLocked,
+      actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
     );
   }
 

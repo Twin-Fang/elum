@@ -8,17 +8,21 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/pro_teaser.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/routine_memory_controller.dart';
 import '../domain/routine_memory.dart';
+import 'pro_teaser_samples.dart';
 import 'routine_memory_line_sheet.dart';
 
 /// 이룸이별 AI 메모 화면 (Pro, 시안 없음 — 설정 묶음 카드 모양을 따름)
 /// 묶음 3개: 켜기/끄기 > 메모 줄(누르면 고치기·지우기, 더하기) > 모두 지우기
-/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모
+/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모 / (Free · 판매 중) 흐린 견본 메모 — 서버를 부르지 않음
 class RoutineMemoryScreen extends ConsumerWidget {
   const RoutineMemoryScreen({super.key});
 
@@ -29,7 +33,33 @@ class RoutineMemoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final body = switch (ref.watch(routineMemoryControllerProvider)) {
+    final access = ref.watch(planAccessProvider);
+    final body = !access.canUseRoutineMemory && access.shouldShowProTeaser
+        ? _proTeaser(context, ref)
+        : _memoryBody(context, ref);
+
+    return ElumScaffold(
+      onBack: context.popOrHome,
+      title: context.l10n.routineMemoryTitle,
+      backTop: _titleRowTop,
+      horizontalPadding: 16,
+      child: body,
+    );
+  }
+
+  Widget _proTeaser(BuildContext context, WidgetRef ref) => SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(top: _topGap.h, bottom: _topGap.h),
+          child: ProTeaser(
+            benefit: context.l10n.proTeaserRoutineMemoryBenefit,
+            onUnlock: () => openPlanPaywall(context, ref),
+            child: ProTeaserSamples.routineMemory(context),
+          ),
+        ),
+      );
+
+  Widget _memoryBody(BuildContext context, WidgetRef ref) {
+    return switch (ref.watch(routineMemoryControllerProvider)) {
       AsyncData(value: final memory) => SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(top: _topGap.h, bottom: _topGap.h),
@@ -46,14 +76,6 @@ class RoutineMemoryScreen extends ConsumerWidget {
         ),
       _ => const ElumStateBody.loading(),
     };
-
-    return ElumScaffold(
-      onBack: context.popOrHome,
-      title: context.l10n.routineMemoryTitle,
-      backTop: _titleRowTop,
-      horizontalPadding: 16,
-      child: body,
-    );
   }
 }
 

@@ -14,7 +14,8 @@ mixin CardReviewAddedImage<T extends ConsumerStatefulWidget>
     fetchImagePath: ref.read(routineFlowProvider.notifier).fetchStepImagePath,
     onImageReady: (stepId, imagePath) {
       if (!mounted) return;
-      ref.read(routineFlowProvider.notifier).applyStepImage(stepId, imagePath);
+      // 직접 추가한 카드 그림은 AI 가 그림
+      ref.read(routineFlowProvider.notifier).applyStepImage(stepId, imagePath, isAiPicture: true);
       setState(() {});
     },
     onGaveUp: (_) {

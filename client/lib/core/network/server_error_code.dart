@@ -60,6 +60,9 @@ enum ServerErrorCode {
   routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
   routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
   routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
+  // 카드 그림 다시 그리기: AI 그림 카드 아님, 그림 생성 실패
+  routineStepImageNotRegeneratable('ROUTINE_STEP_IMAGE_NOT_REGENERATABLE'),
+  routineStepImageRegenerateFailed('ROUTINE_STEP_IMAGE_REGENERATE_FAILED'),
   // 보호자 목소리 녹음: Pro 아님, 형식, 크기, 길이, 저장 실패
   guardianVoiceNotAllowed('GUARDIAN_VOICE_NOT_ALLOWED'),
   guardianVoiceInvalidType('GUARDIAN_VOICE_INVALID_TYPE'),

@@ -7362,6 +7362,180 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 뒤 다시 해 주세요.'**
   String get routineMemorySaveFailedFallback;
+
+  /// Pro 미리 보기 위 배지
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro'**
+  String get proTeaserBadge;
+
+  /// Pro 미리 보기가 실제 기록이 아닌 견본임을 알리는 배지
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 화면'**
+  String get proTeaserSampleLabel;
+
+  /// Pro 미리 보기에서 요금제 화면을 여는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 보기'**
+  String get proTeaserUnlock;
+
+  /// 주간 리포트 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요'**
+  String get proTeaserWeeklyReportBenefit;
+
+  /// AI 메모 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요'**
+  String get proTeaserRoutineMemoryBenefit;
+
+  /// 인쇄용으로 받기 Pro 테마 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드를 여러 디자인으로 받을 수 있어요'**
+  String get proTeaserCardThemeBenefit;
+
+  /// 전문가 일과 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가가 만든 일과를 그대로 가져와 쓸 수 있어요'**
+  String get proTeaserExpertRoutineBenefit;
+
+  /// 반복 일과·주간 계획 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 정해 두면 그날 일과가 저절로 준비돼요'**
+  String get proTeaserWeeklyPlanBenefit;
+
+  /// 미리 보기 견본 일과 제목 1
+  ///
+  /// In ko, this message translates to:
+  /// **'아침 준비하기'**
+  String get proTeaserSampleRoutineMorning;
+
+  /// 미리 보기 견본 일과 제목 2
+  ///
+  /// In ko, this message translates to:
+  /// **'이 닦기'**
+  String get proTeaserSampleRoutineBrush;
+
+  /// 미리 보기 견본 일과 제목 3
+  ///
+  /// In ko, this message translates to:
+  /// **'가방 챙기기'**
+  String get proTeaserSampleRoutineBag;
+
+  /// 미리 보기 견본 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'양말 신기'**
+  String get proTeaserSampleStepSocks;
+
+  /// AI 메모 미리 보기 견본 줄 1
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 문장은 짧게 한 줄로 써요'**
+  String get proTeaserSampleMemoryShort;
+
+  /// AI 메모 미리 보기 견본 줄 2
+  ///
+  /// In ko, this message translates to:
+  /// **'옷 입기는 양말부터 시작해요'**
+  String get proTeaserSampleMemoryOrder;
+
+  /// AI 메모 미리 보기 견본 줄 3
+  ///
+  /// In ko, this message translates to:
+  /// **'보상은 스티커로 정해요'**
+  String get proTeaserSampleMemoryReward;
+
+  /// 전문가 일과 미리 보기 견본 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가가 순서를 다듬은 일과예요'**
+  String get proTeaserSampleExpertSummary;
+
+  /// 카드 그림 위 AI 그림 다시 그리기 칩의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 그리기'**
+  String get cardRegenerateChip;
+
+  /// 다시 그리기 확인 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그릴까요?'**
+  String get cardRegenerateSheetTitle;
+
+  /// 다시 그리기 확인 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요'**
+  String get cardRegenerateSheetBody;
+
+  /// 다시 그리기 비용: Pro 하루 무료 횟수 안
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 무료 (오늘 {count}회 남음)'**
+  String cardRegenerateCostProFree(int count);
+
+  /// 다시 그리기 비용: 크레딧이 꺼져 있거나 단가 0
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 쓰지 않아요'**
+  String get cardRegenerateCostFree;
+
+  /// 다시 그리기 비용: 크레딧 단가
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧 {count}개}}'**
+  String cardRegenerateCostCredits(int count);
+
+  /// 다시 그리기 비용을 불러오지 못했을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 써요'**
+  String get cardRegenerateCostUnknown;
+
+  /// Free 에게 다시 그리기 시트에서 Pro 혜택 한 줄 (판매 중일 때만)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro는 그림을 크레딧 없이 다시 그릴 수 있어요'**
+  String get cardRegenerateProHint;
+
+  /// 다시 그리기 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 그리기'**
+  String get cardRegenerateConfirm;
+
+  /// 다시 그리는 동안 그림 위에 덮이는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그리고 있어요'**
+  String get cardRegenerateInProgress;
+
+  /// 다시 그리기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그렸어요'**
+  String get cardRegenerateDoneToast;
+
+  /// 다시 그리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그리지 못했어요'**
+  String get cardRegenerateFailedTitle;
+
+  /// 다시 그리기 실패 팝업 기본 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요'**
+  String get cardRegenerateFailedFallback;
 }
 
 class _AppLocalizationsDelegate

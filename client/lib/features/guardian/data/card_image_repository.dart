@@ -13,7 +13,7 @@ import '../../../core/storage/card_image_disk_cache.dart';
 import 'card_photo.dart';
 import '../../../app/dio_provider.dart';
 
-/// 카드 이미지를 받아오고, 보호자가 고른 사진으로 바꾼다.
+/// 카드 이미지를 받아오고, 보호자가 고른 사진으로 바꾸거나 AI 그림을 다시 그린다.
 ///
 /// 서버가 AI로 만든 그림을 인증된 요청에만 준다.
 /// `GET /api/routines/{routineId}/steps/{stepId}/image` → `image/png`
@@ -204,6 +204,41 @@ class CardImageRepository {
       return PhotoUploadResult.failed(PhotoFailure.from(AppFailure.of(e)));
     }
   }
+
+  /// 카드 AI 그림을 다시 그린다 (`POST .../image/regenerate`, 크레딧 IMAGE_REGENERATE).
+  ///
+  /// 서버가 그림을 다 그린 뒤 답한다 (수 초). 200 은 카드 한 장이고 `imagePath` 는 새 열쇠다.
+  /// **절대 throw 하지 않는다.** 실패는 서버 코드가 든 [AppFailure] 로 돌려준다 (크레딧 부족·생성 실패 등).
+  Future<CardRegenerateResult> regenerateImage({
+    required String routineId,
+    required String stepId,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/api/routines/$routineId/steps/$stepId/image/regenerate',
+      );
+      final body = response.data;
+      final card = body == null ? null : ActionCard.fromJson(body);
+      // 새 열쇠가 없으면 그림이 바뀌었다고 말할 수 없다 — 성공으로 착각하지 않는다
+      if (card == null || card.imagePath == null || card.imagePath!.isEmpty) {
+        return const CardRegenerateResult.failed(AppFailure(fault: NetworkFault.app));
+      }
+      return CardRegenerateResult.ok(card);
+    } catch (e) {
+      AppLogger.error('card', '그림 다시 그리기 실패: $e');
+      return CardRegenerateResult.failed(AppFailure.of(e));
+    }
+  }
+}
+
+/// 카드 AI 그림 다시 그리기 결과: 바뀐 카드 또는 실패 ([AppFailure] — 서버 코드·문구를 들고 있음)
+@immutable
+class CardRegenerateResult {
+  const CardRegenerateResult.ok(ActionCard this.card) : failure = null;
+  const CardRegenerateResult.failed(AppFailure this.failure) : card = null;
+
+  final ActionCard? card;
+  final AppFailure? failure;
 }
 
 final cardImageRepositoryProvider = Provider<CardImageRepository>(

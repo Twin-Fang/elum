@@ -56,6 +56,9 @@ abstract class ActionCard with _$ActionCard {
 
     /// 보호자 목소리 녹음 열쇠 (Pro). 녹음이 없으면 null. 다시 녹음하면 값도 바뀐다.
     String? guardianVoicePath,
+
+    /// 카드 그림이 AI 가 그린 그림인가 (서버 `aiPicture`). true 면 보호자 카드 수정에 `다시 그리기`
+    @Default(false) bool isAiPicture,
   }) = _ActionCard;
 
   const ActionCard._();
@@ -90,6 +93,7 @@ abstract class ActionCard with _$ActionCard {
         final String v when v.isNotEmpty => v,
         _ => null,
       },
+      isAiPicture: json['aiPicture'] == true,
     );
   }
 
@@ -104,5 +108,6 @@ abstract class ActionCard with _$ActionCard {
         'exampleImageId': exampleImageId,
         'speechPath': speechPath,
         'guardianVoicePath': guardianVoicePath,
+        'aiPicture': isAiPicture,
       };
 }

@@ -12,6 +12,7 @@ class _PlanOverrideView extends ConsumerWidget {
     final current = ref.watch(devPlanOverrideProvider);
     final notifier = ref.read(devPlanOverrideProvider.notifier);
     final isStoreForced = ref.watch(devPlanStoreForcedProvider);
+    final isTeaserForced = ref.watch(devProTeaserForcedProvider);
     return ListView(
       shrinkWrap: true,
       children: [
@@ -48,6 +49,21 @@ class _PlanOverrideView extends ConsumerWidget {
           child: Text(
             '스토어 상품을 불러와 요금제 화면·Pro 알아보기를 연다. '
             '실제 결제는 Sandbox·라이선스 테스트 계정과 서버 스토어 설정이 있어야 끝난다.',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        ListTile(
+          title: const Text('Pro 미리 보기 켜기'),
+          trailing: Switch(
+            value: isTeaserForced,
+            onChanged: (isOn) => ref.read(devProTeaserForcedProvider.notifier).set(isOn),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Text(
+            '스토어 상품 없이도 판매 중으로 보고 Free 화면에 흐린 Pro 미리 보기를 띄운다 (Free 처럼과 함께). '
+            '요금제 화면까지 열려면 결제 화면 켜기도 켠다.',
             style: TextStyle(fontSize: 12),
           ),
         ),

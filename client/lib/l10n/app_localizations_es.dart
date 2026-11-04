@@ -4171,4 +4171,101 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
+
+  @override
+  String get proTeaserBadge => 'Pro';
+
+  @override
+  String get proTeaserSampleLabel => '예시 화면';
+
+  @override
+  String get proTeaserUnlock => 'Pro로 보기';
+
+  @override
+  String get proTeaserWeeklyReportBenefit => '한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요';
+
+  @override
+  String get proTeaserRoutineMemoryBenefit => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
+
+  @override
+  String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
+
+  @override
+  String get proTeaserExpertRoutineBenefit => '전문가가 만든 일과를 그대로 가져와 쓸 수 있어요';
+
+  @override
+  String get proTeaserWeeklyPlanBenefit => '요일과 시각을 정해 두면 그날 일과가 저절로 준비돼요';
+
+  @override
+  String get proTeaserSampleRoutineMorning => '아침 준비하기';
+
+  @override
+  String get proTeaserSampleRoutineBrush => '이 닦기';
+
+  @override
+  String get proTeaserSampleRoutineBag => '가방 챙기기';
+
+  @override
+  String get proTeaserSampleStepSocks => '양말 신기';
+
+  @override
+  String get proTeaserSampleMemoryShort => '카드 문장은 짧게 한 줄로 써요';
+
+  @override
+  String get proTeaserSampleMemoryOrder => '옷 입기는 양말부터 시작해요';
+
+  @override
+  String get proTeaserSampleMemoryReward => '보상은 스티커로 정해요';
+
+  @override
+  String get proTeaserSampleExpertSummary => '전문가가 순서를 다듬은 일과예요';
+
+  @override
+  String get cardRegenerateChip => '다시 그리기';
+
+  @override
+  String get cardRegenerateSheetTitle => '그림을 다시 그릴까요?';
+
+  @override
+  String get cardRegenerateSheetBody =>
+      '지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요';
+
+  @override
+  String cardRegenerateCostProFree(int count) {
+    return 'Pro 무료 (오늘 $count회 남음)';
+  }
+
+  @override
+  String get cardRegenerateCostFree => '크레딧을 쓰지 않아요';
+
+  @override
+  String cardRegenerateCostCredits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크레딧 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardRegenerateCostUnknown => '크레딧을 써요';
+
+  @override
+  String get cardRegenerateProHint => 'Pro는 그림을 크레딧 없이 다시 그릴 수 있어요';
+
+  @override
+  String get cardRegenerateConfirm => '다시 그리기';
+
+  @override
+  String get cardRegenerateInProgress => '그림을 다시 그리고 있어요';
+
+  @override
+  String get cardRegenerateDoneToast => '그림을 다시 그렸어요';
+
+  @override
+  String get cardRegenerateFailedTitle => '그림을 다시 그리지 못했어요';
+
+  @override
+  String get cardRegenerateFailedFallback => '잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요';
 }

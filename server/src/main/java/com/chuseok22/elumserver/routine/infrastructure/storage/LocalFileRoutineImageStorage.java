@@ -91,6 +91,11 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
     return writeNewKey(stepId, "talk-" + UUID.randomUUID() + "." + extension, content.bytes());
   }
 
+  @Override
+  public String saveRegenerated(String stepId, GeneratedImage image) {
+    return writeNewKey(stepId, "ai-" + UUID.randomUUID() + "." + image.extension(), image.bytes());
+  }
+
   /**
    * 새 열쇠 파일 쓰기: 임시 파일 > 옮기기 (실패 시 임시 파일 정리)
    */

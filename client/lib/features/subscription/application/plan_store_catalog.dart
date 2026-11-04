@@ -38,6 +38,8 @@ final planCatalogProvider = FutureProvider<PlanCatalog>((ref) {
 ///
 /// Pro 전용 선택지·`Pro 알아보기` 는 이 값이 true 일 때만 보인다 (살 방법이 없는데 잠금만 보이지 않게)
 final canPurchaseProProvider = Provider<bool>((ref) {
+  // 개발자 도구 `Pro 미리 보기 켜기` (이룸이 기기는 제외)
+  if (ref.watch(devProTeaserForcedProvider) && !ref.watch(localStorageProvider).isElumiDevice) return true;
   if (!ref.watch(isPlanStoreEnabledProvider)) return false;
   return ref.watch(planCatalogProvider).value?.hasOffers ?? false;
 });
