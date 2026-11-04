@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-04T19:48:52Z",
-    "currentVersion": "2.87.0",
+    "lastUpdated": "2026-11-04T19:57:53Z",
+    "currentVersion": "2.87.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 325
+    "totalReleases": 326
   },
   "releases": [
+    {
+      "version": "2.87.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-04",
+      "pr_number": 1091,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 새 서버가 켜지지 않던 문제를 고쳤어요\n* **개선**\n  * 카드 문장을 만드는 AI가 한 곳에서 막혀도 다른 곳으로 이어서 만들어요\n  * 관리자 화면에서 AI 연결 순서와 비용을 확인할 수 있어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "새 서버가 켜지지 않던 문제를 고쳤어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 문장을 만드는 AI가 한 곳에서 막혀도 다른 곳으로 이어서 만들어요",
+            "관리자 화면에서 AI 연결 순서와 비용을 확인할 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.87.0",
       "project_type": "flutter",
