@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.dto.response;
 
 import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
+import com.chuseok22.elumserver.license.application.service.MemberSubscriptionStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -53,7 +54,11 @@ public record MemberResponse(
 
   @Schema(description = "보호자 계정 표시 정보(닉네임·가입 방법·가린 이메일). "
     + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
-  GuardianAccountResponse account
+  GuardianAccountResponse account,
+
+  @Schema(description = "요금제 상태(등급·출처·만료일·자동 갱신·결제 유예). 앱 \"내 요금제\" 화면용 (#1071). "
+    + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
+  MemberSubscriptionStatus subscription
 ) {
 
   /**
@@ -67,7 +72,7 @@ public record MemberResponse(
    */
   public static MemberResponse from(
     Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements,
-    GuardianAccountResponse account
+    GuardianAccountResponse account, MemberSubscriptionStatus subscription
   ) {
     return new MemberResponse(
       member.getId(),
@@ -82,7 +87,8 @@ public record MemberResponse(
       profiles.stream().map(ProfileSummaryResponse::from).toList(),
       // 당사자 항목이 없으면(E29) 기본 만화 — 화면이 null 을 만나지 않게 한다
       profile == null ? ImageStyle.CARTOON : profile.getImageStyle(),
-      account
+      account,
+      subscription
     );
   }
 }

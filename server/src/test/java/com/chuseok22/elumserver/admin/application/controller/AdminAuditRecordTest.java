@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberAccessService;
+import com.chuseok22.elumserver.license.application.service.StorePurchaseHistoryService;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminAuditLogRepository;
@@ -40,7 +41,8 @@ class AdminAuditRecordTest {
 
   private AdminMemberController controllerWith(AdminAuditService adminAuditService) {
     return new AdminMemberController(adminMemberService, new AdminDateFormatter(), mock(AdminCreditQueryService.class),
-      mock(AdminMemberAccessService.class), memberAdminMemoService, adminAuditService);
+      mock(AdminMemberAccessService.class), memberAdminMemoService, adminAuditService,
+      mock(StorePurchaseHistoryService.class));
   }
 
   @Test

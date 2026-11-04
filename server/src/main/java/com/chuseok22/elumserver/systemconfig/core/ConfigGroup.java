@@ -34,6 +34,8 @@ public enum ConfigGroup {
   LANGUAGE("언어"),
   // 이야기 신고 알림 메일: 켜기, 받는 주소, 보내는 SMTP 계정.
   MAIL("신고 메일"),
+  // App Store·Google Play 구독 결제 검증과 결제 알림 (#1071).
+  SUBSCRIPTION_STORE("스토어 구독 결제"),
   ;
 
   private final String label;
