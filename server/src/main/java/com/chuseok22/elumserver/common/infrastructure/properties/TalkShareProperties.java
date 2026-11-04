@@ -33,7 +33,7 @@ public record TalkShareProperties(
   private static final Pattern APP_STORE_APP_ID_PATTERN = Pattern.compile("/id(\\d+)");
 
   public TalkShareProperties {
-    publicBaseUrl = withoutTrailingSlash(orDefault(publicBaseUrl, DEFAULT_PUBLIC_BASE_URL));
+    publicBaseUrl = BaseUrls.withoutTrailingSlash(orDefault(publicBaseUrl, DEFAULT_PUBLIC_BASE_URL));
     defaultImageUrl = orDefault(defaultImageUrl, DEFAULT_IMAGE_URL);
     playStoreUrl = orDefault(playStoreUrl, DEFAULT_PLAY_STORE_URL);
     appStoreUrl = orDefault(appStoreUrl, DEFAULT_APP_STORE_URL);
@@ -56,9 +56,5 @@ public record TalkShareProperties(
 
   private static String orDefault(String value, String fallback) {
     return value == null || value.isBlank() ? fallback : value.trim();
-  }
-
-  private static String withoutTrailingSlash(String url) {
-    return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 }

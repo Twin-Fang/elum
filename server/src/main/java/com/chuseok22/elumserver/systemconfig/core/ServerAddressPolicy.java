@@ -10,12 +10,15 @@ import java.util.Set;
  */
 public final class ServerAddressPolicy {
 
-  // 운영 도메인 2개: 기존 서버(친구 NAS), 새 서버(내 NAS)
-  public static final Set<String> ALLOWED_API_HOSTS = Set.of(
-    "api.elum.chuseok22.com",
-    "api.elum.suhsaechan.kr"
-  );
+  // 기존 서버(친구 NAS) 도메인
+  public static final String LEGACY_SERVER_API_HOST = "api.elum.chuseok22.com";
+  // 새 서버(내 NAS) 도메인
+  public static final String NEW_SERVER_API_HOST = "api.elum.suhsaechan.kr";
+  // 운영 도메인 2개: 기존 서버, 새 서버
+  public static final Set<String> ALLOWED_API_HOSTS = Set.of(LEGACY_SERVER_API_HOST, NEW_SERVER_API_HOST);
   private static final String REQUIRED_SCHEME = "https";
+  // 옛 서버가 안내해야 하는 새 서버 주소 (#1062 이전 상태 화면이 대조)
+  public static final String NEW_SERVER_BASE_URL = REQUIRED_SCHEME + "://" + NEW_SERVER_API_HOST;
 
   private ServerAddressPolicy() {
   }
@@ -36,6 +39,18 @@ public final class ServerAddressPolicy {
         && uri.getRawQuery() == null
         && uri.getRawFragment() == null
         && (path == null || path.isEmpty() || path.equals("/"));
+    } catch (URISyntaxException e) {
+      return false;
+    }
+  }
+
+  /// 허용 규칙에 맞고 새 서버 도메인을 가리키는가 (옛 서버의 안내 주소 확인용)
+  public static boolean isNewServerAddress(String value) {
+    if (!isAllowed(value)) {
+      return false;
+    }
+    try {
+      return NEW_SERVER_API_HOST.equalsIgnoreCase(new URI(value.trim()).getHost());
     } catch (URISyntaxException e) {
       return false;
     }

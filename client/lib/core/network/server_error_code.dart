@@ -77,6 +77,8 @@ enum ServerErrorCode {
   invalidMigrationFilePath('INVALID_MIGRATION_FILE_PATH'),
   migrationFileNotFound('MIGRATION_FILE_NOT_FOUND'),
   migrationFileReadFailed('MIGRATION_FILE_READ_FAILED'),
+  migrationStatusUnreadable('MIGRATION_STATUS_UNREADABLE'),
+  migrationSyncRequestFailed('MIGRATION_SYNC_REQUEST_FAILED'),
 
   // SYSTEM CONFIG
   systemConfigInvalidValue('SYSTEM_CONFIG_INVALID_VALUE'),

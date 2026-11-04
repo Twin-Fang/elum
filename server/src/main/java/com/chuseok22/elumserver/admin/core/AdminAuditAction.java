@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 동작 13개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
+ * 관리자 기록 동작 17개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
  * 크레딧 조정·예약 반환은 원장(actor·사유)에, 시스템 설정은 설정 변경 이력에 남아 여기서 기록하지 않음
  */
 @Getter
@@ -25,6 +25,11 @@ public enum AdminAuditAction {
   LOG_FILE_DELETED("로그 파일 삭제", AdminAuditTargetType.LOG_FILE, true),
   // 서버 이전 파일 목록 조회 (#1053). 대상 id = 파일 종류 코드
   MIGRATION_FILES_LISTED("이전 파일 목록 조회", AdminAuditTargetType.MIGRATION_FILE, false),
+  // 서버 이전 상태 화면 버튼 (#1062). NAS 표식 파일만 만들거나 지움, 대상 id = migration-sync
+  MIGRATION_SYNC_REQUESTED("이전 동기화 요청", AdminAuditTargetType.MIGRATION_SYNC, false),
+  MIGRATION_VERIFY_REQUESTED("정합성 검사 요청", AdminAuditTargetType.MIGRATION_SYNC, false),
+  MIGRATION_SYNC_PAUSED("이전 동기화 멈춤", AdminAuditTargetType.MIGRATION_SYNC, false),
+  MIGRATION_SYNC_RESUMED("이전 동기화 재개", AdminAuditTargetType.MIGRATION_SYNC, false),
   ;
 
   private final String label;
