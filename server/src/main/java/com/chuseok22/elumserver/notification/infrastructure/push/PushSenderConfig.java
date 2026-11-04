@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.push;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.common.infrastructure.properties.FirebaseProperties;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -23,9 +24,10 @@ import org.springframework.core.io.ClassPathResource;
 @Configuration
 public class PushSenderConfig {
 
+  // 실제 발송기(FCM·NoOp)를 이전 잠금 확인으로 감싼다 (#1053)
   @Bean
-  public PushSender pushSender(FirebaseProperties firebaseProperties) {
-    return createPushSender(firebaseProperties.serviceAccountKeyPath());
+  public PushSender pushSender(FirebaseProperties firebaseProperties, MigrationLock migrationLock) {
+    return new MigrationLockAwarePushSender(createPushSender(firebaseProperties.serviceAccountKeyPath()), migrationLock);
   }
 
   PushSender createPushSender(String serviceAccountKeyPath) {

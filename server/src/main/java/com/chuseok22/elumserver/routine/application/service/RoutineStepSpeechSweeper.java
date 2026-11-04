@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import java.util.List;
@@ -25,9 +26,13 @@ public class RoutineStepSpeechSweeper {
 
   private final RoutineStepRepository routineStepRepository;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final MigrationLock migrationLock;
 
   @Scheduled(fixedDelayString = "PT2M", initialDelayString = "PT1M")
   public void sweep() {
+    if (migrationLock.isBlockingScheduledJob("RoutineStepSpeechSweeper")) {
+      return;
+    }
     // 꺼져 있거나 이전 분량을 처리 중이면 건너뜀
     if (!routineStepSpeechQueue.isEnabled() || routineStepSpeechQueue.pendingCount() > 0) {
       return;

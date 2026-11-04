@@ -23,6 +23,8 @@ public enum ConfigFormat {
   MEMBER_ID_LIST(true, "쉼표로 나눈 회원 ID"),
   // 쉼표 목록: 언어 코드 (EnabledLocales)
   CONTENT_LOCALE_LIST(false, "쉼표로 나눈 언어 코드 (ko,en,ja,zh,es)"),
+  // 이룸 서버 주소 (ServerAddressPolicy). 비우면 전환 안 함
+  SERVER_BASE_URL(true, "https://api.elum.suhsaechan.kr 처럼 경로 없는 https 주소"),
   ;
 
   private final boolean isBlankAllowed;

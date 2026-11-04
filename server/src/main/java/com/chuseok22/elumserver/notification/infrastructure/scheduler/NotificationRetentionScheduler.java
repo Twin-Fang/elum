@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import java.time.Clock;
@@ -24,21 +25,26 @@ public class NotificationRetentionScheduler {
 
   private final NotificationRepository notificationRepository;
   private final Clock clock;
+  private final MigrationLock migrationLock;
 
   @Autowired
-  public NotificationRetentionScheduler(NotificationRepository notificationRepository) {
-    this(notificationRepository, Clock.system(NOTIFICATION_ZONE));
+  public NotificationRetentionScheduler(NotificationRepository notificationRepository, MigrationLock migrationLock) {
+    this(notificationRepository, Clock.system(NOTIFICATION_ZONE), migrationLock);
   }
 
-  NotificationRetentionScheduler(NotificationRepository notificationRepository, Clock clock) {
+  NotificationRetentionScheduler(NotificationRepository notificationRepository, Clock clock, MigrationLock migrationLock) {
     this.notificationRepository = notificationRepository;
     this.clock = clock;
+    this.migrationLock = migrationLock;
   }
 
   // 새벽 5시(한국 시각)
   @Scheduled(cron = "${elum.notification.retention-cron:0 0 5 * * *}", zone = NotificationTime.ZONE_ID_NAME)
   @Transactional
   public void run() {
+    if (migrationLock.isBlockingScheduledJob("NotificationRetentionScheduler")) {
+      return;
+    }
     int deletedCount = notificationRepository.deleteAllByLastOccurredAtBefore(
       LocalDateTime.now(clock).minusDays(RETENTION_DAYS));
     log.info("[notification retention] deleted {}", deletedCount);

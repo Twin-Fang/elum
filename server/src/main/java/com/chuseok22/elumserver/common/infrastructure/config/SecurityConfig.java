@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
 import com.chuseok22.elumserver.systemconfig.infrastructure.security.MaintenanceModeFilter;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
@@ -135,7 +136,7 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, tokenAccessValidator, linkAccessValidator);
     // 빈으로 두지 않는다 — @Component 로 두면 Spring Boot 가 서블릿 필터로 한 번 더 등록해
     // 관리자 경로까지 타게 된다. API 체인에만 건다.
-    MaintenanceModeFilter maintenanceModeFilter = new MaintenanceModeFilter(systemConfigService);
+    MaintenanceModeFilter maintenanceModeFilter = new MaintenanceModeFilter(systemConfigService, new MigrationLock(systemConfigService));
 
     http
       .securityMatcher(SecurityPaths.API_MATCHER)
