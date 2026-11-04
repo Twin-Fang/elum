@@ -90,7 +90,7 @@ GoRouter createRouter({
       // 이야기 글 링크도 같은 방식이다
       final talkLink = TalkPostLink.parse(
         state.uri,
-        webHosts: TalkPostLink.webHostsOf(AppConfig.apiBaseUrl),
+        webHosts: AppConfig.acceptedWebLinkHosts,
       );
       if (talkLink != null) {
         onTalkPostLink?.call(talkLink);

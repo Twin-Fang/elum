@@ -190,7 +190,10 @@ class _DevMenu extends ConsumerStatefulWidget {
 class _DevMenuState extends ConsumerState<_DevMenu> {
   @override
   Widget build(BuildContext context) {
-    final serverLabel = AppConfig.isProductionApiServer ? '운영' : AppConfig.apiBaseUrl;
+    final serverAddress = AppConfig.isProductionApiServer
+        ? '운영 ${Uri.tryParse(AppConfig.apiBaseUrl)?.host ?? ''}'
+        : AppConfig.apiBaseUrl;
+    final serverLabel = '$serverAddress · ${_apiBaseUrlSourceLabel(AppConfig.apiBaseUrlSource)}';
     return ListView(
       shrinkWrap: true,
       children: [

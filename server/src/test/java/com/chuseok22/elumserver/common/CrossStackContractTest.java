@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineExampleCategory;
+import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * 스택 간 계약: 마이그레이션 번호 중복 없음, 서버 enum·상수 <-> 앱(client/lib) 값 일치
+ * 스택 간 계약: 마이그레이션 번호 중복 없음, 서버 enum·상수·서버 주소 허용 도메인 <-> 앱(client/lib) 값 일치
  * 앱 테스트가 없어 서버 쪽에서 앱 소스를 글자로 읽어 대조 (모노레포가 아니면 건너뜀)
  */
 class CrossStackContractTest {
@@ -41,6 +42,9 @@ class CrossStackContractTest {
   private static final Pattern MIGRATION_VERSION = Pattern.compile("^V(\\d+)__.+\\.sql$");
   // 다트 enum 항목: name('API_VALUE' ...
   private static final Pattern DART_ENUM_VALUE = Pattern.compile("^\\s*\\w+\\('([A-Z0-9_]*)'", Pattern.MULTILINE);
+  // 다트 허용 도메인 집합: allowedApiHosts = <String>{ '...', '...' };
+  private static final Pattern DART_ALLOWED_API_HOSTS = Pattern.compile("allowedApiHosts\\s*=\\s*(?:<String>)?\\{([^}]*)}");
+  private static final Pattern DART_STRING_LITERAL = Pattern.compile("'([^']+)'");
 
   @Test
   @DisplayName("마이그레이션 버전이 겹치지 않는다 — 같은 번호 둘이면 운영 서버가 기동하지 못한다")
@@ -91,6 +95,21 @@ class CrossStackContractTest {
 
     assertThat(dart).contains("errorSectionTitle = '== 최근 오류 =='");
     assertThat(dart).contains("logSectionTitle = '== 기록 =='");
+  }
+
+  @Test
+  @DisplayName("서버 주소 허용 도메인이 앱과 같다 — 다르면 관리자가 넣은 새 주소를 앱이 무시하거나 서버가 거른 주소로 앱이 옮겨 간다")
+  void allowedApiHostsMatchClient() throws IOException {
+    String dart = readClient("core/config/server_address_policy.dart");
+    Matcher block = DART_ALLOWED_API_HOSTS.matcher(dart);
+    assertThat(block.find()).as("allowedApiHosts 선언").isTrue();
+
+    Set<String> client = new TreeSet<>();
+    Matcher literal = DART_STRING_LITERAL.matcher(block.group(1));
+    while (literal.find()) {
+      client.add(literal.group(1));
+    }
+    assertThat(client).isEqualTo(new TreeSet<>(ServerAddressPolicy.ALLOWED_API_HOSTS));
   }
 
   /**

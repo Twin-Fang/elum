@@ -26,7 +26,7 @@ class TalkPostLink {
 
   /// [raw](문자열 또는 [Uri]) > 이야기 글 링크. 아니거나 id 모양이 틀리면 null. 어떤 입력에도 던지지 않는다
   ///
-  /// [webHosts] 는 받을 웹 링크 호스트 (보통 API 주소 호스트 하나)
+  /// [webHosts] 는 받을 웹 링크 호스트 (운영 도메인 2개 + 지금 API 주소 호스트, `AppConfig.acceptedWebLinkHosts`)
   static TalkPostLink? parse(Object? raw, {required Set<String> webHosts}) {
     final uri = _toUri(raw);
     if (uri == null) return null;
@@ -47,12 +47,6 @@ class TalkPostLink {
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
     return '$base/$_webPathSegment/${Uri.encodeComponent(postId)}';
-  }
-
-  /// API 주소 > 받을 웹 링크 호스트 (주소가 깨졌으면 빈 집합)
-  static Set<String> webHostsOf(String baseUrl) {
-    final host = Uri.tryParse(baseUrl)?.host.toLowerCase() ?? '';
-    return host.isEmpty ? const {} : {host};
   }
 
   // `/s/{글id}` 만 (썸네일 `/s/{글id}/thumbnail` 등은 글 링크가 아님)

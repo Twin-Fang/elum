@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// 앱 위젯 트리 통째로 다시 만들기 (개발자 도구: 서버 바꾸기, 흉내 적용 뒤 홈 다시 열기)
+/// 앱 위젯 트리 통째로 다시 만들기 (개발자 도구: 서버 바꾸기, 흉내 적용 뒤 홈 다시 열기 · 서버 지정 새 주소로 전환 #831)
 /// ProviderScope 가 새로 생겨 Dio·repository·메모리 캐시가 모두 처음부터 만들어짐
 /// 프로세스는 그대로라 정적 값(AppConfig, 흉내 상태)과 저장소 인스턴스는 남음
 class AppRestart extends StatefulWidget {

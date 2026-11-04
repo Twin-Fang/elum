@@ -6,7 +6,9 @@ import '../assets/app_assets.dart';
 import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
+import '../logger/app_logger.dart';
 import '../config/app_config.dart';
+import '../dev/app_restart.dart';
 import '../dev/dev_simulation.dart';
 import '../dev/dev_skip_notice_button.dart';
 import 'app_status_recheck.dart';
@@ -33,6 +35,9 @@ class AppStatusGate extends ConsumerStatefulWidget {
 
 class _AppStatusGateState extends ConsumerState<AppStatusGate>
     with WidgetsBindingObserver {
+  // 새 서버로 다시 띄우기 요청은 한 번만 (같은 결과로 여러 번 불려도)
+  bool _hasRequestedServerRestart = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,8 +57,25 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
     }
   }
 
+  /// 새 서버 주소 확인 완료 > 다음 프레임에 앱을 안에서 다시 띄움 (로그아웃·캐시 비우기 없음, #831)
+  void _restartOnNewServer() {
+    if (_hasRequestedServerRestart) return;
+    _hasRequestedServerRestart = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final isRestarted = AppRestart.restart(context);
+      AppLogger.info(
+        '[server address] restart : ${isRestarted ? 'now' : 'no restart host, next launch'} -> ${AppConfig.apiBaseUrl}',
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 막는 화면 흉내를 건너뛰는 중에도 새 서버 전환은 함
+    ref.listen(appStatusProvider, (previous, next) {
+      if (next.value?.isServerSwitchReady ?? false) _restartOnNewServer();
+    });
     // 테스트 빌드에서 `그냥 계속하기`를 누르면 막는 화면 대신 앱을 그림
     return ValueListenableBuilder<bool>(
       valueListenable: DevSimulation.isBlockingNoticeSkipped,
@@ -74,6 +96,8 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
       // 앱 화면이 잠깐 튀어나와 요청을 보내고, 그 요청이 또 503을 받아 되묻기를 반복한다.
       skipLoadingOnReload: true,
       data: (result) {
+        // 새 서버로 다시 띄우기 직전 > 옛 서버의 점검·업데이트 화면을 그리지 않음
+        if (result.isServerSwitchReady) return widget.child;
         final status = result.status;
         if (status.maintenance) {
           return AdaptivePageFrame(

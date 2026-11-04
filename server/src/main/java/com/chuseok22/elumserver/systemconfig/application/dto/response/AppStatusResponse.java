@@ -22,8 +22,22 @@ public record AppStatusResponse(
   VersionRequirement android,
 
   @Schema(description = "앱이 쓰는 대기·연출 시간값. 관리자 화면에서 고친다")
-  ClientTuning client
+  ClientTuning client,
+
+  @Schema(description = "앱이 옮겨 갈 서버 주소. 구버전 앱은 이 필드를 무시한다 (#831)")
+  ServerAddress server
 ) {
+
+  /**
+   * 서버 이전 안내: 앱이 확인 후 옮겨 갈 API 주소 (#831)
+   * 빈 설정 > null (지금 주소 유지)
+   */
+  @Schema(description = "서버 이전 안내")
+  public record ServerAddress(
+    @Schema(description = "새 API 주소. null 이면 옮기지 않는다", example = "https://api.elum.suhsaechan.kr",
+      nullable = true)
+    String apiBaseUrl
+  ) {}
 
   /**
    * 앱의 대기·연출 시간값 (밀리초).
