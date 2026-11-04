@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +28,8 @@ class RoutineStepSpeechSweeperTest {
 
   @Mock private RoutineStepRepository repository;
   @Mock private RoutineStepSpeechQueue queue;
+  // 목 기본값 false = 서버 이전 잠금 아님 (막지 않음)
+  @Mock private MigrationLock migrationLock;
   @InjectMocks private RoutineStepSpeechSweeper sweeper;
 
   @Test
@@ -63,5 +66,16 @@ class RoutineStepSpeechSweeperTest {
     sweeper.sweep();
 
     verify(repository, never()).findIdsMissingSpeech(any(), any());
+  }
+
+  @Test
+  @DisplayName("서버 이전 잠금 중이면 아무것도 넣지 않는다")
+  void sweep_skipsWhileMigrationLocked() {
+    when(migrationLock.isBlockingScheduledJob("RoutineStepSpeechSweeper")).thenReturn(true);
+
+    sweeper.sweep();
+
+    verify(repository, never()).findIdsMissingSpeech(any(), any());
+    verify(queue, never()).enqueue(anyString());
   }
 }
