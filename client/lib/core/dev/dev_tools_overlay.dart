@@ -11,6 +11,7 @@ import '../../features/auth/application/login_controller.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/notice/domain/app_notice.dart';
 import '../../features/notice/presentation/show_notice_popup.dart';
+import '../../features/notification/application/elumi_push_opener.dart';
 import '../../features/notification/application/push_message_router.dart';
 import '../../features/notification/domain/notification_type.dart';
 import '../../features/notification/domain/push_message.dart';

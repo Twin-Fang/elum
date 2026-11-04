@@ -14,6 +14,7 @@ import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/card_export/card_export_screen.dart';
 import '../../features/guardian/presentation/weekly_report/weekly_report_screen.dart';
+import '../../features/guardian/presentation/weekly_plan_screen.dart';
 import '../../shared/models/routine.dart';
 import '../../features/license/presentation/open_source_licenses_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
@@ -171,6 +172,15 @@ List<RouteBase> guardianRoutes() => [
     pageBuilder: (context, state) => slidePage(
       state,
       const WeeklyReportScreen(),
+      layoutKind: ScreenLayoutKind.contentColumn,
+    ),
+  ),
+  // 주간 계획 (#782): 요일마다 반복 일과
+  GoRoute(
+    path: Routes.guardianWeeklyPlan,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      const WeeklyPlanScreen(),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),

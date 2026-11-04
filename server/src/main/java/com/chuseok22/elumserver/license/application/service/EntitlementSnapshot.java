@@ -19,7 +19,8 @@ public record EntitlementSnapshot(
   boolean cardExportWithoutWatermark,
   boolean cardExportAllThemes,
   boolean weeklyReport,
-  boolean routineTranslate
+  boolean routineTranslate,
+  boolean routineSchedule
 ) {
 
 }

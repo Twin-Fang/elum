@@ -9,12 +9,10 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Ro
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
-import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -93,7 +91,7 @@ public class RoutineLibraryService {
 
   /// 일과관리 원본 조건 2개: 보내기로 만든 일과가 아님, 보낸 상태(임시저장은 승인 전이라 복사하면 승인을 건너뜀)
   private void validateLibraryOriginal(Routine routine) {
-    if (routine.getSourceRoutineId() != null || routine.getStatus() == RoutineStatus.PENDING_REVIEW) {
+    if (!RoutineRules.isSendableOriginal(routine)) {
       log.info("[routine library] rejected 409 : not a library original, routineId={}, status={}",
         routine.getId(), routine.getStatus());
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
@@ -130,14 +128,7 @@ public class RoutineLibraryService {
 
   /// 오늘 이미 보냈는가: 원본 자체가 오늘 홈 일과이거나(복사본 제외), 이 원본으로 보낸 일과가 오늘 있음
   boolean isAlreadySentToday(Routine original) {
-    LocalDate today = LocalDate.now();
-    LocalDateTime startOfDay = today.atStartOfDay();
-    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-    boolean isOriginalOnTodayHome = !original.isLibraryOnly()
-      && !original.getScheduledAt().isBefore(startOfDay)
-      && !original.getScheduledAt().isAfter(endOfDay);
-    return isOriginalOnTodayHome
-      || routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(original.getId(), startOfDay, endOfDay);
+    return RoutineRules.isSentOn(routineRepository, original, LocalDate.now());
   }
 
   /// 지워도 되는 복사본인가: 복사하기로 만든 일과 · 완료한 단계 0 · 이 일과로 보낸 일과 없음

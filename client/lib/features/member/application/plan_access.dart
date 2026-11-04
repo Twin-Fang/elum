@@ -16,6 +16,7 @@ class PlanAccess {
     required this.canUseAllCardDesignThemes,
     required this.canViewWeeklyReport,
     required this.canTranslateRoutines,
+    required this.canScheduleRoutines,
     this.canPurchasePro = false,
   });
 
@@ -26,6 +27,7 @@ class PlanAccess {
     canUseAllCardDesignThemes: false,
     canViewWeeklyReport: false,
     canTranslateRoutines: false,
+    canScheduleRoutines: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -35,6 +37,7 @@ class PlanAccess {
     canUseAllCardDesignThemes: true,
     canViewWeeklyReport: true,
     canTranslateRoutines: true,
+    canScheduleRoutines: true,
   );
 
   final bool isPro;
@@ -54,6 +57,9 @@ class PlanAccess {
 
   /// 만든 일과를 다른 언어 사본으로 만들 수 있는가 (일과관리 메뉴 `다른 언어로 만들기`)
   final bool canTranslateRoutines;
+
+  /// 일과에 요일·시각을 정할 수 있는가 (반복 일과 · 주간 계획 · 이룸이 기기 알림). 보호자 화면에서만 본다
+  final bool canScheduleRoutines;
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -65,6 +71,7 @@ final planAccessProvider = Provider<PlanAccess>((ref) {
     canUseAllCardDesignThemes: access.canUseAllCardDesignThemes,
     canViewWeeklyReport: access.canViewWeeklyReport,
     canTranslateRoutines: access.canTranslateRoutines,
+    canScheduleRoutines: access.canScheduleRoutines,
     canPurchasePro: ref.watch(canPurchaseProProvider),
   );
 });
@@ -87,5 +94,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canUseAllCardDesignThemes: member.canUseAllCardDesignThemes,
     canViewWeeklyReport: member.canViewWeeklyReport,
     canTranslateRoutines: member.canTranslateRoutines,
+    canScheduleRoutines: member.canScheduleRoutines,
   );
 }

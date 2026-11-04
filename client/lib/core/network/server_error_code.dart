@@ -42,6 +42,9 @@ enum ServerErrorCode {
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),
+  // 요일별 반복 일과 (#782): 요금제 권한 없음 · 요일·시각 틀림
+  routineScheduleNotAllowed('ROUTINE_SCHEDULE_NOT_ALLOWED'),
+  routineScheduleInvalid('ROUTINE_SCHEDULE_INVALID'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),

@@ -64,6 +64,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
     required this.libraryNewOutline,
+    required this.weeklyPlanTodayChipBg,
+    required this.weeklyPlanTodayChipBorder,
     required this.talkOriginBandFill,
     required this.talkOriginBandAction,
     required this.talkCardBorder,
@@ -355,6 +357,12 @@ class AppColors extends ThemeExtension<AppColors> {
 
   // 일과 관리 격자의 `새 일과` 칸 테두리 (시안 1931:6923, #93DBCC 2px). 값이 goalSelectedBorder 와 같아도 쓰임이 달라 따로 둔다
   final Color libraryNewOutline;
+
+  /// 주간 계획 `오늘` 칩 바탕 (#B5EAEC 민트 연 — 지금 볼 것)
+  final Color weeklyPlanTodayChipBg;
+
+  /// 주간 계획 `오늘` 칩 테두리 (#93DBCC)
+  final Color weeklyPlanTodayChipBorder;
 
   // 가져온 일과 상세의 출처 띠 — 웜그레이 판 + 남색 글자 (안내 판 결)
   // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
@@ -1092,6 +1100,8 @@ class AppColors extends ThemeExtension<AppColors> {
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
     libraryNewOutline: Color(0xFF93DBCC),
+    weeklyPlanTodayChipBg: Color(0xFFB5EAEC),
+    weeklyPlanTodayChipBorder: Color(0xFF93DBCC),
     talkOriginBandFill: Color(0xFFEEE9E6),
     talkOriginBandAction: Color(0xFF242634),
     talkCardBorder: Color(0xFFEEE9E6),
@@ -1350,6 +1360,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
     Color? libraryNewOutline,
+    Color? weeklyPlanTodayChipBg,
+    Color? weeklyPlanTodayChipBorder,
     Color? talkOriginBandFill,
     Color? talkOriginBandAction,
     Color? talkCardBorder,
@@ -1596,6 +1608,8 @@ class AppColors extends ThemeExtension<AppColors> {
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
       libraryNewOutline: libraryNewOutline ?? this.libraryNewOutline,
+      weeklyPlanTodayChipBg: weeklyPlanTodayChipBg ?? this.weeklyPlanTodayChipBg,
+      weeklyPlanTodayChipBorder: weeklyPlanTodayChipBorder ?? this.weeklyPlanTodayChipBorder,
       talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
       talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
       talkCardBorder: talkCardBorder ?? this.talkCardBorder,
@@ -1878,6 +1892,8 @@ class AppColors extends ThemeExtension<AppColors> {
         other.libraryNewOutline,
         t,
       )!,
+      weeklyPlanTodayChipBg: Color.lerp(weeklyPlanTodayChipBg, other.weeklyPlanTodayChipBg, t)!,
+      weeklyPlanTodayChipBorder: Color.lerp(weeklyPlanTodayChipBorder, other.weeklyPlanTodayChipBorder, t)!,
       talkOriginBandFill: Color.lerp(
         talkOriginBandFill,
         other.talkOriginBandFill,

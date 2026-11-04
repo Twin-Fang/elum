@@ -55,8 +55,12 @@ abstract final class Routes {
 
   /// 약관 목록 (요금제 화면 `이용약관` 링크. 유료 약관 주소가 없을 때)
   static const guardianTerms = '/guardian/terms';
+
   /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
   static const guardianWeeklyReport = '/guardian/weekly-report';
+
+  /// 주간 계획: 요일별 반복 일과 (#782)
+  static const guardianWeeklyPlan = '/guardian/weekly-plan';
 
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';

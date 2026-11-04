@@ -10,6 +10,8 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -109,6 +111,26 @@ final class RoutineRules {
     }
     routine.setIsExample(false);
     log.info("[routine example] edited : example mark cleared, routineId={}", routine.getId());
+  }
+
+  /// 보낼 수 있는 일과관리 원본인가 2개: 보내기로 만든 일과가 아님, 보낸 상태(임시저장은 승인 전)
+  static boolean isSendableOriginal(Routine routine) {
+    return routine.getSourceRoutineId() == null && routine.getStatus() != RoutineStatus.PENDING_REVIEW;
+  }
+
+  /// 그날 이미 보냈는가: 원본 자체가 그날 홈 일과이거나(복사본 제외), 이 원본으로 보낸 일과가 그날 있음
+  static boolean isSentOn(RoutineRepository routineRepository, Routine original, LocalDate date) {
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+    return isOriginalOnHomeOn(original, date)
+      || routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(original.getId(), startOfDay, endOfDay);
+  }
+
+  /// 원본 자체가 그날 홈에 뜨는 일과인가 (일과관리 복사본은 홈에 안 뜸)
+  static boolean isOriginalOnHomeOn(Routine original, LocalDate date) {
+    return !original.isLibraryOnly()
+      && original.getScheduledAt() != null
+      && original.getScheduledAt().toLocalDate().equals(date);
   }
 
   static int countCompleted(List<RoutineStep> steps) {

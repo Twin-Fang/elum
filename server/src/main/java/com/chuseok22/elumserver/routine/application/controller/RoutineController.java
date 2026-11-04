@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderS
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
+import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
@@ -67,6 +68,7 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineStepPhotoService routineStepPhotoService;
   private final RoutineLibraryService routineLibraryService;
   private final RoutineLibraryOrderService routineLibraryOrderService;
+  private final RoutineScheduleRunner routineScheduleRunner;
   // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
 
@@ -127,6 +129,8 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
+    // 오늘 요일 반복 일과를 먼저 오늘 일과로 만든다 (#782, 이미 만들었으면 건너뜀 · 실패해도 조회는 그대로)
+    routineScheduleRunner.materializeTodayFor(caller);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getTodayRoutines(caller)));
   }
 
