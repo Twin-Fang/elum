@@ -56,8 +56,7 @@ class RoutineSwipeActions extends StatefulWidget {
   static const actionGap = 4.0;
 
   /// 활짝 열렸을 때 카드가 비켜나는 거리 (4 + 69 + 4 + 70).
-  static const revealWidth =
-      actionGap + deleteWidth + actionGap + editWidth;
+  static const revealWidth = actionGap + deleteWidth + actionGap + editWidth;
 
   @override
   State<RoutineSwipeActions> createState() => _RoutineSwipeActionsState();
@@ -124,11 +123,11 @@ class _RoutineSwipeActionsState extends State<RoutineSwipeActions>
     _open
         .animateWith(SpringSimulation(_spring, _open.value, target, velocity))
         .then((_) {
-      // 스프링은 허용오차 안에서 멎으므로 끝에 0.0007 같은 찌꺼기가 남는다.
-      // 눈에는 안 보이지만 "닫혔는가"를 값으로 판단하는 쪽이 헷갈린다.
-      // 중간에 손가락이 다시 닿았으면 _target이 바뀌어 있으므로 건드리지 않는다.
-      if (_target == target) _open.value = target;
-    });
+          // 스프링은 허용오차 안에서 멎으므로 끝에 0.0007 같은 찌꺼기가 남는다.
+          // 눈에는 안 보이지만 "닫혔는가"를 값으로 판단하는 쪽이 헷갈린다.
+          // 중간에 손가락이 다시 닿았으면 _target이 바뀌어 있으므로 건드리지 않는다.
+          if (_target == target) _open.value = target;
+        });
   }
 
   /// 끝을 넘긴 만큼을 깎아 점점 뻑뻑하게 만든다. 벽에 닿았다는 것을
@@ -170,13 +169,21 @@ class _RoutineSwipeActionsState extends State<RoutineSwipeActions>
         Positioned.fill(
           child: AnimatedBuilder(
             animation: _open,
-            builder: (context, _) => _ActionRow(
-              progress: _open.value.clamp(0.0, 1.0),
-              onDelete: widget.onDelete,
-              onEdit: widget.onEdit,
-              endInset: widget.endInset,
-              deleteLabel: widget.deleteLabel,
-            ),
+            builder: (context, _) {
+              final progress = _open.value.clamp(0.0, 1.0);
+              // 닫힘: 그리지 않음 (카드 둥근 모서리 틈으로 뒤 버튼 색이 비침, 시안 931:3896). 낭독은 유지
+              return Opacity(
+                opacity: progress > 0 ? 1 : 0,
+                alwaysIncludeSemantics: true,
+                child: _ActionRow(
+                  progress: progress,
+                  onDelete: widget.onDelete,
+                  onEdit: widget.onEdit,
+                  endInset: widget.endInset,
+                  deleteLabel: widget.deleteLabel,
+                ),
+              );
+            },
           ),
         ),
         AnimatedBuilder(
@@ -279,8 +286,11 @@ class _ActionButton extends StatelessWidget {
     final space = context.space;
     // 배경은 카드가 비켜나며 드러나고, 그림만 뒤따라 살아난다.
     // 배경까지 같이 커지면 버튼이 튀어나오는 것처럼 보여 과하다.
-    final reveal = Interval(iconDelay, 1, curve: Curves.easeOut)
-        .transform(progress);
+    final reveal = Interval(
+      iconDelay,
+      1,
+      curve: Curves.easeOut,
+    ).transform(progress);
 
     return Semantics(
       button: true,
