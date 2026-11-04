@@ -4,7 +4,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../shared/models/routine.dart';
 
-/// 일과관리(보관해 둔 원본) 서버 호출: 목록, 오늘 보내기, 복사, 이름 바꾸기, 지우기
+/// 일과관리(보관해 둔 원본) 서버 호출: 목록, 오늘 보내기, 복사, 다른 언어로 만들기, 이름 바꾸기, 지우기
 ///
 /// 모두 [Attempt] 로 돌려준다 — 화면이 실패 팝업과 에러 코드를 띄우고 목록은 그대로 둔다.
 class RoutineLibraryApi {
@@ -30,6 +30,22 @@ class RoutineLibraryApi {
 
   /// 복사하기: 일과관리에 새 원본(`○○ 복사`)을 만든다. 홈에는 나오지 않는다.
   Future<Attempt<Routine>> copy(String routineId) => _post(routineId, 'copy');
+
+  /// 다른 언어로 만들기 (Pro): 글만 [language] 로 바꾼 새 원본을 일과관리에 만든다. 그림은 그대로
+  ///
+  /// [idempotencyKey] 는 누를 때마다 새로 만든다 — 응답을 놓쳐 다시 보내도 서버가 AI 를 다시 부르지 않는다.
+  Future<Attempt<Routine>> translate(
+    String routineId, {
+    required String language,
+    required String idempotencyKey,
+  }) => guarded(_repo, 'translate', () async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/api/routines/$routineId/translate',
+      data: {'language': language},
+      options: Options(headers: {'Idempotency-Key': idempotencyKey}),
+    );
+    return _routineOf(response.data);
+  }, describe: (routine) => 'language=${routine.language}');
 
   Future<Attempt<Routine>> _post(String routineId, String op) =>
       guarded(_repo, op, () async {

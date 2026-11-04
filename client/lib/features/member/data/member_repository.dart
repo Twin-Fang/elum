@@ -30,6 +30,7 @@ class Member {
     this.canUseAllCardDesignThemes = false,
     this.subscription,
     this.canViewWeeklyReport = false,
+    this.canTranslateRoutines = false,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -77,6 +78,9 @@ class Member {
   /// 주간 리포트를 볼 수 있는가 (`entitlements.weeklyReport`). 모르면 false
   final bool canViewWeeklyReport;
 
+  /// 만든 일과를 다른 언어 사본으로 만들 수 있는가 (`entitlements.routineTranslate`). 모르면 false
+  final bool canTranslateRoutines;
+
   /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
   ///
   /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
@@ -104,6 +108,7 @@ class Member {
         canUseAllCardDesignThemes != other.canUseAllCardDesignThemes ||
         subscription != other.subscription ||
         canViewWeeklyReport != other.canViewWeeklyReport ||
+        canTranslateRoutines != other.canTranslateRoutines ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -154,6 +159,7 @@ class Member {
       canUseAllCardDesignThemes: _isEntitled(json, 'cardExportAllThemes'),
       subscription: MemberSubscription.tryParse(json['subscription']),
       canViewWeeklyReport: _isEntitled(json, 'weeklyReport'),
+      canTranslateRoutines: _isEntitled(json, 'routineTranslate'),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );

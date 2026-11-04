@@ -353,10 +353,10 @@ public class CreditReservationService {
     return stale.size();
   }
 
-  /// 예약량·원장 action 을 정하는 행동. 일과 생성은 글 단가만 예약한다(그림 수는 끝나야 안다).
+  /// 예약량·원장 action 을 정하는 행동. 일과 생성은 글 단가만 예약한다(그림 수는 끝나야 안다). 번역은 글 단가 그대로
   private static CreditAction reserveAction(CreditJobKind kind) {
     return switch (kind) {
-      case ROUTINE_CREATE -> CreditAction.ROUTINE_TEXT;
+      case ROUTINE_CREATE, ROUTINE_TRANSLATE -> CreditAction.ROUTINE_TEXT;
       case CARD_IMAGE -> CreditAction.CARD_IMAGE;
       case IMAGE_REGENERATE -> CreditAction.IMAGE_REGENERATE;
     };
@@ -371,6 +371,8 @@ public class CreditReservationService {
         + AiCreditPolicy.costFrom(costs, CreditAction.CARD_IMAGE) * images;
       case CARD_IMAGE -> AiCreditPolicy.costFrom(costs, CreditAction.CARD_IMAGE) * images;
       case IMAGE_REGENERATE -> AiCreditPolicy.costFrom(costs, CreditAction.IMAGE_REGENERATE) * images;
+      // 그림 수와 무관 (그림을 새로 만들지 않음)
+      case ROUTINE_TRANSLATE -> AiCreditPolicy.costFrom(costs, CreditAction.ROUTINE_TEXT);
     };
   }
 

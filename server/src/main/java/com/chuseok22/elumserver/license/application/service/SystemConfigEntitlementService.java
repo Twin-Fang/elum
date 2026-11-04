@@ -136,7 +136,8 @@ public class SystemConfigEntitlementService implements EntitlementService {
       systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan)),
       systemConfigService.getBoolean(Entitlement.CARD_EXPORT_WITHOUT_WATERMARK.configKeyFor(plan)),
       systemConfigService.getBoolean(Entitlement.CARD_EXPORT_ALL_THEMES.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.WEEKLY_REPORT.configKeyFor(plan))
+      systemConfigService.getBoolean(Entitlement.WEEKLY_REPORT.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.ROUTINE_TRANSLATE.configKeyFor(plan))
     );
   }
 

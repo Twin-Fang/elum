@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -10,6 +11,8 @@ import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
+import '../../../member/application/plan_access.dart';
+import '../../application/routine_translate_targets.dart';
 import 'anchored_quick_menu.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
@@ -18,6 +21,7 @@ enum LibraryMenuAction {
   rename,
   addToGroup,
   copy,
+  translate,
   shareToTalk,
   sendLink,
   turnOffLink,
@@ -83,6 +87,16 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
   // 링크는 내가 만든 일과만 보낸다 (공유 불가 조건은 이야기와 같다, 서버도 막음)
   final canSendLink = isMine && canShareToTalk;
   final hasActiveLink = linkPostIdBySourceRoutineId.containsKey(routine.id);
+  // 다른 언어로 만들기 (Pro): 결제가 붙기 전에는 Free 에게 숨김 · 보낸 상태(임시저장 아님)·카드 있음 · 고를 언어가 남음
+  final planAccess = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(planAccessProvider);
+  final canTranslate =
+      (planAccess.canTranslateRoutines || PlanAccess.canPurchasePro) &&
+      routine.isVisibleToChild &&
+      routine.steps.isNotEmpty &&
+      routineTranslateTargetsOf(routine).isNotEmpty;
   return [
     (
       value: LibraryMenuAction.send,
@@ -109,6 +123,13 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
       label: l10n.routineLibraryMenuCopy,
       isDanger: false,
     ),
+    if (canTranslate)
+      (
+        value: LibraryMenuAction.translate,
+        icon: AppAssets.iconLanguage,
+        label: l10n.routineTranslateMenu,
+        isDanger: false,
+      ),
     if (canShareToTalk)
       (
         value: LibraryMenuAction.shareToTalk,

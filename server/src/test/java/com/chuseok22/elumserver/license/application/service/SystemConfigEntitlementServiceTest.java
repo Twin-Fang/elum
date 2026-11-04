@@ -306,6 +306,21 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.weeklyReport()).isTrue();
   }
 
+  @Test
+  @DisplayName("다른 언어로 만들기 권한은 플랜 키를 읽는다 — 다른 키를 읽으면 Pro 가 못 쓰거나 Free 가 쓴다 (#1077)")
+  void snapshot_routineTranslateReadsPlanKey() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_TRANSLATE)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.routineTranslate()).isTrue();
+    assertThat(Entitlement.ROUTINE_TRANSLATE.configKeyFor(PlanType.FREE)).isEqualTo(ConfigKey.FREE_ROUTINE_TRANSLATE);
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {
