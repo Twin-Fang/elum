@@ -213,6 +213,12 @@ final cardImageRepositoryProvider = Provider<CardImageRepository>(
   ),
 );
 
+/// 서버에 그림을 물어볼 수 있는 카드인가.
+///
+/// 아직 서버에 저장되지 않은 카드는 이미지도 없다. 요청 자체를 하지 않는다.
+bool canFetchCardImage(String routineId, String stepId) =>
+    routineId.isNotEmpty && routineId != 'local' && stepId.isNotEmpty;
+
 /// 카드 한 장의 이미지.
 ///
 /// 같은 카드를 여러 화면(카드확인·이룸이 홈)에서 보여주므로 캐시가 필요하다.

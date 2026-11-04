@@ -18,6 +18,7 @@ class RoutineDetailHeader extends StatelessWidget {
     this.caption,
     this.onMoreTap,
     this.onTitleEditTap,
+    this.onExportTap,
   });
 
   final String title;
@@ -33,6 +34,9 @@ class RoutineDetailHeader extends StatelessWidget {
 
   /// 있으면 제목 옆 연필 > 이름 바꾸기 (고칠 수 있는 일과만)
   final VoidCallback? onTitleEditTap;
+
+  /// 있으면 제목 오른쪽에 내려받기 버튼 > 인쇄용으로 받기 (#1073)
+  final VoidCallback? onExportTap;
 
   /// ⋯ 아이콘 한 변
   static const _moreIconSize = 24.0;
@@ -72,6 +76,12 @@ class RoutineDetailHeader extends StatelessWidget {
                   ),
                 ),
               ),
+              if (onExportTap != null)
+                _HeaderIconButton(
+                  asset: AppAssets.iconDownload,
+                  semanticLabel: context.l10n.cardExportOpen,
+                  onTap: onExportTap!,
+                ),
               if (onMoreTap != null)
                 AppPressable(
                   onTap: onMoreTap,
@@ -104,4 +114,30 @@ class RoutineDetailHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 머리 오른쪽 아이콘 버튼 (⋯ 와 같은 크기 · 여백)
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({required this.asset, required this.semanticLabel, required this.onTap});
+
+  final String asset;
+  final String semanticLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => AppPressable(
+    onTap: onTap,
+    scaleDown: AppPressable.scaleIcon,
+    semanticLabel: semanticLabel,
+    child: Padding(
+      padding: EdgeInsets.all(8.w),
+      child: SvgPicture.asset(
+        asset,
+        width: RoutineDetailHeader._moreIconSize.w,
+        height: RoutineDetailHeader._moreIconSize.w,
+        excludeFromSemantics: true,
+        colorFilter: ColorFilter.mode(context.colors.sheetTitleText, BlendMode.srcIn),
+      ),
+    ),
+  );
 }

@@ -28,6 +28,7 @@ import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
 import '../../../../core/router/routes.dart';
+import '../card_export/open_card_export.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
@@ -233,7 +234,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       routine,
       isFinished: _isFinished(routine),
     );
-    if (action != RoutineSheetAction.edit || !mounted) return;
+    if (!mounted) return;
+    if (action == RoutineSheetAction.export) {
+      openCardExport(context, routine);
+      return;
+    }
+    if (action != RoutineSheetAction.edit) return;
     _edit(routine);
   }
 

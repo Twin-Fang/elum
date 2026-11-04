@@ -144,6 +144,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.noticeTitle,
     required this.noticeBody,
     required this.noticeHideLabel,
+    required this.printPageTitle,
+    required this.printCardTitle,
+    required this.printCardTitleLarge,
+    required this.printCardDescription,
+    required this.printCardNumber,
+    required this.printFooter,
+    required this.printWatermark,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -646,6 +653,29 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `일주일간 보지 않기` (14/w400 Pretendard). 설명 최소 14 (docs/08 §7-2).
   final TextStyle noticeHideLabel;
+
+  // 인쇄 지면 (#1073): 시스템 글자 크기와 무관한 A4 포인트 크기, 앱 밖으로 나가 Pretendard(OFL)
+
+  /// 인쇄 지면 제목 (일과 이름) (32/w700 Pretendard)
+  final TextStyle printPageTitle;
+
+  /// 인쇄 카드 제목 (20/w700 Pretendard)
+  final TextStyle printCardTitle;
+
+  /// 인쇄 카드 제목 · 큰 글자 테마 (32/w700 Pretendard)
+  final TextStyle printCardTitleLarge;
+
+  /// 인쇄 카드 설명 (카드 한 장 이미지) (14/w400 Pretendard)
+  final TextStyle printCardDescription;
+
+  /// 인쇄 카드 번호 배지 (18/w700 Pretendard)
+  final TextStyle printCardNumber;
+
+  /// 인쇄 지면 아래 띠 (이룸 로고 옆 문구 · 그림 출처) (12/w500 Pretendard)
+  final TextStyle printFooter;
+
+  /// Free 인쇄물 바탕 워터마크 글자 (20/w700 Pretendard)
+  final TextStyle printWatermark;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -1503,6 +1533,55 @@ class AppTypography extends ThemeExtension<AppTypography> {
       height: 1.0,
       letterSpacing: 0,
     ),
+    printPageTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 32,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    printCardTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    printCardTitleLarge: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 32,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    printCardDescription: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.3,
+      letterSpacing: 0,
+    ),
+    printCardNumber: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+      letterSpacing: 0,
+    ),
+    printFooter: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    printWatermark: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+      letterSpacing: 0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -1655,6 +1734,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? noticeTitle,
     TextStyle? noticeBody,
     TextStyle? noticeHideLabel,
+    TextStyle? printPageTitle,
+    TextStyle? printCardTitle,
+    TextStyle? printCardTitleLarge,
+    TextStyle? printCardDescription,
+    TextStyle? printCardNumber,
+    TextStyle? printFooter,
+    TextStyle? printWatermark,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -1795,6 +1881,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
       noticeTitle: noticeTitle ?? this.noticeTitle,
       noticeBody: noticeBody ?? this.noticeBody,
       noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
+      printPageTitle: printPageTitle ?? this.printPageTitle,
+      printCardTitle: printCardTitle ?? this.printCardTitle,
+      printCardTitleLarge: printCardTitleLarge ?? this.printCardTitleLarge,
+      printCardDescription: printCardDescription ?? this.printCardDescription,
+      printCardNumber: printCardNumber ?? this.printCardNumber,
+      printFooter: printFooter ?? this.printFooter,
+      printWatermark: printWatermark ?? this.printWatermark,
     );
   }
 
@@ -1979,6 +2072,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
       noticeBody: TextStyle.lerp(noticeBody, other.noticeBody, t)!,
       noticeHideLabel:
           TextStyle.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
+      printPageTitle: TextStyle.lerp(printPageTitle, other.printPageTitle, t)!,
+      printCardTitle: TextStyle.lerp(printCardTitle, other.printCardTitle, t)!,
+      printCardTitleLarge: TextStyle.lerp(printCardTitleLarge, other.printCardTitleLarge, t)!,
+      printCardDescription: TextStyle.lerp(printCardDescription, other.printCardDescription, t)!,
+      printCardNumber: TextStyle.lerp(printCardNumber, other.printCardNumber, t)!,
+      printFooter: TextStyle.lerp(printFooter, other.printFooter, t)!,
+      printWatermark: TextStyle.lerp(printWatermark, other.printWatermark, t)!,
     );
   }
 }

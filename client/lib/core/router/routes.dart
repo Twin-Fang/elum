@@ -47,6 +47,9 @@ abstract final class Routes {
   /// 오픈소스 라이선스 (설정 > 약관 및 정보)
   static const guardianLicenses = '/guardian/licenses';
 
+  /// 카드 인쇄용으로 받기 (#1073). extra 로 Routine 을 넘긴다
+  static const guardianCardExport = '/guardian/card-export';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 

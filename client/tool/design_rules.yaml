@@ -82,6 +82,7 @@ material_wrappers:
 text_scale_owners:
   lib/core/layout/app_text_scale.dart: "앱 글자 배율 원본 (시스템 1.0~2.0 × 폭 배율)"
   lib/core/logger/app_log_header.dart: "의견 보내기 진단에 기기 글자 배율 값을 적기만 한다"
+  lib/features/guardian/presentation/card_export/print_page.dart: "인쇄 지면(A4 포인트)은 기기 글자 크기와 무관하게 종이에 같은 크기로 찍혀야 한다 (#1073)"
 
 # 쓰는 곳을 묶어 둔 토큰 — 이 파일 밖에서 쓰면 위반 (그림 색이 UI 강조로 번지는 것을 막는다)
 restricted_tokens:

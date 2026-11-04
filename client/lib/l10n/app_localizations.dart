@@ -6001,6 +6001,210 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'목록을 불러오지 못했어요'**
   String get licenseLoadFailedMessage;
+
+  /// 일과 상세 시트 머리의 내려받기 버튼 낭독 이름 · 내보내기 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용으로 받기'**
+  String get cardExportOpen;
+
+  /// 내보내기 형태 고르기 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떻게 받을까요?'**
+  String get cardExportFormatSection;
+
+  /// 형태: A4 한 장에 일과 카드 전부
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장'**
+  String get cardExportFormatRoutineSheet;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'A4 한 장에 순서대로'**
+  String get cardExportFormatRoutineSheetCaption;
+
+  /// 형태: 자를 선이 있는 A4
+  ///
+  /// In ko, this message translates to:
+  /// **'오려 쓰는 카드'**
+  String get cardExportFormatCutCards;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'A4에 자를 선과 함께'**
+  String get cardExportFormatCutCardsCaption;
+
+  /// 형태: 카드마다 이미지 한 장
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장씩'**
+  String get cardExportFormatCardImages;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드마다 이미지 한 장'**
+  String get cardExportFormatCardImagesCaption;
+
+  /// 오려 쓰는 카드 장수 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 쪽에 몇 장 넣을까요?'**
+  String get cardExportPerPageSection;
+
+  /// 카드 문장을 넣을지 켜고 끄는 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 문장 넣기'**
+  String get cardExportIncludeText;
+
+  /// 디자인 테마 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 디자인'**
+  String get cardExportThemeSection;
+
+  /// 테마 이름: 앱 카드 그대로
+  ///
+  /// In ko, this message translates to:
+  /// **'기본'**
+  String get cardExportThemeBasic;
+
+  /// 테마 이름: 장식 없는 굵은 테두리
+  ///
+  /// In ko, this message translates to:
+  /// **'단순'**
+  String get cardExportThemeSimple;
+
+  /// 테마 이름: 흰 바탕 얇은 테두리
+  ///
+  /// In ko, this message translates to:
+  /// **'잉크 절약'**
+  String get cardExportThemeInkSaver;
+
+  /// 테마 이름: 그림까지 흑백
+  ///
+  /// In ko, this message translates to:
+  /// **'흑백'**
+  String get cardExportThemeMonochrome;
+
+  /// 테마 이름: 글자를 크게
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 글자'**
+  String get cardExportThemeLargeText;
+
+  /// Pro 전용 표시 배지
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro'**
+  String get cardExportProBadge;
+
+  /// Free 가 Pro 테마를 눌렀을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 디자인이에요'**
+  String get cardExportProThemeLocked;
+
+  /// Free 미리 보기 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Free는 이룸 로고와 워터마크가 들어가요'**
+  String get cardExportWatermarkNotice;
+
+  /// 미리 보기 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기'**
+  String get cardExportPreviewSection;
+
+  /// 그림 없는 카드가 있을 때 미리 보기 종이 밖 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림이 아직 없는 카드는 제목만 들어가요'**
+  String get cardExportMissingPicture;
+
+  /// PDF 를 다른 앱으로 보낼 때 크기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요'**
+  String get cardExportActualSizeHint;
+
+  /// 기기 인쇄 화면 열기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄하기'**
+  String get cardExportPrint;
+
+  /// 공유 시트 열기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get cardExportShare;
+
+  /// 그림을 받는 동안
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 준비하고 있어요'**
+  String get cardExportPreparing;
+
+  /// 그림 받기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림을 불러오지 못했어요'**
+  String get cardExportImageFailed;
+
+  /// 파일 만들기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 파일을 만들지 못했어요'**
+  String get cardExportRenderFailed;
+
+  /// 인쇄 화면을 못 열었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요'**
+  String get cardExportPrintFailed;
+
+  /// 카드 0장 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 없는 일과예요'**
+  String get cardExportNoCards;
+
+  /// 카드 한 장씩에서 모두 뺐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 카드를 하나 이상 골라 주세요'**
+  String get cardExportNoneSelected;
+
+  /// Free 인쇄물 아래 띠 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸 앱으로 만들었어요'**
+  String get cardExportFooterMadeWith;
+
+  /// 픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)
+  ///
+  /// In ko, this message translates to:
+  /// **'그림: Mulberry Symbols (CC BY-SA 4.0)'**
+  String get cardExportPictogramCredit;
+
+  /// Free 인쇄물 바탕 워터마크 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸'**
+  String get cardExportWatermarkText;
+
+  /// 오려 쓰는 카드 한 쪽 장수 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}장}}'**
+  String cardExportPerPage(int count);
 }
 
 class _AppLocalizationsDelegate
