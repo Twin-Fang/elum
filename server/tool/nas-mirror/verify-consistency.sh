@@ -45,8 +45,9 @@ is_container_running "$POSTGRES_CONTAINER" || fail "${POSTGRES_CONTAINER} not ru
 
 # 비교에서 빼는 설정 키: 이전용 3개는 복원 직후 내 NAS 에서 기본값으로 되돌린다 (sync-from-source.sh)
 EXCLUDED_CONFIG_KEYS_SQL="'MIGRATION_LOCK','MIGRATION_FILE_EXPORT_ENABLED','APP_API_BASE_URL'"
-# 비교에서 빼는 관리자 기록: 파일 받기 도구가 목록을 볼 때마다 원본에 남기는 기록 (덤프 뒤에도 생겨 0 차이에 닿지 못함)
-EXCLUDED_AUDIT_ACTIONS_SQL="'MIGRATION_FILES_LISTED'"
+# 비교에서 빼는 관리자 기록 종류 2개: 이전 파일(파일 받기 도구가 원본에 남김), 이전 동기화(서버 이전 페이지 버튼이 새 서버에 남김)
+# 덤프 뒤에도 양쪽에 따로 생겨 0 차이에 닿지 못함
+EXCLUDED_AUDIT_TARGET_TYPES_SQL="'MIGRATION_FILE','MIGRATION_SYNC'"
 
 query_source() {
   "$DOCKER" exec -e PGPASSWORD="$SOURCE_DB_PASSWORD" "$POSTGRES_CONTAINER" \
@@ -61,7 +62,7 @@ table_fingerprint_sql() {
   local table_name="$1" where_clause=""
   case "$table_name" in
     system_config|system_config_history) where_clause="WHERE t.config_key NOT IN (${EXCLUDED_CONFIG_KEYS_SQL})" ;;
-    admin_audit_log) where_clause="WHERE t.action NOT IN (${EXCLUDED_AUDIT_ACTIONS_SQL})" ;;
+    admin_audit_log) where_clause="WHERE t.target_type NOT IN (${EXCLUDED_AUDIT_TARGET_TYPES_SQL})" ;;
   esac
   echo "SELECT count(*) || ' ' || md5(coalesce(string_agg(t::text, E'\\n' ORDER BY t::text), '')) FROM public.\"${table_name}\" t ${where_clause}"
 }
