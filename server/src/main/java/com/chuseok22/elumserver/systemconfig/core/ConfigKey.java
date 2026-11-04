@@ -243,6 +243,11 @@ public enum ConfigKey {
     "Free가 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_WEEKLY_REPORT(
+    ConfigGroup.PLAN_FREE, "주간 리포트",
+    "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 신규가입 PRO 이벤트 ---
   //
@@ -316,6 +321,11 @@ public enum ConfigKey {
   PRO_CARD_EXPORT_ALL_THEMES(
     ConfigGroup.PLAN_PRO, "카드 내보내기 디자인 테마",
     "Pro가 카드 내보내기에서 모든 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_WEEKLY_REPORT(
+    ConfigGroup.PLAN_PRO, "주간 리포트",
+    "Pro가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 

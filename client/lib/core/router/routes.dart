@@ -50,6 +50,9 @@ abstract final class Routes {
   /// 카드 인쇄용으로 받기 (#1073). extra 로 Routine 을 넘긴다
   static const guardianCardExport = '/guardian/card-export';
 
+  /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
+  static const guardianWeeklyReport = '/guardian/weekly-report';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 

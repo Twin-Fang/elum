@@ -55,6 +55,11 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 주간 리포트 조회 (#1074). 꺼진 플랜은 집계 API 가 WEEKLY_REPORT_NOT_ALLOWED 로 막는다
+  WEEKLY_REPORT(
+    Kind.FLAG, "주간 리포트",
+    ConfigKey.FREE_WEEKLY_REPORT, ConfigKey.PRO_WEEKLY_REPORT
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

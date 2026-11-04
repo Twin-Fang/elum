@@ -22,7 +22,7 @@ class _PlanOverrideView extends ConsumerWidget {
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Text(
-            '화면 판정만 바뀐다 (카드 내보내기 워터마크·테마 등). '
+            '화면 판정만 바뀐다 (카드 내보내기 워터마크·테마, 주간 리포트 입구 등). '
             '서버 크레딧·결제·권한은 그대로다.',
             style: TextStyle(fontSize: 12),
           ),

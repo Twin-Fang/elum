@@ -26,6 +26,7 @@ class Member {
     this.isPro = false,
     this.canExportCardsWithoutWatermark = false,
     this.canUseAllCardDesignThemes = false,
+    this.canViewWeeklyReport = false,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -64,6 +65,9 @@ class Member {
   /// 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는가 (`entitlements.cardExportAllThemes`).
   final bool canUseAllCardDesignThemes;
 
+  /// 주간 리포트를 볼 수 있는가 (`entitlements.weeklyReport`). 모르면 false
+  final bool canViewWeeklyReport;
+
   /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
   ///
   /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
@@ -88,6 +92,7 @@ class Member {
         isPro != other.isPro ||
         canExportCardsWithoutWatermark != other.canExportCardsWithoutWatermark ||
         canUseAllCardDesignThemes != other.canUseAllCardDesignThemes ||
+        canViewWeeklyReport != other.canViewWeeklyReport ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -135,6 +140,7 @@ class Member {
       },
       canExportCardsWithoutWatermark: _isEntitled(json, 'cardExportWithoutWatermark'),
       canUseAllCardDesignThemes: _isEntitled(json, 'cardExportAllThemes'),
+      canViewWeeklyReport: _isEntitled(json, 'weeklyReport'),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );

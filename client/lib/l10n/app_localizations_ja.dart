@@ -3442,4 +3442,156 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get weeklyReportTitle => '주간 리포트';
+
+  @override
+  String weeklyReportWeekRange(
+    int startMonth,
+    int startDay,
+    int endMonth,
+    int endDay,
+  ) {
+    return '$startMonth월 $startDay일 ~ $endMonth월 $endDay일';
+  }
+
+  @override
+  String weeklyReportThisWeekRange(String range) {
+    return '이번 주 · $range';
+  }
+
+  @override
+  String get weeklyReportPreviousWeek => '지난주 보기';
+
+  @override
+  String get weeklyReportNextWeek => '다음 주 보기';
+
+  @override
+  String get weeklyReportCompletionLabel => '일과 완료율';
+
+  @override
+  String weeklyReportPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String weeklyReportCompletionSummary(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '보낸 일과 $sent개 중 $completed개를 마쳤어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportDayNone => '-';
+
+  @override
+  String weeklyReportDayCount(int completed, int sent) {
+    return '$completed/$sent';
+  }
+
+  @override
+  String get weeklyReportFactsSection => '한 주 기록';
+
+  @override
+  String get weeklyReportStars => '받은 별';
+
+  @override
+  String get weeklyReportRewards => '보상까지 간 일과';
+
+  @override
+  String get weeklyReportStreak => '연속으로 마친 날';
+
+  @override
+  String weeklyReportCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportRoutinesSection => '일과별 기록';
+
+  @override
+  String weeklyReportRoutineValue(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$sent번 중 $completed번 마침',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportRemainingSection => '남아 있던 카드';
+
+  @override
+  String get weeklyReportRemainingFooter =>
+      '지난 날 일과에서 마치지 않고 남은 카드예요. 오늘 일과는 세지 않아요';
+
+  @override
+  String weeklyReportRemainingLabel(String routine, String step) {
+    return '$routine · $step';
+  }
+
+  @override
+  String weeklyReportTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count번',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportEmptyTitle => '이 주에는 보낸 일과가 없어요';
+
+  @override
+  String get weeklyReportEmptyBody => '일과를 보내면 이룸이가 마친 기록이 여기에 모여요';
+
+  @override
+  String get weeklyReportLoadFailed => '주간 리포트를 불러오지 못했어요';
+
+  @override
+  String get weeklyReportNotIncluded => '주간 리포트는 Pro에서 볼 수 있어요';
+
+  @override
+  String get weeklyReportSharePreview => '보낼 한 장';
+
+  @override
+  String get weeklyReportSharePreviewCaption => '미리 보기 그대로 이미지나 PDF로 보내요';
+
+  @override
+  String get weeklyReportShareImage => '이미지';
+
+  @override
+  String get weeklyReportSharePdf => 'PDF로 보내기';
+
+  @override
+  String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
+
+  @override
+  String weeklyReportShareTitle(String name) {
+    return '$name의 한 주';
+  }
+
+  @override
+  String get weeklyReportShareNote => '이룸 앱에 남은 완료 기록을 센 내용이에요';
 }

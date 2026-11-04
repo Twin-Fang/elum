@@ -14,6 +14,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../member/application/member_providers.dart';
+import '../../member/application/plan_access.dart';
 import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
 import 'widgets/my_info_elumi_group.dart';
@@ -148,10 +149,20 @@ class GuardianMyInfoScreen extends ConsumerWidget {
     );
   }
 
-  /// 바로가기 5줄: 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
+  /// 바로가기 5~6줄: (주간 리포트) · 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
+  ///
+  /// 주간 리포트는 Pro 만, 결제를 붙이기 전(canPurchasePro false)에는 Free 에게 줄 자체가 없다
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
+    final access = ref.watch(planAccessProvider);
+    final showsWeeklyReport = access.canViewWeeklyReport || PlanAccess.canPurchasePro;
     return SettingsGroup(
       children: [
+        if (showsWeeklyReport)
+          SettingsTile(
+            isInCard: true,
+            label: context.l10n.weeklyReportTitle,
+            onTap: () => context.push(Routes.guardianWeeklyReport),
+          ),
         SettingsTile(
           isInCard: true,
           label: context.l10n.guardianSettingsPeople,
