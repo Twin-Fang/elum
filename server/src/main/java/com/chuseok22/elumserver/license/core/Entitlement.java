@@ -46,6 +46,15 @@ public enum Entitlement {
     Kind.LIMIT, "기록 보관 일수",
     ConfigKey.FREE_HISTORY_RETENTION_DAYS, ConfigKey.PRO_HISTORY_RETENTION_DAYS
   ),
+  // 카드 내보내기(이미지·인쇄)는 앱이 만든다 — 서버는 판정 값만 내려준다 (#1073)
+  CARD_EXPORT_WITHOUT_WATERMARK(
+    Kind.FLAG, "카드 내보내기 워터마크 없음",
+    ConfigKey.FREE_CARD_EXPORT_WITHOUT_WATERMARK, ConfigKey.PRO_CARD_EXPORT_WITHOUT_WATERMARK
+  ),
+  CARD_EXPORT_ALL_THEMES(
+    Kind.FLAG, "카드 내보내기 디자인 테마 전부",
+    ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
+  ),
   ;
 
   /// 한도를 두지 않는다는 뜻. 수치 권한의 기본값이다.

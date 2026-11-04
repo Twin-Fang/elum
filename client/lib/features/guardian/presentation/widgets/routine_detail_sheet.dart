@@ -50,6 +50,9 @@ enum RoutineSheetAction {
 
   /// 일과관리 원본 — `⋯` 로 빠른 메뉴를 연다 (#834).
   more,
+
+  /// 인쇄용으로 받기 화면을 연다 (#1073). 화면은 부르는 쪽이 민다
+  export,
 }
 
 class RoutineDetailSheet extends ConsumerStatefulWidget {
@@ -243,6 +246,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     ? () => Navigator.of(context).pop(RoutineSheetAction.more)
                     : null,
                 onTitleEditTap: _canEdit ? _rename : null,
+                onExportTap: _steps.isEmpty
+                    ? null
+                    : () => Navigator.of(context).pop(RoutineSheetAction.export),
               ),
 
               // --- 스크롤: 단계 + 보상 ---
