@@ -36,7 +36,10 @@ SOURCE_DB_PORT=
 SOURCE_DB_NAME=
 SOURCE_DB_USER=
 SOURCE_DB_PASSWORD=
-SOURCE_SSH_TARGET=       # 선택: 원본 파일 받을 SSH (user@host). 비우면 파일 동기화 건너뜀
+SOURCE_ADMIN_BASE_URL=   # 파일 받기: 원본 서버 주소 (https://api.elum.chuseok22.com). 원본 관리자 파일 내보내기 API(#1053)를 쓴다
+SOURCE_ADMIN_USERNAME=   # 원본 관리자 아이디
+SOURCE_ADMIN_PASSWORD=   # 원본 관리자 비밀번호
+SOURCE_SSH_TARGET=       # 선택: SSH 로 받을 때 (user@host). 관리자 API 가 있으면 쓰지 않음
 SOURCE_SSH_PORT=22
 SOURCE_DATA_DIR=/volume1/project/elum/server/data
 ```
@@ -46,8 +49,17 @@ SOURCE_DATA_DIR=/volume1/project/elum/server/data
 ```bash
 cd /volume1/project/elum/mirror/bin
 bash setup-mirror.sh        # 처음 한 번 (여러 번 돌려도 같다)
-bash sync-from-source.sh    # 원본 > 미러 덮어쓰기 후 미러 재기동
+bash sync-from-source.sh    # 원본 > 미러 덮어쓰기 후 서버 다시 시작 (신고 메일 끔)
+bash sync-from-source.sh --cutover   # 전환용: 운영 값 그대로, 서버는 멈춘 채 (CUTOVER.md)
+bash verify-consistency.sh [--allow-live] [--skip-files]   # 원본 <-> 내 NAS DB·파일 비교, 차이가 있으면 실패
 bash run-mirror.sh          # 데이터 그대로 미러만 다시 띄우기 (새 이미지 받기)
 ```
 
 `sync-from-source.sh` 는 미러 DB 를 지우고 새로 넣는다. 미러에서 만든 데이터는 사라진다. 운영 전환(2단계) 뒤에는 쓰지 않는다.
+
+## Traefik 배포로 옮긴 뒤 (#1054)
+
+- 서버는 GitHub Actions `PROJECT-SPRING-ELUM-NAS-CICD` 가 `elum-back-blue|green` 으로 띄운다 (`mode=mirror` 는 푸시 끔). `run-mirror.sh` 의 `elum-back-mirror` 는 DSM 프록시를 8079 로 옮긴 뒤 지운다
+- 파일은 `pull_files.py` 가 원본 관리자 API 로 받는다 (음성 포함, 해시 확인). 원본 `이전 파일 내보내기` 를 켜야 한다
+- 전환 절차: `CUTOVER.md`
+
