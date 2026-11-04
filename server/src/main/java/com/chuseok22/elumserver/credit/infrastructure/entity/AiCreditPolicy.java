@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -120,6 +121,21 @@ public class AiCreditPolicy extends BaseEntity {
   public static int costFrom(String costsJson, CreditAction action) {
     Integer cost = parse(costsJson).get(action.name());
     return (cost == null || cost < 0) ? FALLBACK_COST : cost;
+  }
+
+  /**
+   * 이 행동만 단가 0 으로 바꾼 단가 JSON. 무료 다시 그리기 작업의 cost_snapshot 용 (정산이 시작 때 단가 0 을 따름)
+   */
+  public String actionCostsJsonWithFree(CreditAction action) {
+    Map<String, Integer> costs = new LinkedHashMap<>(parse(actionCostsJson));
+    costs.put(action.name(), 0);
+    try {
+      return JSON.writeValueAsString(costs);
+    } catch (Exception e) {
+      // 직렬화 실패 시 원래 단가로 남김 (공짜로 새지 않게)
+      log.warn("크레딧 단가 JSON 직렬화 실패 — 원래 단가를 쓴다: action={}", action, e);
+      return actionCostsJson;
+    }
   }
 
   private static Map<String, Integer> parse(String json) {

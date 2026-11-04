@@ -1,11 +1,14 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -46,16 +49,18 @@ public class OpenAiImageClient implements ImageGenerationClient {
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
+  private final EntitlementService entitlementService;
 
   private final RestClient restClient;
 
   public OpenAiImageClient(RoutineImagePromptComposer promptComposer,
     GeminiRoutineImagePromptBuilder imagePromptBuilder, SystemConfigService systemConfigService,
-    AiCallLogService aiCallLogService, AiRestClientFactory restClientFactory) {
+    AiCallLogService aiCallLogService, EntitlementService entitlementService, AiRestClientFactory restClientFactory) {
     this.promptComposer = promptComposer;
     this.imagePromptBuilder = imagePromptBuilder;
     this.systemConfigService = systemConfigService;
     this.aiCallLogService = aiCallLogService;
+    this.entitlementService = entitlementService;
     this.restClient = restClientFactory.create(BASE_URL);
   }
 
@@ -101,7 +106,7 @@ public class OpenAiImageClient implements ImageGenerationClient {
 
   private GeneratedImage call(String prompt, CharacterType characterType) {
     String model = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_MODEL);
-    String quality = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
+    String quality = resolveQuality();
     String apiKey = systemConfigService.getSecret(ConfigKey.OPENAI_API_KEY);
 
     long startedAt = System.currentTimeMillis();
@@ -133,6 +138,27 @@ public class OpenAiImageClient implements ImageGenerationClient {
       log.warn("OpenAI 이미지 생성 호출 실패: model={}, elapsedMs={}", model, elapsedMs, e);
       aiCallLogService.recordFailure(AiCallType.OPENAI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * 그림 품질: 고품질 권한(IMAGE_HIGH_QUALITY) 회원 > OPENAI_IMAGE_QUALITY_PRO, 그 외 > OPENAI_IMAGE_QUALITY
+   * 회원 미상(관리자 시험)·권한 판정 실패는 기본 품질 (비싼 쪽으로 새지 않게)
+   */
+  String resolveQuality() {
+    String memberId = AiCallContext.currentMemberId();
+    if (memberId != null && !memberId.isBlank() && isHighQualityAllowed(memberId)) {
+      return systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY_PRO);
+    }
+    return systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
+  }
+
+  private boolean isHighQualityAllowed(String memberId) {
+    try {
+      return entitlementService.isAllowed(memberId, Entitlement.IMAGE_HIGH_QUALITY);
+    } catch (RuntimeException e) {
+      log.warn("[openai image] high quality entitlement check failed, using default quality: memberId={}", memberId, e);
+      return false;
     }
   }
 

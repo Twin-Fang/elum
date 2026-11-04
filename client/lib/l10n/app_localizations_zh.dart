@@ -1975,6 +1975,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creditHistoryKindImageRegenerate => '카드 그림 다시 만들기';
 
   @override
+  String get creditHistoryFree => '무료';
+
+  @override
   String get creditHistoryKindWeeklyGrant => '이번 주 크레딧을 채워드렸어요';
 
   @override

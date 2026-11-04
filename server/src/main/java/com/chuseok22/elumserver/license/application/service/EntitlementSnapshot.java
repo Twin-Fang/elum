@@ -23,7 +23,9 @@ public record EntitlementSnapshot(
   boolean routineSchedule,
   boolean guardianVoice,
   boolean routineTemplates,
-  boolean routineMemory
+  boolean routineMemory,
+  boolean imageRegenerateFree,
+  boolean imageHighQuality
 ) {
 
 }

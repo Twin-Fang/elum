@@ -18,15 +18,13 @@ class PlanAccess {
     required this.canTranslateRoutines,
     required this.canScheduleRoutines,
     required this.canUseGuardianVoice,
-    required this.canUseRoutineMemory,
-  });
-
-  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 주간 리포트 없음)
     required this.canImportExpertRoutines,
+    required this.canUseRoutineMemory,
+    required this.canRegenerateImagesFree,
+    this.canPurchasePro = false,
   });
 
-  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · 전문가 일과 못 가져옴)
-    this.canPurchasePro = false,
+  /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · Pro 기능 전부 꺼짐)
   static const free = PlanAccess(
     isPro: false,
     canExportCardsWithoutWatermark: false,
@@ -37,6 +35,7 @@ class PlanAccess {
     canUseGuardianVoice: false,
     canImportExpertRoutines: false,
     canUseRoutineMemory: false,
+    canRegenerateImagesFree: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -50,6 +49,7 @@ class PlanAccess {
     canUseGuardianVoice: true,
     canImportExpertRoutines: true,
     canUseRoutineMemory: true,
+    canRegenerateImagesFree: true,
   );
 
   final bool isPro;
@@ -79,27 +79,36 @@ class PlanAccess {
   /// 전문가 일과를 일과관리로 가져올 수 있는가
   final bool canImportExpertRoutines;
 
-  /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
-  bool get shouldShowExpertRoutines => canImportExpertRoutines || canPurchasePro;
   /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가
   final bool canUseRoutineMemory;
+
+  /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (하루 한도를 넘으면 서버가 원래 단가로 받음)
+  final bool canRegenerateImagesFree;
+
+  /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
+  bool get shouldShowExpertRoutines => canImportExpertRoutines || canPurchasePro;
+
+  /// 같은 권한 판정 + 구매 가능 여부만 바꾼 사본 (필드를 더하면 여기 한 곳만 고친다)
+  PlanAccess withCanPurchasePro(bool canPurchasePro) => PlanAccess(
+    isPro: isPro,
+    canExportCardsWithoutWatermark: canExportCardsWithoutWatermark,
+    canUseAllCardDesignThemes: canUseAllCardDesignThemes,
+    canViewWeeklyReport: canViewWeeklyReport,
+    canTranslateRoutines: canTranslateRoutines,
+    canScheduleRoutines: canScheduleRoutines,
+    canUseGuardianVoice: canUseGuardianVoice,
+    canImportExpertRoutines: canImportExpertRoutines,
+    canUseRoutineMemory: canUseRoutineMemory,
+    canRegenerateImagesFree: canRegenerateImagesFree,
+    canPurchasePro: canPurchasePro,
+  );
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
 final planAccessProvider = Provider<PlanAccess>((ref) {
-  final access = _readPlanAccess(ref);
-  return PlanAccess(
-    isPro: access.isPro,
-    canExportCardsWithoutWatermark: access.canExportCardsWithoutWatermark,
-    canUseAllCardDesignThemes: access.canUseAllCardDesignThemes,
-    canViewWeeklyReport: access.canViewWeeklyReport,
-    canTranslateRoutines: access.canTranslateRoutines,
-    canScheduleRoutines: access.canScheduleRoutines,
-    canUseGuardianVoice: access.canUseGuardianVoice,
-    canImportExpertRoutines: access.canImportExpertRoutines,
-    canUseRoutineMemory: access.canUseRoutineMemory,
-    canPurchasePro: ref.watch(canPurchaseProProvider),
-  );
+  return _readPlanAccess(
+    ref,
+  ).withCanPurchasePro(ref.watch(canPurchaseProProvider));
 });
 
 /// 권한 원본: 개발자 도구 흉내 > 서버 권한 > (모르면) Free
@@ -124,5 +133,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canUseGuardianVoice: member.canUseGuardianVoice,
     canImportExpertRoutines: member.canImportExpertRoutines,
     canUseRoutineMemory: member.canUseRoutineMemory,
+    canRegenerateImagesFree: member.canRegenerateImagesFree,
   );
 }

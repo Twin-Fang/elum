@@ -100,6 +100,14 @@ public final class CreditTestStore {
     lenient().when(jobRepository.findByAccountIdAndStatus(anyString(), any(CreditJobStatus.class))).thenAnswer(inv -> jobs.stream()
       .filter(j -> j.getAccountId().equals(inv.getArgument(0)) && j.getStatus() == inv.getArgument(1))
       .toList());
+    // 무료 다시 그리기 하루 횟수 (종류·예약량·상태·시작 시각 조건 그대로)
+    lenient().when(jobRepository.countByAccountIdAndKindAndReservedAndStatusInAndStartedAtGreaterThanEqual(
+      anyString(), any(CreditJobKind.class), anyInt(), any(), any(java.time.LocalDateTime.class))).thenAnswer(inv -> jobs.stream()
+      .filter(j -> j.getAccountId().equals(inv.getArgument(0)) && j.getKind() == inv.getArgument(1)
+        && j.getReserved() == inv.<Integer>getArgument(2)
+        && inv.<java.util.Collection<CreditJobStatus>>getArgument(3).contains(j.getStatus())
+        && !j.getStartedAt().isBefore(inv.<java.time.LocalDateTime>getArgument(4)))
+      .count());
     lenient().when(jobRepository.findById(anyString())).thenAnswer(inv -> jobs.stream()
       .filter(j -> j.getId().equals(inv.getArgument(0))).findFirst());
     lenient().when(jobRepository.findAccountIdById(anyString())).thenAnswer(inv -> jobs.stream()

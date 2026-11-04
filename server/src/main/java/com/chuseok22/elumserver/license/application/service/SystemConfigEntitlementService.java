@@ -141,7 +141,9 @@ public class SystemConfigEntitlementService implements EntitlementService {
       systemConfigService.getBoolean(Entitlement.ROUTINE_SCHEDULE.configKeyFor(plan)),
       systemConfigService.getBoolean(Entitlement.GUARDIAN_VOICE.configKeyFor(plan)),
       systemConfigService.getBoolean(Entitlement.ROUTINE_TEMPLATES.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_MEMORY.configKeyFor(plan))
+      systemConfigService.getBoolean(Entitlement.ROUTINE_MEMORY.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.IMAGE_REGENERATE_FREE.configKeyFor(plan)),
+      systemConfigService.getBoolean(Entitlement.IMAGE_HIGH_QUALITY.configKeyFor(plan))
     );
   }
 
