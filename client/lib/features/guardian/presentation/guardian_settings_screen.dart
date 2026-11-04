@@ -24,6 +24,7 @@ import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import 'widgets/plan_settings_group.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -172,14 +173,17 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     );
   }
 
-  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16.
-  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 연결 / 앱 사용 / 약관 및 정보 / 계정.
+  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16. 맨 위 요금제 묶음은 시안 #1070.
+  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 요금제 / 연결 / 앱 사용 / 약관 및 정보 / 계정.
   Widget _list(AppSpacing space) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
         SizedBox(height: 16.h),
+        // 요금제: 내 요금제 · 구매 복원 (설정 맨 위, 시안 #1070)
+        PlanSettingsGroup(isBusy: busy),
+        _groupGap,
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
           children: [_LinkTile(busy: busy)],

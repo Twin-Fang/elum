@@ -9,6 +9,7 @@ import '../../../core/network/server_error_code.dart';
 import '../../../shared/models/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../domain/guardian_account.dart';
+import '../domain/member_subscription.dart';
 import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -17,6 +18,7 @@ import '../../../app/dio_provider.dart';
 @immutable
 class Member {
   const Member({
+    this.id,
     this.nickname,
     this.totalStars = 0,
     this.supportGoals = const [],
@@ -26,6 +28,7 @@ class Member {
     this.isPro = false,
     this.canExportCardsWithoutWatermark = false,
     this.canUseAllCardDesignThemes = false,
+    this.subscription,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -54,8 +57,14 @@ class Member {
   /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
   final bool adsRemoved;
 
+  /// 보호자 회원 id (UUID 문자열). 스토어 결제에 실어 구매를 이 계정에 묶는다. 모르면 null
+  final String? id;
+
   /// 서버가 본 요금제가 Pro 인가 (`entitlements.plan`). 모르면 false
   final bool isPro;
+
+  /// 내 요금제 표시용 구독 상태 (만료일·자동 갱신·유예). 이전 서버면 null
+  final MemberSubscription? subscription;
 
   /// 카드 내보내기에서 이룸 로고·워터마크를 뺄 수 있는가 (`entitlements.cardExportWithoutWatermark`).
   /// 모르면 false — 워터마크를 넣는 쪽으로 기운다.
@@ -81,13 +90,15 @@ class Member {
 
   /// 화면에 쓰이는 값이 모두 같은가. 주기 갱신이 같은 값으로 구독자를 다시 그리지 않게 하려는 비교다.
   bool sameAs(Member other) {
-    if (nickname != other.nickname ||
+    if (id != other.id ||
+        nickname != other.nickname ||
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
         adsRemoved != other.adsRemoved ||
         isPro != other.isPro ||
         canExportCardsWithoutWatermark != other.canExportCardsWithoutWatermark ||
         canUseAllCardDesignThemes != other.canUseAllCardDesignThemes ||
+        subscription != other.subscription ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -110,6 +121,7 @@ class Member {
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
+      id: json['id'] is String ? json['id'] as String : null,
       nickname: json['nickname']?.toString(),
       totalStars: switch (json['totalStars']) {
         final int v => v,
@@ -135,6 +147,7 @@ class Member {
       },
       canExportCardsWithoutWatermark: _isEntitled(json, 'cardExportWithoutWatermark'),
       canUseAllCardDesignThemes: _isEntitled(json, 'cardExportAllThemes'),
+      subscription: MemberSubscription.tryParse(json['subscription']),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );

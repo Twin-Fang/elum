@@ -17,10 +17,12 @@ import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
@@ -90,15 +92,23 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                 options: _options,
                 onChanged: (next) => setState(() => _options = next),
                 canUseAllThemes: access.canUseAllCardDesignThemes,
-                showsProThemes: access.canUseAllCardDesignThemes || PlanAccess.canPurchasePro,
-                onLockedThemeTap: () => showElumDialog<void>(
-                  context: context,
-                  title: l10n.cardExportProThemeLocked,
-                  actions: [ElumDialogAction(label: l10n.commonConfirm)],
-                ),
+                showsProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
+                // 살 수 있으면 요금제 화면, 아니면 안내만
+                onLockedThemeTap: access.canPurchasePro
+                    ? () => openPlanPaywall(context, ref)
+                    : () => showElumDialog<void>(
+                        context: context,
+                        title: l10n.cardExportProThemeLocked,
+                        actions: [ElumDialogAction(label: l10n.commonConfirm)],
+                      ),
               ),
               SizedBox(height: _sectionGap.h),
-              _preview(context, picturesAsync, hasWatermark: !access.canExportCardsWithoutWatermark),
+              _preview(
+                context,
+                picturesAsync,
+                hasWatermark: !access.canExportCardsWithoutWatermark,
+                canPurchasePro: access.canPurchasePro,
+              ),
             ],
             SizedBox(height: _sectionGap.h),
           ],
@@ -111,6 +121,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     BuildContext context,
     AsyncValue<CardExportPictures> picturesAsync, {
     required bool hasWatermark,
+    required bool canPurchasePro,
   }) {
     final l10n = context.l10n;
     final colors = context.colors;
@@ -152,9 +163,16 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
           SizedBox(height: 6.h),
           Text(l10n.cardExportMissingPicture, style: caption),
         ],
-        if (hasWatermark && PlanAccess.canPurchasePro) ...[
+        if (hasWatermark && canPurchasePro) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportWatermarkNotice, style: caption),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ElumTextLink(
+              label: l10n.planLearnPro,
+              onTap: () => openPlanPaywall(context, ref),
+            ),
+          ),
         ],
         if (_options.format != CardExportFormat.cardImages) ...[
           SizedBox(height: 6.h),

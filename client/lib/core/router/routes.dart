@@ -50,6 +50,12 @@ abstract final class Routes {
   /// 카드 인쇄용으로 받기 (#1073). extra 로 Routine 을 넘긴다
   static const guardianCardExport = '/guardian/card-export';
 
+  /// 결제 직전 보호자 암호 확인. 맞으면 true 로 닫힌다 (push 로 연다)
+  static const guardianPlanPin = '/guardian/plan/pin';
+
+  /// 약관 목록 (요금제 화면 `이용약관` 링크. 유료 약관 주소가 없을 때)
+  static const guardianTerms = '/guardian/terms';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 

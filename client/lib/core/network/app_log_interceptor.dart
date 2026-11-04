@@ -36,6 +36,10 @@ class AppLogInterceptor extends Interceptor {
     'sanitizedinputtext',
     'answers',
     'rewardtext',
+    // 스토어 결제 증빙: Apple 거래 JWS · Google 구매 토큰 (남이 보내면 그 구독을 주장할 수 있다)
+    'signedtransaction',
+    'signedrenewalinfo',
+    'purchasetoken',
   };
 
   /// 기록에 남길 요청 헤더. 이 밖의 헤더(Authorization 포함)는 적지 않는다.

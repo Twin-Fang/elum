@@ -30,3 +30,22 @@ final devPlanOverrideProvider =
     NotifierProvider<DevPlanOverrideNotifier, DevPlanOverride>(
       DevPlanOverrideNotifier.new,
     );
+
+/// 결제 화면 강제 켜기 (`ELUM_IAP_ENABLED=false` 인 테스트 빌드에서 Sandbox·라이선스 테스트용)
+///
+/// 화면만 켠다 — 실제 결제는 스토어 테스트 계정·서버 설정(SUBSCRIPTION_*_ENABLED)이 있어야 끝난다.
+/// 메모리에만 둔다 (앱을 다시 켜면 꺼짐).
+class DevPlanStoreForcedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  /// 릴리스 빌드(개발자 도구 꺼짐)에서는 켜지지 않는다
+  void set(bool isForced) {
+    state = AppConfig.showDevTools && isForced;
+  }
+}
+
+final devPlanStoreForcedProvider =
+    NotifierProvider<DevPlanStoreForcedNotifier, bool>(
+      DevPlanStoreForcedNotifier.new,
+    );

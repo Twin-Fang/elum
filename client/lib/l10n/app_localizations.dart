@@ -6205,6 +6205,324 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
+
+  /// 결제 직전 보호자 암호 확인 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 보호자만 할 수 있어요'**
+  String get modeSwitchToPurchase;
+
+  /// 요금제(결제) 화면 제목 · 구독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸 Pro'**
+  String get planPaywallTitle;
+
+  /// 요금제 화면 제목 아래 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'더 많이 만들고, 인쇄용 카드를 깔끔하게 받아요'**
+  String get planPaywallDescription;
+
+  /// 혜택 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 할 수 있는 것'**
+  String get planBenefitsSection;
+
+  /// 혜택 줄: 주간 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 AI 크레딧을 더 많이 받아요'**
+  String get planBenefitMoreWeeklyCredits;
+
+  /// 혜택 줄: 워터마크 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드에 로고와 워터마크가 없어요'**
+  String get planBenefitCardExportWithoutWatermark;
+
+  /// 혜택 줄: 카드 디자인 테마
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드 디자인을 골라요'**
+  String get planBenefitCardExportAllThemes;
+
+  /// 혜택 묶음 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나도 만든 일과와 그림은 그대로 남아요'**
+  String get planKeepContentNotice;
+
+  /// 구독 기간 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'기간 고르기'**
+  String get planOffersSection;
+
+  /// 구독 기간 이름: 1개월
+  ///
+  /// In ko, this message translates to:
+  /// **'1개월'**
+  String get planPeriodMonthly;
+
+  /// 구독 기간 이름: 1년
+  ///
+  /// In ko, this message translates to:
+  /// **'1년'**
+  String get planPeriodYearly;
+
+  /// 기간당 가격 (가격은 스토어 문자열 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'{price} / 1개월마다 자동 갱신'**
+  String planPricePerMonth(String price);
+
+  /// 기간당 가격 (가격은 스토어 문자열 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'{price} / 1년마다 자동 갱신'**
+  String planPricePerYear(String price);
+
+  /// 결제 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 시작하기'**
+  String get planSubscribe;
+
+  /// 스토어 가격 불러오는 중
+  ///
+  /// In ko, this message translates to:
+  /// **'가격을 불러오고 있어요'**
+  String get planPriceLoading;
+
+  /// 스토어 가격 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'가격을 불러오지 못했어요'**
+  String get planPriceFailed;
+
+  /// 구매 복원 글자 버튼 · 설정 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 복원'**
+  String get planRestore;
+
+  /// 이용약관 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'이용약관'**
+  String get planTermsOfUse;
+
+  /// 개인정보처리방침 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'개인정보처리방침'**
+  String get planPrivacyPolicy;
+
+  /// 스토어 구독 관리 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리'**
+  String get planManageSubscription;
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 자동 갱신 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신되고, 기간이 끝나기 전 24시간 안에 다음 요금이 청구돼요.'**
+  String get planLegalBillingAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 해지 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리와 해지는 기기 설정의 Apple ID > 구독에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.'**
+  String get planLegalCancelAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 자동 갱신 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 구매를 확인할 때 Google Play 계정으로 청구돼요. 해지하기 전까지 같은 기간과 가격으로 자동 갱신돼요.'**
+  String get planLegalBillingPlayStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 해지 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.'**
+  String get planLegalCancelPlayStore;
+
+  /// 스토어 결제창이 떠 있는 동안
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 진행하고 있어요'**
+  String get planPurchasing;
+
+  /// 서버 확인 중 (서버라는 말은 쓰지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 확인하고 있어요'**
+  String get planVerifying;
+
+  /// 가족 공유 구매 요청 등 스토어가 결제를 미룸
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 요청을 보냈어요'**
+  String get planStorePendingTitle;
+
+  /// 구매 요청 대기 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요'**
+  String get planStorePendingBody;
+
+  /// 결제는 됐지만 아직 Pro가 안 켜짐
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 확인하고 있어요'**
+  String get planVerificationPendingTitle;
+
+  /// 확인 대기 설명 — 결제를 다시 요구하지 않음
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 결제하지 않아도 돼요. 앱을 다시 열면 한 번 더 확인해요'**
+  String get planVerificationPendingBody;
+
+  /// 확인 대기 상태에서 다시 확인
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 확인하기'**
+  String get planVerificationRetry;
+
+  /// 결제 완료
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 시작했어요'**
+  String get planActivatedTitle;
+
+  /// 서버가 확인했지만 Pro 아님
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 켜지지 않았어요'**
+  String get planNotActivatedTitle;
+
+  /// Pro 미반영 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'스토어의 구독 상태를 확인해 주세요'**
+  String get planNotActivatedBody;
+
+  /// 이미 Pro 인 보호자가 요금제 화면을 엶
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 쓰고 있어요'**
+  String get planAlreadyProTitle;
+
+  /// 스토어 결제 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'결제하지 못했어요'**
+  String get planPurchaseFailedTitle;
+
+  /// 서버가 결제를 거부(400)했을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 이 계정에 연결하지 못했어요'**
+  String get planVerifyFailedTitle;
+
+  /// 회원 id 를 몰라 결제를 시작하지 못함
+  ///
+  /// In ko, this message translates to:
+  /// **'계정 정보를 확인하지 못했어요'**
+  String get planAccountFailedTitle;
+
+  /// 결제 실패 팝업 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get planFailedFallback;
+
+  /// 구매 복원 성공
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 되찾았어요'**
+  String get planRestoreDone;
+
+  /// 구매 복원: 활성 구독 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'되찾을 구독이 없어요'**
+  String get planRestoreNothing;
+
+  /// 구매 복원 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'구매를 복원하지 못했어요'**
+  String get planRestoreFailedTitle;
+
+  /// 구매 복원 중 대기 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 내역을 확인하고 있어요'**
+  String get planRestoring;
+
+  /// 스토어 구독 관리 화면 열기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리 화면을 열지 못했어요'**
+  String get planManageFailed;
+
+  /// 약관 링크 열기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 열지 못했어요'**
+  String get planLinkFailed;
+
+  /// 설정 > 내 요금제 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 요금제'**
+  String get planSettingsLabel;
+
+  /// 요금제 상태: 무료
+  ///
+  /// In ko, this message translates to:
+  /// **'Free'**
+  String get planStatusFree;
+
+  /// 요금제 상태: Pro (기간 제한 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro'**
+  String get planStatusPro;
+
+  /// 요금제 상태: 자동 갱신 예정
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro · {date} 갱신'**
+  String planStatusRenewing(String date);
+
+  /// 요금제 상태: 끝나는 날만 앎
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro · {date}까지'**
+  String planStatusUntil(String date);
+
+  /// 요금제 상태: 해지 예약
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro · {date}에 끝나요'**
+  String planStatusCancelScheduled(String date);
+
+  /// 요금제 상태: 결제 실패 유예 중
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro · 결제 확인 필요'**
+  String get planStatusGracePeriod;
+
+  /// 크레딧 부족 팝업·Pro 기능 자리에서 요금제 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 알아보기'**
+  String get planLearnPro;
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,61 @@
+import 'package:flutter/foundation.dart';
+
+import '../../member/domain/member_subscription.dart';
+
+/// 설정 > 내 요금제 줄 상태 6개
+enum PlanStatusKind {
+  free,
+
+  /// Pro, 다음 결제일에 자동 갱신
+  proRenewing,
+
+  /// Pro, 해지 예약 (끝나는 날까지 씀)
+  proCancelScheduled,
+
+  /// Pro, 결제 실패 유예 중 (결제 수단 확인 필요)
+  proGracePeriod,
+
+  /// Pro, 끝나는 날만 앎 (관리자 발급·프로모션 · 갱신 여부 모름)
+  proUntil,
+
+  /// Pro, 기간 제한 없음
+  proUnlimited,
+}
+
+/// 내 요금제 줄에 그릴 것: 상태 + 날짜
+@immutable
+class PlanStatus {
+  const PlanStatus(this.kind, {this.date});
+
+  final PlanStatusKind kind;
+
+  /// 갱신일·끝나는 날 (해당 상태만)
+  final DateTime? date;
+
+  bool get isPro => kind != PlanStatusKind.free;
+
+  /// Pro 여부(권한 판정 한 곳) + 구독 상태 > 줄 상태
+  ///
+  /// [isPro] 는 PlanAccess(서버 `entitlements.plan` · 개발자 도구 흉내)를 따른다. [subscription] 은 날짜 표시만
+  factory PlanStatus.from({
+    required bool isPro,
+    MemberSubscription? subscription,
+  }) {
+    if (!isPro) return const PlanStatus(PlanStatusKind.free);
+    final expiresAt = subscription?.expiresAt;
+    if (subscription?.isInGracePeriod == true) {
+      return PlanStatus(PlanStatusKind.proGracePeriod, date: expiresAt);
+    }
+    if (subscription == null || expiresAt == null) {
+      return const PlanStatus(PlanStatusKind.proUnlimited);
+    }
+    if (!subscription.isStorePurchase) {
+      return PlanStatus(PlanStatusKind.proUntil, date: expiresAt);
+    }
+    return switch (subscription.willAutoRenew) {
+      true => PlanStatus(PlanStatusKind.proRenewing, date: expiresAt),
+      false => PlanStatus(PlanStatusKind.proCancelScheduled, date: expiresAt),
+      null => PlanStatus(PlanStatusKind.proUntil, date: expiresAt),
+    };
+  }
+}
