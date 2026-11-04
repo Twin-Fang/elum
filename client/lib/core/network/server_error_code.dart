@@ -159,6 +159,14 @@ enum ServerErrorCode {
   adRewardSessionNotFound('AD_REWARD_SESSION_NOT_FOUND'),
   adRewardUnavailable('AD_REWARD_UNAVAILABLE'),
 
+  // 스토어 구독 결제 (#1071). 꺼짐·설정 없음은 잠시 뒤 다시, 다른 계정에 묶인 구독은 그 계정으로 로그인 안내.
+  subscriptionStoreDisabled('SUBSCRIPTION_STORE_DISABLED'),
+  subscriptionReceiptInvalid('SUBSCRIPTION_RECEIPT_INVALID'),
+  subscriptionEnvironmentNotAllowed('SUBSCRIPTION_ENVIRONMENT_NOT_ALLOWED'),
+  subscriptionProductNotAllowed('SUBSCRIPTION_PRODUCT_NOT_ALLOWED'),
+  subscriptionOwnedByOtherMember('SUBSCRIPTION_OWNED_BY_OTHER_MEMBER'),
+  subscriptionStoreNotConfigured('SUBSCRIPTION_STORE_NOT_CONFIGURED'),
+
   // 비밀값(외부 API 키) 저장.
   secretMasterKeyMissing('SECRET_MASTER_KEY_MISSING'),
   secretEncryptFailed('SECRET_ENCRYPT_FAILED'),

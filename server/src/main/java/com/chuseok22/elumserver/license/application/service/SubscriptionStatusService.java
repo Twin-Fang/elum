@@ -1,0 +1,65 @@
+package com.chuseok22.elumserver.license.application.service;
+
+import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.core.StorePurchaseState;
+import com.chuseok22.elumserver.license.core.SubscriptionSource;
+import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchase;
+import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
+import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseRepository;
+import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
+import java.util.Optional;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 회원 구독 상태 조회: 적용 요금제(EntitlementService) + 구독 행 + 연결된 스토어 구매(자동 갱신·유예)
+ * 조회가 실패해도 내 정보 응답을 막지 않음 > Free 로 보고 로그 (SystemConfigEntitlementService 와 같은 기준)
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class SubscriptionStatusService {
+
+  private static final Set<SubscriptionSource> STORE_SOURCES = Set.of(SubscriptionSource.APPLE_IAP, SubscriptionSource.GOOGLE_IAP);
+
+  private final EntitlementService entitlementService;
+  private final SubscriptionRepository subscriptionRepository;
+  private final StorePurchaseRepository storePurchaseRepository;
+
+  @Transactional(readOnly = true)
+  public MemberSubscriptionStatus statusOf(String memberId) {
+    try {
+      PlanType plan = entitlementService.planOf(memberId);
+      Optional<Subscription> subscription = subscriptionRepository.findByMemberId(memberId);
+      if (subscription.isEmpty()) {
+        // 행 없는 Pro = 신규가입 PRO 이벤트
+        return plan == PlanType.PRO
+          ? new MemberSubscriptionStatus(PlanType.PRO, SubscriptionSource.PROMO, null, null, null, false)
+          : MemberSubscriptionStatus.free();
+      }
+      return statusFrom(plan, subscription.get());
+    } catch (RuntimeException e) {
+      log.warn("[subscription status] read failed, treating as FREE : memberId={}", memberId, e);
+      return MemberSubscriptionStatus.free();
+    }
+  }
+
+  private MemberSubscriptionStatus statusFrom(PlanType plan, Subscription subscription) {
+    boolean isPro = plan == PlanType.PRO;
+    StorePurchase purchase = STORE_SOURCES.contains(subscription.getSource()) && subscription.getExternalRef() != null
+      ? storePurchaseRepository.findById(subscription.getExternalRef()).orElse(null)
+      : null;
+    boolean isStorePro = isPro && purchase != null;
+    return new MemberSubscriptionStatus(
+      plan,
+      subscription.getSource(),
+      isStorePro ? purchase.getProductId() : null,
+      isPro ? subscription.getExpiresAt() : null,
+      isStorePro ? purchase.getWillAutoRenew() : null,
+      isStorePro && purchase.getState() == StorePurchaseState.IN_GRACE_PERIOD
+    );
+  }
+}

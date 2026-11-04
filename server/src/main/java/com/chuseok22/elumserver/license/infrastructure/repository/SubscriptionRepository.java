@@ -6,13 +6,20 @@ import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, String> {
 
   Optional<Subscription> findByMemberId(String memberId);
+
+  /// 스토어 결제 반영: 검증 요청·알림이 같은 회원 구독을 동시에 바꾸지 않게 행 잠금
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select s from Subscription s where s.member.id = :memberId")
+  Optional<Subscription> findByMemberIdForUpdate(@Param("memberId") String memberId);
 
   List<Subscription> findByMemberIdIn(java.util.Collection<String> memberIds);
 

@@ -25,6 +25,10 @@ public enum ConfigFormat {
   CONTENT_LOCALE_LIST(false, "쉼표로 나눈 언어 코드 (ko,en,ja,zh,es)"),
   // 이룸 서버 주소 (ServerAddressPolicy). 비우면 전환 안 함
   SERVER_BASE_URL(true, "https://api.elum.suhsaechan.kr 처럼 경로 없는 https 주소"),
+  // 쉼표 목록: 스토어 상품 ID (영문·숫자·. _ -). 비우면 어떤 상품도 받지 않음
+  STORE_PRODUCT_ID_LIST(true, "쉼표로 나눈 상품 ID (영문·숫자·. _ -)"),
+  // 긴 비밀값 (서비스 계정 JSON·.p8 개인 키). 일반 비밀값보다 긴 길이 허용
+  SECRET_DOCUMENT(false, "파일 내용 전체"),
   ;
 
   private final boolean isBlankAllowed;

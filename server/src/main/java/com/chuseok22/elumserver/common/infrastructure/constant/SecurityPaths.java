@@ -56,6 +56,14 @@ public final class SecurityPaths {
    */
   public static final String API_ADS_SSV = "/api/ads/ssv";
   /**
+   * 스토어 결제 알림 (#1071): App Store Server Notifications V2, Google Play RTDN(Pub/Sub 푸시).
+   *
+   * <p>토큰이 없다 — 스토어 서버가 부른다. **인증은 Apple 알림 서명, Google 푸시 주소의 token** 이다.
+   * 점검·이전 잠금 중에는 막는다(503 > 스토어가 다시 보낸다).
+   */
+  public static final String API_SUBSCRIPTION_APPLE_NOTIFICATIONS = "/api/subscriptions/apple/notifications";
+  public static final String API_SUBSCRIPTION_GOOGLE_NOTIFICATIONS = "/api/subscriptions/google/notifications";
+  /**
    * 수동 검증용으로 열어 둔 경로. <b>API 체인에서 누구도 부를 수 없게 막는다.</b>
    *
    * <p>API 체인의 마지막 규칙이 보호자 권한이라, 따로 막지 않으면 가입만 하면 누구나 로컬 LLM 을

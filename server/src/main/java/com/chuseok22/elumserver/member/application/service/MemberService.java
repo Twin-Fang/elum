@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
@@ -67,6 +68,7 @@ public class MemberService {
   private final TalkCleanupService talkCleanupService;
   private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
+  private final SubscriptionStatusService subscriptionStatusService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
   private final ConsentDocumentService consentDocumentService;
 
@@ -173,11 +175,12 @@ public class MemberService {
   }
 
   /**
-   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보
+   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보 + 요금제 상태
    */
   private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
-      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member));
+      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member),
+      subscriptionStatusService.statusOf(member.getId()));
   }
 
   /**

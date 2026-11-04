@@ -1,0 +1,162 @@
+package com.chuseok22.elumserver.license.infrastructure.store.apple;
+
+import com.apple.itunes.storekit.model.Environment;
+import com.apple.itunes.storekit.model.JWSRenewalInfoDecodedPayload;
+import com.apple.itunes.storekit.model.JWSTransactionDecodedPayload;
+import com.apple.itunes.storekit.model.ResponseBodyV2DecodedPayload;
+import com.apple.itunes.storekit.verification.SignedDataVerifier;
+import com.apple.itunes.storekit.verification.VerificationException;
+import com.apple.itunes.storekit.verification.VerificationStatus;
+import com.chuseok22.elumserver.license.application.service.store.StoreTemporarilyUnavailableException;
+import com.chuseok22.elumserver.license.application.service.store.StoreVerifyRejectedException;
+import com.chuseok22.elumserver.license.core.StoreEnvironment;
+import com.chuseok22.elumserver.license.core.StoreVerifyRejectReason;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+
+/**
+ * App Store 서명 데이터(JWS) 검증: x5c 체인 > Apple 루트 인증서, ES256 서명, 번들 ID, 환경 (Apple 공식 라이브러리)
+ * 환경 2개: Production 먼저, Sandbox 는 허용할 때만. Xcode·로컬 테스트 환경은 서명 검증을 건너뛰므로 만들지 않음
+ * 온라인 인증서 폐기 확인(OCSP)은 끔 (Apple 장애가 결제 장애가 되지 않게)
+ */
+@Component
+public class AppleSignedDataVerifier {
+
+  /// 운영 루트 인증서: Apple Root CA - G3 (SHA-256 63:34:3A:BF:…:3E:91:79)
+  static final String APPLE_ROOT_CERTIFICATE_PATH = "store/apple/AppleRootCA-G3.cer";
+  private static final boolean IS_ONLINE_CHECK_ENABLED = false;
+
+  private final List<byte[]> rootCertificates;
+  // (환경, 번들 ID, 앱 ID) > 검증기. 설정이 바뀌면 새 키로 다시 만든다
+  private final Map<VerifierKey, SignedDataVerifier> verifiers = new ConcurrentHashMap<>();
+
+  @Autowired
+  public AppleSignedDataVerifier() {
+    this(List.of(readClasspath(APPLE_ROOT_CERTIFICATE_PATH)));
+  }
+
+  /// 시험용: 자체 서명 루트를 넣는다 (실제 Apple 호출 없이 체인·서명 검증 시험)
+  public AppleSignedDataVerifier(List<byte[]> rootCertificates) {
+    this.rootCertificates = List.copyOf(rootCertificates);
+  }
+
+  public Verified<JWSTransactionDecodedPayload> verifyTransaction(String jws, AppleVerifyContext context) {
+    return verifyAcrossEnvironments(context, verifier -> verifier.verifyAndDecodeTransaction(jws));
+  }
+
+  public JWSRenewalInfoDecodedPayload verifyRenewalInfo(String jws, StoreEnvironment environment, AppleVerifyContext context) {
+    return verifyIn(environment, context, verifier -> verifier.verifyAndDecodeRenewalInfo(jws));
+  }
+
+  /// 같은 알림 안의 거래·갱신 정보는 알림과 같은 환경으로만 검증
+  public JWSTransactionDecodedPayload verifyTransactionIn(String jws, StoreEnvironment environment, AppleVerifyContext context) {
+    return verifyIn(environment, context, verifier -> verifier.verifyAndDecodeTransaction(jws));
+  }
+
+  public Verified<ResponseBodyV2DecodedPayload> verifyNotification(String signedPayload, AppleVerifyContext context) {
+    return verifyAcrossEnvironments(context, verifier -> verifier.verifyAndDecodeNotification(signedPayload));
+  }
+
+  // Production 검증 > 환경이 다르면(INVALID_ENVIRONMENT) Sandbox 허용 시에만 Sandbox 로 다시
+  private <T> Verified<T> verifyAcrossEnvironments(AppleVerifyContext context, VerifyCall<T> call) {
+    try {
+      return new Verified<>(call.verify(verifierOf(StoreEnvironment.PRODUCTION, context)), StoreEnvironment.PRODUCTION);
+    } catch (VerificationException e) {
+      if (e.getStatus() != VerificationStatus.INVALID_ENVIRONMENT) {
+        throw toRejection(e);
+      }
+    } catch (StoreVerifyRejectedException | StoreTemporarilyUnavailableException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw new StoreVerifyRejectedException(StoreVerifyRejectReason.MALFORMED, e.getClass().getSimpleName());
+    }
+    if (!context.isSandboxAllowed()) {
+      throw new StoreVerifyRejectedException(StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED, "sandbox");
+    }
+    return new Verified<>(verifyIn(StoreEnvironment.SANDBOX, context, call), StoreEnvironment.SANDBOX);
+  }
+
+  private <T> T verifyIn(StoreEnvironment environment, AppleVerifyContext context, VerifyCall<T> call) {
+    if (environment == StoreEnvironment.SANDBOX && !context.isSandboxAllowed()) {
+      throw new StoreVerifyRejectedException(StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED, "sandbox");
+    }
+    try {
+      return call.verify(verifierOf(environment, context));
+    } catch (VerificationException e) {
+      throw toRejection(e);
+    } catch (RuntimeException e) {
+      throw new StoreVerifyRejectedException(StoreVerifyRejectReason.MALFORMED, e.getClass().getSimpleName());
+    }
+  }
+
+  private SignedDataVerifier verifierOf(StoreEnvironment environment, AppleVerifyContext context) {
+    // Production 은 앱 ID 가 있어야 알림의 앱을 확인할 수 있다 (라이브러리 규칙)
+    if (environment == StoreEnvironment.PRODUCTION && context.appAppleId() == null) {
+      throw new StoreTemporarilyUnavailableException("apple app id not configured");
+    }
+    VerifierKey key = new VerifierKey(environment, context.bundleId(), context.appAppleId());
+    return verifiers.computeIfAbsent(key, this::createVerifier);
+  }
+
+  private SignedDataVerifier createVerifier(VerifierKey key) {
+    Set<InputStream> roots = rootCertificates.stream()
+      .map(ByteArrayInputStream::new)
+      .collect(Collectors.toSet());
+    Environment environment = key.environment() == StoreEnvironment.PRODUCTION ? Environment.PRODUCTION : Environment.SANDBOX;
+    return new SignedDataVerifier(roots, key.bundleId(), key.appAppleId(), environment, IS_ONLINE_CHECK_ENABLED);
+  }
+
+  // 검증 상태 > 거부 사유 (재시도 가능한 실패만 "확인 중")
+  private static RuntimeException toRejection(VerificationException e) {
+    VerificationStatus status = e.getStatus();
+    if (status == VerificationStatus.RETRYABLE_VERIFICATION_FAILURE) {
+      return new StoreTemporarilyUnavailableException("apple verification retryable", e);
+    }
+    StoreVerifyRejectReason reason = switch (status) {
+      case INVALID_APP_IDENTIFIER -> StoreVerifyRejectReason.APP_MISMATCH;
+      case INVALID_ENVIRONMENT -> StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED;
+      default -> StoreVerifyRejectReason.SIGNATURE_INVALID;
+    };
+    return new StoreVerifyRejectedException(reason, status.name());
+  }
+
+  private static byte[] readClasspath(String path) {
+    try (InputStream input = new ClassPathResource(path).getInputStream()) {
+      return input.readAllBytes();
+    } catch (IOException e) {
+      throw new UncheckedIOException("apple root certificate missing: " + path, e);
+    }
+  }
+
+  /// 검증 통과 값 + 그 값이 속한 환경
+  public record Verified<T>(T payload, StoreEnvironment environment) {
+
+  }
+
+  /**
+   * 검증 기준: 번들 ID, 앱 ID(숫자, Production 알림 확인용), Sandbox 허용 여부
+   */
+  public record AppleVerifyContext(String bundleId, Long appAppleId, boolean isSandboxAllowed) {
+
+  }
+
+  private record VerifierKey(StoreEnvironment environment, String bundleId, Long appAppleId) {
+
+  }
+
+  @FunctionalInterface
+  private interface VerifyCall<T> {
+
+    T verify(SignedDataVerifier verifier) throws VerificationException;
+  }
+}
