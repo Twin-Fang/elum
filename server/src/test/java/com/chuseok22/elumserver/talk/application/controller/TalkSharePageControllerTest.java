@@ -78,7 +78,7 @@ class TalkSharePageControllerTest {
       .andExpect(status().isOk())
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
-    assertThat(html).contains("<meta property=\"og:image\" content=\"https://api.elum.chuseok22.com/s/" + POST_ID + "/thumbnail\"");
+    assertThat(html).contains("<meta property=\"og:image\" content=\"https://api.elum.suhsaechan.kr/s/" + POST_ID + "/thumbnail\"");
     assertThat(html).contains("&lt;script&gt;alert(1)&lt;/script&gt;아침").doesNotContain("<script>alert(1)");
     // 안드로이드 기기는 Play 만
     assertThat(html).contains("play.google.com").doesNotContain("apps.apple.com");
@@ -94,7 +94,7 @@ class TalkSharePageControllerTest {
 
     String intentPrefix = "intent://talk?post=" + POST_ID + "#Intent;scheme=elum;package=kr.twinfang.elum;S.browser_fallback_url=";
     assertThat(html).contains("<body data-auto-open=\"" + intentPrefix
-      + "https%3A%2F%2Fapi.elum.chuseok22.com%2Fs%2F" + POST_ID + "%3Fapp%3D0;end\"");
+      + "https%3A%2F%2Fapi.elum.suhsaechan.kr%2Fs%2F" + POST_ID + "%3Fapp%3D0;end\"");
     assertThat(html).contains("href=\"" + intentPrefix + "https%3A%2F%2Fplay.google.com");
   }
 

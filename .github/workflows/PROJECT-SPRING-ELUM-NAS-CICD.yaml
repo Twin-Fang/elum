@@ -11,11 +11,11 @@
 # - 운영 설정·FCM 키를 이미지에 넣지 않는다. NAS 실행 설정 폴더를 /app/config 로 읽기 전용 마운트한다
 #   (미러 컨테이너가 쓰는 server/config 와 다른 폴더: 같은 파일에 운영 설정을 쓰면 미러가 친구 서버 DB 에 붙는다)
 #
-# 언제 도는가 (main 푸시로는 돌지 않음)
-# - deploy-nas 브랜치 푸시: mirror 모드 (수동 실행은 워크플로가 기본 브랜치 main 에 있어야 해서, 그 전에도 배포할 수 있게)
-# - 손으로 (workflow_dispatch): mirror / production
-# - mode=mirror     : 푸시 끔(없는 키 경로), 장애 알림 끔. 기동 뒤 푸시가 켜져 있으면 새 컨테이너를 멈추고 실패
-# - mode=production : FCM 키·장애 알림을 붙인다 (전환 날 7단계)
+# 언제 도는가 (2026-11-05 전환 뒤 운영 서버, #1104)
+# - main 푸시 (server/** 또는 이 파일): production 모드
+# - 손으로 (workflow_dispatch): production (기본) / mirror
+# - mode=production : FCM 키·장애 알림을 붙인다
+# - mode=mirror     : 푸시 끔(없는 키 경로), 장애 알림 끔. 전환 전 미러 전용, 운영에 쓰면 푸시 알림이 꺼진다
 #
 # Secret
 # - APPLICATION_PROD_YML · FIREBASE_ADMINSDK_JSON : 친구 서버와 같은 운영 설정·FCM 키 (한 곳에서 관리, FCM 은 production 모드만)
@@ -29,17 +29,20 @@ name: PROJECT-SPRING-ELUM-NAS-CICD
 on:
   push:
     branches:
-      - deploy-nas
+      - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/PROJECT-SPRING-ELUM-NAS-CICD.yaml'
   workflow_dispatch:
     inputs:
       mode:
-        description: "mirror: 푸시 끔(전환 전) / production: 운영 (전환 날)"
+        description: "production: 운영 / mirror: 푸시 끔 (전환 전 미러 전용, 운영에 쓰지 않는다)"
         required: true
         type: choice
         options:
-          - mirror
           - production
-        default: mirror
+          - mirror
+        default: production
       # 비우면 빌드 > 배포, 값이 있으면 빌드 생략 > 그 태그로 배포
       rollback_image_tag:
         description: "되돌릴 이미지 태그 (예: sha-1a2b3c4). 비우면 새로 빌드"
@@ -159,7 +162,7 @@ jobs:
         env:
           APPLICATION_PROD_YML: ${{ secrets.APPLICATION_PROD_YML }}
           FIREBASE_ADMINSDK_JSON: ${{ secrets.FIREBASE_ADMINSDK_JSON }}
-          MODE: ${{ inputs.mode || 'mirror' }}
+          MODE: ${{ inputs.mode || 'production' }}
         run: |
           if [ -z "${APPLICATION_PROD_YML}" ]; then echo "::error::APPLICATION_PROD_YML 미등록"; exit 1; fi
           if [ "${MODE}" = "production" ] && [ -z "${FIREBASE_ADMINSDK_JSON}" ]; then echo "::error::production 모드인데 FIREBASE_ADMINSDK_JSON 미등록"; exit 1; fi
@@ -172,7 +175,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           IMAGE: ${{ secrets.NAS_DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.deploy_tag.outputs.tag }}
-          MODE: ${{ inputs.mode || 'mirror' }}
+          MODE: ${{ inputs.mode || 'production' }}
           CONTAINER_PREFIX: ${{ env.CONTAINER_PREFIX }}
           SERVICE_DOMAIN: ${{ env.SERVICE_DOMAIN }}
           CONTAINER_INTERNAL_PORT: ${{ env.CONTAINER_INTERNAL_PORT }}
@@ -338,7 +341,7 @@ jobs:
             fi
             echo "[상태] active=${NEW_NAME} 모드=${MODE} (https://${SERVICE_DOMAIN})"
 
-  # 배포 실패 알림: 친구 서버 워크플로와 같은 형식, 웹훅이 없으면 건너뜀
+  # 배포 실패 알림: 웹훅(DISCORD_INCIDENT_WEBHOOK_URL)이 없으면 건너뜀
   notify-deploy-failure:
     needs: [build, deploy]
     if: ${{ failure() }}
@@ -348,7 +351,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_INCIDENT_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          MODE: ${{ inputs.mode || 'mirror' }}
+          MODE: ${{ inputs.mode || 'production' }}
           BUILD_RESULT: ${{ needs.build.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
         run: |

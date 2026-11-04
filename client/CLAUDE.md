@@ -59,10 +59,9 @@ fileKey  VSmGuv1iuOpLZmp6QeBHWr
 ### 서버 — API 원본
 
 ```
-Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
+Swagger  https://api.elum.suhsaechan.kr/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
 내부 로직  <repo>/server/src/main/java/com/chuseok22/elumserver/**
-배포 로그  http://chuseok22.synology.me:8888/containers/elum-back-blue/logs
-          http://chuseok22.synology.me:8888/containers/elum-back-green/logs   ← 둘 중 지금 떠 있는 쪽
+배포 로그  내 NAS docker logs elum-back-blue | elum-back-green   ← 둘 중 지금 떠 있는 쪽 (보는 법: server/CLAUDE.md)
 ```
 
 **Swagger는 "무엇을 받는가", `server/` 코드는 "왜 그런가"를 본다.**
@@ -84,18 +83,9 @@ Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(Op
 클라이언트에서 4xx·5xx를 받았을 때 **요청 코드를 먼저 의심하지 않는다.**
 요청이 서버까지 갔는지, 어느 계층에서 터졌는지는 배포 로그에 남아 있다.
 
-서버는 Blue/Green 배포라 컨테이너가 `elum-back-blue` · `elum-back-green` 중 하나로 떠 있다.
+서버는 내 NAS 의 Blue/Green 배포라 컨테이너가 `elum-back-blue` · `elum-back-green` 중 하나로 떠 있다.
 배포마다 서로 바뀌므로 **지금 떠 있는 쪽**으로 조회하고, 안 나오면 다른 쪽을 본다.
-
-```bash
-# 최근 로그 확인 (lines는 500 · 1000 · all 만 받는다)
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=500" | tail -50
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=500" | tail -50
-
-# 실시간으로 따라가며 재현
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=all&follow=true"
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=all&follow=true"
-```
+보는 법(SSH `docker logs`, 관리자 화면 `/admin/logs`)은 [server/CLAUDE.md](../server/CLAUDE.md) "배포 서버 로그 확인".
 
 로그에 요청 자체가 없으면 클라이언트(URL·헤더·토큰) 문제이고,
 요청은 찍혔는데 예외가 났으면 서버 문제다. **이 구분을 먼저 하고 고친다.**
@@ -602,6 +592,6 @@ flutter run
 
 ## 미확정 사항
 
-- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.chuseok22.com`)
+- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.suhsaechan.kr`, 2026-11-05 전환. 옛 `api.elum.chuseok22.com` 은 새 주소 안내만)
 - 아동 모드 → 보호자 모드 전환 시 PIN 검증 로직 (온보딩에서 PIN 저장까지만 구현)
 - 캐릭터 에셋(여우/고양이 외 추가분) 확보 여부

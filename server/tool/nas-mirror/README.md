@@ -1,5 +1,9 @@
 # 내 NAS 미러 서버
 
+> ⚠️ **2026-11-05 07:56 전환 완료 (#831 · #1104).** 내 NAS 가 운영 원본이다. 이 폴더의 동기화·검사 스크립트는 **다시 돌리지 않는다** —
+> `sync-from-source.sh` 는 운영 DB 를 옛 서버 DB 로 덮어쓴다. DSM 예약 작업은 지웠고, `mirror/CUTOVER_DONE` 표식이 있으면 `sync-from-source.sh` 가 실행을 거부한다 (`SYNC_PAUSED` 도 남겨 둠).
+> 운영 배포는 `PROJECT-SPRING-ELUM-NAS-CICD.yaml` (main 푸시 = production).
+
 친구 NAS 의 운영 서버를 내 NAS 로 옮기기 전, 운영 사본으로 도는 미러 서버를 띄운다. 설계: `docs/superpowers/specs/2026-10-21-server-move-to-my-nas-design.md` (#936)
 
 미러는 테스트 빌드 개발자 도구의 서버 주소로만 붙는다. 운영 사용자는 계속 친구 서버를 쓴다.
