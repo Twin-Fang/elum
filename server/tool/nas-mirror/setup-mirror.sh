@@ -51,3 +51,19 @@ firebase:
 YAML
 chmod 600 "${APP_DIR}/config/application-prod.yml"
 log "mirror config written : ${APP_DIR}/config/application-prod.yml"
+
+# Traefik 배포용 DB 주소 덮어쓰기 (프로필 nas): 운영 설정 전체는 배포 워크플로가 같은 폴더에 쓴다
+# 비밀번호는 YAML 큰따옴표 문자열로 (\ 와 " 만 이스케이프)
+mkdir -p "${RUNTIME_CONFIG_DIR}"
+chmod 700 "${RUNTIME_CONFIG_DIR}"
+escaped_db_password="$(printf '%s' "$ELUM_DB_PASSWORD" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+cat > "${RUNTIME_CONFIG_DIR}/application-nas.yml" <<YAML
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_CONTAINER}:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: "${escaped_db_password}"
+YAML
+chmod 600 "${RUNTIME_CONFIG_DIR}/application-nas.yml"
+log "nas db override written : ${RUNTIME_CONFIG_DIR}/application-nas.yml"
+
