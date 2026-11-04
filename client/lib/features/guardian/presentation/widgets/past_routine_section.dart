@@ -18,6 +18,7 @@ import '../../../../core/widgets/elum_toast.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/home_routines.dart';
 import '../../application/routine_providers.dart';
+import '../card_export/open_card_export.dart';
 
 /// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지).
 /// 광고가 없으면 이 간격도 없다.
@@ -64,7 +65,12 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       routine,
       isPast: true,
     );
-    if (action != RoutineSheetAction.rerun || !mounted) return;
+    if (!mounted) return;
+    if (action == RoutineSheetAction.export) {
+      openCardExport(context, routine);
+      return;
+    }
+    if (action != RoutineSheetAction.rerun) return;
     await _rerun(routine);
   }
 

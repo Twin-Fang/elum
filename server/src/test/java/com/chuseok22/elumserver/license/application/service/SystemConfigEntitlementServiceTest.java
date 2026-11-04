@@ -276,6 +276,22 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.routineCreatePerWeek()).isEqualTo(3);
   }
 
+  @Test
+  @DisplayName("스냅샷의 카드 내보내기 권한은 Pro 키를 읽는다 (Free 는 워터마크가 남는다)")
+  void snapshot_cardExportReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_EXPORT_WITHOUT_WATERMARK)).thenReturn(true);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_EXPORT_ALL_THEMES)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.cardExportWithoutWatermark()).isTrue();
+    assertThat(snapshot.cardExportAllThemes()).isTrue();
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

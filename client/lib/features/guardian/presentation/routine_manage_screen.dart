@@ -35,6 +35,7 @@ import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
+import 'card_export/open_card_export.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
@@ -78,6 +79,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         _editCards(routine);
       case RoutineSheetAction.more:
         await _openMenuSheet(routine);
+      case RoutineSheetAction.export:
+        openCardExport(context, routine);
       case RoutineSheetAction.rerun || null:
         return;
     }
