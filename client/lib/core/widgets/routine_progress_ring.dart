@@ -12,20 +12,23 @@ import '../theme/theme_context_ext.dart';
 ///
 /// 보호자 홈과 아이 홈의 일과 타일이 함께 쓴다.
 /// - 진행 중: 트랙(#C9D6D4) 위에 진행분(#55CFBA)을 그리고 가운데 `NN%`
-/// - 100%: 링 대신 채워진 체크 원 (Figma Group 36)
+/// - 100%: 링 대신 채워진 체크 원 (Figma `채크_라운드` 726:4882 — 체크 21.82×16.26 정가운데)
 class RoutineProgressRing extends StatelessWidget {
   const RoutineProgressRing({
     super.key,
     required this.progress,
-    this.boldCheck = false,
+    this.doneCheckColor,
   });
 
   /// 0.0 ~ 1.0. 범위 밖 값이 와도 화면이 깨지지 않게 내부에서 자른다.
   final double progress;
 
-  /// 완료 체크를 이룸이 홈 시안(`1197:6810`)의 굵고 가로로 긴 벡터(21.82×16.26)로 그린다.
-  /// 보호자 홈 시안(`931:3896`)의 체크는 더 가늘고 작아 기본은 Material 체크다.
-  final bool boldCheck;
+  /// 완료 체크 색. 없으면 흰색(이룸이 홈 `1197:6810`). 보호자 홈 `931:3896`은 타일 바탕색 `#EEE9E6`
+  final Color? doneCheckColor;
+
+  /// Figma 726:4882 체크 벡터 크기
+  static const _checkWidth = 21.82;
+  static const _checkHeight = 16.26;
 
   /// Figma 실측 — 링 지름 40, 두께 4
   static const _size = 40.0;
@@ -65,30 +68,18 @@ class RoutineProgressRing extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: colors.routineRingProgress,
               ),
-              child: boldCheck
-                  ? Center(
-                      child: SvgPicture.asset(
-                        AppAssets.childCheckMark,
-                        width: 21.82.w,
-                        height: 16.26.w,
-                        colorFilter: ColorFilter.mode(
-                          colors.surface,
-                          BlendMode.srcIn,
-                        ),
-                        excludeFromSemantics: true,
-                      ),
-                    )
-                  : Center(
-                      child: SvgPicture.asset(
-                        AppAssets.iconCheckMark,
-                        width: 18.w,
-                        colorFilter: ColorFilter.mode(
-                          colors.surface,
-                          BlendMode.srcIn,
-                        ),
-                        excludeFromSemantics: true,
-                      ),
-                    ),
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.childCheckMark,
+                  width: _checkWidth.w,
+                  height: _checkHeight.w,
+                  colorFilter: ColorFilter.mode(
+                    doneCheckColor ?? colors.surface,
+                    BlendMode.srcIn,
+                  ),
+                  excludeFromSemantics: true,
+                ),
+              ),
             )
           : CustomPaint(
               painter: _RingPainter(

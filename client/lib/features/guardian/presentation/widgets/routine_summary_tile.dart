@@ -210,7 +210,11 @@ class RoutineSummaryTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: _ringTop.h),
-        RoutineProgressRing(progress: progress),
+        // 시안 931:3896: 체크를 타일 바탕색으로 뚫은 모양
+        RoutineProgressRing(
+          progress: progress,
+          doneCheckColor: context.colors.routineTileBg,
+        ),
         if (hasRerun) ...[
           SizedBox(height: _ringToRerun.h),
           _RerunButton(onTap: onRerun!),

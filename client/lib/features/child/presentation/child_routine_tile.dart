@@ -103,7 +103,7 @@ class ChildRoutineTile extends StatelessWidget {
               ),
             ),
             SizedBox(width: space.xs),
-            RoutineProgressRing(progress: progress, boldCheck: true),
+            RoutineProgressRing(progress: progress),
             SizedBox(width: space.xs),
             // 아래 방향 원본을 반시계 90° 돌려 `>`로 만든다
             Transform.rotate(
