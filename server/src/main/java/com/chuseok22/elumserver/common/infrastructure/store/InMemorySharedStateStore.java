@@ -73,4 +73,9 @@ public class InMemorySharedStateStore implements SharedStateStore {
       return true;
     }
   }
+
+  @Override
+  public void clearWindow(String key) {
+    windowHits.remove(key);
+  }
 }
