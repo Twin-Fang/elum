@@ -25,8 +25,21 @@ public record AppStatusResponse(
   ClientTuning client,
 
   @Schema(description = "앱이 옮겨 갈 서버 주소. 구버전 앱은 이 필드를 무시한다 (#831)")
-  ServerAddress server
+  ServerAddress server,
+
+  @Schema(description = "플랫폼별 Pro 신규 판매 여부. 구버전 앱은 이 필드를 무시한다 (#1132)")
+  StoreSales sales
 ) {
+
+  /**
+   * 플랫폼별 Pro 신규 판매: 판매 켜기 AND 구독 검증 켜기 (#1132)
+   * false > 앱이 결제 화면·진입점을 숨김 (기존 구독 검증·복원은 무관)
+   */
+  @Schema(description = "플랫폼별 Pro 신규 판매 여부")
+  public record StoreSales(
+    @Schema(description = "iOS 에서 Pro 를 파는가", example = "true") boolean ios,
+    @Schema(description = "Android 에서 Pro 를 파는가", example = "false") boolean android
+  ) {}
 
   /**
    * 서버 이전 안내: 앱이 확인 후 옮겨 갈 API 주소 (#831)

@@ -185,7 +185,7 @@ abstract final class AppConfig {
 
   // --- 인앱 구독 결제 ---
 
-  /// 앱에서 Pro 를 팔아도 되는가 (스토어 상품·서버 설정을 마친 뒤 켬). 꺼져 있으면 결제 화면·진입점이 없음
+  /// 이 빌드에 스토어 결제를 넣는가 (하드 킬). 꺼져 있으면 서버 판매 스위치와 무관하게 결제 화면·진입점이 없음 (#1132)
   static bool get isInAppPurchaseEnabled => _bool('ELUM_IAP_ENABLED', false);
 
   /// Pro 1개월 구독 상품 id. App Store Connect · Play Console · 서버 `SUBSCRIPTION_*_PRODUCT_IDS` 와 같아야 함

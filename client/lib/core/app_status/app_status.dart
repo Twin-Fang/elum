@@ -14,6 +14,7 @@ class AppStatus {
     this.storeUrl = '',
     this.tuning,
     this.serverAddress,
+    this.isStoreSellingOpen,
   });
 
   final bool maintenance;
@@ -34,6 +35,10 @@ class AppStatus {
 
   /// 서버 이전 안내 (#831). 구버전 서버라 없거나 형식이 다르면 null — 그때는 지금 주소를 그대로 쓴다
   final AppStatusServerAddress? serverAddress;
+
+  /// 지금 플랫폼에서 Pro 를 새로 파는가 (`sales.ios`·`sales.android`, #1132)
+  /// null: 서버 응답을 못 받음 (저장값 사용) · 응답에 없거나 형식이 다름 > false (판매 끔)
+  final bool? isStoreSellingOpen;
 
   /// 서버가 못 오거나 형식이 다를 때 쓰는 값.
   ///
@@ -61,8 +66,13 @@ class AppStatus {
           : '',
       tuning: ClientTuning.tryParse(json['client']),
       serverAddress: AppStatusServerAddress.tryParse(json['server']),
+      isStoreSellingOpen: _parseStoreSelling(json['sales'], platform),
     );
   }
+
+  /// `sales` > 지금 플랫폼 판매 여부 (Map 이 아니거나 값이 true 가 아니면 false). 던지지 않음
+  static bool _parseStoreSelling(Object? sales, String platform) =>
+      sales is Map && sales[platform] == true;
 
   /// 지금 버전이 최소치에 못 미치는가 (업데이트해야 쓸 수 있다).
   bool requiresUpdate(String current) => isLower(current, minVersion);

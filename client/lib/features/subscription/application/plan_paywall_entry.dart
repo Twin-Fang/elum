@@ -17,18 +17,25 @@ import 'store_purchase_coordinator.dart';
 /// 다른 기능이 요금제 화면·구매 복원을 여는 입구 (보호자 화면 전용)
 ///
 /// 다른 기능이 subscription 의 presentation 을 직접 알지 않게 하는 자리 (tool/check_layer_imports.dart)
-/// 판매 스위치가 꺼져 있으면 요금제 화면·복원을 열지 않음 (Pro 안내 팝업만) — 이룸이 기기도 여기서 막힘
+/// 판매 중이 아니면 요금제 화면을 열지 않음 (Pro 안내 팝업만). 이미 Pro 면 구독 관리용으로 엶 — 이룸이 기기는 둘 다 막힘
+
+/// 요금제 화면을 열 수 있는가: 판매 중 · 스토어 연동 + 이미 Pro (판매를 멈춰도 구독 관리·복원 유지, #1132)
+final canOpenPlanPaywallProvider = Provider<bool>((ref) {
+  if (ref.watch(isPlanStoreEnabledProvider)) return true;
+  return ref.watch(isPlanStoreConnectedProvider) &&
+      ref.watch(planAccessProvider.select((access) => access.isPro));
+});
 
 /// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼)
 Future<void> openPlanPaywall(BuildContext context, WidgetRef ref) async {
-  if (!ref.read(isPlanStoreEnabledProvider)) return;
+  if (!ref.read(canOpenPlanPaywallProvider)) return;
   unawaited(ref.read(storePurchaseCoordinatorProvider).start());
   await showPlanPaywall(context, ref);
 }
 
-/// 구매 복원 (설정 줄)
+/// 구매 복원 (설정 줄, 판매 스위치와 무관)
 Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
-  if (!ref.read(isPlanStoreEnabledProvider)) return;
+  if (!ref.read(isPlanStoreConnectedProvider)) return;
   await actions.restorePlanPurchases(context, ref);
 }
 
