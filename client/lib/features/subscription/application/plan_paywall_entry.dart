@@ -11,6 +11,7 @@ import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
 import '../presentation/plan_actions.dart' as actions;
 import '../presentation/plan_paywall_sheet.dart';
+import '../domain/plan_benefit.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
 
@@ -26,11 +27,11 @@ final canOpenPlanPaywallProvider = Provider<bool>((ref) {
       ref.watch(planAccessProvider.select((access) => access.isPro));
 });
 
-/// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼)
-Future<void> openPlanPaywall(BuildContext context, WidgetRef ref) async {
+/// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼). [highlight] 는 혜택 맨 위 (연 기능)
+Future<void> openPlanPaywall(BuildContext context, WidgetRef ref, {PlanBenefit? highlight}) async {
   if (!ref.read(canOpenPlanPaywallProvider)) return;
   unawaited(ref.read(storePurchaseCoordinatorProvider).start());
-  await showPlanPaywall(context, ref);
+  await showPlanPaywall(context, ref, highlight: highlight);
 }
 
 /// 구매 복원 (설정 줄, 판매 스위치와 무관)

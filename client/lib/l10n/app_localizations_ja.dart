@@ -3510,6 +3510,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planBenefitsSection => 'Pro로 할 수 있는 것';
 
   @override
+  String get planBenefitAiImageStyles => '캐릭터·사진 같은 그림으로 카드를 만들어요';
+
+  @override
+  String get planBenefitAdsRemoved => '광고 없이 써요';
+
+  @override
   String get planBenefitWeeklyReport => '한 주 동안 해낸 일과를 리포트로 받아 보내요';
 
   @override

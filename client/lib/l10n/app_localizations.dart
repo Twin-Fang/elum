@@ -6314,6 +6314,18 @@ abstract class AppLocalizations {
   /// **'Pro로 할 수 있는 것'**
   String get planBenefitsSection;
 
+  /// 혜택 줄: AI 맞춤 그림 방식 (그림 방식에서 열면 맨 위)
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터·사진 같은 그림으로 카드를 만들어요'**
+  String get planBenefitAiImageStyles;
+
+  /// 혜택 줄: 광고 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 없이 써요'**
+  String get planBenefitAdsRemoved;
+
   /// 혜택 줄: 주간 리포트
   ///
   /// In ko, this message translates to:

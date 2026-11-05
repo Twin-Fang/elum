@@ -16,13 +16,17 @@ import '../application/store_purchase_coordinator.dart';
 import '../domain/plan_catalog.dart';
 import '../domain/plan_error_code.dart';
 import '../domain/plan_purchase_state.dart';
+import '../domain/plan_benefit.dart';
 import 'plan_actions.dart';
 import 'plan_offer_views.dart';
 import 'plan_state_views.dart';
 
 /// 요금제 화면 내용 (폰 시트 · 태블릿 카드 공통): 이미 Pro > 결제 단계 안내 > 혜택·기간·결제 버튼·필수 안내
 class PlanPaywallBody extends ConsumerStatefulWidget {
-  const PlanPaywallBody({super.key});
+  const PlanPaywallBody({super.key, this.highlight});
+
+  /// 혜택 묶음 맨 위로 올릴 혜택
+  final PlanBenefit? highlight;
 
   @override
   ConsumerState<PlanPaywallBody> createState() => _PlanPaywallBodyState();
@@ -122,7 +126,7 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const PlanBenefitsGroup(),
+        PlanBenefitsGroup(highlight: widget.highlight),
         SizedBox(height: context.space.md.h),
         if (catalog != null && catalog.hasOffers)
           ..._offerPicker(context, catalog, flow)

@@ -9,22 +9,24 @@ import '../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_sheet_frame.dart';
 import '../application/plan_purchase_notifier.dart';
+import '../domain/plan_benefit.dart';
 import '../domain/plan_purchase_state.dart';
 import 'plan_paywall_body.dart';
 
 /// 요금제 화면 열기 (시안 #1070 A안): 폰 > 바닥 시트, 태블릿 > 가운데 카드. 닫히면 결제 단계 정리
-Future<void> showPlanPaywall(BuildContext context, WidgetRef ref) async {
+/// [highlight]: 혜택 묶음 맨 위로 올릴 혜택 (연 기능)
+Future<void> showPlanPaywall(BuildContext context, WidgetRef ref, {PlanBenefit? highlight}) async {
   final isTablet = context.layoutMetrics.isScaleOverridden;
   if (isTablet) {
     await showElumDialogContent<void>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const _PlanPaywallCard(),
+      builder: (_) => _PlanPaywallCard(highlight: highlight),
     );
   } else {
     await showElumSheet<void>(
       context: context,
-      builder: (_) => const _PlanPaywallSheet(),
+      builder: (_) => _PlanPaywallSheet(highlight: highlight),
     );
   }
   // 결제창·확인이 아직 돌면 그대로 둠 (다시 열면 그 단계가 보임)
@@ -46,7 +48,9 @@ class _BusyPopGuard extends ConsumerWidget {
 
 /// 폰: 시트 틀(제목 · 설명 · 본문, 큰 글자면 시트 안 스크롤)
 class _PlanPaywallSheet extends StatelessWidget {
-  const _PlanPaywallSheet();
+  const _PlanPaywallSheet({this.highlight});
+
+  final PlanBenefit? highlight;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,7 @@ class _PlanPaywallSheet extends StatelessWidget {
       child: ElumSheetFrame(
         title: context.l10n.planPaywallTitle,
         description: context.l10n.planPaywallDescription,
-        child: const PlanPaywallBody(),
+        child: PlanPaywallBody(highlight: highlight),
       ),
     );
   }
@@ -62,7 +66,9 @@ class _PlanPaywallSheet extends StatelessWidget {
 
 /// 태블릿: 팝업 카드(322) 안에 같은 내용, 창 높이를 넘으면 카드 안 스크롤
 class _PlanPaywallCard extends StatelessWidget {
-  const _PlanPaywallCard();
+  const _PlanPaywallCard({this.highlight});
+
+  final PlanBenefit? highlight;
 
   /// 카드가 쓸 수 있는 창 높이 비율 (위아래 숨 쉴 자리)
   static const _maxHeightRatio = 0.85;
@@ -95,7 +101,7 @@ class _PlanPaywallCard extends StatelessWidget {
                       style: typo.sheetDescription.copyWith(color: colors.sheetTitleText),
                     ),
                     SizedBox(height: context.space.lg.h),
-                    const PlanPaywallBody(),
+                    PlanPaywallBody(highlight: highlight),
                   ],
                 ),
               ),
