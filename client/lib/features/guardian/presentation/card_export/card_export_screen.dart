@@ -70,7 +70,8 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       _precached = pictures;
       _precacheArt(pictures);
     }
-    final canExport = pictures != null && pictures.failedCount == 0 && _isArtReady && !_isBusy;
+    // 그림 몇 장을 못 받아도 내보냄 (그 카드는 대체 그림·제목으로, 종이 밖에 한 줄 안내)
+    final canExport = pictures != null && _isArtReady && !_isBusy;
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(),
       title: l10n.cardExportOpen,
@@ -147,7 +148,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
         Text(l10n.cardExportPreparing, style: context.typo.body.copyWith(color: colors.textSecondary)),
       ]);
     }
-    if (pictures == null || pictures.failedCount > 0) {
+    if (pictures == null) {
       return ElumErrorView(
         message: l10n.cardExportImageFailed,
         errorCode: CardExportErrorCode.image,
@@ -189,6 +190,17 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
           style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel),
         ),
         // 안내는 종이 밖에만 (미리 보기의 종이 = 파일 그대로)
+        if (pictures.failedCount > 0) ...[
+          SizedBox(height: 6.h),
+          Text(l10n.cardExportSomePicturesFailed(pictures.failedCount), style: caption),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ElumTextLink(
+              label: l10n.commonRetryWithCode(CardExportErrorCode.image),
+              onTap: () => retryCardExportPictures(ref, widget.routine, pictures),
+            ),
+          ),
+        ],
         if (pictures.hasMissingPicture) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportMissingPicture, style: caption),
@@ -313,8 +325,9 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       }
       final pdf = await _files.buildA4Pdf(pngs);
       if (shouldPrint) {
-        final canPrint = await _files.printPdf(pdf: pdf, jobName: stem);
-        if (!canPrint && mounted) {
+        final printOutcome = await _files.printPdf(pdf: pdf, jobName: stem);
+        // 취소는 오류가 아님 > 인쇄 서비스가 없을 때만 안내
+        if (printOutcome == CardPrintOutcome.unavailable && mounted) {
           await showElumDialog<void>(
             context: context,
             icon: ElumDialogIcon.alert,

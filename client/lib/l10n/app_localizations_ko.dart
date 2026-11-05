@@ -3437,6 +3437,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportMissingPicture => '그림이 아직 없는 카드는 제목만 들어가요';
 
   @override
+  String cardExportSomePicturesFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '그림을 불러오지 못한 카드 $count장은 다른 그림이나 제목으로 들어가요',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get cardExportActualSizeHint => '다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요';
 
   @override
@@ -3493,6 +3503,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planBenefitsSection => 'Pro로 할 수 있는 것';
+
+  @override
+  String get planBenefitWeeklyReport => '한 주 동안 해낸 일과를 리포트로 받아 보내요';
+
+  @override
+  String get planBenefitRoutineSchedule => '요일과 시각을 정해 일과를 반복하고 이룸이 기기에 알려요';
+
+  @override
+  String get planBenefitRoutineMemory => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
+
+  @override
+  String get planBenefitExpertRoutines => '전문가가 만든 일과를 그대로 가져와 써요';
+
+  @override
+  String get planBenefitGuardianVoice => '카드마다 보호자 목소리를 녹음해 들려줘요';
+
+  @override
+  String get planBenefitRoutineTranslate => '만든 일과를 다른 언어로 바꿔 만들어요';
+
+  @override
+  String get planBenefitFreeImageRegenerate =>
+      '카드 그림을 하루 정해진 횟수까지 크레딧 없이 다시 그려요';
 
   @override
   String get planBenefitMoreWeeklyCredits => '매주 AI 크레딧을 더 많이 받아요';
