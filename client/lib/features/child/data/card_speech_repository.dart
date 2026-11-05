@@ -23,18 +23,18 @@ typedef StoredSpeechSource = ({
 
 /// 카드 > 저장 음성 위치. 서버에 없는 일과(id 빈 값)는 null
 ///
-/// [includeGuardianVoice] false 면 보호자 목소리를 빼고 기본 음성만 (보호자 화면에서 Pro 가 아닐 때 — 이룸이가 듣는 것과 맞춤)
+/// [shouldIncludeGuardianVoice] false 면 보호자 목소리를 빼고 기본 음성만 (보호자 화면에서 Pro 가 아닐 때 — 이룸이가 듣는 것과 맞춤)
 StoredSpeechSource? storedSpeechOf(
   String? routineId,
   ActionCard card, {
-  bool includeGuardianVoice = true,
+  bool shouldIncludeGuardianVoice = true,
 }) {
   if (routineId == null || routineId.isEmpty) return null;
   return (
     routineId: routineId,
     stepId: card.id,
     speechPath: card.speechPath,
-    guardianVoicePath: includeGuardianVoice ? card.guardianVoicePath : null,
+    guardianVoicePath: shouldIncludeGuardianVoice ? card.guardianVoicePath : null,
   );
 }
 

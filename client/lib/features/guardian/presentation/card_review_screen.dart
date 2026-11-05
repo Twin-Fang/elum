@@ -149,7 +149,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
     ref.read(routineFlowProvider).routine?.id,
     card,
-    includeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+    shouldIncludeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
   );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
