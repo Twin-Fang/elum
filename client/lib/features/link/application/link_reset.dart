@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:go_router/go_router.dart';
 
 import '../../child/application/child_routine_notifier.dart';
@@ -8,6 +9,7 @@ import '../data/device_link_repository.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../member/application/member_providers.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../profile/application/profile_session.dart';
 import '../../../core/router/routes.dart';
 
 /// 연결이 끊긴 이룸이 휴대폰의 **메모리**를 비운다.
@@ -17,14 +19,35 @@ import '../../../core/router/routes.dart';
 /// 이전 이룸이의 이름·일과·체크 기록이 화면에 남는다 (로그인에서 이전 계정 이름이 남는 것과 같은 문제).
 extension LinkedProfileReset on ProviderContainer {
   void forgetLinkedProfile() {
-    invalidate(onboardingProvider);
-    invalidate(memberProvider);
-    invalidate(todayRoutinesProvider);
-    invalidate(pastRoutinesProvider);
-    invalidate(myRoutinesProvider);
-    invalidate(routineFlowProvider);
+    _forgetLinkedProfileMemory(read(memberPrefetchProvider), invalidate);
     invalidate(childRoutineProvider);
   }
+}
+
+/// 연결 성공 직후 연결 전 계정의 **메모리**를 버린다 (#1148).
+///
+/// 연결은 토큰을 이룸이 세션으로 바꾸는 계정 전환인데, 이름(onboarding·회원 정보)·고른 이룸이·일과는
+/// 연결 전 계정 값을 들고 있어 홈 인사말이 기본 호칭으로 남았다. 저장소는 연결이 이미 새 값으로 채웠다.
+/// 체크 대기열(`childRoutineProvider`)은 비우지 않음 — 아직 못 보낸 체크가 있을 수 있음.
+extension LinkedSessionStart on Ref {
+  void forgetPreLinkAccount() =>
+      _forgetLinkedProfileMemory(read(memberPrefetchProvider), invalidate);
+}
+
+/// 연결 전후 이룸이 이름·고른 이룸이·일과 메모리 비우기 (연결·연결 해제 공통)
+void _forgetLinkedProfileMemory(
+  MemberPrefetch memberPrefetch,
+  void Function(ProviderOrFamily provider) invalidate,
+) {
+  // 주기 갱신이 받아 둔 이전 회원 정보 (남기면 다시 만들어진 회원 정보가 이것을 꺼내 씀)
+  memberPrefetch.discard();
+  invalidate(onboardingProvider);
+  invalidate(memberProvider);
+  invalidate(profileSessionProvider);
+  invalidate(todayRoutinesProvider);
+  invalidate(pastRoutinesProvider);
+  invalidate(myRoutinesProvider);
+  invalidate(routineFlowProvider);
 }
 
 /// 이룸이 휴대폰의 **세션이 끝났을 때**(토큰 갱신까지 실패) 하는 일.

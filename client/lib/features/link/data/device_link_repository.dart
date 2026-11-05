@@ -249,6 +249,8 @@ class DeviceLinkRepository {
       await _storage.setElumiDevice(true);
       // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다
       await _storage.setElumiLinkLost(false);
+      // 연결 전 계정이 고른 이룸이 id. 남으면 홈 이름이 회원 이름 대신 기본 호칭으로 감 (#1148)
+      await _storage.clearSelectedProfileId();
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
