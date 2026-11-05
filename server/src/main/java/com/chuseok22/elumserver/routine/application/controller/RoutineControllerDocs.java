@@ -13,5 +13,6 @@ public interface RoutineControllerDocs extends
   RoutineLibraryDocs,
   RoutineProgressDocs,
   RoutineStepEditDocs,
+  RoutineStepImageDocs,
   RoutineStepVoiceDocs {
 }

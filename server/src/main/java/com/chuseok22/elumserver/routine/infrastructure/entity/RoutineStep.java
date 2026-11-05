@@ -50,6 +50,10 @@ public class RoutineStep extends BaseEntity {
   // 조회 시 클라이언트가 null이면 이미지 자리를 비워 렌더링한다.
   private String imagePath;
 
+  // 보호자가 고르기 전인 새 AI 그림 열쇠 {stepId}/ai-{UUID}.{확장자}. 고르면 imagePath 로 옮기고 null.
+  // 이룸이 화면·카드 응답에는 나가지 않음 (AI 결과는 보호자가 고른 뒤 노출)
+  private String imageCandidatePath;
+
   // 무료 픽토그램 id(Mulberry SVG 파일명 stem). SVG 는 앱이 번들하고 서버는 id 만 저장한다.
   // nullable — V29 가 NOT NULL 없이 더한다(옛 서버로 롤백해도 INSERT 가 깨지지 않게). 이 변경 이전 카드,
   // 카탈로그를 못 읽은 서버에서 만든 카드는 null 이다. 앱 표시 우선순위는 사진 > AI 그림 > 픽토그램.

@@ -52,7 +52,7 @@ public class GeminiRoutineImagePromptBuilder {
     GeminiImageAiInput input = new GeminiImageAiInput(
       "CREATE_ROUTINE_CARD_IMAGE",
       new GeminiImageAiInput.Scene(
-        scene.routineTitle(), scene.stepTitle(), scene.stepDescription(), scene.sceneDetail()),
+        scene.routineTitle(), scene.stepTitle(), scene.stepDescription(), scene.sceneDetail(), scene.guardianRequest()),
       characterType == null
         ? null
         : new GeminiImageAiInput.Character(

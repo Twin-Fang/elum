@@ -298,12 +298,14 @@ class ErrorMessageParityTest {
   // 카드 그림 다시 그리기(#1103, #1075)가 더한 코드와 HTTP 상태.
   private static final Map<ErrorCode, String> ADDED_IMAGE_REGENERATE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
     Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE, "CONFLICT"),
-    Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED, "SERVICE_UNAVAILABLE")));
+    Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED, "SERVICE_UNAVAILABLE"),
+    Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND, "NOT_FOUND"),
+    Map.entry(ErrorCode.AI_IMAGE_NOT_ALLOWED, "FORBIDDEN")));
 
   @Test
-  @DisplayName("카드 그림 다시 그리기 코드 2개는 golden 밖에서 상태와 ko·en 문구를 단언한다")
+  @DisplayName("카드 그림 다시 그리기·고르기·AI 맞춤 그림 권한 코드 4개는 golden 밖에서 상태와 ko·en 문구를 단언한다")
   void imageRegenerateCodes_haveStatusAndMessages() {
-    assertThat(ADDED_IMAGE_REGENERATE_CODES).hasSize(2);
+    assertThat(ADDED_IMAGE_REGENERATE_CODES).hasSize(4);
     ADDED_IMAGE_REGENERATE_CODES.forEach((code, status) -> {
       assertThat(GOLDEN).doesNotContainKey(code.name());
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);

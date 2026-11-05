@@ -50,9 +50,13 @@ public enum ErrorCode {
   ROUTINE_STEP_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST),
   ROUTINE_STEP_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST),
   ROUTINE_STEP_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
-  // 카드 그림 다시 그리기: AI 그림이 아닌 카드(사진·가져온 그림·그림 없음·직접 사진 방식), 그림 생성 실패
+  // 카드 그림 다시 그리기·그림 그리기: 대상 아닌 카드(사진·가져온 그림·직접 사진 방식·설명 없음), 그림 생성 실패
   ROUTINE_STEP_IMAGE_NOT_REGENERATABLE(HttpStatus.CONFLICT),
   ROUTINE_STEP_IMAGE_REGENERATE_FAILED(HttpStatus.SERVICE_UNAVAILABLE),
+  // 고를 새 그림 후보가 없음 (이미 골랐거나 버렸거나 다시 그려 바뀜)
+  ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND(HttpStatus.NOT_FOUND),
+  // 요금제에 AI 맞춤 그림이 없음 (Free · FREE_AI_IMAGE_GENERATION 꺼짐) — 다시 그리기·그림 그리기 거절
+  AI_IMAGE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
   // 보호자 목소리 녹음: Pro 아님, 형식(m4a), 크기(1MB), 길이(15초), 저장 실패
   GUARDIAN_VOICE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
   GUARDIAN_VOICE_INVALID_TYPE(HttpStatus.BAD_REQUEST),

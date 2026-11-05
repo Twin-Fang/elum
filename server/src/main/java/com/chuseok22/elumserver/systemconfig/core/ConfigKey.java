@@ -242,11 +242,11 @@ public enum ConfigKey {
   // 수치 한도의 초기값은 전부 -1(무제한)이다. 구조만 넣고 지금 동작을 지금과 똑같게
   // 유지한다 — 실측 원가가 나오기 전에 숫자를 박으면 두 번 일한다.
 
-  // ⚠️ 기본값이 아직 true다. 끄면 Free 카드에 그림이 사라지는데, 대체할 픽토그램이
-  // 아직 없기 때문이다. 픽토그램이 붙으면 false로 내린다.
+  // 끄면 Free 새 일과·카드는 AI 그림 없이 픽토그램, 다시 그리기·그림 그리기는 거절 (이미 만든 그림은 그대로)
+  // 기본 true: 결제 릴리스 때 관리자에서 false 로 (그 전에 끄면 Free 가 살 방법 없이 그림을 잃음)
   FREE_AI_IMAGE_GENERATION(
     ConfigGroup.PLAN_FREE, "AI 맞춤 삽화",
-    "Free에서 AI가 그린 맞춤 삽화를 쓸 수 있는지. 끄면 픽토그램을 쓴다 (픽토그램 적용 전까지는 켜 둔다)",
+    "Free에서 AI가 그린 맞춤 삽화를 쓸 수 있는지. 끄면 새 일과·카드는 픽토그램, 다시 그리기·그림 그리기는 막힌다 (이미 만든 그림은 그대로)",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
   FREE_ADS_REMOVED(
@@ -357,6 +357,25 @@ public enum ConfigKey {
     ConfigGroup.SIGNUP_PRO_EVENT, "Pro 유지 일수",
     "가입 시점부터 Pro 로 취급하는 일수",
     ConfigValueType.INTEGER, List.of(), "30", 1, 3650
+  ),
+  // --- 기존 가입자 Pro 선물 ---
+  //
+  // 기준 시각 전에 가입한 회원을 종료 시각까지 Pro 로 (조회 시점 계산, DB 쓰기 없음). 구독 중인 회원은 구독이 우선
+  // 기본 꺼짐. 기준·종료가 비어 있으면 선물 꺼짐. 기간("6개월")은 코드에 두지 않고 두 시각으로만 정함
+  EXISTING_MEMBER_PRO_GIFT_ENABLED(
+    ConfigGroup.EXISTING_MEMBER_PRO_GIFT, "선물 켜기",
+    "켜면 아래 가입 기준 시각 전에 가입한 회원(구독 중인 회원 제외)이 Pro 종료 시각까지 Pro 로 취급된다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  EXISTING_MEMBER_PRO_GIFT_JOINED_BEFORE(
+    ConfigGroup.EXISTING_MEMBER_PRO_GIFT, "가입 기준 시각",
+    "이 시각 전에 가입한 회원만 받는다 (보통 결제 릴리스 시각). 형식 2026-11-20T00:00 (또는 2026-11-20 00:00, 날짜만도 가능). 비어 있으면 선물 꺼짐",
+    ConfigValueType.DATETIME, List.of(), ""
+  ),
+  EXISTING_MEMBER_PRO_GIFT_ENDS_AT(
+    ConfigGroup.EXISTING_MEMBER_PRO_GIFT, "Pro 종료 시각",
+    "이 시각까지 Pro (보통 기준 시각 6개월 뒤). 앱 내 요금제에 'Pro 선물 · 이 날짜까지'로 보인다. 형식 2027-05-20T00:00. 비어 있으면 선물 꺼짐",
+    ConfigValueType.DATETIME, List.of(), ""
   ),
   PRO_AI_IMAGE_GENERATION(
     ConfigGroup.PLAN_PRO, "AI 맞춤 삽화",

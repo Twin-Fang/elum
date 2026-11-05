@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
@@ -63,6 +64,7 @@ public class RoutineCreateService {
   private final CreditQueryService creditQueryService;
   private final EnabledLocales enabledLocales;
   private final RoutinePersonalizationProvider routinePersonalizationProvider;
+  private final RoutineAiPicturePolicy routineAiPicturePolicy;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -164,10 +166,14 @@ public class RoutineCreateService {
     RoutinePersonalizationProvider.Plan personalizationPlan = routinePersonalizationProvider.planFor(
       caller.memberId(), profile.getId(), profile.getNickname(), contentLocale);
     AiCallContext.setRoutinePersonalization(personalizationPlan.personalization());
+    // Free(AI 맞춤 그림 꺼짐)는 직접 사진과 같은 경로로 그림 호출 없이 픽토그램만 (그림 몫 청구도 없음)
+    ImageStyle imageStyleForCards = routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())
+      ? ImageStyle.PHOTO_ONLY
+      : profile.getImageStyle();
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
-        profile.getCharacter(), profile.getImageStyle(), profile.getId()
+        profile.getCharacter(), imageStyleForCards, profile.getId()
       );
     } catch (RuntimeException e) {
       // 만들지 못했으면 청구하지 않는다 — 예약을 돌려준다.

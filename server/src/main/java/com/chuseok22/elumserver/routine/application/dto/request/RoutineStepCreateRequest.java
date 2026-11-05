@@ -25,7 +25,8 @@ public record RoutineStepCreateRequest(
 
   // 그림은 돈이라 명시적으로 고를 때만 만든다. 빼면 false — 자동으로 그리지 않는다.
   @Schema(description = "AI 그림을 만들지 여부(기본 false). true 면 크레딧 1(그림 단가)을 쓰고, 모자라면 카드만 저장하고 "
-    + "응답 imageSkippedReason 에 AI_CREDIT_INSUFFICIENT 를 담는다. 설명이 비어 있으면 그리지 않는다",
+    + "응답 imageSkippedReason 에 AI_CREDIT_INSUFFICIENT 를 담는다. 요금제에 AI 맞춤 그림이 없으면(Free) 그리지 않고 "
+    + "AI_IMAGE_NOT_ALLOWED 를 담는다(픽토그램). 설명이 비어 있으면 그리지 않는다",
     example = "false", nullable = true)
   Boolean generateImage
 ) {

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,7 +27,9 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepImageRedrawRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepImageCandidateResponse;
+import com.chuseok22.elumserver.routine.core.ImageRedrawHint;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
@@ -41,12 +44,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * 카드 그림 다시 그리기: 크레딧 예약·정산·반환과 카드 그림 교체 (그림 생성·저장은 가짜, 실제 AI 호출 없음)
+ * 카드 그림 새로 그리기(후보): 권한·대상·크레딧 예약·정산·반환, 카드 그림은 그대로 (그림 생성·저장은 가짜, 실제 AI 호출 없음)
  * 무료/유료 단가 판정(Pro 하루 한도 안 0 · Free 정책 단가)은 CreditReservationServiceTest 의 regenerate_* 가 맡는다
  */
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +69,7 @@ class RoutineStepImageRegenerateServiceTest {
   @Mock private AiDailyBudgetGuard aiDailyBudgetGuard;
   @Mock private RoutineStepImageThrottle routineStepImageThrottle;
   @Mock private CreditReservationService creditReservationService;
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
 
   private Routine routine;
   private RoutineStepImageRegenerateService service;
@@ -73,7 +78,7 @@ class RoutineStepImageRegenerateServiceTest {
   void setUp() {
     service = new RoutineStepImageRegenerateService(routineRepository, routineStepRepository, profileAccessGuard,
       cardImageGenerator, routineImageStorage, aiDailyBudgetGuard, routineStepImageThrottle, creditReservationService,
-      mock(PlatformTransactionManager.class));
+      routineAiPicturePolicy, mock(PlatformTransactionManager.class));
     routine = routine(OLD_KEY);
     lenient().when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
     lenient().when(routineStepRepository.findById("step-1")).thenReturn(Optional.of(routine.getSteps().get(0)));
@@ -85,62 +90,107 @@ class RoutineStepImageRegenerateServiceTest {
   }
 
   @Test
-  @DisplayName("성공: IMAGE_REGENERATE 예약 > 그림 1장 정산 > 카드 그림이 새 열쇠로 바뀌고 옛 그림을 지운다 (반환 없음)")
-  void regenerate_replacesPictureAndSettles() {
-    RoutineStepResponse response = service.regenerate(GUARDIAN, "routine-1", "step-1");
+  @DisplayName("성공: IMAGE_REGENERATE 예약 > 그림 1장 정산 > 후보만 저장하고 카드 그림은 그대로 (이룸이는 아직 옛 그림)")
+  void drawCandidate_aiPicture_reservesRegenerate_keepsImage() {
+    RoutineStepImageCandidateResponse response = draw(null);
 
-    assertThat(response.imagePath()).isEqualTo(NEW_KEY);
-    assertThat(response.aiPicture()).isTrue();
-    assertThat(routine.getSteps().get(0).getImagePath()).isEqualTo(NEW_KEY);
+    assertThat(response.candidateImagePath()).isEqualTo(NEW_KEY);
+    assertThat(response.isFirstPicture()).isFalse();
+    assertThat(step().getImagePath()).isEqualTo(OLD_KEY);
+    assertThat(step().getImageCandidatePath()).isEqualTo(NEW_KEY);
     verify(creditReservationService).reserve(eq("member-1"), eq(CreditJobKind.IMAGE_REGENERATE),
       startsWith(RoutineStepImageRegenerateService.REQUEST_KEY_PREFIX), eq(false));
     verify(creditReservationService).settle("job-1", 0, 1, "routine-1", "step-1");
     verify(creditReservationService, never()).release(anyString(), anyString());
-    verify(routineImageStorage).delete(OLD_KEY);
+    verify(routineImageStorage, never()).delete(anyString());
   }
 
   @Test
-  @DisplayName("성공: 복제 일과가 옛 그림을 같이 쓰면 옛 그림을 지우지 않는다 (복제본 그림이 깨지지 않게)")
-  void regenerate_keepsSharedOldPicture() {
-    when(routineStepRepository.existsByImagePathAndIdNot(OLD_KEY, "step-1")).thenReturn(true);
+  @DisplayName("그림 없는 카드(픽토그램)는 처음 그리기 — 카드 그림 단가 CARD_IMAGE 로 예약 (무료 다시 그리기 한도 밖)")
+  void drawCandidate_noPicture_reservesCardImage() {
+    step().setImagePath(null);
+    when(creditReservationService.reserve(eq("member-1"), eq(CreditJobKind.CARD_IMAGE), anyString(), eq(false)))
+      .thenReturn(CreditReservation.reserved("job-2"));
 
-    service.regenerate(GUARDIAN, "routine-1", "step-1");
+    RoutineStepImageCandidateResponse response = draw(null);
 
-    verify(routineImageStorage, never()).delete(OLD_KEY);
+    assertThat(response.isFirstPicture()).isTrue();
+    assertThat(step().getImagePath()).isNull();
+    verify(creditReservationService, never()).reserve(any(), eq(CreditJobKind.IMAGE_REGENERATE), any(), anyBoolean());
+    verify(creditReservationService).settle("job-2", 0, 1, "routine-1", "step-1");
   }
 
   @Test
-  @DisplayName("그림 생성 실패: 예약을 돌려주고 카드 그림은 그대로, REGENERATE_FAILED (청구 없음)")
-  void regenerate_generationFails_refundsAndKeepsPicture() {
+  @DisplayName("Free(AI 맞춤 그림 없음)는 예약·그림 전에 AI_IMAGE_NOT_ALLOWED — 원가가 나가지 않는다")
+  void drawCandidate_free_rejectedBeforeReserve() {
+    doThrow(new CustomException(ErrorCode.AI_IMAGE_NOT_ALLOWED)).when(routineAiPicturePolicy).requireAiPicture("member-1");
+
+    assertErrorCode(() -> draw(null), ErrorCode.AI_IMAGE_NOT_ALLOWED);
+    verifyNoInteractions(creditReservationService, cardImageGenerator);
+  }
+
+  @Test
+  @DisplayName("보호자 요청(칩 + 글)이 그림 지시문의 guardianRequest 로 간다")
+  void drawCandidate_passesGuardianRequest() {
+    ArgumentCaptor<CardImageGenerator.CardImageRequest> captor = ArgumentCaptor.forClass(CardImageGenerator.CardImageRequest.class);
+
+    draw(new RoutineStepImageRedrawRequest("우산을 파란색으로", List.of(ImageRedrawHint.SIMPLER)));
+
+    verify(cardImageGenerator).generate(captor.capture());
+    assertThat(captor.getValue().guardianRequest())
+      .isEqualTo(ImageRedrawHint.SIMPLER.getInstruction() + " Guardian note: 우산을 파란색으로");
+  }
+
+  @Test
+  @DisplayName("요청 글이 60자를 넘으면 예약 전에 INVALID_INPUT_VALUE")
+  void drawCandidate_tooLongRequest_rejectedBeforeReserve() {
+    assertErrorCode(() -> draw(new RoutineStepImageRedrawRequest("가".repeat(61), null)), ErrorCode.INVALID_INPUT_VALUE);
+    verifyNoInteractions(creditReservationService, cardImageGenerator);
+  }
+
+  @Test
+  @DisplayName("고르지 않은 옛 후보가 있으면 새 후보로 바꾸고 옛 후보 파일을 지운다")
+  void drawCandidate_replacesPreviousCandidate() {
+    step().setImageCandidatePath("step-1/ai-old-candidate.png");
+
+    draw(null);
+
+    assertThat(step().getImageCandidatePath()).isEqualTo(NEW_KEY);
+    verify(routineImageStorage).delete("step-1/ai-old-candidate.png");
+    verify(routineImageStorage, never()).delete(NEW_KEY);
+  }
+
+  @Test
+  @DisplayName("그림 생성 실패: 예약을 돌려주고 카드 그림·후보 그대로, REGENERATE_FAILED (청구 없음)")
+  void drawCandidate_generationFails_releases() {
     when(cardImageGenerator.generate(any())).thenThrow(new IllegalStateException("provider down"));
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"),
-      ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
 
     verify(creditReservationService).release(eq("job-1"), anyString());
     verify(creditReservationService, never()).settle(anyString(), anyInt(), anyInt(), any(), any());
-    assertThat(routine.getSteps().get(0).getImagePath()).isEqualTo(OLD_KEY);
+    assertThat(step().getImagePath()).isEqualTo(OLD_KEY);
+    assertThat(step().getImageCandidatePath()).isNull();
   }
 
   @Test
   @DisplayName("그림이 비어 돌아오면 저장하지 않고 반환")
-  void regenerate_emptyImage_refunds() {
+  void drawCandidate_emptyImage_releases() {
     when(cardImageGenerator.generate(any())).thenReturn(null);
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"),
-      ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
 
     verify(routineImageStorage, never()).saveRegenerated(anyString(), any());
     verify(creditReservationService).release(eq("job-1"), anyString());
   }
 
   @Test
-  @DisplayName("정산이 실패하면 새 그림을 지우고 반환 — 카드는 옛 그림을 가리킨 채 청구도 없다")
-  void regenerate_settleFails_deletesNewPictureAndRefunds() {
+  @DisplayName("정산이 실패하면 새 그림을 지우고 반환")
+  void drawCandidate_settleFails_deletesNewPictureAndReleases() {
     when(creditReservationService.settle("job-1", 0, 1, "routine-1", "step-1"))
       .thenThrow(new CustomException(ErrorCode.AI_CREDIT_UNAVAILABLE));
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"), ErrorCode.AI_CREDIT_UNAVAILABLE);
+    assertErrorCode(() -> draw(null), ErrorCode.AI_CREDIT_UNAVAILABLE);
 
     verify(routineImageStorage).delete(NEW_KEY);
     verify(routineImageStorage, never()).delete(OLD_KEY);
@@ -148,78 +198,102 @@ class RoutineStepImageRegenerateServiceTest {
   }
 
   @Test
+  @DisplayName("그리는 사이 보호자가 사진으로 바꾸면 새 그림을 버리고 반환, NOT_REGENERATABLE")
+  void drawCandidate_pictureChangedWhileDrawing_releases() {
+    RoutineStep reloaded = new RoutineStep();
+    reloaded.setId("step-1");
+    reloaded.setImagePath("step-1/0f8fad5b-d9cb-469f-a165-70867728950e.jpg");
+    when(routineStepRepository.findById("step-1")).thenReturn(Optional.of(reloaded));
+
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
+
+    assertThat(reloaded.getImageCandidatePath()).isNull();
+    verify(routineImageStorage).delete(NEW_KEY);
+    verify(creditReservationService).release(eq("job-1"), anyString());
+  }
+
+  @Test
   @DisplayName("그리는 사이 카드가 지워지면 새 그림을 버리고 반환, ROUTINE_STEP_NOT_FOUND")
-  void regenerate_stepDeletedWhileDrawing() {
+  void drawCandidate_stepDeletedWhileDrawing() {
     when(routineStepRepository.findById("step-1")).thenReturn(Optional.empty());
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"), ErrorCode.ROUTINE_STEP_NOT_FOUND);
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_NOT_FOUND);
 
     verify(routineImageStorage).delete(NEW_KEY);
     verify(creditReservationService).release(eq("job-1"), anyString());
   }
 
   @Test
-  @DisplayName("보호자 사진·가져온 그림·그림 없는 카드는 예약·생성 전에 NOT_REGENERATABLE (사진을 AI 그림으로 덮지 않게)")
-  void regenerate_notAiPicture_rejectedBeforeSpending() {
-    for (String key : new String[]{"step-1/0f8fad5b-d9cb-469f-a165-70867728950e.jpg", "step-1/talk-abc.png", null}) {
-      routine.getSteps().get(0).setImagePath(key);
-
-      assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"),
-        ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
+  @DisplayName("보호자 사진·가져온 그림 카드, 설명 없는 카드는 예약·생성 전에 NOT_REGENERATABLE (사진을 AI 그림으로 덮지 않게)")
+  void drawCandidate_guardianPhoto_notRegeneratable() {
+    for (String key : new String[]{"step-1/0f8fad5b-d9cb-469f-a165-70867728950e.jpg", "step-1/talk-abc.png"}) {
+      step().setImagePath(key);
+      assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
     }
+    step().setImagePath(null);
+    step().setDescription(" ");
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
     verifyNoInteractions(creditReservationService, cardImageGenerator);
   }
 
   @Test
-  @DisplayName("직접 사진 방식 이룸이는 NOT_REGENERATABLE — AI 그림을 만들지 않는 방식")
-  void regenerate_photoOnlyStyle_rejected() {
+  @DisplayName("직접 사진 방식 이룸이는 그림 없는 카드도 NOT_REGENERATABLE — AI 그림을 만들지 않는 방식")
+  void drawCandidate_photoOnlyStyle_rejected() {
     routine.getProfile().setImageStyle(ImageStyle.PHOTO_ONLY);
+    step().setImagePath(null);
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"),
-      ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
     verifyNoInteractions(creditReservationService, cardImageGenerator);
   }
 
   @Test
   @DisplayName("크레딧 부족이면 그 코드 그대로 — 그림을 부르지 않는다")
-  void regenerate_insufficientCredit_propagates() {
+  void drawCandidate_insufficientCredit_propagates() {
     when(creditReservationService.reserve(eq("member-1"), eq(CreditJobKind.IMAGE_REGENERATE), anyString(), eq(false)))
       .thenThrow(new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT));
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"), ErrorCode.AI_CREDIT_INSUFFICIENT);
+    assertErrorCode(() -> draw(null), ErrorCode.AI_CREDIT_INSUFFICIENT);
     verifyNoInteractions(cardImageGenerator);
   }
 
   @Test
   @DisplayName("하루 비용 상한이면 예약 전에 AI_DAILY_BUDGET_EXCEEDED")
-  void regenerate_dailyBudget_rejectedBeforeReserve() {
+  void drawCandidate_dailyBudget_rejectedBeforeReserve() {
     doThrow(new CustomException(ErrorCode.AI_DAILY_BUDGET_EXCEEDED)).when(aiDailyBudgetGuard).guard();
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"), ErrorCode.AI_DAILY_BUDGET_EXCEEDED);
+    assertErrorCode(() -> draw(null), ErrorCode.AI_DAILY_BUDGET_EXCEEDED);
     verifyNoInteractions(creditReservationService, cardImageGenerator);
   }
 
   @Test
   @DisplayName("그림 요청이 너무 잦으면 예약을 돌려주고 ROUTINE_REQUEST_TOO_FREQUENT")
-  void regenerate_throttled_refunds() {
+  void drawCandidate_throttled_releases() {
     when(routineStepImageThrottle.tryAcquire("member-1")).thenReturn(false);
 
-    assertErrorCode(() -> service.regenerate(GUARDIAN, "routine-1", "step-1"), ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT);
+    assertErrorCode(() -> draw(null), ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT);
     verify(creditReservationService).release(eq("job-1"), anyString());
     verifyNoInteractions(cardImageGenerator);
   }
 
   @Test
-  @DisplayName("크레딧 정책이 꺼져 있으면 예약·정산 없이 그림만 바꾼다")
-  void regenerate_creditDisabled_noSettlement() {
+  @DisplayName("크레딧 정책이 꺼져 있으면 예약·정산 없이 후보만 만든다")
+  void drawCandidate_creditDisabled_noSettlement() {
     when(creditReservationService.reserve(eq("member-1"), eq(CreditJobKind.IMAGE_REGENERATE), anyString(), eq(false)))
       .thenReturn(CreditReservation.disabled());
 
-    RoutineStepResponse response = service.regenerate(GUARDIAN, "routine-1", "step-1");
+    RoutineStepImageCandidateResponse response = draw(null);
 
-    assertThat(response.imagePath()).isEqualTo(NEW_KEY);
+    assertThat(response.candidateImagePath()).isEqualTo(NEW_KEY);
     verify(creditReservationService, never()).settle(anyString(), anyInt(), anyInt(), any(), any());
     verify(creditReservationService, never()).release(anyString(), anyString());
+  }
+
+  private RoutineStepImageCandidateResponse draw(RoutineStepImageRedrawRequest request) {
+    return service.drawCandidate(GUARDIAN, "routine-1", "step-1", request);
+  }
+
+  private RoutineStep step() {
+    return routine.getSteps().get(0);
   }
 
   private static void assertErrorCode(org.assertj.core.api.ThrowableAssert.ThrowingCallable call, ErrorCode code) {

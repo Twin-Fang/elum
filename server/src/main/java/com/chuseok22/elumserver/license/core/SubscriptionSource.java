@@ -21,6 +21,8 @@ public enum SubscriptionSource {
   APPLE_IAP("App Store 결제"),
   GOOGLE_IAP("Google Play 결제"),
   PROMO("프로모션"),
+  /// 기존 가입자 Pro 선물 (조회 시 계산, 구독 행에 쓰지 않음 · 내 요금제 표시용)
+  PRO_GIFT("기존 가입자 Pro 선물"),
   ;
 
   private final String label;

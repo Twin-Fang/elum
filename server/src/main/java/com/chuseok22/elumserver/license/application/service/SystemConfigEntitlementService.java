@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.license.application.service;
 
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.member.application.service.MemberSignupTimeService;
 import com.chuseok22.elumserver.systemconfig.application.service.ConfigDateTime;
@@ -9,6 +10,7 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
   private final SubscriptionRepository subscriptionRepository;
   private final SystemConfigService systemConfigService;
   private final MemberSignupTimeService memberSignupTimeService;
+  private final ExistingMemberProGift existingMemberProGift;
 
   @Override
   @Transactional(readOnly = true)
@@ -41,10 +44,18 @@ public class SystemConfigEntitlementService implements EntitlementService {
       return PlanType.FREE;
     }
     try {
-      return subscriptionRepository.findByMemberId(memberId)
-        // 행이 없으면 Free (신규가입 PRO 이벤트 대상이면 Pro). 기존 회원을 옮기는 작업이 필요 없는 이유다.
-        .map(subscription -> subscription.effectivePlan(LocalDateTime.now()))
-        .orElseGet(() -> planOfMemberWithoutSubscription(memberId));
+      Optional<Subscription> subscription = subscriptionRepository.findByMemberId(memberId);
+      // 실제로 Pro 인 구독 행이 먼저 (선물·이벤트보다 우선)
+      if (subscription.isPresent() && subscription.get().effectivePlan(LocalDateTime.now()) == PlanType.PRO) {
+        return PlanType.PRO;
+      }
+      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물
+      if (subscription.map(Subscription::isUntouchedSignupFree).orElse(true)
+        && existingMemberProGift.giftEndsAt(memberId).isPresent()) {
+        return PlanType.PRO;
+      }
+      // 행이 없으면 Free (신규가입 PRO 이벤트 대상이면 Pro). 기존 회원을 옮기는 작업이 필요 없는 이유다.
+      return subscription.isPresent() ? PlanType.FREE : planOfMemberWithoutSubscription(memberId);
     } catch (Exception e) {
       log.warn("구독 조회 실패 — Free로 계속 진행한다: memberId={}", memberId, e);
       return PlanType.FREE;

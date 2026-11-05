@@ -120,4 +120,18 @@ class RoutineImagePromptComposerTest {
       .contains("\"sceneDetail\":\"The character holds a stethoscope.\"");
     assertThat(descriptionOnly).contains("\"scene\":{\"stepDescription\":\"옷을 입어요.\"}");
   }
+
+  @Test
+  @DisplayName("고쳐서 다시 그리기의 보호자 요청은 장면 JSON 의 guardianRequest 로 싣고, 없으면 필드를 생략한다")
+  void scene_carriesGuardianRequestOnlyWhenPresent() {
+    language("KO");
+
+    String withRequest = composer.compose(
+      new CardScene(null, null, "옷을 입어요.", null, "Use brighter, lighter colors. Guardian note: 파란 옷"),
+      CharacterType.LULU, true);
+    String withoutRequest = composer.compose(new CardScene(null, null, "옷을 입어요.", null), CharacterType.LULU, true);
+
+    assertThat(withRequest).contains("\"guardianRequest\":\"Use brighter, lighter colors. Guardian note: 파란 옷\"");
+    assertThat(withoutRequest).doesNotContain("guardianRequest");
+  }
 }

@@ -57,21 +57,35 @@ public class CardImageGenerator {
    * @param imageStyle    이룸이의 그림 방식. null 이면 만화 — 기존 동작
    * @param routineTitle  일과 제목 (그림 AI 에게 어떤 일과인지 알리는 참고용). 직접 추가한 카드는 null
    * @param stepTitle     카드 제목. 직접 추가한 카드는 null
+   * @param guardianRequest 고쳐서 다시 그리기의 보호자 요청 (칩 영어 문장 + Guardian note). 없으면 null
    */
   public record CardImageRequest(
     String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle,
-    String routineTitle, String stepTitle
+    String routineTitle, String stepTitle, String guardianRequest
   ) {
 
     public CardImageRequest {
       imageStyle = ImageStyle.orDefault(imageStyle);
     }
 
+    /// 보호자 요청 없는 카드 (일과 만들기·카드 추가)
+    public CardImageRequest(
+      String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle,
+      String routineTitle, String stepTitle
+    ) {
+      this(description, imagePromptEn, characterType, seedKey, imageStyle, routineTitle, stepTitle, null);
+    }
+
+    /// 설명 한 줄만 받는 경로(실사·FLUX 번역)용: 설명 + 보호자 요청
+    String descriptionWithGuardianRequest() {
+      return guardianRequest == null ? description : description + " (" + guardianRequest + ")";
+    }
+
     /// 설명만 있는 카드 (보호자가 직접 추가한 카드, 제목·영어 장면 없음)
     public CardImageRequest(
       String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
     ) {
-      this(description, imagePromptEn, characterType, seedKey, imageStyle, null, null);
+      this(description, imagePromptEn, characterType, seedKey, imageStyle, null, null, null);
     }
   }
 
@@ -91,10 +105,11 @@ public class CardImageGenerator {
       return fallbackToOpenAi(request, new IllegalStateException("FLUX 키가 없음"));
     }
 
-    String scene = usableScene(request.imagePromptEn());
+    // 보호자 요청이 있으면 글 AI 장면 대신 설명 + 요청을 번역 (요청이 장면에 들어가게)
+    String scene = request.guardianRequest() == null ? usableScene(request.imagePromptEn()) : null;
     if (scene == null) {
       try {
-        scene = usableScene(imagePromptTranslator.translateImagePrompt(request.description()));
+        scene = usableScene(imagePromptTranslator.translateImagePrompt(request.descriptionWithGuardianRequest()));
       } catch (Exception e) {
         log.warn("FLUX 용 영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
           LogTextLength.of(request.description()), e);
@@ -123,7 +138,7 @@ public class CardImageGenerator {
    */
   private GeneratedImage generateRealistic(CardImageRequest request) {
     if (imageClientRouter.selected() != ImageProvider.FLUX) {
-      return imageClientRouter.current().generateRealisticImage(request.description());
+      return imageClientRouter.current().generateRealisticImage(request.descriptionWithGuardianRequest());
     }
     if (!fluxImageClient.available()) {
       log.warn("FLUX 를 골랐지만 키가 없다 — 이 실사 카드는 OpenAI 로 그린다");
@@ -132,7 +147,7 @@ public class CardImageGenerator {
 
     String scene;
     try {
-      scene = usableScene(imagePromptTranslator.translateRealisticImagePrompt(request.description()));
+      scene = usableScene(imagePromptTranslator.translateRealisticImagePrompt(request.descriptionWithGuardianRequest()));
     } catch (Exception e) {
       log.warn("FLUX 용 실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
         LogTextLength.of(request.description()), e);
@@ -177,7 +192,7 @@ public class CardImageGenerator {
       throw new IllegalStateException("FLUX 실패, OpenAI 도 쓸 수 없음", cause);
     }
     if (request.imageStyle() == ImageStyle.REALISTIC) {
-      return openAi.get().generateRealisticImage(request.description());
+      return openAi.get().generateRealisticImage(request.descriptionWithGuardianRequest());
     }
     return generateWithSafetyRetry(openAi.get(), request);
   }
@@ -210,6 +225,7 @@ public class CardImageGenerator {
   /// 글 AI 의 영어 장면은 한 줄·영어일 때만 싣는다 (그림 지시문 JSON 의 sceneDetail)
   private CardScene toCardScene(CardImageRequest request) {
     return new CardScene(
-      request.routineTitle(), request.stepTitle(), request.description(), usableScene(request.imagePromptEn()));
+      request.routineTitle(), request.stepTitle(), request.description(), usableScene(request.imagePromptEn()),
+      request.guardianRequest());
   }
 }

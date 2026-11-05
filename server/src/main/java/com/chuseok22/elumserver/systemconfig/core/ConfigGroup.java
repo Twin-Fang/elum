@@ -20,6 +20,8 @@ public enum ConfigGroup {
   PLAN_PRO("Pro 플랜 한도"),
   // 구독 행이 없는 새 회원에게 기간 한정으로 Pro 를 주는 이벤트.
   SIGNUP_PRO_EVENT("신규가입 PRO 이벤트"),
+  // 결제 전부터 쓴 회원에게 종료 시각까지 Pro 를 주는 선물.
+  EXISTING_MEMBER_PRO_GIFT("기존 가입자 Pro 선물"),
   AI_BUDGET("AI 비용 상한"),
   // 호출 비용·남용 방지 한도: 요청 간격, 창당 횟수, 동시 실행 수.
   USAGE_LIMIT("사용 한도·남용 방지"),

@@ -16,13 +16,16 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepImageRedrawRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepImageCandidateResponse;
+import com.chuseok22.elumserver.routine.core.GuardianImageRequest;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,11 +33,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * 카드 그림 다시 그리기: 대상 확인 > 하루 비용 상한 > 크레딧 예약(IMAGE_REGENERATE) > 횟수 제한 > 그림 생성 > 새 열쇠 저장 > 카드 교체·정산 > 옛 그림 정리
- * 응답을 기다리는 동기 호출 (앱이 진행 표시 후 새 그림·실패 코드를 바로 받음). 실패하면 예약 반환·새 파일 삭제, 카드 그림은 그대로
+ * 카드 그림 새로 그리기(다시 그리기·처음 그리기): 권한 > 요청 정리 > 대상 확인 > 하루 비용 상한 > 크레딧 예약 > 횟수 제한 > 그림 생성 > 후보 저장·정산
+ * 카드 그림은 바꾸지 않음 — 후보만 남기고 보호자가 고르면 {@link RoutineStepImageCandidateService} 가 바꿈. 실패하면 예약 반환·새 파일 삭제
  *
- * <p>단가는 예약이 정한다 — 무료 다시 그리기 권한(Pro)이 있고 하루 한도 안이면 0, 아니면 정책 단가.
- * 그림 제공자·품질은 카드 그림과 같은 {@link CardImageGenerator} 를 탄다 (고품질은 회원 권한일 때만, 호출 문맥의 회원으로 판정).
+ * <p>단가: AI 그림 카드 = IMAGE_REGENERATE (Pro 하루 무료 한도 안이면 0), 그림 없는 카드 = CARD_IMAGE (무료 한도 밖).
+ * 그림을 그렸으면 보호자가 원래 그림을 골라도 돌려주지 않음 (정산은 후보 저장 때).
  */
 @Slf4j
 @Service
@@ -51,7 +54,8 @@ public class RoutineStepImageRegenerateService {
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageThrottle routineStepImageThrottle;
   private final CreditReservationService creditReservationService;
-  /// 대상 읽기 · 카드 교체+정산을 각각 짧은 트랜잭션으로 (그림 생성 수 초 동안 DB 연결을 잡지 않음)
+  private final RoutineAiPicturePolicy routineAiPicturePolicy;
+  /// 대상 읽기 · 후보 저장+정산을 각각 짧은 트랜잭션으로 (그림 생성 수 초 동안 DB 연결을 잡지 않음)
   private final TransactionTemplate transaction;
 
   public RoutineStepImageRegenerateService(
@@ -59,7 +63,7 @@ public class RoutineStepImageRegenerateService {
     ProfileAccessGuard profileAccessGuard, CardImageGenerator cardImageGenerator,
     RoutineImageStorage routineImageStorage, AiDailyBudgetGuard aiDailyBudgetGuard,
     RoutineStepImageThrottle routineStepImageThrottle, CreditReservationService creditReservationService,
-    PlatformTransactionManager transactionManager
+    RoutineAiPicturePolicy routineAiPicturePolicy, PlatformTransactionManager transactionManager
   ) {
     this.routineRepository = routineRepository;
     this.routineStepRepository = routineStepRepository;
@@ -69,52 +73,58 @@ public class RoutineStepImageRegenerateService {
     this.aiDailyBudgetGuard = aiDailyBudgetGuard;
     this.routineStepImageThrottle = routineStepImageThrottle;
     this.creditReservationService = creditReservationService;
+    this.routineAiPicturePolicy = routineAiPicturePolicy;
     this.transaction = new TransactionTemplate(transactionManager);
   }
 
   /**
-   * 카드 한 장의 AI 그림을 새로 그려 바꾼다
+   * 카드 한 장의 새 그림 후보를 그린다 (카드 그림은 그대로)
    *
-   * @throws CustomException ROUTINE_NOT_FOUND · ROUTINE_STEP_NOT_FOUND · 권한 코드 · ROUTINE_STEP_IMAGE_NOT_REGENERATABLE ·
-   *                         AI_DAILY_BUDGET_EXCEEDED · AI_CREDIT_* · ROUTINE_REQUEST_TOO_FREQUENT · ROUTINE_STEP_IMAGE_REGENERATE_FAILED
+   * @throws CustomException AI_IMAGE_NOT_ALLOWED · INVALID_INPUT_VALUE · ROUTINE_NOT_FOUND · ROUTINE_STEP_NOT_FOUND · 권한 코드 ·
+   *                         ROUTINE_STEP_IMAGE_NOT_REGENERATABLE · AI_DAILY_BUDGET_EXCEEDED · AI_CREDIT_* ·
+   *                         ROUTINE_REQUEST_TOO_FREQUENT · ROUTINE_STEP_IMAGE_REGENERATE_FAILED
    */
-  public RoutineStepResponse regenerate(Caller caller, String routineId, String stepId) {
-    RegenerateTarget target = readTarget(caller, routineId, stepId);
+  public RoutineStepImageCandidateResponse drawCandidate(
+    Caller caller, String routineId, String stepId, RoutineStepImageRedrawRequest request
+  ) {
+    routineAiPicturePolicy.requireAiPicture(caller.memberId());
+    RoutineStepImageRedrawRequest redrawRequest = request == null ? RoutineStepImageRedrawRequest.EMPTY : request;
+    String guardianRequest = GuardianImageRequest.compose(redrawRequest.requestText(), redrawRequest.hints());
+    DrawTarget target = readTarget(caller, routineId, stepId);
     aiDailyBudgetGuard.guard();
-    String creditJobId = reserveCredit(caller.memberId());
-    // 그림을 붙이고 정산했으면 null. 그 밖의 모든 출구는 finally 에서 이 까닭으로 반환 (성공·실패 공통)
-    String releaseReason = "다시 그리기 중단";
+    String creditJobId = reserveCredit(caller.memberId(), target.isFirstPicture());
+    // 후보를 저장·정산했으면 null. 그 밖의 모든 출구는 finally 에서 이 까닭으로 반환 (성공·실패 공통)
+    String releaseReason = "그림 그리기 중단";
     String newKey = null;
     try {
       requireNotTooFrequent(caller.memberId(), stepId);
-      GeneratedImage image = generate(caller.memberId(), creditJobId, target);
+      GeneratedImage image = generate(caller.memberId(), creditJobId, target, guardianRequest);
       newKey = saveImage(stepId, image);
-      RoutineStepResponse response = replaceAndSettle(target, newKey, creditJobId);
+      String replacedCandidateKey = storeCandidateAndSettle(target, newKey, creditJobId);
       releaseReason = null;
-      deleteOldIfUnreferenced(target.oldImagePath(), stepId);
-      log.info("[routine image regenerate] done : routineId={}, stepId={}", routineId, stepId);
-      return response;
+      deleteIfPresent(replacedCandidateKey);
+      log.info("[routine image regenerate] candidate ready : routineId={}, stepId={}, firstPicture={}, hasRequest={}",
+        routineId, stepId, target.isFirstPicture(), guardianRequest != null);
+      return new RoutineStepImageCandidateResponse(stepId, newKey, target.isFirstPicture());
     } catch (CustomException e) {
-      releaseReason = "다시 그리기 실패: " + e.getErrorCode().name();
+      releaseReason = "그림 그리기 실패: " + e.getErrorCode().name();
       throw e;
     } catch (RuntimeException e) {
       log.warn("[routine image regenerate] failed : routineId={}, stepId={}", routineId, stepId, e);
-      releaseReason = "다시 그리기 실패: " + e.getClass().getSimpleName();
+      releaseReason = "그림 그리기 실패: " + e.getClass().getSimpleName();
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
     } finally {
       AiCallContext.clear();
       if (releaseReason != null) {
-        // 카드에 붙지 않은 새 그림은 남기지 않음
-        if (newKey != null) {
-          routineImageStorage.delete(newKey);
-        }
+        // 후보로 남지 않은 새 그림은 지움
+        deleteIfPresent(newKey);
         releaseCredit(creditJobId, releaseReason);
       }
     }
   }
 
-  /// 대상 확인 (권한 EDIT, 카드 있음, AI 그림 카드, 설명 있음, 직접 사진 방식 아님) > 그림에 필요한 값만 꺼냄
-  private RegenerateTarget readTarget(Caller caller, String routineId, String stepId) {
+  /// 대상 확인 (권한 EDIT, 카드 있음, 다시 그리기·처음 그리기 대상) > 그림에 필요한 값만 꺼냄
+  private DrawTarget readTarget(Caller caller, String routineId, String stepId) {
     return transaction.execute(status -> {
       Routine routine = RoutineRules.routineFor(routineRepository, profileAccessGuard, caller, routineId, RoutineAction.EDIT);
       RoutineStep step = routine.getSteps().stream()
@@ -122,15 +132,15 @@ public class RoutineStepImageRegenerateService {
         .findFirst()
         .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
       ImageStyle imageStyle = routine.getProfile().getImageStyle();
-      if (!isRegeneratable(step, imageStyle)) {
-        log.info("[routine image regenerate] rejected 409 : not an AI picture card, stepId={}", stepId);
+      if (!isDrawable(step, imageStyle)) {
+        log.info("[routine image regenerate] rejected 409 : not a drawable card, stepId={}", stepId);
         throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
       }
       String nickname = routine.getProfile().getNickname();
       AppLocale language = routine.getLanguage() == null ? AppLocale.KO : routine.getLanguage();
       // 그림 AI 로 나가는 글은 이룸이 이름을 자리표시로 (저장값은 그대로)
-      return new RegenerateTarget(
-        routineId, stepId, step.getImagePath(), language,
+      return new DrawTarget(
+        routineId, stepId, step.getImagePath(), step.getImagePath() == null, language,
         NicknamePlaceholder.mask(step.getDescription(), nickname, language),
         NicknamePlaceholder.mask(step.getTitle(), nickname, language),
         NicknamePlaceholder.mask(routine.getTitle(), nickname, language),
@@ -140,17 +150,21 @@ public class RoutineStepImageRegenerateService {
     });
   }
 
-  /// 다시 그릴 수 있는 카드인가 3개: AI 그림이 붙어 있음, 설명 있음, 이룸이 그림 방식이 직접 사진 아님
-  private static boolean isRegeneratable(RoutineStep step, ImageStyle imageStyle) {
-    return RoutineImageStorage.isAiDrawn(step.getImagePath())
-      && step.getDescription() != null && !step.getDescription().isBlank()
-      && imageStyle != ImageStyle.PHOTO_ONLY;
+  /**
+   * 새로 그릴 수 있는 카드인가 3개: 설명 있음, 이룸이 그림 방식이 직접 사진 아님,
+   * 그림이 AI 그림(다시 그리기) 또는 그림 없음(처음 그리기 — 픽토그램·예시 이미지 카드). 보호자 사진·가져온 그림은 제외
+   */
+  private static boolean isDrawable(RoutineStep step, ImageStyle imageStyle) {
+    boolean hasDescription = step.getDescription() != null && !step.getDescription().isBlank();
+    boolean isPictureReplaceable = step.getImagePath() == null || RoutineImageStorage.isAiDrawn(step.getImagePath());
+    return hasDescription && isPictureReplaceable && imageStyle != ImageStyle.PHOTO_ONLY;
   }
 
-  /// 크레딧 예약 (꺼져 있으면 null). 거절(부족·동결·장부 오류)은 그대로 던져 앱이 코드를 보임
-  private String reserveCredit(String memberId) {
+  /// 크레딧 예약 (꺼져 있으면 null): 처음 그리기는 카드 그림 단가, 다시 그리기는 무료 한도가 있는 다시 그리기 단가
+  private String reserveCredit(String memberId, boolean isFirstPicture) {
+    CreditJobKind kind = isFirstPicture ? CreditJobKind.CARD_IMAGE : CreditJobKind.IMAGE_REGENERATE;
     CreditReservation reservation = creditReservationService.reserve(
-      memberId, CreditJobKind.IMAGE_REGENERATE, REQUEST_KEY_PREFIX + UUID.randomUUID(), false);
+      memberId, kind, REQUEST_KEY_PREFIX + UUID.randomUUID(), false);
     return reservation.isReserved() ? reservation.jobId() : null;
   }
 
@@ -163,13 +177,13 @@ public class RoutineStepImageRegenerateService {
   }
 
   /// 그림 생성. 호출 기록·고품질 판정에 회원·크레딧 작업·일과 언어를 세움
-  private GeneratedImage generate(String memberId, String creditJobId, RegenerateTarget target) {
+  private GeneratedImage generate(String memberId, String creditJobId, DrawTarget target, String guardianRequest) {
     AiCallContext.setMemberId(memberId);
     AiCallContext.setCreditJobId(creditJobId);
     AiCallContext.setContentLocale(target.language());
     GeneratedImage image = cardImageGenerator.generate(new CardImageGenerator.CardImageRequest(
       target.description(), null, target.characterType(), target.seedKey(), target.imageStyle(),
-      target.routineTitle(), target.stepTitle()));
+      target.routineTitle(), target.stepTitle(), guardianRequest));
     if (image == null) {
       log.warn("[routine image regenerate] failed : empty image, stepId={}", target.stepId());
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED);
@@ -187,36 +201,30 @@ public class RoutineStepImageRegenerateService {
   }
 
   /**
-   * 카드 그림 교체 + 정산을 한 트랜잭션에서 (정산 실패면 교체도 되돌림)
-   * 그리는 사이 카드가 지워졌으면 ROUTINE_STEP_NOT_FOUND, 사진 등으로 바뀌었으면 NOT_REGENERATABLE (새 그림은 버림)
+   * 후보 저장 + 정산을 한 트랜잭션에서 (정산 실패면 저장도 되돌림) > 밀려난 옛 후보 열쇠 (없으면 null)
+   * 그리는 사이 카드가 지워졌으면 ROUTINE_STEP_NOT_FOUND, 그림이 바뀌었으면 NOT_REGENERATABLE (새 그림은 버림)
    */
-  private RoutineStepResponse replaceAndSettle(RegenerateTarget target, String newKey, String creditJobId) {
+  private String storeCandidateAndSettle(DrawTarget target, String newKey, String creditJobId) {
     return transaction.execute(status -> {
       RoutineStep step = routineStepRepository.findById(target.stepId())
         .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-      if (!target.oldImagePath().equals(step.getImagePath())) {
+      if (!Objects.equals(target.oldImagePath(), step.getImagePath())) {
         log.info("[routine image regenerate] rejected 409 : picture changed while drawing, stepId={}", target.stepId());
         throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE);
       }
-      step.setImagePath(newKey);
-      // 보호자가 그림을 바꿈 > 예시 표시 지움
-      RoutineRules.clearExampleMark(step.getRoutine());
+      String replacedCandidateKey = step.getImageCandidatePath();
+      step.setImageCandidatePath(newKey);
       if (creditJobId != null) {
         creditReservationService.settle(creditJobId, 0, 1, target.routineId(), target.stepId());
       }
-      return RoutineStepResponse.from(step);
+      return replacedCandidateKey;
     });
   }
 
-  /// 옛 그림 정리: 복제 일과가 같은 열쇠를 쓰면 남김. 실패해도 요청은 성공 (경고만)
-  private void deleteOldIfUnreferenced(String oldKey, String stepId) {
-    try {
-      if (routineStepRepository.existsByImagePathAndIdNot(oldKey, stepId)) {
-        return;
-      }
-      routineImageStorage.delete(oldKey);
-    } catch (RuntimeException e) {
-      log.warn("[routine image regenerate] old picture not deleted : stepId={}, key={}", stepId, oldKey, e);
+  /// 파일 정리 (없으면 할 일 없음). 저장소가 실패를 삼킴
+  private void deleteIfPresent(String key) {
+    if (key != null) {
+      routineImageStorage.delete(key);
     }
   }
 
@@ -227,8 +235,8 @@ public class RoutineStepImageRegenerateService {
   }
 
   /// 그림을 그리는 데 필요한 값 (트랜잭션 밖으로 엔티티를 들고 나가지 않음)
-  private record RegenerateTarget(
-    String routineId, String stepId, String oldImagePath, AppLocale language,
+  private record DrawTarget(
+    String routineId, String stepId, String oldImagePath, boolean isFirstPicture, AppLocale language,
     String description, String stepTitle, String routineTitle,
     CharacterType characterType, String seedKey, ImageStyle imageStyle
   ) {

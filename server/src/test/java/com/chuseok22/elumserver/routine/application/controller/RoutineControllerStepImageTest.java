@@ -40,7 +40,7 @@ class RoutineControllerStepImageTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
   private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineStepEditService.class), mock(RoutineCreateService.class),
-    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService, mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class),
+    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService, mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageCandidateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class),
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   @Test
