@@ -205,7 +205,8 @@ public class RoutineStepEditService {
     AppLocale language = routine.getLanguage() == null ? AppLocale.KO : routine.getLanguage();
     step.setPictogramId(AiCallContext.callWithContentLocale(language, () -> pictogramPicker.pick(
       caller.memberId(), NicknamePlaceholder.mask(step.getTitle(), nickname, language),
-      NicknamePlaceholder.mask(step.getDescription(), nickname, language))));
+      NicknamePlaceholder.mask(step.getDescription(), nickname, language),
+      ImageStyle.orDefault(routine.getProfile().getImageStyle()).pictogramSet())));
     // 맨 뒤에 붙인다. 뒤이어 renumberSteps가 1..N으로 정규화하므로
     // 기존 값이 비어 있거나 겹쳐 있어도 결과는 연속값이 된다.
     step.setStepOrder(steps.size() + 1);

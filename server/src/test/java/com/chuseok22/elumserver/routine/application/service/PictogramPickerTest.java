@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -42,7 +44,7 @@ class PictogramPickerTest {
     client = mock(TextGenerationClient.class);
     budgetGuard = mock(AiDailyBudgetGuard.class);
     when(router.current()).thenReturn(client);
-    picker = new PictogramPicker(catalog, router, budgetGuard, Duration.ofMillis(300));
+    picker = new PictogramPicker(PictogramCatalogs.mulberryOnly(catalog), router, budgetGuard, Duration.ofMillis(300));
   }
 
   @Test
@@ -50,7 +52,7 @@ class PictogramPickerTest {
   void validId_isReturned() {
     when(client.pickPictogramJson("양치해요", "이를 닦아요")).thenReturn("{\"pictogramId\":\"brush_teeth\"}");
 
-    assertThat(picker.pick("member-1", "양치해요", "이를 닦아요")).isEqualTo("brush_teeth");
+    assertThat(picker.pick("member-1", "양치해요", "이를 닦아요", PictogramSet.MULBERRY)).isEqualTo("brush_teeth");
   }
 
   @Test
@@ -58,7 +60,7 @@ class PictogramPickerTest {
   void blankDescription_stillPicks() {
     when(client.pickPictogramJson("양치해요", "")).thenReturn("{\"pictogramId\":\"brush_teeth\"}");
 
-    assertThat(picker.pick("member-1", "양치해요", "")).isEqualTo("brush_teeth");
+    assertThat(picker.pick("member-1", "양치해요", "", PictogramSet.MULBERRY)).isEqualTo("brush_teeth");
   }
 
   @Test
@@ -66,7 +68,7 @@ class PictogramPickerTest {
   void nullId_fallsBack() {
     when(client.pickPictogramJson(any(), any())).thenReturn("{\"pictogramId\":null}");
 
-    assertThat(picker.pick("member-1", "제목", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 
   @Test
@@ -74,7 +76,7 @@ class PictogramPickerTest {
   void invalidId_fallsBack() {
     when(client.pickPictogramJson(any(), any())).thenReturn("{\"pictogramId\":\"teleport_to_moon\"}");
 
-    assertThat(picker.pick("member-1", "제목", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 
   @Test
@@ -82,9 +84,9 @@ class PictogramPickerTest {
   void malformedResponse_fallsBack() {
     when(client.pickPictogramJson(any(), any())).thenReturn("{}", "이건 JSON 이 아니다", "{\"pictogramId\":123}");
 
-    assertThat(picker.pick("m", "t", "")).isEqualTo(FALLBACK);
-    assertThat(picker.pick("m", "t", "")).isEqualTo(FALLBACK);
-    assertThat(picker.pick("m", "t", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("m", "t", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
+    assertThat(picker.pick("m", "t", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
+    assertThat(picker.pick("m", "t", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 
   @Test
@@ -92,7 +94,7 @@ class PictogramPickerTest {
   void callFailure_fallsBack() {
     when(client.pickPictogramJson(any(), any())).thenThrow(new IllegalStateException("OpenAI 500"));
 
-    assertThat(picker.pick("member-1", "제목", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 
   @Test
@@ -100,7 +102,7 @@ class PictogramPickerTest {
   void providerUnavailable_fallsBack() {
     when(router.current()).thenThrow(new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE));
 
-    assertThat(picker.pick("member-1", "제목", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 
   @Test
@@ -112,7 +114,7 @@ class PictogramPickerTest {
     });
 
     long startedAt = System.currentTimeMillis();
-    String picked = picker.pick("member-1", "제목", "");
+    String picked = picker.pick("member-1", "제목", "", PictogramSet.MULBERRY);
 
     assertThat(picked).isEqualTo(FALLBACK);
     assertThat(System.currentTimeMillis() - startedAt).isLessThan(2_000);
@@ -123,7 +125,7 @@ class PictogramPickerTest {
   void budgetReached_skipsCall() {
     when(budgetGuard.isReached()).thenReturn(true);
 
-    assertThat(picker.pick("member-1", "제목", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
     verifyNoInteractions(client);
     verify(router, never()).current();
   }
@@ -131,9 +133,9 @@ class PictogramPickerTest {
   @Test
   @DisplayName("카탈로그를 못 읽은 서버는 AI 를 부르지 않고 null 이다")
   void emptyCatalog_returnsNull() {
-    PictogramPicker emptyPicker = new PictogramPicker(PictogramCatalog.empty(), router, budgetGuard, Duration.ofMillis(300));
+    PictogramPicker emptyPicker = new PictogramPicker(PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()), router, budgetGuard, Duration.ofMillis(300));
 
-    assertThat(emptyPicker.pick("member-1", "제목", "")).isNull();
+    assertThat(emptyPicker.pick("member-1", "제목", "", PictogramSet.MULBERRY)).isNull();
     verifyNoInteractions(router);
   }
 
@@ -146,9 +148,25 @@ class PictogramPickerTest {
       return "{\"pictogramId\":\"brush_teeth\"}";
     });
 
-    picker.pick("member-42", "제목", "");
+    picker.pick("member-42", "제목", "", PictogramSet.MULBERRY);
 
     assertThat(seen.get()).isEqualTo("member-42");
     assertThat(AiCallContext.currentMemberId()).isNull();
+  }
+
+  @Test
+  @DisplayName("이모지 방식으로 부르면 이모지 카탈로그로 검증하고, 호출 스레드에 이모지 세트를 세운다 (#1149)")
+  void pickUsesGivenSet() {
+    PictogramCatalog emojiCatalog = new PictogramCatalog(List.of("emoji_toothbrush", "emoji_star"), "emoji_star");
+    PictogramPicker emojiPicker = new PictogramPicker(
+      new PictogramCatalogs(catalog, emojiCatalog), router, budgetGuard, Duration.ofMillis(300));
+    java.util.concurrent.atomic.AtomicReference<PictogramSet> seenSet = new java.util.concurrent.atomic.AtomicReference<>();
+    when(client.pickPictogramJson(any(), any())).thenAnswer(invocation -> {
+      seenSet.set(AiCallContext.currentPictogramSet());
+      return "{\"pictogramId\":\"brush_teeth\"}";
+    });
+
+    assertThat(emojiPicker.pick("member-1", "양치해요", "", PictogramSet.EMOJI)).isEqualTo("emoji_star");
+    assertThat(seenSet.get()).isEqualTo(PictogramSet.EMOJI);
   }
 }

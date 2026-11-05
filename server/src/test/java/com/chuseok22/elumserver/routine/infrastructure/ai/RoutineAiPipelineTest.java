@@ -1,5 +1,10 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
+import static org.mockito.Mockito.verifyNoInteractions;
+import java.util.concurrent.atomic.AtomicReference;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.PictogramSet;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
@@ -76,7 +81,7 @@ class RoutineAiPipelineTest {
     routineAiPipeline = new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, PictogramCatalog.empty());
+      routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
   }
@@ -500,7 +505,7 @@ class RoutineAiPipelineTest {
     return new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, catalog);
+      routineImageStorage, PictogramCatalogs.mulberryOnly(catalog));
   }
 
   private final PictogramCatalog catalog =
@@ -574,5 +579,47 @@ class RoutineAiPipelineTest {
 
     assertThat(steps).hasSize(1);
     assertThat(steps.get(0).pictogramId()).isNull();
+  }
+
+  // ── 이모지 그림 방식 (#1149) ────────────────────────────────────────
+
+  private final PictogramCatalog emojiCatalog =
+    new PictogramCatalog(List.of("emoji_toothbrush", "emoji_star"), "emoji_star");
+
+  private List<RoutineAiPipeline.GeneratedStep> createEmoji(String stepsJson, AtomicReference<PictogramSet> seenSet) {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenAnswer(invocation -> {
+      seenSet.set(AiCallContext.currentPictogramSet());
+      return "{\"title\":\"아침\",\"steps\":[" + stepsJson + "]}";
+    });
+    RoutineAiPipeline pipeline = new RoutineAiPipeline(
+      textClientRouter,
+      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      routineImageStorage, new PictogramCatalogs(catalog, emojiCatalog));
+    return pipeline.generateForCreate(
+      "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.EMOJI, "profile-1").steps();
+  }
+
+  @Test
+  @DisplayName("이모지 방식은 이모지 카탈로그로 검증한다 — Mulberry id 는 이모지 폴백으로 바뀌고 AI 그림은 그리지 않는다")
+  void emojiStyleResolvesAgainstEmojiCatalog() {
+    AtomicReference<PictogramSet> seenSet = new AtomicReference<>();
+    var steps = createEmoji(
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"brush_teeth\"}", seenSet);
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo("emoji_star");
+    assertThat(steps.get(0).imagePath()).isNull();
+    assertThat(seenSet.get()).isEqualTo(PictogramSet.EMOJI);
+    assertThat(AiCallContext.currentPictogramSet()).isEqualTo(PictogramSet.MULBERRY);
+    verifyNoInteractions(imageGenerationClient);
+  }
+
+  @Test
+  @DisplayName("이모지 방식에서 이모지 카탈로그의 id 를 고르면 그대로 카드에 실린다")
+  void emojiStyleKeepsValidEmojiId() {
+    var steps = createEmoji(
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"emoji_toothbrush\"}",
+      new AtomicReference<>());
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo("emoji_toothbrush");
   }
 }

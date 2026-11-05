@@ -17,7 +17,7 @@ public record ProfileSummaryResponse(
   @Schema(description = "캐릭터, 미설정 시 null", example = "LULU")
   CharacterType character,
 
-  @Schema(description = "카드 그림 방식. CARTOON(만화, 기본) · REALISTIC(실사) · PHOTO_ONLY(직접 사진)", example = "CARTOON")
+  @Schema(description = "카드 그림 방식. EMOJI(이모지) · PHOTO_ONLY(그림 기호) · CARTOON(만화, 기본) · REALISTIC(실사)", example = "CARTOON")
   ImageStyle imageStyle
 ) {
 

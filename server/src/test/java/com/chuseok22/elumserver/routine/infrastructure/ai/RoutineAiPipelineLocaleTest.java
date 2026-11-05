@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -55,7 +56,7 @@ class RoutineAiPipelineLocaleTest {
     pipeline = new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, PictogramCatalog.empty());
+      routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
     AiCallContext.setContentLocale(AppLocale.ES);

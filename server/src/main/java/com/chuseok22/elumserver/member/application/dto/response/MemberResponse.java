@@ -48,7 +48,7 @@ public record MemberResponse(
     + "이룸이 휴대폰에는 그 연결의 이룸이 하나만 내려간다. 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
   List<ProfileSummaryResponse> profiles,
 
-  @Schema(description = "카드 그림 방식. CARTOON(만화, 기본) · REALISTIC(실사) · PHOTO_ONLY(직접 사진). "
+  @Schema(description = "카드 그림 방식. EMOJI(이모지) · PHOTO_ONLY(그림 기호) · CARTOON(만화, 기본) · REALISTIC(실사). "
     + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.", example = "CARTOON")
   ImageStyle imageStyle,
 

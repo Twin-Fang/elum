@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.infrastructure.entity;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,10 +18,22 @@ public enum ImageStyle {
   CARTOON("만화"),
   /// 캐릭터 없이 물건·장소를 사진처럼 그린다. 캐릭터 참조 이미지·묘사를 쓰지 않는다.
   REALISTIC("실사"),
-  /// AI 그림을 만들지 않는다(보호자가 직접 사진을 넣는다). 카드 글 생성은 그대로 AI 가 한다.
-  PHOTO_ONLY("직접 사진");
+  /// AI 그림을 만들지 않는다. 카드에는 그림 기호(Mulberry)가 붙고 보호자가 사진을 넣을 수 있다. 카드 글 생성은 그대로 AI 가 한다.
+  PHOTO_ONLY("그림 기호"),
+  /// AI 그림을 만들지 않는다. 카드에는 이모지 그림(Twemoji)이 붙는다 (#1149)
+  EMOJI("이모지");
 
   private final String label;
+
+  /// AI 가 카드 그림을 그리는 방식 (Pro 전용: CARTOON, REALISTIC)
+  public boolean drawsAiImages() {
+    return this == CARTOON || this == REALISTIC;
+  }
+
+  /// 카드 그림 기호 세트: EMOJI > 이모지, 그 외 > Mulberry
+  public PictogramSet pictogramSet() {
+    return this == EMOJI ? PictogramSet.EMOJI : PictogramSet.MULBERRY;
+  }
 
   /// 저장값이 비어 있으면(옛 행·옛 서버가 쓴 행) 기본 만화로 본다.
   public static ImageStyle orDefault(ImageStyle style) {

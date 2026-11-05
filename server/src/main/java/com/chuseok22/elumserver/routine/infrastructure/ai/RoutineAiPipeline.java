@@ -2,8 +2,10 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
@@ -48,11 +50,12 @@ public class RoutineAiPipeline {
   private final TextClientRouter textClientRouter;
   private final CardImageGenerator cardImageGenerator;
   private final RoutineImageStorage routineImageStorage;
-  private final PictogramCatalog pictogramCatalog;
+  private final PictogramCatalogs pictogramCatalogs;
 
   /**
    * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다
-   * @param imageStyle 이룸이의 그림 방식. PHOTO_ONLY 면 그림 호출을 건너뛰고 imagePath 를 null 로 둔다
+   * @param imageStyle 실제로 쓸 그림 방식. AI 그림 방식이 아니면(그림 기호·이모지) 그림 호출을 건너뛰고 imagePath 를 null 로 둔다.
+   *                   그림 기호 세트(Mulberry·이모지)도 이 값으로 정한다
    */
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
@@ -62,10 +65,14 @@ public class RoutineAiPipeline {
     // 그림 지시문의 sceneDetail 로 싣는다 (설명 12자만으로는 행동이 안 그려졌다).
     // 실사는 그 문장("The character" 관례)을 버리고 실사용 번역을 따로 하고, 직접 사진은 그림을 안 그린다.
     boolean includeImagePromptEn = ImageStyle.orDefault(imageStyle) == ImageStyle.CARTOON;
-    RoutineStepDraft draft = parseDraft(
-      () -> textClientRouter.current()
-        .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
-    );
+    // 그림 기호 세트를 호출 스레드에 세워 요청 카탈로그·검증을 같은 세트로 (호출 뒤 원래 값 복구)
+    PictogramSet pictogramSet = ImageStyle.orDefault(imageStyle).pictogramSet();
+    PictogramCatalog pictogramCatalog = pictogramCatalogs.of(pictogramSet);
+    RoutineStepDraft draft = AiCallContext.callWithPictogramSet(pictogramSet,
+      () -> parseDraft(
+        () -> textClientRouter.current()
+          .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn),
+        pictogramCatalog));
     // AI 는 이름 대신 자리표시 '이룸이' 로 쓴다. 그림은 그 문장 그대로 그려 이름이 그림 AI 에도 가지 않게
     // 하고, 결과를 돌려주기 직전에 실제 이름으로 바꾼다. seed 는 저장될 제목(이름 복원본)으로 정한다 —
     // 카드 추가가 저장된 제목으로 같은 seed 를 만들어 같은 캐릭터를 그리기 때문이다(seed 는 해시값이라 이름이 나가지 않는다).
@@ -184,7 +191,7 @@ public class RoutineAiPipeline {
   // 응답 파싱을 하나의 try 블록에서 함께 처리한다. 호출과 파싱을 분리해두면 호출 실패가
   // 이 메서드 밖으로 그대로 전파돼 GlobalExceptionHandler의 범용 500 처리로 새어나가
   // ROUTINE_AI_GENERATION_FAILED(502)로 변환되지 않는다.
-  private RoutineStepDraft parseDraft(Supplier<String> call) {
+  private RoutineStepDraft parseDraft(Supplier<String> call, PictogramCatalog pictogramCatalog) {
     String json = null;
     try {
       json = call.get();
@@ -205,7 +212,7 @@ public class RoutineAiPipeline {
         log.warn("AI가 일부 단계에 title 없이 응답함: responseLength={}", LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
-      return normalizeOrder(draft);
+      return normalizeOrder(draft, pictogramCatalog);
     } catch (CustomException e) {
       throw e;
     } catch (Exception e) {
@@ -219,7 +226,7 @@ public class RoutineAiPipeline {
   //
   // pictogramId 도 여기서 확정한다. 카탈로그에 없거나 비었거나 null 이면(모델이 못 골랐거나 옛 프롬프트라 필드를
   // 빠뜨렸거나 환각) 폴백 id 로 바꾼다 — 카드에는 항상 그림이 있어야 하고, 이 때문에 카드 생성이 실패하면 안 된다.
-  private RoutineStepDraft normalizeOrder(RoutineStepDraft draft) {
+  private RoutineStepDraft normalizeOrder(RoutineStepDraft draft, PictogramCatalog pictogramCatalog) {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
     int fallbackCount = 0;
     for (int i = 0; i < draft.steps().size(); i++) {
@@ -302,9 +309,9 @@ public class RoutineAiPipeline {
     if (reusablePath != null) {
       return new StepResult(stepDraft, null, reusablePath);
     }
-    // 직접 사진: 그림 호출 자체를 하지 않는다. 카드는 imagePath=null 로 저장되고(허용됨) 보호자가 사진을 넣는다.
+    // AI 그림이 아닌 방식(그림 기호·이모지): 그림 호출 자체를 하지 않는다. 카드는 imagePath=null 로 저장되고(허용됨) 보호자가 사진을 넣는다.
     // 재시도·기본 그림 대체 경로도 타지 않는다 — 실패가 아니라 선택이다.
-    if (imageStyle == ImageStyle.PHOTO_ONLY) {
+    if (!imageStyle.drawsAiImages()) {
       return new StepResult(stepDraft, null, null);
     }
     CardImageGenerator.CardImageRequest request = new CardImageGenerator.CardImageRequest(

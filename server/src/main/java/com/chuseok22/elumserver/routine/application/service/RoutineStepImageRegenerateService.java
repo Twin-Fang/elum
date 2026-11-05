@@ -151,13 +151,13 @@ public class RoutineStepImageRegenerateService {
   }
 
   /**
-   * 새로 그릴 수 있는 카드인가 3개: 설명 있음, 이룸이 그림 방식이 직접 사진 아님,
+   * 새로 그릴 수 있는 카드인가 3개: 설명 있음, 그림 방식이 AI 그림(캐릭터·실사),
    * 그림이 AI 그림(다시 그리기) 또는 그림 없음(처음 그리기 — 픽토그램·예시 이미지 카드). 보호자 사진·가져온 그림은 제외
    */
   private static boolean isDrawable(RoutineStep step, ImageStyle imageStyle) {
     boolean hasDescription = step.getDescription() != null && !step.getDescription().isBlank();
     boolean isPictureReplaceable = step.getImagePath() == null || RoutineImageStorage.isAiDrawn(step.getImagePath());
-    return hasDescription && isPictureReplaceable && imageStyle != ImageStyle.PHOTO_ONLY;
+    return hasDescription && isPictureReplaceable && ImageStyle.orDefault(imageStyle).drawsAiImages();
   }
 
   /// 크레딧 예약 (꺼져 있으면 null): 처음 그리기는 카드 그림 단가, 다시 그리기는 무료 한도가 있는 다시 그리기 단가

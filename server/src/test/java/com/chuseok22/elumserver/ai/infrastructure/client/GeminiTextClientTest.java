@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -38,7 +39,7 @@ class GeminiTextClientTest {
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "text-model", "image-model", 1000);
     geminiTextClient = new GeminiTextClient(
       restClient, geminiProperties, promptTemplateService,
-      mock(SystemConfigService.class), mock(AiCallLogService.class), PictogramCatalog.empty()
+      mock(SystemConfigService.class), mock(AiCallLogService.class), PictogramCatalogs.mulberryOnly(PictogramCatalog.empty())
     );
   }
 
