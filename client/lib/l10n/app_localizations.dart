@@ -914,10 +914,10 @@ abstract class AppLocalizations {
   /// **'설정을 저장하지 못했어요'**
   String get pinSaveFailedTitle;
 
-  /// 설정 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  /// 온보딩 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내 (화면에 남아 시작하기로 다시 보냄)
   ///
   /// In ko, this message translates to:
-  /// **'설정 화면에서 다시 확인해주세요'**
+  /// **'잠시 후 시작하기를 다시 눌러주세요'**
   String get pinSaveFailedFallback;
 
   /// 이룸이 기기 설정 페이지 제목
