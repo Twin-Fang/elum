@@ -11,7 +11,6 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/layout/share_origin.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/elum_check_circle.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
@@ -19,7 +18,6 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_state_body.dart';
 import '../../../../core/widgets/elum_spinner.dart';
-import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../../shared/pictogram/pictogram_svg_loader.dart';
@@ -29,7 +27,7 @@ import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
 import 'card_export_options_panel.dart';
-import 'card_export_theme_teaser.dart';
+import 'card_export_preview.dart';
 import 'print_sheets.dart';
 
 /// 인쇄용으로 받기: 설정 > 미리 보기(= 파일 그대로) > 보내기 · 인쇄하기 (#1073)
@@ -48,7 +46,6 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
   static const _backTop = 67.0;
   static const _horizontalPadding = 16.0;
   static const _sectionGap = 24.0;
-  static const _pageGap = 16.0;
   static const _files = CardExportFiles();
 
   CardExportOptions _options = const CardExportOptions();
@@ -95,7 +92,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                   _teaserTheme = null;
                 }),
                 canUseAllThemes: access.canUseAllCardDesignThemes,
-                showsProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
+                shouldShowProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
                 teaserTheme: _teaserTheme,
                 // Free · 판매 중이면 흐린 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
                 onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
@@ -165,7 +162,6 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     while (_sheetKeys.length < sheets.length) {
       _sheetKeys.add(GlobalKey());
     }
-    final caption = context.typo.caption.copyWith(color: colors.textSecondary);
     final teaserTheme = _teaserTheme;
     final teaserSheets = teaserTheme == null
         ? const <PrintSheet>[]
@@ -175,62 +171,16 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
             pictures: pictures,
             hasWatermark: hasWatermark,
           );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (teaserSheets.isNotEmpty) ...[
-          CardExportThemeTeaser(
-            sheet: teaserSheets.first,
-            onUnlock: () => openPlanPaywall(context, ref),
-          ),
-          SizedBox(height: _sectionGap.h),
-        ],
-        Text(
-          l10n.cardExportPreviewSection,
-          style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel),
-        ),
-        // 안내는 종이 밖에만 (미리 보기의 종이 = 파일 그대로)
-        if (pictures.failedCount > 0) ...[
-          SizedBox(height: 6.h),
-          Text(l10n.cardExportSomePicturesFailed(pictures.failedCount), style: caption),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ElumTextLink(
-              label: l10n.commonRetryWithCode(CardExportErrorCode.image),
-              onTap: () => retryCardExportPictures(ref, widget.routine, pictures),
-            ),
-          ),
-        ],
-        if (pictures.hasMissingPicture) ...[
-          SizedBox(height: 6.h),
-          Text(l10n.cardExportMissingPicture, style: caption),
-        ],
-        if (hasWatermark && canPurchasePro) ...[
-          SizedBox(height: 6.h),
-          Text(l10n.cardExportWatermarkNotice, style: caption),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ElumTextLink(
-              label: l10n.planLearnPro,
-              onTap: () => openPlanPaywall(context, ref),
-            ),
-          ),
-        ],
-        if (_options.format != CardExportFormat.cardImages) ...[
-          SizedBox(height: 6.h),
-          Text(l10n.cardExportActualSizeHint, style: caption),
-        ],
-        SizedBox(height: 12.h),
-        for (final (index, sheet) in sheets.indexed) ...[
-          if (index > 0) SizedBox(height: _pageGap.h),
-          _PreviewSheet(
-            sheet: sheet,
-            boundaryKey: _sheetKeys[index],
-            isExcluded: sheet.cardId != null && _options.excludedCardIds.contains(sheet.cardId),
-            onToggle: sheet.cardId == null ? null : () => _toggleCard(sheet.cardId!),
-          ),
-        ],
-      ],
+    return CardExportPreview(
+      routine: widget.routine,
+      options: _options,
+      pictures: pictures,
+      sheets: sheets,
+      sheetKeys: _sheetKeys,
+      hasWatermark: hasWatermark,
+      canPurchasePro: canPurchasePro,
+      onToggleCard: _toggleCard,
+      teaserSheet: teaserSheets.isEmpty ? null : teaserSheets.first,
     );
   }
 
@@ -240,15 +190,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       setState(() => _teaserTheme = _teaserTheme == theme ? null : theme);
       return;
     }
-    if (access.canPurchasePro) {
-      openPlanPaywall(context, ref);
-      return;
-    }
-    showElumDialog<void>(
-      context: context,
-      title: context.l10n.cardExportProThemeLocked,
-      actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
-    );
+    openProOnlyNotice(context, ref, title: context.l10n.cardExportProThemeLocked);
   }
 
   void _toggleCard(String cardId) {
@@ -353,50 +295,5 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
-  }
-}
-
-/// 미리 보기 한 장: 화면 폭에 맞춰 줄여 보이되, 굽는 것은 원래 크기 지면
-class _PreviewSheet extends StatelessWidget {
-  const _PreviewSheet({
-    required this.sheet,
-    required this.boundaryKey,
-    required this.isExcluded,
-    this.onToggle,
-  });
-
-  final PrintSheet sheet;
-  final GlobalKey boundaryKey;
-  final bool isExcluded;
-
-  /// 카드 한 장씩: 눌러서 빼고 넣기
-  final VoidCallback? onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final page = DecoratedBox(
-      decoration: BoxDecoration(border: Border.all(color: context.colors.border)),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: RepaintBoundary(
-          key: boundaryKey,
-          child: SizedBox.fromSize(size: sheet.size, child: sheet.page),
-        ),
-      ),
-    );
-    if (onToggle == null) return page;
-    return GestureDetector(
-      onTap: onToggle,
-      child: Stack(
-        children: [
-          Opacity(opacity: isExcluded ? 0.4 : 1, child: page),
-          Positioned(
-            top: 8.w,
-            right: 8.w,
-            child: ElumCheckCircle(isChecked: !isExcluded),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -17,7 +17,7 @@ class CardExportOptionsPanel extends StatelessWidget {
     required this.options,
     required this.onChanged,
     required this.canUseAllThemes,
-    required this.showsProThemes,
+    required this.shouldShowProThemes,
     required this.onLockedThemeTap,
     this.teaserTheme,
   });
@@ -29,7 +29,7 @@ class CardExportOptionsPanel extends StatelessWidget {
   final bool canUseAllThemes;
 
   /// Pro 테마를 목록에 보이는가 (결제 전 Free 는 숨김)
-  final bool showsProThemes;
+  final bool shouldShowProThemes;
 
   /// 고를 수 없는 Pro 테마 칩 누름 (요금제 · 흐린 미리 보기 · 안내)
   final ValueChanged<CardDesignTheme> onLockedThemeTap;
@@ -44,7 +44,7 @@ class CardExportOptionsPanel extends StatelessWidget {
     final l10n = context.l10n;
     final themes = [
       for (final theme in CardDesignTheme.values)
-        if (!theme.isProOnly || showsProThemes) theme,
+        if (!theme.isProOnly || shouldShowProThemes) theme,
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

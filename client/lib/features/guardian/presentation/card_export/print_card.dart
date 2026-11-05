@@ -22,8 +22,8 @@ class PrintCard extends StatelessWidget {
     required this.picture,
     required this.options,
     required this.language,
-    this.showsNumber = true,
-    this.showsDescription = false,
+    this.shouldShowNumber = true,
+    this.shouldShowDescription = false,
   });
 
   final ActionCard card;
@@ -37,10 +37,10 @@ class PrintCard extends StatelessWidget {
   final String language;
 
   /// 오려 쓰는 카드는 순서를 바꿔 붙이므로 번호를 뺀다
-  final bool showsNumber;
+  final bool shouldShowNumber;
 
   /// 카드 한 장 이미지만 설명까지 넣는다
-  final bool showsDescription;
+  final bool shouldShowDescription;
 
   /// 카드 모서리 · 안쪽 여백 · 그림↔글 간격 (A4 포인트)
   static const _radius = 16.0;
@@ -82,7 +82,7 @@ class PrintCard extends StatelessWidget {
                     child: _picture(context, style),
                   ),
                 ),
-                if (showsNumber)
+                if (shouldShowNumber)
                   Positioned(left: 0, top: 0, child: _number(context, style)),
               ],
             ),
@@ -166,7 +166,7 @@ class PrintCard extends StatelessWidget {
             child: _title(context, maxLines: 2),
           ),
         ),
-        if (showsDescription && card.description != card.displayTitle) ...[
+        if (shouldShowDescription && card.description != card.displayTitle) ...[
           const SizedBox(height: 4),
           Flexible(
             child: FittedBox(

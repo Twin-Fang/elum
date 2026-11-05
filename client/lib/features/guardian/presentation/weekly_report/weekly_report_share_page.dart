@@ -45,7 +45,7 @@ class WeeklyReportSharePage extends StatelessWidget {
     return PrintPage(
       size: PrintPageSize.a4,
       hasWatermark: false,
-      showsPictogramCredit: false,
+      shouldShowPictogramCredit: false,
       margin: _pageMargin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
