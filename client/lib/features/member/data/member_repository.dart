@@ -10,6 +10,7 @@ import '../../../shared/models/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../domain/guardian_account.dart';
 import '../domain/member_subscription.dart';
+import '../domain/plan_entitlements.dart';
 import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -25,18 +26,8 @@ class Member {
     this.imageStyle = ImageStyle.cartoon,
     this.profiles = const [],
     this.adsRemoved = false,
-    this.isPro = false,
-    this.canExportCardsWithoutWatermark = false,
-    this.canUseAllCardDesignThemes = false,
+    this.entitlements = PlanEntitlements.free,
     this.subscription,
-    this.canViewWeeklyReport = false,
-    this.canTranslateRoutines = false,
-    this.canScheduleRoutines = false,
-    this.canUseGuardianVoice = false,
-    this.canImportExpertRoutines = false,
-    this.canUseRoutineMemory = false,
-    this.canRegenerateImagesFree = false,
-    this.canUseAiPictures = false,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -68,43 +59,11 @@ class Member {
   /// 보호자 회원 id (UUID 문자열). 스토어 결제에 실어 구매를 이 계정에 묶는다. 모르면 null
   final String? id;
 
-  /// 서버가 본 요금제가 Pro 인가 (`entitlements.plan`). 모르면 false
-  final bool isPro;
+  /// 서버 권한 묶음 (Pro 판정·Pro 기능별 사용 가능). 화면은 이것 대신 `planAccessProvider` 를 본다
+  final PlanEntitlements entitlements;
 
   /// 내 요금제 표시용 구독 상태 (만료일·자동 갱신·유예). 이전 서버면 null
   final MemberSubscription? subscription;
-
-  /// 카드 내보내기에서 이룸 로고·워터마크를 뺄 수 있는가 (`entitlements.cardExportWithoutWatermark`).
-  /// 모르면 false — 워터마크를 넣는 쪽으로 기운다.
-  final bool canExportCardsWithoutWatermark;
-
-  /// 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는가 (`entitlements.cardExportAllThemes`).
-  final bool canUseAllCardDesignThemes;
-
-  /// 주간 리포트를 볼 수 있는가 (`entitlements.weeklyReport`). 모르면 false
-  final bool canViewWeeklyReport;
-
-  /// 만든 일과를 다른 언어 사본으로 만들 수 있는가 (`entitlements.routineTranslate`). 모르면 false
-  final bool canTranslateRoutines;
-
-  /// 일과에 요일·시각을 정하고 이룸이 기기로 알림을 보낼 수 있는가 (`entitlements.routineSchedule`, #782 · #1080)
-  final bool canScheduleRoutines;
-
-  /// 카드마다 보호자 목소리를 녹음해 이룸이 기기에서 그 녹음으로 읽을 수 있는가 (`entitlements.guardianVoice`)
-  final bool canUseGuardianVoice;
-
-  /// 전문가 일과를 일과관리로 가져올 수 있는가 (`entitlements.routineTemplates`). 모르면 false
-  final bool canImportExpertRoutines;
-
-  /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가 (`entitlements.routineMemory`). 모르면 false
-  final bool canUseRoutineMemory;
-
-  /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (`entitlements.imageRegenerateFree`, 하루 한도는 서버가 봄)
-  final bool canRegenerateImagesFree;
-
-  /// AI 맞춤 그림을 쓸 수 있는가 (`entitlements.aiImageGeneration`): 새 카드 그림·다시 그리기·그림 그리기. 모르면 false
-  /// 꺼져도 이미 만든 AI 그림은 그대로 보인다 (그림 조회는 요금제와 무관)
-  final bool canUseAiPictures;
 
   /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
   ///
@@ -128,18 +87,8 @@ class Member {
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
         adsRemoved != other.adsRemoved ||
-        isPro != other.isPro ||
-        canExportCardsWithoutWatermark != other.canExportCardsWithoutWatermark ||
-        canUseAllCardDesignThemes != other.canUseAllCardDesignThemes ||
+        entitlements != other.entitlements ||
         subscription != other.subscription ||
-        canViewWeeklyReport != other.canViewWeeklyReport ||
-        canTranslateRoutines != other.canTranslateRoutines ||
-        canScheduleRoutines != other.canScheduleRoutines ||
-        canUseGuardianVoice != other.canUseGuardianVoice ||
-        canImportExpertRoutines != other.canImportExpertRoutines ||
-        canUseRoutineMemory != other.canUseRoutineMemory ||
-        canRegenerateImagesFree != other.canRegenerateImagesFree ||
-        canUseAiPictures != other.canUseAiPictures ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -182,21 +131,8 @@ class Member {
         _ => const <ProfileSummary>[],
       },
       adsRemoved: _isEntitled(json, 'adsRemoved'),
-      isPro: switch (json['entitlements']) {
-        final Map<dynamic, dynamic> entitlements => entitlements['plan'] == 'PRO',
-        _ => false,
-      },
-      canExportCardsWithoutWatermark: _isEntitled(json, 'cardExportWithoutWatermark'),
-      canUseAllCardDesignThemes: _isEntitled(json, 'cardExportAllThemes'),
+      entitlements: PlanEntitlements.fromJson(json['entitlements']),
       subscription: MemberSubscription.tryParse(json['subscription']),
-      canViewWeeklyReport: _isEntitled(json, 'weeklyReport'),
-      canTranslateRoutines: _isEntitled(json, 'routineTranslate'),
-      canScheduleRoutines: _isEntitled(json, 'routineSchedule'),
-      canUseGuardianVoice: _isEntitled(json, 'guardianVoice'),
-      canImportExpertRoutines: _isEntitled(json, 'routineTemplates'),
-      canUseRoutineMemory: _isEntitled(json, 'routineMemory'),
-      canRegenerateImagesFree: _isEntitled(json, 'imageRegenerateFree'),
-      canUseAiPictures: _isEntitled(json, 'aiImageGeneration'),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );

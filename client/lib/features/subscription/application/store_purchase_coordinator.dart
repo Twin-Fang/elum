@@ -151,7 +151,7 @@ class StorePurchaseCoordinator {
       await _waitForVerifications();
       final failure = _restoreFailure;
       final member = await _ref.refresh(memberProvider.future);
-      if (member?.isPro == true) {
+      if (member?.entitlements.isPro == true) {
         return const PlanRestoreOutcome(PlanRestoreResult.restored);
       }
       if (failure != null) {
