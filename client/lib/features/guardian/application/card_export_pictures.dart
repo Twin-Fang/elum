@@ -29,10 +29,16 @@ class CardExportPicture {
   bool get hasPicture => bytes != null || exampleImageId != null || pictogramId != null;
 
   /// Mulberry 그림 기호 카드인가 (출처 줄 `Mulberry Symbols`)
-  bool get hasSymbolPictogram => pictogramId != null && !PictogramCatalog.isEmoji(pictogramId!);
+  bool get hasSymbolPictogram => switch (pictogramId) {
+        final id? => !PictogramCatalog.isEmoji(id),
+        null => false,
+      };
 
   /// Twemoji 이모지 카드인가 (출처 줄 `Twemoji`)
-  bool get hasEmojiPictogram => pictogramId != null && PictogramCatalog.isEmoji(pictogramId!);
+  bool get hasEmojiPictogram => switch (pictogramId) {
+        final id? => PictogramCatalog.isEmoji(id),
+        null => false,
+      };
 }
 
 /// 일과 하나의 인쇄 준비 결과: 카드 순서대로 그림 + 그림을 받지 못한 카드

@@ -10,10 +10,16 @@ import 'plan_access.dart';
 /// 그림 방식 고르기 공통 (#1149): 온보딩 · 보호자 설정 · 이룸이 정보 시트가 같은 규칙
 /// Pro 방식(캐릭터·사진 같은 그림)은 AI 맞춤 그림 권한이 있어야 고름, 없으면 요금제 화면으로
 
-/// 화면에 보일 방식: 살 수 없고 권한도 없으면 Pro 방식 숨김 (지금 고른 값은 늘 보임 — 사라지면 안 됨)
-List<ImageStyle> visibleImageStyles(PlanAccess access, {required ImageStyle current}) => [
+/// 화면에 보일 방식: 살 수 없고 권한도 없으면 Pro 방식 숨김
+/// 저장값([saved])과 화면에서 고른 값([picked])은 늘 보임 — 다른 걸 눌러 봐도 저장값으로 되돌릴 수 있게
+List<ImageStyle> visibleImageStyles(
+  PlanAccess access, {
+  required ImageStyle saved,
+  required ImageStyle picked,
+}) => [
   for (final style in ImageStyle.values)
-    if (!isImageStyleLocked(style, access) || access.canPurchasePro || style == current) style,
+    if (!isImageStyleLocked(style, access) || access.canPurchasePro || style == saved || style == picked)
+      style,
 ];
 
 /// 잠긴 방식인가 (Pro 배지 표시): Pro 방식 + AI 맞춤 그림 권한 없음

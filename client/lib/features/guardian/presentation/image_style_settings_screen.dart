@@ -94,7 +94,7 @@ class _ImageStyleSettingsScreenState
     final planAccess = ref.watch(planAccessProvider);
 
     final group = SelectableGroup<ImageStyle>(
-      items: visibleImageStyles(planAccess, current: _pickedStyle),
+      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: _pickedStyle),
       selected: {_pickedStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,

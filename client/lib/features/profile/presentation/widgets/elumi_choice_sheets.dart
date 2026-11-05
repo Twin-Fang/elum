@@ -49,6 +49,7 @@ Future<ImageStyle?> showElumiImageStyleSheet(
       title: context.l10n.elumiInfoImageStyleSheetTitle,
       current: current,
       bodyBuilder: (context, picked, onPicked) => _ImageStyleChoices(
+        saved: current,
         picked: picked,
         character: character,
         onPicked: onPicked,
@@ -146,11 +147,14 @@ class _CharacterChoices extends StatelessWidget {
 /// 크레딧 띠 + 그림 방식 카드 목록 (설정 그림 방식 화면과 같은 카드)
 class _ImageStyleChoices extends StatelessWidget {
   const _ImageStyleChoices({
+    required this.saved,
     required this.picked,
     required this.character,
     required this.onPicked,
   });
 
+  /// 저장된 방식 (살 수 없어도 목록에서 빠지지 않게)
+  final ImageStyle saved;
   final ImageStyle picked;
   final CardCharacter character;
   final ValueChanged<ImageStyle> onPicked;
@@ -175,7 +179,7 @@ class _ImageStyleChoices extends StatelessWidget {
           builder: (context, ref, _) {
             final planAccess = ref.watch(planAccessProvider);
             return SelectableGroup<ImageStyle>(
-              items: visibleImageStyles(planAccess, current: picked),
+              items: visibleImageStyles(planAccess, saved: saved, picked: picked),
               selected: {picked},
               allowDeselect: false,
               gap: gap,

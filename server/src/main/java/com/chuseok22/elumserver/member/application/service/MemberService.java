@@ -163,18 +163,18 @@ public class MemberService {
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
-  /**
-   * 카드 그림 방식을 바꾼다. 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
-   *
-   * <p>request DTO 에 검증 어노테이션을 달지 않는 규칙이라 null 은 여기서 막는다. 비워 저장하면
-   * 그림 방식이 조용히 만화로 돌아가 보호자가 고른 것과 어긋난다.
-   */
   /// 이 그림 방식을 저장할 수 있는가: AI 그림 방식(캐릭터·실사)은 AI_IMAGE_GENERATION 필요 (#1149)
   public boolean canUseImageStyle(String memberId, ImageStyle style) {
     return !ImageStyle.orDefault(style).drawsAiImages()
       || entitlementService.isAllowed(memberId, Entitlement.AI_IMAGE_GENERATION);
   }
 
+  /**
+   * 카드 그림 방식을 바꾼다. 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
+   *
+   * <p>request DTO 에 검증 어노테이션을 달지 않는 규칙이라 null 은 여기서 막는다. 비워 저장하면
+   * 그림 방식이 조용히 만화로 돌아가 보호자가 고른 것과 어긋난다.
+   */
   @Transactional
   public MemberResponse updateImageStyle(Caller caller, MemberImageStyleUpdateRequest request) {
     Member member = requireMember(caller.memberId());

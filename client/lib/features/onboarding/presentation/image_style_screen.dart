@@ -50,7 +50,7 @@ class ImageStyleScreen extends ConsumerWidget {
     final planAccess = ref.watch(planAccessProvider);
 
     final group = SelectableGroup<ImageStyle>(
-      items: visibleImageStyles(planAccess, current: profile.imageStyle),
+      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: profile.imageStyle),
       selected: {profile.imageStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
