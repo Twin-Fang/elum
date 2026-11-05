@@ -20,6 +20,16 @@ final memberSubscriptionProvider = Provider<MemberSubscription?>(
   (ref) => ref.watch(memberProvider).value?.subscription,
 );
 
+/// 탈퇴해도 스토어 결제가 이어지는가: Pro + 스토어 구독 + 해지 예약 아님 (갱신 여부 모르면 이어진다고 봄)
+/// 서버 탈퇴는 스토어 구독을 해지하지 않음 > 회원탈퇴 경고에 스토어 해지 안내 (#1155)
+final hasRenewingStoreSubscriptionProvider = Provider<bool>((ref) {
+  final subscription = ref.watch(memberSubscriptionProvider);
+  return ref.watch(planAccessProvider).isPro &&
+      subscription != null &&
+      subscription.isStorePurchase &&
+      subscription.willAutoRenew != false;
+});
+
 /// 내 요금제 상태 > 한 줄 문구 (설정 줄 · 요금제 화면 `이미 Pro` 가 함께 씀)
 String planStatusLabel(AppLocalizations l10n, PlanStatus status) {
   final date = status.date;

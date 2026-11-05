@@ -368,22 +368,27 @@ class ElumDialogButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isEnabled = onTap != null;
     // 팝업 전용 토큰을 쓴다. `buttonNeutral`·`danger`는 설정 화면과 연결 암호도
     // 함께 쓰므로, 팝업을 시안에 맞추려고 그것을 건드리면 그쪽까지 바뀐다.
-    final (bg, fg) = switch (tone) {
-      ElumDialogTone.primary => (colors.checkDone, colors.surface),
-      ElumDialogTone.neutral => (
-        colors.dialogNeutral,
-        colors.dialogNeutralText,
-      ),
-      ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
-    };
+    // 꺼진 버튼(onTap null)은 하단 CTA 비활성 토큰 (입력 확인 전 탈퇴하기 #1155)
+    final (bg, fg) = !isEnabled
+        ? (colors.buttonDisabled, colors.buttonDisabledText)
+        : switch (tone) {
+            ElumDialogTone.primary => (colors.checkDone, colors.surface),
+            ElumDialogTone.neutral => (
+              colors.dialogNeutral,
+              colors.dialogNeutralText,
+            ),
+            ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
+          };
 
     // 버튼마다 제 접근성 노드를 세운다. 안 세우면 누르는 동작이 위쪽 노드로 합쳐져
     // 버튼의 영역이 제목·본문까지 덮는다 — 공지 `방침 보기`가 그렇다.
     return Semantics(
       container: true,
       button: true,
+      enabled: isEnabled,
       child: AppPressable(
         onTap: onTap,
         // Container 로 둔다 — 설정 화면 테스트가 버튼 문구 뒤의 면 색을 Container 로 찾는다.
