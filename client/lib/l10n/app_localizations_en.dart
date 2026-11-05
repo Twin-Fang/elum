@@ -504,7 +504,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinSaveFailedTitle => 'Couldn\'t save your settings';
 
   @override
-  String get pinSaveFailedFallback => 'Check again in settings';
+  String get pinSaveFailedFallback => 'Tap Start again in a moment';
 
   @override
   String get elumiSettingsTitle => 'Settings';

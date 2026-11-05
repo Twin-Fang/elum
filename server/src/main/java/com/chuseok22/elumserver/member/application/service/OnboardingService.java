@@ -65,6 +65,9 @@ public class OnboardingService {
    */
   private void validate(OnboardingCompleteRequest request) {
     if (request == null || request.nickname() == null || request.nickname().isBlank()) {
+      // 어떤 칸이 비었는지 남김 (값은 남기지 않음)
+      log.warn("[onboarding complete] rejected 400 : nickname is {}",
+        request == null ? "missing body" : request.nickname() == null ? "missing" : "blank");
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
   }

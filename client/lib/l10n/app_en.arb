@@ -134,7 +134,7 @@
   "pinProfileCreateFailedTitle": "Couldn't create the profile",
   "pinProfileCreateFailedFallback": "Try again in a moment",
   "pinSaveFailedTitle": "Couldn't save your settings",
-  "pinSaveFailedFallback": "Check again in settings",
+  "pinSaveFailedFallback": "Tap Start again in a moment",
   "elumiSettingsTitle": "Settings",
   "elumiSettingsHapticLabel": "Vibrate on card check",
   "elumiSettingsTermsLabel": "Terms and Privacy Policy",

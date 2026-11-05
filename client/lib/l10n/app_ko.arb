@@ -456,8 +456,8 @@
   "pinSaveFailedTitle": "설정을 저장하지 못했어요",
   "@pinSaveFailedTitle": { "description": "설정 저장 실패 팝업 제목" },
 
-  "pinSaveFailedFallback": "설정 화면에서 다시 확인해주세요",
-  "@pinSaveFailedFallback": { "description": "설정 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+  "pinSaveFailedFallback": "잠시 후 시작하기를 다시 눌러주세요",
+  "@pinSaveFailedFallback": { "description": "온보딩 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내 (화면에 남아 시작하기로 다시 보냄)" },
 
   "elumiSettingsTitle": "설정",
   "@elumiSettingsTitle": { "description": "이룸이 기기 설정 페이지 제목" },

@@ -482,7 +482,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pinSaveFailedTitle => '설정을 저장하지 못했어요';
 
   @override
-  String get pinSaveFailedFallback => '설정 화면에서 다시 확인해주세요';
+  String get pinSaveFailedFallback => '잠시 후 시작하기를 다시 눌러주세요';
 
   @override
   String get elumiSettingsTitle => '설정';
