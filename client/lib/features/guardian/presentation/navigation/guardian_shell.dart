@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../subscription/application/plan_entitlements_refresher.dart';
 import '../../application/routine_manage_entry.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_side_nav.dart';
@@ -14,7 +15,7 @@ import 'guardian_tab.dart';
 ///
 /// 폰(compact) = 본문 > 하단 바 > 광고 띠, 태블릿(medium·expanded) = 옆 메뉴 | 본문 > 광고 띠.
 /// 칸마다 화면 상태(스크롤 등)는 라우터의 가지가 지킨다.
-class GuardianShell extends StatelessWidget {
+class GuardianShell extends ConsumerWidget {
   const GuardianShell({
     super.key,
     required this.navigationShell,
@@ -44,7 +45,9 @@ class GuardianShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 보호자 화면이 떠 있는 동안 요금제 변화 > 권한 따라 달라지는 서버 값 다시 받기 (#1135)
+    ref.watch(planEntitlementsRefresherProvider);
     return context.sizeClass == WindowSizeClass.compact
         ? _buildPhone(context)
         : _buildTablet(context);
