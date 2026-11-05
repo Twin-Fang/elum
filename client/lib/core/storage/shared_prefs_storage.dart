@@ -50,6 +50,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedToday = 'cache.todayRoutines';
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
+  // 서버 Pro 판매 여부 마지막 값 (#1132)
+  static const _kCachedStoreSellingOpen = 'cache.storeSellingOpen';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
@@ -293,6 +295,15 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setCachedClientTuningJson(String json) {
     AppLogger.storageWrite(_kCachedTuning, json);
     return _prefs.setString(_kCachedTuning, json);
+  }
+
+  @override
+  bool? get isCachedStoreSellingOpen => _prefs.getBool(_kCachedStoreSellingOpen);
+
+  @override
+  Future<void> setCachedStoreSellingOpen(bool isOpen) {
+    AppLogger.storageWrite(_kCachedStoreSellingOpen, isOpen);
+    return _prefs.setBool(_kCachedStoreSellingOpen, isOpen);
   }
 
   @override

@@ -245,6 +245,15 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setCachedClientTuningJson(String json) async =>
       _cachedTuning = json;
 
+  bool? _isCachedStoreSellingOpen;
+
+  @override
+  bool? get isCachedStoreSellingOpen => _isCachedStoreSellingOpen;
+
+  @override
+  Future<void> setCachedStoreSellingOpen(bool isOpen) async =>
+      _isCachedStoreSellingOpen = isOpen;
+
   @override
   String? get cachedConsentJson => _cachedConsent;
 

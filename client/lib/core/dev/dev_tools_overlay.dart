@@ -21,6 +21,7 @@ import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../analytics/analytics_events.dart';
 import '../analytics/app_analytics.dart';
 import '../app_status/app_status_repository.dart';
+import '../app_status/store_selling.dart';
 import '../config/app_config.dart';
 import '../l10n/app_locales.dart';
 import '../logger/app_logger.dart';

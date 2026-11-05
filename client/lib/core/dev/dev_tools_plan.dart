@@ -3,7 +3,7 @@ part of 'dev_tools_overlay.dart';
 /// 요금제 흉내 — 서버 요금제를 바꾸지 않고 이 기기 화면만 Free·Pro 로 본다
 ///
 /// 값은 메모리에만 있다. 앱을 다시 켜면 서버 값으로 돌아간다([DevPlanOverrideNotifier]).
-/// 아래 `결제 화면 켜기` 는 `ELUM_IAP_ENABLED` 가 꺼진 빌드에서 결제 화면·진입점을 연다.
+/// 아래 `결제 화면 켜기` 는 빌드 설정(`ELUM_IAP_ENABLED`)·서버 판매 스위치가 꺼져 있어도 결제 화면·진입점을 연다.
 class _PlanOverrideView extends ConsumerWidget {
   const _PlanOverrideView();
 
@@ -13,6 +13,7 @@ class _PlanOverrideView extends ConsumerWidget {
     final notifier = ref.read(devPlanOverrideProvider.notifier);
     final isStoreForced = ref.watch(devPlanStoreForcedProvider);
     final isTeaserForced = ref.watch(devProTeaserForcedProvider);
+    final isServerSellingOpen = ref.watch(isServerStoreSellingOpenProvider);
     return ListView(
       shrinkWrap: true,
       children: [
@@ -31,17 +32,16 @@ class _PlanOverrideView extends ConsumerWidget {
           ),
         ),
         ListTile(
-          title: Text(
-            AppConfig.isInAppPurchaseEnabled
-                ? '결제 화면 켜기 (빌드 설정으로 이미 켜짐)'
-                : '결제 화면 켜기',
+          title: const Text('결제 화면 켜기'),
+          // 지금 판매 판정 재료 2개: 빌드 설정(하드 킬) · 서버 판매 스위치 (#1132)
+          subtitle: Text(
+            '빌드 설정 ${AppConfig.isInAppPurchaseEnabled ? '켜짐' : '꺼짐'} · '
+            '서버 판매 ${isServerSellingOpen ? '켜짐' : '꺼짐'}',
           ),
           trailing: Switch(
-            value: isStoreForced || AppConfig.isInAppPurchaseEnabled,
-            onChanged: AppConfig.isInAppPurchaseEnabled
-                ? null
-                : (isOn) =>
-                      ref.read(devPlanStoreForcedProvider.notifier).set(isOn),
+            value: isStoreForced,
+            onChanged: (isOn) =>
+                ref.read(devPlanStoreForcedProvider.notifier).set(isOn),
           ),
         ),
         const Padding(

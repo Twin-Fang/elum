@@ -69,10 +69,10 @@ class StorePurchaseCoordinator {
 
   /// 구매 소식 듣기 시작 + Android 미확인 구매 다시 확인 (앱 시작 · 요금제 화면 열 때, 여러 번 불러도 1번)
   ///
-  /// 보호자 기기 + 판매 스위치 켜짐일 때만. 이룸이 기기는 스토어를 건드리지 않음
+  /// 보호자 기기 + 스토어 연동일 때만 (서버 판매 스위치와 무관 — 기존 구독 갱신·미확인 결제 처리 유지). 이룸이 기기는 스토어를 건드리지 않음
   Future<void> start() async {
     if (_purchaseSubscription != null) return;
-    if (!_ref.read(isPlanStoreEnabledProvider)) return;
+    if (!_ref.read(isPlanStoreConnectedProvider)) return;
     _purchaseSubscription = _store.purchaseUpdates.listen(
       (updates) => unawaited(_onPurchaseUpdates(updates)),
       onError: (Object error, StackTrace stack) =>

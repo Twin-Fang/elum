@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Test;
 class SubscriptionStoreConfigKeyTest {
 
   @Test
-  @DisplayName("켜기·테스트 결제 허용은 기본 꺼짐, 상품 목록·비밀값은 비어 있다")
+  @DisplayName("켜기·신규 판매·테스트 결제 허용은 기본 꺼짐, 상품 목록·비밀값은 비어 있다")
   void defaults_keepProductionUnchanged() {
     assertThat(ConfigKey.SUBSCRIPTION_APPLE_ENABLED.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.SUBSCRIPTION_GOOGLE_ENABLED.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.SUBSCRIPTION_APPLE_SELLING_ENABLED.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.SUBSCRIPTION_GOOGLE_SELLING_ENABLED.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.SUBSCRIPTION_APPLE_ALLOW_SANDBOX.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.SUBSCRIPTION_GOOGLE_ALLOW_TEST_PURCHASES.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.SUBSCRIPTION_APPLE_PRODUCT_IDS.getDefaultValue()).isEmpty();
