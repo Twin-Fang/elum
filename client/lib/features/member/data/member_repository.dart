@@ -40,7 +40,7 @@ class Member {
   /// 선택한 도움 목표의 서버 enum 값
   final List<String> supportGoals;
 
-  /// 카드 그림 방식. 필드가 없거나 모르는 값이면 만화다 —
+  /// 카드 그림 방식. 필드가 없거나 모르는 값이면 캐릭터 그림이다 —
   /// 필드가 없거나 새 값이 와도 화면이 죽지 않는다.
   final ImageStyle imageStyle;
 

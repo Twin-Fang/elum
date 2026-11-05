@@ -21,7 +21,7 @@ import '../../shared/models/image_style.dart';
 /// 고르지 않으면 바탕색이다. 사진 같은 그림은 시안의 사진 에셋, 이모지·그림 기호는 실제 카드에 들어가는
 /// 그림(이 닦기)이다. Pro 방식은 이름 옆에 [badgeLabel] 배지 (잠금 판단은 호출부, #1149).
 ///
-/// 두 화면이 같은 카드를 쓰므로 여기서만 고친다.
+/// 세 화면(온보딩·보호자 설정·이룸이 정보 시트)이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
   const ImageStyleOptionCard({
     super.key,

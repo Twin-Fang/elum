@@ -23,7 +23,7 @@ import '../../member/application/plan_access.dart';
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞.
 ///
 /// Figma `그림방식` 1274:9883 · 1274:10129. 제목·설명은 다른 온보딩과 같은 x=24 이고
-/// 카드 셋은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
+/// 카드 넷은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
 ///
 /// 원칙 ④ — 되돌릴 수 있다고 먼저 말한다(`나중에 설정에서 바꿀 수 있어요`).
 /// 이모지 그림이 처음부터 골라져 있어 `다음`만 누르면 되므로 건너뛰기는 두지 않는다.
@@ -78,7 +78,7 @@ class ImageStyleScreen extends ConsumerWidget {
         label: context.l10n.commonNext,
         onPressed: () => context.push(Routes.onboardingPin),
       ),
-      // 글자를 키우면 제목 두 줄과 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 본다
+      // 글자를 키우면 제목 두 줄과 카드 넷이 한 화면을 넘는다 — 스크롤로 끝까지 본다
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

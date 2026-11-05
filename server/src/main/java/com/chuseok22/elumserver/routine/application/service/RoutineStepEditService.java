@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoutineStepEditService {
 
-  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다.
+  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 그림 기호·이모지라 AI 그림을 만들지 않았다.
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
   /// 카드 추가 응답 imageSkippedReason — 요금제에 AI 맞춤 그림이 없어 픽토그램만 둔다 (앱은 그림 기다림 표시 없음)
   static final String IMAGE_SKIPPED_PLAN = ErrorCode.AI_IMAGE_NOT_ALLOWED.name();
@@ -197,7 +197,7 @@ public class RoutineStepEditService {
     step.setRoutine(routine);
     step.setTitle(request.title().trim());
     step.setDescription(request.descriptionOrEmpty());
-    // 그림이 없어도(직접 사진·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다. 고르기는 절대 던지지 않는다.
+    // 그림이 없어도(그림 기호·이모지 방식·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다. 고르기는 절대 던지지 않는다.
     // 글 호출 단가 수준이라 크레딧을 잡지 않고, 그림 예약·건너뜀 판정(imageSkippedReason)과도 무관하다.
     // 보호자가 카드에 이룸이 이름을 적었을 수 있다 — 글 AI·그림 AI 로 나가는 값만 자리표시로 바꾸고 저장값은 그대로 둔다.
     String nickname = routine.getProfile().getNickname();

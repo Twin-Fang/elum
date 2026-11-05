@@ -89,7 +89,7 @@ class _ImageStyleSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(onboardingProvider);
-    // 만화 예시에는 온보딩에서 고른 친구를 그린다 (없으면 고양이)
+    // 캐릭터 예시에는 온보딩에서 고른 친구를 그린다 (없으면 고양이)
     final character = profile.cardCharacter ?? CardCharacter.cat;
     final planAccess = ref.watch(planAccessProvider);
 
@@ -128,7 +128,7 @@ class _ImageStyleSettingsScreenState
         loading: busy,
         onPressed: _confirm,
       ),
-      // 글자를 키우면 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 볼 수 있게 한다
+      // 글자를 키우면 카드 넷이 한 화면을 넘는다 — 스크롤로 끝까지 볼 수 있게 한다
       child: SingleChildScrollView(
         child: Padding(
           // 설정 첫 줄과 같은 자리(y=147)에서 시작한다

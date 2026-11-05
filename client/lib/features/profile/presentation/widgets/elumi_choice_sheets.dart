@@ -36,7 +36,7 @@ Future<CardCharacter?> showElumiCharacterSheet(
 
 /// 그림 방식 바꾸기 시트: 크레딧 띠 + 방식 4개 중 하나 > 저장하기. 저장하면 고른 방식을 돌려준다 (#660)
 ///
-/// 만화 예시에는 그 이룸이의 [character] 를 그린다
+/// 캐릭터 예시에는 그 이룸이의 [character] 를 그린다
 Future<ImageStyle?> showElumiImageStyleSheet(
   BuildContext context, {
   required ImageStyle current,
