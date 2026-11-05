@@ -17,7 +17,9 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../guardian/application/library_talk_import_state.dart';
 import '../../guardian/application/routine_manage_entry.dart';
+import '../../member/application/plan_access.dart';
 import '../../profile/application/profile_session.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/expert_routine_providers.dart';
 import '../domain/expert_routine.dart';
 import 'widgets/expert_routine_step_row.dart';
@@ -51,6 +53,11 @@ class _ExpertRoutineDetailScreenState
   Future<void> _import(ExpertRoutineDetail detail) async {
     if (_isImporting) return;
     final l10n = context.l10n;
+    // Free: 가져오기 대신 Pro 안내 (판매 중 > 요금제 화면)
+    if (!ref.read(planAccessProvider).canImportExpertRoutines) {
+      await openProOnlyNotice(context, ref);
+      return;
+    }
     final profile = ref.read(activeProfileProvider);
     if (profile == null) {
       await showElumDialog<void>(
@@ -83,6 +90,9 @@ class _ExpertRoutineDetailScreenState
     } catch (e) {
       if (!mounted) return;
       setState(() => _isImporting = false);
+      // 서버 Pro 거절(EXPERT_ROUTINE_PRO_ONLY)은 실패가 아니라 Pro 안내
+      if (await handleProOnlyRejection(context, ref, e)) return;
+      if (!mounted) return;
       await showFailure(
         context,
         e,

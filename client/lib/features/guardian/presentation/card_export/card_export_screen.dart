@@ -15,7 +15,9 @@ import '../../../../core/widgets/elum_check_circle.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
+import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
+import '../../../../core/widgets/elum_state_body.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -76,22 +78,15 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       horizontalPadding: _horizontalPadding,
       bottomButton: widget.routine.steps.isEmpty
           ? null
-          : ElumSheetActionRow(
-              // 카드 한 장씩은 이미지라 인쇄 대신 보내기만
-              cancelLabel: _options.format == CardExportFormat.cardImages ? null : l10n.cardExportPrint,
-              onCancel: canExport ? () => _export(shouldPrint: true) : null,
-              confirmLabel: l10n.cardExportShare,
-              onConfirm: canExport ? () => _export(shouldPrint: false) : () {},
-              isLoading: _isBusy || (pictures == null && !picturesAsync.hasError),
-            ),
-      child: SingleChildScrollView(
+          : _bottomButtons(l10n, canExport: canExport, isLoading: _isBusy || (pictures == null && !picturesAsync.hasError)),
+      // 카드 없는 일과: 남는 높이 가운데 빈 상태 (위 왼쪽 한 줄로 두지 않음)
+      child: widget.routine.steps.isEmpty
+          ? ElumStateBody(child: ElumErrorView(message: l10n.cardExportNoCards, compact: true))
+          : SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: _sectionGap.h),
-            if (widget.routine.steps.isEmpty)
-              ElumErrorView(message: l10n.cardExportNoCards, compact: true)
-            else ...[
               CardExportOptionsPanel(
                 options: _options,
                 onChanged: (next) => setState(() {
@@ -111,11 +106,28 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                 hasWatermark: !access.canExportCardsWithoutWatermark,
                 canPurchasePro: access.canPurchasePro,
               ),
-            ],
             SizedBox(height: _sectionGap.h),
           ],
         ),
       ),
+    );
+  }
+
+  /// 아래 버튼: 카드 한 장씩(이미지) > `보내기` 하나 · 그 외 > `인쇄하기` + `보내기`
+  Widget _bottomButtons(AppLocalizations l10n, {required bool canExport, required bool isLoading}) {
+    if (_options.format == CardExportFormat.cardImages) {
+      return ElumButton(
+        label: l10n.cardExportShare,
+        loading: isLoading,
+        onPressed: canExport ? () => _export(shouldPrint: false) : () {},
+      );
+    }
+    return ElumSheetActionRow(
+      cancelLabel: l10n.cardExportPrint,
+      onCancel: canExport ? () => _export(shouldPrint: true) : null,
+      confirmLabel: l10n.cardExportShare,
+      onConfirm: canExport ? () => _export(shouldPrint: false) : () {},
+      isLoading: isLoading,
     );
   }
 

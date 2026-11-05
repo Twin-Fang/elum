@@ -37,3 +37,20 @@ String planStatusLabel(AppLocalizations l10n, PlanStatus status) {
       dateLabel == null ? l10n.planStatusPro : l10n.planStatusUntil(dateLabel),
   };
 }
+
+/// 설정 줄 값 (짧게): Free · Pro. 날짜·결제 확인은 묶음 아래 [planStatusFooter] 한 줄로 (줄 값이 두 줄로 꺾이지 않게)
+String planStatusShortLabel(AppLocalizations l10n, PlanStatus status) =>
+    status.isPro ? l10n.planStatusPro : l10n.planStatusFree;
+
+/// 설정 내 요금제 묶음 아래 한 줄: 갱신일 · 끝나는 날 · 결제 확인. 알릴 것이 없으면(Free · 기간 제한 없음 · 날짜 모름) null
+String? planStatusFooter(AppLocalizations l10n, PlanStatus status) {
+  final date = status.date;
+  final dateLabel = date == null ? null : l10n.yearMonthDay(date);
+  return switch (status.kind) {
+    PlanStatusKind.free || PlanStatusKind.proUnlimited => null,
+    PlanStatusKind.proGracePeriod => l10n.planStatusGracePeriodFooter,
+    PlanStatusKind.proRenewing => dateLabel == null ? null : l10n.planStatusRenewingFooter(dateLabel),
+    PlanStatusKind.proCancelScheduled => dateLabel == null ? null : l10n.planStatusCancelScheduledFooter(dateLabel),
+    PlanStatusKind.proUntil => dateLabel == null ? null : l10n.planStatusUntilFooter(dateLabel),
+  };
+}

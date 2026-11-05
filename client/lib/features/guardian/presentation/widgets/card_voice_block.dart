@@ -9,6 +9,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/guardian_voice_controller.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/guardian_voice_api.dart';
@@ -25,8 +26,8 @@ class CardVoiceBlock extends ConsumerStatefulWidget {
   final String routineId;
   final String stepId;
 
-  /// 칸 높이 (임시 시안 — 시트 입력칸 68 보다 조금 크게, 설명 두 줄)
-  static const height = 76.0;
+  /// 칸 최소 높이 (임시 시안 — 시트 입력칸 68 보다 조금 크게). 글이 길면 더 자람
+  static const minHeight = 76.0;
 
   /// 칸을 둘지: Pro 이거나 녹음이 남아 있을 때 (결제 전에는 Free 에게 녹음 칸을 보이지 않음)
   static bool isShownFor({required bool canUseGuardianVoice, required String? guardianVoicePath}) =>
@@ -131,6 +132,13 @@ class _CardVoiceBlockState extends ConsumerState<CardVoiceBlock> {
       return;
     }
     final failure = uploadResult.failure ?? VoiceFailure.recordFailed;
+    if (failure.isProOnlyRejection) {
+      // Pro 가 끝났음: 칸 실패 대신 Pro 안내 (판정이 새로 오면 칸이 '기본 목소리로 읽어요'로 바뀜)
+      if (!mounted) return;
+      setState(() => _phase = CardVoicePhase.ready);
+      await showProOnlyNoticeAfterRejection(context, ref);
+      return;
+    }
     _fail(failure, retryBytes: failure.canRetrySame ? bytes : null);
   }
 

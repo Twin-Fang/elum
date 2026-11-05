@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/layout/app_text_scale.dart';
 import '../../../../core/layout/layout_context_ext.dart';
 import '../../../../core/layout/window_size_class.dart';
 import '../../../../core/router/routes.dart';
@@ -27,11 +28,52 @@ import 'weekly_plan_entry_pill.dart';
 class LibraryManageHeader extends ConsumerWidget {
   const LibraryManageHeader();
 
+  /// 입구 2개를 제목 옆 한 줄에 둘 수 있는 최소 폭 (393 폰은 제목이 한 글자씩 꺾여 아래 줄로 내림)
+  static const _twoEntriesInlineMinWidth = 480.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final isPhone = context.sizeClass == WindowSizeClass.compact;
     final identity = ref.watch(guardianChildIdentityProvider);
+    // 입구 2개: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · 전문가 일과 (Pro, 살 수 없는 동안 Free 에게는 숨김)
+    final entries = <Widget>[
+      if (ref.watch(canShowRoutineScheduleProvider)) const WeeklyPlanEntryPill(),
+      if (ref.watch(planAccessProvider).shouldShowExpertRoutines)
+        ElumChoiceChip(
+          label: context.l10n.expertRoutineEntry,
+          isSelected: false,
+          onTap: () => context.push(Routes.guardianExpertRoutines),
+        ),
+    ];
+    // 제목 + 사용법(코치마크) 다시 보기 `?`
+    final title = Row(
+      children: [
+        Flexible(
+          child: Text(
+            context.l10n.guardianTabManage,
+            style: context.typo.libraryTitle.copyWith(
+              color: context.colors.textPrimary,
+            ),
+          ),
+        ),
+        SizedBox(width: space.xs.w),
+        CoachHelpButton(
+          onTap: () => ref
+              .read(routineManageCoachProvider.notifier)
+              .requestReplay(),
+        ),
+      ],
+    );
+    final badge = isPhone
+        ? AppPressable(
+            onTap: () => context.go(Routes.child),
+            scaleDown: AppPressable.scaleIcon,
+            semanticLabel: context.l10n.guardianHomeGoChildScreen,
+            child: CharacterBadge(character: identity.character),
+          )
+        : null;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         space.screenH.w,
@@ -39,51 +81,29 @@ class LibraryManageHeader extends ConsumerWidget {
         space.screenH.w,
         0,
       ),
-      child: Row(
-        children: [
-          // 제목 + 사용법(코치마크) 다시 보기 `?` — 배지는 오른쪽 끝에 붙는다
-          Expanded(
-            child: Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final shouldStackEntries = entries.isNotEmpty &&
+              (AppTextScale.isLargeTextOf(context) || (entries.length >= 2 && constraints.maxWidth < _twoEntriesInlineMinWidth));
+          if (shouldStackEntries) {
+            // 제목·배지 한 줄 > 입구 줄 (좁으면 또 내림)
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Flexible(
-                  child: Text(
-                    context.l10n.guardianTabManage,
-                    style: context.typo.libraryTitle.copyWith(
-                      color: context.colors.textPrimary,
-                    ),
-                  ),
-                ),
-                SizedBox(width: space.xs.w),
-                CoachHelpButton(
-                  onTap: () => ref
-                      .read(routineManageCoachProvider.notifier)
-                      .requestReplay(),
-                ),
+                Row(children: [Expanded(child: title), ?badge]),
+                SizedBox(height: space.xs.h),
+                Wrap(spacing: space.xs.w, runSpacing: space.xs.h, children: entries),
               ],
-            ),
-          ),
-          // 주간 계획 입구 (#782): Pro 이거나 정해 둔 반복이 있을 때만
-          if (ref.watch(canShowRoutineScheduleProvider)) ...[
-            const WeeklyPlanEntryPill(),
-            if (isPhone) SizedBox(width: space.xs.w),
-          ],
-          // 전문가 일과 입구 (Pro, 살 수 없는 동안 Free 에게는 숨김)
-          if (ref.watch(planAccessProvider).shouldShowExpertRoutines) ...[
-            ElumChoiceChip(
-              label: context.l10n.expertRoutineEntry,
-              isSelected: false,
-              onTap: () => context.push(Routes.guardianExpertRoutines),
-            ),
-            if (isPhone) SizedBox(width: space.sm.w),
-          ],
-          if (isPhone)
-            AppPressable(
-              onTap: () => context.go(Routes.child),
-              scaleDown: AppPressable.scaleIcon,
-              semanticLabel: context.l10n.guardianHomeGoChildScreen,
-              child: CharacterBadge(character: identity.character),
-            ),
-        ],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(child: title),
+              for (final entry in entries) ...[entry, if (isPhone) SizedBox(width: space.xs.w)],
+              ?badge,
+            ],
+          );
+        },
       ),
     );
   }

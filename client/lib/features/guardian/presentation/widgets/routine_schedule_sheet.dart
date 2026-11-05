@@ -14,6 +14,7 @@ import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/routine_schedule_controller.dart';
 import '../../domain/routine_schedule.dart';
 import 'routine_schedule_weekday_picker.dart';
@@ -106,13 +107,18 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     Navigator.of(context).pop();
   }
 
-  Future<void> _showFailure(Object failure) => showFailure(
+  /// 실패 팝업 (서버 Pro 거절이면 실패 대신 Pro 안내)
+  Future<void> _showFailure(Object failure) async {
+    if (await handleProOnlyRejection(context, ref, failure)) return;
+    if (!mounted) return;
+    await showFailure(
     context,
     failure,
     title: context.l10n.routineScheduleSaveFailedTitle,
     fallback: context.l10n.routineScheduleSaveFailedFallback,
     fallbackCode: 'E-SCHEDULE',
   );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +126,10 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     final colors = context.colors;
     final typo = context.typo;
     final l10n = context.l10n;
-    final canSchedule = ref.watch(planAccessProvider).canScheduleRoutines;
+    final access = ref.watch(planAccessProvider);
+    final canSchedule = access.canScheduleRoutines;
+    // Free · 판매 중: 저장이 꺼진 이유 + Pro 입구 (판매 중이 아니면 권유하지 않음)
+    final shouldShowProNote = !canSchedule && access.shouldShowProTeaser;
     final elumiNotification =
         ref.watch(routineSchedulePlanProvider).value?.elumiNotification ??
         ElumiNotificationState.on;
@@ -131,7 +140,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
       color: colors.routineTileLabel,
     );
 
-    // 틀: 제목 > 설명 > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > 저장 > (있으면) 반복 끄기
+    // 틀: 제목 > 설명 > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > (Pro 안내) > 저장 > (Pro로 보기) > (있으면) 반복 끄기
     return ElumSheetFrame(
       title: l10n.routineScheduleSheetTitle,
       description: l10n.routineScheduleSheetBody,
@@ -178,7 +187,14 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
             ],
           ),
           SizedBox(height: space.lg.h),
-          if (hasNoWeekday) ...[
+          if (shouldShowProNote) ...[
+            Text(
+              l10n.routineScheduleProNote,
+              textAlign: TextAlign.center,
+              style: noteStyle,
+            ),
+            SizedBox(height: space.xs.h),
+          ] else if (hasNoWeekday) ...[
             Text(
               l10n.routineSchedulePickDayHint,
               textAlign: TextAlign.center,
@@ -192,6 +208,13 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
             loading: _isSaving,
             onPressed: _isSaving || hasNoWeekday || !canSchedule ? null : _save,
           ),
+          if (shouldShowProNote) ...[
+            SizedBox(height: space.xs.h),
+            ElumTextLink(
+              label: l10n.proTeaserUnlock,
+              onTap: _isSaving ? null : () => openPlanPaywall(context, ref),
+            ),
+          ],
           if (_existing != null) ...[
             SizedBox(height: space.xs.h),
             ElumTextLink(

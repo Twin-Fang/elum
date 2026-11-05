@@ -87,13 +87,13 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
   // 링크는 내가 만든 일과만 보낸다 (공유 불가 조건은 이야기와 같다, 서버도 막음)
   final canSendLink = isMine && canShareToTalk;
   final hasActiveLink = linkPostIdBySourceRoutineId.containsKey(routine.id);
-  // 다른 언어로 만들기 (Pro): 결제가 붙기 전에는 Free 에게 숨김 · 보낸 상태(임시저장 아님)·카드 있음 · 고를 언어가 남음
+  // 다른 언어로 만들기 (Pro): 앱에서 Pro 를 살 수 없으면 Free 에게 숨김 (판매 중 Free 는 눌러서 Pro 안내) · 보낸 상태(임시저장 아님)·카드 있음 · 고를 언어가 남음
   final planAccess = ProviderScope.containerOf(
     context,
     listen: false,
   ).read(planAccessProvider);
   final canTranslate =
-      (planAccess.canTranslateRoutines || planAccess.canPurchasePro) &&
+      (planAccess.canTranslateRoutines || planAccess.shouldShowProTeaser) &&
       routine.isVisibleToChild &&
       routine.steps.isNotEmpty &&
       routineTranslateTargetsOf(routine).isNotEmpty;

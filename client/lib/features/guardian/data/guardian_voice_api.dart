@@ -10,6 +10,7 @@ import '../../../core/config/app_config.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../../shared/models/action_card.dart';
 import 'guardian_voice_recorder.dart';
 
@@ -19,10 +20,14 @@ class VoiceFailure {
     required this.code,
     required String Function() messageOf,
     this.canRetrySame = false,
+    this.isProOnlyRejection = false,
   }) : _messageOf = messageOf;
 
   final String code;
   final bool canRetrySame;
+
+  /// 서버가 'Pro 기능'이라 거절 (GUARDIAN_VOICE_NOT_ALLOWED · Pro 가 막 끝남) — 칸 실패가 아니라 Pro 안내로 돌림
+  final bool isProOnlyRejection;
   final String Function() _messageOf;
 
   /// 사용자에게 보일 문구 — 읽을 때 앱 언어로 푼다
@@ -48,6 +53,7 @@ class VoiceFailure {
       code: failure.badgeOr(fallbackCode),
       messageOf: () => failure.serverMessage ?? failure.hint ?? (fallback ?? () => appL10n.commonRetryLater)(),
       canRetrySame: !isClientError,
+      isProOnlyRejection: failure.server?.code == ServerErrorCode.guardianVoiceNotAllowed,
     );
   }
 }
