@@ -28,7 +28,7 @@ final routineSchedulePlanProvider = FutureProvider<RoutineSchedulePlan>((
 /// Free 는 판매 중일 때만 입구가 보이고 주간 계획에서 흐린 견본을 본다 ([PlanAccess.shouldShowProTeaser]).
 final canShowRoutineScheduleProvider = Provider<bool>((ref) {
   final access = ref.watch(planAccessProvider);
-  if (access.canScheduleRoutines || access.shouldShowProTeaser) return true;
+  if (access.shouldShowEntryFor(canUseFeature: access.canScheduleRoutines)) return true;
   final plan = ref.watch(routineSchedulePlanProvider).value;
   return plan != null && plan.schedules.isNotEmpty;
 });

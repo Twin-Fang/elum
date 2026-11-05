@@ -50,7 +50,7 @@ class _ExpertRoutineListScreenState
     final l10n = context.l10n;
     final colors = context.colors;
     final access = ref.watch(planAccessProvider);
-    if (!access.canImportExpertRoutines && access.shouldShowProTeaser) {
+    if (access.shouldShowTeaserFor(canUseFeature: access.canImportExpertRoutines)) {
       return _proTeaserScaffold(context);
     }
     final routines = ref.watch(expertRoutineListProvider(_category));

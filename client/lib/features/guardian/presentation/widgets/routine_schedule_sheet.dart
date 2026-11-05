@@ -129,7 +129,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     final access = ref.watch(planAccessProvider);
     final canSchedule = access.canScheduleRoutines;
     // Free · 판매 중: 저장이 꺼진 이유 + Pro 입구 (판매 중이 아니면 권유하지 않음)
-    final shouldShowProNote = !canSchedule && access.shouldShowProTeaser;
+    final shouldShowProNote = access.shouldShowTeaserFor(canUseFeature: canSchedule);
     final elumiNotification =
         ref.watch(routineSchedulePlanProvider).value?.elumiNotification ??
         ElumiNotificationState.on;

@@ -187,7 +187,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         _groupGap,
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
-          children: [_LinkTile(busy: busy)],
+          children: [_LinkTile(isBusy: busy)],
         ),
         _groupGap,
         // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
@@ -205,8 +205,8 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
               label: context.l10n.guardianSettingsPinChange,
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),
-            _ImageStyleTile(busy: busy),
-            _RoutineMemoryTile(busy: busy),
+            _ImageStyleTile(isBusy: busy),
+            _RoutineMemoryTile(isBusy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
             const _ScreenAwakeTile(),
@@ -276,9 +276,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 /// **상태를 못 알아도 `연결하기`로 둔다** — 로딩·실패가 설정 화면을 막으면 안 된다. 연결된 보호자가
 /// 잘못 `연결하기`를 눌러도 새 암호만 만들어질 뿐 기존 연결은 그대로다(서버가 발급과 끊기를 나눈다).
 class _LinkTile extends ConsumerWidget {
-  const _LinkTile({required this.busy});
+  const _LinkTile({required this.isBusy});
 
-  final bool busy;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -296,7 +296,7 @@ class _LinkTile extends ConsumerWidget {
           : context.l10n.guardianSettingsLinkConnect,
       valueText: connected ? context.l10n.guardianSettingsLinkStatus : null,
       showChevronWithValue: connected,
-      onTap: busy
+      onTap: isBusy
           ? null
           : () async {
               // 열려 있는 동안 캐시가 남아 옛 값이 보인다 — 들어가기 전에 비워 새 값을 받게 한다
@@ -313,9 +313,9 @@ class _LinkTile extends ConsumerWidget {
 
 /// `그림 방식` 줄. 오른쪽에 지금 방식(`만화`)을 보여주고 누르면 선택 화면이 열린다.
 class _ImageStyleTile extends ConsumerWidget {
-  const _ImageStyleTile({required this.busy});
+  const _ImageStyleTile({required this.isBusy});
 
-  final bool busy;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -325,7 +325,7 @@ class _ImageStyleTile extends ConsumerWidget {
       label: context.l10n.guardianSettingsImageStyle,
       valueText: style.label,
       showChevronWithValue: true,
-      onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+      onTap: isBusy ? null : () => context.push(Routes.guardianImageStyle),
     );
   }
 }
@@ -333,14 +333,14 @@ class _ImageStyleTile extends ConsumerWidget {
 /// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
 /// Free 는 판매 중일 때만 줄이 보이고 들어가면 흐린 견본 — 살 수 없는 동안 잠긴 줄은 막힌 기능으로 읽혀 숨긴다
 class _RoutineMemoryTile extends ConsumerWidget {
-  const _RoutineMemoryTile({required this.busy});
+  const _RoutineMemoryTile({required this.isBusy});
 
-  final bool busy;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isVisible = ref.watch(
-      planAccessProvider.select((access) => access.canUseRoutineMemory || access.shouldShowProTeaser),
+      planAccessProvider.select((access) => access.shouldShowEntryFor(canUseFeature: access.canUseRoutineMemory)),
     );
     if (!isVisible) {
       return const SizedBox.shrink();
@@ -348,7 +348,7 @@ class _RoutineMemoryTile extends ConsumerWidget {
     return SettingsTile(
       isInCard: true,
       label: context.l10n.guardianSettingsRoutineMemory,
-      onTap: busy ? null : () => context.push(Routes.guardianRoutineMemory),
+      onTap: isBusy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }
 }

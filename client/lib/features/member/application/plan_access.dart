@@ -89,8 +89,14 @@ class PlanAccess {
   /// Pro 인데 권한이 꺼진 기능(운영이 막아 둔 것)에는 권유하지 않는다
   bool get shouldShowProTeaser => !isPro && canPurchasePro;
 
+  /// Pro 기능 입구(설정 줄·메뉴)를 보이는가: 쓸 수 있음 또는 흐린 미리 보기 대상
+  bool shouldShowEntryFor({required bool canUseFeature}) => canUseFeature || shouldShowProTeaser;
+
+  /// 기능 자리에 실제 화면 대신 흐린 미리 보기를 보이는가: 못 씀 + 흐린 미리 보기 대상
+  bool shouldShowTeaserFor({required bool canUseFeature}) => !canUseFeature && shouldShowProTeaser;
+
   /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
-  bool get shouldShowExpertRoutines => canImportExpertRoutines || shouldShowProTeaser;
+  bool get shouldShowExpertRoutines => shouldShowEntryFor(canUseFeature: canImportExpertRoutines);
 
   /// 같은 권한 판정 + 구매 가능 여부만 바꾼 사본 (필드를 더하면 여기 한 곳만 고친다)
   PlanAccess withCanPurchasePro(bool canPurchasePro) => PlanAccess(

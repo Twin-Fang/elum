@@ -43,7 +43,7 @@ class WeeklyPlanScreen extends ConsumerWidget {
 
     final access = ref.watch(planAccessProvider);
     final body = switch (planAsync) {
-      AsyncValue(:final value?) when value.schedules.isEmpty && !access.canScheduleRoutines && access.shouldShowProTeaser =>
+      AsyncValue(:final value?) when value.schedules.isEmpty && access.shouldShowTeaserFor(canUseFeature: access.canScheduleRoutines) =>
         ListView(
           padding: EdgeInsets.only(top: WeeklyPlanScreen._topGap.h),
           children: [
