@@ -8,6 +8,7 @@ import '../../../core/network/server_error_code.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_type_confirm_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -48,6 +49,7 @@ final guardiansProvider = FutureProvider.autoDispose
 /// 확인 팝업이 **먼저 무엇이 사라지고 무엇이 남는지** 말한다. 확인하기 전에는 서버에 아무것도
 /// 보내지 않는다. 마지막 보호자이면 이룸이도 사라진다고 알린다 — 몇 명인지 모르면(목록을
 /// 못 받았으면) 마지막인지 말할 수 없으므로 나가기를 막는다.
+/// 마지막 보호자이면 경고 뒤에 `그만두기` 입력 확인을 한 번 더 받는다 (시안 없는 임시 배치).
 class GuardiansScreen extends ConsumerStatefulWidget {
   const GuardiansScreen({super.key});
 
@@ -97,6 +99,11 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
       ],
     );
     if (ok != true || !mounted) return;
+    // 마지막 보호자 = 이룸이·일과·별 삭제 > 입력 확인 한 단계 더 (다른 보호자가 있으면 생략)
+    if (isLast) {
+      final isTypedConfirmed = await _confirmLeaveByTyping(l10n);
+      if (!isTypedConfirmed || !mounted) return;
+    }
 
     // 나가기 요청과 뒤이은 세션 정리를 한 덩어리로 잠가, 화면을 떠나기 전까지 스피너가 돈다.
     final done = await runBusy(() async {
@@ -137,6 +144,18 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
         context.go(Routes.guardian);
     }
     showElumToastOn(messenger, l10n.guardiansLeft(profileName));
+  }
+
+  /// 마지막 보호자 둘째 단계: `그만두기` 입력이 맞아야 그만두기가 켜짐
+  Future<bool> _confirmLeaveByTyping(AppLocalizations l10n) {
+    final requiredPhrase = l10n.guardiansLeaveTypePhrase;
+    return confirmByTyping(
+      context,
+      requiredPhrase: requiredPhrase,
+      title: l10n.guardiansLeaveTypeTitle,
+      message: l10n.guardiansLeaveTypeMessage(requiredPhrase),
+      actionLabel: l10n.guardiansLeaveTypeAction,
+    );
   }
 
   Future<void> _editMe(String profileId, Guardian me) async {

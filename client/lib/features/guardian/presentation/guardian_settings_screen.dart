@@ -7,6 +7,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_type_confirm_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -27,7 +28,6 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../subscription/application/plan_status_providers.dart';
 import 'widgets/plan_settings_group.dart';
-import 'widgets/withdraw_type_confirm_dialog.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -87,11 +87,24 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
   Future<void> _deleteAccount() async {
     final isWarningConfirmed = await _confirmWithdrawWarning();
     if (!isWarningConfirmed || !mounted) return;
-    final isTypedConfirmed = await confirmWithdrawByTyping(context);
+    final isTypedConfirmed = await _confirmWithdrawByTyping();
     if (!isTypedConfirmed || !mounted) return;
     await _run(
       _withdrawKey,
       () => ref.read(authSessionControllerProvider).deleteAccount(),
+    );
+  }
+
+  /// 둘째 단계: `회원탈퇴` 입력이 맞아야 탈퇴하기가 켜짐
+  Future<bool> _confirmWithdrawByTyping() {
+    final l10n = context.l10n;
+    final requiredPhrase = l10n.guardianSettingsWithdrawTypePhrase;
+    return confirmByTyping(
+      context,
+      requiredPhrase: requiredPhrase,
+      title: l10n.guardianSettingsWithdrawTypeTitle,
+      message: l10n.guardianSettingsWithdrawTypeMessage(requiredPhrase),
+      actionLabel: l10n.guardianSettingsWithdrawTypeAction,
     );
   }
 

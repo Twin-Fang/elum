@@ -1328,6 +1328,30 @@ abstract class AppLocalizations {
   /// **'그만두기'**
   String get guardiansLeaveConfirmAction;
 
+  /// 마지막 보호자가 그만둘 때 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번 더 확인할게요'**
+  String get guardiansLeaveTypeTitle;
+
+  /// 마지막 보호자가 그만둘 때 둘째 단계 안내. phrase 는 guardiansLeaveTypePhrase
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이와 일과, 별이 모두 사라져요\n아래 칸에 \'{phrase}\'라고\n똑같이 입력해 주세요'**
+  String guardiansLeaveTypeMessage(String phrase);
+
+  /// 마지막 보호자가 그만둘 때 입력해야 하는 문구. 비교 원본이자 입력칸 안내 글 — 번역하면 그 언어 문구를 입력함
+  ///
+  /// In ko, this message translates to:
+  /// **'그만두기'**
+  String get guardiansLeaveTypePhrase;
+
+  /// 마지막 보호자 그만두기 둘째 단계 실행 버튼. 문구가 맞을 때만 켜짐
+  ///
+  /// In ko, this message translates to:
+  /// **'그만두기'**
+  String get guardiansLeaveTypeAction;
+
   /// 함께 돌보기 그만두기 실패 팝업 제목
   ///
   /// In ko, this message translates to:

@@ -677,6 +677,21 @@
   "guardiansLeaveConfirmAction": "그만두기",
   "@guardiansLeaveConfirmAction": {"description": "함께 돌보기 그만두기 확인 팝업의 위험 버튼"},
 
+  "guardiansLeaveTypeTitle": "한 번 더 확인할게요",
+  "@guardiansLeaveTypeTitle": {"description": "마지막 보호자가 그만둘 때 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치"},
+
+  "guardiansLeaveTypeMessage": "이룸이와 일과, 별이 모두 사라져요\n아래 칸에 '{phrase}'라고\n똑같이 입력해 주세요",
+  "@guardiansLeaveTypeMessage": {
+    "description": "마지막 보호자가 그만둘 때 둘째 단계 안내. phrase 는 guardiansLeaveTypePhrase",
+    "placeholders": {"phrase": {"type": "String", "example": "그만두기"}}
+  },
+
+  "guardiansLeaveTypePhrase": "그만두기",
+  "@guardiansLeaveTypePhrase": {"description": "마지막 보호자가 그만둘 때 입력해야 하는 문구. 비교 원본이자 입력칸 안내 글 — 번역하면 그 언어 문구를 입력함"},
+
+  "guardiansLeaveTypeAction": "그만두기",
+  "@guardiansLeaveTypeAction": {"description": "마지막 보호자 그만두기 둘째 단계 실행 버튼. 문구가 맞을 때만 켜짐"},
+
   "guardiansLeaveFailTitle": "나가지 못했어요",
   "@guardiansLeaveFailTitle": {"description": "함께 돌보기 그만두기 실패 팝업 제목"},
 
