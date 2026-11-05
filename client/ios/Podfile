@@ -1,7 +1,8 @@
 # Uncomment this line to define a global platform for your project
 # Apple 정책(ITMS-90068): 2027년 봄부터 최소 15.0 이상만 App Store Connect 업로드 가능.
 # 아래 pbxproj·AppFrameworkInfo.plist와 반드시 같은 값으로 맞춘다.
-platform :ios, '15.0'
+IOS_DEPLOYMENT_TARGET = '15.0'
+platform :ios, IOS_DEPLOYMENT_TARGET
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -44,5 +45,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # Pod 최소 iOS 를 앱과 같게 올림 (Xcode 27 은 15.0 미만을 오류로 멈춤). 더 높게 정한 Pod 는 그대로
+    target.build_configurations.each do |config|
+      pod_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+      if pod_target.nil? || Gem::Version.new(pod_target) < Gem::Version.new(IOS_DEPLOYMENT_TARGET)
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = IOS_DEPLOYMENT_TARGET
+      end
+    end
   end
 end

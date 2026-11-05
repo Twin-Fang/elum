@@ -6194,6 +6194,12 @@ abstract class AppLocalizations {
   /// **'그림이 아직 없는 카드는 제목만 들어가요'**
   String get cardExportMissingPicture;
 
+  /// 카드 그림 일부를 못 받았을 때 미리 보기 종이 밖 안내 (그 카드는 예시 그림·픽토그램·제목으로 대신)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{그림을 불러오지 못한 카드 {count}장은 다른 그림이나 제목으로 들어가요}}'**
+  String cardExportSomePicturesFailed(int count);
+
   /// PDF 를 다른 앱으로 보낼 때 크기 안내
   ///
   /// In ko, this message translates to:
@@ -6295,6 +6301,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro로 할 수 있는 것'**
   String get planBenefitsSection;
+
+  /// 혜택 줄: 주간 리포트
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 동안 해낸 일과를 리포트로 받아 보내요'**
+  String get planBenefitWeeklyReport;
+
+  /// 혜택 줄: 반복 일과·주간 계획·이룸이 기기 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 정해 일과를 반복하고 이룸이 기기에 알려요'**
+  String get planBenefitRoutineSchedule;
+
+  /// 혜택 줄: AI 메모
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요'**
+  String get planBenefitRoutineMemory;
+
+  /// 혜택 줄: 전문가 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'전문가가 만든 일과를 그대로 가져와 써요'**
+  String get planBenefitExpertRoutines;
+
+  /// 혜택 줄: 보호자 목소리
+  ///
+  /// In ko, this message translates to:
+  /// **'카드마다 보호자 목소리를 녹음해 들려줘요'**
+  String get planBenefitGuardianVoice;
+
+  /// 혜택 줄: 다른 언어로 만들기
+  ///
+  /// In ko, this message translates to:
+  /// **'만든 일과를 다른 언어로 바꿔 만들어요'**
+  String get planBenefitRoutineTranslate;
+
+  /// 혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림을 하루 정해진 횟수까지 크레딧 없이 다시 그려요'**
+  String get planBenefitFreeImageRegenerate;
 
   /// 혜택 줄: 주간 크레딧
   ///

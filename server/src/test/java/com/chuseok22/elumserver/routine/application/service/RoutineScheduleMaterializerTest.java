@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.notification.application.service.ElumiPushDispatcher;
+import com.chuseok22.elumserver.notification.core.ElumiNotificationState;
 import com.chuseok22.elumserver.notification.core.event.RoutineTimeArrivedEvent;
 import com.chuseok22.elumserver.routine.core.RoutineScheduleWeekdays;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -48,6 +50,8 @@ class RoutineScheduleMaterializerTest {
   private RoutineStepSpeechQueue routineStepSpeechQueue;
   @Mock
   private ApplicationEventPublisher eventPublisher;
+  @Mock
+  private ElumiPushDispatcher elumiPushDispatcher;
 
   @InjectMocks
   private RoutineScheduleMaterializer materializer;
@@ -125,6 +129,7 @@ class RoutineScheduleMaterializerTest {
     givenSchedule(schedule(true));
     givenOriginal(original());
     givenAlreadyMaterialized(dayCopy(RoutineStatus.CONFIRMED));
+    givenElumiNotification(ElumiNotificationState.ON);
     when(routineScheduleRepository.claimNotification("schedule-1", MONDAY)).thenReturn(1);
 
     RoutineScheduleRunResult runResult = materializer.materializeAndNotify("schedule-1", MONDAY);
@@ -134,6 +139,21 @@ class RoutineScheduleMaterializerTest {
     verify(eventPublisher).publishEvent(event.capture());
     assertThat(event.getValue().routineId()).isEqualTo("day-copy-1");
     assertThat(event.getValue().profileId()).isEqualTo("profile-1");
+    assertThat(event.getValue().scheduleId()).isEqualTo("schedule-1");
+  }
+
+  @Test
+  @DisplayName("받을 이룸이 기기가 없으면 NOTIFIED 로 세지 않고 알림 날짜도 차지하지 않는다 — 로그가 '보냈다'고 거짓말하지 않는다")
+  void notify_noElumiDevice_countsNoDeviceWithoutClaim() {
+    givenSchedule(schedule(true));
+    givenOriginal(original());
+    givenAlreadyMaterialized(dayCopy(RoutineStatus.CONFIRMED));
+    givenElumiNotification(ElumiNotificationState.NO_DEVICE);
+
+    assertThat(materializer.materializeAndNotify("schedule-1", MONDAY))
+      .isEqualTo(RoutineScheduleRunResult.NO_DEVICE);
+    verify(routineScheduleRepository, never()).claimNotification(any(), any());
+    verify(eventPublisher, never()).publishEvent(any());
   }
 
   @Test
@@ -155,6 +175,7 @@ class RoutineScheduleMaterializerTest {
     givenSchedule(schedule(true));
     givenOriginal(original());
     givenAlreadyMaterialized(dayCopy(RoutineStatus.CONFIRMED));
+    givenElumiNotification(ElumiNotificationState.ON);
     when(routineScheduleRepository.claimNotification("schedule-1", MONDAY)).thenReturn(0);
 
     assertThat(materializer.materializeAndNotify("schedule-1", MONDAY))
@@ -176,6 +197,10 @@ class RoutineScheduleMaterializerTest {
 
   private void givenSchedule(RoutineSchedule schedule) {
     when(routineScheduleRepository.findById("schedule-1")).thenReturn(Optional.of(schedule));
+  }
+
+  private void givenElumiNotification(ElumiNotificationState state) {
+    when(elumiPushDispatcher.notificationStateOf("profile-1")).thenReturn(state);
   }
 
   private void givenOriginal(Routine original) {

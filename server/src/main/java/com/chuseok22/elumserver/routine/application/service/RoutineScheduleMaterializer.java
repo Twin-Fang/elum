@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.notification.application.service.ElumiPushDispatcher;
+import com.chuseok22.elumserver.notification.core.ElumiNotificationState;
 import com.chuseok22.elumserver.notification.core.event.RoutineTimeArrivedEvent;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineSchedule;
@@ -28,6 +30,7 @@ public class RoutineScheduleMaterializer {
   private final RoutineRepository routineRepository;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
   private final ApplicationEventPublisher eventPublisher;
+  private final ElumiPushDispatcher elumiPushDispatcher;
 
   /** 그날 일과 만들기: 원본 확인 > 날짜 차지 > (그날 안 보냈으면) 카드 복사, 그 시각으로 > 그날 일과 */
   @Transactional
@@ -36,8 +39,8 @@ public class RoutineScheduleMaterializer {
   }
 
   /**
-   * 정한 시각: 그날 일과 만들기 > 알림 조건 확인(켜짐, 아직 안 끝냄) > 알림 날짜 차지 > 커밋 뒤 이룸이 기기 푸시
-   * 푸시 실패는 리스너가 기록만 함 (차지한 날짜는 그대로: 같은 날 다시 울리지 않음)
+   * 정한 시각: 그날 일과 만들기 > 알림 조건 확인(켜짐, 아직 안 끝냄, 받을 기기 있음) > 알림 날짜 차지 > 커밋 뒤 이룸이 기기 푸시
+   * 받을 기기가 없으면 날짜를 차지하지 않음 (되짚는 폭 안에 기기를 연결하면 그날 알림이 감). 푸시 실패는 리스너가 기록만 함
    */
   @Transactional
   public RoutineScheduleRunResult materializeAndNotify(String scheduleId, LocalDate date) {
@@ -57,10 +60,14 @@ public class RoutineScheduleMaterializer {
     if (isFinished(routine)) {
       return RoutineScheduleRunResult.ALREADY_FINISHED;
     }
+    // 연결 없음·알림 토큰 없음 > 보낼 곳이 없음 (NOTIFIED 로 세지 않음)
+    if (elumiPushDispatcher.notificationStateOf(schedule.getProfileId()) != ElumiNotificationState.ON) {
+      return RoutineScheduleRunResult.NO_DEVICE;
+    }
     if (routineScheduleRepository.claimNotification(schedule.getId(), date) == 0) {
       return RoutineScheduleRunResult.ALREADY_NOTIFIED;
     }
-    eventPublisher.publishEvent(new RoutineTimeArrivedEvent(routine.getId(), schedule.getProfileId()));
+    eventPublisher.publishEvent(new RoutineTimeArrivedEvent(routine.getId(), schedule.getProfileId(), schedule.getId()));
     return RoutineScheduleRunResult.NOTIFIED;
   }
 

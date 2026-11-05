@@ -8,6 +8,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_check_circle.dart';
 import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/settings_group.dart';
+import '../application/plan_benefits.dart';
 import '../domain/plan_benefit.dart';
 import '../domain/plan_catalog.dart';
 
@@ -22,9 +23,16 @@ class PlanBenefitsGroup extends StatelessWidget {
       header: l10n.planBenefitsSection,
       footer: l10n.planKeepContentNotice,
       children: [
-        for (final benefit in PlanBenefit.values)
+        for (final benefit in proPlanBenefits())
           _PlanTextRow(
             title: switch (benefit) {
+              PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
+              PlanBenefit.routineSchedule => l10n.planBenefitRoutineSchedule,
+              PlanBenefit.routineMemory => l10n.planBenefitRoutineMemory,
+              PlanBenefit.expertRoutines => l10n.planBenefitExpertRoutines,
+              PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
+              PlanBenefit.routineTranslate => l10n.planBenefitRoutineTranslate,
+              PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,
               PlanBenefit.moreWeeklyCredits => l10n.planBenefitMoreWeeklyCredits,
               PlanBenefit.cardExportWithoutWatermark =>
                 l10n.planBenefitCardExportWithoutWatermark,
