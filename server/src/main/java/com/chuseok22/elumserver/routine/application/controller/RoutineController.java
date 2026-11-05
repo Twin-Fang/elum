@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
@@ -61,7 +62,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
     // 크레딧 멱등 키. 구버전 앱은 보내지 않는다 — 서비스가 새로 만든다.
-    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+    @RequestHeader(value = IdempotencyHeader.NAME, required = false) String idempotencyKey,
     @RequestBody @Valid RoutineCreateRequest request
   ) {
     Caller caller = Caller.from(authentication, profileId);

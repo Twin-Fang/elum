@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/idempotency_key.dart';
 import '../../../shared/models/routine.dart';
 
 /// 일과관리(보관해 둔 원본) 서버 호출: 목록, 오늘 보내기, 복사, 다른 언어로 만들기, 이름 바꾸기, 지우기
@@ -42,7 +43,7 @@ class RoutineLibraryApi {
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/routines/$routineId/translate',
       data: {'language': language},
-      options: Options(headers: {'Idempotency-Key': idempotencyKey}),
+      options: Options(headers: {idempotencyKeyHeader: idempotencyKey}),
     );
     return _routineOf(response.data);
   }, describe: (routine) => 'language=${routine.language}');

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/idempotency_key.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
 import '../../../shared/models/support_goal.dart';
@@ -161,7 +162,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       },
       options: idempotencyKey.isEmpty
           ? null
-          : Options(headers: {'Idempotency-Key': idempotencyKey}),
+          : Options(headers: {idempotencyKeyHeader: idempotencyKey}),
     );
     final body = res.data;
     // 응답이 비었거나 카드가 0장이면 실패로 본다. 로컬로 지어내지 않고 예외를 던져

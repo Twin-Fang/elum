@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineTranslateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -59,7 +60,7 @@ public interface RoutineTranslateControllerDocs {
   })
   ResponseEntity<RoutineResponse> translate(
     Authentication authentication, String routineId,
-    @Parameter(in = ParameterIn.HEADER, name = "Idempotency-Key", description = "누를 때마다 새로 만든 키 (선택)")
+    @Parameter(in = ParameterIn.HEADER, name = IdempotencyHeader.NAME, description = "누를 때마다 새로 만든 키 (선택)")
     String idempotencyKey,
     RoutineTranslateRequest request
   );

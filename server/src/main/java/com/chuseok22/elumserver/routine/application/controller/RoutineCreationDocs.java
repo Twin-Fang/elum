@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
@@ -112,7 +113,7 @@ public interface RoutineCreationDocs {
   ResponseEntity<RoutineResponse> create(
     Authentication authentication,
     @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
-    @Parameter(in = ParameterIn.HEADER, name = "Idempotency-Key",
+    @Parameter(in = ParameterIn.HEADER, name = IdempotencyHeader.NAME,
       description = "생성 요청 멱등 키(255자 이하). 같은 키로 다시 보내면 AI를 다시 부르지 않는다. 빼면 서버가 만든다")
     String idempotencyKey,
     RoutineCreateRequest request

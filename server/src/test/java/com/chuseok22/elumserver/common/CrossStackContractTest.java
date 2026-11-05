@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
 import com.chuseok22.elumserver.license.core.PlanType;
@@ -106,6 +107,14 @@ class CrossStackContractTest {
 
     assertThat(dart).contains("errorSectionTitle = '== 최근 오류 =='");
     assertThat(dart).contains("logSectionTitle = '== 기록 =='");
+  }
+
+  @Test
+  @DisplayName("멱등 키 헤더 이름이 앱과 같다 — 다르면 다시 하기가 새 요청이 되어 AI 를 다시 부르고 크레딧을 또 쓴다")
+  void idempotencyHeaderMatchesClient() throws IOException {
+    String dart = readClient("core/network/idempotency_key.dart");
+
+    assertThat(dart).contains("const idempotencyKeyHeader = '" + IdempotencyHeader.NAME + "';");
   }
 
   @Test
