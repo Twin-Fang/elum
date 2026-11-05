@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -75,7 +76,6 @@ class RoutineStepVoiceServiceTest {
   void upload_replacesKeyAndDeletesOld() {
     Routine routine = routine(OLD_KEY);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    when(entitlementService.isAllowed("member-1", Entitlement.GUARDIAN_VOICE)).thenReturn(true);
     byte[] audio = GuardianVoiceAudioFixture.m4aOfMillis(4_000);
     when(guardianVoiceStorage.save("member-1", audio)).thenReturn(NEW_KEY);
     when(routineStepRepository.existsByGuardianVoicePath(OLD_KEY)).thenReturn(false);
@@ -92,7 +92,6 @@ class RoutineStepVoiceServiceTest {
   @DisplayName("복제한 일과가 옛 녹음을 아직 가리키면 옛 파일을 지우지 않는다")
   void upload_keepsSharedOldFile() {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine(OLD_KEY)));
-    when(entitlementService.isAllowed("member-1", Entitlement.GUARDIAN_VOICE)).thenReturn(true);
     when(guardianVoiceStorage.save(any(), any())).thenReturn(NEW_KEY);
     when(routineStepRepository.existsByGuardianVoicePath(OLD_KEY)).thenReturn(true);
 
@@ -106,7 +105,7 @@ class RoutineStepVoiceServiceTest {
   void upload_rejectsFree() {
     Routine routine = routine(null);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    when(entitlementService.isAllowed("member-1", Entitlement.GUARDIAN_VOICE)).thenReturn(false);
+    doThrow(new CustomException(Entitlement.GUARDIAN_VOICE.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.GUARDIAN_VOICE);
 
     assertRejected(() -> service.upload(GUARDIAN, "routine-1", "step-1",
       voice(GuardianVoiceAudioFixture.m4aOfMillis(2_000))), ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED);
@@ -120,7 +119,6 @@ class RoutineStepVoiceServiceTest {
   void upload_rejectsInvalidAudio() {
     Routine routine = routine(OLD_KEY);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    when(entitlementService.isAllowed("member-1", Entitlement.GUARDIAN_VOICE)).thenReturn(true);
 
     assertRejected(() -> service.upload(GUARDIAN, "routine-1", "step-1",
       voice(new byte[(int) GuardianVoiceAudio.MAX_BYTES + 1])), ErrorCode.GUARDIAN_VOICE_TOO_LARGE);

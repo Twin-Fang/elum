@@ -54,9 +54,7 @@ public class WeeklyReportService {
 
   /// 요금제 확인: WEEKLY_REPORT 꺼짐 > 403 WEEKLY_REPORT_NOT_ALLOWED (이룸이 기기의 계정은 연결해 준 보호자)
   private void requireWeeklyReportAllowed(Caller caller) {
-    if (!entitlementService.isAllowed(caller.memberId(), Entitlement.WEEKLY_REPORT)) {
-      throw new CustomException(ErrorCode.WEEKLY_REPORT_NOT_ALLOWED);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.WEEKLY_REPORT);
   }
 
   /// 요청 날짜 > 그 날이 든 주. 없으면 이번 주, 이번 주보다 뒤면 INVALID_INPUT_VALUE

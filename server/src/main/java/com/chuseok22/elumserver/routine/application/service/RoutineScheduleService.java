@@ -73,10 +73,7 @@ public class RoutineScheduleService {
   @Transactional
   public RoutineScheduleResponse save(Caller caller, String routineId, RoutineScheduleSaveRequest request) {
     Routine original = originalFor(caller, routineId);
-    if (!entitlementService.isAllowed(caller.memberId(), Entitlement.ROUTINE_SCHEDULE)) {
-      log.info("[routine schedule] save rejected 403 : plan not allowed, routineId={}", routineId);
-      throw new CustomException(ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.ROUTINE_SCHEDULE);
     int weekdaysMask = toWeekdaysMask(request);
     LocalTime timeOfDay = toTimeOfDay(request);
 

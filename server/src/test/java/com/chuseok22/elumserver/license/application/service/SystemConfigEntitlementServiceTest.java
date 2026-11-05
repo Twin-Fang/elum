@@ -1,10 +1,14 @@
 package com.chuseok22.elumserver.license.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
@@ -15,6 +19,7 @@ import com.chuseok22.elumserver.member.application.service.MemberSignupTimeServi
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class SystemConfigEntitlementServiceTest {
@@ -228,6 +234,35 @@ class SystemConfigEntitlementServiceTest {
     when(systemConfigService.getBoolean(ConfigKey.PRO_AI_IMAGE_GENERATION)).thenReturn(true);
 
     assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isTrue();
+  }
+
+  // --- Pro 검문 ---
+
+  @Test
+  @DisplayName("Pro 검문: 꺼진 플랜은 그 기능의 403 코드로 거절, 켜진 플랜은 통과")
+  void requireAllowed_rejectsWithEntitlementCode() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    assertThatThrownBy(() -> entitlementService.requireAllowed(MEMBER_ID, Entitlement.WEEKLY_REPORT))
+      .isInstanceOf(CustomException.class)
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WEEKLY_REPORT_NOT_ALLOWED);
+
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    when(systemConfigService.getBoolean(ConfigKey.PRO_WEEKLY_REPORT)).thenReturn(true);
+    assertThatCode(() -> entitlementService.requireAllowed(MEMBER_ID, Entitlement.WEEKLY_REPORT))
+      .doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("Pro 검문 거절 코드 표: 기능 7개 모두 서로 다른 403 코드 (앱이 코드로 안내 문구를 고름)")
+  void rejectionCodeTable_isForbiddenAndDistinct() {
+    List<Entitlement> gatedEntitlements = List.of(Entitlement.AI_IMAGE_GENERATION, Entitlement.WEEKLY_REPORT,
+      Entitlement.ROUTINE_TRANSLATE, Entitlement.ROUTINE_SCHEDULE, Entitlement.GUARDIAN_VOICE,
+      Entitlement.ROUTINE_TEMPLATES, Entitlement.ROUTINE_MEMORY);
+
+    assertThat(gatedEntitlements).allSatisfy(entitlement ->
+      assertThat(entitlement.rejectionCode().getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
+    assertThat(gatedEntitlements.stream().map(Entitlement::rejectionCode).distinct()).hasSize(gatedEntitlements.size());
   }
 
   // --- 한도 판정 ---

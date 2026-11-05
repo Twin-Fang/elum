@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.license.core;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -107,6 +108,20 @@ public enum Entitlement {
 
   public ConfigKey configKeyFor(PlanType plan) {
     return plan == PlanType.PRO ? proKey : freeKey;
+  }
+
+  /// Pro 검문 거절 코드 표 (기능 7개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
+  public ErrorCode rejectionCode() {
+    return switch (this) {
+      case AI_IMAGE_GENERATION -> ErrorCode.AI_IMAGE_NOT_ALLOWED;
+      case WEEKLY_REPORT -> ErrorCode.WEEKLY_REPORT_NOT_ALLOWED;
+      case ROUTINE_TRANSLATE -> ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED;
+      case ROUTINE_SCHEDULE -> ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED;
+      case GUARDIAN_VOICE -> ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED;
+      case ROUTINE_TEMPLATES -> ErrorCode.EXPERT_ROUTINE_PRO_ONLY;
+      case ROUTINE_MEMORY -> ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED;
+      default -> throw new IllegalStateException("no pro gate rejection code: " + this);
+    };
   }
 
   public enum Kind {

@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.license.application.service;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.license.application.service.store.StoreLogValues;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
@@ -96,6 +98,14 @@ public class SystemConfigEntitlementService implements EntitlementService {
       return false;
     }
     return isAllowed(planOf(memberId), flag);
+  }
+
+  @Override
+  public void requireAllowed(String memberId, Entitlement flag) {
+    if (!isAllowed(memberId, flag)) {
+      log.info("[pro gate] rejected 403 : {} member={}", flag, StoreLogValues.mask(memberId));
+      throw new CustomException(flag.rejectionCode());
+    }
   }
 
   @Override

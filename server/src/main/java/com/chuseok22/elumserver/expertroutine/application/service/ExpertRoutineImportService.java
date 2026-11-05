@@ -46,10 +46,7 @@ public class ExpertRoutineImportService {
     if (request == null || request.profileId() == null || request.profileId().isBlank()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
-    if (!entitlementService.isAllowed(caller.memberId(), Entitlement.ROUTINE_TEMPLATES)) {
-      log.info("[expert routine import] rejected 403 : plan has no routine templates");
-      throw new CustomException(ErrorCode.EXPERT_ROUTINE_PRO_ONLY);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.ROUTINE_TEMPLATES);
     ExpertRoutine expertRoutine = expertRoutineQueryService.requireVisible(expertRoutineId);
 
     RoutineImportDraft draft = toDraft(expertRoutine, expertRoutineQueryService.stepsOf(expertRoutine.getId()));

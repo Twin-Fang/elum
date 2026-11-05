@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +56,7 @@ class WeeklyReportServiceTest {
   @DisplayName("요금제에 주간 리포트가 없으면 403 WEEKLY_REPORT_NOT_ALLOWED 이고 일과를 읽지 않는다")
   void freePlan_isRejected() {
     givenProfile();
-    when(entitlementService.isAllowed("member-1", Entitlement.WEEKLY_REPORT)).thenReturn(false);
+    doThrow(new CustomException(Entitlement.WEEKLY_REPORT.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.WEEKLY_REPORT);
 
     assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, null))
       .isInstanceOf(CustomException.class)
@@ -68,7 +69,6 @@ class WeeklyReportServiceTest {
   @DisplayName("이번 주보다 뒤의 주는 400 INVALID_INPUT_VALUE")
   void futureWeek_isRejected() {
     givenProfile();
-    when(entitlementService.isAllowed("member-1", Entitlement.WEEKLY_REPORT)).thenReturn(true);
 
     assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, LocalDate.now().plusWeeks(1)))
       .isInstanceOf(CustomException.class)
@@ -79,7 +79,6 @@ class WeeklyReportServiceTest {
   @DisplayName("주 중간 날짜를 주면 그 주 월요일 0시 ~ 일요일 끝으로 조회하고, 일과관리 복사본은 세지 않는다")
   void weekIsNormalizedToMonday_andLibraryCopiesExcluded() {
     givenProfile();
-    when(entitlementService.isAllowed("member-1", Entitlement.WEEKLY_REPORT)).thenReturn(true);
     ReportWeek lastWeek = ReportWeek.containing(LocalDate.now().minusWeeks(1));
     Routine libraryCopy = routine("copy", null, lastWeek.start(), RoutineStatus.COMPLETED, true);
     libraryCopy.setLibraryOnly(true);

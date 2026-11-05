@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,7 +60,7 @@ class RoutineScheduleServiceTest {
   @DisplayName("Free 보호자가 저장하면 ROUTINE_SCHEDULE_NOT_ALLOWED — 새 기능은 Pro 다")
   void save_free_rejected() {
     givenOriginal();
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_SCHEDULE)).thenReturn(false);
+    doThrow(new CustomException(Entitlement.ROUTINE_SCHEDULE.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.ROUTINE_SCHEDULE);
 
     assertThatThrownBy(() -> routineScheduleService.save(GUARDIAN, "routine-1",
       new RoutineScheduleSaveRequest(List.of("MONDAY"), "08:00", true)))
@@ -72,7 +73,6 @@ class RoutineScheduleServiceTest {
   @DisplayName("요일을 하나도 고르지 않으면 ROUTINE_SCHEDULE_INVALID")
   void save_emptyWeekdays_rejected() {
     givenOriginal();
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_SCHEDULE)).thenReturn(true);
 
     assertThatThrownBy(() -> routineScheduleService.save(GUARDIAN, "routine-1",
       new RoutineScheduleSaveRequest(List.of(), "08:00", true)))
@@ -84,7 +84,6 @@ class RoutineScheduleServiceTest {
   @DisplayName("시각을 바꾸면 오늘 알림 기록을 지우고 요일은 월요일부터 돌려준다 — 바꾼 시각에 오늘 다시 울려야 한다")
   void save_timeChanged_resetsTodayNotification() {
     givenOriginal();
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_SCHEDULE)).thenReturn(true);
     RoutineSchedule existing = new RoutineSchedule();
     existing.setRoutineId("routine-1");
     existing.setTimeOfDay(LocalTime.of(8, 0));
