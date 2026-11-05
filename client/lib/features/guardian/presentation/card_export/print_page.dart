@@ -28,7 +28,7 @@ class PrintPage extends StatelessWidget {
     required this.size,
     required this.child,
     required this.hasWatermark,
-    required this.showsPictogramCredit,
+    required this.shouldShowPictogramCredit,
     this.margin = 24,
   });
 
@@ -39,7 +39,7 @@ class PrintPage extends StatelessWidget {
   final bool hasWatermark;
 
   /// Mulberry 픽토그램을 쓴 지면은 출처를 적는다 (CC BY-SA 4.0 조건)
-  final bool showsPictogramCredit;
+  final bool shouldShowPictogramCredit;
 
   /// 종이 가장자리 여백 (프린터가 못 찍는 자리 포함)
   final double margin;
@@ -47,7 +47,7 @@ class PrintPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasFooter = hasWatermark || showsPictogramCredit;
+    final hasFooter = hasWatermark || shouldShowPictogramCredit;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
       child: SizedBox.fromSize(
@@ -68,7 +68,7 @@ class PrintPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       _Footer(
                         hasWatermark: hasWatermark,
-                        showsPictogramCredit: showsPictogramCredit,
+                        shouldShowPictogramCredit: shouldShowPictogramCredit,
                       ),
                     ],
                   ],
@@ -84,10 +84,10 @@ class PrintPage extends StatelessWidget {
 
 /// 아래 띠: (Free) 이룸 로고 + 문구 · (픽토그램) 그림 출처
 class _Footer extends StatelessWidget {
-  const _Footer({required this.hasWatermark, required this.showsPictogramCredit});
+  const _Footer({required this.hasWatermark, required this.shouldShowPictogramCredit});
 
   final bool hasWatermark;
-  final bool showsPictogramCredit;
+  final bool shouldShowPictogramCredit;
 
   /// 로고 높이 (포인트)
   static const _logoHeight = 16.0;
@@ -103,7 +103,7 @@ class _Footer extends StatelessWidget {
           Text(context.l10n.cardExportFooterMadeWith, style: style),
         ],
         const Spacer(),
-        if (showsPictogramCredit)
+        if (shouldShowPictogramCredit)
           Text(context.l10n.cardExportPictogramCredit, style: style),
       ],
     );

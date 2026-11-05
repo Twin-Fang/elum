@@ -154,10 +154,10 @@ class GuardianMyInfoScreen extends ConsumerWidget {
   /// 주간 리포트는 Pro 만. Free 는 판매 중일 때만 줄이 보이고 들어가면 흐린 견본 (아니면 줄 자체가 없다)
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
-    final showsWeeklyReport = access.canViewWeeklyReport || access.shouldShowProTeaser;
+    final shouldShowWeeklyReport = access.shouldShowEntryFor(canUseFeature: access.canViewWeeklyReport);
     return SettingsGroup(
       children: [
-        if (showsWeeklyReport)
+        if (shouldShowWeeklyReport)
           SettingsTile(
             isInCard: true,
             label: context.l10n.weeklyReportTitle,

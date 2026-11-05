@@ -17,7 +17,7 @@ import 'store_purchase_coordinator.dart';
 /// 다른 기능이 요금제 화면·구매 복원을 여는 입구 (보호자 화면 전용)
 ///
 /// 다른 기능이 subscription 의 presentation 을 직접 알지 않게 하는 자리 (tool/check_layer_imports.dart)
-/// 판매 스위치가 꺼져 있으면 아무것도 열지 않음 — 이룸이 기기도 여기서 막힘
+/// 판매 스위치가 꺼져 있으면 요금제 화면·복원을 열지 않음 (Pro 안내 팝업만) — 이룸이 기기도 여기서 막힘
 
 /// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼)
 Future<void> openPlanPaywall(BuildContext context, WidgetRef ref) async {
@@ -51,15 +51,15 @@ const _proOnlyRejectionCodes = {
 bool isProOnlyRejection(Object? failure) =>
     failure is AppFailure && _proOnlyRejectionCodes.contains(failure.server?.code);
 
-/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 · 아니면 안내 팝업 (실패 팝업 아님)
-Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref) async {
+/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 · 아니면 안내 팝업 (실패 팝업 아님, [title] 없으면 공통 문구)
+Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref, {String? title}) async {
   if (ref.read(planAccessProvider).canPurchasePro) {
     await openPlanPaywall(context, ref);
     return;
   }
   await showElumDialog<void>(
     context: context,
-    title: context.l10n.proOnlyNoticeTitle,
+    title: title ?? context.l10n.proOnlyNoticeTitle,
     actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
 }

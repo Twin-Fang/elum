@@ -108,7 +108,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
   StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
     widget.routineId,
     card,
-    includeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+    shouldIncludeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
   );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다 (카드확인과 같다).

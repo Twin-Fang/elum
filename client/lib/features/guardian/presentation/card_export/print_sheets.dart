@@ -30,17 +30,17 @@ List<PrintSheet> buildPrintSheets({
 }) {
   final cards = [...routine.steps]..sort((a, b) => a.stepOrder.compareTo(b.stepOrder));
   if (cards.isEmpty) return const [];
-  final credit = pictures.usesPictogram;
+  final hasPictogramCredit = pictures.hasPictogram;
 
-  PrintCard cardAt(ActionCard card, {bool showsNumber = true, bool showsDescription = false}) =>
+  PrintCard cardAt(ActionCard card, {bool shouldShowNumber = true, bool shouldShowDescription = false}) =>
       PrintCard(
         card: card,
         index: cards.indexOf(card),
         picture: pictures.of(card),
         options: options,
         language: routine.language,
-        showsNumber: showsNumber,
-        showsDescription: showsDescription,
+        shouldShowNumber: shouldShowNumber,
+        shouldShowDescription: shouldShowDescription,
       );
 
   switch (options.format) {
@@ -52,7 +52,7 @@ List<PrintSheet> buildPrintSheets({
           page: PrintPage(
             size: PrintPageSize.a4,
             hasWatermark: hasWatermark,
-            showsPictogramCredit: credit,
+            shouldShowPictogramCredit: hasPictogramCredit,
             child: _RoutineSheetBody(
               title: routine.title,
               language: routine.language,
@@ -71,10 +71,10 @@ List<PrintSheet> buildPrintSheets({
             page: PrintPage(
               size: PrintPageSize.a4,
               hasWatermark: hasWatermark,
-              showsPictogramCredit: credit,
+              shouldShowPictogramCredit: hasPictogramCredit,
               child: _CutCardsBody(
                 perPage: perPage,
-                cards: [for (final card in pageCards) cardAt(card, showsNumber: false)],
+                cards: [for (final card in pageCards) cardAt(card, shouldShowNumber: false)],
               ),
             ),
           ),
@@ -90,8 +90,8 @@ List<PrintSheet> buildPrintSheets({
                 size: PrintPageSize.cardImage,
                 margin: 12,
                 hasWatermark: hasWatermark,
-                showsPictogramCredit: credit && pictures.of(card).pictogramId != null,
-                child: cardAt(card, showsDescription: true),
+                shouldShowPictogramCredit: hasPictogramCredit && pictures.of(card).pictogramId != null,
+                child: cardAt(card, shouldShowDescription: true),
               ),
             ),
       ];

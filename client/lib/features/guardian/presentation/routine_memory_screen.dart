@@ -35,7 +35,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
-    final body = !access.canUseRoutineMemory && access.shouldShowProTeaser
+    final body = access.shouldShowTeaserFor(canUseFeature: access.canUseRoutineMemory)
         ? _proTeaser(context, ref)
         : _memoryBody(context, ref);
 

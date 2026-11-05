@@ -46,7 +46,7 @@ class CardExportPictures {
   CardExportPicture of(ActionCard card) =>
       byCardId[card.id] ?? const CardExportPicture.none();
 
-  bool get usesPictogram => byCardId.values.any((p) => p.pictogramId != null);
+  bool get hasPictogram => byCardId.values.any((p) => p.pictogramId != null);
 
   /// 원래 그림이 없는 카드가 있는가 (못 받은 카드는 따로 안내하므로 뺌)
   bool get hasMissingPicture => byCardId.entries

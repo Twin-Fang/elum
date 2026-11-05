@@ -83,14 +83,14 @@ public class RoutineMemoryService {
 
   /// 켜기/끄기. 끄면 일과 만들기에 넣지 않고 새 확정도 배우지 않음 (줄은 남음)
   @Transactional
-  public RoutineMemoryResponse setEnabled(Caller caller, Boolean enabled) {
-    if (enabled == null) {
+  public RoutineMemoryResponse setEnabled(Caller caller, Boolean isEnabled) {
+    if (isEnabled == null) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
     Profile profile = requireAvailableProfile(caller);
     RoutineMemory memory = routineMemoryRows.findOrCreate(profile.getId());
-    memory.setEnabled(enabled);
-    log.info("[routine memory] enabled changed : profileId={}, enabled={}", profile.getId(), enabled);
+    memory.setEnabled(isEnabled);
+    log.info("[routine memory] enabled changed : profileId={}, enabled={}", profile.getId(), isEnabled);
     return toResponse(Optional.of(memory));
   }
 
