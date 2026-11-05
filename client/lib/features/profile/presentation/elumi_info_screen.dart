@@ -18,6 +18,7 @@ import '../../../shared/models/character.dart';
 import '../../../core/widgets/routine_rename_sheet.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/elumi_info_editor.dart';
+import '../../member/domain/elumi_nickname_policy.dart';
 import '../domain/profile_summary.dart';
 import 'widgets/elumi_choice_sheets.dart';
 
@@ -38,9 +39,6 @@ enum _ElumiInfoField { name, character, imageStyle }
 
 class _ElumiInfoScreenState extends ConsumerState<ElumiInfoScreen>
     with BusyStateMixin<ElumiInfoScreen> {
-  /// 이름 글자 수 상한 (보호자 표시 이름과 같은 20자)
-  static const _nicknameMaxLength = 20;
-
   /// 배지 한 변 · 배지와 줄 묶음 사이
   static const _badgeSize = 88.0;
   static const _badgeToGroupGap = 24.0;
@@ -55,7 +53,7 @@ class _ElumiInfoScreenState extends ConsumerState<ElumiInfoScreen>
     final nickname = await showRoutineRenameSheet(
       context,
       currentTitle: profile.nickname ?? '',
-      maxLength: _nicknameMaxLength,
+      maxLength: ElumiNicknamePolicy.maxLength,
       hintText: context.l10n.onboardingNameHint,
     );
     if (nickname == null || !mounted) return;

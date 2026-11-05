@@ -84,13 +84,17 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                 ),
               ),
               SizedBox(height: _RewardLayout.titleToBody),
-              _FadeSlideIn(
-                delay: AppMotion.slow,
-                child: Text(
-                  _character.messageFor(childName),
-                  textAlign: TextAlign.center,
-                  style: context.typo.cardDescription.copyWith(
-                    color: colors.surface,
+              // 좌우 여백 안에서 줄바꿈 (상한 전 저장된 긴 이름도 화면 끝에 붙지 않게 #1129)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: space.screenH),
+                child: _FadeSlideIn(
+                  delay: AppMotion.slow,
+                  child: Text(
+                    _character.messageFor(childName),
+                    textAlign: TextAlign.center,
+                    style: context.typo.cardDescription.copyWith(
+                      color: colors.surface,
+                    ),
                   ),
                 ),
               ),
