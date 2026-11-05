@@ -34,7 +34,7 @@ public interface NotificationRepository
     @Param("id") String id, Pageable pageable);
 
   /// 내 안 읽은 알림 전부 읽음 처리
-  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("update Notification n set n.readAt = :readAt where n.recipientMemberId = :recipientMemberId and n.readAt is null")
   int markAllRead(@Param("recipientMemberId") String recipientMemberId, @Param("readAt") LocalDateTime readAt);
 
@@ -47,7 +47,7 @@ public interface NotificationRepository
   int deleteAllByProfileId(String profileId);
 
   /// 보관 기간이 지난 알림 정리 (일괄 삭제, 트랜잭션 안에서 호출)
-  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("delete from Notification n where n.lastOccurredAt < :threshold")
   int deleteAllByLastOccurredAtBefore(@Param("threshold") LocalDateTime threshold);
 }

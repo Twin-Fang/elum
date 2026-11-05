@@ -45,7 +45,7 @@ public interface MemberDailyVisitRepository extends JpaRepository<MemberDailyVis
     @Param("unit") String unit, @Param("from") LocalDate from, @Param("to") LocalDate to);
 
   /// 탈퇴·완전 삭제: 그 회원 방문 기록 전부
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("delete from MemberDailyVisit v where v.memberId = :memberId")
   int deleteAllByMemberId(@Param("memberId") String memberId);
 }

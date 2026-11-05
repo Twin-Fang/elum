@@ -47,7 +47,7 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
    *
    * <p>member를 외래키로 참조하지 않아 DB가 대신 처리해 주지 않는다 — 여기서 직접 해야 한다.
    */
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("update AiCallLog l set l.memberId = null where l.memberId = :memberId")
   int detachMember(@Param("memberId") String memberId);
 
