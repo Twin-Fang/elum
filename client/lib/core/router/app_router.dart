@@ -13,6 +13,7 @@ import 'routes.dart';
 import 'routes_child.dart';
 import 'routes_entry.dart';
 import 'routes_guardian.dart';
+import 'routes_guardian_settings.dart';
 import 'routes_routine_flow.dart';
 
 /// 연결 암호 넣기 화면 아래에 깔아 둘 화면 — **뒤로가기의 도착지**다.
@@ -122,6 +123,7 @@ GoRouter createRouter({
     routes: [
       ...entryRoutes(),
       ...guardianRoutes(),
+      ...guardianSettingsRoutes(),
       ...routineFlowRoutes(),
       ...childRoutes(),
     ],
