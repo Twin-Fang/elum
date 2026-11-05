@@ -18,7 +18,6 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreat
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
-import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.core.RoutineStepSpeechText;
