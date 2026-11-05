@@ -16,7 +16,7 @@ public interface ExpertRoutineStepRepository extends JpaRepository<ExpertRoutine
   List<ExpertRoutineStep> findByExpertRoutineIdInAndStepOrder(Collection<String> expertRoutineIds, int stepOrder);
 
   /// 카드 전부 지우기 (고칠 때 통째로 바꿈, 지울 때 함께 지움)
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("delete from ExpertRoutineStep step where step.expertRoutineId = :expertRoutineId")
   int deleteByExpertRoutineId(@Param("expertRoutineId") String expertRoutineId);
 }

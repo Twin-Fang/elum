@@ -24,7 +24,7 @@ public interface ExpertRoutineRepository extends JpaRepository<ExpertRoutine, St
   List<ExpertRoutine> findAllByOrderBySortOrderAscTitleAsc();
 
   /// 가져간 횟수 +1 (동시 가져가기에도 빠지지 않게 DB 에서 더함)
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("update ExpertRoutine routine set routine.importCount = routine.importCount + 1 where routine.id = :id")
   int increaseImportCount(@Param("id") String id);
 }

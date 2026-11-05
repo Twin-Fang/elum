@@ -50,7 +50,7 @@ public interface AiCreditAccountRepository extends JpaRepository<AiCreditAccount
    *
    * <p>member 에 외래키가 없어 DB 가 대신 처리해 주지 않는다.
    */
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("update AiCreditAccount a set a.memberId = null, a.identityKey = null where a.memberId = :memberId")
   int detachMember(@Param("memberId") String memberId);
 }
