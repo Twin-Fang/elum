@@ -45,6 +45,8 @@ class ArchitectureRulesTest {
       + "|responseText|responseBody|answer|answers|reply|output|input|body)\\b");
   private static final String LOG_TEXT_LENGTH_CALL = "LogTextLength.of(";
   private static final Pattern NEW_OBJECT_MAPPER = Pattern.compile("new ObjectMapper\\(");
+  // @Modifying(clearAutomatically = true): 트랜잭션 중간에 영속성 컨텍스트 전체를 비움
+  private static final Pattern CLEAR_AUTOMATICALLY = Pattern.compile("clearAutomatically\\s*=\\s*true");
   /// @LogMonitoring 사용 (괄호 없는 형태 포함: 기본값은 인자·결과 로그가 둘 다 켜짐)
   private static final Pattern LOG_MONITORING_USE = Pattern.compile("^\\s*@LogMonitoring(?:\\(([^)]*)\\))?\\s*$", Pattern.MULTILINE);
 
@@ -138,6 +140,22 @@ class ArchitectureRulesTest {
     actual.remove(OBJECT_MAPPER_FACTORY_FILE);
 
     assertThat(actual).as("ObjectMapper 를 새로 만들지 말고 DefaultJsonMapper.SHARED 를 쓴다").isEmpty();
+  }
+
+  @Test
+  @DisplayName("@Modifying 일괄 쿼리는 영속성 컨텍스트를 비우지 않는다 (clearAutomatically 금지)")
+  void modifyingQueriesDoNotClearPersistenceContext() throws IOException {
+    Set<String> actual = new TreeSet<>();
+    for (Path file : javaFiles(SOURCE_ROOT)) {
+      if (CLEAR_AUTOMATICALLY.matcher(Files.readString(file)).find()) {
+        actual.add(SOURCE_ROOT.relativize(file).toString());
+      }
+    }
+
+    // 비우면 앞서 읽은 엔티티가 분리돼 뒤의 변경이 저장되지 않는다 (#1143 탈퇴 상태 유실)
+    assertThat(actual)
+      .as("flushAutomatically = true 만 쓰고, 일괄 변경한 엔티티를 다시 읽어야 하면 그 엔티티만 refresh 한다")
+      .isEmpty();
   }
 
   /**
