@@ -34,6 +34,7 @@ abstract final class AppAssets {
 
   /// 오픈소스 라이선스 전문 (#1046). Mulberry 는 그림과 같이 받은 원문을 그대로 씀
   static const licenseMulberrySymbols = 'assets/pictograms/LICENSE.txt';
+  static const licenseTwemoji = 'assets/emoji/LICENSE.txt';
   static const licensePretendard = 'assets/licenses/pretendard_ofl.txt';
   static const licenseTmoneyRoundWind = 'assets/licenses/tmoney_round_wind.txt';
 

@@ -23,10 +23,16 @@ class CardExportPicture {
   /// 앱 번들 예시 이미지 id
   final String? exampleImageId;
 
-  /// Mulberry 픽토그램 id (변형 금지 · 인쇄물에 출처 표기)
+  /// 픽토그램 id: Mulberry 그림 기호 또는 Twemoji 이모지(`emoji_`) (변형 금지 · 인쇄물에 출처 표기)
   final String? pictogramId;
 
   bool get hasPicture => bytes != null || exampleImageId != null || pictogramId != null;
+
+  /// Mulberry 그림 기호 카드인가 (출처 줄 `Mulberry Symbols`)
+  bool get hasSymbolPictogram => pictogramId != null && !PictogramCatalog.isEmoji(pictogramId!);
+
+  /// Twemoji 이모지 카드인가 (출처 줄 `Twemoji`)
+  bool get hasEmojiPictogram => pictogramId != null && PictogramCatalog.isEmoji(pictogramId!);
 }
 
 /// 일과 하나의 인쇄 준비 결과: 카드 순서대로 그림 + 그림을 받지 못한 카드
@@ -46,7 +52,11 @@ class CardExportPictures {
   CardExportPicture of(ActionCard card) =>
       byCardId[card.id] ?? const CardExportPicture.none();
 
-  bool get hasPictogram => byCardId.values.any((p) => p.pictogramId != null);
+  /// 그림 기호(Mulberry)를 쓴 카드가 있는가 (인쇄 출처 줄)
+  bool get hasSymbolPictogram => byCardId.values.any((p) => p.hasSymbolPictogram);
+
+  /// 이모지 그림(Twemoji)을 쓴 카드가 있는가 (인쇄 출처 줄, #1149)
+  bool get hasEmojiPictogram => byCardId.values.any((p) => p.hasEmojiPictogram);
 
   /// 원래 그림이 없는 카드가 있는가 (못 받은 카드는 따로 안내하므로 뺌)
   bool get hasMissingPicture => byCardId.entries

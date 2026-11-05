@@ -3539,6 +3539,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
 
   @override
+  String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
+
+  @override
   String get cardExportWatermarkText => '이룸';
 
   @override

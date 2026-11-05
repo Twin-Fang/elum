@@ -2791,6 +2791,8 @@
   "@cardExportFooterMadeWith": { "description": "Free 인쇄물 아래 띠 문구" },
   "cardExportPictogramCredit": "그림: Mulberry Symbols (CC BY-SA 4.0)",
   "@cardExportPictogramCredit": { "description": "픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)" },
+  "cardExportEmojiCredit": "그림: Twemoji (CC BY 4.0)",
+  "@cardExportEmojiCredit": { "description": "이모지 그림을 쓴 인쇄물 출처 표기 (라이선스 조건, #1149)" },
   "cardExportWatermarkText": "이룸",
   "@cardExportWatermarkText": { "description": "Free 인쇄물 바탕 워터마크 글자" },
   "cardExportPerPage": "{count, plural, other{{count}장}}",

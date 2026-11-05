@@ -6278,6 +6278,12 @@ abstract class AppLocalizations {
   /// **'그림: Mulberry Symbols (CC BY-SA 4.0)'**
   String get cardExportPictogramCredit;
 
+  /// 이모지 그림을 쓴 인쇄물 출처 표기 (라이선스 조건, #1149)
+  ///
+  /// In ko, this message translates to:
+  /// **'그림: Twemoji (CC BY 4.0)'**
+  String get cardExportEmojiCredit;
+
   /// Free 인쇄물 바탕 워터마크 글자
   ///
   /// In ko, this message translates to:
