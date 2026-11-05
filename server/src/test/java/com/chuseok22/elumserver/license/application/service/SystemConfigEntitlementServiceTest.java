@@ -19,7 +19,7 @@ import com.chuseok22.elumserver.member.application.service.MemberSignupTimeServi
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -254,15 +254,22 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("Pro 검문 거절 코드 표: 기능 7개 모두 서로 다른 403 코드 (앱이 코드로 안내 문구를 고름)")
-  void rejectionCodeTable_isForbiddenAndDistinct() {
-    List<Entitlement> gatedEntitlements = List.of(Entitlement.AI_IMAGE_GENERATION, Entitlement.WEEKLY_REPORT,
-      Entitlement.ROUTINE_TRANSLATE, Entitlement.ROUTINE_SCHEDULE, Entitlement.GUARDIAN_VOICE,
-      Entitlement.ROUTINE_TEMPLATES, Entitlement.ROUTINE_MEMORY);
+  @DisplayName("Pro 검문 거절 코드 표: 기능 7개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
+  void rejectionCodeTable_mapsEachGatedEntitlement() {
+    Map<Entitlement, ErrorCode> expectedRejectionCodes = Map.of(
+      Entitlement.AI_IMAGE_GENERATION, ErrorCode.AI_IMAGE_NOT_ALLOWED,
+      Entitlement.WEEKLY_REPORT, ErrorCode.WEEKLY_REPORT_NOT_ALLOWED,
+      Entitlement.ROUTINE_TRANSLATE, ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED,
+      Entitlement.ROUTINE_SCHEDULE, ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED,
+      Entitlement.GUARDIAN_VOICE, ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED,
+      Entitlement.ROUTINE_TEMPLATES, ErrorCode.EXPERT_ROUTINE_PRO_ONLY,
+      Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED);
 
-    assertThat(gatedEntitlements).allSatisfy(entitlement ->
-      assertThat(entitlement.rejectionCode().getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
-    assertThat(gatedEntitlements.stream().map(Entitlement::rejectionCode).distinct()).hasSize(gatedEntitlements.size());
+    expectedRejectionCodes.forEach((entitlement, code) -> {
+      assertThat(entitlement.rejectionCode()).as(entitlement.name()).isEqualTo(code);
+      assertThat(code.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+    });
+    assertThatThrownBy(Entitlement.ADS_REMOVED::rejectionCode).isInstanceOf(IllegalStateException.class);
   }
 
   // --- 한도 판정 ---

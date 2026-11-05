@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.license.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.store.StoreLogValues;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
@@ -102,9 +103,11 @@ public class SystemConfigEntitlementService implements EntitlementService {
 
   @Override
   public void requireAllowed(String memberId, Entitlement flag) {
+    // 거절 코드 먼저 (검문 대상이 아닌 권한이면 로그 전에 호출 코드 오류로 드러남)
+    ErrorCode rejectionCode = flag.rejectionCode();
     if (!isAllowed(memberId, flag)) {
       log.info("[pro gate] rejected 403 : {} member={}", flag, StoreLogValues.mask(memberId));
-      throw new CustomException(flag.rejectionCode());
+      throw new CustomException(rejectionCode);
     }
   }
 

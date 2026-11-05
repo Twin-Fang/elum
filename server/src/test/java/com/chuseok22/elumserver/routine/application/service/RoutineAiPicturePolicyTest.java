@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -50,5 +51,6 @@ class RoutineAiPicturePolicyTest {
 
     assertThat(routineAiPicturePolicy.shouldSkipAiPicture("m1")).isFalse();
     assertThatCode(() -> routineAiPicturePolicy.requireAiPicture("m1")).doesNotThrowAnyException();
+    verify(entitlementService).requireAllowed("m1", Entitlement.AI_IMAGE_GENERATION);
   }
 }
