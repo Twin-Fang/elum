@@ -58,10 +58,14 @@ class ChildNoRoutine extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: _emptyTop),
-          Text(
-            context.l10n.childHomeEmptyTitle(childName),
-            textAlign: TextAlign.center,
-            style: context.typo.greeting.copyWith(color: colors.textPrimary),
+          // 좌우 여백 안에서 줄바꿈 (긴 이름이 화면 끝에 붙지 않게 #1129)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.space.screenH),
+            child: Text(
+              context.l10n.childHomeEmptyTitle(childName),
+              textAlign: TextAlign.center,
+              style: context.typo.greeting.copyWith(color: colors.textPrimary),
+            ),
           ),
           SizedBox(height: 14.h),
           Text(

@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.member.application.dto.response.GuardianAccountR
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
+import com.chuseok22.elumserver.member.core.ElumiNickname;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -123,7 +124,8 @@ public class MemberService {
   public MemberResponse updateNickname(Caller caller, MemberNicknameUpdateRequest request) {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-    profile.setNickname(request.nickname());
+    // 길이·제어 문자 검사 (온보딩도 이 길을 지남)
+    profile.setNickname(ElumiNickname.normalize(request.nickname()));
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/l10n/current_l10n.dart';
+import '../../member/domain/elumi_nickname_policy.dart';
 import '../../../shared/models/character.dart';
 import '../../../shared/models/image_style.dart';
 import '../../../shared/models/routine_example_category.dart';
@@ -50,7 +51,9 @@ abstract class OnboardingProfile with _$OnboardingProfile {
 
   // 각 단계의 진행 조건을 모델이 스스로 안다.
   // 화면마다 조건을 재구현하면 하나만 틀려도 CTA가 잘못 열린다.
-  bool get canProceedFromName => childNickname.trim().isNotEmpty;
+  // 이름: 비지 않고 상한 이내 (되살린 옛 입력이 길어도 서버 400 전에 막음)
+  bool get canProceedFromName =>
+      ElumiNicknamePolicy.isValidLength(childNickname);
   bool get canProceedFromExampleCategories => exampleCategories.isNotEmpty;
   bool get canProceedFromCharacter => cardCharacter != null;
   bool get isPinComplete => guardianPin.length == pinLength;
