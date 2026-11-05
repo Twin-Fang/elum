@@ -13,14 +13,82 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 카드 AI 그림 새로 그리기 API 문서: 그리기(후보), 후보 받기, 새 그림으로 바꾸기, 원래 그림 그대로
- * RoutineControllerDocs 가 묶어서 RoutineController 에 제공
+ * 카드 그림 API 문서: 사진으로 바꾸기, AI 그림 새로 그리기(후보), 후보 받기, 새 그림으로 바꾸기, 원래 그림 그대로
+ * RoutineStepImageController 에 제공 (Swagger 묶음은 RoutineControllerDocs 와 같음)
  */
+@Tag(name = RoutineControllerDocs.TAG_NAME, description = RoutineControllerDocs.TAG_DESCRIPTION)
 public interface RoutineStepImageDocs {
+
+  @Operation(
+    summary = "카드 그림을 사진으로 바꾸기",
+    description = """
+      보호자가 직접 찍은 사진으로 카드 그림을 바꿉니다. **AI 를 부르지 않고 AI 크레딧도 쓰지 않습니다.**
+
+      **요청**: `multipart/form-data`, 파일 필드명 `image`. JPEG·PNG 만 받습니다(파일 서명으로 판별, Content-Type 은 보지 않음). 5MB 까지.
+
+      **처리**: 긴 변 1024px 로 줄이고(작으면 그대로), EXIF 방향대로 돌린 뒤 JPEG(품질 0.85)로 다시 저장합니다. EXIF·GPS 등 메타데이터는 남기지 않고, 투명한 PNG 는 흰 배경에 합성합니다.
+
+      **응답**: 바뀐 카드(`RoutineStepResponse`). `imagePath` 는 **매번 새 값**입니다 — 값이 바뀌었으면 이미지 캐시를 갱신하세요.
+
+      **권한**: 카드 수정과 같습니다. 일과를 만든 보호자만 가능하고 이룸이는 403 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "그림 교체 성공"),
+    @ApiResponse(
+      responseCode = "400",
+      description = "JPEG·PNG 가 아니거나 깨진 파일, 파일 누락",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_INVALID_TYPE\",\"errorMessage\":\"png, jpg 사진만 올릴 수 있어요.\"}"
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "일과를 만든 보호자가 아님(이룸이 포함)",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_NOT_CREATOR\",\"errorMessage\":\"일과를 만든 사람만 바꿀 수 있어요.\"}"
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "존재하지 않는 일과 또는 단계",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 단계예요.\"}"
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "사진 저장 실패",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_SAVE_FAILED\",\"errorMessage\":\"사진을 저장하지 못했어요. 잠시 후 다시 시도해주세요.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<RoutineStepResponse> replaceStepImage(
+    Authentication authentication,
+    @Parameter(description = "일과 ID") String routineId,
+    @Parameter(description = "카드 ID") String stepId,
+    @Parameter(description = "사진 파일 (필드명 image, JPEG·PNG, 5MB 이하)") MultipartFile image
+  );
 
   @Operation(
     summary = "카드 AI 그림 다시 그리기 · AI 그림 그리기 (후보 만들기)",

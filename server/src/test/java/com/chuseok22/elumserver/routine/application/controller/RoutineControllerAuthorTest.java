@@ -13,15 +13,11 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateReq
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
 import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +33,7 @@ class RoutineControllerAuthorTest {
   private final RoutineProgressService progressService = mock(RoutineProgressService.class);
   private final ProfileGuardianRepository guardians = mock(ProfileGuardianRepository.class);
   private final RoutineController controller = new RoutineController(
-    service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageCandidateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class), new RoutineAuthorResolver(guardians));
+    service, mock(RoutineStepEditService.class), createService, queryService, progressService, mock(RoutineScheduleRunner.class), new RoutineAuthorResolver(guardians));
 
   private final Authentication guardian = new TestingAuthenticationToken("member-1", null);
 
