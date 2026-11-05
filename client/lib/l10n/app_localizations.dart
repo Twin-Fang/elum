@@ -2504,11 +2504,17 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get guardianSettingsWithdrawFailedFallback;
 
-  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 스토어 결제 Pro 가 자동 갱신 중일 때만 보임 — 탈퇴가 스토어 구독을 해지하지 않음 (#1155)
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. App Store 결제 Pro 가 자동 갱신 중일 때만 보임 — Apple 은 서버가 구독을 해지할 수 없음 (#1155)
   ///
   /// In ko, this message translates to:
-  /// **'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어·플레이스토어에서\n직접 해지해 주세요'**
-  String get guardianSettingsWithdrawStoreSubscriptionNotice;
+  /// **'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요'**
+  String get guardianSettingsWithdrawAppStoreSubscriptionNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Google Play 결제 Pro 가 자동 갱신 중일 때만 보임 — 탈퇴하면 서버가 자동 갱신을 해지함 (#1158)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요'**
+  String get guardianSettingsWithdrawGooglePlaySubscriptionNotice;
 
   /// 회원탈퇴 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치 (#1155)
   ///

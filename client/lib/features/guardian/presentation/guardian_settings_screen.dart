@@ -26,6 +26,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../subscription/application/plan_status_providers.dart';
+import '../../subscription/domain/withdraw_store_subscription_notice.dart';
 import 'widgets/plan_settings_group.dart';
 import 'widgets/withdraw_type_confirm_dialog.dart';
 
@@ -95,12 +96,18 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     );
   }
 
-  /// 첫 단계 경고. 스토어 결제 Pro 가 갱신 중이면 스토어 해지 안내 한 줄 추가
+  /// 첫 단계 경고. 스토어 결제 Pro 가 갱신 중이면 스토어별 해지 안내 한 줄 추가
   Future<bool> _confirmWithdrawWarning() async {
     final l10n = context.l10n;
-    final hasRenewingStoreSubscription = ref.read(
-      hasRenewingStoreSubscriptionProvider,
-    );
+    final storeSubscriptionNotice = switch (ref.read(
+      withdrawStoreSubscriptionNoticeProvider,
+    )) {
+      WithdrawStoreSubscriptionNotice.none => null,
+      WithdrawStoreSubscriptionNotice.cancelledOnWithdraw =>
+        l10n.guardianSettingsWithdrawGooglePlaySubscriptionNotice,
+      WithdrawStoreSubscriptionNotice.cancelInStore =>
+        l10n.guardianSettingsWithdrawAppStoreSubscriptionNotice,
+    };
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
@@ -112,8 +119,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
       message: [
         l10n.guardianSettingsWithdrawConfirmMessage,
-        if (hasRenewingStoreSubscription)
-          l10n.guardianSettingsWithdrawStoreSubscriptionNotice,
+        ?storeSubscriptionNotice,
       ].join('\n'),
       actions: [
         ElumDialogAction(

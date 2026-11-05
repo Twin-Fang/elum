@@ -26,6 +26,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
+import com.chuseok22.elumserver.license.application.service.store.GoogleSubscriptionWithdrawalCanceler;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
@@ -98,6 +99,7 @@ class MemberServiceTest {
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  @Mock private GoogleSubscriptionWithdrawalCanceler googleSubscriptionWithdrawalCanceler;
   @InjectMocks
   private MemberService memberService;
 
@@ -165,6 +167,8 @@ class MemberServiceTest {
     verify(refreshTokenRepository).deleteAllByMemberId("member-1");
     verify(deviceLinkRepository).deleteAllByMemberId("member-1");
     verify(subscriptionRepository).deleteByMemberId("member-1");
+    // 스토어 결제는 우리 행을 지워도 계속 갱신된다 > Google 구독 해지를 커밋 뒤로 예약
+    verify(googleSubscriptionWithdrawalCanceler).cancelRenewalsAfterCommit("member-1");
     // 광고 보상 세션은 회원을 가리키는 운영 기록이라 탈퇴 즉시 지운다 (#463).
     verify(adRewardSessionRepository).deleteAllByMemberId("member-1");
     verify(feedbackService).deleteAllOf("member-1");

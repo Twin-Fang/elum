@@ -1361,8 +1361,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianSettingsWithdrawFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String get guardianSettingsWithdrawStoreSubscriptionNotice =>
-      'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어·플레이스토어에서\n직접 해지해 주세요';
+  String get guardianSettingsWithdrawAppStoreSubscriptionNotice =>
+      'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요';
+
+  @override
+  String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
+      '탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요';
 
   @override
   String get guardianSettingsWithdrawTypeTitle => '한 번 더 확인할게요';
