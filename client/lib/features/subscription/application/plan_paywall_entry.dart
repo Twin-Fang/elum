@@ -50,15 +50,15 @@ const _proOnlyRejectionCodes = {
 bool isProOnlyRejection(Object? failure) =>
     failure is AppFailure && _proOnlyRejectionCodes.contains(failure.server?.code);
 
-/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 · 아니면 안내 팝업 (실패 팝업 아님)
-Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref) async {
+/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 · 아니면 안내 팝업 (실패 팝업 아님, [title] 없으면 공통 문구)
+Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref, {String? title}) async {
   if (ref.read(planAccessProvider).canPurchasePro) {
     await openPlanPaywall(context, ref);
     return;
   }
   await showElumDialog<void>(
     context: context,
-    title: context.l10n.proOnlyNoticeTitle,
+    title: title ?? context.l10n.proOnlyNoticeTitle,
     actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
 }

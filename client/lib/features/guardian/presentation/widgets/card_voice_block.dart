@@ -132,7 +132,7 @@ class _CardVoiceBlockState extends ConsumerState<CardVoiceBlock> {
       return;
     }
     final failure = uploadResult.failure ?? VoiceFailure.recordFailed;
-    if (failure.isProOnlyRejection) {
+    if (isProOnlyRejection(failure.cause)) {
       // Pro 가 끝났음: 칸 실패 대신 Pro 안내 (판정이 새로 오면 칸이 '기본 목소리로 읽어요'로 바뀜)
       if (!mounted) return;
       setState(() => _phase = CardVoicePhase.ready);
