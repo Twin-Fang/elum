@@ -43,7 +43,7 @@ class WeeklyReportScreen extends ConsumerStatefulWidget {
 }
 
 class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _horizontalPadding = 16.0;
   static const _pickerTopGap = 8.0;
   static const _sectionGap = 16.0;

@@ -262,7 +262,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
   /// 바꾸기(설정에서 들어옴)는 시안(`1027:4683` 외)이 설정 계열 머리를 쓴다 — 뒤로가기 줄(y=67)에
   /// `비밀암호 변경하기` 제목이 서고 큰 제목은 y=148 에서 시작한다. 점 자리(y≈299)는 그대로라
   /// 설명과 점 사이가 그만큼(17) 줄어든다.
-  static const _changeBackTop = 67.0;
+  static const _changeBackTop = ElumScaffold.settingsBackTop;
   static const _changeTitleY = 148.0;
   static const _changeDescriptionToDots = 55.0;
 

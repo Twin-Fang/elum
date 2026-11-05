@@ -75,7 +75,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
       onBack: context.popOrHome,
       // 시안(`1045:4910`)도 같은 네비게이션 제목이다.
       title: context.l10n.draftRoutinesTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 하단 배너. 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
       bottomBanner: const AdBottomStripSlot(placement: AdPlacement.bannerDrafts),

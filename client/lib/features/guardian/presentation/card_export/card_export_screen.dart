@@ -43,7 +43,7 @@ class CardExportScreen extends ConsumerStatefulWidget {
 }
 
 class _CardExportScreenState extends ConsumerState<CardExportScreen> {
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _horizontalPadding = 16.0;
   static const _sectionGap = 24.0;
   static const _files = CardExportFiles();

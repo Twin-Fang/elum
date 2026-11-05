@@ -180,7 +180,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
         onBack: context.popOrHome,
         isBackEnabled: !busy,
         title: context.l10n.guardiansTitle,
-        backTop: 67,
+        backTop: ElumScaffold.settingsBackTop,
         horizontalPadding: 16,
         child: SingleChildScrollView(
           child: Column(

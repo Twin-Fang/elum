@@ -28,7 +28,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
   const RoutineMemoryScreen({super.key});
 
   /// 설정 화면들과 같은 제목 줄 y · 첫 묶음까지 · 묶음 사이
-  static const _titleRowTop = 67.0;
+  static const _titleRowTop = ElumScaffold.settingsBackTop;
   static const _topGap = 24.0;
   static const _groupGap = 16.0;
 

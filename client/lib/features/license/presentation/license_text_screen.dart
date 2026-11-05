@@ -26,7 +26,7 @@ class LicenseTextScreen extends StatelessWidget {
   final VoidCallback? onRetry;
   final String? errorCode;
 
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _headToBody = 40.0;
   // 문단 사이: 약관 전문 화면의 빈 줄 하나와 같음
   static const _paragraphGap = 14.0;

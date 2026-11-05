@@ -31,7 +31,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   /// 제목 줄(뒤로가기 상자와 같은 높이) 오른쪽 끝 여백
   static const _gearRight = 16.0;
-  static const _titleRowTop = 67.0;
+  static const _titleRowTop = ElumScaffold.settingsBackTop;
 
   late int _selectedTabIndex = widget.isNoticeTabInitiallySelected
       ? _noticeTabIndex
@@ -52,7 +52,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final scaffold = ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.notificationTabNotifications,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       // 탭 밑줄이 화면 폭 끝까지 가도록 여백은 안쪽 위젯이 각자 둔다
       horizontalPadding: 0,
       child: Column(

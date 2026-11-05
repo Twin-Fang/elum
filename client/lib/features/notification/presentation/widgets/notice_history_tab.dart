@@ -9,6 +9,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/widgets/scroll_near_end.dart';
 import '../../../notice/application/notice_history_controller.dart';
 import '../../application/unread_summary_provider.dart';
 import 'notice_history_card.dart';
@@ -26,8 +27,6 @@ class NoticeHistoryTab extends ConsumerStatefulWidget {
 class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
   final _scrollController = ScrollController();
 
-  /// 끝까지 이만큼 남으면 다음 쪽을 받는다
-  static const _loadMoreExtent = 320.0;
   static const _sidePadding = 16.0;
   static const _cardGap = 12.0;
   static const _emptyIllustrationSize = 160.0;
@@ -52,7 +51,7 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
   }
 
   void _loadMoreNearEnd() {
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref.read(noticeHistoryControllerProvider.notifier).loadMore();
     }
   }

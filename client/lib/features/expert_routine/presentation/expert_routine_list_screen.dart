@@ -58,7 +58,7 @@ class _ExpertRoutineListScreenState
     return ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.expertRoutineListTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -117,7 +117,7 @@ extension on _ExpertRoutineListScreenState {
     return ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.expertRoutineListTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: ListView(
         padding: EdgeInsets.only(

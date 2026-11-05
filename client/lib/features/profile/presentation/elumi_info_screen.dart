@@ -134,7 +134,7 @@ class _ElumiInfoScreenState extends ConsumerState<ElumiInfoScreen>
       title: profile == null
           ? null
           : context.l10n.elumiInfoTitle(profile.displayName),
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: _content(member, profile),
     );

@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
+import '../../../core/widgets/scroll_near_end.dart';
 import '../../guardian/domain/routine_template.dart';
 import '../application/talk_feed_controller.dart';
 import '../application/talk_popular_provider.dart';
@@ -39,8 +40,6 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   /// 고른 분류. null 이면 전체
   RoutineTemplateCategory? _selectedCategory;
 
-  /// 끝까지 이만큼 남으면 다음 쪽을 받는다
-  static const _loadMoreExtent = 320.0;
 
   /// 안전영역 > 제목 (시안 y=87, 상태 바 59 아래)
   static const _titleTop = 28.0;
@@ -80,7 +79,7 @@ class _TalkFeedScreenState extends ConsumerState<TalkFeedScreen> {
   }
 
   void _loadMoreNearEnd() {
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref.read(talkFeedControllerProvider(_categoryValue).notifier).loadMore();
     }
   }
