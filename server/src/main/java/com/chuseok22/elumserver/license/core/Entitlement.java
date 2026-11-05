@@ -90,6 +90,11 @@ public enum Entitlement {
     Kind.FLAG, "그림 다시 그리기 무료",
     ConfigKey.FREE_IMAGE_REGENERATE_FREE, ConfigKey.PRO_IMAGE_REGENERATE_FREE
   ),
+  // 일과 만들기 글 몫 0크레딧, 카드 그림은 장수만큼 그대로 청구. 켜진 요금제는 크레딧이 켜져 있어도 하루·주당 횟수를 셈 (#1110)
+  ROUTINE_CREATE_FREE(
+    Kind.FLAG, "일과 생성 무료 (글 크레딧 없음)",
+    ConfigKey.FREE_ROUTINE_CREATE_FREE, ConfigKey.PRO_ROUTINE_CREATE_FREE
+  ),
   // OpenAI 그림 품질을 OPENAI_IMAGE_QUALITY_PRO 로 올림. Free·Pro 모두 기본 꺼짐 (#1075)
   IMAGE_HIGH_QUALITY(
     Kind.FLAG, "고품질 그림",

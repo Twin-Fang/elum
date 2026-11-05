@@ -66,7 +66,8 @@ public class RoutineQuotaGuard {
     PlanType plan = entitlementService.planOf(memberId);
     // 크레딧이 켜져 있으면 하루·주간 횟수는 보지 않는다 — 크레딧 예약이 대신 막는다.
     // 보유 일과 최대 수는 저장 공간 한도라 크레딧과 무관하게 남긴다.
-    if (!creditEnabled()) {
+    // 일과 글 무료 요금제는 크레딧이 글 몫을 못 묶으므로 크레딧이 켜져 있어도 횟수를 센다 (#1110)
+    if (!creditEnabled() || entitlementService.isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE)) {
       // 주간을 먼저 본다. 주간이 다 찼는데 하루 한도로 거절하면 "내일 다시" 라고 안내하게
       // 되는데, 내일도 막힌다.
       guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_WEEK, weekStart(),

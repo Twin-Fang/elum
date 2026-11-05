@@ -46,6 +46,8 @@ public class CreditReservationService {
 
   /// 무료 다시 그리기 사용 줄의 사유 (보호자 내역에는 안 보임, 관리자 원장용)
   static final String FREE_REGENERATE_REASON = "무료 다시 그리기 (요금제 권한)";
+  /// 일과 생성 글 몫 무료 사용 줄의 사유 (관리자 원장용, #1110)
+  static final String FREE_ROUTINE_TEXT_REASON = "일과 생성 글 무료 (요금제 권한)";
   /// 무료 다시 그리기 하루 횟수에 드는 작업 상태 (반환·만료는 그림을 못 받았으니 제외)
   private static final List<CreditJobStatus> FREE_REGENERATE_COUNTED_STATUSES =
     List.of(CreditJobStatus.RESERVED, CreditJobStatus.SETTLED);
@@ -156,9 +158,11 @@ public class CreditReservationService {
     }
 
     accountService.ensureWeeklyGrant(account, policyService::grantPolicyFor, planOf(account), now);
-    // 시작 때 단가 (무료 다시 그리기 대상이면 다시 그리기 단가만 0)
-    String costSnapshot = costSnapshotFor(account, kind, policy, now);
-    int cost = AiCreditPolicy.costFrom(costSnapshot, reserveAction(kind));
+    // 시작 때 단가 (무료 다시 그리기 대상이면 다시 그리기 단가만 0, 일과 글 무료 대상이면 글 단가만 0)
+    boolean isRoutineTextFree = kind == CreditJobKind.ROUTINE_CREATE && hasFreeRoutineTextEntitlement(account);
+    String costSnapshot = costSnapshotFor(account, kind, policy, now, isRoutineTextFree);
+    CreditAction holdAction = holdActionOf(kind, isRoutineTextFree);
+    int cost = AiCreditPolicy.costFrom(costSnapshot, holdAction);
     int available = accountService.balance(account, now).available();
     if (available < cost) {
       return ReserveResult.rejected(ErrorCode.AI_CREDIT_INSUFFICIENT);
@@ -183,7 +187,7 @@ public class CreditReservationService {
 
     AiCreditLedger line = CreditAccountService.ledgerLine(account.getId(), CreditLedgerType.RESERVE, -cost, available - cost);
     line.setJobId(saved.getId());
-    line.setAction(reserveAction(kind));
+    line.setAction(holdAction);
     line.setPolicyVersion(policy.getVersion());
     ledgerRepository.save(line);
     return ReserveResult.of(CreditReservation.reserved(saved.getId()));
@@ -233,6 +237,16 @@ public class CreditReservationService {
     if (!job.getKind().overageAllowed()) {
       charge = Math.min(charge, Math.max(0, running));
     }
+    // 일과 글 무료: 그림 차감 줄보다 먼저 0 짜리 글 사용 줄을 남김 (내역에 "무료" 글 줄, 그림 줄은 그 위)
+    if (isFreeRoutineTextJob(job)) {
+      AiCreditLedger freeText = CreditAccountService.ledgerLine(accountId, CreditLedgerType.CONSUME, 0, running);
+      freeText.setJobId(jobId);
+      freeText.setAction(CreditAction.ROUTINE_TEXT);
+      freeText.setPolicyVersion(job.getPolicyVersion());
+      freeText.setReason(FREE_ROUTINE_TEXT_REASON);
+      ledgerRepository.save(freeText);
+    }
+
     int left = Math.min(charge, running);
     int deducted = 0;
     List<AiCreditGrant> grants = accountService.spendableGrants(accountId, now);
@@ -376,13 +390,27 @@ public class CreditReservationService {
   }
 
   /**
-   * 시작 때 단가 JSON: 정책 단가 그대로, 무료 다시 그리기 대상이면 IMAGE_REGENERATE 만 0
+   * 시작 때 단가 JSON: 정책 단가 그대로, 무료 다시 그리기 대상이면 IMAGE_REGENERATE 만 0, 일과 글 무료면 ROUTINE_TEXT 만 0
    */
-  private String costSnapshotFor(AiCreditAccount account, CreditJobKind kind, AiCreditPolicy policy, LocalDateTime now) {
-    if (kind != CreditJobKind.IMAGE_REGENERATE || !isFreeRegenerateAvailable(account, now)) {
-      return policy.getActionCostsJson();
+  private String costSnapshotFor(
+    AiCreditAccount account, CreditJobKind kind, AiCreditPolicy policy, LocalDateTime now, boolean isRoutineTextFree
+  ) {
+    if (isRoutineTextFree) {
+      return policy.actionCostsJsonWithFree(CreditAction.ROUTINE_TEXT);
     }
-    return policy.actionCostsJsonWithFree(CreditAction.IMAGE_REGENERATE);
+    if (kind == CreditJobKind.IMAGE_REGENERATE && isFreeRegenerateAvailable(account, now)) {
+      return policy.actionCostsJsonWithFree(CreditAction.IMAGE_REGENERATE);
+    }
+    return policy.getActionCostsJson();
+  }
+
+  /**
+   * 일과 생성을 시작하려면 있어야 하는 사용 가능량 (예약량과 같은 계산): 글 단가, 글 무료 권한이면 그림 한 장 단가
+   * 크레딧 요약의 "시작 가능"과 추가 질문 막기가 예약과 같은 기준을 씀
+   */
+  public int routineCreateStartCost(AiCreditAccount account, AiCreditPolicy policy) {
+    boolean isRoutineTextFree = hasFreeRoutineTextEntitlement(account);
+    return policy.costOf(holdActionOf(CreditJobKind.ROUTINE_CREATE, isRoutineTextFree));
   }
 
   /**
@@ -420,10 +448,29 @@ public class CreditReservationService {
     return memberId != null && entitlementService.isAllowed(memberId, Entitlement.IMAGE_REGENERATE_FREE);
   }
 
+  private boolean hasFreeRoutineTextEntitlement(AiCreditAccount account) {
+    String memberId = account.getMemberId();
+    return memberId != null && entitlementService.isAllowed(memberId, Entitlement.ROUTINE_CREATE_FREE);
+  }
+
+  /// 시작 때 글 단가가 0 인 일과 생성 작업인가 (글 무료 권한 또는 정책 글 단가 0)
+  private static boolean isFreeRoutineTextJob(AiCreditJob job) {
+    return job.getKind() == CreditJobKind.ROUTINE_CREATE
+      && AiCreditPolicy.costFrom(job.getCostSnapshot(), CreditAction.ROUTINE_TEXT) == 0;
+  }
+
   /// 시작 때 다시 그리기 단가가 0 이고 그림을 실제로 그린 다시 그리기 작업인가
   private static boolean isFreeRegenerateJob(AiCreditJob job, int imageCount) {
     return job.getKind() == CreditJobKind.IMAGE_REGENERATE && imageCount > 0
       && AiCreditPolicy.costFrom(job.getCostSnapshot(), CreditAction.IMAGE_REGENERATE) == 0;
+  }
+
+  /**
+   * 예약량을 정하는 행동: 보통은 reserveAction, 일과 글 무료면 그림 한 장 단가
+   * (글 단가 0 으로 예약하면 잔액 0 에서도 시작해 그림 전부가 초과로 빠져 청구되지 않음)
+   */
+  private static CreditAction holdActionOf(CreditJobKind kind, boolean isRoutineTextFree) {
+    return isRoutineTextFree ? CreditAction.CARD_IMAGE : reserveAction(kind);
   }
 
   /// 예약량·원장 action 을 정하는 행동. 일과 생성은 글 단가만 예약한다(그림 수는 끝나야 안다). 번역은 글 단가 그대로

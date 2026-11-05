@@ -155,6 +155,24 @@ class CreditHistoryServiceTest {
   }
 
   @Test
+  @DisplayName("일과 글 무료 작업은 글 줄이 증감 0('무료')으로, 그림 차감 줄은 그림 몫만으로 보인다 (#1110)")
+  void showsFreeRoutineTextLineAndImageOnlyLine() {
+    AiCreditLedger images = consumeLine("l1", "job1", -3);
+    AiCreditLedger freeText = consumeLine("l0", "job1", 0);
+    stubPage(images, freeText);
+    AiCreditJob job = stubJob("job1", CreditJobKind.ROUTINE_CREATE, 3, "r1");
+    job.setCostSnapshot("{\"ROUTINE_TEXT\":0,\"CARD_IMAGE\":1,\"IMAGE_REGENERATE\":1}");
+    stubRoutineTitle("r1", "양치하기");
+
+    List<Entry> entries = service.getMine(MEMBER_ID, 0, 30).entries();
+
+    assertThat(entries).extracting(Entry::kind)
+      .containsExactly(CreditHistoryKind.CARD_IMAGES, CreditHistoryKind.ROUTINE_TEXT);
+    assertThat(entries).extracting(Entry::delta).containsExactly(-3, 0);
+    assertThat(entries).extracting(Entry::occurredAt).containsExactly(SETTLED_AT, STARTED_AT);
+  }
+
+  @Test
   @DisplayName("계정이 아직 없으면 원장을 읽지 않고 빈 쪽을 돌려준다")
   void returnsEmptyPageWithoutAccount() {
     when(accountService.findAccount("nobody")).thenReturn(Optional.empty());
@@ -202,7 +220,7 @@ class CreditHistoryServiceTest {
     return line;
   }
 
-  private void stubJob(String jobId, CreditJobKind kind, int imageCount, String routineId) {
+  private AiCreditJob stubJob(String jobId, CreditJobKind kind, int imageCount, String routineId) {
     AiCreditJob job = new AiCreditJob();
     job.setId(jobId);
     job.setKind(kind);
@@ -211,6 +229,7 @@ class CreditHistoryServiceTest {
     job.setCostSnapshot(COSTS);
     job.setStartedAt(STARTED_AT);
     when(jobRepository.findAllById(any())).thenReturn(List.of(job));
+    return job;
   }
 
   private void stubRoutineTitle(String routineId, String title) {

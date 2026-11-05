@@ -88,7 +88,7 @@ public class CreditQueryService {
     if (!policy.isEnabled()) {
       return CreditSummaryResponse.disabled(MAX_CARDS_PER_ROUTINE);
     }
-    Snapshot snapshot = snapshot(memberId);
+    Snapshot snapshot = snapshot(memberId, policy);
     CreditBalance balance = snapshot.balance();
     int routineText = policy.costOf(CreditAction.ROUTINE_TEXT);
     int cardImage = policy.costOf(CreditAction.CARD_IMAGE);
@@ -111,7 +111,8 @@ public class CreditQueryService {
       new CreditSummaryResponse.Costs(routineText, cardImage, imageRegenerate),
       MAX_CARDS_PER_ROUTINE,
       inProgress,
-      !snapshot.isFrozen() && balance.available() >= routineText,
+      // 일과 시작 기준은 예약과 같은 값 (글 무료 권한이면 그림 한 장 단가)
+      !snapshot.isFrozen() && balance.available() >= snapshot.routineCreateStartCost(),
       !snapshot.isFrozen() && balance.available() >= cardImage,
       snapshot.freeImageRegeneratesLeftToday()
     );
@@ -128,11 +129,11 @@ public class CreditQueryService {
     if (!policy.isEnabled()) {
       return;
     }
-    Snapshot snapshot = snapshot(memberId);
+    Snapshot snapshot = snapshot(memberId, policy);
     if (snapshot.isFrozen()) {
       throw new CustomException(ErrorCode.AI_CREDIT_ACCOUNT_FROZEN);
     }
-    if (snapshot.balance().available() < policy.costOf(CreditAction.ROUTINE_TEXT)) {
+    if (snapshot.balance().available() < snapshot.routineCreateStartCost()) {
       log.info("크레딧 부족 — 추가 질문을 막는다: memberId={}, available={}", memberId, snapshot.balance().available());
       throw new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT);
     }
@@ -155,7 +156,7 @@ public class CreditQueryService {
 
   /// 계정을 잠그고 멈춘 예약 정리 → 이번 주 지급 보장 → 잔액을 한 트랜잭션에서 읽는다.
   /// 지급량은 주 시작 때 정책으로 정한다(grantPolicyFor) — 주 중간 NEXT_PERIOD 발행이 이번 주로 새지 않게.
-  private Snapshot snapshot(String memberId) {
+  private Snapshot snapshot(String memberId, AiCreditPolicy policy) {
     Snapshot snapshot;
     try {
       snapshot = transaction.execute(status -> {
@@ -167,7 +168,8 @@ public class CreditQueryService {
         CreditBalance balance = accountService.balance(account, now);
         List<AiCreditJob> reserved = jobRepository.findByAccountIdAndStatus(account.getId(), CreditJobStatus.RESERVED);
         int freeRegeneratesLeft = reservationService.freeRegeneratesLeftToday(account, now);
-        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft);
+        int routineCreateStartCost = reservationService.routineCreateStartCost(account, policy);
+        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft, routineCreateStartCost);
       });
     } catch (CustomException e) {
       throw e;
@@ -183,7 +185,8 @@ public class CreditQueryService {
   }
 
   private record Snapshot(
-    CreditBalance balance, List<AiCreditJob> reservedJobs, boolean isFrozen, int freeImageRegeneratesLeftToday
+    CreditBalance balance, List<AiCreditJob> reservedJobs, boolean isFrozen, int freeImageRegeneratesLeftToday,
+    int routineCreateStartCost
   ) {
 
   }

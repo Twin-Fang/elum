@@ -21,6 +21,7 @@ class PlanAccess {
     required this.canImportExpertRoutines,
     required this.canUseRoutineMemory,
     required this.canRegenerateImagesFree,
+    required this.canCreateRoutineTextFree,
     required this.canUseAiPictures,
     this.canPurchasePro = false,
   });
@@ -37,6 +38,7 @@ class PlanAccess {
     canImportExpertRoutines: false,
     canUseRoutineMemory: false,
     canRegenerateImagesFree: false,
+    canCreateRoutineTextFree: false,
     canUseAiPictures: false,
   );
 
@@ -52,6 +54,7 @@ class PlanAccess {
     canImportExpertRoutines: true,
     canUseRoutineMemory: true,
     canRegenerateImagesFree: true,
+    canCreateRoutineTextFree: true,
     canUseAiPictures: true,
   );
 
@@ -88,6 +91,9 @@ class PlanAccess {
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
 
+  /// AI 일과 만들기의 글 몫이 크레딧 없이 되는가 (카드 그림은 장수만큼 듦, 하루 횟수는 서버가 봄)
+  final bool canCreateRoutineTextFree;
+
   /// AI 맞춤 그림을 쓸 수 있는가: 카드 `다시 그리기`·`AI 그림 그리기`. 꺼지면 그 자리에 Pro 안내 (이미 만든 그림은 그대로)
   final bool canUseAiPictures;
 
@@ -116,6 +122,7 @@ class PlanAccess {
     canImportExpertRoutines: canImportExpertRoutines,
     canUseRoutineMemory: canUseRoutineMemory,
     canRegenerateImagesFree: canRegenerateImagesFree,
+    canCreateRoutineTextFree: canCreateRoutineTextFree,
     canUseAiPictures: canUseAiPictures,
     canPurchasePro: canPurchasePro,
   );
@@ -151,6 +158,7 @@ PlanAccess _readPlanAccess(Ref ref) {
     canImportExpertRoutines: member.canImportExpertRoutines,
     canUseRoutineMemory: member.canUseRoutineMemory,
     canRegenerateImagesFree: member.canRegenerateImagesFree,
+    canCreateRoutineTextFree: member.canCreateRoutineTextFree,
     canUseAiPictures: member.canUseAiPictures,
   );
 }

@@ -320,6 +320,17 @@ class RoutineQuotaGuardTest {
   }
 
   @Test
+  @DisplayName("일과 글 무료 요금제는 크레딧이 켜져 있어도 하루 횟수로 막는다 — 글 몫을 크레딧이 묶지 못한다 (#1110)")
+  void creditEnabled_routineTextFreePlan_keepsDailyLimit() {
+    creditEnabled();
+    when(entitlementService.isAllowed(PlanType.FREE, Entitlement.ROUTINE_CREATE_FREE)).thenReturn(true);
+    logged(2, AiCallType.GEMINI_TEXT_CREATE, TODAY);
+    limits(2, 10);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED);
+  }
+
+  @Test
   @DisplayName("크레딧이 켜져 있어도 보유 일과 최대 수는 본다 (#407)")
   void creditEnabled_keepsOwnedCountLimit() {
     creditEnabled();

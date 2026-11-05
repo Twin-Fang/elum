@@ -155,6 +155,19 @@ class CreditQueryServiceTest {
   }
 
   @Test
+  @DisplayName("일과 글 무료 권한이면 시작 기준이 그림 한 장 단가 — 잔액 1 < 그림 2 라 시작 불가, 단가 표시는 정책 그대로 (#1110)")
+  void getMine_routineTextFree_startNeedsOneImageCost() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 1);
+    // 같은 목에 다시 그리기 무료 질의도 오므로 lenient
+    lenient().when(entitlementService.isAllowed(MEMBER_ID, Entitlement.ROUTINE_CREATE_FREE)).thenReturn(true);
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.canStartRoutine()).isFalse();
+    assertThat(summary.costs().routineText()).as("번역이 쓰는 글 단가는 그대로").isEqualTo(1);
+  }
+
+  @Test
   @DisplayName("무료 다시 그리기 권한이 있으면 오늘 남은 무료 횟수 = 하루 한도 30 − 오늘 쓴 무료 횟수 (확인 시트의 'N회 남음')")
   void getMine_freeRegeneratesLeft_whenEntitled() {
     store.weekly(ACCOUNT_ID, NOW, 100, 50);
