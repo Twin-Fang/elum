@@ -36,6 +36,7 @@ class Member {
     this.canImportExpertRoutines = false,
     this.canUseRoutineMemory = false,
     this.canRegenerateImagesFree = false,
+    this.canUseAiPictures = false,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -101,6 +102,10 @@ class Member {
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (`entitlements.imageRegenerateFree`, 하루 한도는 서버가 봄)
   final bool canRegenerateImagesFree;
 
+  /// AI 맞춤 그림을 쓸 수 있는가 (`entitlements.aiImageGeneration`): 새 카드 그림·다시 그리기·그림 그리기. 모르면 false
+  /// 꺼져도 이미 만든 AI 그림은 그대로 보인다 (그림 조회는 요금제와 무관)
+  final bool canUseAiPictures;
+
   /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
   ///
   /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
@@ -134,6 +139,7 @@ class Member {
         canImportExpertRoutines != other.canImportExpertRoutines ||
         canUseRoutineMemory != other.canUseRoutineMemory ||
         canRegenerateImagesFree != other.canRegenerateImagesFree ||
+        canUseAiPictures != other.canUseAiPictures ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -190,6 +196,7 @@ class Member {
       canImportExpertRoutines: _isEntitled(json, 'routineTemplates'),
       canUseRoutineMemory: _isEntitled(json, 'routineMemory'),
       canRegenerateImagesFree: _isEntitled(json, 'imageRegenerateFree'),
+      canUseAiPictures: _isEntitled(json, 'aiImageGeneration'),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );

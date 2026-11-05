@@ -8,9 +8,11 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
-import '../../../../core/widgets/elum_toast.dart';
-import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/action_card.dart';
+import '../../../../shared/models/image_style.dart';
+import '../../../member/application/member_providers.dart';
+import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/routine_notifier.dart';
 import '../../application/card_photo_controller.dart';
 import '../../data/card_photo.dart';
@@ -18,13 +20,13 @@ import '../../data/card_photo_picker.dart';
 import 'card_image.dart';
 import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
-import 'card_regenerate_sheet.dart';
+import 'card_redraw_flow.dart';
 import 'default_card_art.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 
 part 'card_photo_block_parts.dart';
 
-/// 카드 수정 시트 안의 그림 칸 — 그림 아래 `사진 바꾸기` · (AI 그림이면) `다시 그리기` 칩과 그 뒤의 모든 상태.
+/// 카드 수정 시트 안의 그림 칸 — 그림 아래 `사진 바꾸기` · `다시 그리기`(또는 `AI 그림 그리기`) 칩과 그 뒤의 모든 상태.
 ///
 /// **임시 시안이다.** 디자이너 확정 전 제시용 목업(`opt2_A`)을 그대로 옮겼다.
 ///
@@ -32,7 +34,8 @@ part 'card_photo_block_parts.dart';
 /// 취소는 아무 일도 없고, 권한 거부는 우회 안내, 올리는 중은 칩을 감춰 두 번 못 누르며,
 /// 실패는 문구 + **에러 코드** + `다시 하기`다.
 ///
-/// 다시 그리기: 칩 → 비용 확인 시트 → 그리는 중 → 성공(그림 갈아 끼움 + 토스트) / 실패(에러 코드 팝업, 그림 그대로).
+/// 다시 그리기 · AI 그림 그리기: 칩 → 요청 시트 → 그리는 중 → 나란히 고르기 → 바꾸기(토스트) / 실패(에러 코드 팝업, 그림 그대로).
+/// AI 맞춤 그림이 없는 요금제는 그 칩 자리에 Pro 안내 칩.
 ///
 /// **서버 id 가 있는 카드에서만 쓴다.** 호출부가 [routineId]·[stepId] 가 서버 것일 때만
 /// 이 위젯을 놓는다 — 서버에 없는 카드는 올릴 곳이 없다.
@@ -48,9 +51,6 @@ class CardPhotoBlock extends ConsumerStatefulWidget {
 
   /// 칩의 누름 영역 — 테스트가 48×48 을 재는 데 쓴다.
   static const chipTapKey = ValueKey('card-photo-chip-tap');
-
-  /// 다시 그리기 실패 팝업의 에러 코드 (서버 코드가 없을 때)
-  static const regenerateErrorCode = 'E-CARD-REGENERATE';
 
   /// 그림 칸 높이 (목업 150).
   static const height = 150.0;
@@ -73,6 +73,9 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
 
   /// 고르는 중이거나 올리는 중 — 칩·다시 하기를 또 눌러도 새 흐름이 시작되지 않는다.
   var _busy = false;
+
+  /// 그리는 중 덮개 문구: 처음 그리기면 `그리고 있어요`, 아니면 `다시 그리고 있어요`
+  var _isDrawingFirstPicture = false;
 
   ActionCard? _step() {
     final steps = ref.watch(routineFlowProvider).routine?.steps;
@@ -191,49 +194,28 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     }
   }
 
-  /// 다시 그리기: 확인 시트 > 그리는 중 > 성공이면 새 열쇠로 교체, 실패면 에러 코드 팝업 (그림 그대로)
-  Future<void> _regenerate() async {
+  /// 다시 그리기 · AI 그림 그리기: 요청 시트 > 그리는 중 > 나란히 고르기 > 바꾸기 (실패는 에러 코드 팝업, 그림 그대로)
+  Future<void> _redraw(ActionCard step) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final isConfirmed = await CardRegenerateSheet.show(context);
-      if (!isConfirmed || !mounted) return;
-      await _runRegenerate();
+      await runCardRedrawFlow(
+        context: context,
+        ref: ref,
+        routineId: widget.routineId,
+        step: step,
+        onDrawingChanged: (isDrawing) {
+          if (!mounted) return;
+          setState(() {
+            _phase = isDrawing ? _Phase.regenerating : _Phase.idle;
+            _failure = null;
+            _isDrawingFirstPicture = !step.isAiPicture;
+          });
+        },
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-  }
-
-  Future<void> _runRegenerate() async {
-    // await 뒤 시트가 사라져도 끝까지 반영하고 알릴 수 있게 미리 잡아 둠 (사진 올리기와 같은 이유)
-    final notifier = ref.read(routineFlowProvider.notifier);
-    final controller = ref.read(cardPhotoControllerProvider);
-    final rootContext = Overlay.of(context, rootOverlay: true).context;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    setState(() {
-      _phase = _Phase.regenerating;
-      _failure = null;
-    });
-
-    final regenerateResult = await controller.regenerateImage(routineId: widget.routineId, stepId: widget.stepId);
-    if (mounted) setState(() => _phase = _Phase.idle);
-
-    final card = regenerateResult.card;
-    if (card != null) {
-      // 새 imagePath 가 오면 이미지 캐시 열쇠가 달라져 그림이 바뀐다
-      notifier.applyStepImage(widget.stepId, card.imagePath!, isAiPicture: true);
-      if (rootContext.mounted) showElumToastOn(messenger, rootContext.l10n.cardRegenerateDoneToast);
-      return;
-    }
-    final targetContext = mounted ? context : rootContext;
-    if (!targetContext.mounted) return;
-    await showFailure(
-      targetContext,
-      regenerateResult.failure,
-      title: targetContext.l10n.cardRegenerateFailedTitle,
-      fallback: targetContext.l10n.cardRegenerateFailedFallback,
-      fallbackCode: CardPhotoBlock.regenerateErrorCode,
-    );
   }
 
   void _onFailureButton() {
@@ -260,6 +242,34 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     }
   }
 
+  /// 그림 칩 하나: AI 그림 카드는 `다시 그리기`, 그림 없는 카드는 `AI 그림 그리기` (사진·가져온 그림·사진만 쓰기·설명 없음은 없음)
+  /// AI 맞춤 그림이 없는 요금제면 같은 자리에 Pro 안내 칩 (살 수 없는 동안은 숨김)
+  Widget? _drawChip(BuildContext context, ActionCard? step) {
+    if (step == null) return null;
+    final l10n = context.l10n;
+    final planAccess = ref.watch(planAccessProvider);
+    final imageStyle = ref.watch(memberProvider).value?.imageStyle ?? ImageStyle.cartoon;
+    final imagePath = step.imagePath;
+    final canDrawFirstPicture = (imagePath == null || imagePath.isEmpty) &&
+        step.description.trim().isNotEmpty &&
+        imageStyle.drawsCardImages;
+    if (!step.isAiPicture && !canDrawFirstPicture) return null;
+
+    if (!planAccess.canUseAiPictures) {
+      if (!planAccess.shouldShowProTeaser) return null;
+      return _Chip(
+        asset: AppAssets.iconRefresh,
+        label: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,
+        onTap: _busy ? null : () => openProOnlyNotice(context, ref),
+      );
+    }
+    return _Chip(
+      asset: AppAssets.iconRefresh,
+      label: step.isAiPicture ? l10n.cardRegenerateChip : l10n.cardFirstDrawChip,
+      onTap: _busy ? null : () => _redraw(step),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -277,12 +287,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
         alignment: WrapAlignment.center,
         spacing: space.xs,
         children: [
-          if (step?.isAiPicture ?? false)
-            _Chip(
-              asset: AppAssets.iconRefresh,
-              label: context.l10n.cardRegenerateChip,
-              onTap: _busy ? null : _regenerate,
-            ),
+          ?_drawChip(context, step),
           _Chip(
             key: CardPhotoBlock.chipTapKey,
             asset: AppAssets.iconCamera,
@@ -342,7 +347,12 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
             ),
           ),
           if (_phase == _Phase.uploading) _ProgressOverlay(message: context.l10n.cardPhotoUploading),
-          if (_phase == _Phase.regenerating) _ProgressOverlay(message: context.l10n.cardRegenerateInProgress),
+          if (_phase == _Phase.regenerating)
+            _ProgressOverlay(
+              message: _isDrawingFirstPicture
+                  ? context.l10n.cardFirstDrawInProgress
+                  : context.l10n.cardRegenerateInProgress,
+            ),
           if (_phase == _Phase.failed && _failure != null)
             _FailureOverlay(failure: _failure!, onButton: _onFailureButton),
         ],

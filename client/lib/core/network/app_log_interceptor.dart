@@ -31,11 +31,12 @@ class AppLogInterceptor extends Interceptor {
     'authorization',
     'secret',
     'code',
-    // 보호자 원문 (docs 원칙 5번): 일과 입력·서버 응답 사본·질문 답·보상 문구
+    // 보호자 원문 (docs 원칙 5번): 일과 입력·서버 응답 사본·질문 답·보상 문구·다시 그리기 요청 글
     'rawinputtext',
     'sanitizedinputtext',
     'answers',
     'rewardtext',
+    'requesttext',
     // 스토어 결제 증빙: Apple 거래 JWS · Google 구매 토큰 (남이 보내면 그 구독을 주장할 수 있다)
     'signedtransaction',
     'signedrenewalinfo',

@@ -8,6 +8,9 @@ enum SubscriptionSource {
   googleIap('GOOGLE_IAP'),
   promo('PROMO'),
 
+  /// 기존 가입자 Pro 선물 (`expiresAt` = 선물 끝나는 시각)
+  proGift('PRO_GIFT'),
+
   /// 앱이 모르는 새 값
   unknown('');
 

@@ -5,67 +5,106 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_choice_chip.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../../credit/application/image_regenerate_cost.dart';
-import '../../../member/application/plan_access.dart';
+import '../../domain/image_redraw_hint.dart';
 
-/// 카드 그림 다시 그리기 확인 시트: 제목 > 설명 > 비용 한 줄 (> Free · 판매 중이면 Pro 혜택 한 줄) > 취소 · 다시 그리기
+/// 고쳐서 다시 그리기 · AI 그림 그리기 시트: 제목 > 설명 > 고치고 싶은 점(60자) > 칩 4개 > 비용 한 줄 > 취소 · 그리기
 ///
-/// 비용 3가지: `Pro 무료 (오늘 N회 남음)` · `크레딧을 쓰지 않아요`(크레딧 꺼짐·단가 0) · `크레딧 N개`.
-/// 비용을 못 받으면 `크레딧을 써요` 로 두고 진행은 막지 않음 (서버가 예약 때 다시 판정)
-class CardRegenerateSheet extends ConsumerWidget {
-  const CardRegenerateSheet({super.key});
+/// 글·칩은 함께 쓸 수 있고, 둘 다 비면 같은 조건으로 다시 그림. 비용: 다시 그리기는 Pro 무료 횟수 > 크레딧 안 씀 > 크레딧 N개,
+/// 처음 그리기는 카드 그림 단가 (무료 횟수 밖). 비용을 못 받으면 `크레딧을 써요` 로 두고 진행은 막지 않음 (서버가 다시 판정)
+class CardRegenerateSheet extends ConsumerStatefulWidget {
+  const CardRegenerateSheet({super.key, required this.isFirstPicture});
 
-  /// 확인하면 true, 취소·내려 닫음이면 false
-  static Future<bool> show(BuildContext context) async {
-    final isConfirmed = await showElumSheet<bool>(
+  /// AI 그림이 없던 카드에 처음 그리는가 (제목·버튼·비용이 다름)
+  final bool isFirstPicture;
+
+  /// 그리기를 누르면 요청, 취소·내려 닫음이면 null
+  static Future<CardRedrawRequest?> show(BuildContext context, {required bool isFirstPicture}) {
+    return showElumSheet<CardRedrawRequest>(
       context: context,
-      builder: (_) => const CardRegenerateSheet(),
+      builder: (_) => CardRegenerateSheet(isFirstPicture: isFirstPicture),
     );
-    return isConfirmed ?? false;
   }
 
-  /// 비용 > Pro 혜택 줄 · 혜택 줄 > 버튼
-  static const _costToHint = 8.0;
-  static const _bodyToButtons = 24.0;
+  @override
+  ConsumerState<CardRegenerateSheet> createState() => _CardRegenerateSheetState();
+}
+
+class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
+  final _requestTextController = TextEditingController();
+  final _selectedHints = <ImageRedrawHint>{};
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    _requestTextController.dispose();
+    super.dispose();
+  }
+
+  void _onHintTapped(ImageRedrawHint hint) {
+    setState(() {
+      if (!_selectedHints.remove(hint)) _selectedHints.add(hint);
+    });
+  }
+
+  void _onConfirmPressed() {
+    Navigator.of(context).pop<CardRedrawRequest>((
+      requestText: _requestTextController.text,
+      hints: Set.unmodifiable(_selectedHints),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
+    final space = context.space;
     final costAsync = ref.watch(imageRegenerateCostProvider);
-    final cost = costAsync.value;
-    final isFree = cost != null && (cost.freeLeftToday > 0 || !cost.isCreditEnabled || cost.credits <= 0);
-    final shouldShowProHint = !isFree && ref.watch(planAccessProvider).shouldShowProTeaser;
+    final isFirstPicture = widget.isFirstPicture;
 
     return ElumSheetFrame(
-      title: l10n.cardRegenerateSheetTitle,
-      description: l10n.cardRegenerateSheetBody,
+      title: isFirstPicture ? l10n.cardFirstDrawSheetTitle : l10n.cardRegenerateSheetTitle,
+      description: isFirstPicture ? l10n.cardFirstDrawSheetBody : l10n.cardRedrawSheetBody,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          ElumSheetTextField(
+            controller: _requestTextController,
+            label: l10n.cardRedrawRequestLabel,
+            hintText: l10n.cardRedrawRequestHint,
+            maxLength: ImageRedrawHint.maxRequestTextLength,
+            shouldBlockLineBreaks: true,
+          ),
+          SizedBox(height: space.sm.h),
+          Wrap(
+            spacing: space.xs.w,
+            runSpacing: space.xs.h,
+            children: [
+              for (final hint in ImageRedrawHint.values)
+                ElumChoiceChip(
+                  label: _hintLabel(context, hint),
+                  isSelected: _selectedHints.contains(hint),
+                  onTap: () => _onHintTapped(hint),
+                ),
+            ],
+          ),
+          SizedBox(height: space.md.h),
           Text(
-            _costLabel(context, cost),
+            _costLabel(context, costAsync.value, isFirstPicture: isFirstPicture),
             textAlign: TextAlign.center,
             style: context.typo.settingsTileLabel.copyWith(color: colors.textPrimary),
           ),
-          if (shouldShowProHint) ...[
-            SizedBox(height: _costToHint.h),
-            Text(
-              l10n.cardRegenerateProHint,
-              textAlign: TextAlign.center,
-              style: context.typo.caption.copyWith(color: colors.textSecondary),
-            ),
-          ],
-          SizedBox(height: _bodyToButtons.h),
+          SizedBox(height: space.lg.h),
           ElumSheetActionRow(
             cancelLabel: l10n.commonCancel,
-            onCancel: () => Navigator.of(context).pop(false),
-            confirmLabel: l10n.cardRegenerateConfirm,
+            onCancel: () => Navigator.of(context).pop(),
+            confirmLabel: isFirstPicture ? l10n.cardFirstDrawConfirm : l10n.cardRegenerateConfirm,
             // 비용을 받는 동안만 잠깐 막음 (실패면 진행 가능)
-            onConfirm: costAsync.isLoading ? null : () => Navigator.of(context).pop(true),
+            onConfirm: costAsync.isLoading ? null : _onConfirmPressed,
             isLoading: costAsync.isLoading,
           ),
         ],
@@ -73,12 +112,23 @@ class CardRegenerateSheet extends ConsumerWidget {
     );
   }
 
-  /// 비용 > 한 줄: 무료 횟수 남음 > 크레딧 안 씀 > 크레딧 N개 (모르면 크레딧을 써요)
-  static String _costLabel(BuildContext context, ImageRegenerateCost? cost) {
+  static String _hintLabel(BuildContext context, ImageRedrawHint hint) {
+    final l10n = context.l10n;
+    return switch (hint) {
+      ImageRedrawHint.simpler => l10n.cardRedrawHintSimpler,
+      ImageRedrawHint.noBackground => l10n.cardRedrawHintNoBackground,
+      ImageRedrawHint.noPeople => l10n.cardRedrawHintNoPeople,
+      ImageRedrawHint.brighter => l10n.cardRedrawHintBrighter,
+    };
+  }
+
+  /// 비용 > 한 줄: (다시 그리기만) 무료 횟수 남음 > 크레딧 안 씀 > 크레딧 N개 (모르면 크레딧을 써요)
+  static String _costLabel(BuildContext context, ImageRegenerateCost? cost, {required bool isFirstPicture}) {
     final l10n = context.l10n;
     if (cost == null) return l10n.cardRegenerateCostUnknown;
-    if (cost.freeLeftToday > 0) return l10n.cardRegenerateCostProFree(cost.freeLeftToday);
-    if (!cost.isCreditEnabled || cost.credits <= 0) return l10n.cardRegenerateCostFree;
-    return l10n.cardRegenerateCostCredits(cost.credits);
+    if (!isFirstPicture && cost.freeLeftToday > 0) return l10n.cardRegenerateCostProFree(cost.freeLeftToday);
+    final credits = isFirstPicture ? cost.firstPictureCredits : cost.credits;
+    if (!cost.isCreditEnabled || credits <= 0) return l10n.cardRegenerateCostFree;
+    return l10n.cardRegenerateCostCredits(credits);
   }
 }
