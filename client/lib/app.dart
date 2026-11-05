@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'features/ads/data/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
+import 'core/app_status/store_selling.dart';
 import 'core/config/client_tuning.dart';
 import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
@@ -223,6 +224,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 서버가 준 대기·연출 시간값을 받자마자 적용하고 다음 실행을 위해 저장한다.
     // 관리자 화면에서 고친 값이 앱을 다시 올리지 않아도 반영된다.
     ref.listen(appStatusProvider, (previous, next) {
+      // Pro 판매 스위치도 다음 실행용으로 저장 (#1132)
+      cacheServerStoreSelling(
+        next.value?.status.isStoreSellingOpen,
+        storage: ref.read(localStorageProvider),
+      );
       final tuning = next.value?.status.tuning;
       if (tuning == null) return;
       applyServerTuning(

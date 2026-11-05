@@ -1,5 +1,8 @@
 package com.chuseok22.elumserver.license.application.service;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.store.StoreLogValues;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
@@ -99,6 +102,16 @@ public class SystemConfigEntitlementService implements EntitlementService {
   }
 
   @Override
+  public void requireAllowed(String memberId, Entitlement flag) {
+    // 거절 코드 먼저 (검문 대상이 아닌 권한이면 로그 전에 호출 코드 오류로 드러남)
+    ErrorCode rejectionCode = flag.rejectionCode();
+    if (!isAllowed(memberId, flag)) {
+      log.info("[pro gate] rejected 403 : {} member={}", flag, StoreLogValues.mask(memberId));
+      throw new CustomException(rejectionCode);
+    }
+  }
+
+  @Override
   public int limitOf(String memberId, Entitlement limit) {
     return limitOf(planOf(memberId), limit);
   }
@@ -133,29 +146,30 @@ public class SystemConfigEntitlementService implements EntitlementService {
     return current < allowed;
   }
 
+  /// 앱에 내려줄 권한 한 벌: 플랜 1회 조회 > 플랜 기준 isAllowed·limitOf (광고 항상 노출 회원은 광고 제거 끔)
   @Override
   public EntitlementSnapshot snapshot(String memberId) {
     PlanType plan = planOf(memberId);
     return new EntitlementSnapshot(
       plan,
-      systemConfigService.getBoolean(Entitlement.AI_IMAGE_GENERATION.configKeyFor(plan)),
-      !isAdsAlwaysShownMember(memberId) && systemConfigService.getBoolean(Entitlement.ADS_REMOVED.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_DAY.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_WEEK.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.ROUTINE_MAX_COUNT.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.PROFILE_MAX_COUNT.configKeyFor(plan)),
-      systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.CARD_EXPORT_WITHOUT_WATERMARK.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.CARD_EXPORT_ALL_THEMES.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.WEEKLY_REPORT.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_TRANSLATE.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_SCHEDULE.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.GUARDIAN_VOICE.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_TEMPLATES.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_MEMORY.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.IMAGE_REGENERATE_FREE.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ROUTINE_CREATE_FREE.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.IMAGE_HIGH_QUALITY.configKeyFor(plan))
+      isAllowed(plan, Entitlement.AI_IMAGE_GENERATION),
+      !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED),
+      limitOf(plan, Entitlement.ROUTINE_CREATE_PER_DAY),
+      limitOf(plan, Entitlement.ROUTINE_CREATE_PER_WEEK),
+      limitOf(plan, Entitlement.ROUTINE_MAX_COUNT),
+      limitOf(plan, Entitlement.PROFILE_MAX_COUNT),
+      limitOf(plan, Entitlement.HISTORY_RETENTION_DAYS),
+      isAllowed(plan, Entitlement.CARD_EXPORT_WITHOUT_WATERMARK),
+      isAllowed(plan, Entitlement.CARD_EXPORT_ALL_THEMES),
+      isAllowed(plan, Entitlement.WEEKLY_REPORT),
+      isAllowed(plan, Entitlement.ROUTINE_TRANSLATE),
+      isAllowed(plan, Entitlement.ROUTINE_SCHEDULE),
+      isAllowed(plan, Entitlement.GUARDIAN_VOICE),
+      isAllowed(plan, Entitlement.ROUTINE_TEMPLATES),
+      isAllowed(plan, Entitlement.ROUTINE_MEMORY),
+      isAllowed(plan, Entitlement.IMAGE_REGENERATE_FREE),
+      isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE),
+      isAllowed(plan, Entitlement.IMAGE_HIGH_QUALITY)
     );
   }
 

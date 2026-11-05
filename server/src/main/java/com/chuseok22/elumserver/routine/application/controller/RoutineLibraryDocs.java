@@ -14,14 +14,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 /**
  * 일과관리 API 문서: 목록, 보내기, 복사하기, 지우기, 제목 수정 (#804)
- * RoutineControllerDocs 가 묶어서 RoutineController 에 제공
+ * RoutineLibraryController 에 제공 (Swagger 묶음은 RoutineControllerDocs 와 같음)
  */
+@Tag(name = RoutineControllerDocs.TAG_NAME, description = RoutineControllerDocs.TAG_DESCRIPTION)
 public interface RoutineLibraryDocs {
 
   @Operation(

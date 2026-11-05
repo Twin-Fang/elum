@@ -31,7 +31,7 @@ final devPlanOverrideProvider =
       DevPlanOverrideNotifier.new,
     );
 
-/// 결제 화면 강제 켜기 (`ELUM_IAP_ENABLED=false` 인 테스트 빌드에서 Sandbox·라이선스 테스트용)
+/// 결제 화면 강제 켜기 (빌드 설정 `ELUM_IAP_ENABLED`·서버 판매 스위치가 꺼진 테스트 빌드에서 Sandbox·라이선스 테스트용)
 ///
 /// 화면만 켠다 — 실제 결제는 스토어 테스트 계정·서버 설정(SUBSCRIPTION_*_ENABLED)이 있어야 끝난다.
 /// 메모리에만 둔다 (앱을 다시 켜면 꺼짐).

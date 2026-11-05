@@ -187,7 +187,7 @@ class RemoteSpeech implements SpeechService {
     }
 
     try {
-      final res = await _dio.post<List<int>>(
+      final response = await _dio.post<List<int>>(
         '${AppConfig.ttsBaseUrl}/tts',
         data: {
           // 길이 때문에 실패하느니 앞부분이라도 들리는 편이 낫다
@@ -201,7 +201,7 @@ class RemoteSpeech implements SpeechService {
         ),
       );
 
-      final bytes = res.data;
+      final bytes = response.data;
       if (bytes == null || bytes.isEmpty) return false;
 
       await _player.stop();

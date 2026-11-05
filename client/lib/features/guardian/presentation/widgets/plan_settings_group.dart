@@ -10,7 +10,7 @@ import '../../../subscription/application/plan_store_catalog.dart';
 
 /// 설정 맨 위 요금제 묶음: `내 요금제` 줄(Free · Pro) + `구매 복원` > 아래 한 줄(갱신일 · 해지 예약 · 결제 확인 필요)
 ///
-/// 판매 스위치가 꺼져 있으면 상태만 보이고 누를 곳이 없음 (살 방법이 없는데 결제 화면을 열지 않음)
+/// 요금제 화면을 열 수 없으면(판매 중 아님 + Pro 아님) 상태만 보임. 구매 복원은 스토어 연동이면 판매와 무관하게 보임 (#1132)
 class PlanSettingsGroup extends ConsumerWidget {
   const PlanSettingsGroup({super.key, required this.isBusy});
 
@@ -20,7 +20,8 @@ class PlanSettingsGroup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isStoreEnabled = ref.watch(isPlanStoreEnabledProvider);
+    final canOpenPaywall = ref.watch(canOpenPlanPaywallProvider);
+    final isStoreConnected = ref.watch(isPlanStoreConnectedProvider);
     final status = ref.watch(planStatusProvider);
     return SettingsGroup(
       footer: planStatusFooter(l10n, status),
@@ -29,10 +30,10 @@ class PlanSettingsGroup extends ConsumerWidget {
           isInCard: true,
           label: l10n.planSettingsLabel,
           valueText: planStatusShortLabel(l10n, status),
-          showChevronWithValue: isStoreEnabled,
-          onTap: isBusy || !isStoreEnabled ? null : () => openPlanPaywall(context, ref),
+          showChevronWithValue: canOpenPaywall,
+          onTap: isBusy || !canOpenPaywall ? null : () => openPlanPaywall(context, ref),
         ),
-        if (isStoreEnabled)
+        if (isStoreConnected)
           SettingsTile(
             isInCard: true,
             label: l10n.planRestore,

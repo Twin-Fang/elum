@@ -162,14 +162,14 @@ class AppLogBuffer {
   static String _fitHead(String text, int limit) {
     if (_bytes(text) <= limit) return text;
     var bytes = 0;
-    final buf = StringBuffer();
+    final buffer = StringBuffer();
     for (final r in text.runes) {
       final w = _bytes(String.fromCharCode(r));
       if (bytes + w > limit) break;
       bytes += w;
-      buf.writeCharCode(r);
+      buffer.writeCharCode(r);
     }
-    return buf.toString();
+    return buffer.toString();
   }
 
   /// 앞쪽 [limit] 글자만 남긴다. 서로게이트 쌍은 쪼개지 않는다.

@@ -647,7 +647,7 @@ class CreditReservationServiceTest {
       .singleElement()
       .satisfies(line -> {
         assertThat(line.getAction()).isEqualTo(CreditAction.ROUTINE_TEXT);
-        assertThat(line.getReason()).isEqualTo(CreditReservationService.FREE_ROUTINE_TEXT_REASON);
+        assertThat(line.getReason()).isEqualTo(CreditFreeRoutineTextAllowance.FREE_ROUTINE_TEXT_REASON);
       });
   }
 

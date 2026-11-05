@@ -756,6 +756,12 @@ public enum ConfigKey {
     "켜면 앱의 App Store 구독 검증과 App Store 결제 알림을 받는다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  // 앱 결제 화면 노출 = 이 값 AND 검증 켜기 (/api/app/status sales.ios, #1132)
+  SUBSCRIPTION_APPLE_SELLING_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "App Store 신규 판매 켜기",
+    "끄면 iOS 앱에서 Pro 결제 화면·진입점을 숨긴다. 기존 구독 검증·복원은 그대로. 검증이 꺼져 있으면 켜도 팔지 않는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   SUBSCRIPTION_APPLE_BUNDLE_ID(
     ConfigGroup.SUBSCRIPTION_STORE, "App Store 번들 ID",
     "다른 앱의 결제를 거르는 기준. iOS 앱 PRODUCT_BUNDLE_IDENTIFIER 와 같아야 한다",
@@ -794,6 +800,12 @@ public enum ConfigKey {
   SUBSCRIPTION_GOOGLE_ENABLED(
     ConfigGroup.SUBSCRIPTION_STORE, "Google Play 구독 켜기",
     "켜면 앱의 Google Play 구독 검증과 Play 실시간 결제 알림(RTDN)을 받는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  // 앱 결제 화면 노출 = 이 값 AND 검증 켜기 (/api/app/status sales.android, #1132)
+  SUBSCRIPTION_GOOGLE_SELLING_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "Google Play 신규 판매 켜기",
+    "끄면 Android 앱에서 Pro 결제 화면·진입점을 숨긴다. 기존 구독 검증·복원은 그대로. 검증이 꺼져 있으면 켜도 팔지 않는다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   SUBSCRIPTION_GOOGLE_PACKAGE_NAME(

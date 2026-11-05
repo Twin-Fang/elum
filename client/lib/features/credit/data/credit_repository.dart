@@ -26,8 +26,8 @@ class CreditRepository {
         'CreditRepository',
         'getMine',
         () async {
-          final res = await _dio.get<Map<String, dynamic>>('/api/credits/me');
-          final body = res.data;
+          final response = await _dio.get<Map<String, dynamic>>('/api/credits/me');
+          final body = response.data;
           if (body == null) throw const FormatException('빈 응답');
           return CreditSummary.fromJson(body);
         },
@@ -46,11 +46,11 @@ class CreditRepository {
         'CreditRepository',
         'getHistory',
         () async {
-          final res = await _dio.get<Map<String, dynamic>>(
+          final response = await _dio.get<Map<String, dynamic>>(
             '/api/credits/ledger',
             queryParameters: {'page': page, 'size': size},
           );
-          final body = res.data;
+          final body = response.data;
           if (body == null) throw const FormatException('빈 응답');
           return CreditHistoryPage.fromJson(body);
         },

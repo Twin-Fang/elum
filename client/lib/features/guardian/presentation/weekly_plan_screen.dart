@@ -29,7 +29,7 @@ class WeeklyPlanScreen extends ConsumerWidget {
   const WeeklyPlanScreen({super.key});
 
   /// 제목 줄 y (알림 설정 화면과 같은 하위 화면 결) · 머리 > 첫 묶음 24 · 요일 묶음 사이 24 · 라벨 > 줄 8 · 줄 사이 8
-  static const _titleRowTop = 67.0;
+  static const _titleRowTop = ElumScaffold.settingsBackTop;
   static const _topGap = 24.0;
   static const _sectionGap = 24.0;
 

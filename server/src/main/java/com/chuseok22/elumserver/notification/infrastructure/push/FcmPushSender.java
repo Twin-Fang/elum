@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.push;
 
+import com.chuseok22.elumserver.common.infrastructure.security.Sha256Hex;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.ApnsConfig;
@@ -10,10 +11,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.Notification;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,11 +102,6 @@ public class FcmPushSender implements PushSender {
     if (key.getBytes(StandardCharsets.UTF_8).length <= APNS_COLLAPSE_ID_MAX_BYTES) {
       return key;
     }
-    try {
-      byte[] digest = MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(digest);
-    } catch (NoSuchAlgorithmException exception) {
-      throw new IllegalStateException(exception);
-    }
+    return Sha256Hex.hexOf(key);
   }
 }

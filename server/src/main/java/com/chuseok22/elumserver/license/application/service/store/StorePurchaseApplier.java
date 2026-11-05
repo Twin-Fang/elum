@@ -9,7 +9,6 @@ import com.chuseok22.elumserver.license.core.StorePurchaseTrigger;
 import com.chuseok22.elumserver.license.core.StoreVerifyRejectReason;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchase;
-import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchaseEvent;
 import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseEventRepository;
 import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseRepository;
 import java.time.Clock;
@@ -34,11 +33,11 @@ public class StorePurchaseApplier {
 
   /// 앱 검증 요청의 거래 이력 종류
   public static final String VERIFY_EVENT_TYPE = "VERIFY";
-  private static final int TRANSACTION_ID_MAX_LENGTH = 255;
 
   private final StorePurchaseRepository storePurchaseRepository;
   private final StorePurchaseEventRepository storePurchaseEventRepository;
   private final SubscriptionService subscriptionService;
+  private final StorePurchaseEventRecorder eventRecorder;
   private final Clock clock;
 
   @Autowired
@@ -57,6 +56,7 @@ public class StorePurchaseApplier {
     this.storePurchaseRepository = storePurchaseRepository;
     this.storePurchaseEventRepository = storePurchaseEventRepository;
     this.subscriptionService = subscriptionService;
+    this.eventRecorder = new StorePurchaseEventRecorder(storePurchaseEventRepository);
     this.clock = clock;
   }
 
@@ -85,17 +85,17 @@ public class StorePurchaseApplier {
       log.warn("[subscription verify] rejected 400 : {} : store={}, purchase={}, requester={}, owner={}",
         StoreVerifyRejectReason.OWNED_BY_OTHER_MEMBER, snapshot.store(), StoreLogValues.mask(snapshot.purchaseKey()),
         StoreLogValues.mask(requesterMemberId), StoreLogValues.mask(currentOwner));
-      recordEvent(snapshot, requesterMemberId, trigger, eventType, externalEventId,
+      eventRecorder.recordEvent(snapshot, requesterMemberId, trigger, eventType, externalEventId,
         StorePurchaseEventResult.REJECTED, StoreVerifyRejectReason.OWNED_BY_OTHER_MEMBER.name(), null, now);
       return new StoreApplyOutcome(StorePurchaseEventResult.REJECTED, existing.orElse(null), false);
     }
 
-    StorePurchase purchase = existing.orElseGet(() -> newPurchase(snapshot));
+    StorePurchase purchase = existing.orElseGet(() -> StorePurchaseSnapshotCopy.newPurchase(snapshot));
     String previousOwner = purchase.getMemberId();
     boolean isOwnerChanged = !Objects.equals(previousOwner, decision.ownerMemberId());
     purchase.setMemberId(decision.ownerMemberId());
-    boolean isStale = isOlderThanStored(purchase, snapshot);
-    boolean isStateChanged = !isStale && copyState(snapshot, purchase);
+    boolean isStale = StorePurchaseSnapshotCopy.isOlderThanStored(purchase, snapshot);
+    boolean isStateChanged = !isStale && StorePurchaseSnapshotCopy.copyState(snapshot, purchase);
     boolean isLinkedSuperseded = linked.map(this::supersede).orElse(false);
     storePurchaseRepository.save(purchase);
 
@@ -111,7 +111,7 @@ public class StorePurchaseApplier {
     StorePurchaseEventResult eventResult = resultOf(decision, isOwnerChanged, isStale, isStateChanged || isLinkedSuperseded);
     boolean isChanged = isOwnerChanged || isStateChanged || isLinkedSuperseded || isSubscriptionChanged;
     if (trigger == StorePurchaseTrigger.STORE_NOTIFICATION || isChanged) {
-      recordEvent(snapshot, decision.ownerMemberId(), trigger, eventType, externalEventId, eventResult, null, purchase, now);
+      eventRecorder.recordEvent(snapshot, decision.ownerMemberId(), trigger, eventType, externalEventId, eventResult, null, purchase, now);
     }
     return new StoreApplyOutcome(eventResult, purchase, isChanged);
   }
@@ -130,7 +130,7 @@ public class StorePurchaseApplier {
     LocalDateTime now = LocalDateTime.now(clock);
     Optional<StorePurchase> existing = storePurchaseRepository.findForUpdate(store, purchaseKey);
     if (existing.isEmpty()) {
-      recordRevocationEvent(store, purchaseKey, null, eventType, externalEventId, StorePurchaseEventResult.UNBOUND, null, now);
+      eventRecorder.recordRevocationEvent(store, purchaseKey, null, eventType, externalEventId, StorePurchaseEventResult.UNBOUND, null, now);
       return new StoreApplyOutcome(StorePurchaseEventResult.UNBOUND, null, false);
     }
     StorePurchase purchase = existing.get();
@@ -143,7 +143,7 @@ public class StorePurchaseApplier {
     storePurchaseRepository.save(purchase);
     syncMember(purchase.getMemberId(), now);
     StorePurchaseEventResult eventResult = isChanged ? StorePurchaseEventResult.APPLIED : StorePurchaseEventResult.UNCHANGED;
-    recordRevocationEvent(store, purchaseKey, purchase, eventType, externalEventId, eventResult, purchase.getMemberId(), now);
+    eventRecorder.recordRevocationEvent(store, purchaseKey, purchase, eventType, externalEventId, eventResult, purchase.getMemberId(), now);
     return new StoreApplyOutcome(eventResult, purchase, isChanged);
   }
 
@@ -206,50 +206,6 @@ public class StorePurchaseApplier {
     return true;
   }
 
-  private static StorePurchase newPurchase(StoreSubscriptionSnapshot snapshot) {
-    StorePurchase purchase = new StorePurchase();
-    purchase.setStore(snapshot.store());
-    purchase.setPurchaseKey(snapshot.purchaseKey());
-    purchase.setEnvironment(snapshot.environment());
-    purchase.setState(snapshot.state());
-    return purchase;
-  }
-
-  // 이미 저장한 상태보다 스토어 서명 시각이 이른 정보 (늦게 도착한 옛 알림, 환불 전 영수증 재전송)
-  private static boolean isOlderThanStored(StorePurchase purchase, StoreSubscriptionSnapshot snapshot) {
-    return purchase.getStoreSignedAt() != null && snapshot.storeSignedAt() != null
-      && snapshot.storeSignedAt().isBefore(purchase.getStoreSignedAt());
-  }
-
-  /// 스냅샷 > 구매 행, 하나라도 바뀌었으면 true (회원 연결·확인 여부는 따로)
-  private static boolean copyState(StoreSubscriptionSnapshot snapshot, StorePurchase purchase) {
-    boolean isChanged = purchase.getId() == null
-      || !Objects.equals(purchase.getProductId(), snapshot.productId())
-      || purchase.getEnvironment() != snapshot.environment()
-      || purchase.getState() != snapshot.state()
-      || !Objects.equals(purchase.getExpiresAt(), snapshot.expiresAt())
-      || !Objects.equals(purchase.getGracePeriodExpiresAt(), snapshot.gracePeriodExpiresAt())
-      || !Objects.equals(purchase.getWillAutoRenew(), snapshot.willAutoRenew())
-      || !Objects.equals(purchase.getRevokedAt(), snapshot.revokedAt())
-      || !Objects.equals(purchase.getLatestTransactionId(), snapshot.latestTransactionId())
-      || !Objects.equals(purchase.getLinkedPurchaseKey(), snapshot.linkedPurchaseKey());
-    purchase.setProductId(snapshot.productId());
-    purchase.setEnvironment(snapshot.environment());
-    purchase.setState(snapshot.state());
-    purchase.setExpiresAt(snapshot.expiresAt());
-    purchase.setGracePeriodExpiresAt(snapshot.gracePeriodExpiresAt());
-    purchase.setWillAutoRenew(snapshot.willAutoRenew());
-    purchase.setRevokedAt(snapshot.revokedAt());
-    purchase.setLatestTransactionId(snapshot.latestTransactionId());
-    purchase.setLinkedPurchaseKey(snapshot.linkedPurchaseKey());
-    if (snapshot.storeSignedAt() != null) {
-      purchase.setStoreSignedAt(snapshot.storeSignedAt());
-    }
-    // 확인 완료는 되돌리지 않음 (Google 이 확인 전 상태를 늦게 돌려줘도). 새 구매는 스토어 값 그대로
-    purchase.setAcknowledged((purchase.getId() != null && purchase.isAcknowledged()) || !snapshot.needsAcknowledge());
-    return isChanged;
-  }
-
   private static StorePurchaseEventResult resultOf(
     BindingDecision decision, boolean isOwnerChanged, boolean isStale, boolean isStateChanged
   ) {
@@ -260,47 +216,6 @@ public class StorePurchaseApplier {
       return StorePurchaseEventResult.APPLIED;
     }
     return isStale ? StorePurchaseEventResult.STALE : StorePurchaseEventResult.UNCHANGED;
-  }
-
-  private void recordEvent(
-    StoreSubscriptionSnapshot snapshot, String memberId, StorePurchaseTrigger trigger, String eventType,
-    String externalEventId, StorePurchaseEventResult result, String reason, StorePurchase purchase, LocalDateTime now
-  ) {
-    StorePurchaseEvent event = new StorePurchaseEvent();
-    event.setStore(snapshot.store());
-    event.setPurchaseKey(snapshot.purchaseKey());
-    event.setMemberId(memberId);
-    event.setTrigger(trigger);
-    event.setEventType(truncate(eventType, StorePurchaseEvent.EVENT_TYPE_MAX_LENGTH));
-    event.setExternalEventId(truncate(externalEventId, TRANSACTION_ID_MAX_LENGTH));
-    event.setTransactionId(truncate(snapshot.latestTransactionId(), TRANSACTION_ID_MAX_LENGTH));
-    event.setResult(result);
-    event.setReason(truncate(reason, StorePurchaseEvent.REASON_MAX_LENGTH));
-    event.setStateAfter(purchase == null ? null : purchase.getState());
-    event.setExpiresAtAfter(purchase == null ? null : purchase.entitledUntil());
-    event.setOccurredAt(now);
-    storePurchaseEventRepository.save(event);
-  }
-
-  private void recordRevocationEvent(
-    SubscriptionSource store, String purchaseKey, StorePurchase purchase, String eventType, String externalEventId,
-    StorePurchaseEventResult result, String memberId, LocalDateTime now
-  ) {
-    StorePurchaseEvent event = new StorePurchaseEvent();
-    event.setStore(store);
-    event.setPurchaseKey(purchaseKey);
-    event.setMemberId(memberId);
-    event.setTrigger(StorePurchaseTrigger.STORE_NOTIFICATION);
-    event.setEventType(truncate(eventType, StorePurchaseEvent.EVENT_TYPE_MAX_LENGTH));
-    event.setExternalEventId(truncate(externalEventId, TRANSACTION_ID_MAX_LENGTH));
-    event.setResult(result);
-    event.setStateAfter(purchase == null ? null : purchase.getState());
-    event.setOccurredAt(now);
-    storePurchaseEventRepository.save(event);
-  }
-
-  private static String truncate(String value, int maxLength) {
-    return value == null || value.length() <= maxLength ? value : value.substring(0, maxLength);
   }
 
   /**

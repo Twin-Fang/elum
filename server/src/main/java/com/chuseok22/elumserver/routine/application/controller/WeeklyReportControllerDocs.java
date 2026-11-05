@@ -17,7 +17,10 @@ import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
-@Tag(name = "Routine", description = "주간 리포트 API (#1074). accessToken(Bearer) 인증이 필요합니다.")
+/**
+ * 주간 리포트 API 문서 (#1074). Swagger 묶음은 RoutineControllerDocs 와 같음
+ */
+@Tag(name = RoutineControllerDocs.TAG_NAME, description = RoutineControllerDocs.TAG_DESCRIPTION)
 public interface WeeklyReportControllerDocs {
 
   @Operation(

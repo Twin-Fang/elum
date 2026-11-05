@@ -88,7 +88,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
   /// 설정 진입 시안(`1027:4617`)의 뒤로가기 y와 제목 y.
   /// 설정 묶음은 전부 67/147 이다 — 온보딩 계열(79/131)과 12·16씩 다르다.
-  static const _settingsBackTop = 67.0;
+  static const _settingsBackTop = ElumScaffold.settingsBackTop;
   static const _settingsTitleY = 147.0;
 
   /// 온보딩 시안의 `링크로 보내기`(y=593~659)와 `시작하기`(y=675) 사이 (Figma 1532:6801).

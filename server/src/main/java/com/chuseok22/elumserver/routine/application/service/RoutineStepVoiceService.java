@@ -44,10 +44,7 @@ public class RoutineStepVoiceService {
   @Transactional
   public RoutineStepResponse upload(Caller caller, String routineId, String stepId, MultipartFile voice) {
     RoutineStep step = editableStepOf(caller, routineId, stepId);
-    if (!entitlementService.isAllowed(caller.memberId(), Entitlement.GUARDIAN_VOICE)) {
-      log.info("[guardian voice] rejected 403 : not allowed, memberId={}", caller.memberId());
-      throw new CustomException(ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.GUARDIAN_VOICE);
     byte[] audio = readBytes(voice);
     long durationMillis = GuardianVoiceAudio.inspect(audio);
 

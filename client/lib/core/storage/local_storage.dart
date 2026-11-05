@@ -157,6 +157,12 @@ abstract interface class LocalStorage {
   String? get cachedClientTuningJson;
   Future<void> setCachedClientTuningJson(String json);
 
+  /// 마지막으로 서버에서 받은 Pro 판매 여부 (`/api/app/status` 의 `sales`, #1132). 받은 적 없으면 null
+  ///
+  /// 로그아웃해도 지우지 않음 (계정이 아니라 이 기기의 서버 설정)
+  bool? get isCachedStoreSellingOpen;
+  Future<void> setCachedStoreSellingOpen(bool isOpen);
+
   // --- 공지 "보지 않기" 기록 ---
   // 공지마다 `{revision, until}` JSON 한 줄. 판단은 feature 쪽 NoticeHideStore 가 한다 —
   // 진행 기록과 같은 이유로 core 는 문자열만 주고받는다.

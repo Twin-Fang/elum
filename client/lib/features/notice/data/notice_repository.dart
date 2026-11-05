@@ -28,11 +28,11 @@ class NoticeRepository {
   Future<NoticeFeed> fetch(NoticePlatform platform) async {
     try {
       return await logged('NoticeRepository', 'fetch', () async {
-        final res = await _dio.get<Object?>(
+        final response = await _dio.get<Object?>(
           '/api/app/notices',
           queryParameters: {'platform': platform.wire},
         );
-        return NoticeFeed.fromJson(res.data, baseUrl: _dio.options.baseUrl);
+        return NoticeFeed.fromJson(response.data, baseUrl: _dio.options.baseUrl);
       });
     } catch (e, st) {
       AppLogger.error('notice', e, st, {

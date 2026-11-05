@@ -185,7 +185,7 @@ abstract final class AppConfig {
 
   // --- 인앱 구독 결제 ---
 
-  /// 앱에서 Pro 를 팔아도 되는가 (스토어 상품·서버 설정을 마친 뒤 켬). 꺼져 있으면 결제 화면·진입점이 없음
+  /// 이 빌드에 스토어 결제를 넣는가 (하드 킬). 꺼져 있으면 서버 판매 스위치와 무관하게 결제 화면·진입점이 없음 (#1132)
   static bool get isInAppPurchaseEnabled => _bool('ELUM_IAP_ENABLED', false);
 
   /// Pro 1개월 구독 상품 id. App Store Connect · Play Console · 서버 `SUBSCRIPTION_*_PRODUCT_IDS` 와 같아야 함
@@ -302,14 +302,14 @@ abstract final class AppConfig {
   ///
   /// 릴리스 빌드에서만 false라 `.env`의 실제 광고 단위를 읽는다.
   /// 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
-  static bool get useTestAds => kDebugMode || kProfileMode || isDevBuild;
+  static bool get shouldUseTestAds => kDebugMode || kProfileMode || isDevBuild;
 
   /// 배치별 광고 단위 ID. 릴리스에서 `.env`에 값이 없으면 null이다.
   static String? adUnitId(AdPlacement placement, {required bool isIos}) =>
       AdIds.resolve(
         placement: placement,
         isIos: isIos,
-        useTestIds: useTestAds,
+        shouldUseTestIds: shouldUseTestAds,
         readEnv: (key) => _string(key, ''),
       );
 

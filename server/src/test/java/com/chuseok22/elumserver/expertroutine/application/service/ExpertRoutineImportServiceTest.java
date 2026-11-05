@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -62,7 +63,7 @@ class ExpertRoutineImportServiceTest {
   @Test
   @DisplayName("Free 는 EXPERT_ROUTINE_PRO_ONLY(403), 일과를 만들지 않고 횟수도 그대로다")
   void importToLibrary_free_isRejected() {
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TEMPLATES)).thenReturn(false);
+    doThrow(new CustomException(Entitlement.ROUTINE_TEMPLATES.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.ROUTINE_TEMPLATES);
 
     assertThatThrownBy(() -> importService.importToLibrary(GUARDIAN, "expert-1", new ExpertRoutineImportRequest("profile-1", null)))
       .isInstanceOf(CustomException.class)
@@ -76,7 +77,6 @@ class ExpertRoutineImportServiceTest {
   @Test
   @DisplayName("내렸거나 검수 전(공개만 켠 초안)인 일과는 EXPERT_ROUTINE_NOT_FOUND, 일과를 만들지 않는다")
   void importToLibrary_hiddenOrDraft_isNotFound() {
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TEMPLATES)).thenReturn(true);
     when(expertRoutineRepository.findById("hidden")).thenReturn(Optional.of(expert(false, ExpertRoutineReviewStatus.REVIEWED)));
     when(expertRoutineRepository.findById("draft")).thenReturn(Optional.of(expert(true, ExpertRoutineReviewStatus.DRAFT)));
     when(expertRoutineRepository.findById("gone")).thenReturn(Optional.empty());
@@ -94,7 +94,6 @@ class ExpertRoutineImportServiceTest {
   @Test
   @DisplayName("Pro 는 카드 문장·픽토그램·보상을 그대로 원본 일과로 복사한다 (이야기 글 아님, 그림 파일 없음 = AI·크레딧 없음)")
   void importToLibrary_pro_copiesAsOriginalWithoutAi() {
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TEMPLATES)).thenReturn(true);
     when(expertRoutineRepository.findById("expert-1")).thenReturn(Optional.of(expert(true, ExpertRoutineReviewStatus.REVIEWED)));
     when(expertRoutineStepRepository.findByExpertRoutineIdOrderByStepOrderAsc("expert-1"))
       .thenReturn(List.of(step(0, "손을 씻어요", "wash_hands_,_to"), step(1, "손을 닦아요", null)));

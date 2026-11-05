@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.talk.application.service;
 
+import com.chuseok22.elumserver.common.application.paging.AppCursorPageSize;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -47,8 +48,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TalkFeedQueryService {
 
-  static final int DEFAULT_PAGE_SIZE = 20;
-  static final int MAX_PAGE_SIZE = 50;
   // cursor 없음: 어떤 글보다 늦은 시각 (cursor 조건을 항상 참으로 만듦)
   static final LocalDateTime NO_CURSOR_CREATED_AT = LocalDateTime.of(9999, 12, 31, 0, 0);
   // 한 쪽을 채우려고 차단·정지 글을 건너뛰며 다시 읽는 최대 횟수
@@ -101,7 +100,7 @@ public class TalkFeedQueryService {
    */
   public TalkFeedPageResponse feed(Caller caller, String category, String cursor, Integer size, AppLocale viewerLocale) {
     List<TalkCategory> categories = categoriesOf(category);
-    int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
+    int pageSize = AppCursorPageSize.resolve(size);
     int fetchSize = pageSize + 1;
     Set<String> blockedAuthorIds = talkPostAccess.blockedAuthorIdsOf(caller);
 
@@ -169,7 +168,7 @@ public class TalkFeedQueryService {
    * 내려간 글 제외, 언어·차단 거름 없음 (내 글), cursor 형식이 틀리면 첫 쪽, size 는 1~50 (기본 20)
    */
   public TalkFeedPageResponse myPosts(Caller caller, String cursor, Integer size) {
-    int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
+    int pageSize = AppCursorPageSize.resolve(size);
     TalkCursor position = TalkCursor.decode(cursor).orElse(null);
     List<TalkPost> fetched = talkPostRepository.findMyPostsPage(caller.memberId(), TalkPostStatus.VISIBLE,
       position == null ? NO_CURSOR_CREATED_AT : position.createdAt(),

@@ -103,6 +103,9 @@ class ElumScaffold extends StatelessWidget {
   /// 상자를 시안대로 두고 아이콘을 가운데 놓으면 둘 다 맞는다.
   static const _backBoxLeft = 16.0;
   static const _backBoxY = 79.0;
+
+  /// 설정 묶음 시안(`1022:4467` 등)의 뒤로가기 상자 y. 설정·약관·알림·연결 등 하위 화면이 [backTop] 으로 씀
+  static const settingsBackTop = 67.0;
   static const _backBoxSize = 40.0;
   static const _backIconSize = 24.0;
 

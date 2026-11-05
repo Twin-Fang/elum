@@ -19,7 +19,7 @@ public record RoutineResponse(
   @Schema(description = "일과 원문(마스킹 전)", example = "내일 오후 3시에 병원 가기")
   String rawInputText,
 
-  @Schema(description = "민감정보를 카테고리 태그로 치환한 텍스트(Gemini에 실제 전달된 값). 자동화 테스트가 없는 프로젝트 특성상, 마스킹이 실제로 적용됐는지 API 응답만으로 수동 검증할 수 있도록 노출한다.", example = "<이름>이랑 내일 오후 3시에 병원 가기")
+  @Schema(description = "AI 에 전달한 텍스트. 입력을 가공하지 않으므로 rawInputText 와 같다 (앱 호환으로 필드 유지)", example = "내일 오후 3시에 병원 가기")
   String sanitizedInputText,
 
   @Schema(description = "일과 수행 날짜/시각")

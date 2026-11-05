@@ -64,7 +64,7 @@ public abstract class IdTokenVerifier implements OAuthVerifier {
       throw new CustomException(ErrorCode.OAUTH_VERIFICATION_FAILED);
     }
 
-    return new OAuthUser(subject, claims.get("email", String.class), emailVerifiedOf(claims));
+    return new OAuthUser(subject, claims.get("email", String.class), isEmailVerified(claims));
   }
 
   private Claims parseAndVerifySignature(String idToken) {
@@ -127,7 +127,7 @@ public abstract class IdTokenVerifier implements OAuthVerifier {
   }
 
   /** 애플은 email_verified를 boolean이 아니라 "true" 문자열로 보내는 경우가 있다. */
-  private boolean emailVerifiedOf(Claims claims) {
+  private boolean isEmailVerified(Claims claims) {
     Object verified = claims.get("email_verified");
     if (verified instanceof Boolean bool) {
       return bool;

@@ -150,9 +150,7 @@ public class RoutineMemoryService {
 
   private Profile requireAvailableProfile(Caller caller) {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-    if (!isAvailable(caller)) {
-      throw new CustomException(ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.ROUTINE_MEMORY);
     return profile;
   }
 

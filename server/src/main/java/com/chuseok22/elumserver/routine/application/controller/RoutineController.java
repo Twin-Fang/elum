@@ -1,45 +1,31 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineLibraryOrderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepImageCandidateApplyRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepImageRedrawRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineTitleUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepImageCandidateResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepImageCandidateService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -53,32 +39,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequestMapping("/api/routines")
 @RestController
 @RequiredArgsConstructor
 public class RoutineController implements RoutineControllerDocs {
 
-  // 단계 음성 응답 형식 (#675)
-  private static final MediaType SPEECH_MEDIA_TYPE = MediaType.parseMediaType("audio/wav");
-  // 보호자 목소리 응답 형식 (m4a, #787)
-  private static final MediaType VOICE_MEDIA_TYPE = MediaType.parseMediaType("audio/mp4");
-
   private final RoutineService routineService;
   private final RoutineStepEditService routineStepEditService;
   private final RoutineCreateService routineCreateService;
   private final RoutineQueryService routineQueryService;
-  private final RoutineStepSpeechProvider routineStepSpeechProvider;
   private final RoutineProgressService routineProgressService;
-  private final RoutineStepPhotoService routineStepPhotoService;
-  private final RoutineStepImageRegenerateService routineStepImageRegenerateService;
-  private final RoutineStepImageCandidateService routineStepImageCandidateService;
-  private final RoutineStepVoiceService routineStepVoiceService;
-  private final RoutineLibraryService routineLibraryService;
-  private final RoutineLibraryOrderService routineLibraryOrderService;
   private final RoutineScheduleRunner routineScheduleRunner;
   // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
@@ -90,7 +62,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
     // 크레딧 멱등 키. 구버전 앱은 보내지 않는다 — 서비스가 새로 만든다.
-    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+    @RequestHeader(value = IdempotencyHeader.NAME, required = false) String idempotencyKey,
     @RequestBody @Valid RoutineCreateRequest request
   ) {
     Caller caller = Caller.from(authentication, profileId);
@@ -164,30 +136,6 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(content.contentType()))
       .body(content.bytes());
-  }
-
-  // 단계 음성 (#675). 저장본이 없으면 요청 중 한 번 합성 (#765), 못 만들면 404 — 앱은 기기 음성으로 읽음
-  // ETag = 음성 열쇠. 앱이 가진 열쇠와 같으면 304 (다시 받지 않음), 다르면 새 음성
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @GetMapping("/{routineId}/steps/{stepId}/speech")
-  public ResponseEntity<byte[]> getStepSpeech(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
-    @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
-  ) {
-    return routineStepSpeechProvider.getStepSpeech(Caller.from(authentication), routineId, stepId)
-      .map(speech -> toSpeechResponse(speech, ifNoneMatch))
-      .orElseGet(() -> ResponseEntity.notFound().build());
-  }
-
-  private static ResponseEntity<byte[]> toSpeechResponse(RoutineQueryService.StepSpeech speech, String ifNoneMatch) {
-    String etag = "\"" + speech.speechKey() + "\"";
-    if (etag.equals(ifNoneMatch)) {
-      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
-    }
-    return ResponseEntity.ok()
-      .contentType(SPEECH_MEDIA_TYPE)
-      .eTag(etag)
-      .body(speech.wav());
   }
 
   // 보상 텍스트는 보호자 자유 입력이라 민감정보가 섞일 수 있다 — 파라미터를 로그에 남기지 않는다.
@@ -266,73 +214,6 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
-  // 일과관리 원본 목록 (#804). /{routineId} 보다 구체적인 경로라 먼저 잡힌다
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @GetMapping("/library")
-  public ResponseEntity<List<RoutineResponse>> getLibraryRoutines(
-    Authentication authentication,
-    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
-  ) {
-    Caller caller = Caller.from(authentication, profileId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getLibraryRoutines(caller)));
-  }
-
-  // 일과관리 칸 순서 저장: 낱개 일과 + 묶음을 한 줄로 (#844)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PutMapping("/library/order")
-  public ResponseEntity<Void> reorderLibrary(
-    Authentication authentication,
-    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
-    @RequestBody RoutineLibraryOrderRequest request
-  ) {
-    routineLibraryOrderService.reorder(Caller.from(authentication, profileId), request == null ? null : request.cells());
-    return ResponseEntity.noContent().build();
-  }
-
-  // 원본 카드로 오늘 일과를 만든다. AI 호출 없음, 원본 하나당 하루 한 번 (#804)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PostMapping("/{routineId}/send")
-  public ResponseEntity<RoutineResponse> send(
-    Authentication authentication, @PathVariable String routineId
-  ) {
-    Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineLibraryService.send(caller, routineId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
-  }
-
-  // 일과관리에만 있는 새 원본을 만든다. 홈에는 뜨지 않음 (#804)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PostMapping("/{routineId}/copy")
-  public ResponseEntity<RoutineResponse> copy(
-    Authentication authentication, @PathVariable String routineId
-  ) {
-    Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineLibraryService.copy(caller, routineId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
-  }
-
-  // 일과관리 목록에서만 뺀다. 기록 없는 복사본만 실제로 지움 (#804)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @DeleteMapping("/{routineId}/library")
-  public ResponseEntity<Void> removeFromLibrary(
-    Authentication authentication, @PathVariable String routineId
-  ) {
-    routineLibraryService.removeFromLibrary(Caller.from(authentication), routineId);
-    return ResponseEntity.noContent().build();
-  }
-
-  // 제목은 보호자 자유 입력이라 파라미터·결과를 로그에 남기지 않는다 (#804)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PatchMapping("/{routineId}/title")
-  public ResponseEntity<RoutineResponse> updateTitle(
-    Authentication authentication, @PathVariable String routineId,
-    @RequestBody RoutineTitleUpdateRequest request
-  ) {
-    Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineService.rename(caller, routineId, request == null ? null : request.title());
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
-  }
-
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/{routineId}")
   public ResponseEntity<Void> delete(
@@ -396,115 +277,6 @@ public class RoutineController implements RoutineControllerDocs {
     Caller caller = Caller.from(authentication);
     RoutineResponse response = routineStepEditService.updateStep(caller, routineId, stepId, request);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
-  }
-
-  // 카드 그림을 보호자가 찍은 사진으로 바꾼다. AI·크레딧을 쓰지 않는다.
-  // 파일 바이트를 로그에 남기지 않도록 파라미터·결과 모두 뺀다.
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PutMapping(value = "/{routineId}/steps/{stepId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<RoutineStepResponse> replaceStepImage(
-    Authentication authentication,
-    @PathVariable String routineId,
-    @PathVariable String stepId,
-    @RequestPart("image") MultipartFile image
-  ) {
-    RoutineStepResponse response =
-      routineStepPhotoService.replaceStepImage(Caller.from(authentication), routineId, stepId, image);
-    return ResponseEntity.ok(response);
-  }
-
-  // 카드 그림 새로 그리기 (다시 그리기·처음 그리기). 후보만 만들고 카드 그림은 그대로. 요청 글은 보호자 입력이라 파라미터를 로그에서 뺀다
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PostMapping("/{routineId}/steps/{stepId}/image/regenerate")
-  public ResponseEntity<RoutineStepImageCandidateResponse> regenerateStepImage(
-    Authentication authentication,
-    @PathVariable String routineId,
-    @PathVariable String stepId,
-    @RequestBody(required = false) RoutineStepImageRedrawRequest request
-  ) {
-    return ResponseEntity.ok(
-      routineStepImageRegenerateService.drawCandidate(Caller.from(authentication), routineId, stepId, request));
-  }
-
-  // 고르기 전 새 그림 후보 받기 (보호자만)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @GetMapping("/{routineId}/steps/{stepId}/image/candidate")
-  public ResponseEntity<byte[]> getStepImageCandidate(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
-  ) {
-    RoutineImageStorage.ImageContent content =
-      routineStepImageCandidateService.readCandidate(Caller.from(authentication), routineId, stepId);
-    return ResponseEntity.ok()
-      .contentType(MediaType.parseMediaType(content.contentType()))
-      .body(content.bytes());
-  }
-
-  // 새 그림으로 바꾸기. 응답에 카드 문장이 있어 결과를 로그에서 뺀다
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PostMapping("/{routineId}/steps/{stepId}/image/candidate/apply")
-  public ResponseEntity<RoutineStepResponse> applyStepImageCandidate(
-    Authentication authentication,
-    @PathVariable String routineId,
-    @PathVariable String stepId,
-    @RequestBody RoutineStepImageCandidateApplyRequest request
-  ) {
-    return ResponseEntity.ok(routineStepImageCandidateService.applyCandidate(
-      Caller.from(authentication), routineId, stepId, request.candidateImagePath()));
-  }
-
-  // 원래 그림 그대로 (후보 버리기). 후보가 없어도 204
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @DeleteMapping("/{routineId}/steps/{stepId}/image/candidate")
-  public ResponseEntity<Void> discardStepImageCandidate(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
-  ) {
-    routineStepImageCandidateService.discardCandidate(Caller.from(authentication), routineId, stepId);
-    return ResponseEntity.noContent().build();
-  }
-
-  // 보호자 목소리 녹음 올리기 (Pro, #787). 녹음은 개인정보라 파라미터·결과를 로그에 남기지 않는다.
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @PutMapping(value = "/{routineId}/steps/{stepId}/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<RoutineStepResponse> uploadStepVoice(
-    Authentication authentication,
-    @PathVariable String routineId,
-    @PathVariable String stepId,
-    @RequestPart("voice") MultipartFile voice
-  ) {
-    return ResponseEntity.ok(routineStepVoiceService.upload(Caller.from(authentication), routineId, stepId, voice));
-  }
-
-  // 보호자 목소리 녹음 지우기. 요금제와 상관없이 언제나 (#787)
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @DeleteMapping("/{routineId}/steps/{stepId}/voice")
-  public ResponseEntity<RoutineStepResponse> deleteStepVoice(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
-  ) {
-    return ResponseEntity.ok(routineStepVoiceService.delete(Caller.from(authentication), routineId, stepId));
-  }
-
-  // 보호자 목소리 받기 (#787). 없거나 이룸이 기기에서 재생 불가면 404 — 앱은 기본 음성으로 읽음
-  // ETag = 녹음 열쇠. 앱이 가진 열쇠와 같으면 304
-  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
-  @GetMapping("/{routineId}/steps/{stepId}/voice")
-  public ResponseEntity<byte[]> getStepVoice(
-    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
-    @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
-  ) {
-    return routineStepVoiceService.read(Caller.from(authentication), routineId, stepId)
-      .map(voice -> toVoiceResponse(voice, ifNoneMatch))
-      .orElseGet(() -> ResponseEntity.notFound().build());
-  }
-
-  private static ResponseEntity<byte[]> toVoiceResponse(RoutineStepVoiceService.StepVoice voice, String ifNoneMatch) {
-    String etag = "\"" + voice.voiceKey() + "\"";
-    if (etag.equals(ifNoneMatch)) {
-      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
-    }
-    return ResponseEntity.ok()
-      .contentType(VOICE_MEDIA_TYPE)
-      .eTag(etag)
-      .body(voice.audio());
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.

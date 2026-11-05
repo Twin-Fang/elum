@@ -194,22 +194,22 @@ public class RoutinePhotoProcessor {
    */
   static int readExifOrientation(byte[] jpeg) {
     try {
-      int pos = 2; // SOI(FFD8) 다음
-      while (pos + 4 <= jpeg.length && (jpeg[pos] & 0xFF) == 0xFF) {
-        int marker = jpeg[pos + 1] & 0xFF;
+      int offset = 2; // SOI(FFD8) 다음
+      while (offset + 4 <= jpeg.length && (jpeg[offset] & 0xFF) == 0xFF) {
+        int marker = jpeg[offset + 1] & 0xFF;
         if (marker == 0xDA || marker == 0xD9) {
           break; // 이미지 데이터 시작 — 그 뒤엔 메타데이터가 없다
         }
-        int length = u16(jpeg, pos + 2, false);
-        int segmentStart = pos + 4;
-        int segmentEnd = pos + 2 + length;
+        int length = u16(jpeg, offset + 2, false);
+        int segmentStart = offset + 4;
+        int segmentEnd = offset + 2 + length;
         if (length < 2 || segmentEnd > jpeg.length) {
           return 1;
         }
         if (marker == 0xE1 && segmentEnd - segmentStart >= 14 && isExifHeader(jpeg, segmentStart)) {
           return orientationFromTiff(jpeg, segmentStart + 6, segmentEnd);
         }
-        pos = segmentEnd;
+        offset = segmentEnd;
       }
     } catch (RuntimeException e) {
       // 배열 범위를 벗어나는 깨진 EXIF — 방향 없음으로 본다

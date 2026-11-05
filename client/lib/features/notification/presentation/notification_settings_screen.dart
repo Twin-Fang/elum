@@ -18,7 +18,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
 
   /// 제목 줄 y (시안 뒤로가기 67) · 제목 줄 아래 첫 카드까지 24 · 띠 아래 24
-  static const _titleRowTop = 67.0;
+  static const _titleRowTop = ElumScaffold.settingsBackTop;
   static const _topGap = 24.0;
   static const _bannerBottomGap = 24.0;
 

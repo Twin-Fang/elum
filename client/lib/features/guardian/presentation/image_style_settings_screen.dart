@@ -111,7 +111,7 @@ class _ImageStyleSettingsScreenState
       isBackEnabled: !busy,
       title: context.l10n.imageStyleTitle,
       // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       bottomButton: ElumButton(
         label: context.l10n.commonConfirm,

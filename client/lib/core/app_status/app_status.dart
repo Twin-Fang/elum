@@ -7,16 +7,18 @@ import '../config/client_tuning.dart';
 /// 점검 중인지, 이 버전으로 계속 써도 되는지를 담는다.
 class AppStatus {
   const AppStatus({
-    this.maintenance = false,
+    this.isUnderMaintenance = false,
     this.maintenanceMessage = '',
     this.minVersion = '',
     this.latestVersion = '',
     this.storeUrl = '',
     this.tuning,
     this.serverAddress,
+    this.isStoreSellingOpen,
   });
 
-  final bool maintenance;
+  /// 서버 점검 중인가 (응답 `maintenance`). true 면 점검 안내 화면
+  final bool isUnderMaintenance;
   final String maintenanceMessage;
 
   /// 이 버전 미만이면 업데이트해야 쓸 수 있다. 비어 있으면 막지 않는다.
@@ -35,6 +37,10 @@ class AppStatus {
   /// 서버 이전 안내 (#831). 구버전 서버라 없거나 형식이 다르면 null — 그때는 지금 주소를 그대로 쓴다
   final AppStatusServerAddress? serverAddress;
 
+  /// 지금 플랫폼에서 Pro 를 새로 파는가 (`sales.ios`·`sales.android`, #1132)
+  /// null: 서버 응답을 못 받음 (저장값 사용) · 응답에 없거나 형식이 다름 > false (판매 끔)
+  final bool? isStoreSellingOpen;
+
   /// 서버가 못 오거나 형식이 다를 때 쓰는 값.
   ///
   /// **아무것도 막지 않는다.** 서버를 못 봤다는 이유로 앱을 세우면,
@@ -47,7 +53,7 @@ class AppStatus {
     final platform = Platform.isIOS ? 'ios' : 'android';
     final version = json[platform];
     return AppStatus(
-      maintenance: json['maintenance'] == true,
+      isUnderMaintenance: json['maintenance'] == true,
       maintenanceMessage: (json['maintenanceMessage'] as String?)?.trim() ?? '',
       minVersion: version is Map
           ? (version['minVersion'] as String?)?.trim() ?? ''
@@ -61,8 +67,13 @@ class AppStatus {
           : '',
       tuning: ClientTuning.tryParse(json['client']),
       serverAddress: AppStatusServerAddress.tryParse(json['server']),
+      isStoreSellingOpen: _parseStoreSelling(json['sales'], platform),
     );
   }
+
+  /// `sales` > 지금 플랫폼 판매 여부 (Map 이 아니거나 값이 true 가 아니면 false). 던지지 않음
+  static bool _parseStoreSelling(Object? sales, String platform) =>
+      sales is Map && sales[platform] == true;
 
   /// 지금 버전이 최소치에 못 미치는가 (업데이트해야 쓸 수 있다).
   bool requiresUpdate(String current) => isLower(current, minVersion);

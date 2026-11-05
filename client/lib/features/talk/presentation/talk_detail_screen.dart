@@ -13,6 +13,7 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
+import '../../../core/widgets/scroll_near_end.dart';
 import '../application/talk_comment_controller.dart';
 import '../application/talk_detail_controller.dart';
 import '../domain/talk_post.dart';
@@ -39,8 +40,6 @@ class TalkDetailScreen extends ConsumerStatefulWidget {
 class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   final _scrollController = ScrollController();
 
-  /// 끝까지 이만큼 남으면 다음 댓글 쪽을 받는다
-  static const _loadMoreExtent = 320.0;
 
   /// 도움돼요 칩 > 구분 띠 16 · 띠 높이 7 · 띠 > 댓글 머리 16 (시안 1813:7718 · 1783:7172 실측, 칩·머리 줄 높이 1.0)
   static const _bodyToDivider = 16.0;
@@ -74,7 +73,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
 
   void _loadMoreCommentsNearEnd() {
     if (_isLinkOnlyPost) return;
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref
           .read(talkCommentControllerProvider(widget.postId).notifier)
           .loadMore();

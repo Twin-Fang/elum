@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * <p>강제 업데이트 화면은 옛 버전 앱에서 뜬다. 주소를 서버가 주면 이미 깔린 앱도
  * 앱을 다시 내지 않고 보낼 곳을 바꿀 수 있다.
  * 새 서버 주소: 빈 설정 > null, 허용 주소 > 그대로 (#831)
+ * 신규 판매: 판매 켜기 AND 검증 켜기, 설정 읽기 실패 > false (#1132)
  */
 @ExtendWith(MockitoExtension.class)
 class AppStatusControllerTest {
@@ -37,6 +38,7 @@ class AppStatusControllerTest {
     // 이 테스트가 보지 않는 값은 기본값처럼 채운다
     lenient().when(systemConfigService.getString(any())).thenReturn("");
     lenient().when(systemConfigService.getInt(any())).thenReturn(1000);
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
   }
 
   @Test
@@ -97,5 +99,42 @@ class AppStatusControllerTest {
 
     assertThat(body).isNotNull();
     assertThat(body.server().apiBaseUrl()).isNull();
+  }
+
+  @Test
+  @DisplayName("검증이 꺼진 플랫폼은 판매를 켜도 false — 검증 못 하는 결제 화면을 열지 않는다")
+  void status_sellingOnButVerificationOff_closesSales() {
+    when(systemConfigService.getBoolean(ConfigKey.SUBSCRIPTION_APPLE_SELLING_ENABLED)).thenReturn(true);
+    when(systemConfigService.getBoolean(ConfigKey.SUBSCRIPTION_APPLE_ENABLED)).thenReturn(false);
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.sales().ios()).isFalse();
+  }
+
+  @Test
+  @DisplayName("판매·검증 모두 켜진 플랫폼만 true — 플랫폼끼리 섞이지 않는다")
+  void status_sellingAndVerificationOn_opensOnlyThatPlatform() {
+    when(systemConfigService.getBoolean(ConfigKey.SUBSCRIPTION_APPLE_SELLING_ENABLED)).thenReturn(true);
+    when(systemConfigService.getBoolean(ConfigKey.SUBSCRIPTION_APPLE_ENABLED)).thenReturn(true);
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.sales().ios()).isTrue();
+    assertThat(body.sales().android()).isFalse();
+  }
+
+  @Test
+  @DisplayName("판매 설정을 못 읽으면 false — 상태 응답 자체는 나간다")
+  void status_salesConfigReadFails_closesSalesAndStillResponds() {
+    when(systemConfigService.getBoolean(ConfigKey.SUBSCRIPTION_GOOGLE_SELLING_ENABLED))
+      .thenThrow(new IllegalStateException("db down"));
+
+    AppStatusResponse body = controller.status().getBody();
+
+    assertThat(body).isNotNull();
+    assertThat(body.sales().android()).isFalse();
   }
 }

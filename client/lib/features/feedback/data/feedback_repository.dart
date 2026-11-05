@@ -26,7 +26,7 @@ class FeedbackRepository {
     String? os,
   }) {
     return guarded<String>('FeedbackRepository', 'send', () async {
-      final res = await _dio.post<Object?>(
+      final response = await _dio.post<Object?>(
         '/api/feedback',
         data: {
           'message': message,
@@ -37,7 +37,7 @@ class FeedbackRepository {
         },
       );
       // 응답 모양이 달라도 앱이 죽지 않고 실패 팝업으로 간다
-      final data = res.data;
+      final data = response.data;
       final id = data is Map ? data['id'] : null;
       if (id is! String || id.isEmpty) {
         throw const FormatException('의견 응답에 id 가 없다');

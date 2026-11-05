@@ -81,8 +81,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
-              // 시안은 `이 기기는`이었다. `기기`만 `휴대폰`으로 바꾼다 —
-              // 50대 보호자가 실제로 못 알아듣는 말이라서다.
+              // `기기`는 시안 그대로 (이룸이는 태블릿도 씀, 2026-10-19 합의)
               title: context.l10n.roleSelectTitle,
               // `모드`는 시안 그대로 둔다. 널리 쓰이는 말이고, 시안을 고치면
               // 디자이너와 화면이 어긋나 매번 대조해야 한다.

@@ -43,8 +43,8 @@ class AppStatusRepository {
 
   Future<AppStatusFetchResult> fetch() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/app/status');
-      final data = res.data;
+      final response = await _dio.get<Map<String, dynamic>>('/api/app/status');
+      final data = response.data;
       if (data == null) return (status: AppStatus.unknown, isServerUnreachable: false);
       return (status: AppStatus.fromJson(data), isServerUnreachable: false);
     } catch (e) {

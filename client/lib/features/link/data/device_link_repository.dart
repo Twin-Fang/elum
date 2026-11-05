@@ -119,11 +119,11 @@ class DeviceLinkRepository {
   /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다.
   Future<Attempt<IssuedLinkCode>> issue() {
     return guarded(_repo, 'issue', () async {
-      final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
-      final code = res.data?['code']?.toString();
+      final response = await _dio.post<Map<String, dynamic>>('/api/device-links');
+      final code = response.data?['code']?.toString();
       // 서버의 절대 시각이 아니라 **남은 초**를 쓴다. 두 시계가 어긋나 있으면
       // 절대 시각을 그대로 믿을 때 남은 시간이 서버보다 길게 나온다.
-      final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
+      final seconds = (response.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
         // 암호를 못 읽으면 보여줄 것이 없어 앱 오류로 본다
         throw const AppFailure(fault: NetworkFault.app);
@@ -131,7 +131,7 @@ class DeviceLinkRepository {
       return IssuedLinkCode.fromNow(
         code: code,
         expiresInSeconds: seconds,
-        serverExpiresAt: DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''),
+        serverExpiresAt: DateTime.tryParse(response.data?['expiresAt']?.toString() ?? ''),
       );
     });
   }
@@ -141,8 +141,8 @@ class DeviceLinkRepository {
   /// 상태 화면이 빈 화면·무한 로딩 대신 `다시 시도`와 에러 코드를 보여줘야 한다.
   Future<Attempt<LinkStatus>> statusResult() {
     return guarded(_repo, 'statusResult', () async {
-      final res = await _dio.get<Map<String, dynamic>>('/api/device-links');
-      final data = res.data;
+      final response = await _dio.get<Map<String, dynamic>>('/api/device-links');
+      final data = response.data;
       return data == null ? LinkStatus.empty : LinkStatus.fromJson(data);
     });
   }
@@ -227,7 +227,7 @@ class DeviceLinkRepository {
     try {
       // 이름은 부가 정보다 — 못 읽으면 보내지 않고 연결만 한다. 옛 서버는 모르는 필드를 무시한다.
       final deviceName = await _deviceNameReader();
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/device-links/redeem',
         data: {
           'code': code,
@@ -235,8 +235,8 @@ class DeviceLinkRepository {
             'deviceName': deviceName,
         },
       );
-      final access = res.data?['accessToken']?.toString();
-      final refresh = res.data?['refreshToken']?.toString();
+      final access = response.data?['accessToken']?.toString();
+      final refresh = response.data?['refreshToken']?.toString();
       if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
         AppLogger.error('연결', '응답에 토큰이 없습니다');
         return const RedeemResult(RedeemOutcome.failed);
@@ -268,18 +268,18 @@ class DeviceLinkRepository {
   /// 실패해도 연결 자체는 성공이다 — 다음 화면에서 다시 조회할 기회가 있다.
   Future<void> _pullProfile() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
-      final nickname = res.data?['nickname']?.toString();
+      final response = await _dio.get<Map<String, dynamic>>('/api/member/me');
+      final nickname = response.data?['nickname']?.toString();
       if (nickname != null && nickname.isNotEmpty) {
         await _storage.setNickname(nickname);
       }
-      final character = res.data?['character']?.toString();
+      final character = response.data?['character']?.toString();
       if (character != null && character.isNotEmpty) {
         await _storage.setCharacter(character);
       }
       // 보호자가 정한 그림 방식. 없거나 모르는 값이면 담지 않는다 — 로컬이 비면
       // 읽는 쪽이 만화로 처리하므로 옛 서버·새 값이어도 연결은 그대로 성공한다.
-      final imageStyle = res.data?['imageStyle'];
+      final imageStyle = response.data?['imageStyle'];
       if (imageStyle is String &&
           ImageStyle.values.any((s) => s.apiValue == imageStyle)) {
         await _storage.setImageStyle(imageStyle);

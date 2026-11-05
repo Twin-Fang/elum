@@ -18,19 +18,19 @@ public class StoreSubscriptionSettings {
   private final SystemConfigService systemConfigService;
 
   public boolean isAppleEnabled() {
-    return readFlagOrFalse(ConfigKey.SUBSCRIPTION_APPLE_ENABLED);
+    return isFlagOn(ConfigKey.SUBSCRIPTION_APPLE_ENABLED);
   }
 
   public boolean isGoogleEnabled() {
-    return readFlagOrFalse(ConfigKey.SUBSCRIPTION_GOOGLE_ENABLED);
+    return isFlagOn(ConfigKey.SUBSCRIPTION_GOOGLE_ENABLED);
   }
 
   public boolean isAppleSandboxAllowed() {
-    return readFlagOrFalse(ConfigKey.SUBSCRIPTION_APPLE_ALLOW_SANDBOX);
+    return isFlagOn(ConfigKey.SUBSCRIPTION_APPLE_ALLOW_SANDBOX);
   }
 
   public boolean isGoogleTestPurchaseAllowed() {
-    return readFlagOrFalse(ConfigKey.SUBSCRIPTION_GOOGLE_ALLOW_TEST_PURCHASES);
+    return isFlagOn(ConfigKey.SUBSCRIPTION_GOOGLE_ALLOW_TEST_PURCHASES);
   }
 
   public String appleBundleId() {
@@ -80,7 +80,7 @@ public class StoreSubscriptionSettings {
     return systemConfigService.getSecret(ConfigKey.SUBSCRIPTION_GOOGLE_RTDN_PUSH_TOKEN).trim();
   }
 
-  private boolean readFlagOrFalse(ConfigKey key) {
+  private boolean isFlagOn(ConfigKey key) {
     try {
       return systemConfigService.getBoolean(key);
     } catch (RuntimeException e) {

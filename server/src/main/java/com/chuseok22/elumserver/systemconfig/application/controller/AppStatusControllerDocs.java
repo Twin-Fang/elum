@@ -37,6 +37,9 @@ public interface AppStatusControllerDocs {
         앱에 넣어 둔 주소를 씁니다 (#416)
       - `server.apiBaseUrl`이 지금 주소와 다르고 앱의 허용 도메인이면, 새 주소의 이 엔드포인트를
         확인한 뒤 그 주소로 옮겨 다시 시작합니다. null 이면 옮기지 않습니다 (#831)
+      - `sales.ios`·`sales.android`가 false면 그 플랫폼에서 Pro 결제 화면·진입점을 숨깁니다.
+        값 = 신규 판매 켜기 AND 구독 검증 켜기. 앱은 받은 값을 저장해 두고, 못 받으면 저장값,
+        저장값도 없으면 false 로 봅니다. 기존 구독의 검증·복원과는 무관합니다 (#1132)
       - **이 요청이 실패하면 그냥 진행합니다** — 서버를 못 봤다는 이유로 앱을 막으면
         서버가 죽었을 때 아무도 앱을 열지 못합니다
       """
@@ -55,7 +58,8 @@ public interface AppStatusControllerDocs {
             "connectTimeoutMs": 10000, "receiveTimeoutMs": 60000, "loadingMaxWaitMs": 45000,
             "consentFetchTimeoutMs": 3000, "dlpMinDelayMs": 1500
           },
-          "server": { "apiBaseUrl": null }
+          "server": { "apiBaseUrl": null },
+          "sales": { "ios": true, "android": false }
         }
         """))
   ))

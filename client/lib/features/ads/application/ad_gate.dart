@@ -21,6 +21,6 @@ final adsEnabledProvider = Provider<bool>((ref) {
 /// **모르면 띄우지 않는다.** 조회 중이거나 실패(null)했을 때 광고를 먼저 요청하면 광고를
 /// 없애 준 Pro 계정이 첫 화면에서 잠깐 광고를 본다. 광고 요청은 요금제를 확인한 뒤에만 한다.
 bool adsAllowedFor(AsyncValue<Member?> member) => member.maybeWhen(
-  data: (m) => m != null && !m.adsRemoved,
+  data: (m) => m != null && !m.entitlements.isAdsRemoved,
   orElse: () => false,
 );
