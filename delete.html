@@ -24,7 +24,7 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);line-height:1.7;
   font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased}
+  -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 .wrap{max-width:820px;margin:0 auto;padding:0 28px}
 .tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
 a{color:var(--ink)}
@@ -37,7 +37,7 @@ nav{margin-left:auto;display:flex;gap:26px}
 nav a{font-size:14px;color:var(--muted);text-decoration:none}
 nav a:hover{color:var(--ink)}
 
-.doc{padding:64px 0 40px}
+.doc{padding-top:64px;padding-bottom:40px}
 h1{margin:12px 0 0;font-size:clamp(30px,4.4vw,44px);line-height:1.14;letter-spacing:-.03em;font-weight:800}
 h2{margin:44px 0 12px;font-size:20px;letter-spacing:-.02em;font-weight:800;
   padding-top:22px;border-top:1px solid var(--line)}
@@ -67,7 +67,26 @@ footer.site{border-top:1px solid var(--line);padding:32px 0 60px;color:var(--fai
 .fl{display:flex;flex-wrap:wrap;align-items:center;gap:16px;max-width:1120px;margin:0 auto;padding:0 28px}
 .fl img{height:18px;opacity:.85}
 
-@media (max-width:880px){ nav{display:none} .doc{padding:44px 0 28px} }
+@media (max-width:880px){ nav{display:none} .doc{padding-top:44px;padding-bottom:28px} }
+
+/* 휴대폰 폭: 좌우 여백 확보, 표는 카드로 쌓기 (가로 스크롤 없이 읽히게) */
+@media (max-width:640px){
+  .wrap,.bar,.fl{padding-left:20px;padding-right:20px}
+  .stack{overflow:visible;border:0;background:none;border-radius:0}
+  .stack table,.stack tbody,.stack tr,.stack td{display:block;width:100%;min-width:0}
+  .stack thead{display:none}
+  .stack tr{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 16px;margin:0 0 12px}
+  .stack td{border:0;padding:10px 0}
+  .stack td+td{border-top:1px solid var(--line)}
+  .stack td::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  .stack td:first-child{font-weight:700}
+  .stack td:first-child::before{display:none}
+  .kv table,.kv tbody,.kv tr,.kv th,.kv td{display:block;width:100%;min-width:0}
+  .kv tr{border-bottom:1px solid var(--line)}
+  .kv tr:last-child{border-bottom:0}
+  .kv th{border:0;background:none;padding:12px 16px 0;font-size:12px;color:var(--muted)}
+  .kv td{border:0;padding:2px 16px 12px}
+}
 </style>
 </head>
 <body>
