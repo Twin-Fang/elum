@@ -741,6 +741,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansLeaveConfirmAction => 'Stop';
 
   @override
+  String get guardiansLeaveTypeTitle => '한 번 더 확인할게요';
+
+  @override
+  String guardiansLeaveTypeMessage(String phrase) {
+    return '이룸이와 일과, 별이 모두 사라져요\n아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+  }
+
+  @override
+  String get guardiansLeaveTypePhrase => '그만두기';
+
+  @override
+  String get guardiansLeaveTypeAction => '그만두기';
+
+  @override
   String get guardiansLeaveFailTitle => 'Couldn\'t leave';
 
   @override
