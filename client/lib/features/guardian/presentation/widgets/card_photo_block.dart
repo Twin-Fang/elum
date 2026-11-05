@@ -24,7 +24,7 @@ import '../../../../core/widgets/elum_spinner.dart';
 
 part 'card_photo_block_parts.dart';
 
-/// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` · (AI 그림이면) `다시 그리기` 칩과 그 뒤의 모든 상태.
+/// 카드 수정 시트 안의 그림 칸 — 그림 아래 `사진 바꾸기` · (AI 그림이면) `다시 그리기` 칩과 그 뒤의 모든 상태.
 ///
 /// **임시 시안이다.** 디자이너 확정 전 제시용 목업(`opt2_A`)을 그대로 옮겼다.
 ///
@@ -266,14 +266,43 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     final space = context.space;
     final step = _step();
 
-    return SizedBox(
+    // 그림 아래 칩 줄 — 그림 폭(204)에 칩 두 개가 안 들어가 글자가 잘려서 그림 밖으로 뺌.
+    // 좁거나 글자가 크면 다음 줄로 내림. 올리는 중·실패에도 자리는 남겨 시트 높이가 튀지 않음
+    final chips = Visibility(
+      visible: _phase == _Phase.idle,
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: space.xs,
+        children: [
+          if (step?.isAiPicture ?? false)
+            _Chip(
+              asset: AppAssets.iconRefresh,
+              label: context.l10n.cardRegenerateChip,
+              onTap: _busy ? null : _regenerate,
+            ),
+          _Chip(
+            key: CardPhotoBlock.chipTapKey,
+            asset: AppAssets.iconCamera,
+            label: context.l10n.cardPhotoChange,
+            onTap: _busy ? null : _start,
+          ),
+        ],
+      ),
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
       height: CardPhotoBlock.height.h,
       width: double.infinity,
       child: Stack(
         children: [
           // 카드 그림 칸과 **같은 비율**(313:230)의 미리보기를 가운데에 둔다. 시트 폭
           // 전체 띠로 두면 사진이 카드에서 어떻게 잘리는지 알 수 없다.
-          // 칩은 이 미리보기 안쪽 오른쪽 아래에 붙는다.
           Positioned.fill(
             child: Center(
               child: AspectRatio(
@@ -307,27 +336,6 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                         ),
                       ),
                     ),
-                    if (_phase == _Phase.idle && (step?.isAiPicture ?? false))
-                      Positioned(
-                        left: 4.w,
-                        bottom: 0,
-                        child: _Chip(
-                          asset: AppAssets.iconRefresh,
-                          label: context.l10n.cardRegenerateChip,
-                          onTap: _busy ? null : _regenerate,
-                        ),
-                      ),
-                    if (_phase == _Phase.idle)
-                      Positioned(
-                        right: 4.w,
-                        bottom: 0,
-                        child: _Chip(
-                          key: CardPhotoBlock.chipTapKey,
-                          asset: AppAssets.iconCamera,
-                          label: context.l10n.cardPhotoChange,
-                          onTap: _busy ? null : _start,
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -339,6 +347,9 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
             _FailureOverlay(failure: _failure!, onButton: _onFailureButton),
         ],
       ),
+        ),
+        chips,
+      ],
     );
   }
 }

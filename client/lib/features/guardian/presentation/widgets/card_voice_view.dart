@@ -54,7 +54,7 @@ class CardVoiceView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardVoiceFrame(height: CardVoiceBlock.height.h, child: _row(context));
+    return CardVoiceFrame(minHeight: CardVoiceBlock.minHeight.h, child: _row(context));
   }
 
   Widget _row(BuildContext context) {

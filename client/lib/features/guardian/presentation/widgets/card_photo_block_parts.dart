@@ -28,7 +28,7 @@ class _ChipIcon extends StatelessWidget {
   }
 }
 
-/// 그림 위 칩 (`사진 바꾸기` · `다시 그리기`) — 보이는 알약은 작아도 누름 영역은 48 이상이다.
+/// 그림 아래 칩 (`사진 바꾸기` · `다시 그리기`) — 보이는 알약은 작아도 누름 영역은 48 이상이다.
 class _Chip extends StatelessWidget {
   const _Chip({super.key, required this.asset, required this.label, required this.onTap});
 
@@ -43,9 +43,10 @@ class _Chip extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       semanticLabel: label,
-      child: SizedBox(
-        height: 48.h < 48 ? 48 : 48.h,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: 48.h < 48 ? 48 : 48.h),
         child: Align(
+          widthFactor: 1,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(

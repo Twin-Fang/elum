@@ -221,7 +221,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
 
   /// 다른 언어로 만들기: 언어 시트 > 새 일과 > 격자를 그 칸으로 옮기고 상세를 연다 (실패는 흐름이 팝업)
   Future<void> _translate(Routine routine) async {
-    final created = await translateRoutineWithSheet(context, routine);
+    final created = await translateRoutineWithSheet(context, ref, routine);
     if (created == null || !mounted) return;
     ref.read(libraryScrollTargetRoutineIdProvider.notifier).request(created.id);
     await openRoutineDetail(created);

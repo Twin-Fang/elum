@@ -7,6 +7,7 @@ import '../../domain/weekly_report.dart';
 import '../card_export/print_page.dart';
 
 /// 선생님·치료사에게 보내는 한 장 (A4 595×842 포인트): 제목 > 숫자 4칸 > 월~일 > 일과별 > 남은 카드 > 출처
+/// 묶음 사이는 최소 [_blockGap] + 남는 높이를 고르게 나눔 (줄이 적어도 아래 절반이 비지 않게)
 ///
 /// 화면 미리 보기 = 굽는 파일 그대로. Pro 기능이라 워터마크 없음 · 원문·보상 문구 없음.
 class WeeklyReportSharePage extends StatelessWidget {
@@ -25,6 +26,13 @@ class WeeklyReportSharePage extends StatelessWidget {
   static const _labelToRows = 8.0;
   static const _rowGap = 6.0;
   static const _statGap = 8.0;
+
+  /// 묶음 사이: 최소 간격 + 남는 높이 몫 (넘치면 최소 간격만)
+  static const _blockGapWithShare = [SizedBox(height: _blockGap), Spacer()];
+
+  /// 월~일 칸 위아래 안쪽 · 테두리 모서리 (숫자 칸과 같은 판)
+  static const _dayPanelPadding = 16.0;
+  static const _panelRadius = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +56,7 @@ class WeeklyReportSharePage extends StatelessWidget {
             l10n.weekRangeOf(report.weekStart, report.weekEnd),
             style: typo.printCardDescription.copyWith(color: muted),
           ),
+          // 제목·날짜와 숫자 칸은 한 덩어리 (남는 높이는 그 아래 묶음 사이로)
           const SizedBox(height: _blockGap),
           // 숫자 4칸: 완료율 · 받은 별 · 보상까지 간 일과 · 연속으로 마친 날
           Row(
@@ -66,9 +75,16 @@ class WeeklyReportSharePage extends StatelessWidget {
             l10n.weeklyReportCompletionSummary(report.sentRoutineCount, report.completedRoutineCount),
             style: typo.printCardDescription.copyWith(color: primary),
           ),
-          const SizedBox(height: _blockGap),
-          // 월 ~ 일: 요일 + 마친/보낸
-          Row(
+          ..._blockGapWithShare,
+          // 월 ~ 일: 요일 + 마친/보낸 (테두리 판)
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(color: colors.border),
+              borderRadius: BorderRadius.circular(_panelRadius),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: _dayPanelPadding),
+              child: Row(
             children: [
               for (final day in report.days)
                 Expanded(
@@ -86,9 +102,11 @@ class WeeklyReportSharePage extends StatelessWidget {
                   ),
                 ),
             ],
+              ),
+            ),
           ),
           if (routines.isNotEmpty) ...[
-            const SizedBox(height: _blockGap),
+            ..._blockGapWithShare,
             _SectionLabel(text: l10n.weeklyReportRoutinesSection),
             for (final routine in routines)
               _FactRow(
@@ -97,7 +115,7 @@ class WeeklyReportSharePage extends StatelessWidget {
               ),
           ],
           if (report.remainingSteps.isNotEmpty) ...[
-            const SizedBox(height: _blockGap),
+            ..._blockGapWithShare,
             _SectionLabel(text: l10n.weeklyReportRemainingSection),
             for (final step in report.remainingSteps)
               _FactRow(
@@ -105,7 +123,7 @@ class WeeklyReportSharePage extends StatelessWidget {
                 valueText: l10n.weeklyReportTimes(step.remainingCount),
               ),
           ],
-          const Spacer(),
+          ..._blockGapWithShare,
           Text(l10n.weeklyReportShareNote, style: typo.printFooter.copyWith(color: muted)),
         ],
       ),
@@ -163,7 +181,7 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-/// 이름 · 값 한 줄 (이름이 길면 한 줄에서 자름 — 종이 칸이 넘치지 않게)
+/// 이름 · 값 한 줄 + 아래 선 (이름이 길면 한 줄에서 자름 — 종이 칸이 넘치지 않게)
 class _FactRow extends StatelessWidget {
   const _FactRow({required this.label, required this.valueText});
 
@@ -171,12 +189,14 @@ class _FactRow extends StatelessWidget {
   final String valueText;
 
   static const _labelToValue = 12.0;
+  static const _rowPaddingV = 10.0;
 
   @override
   Widget build(BuildContext context) {
     final style = context.typo.printCardDescription.copyWith(color: context.colors.textPrimary);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: WeeklyReportSharePage._rowGap),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: _rowPaddingV),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.colors.border))),
       child: Row(
         children: [
           Expanded(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: style)),

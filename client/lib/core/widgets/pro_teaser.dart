@@ -45,7 +45,9 @@ class ProTeaser extends StatelessWidget {
     final l10n = context.l10n;
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: _minHeight.h),
+      // 견본·안내 판 둘 다 높이를 정함 (글자가 커져 판이 견본보다 길면 판 높이만큼 자람)
       child: Stack(
+      alignment: Alignment.center,
       children: [
         // 견본: 흐림 + 입력·낭독 막음 (가짜 줄을 눌러 시트가 열리지 않게)
         ExcludeSemantics(
@@ -59,9 +61,7 @@ class ProTeaser extends StatelessWidget {
             ),
           ),
         ),
-        Positioned.fill(
-          child: Center(
-            child: Padding(
+        Padding(
               padding: EdgeInsets.all(context.space.md.w),
               child: Container(
                 padding: EdgeInsets.all(_panelPadding.w),
@@ -73,15 +73,16 @@ class ProTeaser extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: _badgeGap.w,
+                      runSpacing: _badgeGap.h,
                       children: [
                         ElumLabelChip(
                           label: l10n.proTeaserBadge,
                           background: colors.accentYellow,
                           foreground: colors.textPrimary,
                         ),
-                        SizedBox(width: _badgeGap.w),
                         ElumLabelChip(
                           label: l10n.proTeaserSampleLabel,
                           background: colors.editChipBg,
@@ -104,8 +105,6 @@ class ProTeaser extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ),
         ),
       ],
       ),

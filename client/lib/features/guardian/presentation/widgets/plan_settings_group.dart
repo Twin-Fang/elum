@@ -8,7 +8,7 @@ import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../../subscription/application/plan_status_providers.dart';
 import '../../../subscription/application/plan_store_catalog.dart';
 
-/// 설정 맨 위 요금제 묶음: `내 요금제` 줄(Free · Pro 갱신일 · 해지 예약 · 결제 확인 필요) + `구매 복원`
+/// 설정 맨 위 요금제 묶음: `내 요금제` 줄(Free · Pro) + `구매 복원` > 아래 한 줄(갱신일 · 해지 예약 · 결제 확인 필요)
 ///
 /// 판매 스위치가 꺼져 있으면 상태만 보이고 누를 곳이 없음 (살 방법이 없는데 결제 화면을 열지 않음)
 class PlanSettingsGroup extends ConsumerWidget {
@@ -23,11 +23,12 @@ class PlanSettingsGroup extends ConsumerWidget {
     final isStoreEnabled = ref.watch(isPlanStoreEnabledProvider);
     final status = ref.watch(planStatusProvider);
     return SettingsGroup(
+      footer: planStatusFooter(l10n, status),
       children: [
         SettingsTile(
           isInCard: true,
           label: l10n.planSettingsLabel,
-          valueText: planStatusLabel(l10n, status),
+          valueText: planStatusShortLabel(l10n, status),
           showChevronWithValue: isStoreEnabled,
           onTap: isBusy || !isStoreEnabled ? null : () => openPlanPaywall(context, ref),
         ),

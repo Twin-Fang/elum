@@ -99,7 +99,10 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
 
   Widget _body(BuildContext context, AsyncValue<WeeklyReport>? reportAsync, DateTime weekStart) {
     final l10n = context.l10n;
-    if (reportAsync == null) {
+    // Pro 가 아님: 앱 판정(null) 또는 서버 Pro 거절(WEEKLY_REPORT_NOT_ALLOWED) > 실패 대신 미리 보기·안내
+    final isNotIncluded = reportAsync == null ||
+        (reportAsync is AsyncError && isProOnlyRejection(reportAsync.error));
+    if (isNotIncluded) {
       if (ref.watch(planAccessProvider).shouldShowProTeaser) {
         return SingleChildScrollView(
           child: ProTeaser(

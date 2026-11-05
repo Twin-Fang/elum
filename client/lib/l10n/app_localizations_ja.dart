@@ -3653,6 +3653,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planStatusGracePeriod => 'Pro · 결제 확인 필요';
 
   @override
+  String planStatusRenewingFooter(String date) {
+    return '$date에 갱신돼요';
+  }
+
+  @override
+  String planStatusUntilFooter(String date) {
+    return '$date까지 쓸 수 있어요';
+  }
+
+  @override
+  String planStatusCancelScheduledFooter(String date) {
+    return '$date에 끝나요';
+  }
+
+  @override
+  String get planStatusGracePeriodFooter => '결제 수단을 확인해 주세요';
+
+  @override
   String get planLearnPro => 'Pro 알아보기';
 
   @override
@@ -3884,6 +3902,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineSchedulePickDayHint => '요일을 하나 이상 골라 주세요';
 
   @override
+  String get routineScheduleProNote => '반복 일과는 Pro에서 저장할 수 있어요';
+
+  @override
   String get weeklyPlanEntry => '주간 계획';
 
   @override
@@ -4070,6 +4091,15 @@ class AppLocalizationsJa extends AppLocalizations {
       '줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.';
 
   @override
+  String get routineMemoryDisabledFooter =>
+      '꺼져 있어요. 켜기 전까지 일과를 만들 때 메모를 쓰지 않고, 고친 카드에서 새로 배우지도 않아요.';
+
+  @override
+  String routineMemoryFullFooter(int max) {
+    return '메모는 $max개까지예요. 줄을 지우면 새로 더할 수 있어요.';
+  }
+
+  @override
   String get routineMemoryEmpty => '아직 메모가 없어요';
 
   @override
@@ -4126,6 +4156,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get proTeaserUnlock => 'Pro로 보기';
+
+  @override
+  String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
 
   @override
   String get proTeaserWeeklyReportBenefit => '한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요';

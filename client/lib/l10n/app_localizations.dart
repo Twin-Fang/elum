@@ -6584,6 +6584,30 @@ abstract class AppLocalizations {
   /// **'Pro · 결제 확인 필요'**
   String get planStatusGracePeriod;
 
+  /// 설정 내 요금제 묶음 아래 한 줄: 자동 갱신 예정 (줄 값은 Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}에 갱신돼요'**
+  String planStatusRenewingFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 끝나는 날만 앎
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지 쓸 수 있어요'**
+  String planStatusUntilFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 해지 예약
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}에 끝나요'**
+  String planStatusCancelScheduledFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 결제 실패 유예 중
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 수단을 확인해 주세요'**
+  String get planStatusGracePeriodFooter;
+
   /// 크레딧 부족 팝업·Pro 기능 자리에서 요금제 화면 열기
   ///
   /// In ko, this message translates to:
@@ -6937,6 +6961,12 @@ abstract class AppLocalizations {
   /// **'요일을 하나 이상 골라 주세요'**
   String get routineSchedulePickDayHint;
 
+  /// 반복 시트 — Free(판매 중)라 저장 버튼이 꺼진 이유. 아래에 Pro로 보기 입구
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 일과는 Pro에서 저장할 수 있어요'**
+  String get routineScheduleProNote;
+
   /// 일과관리 머리 — 주간 계획 화면 입구 알약
   ///
   /// In ko, this message translates to:
@@ -7267,6 +7297,18 @@ abstract class AppLocalizations {
   /// **'줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.'**
   String get routineMemoryLinesFooter;
 
+  /// AI 메모가 꺼져 있을 때 스위치 아래 설명 (켜짐 설명 대신)
+  ///
+  /// In ko, this message translates to:
+  /// **'꺼져 있어요. 켜기 전까지 일과를 만들 때 메모를 쓰지 않고, 고친 카드에서 새로 배우지도 않아요.'**
+  String get routineMemoryDisabledFooter;
+
+  /// 메모 줄이 가득 차 더하기 줄이 없을 때 묶음 아래 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'메모는 {max}개까지예요. 줄을 지우면 새로 더할 수 있어요.'**
+  String routineMemoryFullFooter(int max);
+
   /// 메모가 0줄일 때 줄 자리
   ///
   /// In ko, this message translates to:
@@ -7380,6 +7422,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro로 보기'**
   String get proTeaserUnlock;
+
+  /// Pro 전용 기능을 Free 가 눌렀는데 앱에서 Pro 를 살 수 없을 때 안내 팝업 (실패 아님)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 기능이에요'**
+  String get proOnlyNoticeTitle;
 
   /// 주간 리포트 미리 보기 한 줄 혜택
   ///
