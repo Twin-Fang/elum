@@ -7,7 +7,7 @@ import '../config/client_tuning.dart';
 /// 점검 중인지, 이 버전으로 계속 써도 되는지를 담는다.
 class AppStatus {
   const AppStatus({
-    this.maintenance = false,
+    this.isUnderMaintenance = false,
     this.maintenanceMessage = '',
     this.minVersion = '',
     this.latestVersion = '',
@@ -17,7 +17,8 @@ class AppStatus {
     this.isStoreSellingOpen,
   });
 
-  final bool maintenance;
+  /// 서버 점검 중인가 (응답 `maintenance`). true 면 점검 안내 화면
+  final bool isUnderMaintenance;
   final String maintenanceMessage;
 
   /// 이 버전 미만이면 업데이트해야 쓸 수 있다. 비어 있으면 막지 않는다.
@@ -52,7 +53,7 @@ class AppStatus {
     final platform = Platform.isIOS ? 'ios' : 'android';
     final version = json[platform];
     return AppStatus(
-      maintenance: json['maintenance'] == true,
+      isUnderMaintenance: json['maintenance'] == true,
       maintenanceMessage: (json['maintenanceMessage'] as String?)?.trim() ?? '',
       minVersion: version is Map
           ? (version['minVersion'] as String?)?.trim() ?? ''

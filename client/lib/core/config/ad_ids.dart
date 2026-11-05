@@ -59,10 +59,10 @@ abstract final class AdIds {
   static String? resolve({
     required AdPlacement placement,
     required bool isIos,
-    required bool useTestIds,
+    required bool shouldUseTestIds,
     required String Function(String key) readEnv,
   }) {
-    if (useTestIds) {
+    if (shouldUseTestIds) {
       final ids = _testIds[placement]!;
       return isIos ? ids.ios : ids.android;
     }

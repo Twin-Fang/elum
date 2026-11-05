@@ -1,5 +1,8 @@
 import 'dart:math';
 
+/// 요청 멱등 키 헤더 이름. 서버 짝: IdempotencyHeader.NAME (CrossStackContractTest 가 대조)
+const idempotencyKeyHeader = 'Idempotency-Key';
+
 /// 요청 멱등 키 — UUID v4.
 ///
 /// 서버는 같은 키로 다시 온 생성 요청에 AI 를 다시 부르지 않고 저장된 결과를 준다.

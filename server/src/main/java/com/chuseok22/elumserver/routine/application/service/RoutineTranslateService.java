@@ -117,10 +117,7 @@ public class RoutineTranslateService {
   private SourceRoutine readSource(Caller caller, String routineId, AppLocale targetLanguage) {
     Routine routine = RoutineRules.routineFor(routineRepository, profileAccessGuard, caller, routineId,
       RoutineAction.COPY);
-    if (!entitlementService.isAllowed(caller.memberId(), Entitlement.ROUTINE_TRANSLATE)) {
-      log.info("[routine translate] rejected 403 : plan not allowed, routineId={}", routineId);
-      throw new CustomException(ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED);
-    }
+    entitlementService.requireAllowed(caller.memberId(), Entitlement.ROUTINE_TRANSLATE);
     // 임시저장은 보호자 승인 전 카드라 번역 사본이 승인을 건너뛰게 됨 (서비스 원칙 3)
     if (routine.getStatus() == RoutineStatus.PENDING_REVIEW || routine.getSteps().isEmpty()) {
       log.info("[routine translate] rejected 409 : not translatable, routineId={}, status={}, stepCount={}",

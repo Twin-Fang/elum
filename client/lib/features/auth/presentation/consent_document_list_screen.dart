@@ -32,7 +32,7 @@ class ConsentDocumentListScreen extends ConsumerWidget {
       // 제목은 뒤로가기와 같은 줄에 선다 (Figma `1274:9315`)
       title: context.l10n.consentListTitle,
       // 설정 계열 머리: 뒤로가기 y=67, 줄 x=16
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 스크롤 고정 영역 높이 115 (뒤로가기 하단 107 + 8), 스크롤하는 줄이 제목 아래로 비치지 않게 한다
       child: Padding(

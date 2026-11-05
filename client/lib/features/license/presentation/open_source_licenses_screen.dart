@@ -19,7 +19,7 @@ class OpenSourceLicensesScreen extends StatelessWidget {
   const OpenSourceLicensesScreen({super.key});
 
   // 설정 계열 머리: 뒤로가기 y=67, 줄 x=16 (약관 목록과 같음)
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _horizontalPadding = 16.0;
   // 뒤로가기 하단(107) > 안내 글 (약관 목록 첫 묶음과 같음)
   static const _headToBody = 24.0;

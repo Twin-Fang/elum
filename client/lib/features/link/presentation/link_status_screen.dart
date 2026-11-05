@@ -131,7 +131,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
       isBackEnabled: !busy,
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
       title: context.l10n.linkStatusTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 로딩·실패·빈 상태는 같은 자리(본문 가운데)에 둔다 — 바뀔 때 튀지 않게.
       child: status.when(

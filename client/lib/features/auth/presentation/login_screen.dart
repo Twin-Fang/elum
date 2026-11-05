@@ -220,7 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool get _isIos => LoginScreen.debugPretendIos ?? Platform.isIOS;
 
   /// 애플 버튼을 그리는가 — iOS 에서만 뜬다 (심사 요건).
-  bool get _showApple => _isIos;
+  bool get _shouldShowApple => _isIos;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +294,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             //
             // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
             // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
-            if (_showApple) ...[
+            if (_shouldShowApple) ...[
               SizedBox(height: _buttonGap.h),
 
               // ⚠️ 규격 위젯(`SignInWithAppleButton`) 대신 직접 그린다.

@@ -27,8 +27,8 @@ class AdRewardRepository {
   );
 
   Future<AdRewardSession> createSession() => _call('createSession', () async {
-    final res = await _dio.post<Map<String, dynamic>>('$_base/sessions');
-    return AdRewardSession.fromJson(_body(res));
+    final response = await _dio.post<Map<String, dynamic>>('$_base/sessions');
+    return AdRewardSession.fromJson(_body(response));
   });
 
   Future<AdRewardSessionStatus> getStatus(String nonce) => _call(
@@ -41,8 +41,8 @@ class AdRewardRepository {
   Future<Map<String, dynamic>> _get(String path) async =>
       _body(await _dio.get<Map<String, dynamic>>(path));
 
-  Map<String, dynamic> _body(Response<Map<String, dynamic>> res) {
-    final body = res.data;
+  Map<String, dynamic> _body(Response<Map<String, dynamic>> response) {
+    final body = response.data;
     if (body == null) throw const FormatException('빈 응답');
     return body;
   }

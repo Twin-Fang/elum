@@ -123,9 +123,9 @@ class AuthRepository {
   /// 나머지는 그 결과를 함께 기다린다.
   Future<String?>? _refreshInFlight;
 
-  bool _restoring = false;
+  bool _isRestoring = false;
   bool lastSignInChangedAccount = false;
-  bool get hasSession => !_restoring && _tokens.hasSession;
+  bool get hasSession => !_isRestoring && _tokens.hasSession;
   bool _guardianPinSetupAllowed = false;
   bool guardianPinSetupPending = false;
 
@@ -214,17 +214,17 @@ class AuthRepository {
     String? lastLoginProviderName,
   }) async {
     _guardianPinSetupAllowed = false;
-    _restoring = true;
+    _isRestoring = true;
     final previousOwner =
         _storage.accountMemberId ??
         (_tokens is SecureTokenStore ? _tokens.previousMemberId : null);
     final previousProfile = _storage.selectedProfileId;
     var exchanged = false;
     try {
-      final res = await requestTokens();
+      final response = await requestTokens();
 
-      final access = res.data?['accessToken']?.toString();
-      final refresh = res.data?['refreshToken']?.toString();
+      final access = response.data?['accessToken']?.toString();
+      final refresh = response.data?['refreshToken']?.toString();
       if (access == null ||
           access.isEmpty ||
           refresh == null ||
@@ -270,7 +270,7 @@ class AuthRepository {
       if (exchanged) await _discardIncompleteSession();
       return AuthResult(AuthOutcome.failed, failure: AppFailure.of(e));
     } finally {
-      _restoring = false;
+      _isRestoring = false;
     }
   }
 
@@ -293,14 +293,14 @@ class AuthRepository {
     String? previousProfile,
     String access,
   ) async {
-    final res = await _dio.get<Map<String, dynamic>>(
+    final response = await _dio.get<Map<String, dynamic>>(
       '/api/member/me',
       options: Options(
         headers: {'Authorization': 'Bearer $access'},
         extra: {ProfileHeaderInterceptor.skipKey: true},
       ),
     );
-    var body = res.data;
+    var body = response.data;
     final memberId = body?['id'];
     if (body == null ||
         memberId is! String ||
@@ -406,13 +406,13 @@ class AuthRepository {
     if (refresh == null || refresh.isEmpty) return null;
 
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/auth/refresh',
         data: {'refreshToken': refresh},
       );
 
-      final access = res.data?['accessToken']?.toString();
-      final nextRefresh = res.data?['refreshToken']?.toString();
+      final access = response.data?['accessToken']?.toString();
+      final nextRefresh = response.data?['refreshToken']?.toString();
       if (access == null ||
           access.isEmpty ||
           nextRefresh == null ||

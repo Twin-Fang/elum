@@ -28,7 +28,7 @@ abstract final class DevLogFile {
   static const _trimRatio = 0.25;
 
   static File? _file;
-  static bool _initFailed = false;
+  static bool _hasInitFailed = false;
 
   /// 쓰기를 직렬화한다. 여러 로그가 동시에 append하면 줄이 섞인다.
   static Future<void> _queue = Future<void>.value();
@@ -46,7 +46,7 @@ abstract final class DevLogFile {
   ///
   /// 실패해도 예외를 던지지 않는다 — 로그 때문에 앱이 안 뜨면 본말전도다.
   static Future<void> init() async {
-    if (_file != null || _initFailed) return;
+    if (_file != null || _hasInitFailed) return;
     try {
       final dir = await getApplicationDocumentsDirectory();
       final f = File('${dir.path}/elum-debug.log');
@@ -56,7 +56,7 @@ abstract final class DevLogFile {
       _file = f;
       sizeBytes.value = await f.length();
     } catch (e) {
-      _initFailed = true;
+      _hasInitFailed = true;
       debugPrint('[개발자도구] 로그 파일 초기화 실패: $e');
     }
   }
@@ -131,7 +131,7 @@ abstract final class DevLogFile {
   @visibleForTesting
   static void resetForTest() {
     _file = null;
-    _initFailed = false;
+    _hasInitFailed = false;
     _queue = Future<void>.value();
     sizeBytes.value = 0;
   }
@@ -140,7 +140,7 @@ abstract final class DevLogFile {
   @visibleForTesting
   static void useFileForTest(File f) {
     _file = f;
-    _initFailed = false;
+    _hasInitFailed = false;
     sizeBytes.value = f.existsSync() ? f.lengthSync() : 0;
   }
 

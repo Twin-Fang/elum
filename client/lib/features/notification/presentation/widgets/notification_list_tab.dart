@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/widgets/scroll_near_end.dart';
 import '../../../member/application/member_providers.dart';
 import '../../application/notification_day_grouping.dart';
 import '../../application/notification_list_controller.dart';
@@ -32,8 +33,6 @@ class NotificationListTab extends ConsumerStatefulWidget {
 class _NotificationListTabState extends ConsumerState<NotificationListTab> {
   final _scrollController = ScrollController();
 
-  /// 끝까지 이만큼 남으면 다음 쪽을 받는다
-  static const _loadMoreExtent = 320.0;
   static const _sidePadding = 16.0;
   static const _rowGap = 8.0;
   /// 묶음 사이 24 = 마지막 줄 아래 _rowGap 8 + 16 (시안 1724:8346)
@@ -57,7 +56,7 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
   }
 
   void _loadMoreNearEnd() {
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref.read(notificationListControllerProvider.notifier).loadMore();
     }
   }

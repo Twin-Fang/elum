@@ -97,21 +97,21 @@ public final class NicknamePlaceholder {
     try {
       String name = nickname.trim();
       StringBuilder out = new StringBuilder(text.length() + 8);
-      int pos = 0;
+      int searchFrom = 0;
       int hit;
-      while ((hit = text.indexOf(PLACEHOLDER, pos)) >= 0) {
-        out.append(text, pos, hit);
+      while ((hit = text.indexOf(PLACEHOLDER, searchFrom)) >= 0) {
+        out.append(text, searchFrom, hit);
         int after = hit + PLACEHOLDER.length();
         Josa josa = matchJosa(text, after);
         if (josa == null) {
           out.append(name);
-          pos = after;
+          searchFrom = after;
         } else {
           out.append(name).append(josa.pick(name));
-          pos = after + josa.token().length();
+          searchFrom = after + josa.token().length();
         }
       }
-      out.append(text, pos, text.length());
+      out.append(text, searchFrom, text.length());
       return out.toString();
     } catch (RuntimeException e) {
       // 치환만 포기한다 — AI 결과는 그대로 쓴다(자리표시가 보일 뿐 일과 생성은 이어진다).
@@ -143,9 +143,9 @@ public final class NicknamePlaceholder {
     try {
       boolean hasJong = jongKind(name.charAt(name.length() - 1)) != 0;
       StringBuilder out = new StringBuilder(text.length());
-      int pos = 0;
+      int searchFrom = 0;
       int hit;
-      while ((hit = text.indexOf(name, pos)) >= 0) {
+      while ((hit = text.indexOf(name, searchFrom)) >= 0) {
         int end = hit + name.length();
         // 받침 있는 이름은 "하늘이가" 처럼 이름 뒤에 호칭 '이'를 붙여 쓴다. 뒤가 조사·끝이면 함께 먹는다.
         int consumed = end;
@@ -154,14 +154,14 @@ public final class NicknamePlaceholder {
         }
         // 뒤에 다른 한글이 이어지면 더 긴 낱말의 일부다("하늘색"). 건드리지 않는다.
         if (!followsAsParticle(text, consumed)) {
-          out.append(text, pos, end);
-          pos = end;
+          out.append(text, searchFrom, end);
+          searchFrom = end;
           continue;
         }
-        out.append(text, pos, hit).append(PLACEHOLDER);
-        pos = consumed;
+        out.append(text, searchFrom, hit).append(PLACEHOLDER);
+        searchFrom = consumed;
       }
-      out.append(text, pos, text.length());
+      out.append(text, searchFrom, text.length());
       return out.toString();
     } catch (RuntimeException e) {
       log.warn("이룸이 이름 가리기 실패, 원문 그대로 둔다", e);
@@ -220,15 +220,15 @@ public final class NicknamePlaceholder {
   }
 
   /// 문장 끝이거나 한글이 아니거나, 이름 뒤에 올 만한 조사 글자면 true.
-  private static boolean followsAsParticle(String text, int idx) {
-    if (idx >= text.length()) {
+  private static boolean followsAsParticle(String text, int index) {
+    if (index >= text.length()) {
       return true;
     }
-    char c = text.charAt(idx);
+    char c = text.charAt(index);
     if (!isHangulSyllable(c)) {
       return true;
     }
-    return NAME_FOLLOWERS.indexOf(c) >= 0 || text.startsWith("한테", idx);
+    return NAME_FOLLOWERS.indexOf(c) >= 0 || text.startsWith("한테", index);
   }
 
   private static Josa matchJosa(String text, int from) {

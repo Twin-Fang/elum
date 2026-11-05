@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -71,7 +72,7 @@ class RoutineTranslateServiceTest {
   @DisplayName("Free 는 AI·크레딧 예약 전에 ROUTINE_TRANSLATE_NOT_ALLOWED — 열어 두면 Free 가 Pro 기능을 쓰고 비용이 나간다")
   void free_isRejectedBeforeAiAndReservation() {
     givenRoutine(original(RoutineStatus.CONFIRMED));
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TRANSLATE)).thenReturn(false);
+    doThrow(new CustomException(Entitlement.ROUTINE_TRANSLATE.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.ROUTINE_TRANSLATE);
 
     assertThatThrownBy(() -> service.translate(GUARDIAN, "routine-1", "en", "key-1"))
       .isInstanceOf(CustomException.class)
@@ -85,7 +86,6 @@ class RoutineTranslateServiceTest {
   void pro_createsLibraryCopyWithTranslatedTexts() {
     Routine original = original(RoutineStatus.CONFIRMED);
     givenRoutine(original);
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TRANSLATE)).thenReturn(true);
     when(routineTranslationAi.translate(any(), eq("하늘"), eq(AppLocale.KO), eq(AppLocale.EN)))
       .thenReturn(new RoutineTranslationDraft("Morning routine", "Sticker",
         List.of(new RoutineTranslationDraft.StepText("Brush teeth", "Brush your teeth"))));
@@ -116,7 +116,6 @@ class RoutineTranslateServiceTest {
   @DisplayName("AI 번역이 실패하면 사본을 저장하지 않고 예약을 돌려준다 — 남기면 반쪽 일과·잃은 크레딧이 생긴다")
   void aiFailure_savesNothingAndReleasesCredit() {
     givenRoutine(original(RoutineStatus.CONFIRMED));
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TRANSLATE)).thenReturn(true);
     when(routineTranslationAi.translate(any(), any(), any(), any()))
       .thenThrow(new CustomException(ErrorCode.ROUTINE_TRANSLATE_FAILED));
 
@@ -129,7 +128,6 @@ class RoutineTranslateServiceTest {
   @Test
   @DisplayName("원래 언어·앱이 열지 않은 언어는 예약 전에 INVALID_INPUT_VALUE / 임시저장은 ROUTINE_INVALID_STATUS")
   void invalidLanguageOrDraft_isRejectedBeforeReservation() {
-    when(entitlementService.isAllowed("member-1", Entitlement.ROUTINE_TRANSLATE)).thenReturn(true);
     givenRoutine(original(RoutineStatus.CONFIRMED));
     assertThatThrownBy(() -> service.translate(GUARDIAN, "routine-1", "ko", "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT_VALUE);

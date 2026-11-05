@@ -8,17 +8,8 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
-import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
-import com.chuseok22.elumserver.routine.application.service.RoutineScheduleRunner;
-import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
-import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
-import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
-import com.chuseok22.elumserver.routine.application.service.RoutineService;
-import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
-import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepImageCandidateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.DisplayName;
@@ -36,12 +27,11 @@ import org.springframework.web.bind.annotation.RequestPart;
  *
  * <p>스프링을 띄우지 않는다. 서비스로 넘기는 인자와 매핑(PUT · multipart · 필드명 image)만 본다.
  */
-class RoutineControllerStepImageTest {
+class RoutineStepImageControllerTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
-  private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineStepEditService.class), mock(RoutineCreateService.class),
-    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService, mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageRegenerateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepImageCandidateService.class), mock(com.chuseok22.elumserver.routine.application.service.RoutineStepVoiceService.class), mock(RoutineLibraryService.class), mock(RoutineLibraryOrderService.class), mock(RoutineScheduleRunner.class),
-    new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
+  private final RoutineStepImageController controller = new RoutineStepImageController(photoService,
+    mock(RoutineStepImageRegenerateService.class), mock(RoutineStepImageCandidateService.class));
 
   @Test
   @DisplayName("호출자와 경로 값, 파일을 서비스에 그대로 넘기고 카드 응답을 200 으로 돌려준다")
@@ -61,7 +51,7 @@ class RoutineControllerStepImageTest {
   @Test
   @DisplayName("PUT /{routineId}/steps/{stepId}/image 이고 multipart 의 image 파트를 받는다")
   void mapping() throws NoSuchMethodException {
-    Method method = RoutineController.class.getMethod("replaceStepImage",
+    Method method = RoutineStepImageController.class.getMethod("replaceStepImage",
       Authentication.class, String.class, String.class, org.springframework.web.multipart.MultipartFile.class);
 
     PutMapping mapping = method.getAnnotation(PutMapping.class);

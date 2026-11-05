@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineTranslateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -32,7 +33,7 @@ public class RoutineTranslateController implements RoutineTranslateControllerDoc
   @PostMapping("/{routineId}/translate")
   public ResponseEntity<RoutineResponse> translate(
     Authentication authentication, @PathVariable String routineId,
-    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+    @RequestHeader(value = IdempotencyHeader.NAME, required = false) String idempotencyKey,
     @RequestBody(required = false) RoutineTranslateRequest request
   ) {
     Caller caller = Caller.from(authentication);

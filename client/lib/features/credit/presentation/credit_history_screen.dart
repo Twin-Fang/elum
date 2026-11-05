@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/scroll_near_end.dart';
 import '../application/credit_history_notifier.dart';
 import '../domain/credit_history.dart';
 import 'widgets/credit_history_day_card.dart';
@@ -42,8 +43,6 @@ class _CreditHistoryScreenState extends ConsumerState<CreditHistoryScreen> {
   /// 날짜 묶음 사이 (Figma `1589:8519` gap 24)
   static const _dayGap = 24.0;
 
-  /// 끝까지 이만큼 남으면 다음 쪽을 받는다.
-  static const _loadMoreExtent = 320.0;
 
   @override
   void initState() {
@@ -60,7 +59,7 @@ class _CreditHistoryScreenState extends ConsumerState<CreditHistoryScreen> {
   }
 
   void _loadMoreNearEnd() {
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref.read(creditHistoryProvider.notifier).loadMore();
     }
   }
@@ -72,7 +71,7 @@ class _CreditHistoryScreenState extends ConsumerState<CreditHistoryScreen> {
     return ElumScaffold(
       onBack: context.popOrHome,
       title: context.l10n.creditHistoryTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: Padding(
         padding: EdgeInsets.only(top: 8.h),

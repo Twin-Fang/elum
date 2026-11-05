@@ -80,7 +80,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       onBack: context.popOrHome,
       isBackEnabled: !_sending,
       title: l10n.feedbackTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

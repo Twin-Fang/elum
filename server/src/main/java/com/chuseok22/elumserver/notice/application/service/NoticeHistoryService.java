@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notice.application.service;
 
+import com.chuseok22.elumserver.common.application.paging.AppCursorPageSize;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.notice.application.dto.response.NoticeHistoryItemResponse;
@@ -27,8 +28,6 @@ public class NoticeHistoryService {
 
   /** 공지 탭에 남겨 두는 기간 (일) */
   static final int HISTORY_DAYS = 90;
-  static final int DEFAULT_PAGE_SIZE = 20;
-  static final int MAX_PAGE_SIZE = 50;
 
   /** cursor 구분자: "{visibleSince ISO-8601}|{id}" */
   private static final String CURSOR_DELIMITER = "|";
@@ -62,7 +61,7 @@ public class NoticeHistoryService {
    * region: 요청 국가 (CurrentRegion.get(), 국가 미상이면 null)
    */
   public NoticeHistoryPageResponse history(String platform, String cursor, Integer size, String region) {
-    int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
+    int pageSize = AppCursorPageSize.resolve(size);
     List<AppNotice> sorted = historyNotices(NoticePlatform.parse(platform), CurrentLocale.get(), region);
 
     CursorPosition position = parseCursor(cursor);

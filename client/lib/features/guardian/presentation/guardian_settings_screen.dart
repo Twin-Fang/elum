@@ -159,7 +159,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       // 뒤로가기 아래로 내려간다.
       title: context.l10n.guardianSettingsTitle,
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 설정에는 광고를 두지 않는다. 맨 아래 `회원탈퇴` 줄과 가까워 광고를 잘못 누르면 되돌릴 수 없는
       // 동작으로 이어질 수 있다. 시안에서 간격이 정해지기 전까지 뺀다.

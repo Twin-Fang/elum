@@ -10,7 +10,7 @@ import com.chuseok22.elumserver.license.core.PlanType;
  * 셋 이상 되거나 기관별 커스텀 한도가 필요해져 구현을 갈아끼워도 <b>부르는 쪽은 한 줄도
  * 바뀌지 않는다.</b>
  *
- * <p>예외는 여기서 던지지 않는다. 한도를 넘었을 때 무엇을 할지는 기능마다 다르기
+ * <p>예외는 {@link #requireAllowed} 만 던진다. 한도를 넘었을 때 무엇을 할지는 기능마다 다르기
  * 때문이다 — 일과 생성은 거부하지만 AI 삽화는 거부 대신 픽토그램으로 내려간다.
  */
 public interface EntitlementService {
@@ -20,6 +20,9 @@ public interface EntitlementService {
 
   /// 켜짐/꺼짐 권한.
   boolean isAllowed(String memberId, Entitlement flag);
+
+  /// Pro 검문: 꺼져 있으면 로그 + 403 {@link Entitlement#rejectionCode()} (기능 API 입구에서 부름)
+  void requireAllowed(String memberId, Entitlement flag);
 
   /// 수치 한도. {@link Entitlement#UNLIMITED}(-1)이면 무제한.
   int limitOf(String memberId, Entitlement limit);

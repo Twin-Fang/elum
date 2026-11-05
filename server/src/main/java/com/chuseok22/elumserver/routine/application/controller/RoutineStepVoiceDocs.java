@@ -10,13 +10,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 보호자 목소리 녹음 API 문서 (#787): 올리기, 지우기, 받기
+ * RoutineStepAudioController 에 제공 (Swagger 묶음은 RoutineControllerDocs 와 같음)
  */
+@Tag(name = RoutineControllerDocs.TAG_NAME, description = RoutineControllerDocs.TAG_DESCRIPTION)
 public interface RoutineStepVoiceDocs {
 
   @Operation(

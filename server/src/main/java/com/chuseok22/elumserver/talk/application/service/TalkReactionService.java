@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.talk.application.service;
 
+import com.chuseok22.elumserver.common.application.paging.AppCursorPageSize;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
@@ -98,8 +99,7 @@ public class TalkReactionService {
   @Transactional(readOnly = true)
   public TalkCommentPageResponse comments(Caller caller, String postId, String cursor, Integer size) {
     TalkPost post = talkPostAccess.requireReadablePost(caller, postId);
-    int pageSize = size == null ? TalkFeedQueryService.DEFAULT_PAGE_SIZE
-      : Math.clamp(size, 1, TalkFeedQueryService.MAX_PAGE_SIZE);
+    int pageSize = AppCursorPageSize.resolve(size);
     int fetchSize = pageSize + 1;
     Set<String> blockedAuthorIds = talkBlockRepository.findByBlockerMemberId(caller.memberId()).stream()
       .map(TalkBlock::getBlockedMemberId)

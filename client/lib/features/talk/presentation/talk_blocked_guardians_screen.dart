@@ -40,7 +40,7 @@ class TalkBlockedGuardiansScreen extends ConsumerWidget {
     return ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.talkBlockedGuardiansTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: switch (blocks) {
         // 0명: 목록 첫 줄 자리에 웜그레이 글 줄

@@ -3,8 +3,11 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.core.Entitlement;
@@ -32,6 +35,9 @@ class RoutineAiPicturePolicyTest {
   void withoutEntitlement_skipsAndRejects() {
     when(entitlementService.isAllowed("m1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(false);
 
+    doThrow(new CustomException(Entitlement.AI_IMAGE_GENERATION.rejectionCode())).when(entitlementService)
+      .requireAllowed("m1", Entitlement.AI_IMAGE_GENERATION);
+
     assertThat(routineAiPicturePolicy.shouldSkipAiPicture("m1")).isTrue();
     assertThatThrownBy(() -> routineAiPicturePolicy.requireAiPicture("m1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_IMAGE_NOT_ALLOWED);
@@ -45,5 +51,6 @@ class RoutineAiPicturePolicyTest {
 
     assertThat(routineAiPicturePolicy.shouldSkipAiPicture("m1")).isFalse();
     assertThatCode(() -> routineAiPicturePolicy.requireAiPicture("m1")).doesNotThrowAnyException();
+    verify(entitlementService).requireAllowed("m1", Entitlement.AI_IMAGE_GENERATION);
   }
 }

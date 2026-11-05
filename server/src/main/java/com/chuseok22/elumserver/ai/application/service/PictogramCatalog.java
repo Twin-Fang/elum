@@ -1,7 +1,6 @@
 package com.chuseok22.elumserver.ai.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.io.IOException;
 import java.io.InputStream;

@@ -62,7 +62,7 @@ public class SsvCallbackVerifier {
     byte[] signatureBytes = decodeSignature(encodedSignature);
     PublicKey publicKey = keyProvider.find(keyId)
       .orElseThrow(() -> new SsvInvalidException("모르는 key_id 다"));
-    if (!signatureMatches(signedMessage, signatureBytes, publicKey)) {
+    if (!isSignatureMatched(signedMessage, signatureBytes, publicKey)) {
       throw new SsvInvalidException("서명이 맞지 않다");
     }
 
@@ -86,7 +86,7 @@ public class SsvCallbackVerifier {
     }
   }
 
-  private static boolean signatureMatches(String message, byte[] signatureBytes, PublicKey key) {
+  private static boolean isSignatureMatched(String message, byte[] signatureBytes, PublicKey key) {
     try {
       Signature signature = Signature.getInstance("SHA256withECDSA");
       signature.initVerify(key);

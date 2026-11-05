@@ -150,7 +150,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
       isBackEnabled: !busy,
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
       title: context.l10n.elumiSettingsTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 글자를 키우면 한 화면을 넘을 수 있어 스크롤로 받는다
       child: SingleChildScrollView(

@@ -112,7 +112,7 @@ class _ExpertRoutineDetailScreenState
     return ElumScaffold(
       onBack: context.popOrHome,
       title: loaded?.title ?? l10n.expertRoutineListTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       bottomButton: loaded == null || loaded.steps.isEmpty
           ? null
