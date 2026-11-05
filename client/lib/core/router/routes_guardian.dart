@@ -19,7 +19,7 @@ import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
-/// 보호자 화면: 칸 4개(셸) + 칸 위에 덮는 이야기·전문가 일과·인쇄 화면 (설정·연결·사람 관리는 routes_guardian_settings.dart)
+/// 보호자 화면: 칸 4개(셸) + 칸 위에 덮는 이야기 글·올리기·링크, 전문가 일과, 인쇄 (설정·내정보 하위 화면은 routes_guardian_settings.dart)
 List<RouteBase> guardianRoutes() => [
   // --- 보호자 모드: 칸 4개 (홈 · 일과관리 · 이야기 · 내정보) ---
   // 가지 순서 = GuardianTab 순서. 칸을 더하면 GuardianTab 과 여기 가지를 함께 늘린다.

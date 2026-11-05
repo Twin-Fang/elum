@@ -142,9 +142,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
                 creatorName: shouldShowCreator
                     ? routine.creatorDisplayName
                     : null,
-                // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
-                // 없었다. 로 목록 자체가 안 보이던 동안 아무도 열어 보지
-                // 못해 빠진 것이 드러나지 않았다.
+                // 누르면 지난 일과 시트 (시안 980:4777)
                 onTap: () => _openPastSheet(routine),
                 highlighted: _rerunning == routine.id,
               );

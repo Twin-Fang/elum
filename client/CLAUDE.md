@@ -560,7 +560,6 @@ dart run build_runner build --delete-conflicting-outputs
 | 코드 생성 패키지 추가 실패 | analyzer 버전 충돌 → `--dry-run`으로 먼저 확인 |
 | 폰트가 안 나옴 | `pubspec.yaml` 선언 누락 → `FontManifest.json` 확인 |
 | 텍스트인 줄 알았는데 폰트가 없음 | 실은 이미지일 수 있다 → Figma 노드 타입 확인 |
-| 위젯 테스트에서 `.w` 에러 | `ScreenUtilInit` 누락 |
 | 화면 문구에 조사만 남음 | 사용자 입력이 빈 값 → 대체어 getter |
 
 > **새 문제를 해결했으면 [트러블슈팅 문서](./docs/troubleshooting.md)에 기록한다.**
