@@ -1,37 +1,45 @@
 import Flutter
 import google_mobile_ads
-import NidThirdPartyLogin
 import UIKit
 import UserNotifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
     // 일과 알림 (#777): 앱이 떠 있을 때도 알림 배너가 보이게 알림 센터 대리자를 잡는다
+    // (실행 완료 전에 잡아야 함 > scene 연결 시점이 아니라 여기)
     UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  /// scene 창의 FlutterViewController 가 엔진을 만든 직후: 플러그인 > 광고 팩토리 > 앱 채널 등록
+  /// scene 에서는 실행 시점에 엔진이 없음 > didFinishLaunching 에서 등록하면 채널이 비어 버림
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    let pluginRegistry = engineBridge.pluginRegistry
+    GeneratedPluginRegistrant.register(with: pluginRegistry)
+    // 네이버 로그인 콜백 URL · 옛 플러그인용 창 연결
+    if let registrar = pluginRegistry.registrar(forPlugin: ElumSceneBridgePlugin.pluginKey) {
+      ElumSceneBridgePlugin.register(with: registrar)
+    }
     // 하단 한 줄 광고 띠 팩토리 (#743). Dart NativeAd 의 factoryId 가 이 이름을 찾는다
     FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
-      self,
+      pluginRegistry,
       factoryId: StripNativeAdFactory.factoryId,
       nativeAdFactory: StripNativeAdFactory()
     )
-    // rootViewController 형변환에 기대면 실패 시 채널이 없어 앱이 설치 오류 화면에 갇힌다.
-    if let registrar = self.registrar(forPlugin: "ElumInstallation") {
-      FlutterMethodChannel(name: "elum/installation", binaryMessenger: registrar.messenger())
-        .setMethodCallHandler { call, result in
-          guard call.method == "getInstallationId" else {
-            result(FlutterMethodNotImplemented)
-            return
-          }
-          do { result(try Self.installationId()) }
-          catch { result(FlutterError(code: "E-INSTALL", message: "Installation marker unavailable", details: nil)) }
+    // 채널이 없으면 앱이 설치 오류 화면에 갇힌다 > 화면 컨트롤러 대신 엔진 messenger 로 만든다
+    FlutterMethodChannel(name: "elum/installation", binaryMessenger: engineBridge.applicationRegistrar.messenger())
+      .setMethodCallHandler { call, result in
+        guard call.method == "getInstallationId" else {
+          result(FlutterMethodNotImplemented)
+          return
         }
-    }
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        do { result(try Self.installationId()) }
+        catch { result(FlutterError(code: "E-INSTALL", message: "Installation marker unavailable", details: nil)) }
+      }
   }
 
   private static func installationId() throws -> String {
@@ -62,21 +70,5 @@ import UserNotifications
     }
     try file.setResourceValues(values)
     return id
-  }
-
-  /// 로그인을 마친 외부 앱이 우리 앱을 다시 열 때 들어온다.
-  ///
-  /// 네이버는 SDK가 직접 처리해야 하므로 먼저 넘긴다. 네이버 것이 아니면
-  /// super로 넘겨 다른 플러그인(카카오·구글)이 처리하게 둔다.
-  /// 여기서 곧바로 false를 돌려주면 다른 소셜 로그인이 콜백을 받지 못한다.
-  override func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    if NidOAuth.shared.handleURL(url) {
-      return true
-    }
-    return super.application(app, open: url, options: options)
   }
 }
