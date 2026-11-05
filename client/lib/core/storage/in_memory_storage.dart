@@ -57,6 +57,7 @@ class InMemoryStorage implements LocalStorage {
   final Map<String, String> _progress = {};
   List<String> _pendingSync = const [];
   String? _cachedToday;
+  String? _cachedTodayOwner;
   String? _cachedConsent;
 
   @override
@@ -227,14 +228,24 @@ class InMemoryStorage implements LocalStorage {
       _pendingSync = ids;
 
   @override
-  String? get cachedTodayRoutinesJson => _cachedToday;
+  String? get cachedTodayRoutinesJson =>
+      _cachedTodayOwner == _accountMemberId ? _cachedToday : null;
 
   @override
-  Future<void> setCachedTodayRoutinesJson(String json) async =>
-      _cachedToday = json;
+  Future<void> setCachedTodayRoutinesJson(
+    String json, {
+    required String? ownerMemberId,
+  }) async {
+    if (ownerMemberId != _accountMemberId) return;
+    _cachedTodayOwner = ownerMemberId;
+    _cachedToday = json;
+  }
 
   @override
-  Future<void> clearCachedTodayRoutines() async => _cachedToday = null;
+  Future<void> clearCachedTodayRoutines() async {
+    _cachedToday = null;
+    _cachedTodayOwner = null;
+  }
 
   String? _cachedTuning;
 
@@ -370,6 +381,7 @@ class InMemoryStorage implements LocalStorage {
     _selectedProfileId = null;
     _progress.clear();
     _cachedToday = null;
+    _cachedTodayOwner = null;
   }
 
   @override
@@ -393,5 +405,8 @@ class InMemoryStorage implements LocalStorage {
     _progress.clear();
     _pendingSync = const [];
     _cachedToday = null;
+    _cachedTodayOwner = null;
+    _talkImportedSeenRoutineIds = const [];
+    _talkShareHintDismissedRoutineIds = const [];
   }
 }

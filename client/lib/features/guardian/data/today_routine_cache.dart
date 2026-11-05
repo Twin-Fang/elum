@@ -11,10 +11,18 @@ class TodayRoutineCache {
 
   final LocalStorage? _storage;
 
+  /// 지금 로그인한 회원 id (요청 전에 잡아 [save] 에 넘김)
+  String? get currentOwnerMemberId => _storage?.accountMemberId;
+
   /// 성공한 응답을 저장한다. toJson 이 보호자 원문을 빼고 직렬화한다.
-  Future<void> save(List<Routine> routines) async {
+  /// [ownerMemberId] 가 지금 회원과 다르면(응답 사이 계정 전환) 저장소가 버린다.
+  Future<void> save(
+    List<Routine> routines, {
+    required String? ownerMemberId,
+  }) async {
     await _storage?.setCachedTodayRoutinesJson(
       jsonEncode(routines.map((r) => r.toJson()).toList()),
+      ownerMemberId: ownerMemberId,
     );
   }
 
@@ -57,6 +65,7 @@ class TodayRoutineCache {
       _storage
           ?.setCachedTodayRoutinesJson(
             jsonEncode(routines.map((r) => r.toJson()).toList()),
+            ownerMemberId: currentOwnerMemberId,
           )
           .catchError((Object e) {
             AppLogger.repositoryError('RoutineRepository', 'cacheMigrate', e);
