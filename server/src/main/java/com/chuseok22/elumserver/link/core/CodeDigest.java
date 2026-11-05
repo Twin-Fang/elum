@@ -1,10 +1,7 @@
 package com.chuseok22.elumserver.link.core;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.chuseok22.elumserver.common.infrastructure.security.Sha256Hex;
 import java.time.Duration;
-import java.util.HexFormat;
 
 /**
  * 연결 암호·초대 코드가 함께 쓰는 규칙 — 저장용 해시와 유효 시간·실패 횟수.
@@ -25,11 +22,6 @@ public final class CodeDigest {
 
   /** 정규화한 코드를 해시한다. 원문은 어디에도 남기지 않는다. */
   public static String sha256(String normalizedCode) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      return HexFormat.of().formatHex(digest.digest(normalizedCode.getBytes(StandardCharsets.UTF_8)));
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256을 쓸 수 없습니다", e);
-    }
+    return Sha256Hex.hexOf(normalizedCode);
   }
 }

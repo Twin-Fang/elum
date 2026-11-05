@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.credit.application.service;
 
+import com.chuseok22.elumserver.common.infrastructure.security.Sha256Hex;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
@@ -17,12 +18,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.core.PlanType;
 import jakarta.persistence.EntityManager;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -262,14 +259,7 @@ public class CreditAccountService {
 
   /// sha256("{provider}:{providerUserId}") hex. V26 의 encode(sha256(convert_to(provider||':'||id,'UTF8')),'hex') 와 같다.
   public static String identityKey(String provider, String providerUserId) {
-    try {
-      byte[] digest = MessageDigest.getInstance("SHA-256")
-        .digest((provider + ":" + providerUserId).getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(digest);
-    } catch (NoSuchAlgorithmException e) {
-      // 모든 JVM 이 SHA-256 을 갖춘다(자바 표준 필수 알고리즘).
-      throw new IllegalStateException(e);
-    }
+    return Sha256Hex.hexOf(provider + ":" + providerUserId);
   }
 
   static AiCreditLedger ledgerLine(String accountId, CreditLedgerType type, int delta, int balanceAfter) {
