@@ -8,8 +8,6 @@
 class SingleFlight<T> {
   Future<T>? _running;
 
-  bool get running => _running != null;
-
   Future<T> run(Future<T> Function() task) {
     final running = _running;
     if (running != null) return running;

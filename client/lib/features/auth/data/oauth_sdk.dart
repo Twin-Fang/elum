@@ -42,7 +42,7 @@ class OAuthSdkFailure extends OAuthSdkOutcome {
 /// 네 제공자의 API가 제각각이라 호출부가 분기를 떠안으면 화면 코드가 지저분해진다.
 /// 여기서 차이를 흡수하고 밖으로는 토큰 문자열 하나만 내보낸다.
 class OAuthSdk {
-  bool _googleInitialized = false;
+  bool _isGoogleInitialized = false;
 
   /// 앱 시작 시 한 번 호출한다. 카카오는 SDK 초기화가 선행돼야 로그인이 동작한다.
   static Future<void> initialize() async {
@@ -129,13 +129,13 @@ class OAuthSdk {
       return const OAuthSdkFailure('SDK-GOOGLE-CONFIG');
     }
 
-    if (!_googleInitialized) {
+    if (!_isGoogleInitialized) {
       final iosClientId = AppConfig.googleIosClientId;
       await GoogleSignIn.instance.initialize(
         clientId: iosClientId.isEmpty ? null : iosClientId,
         serverClientId: serverClientId,
       );
-      _googleInitialized = true;
+      _isGoogleInitialized = true;
     }
 
     if (!GoogleSignIn.instance.supportsAuthenticate()) {

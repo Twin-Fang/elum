@@ -109,11 +109,11 @@ class CardImageRepository {
     required String imagePath,
   }) async {
     try {
-      final res = await _dio.get<List<int>>(
+      final response = await _dio.get<List<int>>(
         '/api/routines/$routineId/steps/$stepId/image',
         options: Options(responseType: ResponseType.bytes),
       );
-      final bytes = res.data;
+      final bytes = response.data;
       if (bytes == null || bytes.isEmpty) return null;
       return Uint8List.fromList(bytes);
     } catch (e) {
@@ -172,7 +172,7 @@ class CardImageRepository {
     if (mime == null) return const PhotoUploadResult.failed(PhotoFailure.type);
 
     try {
-      final res = await _dio.put<Map<String, dynamic>>(
+      final response = await _dio.put<Map<String, dynamic>>(
         '/api/routines/$routineId/steps/$stepId/image',
         data: FormData.fromMap({
           'image': MultipartFile.fromBytes(
@@ -185,7 +185,7 @@ class CardImageRepository {
         // 받는 쪽과 같은 값을 쓴다(사진은 수 MB 라 다른 요청보다 오래 걸린다).
         options: Options(sendTimeout: AppConfig.receiveTimeout),
       );
-      final body = res.data;
+      final body = response.data;
       if (body == null) {
         return PhotoUploadResult.failed(
           PhotoFailure.from(const AppFailure(fault: NetworkFault.app)),

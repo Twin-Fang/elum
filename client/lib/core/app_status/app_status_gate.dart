@@ -99,7 +99,7 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
         // 새 서버로 다시 띄우기 직전 > 옛 서버의 점검·업데이트 화면을 그리지 않음
         if (result.isServerSwitchReady) return widget.child;
         final status = result.status;
-        if (status.maintenance) {
+        if (status.isUnderMaintenance) {
           return AdaptivePageFrame(
             kind: ScreenLayoutKind.phoneColumn,
             child: MaterialApp(

@@ -59,19 +59,19 @@ class AppLogInterceptor extends Interceptor {
       options.extra[_idKey] = id;
       options.extra[_startKey] = Stopwatch()..start();
 
-      final buf = StringBuffer(
+      final buffer = StringBuffer(
         '→ [$id] ${options.method} ${_pathWithQuery(options)}',
       );
       for (final name in _shownHeaders) {
         final v = _header(options.headers, name);
-        if (v != null) buf.write('\n  $name: $v');
+        if (v != null) buffer.write('\n  $name: $v');
       }
       // 의견 요청 본문은 이 기록 자신이라, 남기면 다음 전송 때 기록 안에 기록이 겹쳐 쌓인다.
       final body = options.uri.path.endsWith('/api/feedback')
           ? '(feedback body omitted)'
           : describeBody(options.data, _header(options.headers, 'content-type'));
-      if (body != null) buf.write('\n  body: $body');
-      AppLogger.network(buf.toString());
+      if (body != null) buffer.write('\n  body: $body');
+      AppLogger.network(buffer.toString());
     } catch (_) {}
     handler.next(options);
   }
@@ -80,7 +80,7 @@ class AppLogInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     try {
       final o = response.requestOptions;
-      final buf = StringBuffer(
+      final buffer = StringBuffer(
         '← [${_idOf(o)}] ${response.statusCode ?? 0} ${o.method} ${o.uri.path} '
         '(${_elapsedMs(o)}ms)',
       );
@@ -88,8 +88,8 @@ class AppLogInterceptor extends Interceptor {
         response.data,
         response.headers.value('content-type'),
       );
-      if (body != null) buf.write('\n  body: $body');
-      AppLogger.network(buf.toString());
+      if (body != null) buffer.write('\n  body: $body');
+      AppLogger.network(buffer.toString());
     } catch (_) {}
     handler.next(response);
   }
@@ -98,17 +98,17 @@ class AppLogInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     try {
       final o = err.requestOptions;
-      final res = err.response;
-      final buf = StringBuffer(
+      final response = err.response;
+      final buffer = StringBuffer(
         '✕ [${_idOf(o)}] ${o.method} ${o.uri.path} '
-        'status=${res?.statusCode ?? 0} '
-        'serverErrorCode=${_serverErrorCode(res?.data) ?? '-'} '
+        'status=${response?.statusCode ?? 0} '
+        'serverErrorCode=${_serverErrorCode(response?.data) ?? '-'} '
         'type=${err.type.name} message=${err.message ?? '-'} '
         '(${_elapsedMs(o)}ms)',
       );
-      final body = describeBody(res?.data, res?.headers.value('content-type'));
-      if (body != null) buf.write('\n  body: $body');
-      AppLogger.network(buf.toString());
+      final body = describeBody(response?.data, response?.headers.value('content-type'));
+      if (body != null) buffer.write('\n  body: $body');
+      AppLogger.network(buffer.toString());
     } catch (_) {}
     handler.next(err);
   }

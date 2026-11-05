@@ -31,8 +31,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getMyRoutines');
 
     try {
-      final res = await _dio.get<List<dynamic>>('/api/routines');
-      final body = res.data;
+      final response = await _dio.get<List<dynamic>>('/api/routines');
+      final body = response.data;
       if (body == null) return const [];
 
       final routines = body
@@ -59,8 +59,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getSuggestions');
 
     try {
-      final res = await _dio.get<List<dynamic>>('/api/routines/suggestions');
-      final body = res.data;
+      final response = await _dio.get<List<dynamic>>('/api/routines/suggestions');
+      final body = response.data;
 
       final parsed =
           body
@@ -93,11 +93,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     });
 
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/routines/questions',
         data: {'rawInputText': rawInputText},
       );
-      final body = res.data;
+      final body = response.data;
       if (body != null) {
         final question = RoutineQuestion.fromJson(body);
         AppLogger.repositorySuccess(
@@ -146,7 +146,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'hasReward': rewardText.trim().isNotEmpty,
     });
 
-    final res = await _dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/api/routines',
       data: {
         'rawInputText': rawInputText,
@@ -164,7 +164,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
           ? null
           : Options(headers: {idempotencyKeyHeader: idempotencyKey}),
     );
-    final body = res.data;
+    final body = response.data;
     // 응답이 비었거나 카드가 0장이면 실패로 본다. 로컬로 지어내지 않고 예외를 던져
     // notifier가 에러 화면(코드+재시도)으로 처리하게 한다. 재시도는 AI를 다시 호출한다.
     if (body == null) {
@@ -207,10 +207,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
       throw StateError('승인할 일과가 서버에 없습니다');
     }
 
-    final res = await _dio.patch<Map<String, dynamic>>(
+    final response = await _dio.patch<Map<String, dynamic>>(
       '/api/routines/${routine.id}/confirm',
     );
-    final body = res.data;
+    final body = response.data;
     if (body == null) {
       throw StateError('승인 응답이 비어 있습니다');
     }
@@ -257,8 +257,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getTodayRoutines');
 
     try {
-      final res = await _dio.get<List<dynamic>>('/api/routines/today');
-      final body = res.data;
+      final response = await _dio.get<List<dynamic>>('/api/routines/today');
+      final body = response.data;
       if (body != null) {
         final routines = body
             .whereType<Map<String, dynamic>>()
@@ -319,7 +319,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
     if (routine.id.isNotEmpty) {
       try {
-        final res = await _dio.patch<Map<String, dynamic>>(
+        final response = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/reward',
           data: {
             // 빈 문자열을 그대로 보낸다 — 서버가 이걸 "보상 지우기"로 읽는다.
@@ -327,7 +327,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
             'rewardPresetKey': rewardPresetKey.trim(),
           },
         );
-        final body = res.data;
+        final body = response.data;
         if (body != null) {
           AppLogger.repositorySuccess(
             'RoutineRepository',
@@ -357,9 +357,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getRecentRewards');
 
     try {
-      final res = await _dio.get<List<dynamic>>('/api/routines/recent-rewards');
+      final response = await _dio.get<List<dynamic>>('/api/routines/recent-rewards');
       final rewards =
-          res.data
+          response.data
               ?.whereType<Map<String, dynamic>>()
               .map(RecentReward.fromJson)
               .where((r) => r.isValid)
@@ -392,9 +392,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', label);
 
     try {
-      final res = await _dio.get<List<dynamic>>(path);
+      final response = await _dio.get<List<dynamic>>(path);
       final routines =
-          res.data
+          response.data
               ?.whereType<Map<String, dynamic>>()
               .map(Routine.fromJson)
               .toList() ??
@@ -422,10 +422,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/routines/$routineId/duplicate',
       );
-      final body = res.data;
+      final body = response.data;
       if (body == null) {
         return const Attempt.failed(AppFailure(fault: NetworkFault.app));
       }

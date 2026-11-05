@@ -302,14 +302,14 @@ abstract final class AppConfig {
   ///
   /// 릴리스 빌드에서만 false라 `.env`의 실제 광고 단위를 읽는다.
   /// 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
-  static bool get useTestAds => kDebugMode || kProfileMode || isDevBuild;
+  static bool get shouldUseTestAds => kDebugMode || kProfileMode || isDevBuild;
 
   /// 배치별 광고 단위 ID. 릴리스에서 `.env`에 값이 없으면 null이다.
   static String? adUnitId(AdPlacement placement, {required bool isIos}) =>
       AdIds.resolve(
         placement: placement,
         isIos: isIos,
-        useTestIds: useTestAds,
+        shouldUseTestIds: shouldUseTestAds,
         readEnv: (key) => _string(key, ''),
       );
 

@@ -172,7 +172,7 @@ final routes = [
 - **광고 자리는 보호자 화면 세 곳뿐이다**: 칸 틀 맨 아래 광고 띠(라우터가 넣음), 홈 지난 일과 목록 안 배너 한 개(`past_routine_section.dart`), 임시저장 하단 띠. 이룸이 화면·일과 만들기
   흐름·보상 연출·온보딩에는 광고 코드가 닿지 않는다. 막는 시험은 없다(앱 시험 삭제, #848) — 리뷰로 지킨다.
 - `google_mobile_ads`는 `features/ads/data` 안에서만 쓴다. 광고 요청에는 `nonPersonalizedAds` 외 사용자 정보를 넘기지 않는다.
-- **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.useTestAds`). 실제 ID는
+- **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.shouldUseTestAds`). 실제 ID는
   릴리스 빌드의 `.env`로만 들어간다. 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
 - 하단 배너는 `ElumScaffold.bottomBanner`로 둔다. 홈의 목록 한가운데(오늘 일과와 지난 일과 사이)에는 배너를 두지 않는다 — 앱 디자인을 해쳐 뺐다. `AdBannerSlot.padding`은 광고가 뜬 뒤에만 적용돼 광고가 없으면 자리가 0이다. `bottomButton`·`belowButton`과 함께 쓰면 assert로 막힌다.
 - **`google_mobile_ads`는 `^7.0.0`(광고 SDK iOS 12.14)으로 고정한다.** 9.x(iOS 13.7)는 Xcode 26 미만에서

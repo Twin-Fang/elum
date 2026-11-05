@@ -44,7 +44,7 @@ abstract final class DevSimulation {
       DevAppStatusSimulation.off => null,
       DevAppStatusSimulation.suggestUpdate => const AppStatus(latestVersion: _unreachableVersion),
       DevAppStatusSimulation.forceUpdate => const AppStatus(minVersion: _unreachableVersion),
-      DevAppStatusSimulation.maintenance => const AppStatus(maintenance: true),
+      DevAppStatusSimulation.maintenance => const AppStatus(isUnderMaintenance: true),
     };
   }
 

@@ -41,7 +41,7 @@ class RoutineStepApi {
     }
 
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/routines/${routine.id}/steps',
         data: {
           'title': title,
@@ -49,7 +49,7 @@ class RoutineStepApi {
           'generateImage': true,
         },
       );
-      final body = res.data;
+      final body = response.data;
       if (body == null) {
         return (
           routine: routine,
@@ -95,12 +95,12 @@ class RoutineStepApi {
 
     if (routine.id.isNotEmpty) {
       try {
-        final res = await _dio.patch<Map<String, dynamic>>(
+        final response = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/steps/$stepId',
           // 보낸 필드만 바뀐다 — 제목도 함께 보내야 서버에 남는다
           data: {'title': title, 'description': description},
         );
-        final body = res.data;
+        final body = response.data;
         if (body != null) {
           final updated = Routine.fromJson(body);
           AppLogger.repositorySuccess(
@@ -143,10 +143,10 @@ class RoutineStepApi {
   Future<String?> fetchStepImagePath(String routineId, String stepId) async {
     if (routineId.isEmpty) return null;
     try {
-      final res = await _dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         '/api/routines/$routineId',
       );
-      final body = res.data;
+      final body = response.data;
       if (body == null) return null;
       final steps = Routine.fromJson(body).steps.where((s) => s.id == stepId);
       final imagePath = steps.isEmpty ? null : steps.first.imagePath;
