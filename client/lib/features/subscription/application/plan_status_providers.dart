@@ -21,7 +21,7 @@ final memberSubscriptionProvider = Provider<MemberSubscription?>(
 );
 
 /// 탈퇴해도 스토어 결제가 이어지는가: Pro + 스토어 구독 + 해지 예약 아님 (갱신 여부 모르면 이어진다고 봄)
-/// 서버 탈퇴는 스토어 구독을 해지하지 않음 > 회원탈퇴 경고에 스토어 해지 안내 (#1155)
+/// 서버 탈퇴는 스토어 구독을 해지하지 않음 > 회원탈퇴 경고에 스토어 해지 안내
 final hasRenewingStoreSubscriptionProvider = Provider<bool>((ref) {
   final subscription = ref.watch(memberSubscriptionProvider);
   return ref.watch(planAccessProvider).isPro &&

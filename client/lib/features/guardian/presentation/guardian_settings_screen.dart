@@ -83,7 +83,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     });
   }
 
-  /// 회원탈퇴: 경고 팝업 > `회원탈퇴` 입력 확인 > 탈퇴 (#1155)
+  /// 회원탈퇴: 경고 팝업 > `회원탈퇴` 입력 확인 > 탈퇴
   Future<void> _deleteAccount() async {
     final isWarningConfirmed = await _confirmWithdrawWarning();
     if (!isWarningConfirmed || !mounted) return;

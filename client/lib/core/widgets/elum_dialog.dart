@@ -371,7 +371,7 @@ class ElumDialogButton extends StatelessWidget {
     final isEnabled = onTap != null;
     // 팝업 전용 토큰을 쓴다. `buttonNeutral`·`danger`는 설정 화면과 연결 암호도
     // 함께 쓰므로, 팝업을 시안에 맞추려고 그것을 건드리면 그쪽까지 바뀐다.
-    // 꺼진 버튼(onTap null)은 하단 CTA 비활성 토큰 (입력 확인 전 탈퇴하기 #1155)
+    // 꺼진 버튼(onTap null)은 하단 CTA 비활성 토큰 (입력 확인 전 탈퇴하기)
     final (bg, fg) = !isEnabled
         ? (colors.buttonDisabled, colors.buttonDisabledText)
         : switch (tone) {

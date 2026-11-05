@@ -7,7 +7,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
 
-/// 회원탈퇴 둘째 단계: `회원탈퇴` 입력 확인 팝업 (#1155). 문구가 맞아야 탈퇴하기가 켜지고, 누르면 true
+/// 회원탈퇴 둘째 단계: `회원탈퇴` 입력 확인 팝업. 문구가 맞아야 탈퇴하기가 켜지고, 누르면 true
 ///
 /// ⚠️ 시안 없는 임시 배치: 팝업 틀(`ElumDialogSurface`·버튼 줄) + 시트 입력칸(`ElumSheetTextField`) 조합
 /// 바깥 누름·뒤로가기 = 취소 (false). 닫히면 입력은 팝업과 함께 버려짐
