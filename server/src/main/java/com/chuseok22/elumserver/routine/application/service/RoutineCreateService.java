@@ -190,9 +190,7 @@ public class RoutineCreateService {
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다.
     routine.setSanitizedInputText(request.rawInputText());
     routine.setTitle(generation.title());
-    // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
-    // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
-    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다.
+    // scheduledAt 은 비워서 보낼 수 있음. DB 는 NOT NULL 이라 서버가 채움 (값을 요구하면 빠뜨린 호출이 AI 를 다 태운 뒤 DB 에서 터짐)
     routine.setScheduledAt(
       request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
     );
