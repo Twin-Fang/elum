@@ -9,6 +9,7 @@ bool isPlanBenefitGranted(PlanBenefit benefit, PlanAccess access) => switch (ben
   PlanBenefit.expertRoutines => access.canImportExpertRoutines,
   PlanBenefit.guardianVoice => access.canUseGuardianVoice,
   PlanBenefit.routineTranslate => access.canTranslateRoutines,
+  PlanBenefit.freeRoutineText => access.canCreateRoutineTextFree,
   PlanBenefit.freeImageRegenerate => access.canRegenerateImagesFree,
   PlanBenefit.moreWeeklyCredits => access.isPro,
   PlanBenefit.cardExportWithoutWatermark => access.canExportCardsWithoutWatermark,

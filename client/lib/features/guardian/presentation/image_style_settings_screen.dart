@@ -129,7 +129,7 @@ class _ImageStyleSettingsScreenState
               // 고른 방식의 비용을 보여 준다 (저장 전)
               ImageStyleCreditBar(
                 style: _pickedStyle,
-                costs: ref.watch(creditCostsProvider),
+                costs: ref.watch(routineCreateCreditCostsProvider),
               ),
               SizedBox(height: _cardGap.h),
               group,

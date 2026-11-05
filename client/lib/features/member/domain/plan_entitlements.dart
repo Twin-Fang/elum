@@ -18,6 +18,7 @@ class PlanEntitlements {
     this.canImportExpertRoutines = false,
     this.canUseRoutineMemory = false,
     this.canRegenerateImagesFree = false,
+    this.canCreateRoutineTextFree = false,
     this.canUseAiPictures = false,
   });
 
@@ -37,6 +38,7 @@ class PlanEntitlements {
     canImportExpertRoutines: true,
     canUseRoutineMemory: true,
     canRegenerateImagesFree: true,
+    canCreateRoutineTextFree: true,
     canUseAiPictures: true,
   );
 
@@ -73,6 +75,9 @@ class PlanEntitlements {
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (`imageRegenerateFree`, 하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
 
+  /// AI 일과 만들기의 글 몫이 크레딧 없이 되는가 (`routineCreateFree`, 카드 그림은 장수만큼 듦, 하루 횟수는 서버가 봄)
+  final bool canCreateRoutineTextFree;
+
   /// AI 맞춤 그림을 쓸 수 있는가 (`aiImageGeneration`): 새 카드 그림·다시 그리기·그림 그리기
   /// 꺼져도 이미 만든 AI 그림은 그대로 보인다 (그림 조회는 요금제와 무관)
   final bool canUseAiPictures;
@@ -93,6 +98,7 @@ class PlanEntitlements {
       canImportExpertRoutines: isEntitled('routineTemplates'),
       canUseRoutineMemory: isEntitled('routineMemory'),
       canRegenerateImagesFree: isEntitled('imageRegenerateFree'),
+      canCreateRoutineTextFree: isEntitled('routineCreateFree'),
       canUseAiPictures: isEntitled('aiImageGeneration'),
     );
   }
@@ -110,6 +116,7 @@ class PlanEntitlements {
     canImportExpertRoutines,
     canUseRoutineMemory,
     canRegenerateImagesFree,
+    canCreateRoutineTextFree,
     canUseAiPictures,
   ];
 

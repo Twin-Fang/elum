@@ -375,6 +375,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
 
+  "imageStyleCreditRoutineFree": "일과 무료",
+  "@imageStyleCreditRoutineFree": { "description": "크레딧 띠 — 요금제 혜택으로 일과 글 몫에 크레딧이 들지 않을 때 (그림 한 장 단가는 따로 보임)" },
+
   "imageStyleCreditImage": "{count, plural, other{그림 한 장 {count}개}}",
   "@imageStyleCreditImage": {
     "description": "크레딧 띠 — 만화·실사에서 카드 그림 한 장마다 더 드는 크레딧. count 는 서버 단가",
@@ -1517,6 +1520,9 @@
   "creditCostTitle": "AI 크레딧은 이렇게 줄어요",
   "@creditCostTitle": {"description": "AI 크레딧 안내 팝업 제목"},
 
+  "creditCostLineTextFree": "일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.",
+  "@creditCostLineTextFree": {"description": "AI 크레딧 단가 안내 — 요금제 혜택으로 일과 글이 무료일 때. imageCost 는 카드 그림 한 장 단가(서버 값)", "placeholders": {"imageCost": {"type": "int"}}},
+
   "creditCostLine": "일과 글을 만들 때 {textCost, plural, other{{textCost}개}}, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.",
   "@creditCostLine": {"description": "AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)", "placeholders": {"textCost": {"type": "int"}, "imageCost": {"type": "int"}}},
 
@@ -1823,7 +1829,7 @@
   "creditHistoryKindImageRegenerate": "카드 그림 다시 만들기",
   "@creditHistoryKindImageRegenerate": {"description": "사용 내역 종류: 그림 다시 만들기 (사용)"},
   "creditHistoryFree": "무료",
-  "@creditHistoryFree": {"description": "사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기(요금제 혜택)"},
+  "@creditHistoryFree": {"description": "사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기·일과 글(요금제 혜택)"},
 
   "creditHistoryKindWeeklyGrant": "이번 주 크레딧을 채워드렸어요",
   "@creditHistoryKindWeeklyGrant": {"description": "사용 내역 종류: 주간 지급 (Figma 1589:8444)"},
@@ -2809,6 +2815,8 @@
   "@planBenefitGuardianVoice": {"description": "혜택 줄: 보호자 목소리"},
   "planBenefitRoutineTranslate": "만든 일과를 다른 언어로 바꿔 만들어요",
   "@planBenefitRoutineTranslate": {"description": "혜택 줄: 다른 언어로 만들기"},
+  "planBenefitFreeRoutineText": "일과는 크레딧 없이 만들고 카드 그림만 크레딧을 써요",
+  "@planBenefitFreeRoutineText": {"description": "혜택 줄: 일과 생성 글 무료 (카드 그림은 장수만큼 크레딧)"},
   "planBenefitFreeImageRegenerate": "카드 그림을 하루 정해진 횟수까지 크레딧 없이 다시 그려요",
   "@planBenefitFreeImageRegenerate": {"description": "혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)"},
   "planBenefitMoreWeeklyCredits": "매주 AI 크레딧을 더 많이 받아요",

@@ -168,6 +168,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
       isAllowed(plan, Entitlement.ROUTINE_TEMPLATES),
       isAllowed(plan, Entitlement.ROUTINE_MEMORY),
       isAllowed(plan, Entitlement.IMAGE_REGENERATE_FREE),
+      isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE),
       isAllowed(plan, Entitlement.IMAGE_HIGH_QUALITY)
     );
   }

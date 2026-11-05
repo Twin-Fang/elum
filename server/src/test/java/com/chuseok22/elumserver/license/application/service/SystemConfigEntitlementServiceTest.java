@@ -464,6 +464,22 @@ class SystemConfigEntitlementServiceTest {
     assertThat(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP.getDefaultValue()).isEqualTo("30");
   }
 
+  @Test
+  @DisplayName("일과 생성 글 무료 권한은 플랜 키를 읽고 기본값은 Pro 만 켜짐, Pro 하루 일과 생성 횟수 기본은 무제한 그대로 (#1110)")
+  void snapshot_routineCreateFreeReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_CREATE_FREE)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).routineCreateFree()).isTrue();
+    assertThat(Entitlement.ROUTINE_CREATE_FREE.configKeyFor(PlanType.FREE)).isEqualTo(ConfigKey.FREE_ROUTINE_CREATE_FREE);
+    assertThat(ConfigKey.FREE_ROUTINE_CREATE_FREE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_CREATE_FREE.getDefaultValue()).isEqualTo("true");
+    assertThat(ConfigKey.PRO_ROUTINE_CREATE_PER_DAY.getDefaultValue()).isEqualTo("-1");
+  }
+
   // --- 광고 항상 노출 회원 ---
 
   private void givenProWithAdsRemoved(String alwaysShownMemberIds) {

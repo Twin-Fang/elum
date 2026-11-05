@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.credit.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
@@ -46,6 +47,7 @@ public class CreditReservationService {
   private final AiCreditJobRepository jobRepository;
   private final AiCreditLedgerRepository ledgerRepository;
   private final CreditFreeRegenerateAllowance freeRegenerateAllowance;
+  private final CreditFreeRoutineTextAllowance freeRoutineTextAllowance;
   private final CreditReservationReturns reservationReturns;
   private final CreditSettlementLedger settlementLedger;
   /// 예약: 호출자 트랜잭션이 있으면 합류(수동 카드 저장 안), 없으면 짧게 새로 연다(일과 생성 전).
@@ -76,6 +78,7 @@ public class CreditReservationService {
     this.jobRepository = jobRepository;
     this.ledgerRepository = ledgerRepository;
     this.freeRegenerateAllowance = new CreditFreeRegenerateAllowance(entitlementService, jobRepository, usageLimitSettings);
+    this.freeRoutineTextAllowance = new CreditFreeRoutineTextAllowance(entitlementService);
     this.reservationReturns = new CreditReservationReturns(accountService, jobRepository, ledgerRepository, clock);
     this.settlementLedger = new CreditSettlementLedger(accountService, ledgerRepository);
     this.joinOrNew = new TransactionTemplate(transactionManager);
@@ -150,9 +153,13 @@ public class CreditReservationService {
     }
 
     accountService.ensureWeeklyGrant(account, policyService::grantPolicyFor, planOf(account), now);
-    // 시작 때 단가 (무료 다시 그리기 대상이면 다시 그리기 단가만 0)
-    String costSnapshot = freeRegenerateAllowance.costSnapshotFor(account, kind, policy, now);
-    int cost = AiCreditPolicy.costFrom(costSnapshot, CreditJobCharges.reserveAction(kind));
+    // 시작 때 단가 (무료 다시 그리기 대상이면 다시 그리기 단가만 0, 일과 글 무료 대상이면 글 단가만 0)
+    boolean isRoutineTextFree = freeRoutineTextAllowance.isRoutineTextFree(account, kind);
+    String costSnapshot = isRoutineTextFree
+      ? policy.actionCostsJsonWithFree(CreditAction.ROUTINE_TEXT)
+      : freeRegenerateAllowance.costSnapshotFor(account, kind, policy, now);
+    CreditAction holdAction = CreditFreeRoutineTextAllowance.holdActionOf(kind, isRoutineTextFree);
+    int cost = AiCreditPolicy.costFrom(costSnapshot, holdAction);
     int available = accountService.balance(account, now).available();
     if (available < cost) {
       return ReserveResult.rejected(ErrorCode.AI_CREDIT_INSUFFICIENT);
@@ -177,7 +184,7 @@ public class CreditReservationService {
 
     AiCreditLedger line = CreditAccountService.ledgerLine(account.getId(), CreditLedgerType.RESERVE, -cost, available - cost);
     line.setJobId(saved.getId());
-    line.setAction(CreditJobCharges.reserveAction(kind));
+    line.setAction(holdAction);
     line.setPolicyVersion(policy.getVersion());
     ledgerRepository.save(line);
     return ReserveResult.of(CreditReservation.reserved(saved.getId()));
@@ -273,6 +280,13 @@ public class CreditReservationService {
    */
   public int freeRegeneratesLeftToday(AiCreditAccount account, LocalDateTime now) {
     return freeRegenerateAllowance.freeRegeneratesLeftToday(account, now);
+  }
+
+  /**
+   * 일과 생성 시작에 필요한 사용 가능량 (크레딧 요약·추가 질문 공통, 계산은 {@link CreditFreeRoutineTextAllowance})
+   */
+  public int routineCreateStartCost(AiCreditAccount account, AiCreditPolicy policy) {
+    return freeRoutineTextAllowance.routineCreateStartCost(account, policy);
   }
 
   private PlanType planOf(AiCreditAccount account) {

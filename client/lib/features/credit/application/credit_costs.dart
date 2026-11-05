@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../member/application/plan_access.dart';
 import '../data/credit_repository.dart';
 
 /// 일과 하나를 만들 때(`routine`)와 카드 그림 한 장마다(`image`) 드는 크레딧.
@@ -21,4 +22,16 @@ final creditCostsProvider = Provider.autoDispose<CreditCosts?>((ref) {
     routine: summary?.routineTextCost ?? 1,
     image: summary?.cardImageCost ?? 1,
   );
+});
+
+/// 일과 만들기 비용 미리 보기(그림 방식 띠)가 보는 단가: 글 무료 권한(Pro)이면 글 0, 그림은 그대로
+///
+/// 번역 안내는 글 단가를 그대로 써야 해서 [creditCostsProvider] 를 본다 (글 무료는 일과 만들기에만)
+final routineCreateCreditCostsProvider = Provider.autoDispose<CreditCosts?>((ref) {
+  final costs = ref.watch(creditCostsProvider);
+  if (costs == null) return null;
+  final canCreateRoutineTextFree = ref.watch(
+    planAccessProvider.select((access) => access.canCreateRoutineTextFree),
+  );
+  return canCreateRoutineTextFree ? (routine: 0, image: costs.image) : costs;
 });

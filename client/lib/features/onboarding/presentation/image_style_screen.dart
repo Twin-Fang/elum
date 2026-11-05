@@ -84,7 +84,7 @@ class ImageStyleScreen extends ConsumerWidget {
             SizedBox(height: space.headerToContent),
             ImageStyleCreditBar(
               style: profile.imageStyle,
-              costs: ref.watch(creditCostsProvider),
+              costs: ref.watch(routineCreateCreditCostsProvider),
             ),
             SizedBox(height: _cardGap.h),
             group,

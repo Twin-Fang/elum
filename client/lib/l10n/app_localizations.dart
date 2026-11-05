@@ -764,6 +764,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{일과 {count}개}}'**
   String imageStyleCreditRoutine(int count);
 
+  /// 크레딧 띠 — 요금제 혜택으로 일과 글 몫에 크레딧이 들지 않을 때 (그림 한 장 단가는 따로 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 무료'**
+  String get imageStyleCreditRoutineFree;
+
   /// 크레딧 띠 — 만화·실사에서 카드 그림 한 장마다 더 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
@@ -3002,6 +3008,12 @@ abstract class AppLocalizations {
   /// **'AI 크레딧은 이렇게 줄어요'**
   String get creditCostTitle;
 
+  /// AI 크레딧 단가 안내 — 요금제 혜택으로 일과 글이 무료일 때. imageCost 는 카드 그림 한 장 단가(서버 값)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.'**
+  String creditCostLineTextFree(int imageCost);
+
   /// AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)
   ///
   /// In ko, this message translates to:
@@ -3614,7 +3626,7 @@ abstract class AppLocalizations {
   /// **'카드 그림 다시 만들기'**
   String get creditHistoryKindImageRegenerate;
 
-  /// 사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기(요금제 혜택)
+  /// 사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기·일과 글(요금제 혜택)
   ///
   /// In ko, this message translates to:
   /// **'무료'**
@@ -6337,6 +6349,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'만든 일과를 다른 언어로 바꿔 만들어요'**
   String get planBenefitRoutineTranslate;
+
+  /// 혜택 줄: 일과 생성 글 무료 (카드 그림은 장수만큼 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과는 크레딧 없이 만들고 카드 그림만 크레딧을 써요'**
+  String get planBenefitFreeRoutineText;
 
   /// 혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)
   ///
