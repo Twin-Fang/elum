@@ -7,6 +7,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
+import 'elum_label_chip.dart';
 import '../../shared/models/character.dart';
 import '../../shared/models/image_style.dart';
 
@@ -16,9 +17,9 @@ import '../../shared/models/image_style.dart';
 /// 모서리 20이고 왼쪽에 70×70 예시, 오른쪽에 20×20 라디오가 선다. 고르면 민트 면(`#B5EAEC`)과
 /// 2px 테두리(`#93DBCC`)로 바뀐다.
 ///
-/// 만화 예시는 온보딩에서 고른 친구를 그린다(시안은 포포다). 고른 면이 민트색(`#93DBCC`)이고
-/// 고르지 않으면 바탕색이다. 실사는 시안의 사진 에셋, 기본 그림은 실제 카드에 들어가는
-/// 픽토그램이다.
+/// 캐릭터 예시는 온보딩에서 고른 친구를 그린다(시안은 포포다). 고른 면이 민트색(`#93DBCC`)이고
+/// 고르지 않으면 바탕색이다. 사진 같은 그림은 시안의 사진 에셋, 이모지·그림 기호는 실제 카드에 들어가는
+/// 그림(이 닦기)이다. Pro 방식은 이름 옆에 [badgeLabel] 배지 (잠금 판단은 호출부, #1149).
 ///
 /// 두 화면이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
@@ -27,13 +28,17 @@ class ImageStyleOptionCard extends StatelessWidget {
     required this.style,
     required this.isSelected,
     this.character = CardCharacter.cat,
+    this.badgeLabel,
   });
 
   final ImageStyle style;
   final bool isSelected;
 
-  /// 만화 예시에 그릴 캐릭터. 온보딩에서 고른 친구가 그대로 보이게 한다.
+  /// 캐릭터 예시에 그릴 캐릭터. 온보딩에서 고른 친구가 그대로 보이게 한다.
   final CardCharacter character;
+
+  /// 이름 옆 배지 글 (예 `Pro`). null 이면 배지 없음
+  final String? badgeLabel;
 
   /// 시안 실측 — 카드 높이 94 · 안쪽 여백 12 · 예시 70×70 r8 · 라디오 20×20 · 라디오 오른쪽 16.
   static const minHeight = 94.0;
@@ -53,6 +58,9 @@ class ImageStyleOptionCard extends StatelessWidget {
   static const _exampleToText = 10.0;
   static const _titleToBody = 8.0;
   static const _textToRadio = 2.0;
+
+  /// 이름과 Pro 배지 사이 (인쇄 디자인 Pro 배지와 같은 6)
+  static const _titleToBadge = 6.0;
 
   /// 문장이 둘이면 문장 끝에서 줄을 나눈다 (시안 `1274:10078` — `...넣어요.` / `글은 ...`).
   ///
@@ -110,11 +118,24 @@ class ImageStyleOptionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  style.label,
-                  style: typo.imageStyleOptionTitle.copyWith(
-                    color: colors.textPrimary,
-                  ),
+                Wrap(
+                  spacing: _titleToBadge.w,
+                  runSpacing: _titleToBadge.h,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      style.label,
+                      style: typo.imageStyleOptionTitle.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    if (badgeLabel case final badge?)
+                      ElumLabelChip(
+                        label: badge,
+                        background: colors.accentYellow,
+                        foreground: colors.textPrimary,
+                      ),
+                  ],
                 ),
                 SizedBox(height: _titleToBody.h),
                 Text(
@@ -127,7 +148,7 @@ class ImageStyleOptionCard extends StatelessWidget {
                   semanticsLabel: style.description,
                   // 색 `#74757D`. 두 줄인 설명만 줄 높이 1.2 다(`1274:10078`).
                   style: typo.imageStyleOptionBody.copyWith(
-                    height: style == ImageStyle.photoOnly ? 1.2 : 1.0,
+                    height: style == ImageStyle.symbol ? 1.2 : 1.0,
                     color: colors.routineTileLabel,
                   ),
                 ),
@@ -160,9 +181,9 @@ class _Example extends StatelessWidget {
     final size = ImageStyleOptionCard._exampleSize.w;
 
     final Widget picture = switch (style) {
-      // 만화: 고르면 민트 면, 아니면 바탕색 위에 캐릭터(57×57). 형태 있는 일러스트는
+      // 캐릭터: 고르면 민트 면, 아니면 바탕색 위에 캐릭터(57×57). 형태 있는 일러스트는
       // 에셋이다 — 코드로 그리지 않는다.
-      ImageStyle.cartoon => ColoredBox(
+      ImageStyle.character => ColoredBox(
         color: isSelected ? colors.goalSelectedBorder : colors.background,
         child: Center(
           child: SvgPicture.asset(
@@ -179,18 +200,9 @@ class _Example extends StatelessWidget {
         // 장식 그림이다 — 카드 이름이 이미 뜻을 말한다
         excludeFromSemantics: true,
       ),
-      // 픽토그램은 흰 면 위에 그려진 그림이라 카드 면(surface)에 여백을 두고 얹는다.
-      ImageStyle.photoOnly => ColoredBox(
-        color: colors.surface,
-        child: Padding(
-          padding: EdgeInsets.all(6.w),
-          child: SvgPicture.asset(
-            AppAssets.imageStyleBasic,
-            fit: BoxFit.contain,
-            excludeFromSemantics: true,
-          ),
-        ),
-      ),
+      // 그림 기호·이모지는 흰 면 위에 그려진 그림이라 카드 면(surface)에 여백을 두고 얹는다.
+      ImageStyle.symbol => const _PictureOnSurface(isEmoji: false),
+      ImageStyle.emoji => const _PictureOnSurface(isEmoji: true),
     };
 
     return SizedBox(
@@ -239,6 +251,28 @@ class _Radio extends StatelessWidget {
               ),
             )
           : null,
+    );
+  }
+}
+
+/// 카드 면 위에 여백을 두고 얹는 예시 그림 (그림 기호·이모지 공용)
+class _PictureOnSurface extends StatelessWidget {
+  const _PictureOnSurface({required this.isEmoji});
+
+  final bool isEmoji;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: context.colors.surface,
+      child: Padding(
+        padding: EdgeInsets.all(6.w),
+        child: SvgPicture.asset(
+          isEmoji ? AppAssets.imageStyleEmoji : AppAssets.imageStyleSymbol,
+          fit: BoxFit.contain,
+          excludeFromSemantics: true,
+        ),
+      ),
     );
   }
 }

@@ -716,41 +716,53 @@ abstract class AppLocalizations {
   /// **'병아리'**
   String get agentChickLabel;
 
-  /// 카드 그림 방식 이름
+  /// 카드 그림 방식 이름 (Free, Twemoji)
   ///
   /// In ko, this message translates to:
-  /// **'만화'**
-  String get imageStyleCartoonLabel;
+  /// **'이모지 그림'**
+  String get imageStyleEmojiLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터가 나오는 그림이에요'**
-  String get imageStyleCartoonDescription;
+  /// **'귀여운 이모지로 물건을 보여줘요'**
+  String get imageStyleEmojiDescription;
 
-  /// 카드 그림 방식 이름
+  /// 카드 그림 방식 이름 (Free, Mulberry 그림 기호)
   ///
   /// In ko, this message translates to:
-  /// **'실사'**
+  /// **'그림 기호'**
+  String get imageStyleSymbolLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'하는 동작을 선 그림으로 보여줘요'**
+  String get imageStyleSymbolDescription;
+
+  /// 카드 그림 방식 이름 (Pro, AI 캐릭터 그림)
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 그림'**
+  String get imageStyleCharacterLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터가 직접 해 보여요'**
+  String get imageStyleCharacterDescription;
+
+  /// 카드 그림 방식 이름 (Pro, AI 실사 그림)
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 같은 그림'**
   String get imageStyleRealisticLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'실제 물건 사진처럼 보여요'**
+  /// **'실제 물건처럼 보여요'**
   String get imageStyleRealisticDescription;
-
-  /// 카드 그림 방식 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'기본 그림'**
-  String get imageStylePhotoOnlyLabel;
-
-  /// 카드 그림 방식 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'간단한 그림 기호가 들어가요'**
-  String get imageStylePhotoOnlyDescription;
 
   /// 그림 방식 목록 위 크레딧 띠의 왼쪽 이름
   ///
@@ -6164,11 +6176,11 @@ abstract class AppLocalizations {
   /// **'큰 글자'**
   String get cardExportThemeLargeText;
 
-  /// Pro 전용 표시 배지
+  /// Pro 전용 표시 배지 (인쇄 디자인·그림 방식 공용)
   ///
   /// In ko, this message translates to:
   /// **'Pro'**
-  String get cardExportProBadge;
+  String get planProBadge;
 
   /// Free 가 Pro 테마를 눌렀을 때 안내
   ///

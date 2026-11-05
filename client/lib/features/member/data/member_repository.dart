@@ -23,7 +23,7 @@ class Member {
     this.nickname,
     this.totalStars = 0,
     this.supportGoals = const [],
-    this.imageStyle = ImageStyle.cartoon,
+    this.imageStyle = ImageStyle.character,
     this.profiles = const [],
     this.entitlements = PlanEntitlements.free,
     this.subscription,

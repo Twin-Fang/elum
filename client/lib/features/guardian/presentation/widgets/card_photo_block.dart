@@ -248,7 +248,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     if (step == null) return null;
     final l10n = context.l10n;
     final planAccess = ref.watch(planAccessProvider);
-    final imageStyle = ref.watch(memberProvider).value?.imageStyle ?? ImageStyle.cartoon;
+    final imageStyle = ref.watch(memberProvider).value?.imageStyle ?? ImageStyle.character;
     final imagePath = step.imagePath;
     final canDrawFirstPicture = (imagePath == null || imagePath.isEmpty) &&
         step.description.trim().isNotEmpty &&

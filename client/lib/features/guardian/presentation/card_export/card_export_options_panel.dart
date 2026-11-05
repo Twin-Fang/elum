@@ -239,7 +239,7 @@ class _OptionChip extends StatelessWidget {
               if (isPro) ...[
                 SizedBox(width: 6.w),
                 ElumLabelChip(
-                  label: context.l10n.cardExportProBadge,
+                  label: context.l10n.planProBadge,
                   background: colors.accentYellow,
                   foreground: colors.textPrimary,
                 ),

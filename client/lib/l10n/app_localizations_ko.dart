@@ -367,22 +367,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get agentChickLabel => '병아리';
 
   @override
-  String get imageStyleCartoonLabel => '만화';
+  String get imageStyleEmojiLabel => '이모지 그림';
 
   @override
-  String get imageStyleCartoonDescription => '캐릭터가 나오는 그림이에요';
+  String get imageStyleEmojiDescription => '귀여운 이모지로 물건을 보여줘요';
 
   @override
-  String get imageStyleRealisticLabel => '실사';
+  String get imageStyleSymbolLabel => '그림 기호';
 
   @override
-  String get imageStyleRealisticDescription => '실제 물건 사진처럼 보여요';
+  String get imageStyleSymbolDescription => '하는 동작을 선 그림으로 보여줘요';
 
   @override
-  String get imageStylePhotoOnlyLabel => '기본 그림';
+  String get imageStyleCharacterLabel => '캐릭터 그림';
 
   @override
-  String get imageStylePhotoOnlyDescription => '간단한 그림 기호가 들어가요';
+  String get imageStyleCharacterDescription => '캐릭터가 직접 해 보여요';
+
+  @override
+  String get imageStyleRealisticLabel => '사진 같은 그림';
+
+  @override
+  String get imageStyleRealisticDescription => '실제 물건처럼 보여요';
 
   @override
   String get imageStyleCreditLabel => '크레딧';
@@ -3422,7 +3428,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportThemeLargeText => '큰 글자';
 
   @override
-  String get cardExportProBadge => 'Pro';
+  String get planProBadge => 'Pro';
 
   @override
   String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
