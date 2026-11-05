@@ -2504,6 +2504,36 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get guardianSettingsWithdrawFailedFallback;
 
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 스토어 결제 Pro 가 자동 갱신 중일 때만 보임 — 탈퇴가 스토어 구독을 해지하지 않음 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어·플레이스토어에서\n직접 해지해 주세요'**
+  String get guardianSettingsWithdrawStoreSubscriptionNotice;
+
+  /// 회원탈퇴 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번 더 확인할게요'**
+  String get guardianSettingsWithdrawTypeTitle;
+
+  /// 회원탈퇴 둘째 단계 안내. phrase 는 guardianSettingsWithdrawTypePhrase (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'아래 칸에 \'{phrase}\'라고\n똑같이 입력해 주세요'**
+  String guardianSettingsWithdrawTypeMessage(String phrase);
+
+  /// 회원탈퇴 둘째 단계에서 입력해야 하는 문구. 비교 원본이자 입력칸 안내 글 — 번역하면 그 언어 문구를 입력함 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴'**
+  String get guardianSettingsWithdrawTypePhrase;
+
+  /// 회원탈퇴 둘째 단계 실행 버튼. 문구가 맞을 때만 켜짐 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get guardianSettingsWithdrawTypeAction;
+
   /// 보호자 설정 화면 제목
   ///
   /// In ko, this message translates to:

@@ -1345,6 +1345,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSettingsWithdrawFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
+  String get guardianSettingsWithdrawStoreSubscriptionNotice =>
+      'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어·플레이스토어에서\n직접 해지해 주세요';
+
+  @override
+  String get guardianSettingsWithdrawTypeTitle => '한 번 더 확인할게요';
+
+  @override
+  String guardianSettingsWithdrawTypeMessage(String phrase) {
+    return '아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+  }
+
+  @override
+  String get guardianSettingsWithdrawTypePhrase => '회원탈퇴';
+
+  @override
+  String get guardianSettingsWithdrawTypeAction => '탈퇴하기';
+
+  @override
   String get guardianSettingsTitle => '설정';
 
   @override

@@ -25,7 +25,9 @@ import '../../member/application/plan_access.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import '../../subscription/application/plan_status_providers.dart';
 import 'widgets/plan_settings_group.dart';
+import 'widgets/withdraw_type_confirm_dialog.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -81,35 +83,52 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     });
   }
 
+  /// 회원탈퇴: 경고 팝업 > `회원탈퇴` 입력 확인 > 탈퇴
   Future<void> _deleteAccount() async {
+    final isWarningConfirmed = await _confirmWithdrawWarning();
+    if (!isWarningConfirmed || !mounted) return;
+    final isTypedConfirmed = await confirmWithdrawByTyping(context);
+    if (!isTypedConfirmed || !mounted) return;
+    await _run(
+      _withdrawKey,
+      () => ref.read(authSessionControllerProvider).deleteAccount(),
+    );
+  }
+
+  /// 첫 단계 경고. 스토어 결제 Pro 가 갱신 중이면 스토어 해지 안내 한 줄 추가
+  Future<bool> _confirmWithdrawWarning() async {
+    final l10n = context.l10n;
+    final hasRenewingStoreSubscription = ref.read(
+      hasRenewingStoreSubscriptionProvider,
+    );
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: context.l10n.guardianSettingsWithdrawConfirmTitle,
+      title: l10n.guardianSettingsWithdrawConfirmTitle,
       // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
       // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
       // 다시 들어오면 그대로지만 탈퇴는 되돌아오지 않는다. 되돌릴 수 없다는
       // 고지를 빼면 사용자가 잃는 것이 크다 (docs 예외처리 규칙).
       // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
-      message: context.l10n.guardianSettingsWithdrawConfirmMessage,
+      message: [
+        l10n.guardianSettingsWithdrawConfirmMessage,
+        if (hasRenewingStoreSubscription)
+          l10n.guardianSettingsWithdrawStoreSubscriptionNotice,
+      ].join('\n'),
       actions: [
         ElumDialogAction(
-          label: context.l10n.commonCancel,
+          label: l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
         ElumDialogAction(
-          label: context.l10n.commonConfirm,
+          label: l10n.commonConfirm,
           value: true,
           tone: ElumDialogTone.danger,
         ),
       ],
     );
-    if (ok != true) return;
-    await _run(
-      _withdrawKey,
-      () => ref.read(authSessionControllerProvider).deleteAccount(),
-    );
+    return ok == true;
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.
