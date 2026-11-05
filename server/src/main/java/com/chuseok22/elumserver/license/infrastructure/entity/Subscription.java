@@ -69,6 +69,11 @@ public class Subscription extends BaseEntity {
   @Column(length = 500)
   private String memo;
 
+  /// 가입 때 만든 기본 Free 행 그대로인가 (관리자 회수·스토어 결제 이력이 없음) — 행 없는 회원과 같게 봄
+  public boolean isUntouchedSignupFree() {
+    return source == SubscriptionSource.SIGNUP && plan == PlanType.FREE;
+  }
+
   /**
    * 지금 이 시각에 실제로 유효한 플랜.
    *

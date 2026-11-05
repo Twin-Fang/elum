@@ -44,6 +44,8 @@ public class RoutineStepEditService {
 
   /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다.
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
+  /// 카드 추가 응답 imageSkippedReason — 요금제에 AI 맞춤 그림이 없어 픽토그램만 둔다 (앱은 그림 기다림 표시 없음)
+  static final String IMAGE_SKIPPED_PLAN = ErrorCode.AI_IMAGE_NOT_ALLOWED.name();
 
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
@@ -54,6 +56,7 @@ public class RoutineStepEditService {
   private final PictogramPicker pictogramPicker;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
   private final GuardianVoiceFiles guardianVoiceFiles;
+  private final RoutineAiPicturePolicy routineAiPicturePolicy;
 
   @Transactional
   public RoutineResponse updateStep(
@@ -231,6 +234,11 @@ public class RoutineStepEditService {
 
     if (!request.wantsImage() || step.getDescription().isBlank()) {
       return RoutineResponse.from(routine);
+    }
+
+    // Free(AI 맞춤 그림 꺼짐): 예약·채우기 없이 픽토그램만. 까닭을 실어 앱이 "그림 만드는 중"을 띄우지 않게
+    if (routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())) {
+      return RoutineResponse.from(routine).withImageSkippedReason(IMAGE_SKIPPED_PLAN);
     }
 
     String creditJobId;

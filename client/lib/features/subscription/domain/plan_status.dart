@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../member/domain/member_subscription.dart';
 
-/// 설정 > 내 요금제 줄 상태 6개
+/// 설정 > 내 요금제 줄 상태 7개
 enum PlanStatusKind {
   free,
 
@@ -20,6 +20,9 @@ enum PlanStatusKind {
 
   /// Pro, 기간 제한 없음
   proUnlimited,
+
+  /// Pro 선물 (기존 가입자), 끝나는 날까지
+  proGift,
 }
 
 /// 내 요금제 줄에 그릴 것: 상태 + 날짜
@@ -48,6 +51,9 @@ class PlanStatus {
     }
     if (subscription == null || expiresAt == null) {
       return const PlanStatus(PlanStatusKind.proUnlimited);
+    }
+    if (subscription.source == SubscriptionSource.proGift) {
+      return PlanStatus(PlanStatusKind.proGift, date: expiresAt);
     }
     if (!subscription.isStorePurchase) {
       return PlanStatus(PlanStatusKind.proUntil, date: expiresAt);

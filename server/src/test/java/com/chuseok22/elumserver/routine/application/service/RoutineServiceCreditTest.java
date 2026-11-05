@@ -29,6 +29,7 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -97,6 +98,9 @@ class RoutineServiceCreditTest {
       .thenReturn(RoutinePersonalizationProvider.Plan.INACTIVE);
   }
 
+  // 목 기본 false = 그림을 그리는 요금제 (기존 시험 동작 그대로)
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
+
   @InjectMocks private RoutineCreateService routineCreateService;
 
   @BeforeEach
@@ -148,6 +152,23 @@ class RoutineServiceCreditTest {
     // 그림 수 = imagePath 가 있는 카드만 — 실패해 비어 있는 카드는 청구하지 않는다
     assertThat(response.credit()).isEqualTo(new RoutineResponse.CreditUsage(3, 2, 3, 97));
     verify(creditReservationService, never()).release(anyString(), anyString());
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림이 없는 Free 의 새 일과는 그림 호출 없는 경로(PHOTO_ONLY)로 만든다 — 픽토그램만, 그림 몫 청구 없음")
+  void create_freeWithoutAiPicture_generatesWithoutPictures() {
+    Profile profile = profile();
+    profile.setImageStyle(ImageStyle.CARTOON);
+    reserved("key-1");
+    stubPipeline();
+    when(routineAiPicturePolicy.shouldSkipAiPicture("member-1")).thenReturn(true);
+    when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(),
+      eq(ImageStyle.PHOTO_ONLY), any());
   }
 
   @Test

@@ -3739,6 +3739,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planStatusGracePeriod => 'Pro · 결제 확인 필요';
 
   @override
+  String get planStatusGift => 'Pro 선물';
+
+  @override
+  String planStatusGiftUntil(String date) {
+    return 'Pro 선물 · $date까지';
+  }
+
+  @override
   String planStatusRenewingFooter(String date) {
     return '$date에 갱신돼요';
   }
@@ -4317,9 +4325,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardRegenerateCostUnknown => '크레딧을 써요';
 
   @override
-  String get cardRegenerateProHint => 'Pro는 그림을 크레딧 없이 다시 그릴 수 있어요';
-
-  @override
   String get cardRegenerateConfirm => '다시 그리기';
 
   @override
@@ -4333,4 +4338,79 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cardRegenerateFailedFallback => '잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요';
+
+  @override
+  String get cardFirstDrawChip => 'AI 그림 그리기';
+
+  @override
+  String get cardRedrawProChip => 'Pro로 다시 그리기';
+
+  @override
+  String get cardFirstDrawProChip => 'Pro로 AI 그림 그리기';
+
+  @override
+  String get cardFirstDrawSheetTitle => 'AI 그림을 그릴까요?';
+
+  @override
+  String get cardRedrawSheetBody => '고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요';
+
+  @override
+  String get cardFirstDrawSheetBody => '원하는 점을 적거나 골라 주세요. 새 그림을 보고 고를 수 있어요';
+
+  @override
+  String get cardRedrawRequestLabel => '고치고 싶은 점';
+
+  @override
+  String get cardRedrawRequestHint => '예: 우산을 파란색으로';
+
+  @override
+  String get cardRedrawHintSimpler => '더 단순하게';
+
+  @override
+  String get cardRedrawHintNoBackground => '배경 빼기';
+
+  @override
+  String get cardRedrawHintNoPeople => '사람 빼기';
+
+  @override
+  String get cardRedrawHintBrighter => '더 밝게';
+
+  @override
+  String get cardFirstDrawConfirm => '그리기';
+
+  @override
+  String get cardFirstDrawInProgress => '그림을 그리고 있어요';
+
+  @override
+  String get cardFirstDrawFailedTitle => 'AI 그림을 그리지 못했어요';
+
+  @override
+  String get cardRedrawFailedFallback => '다시 해 볼까요? 크레딧은 쓰지 않았어요';
+
+  @override
+  String get cardCandidateSheetTitle => '어떤 그림으로 할까요?';
+
+  @override
+  String get cardCandidateSheetBody => '고른 그림만 이룸이에게 보여요';
+
+  @override
+  String get cardCandidateCurrentLabel => '지금 그림';
+
+  @override
+  String get cardCandidateNewLabel => '새 그림';
+
+  @override
+  String get cardCandidateKeepButton => '지금 그림 그대로';
+
+  @override
+  String get cardCandidateApplyButton => '새 그림으로 바꾸기';
+
+  @override
+  String get cardCandidateAppliedToast => '새 그림으로 바꿨어요';
+
+  @override
+  String get cardCandidateLoadFailedTitle => '새 그림을 불러오지 못했어요';
+
+  @override
+  String get cardCandidateApplyFailedTitle => '새 그림으로 바꾸지 못했어요';
 }

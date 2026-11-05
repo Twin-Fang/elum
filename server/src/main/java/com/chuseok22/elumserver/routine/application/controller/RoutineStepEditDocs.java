@@ -18,7 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 일과 단계 편집 API 문서: 추가, 수정, 삭제, 그림 교체, AI 그림 다시 그리기
+ * 일과 단계 편집 API 문서: 추가, 수정, 삭제, 그림 교체 (AI 그림 새로 그리기·고르기는 RoutineStepImageDocs)
  * RoutineControllerDocs 가 묶어서 RoutineController 에 제공
  */
 public interface RoutineStepEditDocs {
@@ -31,6 +31,7 @@ public interface RoutineStepEditDocs {
       **그림은 `generateImage: true` 일 때만 만듭니다 (#407).** 빼거나 false 면 그림 없이 카드만 추가합니다.
       크레딧이 켜져 있으면 그림 1장 단가를 예약하고(초과 허용 없음), 모자라거나 계정이 멈춰 있으면 **카드는 추가하고**
       응답 `imageSkippedReason`에 `AI_CREDIT_INSUFFICIENT`(또는 `AI_CREDIT_ACCOUNT_FROZEN`)를 담습니다.
+      요금제에 AI 맞춤 그림이 없으면(Free · `FREE_AI_IMAGE_GENERATION` 꺼짐) 예약 없이 카드만 추가하고 `AI_IMAGE_NOT_ALLOWED`를 담습니다(픽토그램).
       그림이 카드에 붙으면 차감하고, 비용 상한·횟수 제한·생성 실패·카드 삭제로 못 붙이면 예약을 돌려줍니다.
       장부 오류면 503 `AI_CREDIT_UNAVAILABLE`로 카드 추가도 실패합니다.
 
@@ -253,81 +254,5 @@ public interface RoutineStepEditDocs {
     @Parameter(description = "일과 ID") String routineId,
     @Parameter(description = "카드 ID") String stepId,
     @Parameter(description = "사진 파일 (필드명 image, JPEG·PNG, 5MB 이하)") MultipartFile image
-  );
-
-  @Operation(
-    summary = "카드 AI 그림 다시 그리기",
-    description = """
-      AI 가 그린 카드 그림을 새로 그려 바꿉니다. 응답이 올 때까지 수 초 걸립니다(그림 생성을 기다림).
-
-      **대상**: `aiPicture=true` 인 카드만. 보호자 사진·이야기에서 가져온 그림·그림 없는 카드·직접 사진 방식 이룸이는 409 입니다.
-
-      **크레딧**: `IMAGE_REGENERATE` 1건을 예약합니다. 무료 다시 그리기 권한(Pro)이 있고 오늘 무료 횟수가 남았으면 0,
-      아니면 정책 단가입니다(`GET /api/credits/me` 의 `freeImageRegeneratesLeftToday` · `costs.imageRegenerate`).
-      그림을 붙이면 정산하고, 실패하면 예약을 돌려줍니다(카드 그림은 그대로).
-
-      **응답**: 바뀐 카드(`RoutineStepResponse`). `imagePath` 는 **매번 새 값**입니다 — 값이 바뀌었으면 이미지 캐시를 갱신하세요.
-
-      **권한**: 카드 수정과 같습니다. 일과를 만든 보호자만 가능하고 이룸이는 403 입니다.
-      """
-  )
-  @SecurityRequirement(name = "bearerAuth")
-  @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "다시 그리기 성공"),
-    @ApiResponse(
-      responseCode = "403",
-      description = "크레딧 부족·동결, 일과를 만든 보호자가 아님",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요.\"}"
-        )
-      )
-    ),
-    @ApiResponse(
-      responseCode = "404",
-      description = "존재하지 않는 일과 또는 단계",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_STEP_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 단계예요.\"}"
-        )
-      )
-    ),
-    @ApiResponse(
-      responseCode = "409",
-      description = "AI 그림 카드가 아님, 또는 그리는 사이 그림이 바뀜",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_NOT_REGENERATABLE\",\"errorMessage\":\"이 카드는 그림을 다시 그릴 수 없어요.\"}"
-        )
-      )
-    ),
-    @ApiResponse(
-      responseCode = "429",
-      description = "그림 요청이 너무 잦음",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_REQUEST_TOO_FREQUENT\",\"errorMessage\":\"요청이 너무 잦아요. 30초 뒤에 다시 시도해 주세요.\"}"
-        )
-      )
-    ),
-    @ApiResponse(
-      responseCode = "503",
-      description = "그림 생성 실패 또는 서비스 하루 비용 상한 (크레딧은 돌려줌)",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_REGENERATE_FAILED\",\"errorMessage\":\"그림을 다시 그리지 못했어요. 크레딧은 쓰지 않았어요. 잠시 후 다시 해 주세요.\"}"
-        )
-      )
-    )
-  })
-  ResponseEntity<RoutineStepResponse> regenerateStepImage(
-    Authentication authentication,
-    @Parameter(description = "일과 ID") String routineId,
-    @Parameter(description = "카드 ID") String stepId
   );
 }

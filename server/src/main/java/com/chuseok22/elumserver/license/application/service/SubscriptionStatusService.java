@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchase;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseRepository;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 회원 구독 상태 조회: 적용 요금제(EntitlementService) + 구독 행 + 연결된 스토어 구매(자동 갱신·유예)
+ * 회원 구독 상태 조회: 적용 요금제(EntitlementService) + 구독 행 + 연결된 스토어 구매(자동 갱신·유예) + 기존 가입자 선물 종료일
  * 조회가 실패해도 내 정보 응답을 막지 않음 > Free 로 보고 로그 (SystemConfigEntitlementService 와 같은 기준)
  */
 @Slf4j
@@ -28,12 +29,21 @@ public class SubscriptionStatusService {
   private final EntitlementService entitlementService;
   private final SubscriptionRepository subscriptionRepository;
   private final StorePurchaseRepository storePurchaseRepository;
+  private final ExistingMemberProGift existingMemberProGift;
 
   @Transactional(readOnly = true)
   public MemberSubscriptionStatus statusOf(String memberId) {
     try {
       PlanType plan = entitlementService.planOf(memberId);
       Optional<Subscription> subscription = subscriptionRepository.findByMemberId(memberId);
+      // 행 없음·가입 기본 Free 행인데 Pro = 기존 가입자 선물 (종료일 표시) 또는 신규가입 이벤트
+      Optional<LocalDateTime> giftEndsAt = plan == PlanType.PRO
+        && subscription.map(Subscription::isUntouchedSignupFree).orElse(true)
+        ? existingMemberProGift.giftEndsAt(memberId)
+        : Optional.empty();
+      if (giftEndsAt.isPresent()) {
+        return new MemberSubscriptionStatus(PlanType.PRO, SubscriptionSource.PRO_GIFT, null, giftEndsAt.get(), null, false);
+      }
       if (subscription.isEmpty()) {
         // 행 없는 Pro = 신규가입 PRO 이벤트
         return plan == PlanType.PRO

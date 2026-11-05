@@ -21,6 +21,7 @@ class PlanAccess {
     required this.canImportExpertRoutines,
     required this.canUseRoutineMemory,
     required this.canRegenerateImagesFree,
+    required this.canUseAiPictures,
     this.canPurchasePro = false,
   });
 
@@ -36,6 +37,7 @@ class PlanAccess {
     canImportExpertRoutines: false,
     canUseRoutineMemory: false,
     canRegenerateImagesFree: false,
+    canUseAiPictures: false,
   );
 
   /// 개발자 도구 `Pro 처럼`
@@ -50,6 +52,7 @@ class PlanAccess {
     canImportExpertRoutines: true,
     canUseRoutineMemory: true,
     canRegenerateImagesFree: true,
+    canUseAiPictures: true,
   );
 
   final bool isPro;
@@ -85,6 +88,9 @@ class PlanAccess {
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
 
+  /// AI 맞춤 그림을 쓸 수 있는가: 카드 `다시 그리기`·`AI 그림 그리기`. 꺼지면 그 자리에 Pro 안내 (이미 만든 그림은 그대로)
+  final bool canUseAiPictures;
+
   /// Pro 기능 자리에 흐린 미리 보기(`ProTeaser`)를 보이는가: Free + 앱에서 Pro 를 살 수 있음
   /// Pro 인데 권한이 꺼진 기능(운영이 막아 둔 것)에는 권유하지 않는다
   bool get shouldShowProTeaser => !isPro && canPurchasePro;
@@ -104,6 +110,7 @@ class PlanAccess {
     canImportExpertRoutines: canImportExpertRoutines,
     canUseRoutineMemory: canUseRoutineMemory,
     canRegenerateImagesFree: canRegenerateImagesFree,
+    canUseAiPictures: canUseAiPictures,
     canPurchasePro: canPurchasePro,
   );
 }
@@ -138,5 +145,6 @@ PlanAccess _readPlanAccess(Ref ref) {
     canImportExpertRoutines: member.canImportExpertRoutines,
     canUseRoutineMemory: member.canUseRoutineMemory,
     canRegenerateImagesFree: member.canRegenerateImagesFree,
+    canUseAiPictures: member.canUseAiPictures,
   );
 }

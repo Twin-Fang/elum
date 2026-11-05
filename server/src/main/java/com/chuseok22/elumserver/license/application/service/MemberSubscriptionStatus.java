@@ -14,7 +14,8 @@ public record MemberSubscriptionStatus(
   @Schema(description = "지금 실제로 적용되는 요금제", example = "PRO")
   PlanType plan,
 
-  @Schema(description = "요금제가 생긴 경로. SIGNUP(가입 기본) · MANUAL(관리자 발급) · APPLE_IAP · GOOGLE_IAP · PROMO",
+  @Schema(description = "요금제가 생긴 경로. SIGNUP(가입 기본) · MANUAL(관리자 발급) · APPLE_IAP · GOOGLE_IAP · PROMO · "
+    + "PRO_GIFT(기존 가입자 Pro 선물, expiresAt 이 선물 종료 시각)",
     example = "APPLE_IAP")
   SubscriptionSource source,
 

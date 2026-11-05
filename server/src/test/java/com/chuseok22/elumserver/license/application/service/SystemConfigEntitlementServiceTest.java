@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.license.core.SubscriptionStatus;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
@@ -35,6 +36,9 @@ class SystemConfigEntitlementServiceTest {
 
   @Mock
   private MemberSignupTimeService memberSignupTimeService;
+
+  @Mock
+  private ExistingMemberProGift existingMemberProGift;
 
   @InjectMocks
   private SystemConfigEntitlementService entitlementService;
@@ -131,6 +135,52 @@ class SystemConfigEntitlementServiceTest {
 
     givenEvent(true, "2026-01-01", "2099-01-01", 30);
     when(memberSignupTimeService.findSignupAt(MEMBER_ID)).thenThrow(new RuntimeException("DB 장애"));
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
+  }
+
+  // --- 기존 가입자 Pro 선물 ---
+
+  private Subscription signupFreeRow() {
+    Subscription row = subscription(PlanType.FREE, SubscriptionStatus.ACTIVE, null);
+    row.setSource(SubscriptionSource.SIGNUP);
+    return row;
+  }
+
+  @Test
+  @DisplayName("선물 대상이고 구독 행이 없으면 Pro 다")
+  void gift_appliesWithoutRow() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
+  }
+
+  @Test
+  @DisplayName("가입 때 만든 기본 Free 행이 있어도 선물을 받는다 — 행 없음만 보면 기존 회원 대부분이 못 받는다")
+  void gift_appliesToDefaultSignupRow() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupFreeRow()));
+    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
+  }
+
+  @Test
+  @DisplayName("선물 대상이 아니면 기본 Free 행은 Free 그대로다")
+  void gift_notTarget_defaultRowStaysFree() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupFreeRow()));
+    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.empty());
+
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
+  }
+
+  @Test
+  @DisplayName("관리자가 회수한 Free 행(MANUAL)은 선물을 받지 않는다 — 회수가 선물로 되살아나지 않게")
+  void gift_revokedManualRowDoesNotGetGift() {
+    Subscription revoked = subscription(PlanType.FREE, SubscriptionStatus.ACTIVE, null);
+    revoked.setSource(SubscriptionSource.MANUAL);
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(revoked));
+    lenient().when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
   }
 

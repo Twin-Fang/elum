@@ -6632,6 +6632,18 @@ abstract class AppLocalizations {
   /// **'Pro · 결제 확인 필요'**
   String get planStatusGracePeriod;
 
+  /// 요금제 상태: 기존 가입자 Pro 선물 (설정 줄 값)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물'**
+  String get planStatusGift;
+
+  /// 요금제 상태: 기존 가입자 Pro 선물, 끝나는 날까지
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물 · {date}까지'**
+  String planStatusGiftUntil(String date);
+
   /// 설정 내 요금제 묶음 아래 한 줄: 자동 갱신 예정 (줄 값은 Pro)
   ///
   /// In ko, this message translates to:
@@ -7597,12 +7609,6 @@ abstract class AppLocalizations {
   /// **'크레딧을 써요'**
   String get cardRegenerateCostUnknown;
 
-  /// Free 에게 다시 그리기 시트에서 Pro 혜택 한 줄 (판매 중일 때만)
-  ///
-  /// In ko, this message translates to:
-  /// **'Pro는 그림을 크레딧 없이 다시 그릴 수 있어요'**
-  String get cardRegenerateProHint;
-
   /// 다시 그리기 확인 버튼
   ///
   /// In ko, this message translates to:
@@ -7632,6 +7638,156 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요'**
   String get cardRegenerateFailedFallback;
+
+  /// 그림 없는 카드(픽토그램) 아래 AI 그림 처음 그리기 칩의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림 그리기'**
+  String get cardFirstDrawChip;
+
+  /// Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩 (누르면 요금제 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 다시 그리기'**
+  String get cardRedrawProChip;
+
+  /// Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩 (누르면 요금제 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 AI 그림 그리기'**
+  String get cardFirstDrawProChip;
+
+  /// AI 그림 처음 그리기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림을 그릴까요?'**
+  String get cardFirstDrawSheetTitle;
+
+  /// 다시 그리기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요'**
+  String get cardRedrawSheetBody;
+
+  /// AI 그림 처음 그리기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'원하는 점을 적거나 골라 주세요. 새 그림을 보고 고를 수 있어요'**
+  String get cardFirstDrawSheetBody;
+
+  /// 다시 그리기 시트 요청 글 칸 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'고치고 싶은 점'**
+  String get cardRedrawRequestLabel;
+
+  /// 다시 그리기 시트 요청 글 칸 안내 (60자까지)
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 우산을 파란색으로'**
+  String get cardRedrawRequestHint;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'더 단순하게'**
+  String get cardRedrawHintSimpler;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'배경 빼기'**
+  String get cardRedrawHintNoBackground;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'사람 빼기'**
+  String get cardRedrawHintNoPeople;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'더 밝게'**
+  String get cardRedrawHintBrighter;
+
+  /// AI 그림 처음 그리기 시트 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'그리기'**
+  String get cardFirstDrawConfirm;
+
+  /// AI 그림 처음 그리는 동안 그림 위에 덮이는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 그리고 있어요'**
+  String get cardFirstDrawInProgress;
+
+  /// AI 그림 처음 그리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림을 그리지 못했어요'**
+  String get cardFirstDrawFailedTitle;
+
+  /// 그리기·새 그림 받기 실패 팝업 기본 설명 (서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 해 볼까요? 크레딧은 쓰지 않았어요'**
+  String get cardRedrawFailedFallback;
+
+  /// 새 그림 고르기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 그림으로 할까요?'**
+  String get cardCandidateSheetTitle;
+
+  /// 새 그림 고르기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 그림만 이룸이에게 보여요'**
+  String get cardCandidateSheetBody;
+
+  /// 새 그림 고르기 시트: 원래 그림(또는 픽토그램) 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 그림'**
+  String get cardCandidateCurrentLabel;
+
+  /// 새 그림 고르기 시트: 새로 그린 그림 이름과 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림'**
+  String get cardCandidateNewLabel;
+
+  /// 새 그림 고르기 시트: 원래 그림을 두는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 그림 그대로'**
+  String get cardCandidateKeepButton;
+
+  /// 새 그림 고르기 시트: 새 그림으로 바꾸는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림으로 바꾸기'**
+  String get cardCandidateApplyButton;
+
+  /// 새 그림으로 바꾸기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림으로 바꿨어요'**
+  String get cardCandidateAppliedToast;
+
+  /// 새로 그린 그림을 받지 못했을 때 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림을 불러오지 못했어요'**
+  String get cardCandidateLoadFailedTitle;
+
+  /// 새 그림으로 바꾸기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림으로 바꾸지 못했어요'**
+  String get cardCandidateApplyFailedTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -60,6 +60,9 @@ class RoutineCreateServiceMemoryTest {
   @Mock private CreditQueryService creditQueryService;
   @Mock private EnabledLocales enabledLocales;
   @Mock private RoutinePersonalizationProvider routinePersonalizationProvider;
+  // 목 기본 false = 그림을 그리는 요금제 (기존 시험 동작 그대로)
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
+
   @InjectMocks private RoutineCreateService routineCreateService;
 
   private final AtomicReference<RoutinePersonalization> seenByAi = new AtomicReference<>();

@@ -4,7 +4,7 @@ enum AddedCardImageState {
   /// 서버가 커밋 뒤 그림을 그리는 중 > 카드에 "그림을 만들고 있어요"
   generating,
 
-  /// 그림 방식이 기본 그림 > 그림 기호만 (안내 없음)
+  /// 그림 방식이 기본 그림이거나 요금제에 AI 맞춤 그림이 없음 > 그림 기호만 (안내 없음)
   basicPictogramStyle,
 
   /// 크레딧 부족 > 그림 기호로 대신하고 안내
@@ -20,6 +20,8 @@ enum AddedCardImageState {
   static const _skippedPhotoOnly = 'IMAGE_STYLE_PHOTO_ONLY';
   // 서버 ErrorCode.AI_CREDIT_INSUFFICIENT
   static const _skippedCreditInsufficient = 'AI_CREDIT_INSUFFICIENT';
+  // 서버 RoutineStepEditService.IMAGE_SKIPPED_PLAN (요금제에 AI 맞춤 그림 없음 > 픽토그램, 안내 없음)
+  static const _skippedPlanWithoutAiPicture = 'AI_IMAGE_NOT_ALLOWED';
 
   /// 서버 응답 > 그림 상태 (설명이 비면 서버가 까닭 없이 건너뜀)
   static AddedCardImageState fromAddResponse({
@@ -30,7 +32,7 @@ enum AddedCardImageState {
       return description.trim().isEmpty ? notRequested : generating;
     }
     return switch (imageSkippedReason) {
-      _skippedPhotoOnly => basicPictogramStyle,
+      _skippedPhotoOnly || _skippedPlanWithoutAiPicture => basicPictogramStyle,
       _skippedCreditInsufficient => creditInsufficient,
       _ => unavailable,
     };
