@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +60,7 @@ class GeminiTextClientImagePromptTest {
     when(systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE)).thenReturn(0.0);
     client = new GeminiTextClient(
       builder.build(), new GeminiProperties("key", null, "text-model", "image-model", 1000),
-      promptTemplateService, systemConfigService, aiCallLogService, PictogramCatalog.empty()
+      promptTemplateService, systemConfigService, aiCallLogService, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty())
     );
   }
 

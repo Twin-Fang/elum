@@ -19,6 +19,7 @@ import '../../../core/widgets/routine_rename_sheet.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/elumi_info_editor.dart';
 import '../../member/domain/elumi_nickname_policy.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../domain/profile_summary.dart';
 import 'widgets/elumi_choice_sheets.dart';
 
@@ -106,6 +107,9 @@ class _ElumiInfoScreenState extends ConsumerState<ElumiInfoScreen>
       );
       return;
     }
+    // Pro 가 끝나 서버가 그림 방식을 거절(403)했으면 실패 팝업 대신 Pro 안내 (#1149)
+    if (await handleProOnlyRejection(context, ref, failure)) return;
+    if (!mounted) return;
     await showFailure(
       context,
       failure,

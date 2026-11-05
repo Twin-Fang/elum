@@ -11,6 +11,7 @@ import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
 import '../presentation/plan_actions.dart' as actions;
 import '../presentation/plan_paywall_sheet.dart';
+import '../domain/plan_benefit.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
 
@@ -26,11 +27,11 @@ final canOpenPlanPaywallProvider = Provider<bool>((ref) {
       ref.watch(planAccessProvider.select((access) => access.isPro));
 });
 
-/// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼)
-Future<void> openPlanPaywall(BuildContext context, WidgetRef ref) async {
+/// 요금제 화면 열기 (크레딧 부족 팝업 · 설정 줄 · Pro 기능 버튼). [highlight] 는 혜택 맨 위 (연 기능)
+Future<void> openPlanPaywall(BuildContext context, WidgetRef ref, {PlanBenefit? highlight}) async {
   if (!ref.read(canOpenPlanPaywallProvider)) return;
   unawaited(ref.read(storePurchaseCoordinatorProvider).start());
-  await showPlanPaywall(context, ref);
+  await showPlanPaywall(context, ref, highlight: highlight);
 }
 
 /// 구매 복원 (설정 줄, 판매 스위치와 무관)
@@ -43,9 +44,10 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
 void startStorePurchaseSync(WidgetRef ref) =>
     unawaited(ref.read(storePurchaseCoordinatorProvider).start());
 
-/// 서버가 'Pro 기능'이라 거절한 코드 7개 (앱 판정이 늦었거나 Pro 가 막 끝남). 실패 팝업이 아니라 Pro 안내로 돌림
+/// 서버가 'Pro 기능'이라 거절한 코드 8개 (앱 판정이 늦었거나 Pro 가 막 끝남). 실패 팝업이 아니라 Pro 안내로 돌림
 const _proOnlyRejectionCodes = {
   ServerErrorCode.aiImageNotAllowed,
+  ServerErrorCode.imageStyleNotAllowed,
   ServerErrorCode.weeklyReportNotAllowed,
   ServerErrorCode.routineTranslateNotAllowed,
   ServerErrorCode.routineScheduleNotAllowed,

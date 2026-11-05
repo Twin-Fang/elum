@@ -14,6 +14,8 @@ import '../../../../core/widgets/character_card.dart';
 import '../../../../core/widgets/image_style_credit_bar.dart';
 import '../../../../core/widgets/image_style_option_card.dart';
 import '../../../credit/application/credit_costs.dart';
+import '../../../member/application/image_style_choice.dart';
+import '../../../member/application/plan_access.dart';
 
 /// 캐릭터 바꾸기 시트: 카드 2장 중 하나 > 저장하기. 저장하면 고른 캐릭터를 돌려준다 (#660)
 Future<CardCharacter?> showElumiCharacterSheet(
@@ -32,9 +34,9 @@ Future<CardCharacter?> showElumiCharacterSheet(
   );
 }
 
-/// 그림 방식 바꾸기 시트: 크레딧 띠 + 방식 3개 중 하나 > 저장하기. 저장하면 고른 방식을 돌려준다 (#660)
+/// 그림 방식 바꾸기 시트: 크레딧 띠 + 방식 4개 중 하나 > 저장하기. 저장하면 고른 방식을 돌려준다 (#660)
 ///
-/// 만화 예시에는 그 이룸이의 [character] 를 그린다
+/// 캐릭터 예시에는 그 이룸이의 [character] 를 그린다
 Future<ImageStyle?> showElumiImageStyleSheet(
   BuildContext context, {
   required ImageStyle current,
@@ -47,6 +49,7 @@ Future<ImageStyle?> showElumiImageStyleSheet(
       title: context.l10n.elumiInfoImageStyleSheetTitle,
       current: current,
       bodyBuilder: (context, picked, onPicked) => _ImageStyleChoices(
+        saved: current,
         picked: picked,
         character: character,
         onPicked: onPicked,
@@ -144,11 +147,14 @@ class _CharacterChoices extends StatelessWidget {
 /// 크레딧 띠 + 그림 방식 카드 목록 (설정 그림 방식 화면과 같은 카드)
 class _ImageStyleChoices extends StatelessWidget {
   const _ImageStyleChoices({
+    required this.saved,
     required this.picked,
     required this.character,
     required this.onPicked,
   });
 
+  /// 저장된 방식 (살 수 없어도 목록에서 빠지지 않게)
+  final ImageStyle saved;
   final ImageStyle picked;
   final CardCharacter character;
   final ValueChanged<ImageStyle> onPicked;
@@ -169,21 +175,30 @@ class _ImageStyleChoices extends StatelessWidget {
           ),
         ),
         SizedBox(height: gap),
-        SelectableGroup<ImageStyle>(
-          items: ImageStyle.values,
-          selected: {picked},
-          allowDeselect: false,
-          gap: gap,
-          asRadio: true,
-          onChanged: (next) {
-            if (next.isNotEmpty) onPicked(next.first);
+        Consumer(
+          builder: (context, ref, _) {
+            final planAccess = ref.watch(planAccessProvider);
+            return SelectableGroup<ImageStyle>(
+              items: visibleImageStyles(planAccess, saved: saved, picked: picked),
+              selected: {picked},
+              allowDeselect: false,
+              gap: gap,
+              asRadio: true,
+              // Pro 방식은 권한이 없으면 요금제 화면 > 사면 그 방식 (#1149)
+              onChanged: (next) async {
+                if (next.isEmpty) return;
+                final chosen = await chooseImageStyle(context, ref, next.first);
+                if (chosen != null) onPicked(chosen);
+              },
+              itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
+                style: style,
+                isSelected: isSelected,
+                character: character,
+                badgeLabel: isImageStyleLocked(style, planAccess) ? context.l10n.planProBadge : null,
+              ),
+              semanticLabelOf: ImageStyleOptionCard.semanticLabel,
+            );
           },
-          itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
-            style: style,
-            isSelected: isSelected,
-            character: character,
-          ),
-          semanticLabelOf: ImageStyleOptionCard.semanticLabel,
         ),
       ],
     );

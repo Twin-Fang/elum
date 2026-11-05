@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
@@ -161,6 +163,12 @@ public class MemberService {
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
+  /// 이 그림 방식을 저장할 수 있는가: AI 그림 방식(캐릭터·실사)은 AI_IMAGE_GENERATION 필요 (#1149)
+  public boolean canUseImageStyle(String memberId, ImageStyle style) {
+    return !ImageStyle.orDefault(style).drawsAiImages()
+      || entitlementService.isAllowed(memberId, Entitlement.AI_IMAGE_GENERATION);
+  }
+
   /**
    * 카드 그림 방식을 바꾼다. 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
    *
@@ -174,6 +182,9 @@ public class MemberService {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
+    if (!canUseImageStyle(caller.memberId(), request.imageStyle())) {
+      throw new CustomException(ErrorCode.IMAGE_STYLE_NOT_ALLOWED);
+    }
     profile.setImageStyle(request.imageStyle());
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }

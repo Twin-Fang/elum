@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,7 +81,7 @@ class ClaudeTextClientTest {
     healthTracker = new ClaudeKeyHealthTracker(Clock.systemDefaultZone());
     GeminiTextClient gemini = new GeminiTextClient(mock(RestClient.class),
       new GeminiProperties("k", null, "m", "i", 1000), mock(PromptTemplateService.class), config, aiCallLogService,
-      new PictogramCatalog(List.of("toothbrush"), "toothbrush"));
+      PictogramCatalogs.mulberryOnly(new PictogramCatalog(List.of("toothbrush"), "toothbrush")));
     client = new ClaudeTextClient(gemini, mock(PromptTemplateService.class), config, aiCallLogService, keyService,
       healthTracker, factory);
   }

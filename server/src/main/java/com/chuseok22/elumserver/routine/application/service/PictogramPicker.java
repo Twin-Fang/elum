@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
@@ -38,7 +40,7 @@ public class PictogramPicker {
   static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
   private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
-  private final PictogramCatalog catalog;
+  private final PictogramCatalogs catalogs;
   private final TextClientRouter textClientRouter;
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final Duration timeout;
@@ -46,16 +48,16 @@ public class PictogramPicker {
 
   @Autowired
   public PictogramPicker(
-    PictogramCatalog catalog, TextClientRouter textClientRouter, AiDailyBudgetGuard aiDailyBudgetGuard
+    PictogramCatalogs catalogs, TextClientRouter textClientRouter, AiDailyBudgetGuard aiDailyBudgetGuard
   ) {
-    this(catalog, textClientRouter, aiDailyBudgetGuard, DEFAULT_TIMEOUT);
+    this(catalogs, textClientRouter, aiDailyBudgetGuard, DEFAULT_TIMEOUT);
   }
 
   PictogramPicker(
-    PictogramCatalog catalog, TextClientRouter textClientRouter, AiDailyBudgetGuard aiDailyBudgetGuard,
+    PictogramCatalogs catalogs, TextClientRouter textClientRouter, AiDailyBudgetGuard aiDailyBudgetGuard,
     Duration timeout
   ) {
-    this.catalog = catalog;
+    this.catalogs = catalogs;
     this.textClientRouter = textClientRouter;
     this.aiDailyBudgetGuard = aiDailyBudgetGuard;
     this.timeout = timeout;
@@ -63,9 +65,11 @@ public class PictogramPicker {
 
   /**
    * @param memberId AI 호출 기록에 회원을 남기려고 호출 스레드에 세운다
+   * @param pictogramSet 이 세트의 카탈로그에서 고르고 검증한다 (이모지 방식 > EMOJI)
    * @return 유효한 픽토그램 id, 못 골랐으면 폴백 id. 카탈로그가 비었으면 null. 던지지 않는다.
    */
-  public String pick(String memberId, String title, String description) {
+  public String pick(String memberId, String title, String description, PictogramSet pictogramSet) {
+    PictogramCatalog catalog = catalogs.of(pictogramSet);
     if (catalog.isEmpty()) {
       return null;
     }
@@ -77,7 +81,7 @@ public class PictogramPicker {
       // 호출 스레드의 일과 언어를 가상 스레드로 직접 넘긴다
       AppLocale locale = AiCallContext.currentContentLocale();
       String json = CompletableFuture
-        .supplyAsync(() -> callModel(memberId, title, description, locale), executor)
+        .supplyAsync(() -> callModel(memberId, title, description, locale, pictogramSet), executor)
         .get(timeout.toMillis(), TimeUnit.MILLISECONDS);
       String resolved = catalog.resolve(readPictogramId(json));
       if (resolved != null && !resolved.equals(catalog.fallbackId())) {
@@ -97,10 +101,13 @@ public class PictogramPicker {
     }
   }
 
-  // 요청 스레드가 아닌 가상 스레드라 회원·언어 맥락을 다시 세워야 호출 기록에 회원이 남고 일과 언어로 돈다.
-  private String callModel(String memberId, String title, String description, AppLocale locale) {
+  // 요청 스레드가 아닌 가상 스레드라 회원·언어·그림 세트 맥락을 다시 세워야 호출 기록에 회원이 남고 일과 언어로 돈다.
+  private String callModel(
+    String memberId, String title, String description, AppLocale locale, PictogramSet pictogramSet
+  ) {
     AiCallContext.setMemberId(memberId);
     AiCallContext.setContentLocale(locale);
+    AiCallContext.setPictogramSet(pictogramSet);
     try {
       return textClientRouter.current().pickPictogramJson(title, description);
     } finally {

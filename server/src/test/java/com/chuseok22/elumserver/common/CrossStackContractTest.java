@@ -85,7 +85,7 @@ class CrossStackContractTest {
   void sharedEnumsMatchClient() throws IOException {
     assertSameValues("shared/models/support_goal.dart", SupportGoal.values(), SupportGoal::name);
     assertSameValues("shared/models/character.dart", CharacterType.values(), CharacterType::name);
-    assertSameValues("features/onboarding/domain/image_style.dart", ImageStyle.values(), ImageStyle::name);
+    assertSameValues("shared/models/image_style.dart", ImageStyle.values(), ImageStyle::name);
     assertSameValues("shared/models/routine_example_category.dart", RoutineExampleCategory.values(),
       RoutineExampleCategory::name);
     assertSameValues("features/guardian/domain/routine_template.dart", TalkCategory.values(), Enum::name);

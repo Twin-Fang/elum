@@ -382,24 +382,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentChickLabel => 'Chick';
 
   @override
-  String get imageStyleCartoonLabel => 'Cartoon';
+  String get imageStyleEmojiLabel => 'Emoji';
 
   @override
-  String get imageStyleCartoonDescription => 'Pictures with characters';
+  String get imageStyleEmojiDescription => 'Shows things with cute emoji';
+
+  @override
+  String get imageStyleSymbolLabel => 'Picture symbols';
+
+  @override
+  String get imageStyleSymbolDescription =>
+      'Shows the action as a line drawing';
+
+  @override
+  String get imageStyleCharacterLabel => 'Character';
+
+  @override
+  String get imageStyleCharacterDescription => 'A character acts it out';
 
   @override
   String get imageStyleRealisticLabel => 'Realistic';
 
   @override
-  String get imageStyleRealisticDescription =>
-      'Looks like photos of real things';
-
-  @override
-  String get imageStylePhotoOnlyLabel => 'My own photos';
-
-  @override
-  String get imageStylePhotoOnlyDescription =>
-      'Simple picture symbols are used';
+  String get imageStyleRealisticDescription => 'Looks like real things';
 
   @override
   String get imageStyleCreditLabel => 'Credits';
@@ -3597,7 +3602,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardExportThemeLargeText => '큰 글자';
 
   @override
-  String get cardExportProBadge => 'Pro';
+  String get planProBadge => 'Pro';
 
   @override
   String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
@@ -3655,6 +3660,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
 
   @override
+  String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
+
+  @override
   String get cardExportWatermarkText => '이룸';
 
   @override
@@ -3678,6 +3686,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitsSection => 'Pro로 할 수 있는 것';
+
+  @override
+  String get planBenefitAiImageStyles => '캐릭터·사진 같은 그림으로 카드를 만들어요';
+
+  @override
+  String get planBenefitAdsRemoved => '광고 없이 써요';
 
   @override
   String get planBenefitWeeklyReport => '한 주 동안 해낸 일과를 리포트로 받아 보내요';

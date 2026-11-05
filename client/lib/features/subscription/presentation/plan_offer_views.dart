@@ -14,7 +14,10 @@ import '../domain/plan_catalog.dart';
 
 /// 혜택 묶음: 흰 판 안에 혜택 줄 (앱에 있는 Pro 차이만) + 아래 "끝나도 그대로" 안내
 class PlanBenefitsGroup extends StatelessWidget {
-  const PlanBenefitsGroup({super.key});
+  const PlanBenefitsGroup({super.key, this.highlight});
+
+  /// 맨 위로 올릴 혜택 (요금제 화면을 연 기능)
+  final PlanBenefit? highlight;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +26,11 @@ class PlanBenefitsGroup extends StatelessWidget {
       header: l10n.planBenefitsSection,
       footer: l10n.planKeepContentNotice,
       children: [
-        for (final benefit in proPlanBenefits())
+        for (final benefit in proPlanBenefits(highlight: highlight))
           _PlanTextRow(
             title: switch (benefit) {
+              PlanBenefit.aiImageStyles => l10n.planBenefitAiImageStyles,
+              PlanBenefit.adsRemoved => l10n.planBenefitAdsRemoved,
               PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
               PlanBenefit.routineSchedule => l10n.planBenefitRoutineSchedule,
               PlanBenefit.routineMemory => l10n.planBenefitRoutineMemory,

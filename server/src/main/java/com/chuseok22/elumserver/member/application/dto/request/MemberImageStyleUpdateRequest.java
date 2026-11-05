@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "카드 그림 방식 설정 요청")
 public record MemberImageStyleUpdateRequest(
 
-  @Schema(description = "카드 그림 방식. CARTOON(만화) · REALISTIC(실사) · PHOTO_ONLY(직접 사진, AI 그림 생략). 필수",
+  @Schema(description = "카드 그림 방식. EMOJI(이모지) · PHOTO_ONLY(그림 기호) · CARTOON(만화, Pro) · REALISTIC(실사, Pro). 필수",
     example = "REALISTIC")
   ImageStyle imageStyle
 ) {

@@ -4,6 +4,12 @@
 /// 새 Pro 기능 = PlanAccess 판정 + 여기 값 하나 + 판정 연결 한 줄 (switch 가 빠뜨림을 막음)
 /// 크레딧은 숫자를 적지 않음: 지급량은 관리자 설정이라 Free 계정이 미리 알 수 없음
 enum PlanBenefit {
+  /// 캐릭터·사진 같은 그림 방식 (AI 맞춤 그림, #1149)
+  aiImageStyles,
+
+  /// 광고 없음
+  adsRemoved,
+
   /// 주간 리포트 보기·보내기
   weeklyReport,
 

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -50,7 +51,7 @@ class RoutineAiPipelineFallbackLocaleTest {
     pipeline = new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, PictogramCatalog.empty());
+      routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
     // AI 가 실패하면 폴백 질문이 나간다
     when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenThrow(new RuntimeException("AI 실패"));

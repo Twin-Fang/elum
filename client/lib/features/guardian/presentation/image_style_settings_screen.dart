@@ -16,6 +16,9 @@ import '../../../core/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../credit/application/credit_costs.dart';
+import '../../member/application/image_style_choice.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 
 /// 보호자 설정의 `그림 방식` 선택 화면.
 ///
@@ -67,6 +70,9 @@ class _ImageStyleSettingsScreenState
       return;
     }
 
+    // Pro 가 끝나 서버가 거절(403)했으면 실패 팝업 대신 Pro 안내 (#1149)
+    if (await handleProOnlyRejection(context, ref, failure)) return;
+    if (!mounted) return;
     // 저장값은 이전으로 되돌아갔다. 고른 방식은 화면에 남겨 확인으로 다시 시도한다.
     await showFailure(
       context,
@@ -83,25 +89,29 @@ class _ImageStyleSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(onboardingProvider);
-    // 만화 예시에는 온보딩에서 고른 친구를 그린다 (없으면 고양이)
+    // 캐릭터 예시에는 온보딩에서 고른 친구를 그린다 (없으면 고양이)
     final character = profile.cardCharacter ?? CardCharacter.cat;
+    final planAccess = ref.watch(planAccessProvider);
 
     final group = SelectableGroup<ImageStyle>(
-      items: ImageStyle.values,
+      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: _pickedStyle),
       selected: {_pickedStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
       gap: _cardGap.h,
       asRadio: true,
-      onChanged: (next) {
+      onChanged: (next) async {
         // 저장 중에는 고른 값을 바꾸지 않는다
         if (busy || next.isEmpty) return;
-        setState(() => _pickedStyle = next.first);
+        // Pro 방식은 권한이 없으면 요금제 화면 > 사면 그 방식 (#1149)
+        final chosen = await chooseImageStyle(context, ref, next.first);
+        if (chosen != null && mounted) setState(() => _pickedStyle = chosen);
       },
       itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
         style: style,
         isSelected: isSelected,
         character: character,
+        badgeLabel: isImageStyleLocked(style, planAccess) ? context.l10n.planProBadge : null,
       ),
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
@@ -118,7 +128,7 @@ class _ImageStyleSettingsScreenState
         loading: busy,
         onPressed: _confirm,
       ),
-      // 글자를 키우면 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 볼 수 있게 한다
+      // 글자를 키우면 카드 넷이 한 화면을 넘는다 — 스크롤로 끝까지 볼 수 있게 한다
       child: SingleChildScrollView(
         child: Padding(
           // 설정 첫 줄과 같은 자리(y=147)에서 시작한다

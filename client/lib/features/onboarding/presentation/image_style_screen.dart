@@ -17,14 +17,16 @@ import '../../../core/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../credit/application/credit_costs.dart';
+import '../../member/application/image_style_choice.dart';
+import '../../member/application/plan_access.dart';
 
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞.
 ///
 /// Figma `그림방식` 1274:9883 · 1274:10129. 제목·설명은 다른 온보딩과 같은 x=24 이고
-/// 카드 셋은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
+/// 카드 넷은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
 ///
 /// 원칙 ④ — 되돌릴 수 있다고 먼저 말한다(`나중에 설정에서 바꿀 수 있어요`).
-/// 기본 그림이 처음부터 골라져 있어 `다음`만 누르면 되므로 건너뛰기는 두지 않는다.
+/// 이모지 그림이 처음부터 골라져 있어 `다음`만 누르면 되므로 건너뛰기는 두지 않는다.
 /// 목록 위 크레딧 띠가 고른 방식이 쓰는 크레딧을 보인다(설정 화면과 같다).
 ///
 /// 선택은 여기서 저장하지 않는다. 온보딩이 끝날 때 [OnboardingNotifier.complete]가
@@ -45,21 +47,26 @@ class ImageStyleScreen extends ConsumerWidget {
     final space = context.space;
 
     final character = profile.cardCharacter ?? CardCharacter.cat;
+    final planAccess = ref.watch(planAccessProvider);
 
     final group = SelectableGroup<ImageStyle>(
-      items: ImageStyle.values,
+      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: profile.imageStyle),
       selected: {profile.imageStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
       gap: _cardGap.h,
       asRadio: true,
-      onChanged: (next) {
-        if (next.isNotEmpty) notifier.setImageStyle(next.first);
+      // Pro 방식은 권한이 없으면 요금제 화면 > 사면 그 방식 (#1149)
+      onChanged: (next) async {
+        if (next.isEmpty) return;
+        final chosen = await chooseImageStyle(context, ref, next.first);
+        if (chosen != null) notifier.setImageStyle(chosen);
       },
       itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
         style: style,
         isSelected: isSelected,
         character: character,
+        badgeLabel: isImageStyleLocked(style, planAccess) ? context.l10n.planProBadge : null,
       ),
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
@@ -71,7 +78,7 @@ class ImageStyleScreen extends ConsumerWidget {
         label: context.l10n.commonNext,
         onPressed: () => context.push(Routes.onboardingPin),
       ),
-      // 글자를 키우면 제목 두 줄과 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 본다
+      // 글자를 키우면 제목 두 줄과 카드 넷이 한 화면을 넘는다 — 스크롤로 끝까지 본다
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

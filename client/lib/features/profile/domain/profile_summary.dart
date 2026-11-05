@@ -14,7 +14,7 @@ class ProfileSummary {
     required this.id,
     this.nickname,
     this.character,
-    this.imageStyle = ImageStyle.cartoon,
+    this.imageStyle = ImageStyle.character,
   });
 
   final String id;

@@ -29,6 +29,7 @@ class PrintPage extends StatelessWidget {
     required this.child,
     required this.hasWatermark,
     required this.shouldShowPictogramCredit,
+    this.shouldShowEmojiCredit = false,
     this.margin = 24,
   });
 
@@ -41,13 +42,16 @@ class PrintPage extends StatelessWidget {
   /// Mulberry 픽토그램을 쓴 지면은 출처를 적는다 (CC BY-SA 4.0 조건)
   final bool shouldShowPictogramCredit;
 
+  /// Twemoji 이모지를 쓴 지면은 출처를 적는다 (CC BY 4.0 조건, #1149)
+  final bool shouldShowEmojiCredit;
+
   /// 종이 가장자리 여백 (프린터가 못 찍는 자리 포함)
   final double margin;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasFooter = hasWatermark || shouldShowPictogramCredit;
+    final hasFooter = hasWatermark || shouldShowPictogramCredit || shouldShowEmojiCredit;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
       child: SizedBox.fromSize(
@@ -69,6 +73,7 @@ class PrintPage extends StatelessWidget {
                       _Footer(
                         hasWatermark: hasWatermark,
                         shouldShowPictogramCredit: shouldShowPictogramCredit,
+                        shouldShowEmojiCredit: shouldShowEmojiCredit,
                       ),
                     ],
                   ],
@@ -82,15 +87,23 @@ class PrintPage extends StatelessWidget {
   }
 }
 
-/// 아래 띠: (Free) 이룸 로고 + 문구 · (픽토그램) 그림 출처
+/// 아래 띠: (Free) 이룸 로고 + 문구 · (그림 기호·이모지) 그림 출처
 class _Footer extends StatelessWidget {
-  const _Footer({required this.hasWatermark, required this.shouldShowPictogramCredit});
+  const _Footer({
+    required this.hasWatermark,
+    required this.shouldShowPictogramCredit,
+    required this.shouldShowEmojiCredit,
+  });
 
   final bool hasWatermark;
   final bool shouldShowPictogramCredit;
+  final bool shouldShowEmojiCredit;
 
   /// 로고 높이 (포인트)
   static const _logoHeight = 16.0;
+
+  /// 출처 글이 차지할 몫 (Spacer 1 대비, 로고 띠보다 넓게)
+  static const _creditFlex = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +116,19 @@ class _Footer extends StatelessWidget {
           Text(context.l10n.cardExportFooterMadeWith, style: style),
         ],
         const Spacer(),
-        if (shouldShowPictogramCredit)
-          Text(context.l10n.cardExportPictogramCredit, style: style),
+        // 출처 둘이면 한 줄에 이어 씀 (카드 이미지 폭이 좁아 넘치면 줄바꿈)
+        if (shouldShowPictogramCredit || shouldShowEmojiCredit)
+          Flexible(
+            flex: _creditFlex,
+            child: Text(
+              [
+                if (shouldShowPictogramCredit) context.l10n.cardExportPictogramCredit,
+                if (shouldShowEmojiCredit) context.l10n.cardExportEmojiCredit,
+              ].join(' · '),
+              textAlign: TextAlign.end,
+              style: style,
+            ),
+          ),
       ],
     );
   }

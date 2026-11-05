@@ -26,8 +26,15 @@ abstract final class AppAssets {
   /// 허용 id 는 `PictogramCatalog` 가 걸러 준다.
   static String pictogram(String id) => 'assets/pictograms/$id.svg';
 
+  /// 카드 그림 자리의 이모지 그림 — Twemoji v15.0.0 (CC BY 4.0, #1149).
+  ///
+  /// [id] 는 `emoji_` 로 시작하는 `pictogramId` (예 `emoji_toothbrush`). 원본 SVG 그대로 번들
+  /// (server/tool/emoji 생성물). 허용 id 는 `PictogramCatalog` 가 걸러 준다.
+  static String emoji(String id) => 'assets/emoji/$id.svg';
+
   /// 오픈소스 라이선스 전문 (#1046). Mulberry 는 그림과 같이 받은 원문을 그대로 씀
   static const licenseMulberrySymbols = 'assets/pictograms/LICENSE.txt';
+  static const licenseTwemoji = 'assets/emoji/LICENSE.txt';
   static const licensePretendard = 'assets/licenses/pretendard_ofl.txt';
   static const licenseTmoneyRoundWind = 'assets/licenses/tmoney_round_wind.txt';
 
@@ -230,8 +237,9 @@ abstract final class AppAssets {
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
-  /// 그림 방식 선택의 `기본 그림` 예시. 이 방식의 카드에 실제로 들어가는 픽토그램을 그대로 보여 준다.
-  static final imageStyleBasic = pictogram('brush_teeth_,_to');
+  /// 그림 방식 선택의 `그림 기호`·`이모지 그림` 예시. 그 방식의 카드에 실제로 들어가는 그림을 같은 장면(이 닦기)으로 보여 준다.
+  static final imageStyleSymbol = pictogram('brush_teeth_,_to');
+  static final imageStyleEmoji = emoji('emoji_toothbrush');
 
   /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
   static const stageCheckDone = '$_images/stage_check_done.svg';

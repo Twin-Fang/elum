@@ -90,9 +90,9 @@ public class CardImageGenerator {
   }
 
   public GeneratedImage generate(CardImageRequest request) {
-    // 직접 사진은 호출부가 여기 오기 전에 건너뛴다. 그래도 왔다면 돈이 나가기 전에 막는다.
-    if (request.imageStyle() == ImageStyle.PHOTO_ONLY) {
-      throw new IllegalStateException("직접 사진 방식은 AI 그림을 만들지 않는다");
+    // AI 그림이 아닌 방식(그림 기호·이모지)은 호출부가 여기 오기 전에 건너뛴다. 그래도 왔다면 돈이 나가기 전에 막는다.
+    if (!ImageStyle.orDefault(request.imageStyle()).drawsAiImages()) {
+      throw new IllegalStateException("AI 그림을 만들지 않는 방식: " + request.imageStyle());
     }
     if (request.imageStyle() == ImageStyle.REALISTIC) {
       return generateRealistic(request);

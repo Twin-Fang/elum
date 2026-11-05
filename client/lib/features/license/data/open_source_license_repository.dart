@@ -15,6 +15,7 @@ class OpenSourceLicenseRepository {
   Future<String> loadBundledLicenseText(BundledLicenseKind kind) =>
       _assetBundle.loadString(switch (kind) {
         BundledLicenseKind.mulberrySymbols => AppAssets.licenseMulberrySymbols,
+        BundledLicenseKind.twemoji => AppAssets.licenseTwemoji,
         BundledLicenseKind.pretendard => AppAssets.licensePretendard,
         BundledLicenseKind.tmoneyRoundWind => AppAssets.licenseTmoneyRoundWind,
       });

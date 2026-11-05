@@ -1,7 +1,9 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -105,7 +107,7 @@ class RoutineStepEditTest {
   void addStep_storesPickedPictogramId() {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    when(pictogramPicker.pick("member-1", "양치해요", "이를 닦아요")).thenReturn("brush_teeth");
+    when(pictogramPicker.pick("member-1", "양치해요", "이를 닦아요", PictogramSet.MULBERRY)).thenReturn("brush_teeth");
 
     RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("양치해요", "이를 닦아요", null));
@@ -119,7 +121,7 @@ class RoutineStepEditTest {
   void addStep_picksPictogramEvenWithoutImageRequest() {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    when(pictogramPicker.pick(anyString(), anyString(), anyString())).thenReturn("go_,_to");
+    when(pictogramPicker.pick(anyString(), anyString(), anyString(), any())).thenReturn("go_,_to");
 
     routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("양치해요", "", false));
 

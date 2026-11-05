@@ -294,9 +294,10 @@ public interface MemberControllerDocs {
 
       | imageStyle | 동작 |
       |---|---|
-      | CARTOON | 기본. 캐릭터 만화 그림 (기존 동작 그대로) |
-      | REALISTIC | 캐릭터 없이 물건·장소를 사진처럼 그립니다 |
-      | PHOTO_ONLY | AI 그림을 만들지 않습니다(카드 글은 AI 가 만듭니다). 카드 imagePath 는 null 이며 그림 몫 크레딧을 청구하지 않습니다. 카드 추가 응답의 imageSkippedReason 에 IMAGE_STYLE_PHOTO_ONLY 가 담깁니다 |
+      | EMOJI | 이모지 그림 (Free). AI 그림을 만들지 않고 카드 pictogramId 에 이모지 id(emoji_ 로 시작)를 담습니다. 카드 추가 응답의 imageSkippedReason 은 IMAGE_STYLE_PHOTO_ONLY 입니다 (#1149) |
+      | PHOTO_ONLY | 그림 기호 (Free). AI 그림을 만들지 않습니다(카드 글은 AI 가 만듭니다). 카드 imagePath 는 null 이며 그림 몫 크레딧을 청구하지 않습니다. 카드 추가 응답의 imageSkippedReason 에 IMAGE_STYLE_PHOTO_ONLY 가 담깁니다 |
+      | CARTOON | 캐릭터 만화 그림 (Pro). 값이 없을 때의 기본값 |
+      | REALISTIC | 캐릭터 없이 물건·장소를 사진처럼 그립니다 (Pro) |
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -308,7 +309,7 @@ public interface MemberControllerDocs {
     ),
     @ApiResponse(
       responseCode = "400",
-      description = "imageStyle 이 비었거나 CARTOON/REALISTIC/PHOTO_ONLY 가 아닌 값인 경우",
+      description = "imageStyle 이 비었거나 EMOJI/PHOTO_ONLY/CARTOON/REALISTIC 가 아닌 값인 경우",
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(

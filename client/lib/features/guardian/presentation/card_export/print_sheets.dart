@@ -30,7 +30,8 @@ List<PrintSheet> buildPrintSheets({
 }) {
   final cards = [...routine.steps]..sort((a, b) => a.stepOrder.compareTo(b.stepOrder));
   if (cards.isEmpty) return const [];
-  final hasPictogramCredit = pictures.hasPictogram;
+  final hasPictogramCredit = pictures.hasSymbolPictogram;
+  final hasEmojiCredit = pictures.hasEmojiPictogram;
 
   PrintCard cardAt(ActionCard card, {bool shouldShowNumber = true, bool shouldShowDescription = false}) =>
       PrintCard(
@@ -53,6 +54,7 @@ List<PrintSheet> buildPrintSheets({
             size: PrintPageSize.a4,
             hasWatermark: hasWatermark,
             shouldShowPictogramCredit: hasPictogramCredit,
+            shouldShowEmojiCredit: hasEmojiCredit,
             child: _RoutineSheetBody(
               title: routine.title,
               language: routine.language,
@@ -72,6 +74,7 @@ List<PrintSheet> buildPrintSheets({
               size: PrintPageSize.a4,
               hasWatermark: hasWatermark,
               shouldShowPictogramCredit: hasPictogramCredit,
+              shouldShowEmojiCredit: hasEmojiCredit,
               child: _CutCardsBody(
                 perPage: perPage,
                 cards: [for (final card in pageCards) cardAt(card, shouldShowNumber: false)],
@@ -90,7 +93,8 @@ List<PrintSheet> buildPrintSheets({
                 size: PrintPageSize.cardImage,
                 margin: 12,
                 hasWatermark: hasWatermark,
-                shouldShowPictogramCredit: hasPictogramCredit && pictures.of(card).pictogramId != null,
+                shouldShowPictogramCredit: pictures.of(card).hasSymbolPictogram,
+                shouldShowEmojiCredit: pictures.of(card).hasEmojiPictogram,
                 child: cardAt(card, shouldShowDescription: true),
               ),
             ),

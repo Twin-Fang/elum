@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
@@ -45,7 +46,8 @@ public class GeminiTextClient implements TextGenerationClient {
   private final PromptTemplateService promptTemplateService;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
-  private final PictogramCatalog pictogramCatalog;
+  /// 그림 방식별 카탈로그. 호출 스레드의 세트(AiCallContext)로 고름 (#1149)
+  private final PictogramCatalogs pictogramCatalogs;
 
   // 공통 JSON 매퍼 (DefaultJsonMapper)
   private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
@@ -121,7 +123,7 @@ public class GeminiTextClient implements TextGenerationClient {
     input.put("task", "PICK_PICTOGRAM");
     input.put("stepTitle", stepTitle == null ? "" : stepTitle);
     input.put("stepDescription", stepDescription == null ? "" : stepDescription);
-    input.put("pictogramCatalog", pictogramCatalog.ids());
+    input.put("pictogramCatalog", currentPictogramCatalog().ids());
     return toJson(input);
   }
 
@@ -220,7 +222,7 @@ public class GeminiTextClient implements TextGenerationClient {
       new ChildProfileInput(
         NicknamePlaceholder.forAi(nickname, locale), supportGoals == null ? Set.of() : supportGoals),
       maskedAnswers,
-      pictogramCatalog.ids(),
+      currentPictogramCatalog().ids(),
       // Pro AI 메모·확정 예시 (#1082). 요청 스레드에 실린 것만, 없으면 필드째 빠짐 (세 제공자 공용 조립)
       AiCallContext.currentRoutinePersonalization()
     );
@@ -333,7 +335,12 @@ public class GeminiTextClient implements TextGenerationClient {
 
   /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
   public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
-    return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !pictogramCatalog.isEmpty());
+    return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !currentPictogramCatalog().isEmpty());
+  }
+
+  /// 호출 스레드 세트 > 카탈로그 (세 제공자 공용 조립이라 여기 한 곳)
+  private PictogramCatalog currentPictogramCatalog() {
+    return pictogramCatalogs.of(AiCallContext.currentPictogramSet());
   }
 
   public Map<String, Object> questionResponseSchemaFor(Set<SupportGoal> supportGoals) {

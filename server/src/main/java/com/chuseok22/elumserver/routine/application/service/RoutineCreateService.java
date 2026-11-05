@@ -166,10 +166,12 @@ public class RoutineCreateService {
     RoutinePersonalizationProvider.Plan personalizationPlan = routinePersonalizationProvider.planFor(
       caller.memberId(), profile.getId(), profile.getNickname(), contentLocale);
     AiCallContext.setRoutinePersonalization(personalizationPlan.personalization());
-    // Free(AI 맞춤 그림 꺼짐)는 직접 사진과 같은 경로로 그림 호출 없이 픽토그램만 (그림 몫 청구도 없음)
-    ImageStyle imageStyleForCards = routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())
-      ? ImageStyle.PHOTO_ONLY
-      : profile.getImageStyle();
+    // Free(AI 맞춤 그림 꺼짐) + 캐릭터·실사 저장값은 그림 기호로 (그림 호출·청구 없음). 이모지·그림 기호는 그대로, 저장값은 유지 (#1149)
+    ImageStyle storedImageStyle = ImageStyle.orDefault(profile.getImageStyle());
+    ImageStyle imageStyleForCards =
+      storedImageStyle.drawsAiImages() && routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())
+        ? ImageStyle.PHOTO_ONLY
+        : storedImageStyle;
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,

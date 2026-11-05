@@ -348,23 +348,29 @@
   "agentChickLabel": "병아리",
   "@agentChickLabel": { "description": "서비스 에이전트(루미)의 종류 이름" },
 
-  "imageStyleCartoonLabel": "만화",
-  "@imageStyleCartoonLabel": { "description": "카드 그림 방식 이름" },
+  "imageStyleEmojiLabel": "이모지 그림",
+  "@imageStyleEmojiLabel": { "description": "카드 그림 방식 이름 (Free, Twemoji)" },
 
-  "imageStyleCartoonDescription": "캐릭터가 나오는 그림이에요",
-  "@imageStyleCartoonDescription": { "description": "카드 그림 방식 설명" },
+  "imageStyleEmojiDescription": "귀여운 이모지로 물건을 보여줘요",
+  "@imageStyleEmojiDescription": { "description": "카드 그림 방식 설명" },
 
-  "imageStyleRealisticLabel": "실사",
-  "@imageStyleRealisticLabel": { "description": "카드 그림 방식 이름" },
+  "imageStyleSymbolLabel": "그림 기호",
+  "@imageStyleSymbolLabel": { "description": "카드 그림 방식 이름 (Free, Mulberry 그림 기호)" },
 
-  "imageStyleRealisticDescription": "실제 물건 사진처럼 보여요",
+  "imageStyleSymbolDescription": "하는 동작을 선 그림으로 보여줘요",
+  "@imageStyleSymbolDescription": { "description": "카드 그림 방식 설명" },
+
+  "imageStyleCharacterLabel": "캐릭터 그림",
+  "@imageStyleCharacterLabel": { "description": "카드 그림 방식 이름 (Pro, AI 캐릭터 그림)" },
+
+  "imageStyleCharacterDescription": "캐릭터가 직접 해 보여요",
+  "@imageStyleCharacterDescription": { "description": "카드 그림 방식 설명" },
+
+  "imageStyleRealisticLabel": "사진 같은 그림",
+  "@imageStyleRealisticLabel": { "description": "카드 그림 방식 이름 (Pro, AI 실사 그림)" },
+
+  "imageStyleRealisticDescription": "실제 물건처럼 보여요",
   "@imageStyleRealisticDescription": { "description": "카드 그림 방식 설명" },
-
-  "imageStylePhotoOnlyLabel": "기본 그림",
-  "@imageStylePhotoOnlyLabel": { "description": "카드 그림 방식 이름" },
-
-  "imageStylePhotoOnlyDescription": "간단한 그림 기호가 들어가요",
-  "@imageStylePhotoOnlyDescription": { "description": "카드 그림 방식 설명" },
 
   "imageStyleCreditLabel": "크레딧",
   "@imageStyleCreditLabel": { "description": "그림 방식 목록 위 크레딧 띠의 왼쪽 이름" },
@@ -2754,8 +2760,8 @@
   "@cardExportThemeMonochrome": { "description": "테마 이름: 그림까지 흑백" },
   "cardExportThemeLargeText": "큰 글자",
   "@cardExportThemeLargeText": { "description": "테마 이름: 글자를 크게" },
-  "cardExportProBadge": "Pro",
-  "@cardExportProBadge": { "description": "Pro 전용 표시 배지" },
+  "planProBadge": "Pro",
+  "@planProBadge": { "description": "Pro 전용 표시 배지 (인쇄 디자인·그림 방식 공용)" },
   "cardExportProThemeLocked": "Pro에서 쓸 수 있는 디자인이에요",
   "@cardExportProThemeLocked": { "description": "Free 가 Pro 테마를 눌렀을 때 안내" },
   "cardExportWatermarkNotice": "Free는 이룸 로고와 워터마크가 들어가요",
@@ -2791,6 +2797,8 @@
   "@cardExportFooterMadeWith": { "description": "Free 인쇄물 아래 띠 문구" },
   "cardExportPictogramCredit": "그림: Mulberry Symbols (CC BY-SA 4.0)",
   "@cardExportPictogramCredit": { "description": "픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)" },
+  "cardExportEmojiCredit": "그림: Twemoji (CC BY 4.0)",
+  "@cardExportEmojiCredit": { "description": "이모지 그림을 쓴 인쇄물 출처 표기 (라이선스 조건, #1149)" },
   "cardExportWatermarkText": "이룸",
   "@cardExportWatermarkText": { "description": "Free 인쇄물 바탕 워터마크 글자" },
   "cardExportPerPage": "{count, plural, other{{count}장}}",
@@ -2803,6 +2811,10 @@
   "@planPaywallDescription": {"description": "요금제 화면 제목 아래 한 줄"},
   "planBenefitsSection": "Pro로 할 수 있는 것",
   "@planBenefitsSection": {"description": "혜택 묶음 제목"},
+  "planBenefitAiImageStyles": "캐릭터·사진 같은 그림으로 카드를 만들어요",
+  "@planBenefitAiImageStyles": {"description": "혜택 줄: AI 맞춤 그림 방식 (그림 방식에서 열면 맨 위)"},
+  "planBenefitAdsRemoved": "광고 없이 써요",
+  "@planBenefitAdsRemoved": {"description": "혜택 줄: 광고 없음"},
   "planBenefitWeeklyReport": "한 주 동안 해낸 일과를 리포트로 받아 보내요",
   "@planBenefitWeeklyReport": {"description": "혜택 줄: 주간 리포트"},
   "planBenefitRoutineSchedule": "요일과 시각을 정해 일과를 반복하고 이룸이 기기에 알려요",
