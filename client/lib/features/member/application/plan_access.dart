@@ -38,6 +38,7 @@ class PlanAccess {
   bool get canImportExpertRoutines => entitlements.canImportExpertRoutines;
   bool get canUseRoutineMemory => entitlements.canUseRoutineMemory;
   bool get canRegenerateImagesFree => entitlements.canRegenerateImagesFree;
+  bool get canCreateRoutineTextFree => entitlements.canCreateRoutineTextFree;
   bool get canUseAiPictures => entitlements.canUseAiPictures;
 
   /// Pro 기능 자리에 흐린 미리 보기(`ProTeaser`)를 보이는가: Free + 앱에서 Pro 를 살 수 있음

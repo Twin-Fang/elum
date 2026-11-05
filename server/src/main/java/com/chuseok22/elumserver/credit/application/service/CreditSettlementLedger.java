@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 정산 원장 줄 쓰기: 예약 풀기 > 묶음별 차감 > 무료 다시 그리기 0 줄 > 초과 줄
+ * 정산 원장 줄 쓰기: 예약 풀기 > 일과 글 무료 0 줄 > 묶음별 차감 > 무료 다시 그리기 0 줄 > 초과 줄
  * 계정 행 잠금 안에서 CreditReservationService.settle 이 부름 (작업 상태 갱신은 settle)
  */
 class CreditSettlementLedger {
@@ -50,6 +50,16 @@ class CreditSettlementLedger {
     if (!job.getKind().overageAllowed()) {
       charge = Math.min(charge, Math.max(0, running));
     }
+    // 일과 글 무료: 그림 차감 줄보다 먼저 0 짜리 글 사용 줄을 남김 (내역에 "무료" 글 줄, 그림 줄은 그 위) (#1110)
+    if (CreditFreeRoutineTextAllowance.isFreeRoutineTextJob(job)) {
+      AiCreditLedger freeText = CreditAccountService.ledgerLine(accountId, CreditLedgerType.CONSUME, 0, running);
+      freeText.setJobId(jobId);
+      freeText.setAction(CreditAction.ROUTINE_TEXT);
+      freeText.setPolicyVersion(job.getPolicyVersion());
+      freeText.setReason(CreditFreeRoutineTextAllowance.FREE_ROUTINE_TEXT_REASON);
+      ledgerRepository.save(freeText);
+    }
+
     int left = Math.min(charge, running);
     int deducted = 0;
     List<AiCreditGrant> grants = accountService.spendableGrants(accountId, now);

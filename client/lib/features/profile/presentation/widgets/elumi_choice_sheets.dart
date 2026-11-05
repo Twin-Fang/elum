@@ -171,7 +171,7 @@ class _ImageStyleChoices extends StatelessWidget {
         Consumer(
           builder: (context, ref, _) => ImageStyleCreditBar(
             style: picked,
-            costs: ref.watch(creditCostsProvider),
+            costs: ref.watch(routineCreateCreditCostsProvider),
           ),
         ),
         SizedBox(height: gap),

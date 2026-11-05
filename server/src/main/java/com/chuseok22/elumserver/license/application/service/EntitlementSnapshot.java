@@ -25,6 +25,7 @@ public record EntitlementSnapshot(
   boolean routineTemplates,
   boolean routineMemory,
   boolean imageRegenerateFree,
+  boolean routineCreateFree,
   boolean imageHighQuality
 ) {
 

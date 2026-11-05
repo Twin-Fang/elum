@@ -28,6 +28,9 @@ enum PlanBenefit {
   /// 만든 일과를 다른 언어 사본으로
   routineTranslate,
 
+  /// 일과 만들기 글 몫 크레딧 없이 (카드 그림은 그대로 듦)
+  freeRoutineText,
+
   /// 카드 그림 다시 그리기 크레딧 없이 (하루 한도까지)
   freeImageRegenerate,
 

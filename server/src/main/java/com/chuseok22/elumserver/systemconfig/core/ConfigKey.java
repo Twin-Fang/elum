@@ -259,12 +259,12 @@ public enum ConfigKey {
   // 기간을 고르는 설정을 따로 두지 않는다 — 한쪽을 -1 로 두면 "하루만" / "주만" 이 된다.
   FREE_ROUTINE_CREATE_PER_DAY(
     ConfigGroup.PLAN_FREE, "하루 일과 생성 횟수",
-    "Free가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. -1이면 무제한",
+    "Free가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. 크레딧이 켜져 있으면 '일과 생성 무료' 권한이 켜진 때만 센다. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
   FREE_ROUTINE_CREATE_PER_WEEK(
     ConfigGroup.PLAN_FREE, "주당 일과 생성 횟수",
-    "Free가 한 주(월요일 시작)에 만들 수 있는 일과 수. -1이면 무제한",
+    "Free가 한 주(월요일 시작)에 만들 수 있는 일과 수. 크레딧이 켜져 있으면 '일과 생성 무료' 권한이 켜진 때만 센다. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
   FREE_ROUTINE_MAX_COUNT(
@@ -326,6 +326,13 @@ public enum ConfigKey {
   FREE_IMAGE_REGENERATE_FREE(
     ConfigGroup.PLAN_FREE, "그림 다시 그리기 무료",
     "Free가 카드 그림 다시 그리기를 크레딧 없이 할 수 있는지. 하루 무료 횟수를 넘으면 원래 단가를 쓴다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  // 일과 생성 무료: 켜면 ROUTINE_CREATE 의 글 단가 0, 그림 단가는 그대로 (#1110)
+  FREE_ROUTINE_CREATE_FREE(
+    ConfigGroup.PLAN_FREE, "일과 생성 무료 (글 크레딧 없음)",
+    "Free가 AI 일과 만들기의 글 몫을 크레딧 없이 할 수 있는지. 카드 그림은 그린 장수만큼 크레딧을 그대로 쓴다. "
+      + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(FREE_ROUTINE_CREATE_PER_DAY)로 막는다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   // 고품질 그림: 켜면 OpenAI 품질을 OPENAI_IMAGE_QUALITY_PRO 로 그린다 (그림 원가가 올라 기본 꺼짐)
@@ -395,12 +402,12 @@ public enum ConfigKey {
   ),
   PRO_ROUTINE_CREATE_PER_DAY(
     ConfigGroup.PLAN_PRO, "하루 일과 생성 횟수",
-    "Pro가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. -1이면 무제한",
+    "Pro가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. 크레딧이 켜져 있으면 '일과 생성 무료' 권한이 켜진 때만 센다. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
   PRO_ROUTINE_CREATE_PER_WEEK(
     ConfigGroup.PLAN_PRO, "주당 일과 생성 횟수",
-    "Pro가 한 주에 만들 수 있는 일과 수. -1이면 무제한",
+    "Pro가 한 주에 만들 수 있는 일과 수. 크레딧이 켜져 있으면 '일과 생성 무료' 권한이 켜진 때만 센다. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
   PRO_ROUTINE_MAX_COUNT(
@@ -462,6 +469,12 @@ public enum ConfigKey {
   PRO_IMAGE_REGENERATE_FREE(
     ConfigGroup.PLAN_PRO, "그림 다시 그리기 무료",
     "Pro가 카드 그림 다시 그리기를 크레딧 없이 할 수 있는지. 하루 무료 횟수를 넘으면 원래 단가를 쓴다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_CREATE_FREE(
+    ConfigGroup.PLAN_PRO, "일과 생성 무료 (글 크레딧 없음)",
+    "Pro가 AI 일과 만들기의 글 몫을 크레딧 없이 할 수 있는지. 카드 그림은 그린 장수만큼 크레딧을 그대로 쓴다. "
+      + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(PRO_ROUTINE_CREATE_PER_DAY)로 막는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
   // 그림이 비싸 Pro 도 기본 꺼짐 — 원가 실측 뒤 관리자 화면에서 켠다

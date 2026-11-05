@@ -37,6 +37,7 @@ class PlanBenefitsGroup extends StatelessWidget {
               PlanBenefit.expertRoutines => l10n.planBenefitExpertRoutines,
               PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
               PlanBenefit.routineTranslate => l10n.planBenefitRoutineTranslate,
+              PlanBenefit.freeRoutineText => l10n.planBenefitFreeRoutineText,
               PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,
               PlanBenefit.moreWeeklyCredits => l10n.planBenefitMoreWeeklyCredits,
               PlanBenefit.cardExportWithoutWatermark =>

@@ -37,7 +37,8 @@ public record CreditSummaryResponse(
   int maxCardsPerRoutine,
   @Schema(description = "진행 중(예약) 작업")
   List<InProgress> inProgress,
-  @Schema(description = "지금 AI 일과를 시작할 수 있는가", example = "true")
+  @Schema(description = "지금 AI 일과를 시작할 수 있는가. 사용 가능 ≥ 일과 글 단가 "
+    + "(요금제 권한 ROUTINE_CREATE_FREE 면 그림 한 장 단가)", example = "true")
   boolean canStartRoutine,
   @Schema(description = "지금 수동 카드 그림을 만들 수 있는가", example = "true")
   boolean canGenerateImage,
@@ -48,7 +49,8 @@ public record CreditSummaryResponse(
 
   @Schema(description = "행동별 단가")
   public record Costs(
-    @Schema(description = "일과 글 1건", example = "1") int routineText,
+    @Schema(description = "일과 글 1건 (정책 단가. 요금제 권한 ROUTINE_CREATE_FREE 면 일과 생성 때만 0, 번역은 그대로)",
+      example = "1") int routineText,
     @Schema(description = "AI 그림 1장", example = "1") int cardImage,
     @Schema(description = "카드 그림 다시 그리기 1장 (무료 횟수가 남았으면 0 으로 예약)", example = "1") int imageRegenerate
   ) {

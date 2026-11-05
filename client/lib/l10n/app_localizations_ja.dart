@@ -404,6 +404,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get imageStyleCreditRoutineFree => '일과 무료';
+
+  @override
   String imageStyleCreditImage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1615,6 +1618,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get creditCostTitle => 'AI 크레딧은 이렇게 줄어요';
+
+  @override
+  String creditCostLineTextFree(int imageCost) {
+    String _temp0 = intl.Intl.pluralLogic(
+      imageCost,
+      locale: localeName,
+      other: '$imageCost개',
+    );
+    return '일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 $_temp0씩 써요.';
+  }
 
   @override
   String creditCostLine(int textCost, int imageCost) {
@@ -3535,6 +3548,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get planBenefitRoutineTranslate => '만든 일과를 다른 언어로 바꿔 만들어요';
+
+  @override
+  String get planBenefitFreeRoutineText => '일과는 크레딧 없이 만들고 카드 그림만 크레딧을 써요';
 
   @override
   String get planBenefitFreeImageRegenerate =>
