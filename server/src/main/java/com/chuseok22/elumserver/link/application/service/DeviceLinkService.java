@@ -286,7 +286,7 @@ public class DeviceLinkService {
   public void revoke(String memberId, String linkId) {
     DeviceLink link = deviceLinkRepository.findById(linkId)
       .filter(DeviceLink::isLinked)
-      .filter(l -> mayManage(memberId, l))
+      .filter(l -> canManage(memberId, l))
       .orElseThrow(() -> new CustomException(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
 
     terminate(link);
@@ -313,7 +313,7 @@ public class DeviceLinkService {
   }
 
   /** 이 보호자가 이 연결을 끊어도 되는가 — 그 이룸이를 돌보는 사람. 이룸이가 비어 있는 옛 행은 붙인 사람만. */
-  private boolean mayManage(String memberId, DeviceLink link) {
+  private boolean canManage(String memberId, DeviceLink link) {
     if (link.getProfileId() == null) {
       return link.getMemberId().equals(memberId);
     }

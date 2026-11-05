@@ -211,11 +211,11 @@ public class AdminCreditQueryService {
     long stuck = countStuckReservations(policy, now);
     long mismatch = jobRepository.countSettledWithoutCallLog(CreditJobStatus.SETTLED, period.start(), period.end());
 
-    CreditPeriod prev = CreditPeriod.of(period.start().minusWeeks(1));
+    CreditPeriod previousPeriod = CreditPeriod.of(period.start().minusWeeks(1));
     String nextKey = current ? null : CreditPeriod.of(period.end()).key();
-    return new AdminCreditOverview(period, prev.key(), nextKey, current, active, granted, bonus, used, reserved,
+    return new AdminCreditOverview(period, previousPeriod.key(), nextKey, current, active, granted, bonus, used, reserved,
       remaining, overageJobs, overageCredits, released, exhausted, totalUsd, linkedUsd, perCredit(linkedUsd, used), models, kinds,
-      stuck, mismatch, budgetReached(), policy);
+      stuck, mismatch, isBudgetReached(), policy);
   }
 
   /** 멈춘 예약 수: 예약 유지 시간이 지났는데 아직 예약 중 (대시보드 확인할 일) */
@@ -453,7 +453,7 @@ public class AdminCreditQueryService {
   }
 
   /// 비용 상한 도달 여부. 집계 실패는 가드가 false 로 돌려준다 — 경고 하나 때문에 개요가 깨지지 않게 여기서도 감싼다.
-  private boolean budgetReached() {
+  private boolean isBudgetReached() {
     try {
       return dailyBudgetGuard.isReached();
     } catch (RuntimeException e) {
