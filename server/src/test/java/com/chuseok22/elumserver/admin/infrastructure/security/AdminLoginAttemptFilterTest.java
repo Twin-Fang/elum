@@ -12,10 +12,13 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
- * 관리자 로그인 시도 제한: 같은 아이디로 6번째 시도부터 인증 없이 잠김 안내로 돌려보내는지
+ * 관리자 로그인 시도 제한: 같은 아이디로 51번째 시도부터 인증 없이 잠김 안내로 돌려보내는지
  * 막힌 시도가 뒤 필터(비밀번호 대조)까지 가면 무차별 대입 방어가 아니므로 통과 횟수를 센다.
  */
 class AdminLoginAttemptFilterTest {
+
+  // AdminLoginAttemptFilter.MAX_ATTEMPTS_PER_WINDOW 와 같아야 한다
+  private static final int MAX_ATTEMPTS = 50;
 
   private AdminLoginAttemptFilter filter;
   private AtomicInteger passedToNextFilterCount;
@@ -29,24 +32,25 @@ class AdminLoginAttemptFilterTest {
   }
 
   @Test
-  @DisplayName("같은 아이디로 5번까지는 통과하고 6번째는 잠김 안내로 돌려보낸다")
-  void blocksSixthAttemptOfSameUsername() throws Exception {
-    for (int attempt = 1; attempt <= 5; attempt++) {
+  @DisplayName("같은 아이디로 50번까지는 통과하고 51번째는 잠김 안내로 돌려보낸다")
+  void blocksAttemptOverLimitOfSameUsername() throws Exception {
+    for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       MockHttpServletResponse response = submitLogin("kimchi");
       assertThat(response.getRedirectedUrl()).as("시도 %d", attempt).isNull();
     }
 
-    MockHttpServletResponse sixth = submitLogin("kimchi");
+    MockHttpServletResponse overLimit = submitLogin("kimchi");
 
-    assertThat(sixth.getRedirectedUrl()).isEqualTo("/admin/login?locked");
-    assertThat(passedToNextFilterCount.get()).isEqualTo(5);
+    assertThat(overLimit.getRedirectedUrl()).isEqualTo("/admin/login?locked");
+    assertThat(passedToNextFilterCount.get()).isEqualTo(MAX_ATTEMPTS);
   }
 
   @Test
   @DisplayName("대소문자를 바꿔도 같은 아이디로 센다")
   void countsCaseVariantsTogether() throws Exception {
-    for (String username : new String[] {"kimchi", "KIMCHI", "Kimchi", " kimchi ", "kImChI"}) {
-      submitLogin(username);
+    String[] caseVariants = {"kimchi", "KIMCHI", "Kimchi", " kimchi ", "kImChI"};
+    for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      submitLogin(caseVariants[attempt % caseVariants.length]);
     }
 
     MockHttpServletResponse locked = submitLogin("KiMcHi");
@@ -57,7 +61,7 @@ class AdminLoginAttemptFilterTest {
   @Test
   @DisplayName("다른 아이디는 영향받지 않는다")
   void doesNotAffectOtherUsername() throws Exception {
-    for (int attempt = 0; attempt < 6; attempt++) {
+    for (int attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
       submitLogin("kimchi");
     }
 
@@ -69,7 +73,7 @@ class AdminLoginAttemptFilterTest {
   @Test
   @DisplayName("로그인 제출이 아닌 요청은 세지 않는다 (로그인 화면 조회, 다른 관리자 경로)")
   void ignoresNonLoginSubmitRequests() throws Exception {
-    for (int attempt = 0; attempt < 10; attempt++) {
+    for (int attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
       MockHttpServletRequest loginPage = new MockHttpServletRequest("GET", "/admin/login");
       loginPage.setServletPath("/admin/login");
       filter.doFilter(loginPage, new MockHttpServletResponse(), countingChain);

@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.config;
 
 import com.chuseok22.elumserver.admin.infrastructure.security.AdminLoginAttemptFilter;
+import com.chuseok22.elumserver.admin.infrastructure.security.AdminLoginSuccessHandler;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
@@ -115,7 +116,8 @@ public class SecurityConfig {
         // loginPage()만으로는 POST 처리 URL이 기본값 "/login"으로 남는다.
         // admin/login.html의 폼이 "/admin/login"으로 제출하므로 명시적으로 맞춰준다.
         .loginProcessingUrl(SecurityPaths.ADMIN_LOGIN)
-        .defaultSuccessUrl(SecurityPaths.ADMIN_DASHBOARD, true)
+        // 성공하면 그 아이디의 시도 기록을 지우고 대시보드로 (실패만 센다, #1102)
+        .successHandler(new AdminLoginSuccessHandler(sharedStateStore))
         .permitAll()
       )
       .logout(logout -> logout

@@ -38,4 +38,11 @@ public interface SharedStateStore {
    * 통과한다.
    */
   boolean tryRecordInWindow(String key, Duration window, int max, long nowMillis);
+
+  /**
+   * 이 열쇠의 창 기록을 모두 지운다. 없으면 아무 일도 하지 않는다.
+   *
+   * <p>관리자 로그인 성공 시 그 아이디의 시도 기록을 비워 실패만 남게 한다 (#1102).
+   */
+  void clearWindow(String key);
 }
