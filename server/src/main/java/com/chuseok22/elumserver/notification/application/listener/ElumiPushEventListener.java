@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.notification.application.listener;
 
 import com.chuseok22.elumserver.common.infrastructure.config.AsyncConfig;
 import com.chuseok22.elumserver.notification.application.service.ElumiPushDispatcher;
+import com.chuseok22.elumserver.notification.application.service.ElumiPushResult;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineTimeArrivedEvent;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +41,14 @@ public class ElumiPushEventListener {
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onRoutineTimeArrived(RoutineTimeArrivedEvent event) {
     try {
-      elumiPushDispatcher.dispatchRoutineTime(event.profileId(), event.routineId());
+      ElumiPushResult pushResult = elumiPushDispatcher.dispatchRoutineTime(event.profileId(), event.routineId());
+      // 예약마다 결과 한 줄 (기기 0대·전부 실패도 남김: "알림이 안 왔다" 제보를 로그로 가름)
+      log.info("[routine schedule push] scheduleId={} devices={} sent={}", event.scheduleId(),
+        pushResult.deviceCount(), pushResult.sentCount());
     } catch (RuntimeException exception) {
       // 푸시 실패는 기록만 하고 다음 예약은 그대로 (차지한 날짜는 되돌리지 않음: 같은 날 다시 울리지 않게)
-      log.warn("[elumi push] failed routine time : {}", exception.getClass().getSimpleName());
+      log.warn("[routine schedule push] failed : scheduleId={} {}", event.scheduleId(),
+        exception.getClass().getSimpleName());
     }
   }
 }

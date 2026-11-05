@@ -29,14 +29,16 @@ public class ElumiPushDispatcher {
 
   /** 보호자가 일과를 보냄 > 그 이룸이에 연결된 기기 전부에 "새 일과가 도착했어요" */
   // 트랜잭션 없음: FCM 호출 동안 DB 연결을 잡지 않음 (PushDispatcher 와 같은 이유)
-  public void dispatchRoutineArrived(String profileId, String routineId) {
-    dispatch(profileId, "routine arrived",
+  public ElumiPushResult dispatchRoutineArrived(String profileId, String routineId) {
+    ElumiPushResult pushResult = dispatch(profileId,
       device -> pushMessageFactory.createElumiRoutineArrived(device, profileId, routineId));
+    log.info("[elumi push] routine arrived : devices={} sent={}", pushResult.deviceCount(), pushResult.sentCount());
+    return pushResult;
   }
 
-  /** 반복 일과의 정한 시각 > 연결된 기기 전부에 "일과를 시작할 시간이에요" (#1080) */
-  public void dispatchRoutineTime(String profileId, String routineId) {
-    dispatch(profileId, "routine time",
+  /** 반복 일과의 정한 시각 > 연결된 기기 전부에 "일과를 시작할 시간이에요" (#1080). 결과 로그는 예약 ID 를 아는 쪽(리스너)이 남김 */
+  public ElumiPushResult dispatchRoutineTime(String profileId, String routineId) {
+    return dispatch(profileId,
       device -> pushMessageFactory.createElumiRoutineTime(device, profileId, routineId));
   }
 
@@ -51,11 +53,11 @@ public class ElumiPushDispatcher {
       : ElumiNotificationState.ON;
   }
 
-  // 살아 있는 연결 > 그 연결의 기기 > 순차 발송 > 무효 토큰 삭제 (종류만 다르고 순서는 같음)
-  private void dispatch(String profileId, String kind, Function<PushDevice, PushMessage> messageOf) {
+  // 살아 있는 연결 > 그 연결의 기기 > 순차 발송 > 무효 토큰 삭제 (종류만 다르고 순서는 같음). 연결 0개도 결과로 돌려줌
+  private ElumiPushResult dispatch(String profileId, Function<PushDevice, PushMessage> messageOf) {
     List<String> liveLinkIds = deviceLinkService.liveLinkIdsOf(profileId);
     if (liveLinkIds.isEmpty()) {
-      return;
+      return ElumiPushResult.NO_DEVICE;
     }
     // 끊긴 연결의 남은 토큰은 대상에서 빠짐 (살아 있는 연결 ID 로만 조회)
     List<PushDevice> devices = pushDeviceRepository.findAllByLinkIdIn(liveLinkIds);
@@ -74,6 +76,6 @@ public class ElumiPushDispatcher {
         log.warn("[elumi push] failed : {}", exception.getClass().getSimpleName());
       }
     }
-    log.info("[elumi push] {} : devices={} sent={}", kind, devices.size(), sentCount);
+    return new ElumiPushResult(devices.size(), sentCount);
   }
 }

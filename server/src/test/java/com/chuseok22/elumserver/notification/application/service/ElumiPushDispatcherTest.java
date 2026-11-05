@@ -63,12 +63,13 @@ class ElumiPushDispatcherTest {
   }
 
   @Test
-  @DisplayName("살아 있는 연결이 없으면 기기를 찾지도 보내지도 않는다")
-  void dispatchRoutineArrived_noLiveLink_sendsNothing() {
+  @DisplayName("살아 있는 연결이 없으면 기기를 찾지도 보내지도 않고 0대·0건으로 알린다")
+  void dispatchRoutineTime_noLiveLink_sendsNothingAndReportsZero() {
     when(deviceLinkService.liveLinkIdsOf("p1")).thenReturn(List.of());
 
-    dispatcher.dispatchRoutineArrived("p1", "r1");
+    ElumiPushResult pushResult = dispatcher.dispatchRoutineTime("p1", "r1");
 
+    assertThat(pushResult).isEqualTo(new ElumiPushResult(0, 0));
     verify(pushDeviceRepository, never()).findAllByLinkIdIn(any());
     verify(pushSender, never()).send(any());
   }
@@ -83,10 +84,12 @@ class ElumiPushDispatcherTest {
       .thenThrow(new IllegalStateException("fcm down"))
       .thenReturn(PushResult.SENT);
 
-    dispatcher.dispatchRoutineArrived("p1", "r1");
+    ElumiPushResult pushResult = dispatcher.dispatchRoutineArrived("p1", "r1");
 
     verify(pushDeviceRepository).deleteByToken("t1");
     verify(pushSender, times(3)).send(any());
+    // 실제로 보낸 1대만 sent 로 셈 (무효 토큰·실패 제외)
+    assertThat(pushResult).isEqualTo(new ElumiPushResult(3, 1));
   }
 
   private PushDevice device(String token) {
