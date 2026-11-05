@@ -72,7 +72,7 @@ class AppLogInterceptor extends Interceptor {
           : describeBody(options.data, _header(options.headers, 'content-type'));
       if (body != null) buffer.write('\n  body: $body');
       AppLogger.network(buffer.toString());
-    } catch (_) {}
+    } catch (_) {} // 기록 실패가 요청·응답 흐름을 막지 않게 (로그 전용)
     handler.next(options);
   }
 
@@ -90,7 +90,7 @@ class AppLogInterceptor extends Interceptor {
       );
       if (body != null) buffer.write('\n  body: $body');
       AppLogger.network(buffer.toString());
-    } catch (_) {}
+    } catch (_) {} // 기록 실패가 요청·응답 흐름을 막지 않게 (로그 전용)
     handler.next(response);
   }
 
@@ -109,7 +109,7 @@ class AppLogInterceptor extends Interceptor {
       final body = describeBody(response?.data, response?.headers.value('content-type'));
       if (body != null) buffer.write('\n  body: $body');
       AppLogger.network(buffer.toString());
-    } catch (_) {}
+    } catch (_) {} // 기록 실패가 요청·응답 흐름을 막지 않게 (로그 전용)
     handler.next(err);
   }
 

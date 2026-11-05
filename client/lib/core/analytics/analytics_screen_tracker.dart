@@ -31,6 +31,6 @@ class AnalyticsScreenTracker {
       if (routePattern == _lastRoutePattern) return;
       _lastRoutePattern = routePattern;
       AppAnalytics.logScreenView(routePattern);
-    } catch (_) {}
+    } catch (_) {} // 분석 실패가 화면 이동을 막지 않게
   }
 }
