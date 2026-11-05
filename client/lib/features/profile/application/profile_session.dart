@@ -327,8 +327,18 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   ///
   /// 비밀암호는 지킨다. 이 휴대폰에서 이룸이 화면 → 보호자 화면으로 넘어올 때 쓰는 것이라
   /// 이룸이와 무관하다 (E45).
+  ///
+  /// 이미 온보딩 중(완료 표시 없음)이면 이룸이 값을 비우지 않는다 — 그 값은 지금 입력 중인
+  /// 이름·캐릭터·그림 방식이다. 이 상태는 새로 만든 메모리 상태(로그인 뒤)라 늦게 도착한
+  /// "이룸이 없음"(새 이룸이를 만들기 전 목록·요청 실패)으로도 들어오는데, 그때 비우면
+  /// 온보딩 저장에 빈 이름이 나가 400 이 된다.
   Future<void> _enterNoProfile() async {
     final storage = _storage;
+    if (storage != null && !storage.isOnboardingCompleted) {
+      state = const ProfileSession(noProfile: true);
+      await _refreshScoped();
+      return;
+    }
     if (storage != null) {
       try {
         await storage.clearChildProfile();
