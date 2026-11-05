@@ -119,6 +119,13 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     if (_isElumi) return;
     // 옛 서버는 목록을 주지 않는다. 모르는 것을 "없다"로 읽지 않는다 (E36).
     if (!member.profilesKnown) return;
+    // 늦게 온 이전 계정 회원 정보로 고른 이룸이를 되살리지 않음 (응답 회원 <-> 로그인 회원)
+    if (_isOtherAccount(member)) {
+      AppLogger.notifierCall('ProfileSessionNotifier', 'reconcile skipped', {
+        'reason': 'member of another account',
+      });
+      return;
+    }
     final profiles = member.profiles;
 
     if (profiles.isEmpty) {
@@ -153,6 +160,14 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     await ref
         .read(onboardingProvider.notifier)
         .applyServerProfile(target, goals: member.supportGoals);
+  }
+
+  /// 회원 정보가 지금 로그인한 계정 것이 아닌가 (둘 다 알 때만 판정)
+  bool _isOtherAccount(Member member) {
+    final loggedInMemberId = _storage?.accountMemberId;
+    final responseMemberId = member.id;
+    if (loggedInMemberId == null || responseMemberId == null) return false;
+    return loggedInMemberId != responseMemberId;
   }
 
   Future<Attempt<bool>>? _ensuring;
@@ -309,7 +324,14 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   /// 여러 요청이 한꺼번에 같은 실패를 받으면 이 메서드가 여러 번 불린다 — **지금 고른 이룸이를
   /// 잃은 경우에만** 움직여 한 번만 처리한다.
   void lost(String profileId) {
-    if (state.selectedId != profileId) return;
+    // 헤더는 저장소 값으로 나감: 메모리 선택만 보면 저장소에 남은 이전 계정 id 를 못 풀어 403 이 반복됨
+    final isSelectedInMemory = state.selectedId == profileId;
+    final isSelectedInStorage = _storage?.selectedProfileId == profileId;
+    if (!isSelectedInMemory && !isSelectedInStorage) return;
+    AppLogger.notifierCall('ProfileSessionNotifier', 'lost', {
+      'inMemory': isSelectedInMemory,
+      'inStorage': isSelectedInStorage,
+    });
     state = const ProfileSession();
     _storage?.clearSelectedProfileId().catchError((Object e, StackTrace stack) {
       AppLogger.error('[profile] lost profile selection clear failed', e, stack);

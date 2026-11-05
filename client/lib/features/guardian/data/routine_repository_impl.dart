@@ -255,6 +255,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
   @override
   Future<List<Routine>> getTodayRoutines() async {
     AppLogger.repositoryCall('RoutineRepository', 'getTodayRoutines');
+    // 요청 시점 회원 (응답 사이 계정이 바뀌면 캐시에 남기지 않게)
+    final ownerMemberId = _todayCache.currentOwnerMemberId;
 
     try {
       final response = await _dio.get<List<dynamic>>('/api/routines/today');
@@ -271,11 +273,13 @@ class RoutineRepositoryImpl implements RoutineRepository {
         );
         // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다.
         // toJson 이 보호자 원문을 빼고 직렬화한다.
-        await _todayCache.save(routines);
+        await _todayCache.save(routines, ownerMemberId: ownerMemberId);
         return routines;
       }
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'getTodayRoutines', e);
+      // 서버가 거절(401·403)하면 캐시로 덮지 않음: 볼 수 없는 이룸이·끝난 세션의 일과를 보이지 않게
+      if (_isAccessRejected(e)) rethrow;
     }
 
     // 오프라인이거나 서버가 죽었다 — 마지막 성공 응답이 있으면 그걸 쓴다.
@@ -483,4 +487,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
       return AppFailure.of(e);
     }
   }
+}
+
+/// 서버가 인증·권한으로 거절했는지 (401 세션 끝 · 403 볼 수 없는 이룸이 등)
+bool _isAccessRejected(Object error) {
+  if (error is! DioException) return false;
+  final statusCode = error.response?.statusCode;
+  return statusCode == 401 || statusCode == 403;
 }

@@ -76,6 +76,22 @@ class RoutineReminderController extends Notifier<Map<String, RoutineReminder>> {
     await _persist();
   }
 
+  /// 이전 계정 알림 전부 끄기: 예약 취소(실패해도 다음 건 계속) > 빈 목록 저장
+  ///
+  /// 다른 계정이 로그인했을 때 부름. 알림 글에 이전 계정의 일과 제목이 들어 있음.
+  Future<void> forgetPreviousAccountReminders() async {
+    final scheduler = ref.read(reminderSchedulerProvider);
+    for (final reminder in state.values) {
+      try {
+        await scheduler.cancel(reminder);
+      } catch (e, st) {
+        AppLogger.error('RoutineReminderController.forgetPreviousAccountReminders', e, st);
+      }
+    }
+    state = const {};
+    await _persist();
+  }
+
   ReminderTexts _textsFor(RoutineReminder reminder) => (
     channelName: appL10n.reminderChannelName,
     title: appL10n.reminderNotificationTitle,

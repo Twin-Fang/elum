@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../network/app_failure.dart';
+import '../network/server_error_code.dart';
 import '../theme/theme_context_ext.dart';
 import 'show_failure.dart';
 
@@ -41,6 +43,11 @@ class ElumPullToRefresh extends StatelessWidget {
       await onRefresh();
     } catch (error) {
       if (!context.mounted) return;
+      // 볼 수 없는 이룸이: 헤더 인터셉터가 선택을 풀고 다시 받음 > 팝업 없이 새 목록을 기다림
+      if (AppFailure.of(error).server?.code ==
+          ServerErrorCode.profileAccessDenied) {
+        return;
+      }
       // 스피너가 팝업을 기다리지 않게 await 하지 않음
       unawaited(
         showFailure(

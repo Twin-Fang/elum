@@ -134,8 +134,15 @@ abstract interface class LocalStorage {
   Future<void> setPendingSyncRoutineIds(List<String> ids);
 
   /// 마지막으로 성공한 `/api/routines/today` 응답. 오프라인에서 목록을 띄우는 데 쓴다.
+  ///
+  /// 받은 회원([accountMemberId])에 묶음: 지금 회원과 다르면 읽기는 null, 쓰기는 건너뜀.
   String? get cachedTodayRoutinesJson;
-  Future<void> setCachedTodayRoutinesJson(String json);
+
+  /// [ownerMemberId]: 요청을 보낸 시점의 [accountMemberId] (응답 사이 계정이 바뀌면 버리려고)
+  Future<void> setCachedTodayRoutinesJson(
+    String json, {
+    required String? ownerMemberId,
+  });
 
   /// 오늘 일과 캐시만 지운다. 이룸이를 바꿀 때 쓴다 (E44).
   ///
@@ -251,15 +258,17 @@ abstract interface class LocalStorage {
   bool get isTalkGridView;
   Future<void> setTalkGridView(bool isGridView);
 
-  /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
+  /// 일과 알림 설정 JSON (#777). 없으면 null
+  ///
+  /// 일과 제목이 들어 있어 계정 범위다. 예약과 함께 지워야 하므로 [clearAll] 이 남기고,
+  /// 다른 계정이 로그인하면 알림 기능이 예약 취소와 함께 비운다.
   String? get routineRemindersJson;
   Future<void> setRoutineRemindersJson(String json);
 
-  /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
+  /// 계정 범위 값 전부 지우기: 로그아웃·탈퇴·다른 계정 로그인
   ///
-  /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
-  /// 인터페이스에 두는 이유는 InMemoryStorage도 같은 동작을 보장해
-  /// 테스트로 검증할 수 있게 하기 위함이다.
+  /// 지우는 키는 `SharedPrefsStorage.accountScopedKeys` 분류표 한 곳이 정한다.
+  /// 기기 범위(언어·소리·안내 본 기록·서버 설정 캐시)는 남긴다.
   Future<void> clearAll();
 
   /// 아이 정보만 지운다. 토큰은 건드리지 않는다.
