@@ -61,6 +61,10 @@ dependencies:
   kakao_flutter_sdk_user: ^2.0.1
   flutter_naver_login: ^2.1.1
   google_sign_in: ^7.2.0
+  # iOS scene 생명주기: 6.3.3 은 scene URL 처리 결과를 돌려주지 않아 카카오·네이버 콜백과
+  # 앱 링크(elum://)가 구글 플러그인에서 멈출 수 있음 > 결과를 돌려주는 6.3.4 로 고정
+  # (6.3.6+ 는 Flutter 3.41 필요, CI FLUTTER_VERSION 을 올릴 때 함께 풀기)
+  google_sign_in_ios: 6.3.4
   sign_in_with_apple: ^7.0.1
   flutter_secure_storage: ^11.2.0
   # 공지 팝업의 링크 버튼을 외부 브라우저로 연다 (이슈 #371). 앱에 링크를 여는 길이
