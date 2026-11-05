@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -163,6 +164,20 @@ class RoutineStepImageCreditTest {
 
     assertThat(response.imageSkippedReason()).isEqualTo("AI_IMAGE_NOT_ALLOWED");
     assertThat(routine.getSteps()).hasSize(2);
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
+  }
+
+  @Test
+  @DisplayName("이모지 방식은 그림 요청이 와도 예약·그림 없이 까닭 IMAGE_STYLE_PHOTO_ONLY, 이모지 세트에서 고른다 (#1149)")
+  void addStep_emojiStyle_skipsImageAndPicksFromEmojiSet() {
+    Routine routine = givenRoutine();
+    routine.getProfile().setImageStyle(ImageStyle.EMOJI);
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
+
+    assertThat(response.imageSkippedReason()).isEqualTo("IMAGE_STYLE_PHOTO_ONLY");
+    verify(pictogramPicker).pick(eq("member-1"), any(), any(), eq(PictogramSet.EMOJI));
     verifyNoInteractions(routineStepImageFiller, creditReservationService);
   }
 

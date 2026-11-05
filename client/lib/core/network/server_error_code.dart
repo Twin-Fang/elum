@@ -67,6 +67,8 @@ enum ServerErrorCode {
   routineStepImageCandidateNotFound('ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND'),
   // 요금제에 AI 맞춤 그림이 없음 — 다시 그리기·그림 그리기 거절 (Pro 안내로 돌림)
   aiImageNotAllowed('AI_IMAGE_NOT_ALLOWED'),
+  // 요금제에 AI 맞춤 그림이 없는데 캐릭터·사진 같은 그림 방식 저장 (#1149)
+  imageStyleNotAllowed('IMAGE_STYLE_NOT_ALLOWED'),
   // 보호자 목소리 녹음: Pro 아님, 형식, 크기, 길이, 저장 실패
   guardianVoiceNotAllowed('GUARDIAN_VOICE_NOT_ALLOWED'),
   guardianVoiceInvalidType('GUARDIAN_VOICE_INVALID_TYPE'),

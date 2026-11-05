@@ -439,4 +439,22 @@ class RoutineServiceCreditTest {
     routine.setSteps(List.of());
     return routine;
   }
+
+  @Test
+  @DisplayName("AI 맞춤 그림이 없는 Free 라도 이모지 방식은 이모지 그대로 만든다 — 그림 기호로 바꾸지 않음 (#1149)")
+  void createUsesResolvedStyle() {
+    Profile profile = profile();
+    profile.setImageStyle(ImageStyle.EMOJI);
+    reserved("key-1");
+    stubPipeline();
+    // 이모지는 요금제 판정을 보지 않음 — Free 여도 그대로인지만 확인
+    lenient().when(routineAiPicturePolicy.shouldSkipAiPicture("member-1")).thenReturn(true);
+    when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(),
+      eq(ImageStyle.EMOJI), any());
+  }
 }

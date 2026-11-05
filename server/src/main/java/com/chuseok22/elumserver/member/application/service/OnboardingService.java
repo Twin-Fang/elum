@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
@@ -47,7 +48,7 @@ public class OnboardingService {
       memberService.updateCharacter(target, new MemberCharacterUpdateRequest(request.character()));
     }
     if (request.imageStyle() != null) {
-      memberService.updateImageStyle(target, new MemberImageStyleUpdateRequest(request.imageStyle()));
+      memberService.updateImageStyle(target, new MemberImageStyleUpdateRequest(imageStyleForOnboarding(target, request.imageStyle())));
     }
 
     // 예시 일과 (모르는 분류는 빼고, 이미 만들었으면 서비스가 건너뜀)
@@ -88,5 +89,14 @@ public class OnboardingService {
         codes.size(), known.size());
     }
     return known;
+  }
+
+  /// 쓸 수 없는 방식(Free + 캐릭터·실사)은 거절 대신 Free 기본 이모지로 (온보딩은 실패하면 안 됨, #1149)
+  private ImageStyle imageStyleForOnboarding(Caller target, ImageStyle chosen) {
+    if (memberService.canUseImageStyle(target.memberId(), chosen)) {
+      return chosen;
+    }
+    log.warn("[image style] onboarding downgraded : {} -> EMOJI", chosen);
+    return ImageStyle.EMOJI;
   }
 }

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
@@ -11,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -433,6 +435,7 @@ class MemberServiceTest {
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
+    when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(true);
 
     MemberResponse response = memberService.updateImageStyle(
       Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.REALISTIC));
@@ -490,5 +493,40 @@ class MemberServiceTest {
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of());
 
     assertThat(memberService.getMyInfo(Caller.guardian("member-1")).imageStyle()).isEqualTo(ImageStyle.CARTOON);
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림 권한이 없으면 캐릭터 그림 저장은 403 IMAGE_STYLE_NOT_ALLOWED, 값은 그대로 (#1149)")
+  void updateImageStyleRejectsProStyleForFree() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setImageStyle(ImageStyle.EMOJI);
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(false);
+
+    assertThatThrownBy(() -> memberService.updateImageStyle(
+      Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.CARTOON)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.IMAGE_STYLE_NOT_ALLOWED));
+    assertThat(profile.getImageStyle()).isEqualTo(ImageStyle.EMOJI);
+  }
+
+  @Test
+  @DisplayName("권한이 없어도 이모지·그림 기호는 저장한다 (#1149)")
+  void updateImageStyleAllowsFreeStyleWithoutEntitlement() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
+    // 이모지는 권한을 보지 않음 — 꺼져 있어도 저장되는지만 확인
+    lenient().when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(false);
+
+    memberService.updateImageStyle(Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.EMOJI));
+
+    assertThat(profile.getImageStyle()).isEqualTo(ImageStyle.EMOJI);
   }
 }

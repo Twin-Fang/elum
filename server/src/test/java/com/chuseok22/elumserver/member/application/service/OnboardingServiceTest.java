@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -92,5 +93,26 @@ class OnboardingServiceTest {
 
     verify(memberService, never()).createProfile(any());
     verifyNoInteractions(routineExampleService);
+  }
+
+  @Test
+  @DisplayName("권한 없이 사진 같은 그림을 골라 와도 온보딩은 실패하지 않고 이모지 그림으로 저장한다 (#1149)")
+  void onboardingStoresEmojiWhenProStyleNotAllowed() {
+    when(memberService.canUseImageStyle("member-1", ImageStyle.REALISTIC)).thenReturn(false);
+
+    onboardingService.complete(staleCaller, new OnboardingCompleteRequest(
+      "하늘이", Set.of(), CharacterType.LULU, ImageStyle.REALISTIC, List.of()));
+
+    verify(memberService).updateImageStyle(eq(ownProfile), eq(new MemberImageStyleUpdateRequest(ImageStyle.EMOJI)));
+  }
+
+  @Test
+  @DisplayName("쓸 수 있는 방식이면 고른 그대로 저장한다 (#1149)")
+  void onboardingStoresChosenStyleWhenAllowed() {
+    when(memberService.canUseImageStyle("member-1", ImageStyle.CARTOON)).thenReturn(true);
+
+    onboardingService.complete(staleCaller, request("하늘이", List.of()));
+
+    verify(memberService).updateImageStyle(eq(ownProfile), eq(new MemberImageStyleUpdateRequest(ImageStyle.CARTOON)));
   }
 }

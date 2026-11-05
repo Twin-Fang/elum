@@ -57,6 +57,8 @@ public enum ErrorCode {
   ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND(HttpStatus.NOT_FOUND),
   // 요금제에 AI 맞춤 그림이 없음 (Free · FREE_AI_IMAGE_GENERATION 꺼짐) — 다시 그리기·그림 그리기 거절
   AI_IMAGE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  // 요금제에 AI 맞춤 그림이 없는데 캐릭터·사진 같은 그림 방식을 저장하려 함 (#1149)
+  IMAGE_STYLE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
   // 보호자 목소리 녹음: Pro 아님, 형식(m4a), 크기(1MB), 길이(15초), 저장 실패
   GUARDIAN_VOICE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
   GUARDIAN_VOICE_INVALID_TYPE(HttpStatus.BAD_REQUEST),

@@ -225,9 +225,9 @@ public class RoutineStepEditService {
     // 단계 음성은 그림 여부와 무관하게 커밋 뒤 만듦 (#675)
     routineStepSpeechQueue.enqueueAfterCommit(step.getId());
 
-    // 직접 사진 방식: 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
+    // AI 그림이 아닌 방식(그림 기호·이모지): 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
     // 잡지 않으니 청구도 없다. 그림을 원했는데 안 나온 까닭을 클라가 알 수 있게 사유를 싣는다.
-    if (routine.getProfile().getImageStyle() == ImageStyle.PHOTO_ONLY) {
+    if (!ImageStyle.orDefault(routine.getProfile().getImageStyle()).drawsAiImages()) {
       RoutineResponse response = RoutineResponse.from(routine);
       return request.wantsImage() ? response.withImageSkippedReason(IMAGE_SKIPPED_PHOTO_ONLY) : response;
     }
