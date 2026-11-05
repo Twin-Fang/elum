@@ -19,7 +19,7 @@ public class AdminLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
   public AdminLoginSuccessHandler(SharedStateStore sharedStateStore) {
     super(SecurityPaths.ADMIN_DASHBOARD);
-    // 저장된 요청 주소와 상관없이 언제나 대시보드로 (기존 defaultSuccessUrl(…, true) 와 같음)
+    // 저장된 요청 주소와 상관없이 언제나 대시보드로
     setAlwaysUseDefaultTargetUrl(true);
     this.sharedStateStore = sharedStateStore;
   }
