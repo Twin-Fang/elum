@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 /// 서버 권한 묶음 한 벌 (`MemberResponse.entitlements`): Pro 판정 + Pro 기능별 사용 가능 여부
 ///
 /// 새 Pro 기능 = 이 파일 5곳(생성자·필드·[pro]·[PlanEntitlements.fromJson]·`_values`) + `PlanAccess` 전달 getter 1곳.
-/// 모르는 값·빠진 필드는 전부 false (Free 쪽으로 기움). 출처: server/.../member/application/dto/response/EntitlementSnapshot.java
+/// 모르는 값·빠진 필드는 전부 false (Free 쪽으로 기움). 출처: server/.../license/application/service/EntitlementSnapshot.java
 @immutable
 class PlanEntitlements {
   const PlanEntitlements({
     this.isPro = false,
+    this.isAdsRemoved = false,
     this.canExportCardsWithoutWatermark = false,
     this.canUseAllCardDesignThemes = false,
     this.canViewWeeklyReport = false,
@@ -26,6 +27,7 @@ class PlanEntitlements {
   /// 개발자 도구 `Pro 처럼`
   static const pro = PlanEntitlements(
     isPro: true,
+    isAdsRemoved: true,
     canExportCardsWithoutWatermark: true,
     canUseAllCardDesignThemes: true,
     canViewWeeklyReport: true,
@@ -40,6 +42,9 @@ class PlanEntitlements {
 
   /// 서버가 본 요금제가 Pro 인가 (`plan == 'PRO'`)
   final bool isPro;
+
+  /// 요금제가 광고를 없애는가 (`adsRemoved` · 요금제별 `*_ADS_REMOVED`). 광고 게이트가 회원 값으로 직접 봄 (개발자 도구 흉내와 무관)
+  final bool isAdsRemoved;
 
   /// 카드 내보내기에서 로고·워터마크를 뺄 수 있는가 (`cardExportWithoutWatermark`)
   final bool canExportCardsWithoutWatermark;
@@ -78,6 +83,7 @@ class PlanEntitlements {
     bool isEntitled(String key) => entitlementsJson[key] == true;
     return PlanEntitlements(
       isPro: entitlementsJson['plan'] == 'PRO',
+      isAdsRemoved: isEntitled('adsRemoved'),
       canExportCardsWithoutWatermark: isEntitled('cardExportWithoutWatermark'),
       canUseAllCardDesignThemes: isEntitled('cardExportAllThemes'),
       canViewWeeklyReport: isEntitled('weeklyReport'),
@@ -94,6 +100,7 @@ class PlanEntitlements {
   /// 비교·해시 원본 (필드를 더하면 여기에도 한 줄)
   List<bool> get _values => [
     isPro,
+    isAdsRemoved,
     canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes,
     canViewWeeklyReport,

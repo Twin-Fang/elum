@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
+import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -14,6 +16,7 @@ import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineExampleCa
 import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.talk.core.TalkCategory;
 import java.io.IOException;
+import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +34,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * 스택 간 계약: 마이그레이션 번호 중복 없음, 서버 enum·상수·서버 주소 허용 도메인 <-> 앱(client/lib) 값 일치
+ * 스택 간 계약: 마이그레이션 번호 중복 없음, 서버 enum·상수·서버 주소 허용 도메인·권한 키 <-> 앱(client/lib) 값 일치
  * 앱 테스트가 없어 서버 쪽에서 앱 소스를 글자로 읽어 대조 (모노레포가 아니면 건너뜀)
  */
 class CrossStackContractTest {
@@ -50,6 +53,9 @@ class CrossStackContractTest {
   // 다트 연 언어 목록: openedAppLocales = <Locale>[ Locale('ko'), Locale.fromSubtags(languageCode: 'zh', ...) ];
   private static final Pattern DART_OPENED_APP_LOCALES = Pattern.compile("openedAppLocales\\s*=\\s*(?:<Locale>)?\\[([^;]*)];");
   private static final Pattern DART_LOCALE_LANGUAGE = Pattern.compile("Locale\\('([a-z]+)'|languageCode:\\s*'([a-z]+)'");
+  // 다트 권한 키 읽기: isEntitled('weeklyReport') · entitlementsJson['plan'] == 'PRO'
+  private static final Pattern DART_ENTITLEMENT_KEY = Pattern.compile("isEntitled\\('(\\w+)'\\)|entitlementsJson\\['(\\w+)']");
+  private static final Pattern DART_PRO_PLAN_VALUE = Pattern.compile("entitlementsJson\\['plan'] == '(\\w+)'");
 
   @Test
   @DisplayName("마이그레이션 버전이 겹치지 않는다 — 같은 번호 둘이면 운영 서버가 기동하지 못한다")
@@ -132,6 +138,25 @@ class CrossStackContractTest {
     Set<String> server = RoutineTranslationLanguages.TARGETS.stream().map(AppLocale::code)
       .collect(Collectors.toCollection(TreeSet::new));
     assertThat(client).isEqualTo(server);
+  }
+
+  @Test
+  @DisplayName("앱이 읽는 권한 키가 서버 응답에 있다 — 없으면 Pro 회원 기능이 조용히 꺼진다 (모르는 키는 false)")
+  void entitlementKeysExistInServerSnapshot() throws IOException {
+    String dart = readClient("features/member/domain/plan_entitlements.dart");
+    Set<String> clientKeys = new TreeSet<>();
+    Matcher key = DART_ENTITLEMENT_KEY.matcher(dart);
+    while (key.find()) {
+      clientKeys.add(key.group(1) != null ? key.group(1) : key.group(2));
+    }
+    Set<String> serverKeys = Arrays.stream(EntitlementSnapshot.class.getRecordComponents())
+      .map(RecordComponent::getName).collect(Collectors.toCollection(TreeSet::new));
+
+    assertThat(clientKeys).as("plan_entitlements.dart 가 읽는 키").isNotEmpty();
+    assertThat(serverKeys).containsAll(clientKeys);
+    Matcher proPlan = DART_PRO_PLAN_VALUE.matcher(dart);
+    assertThat(proPlan.find()).as("Pro 판정 값").isTrue();
+    assertThat(proPlan.group(1)).isEqualTo(PlanType.PRO.name());
   }
 
   /**

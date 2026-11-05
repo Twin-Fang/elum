@@ -25,7 +25,6 @@ class Member {
     this.supportGoals = const [],
     this.imageStyle = ImageStyle.cartoon,
     this.profiles = const [],
-    this.adsRemoved = false,
     this.entitlements = PlanEntitlements.free,
     this.subscription,
     this.account,
@@ -50,11 +49,6 @@ class Member {
   /// 필드가 없거나 모양이 달라도 빈 목록이다. 위 [nickname] 등은 `X-Profile-Id` 로
   /// 짚은 이룸이(없으면 첫 이룸이)의 값이다.
   final List<ProfileSummary> profiles;
-
-  /// 이 계정의 요금제가 광고를 없애는가 (`entitlements.adsRemoved` · 요금제별 `*_ADS_REMOVED`).
-  ///
-  /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
-  final bool adsRemoved;
 
   /// 보호자 회원 id (UUID 문자열). 스토어 결제에 실어 구매를 이 계정에 묶는다. 모르면 null
   final String? id;
@@ -86,7 +80,6 @@ class Member {
         nickname != other.nickname ||
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
-        adsRemoved != other.adsRemoved ||
         entitlements != other.entitlements ||
         subscription != other.subscription ||
         account != other.account ||
@@ -130,7 +123,6 @@ class Member {
           list.map(ProfileSummary.tryParse).whereType<ProfileSummary>().toList(),
         _ => const <ProfileSummary>[],
       },
-      adsRemoved: _isEntitled(json, 'adsRemoved'),
       entitlements: PlanEntitlements.fromJson(json['entitlements']),
       subscription: MemberSubscription.tryParse(json['subscription']),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
@@ -138,13 +130,6 @@ class Member {
     );
   }
 }
-
-/// `entitlements.{key}` 가 true 인가. 필드가 없거나 모양이 달라도 false
-bool _isEntitled(Map<String, dynamic> json, String key) =>
-    switch (json['entitlements']) {
-      final Map<dynamic, dynamic> entitlements => entitlements[key] == true,
-      _ => false,
-    };
 
 /// 회원 정보 저장소.
 ///
