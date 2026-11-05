@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.consent.application.service.ConsentDocumentServi
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
+import com.chuseok22.elumserver.license.application.service.store.GoogleSubscriptionWithdrawalCanceler;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
@@ -66,6 +67,7 @@ public class MemberService {
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final GoogleSubscriptionWithdrawalCanceler googleSubscriptionWithdrawalCanceler;
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
@@ -322,6 +324,8 @@ public class MemberService {
     deviceLinkRepository.deleteAllByMemberId(memberId);
     // 구독. 되살릴 때 가입처럼 Free 로 새로 만든다.
     subscriptionRepository.deleteByMemberId(memberId);
+    // Google Play 구독 자동 갱신 해지: 커밋 뒤 별도 스레드 (실패해도 탈퇴는 그대로, App Store 는 앱에서 직접 해지 안내)
+    googleSubscriptionWithdrawalCanceler.cancelRenewalsAfterCommit(memberId);
     // 광고 보상 세션(nonce·transaction_id)은 회원을 가리키는 운영 기록이라 탈퇴에서 지운다. 받은 크레딧은 묶음·원장에 남는다.
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     // 의견 글과 앱 상태 기록. 개인 정보가 섞여 있을 수 있어 남기지 않는다.

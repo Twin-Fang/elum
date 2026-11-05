@@ -36,6 +36,9 @@ public class HttpGooglePlayDeveloperClient implements GooglePlayDeveloperClient 
   private static final int HTTP_NO_CONTENT = 204;
   // 토큰이 틀렸거나 오래돼 지워진 구매
   private static final Set<Integer> NOT_FOUND_STATUSES = Set.of(400, 404, 410);
+  // 해지 유형: 사용자 요청 해지 (다음 갱신만 멈춤, 사용자가 스토어에서 되살릴 수 있음)
+  private static final String CANCEL_REQUEST_BODY =
+    "{\"cancellationContext\":{\"cancellationType\":\"USER_REQUESTED_STOP_RENEWALS\"}}";
 
   private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
   // 서비스 계정 JSON 이 바뀔 때만 새로 읽는다 (토큰 캐시를 살리려고)
@@ -70,6 +73,19 @@ public class HttpGooglePlayDeveloperClient implements GooglePlayDeveloperClient 
     HttpResponse<String> response = send(request);
     if (response.statusCode() != HTTP_OK && response.statusCode() != HTTP_NO_CONTENT) {
       throw unavailable("acknowledge", response.statusCode());
+    }
+  }
+
+  @Override
+  public void cancelSubscription(String packageName, String purchaseToken, String serviceAccountJson) {
+    URI uri = URI.create(API_BASE_URL + encode(packageName) + "/purchases/subscriptionsv2/tokens/" + encode(purchaseToken) + ":cancel");
+    HttpRequest request = authorized(HttpRequest.newBuilder(uri), serviceAccountJson)
+      .header("Content-Type", "application/json")
+      .POST(HttpRequest.BodyPublishers.ofString(CANCEL_REQUEST_BODY))
+      .build();
+    HttpResponse<String> response = send(request);
+    if (response.statusCode() != HTTP_OK && response.statusCode() != HTTP_NO_CONTENT) {
+      throw unavailable("subscriptionsv2.cancel", response.statusCode());
     }
   }
 

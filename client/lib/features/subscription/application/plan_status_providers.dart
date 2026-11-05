@@ -6,6 +6,7 @@ import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
 import '../../member/domain/member_subscription.dart';
 import '../domain/plan_status.dart';
+import '../domain/withdraw_store_subscription_notice.dart';
 
 /// 지금 계정의 내 요금제 상태 (Pro 여부는 PlanAccess, 날짜는 회원 정보 `subscription`)
 final planStatusProvider = Provider<PlanStatus>((ref) {
@@ -20,14 +21,26 @@ final memberSubscriptionProvider = Provider<MemberSubscription?>(
   (ref) => ref.watch(memberProvider).value?.subscription,
 );
 
-/// 탈퇴해도 스토어 결제가 이어지는가: Pro + 스토어 구독 + 해지 예약 아님 (갱신 여부 모르면 이어진다고 봄)
-/// 서버 탈퇴는 스토어 구독을 해지하지 않음 > 회원탈퇴 경고에 스토어 해지 안내
+/// 스토어 결제가 갱신 중인가: Pro + 스토어 구독 + 해지 예약 아님 (갱신 여부 모르면 이어진다고 봄)
 final hasRenewingStoreSubscriptionProvider = Provider<bool>((ref) {
   final subscription = ref.watch(memberSubscriptionProvider);
   return ref.watch(planAccessProvider).isPro &&
       subscription != null &&
       subscription.isStorePurchase &&
       subscription.willAutoRenew != false;
+});
+
+/// 회원탈퇴 경고의 스토어 구독 안내: 갱신 중 아님 > 없음, Google Play > 탈퇴가 해지, App Store > 직접 해지
+/// 구분 기준은 기기가 아니라 결제한 스토어 (서버는 Google Play 만 해지 가능)
+final withdrawStoreSubscriptionNoticeProvider =
+    Provider<WithdrawStoreSubscriptionNotice>((ref) {
+  if (!ref.watch(hasRenewingStoreSubscriptionProvider)) {
+    return WithdrawStoreSubscriptionNotice.none;
+  }
+  final source = ref.watch(memberSubscriptionProvider)?.source;
+  return source == SubscriptionSource.googleIap
+      ? WithdrawStoreSubscriptionNotice.cancelledOnWithdraw
+      : WithdrawStoreSubscriptionNotice.cancelInStore;
 });
 
 /// 내 요금제 상태 > 한 줄 문구 (설정 줄 · 요금제 화면 `이미 Pro` 가 함께 씀)
