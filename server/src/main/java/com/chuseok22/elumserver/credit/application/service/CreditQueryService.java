@@ -111,8 +111,8 @@ public class CreditQueryService {
       new CreditSummaryResponse.Costs(routineText, cardImage, imageRegenerate),
       MAX_CARDS_PER_ROUTINE,
       inProgress,
-      !snapshot.frozen() && balance.available() >= routineText,
-      !snapshot.frozen() && balance.available() >= cardImage,
+      !snapshot.isFrozen() && balance.available() >= routineText,
+      !snapshot.isFrozen() && balance.available() >= cardImage,
       snapshot.freeImageRegeneratesLeftToday()
     );
   }
@@ -129,7 +129,7 @@ public class CreditQueryService {
       return;
     }
     Snapshot snapshot = snapshot(memberId);
-    if (snapshot.frozen()) {
+    if (snapshot.isFrozen()) {
       throw new CustomException(ErrorCode.AI_CREDIT_ACCOUNT_FROZEN);
     }
     if (snapshot.balance().available() < policy.costOf(CreditAction.ROUTINE_TEXT)) {
@@ -183,7 +183,7 @@ public class CreditQueryService {
   }
 
   private record Snapshot(
-    CreditBalance balance, List<AiCreditJob> reservedJobs, boolean frozen, int freeImageRegeneratesLeftToday
+    CreditBalance balance, List<AiCreditJob> reservedJobs, boolean isFrozen, int freeImageRegeneratesLeftToday
   ) {
 
   }
