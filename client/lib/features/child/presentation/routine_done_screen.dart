@@ -89,14 +89,18 @@ class RoutineDoneScreen extends ConsumerWidget {
                   ),
                   // 제목(y395, 높이 30) → 안내(y441)
                   SizedBox(height: 16.h),
-                  _FadeIn(
-                    isMotionOn: isMotionOn,
-                    delay: AppMotion.emphasis + AppMotion.sceneStagger,
-                    child: Text(
-                      context.l10n.routineDoneMessage(childName),
-                      textAlign: TextAlign.center,
-                      style: context.typo.cardDescription.copyWith(
-                        color: colors.surface,
+                  // 좌우 여백 안에서 줄바꿈 (긴 이름이 화면 끝에 붙지 않게 #1129)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: space.screenH),
+                    child: _FadeIn(
+                      isMotionOn: isMotionOn,
+                      delay: AppMotion.emphasis + AppMotion.sceneStagger,
+                      child: Text(
+                        context.l10n.routineDoneMessage(childName),
+                        textAlign: TextAlign.center,
+                        style: context.typo.cardDescription.copyWith(
+                          color: colors.surface,
+                        ),
                       ),
                     ),
                   ),

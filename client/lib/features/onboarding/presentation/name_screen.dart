@@ -10,6 +10,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
+import '../../member/domain/elumi_nickname_policy.dart';
 import '../application/name_controller.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -126,6 +127,8 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             ElumTextField(
               controller: _controller,
               hintText: context.l10n.onboardingNameHint,
+              // 서버와 같은 상한 (공백 없는 긴 이름이 이룸이 화면을 깨뜨림 #1129)
+              maxLength: ElumiNicknamePolicy.maxLength,
               // 입력 때 읽음 (빌드 중 ref.read 를 두지 않음)
               onChanged: (nickname) => ref.read(onboardingProvider.notifier).setNickname(nickname),
               // 완료 키로도 다음 단계로 간다.
