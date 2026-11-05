@@ -16,6 +16,9 @@ abstract final class CardExportErrorCode {
   static const print = 'E-EXPORT-PRINT';
 }
 
+/// 인쇄 결과 3개: 인쇄 서비스 없음(안내 대상) · 사용자가 취소(조용히 돌아감) · 인쇄로 넘김
+enum CardPrintOutcome { unavailable, cancelled, printed }
+
 /// 내보내기 파일 만들기: 미리 보기 지면 굽기 > PNG · PDF > 공유 시트 · 인쇄 화면
 class CardExportFiles {
   const CardExportFiles();
@@ -65,17 +68,20 @@ class CardExportFiles {
     );
   }
 
-  /// 기기 인쇄 화면 (iOS AirPrint · Android 인쇄 서비스). 인쇄할 수 없는 기기면 false
-  Future<bool> printPdf({required Uint8List pdf, required String jobName}) async {
+  /// 기기 인쇄 화면 (iOS AirPrint · Android 인쇄 서비스) > 결과 3개
+  ///
+  /// `layoutPdf` 는 취소해도 false 라, 인쇄 불가 판정은 `Printing.info().canPrint` 하나로만 함
+  Future<CardPrintOutcome> printPdf({required Uint8List pdf, required String jobName}) async {
     final info = await Printing.info();
-    if (!info.canPrint) return false;
-    return Printing.layoutPdf(
+    if (!info.canPrint) return CardPrintOutcome.unavailable;
+    final isPrinted = await Printing.layoutPdf(
       name: jobName,
       format: PdfPageFormat.a4,
       // 실제 크기로 찍게 A4 그대로 넘김 (용지에 맞춤 축소를 막아 오려 쓰는 카드 크기 유지)
       usePrinterSettings: false,
       onLayout: (_) async => pdf,
     );
+    return isPrinted ? CardPrintOutcome.printed : CardPrintOutcome.cancelled;
   }
 }
 

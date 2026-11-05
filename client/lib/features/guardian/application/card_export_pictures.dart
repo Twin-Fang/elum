@@ -29,29 +29,35 @@ class CardExportPicture {
   bool get hasPicture => bytes != null || exampleImageId != null || pictogramId != null;
 }
 
-/// 일과 하나의 인쇄 준비 결과: 카드 순서대로 그림 + 그림을 받지 못한 카드 수
+/// 일과 하나의 인쇄 준비 결과: 카드 순서대로 그림 + 그림을 받지 못한 카드
+///
+/// 못 받은 카드는 예시 > 픽토그램 > 제목만 순서로 대신 채워 두므로 내보내기는 막지 않는다
 @immutable
 class CardExportPictures {
-  const CardExportPictures({required this.byCardId, required this.failedCount});
+  const CardExportPictures({required this.byCardId, this.failedCardIds = const {}});
 
   final Map<String, CardExportPicture> byCardId;
 
-  /// 서버에 그림이 있다는데(`imagePath`) 받지 못한 카드 수. 0 이 아니면 실패로 안내
-  final int failedCount;
+  /// 서버에 그림이 있다는데(`imagePath`) 받지 못한 카드 id. 종이 밖 한 줄 안내 + 다시 받기 대상
+  final Set<String> failedCardIds;
+
+  int get failedCount => failedCardIds.length;
 
   CardExportPicture of(ActionCard card) =>
       byCardId[card.id] ?? const CardExportPicture.none();
 
   bool get usesPictogram => byCardId.values.any((p) => p.pictogramId != null);
 
-  bool get hasMissingPicture => byCardId.values.any((p) => !p.hasPicture);
+  /// 원래 그림이 없는 카드가 있는가 (못 받은 카드는 따로 안내하므로 뺌)
+  bool get hasMissingPicture => byCardId.entries
+      .any((entry) => !entry.value.hasPicture && !failedCardIds.contains(entry.key));
 }
 
 /// 일과의 카드 그림을 전부 받아 둔다 (인쇄물은 다 받은 뒤에 굽는다 — 덜 받은 채 구우면 빈 칸이 찍힘)
 final cardExportPicturesProvider = FutureProvider.autoDispose
     .family<CardExportPictures, Routine>((ref, routine) async {
       final byCardId = <String, CardExportPicture>{};
-      var failedCount = 0;
+      final failedCardIds = <String>{};
       for (final card in routine.steps) {
         final downloaded = await _downloadPicture(ref, routine.id, card);
         if (downloaded != null) {
@@ -60,12 +66,25 @@ final cardExportPicturesProvider = FutureProvider.autoDispose
         }
         // 서버에 그림이 있다는데 못 받았으면 실패로 센다 (그림이 원래 없는 카드와 구분)
         if (card.imagePath != null && canFetchCardImage(routine.id, card.id)) {
-          failedCount++;
+          failedCardIds.add(card.id);
         }
         byCardId[card.id] = _bundledPictureOf(card);
       }
-      return CardExportPictures(byCardId: byCardId, failedCount: failedCount);
+      return CardExportPictures(byCardId: byCardId, failedCardIds: failedCardIds);
     });
+
+/// 못 받은 카드 그림 다시 받기: 실패한 카드 그림 > 인쇄 준비 결과 순서로 새로 부름
+///
+/// 카드 그림 provider 는 일과 화면과 함께 쓰여 실패 값이 남아 있을 수 있어 그것부터 버림
+void retryCardExportPictures(WidgetRef ref, Routine routine, CardExportPictures pictures) {
+  for (final card in routine.steps) {
+    if (!pictures.failedCardIds.contains(card.id)) continue;
+    ref.invalidate(
+      cardImageProvider((routineId: routine.id, stepId: card.id, imagePath: card.imagePath)),
+    );
+  }
+  ref.invalidate(cardExportPicturesProvider(routine));
+}
 
 Future<Uint8List?> _downloadPicture(Ref ref, String routineId, ActionCard card) async {
   if (!canFetchCardImage(routineId, card.id)) return null;

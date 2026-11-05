@@ -49,7 +49,7 @@ class PrintCard extends StatelessWidget {
   static const _numberSize = 30.0;
   static const _pictogramInset = 4.0;
 
-  /// 흑백 테마: 받은 그림(AI·사진)만 회색으로 (번들 픽토그램은 라이선스상 변형하지 않음)
+  /// 흑백 테마: 받은 그림(AI·사진)·앱 예시 그림을 회색으로 (Mulberry 픽토그램은 라이선스상 변형하지 않음)
   static const _grayscale = ColorFilter.matrix(<double>[
     0.2126, 0.7152, 0.0722, 0, 0, //
     0.2126, 0.7152, 0.0722, 0, 0, //
@@ -101,12 +101,11 @@ class PrintCard extends StatelessWidget {
 
   // 그림 자리: 받은 그림 > 예시 > 픽토그램 > 제목만 크게 (빈 칸으로 찍히지 않게)
   Widget _picture(BuildContext context, _PrintCardStyle style) {
+    Widget grayscaleIfNeeded(Widget art) =>
+        style.isGrayscalePicture ? ColorFiltered(colorFilter: _grayscale, child: art) : art;
     final bytes = picture.bytes;
     if (bytes != null) {
-      final image = Image.memory(bytes, fit: BoxFit.cover, gaplessPlayback: true);
-      return style.isGrayscalePicture
-          ? ColorFiltered(colorFilter: _grayscale, child: image)
-          : image;
+      return grayscaleIfNeeded(Image.memory(bytes, fit: BoxFit.cover, gaplessPlayback: true));
     }
     Widget titleOnly(BuildContext context) => ColoredBox(
       color: context.colors.surface,
@@ -121,7 +120,10 @@ class PrintCard extends StatelessWidget {
       ),
     );
     if (picture.exampleImageId case final id?) {
-      return ExampleCardArt(id: id, label: card.displayTitle, fallbackBuilder: titleOnly);
+      // 예시 그림은 앱이 가진 루미 그림이라 흑백 변형 가능
+      return grayscaleIfNeeded(
+        ExampleCardArt(id: id, label: card.displayTitle, fallbackBuilder: titleOnly),
+      );
     }
     if (picture.pictogramId case final id?) {
       // 앱용 PictogramArt 는 여백이 화면 기준이라 작은 칸에서 그림이 줄어듦 > 인쇄는 여백을 칸 비율로

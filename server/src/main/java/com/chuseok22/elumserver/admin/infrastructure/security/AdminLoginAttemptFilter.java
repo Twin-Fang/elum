@@ -15,15 +15,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * 관리자 로그인 시도 제한: 아이디별 15분 안에 5회
+ * 관리자 로그인 시도 제한: 아이디별 15분 안에 50회, 로그인 성공 시 기록 초기화(AdminLoginSuccessHandler) > 실패만 쌓임 (#1102)
  * 한도 초과 > 인증을 거치지 않고 로그인 화면으로 되돌림 (거부된 시도는 창에 남기지 않아 시간이 지나면 풀림)
  */
 @Slf4j
 @RequiredArgsConstructor
 public class AdminLoginAttemptFilter extends OncePerRequestFilter {
 
-  // 아이디별 허용 횟수 (로그인 성공도 센다, 관리자는 로그인이 드물다)
-  private static final int MAX_ATTEMPTS_PER_WINDOW = 5;
+  // 아이디별 허용 횟수 (마지막 성공 뒤 시도만 남는다: 테스트·이전 도구가 자주 드나들어도 막히지 않게)
+  private static final int MAX_ATTEMPTS_PER_WINDOW = 50;
   private static final Duration ATTEMPT_WINDOW = Duration.ofMinutes(15);
   private static final String KEY_PREFIX = "admin-login:";
   private static final String USERNAME_PARAMETER = "username";
@@ -51,7 +51,7 @@ public class AdminLoginAttemptFilter extends OncePerRequestFilter {
   ) throws ServletException, IOException {
     String normalizedUsername = normalizeUsername(request.getParameter(USERNAME_PARAMETER));
     boolean isAttemptAllowed = sharedStateStore.tryRecordInWindow(
-      KEY_PREFIX + normalizedUsername, ATTEMPT_WINDOW, MAX_ATTEMPTS_PER_WINDOW, System.currentTimeMillis());
+      toAttemptKey(normalizedUsername), ATTEMPT_WINDOW, MAX_ATTEMPTS_PER_WINDOW, System.currentTimeMillis());
 
     if (!isAttemptAllowed) {
       log.warn("[admin login] rejected 302 : too many attempts, username={}", sanitizeForLog(normalizedUsername));
@@ -61,8 +61,17 @@ public class AdminLoginAttemptFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
+  /// 로그인 요청의 아이디 > 시도 기록 열쇠 (성공 처리기가 같은 열쇠로 기록을 지운다)
+  static String attemptKeyOf(HttpServletRequest request) {
+    return toAttemptKey(normalizeUsername(request.getParameter(USERNAME_PARAMETER)));
+  }
+
+  private static String toAttemptKey(String normalizedUsername) {
+    return KEY_PREFIX + normalizedUsername;
+  }
+
   // 대소문자 변형으로 횟수를 피해 가지 못하게 소문자로 통일
-  private String normalizeUsername(String rawUsername) {
+  private static String normalizeUsername(String rawUsername) {
     if (rawUsername == null) {
       return "";
     }
