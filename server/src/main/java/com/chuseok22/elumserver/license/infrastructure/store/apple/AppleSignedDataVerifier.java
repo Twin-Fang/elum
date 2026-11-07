@@ -20,15 +20,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
  * App Store 서명 데이터(JWS) 검증: x5c 체인 > Apple 루트 인증서, ES256 서명, 번들 ID, 환경 (Apple 공식 라이브러리)
- * 환경 2개: Production 먼저, Sandbox 는 허용할 때만. Xcode·로컬 테스트 환경은 서명 검증을 건너뛰므로 만들지 않음
+ * 환경 2개: Production 먼저, Sandbox 는 허용할 때만 통과. Xcode·로컬 테스트 환경은 서명 검증을 건너뛰므로 만들지 않음
  * 온라인 인증서 폐기 확인(OCSP)은 끔 (Apple 장애가 결제 장애가 되지 않게)
  */
+@Slf4j
 @Component
 public class AppleSignedDataVerifier {
 
@@ -67,23 +69,63 @@ public class AppleSignedDataVerifier {
     return verifyAcrossEnvironments(context, verifier -> verifier.verifyAndDecodeNotification(signedPayload));
   }
 
-  // Production 검증 > 환경이 다르면(INVALID_ENVIRONMENT) Sandbox 허용 시에만 Sandbox 로 다시
+  /**
+   * Production 검증 > 환경·앱 ID 불일치면 Sandbox 검증기로 완전 재검증 > Sandbox 허용 확인
+   * Sandbox 알림은 앱 ID 가 비어 와서 Production 검증기가 환경보다 앱 ID 불일치를 먼저 던짐 (#1187)
+   */
   private <T> Verified<T> verifyAcrossEnvironments(AppleVerifyContext context, VerifyCall<T> call) {
+    VerificationException productionFailure;
     try {
       return new Verified<>(call.verify(verifierOf(StoreEnvironment.PRODUCTION, context)), StoreEnvironment.PRODUCTION);
     } catch (VerificationException e) {
-      if (e.getStatus() != VerificationStatus.INVALID_ENVIRONMENT) {
-        throw toRejection(e);
+      if (!isRetryableInSandbox(e.getStatus())) {
+        throw toLoggedRejection(StoreEnvironment.PRODUCTION, e);
       }
+      productionFailure = e;
     } catch (StoreVerifyRejectedException | StoreTemporarilyUnavailableException e) {
       throw e;
     } catch (RuntimeException e) {
       throw new StoreVerifyRejectedException(StoreVerifyRejectReason.MALFORMED, e.getClass().getSimpleName());
     }
+    T sandboxPayload = verifyInSandboxAfter(productionFailure, context, call);
+    // 서명 검증을 통과한 Sandbox 값이어도 허용이 꺼져 있으면 거부 (알림은 200 무시로 처리)
     if (!context.isSandboxAllowed()) {
+      log.info("[subscription apple] rejected : environment=SANDBOX, status=VERIFIED, reason={}",
+        StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED);
       throw new StoreVerifyRejectedException(StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED, "sandbox");
     }
-    return new Verified<>(verifyIn(StoreEnvironment.SANDBOX, context, call), StoreEnvironment.SANDBOX);
+    log.info("[subscription apple] verified : environment=SANDBOX, productionStatus={}", productionFailure.getStatus());
+    return new Verified<>(sandboxPayload, StoreEnvironment.SANDBOX);
+  }
+
+  // Sandbox 검증기 재검증 (체인·서명·번들·환경=Sandbox)
+  private <T> T verifyInSandboxAfter(VerificationException productionFailure, AppleVerifyContext context, VerifyCall<T> call) {
+    try {
+      return call.verify(verifierOf(StoreEnvironment.SANDBOX, context));
+    } catch (VerificationException e) {
+      // Sandbox 도 환경 불일치면 Production 쪽 사유가 진짜 원인 (다른 앱 ID 의 Production 알림, Xcode 환경)
+      if (e.getStatus() == VerificationStatus.INVALID_ENVIRONMENT) {
+        throw toLoggedRejection(StoreEnvironment.PRODUCTION, productionFailure);
+      }
+      throw toLoggedRejection(StoreEnvironment.SANDBOX, e);
+    } catch (StoreVerifyRejectedException | StoreTemporarilyUnavailableException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw new StoreVerifyRejectedException(StoreVerifyRejectReason.MALFORMED, e.getClass().getSimpleName());
+    }
+  }
+
+  // 환경 불일치 + 앱 ID 불일치(Sandbox 알림은 앱 ID 없음). 번들 불일치도 같은 상태라 Sandbox 에서 다시 걸러짐
+  private static boolean isRetryableInSandbox(VerificationStatus status) {
+    return status == VerificationStatus.INVALID_ENVIRONMENT || status == VerificationStatus.INVALID_APP_IDENTIFIER;
+  }
+
+  // 검증 실패 > 거부 사유 변환 + 마지막으로 시도한 환경·상태 기록
+  private static RuntimeException toLoggedRejection(StoreEnvironment lastTriedEnvironment, VerificationException e) {
+    RuntimeException rejection = toRejection(e);
+    String reason = rejection instanceof StoreVerifyRejectedException rejected ? rejected.getReason().name() : "RETRY_LATER";
+    log.warn("[subscription apple] verify failed : environment={}, status={}, reason={}", lastTriedEnvironment, e.getStatus(), reason);
+    return rejection;
   }
 
   private <T> T verifyIn(StoreEnvironment environment, AppleVerifyContext context, VerifyCall<T> call) {
@@ -93,7 +135,7 @@ public class AppleSignedDataVerifier {
     try {
       return call.verify(verifierOf(environment, context));
     } catch (VerificationException e) {
-      throw toRejection(e);
+      throw toLoggedRejection(environment, e);
     } catch (RuntimeException e) {
       throw new StoreVerifyRejectedException(StoreVerifyRejectReason.MALFORMED, e.getClass().getSimpleName());
     }

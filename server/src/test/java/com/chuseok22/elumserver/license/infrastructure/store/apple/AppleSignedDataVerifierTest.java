@@ -104,6 +104,34 @@ class AppleSignedDataVerifierTest {
   }
 
   @Test
+  @DisplayName("앱 ID 없이 오는 Sandbox 알림: 테스트 결제 허용이면 SANDBOX 로 통과, 꺼져 있으면 환경 거부 (#1187)")
+  void sandboxNotificationWithoutAppAppleId_dependsOnSetting() {
+    String transaction = AppleJwsTestFixtures.sign(TRUSTED, transaction("Sandbox"));
+    String sandboxNotification = AppleJwsTestFixtures.sign(TRUSTED, AppleJwsTestFixtures.notification(
+      "DID_CHANGE_RENEWAL_STATUS", "AUTO_RENEW_DISABLED", "uuid-3", "Sandbox", null, transaction, null));
+
+    Verified<ResponseBodyV2DecodedPayload> verified = verifier.verifyNotification(sandboxNotification, SANDBOX_ALLOWED);
+
+    assertThat(verified.environment()).isEqualTo(StoreEnvironment.SANDBOX);
+    assertThat(verified.payload().getNotificationType()).isEqualTo(NotificationTypeV2.DID_CHANGE_RENEWAL_STATUS);
+    assertRejected(() -> verifier.verifyNotification(sandboxNotification, PRODUCTION_ONLY),
+      StoreVerifyRejectReason.ENVIRONMENT_NOT_ALLOWED);
+  }
+
+  @Test
+  @DisplayName("Sandbox 다시 검증을 거쳐도 다른 앱 ID 의 Production 알림은 앱 불일치, 위조 Sandbox 알림은 서명 오류로 거부된다")
+  void sandboxRetry_keepsRejections() {
+    String transaction = AppleJwsTestFixtures.sign(TRUSTED, transaction("Production"));
+    String otherAppProduction = AppleJwsTestFixtures.sign(TRUSTED, AppleJwsTestFixtures.notification(
+      "DID_RENEW", null, "uuid-4", "Production", 1L, transaction, null));
+    String forgedSandbox = AppleJwsTestFixtures.sign(ATTACKER, AppleJwsTestFixtures.notification(
+      "DID_RENEW", null, "uuid-5", "Sandbox", null, transaction, null));
+
+    assertRejected(() -> verifier.verifyNotification(otherAppProduction, SANDBOX_ALLOWED), StoreVerifyRejectReason.APP_MISMATCH);
+    assertRejected(() -> verifier.verifyNotification(forgedSandbox, SANDBOX_ALLOWED), StoreVerifyRejectReason.SIGNATURE_INVALID);
+  }
+
+  @Test
   @DisplayName("JWS 형식이 아닌 값은 형식 오류로 거부된다 (서버 오류가 아니다)")
   void garbage_isRejected() {
     assertThatThrownBy(() -> verifier.verifyTransaction("not-a-jws", PRODUCTION_ONLY))
