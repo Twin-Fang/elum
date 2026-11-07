@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/notifications/routine_reminder_reset_hook.dart';
 import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
@@ -97,12 +98,14 @@ class AuthRepository {
     required OAuthSdk sdk,
     CardImageDiskCache? imageCache,
     PushUnregister? unregisterPush,
+    RoutineReminderReset? resetRoutineReminders,
   }) : _dio = dio,
        _storage = storage,
        _tokens = tokens,
        _sdk = sdk,
        _imageCache = imageCache,
-       _unregisterPush = unregisterPush;
+       _unregisterPush = unregisterPush,
+       _resetRoutineReminders = resetRoutineReminders;
 
   final Dio _dio;
   final LocalStorage _storage;
@@ -115,6 +118,9 @@ class AuthRepository {
   /// 로그아웃·회원삭제 직전 푸시 토큰 해제 (세션이 살아 있을 때만 서버 해제가 통함)
   final PushUnregister? _unregisterPush;
 
+  /// 다른 계정 로그인·로그아웃·탈퇴 때 이 기기 일과 알림 예약 취소 (알림 글에 이전 계정 일과 제목)
+  final RoutineReminderReset? _resetRoutineReminders;
+
   /// 진행 중인 갱신 요청. **동시에 여러 번 갱신하지 않기 위한 장치다.**
   ///
   /// 홈 화면이 API 3개를 동시에 부르다 다 같이 401을 받으면 각자 갱신을 시도한다.
@@ -124,7 +130,6 @@ class AuthRepository {
   Future<String?>? _refreshInFlight;
 
   bool _isRestoring = false;
-  bool lastSignInChangedAccount = false;
   bool get hasSession => !_isRestoring && _tokens.hasSession;
   bool _guardianPinSetupAllowed = false;
   bool guardianPinSetupPending = false;
@@ -360,8 +365,13 @@ class AuthRepository {
       throw const FormatException('invalid profile settings');
     }
     // 응답을 검증한 뒤에만 계정 범위 로컬 상태를 교체한다. 조회 실패는 기존 큐를 보존한다.
-    lastSignInChangedAccount = !sameAccount;
-    if (!sameAccount) await _storage.clearAll();
+    if (!sameAccount) {
+      await _storage.clearAll();
+      await resetRoutineRemindersSafely(
+        _resetRoutineReminders,
+        reason: 'sign in other account',
+      );
+    }
     if (sameAccount &&
         previousProfile != null &&
         selectedId != previousProfile) {
@@ -444,7 +454,7 @@ class AuthRepository {
     }
   }
 
-  /// 로그아웃: 푸시 토큰 해제 > 서버 세션 끊기 > 로컬 토큰 지우기
+  /// 로그아웃: 푸시 토큰 해제 > 서버 세션 끊기 > 로컬 지우기 (일과 알림 예약·토큰·저장값)
   ///
   /// **서버 요청이 실패해도 로컬은 반드시 지운다.** 로컬에 남으면 사용자는
   /// 로그아웃했다고 생각하는데 앱은 로그인 상태로 동작한다.
@@ -467,10 +477,11 @@ class AuthRepository {
       tokens: _tokens,
       storage: _storage,
       imageCache: _imageCache,
+      resetRoutineReminders: _resetRoutineReminders,
     );
   }
 
-  /// 회원삭제: 푸시 토큰 해제 > 서버 계정 삭제 > 로컬 저장값 지우기. 지워졌으면 null
+  /// 회원삭제: 푸시 토큰 해제 > 서버 계정 삭제 > 로컬 지우기 (일과 알림 예약·토큰·저장값). 지워졌으면 null
   ///
   /// 로그아웃과 다르다. 로그아웃 후 같은 계정으로 다시 들어오면 데이터가 그대로지만,
   /// 회원삭제 후에는 같은 소셜 계정으로 로그인해도 **신규 가입**이 된다.
@@ -497,6 +508,7 @@ class AuthRepository {
       tokens: _tokens,
       storage: _storage,
       imageCache: _imageCache,
+      resetRoutineReminders: _resetRoutineReminders,
     );
     return null;
   }
@@ -533,6 +545,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     imageCache: ref.watch(cardImageDiskCacheProvider),
     // 호출 시점에 읽는다 (알림 기능이 인증을 읽으므로 만들 때 읽으면 순환)
     unregisterPush: () => ref.read(pushUnregisterProvider)(),
+    resetRoutineReminders: () => ref.read(routineReminderResetProvider)(),
   )..restoreGuardianPinRequirement(lockMissing: ref.watch(startupLockMissingProvider));
 });
 

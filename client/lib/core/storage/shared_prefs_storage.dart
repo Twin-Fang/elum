@@ -102,7 +102,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kTalkShareHintDismissedRoutineIds,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
-  // 계정 범위지만 기기 알림 예약과 묶여 [clearAll] 이 남김: 다른 계정 로그인 때 알림 기능이 예약 취소와 함께 비움
+  // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
   static const accountScopedKeysClearedByFeature = [_kRoutineReminders];
   // 기기 범위: 계정이 바뀌어도 남김 (기기 설정·서버 설정 캐시·이 기기에서 본 안내)
   static const deviceScopedKeys = [

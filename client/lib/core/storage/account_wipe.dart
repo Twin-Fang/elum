@@ -1,3 +1,4 @@
+import '../notifications/routine_reminder_reset_hook.dart';
 import 'card_image_disk_cache.dart';
 import 'local_storage.dart';
 import 'token_store.dart';
@@ -7,11 +8,18 @@ import 'token_store.dart';
 /// - 이룸이 표식·역할까지 지운다. 남으면 다음 시작이 연결 화면으로 끌려간다.
 /// - 캐시(보호자가 올린 사진 포함)는 지운 뒤에 돌아온다. 끝났다고 알린 뒤에 남아 있으면 안 된다.
 /// - 밖에서 끊긴 경우는 표식을 남겨야 하므로 `DeviceLinkRepository.releaseThisPhone` 을 쓴다.
+/// - 일과 알림 예약도 취소한다 (저장값 비우기가 남기는 알림 목록 키를 알림 기능이 함께 비움, 실패해도 계속)
 Future<void> wipeLocalAccount({
   required TokenStore tokens,
   required LocalStorage storage,
   CardImageDiskCache? imageCache,
+  RoutineReminderReset? resetRoutineReminders,
 }) async {
+  // 저장값 비우기가 실패해도 알림은 꺼지도록 먼저
+  await resetRoutineRemindersSafely(
+    resetRoutineReminders,
+    reason: 'account wipe',
+  );
   await tokens.clear();
   await storage.clearAll();
   await imageCache?.clear();

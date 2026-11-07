@@ -9,7 +9,6 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../notification/application/push_token_registrar.dart';
 import '../../notification/application/unread_summary_provider.dart';
 import '../../profile/application/profile_session.dart';
-import '../../reminder/application/routine_reminder_controller.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
 import 'account_reset.dart';
@@ -29,9 +28,9 @@ class LoginController {
   Future<AuthResult> signIn(OAuthProvider provider) =>
       _ref.read(authRepositoryProvider).signInWith(provider);
 
-  /// 로그인 성공 뒤: 이전 계정 메모리 상태 버리기 > (다른 계정이면) 이전 계정 알림 예약 취소 > 새 계정으로 푸시 토큰 다시 등록
+  /// 로그인 성공 뒤: 이전 계정 메모리 상태 버리기 > 새 계정으로 푸시 토큰 다시 등록
   ///
-  /// 저장소의 계정 범위 값은 로그인([AuthRepository])이 회원 id 를 비교해 이미 지웠다.
+  /// 저장소의 계정 범위 값·일과 알림 예약은 로그인([AuthRepository])이 회원 id 를 비교해 이미 지웠다.
   Future<void> resetPreviousAccount() async {
     // 주기 갱신이 받아 둔 이전 계정 회원 정보 (남기면 그 이룸이 id 로 요청해 403)
     _ref.read(memberPrefetchProvider).discard();
@@ -46,10 +45,6 @@ class LoginController {
     // 메모리 큐까지 상속하지 않는다. 같은 계정은 로컬 큐에서 복원한다.
     _ref.invalidate(childRoutineProvider);
     await _ref.read(childRoutineProvider.notifier).hydrate();
-    // 일과 알림: 같은 계정 재로그인은 그대로, 다른 계정이면 예약까지 취소 (알림 글에 일과 제목)
-    if (_ref.read(authRepositoryProvider).lastSignInChangedAccount) {
-      await _ref.read(routineReminderProvider.notifier).forgetPreviousAccountReminders();
-    }
     // 이 기기가 이미 알림 권한을 받아 둔 상태면 새 계정으로 푸시 토큰 등록 (기다리지 않음, 실패는 안에서 기록)
     unawaited(_ref.read(pushTokenRegistrarProvider).syncRegistration());
   }
