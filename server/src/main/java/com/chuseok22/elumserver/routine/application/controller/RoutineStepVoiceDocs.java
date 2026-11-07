@@ -52,7 +52,7 @@ public interface RoutineStepVoiceDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"GUARDIAN_VOICE_NOT_ALLOWED\",\"errorMessage\":\"보호자 목소리 녹음은 Pro 에서 쓸 수 있어요.\"}"
+          value = "{\"errorCode\":\"GUARDIAN_VOICE_NOT_ALLOWED\",\"errorMessage\":\"보호자 목소리 녹음은 Pro에서 쓸 수 있어요.\"}"
         )
       )
     ),

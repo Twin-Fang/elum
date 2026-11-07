@@ -127,7 +127,7 @@ public interface RoutineStepImageDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_IMAGE_NOT_ALLOWED\",\"errorMessage\":\"AI 맞춤 그림은 Pro 에서 쓸 수 있어요.\"}"
+          value = "{\"errorCode\":\"AI_IMAGE_NOT_ALLOWED\",\"errorMessage\":\"AI 맞춤 그림은 Pro에서 쓸 수 있어요.\"}"
         )
       )
     ),
