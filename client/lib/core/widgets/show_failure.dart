@@ -47,11 +47,11 @@ Future<void> showFailure(
   }
 
   final l10n = context.l10n;
-  await showElumDialog<void>(
-    context: context,
+  await showFailureMessage(
+    context,
     // 제목이 `무엇이 안 됐는지`를 이미 말하므로, 네트워크 안내가 있으면 할 일
     // 자리를 그 안내로 바꾼다. 둘을 잇으면 할 일이 두 개가 된다.
-    title: failureSentence(
+    sentence: failureSentence(
       title,
       title == null
           ? failure.bodyOr(fallback)
@@ -59,9 +59,23 @@ Future<void> showFailure(
       stop: l10n.sentenceStop,
     ),
     code: failure.badgeOr(fallbackCode),
+  );
+}
+
+/// 문장·코드를 이미 가진 실패 팝업 (광고 지급 실패 · 인쇄 불가 · 사진 올리기 실패처럼 [AppFailure] 가 아닌 앱 쪽 실패)
+/// 모양은 [showFailure] 와 같음: 붉은 ! + 문장 + 코드 줄 + 붉은 `확인` (#1171)
+Future<void> showFailureMessage(
+  BuildContext context, {
+  required String sentence,
+  required String code,
+}) {
+  return showElumDialog<void>(
+    context: context,
+    title: sentence,
+    code: code,
     icon: ElumDialogIcon.alert,
     actions: [
-      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
+      ElumDialogAction(label: context.l10n.commonConfirm, tone: ElumDialogTone.danger),
     ],
   );
 }

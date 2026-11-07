@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
+import '../../../../core/widgets/elum_error_code_text.dart';
 import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
@@ -74,10 +75,11 @@ class CardExportPreview extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: ElumTextLink(
-              label: l10n.commonRetryWithCode(CardExportErrorCode.image),
+              label: l10n.commonRetry,
               onTap: () => retryCardExportPictures(ref, routine, pictures),
             ),
           ),
+          const ElumErrorCodeText(CardExportErrorCode.image, textAlign: TextAlign.left),
         ],
         if (pictures.hasMissingPicture) ...[
           SizedBox(height: 6.h),

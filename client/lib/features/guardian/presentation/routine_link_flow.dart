@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../talk/application/talk_link_actions.dart';
 import '../../talk/domain/talk_screen_codes.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 일과관리 링크 동작: 보내기(링크로 보내기 화면), 끄기(확인 > 요청 > 토스트 · 실패 팝업)
 
@@ -33,25 +33,14 @@ Future<void> turnOffRoutineLink(
   required String linkPostId,
 }) async {
   final l10n = context.l10n;
-  final isConfirmed = await showElumDialog<bool>(
-    context: context,
+  final isConfirmed = await confirmDangerousAction(
+    context,
+    icon: ElumDangerIcon.alert,
     title: l10n.talkLinkTurnOffTitle,
     message: l10n.talkLinkTurnOffMessage,
-    icon: ElumDialogIcon.alert,
-    actions: [
-      ElumDialogAction(
-        label: l10n.commonCancel,
-        value: false,
-        tone: ElumDialogTone.neutral,
-      ),
-      ElumDialogAction(
-        label: l10n.talkLinkTurnOff,
-        value: true,
-        tone: ElumDialogTone.danger,
-      ),
-    ],
+    actionLabel: l10n.talkLinkTurnOff,
   );
-  if (isConfirmed != true || !context.mounted) return;
+  if (!isConfirmed || !context.mounted) return;
   try {
     await ref.read(talkLinkActionsProvider).turnOff(linkPostId);
   } catch (e) {

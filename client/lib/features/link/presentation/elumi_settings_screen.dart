@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/device/screen_awake.dart';
 import '../../../core/haptics/child_haptics.dart';
@@ -20,6 +19,7 @@ import '../application/link_reset.dart';
 import '../application/elumi_settings_controller.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 이룸이 휴대폰의 설정 페이지.
 ///
@@ -72,6 +72,12 @@ enum _Exit {
     withdraw => l10n.elumiSettingsWithdrawMessage,
   };
 
+  /// 위험 버튼 = 행동 이름 (`확인` 아님, #1171)
+  String actionLabel(AppLocalizations l10n) => switch (this) {
+    logout => l10n.elumiSettingsLogoutLabel,
+    withdraw => l10n.elumiSettingsWithdrawAction,
+  };
+
   String failTitle(AppLocalizations l10n) => switch (this) {
     logout => l10n.elumiSettingsLogoutFailTitle,
     withdraw => l10n.elumiSettingsWithdrawFailTitle,
@@ -90,25 +96,14 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
   Future<void> _exit(_Exit kind) async {
     // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
     final l10n = context.l10n;
-    final ok = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    final ok = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
       title: kind.title(l10n),
       message: kind.message(l10n),
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.commonConfirm,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: kind.actionLabel(l10n),
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
 
     // 연결 암호 화면으로 옮기면 이 화면은 사라진다 — 옮긴 뒤에도 쓸 것을 미리 잡아 둔다.
     final router = GoRouter.of(context);

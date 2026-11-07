@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// "이 글을 내릴까요?" 확인: 내리기를 누르면 true
 Future<bool> confirmTalkTakeDown(BuildContext context) => _confirmDelete(
@@ -23,24 +23,10 @@ Future<bool> _confirmDelete(
   required String title,
   required String actionLabel,
   String? message,
-}) async {
-  final isConfirmed = await showElumDialog<bool>(
-    context: context,
-    title: title,
-    message: message,
-    icon: ElumDialogIcon.trash,
-    actions: [
-      ElumDialogAction(
-        label: context.l10n.commonCancel,
-        value: false,
-        tone: ElumDialogTone.neutral,
-      ),
-      ElumDialogAction(
-        label: actionLabel,
-        value: true,
-        tone: ElumDialogTone.danger,
-      ),
-    ],
-  );
-  return isConfirmed ?? false;
-}
+}) => confirmDangerousAction(
+  context,
+  icon: ElumDangerIcon.trash,
+  title: title,
+  message: message,
+  actionLabel: actionLabel,
+);

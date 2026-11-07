@@ -29,6 +29,7 @@ import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
 import '../../../../core/router/routes.dart';
 import '../card_export/open_card_export.dart';
+import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
@@ -127,12 +128,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       routine.hasStarted ||
       routineProgress(routine, ref.read(childRoutineProvider)) > 0;
 
-  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다.
+  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다 (아이콘 없음, #1171)
   Future<void> _showStartedNotice() => showElumDialog<void>(
     context: context,
     title: context.l10n.todayRoutineStartedTitle,
     message: context.l10n.todayRoutineStartedMessage,
-    icon: ElumDialogIcon.alert,
     code: 'E-DEL-STARTED',
     actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
@@ -153,24 +153,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       return;
     }
 
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: l10n.todayRoutineDeleteConfirmTitle,
-      icon: ElumDialogIcon.trash,
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.todayRoutineDeleteAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.todayRoutineDeleteAction,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     // 같은 일과를 두 번 지우면 서버가 거절해 실패 팝업이 뜬다 — 일과 단위로 잠근다.
     // 성공도 null 이라 기록으로 감싸 진행 중이라 건너뛴 경우(result == null)와 가른다.

@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/logger/app_logger.dart';
-import '../../../../core/widgets/elum_dialog.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/guardian_voice_controller.dart';
@@ -15,6 +14,7 @@ import '../../application/routine_notifier.dart';
 import '../../data/guardian_voice_api.dart';
 import '../../data/guardian_voice_recorder.dart';
 import 'card_voice_view.dart';
+import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 카드 수정 시트 안의 보호자 목소리 칸 (Pro): 녹음 > 멈춤 > 올리기 > 듣기 · 다시 녹음 · 지우기
 ///
@@ -176,16 +176,14 @@ class _CardVoiceBlockState extends ConsumerState<CardVoiceBlock> {
   /// 지우기: 확인 팝업 > 지우기 > 열쇠 비움
   Future<void> _delete() async {
     final notifier = ref.read(routineFlowProvider.notifier);
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: context.l10n.guardianVoiceDeleteConfirmTitle,
       message: context.l10n.guardianVoiceDeleteConfirmMessage,
-      actions: [
-        ElumDialogAction(label: context.l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: context.l10n.guardianVoiceDelete, value: true, tone: ElumDialogTone.danger),
-      ],
+      actionLabel: context.l10n.guardianVoiceDelete,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     await _stopPlaying();
     setState(() => _phase = CardVoicePhase.uploading);
     final deleteResult = await _controller.delete(routineId: widget.routineId, stepId: widget.stepId);

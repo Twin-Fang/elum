@@ -119,12 +119,6 @@
   "commonRetryLater": "잠시 후 다시 해주세요",
   "@commonRetryLater": { "description": "서버가 이유를 주지 않은 일시 실패의 기본 안내" },
 
-  "commonRetryWithCode": "다시 시도 ({code})",
-  "@commonRetryWithCode": {
-    "description": "실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)",
-    "placeholders": { "code": { "type": "String" } }
-  },
-
   "sentenceStop": ".",
   "@sentenceStop": { "description": "제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。" },
 
@@ -501,6 +495,8 @@
 
   "elumiSettingsWithdrawMessage": "이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요",
   "@elumiSettingsWithdrawMessage": { "description": "회원탈퇴 확인 팝업 본문" },
+  "elumiSettingsWithdrawAction": "탈퇴하기",
+  "@elumiSettingsWithdrawAction": { "description": "이룸이 화면 회원탈퇴 확인 팝업의 위험 버튼 (행동 이름, #1171)" },
 
   "inviteRejectedOnElumiDevice": "이 기기에서는 초대를 받을 수 없어요\n보호자 기기에서 열어주세요",
   "@inviteRejectedOnElumiDevice": { "description": "이룸이 전용 기기에서 초대 링크를 열었을 때의 토스트" },
@@ -1281,6 +1277,8 @@
 
   "guardianSettingsWithdrawConfirmMessage": "만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요",
   "@guardianSettingsWithdrawConfirmMessage": { "description": "회원탈퇴 확인 팝업의 되돌릴 수 없다는 고지" },
+  "guardianSettingsWithdrawConfirmAction": "탈퇴하기",
+  "@guardianSettingsWithdrawConfirmAction": { "description": "회원탈퇴 1단계 경고 팝업의 위험 버튼 (행동 이름, #1171)" },
 
   "guardianSettingsWithdrawFailedTitle": "탈퇴하지 못했어요",
   "@guardianSettingsWithdrawFailedTitle": { "description": "회원탈퇴 실패 팝업 제목" },
@@ -3281,6 +3279,8 @@
   "@routineMemoryClearConfirmTitle": { "description": "모두 지우기 확인 팝업 제목" },
   "routineMemoryClearConfirmMessage": "지운 메모는 되돌릴 수 없어요.",
   "@routineMemoryClearConfirmMessage": { "description": "모두 지우기 확인 팝업 설명" },
+  "routineMemoryClearConfirmAction": "모두 지우기",
+  "@routineMemoryClearConfirmAction": { "description": "AI 메모 모두 지우기 확인 팝업의 위험 버튼 (행동 이름, #1171)" },
   "routineMemoryLoadFailed": "메모를 불러오지 못했어요",
   "@routineMemoryLoadFailed": { "description": "AI 메모 불러오기 실패" },
   "routineMemorySaveFailedTitle": "메모를 저장하지 못했어요",

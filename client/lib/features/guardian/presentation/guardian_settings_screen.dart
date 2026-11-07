@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_type_confirm_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -30,6 +29,7 @@ import '../../subscription/application/plan_status_providers.dart';
 import '../../subscription/domain/withdraw_store_subscription_notice.dart';
 import 'widgets/plan_settings_group.dart';
 import '../../subscription/domain/plan_benefit.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -58,26 +58,15 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
     // 바텀시트로 따로 그려 두고 있었는데, 그러면 같은 확인을 앱이 두 가지
     // 모양으로 하게 된다 — 일과 삭제는 팝업, 로그아웃은 시트였다.
-    final ok = await showElumDialog<bool>(
-      context: context,
+    final ok = await confirmDangerousAction(
+      context,
       // 시안에 노란 변형이 없으므로 로그아웃도 시안 그대로 붉게 칠한다.
       // 되돌릴 수 없는 탈퇴와는 설명 문장 유무로 구분된다.
-      icon: ElumDialogIcon.alert,
+      icon: ElumDangerIcon.alert,
       title: context.l10n.guardianSettingsLogoutConfirmTitle,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.commonConfirm,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: context.l10n.guardianSettingsLogout,
     );
-    if (ok != true) return;
+    if (!ok) return;
     await _run(_logoutKey, () async {
       await ref.read(authSessionControllerProvider).logout();
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
@@ -122,9 +111,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       WithdrawStoreSubscriptionNotice.cancelInStore =>
         l10n.guardianSettingsWithdrawAppStoreSubscriptionNotice,
     };
-    final ok = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    return confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
       title: l10n.guardianSettingsWithdrawConfirmTitle,
       // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
       // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
@@ -135,20 +124,8 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         l10n.guardianSettingsWithdrawConfirmMessage,
         ?storeSubscriptionNotice,
       ].join('\n'),
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.commonConfirm,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.guardianSettingsWithdrawConfirmAction,
     );
-    return ok == true;
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.

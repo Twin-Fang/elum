@@ -1,7 +1,7 @@
 // 디자인 규칙 검사기. `dart run tool/check_design_rules.dart` 로 돌리고, CI 는 Flutter CI 의 규칙 검사 단계가 돌린다.
 //
 // 규칙 원본은 `tool/design_rules.yaml` (Figma 화면 통계에서 뽑은 허용 값) 한 곳이다.
-// 규칙 10개
+// 규칙 11개
 // - palette: 색 토큰 값이 시안 색에 있다
 // - type-token: 글자 토큰의 글꼴 · 굵기 · 크기 조합이 시안에 있다
 // - color-literal · material-color: 화면 코드는 색을 토큰으로만 쓴다
@@ -10,6 +10,7 @@
 // - material-widget: 테두리 버튼 · ListTile · Divider 같은 Material 기본 부품 금지 (공통 위젯 안 감싸기만 허용)
 // - spacing · radius: 숫자로 쓴 간격 · 모서리가 시안 단계 안에 있다
 // - restricted-token: 쓰는 곳을 묶어 둔 토큰(그림 색)을 화면에서 쓰지 않는다
+// - restricted-pattern: 공통 부품만 쓸 수 있는 코드 모양 (위험 버튼 톤 · 실패/삭제 아이콘 > 확인·실패 팝업 부품, #1171)
 // - text-scale: 글자 배율은 AppTextScale 한 곳 (`.sp` · noScaling · 숫자 배율 · 옛 textScaleFactor 금지, yaml `text_scale_owners` 만 예외)
 // 시안 실측으로 확인한 단계 밖 값은 yaml `measured_exceptions` 에 근거 노드와 함께 둔다
 //
@@ -84,6 +85,14 @@ class DesignRules {
         for (final entry in ((yaml['restricted_tokens'] as YamlMap?) ?? YamlMap()).entries)
           entry.key as String: Set<String>.from((entry.value as YamlMap)['allowed'] as YamlList),
       },
+      restrictedPatterns = [
+        for (final entry in ((yaml['restricted_patterns'] as YamlMap?) ?? YamlMap()).entries)
+          (
+            name: entry.key as String,
+            pattern: RegExp((entry.value as YamlMap)['pattern'] as String),
+            allowed: Set<String>.from(((entry.value as YamlMap)['allowed'] as YamlMap).keys),
+          ),
+      ],
       measuredExceptions = {
         for (final item in (yaml['measured_exceptions'] as YamlList?) ?? YamlList())
           '${item['rule']}  ${item['path']}  ${item['value']}',
@@ -106,6 +115,9 @@ class DesignRules {
 
   /// 토큰 이름 > 써도 되는 파일
   final Map<String, Set<String>> restrictedTokens;
+
+  /// 이름 · 코드 모양 · 써도 되는 파일 (파일마다 이유는 yaml)
+  final List<({String name, RegExp pattern, Set<String> allowed})> restrictedPatterns;
 
   /// 시안 실측으로 확인한 예외 (동결 키와 같은 모양)
   final Set<String> measuredExceptions;
@@ -204,6 +216,11 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
       if (!token.value.contains(path) &&
           RegExp('\\.${token.key}\\b').hasMatch(line)) {
         add('restricted-token', token.key);
+      }
+    }
+    for (final restricted in rules.restrictedPatterns) {
+      if (!restricted.allowed.contains(path) && restricted.pattern.hasMatch(line)) {
+        add('restricted-pattern', restricted.name);
       }
     }
   }

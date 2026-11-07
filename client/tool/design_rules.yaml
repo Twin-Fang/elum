@@ -90,6 +90,24 @@ restricted_tokens:
     allowed: [lib/core/theme/app_colors.dart]
     reason: "포포 그림 주황 — 축하 색종이(AppColors.confetti)에만. UI 강조는 민트"
 
+# 공통 부품 안에서만 쓸 수 있는 코드 모양 (#1171). 화면은 부품을 부른다
+#   위험 확인 한 번: confirmDangerousAction · 입력 확인: confirmByTyping · 실패: showFailure / showFailureMessage
+#   예외는 파일마다 이유를 적는다 (늘리기 전에 부품으로 못 하는지 먼저 본다)
+restricted_patterns:
+  dialog-danger-tone:
+    pattern: 'ElumDialogTone\.danger'
+    allowed:
+      lib/core/widgets/elum_dialog.dart: "톤 정의"
+      lib/core/widgets/show_failure.dart: "실패 팝업의 붉은 확인"
+      lib/core/widgets/elum_danger_confirm_dialog.dart: "위험 확인 한 번"
+      lib/core/widgets/elum_type_confirm_dialog.dart: "입력 확인의 실행 버튼"
+  dialog-alert-trash-icon:
+    pattern: 'ElumDialogIcon\.(alert|trash)'
+    allowed:
+      lib/core/widgets/elum_dialog.dart: "아이콘 정의"
+      lib/core/widgets/show_failure.dart: "실패만 붉은 !"
+      lib/core/widgets/elum_danger_confirm_dialog.dart: "위험 확인의 ! · 휴지통"
+
 # 단계 밖이지만 시안을 실측하면 정확히 그 값인 자리 (파일 · 규칙 · 값 · 근거 노드)
 measured_exceptions:
   - {path: lib/core/widgets/elum_sheet_text_field.dart, rule: spacing, value: "9", reason: "1197:5923 라벨 y84 h16 > 칸 y109"}
