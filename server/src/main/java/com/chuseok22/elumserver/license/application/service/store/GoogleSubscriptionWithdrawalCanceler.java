@@ -28,8 +28,10 @@ public class GoogleSubscriptionWithdrawalCanceler {
 
   // 해지할 필요 없는 끝난 상태 2개: 만료, 환불·회수
   private static final Set<StorePurchaseState> FINISHED_STATES = Set.of(StorePurchaseState.EXPIRED, StorePurchaseState.REVOKED);
-  // 장애 알림 원인 키: 설정 없음·예상 못 한 실패는 회원과 무관한 한 묶음
+  // 장애 알림 원인 키 4개: 결제 설정 꺼짐, 인증값 없음, 예약 거절, 예상 못 한 실패 (회원과 무관한 묶음)
+  private static final String ALERT_CAUSE_DISABLED = "disabled";
   private static final String ALERT_CAUSE_NOT_CONFIGURED = "not-configured";
+  private static final String ALERT_CAUSE_NOT_SCHEDULED = "not-scheduled";
   private static final String ALERT_CAUSE_UNEXPECTED = "unexpected";
   private static final String ALERT_MANUAL_ACTION = "Play Console 에서 직접 해지 (서버 로그 [subscription cancel] 확인)";
 
@@ -91,10 +93,11 @@ public class GoogleSubscriptionWithdrawalCanceler {
     if (targets.isEmpty()) {
       return;
     }
-    // 꺼짐: 결제를 열지 않은 상태 > 건너뜀 (로그만)
+    // 꺼짐: 해지할 구독이 남아 있으면 결제가 이어짐 > 알림
     if (!settings.isGoogleEnabled()) {
-      log.info("[subscription cancel] google skipped : disabled, member={}, count={}",
+      log.warn("[subscription cancel] google skipped : disabled, member={}, count={}",
         StoreLogValues.mask(memberId), targets.size());
+      notifyFailure(ALERT_CAUSE_DISABLED, "Google 결제 설정 꺼짐 (" + targets.size() + "건)");
       return;
     }
     String packageName = settings.googlePackageName();
@@ -109,12 +112,13 @@ public class GoogleSubscriptionWithdrawalCanceler {
   }
 
   /**
-   * 해지 대상: Google 구독 + 회원에 묶임 + 자동 갱신 켜짐 + 회수 안 됨 + 끝난 상태 아님
+   * 해지 대상: Google 구독 + 회원에 묶임 + 자동 갱신 꺼짐 확인 안 됨(모름 포함) + 회수 안 됨 + 끝난 상태 아님
+   * 갱신 여부 조건 <-> 앱 탈퇴 안내 hasRenewingStoreSubscriptionProvider (CrossStackContractTest 대조, #1191)
    */
-  static boolean isRenewingGoogleSubscription(StorePurchase purchase) {
+  public static boolean isRenewingGoogleSubscription(StorePurchase purchase) {
     return purchase.getStore() == SubscriptionSource.GOOGLE_IAP
       && purchase.getMemberId() != null
-      && Boolean.TRUE.equals(purchase.getWillAutoRenew())
+      && !Boolean.FALSE.equals(purchase.getWillAutoRenew())
       && purchase.getRevokedAt() == null
       && purchase.getState() != null
       && !FINISHED_STATES.contains(purchase.getState());
@@ -140,6 +144,7 @@ public class GoogleSubscriptionWithdrawalCanceler {
     } catch (RuntimeException e) {
       log.warn("[subscription cancel] google not scheduled : member={}, cause={}",
         StoreLogValues.mask(memberId), e.getClass().getSimpleName());
+      notifyFailure(ALERT_CAUSE_NOT_SCHEDULED, "해지 작업 예약 실패 (" + e.getClass().getSimpleName() + ")");
     }
   }
 

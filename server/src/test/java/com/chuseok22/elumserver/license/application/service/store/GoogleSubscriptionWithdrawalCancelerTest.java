@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseR
 import com.chuseok22.elumserver.license.infrastructure.store.google.GooglePlayDeveloperClient;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +64,7 @@ class GoogleSubscriptionWithdrawalCancelerTest {
   }
 
   @Test
-  @DisplayName("자동 갱신 중인 Google 구독만 해지한다 — App Store·갱신 꺼짐·만료·회수 구매는 건드리지 않는다")
+  @DisplayName("갱신이 꺼졌다고 확인된 것 외의 Google 구독은 해지한다 — 갱신 여부 모름도 해지 (앱 탈퇴 안내와 같은 조건, #1191)")
   void cancelsOnlyRenewingGoogleSubscriptions() {
     StorePurchase renewingGoogle = purchase("g-renewing", SubscriptionSource.GOOGLE_IAP, StorePurchaseState.ACTIVE, true);
     StorePurchase graceGoogle = purchase("g-grace", SubscriptionSource.GOOGLE_IAP, StorePurchaseState.IN_GRACE_PERIOD, true);
@@ -79,9 +80,9 @@ class GoogleSubscriptionWithdrawalCancelerTest {
     canceler.cancelRenewalsAfterCommit(MEMBER_ID);
 
     ArgumentCaptor<String> cancelledTokens = ArgumentCaptor.forClass(String.class);
-    verify(playClient, times(2))
+    verify(playClient, times(3))
       .cancelSubscription(eq(PACKAGE_NAME), cancelledTokens.capture(), eq(SERVICE_ACCOUNT_JSON));
-    assertThat(cancelledTokens.getAllValues()).containsExactly("token-g-renewing", "token-g-grace");
+    assertThat(cancelledTokens.getAllValues()).containsExactly("token-g-renewing", "token-g-grace", "token-g-unknown");
   }
 
   @Test
@@ -133,8 +134,8 @@ class GoogleSubscriptionWithdrawalCancelerTest {
   }
 
   @Test
-  @DisplayName("Google 구독이 꺼져 있으면(결제 미출시) 건너뛰고 알림도 보내지 않는다")
-  void googleDisabled_skipsSilently() {
+  @DisplayName("Google 결제 설정이 꺼져 있으면 해지를 부르지 않고, 해지 못 한 구독을 장애 알림으로 알린다 (#1191)")
+  void googleDisabled_alertsWithoutCalling() {
     when(settings.isGoogleEnabled()).thenReturn(false);
     when(storePurchaseRepository.findByMemberId(MEMBER_ID)).thenReturn(List.of(
       purchase("g-renewing", SubscriptionSource.GOOGLE_IAP, StorePurchaseState.ACTIVE, true)));
@@ -142,7 +143,24 @@ class GoogleSubscriptionWithdrawalCancelerTest {
     canceler.cancelRenewalsAfterCommit(MEMBER_ID);
 
     verify(playClient, never()).cancelSubscription(anyString(), anyString(), anyString());
-    verify(incidentAlertService, never()).notify(any(IncidentAlert.class));
+    ArgumentCaptor<IncidentAlert> alert = ArgumentCaptor.forClass(IncidentAlert.class);
+    verify(incidentAlertService).notify(alert.capture());
+    assertThat(alert.getValue().causeKey()).isEqualTo("disabled");
+  }
+
+  @Test
+  @DisplayName("해지 작업 예약이 거절돼도 예외가 탈퇴 쪽으로 나가지 않고 장애 알림을 보낸다 (#1191)")
+  void executorRejected_neverPropagates_andAlerts() {
+    GoogleSubscriptionWithdrawalCanceler rejecting = new GoogleSubscriptionWithdrawalCanceler(
+      settings, playClient, storePurchaseRepository, incidentAlertService,
+      task -> { throw new RejectedExecutionException("queue full"); });
+
+    assertThatCode(() -> rejecting.cancelRenewalsAfterCommit(MEMBER_ID)).doesNotThrowAnyException();
+
+    verify(playClient, never()).cancelSubscription(anyString(), anyString(), anyString());
+    ArgumentCaptor<IncidentAlert> alert = ArgumentCaptor.forClass(IncidentAlert.class);
+    verify(incidentAlertService).notify(alert.capture());
+    assertThat(alert.getValue().causeKey()).isEqualTo("not-scheduled");
   }
 
   @Test

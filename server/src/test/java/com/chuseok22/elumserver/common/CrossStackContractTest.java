@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
+import com.chuseok22.elumserver.license.application.service.store.GoogleSubscriptionWithdrawalCanceler;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.core.StorePurchaseState;
+import com.chuseok22.elumserver.license.core.SubscriptionSource;
+import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchase;
 import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -56,6 +60,8 @@ class CrossStackContractTest {
   private static final Pattern DART_LOCALE_LANGUAGE = Pattern.compile("Locale\\('([a-z]+)'|languageCode:\\s*'([a-z]+)'");
   // 다트 권한 키 읽기: isEntitled('weeklyReport') · entitlementsJson['plan'] == 'PRO'
   private static final Pattern DART_ENTITLEMENT_KEY = Pattern.compile("isEntitled\\('(\\w+)'\\)|entitlementsJson\\['(\\w+)']");
+  // 다트 탈퇴 안내 갱신 조건: subscription.willAutoRenew != false
+  private static final Pattern DART_WILL_AUTO_RENEW_CHECK = Pattern.compile("willAutoRenew\\s*(!=|==)\\s*(true|false)");
   private static final Pattern DART_PRO_PLAN_VALUE = Pattern.compile("entitlementsJson\\['plan'] == '(\\w+)'");
 
   @Test
@@ -115,6 +121,30 @@ class CrossStackContractTest {
     String dart = readClient("core/network/idempotency_key.dart");
 
     assertThat(dart).contains("const idempotencyKeyHeader = '" + IdempotencyHeader.NAME + "';");
+  }
+
+  @Test
+  @DisplayName("탈퇴 안내 '결제를 멈춰요' 조건이 서버 Google 해지 대상과 같다 — 다르면 안내와 달리 결제가 이어진다 (#1191)")
+  void withdrawRenewalNoticeMatchesServerCancelTarget() throws IOException {
+    Matcher check = DART_WILL_AUTO_RENEW_CHECK.matcher(
+      readClient("features/subscription/application/plan_status_providers.dart"));
+    assertThat(check.find()).as("앱 hasRenewingStoreSubscriptionProvider 의 willAutoRenew 조건").isTrue();
+    boolean isEqualityCheck = check.group(1).equals("==");
+    Boolean comparedValue = Boolean.valueOf(check.group(2));
+
+    // 갱신 여부 3가지(모름·켜짐·꺼짐) > 앱 판정 <-> 서버 판정
+    for (Boolean willAutoRenew : new Boolean[] {null, true, false}) {
+      boolean isRenewingInApp = isEqualityCheck == comparedValue.equals(willAutoRenew);
+      StorePurchase purchase = new StorePurchase();
+      purchase.setStore(SubscriptionSource.GOOGLE_IAP);
+      purchase.setMemberId("member");
+      purchase.setState(StorePurchaseState.ACTIVE);
+      purchase.setWillAutoRenew(willAutoRenew);
+
+      assertThat(GoogleSubscriptionWithdrawalCanceler.isRenewingGoogleSubscription(purchase))
+        .as("willAutoRenew=%s", willAutoRenew)
+        .isEqualTo(isRenewingInApp);
+    }
   }
 
   @Test
