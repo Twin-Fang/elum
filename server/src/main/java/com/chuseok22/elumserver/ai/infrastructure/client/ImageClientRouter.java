@@ -28,17 +28,20 @@ public class ImageClientRouter {
 
   /**
    * 지금 써야 할 제공자.
+   * 키 없음은 카드마다 로그를 남기지 않음 — 호출부가 일과·요청 단위로 1줄 남김 (#1172)
    *
-   * @throws CustomException 고른 제공자를 쓸 수 없을 때(키 없음 등)
+   * @throws CustomException IMAGE_PROVIDER_UNAVAILABLE, detail "provider=..." (고른 제공자 키 없음)
    */
   public ImageGenerationClient current() {
     ImageProvider selected = selected();
     return of(selected)
       .filter(ImageGenerationClient::available)
-      .orElseThrow(() -> {
-        log.error("이미지 제공자를 쓸 수 없습니다. 키가 설정되지 않았습니다: provider={}", selected);
-        return new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE);
-      });
+      .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE, "provider=" + selected));
+  }
+
+  /// 그림 제공자 키가 없어 못 그린 실패인가 (설정 문제라 재시도해도 같은 결과)
+  public static boolean isProviderUnavailable(Throwable failure) {
+    return failure instanceof CustomException custom && custom.getErrorCode() == ErrorCode.IMAGE_PROVIDER_UNAVAILABLE;
   }
 
   public Optional<ImageGenerationClient> of(ImageProvider provider) {

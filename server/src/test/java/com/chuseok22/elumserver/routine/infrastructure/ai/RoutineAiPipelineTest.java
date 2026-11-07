@@ -371,6 +371,7 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps()).hasSize(1);
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+    assertThat(result.failedImageCount()).isZero();
     verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
   }
 
@@ -392,6 +393,29 @@ class RoutineAiPipelineTest {
     // 이미지가 없으므로 저장은 아예 호출되지 않는다.
     verify(routineImageStorage, never()).save(any(), any(), any());
     verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
+    // 깨지면: Pro 그림 실패가 응답에 표시되지 않고 조용히 픽토그램으로 바뀐다 (#1172)
+    assertThat(result.failedImageCount()).isEqualTo(1);
+  }
+
+  // 깨지면: 그림 키가 없을 때 카드마다 같은 실패를 재시도해 시간과 로그만 늘어난다 (#1172)
+  @Test
+  @DisplayName("그림 제공자 키가 없으면 재시도 없이 카드마다 그림 없이 저장하고 실패 수를 센다")
+  void generateForCreate_providerUnavailable_skipsRetryAndCountsFailures() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":["
+      + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"},"
+      + "{\"order\":2,\"title\":\"신발을 신어요\",\"description\":\"신발을 신어요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+    when(imageClientRouter.current())
+      .thenThrow(new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE, "provider=OPENAI"));
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, ImageStyle.CARTOON, "profile-1"
+    );
+
+    assertThat(result.steps()).extracting(RoutineAiPipeline.GeneratedStep::imagePath).containsOnlyNulls();
+    assertThat(result.failedImageCount()).isEqualTo(2);
+    // 카드당 1번만 (재시도 없음)
+    verify(imageClientRouter, times(2)).current();
   }
 
   @Test
