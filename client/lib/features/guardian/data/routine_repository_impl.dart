@@ -8,6 +8,7 @@ import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
 import '../../../shared/models/support_goal.dart';
 import '../../credit/domain/credit_summary.dart';
+import '../domain/card_image_skipped_reason.dart';
 import '../domain/routine_suggestion.dart';
 import 'routine_repository.dart';
 import 'routine_step_api.dart';
@@ -129,7 +130,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<Routine> createRoutine({
+  Future<RoutineCreateResult> createRoutine({
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
@@ -185,7 +186,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'createRoutine',
       '${routine.steps.length}개 카드 생성됨',
     );
-    return routine;
+    return (
+      routine: routine,
+      imageSkippedReason: CardImageSkippedReason.readFromResponse(body['imageSkippedReason']),
+    );
   }
 
   @override

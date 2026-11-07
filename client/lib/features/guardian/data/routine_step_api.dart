@@ -4,6 +4,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
+import '../domain/card_image_skipped_reason.dart';
 import 'routine_repository.dart' show StepAddResult;
 
 /// 일과 카드 서버 호출: 추가, 수정, 순서 변경, 삭제
@@ -57,13 +58,11 @@ class RoutineStepApi {
           imageSkippedReason: null,
         );
       }
-      // 그림 건너뛴 까닭: IMAGE_STYLE_PHOTO_ONLY, AI_CREDIT_INSUFFICIENT, AI_CREDIT_ACCOUNT_FROZEN
-      final skippedReason = body['imageSkippedReason'];
       AppLogger.repositorySuccess('RoutineRepository', 'addStep', '카드 추가 완료');
       return (
         routine: Routine.fromJson(body),
         failure: null,
-        imageSkippedReason: skippedReason is String ? skippedReason : null,
+        imageSkippedReason: CardImageSkippedReason.readFromResponse(body['imageSkippedReason']),
       );
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'addStep', e);

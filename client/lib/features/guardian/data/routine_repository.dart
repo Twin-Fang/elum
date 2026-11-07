@@ -10,6 +10,9 @@ typedef StepAddResult = ({
   String? imageSkippedReason,
 });
 
+/// 일과 만들기 결과: 일과, 그림 건너뛴 까닭(서버 `imageSkippedReason`, 다 그렸으면 null)
+typedef RoutineCreateResult = ({Routine routine, String? imageSkippedReason});
+
 /// 일과 저장소.
 ///
 /// **절대 throw하지 않는다.** 데모는 어떤 실패에도 끝까지 진행되어야 한다 (docs 원칙 6번).
@@ -40,14 +43,14 @@ abstract interface class RoutineRepository {
   /// 통째로 사라져 빈 화면처럼 보이기 때문이다.
   Future<List<RoutineSuggestion>> getSuggestions();
 
-  /// 일과 생성 → 카드 5장.
+  /// 일과 생성 → 카드 5장. 돌려줌: 일과 + 그림 건너뛴 까닭 (`AI_IMAGE_FAILED` 또는 null, #1178)
   ///
   /// [rewardText]는 보호자가 카드 생성 **전에** 정한 보상이다. 비워둘 수 있다.
   ///
   /// [idempotencyKey]는 `Idempotency-Key` 헤더로 간다. 같은 키로 다시 오면
   /// 서버가 AI 를 다시 부르지 않고 저장된 일과를 준다 — 재시도가 크레딧을 두 번
   /// 쓰지 않는다. 비우면 헤더를 보내지 않고 서버가 만든다(구버전 호환과 같은 길).
-  Future<Routine> createRoutine({
+  Future<RoutineCreateResult> createRoutine({
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers,
