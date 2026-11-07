@@ -24,7 +24,7 @@ class GuardianShell extends ConsumerWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  /// 맨 아래 광고 띠. 칸 4개 모두 늘 둔다 (로드 전·실패 시 높이 0). 다른 기능(광고)의 화면이라 라우터가 넣어 준다
+  /// 맨 아래 광고 띠. 칸 4개 모두 늘 둔다 (광고 계정이면 로드 전부터 자리 고정, #1168). 다른 기능(광고)의 화면이라 라우터가 넣어 준다
   final Widget adStrip;
 
   GuardianTab get _currentTab =>
