@@ -24,7 +24,7 @@ import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 이룸이별 AI 메모 화면 (Pro, 시안 없음 — 설정 묶음 카드 모양을 따름)
 /// 묶음 3개: 켜기/끄기 > 메모 줄(누르면 고치기·지우기, 더하기) > 모두 지우기
-/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모 / (Free · 판매 중) 흐린 견본 메모 — 서버를 부르지 않음
+/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모 / (Free · 판매 중) Pro 미리 보기 (견본 메모) — 서버를 부르지 않음
 class RoutineMemoryScreen extends ConsumerWidget {
   const RoutineMemoryScreen({super.key});
 
@@ -53,8 +53,9 @@ class RoutineMemoryScreen extends ConsumerWidget {
         child: Padding(
           padding: EdgeInsets.only(top: _topGap.h, bottom: _topGap.h),
           child: ProTeaser(
+            title: context.l10n.proTeaserRoutineMemoryTitle,
             benefit: context.l10n.proTeaserRoutineMemoryBenefit,
-            onUnlock: () => openPlanPaywall(context, ref),
+            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.routineMemory),
             child: ProTeaserSamples.routineMemory(context),
           ),
         ),

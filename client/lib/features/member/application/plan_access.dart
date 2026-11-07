@@ -30,7 +30,7 @@ class PlanAccess {
   final PlanEntitlements entitlements;
 
   /// Pro 요금제가 지금 주는 권한 (서버 `proPlanEntitlements`, #1165). 이전 서버·회원 모름이면 앱 기본 Pro 묶음
-  /// 요금제 화면 혜택 줄 · 흐린 미리 보기가 이 값을 봄 — 관리자가 끈 Pro 권한을 팔지 않게
+  /// 요금제 화면 혜택 묶음 · Pro 미리 보기가 이 값을 봄 — 관리자가 끈 Pro 권한을 팔지 않게
   final PlanEntitlements proPlanEntitlements;
 
   /// 앱에서 Pro 를 살 수 있는가 (판매 스위치 + 스토어 연결 + 상품 불러옴, [canPurchaseProProvider]).
@@ -67,7 +67,7 @@ class PlanAccess {
   /// Pro 기능 입구(설정 줄·메뉴)를 보이는가: 쓸 수 있음 또는 권유 대상
   bool shouldShowEntryFor(PlanBenefit benefit) => canUseBenefit(benefit) || shouldPromoteBenefit(benefit);
 
-  /// 기능 자리에 실제 화면 대신 흐린 미리 보기를 보이는가: 못 씀 + 권유 대상
+  /// 기능 자리에 실제 화면 대신 Pro 미리 보기를 보이는가: 못 씀 + 권유 대상
   bool shouldShowTeaserFor(PlanBenefit benefit) => !canUseBenefit(benefit) && shouldPromoteBenefit(benefit);
 
   /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다

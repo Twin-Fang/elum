@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
@@ -29,7 +30,9 @@ class PlanSettingsGroup extends ConsumerWidget {
         SettingsTile(
           isInCard: true,
           label: l10n.planSettingsLabel,
+          // 글자보다 모양으로 Free · Pro 차이를 보여 줌 (읽기 프로그램은 값 글자를 읽음)
           valueText: planStatusShortLabel(l10n, status),
+          valueChip: PlanTierChip(tier: planTierOf(status)),
           showChevronWithValue: canOpenPaywall,
           onTap: isBusy || !canOpenPaywall ? null : () => openPlanPaywall(context, ref),
         ),

@@ -27,6 +27,7 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     required this.checkSize,
     required this.checkRadius,
     required this.iconSm,
+    required this.pillRadius,
   });
 
   final double xs;
@@ -83,6 +84,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   /// 목록 우측 화살표처럼 글에 곁들이는 작은 아이콘.
   final double iconSm;
 
+  /// 끝이 둥근 알약 모서리 (높이와 무관하게 반원, PRO 배지 · Free 칩 · 할인 띠)
+  final double pillRadius;
+
   static const standard = AppSpacing(
     xs: 8,
     sm: 12,
@@ -105,6 +109,7 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     checkSize: 24,
     checkRadius: 8,
     iconSm: 20,
+    pillRadius: 100,
   );
 
   @override
@@ -129,6 +134,7 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     double? checkSize,
     double? checkRadius,
     double? iconSm,
+    double? pillRadius,
   }) {
     return AppSpacing(
       xs: xs ?? this.xs,
@@ -151,6 +157,7 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       checkSize: checkSize ?? this.checkSize,
       checkRadius: checkRadius ?? this.checkRadius,
       iconSm: iconSm ?? this.iconSm,
+      pillRadius: pillRadius ?? this.pillRadius,
     );
   }
 
@@ -179,6 +186,7 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       checkSize: lerpDouble(checkSize, other.checkSize, t),
       checkRadius: lerpDouble(checkRadius, other.checkRadius, t),
       iconSm: lerpDouble(iconSm, other.iconSm, t),
+      pillRadius: lerpDouble(pillRadius, other.pillRadius, t),
     );
   }
 

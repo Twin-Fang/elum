@@ -27,6 +27,7 @@ class SettingsTile extends StatelessWidget {
     this.loading = false,
     this.isInCard = true,
     this.shouldShowProBadge = false,
+    this.valueChip,
   });
 
   final String label;
@@ -53,8 +54,11 @@ class SettingsTile extends StatelessWidget {
   /// 새 화면은 [SettingsGroup] 안에 기본값(true)으로 쓴다.
   final bool isInCard;
 
-  /// 이름 뒤 [ProBadge]: Free 라 들어가면 흐린 미리 보기인 Pro 줄 (#1170)
+  /// 이름 뒤 [ProBadge]: Free 라 들어가면 Pro 미리 보기인 Pro 줄 (#1170)
   final bool shouldShowProBadge;
+
+  /// 오른쪽 값 자리에 글자 대신 그릴 칩 (내 요금제 `Free` · `PRO`, #1189). 있으면 [valueText] 대신 그림
+  final Widget? valueChip;
 
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
@@ -85,7 +89,7 @@ class SettingsTile extends StatelessWidget {
         ? colors.settingsDestructive
         : (isInCard ? colors.settingsCardLabel : colors.textPrimary);
 
-    final isValueBelowLabel = value != null && value.isNotEmpty && !loading && AppTextScale.isLargeTextOf(context);
+    final isValueBelowLabel = valueChip == null && value != null && value.isNotEmpty && !loading && AppTextScale.isLargeTextOf(context);
     final labelText = Text(
       label,
       style: context.typo.settingsTileLabel.copyWith(
@@ -137,7 +141,10 @@ class SettingsTile extends StatelessWidget {
             ),
             if (loading)
               ElumSpinner(size: 20.w, color: colors.settingsChevron)
-            else ...[
+            else if (valueChip case final chip?) ...[
+              chip,
+              if (showChevronWithValue) ...[SizedBox(width: cardValueGap.w), chevron],
+            ] else ...[
               if (value != null && !isValueBelowLabel)
                 // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
                 ConstrainedBox(

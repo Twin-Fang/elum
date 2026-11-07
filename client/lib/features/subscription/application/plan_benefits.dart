@@ -34,3 +34,28 @@ List<PlanBenefit> proPlanBenefits({
   if (highlight == null || !benefits.remove(highlight)) return benefits;
   return [highlight, ...benefits];
 }
+
+/// 혜택 묶음 하나: 묶음 + 그 안에 보일 혜택 (비지 않음)
+typedef PlanBenefitSection = ({PlanBenefitGroup group, List<PlanBenefit> benefits});
+
+/// 요금제 화면 혜택 묶음: [proPlanBenefits] 를 묶음 순서로 나눔. 빈 묶음은 빠짐, [highlight] 의 묶음·혜택은 맨 앞
+List<PlanBenefitSection> proPlanBenefitSections({
+  required PlanEntitlements proPlan,
+  required PlanEntitlements current,
+  PlanBenefit? highlight,
+}) {
+  final shown = proPlanBenefits(proPlan: proPlan, current: current).toSet();
+  final sections = <PlanBenefitSection>[];
+  for (final group in PlanBenefitGroup.values) {
+    final benefits = [
+      if (highlight != null && group.benefits.contains(highlight) && shown.contains(highlight)) highlight,
+      for (final benefit in group.benefits)
+        if (shown.contains(benefit) && benefit != highlight) benefit,
+    ];
+    if (benefits.isEmpty) continue;
+    final section = (group: group, benefits: benefits);
+    final isHighlighted = highlight != null && benefits.first == highlight;
+    isHighlighted ? sections.insert(0, section) : sections.add(section);
+  }
+  return sections;
+}

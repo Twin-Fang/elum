@@ -26,7 +26,7 @@ final routineSchedulePlanProvider = FutureProvider<RoutineSchedulePlan>((
 
 /// 보호자 화면에 요일·시각 입구를 보일지: 앱 판정 Pro, 또는 이미 정해 둔 예약이 있음(멈춤 안내용)
 ///
-/// Free 는 판매 중일 때만 입구가 보이고 주간 계획에서 흐린 견본을 본다 ([PlanAccess.shouldShowEntryFor]).
+/// Free 는 판매 중일 때만 입구가 보이고 주간 계획에서 Pro 미리 보기를 본다 ([PlanAccess.shouldShowEntryFor]).
 final canShowRoutineScheduleProvider = Provider<bool>((ref) {
   final access = ref.watch(planAccessProvider);
   if (access.shouldShowEntryFor(PlanBenefit.routineSchedule)) return true;

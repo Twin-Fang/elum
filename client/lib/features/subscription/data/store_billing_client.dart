@@ -65,6 +65,8 @@ class StoreBillingClient {
           productId: productId,
           priceLabel: choice.priceLabel,
           freeTrial: _isAndroid ? choice.freeTrial : appStoreTrials[productId],
+          rawPrice: choice.rawPrice,
+          currencyCode: choice.currencyCode,
         ),
       );
     }
@@ -82,7 +84,7 @@ class StoreBillingClient {
     if (candidates.isEmpty) return null;
     if (!_isAndroid) {
       final product = candidates.first;
-      return _PurchaseChoice(purchaseProduct: product, priceLabel: product.price);
+      return _PurchaseChoice.priced(product, priceProduct: product);
     }
     final googleCandidates = candidates.whereType<GooglePlayProductDetails>().toList();
     GooglePlayProductDetails? basePlan;
@@ -99,10 +101,10 @@ class StoreBillingClient {
     for (final product in googleCandidates) {
       final freeTrial = googlePlayFreeTrialOf(product, basePriceMicros: basePriceMicros);
       if (freeTrial != null) {
-        return _PurchaseChoice(purchaseProduct: product, priceLabel: basePlan.price, freeTrial: freeTrial);
+        return _PurchaseChoice.priced(product, priceProduct: basePlan, freeTrial: freeTrial);
       }
     }
-    return _PurchaseChoice(purchaseProduct: basePlan, priceLabel: basePlan.price);
+    return _PurchaseChoice.priced(basePlan, priceProduct: basePlan);
   }
 
   /// 결제창 열기. [accountToken] 은 보호자 회원 id(UUID) > Apple appAccountToken · Google obfuscatedAccountId
@@ -167,9 +169,28 @@ class StoreBillingClient {
   }
 }
 
-/// 상품 하나에서 고른 결제 대상 · 표시 가격 · 무료 체험
+/// 상품 하나에서 고른 결제 대상 · 표시 가격(문자열 · 숫자 · 통화) · 무료 체험
 class _PurchaseChoice {
-  const _PurchaseChoice({required this.purchaseProduct, required this.priceLabel, this.freeTrial});
+  const _PurchaseChoice({
+    required this.purchaseProduct,
+    required this.priceLabel,
+    this.freeTrial,
+    this.rawPrice,
+    this.currencyCode,
+  });
+
+  /// 결제 대상 + 가격을 읽을 상품 (Android 는 기본 요금제 가격: 체험 혜택 상품의 첫 가격은 0)
+  factory _PurchaseChoice.priced(
+    ProductDetails purchaseProduct, {
+    required ProductDetails priceProduct,
+    PlanFreeTrial? freeTrial,
+  }) => _PurchaseChoice(
+    purchaseProduct: purchaseProduct,
+    priceLabel: priceProduct.price,
+    freeTrial: freeTrial,
+    rawPrice: priceProduct.rawPrice,
+    currencyCode: priceProduct.currencyCode.isEmpty ? null : priceProduct.currencyCode,
+  );
 
   /// 결제창에 넘길 상품 (Android 는 이 혜택의 토큰으로 결제)
   final ProductDetails purchaseProduct;
@@ -177,6 +198,8 @@ class _PurchaseChoice {
   /// 체험 뒤 갱신 가격 (스토어 문자열)
   final String priceLabel;
   final PlanFreeTrial? freeTrial;
+  final double? rawPrice;
+  final String? currencyCode;
 }
 
 final storeBillingClientProvider = Provider<StoreBillingClient>(

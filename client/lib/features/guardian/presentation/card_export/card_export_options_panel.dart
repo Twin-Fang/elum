@@ -31,10 +31,10 @@ class CardExportOptionsPanel extends StatelessWidget {
   /// Pro 테마를 목록에 보이는가 (결제 전 Free 는 숨김)
   final bool shouldShowProThemes;
 
-  /// 고를 수 없는 Pro 테마 칩 누름 (요금제 · 흐린 미리 보기 · 안내)
+  /// 고를 수 없는 Pro 테마 칩 누름 (요금제 · Pro 미리 보기 · 안내)
   final ValueChanged<CardDesignTheme> onLockedThemeTap;
 
-  /// 흐린 미리 보기로 보고 있는 Pro 테마 (칩에 고름 표시만, 내보내기 설정은 그대로)
+  /// Pro 미리 보기로 보고 있는 Pro 테마 (칩에 고름 표시만, 내보내기 설정은 그대로)
   final CardDesignTheme? teaserTheme;
 
   static const _groupGap = 20.0;

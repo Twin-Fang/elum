@@ -283,6 +283,36 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stepBadge4,
     required this.noticeImagePlaceholder,
     required this.noticeHideLabel,
+    required this.proPlanBadgeStart,
+    required this.proPlanBadgeEnd,
+    required this.proPlanBadgeText,
+    required this.proPlanBadgeOutline,
+    required this.proPlanCtaStart,
+    required this.proPlanCtaEnd,
+    required this.proPlanCtaText,
+    required this.proPlanCtaShadow,
+    required this.proPlanHeroGlow,
+    required this.proPlanProCardRing,
+    required this.proPlanProCardShadow,
+    required this.proPlanProPictureStart,
+    required this.proPlanProPictureEnd,
+    required this.proPlanFreePicture,
+    required this.proPlanCardShadow,
+    required this.proPlanArrow,
+    required this.proPlanSaveRibbon,
+    required this.proPlanSaveRibbonText,
+    required this.proPlanOptionBorder,
+    required this.proPlanOptionSelectedBorder,
+    required this.proPlanRadioBorder,
+    required this.proPlanBenefitDetail,
+    required this.proPlanTileCards,
+    required this.proPlanTileRoutines,
+    required this.proPlanTileWeek,
+    required this.proPlanTileExtra,
+    required this.proPlanCloseFill,
+    required this.proPlanFreeChipFill,
+    required this.proPlanFreeChipText,
+    required this.proPlanTeaserCardShadow,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -1068,6 +1098,98 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 제목·본문(순검정)보다 한 단계 흐리다. 누를 수 있지만 주 동작은 아니다.
   final Color noticeHideLabel;
 
+  // --- Pro 요금제 화면 · PRO 배지 · Pro 미리보기 (#1189, 디자이너 시안 전 임시 값) ---
+
+  /// PRO 배지 금빛 그라데이션 시작 (#1189 임시 시안)
+  final Color proPlanBadgeStart;
+
+  /// PRO 배지 금빛 그라데이션 끝
+  final Color proPlanBadgeEnd;
+
+  /// PRO 배지 글자 · 반짝 표시 (금빛 위 진한 갈색)
+  final Color proPlanBadgeText;
+
+  /// PRO 배지 안쪽 테두리 (갈색 15%)
+  final Color proPlanBadgeOutline;
+
+  /// Pro 미리보기 버튼 민트 그라데이션 시작
+  final Color proPlanCtaStart;
+
+  /// Pro 미리보기 버튼 민트 그라데이션 끝
+  final Color proPlanCtaEnd;
+
+  /// Pro 미리보기 버튼 글자
+  final Color proPlanCtaText;
+
+  /// Pro 미리보기 버튼 그림자 (35%)
+  final Color proPlanCtaShadow;
+
+  /// 요금제 화면 머리 민트 빛 (가운데 > 배경으로 사라짐)
+  final Color proPlanHeroGlow;
+
+  /// 머리 비교의 Pro 카드 민트 테두리
+  final Color proPlanProCardRing;
+
+  /// 머리 비교의 Pro 카드 민트 빛 (35%)
+  final Color proPlanProCardShadow;
+
+  /// Pro 카드 그림 자리 그라데이션 시작
+  final Color proPlanProPictureStart;
+
+  /// Pro 카드 그림 자리 그라데이션 끝
+  final Color proPlanProPictureEnd;
+
+  /// Free 카드 그림 자리
+  final Color proPlanFreePicture;
+
+  /// 요금제 화면 흰 카드 그림자 (8%)
+  final Color proPlanCardShadow;
+
+  /// Free > Pro 화살표
+  final Color proPlanArrow;
+
+  /// 1년 `N% 아껴요` 띠
+  final Color proPlanSaveRibbon;
+
+  /// 1년 `N% 아껴요` 띠 글자
+  final Color proPlanSaveRibbonText;
+
+  /// 기간 카드 테두리 (안 고름)
+  final Color proPlanOptionBorder;
+
+  /// 기간 카드 테두리 · 라디오 (고름)
+  final Color proPlanOptionSelectedBorder;
+
+  /// 기간 카드 라디오 (안 고름)
+  final Color proPlanRadioBorder;
+
+  /// 혜택 묶음 한 줄 · 미리보기 한 줄 글자
+  final Color proPlanBenefitDetail;
+
+  /// 혜택 아이콘 타일: 더 예쁜 카드
+  final Color proPlanTileCards;
+
+  /// 혜택 아이콘 타일: 일과가 알아서 준비돼요
+  final Color proPlanTileRoutines;
+
+  /// 혜택 아이콘 타일: 한 주를 한눈에
+  final Color proPlanTileWeek;
+
+  /// 혜택 아이콘 타일: 넉넉하게, 광고 없이
+  final Color proPlanTileExtra;
+
+  /// 요금제 화면 ✕ 원 (배경보다 한 단계 진하게, 스크롤된 글 위에서도 읽히게 불투명)
+  final Color proPlanCloseFill;
+
+  /// `Free` 요금제 칩 바탕 (내 요금제 줄)
+  final Color proPlanFreeChipFill;
+
+  /// `Free` 요금제 칩 글자
+  final Color proPlanFreeChipText;
+
+  /// Pro 미리보기 떠 있는 카드 그림자 (14%)
+  final Color proPlanTeaserCardShadow;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -1320,6 +1442,36 @@ class AppColors extends ThemeExtension<AppColors> {
     stepBadge4: Color(0xFFECE0AE),
     noticeImagePlaceholder: Color(0xFFF7F2EF),
     noticeHideLabel: Color(0xFF74757D),
+    proPlanBadgeStart: Color(0xFFFFE27A),
+    proPlanBadgeEnd: Color(0xFFFFC97A),
+    proPlanBadgeText: Color(0xFF3B2B00),
+    proPlanBadgeOutline: Color(0x26A06E00),
+    proPlanCtaStart: Color(0xFF55CFBA),
+    proPlanCtaEnd: Color(0xFF3FB7C9),
+    proPlanCtaText: Color(0xFFFFFFFF),
+    proPlanCtaShadow: Color(0x593FB7C9),
+    proPlanHeroGlow: Color(0xFFD8F5EE),
+    proPlanProCardRing: Color(0xFF55CFBA),
+    proPlanProCardShadow: Color(0x5955CFBA),
+    proPlanProPictureStart: Color(0xFFEAFAF6),
+    proPlanProPictureEnd: Color(0xFFFFF6D6),
+    proPlanFreePicture: Color(0xFFEEE9E6),
+    proPlanCardShadow: Color(0x14242634),
+    proPlanArrow: Color(0xFF55CFBA),
+    proPlanSaveRibbon: Color(0xFFEB9B73),
+    proPlanSaveRibbonText: Color(0xFFFFFFFF),
+    proPlanOptionBorder: Color(0xFFEFEFEF),
+    proPlanOptionSelectedBorder: Color(0xFF242634),
+    proPlanRadioBorder: Color(0xFFCFCBC8),
+    proPlanBenefitDetail: Color(0xFF6C6E7A),
+    proPlanTileCards: Color(0xFFE3F8F3),
+    proPlanTileRoutines: Color(0xFFFFF1E6),
+    proPlanTileWeek: Color(0xFFFFF7DA),
+    proPlanTileExtra: Color(0xFFEEF0FF),
+    proPlanCloseFill: Color(0xFFEBE6E3),
+    proPlanFreeChipFill: Color(0xFFEEE9E6),
+    proPlanFreeChipText: Color(0xFF6C6E7A),
+    proPlanTeaserCardShadow: Color(0x24242634),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -1579,6 +1731,36 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stepBadge4,
     Color? noticeImagePlaceholder,
     Color? noticeHideLabel,
+    Color? proPlanBadgeStart,
+    Color? proPlanBadgeEnd,
+    Color? proPlanBadgeText,
+    Color? proPlanBadgeOutline,
+    Color? proPlanCtaStart,
+    Color? proPlanCtaEnd,
+    Color? proPlanCtaText,
+    Color? proPlanCtaShadow,
+    Color? proPlanHeroGlow,
+    Color? proPlanProCardRing,
+    Color? proPlanProCardShadow,
+    Color? proPlanProPictureStart,
+    Color? proPlanProPictureEnd,
+    Color? proPlanFreePicture,
+    Color? proPlanCardShadow,
+    Color? proPlanArrow,
+    Color? proPlanSaveRibbon,
+    Color? proPlanSaveRibbonText,
+    Color? proPlanOptionBorder,
+    Color? proPlanOptionSelectedBorder,
+    Color? proPlanRadioBorder,
+    Color? proPlanBenefitDetail,
+    Color? proPlanTileCards,
+    Color? proPlanTileRoutines,
+    Color? proPlanTileWeek,
+    Color? proPlanTileExtra,
+    Color? proPlanCloseFill,
+    Color? proPlanFreeChipFill,
+    Color? proPlanFreeChipText,
+    Color? proPlanTeaserCardShadow,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -1830,6 +2012,36 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge4: stepBadge4 ?? this.stepBadge4,
       noticeImagePlaceholder: noticeImagePlaceholder ?? this.noticeImagePlaceholder,
       noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
+      proPlanBadgeStart: proPlanBadgeStart ?? this.proPlanBadgeStart,
+      proPlanBadgeEnd: proPlanBadgeEnd ?? this.proPlanBadgeEnd,
+      proPlanBadgeText: proPlanBadgeText ?? this.proPlanBadgeText,
+      proPlanBadgeOutline: proPlanBadgeOutline ?? this.proPlanBadgeOutline,
+      proPlanCtaStart: proPlanCtaStart ?? this.proPlanCtaStart,
+      proPlanCtaEnd: proPlanCtaEnd ?? this.proPlanCtaEnd,
+      proPlanCtaText: proPlanCtaText ?? this.proPlanCtaText,
+      proPlanCtaShadow: proPlanCtaShadow ?? this.proPlanCtaShadow,
+      proPlanHeroGlow: proPlanHeroGlow ?? this.proPlanHeroGlow,
+      proPlanProCardRing: proPlanProCardRing ?? this.proPlanProCardRing,
+      proPlanProCardShadow: proPlanProCardShadow ?? this.proPlanProCardShadow,
+      proPlanProPictureStart: proPlanProPictureStart ?? this.proPlanProPictureStart,
+      proPlanProPictureEnd: proPlanProPictureEnd ?? this.proPlanProPictureEnd,
+      proPlanFreePicture: proPlanFreePicture ?? this.proPlanFreePicture,
+      proPlanCardShadow: proPlanCardShadow ?? this.proPlanCardShadow,
+      proPlanArrow: proPlanArrow ?? this.proPlanArrow,
+      proPlanSaveRibbon: proPlanSaveRibbon ?? this.proPlanSaveRibbon,
+      proPlanSaveRibbonText: proPlanSaveRibbonText ?? this.proPlanSaveRibbonText,
+      proPlanOptionBorder: proPlanOptionBorder ?? this.proPlanOptionBorder,
+      proPlanOptionSelectedBorder: proPlanOptionSelectedBorder ?? this.proPlanOptionSelectedBorder,
+      proPlanRadioBorder: proPlanRadioBorder ?? this.proPlanRadioBorder,
+      proPlanBenefitDetail: proPlanBenefitDetail ?? this.proPlanBenefitDetail,
+      proPlanTileCards: proPlanTileCards ?? this.proPlanTileCards,
+      proPlanTileRoutines: proPlanTileRoutines ?? this.proPlanTileRoutines,
+      proPlanTileWeek: proPlanTileWeek ?? this.proPlanTileWeek,
+      proPlanTileExtra: proPlanTileExtra ?? this.proPlanTileExtra,
+      proPlanCloseFill: proPlanCloseFill ?? this.proPlanCloseFill,
+      proPlanFreeChipFill: proPlanFreeChipFill ?? this.proPlanFreeChipFill,
+      proPlanFreeChipText: proPlanFreeChipText ?? this.proPlanFreeChipText,
+      proPlanTeaserCardShadow: proPlanTeaserCardShadow ?? this.proPlanTeaserCardShadow,
     );
   }
 
@@ -2278,6 +2490,36 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge4: Color.lerp(stepBadge4, other.stepBadge4, t)!,
       noticeImagePlaceholder: Color.lerp(noticeImagePlaceholder, other.noticeImagePlaceholder, t)!,
       noticeHideLabel: Color.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
+      proPlanBadgeStart: Color.lerp(proPlanBadgeStart, other.proPlanBadgeStart, t)!,
+      proPlanBadgeEnd: Color.lerp(proPlanBadgeEnd, other.proPlanBadgeEnd, t)!,
+      proPlanBadgeText: Color.lerp(proPlanBadgeText, other.proPlanBadgeText, t)!,
+      proPlanBadgeOutline: Color.lerp(proPlanBadgeOutline, other.proPlanBadgeOutline, t)!,
+      proPlanCtaStart: Color.lerp(proPlanCtaStart, other.proPlanCtaStart, t)!,
+      proPlanCtaEnd: Color.lerp(proPlanCtaEnd, other.proPlanCtaEnd, t)!,
+      proPlanCtaText: Color.lerp(proPlanCtaText, other.proPlanCtaText, t)!,
+      proPlanCtaShadow: Color.lerp(proPlanCtaShadow, other.proPlanCtaShadow, t)!,
+      proPlanHeroGlow: Color.lerp(proPlanHeroGlow, other.proPlanHeroGlow, t)!,
+      proPlanProCardRing: Color.lerp(proPlanProCardRing, other.proPlanProCardRing, t)!,
+      proPlanProCardShadow: Color.lerp(proPlanProCardShadow, other.proPlanProCardShadow, t)!,
+      proPlanProPictureStart: Color.lerp(proPlanProPictureStart, other.proPlanProPictureStart, t)!,
+      proPlanProPictureEnd: Color.lerp(proPlanProPictureEnd, other.proPlanProPictureEnd, t)!,
+      proPlanFreePicture: Color.lerp(proPlanFreePicture, other.proPlanFreePicture, t)!,
+      proPlanCardShadow: Color.lerp(proPlanCardShadow, other.proPlanCardShadow, t)!,
+      proPlanArrow: Color.lerp(proPlanArrow, other.proPlanArrow, t)!,
+      proPlanSaveRibbon: Color.lerp(proPlanSaveRibbon, other.proPlanSaveRibbon, t)!,
+      proPlanSaveRibbonText: Color.lerp(proPlanSaveRibbonText, other.proPlanSaveRibbonText, t)!,
+      proPlanOptionBorder: Color.lerp(proPlanOptionBorder, other.proPlanOptionBorder, t)!,
+      proPlanOptionSelectedBorder: Color.lerp(proPlanOptionSelectedBorder, other.proPlanOptionSelectedBorder, t)!,
+      proPlanRadioBorder: Color.lerp(proPlanRadioBorder, other.proPlanRadioBorder, t)!,
+      proPlanBenefitDetail: Color.lerp(proPlanBenefitDetail, other.proPlanBenefitDetail, t)!,
+      proPlanTileCards: Color.lerp(proPlanTileCards, other.proPlanTileCards, t)!,
+      proPlanTileRoutines: Color.lerp(proPlanTileRoutines, other.proPlanTileRoutines, t)!,
+      proPlanTileWeek: Color.lerp(proPlanTileWeek, other.proPlanTileWeek, t)!,
+      proPlanTileExtra: Color.lerp(proPlanTileExtra, other.proPlanTileExtra, t)!,
+      proPlanCloseFill: Color.lerp(proPlanCloseFill, other.proPlanCloseFill, t)!,
+      proPlanFreeChipFill: Color.lerp(proPlanFreeChipFill, other.proPlanFreeChipFill, t)!,
+      proPlanFreeChipText: Color.lerp(proPlanFreeChipText, other.proPlanFreeChipText, t)!,
+      proPlanTeaserCardShadow: Color.lerp(proPlanTeaserCardShadow, other.proPlanTeaserCardShadow, t)!,
     );
   }
 

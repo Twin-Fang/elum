@@ -43,3 +43,38 @@ enum PlanBenefit {
   /// 인쇄용 카드 디자인 테마 고르기
   cardExportAllThemes,
 }
+
+/// 요금제 화면 혜택 묶음 4개 (#1189 시안 A). 순서 = 화면 순서, [benefits] = 묶음 안 순서
+///
+/// 새 혜택은 [PlanBenefit] 값 + 여기 한 묶음의 [benefits] 에 한 줄 (빠지면 화면에 안 나옴)
+enum PlanBenefitGroup {
+  /// 더 예쁜 카드: 그림 · 다시 그리기 · 인쇄
+  prettierCards([
+    PlanBenefit.aiImageStyles,
+    PlanBenefit.freeImageRegenerate,
+    PlanBenefit.cardExportAllThemes,
+    PlanBenefit.cardExportWithoutWatermark,
+  ]),
+
+  /// 일과가 알아서 준비돼요: 반복 · 전문가 일과 · 다른 언어 · AI 메모
+  readyRoutines([
+    PlanBenefit.routineSchedule,
+    PlanBenefit.expertRoutines,
+    PlanBenefit.routineTranslate,
+    PlanBenefit.routineMemory,
+  ]),
+
+  /// 한 주를 한눈에: 주간 리포트 · 보호자 목소리
+  weekAtAGlance([PlanBenefit.weeklyReport, PlanBenefit.guardianVoice]),
+
+  /// 넉넉하게, 광고 없이: 크레딧 · 광고
+  plentyWithoutAds([
+    PlanBenefit.moreWeeklyCredits,
+    PlanBenefit.freeRoutineText,
+    PlanBenefit.adsRemoved,
+  ]);
+
+  const PlanBenefitGroup(this.benefits);
+
+  final List<PlanBenefit> benefits;
+}

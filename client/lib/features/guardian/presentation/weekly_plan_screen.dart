@@ -25,7 +25,7 @@ import '../../subscription/domain/plan_benefit.dart';
 ///
 /// 상태: 불러오는 중 / 실패(다시 하기 + 코드) / 예약 0건(글만 든 웜그레이 줄) / 요일 묶음.
 /// 위에는 이룸이 기기 알림 상태와 Pro 끝남 멈춤 안내를 한 줄씩 (해당할 때만)
-/// Free · 판매 중 · 예약 0건이면 흐린 견본 주간 계획 + `Pro로 보기` (멈춘 예약이 있으면 실제 계획을 보임)
+/// Free · 판매 중 · 예약 0건이면 Pro 미리 보기 (견본 주간 계획) (멈춘 예약이 있으면 실제 계획을 보임)
 class WeeklyPlanScreen extends ConsumerWidget {
   const WeeklyPlanScreen({super.key});
 
@@ -49,8 +49,9 @@ class WeeklyPlanScreen extends ConsumerWidget {
           padding: EdgeInsets.only(top: WeeklyPlanScreen._topGap.h),
           children: [
             ProTeaser(
+              title: context.l10n.proTeaserWeeklyPlanTitle,
               benefit: context.l10n.proTeaserWeeklyPlanBenefit,
-              onUnlock: () => openPlanPaywall(context, ref),
+              actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.routineSchedule),
               child: ProTeaserSamples.weeklyPlan(context),
             ),
           ],

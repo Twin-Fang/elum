@@ -51,7 +51,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
 
   CardExportOptions _options = const CardExportOptions();
 
-  /// Free 가 흐리게 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
+  /// Free 가 미리 보기로 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
   CardDesignTheme? _teaserTheme;
   bool _isBusy = false;
   bool _isArtReady = false;
@@ -95,7 +95,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                 canUseAllThemes: access.canUseAllCardDesignThemes,
                 shouldShowProThemes: access.shouldShowEntryFor(PlanBenefit.cardExportAllThemes),
                 teaserTheme: _teaserTheme,
-                // Free · 판매 중이면 흐린 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
+                // Free · 판매 중이면 Pro 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
                 onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
               ),
               SizedBox(height: _sectionGap.h),
