@@ -112,6 +112,55 @@ class CreditAccountServiceTest {
     assertThat(store.ledger).isEmpty();
   }
 
+  // 깨지면: 주 중간에 Pro 가 된 보호자가 그 주에 Free 몫만 받는다 (#1164)
+  @Test
+  @DisplayName("주 중간 Free → Pro: 이번 주 지급을 Pro 몫까지 차이만 더하고 GRANT 원장을 남긴다")
+  void ensureWeeklyGrant_topsUpWhenPlanRaisedMidWeek() {
+    AiCreditAccount account = store.account(ACCOUNT_ID, MEMBER_ID);
+    AiCreditGrant freeWeek = store.weekly(ACCOUNT_ID, NOW, 100, 40);
+
+    service.ensureWeeklyGrant(account, policy, PlanType.PRO, NOW);
+
+    assertThat(store.grants).singleElement();
+    assertThat(freeWeek.getAmount()).isEqualTo(300);
+    assertThat(freeWeek.getRemaining()).isEqualTo(240);
+    assertThat(store.ledgerOf(CreditLedgerType.GRANT)).singleElement().satisfies(line -> {
+      assertThat(line.getDelta()).isEqualTo(200);
+      assertThat(line.getBalanceAfter()).isEqualTo(240);
+      assertThat(line.getGrantId()).isEqualTo(freeWeek.getId());
+    });
+  }
+
+  // 깨지면: Pro↔Free 를 오가며 같은 주에 Pro 몫을 여러 번 받는다
+  @Test
+  @DisplayName("이미 Pro 몫으로 올린 주는 다시 조회해도 더 주지 않는다")
+  void ensureWeeklyGrant_topUpOnlyOnce() {
+    AiCreditAccount account = store.account(ACCOUNT_ID, MEMBER_ID);
+    AiCreditGrant week = store.weekly(ACCOUNT_ID, NOW, 100, 40);
+
+    service.ensureWeeklyGrant(account, policy, PlanType.PRO, NOW);
+    service.ensureWeeklyGrant(account, policy, PlanType.FREE, NOW);
+    service.ensureWeeklyGrant(account, policy, PlanType.PRO, NOW);
+
+    assertThat(week.getAmount()).isEqualTo(300);
+    assertThat(week.getRemaining()).isEqualTo(240);
+    assertThat(store.ledgerOf(CreditLedgerType.GRANT)).hasSize(1);
+  }
+
+  // 깨지면: 구독이 끝난 주에 남은 크레딧이 갑자기 사라진다
+  @Test
+  @DisplayName("주 중간 Pro → Free: 이번 주 지급은 빼지 않는다")
+  void ensureWeeklyGrant_keepsGrantWhenPlanLoweredMidWeek() {
+    AiCreditAccount account = store.account(ACCOUNT_ID, MEMBER_ID);
+    AiCreditGrant proWeek = store.weekly(ACCOUNT_ID, NOW, 300, 250);
+
+    service.ensureWeeklyGrant(account, policy, PlanType.FREE, NOW);
+
+    assertThat(proWeek.getAmount()).isEqualTo(300);
+    assertThat(proWeek.getRemaining()).isEqualTo(250);
+    assertThat(store.ledger).isEmpty();
+  }
+
   @Test
   @DisplayName("(c) 지난 주 WEEKLY 에 남은 30 은 0 으로 만들고 EXPIRE −30 을 남긴다 — 이월 없음")
   void ensureWeeklyGrant_expiresLastWeek() {
