@@ -378,15 +378,14 @@ class _RoutineMemoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isVisible = ref.watch(
-      planAccessProvider.select((access) => access.shouldShowEntryFor(PlanBenefit.routineMemory)),
-    );
-    if (!isVisible) {
+    final access = ref.watch(planAccessProvider);
+    if (!access.shouldShowEntryFor(PlanBenefit.routineMemory)) {
       return const SizedBox.shrink();
     }
     return SettingsTile(
       isInCard: true,
       label: context.l10n.guardianSettingsRoutineMemory,
+      shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineMemory),
       onTap: isBusy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }

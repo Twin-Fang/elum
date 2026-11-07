@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
 import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/card_export_pictures.dart';
@@ -88,8 +89,8 @@ class CardExportPreview extends ConsumerWidget {
           Text(l10n.cardExportWatermarkNotice, style: caption),
           Align(
             alignment: Alignment.centerLeft,
-            child: ElumTextLink(
-              label: l10n.planLearnPro,
+            child: ProUpsellButton(
+              style: ProUpsellStyle.link,
               onTap: () => openPlanPaywall(context, ref),
             ),
           ),

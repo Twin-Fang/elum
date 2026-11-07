@@ -7,7 +7,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
-import 'elum_label_chip.dart';
+import 'pro_badge.dart';
 import '../../shared/models/character.dart';
 import '../../shared/models/image_style.dart';
 
@@ -19,7 +19,7 @@ import '../../shared/models/image_style.dart';
 ///
 /// 캐릭터 예시는 온보딩에서 고른 친구를 그린다(시안은 포포다). 고른 면이 민트색(`#93DBCC`)이고
 /// 고르지 않으면 바탕색이다. 사진 같은 그림은 시안의 사진 에셋, 이모지·그림 기호는 실제 카드에 들어가는
-/// 그림(이 닦기)이다. Pro 방식은 이름 옆에 [badgeLabel] 배지 (잠금 판단은 호출부, #1149).
+/// 그림(이 닦기)이다. Pro 방식은 이름 옆에 [ProBadge] (잠금 판단은 호출부, #1149).
 ///
 /// 세 화면(온보딩·보호자 설정·이룸이 정보 시트)이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
@@ -28,7 +28,7 @@ class ImageStyleOptionCard extends StatelessWidget {
     required this.style,
     required this.isSelected,
     this.character = CardCharacter.cat,
-    this.badgeLabel,
+    this.shouldShowProBadge = false,
   });
 
   final ImageStyle style;
@@ -37,8 +37,8 @@ class ImageStyleOptionCard extends StatelessWidget {
   /// 캐릭터 예시에 그릴 캐릭터. 온보딩에서 고른 친구가 그대로 보이게 한다.
   final CardCharacter character;
 
-  /// 이름 옆 배지 글 (예 `Pro`). null 이면 배지 없음
-  final String? badgeLabel;
+  /// 이름 옆 [ProBadge] 를 보이는가 (Free 에게 잠긴 Pro 방식)
+  final bool shouldShowProBadge;
 
   /// 시안 실측 — 카드 높이 94 · 안쪽 여백 12 · 예시 70×70 r8 · 라디오 20×20 · 라디오 오른쪽 16.
   static const minHeight = 94.0;
@@ -129,12 +129,7 @@ class ImageStyleOptionCard extends StatelessWidget {
                         color: colors.textPrimary,
                       ),
                     ),
-                    if (badgeLabel case final badge?)
-                      ElumLabelChip(
-                        label: badge,
-                        background: colors.accentYellow,
-                        foreground: colors.textPrimary,
-                      ),
+                    if (shouldShowProBadge) const ProBadge(),
                   ],
                 ),
                 SizedBox(height: _titleToBody.h),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/layout/app_text_scale.dart';
 import '../../../../core/layout/layout_context_ext.dart';
@@ -11,16 +12,16 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
-import '../../../../core/widgets/elum_choice_chip.dart';
 import '../../../../core/widgets/elum_floating_pill_button.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../member/application/plan_access.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/guardian_child_identity.dart';
 import '../../application/routine_schedule_controller.dart';
 import '../../application/routine_manage_coach_notifier.dart';
 import 'coach_help_button.dart';
 import 'grey_tile_shell.dart';
-import 'weekly_plan_entry_pill.dart';
+import 'library_entry_pill.dart';
 
 // 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
@@ -37,12 +38,21 @@ class LibraryManageHeader extends ConsumerWidget {
     final isPhone = context.sizeClass == WindowSizeClass.compact;
     final identity = ref.watch(guardianChildIdentityProvider);
     // 입구 2개: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · 전문가 일과 (Pro, 살 수 없는 동안 Free 에게는 숨김)
+    // 두 입구 같은 알약 · Free 면 Pro 배지 (#1170)
+    final access = ref.watch(planAccessProvider);
     final entries = <Widget>[
-      if (ref.watch(canShowRoutineScheduleProvider)) const WeeklyPlanEntryPill(),
-      if (ref.watch(planAccessProvider).shouldShowExpertRoutines)
-        ElumChoiceChip(
+      if (ref.watch(canShowRoutineScheduleProvider))
+        LibraryEntryPill(
+          label: context.l10n.weeklyPlanEntry,
+          iconAsset: AppAssets.iconCalendar,
+          shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineSchedule),
+          onTap: () => context.push(Routes.guardianWeeklyPlan),
+        ),
+      if (access.shouldShowExpertRoutines)
+        LibraryEntryPill(
           label: context.l10n.expertRoutineEntry,
-          isSelected: false,
+          iconAsset: AppAssets.iconBook,
+          shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.expertRoutines),
           onTap: () => context.push(Routes.guardianExpertRoutines),
         ),
     ];
