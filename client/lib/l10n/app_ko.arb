@@ -1168,6 +1168,12 @@
   "routineLoadingGenerateFailed": "카드를 만들지 못했어요",
   "@routineLoadingGenerateFailed": { "description": "생성 로딩 실패 제목" },
 
+  "routineLoadingInputNeededTitle": "어떤 일과인지 알려 주세요",
+  "@routineLoadingInputNeededTitle": { "description": "입력에 이룸이가 할 행동이 없어 카드 0장일 때의 안내 제목" },
+
+  "routineLoadingEditInput": "다시 적기",
+  "@routineLoadingEditInput": { "description": "카드 0장 안내에서 입력 화면으로 돌아가는 버튼. 적은 글은 그대로 남는다" },
+
   "routineLoadingPercent": "{percent}% 진행됐어요",
   "@routineLoadingPercent": { "description": "일과 만들기 로딩의 진행률을 낭독기가 읽는 문장", "placeholders": {"percent": {"type": "int"}} },
 

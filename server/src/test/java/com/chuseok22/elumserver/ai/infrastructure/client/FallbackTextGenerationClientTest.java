@@ -47,6 +47,16 @@ class FallbackTextGenerationClientTest {
   }
 
   @Test
+  @DisplayName("1번이 카드 0장으로 답하면 2번을 부르지 않는다 — 넘기면 2번이 카드를 지어낼 수 있다")
+  void emptySteps_doesNotMoveOn() {
+    String noCards = "{\"title\":\"어떤 일과인지 알려 주세요\",\"steps\":[]}";
+    when(first.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(noCards);
+
+    assertThat(chain.generateRoutineJson("ㅁㄴㅇㄹ", null, java.util.Set.of(), List.of(), false)).isEqualTo(noCards);
+    verify(second, never()).generateRoutineJson(any(), any(), any(), any(), anyBoolean());
+  }
+
+  @Test
   @DisplayName("마지막 제공자의 실패는 그대로 던진다 — 부르는 쪽의 기존 실패 처리(폴백 질문 등)가 받는다")
   void lastFailure_propagates() {
     when(first.pickPictogramJson("t", "d")).thenThrow(new IllegalStateException("first"));

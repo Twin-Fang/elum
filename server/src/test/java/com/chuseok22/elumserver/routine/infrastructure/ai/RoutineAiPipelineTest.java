@@ -343,16 +343,16 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("Gemini가 빈 steps를 반환하면 ROUTINE_STEP_LIMIT_EXCEEDED를 던진다")
-  void generateForCreate_emptySteps_throwsStepLimitExceeded() {
-    String json = "{\"title\":\"제목\",\"steps\":[]}";
+  @DisplayName("AI가 빈 steps를 반환하면 ROUTINE_INPUT_NOT_ACTIONABLE을 던진다 (실패가 아니라 입력 안내)")
+  void generateForCreate_emptySteps_throwsInputNotActionable() {
+    String json = "{\"title\":\"어떤 일과인지 알려 주세요\",\"steps\":[]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
       routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
-        .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
+        .isEqualTo(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE));
   }
 
   @Test

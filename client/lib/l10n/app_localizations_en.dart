@@ -1313,6 +1313,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLoadingGenerateFailed => 'Couldn\'t make the cards';
 
   @override
+  String get routineLoadingInputNeededTitle => '어떤 일과인지 알려 주세요';
+
+  @override
+  String get routineLoadingEditInput => '다시 적기';
+
+  @override
   String routineLoadingPercent(int percent) {
     return '$percent% done';
   }

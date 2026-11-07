@@ -26,3 +26,34 @@ python3 image_metrics.py before after                               # 흰 배경
 - Gemini 키는 `application-dev.yml` 의 `gemini.api-key` 에서 읽는다. 값은 출력하지 않는다.
 - `variant.json` 의 `description_hint`, `imagePromptEn` 스키마 설명은 서버 코드(`ContentLanguageSpec`, `GeminiRoutineSchemas`)의 사본이다. 서버에서 바꾸면 같이 바꾼다.
 - 자동 지표는 구조 위반만 센다. 의미와 그림 품질은 컨택트 시트로 사람이 본다. 결과 폴더 `results/` 는 커밋하지 않는다.
+
+## 행동카드 평가 (Claude Haiku 5.5)
+
+보호자 입력을 `claude -p`로 호출해 카드와 그림 가이드를 채점한다. 운영 지시문과 설정은 관리자 화면에서 읽고(저장하지 않음), 보강 규칙과 스키마는 `origin/develop` 자바 소스에서 읽는다.
+`.env.local`에 `ELUM_ADMIN_USERNAME`, `ELUM_ADMIN_PASSWORD`가 있어야 한다. 값은 보고와 커밋에 옮기지 않는다.
+
+| 파일 | 역할 |
+|---|---|
+| `card_cases.json` | 튜닝 입력 68건 (프롬프트를 고칠 때 본다) |
+| `card_cases_holdout.json` | 입력 180건. v5 검증에 썼고, 여기서 찾은 안전 결함으로 v6을 고쳐 지금은 회귀 확인용 |
+| `card_cases_holdout2.json` | 처음 보는 입력 110건 (프롬프트를 보지 않은 모델이 작성. 이 입력으로는 프롬프트를 고치지 않는다) |
+| `variants/cards/` | 변형. `이름.txt`는 운영 지시문 뒤에 덧붙이고, `이름.full.txt`는 전체를 교체한다. 최종안은 `v6_final.full.txt` |
+| `run_cards.py` | 호출, 채점, 보고서 |
+| `card_rules.py` | 채점 규칙 |
+| `card_report.py` | 두 실행 비교, 호출 없는 재채점 |
+| `card_verification.py` | 항목별 검증표 (N회 중 M회) |
+
+```bash
+cd server/tool/prompt-eval
+python3 run_cards.py --variant v6_final --repeat 2                        # 호출 수만 보여 주고 멈춘다
+python3 run_cards.py --variant v6_final --repeat 2 --workers 4 --yes      # 튜닝 입력 실행
+python3 run_cards.py --variant v6_final --case-file card_cases_holdout2.json --repeat 5 --workers 4 --yes
+python3 run_cards.py --variant v6_final --repeat 2 --workers 4 --resume 폴더이름 --yes  # 중단 뒤 남은 호출만
+python3 card_report.py 기준폴더 변형폴더                                     # 비교
+python3 card_report.py --regrade 폴더                                       # 호출 없이 재채점
+python3 card_verification.py 튜닝폴더 처음보는입력폴더                         # 항목별 검증표
+```
+
+- 호출 방식이 서버의 `output_config`와 다를 수 있어, 최종안은 운영 경로로 다시 확인한다.
+- `--resume`은 프롬프트를 고치지 않았을 때만 쓴다. 고쳤으면 새 실행으로 돌린다.
+- 동시 호출이 많으면 컴퓨터 메모리가 부족해진다. `--workers`는 4 이하로 둔다.

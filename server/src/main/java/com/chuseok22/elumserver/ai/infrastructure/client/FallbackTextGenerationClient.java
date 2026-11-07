@@ -51,7 +51,7 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
     boolean includeImagePromptEn
   ) {
-    return tryInOrder("routine", FallbackTextGenerationClient::isUsableRoutine,
+    return tryInOrder("routine", FallbackTextGenerationClient::isUsableNewRoutine,
       client -> client.generateRoutineJson(sanitizedInputText, nickname, supportGoals, answers, includeImagePromptEn));
   }
 
@@ -129,7 +129,13 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
     }
   }
 
-  /// 일과: 제목 있음 + 단계 배열 1개 이상
+  /// 새 일과: 제목 있음 + 단계 배열 (0장은 할 행동이 없다는 답. 다음 제공자로 넘기면 카드를 지어낼 수 있음)
+  private static boolean isUsableNewRoutine(JsonNode root) {
+    return root.isObject() && !root.path(ROUTINE_TITLE_FIELD).asText("").isBlank()
+      && root.path(ROUTINE_STEPS_FIELD).isArray();
+  }
+
+  /// 번역: 제목 있음 + 단계 배열 1개 이상
   private static boolean isUsableRoutine(JsonNode root) {
     return root.isObject() && !root.path(ROUTINE_TITLE_FIELD).asText("").isBlank()
       && root.path(ROUTINE_STEPS_FIELD).isArray() && !root.path(ROUTINE_STEPS_FIELD).isEmpty();

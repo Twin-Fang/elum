@@ -2294,6 +2294,18 @@ abstract class AppLocalizations {
   /// **'카드를 만들지 못했어요'**
   String get routineLoadingGenerateFailed;
 
+  /// 입력에 이룸이가 할 행동이 없어 카드 0장일 때의 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 일과인지 알려 주세요'**
+  String get routineLoadingInputNeededTitle;
+
+  /// 카드 0장 안내에서 입력 화면으로 돌아가는 버튼. 적은 글은 그대로 남는다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 적기'**
+  String get routineLoadingEditInput;
+
   /// 일과 만들기 로딩의 진행률을 낭독기가 읽는 문장
   ///
   /// In ko, this message translates to:
