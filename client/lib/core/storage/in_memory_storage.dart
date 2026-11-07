@@ -386,6 +386,16 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> clearAll() async {
+    // 연결 때 남기는 표식·역할·잠금까지 지움
+    _pin = null;
+    _elumi = false;
+    _elumiLinkLost = false;
+    _role = null;
+    await clearAccountForElumiLink();
+  }
+
+  @override
+  Future<void> clearAccountForElumiLink() async {
     _accountMemberId = null;
     _nickname = null;
     _goals = const [];
@@ -394,13 +404,9 @@ class InMemoryStorage implements LocalStorage {
     _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
-    _pin = null;
     _completed = false;
     _selectedProfileId = null;
     _accessToken = null;
-    _elumi = false;
-    _elumiLinkLost = false;
-    _role = null;
     _resumeElumiScreen = false;
     _progress.clear();
     _pendingSync = const [];
