@@ -44,7 +44,6 @@ sudo docker logs -f --since 1m elum-back-blue 2>&1
 ```
 
 관리자 화면 `https://api.elum.suhsaechan.kr/admin/logs` (서버 로그) 에서도 볼 수 있다.
-옛 서버(친구 NAS, `api.elum.chuseok22.com`)는 이전 잠금을 켠 채 옛 앱에 업데이트·새 주소만 안내한다. 사용자 요청은 오지 않는다.
 
 > 클라이언트에서 API가 실패할 때(4xx/5xx) **서버 코드를 추측하기 전에 이 로그를 먼저 본다.**
 > 요청이 서버까지 왔는지, 어느 계층에서 터졌는지가 로그에 남는다.

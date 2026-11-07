@@ -591,6 +591,6 @@ flutter run
 
 ## 미확정 사항
 
-- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.suhsaechan.kr`, 2026-11-05 전환. 옛 `api.elum.chuseok22.com` 은 새 주소 안내만)
+- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.suhsaechan.kr`)
 - 아동 모드 → 보호자 모드 전환 시 PIN 검증 로직 (온보딩에서 PIN 저장까지만 구현)
 - 캐릭터 에셋(여우/고양이 외 추가분) 확보 여부

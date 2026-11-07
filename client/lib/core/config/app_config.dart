@@ -47,11 +47,11 @@ abstract final class AppConfig {
   /// 빌드에 넣은 기본 주소 (`.env`, 없으면 운영)
   static String get defaultApiBaseUrl => _string('ELUM_API_BASE_URL', productionApiBaseUrl);
 
-  /// 운영 서버를 보고 있는가: 지금 주소가 운영 도메인 2개 중 하나 (개발자 도구 테스트 계정·서버 표시 판단)
+  /// 운영 서버를 보고 있는가: 지금 주소가 운영 도메인 (개발자 도구 테스트 계정·서버 표시 판단)
   static bool get isProductionApiServer =>
       ServerAddressPolicy.toAllowedApiBaseUrl(apiBaseUrl) != null;
 
-  /// 앱이 받는 이야기 공유 웹 링크 호스트: 운영 도메인 2개 + 지금 주소 호스트 (옛·새 도메인 링크 모두)
+  /// 앱이 받는 이야기 공유 웹 링크 호스트: 운영 도메인 + 지금 주소 호스트
   static Set<String> get acceptedWebLinkHosts {
     final currentHost = Uri.tryParse(apiBaseUrl)?.host.toLowerCase() ?? '';
     return {

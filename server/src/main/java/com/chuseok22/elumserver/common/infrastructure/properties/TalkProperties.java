@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record TalkProperties(String imageStoragePath, String adminBaseUrl) {
 
   private static final String DEFAULT_IMAGE_STORAGE_PATH = "data/talk-images";
-  // 운영 서버 (2026-11-05 내 NAS 로 전환, #1104). common 은 도메인을 import 하지 않아 ServerAddressPolicy.NEW_SERVER_BASE_URL 과 같은 값을 따로 둔다
+  // 운영 서버 (2026-11-05 내 NAS 로 전환, #1104). common 은 도메인을 import 하지 않아 ServerAddressPolicy.PRODUCTION_API_HOST 와 같은 서버 주소를 따로 둔다
   private static final String DEFAULT_ADMIN_BASE_URL = "https://api.elum.suhsaechan.kr";
 
   public TalkProperties {
