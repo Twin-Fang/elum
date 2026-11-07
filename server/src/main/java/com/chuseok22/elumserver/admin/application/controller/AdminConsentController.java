@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 import com.chuseok22.elumserver.admin.application.dto.request.ConsentEditForm;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.text.HangulSyllables;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService.UpdateResult;
 import com.chuseok22.elumserver.consent.core.ConsentKey;
@@ -132,10 +133,9 @@ public class AdminConsentController {
       return "을";
     }
     char last = word.strip().charAt(word.strip().length() - 1);
-    if (last < 0xAC00 || last > 0xD7A3) {
+    if (!HangulSyllables.isHangulSyllable(last)) {
       return "을";
     }
-    // 한글 음절은 (초성, 중성, 종성) 조합이고 종성 자리가 28칸이다. 나머지가 0이면 받침이 없다.
-    return (last - 0xAC00) % 28 == 0 ? "를" : "을";
+    return HangulSyllables.hasJongseong(last) ? "을" : "를";
   }
 }

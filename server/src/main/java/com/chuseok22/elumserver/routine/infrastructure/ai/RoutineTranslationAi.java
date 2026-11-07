@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.text.ObjectParticleFixer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,12 @@ public class RoutineTranslationAi {
       throw new CustomException(ErrorCode.ROUTINE_TRANSLATE_FAILED);
     }
     RoutineTranslationDraft translated = parse(json, source);
-    return mapTexts(translated, text -> NicknamePlaceholder.restore(text, nickname, targetLanguage));
+    return mapTexts(translated, text -> toSavedText(NicknamePlaceholder.restore(text, nickname, targetLanguage), targetLanguage));
+  }
+
+  // ko 대상은 목적격 조사 보정 (#1190)
+  private static String toSavedText(String restoredText, AppLocale targetLanguage) {
+    return targetLanguage == AppLocale.KO ? ObjectParticleFixer.fix(restoredText) : restoredText;
   }
 
   /**

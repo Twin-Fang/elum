@@ -281,6 +281,21 @@ class RoutineAiPipelineTest {
   }
 
   @Test
+  @DisplayName("ko 일과는 AI 가 틀린 목적격 조사를 저장 전에 바로잡는다 — 이름을 되돌린 뒤의 문장 기준 (#1190)")
+  void generateForCreate_fixesObjectParticleInKorean() {
+    String json = "{\"title\":\"손 씻기\",\"steps\":["
+      + "{\"order\":1,\"title\":\"수도꼭지을 닫아요\",\"description\":\"물컵를 챙겨요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "손 씻기", "하늘", Set.of(), null, CharacterType.LULU, ImageStyle.PHOTO_ONLY, "profile-1"
+    );
+
+    assertThat(result.steps().get(0).title()).isEqualTo("수도꼭지를 닫아요");
+    assertThat(result.steps().get(0).description()).isEqualTo("물컵을 챙겨요");
+  }
+
+  @Test
   @DisplayName("이름이 비어 있으면 AI 가 쓴 이룸이를 그대로 둔다 (#374 E1)")
   void generateForCreate_blankNickname_keepsPlaceholder() {
     String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
