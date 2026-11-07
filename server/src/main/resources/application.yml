@@ -83,6 +83,16 @@ elum:
     cooldown-seconds: ${ELUM_INCIDENT_ALERT_COOLDOWN_SECONDS:1800}
     # AI 제공자 줄(OpenAI 그림 등) 연속 실패 기준 (회)
     ai-consecutive-failure-threshold: ${ELUM_INCIDENT_ALERT_AI_CONSECUTIVE_FAILURE_THRESHOLD:5}
+  # 이미지 저장소 (카드, 이야기, 공지). local: 서버 폴더, minio: MinIO
+  store:
+    image: ${ELUM_STORE_IMAGE:local}
+    minio:
+      endpoint: ${ELUM_MINIO_ENDPOINT:}
+      access-key: ${ELUM_MINIO_ACCESS_KEY:}
+      secret-key: ${ELUM_MINIO_SECRET_KEY:}
+      bucket: ${ELUM_MINIO_BUCKET:elum}
+      # MinIO 에 없는 그림을 로컬에서 읽기. 복사 대조가 끝나면 false
+      fallback-to-local: ${ELUM_MINIO_FALLBACK_TO_LOCAL:true}
   # 서버 이전 상태 화면 (#1062). 비우면 MigrationProperties 기본값 (migration-sync, 옛 서버 https://api.elum.chuseok22.com)
   migration:
     # NAS 스크립트가 결과 JSON·요청 파일을 주고받는 폴더 (/app 기준, 없으면 "동기화 정보 없음")
