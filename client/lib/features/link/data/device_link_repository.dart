@@ -249,8 +249,7 @@ class DeviceLinkRepository {
       await _storage.setElumiDevice(true);
       // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다
       await _storage.setElumiLinkLost(false);
-      // 연결 전 계정이 고른 이룸이 id. 남으면 홈 이름이 회원 이름 대신 기본 호칭으로 감 (#1148)
-      await _storage.clearSelectedProfileId();
+      await _forgetPreLinkAccountStorage();
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
@@ -258,6 +257,17 @@ class DeviceLinkRepository {
     } catch (e) {
       AppLogger.error('연결', e);
       return RedeemResult(RedeemOutcome.failed, failure: AppFailure.of(e));
+    }
+  }
+
+  /// 연결 전 계정의 계정 범위 저장값 지우기 (회원 id·고른 이룸이·체크 기록·일과 캐시 등)
+  ///
+  /// 실패해도 연결은 성공으로 둠 (토큰이 이미 이룸이 세션이라 되돌릴 수 없음, 로그만 남김)
+  Future<void> _forgetPreLinkAccountStorage() async {
+    try {
+      await _storage.clearAccountForElumiLink();
+    } catch (e, stack) {
+      AppLogger.error('[link redeem] pre-link account storage not cleared', e, stack);
     }
   }
 
