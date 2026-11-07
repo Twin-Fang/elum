@@ -122,7 +122,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   ///
   /// `✕` 가 곧바로 지우면 잘못 눌러도 되돌릴 길이 없다. 카드 그림은 AI 가 만든
   /// 것이라 다시 받으려면 크레딧이 든다. 일과 삭제 팝업과 같은 모양을 쓴다.
-  /// 바깥을 눌러 닫으면 null 이므로 취소로 다룬다.
+  /// 바깥을 눌러 닫으면 false 라 취소로 다룬다.
   Future<void> _confirmRemove(ActionCard card) async {
     final confirmed = await confirmDangerousAction(
       context,
