@@ -9,6 +9,7 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/elum_toast.dart';
+import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -211,8 +212,8 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
           ),
           if (shouldShowProNote) ...[
             SizedBox(height: space.xs.h),
-            ElumTextLink(
-              label: l10n.proTeaserUnlock,
+            ProUpsellButton(
+              style: ProUpsellStyle.link,
               onTap: _isSaving ? null : () => openPlanPaywall(context, ref),
             ),
           ],

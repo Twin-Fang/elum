@@ -1,24 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/min_tap_target.dart';
+import '../../../../core/widgets/pro_badge.dart';
 
-/// 일과관리 머리 오른쪽 `주간 계획` 알약 (#782): 웜그레이 알약 + 달력 12 + 14/500 (시안 「보기 전환」 결 1813:7665)
-class WeeklyPlanEntryPill extends StatelessWidget {
-  const WeeklyPlanEntryPill({super.key});
+/// 일과관리 머리 오른쪽 입구 알약 (`주간 계획` · `전문가 일과`): 웜그레이 알약 + 아이콘 12 + 14/500 (시안 「보기 전환」 결 1813:7665, #782)
+///
+/// 두 입구가 같은 모양 (아이콘 있음 · Free 에게 권하는 중이면 글 뒤 [ProBadge], #1170)
+class LibraryEntryPill extends StatelessWidget {
+  const LibraryEntryPill({
+    super.key,
+    required this.label,
+    required this.iconAsset,
+    required this.onTap,
+    this.shouldShowProBadge = false,
+  });
 
-  /// 안쪽 위아래 10 · 좌우 16 · 아이콘 12 · 아이콘 > 글 4 · 알약 모서리 100
+  final String label;
+  final String iconAsset;
+  final VoidCallback onTap;
+
+  /// Free 라 들어가면 흐린 미리 보기인 입구 (`PlanAccess.shouldShowTeaserFor`)
+  final bool shouldShowProBadge;
+
+  /// 안쪽 위아래 10 · 좌우 16 · 아이콘 12 · 아이콘 > 글 4 · 글 > 배지 6 · 알약 모서리 100
   static const _paddingVertical = 10.0;
   static const _paddingHorizontal = 16.0;
   static const _iconSize = 12.0;
   static const _iconToText = 4.0;
+  static const _textToBadge = 6.0;
   static const _pillRadius = 100.0;
 
   @override
@@ -26,9 +39,9 @@ class WeeklyPlanEntryPill extends StatelessWidget {
     final colors = context.colors;
     return MinTapTarget(
       child: AppPressable(
-        onTap: () => context.push(Routes.guardianWeeklyPlan),
+        onTap: onTap,
         scaleDown: AppPressable.scaleIcon,
-        semanticLabel: context.l10n.weeklyPlanEntry,
+        semanticLabel: label,
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: _paddingHorizontal.w,
@@ -42,7 +55,7 @@ class WeeklyPlanEntryPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.asset(
-                AppAssets.iconCalendar,
+                iconAsset,
                 width: _iconSize.w,
                 height: _iconSize.w,
                 excludeFromSemantics: true,
@@ -50,10 +63,14 @@ class WeeklyPlanEntryPill extends StatelessWidget {
               ),
               SizedBox(width: _iconToText.w),
               Text(
-                context.l10n.weeklyPlanEntry,
+                label,
                 maxLines: 1,
                 style: context.typo.chipLabel.copyWith(color: colors.textPrimary),
               ),
+              if (shouldShowProBadge) ...[
+                SizedBox(width: _textToBadge.w),
+                const ProBadge(),
+              ],
             ],
           ),
         ),

@@ -4324,13 +4324,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
 
   @override
-  String get proTeaserBadge => 'Pro';
-
-  @override
   String get proTeaserSampleLabel => '예시 화면';
-
-  @override
-  String get proTeaserUnlock => 'Pro로 보기';
 
   @override
   String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
