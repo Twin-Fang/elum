@@ -7,9 +7,29 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/pro_badge.dart';
 
-/// 빠른 메뉴 한 줄: 돌려줄 값 · 아이콘(`fi-br` SVG 경로) · 글자 · 붉게(되돌리기 어려운 동작)
-typedef QuickMenuRow<T> = ({T value, String icon, String label, bool isDanger});
+/// 빠른 메뉴 한 줄: 돌려줄 값 · 아이콘(`fi-br` SVG 경로) · 글자 · 붉게(되돌리기 어려운 동작) · Pro 배지
+///
+/// 칸 옆 메뉴([AnchoredQuickMenuPanel])와 아래 시트(`QuickMenuGroup`)가 같은 줄 자료를 그린다
+@immutable
+class QuickMenuRow<T> {
+  const QuickMenuRow({
+    required this.value,
+    required this.icon,
+    required this.label,
+    this.isDanger = false,
+    this.shouldShowProBadge = false,
+  });
+
+  final T value;
+  final String icon;
+  final String label;
+  final bool isDanger;
+
+  /// 글자 뒤 [ProBadge]: Free 라 누르면 Pro 안내로 가는 줄 (`PlanAccess.shouldShowTeaserFor`)
+  final bool shouldShowProBadge;
+}
 
 /// 길게 누른 칸 옆에 뜨는 메뉴 (#837, 시안 「이룸 일과관리 시안」)
 ///
@@ -210,9 +230,12 @@ class _AnchoredMenuRow<T> extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  row.label,
-                  style: context.typo.settingsTileLabel.copyWith(color: color),
+                child: LabelWithProBadge(
+                  label: Text(
+                    row.label,
+                    style: context.typo.settingsTileLabel.copyWith(color: color),
+                  ),
+                  shouldShowProBadge: row.shouldShowProBadge,
                 ),
               ),
               SvgPicture.asset(
@@ -229,3 +252,4 @@ class _AnchoredMenuRow<T> extends StatelessWidget {
     );
   }
 }
+

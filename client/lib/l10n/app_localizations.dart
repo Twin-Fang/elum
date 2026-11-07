@@ -2327,25 +2327,25 @@ abstract class AppLocalizations {
   /// 줄을 밀면 나오는 삭제 버튼의 낭독 이름
   ///
   /// In ko, this message translates to:
-  /// **'임시저장 삭제'**
+  /// **'임시저장 지우기'**
   String get draftRoutinesDeleteLabel;
 
   /// 임시저장 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'임시저장을 삭제할까요?'**
+  /// **'임시저장을 지울까요?'**
   String get draftRoutinesDeleteConfirmTitle;
 
   /// 임시저장 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get draftRoutinesDeleteAction;
 
   /// 임시저장 삭제 실패 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'임시저장을 삭제하지 못했어요'**
+  /// **'임시저장을 지우지 못했어요'**
   String get draftRoutinesDeleteFailedTitle;
 
   /// 임시저장 삭제 실패 팝업의 기본 안내(서버 문구가 없을 때)
@@ -2387,13 +2387,13 @@ abstract class AppLocalizations {
   /// 카드 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'카드를 삭제할까요?'**
+  /// **'카드를 지울까요?'**
   String get cardReviewDeleteConfirmTitle;
 
   /// 카드 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get cardReviewDeleteAction;
 
   /// 카드 소리 재생 실패 팝업 제목
@@ -3125,7 +3125,7 @@ abstract class AppLocalizations {
   /// 일과 줄을 밀었을 때 나오는 삭제 버튼 기본 글자
   ///
   /// In ko, this message translates to:
-  /// **'일과 삭제'**
+  /// **'일과 지우기'**
   String get routineSwipeDelete;
 
   /// 일과 줄을 밀었을 때 나오는 수정 버튼
@@ -3287,7 +3287,7 @@ abstract class AppLocalizations {
   /// 보호자 홈에서 일과를 지우기 전 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과를 삭제할까요?'**
+  /// **'일과를 지울까요?'**
   String get todayRoutineDeleteConfirmTitle;
 
   /// 이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목
@@ -3305,13 +3305,13 @@ abstract class AppLocalizations {
   /// 보호자 홈 일과 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get todayRoutineDeleteAction;
 
   /// 보호자 홈에서 일과 삭제가 실패했을 때 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과를 삭제하지 못했어요'**
+  /// **'일과를 지우지 못했어요'**
   String get todayRoutineDeleteFailedTitle;
 
   /// 보호자 홈에서 일과 삭제가 실패했을 때 서버 문구가 없을 때의 안내
@@ -3377,7 +3377,7 @@ abstract class AppLocalizations {
   /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요'**
+  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요'**
   String get homeCoachSwipe;
 
   /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
@@ -7819,13 +7819,13 @@ abstract class AppLocalizations {
   /// **'AI 그림 그리기'**
   String get cardFirstDrawChip;
 
-  /// Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩 (누르면 요금제 화면)
+  /// Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardRegenerateChip + Pro 배지, 누르면 요금제 화면)
   ///
   /// In ko, this message translates to:
   /// **'Pro로 다시 그리기'**
   String get cardRedrawProChip;
 
-  /// Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩 (누르면 요금제 화면)
+  /// Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardFirstDrawChip + Pro 배지, 누르면 요금제 화면)
   ///
   /// In ko, this message translates to:
   /// **'Pro로 AI 그림 그리기'**

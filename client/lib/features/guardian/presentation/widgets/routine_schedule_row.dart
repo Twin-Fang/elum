@@ -7,13 +7,16 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
+import '../../../member/application/plan_access.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/routine_schedule_controller.dart';
 import 'routine_schedule_labels.dart';
 import 'routine_schedule_sheet.dart';
 
-/// 일과관리 원본 상세 시트의 반복 줄 (#782): `요일·시각 정하기` / `월·수·금 오전 8:00` / 멈춤 · 누르면 반복 시트
+/// 일과관리 원본 상세 시트의 반복 줄 (#782): `요일·시각 정하기` / `월·수·금 오전 8:00` / 멈춤 (+ Free 면 Pro 배지) · 누르면 반복 시트
 ///
 /// 보상 줄과 같은 짜임 (달력 칸 40 + 카드 68). 보이는 조건은 부르는 쪽 ([canShowRoutineScheduleProvider])
 class RoutineScheduleRow extends ConsumerWidget {
@@ -40,6 +43,10 @@ class RoutineScheduleRow extends ConsumerWidget {
     final space = context.space;
     final schedule = ref.watch(routineScheduleOfProvider(routine.id));
     final isOn = schedule != null && !schedule.isPaused;
+    // Free 판매 중이면 눌러서 반복 시트의 Pro 안내로 감 (멈춘 예약도 Pro 가 있어야 다시 돎)
+    final shouldShowProBadge = ref
+        .watch(planAccessProvider)
+        .shouldShowTeaserFor(PlanBenefit.routineSchedule);
     final label = switch (schedule) {
       null => context.l10n.routineScheduleRowOff,
       final paused when paused.isPaused => context.l10n.routineSchedulePaused,
@@ -83,15 +90,18 @@ class RoutineScheduleRow extends ConsumerWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: typo.sheetStepTitle.copyWith(
-                        color: isOn
-                            ? colors.textPrimary
-                            : colors.rewardEmptyLabel,
+                    child: LabelWithProBadge(
+                      label: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: typo.sheetStepTitle.copyWith(
+                          color: isOn
+                              ? colors.textPrimary
+                              : colors.rewardEmptyLabel,
+                        ),
                       ),
+                      shouldShowProBadge: shouldShowProBadge,
                     ),
                   ),
                   const SettingsCardChevron(),

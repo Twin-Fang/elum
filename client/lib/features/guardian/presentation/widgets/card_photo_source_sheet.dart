@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../data/card_photo.dart';
+import 'anchored_quick_menu.dart' show QuickMenuRow;
 import 'library_quick_menu.dart';
 
 /// 사진을 어디서 가져올지 고르는 시트: 흰 묶음 판 안 `사진 찍기` · `갤러리에서 고르기`
@@ -27,17 +28,15 @@ class CardPhotoSourceSheet extends StatelessWidget {
     return ElumSheetFrame(
       child: QuickMenuGroup<PhotoSource>(
         rows: [
-          (
+          QuickMenuRow(
             value: PhotoSource.camera,
             icon: AppAssets.iconCamera,
             label: l10n.cardPhotoSourceTake,
-            isDanger: false,
           ),
-          (
+          QuickMenuRow(
             value: PhotoSource.gallery,
             icon: AppAssets.iconPicture,
             label: l10n.cardPhotoSourceGallery,
-            isDanger: false,
           ),
         ],
       ),

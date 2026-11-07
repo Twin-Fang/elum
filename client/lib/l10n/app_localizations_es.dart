@@ -1268,16 +1268,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get draftRoutinesLoadFailedFallback => '임시저장을 불러오지 못했어요';
 
   @override
-  String get draftRoutinesDeleteLabel => '임시저장 삭제';
+  String get draftRoutinesDeleteLabel => '임시저장 지우기';
 
   @override
-  String get draftRoutinesDeleteConfirmTitle => '임시저장을 삭제할까요?';
+  String get draftRoutinesDeleteConfirmTitle => '임시저장을 지울까요?';
 
   @override
-  String get draftRoutinesDeleteAction => '삭제';
+  String get draftRoutinesDeleteAction => '지우기';
 
   @override
-  String get draftRoutinesDeleteFailedTitle => '임시저장을 삭제하지 못했어요';
+  String get draftRoutinesDeleteFailedTitle => '임시저장을 지우지 못했어요';
 
   @override
   String get draftRoutinesDeleteFailedFallback => '잠시 후 다시 시도해주세요';
@@ -1298,10 +1298,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get draftRoutinesEmptyBody => '일과를 만들다 그만두면 여기에 남아요';
 
   @override
-  String get cardReviewDeleteConfirmTitle => '카드를 삭제할까요?';
+  String get cardReviewDeleteConfirmTitle => '카드를 지울까요?';
 
   @override
-  String get cardReviewDeleteAction => '삭제';
+  String get cardReviewDeleteAction => '지우기';
 
   @override
   String get cardReviewSoundFailedTitle => '소리를 재생하지 못했어요';
@@ -1711,7 +1711,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineCreateButton => '새로운 일과 만들기';
 
   @override
-  String get routineSwipeDelete => '일과 삭제';
+  String get routineSwipeDelete => '일과 지우기';
 
   @override
   String get routineSwipeEdit => '일과 수정';
@@ -1793,7 +1793,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get todayRoutineReorderFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String get todayRoutineDeleteConfirmTitle => '일과를 삭제할까요?';
+  String get todayRoutineDeleteConfirmTitle => '일과를 지울까요?';
 
   @override
   String get todayRoutineStartedTitle => '이룸이가 시작한 일과예요';
@@ -1802,10 +1802,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get todayRoutineStartedMessage => '한 일이 기록으로 남도록 지울 수 없어요';
 
   @override
-  String get todayRoutineDeleteAction => '삭제';
+  String get todayRoutineDeleteAction => '지우기';
 
   @override
-  String get todayRoutineDeleteFailedTitle => '일과를 삭제하지 못했어요';
+  String get todayRoutineDeleteFailedTitle => '일과를 지우지 못했어요';
 
   @override
   String get todayRoutineDeleteFailedFallback => '잠시 후 다시 시도해주세요';
@@ -1840,7 +1840,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeCoachCreate => '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*';
 
   @override
-  String get homeCoachSwipe => '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요';
+  String get homeCoachSwipe => '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요';
 
   @override
   String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
