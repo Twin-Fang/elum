@@ -114,8 +114,9 @@ public class CreditAccountService {
   }
 
   /**
-   * 지급량을 정할 정책을 주기로 고른다({@link CreditPolicyService#grantPolicyFor}). 지급 행이 이미 있으면
+   * 지급량을 정할 정책을 주기로 고른다({@link CreditPolicyService#grantPolicyFor}). Free 는 지급 행이 이미 있으면
    * 고르지 않는다 — 대부분의 요청이 여기서 끝나 정책 조회가 더 들지 않는다.
+   * 지급 행이 있어도 지금 요금제 몫이 더 크면 차이만 더함, 내려가면 그대로 (#1164)
    */
   @Transactional(propagation = Propagation.MANDATORY)
   public void ensureWeeklyGrant(
@@ -124,7 +125,12 @@ public class CreditAccountService {
     CreditPeriod period = CreditPeriod.of(now);
     expireEndedGrants(account, period, now);
 
-    if (grantRepository.findByAccountIdAndPeriodKey(account.getId(), period.key()).isPresent()) {
+    Optional<AiCreditGrant> thisWeek = grantRepository.findByAccountIdAndPeriodKey(account.getId(), period.key());
+    if (thisWeek.isPresent()) {
+      // Free 는 가장 낮은 요금제라 올릴 일이 없음 (정책 조회 생략)
+      if (plan != PlanType.FREE) {
+        topUpToPlanAmount(account, thisWeek.get(), grantPolicyOf.apply(period), plan, period, now);
+      }
       return;
     }
     AiCreditPolicy policy = grantPolicyOf.apply(period);
@@ -147,6 +153,33 @@ public class CreditAccountService {
     line.setPolicyVersion(policy.getVersion());
     line.setReason("주간 지급 " + period.key() + " (" + plan.name() + ")");
     ledgerRepository.save(line);
+  }
+
+  /**
+   * 이번 주 지급을 지금 요금제 몫까지 올림: 차이만큼 지급량·남은 양 +, GRANT 원장 1줄
+   * 이미 그 몫 이상이면 아무것도 하지 않음 (같은 주 재조회·왕복 전환에도 한 번만)
+   */
+  private void topUpToPlanAmount(
+    AiCreditAccount account, AiCreditGrant grant, AiCreditPolicy policy, PlanType plan, CreditPeriod period,
+    LocalDateTime now
+  ) {
+    int planAmount = policy.weeklyGrantFor(plan);
+    int shortfall = planAmount - grant.getAmount();
+    if (shortfall <= 0) {
+      return;
+    }
+    int balanceBefore = balance(account, now).available();
+    grant.setAmount(planAmount);
+    grant.setRemaining(grant.getRemaining() + shortfall);
+    grantRepository.save(grant);
+
+    AiCreditLedger line = ledgerLine(account.getId(), CreditLedgerType.GRANT, shortfall, balanceBefore + shortfall);
+    line.setGrantId(grant.getId());
+    line.setPolicyVersion(policy.getVersion());
+    line.setReason("주간 지급 보정 " + period.key() + " (" + plan.name() + ")");
+    ledgerRepository.save(line);
+    log.info("[credit weekly grant] topped up : accountId={}, plan={}, {} -> {}",
+      account.getId(), plan, planAmount - shortfall, planAmount);
   }
 
   /** 기한이 지났거나 지난 주기의 주간 묶음에 남은 양을 0 으로 만들고 EXPIRE 를 남긴다. */
