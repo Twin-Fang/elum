@@ -16,7 +16,9 @@ import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.common.text.ObjectParticleFixer;
 import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -83,19 +85,26 @@ public class RoutineAiPipeline {
     return restoreNickname(result, nickname);
   }
 
-  // 제목·카드 제목·설명의 자리표시를 이름으로 되돌린다. NicknamePlaceholder.restore 는 던지지 않고 실패하면 원문을
+  // 제목·카드 제목·설명의 자리표시를 이름으로 되돌린다(ko 는 조사 보정까지, toSavedText). NicknamePlaceholder.restore 는 던지지 않고 실패하면 원문을
   // 돌려주므로(E10) 치환 때문에 일과 생성이 실패하지 않는다.
   private RoutineGenerationResult restoreNickname(RoutineGenerationResult result, String nickname) {
     List<GeneratedStep> steps = result.steps().stream()
       .map(step -> new GeneratedStep(
         step.order(),
-        NicknamePlaceholder.restore(step.title(), nickname, AiCallContext.currentContentLocale()),
-        NicknamePlaceholder.restore(step.description(), nickname, AiCallContext.currentContentLocale()),
+        toSavedText(step.title(), nickname),
+        toSavedText(step.description(), nickname),
         step.imagePath(),
         step.pictogramId()))
       .toList();
-    return new RoutineGenerationResult(NicknamePlaceholder.restore(result.title(), nickname, AiCallContext.currentContentLocale()), steps, result.batchId(),
+    return new RoutineGenerationResult(toSavedText(result.title(), nickname), steps, result.batchId(),
       result.failedImageCount());
+  }
+
+  // AI 문장 > 저장 문장: 이름 되돌림 > ko 는 목적격 조사 보정 (AI 가 가끔 '수도꼭지을' 처럼 틀림, #1190)
+  private static String toSavedText(String aiText, String nickname) {
+    AppLocale contentLocale = AiCallContext.currentContentLocale();
+    String restored = NicknamePlaceholder.restore(aiText, nickname, contentLocale);
+    return contentLocale == AppLocale.KO ? ObjectParticleFixer.fix(restored) : restored;
   }
 
   private static final int MIN_OPTIONS = 3;

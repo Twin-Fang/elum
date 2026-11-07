@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.ai.core;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.text.HangulSyllables;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -248,18 +249,14 @@ public final class NicknamePlaceholder {
 
   /// 0 = 받침 없음(한글이 아니어도 0), 1 = 받침 있음, 2 = ㄹ받침.
   private static int jongKind(char c) {
-    if (!isHangulSyllable(c)) {
+    if (!HangulSyllables.hasJongseong(c)) {
       return 0;
     }
-    int jong = (c - 0xAC00) % 28;
-    if (jong == 0) {
-      return 0;
-    }
-    return jong == 8 ? 2 : 1;
+    return HangulSyllables.hasRieulJongseong(c) ? 2 : 1;
   }
 
   private static boolean isHangulSyllable(char c) {
-    return c >= 0xAC00 && c <= 0xD7A3;
+    return HangulSyllables.isHangulSyllable(c);
   }
 
   private static boolean isBlank(String s) {

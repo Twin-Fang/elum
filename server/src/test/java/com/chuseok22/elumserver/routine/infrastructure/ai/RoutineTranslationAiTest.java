@@ -64,4 +64,18 @@ class RoutineTranslationAiTest {
       .containsExactly("하늘 brushes teeth", "Put on clothes");
     assertThat(translated.rewardText()).isNull();
   }
+
+  @Test
+  @DisplayName("한국어로 바꾼 일과는 AI 가 틀린 목적격 조사를 바로잡는다 (#1190)")
+  void translatedToKorean_fixesObjectParticle() {
+    RoutineTranslationDraft english = new RoutineTranslationDraft("Wash hands", null, List.of(
+      new RoutineTranslationDraft.StepText("Turn off", "Turn off the tap")));
+    when(textClient.translateRoutineJson(any(), eq(AppLocale.EN), eq(AppLocale.KO)))
+      .thenReturn("{\"title\":\"손 씻기\",\"rewardText\":null,\"steps\":["
+        + "{\"title\":\"수도꼭지을 닫아요\",\"description\":\"수도꼭지을 닫아요\"}]}");
+
+    RoutineTranslationDraft translated = translationAi.translate(english, "하늘", AppLocale.EN, AppLocale.KO);
+
+    assertThat(translated.steps().get(0).description()).isEqualTo("수도꼭지를 닫아요");
+  }
 }
