@@ -18,7 +18,7 @@ public record MemberResponse(
   @Schema(description = "회원 고유 ID (UUID 문자열)", example = "b3b1e2a0-1234-4d56-9abc-1234567890ab")
   String id,
 
-  @Schema(description = "로그인 아이디", example = "chuseok22")
+  @Schema(description = "로그인 아이디", example = "guardian01")
   String username,
 
   @Schema(description = "누적 획득 별 개수", example = "12")

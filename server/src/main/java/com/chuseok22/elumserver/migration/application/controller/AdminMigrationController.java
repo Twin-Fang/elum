@@ -7,7 +7,6 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.migration.application.service.MigrationSettingsReader;
 import com.chuseok22.elumserver.migration.application.service.MigrationSyncStatusService;
-import com.chuseok22.elumserver.migration.application.service.SourceServerProbeService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * 관리자 > 시스템 > 서버 이전 화면 (#1062): 동기화·검사 상태, 이전 설정, 옛 서버 안내 상태, 요청 버튼 4개
+ * 관리자 > 시스템 > 서버 이전 화면 (#1062): 동기화·검사 상태, 이전 설정, 요청 버튼 4개
  * 버튼은 NAS 표식 파일만 만들거나 지움 (실행은 NAS 1분 작업). 성공한 버튼만 관리자 기록 1건
  */
 @Controller
@@ -30,15 +29,13 @@ public class AdminMigrationController {
 
   private final MigrationSyncStatusService migrationSyncStatusService;
   private final MigrationSettingsReader migrationSettingsReader;
-  private final SourceServerProbeService sourceServerProbeService;
   private final AdminAuditService adminAuditService;
 
-  /// 화면: 동기화 상태 > 이전 설정 > 옛 서버 조회 (각자 실패를 상태로 돌려줘 화면은 늘 뜸)
+  /// 화면: 동기화 상태 > 이전 설정 (각자 실패를 상태로 돌려줘 화면은 늘 뜸)
   @GetMapping("/admin/migration")
   public String page(Model model) {
     model.addAttribute("overview", migrationSyncStatusService.readOverview());
     model.addAttribute("settings", migrationSettingsReader.read());
-    model.addAttribute("probe", sourceServerProbeService.probe());
     return "admin/migration";
   }
 

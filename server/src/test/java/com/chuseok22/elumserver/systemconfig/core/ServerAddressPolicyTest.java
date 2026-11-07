@@ -15,7 +15,7 @@ class ServerAddressPolicyTest {
   @DisplayName("허용 도메인의 https 주소만 받는다 (끝 / 하나는 허용)")
   void allowedHosts_accepted() {
     assertThat(ServerAddressPolicy.isAllowed("https://api.elum.suhsaechan.kr")).isTrue();
-    assertThat(ServerAddressPolicy.isAllowed("https://api.elum.chuseok22.com/")).isTrue();
+    assertThat(ServerAddressPolicy.isAllowed("https://api.elum.suhsaechan.kr/")).isTrue();
   }
 
   @Test
