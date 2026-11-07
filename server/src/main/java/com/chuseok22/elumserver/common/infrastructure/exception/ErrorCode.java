@@ -168,6 +168,8 @@ public enum ErrorCode {
   // "내일 다시" 는 하루 한도에서만 맞는 말이다.
   ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
+  // 한도 집계(생성 횟수·보유 수) 실패 > 막음(fail-closed), 다시 시도 가능 (#1192)
+  ROUTINE_QUOTA_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
   WEEKLY_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN),

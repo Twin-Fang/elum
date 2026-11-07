@@ -36,9 +36,9 @@ class ErrorMessageParityTest {
   }
 
   @Test
-  @DisplayName("golden 은 작업 전 ErrorCode 104개를 모두 담고 있다")
+  @DisplayName("golden 은 ErrorCode 105개를 모두 담고 있다")
   void goldenCoversAllLegacyCodes() {
-    assertThat(GOLDEN).hasSize(104);
+    assertThat(GOLDEN).hasSize(105);
   }
 
   @Test
