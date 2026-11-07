@@ -18,6 +18,7 @@ import '../application/expert_routine_providers.dart';
 import '../domain/expert_routine.dart';
 import 'widgets/expert_routine_category_chips.dart';
 import 'widgets/expert_routine_tile.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 전문가 일과 목록 (일과관리 > 전문가 일과, Pro): 안내 한 줄 > 분류 칩 > 목록, 누르면 미리 보기
 /// 상태: 받는 중 / 0건(글만 든 웜그레이 줄) / 실패(다시 하기 + 에러 코드) / 목록
@@ -50,7 +51,7 @@ class _ExpertRoutineListScreenState
     final l10n = context.l10n;
     final colors = context.colors;
     final access = ref.watch(planAccessProvider);
-    if (access.shouldShowTeaserFor(canUseFeature: access.canImportExpertRoutines)) {
+    if (access.shouldShowTeaserFor(PlanBenefit.expertRoutines)) {
       return _proTeaserScaffold(context);
     }
     final routines = ref.watch(expertRoutineListProvider(_category));

@@ -6572,6 +6572,66 @@ abstract class AppLocalizations {
   /// **'구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.'**
   String get planLegalCancelPlayStore;
 
+  /// 무료 체험 기간 (스토어 값, 일 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일}}'**
+  String planTrialDays(int count);
+
+  /// 무료 체험 기간 (스토어 값, 주 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}주}}'**
+  String planTrialWeeks(int count);
+
+  /// 무료 체험 기간 (스토어 값, 달 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개월}}'**
+  String planTrialMonths(int count);
+
+  /// 무료 체험 기간 (스토어 값, 해 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}년}}'**
+  String planTrialYears(int count);
+
+  /// 체험이 붙은 1개월 상품 줄 (스토어가 체험 대상이라고 알릴 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 무료 체험 후 {price} / 1개월마다 자동 갱신'**
+  String planPricePerMonthAfterTrial(String trial, String price);
+
+  /// 체험이 붙은 1년 상품 줄 (스토어가 체험 대상이라고 알릴 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 무료 체험 후 {price} / 1년마다 자동 갱신'**
+  String planPricePerYearAfterTrial(String trial, String price);
+
+  /// 고른 상품에 체험이 있을 때 결제 버튼 #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 무료 체험 시작하기'**
+  String planStartFreeTrial(String trial);
+
+  /// 기간 고르기 아래: 고른 상품의 체험 종료일·첫 청구 (오늘 시작 기준) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험은 {date}에 끝나요. 해지하지 않으면 그날부터 {price}씩 청구돼요.'**
+  String planTrialEndsNotice(String date, String price);
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.'**
+  String get planLegalTrialAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험 중에 해지하면 요금이 청구되지 않아요.'**
+  String get planLegalTrialPlayStore;
+
   /// 스토어 결제창이 떠 있는 동안
   ///
   /// In ko, this message translates to:

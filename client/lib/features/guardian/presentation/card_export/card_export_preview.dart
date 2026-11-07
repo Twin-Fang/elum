@@ -24,7 +24,7 @@ class CardExportPreview extends ConsumerWidget {
     required this.sheets,
     required this.sheetKeys,
     required this.hasWatermark,
-    required this.canPurchasePro,
+    required this.shouldPromoteNoWatermark,
     required this.onToggleCard,
     this.teaserSheet,
   });
@@ -40,7 +40,8 @@ class CardExportPreview extends ConsumerWidget {
   /// 지면마다 굽기용 열쇠 ([sheets] 와 같은 차례, 화면이 들고 있음)
   final List<GlobalKey> sheetKeys;
   final bool hasWatermark;
-  final bool canPurchasePro;
+  /// 워터마크 줄 아래 `Pro 알아보기` 를 보이는가 (Pro 가 워터마크 없음을 줌 + 권유 대상)
+  final bool shouldPromoteNoWatermark;
   final ValueChanged<String> onToggleCard;
 
   /// Free 가 흐리게 보고 있는 Pro 테마의 첫 지면, 없으면 null
@@ -82,7 +83,7 @@ class CardExportPreview extends ConsumerWidget {
           SizedBox(height: 6.h),
           Text(l10n.cardExportMissingPicture, style: caption),
         ],
-        if (hasWatermark && canPurchasePro) ...[
+        if (hasWatermark && shouldPromoteNoWatermark) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportWatermarkNotice, style: caption),
           Align(

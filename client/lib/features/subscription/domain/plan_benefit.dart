@@ -1,7 +1,7 @@
 /// 요금제 화면 혜택 줄 — **앱에 실제로 있는 Pro 차이만** 둔다
 ///
-/// 줄마다 여는 PlanAccess 판정이 있고(`plan_benefits.dart`), 화면은 Pro 에서 켜지고 Free 에서 꺼진 줄만 보인다.
-/// 새 Pro 기능 = PlanAccess 판정 + 여기 값 하나 + 판정 연결 한 줄 (switch 가 빠뜨림을 막음)
+/// 줄마다 여는 권한이 있고(`plan_benefits.dart`), 화면은 서버 Pro 권한에서 켜지고 지금 계정은 못 쓰는 줄만 보인다.
+/// 새 Pro 기능 = PlanEntitlements 권한 + 여기 값 하나 + 권한 연결 한 줄 (switch 가 빠뜨림을 막음)
 /// 크레딧은 숫자를 적지 않음: 지급량은 관리자 설정이라 Free 계정이 미리 알 수 없음
 enum PlanBenefit {
   /// 캐릭터·사진 같은 그림 방식 (AI 맞춤 그림, #1149)

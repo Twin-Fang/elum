@@ -15,6 +15,7 @@ import '../../../../core/widgets/pro_teaser.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/guardian_child_identity.dart';
 import '../../application/weekly_report_providers.dart';
 import '../../data/card_export_files.dart';
@@ -103,7 +104,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final isNotIncluded = reportAsync == null ||
         (reportAsync is AsyncError && isProOnlyRejection(reportAsync.error));
     if (isNotIncluded) {
-      if (ref.watch(planAccessProvider).shouldShowProTeaser) {
+      if (ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.weeklyReport)) {
         return SingleChildScrollView(
           child: ProTeaser(
             benefit: l10n.proTeaserWeeklyReportBenefit,

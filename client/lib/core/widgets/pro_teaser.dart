@@ -12,7 +12,7 @@ import 'elum_label_chip.dart';
 /// Pro 미리 보기: 견본 화면을 흐리게 깔고 위에 `Pro` · `예시 화면` 배지 + 한 줄 혜택 + `Pro로 보기`
 ///
 /// 견본은 누르거나 읽히지 않음 (입력·낭독 막음). 버튼은 부르는 쪽이 요금제 화면을 열도록 [onUnlock] 으로 받음.
-/// 보이는 조건(판매 중 · Free · 보호자 화면)은 부르는 쪽이 정함 (`PlanAccess.shouldShowProTeaser`). 이룸이 화면에는 두지 않음
+/// 보이는 조건(판매 중 · Free · 보호자 화면)은 부르는 쪽이 정함 (`PlanAccess.shouldShowTeaserFor`). 이룸이 화면에는 두지 않음
 class ProTeaser extends StatelessWidget {
   const ProTeaser({
     super.key,

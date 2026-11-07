@@ -20,6 +20,7 @@ import '../application/routine_memory_controller.dart';
 import '../domain/routine_memory.dart';
 import 'pro_teaser_samples.dart';
 import 'routine_memory_line_sheet.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 이룸이별 AI 메모 화면 (Pro, 시안 없음 — 설정 묶음 카드 모양을 따름)
 /// 묶음 3개: 켜기/끄기 > 메모 줄(누르면 고치기·지우기, 더하기) > 모두 지우기
@@ -35,7 +36,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
-    final body = access.shouldShowTeaserFor(canUseFeature: access.canUseRoutineMemory)
+    final body = access.shouldShowTeaserFor(PlanBenefit.routineMemory)
         ? _proTeaser(context, ref)
         : _memoryBody(context, ref);
 
@@ -68,7 +69,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
           ),
         ),
       // 서버 Pro 거절(ROUTINE_MEMORY_PRO_REQUIRED · Pro 가 막 끝남): 실패 대신 미리 보기 (판매 중일 때)
-      AsyncError(:final error) when isProOnlyRejection(error) && ref.watch(planAccessProvider).shouldShowProTeaser =>
+      AsyncError(:final error) when isProOnlyRejection(error) && ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.routineMemory) =>
         _proTeaser(context, ref),
       AsyncError(:final error) => ElumStateBody(
           child: ElumErrorView.failure(

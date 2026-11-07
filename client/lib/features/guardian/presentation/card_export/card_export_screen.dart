@@ -23,6 +23,7 @@ import '../../../../shared/models/routine.dart';
 import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
@@ -92,7 +93,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                   _teaserTheme = null;
                 }),
                 canUseAllThemes: access.canUseAllCardDesignThemes,
-                shouldShowProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
+                shouldShowProThemes: access.shouldShowEntryFor(PlanBenefit.cardExportAllThemes),
                 teaserTheme: _teaserTheme,
                 // Free · 판매 중이면 흐린 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
                 onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
@@ -102,7 +103,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                 context,
                 picturesAsync,
                 hasWatermark: !access.canExportCardsWithoutWatermark,
-                canPurchasePro: access.canPurchasePro,
+                shouldPromoteNoWatermark: access.shouldPromoteBenefit(PlanBenefit.cardExportWithoutWatermark),
               ),
             SizedBox(height: _sectionGap.h),
           ],
@@ -133,7 +134,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     BuildContext context,
     AsyncValue<CardExportPictures> picturesAsync, {
     required bool hasWatermark,
-    required bool canPurchasePro,
+    required bool shouldPromoteNoWatermark,
   }) {
     final l10n = context.l10n;
     final colors = context.colors;
@@ -178,14 +179,14 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       sheets: sheets,
       sheetKeys: _sheetKeys,
       hasWatermark: hasWatermark,
-      canPurchasePro: canPurchasePro,
+      shouldPromoteNoWatermark: shouldPromoteNoWatermark,
       onToggleCard: _toggleCard,
       teaserSheet: teaserSheets.isEmpty ? null : teaserSheets.first,
     );
   }
 
   void _onLockedThemeTap(PlanAccess access, CardDesignTheme theme) {
-    if (access.shouldShowProTeaser) {
+    if (access.shouldPromoteBenefit(PlanBenefit.cardExportAllThemes)) {
       // 같은 칩을 다시 누르면 미리 보기를 닫음
       setState(() => _teaserTheme = _teaserTheme == theme ? null : theme);
       return;

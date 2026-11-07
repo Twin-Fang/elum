@@ -2,17 +2,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/dev/dev_plan_override.dart';
+import '../../subscription/application/plan_benefits.dart';
 import '../../subscription/application/plan_store_catalog.dart';
+import '../../subscription/domain/plan_benefit.dart';
 import '../domain/plan_entitlements.dart';
 import 'member_providers.dart';
 
-/// 화면이 묻는 Free·Pro 판정 한 벌: 서버 권한 묶음([PlanEntitlements]) + 앱에서 살 수 있는가
+/// 화면이 묻는 Free·Pro 판정 한 벌: 서버 권한 묶음([PlanEntitlements]) + Pro 요금제 권한 + 앱에서 살 수 있는가
 ///
 /// 원본은 서버 권한(`entitlements`). 개발자 도구 요금제 흉내가 켜져 있으면 그 값으로 덮는다.
 /// 새 Pro 기능은 [PlanEntitlements] 에 값을 더하고 여기에 전달 getter 한 줄. 화면은 이것만 본다
 @immutable
 class PlanAccess {
-  const PlanAccess({required this.entitlements, this.canPurchasePro = false});
+  const PlanAccess({
+    required this.entitlements,
+    this.proPlanEntitlements = PlanEntitlements.pro,
+    this.canPurchasePro = false,
+  });
 
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · Pro 기능 전부 꺼짐)
   static const free = PlanAccess(entitlements: PlanEntitlements.free);
@@ -22,6 +28,10 @@ class PlanAccess {
 
   /// 서버 권한 묶음 (개발자 도구 흉내면 그 묶음)
   final PlanEntitlements entitlements;
+
+  /// Pro 요금제가 지금 주는 권한 (서버 `proPlanEntitlements`, #1165). 이전 서버·회원 모름이면 앱 기본 Pro 묶음
+  /// 요금제 화면 혜택 줄 · 흐린 미리 보기가 이 값을 봄 — 관리자가 끈 Pro 권한을 팔지 않게
+  final PlanEntitlements proPlanEntitlements;
 
   /// 앱에서 Pro 를 살 수 있는가 (판매 스위치 + 스토어 연결 + 상품 불러옴, [canPurchaseProProvider]).
   /// false 면 Pro 전용 선택지·`Pro 알아보기` 를 숨긴다 — 살 방법이 없는데 잠금만 보이면 막힌 기능처럼 느껴짐
@@ -41,22 +51,34 @@ class PlanAccess {
   bool get canCreateRoutineTextFree => entitlements.canCreateRoutineTextFree;
   bool get canUseAiPictures => entitlements.canUseAiPictures;
 
-  /// Pro 기능 자리에 흐린 미리 보기(`ProTeaser`)를 보이는가: Free + 앱에서 Pro 를 살 수 있음
+  /// Pro 를 권해도 되는 계정인가: Free + 앱에서 Pro 를 살 수 있음 (혜택 무관한 권유 · 거절 응답 처리용)
   /// Pro 인데 권한이 꺼진 기능(운영이 막아 둔 것)에는 권유하지 않는다
   bool get shouldShowProTeaser => !isPro && canPurchasePro;
 
-  /// Pro 기능 입구(설정 줄·메뉴)를 보이는가: 쓸 수 있음 또는 흐린 미리 보기 대상
-  bool shouldShowEntryFor({required bool canUseFeature}) => canUseFeature || shouldShowProTeaser;
+  /// 지금 계정이 이 혜택을 쓸 수 있는가
+  bool canUseBenefit(PlanBenefit benefit) => isPlanBenefitGranted(benefit, entitlements);
 
-  /// 기능 자리에 실제 화면 대신 흐린 미리 보기를 보이는가: 못 씀 + 흐린 미리 보기 대상
-  bool shouldShowTeaserFor({required bool canUseFeature}) => !canUseFeature && shouldShowProTeaser;
+  /// Pro 요금제가 지금 이 혜택을 주는가 (서버 설정)
+  bool isBenefitOfferedByPro(PlanBenefit benefit) => isPlanBenefitGranted(benefit, proPlanEntitlements);
+
+  /// 이 혜택으로 Pro 를 권해도 되는가: 권유 대상 + Pro 가 실제로 줌 (사도 못 쓰는 기능을 팔지 않음)
+  bool shouldPromoteBenefit(PlanBenefit benefit) => shouldShowProTeaser && isBenefitOfferedByPro(benefit);
+
+  /// Pro 기능 입구(설정 줄·메뉴)를 보이는가: 쓸 수 있음 또는 권유 대상
+  bool shouldShowEntryFor(PlanBenefit benefit) => canUseBenefit(benefit) || shouldPromoteBenefit(benefit);
+
+  /// 기능 자리에 실제 화면 대신 흐린 미리 보기를 보이는가: 못 씀 + 권유 대상
+  bool shouldShowTeaserFor(PlanBenefit benefit) => !canUseBenefit(benefit) && shouldPromoteBenefit(benefit);
 
   /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
-  bool get shouldShowExpertRoutines => shouldShowEntryFor(canUseFeature: canImportExpertRoutines);
+  bool get shouldShowExpertRoutines => shouldShowEntryFor(PlanBenefit.expertRoutines);
 
   /// 같은 권한 판정 + 구매 가능 여부만 바꾼 사본
-  PlanAccess withCanPurchasePro(bool canPurchasePro) =>
-      PlanAccess(entitlements: entitlements, canPurchasePro: canPurchasePro);
+  PlanAccess withCanPurchasePro(bool canPurchasePro) => PlanAccess(
+    entitlements: entitlements,
+    proPlanEntitlements: proPlanEntitlements,
+    canPurchasePro: canPurchasePro,
+  );
 }
 
 /// 지금 계정의 Free·Pro 판정 (회원 조회 중·실패면 Free 로 본다)
@@ -78,5 +100,8 @@ PlanAccess _readPlanAccess(Ref ref) {
   }
   final member = ref.watch(memberProvider).value;
   if (member == null) return PlanAccess.free;
-  return PlanAccess(entitlements: member.entitlements);
+  return PlanAccess(
+    entitlements: member.entitlements,
+    proPlanEntitlements: member.proPlanEntitlements ?? PlanEntitlements.pro,
+  );
 }
