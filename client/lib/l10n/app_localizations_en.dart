@@ -76,7 +76,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String creditBlockedExhausted(String reset) {
-    return 'You\'ve used all your credits this week.\nYou can make more from $reset';
+    return 'You\'ve used all your credits this week.\nCredits refill on $reset';
   }
 
   @override
@@ -414,7 +414,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Routine $count',
+      other: 'Each routine $count',
     );
     return '$_temp0';
   }
@@ -1345,7 +1345,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get draftRoutinesDeleteFailedFallback => 'Try again in a moment';
 
   @override
-  String get draftRoutinesRewardUnset => 'Not set';
+  String get draftRoutinesRewardUnset => 'No reward yet';
 
   @override
   String get draftRoutinesRewardLabel => 'When done';
@@ -2606,7 +2606,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineTranslateSheetDescription =>
-      '글만 바꾼 새 일과를 일과관리에 만들어요. 그림은 그대로 써요.';
+      '글만 바꾼 새 일과를 일과 관리에 만들어요. 그림은 그대로 써요.';
 
   @override
   String get routineTranslateLanguageKo => '한국어';
@@ -4198,7 +4198,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyPlanEmptyTitle => '아직 요일을 정한 일과가 없어요';
 
   @override
-  String get weeklyPlanEmptyBody => '일과관리에서 일과를 누르고 요일·시각을 정해 보세요';
+  String get weeklyPlanEmptyBody => '일과 관리에서 일과를 누르고 요일·시각을 정해 보세요';
 
   @override
   String get weeklyPlanLoadFailed => '주간 계획을 불러오지 못했어요';
@@ -4286,7 +4286,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianVoiceRecordChip => '녹음';
 
   @override
-  String get guardianVoicePlanEndedHint => 'Pro 가 끝나도 녹음은 남겨 뒀어요';
+  String get guardianVoicePlanEndedHint => 'Pro가 끝나도 녹음은 남겨 뒀어요';
 
   @override
   String get expertRoutineEntry => '전문가 일과';
@@ -4328,15 +4328,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expertRoutineCardsSection => '카드';
 
   @override
-  String get expertRoutineImport => '일과관리에 넣기';
+  String get expertRoutineImport => '일과 관리에 넣기';
 
   @override
   String expertRoutineImportDone(String elumiName) {
-    return '$elumiName 일과관리에 넣었어요';
+    return '$elumiName 일과 관리에 넣었어요';
   }
 
   @override
-  String get expertRoutineImportFailedTitle => '일과관리에 넣지 못했어요';
+  String get expertRoutineImportFailedTitle => '일과 관리에 넣지 못했어요';
 
   @override
   String get expertRoutineNoElumi => '이룸이를 먼저 연결해 주세요';
@@ -4443,7 +4443,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
 
   @override
-  String get proTeaserExpertRoutineBenefit => '전문가가 만든 일과를 그대로 가져와 쓸 수 있어요';
+  String get proTeaserExpertRoutineBenefit => '전문가가 만든 일과를 그대로 가져와요';
 
   @override
   String get proTeaserWeeklyPlanBenefit => '요일과 시각을 정해 두면 그날 일과가 저절로 준비돼요';

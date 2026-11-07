@@ -45,8 +45,7 @@ final withdrawStoreSubscriptionNoticeProvider =
 
 /// 내 요금제 상태 > 한 줄 문구 (설정 줄 · 요금제 화면 `이미 Pro` 가 함께 씀)
 String planStatusLabel(AppLocalizations l10n, PlanStatus status) {
-  final date = status.date;
-  final dateLabel = date == null ? null : l10n.yearMonthDay(date);
+  final dateLabel = _planStatusDateLabel(l10n, status);
   return switch (status.kind) {
     PlanStatusKind.free => l10n.planStatusFree,
     PlanStatusKind.proUnlimited => l10n.planStatusPro,
@@ -72,8 +71,7 @@ String planStatusShortLabel(AppLocalizations l10n, PlanStatus status) => switch 
 
 /// 설정 내 요금제 묶음 아래 한 줄: 갱신일 · 끝나는 날 · 결제 확인. 알릴 것이 없으면(Free · 기간 제한 없음 · 날짜 모름) null
 String? planStatusFooter(AppLocalizations l10n, PlanStatus status) {
-  final date = status.date;
-  final dateLabel = date == null ? null : l10n.yearMonthDay(date);
+  final dateLabel = _planStatusDateLabel(l10n, status);
   return switch (status.kind) {
     PlanStatusKind.free || PlanStatusKind.proUnlimited => null,
     PlanStatusKind.proGracePeriod => l10n.planStatusGracePeriodFooter,
@@ -82,4 +80,12 @@ String? planStatusFooter(AppLocalizations l10n, PlanStatus status) {
     PlanStatusKind.proUntil => dateLabel == null ? null : l10n.planStatusUntilFooter(dateLabel),
     PlanStatusKind.proGift => dateLabel == null ? null : l10n.planStatusGiftUntil(dateLabel),
   };
+}
+
+/// 상태 날짜 > 표시 날짜: `…까지` 상태 2개(proUntil · proGift)는 마지막으로 쓸 수 있는 날, 그 외(갱신일 · 끝나는 날)는 그날 그대로
+String? _planStatusDateLabel(AppLocalizations l10n, PlanStatus status) {
+  final date = status.date;
+  if (date == null) return null;
+  final isUntilLabel = status.kind == PlanStatusKind.proUntil || status.kind == PlanStatusKind.proGift;
+  return isUntilLabel ? l10n.yearMonthDayUntil(date) : l10n.yearMonthDay(date.toLocal());
 }

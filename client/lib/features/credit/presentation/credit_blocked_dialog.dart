@@ -53,6 +53,8 @@ Future<void> showCreditBlockedDialog(
     title: generating
         ? l10n.creditBlockedBusy
         : l10n.creditBlockedExhausted(blocked.resetLabel),
+    // 날짜가 끼어 길이가 바뀌는 문장 — 마지막 글자만 다음 줄로 떨어지지 않게 낱말 단위 (#1169)
+    keepWordsInTitle: true,
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
     actions: offer == null
         ? [

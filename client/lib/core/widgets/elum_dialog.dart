@@ -83,6 +83,7 @@ class ElumDialogAction<T> {
 /// [keepWordsInMessage] 를 켜면 설명을 **띄어쓰기에서만** 줄바꿈한다([keepWords]).
 /// 기본은 꺼 둔다 — 다른 팝업은 시안 대조가 글자 단위 줄에 맞춰져 있어, 앱 전체
 /// 규칙으로 바꾸면 골든이 함께 흔들린다 (보상 도움말에만 켠다).
+/// [keepWordsInTitle] 은 제목에 같은 규칙을 건다 — 날짜가 끼어 길이가 바뀌는 문장 제목용 (크레딧 소진 팝업, #1169).
 Future<T?> showElumDialog<T>({
   required BuildContext context,
   required String title,
@@ -91,6 +92,7 @@ Future<T?> showElumDialog<T>({
   List<ElumDialogAction<T>> actions = const [],
   bool barrierDismissible = false,
   bool keepWordsInMessage = false,
+  bool keepWordsInTitle = false,
   String? code,
 }) {
   return showDialog<T>(
@@ -110,6 +112,7 @@ Future<T?> showElumDialog<T>({
       icon: icon,
       actions: actions,
       keepWordsInMessage: keepWordsInMessage,
+      keepWordsInTitle: keepWordsInTitle,
       code: code,
     ),
   );
@@ -142,6 +145,7 @@ class ElumDialogCard<T> extends StatelessWidget {
     this.icon,
     this.actions = const [],
     this.keepWordsInMessage = false,
+    this.keepWordsInTitle = false,
     this.code,
   });
 
@@ -152,6 +156,9 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   /// 설명을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
   final bool keepWordsInMessage;
+
+  /// 제목을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
+  final bool keepWordsInTitle;
 
   /// 추적용 식별자(`E-AUTH` 등). 문장 아래에 작은 글자로 적는다.
   ///
@@ -197,7 +204,9 @@ class ElumDialogCard<T> extends StatelessWidget {
               SizedBox(height: _iconToTitle.h),
             ],
             Text(
-              title,
+              keepWordsInTitle ? keepWords(title, locale: context.appLocale) : title,
+              // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
+              semanticsLabel: keepWordsInTitle ? title : null,
               textAlign: TextAlign.center,
               // 앱 본문색이 아니라 시안 그대로 순검정이다.
               // 두 줄 문장은 시안 `로그인실패` 처럼 줄 간격을 벌린다.

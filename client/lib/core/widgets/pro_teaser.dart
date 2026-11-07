@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/l10n_context.dart';
+import '../text/keep_words.dart';
 import '../theme/app_effects.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_floating_pill_button.dart';
@@ -91,8 +92,10 @@ class ProTeaser extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: _badgeToBenefit.h),
+                    // 혜택 문장은 낱말 단위로 줄바꿈 (`쓸 / 수 있어요` 처럼 꺾이지 않게, #1169)
                     Text(
-                      benefit,
+                      keepWords(benefit, locale: context.appLocale),
+                      semanticsLabel: benefit,
                       textAlign: TextAlign.center,
                       style: context.typo.dialogSentence.copyWith(color: colors.textPrimary),
                     ),

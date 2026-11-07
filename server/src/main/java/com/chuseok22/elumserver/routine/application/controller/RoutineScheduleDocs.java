@@ -58,7 +58,7 @@ public interface RoutineScheduleDocs {
       content = @Content(schema = @Schema(implementation = RoutineScheduleResponse.class))),
     @ApiResponse(responseCode = "403", description = "요금제 권한 없음",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(value = "{\"errorCode\":\"ROUTINE_SCHEDULE_NOT_ALLOWED\",\"errorMessage\":\"요일별 반복 일과는 Pro 에서 쓸 수 있어요.\"}"))),
+        examples = @ExampleObject(value = "{\"errorCode\":\"ROUTINE_SCHEDULE_NOT_ALLOWED\",\"errorMessage\":\"요일별 반복 일과는 Pro에서 쓸 수 있어요.\"}"))),
     @ApiResponse(responseCode = "400", description = "요일·시각이 틀림",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(value = "{\"errorCode\":\"ROUTINE_SCHEDULE_INVALID\",\"errorMessage\":\"요일을 하나 이상 고르고 시각을 다시 정해 주세요.\"}")))
