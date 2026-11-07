@@ -14,6 +14,7 @@ import '../../../../shared/models/routine.dart';
 import '../../../member/application/plan_access.dart';
 import '../../application/routine_translate_targets.dart';
 import 'anchored_quick_menu.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
 enum LibraryMenuAction {
@@ -93,7 +94,7 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
     listen: false,
   ).read(planAccessProvider);
   final canTranslate =
-      planAccess.shouldShowEntryFor(canUseFeature: planAccess.canTranslateRoutines) &&
+      planAccess.shouldShowEntryFor(PlanBenefit.routineTranslate) &&
       routine.isVisibleToChild &&
       routine.steps.isNotEmpty &&
       routineTranslateTargetsOf(routine).isNotEmpty;

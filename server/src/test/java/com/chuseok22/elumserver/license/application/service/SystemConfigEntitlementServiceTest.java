@@ -524,4 +524,20 @@ class SystemConfigEntitlementServiceTest {
 
     assertThat(entitlementService.snapshot(MEMBER_ID).adsRemoved()).isTrue();
   }
+
+  // 깨지면: 관리자가 끈 Pro 권한(예 PRO_ROUTINE_MEMORY)을 요금제 화면이 Pro 혜택으로 계속 팖 (#1165)
+  @Test
+  @DisplayName("Pro 요금제 권한 한 벌은 회원과 무관하게 PRO_* 설정값을 그대로 따른다")
+  void planSnapshot_followsProConfigValues() {
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(true);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_MEMORY)).thenReturn(false);
+
+    EntitlementSnapshot proPlan = entitlementService.planSnapshot(PlanType.PRO);
+
+    assertThat(proPlan.plan()).isEqualTo(PlanType.PRO);
+    assertThat(proPlan.routineMemory()).isFalse();
+    assertThat(proPlan.weeklyReport()).isTrue();
+    assertThat(proPlan.adsRemoved()).isTrue();
+  }
 }

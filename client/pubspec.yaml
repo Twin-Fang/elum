@@ -93,6 +93,8 @@ dependencies:
   printing: ^5.14.3
   in_app_purchase: ^3.3.1
   in_app_purchase_android: ^0.5.0
+  # App Store 무료 체험 대상·기간 조회 (#1166). in_app_purchase 가 이미 쓰는 판과 같게
+  in_app_purchase_storekit: ^0.4.13
   # 보호자 목소리 녹음 (AAC m4a, 마이크 권한 요청 포함). 재생은 audioplayers 그대로
   record: ^6.2.1
 

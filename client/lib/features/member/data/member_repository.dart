@@ -26,6 +26,7 @@ class Member {
     this.imageStyle = ImageStyle.character,
     this.profiles = const [],
     this.entitlements = PlanEntitlements.free,
+    this.proPlanEntitlements,
     this.subscription,
     this.account,
     bool? profilesKnown,
@@ -56,6 +57,9 @@ class Member {
   /// 서버 권한 묶음 (Pro 판정·Pro 기능별 사용 가능). 화면은 이것 대신 `planAccessProvider` 를 본다
   final PlanEntitlements entitlements;
 
+  /// Pro 요금제가 지금 주는 권한 (`proPlanEntitlements`, #1165). 이전 서버면 null
+  final PlanEntitlements? proPlanEntitlements;
+
   /// 내 요금제 표시용 구독 상태 (만료일·자동 갱신·유예). 이전 서버면 null
   final MemberSubscription? subscription;
 
@@ -81,6 +85,7 @@ class Member {
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
         entitlements != other.entitlements ||
+        proPlanEntitlements != other.proPlanEntitlements ||
         subscription != other.subscription ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
@@ -124,6 +129,10 @@ class Member {
         _ => const <ProfileSummary>[],
       },
       entitlements: PlanEntitlements.fromJson(json['entitlements']),
+      // 필드 없음(이전 서버) > null: 앱 기본 Pro 묶음으로 봄 (PlanAccess)
+      proPlanEntitlements: json['proPlanEntitlements'] is Map
+          ? PlanEntitlements.fromJson(json['proPlanEntitlements'])
+          : null,
       subscription: MemberSubscription.tryParse(json['subscription']),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.license.core.Entitlement;
+import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
@@ -192,12 +193,12 @@ public class MemberService {
   }
 
   /**
-   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보 + 요금제 상태
+   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보 + 요금제 상태 + Pro 요금제 권한
    */
   private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
       member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member),
-      subscriptionStatusService.statusOf(member.getId()));
+      subscriptionStatusService.statusOf(member.getId()), entitlementService.planSnapshot(PlanType.PRO));
   }
 
   /**

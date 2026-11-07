@@ -19,6 +19,7 @@ import '../application/routine_schedule_controller.dart';
 import '../domain/routine_schedule.dart';
 import 'pro_teaser_samples.dart';
 import 'widgets/weekly_plan_parts.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 주간 계획 (#782): 월 ~ 일 요일마다 반복 일과를 시각 순으로. 누르면 그 일과의 반복 시트
 ///
@@ -43,7 +44,7 @@ class WeeklyPlanScreen extends ConsumerWidget {
 
     final access = ref.watch(planAccessProvider);
     final body = switch (planAsync) {
-      AsyncValue(:final value?) when value.schedules.isEmpty && access.shouldShowTeaserFor(canUseFeature: access.canScheduleRoutines) =>
+      AsyncValue(:final value?) when value.schedules.isEmpty && access.shouldShowTeaserFor(PlanBenefit.routineSchedule) =>
         ListView(
           padding: EdgeInsets.only(top: WeeklyPlanScreen._topGap.h),
           children: [

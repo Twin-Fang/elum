@@ -13,6 +13,7 @@ import '../../../../shared/models/image_style.dart';
 import '../../../member/application/member_providers.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/routine_notifier.dart';
 import '../../application/card_photo_controller.dart';
 import '../../data/card_photo.dart';
@@ -256,7 +257,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     if (!step.isAiPicture && !canDrawFirstPicture) return null;
 
     if (!planAccess.canUseAiPictures) {
-      if (!planAccess.shouldShowProTeaser) return null;
+      if (!planAccess.shouldPromoteBenefit(PlanBenefit.aiImageStyles)) return null;
       return _Chip(
         asset: AppAssets.iconRefresh,
         label: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,

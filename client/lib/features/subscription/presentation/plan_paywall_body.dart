@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
+import '../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../member/application/plan_access.dart';
 import '../application/plan_purchase_notifier.dart';
@@ -118,18 +118,26 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
     );
   }
 
-  /// 고르는 화면: 혜택 > 기간·가격 (불러오는 중 · 실패) > 결제 버튼 > 필수 안내 > 링크
+  /// 고르는 화면: 혜택 > 기간·가격 (불러오는 중 · 실패) > 닫기·결제 버튼 > 필수 안내 > 링크
+  ///
+  /// 닫기는 가격 상태와 무관하게 늘 보임 (#1167: 큰 글자에서 시트 위 띠가 거의 사라져 빠져나갈 길이 없었음)
   Widget _offers(BuildContext context, PlanPurchaseState flow) {
     final l10n = context.l10n;
     final catalogAsync = ref.watch(planCatalogProvider);
     final catalog = catalogAsync.value;
+    final hasCatalog = catalog != null && catalog.hasOffers;
+    final selected = hasCatalog ? (catalog.offerFor(_selectedPeriod) ?? catalog.offers.first) : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PlanBenefitsGroup(highlight: widget.highlight),
         SizedBox(height: context.space.md.h),
-        if (catalog != null && catalog.hasOffers)
-          ..._offerPicker(context, catalog, flow)
+        if (hasCatalog && selected != null)
+          PlanOffersGroup(
+            catalog: catalog,
+            selectedPeriod: selected.period,
+            onSelected: flow.isBusy ? null : (period) => setState(() => _selectedPeriod = period),
+          )
         else if (catalogAsync.hasError)
           ElumErrorView(
             message: l10n.planPriceFailed,
@@ -140,31 +148,28 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
         else
           PlanProgressLine(label: l10n.planPriceLoading),
         SizedBox(height: context.space.md.h),
-        const PlanLegalNotice(),
+        _actions(context, flow, selected),
+        SizedBox(height: context.space.md.h),
+        PlanLegalNotice(hasFreeTrial: hasCatalog && catalog.hasAnyFreeTrial),
         SizedBox(height: context.space.sm.h),
         _links(context, isBusy: flow.isBusy),
       ],
     );
   }
 
-  List<Widget> _offerPicker(BuildContext context, PlanCatalog catalog, PlanPurchaseState flow) {
-    final selected = catalog.offerFor(_selectedPeriod) ?? catalog.offers.first;
-    final isBusy = flow.isBusy;
-    return [
-      PlanOffersGroup(
-        catalog: catalog,
-        selectedPeriod: selected.period,
-        onSelected: isBusy ? null : (period) => setState(() => _selectedPeriod = period),
-      ),
-      SizedBox(height: context.space.md.h),
-      ElumButton(
-        label: context.l10n.planSubscribe,
-        loading: isBusy,
-        onPressed: flow.canStartPurchase
-            ? () => confirmGuardianAndBuy(context, ref, selected)
-            : null,
-      ),
-    ];
+  /// 시트 버튼 줄: `닫기` + 결제 (고른 상품에 체험이 있으면 `7일 무료 체험 시작하기`). 상품을 못 불러왔으면 결제만 꺼짐
+  Widget _actions(BuildContext context, PlanPurchaseState flow, PlanOffer? selected) {
+    final l10n = context.l10n;
+    final trial = selected?.freeTrial;
+    return ElumSheetActionRow(
+      cancelLabel: l10n.commonClose,
+      onCancel: Navigator.of(context).pop,
+      confirmLabel: trial == null ? l10n.planSubscribe : l10n.planStartFreeTrial(planTrialLabel(context, trial)),
+      isLoading: flow.isBusy,
+      onConfirm: selected != null && flow.canStartPurchase
+          ? () => confirmGuardianAndBuy(context, ref, selected)
+          : null,
+    );
   }
 
   Widget _links(BuildContext context, {required bool isBusy}) => PlanLinksRow(

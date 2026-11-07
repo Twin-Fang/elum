@@ -42,4 +42,7 @@ public interface EntitlementService {
   boolean isWithinLimit(PlanType plan, Entitlement limit, long current);
 
   EntitlementSnapshot snapshot(String memberId);
+
+  /// 요금제 한 벌의 권한 (회원과 무관한 설정값). Free 앱이 요금제 화면 혜택을 그릴 원본 (#1165)
+  EntitlementSnapshot planSnapshot(PlanType plan);
 }

@@ -3715,6 +3715,73 @@ class AppLocalizationsEs extends AppLocalizations {
       '구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
 
   @override
+  String planTrialDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count주',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개월',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count년',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planPricePerMonthAfterTrial(String trial, String price) {
+    return '$trial 무료 체험 후 $price / 1개월마다 자동 갱신';
+  }
+
+  @override
+  String planPricePerYearAfterTrial(String trial, String price) {
+    return '$trial 무료 체험 후 $price / 1년마다 자동 갱신';
+  }
+
+  @override
+  String planStartFreeTrial(String trial) {
+    return '$trial 무료 체험 시작하기';
+  }
+
+  @override
+  String planTrialEndsNotice(String date, String price) {
+    return '무료 체험은 $date에 끝나요. 해지하지 않으면 그날부터 $price씩 청구돼요.';
+  }
+
+  @override
+  String get planLegalTrialAppStore =>
+      '무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.';
+
+  @override
+  String get planLegalTrialPlayStore => '무료 체험 중에 해지하면 요금이 청구되지 않아요.';
+
+  @override
   String get planPurchasing => '결제를 진행하고 있어요';
 
   @override

@@ -150,10 +150,21 @@ public class SystemConfigEntitlementService implements EntitlementService {
   @Override
   public EntitlementSnapshot snapshot(String memberId) {
     PlanType plan = planOf(memberId);
+    return buildSnapshot(plan, !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED));
+  }
+
+  /// 요금제 설정값 그대로 (광고 항상 노출 같은 회원별 예외 없음)
+  @Override
+  public EntitlementSnapshot planSnapshot(PlanType plan) {
+    return buildSnapshot(plan, isAllowed(plan, Entitlement.ADS_REMOVED));
+  }
+
+  // 플랜 기준 권한 한 벌 (광고 제거만 부르는 쪽이 정함)
+  private EntitlementSnapshot buildSnapshot(PlanType plan, boolean isAdsRemoved) {
     return new EntitlementSnapshot(
       plan,
       isAllowed(plan, Entitlement.AI_IMAGE_GENERATION),
-      !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED),
+      isAdsRemoved,
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_DAY),
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_WEEK),
       limitOf(plan, Entitlement.ROUTINE_MAX_COUNT),

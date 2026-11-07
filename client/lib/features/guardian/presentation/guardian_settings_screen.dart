@@ -29,6 +29,7 @@ import '../../../core/router/routes.dart';
 import '../../subscription/application/plan_status_providers.dart';
 import '../../subscription/domain/withdraw_store_subscription_notice.dart';
 import 'widgets/plan_settings_group.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -378,7 +379,7 @@ class _RoutineMemoryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isVisible = ref.watch(
-      planAccessProvider.select((access) => access.shouldShowEntryFor(canUseFeature: access.canUseRoutineMemory)),
+      planAccessProvider.select((access) => access.shouldShowEntryFor(PlanBenefit.routineMemory)),
     );
     if (!isVisible) {
       return const SizedBox.shrink();
