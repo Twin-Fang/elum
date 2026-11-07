@@ -154,6 +154,40 @@ class RoutineServiceCreditTest {
     verify(creditReservationService, never()).release(anyString(), anyString());
   }
 
+  // 깨지면: Pro 그림이 실패해 픽토그램으로 바뀌어도 앱이 알 길이 없다 (#1172)
+  @Test
+  @DisplayName("AI 그림 일부를 못 그리면 응답 imageSkippedReason 이 AI_IMAGE_FAILED, 다 그리면 null")
+  void create_someImagesFailed_flagsImageSkippedReason() {
+    profile();
+    reserved("key-1");
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult("병원 다녀오기", List.of(
+        new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발", "img/b/1.png"),
+        new RoutineAiPipeline.GeneratedStep(2, "차 타요", "차", null)
+      ), "batch-1", 1));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(2, 0, 98)));
+
+    RoutineResponse failed = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    assertThat(failed.imageSkippedReason()).isEqualTo("AI_IMAGE_FAILED");
+    assertThat(failed.credit()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("그림을 다 붙이면 일과 만들기 응답 imageSkippedReason 은 null")
+  void create_allImagesDrawn_noImageSkippedReason() {
+    profile();
+    reserved("key-1");
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult("병원 다녀오기", List.of(
+        new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발", "img/b/1.png")), "batch-1", 0));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    assertThat(routineCreateService.create(GUARDIAN, REQUEST, "key-1").imageSkippedReason()).isNull();
+  }
+
   @Test
   @DisplayName("AI 맞춤 그림이 없는 Free 의 새 일과는 그림 호출 없는 경로(PHOTO_ONLY)로 만든다 — 픽토그램만, 그림 몫 청구 없음")
   void create_freeWithoutAiPicture_generatesWithoutPictures() {

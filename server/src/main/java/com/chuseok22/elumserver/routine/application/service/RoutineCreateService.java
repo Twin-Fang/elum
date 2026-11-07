@@ -53,6 +53,9 @@ public class RoutineCreateService {
   /// 반환 사유 최대 길이 — ai_credit_job.fail_reason 이 varchar(500) 다.
   private static final int RELEASE_REASON_MAX_LENGTH = 200;
 
+  /// 일과 만들기 응답 imageSkippedReason — AI 그림 카드 중 일부를 못 그려 픽토그램으로 둠
+  static final String IMAGE_SKIPPED_FAILED = "AI_IMAGE_FAILED";
+
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
@@ -222,13 +225,20 @@ public class RoutineCreateService {
       releaseCredit(creditJobId, "일과 저장 실패", e);
       throw e;
     }
-    RoutineResponse response = RoutineResponse.from(saved.routine());
+    RoutineResponse response = withImageFailureFlag(RoutineResponse.from(saved.routine()), generation);
     CreditSettlement settlement = saved.settlement();
     if (settlement == null) {
       return response;
     }
     return response.withCredit(new RoutineResponse.CreditUsage(
       saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
+  }
+
+  /// AI 그림이 하나라도 비면 응답 imageSkippedReason=AI_IMAGE_FAILED (조용히 픽토그램으로 바뀌지 않게, #1172)
+  private static RoutineResponse withImageFailureFlag(
+    RoutineResponse response, RoutineAiPipeline.RoutineGenerationResult generation
+  ) {
+    return generation.failedImageCount() > 0 ? response.withImageSkippedReason(IMAGE_SKIPPED_FAILED) : response;
   }
 
   /// 이번 요청이 만드는 일과의 콘텐츠 언어: 화면 언어 > 켜진 언어 목록에 비춰 결정 (요청 스레드 전용)

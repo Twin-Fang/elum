@@ -3,6 +3,8 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -162,8 +164,14 @@ public class RoutineStepImageFiller {
       }
       releaseReason = null;
     } catch (Exception e) {
-      log.warn("추가 카드 이미지 실패 — 기본 그림으로 둔다: routineId={}, stepId={}",
-        routineId, stepId, e);
+      // 키 없음은 설정 문제라 스택 없이 원인 1줄 (#1172)
+      if (ImageClientRouter.isProviderUnavailable(e)) {
+        log.warn("[card image] skipped : image provider unavailable (api key not configured), {}, routineId={}, stepId={}",
+          ((CustomException) e).getDetail(), routineId, stepId);
+      } else {
+        log.warn("추가 카드 이미지 실패 — 기본 그림으로 둔다: routineId={}, stepId={}",
+          routineId, stepId, e);
+      }
       // 그림을 붙인 뒤 정산만 실패했을 수도 있다 — 그래도 반환한다. 그림 1장이 무료가 될 뿐 빚은 남기지 않는다.
       releaseReason = "그림 생성·정산 실패: " + e.getClass().getSimpleName();
     } finally {
