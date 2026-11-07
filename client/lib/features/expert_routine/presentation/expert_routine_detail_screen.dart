@@ -63,11 +63,8 @@ class _ExpertRoutineDetailScreenState
       await showElumDialog<void>(
         context: context,
         title: l10n.expertRoutineNoElumi,
+        // 실패가 아닌 먼저 할 일 안내: 아이콘 없음 · 주 버튼 (#1171)
         code: ExpertRoutineScreenCodes.noElumi,
-        icon: ElumDialogIcon.alert,
-        actions: [
-          ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
-        ],
       );
       return;
     }

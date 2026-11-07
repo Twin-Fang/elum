@@ -302,12 +302,6 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 해주세요'**
   String get commonRetryLater;
 
-  /// 실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)
-  ///
-  /// In ko, this message translates to:
-  /// **'다시 시도 ({code})'**
-  String commonRetryWithCode(String code);
-
   /// 제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。
   ///
   /// In ko, this message translates to:
@@ -1009,6 +1003,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
   String get elumiSettingsWithdrawMessage;
+
+  /// 이룸이 화면 회원탈퇴 확인 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get elumiSettingsWithdrawAction;
 
   /// 이룸이 전용 기기에서 초대 링크를 열었을 때의 토스트
   ///
@@ -2521,6 +2521,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요'**
   String get guardianSettingsWithdrawConfirmMessage;
+
+  /// 회원탈퇴 1단계 경고 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get guardianSettingsWithdrawConfirmAction;
 
   /// 회원탈퇴 실패 팝업 제목
   ///
@@ -7620,6 +7626,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지운 메모는 되돌릴 수 없어요.'**
   String get routineMemoryClearConfirmMessage;
+
+  /// AI 메모 모두 지우기 확인 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 지우기'**
+  String get routineMemoryClearConfirmAction;
 
   /// AI 메모 불러오기 실패
   ///

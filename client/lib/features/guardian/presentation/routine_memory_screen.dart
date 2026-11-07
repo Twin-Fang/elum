@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/app_effects.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -21,6 +20,7 @@ import '../domain/routine_memory.dart';
 import 'pro_teaser_samples.dart';
 import 'routine_memory_line_sheet.dart';
 import '../../subscription/domain/plan_benefit.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 이룸이별 AI 메모 화면 (Pro, 시안 없음 — 설정 묶음 카드 모양을 따름)
 /// 묶음 3개: 켜기/끄기 > 메모 줄(누르면 고치기·지우기, 더하기) > 모두 지우기
@@ -173,17 +173,15 @@ class _RoutineMemoryGroups extends ConsumerWidget {
   /// 되돌릴 수 없으니 팝업으로 한 번 묻는다
   Future<void> _confirmClear(BuildContext context, WidgetRef ref, RoutineMemoryController controller) async {
     final l10n = context.l10n;
-    final isConfirmed = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    // 한 번 확인 (일과·기록·별은 남고 메모는 다음 일과부터 다시 쌓임 — 입력 확인까지는 아님, #1171)
+    final isConfirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: l10n.routineMemoryClearConfirmTitle,
       message: l10n.routineMemoryClearConfirmMessage,
-      actions: [
-        ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: l10n.commonConfirm, value: true, tone: ElumDialogTone.danger),
-      ],
+      actionLabel: l10n.routineMemoryClearConfirmAction,
     );
-    if (isConfirmed != true || !context.mounted) return;
+    if (!isConfirmed || !context.mounted) return;
     await _runSave(context, ref, controller.clearAll);
   }
 

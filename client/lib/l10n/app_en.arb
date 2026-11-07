@@ -32,7 +32,6 @@
   "commonBack": "Back",
   "commonScreenNotFound": "We can't find this screen",
   "commonRetryLater": "Try again in a moment",
-  "commonRetryWithCode": "Try again ({code})",
   "sentenceStop": ".",
   "failureHintOffline": "Check your internet connection",
   "failureHintTimeout": "The connection is slow. Try again in a moment.",

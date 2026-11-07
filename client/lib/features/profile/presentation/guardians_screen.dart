@@ -7,7 +7,6 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_type_confirm_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -26,6 +25,7 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/kept_text.dart';
 import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람.
 ///
@@ -79,9 +79,9 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
     // 목록에서 "나" 외에 다른 사람이 없으면 마지막 보호자다.
     final isLast = guardians.every((g) => g.me);
 
-    final ok = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    final ok = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
       title: l10n.guardiansLeaveConfirmTitle,
       // 무엇이 사라지고 무엇이 남는지 먼저 말한다 (되돌릴 수 없는 일 · 서버 명세 4-3).
       message: isLast
@@ -89,16 +89,9 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
           : l10n.guardiansLeaveConfirmMessageOthers,
       // 긴 안내가 단어 중간에서 꺾이지 않게 어절 단위로 줄바꿈한다.
       keepWordsInMessage: true,
-      actions: [
-        ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(
-          label: l10n.guardiansLeaveConfirmAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.guardiansLeaveConfirmAction,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     // 마지막 보호자 = 이룸이·일과·별 삭제 > 입력 확인 한 단계 더 (다른 보호자가 있으면 생략)
     if (isLast) {
       final isTypedConfirmed = await _confirmLeaveByTyping(l10n);

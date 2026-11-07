@@ -9,6 +9,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'elum_error_code_text.dart';
 import '../theme/app_typography.dart';
 
 /// 팝업 위쪽에 놓이는 원형 아이콘.
@@ -229,13 +230,7 @@ class ElumDialogCard<T> extends StatelessWidget {
             ],
             if (code != null) ...[
               SizedBox(height: context.space.sm),
-              Text(
-                code!,
-                textAlign: TextAlign.center,
-                style: context.typo.bodySmall.paragraph.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
+              ElumErrorCodeText(code!),
             ],
             SizedBox(height: _bodyToActions.h),
             ElumDialogButtonRow(

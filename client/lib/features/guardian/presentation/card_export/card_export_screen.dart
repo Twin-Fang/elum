@@ -271,12 +271,10 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
         final printOutcome = await _files.printPdf(pdf: pdf, jobName: stem);
         // 취소는 오류가 아님 > 인쇄 서비스가 없을 때만 안내
         if (printOutcome == CardPrintOutcome.unavailable && mounted) {
-          await showElumDialog<void>(
-            context: context,
-            icon: ElumDialogIcon.alert,
-            title: l10n.cardExportPrintFailed,
+          await showFailureMessage(
+            context,
+            sentence: l10n.cardExportPrintFailed,
             code: CardExportErrorCode.print,
-            actions: [ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger)],
           );
         }
         return;

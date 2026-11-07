@@ -7,7 +7,6 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/image_style.dart';
 import '../../../member/application/member_providers.dart';
@@ -24,6 +23,7 @@ import 'card_photo_source_sheet.dart';
 import 'card_redraw_flow.dart';
 import 'default_card_art.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/show_failure.dart';
 
 part 'card_photo_block_parts.dart';
 
@@ -180,17 +180,10 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     // 올리는 도중 시트가 닫혔다 — 인라인으로 알릴 자리가 없으니 팝업으로 알린다.
     // 실패를 삼키면 보호자는 그림이 바뀐 줄 안다.
     if (rootContext.mounted) {
-      await showElumDialog<void>(
-        context: rootContext,
-        title: rootContext.l10n.cardPhotoUploadFailedDialog(failure.message),
+      await showFailureMessage(
+        rootContext,
+        sentence: rootContext.l10n.cardPhotoUploadFailedDialog(failure.message),
         code: failure.code,
-        icon: ElumDialogIcon.alert,
-        actions: [
-          ElumDialogAction(
-            label: rootContext.l10n.commonConfirm,
-            tone: ElumDialogTone.danger,
-          ),
-        ],
       );
     }
   }

@@ -157,11 +157,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonRetryLater => 'Try again in a moment';
 
   @override
-  String commonRetryWithCode(String code) {
-    return 'Try again ($code)';
-  }
-
-  @override
   String get sentenceStop => '.';
 
   @override
@@ -552,6 +547,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get elumiSettingsWithdrawMessage =>
       'Only this device is disconnected\nRoutines and stars stay on the guardian\'s device\nTo use it again, get a\nlink code from a guardian';
+
+  @override
+  String get elumiSettingsWithdrawAction => '탈퇴하기';
 
   @override
   String get inviteRejectedOnElumiDevice =>
@@ -1433,6 +1431,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guardianSettingsWithdrawConfirmMessage =>
       'All routines and stars will be gone\nLogging in again won\'t bring them back';
+
+  @override
+  String get guardianSettingsWithdrawConfirmAction => '탈퇴하기';
 
   @override
   String get guardianSettingsWithdrawFailedTitle =>
@@ -4478,6 +4479,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineMemoryClearConfirmMessage => '지운 메모는 되돌릴 수 없어요.';
+
+  @override
+  String get routineMemoryClearConfirmAction => '모두 지우기';
 
   @override
   String get routineMemoryLoadFailed => '메모를 불러오지 못했어요';

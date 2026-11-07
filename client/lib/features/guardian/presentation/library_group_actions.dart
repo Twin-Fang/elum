@@ -262,9 +262,9 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
   /// 묶음 풀기 확인 > 풀기. 정리 상태 ⊖ 와 메뉴가 같이 쓴다
   Future<void> confirmUngroup(RoutineGroup group) async {
     final l10n = context.l10n;
+    // 잃는 것 없음 (일과는 낱개로 남음) > 아이콘 없는 일반 확인 (#1171)
     final isConfirmed = await showElumDialog<bool>(
       context: context,
-      icon: ElumDialogIcon.alert,
       title: l10n.routineGroupUngroupConfirmTitle,
       message: l10n.routineGroupUngroupConfirmMessage,
       keepWordsInMessage: true,
