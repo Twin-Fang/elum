@@ -29,6 +29,7 @@ class RoutineFlowState {
     this.errorFault,
     this.idempotencyKey,
     this.creditUsage,
+    this.hasPendingMissingAiImageNotice = false,
   });
 
   final RoutineFlowStep step;
@@ -90,6 +91,10 @@ class RoutineFlowState {
   /// 이미 만든 일과를 연 경우 null 이다.
   final CreditUsage? creditUsage;
 
+  /// 방금 만든 일과에 AI 그림을 못 그린 카드가 있어 카드확인에서 아직 안내하지 않음 (#1178)
+  /// 안내를 띄우면 false 로 되돌림 (다시 들어와도 한 번만)
+  final bool hasPendingMissingAiImageNotice;
+
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
@@ -105,6 +110,7 @@ class RoutineFlowState {
     NetworkFault? errorFault,
     String? idempotencyKey,
     CreditUsage? creditUsage,
+    bool? hasPendingMissingAiImageNotice,
   }) {
     return RoutineFlowState(
       step: step ?? this.step,
@@ -122,6 +128,8 @@ class RoutineFlowState {
       errorFault: errorFault,
       idempotencyKey: idempotencyKey ?? this.idempotencyKey,
       creditUsage: creditUsage ?? this.creditUsage,
+      hasPendingMissingAiImageNotice:
+          hasPendingMissingAiImageNotice ?? this.hasPendingMissingAiImageNotice,
     );
   }
 }

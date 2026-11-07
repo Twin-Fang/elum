@@ -1403,6 +1403,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t make the picture, so we added a basic picture';
 
   @override
+  String get cardImageMissingAfterCreateToast =>
+      '그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요';
+
+  @override
   String get cardReviewReorderDone => 'Done';
 
   @override
