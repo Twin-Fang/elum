@@ -1341,6 +1341,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo crear la imagen, así que pusimos una imagen básica';
 
   @override
+  String get cardImageMissingAfterCreateToast =>
+      '그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요';
+
+  @override
   String get cardReviewReorderDone => '완료';
 
   @override

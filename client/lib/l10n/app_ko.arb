@@ -1252,6 +1252,9 @@
   "cardImageUnavailableToast": "그림을 만들지 못해 기본 그림을 넣었어요",
   "@cardImageUnavailableToast": { "description": "카드 추가 때 AI 그림을 만들지 못해 그림 기호로 남았을 때 아래 토스트" },
 
+  "cardImageMissingAfterCreateToast": "그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요",
+  "@cardImageMissingAfterCreateToast": { "description": "일과 만들기에서 AI 그림 일부를 못 그려 그림 기호로 둔 뒤 카드확인에 들어설 때 한 번 뜨는 토스트 (#1178). '이 카드 수정' = cardReviewToolEdit, 'AI 그림 그리기' = cardFirstDrawChip. 처음 그리기는 크레딧을 써서 무료라고 쓰지 않음" },
+
   "cardReviewReorderDone": "완료",
   "@cardReviewReorderDone": { "description": "카드 순서 바꾸기 중 하단 버튼" },
 

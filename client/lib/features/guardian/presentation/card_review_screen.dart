@@ -102,9 +102,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   @override
   void initState() {
     super.initState();
-    // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
+    // 첫 프레임 뒤: 소리 서비스 잡기, 만든 일과 그림 안내 (토스트는 Scaffold 가 선 뒤에 띄움)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _speech = ref.read(speechServiceProvider);
+      if (!mounted) return;
+      _speech = ref.read(speechServiceProvider);
+      showMissingAiImageNoticeIfPending();
     });
   }
 

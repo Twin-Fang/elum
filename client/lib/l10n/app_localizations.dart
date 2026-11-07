@@ -2462,6 +2462,12 @@ abstract class AppLocalizations {
   /// **'그림을 만들지 못해 기본 그림을 넣었어요'**
   String get cardImageUnavailableToast;
 
+  /// 일과 만들기에서 AI 그림 일부를 못 그려 그림 기호로 둔 뒤 카드확인에 들어설 때 한 번 뜨는 토스트 (#1178). '이 카드 수정' = cardReviewToolEdit, 'AI 그림 그리기' = cardFirstDrawChip. 처음 그리기는 크레딧을 써서 무료라고 쓰지 않음
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요'**
+  String get cardImageMissingAfterCreateToast;
+
   /// 카드 순서 바꾸기 중 하단 버튼
   ///
   /// In ko, this message translates to:

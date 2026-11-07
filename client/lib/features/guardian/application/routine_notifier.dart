@@ -7,6 +7,7 @@ import '../../../core/network/idempotency_key.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/data/credit_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../domain/card_image_skipped_reason.dart';
 import 'routine_flow_state.dart';
 import 'routine_providers.dart';
 import 'routine_step_editing.dart';
@@ -279,7 +280,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
         state.step.name,
         'generating',
       );
-      final routine = await repo.createRoutine(
+      final created = await repo.createRoutine(
         rawInputText: state.rawInput,
         goals: goals,
         answers: state.answers,
@@ -288,6 +289,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
         rewardPresetKey: state.rewardPresetKey,
         idempotencyKey: state.idempotencyKey ?? '',
       );
+      final routine = created.routine;
 
       AppLogger.notifierStateChange(
         'RoutineFlowNotifier',
@@ -299,6 +301,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
         step: RoutineFlowStep.review,
         routine: routine,
         creditUsage: routine.creditUsage,
+        hasPendingMissingAiImageNotice: CardImageSkippedReason.hasCreatedRoutineMissingAiImage(
+          created.imageSkippedReason,
+        ),
       );
       AppAnalytics.logRoutineGenerationCompleted(cardCount: routine.steps.length);
       // 잔액이 바뀌었다 — 설정 카드·직전 안내가 이전 숫자를 보이지 않게 한다.
@@ -329,6 +334,12 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState>
       // 실패해도 예약이 풀렸거나(반환) 부족이 드러났다 — 다음에 볼 숫자를 새로 받는다.
       ref.invalidate(creditSummaryProvider);
     }
+  }
+
+  /// 카드확인이 AI 그림 못 그린 안내를 띄운 뒤 호출 > 다시 띄우지 않음
+  void markMissingAiImageNoticeShown() {
+    if (!state.hasPendingMissingAiImageNotice) return;
+    state = state.copyWith(hasPendingMissingAiImageNotice: false);
   }
 
   /// 이번 요청의 멱등 키. 같은 요청이면 전에 발급한 키를, 아니면 새 키를 준다.
