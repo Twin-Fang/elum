@@ -461,7 +461,7 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.imageHighQuality()).isFalse();
     assertThat(ConfigKey.FREE_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.PRO_IMAGE_REGENERATE_FREE.getDefaultValue()).isEqualTo("true");
-    assertThat(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP.getDefaultValue()).isEqualTo("30");
+    assertThat(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP.getDefaultValue()).isEqualTo("5");
   }
 
   @Test
