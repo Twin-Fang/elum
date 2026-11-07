@@ -5,7 +5,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/pro_teaser.dart';
 import 'print_sheets.dart';
 
-/// 인쇄용으로 받기: Free 가 Pro 테마 칩을 누르면 그 테마로 만든 첫 지면을 흐리게 보여 줌 + `Pro로 보기`
+/// 인쇄용으로 받기: Free 가 Pro 테마 칩을 누르면 그 테마로 만든 첫 지면을 흐리게 보여 줌 + `Pro 알아보기`
 ///
 /// 굽는 미리 보기(RepaintBoundary)와 따로 그린다 — 보내기·인쇄는 언제나 고를 수 있는 테마로만 나감
 class CardExportThemeTeaser extends StatelessWidget {

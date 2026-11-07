@@ -6260,7 +6260,7 @@ abstract class AppLocalizations {
   /// **'큰 글자'**
   String get cardExportThemeLargeText;
 
-  /// Pro 전용 표시 배지 (인쇄 디자인·그림 방식 공용)
+  /// Pro 배지 하나 (미리 보기 판·그림 방식·인쇄 디자인·일과관리 입구·설정 줄 공통, ProBadge, #1170)
   ///
   /// In ko, this message translates to:
   /// **'Pro'**
@@ -6848,7 +6848,7 @@ abstract class AppLocalizations {
   /// **'결제 수단을 확인해 주세요'**
   String get planStatusGracePeriodFooter;
 
-  /// 크레딧 부족 팝업·Pro 기능 자리에서 요금제 화면 열기
+  /// 요금제 화면을 여는 버튼 문구 하나 (미리 보기 판·글자 링크·크레딧 부족 팝업 공통, ProUpsellButton, #1170)
   ///
   /// In ko, this message translates to:
   /// **'Pro 알아보기'**
@@ -7201,7 +7201,7 @@ abstract class AppLocalizations {
   /// **'요일을 하나 이상 골라 주세요'**
   String get routineSchedulePickDayHint;
 
-  /// 반복 시트 — Free(판매 중)라 저장 버튼이 꺼진 이유. 아래에 Pro로 보기 입구
+  /// 반복 시트 — Free(판매 중)라 저장 버튼이 꺼진 이유. 아래에 Pro 알아보기 입구
   ///
   /// In ko, this message translates to:
   /// **'반복 일과는 Pro에서 저장할 수 있어요'**
@@ -7651,23 +7651,11 @@ abstract class AppLocalizations {
   /// **'잠시 뒤 다시 해 주세요.'**
   String get routineMemorySaveFailedFallback;
 
-  /// Pro 미리 보기 위 배지
-  ///
-  /// In ko, this message translates to:
-  /// **'Pro'**
-  String get proTeaserBadge;
-
   /// Pro 미리 보기가 실제 기록이 아닌 견본임을 알리는 배지
   ///
   /// In ko, this message translates to:
   /// **'예시 화면'**
   String get proTeaserSampleLabel;
-
-  /// Pro 미리 보기에서 요금제 화면을 여는 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'Pro로 보기'**
-  String get proTeaserUnlock;
 
   /// Pro 전용 기능을 Free 가 눌렀는데 앱에서 Pro 를 살 수 없을 때 안내 팝업 (실패 아님)
   ///

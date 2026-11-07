@@ -89,6 +89,18 @@ restricted_tokens:
   brandOrange:
     allowed: [lib/core/theme/app_colors.dart]
     reason: "포포 그림 주황 — 축하 색종이(AppColors.confetti)에만. UI 강조는 민트"
+  # Pro 권유 자리 통일 (#1170): 배지 · 버튼은 공통 부품 하나로만
+  accentYellow:
+    allowed: [lib/core/theme/app_colors.dart, lib/core/widgets/pro_badge.dart]
+    reason: "Pro 배지 노랑 — ProBadge 에서만 (화면마다 배지를 따로 그리면 모양·색이 갈라짐)"
+  planProBadge:
+    allowed: [lib/core/widgets/pro_badge.dart]
+    reason: "Pro 배지 문구 — ProBadge 에서만"
+  planLearnPro:
+    allowed:
+      - lib/core/widgets/pro_upsell_button.dart
+      - lib/features/credit/presentation/credit_blocked_dialog.dart  # 팝업 버튼은 ElumDialogAction 이라 위젯을 못 넣음 (문구 키만 공유)
+    reason: "요금제 화면 여는 버튼 문구 — ProUpsellButton 에서만 (문구·모양이 화면마다 달라지지 않게)"
 
 # 공통 부품 안에서만 쓸 수 있는 코드 모양 (#1171). 화면은 부품을 부른다
 #   위험 확인 한 번: confirmDangerousAction · 입력 확인: confirmByTyping · 실패: showFailure / showFailureMessage

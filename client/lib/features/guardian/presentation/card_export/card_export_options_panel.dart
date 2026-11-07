@@ -5,7 +5,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
-import '../../../../core/widgets/elum_label_chip.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../domain/card_export_options.dart';
@@ -238,11 +238,7 @@ class _OptionChip extends StatelessWidget {
               Text(label, style: context.typo.chipLabel.copyWith(color: colors.textPrimary)),
               if (isPro) ...[
                 SizedBox(width: 6.w),
-                ElumLabelChip(
-                  label: context.l10n.planProBadge,
-                  background: colors.accentYellow,
-                  foreground: colors.textPrimary,
-                ),
+                const ProBadge(),
               ],
             ],
           ),

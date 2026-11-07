@@ -66,7 +66,7 @@ class ImageStyleScreen extends ConsumerWidget {
         style: style,
         isSelected: isSelected,
         character: character,
-        badgeLabel: isImageStyleLocked(style, planAccess) ? context.l10n.planProBadge : null,
+        shouldShowProBadge: isImageStyleLocked(style, planAccess),
       ),
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
