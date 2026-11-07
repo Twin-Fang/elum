@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -116,8 +117,9 @@ class LibraryGroupTile extends StatelessWidget {
               ],
             ),
             SizedBox(height: space.xs.h),
+            // 묶음 이름도 일과 칸과 같이 낱말 단위로 줄바꿈 (#1169)
             Text(
-              entry.group.name,
+              keepWords(entry.group.name, locale: context.appLocale),
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,

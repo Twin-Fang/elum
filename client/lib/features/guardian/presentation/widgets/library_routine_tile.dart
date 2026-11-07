@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/routine.dart';
@@ -107,10 +108,14 @@ class LibraryRoutineTile extends ConsumerWidget {
             ),
             SizedBox(height: space.xs.h),
             // 이야기에서 온 일과는 이름 한 줄 + `이야기에서` 한 줄: 칸 높이(이름 두 줄)를 늘리지 않는다
+            // 이름은 낱말 단위로 줄바꿈 (큰 글자에서 `등교 준 / 비` 로 꺾이지 않게, 일과 언어 기준, #1169)
             ContentLocale(
               language: routine.language,
               child: Text(
-                routine.displayTitle,
+                keepWords(
+                  routine.displayTitle,
+                  locale: contentLocaleOf(routine.language),
+                ),
                 maxLines: isFromTalk ? 1 : 2,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,

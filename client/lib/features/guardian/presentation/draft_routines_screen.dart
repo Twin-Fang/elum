@@ -249,7 +249,7 @@ class _DraftTile extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
     final space = context.space;
-    // 보상을 안 정했으면 줄을 감추지 않고 `미설정` 이라 적는다 (시안 1274:9276).
+    // 보상을 안 정했으면 줄을 감추지 않고 `보상 아직 안 정했어요` 라 적는다 (시안 1274:9276, 말머리 없이 #1169).
     final reward = routine.hasReward
         ? routine.rewardDisplay
         : context.l10n.draftRoutinesRewardUnset;
@@ -293,15 +293,18 @@ class _DraftTile extends StatelessWidget {
                   SizedBox(height: _titleToMeta.h),
                   Row(
                     children: [
-                      Text(
-                        context.l10n.draftRoutinesRewardLabel,
-                        style: typo.routineTileMeta.copyWith(
-                          color: colors.routineTileLabel,
+                      // `완료 시` 말머리는 보상이 있을 때만 (없을 때 `완료 시 보상 아직…` 으로 읽히지 않게)
+                      if (routine.hasReward) ...[
+                        Text(
+                          context.l10n.draftRoutinesRewardLabel,
+                          style: typo.routineTileMeta.copyWith(
+                            color: colors.routineTileLabel,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: _labelGap.w),
+                        SizedBox(width: _labelGap.w),
+                      ],
                       Expanded(
-                        // 보상 글만 일과 언어다. `미설정` 은 화면 문구라 따르지 않는다.
+                        // 보상 글만 일과 언어다. 보상 없음 문구는 화면 문구라 따르지 않는다.
                         child: routine.hasReward
                             ? ContentLocale(
                                 language: routine.language,

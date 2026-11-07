@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// 이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)
   ///
   /// In ko, this message translates to:
-  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}부터 다시 만들 수 있어요'**
+  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
   String creditBlockedExhausted(String reset);
 
   /// 광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수
@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// 크레딧 띠 — 일과 하나를 만들 때 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{일과 {count}개}}'**
+  /// **'{count, plural, other{일과 하나에 {count}개}}'**
   String imageStyleCreditRoutine(int count);
 
   /// 크레딧 띠 — 요금제 혜택으로 일과 글 몫에 크레딧이 들지 않을 때 (그림 한 장 단가는 따로 보임)
@@ -785,7 +785,7 @@ abstract class AppLocalizations {
   /// 크레딧 띠 — 만화·실사에서 카드 그림 한 장마다 더 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{그림 한 장 {count}개}}'**
+  /// **'{count, plural, other{그림 한 장에 {count}개}}'**
   String imageStyleCreditImage(int count);
 
   /// 도움 목표 선택지
@@ -2354,10 +2354,10 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get draftRoutinesDeleteFailedFallback;
 
-  /// 보상을 안 정한 임시저장 줄의 보상 자리 글
+  /// 보상을 안 정한 임시저장 줄의 보상 자리 글. `완료 시` 말머리 없이 이 글만 보인다
   ///
   /// In ko, this message translates to:
-  /// **'미설정'**
+  /// **'보상 아직 안 정했어요'**
   String get draftRoutinesRewardUnset;
 
   /// 임시저장 줄의 보상 앞 말머리
@@ -2753,7 +2753,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면 아래 순서 변경 안내 한 줄
   ///
   /// In ko, this message translates to:
-  /// **'카드를 길게 눌러 순서를 변경하세요'**
+  /// **'카드를 길게 눌러 순서를 바꿀 수 있어요'**
   String get cardReviewReorderHint;
 
   /// 카드 검토 화면 도구 버튼. 순서 변경 모드를 켜고 끈다
@@ -3545,7 +3545,7 @@ abstract class AppLocalizations {
   /// 화면 전환 암호 입력 화면의 제목(시안 문구)
   ///
   /// In ko, this message translates to:
-  /// **'비밀암호를 입력하세요'**
+  /// **'비밀암호를 입력해 주세요'**
   String get modeSwitchTitle;
 
   /// 화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내
@@ -4505,7 +4505,7 @@ abstract class AppLocalizations {
   /// 언어 고르는 시트 설명. 원래 일과는 그대로 남는다
   ///
   /// In ko, this message translates to:
-  /// **'글만 바꾼 새 일과를 일과관리에 만들어요. 그림은 그대로 써요.'**
+  /// **'글만 바꾼 새 일과를 일과 관리에 만들어요. 그림은 그대로 써요.'**
   String get routineTranslateSheetDescription;
 
   /// 고를 언어 줄: 한국어
@@ -5417,7 +5417,7 @@ abstract class AppLocalizations {
   /// 상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
   ///
   /// In ko, this message translates to:
-  /// **'✓ 일과관리에 넣었어요'**
+  /// **'✓ 일과 관리에 넣었어요'**
   String get talkImportedButton;
 
   /// 상세 머리 줄 오른쪽 공유 아이콘의 읽기 이름: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
@@ -5483,7 +5483,7 @@ abstract class AppLocalizations {
   /// 가져온 직후 토스트. elumiName 은 고른 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{elumiName} 일과관리에 넣었어요'**
+  /// **'{elumiName} 일과 관리에 넣었어요'**
   String talkImportDone(String elumiName);
 
   /// 가져온 직후 토스트의 버튼: 일과관리 칸으로 이동
@@ -5495,7 +5495,7 @@ abstract class AppLocalizations {
   /// 가져오기 실패 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 넣지 못했어요'**
+  /// **'일과 관리에 넣지 못했어요'**
   String get talkImportFailedTitle;
 
   /// 상세 화면: 댓글 목록 제목
@@ -5849,7 +5849,7 @@ abstract class AppLocalizations {
   /// 올릴 일과가 없을 때 설명. 예시는 고치면 올릴 수 있다 (#983)
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
+  /// **'일과 관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
   String get talkSharePickEmptyHint;
 
   /// 올릴 일과 목록 실패 안내
@@ -5981,7 +5981,7 @@ abstract class AppLocalizations {
   /// 링크로 보내기 화면 안내: 링크를 받은 사람만 보고, 이야기에 안 올라가고, 나중에 끌 수 있다
   ///
   /// In ko, this message translates to:
-  /// **'링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과관리에서 링크를 끌 수 있어요'**
+  /// **'링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과 관리에서 링크를 끌 수 있어요'**
   String get talkLinkConfirmGuide;
 
   /// 링크로 보내기 화면 안내: 이미 켜진 링크가 있어 같은 링크를 다시 보낼 때 (처음 보낸 모습 그대로)
@@ -7174,7 +7174,7 @@ abstract class AppLocalizations {
   /// 주간 계획 빈 상태 안내
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에서 일과를 누르고 요일·시각을 정해 보세요'**
+  /// **'일과 관리에서 일과를 누르고 요일·시각을 정해 보세요'**
   String get weeklyPlanEmptyBody;
 
   /// 주간 계획 불러오기 실패
@@ -7342,7 +7342,7 @@ abstract class AppLocalizations {
   /// Pro 가 끝났는데 녹음이 남아 있을 때 칸 설명
   ///
   /// In ko, this message translates to:
-  /// **'Pro 가 끝나도 녹음은 남겨 뒀어요'**
+  /// **'Pro가 끝나도 녹음은 남겨 뒀어요'**
   String get guardianVoicePlanEndedHint;
 
   /// 일과관리 제목 줄 오른쪽 알약 버튼: 전문가 일과 목록 열기 (Pro)
@@ -7408,19 +7408,19 @@ abstract class AppLocalizations {
   /// 미리 보기 아래 주 버튼: 지금 보는 이룸이 일과관리 맨 앞에 넣는다 (크레딧 없음)
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 넣기'**
+  /// **'일과 관리에 넣기'**
   String get expertRoutineImport;
 
   /// 가져온 직후 토스트. elumiName 은 지금 보는 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{elumiName} 일과관리에 넣었어요'**
+  /// **'{elumiName} 일과 관리에 넣었어요'**
   String expertRoutineImportDone(String elumiName);
 
   /// 가져오기 실패 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 넣지 못했어요'**
+  /// **'일과 관리에 넣지 못했어요'**
   String get expertRoutineImportFailedTitle;
 
   /// 연결된 이룸이가 없어 가져올 곳이 없을 때 실패 팝업 문장
@@ -7618,7 +7618,7 @@ abstract class AppLocalizations {
   /// 전문가 일과 미리 보기 한 줄 혜택
   ///
   /// In ko, this message translates to:
-  /// **'전문가가 만든 일과를 그대로 가져와 쓸 수 있어요'**
+  /// **'전문가가 만든 일과를 그대로 가져와요'**
   String get proTeaserExpertRoutineBenefit;
 
   /// 반복 일과·주간 계획 미리 보기 한 줄 혜택

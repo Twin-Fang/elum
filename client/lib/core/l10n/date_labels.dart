@@ -17,6 +17,22 @@ extension DateLabels on AppLocalizations {
   /// `2026년 9월 20일`
   String yearMonthDay(DateTime d) => dateYearMonthDay(d.year, d.month, d.day);
 
+  /// 끝나는 시각(그 시각부터 못 씀) > `…까지` 앞에 쓸 마지막 날 (0시 정각 종료면 전날, #1169)
+  /// 예: `2027-05-07T00:00` > `2027년 5월 6일`, `2027-05-07T14:30` > `2027년 5월 7일`
+  String yearMonthDayUntil(DateTime endsAt) {
+    final local = endsAt.toLocal();
+    final isMidnightEnd = local.hour == 0 &&
+        local.minute == 0 &&
+        local.second == 0 &&
+        local.millisecond == 0 &&
+        local.microsecond == 0;
+    // Duration 빼기 대신 날짜 칸을 줄임 (서머타임 날 23시간 하루에도 전날)
+    final lastDay = isMidnightEnd
+        ? DateTime(local.year, local.month, local.day - 1)
+        : local;
+    return yearMonthDay(lastDay);
+  }
+
   /// `9월 18일부터`
   String monthDaySince(DateTime d) => dateMonthDaySince(d.month, d.day);
 
