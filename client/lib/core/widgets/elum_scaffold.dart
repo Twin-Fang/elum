@@ -59,8 +59,7 @@ class ElumScaffold extends StatelessWidget {
   /// 화면 맨 아래 광고 자리. 없으면 자리도 없다.
   ///
   /// [bottomButton]·[belowButton]과 함께 못 쓰게 assert로 막는다 — 광고가 하단 고정
-  /// 버튼을 가리면 심사 4.0에서 반려된다. 값이 `AdBottomStripSlot`이면 로드 전·실패 시
-  /// 높이 0이라 자리를 차지하지 않는다.
+  /// 버튼을 가리면 심사 4.0에서 반려된다. `AdBottomStripSlot`은 광고 계정이면 로드 전부터 높이 고정 (#1168).
   final Widget? bottomBanner;
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
