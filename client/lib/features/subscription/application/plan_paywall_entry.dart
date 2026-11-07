@@ -7,11 +7,13 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/pro_upsell_button.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
 import '../presentation/plan_actions.dart' as actions;
 import '../presentation/plan_paywall_sheet.dart';
 import '../domain/plan_benefit.dart';
+import 'plan_offer_labels.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
 
@@ -32,6 +34,17 @@ Future<void> openPlanPaywall(BuildContext context, WidgetRef ref, {PlanBenefit? 
   if (!ref.read(canOpenPlanPaywallProvider)) return;
   unawaited(ref.read(storePurchaseCoordinatorProvider).start());
   await showPlanPaywall(context, ref, highlight: highlight);
+}
+
+/// Pro 미리 보기 판의 버튼 (build 안에서 부름: 상품을 불러오면 `7일 무료로 써 보기` 로 바뀜)
+/// 주 버튼은 [highlight] 혜택을 맨 위로 올린 요금제 화면, `Pro 혜택 모두 보기` 는 그냥 요금제 화면
+ProUpsellActions watchProUpsellActions(BuildContext context, WidgetRef ref, {PlanBenefit? highlight}) {
+  final trial = ref.watch(proUpsellFreeTrialProvider);
+  return ProUpsellActions(
+    freeTrialLabel: trial == null ? null : planTrialLabel(context.l10n, trial),
+    onStart: () => openPlanPaywall(context, ref, highlight: highlight),
+    onSeeAllBenefits: () => openPlanPaywall(context, ref),
+  );
 }
 
 /// 구매 복원 (설정 줄, 판매 스위치와 무관)

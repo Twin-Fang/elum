@@ -241,6 +241,20 @@ abstract final class AppAssets {
   static final imageStyleSymbol = pictogram('brush_teeth_,_to');
   static final imageStyleEmoji = emoji('emoji_toothbrush');
 
+  // --- 요금제 화면 (#1189 시안 A) ---
+
+  /// 머리 비교 Free 카드: 이모지 그림 방식 카드에 실제로 들어가는 그림 (그림 방식 예시와 같은 장면)
+  static final planHeroFreePicture = imageStyleEmoji;
+
+  /// 머리 비교 Pro 카드: 예시 일과 `이 닦기` 캐릭터 그림 (새로 그리지 않음)
+  static final planHeroProPicture = exampleRoutineImage('brush_teeth');
+
+  /// 혜택 묶음 아이콘 4개 (Twemoji): 더 예쁜 카드 🎨 · 일과가 알아서 준비돼요 🗓️ · 한 주를 한눈에 📋 · 넉넉하게, 광고 없이 ✨
+  static final planBenefitIconCards = emoji('emoji_artist_palette');
+  static final planBenefitIconRoutines = emoji('emoji_spiral_calendar');
+  static final planBenefitIconWeek = emoji('emoji_clipboard');
+  static final planBenefitIconExtra = emoji('emoji_sparkles');
+
   /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
   static const stageCheckDone = '$_images/stage_check_done.svg';
 

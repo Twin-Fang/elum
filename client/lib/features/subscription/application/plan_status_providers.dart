@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/date_labels.dart';
+import '../../../core/widgets/pro_badge.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
@@ -67,6 +68,13 @@ String planStatusShortLabel(AppLocalizations l10n, PlanStatus status) => switch 
   PlanStatusKind.free => l10n.planStatusFree,
   PlanStatusKind.proGift => l10n.planStatusGift,
   _ => l10n.planStatusPro,
+};
+
+/// 설정 줄 칩: Free · Pro · Pro 선물 ([planStatusShortLabel] 과 같은 갈래)
+PlanTier planTierOf(PlanStatus status) => switch (status.kind) {
+  PlanStatusKind.free => PlanTier.free,
+  PlanStatusKind.proGift => PlanTier.proGift,
+  _ => PlanTier.pro,
 };
 
 /// 설정 내 요금제 묶음 아래 한 줄: 갱신일 · 끝나는 날 · 결제 확인. 알릴 것이 없으면(Free · 기간 제한 없음 · 날짜 모름) null

@@ -399,7 +399,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get imageStyleCreditRoutineFree => '일과 무료';
+  String get imageStyleCreditRoutineFree => '일과 글은 크레딧 없이';
 
   @override
   String imageStyleCreditImage(int count) {
@@ -1365,7 +1365,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guardianSettingsWithdrawAppStoreSubscriptionNotice =>
-      'Pro 구독 결제는 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요';
+      'Pro 구독은 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요';
 
   @override
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
@@ -2035,7 +2035,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get creditHistoryKindImageRegenerate => '카드 그림 다시 만들기';
 
   @override
-  String get creditHistoryFree => '무료';
+  String get creditHistoryFree => '크레딧 없이';
 
   @override
   String get creditHistoryKindWeeklyGrant => '이번 주 크레딧을 채워드렸어요';
@@ -3482,7 +3482,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportThemeLargeText => '큰 글자';
 
   @override
-  String get planProBadge => 'Pro';
+  String get planProBadge => 'PRO';
 
   @override
   String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
@@ -3559,75 +3559,52 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
 
   @override
-  String get planPaywallTitle => '이룸 Pro';
+  String get planBenefitAiImageStyles => '캐릭터·사진 같은 AI 그림';
 
   @override
-  String get planPaywallDescription => '더 많이 만들고, 인쇄용 카드를 깔끔하게 받아요';
+  String get planBenefitAdsRemoved => '광고 없음';
 
   @override
-  String get planBenefitsSection => 'Pro로 할 수 있는 것';
+  String get planBenefitWeeklyReport => '주간 리포트';
 
   @override
-  String get planBenefitAiImageStyles => '캐릭터·사진 같은 그림으로 카드를 만들어요';
+  String get planBenefitRoutineSchedule => '요일·시각 정해 반복';
 
   @override
-  String get planBenefitAdsRemoved => '광고 없이 써요';
+  String get planBenefitRoutineMemory => '내가 고친 방식 기억하기';
 
   @override
-  String get planBenefitWeeklyReport => '한 주 동안 해낸 일과를 리포트로 받아 보내요';
+  String get planBenefitExpertRoutines => '전문가가 만든 일과 가져오기';
 
   @override
-  String get planBenefitRoutineSchedule => '요일과 시각을 정해 일과를 반복하고 이룸이 기기에 알려요';
+  String get planBenefitGuardianVoice => '카드마다 보호자 목소리';
 
   @override
-  String get planBenefitRoutineMemory => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
+  String get planBenefitRoutineTranslate => '다른 언어로 바꾸기';
 
   @override
-  String get planBenefitExpertRoutines => '전문가가 만든 일과를 그대로 가져와 써요';
+  String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이';
 
   @override
-  String get planBenefitGuardianVoice => '카드마다 보호자 목소리를 녹음해 들려줘요';
+  String get planBenefitFreeImageRegenerate => '다시 그리기 하루 여러 번 크레딧 없이';
 
   @override
-  String get planBenefitRoutineTranslate => '만든 일과를 다른 언어로 바꿔 만들어요';
+  String get planBenefitMoreWeeklyCredits => '매주 크레딧 더 많이';
 
   @override
-  String get planBenefitFreeRoutineText => '일과는 크레딧 없이 만들고 카드 그림만 크레딧을 써요';
+  String get planBenefitCardExportWithoutWatermark => '워터마크 없이 인쇄';
 
   @override
-  String get planBenefitFreeImageRegenerate =>
-      '카드 그림을 하루 정해진 횟수까지 크레딧 없이 다시 그려요';
-
-  @override
-  String get planBenefitMoreWeeklyCredits => '매주 AI 크레딧을 더 많이 받아요';
-
-  @override
-  String get planBenefitCardExportWithoutWatermark => '인쇄용 카드에 로고와 워터마크가 없어요';
-
-  @override
-  String get planBenefitCardExportAllThemes => '인쇄용 카드 디자인을 골라요';
+  String get planBenefitCardExportAllThemes => '인쇄 디자인 전부';
 
   @override
   String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
-
-  @override
-  String get planOffersSection => '기간 고르기';
 
   @override
   String get planPeriodMonthly => '1개월';
 
   @override
   String get planPeriodYearly => '1년';
-
-  @override
-  String planPricePerMonth(String price) {
-    return '$price / 1개월마다 자동 갱신';
-  }
-
-  @override
-  String planPricePerYear(String price) {
-    return '$price / 1년마다 자동 갱신';
-  }
 
   @override
   String get planSubscribe => '구독 시작하기';
@@ -3707,18 +3684,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String planPricePerMonthAfterTrial(String trial, String price) {
-    return '$trial 무료 체험 후 $price / 1개월마다 자동 갱신';
-  }
-
-  @override
-  String planPricePerYearAfterTrial(String trial, String price) {
-    return '$trial 무료 체험 후 $price / 1년마다 자동 갱신';
-  }
-
-  @override
   String planStartFreeTrial(String trial) {
-    return '$trial 무료 체험 시작하기';
+    return '$trial 무료로 시작하기';
   }
 
   @override
@@ -3740,7 +3707,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planVerifying => '결제를 확인하고 있어요';
 
   @override
-  String get planStorePendingTitle => '구매 요청을 보냈어요';
+  String get planStorePendingTitle => '결제 허락을 요청했어요';
 
   @override
   String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요';
@@ -4350,7 +4317,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proTeaserExpertRoutineBenefit => '전문가가 만든 일과를 그대로 가져와요';
 
   @override
-  String get proTeaserWeeklyPlanBenefit => '요일과 시각을 정해 두면 그날 일과가 저절로 준비돼요';
+  String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
 
   @override
   String get proTeaserSampleRoutineMorning => '아침 준비하기';
@@ -4388,7 +4355,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String cardRegenerateCostProFree(int count) {
-    return 'Pro 무료 (오늘 $count회 남음)';
+    return '크레딧 없이 · 오늘 $count번 남았어요';
   }
 
   @override
@@ -4496,4 +4463,100 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cardCandidateApplyFailedTitle => '새 그림으로 바꾸지 못했어요';
+
+  @override
+  String get planHeroHeadline => '이룸이만을 위한 카드로 바뀌어요';
+
+  @override
+  String get planHeroSubline => '같은 일과도 Pro로 만들면 이렇게 달라져요';
+
+  @override
+  String get planHeroFreeTag => 'Free · 이모지';
+
+  @override
+  String get planHeroProTag => 'Pro · 캐릭터 그림';
+
+  @override
+  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요';
+
+  @override
+  String get planBenefitGroupCards => '더 예쁜 카드';
+
+  @override
+  String get planBenefitGroupRoutines => '일과가 알아서 준비돼요';
+
+  @override
+  String get planBenefitGroupWeek => '한 주를 한눈에';
+
+  @override
+  String get planBenefitGroupExtra => '넉넉하게, 광고 없이';
+
+  @override
+  String get planBenefitSeparator => ' · ';
+
+  @override
+  String planYearlySaving(int percent) {
+    return '$percent% 아껴요';
+  }
+
+  @override
+  String planMonthlyEquivalent(String price) {
+    return '한 달에 $price 꼴';
+  }
+
+  @override
+  String get planRenewsYearly => '1년마다 자동 갱신';
+
+  @override
+  String get planRenewsMonthly => '1개월마다 자동 갱신';
+
+  @override
+  String planPriceUnit(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'yearly': '/년',
+      'other': '/월',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
+    return '$trial 뒤 $price$unit 자동 결제 · 끝나기 하루 전까지 해지하면 청구되지 않아요';
+  }
+
+  @override
+  String planCtaTrialNoticePlayStore(String trial, String price, String unit) {
+    return '$trial 뒤 $price$unit 자동 결제 · 체험 중 해지하면 청구되지 않아요';
+  }
+
+  @override
+  String planCtaRenewNotice(String price, String unit) {
+    return '$price$unit 자동 갱신 · 언제든 해지할 수 있어요';
+  }
+
+  @override
+  String planTryFreeTrial(String trial) {
+    return '$trial 무료로 써 보기';
+  }
+
+  @override
+  String get planSeeAllBenefits => 'Pro 혜택 모두 보기';
+
+  @override
+  String get planTierGift => '선물';
+
+  @override
+  String get proTeaserWeeklyPlanTitle => '요일과 시각만 정해 두면 그날 일과가 준비돼요';
+
+  @override
+  String get proTeaserWeeklyReportTitle => '한 주를 한 장으로 받아 봐요';
+
+  @override
+  String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
+
+  @override
+  String get proTeaserExpertRoutineTitle => '전문가가 다듬은 일과를 바로 써요';
+
+  @override
+  String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
 }

@@ -152,7 +152,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
 
   /// 바로가기 5~6줄: (주간 리포트) · 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
   ///
-  /// 주간 리포트는 Pro 만. Free 는 판매 중이고 Pro 가 주간 리포트를 줄 때만 줄이 보이고 들어가면 흐린 견본 (아니면 줄 자체가 없다)
+  /// 주간 리포트는 Pro 만. Free 는 판매 중이고 Pro 가 주간 리포트를 줄 때만 줄이 보이고 들어가면 Pro 미리 보기 (아니면 줄 자체가 없다)
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
     final shouldShowWeeklyReport = access.shouldShowEntryFor(PlanBenefit.weeklyReport);

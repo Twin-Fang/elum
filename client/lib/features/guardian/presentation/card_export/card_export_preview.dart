@@ -10,13 +10,14 @@ import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
 import 'card_export_theme_teaser.dart';
 import 'print_sheets.dart';
 
-/// 인쇄용 미리 보기: (Pro 테마 흐린 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
+/// 인쇄용 미리 보기: (Pro 테마 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
 class CardExportPreview extends ConsumerWidget {
   const CardExportPreview({
     super.key,
@@ -46,7 +47,7 @@ class CardExportPreview extends ConsumerWidget {
   final bool shouldPromoteNoWatermark;
   final ValueChanged<String> onToggleCard;
 
-  /// Free 가 흐리게 보고 있는 Pro 테마의 첫 지면, 없으면 null
+  /// Free 가 미리 보기로 보고 있는 Pro 테마의 첫 지면, 없으면 null
   final PrintSheet? teaserSheet;
 
   @override
@@ -61,7 +62,7 @@ class CardExportPreview extends ConsumerWidget {
         if (teaser != null) ...[
           CardExportThemeTeaser(
             sheet: teaser,
-            onUnlock: () => openPlanPaywall(context, ref),
+            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.cardExportAllThemes),
           ),
           SizedBox(height: _sectionGap.h),
         ],

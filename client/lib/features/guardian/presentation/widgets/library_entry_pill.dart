@@ -23,7 +23,7 @@ class LibraryEntryPill extends StatelessWidget {
   final String iconAsset;
   final VoidCallback onTap;
 
-  /// Free 라 들어가면 흐린 미리 보기인 입구 (`PlanAccess.shouldShowTeaserFor`)
+  /// Free 라 들어가면 Pro 미리 보기인 입구 (`PlanAccess.shouldShowTeaserFor`)
   final bool shouldShowProBadge;
 
   /// 안쪽 위아래 10 · 좌우 16 · 아이콘 12 · 아이콘 > 글 4 · 글 > 배지 6 · 알약 모서리 100
