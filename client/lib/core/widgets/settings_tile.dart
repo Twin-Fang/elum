@@ -56,9 +56,6 @@ class SettingsTile extends StatelessWidget {
   /// 이름 뒤 [ProBadge]: Free 라 들어가면 흐린 미리 보기인 Pro 줄 (#1170)
   final bool shouldShowProBadge;
 
-  /// 이름 > Pro 배지
-  static const _labelToBadge = 6.0;
-
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
   static const _padH = 16.0;
@@ -99,15 +96,10 @@ class SettingsTile extends StatelessWidget {
         fontWeight: destructive && !isInCard ? FontWeight.w500 : null,
       ),
     );
-    final labelWithBadge = shouldShowProBadge
-        ? Row(
-            children: [
-              Flexible(child: labelText),
-              SizedBox(width: _labelToBadge.w),
-              const ProBadge(),
-            ],
-          )
-        : labelText;
+    final labelWithBadge = LabelWithProBadge(
+      label: labelText,
+      shouldShowProBadge: shouldShowProBadge,
+    );
     Widget buildValueText(TextAlign align) => Text(
           value ?? '',
           textAlign: align,

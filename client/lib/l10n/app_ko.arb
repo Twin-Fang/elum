@@ -1179,16 +1179,16 @@
   "draftRoutinesLoadFailedFallback": "임시저장을 불러오지 못했어요",
   "@draftRoutinesLoadFailedFallback": { "description": "임시저장 목록을 못 불러왔을 때의 기본 안내(서버 문구가 없을 때)" },
 
-  "draftRoutinesDeleteLabel": "임시저장 삭제",
+  "draftRoutinesDeleteLabel": "임시저장 지우기",
   "@draftRoutinesDeleteLabel": { "description": "줄을 밀면 나오는 삭제 버튼의 낭독 이름" },
 
-  "draftRoutinesDeleteConfirmTitle": "임시저장을 삭제할까요?",
+  "draftRoutinesDeleteConfirmTitle": "임시저장을 지울까요?",
   "@draftRoutinesDeleteConfirmTitle": { "description": "임시저장 삭제 확인 팝업 제목" },
 
-  "draftRoutinesDeleteAction": "삭제",
+  "draftRoutinesDeleteAction": "지우기",
   "@draftRoutinesDeleteAction": { "description": "임시저장 삭제 확인 팝업의 삭제 버튼" },
 
-  "draftRoutinesDeleteFailedTitle": "임시저장을 삭제하지 못했어요",
+  "draftRoutinesDeleteFailedTitle": "임시저장을 지우지 못했어요",
   "@draftRoutinesDeleteFailedTitle": { "description": "임시저장 삭제 실패 팝업 제목" },
 
   "draftRoutinesDeleteFailedFallback": "잠시 후 다시 시도해주세요",
@@ -1209,10 +1209,10 @@
   "draftRoutinesEmptyBody": "일과를 만들다 그만두면 여기에 남아요",
   "@draftRoutinesEmptyBody": { "description": "임시저장이 0건일 때 설명" },
 
-  "cardReviewDeleteConfirmTitle": "카드를 삭제할까요?",
+  "cardReviewDeleteConfirmTitle": "카드를 지울까요?",
   "@cardReviewDeleteConfirmTitle": { "description": "카드 삭제 확인 팝업 제목" },
 
-  "cardReviewDeleteAction": "삭제",
+  "cardReviewDeleteAction": "지우기",
   "@cardReviewDeleteAction": { "description": "카드 삭제 확인 팝업의 삭제 버튼" },
 
   "cardReviewSoundFailedTitle": "소리를 재생하지 못했어요",
@@ -1577,7 +1577,7 @@
   "routineCreateButton": "새로운 일과 만들기",
   "@routineCreateButton": {"description": "보호자 홈의 새 일과 만들기 버튼"},
 
-  "routineSwipeDelete": "일과 삭제",
+  "routineSwipeDelete": "일과 지우기",
   "@routineSwipeDelete": {"description": "일과 줄을 밀었을 때 나오는 삭제 버튼 기본 글자"},
 
   "routineSwipeEdit": "일과 수정",
@@ -1657,17 +1657,17 @@
   "todayRoutineReorderFailedFallback": "잠시 후 다시 시도해주세요",
   "@todayRoutineReorderFailedFallback": {"description": "보호자 홈에서 일과 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내"},
 
-  "todayRoutineDeleteConfirmTitle": "일과를 삭제할까요?",
+  "todayRoutineDeleteConfirmTitle": "일과를 지울까요?",
   "@todayRoutineDeleteConfirmTitle": {"description": "보호자 홈에서 일과를 지우기 전 확인 팝업 제목"},
   "todayRoutineStartedTitle": "이룸이가 시작한 일과예요",
   "@todayRoutineStartedTitle": {"description": "이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목"},
   "todayRoutineStartedMessage": "한 일이 기록으로 남도록 지울 수 없어요",
   "@todayRoutineStartedMessage": {"description": "시작한 일과를 지울 수 없는 이유를 알리는 안내 팝업 문장"},
 
-  "todayRoutineDeleteAction": "삭제",
+  "todayRoutineDeleteAction": "지우기",
   "@todayRoutineDeleteAction": {"description": "보호자 홈 일과 삭제 확인 팝업의 삭제 버튼"},
 
-  "todayRoutineDeleteFailedTitle": "일과를 삭제하지 못했어요",
+  "todayRoutineDeleteFailedTitle": "일과를 지우지 못했어요",
   "@todayRoutineDeleteFailedTitle": {"description": "보호자 홈에서 일과 삭제가 실패했을 때 제목"},
 
   "todayRoutineDeleteFailedFallback": "잠시 후 다시 시도해주세요",
@@ -1700,7 +1700,7 @@
   "homeCoachCreate": "이룸이가 수행할 *새로운\n일과를 만들 수 있어요*",
   "@homeCoachCreate": {"description": "홈 코치마크 1단계. *로 감싼 부분이 강조된다"},
 
-  "homeCoachSwipe": "일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요",
+  "homeCoachSwipe": "일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요",
   "@homeCoachSwipe": {"description": "홈 코치마크 2단계. *로 감싼 부분이 강조된다"},
 
   "homeCoachSwitch": "캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*",
@@ -3344,9 +3344,9 @@
   "cardFirstDrawChip": "AI 그림 그리기",
   "@cardFirstDrawChip": {"description": "그림 없는 카드(픽토그램) 아래 AI 그림 처음 그리기 칩의 글자와 낭독 이름"},
   "cardRedrawProChip": "Pro로 다시 그리기",
-  "@cardRedrawProChip": {"description": "Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩 (누르면 요금제 화면)"},
+  "@cardRedrawProChip": {"description": "Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardRegenerateChip + Pro 배지, 누르면 요금제 화면)"},
   "cardFirstDrawProChip": "Pro로 AI 그림 그리기",
-  "@cardFirstDrawProChip": {"description": "Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩 (누르면 요금제 화면)"},
+  "@cardFirstDrawProChip": {"description": "Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardFirstDrawChip + Pro 배지, 누르면 요금제 화면)"},
   "cardFirstDrawSheetTitle": "AI 그림을 그릴까요?",
   "@cardFirstDrawSheetTitle": {"description": "AI 그림 처음 그리기 시트 제목"},
   "cardRedrawSheetBody": "고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요",

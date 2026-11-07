@@ -29,12 +29,24 @@ class _ChipIcon extends StatelessWidget {
 }
 
 /// 그림 아래 칩 (`사진 바꾸기` · `다시 그리기`) — 보이는 알약은 작아도 누름 영역은 48 이상이다.
+/// Free 권유 칩은 글자 뒤 Pro 배지, 낭독은 [semanticLabel] (`Pro로 다시 그리기`)
 class _Chip extends StatelessWidget {
-  const _Chip({super.key, required this.asset, required this.label, required this.onTap});
+  const _Chip({
+    super.key,
+    required this.asset,
+    required this.label,
+    required this.onTap,
+    this.shouldShowProBadge = false,
+    this.semanticLabel,
+  });
 
   final String asset;
   final String label;
   final VoidCallback? onTap;
+  final bool shouldShowProBadge;
+
+  /// null 이면 [label] 을 읽음
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +54,7 @@ class _Chip extends StatelessWidget {
 
     return AppPressable(
       onTap: onTap,
-      semanticLabel: label,
+      semanticLabel: semanticLabel ?? label,
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: 48.h < 48 ? 48 : 48.h),
         child: Align(
@@ -58,12 +70,15 @@ class _Chip extends StatelessWidget {
               children: [
                 _ChipIcon(asset: asset),
                 SizedBox(width: 6.w),
-                Text(
-                  label,
-                  style: context.typo.editChipLabel.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w700,
+                LabelWithProBadge(
+                  label: Text(
+                    label,
+                    style: context.typo.editChipLabel.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
+                  shouldShowProBadge: shouldShowProBadge,
                 ),
               ],
             ),
