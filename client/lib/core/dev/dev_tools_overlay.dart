@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -8,6 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../features/auth/application/login_controller.dart';
+import '../../features/credit/data/credit_repository.dart';
+import '../../features/credit/domain/credit_summary.dart';
+import '../../features/feedback/data/feedback_repository.dart';
+import '../../features/member/application/member_providers.dart';
+import '../../features/member/application/plan_access.dart';
+import '../../features/member/data/member_repository.dart';
+import '../../features/member/domain/member_subscription.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/notice/domain/app_notice.dart';
 import '../../features/notice/presentation/show_notice_popup.dart';
@@ -38,6 +46,7 @@ import 'dev_log_file.dart';
 import 'dev_server_store.dart';
 import 'dev_simulation.dart';
 import 'dev_state_dump.dart';
+import 'dev_state_report.dart';
 import 'dev_tools_visibility.dart';
 
 part 'dev_tools_sheet.dart';
@@ -49,6 +58,10 @@ part 'dev_tools_simulate.dart';
 part 'dev_tools_crash.dart';
 part 'dev_tools_analytics.dart';
 part 'dev_tools_plan.dart';
+part 'dev_tools_menu.dart';
+part 'dev_tools_overview.dart';
+part 'dev_tools_live_state.dart';
+part 'dev_tools_rows.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///
@@ -68,9 +81,13 @@ class DevToolsOverlay extends StatefulWidget {
     required this.child,
     required this.onNavigate,
     required this.navigatorContext,
+    required this.currentLocation,
   });
 
   final Widget child;
+
+  /// 지금 라우터 위치 (예: /guardian). 오버레이가 GoRouter 위라 app.dart 가 읽는 방법을 넘김
+  final String? Function() currentLocation;
 
   /// 화면 이동. `context.go`를 쓰지 않는 이유는 이 위젯이
   /// `MaterialApp.router`의 `builder`에 놓여 **GoRouter보다 위**라
@@ -165,6 +182,7 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
                           onClose: () => setState(() => _panelOpen = false),
                           onNavigate: widget.onNavigate,
                           navigatorContext: widget.navigatorContext,
+                          currentLocation: widget.currentLocation,
                         ),
                       ),
                     ),

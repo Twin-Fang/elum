@@ -270,6 +270,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
           // 견본 공지 팝업을 띄울 화면 (라우터 Navigator)
           navigatorContext: () =>
               _router.routerDelegate.navigatorKey.currentContext,
+          // 상태 복사에 담을 지금 화면 경로
+          currentLocation: () =>
+              _router.routerDelegate.currentConfiguration.uri.toString(),
           child: AppStatusGate(
             // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
             // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
