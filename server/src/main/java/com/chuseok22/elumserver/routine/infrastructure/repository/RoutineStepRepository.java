@@ -106,6 +106,12 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
     String getSpeechPath();
   }
 
+  /**
+   * 카드가 쓰는 음성 열쇠 전체 (쓰지 않는 파일 정리용, #1212)
+   */
+  @Query("select s.speechPath from RoutineStep s where s.speechPath is not null")
+  List<String> findAllSpeechPaths();
+
   /// 음성 문장 재료 projection
   interface SpeechTextSource {
 
