@@ -56,6 +56,11 @@ public enum Entitlement {
     Kind.FLAG, "카드 내보내기 디자인 테마 전부",
     ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
   ),
+  // 꺼진 플랜은 카드 한 장씩 이미지만 (일과 한 장 · 오려 쓰는 카드 · 용지 방향 · 장수 · 카드 크기 잠금)
+  CARD_EXPORT_ALL_LAYOUTS(
+    Kind.FLAG, "카드 내보내기 형태·배치 전부",
+    ConfigKey.FREE_CARD_EXPORT_ALL_LAYOUTS, ConfigKey.PRO_CARD_EXPORT_ALL_LAYOUTS
+  ),
   // 주간 리포트 조회 (#1074). 꺼진 플랜은 집계 API 가 WEEKLY_REPORT_NOT_ALLOWED 로 막는다
   WEEKLY_REPORT(
     Kind.FLAG, "주간 리포트",

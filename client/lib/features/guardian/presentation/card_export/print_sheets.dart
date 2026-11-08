@@ -22,6 +22,7 @@ class PrintSheet {
 }
 
 /// 설정 > 지면 목록: 일과 한 장 1장 · 오려 쓰는 카드 N쪽 · 카드 한 장씩 N장 (뺀 카드도 만듦 — 미리 보기에서 다시 넣게)
+/// A4 는 용지 방향대로, 카드 한 장씩은 카드 크기 그대로
 List<PrintSheet> buildPrintSheets({
   required Routine routine,
   required CardExportOptions options,
@@ -44,39 +45,41 @@ List<PrintSheet> buildPrintSheets({
         shouldShowDescription: shouldShowDescription,
       );
 
+  final pageSize = PrintPageSize.a4Of(options.orientation);
   switch (options.format) {
     case CardExportFormat.routineSheet:
       return [
         PrintSheet(
-          size: PrintPageSize.a4,
+          size: pageSize,
           pixelRatio: PrintPageSize.a4PixelRatio,
           page: PrintPage(
-            size: PrintPageSize.a4,
+            size: pageSize,
             hasWatermark: hasWatermark,
             shouldShowPictogramCredit: hasPictogramCredit,
             shouldShowEmojiCredit: hasEmojiCredit,
             child: _RoutineSheetBody(
               title: routine.title,
-              language: routine.language,
+              cardSize: options.cardSize,
               cards: [for (final card in cards) cardAt(card)],
             ),
           ),
         ),
       ];
     case CardExportFormat.cutCards:
-      final perPage = options.cutCardsPerPage;
+      final perPage = options.cardsPerPage.count;
       return [
-        for (final pageCards in chunkIntoPages(cards, perPage.count))
+        for (final pageCards in chunkIntoPages(cards, perPage))
           PrintSheet(
-            size: PrintPageSize.a4,
+            size: pageSize,
             pixelRatio: PrintPageSize.a4PixelRatio,
             page: PrintPage(
-              size: PrintPageSize.a4,
+              size: pageSize,
               hasWatermark: hasWatermark,
               shouldShowPictogramCredit: hasPictogramCredit,
               shouldShowEmojiCredit: hasEmojiCredit,
               child: _CutCardsBody(
                 perPage: perPage,
+                cardSize: options.cardSize,
                 cards: [for (final card in pageCards) cardAt(card, shouldShowNumber: false)],
               ),
             ),
@@ -102,20 +105,18 @@ List<PrintSheet> buildPrintSheets({
   }
 }
 
-/// 일과 한 장: 제목 + 카드 격자 (열 수는 카드 수로 정함)
+/// 일과 한 장: 제목 + 카드 전부 (열 수는 남는 칸에 카드가 가장 크게 들어가게)
 class _RoutineSheetBody extends StatelessWidget {
-  const _RoutineSheetBody({required this.title, required this.language, required this.cards});
+  const _RoutineSheetBody({required this.title, required this.cardSize, required this.cards});
 
   final String title;
-  final String language;
+  final CardSize cardSize;
   final List<Widget> cards;
 
   static const _gap = 12.0;
 
   @override
   Widget build(BuildContext context) {
-    final columns = routineSheetColumnsFor(cards.length);
-    final rows = (cards.length / columns).ceil();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -127,30 +128,33 @@ class _RoutineSheetBody extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: _Grid(columns: columns, rows: rows, gap: _gap, children: cards),
+          child: _CardGrid(cardCount: cards.length, gap: _gap, cardSize: cardSize, children: cards),
         ),
       ],
     );
   }
 }
 
-/// 오려 쓰는 카드: 칸마다 점선 자를 선 + 안쪽 카드
+/// 오려 쓰는 카드: 카드마다 점선 자를 선 (선 ↔ 카드 사이 가위 자리)
 class _CutCardsBody extends StatelessWidget {
-  const _CutCardsBody({required this.perPage, required this.cards});
+  const _CutCardsBody({required this.perPage, required this.cardSize, required this.cards});
 
-  final CutCardsPerPage perPage;
+  /// 한 쪽 장수 (마지막 쪽이 덜 차도 카드 크기가 같게 격자는 이 수로 계산)
+  final int perPage;
+  final CardSize cardSize;
   final List<Widget> cards;
 
-  /// 자를 선 ↔ 카드 여백 (가위 들어갈 자리)
+  /// 자를 선 ↔ 카드 여백 (가위 들어갈 자리) · 자를 선끼리 간격
   static const _cutInset = 8.0;
+  static const _gap = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final cutColor = context.colors.textPlaceholder;
-    return _Grid(
-      columns: perPage.columns,
-      rows: perPage.rows,
-      gap: 0,
+    return _CardGrid(
+      cardCount: perPage,
+      gap: _gap,
+      cardSize: cardSize,
       children: [
         for (final card in cards)
           CustomPaint(
@@ -162,38 +166,44 @@ class _CutCardsBody extends StatelessWidget {
   }
 }
 
-/// 열 × 줄 고정 격자 (빈 칸은 비워 둠 — 마지막 쪽이 덜 차도 카드 크기가 같게)
-class _Grid extends StatelessWidget {
-  const _Grid({required this.columns, required this.rows, required this.gap, required this.children});
+/// 카드 격자: 칸 모양과 무관하게 카드 비율 고정 > [cardSize] 만큼 줄여 칸 가운데 (빈 칸은 비워 둠)
+class _CardGrid extends StatelessWidget {
+  const _CardGrid({required this.cardCount, required this.gap, required this.cardSize, required this.children});
 
-  final int columns;
-  final int rows;
+  /// 격자를 계산할 장수 (실제 [children] 보다 클 수 있음)
+  final int cardCount;
   final double gap;
+  final CardSize cardSize;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (var row = 0; row < rows; row++) ...[
-          if (row > 0) SizedBox(height: gap),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var column = 0; column < columns; column++) ...[
-                  if (column > 0) SizedBox(width: gap),
-                  Expanded(
-                    child: row * columns + column < children.length
-                        ? children[row * columns + column]
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final layout = bestCardGridLayout(cardCount: cardCount, area: constraints.biggest, gap: gap);
+        Widget cell(int index) => index < children.length
+            ? Center(
+                child: SizedBox.fromSize(size: layout.cardSize * cardSize.scale, child: children[index]),
+              )
+            : const SizedBox.shrink();
+        return Column(
+          children: [
+            for (var row = 0; row < layout.rows; row++) ...[
+              if (row > 0) SizedBox(height: gap),
+              Expanded(
+                child: Row(
+                  children: [
+                    for (var column = 0; column < layout.columns; column++) ...[
+                      if (column > 0) SizedBox(width: gap),
+                      Expanded(child: cell(row * layout.columns + column)),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }

@@ -385,6 +385,22 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
+  @DisplayName("카드 내보내기 형태·배치: Free 는 기본 꺼짐(카드 한 장씩만), Pro 키가 켜지면 Pro 는 전부 고른다")
+  void snapshot_cardExportAllLayoutsReadsPlanKey() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_EXPORT_ALL_LAYOUTS)).thenReturn(true);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.cardExportAllLayouts()).isTrue();
+    assertThat(ConfigKey.FREE_CARD_EXPORT_ALL_LAYOUTS.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_CARD_EXPORT_ALL_LAYOUTS.getDefaultValue()).isEqualTo("true");
+  }
+
+  @Test
   @DisplayName("스냅샷의 주간 리포트 권한은 그 플랜 키를 읽는다 (관리자가 Free 키를 켜면 Free 도 보인다)")
   void snapshot_weeklyReportReadsPlanKey() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());

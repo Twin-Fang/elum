@@ -29,11 +29,12 @@ import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
 import 'card_export_options_panel.dart';
 import 'card_export_preview.dart';
+import 'card_export_pro_teaser.dart';
 import 'print_sheets.dart';
 
 /// 인쇄용으로 받기: 설정 > 미리 보기(= 파일 그대로) > 보내기 · 인쇄하기 (#1073)
 ///
-/// Free 는 이룸 로고·워터마크가 들어가고, Pro 는 워터마크 없음 + 디자인 테마 전부.
+/// Free 는 카드 한 장씩 · 기본 디자인 + 이룸 로고·워터마크, Pro 는 형태·배치·디자인 전부 + 워터마크 없음.
 class CardExportScreen extends ConsumerStatefulWidget {
   const CardExportScreen({super.key, required this.routine});
 
@@ -51,17 +52,28 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
 
   CardExportOptions _options = const CardExportOptions();
 
-  /// Free 가 미리 보기로 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
-  CardDesignTheme? _teaserTheme;
+  /// Free 가 Pro 미리 보기로 보고 있는 잠긴 설정 (판매 중일 때만). 다른 값을 고르면 지움
+  ({CardExportOptions options, CardExportLock lock})? _teaser;
   bool _isBusy = false;
   bool _isArtReady = false;
   CardExportPictures? _precached;
   final _sheetKeys = <GlobalKey>[];
 
+  /// Pro 미리 보기 판 자리 (고른 뒤 화면 안으로 스크롤)
+  final _teaserKey = GlobalKey();
+
+  /// Pro 미리 보기 판으로 스크롤하는 시간
+  static const _teaserScrollDuration = Duration(milliseconds: 300);
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final access = ref.watch(planAccessProvider);
+    // 권한 밖 값은 Free 값으로 (Pro 가 끝난 뒤 남은 설정이 미리 보기·파일로 나가지 않게)
+    final options = _options.limitedTo(
+      canUseAllLayouts: access.canUseAllCardExportLayouts,
+      canUseAllThemes: access.canUseAllCardDesignThemes,
+    );
     final picturesAsync = ref.watch(cardExportPicturesProvider(widget.routine));
     final pictures = picturesAsync.value;
     if (pictures != null && !identical(pictures, _precached)) {
@@ -77,7 +89,12 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       horizontalPadding: _horizontalPadding,
       bottomButton: widget.routine.steps.isEmpty
           ? null
-          : _bottomButtons(l10n, canExport: canExport, isLoading: _isBusy || (pictures == null && !picturesAsync.hasError)),
+          : _bottomButtons(
+              l10n,
+              options,
+              canExport: canExport,
+              isLoading: _isBusy || (pictures == null && !picturesAsync.hasError),
+            ),
       // 카드 없는 일과: 남는 높이 가운데 빈 상태 (위 왼쪽 한 줄로 두지 않음)
       child: widget.routine.steps.isEmpty
           ? ElumStateBody(child: ElumErrorView(message: l10n.cardExportNoCards, compact: true))
@@ -87,21 +104,26 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
           children: [
             SizedBox(height: _sectionGap.h),
               CardExportOptionsPanel(
-                options: _options,
+                options: options,
                 onChanged: (next) => setState(() {
                   _options = next;
-                  _teaserTheme = null;
+                  _teaser = null;
                 }),
+                canUseAllLayouts: access.canUseAllCardExportLayouts,
                 canUseAllThemes: access.canUseAllCardDesignThemes,
+                shouldShowProLayouts: access.shouldShowEntryFor(PlanBenefit.cardExportAllLayouts),
                 shouldShowProThemes: access.shouldShowEntryFor(PlanBenefit.cardExportAllThemes),
-                teaserTheme: _teaserTheme,
-                // Free · 판매 중이면 Pro 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
-                onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
+                // Free · 판매 중이면 Pro 미리 보기, 아니면 안내만
+                onLockedPick: (previewOptions, lock) => _onLockedPick(access, previewOptions, lock),
+                onUpsellTap: access.shouldPromoteBenefit(PlanBenefit.cardExportAllLayouts)
+                    ? () => openPlanPaywall(context, ref, highlight: PlanBenefit.cardExportAllLayouts)
+                    : null,
               ),
               SizedBox(height: _sectionGap.h),
               _preview(
                 context,
                 picturesAsync,
+                options,
                 hasWatermark: !access.canExportCardsWithoutWatermark,
                 shouldPromoteNoWatermark: access.shouldPromoteBenefit(PlanBenefit.cardExportWithoutWatermark),
               ),
@@ -113,26 +135,32 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
   }
 
   /// 아래 버튼: 카드 한 장씩(이미지) > `보내기` 하나 · 그 외 > `인쇄하기` + `보내기`
-  Widget _bottomButtons(AppLocalizations l10n, {required bool canExport, required bool isLoading}) {
-    if (_options.format == CardExportFormat.cardImages) {
+  Widget _bottomButtons(
+    AppLocalizations l10n,
+    CardExportOptions options, {
+    required bool canExport,
+    required bool isLoading,
+  }) {
+    if (options.format == CardExportFormat.cardImages) {
       return ElumButton(
         label: l10n.cardExportShare,
         loading: isLoading,
-        onPressed: canExport ? () => _export(shouldPrint: false) : () {},
+        onPressed: canExport ? () => _export(options, shouldPrint: false) : () {},
       );
     }
     return ElumSheetActionRow(
       cancelLabel: l10n.cardExportPrint,
-      onCancel: canExport ? () => _export(shouldPrint: true) : null,
+      onCancel: canExport ? () => _export(options, shouldPrint: true) : null,
       confirmLabel: l10n.cardExportShare,
-      onConfirm: canExport ? () => _export(shouldPrint: false) : () {},
+      onConfirm: canExport ? () => _export(options, shouldPrint: false) : () {},
       isLoading: isLoading,
     );
   }
 
   Widget _preview(
     BuildContext context,
-    AsyncValue<CardExportPictures> picturesAsync, {
+    AsyncValue<CardExportPictures> picturesAsync,
+    CardExportOptions options, {
     required bool hasWatermark,
     required bool shouldPromoteNoWatermark,
   }) {
@@ -156,42 +184,70 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     }
     final sheets = buildPrintSheets(
       routine: widget.routine,
-      options: _options,
+      options: options,
       pictures: pictures,
       hasWatermark: hasWatermark,
     );
     while (_sheetKeys.length < sheets.length) {
       _sheetKeys.add(GlobalKey());
     }
-    final teaserTheme = _teaserTheme;
-    final teaserSheets = teaserTheme == null
-        ? const <PrintSheet>[]
-        : buildPrintSheets(
-            routine: widget.routine,
-            options: _options.copyWith(theme: teaserTheme),
-            pictures: pictures,
-            hasWatermark: hasWatermark,
-          );
     return CardExportPreview(
       routine: widget.routine,
-      options: _options,
+      options: options,
       pictures: pictures,
       sheets: sheets,
       sheetKeys: _sheetKeys,
       hasWatermark: hasWatermark,
       shouldPromoteNoWatermark: shouldPromoteNoWatermark,
       onToggleCard: _toggleCard,
-      teaserSheet: teaserSheets.isEmpty ? null : teaserSheets.first,
+      teaser: _teaserOf(context, pictures, hasWatermark: hasWatermark),
     );
   }
 
-  void _onLockedThemeTap(PlanAccess access, CardDesignTheme theme) {
-    if (access.shouldPromoteBenefit(PlanBenefit.cardExportAllThemes)) {
-      // 같은 칩을 다시 누르면 미리 보기를 닫음
-      setState(() => _teaserTheme = _teaserTheme == theme ? null : theme);
+  // 잠긴 설정의 첫 지면 > Pro 미리 보기 판 (형태·배치 / 디자인 문구)
+  Widget? _teaserOf(BuildContext context, CardExportPictures pictures, {required bool hasWatermark}) {
+    final teaser = _teaser;
+    if (teaser == null) return null;
+    final teaserSheets = buildPrintSheets(
+      routine: widget.routine,
+      options: teaser.options,
+      pictures: pictures,
+      hasWatermark: hasWatermark,
+    );
+    if (teaserSheets.isEmpty) return null;
+    final l10n = context.l10n;
+    final isLayout = teaser.lock == CardExportLock.layout;
+    return CardExportProTeaser(
+      key: _teaserKey,
+      sheet: teaserSheets.first,
+      title: isLayout ? l10n.proTeaserCardLayoutTitle : l10n.proTeaserCardThemeTitle,
+      benefit: isLayout ? l10n.proTeaserCardLayoutBenefit : l10n.proTeaserCardThemeBenefit,
+      actions: watchProUpsellActions(
+        context,
+        ref,
+        highlight: isLayout ? PlanBenefit.cardExportAllLayouts : PlanBenefit.cardExportAllThemes,
+      ),
+    );
+  }
+
+  // 잠긴 값 고름: 판매 중 > Pro 미리 보기(판까지 스크롤) · 아니면 Pro 안내
+  void _onLockedPick(PlanAccess access, CardExportOptions previewOptions, CardExportLock lock) {
+    final benefit = lock == CardExportLock.layout ? PlanBenefit.cardExportAllLayouts : PlanBenefit.cardExportAllThemes;
+    if (access.shouldPromoteBenefit(benefit)) {
+      setState(() => _teaser = (options: previewOptions, lock: lock));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final teaserContext = _teaserKey.currentContext;
+        if (teaserContext != null && teaserContext.mounted) {
+          Scrollable.ensureVisible(teaserContext, duration: _teaserScrollDuration);
+        }
+      });
       return;
     }
-    openProOnlyNotice(context, ref, title: context.l10n.cardExportProThemeLocked);
+    openProOnlyNotice(
+      context,
+      ref,
+      title: lock == CardExportLock.layout ? context.l10n.cardExportProLayoutLocked : context.l10n.cardExportProThemeLocked,
+    );
   }
 
   void _toggleCard(String cardId) {
@@ -223,20 +279,20 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
   }
 
   // 미리 보기 지면 굽기 > PNG(카드 한 장씩) 또는 PDF > 보내기 · 인쇄
-  Future<void> _export({required bool shouldPrint}) async {
+  Future<void> _export(CardExportOptions options, {required bool shouldPrint}) async {
     final l10n = context.l10n;
     final origin = shareOriginOf(context);
     final pictures = _precached;
     if (pictures == null) return;
     final sheets = buildPrintSheets(
       routine: widget.routine,
-      options: _options,
+      options: options,
       pictures: pictures,
       hasWatermark: !ref.read(planAccessProvider).canExportCardsWithoutWatermark,
     );
     final included = [
       for (final (index, sheet) in sheets.indexed)
-        if (sheet.cardId == null || !_options.excludedCardIds.contains(sheet.cardId)) (index, sheet),
+        if (sheet.cardId == null || !options.excludedCardIds.contains(sheet.cardId)) (index, sheet),
     ];
     if (included.isEmpty) {
       await showElumDialog<void>(
@@ -256,7 +312,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
         pngs.add(await _files.capturePng(boundary, sheet.pixelRatio));
       }
       final stem = exportFileStem(widget.routine.title);
-      if (_options.format == CardExportFormat.cardImages) {
+      if (options.format == CardExportFormat.cardImages) {
         await _files.share(
           files: [
             for (final (index, png) in pngs.indexed)
@@ -266,9 +322,10 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
         );
         return;
       }
-      final pdf = await _files.buildA4Pdf(pngs);
+      final isLandscape = options.orientation == PaperOrientation.landscape;
+      final pdf = await _files.buildA4Pdf(pngs, isLandscape: isLandscape);
       if (shouldPrint) {
-        final printOutcome = await _files.printPdf(pdf: pdf, jobName: stem);
+        final printOutcome = await _files.printPdf(pdf: pdf, jobName: stem, isLandscape: isLandscape);
         // 취소는 오류가 아님 > 인쇄 서비스가 없을 때만 안내
         if (printOutcome == CardPrintOutcome.unavailable && mounted) {
           await showFailureMessage(

@@ -18,6 +18,7 @@ public record EntitlementSnapshot(
   int historyRetentionDays,
   boolean cardExportWithoutWatermark,
   boolean cardExportAllThemes,
+  boolean cardExportAllLayouts,
   boolean weeklyReport,
   boolean routineTranslate,
   boolean routineSchedule,

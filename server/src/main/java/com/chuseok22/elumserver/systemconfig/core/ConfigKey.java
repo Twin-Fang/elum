@@ -287,6 +287,11 @@ public enum ConfigKey {
     "Free가 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_CARD_EXPORT_ALL_LAYOUTS(
+    ConfigGroup.PLAN_FREE, "카드 내보내기 형태·배치",
+    "Free가 카드 한 장씩 이미지 말고 일과 한 장 · 오려 쓰는 카드와 용지 방향 · 한 장에 몇 장 · 카드 크기를 고를 수 있는지. 끄면 카드 한 장씩만",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   FREE_WEEKLY_REPORT(
     ConfigGroup.PLAN_FREE, "주간 리포트",
     "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
@@ -428,6 +433,11 @@ public enum ConfigKey {
   PRO_CARD_EXPORT_ALL_THEMES(
     ConfigGroup.PLAN_PRO, "카드 내보내기 디자인 테마",
     "Pro가 카드 내보내기에서 모든 디자인 테마를 고를 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_CARD_EXPORT_ALL_LAYOUTS(
+    ConfigGroup.PLAN_PRO, "카드 내보내기 형태·배치",
+    "Pro가 일과 한 장 · 오려 쓰는 카드와 용지 방향 · 한 장에 몇 장 · 카드 크기를 고를 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
   PRO_WEEKLY_REPORT(

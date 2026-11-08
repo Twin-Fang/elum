@@ -41,6 +41,7 @@ class PlanAccess {
   bool get isPro => entitlements.isPro;
   bool get canExportCardsWithoutWatermark => entitlements.canExportCardsWithoutWatermark;
   bool get canUseAllCardDesignThemes => entitlements.canUseAllCardDesignThemes;
+  bool get canUseAllCardExportLayouts => entitlements.canUseAllCardExportLayouts;
   bool get canViewWeeklyReport => entitlements.canViewWeeklyReport;
   bool get canTranslateRoutines => entitlements.canTranslateRoutines;
   bool get canScheduleRoutines => entitlements.canScheduleRoutines;

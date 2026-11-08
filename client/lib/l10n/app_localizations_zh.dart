@@ -3521,6 +3521,55 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get cardExportFormatRow => '형태';
+
+  @override
+  String get cardExportLayoutSection => '배치';
+
+  @override
+  String get cardExportStyleSection => '꾸밈';
+
+  @override
+  String get cardExportOrientationRow => '용지 방향';
+
+  @override
+  String get cardExportOrientationSheetTitle => '용지를 어떻게 놓을까요?';
+
+  @override
+  String get cardExportOrientationPortrait => '세로';
+
+  @override
+  String get cardExportOrientationLandscape => '가로';
+
+  @override
+  String get cardExportPerPageRow => '한 장에';
+
+  @override
+  String get cardExportCardSizeRow => '카드 크기';
+
+  @override
+  String get cardExportCardSizeSheetTitle => '카드를 얼마나 크게 넣을까요?';
+
+  @override
+  String get cardExportCardSizeFit => '꽉 차게';
+
+  @override
+  String get cardExportCardSizeMedium => '보통';
+
+  @override
+  String get cardExportCardSizeSmall => '작게';
+
+  @override
+  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 형태예요';
+
+  @override
+  String get cardExportUpsellTitle => 'Pro면 원하는 대로 받을 수 있어요';
+
+  @override
+  String get cardExportUpsellBody =>
+      '일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요';
+
+  @override
   String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
 
   @override
@@ -3561,6 +3610,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planBenefitCardExportAllThemes => '인쇄 디자인 전부';
+
+  @override
+  String get planBenefitCardExportAllLayouts => '일과 한 장·오려 쓰는 카드 인쇄';
 
   @override
   String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
@@ -4511,4 +4563,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
+
+  @override
+  String get proTeaserCardLayoutTitle => '인쇄용 카드를 원하는 대로 받아요';
+
+  @override
+  String get proTeaserCardLayoutBenefit =>
+      '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
 }

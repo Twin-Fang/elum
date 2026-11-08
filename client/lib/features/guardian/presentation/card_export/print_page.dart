@@ -6,10 +6,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../domain/card_export_options.dart';
 
-/// 인쇄 지면 크기 (포인트). A4 = 595 × 842
+/// 인쇄 지면 크기 (포인트). A4 세로 595 × 842 · 가로 842 × 595
 abstract final class PrintPageSize {
   static const a4 = Size(595, 842);
+  static const a4Landscape = Size(842, 595);
+
+  /// 용지 방향 > A4 크기
+  static Size a4Of(PaperOrientation orientation) =>
+      orientation == PaperOrientation.landscape ? a4Landscape : a4;
 
   /// 카드 한 장 이미지 (앱 카드 333×410 비율 + 아래 띠)
   static const cardImage = Size(333, 440);
@@ -99,8 +105,8 @@ class _Footer extends StatelessWidget {
   final bool shouldShowPictogramCredit;
   final bool shouldShowEmojiCredit;
 
-  /// 로고 높이 (포인트)
-  static const _logoHeight = 16.0;
+  /// 로고 높이 (포인트, 카드 한 장 이미지 폭 333 에서도 띠 한 줄에 들어가는 크기)
+  static const _logoHeight = 24.0;
 
   /// 출처 글이 차지할 몫 (Spacer 1 대비, 로고 띠보다 넓게)
   static const _creditFlex = 4;
