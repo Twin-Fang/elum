@@ -2,6 +2,11 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.ControlTowerAttentionItem;
+import com.chuseok22.elumserver.admin.application.dto.response.ControlTowerAttentionLevel;
+import com.chuseok22.elumserver.admin.application.dto.response.ControlTowerAttentionResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.ControlTowerAttentionSource;
+import com.chuseok22.elumserver.admin.application.dto.response.ControlTowerIntegrationPanel;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsEditorView;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingsSectionLink;
@@ -116,6 +121,36 @@ class AdminSettingsTemplateTest {
       .contains("data-refresh-url=\"/admin/settings\"");
     assertThat(html).contains("2026-10-18 09:05").contains("· admin").contains("실증");
     assertThat(html).contains("기본값과 다름");
+  }
+
+  @Test
+  @DisplayName("시스템 설정: 관제소 연동 칸에 켜짐·토큰 설정 여부·마지막 수집·항목 미리보기가 그려지고 토큰 값은 없다")
+  void settingsPage_rendersControlTowerPanel() {
+    ControlTowerAttentionResponse preview = ControlTowerAttentionResponse.of(
+      new ControlTowerAttentionSource("elum-server", "2.87.2", "production", "https://api.elum.example"),
+      "2026-11-08T03:00:00Z",
+      List.of(ControlTowerAttentionItem.count("feedback.new", "새 의견", 2, ControlTowerAttentionLevel.INFO, "/admin/feedback"),
+        ControlTowerAttentionItem.gauge("budget.daily", "오늘 AI 비용", 1.5, null, "USD", ControlTowerAttentionLevel.OK,
+          "/admin/settings/ai")));
+    Map<String, Object> model = settingsModel(List.of());
+    model.put("controlTowerPanel", new ControlTowerIntegrationPanel(true, true, true,
+      LocalDateTime.of(2026, 11, 8, 12, 1), preview, null));
+
+    String html = render("admin/settings", model);
+
+    assertThat(html).contains("data-control-tower-panel").contains("관제소 연동");
+    assertThat(html).contains("켜짐").contains("설정됨").contains("2026-11-08 12:01");
+    assertThat(html).contains("data-item-key=\"feedback.new\"").contains("2건").contains("badge-info");
+    assertThat(html).contains("data-item-key=\"budget.daily\"").contains("$1.50 (상한 꺼짐)");
+    assertThat(html).contains("data-open-key=\"CONTROL_TOWER_ATTENTION_ENABLED\"");
+  }
+
+  @Test
+  @DisplayName("시스템 설정: 관제소 칸 값이 없으면 칸만 빠지고 화면은 그려진다")
+  void settingsPage_withoutControlTowerPanel_stillRenders() {
+    String html = render("admin/settings", settingsModel(List.of()));
+
+    assertThat(html).contains("지금 적용 중").doesNotContain("data-control-tower-panel");
   }
 
   @Test

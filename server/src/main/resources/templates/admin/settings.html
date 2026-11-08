@@ -6,7 +6,7 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">시스템 설정</h1>
-      <p class="text-base-content/60">앱 점검·버전, 대기 시간, 언어, 회원, 사용 한도, 신고 메일이에요. 바꾸면 최대 30초 안에 모든 서버에 반영돼요.</p>
+      <p class="text-base-content/60">앱 점검·버전, 대기 시간, 언어, 회원, 사용 한도, 신고 메일, 관제소 연동이에요. 바꾸면 최대 30초 안에 모든 서버에 반영돼요.</p>
     </div>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">저장했어요.</div>
@@ -15,6 +15,10 @@
     <section th:replace="~{admin/fragments/settings-parts :: highlights(${overview})}"></section>
 
     <section th:replace="~{admin/fragments/settings-parts :: sectionLinks(${sectionLinks})}"></section>
+
+    <th:block th:if="${controlTowerPanel != null}">
+      <section th:replace="~{admin/fragments/control-tower-panel :: panel(${controlTowerPanel})}"></section>
+    </th:block>
 
     <div th:replace="~{admin/fragments/settings-parts :: editor(${editor}, '앱·회원·한도 설정')}"></div>
   </main>

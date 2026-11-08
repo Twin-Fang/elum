@@ -30,7 +30,7 @@ public enum SettingsSection {
   /// 설정 묶음 > 그 묶음을 고치는 화면
   public static SettingsSection of(ConfigGroup group) {
     return switch (group) {
-      case MEMBER, USAGE_LIMIT, APP_CONTROL, APP_TUNING, LANGUAGE, MAIL -> SYSTEM;
+      case MEMBER, USAGE_LIMIT, APP_CONTROL, APP_TUNING, LANGUAGE, MAIL, CONTROL_TOWER -> SYSTEM;
       case GEMINI_TEXT, GEMINI_IMAGE, IMAGE_PROVIDER, TEXT_PROVIDER, PRICING, AI_BUDGET -> AI;
       case PLAN_FREE, PLAN_PRO, SIGNUP_PRO_EVENT, EXISTING_MEMBER_PRO_GIFT, SUBSCRIPTION_STORE -> PLAN;
       case AD_REWARD -> AD_REWARD;

@@ -46,7 +46,8 @@ class AdminConfigControllerMemberIdsTest {
       mock(TextClientRouter.class), mock(PromptLocaleGate.class), mock(SystemConfigOverviewService.class),
       memberPickerService,
       mock(com.chuseok22.elumserver.admin.application.service.AdminTextProviderService.class),
-      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SettingsEditorService.class));
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SettingsEditorService.class),
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.ControlTowerAttentionService.class));
     when(memberPickerService.findExisting(any())).thenReturn(List.of(
       new MemberPickerItem(EXISTING_MEMBER_ID, "tester", "시험", "ACTIVE", "활성")));
   }
