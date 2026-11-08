@@ -9,17 +9,21 @@ class _DevToolsSheet extends StatefulWidget {
     required this.onClose,
     required this.onNavigate,
     required this.navigatorContext,
+    required this.currentLocation,
   });
 
   final VoidCallback onClose;
   final void Function(String route) onNavigate;
   final BuildContext? Function() navigatorContext;
 
+  /// 지금 라우터 위치 (상태 복사에 담음)
+  final String? Function() currentLocation;
+
   @override
   State<_DevToolsSheet> createState() => _DevToolsSheetState();
 }
 
-/// 시트 화면: 메뉴 + 하위 화면 13개 (제목은 [title])
+/// 시트 화면: 메뉴 + 하위 화면 12개 (제목은 [title])
 enum _DevView {
   menu('개발자 도구'),
   server('서버 바꾸기'),
@@ -27,12 +31,11 @@ enum _DevView {
   appStatus('앱 상태 흉내'),
   notice('공지 흉내'),
   push('푸시 알림 흉내'),
-  networkFault('실패 흉내'),
+  networkFault('요청 실패 흉내'),
   navigate('화면 이동'),
   locale('언어 강제'),
-  plan('요금제 흉내'),
   logs('로그'),
-  dump('상태 덤프'),
+  dump('전체 값 보기'),
   confirmReset('회원을 삭제할까요?'),
   confirmLogout('로그아웃할까요?');
 
@@ -82,7 +85,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
                   maxHeight: (MediaQuery.sizeOf(context).height - keyboardInset) * 0.85,
                 ),
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: _DevPalette.sheetBackground,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: SafeArea(
@@ -92,7 +95,14 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
                     children: [
                       const _Handle(),
                       _header(),
-                      Flexible(child: _body()),
+                      // 상단 안전영역 여백이 목록에 한 번 더 붙어 제목 아래 빈 칸이 생기지 않게 지움
+                      Flexible(
+                        child: MediaQuery.removePadding(
+                          context: context,
+                          removeTop: true,
+                          child: _view == _DevView.menu ? _body() : _SubViewCard(child: _body()),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -124,10 +134,19 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
           else
             const SizedBox(width: 48),
           Expanded(
-            child: Text(
-              _view.title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            child: Column(
+              children: [
+                Text(
+                  _view.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _DevPalette.title),
+                ),
+                if (_view == _DevView.menu)
+                  const Text(
+                    '테스트 빌드 전용 · 이 기기에만 적용',
+                    style: TextStyle(fontSize: 11, color: _DevPalette.caption),
+                  ),
+              ],
             ),
           ),
           IconButton(
@@ -143,6 +162,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
         _DevView.menu => _DevMenu(
             onSelect: (v) => setState(() => _view = v),
             onRestartApp: _closeAndRestartApp,
+            currentLocation: widget.currentLocation,
           ),
         _DevView.server => _ServerView(onRestartApp: _closeAndRestartApp),
         _DevView.testAccounts => _TestAccountView(
@@ -162,9 +182,8 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             onNavigate: widget.onNavigate,
           ),
         _DevView.locale => const _LocaleView(),
-        _DevView.plan => const _PlanOverrideView(),
         _DevView.logs => const _LogViewer(),
-        _DevView.dump => const _DumpView(),
+        _DevView.dump => _DumpView(currentLocation: widget.currentLocation),
         _DevView.confirmReset => _ConfirmResetView(
             onCancel: _backToMenu,
             onDone: widget.onClose,
@@ -178,152 +197,20 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       };
 }
 
-/// 기능 목록: 묶음 7개 (서버와 계정, 이 기기에서만 흉내, 화면과 언어, 기록, 크래시 보내기, 분석 보내기, 위험)
-class _DevMenu extends ConsumerStatefulWidget {
-  const _DevMenu({required this.onSelect, required this.onRestartApp});
+/// 하위 화면 틀: 회색 시트 위 흰 둥근 카드
+class _SubViewCard extends StatelessWidget {
+  const _SubViewCard({required this.child});
 
-  final ValueChanged<_DevView> onSelect;
-  final void Function(BuildContext context) onRestartApp;
+  final Widget child;
 
-  @override
-  ConsumerState<_DevMenu> createState() => _DevMenuState();
-}
-
-class _DevMenuState extends ConsumerState<_DevMenu> {
   @override
   Widget build(BuildContext context) {
-    final serverAddress = AppConfig.isProductionApiServer
-        ? '운영 ${Uri.tryParse(AppConfig.apiBaseUrl)?.host ?? ''}'
-        : AppConfig.apiBaseUrl;
-    final serverLabel = '$serverAddress · ${_apiBaseUrlSourceLabel(AppConfig.apiBaseUrlSource)}';
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        const _Section('서버와 계정'),
-        _Tile(
-          icon: Icons.dns_outlined,
-          label: '서버 바꾸기',
-          subtitle: '지금: $serverLabel',
-          onTap: () => widget.onSelect(_DevView.server),
-        ),
-        _Tile(
-          icon: Icons.badge_outlined,
-          label: '테스트 계정',
-          subtitle: AppConfig.isProductionApiServer
-              ? '운영 서버에서는 쓸 수 없음 (서버를 먼저 바꾸기)'
-              : '소셜 로그인 없이 새 계정 만들기·바꾸기',
-          onTap: () => widget.onSelect(_DevView.testAccounts),
-        ),
-        _Tile(
-          icon: Icons.logout,
-          label: '로그아웃',
-          subtitle: '계정은 남기고 세션만 끊는다',
-          onTap: () => widget.onSelect(_DevView.confirmLogout),
-        ),
-        const _Section('이 기기에서만 흉내 (다른 사용자 영향 없음)'),
-        _Tile(
-          icon: Icons.system_update_outlined,
-          label: '앱 상태',
-          subtitle: '업데이트 권유·강제 업데이트·점검 — 지금: ${DevSimulation.appStatus.value.label}',
-          onTap: () => widget.onSelect(_DevView.appStatus),
-        ),
-        _Tile(
-          icon: Icons.campaign_outlined,
-          label: '공지',
-          subtitle: '숨긴 공지 다시 보기·견본 공지 띄우기',
-          onTap: () => widget.onSelect(_DevView.notice),
-        ),
-        _Tile(
-          icon: Icons.notifications_active_outlined,
-          label: '푸시 알림',
-          subtitle: '종류별 배너 띄우기·눌러서 이동',
-          onTap: () => widget.onSelect(_DevView.push),
-        ),
-        _Tile(
-          icon: Icons.wifi_off_outlined,
-          label: '실패',
-          subtitle: '네트워크 끊김·지연·서버 오류 — 지금: ${DevSimulation.networkFault.value.label}',
-          onTap: () => widget.onSelect(_DevView.networkFault),
-        ),
-        _Tile(
-          icon: Icons.workspace_premium_outlined,
-          label: '요금제 흉내',
-          subtitle: 'Free·Pro 화면 확인 — 지금: ${ref.watch(devPlanOverrideProvider).label}',
-          onTap: () => widget.onSelect(_DevView.plan),
-        ),
-        _Tile(
-          icon: Icons.restart_alt,
-          label: '처음 한 번만 보이는 것 다시 보기',
-          subtitle: '코치마크·공지 숨김·업데이트 권유 기록을 지우고 앱을 다시 띄움',
-          onTap: _resetFirstTimeRecords,
-        ),
-        const _Section('화면과 언어'),
-        _Tile(
-          icon: Icons.navigation_outlined,
-          label: '화면 이동',
-          subtitle: '온보딩 단계·보호자 홈·이룸이 화면',
-          onTap: () => widget.onSelect(_DevView.navigate),
-        ),
-        _Tile(
-          icon: Icons.language,
-          label: '언어 강제',
-          subtitle: '기기 언어와 무관하게 앱 언어를 고른다',
-          onTap: () => widget.onSelect(_DevView.locale),
-        ),
-        _SwitchTile(
-          icon: Icons.speed,
-          label: '온보딩 건너뛰기',
-          subtitle: '이번 실행만 (앱을 끄면 .env 값으로 돌아감)',
-          isOn: AppConfig.skipOnboarding,
-          onChanged: (value) => setState(() => AppConfig.skipOnboarding = value),
-        ),
-        const _Section('기록'),
-        _Tile(
-          icon: Icons.article_outlined,
-          label: '로그 보기',
-          subtitle: '최근 ${DevLogBuffer.maxLines}줄',
-          onTap: () => widget.onSelect(_DevView.logs),
-        ),
-        // 로그 용량은 실시간으로 바뀐다 — 얼마나 찼는지 여기서 바로 보인다
-        ValueListenableBuilder<int>(
-          valueListenable: DevLogFile.sizeBytes,
-          builder: (context, bytes, _) => _Tile(
-            icon: Icons.download_outlined,
-            label: '상태 덤프',
-            subtitle: '저장값·세션·설정·로그 보기와 파일 내보내기 '
-                '(${DevStateDump.formatBytes(bytes)} / 2.00 MB)',
-            onTap: () => widget.onSelect(_DevView.dump),
-          ),
-        ),
-        _Tile(
-          icon: Icons.visibility_off_outlined,
-          label: '디버깅 버튼 숨기기',
-          subtitle: '앱을 완전히 종료했다 켜면 다시 보인다',
-          onTap: DevToolsVisibility.hide,
-        ),
-        const _Section('크래시 보내기'),
-        const _CrashReportingTiles(),
-        const _Section('분석 보내기'),
-        const _AnalyticsTiles(),
-        const _Section('위험'),
-        _Tile(
-          icon: Icons.person_remove_outlined,
-          label: '회원삭제',
-          subtitle: '서버 계정과 이 기기 저장값을 지우고 처음부터',
-          isDestructive: true,
-          onTap: () => widget.onSelect(_DevView.confirmReset),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: ColoredBox(color: _DevPalette.groupBackground, child: child),
+      ),
     );
-  }
-
-  // 코치마크·공지 숨김·업데이트 권유 기록 초기화 > 앱 다시 띄우기 (화면들이 처음부터 다시 판단)
-  Future<void> _resetFirstTimeRecords() async {
-    final storage = ref.read(localStorageProvider);
-    await storage.resetCoachMarks();
-    await storage.clearNoticeHidden();
-    await storage.setUpdateSuggestionShownRecord('');
-    if (!mounted) return;
-    widget.onRestartApp(context);
   }
 }
