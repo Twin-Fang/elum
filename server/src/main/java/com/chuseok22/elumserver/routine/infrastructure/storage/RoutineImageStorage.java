@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -100,6 +102,14 @@ public interface RoutineImageStorage {
   void delete(String key);
 
   ImageContent read(String key);
+
+  /**
+   * 쓰지 않는 그림 정리 (#1216): 기준 시각보다 오래됐고 열쇠 목록에 없는 파일 삭제 > 빈 폴더 삭제 > 지운 개수
+   * 기본 구현은 아무것도 지우지 않음 (운영은 로컬 디스크 구현만 정리)
+   */
+  default int deleteUnreferenced(Collection<String> referencedKeys, Instant cutoff) {
+    return 0;
+  }
 
   record ImageContent(byte[] bytes, String contentType) {
 

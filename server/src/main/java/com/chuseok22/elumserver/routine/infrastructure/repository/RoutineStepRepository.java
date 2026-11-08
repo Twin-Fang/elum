@@ -42,6 +42,18 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
    */
   boolean existsByImagePathAndIdNot(String imagePath, String id);
 
+  /**
+   * 카드가 쓰는 그림 열쇠 전체 (쓰지 않는 그림 정리용, #1216)
+   */
+  @Query("select s.imagePath from RoutineStep s where s.imagePath is not null")
+  List<String> findAllImagePaths();
+
+  /**
+   * 카드가 쓰는 그림 후보 열쇠 전체 (쓰지 않는 그림 정리용, #1216)
+   */
+  @Query("select s.imageCandidatePath from RoutineStep s where s.imageCandidatePath is not null")
+  List<String> findAllImageCandidatePaths();
+
   // 보호자 목소리 열쇠를 아직 가리키는 카드가 있는가 (일과 복제는 같은 열쇠를 공유, #787)
   boolean existsByGuardianVoicePath(String guardianVoicePath);
 
