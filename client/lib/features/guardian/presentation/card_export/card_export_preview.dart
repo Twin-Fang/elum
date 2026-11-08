@@ -10,14 +10,12 @@ import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
-import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
-import 'card_export_theme_teaser.dart';
 import 'print_sheets.dart';
 
-/// 인쇄용 미리 보기: (Pro 테마 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
+/// 인쇄용 미리 보기: (Pro 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
 class CardExportPreview extends ConsumerWidget {
   const CardExportPreview({
     super.key,
@@ -29,7 +27,7 @@ class CardExportPreview extends ConsumerWidget {
     required this.hasWatermark,
     required this.shouldPromoteNoWatermark,
     required this.onToggleCard,
-    this.teaserSheet,
+    this.teaser,
   });
 
   static const _sectionGap = 24.0;
@@ -47,23 +45,20 @@ class CardExportPreview extends ConsumerWidget {
   final bool shouldPromoteNoWatermark;
   final ValueChanged<String> onToggleCard;
 
-  /// Free 가 미리 보기로 보고 있는 Pro 테마의 첫 지면, 없으면 null
-  final PrintSheet? teaserSheet;
+  /// Free 가 잠긴 값을 골랐을 때 그 값의 Pro 미리 보기 판 ([CardExportProTeaser]), 없으면 null
+  final Widget? teaser;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
     final caption = context.typo.caption.copyWith(color: colors.textSecondary);
-    final teaser = teaserSheet;
+    final teaser = this.teaser;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (teaser != null) ...[
-          CardExportThemeTeaser(
-            sheet: teaser,
-            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.cardExportAllThemes),
-          ),
+          teaser,
           SizedBox(height: _sectionGap.h),
         ],
         Text(

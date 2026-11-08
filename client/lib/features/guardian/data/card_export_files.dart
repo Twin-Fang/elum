@@ -35,14 +35,15 @@ class CardExportFiles {
     }
   }
 
-  /// A4 PNG 여러 장 > PDF (쪽마다 그림 한 장을 꽉 채움 · 여백은 지면이 이미 들고 있음)
-  Future<Uint8List> buildA4Pdf(List<Uint8List> pagePngs) async {
+  /// A4 PNG 여러 장 > PDF (쪽마다 그림 한 장을 꽉 채움 · 여백은 지면이 이미 들고 있음). [isLandscape] 면 A4 가로
+  Future<Uint8List> buildA4Pdf(List<Uint8List> pagePngs, {bool isLandscape = false}) async {
     final document = pw.Document();
+    final pageFormat = isLandscape ? PdfPageFormat.a4.landscape : PdfPageFormat.a4;
     for (final png in pagePngs) {
       final image = pw.MemoryImage(png);
       document.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: pageFormat,
           margin: pw.EdgeInsets.zero,
           build: (_) => pw.Image(image, fit: pw.BoxFit.fill),
         ),
@@ -71,12 +72,12 @@ class CardExportFiles {
   /// 기기 인쇄 화면 (iOS AirPrint · Android 인쇄 서비스) > 결과 3개
   ///
   /// `layoutPdf` 는 취소해도 false 라, 인쇄 불가 판정은 `Printing.info().canPrint` 하나로만 함
-  Future<CardPrintOutcome> printPdf({required Uint8List pdf, required String jobName}) async {
+  Future<CardPrintOutcome> printPdf({required Uint8List pdf, required String jobName, bool isLandscape = false}) async {
     final info = await Printing.info();
     if (!info.canPrint) return CardPrintOutcome.unavailable;
     final isPrinted = await Printing.layoutPdf(
       name: jobName,
-      format: PdfPageFormat.a4,
+      format: isLandscape ? PdfPageFormat.a4.landscape : PdfPageFormat.a4,
       // 실제 크기로 찍게 A4 그대로 넘김 (용지에 맞춤 축소를 막아 오려 쓰는 카드 크기 유지)
       usePrinterSettings: false,
       onLayout: (_) async => pdf,

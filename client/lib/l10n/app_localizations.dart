@@ -6326,11 +6326,107 @@ abstract class AppLocalizations {
   /// **'이룸'**
   String get cardExportWatermarkText;
 
-  /// 오려 쓰는 카드 한 쪽 장수 칩
+  /// 오려 쓰는 카드 한 쪽 장수 (줄 값 · 시트 고르기)
   ///
   /// In ko, this message translates to:
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
+
+  /// 인쇄용으로 받기 줄: 받는 형태 (누르면 형태 시트) #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'형태'**
+  String get cardExportFormatRow;
+
+  /// 인쇄용으로 받기 묶음 머리: 용지 방향 · 장수 · 카드 크기 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'배치'**
+  String get cardExportLayoutSection;
+
+  /// 인쇄용으로 받기 묶음 머리: 디자인 · 카드 문장 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'꾸밈'**
+  String get cardExportStyleSection;
+
+  /// 인쇄용으로 받기 줄: A4 세로·가로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'용지 방향'**
+  String get cardExportOrientationRow;
+
+  /// 용지 방향 고르기 시트 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'용지를 어떻게 놓을까요?'**
+  String get cardExportOrientationSheetTitle;
+
+  /// 용지 방향 값: 세로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'세로'**
+  String get cardExportOrientationPortrait;
+
+  /// 용지 방향 값: 가로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'가로'**
+  String get cardExportOrientationLandscape;
+
+  /// 인쇄용으로 받기 줄: 오려 쓰는 카드 한 쪽 장수 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'한 장에'**
+  String get cardExportPerPageRow;
+
+  /// 인쇄용으로 받기 줄: 카드 크기 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 크기'**
+  String get cardExportCardSizeRow;
+
+  /// 카드 크기 고르기 시트 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 얼마나 크게 넣을까요?'**
+  String get cardExportCardSizeSheetTitle;
+
+  /// 카드 크기 값: 칸에 맞춰 가장 크게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'꽉 차게'**
+  String get cardExportCardSizeFit;
+
+  /// 카드 크기 값: 조금 작게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'보통'**
+  String get cardExportCardSizeMedium;
+
+  /// 카드 크기 값: 자를 여백을 넓게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'작게'**
+  String get cardExportCardSizeSmall;
+
+  /// Pro 를 살 수 없을 때 잠긴 형태·배치를 누르면 뜨는 안내 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 형태예요'**
+  String get cardExportProLayoutLocked;
+
+  /// Free 인쇄용으로 받기 아래 Pro 안내 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro면 원하는 대로 받을 수 있어요'**
+  String get cardExportUpsellTitle;
+
+  /// Free 인쇄용으로 받기 아래 Pro 안내 한 줄 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요'**
+  String get cardExportUpsellBody;
 
   /// 결제 직전 보호자 암호 확인 화면 설명
   ///
@@ -6415,6 +6511,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'인쇄 디자인 전부'**
   String get planBenefitCardExportAllThemes;
+
+  /// 혜택 줄: 카드 내보내기 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장·오려 쓰는 카드 인쇄'**
+  String get planBenefitCardExportAllLayouts;
 
   /// 혜택 묶음 아래 안내
   ///
@@ -7998,6 +8100,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'인쇄용 카드를 더 예쁘게 받아요'**
   String get proTeaserCardThemeTitle;
+
+  /// Pro 미리보기 제목: 인쇄 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드를 원하는 대로 받아요'**
+  String get proTeaserCardLayoutTitle;
+
+  /// Pro 미리보기 한 줄: 인쇄 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요'**
+  String get proTeaserCardLayoutBenefit;
 }
 
 class _AppLocalizationsDelegate

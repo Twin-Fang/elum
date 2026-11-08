@@ -42,6 +42,9 @@ enum PlanBenefit {
 
   /// 인쇄용 카드 디자인 테마 고르기
   cardExportAllThemes,
+
+  /// 인쇄용 일과 한 장 · 오려 쓰는 카드와 용지 방향 · 장수 · 카드 크기
+  cardExportAllLayouts,
 }
 
 /// 요금제 화면 혜택 묶음 4개 (#1189 시안 A). 순서 = 화면 순서, [benefits] = 묶음 안 순서
@@ -52,6 +55,7 @@ enum PlanBenefitGroup {
   prettierCards([
     PlanBenefit.aiImageStyles,
     PlanBenefit.freeImageRegenerate,
+    PlanBenefit.cardExportAllLayouts,
     PlanBenefit.cardExportAllThemes,
     PlanBenefit.cardExportWithoutWatermark,
   ]),

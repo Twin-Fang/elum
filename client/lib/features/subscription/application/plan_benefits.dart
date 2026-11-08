@@ -16,6 +16,7 @@ bool isPlanBenefitGranted(PlanBenefit benefit, PlanEntitlements entitlements) =>
   PlanBenefit.moreWeeklyCredits => entitlements.isPro,
   PlanBenefit.cardExportWithoutWatermark => entitlements.canExportCardsWithoutWatermark,
   PlanBenefit.cardExportAllThemes => entitlements.canUseAllCardDesignThemes,
+  PlanBenefit.cardExportAllLayouts => entitlements.canUseAllCardExportLayouts,
 };
 
 /// 요금제 화면 혜택 줄: Pro 요금제가 주고([proPlan]) 지금 계정은 못 쓰는 것만 (순서 = [PlanBenefit] 순서, [highlight] 는 맨 위)

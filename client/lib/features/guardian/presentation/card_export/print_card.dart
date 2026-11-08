@@ -49,6 +49,9 @@ class PrintCard extends StatelessWidget {
   static const _numberSize = 30.0;
   static const _pictogramInset = 4.0;
 
+  /// 큰 글자 테마의 그림 칸 폭 (카드 폭 대비)
+  static const _largeTextPictureWidthFactor = 0.75;
+
   /// 흑백 테마: 받은 그림(AI·사진)·앱 예시 그림을 회색으로 (Mulberry 픽토그램은 라이선스상 변형하지 않음)
   static const _grayscale = ColorFilter.matrix(<double>[
     0.2126, 0.7152, 0.0722, 0, 0, //
@@ -62,39 +65,44 @@ class PrintCard extends StatelessWidget {
     final style = _PrintCardStyle.of(options.theme, index, context.colors);
     // 그림이 없으면 그림 칸에 제목을 크게 넣으므로 아래 글 줄은 두지 않음 (같은 제목이 두 번 찍히지 않게)
     final hasText = options.shouldIncludeText && picture.hasPicture;
-    return Container(
-      decoration: BoxDecoration(
-        color: style.fill,
-        borderRadius: BorderRadius.circular(_radius),
-        border: Border.all(color: style.border, width: style.borderWidth),
-      ),
-      padding: const EdgeInsets.all(_inset),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: options.theme == CardDesignTheme.largeText ? 3 : 5,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(_radius - _inset / 2),
-                    child: _picture(context, style),
-                  ),
-                ),
-                if (shouldShowNumber)
-                  Positioned(left: 0, top: 0, child: _number(context, style)),
-              ],
-            ),
+    final pictureBox = Stack(
+      children: [
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_radius - _inset / 2),
+            child: _picture(context, style),
           ),
-          if (hasText) ...[
-            const SizedBox(height: _pictureToText),
-            Expanded(
-              flex: options.theme == CardDesignTheme.largeText ? 3 : 2,
-              child: _texts(context),
-            ),
-          ],
-        ],
+        ),
+        if (shouldShowNumber) Positioned(left: 0, top: 0, child: _number(context, style)),
+      ],
+    );
+    // 카드 모양 고정 (칸 모양과 무관, 남는 곳은 바깥 여백) > 그림 칸 4:3 고정 > 남는 높이에 글
+    return Center(
+      child: AspectRatio(
+        aspectRatio: printCardAspectRatio,
+        child: Container(
+          decoration: BoxDecoration(
+            color: style.fill,
+            borderRadius: BorderRadius.circular(_radius),
+            border: Border.all(color: style.border, width: style.borderWidth),
+          ),
+          padding: const EdgeInsets.all(_inset),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: hasText ? MainAxisAlignment.start : MainAxisAlignment.center,
+            children: [
+              // 큰 글자 테마는 그림 칸을 줄여 글 자리를 넓힘
+              FractionallySizedBox(
+                widthFactor: options.theme == CardDesignTheme.largeText ? _largeTextPictureWidthFactor : 1,
+                child: AspectRatio(aspectRatio: printCardPictureAspectRatio, child: pictureBox),
+              ),
+              if (hasText) ...[
+                const SizedBox(height: _pictureToText),
+                Expanded(child: _texts(context)),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

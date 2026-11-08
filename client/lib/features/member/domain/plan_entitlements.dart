@@ -11,6 +11,7 @@ class PlanEntitlements {
     this.isAdsRemoved = false,
     this.canExportCardsWithoutWatermark = false,
     this.canUseAllCardDesignThemes = false,
+    this.canUseAllCardExportLayouts = false,
     this.canViewWeeklyReport = false,
     this.canTranslateRoutines = false,
     this.canScheduleRoutines = false,
@@ -31,6 +32,7 @@ class PlanEntitlements {
     isAdsRemoved: true,
     canExportCardsWithoutWatermark: true,
     canUseAllCardDesignThemes: true,
+    canUseAllCardExportLayouts: true,
     canViewWeeklyReport: true,
     canTranslateRoutines: true,
     canScheduleRoutines: true,
@@ -53,6 +55,9 @@ class PlanEntitlements {
 
   /// 카드 내보내기에서 기본 말고 다른 디자인 테마를 고를 수 있는가 (`cardExportAllThemes`)
   final bool canUseAllCardDesignThemes;
+
+  /// 카드 내보내기에서 카드 한 장씩 말고 일과 한 장 · 오려 쓰는 카드와 용지 방향 · 장수 · 카드 크기를 고를 수 있는가 (`cardExportAllLayouts`)
+  final bool canUseAllCardExportLayouts;
 
   /// 주간 리포트를 볼 수 있는가 (`weeklyReport`)
   final bool canViewWeeklyReport;
@@ -91,6 +96,7 @@ class PlanEntitlements {
       isAdsRemoved: isEntitled('adsRemoved'),
       canExportCardsWithoutWatermark: isEntitled('cardExportWithoutWatermark'),
       canUseAllCardDesignThemes: isEntitled('cardExportAllThemes'),
+      canUseAllCardExportLayouts: isEntitled('cardExportAllLayouts'),
       canViewWeeklyReport: isEntitled('weeklyReport'),
       canTranslateRoutines: isEntitled('routineTranslate'),
       canScheduleRoutines: isEntitled('routineSchedule'),
@@ -109,6 +115,7 @@ class PlanEntitlements {
     isAdsRemoved,
     canExportCardsWithoutWatermark,
     canUseAllCardDesignThemes,
+    canUseAllCardExportLayouts,
     canViewWeeklyReport,
     canTranslateRoutines,
     canScheduleRoutines,

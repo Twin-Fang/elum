@@ -172,6 +172,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
       limitOf(plan, Entitlement.HISTORY_RETENTION_DAYS),
       isAllowed(plan, Entitlement.CARD_EXPORT_WITHOUT_WATERMARK),
       isAllowed(plan, Entitlement.CARD_EXPORT_ALL_THEMES),
+      isAllowed(plan, Entitlement.CARD_EXPORT_ALL_LAYOUTS),
       isAllowed(plan, Entitlement.WEEKLY_REPORT),
       isAllowed(plan, Entitlement.ROUTINE_TRANSLATE),
       isAllowed(plan, Entitlement.ROUTINE_SCHEDULE),

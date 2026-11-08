@@ -159,4 +159,5 @@ String planBenefitLabel(AppLocalizations l10n, PlanBenefit benefit) => switch (b
   PlanBenefit.moreWeeklyCredits => l10n.planBenefitMoreWeeklyCredits,
   PlanBenefit.cardExportWithoutWatermark => l10n.planBenefitCardExportWithoutWatermark,
   PlanBenefit.cardExportAllThemes => l10n.planBenefitCardExportAllThemes,
+  PlanBenefit.cardExportAllLayouts => l10n.planBenefitCardExportAllLayouts,
 };
