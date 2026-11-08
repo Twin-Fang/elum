@@ -70,6 +70,15 @@ public final class SecurityPaths {
    * API 체인에는 관리자 역할이 없으므로 "관리자만"이 아니라 전부 막음. 관리자 프롬프트 시험 화면은 서비스를 직접 부름
    */
   public static final String API_INTERNAL_MATCHER = "/api/internal/**";
+  /**
+   * 서버 성능 지표 (#1222). 같은 NAS 의 Prometheus 만 수집기 전용 토큰으로 부름
+   *
+   * <p>공개 도메인과 같은 포트라 체인 밖에 두면 누구나 읽음. 지표 경로 하나만 열고 나머지 actuator 는 전부 막음
+   */
+  public static final String ACTUATOR_MATCHER = "/actuator/**";
+  public static final String ACTUATOR_PROMETHEUS = "/actuator/prometheus";
+  // 서블릿 필터의 경로 앞부분 비교용 (요청 로그 숨김·5xx 급증 집계 제외)
+  public static final String ACTUATOR_PATH_PREFIX = "/actuator/";
 
   private SecurityPaths() {
   }

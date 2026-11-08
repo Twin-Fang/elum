@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.common.infrastructure.alert;
 
 import com.chuseok22.elumserver.common.application.alert.IncidentAlertService;
 import com.chuseok22.elumserver.common.application.alert.ServerErrorSurgeDetector;
+import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,6 +44,12 @@ public class ServerErrorSurgeFilter extends OncePerRequestFilter {
       return;
     }
     requestAttributes.setAttribute(ERROR_CODE_ATTRIBUTE, errorCode.name(), RequestAttributes.SCOPE_REQUEST);
+  }
+
+  // 지표 수집(30초마다, #1222)은 사용자 요청이 아님 > 급증 집계 제외
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return request.getRequestURI().startsWith(SecurityPaths.ACTUATOR_PATH_PREFIX);
   }
 
   @Override

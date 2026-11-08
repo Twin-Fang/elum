@@ -98,11 +98,28 @@ elum:
   migration:
     # NAS 스크립트가 결과 JSON·요청 파일을 주고받는 폴더 (/app 기준, 없으면 "동기화 정보 없음")
     sync-dir: ${ELUM_MIGRATION_SYNC_DIR:}
+  # 서버 성능 지표 수집기 전용 토큰 (#1222). 운영 값은 application-prod.yml(시크릿 APPLICATION_PROD_YML), 비면 /actuator/prometheus 도 401
+  metrics:
+    scrape-token: ${ELUM_METRICS_SCRAPE_TOKEN:}
   auth:
     legacy-password:
       # 구형 이름 가입 APK가 운영 DB에 계정을 다시 만들지 못하게 기본값을 닫아 둔다.
       # 로컬 E2E에서만 ELUM_AUTH_LEGACY_PASSWORD_ENABLED=true로 명시적으로 연다.
       enabled: ${ELUM_AUTH_LEGACY_PASSWORD_ENABLED:false}
+
+# 서버 성능 지표 (#1222). 웹 노출은 prometheus 하나 (헬스체크는 /healthz), 인증은 SecurityConfig actuator 체인
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    tags:
+      application: elum-server
+    distribution:
+      # 응답 시간 분위수(p95·p99)를 Prometheus 에서 계산하려면 히스토그램 버킷 필요
+      percentiles-histogram:
+        "[http.server.requests]": true
 
 springdoc:
   title: ELUM API

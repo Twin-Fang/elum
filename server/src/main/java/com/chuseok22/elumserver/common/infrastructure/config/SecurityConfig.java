@@ -11,10 +11,14 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
+import com.chuseok22.elumserver.common.infrastructure.security.MetricsScrapeTokenFilter;
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
@@ -28,6 +32,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -95,6 +101,36 @@ public class SecurityConfig {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider(adminUserDetailsService);
     provider.setPasswordEncoder(passwordEncoder());
     return new ProviderManager(provider);
+  }
+
+  /**
+   * actuator 체인 (#1222): 지표 경로만 수집기 토큰으로 열고 나머지 actuator 는 전부 막음
+   * 401 토큰 없음·불일치·설정 토큰 비어 있음, 403 토큰은 맞지만 지표 외 경로
+   */
+  @Bean
+  @Order(0)
+  public SecurityFilterChain actuatorSecurityFilterChain(
+    HttpSecurity http,
+    // 운영 값은 application-prod.yml(시크릿 APPLICATION_PROD_YML). 비면 지표도 401
+    @Value("${elum.metrics.scrape-token:}") String metricsScrapeToken
+  ) throws Exception {
+    http
+      .securityMatcher(SecurityPaths.ACTUATOR_MATCHER)
+      .csrf(csrf -> csrf.disable())
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.GET, SecurityPaths.ACTUATOR_PROMETHEUS)
+        .hasAuthority(MetricsScrapeTokenFilter.METRICS_SCRAPER_AUTHORITY)
+        .anyRequest().denyAll()
+      )
+      // 상태 코드만 (sendError 의 /error 재진입 없음)
+      .exceptionHandling(handling -> handling
+        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+        .accessDeniedHandler((request, response, exception) -> response.setStatus(HttpServletResponse.SC_FORBIDDEN))
+      )
+      .addFilterBefore(new MetricsScrapeTokenFilter(metricsScrapeToken), AnonymousAuthenticationFilter.class);
+
+    return http.build();
   }
 
   @Bean
