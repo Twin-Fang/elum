@@ -37,7 +37,8 @@ python3 image_metrics.py before after                               # 흰 배경
 | `card_cases.json` | 튜닝 입력 68건 (프롬프트를 고칠 때 본다) |
 | `card_cases_holdout.json` | 입력 180건. v5 검증에 썼고, 여기서 찾은 안전 결함으로 v6을 고쳐 지금은 회귀 확인용 |
 | `card_cases_holdout2.json` | 처음 보는 입력 110건 (프롬프트를 보지 않은 모델이 작성. 이 입력으로는 프롬프트를 고치지 않는다) |
-| `variants/cards/` | 변형. `이름.txt`는 운영 지시문 뒤에 덧붙이고, `이름.full.txt`는 전체를 교체한다. 최종안은 `v6_final.full.txt` |
+| `--case-file chips` | 일과 입력 화면 예시 칩 전체를 `routine-phrases_ko.properties` 에서 바로 읽음. 칩이나 지시문을 바꾸면 3회씩 돌려 카드 0장이 0건인지 본다 (#1226) |
+| `variants/cards/` | 변형. `이름.txt`는 운영 지시문 뒤에 덧붙이고, `이름.full.txt`는 전체를 교체한다. 최종안은 `v7_try_make.full.txt` (v6 + 일과 관련 입력은 꼭 카드를 만듦, #1226) |
 | `run_cards.py` | 호출, 채점, 보고서 |
 | `card_rules.py` | 채점 규칙 |
 | `card_report.py` | 두 실행 비교, 호출 없는 재채점 |
@@ -52,6 +53,7 @@ python3 run_cards.py --variant v6_final --repeat 2 --workers 4 --resume 폴더�
 python3 card_report.py 기준폴더 변형폴더                                     # 비교
 python3 card_report.py --regrade 폴더                                       # 호출 없이 재채점
 python3 card_verification.py 튜닝폴더 처음보는입력폴더                         # 항목별 검증표
+python3 run_cards.py --variant v7_try_make --case-file chips --repeat 3 --workers 4 --yes  # 예시 칩 전체
 ```
 
 - 호출 방식이 서버의 `output_config`와 다를 수 있어, 최종안은 운영 경로로 다시 확인한다.

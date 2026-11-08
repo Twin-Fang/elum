@@ -6,6 +6,7 @@
 """
 import argparse
 import json
+import re
 import sys
 import time
 from collections import Counter
@@ -24,9 +25,32 @@ PROVIDER_SETTING_KEYS = ["TEXT_PROVIDER_SELECTED", "CLAUDE_TEXT_MODEL", "CLAUDE_
                          "IMAGE_PROVIDER_SELECTED", "OPENAI_IMAGE_MODEL", "OPENAI_IMAGE_QUALITY"]
 
 
+# 예시 칩 원본: 서버 문구 파일 (사본을 두지 않음, #1226)
+CHIP_CASE_FILE = "chips"
+CHIP_PHRASES_FILE = lib.RESOURCES_DIR / "i18n" / "routine-phrases_ko.properties"
+CHIP_EXAMPLE_PATTERN = re.compile(r"^suggestion\.(\d+)\.example=(.*)$")
+CHIP_TEXT_PATTERN = re.compile(r"^suggestion\.(\d+)\.text=(.*)$")
+
+
+def load_chip_cases() -> list:
+    """routine-phrases_ko.properties 예시 칩 > 입력 세트 (카드 0장이면 실패)"""
+    text_by_number, example_by_number = {}, {}
+    for line in CHIP_PHRASES_FILE.read_text(encoding="utf-8").splitlines():
+        if match := CHIP_TEXT_PATTERN.match(line):
+            text_by_number[match[1]] = match[2]
+        elif match := CHIP_EXAMPLE_PATTERN.match(line):
+            example_by_number[match[1]] = match[2]
+    return [{"id": f"chip{number}", "demand": text_by_number.get(number, ""), "style": "예시칩",
+             "text": example, "goals": [], "must": [], "must_not": [], "order": [], "max_steps": 10}
+            for number, example in sorted(example_by_number.items())]
+
+
 def select_cases(args) -> list:
     """입력 세트 고르기 (id, 입력 방식, 요구 종류)"""
-    cases = json.loads((lib.TOOL_DIR / args.case_file).read_text(encoding="utf-8"))
+    if args.case_file == CHIP_CASE_FILE:
+        cases = load_chip_cases()
+    else:
+        cases = json.loads((lib.TOOL_DIR / args.case_file).read_text(encoding="utf-8"))
     if args.cases:
         wanted = set(args.cases.split(","))
         cases = [case for case in cases if case["id"] in wanted]
@@ -59,7 +83,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--variant", default="prod", help="variants/cards/<이름>.txt 를 운영 지시문 뒤에 덧붙여 시험")
     parser.add_argument("--effort", default=card_request.TEXT_EFFORT)
-    parser.add_argument("--case-file", default="card_cases.json", help="입력 세트 (처음 보는 입력: card_cases_holdout.json)")
+    parser.add_argument("--case-file", default="card_cases.json", help="입력 세트 (처음 보는 입력: card_cases_holdout.json, 예시 칩: chips)")
     parser.add_argument("--cases", default="")
     parser.add_argument("--style", default="")
     parser.add_argument("--demand", default="")
