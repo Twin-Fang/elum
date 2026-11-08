@@ -17,8 +17,11 @@ abstract final class PrintPageSize {
   static Size a4Of(PaperOrientation orientation) =>
       orientation == PaperOrientation.landscape ? a4Landscape : a4;
 
-  /// 카드 한 장 이미지 (앱 카드 333×410 비율 + 아래 띠)
-  static const cardImage = Size(333, 440);
+  /// 카드 한 장 이미지 (인쇄 카드 + 아래 띠 자리)
+  static const cardImage = Size(printCardWidth, printCardHeight + _cardImageFooterHeight);
+
+  /// 카드 한 장 이미지의 아래 띠 자리 (로고·출처 한 줄)
+  static const _cardImageFooterHeight = 30.0;
 
   /// 굽는 해상도: A4 300dpi (2480px) · 카드 이미지 긴 변 약 2600px
   static const a4PixelRatio = 2480 / 595;

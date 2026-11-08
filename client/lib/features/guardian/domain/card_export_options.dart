@@ -67,8 +67,12 @@ enum CardSize {
   final double scale;
 }
 
-/// 인쇄 카드 가로:세로 = 앱 카드(333×410). 어떤 배치에서도 이 비율을 지키고 크기만 바뀜
-const printCardAspectRatio = 333 / 410;
+/// 인쇄 카드 기준 크기 (포인트, 앱 카드 333×410). 비율·카드 한 장 이미지 크기의 원본
+const printCardWidth = 333.0;
+const printCardHeight = 410.0;
+
+/// 인쇄 카드 가로:세로. 어떤 배치에서도 이 비율을 지키고 크기만 바뀜
+const printCardAspectRatio = printCardWidth / printCardHeight;
 
 /// 인쇄 카드 그림 칸 가로:세로 (AI 그림 4:3)
 const printCardPictureAspectRatio = 4 / 3;
@@ -97,9 +101,6 @@ class CardExportOptions {
 
   /// 카드 한 장씩에서 뺀 카드 id. 처음엔 비어 있음(전부 선택)
   final Set<String> excludedCardIds;
-
-  /// 형태·배치 권한(`cardExportAllLayouts`)이 있어야 하는 설정인가 (Free 는 카드 한 장씩만)
-  bool get requiresAllLayouts => format != CardExportFormat.cardImages;
 
   /// 권한 밖 설정 > Free 가 쓸 수 있는 값으로 (Pro 가 끝난 뒤 남은 설정이 파일로 나가지 않게)
   CardExportOptions limitedTo({required bool canUseAllLayouts, required bool canUseAllThemes}) => copyWith(
