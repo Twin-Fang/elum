@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.common.infrastructure.storage;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,6 +58,35 @@ public final class StoredImageArea {
     } catch (IllegalArgumentException | ObjectStoreException e) {
       log.warn("[image store] delete folder failed : area={}, error={}", areaName, e.getClass().getSimpleName());
     }
+  }
+
+  /**
+   * 구역 안 객체 전부 > (열쇠, 마지막 수정 시각). 목록 실패는 던짐 (정리 작업이 지우지 않고 멈추게)
+   *
+   * @throws ObjectStoreException 저장소 장애
+   */
+  public List<StoredKey> listKeys() {
+    String areaPrefix = areaName + SEPARATOR;
+    return objectStore.list(areaName).stream()
+      .filter(object -> object.objectName().startsWith(areaPrefix))
+      .map(object -> new StoredKey(object.objectName().substring(areaPrefix.length()), object.lastModified()))
+      .toList();
+  }
+
+  /**
+   * 열쇠 > 구역 기준 열쇠 (옛 형식 전체 경로도 같은 모양으로). 구역 밖이면 빈 값
+   */
+  public Optional<String> normalizedKeyOf(String key) {
+    try {
+      return Optional.of(toObjectName(key).substring(areaName.length() + SEPARATOR.length()));
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();
+    }
+  }
+
+  /// 구역 안 객체 1개: 열쇠, 마지막 수정 시각
+  public record StoredKey(String key, Instant lastModified) {
+
   }
 
   // 열쇠 > 객체 이름. 옛 DB 값은 경로 전체(data/routine-images/abc/1.png)라 구역 뒤만 씀

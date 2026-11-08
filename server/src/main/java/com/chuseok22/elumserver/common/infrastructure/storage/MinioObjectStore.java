@@ -11,6 +11,8 @@ import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -98,6 +100,22 @@ public class MinioObjectStore implements ObjectStore {
       throw e;
     } catch (Exception e) {
       throw new ObjectStoreException("minio delete folder failed : " + folderName, e);
+    }
+  }
+
+  @Override
+  public List<StoredObject> list(String folderName) {
+    try {
+      Iterable<Result<Item>> objects = minioClient.listObjects(ListObjectsArgs.builder()
+        .bucket(bucket).prefix(folderName + "/").recursive(true).build());
+      List<StoredObject> storedObjects = new ArrayList<>();
+      for (Result<Item> object : objects) {
+        Item item = object.get();
+        storedObjects.add(new StoredObject(item.objectName(), item.lastModified().toInstant()));
+      }
+      return storedObjects;
+    } catch (Exception e) {
+      throw new ObjectStoreException("minio list failed : " + folderName, e);
     }
   }
 

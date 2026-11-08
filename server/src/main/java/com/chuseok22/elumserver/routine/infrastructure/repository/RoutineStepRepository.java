@@ -49,6 +49,23 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
   List<String> findAllImagePaths();
 
   /**
+   * 아직 png 인 카드 그림 열쇠 (webp 전환용, #1219). 복제한 일과가 같은 열쇠를 함께 써서 중복 제거
+   */
+  @Query("select distinct s.imagePath from RoutineStep s where s.imagePath like '%.png'")
+  List<String> findPngImagePaths(Pageable pageable);
+
+  // 다시 그리기 후보로 아직 쓰는 그림인가 (#1219, 옛 png 를 지우기 전 확인)
+  boolean existsByImageCandidatePath(String imageCandidatePath);
+
+  /**
+   * 같은 그림 열쇠를 가리키는 카드 모두 새 열쇠로 교체 (#1219). 0 이면 그새 그림이 바뀌었거나 카드가 지워짐
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.imagePath = :newImagePath where s.imagePath = :oldImagePath")
+  int replaceImagePath(@Param("oldImagePath") String oldImagePath, @Param("newImagePath") String newImagePath);
+
+  /**
    * 카드가 쓰는 그림 후보 열쇠 전체 (쓰지 않는 그림 정리용, #1216)
    */
   @Query("select s.imageCandidatePath from RoutineStep s where s.imageCandidatePath is not null")

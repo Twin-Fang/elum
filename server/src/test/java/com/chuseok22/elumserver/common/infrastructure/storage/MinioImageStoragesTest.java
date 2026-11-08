@@ -20,8 +20,11 @@ import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -177,6 +180,54 @@ class MinioImageStoragesTest {
   }
 
   /// 저장소 동작 대역: 메모리 Map, isDown 이면 전부 장애
+  @Test
+  @DisplayName("카드 그림 MinIO: AI 그림은 webp 로 저장하고, 옛 png 는 같은 이름의 .webp 사본을 만든다 (#1219)")
+  void routine_minio_compressesAndCopiesWebp() {
+    byte[] webpBytes = {9, 9};
+    MinioRoutineImageStorage storage = new MinioRoutineImageStorage(objectStore,
+      new RoutineProperties(tempDir.toString()), properties(false),
+      image -> Optional.of(new GeneratedImage(webpBytes, "webp")));
+
+    assertThat(storage.save("batch-1", 1, new GeneratedImage(IMAGE_BYTES, "png"))).isEqualTo("batch-1/1.webp");
+    assertThat(objectStore.objects).containsKey("routine-images/batch-1/1.webp");
+
+    objectStore.objects.put("routine-images/batch-2/1.png", IMAGE_BYTES);
+    assertThat(storage.saveWebpCopy("batch-2/1.png")).contains("batch-2/1.webp");
+    assertThat(objectStore.objects.get("routine-images/batch-2/1.webp")).isEqualTo(webpBytes);
+    assertThat(objectStore.objects).containsKey("routine-images/batch-2/1.png");
+    assertThat(storage.saveWebpCopy("batch-2/missing.png")).isEmpty();
+  }
+
+  @Test
+  @DisplayName("카드 그림 MinIO: 열쇠에 없는 오래된 객체만 지우고, 쓰는 그림·옛 형식 열쇠·방금 만든 그림은 남긴다 (#1216)")
+  void routine_minio_deletesUnreferencedOnly() {
+    MinioRoutineImageStorage storage = routineStorage(false);
+    objectStore.objects.put("routine-images/batch-live/1.png", IMAGE_BYTES);
+    objectStore.objects.put("routine-images/batch-legacy/1.png", IMAGE_BYTES);
+    objectStore.objects.put("routine-images/batch-deleted/1.png", IMAGE_BYTES);
+    objectStore.objects.put("routine-images/batch-new/1.png", IMAGE_BYTES);
+    objectStore.objects.put("talk-images/post-1/1.png", IMAGE_BYTES);
+    objectStore.recentObjectNames.add("routine-images/batch-new/1.png");
+
+    int deletedCount = storage.deleteUnreferenced(
+      List.of("batch-live/1.png", "data/routine-images/batch-legacy/1.png"), Instant.now().minusSeconds(3_600));
+
+    assertThat(deletedCount).isEqualTo(1);
+    assertThat(objectStore.objects).doesNotContainKey("routine-images/batch-deleted/1.png")
+      .containsKeys("routine-images/batch-live/1.png", "routine-images/batch-legacy/1.png",
+        "routine-images/batch-new/1.png", "talk-images/post-1/1.png");
+  }
+
+  @Test
+  @DisplayName("카드 그림 MinIO: 목록을 못 읽으면 던진다 — 정리 작업이 아무것도 지우지 않게")
+  void routine_minio_listFails_throws() {
+    MinioRoutineImageStorage storage = routineStorage(false);
+    objectStore.isDown = true;
+
+    assertThatThrownBy(() -> storage.deleteUnreferenced(List.of("a/1.png"), Instant.now()))
+      .isInstanceOf(ObjectStoreException.class);
+  }
+
   private static final class MemoryObjectStore implements ObjectStore {
 
     private final Map<String, byte[]> objects = new HashMap<>();
@@ -204,6 +255,18 @@ class MinioImageStoragesTest {
     public void deleteFolder(String folderName) {
       failIfDown();
       objects.keySet().removeIf(name -> name.startsWith(folderName + "/"));
+    }
+
+    // 시험용 수정 시각: 기본은 오래전, recentObjectNames 는 지금
+    private final Set<String> recentObjectNames = new java.util.HashSet<>();
+
+    @Override
+    public List<StoredObject> list(String folderName) {
+      failIfDown();
+      return objects.keySet().stream()
+        .filter(name -> name.startsWith(folderName + "/"))
+        .map(name -> new StoredObject(name, recentObjectNames.contains(name) ? Instant.now() : Instant.EPOCH))
+        .toList();
     }
 
     private void failIfDown() {
