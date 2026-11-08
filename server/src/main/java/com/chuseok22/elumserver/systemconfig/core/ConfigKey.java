@@ -839,6 +839,17 @@ public enum ConfigKey {
     "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
   ),
+
+  // --- 관제소 연동 (#1229) ---
+  //
+  // 끄면 GET /control/attention 이 404 (관제소는 "연동 꺼짐"으로 표시). 기본 꺼짐이라 배포만으로는 내보내지 않는다.
+  // 수집 토큰은 여기 두지 않고 환경 변수(CONTROL_TOWER_ATTENTION_TOKEN)로만 받는다.
+  CONTROL_TOWER_ATTENTION_ENABLED(
+    ConfigGroup.CONTROL_TOWER, "관제소 확인할 일 내보내기",
+    "켜면 관제소가 /control/attention 으로 새 의견·검토 대기·멈춘 예약·AI 이상·이야기 신고·오늘 AI 비용을 모아 간다. "
+      + "개수와 값만 나가고 의견 내용·회원 정보는 나가지 않는다. 서버에 수집 토큰이 없으면 켜도 모든 요청을 거절한다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   ;
 
 

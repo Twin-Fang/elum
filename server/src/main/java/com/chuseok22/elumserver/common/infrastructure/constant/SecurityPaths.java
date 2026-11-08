@@ -70,6 +70,13 @@ public final class SecurityPaths {
    * API 체인에는 관리자 역할이 없으므로 "관리자만"이 아니라 전부 막음. 관리자 프롬프트 시험 화면은 서비스를 직접 부름
    */
   public static final String API_INTERNAL_MATCHER = "/api/internal/**";
+  /**
+   * 관제소(suh-project-control)가 확인할 일을 모아 가는 곳 (#1229).
+   *
+   * <p><b>관리자·API 보안 체인 어디에도 걸리지 않는다</b>(/admin/**, /api/** 밖). 로그인·JWT 가 없고
+   * 인증은 컨트롤러가 X-Control-Token 을 환경 변수 토큰과 상수 시간 비교로 확인한다. 점검 중에도 연다.
+   */
+  public static final String CONTROL_ATTENTION = "/control/attention";
 
   private SecurityPaths() {
   }

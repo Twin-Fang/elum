@@ -39,6 +39,8 @@ public enum ConfigGroup {
   MAIL("신고 메일"),
   // App Store·Google Play 구독 결제 검증과 결제 알림 (#1071).
   SUBSCRIPTION_STORE("스토어 구독 결제"),
+  // 관제소(suh-project-control)가 확인할 일을 모아 가는 연동 (#1229).
+  CONTROL_TOWER("관제소 연동"),
   ;
 
   private final String label;

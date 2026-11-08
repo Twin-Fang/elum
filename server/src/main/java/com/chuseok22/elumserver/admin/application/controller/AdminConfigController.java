@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import com.chuseok22.elumserver.admin.application.service.AdminTextProviderService;
+import com.chuseok22.elumserver.admin.application.service.ControlTowerAttentionService;
 import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
 import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService;
@@ -53,14 +54,16 @@ public class AdminConfigController {
   private final MemberPickerService memberPickerService;
   private final AdminTextProviderService adminTextProviderService;
   private final SettingsEditorService settingsEditorService;
+  private final ControlTowerAttentionService controlTowerAttentionService;
 
-  /// 시스템 설정: 지금 적용 중 요약 + 다른 화면 바로가기 + 앱·회원·한도·메일 설정
+  /// 시스템 설정: 지금 적용 중 요약 + 다른 화면 바로가기 + 관제소 연동 + 앱·회원·한도·메일 설정
   @GetMapping("/admin/settings")
   public String settings(Model model) {
     List<SettingRow> allRows = overviewService.buildRows();
     LocalDateTime now = LocalDateTime.now();
     model.addAttribute("overview", overviewService.buildOverview(allRows, now));
     model.addAttribute("sectionLinks", settingsEditorService.sectionLinksOf(allRows));
+    model.addAttribute("controlTowerPanel", controlTowerAttentionService.buildPanel());
     model.addAttribute("editor", settingsEditorService.buildEditor(SettingsSection.SYSTEM, allRows, now.toLocalDate()));
     return "admin/settings";
   }
