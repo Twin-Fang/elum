@@ -196,7 +196,7 @@ public class RoutineQueryService {
   }
 
   /**
-   * 단계 음성 조회: 권한 확인 > 열쇠 > WAV. 아직 없으면 빈 값 (#675)
+   * 단계 음성 조회: 권한 확인 > 열쇠 > 저장된 음성(m4a 또는 wav). 아직 없으면 빈 값 (#675)
    */
   public Optional<StepSpeech> getStepSpeech(Caller caller, String routineId, String stepId) {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.VIEW);
@@ -208,11 +208,11 @@ public class RoutineQueryService {
     if (speechKey == null) {
       return Optional.empty();
     }
-    return routineStepSpeechStorage.read(speechKey).map(wav -> new StepSpeech(speechKey, wav));
+    return routineStepSpeechStorage.read(speechKey).map(audio -> new StepSpeech(speechKey, audio));
   }
 
-  /// 단계 음성: 열쇠(앱 캐시 이름·ETag), WAV
-  public record StepSpeech(String speechKey, byte[] wav) {
+  /// 단계 음성: 열쇠(앱 캐시 이름·ETag, 확장자 = 형식), 저장된 바이트
+  public record StepSpeech(String speechKey, byte[] audio) {
 
   }
 

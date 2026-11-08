@@ -3,8 +3,8 @@ FROM eclipse-temurin:21-jre-alpine
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# curl 설치
-RUN apk add --no-cache curl
+# curl 설치 (헬스체크), ffmpeg 설치 (단계 음성 AAC 변환, #1211)
+RUN apk add --no-cache curl ffmpeg
 
 # 빌드된 JAR 파일을 복사
 COPY build/libs/elum-server-*.jar /app.jar

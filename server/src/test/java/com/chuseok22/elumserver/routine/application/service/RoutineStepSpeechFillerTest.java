@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.infrastructure.client.SupertonicTtsClient;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.routine.core.RoutineStepSpeechText;
+import com.chuseok22.elumserver.routine.core.SpeechAudioFormat;
+import com.chuseok22.elumserver.routine.infrastructure.audio.SpeechAudioCodec;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository.SpeechTextSource;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineStepSpeechStorage;
@@ -29,19 +31,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class RoutineStepSpeechFillerTest {
 
   private static final byte[] WAV = {82, 73, 70, 70};
+  private static final byte[] AAC = {0, 0, 0, 24, 102, 116, 121, 112};
   private static final String KEY = "step-1/hash.wav";
 
   @Mock private SupertonicTtsClient supertonicTtsClient;
   @Mock private RoutineStepSpeechStorage storage;
   @Mock private RoutineStepRepository repository;
+  @Mock private SpeechAudioCodec codec;
 
   private RoutineStepSpeechFiller filler;
 
   @BeforeEach
   void setUp() {
-    filler = new RoutineStepSpeechFiller(supertonicTtsClient, storage, repository);
+    filler = new RoutineStepSpeechFiller(supertonicTtsClient, storage, repository, codec);
     lenient().when(supertonicTtsClient.synthesize(anyString())).thenReturn(WAV);
-    lenient().when(storage.save(anyString(), anyString(), any())).thenReturn(KEY);
+    lenient().when(codec.toAac(any())).thenReturn(Optional.of(AAC));
+    lenient().when(storage.save(anyString(), anyString(), any(), any())).thenReturn(KEY);
   }
 
   @Test
@@ -53,8 +58,20 @@ class RoutineStepSpeechFillerTest {
     assertThat(filler.fill("step-1")).isTrue();
 
     verify(supertonicTtsClient).synthesize("옷을 입어요. 학교 갈 옷을 입어요");
-    verify(storage).save("step-1", RoutineStepSpeechText.hashOf("옷을 입어요. 학교 갈 옷을 입어요"), WAV);
+    verify(storage).save("step-1", RoutineStepSpeechText.hashOf("옷을 입어요. 학교 갈 옷을 입어요"), AAC, SpeechAudioFormat.AAC);
     verify(storage, never()).delete(anyString());
+  }
+
+  @Test
+  @DisplayName("압축에 실패하면 WAV 그대로 저장한다 — ffmpeg 가 없거나 깨져도 음성이 빠지지 않게")
+  void fill_codecFails_savesWav() {
+    when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
+    when(codec.toAac(any())).thenReturn(Optional.empty());
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "손", "손을 씻어요")).thenReturn(1);
+
+    assertThat(filler.fill("step-1")).isTrue();
+
+    verify(storage).save("step-1", RoutineStepSpeechText.hashOf("손. 손을 씻어요"), WAV, SpeechAudioFormat.WAV);
   }
 
   @Test
@@ -111,7 +128,7 @@ class RoutineStepSpeechFillerTest {
   }
 
   @Test
-  @DisplayName("즉석 채우기는 6초 제한 합성을 쓰고, 저장한 열쇠와 WAV 를 돌려준다")
+  @DisplayName("즉석 채우기는 6초 제한 합성을 쓰고, 저장한 열쇠와 압축본을 돌려준다")
   void fillOnDemand_usesLimitedSynthesisAndReturnsSpeech() {
     when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
     when(supertonicTtsClient.synthesizeWithinOnDemandLimit(anyString())).thenReturn(WAV);
@@ -121,7 +138,7 @@ class RoutineStepSpeechFillerTest {
 
     assertThat(filled).isPresent();
     assertThat(filled.get().speechKey()).isEqualTo(KEY);
-    assertThat(filled.get().wav()).isEqualTo(WAV);
+    assertThat(filled.get().audio()).isEqualTo(AAC);
     verify(supertonicTtsClient, never()).synthesize(anyString());
   }
 

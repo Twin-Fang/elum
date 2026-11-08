@@ -84,7 +84,7 @@ class RoutineStepSpeechProviderTest {
     Optional<StepSpeech> speech = provider(2, Duration.ofSeconds(2)).getStepSpeech(caller, "r1", "step-1");
 
     assertThat(speech.orElseThrow().speechKey()).isEqualTo(KEY);
-    assertThat(speech.get().wav()).isEqualTo(WAV);
+    assertThat(speech.get().audio()).isEqualTo(WAV);
     verify(filler, times(1)).fillOnDemand("step-1");
   }
 
