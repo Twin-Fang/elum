@@ -10,7 +10,6 @@ public enum ConfigGroup {
 
   GEMINI_TEXT("Gemini 텍스트"),
   GEMINI_IMAGE("Gemini 이미지"),
-  LOCAL_LLM("로컬 LLM"),
   IMAGE_PROVIDER("이미지 생성 제공자"),
   TEXT_PROVIDER("텍스트 생성 제공자"),
   PRICING("AI 요금 단가"),

@@ -3,7 +3,6 @@
 # 남은 갈래
 # - spacing · radius: 시안 대조(✅) 화면의 실측 값일 수 있다 → 노드를 재서 맞으면 design_rules.yaml `measured_exceptions` 로 옮기고, 아니면 단계 값으로 고친다
 # - color-literal (card_palette): 카드 번호 파스텔 (design-language §3-1). 시안 밖 3색(#FFF3C4 · #C7EB73 · #E8F5C8)은 디자이너 확인 대기
-# - recommended_routine_strip: 쓰는 곳 없음 — 지울 후보
 # - type-token: 시안에 없는 글자 조합 토큰. 쓰는 곳을 시안 토큰으로 옮기면 토큰째 지운다
 color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFF93DBCC)
 color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFF9CADF1)
@@ -15,17 +14,8 @@ color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFEB9B73)
 color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFF3C500)
 color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFFFDAC7)
 color-literal  lib/features/guardian/domain/card_palette.dart  Color(0xFFFFF3C4)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFA0B7DB)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFADE2DC)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFCEDBEF)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFCEEFEB)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFE0D185)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFF4B0E7)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFF5E9AE)
-color-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  Color(0xFFFCCAF3)
 font-literal  lib/core/widgets/login_scene.dart  fontSize
 font-literal  lib/core/widgets/login_scene.dart  fontSize
-font-literal  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  fontSize
 material-color  lib/core/widgets/inset_shadow.dart  Colors.black
 material-color  lib/features/child/presentation/child_routine_tile.dart  Colors.black
 material-color  lib/features/guardian/presentation/widgets/card_review_reorder_card.dart  Colors.black
@@ -34,7 +24,6 @@ material-color  lib/features/guardian/presentation/widgets/step_card_viewer.dart
 material-color  lib/shared/example_card_image/example_card_art.dart  Colors.white
 material-color  lib/shared/pictogram/pictogram_art.dart  Colors.white
 material-widget  lib/features/guardian/presentation/routine_loading_stage_row.dart  CircularProgressIndicator
-material-widget  lib/features/guardian/presentation/widgets/recommended_routine_strip.dart  TextButton
 radius  lib/features/guardian/presentation/navigation/guardian_side_nav.dart  14
 radius  lib/features/guardian/presentation/widgets/coach_demo_content.dart  6
 radius  lib/features/guardian/presentation/widgets/create_routine_button.dart  2.7

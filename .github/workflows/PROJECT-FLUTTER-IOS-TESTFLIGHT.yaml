@@ -4,17 +4,14 @@
 #
 # 이 워크플로우는 Flutter iOS 앱을 빌드하여 TestFlight에 자동 배포합니다.
 #
-# ★ 마법사 우선 아키텍처 ★
-# - 빌드에 필요한 설정 파일들은 웹 마법사가 생성합니다
-# - 워크플로우는 마법사가 생성한 파일들을 그대로 사용합니다
-# - 마법사 경로: .github/util/flutter/ios-testflight-setup-wizard/index.html
-#   (브라우저에서 열어서 사용)
+# ★ 레포 설정 파일 우선 ★
+# - 빌드 설정 파일(ios/fastlane/Fastfile, ios/ExportOptions.plist)은 레포에 커밋된 것을 그대로 사용
 #
 # 빌드 파이프라인:
 #   1. flutter build ios --no-codesign (Flutter 빌드)
 #   2. xcodebuild archive (Xcode 아카이브 생성)
 #   3. xcodebuild -exportArchive (IPA 생성, ExportOptions.plist 사용)
-#   4. fastlane deploy (마법사 생성 Fastfile 사용, DEPLOY_MODE에 따라 TestFlight/심사 제출)
+#   4. fastlane deploy (레포 Fastfile 사용, DEPLOY_MODE에 따라 TestFlight/심사 제출)
 #
 # ===================================================================
 # 🔑 필수 GitHub Secrets
@@ -32,20 +29,15 @@
 # APP_STORE_CONNECT_API_KEY_BASE64: AuthKey_XXXXXX.p8 파일 (base64 인코딩)
 #
 # 📝 환경 설정 (선택):
-# ENV_FILE (선택): .env 파일 내용
-# SECRETS_XCCONFIG (선택): ios/Flutter/Secrets.xcconfig 내용
+# CLIENT_ENV_FILE: .env 파일 내용
 #
 # ===================================================================
 # 🛠️ 초기 설정 방법
 # ===================================================================
 #
-# 1. 웹 마법사 실행:
-#    브라우저에서 .github/util/flutter/ios-testflight-setup-wizard/index.html 열기
-#    → 필요한 정보 입력 후 설정 파일 다운로드
+# 1. GitHub Secrets 설정 (위 목록 참고)
 #
-# 2. GitHub Secrets 설정 (위 목록 참고)
-#
-# 3. 생성된 파일 커밋:
+# 2. ios/ 설정 파일 커밋:
 #    git add ios/
 #    git commit -m "chore: iOS TestFlight 배포 설정"
 #
@@ -156,7 +148,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -175,13 +167,9 @@ jobs:
 
       - name: Create Secrets.xcconfig file
         run: |
+          # 자리표시 파일 (실제 값은 빌드 잡의 gen_ios_secrets.sh 가 .env 로 생성)
           mkdir -p ios/Flutter
-          if [ -n "${{ secrets.SECRETS_XCCONFIG }}" ]; then
-            echo "${{ secrets.SECRETS_XCCONFIG }}" > ios/Flutter/Secrets.xcconfig
-            echo "Secrets.xcconfig created"
-          else
-            echo "// No secrets provided" > ios/Flutter/Secrets.xcconfig
-          fi
+          echo "// No secrets provided" > ios/Flutter/Secrets.xcconfig
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -339,7 +327,7 @@ jobs:
         run: |
           if [ ! -f "${{ env.ENV_FILE_PATH }}" ]; then
             cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
             echo "✅ ${{ env.ENV_FILE_PATH }} file created (fallback)"
           fi
@@ -488,7 +476,7 @@ jobs:
           retention-days: 1
 
   # ============================================
-  # TestFlight 배포 (마법사 생성 Fastfile 사용)
+  # TestFlight 배포 (레포 Fastfile 사용)
   # ============================================
   deploy-testflight:
     name: TestFlight 배포
@@ -526,8 +514,7 @@ jobs:
         run: |
           if [ ! -f "ios/fastlane/Fastfile" ]; then
             echo "❌ ios/fastlane/Fastfile이 없습니다!"
-            echo "웹 마법사를 실행하여 설정 파일을 생성하세요:"
-            echo "  브라우저에서 .github/util/flutter/ios-testflight-setup-wizard/index.html 열기"
+            echo "ios/ 설정 파일을 레포에 커밋하세요"
             exit 1
           fi
           echo "✅ Fastfile 확인됨: ios/fastlane/Fastfile"

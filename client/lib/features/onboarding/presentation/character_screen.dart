@@ -17,8 +17,7 @@ import '../../../core/router/routes.dart';
 
 /// Figma `온보딩_캐릭터` — 카드 속 주인공이 될 친구를 고른다.
 ///
-/// 여기서 고르는 건 카드 콘텐츠의 주인공이다.
-/// 채팅에서 말을 거는 병아리(AgentPersona)와는 다른 존재다.
+/// 여기서 고르는 건 카드 콘텐츠의 주인공
 class CharacterScreen extends ConsumerWidget {
   const CharacterScreen({super.key});
 

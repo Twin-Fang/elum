@@ -15,8 +15,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
 
   Optional<RefreshToken> findByTokenHash(String tokenHash);
 
-  List<RefreshToken> findAllByMemberIdAndRevokedAtIsNull(String memberId);
-
   /** 계정 정지·강제 로그아웃 시 계정의 살아 있는 토큰을 한 번에 끊는다. 사유는 부른 쪽이 정한다. */
   @Modifying
   @Query("update RefreshToken t set t.revokedAt = :now, t.revokeReason = :reason "

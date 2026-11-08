@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -590,15 +589,6 @@ class RoutineServiceTest {
 
     verify(routineAiPipeline).generateQuestion(
       eq("하늘이"), eq(Set.of(SupportGoal.PREPARE_ITEMS)), eq("학교 가기 010-1234-5678"));
-  }
-
-  @Test
-  @DisplayName("일과 서비스는 로컬 LLM 민감정보 검사에 의존하지 않는다 (이슈 #377)")
-  void routineService_doesNotDependOnLocalLlmGuard() {
-    // 필드로 다시 들어오면 누군가 호출을 되살린 것이다 — 약관은 가린다고 적지 않는다.
-    assertThat(java.util.Arrays.stream(RoutineService.class.getDeclaredFields())
-      .map(java.lang.reflect.Field::getType))
-      .doesNotContain((Class) SensitiveInfoGuardService.class);
   }
 
   /**

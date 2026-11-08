@@ -133,9 +133,6 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     """)
   List<String> findIdsByKeyword(@Param("keyword") String keyword);
 
-  // 최근 활동 회원수(대시보드) — lastActivityAt 기준.
-  long countByLastActivityAtAfter(LocalDateTime after);
-
   /// 기간[from, to) 가입 수 (탈퇴 회원 포함 — 그날 가입한 사실은 남음)
   long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime from, LocalDateTime to);
 

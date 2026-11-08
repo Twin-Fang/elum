@@ -320,16 +320,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get consentOptionalTag => '선택';
 
   @override
-  String consentChipRequired(String label) {
-    return '[필수] $label';
-  }
-
-  @override
-  String consentChipOptional(String label) {
-    return '[선택] $label';
-  }
-
-  @override
   String consentDocumentMeta(String label, String version) {
     return '$label · 버전 $version';
   }
@@ -357,9 +347,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get characterFoxName => '포포';
-
-  @override
-  String get agentChickLabel => '병아리';
 
   @override
   String get imageStyleEmojiLabel => '이모지 그림';
@@ -828,9 +815,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get inviteCodeIssueFailedFallback => '초대 코드를 만들지 못했어요';
 
   @override
-  String get inviteCodeRetryChip => '초대 코드 다시 만들기';
-
-  @override
   String get inviteEnterLinkInvalid =>
       '초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)';
 
@@ -1130,9 +1114,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String notificationTalkPostImported(int count) {
     return '有$count位监护人拿走了我的帖子';
   }
-
-  @override
-  String get guardianHomeSettings => '설정';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1705,9 +1686,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get routineSwipeEdit => '일과 수정';
-
-  @override
-  String get routineSuggestLoadFailed => '추천을 불러오지 못했어요 · 다시 시도';
 
   @override
   String get routineFlowHomeLabel => '홈으로 가기';
@@ -2401,9 +2379,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get guardianMyInfoChildrenHeader => '이룸이';
-
-  @override
   String get guardianMyInfoActiveBadge => '보는 중';
 
   @override
@@ -2692,16 +2667,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineGroupAdded => '묶음에 넣었어요';
 
   @override
-  String get routineGroupRemovedOne => '묶음에서 뺐어요';
-
-  @override
   String get routineGroupUngrouped => '묶음을 풀었어요';
 
   @override
   String get routineGroupUngroupedEmpty => '일과를 다 빼서 묶음을 풀었어요';
-
-  @override
-  String get routineGroupReordered => '순서를 바꿨어요';
 
   @override
   String routineGroupSent(String name) {
@@ -2925,9 +2894,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get talkEmptyTitle => '还没有人分享日常';
-
-  @override
-  String get talkEmptyAction => '来分享第一个日常吧';
 
   @override
   String get talkEmptyCategoryTitle => '这个分类还没有人分享日常';
@@ -3700,9 +3666,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planLegalTrialPlayStore => '무료 체험 중에 해지하면 요금이 청구되지 않아요.';
 
   @override
-  String get planPurchasing => '결제를 진행하고 있어요';
-
-  @override
   String get planVerifying => '결제를 확인하고 있어요';
 
   @override
@@ -4349,10 +4312,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardRegenerateSheetTitle => '그림을 다시 그릴까요?';
 
   @override
-  String get cardRegenerateSheetBody =>
-      '지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요';
-
-  @override
   String cardRegenerateCostProFree(int count) {
     return '크레딧 없이 · 오늘 $count번 남았어요';
   }
@@ -4380,13 +4339,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardRegenerateInProgress => '그림을 다시 그리고 있어요';
 
   @override
-  String get cardRegenerateDoneToast => '그림을 다시 그렸어요';
-
-  @override
   String get cardRegenerateFailedTitle => '그림을 다시 그리지 못했어요';
-
-  @override
-  String get cardRegenerateFailedFallback => '잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요';
 
   @override
   String get cardFirstDrawChip => 'AI 그림 그리기';

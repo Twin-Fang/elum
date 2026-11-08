@@ -127,8 +127,6 @@ class AppLogBuffer {
 
   static int get length => _lines.length;
 
-  static int get errorCount => _errors.length;
-
   /// 일반 기록의 UTF-8 바이트 합계.
   static int get totalBytes => _totalBytes;
 

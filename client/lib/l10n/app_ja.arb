@@ -68,7 +68,6 @@
   "talkPopularImportCount": "{count, plural, other{{count}人が持っていきました}}",
   "talkLatestTitle": "新しく投稿されました",
   "talkEmptyTitle": "まだシェアされた日課がありません",
-  "talkEmptyAction": "最初の日課をシェアしてみましょう",
   "talkEmptyCategoryTitle": "この分類にはまだシェアされた日課がありません",
   "talkEmptyCategoryAction": "すべて見る",
   "talkFeedFailed": "トークを読み込めませんでした",

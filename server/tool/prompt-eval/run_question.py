@@ -54,6 +54,9 @@ def main():
         cases = [case for case in cases if case["id"] in set(args.cases.split(","))]
     prod = lib.load_prod_config()
     print(lib.describe_prod_config(prod))
+    # Gemini 전용 하네스 (운영 글 제공자가 다르면 운영 조건 시험이 아님)
+    if prod["text"]["provider"] != "GEMINI":
+        raise SystemExit(f"운영 글 제공자 {prod['text']['provider']}: 이 하네스는 Gemini 전용")
     prompt, settings = load_prompt(args.variant), lib.load_gemini_settings()
     settings["text-model"] = prod["text"]["model"]
     settings["thinking-budget"] = prod["text"]["thinking_budget"]

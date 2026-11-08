@@ -30,9 +30,6 @@ class ModeSwitchScreen extends ConsumerStatefulWidget {
   /// 어디로 갈 것인가. 문구와 이동 경로가 갈린다.
   final ModeSwitchTarget target;
 
-  /// 암호 만들기 화면에 "여기서 왔다"를 알리는 값. 만든 뒤 보호자 홈으로 보낸다.
-  static const pinCreateFrom = 'mode-switch';
-
   @override
   ConsumerState<ModeSwitchScreen> createState() => _ModeSwitchScreenState();
 }

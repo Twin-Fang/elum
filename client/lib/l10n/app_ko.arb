@@ -297,18 +297,6 @@
   "consentOptionalTag": "선택",
   "@consentOptionalTag": { "description": "약관 행의 선택 표시. 약관 문서 화면의 머리 줄에도 쓴다" },
 
-  "consentChipRequired": "[필수] {label}",
-  "@consentChipRequired": {
-    "description": "약관 칩의 필수 항목",
-    "placeholders": { "label": { "type": "String" } }
-  },
-
-  "consentChipOptional": "[선택] {label}",
-  "@consentChipOptional": {
-    "description": "약관 칩의 선택 항목",
-    "placeholders": { "label": { "type": "String" } }
-  },
-
   "consentDocumentMeta": "{label} · 버전 {version}",
   "@consentDocumentMeta": {
     "description": "약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다",
@@ -338,9 +326,6 @@
 
   "characterFoxName": "포포",
   "@characterFoxName": { "description": "여우 캐릭터의 카드 아래 이름. 번역 여부는 용어집이 정한다" },
-
-  "agentChickLabel": "병아리",
-  "@agentChickLabel": { "description": "서비스 에이전트(루미)의 종류 이름" },
 
   "imageStyleEmojiLabel": "이모지 그림",
   "@imageStyleEmojiLabel": { "description": "카드 그림 방식 이름 (Free, Twemoji)" },
@@ -402,14 +387,11 @@
   "onboardingCharacterDescription": "선택한 친구가 카드 속 주인공이 되어 도와줘요",
   "@onboardingCharacterDescription": { "description": "캐릭터 고르기 화면 설명" },
 
-
-
   "onboardingImageStyleTitle": "카드 그림은 어떤 방식으로\n만들까요?",
   "@onboardingImageStyleTitle": { "description": "카드 그림 방식 화면 제목" },
 
   "onboardingImageStyleDescription": "나중에 설정에서 바꿀 수 있어요",
   "@onboardingImageStyleDescription": { "description": "카드 그림 방식 화면 설명" },
-
 
   "onboardingNameTitle": "이룸이를 어떻게\n불러드릴까요?",
   "@onboardingNameTitle": { "description": "이름 입력 화면 제목" },
@@ -591,7 +573,6 @@
   "linkCodeIssueFailedFallback": "암호를 만들지 못했어요. 다시 해주세요",
   "@linkCodeIssueFailedFallback": { "description": "연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
 
-
   "linkCodeSuccessTitle": "기기 연결에 성공했어요!",
   "@linkCodeSuccessTitle": { "description": "이룸이 기기가 연결됐을 때 팝업 제목" },
 
@@ -712,7 +693,6 @@
   "guardiansNoProfileDescription": "이룸이를 먼저 등록해주세요",
   "@guardiansNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
 
-
   "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요",
   "@guardiansIntro": {"description": "함께하는 사람 목록 머리 설명"},
 
@@ -740,7 +720,6 @@
   "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라져요",
   "@guardiansLeaveHintWithOthers": {"description": "그만두기 줄 아래 설명(다른 보호자가 있을 때)"},
 
-
   "inviteCodeGuestJoinedTitle": "{name}님이 함께하게 됐어요",
   "@inviteCodeGuestJoinedTitle": {"description": "내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)", "placeholders": {"name": {"type": "String"}}},
 
@@ -756,13 +735,11 @@
   "guardiansRenameAction": "이름 변경",
   "@guardiansRenameAction": {"description": "내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다"},
 
-
   "inviteCodeShareFailTitle": "링크를 보내지 못했어요",
   "@inviteCodeShareFailTitle": {"description": "초대 링크 공유 실패 팝업 제목"},
 
   "inviteCodeShareFailFallback": "코드를 직접 알려주세요",
   "@inviteCodeShareFailFallback": {"description": "초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
-
 
   "inviteCodeTitle": "초대 코드",
   "@inviteCodeTitle": {"description": "초대 코드 만들기 화면의 제목"},
@@ -784,11 +761,6 @@
 
   "inviteCodeIssueFailedFallback": "초대 코드를 만들지 못했어요",
   "@inviteCodeIssueFailedFallback": {"description": "초대 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
-
-  "inviteCodeRetryChip": "초대 코드 다시 만들기",
-  "@inviteCodeRetryChip": {"description": "초대 코드를 다시 만드는 칩"},
-
-
 
   "inviteEnterLinkInvalid": "초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)",
   "@inviteEnterLinkInvalid": {"description": "링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다"},
@@ -1061,9 +1033,6 @@
   "notificationTalkPostImported": "보호자 {count}명이 내 글을 가져갔어요",
   "@notificationTalkPostImported": {"description": "알림 줄: 내 이야기 글을 다른 보호자가 가져감(묶음). count 는 가져간 사람 수", "placeholders": {"count": {"type": "int"}}},
   "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
-
-  "guardianHomeSettings": "설정",
-  "@guardianHomeSettings": { "description": "보호자 홈의 설정 아이콘 버튼 낭독 이름" },
 
   "guardianHomeGreeting": "안녕하세요,\n{name} 보호자님 👋🏻",
   "@guardianHomeGreeting": { "description": "보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}} },
@@ -1589,9 +1558,6 @@
   "routineSwipeEdit": "일과 수정",
   "@routineSwipeEdit": {"description": "일과 줄을 밀었을 때 나오는 수정 버튼"},
 
-  "routineSuggestLoadFailed": "추천을 불러오지 못했어요 · 다시 시도",
-  "@routineSuggestLoadFailed": {"description": "일과 입력 화면의 추천 목록이 실패했을 때 한 줄(서버 문구가 우선)"},
-
   "routineFlowHomeLabel": "홈으로 가기",
   "@routineFlowHomeLabel": {"description": "일과 만들기 흐름 위쪽 집 버튼 낭독 이름"},
 
@@ -2106,9 +2072,6 @@
     "placeholders": { "date": { "type": "DateTime", "format": "y. MM. dd", "isCustomDateFormat": "true" } }
   },
 
-  "guardianMyInfoChildrenHeader": "이룸이",
-  "@guardianMyInfoChildrenHeader": { "description": "내정보 이룸이 목록 묶음 머리 글" },
-
   "guardianMyInfoActiveBadge": "보는 중",
   "@guardianMyInfoActiveBadge": { "description": "내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시" },
 
@@ -2297,14 +2260,10 @@
   "@routineGroupCreated": {"description": "일과 묶음 (#807)"},
   "routineGroupAdded": "묶음에 넣었어요",
   "@routineGroupAdded": {"description": "일과 묶음 (#807)"},
-  "routineGroupRemovedOne": "묶음에서 뺐어요",
-  "@routineGroupRemovedOne": {"description": "일과 묶음 (#807)"},
   "routineGroupUngrouped": "묶음을 풀었어요",
   "@routineGroupUngrouped": {"description": "일과 묶음 (#807)"},
   "routineGroupUngroupedEmpty": "일과를 다 빼서 묶음을 풀었어요",
   "@routineGroupUngroupedEmpty": {"description": "일과 묶음 (#807)"},
-  "routineGroupReordered": "순서를 바꿨어요",
-  "@routineGroupReordered": {"description": "일과 묶음 (#807)"},
   "routineGroupSent": "{name} 묶음을 오늘 일과로 보냈어요",
   "@routineGroupSent": {"description": "일과 묶음 (#807)", "placeholders": {"name": {"type": "String"}}},
   "routineGroupAllSentAlready": "묶음 안 일과를 오늘 모두 보냈어요",
@@ -2443,8 +2402,6 @@
   "@talkLatestTitle": { "description": "이야기 칸 최신 글 목록 제목" },
   "talkEmptyTitle": "아직 나눈 일과가 없어요",
   "@talkEmptyTitle": { "description": "이야기 칸 글이 0건일 때 안내" },
-  "talkEmptyAction": "첫 일과를 나눠 보세요",
-  "@talkEmptyAction": { "description": "이야기 칸 빈 상태 버튼: 올리기로 이동" },
   "talkEmptyCategoryTitle": "이 분류에는 아직 나눈 일과가 없어요",
   "@talkEmptyCategoryTitle": { "description": "이야기 칸 분류 칩으로 거른 결과가 0건일 때 안내" },
   "talkEmptyCategoryAction": "전체 보기",
@@ -2917,8 +2874,6 @@
   "@planLegalTrialAppStore": {"description": "법적 문구 — #1079 확정 전 초안 · App Store 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166"},
   "planLegalTrialPlayStore": "무료 체험 중에 해지하면 요금이 청구되지 않아요.",
   "@planLegalTrialPlayStore": {"description": "법적 문구 — #1079 확정 전 초안 · Google Play 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166"},
-  "planPurchasing": "결제를 진행하고 있어요",
-  "@planPurchasing": {"description": "스토어 결제창이 떠 있는 동안"},
   "planVerifying": "결제를 확인하고 있어요",
   "@planVerifying": {"description": "서버 확인 중 (서버라는 말은 쓰지 않음)"},
   "planStorePendingTitle": "결제 허락을 요청했어요",
@@ -3311,8 +3266,6 @@
   "@cardRegenerateChip": {"description": "카드 그림 위 AI 그림 다시 그리기 칩의 글자와 낭독 이름"},
   "cardRegenerateSheetTitle": "그림을 다시 그릴까요?",
   "@cardRegenerateSheetTitle": {"description": "다시 그리기 확인 시트 제목"},
-  "cardRegenerateSheetBody": "지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요",
-  "@cardRegenerateSheetBody": {"description": "다시 그리기 확인 시트 설명"},
   "cardRegenerateCostProFree": "크레딧 없이 · 오늘 {count}번 남았어요",
   "@cardRegenerateCostProFree": {"description": "다시 그리기 비용: Pro 하루 무료 횟수 안", "placeholders": {"count": {"type": "int"}}},
   "cardRegenerateCostFree": "크레딧을 쓰지 않아요",
@@ -3325,12 +3278,8 @@
   "@cardRegenerateConfirm": {"description": "다시 그리기 확인 버튼"},
   "cardRegenerateInProgress": "그림을 다시 그리고 있어요",
   "@cardRegenerateInProgress": {"description": "다시 그리는 동안 그림 위에 덮이는 안내"},
-  "cardRegenerateDoneToast": "그림을 다시 그렸어요",
-  "@cardRegenerateDoneToast": {"description": "다시 그리기 성공 토스트"},
   "cardRegenerateFailedTitle": "그림을 다시 그리지 못했어요",
   "@cardRegenerateFailedTitle": {"description": "다시 그리기 실패 팝업 제목"},
-  "cardRegenerateFailedFallback": "잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요",
-  "@cardRegenerateFailedFallback": {"description": "다시 그리기 실패 팝업 기본 설명"},
   "cardFirstDrawChip": "AI 그림 그리기",
   "@cardFirstDrawChip": {"description": "그림 없는 카드(픽토그램) 아래 AI 그림 처음 그리기 칩의 글자와 낭독 이름"},
   "cardRedrawProChip": "Pro로 다시 그리기",

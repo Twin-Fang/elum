@@ -68,7 +68,6 @@
   "talkPopularImportCount": "{count, plural, one{{count} se la llevó} other{{count} se la llevaron}}",
   "talkLatestTitle": "Recién publicadas",
   "talkEmptyTitle": "Aún no hay rutinas compartidas",
-  "talkEmptyAction": "Comparte tu primera rutina",
   "talkEmptyCategoryTitle": "Aún no hay rutinas compartidas en esta categoría",
   "talkEmptyCategoryAction": "Ver todo",
   "talkFeedFailed": "No se pudo cargar Historias",

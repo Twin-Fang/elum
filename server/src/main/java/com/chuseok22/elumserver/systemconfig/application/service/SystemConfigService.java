@@ -3,7 +3,6 @@ package com.chuseok22.elumserver.systemconfig.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
-import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
@@ -41,7 +40,6 @@ public class SystemConfigService {
 
   private final SystemConfigRepository systemConfigRepository;
   private final GeminiProperties geminiProperties;
-  private final LocalLlmProperties localLlmProperties;
   private final SecretCipher secretCipher;
   private final SystemConfigHistoryRepository systemConfigHistoryRepository;
 
@@ -130,7 +128,6 @@ public class SystemConfigService {
     String propertyValue = switch (key) {
       case GEMINI_TEXT_MODEL -> geminiProperties.textModel();
       case GEMINI_IMAGE_MODEL -> geminiProperties.imageModel();
-      case LOCAL_LLM_MODEL -> localLlmProperties.model();
       default -> null;
     };
     return propertyValue == null || propertyValue.isBlank() ? null : propertyValue;

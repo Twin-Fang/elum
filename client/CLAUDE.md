@@ -524,7 +524,7 @@ context.typo.cardTitle.copyWith(color: ...)
 
 ### 6. 검증 — 앱 테스트는 두지 않는다 (2026-10-20, #848)
 
-앱 테스트(`client/test`)는 실행 비용에 비해 얻는 것이 적어 지웠다. 앱 쪽 검증은 아래 셋으로 한다.
+앱 테스트(`client/test`)는 실행 비용에 비해 얻는 것이 적어 지웠다. 앱 쪽 검증은 아래 표로 한다.
 
 | 무엇을 | 어떻게 | 어디서 |
 | --- | --- | --- |
@@ -533,6 +533,8 @@ context.typo.cardTitle.copyWith(color: ...)
 | 디자인 규칙 (시안 색 · 글자 조합 · 간격 · 모서리 · fi-br 아이콘 · Material 기본 부품) | `dart run tool/check_design_rules.dart` (원본 `tool/design_rules.yaml` · 동결 `tool/design_rules_allowed.txt` · 절차 `docs/design-language.md` §10) | 로컬 · Flutter CI |
 | 화면 문구 하드코딩 | `dart run tool/check_hangul_literals.dart lib` (0줄이어야 한다) | 로컬 · Flutter CI |
 | 네이티브 언어 등록 (OS 앱별 언어 목록 = 연 언어, iOS 권한 문구 키) | `dart run tool/check_native_locales.dart` (원본 `lib/core/l10n/app_locales.dart` `openedAppLocales` · 여는 순서 `docs/store/locales/README.md`) | 로컬 · Flutter CI |
+| 로컬 저장 키 범위 (키마다 계정 범위 · 기기 범위 분류) | `dart run tool/check_storage_scopes.dart` (원본 `lib/core/storage/shared_prefs_storage.dart` 분류 목록) | 로컬 · Flutter CI |
+| 안 쓰는 코드 (진입점에서 안 닿는 dart 파일 · 안 쓰는 ARB 키 · 안 쓰는 AppAssets 상수 · 이름이 안 나오는 에셋 파일) | `dart run tool/check_unused_code.dart` (예외는 스크립트 안 목록에 이유와 함께) | 로컬 |
 | 서버 계약 (에러 코드·공유 enum·연결 암호·의견 기록 표지) | 서버 `CrossStackContractTest` 가 앱 소스를 읽어 대조 | `cd server && ./gradlew test --tests '*CrossStackContractTest*'` |
 | 실제 동작 | 시뮬레이터·실기기에서 직접 띄워 확인 (`/pro-launch`) | 로컬 |
 

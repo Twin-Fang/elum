@@ -108,9 +108,6 @@ class ElumScaffold extends StatelessWidget {
   static const _backBoxSize = 40.0;
   static const _backIconSize = 24.0;
 
-  /// 뒤로가기 상자 하단 — [ElumHeader]가 제목 y를 여기서 이어 계산한다.
-  static const backBoxBottom = _backBoxY + _backBoxSize;
-
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///
   /// CTA는 y=675, h=66 → 하단 741. 프레임 하단 852까지 111이 남는다.

@@ -62,10 +62,6 @@ public record SettingRow(
     return "BOOLEAN".equals(valueType);
   }
 
-  public boolean isDatetime() {
-    return "DATETIME".equals(valueType);
-  }
-
   /** 마지막 변경이 그날인지 ("오늘 변경" 칩) */
   public boolean isChangedOn(LocalDate day) {
     return lastChangedAt != null && lastChangedAt.toLocalDate().equals(day);

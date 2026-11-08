@@ -27,8 +27,7 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class GeminiImageClient implements ImageGenerationClient {
 
-  // GeminiConfig(Task 1)와 LocalLlmConfig가 각각 RestClient 빈을 하나씩 등록해 타입이
-  // 같은 빈이 2개 존재하므로, 파라미터명-빈명 자동 매칭에만 기대지 않고 명시한다.
+  // RestClient 빈 여러 개 (빈 이름으로 명시)
   @Qualifier("geminiRestClient")
   private final RestClient geminiRestClient;
   private final GeminiProperties geminiProperties;

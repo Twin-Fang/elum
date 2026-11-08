@@ -27,6 +27,8 @@
 - 새 `ErrorCode`를 만들면 `i18n/messages_ko.properties`에 문구를 함께 더한다. 빠지면 `ErrorMessagesStartupGuard`가 서버 기동을 막는다. 클라 `server_error_code.dart`에도 같은 이름으로 더한다(안 하면 앱의 동기화 시험이 실패한다). 사용자에게 가는 문장은 `ErrorCode`에 쓰지 않는다
 - 서버가 만들어 내려주는 사용자 노출 문장(추천 일과·폴백 질문)은 코드가 아니라 `i18n/routine-phrases_*.properties`에 둔다. 이 파일을 채워야 관리자 `ENABLED_CONTENT_LOCALES`에서 그 언어를 켤 수 있다
 - 일과 AI 출력은 아직 한국어 고정이고 `Routine.language`만 요청 언어로 저장된다. AI 출력 언어 지정이 배포되기 전에는 `ko` 외 언어를 켜지 않는다
+- 설정 파일은 세 개뿐이다. `application.yml`은 공개돼도 되는 공통값만, `application-prod.yml`은 운영값(원본은 GitHub 시크릿 `APPLICATION_PROD_YML`, 배포가 NAS에 써서 마운트), `application-dev.yml`은 로컬 전용이다. 덮어쓰기용 파일·프로필(`application-nas.yml` 등)을 만들지 않는다. `application.yml`에는 활성 프로필(`profiles.active`)과 비밀값을 넣지 않는다(기본은 `profiles.default: dev`) — `RepositoryHygieneRulesTest`가 막는다
+- 쓰지 않게 된 코드는 남기지 않고 지운다. 나중에 다시 쓸 장치(서버 이전, 다른 AI 제공자)는 남기되 이유를 주석 한 줄로 둔다
 
 ## 배포 서버 로그 확인
 

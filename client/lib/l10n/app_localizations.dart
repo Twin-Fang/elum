@@ -638,18 +638,6 @@ abstract class AppLocalizations {
   /// **'선택'**
   String get consentOptionalTag;
 
-  /// 약관 칩의 필수 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'[필수] {label}'**
-  String consentChipRequired(String label);
-
-  /// 약관 칩의 선택 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'[선택] {label}'**
-  String consentChipOptional(String label);
-
   /// 약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다
   ///
   /// In ko, this message translates to:
@@ -703,12 +691,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'포포'**
   String get characterFoxName;
-
-  /// 서비스 에이전트(루미)의 종류 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'병아리'**
-  String get agentChickLabel;
 
   /// 카드 그림 방식 이름 (Free, Twemoji)
   ///
@@ -1538,12 +1520,6 @@ abstract class AppLocalizations {
   /// **'초대 코드를 만들지 못했어요'**
   String get inviteCodeIssueFailedFallback;
 
-  /// 초대 코드를 다시 만드는 칩
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드 다시 만들기'**
-  String get inviteCodeRetryChip;
-
   /// 링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다
   ///
   /// In ko, this message translates to:
@@ -2089,12 +2065,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보호자 {count}명이 내 글을 가져갔어요'**
   String notificationTalkPostImported(int count);
-
-  /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'설정'**
-  String get guardianHomeSettings;
 
   /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
   ///
@@ -3145,12 +3115,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과 수정'**
   String get routineSwipeEdit;
-
-  /// 일과 입력 화면의 추천 목록이 실패했을 때 한 줄(서버 문구가 우선)
-  ///
-  /// In ko, this message translates to:
-  /// **'추천을 불러오지 못했어요 · 다시 시도'**
-  String get routineSuggestLoadFailed;
 
   /// 일과 만들기 흐름 위쪽 집 버튼 낭독 이름
   ///
@@ -4358,12 +4322,6 @@ abstract class AppLocalizations {
   /// **'{date} 가입'**
   String guardianMyInfoJoinedOn(DateTime date);
 
-  /// 내정보 이룸이 목록 묶음 머리 글
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이'**
-  String get guardianMyInfoChildrenHeader;
-
   /// 내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시
   ///
   /// In ko, this message translates to:
@@ -4895,12 +4853,6 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'묶음에서 뺐어요'**
-  String get routineGroupRemovedOne;
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
   /// **'묶음을 풀었어요'**
   String get routineGroupUngrouped;
 
@@ -4909,12 +4861,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과를 다 빼서 묶음을 풀었어요'**
   String get routineGroupUngroupedEmpty;
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'순서를 바꿨어요'**
-  String get routineGroupReordered;
 
   /// 일과 묶음 (#807)
   ///
@@ -5311,12 +5257,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'아직 나눈 일과가 없어요'**
   String get talkEmptyTitle;
-
-  /// 이야기 칸 빈 상태 버튼: 올리기로 이동
-  ///
-  /// In ko, this message translates to:
-  /// **'첫 일과를 나눠 보세요'**
-  String get talkEmptyAction;
 
   /// 이야기 칸 분류 칩으로 거른 결과가 0건일 때 안내
   ///
@@ -6608,12 +6548,6 @@ abstract class AppLocalizations {
   /// **'무료 체험 중에 해지하면 요금이 청구되지 않아요.'**
   String get planLegalTrialPlayStore;
 
-  /// 스토어 결제창이 떠 있는 동안
-  ///
-  /// In ko, this message translates to:
-  /// **'결제를 진행하고 있어요'**
-  String get planPurchasing;
-
   /// 서버 확인 중 (서버라는 말은 쓰지 않음)
   ///
   /// In ko, this message translates to:
@@ -7717,12 +7651,6 @@ abstract class AppLocalizations {
   /// **'그림을 다시 그릴까요?'**
   String get cardRegenerateSheetTitle;
 
-  /// 다시 그리기 확인 시트 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요'**
-  String get cardRegenerateSheetBody;
-
   /// 다시 그리기 비용: Pro 하루 무료 횟수 안
   ///
   /// In ko, this message translates to:
@@ -7759,23 +7687,11 @@ abstract class AppLocalizations {
   /// **'그림을 다시 그리고 있어요'**
   String get cardRegenerateInProgress;
 
-  /// 다시 그리기 성공 토스트
-  ///
-  /// In ko, this message translates to:
-  /// **'그림을 다시 그렸어요'**
-  String get cardRegenerateDoneToast;
-
   /// 다시 그리기 실패 팝업 제목
   ///
   /// In ko, this message translates to:
   /// **'그림을 다시 그리지 못했어요'**
   String get cardRegenerateFailedTitle;
-
-  /// 다시 그리기 실패 팝업 기본 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요'**
-  String get cardRegenerateFailedFallback;
 
   /// 그림 없는 카드(픽토그램) 아래 AI 그림 처음 그리기 칩의 글자와 낭독 이름
   ///

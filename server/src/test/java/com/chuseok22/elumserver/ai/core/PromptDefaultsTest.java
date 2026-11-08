@@ -64,20 +64,6 @@ class PromptDefaultsTest {
     }
   }
 
-  /**
-   * 이슈 #197 — DLP 판별 규칙의 "아이"/"아동"은 <b>지우면 안 된다</b>.
-   *
-   * <p>보호자는 실제로 "우리 아이가…"라고 입력한다. 이 목록이 사라지면 그 단어를
-   * 사람 이름으로 오인해 마스킹이 오작동한다. 말투를 고치다 함께 지워지는 것을 막는다.
-   */
-  @Test
-  @DisplayName("DLP 판별 규칙의 아이·아동 목록은 그대로 남아 있다 (이슈 #197)")
-  void dlpPrompt_keepsChildWordsAsNonNameExamples() {
-    String content = PromptDefaults.DEFAULTS.get(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
-
-    assertThat(content).contains("\"아이\", \"아동\"").contains("이름이 아닙니다");
-  }
-
   @Test
   @DisplayName("영어 그림 지시문은 한국어 없이 같은 규칙을 담는다 — 같은 지시가 토큰 1/3 이다 (#375)")
   void englishImagePrompt_hasNoKoreanAndKeepsRules() {
@@ -136,7 +122,7 @@ class PromptDefaultsTest {
     for (PromptKey key : PromptKey.values()) {
       assertThat(PromptDefaults.DEFAULTS.get(key)).as(key.name()).isNotBlank();
     }
-    assertThat(PromptDefaults.DEFAULTS).hasSize(9);
+    assertThat(PromptDefaults.DEFAULTS).hasSize(8);
   }
 
   @Test

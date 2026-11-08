@@ -112,10 +112,6 @@ abstract final class AppConfig {
   /// ⚠️ 유출되면 안 되는 값이다. `.env.example`에는 빈 값으로 둔다.
   static String get ttsApiKey => _string('ELUM_TTS_API_KEY', '');
 
-  /// AI DLP 요청 암호화 마스터 시크릿. 서버 `elum.aidlp.secret` 설정과 같은 값.
-  /// 암호화 인터셉터가 꺼져 있어 지금은 읽는 곳 없음 (`dio_client.dart`).
-  static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
-
   /// 문의를 받는 주소. 설정 화면의 `문의하기`가 보여준다.
   ///
   /// 게시된 도움말 페이지·개인정보처리방침의 보호책임자 주소와 **같은 값이어야 한다.**
@@ -234,14 +230,7 @@ abstract final class AppConfig {
   static String get kakaoNativeAppKey =>
       _string('ELUM_KAKAO_NATIVE_APP_KEY', '');
 
-  static String get naverClientId => _string('ELUM_NAVER_CLIENT_ID', '');
-
-  /// 네이버는 모바일 SDK가 시크릿을 요구한다. 앱에 들어갈 수밖에 없는 구조다.
-  static String get naverClientSecret =>
-      _string('ELUM_NAVER_CLIENT_SECRET', '');
-
-  /// 네이버 로그인 동의 화면에 표시되는 서비스 이름.
-  static String get naverClientName => _string('ELUM_NAVER_CLIENT_NAME', '이룸'); // l10n-ignore: 네이버 SDK 에 넘기는 앱 이름 기본값 — 계획 6(네이티브)
+  // 네이버 키(ELUM_NAVER_CLIENT_ID · SECRET · NAME)는 네이티브(Info.plist · build.gradle.kts)가 .env 에서 직접 읽음
 
   /// 구글 **웹** 클라이언트 ID. 안드로이드 클라이언트 ID가 아니다.
   /// 안드로이드에서 ID 토큰을 받으려면 serverClientId에 웹 ID를 넘겨야 한다.
