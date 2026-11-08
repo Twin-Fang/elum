@@ -213,8 +213,12 @@ public class RoutineAiPipeline {
         log.warn("AI가 title 없이 응답함: responseLength={}", LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
-      if (draft.steps() == null || draft.steps().isEmpty()
-        || draft.steps().size() > RoutineStepLimits.MAX_STEP_COUNT) {
+      // 빈 배열: 입력에 이룸이가 할 행동이 없다는 AI 판단 (지어내지 않음). 실패가 아니라 안내
+      if (draft.steps() != null && draft.steps().isEmpty()) {
+        log.info("AI가 카드 0장으로 응답함: responseLength={}", LogTextLength.of(json));
+        throw new CustomException(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE);
+      }
+      if (draft.steps() == null || draft.steps().size() > RoutineStepLimits.MAX_STEP_COUNT) {
         log.warn("AI가 반환한 단계 수가 허용 범위를 벗어남: count={}, responseLength={}",
           draft.steps() == null ? 0 : draft.steps().size(), LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);

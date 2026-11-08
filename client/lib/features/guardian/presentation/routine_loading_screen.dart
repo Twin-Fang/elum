@@ -14,6 +14,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
@@ -264,6 +265,9 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final flow = ref.watch(routineFlowProvider);
     if (flow.step == RoutineFlowStep.error) {
       final blocked = isCreditBlockingCode(flow.errorCode);
+      // 입력에 할 행동이 없다: 오류가 아니라 안내. 다시 해도 같아 적은 글이 남은 입력 화면으로 보낸다
+      final needsBetterInput =
+          flow.errorCode == ServerErrorCode.routineInputNotActionable.wire;
       // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 이전 문구가 나온다.
       // 서버에 닿지도 못했으면 인터넷을 확인하라고 한다.
       final description = switch (flow.errorMessage?.trim()) {
@@ -279,10 +283,16 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 홈으로가 주 버튼이다.
         pinCtaToFigmaY: true,
         bottomButton: ElumButton(
-          label: blocked
+          label: needsBetterInput
+              ? context.l10n.routineLoadingEditInput
+              : blocked
               ? context.l10n.routineLoadingHome
               : context.l10n.routineLoadingRetry,
-          onPressed: blocked ? () => context.go(Routes.guardian) : _retry,
+          onPressed: needsBetterInput
+              ? () => context.go(Routes.routineInput)
+              : blocked
+              ? () => context.go(Routes.guardian)
+              : _retry,
         ),
         // 다시 해도 같은 실패가 반복될 때 빠져나갈 길. 같은 무게의 버튼으로 두지 않는다.
         belowButton: blocked
@@ -307,7 +317,9 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다.
           // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
           // 하면 다시 하면 될 줄 안다. 이유는 서버 문구가 말한다.
-          message: blocked
+          message: needsBetterInput
+              ? context.l10n.routineLoadingInputNeededTitle
+              : blocked
               ? context.l10n.routineLoadingBlockedTitle
               : switch (widget.kind) {
                   RoutineLoadingKind.prepare =>
@@ -316,7 +328,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                     context.l10n.routineLoadingGenerateFailed,
                 },
           description: description,
-          errorCode: flow.errorCode,
+          errorCode: needsBetterInput ? null : flow.errorCode,
         ),
       );
     }

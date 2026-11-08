@@ -33,6 +33,8 @@ enum ServerErrorCode {
   // ROUTINE
   routineAiGenerationFailed('ROUTINE_AI_GENERATION_FAILED'),
   routineStepLimitExceeded('ROUTINE_STEP_LIMIT_EXCEEDED'),
+  // 입력에 이룸이가 할 행동이 없다 (카드 0장). 다시 해도 같아 입력으로 돌려보낸다
+  routineInputNotActionable('ROUTINE_INPUT_NOT_ACTIONABLE'),
   routineNotFound('ROUTINE_NOT_FOUND'),
   routineAccessDenied('ROUTINE_ACCESS_DENIED'),
   routineInvalidStatus('ROUTINE_INVALID_STATUS'),

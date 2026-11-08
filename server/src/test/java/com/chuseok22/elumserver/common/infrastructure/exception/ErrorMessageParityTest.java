@@ -53,7 +53,8 @@ class ErrorMessageParityTest {
       + ADDED_EXPERT_ROUTINE_CODES.size()
       + ADDED_ROUTINE_MEMORY_CODES.size()
       + ADDED_PLAN_STORE_AND_REPORT_CODES.size()
-      + ADDED_IMAGE_REGENERATE_CODES.size());
+      + ADDED_IMAGE_REGENERATE_CODES.size()
+      + 1);
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -296,6 +297,17 @@ class ErrorMessageParityTest {
   }
 
   // 카드 그림 다시 그리기(#1103, #1075)가 더한 코드와 HTTP 상태.
+  @Test
+  @DisplayName("입력 안내 코드: 422, 할 행동을 적으라는 문구")
+  void routineInputNotActionable_guidesInsteadOfFailing() {
+    assertThat(GOLDEN).doesNotContainKey(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE.name());
+    assertThat(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE.getStatus().name()).isEqualTo("UNPROCESSABLE_ENTITY");
+    assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE, AppLocale.KO))
+      .isEqualTo("이룸이가 할 행동을 적으면 카드로 만들어요.");
+    assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE, AppLocale.EN))
+      .isNotBlank().isNotEqualTo(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE.name());
+  }
+
   private static final Map<ErrorCode, String> ADDED_IMAGE_REGENERATE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
     Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_NOT_REGENERATABLE, "CONFLICT"),
     Map.entry(ErrorCode.ROUTINE_STEP_IMAGE_REGENERATE_FAILED, "SERVICE_UNAVAILABLE"),
