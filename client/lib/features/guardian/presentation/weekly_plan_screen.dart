@@ -19,12 +19,13 @@ import '../application/routine_schedule_controller.dart';
 import '../domain/routine_schedule.dart';
 import 'pro_teaser_samples.dart';
 import 'widgets/weekly_plan_parts.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 주간 계획 (#782): 월 ~ 일 요일마다 반복 일과를 시각 순으로. 누르면 그 일과의 반복 시트
 ///
 /// 상태: 불러오는 중 / 실패(다시 하기 + 코드) / 예약 0건(글만 든 웜그레이 줄) / 요일 묶음.
 /// 위에는 이룸이 기기 알림 상태와 Pro 끝남 멈춤 안내를 한 줄씩 (해당할 때만)
-/// Free · 판매 중 · 예약 0건이면 흐린 견본 주간 계획 + `Pro로 보기` (멈춘 예약이 있으면 실제 계획을 보임)
+/// Free · 판매 중 · 예약 0건이면 Pro 미리 보기 (견본 주간 계획) (멈춘 예약이 있으면 실제 계획을 보임)
 class WeeklyPlanScreen extends ConsumerWidget {
   const WeeklyPlanScreen({super.key});
 
@@ -43,13 +44,14 @@ class WeeklyPlanScreen extends ConsumerWidget {
 
     final access = ref.watch(planAccessProvider);
     final body = switch (planAsync) {
-      AsyncValue(:final value?) when value.schedules.isEmpty && access.shouldShowTeaserFor(canUseFeature: access.canScheduleRoutines) =>
+      AsyncValue(:final value?) when value.schedules.isEmpty && access.shouldShowTeaserFor(PlanBenefit.routineSchedule) =>
         ListView(
           padding: EdgeInsets.only(top: WeeklyPlanScreen._topGap.h),
           children: [
             ProTeaser(
+              title: context.l10n.proTeaserWeeklyPlanTitle,
               benefit: context.l10n.proTeaserWeeklyPlanBenefit,
-              onUnlock: () => openPlanPaywall(context, ref),
+              actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.routineSchedule),
               child: ProTeaserSamples.weeklyPlan(context),
             ),
           ],

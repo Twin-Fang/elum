@@ -13,7 +13,6 @@ import '../../talk/application/talk_my_links_provider.dart';
 import '../../talk/application/talk_my_shared_posts_provider.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_toast.dart';
@@ -37,6 +36,7 @@ import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
 import 'card_export/open_card_export.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
@@ -238,27 +238,16 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 지우기: 확인 팝업 > 일과관리에서 뺀다 (이룸이가 한 기록은 서버가 남긴다)
   Future<void> _remove(Routine routine) async {
     final l10n = context.l10n;
-    final isConfirmed = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    final isConfirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: l10n.routineLibraryRemoveConfirmTitle,
       message: l10n.routineLibraryRemoveConfirmMessage,
       // "남아요"가 "남아 / 요"로 끊기지 않게 낱말 단위로 줄바꿈
       keepWordsInMessage: true,
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.routineLibraryMenuRemove,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.routineLibraryMenuRemove,
     );
-    if (isConfirmed != true || !mounted) return;
+    if (!isConfirmed || !mounted) return;
     final result = await runBusy(
       () async => (
         failure: await ref

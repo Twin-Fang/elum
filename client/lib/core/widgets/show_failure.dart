@@ -5,7 +5,7 @@ import '../logger/crash_reporter.dart';
 import '../network/app_failure.dart';
 import 'elum_dialog.dart';
 
-/// 실패를 팝업으로 알린다 — **앱에서 실패를 말하는 방법은 이것 하나다.**
+/// 실패를 팝업으로 알린다 — **앱에서 실패를 말하는 방법은 이 파일 둘뿐이다** (예외는 이것, 문장·코드를 가진 실패는 [showFailureMessage]).
 ///
 /// 시안 `팝업` 변형 `로그인실패`(1045:5079) 그대로다 — 붉은 느낌표, 문장 하나,
 /// 붉은 `확인`. 노란 경고 팝업과 스낵바는 시안에 없다. 스낵바는 화면 아래에 잠깐 떴다 사라져 놓치기 쉬웠다.
@@ -47,11 +47,11 @@ Future<void> showFailure(
   }
 
   final l10n = context.l10n;
-  await showElumDialog<void>(
-    context: context,
+  await showFailureMessage(
+    context,
     // 제목이 `무엇이 안 됐는지`를 이미 말하므로, 네트워크 안내가 있으면 할 일
     // 자리를 그 안내로 바꾼다. 둘을 잇으면 할 일이 두 개가 된다.
-    title: failureSentence(
+    sentence: failureSentence(
       title,
       title == null
           ? failure.bodyOr(fallback)
@@ -59,9 +59,23 @@ Future<void> showFailure(
       stop: l10n.sentenceStop,
     ),
     code: failure.badgeOr(fallbackCode),
+  );
+}
+
+/// 문장·코드를 이미 가진 실패 팝업 (광고 지급 실패 · 인쇄 불가 · 사진 올리기 실패처럼 [AppFailure] 가 아닌 앱 쪽 실패)
+/// 모양은 [showFailure] 와 같음: 붉은 ! + 문장 + 코드 줄 + 붉은 `확인` (#1171)
+Future<void> showFailureMessage(
+  BuildContext context, {
+  required String sentence,
+  required String code,
+}) {
+  return showElumDialog<void>(
+    context: context,
+    title: sentence,
+    code: code,
     icon: ElumDialogIcon.alert,
     actions: [
-      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
+      ElumDialogAction(label: context.l10n.commonConfirm, tone: ElumDialogTone.danger),
     ],
   );
 }

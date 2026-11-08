@@ -9,11 +9,13 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../member/application/plan_access.dart';
 import '../../application/routine_translate_targets.dart';
 import 'anchored_quick_menu.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
 enum LibraryMenuAction {
@@ -93,67 +95,63 @@ List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
     listen: false,
   ).read(planAccessProvider);
   final canTranslate =
-      planAccess.shouldShowEntryFor(canUseFeature: planAccess.canTranslateRoutines) &&
+      planAccess.shouldShowEntryFor(PlanBenefit.routineTranslate) &&
       routine.isVisibleToChild &&
       routine.steps.isNotEmpty &&
       routineTranslateTargetsOf(routine).isNotEmpty;
   return [
-    (
+    QuickMenuRow(
       value: LibraryMenuAction.send,
       icon: AppAssets.iconPaperPlane,
       label: l10n.routineLibrarySendToday,
-      isDanger: false,
     ),
     if (isMine)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.rename,
         icon: AppAssets.iconPencil,
         label: l10n.routineLibraryMenuRename,
-        isDanger: false,
       ),
-    (
+    QuickMenuRow(
       value: LibraryMenuAction.addToGroup,
       icon: AppAssets.iconFolderAdd,
       label: l10n.routineGroupMenuAddToGroup,
-      isDanger: false,
     ),
-    (
+    QuickMenuRow(
       value: LibraryMenuAction.copy,
       icon: AppAssets.iconCopy,
       label: l10n.routineLibraryMenuCopy,
-      isDanger: false,
     ),
     if (canTranslate)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.translate,
         icon: AppAssets.iconLanguage,
         label: l10n.routineTranslateMenu,
-        isDanger: false,
+        shouldShowProBadge: planAccess.shouldShowTeaserFor(
+          PlanBenefit.routineTranslate,
+        ),
       ),
     if (canShareToTalk)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.shareToTalk,
         icon: AppAssets.iconBook,
         label: hasSharedPost ? l10n.talkMenuViewMyPost : l10n.talkMenuShare,
-        isDanger: false,
       ),
     if (canSendLink)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.sendLink,
         icon: AppAssets.iconShare,
         label: l10n.talkLinkSend,
-        isDanger: false,
       ),
     // 켜진 링크는 보내기 줄과 따로 본다 (보낼 수 없는 상태가 되어도 끌 수 있게)
     if (isMine && hasActiveLink)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.turnOffLink,
         icon: AppAssets.iconEyeCrossed,
         label: l10n.talkLinkTurnOff,
         isDanger: true,
       ),
     if (isMine)
-      (
+      QuickMenuRow(
         value: LibraryMenuAction.remove,
         icon: AppAssets.iconTrash,
         label: l10n.routineLibraryMenuRemove,
@@ -178,35 +176,30 @@ Future<GroupMenuAction?> showGroupQuickMenu(
 List<QuickMenuRow<GroupMenuAction>> groupMenuRows(BuildContext context) {
   final l10n = context.l10n;
   return [
-    (
+    QuickMenuRow(
       value: GroupMenuAction.send,
       icon: AppAssets.iconPaperPlane,
       label: l10n.routineLibrarySendToday,
-      isDanger: false,
     ),
-    (
+    QuickMenuRow(
       value: GroupMenuAction.rename,
       icon: AppAssets.iconPencil,
       label: l10n.routineLibraryMenuRename,
-      isDanger: false,
     ),
-    (
+    QuickMenuRow(
       value: GroupMenuAction.reorder,
       icon: AppAssets.iconInterlining,
       label: l10n.routineGroupMenuReorder,
-      isDanger: false,
     ),
-    (
+    QuickMenuRow(
       value: GroupMenuAction.copy,
       icon: AppAssets.iconCopy,
       label: l10n.routineLibraryMenuCopy,
-      isDanger: false,
     ),
-    (
+    QuickMenuRow(
       value: GroupMenuAction.ungroup,
       icon: AppAssets.iconFolderMinus,
       label: l10n.routineGroupMenuUngroup,
-      isDanger: false,
     ),
   ];
 }
@@ -246,6 +239,7 @@ class QuickMenuGroup<T> extends StatelessWidget {
                 icon: row.icon,
                 label: row.label,
                 isDanger: row.isDanger,
+                shouldShowProBadge: row.shouldShowProBadge,
                 onTap: () => Navigator.of(context).pop(row.value),
               ),
           ],
@@ -255,12 +249,13 @@ class QuickMenuGroup<T> extends StatelessWidget {
   }
 }
 
-/// 메뉴 한 줄 (설정 묶음 줄 결: 높이 56 · 왼쪽 20): 아이콘 20 + 글자, 되돌리기 어려운 동작은 붉게
+/// 메뉴 한 줄 (설정 묶음 줄 결: 높이 56 · 왼쪽 20): 아이콘 20 + 글자(+ Pro 배지), 되돌리기 어려운 동작은 붉게
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
     required this.icon,
     required this.label,
     required this.isDanger,
+    required this.shouldShowProBadge,
     required this.onTap,
   });
 
@@ -268,6 +263,7 @@ class _MenuRow extends StatelessWidget {
   final String icon;
   final String label;
   final bool isDanger;
+  final bool shouldShowProBadge;
   final VoidCallback onTap;
 
   static const _iconSize = 20.0;
@@ -303,13 +299,16 @@ class _MenuRow extends StatelessWidget {
               ),
               SizedBox(width: _iconToLabel.w),
               Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typo.settingsTileLabel.copyWith(
-                    color: labelColor,
+                child: LabelWithProBadge(
+                  label: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.typo.settingsTileLabel.copyWith(
+                      color: labelColor,
+                    ),
                   ),
+                  shouldShowProBadge: shouldShowProBadge,
                 ),
               ),
             ],

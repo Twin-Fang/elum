@@ -57,7 +57,8 @@ public record RoutineResponse(
   CreditUsage credit,
 
   @Schema(description = "카드 추가에서 그림을 만들지 않은 까닭 (#407). 그림을 요청했는데 크레딧이 모자라면 "
-    + "AI_CREDIT_INSUFFICIENT — 카드는 저장했다. 그 밖에는 null", example = "AI_CREDIT_INSUFFICIENT", nullable = true)
+    + "AI_CREDIT_INSUFFICIENT — 카드는 저장했다. 일과 만들기 응답은 AI 그림 일부를 못 그려 픽토그램으로 두면 "
+    + "AI_IMAGE_FAILED (#1172). 그 밖에는 null", example = "AI_CREDIT_INSUFFICIENT", nullable = true)
   String imageSkippedReason,
 
   /// 일과를 만든 보호자 ID. 응답에는 싣지 않는다 — forCaller 가 원문을 가릴지 판단하는 데만 쓴다.

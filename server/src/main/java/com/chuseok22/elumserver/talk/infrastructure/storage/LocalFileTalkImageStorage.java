@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.talk.infrastructure.storage;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.storage.StoredImageFormat;
 import com.chuseok22.elumserver.common.infrastructure.properties.TalkProperties;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "elum.store.image", havingValue = "local", matchIfMissing = true)
 @RequiredArgsConstructor
 public class LocalFileTalkImageStorage implements TalkImageStorage {
 
@@ -27,7 +30,7 @@ public class LocalFileTalkImageStorage implements TalkImageStorage {
 
   @Override
   public String save(String postId, int stepOrder, byte[] bytes, String contentType) {
-    String key = postId + "/" + stepOrder + "." + extensionOf(contentType);
+    String key = postId + "/" + stepOrder + "." + StoredImageFormat.extensionOf(contentType);
     try {
       Path file = resolve(key);
       Files.createDirectories(file.getParent());
@@ -44,7 +47,7 @@ public class LocalFileTalkImageStorage implements TalkImageStorage {
     try {
       byte[] bytes = Files.readAllBytes(resolve(key));
       // 저장할 때 정한 확장자로 형식을 돌려줌 (운영체제 추측은 환경마다 다름)
-      return new RoutineImageStorage.ImageContent(bytes, contentTypeOf(key));
+      return new RoutineImageStorage.ImageContent(bytes, StoredImageFormat.contentTypeOf(key));
     } catch (IOException e) {
       log.warn("[talk image] read failed : key={}", key);
       throw new CustomException(ErrorCode.TALK_IMAGE_NOT_FOUND);
@@ -75,28 +78,6 @@ public class LocalFileTalkImageStorage implements TalkImageStorage {
     } catch (IOException e) {
       log.warn("[talk image] delete post failed : postId={}", postId, e);
     }
-  }
-
-  private static String extensionOf(String contentType) {
-    if (contentType == null) {
-      return "jpg";
-    }
-    return switch (contentType.toLowerCase(Locale.ROOT)) {
-      case "image/png" -> "png";
-      case "image/webp" -> "webp";
-      default -> "jpg";
-    };
-  }
-
-  private static String contentTypeOf(String key) {
-    int dot = key.lastIndexOf('.');
-    String extension = dot < 0 ? "" : key.substring(dot + 1).toLowerCase(Locale.ROOT);
-    return switch (extension) {
-      case "jpg", "jpeg" -> "image/jpeg";
-      case "png" -> "image/png";
-      case "webp" -> "image/webp";
-      default -> "application/octet-stream";
-    };
   }
 
   private Path base() {

@@ -5,16 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
+import '../../../../core/widgets/elum_error_code_text.dart';
 import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../shared/models/routine.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
 import 'card_export_theme_teaser.dart';
 import 'print_sheets.dart';
 
-/// 인쇄용 미리 보기: (Pro 테마 흐린 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
+/// 인쇄용 미리 보기: (Pro 테마 미리 보기) > 종이 밖 안내 > 지면들 (= 굽는 파일 그대로)
 class CardExportPreview extends ConsumerWidget {
   const CardExportPreview({
     super.key,
@@ -24,7 +27,7 @@ class CardExportPreview extends ConsumerWidget {
     required this.sheets,
     required this.sheetKeys,
     required this.hasWatermark,
-    required this.canPurchasePro,
+    required this.shouldPromoteNoWatermark,
     required this.onToggleCard,
     this.teaserSheet,
   });
@@ -40,10 +43,11 @@ class CardExportPreview extends ConsumerWidget {
   /// 지면마다 굽기용 열쇠 ([sheets] 와 같은 차례, 화면이 들고 있음)
   final List<GlobalKey> sheetKeys;
   final bool hasWatermark;
-  final bool canPurchasePro;
+  /// 워터마크 줄 아래 `Pro 알아보기` 를 보이는가 (Pro 가 워터마크 없음을 줌 + 권유 대상)
+  final bool shouldPromoteNoWatermark;
   final ValueChanged<String> onToggleCard;
 
-  /// Free 가 흐리게 보고 있는 Pro 테마의 첫 지면, 없으면 null
+  /// Free 가 미리 보기로 보고 있는 Pro 테마의 첫 지면, 없으면 null
   final PrintSheet? teaserSheet;
 
   @override
@@ -58,7 +62,7 @@ class CardExportPreview extends ConsumerWidget {
         if (teaser != null) ...[
           CardExportThemeTeaser(
             sheet: teaser,
-            onUnlock: () => openPlanPaywall(context, ref),
+            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.cardExportAllThemes),
           ),
           SizedBox(height: _sectionGap.h),
         ],
@@ -73,22 +77,23 @@ class CardExportPreview extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: ElumTextLink(
-              label: l10n.commonRetryWithCode(CardExportErrorCode.image),
+              label: l10n.commonRetry,
               onTap: () => retryCardExportPictures(ref, routine, pictures),
             ),
           ),
+          const ElumErrorCodeText(CardExportErrorCode.image, textAlign: TextAlign.left),
         ],
         if (pictures.hasMissingPicture) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportMissingPicture, style: caption),
         ],
-        if (hasWatermark && canPurchasePro) ...[
+        if (hasWatermark && shouldPromoteNoWatermark) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportWatermarkNotice, style: caption),
           Align(
             alignment: Alignment.centerLeft,
-            child: ElumTextLink(
-              label: l10n.planLearnPro,
+            child: ProUpsellButton(
+              style: ProUpsellStyle.link,
               onTap: () => openPlanPaywall(context, ref),
             ),
           ),

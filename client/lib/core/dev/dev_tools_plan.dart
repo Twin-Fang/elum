@@ -62,7 +62,7 @@ class _PlanOverrideView extends ConsumerWidget {
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Text(
-            '스토어 상품 없이도 판매 중으로 보고 Free 화면에 흐린 Pro 미리 보기를 띄운다 (Free 처럼과 함께). '
+            '스토어 상품 없이도 판매 중으로 보고 Free 화면에 Pro 미리 보기를 띄운다 (Free 처럼과 함께). '
             '요금제 화면까지 열려면 결제 화면 켜기도 켠다.',
             style: TextStyle(fontSize: 12),
           ),

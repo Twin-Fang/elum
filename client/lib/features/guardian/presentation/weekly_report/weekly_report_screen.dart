@@ -15,6 +15,7 @@ import '../../../../core/widgets/pro_teaser.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/guardian_child_identity.dart';
 import '../../application/weekly_report_providers.dart';
 import '../../data/card_export_files.dart';
@@ -34,7 +35,7 @@ abstract final class WeeklyReportErrorCode {
 /// 주간 리포트 (#1074, Pro): 주 고르기 > 요약·기록 > 보낼 한 장 미리 보기 > 이미지·PDF 로 보내기
 ///
 /// 상태 4개: 불러오는 중 / 보낸 일과 0건(빈 상태) / 실패(에러 코드 + 다시 하기) / 리포트.
-/// Free: 판매 중이면 흐린 견본 리포트 + `Pro로 보기`, 아니면 입구가 없다 (그래도 들어오면 안내만).
+/// Free: 판매 중이면 Pro 미리 보기 (견본 리포트), 아니면 입구가 없다 (그래도 들어오면 안내만).
 class WeeklyReportScreen extends ConsumerStatefulWidget {
   const WeeklyReportScreen({super.key});
 
@@ -103,11 +104,12 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final isNotIncluded = reportAsync == null ||
         (reportAsync is AsyncError && isProOnlyRejection(reportAsync.error));
     if (isNotIncluded) {
-      if (ref.watch(planAccessProvider).shouldShowProTeaser) {
+      if (ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.weeklyReport)) {
         return SingleChildScrollView(
           child: ProTeaser(
+            title: l10n.proTeaserWeeklyReportTitle,
             benefit: l10n.proTeaserWeeklyReportBenefit,
-            onUnlock: () => openPlanPaywall(context, ref),
+            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.weeklyReport),
             child: ProTeaserSamples.weeklyReportSections(context),
           ),
         );

@@ -5,6 +5,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/device/device_name_reader.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/notifications/routine_reminder_reset_hook.dart';
 import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
@@ -89,8 +90,10 @@ class DeviceLinkRepository {
     CardImageDiskCache? imageCache,
     DeviceNameReader deviceNameReader = readDeviceName,
     PushUnregister? unregisterPush,
+    RoutineReminderReset? resetRoutineReminders,
   })  : _deviceNameReader = deviceNameReader,
         _unregisterPush = unregisterPush,
+        _resetRoutineReminders = resetRoutineReminders,
         _dio = dio,
         _tokens = tokens,
         _storage = storage,
@@ -100,6 +103,9 @@ class DeviceLinkRepository {
 
   /// 이 기기가 이룸이 기기로 바뀌기 직전 보호자 푸시 토큰 해제
   final PushUnregister? _unregisterPush;
+
+  /// 이룸이 기기로 바뀔 때·스스로 연결 끊을 때 이 기기 일과 알림 예약 취소 (보호자 계정 일과 제목이 남지 않게)
+  final RoutineReminderReset? _resetRoutineReminders;
 
   final Dio _dio;
 
@@ -202,6 +208,7 @@ class DeviceLinkRepository {
       tokens: _tokens,
       storage: _storage,
       imageCache: _imageCache,
+      resetRoutineReminders: _resetRoutineReminders,
     );
     return null;
   }
@@ -249,8 +256,12 @@ class DeviceLinkRepository {
       await _storage.setElumiDevice(true);
       // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다
       await _storage.setElumiLinkLost(false);
-      // 연결 전 계정이 고른 이룸이 id. 남으면 홈 이름이 회원 이름 대신 기본 호칭으로 감 (#1148)
-      await _storage.clearSelectedProfileId();
+      await _forgetPreLinkAccountStorage();
+      // 연결 전 보호자 계정의 일과 알림 (계정 범위 비우기가 남기는 키라 알림 기능이 예약 취소와 함께 비움)
+      await resetRoutineRemindersSafely(
+        _resetRoutineReminders,
+        reason: 'elumi link',
+      );
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
@@ -258,6 +269,17 @@ class DeviceLinkRepository {
     } catch (e) {
       AppLogger.error('연결', e);
       return RedeemResult(RedeemOutcome.failed, failure: AppFailure.of(e));
+    }
+  }
+
+  /// 연결 전 계정의 계정 범위 저장값 지우기 (회원 id·고른 이룸이·체크 기록·일과 캐시 등)
+  ///
+  /// 실패해도 연결은 성공으로 둠 (토큰이 이미 이룸이 세션이라 되돌릴 수 없음, 로그만 남김)
+  Future<void> _forgetPreLinkAccountStorage() async {
+    try {
+      await _storage.clearAccountForElumiLink();
+    } catch (e, stack) {
+      AppLogger.error('[link redeem] pre-link account storage not cleared', e, stack);
     }
   }
 
@@ -325,6 +347,7 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
     storage: ref.watch(localStorageProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
     unregisterPush: () => ref.read(pushUnregisterProvider)(),
+    resetRoutineReminders: () => ref.read(routineReminderResetProvider)(),
   );
 });
 

@@ -102,7 +102,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kTalkShareHintDismissedRoutineIds,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
-  // 계정 범위지만 기기 알림 예약과 묶여 [clearAll] 이 남김: 다른 계정 로그인 때 알림 기능이 예약 취소와 함께 비움
+  // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
   static const accountScopedKeysClearedByFeature = [_kRoutineReminders];
   // 기기 범위: 계정이 바뀌어도 남김 (기기 설정·서버 설정 캐시·이 기기에서 본 안내)
   static const deviceScopedKeys = [
@@ -123,6 +123,13 @@ class SharedPrefsStorage implements LocalStorage {
     _kTalkGridView,
   ];
   static const deviceScopedKeyPrefixes = [_kNoticeHiddenPrefix];
+  // 계정 범위 중 이룸이 기기 연결([clearAccountForElumiLink]) 때 남김: 연결이 방금 쓴 표식·역할, 보호자 잠금
+  static const keptOnElumiLinkKeys = [
+    _kElumiDevice,
+    _kElumiLinkLost,
+    _kSelectedRole,
+    _kPin,
+  ];
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -630,7 +637,19 @@ class SharedPrefsStorage implements LocalStorage {
     await _guardianLock.clear();
     if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
     // 계정 범위 키 전부 (분류표 한 곳 · 역할·이룸이 표식 포함: 이룸이 기기의 로그아웃은 곧 연결 끊기)
+    await _removeAccountScopedKeys();
+  }
+
+  @override
+  Future<void> clearAccountForElumiLink() =>
+      _removeAccountScopedKeys(keptKeys: keptOnElumiLinkKeys);
+
+  /// 계정 범위 키·접두사 키 지우기 ([keptKeys] 제외, 로그아웃·연결 공통)
+  Future<void> _removeAccountScopedKeys({
+    List<String> keptKeys = const [],
+  }) async {
     for (final key in accountScopedKeys) {
+      if (keptKeys.contains(key)) continue;
       await _prefs.remove(key);
     }
     for (final key in _prefs.getKeys().where(

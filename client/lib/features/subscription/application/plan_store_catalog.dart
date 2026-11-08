@@ -54,3 +54,8 @@ final canPurchaseProProvider = Provider<bool>((ref) {
   if (!ref.watch(isPlanStoreEnabledProvider)) return false;
   return ref.watch(planCatalogProvider).value?.hasOffers ?? false;
 });
+
+/// Pro 권유 버튼의 체험: 처음 고르는 상품(1년)에 스토어가 체험을 준다고 알렸을 때만 (#1166). 상품 모름·체험 없음 > null
+final proUpsellFreeTrialProvider = Provider<PlanFreeTrial?>(
+  (ref) => ref.watch(planCatalogProvider).value?.recommendedOffer?.freeTrial,
+);

@@ -7,12 +7,13 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/image_style.dart';
 import '../../../member/application/member_providers.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/routine_notifier.dart';
 import '../../application/card_photo_controller.dart';
 import '../../data/card_photo.dart';
@@ -23,6 +24,7 @@ import 'card_photo_source_sheet.dart';
 import 'card_redraw_flow.dart';
 import 'default_card_art.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/show_failure.dart';
 
 part 'card_photo_block_parts.dart';
 
@@ -179,17 +181,10 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     // 올리는 도중 시트가 닫혔다 — 인라인으로 알릴 자리가 없으니 팝업으로 알린다.
     // 실패를 삼키면 보호자는 그림이 바뀐 줄 안다.
     if (rootContext.mounted) {
-      await showElumDialog<void>(
-        context: rootContext,
-        title: rootContext.l10n.cardPhotoUploadFailedDialog(failure.message),
+      await showFailureMessage(
+        rootContext,
+        sentence: rootContext.l10n.cardPhotoUploadFailedDialog(failure.message),
         code: failure.code,
-        icon: ElumDialogIcon.alert,
-        actions: [
-          ElumDialogAction(
-            label: rootContext.l10n.commonConfirm,
-            tone: ElumDialogTone.danger,
-          ),
-        ],
       );
     }
   }
@@ -243,7 +238,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   }
 
   /// 그림 칩 하나: AI 그림 카드는 `다시 그리기`, 그림 없는 카드는 `AI 그림 그리기` (사진·가져온 그림·사진만 쓰기·설명 없음은 없음)
-  /// AI 맞춤 그림이 없는 요금제면 같은 자리에 Pro 안내 칩 (살 수 없는 동안은 숨김)
+  /// AI 맞춤 그림이 없는 요금제면 같은 자리에 Pro 안내 칩 (같은 글 + Pro 배지, 살 수 없는 동안은 숨김)
   Widget? _drawChip(BuildContext context, ActionCard? step) {
     if (step == null) return null;
     final l10n = context.l10n;
@@ -256,10 +251,13 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     if (!step.isAiPicture && !canDrawFirstPicture) return null;
 
     if (!planAccess.canUseAiPictures) {
-      if (!planAccess.shouldShowProTeaser) return null;
+      if (!planAccess.shouldPromoteBenefit(PlanBenefit.aiImageStyles)) return null;
+      // Pro 칩과 같은 행동 이름 + Pro 배지 (다른 Pro 입구와 같은 모양). 낭독만 `Pro로 다시 그리기`
       return _Chip(
         asset: AppAssets.iconRefresh,
-        label: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,
+        label: step.isAiPicture ? l10n.cardRegenerateChip : l10n.cardFirstDrawChip,
+        semanticLabel: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,
+        shouldShowProBadge: planAccess.shouldShowTeaserFor(PlanBenefit.aiImageStyles),
         onTap: _busy ? null : () => openProOnlyNotice(context, ref),
       );
     }

@@ -5,7 +5,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
-import '../../../../core/widgets/elum_label_chip.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../domain/card_export_options.dart';
@@ -31,10 +31,10 @@ class CardExportOptionsPanel extends StatelessWidget {
   /// Pro 테마를 목록에 보이는가 (결제 전 Free 는 숨김)
   final bool shouldShowProThemes;
 
-  /// 고를 수 없는 Pro 테마 칩 누름 (요금제 · 흐린 미리 보기 · 안내)
+  /// 고를 수 없는 Pro 테마 칩 누름 (요금제 · Pro 미리 보기 · 안내)
   final ValueChanged<CardDesignTheme> onLockedThemeTap;
 
-  /// 흐린 미리 보기로 보고 있는 Pro 테마 (칩에 고름 표시만, 내보내기 설정은 그대로)
+  /// Pro 미리 보기로 보고 있는 Pro 테마 (칩에 고름 표시만, 내보내기 설정은 그대로)
   final CardDesignTheme? teaserTheme;
 
   static const _groupGap = 20.0;
@@ -238,11 +238,7 @@ class _OptionChip extends StatelessWidget {
               Text(label, style: context.typo.chipLabel.copyWith(color: colors.textPrimary)),
               if (isPro) ...[
                 SizedBox(width: 6.w),
-                ElumLabelChip(
-                  label: context.l10n.planProBadge,
-                  background: colors.accentYellow,
-                  foreground: colors.textPrimary,
-                ),
+                const ProBadge(),
               ],
             ],
           ),

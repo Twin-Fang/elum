@@ -5,7 +5,7 @@
 /// | 웹 링크 | `{API 주소}/s/{글id}` | 공유 시트로 보냄. 서버가 미리보기 페이지를 그림 |
 /// | 앱 주소 | `elum://talk?post={글id}` | 웹 페이지의 `이룸 앱에서 보기` (서버 TalkSharePageController 와 같은 모양) |
 ///
-/// 웹 링크 호스트는 [webHosts] 로 정확히 맞는 것만 받는다 — `…chuseok22.com.evil.com` 같은 주소를 거른다.
+/// 웹 링크 호스트는 [webHosts] 로 정확히 맞는 것만 받는다 — `…suhsaechan.kr.evil.com` 같은 주소를 거른다.
 class TalkPostLink {
   const TalkPostLink({required this.postId});
 
@@ -26,7 +26,7 @@ class TalkPostLink {
 
   /// [raw](문자열 또는 [Uri]) > 이야기 글 링크. 아니거나 id 모양이 틀리면 null. 어떤 입력에도 던지지 않는다
   ///
-  /// [webHosts] 는 받을 웹 링크 호스트 (운영 도메인 2개 + 지금 API 주소 호스트, `AppConfig.acceptedWebLinkHosts`)
+  /// [webHosts] 는 받을 웹 링크 호스트 (운영 도메인 + 지금 API 주소 호스트, `AppConfig.acceptedWebLinkHosts`)
   static TalkPostLink? parse(Object? raw, {required Set<String> webHosts}) {
     final uri = _toUri(raw);
     if (uri == null) return null;

@@ -1,9 +1,7 @@
-/// 운영 API 주소 규칙: https, 허용 도메인 2개, 포트·경로·쿼리 없음 (#831)
+/// 운영 API 주소 규칙: https, 운영 도메인, 포트·경로·쿼리 없음
 /// 서버 `ServerAddressPolicy.ALLOWED_API_HOSTS` 와 같은 목록 (서버 CrossStackContractTest 가 대조)
 abstract final class ServerAddressPolicy {
-  // 운영 도메인 2개: 기존 서버(친구 NAS), 새 서버(내 NAS)
   static const allowedApiHosts = <String>{
-    'api.elum.chuseok22.com',
     'api.elum.suhsaechan.kr',
   };
 

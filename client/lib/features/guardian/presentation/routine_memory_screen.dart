@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/app_effects.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -20,10 +19,12 @@ import '../application/routine_memory_controller.dart';
 import '../domain/routine_memory.dart';
 import 'pro_teaser_samples.dart';
 import 'routine_memory_line_sheet.dart';
+import '../../subscription/domain/plan_benefit.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 이룸이별 AI 메모 화면 (Pro, 시안 없음 — 설정 묶음 카드 모양을 따름)
 /// 묶음 3개: 켜기/끄기 > 메모 줄(누르면 고치기·지우기, 더하기) > 모두 지우기
-/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모 / (Free · 판매 중) 흐린 견본 메모 — 서버를 부르지 않음
+/// 상태: 불러오는 중 / 실패(다시 하기 + 에러 코드) / 메모 / (Free · 판매 중) Pro 미리 보기 (견본 메모) — 서버를 부르지 않음
 class RoutineMemoryScreen extends ConsumerWidget {
   const RoutineMemoryScreen({super.key});
 
@@ -35,7 +36,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final access = ref.watch(planAccessProvider);
-    final body = access.shouldShowTeaserFor(canUseFeature: access.canUseRoutineMemory)
+    final body = access.shouldShowTeaserFor(PlanBenefit.routineMemory)
         ? _proTeaser(context, ref)
         : _memoryBody(context, ref);
 
@@ -52,8 +53,9 @@ class RoutineMemoryScreen extends ConsumerWidget {
         child: Padding(
           padding: EdgeInsets.only(top: _topGap.h, bottom: _topGap.h),
           child: ProTeaser(
+            title: context.l10n.proTeaserRoutineMemoryTitle,
             benefit: context.l10n.proTeaserRoutineMemoryBenefit,
-            onUnlock: () => openPlanPaywall(context, ref),
+            actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.routineMemory),
             child: ProTeaserSamples.routineMemory(context),
           ),
         ),
@@ -68,7 +70,7 @@ class RoutineMemoryScreen extends ConsumerWidget {
           ),
         ),
       // 서버 Pro 거절(ROUTINE_MEMORY_PRO_REQUIRED · Pro 가 막 끝남): 실패 대신 미리 보기 (판매 중일 때)
-      AsyncError(:final error) when isProOnlyRejection(error) && ref.watch(planAccessProvider).shouldShowProTeaser =>
+      AsyncError(:final error) when isProOnlyRejection(error) && ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.routineMemory) =>
         _proTeaser(context, ref),
       AsyncError(:final error) => ElumStateBody(
           child: ElumErrorView.failure(
@@ -172,17 +174,15 @@ class _RoutineMemoryGroups extends ConsumerWidget {
   /// 되돌릴 수 없으니 팝업으로 한 번 묻는다
   Future<void> _confirmClear(BuildContext context, WidgetRef ref, RoutineMemoryController controller) async {
     final l10n = context.l10n;
-    final isConfirmed = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    // 한 번 확인 (일과·기록·별은 남고 메모는 다음 일과부터 다시 쌓임 — 입력 확인까지는 아님, #1171)
+    final isConfirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: l10n.routineMemoryClearConfirmTitle,
       message: l10n.routineMemoryClearConfirmMessage,
-      actions: [
-        ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: l10n.commonConfirm, value: true, tone: ElumDialogTone.danger),
-      ],
+      actionLabel: l10n.routineMemoryClearConfirmAction,
     );
-    if (isConfirmed != true || !context.mounted) return;
+    if (!isConfirmed || !context.mounted) return;
     await _runSave(context, ref, controller.clearAll);
   }
 

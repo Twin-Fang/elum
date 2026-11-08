@@ -10,12 +10,15 @@ import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageSafetyRejection;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.common.text.ObjectParticleFixer;
 import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -82,18 +85,26 @@ public class RoutineAiPipeline {
     return restoreNickname(result, nickname);
   }
 
-  // 제목·카드 제목·설명의 자리표시를 이름으로 되돌린다. NicknamePlaceholder.restore 는 던지지 않고 실패하면 원문을
+  // 제목·카드 제목·설명의 자리표시를 이름으로 되돌린다(ko 는 조사 보정까지, toSavedText). NicknamePlaceholder.restore 는 던지지 않고 실패하면 원문을
   // 돌려주므로(E10) 치환 때문에 일과 생성이 실패하지 않는다.
   private RoutineGenerationResult restoreNickname(RoutineGenerationResult result, String nickname) {
     List<GeneratedStep> steps = result.steps().stream()
       .map(step -> new GeneratedStep(
         step.order(),
-        NicknamePlaceholder.restore(step.title(), nickname, AiCallContext.currentContentLocale()),
-        NicknamePlaceholder.restore(step.description(), nickname, AiCallContext.currentContentLocale()),
+        toSavedText(step.title(), nickname),
+        toSavedText(step.description(), nickname),
         step.imagePath(),
         step.pictogramId()))
       .toList();
-    return new RoutineGenerationResult(NicknamePlaceholder.restore(result.title(), nickname, AiCallContext.currentContentLocale()), steps, result.batchId());
+    return new RoutineGenerationResult(toSavedText(result.title(), nickname), steps, result.batchId(),
+      result.failedImageCount());
+  }
+
+  // AI 문장 > 저장 문장: 이름 되돌림 > ko 는 목적격 조사 보정 (AI 가 가끔 '수도꼭지을' 처럼 틀림, #1190)
+  private static String toSavedText(String aiText, String nickname) {
+    AppLocale contentLocale = AiCallContext.currentContentLocale();
+    String restored = NicknamePlaceholder.restore(aiText, nickname, contentLocale);
+    return contentLocale == AppLocale.KO ? ObjectParticleFixer.fix(restored) : restored;
   }
 
   private static final int MIN_OPTIONS = 3;
@@ -270,6 +281,7 @@ public class RoutineAiPipeline {
       // futures는 draft.steps() 순서 그대로이고 normalizeOrder가 이미 1..N으로 정렬해뒀으므로
       // 별도 정렬 없이도 steps는 순서대로 나온다.
       List<StepResult> stepResults = futures.stream().map(CompletableFuture::join).toList();
+      logProviderUnavailableOnce(stepResults);
 
       List<GeneratedStep> steps = stepResults.stream()
         .map(result -> new GeneratedStep(
@@ -281,13 +293,24 @@ public class RoutineAiPipeline {
         ))
         .toList();
 
-      return new RoutineGenerationResult(draft.title(), steps, batchId);
+      int failedImageCount = (int) stepResults.stream().filter(StepResult::isAiImageFailed).count();
+      return new RoutineGenerationResult(draft.title(), steps, batchId, failedImageCount);
     } catch (CompletionException e) {
       log.warn("단계별 이미지 생성 실패", e);
       throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
     } finally {
       executor.shutdown();
     }
+  }
+
+  // 그림 키 없음은 카드마다가 아니라 일과 1회에 1줄 (원인·영향 카드 수, 스택 없음) (#1172)
+  private void logProviderUnavailableOnce(List<StepResult> stepResults) {
+    List<StepResult> unavailable = stepResults.stream().filter(StepResult::isProviderUnavailable).toList();
+    if (unavailable.isEmpty()) {
+      return;
+    }
+    log.warn("[card image] skipped : image provider unavailable (api key not configured), {}, cards={}/{}",
+      unavailable.get(0).unavailableDetail(), unavailable.size(), stepResults.size());
   }
 
   // 단계 하나의 최종 imagePath를 결정한다.
@@ -311,17 +334,22 @@ public class RoutineAiPipeline {
   ) {
     String reusablePath = reusableImagePathsByOrder.get(stepDraft.order());
     if (reusablePath != null) {
-      return new StepResult(stepDraft, null, reusablePath);
+      return StepResult.reused(stepDraft, reusablePath);
     }
     // AI 그림이 아닌 방식(그림 기호·이모지): 그림 호출 자체를 하지 않는다. 카드는 imagePath=null 로 저장되고(허용됨) 보호자가 사진을 넣는다.
     // 재시도·기본 그림 대체 경로도 타지 않는다 — 실패가 아니라 선택이다.
     if (!imageStyle.drawsAiImages()) {
-      return new StepResult(stepDraft, null, null);
+      return StepResult.noAiImage(stepDraft);
     }
     CardImageGenerator.CardImageRequest request = new CardImageGenerator.CardImageRequest(
       stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey, imageStyle,
       routineTitle, stepDraft.title());
-    return new StepResult(stepDraft, generateImageWithRetry(request), null);
+    try {
+      return StepResult.drawn(stepDraft, generateImageWithRetry(request));
+    } catch (CustomException unavailable) {
+      // 키 없음만 여기로 온다 (generateImageWithRetry 가 그 밖의 실패는 null 로 삼킴)
+      return StepResult.providerUnavailable(stepDraft, unavailable.getDetail());
+    }
   }
 
   // 이미지 단계 하나가 일시적으로 실패해도 전체 루틴 생성을 곧바로 포기하지 않도록, 실패한
@@ -331,11 +359,16 @@ public class RoutineAiPipeline {
   // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다.
   // FLUX 실패의 OpenAI fallback 은 CardImageGenerator 안에서 이미 한 번 일어난다. 여기 재시도는 그
   // 둘이 다 실패했을 때의 것이다.
+  // 예외: 키 없음(IMAGE_PROVIDER_UNAVAILABLE)만 던짐 — resolveStepResult 가 받아 그 카드만 그림 없이 둠
   private GeneratedImage generateImageWithRetry(CardImageGenerator.CardImageRequest request) {
     String description = request.description();
     try {
       return cardImageGenerator.generate(request);
     } catch (Exception first) {
+      // 키 없음은 설정 문제라 재시도 없이 호출부로 (로그는 일과 1회로 모음)
+      if (ImageClientRouter.isProviderUnavailable(first)) {
+        throw (CustomException) first;
+      }
       // 안전 거절은 CardImageGenerator 가 장면을 바꿔 이미 한 번 더 시도했다 — 같은 요청 반복은 낭비라 기본 그림으로
       if (ImageSafetyRejection.isRejection(first)) {
         log.warn("이미지 안전 거절, 기본 그림으로 진행: descriptionLength={}", LogTextLength.of(description));
@@ -352,19 +385,45 @@ public class RoutineAiPipeline {
     }
   }
 
+  /// @param isAiImageFailed AI 그림을 그리려 했는데 못 붙임 (안전 거절·재시도 실패·키 없음)
+  /// @param unavailableDetail 키 없음일 때 제공자 ("provider=OPENAI"), 그 밖에는 null
   private record StepResult(
-    RoutineStepDraft.StepDraft stepDraft, GeneratedImage generatedImage, String reusedImagePath
+    RoutineStepDraft.StepDraft stepDraft, GeneratedImage generatedImage, String reusedImagePath,
+    boolean isAiImageFailed, String unavailableDetail
   ) {
 
+    static StepResult reused(RoutineStepDraft.StepDraft stepDraft, String reusedImagePath) {
+      return new StepResult(stepDraft, null, reusedImagePath, false, null);
+    }
+
+    static StepResult noAiImage(RoutineStepDraft.StepDraft stepDraft) {
+      return new StepResult(stepDraft, null, null, false, null);
+    }
+
+    static StepResult drawn(RoutineStepDraft.StepDraft stepDraft, GeneratedImage generatedImage) {
+      return new StepResult(stepDraft, generatedImage, null, generatedImage == null, null);
+    }
+
+    static StepResult providerUnavailable(RoutineStepDraft.StepDraft stepDraft, String unavailableDetail) {
+      return new StepResult(stepDraft, null, null, true, unavailableDetail == null ? "provider=unknown" : unavailableDetail);
+    }
+
+    boolean isProviderUnavailable() {
+      return unavailableDetail != null;
+    }
   }
 
   /**
    * @param batchId 이번 생성에서 만든 이미지가 들어간 폴더. 저장이 실패하면 서비스가
    *                이 폴더를 지워 고아 파일을 남기지 않는다.
    *                재사용 이미지(revise)는 다른 batchId에 있으므로 함께 지워지지 않는다.
+   * @param failedImageCount AI 그림을 그리려 했는데 못 붙인 카드 수 (픽토그램으로 보임). 응답 imageSkippedReason 근거
    */
-  public record RoutineGenerationResult(String title, List<GeneratedStep> steps, String batchId) {
+  public record RoutineGenerationResult(String title, List<GeneratedStep> steps, String batchId, int failedImageCount) {
 
+    public RoutineGenerationResult(String title, List<GeneratedStep> steps, String batchId) {
+      this(title, steps, batchId, 0);
+    }
   }
 
   /// @param pictogramId 무료 픽토그램 id. 검증·폴백을 마친 값이라 카탈로그가 있으면 항상 채워져 있다.

@@ -165,9 +165,9 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
   /// ⊖ 확인: 지우기가 아니라 묶음에서 빼기 (일과는 일과 관리에 남는다). 빼기를 골랐으면 true
   Future<bool> _confirmRemove(Routine routine) async {
     final l10n = context.l10n;
+    // 잃는 것 없음 (일과는 일과 관리에 남음) > 아이콘 없는 일반 확인 (#1171)
     final isConfirmed = await showElumDialog<bool>(
       context: context,
-      icon: ElumDialogIcon.alert,
       title: l10n.routineGroupRemoveConfirmTitle(routine.displayTitle),
       message: l10n.routineGroupRemoveConfirmMessage,
       keepWordsInMessage: true,

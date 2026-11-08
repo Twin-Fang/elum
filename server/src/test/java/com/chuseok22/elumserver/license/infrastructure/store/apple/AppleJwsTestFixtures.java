@@ -89,9 +89,12 @@ public final class AppleJwsTestFixtures {
   }
 
   public static Map<String, Object> notification(String notificationType, String subtype, String uuid, String environment,
-    long appAppleId, String signedTransactionInfo, String signedRenewalInfo) {
+    Long appAppleId, String signedTransactionInfo, String signedRenewalInfo) {
     Map<String, Object> data = new LinkedHashMap<>();
-    data.put("appAppleId", appAppleId);
+    // appAppleId null: Sandbox 알림처럼 앱 ID 없이 옴 (#1187)
+    if (appAppleId != null) {
+      data.put("appAppleId", appAppleId);
+    }
     data.put("bundleId", BUNDLE_ID);
     data.put("environment", environment);
     data.put("signedTransactionInfo", signedTransactionInfo);

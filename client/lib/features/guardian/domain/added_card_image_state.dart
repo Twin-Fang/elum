@@ -1,3 +1,5 @@
+import 'card_image_skipped_reason.dart';
+
 /// 직접 추가한 카드의 그림 상태 (#868)
 /// 서버 응답 `imageSkippedReason` > 화면이 할 일(그림 기다리기, 안내 토스트, 아무것도 안 함)
 enum AddedCardImageState {
@@ -16,13 +18,6 @@ enum AddedCardImageState {
   /// 설명이 비어 서버가 그림을 건너뜀 > 그림 기호만 (안내 없음)
   notRequested;
 
-  // 서버 RoutineStepEditService.IMAGE_SKIPPED_PHOTO_ONLY 와 같은 값
-  static const _skippedPhotoOnly = 'IMAGE_STYLE_PHOTO_ONLY';
-  // 서버 ErrorCode.AI_CREDIT_INSUFFICIENT
-  static const _skippedCreditInsufficient = 'AI_CREDIT_INSUFFICIENT';
-  // 서버 RoutineStepEditService.IMAGE_SKIPPED_PLAN (요금제에 AI 맞춤 그림 없음 > 픽토그램, 안내 없음)
-  static const _skippedPlanWithoutAiPicture = 'AI_IMAGE_NOT_ALLOWED';
-
   /// 서버 응답 > 그림 상태 (설명이 비면 서버가 까닭 없이 건너뜀)
   static AddedCardImageState fromAddResponse({
     required String? imageSkippedReason,
@@ -32,8 +27,9 @@ enum AddedCardImageState {
       return description.trim().isEmpty ? notRequested : generating;
     }
     return switch (imageSkippedReason) {
-      _skippedPhotoOnly || _skippedPlanWithoutAiPicture => basicPictogramStyle,
-      _skippedCreditInsufficient => creditInsufficient,
+      CardImageSkippedReason.photoOnly ||
+      CardImageSkippedReason.planWithoutAiPicture => basicPictogramStyle,
+      CardImageSkippedReason.creditInsufficient => creditInsufficient,
       _ => unavailable,
     };
   }

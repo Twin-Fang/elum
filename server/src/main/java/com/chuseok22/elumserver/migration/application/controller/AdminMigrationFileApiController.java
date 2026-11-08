@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 서버 이전 파일 내보내기 관리자 API (#1053, 임시: 이전이 끝나면 제거)
- * 시스템 설정 "이전 파일 내보내기"가 꺼져 있으면 404. 받는 쪽은 server/tool/nas-mirror/pull-files.sh
+ * 시스템 설정 "이전 파일 내보내기"가 꺼져 있으면 404.
  */
 // 스크립트가 부르므로 JSON 에러. @LogMonitoring 은 붙이지 않음 (파일 수백 개 다운로드가 로그를 덮음)
 @Slf4j

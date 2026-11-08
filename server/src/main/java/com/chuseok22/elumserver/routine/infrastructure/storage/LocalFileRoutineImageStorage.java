@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.infrastructure.storage;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.storage.StoredImageFormat;
 import com.chuseok22.elumserver.common.infrastructure.properties.RoutineProperties;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
  * 읽지 못해 조회의 상당수가 "이미지를 찾을 수 없습니다"로 떨어진다. 그때는 공유
  * 저장소 구현체로 바꾼다.
  *
- * <p><b>구현체는 설정으로 고른다.</b> {@code elum.store.routine-image} 값이 없거나
+ * <p><b>구현체는 설정으로 고른다.</b> {@code elum.store.image} 값이 없거나
  * {@code local}이면 이것이 쓰인다. 다른 구현체를 추가해도 등록되는 것은 하나뿐이라
  * 충돌하지 않는다.
  *
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "elum.store.routine-image", havingValue = "local", matchIfMissing = true)
+@ConditionalOnProperty(name = "elum.store.image", havingValue = "local", matchIfMissing = true)
 @RequiredArgsConstructor
 public class LocalFileRoutineImageStorage implements RoutineImageStorage {
 
@@ -87,7 +88,7 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
 
   @Override
   public String saveImported(String stepId, ImageContent content) {
-    String extension = extensionOf(content.contentType());
+    String extension = StoredImageFormat.extensionOf(content.contentType());
     return writeNewKey(stepId, "talk-" + UUID.randomUUID() + "." + extension, content.bytes());
   }
 
@@ -127,18 +128,6 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
     }
   }
 
-  // 형식 > 확장자 (모르면 jpg)
-  private static String extensionOf(String contentType) {
-    if (contentType == null) {
-      return "jpg";
-    }
-    return switch (contentType.toLowerCase(Locale.ROOT)) {
-      case "image/png" -> "png";
-      case "image/webp" -> "webp";
-      default -> "jpg";
-    };
-  }
-
   @Override
   public void delete(String key) {
     if (key == null || key.isBlank()) {
@@ -157,22 +146,11 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
       Path path = resolve(key);
       byte[] bytes = Files.readAllBytes(path);
       // 운영체제의 형식 추측(probeContentType)은 환경마다 달라 확장자로 정한다 — 저장할 때 정한 확장자다.
-      return new ImageContent(bytes, contentTypeOf(key));
+      return new ImageContent(bytes, StoredImageFormat.contentTypeOf(key));
     } catch (IOException e) {
       log.warn("일과 이미지 조회 실패: key={}", key, e);
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
     }
-  }
-
-  private static String contentTypeOf(String key) {
-    int dot = key.lastIndexOf('.');
-    String extension = dot < 0 ? "" : key.substring(dot + 1).toLowerCase(Locale.ROOT);
-    return switch (extension) {
-      case "jpg", "jpeg" -> "image/jpeg";
-      case "png" -> "image/png";
-      case "webp" -> "image/webp";
-      default -> "application/octet-stream";
-    };
   }
 
   private Path base() {

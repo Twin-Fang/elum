@@ -14,6 +14,7 @@ import 'aurora_background.dart';
 import 'routine_flow_backdrop.dart';
 import '../../application/routine_providers.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 일과 만들기 흐름의 공통 뼈대.
 ///
@@ -300,9 +301,18 @@ Future<bool> confirmLeaveRoutineFlow(
   // 경고 아이콘·붉은 버튼을 쓰지 않는다 — 괜히 겁을 주면 저장된 것도 못 믿는다.
   // 경고는 시안 팝업의 느낌표 + 붉은 버튼이다. 노란 변형은 시안에 없다.
   final loses = kind == RoutineLeave.discard;
+  if (loses) {
+    return confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
+      title: title,
+      message: message,
+      actionLabel: context.l10n.routineFlowLeaveConfirm,
+      cancelLabel: context.l10n.routineFlowLeaveStay,
+    );
+  }
   final leave = await showElumDialog<bool>(
     context: context,
-    icon: loses ? ElumDialogIcon.alert : null,
     title: title,
     message: message,
     actions: [
@@ -315,7 +325,6 @@ Future<bool> confirmLeaveRoutineFlow(
       ElumDialogAction(
         label: context.l10n.routineFlowLeaveConfirm,
         value: true,
-        tone: loses ? ElumDialogTone.danger : ElumDialogTone.primary,
       ),
     ],
   );

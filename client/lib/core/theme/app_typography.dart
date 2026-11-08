@@ -151,6 +151,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.printCardNumber,
     required this.printFooter,
     required this.printWatermark,
+    required this.proPlanBadgeLabel,
+    required this.proPlanHeadline,
+    required this.proPlanSubline,
+    required this.proPlanCompareTitle,
+    required this.proPlanCompareTag,
+    required this.proPlanBenefitTitle,
+    required this.proPlanBenefitDetail,
+    required this.proPlanOptionName,
+    required this.proPlanOptionCaption,
+    required this.proPlanOptionPrice,
+    required this.proPlanRibbon,
+    required this.proPlanCtaLabel,
+    required this.proPlanFinePrint,
+    required this.proPlanTeaserTitle,
+    required this.proPlanTeaserBody,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -676,6 +691,53 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// Free 인쇄물 바탕 워터마크 글자 (20/w700 Pretendard)
   final TextStyle printWatermark;
+
+  // --- Pro 요금제 화면 · PRO 배지 · Pro 미리보기 (#1189, 디자이너 시안 전 임시 값) ---
+
+  /// PRO 배지 글자 (12/w800 티머니, 대문자 자간 넓게)
+  final TextStyle proPlanBadgeLabel;
+
+  /// 요금제 화면 머리 제목 (24/w800 티머니)
+  final TextStyle proPlanHeadline;
+
+  /// 요금제 화면 머리 설명 (14/w400 Pretendard)
+  final TextStyle proPlanSubline;
+
+  /// 머리 비교 카드 일과 이름 (16/w800 티머니)
+  final TextStyle proPlanCompareTitle;
+
+  /// 머리 비교 카드 `Free · 이모지` (12/w400 Pretendard)
+  final TextStyle proPlanCompareTag;
+
+  /// 혜택 묶음 제목 (16/w800 티머니)
+  final TextStyle proPlanBenefitTitle;
+
+  /// 혜택 묶음 한 줄 (13/w400 Pretendard)
+  final TextStyle proPlanBenefitDetail;
+
+  /// 기간 카드 이름 `1년` (16/w800 티머니)
+  final TextStyle proPlanOptionName;
+
+  /// 기간 카드 설명 · 가격 단위 (12/w400 Pretendard)
+  final TextStyle proPlanOptionCaption;
+
+  /// 기간 카드 가격 (18/w800 티머니)
+  final TextStyle proPlanOptionPrice;
+
+  /// `N% 아껴요` 띠 (12/w800 티머니)
+  final TextStyle proPlanRibbon;
+
+  /// 요금제 화면 하단 버튼 · 미리보기 버튼 글자 (18/w800 티머니)
+  final TextStyle proPlanCtaLabel;
+
+  /// 버튼 아래 한 줄 · 법적 안내 (12/w400 Pretendard)
+  final TextStyle proPlanFinePrint;
+
+  /// Pro 미리보기 카드 제목 (18/w800 티머니)
+  final TextStyle proPlanTeaserTitle;
+
+  /// Pro 미리보기 카드 한 줄 (13/w400 Pretendard)
+  final TextStyle proPlanTeaserBody;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -1582,6 +1644,111 @@ class AppTypography extends ThemeExtension<AppTypography> {
       height: 1.0,
       letterSpacing: 0,
     ),
+    proPlanBadgeLabel: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+      letterSpacing: 0.7,
+    ),
+    proPlanHeadline: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 24,
+      fontWeight: FontWeight.w800,
+      height: 1.35,
+      letterSpacing: 0,
+    ),
+    proPlanSubline: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+      letterSpacing: 0,
+    ),
+    proPlanCompareTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    proPlanCompareTag: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    proPlanBenefitTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w800,
+      height: 1.3,
+      letterSpacing: 0,
+    ),
+    proPlanBenefitDetail: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.5,
+      letterSpacing: 0,
+    ),
+    proPlanOptionName: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    proPlanOptionCaption: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.3,
+      letterSpacing: 0,
+    ),
+    proPlanOptionPrice: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    proPlanRibbon: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+      letterSpacing: 0,
+    ),
+    proPlanCtaLabel: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+      letterSpacing: 0,
+    ),
+    proPlanFinePrint: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      letterSpacing: 0,
+    ),
+    proPlanTeaserTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      height: 1.4,
+      letterSpacing: 0,
+    ),
+    proPlanTeaserBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.5,
+      letterSpacing: 0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -1741,6 +1908,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? printCardNumber,
     TextStyle? printFooter,
     TextStyle? printWatermark,
+    TextStyle? proPlanBadgeLabel,
+    TextStyle? proPlanHeadline,
+    TextStyle? proPlanSubline,
+    TextStyle? proPlanCompareTitle,
+    TextStyle? proPlanCompareTag,
+    TextStyle? proPlanBenefitTitle,
+    TextStyle? proPlanBenefitDetail,
+    TextStyle? proPlanOptionName,
+    TextStyle? proPlanOptionCaption,
+    TextStyle? proPlanOptionPrice,
+    TextStyle? proPlanRibbon,
+    TextStyle? proPlanCtaLabel,
+    TextStyle? proPlanFinePrint,
+    TextStyle? proPlanTeaserTitle,
+    TextStyle? proPlanTeaserBody,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -1888,6 +2070,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
       printCardNumber: printCardNumber ?? this.printCardNumber,
       printFooter: printFooter ?? this.printFooter,
       printWatermark: printWatermark ?? this.printWatermark,
+      proPlanBadgeLabel: proPlanBadgeLabel ?? this.proPlanBadgeLabel,
+      proPlanHeadline: proPlanHeadline ?? this.proPlanHeadline,
+      proPlanSubline: proPlanSubline ?? this.proPlanSubline,
+      proPlanCompareTitle: proPlanCompareTitle ?? this.proPlanCompareTitle,
+      proPlanCompareTag: proPlanCompareTag ?? this.proPlanCompareTag,
+      proPlanBenefitTitle: proPlanBenefitTitle ?? this.proPlanBenefitTitle,
+      proPlanBenefitDetail: proPlanBenefitDetail ?? this.proPlanBenefitDetail,
+      proPlanOptionName: proPlanOptionName ?? this.proPlanOptionName,
+      proPlanOptionCaption: proPlanOptionCaption ?? this.proPlanOptionCaption,
+      proPlanOptionPrice: proPlanOptionPrice ?? this.proPlanOptionPrice,
+      proPlanRibbon: proPlanRibbon ?? this.proPlanRibbon,
+      proPlanCtaLabel: proPlanCtaLabel ?? this.proPlanCtaLabel,
+      proPlanFinePrint: proPlanFinePrint ?? this.proPlanFinePrint,
+      proPlanTeaserTitle: proPlanTeaserTitle ?? this.proPlanTeaserTitle,
+      proPlanTeaserBody: proPlanTeaserBody ?? this.proPlanTeaserBody,
     );
   }
 
@@ -2079,6 +2276,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
       printCardNumber: TextStyle.lerp(printCardNumber, other.printCardNumber, t)!,
       printFooter: TextStyle.lerp(printFooter, other.printFooter, t)!,
       printWatermark: TextStyle.lerp(printWatermark, other.printWatermark, t)!,
+      proPlanBadgeLabel: TextStyle.lerp(proPlanBadgeLabel, other.proPlanBadgeLabel, t)!,
+      proPlanHeadline: TextStyle.lerp(proPlanHeadline, other.proPlanHeadline, t)!,
+      proPlanSubline: TextStyle.lerp(proPlanSubline, other.proPlanSubline, t)!,
+      proPlanCompareTitle: TextStyle.lerp(proPlanCompareTitle, other.proPlanCompareTitle, t)!,
+      proPlanCompareTag: TextStyle.lerp(proPlanCompareTag, other.proPlanCompareTag, t)!,
+      proPlanBenefitTitle: TextStyle.lerp(proPlanBenefitTitle, other.proPlanBenefitTitle, t)!,
+      proPlanBenefitDetail: TextStyle.lerp(proPlanBenefitDetail, other.proPlanBenefitDetail, t)!,
+      proPlanOptionName: TextStyle.lerp(proPlanOptionName, other.proPlanOptionName, t)!,
+      proPlanOptionCaption: TextStyle.lerp(proPlanOptionCaption, other.proPlanOptionCaption, t)!,
+      proPlanOptionPrice: TextStyle.lerp(proPlanOptionPrice, other.proPlanOptionPrice, t)!,
+      proPlanRibbon: TextStyle.lerp(proPlanRibbon, other.proPlanRibbon, t)!,
+      proPlanCtaLabel: TextStyle.lerp(proPlanCtaLabel, other.proPlanCtaLabel, t)!,
+      proPlanFinePrint: TextStyle.lerp(proPlanFinePrint, other.proPlanFinePrint, t)!,
+      proPlanTeaserTitle: TextStyle.lerp(proPlanTeaserTitle, other.proPlanTeaserTitle, t)!,
+      proPlanTeaserBody: TextStyle.lerp(proPlanTeaserBody, other.proPlanTeaserBody, t)!,
     );
   }
 }

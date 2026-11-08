@@ -18,7 +18,7 @@ public record MemberResponse(
   @Schema(description = "회원 고유 ID (UUID 문자열)", example = "b3b1e2a0-1234-4d56-9abc-1234567890ab")
   String id,
 
-  @Schema(description = "로그인 아이디", example = "chuseok22")
+  @Schema(description = "로그인 아이디", example = "guardian01")
   String username,
 
   @Schema(description = "누적 획득 별 개수", example = "12")
@@ -58,7 +58,11 @@ public record MemberResponse(
 
   @Schema(description = "요금제 상태(등급·출처·만료일·자동 갱신·결제 유예). 앱 \"내 요금제\" 화면용 (#1071). "
     + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
-  MemberSubscriptionStatus subscription
+  MemberSubscriptionStatus subscription,
+
+  @Schema(description = "Pro 요금제가 지금 주는 권한 (회원과 무관한 설정값). 앱 요금제 화면의 혜택 줄·Free 미리 보기를 "
+    + "이 값으로 그려 꺼진 Pro 권한을 팔지 않는다 (#1165). 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
+  EntitlementSnapshot proPlanEntitlements
 ) {
 
   /**
@@ -72,7 +76,7 @@ public record MemberResponse(
    */
   public static MemberResponse from(
     Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements,
-    GuardianAccountResponse account, MemberSubscriptionStatus subscription
+    GuardianAccountResponse account, MemberSubscriptionStatus subscription, EntitlementSnapshot proPlanEntitlements
   ) {
     return new MemberResponse(
       member.getId(),
@@ -88,7 +92,8 @@ public record MemberResponse(
       // 당사자 항목이 없으면(E29) 기본 만화 — 화면이 null 을 만나지 않게 한다
       profile == null ? ImageStyle.CARTOON : profile.getImageStyle(),
       account,
-      subscription
+      subscription,
+      proPlanEntitlements
     );
   }
 }

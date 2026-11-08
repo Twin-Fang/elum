@@ -4,7 +4,6 @@ import java.util.List;
 
 /**
  * 이전 파일 목록: 종류 코드, 개수, 전체 바이트, 파일별 상대 경로·크기·SHA-256·수정 시각
- * 받는 쪽(server/tool/nas-mirror/pull-files.sh)이 해시로 원본과 같은지 확인한다
  */
 public record MigrationFileListResponse(
   String area,

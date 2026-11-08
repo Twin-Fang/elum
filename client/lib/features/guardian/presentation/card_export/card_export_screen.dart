@@ -23,6 +23,7 @@ import '../../../../shared/models/routine.dart';
 import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
@@ -50,7 +51,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
 
   CardExportOptions _options = const CardExportOptions();
 
-  /// Free 가 흐리게 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
+  /// Free 가 미리 보기로 보고 있는 Pro 테마 (판매 중일 때만). 다른 칩을 고르면 지움
   CardDesignTheme? _teaserTheme;
   bool _isBusy = false;
   bool _isArtReady = false;
@@ -92,9 +93,9 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                   _teaserTheme = null;
                 }),
                 canUseAllThemes: access.canUseAllCardDesignThemes,
-                shouldShowProThemes: access.canUseAllCardDesignThemes || access.canPurchasePro,
+                shouldShowProThemes: access.shouldShowEntryFor(PlanBenefit.cardExportAllThemes),
                 teaserTheme: _teaserTheme,
-                // Free · 판매 중이면 흐린 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
+                // Free · 판매 중이면 Pro 미리 보기, 살 수만 있으면 요금제 화면, 아니면 안내만
                 onLockedThemeTap: (theme) => _onLockedThemeTap(access, theme),
               ),
               SizedBox(height: _sectionGap.h),
@@ -102,7 +103,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
                 context,
                 picturesAsync,
                 hasWatermark: !access.canExportCardsWithoutWatermark,
-                canPurchasePro: access.canPurchasePro,
+                shouldPromoteNoWatermark: access.shouldPromoteBenefit(PlanBenefit.cardExportWithoutWatermark),
               ),
             SizedBox(height: _sectionGap.h),
           ],
@@ -133,7 +134,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
     BuildContext context,
     AsyncValue<CardExportPictures> picturesAsync, {
     required bool hasWatermark,
-    required bool canPurchasePro,
+    required bool shouldPromoteNoWatermark,
   }) {
     final l10n = context.l10n;
     final colors = context.colors;
@@ -178,14 +179,14 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       sheets: sheets,
       sheetKeys: _sheetKeys,
       hasWatermark: hasWatermark,
-      canPurchasePro: canPurchasePro,
+      shouldPromoteNoWatermark: shouldPromoteNoWatermark,
       onToggleCard: _toggleCard,
       teaserSheet: teaserSheets.isEmpty ? null : teaserSheets.first,
     );
   }
 
   void _onLockedThemeTap(PlanAccess access, CardDesignTheme theme) {
-    if (access.shouldShowProTeaser) {
+    if (access.shouldPromoteBenefit(PlanBenefit.cardExportAllThemes)) {
       // 같은 칩을 다시 누르면 미리 보기를 닫음
       setState(() => _teaserTheme = _teaserTheme == theme ? null : theme);
       return;
@@ -270,12 +271,10 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
         final printOutcome = await _files.printPdf(pdf: pdf, jobName: stem);
         // 취소는 오류가 아님 > 인쇄 서비스가 없을 때만 안내
         if (printOutcome == CardPrintOutcome.unavailable && mounted) {
-          await showElumDialog<void>(
-            context: context,
-            icon: ElumDialogIcon.alert,
-            title: l10n.cardExportPrintFailed,
+          await showFailureMessage(
+            context,
+            sentence: l10n.cardExportPrintFailed,
             code: CardExportErrorCode.print,
-            actions: [ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger)],
           );
         }
         return;

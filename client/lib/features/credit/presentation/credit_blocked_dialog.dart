@@ -15,6 +15,7 @@ import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_summary.dart';
 import '../../../core/widgets/elum_spinner.dart';
+import '../../../core/widgets/show_failure.dart';
 
 /// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기 + (살 수 있으면) `Pro 알아보기`.
 ///
@@ -48,17 +49,18 @@ Future<void> showCreditBlockedDialog(
 
   final choice = await showElumDialog<_CreditBlockedChoice>(
     context: context,
-    // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인.
-    icon: ElumDialogIcon.alert,
+    // 실패가 아닌 한도 안내 > 아이콘 없음 · 붉은 버튼 없음 (§2-⑥ 겁주지 않는다, #1171)
     title: generating
         ? l10n.creditBlockedBusy
         : l10n.creditBlockedExhausted(blocked.resetLabel),
+    // 날짜가 끼어 길이가 바뀌는 문장 — 마지막 글자만 다음 줄로 떨어지지 않게 낱말 단위 (#1169)
+    keepWordsInTitle: true,
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
     actions: offer == null
         ? [
             ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonConfirm,
-              tone: canSuggestPro ? ElumDialogTone.neutral : ElumDialogTone.danger,
+              tone: canSuggestPro ? ElumDialogTone.neutral : ElumDialogTone.primary,
             ),
             if (canSuggestPro) proAction,
           ]
@@ -126,15 +128,7 @@ Future<void> _watchAd(
   }
 
   final failure = result.failure!;
-  await showElumDialog<void>(
-    context: context,
-    icon: ElumDialogIcon.alert,
-    title: failure.sentence,
-    code: failure.code,
-    actions: [
-      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
-    ],
-  );
+  await showFailureMessage(context, sentence: failure.sentence, code: failure.code);
 }
 
 /// 광고 준비·지급 확인 중 대기 팝업. 닫을 수 없다 — 끝나면 흐름이 직접 닫는다.

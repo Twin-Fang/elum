@@ -10,7 +10,6 @@ import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
 import '../../member/application/plan_access.dart';
@@ -30,6 +29,7 @@ import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -102,9 +102,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   @override
   void initState() {
     super.initState();
-    // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
+    // 첫 프레임 뒤: 소리 서비스 잡기, 만든 일과 그림 안내 (토스트는 Scaffold 가 선 뒤에 띄움)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _speech = ref.read(speechServiceProvider);
+      if (!mounted) return;
+      _speech = ref.read(speechServiceProvider);
+      showMissingAiImageNoticeIfPending();
     });
   }
 
@@ -120,27 +122,16 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   ///
   /// `✕` 가 곧바로 지우면 잘못 눌러도 되돌릴 길이 없다. 카드 그림은 AI 가 만든
   /// 것이라 다시 받으려면 크레딧이 든다. 일과 삭제 팝업과 같은 모양을 쓴다.
-  /// 바깥을 눌러 닫으면 null 이므로 취소로 다룬다.
+  /// 바깥을 눌러 닫으면 false 라 취소로 다룬다.
   Future<void> _confirmRemove(ActionCard card) async {
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: context.l10n.cardReviewDeleteConfirmTitle,
-      icon: ElumDialogIcon.trash,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.cardReviewDeleteAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: context.l10n.cardReviewDeleteAction,
     );
     // 팝업이 떠 있는 사이 화면이 닫혔으면 건드리지 않는다
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     ref.read(routineFlowProvider.notifier).removeStep(card.id);
   }
 

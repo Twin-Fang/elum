@@ -512,12 +512,12 @@ public enum ConfigKey {
       + "다음 요청부터 반영. 1~100",
     ConfigValueType.INTEGER, List.of(), "10", 1, 100
   ),
-  // 0 이면 무료 다시 그리기 없음 (모두 원래 단가)
+  // 0 이면 무료 다시 그리기 없음 (모두 원래 단가). 기본 5 = 요금제 설계 Pro 하루 5회 (#1185)
   IMAGE_REGENERATE_FREE_DAILY_CAP(
     ConfigGroup.USAGE_LIMIT, "무료 다시 그리기 하루 한도 (회)",
     "'그림 다시 그리기 무료' 권한이 있는 회원이 하루(서버 시각 0시 시작)에 크레딧 없이 다시 그릴 수 있는 횟수. "
       + "넘으면 원래 단가로 크레딧을 쓴다. 다음 요청부터 반영. 0~500",
-    ConfigValueType.INTEGER, List.of(), "30", 0, 500
+    ConfigValueType.INTEGER, List.of(), "5", 0, 500
   ),
   FEEDBACK_DAILY_LIMIT(
     ConfigGroup.USAGE_LIMIT, "의견 보내기 하루 한도 (건)",

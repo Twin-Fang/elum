@@ -85,7 +85,7 @@ public class CreditPolicyService {
    *   <li>주기 시작 때 버전이 하나도 없으면(V26 이 주 중간에 v1 을 넣었다) 지금 정책.</li>
    * </ol>
    *
-   * <p>회원마다 그 주 첫 지급 때 한 번만 부른다(지급 행이 있으면 부르지 않는다) — 캐시하지 않는다.
+   * <p>그 주 첫 지급 때, 그리고 Free 가 아닌 회원은 요청마다 부른다(주 중간 요금제 상향 보정, #1164) — 캐시하지 않는다.
    * DB 오류는 {@link #current()} 처럼 그대로 던진다.
    */
   public AiCreditPolicy grantPolicyFor(CreditPeriod period) {

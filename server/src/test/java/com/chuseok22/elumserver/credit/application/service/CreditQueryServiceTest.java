@@ -168,7 +168,7 @@ class CreditQueryServiceTest {
   }
 
   @Test
-  @DisplayName("무료 다시 그리기 권한이 있으면 오늘 남은 무료 횟수 = 하루 한도 30 − 오늘 쓴 무료 횟수 (확인 시트의 'N회 남음')")
+  @DisplayName("무료 다시 그리기 권한이 있으면 오늘 남은 무료 횟수 = 하루 한도 5 − 오늘 쓴 무료 횟수 (확인 시트의 'N회 남음')")
   void getMine_freeRegeneratesLeft_whenEntitled() {
     store.weekly(ACCOUNT_ID, NOW, 100, 50);
     when(entitlementService.isAllowed(MEMBER_ID, Entitlement.IMAGE_REGENERATE_FREE)).thenReturn(true);
@@ -176,7 +176,7 @@ class CreditQueryServiceTest {
 
     CreditSummaryResponse summary = service.getMine(MEMBER_ID);
 
-    assertThat(summary.freeImageRegeneratesLeftToday()).isEqualTo(29);
+    assertThat(summary.freeImageRegeneratesLeftToday()).isEqualTo(4);
     assertThat(summary.costs().imageRegenerate()).isEqualTo(1);
   }
 

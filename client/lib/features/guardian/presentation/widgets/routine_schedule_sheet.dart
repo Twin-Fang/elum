@@ -9,6 +9,7 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/elum_text_link.dart';
 import '../../../../core/widgets/elum_toast.dart';
+import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -18,6 +19,7 @@ import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/routine_schedule_controller.dart';
 import '../../domain/routine_schedule.dart';
 import 'routine_schedule_weekday_picker.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 
 /// 반복 요일·시각 시트 (#782, #1080): 요일 고르기 > 시각 바퀴 > 이룸이 기기 알림 스위치 > 저장 / 반복 끄기
 ///
@@ -128,8 +130,8 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     final l10n = context.l10n;
     final access = ref.watch(planAccessProvider);
     final canSchedule = access.canScheduleRoutines;
-    // Free · 판매 중: 저장이 꺼진 이유 + Pro 입구 (판매 중이 아니면 권유하지 않음)
-    final shouldShowProNote = access.shouldShowTeaserFor(canUseFeature: canSchedule);
+    // Free · 판매 중 · Pro 가 반복 일과를 줌: 저장이 꺼진 이유 + Pro 입구 (아니면 권유하지 않음)
+    final shouldShowProNote = access.shouldShowTeaserFor(PlanBenefit.routineSchedule);
     final elumiNotification =
         ref.watch(routineSchedulePlanProvider).value?.elumiNotification ??
         ElumiNotificationState.on;
@@ -210,8 +212,8 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
           ),
           if (shouldShowProNote) ...[
             SizedBox(height: space.xs.h),
-            ElumTextLink(
-              label: l10n.proTeaserUnlock,
+            ProUpsellButton(
+              style: ProUpsellStyle.link,
               onTap: _isSaving ? null : () => openPlanPaywall(context, ref),
             ),
           ],
