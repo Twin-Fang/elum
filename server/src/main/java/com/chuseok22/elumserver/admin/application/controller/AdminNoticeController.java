@@ -5,6 +5,8 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
 import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminNoticeList;
+import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.notice.application.service.NoticeService;
 import com.chuseok22.elumserver.notice.core.NoticeEmphasis;
@@ -55,6 +57,7 @@ public class AdminNoticeController {
   private static final ObjectMapper JSON = DefaultJsonMapper.SHARED;
 
   private final NoticeService noticeService;
+  private final SettingsEditorService settingsEditorService;
 
   /// 공지 목록: 검색어(q), 필터(AdminNoticeList 정의 4개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/notices")
@@ -75,6 +78,7 @@ public class AdminNoticeController {
     model.addAttribute("query", query);
     // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
     model.addAttribute("pagerBaseUrl", "/admin/notices" + query.toQueryString(query.sort(), 1));
+    model.addAttribute("editor", settingsEditorService.buildEditorOrFailure(SettingsSection.NOTICE));
     addPreview(model, null);
     return "admin/notices";
   }

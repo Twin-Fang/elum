@@ -8,7 +8,10 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6"
       th:with="today=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
   <div th:replace="~{admin/fragments/admin-ui :: pageHeader('광고 보상',
-       '광고 한 번을 보고 크레딧을 받는 흐름(세션 > Google 서버 콜백 > 지급)이에요. 읽기 전용이에요.')}"></div>
+       '광고 한 번을 보고 크레딧을 받는 흐름(세션 > Google 서버 콜백 > 지급)이에요. 지급 규칙은 맨 아래 광고 보상 설정에서 바꿔요.')}"></div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
 
   <!-- 오늘 만든 세션 요약: 칸을 누르면 오늘 그 상태만 본다 -->
   <div th:if="${todaySummary != null}" class="grid grid-cols-2 md:grid-cols-5 gap-4" data-ad-reward-today>
@@ -161,6 +164,8 @@
     "광고를 봤는데 못 받았어요" 제보에 세션이 대기·만료로만 남아 있으면
     <a th:href="@{/admin/logs}" class="link link-hover">서버 로그</a>에서 광고 보상 콜백 기록을 찾아봐요.
   </p>
+
+  <div th:replace="~{admin/fragments/settings-parts :: editor(${editor}, '광고 보상 설정')}"></div>
 </main>
 </body>
 </html>

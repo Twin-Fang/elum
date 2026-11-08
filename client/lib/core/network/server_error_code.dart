@@ -102,7 +102,6 @@ enum ServerErrorCode {
   migrationFileReadFailed('MIGRATION_FILE_READ_FAILED'),
   migrationStatusUnreadable('MIGRATION_STATUS_UNREADABLE'),
   migrationSyncRequestFailed('MIGRATION_SYNC_REQUEST_FAILED'),
-  migrationSettingsUnreadable('MIGRATION_SETTINGS_UNREADABLE'),
 
   // SYSTEM CONFIG
   systemConfigInvalidValue('SYSTEM_CONFIG_INVALID_VALUE'),

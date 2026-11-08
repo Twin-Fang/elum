@@ -40,7 +40,8 @@ class AdminConfigControllerPromptGateTest {
       systemConfigService, mock(ImageClientRouter.class), mock(TextClientRouter.class), promptLocaleGate,
       mock(com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService.class),
       mock(com.chuseok22.elumserver.member.application.service.MemberPickerService.class),
-      mock(com.chuseok22.elumserver.admin.application.service.AdminTextProviderService.class));
+      mock(com.chuseok22.elumserver.admin.application.service.AdminTextProviderService.class),
+      org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SettingsEditorService.class));
     redirect = new RedirectAttributesModelMap();
   }
 

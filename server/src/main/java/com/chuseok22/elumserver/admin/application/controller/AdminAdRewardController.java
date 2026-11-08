@@ -4,6 +4,8 @@ import com.chuseok22.elumserver.admin.application.list.AdminAdRewardList;
 import com.chuseok22.elumserver.admin.application.list.AdminListPeriod;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.service.AdminAdRewardService;
+import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/// 광고 보상 조회 (읽기 전용): 세션 목록·상태 요약, 세션 상세(콜백 결과·지급 내역·타임라인)
+/// 광고 보상: 세션 목록·상태 요약, 세션 상세(콜백 결과·지급 내역·타임라인), 광고 보상 설정
 @Controller
 @RequiredArgsConstructor
 public class AdminAdRewardController {
@@ -22,6 +24,7 @@ public class AdminAdRewardController {
   static final String LIST_PATH = "/admin/ad-rewards";
 
   private final AdminAdRewardService adminAdRewardService;
+  private final SettingsEditorService settingsEditorService;
 
   /// 목록: 검색어(q, 회원 아이디·호칭), 필터(memberId, status, reason, from, to), 정렬(sort), 페이지(page, 1부터). 허용 밖 값·기간은 보정된다
   @GetMapping(LIST_PATH)
@@ -57,6 +60,7 @@ public class AdminAdRewardController {
     model.addAttribute("query", query);
     // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
     model.addAttribute("pagerBaseUrl", LIST_PATH + query.toQueryString(query.sort(), 1));
+    model.addAttribute("editor", settingsEditorService.buildEditorOrFailure(SettingsSection.AD_REWARD));
     return "admin/ad-rewards";
   }
 
