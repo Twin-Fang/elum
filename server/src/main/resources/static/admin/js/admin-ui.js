@@ -34,9 +34,10 @@
   function apply(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     // 토글은 상단바·사이드바 두 곳에 있다. 둘 다 바꿔야 한쪽이 어긋나지 않는다.
+    // 아이콘은 지금 테마 쪽만 보임 (밝음: 달, 어두움: 해)
     var icons = document.querySelectorAll('[data-theme-icon]');
     for (var i = 0; i < icons.length; i++) {
-      icons[i].textContent = theme === 'dark' ? '☀️' : '🌙';
+      icons[i].classList.toggle('hidden', icons[i].getAttribute('data-theme-icon') !== theme);
     }
   }
 

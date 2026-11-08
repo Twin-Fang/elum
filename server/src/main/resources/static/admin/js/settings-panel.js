@@ -1,8 +1,8 @@
 /*
- * 시스템 설정 수정 패널 — 행을 누르면 열려 값을 고치고, 그 키의 변경 이력을 본다.
+ * 설정 수정 패널 — 행을 누르면 열려 값을 고치고, 그 키의 변경 이력을 본다.
  *
  * 저장은 페이지를 다시 그리지 않는다(스크롤이 맨 위로 튀지 않게).
- * 성공하면 설정 화면을 한 번 더 받아 요약과 그 행만 갈아 끼운다 — 화면을 그리는 곳은 서버 한 곳이다.
+ * 성공하면 지금 화면(data-refresh-url)을 한 번 더 받아 요약과 그 행만 갈아 끼운다 — 화면을 그리는 곳은 서버 한 곳이다.
  */
 (function () {
   'use strict';
@@ -75,7 +75,7 @@
       // Claude 키 목록: 글로 넣지 않고 'AI 제공자 전환'의 Claude 키 카드에서 관리 (서버도 거부)
       if (row.getAttribute('data-format') === 'CLAUDE_KEY_LIST') {
         widget.appendChild(element('p', 'text-sm text-base-content/70',
-          "아래 'AI 제공자 전환 > Claude API 키' 카드에서 키를 추가·삭제하고 순서를 바꿔요."));
+          "이 화면 위쪽 'AI 제공자 전환 > Claude API 키' 카드에서 키를 추가·삭제하고 순서를 바꿔요."));
         return;
       }
       if (type === 'BOOLEAN') {
@@ -246,10 +246,12 @@
       var row = event.target.closest('[data-config-row]');
       if (row) openPanel(row.getAttribute('data-key'));
     });
-    // 요약·Free/Pro 비교의 값을 누르면 그 설정의 패널
+    // 요약·Free/Pro 비교의 값을 누르면 그 설정의 패널 (이 화면에 없는 설정이면 링크대로 그 화면으로 이동)
     document.addEventListener('click', function (event) {
       var opener = event.target.closest('[data-open-key]');
-      if (opener) openPanel(opener.getAttribute('data-open-key'));
+      if (!opener || !rowOfKey(opener.getAttribute('data-open-key'))) return;
+      event.preventDefault();
+      openPanel(opener.getAttribute('data-open-key'));
     });
     backdrop.addEventListener('click', closePanel);
     panel.querySelector('[data-panel-close]').addEventListener('click', closePanel);
@@ -277,9 +279,10 @@
       toastTimer = setTimeout(function () { toast.classList.add('hidden'); }, TOAST_VISIBLE_MILLISECONDS);
     }
 
-    // --- 저장 후 서버가 그린 요약·행으로 교체 ---
+    // --- 저장 후 서버가 그린 요약·행으로 교체 (이 화면 주소를 다시 받음) ---
     function refreshFromServer(key) {
-      return fetch('/admin/settings', { headers: { Accept: 'text/html' } })
+      var refreshUrl = tbody.closest('[data-settings-table]').getAttribute('data-refresh-url') || window.location.pathname;
+      return fetch(refreshUrl, { headers: { Accept: 'text/html' } })
         .then(function (response) {
           if (!response.ok) throw new Error('HTTP ' + response.status);
           return response.text();
@@ -289,9 +292,12 @@
           var freshRow = fresh.querySelector('[data-config-row][data-key="' + key + '"]');
           var currentRow = rowOfKey(key);
           if (freshRow && currentRow) currentRow.replaceWith(freshRow);
-          var freshSummary = fresh.querySelector('[data-settings-summary]');
-          var currentSummary = document.querySelector('[data-settings-summary]');
-          if (freshSummary && currentSummary) currentSummary.replaceWith(freshSummary);
+          // 요약 구역은 이름(data-settings-summary 값)으로 짝지어 교체
+          document.querySelectorAll('[data-settings-summary]').forEach(function (currentSummary) {
+            var name = currentSummary.getAttribute('data-settings-summary');
+            var freshSummary = fresh.querySelector('[data-settings-summary="' + name + '"]');
+            if (freshSummary) currentSummary.replaceWith(freshSummary);
+          });
           if (window.elumSettingsTable) window.elumSettingsTable.refresh();
         });
     }
@@ -328,6 +334,13 @@
         .catch(function () { showToast(false, NETWORK_ERROR_MESSAGE, panel); })
         .then(function () { saveButton.disabled = false; });
     });
+
+    // 다른 화면에서 {경로}#setting={KEY} 로 들어오면 그 설정 패널을 바로 엶
+    var openSettingMatch = /^#setting=([A-Z0-9_]+)$/.exec(window.location.hash);
+    if (openSettingMatch && rowOfKey(openSettingMatch[1])) {
+      rowOfKey(openSettingMatch[1]).scrollIntoView({ block: 'center' });
+      openPanel(openSettingMatch[1]);
+    }
 
     // 기본값 복원: 서버가 처리한 뒤 화면을 다시 받는다(메시지는 상단에)
     panel.querySelector('[data-panel-reset]').addEventListener('click', function () {

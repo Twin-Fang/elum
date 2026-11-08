@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.dto.response;
 
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import java.util.List;
 
 /**
@@ -13,6 +14,11 @@ public record SettingsOverview(
 
   /** 요약 항목 하나. isOn 은 켜진 상태(강조), isDifferent 는 기본값과 다름 */
   public record Highlight(String key, String label, String valueText, boolean isOn, boolean isDifferent) {
+
+    /** 그 설정이 있는 화면에서 패널을 여는 주소 */
+    public String openPath() {
+      return SettingsSection.openPathOf(key);
+    }
   }
 
   /** Free/Pro 비교 표의 한 줄. 같은 항목의 두 플랜 값 */

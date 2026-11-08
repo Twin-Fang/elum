@@ -30,7 +30,7 @@
           <a th:if="${attention.stuckReservationCount() > 0}" th:href="@{/admin/credits/jobs(status='RESERVED')}"
              class="btn btn-sm btn-outline btn-warning"
              th:text="'멈춘 크레딧 예약 ' + ${attention.stuckReservationCount()} + '건'">멈춘 예약</a>
-          <a th:if="${attention.isBudgetNearLimit()}" th:href="@{/admin/settings}"
+          <a th:if="${attention.isBudgetNearLimit()}" th:href="@{/admin/settings/ai#setting=AI_DAILY_BUDGET_USD}"
              class="btn btn-sm btn-outline btn-error"
              th:text="'오늘 AI 비용 상한 ' + ${attention.budgetUsedPercent()} + '% 사용'">비용 상한</a>
         </div>
@@ -168,7 +168,7 @@
           <ul class="space-y-1 text-sm">
             <li th:each="highlight : ${summary.configOverview().highlights()}"
                 class="flex items-center justify-between gap-3">
-              <a th:href="@{/admin/settings}" class="link link-hover text-base-content/70"
+              <a th:href="@{${highlight.openPath()}}" class="link link-hover text-base-content/70"
                  th:text="${highlight.label()}">항목</a>
               <span class="badge" th:classappend="${highlight.isOn()} ? 'badge-success' : 'badge-ghost'"
                     th:text="${highlight.valueText()}">값</span>

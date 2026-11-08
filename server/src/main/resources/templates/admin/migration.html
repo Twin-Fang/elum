@@ -152,23 +152,8 @@
     </section>
   </th:block>
 
-  <!-- 이전 설정 3개 (읽기 전용): 바꾸는 곳은 시스템 설정 화면 -->
-  <section class="card bg-base-100 shadow-md border border-base-300" data-migration-settings>
-    <div class="card-body space-y-3">
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <h2 class="card-title text-lg">이전 설정</h2>
-        <a th:href="@{/admin/settings}" class="btn btn-ghost btn-sm">시스템 설정에서 바꾸기</a>
-      </div>
-      <div th:unless="${settings.isReadable()}" class="alert alert-error" role="alert"
-           th:text="${settings.errorMessage()}">이전 설정을 읽지 못했어요.</div>
-      <dl th:if="${settings.isReadable()}" class="grid grid-cols-1 gap-y-2 text-sm">
-        <div th:each="row : ${settings.rows()}" class="flex gap-2">
-          <dt class="text-base-content/60" th:text="${row.label()}">이전 잠금</dt>
-          <dd th:classappend="${row.isHighlighted()} ? 'font-bold'" class="break-all" th:text="${row.valueText()}">꺼짐</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
+  <!-- 이전 설정 3개: 이전 잠금, 이전 파일 내보내기, 새 서버 주소 -->
+  <div th:replace="~{admin/fragments/settings-parts :: editor(${editor}, '이전 설정')}"></div>
 </main>
 
 </body>

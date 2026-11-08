@@ -1,11 +1,12 @@
 package com.chuseok22.elumserver.migration.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
+import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.locale.AppLocale;
-import com.chuseok22.elumserver.migration.application.service.MigrationSettingsReader;
 import com.chuseok22.elumserver.migration.application.service.MigrationSyncStatusService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +29,14 @@ public class AdminMigrationController {
   private static final String REDIRECT_TO_PAGE = "redirect:/admin/migration";
 
   private final MigrationSyncStatusService migrationSyncStatusService;
-  private final MigrationSettingsReader migrationSettingsReader;
+  private final SettingsEditorService settingsEditorService;
   private final AdminAuditService adminAuditService;
 
   /// 화면: 동기화 상태 > 이전 설정 (각자 실패를 상태로 돌려줘 화면은 늘 뜸)
   @GetMapping("/admin/migration")
   public String page(Model model) {
     model.addAttribute("overview", migrationSyncStatusService.readOverview());
-    model.addAttribute("settings", migrationSettingsReader.read());
+    model.addAttribute("editor", settingsEditorService.buildEditorOrFailure(SettingsSection.MIGRATION));
     return "admin/migration";
   }
 

@@ -1,7 +1,7 @@
 /*
- * 시스템 설정 표 — 검색, 필터 칩, 열 정렬 (화면 안에서만 처리).
+ * 설정 표 — 검색, 필터 칩, 열 정렬 (화면 안에서만 처리).
  *
- * 설정은 한 화면에 다 실려 있어 서버를 거칠 이유가 없다.
+ * 그 화면 설정이 다 실려 있어 서버를 거칠 이유가 없다.
  * 저장 뒤 행이 바뀌면 settings-panel.js 가 window.elumSettingsTable.refresh() 로 다시 거른다.
  */
 (function () {
@@ -98,14 +98,6 @@
     search.addEventListener('input', applyFilter);
     document.querySelectorAll('[data-chip]').forEach(function (button) {
       button.addEventListener('click', function () { selectChip(button.getAttribute('data-chip')); });
-    });
-    // 요약의 "기본값과 다른 설정 N개 보기" 는 요약이 다시 그려져도 동작해야 해서 문서에서 받는다
-    document.addEventListener('click', function (event) {
-      var shortcut = event.target.closest('[data-chip-shortcut]');
-      if (!shortcut) return;
-      selectChip(shortcut.getAttribute('data-chip-shortcut'));
-      // 표가 카드보다 넓어 표를 맞추면 화면이 가로로 밀림 > 카드 기준
-      (table.closest('.card') || table).scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     });
     table.querySelectorAll('[data-sort-by]').forEach(function (button) {
       button.addEventListener('click', function () {

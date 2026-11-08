@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('요금제·구독', 'settings-plans', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">요금제·구독</h1>
+      <p class="text-base-content/60">Free·Pro 플랜에서 쓸 수 있는 기능과 한도, Pro 이벤트, 스토어 구독 결제예요. 바꾸면 최대 30초 안에 모든 서버에 반영돼요.</p>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">저장했어요.</div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
+
+    <section th:replace="~{admin/fragments/settings-parts :: planComparison(${overview})}"></section>
+
+    <div th:replace="~{admin/fragments/settings-parts :: editor(${editor}, '플랜·이벤트·결제 설정')}"></div>
+  </main>
+</body>
+</html>

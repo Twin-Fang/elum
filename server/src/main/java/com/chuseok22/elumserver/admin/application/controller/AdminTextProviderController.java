@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminTextProviderService;
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import java.security.Principal;
@@ -19,7 +20,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AdminTextProviderController {
 
-  private static final String SETTINGS_REDIRECT = "redirect:/admin/settings";
+  // 제공자 순서·Claude 키 카드는 AI 설정 화면에 있음
+  private static final String SETTINGS_REDIRECT = "redirect:" + SettingsSection.AI.getPath();
   // direction 요청값: 올리기
   private static final String DIRECTION_UP = "up";
 

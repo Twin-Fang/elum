@@ -124,7 +124,7 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
-  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 광고 보상, 의견, 이야기, 알림 기록) / 콘텐츠(공지, 전문가 일과, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그, 관리자 기록, 서버 이전, API 문서)
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 요금제·구독, 광고 보상, 의견, 이야기, 알림 기록) / 콘텐츠(공지, 전문가 일과, 약관, 프롬프트) / 시스템(설정, AI 설정, 모니터링, 서버 로그, 관리자 기록, 서버 이전, API 문서)
        배지: 검토 대기 일과 · 새 의견 · 이야기 신고 · AI 이상 · 서버 오류 (아래 스크립트가 채운다) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
@@ -135,6 +135,7 @@
         <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리
           <span data-sidebar-badge="pendingReviewRoutineCount" class="badge badge-warning badge-sm hidden" title="검토 대기 일과"></span></a></li>
         <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
+        <li><a th:href="@{/admin/settings/plans}" th:classappend="${active == 'settings-plans'} ? 'active'">요금제·구독</a></li>
         <li><a th:href="@{/admin/ad-rewards}" th:classappend="${active == 'ad-rewards'} ? 'active'">광고 보상</a></li>
         <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리
           <span data-sidebar-badge="newFeedbackCount" class="badge badge-error badge-sm hidden" title="확인하지 않은 새 의견"></span></a></li>
@@ -156,6 +157,7 @@
       <h2 class="menu-title">시스템</h2>
       <ul>
         <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>
+        <li><a th:href="@{/admin/settings/ai}" th:classappend="${active == 'settings-ai'} ? 'active'">AI 설정</a></li>
         <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링
           <span data-sidebar-badge="aiAlertCount" data-badge-text="주의" class="badge badge-warning badge-sm hidden" title="AI 제공자 이상"></span></a></li>
         <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
@@ -175,9 +177,18 @@
      **id를 쓰지 않는다** — 이 조각은 상단바와 사이드바 양쪽에 놓여 한 문서에
      두 번 나온다. id를 달면 중복이 되고, 스크립트가 첫 번째만 찾아
      넓은 화면에서는 숨겨진 쪽을 붙잡아 아무 일도 일어나지 않는다. -->
+<!-- 아이콘 2개(달: 밝은 화면에서 어둡게, 해: 어두운 화면에서 밝게) 중 하나만 보임. admin-ui.js 가 hidden 을 바꿈 -->
 <button th:fragment="themeToggle" type="button" data-theme-toggle
         class="btn btn-ghost btn-sm btn-circle" aria-label="밝게/어둡게 전환">
-  <span data-theme-icon>🌙</span>
+  <svg data-theme-icon="light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
+       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+  </svg>
+  <svg data-theme-icon="dark" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
+       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+  </svg>
 </button>
 
 </body>

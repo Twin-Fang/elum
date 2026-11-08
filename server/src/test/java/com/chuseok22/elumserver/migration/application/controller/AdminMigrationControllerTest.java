@@ -9,10 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
+import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
 import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
-import com.chuseok22.elumserver.migration.application.service.MigrationSettingsReader;
 import com.chuseok22.elumserver.migration.application.service.MigrationSyncStatusService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class AdminMigrationControllerTest {
   private final MigrationSyncStatusService migrationSyncStatusService = mock(MigrationSyncStatusService.class);
   private final AdminAuditService adminAuditService = mock(AdminAuditService.class);
   private final AdminMigrationController controller = new AdminMigrationController(
-    migrationSyncStatusService, mock(MigrationSettingsReader.class), adminAuditService);
+    migrationSyncStatusService, mock(SettingsEditorService.class), adminAuditService);
   private final RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
   @Test
