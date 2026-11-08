@@ -37,10 +37,6 @@ enum RewardPreset {
   /// **[custom]은 비어 있다** — 직접 적은 말에 어울리는 그림은 앱이 알 수 없다.
   final String emoji;
 
-  /// 보호자가 고를 수 있는 프리셋 — [custom]은 별도 버튼이라 목록에서 뺀다.
-  static List<RewardPreset> get selectable =>
-      values.where((p) => p != custom).toList();
-
   /// 서버가 준 키를 enum으로 되돌린다.
   ///
   /// **모르는 키·null·빈 문자열은 전부 null이다.** 서버에 프리셋이 추가됐는데

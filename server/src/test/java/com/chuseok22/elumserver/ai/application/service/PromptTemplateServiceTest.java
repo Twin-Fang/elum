@@ -68,17 +68,17 @@ class PromptTemplateServiceTest {
   @DisplayName("update는 직전 내용을 이력으로 남긴 뒤 프롬프트를 변경한다")
   void update_existingKey_changesContentAndRecordsHistory() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     template.setContent("이전 내용");
-    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "ko"))
       .thenReturn(Optional.of(template));
 
-    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "새 내용");
+    promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "새 내용");
 
     assertThat(template.getContent()).isEqualTo("새 내용");
     ArgumentCaptor<PromptTemplateHistory> captor = ArgumentCaptor.forClass(PromptTemplateHistory.class);
     verify(promptTemplateHistoryRepository).save(captor.capture());
-    assertThat(captor.getValue().getPromptKey()).isEqualTo(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    assertThat(captor.getValue().getPromptKey()).isEqualTo(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     assertThat(captor.getValue().getContent()).isEqualTo("이전 내용");
     assertThat(captor.getValue().getLocale()).isEqualTo("ko");
   }
@@ -87,13 +87,13 @@ class PromptTemplateServiceTest {
   @DisplayName("update는 저장한 관리자 이름을 이력에 남기고, 이름을 모르면 비워 둔다")
   void update_recordsChangedBy() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     template.setContent("이전 내용");
-    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "ko"))
       .thenReturn(Optional.of(template));
 
-    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, AppLocale.KO, "둘째 내용", "kimchi");
-    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, AppLocale.KO, "셋째 내용");
+    promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, AppLocale.KO, "둘째 내용", "kimchi");
+    promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, AppLocale.KO, "셋째 내용");
 
     ArgumentCaptor<PromptTemplateHistory> captor = ArgumentCaptor.forClass(PromptTemplateHistory.class);
     verify(promptTemplateHistoryRepository, times(2)).save(captor.capture());
@@ -119,12 +119,12 @@ class PromptTemplateServiceTest {
   @DisplayName("update는 내용이 같으면 이력을 만들지 않고 그대로 둔다")
   void update_sameContent_skipsHistory() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     template.setContent("같은 내용");
-    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "ko"))
       .thenReturn(Optional.of(template));
 
-    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "같은 내용");
+    promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "같은 내용");
 
     assertThat(template.getContent()).isEqualTo("같은 내용");
     verify(promptTemplateHistoryRepository, never()).save(any());
@@ -134,12 +134,12 @@ class PromptTemplateServiceTest {
   @DisplayName("update는 textarea가 제출한 CRLF를 LF로 정규화해 가짜 이력을 만들지 않는다")
   void update_crlfContent_normalizedAndSkipsHistory() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     template.setContent("첫 줄\n둘째 줄");
-    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "ko"))
       .thenReturn(Optional.of(template));
 
-    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "첫 줄\r\n둘째 줄");
+    promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "첫 줄\r\n둘째 줄");
 
     assertThat(template.getContent()).isEqualTo("첫 줄\n둘째 줄");
     verify(promptTemplateHistoryRepository, never()).save(any());
@@ -149,11 +149,11 @@ class PromptTemplateServiceTest {
   @DisplayName("update는 공백만 있는 프롬프트를 거절하고 기존 내용을 지킨다 (#278 QA)")
   void update_blankContent_rejected() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     template.setContent("당신은 개인정보 DLP 엔티티 탐지 엔진입니다.");
 
     // 공백 검사가 저장소를 읽기 전에 끝나므로 조회는 일어나지 않는다.
-    assertThatThrownBy(() -> promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "   "))
+    assertThatThrownBy(() -> promptTemplateService.update(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "   "))
       .isInstanceOf(CustomException.class)
       .extracting("errorCode")
       .isEqualTo(ErrorCode.PROMPT_TEMPLATE_BLANK);
@@ -180,12 +180,12 @@ class PromptTemplateServiceTest {
   void getAll_returnsSortedByDeclarationOrder() {
     PromptTemplate image = new PromptTemplate();
     image.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
-    PromptTemplate localLlm = new PromptTemplate();
-    localLlm.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
-    when(promptTemplateRepository.findAll()).thenReturn(List.of(image, localLlm));
+    PromptTemplate create = new PromptTemplate();
+    create.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
+    when(promptTemplateRepository.findAll()).thenReturn(List.of(image, create));
 
     List<PromptTemplate> result = promptTemplateService.getAll();
 
-    assertThat(result).containsExactly(localLlm, image);
+    assertThat(result).containsExactly(create, image);
   }
 }

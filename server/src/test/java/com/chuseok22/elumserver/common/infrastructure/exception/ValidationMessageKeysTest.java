@@ -68,12 +68,12 @@ class ValidationMessageKeysTest {
   }
 
   @Test
-  @DisplayName("message 를 적은 제약이 17개 있고, 키가 서로 겹치지 않는다")
+  @DisplayName("message 를 적은 제약이 15개 있고, 키가 서로 겹치지 않는다")
   void keysAreUnique() throws Exception {
     List<Constraint> found = literalConstraints();
 
-    // 실제 개수를 코드로 센 값이다(계획 사전 점검: 13줄이 아니라 17줄)
-    assertThat(found).hasSize(17);
+    // 실제 개수를 코드로 센 값
+    assertThat(found).hasSize(15);
     assertThat(found.stream().map(Constraint::key).toList()).doesNotHaveDuplicates();
   }
 

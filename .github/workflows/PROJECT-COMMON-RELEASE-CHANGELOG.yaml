@@ -824,7 +824,7 @@ jobs:
           # version_manager는 레포 루트(version.yml 위치) 기준 cwd에서 실행해야 한다
           VERSION_CODE=$(cd .. && ./.github/scripts/version_manager.sh get-code)
 
-          printf '%s\n' "${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}" > .env
+          printf '%s\n' "${{ secrets.CLIENT_ENV_FILE }}" > .env
 
           mkdir -p android/app/keystore
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/keystore/key.jks

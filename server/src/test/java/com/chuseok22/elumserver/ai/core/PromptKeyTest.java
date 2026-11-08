@@ -22,12 +22,11 @@ class PromptKeyTest {
   }
 
   @Test
-  @DisplayName("그림 지시문과 로컬 LLM 검사는 언어와 무관하다 — ko 행 하나만 둔다")
+  @DisplayName("그림 지시문은 언어와 무관하다 — ko 행 하나만 둔다")
   void neutralKeys() {
     assertThat(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX.isLocalized()).isFalse();
     assertThat(PromptKey.ROUTINE_IMAGE_PREFIX_EN.isLocalized()).isFalse();
     assertThat(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX.isLocalized()).isFalse();
     assertThat(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX.isLocalized()).isFalse();
-    assertThat(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK.isLocalized()).isFalse();
   }
 }

@@ -9,9 +9,8 @@ import '../../../core/l10n/current_l10n.dart';
 ///
 /// **개수를 고정하지 않는다.** 서버가 몇 개를 주든 화면이 깨지지 않아야 한다.
 ///
-/// **색은 여기 없다.** 서버가 주지 않으므로 화면이 인덱스로 배정한다
-/// (`RecommendedRoutineStrip._palette`). 디자인 값을 서버가 알아야 하는
-/// 구조가 되면 관리 지점이 둘로 나뉜다.
+/// **색은 여기 없다.** 서버가 주지 않으므로 화면이 인덱스로 배정한다.
+/// 디자인 값을 서버가 알아야 하는 구조가 되면 관리 지점이 둘로 나뉜다.
 @immutable
 class RoutineSuggestion {
   const RoutineSuggestion({

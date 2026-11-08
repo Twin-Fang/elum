@@ -49,10 +49,6 @@ class InviteLink {
   /// 같은 겉모습만 닮은 주소를 걸러야 한다.
   static const webHost = 'twin-fang.github.io';
 
-  /// 웹 링크의 기준 주소. 앱 식별자처럼 앱과 게시 페이지가 짝으로 정하는 값이라 `.env` 에 두지 않는다 —
-  /// Secret 을 빠뜨려 빈 값이 배포돼도 증상이 없는 길을 만들 이유가 없다.
-  static const webBase = 'https://$webHost/elum/$_segment/';
-
   /// 값 하나의 길이 상한. 우리 코드는 여섯 글자이고, 공백·하이픈·인코딩을 끼워도 이보다 길 수 없다.
   /// 이보다 길면 디코딩하지 않고 버린다 — 수만 자짜리 입력을 두 번 푸는 일을 막는다.
   static const _maxRawValue = 64;

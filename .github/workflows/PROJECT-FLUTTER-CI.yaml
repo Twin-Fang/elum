@@ -36,7 +36,7 @@
 # ==========================================================================================
 # 🔑 필수 GitHub Secrets
 # ==========================================================================================
-# ENV_FILE (선택): .env 파일 내용
+# CLIENT_ENV_FILE: .env 파일 내용
 #
 # ※ CI는 빌드 검증 목적이므로 서명/배포 관련 Secrets 불필요
 # ==========================================================================================
@@ -256,7 +256,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -304,6 +304,7 @@ jobs:
           dart run tool/check_design_rules.dart
           dart run tool/check_native_locales.dart
           dart run tool/check_storage_scopes.dart
+          dart run tool/check_unused_code.dart
           echo "✅ 규칙 검사 완료"
 
       # 분석 결과 기록
@@ -361,7 +362,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -531,7 +532,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 

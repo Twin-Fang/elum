@@ -68,7 +68,6 @@
   "talkPopularImportCount": "{count, plural, other{{count}人拿走了}}",
   "talkLatestTitle": "最新发布",
   "talkEmptyTitle": "还没有人分享日常",
-  "talkEmptyAction": "来分享第一个日常吧",
   "talkEmptyCategoryTitle": "这个分类还没有人分享日常",
   "talkEmptyCategoryAction": "查看全部",
   "talkFeedFailed": "没能加载故事区",

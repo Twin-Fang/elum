@@ -38,10 +38,6 @@ abstract final class DevLogFile {
 
   static String? get path => _file?.path;
 
-  /// 0.0 ~ 1.0. 디버깅 버튼이 얼마나 찼는지 보여준다.
-  static double get usedRatio =>
-      (sizeBytes.value / maxBytes).clamp(0.0, 1.0).toDouble();
-
   /// 파일을 열고 현재 크기를 읽는다. main()에서 한 번 부른다.
   ///
   /// 실패해도 예외를 던지지 않는다 — 로그 때문에 앱이 안 뜨면 본말전도다.
@@ -135,16 +131,4 @@ abstract final class DevLogFile {
     _queue = Future<void>.value();
     sizeBytes.value = 0;
   }
-
-  /// 테스트에서 임시 파일을 물린다. 실제 문서 폴더를 건드리지 않는다.
-  @visibleForTesting
-  static void useFileForTest(File f) {
-    _file = f;
-    _hasInitFailed = false;
-    sizeBytes.value = f.existsSync() ? f.lengthSync() : 0;
-  }
-
-  /// 큐에 쌓인 쓰기가 끝날 때까지 기다린다. 테스트에서만 쓴다.
-  @visibleForTesting
-  static Future<void> flushForTest() => _queue;
 }

@@ -335,16 +335,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentOptionalTag => 'Optional';
 
   @override
-  String consentChipRequired(String label) {
-    return '[Required] $label';
-  }
-
-  @override
-  String consentChipOptional(String label) {
-    return '[Optional] $label';
-  }
-
-  @override
   String consentDocumentMeta(String label, String version) {
     return '$label · Version $version';
   }
@@ -372,9 +362,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get characterFoxName => 'Popo';
-
-  @override
-  String get agentChickLabel => 'Chick';
 
   @override
   String get imageStyleEmojiLabel => 'Emoji';
@@ -866,9 +853,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteCodeIssueFailedFallback => 'Couldn\'t make the invite code';
 
   @override
-  String get inviteCodeRetryChip => 'Make a new invite code';
-
-  @override
   String get inviteEnterLinkInvalid =>
       'This invite link isn\'t right. Ask them to send it again. (E-INV-LINK)';
 
@@ -1200,9 +1184,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get guardianHomeSettings => 'Settings';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1796,10 +1777,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineSwipeEdit => 'Edit routine';
-
-  @override
-  String get routineSuggestLoadFailed =>
-      'Couldn\'t load suggestions · Try again';
 
   @override
   String get routineFlowHomeLabel => 'Go home';
@@ -2522,9 +2499,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get guardianMyInfoChildrenHeader => 'Elumi';
-
-  @override
   String get guardianMyInfoActiveBadge => 'Viewing';
 
   @override
@@ -2821,17 +2795,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineGroupAdded => 'Added to bundle';
 
   @override
-  String get routineGroupRemovedOne => 'Removed from bundle';
-
-  @override
   String get routineGroupUngrouped => 'Bundle ungrouped';
 
   @override
   String get routineGroupUngroupedEmpty =>
       'All routines were taken out, so the bundle was ungrouped';
-
-  @override
-  String get routineGroupReordered => 'Order changed';
 
   @override
   String routineGroupSent(String name) {
@@ -3073,9 +3041,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get talkEmptyTitle => 'No routines shared yet';
-
-  @override
-  String get talkEmptyAction => 'Share your first routine';
 
   @override
   String get talkEmptyCategoryTitle =>
@@ -3868,9 +3833,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planLegalTrialPlayStore => '무료 체험 중에 해지하면 요금이 청구되지 않아요.';
 
   @override
-  String get planPurchasing => '결제를 진행하고 있어요';
-
-  @override
   String get planVerifying => '결제를 확인하고 있어요';
 
   @override
@@ -4517,10 +4479,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardRegenerateSheetTitle => '그림을 다시 그릴까요?';
 
   @override
-  String get cardRegenerateSheetBody =>
-      '지금 그림 대신 새 그림을 그려요. 마음에 들지 않으면 또 다시 그릴 수 있어요';
-
-  @override
   String cardRegenerateCostProFree(int count) {
     return '크레딧 없이 · 오늘 $count번 남았어요';
   }
@@ -4548,13 +4506,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardRegenerateInProgress => '그림을 다시 그리고 있어요';
 
   @override
-  String get cardRegenerateDoneToast => '그림을 다시 그렸어요';
-
-  @override
   String get cardRegenerateFailedTitle => '그림을 다시 그리지 못했어요';
-
-  @override
-  String get cardRegenerateFailedFallback => '잠시 뒤 다시 해 주세요. 크레딧은 쓰지 않았어요';
 
   @override
   String get cardFirstDrawChip => 'AI 그림 그리기';

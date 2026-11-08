@@ -11,7 +11,6 @@ import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxPromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
@@ -35,9 +34,6 @@ class AdminPromptServiceTest {
 
   @Mock
   private PromptTemplateService promptTemplateService;
-
-  @Mock
-  private SensitiveInfoGuardService sensitiveInfoGuardService;
 
   @Mock
   private GeminiTextClient geminiTextClient;
@@ -111,19 +107,6 @@ class AdminPromptServiceTest {
     );
 
     assertThat(result).isEqualTo("English rules\n\nScene info:\n{...}");
-  }
-
-  @Test
-  @DisplayName("LOCAL_LLM_SENSITIVE_INFO_CHECK preview는 <text> 태그가 아니라 SensitiveInfoGuardService의 JSON 래핑을 사용한다")
-  void preview_localLlmPrefix_usesJsonWrappingNotTextTag() {
-    when(sensitiveInfoGuardService.buildUserContent("김민준입니다")).thenReturn("{\"text\":\"김민준입니다\"}");
-
-    String result = adminPromptService.preview(
-      PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "시스템 프롬프트", "김민준입니다", null
-    );
-
-    assertThat(result).contains("{\"text\":\"김민준입니다\"}");
-    assertThat(result).doesNotContain("<text>");
   }
 
   @Test

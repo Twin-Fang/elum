@@ -12,8 +12,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface StorePurchaseRepository extends JpaRepository<StorePurchase, String> {
 
-  Optional<StorePurchase> findByStoreAndPurchaseKey(SubscriptionSource store, String purchaseKey);
-
   /// 같은 구매를 검증 요청·알림이 동시에 바꾸지 않게 행 잠금 (같은 트랜잭션 안에서만)
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select p from StorePurchase p where p.store = :store and p.purchaseKey = :purchaseKey")

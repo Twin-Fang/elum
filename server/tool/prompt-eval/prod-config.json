@@ -1,8 +1,9 @@
 {
- "_설명": "운영 DB system_config 와 prompt_template 에서 읽은 값 (2026-10-20, 읽기 전용 조회. text 설정과 prompts 본문은 2026-11-07 다시 읽음). 운영 설정이 바뀌면 갱신한다. 비밀값은 두지 않는다.",
+ "_설명": "운영 DB system_config 와 prompt_template 에서 읽은 값 (읽기 전용 조회, text 는 2026-11-08 다시 읽음). 운영 설정이 바뀌면 갱신한다. 비밀값은 두지 않는다.",
  "text": {
-  "provider": "GEMINI",
-  "model": "gemini-flash-latest",
+  "provider": "CLAUDE",
+  "model": "claude-haiku-5-5",
+  "fallbacks": [],
   "temperature": 0,
   "thinking_budget": "UNSET",
   "verified": true

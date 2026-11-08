@@ -1,6 +1,7 @@
 spring:
+  # 프로필 미지정 시 dev (운영은 배포가 SPRING_PROFILES_ACTIVE=prod 로 지정)
   profiles:
-    active: prod
+    default: dev
   jpa:
     open-in-view: false
     properties:

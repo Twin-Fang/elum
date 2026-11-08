@@ -57,11 +57,6 @@ public class MemberStatsService {
     return memberDailyVisitRepository.countByVisitDate(date);
   }
 
-  /** 기간[from, to] 중복 없는 방문 회원 수 */
-  public long countDistinctVisitorsBetween(LocalDate from, LocalDate toInclusive) {
-    return memberDailyVisitRepository.countDistinctMembersBetween(from, toInclusive);
-  }
-
   public long countJoinedOn(LocalDate date) {
     return memberRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
       date.atStartOfDay(), date.plusDays(1).atStartOfDay());

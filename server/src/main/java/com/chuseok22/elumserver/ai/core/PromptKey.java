@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum PromptKey {
 
-  LOCAL_LLM_SENSITIVE_INFO_CHECK("로컬 LLM 민감정보 검사", false),
   GEMINI_ROUTINE_CREATE_PREFIX("Gemini 루틴 생성", true),
   GEMINI_ROUTINE_QUESTION_PREFIX("Gemini 추가 질문 생성", true),
   GEMINI_ROUTINE_IMAGE_PREFIX("Gemini 이미지 프롬프트 프리픽스", false),

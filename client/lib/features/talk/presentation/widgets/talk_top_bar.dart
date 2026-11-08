@@ -51,9 +51,6 @@ class TalkTopBar extends StatelessWidget {
   static const _trailingIconSize = 20.0;
   static const _bottomGap = 12.0;
 
-  /// 화면 위에서 본문이 시작하는 시안 y (상자 아래 + 간격)
-  static const contentTop = _boxTop + _boxSize + _bottomGap;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;

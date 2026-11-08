@@ -1,7 +1,6 @@
 package com.chuseok22.elumserver.credit.infrastructure.repository;
 
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
-import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
 import jakarta.persistence.LockModeType;
 import java.util.Collection;
 import java.util.List;
@@ -17,11 +16,6 @@ public interface AiCreditAccountRepository extends JpaRepository<AiCreditAccount
   Optional<AiCreditAccount> findByMemberId(String memberId);
 
   Optional<AiCreditAccount> findByIdentityKey(String identityKey);
-
-  /// 회원에 붙은 계정 수. 관리자 정책 미리보기의 대상 회원 수.
-  long countByMemberIdIsNotNull();
-
-  List<AiCreditAccount> findByStatus(CreditAccountStatus status);
 
   List<AiCreditAccount> findByMemberIdIn(Collection<String> memberIds);
 

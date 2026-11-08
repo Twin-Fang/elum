@@ -178,9 +178,7 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 > `homeCardTitle`은 `catSelectedBorder`와 값이 같지만 **의도적으로 분리**했다.
 > 위 [같은 색이어도 쓰임이 다르면 나눈다](#같은-색이어도-쓰임이-다르면-토큰을-나눈다--이-문서의-핵심-규칙) 규칙의 실제 사례다.
 
-**추천 일과 타일 8색은 `AppColors`에 없다.** `RecommendedRoutine` enum에 항목별 데이터로
-들어 있다 — 전역 의미가 없고, 백엔드가 추천을 내려주면 색도 함께 올 값이기 때문이다.
-(`lib/features/guardian/domain/recommended_routine.dart`)
+**추천 일과 타일 색은 `AppColors`에 없다.** 전역 의미가 없고, 화면이 인덱스로 배정하는 값이기 때문이다.
 
 ### 보호자 카드확인 (`보호자_카드확인` `1173:5541` · 2026-09-29 덤프, #444)
 

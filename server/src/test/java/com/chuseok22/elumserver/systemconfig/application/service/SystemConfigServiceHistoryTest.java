@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
-import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.SecretProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -41,10 +40,9 @@ class SystemConfigServiceHistoryTest {
   @BeforeEach
   void setUp() {
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "yml-text-model", "yml-image-model", 1000);
-    LocalLlmProperties localLlmProperties = new LocalLlmProperties(true, null, "/chat", "key", "yml-local-model", 1000);
     secretCipher = new SecretCipher(new SecretProperties("test-master-key"));
     service = new SystemConfigService(
-      systemConfigRepository, geminiProperties, localLlmProperties, secretCipher, historyRepository);
+      systemConfigRepository, geminiProperties, secretCipher, historyRepository);
     lenient().when(systemConfigRepository.findAll()).thenReturn(List.of());
   }
 

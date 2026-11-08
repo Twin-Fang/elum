@@ -43,11 +43,6 @@ public enum ConfigKey {
     "생성 이미지의 가로세로 비율 (클라이언트 카드 영역은 4:3에 가장 가깝다)",
     ConfigValueType.SELECT, List.of("1:1", "4:3", "3:4", "16:9", "9:16"), "4:3"
   ),
-  LOCAL_LLM_MODEL(
-    ConfigGroup.LOCAL_LLM, "로컬 LLM 모델",
-    "민감정보 검사(DLP)에 사용하는 내부 Ollama 모델명",
-    ConfigValueType.STRING, List.of(), ""
-  ),
   PRICE_GEMINI_TEXT_INPUT_PER_1M(
     ConfigGroup.PRICING, "텍스트 입력 단가 (USD/1M 토큰)",
     "Gemini 텍스트 입력 토큰 100만 개당 요금. AI 호출 비용 추정에 사용",
