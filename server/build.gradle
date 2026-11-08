@@ -39,6 +39,9 @@ dependencies {
     // 이야기 신고 알림 메일
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    // 서버 성능 지표: /actuator/prometheus 만 노출, 수집기 전용 토큰으로 보호 (#1222)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
