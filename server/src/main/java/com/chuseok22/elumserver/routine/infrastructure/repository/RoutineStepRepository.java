@@ -81,6 +81,31 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
     + "order by s.createdAt desc")
   List<String> findIdsMissingSpeech(@Param("language") AppLocale language, Pageable pageable);
 
+  /**
+   * 아직 WAV 로 저장된 음성 (압축 전환용, #1211). 최근 단계 먼저
+   */
+  @Query("select s.id as stepId, s.speechPath as speechPath from RoutineStep s "
+    + "where s.speechPath like '%.wav' order by s.createdAt desc")
+  List<StoredSpeechPath> findWavSpeechPaths(Pageable pageable);
+
+  /**
+   * 열쇠가 지금도 옛 열쇠일 때만 새 열쇠로 교체 (#1211). 0 이면 그새 글 수정·삭제로 열쇠가 바뀜
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.speechPath = :newSpeechPath where s.id = :stepId and s.speechPath = :oldSpeechPath")
+  int replaceSpeechPath(
+    @Param("stepId") String stepId, @Param("oldSpeechPath") String oldSpeechPath,
+    @Param("newSpeechPath") String newSpeechPath);
+
+  /// 저장된 음성 열쇠 projection: 단계 id, 열쇠
+  interface StoredSpeechPath {
+
+    String getStepId();
+
+    String getSpeechPath();
+  }
+
   /// 음성 문장 재료 projection
   interface SpeechTextSource {
 

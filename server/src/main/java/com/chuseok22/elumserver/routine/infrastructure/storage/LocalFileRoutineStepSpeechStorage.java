@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.TtsProperties;
+import com.chuseok22.elumserver.routine.core.SpeechAudioFormat;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -23,20 +24,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LocalFileRoutineStepSpeechStorage implements RoutineStepSpeechStorage {
 
-  private static final String SPEECH_EXTENSION = ".wav";
-
   private final TtsProperties ttsProperties;
 
   @Override
-  public String save(String stepId, String textHash, byte[] wav) {
-    String key = stepId + "/" + textHash + SPEECH_EXTENSION;
+  public String save(String stepId, String textHash, byte[] audio, SpeechAudioFormat format) {
+    String key = format.keyOf(stepId, textHash);
     Path temp = null;
     try {
       Path file = resolve(key);
       Files.createDirectories(file.getParent());
       // 임시 파일에 다 쓴 뒤 옮김 (끊겨도 반쪽 파일이 열쇠 자리에 남지 않음)
       temp = Files.createTempFile(file.getParent(), ".speech-", ".tmp");
-      Files.write(temp, wav);
+      Files.write(temp, audio);
       try {
         Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
       } catch (AtomicMoveNotSupportedException e) {

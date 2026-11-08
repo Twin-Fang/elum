@@ -51,7 +51,7 @@ public final class GuardianVoiceAudio {
   /**
    * 첫 상자가 ftyp 인가 (바이트 4~7 = "ftyp")
    */
-  static boolean isMp4Container(byte[] audio) {
+  public static boolean isMp4Container(byte[] audio) {
     return audio.length >= BOX_HEADER_BYTES && "ftyp".equals(typeAt(audio, 4));
   }
 

@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../app/dio_provider.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/sound/audio_file_header.dart';
 import '../../../core/storage/card_image_disk_cache.dart';
 
 /// 보호자 목소리 받기·파일 캐시: 서버 확인(If-None-Match) > 304 캐시 / 200 저장 / 404 캐시 삭제 / 실패 시 캐시
@@ -209,12 +210,7 @@ class GuardianVoiceRepository {
 
   /// MP4 머리 `....ftyp` 확인 (HTML 오류 페이지 등을 걸러냄)
   @visibleForTesting
-  static bool looksLikeM4a(Uint8List bytes) =>
-      bytes.length >= 8 &&
-      bytes[4] == 0x66 &&
-      bytes[5] == 0x74 &&
-      bytes[6] == 0x79 &&
-      bytes[7] == 0x70;
+  static bool looksLikeM4a(Uint8List bytes) => AudioFileHeader.isM4a(bytes);
 }
 
 final guardianVoiceRepositoryProvider = Provider<GuardianVoiceRepository>(
