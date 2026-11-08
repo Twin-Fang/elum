@@ -10,6 +10,11 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.UUID;
@@ -150,6 +155,80 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
     } catch (IOException e) {
       log.warn("일과 이미지 조회 실패: key={}", key, e);
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
+    }
+  }
+
+  /**
+   * 쓰지 않는 그림 정리: 열쇠 > 실제 위치 > 오래된 파일 중 위치에 없는 것 삭제 > 빈 폴더 삭제
+   * 보호자 녹음 폴더는 건드리지 않음 (GuardianVoiceFiles 가 따로 정리)
+   */
+  @Override
+  public int deleteUnreferenced(Collection<String> referencedKeys, Instant cutoff) {
+    Path base = base();
+    if (!Files.isDirectory(base)) {
+      return 0;
+    }
+    // 열쇠를 실제 위치로 비교 (옛 형식 전체 경로 열쇠도 같은 파일로 맞춤)
+    Set<Path> referencedFiles = new HashSet<>();
+    for (String key : referencedKeys) {
+      try {
+        referencedFiles.add(resolve(key));
+      } catch (IOException e) {
+        log.warn("[routine image] orphan clean skipped key : reason={}", e.getMessage());
+      }
+    }
+    Path voiceDirectory = base.resolve(LocalFileGuardianVoiceStorage.VOICE_DIRECTORY_NAME);
+    List<Path> orphanFiles;
+    try (Stream<Path> paths = Files.walk(base)) {
+      orphanFiles = paths.filter(Files::isRegularFile)
+        .filter(path -> !path.startsWith(voiceDirectory))
+        .filter(path -> !referencedFiles.contains(path))
+        .filter(path -> isModifiedBefore(path, cutoff))
+        .toList();
+    } catch (IOException e) {
+      throw new IllegalStateException("image list failed", e);
+    }
+    int deletedCount = 0;
+    for (Path orphanFile : orphanFiles) {
+      try {
+        Files.deleteIfExists(orphanFile);
+        deletedCount++;
+      } catch (IOException e) {
+        log.warn("[routine image] orphan delete failed : path={}", base.relativize(orphanFile));
+      }
+    }
+    deleteEmptyFolders(base, voiceDirectory);
+    return deletedCount;
+  }
+
+  private static boolean isModifiedBefore(Path path, Instant cutoff) {
+    try {
+      return Files.getLastModifiedTime(path).toInstant().isBefore(cutoff);
+    } catch (IOException e) {
+      // 시각을 못 읽으면 지우지 않는 쪽
+      return false;
+    }
+  }
+
+  /// 빈 폴더 삭제 (깊은 곳부터, 저장 폴더·녹음 폴더 자체는 남김)
+  private static void deleteEmptyFolders(Path base, Path voiceDirectory) {
+    try (Stream<Path> paths = Files.walk(base)) {
+      paths.filter(Files::isDirectory)
+        .filter(path -> !path.equals(base) && !path.startsWith(voiceDirectory))
+        .sorted(Comparator.reverseOrder())
+        .forEach(LocalFileRoutineImageStorage::deleteIfEmpty);
+    } catch (IOException e) {
+      log.warn("[routine image] empty folder clean failed : cause={}", e.getClass().getSimpleName());
+    }
+  }
+
+  private static void deleteIfEmpty(Path folder) {
+    try (Stream<Path> children = Files.list(folder)) {
+      if (children.findAny().isEmpty()) {
+        Files.deleteIfExists(folder);
+      }
+    } catch (IOException e) {
+      log.warn("[routine image] empty folder delete failed : cause={}", e.getClass().getSimpleName());
     }
   }
 
