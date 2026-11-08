@@ -78,7 +78,7 @@ class CardExportFiles {
     final isPrinted = await Printing.layoutPdf(
       name: jobName,
       format: isLandscape ? PdfPageFormat.a4.landscape : PdfPageFormat.a4,
-      // 실제 크기로 찍게 A4 그대로 넘김 (용지에 맞춤 축소를 막아 오려 쓰는 카드 크기 유지)
+      // 실제 크기로 찍게 A4(고른 용지 방향) 그대로 넘김 (용지에 맞춤 축소를 막아 오려 쓰는 카드 크기 유지)
       usePrinterSettings: false,
       onLayout: (_) async => pdf,
     );
