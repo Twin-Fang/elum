@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.infrastructure.storage;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -102,6 +103,14 @@ public interface RoutineImageStorage {
   void delete(String key);
 
   ImageContent read(String key);
+
+  /**
+   * 저장된 그림 1장 > 옆에 webp 사본 저장 > 새 열쇠 (#1219, 옛 png 전환용). 옛 파일은 그대로 둠
+   * 파일이 없거나 변환 실패면 빈 값. 기본 구현은 전환하지 않음
+   */
+  default Optional<String> saveWebpCopy(String key) {
+    return Optional.empty();
+  }
 
   /**
    * 쓰지 않는 그림 정리 (#1216): 기준 시각보다 오래됐고 열쇠 목록에 없는 파일 삭제 > 빈 폴더 삭제 > 지운 개수

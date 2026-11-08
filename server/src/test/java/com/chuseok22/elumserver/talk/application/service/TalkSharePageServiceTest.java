@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.media.PreviewImageConverter;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.routine.application.service.RoutineShareService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage.ImageContent;
@@ -51,6 +52,8 @@ class TalkSharePageServiceTest {
   private TalkImageStorage talkImageStorage;
   @Mock
   private MemberService memberService;
+  @Mock
+  private PreviewImageConverter previewImageConverter;
 
   private TalkSharePageService service;
 
@@ -58,7 +61,7 @@ class TalkSharePageServiceTest {
   void setUp() {
     TalkPostAccess talkPostAccess =
       new TalkPostAccess(talkPostRepository, talkBlockRepository, memberService, routineShareService);
-    service = new TalkSharePageService(talkPostAccess, talkPostStepRepository, talkImageStorage);
+    service = new TalkSharePageService(talkPostAccess, talkPostStepRepository, talkImageStorage, previewImageConverter);
   }
 
   @Test
@@ -134,6 +137,23 @@ class TalkSharePageServiceTest {
     when(talkImageStorage.read(POST_ID + "/2.jpg")).thenReturn(image);
 
     assertThat(service.thumbnail(POST_ID)).contains(image);
+  }
+
+  @Test
+  @DisplayName("webp 그림은 JPEG 로 바꿔 준다 — 카카오톡 미리보기가 webp 를 못 그려 AI 카드 그림이 빠지지 않게")
+  void thumbnail_webp_convertsToJpeg() {
+    when(talkPostRepository.findById(POST_ID)).thenReturn(Optional.of(post(TalkPostStatus.VISIBLE, null)));
+    when(memberService.suspendedAmong(anyCollection())).thenReturn(Set.of());
+    when(talkPostStepRepository.findByPostIdOrderByStepOrderAsc(POST_ID)).thenReturn(List.of(step(1, POST_ID + "/1.webp")));
+    byte[] webp = {1};
+    byte[] jpeg = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
+    when(talkImageStorage.read(POST_ID + "/1.webp")).thenReturn(new ImageContent(webp, "image/webp"));
+    when(previewImageConverter.webpToJpeg(webp)).thenReturn(Optional.of(jpeg));
+
+    assertThat(service.thumbnail(POST_ID)).hasValueSatisfying(preview -> {
+      assertThat(preview.contentType()).isEqualTo("image/jpeg");
+      assertThat(preview.bytes()).isEqualTo(jpeg);
+    });
   }
 
   @Test

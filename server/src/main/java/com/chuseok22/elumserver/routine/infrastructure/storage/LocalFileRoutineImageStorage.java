@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -41,13 +42,26 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "elum.store.image", havingValue = "local", matchIfMissing = true)
-@RequiredArgsConstructor
 public class LocalFileRoutineImageStorage implements RoutineImageStorage {
 
   private final RoutineProperties routineProperties;
+  // AI 그림 저장 직전 webp 압축 (#1219)
+  private final CardImageCompressor cardImageCompressor;
+
+  @Autowired
+  public LocalFileRoutineImageStorage(RoutineProperties routineProperties, CardImageCompressor cardImageCompressor) {
+    this.routineProperties = routineProperties;
+    this.cardImageCompressor = cardImageCompressor;
+  }
+
+  /// 압축 없이 (MinIO 안의 로컬 사본·시험용)
+  public LocalFileRoutineImageStorage(RoutineProperties routineProperties) {
+    this(routineProperties, CardImageCompressor.NONE);
+  }
 
   @Override
-  public String save(String batchId, Integer stepOrder, GeneratedImage image) {
+  public String save(String batchId, Integer stepOrder, GeneratedImage generatedImage) {
+    GeneratedImage image = compress(generatedImage);
     String key = batchId + "/" + stepOrder + "." + image.extension();
     try {
       Path file = resolve(key);
@@ -98,8 +112,57 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
   }
 
   @Override
-  public String saveRegenerated(String stepId, GeneratedImage image) {
+  public String saveRegenerated(String stepId, GeneratedImage generatedImage) {
+    GeneratedImage image = compress(generatedImage);
     return writeNewKey(stepId, "ai-" + UUID.randomUUID() + "." + image.extension(), image.bytes());
+  }
+
+  /**
+   * 저장된 그림 > 같은 폴더·같은 이름의 .webp 사본 > 새 열쇠 (옛 열쇠의 확장자만 바꿈)
+   */
+  @Override
+  public Optional<String> saveWebpCopy(String key) {
+    int extensionStart = key.lastIndexOf('.');
+    if (extensionStart < 0 || key.lastIndexOf('/') > extensionStart) {
+      return Optional.empty();
+    }
+    try {
+      Path source = resolve(key);
+      if (!Files.isRegularFile(source)) {
+        return Optional.empty();
+      }
+      GeneratedImage original = new GeneratedImage(Files.readAllBytes(source), key.substring(extensionStart + 1));
+      Optional<GeneratedImage> webp = cardImageCompressor.toWebp(original);
+      if (webp.isEmpty()) {
+        return Optional.empty();
+      }
+      String webpKey = key.substring(0, extensionStart + 1) + webp.get().extension();
+      writeAtomically(resolve(webpKey), webp.get().bytes());
+      return Optional.of(webpKey);
+    } catch (IOException e) {
+      log.warn("[routine image] webp copy failed : cause={}", e.getClass().getSimpleName());
+      return Optional.empty();
+    }
+  }
+
+  /// 임시 파일에 다 쓴 뒤 옮김 (끊겨도 반쪽 파일이 열쇠 자리에 남지 않음)
+  private static void writeAtomically(Path file, byte[] bytes) throws IOException {
+    Path tempFile = Files.createTempFile(file.getParent(), ".webp-", ".tmp");
+    try {
+      Files.write(tempFile, bytes);
+      try {
+        Files.move(tempFile, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+      } catch (AtomicMoveNotSupportedException e) {
+        Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+      }
+    } finally {
+      Files.deleteIfExists(tempFile);
+    }
+  }
+
+  /// AI 그림 > webp. 실패면 원본 그대로 (그림이 빠지지 않게)
+  private GeneratedImage compress(GeneratedImage image) {
+    return cardImageCompressor.toWebp(image).orElse(image);
   }
 
   /**
