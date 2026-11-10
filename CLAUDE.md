@@ -20,19 +20,19 @@ elum/
 모든 작업은 아래 순서를 따른다.
 
 ```
-설계 → 이슈 작성 → 구현 → 검증 → 커밋 → 푸시 → main 최신화 → 배포 → 완료 보고서 → 라벨 완료처리
+설계 → 이슈 작성 → 구현 → 검증 → 커밋 → 푸시 → deploy 최신화 → 배포 → 완료 보고서 → 라벨 완료처리
 ```
 
 | 단계 | 내용 | 도구 |
 | --- | --- | --- |
 | 1. 설계 | 요구사항·접근법을 정리하고 승인받는다. 결과는 `docs/superpowers/specs/`에 남긴다 | `/brainstorming` |
 | 2. 이슈 작성 | 아래 제목 규칙에 맞춰 이슈를 등록한다 | `/pro-github` |
-| 3. 구현 | `develop`에서 작업한다. **`main`에 직접 커밋하지 않는다** | `/pro-init-worktree` |
+| 3. 구현 | `develop`에서 작업한다. **`main`·`deploy`에 직접 커밋하지 않는다** | `/pro-init-worktree` |
 | 4. 검증 | 빌드·분석·동작 확인. **통과를 확인하기 전에 완료라고 말하지 않는다** | `flutter analyze`·`tool/check_*` / `./gradlew test` |
 | 5. 커밋 | 이슈 번호를 연결한다 | `/pro-commit` |
 | 6. 푸시 | **사용자가 명시적으로 요청할 때만** | |
-| 7. main 최신화 | **배포 전 `develop`에 `main`을 병합한다.** 생략하면 버전 충돌로 배포가 실패한다 | `git merge origin/main` |
-| 8. 배포 | develop → main 릴리스 PR을 올린다 | `/pro-changelog-deploy` |
+| 7. deploy 최신화 | **배포 전 `main`에 `deploy`를 병합한다.** 생략하면 버전 충돌로 배포가 실패한다 | `git merge origin/deploy` |
+| 8. 배포 | develop → main 병합(배포 안 됨) 뒤 main → deploy 릴리스 PR을 올린다 | `/pro-changelog-deploy` |
 | 8-1. 테스트 빌드 | **앱이 바뀐 이슈**에 `@projectops app build <브랜치명>` 댓글 (아래 설명) | `/pro-github` |
 | 9. 완료 보고서 | **이슈가 마무리되면 해당 이슈에 구현 내용을 보고서로 남긴다** | `/pro-report` |
 | 10. 라벨 완료처리 | 라벨을 `작업완료`로 바꾸고 **이슈를 닫는다** | `/pro-github` |
@@ -81,7 +81,7 @@ Android 테스트 APK와 iOS 테스트 TestFlight(개발자 도구 켜진 `test`
 
 - 브랜치명은 `#` 포함 원본 그대로 쓰고, **원격에 올라가 있어야** 한다 (`git push origin <작업 브랜치>`). develop 에만 푸시하면 빌드가 브랜치를 못 찾는다.
 - **수정 커밋을 더 푸시했으면 댓글을 다시 단다.** 댓글을 단 시점의 브랜치 끝을 빌드한다.
-- 서버만 바뀐 이슈에는 달지 않는다. 배포 PR(`main`)은 개발자 도구가 꺼진 release 빌드만 만든다.
+- 서버만 바뀐 이슈에는 달지 않는다. 배포 PR(`deploy`)은 개발자 도구가 꺼진 release 빌드만 만든다.
 - 이슈를 닫을 때 이 댓글이 있는지 확인한다 (10단계 전 점검).
 
 ### 작업이 끝나면 이슈를 닫는다 (10단계)
@@ -100,42 +100,38 @@ Android 테스트 APK와 iOS 테스트 TestFlight(개발자 도구 켜진 `test`
 
 ```
 develop  ← 개발 브랜치 (모든 구현은 여기서)
+  ↓ 병합 (배포 안 됨)
+main     ← 기본 브랜치 (default) · 워크플로 파일이 반영되는 곳
   ↓ 릴리스 PR
-main     ← 배포 브랜치 (default) · 버전·릴리스 노트 자동 관리
+deploy   ← 배포 브랜치 · 푸시되면 앱 스토어 제출·서버 배포 · 버전·릴리스 노트 자동 관리
 ```
 
 **배포는 `/pro-changelog-deploy` 하나로 처리한다.**
 
-이 스킬이 develop push → 릴리스 PR 생성 → 릴리스 노트 작성 → automerge까지 진행한다.
-직접 PR을 만들거나 main에 머지하지 않는다.
+이 스킬이 릴리스 PR(main → deploy) 생성 → 릴리스 노트 작성 → automerge까지 진행한다.
+직접 PR을 만들거나 deploy에 머지하지 않는다.
+스킬이 develop → main 으로 가정하면 head 를 `main`, base 를 `deploy` 로 지정한다.
 
-> ⚠️ **`main`에 직접 커밋·푸시하지 않는다.** main은 배포 트리거이므로 의도치 않은 배포가 발생한다.
+> ⚠️ **`deploy`에 직접 커밋·푸시하지 않는다.** deploy는 배포 트리거이므로 의도치 않은 배포가 발생한다.
+> `main`은 배포되지 않는다. 워크플로 파일 수정은 main 에 머지해도 안전하다.
 
-### 배포 전 필수 — develop을 main으로 최신화한다 ⚠️
+### 배포 전 필수 — main을 deploy로 최신화한다 ⚠️
 
 **`/pro-changelog-deploy`를 부르기 전에 반드시 아래를 먼저 한다.**
 
 ```bash
 git fetch origin
-git log origin/develop..origin/main --oneline   # 비어있어야 정상
-git merge origin/main --no-edit                 # 내용이 있으면 병합
-git push origin develop
+git log origin/main..origin/deploy --oneline   # 비어있어야 정상
+git merge origin/deploy --no-edit              # 내용이 있으면 main 에서 병합
+git push origin main
 ```
 
-**왜 필요한가.** 릴리스 워크플로우가 머지 직후 **main에만** 버전 커밋을 남긴다
-(`version.yml` · `pubspec.yaml` · `build.gradle` · `README.md`). 이 커밋이 develop으로
-돌아오지 않으므로, 배포할 때마다 develop과 main의 버전이 한 칸씩 벌어진다.
+**왜 필요한가.** 릴리스 워크플로우가 머지 직후 **deploy에만** README 버전 커밋을 남기고,
+안전망 버전 증가도 deploy 직접 푸시에서만 돈다. 이 커밋이 main으로 돌아오지 않으므로
+방치하면 다음 배포에서 **버전 파일 머지 충돌**로 워크플로우가 실패할 수 있다.
+(전환 전 main 기준에서 실제로 v1.0.32 배포가 이 문제로 PR을 닫고 다시 열어야 했다.)
 
-방치하면 다음 배포에서 **버전 파일 머지 충돌**로 워크플로우가 실패한다.
-실제로 v1.0.32 배포 때 이 문제로 PR을 닫고 다시 열어야 했다.
-
-```
-main:     version 1.0.30  ← 릴리스 워크플로우가 올림
-develop:  version 1.0.31  ← 이쪽도 따로 올라감
-          → 다음 배포 시 CONFLICT (content): version.yml
-```
-
-> 충돌이 이미 났다면 `git merge origin/main`으로 해소한 뒤, **PR을 닫고 새로 연다.**
+> 충돌이 이미 났다면 `git merge origin/deploy`로 해소한 뒤, **PR을 닫고 새로 연다.**
 > 실패한 워크플로우는 재실행해도 옛 커밋 기준으로 돌아 다시 실패한다.
 
 ### 여러 에이전트가 동시에 작업한다
@@ -199,7 +195,7 @@ develop:  version 1.0.31  ← 이쪽도 따로 올라감
 
 ⚠️ **루트 `README.md`의 `## 최신 버전 :` 라인은 워크플로우가 자동 관리한다. 수동으로 편집하지 않는다.**
 
-`PROJECT-COMMON-README-VERSION-UPDATE.yaml`이 main push마다 이 라인을 갱신한다.
+`PROJECT-COMMON-README-VERSION-UPDATE.yaml`이 deploy push마다 이 라인을 갱신한다.
 아래 제약을 어기면 워크플로우가 실패한다.
 
 - 마크다운 볼드(`**`) 사용 금지
@@ -210,7 +206,7 @@ develop:  version 1.0.31  ← 이쪽도 따로 올라감
 
 ## 브랜치 전략
 
-`develop`에서 작업을 모아 `main`으로 릴리스 PR을 올린다.
+`develop`에서 작업을 모아 `main`에 병합하고, `main`에서 `deploy`로 릴리스 PR을 올린다.
 버전·릴리스 노트는 워크플로우가 자동 관리한다.
 
 ## 서비스 원칙

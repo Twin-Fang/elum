@@ -11,7 +11,7 @@
 # - 운영 설정·FCM 키를 이미지에 넣지 않는다. NAS 실행 설정 폴더를 /app/config 로 읽기 전용 마운트한다
 #
 # 언제 도는가
-# - main 푸시 (server/** 또는 이 파일)
+# - deploy 브랜치 푸시 (server/** 또는 이 파일). main 푸시로는 돌지 않음
 # - 손으로 (workflow_dispatch)
 #
 # Secret
@@ -25,7 +25,8 @@ name: PROJECT-SPRING-ELUM-NAS-CICD
 on:
   push:
     branches:
-      - main
+      - deploy
+    # 서버가 바뀐 푸시만 (앱·문서만 바뀐 릴리스는 건너뜀)
     paths:
       - 'server/**'
       - '.github/workflows/PROJECT-SPRING-ELUM-NAS-CICD.yaml'
