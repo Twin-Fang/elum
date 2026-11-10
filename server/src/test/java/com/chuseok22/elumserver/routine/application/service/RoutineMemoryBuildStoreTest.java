@@ -124,7 +124,8 @@ class RoutineMemoryBuildStoreTest {
     Routine routine = editedRoutine("r1");
     when(routineRepository.findAllById(List.of("r1"))).thenReturn(List.of(routine));
     RoutineMemoryBuildStore.BuildJob job = new RoutineMemoryBuildStore.BuildJob(
-      PROFILE_ID, List.of("r1"), null, "member-1", com.chuseok22.elumserver.common.locale.AppLocale.KO, "하늘이");
+      PROFILE_ID, List.of("r1"),
+      RoutineMemoryAi.MemoryInput.of(List.of(), List.of(), List.of(), List.of(), 9), "member-1", com.chuseok22.elumserver.common.locale.AppLocale.KO, "하늘이");
 
     List<RoutineMemoryLine> saved = store.apply(job, List.of(
       "'손을 씻어요' 대신 '손을 닦아요'라고 써요", "자폐가 있어 짧게 나눠요", "카드를 크게 합쳐요"));
@@ -134,6 +135,22 @@ class RoutineMemoryBuildStoreTest {
     assertThat(saved.get(1).source()).isEqualTo(RoutineMemoryLine.Source.AI);
     assertThat(memory.getLastBuiltAt()).isEqualTo(NOW);
     assertThat(routine.getMemoryReflectedAt()).isEqualTo(NOW);
+  }
+
+  @Test
+  @DisplayName("반영: AI 가 maxLines 보다 많이 줘도 maxLines 줄까지만 저장한다 — 보호자 줄 자리가 AI 줄에 밀린다")
+  void apply_cutsAiLinesAtMaxLines() {
+    RoutineMemory memory = new RoutineMemory();
+    when(routineMemoryRows.findOrCreate(PROFILE_ID)).thenReturn(memory);
+    when(routineRepository.findAllById(List.of("r1"))).thenReturn(List.of(editedRoutine("r1")));
+    RoutineMemoryBuildStore.BuildJob job = new RoutineMemoryBuildStore.BuildJob(
+      PROFILE_ID, List.of("r1"),
+      RoutineMemoryAi.MemoryInput.of(List.of(), List.of(), List.of(), List.of(), 2), "member-1",
+      com.chuseok22.elumserver.common.locale.AppLocale.KO, "하늘이");
+
+    List<RoutineMemoryLine> saved = store.apply(job, List.of("줄 하나예요", "줄 둘이에요", "줄 셋이에요", "줄 넷이에요"));
+
+    assertThat(saved).extracting(RoutineMemoryLine::text).containsExactly("줄 하나예요", "줄 둘이에요");
   }
 
   @Test

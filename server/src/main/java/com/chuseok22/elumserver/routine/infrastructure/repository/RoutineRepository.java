@@ -132,8 +132,26 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   long countByStatus(RoutineStatus status);
 
-  List<Routine> findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-    String profileId, List<RoutineStatus> statuses, LocalDateTime start, LocalDateTime end
+  /// 주간 리포트용: 기간 안 일과를 카드까지 한 번에 읽음 (카드를 일과마다 따로 읽지 않게)
+  @Query("""
+    select distinct r from Routine r left join fetch r.steps
+    where r.profile.id = :profileId and r.status in :statuses
+      and r.scheduledAt between :start and :end
+    order by r.scheduledAt asc
+    """)
+  List<Routine> findAllWithStepsByProfileIdAndStatusInAndScheduledAtBetween(
+    @Param("profileId") String profileId, @Param("statuses") List<RoutineStatus> statuses,
+    @Param("start") LocalDateTime start, @Param("end") LocalDateTime end
+  );
+
+  /// 주간 리포트용: 그 시각 전에 끝낸 적 있는 일과 묶음 열쇠 (원본 ID, 없으면 자기 ID. 일과관리 복사본 제외)
+  @Query("""
+    select distinct coalesce(r.sourceRoutineId, r.id) from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+      and r.scheduledAt < :before
+    """)
+  List<String> findCompletedRoutineKeysBefore(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status, @Param("before") LocalDateTime before
   );
 
   // 보호자 홈 "지난 일과" — 오늘 이전에 예정됐던 것만 최신순.

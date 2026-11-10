@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.core;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -19,9 +20,9 @@ public final class RoutineMemorySafetyFilter {
    */
   private static final List<String> FORBIDDEN_TERMS = List.of(
     // 진단·장애명
-    "장애", "자폐", "아스퍼거", "adhd", "add ", "다운증후군", "다운 증후군", "뇌병변", "뇌성마비", "지적",
+    "장애", "자폐", "아스퍼거", "다운증후군", "다운 증후군", "뇌병변", "뇌성마비", "지적",
     "발달지연", "발달 지연", "지연", "뇌전증", "간질", "틱장애", "뚜렛", "투렛", "언어장애", "학습장애",
-    "증후군", "스펙트럼", "asd", "진단", "질환", "병명", "지능", "iq", "경계선",
+    "증후군", "스펙트럼", "진단", "질환", "병명", "지능", "경계선",
     // 정도·수준·단계
     "중증", "경증", "중등도", "중도", "경도", "심한", "심해", "수준", "등급", "단계가 낮", "정도가",
     // 치료·약·증상
@@ -30,6 +31,18 @@ public final class RoutineMemorySafetyFilter {
     "못해요", "못 해요", "못한다", "못함", "느려요", "느린 아이", "이해를 못", "이해 못", "부족해", "떨어져요",
     "문제행동", "문제 행동", "산만", "고집", "공격적"
   );
+
+  /// 영어 금지어: 다른 낱말 일부(liquid 의 iq, add toothpaste 의 add)에 걸리지 않게 낱말 경계로 검사. ADD 는 대문자 약어만
+  private static final Pattern FORBIDDEN_ENGLISH_PATTERN =
+    Pattern.compile("(?<![A-Za-z0-9])((?i:adhd|asd|iq)|ADD)(?![A-Za-z0-9])");
+
+  /// 기관 이름: 고유한 이름(2자 이상)이 붙은 학교·유치원·어린이집·학원·병원. "학교에 가요"·"병원에 가요"는 이름이 없어 통과
+  private static final Pattern INSTITUTION_NAME_PATTERN = Pattern.compile(
+    "[가-힣A-Za-z0-9]{2,}(초등학교|중학교|고등학교|유치원|어린이집|학원|병원)");
+
+  /// 학원·병원 앞에 붙는 보통 말 (기관 이름이 아님)
+  private static final List<String> COMMON_INSTITUTION_PREFIXES = List.of(
+    "수영", "태권도", "피아노", "미술", "영어", "수학", "음악", "동물", "소아", "치과", "한방", "종합", "대학", "응급", "동네");
 
   /// 전화번호·이메일처럼 보이는 것
   private static final Pattern CONTACT_PATTERN =
@@ -49,7 +62,9 @@ public final class RoutineMemorySafetyFilter {
       return false;
     }
     String lowered = text.trim().toLowerCase(Locale.ROOT) + " ";
-    return FORBIDDEN_TERMS.stream().anyMatch(lowered::contains) || CONTACT_PATTERN.matcher(text).find();
+    return FORBIDDEN_TERMS.stream().anyMatch(lowered::contains)
+      || FORBIDDEN_ENGLISH_PATTERN.matcher(text).find()
+      || CONTACT_PATTERN.matcher(text).find();
   }
 
   /// 거절 사유 (로그용 짧은 영문, 원문 없음). 통과면 null
@@ -67,9 +82,29 @@ public final class RoutineMemorySafetyFilter {
         return "forbidden term";
       }
     }
+    if (FORBIDDEN_ENGLISH_PATTERN.matcher(trimmed).find()) {
+      return "forbidden term";
+    }
     if (CONTACT_PATTERN.matcher(trimmed).find()) {
       return "contact";
     }
+    if (hasInstitutionName(trimmed)) {
+      return "institution name";
+    }
     return null;
+  }
+
+  /// 고유한 기관 이름이 든 줄인가 (보통 말 앞붙이 + 학원·병원은 통과)
+  private static boolean hasInstitutionName(String line) {
+    Matcher matcher = INSTITUTION_NAME_PATTERN.matcher(line);
+    while (matcher.find()) {
+      String prefix = line.substring(matcher.start(), matcher.start(1));
+      boolean isCommonPrefix = COMMON_INSTITUTION_PREFIXES.stream().anyMatch(prefix::endsWith);
+      boolean isAcademyOrHospital = matcher.group(1).endsWith("학원") || matcher.group(1).endsWith("병원");
+      if (!(isAcademyOrHospital && isCommonPrefix)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

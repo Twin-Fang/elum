@@ -139,7 +139,7 @@ public class RoutineMemoryBuildStore {
       locale, profile.getNickname());
   }
 
-  /// 반영: 보호자 줄 유지 > 새 AI 줄 거르기(금지 낱말·보호자 줄과 같음·지운 줄) > 10줄로 자름 > 저장 > 일과 반영 표시
+  /// 반영: 보호자 줄 유지 > 새 AI 줄 거르기(금지 낱말·기관 이름·보호자 줄과 같음·지운 줄) > 입력의 maxLines 로 자름 > 저장 > 일과 반영 표시
   @Transactional
   public List<RoutineMemoryLine> apply(BuildJob job, List<String> newAiLines) {
     LocalDateTime now = LocalDateTime.now(clock);
@@ -151,10 +151,11 @@ public class RoutineMemoryBuildStore {
     guardianLines.forEach(line -> blocked.add(line.text()));
 
     List<RoutineMemoryLine> merged = new ArrayList<>(guardianLines);
+    int maxMergedLineCount = Math.min(RoutineMemoryLine.MAX_LINES, guardianLines.size() + job.input().maxLines());
     int droppedCount = 0;
     for (String rawLine : newAiLines) {
       String line = NicknamePlaceholder.restore(rawLine.trim(), job.nickname(), job.locale());
-      if (merged.size() >= RoutineMemoryLine.MAX_LINES) {
+      if (merged.size() >= maxMergedLineCount) {
         break;
       }
       String rejection = RoutineMemorySafetyFilter.rejectionReason(line);

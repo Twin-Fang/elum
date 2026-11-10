@@ -7,8 +7,6 @@ import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
-import com.chuseok22.elumserver.member.application.service.MemberSignupTimeService;
-import com.chuseok22.elumserver.systemconfig.application.service.ConfigDateTime;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -37,8 +35,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
 
   private final SubscriptionRepository subscriptionRepository;
   private final SystemConfigService systemConfigService;
-  private final MemberSignupTimeService memberSignupTimeService;
-  private final ExistingMemberProGift existingMemberProGift;
+  private final MemberProPromotion memberProPromotion;
 
   @Override
   @Transactional(readOnly = true)
@@ -52,42 +49,13 @@ public class SystemConfigEntitlementService implements EntitlementService {
       if (subscription.isPresent() && subscription.get().effectivePlan(LocalDateTime.now()) == PlanType.PRO) {
         return PlanType.PRO;
       }
-      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물
-      if (subscription.map(Subscription::isUntouchedSignupFree).orElse(true)
-        && existingMemberProGift.giftEndsAt(memberId).isPresent()) {
-        return PlanType.PRO;
-      }
-      // 행이 없으면 Free (신규가입 PRO 이벤트 대상이면 Pro). 기존 회원을 옮기는 작업이 필요 없는 이유다.
-      return subscription.isPresent() ? PlanType.FREE : planOfMemberWithoutSubscription(memberId);
+      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물·신규가입 체험 (회수·스토어 행은 대상 아님)
+      boolean isPromotionCandidate = subscription.map(Subscription::isUntouchedSignupFree).orElse(true);
+      return isPromotionCandidate && memberProPromotion.findPromotion(memberId).isPresent()
+        ? PlanType.PRO
+        : PlanType.FREE;
     } catch (Exception e) {
       log.warn("구독 조회 실패 — Free로 계속 진행한다: memberId={}", memberId, e);
-      return PlanType.FREE;
-    }
-  }
-
-  // 구독 행 없는 회원: 신규가입 PRO 이벤트 대상이면 Pro, 아니면 Free (조회 시점 계산, DB 쓰기 없음)
-  private PlanType planOfMemberWithoutSubscription(String memberId) {
-    if (!systemConfigService.getBoolean(ConfigKey.SIGNUP_PRO_EVENT_ENABLED)) {
-      return PlanType.FREE;
-    }
-    try {
-      String startAtText = systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_START_AT);
-      String endAtText = systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_END_AT);
-      // 가입 기간이 비어 있으면 이벤트 꺼짐
-      if (startAtText.isBlank() || endAtText.isBlank()) {
-        return PlanType.FREE;
-      }
-      LocalDateTime signupWindowStart = ConfigDateTime.parse(startAtText);
-      LocalDateTime signupWindowEnd = ConfigDateTime.parse(endAtText);
-      int grantDays = systemConfigService.getInt(ConfigKey.SIGNUP_PRO_EVENT_GRANT_DAYS);
-      return memberSignupTimeService.findSignupAt(memberId)
-        .filter(signupAt -> !signupAt.isBefore(signupWindowStart) && !signupAt.isAfter(signupWindowEnd))
-        // 가입 시점 + 유지 일수 이전까지만
-        .filter(signupAt -> LocalDateTime.now().isBefore(signupAt.plusDays(grantDays)))
-        .map(signupAt -> PlanType.PRO)
-        .orElse(PlanType.FREE);
-    } catch (Exception e) {
-      log.warn("[signup pro event] evaluation failed, treating as FREE: memberId={}", memberId, e);
       return PlanType.FREE;
     }
   }

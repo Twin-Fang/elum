@@ -71,11 +71,11 @@ public interface RoutineCreationDocs {
     ),
     @ApiResponse(
       responseCode = "403",
-      description = "이번 주 크레딧 부족(AI_CREDIT_INSUFFICIENT) 또는 멈춘 계정(AI_CREDIT_ACCOUNT_FROZEN)",
+      description = "크레딧 부족(AI_CREDIT_INSUFFICIENT) 또는 멈춘 계정(AI_CREDIT_ACCOUNT_FROZEN)",
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요.\"}"
+          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"크레딧을 모두 사용했어요. 다시 채워지면 이어서 만들 수 있어요.\"}"
         )
       )
     ),
@@ -143,7 +143,7 @@ public interface RoutineCreationDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요.\"}"
+          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"크레딧을 모두 사용했어요. 다시 채워지면 이어서 만들 수 있어요.\"}"
         )
       )
     ),

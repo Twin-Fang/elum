@@ -269,7 +269,7 @@
  },
  "AI_CREDIT_INSUFFICIENT": {
   "status": "FORBIDDEN",
-  "message": "이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요."
+  "message": "크레딧을 모두 사용했어요. 다시 채워지면 이어서 만들 수 있어요."
  },
  "AI_CREDIT_JOB_IN_PROGRESS": {
   "status": "CONFLICT",

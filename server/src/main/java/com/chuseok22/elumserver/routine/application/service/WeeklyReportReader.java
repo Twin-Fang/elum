@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.routine.application.dto.response.WeeklyReportInsightsResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.WeeklyReportResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.WeeklyReportWeeksResponse;
 import com.chuseok22.elumserver.routine.core.ReportWeek;
@@ -9,10 +10,12 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -38,7 +41,9 @@ public class WeeklyReportReader {
 
   /// 이룸이 한 명의 한 주 집계 (그 주 보낸 일과, 일과관리 복사본 제외)
   public WeeklyReportResponse aggregate(String profileId, ReportWeek week, LocalDate today) {
-    return WeeklyReportAggregator.aggregate(week, sentRoutinesOf(profileId, week), today);
+    List<Routine> routines = sentRoutinesOf(profileId, week);
+    WeeklyReportResponse report = WeeklyReportAggregator.aggregate(week, routines, today);
+    return report.withInsights(insightsOf(profileId, week, report, routines, today));
   }
 
   /// 집계 + 이룸이 호칭·일과 언어 (월요일 알림용). 그 주 보낸 일과가 없으면 empty
@@ -82,9 +87,22 @@ public class WeeklyReportReader {
     return routineRepository.findProfileIdsWithStatusBetween(RoutineStatus.COMPLETED, week.startAt(), week.lastMoment());
   }
 
+  /// 인사이트: 기록 없는 주면 null. 지난주 일과·이전 완료 열쇠를 각 1회 조회
+  private WeeklyReportInsightsResponse insightsOf(String profileId, ReportWeek week, WeeklyReportResponse report,
+    List<Routine> routines, LocalDate today) {
+    if (routines.isEmpty()) {
+      return null;
+    }
+    List<Routine> previousRoutines = sentRoutinesOf(profileId, ReportWeek.containing(week.start().minusWeeks(1)));
+    Set<String> priorCompletedKeys = new HashSet<>(
+      routineRepository.findCompletedRoutineKeysBefore(profileId, RoutineStatus.COMPLETED, week.startAt()));
+    return WeeklyReportInsightCalculator.calculate(report.longestCompletedDayStreak(), routines, previousRoutines,
+      priorCompletedKeys, today, routineRepository::existsById);
+  }
+
   private List<Routine> sentRoutinesOf(String profileId, ReportWeek week) {
     return routineRepository
-      .findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+      .findAllWithStepsByProfileIdAndStatusInAndScheduledAtBetween(
         profileId, SENT_STATUSES, week.startAt(), week.lastMoment())
       .stream()
       .filter(routine -> !routine.isLibraryOnly())

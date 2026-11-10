@@ -45,4 +45,55 @@ class RoutineMemorySafetyFilterTest {
     assertThat(RoutineMemorySafetyFilter.isAllowed("  ")).isFalse();
     assertThat(RoutineMemorySafetyFilter.isAllowed("가".repeat(61))).isFalse();
   }
+
+  @ParameterizedTest
+  @DisplayName("영어 금지어는 낱말일 때만 막는다 — add·iq 가 다른 낱말 일부에 걸려 정상 카드 메모가 버려진다")
+  @ValueSource(strings = {
+    "Add toothpaste before brushing",
+    "add a water card after meals",
+    "Use a liquid soap card",
+    "squeeze the liquid out",
+  })
+  void keepsEnglishWordsContainingForbiddenLetters(String line) {
+    assertThat(RoutineMemorySafetyFilter.isAllowed(line)).isTrue();
+  }
+
+  @ParameterizedTest
+  @DisplayName("영어 진단 약어(ADHD·ASD·IQ·ADD)는 낱말로 있으면 버린다")
+  @ValueSource(strings = {
+    "Split cards because of ADHD",
+    "he has asd so keep it short",
+    "IQ is low so use short words",
+    "child with ADD needs short cards",
+    "adhd라서 짧게 나눠요",
+  })
+  void rejectsEnglishDiagnosisAcronyms(String line) {
+    assertThat(RoutineMemorySafetyFilter.isAllowed(line)).isFalse();
+  }
+
+  @ParameterizedTest
+  @DisplayName("기관 이름(고유한 이름 + 학교·유치원·어린이집·학원·병원)이 든 줄은 버린다 — 아이가 다니는 곳이 AI 로 나간다")
+  @ValueSource(strings = {
+    "햇살초등학교 가는 날은 가방 카드를 넣어요",
+    "사랑어린이집 일과는 간식 카드로 끝내요",
+    "푸른유치원 등원 일과는 3장으로 나눠요",
+    "해법학원 가는 날은 숙제 카드를 넣어요",
+    "서울중앙병원 가는 날은 짧게 나눠요",
+  })
+  void rejectsInstitutionNames(String line) {
+    assertThat(RoutineMemorySafetyFilter.isAllowed(line)).isFalse();
+  }
+
+  @ParameterizedTest
+  @DisplayName("보통 말 \"학교에 가요\"·\"병원에 가요\"·\"수영학원\" 같은 줄은 그대로 둔다 — 정상 카드 메모가 버려진다")
+  @ValueSource(strings = {
+    "학교에 가요 카드는 가방 챙기기부터 나눠요",
+    "병원에 가요 카드 뒤에 손 씻기를 넣어요",
+    "초등학교 가는 날은 도시락 카드를 넣어요",
+    "수영학원 가는 날은 수건 카드를 넣어요",
+    "동네 병원에 가요 일과는 짧게 써요",
+  })
+  void keepsPlainSchoolAndHospitalWords(String line) {
+    assertThat(RoutineMemorySafetyFilter.isAllowed(line)).isTrue();
+  }
 }

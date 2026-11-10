@@ -41,7 +41,7 @@ class WeeklyReportReaderTest {
     ReportWeek lastWeek = ReportWeek.containing(LocalDate.now().minusWeeks(1));
     Routine libraryCopy = routineAt(lastWeek.start().atTime(8, 0));
     libraryCopy.setLibraryOnly(true);
-    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+    when(routineRepository.findAllWithStepsByProfileIdAndStatusInAndScheduledAtBetween(
       eq(PROFILE_ID), anyList(), eq(lastWeek.startAt()), eq(lastWeek.lastMoment())))
       .thenReturn(List.of(libraryCopy));
 

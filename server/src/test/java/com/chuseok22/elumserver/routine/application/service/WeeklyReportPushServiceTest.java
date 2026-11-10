@@ -175,7 +175,7 @@ class WeeklyReportPushServiceTest {
 
   private static WeeklyReportReader.ReportWithNickname completedReport() {
     WeeklyReportResponse report = new WeeklyReportResponse(LAST_WEEK.start(), LAST_WEEK.lastDay(), false, 4, 2, 50, 2, 0,
-      2, List.of(), List.of(), List.of(), null);
+      2, List.of(), List.of(), List.of(), null, null);
     return new WeeklyReportReader.ReportWithNickname(report, "하늘이", AppLocale.KO);
   }
 }
