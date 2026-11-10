@@ -39,5 +39,11 @@ String routineScheduleTimeLabel(
   TimeOfDay(hour: schedule.hour, minute: schedule.minute),
 );
 
+/// 오늘 일과 줄에 붙일 반복 시각: 오늘 요일에 켜진 반복이 있으면 `오전 7:30`, 아니면 null (반복이 아닌 일과 · 멈춤 · 다른 요일)
+String? todayScheduleTimeLabel(BuildContext context, RoutineSchedule? schedule, DateTime now) {
+  if (schedule == null || schedule.isPaused || !schedule.isOn(now.weekday)) return null;
+  return routineScheduleTimeLabel(context, schedule);
+}
+
 bool _isSameSet(Set<int> a, Set<int> b) =>
     a.length == b.length && a.containsAll(b);

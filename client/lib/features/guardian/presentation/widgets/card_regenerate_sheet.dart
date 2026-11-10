@@ -9,6 +9,7 @@ import '../../../../core/widgets/elum_choice_chip.dart';
 import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
+import '../../../../core/widgets/credit_cost_label.dart';
 import '../../../credit/application/image_regenerate_cost.dart';
 import '../../domain/image_redraw_hint.dart';
 
@@ -60,7 +61,6 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final space = context.space;
     final costAsync = ref.watch(imageRegenerateCostProvider);
     final isFirstPicture = widget.isFirstPicture;
@@ -93,11 +93,7 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
             ],
           ),
           SizedBox(height: space.md.h),
-          Text(
-            _costLabel(context, costAsync.value, isFirstPicture: isFirstPicture),
-            textAlign: TextAlign.center,
-            style: context.typo.settingsTileLabel.copyWith(color: colors.textPrimary),
-          ),
+          _costView(context, costAsync.value, isFirstPicture: isFirstPicture),
           SizedBox(height: space.lg.h),
           ElumSheetActionRow(
             cancelLabel: l10n.commonCancel,
@@ -123,6 +119,21 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
   }
 
   /// 비용 > 한 줄: (다시 그리기만) 무료 횟수 남음 > 크레딧 안 씀 > 크레딧 N개 (모르면 크레딧을 써요)
+  /// 비용 한 줄: 크레딧 그림 + 숫자(`1개`) 또는 문구 (낭독은 `크레딧 1개`)
+  static Widget _costView(BuildContext context, ImageRegenerateCost? cost, {required bool isFirstPicture}) {
+    final l10n = context.l10n;
+    final sentence = _costLabel(context, cost, isFirstPicture: isFirstPicture);
+    final credits = cost == null ? 0 : (isFirstPicture ? cost.firstPictureCredits : cost.credits);
+    final isCountShown = cost != null &&
+        (isFirstPicture || cost.freeLeftToday <= 0) &&
+        cost.isCreditEnabled &&
+        credits > 0;
+    return CreditCostLabel(
+      text: isCountShown ? l10n.creditCostCount(credits) : sentence,
+      semanticLabel: sentence,
+    );
+  }
+
   static String _costLabel(BuildContext context, ImageRegenerateCost? cost, {required bool isFirstPicture}) {
     final l10n = context.l10n;
     if (cost == null) return l10n.cardRegenerateCostUnknown;

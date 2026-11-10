@@ -196,6 +196,12 @@ abstract interface class LocalStorage {
   DateTime? get pushPermissionNudgedAt;
   Future<void> setPushPermissionNudgedAt(DateTime at);
 
+  /// 보호자 홈 `알림이 꺼져 있어요` 띠를 닫은 시각 (닫으면 7일 숨김). 없으면 null
+  ///
+  /// 기기에 속하고 [clearAll] 이 지우지 않는다
+  DateTime? get homeNotificationNoticeDismissedAt;
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at);
+
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
   /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다

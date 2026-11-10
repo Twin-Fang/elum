@@ -285,6 +285,14 @@ class InMemoryStorage implements LocalStorage {
 
   bool _hasAskedPushPermission = false;
   DateTime? _pushPermissionNudgedAt;
+  DateTime? _homeNotificationNoticeDismissedAt;
+
+  @override
+  DateTime? get homeNotificationNoticeDismissedAt => _homeNotificationNoticeDismissedAt;
+
+  @override
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async =>
+      _homeNotificationNoticeDismissedAt = at;
   String? _updateSuggestionShownRecord;
 
   @override

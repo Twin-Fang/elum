@@ -8,7 +8,7 @@ import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
-import '../../features/guardian/presentation/routine_memory_screen.dart';
+import '../../features/guardian/presentation/memory/routine_memory_screen.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/weekly_report/weekly_report_screen.dart';
 import '../../features/guardian/presentation/weekly_plan_screen.dart';

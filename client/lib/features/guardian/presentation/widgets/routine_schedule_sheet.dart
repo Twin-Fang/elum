@@ -132,6 +132,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     final canSchedule = access.canScheduleRoutines;
     // Free · 판매 중 · Pro 가 반복 일과를 줌: 저장이 꺼진 이유 + Pro 입구 (아니면 권유하지 않음)
     final shouldShowProNote = access.shouldShowTeaserFor(PlanBenefit.routineSchedule);
+    final proActions = watchProUpsellActions(context, ref, highlight: PlanBenefit.routineSchedule);
     final elumiNotification =
         ref.watch(routineSchedulePlanProvider).value?.elumiNotification ??
         ElumiNotificationState.on;
@@ -142,7 +143,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
       color: colors.routineTileLabel,
     );
 
-    // 틀: 제목 > 설명 > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > (Pro 안내) > 저장 > (Pro로 보기) > (있으면) 반복 끄기
+    // 틀: 제목 > 설명 > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > (Pro 안내) > 저장 또는 Pro 버튼 > (있으면) 반복 끄기
     return ElumSheetFrame(
       title: l10n.routineScheduleSheetTitle,
       description: l10n.routineScheduleSheetBody,
@@ -204,19 +205,20 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
             ),
             SizedBox(height: space.xs.h),
           ],
-          ElumButton(
-            key: RoutineScheduleSheet.saveButtonKey,
-            label: l10n.routineScheduleSave,
-            loading: _isSaving,
-            onPressed: _isSaving || hasNoWeekday || !canSchedule ? null : _save,
-          ),
-          if (shouldShowProNote) ...[
-            SizedBox(height: space.xs.h),
+          // Free · 판매 중이면 저장 자리에 공통 Pro 버튼 (그 혜택을 위로 올린 요금제 화면), 아니면 저장
+          if (shouldShowProNote)
             ProUpsellButton(
-              style: ProUpsellStyle.link,
-              onTap: _isSaving ? null : () => openPlanPaywall(context, ref),
+              style: ProUpsellStyle.filled,
+              freeTrialLabel: proActions.freeTrialLabel,
+              onTap: _isSaving ? null : proActions.onStart,
+            )
+          else
+            ElumButton(
+              key: RoutineScheduleSheet.saveButtonKey,
+              label: l10n.routineScheduleSave,
+              loading: _isSaving,
+              onPressed: _isSaving || hasNoWeekday || !canSchedule ? null : _save,
             ),
-          ],
           if (_existing != null) ...[
             SizedBox(height: space.xs.h),
             ElumTextLink(

@@ -170,6 +170,9 @@ abstract final class AppAssets {
   /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다.
   static const lumiThinking = '$_images/lumi_thinking.png';
 
+  /// AI 메모리 위 카드 그림 (공책 든 루미, 투명 PNG 384)
+  static const routineMemoryHero = '$_images/routine_memory_hero.png';
+
   /// 크레딧 그림 (투명 PNG 256): 정면 = 기본 · 주기 지급 / 보너스(주황) / 구매(보라) / 한 장(살짝 기움) / 여러 장.
   /// 별은 이룸이 보상 그림이라 크레딧에는 쓰지 않는다.
   static const creditTicket = '$_images/credit_ticket.png';

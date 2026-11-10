@@ -10,6 +10,7 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_error_code_text.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/mint_gradient_button.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/credit_pack_catalog.dart';
 import '../../../subscription/application/credit_purchase_coordinator.dart';
@@ -127,12 +128,10 @@ class _MyCreditPackSectionState extends ConsumerState<MyCreditPackSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElumButton(
+        MintGradientButton(
           label: l10n.myCreditPackBuy(selected.pack.credits),
-          loading: flow.isBusy,
-          backgroundColor: colors.creditPackBuyButton,
-          labelColor: colors.surface,
-          onPressed: flow.canStartPurchase
+          isLoading: flow.isBusy,
+          onTap: flow.canStartPurchase
               ? () => confirmGuardianAndBuyCredits(context, ref, selected.pack)
               : null,
         ),

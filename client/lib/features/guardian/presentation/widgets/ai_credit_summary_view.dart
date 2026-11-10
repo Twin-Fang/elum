@@ -35,9 +35,8 @@ class AiCreditSummaryView extends StatelessWidget {
   /// 막대 > 알릴 줄 > 다시 채워지는 날 사이 (Figma `1579:8122` gap 16)
   static const _sectionGap = 16.0;
 
-  /// 큰 숫자 옆 반짝임 (Figma `1579:8119` 20×24)와 숫자·단위 사이 (gap 4)
-  static const _sparkleWidth = 20.0;
-  static const _sparkleHeight = 24.0;
+  /// 큰 숫자 옆 크레딧 그림 (정사각)과 숫자·단위 사이 (gap 4)
+  static const _ticketSize = 32.0;
   static const _inlineGap = 4.0;
 
   @override
@@ -94,14 +93,10 @@ class AiCreditSummaryView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SvgPicture.asset(
-                      AppAssets.iconSparkles,
-                      width: _sparkleWidth.w,
-                      height: _sparkleHeight.h,
-                      colorFilter: ColorFilter.mode(
-                        colors.creditNumberText,
-                        BlendMode.srcIn,
-                      ),
+                    Image.asset(
+                      AppAssets.creditTicket,
+                      width: _ticketSize.w,
+                      excludeFromSemantics: true,
                     ),
                     SizedBox(width: _inlineGap.w),
                     Text(

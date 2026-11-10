@@ -19,6 +19,8 @@ import 'grey_tile_shell.dart';
 import 'routine_loading_tile.dart';
 import 'routine_tile_gap.dart';
 import 'routine_summary_tile.dart';
+import 'routine_schedule_labels.dart';
+import '../../application/routine_schedule_controller.dart';
 import 'routine_swipe_actions.dart';
 import 'talk_share_hint_link.dart';
 import '../../../../core/state/busy_state_mixin.dart';
@@ -362,6 +364,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
                   onEdit: () => _edit(routine),
                   child: RoutineSummaryTile(
                     routine: routine,
+                    // 오늘 요일에 켜진 반복이 있는 일과만 시각 (원본 일과의 예약)
+                    scheduleTimeLabel: todayScheduleTimeLabel(
+                      context,
+                      ref.watch(routineScheduleOfProvider(routine.sourceRoutineId ?? routine.id)),
+                      DateTime.now(),
+                    ),
                     progress: routineProgress(routine, progress),
                     creatorName: shouldShowCreator
                         ? routine.creatorDisplayName

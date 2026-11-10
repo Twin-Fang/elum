@@ -48,6 +48,9 @@ class CardImageCandidateSheet extends StatelessWidget {
   /// 카드 그림 칸과 같은 비율 (Figma 313×230)
   static const _previewAspect = 313 / 230;
 
+  /// 왼쪽 버튼 폭 (`지금 그림 그대로` 가 한 줄)
+  static const _cancelButtonWidth = 150.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -97,6 +100,8 @@ class CardImageCandidateSheet extends StatelessWidget {
             onCancel: () => Navigator.of(context).pop(false),
             confirmLabel: l10n.cardCandidateApplyButton,
             onConfirm: () => Navigator.of(context).pop(true),
+            // `지금 그림 그대로` 가 한 줄에 들어가게 넓힘
+            cancelWidth: _cancelButtonWidth,
           ),
         ],
       ),

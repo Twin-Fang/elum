@@ -104,6 +104,30 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// 알림 꺼짐 안내 제목 (홈 띠 · 알림 화면 카드)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림이 꺼져 있어요'**
+  String get notificationOffNoticeTitle;
+
+  /// 알림 꺼짐 안내 본문. name 은 이룸이 호칭, batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 일과를 끝낸 소식, 이야기 댓글, 새 기능 소식을 받을 수 없어요'**
+  String notificationOffNoticeBody(String name, String batchim);
+
+  /// 알림 화면 카드 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 켜기'**
+  String get notificationOffNoticeTurnOn;
+
+  /// 설정의 알림 줄 제목 아래 작은 글 (기기 알림이 꺼졌을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'꺼져 있어 소식을 받을 수 없어요'**
+  String get notificationOffRowHint;
+
   /// 앱 이름. 운영체제의 앱 전환 화면에 보인다.
   ///
   /// In ko, this message translates to:
@@ -6806,6 +6830,12 @@ abstract class AppLocalizations {
   /// **'다시 확인하기'**
   String get planVerificationRetry;
 
+  /// Pro 구독 직후 열린 혜택 안내 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get planActivatedStart;
+
   /// 결제 완료
   ///
   /// In ko, this message translates to:
@@ -7739,74 +7769,284 @@ abstract class AppLocalizations {
   /// 설정 줄 — 이룸이별 AI 메모 화면으로 (Pro)
   ///
   /// In ko, this message translates to:
-  /// **'AI 메모'**
+  /// **'AI 메모리'**
   String get guardianSettingsRoutineMemory;
 
-  /// AI 메모 화면 제목
+  /// AI 메모리 위 카드 제목. name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'AI 메모'**
-  String get routineMemoryTitle;
+  /// **'{name} AI 메모리'**
+  String memoryHeroTitle(String name);
 
-  /// AI 메모 켜기/끄기 스위치
+  /// AI 메모리 위 카드 설명 (다른 보호자와 공유하지 않음)
   ///
   /// In ko, this message translates to:
-  /// **'내가 고친 일과처럼 만들기'**
-  String get routineMemoryEnabledLabel;
+  /// **'내가 고친 방식을 기억해서 다음 일과를 그렇게 만들어요. 나만 봐요'**
+  String get memoryHeroBody;
 
-  /// 스위치 아래 설명
+  /// 숫자 칸 이름: 적용 중인 규칙 수
   ///
   /// In ko, this message translates to:
-  /// **'카드를 고쳐서 보내면 AI가 이룸이에게 맞는 카드 만들기 방법을 짧게 적어 둬요. 다음 일과를 만들 때 이 메모와 고친 일과를 참고해요.'**
-  String get routineMemoryEnabledFooter;
+  /// **'적용 중'**
+  String get memoryStatApplied;
 
-  /// 메모 묶음 머리 글 (지금 줄 수/최대)
+  /// 숫자 칸 이름: 관찰 중인 규칙 수
   ///
   /// In ko, this message translates to:
-  /// **'메모 {count}/{max}'**
-  String routineMemoryLinesHeader(int count, int max);
+  /// **'관찰 중'**
+  String get memoryStatWatching;
 
-  /// 메모 묶음 아래 설명
+  /// 숫자 칸 이름: 일과를 고쳐 보낸 기록 수
   ///
   /// In ko, this message translates to:
-  /// **'줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.'**
-  String get routineMemoryLinesFooter;
+  /// **'수정 기록'**
+  String get memoryStatEdits;
 
-  /// AI 메모가 꺼져 있을 때 스위치 아래 설명 (켜짐 설명 대신)
+  /// 목록 머리: 적용 중 탭
   ///
   /// In ko, this message translates to:
-  /// **'꺼져 있어요. 켜기 전까지 일과를 만들 때 메모를 쓰지 않고, 고친 카드에서 새로 배우지도 않아요.'**
-  String get routineMemoryDisabledFooter;
+  /// **'적용 중인 규칙'**
+  String get memoryListAppliedHeader;
 
-  /// 메모 줄이 가득 차 더하기 줄이 없을 때 묶음 아래 설명
+  /// 목록 머리 오른쪽 작은 글: 적용 중 탭
   ///
   /// In ko, this message translates to:
-  /// **'메모는 {max}개까지예요. 줄을 지우면 새로 더할 수 있어요.'**
-  String routineMemoryFullFooter(int max);
+  /// **'새 일과에 쓰여요'**
+  String get memoryListAppliedHint;
 
-  /// 메모가 0줄일 때 줄 자리
+  /// 목록 머리: 관찰 중 탭
   ///
   /// In ko, this message translates to:
-  /// **'아직 메모가 없어요'**
-  String get routineMemoryEmpty;
+  /// **'관찰 중인 규칙'**
+  String get memoryListWatchingHeader;
 
-  /// 메모가 0줄일 때 묶음 아래 설명
+  /// 목록 머리 오른쪽 작은 글: 관찰 중 탭
   ///
   /// In ko, this message translates to:
-  /// **'카드를 고쳐서 보내면 하루에 한 번 정리해요. 직접 적어도 돼요.'**
-  String get routineMemoryEmptyFooter;
+  /// **'점이 다 차면 적용돼요'**
+  String get memoryListWatchingHint;
 
-  /// 보호자가 쓰거나 고친 줄 오른쪽 표시
+  /// 목록 머리: 수정 기록 탭
   ///
   /// In ko, this message translates to:
-  /// **'내가 씀'**
-  String get routineMemoryWrittenByMe;
+  /// **'고쳐서 보낸 기록'**
+  String get memoryListEditsHeader;
 
-  /// 메모 줄 더하기 줄
+  /// 규칙 줄 아래 작은 글: AI 가 찾은 규칙 (몇 개 일과에서 봤나)
   ///
   /// In ko, this message translates to:
-  /// **'메모 더하기'**
-  String get routineMemoryAddLine;
+  /// **'AI가 찾음, 일과 {count}개'**
+  String memoryRuleByAi(int count);
+
+  /// 규칙 줄 아래 작은 글: 직접 적은 규칙
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 적음'**
+  String get memoryRuleByMe;
+
+  /// 수정 기록 줄: 카드 장수 변화
+  ///
+  /// In ko, this message translates to:
+  /// **'{before}장 → {after}장'**
+  String memoryEditCards(int before, int after);
+
+  /// 수정 기록 줄: 고친 글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'글 {count}곳'**
+  String memoryEditTexts(int count);
+
+  /// 적용 중 탭 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'+ 규칙 직접 적기'**
+  String get memoryAddRule;
+
+  /// 맨 아래 스위치 이름 (서버 enabled)
+  ///
+  /// In ko, this message translates to:
+  /// **'고친 내용에서 자동으로 찾기'**
+  String get memoryAutoFind;
+
+  /// 자동 찾기 스위치 아래 작은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 수정이 일과 {count}개에서 반복되면 적용돼요'**
+  String memoryAutoFindNote(int count);
+
+  /// 규칙이 하나도 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 고쳐서 보내면 여기에 쌓여요'**
+  String get memoryEmptyTitle;
+
+  /// 수정 기록 탭이 비었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 고쳐서 보낸 일과가 없어요'**
+  String get memoryEmptyEdits;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'낱말 바꾸기'**
+  String get memoryTypeWord;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 나누기'**
+  String get memoryTypeSplit;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 합치기'**
+  String get memoryTypeMerge;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 더하기'**
+  String get memoryTypeAdd;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 빼기'**
+  String get memoryTypeRemove;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 적은 규칙'**
+  String get memoryTypeManual;
+
+  /// 규칙 시트 버튼: 관찰 중 규칙을 바로 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 적용'**
+  String get memoryApplyNow;
+
+  /// 규칙 시트 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get memoryRuleDelete;
+
+  /// 규칙 시트 버튼: 직접 적은 규칙 글 고치기
+  ///
+  /// In ko, this message translates to:
+  /// **'수정'**
+  String get memoryRuleEdit;
+
+  /// 규칙 근거 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}, {month}월 {day}일'**
+  String memoryEvidenceLine(String routine, int month, int day);
+
+  /// AI 메모리 오른쪽 위 ··· 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'메뉴'**
+  String get memoryMenuLabel;
+
+  /// 오른쪽 위 메뉴
+  ///
+  /// In ko, this message translates to:
+  /// **'파일로 내보내기'**
+  String get memoryMenuExport;
+
+  /// 오른쪽 위 메뉴 (위험)
+  ///
+  /// In ko, this message translates to:
+  /// **'메모리 모두 지우기'**
+  String get memoryMenuClear;
+
+  /// 내보내기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모리를 내보내지 못했어요'**
+  String get memoryExportFailed;
+
+  /// 일과를 보낸 직후 카드 머리
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리'**
+  String get memoryObsTitle;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'낱말을 이렇게 바꾸셨어요'**
+  String get memoryObsWord;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 나누셨어요'**
+  String get memoryObsSplit;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 합치셨어요'**
+  String get memoryObsMerge;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 더하셨어요'**
+  String get memoryObsAdd;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 빼셨어요'**
+  String get memoryObsRemove;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 고치셨어요'**
+  String get memoryObsManual;
+
+  /// 일과를 보낸 직후 카드 질문
+  ///
+  /// In ko, this message translates to:
+  /// **'{phrase}. 다음 일과에도 이렇게 할까요?'**
+  String memoryObsAsk(String phrase);
+
+  /// 카드 버튼: 규칙으로 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'항상 이렇게'**
+  String get memoryObsAlways;
+
+  /// 카드 버튼: 카드 닫기
+  ///
+  /// In ko, this message translates to:
+  /// **'이번만'**
+  String get memoryObsOnce;
+
+  /// 항상 이렇게를 누른 뒤 카드 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 일과부터 이렇게 만들어요'**
+  String get memoryObsDone;
+
+  /// 보이는 최대 2개 밖의 나머지
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리에서 {count}개 더 보기'**
+  String memoryObsMore(int count);
+
+  /// 새 일과 결과 화면 제목 아래 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리 규칙 {count}개 적용됨'**
+  String memoryAppliedPill(int count);
 
   /// 메모 더하기 시트 제목
   ///
@@ -7837,18 +8077,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 줄 지우기'**
   String get routineMemoryDeleteLine;
-
-  /// 메모 모두 지우기 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'메모 모두 지우기'**
-  String get routineMemoryClearAll;
-
-  /// 모두 지우기 아래 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'지난 일과에서 배운 것도 함께 지워요. 그다음 보낸 일과부터 다시 배워요.'**
-  String get routineMemoryClearFooter;
 
   /// 모두 지우기 확인 팝업 제목
   ///
@@ -7993,6 +8221,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{크레딧 {count}개}}'**
   String cardRegenerateCostCredits(int count);
+
+  /// 크레딧 비용 표시: 크레딧 그림 옆 개수 (낭독은 cardRegenerateCostCredits)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개}}'**
+  String creditCostCount(int count);
 
   /// 다시 그리기 비용을 불러오지 못했을 때
   ///

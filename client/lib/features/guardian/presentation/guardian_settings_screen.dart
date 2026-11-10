@@ -1,3 +1,6 @@
+import '../../../core/widgets/app_pressable.dart';
+import '../../notification/application/device_notification_permission_controller.dart';
+import '../../../core/widgets/notification_off_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -209,13 +212,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.notificationSettingsTitle,
-              onTap: busy
-                  ? null
-                  : () => context.push(Routes.guardianNotificationSettings),
-            ),
+            _NotificationTile(isBusy: busy),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
@@ -342,6 +339,74 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: isBusy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// 알림 줄: 기기 알림이 꺼져 있으면 제목 아래 작은 글 + 어두운 알약 `켜기` (앱이 앞으로 돌아오면 다시 확인), 켜져 있으면 그대로
+class _NotificationTile extends ConsumerStatefulWidget {
+  const _NotificationTile({required this.isBusy});
+
+  final bool isBusy;
+
+  @override
+  ConsumerState<_NotificationTile> createState() => _NotificationTileState();
+}
+
+class _NotificationTileState extends ConsumerState<_NotificationTile> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(deviceNotificationPermissionControllerProvider.notifier).recheck();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isPermissionOff = ref.watch(deviceNotificationPermissionControllerProvider);
+    void openSettings() => context.push(Routes.guardianNotificationSettings);
+    if (!isPermissionOff) {
+      return SettingsTile(isInCard: true, label: l10n.notificationSettingsTitle, onTap: widget.isBusy ? null : openSettings);
+    }
+    final colors = context.colors;
+    return AppPressable(
+      onTap: widget.isBusy ? null : openSettings,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: SettingsTile.cardHeight.h),
+        child: Padding(
+          padding: EdgeInsets.only(left: SettingsTile.cardPadLeft.w, right: SettingsTile.cardPadRight.w, top: context.space.xs.h, bottom: context.space.xs.h),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.notificationSettingsTitle, style: context.typo.settingsTileLabel.copyWith(color: colors.settingsCardLabel)),
+                    Text(l10n.notificationOffRowHint, style: context.typo.creditCaption.copyWith(color: colors.highlightBorder)),
+                  ],
+                ),
+              ),
+              NotificationTurnOnPill(
+                label: l10n.notificationTurnOnDeviceNotification,
+                onTap: ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

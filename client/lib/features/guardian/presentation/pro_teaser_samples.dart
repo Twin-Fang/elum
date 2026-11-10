@@ -3,13 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/settings_group.dart';
-import '../../../core/widgets/settings_tile.dart';
 import '../../../core/l10n/date_labels.dart';
 import '../../../shared/models/routine.dart';
 import '../domain/routine_memory.dart';
 import '../domain/routine_schedule.dart';
 import '../domain/weekly_report.dart';
+import 'memory/routine_memory_hero_card.dart';
+import 'memory/routine_memory_rows.dart';
 import 'weekly_report/weekly_report_sections.dart';
 import 'widgets/weekly_plan_parts.dart';
 
@@ -86,24 +86,36 @@ abstract final class ProTeaserSamples {
     );
   }
 
-  /// 견본 AI 메모: 켜짐 줄 + 메모 3줄 (실제 화면과 같은 설정 묶음 모양)
+  /// 견본 AI 메모리: 위 카드(PRO 배지 + 숫자 3칸) + 규칙 3줄 (실제 화면과 같은 모양)
   static Widget routineMemory(BuildContext context) {
     final l10n = context.l10n;
-    final sampleLines = [
-      l10n.proTeaserSampleMemoryShort,
-      l10n.proTeaserSampleMemoryOrder,
-      l10n.proTeaserSampleMemoryReward,
+    MemoryRule sampleRule(String id, String summary, MemoryRuleType type, MemoryRuleStatus status, int count) => MemoryRule(
+      id: id,
+      type: type,
+      status: status,
+      source: type == MemoryRuleType.manual ? MemoryRuleSource.manual : MemoryRuleSource.ai,
+      summary: summary,
+      evidenceCount: count,
+    );
+    final rules = [
+      sampleRule('sample-1', l10n.proTeaserSampleMemoryShort, MemoryRuleType.word, MemoryRuleStatus.active, 3),
+      sampleRule('sample-2', l10n.proTeaserSampleMemoryOrder, MemoryRuleType.split, MemoryRuleStatus.active, 4),
+      sampleRule('sample-3', l10n.proTeaserSampleMemoryReward, MemoryRuleType.manual, MemoryRuleStatus.active, 0),
     ];
+    final memory = RoutineMemory(isEnabled: true, autoApplyCount: RoutineMemory.defaultAutoApplyCount, rules: rules, edits: const []);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsGroup(
-          header: l10n.routineMemoryLinesHeader(sampleLines.length, RoutineMemory.maxLineCount),
-          children: [
-            for (final line in sampleLines)
-              SettingsTile(label: line, onTap: null, valueText: ''),
-          ],
+        RoutineMemoryHeroCard(
+          elumiName: l10n.commonElumiName,
+          memory: memory,
+          selectedTab: RoutineMemoryTab.applied,
+          onTabSelected: (_) {},
+          isProBadgeShown: true,
         ),
+        SizedBox(height: context.space.sm.h),
+        for (final rule in rules)
+          MemoryRuleRow(rule: rule, autoApplyCount: memory.autoApplyCount, onTap: () {}, onSwitchChanged: (_) {}),
       ],
     );
   }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/l10n/l10n_context.dart';
-import '../../../core/widgets/elum_bottom_sheet.dart';
-import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_sheet_frame.dart';
-import '../../../core/widgets/elum_sheet_text_field.dart';
-import '../../../core/widgets/elum_text_link.dart';
-import '../domain/routine_memory.dart';
+import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/elum_sheet_text_field.dart';
+import '../../../../core/widgets/elum_text_link.dart';
+import '../../domain/routine_memory.dart';
 
 /// 메모 줄 시트 결과: 저장(새 글) 또는 지우기
 sealed class RoutineMemoryLineSheetResult {
@@ -82,7 +82,7 @@ class _RoutineMemoryLineSheetState extends State<_RoutineMemoryLineSheet> {
           ElumSheetTextField(
             controller: _controller,
             hintText: l10n.routineMemoryLineHint,
-            maxLength: RoutineMemory.maxLineLength,
+            maxLength: RoutineMemory.maxTextLength,
             maxLines: _fieldMaxLines,
             isAutofocused: true,
             onChanged: (_) => setState(() {}),

@@ -45,6 +45,7 @@ List<DevStateSection> _readLiveSections(WidgetRef ref, String? Function() curren
           ? '켜짐 (빌드 설정)'
           : (ref.read(devPlanStoreForcedProvider) ? '켜짐 (개발자 도구)' : '꺼짐'),
       '서버 판매 스위치': ref.read(isServerStoreSellingOpenProvider) ? '켜짐' : '꺼짐',
+      '크레딧 판매 강제': ref.read(devCreditPackSaleForcedProvider) ? '켜짐 (개발자 도구)' : '꺼짐',
       'Pro 미리 보기 강제': ref.read(devProTeaserForcedProvider) ? '켜짐 (개발자 도구)' : '꺼짐',
       'Pro 구매 가능 판정': planAccess.canPurchasePro ? '예' : '아니오',
     }),

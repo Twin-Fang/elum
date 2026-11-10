@@ -102,12 +102,16 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditKindPeriodic,
     required this.creditKindBonus,
     required this.creditKindPurchased,
+    required this.routineMemoryHeroStart,
+    required this.routineMemoryHeroEnd,
+    required this.routineMemoryIconWord,
+    required this.routineMemoryIconStructure,
+    required this.routineMemoryIconManual,
     required this.creditPackTileMint,
     required this.creditPackTilePeach,
     required this.creditPackTileCream,
     required this.creditPackPopularBorder,
     required this.creditPackDiscountFill,
-    required this.creditPackBuyButton,
     required this.proPlanFreeBadgeFill,
     required this.proPlanFreeBadgeText,
     required this.catSelectedFill,
@@ -501,6 +505,16 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color creditKindBonus;
   // 내 크레딧: 구매 종류 색
   final Color creditKindPurchased;
+  // AI 메모리 위 카드 그라데이션 시작 (연보라)
+  final Color routineMemoryHeroStart;
+  // AI 메모리 위 카드 그라데이션 끝
+  final Color routineMemoryHeroEnd;
+  // AI 메모리 줄 아이콘 원: 낱말 바꾸기 (민트)
+  final Color routineMemoryIconWord;
+  // AI 메모리 줄 아이콘 원: 나누기 · 합치기 · 더하기 · 빼기 (주황)
+  final Color routineMemoryIconStructure;
+  // AI 메모리 줄 아이콘 원: 직접 적음 (검정)
+  final Color routineMemoryIconManual;
   // 크레딧 꾸러미 칸 그림 바탕 (민트)
   final Color creditPackTileMint;
   // 크레딧 꾸러미 인기 칸 바탕 (복숭아)
@@ -511,8 +525,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color creditPackPopularBorder;
   // 크레딧 꾸러미 할인율 알약 바탕
   final Color creditPackDiscountFill;
-  // 크레딧 꾸러미 받기 버튼 바탕
-  final Color creditPackBuyButton;
   // FREE 배지 바탕 (민트)
   final Color proPlanFreeBadgeFill;
   // FREE 배지 점 · 글자
@@ -1307,12 +1319,16 @@ class AppColors extends ThemeExtension<AppColors> {
     creditKindPeriodic: Color(0xFF55CFBA),
     creditKindBonus: Color(0xFFEB9B73),
     creditKindPurchased: Color(0xFF9CADF1),
+    routineMemoryHeroStart: Color(0xFFF4EEFF),
+    routineMemoryHeroEnd: Color(0xFFE4ECFF),
+    routineMemoryIconWord: Color(0xFF55CFBA),
+    routineMemoryIconStructure: Color(0xFFEB9B73),
+    routineMemoryIconManual: Color(0xFF242634),
     creditPackTileMint: Color(0xFFE3F8F3),
     creditPackTilePeach: Color(0xFFFFF1E6),
     creditPackTileCream: Color(0xFFFFF7DA),
     creditPackPopularBorder: Color(0xFFEB9B73),
     creditPackDiscountFill: Color(0xFFFF8B22),
-    creditPackBuyButton: Color(0xFF55CFBA),
     proPlanFreeBadgeFill: Color(0xFFE3F8F3),
     proPlanFreeBadgeText: Color(0xFF3FB7C9),
     catSelectedFill: Color(0xFFCED8FF),
@@ -1613,12 +1629,16 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditKindPeriodic,
     Color? creditKindBonus,
     Color? creditKindPurchased,
+    Color? routineMemoryHeroStart,
+    Color? routineMemoryHeroEnd,
+    Color? routineMemoryIconWord,
+    Color? routineMemoryIconStructure,
+    Color? routineMemoryIconManual,
     Color? creditPackTileMint,
     Color? creditPackTilePeach,
     Color? creditPackTileCream,
     Color? creditPackPopularBorder,
     Color? creditPackDiscountFill,
-    Color? creditPackBuyButton,
     Color? proPlanFreeBadgeFill,
     Color? proPlanFreeBadgeText,
     Color? catSelectedFill,
@@ -1907,12 +1927,16 @@ class AppColors extends ThemeExtension<AppColors> {
       creditKindPeriodic: creditKindPeriodic ?? this.creditKindPeriodic,
       creditKindBonus: creditKindBonus ?? this.creditKindBonus,
       creditKindPurchased: creditKindPurchased ?? this.creditKindPurchased,
+      routineMemoryHeroStart: routineMemoryHeroStart ?? this.routineMemoryHeroStart,
+      routineMemoryHeroEnd: routineMemoryHeroEnd ?? this.routineMemoryHeroEnd,
+      routineMemoryIconWord: routineMemoryIconWord ?? this.routineMemoryIconWord,
+      routineMemoryIconStructure: routineMemoryIconStructure ?? this.routineMemoryIconStructure,
+      routineMemoryIconManual: routineMemoryIconManual ?? this.routineMemoryIconManual,
       creditPackTileMint: creditPackTileMint ?? this.creditPackTileMint,
       creditPackTilePeach: creditPackTilePeach ?? this.creditPackTilePeach,
       creditPackTileCream: creditPackTileCream ?? this.creditPackTileCream,
       creditPackPopularBorder: creditPackPopularBorder ?? this.creditPackPopularBorder,
       creditPackDiscountFill: creditPackDiscountFill ?? this.creditPackDiscountFill,
-      creditPackBuyButton: creditPackBuyButton ?? this.creditPackBuyButton,
       proPlanFreeBadgeFill: proPlanFreeBadgeFill ?? this.proPlanFreeBadgeFill,
       proPlanFreeBadgeText: proPlanFreeBadgeText ?? this.proPlanFreeBadgeText,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
@@ -2249,12 +2273,16 @@ class AppColors extends ThemeExtension<AppColors> {
       creditKindPeriodic: Color.lerp(creditKindPeriodic, other.creditKindPeriodic, t)!,
       creditKindBonus: Color.lerp(creditKindBonus, other.creditKindBonus, t)!,
       creditKindPurchased: Color.lerp(creditKindPurchased, other.creditKindPurchased, t)!,
+      routineMemoryHeroStart: Color.lerp(routineMemoryHeroStart, other.routineMemoryHeroStart, t)!,
+      routineMemoryHeroEnd: Color.lerp(routineMemoryHeroEnd, other.routineMemoryHeroEnd, t)!,
+      routineMemoryIconWord: Color.lerp(routineMemoryIconWord, other.routineMemoryIconWord, t)!,
+      routineMemoryIconStructure: Color.lerp(routineMemoryIconStructure, other.routineMemoryIconStructure, t)!,
+      routineMemoryIconManual: Color.lerp(routineMemoryIconManual, other.routineMemoryIconManual, t)!,
       creditPackTileMint: Color.lerp(creditPackTileMint, other.creditPackTileMint, t)!,
       creditPackTilePeach: Color.lerp(creditPackTilePeach, other.creditPackTilePeach, t)!,
       creditPackTileCream: Color.lerp(creditPackTileCream, other.creditPackTileCream, t)!,
       creditPackPopularBorder: Color.lerp(creditPackPopularBorder, other.creditPackPopularBorder, t)!,
       creditPackDiscountFill: Color.lerp(creditPackDiscountFill, other.creditPackDiscountFill, t)!,
-      creditPackBuyButton: Color.lerp(creditPackBuyButton, other.creditPackBuyButton, t)!,
       proPlanFreeBadgeFill: Color.lerp(proPlanFreeBadgeFill, other.proPlanFreeBadgeFill, t)!,
       proPlanFreeBadgeText: Color.lerp(proPlanFreeBadgeText, other.proPlanFreeBadgeText, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/l10n_context.dart';
-import '../theme/theme_context_ext.dart';
-import 'app_pressable.dart';
+import 'mint_gradient_button.dart';
 import 'elum_text_link.dart';
 
 /// 요금제 화면을 여는 버튼 모양 2개: 미리 보기 판의 주 버튼 · 화면 안 보조 안내의 글자 링크
@@ -61,60 +59,11 @@ class ProUpsellButton extends StatelessWidget {
     final l10n = context.l10n;
     final freeTrialLabel = this.freeTrialLabel;
     return switch (style) {
-      ProUpsellStyle.filled => _ProGradientButton(
+      ProUpsellStyle.filled => MintGradientButton(
         label: freeTrialLabel == null ? l10n.planLearnPro : l10n.planTryFreeTrial(freeTrialLabel),
         onTap: onTap,
       ),
       ProUpsellStyle.link => ElumTextLink(label: l10n.planLearnPro, onTap: onTap),
     };
-  }
-}
-
-/// 민트 그라데이션 버튼 (폭 가득, 큰 글자면 높이만 늘어남)
-class _ProGradientButton extends StatelessWidget {
-  const _ProGradientButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback? onTap;
-
-  /// 최소 높이 52 · 그림자 아래 8 · 번짐 20
-  static const _minHeight = 52.0;
-  static const _shadowOffsetY = 8.0;
-  static const _shadowBlur = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    return Semantics(
-      container: true,
-      button: true,
-      enabled: onTap != null,
-      child: AppPressable(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          constraints: BoxConstraints(minHeight: _minHeight.h),
-          padding: EdgeInsets.symmetric(horizontal: space.md.w, vertical: space.xs.h),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [colors.proPlanCtaStart, colors.proPlanCtaEnd]),
-            borderRadius: BorderRadius.circular(space.buttonRadius.r),
-            boxShadow: [
-              BoxShadow(
-                color: colors.proPlanCtaShadow,
-                offset: Offset(0, _shadowOffsetY.h),
-                blurRadius: _shadowBlur.r,
-              ),
-            ],
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: context.typo.proPlanCtaLabel.copyWith(color: colors.proPlanCtaText),
-          ),
-        ),
-      ),
-    );
   }
 }

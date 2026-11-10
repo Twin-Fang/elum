@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../assets/app_assets.dart';
+import 'credit_cost_label.dart';
 import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
 import '../../shared/models/image_style.dart';
@@ -59,7 +58,7 @@ class ImageStyleCreditBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const _Coin(size: _coinSize),
+              const CreditTicketIcon(size: _coinSize),
               SizedBox(width: 10.w),
               Text(
                 label,
@@ -130,28 +129,6 @@ class _Cost extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 크레딧 표시 — 보라 반짝임 (시안 1736:8780 `✦ 90` 결, 원 없이).
-class _Coin extends StatelessWidget {
-  const _Coin({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final side = size.w;
-    return SvgPicture.asset(
-      AppAssets.iconSparkles,
-      width: side,
-      height: side,
-      colorFilter: ColorFilter.mode(
-        context.colors.creditNumberText,
-        BlendMode.srcIn,
-      ),
-      excludeFromSemantics: true,
     );
   }
 }

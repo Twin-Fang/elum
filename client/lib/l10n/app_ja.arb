@@ -1,4 +1,8 @@
 {
+  "notificationOffNoticeTitle": "通知がオフです",
+  "notificationOffNoticeBody": "{name}がルーティンを終えた知らせ、ストーリーのコメント、新機能のお知らせを受け取れません",
+  "notificationOffNoticeTurnOn": "通知をオンにする",
+  "notificationOffRowHint": "オフのため知らせを受け取れません",
   "@@locale": "ja",
   "installationRetryMessage": "ログイン情報を確認できませんでした。もう一度お試しください。",
   "installationRetryButton": "再試行",

@@ -29,6 +29,7 @@ class RoutineSummaryTile extends StatelessWidget {
     this.onRerun,
     this.highlighted = false,
     this.creatorName,
+    this.scheduleTimeLabel,
   });
 
   final Routine routine;
@@ -54,6 +55,9 @@ class RoutineSummaryTile extends StatelessWidget {
   /// 보상 뒤 세로선과 함께 붙는 만든 사람 호칭 (`| 엄마`). null 이면 붙이지 않음
   final String? creatorName;
 
+  /// 반복으로 정해진 시각 (`오전 7:30`). 반복이 아니면 null
+  final String? scheduleTimeLabel;
+
   // --- Figma 실측 ---
   static const _shortHeight = 68.0;
   static const _tallHeight = 105.0;
@@ -78,6 +82,9 @@ class RoutineSummaryTile extends StatelessWidget {
   static const _padTop = 16.0;
   static const _padBottom = 12.0;
   static const _titleToMeta = 8.0;
+
+  /// 제목 > 반복 시각 사이
+  static const _titleToTime = 6.0;
   static const _metaToDate = 21.0;
   // 제목 ↔ 예시 배지
 
@@ -156,7 +163,8 @@ class RoutineSummaryTile extends StatelessWidget {
     final showsDate = showDate && dateLabel.isNotEmpty;
     final hasMetaLine = RoutineTileMetaLine.hasContent(routine, creatorName);
 
-    final title = ContentLocale(
+    final scheduleTimeLabel = this.scheduleTimeLabel;
+    final titleText = ContentLocale(
       language: routine.language,
       child: Text(
         routine.displayTitle,
@@ -165,6 +173,20 @@ class RoutineSummaryTile extends StatelessWidget {
         style: typo.routineTileTitle.copyWith(color: colors.chipLabel),
       ),
     );
+    // 반복 시각은 제목 옆에 작게 (제목이 줄고 시각은 남음)
+    final title = scheduleTimeLabel == null
+        ? titleText
+        : Row(
+            children: [
+              Flexible(child: titleText),
+              SizedBox(width: _titleToTime.w),
+              Text(
+                scheduleTimeLabel,
+                maxLines: 1,
+                style: typo.routineTileMeta.copyWith(color: colors.textSecondary),
+              ),
+            ],
+          );
 
     // 보상·만든 사람·날짜가 다 없으면 제목 하나뿐이다. 위에서 16 띄우면 아래로 처져 보인다.
     if (!hasMetaLine && !showsDate) {

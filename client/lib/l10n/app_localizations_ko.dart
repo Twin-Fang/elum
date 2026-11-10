@@ -9,6 +9,21 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get notificationOffNoticeTitle => '알림이 꺼져 있어요';
+
+  @override
+  String notificationOffNoticeBody(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 일과를 끝낸 소식, 이야기 댓글, 새 기능 소식을 받을 수 없어요';
+  }
+
+  @override
+  String get notificationOffNoticeTurnOn => '알림 켜기';
+
+  @override
+  String get notificationOffRowHint => '꺼져 있어 소식을 받을 수 없어요';
+
+  @override
   String get appTitle => '이룸';
 
   @override
@@ -3820,6 +3835,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planVerificationRetry => '다시 확인하기';
 
   @override
+  String get planActivatedStart => '시작하기';
+
+  @override
   String get planActivatedTitle => 'Pro를 시작했어요';
 
   @override
@@ -4413,47 +4431,163 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guardianVoicePlanEndedHint => 'Pro가 끝나도 녹음은 남겨 뒀어요';
 
   @override
-  String get guardianSettingsRoutineMemory => 'AI 메모';
+  String get guardianSettingsRoutineMemory => 'AI 메모리';
 
   @override
-  String get routineMemoryTitle => 'AI 메모';
-
-  @override
-  String get routineMemoryEnabledLabel => '내가 고친 일과처럼 만들기';
-
-  @override
-  String get routineMemoryEnabledFooter =>
-      '카드를 고쳐서 보내면 AI가 이룸이에게 맞는 카드 만들기 방법을 짧게 적어 둬요. 다음 일과를 만들 때 이 메모와 고친 일과를 참고해요.';
-
-  @override
-  String routineMemoryLinesHeader(int count, int max) {
-    return '메모 $count/$max';
+  String memoryHeroTitle(String name) {
+    return '$name AI 메모리';
   }
 
   @override
-  String get routineMemoryLinesFooter =>
-      '줄을 누르면 고치거나 지울 수 있어요. 진단이나 장애, 정도에 관한 말은 적지 않아요.';
+  String get memoryHeroBody => '내가 고친 방식을 기억해서 다음 일과를 그렇게 만들어요. 나만 봐요';
 
   @override
-  String get routineMemoryDisabledFooter =>
-      '꺼져 있어요. 켜기 전까지 일과를 만들 때 메모를 쓰지 않고, 고친 카드에서 새로 배우지도 않아요.';
+  String get memoryStatApplied => '적용 중';
 
   @override
-  String routineMemoryFullFooter(int max) {
-    return '메모는 $max개까지예요. 줄을 지우면 새로 더할 수 있어요.';
+  String get memoryStatWatching => '관찰 중';
+
+  @override
+  String get memoryStatEdits => '수정 기록';
+
+  @override
+  String get memoryListAppliedHeader => '적용 중인 규칙';
+
+  @override
+  String get memoryListAppliedHint => '새 일과에 쓰여요';
+
+  @override
+  String get memoryListWatchingHeader => '관찰 중인 규칙';
+
+  @override
+  String get memoryListWatchingHint => '점이 다 차면 적용돼요';
+
+  @override
+  String get memoryListEditsHeader => '고쳐서 보낸 기록';
+
+  @override
+  String memoryRuleByAi(int count) {
+    return 'AI가 찾음, 일과 $count개';
   }
 
   @override
-  String get routineMemoryEmpty => '아직 메모가 없어요';
+  String get memoryRuleByMe => '내가 적음';
 
   @override
-  String get routineMemoryEmptyFooter => '카드를 고쳐서 보내면 하루에 한 번 정리해요. 직접 적어도 돼요.';
+  String memoryEditCards(int before, int after) {
+    return '$before장 → $after장';
+  }
 
   @override
-  String get routineMemoryWrittenByMe => '내가 씀';
+  String memoryEditTexts(int count) {
+    return '글 $count곳';
+  }
 
   @override
-  String get routineMemoryAddLine => '메모 더하기';
+  String get memoryAddRule => '+ 규칙 직접 적기';
+
+  @override
+  String get memoryAutoFind => '고친 내용에서 자동으로 찾기';
+
+  @override
+  String memoryAutoFindNote(int count) {
+    return '같은 수정이 일과 $count개에서 반복되면 적용돼요';
+  }
+
+  @override
+  String get memoryEmptyTitle => '일과를 고쳐서 보내면 여기에 쌓여요';
+
+  @override
+  String get memoryEmptyEdits => '아직 고쳐서 보낸 일과가 없어요';
+
+  @override
+  String get memoryTypeWord => '낱말 바꾸기';
+
+  @override
+  String get memoryTypeSplit => '카드 나누기';
+
+  @override
+  String get memoryTypeMerge => '카드 합치기';
+
+  @override
+  String get memoryTypeAdd => '카드 더하기';
+
+  @override
+  String get memoryTypeRemove => '카드 빼기';
+
+  @override
+  String get memoryTypeManual => '직접 적은 규칙';
+
+  @override
+  String get memoryApplyNow => '지금 적용';
+
+  @override
+  String get memoryRuleDelete => '삭제';
+
+  @override
+  String get memoryRuleEdit => '수정';
+
+  @override
+  String memoryEvidenceLine(String routine, int month, int day) {
+    return '$routine, $month월 $day일';
+  }
+
+  @override
+  String get memoryMenuLabel => '메뉴';
+
+  @override
+  String get memoryMenuExport => '파일로 내보내기';
+
+  @override
+  String get memoryMenuClear => '메모리 모두 지우기';
+
+  @override
+  String get memoryExportFailed => '메모리를 내보내지 못했어요';
+
+  @override
+  String get memoryObsTitle => 'AI 메모리';
+
+  @override
+  String get memoryObsWord => '낱말을 이렇게 바꾸셨어요';
+
+  @override
+  String get memoryObsSplit => '카드를 나누셨어요';
+
+  @override
+  String get memoryObsMerge => '카드를 합치셨어요';
+
+  @override
+  String get memoryObsAdd => '카드를 더하셨어요';
+
+  @override
+  String get memoryObsRemove => '카드를 빼셨어요';
+
+  @override
+  String get memoryObsManual => '이렇게 고치셨어요';
+
+  @override
+  String memoryObsAsk(String phrase) {
+    return '$phrase. 다음 일과에도 이렇게 할까요?';
+  }
+
+  @override
+  String get memoryObsAlways => '항상 이렇게';
+
+  @override
+  String get memoryObsOnce => '이번만';
+
+  @override
+  String get memoryObsDone => '다음 일과부터 이렇게 만들어요';
+
+  @override
+  String memoryObsMore(int count) {
+    return 'AI 메모리에서 $count개 더 보기';
+  }
+
+  @override
+  String memoryAppliedPill(int count) {
+    return 'AI 메모리 규칙 $count개 적용됨';
+  }
 
   @override
   String get routineMemoryAddSheetTitle => '메모 더하기';
@@ -4469,13 +4603,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineMemoryDeleteLine => '이 줄 지우기';
-
-  @override
-  String get routineMemoryClearAll => '메모 모두 지우기';
-
-  @override
-  String get routineMemoryClearFooter =>
-      '지난 일과에서 배운 것도 함께 지워요. 그다음 보낸 일과부터 다시 배워요.';
 
   @override
   String get routineMemoryClearConfirmTitle => '메모를 모두 지울까요?';
@@ -4554,6 +4681,16 @@ class AppLocalizationsKo extends AppLocalizations {
       count,
       locale: localeName,
       other: '크레딧 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditCostCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
     );
     return '$_temp0';
   }

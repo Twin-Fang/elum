@@ -67,6 +67,22 @@ class _StoreForcedRow extends ConsumerWidget {
   }
 }
 
+/// 크레딧 판매 화면 켜기 줄: 서버 판매 스위치가 꺼져 있어도 내 크레딧의 꾸러미 구역을 보임
+class _CreditPackSaleForcedRow extends ConsumerWidget {
+  const _CreditPackSaleForcedRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _SwitchTile(
+      icon: Icons.confirmation_number_outlined,
+      label: '크레딧 판매 화면 켜기',
+      subtitle: '서버 판매 스위치와 무관하게 꾸러미 구역 표시. 스토어 값이 없으면 값 오류가 보임',
+      isOn: ref.watch(devCreditPackSaleForcedProvider),
+      onChanged: ref.read(devCreditPackSaleForcedProvider.notifier).set,
+    );
+  }
+}
+
 /// Pro 미리 보기 켜기 줄: 스토어 상품 없이도 판매 중으로 보고 Free 화면에 Pro 미리 보기를 띄움
 class _ProTeaserForcedRow extends ConsumerWidget {
   const _ProTeaserForcedRow();
