@@ -4240,6 +4240,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportRecordSection => '한 주 기록';
 
   @override
+  String get weeklyReportDonutLabel => 'Completion rate';
+
+  @override
+  String weeklyReportDonutSummary(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDonutSemantics(int percent, int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other:
+          'Completion rate $percent percent, $completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportDaysSection => 'Daily record';
+
+  @override
+  String weeklyReportDayBarSemantics(String weekday, int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$weekday: $completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDayBarEmptySemantics(String weekday) {
+    return '$weekday: no routines sent';
+  }
+
+  @override
+  String get weeklyReportTrendSection => 'Compared with past weeks';
+
+  @override
+  String weeklyReportTrendWeekLabel(int month, int day) {
+    return '$month/$day';
+  }
+
+  @override
+  String weeklyReportTrendPointSemantics(int month, int day, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Week of $month/$day: $count routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get weeklyReportInsightHighlightTitle => '잘한 것';
 
   @override

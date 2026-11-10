@@ -7195,6 +7195,60 @@ abstract class AppLocalizations {
   /// **'한 주 기록'**
   String get weeklyReportRecordSection;
 
+  /// 주간 리포트 맨 위 도넛 옆 작은 제목: 완료율
+  ///
+  /// In ko, this message translates to:
+  /// **'완료율'**
+  String get weeklyReportDonutLabel;
+
+  /// 도넛 옆 한 줄: 보낸 일과 중 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  String weeklyReportDonutSummary(int sent, int completed);
+
+  /// 도넛 낭독 라벨: 완료율 퍼센트와 보낸 일과 중 끝낸 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{완료율 {percent}퍼센트, 일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  String weeklyReportDonutSemantics(int percent, int sent, int completed);
+
+  /// 요일별 막대 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'요일별 기록'**
+  String get weeklyReportDaysSection;
+
+  /// 요일 막대 낭독 라벨. weekday 는 짧은 요일 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{weekday}요일 일과 {sent}개 중 {completed}개 끝냄}}'**
+  String weeklyReportDayBarSemantics(String weekday, int sent, int completed);
+
+  /// 보낸 일과가 없는 요일 막대 낭독 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'{weekday}요일 보낸 일과 없음'**
+  String weeklyReportDayBarEmptySemantics(String weekday);
+
+  /// 주별 추이 선 그래프 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 주들과 견주기'**
+  String get weeklyReportTrendSection;
+
+  /// 주별 추이 아래 날짜 이름: 그 주 월요일 월/일
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}/{day}'**
+  String weeklyReportTrendWeekLabel(int month, int day);
+
+  /// 주별 추이 점 낭독 라벨: 그 주 월요일 날짜와 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{month}월 {day}일 주에 일과 {count}개 끝냄}}'**
+  String weeklyReportTrendPointSemantics(int month, int day, int count);
+
   /// 주간 리포트 돌아보기 카드 제목
   ///
   /// In ko, this message translates to:

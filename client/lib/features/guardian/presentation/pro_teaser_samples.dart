@@ -8,6 +8,7 @@ import '../../../shared/models/routine.dart';
 import '../domain/routine_memory.dart';
 import '../domain/routine_schedule.dart';
 import '../domain/weekly_report.dart';
+import '../domain/weekly_report_trend.dart';
 import 'memory/routine_memory_hero_card.dart';
 import 'memory/routine_memory_rows.dart';
 import 'weekly_report/weekly_report_sections.dart';
@@ -122,5 +123,25 @@ abstract final class ProTeaserSamples {
 
   /// 견본 주간 리포트 화면 (요약·기록 묶음 그대로)
   static Widget weeklyReportSections(BuildContext context) =>
-      WeeklyReportSections(report: weeklyReport(context.l10n, DateTime.now()));
+      WeeklyReportSections(
+        report: weeklyReport(context.l10n, DateTime.now()),
+        sampleTrendPoints: weeklyReportTrendPoints(DateTime.now()),
+      );
+
+  /// 견본 주별 추이: 이번 주까지 5주 (끝낸 일과 수 예시 값)
+  static List<WeeklyReportTrendPoint> weeklyReportTrendPoints(DateTime today) {
+    final monday = DateTime(today.year, today.month, today.day - (today.weekday - DateTime.monday));
+    const completedCounts = [9, 11, 8, 12, 13];
+    return [
+      for (final (index, count) in completedCounts.indexed)
+        WeeklyReportTrendPoint(
+          weekStart: DateTime(
+            monday.year,
+            monday.month,
+            monday.day - DateTime.daysPerWeek * (completedCounts.length - 1 - index),
+          ),
+          completedRoutineCount: count,
+        ),
+    ];
+  }
 }
