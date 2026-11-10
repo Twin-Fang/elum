@@ -430,6 +430,15 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
+  @DisplayName("전문가 일과·다른 언어로 만들기는 Free·Pro 모두 기본 꺼짐 — 켜진 채 출시되면 내용 없는 기능이 Pro 혜택으로 팔린다")
+  void excludedBenefits_defaultOffForBothPlans() {
+    assertThat(ConfigKey.FREE_ROUTINE_TEMPLATES.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_TEMPLATES.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.FREE_ROUTINE_TRANSLATE.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_ROUTINE_TRANSLATE.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
   @DisplayName("스냅샷의 요일별 반복 일과 권한은 플랜 키를 읽는다 (Free 기본 꺼짐 · Pro 켜짐)")
   void snapshot_routineScheduleReadsPlanKeys() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID))

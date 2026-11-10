@@ -26,7 +26,8 @@ class PlanEntitlements {
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · Pro 기능 전부 꺼짐)
   static const free = PlanEntitlements();
 
-  /// 개발자 도구 `Pro 처럼`
+  /// 개발자 도구 `Pro 처럼` · 서버가 Pro 권한 묶음을 안 줄 때의 기본 Pro
+  /// 다른 언어로 만들기 · 전문가 일과는 꺼 둠: 서버 기본값(`PRO_ROUTINE_TRANSLATE` · `PRO_ROUTINE_TEMPLATES`)과 같게
   static const pro = PlanEntitlements(
     isPro: true,
     isAdsRemoved: true,
@@ -34,10 +35,8 @@ class PlanEntitlements {
     canUseAllCardDesignThemes: true,
     canUseAllCardExportLayouts: true,
     canViewWeeklyReport: true,
-    canTranslateRoutines: true,
     canScheduleRoutines: true,
     canUseGuardianVoice: true,
-    canImportExpertRoutines: true,
     canUseRoutineMemory: true,
     canRegenerateImagesFree: true,
     canCreateRoutineTextFree: true,

@@ -448,7 +448,8 @@ public enum ConfigKey {
   PRO_ROUTINE_TRANSLATE(
     ConfigGroup.PLAN_PRO, "일과 다른 언어로 만들기",
     "Pro가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
-    ConfigValueType.BOOLEAN, List.of(), "true"
+    // 기본 꺼짐: 출시 혜택에서 뺌. 켜면 앱 메뉴·요금제 혜택 줄이 다시 보임
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   PRO_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_PRO, "요일별 반복 일과",
@@ -463,7 +464,8 @@ public enum ConfigKey {
   PRO_ROUTINE_TEMPLATES(
     ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
     "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
-    ConfigValueType.BOOLEAN, List.of(), "true"
+    // 기본 꺼짐: 검수된 일과가 생기기 전이라 출시 혜택에서 뺌. 켜면 앱 입구·요금제 혜택 줄이 다시 보임
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   PRO_ROUTINE_MEMORY(
     ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",
