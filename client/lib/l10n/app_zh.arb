@@ -99,7 +99,7 @@
   "talkImportConfirm": "完成",
   "talkImportNoElumiTitle": "请先连接Elumi",
   "talkImportNoElumiAction": "连接Elumi",
-  "talkImportDone": "已放入{elumiName}的日常管理",
+  "talkImportDone": "已导入{routineTitle}",
   "talkImportGoToLibrary": "去看看",
   "talkImportFailedTitle": "没能放入日常管理",
   "talkCommentsTitle": "评论",

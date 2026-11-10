@@ -15,6 +15,7 @@ Future<Uint8List> captureWeeklyReportPng({
   required BuildContext context,
   required WeeklyReport report,
   required String elumiName,
+  required bool hasWatermark,
   CardExportFiles files = const CardExportFiles(),
 }) async {
   final overlay = Overlay.of(context, rootOverlay: true);
@@ -28,7 +29,11 @@ Future<Uint8List> captureWeeklyReportPng({
           type: MaterialType.transparency,
           child: RepaintBoundary(
             key: boundaryKey,
-            child: WeeklyReportSharePage(report: report, elumiName: elumiName),
+            child: WeeklyReportSharePage(
+              report: report,
+              elumiName: elumiName,
+              hasWatermark: hasWatermark,
+            ),
           ),
         ),
       ),

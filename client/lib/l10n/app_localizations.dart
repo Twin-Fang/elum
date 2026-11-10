@@ -5390,11 +5390,11 @@ abstract class AppLocalizations {
   /// **'이룸이 연결하기'**
   String get talkImportNoElumiAction;
 
-  /// 가져온 직후 토스트. elumiName 은 고른 이룸이 호칭
+  /// 가져온 직후 토스트. routineTitle 은 가져온 일과 이름. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{elumiName} 일과 관리에 넣었어요'**
-  String talkImportDone(String elumiName);
+  /// **'{routineTitle}{batchim, select, yes{을} other{를}} 가져왔어요'**
+  String talkImportDone(String routineTitle, String batchim);
 
   /// 가져온 직후 토스트의 버튼: 일과관리 칸으로 이동
   ///
@@ -6158,7 +6158,7 @@ abstract class AppLocalizations {
   /// **'큰 글자'**
   String get cardExportThemeLargeText;
 
-  /// Pro 배지 하나 (미리 보기 판·그림 방식·인쇄 디자인·일과관리 입구·설정 줄 공통, ProBadge, #1170)
+  /// Pro 배지 하나 (미리 보기 판·그림 방식·인쇄 선택지·카드 그림 칩·요금제 화면 공통, ProBadge, #1170)
   ///
   /// In ko, this message translates to:
   /// **'PRO'**
@@ -6173,7 +6173,7 @@ abstract class AppLocalizations {
   /// Free 미리 보기 아래 안내
   ///
   /// In ko, this message translates to:
-  /// **'Free는 이룸 로고와 워터마크가 들어가요'**
+  /// **'Free는 아래에 이룸 로고 띠가 들어가요'**
   String get cardExportWatermarkNotice;
 
   /// 미리 보기 묶음 제목
@@ -6248,11 +6248,11 @@ abstract class AppLocalizations {
   /// **'보낼 카드를 하나 이상 골라 주세요'**
   String get cardExportNoneSelected;
 
-  /// Free 인쇄물 아래 띠 문구
+  /// Free 인쇄물 아래 띠 오른쪽 한 줄 (로고 옆)
   ///
   /// In ko, this message translates to:
-  /// **'이룸 앱으로 만들었어요'**
-  String get cardExportFooterMadeWith;
+  /// **'일상을 함께 | 이룸 행동카드'**
+  String get printBrandTagline;
 
   /// 픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)
   ///
@@ -6265,12 +6265,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'그림: Twemoji (CC BY 4.0)'**
   String get cardExportEmojiCredit;
-
-  /// Free 인쇄물 바탕 워터마크 글자
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸'**
-  String get cardExportWatermarkText;
 
   /// 오려 쓰는 카드 한 쪽 장수 (줄 값 · 시트 고르기)
   ///
@@ -6383,73 +6377,73 @@ abstract class AppLocalizations {
   /// 혜택 줄: AI 맞춤 그림 방식 (그림 방식에서 열면 맨 위)
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터·사진 같은 AI 그림'**
+  /// **'카드마다 AI가 그려 줘요'**
   String get planBenefitAiImageStyles;
 
   /// 혜택 줄: 광고 없음
   ///
   /// In ko, this message translates to:
-  /// **'광고 없음'**
+  /// **'광고 없이 써요'**
   String get planBenefitAdsRemoved;
 
   /// 혜택 줄: 주간 리포트
   ///
   /// In ko, this message translates to:
-  /// **'주간 리포트'**
+  /// **'주간 리포트를 받아요'**
   String get planBenefitWeeklyReport;
 
   /// 혜택 줄: 반복 일과·주간 계획·이룸이 기기 알림
   ///
   /// In ko, this message translates to:
-  /// **'요일·시각 정해 반복'**
+  /// **'요일과 시각을 정해 매일 보내요'**
   String get planBenefitRoutineSchedule;
 
   /// 혜택 줄: AI 메모
   ///
   /// In ko, this message translates to:
-  /// **'내가 고친 방식 기억하기'**
+  /// **'내가 고친 방식을 기억해요'**
   String get planBenefitRoutineMemory;
 
   /// 혜택 줄: 보호자 목소리
   ///
   /// In ko, this message translates to:
-  /// **'카드마다 보호자 목소리'**
+  /// **'보호자 목소리로 카드를 읽어 줘요'**
   String get planBenefitGuardianVoice;
 
   /// 혜택 줄: 일과 생성 글 무료 (카드 그림은 장수만큼 크레딧)
   ///
   /// In ko, this message translates to:
-  /// **'일과 글은 크레딧 없이'**
+  /// **'일과 글은 크레딧 없이 써요'**
   String get planBenefitFreeRoutineText;
 
   /// 혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)
   ///
   /// In ko, this message translates to:
-  /// **'다시 그리기 하루 여러 번 크레딧 없이'**
+  /// **'마음에 안 들면 크레딧 없이 다시 그려요'**
   String get planBenefitFreeImageRegenerate;
 
   /// 혜택 줄: 주간 크레딧
   ///
   /// In ko, this message translates to:
-  /// **'매주 크레딧 더 많이'**
+  /// **'매주 크레딧을 더 많이 받아요'**
   String get planBenefitMoreWeeklyCredits;
 
   /// 혜택 줄: 워터마크 없음
   ///
   /// In ko, this message translates to:
-  /// **'워터마크 없이 인쇄'**
+  /// **'인쇄물 아래 띠 없이 깔끔해요'**
   String get planBenefitCardExportWithoutWatermark;
 
   /// 혜택 줄: 카드 디자인 테마
   ///
   /// In ko, this message translates to:
-  /// **'인쇄 디자인 전부'**
+  /// **'인쇄 디자인을 모두 골라요'**
   String get planBenefitCardExportAllThemes;
 
   /// 혜택 줄: 카드 내보내기 형태·배치 #1224
   ///
   /// In ko, this message translates to:
-  /// **'일과 한 장·오려 쓰는 카드 인쇄'**
+  /// **'일과 한 장, 오려 쓰는 카드로 인쇄해요'**
   String get planBenefitCardExportAllLayouts;
 
   /// 혜택 묶음 아래 안내
@@ -6725,25 +6719,25 @@ abstract class AppLocalizations {
   /// 요금제 상태: 자동 갱신 예정
   ///
   /// In ko, this message translates to:
-  /// **'Pro · {date} 갱신'**
+  /// **'Pro, {date}에 갱신돼요'**
   String planStatusRenewing(String date);
 
   /// 요금제 상태: 끝나는 날만 앎
   ///
   /// In ko, this message translates to:
-  /// **'Pro · {date}까지'**
+  /// **'Pro, {date}까지'**
   String planStatusUntil(String date);
 
   /// 요금제 상태: 해지 예약
   ///
   /// In ko, this message translates to:
-  /// **'Pro · {date}에 끝나요'**
+  /// **'Pro, {date}에 끝나요'**
   String planStatusCancelScheduled(String date);
 
   /// 요금제 상태: 결제 실패 유예 중
   ///
   /// In ko, this message translates to:
-  /// **'Pro · 결제 확인 필요'**
+  /// **'Pro, 결제 확인이 필요해요'**
   String get planStatusGracePeriod;
 
   /// 요금제 상태: 기존 가입자 Pro 선물 (설정 줄 값)
@@ -6755,7 +6749,7 @@ abstract class AppLocalizations {
   /// 요금제 상태: 기존 가입자 Pro 선물, 끝나는 날까지
   ///
   /// In ko, this message translates to:
-  /// **'Pro 선물 · {date}까지'**
+  /// **'Pro 선물, {date}까지'**
   String planStatusGiftUntil(String date);
 
   /// 설정 내 요금제 묶음 아래 한 줄: 자동 갱신 예정 (줄 값은 Pro)
@@ -7642,7 +7636,7 @@ abstract class AppLocalizations {
   /// 다시 그리기 비용: Pro 하루 무료 횟수 안
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 없이 · 오늘 {count}번 남았어요'**
+  /// **'크레딧 없이, 오늘 {count}번 남았어요'**
   String cardRegenerateCostProFree(int count);
 
   /// 다시 그리기 비용: 크레딧이 꺼져 있거나 단가 0
@@ -7846,13 +7840,13 @@ abstract class AppLocalizations {
   /// 머리 비교: Free 카드 아래 작은 글 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Free · 이모지'**
+  /// **'Free 이모지'**
   String get planHeroFreeTag;
 
   /// 머리 비교: Pro 카드 아래 작은 글 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Pro · 캐릭터 그림'**
+  /// **'Pro 캐릭터 그림'**
   String get planHeroProTag;
 
   /// 머리 비교 그림의 읽기 프로그램 문구 #1189
@@ -7861,35 +7855,29 @@ abstract class AppLocalizations {
   /// **'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요'**
   String get planHeroCompareSemantics;
 
-  /// 혜택 묶음 제목: 그림·다시 그리기·인쇄 #1189
+  /// 혜택 묶음 제목: 그림·다시 그리기·인쇄. elumiName 은 고른 이룸이 호칭 #1189
   ///
   /// In ko, this message translates to:
-  /// **'더 예쁜 카드'**
-  String get planBenefitGroupCards;
+  /// **'{elumiName}만의 카드 그림'**
+  String planBenefitGroupCards(String elumiName);
 
   /// 혜택 묶음 제목: 반복·AI 메모 #1189
   ///
   /// In ko, this message translates to:
-  /// **'일과가 알아서 준비돼요'**
+  /// **'일과가 알아서 가요'**
   String get planBenefitGroupRoutines;
 
   /// 혜택 묶음 제목: 주간 리포트·보호자 목소리 #1189
   ///
   /// In ko, this message translates to:
-  /// **'한 주를 한눈에'**
+  /// **'한 주를 정리해 드려요'**
   String get planBenefitGroupWeek;
 
   /// 혜택 묶음 제목: 크레딧·광고 #1189
   ///
   /// In ko, this message translates to:
-  /// **'넉넉하게, 광고 없이'**
+  /// **'더 넉넉하게'**
   String get planBenefitGroupExtra;
-
-  /// 혜택 묶음 한 줄에서 혜택 사이 구분 #1189
-  ///
-  /// In ko, this message translates to:
-  /// **' · '**
-  String get planBenefitSeparator;
 
   /// 1년 기간 카드 위 띠 (1개월 × 12 대비, 내림) #1189
   ///
@@ -7924,19 +7912,19 @@ abstract class AppLocalizations {
   /// 요금제 화면 버튼 아래 한 줄 (App Store 체험, 스토어 값) #1189
   ///
   /// In ko, this message translates to:
-  /// **'{trial} 뒤 {price}{unit} 자동 결제 · 끝나기 하루 전까지 해지하면 청구되지 않아요'**
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요'**
   String planCtaTrialNoticeAppStore(String trial, String price, String unit);
 
   /// 요금제 화면 버튼 아래 한 줄 (Google Play 체험, 스토어 값) #1189
   ///
   /// In ko, this message translates to:
-  /// **'{trial} 뒤 {price}{unit} 자동 결제 · 체험 중 해지하면 청구되지 않아요'**
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 체험 중 해지하면 청구되지 않아요'**
   String planCtaTrialNoticePlayStore(String trial, String price, String unit);
 
   /// 요금제 화면 버튼 아래 한 줄 (체험 없음) #1189
   ///
   /// In ko, this message translates to:
-  /// **'{price}{unit} 자동 갱신 · 언제든 해지할 수 있어요'**
+  /// **'{price}{unit} 자동 갱신돼요. 언제든 해지할 수 있어요'**
   String planCtaRenewNotice(String price, String unit);
 
   /// Pro 미리보기 버튼 (체험 대상일 때, ProUpsellButton 에서만) #1189

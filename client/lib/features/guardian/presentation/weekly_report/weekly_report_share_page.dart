@@ -9,12 +9,20 @@ import '../card_export/print_page.dart';
 /// 선생님·치료사에게 보내는 한 장 (A4 595×842 포인트): 제목 > 숫자 4칸 > 정리 글 > 월~일 > 일과별 > 남은 카드 > 출처
 /// 묶음 사이는 최소 [_blockGap] + 남는 높이를 고르게 나눔 (줄이 적어도 아래 절반이 비지 않게)
 ///
-/// 화면 미리 보기 = 굽는 파일 그대로. Pro 기능이라 워터마크 없음 · 원문·보상 문구 없음.
+/// 화면 미리 보기 = 굽는 파일 그대로. Pro 는 아래 띠 없음 · 원문·보상 문구 없음.
 class WeeklyReportSharePage extends StatelessWidget {
-  const WeeklyReportSharePage({super.key, required this.report, required this.elumiName});
+  const WeeklyReportSharePage({
+    super.key,
+    required this.report,
+    required this.elumiName,
+    required this.hasWatermark,
+  });
 
   final WeeklyReport report;
   final String elumiName;
+
+  /// Free: 아래 띠에 이룸 로고 + 소개 글 (인쇄물과 같은 띠)
+  final bool hasWatermark;
 
   /// 한 장에 넣는 일과 줄 수 (넘치면 마친 횟수 많은 순 앞부분만)
   static const maxRoutineRows = 8;
@@ -45,7 +53,7 @@ class WeeklyReportSharePage extends StatelessWidget {
     final summary = report.summary;
     return PrintPage(
       size: PrintPageSize.a4,
-      hasWatermark: false,
+      hasWatermark: hasWatermark,
       shouldShowPictogramCredit: false,
       margin: _pageMargin,
       child: Column(

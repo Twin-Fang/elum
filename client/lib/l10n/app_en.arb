@@ -865,7 +865,7 @@
   "talkImportConfirm": "Done",
   "talkImportNoElumiTitle": "Connect your Elumi first",
   "talkImportNoElumiAction": "Connect Elumi",
-  "talkImportDone": "Added to {elumiName}'s routines",
+  "talkImportDone": "Imported {routineTitle}",
   "talkImportGoToLibrary": "Go see",
   "talkImportFailedTitle": "Couldn't add it to Routines",
   "talkCommentsTitle": "Comments",

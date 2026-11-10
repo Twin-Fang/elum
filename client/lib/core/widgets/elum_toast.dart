@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../layout/layout_context_ext.dart';
 
@@ -7,16 +8,19 @@ import '../layout/layout_context_ext.dart';
 /// 모양은 테마(`snackBarTheme`) 한 곳이 정한다 — 여기서도 화면에서도 스타일을 덧쓰지 않는다.
 ///
 /// [actionLabel] 과 [onAction] 을 함께 주면 문구 옆에 누를 수 있는 글자가 붙는다 (`보러 가기` 등).
+/// [picture] 를 주면 문구 앞에 둥근 모서리 작은 그림이 붙는다 (없으면 글자만).
 void showElumToast(
   BuildContext context,
   String message, {
   String? actionLabel,
   VoidCallback? onAction,
+  Widget? picture,
 }) => showElumToastOn(
   ScaffoldMessenger.maybeOf(context),
   message,
   actionLabel: actionLabel,
   onAction: onAction,
+  picture: picture,
 );
 
 /// 화면을 옮기기 전에 잡아 둔 [messenger] 로 띄운다 — 옮긴 뒤에는 앞 화면의 context 가 없다.
@@ -25,6 +29,7 @@ void showElumToastOn(
   String message, {
   String? actionLabel,
   VoidCallback? onAction,
+  Widget? picture,
 }) {
   if (messenger == null) {
     // 알림 하나 못 띄웠다고 동작을 멈출 일은 아니다. 대신 흔적은 남긴다.
@@ -42,7 +47,9 @@ void showElumToastOn(
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: picture == null
+            ? Text(message)
+            : _ToastWithPicture(picture: picture, message: message),
         width: maxWidth,
         // 액션이 있으면 Flutter 가 기본으로 안 사라지게(persist) 두므로 끄고, 누를 시간만 조금 더 준다
         persist: hasAction ? false : null,
@@ -57,3 +64,33 @@ void showElumToastOn(
 // 토스트가 떠 있는 시간: 액션 없음은 Flutter 기본값 그대로, 액션 있음은 누를 시간을 더 준다
 const _plainToastDuration = Duration(seconds: 4);
 const _actionToastDuration = Duration(seconds: 6);
+
+/// 그림 + 문구 한 줄: 그림은 정사각 썸네일, 문구는 남는 폭 안에서 두 줄까지
+class _ToastWithPicture extends StatelessWidget {
+  const _ToastWithPicture({required this.picture, required this.message});
+
+  final Widget picture;
+  final String message;
+
+  // 썸네일 한 변 38 · 모서리 10 · 그림 > 문구 10
+  static const _pictureSize = 38.0;
+  static const _pictureRadius = 10.0;
+  static const _pictureToMessage = 10.0;
+  static const _messageMaxLines = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(_pictureRadius.r),
+          child: SizedBox(width: _pictureSize.w, height: _pictureSize.w, child: picture),
+        ),
+        SizedBox(width: _pictureToMessage.w),
+        Expanded(
+          child: Text(message, maxLines: _messageMaxLines, overflow: TextOverflow.ellipsis),
+        ),
+      ],
+    );
+  }
+}

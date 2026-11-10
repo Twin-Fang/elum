@@ -211,7 +211,13 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final elumiName = ref.read(guardianChildIdentityProvider).name;
     setState(() => _isSaving = true);
     try {
-      final png = await captureWeeklyReportPng(context: context, report: report, elumiName: elumiName);
+      final png = await captureWeeklyReportPng(
+        context: context,
+        report: report,
+        elumiName: elumiName,
+        // Free 는 아래 이룸 띠가 들어감 (인쇄물과 같은 판정)
+        hasWatermark: !ref.read(planAccessProvider).canExportCardsWithoutWatermark,
+      );
       final stem = '${exportFileStem(l10n.weeklyReportShareTitle(elumiName))}_${_dateStamp(report.weekStart)}';
       switch (format) {
         case WeeklyReportSaveFormat.pdf:

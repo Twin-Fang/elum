@@ -3038,8 +3038,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get talkImportNoElumiAction => 'Conectar a Elumi';
 
   @override
-  String talkImportDone(String elumiName) {
-    return 'Añadida a las rutinas de $elumiName';
+  String talkImportDone(String routineTitle, String batchim) {
+    return 'Se importó $routineTitle';
   }
 
   @override
@@ -3481,7 +3481,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
 
   @override
-  String get cardExportWatermarkNotice => 'Free는 이룸 로고와 워터마크가 들어가요';
+  String get cardExportWatermarkNotice => 'Free는 아래에 이룸 로고 띠가 들어가요';
 
   @override
   String get cardExportPreviewSection => '미리 보기';
@@ -3527,16 +3527,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardExportNoneSelected => '보낼 카드를 하나 이상 골라 주세요';
 
   @override
-  String get cardExportFooterMadeWith => '이룸 앱으로 만들었어요';
+  String get printBrandTagline => '일상을 함께 | 이룸 행동카드';
 
   @override
   String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
 
   @override
   String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
-
-  @override
-  String get cardExportWatermarkText => '이룸';
 
   @override
   String cardExportPerPage(int count) {
@@ -3601,40 +3598,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
 
   @override
-  String get planBenefitAiImageStyles => '캐릭터·사진 같은 AI 그림';
+  String get planBenefitAiImageStyles => '카드마다 AI가 그려 줘요';
 
   @override
-  String get planBenefitAdsRemoved => '광고 없음';
+  String get planBenefitAdsRemoved => '광고 없이 써요';
 
   @override
-  String get planBenefitWeeklyReport => '주간 리포트';
+  String get planBenefitWeeklyReport => '주간 리포트를 받아요';
 
   @override
-  String get planBenefitRoutineSchedule => '요일·시각 정해 반복';
+  String get planBenefitRoutineSchedule => '요일과 시각을 정해 매일 보내요';
 
   @override
-  String get planBenefitRoutineMemory => '내가 고친 방식 기억하기';
+  String get planBenefitRoutineMemory => '내가 고친 방식을 기억해요';
 
   @override
-  String get planBenefitGuardianVoice => '카드마다 보호자 목소리';
+  String get planBenefitGuardianVoice => '보호자 목소리로 카드를 읽어 줘요';
 
   @override
-  String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이';
+  String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이 써요';
 
   @override
-  String get planBenefitFreeImageRegenerate => '다시 그리기 하루 여러 번 크레딧 없이';
+  String get planBenefitFreeImageRegenerate => '마음에 안 들면 크레딧 없이 다시 그려요';
 
   @override
-  String get planBenefitMoreWeeklyCredits => '매주 크레딧 더 많이';
+  String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '워터마크 없이 인쇄';
+  String get planBenefitCardExportWithoutWatermark => '인쇄물 아래 띠 없이 깔끔해요';
 
   @override
-  String get planBenefitCardExportAllThemes => '인쇄 디자인 전부';
+  String get planBenefitCardExportAllThemes => '인쇄 디자인을 모두 골라요';
 
   @override
-  String get planBenefitCardExportAllLayouts => '일과 한 장·오려 쓰는 카드 인쇄';
+  String get planBenefitCardExportAllLayouts => '일과 한 장, 오려 쓰는 카드로 인쇄해요';
 
   @override
   String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
@@ -3811,28 +3808,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String planStatusRenewing(String date) {
-    return 'Pro · $date 갱신';
+    return 'Pro, $date에 갱신돼요';
   }
 
   @override
   String planStatusUntil(String date) {
-    return 'Pro · $date까지';
+    return 'Pro, $date까지';
   }
 
   @override
   String planStatusCancelScheduled(String date) {
-    return 'Pro · $date에 끝나요';
+    return 'Pro, $date에 끝나요';
   }
 
   @override
-  String get planStatusGracePeriod => 'Pro · 결제 확인 필요';
+  String get planStatusGracePeriod => 'Pro, 결제 확인이 필요해요';
 
   @override
   String get planStatusGift => 'Pro 선물';
 
   @override
   String planStatusGiftUntil(String date) {
-    return 'Pro 선물 · $date까지';
+    return 'Pro 선물, $date까지';
   }
 
   @override
@@ -4365,7 +4362,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String cardRegenerateCostProFree(int count) {
-    return '크레딧 없이 · 오늘 $count번 남았어요';
+    return '크레딧 없이, 오늘 $count번 남았어요';
   }
 
   @override
@@ -4475,28 +4472,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planHeroSubline => '같은 일과도 Pro로 만들면 이렇게 달라져요';
 
   @override
-  String get planHeroFreeTag => 'Free · 이모지';
+  String get planHeroFreeTag => 'Free 이모지';
 
   @override
-  String get planHeroProTag => 'Pro · 캐릭터 그림';
+  String get planHeroProTag => 'Pro 캐릭터 그림';
 
   @override
   String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요';
 
   @override
-  String get planBenefitGroupCards => '더 예쁜 카드';
+  String planBenefitGroupCards(String elumiName) {
+    return '$elumiName만의 카드 그림';
+  }
 
   @override
-  String get planBenefitGroupRoutines => '일과가 알아서 준비돼요';
+  String get planBenefitGroupRoutines => '일과가 알아서 가요';
 
   @override
-  String get planBenefitGroupWeek => '한 주를 한눈에';
+  String get planBenefitGroupWeek => '한 주를 정리해 드려요';
 
   @override
-  String get planBenefitGroupExtra => '넉넉하게, 광고 없이';
-
-  @override
-  String get planBenefitSeparator => ' · ';
+  String get planBenefitGroupExtra => '더 넉넉하게';
 
   @override
   String planYearlySaving(int percent) {
@@ -4525,17 +4521,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제 · 끝나기 하루 전까지 해지하면 청구되지 않아요';
+    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요';
   }
 
   @override
   String planCtaTrialNoticePlayStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제 · 체험 중 해지하면 청구되지 않아요';
+    return '$trial 뒤 $price$unit 자동 결제돼요. 체험 중 해지하면 청구되지 않아요';
   }
 
   @override
   String planCtaRenewNotice(String price, String unit) {
-    return '$price$unit 자동 갱신 · 언제든 해지할 수 있어요';
+    return '$price$unit 자동 갱신돼요. 언제든 해지할 수 있어요';
   }
 
   @override
