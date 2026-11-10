@@ -2,7 +2,7 @@
 # Flutter Android 자체 서버(SMB) 배포 워크플로우
 # ===================================================================
 #
-# main 브랜치 푸시 시 Android APK를 빌드하고
+# deploy 브랜치 푸시 시 Android APK를 빌드하고
 # 자체 서버(예: Synology NAS·NAS·Linux)의 SMB 공유에 APK를 배포합니다.
 #
 # ===================================================================
@@ -28,7 +28,7 @@ permissions:
 
 on:
   push:
-    branches: ["main"]
+    branches: ["deploy"]
     # 앱 소스가 바뀔 때만 빌드한다. 서버(server/**)만 변경된 릴리스에서 앱이 재빌드·재배포되는 것을 막는다.
     # 릴리스 버전 커밋이 매번 client/pubspec.yaml(버전 라인)을 갱신하므로 그 파일만으로는 트리거하지
     # 않게 제외한다 — 실제 의존성 변경은 client/pubspec.lock도 함께 바뀌어 정상 트리거된다.
@@ -257,7 +257,8 @@ jobs:
     name: Deploy Android APK
     runs-on: ubuntu-latest
     needs: build-android
-    if: github.ref == 'refs/heads/main'
+    # job if 에는 env 를 못 써서 이름을 직접 적는다 (on.push.branches 와 같은 값)
+    if: github.ref == 'refs/heads/deploy'
 
     defaults:
       run:
