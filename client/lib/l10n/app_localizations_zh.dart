@@ -2456,41 +2456,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryMenuCopy => '복사하기';
 
   @override
-  String get routineTranslateMenu => '다른 언어로 만들기';
-
-  @override
-  String get routineTranslateSheetTitle => '다른 언어로 만들기';
-
-  @override
-  String get routineTranslateSheetDescription =>
-      '글만 바꾼 새 일과를 일과 관리에 만들어요. 그림은 그대로 써요.';
-
-  @override
-  String get routineTranslateLanguageKo => '한국어';
-
-  @override
-  String get routineTranslateLanguageEn => '영어 (English)';
-
-  @override
-  String routineTranslateCreditNote(int count) {
-    return '크레딧 $count개를 써요';
-  }
-
-  @override
-  String get routineTranslateInProgress => '글을 바꾸고 있어요. 잠시만 기다려 주세요';
-
-  @override
-  String routineTranslateDone(String language) {
-    return '$language 일과를 만들었어요';
-  }
-
-  @override
-  String get routineTranslateFailedTitle => '다른 언어로 만들지 못했어요';
-
-  @override
-  String get routineTranslateFailedFallback => '잠시 뒤 다시 해 주세요. 원래 일과는 그대로예요.';
-
-  @override
   String get routineLibraryMenuRemove => '지우기';
 
   @override
@@ -3588,13 +3553,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitRoutineMemory => '내가 고친 방식 기억하기';
 
   @override
-  String get planBenefitExpertRoutines => '전문가가 만든 일과 가져오기';
-
-  @override
   String get planBenefitGuardianVoice => '카드마다 보호자 목소리';
-
-  @override
-  String get planBenefitRoutineTranslate => '다른 언어로 바꾸기';
 
   @override
   String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이';
@@ -4177,59 +4136,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianVoicePlanEndedHint => 'Pro가 끝나도 녹음은 남겨 뒀어요';
 
   @override
-  String get expertRoutineEntry => '전문가 일과';
-
-  @override
-  String get expertRoutineListTitle => '전문가 일과';
-
-  @override
-  String get expertRoutineListHint => '전문가가 살펴본 일과를 크레딧 없이 가져와요';
-
-  @override
-  String get expertRoutineCategoryAll => '전체';
-
-  @override
-  String get expertRoutineEmpty => '아직 준비된 전문가 일과가 없어요';
-
-  @override
-  String get expertRoutineEmptyHint => '검수를 마친 일과부터 차례로 올라와요';
-
-  @override
-  String get expertRoutineLoadFailed => '전문가 일과를 불러오지 못했어요';
-
-  @override
-  String expertRoutineStepCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '카드 $count장',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String expertRoutineReward(String reward) {
-    return '보상 · $reward';
-  }
-
-  @override
-  String get expertRoutineCardsSection => '카드';
-
-  @override
-  String get expertRoutineImport => '일과 관리에 넣기';
-
-  @override
-  String expertRoutineImportDone(String elumiName) {
-    return '$elumiName 일과 관리에 넣었어요';
-  }
-
-  @override
-  String get expertRoutineImportFailedTitle => '일과 관리에 넣지 못했어요';
-
-  @override
-  String get expertRoutineNoElumi => '이룸이를 먼저 연결해 주세요';
-
-  @override
   String get guardianSettingsRoutineMemory => 'AI 메모';
 
   @override
@@ -4328,9 +4234,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
 
   @override
-  String get proTeaserExpertRoutineBenefit => '전문가가 만든 일과를 그대로 가져와요';
-
-  @override
   String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
 
   @override
@@ -4353,9 +4256,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get proTeaserSampleMemoryReward => '보상은 스티커로 정해요';
-
-  @override
-  String get proTeaserSampleExpertSummary => '전문가가 순서를 다듬은 일과예요';
 
   @override
   String get cardRegenerateChip => '다시 그리기';
@@ -4557,9 +4457,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
-
-  @override
-  String get proTeaserExpertRoutineTitle => '전문가가 다듬은 일과를 바로 써요';
 
   @override
   String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';

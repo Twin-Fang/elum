@@ -43,10 +43,8 @@ class PlanAccess {
   bool get canUseAllCardDesignThemes => entitlements.canUseAllCardDesignThemes;
   bool get canUseAllCardExportLayouts => entitlements.canUseAllCardExportLayouts;
   bool get canViewWeeklyReport => entitlements.canViewWeeklyReport;
-  bool get canTranslateRoutines => entitlements.canTranslateRoutines;
   bool get canScheduleRoutines => entitlements.canScheduleRoutines;
   bool get canUseGuardianVoice => entitlements.canUseGuardianVoice;
-  bool get canImportExpertRoutines => entitlements.canImportExpertRoutines;
   bool get canUseRoutineMemory => entitlements.canUseRoutineMemory;
   bool get canRegenerateImagesFree => entitlements.canRegenerateImagesFree;
   bool get canCreateRoutineTextFree => entitlements.canCreateRoutineTextFree;
@@ -70,9 +68,6 @@ class PlanAccess {
 
   /// 기능 자리에 실제 화면 대신 Pro 미리 보기를 보이는가: 못 씀 + 권유 대상
   bool shouldShowTeaserFor(PlanBenefit benefit) => !canUseBenefit(benefit) && shouldPromoteBenefit(benefit);
-
-  /// 일과관리에 `전문가 일과` 입구를 보이는가. 살 수 없는 동안 Free 에게는 숨긴다
-  bool get shouldShowExpertRoutines => shouldShowEntryFor(PlanBenefit.expertRoutines);
 
   /// 같은 권한 판정 + 구매 가능 여부만 바꾼 사본
   PlanAccess withCanPurchasePro(bool canPurchasePro) => PlanAccess(

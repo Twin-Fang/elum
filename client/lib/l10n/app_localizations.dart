@@ -4472,66 +4472,6 @@ abstract class AppLocalizations {
   /// **'복사하기'**
   String get routineLibraryMenuCopy;
 
-  /// 일과관리 빠른 메뉴 줄 (Pro). 글만 다른 언어로 바꾼 새 일과를 만든다
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 언어로 만들기'**
-  String get routineTranslateMenu;
-
-  /// 언어 고르는 시트 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 언어로 만들기'**
-  String get routineTranslateSheetTitle;
-
-  /// 언어 고르는 시트 설명. 원래 일과는 그대로 남는다
-  ///
-  /// In ko, this message translates to:
-  /// **'글만 바꾼 새 일과를 일과 관리에 만들어요. 그림은 그대로 써요.'**
-  String get routineTranslateSheetDescription;
-
-  /// 고를 언어 줄: 한국어
-  ///
-  /// In ko, this message translates to:
-  /// **'한국어'**
-  String get routineTranslateLanguageKo;
-
-  /// 고를 언어 줄: 영어. 괄호 안은 그 언어로 쓴 이름이라 번역하지 않는다
-  ///
-  /// In ko, this message translates to:
-  /// **'영어 (English)'**
-  String get routineTranslateLanguageEn;
-
-  /// 언어 시트 아래 안내. count 는 글 만들기 한 번의 크레딧
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 {count}개를 써요'**
-  String routineTranslateCreditNote(int count);
-
-  /// 언어를 고른 뒤 만드는 동안 시트 아래 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'글을 바꾸고 있어요. 잠시만 기다려 주세요'**
-  String get routineTranslateInProgress;
-
-  /// 다른 언어로 만들기 성공 알림. language 는 고른 언어 줄 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'{language} 일과를 만들었어요'**
-  String routineTranslateDone(String language);
-
-  /// 다른 언어로 만들기 실패 팝업 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 언어로 만들지 못했어요'**
-  String get routineTranslateFailedTitle;
-
-  /// 다른 언어로 만들기 실패 팝업 본문 (서버 문구가 없을 때)
-  ///
-  /// In ko, this message translates to:
-  /// **'잠시 뒤 다시 해 주세요. 원래 일과는 그대로예요.'**
-  String get routineTranslateFailedFallback;
-
   /// 빠른 메뉴 줄 · 지우기 확인 버튼
   ///
   /// In ko, this message translates to:
@@ -6464,23 +6404,11 @@ abstract class AppLocalizations {
   /// **'내가 고친 방식 기억하기'**
   String get planBenefitRoutineMemory;
 
-  /// 혜택 줄: 전문가 일과
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가가 만든 일과 가져오기'**
-  String get planBenefitExpertRoutines;
-
   /// 혜택 줄: 보호자 목소리
   ///
   /// In ko, this message translates to:
   /// **'카드마다 보호자 목소리'**
   String get planBenefitGuardianVoice;
-
-  /// 혜택 줄: 다른 언어로 만들기
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 언어로 바꾸기'**
-  String get planBenefitRoutineTranslate;
 
   /// 혜택 줄: 일과 생성 글 무료 (카드 그림은 장수만큼 크레딧)
   ///
@@ -7417,90 +7345,6 @@ abstract class AppLocalizations {
   /// **'Pro가 끝나도 녹음은 남겨 뒀어요'**
   String get guardianVoicePlanEndedHint;
 
-  /// 일과관리 제목 줄 오른쪽 알약 버튼: 전문가 일과 목록 열기 (Pro)
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가 일과'**
-  String get expertRoutineEntry;
-
-  /// 전문가 일과 목록 화면 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가 일과'**
-  String get expertRoutineListTitle;
-
-  /// 전문가 일과 목록 위 한 줄 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가가 살펴본 일과를 크레딧 없이 가져와요'**
-  String get expertRoutineListHint;
-
-  /// 분류 칩: 전체
-  ///
-  /// In ko, this message translates to:
-  /// **'전체'**
-  String get expertRoutineCategoryAll;
-
-  /// 목록 0건 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'아직 준비된 전문가 일과가 없어요'**
-  String get expertRoutineEmpty;
-
-  /// 목록 0건 안내 한 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'검수를 마친 일과부터 차례로 올라와요'**
-  String get expertRoutineEmptyHint;
-
-  /// 목록·미리 보기 받기 실패
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가 일과를 불러오지 못했어요'**
-  String get expertRoutineLoadFailed;
-
-  /// 목록 칸 메타: 카드 수
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{카드 {count}장}}'**
-  String expertRoutineStepCount(int count);
-
-  /// 미리 보기: 보상 제안 한 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'보상 · {reward}'**
-  String expertRoutineReward(String reward);
-
-  /// 미리 보기: 카드 목록 섹션 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'카드'**
-  String get expertRoutineCardsSection;
-
-  /// 미리 보기 아래 주 버튼: 지금 보는 이룸이 일과관리 맨 앞에 넣는다 (크레딧 없음)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과 관리에 넣기'**
-  String get expertRoutineImport;
-
-  /// 가져온 직후 토스트. elumiName 은 지금 보는 이룸이 호칭
-  ///
-  /// In ko, this message translates to:
-  /// **'{elumiName} 일과 관리에 넣었어요'**
-  String expertRoutineImportDone(String elumiName);
-
-  /// 가져오기 실패 팝업 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'일과 관리에 넣지 못했어요'**
-  String get expertRoutineImportFailedTitle;
-
-  /// 연결된 이룸이가 없어 가져올 곳이 없을 때 실패 팝업 문장
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이를 먼저 연결해 주세요'**
-  String get expertRoutineNoElumi;
-
   /// 설정 줄 — 이룸이별 AI 메모 화면으로 (Pro)
   ///
   /// In ko, this message translates to:
@@ -7681,12 +7525,6 @@ abstract class AppLocalizations {
   /// **'인쇄용 카드를 여러 디자인으로 받을 수 있어요'**
   String get proTeaserCardThemeBenefit;
 
-  /// 전문가 일과 미리 보기 한 줄 혜택
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가가 만든 일과를 그대로 가져와요'**
-  String get proTeaserExpertRoutineBenefit;
-
   /// 반복 일과·주간 계획 미리 보기 한 줄 혜택
   ///
   /// In ko, this message translates to:
@@ -7734,12 +7572,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보상은 스티커로 정해요'**
   String get proTeaserSampleMemoryReward;
-
-  /// 전문가 일과 미리 보기 견본 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가가 순서를 다듬은 일과예요'**
-  String get proTeaserSampleExpertSummary;
 
   /// 카드 그림 위 AI 그림 다시 그리기 칩의 글자와 낭독 이름
   ///
@@ -8088,12 +7920,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이에게 맞춘 방식을 기억해요'**
   String get proTeaserRoutineMemoryTitle;
-
-  /// Pro 미리보기 제목: 전문가 일과 #1189
-  ///
-  /// In ko, this message translates to:
-  /// **'전문가가 다듬은 일과를 바로 써요'**
-  String get proTeaserExpertRoutineTitle;
 
   /// Pro 미리보기 제목: 인쇄 디자인 #1189
   ///

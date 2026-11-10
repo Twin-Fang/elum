@@ -37,8 +37,7 @@ class LibraryManageHeader extends ConsumerWidget {
     final space = context.space;
     final isPhone = context.sizeClass == WindowSizeClass.compact;
     final identity = ref.watch(guardianChildIdentityProvider);
-    // 입구 2개: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · 전문가 일과 (Pro, 살 수 없는 동안 Free 에게는 숨김)
-    // 두 입구 같은 알약 · Free 면 Pro 배지 (#1170)
+    // 입구: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · Free 면 Pro 배지
     final access = ref.watch(planAccessProvider);
     final entries = <Widget>[
       if (ref.watch(canShowRoutineScheduleProvider))
@@ -47,13 +46,6 @@ class LibraryManageHeader extends ConsumerWidget {
           iconAsset: AppAssets.iconCalendar,
           shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineSchedule),
           onTap: () => context.push(Routes.guardianWeeklyPlan),
-        ),
-      if (access.shouldShowExpertRoutines)
-        LibraryEntryPill(
-          label: context.l10n.expertRoutineEntry,
-          iconAsset: AppAssets.iconBook,
-          shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.expertRoutines),
-          onTap: () => context.push(Routes.guardianExpertRoutines),
         ),
     ];
     // 제목 + 사용법(코치마크) 다시 보기 `?`

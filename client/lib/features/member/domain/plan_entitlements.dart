@@ -13,10 +13,8 @@ class PlanEntitlements {
     this.canUseAllCardDesignThemes = false,
     this.canUseAllCardExportLayouts = false,
     this.canViewWeeklyReport = false,
-    this.canTranslateRoutines = false,
     this.canScheduleRoutines = false,
     this.canUseGuardianVoice = false,
-    this.canImportExpertRoutines = false,
     this.canUseRoutineMemory = false,
     this.canRegenerateImagesFree = false,
     this.canCreateRoutineTextFree = false,
@@ -26,8 +24,7 @@ class PlanEntitlements {
   /// 모르거나 Free 일 때 (워터마크 넣음 · 기본 테마만 · Pro 기능 전부 꺼짐)
   static const free = PlanEntitlements();
 
-  /// 개발자 도구 `Pro 처럼` · 서버가 Pro 권한 묶음을 안 줄 때의 기본 Pro
-  /// 다른 언어로 만들기 · 전문가 일과는 꺼 둠: 서버 기본값(`PRO_ROUTINE_TRANSLATE` · `PRO_ROUTINE_TEMPLATES`)과 같게
+  /// 개발자 도구 `Pro 처럼`
   static const pro = PlanEntitlements(
     isPro: true,
     isAdsRemoved: true,
@@ -61,17 +58,11 @@ class PlanEntitlements {
   /// 주간 리포트를 볼 수 있는가 (`weeklyReport`)
   final bool canViewWeeklyReport;
 
-  /// 만든 일과를 다른 언어 사본으로 만들 수 있는가 (`routineTranslate`, 일과관리 메뉴 `다른 언어로 만들기`)
-  final bool canTranslateRoutines;
-
   /// 일과에 요일·시각을 정할 수 있는가 (`routineSchedule`: 반복 일과 · 주간 계획 · 이룸이 기기 알림, #782 · #1080)
   final bool canScheduleRoutines;
 
   /// 카드마다 보호자 목소리를 녹음할 수 있는가 (`guardianVoice`). 꺼져도 이미 한 녹음은 남고 이룸이는 기본 음성으로 듣는다
   final bool canUseGuardianVoice;
-
-  /// 전문가 일과를 일과관리로 가져올 수 있는가 (`routineTemplates`)
-  final bool canImportExpertRoutines;
 
   /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가 (`routineMemory`)
   final bool canUseRoutineMemory;
@@ -97,10 +88,8 @@ class PlanEntitlements {
       canUseAllCardDesignThemes: isEntitled('cardExportAllThemes'),
       canUseAllCardExportLayouts: isEntitled('cardExportAllLayouts'),
       canViewWeeklyReport: isEntitled('weeklyReport'),
-      canTranslateRoutines: isEntitled('routineTranslate'),
       canScheduleRoutines: isEntitled('routineSchedule'),
       canUseGuardianVoice: isEntitled('guardianVoice'),
-      canImportExpertRoutines: isEntitled('routineTemplates'),
       canUseRoutineMemory: isEntitled('routineMemory'),
       canRegenerateImagesFree: isEntitled('imageRegenerateFree'),
       canCreateRoutineTextFree: isEntitled('routineCreateFree'),
@@ -116,10 +105,8 @@ class PlanEntitlements {
     canUseAllCardDesignThemes,
     canUseAllCardExportLayouts,
     canViewWeeklyReport,
-    canTranslateRoutines,
     canScheduleRoutines,
     canUseGuardianVoice,
-    canImportExpertRoutines,
     canUseRoutineMemory,
     canRegenerateImagesFree,
     canCreateRoutineTextFree,

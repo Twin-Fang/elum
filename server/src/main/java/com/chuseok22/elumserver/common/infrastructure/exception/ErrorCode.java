@@ -174,9 +174,6 @@ public enum ErrorCode {
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
   WEEKLY_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN),
-  // 일과 다른 언어로 만들기 (#1077). 요금제에 없음 403 (앱은 Free 에게 입구를 숨김), AI 번역 실패 502 (사본을 만들지 않음)
-  ROUTINE_TRANSLATE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
-  ROUTINE_TRANSLATE_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -311,11 +308,6 @@ public enum ErrorCode {
   // 링크로 보내기: 남이 만든 일과 403, 공유 불가 일과(예시·지움·가져온 일과·승인 전) 400
   TALK_LINK_ROUTINE_NOT_MINE(HttpStatus.FORBIDDEN),
   TALK_LINK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
-
-  // 전문가 일과(#1076): 내렸거나 없는 일과 404, Free 가져오기 403, 관리자 입력 오류 400 (이유는 detail)
-  EXPERT_ROUTINE_NOT_FOUND(HttpStatus.NOT_FOUND),
-  EXPERT_ROUTINE_PRO_ONLY(HttpStatus.FORBIDDEN),
-  EXPERT_ROUTINE_INVALID(HttpStatus.BAD_REQUEST),
 
   ;
 

@@ -297,11 +297,6 @@ public enum ConfigKey {
     "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
-  FREE_ROUTINE_TRANSLATE(
-    ConfigGroup.PLAN_FREE, "일과 다른 언어로 만들기",
-    "Free가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
   FREE_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_FREE, "요일별 반복 일과",
     "Free가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지",
@@ -310,11 +305,6 @@ public enum ConfigKey {
   FREE_GUARDIAN_VOICE(
     ConfigGroup.PLAN_FREE, "보호자 목소리 녹음",
     "Free가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
-  FREE_ROUTINE_TEMPLATES(
-    ConfigGroup.PLAN_FREE, "전문가 일과 가져오기",
-    "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   FREE_ROUTINE_MEMORY(
@@ -445,12 +435,6 @@ public enum ConfigKey {
     "Pro가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
-  PRO_ROUTINE_TRANSLATE(
-    ConfigGroup.PLAN_PRO, "일과 다른 언어로 만들기",
-    "Pro가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
-    // 기본 꺼짐: 출시 혜택에서 뺌. 켜면 앱 메뉴·요금제 혜택 줄이 다시 보임
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
   PRO_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_PRO, "요일별 반복 일과",
     "Pro가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지. 꺼도 정해 둔 요일·시각은 지우지 않고 멈춘다",
@@ -460,12 +444,6 @@ public enum ConfigKey {
     ConfigGroup.PLAN_PRO, "보호자 목소리 녹음",
     "Pro가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지. 끄면 녹음은 남고 이룸이는 기본 음성으로 듣는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
-  ),
-  PRO_ROUTINE_TEMPLATES(
-    ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
-    "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
-    // 기본 꺼짐: 검수된 일과가 생기기 전이라 출시 혜택에서 뺌. 켜면 앱 입구·요금제 혜택 줄이 다시 보임
-    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   PRO_ROUTINE_MEMORY(
     ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",

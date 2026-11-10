@@ -57,15 +57,13 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
 void startStorePurchaseSync(WidgetRef ref) =>
     unawaited(ref.read(storePurchaseCoordinatorProvider).start());
 
-/// 서버가 'Pro 기능'이라 거절한 코드 8개 (앱 판정이 늦었거나 Pro 가 막 끝남). 실패 팝업이 아니라 Pro 안내로 돌림
+/// 서버가 'Pro 기능'이라 거절한 코드 6개 (앱 판정이 늦었거나 Pro 가 막 끝남). 실패 팝업이 아니라 Pro 안내로 돌림
 const _proOnlyRejectionCodes = {
   ServerErrorCode.aiImageNotAllowed,
   ServerErrorCode.imageStyleNotAllowed,
   ServerErrorCode.weeklyReportNotAllowed,
-  ServerErrorCode.routineTranslateNotAllowed,
   ServerErrorCode.routineScheduleNotAllowed,
   ServerErrorCode.guardianVoiceNotAllowed,
-  ServerErrorCode.expertRoutineProOnly,
   ServerErrorCode.routineMemoryProRequired,
 };
 

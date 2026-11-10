@@ -711,16 +711,4 @@ class CreditReservationServiceTest {
     assertThat(store.job(reservation.jobId()).orElseThrow().getStatus()).isEqualTo(CreditJobStatus.RELEASED);
     assertThat(available()).isEqualTo(5);
   }
-
-  @Test
-  @DisplayName("일과 글 무료 권한은 번역에 쓰지 않는다 — 번역은 글 단가 그대로")
-  void routineTextFree_doesNotApplyToTranslate() {
-    weeklyRemaining(5);
-    givenFreeRoutineTextAllowed(true);
-
-    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_TRANSLATE, "translate-1", false);
-    CreditSettlement settlement = service.settle(reservation.jobId(), 4, 0, "routine-2", null);
-
-    assertThat(settlement.charged()).isEqualTo(1);
-  }
 }

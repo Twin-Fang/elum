@@ -1,8 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
-import com.chuseok22.elumserver.ai.core.RoutineTranslationDraft;
 import com.chuseok22.elumserver.ai.core.TextProvider;
-import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -64,15 +62,6 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   @Override
   public String pickPictogramJson(String stepTitle, String stepDescription) {
     return tryInOrder("pictogram", JsonNode::isObject, client -> client.pickPictogramJson(stepTitle, stepDescription));
-  }
-
-  // 번역: 제목 있음 + 단계 배열 1개 이상이면 넘기지 않음 (단계 수 대조는 RoutineTranslationAi)
-  @Override
-  public String translateRoutineJson(
-    RoutineTranslationDraft draft, AppLocale sourceLanguage, AppLocale targetLanguage
-  ) {
-    return tryInOrder("translate", FallbackTextGenerationClient::isUsableRoutine,
-      client -> client.translateRoutineJson(draft, sourceLanguage, targetLanguage));
   }
 
   @Override

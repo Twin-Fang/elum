@@ -66,11 +66,6 @@ public enum Entitlement {
     Kind.FLAG, "주간 리포트",
     ConfigKey.FREE_WEEKLY_REPORT, ConfigKey.PRO_WEEKLY_REPORT
   ),
-  // 만든 일과를 다른 언어 사본으로 (#1077). 꺼진 플랜은 번역 API 가 ROUTINE_TRANSLATE_NOT_ALLOWED 로 막음
-  ROUTINE_TRANSLATE(
-    Kind.FLAG, "일과 다른 언어로 만들기",
-    ConfigKey.FREE_ROUTINE_TRANSLATE, ConfigKey.PRO_ROUTINE_TRANSLATE
-  ),
   // 요일·시각 반복 일과 + 이룸이 기기 일과 시간 알림 (#782, #1080). 꺼지면 예약만 멈추고 지우지 않음
   ROUTINE_SCHEDULE(
     Kind.FLAG, "요일별 반복 일과·이룸이 기기 알림",
@@ -80,11 +75,6 @@ public enum Entitlement {
   GUARDIAN_VOICE(
     Kind.FLAG, "보호자 목소리 녹음",
     ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
-  ),
-  // 전문가 일과 가져오기. 목록·미리 보기는 열고 가져오기만 막는다 (#1076)
-  ROUTINE_TEMPLATES(
-    Kind.FLAG, "전문가 일과 가져오기",
-    ConfigKey.FREE_ROUTINE_TEMPLATES, ConfigKey.PRO_ROUTINE_TEMPLATES
   ),
   // 이룸이별 AI 메모 + 확정 예시로 맞춤 쪼개기 (#1082). 서버가 일과 만들기에 넣고, 앱은 메모 화면을 연다
   ROUTINE_MEMORY(
@@ -120,15 +110,13 @@ public enum Entitlement {
     return plan == PlanType.PRO ? proKey : freeKey;
   }
 
-  /// Pro 검문 거절 코드 표 (기능 7개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
+  /// Pro 검문 거절 코드 표 (기능 5개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
   public ErrorCode rejectionCode() {
     return switch (this) {
       case AI_IMAGE_GENERATION -> ErrorCode.AI_IMAGE_NOT_ALLOWED;
       case WEEKLY_REPORT -> ErrorCode.WEEKLY_REPORT_NOT_ALLOWED;
-      case ROUTINE_TRANSLATE -> ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED;
       case ROUTINE_SCHEDULE -> ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED;
       case GUARDIAN_VOICE -> ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED;
-      case ROUTINE_TEMPLATES -> ErrorCode.EXPERT_ROUTINE_PRO_ONLY;
       case ROUTINE_MEMORY -> ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED;
       default -> throw new IllegalStateException("no pro gate rejection code: " + this);
     };

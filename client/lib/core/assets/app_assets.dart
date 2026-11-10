@@ -384,7 +384,6 @@ abstract final class AppAssets {
   static const iconStop = '$_images/icon_stop.svg';
   static const iconPlay = '$_images/icon_play.svg';
   static const iconCopy = '$_images/icon_copy.svg';
-  static const iconLanguage = '$_images/icon_language.svg';
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';
   static const iconBell = '$_images/icon_bell.svg';

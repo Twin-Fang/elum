@@ -60,7 +60,7 @@ public record CreditSummaryResponse(
   @Schema(description = "진행 중 작업")
   public record InProgress(
     @Schema(description = "작업 ID") String jobId,
-    @Schema(description = "ROUTINE_CREATE · CARD_IMAGE · IMAGE_REGENERATE · ROUTINE_TRANSLATE", example = "ROUTINE_CREATE") String kind,
+    @Schema(description = "ROUTINE_CREATE · CARD_IMAGE · IMAGE_REGENERATE", example = "ROUTINE_CREATE") String kind,
     @Schema(description = "시작 시각") LocalDateTime startedAt
   ) {
 

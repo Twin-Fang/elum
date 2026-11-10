@@ -254,15 +254,13 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("Pro 검문 거절 코드 표: 기능 7개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
+  @DisplayName("Pro 검문 거절 코드 표: 기능 5개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
   void rejectionCodeTable_mapsEachGatedEntitlement() {
     Map<Entitlement, ErrorCode> expectedRejectionCodes = Map.of(
       Entitlement.AI_IMAGE_GENERATION, ErrorCode.AI_IMAGE_NOT_ALLOWED,
       Entitlement.WEEKLY_REPORT, ErrorCode.WEEKLY_REPORT_NOT_ALLOWED,
-      Entitlement.ROUTINE_TRANSLATE, ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED,
       Entitlement.ROUTINE_SCHEDULE, ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED,
       Entitlement.GUARDIAN_VOICE, ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED,
-      Entitlement.ROUTINE_TEMPLATES, ErrorCode.EXPERT_ROUTINE_PRO_ONLY,
       Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED);
 
     expectedRejectionCodes.forEach((entitlement, code) -> {
@@ -412,30 +410,6 @@ class SystemConfigEntitlementServiceTest {
 
     assertThat(snapshot.plan()).isEqualTo(PlanType.FREE);
     assertThat(snapshot.weeklyReport()).isTrue();
-  }
-
-  @Test
-  @DisplayName("다른 언어로 만들기 권한은 플랜 키를 읽는다 — 다른 키를 읽으면 Pro 가 못 쓰거나 Free 가 쓴다 (#1077)")
-  void snapshot_routineTranslateReadsPlanKey() {
-    when(subscriptionRepository.findByMemberId(MEMBER_ID))
-      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
-    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
-    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
-    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_TRANSLATE)).thenReturn(true);
-
-    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
-
-    assertThat(snapshot.routineTranslate()).isTrue();
-    assertThat(Entitlement.ROUTINE_TRANSLATE.configKeyFor(PlanType.FREE)).isEqualTo(ConfigKey.FREE_ROUTINE_TRANSLATE);
-  }
-
-  @Test
-  @DisplayName("전문가 일과·다른 언어로 만들기는 Free·Pro 모두 기본 꺼짐 — 켜진 채 출시되면 내용 없는 기능이 Pro 혜택으로 팔린다")
-  void excludedBenefits_defaultOffForBothPlans() {
-    assertThat(ConfigKey.FREE_ROUTINE_TEMPLATES.getDefaultValue()).isEqualTo("false");
-    assertThat(ConfigKey.PRO_ROUTINE_TEMPLATES.getDefaultValue()).isEqualTo("false");
-    assertThat(ConfigKey.FREE_ROUTINE_TRANSLATE.getDefaultValue()).isEqualTo("false");
-    assertThat(ConfigKey.PRO_ROUTINE_TRANSLATE.getDefaultValue()).isEqualTo("false");
   }
 
   @Test
