@@ -81,7 +81,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditResetFallback => 'next Monday at 0:00';
 
   @override
-  String get creditResetFallbackMonth => '다음 달 1일 0시';
+  String get creditResetFallbackMonth => '12:00 AM on the 1st of next month';
 
   @override
   String get creditBlockedBusy =>
@@ -94,7 +94,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String creditBlockedExhaustedMonth(String reset) {
-    return '이번 달 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
+    return 'You\'ve used all your credits this month.\nThey refill on $reset';
   }
 
   @override
@@ -420,7 +420,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get imageStyleCreditRoutineFree => '일과 글은 크레딧 없이';
+  String get imageStyleCreditRoutineFree => 'Routine text is free';
 
   @override
   String imageStyleCreditImage(int count) {
@@ -554,7 +554,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only this device is disconnected\nRoutines and stars stay on the guardian\'s device\nTo use it again, get a\nlink code from a guardian';
 
   @override
-  String get elumiSettingsWithdrawAction => '탈퇴하기';
+  String get elumiSettingsWithdrawAction => 'Delete account';
 
   @override
   String get inviteRejectedOnElumiDevice =>
@@ -744,18 +744,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansLeaveConfirmAction => 'Stop';
 
   @override
-  String get guardiansLeaveTypeTitle => '한 번 더 확인할게요';
+  String get guardiansLeaveTypeTitle => 'One more check';
 
   @override
   String guardiansLeaveTypeMessage(String phrase) {
-    return '이룸이와 일과, 별이 모두 사라져요\n아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+    return 'Elumi, routines, and stars will all be gone.\nPlease type \'$phrase\'\nexactly as shown below';
   }
 
   @override
-  String get guardiansLeaveTypePhrase => '그만두기';
+  String get guardiansLeaveTypePhrase => 'Leave';
 
   @override
-  String get guardiansLeaveTypeAction => '그만두기';
+  String get guardiansLeaveTypeAction => 'Leave';
 
   @override
   String get guardiansLeaveFailTitle => 'Couldn\'t leave';
@@ -1204,7 +1204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
+  String get notificationWeeklyReportReady => 'Last week\'s report is ready';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1313,10 +1313,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLoadingGenerateFailed => 'Couldn\'t make the cards';
 
   @override
-  String get routineLoadingInputNeededTitle => '어떤 일과인지 알려 주세요';
+  String get routineLoadingInputNeededTitle => 'Tell us what the routine is';
 
   @override
-  String get routineLoadingEditInput => '다시 적기';
+  String get routineLoadingEditInput => 'Write again';
 
   @override
   String routineLoadingPercent(int percent) {
@@ -1410,7 +1410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardImageMissingAfterCreateToast =>
-      '그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요';
+      'Cards without a picture got a default one. You can draw an AI picture when you edit the card';
 
   @override
   String get cardReviewReorderDone => 'Done';
@@ -1441,7 +1441,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'All routines and stars will be gone\nLogging in again won\'t bring them back';
 
   @override
-  String get guardianSettingsWithdrawConfirmAction => '탈퇴하기';
+  String get guardianSettingsWithdrawConfirmAction => 'Delete account';
 
   @override
   String get guardianSettingsWithdrawFailedTitle =>
@@ -1452,25 +1452,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSettingsWithdrawAppStoreSubscriptionNotice =>
-      'Pro 구독은 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요';
+      'Your Pro subscription continues after you delete your account.\nPlease cancel it yourself\nin the App Store';
 
   @override
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
-      '탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요';
+      'Deleting your account stops the next\npayment for your Google Play Pro subscription';
 
   @override
-  String get guardianSettingsWithdrawTypeTitle => '한 번 더 확인할게요';
+  String get guardianSettingsWithdrawTypeTitle => 'One more check';
 
   @override
   String guardianSettingsWithdrawTypeMessage(String phrase) {
-    return '아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+    return 'Please type \'$phrase\'\nexactly as shown below';
   }
 
   @override
-  String get guardianSettingsWithdrawTypePhrase => '회원탈퇴';
+  String get guardianSettingsWithdrawTypePhrase => 'Delete account';
 
   @override
-  String get guardianSettingsWithdrawTypeAction => '탈퇴하기';
+  String get guardianSettingsWithdrawTypeAction => 'Delete account';
 
   @override
   String get guardianSettingsTitle => 'Settings';
@@ -1717,13 +1717,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditCardTitle => 'AI this week';
 
   @override
-  String get creditCardTitleMonth => '이번 달 AI 생성';
+  String get creditCardTitleMonth => 'AI creations this month';
 
   @override
   String get creditCardLoading => 'Loading this week\'s AI usage';
 
   @override
-  String get creditCardLoadingMonth => '이번 달 AI 생성 사용량을 불러오고 있어요';
+  String get creditCardLoadingMonth => 'Loading this month\'s AI usage';
 
   @override
   String get creditCardLoadFailed => 'Couldn\'t load usage';
@@ -1738,7 +1738,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditExhausted => 'You\'ve used all your credits this week';
 
   @override
-  String get creditExhaustedMonth => '이번 달 크레딧을 모두 사용했어요';
+  String get creditExhaustedMonth => 'You\'ve used all your credits this month';
 
   @override
   String get creditExhaustedStillOk =>
@@ -1770,9 +1770,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       imageCost,
       locale: localeName,
-      other: '$imageCost개',
+      other: '$imageCost credits',
+      one: '$imageCost credit',
     );
-    return '일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 $_temp0씩 써요.';
+    return 'Routine text is free. Each finished card picture uses $_temp0.';
   }
 
   @override
@@ -1800,7 +1801,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditWeeklyRefill => 'Credits refill every Monday at 0:00.';
 
   @override
-  String get creditMonthlyRefill => '매달 1일 0시에 다시 채워져요.';
+  String get creditMonthlyRefill =>
+      'Refills at 12:00 AM on the 1st of every month.';
 
   @override
   String get routineCreateButton => 'Make a new routine';
@@ -2126,57 +2128,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s device';
 
   @override
-  String get myCreditTitle => '내 크레딧';
+  String get myCreditTitle => 'My credits';
 
   @override
   String get planFreeBadge => 'FREE';
 
   @override
-  String get myCreditHistoryButton => '쓴 내역';
+  String get myCreditHistoryButton => 'Usage history';
 
   @override
-  String get myCreditCountUnit => '개';
+  String get myCreditCountUnit => '';
 
   @override
-  String get myCreditKindPeriodicWeek => '주간';
+  String get myCreditKindPeriodicWeek => 'Weekly';
 
   @override
-  String get myCreditKindPeriodicMonth => '월간';
+  String get myCreditKindPeriodicMonth => 'Monthly';
 
   @override
-  String get myCreditKindBonus => '보너스';
+  String get myCreditKindBonus => 'Bonus';
 
   @override
-  String get myCreditKindPurchased => '구매';
+  String get myCreditKindPurchased => 'Purchased';
 
   @override
-  String get myCreditRefillWeek => '월요일에 다시 채워져요';
+  String get myCreditRefillWeek => 'Refills on Monday';
 
   @override
-  String get myCreditRefillMonth => '다음 달 1일에 다시 채워져요';
+  String get myCreditRefillMonth => 'Refills on the 1st of next month';
 
   @override
   String myCreditUntilDate(int month, int day) {
-    return '$month월 $day일까지';
+    return 'Until $month/$day';
   }
 
   @override
-  String get myCreditNoExpiry => '기간 제한 없음';
+  String get myCreditNoExpiry => 'No expiry';
 
   @override
-  String get myCreditSubscribeLabel => '구독하면';
+  String get myCreditSubscribeLabel => 'When you subscribe';
 
   @override
-  String get myCreditSubscribeBody => 'AI 그림도 그리고 일과도 알아서 보내요';
+  String get myCreditSubscribeBody =>
+      'Draw AI pictures and send routines automatically';
 
   @override
-  String get myCreditPackLabelFree => '크레딧만 더 받기';
+  String get myCreditPackLabelFree => 'Get more credits';
 
   @override
-  String get myCreditPackLabelPro => '크레딧 더 받기';
+  String get myCreditPackLabelPro => 'Get more credits';
 
   @override
-  String get creditGetMore => '크레딧 더 받기';
+  String get creditGetMore => 'Get more credits';
 
   @override
   String myCreditPackDiscount(int percent) {
@@ -2184,45 +2187,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '인기!';
+  String get myCreditPackPopular => 'Popular!';
 
   @override
   String myCreditPackBuy(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개 받기',
+      other: 'Get $count credits',
+      one: 'Get $count credit',
     );
     return '$_temp0';
   }
 
   @override
-  String get myCreditPackNoExpiryNote => '구매한 크레딧은 기간 제한이 없어요';
+  String get myCreditPackNoExpiryNote => 'Purchased credits never expire';
 
   @override
-  String get myCreditPackPriceFailed => '크레딧 값을 불러오지 못했어요';
+  String get myCreditPackPriceFailed => 'Couldn\'t load credit prices';
 
   @override
   String myCreditPackTileLabel(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧 $count개',
+      other: '$count credits',
+      one: '$count credit',
     );
     return '$_temp0, $price';
   }
 
   @override
-  String get myCreditPurchaseRecheckTitle => '크레딧을 아직 받지 못했어요';
+  String get myCreditPurchaseRecheckTitle =>
+      'Your credits haven\'t arrived yet';
 
   @override
-  String get myCreditPurchaseRecheckBody => '결제는 끝났어요. 다시 결제하지 않고 확인만 하면 돼요';
+  String get myCreditPurchaseRecheckBody =>
+      'Your payment went through. You only need to check again, not pay again';
 
   @override
   String get creditHistoryTitle => 'Credit history';
 
   @override
-  String get creditMineLink => '내 크레딧 보기';
+  String get creditMineLink => 'View my credits';
 
   @override
   String creditHistoryDay(int month, int day) {
@@ -2255,7 +2262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditHistoryKindImageRegenerate => 'Remaking a card picture';
 
   @override
-  String get creditHistoryFree => '크레딧 없이';
+  String get creditHistoryFree => 'No credits used';
 
   @override
   String get creditHistoryKindWeeklyGrant =>
@@ -3657,267 +3664,284 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenseLoadFailedMessage => 'We couldn\'t load the list';
 
   @override
-  String get cardExportOpen => '인쇄용으로 받기';
+  String get cardExportOpen => 'Save for printing';
 
   @override
-  String get cardExportFormatSection => '어떻게 받을까요?';
+  String get cardExportFormatSection => 'How would you like it?';
 
   @override
-  String get cardExportFormatRoutineSheet => '일과 한 장';
+  String get cardExportFormatRoutineSheet => 'One-page routine';
 
   @override
-  String get cardExportFormatRoutineSheetCaption => 'A4 한 장에 순서대로';
+  String get cardExportFormatRoutineSheetCaption => 'In order on one A4 page';
 
   @override
-  String get cardExportFormatCutCards => '오려 쓰는 카드';
+  String get cardExportFormatCutCards => 'Cut-out cards';
 
   @override
-  String get cardExportFormatCutCardsCaption => 'A4에 자를 선과 함께';
+  String get cardExportFormatCutCardsCaption => 'On A4 with cutting lines';
 
   @override
-  String get cardExportFormatCardImages => '카드 한 장씩';
+  String get cardExportFormatCardImages => 'One card at a time';
 
   @override
-  String get cardExportFormatCardImagesCaption => '카드마다 이미지 한 장';
+  String get cardExportFormatCardImagesCaption => 'One image per card';
 
   @override
-  String get cardExportPerPageSection => '한 쪽에 몇 장 넣을까요?';
+  String get cardExportPerPageSection => 'How many cards per page?';
 
   @override
-  String get cardExportIncludeText => '카드 문장 넣기';
+  String get cardExportIncludeText => 'Include card text';
 
   @override
-  String get cardExportThemeSection => '카드 디자인';
+  String get cardExportThemeSection => 'Card design';
 
   @override
-  String get cardExportThemeBasic => '기본';
+  String get cardExportThemeBasic => 'Basic';
 
   @override
-  String get cardExportThemeSimple => '단순';
+  String get cardExportThemeSimple => 'Simple';
 
   @override
-  String get cardExportThemeInkSaver => '잉크 절약';
+  String get cardExportThemeInkSaver => 'Ink saver';
 
   @override
-  String get cardExportThemeMonochrome => '흑백';
+  String get cardExportThemeMonochrome => 'Black & white';
 
   @override
-  String get cardExportThemeLargeText => '큰 글자';
+  String get cardExportThemeLargeText => 'Large text';
 
   @override
   String get planProBadge => 'Pro';
 
   @override
-  String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
+  String get cardExportProThemeLocked => 'This design is available with Pro';
 
   @override
-  String get cardExportWatermarkNotice => 'Free는 아래에 이룸 로고 띠가 들어가요';
+  String get cardExportWatermarkNotice =>
+      'Free adds an Elumi logo strip at the bottom';
 
   @override
-  String get cardExportPreviewSection => '미리 보기';
+  String get cardExportPreviewSection => 'Preview';
 
   @override
-  String get cardExportMissingPicture => '그림이 아직 없는 카드는 제목만 들어가요';
+  String get cardExportMissingPicture =>
+      'Cards without a picture show only the title';
 
   @override
   String cardExportSomePicturesFailed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '그림을 불러오지 못한 카드 $count장은 다른 그림이나 제목으로 들어가요',
+      other:
+          '$count cards whose pictures couldn\'t load will use other pictures or their titles',
+      one:
+          '$count card whose picture couldn\'t load will use another picture or its title',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardExportActualSizeHint => '다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요';
+  String get cardExportActualSizeHint =>
+      'When printing from another app, choose actual size';
 
   @override
-  String get cardExportPrint => '인쇄하기';
+  String get cardExportPrint => 'Print';
 
   @override
-  String get cardExportShare => '보내기';
+  String get cardExportShare => 'Send';
 
   @override
-  String get cardExportPreparing => '카드를 준비하고 있어요';
+  String get cardExportPreparing => 'Getting your cards ready';
 
   @override
-  String get cardExportImageFailed => '카드 그림을 불러오지 못했어요';
+  String get cardExportImageFailed => 'Couldn\'t load the card picture';
 
   @override
-  String get cardExportRenderFailed => '인쇄용 파일을 만들지 못했어요';
+  String get cardExportRenderFailed => 'Couldn\'t create the printable file';
 
   @override
-  String get cardExportPrintFailed => '이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요';
+  String get cardExportPrintFailed =>
+      'This device can\'t print. Please use Send instead';
 
   @override
-  String get cardExportNoCards => '카드가 없는 일과예요';
+  String get cardExportNoCards => 'This routine has no cards';
 
   @override
-  String get cardExportNoneSelected => '보낼 카드를 하나 이상 골라 주세요';
+  String get cardExportNoneSelected =>
+      'Please choose at least one card to send';
 
   @override
-  String get printBrandTagline => '일상을 함께 | 이룸 행동카드';
+  String get printBrandTagline => 'Every day, together | Elumi Behavior Cards';
 
   @override
-  String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
+  String get cardExportPictogramCredit =>
+      'Pictures: Mulberry Symbols (CC BY-SA 4.0)';
 
   @override
-  String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
+  String get cardExportEmojiCredit => 'Pictures: Twemoji (CC BY 4.0)';
 
   @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count장',
+      other: '$count cards',
+      one: '$count card',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardExportFormatRow => '형태';
+  String get cardExportFormatRow => 'Format';
 
   @override
-  String get cardExportLayoutSection => '배치';
+  String get cardExportLayoutSection => 'Layout';
 
   @override
-  String get cardExportStyleSection => '꾸밈';
+  String get cardExportStyleSection => 'Style';
 
   @override
-  String get cardExportOrientationRow => '용지 방향';
+  String get cardExportOrientationRow => 'Paper orientation';
 
   @override
-  String get cardExportOrientationSheetTitle => '용지를 어떻게 놓을까요?';
+  String get cardExportOrientationSheetTitle =>
+      'How should the paper be laid out?';
 
   @override
-  String get cardExportOrientationPortrait => '세로';
+  String get cardExportOrientationPortrait => 'Portrait';
 
   @override
-  String get cardExportOrientationLandscape => '가로';
+  String get cardExportOrientationLandscape => 'Landscape';
 
   @override
-  String get cardExportPerPageRow => '한 장에';
+  String get cardExportPerPageRow => 'Per page';
 
   @override
-  String get cardExportCardSizeRow => '카드 크기';
+  String get cardExportCardSizeRow => 'Card size';
 
   @override
-  String get cardExportCardSizeSheetTitle => '카드를 얼마나 크게 넣을까요?';
+  String get cardExportCardSizeSheetTitle => 'How big should the cards be?';
 
   @override
-  String get cardExportCardSizeFit => '꽉 차게';
+  String get cardExportCardSizeFit => 'Fill the page';
 
   @override
-  String get cardExportCardSizeMedium => '보통';
+  String get cardExportCardSizeMedium => 'Medium';
 
   @override
-  String get cardExportCardSizeSmall => '작게';
+  String get cardExportCardSizeSmall => 'Small';
 
   @override
-  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 형태예요';
+  String get cardExportProLayoutLocked => 'This format is available with Pro';
 
   @override
-  String get cardExportUpsellTitle => 'Pro면 원하는 대로 받을 수 있어요';
+  String get cardExportUpsellTitle => 'With Pro, save it your way';
 
   @override
   String get cardExportUpsellBody =>
-      '일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요';
+      'Pick a one-page routine, cut-out cards, several cards per page, landscape paper, and designs';
 
   @override
-  String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
+  String get modeSwitchToPurchase => 'Only a guardian can make purchases';
 
   @override
-  String get planBenefitAiImageStyles => '카드마다 AI가 그려 줘요';
+  String get planBenefitAiImageStyles => 'AI draws a picture for every card';
 
   @override
-  String get planBenefitAdsRemoved => '광고 없이 써요';
+  String get planBenefitAdsRemoved => 'Use it without ads';
 
   @override
-  String get planBenefitWeeklyReport => '주간 리포트를 받아요';
+  String get planBenefitWeeklyReport => 'Get a weekly report';
 
   @override
-  String get planBenefitRoutineSchedule => '요일과 시각을 정해 매일 보내요';
+  String get planBenefitRoutineSchedule =>
+      'Pick days and times and send every day';
 
   @override
-  String get planBenefitRoutineMemory => '내가 고친 방식을 기억해요';
+  String get planBenefitRoutineMemory => 'Remember how I edit things';
 
   @override
-  String get planBenefitGuardianVoice => '보호자 목소리로 카드를 읽어 줘요';
+  String get planBenefitGuardianVoice => 'Read cards aloud in your own voice';
 
   @override
-  String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이 써요';
+  String get planBenefitFreeRoutineText => 'Routine text is free of credits';
 
   @override
-  String get planBenefitFreeImageRegenerate => '마음에 안 들면 크레딧 없이 다시 그려요';
+  String get planBenefitFreeImageRegenerate =>
+      'Redraw a picture you don\'t like without credits';
 
   @override
-  String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
+  String get planBenefitMoreWeeklyCredits => 'Get more credits every week';
 
   @override
-  String get planBenefitMoreMonthlyCredits => '매달 크레딧을 더 많이 받아요';
+  String get planBenefitMoreMonthlyCredits => 'Get more credits every month';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '인쇄물 아래 띠 없이 깔끔해요';
+  String get planBenefitCardExportWithoutWatermark =>
+      'Clean printouts with no strip at the bottom';
 
   @override
-  String get planBenefitCardExportAllThemes => '인쇄 디자인을 모두 골라요';
+  String get planBenefitCardExportAllThemes => 'Choose from every print design';
 
   @override
-  String get planBenefitCardExportAllLayouts => '일과 한 장, 오려 쓰는 카드로 인쇄해요';
+  String get planBenefitCardExportAllLayouts =>
+      'Print a one-page routine or cut-out cards';
 
   @override
-  String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
+  String get planKeepContentNotice =>
+      'Routines and pictures you made stay even after Pro ends';
 
   @override
-  String get planPeriodMonthly => '1개월';
+  String get planPeriodMonthly => '1 month';
 
   @override
-  String get planPeriodYearly => '1년';
+  String get planPeriodYearly => '1 year';
 
   @override
-  String get planSubscribe => '구독 시작하기';
+  String get planSubscribe => 'Start subscription';
 
   @override
-  String get planPriceLoading => '가격을 불러오고 있어요';
+  String get planPriceLoading => 'Loading prices';
 
   @override
-  String get planPriceFailed => '가격을 불러오지 못했어요';
+  String get planPriceFailed => 'Couldn\'t load prices';
 
   @override
-  String get planRestore => '구매 복원';
+  String get planRestore => 'Restore purchases';
 
   @override
-  String get planTermsOfUse => '이용약관';
+  String get planTermsOfUse => 'Terms of Use';
 
   @override
-  String get planPrivacyPolicy => '개인정보처리방침';
+  String get planPrivacyPolicy => 'Privacy Policy';
 
   @override
-  String get planManageSubscription => '구독 관리';
+  String get planManageSubscription => 'Manage subscription';
 
   @override
   String get planLegalBillingAppStore =>
-      '결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신되고, 기간이 끝나기 전 24시간 안에 다음 요금이 청구돼요.';
+      'Payment is charged to your Apple ID account when you confirm the purchase. The subscription renews automatically at the same length and price unless you cancel at least 24 hours before the period ends, and your account is charged for the next period within 24 hours before it ends.';
 
   @override
   String get planLegalCancelAppStore =>
-      '구독 관리와 해지는 기기 설정의 Apple ID > 구독에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+      'You can manage and cancel your subscription in Settings > Apple ID > Subscriptions on your device. After you cancel, you can use Pro until the end of the paid period.';
 
   @override
   String get planLegalBillingPlayStore =>
-      '결제는 구매를 확인할 때 Google Play 계정으로 청구돼요. 해지하기 전까지 같은 기간과 가격으로 자동 갱신돼요.';
+      'Payment is charged to your Google Play account when you confirm the purchase. The subscription renews automatically at the same length and price until you cancel.';
 
   @override
   String get planLegalCancelPlayStore =>
-      '구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+      'You can manage and cancel your subscription in the Google Play Store under Payments & subscriptions > Subscriptions. After you cancel, you can use Pro until the end of the paid period.';
 
   @override
   String planTrialDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count일',
+      other: '$count days',
+      one: '$count day',
     );
     return '$_temp0';
   }
@@ -3927,7 +3951,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count주',
+      other: '$count weeks',
+      one: '$count week',
     );
     return '$_temp0';
   }
@@ -3937,7 +3962,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개월',
+      other: '$count months',
+      one: '$count month',
     );
     return '$_temp0';
   }
@@ -3947,94 +3973,99 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count년',
+      other: '$count years',
+      one: '$count year',
     );
     return '$_temp0';
   }
 
   @override
   String planStartFreeTrial(String trial) {
-    return '$trial 무료로 시작하기';
+    return 'Start $trial free';
   }
 
   @override
   String planTrialEndsNotice(String date, String price) {
-    return '무료 체험은 $date에 끝나요. 해지하지 않으면 그날부터 $price씩 청구돼요.';
+    return 'Your free trial ends on $date. If you don\'t cancel, you\'ll be charged $price from that day.';
   }
 
   @override
   String get planLegalTrialAppStore =>
-      '무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.';
+      'If you cancel at least 24 hours before the free trial ends, you won\'t be charged.';
 
   @override
-  String get planLegalTrialPlayStore => '무료 체험 중에 해지하면 요금이 청구되지 않아요.';
+  String get planLegalTrialPlayStore =>
+      'If you cancel during the free trial, you won\'t be charged.';
 
   @override
-  String get planVerifying => '결제를 확인하고 있어요';
+  String get planVerifying => 'Confirming your payment';
 
   @override
-  String get planStorePendingTitle => '결제 허락을 요청했어요';
+  String get planStorePendingTitle => 'Payment approval requested';
 
   @override
-  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요';
+  String get planStorePendingBody =>
+      'Pro turns on once it\'s approved. You can close this screen';
 
   @override
-  String get planVerificationPendingTitle => '결제를 확인하고 있어요';
+  String get planVerificationPendingTitle => 'Confirming your payment';
 
   @override
   String get planVerificationPendingBody =>
-      '다시 결제하지 않아도 돼요. 앱을 다시 열면 한 번 더 확인해요';
+      'You don\'t need to pay again. We\'ll check once more when you reopen the app';
 
   @override
-  String get planVerificationRetry => '다시 확인하기';
+  String get planVerificationRetry => 'Check again';
 
   @override
-  String get planActivatedStart => '시작하기';
+  String get planActivatedStart => 'Get started';
 
   @override
-  String get planActivatedTitle => 'Pro를 시작했어요';
+  String get planActivatedTitle => 'Pro has started';
 
   @override
-  String get planNotActivatedTitle => 'Pro가 켜지지 않았어요';
+  String get planNotActivatedTitle => 'Pro isn\'t on yet';
 
   @override
-  String get planNotActivatedBody => '스토어의 구독 상태를 확인해 주세요';
+  String get planNotActivatedBody =>
+      'Please check your subscription status in the store';
 
   @override
-  String get planAlreadyProTitle => 'Pro를 쓰고 있어요';
+  String get planAlreadyProTitle => 'You\'re using Pro';
 
   @override
-  String get planPurchaseFailedTitle => '결제하지 못했어요';
+  String get planPurchaseFailedTitle => 'Couldn\'t complete the payment';
 
   @override
-  String get planVerifyFailedTitle => '결제를 이 계정에 연결하지 못했어요';
+  String get planVerifyFailedTitle =>
+      'Couldn\'t link the payment to this account';
 
   @override
-  String get planAccountFailedTitle => '계정 정보를 확인하지 못했어요';
+  String get planAccountFailedTitle => 'Couldn\'t check your account';
 
   @override
-  String get planFailedFallback => '잠시 후 다시 시도해주세요';
+  String get planFailedFallback => 'Please try again in a moment';
 
   @override
-  String get planRestoreDone => 'Pro를 되찾았어요';
+  String get planRestoreDone => 'Pro is back';
 
   @override
-  String get planRestoreNothing => '되찾을 구독이 없어요';
+  String get planRestoreNothing => 'There\'s no subscription to restore';
 
   @override
-  String get planRestoreFailedTitle => '구매를 복원하지 못했어요';
+  String get planRestoreFailedTitle => 'Couldn\'t restore your purchase';
 
   @override
-  String get planRestoring => '구매 내역을 확인하고 있어요';
+  String get planRestoring => 'Checking your purchases';
 
   @override
-  String get planManageFailed => '구독 관리 화면을 열지 못했어요';
+  String get planManageFailed => 'Couldn\'t open subscription management';
 
   @override
-  String get planLinkFailed => '링크를 열지 못했어요';
+  String get planLinkFailed => 'Couldn\'t open the link';
 
   @override
-  String get planSettingsLabel => '내 요금제';
+  String get planSettingsLabel => 'My plan';
 
   @override
   String get planStatusFree => 'Free';
@@ -4044,61 +4075,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planStatusRenewing(String date) {
-    return 'Pro, $date에 갱신돼요';
+    return 'Pro, renews on $date';
   }
 
   @override
   String planStatusUntil(String date) {
-    return 'Pro, $date까지';
+    return 'Pro, until $date';
   }
 
   @override
   String planStatusCancelScheduled(String date) {
-    return 'Pro, $date에 끝나요';
+    return 'Pro, ends on $date';
   }
 
   @override
-  String get planStatusGracePeriod => 'Pro, 결제 확인이 필요해요';
+  String get planStatusGracePeriod => 'Pro, payment needs checking';
 
   @override
   String planStatusTrial(int days) {
-    return 'Pro 체험 중, $days일 남았어요';
+    return 'Pro trial, $days days left';
   }
 
   @override
-  String get planStatusTrialLastDay => 'Pro 체험 중, 오늘까지예요';
+  String get planStatusTrialLastDay => 'Pro trial, ends today';
 
   @override
-  String get planStatusGift => 'Pro 선물';
+  String get planStatusGift => 'Pro gift';
 
   @override
   String planStatusGiftUntil(String date) {
-    return 'Pro 선물, $date까지';
+    return 'Pro gift, until $date';
   }
 
   @override
   String planStatusRenewingFooter(String date) {
-    return '$date에 갱신돼요';
+    return 'Renews on $date';
   }
 
   @override
   String planStatusUntilFooter(String date) {
-    return '$date까지 쓸 수 있어요';
+    return 'You can use it until $date';
   }
 
   @override
   String planStatusCancelScheduledFooter(String date) {
-    return '$date에 끝나요';
+    return 'Ends on $date';
   }
 
   @override
-  String get planStatusGracePeriodFooter => '결제 수단을 확인해 주세요';
+  String get planStatusGracePeriodFooter => 'Please check your payment method';
 
   @override
-  String get planLearnPro => 'Pro 알아보기';
+  String get planLearnPro => 'Learn about Pro';
 
   @override
-  String get weeklyReportTitle => '주간 리포트';
+  String get weeklyReportTitle => 'Weekly report';
 
   @override
   String weeklyReportWeekRange(
@@ -4107,22 +4138,22 @@ class AppLocalizationsEn extends AppLocalizations {
     int endMonth,
     int endDay,
   ) {
-    return '$startMonth월 $startDay일 ~ $endMonth월 $endDay일';
+    return '$startMonth/$startDay - $endMonth/$endDay';
   }
 
   @override
   String weeklyReportThisWeekRange(String range) {
-    return '이번 주 · $range';
+    return 'This week · $range';
   }
 
   @override
-  String get weeklyReportPreviousWeek => '지난주 보기';
+  String get weeklyReportPreviousWeek => 'View last week';
 
   @override
-  String get weeklyReportNextWeek => '다음 주 보기';
+  String get weeklyReportNextWeek => 'View next week';
 
   @override
-  String get weeklyReportCompletionLabel => '일과 완료율';
+  String get weeklyReportCompletionLabel => 'Routines completed';
 
   @override
   String weeklyReportPercent(int percent) {
@@ -4134,7 +4165,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '보낸 일과 $sent개 중 $completed개를 마쳤어요',
+      other: 'Finished $completed of $sent routines sent',
+      one: 'Finished $completed of $sent routine sent',
     );
     return '$_temp0';
   }
@@ -4148,20 +4180,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportStars => '받은 별';
+  String get weeklyReportStars => 'Stars earned';
 
   @override
-  String get weeklyReportRewards => '보상까지 간 일과';
+  String get weeklyReportRewards => 'Routines that reached a reward';
 
   @override
-  String get weeklyReportStreak => '연속으로 마친 날';
+  String get weeklyReportStreak => 'Days finished in a row';
 
   @override
   String weeklyReportCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count',
+      one: '$count',
     );
     return '$_temp0';
   }
@@ -4171,26 +4204,28 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count일',
+      other: '$count days',
+      one: '$count day',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportRoutinesSection => '일과별 기록';
+  String get weeklyReportRoutinesSection => 'By routine';
 
   @override
   String weeklyReportRoutineValue(int sent, int completed) {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$sent번 중 $completed번 마침',
+      other: 'Finished $completed of $sent times',
+      one: 'Finished $completed of $sent time',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportRemainingSection => '자주 남은 카드';
+  String get weeklyReportRemainingSection => 'Cards often left undone';
 
   @override
   String weeklyReportRemainingLabel(String routine, String step) {
@@ -4202,42 +4237,46 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count번',
+      other: '$count times',
+      one: '$count time',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportEmptyTitle => '이 주에는 보낸 일과가 없어요';
+  String get weeklyReportEmptyTitle => 'No routines were sent this week';
 
   @override
-  String get weeklyReportEmptyBody => '일과를 보내면 이룸이가 마친 기록이 여기에 모여요';
+  String get weeklyReportEmptyBody =>
+      'When you send routines, Elumi\'s finished records gather here';
 
   @override
-  String get weeklyReportLoadFailed => '주간 리포트를 불러오지 못했어요';
+  String get weeklyReportLoadFailed => 'Couldn\'t load the weekly report';
 
   @override
-  String get weeklyReportNotIncluded => '주간 리포트는 Pro에서 볼 수 있어요';
+  String get weeklyReportNotIncluded =>
+      'The weekly report is available with Pro';
 
   @override
-  String get weeklyReportShareImage => '이미지';
+  String get weeklyReportShareImage => 'Image';
 
   @override
   String get weeklyReportSharePdf => 'PDF';
 
   @override
-  String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
+  String get weeklyReportShareFailed => 'Couldn\'t create the page to send';
 
   @override
   String weeklyReportShareTitle(String name) {
-    return '$name의 한 주';
+    return '$name\'s week';
   }
 
   @override
-  String get weeklyReportShareNote => '이룸 앱에 남은 완료 기록을 센 내용이에요';
+  String get weeklyReportShareNote =>
+      'Counted from the completion records in the Elumi app';
 
   @override
-  String get weeklyReportRecordSection => '한 주 기록';
+  String get weeklyReportRecordSection => 'This week\'s record';
 
   @override
   String get weeklyReportDonutLabel => 'Completion rate';
@@ -4300,12 +4339,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportInsightHighlightTitle => '잘한 것';
+  String get weeklyReportInsightHighlightTitle => 'What went well';
 
   @override
   String weeklyReportInsightHighlightFirst(String routine, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$routine$_temp0 이번 주에 처음 끝까지 했어요';
+    return 'Finished $routine all the way for the first time this week';
   }
 
   @override
@@ -4314,22 +4352,21 @@ class AppLocalizationsEn extends AppLocalizations {
     String batchim,
     int count,
   ) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$routine$_temp0 $count번 모두 끝까지 했어요';
+    return 'Finished $routine all the way every one of $count times';
   }
 
   @override
   String weeklyReportInsightHighlightStreak(int days) {
-    return '$days일 이어서 일과를 끝냈어요';
+    return 'Finished routines $days days in a row';
   }
 
   @override
   String weeklyReportInsightHighlightHint(String name) {
-    return '오늘 $name에게 말해 주세요';
+    return 'Tell $name today';
   }
 
   @override
-  String get weeklyReportInsightStuckTitle => '자주 멈춘 곳';
+  String get weeklyReportInsightStuckTitle => 'Where they often stop';
 
   @override
   String weeklyReportInsightStuckLine(
@@ -4338,53 +4375,56 @@ class AppLocalizationsEn extends AppLocalizations {
     int sent,
     int remained,
   ) {
-    return '$routine의 $step에서 $sent번 중 $remained번 멈췄어요';
+    return 'Stopped at $step in $routine $remained of $sent times';
   }
 
   @override
-  String get weeklyReportInsightStuckShorten => '카드 글을 더 짧게 바꾸거나 둘로 나눠 볼 수 있어요';
+  String get weeklyReportInsightStuckShorten =>
+      'You could shorten the card text or split it into two';
 
   @override
-  String get weeklyReportInsightStuckAddMedia => '목소리나 사진을 붙여 볼 수 있어요';
+  String get weeklyReportInsightStuckAddMedia =>
+      'You could add a voice or a photo';
 
   @override
   String weeklyReportInsightStuckFix(String step) {
-    return '$step 카드 고치기';
+    return 'Edit the $step card';
   }
 
   @override
-  String get weeklyReportInsightStuckFixFailed => '고칠 일과를 열지 못했어요';
+  String get weeklyReportInsightStuckFixFailed =>
+      'Couldn\'t open the routine to edit';
 
   @override
-  String get weeklyReportInsightTrendTitle => '지난주와 달라진 점';
+  String get weeklyReportInsightTrendTitle => 'Changes from last week';
 
   @override
   String weeklyReportInsightTrendUp(int before, int after) {
-    return '끝낸 일과가 $before개에서 $after개로 늘었어요';
+    return 'Finished routines went up from $before to $after';
   }
 
   @override
   String weeklyReportInsightTrendDown(int before, int after) {
-    return '끝낸 일과가 $before개에서 $after개가 됐어요';
+    return 'Finished routines went from $before to $after';
   }
 
   @override
   String weeklyReportInsightTrendSame(int after) {
-    return '지난주와 같이 $after개를 끝냈어요';
+    return 'Finished $after again, same as last week';
   }
 
   @override
   String weeklyReportInsightTrendBarPrevious(int count) {
-    return '지난주 $count';
+    return 'Last week $count';
   }
 
   @override
   String weeklyReportInsightTrendBarCurrent(int count) {
-    return '이번 주 $count';
+    return 'This week $count';
   }
 
   @override
-  String get weeklyReportInsightDurationTitle => '걸린 시간';
+  String get weeklyReportInsightDurationTitle => 'Time taken';
 
   @override
   String weeklyReportInsightDurationLine(
@@ -4392,11 +4432,11 @@ class AppLocalizationsEn extends AppLocalizations {
     int before,
     int after,
   ) {
-    return '$routine에 걸린 시간이 $before분에서 $after분이 됐어요';
+    return 'Time for $routine went from $before min to $after min';
   }
 
   @override
-  String get weeklyReportInsightSlowestTitle => '가장 오래 머문 카드';
+  String get weeklyReportInsightSlowestTitle => 'Card they stayed on longest';
 
   @override
   String weeklyReportInsightSlowestLine(
@@ -4404,61 +4444,64 @@ class AppLocalizationsEn extends AppLocalizations {
     String step,
     int minutes,
   ) {
-    return '$routine의 $step에서 평균 $minutes분 머물렀어요';
+    return 'Stayed $minutes min on average at $step in $routine';
   }
 
   @override
-  String get weeklyReportStatCompleted => '끝낸 일과';
+  String get weeklyReportStatCompleted => 'Routines finished';
 
   @override
-  String get weeklyReportStatRemaining => '남은 카드';
+  String get weeklyReportStatRemaining => 'Cards left';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$sent번 중 $completed번',
+      other: '$completed of $sent times',
+      one: '$completed of $sent time',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportSave => '리포트 저장하기';
+  String get weeklyReportSave => 'Save report';
 
   @override
-  String get weeklyReportSaveSheetTitle => '리포트를 어떻게 저장할까요?';
+  String get weeklyReportSaveSheetTitle =>
+      'How would you like to save the report?';
 
   @override
-  String get weeklyReportPastReports => '지난 리포트 보기';
+  String get weeklyReportPastReports => 'View past reports';
 
   @override
-  String get weeklyReportPastSheetTitle => '지난 리포트';
+  String get weeklyReportPastSheetTitle => 'Past reports';
 
   @override
   String weeklyReportPastWeekValue(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '일과 $count개 끝냄',
+      other: 'Finished $count routines',
+      one: 'Finished $count routine',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportPastEmpty => '아직 지난 리포트가 없어요';
+  String get weeklyReportPastEmpty => 'No past reports yet';
 
   @override
-  String get weeklyReportPastLoadFailed => '지난 리포트를 불러오지 못했어요';
+  String get weeklyReportPastLoadFailed => 'Couldn\'t load past reports';
 
   @override
-  String get weeklyReportFreePreviewNote => '첫 리포트는 그냥 보여 드려요';
+  String get weeklyReportFreePreviewNote => 'Your first report is on us';
 
   @override
-  String get routineScheduleRowOff => '요일·시각 정하기';
+  String get routineScheduleRowOff => 'Set days and time';
 
   @override
-  String get routineScheduleRowLabel => '반복 요일과 시각';
+  String get routineScheduleRowLabel => 'Repeat days and time';
 
   @override
   String routineScheduleSummary(String days, String time) {
@@ -4466,435 +4509,474 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get routineScheduleEveryDay => '매일';
+  String get routineScheduleEveryDay => 'Every day';
 
   @override
-  String get routineScheduleWeekdaysOnly => '평일';
+  String get routineScheduleWeekdaysOnly => 'Weekdays';
 
   @override
-  String get routineScheduleWeekendOnly => '주말';
+  String get routineScheduleWeekendOnly => 'Weekends';
 
   @override
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro가 끝나 멈췄어요';
+  String get routineSchedulePaused => 'Paused because Pro ended';
 
   @override
   String get routineSchedulePausedNote =>
-      'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요';
+      'Repeating paused because Pro ended. Your days and time are still saved';
 
   @override
-  String get routineScheduleSheetTitle => '언제 할까요?';
+  String get routineScheduleSheetTitle => 'When should it happen?';
 
   @override
-  String get routineScheduleSheetBody => '고른 요일마다 이 일과가 오늘 일과로 가요';
+  String get routineScheduleSheetBody =>
+      'On each day you pick, this routine goes to today\'s routines';
 
   @override
-  String get routineScheduleDaysLabel => '요일';
+  String get routineScheduleDaysLabel => 'Days';
 
   @override
-  String get routineScheduleTimeLabel => '시각';
+  String get routineScheduleTimeLabel => 'Time';
 
   @override
-  String get routineScheduleNotifyElumi => '그 시각에 이룸이 기기에 알리기';
+  String get routineScheduleNotifyElumi =>
+      'Notify Elumi\'s device at that time';
 
   @override
-  String get routineScheduleElumiNotificationOff => '이룸이 기기 알림이 꺼져 있어요';
+  String get routineScheduleElumiNotificationOff =>
+      'Notifications are off on Elumi\'s device';
 
   @override
   String get routineScheduleElumiNotificationOffHint =>
-      '이룸이 기기의 설정에서 이룸 알림을 켜 주세요';
+      'Turn on Elumi notifications in the settings of Elumi\'s device';
 
   @override
-  String get routineScheduleElumiNoDevice => '이룸이 기기를 연결하면 그 시각에 알림이 가요';
+  String get routineScheduleElumiNoDevice =>
+      'Once you connect Elumi\'s device, it gets a notification at that time';
 
   @override
-  String get routineScheduleSave => '저장하기';
+  String get routineScheduleSave => 'Save';
 
   @override
-  String get routineScheduleTurnOff => '반복 끄기';
+  String get routineScheduleTurnOff => 'Turn off repeat';
 
   @override
-  String get routineScheduleSavedToast => '요일과 시각을 저장했어요';
+  String get routineScheduleSavedToast => 'Saved the days and time';
 
   @override
-  String get routineScheduleTurnedOffToast => '반복을 껐어요';
+  String get routineScheduleTurnedOffToast => 'Turned off repeat';
 
   @override
-  String get routineScheduleSaveFailedTitle => '저장하지 못했어요';
+  String get routineScheduleSaveFailedTitle => 'Couldn\'t save';
 
   @override
-  String get routineScheduleSaveFailedFallback => '잠시 뒤 다시 해 주세요';
+  String get routineScheduleSaveFailedFallback =>
+      'Please try again in a moment';
 
   @override
-  String get routineSchedulePickDayHint => '요일을 하나 이상 골라 주세요';
+  String get routineSchedulePickDayHint => 'Please choose at least one day';
 
   @override
-  String get routineScheduleProNote => '반복 일과는 Pro에서 저장할 수 있어요';
+  String get routineScheduleProNote =>
+      'Repeating routines can be saved with Pro';
 
   @override
-  String get weeklyPlanEntry => '주간 계획';
+  String get weeklyPlanEntry => 'Weekly plan';
 
   @override
-  String get weeklyPlanTitle => '주간 계획';
+  String get weeklyPlanTitle => 'Weekly plan';
 
   @override
   String weeklyPlanDayTitle(String weekday) {
-    return '$weekday요일';
+    return '$weekday';
   }
 
   @override
-  String get weeklyPlanToday => '오늘';
+  String get weeklyPlanToday => 'Today';
 
   @override
-  String get weeklyPlanEmptyDay => '정한 일과가 없어요';
+  String get weeklyPlanEmptyDay => 'No routines planned';
 
   @override
-  String get weeklyPlanEmptyTitle => '아직 요일을 정한 일과가 없어요';
+  String get weeklyPlanEmptyTitle => 'No routines have days set yet';
 
   @override
-  String get weeklyPlanEmptyBody => '일과 관리에서 일과를 누르고 요일·시각을 정해 보세요';
+  String get weeklyPlanEmptyBody =>
+      'In Manage routines, tap a routine and set its days and time';
 
   @override
-  String get weeklyPlanLoadFailed => '주간 계획을 불러오지 못했어요';
+  String get weeklyPlanLoadFailed => 'Couldn\'t load the weekly plan';
 
   @override
-  String get weeklyPlanNotifyOff => '알림 없음';
+  String get weeklyPlanNotifyOff => 'No notification';
 
   @override
   String get weeklyPlanMetaSeparator => ' · ';
 
   @override
-  String get guardianVoiceRecordAction => '내 목소리로 녹음하기';
+  String get guardianVoiceRecordAction => 'Record in my voice';
 
   @override
-  String get guardianVoiceRecordHint => '카드를 누르면 이 목소리가 들려요';
+  String get guardianVoiceRecordHint =>
+      'When a card is tapped, this voice plays';
 
   @override
   String guardianVoiceRecording(int seconds) {
-    return '녹음하고 있어요 $seconds초';
+    return 'Recording ${seconds}s';
   }
 
   @override
   String guardianVoiceRecordingLimit(int seconds) {
-    return '$seconds초까지 녹음돼요';
+    return 'Records up to ${seconds}s';
   }
 
   @override
-  String get guardianVoiceStop => '멈추기';
+  String get guardianVoiceStop => 'Stop';
 
   @override
-  String get guardianVoiceSaving => '녹음을 저장하고 있어요';
+  String get guardianVoiceSaving => 'Saving your recording';
 
   @override
-  String get guardianVoiceSaved => '녹음했어요';
+  String get guardianVoiceSaved => 'Recorded';
 
   @override
-  String get guardianVoicePlay => '듣기';
+  String get guardianVoicePlay => 'Listen';
 
   @override
-  String get guardianVoiceRerecord => '다시 녹음';
+  String get guardianVoiceRerecord => 'Record again';
 
   @override
-  String get guardianVoiceDelete => '지우기';
+  String get guardianVoiceDelete => 'Delete';
 
   @override
-  String get guardianVoiceDeleteConfirmTitle => '녹음을 지울까요?';
+  String get guardianVoiceDeleteConfirmTitle => 'Delete the recording?';
 
   @override
-  String get guardianVoiceDeleteConfirmMessage => '지우면 기본 목소리로 읽어 줘요';
+  String get guardianVoiceDeleteConfirmMessage =>
+      'If you delete it, the default voice reads the card';
 
   @override
-  String get guardianVoicePlanEnded => '기본 목소리로 읽어요';
+  String get guardianVoicePlanEnded => 'Reading in the default voice';
 
   @override
-  String get guardianVoiceMicDeniedTitle => '마이크가 꺼져 있어요';
+  String get guardianVoiceMicDeniedTitle => 'The microphone is off';
 
   @override
-  String get guardianVoiceMicDeniedBody => '켜기 전까지 기본 목소리로 읽어요';
+  String get guardianVoiceMicDeniedBody =>
+      'Until you turn it on, the default voice reads the card';
 
   @override
-  String get guardianVoiceOpenSettings => '설정 열기';
+  String get guardianVoiceOpenSettings => 'Open settings';
 
   @override
-  String get guardianVoiceFailedTitle => '녹음을 저장하지 못했어요';
+  String get guardianVoiceFailedTitle => 'Couldn\'t save the recording';
 
   @override
-  String get guardianVoiceRetry => '다시 하기';
+  String get guardianVoiceRetry => 'Try again';
 
   @override
-  String get guardianVoiceTooShort => '너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요';
+  String get guardianVoiceTooShort => 'That\'s too short. Speak, then tap Stop';
 
   @override
-  String get guardianVoiceRecordFailed => '녹음하지 못했어요. 다시 해 주세요';
+  String get guardianVoiceRecordFailed => 'Couldn\'t record. Please try again';
 
   @override
-  String get guardianVoiceTooLarge => '녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요';
+  String get guardianVoiceTooLarge =>
+      'The recording is too large. Please record a shorter one';
 
   @override
-  String get guardianVoicePlayFailed => '녹음을 틀지 못했어요';
+  String get guardianVoicePlayFailed => 'Couldn\'t play the recording';
 
   @override
-  String get guardianVoiceDeleteFailed => '녹음을 지우지 못했어요';
+  String get guardianVoiceDeleteFailed => 'Couldn\'t delete the recording';
 
   @override
-  String get guardianVoiceRecordChip => '녹음';
+  String get guardianVoiceRecordChip => 'Record';
 
   @override
-  String get guardianVoicePlanEndedHint => 'Pro가 끝나도 녹음은 남겨 뒀어요';
+  String get guardianVoicePlanEndedHint =>
+      'Your recording is kept even after Pro ends';
 
   @override
-  String get guardianSettingsRoutineMemory => 'AI 메모리';
+  String get guardianSettingsRoutineMemory => 'AI memory';
 
   @override
   String memoryHeroTitle(String name) {
-    return '$name AI 메모리';
+    return '$name AI memory';
   }
 
   @override
-  String get memoryHeroBody => '내가 고친 방식을 기억해서 다음 일과를 그렇게 만들어요. 나만 봐요';
+  String get memoryHeroBody =>
+      'It remembers how you edit and makes your next routines that way. Only you can see it';
 
   @override
-  String get memoryStatApplied => '적용 중';
+  String get memoryStatApplied => 'In use';
 
   @override
-  String get memoryStatWatching => '관찰 중';
+  String get memoryStatWatching => 'Watching';
 
   @override
-  String get memoryStatEdits => '수정 기록';
+  String get memoryStatEdits => 'Edit history';
 
   @override
-  String get memoryListAppliedHeader => '적용 중인 규칙';
+  String get memoryListAppliedHeader => 'Rules in use';
 
   @override
-  String get memoryListAppliedHint => '새 일과에 쓰여요';
+  String get memoryListAppliedHint => 'Used for new routines';
 
   @override
-  String get memoryListWatchingHeader => '관찰 중인 규칙';
+  String get memoryListWatchingHeader => 'Rules being watched';
 
   @override
-  String get memoryListWatchingHint => '점이 다 차면 적용돼요';
+  String get memoryListWatchingHint => 'Applied once the dots fill up';
 
   @override
-  String get memoryListEditsHeader => '고쳐서 보낸 기록';
+  String get memoryListEditsHeader => 'Edited and sent';
 
   @override
   String memoryRuleByAi(int count) {
-    return 'AI가 찾음, 일과 $count개';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count routines',
+      one: '$count routine',
+    );
+    return 'Found by AI, $_temp0';
   }
 
   @override
-  String get memoryRuleByMe => '내가 적음';
+  String get memoryRuleByMe => 'Written by me';
 
   @override
   String memoryEditCards(int before, int after) {
-    return '$before장 → $after장';
+    return '$before → $after cards';
   }
 
   @override
   String memoryEditTexts(int count) {
-    return '글 $count곳';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count texts',
+      one: '$count text',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get memoryAddRule => '+ 규칙 직접 적기';
+  String get memoryAddRule => '+ Write a rule';
 
   @override
-  String get memoryAutoFind => '고친 내용에서 자동으로 찾기';
+  String get memoryAutoFind => 'Find from my edits automatically';
 
   @override
   String memoryAutoFindNote(int count) {
-    return '같은 수정이 일과 $count개에서 반복되면 적용돼요';
+    return 'Applied when the same edit repeats in $count routines';
   }
 
   @override
-  String get memoryEmptyTitle => '일과를 고쳐서 보내면 여기에 쌓여요';
+  String get memoryEmptyTitle =>
+      'When you edit and send routines, they gather here';
 
   @override
-  String get memoryEmptyEdits => '아직 고쳐서 보낸 일과가 없어요';
+  String get memoryEmptyEdits => 'No edited routines have been sent yet';
 
   @override
-  String get memoryTypeWord => '낱말 바꾸기';
+  String get memoryTypeWord => 'Replace a word';
 
   @override
-  String get memoryTypeSplit => '카드 나누기';
+  String get memoryTypeSplit => 'Split a card';
 
   @override
-  String get memoryTypeMerge => '카드 합치기';
+  String get memoryTypeMerge => 'Merge cards';
 
   @override
-  String get memoryTypeAdd => '카드 더하기';
+  String get memoryTypeAdd => 'Add a card';
 
   @override
-  String get memoryTypeRemove => '카드 빼기';
+  String get memoryTypeRemove => 'Remove a card';
 
   @override
-  String get memoryTypeManual => '직접 적은 규칙';
+  String get memoryTypeManual => 'Rule I wrote';
 
   @override
-  String get memoryApplyNow => '지금 적용';
+  String get memoryApplyNow => 'Apply now';
 
   @override
-  String get memoryRuleDelete => '삭제';
+  String get memoryRuleDelete => 'Delete';
 
   @override
-  String get memoryRuleEdit => '수정';
+  String get memoryRuleEdit => 'Edit';
 
   @override
   String memoryEvidenceLine(String routine, int month, int day) {
-    return '$routine, $month월 $day일';
+    return '$routine, $month/$day';
   }
 
   @override
-  String get memoryMenuLabel => '메뉴';
+  String get memoryMenuLabel => 'Menu';
 
   @override
-  String get memoryMenuExport => '파일로 내보내기';
+  String get memoryMenuExport => 'Export as a file';
 
   @override
-  String get memoryMenuClear => '메모리 모두 지우기';
+  String get memoryMenuClear => 'Clear all memory';
 
   @override
-  String get memoryExportFailed => '메모리를 내보내지 못했어요';
+  String get memoryExportFailed => 'Couldn\'t export your memory';
 
   @override
-  String get memoryObsTitle => 'AI 메모리';
+  String get memoryObsTitle => 'AI memory';
 
   @override
-  String get memoryObsWord => '낱말을 이렇게 바꾸셨어요';
+  String get memoryObsWord => 'You changed a word like this';
 
   @override
-  String get memoryObsSplit => '카드를 나누셨어요';
+  String get memoryObsSplit => 'You split a card';
 
   @override
-  String get memoryObsMerge => '카드를 합치셨어요';
+  String get memoryObsMerge => 'You merged cards';
 
   @override
-  String get memoryObsAdd => '카드를 더하셨어요';
+  String get memoryObsAdd => 'You added a card';
 
   @override
-  String get memoryObsRemove => '카드를 빼셨어요';
+  String get memoryObsRemove => 'You removed a card';
 
   @override
-  String get memoryObsManual => '이렇게 고치셨어요';
+  String get memoryObsManual => 'You edited it like this';
 
   @override
   String memoryObsAsk(String phrase) {
-    return '$phrase. 다음 일과에도 이렇게 할까요?';
+    return '$phrase. Should we do this in the next routine too?';
   }
 
   @override
-  String get memoryObsAlways => '항상 이렇게';
+  String get memoryObsAlways => 'Always do this';
 
   @override
-  String get memoryObsOnce => '이번만';
+  String get memoryObsOnce => 'Just this time';
 
   @override
-  String get memoryObsDone => '다음 일과부터 이렇게 만들어요';
+  String get memoryObsDone => 'From the next routine, we\'ll make it this way';
 
   @override
   String memoryObsMore(int count) {
-    return 'AI 메모리에서 $count개 더 보기';
+    return 'See $count more in AI memory';
   }
 
   @override
   String memoryAppliedPill(int count) {
-    return 'AI 메모리 규칙 $count개 적용됨';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count AI memory rules applied',
+      one: '$count AI memory rule applied',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get routineMemoryAddSheetTitle => '메모 더하기';
+  String get routineMemoryAddSheetTitle => 'Add a note';
 
   @override
-  String get routineMemoryEditSheetTitle => '메모 고치기';
+  String get routineMemoryEditSheetTitle => 'Edit note';
 
   @override
-  String get routineMemoryLineHint => '예: \'씻기\' 대신 \'손 닦기\'라고 써요';
+  String get routineMemoryLineHint =>
+      'e.g. Write \'wipe hands\' instead of \'wash up\'';
 
   @override
-  String get routineMemorySave => '저장하기';
+  String get routineMemorySave => 'Save';
 
   @override
-  String get routineMemoryDeleteLine => '이 줄 지우기';
+  String get routineMemoryDeleteLine => 'Delete this line';
 
   @override
-  String get routineMemoryClearConfirmTitle => '메모를 모두 지울까요?';
+  String get routineMemoryClearConfirmTitle => 'Delete all notes?';
 
   @override
-  String get routineMemoryClearConfirmMessage => '지운 메모는 되돌릴 수 없어요.';
+  String get routineMemoryClearConfirmMessage =>
+      'Deleted notes can\'t be brought back.';
 
   @override
-  String get routineMemoryClearConfirmAction => '모두 지우기';
+  String get routineMemoryClearConfirmAction => 'Delete all';
 
   @override
-  String get routineMemoryLoadFailed => '메모를 불러오지 못했어요';
+  String get routineMemoryLoadFailed => 'Couldn\'t load notes';
 
   @override
-  String get routineMemorySaveFailedTitle => '메모를 저장하지 못했어요';
+  String get routineMemorySaveFailedTitle => 'Couldn\'t save the note';
 
   @override
-  String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
+  String get routineMemorySaveFailedFallback => 'Please try again in a moment.';
 
   @override
-  String get proTeaserSampleLabel => '예시 화면';
+  String get proTeaserSampleLabel => 'Example screen';
 
   @override
-  String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
+  String get proOnlyNoticeTitle => 'This feature is available with Pro';
 
   @override
-  String get proTeaserWeeklyReportBenefit => '한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요';
+  String get proTeaserWeeklyReportBenefit =>
+      'Send a one-page summary of the routines done over the week';
 
   @override
-  String get proTeaserRoutineMemoryBenefit => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
+  String get proTeaserRoutineMemoryBenefit =>
+      'Remember how you edit so the next routines fit better';
 
   @override
-  String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
+  String get proTeaserCardThemeBenefit =>
+      'Get printable cards in several designs';
 
   @override
-  String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
+  String get proTeaserWeeklyPlanBenefit =>
+      'No need to send the routine again every morning';
 
   @override
-  String get proTeaserSampleRoutineMorning => '아침 준비하기';
+  String get proTeaserSampleRoutineMorning => 'Getting ready in the morning';
 
   @override
-  String get proTeaserSampleRoutineBrush => '이 닦기';
+  String get proTeaserSampleRoutineBrush => 'Brush teeth';
 
   @override
-  String get proTeaserSampleRoutineBag => '가방 챙기기';
+  String get proTeaserSampleRoutineBag => 'Pack your bag';
 
   @override
-  String get proTeaserSampleStepSocks => '양말 신기';
+  String get proTeaserSampleStepSocks => 'Put on socks';
 
   @override
-  String get proTeaserSampleMemoryShort => '카드 문장은 짧게 한 줄로 써요';
+  String get proTeaserSampleMemoryShort => 'Write card text short, in one line';
 
   @override
-  String get proTeaserSampleMemoryOrder => '옷 입기는 양말부터 시작해요';
+  String get proTeaserSampleMemoryOrder => 'Start getting dressed with socks';
 
   @override
-  String get proTeaserSampleMemoryReward => '보상은 스티커로 정해요';
+  String get proTeaserSampleMemoryReward => 'Choose stickers as the reward';
 
   @override
-  String get cardRegenerateChip => '다시 그리기';
+  String get cardRegenerateChip => 'Redraw';
 
   @override
-  String get cardRegenerateSheetTitle => '그림을 다시 그릴까요?';
+  String get cardRegenerateSheetTitle => 'Redraw the picture?';
 
   @override
   String cardRegenerateCostProFree(int count) {
-    return '크레딧 없이, 오늘 $count번 남았어요';
+    return 'No credits, $count left today';
   }
 
   @override
-  String get cardRegenerateCostFree => '크레딧을 쓰지 않아요';
+  String get cardRegenerateCostFree => 'Doesn\'t use credits';
 
   @override
   String cardRegenerateCostCredits(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧 $count개',
+      other: '$count credits',
+      one: '$count credit',
     );
     return '$_temp0';
   }
@@ -4904,193 +4986,202 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count',
+      one: '$count',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardRegenerateCostUnknown => '크레딧을 써요';
+  String get cardRegenerateCostUnknown => 'Uses credits';
 
   @override
-  String get cardRegenerateConfirm => '다시 그리기';
+  String get cardRegenerateConfirm => 'Redraw';
 
   @override
-  String get cardRegenerateInProgress => '그림을 다시 그리고 있어요';
+  String get cardRegenerateInProgress => 'Redrawing the picture';
 
   @override
-  String get cardRegenerateFailedTitle => '그림을 다시 그리지 못했어요';
+  String get cardRegenerateFailedTitle => 'Couldn\'t redraw the picture';
 
   @override
-  String get cardFirstDrawChip => 'AI 그림 그리기';
+  String get cardFirstDrawChip => 'Draw AI picture';
 
   @override
-  String get cardRedrawProChip => 'Pro로 다시 그리기';
+  String get cardRedrawProChip => 'Redraw with Pro';
 
   @override
-  String get cardFirstDrawProChip => 'Pro로 AI 그림 그리기';
+  String get cardFirstDrawProChip => 'Draw AI picture with Pro';
 
   @override
-  String get cardFirstDrawSheetTitle => 'AI 그림을 그릴까요?';
+  String get cardFirstDrawSheetTitle => 'Draw an AI picture?';
 
   @override
-  String get cardRedrawSheetBody => '고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요';
+  String get cardRedrawSheetBody =>
+      'Write or pick what you\'d like to change. Leave it blank to redraw as is';
 
   @override
-  String get cardFirstDrawSheetBody => '원하는 점을 적거나 골라 주세요. 새 그림을 보고 고를 수 있어요';
+  String get cardFirstDrawSheetBody =>
+      'Write or pick what you\'d like. You can choose after seeing the new picture';
 
   @override
-  String get cardRedrawRequestLabel => '고치고 싶은 점';
+  String get cardRedrawRequestLabel => 'What to change';
 
   @override
-  String get cardRedrawRequestHint => '예: 우산을 파란색으로';
+  String get cardRedrawRequestHint => 'e.g. Make the umbrella blue';
 
   @override
-  String get cardRedrawHintSimpler => '더 단순하게';
+  String get cardRedrawHintSimpler => 'Simpler';
 
   @override
-  String get cardRedrawHintNoBackground => '배경 빼기';
+  String get cardRedrawHintNoBackground => 'No background';
 
   @override
-  String get cardRedrawHintNoPeople => '사람 빼기';
+  String get cardRedrawHintNoPeople => 'No people';
 
   @override
-  String get cardRedrawHintBrighter => '더 밝게';
+  String get cardRedrawHintBrighter => 'Brighter';
 
   @override
-  String get cardFirstDrawConfirm => '그리기';
+  String get cardFirstDrawConfirm => 'Draw';
 
   @override
-  String get cardFirstDrawInProgress => '그림을 그리고 있어요';
+  String get cardFirstDrawInProgress => 'Drawing the picture';
 
   @override
-  String get cardFirstDrawFailedTitle => 'AI 그림을 그리지 못했어요';
+  String get cardFirstDrawFailedTitle => 'Couldn\'t draw the AI picture';
 
   @override
-  String get cardRedrawFailedFallback => '다시 해 볼까요? 크레딧은 쓰지 않았어요';
+  String get cardRedrawFailedFallback =>
+      'Want to try again? No credits were used';
 
   @override
-  String get cardCandidateSheetTitle => '어떤 그림으로 할까요?';
+  String get cardCandidateSheetTitle => 'Which picture would you like?';
 
   @override
-  String get cardCandidateSheetBody => '고른 그림만 이룸이에게 보여요';
+  String get cardCandidateSheetBody =>
+      'Only the picture you choose is shown to Elumi';
 
   @override
-  String get cardCandidateCurrentLabel => '지금 그림';
+  String get cardCandidateCurrentLabel => 'Current';
 
   @override
-  String get cardCandidateNewLabel => '새 그림';
+  String get cardCandidateNewLabel => 'New';
 
   @override
-  String get cardCandidateSelectButton => '이 그림으로 하기';
+  String get cardCandidateSelectButton => 'Use this picture';
 
   @override
-  String get cardCandidateAppliedToast => '새 그림으로 바꿨어요';
+  String get cardCandidateAppliedToast => 'Changed to the new picture';
 
   @override
-  String get cardCandidateLoadFailedTitle => '새 그림을 불러오지 못했어요';
+  String get cardCandidateLoadFailedTitle => 'Couldn\'t load the new picture';
 
   @override
-  String get cardCandidateApplyFailedTitle => '새 그림으로 바꾸지 못했어요';
+  String get cardCandidateApplyFailedTitle =>
+      'Couldn\'t change to the new picture';
 
   @override
-  String get planHeroHeadline => '이룸이만을 위한 카드로 바뀌어요';
+  String get planHeroHeadline => 'Cards made just for Elumi';
 
   @override
-  String get planHeroSubline => '같은 일과도 Pro로 만들면 이렇게 달라져요';
+  String get planHeroSubline =>
+      'Make the same routine with Pro and it looks like this';
 
   @override
-  String get planHeroFreeTag => 'Free 이모지';
+  String get planHeroFreeTag => 'Free emoji';
 
   @override
-  String get planHeroProTag => 'Pro 캐릭터 그림';
+  String get planHeroProTag => 'Pro character picture';
 
   @override
-  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요';
+  String get planHeroCompareSemantics =>
+      'Free gives emoji cards, Pro gives character picture cards';
 
   @override
   String planBenefitGroupCards(String elumiName) {
-    return '$elumiName만의 카드 그림';
+    return 'Card pictures made just for $elumiName';
   }
 
   @override
-  String get planBenefitGroupRoutines => '일과가 알아서 가요';
+  String get planBenefitGroupRoutines => 'Routines send themselves';
 
   @override
-  String get planBenefitGroupWeek => '한 주를 정리해 드려요';
+  String get planBenefitGroupWeek => 'We sum up the week for you';
 
   @override
-  String get planBenefitGroupExtra => '더 넉넉하게';
+  String get planBenefitGroupExtra => 'A little more room';
 
   @override
   String planYearlySaving(int percent) {
-    return '$percent% 아껴요';
+    return 'Save $percent%';
   }
 
   @override
   String planMonthlyEquivalent(String price) {
-    return '한 달에 $price 꼴';
+    return 'About $price a month';
   }
 
   @override
-  String get planRenewsYearly => '1년마다 자동 갱신';
+  String get planRenewsYearly => 'Renews every year';
 
   @override
-  String get planRenewsMonthly => '1개월마다 자동 갱신';
+  String get planRenewsMonthly => 'Renews every month';
 
   @override
   String planPriceUnit(String period) {
     String _temp0 = intl.Intl.selectLogic(period, {
-      'yearly': '/년',
-      'other': '/월',
+      'yearly': '/year',
+      'other': '/month',
     });
     return '$_temp0';
   }
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요';
+    return 'After $trial, $price$unit is charged automatically. Cancel at least a day before it ends to avoid being charged';
   }
 
   @override
   String planCtaTrialNoticePlayStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 체험 중 해지하면 청구되지 않아요';
+    return 'After $trial, $price$unit is charged automatically. Cancel during the trial to avoid being charged';
   }
 
   @override
   String planCtaRenewNotice(String price, String unit) {
-    return '$price$unit 자동 갱신돼요. 언제든 해지할 수 있어요';
+    return 'Renews automatically at $price$unit. Cancel anytime';
   }
 
   @override
   String planTryFreeTrial(String trial) {
-    return '$trial 무료로 써 보기';
+    return 'Try $trial free';
   }
 
   @override
-  String get planSeeAllBenefits => 'Pro 혜택 모두 보기';
+  String get planSeeAllBenefits => 'See all Pro benefits';
 
   @override
-  String get planTierGift => '선물';
+  String get planTierGift => 'Gift';
 
   @override
-  String get proTeaserWeeklyPlanTitle => '요일과 시각만 정해 두면 그날 일과가 준비돼요';
+  String get proTeaserWeeklyPlanTitle =>
+      'Set the days and time, and that day\'s routine is ready';
 
   @override
-  String get proTeaserWeeklyReportTitle => '한 주를 한 장으로 받아 봐요';
+  String get proTeaserWeeklyReportTitle => 'Get the whole week on one page';
 
   @override
-  String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
+  String get proTeaserRoutineMemoryTitle => 'Remember what works for Elumi';
 
   @override
-  String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
+  String get proTeaserCardThemeTitle => 'Get prettier printable cards';
 
   @override
-  String get proTeaserCardLayoutTitle => '인쇄용 카드를 원하는 대로 받아요';
+  String get proTeaserCardLayoutTitle => 'Get printable cards your way';
 
   @override
   String get proTeaserCardLayoutBenefit =>
-      '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+      'Choose several cards per page, landscape paper, or a one-page routine';
 
   @override
   String get homeSuggestionDismissLabel => 'No thanks';
