@@ -6,7 +6,8 @@ enum NotificationType {
   creditRefilled('CREDIT_REFILLED'),
   feedbackResolved('FEEDBACK_RESOLVED'),
   talkPostCommented('TALK_POST_COMMENTED'),
-  talkPostImported('TALK_POST_IMPORTED');
+  talkPostImported('TALK_POST_IMPORTED'),
+  weeklyReportReady('WEEKLY_REPORT_READY');
 
   const NotificationType(this.wire);
 

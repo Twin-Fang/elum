@@ -1186,6 +1186,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
+
+  @override
   String guardianHomeGreeting(String name) {
     return 'Hello,\n$name 👋🏻';
   }
@@ -4011,9 +4014,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportFactsSection => '한 주 기록';
-
-  @override
   String get weeklyReportStars => '받은 별';
 
   @override
@@ -4056,11 +4056,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportRemainingSection => '남아 있던 카드';
-
-  @override
-  String get weeklyReportRemainingFooter =>
-      '지난 날 일과에서 마치지 않고 남은 카드예요. 오늘 일과는 세지 않아요';
+  String get weeklyReportRemainingSection => '자주 남은 카드';
 
   @override
   String weeklyReportRemainingLabel(String routine, String step) {
@@ -4090,16 +4086,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportNotIncluded => '주간 리포트는 Pro에서 볼 수 있어요';
 
   @override
-  String get weeklyReportSharePreview => '보낼 한 장';
-
-  @override
-  String get weeklyReportSharePreviewCaption => '미리 보기 그대로 이미지나 PDF로 보내요';
-
-  @override
   String get weeklyReportShareImage => '이미지';
 
   @override
-  String get weeklyReportSharePdf => 'PDF로 보내기';
+  String get weeklyReportSharePdf => 'PDF';
 
   @override
   String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
@@ -4111,6 +4101,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeklyReportShareNote => '이룸 앱에 남은 완료 기록을 센 내용이에요';
+
+  @override
+  String get weeklyReportSummaryEyebrow => '루미가 정리했어요';
+
+  @override
+  String get weeklyReportStatCompleted => '끝낸 일과';
+
+  @override
+  String get weeklyReportStatRemaining => '남은 카드';
+
+  @override
+  String weeklyReportRoutineRatio(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$sent번 중 $completed번',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportSave => '리포트 저장하기';
+
+  @override
+  String get weeklyReportSaveSheetTitle => '리포트를 어떻게 저장할까요?';
+
+  @override
+  String get weeklyReportPastReports => '지난 리포트 보기';
+
+  @override
+  String get weeklyReportPastSheetTitle => '지난 리포트';
+
+  @override
+  String weeklyReportPastWeekValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '일과 $count개 끝냄',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportPastEmpty => '아직 지난 리포트가 없어요';
+
+  @override
+  String get weeklyReportPastLoadFailed => '지난 리포트를 불러오지 못했어요';
+
+  @override
+  String get weeklyReportFreePreviewNote => '첫 리포트는 그냥 보여 드려요';
 
   @override
   String get routineScheduleRowOff => '요일·시각 정하기';

@@ -93,6 +93,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
+    required this.weeklyReportSummaryFill,
     required this.catSelectedFill,
     required this.catSelectedBorder,
     required this.brandPeach,
@@ -467,6 +468,8 @@ class AppColors extends ThemeExtension<AppColors> {
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
   final Color foxSelectedBorder;
+  // 주간 리포트 루미 정리 글 판 (연보라, 시안 screens-v2)
+  final Color weeklyReportSummaryFill;
   final Color catSelectedFill;
   final Color catSelectedBorder;
 
@@ -1251,6 +1254,7 @@ class AppColors extends ThemeExtension<AppColors> {
     talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
+    weeklyReportSummaryFill: Color(0x66CED8FF),
     catSelectedFill: Color(0xFFCED8FF),
     catSelectedBorder: Color(0xFF9CADF1),
     brandPeach: Color(0xFFFFC9BB),
@@ -1541,6 +1545,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
+    Color? weeklyReportSummaryFill,
     Color? catSelectedFill,
     Color? catSelectedBorder,
     Color? brandPeach,
@@ -1819,6 +1824,7 @@ class AppColors extends ThemeExtension<AppColors> {
       talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
+      weeklyReportSummaryFill: weeklyReportSummaryFill ?? this.weeklyReportSummaryFill,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
       catSelectedBorder: catSelectedBorder ?? this.catSelectedBorder,
       brandPeach: brandPeach ?? this.brandPeach,
@@ -2145,6 +2151,7 @@ class AppColors extends ThemeExtension<AppColors> {
         other.foxSelectedBorder,
         t,
       )!,
+      weeklyReportSummaryFill: Color.lerp(weeklyReportSummaryFill, other.weeklyReportSummaryFill, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
       catSelectedBorder: Color.lerp(
         catSelectedBorder,

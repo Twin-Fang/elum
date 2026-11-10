@@ -48,7 +48,7 @@ List<RouteBase> guardianSettingsRoutes() => [
     path: Routes.guardianWeeklyReport,
     pageBuilder: (context, state) => slidePage(
       state,
-      const WeeklyReportScreen(),
+      WeeklyReportScreen(initialWeekStart: DateTime.tryParse(state.uri.queryParameters['weekStart'] ?? '')),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),

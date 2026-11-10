@@ -99,6 +99,9 @@ class NotificationNavigator {
         context.push(Routes.guardianCreditHistory);
       case NotificationType.feedbackResolved:
         break; // 이동할 화면 없음
+      case NotificationType.weeklyReportReady:
+        // 알림의 주(월요일)로 열기, 없으면 이번 주 (권한이 없으면 화면이 Pro 미리 보기 판을 보임)
+        context.push(Routes.guardianWeeklyReportOf(target.targetId));
       case NotificationType.talkPostCommented:
       case NotificationType.talkPostImported:
         // 글 id 가 없으면 이야기 칸으로 (지워진 글은 상세 화면이 안내)

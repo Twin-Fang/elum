@@ -2066,6 +2066,12 @@ abstract class AppLocalizations {
   /// **'보호자 {count}명이 내 글을 가져갔어요'**
   String notificationTalkPostImported(int count);
 
+  /// 알림 줄: 월요일마다 오는 주간 리포트
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 리포트가 도착했어요'**
+  String get notificationWeeklyReportReady;
+
   /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
@@ -6847,12 +6853,6 @@ abstract class AppLocalizations {
   /// **'{completed}/{sent}'**
   String weeklyReportDayCount(int completed, int sent);
 
-  /// 별·보상·연속 묶음 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'한 주 기록'**
-  String get weeklyReportFactsSection;
-
   /// 줄 이름 · 이 주에 마친 카드 수
   ///
   /// In ko, this message translates to:
@@ -6898,14 +6898,8 @@ abstract class AppLocalizations {
   /// 지난 날 마치지 않고 남은 카드 묶음 제목
   ///
   /// In ko, this message translates to:
-  /// **'남아 있던 카드'**
+  /// **'자주 남은 카드'**
   String get weeklyReportRemainingSection;
-
-  /// 남은 카드 묶음 아래 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'지난 날 일과에서 마치지 않고 남은 카드예요. 오늘 일과는 세지 않아요'**
-  String get weeklyReportRemainingFooter;
 
   /// 남은 카드 줄 이름 · 일과 이름 · 카드 이름
   ///
@@ -6943,28 +6937,16 @@ abstract class AppLocalizations {
   /// **'주간 리포트는 Pro에서 볼 수 있어요'**
   String get weeklyReportNotIncluded;
 
-  /// 선생님·치료사에게 보낼 한 장 미리 보기 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'보낼 한 장'**
-  String get weeklyReportSharePreview;
-
-  /// 미리 보기 아래 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'미리 보기 그대로 이미지나 PDF로 보내요'**
-  String get weeklyReportSharePreviewCaption;
-
-  /// 한 장을 PNG 로 공유 시트에
+  /// 리포트 저장 시트: 한 장을 PNG 로 공유 시트에
   ///
   /// In ko, this message translates to:
   /// **'이미지'**
   String get weeklyReportShareImage;
 
-  /// 한 장을 A4 PDF 로 공유 시트에
+  /// 리포트 저장 시트: 한 장을 A4 PDF 로 공유 시트에
   ///
   /// In ko, this message translates to:
-  /// **'PDF로 보내기'**
+  /// **'PDF'**
   String get weeklyReportSharePdf;
 
   /// 한 장 굽기 실패 팝업
@@ -6984,6 +6966,78 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸 앱에 남은 완료 기록을 센 내용이에요'**
   String get weeklyReportShareNote;
+
+  /// 주간 리포트 정리 글 카드 위 작은 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'루미가 정리했어요'**
+  String get weeklyReportSummaryEyebrow;
+
+  /// 숫자 3개 중 첫째 이름: 이 주에 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과'**
+  String get weeklyReportStatCompleted;
+
+  /// 숫자 3개 중 셋째 이름: 마치지 않고 남은 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 카드'**
+  String get weeklyReportStatRemaining;
+
+  /// 일과별 기록 줄 오른쪽 값: 보낸 횟수 중 마친 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{sent}번 중 {completed}번}}'**
+  String weeklyReportRoutineRatio(int sent, int completed);
+
+  /// 주간 리포트 아래 버튼: 누르면 PDF·이미지 고르기 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'리포트 저장하기'**
+  String get weeklyReportSave;
+
+  /// 리포트 저장 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'리포트를 어떻게 저장할까요?'**
+  String get weeklyReportSaveSheetTitle;
+
+  /// 주간 리포트 아래 글자 링크: 지난 리포트 목록 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트 보기'**
+  String get weeklyReportPastReports;
+
+  /// 지난 리포트 목록 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트'**
+  String get weeklyReportPastSheetTitle;
+
+  /// 지난 리포트 줄 오른쪽 값: 그 주에 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{일과 {count}개 끝냄}}'**
+  String weeklyReportPastWeekValue(int count);
+
+  /// 지난 리포트 목록이 비었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 지난 리포트가 없어요'**
+  String get weeklyReportPastEmpty;
+
+  /// 지난 리포트 목록 불러오기 실패 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트를 불러오지 못했어요'**
+  String get weeklyReportPastLoadFailed;
+
+  /// Free 에게 미리 보여 주는 주 리포트 위 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 리포트는 그냥 보여 드려요'**
+  String get weeklyReportFreePreviewNote;
 
   /// 일과 상세 시트(일과관리) 반복 줄 — 아직 정하지 않았을 때
   ///
@@ -7813,7 +7867,7 @@ abstract class AppLocalizations {
   /// **'더 예쁜 카드'**
   String get planBenefitGroupCards;
 
-  /// 혜택 묶음 제목: 반복·전문가 일과·다른 언어·AI 메모 #1189
+  /// 혜택 묶음 제목: 반복·AI 메모 #1189
   ///
   /// In ko, this message translates to:
   /// **'일과가 알아서 준비돼요'**
