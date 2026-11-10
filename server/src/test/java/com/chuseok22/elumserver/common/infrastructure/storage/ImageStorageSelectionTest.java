@@ -9,16 +9,19 @@ import com.chuseok22.elumserver.common.infrastructure.properties.TalkProperties;
 import com.chuseok22.elumserver.notice.infrastructure.storage.LocalFileNoticeImageStorage;
 import com.chuseok22.elumserver.notice.infrastructure.storage.MinioNoticeImageStorage;
 import com.chuseok22.elumserver.notice.infrastructure.storage.NoticeImageStorage;
+import com.chuseok22.elumserver.routine.infrastructure.storage.CardImageCompressor;
 import com.chuseok22.elumserver.routine.infrastructure.storage.LocalFileRoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.storage.MinioRoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.elumserver.talk.infrastructure.storage.LocalFileTalkImageStorage;
 import com.chuseok22.elumserver.talk.infrastructure.storage.MinioTalkImageStorage;
 import com.chuseok22.elumserver.talk.infrastructure.storage.TalkImageStorage;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -70,5 +73,11 @@ class ImageStorageSelectionTest {
     LocalFileRoutineImageStorage.class, LocalFileTalkImageStorage.class, LocalFileNoticeImageStorage.class,
     MinioRoutineImageStorage.class, MinioTalkImageStorage.class, MinioNoticeImageStorage.class})
   static class StorageBeans {
+
+    /// 그림 저장소가 요구하는 압축기 (이 시험은 저장소 선택만 보므로 압축하지 않는 가짜)
+    @Bean
+    CardImageCompressor cardImageCompressor() {
+      return image -> Optional.empty();
+    }
   }
 }
