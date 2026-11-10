@@ -566,7 +566,6 @@
   "linkRejectedAlreadyLinked": "This device is already connected",
   "linkRejectedOnGuardianPhone": "Open this on Elumi's device",
   "creditHistoryTitle": "Credit history",
-  "creditHistoryLink": "View credit history",
   "creditHistoryDay": "{month}/{day}",
   "creditHistoryDetail": "{kind}・{time}",
   "creditHistoryKindRoutineText": "Making the routine",

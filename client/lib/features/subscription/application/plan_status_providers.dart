@@ -18,6 +18,9 @@ final planStatusProvider = Provider<PlanStatus>((ref) {
 });
 
 /// 지금 구독이 스토어 결제인가 (구독 관리 버튼을 스토어로 보냄)
+/// 지금 가입 체험 중인가 (스토어 구독이 아니라 요금제 화면에서 구독을 시작할 수 있음)
+final isProTrialProvider = Provider<bool>((ref) => ref.watch(planStatusProvider).isTrial);
+
 final memberSubscriptionProvider = Provider<MemberSubscription?>(
   (ref) => ref.watch(memberProvider).value?.subscription,
 );
@@ -60,7 +63,14 @@ String planStatusLabel(AppLocalizations l10n, PlanStatus status) {
       dateLabel == null ? l10n.planStatusPro : l10n.planStatusUntil(dateLabel),
     PlanStatusKind.proGift =>
       dateLabel == null ? l10n.planStatusGift : l10n.planStatusGiftUntil(dateLabel),
+    PlanStatusKind.proTrial => _trialLabel(l10n, status),
   };
+}
+
+/// `Pro 체험 중, 3일 남았어요` · 마지막 날은 `Pro 체험 중, 오늘까지예요`
+String _trialLabel(AppLocalizations l10n, PlanStatus status) {
+  final daysLeft = status.trialDaysLeft(DateTime.now());
+  return daysLeft == 0 ? l10n.planStatusTrialLastDay : l10n.planStatusTrial(daysLeft);
 }
 
 /// 설정 줄 값 (짧게): Free · Pro · Pro 선물. 날짜·결제 확인은 묶음 아래 [planStatusFooter] 한 줄로 (줄 값이 두 줄로 꺾이지 않게)
@@ -87,6 +97,7 @@ String? planStatusFooter(AppLocalizations l10n, PlanStatus status) {
     PlanStatusKind.proCancelScheduled => dateLabel == null ? null : l10n.planStatusCancelScheduledFooter(dateLabel),
     PlanStatusKind.proUntil => dateLabel == null ? null : l10n.planStatusUntilFooter(dateLabel),
     PlanStatusKind.proGift => dateLabel == null ? null : l10n.planStatusGiftUntil(dateLabel),
+    PlanStatusKind.proTrial => _trialLabel(l10n, status),
   };
 }
 

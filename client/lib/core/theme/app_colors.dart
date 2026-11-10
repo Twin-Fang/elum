@@ -99,6 +99,17 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.weeklyReportInsightStuckAccent,
     required this.weeklyReportInsightTrendFill,
     required this.weeklyReportInsightTrendAccent,
+    required this.creditKindPeriodic,
+    required this.creditKindBonus,
+    required this.creditKindPurchased,
+    required this.creditPackTileMint,
+    required this.creditPackTilePeach,
+    required this.creditPackTileCream,
+    required this.creditPackPopularBorder,
+    required this.creditPackDiscountFill,
+    required this.creditPackBuyButton,
+    required this.proPlanFreeBadgeFill,
+    required this.proPlanFreeBadgeText,
     required this.catSelectedFill,
     required this.catSelectedBorder,
     required this.brandPeach,
@@ -484,6 +495,28 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color weeklyReportInsightTrendFill;
   // 주간 리포트 돌아보기: 지난주와 달라진 점 강조색 (이번 주 막대 포함)
   final Color weeklyReportInsightTrendAccent;
+  // 내 크레딧: 주기 지급 종류 색 (게이지 조각 · 줄 그림 바탕)
+  final Color creditKindPeriodic;
+  // 내 크레딧: 보너스 종류 색
+  final Color creditKindBonus;
+  // 내 크레딧: 구매 종류 색
+  final Color creditKindPurchased;
+  // 크레딧 꾸러미 칸 그림 바탕 (민트)
+  final Color creditPackTileMint;
+  // 크레딧 꾸러미 인기 칸 바탕 (복숭아)
+  final Color creditPackTilePeach;
+  // 크레딧 꾸러미 큰 꾸러미 그림 바탕 (크림)
+  final Color creditPackTileCream;
+  // 크레딧 꾸러미 인기 칸 테두리
+  final Color creditPackPopularBorder;
+  // 크레딧 꾸러미 할인율 알약 바탕
+  final Color creditPackDiscountFill;
+  // 크레딧 꾸러미 받기 버튼 바탕
+  final Color creditPackBuyButton;
+  // FREE 배지 바탕 (민트)
+  final Color proPlanFreeBadgeFill;
+  // FREE 배지 점 · 글자
+  final Color proPlanFreeBadgeText;
   final Color catSelectedFill;
   final Color catSelectedBorder;
 
@@ -1271,6 +1304,17 @@ class AppColors extends ThemeExtension<AppColors> {
     weeklyReportInsightStuckAccent: Color(0xFFEB9B73),
     weeklyReportInsightTrendFill: Color(0xFFEEF0FF),
     weeklyReportInsightTrendAccent: Color(0xFF9CADF1),
+    creditKindPeriodic: Color(0xFF55CFBA),
+    creditKindBonus: Color(0xFFEB9B73),
+    creditKindPurchased: Color(0xFF9CADF1),
+    creditPackTileMint: Color(0xFFE3F8F3),
+    creditPackTilePeach: Color(0xFFFFF1E6),
+    creditPackTileCream: Color(0xFFFFF7DA),
+    creditPackPopularBorder: Color(0xFFEB9B73),
+    creditPackDiscountFill: Color(0xFFFF8B22),
+    creditPackBuyButton: Color(0xFF55CFBA),
+    proPlanFreeBadgeFill: Color(0xFFE3F8F3),
+    proPlanFreeBadgeText: Color(0xFF3FB7C9),
     catSelectedFill: Color(0xFFCED8FF),
     catSelectedBorder: Color(0xFF9CADF1),
     brandPeach: Color(0xFFFFC9BB),
@@ -1566,6 +1610,17 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? weeklyReportInsightStuckAccent,
     Color? weeklyReportInsightTrendFill,
     Color? weeklyReportInsightTrendAccent,
+    Color? creditKindPeriodic,
+    Color? creditKindBonus,
+    Color? creditKindPurchased,
+    Color? creditPackTileMint,
+    Color? creditPackTilePeach,
+    Color? creditPackTileCream,
+    Color? creditPackPopularBorder,
+    Color? creditPackDiscountFill,
+    Color? creditPackBuyButton,
+    Color? proPlanFreeBadgeFill,
+    Color? proPlanFreeBadgeText,
     Color? catSelectedFill,
     Color? catSelectedBorder,
     Color? brandPeach,
@@ -1849,6 +1904,17 @@ class AppColors extends ThemeExtension<AppColors> {
       weeklyReportInsightStuckAccent: weeklyReportInsightStuckAccent ?? this.weeklyReportInsightStuckAccent,
       weeklyReportInsightTrendFill: weeklyReportInsightTrendFill ?? this.weeklyReportInsightTrendFill,
       weeklyReportInsightTrendAccent: weeklyReportInsightTrendAccent ?? this.weeklyReportInsightTrendAccent,
+      creditKindPeriodic: creditKindPeriodic ?? this.creditKindPeriodic,
+      creditKindBonus: creditKindBonus ?? this.creditKindBonus,
+      creditKindPurchased: creditKindPurchased ?? this.creditKindPurchased,
+      creditPackTileMint: creditPackTileMint ?? this.creditPackTileMint,
+      creditPackTilePeach: creditPackTilePeach ?? this.creditPackTilePeach,
+      creditPackTileCream: creditPackTileCream ?? this.creditPackTileCream,
+      creditPackPopularBorder: creditPackPopularBorder ?? this.creditPackPopularBorder,
+      creditPackDiscountFill: creditPackDiscountFill ?? this.creditPackDiscountFill,
+      creditPackBuyButton: creditPackBuyButton ?? this.creditPackBuyButton,
+      proPlanFreeBadgeFill: proPlanFreeBadgeFill ?? this.proPlanFreeBadgeFill,
+      proPlanFreeBadgeText: proPlanFreeBadgeText ?? this.proPlanFreeBadgeText,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
       catSelectedBorder: catSelectedBorder ?? this.catSelectedBorder,
       brandPeach: brandPeach ?? this.brandPeach,
@@ -2180,6 +2246,17 @@ class AppColors extends ThemeExtension<AppColors> {
       weeklyReportInsightStuckAccent: Color.lerp(weeklyReportInsightStuckAccent, other.weeklyReportInsightStuckAccent, t)!,
       weeklyReportInsightTrendFill: Color.lerp(weeklyReportInsightTrendFill, other.weeklyReportInsightTrendFill, t)!,
       weeklyReportInsightTrendAccent: Color.lerp(weeklyReportInsightTrendAccent, other.weeklyReportInsightTrendAccent, t)!,
+      creditKindPeriodic: Color.lerp(creditKindPeriodic, other.creditKindPeriodic, t)!,
+      creditKindBonus: Color.lerp(creditKindBonus, other.creditKindBonus, t)!,
+      creditKindPurchased: Color.lerp(creditKindPurchased, other.creditKindPurchased, t)!,
+      creditPackTileMint: Color.lerp(creditPackTileMint, other.creditPackTileMint, t)!,
+      creditPackTilePeach: Color.lerp(creditPackTilePeach, other.creditPackTilePeach, t)!,
+      creditPackTileCream: Color.lerp(creditPackTileCream, other.creditPackTileCream, t)!,
+      creditPackPopularBorder: Color.lerp(creditPackPopularBorder, other.creditPackPopularBorder, t)!,
+      creditPackDiscountFill: Color.lerp(creditPackDiscountFill, other.creditPackDiscountFill, t)!,
+      creditPackBuyButton: Color.lerp(creditPackBuyButton, other.creditPackBuyButton, t)!,
+      proPlanFreeBadgeFill: Color.lerp(proPlanFreeBadgeFill, other.proPlanFreeBadgeFill, t)!,
+      proPlanFreeBadgeText: Color.lerp(proPlanFreeBadgeText, other.proPlanFreeBadgeText, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
       catSelectedBorder: Color.lerp(
         catSelectedBorder,

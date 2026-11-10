@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/consent_document_list_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/credit/presentation/credit_history_screen.dart';
+import '../../features/credit/presentation/my_credit_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
@@ -132,6 +133,10 @@ List<RouteBase> guardianSettingsRoutes() => [
     path: Routes.guardianNotificationSettings,
     pageBuilder: (context, state) =>
         slidePage(state, const NotificationSettingsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianMyCredit,
+    pageBuilder: (context, state) => slidePage(state, const MyCreditScreen()),
   ),
   GoRoute(
     path: Routes.guardianCreditHistory,

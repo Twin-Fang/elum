@@ -59,6 +59,8 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
     });
     final flow = ref.watch(planPurchaseStateProvider);
     final isPro = ref.watch(planAccessProvider.select((access) => access.isPro));
+    // 가입 체험 중이어도 구독을 시작할 수 있으면(살 수 있음) 고르는 화면을 보임
+    final canStartSubscription = ref.watch(isProTrialProvider) && ref.watch(planAccessProvider.select((access) => access.canPurchasePro));
     final l10n = context.l10n;
     final coordinator = ref.read(storePurchaseCoordinatorProvider);
     final close = Navigator.of(context).pop;
@@ -103,7 +105,7 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
       case PlanPurchasePhase.idle:
       case PlanPurchasePhase.purchasing:
       case PlanPurchasePhase.failed:
-        return isPro ? _alreadyPro(context) : _offers(context, flow);
+        return isPro && !canStartSubscription ? _alreadyPro(context) : _offers(context, flow);
     }
   }
 
@@ -162,6 +164,14 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (ref.watch(isProTrialProvider)) ...[
+                  Text(
+                    planStatusLabel(context.l10n, ref.watch(planStatusProvider)),
+                    textAlign: TextAlign.center,
+                    style: context.typo.settingsGroupLabel.copyWith(color: context.colors.textSecondary),
+                  ),
+                  SizedBox(height: space.sm.h),
+                ],
                 PlanBenefitCards(highlight: widget.highlight),
                 SizedBox(height: _sectionGap.h),
                 _offerSection(context, flow, catalogAsync, selected),

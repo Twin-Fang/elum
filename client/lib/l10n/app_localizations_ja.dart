@@ -2012,10 +2012,103 @@ class AppLocalizationsJa extends AppLocalizations {
   String get linkRejectedOnGuardianPhone => '이룸이 기기에서 열어주세요';
 
   @override
+  String get myCreditTitle => '내 크레딧';
+
+  @override
+  String get planFreeBadge => 'FREE';
+
+  @override
+  String get myCreditHistoryButton => '쓴 내역';
+
+  @override
+  String get myCreditCountUnit => '개';
+
+  @override
+  String get myCreditKindPeriodicWeek => '주간';
+
+  @override
+  String get myCreditKindPeriodicMonth => '월간';
+
+  @override
+  String get myCreditKindBonus => '보너스';
+
+  @override
+  String get myCreditKindPurchased => '구매';
+
+  @override
+  String get myCreditRefillWeek => '월요일에 다시 채워져요';
+
+  @override
+  String get myCreditRefillMonth => '다음 달 1일에 다시 채워져요';
+
+  @override
+  String myCreditUntilDate(int month, int day) {
+    return '$month월 $day일까지';
+  }
+
+  @override
+  String get myCreditNoExpiry => '기간 제한 없음';
+
+  @override
+  String get myCreditSubscribeLabel => '구독하면';
+
+  @override
+  String get myCreditSubscribeBody => 'AI 그림도 그리고 일과도 알아서 보내요';
+
+  @override
+  String get myCreditPackLabelFree => '크레딧만 더 받기';
+
+  @override
+  String get myCreditPackLabelPro => '크레딧 더 받기';
+
+  @override
+  String get creditGetMore => '크레딧 더 받기';
+
+  @override
+  String myCreditPackDiscount(int percent) {
+    return '-$percent%';
+  }
+
+  @override
+  String get myCreditPackPopular => '인기!';
+
+  @override
+  String myCreditPackBuy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 받기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myCreditPackNoExpiryNote => '구매한 크레딧은 기간 제한이 없어요';
+
+  @override
+  String get myCreditPackPriceFailed => '크레딧 값을 불러오지 못했어요';
+
+  @override
+  String myCreditPackTileLabel(int count, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크레딧 $count개',
+    );
+    return '$_temp0, $price';
+  }
+
+  @override
+  String get myCreditPurchaseRecheckTitle => '크레딧을 아직 받지 못했어요';
+
+  @override
+  String get myCreditPurchaseRecheckBody => '결제는 끝났어요. 다시 결제하지 않고 확인만 하면 돼요';
+
+  @override
   String get creditHistoryTitle => '크레딧 사용 내역';
 
   @override
-  String get creditHistoryLink => '크레딧 사용 내역 보기';
+  String get creditMineLink => '내 크레딧 보기';
 
   @override
   String creditHistoryDay(int month, int day) {
@@ -3792,6 +3885,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get planStatusGracePeriod => 'Pro, 결제 확인이 필요해요';
+
+  @override
+  String planStatusTrial(int days) {
+    return 'Pro 체험 중, $days일 남았어요';
+  }
+
+  @override
+  String get planStatusTrialLastDay => 'Pro 체험 중, 오늘까지예요';
 
   @override
   String get planStatusGift => 'Pro 선물';

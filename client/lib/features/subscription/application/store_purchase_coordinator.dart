@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../member/application/member_providers.dart';
 import '../data/store_billing_client.dart';
@@ -11,6 +12,7 @@ import '../domain/plan_error_code.dart';
 import '../domain/plan_purchase_state.dart';
 import '../domain/store_purchase_update.dart';
 import '../domain/store_verification.dart';
+import 'credit_purchase_coordinator.dart';
 import 'plan_purchase_notifier.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_verifier.dart';
@@ -25,6 +27,10 @@ class PlanRestoreOutcome {
   final PlanRestoreResult result;
   final Object? failure;
 }
+
+/// 이 상품 id 가 구독인가 (아니면 크레딧 꾸러미 소모성 상품으로 봄)
+bool isSubscriptionProduct(String productId) =>
+    productId == AppConfig.iapProductMonthly || productId == AppConfig.iapProductYearly;
 
 /// 스토어 구매 > 서버 확인 > 거래 마무리를 맡는 한 곳 (결제·복원·앱 시작 때 남은 거래)
 ///
@@ -156,6 +162,11 @@ class StorePurchaseCoordinator {
       AppLogger.info(
         '[plan purchase] store update : ${update.platform.name} ${update.status.name}',
       );
+      // 크레딧 꾸러미는 구독과 같은 구매 소식을 나눠 받음 > 상품 id 로 갈라 크레딧 쪽에 넘김
+      if (!isSubscriptionProduct(update.productId)) {
+        await _ref.read(creditPurchaseCoordinatorProvider).onStoreUpdate(update);
+        continue;
+      }
       switch (update.status) {
         case StorePurchaseStatus.pending:
           _flow.apply(const PlanPurchaseEvent.storePending());
@@ -176,7 +187,11 @@ class StorePurchaseCoordinator {
     try {
       final purchases = await _store.unsettledPastPurchases();
       for (final purchase in purchases) {
-        if (purchase.status == StorePurchaseStatus.purchased) await _verifier.verify(purchase);
+        if (!isSubscriptionProduct(purchase.productId)) {
+          await _ref.read(creditPurchaseCoordinatorProvider).recheckSilently(purchase);
+        } else if (purchase.status == StorePurchaseStatus.purchased) {
+          await _verifier.verify(purchase);
+        }
       }
     } catch (error, stack) {
       AppLogger.error('[plan purchase] past purchases failed', error, stack);

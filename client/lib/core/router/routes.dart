@@ -111,6 +111,9 @@ abstract final class Routes {
   /// 크레딧 사용 내역 (Figma `1589:8359`). 설정 크레딧 카드에서 들어온다.
   static const guardianCreditHistory = '/guardian/settings/credit-history';
 
+  /// 내 크레딧: 종류별 잔액 · 구독 안내 · 꾸러미 구매
+  static const guardianMyCredit = '/guardian/settings/my-credit';
+
   /// 함께하는 사람. 시안이 없어 임시 화면이다.
   static const guardianPeople = '/guardian/settings/people';
 

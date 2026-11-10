@@ -3680,17 +3680,167 @@ abstract class AppLocalizations {
   /// **'이룸이 기기에서 열어주세요'**
   String get linkRejectedOnGuardianPhone;
 
+  /// 내 크레딧 화면 제목 · 설정의 요금제 묶음 아래 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 크레딧'**
+  String get myCreditTitle;
+
+  /// 내 크레딧 머리의 Free 요금제 태그 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'FREE'**
+  String get planFreeBadge;
+
+  /// 내 크레딧 위 카드 오른쪽 버튼: 크레딧 사용 내역 화면으로
+  ///
+  /// In ko, this message translates to:
+  /// **'쓴 내역'**
+  String get myCreditHistoryButton;
+
+  /// 내 크레딧 큰 숫자 옆 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'개'**
+  String get myCreditCountUnit;
+
+  /// 내 크레딧 종류 이름: 매주 채워지는 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'주간'**
+  String get myCreditKindPeriodicWeek;
+
+  /// 내 크레딧 종류 이름: 매달 채워지는 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'월간'**
+  String get myCreditKindPeriodicMonth;
+
+  /// 내 크레딧 종류 이름: 선물 · 광고 보상 · 이벤트
+  ///
+  /// In ko, this message translates to:
+  /// **'보너스'**
+  String get myCreditKindBonus;
+
+  /// 내 크레딧 종류 이름: 산 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'구매'**
+  String get myCreditKindPurchased;
+
+  /// 내 크레딧 주간 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'월요일에 다시 채워져요'**
+  String get myCreditRefillWeek;
+
+  /// 내 크레딧 월간 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 달 1일에 다시 채워져요'**
+  String get myCreditRefillMonth;
+
+  /// 내 크레딧 보너스 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일까지'**
+  String myCreditUntilDate(int month, int day);
+
+  /// 내 크레딧 구매 줄 끝나는 때 (제한 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'기간 제한 없음'**
+  String get myCreditNoExpiry;
+
+  /// 내 크레딧 구독 카드 위 작은 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'구독하면'**
+  String get myCreditSubscribeLabel;
+
+  /// 내 크레딧 구독 카드 설명 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림도 그리고 일과도 알아서 보내요'**
+  String get myCreditSubscribeBody;
+
+  /// 내 크레딧 꾸러미 구역 제목 (Free: 구독 카드 아래라 크레딧만 사는 것임을 말함)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧만 더 받기'**
+  String get myCreditPackLabelFree;
+
+  /// 내 크레딧 꾸러미 구역 제목 (Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 더 받기'**
+  String get myCreditPackLabelPro;
+
+  /// 크레딧 부족 팝업 버튼: 내 크레딧 화면의 꾸러미로
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 더 받기'**
+  String get creditGetMore;
+
+  /// 꾸러미 칸 오른쪽 위 할인율 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'-{percent}%'**
+  String myCreditPackDiscount(int percent);
+
+  /// 꾸러미 인기 칸 아래 걸친 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'인기!'**
+  String get myCreditPackPopular;
+
+  /// 꾸러미 구매 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개 받기}}'**
+  String myCreditPackBuy(int count);
+
+  /// 꾸러미 구매 버튼 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구매한 크레딧은 기간 제한이 없어요'**
+  String get myCreditPackNoExpiryNote;
+
+  /// 스토어 값을 못 불러왔을 때 꾸러미 자리 문구 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 값을 불러오지 못했어요'**
+  String get myCreditPackPriceFailed;
+
+  /// 꾸러미 칸 낭독 이름. price 는 스토어 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧 {count}개}}, {price}'**
+  String myCreditPackTileLabel(int count, String price);
+
+  /// 결제는 됐는데 서버가 아직 크레딧을 안 넣었을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 아직 받지 못했어요'**
+  String get myCreditPurchaseRecheckTitle;
+
+  /// 크레딧 구매 확인 대기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 끝났어요. 다시 결제하지 않고 확인만 하면 돼요'**
+  String get myCreditPurchaseRecheckBody;
+
   /// 크레딧 사용 내역 화면의 제목 (Figma 1589:8359)
   ///
   /// In ko, this message translates to:
   /// **'크레딧 사용 내역'**
   String get creditHistoryTitle;
 
-  /// 설정 크레딧 카드 맨 아래 줄. 누르면 사용 내역 화면으로 간다 (Figma 1532:7501)
+  /// 내 정보 크레딧 카드 맨 아래 줄: 내 크레딧 화면으로
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 사용 내역 보기'**
-  String get creditHistoryLink;
+  /// **'내 크레딧 보기'**
+  String get creditMineLink;
 
   /// 사용 내역의 날짜 머리글. 예: 10월 1일
   ///
@@ -6781,6 +6931,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro, 결제 확인이 필요해요'**
   String get planStatusGracePeriod;
+
+  /// 요금제 상태: 가입 체험 중. days 는 끝나기까지 남은 날(1 이상)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험 중, {days}일 남았어요'**
+  String planStatusTrial(int days);
+
+  /// 요금제 상태: 가입 체험 마지막 날
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험 중, 오늘까지예요'**
+  String get planStatusTrialLastDay;
 
   /// 요금제 상태: 기존 가입자 Pro 선물 (설정 줄 값)
   ///

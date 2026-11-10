@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/date_labels.dart';
 import '../../../core/network/server_error_code.dart';
+import 'credit_breakdown.dart';
 import 'credit_period_unit.dart';
 
 /// 진행 중인 생성 작업 한 건 — `inProgress[]`.
@@ -45,6 +46,7 @@ class CreditSummary {
     this.canStartRoutine = true,
     this.canGenerateImage = true,
     this.periodUnit = CreditPeriodUnit.week,
+    this.breakdown = const [],
   });
 
   /// 크레딧 정책이 꺼져 있다 — 설정 카드를 그리지 않고 홈도 막지 않는다.
@@ -75,6 +77,9 @@ class CreditSummary {
 
   /// 다시 채워지는 주기 (서버가 안 주면 주)
   final CreditPeriodUnit periodUnit;
+
+  /// 종류별 줄 (서버가 안 주면 빈 목록 > [breakdownLines] 가 주기 한 줄로 채움)
+  final List<CreditBreakdownLine> breakdown;
 
   factory CreditSummary.fromJson(Map<String, dynamic> json) {
     final enabled = json['enabled'];
@@ -131,10 +136,24 @@ class CreditSummary {
           ? json['canGenerateImage'] as bool
           : true,
       periodUnit: CreditPeriodUnit.fromWire(json['periodUnit']),
+      breakdown: switch (json['breakdown']) {
+        final List<dynamic> list => list.map(CreditBreakdownLine.tryParse).whereType<CreditBreakdownLine>().toList(),
+        _ => const [],
+      },
     );
   }
 
   bool get isExhausted => available <= 0;
+
+  /// 화면이 그릴 종류별 줄: 서버 줄 중 남은 게 있는 것(주기는 0이어도 둠), 없으면 `available` + 주기 지급량으로 주기 한 줄
+  List<CreditBreakdownLine> get breakdownLines {
+    final lines = [
+      for (final line in breakdown)
+        if (line.remaining > 0 || line.kind == CreditKind.periodic) line,
+    ];
+    if (lines.isNotEmpty) return lines;
+    return [CreditBreakdownLine(kind: CreditKind.periodic, remaining: available, granted: weeklyGrant, expiresAt: nextResetAt)];
+  }
 
   /// 지금 일과를 만들고 있다 — 설정 카드에 한 줄로 알린다.
   bool get isGeneratingRoutine =>

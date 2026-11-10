@@ -23,6 +23,9 @@ enum PlanStatusKind {
 
   /// Pro 선물 (기존 가입자), 끝나는 날까지
   proGift,
+
+  /// 가입 체험 중 (스토어 구독 아님), 끝나는 날까지
+  proTrial,
 }
 
 /// 내 요금제 줄에 그릴 것: 상태 + 날짜
@@ -36,6 +39,17 @@ class PlanStatus {
   final DateTime? date;
 
   bool get isPro => kind != PlanStatusKind.free;
+
+  /// 가입 체험 중인가 (요금제 화면에서 구독을 시작할 수 있음)
+  bool get isTrial => kind == PlanStatusKind.proTrial;
+
+  /// 체험이 끝나기까지 남은 날 (끝나는 날이 오늘이면 0, 이미 지났으면 0)
+  int trialDaysLeft(DateTime now) {
+    final end = date?.toLocal();
+    if (end == null) return 0;
+    final days = DateTime(end.year, end.month, end.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+    return days < 0 ? 0 : days;
+  }
 
   /// Pro 여부(권한 판정 한 곳) + 구독 상태 > 줄 상태
   ///
@@ -51,6 +65,9 @@ class PlanStatus {
     }
     if (subscription == null || expiresAt == null) {
       return const PlanStatus(PlanStatusKind.proUnlimited);
+    }
+    if (subscription.source == SubscriptionSource.promo) {
+      return PlanStatus(PlanStatusKind.proTrial, date: expiresAt);
     }
     if (subscription.source == SubscriptionSource.proGift) {
       return PlanStatus(PlanStatusKind.proGift, date: expiresAt);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
+import '../../credit/domain/credit_pack.dart';
 import '../domain/plan_catalog.dart';
 import '../domain/store_purchase_update.dart';
 import 'store_free_trial.dart';
@@ -73,6 +74,35 @@ class StoreBillingClient {
     if (offers.isEmpty) throw const StoreCatalogException('empty');
     offers.sort((a, b) => a.period.index.compareTo(b.period.index));
     return PlanCatalog(offers);
+  }
+
+  /// 소모성 상품(크레딧 꾸러미) 값 불러오기: 스토어 연결 확인 > 조회 > 상품 id > 스토어 값 (못 찾은 id 는 빠짐)
+  Future<Map<String, CreditPackStorePrice>> loadConsumablePrices(Set<String> productIds) async {
+    if (!await _store.isAvailable()) throw const StoreCatalogException('unavailable');
+    final response = await _store.queryProductDetails(productIds);
+    final error = response.error;
+    if (error != null) throw StoreCatalogException('query:${error.code}');
+    final prices = <String, CreditPackStorePrice>{};
+    for (final product in response.productDetails) {
+      _productsById[product.id] = product;
+      prices[product.id] = CreditPackStorePrice(
+        label: product.price,
+        rawPrice: product.rawPrice,
+        currencyCode: product.currencyCode.isEmpty ? null : product.currencyCode,
+      );
+    }
+    if (prices.isEmpty) throw const StoreCatalogException('empty');
+    return prices;
+  }
+
+  /// 소모성 결제창 열기. Android 는 서버가 consume 하므로 앱이 자동 소비하지 않음 (결과는 [purchaseUpdates])
+  Future<bool> buyConsumable({required String productId, required String accountToken}) async {
+    final product = _productsById[productId];
+    if (product == null) throw StateError('product not loaded: $productId');
+    return _store.buyConsumable(
+      purchaseParam: PurchaseParam(productDetails: product, applicationUserName: accountToken),
+      autoConsume: false,
+    );
   }
 
   /// 같은 상품 id 중 결제할 것 + 표시 가격 + (Android) 무료 체험
