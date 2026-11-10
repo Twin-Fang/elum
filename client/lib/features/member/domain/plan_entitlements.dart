@@ -16,6 +16,7 @@ class PlanEntitlements {
     this.canScheduleRoutines = false,
     this.canUseGuardianVoice = false,
     this.canUseRoutineMemory = false,
+    this.canSplitCards = false,
     this.canRegenerateImagesFree = false,
     this.canCreateRoutineTextFree = false,
     this.canUseAiPictures = false,
@@ -35,6 +36,7 @@ class PlanEntitlements {
     canScheduleRoutines: true,
     canUseGuardianVoice: true,
     canUseRoutineMemory: true,
+    canSplitCards: true,
     canRegenerateImagesFree: true,
     canCreateRoutineTextFree: true,
     canUseAiPictures: true,
@@ -67,6 +69,9 @@ class PlanEntitlements {
   /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가 (`routineMemory`)
   final bool canUseRoutineMemory;
 
+  /// 카드 한 장을 AI 가 2~3장으로 나눈 안을 받을 수 있는가 (`cardSplit`, 크레딧은 쓰지 않음)
+  final bool canSplitCards;
+
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (`imageRegenerateFree`, 하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
 
@@ -91,6 +96,7 @@ class PlanEntitlements {
       canScheduleRoutines: isEntitled('routineSchedule'),
       canUseGuardianVoice: isEntitled('guardianVoice'),
       canUseRoutineMemory: isEntitled('routineMemory'),
+      canSplitCards: isEntitled('cardSplit'),
       canRegenerateImagesFree: isEntitled('imageRegenerateFree'),
       canCreateRoutineTextFree: isEntitled('routineCreateFree'),
       canUseAiPictures: isEntitled('aiImageGeneration'),
@@ -108,6 +114,7 @@ class PlanEntitlements {
     canScheduleRoutines,
     canUseGuardianVoice,
     canUseRoutineMemory,
+    canSplitCards,
     canRegenerateImagesFree,
     canCreateRoutineTextFree,
     canUseAiPictures,

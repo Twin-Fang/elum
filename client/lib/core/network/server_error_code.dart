@@ -50,6 +50,9 @@ enum ServerErrorCode {
   // AI 메모 (#1082): Pro 아님 · 진단·장애·정도가 든 줄
   routineMemoryProRequired('ROUTINE_MEMORY_PRO_REQUIRED'),
   routineMemoryLineNotAllowed('ROUTINE_MEMORY_LINE_NOT_ALLOWED'),
+  // 카드 나누기 (#1244): Pro 아님 · AI 실패·시간 초과·검증 어긋남
+  cardSplitProRequired('CARD_SPLIT_PRO_REQUIRED'),
+  cardSplitFailed('CARD_SPLIT_FAILED'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),

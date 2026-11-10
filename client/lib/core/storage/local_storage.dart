@@ -258,6 +258,16 @@ abstract interface class LocalStorage {
   List<String> get talkShareHintDismissedRoutineIds;
   Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
 
+  /// 보호자 홈 권유 카드: 종류 이름 > 마지막으로 보인 시각 (같은 종류는 한 달에 한 번까지)
+  ///
+  /// 일과·계정에 묶인 값이라 [clearAll] 이 지운다
+  Map<String, DateTime> get homeSuggestionShownAtByKind;
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind);
+
+  /// 보호자 홈 권유 카드를 닫은 기록 `{종류 이름}:{일과 id}` (다시 나오지 않음). [clearAll] 이 지운다
+  Set<String> get homeSuggestionDismissedKeys;
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys);
+
   /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
   ///
   /// 보기 취향이라 휴대폰에 속하고 [clearAll] 이 지우지 않는다

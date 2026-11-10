@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/assets/app_assets.dart';
 import '../core/l10n/l10n_context.dart';
-import '../core/widgets/notification_off_notice.dart';
+import '../core/widgets/home_notice_card.dart';
 import '../features/notification/application/device_notification_permission_controller.dart';
 
 /// 보호자 홈의 알림 꺼짐 카드를 권한 상태에 묶는 곳: 기기 알림이 꺼졌을 때만 보임
@@ -43,11 +44,12 @@ class _NotificationOffNoticeHostState extends ConsumerState<NotificationOffNotic
   Widget build(BuildContext context) {
     if (!ref.watch(deviceNotificationPermissionControllerProvider)) return const SizedBox.shrink();
     final l10n = context.l10n;
-    return NotificationOffNotice(
+    return HomeNoticeCard(
       title: l10n.notificationOffNoticeTitle,
       body: l10n.notificationOffNoticeBody,
-      turnOnLabel: l10n.notificationTurnOnDeviceNotification,
-      onTurnOn: ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn,
+      actionLabel: l10n.notificationTurnOnDeviceNotification,
+      actionIconAsset: AppAssets.iconBell,
+      onAction: ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn,
       onDismiss: widget.onDismiss,
       dismissLabel: l10n.commonClose,
     );

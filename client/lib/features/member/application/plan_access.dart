@@ -46,6 +46,7 @@ class PlanAccess {
   bool get canScheduleRoutines => entitlements.canScheduleRoutines;
   bool get canUseGuardianVoice => entitlements.canUseGuardianVoice;
   bool get canUseRoutineMemory => entitlements.canUseRoutineMemory;
+  bool get canSplitCards => entitlements.canSplitCards;
   bool get canRegenerateImagesFree => entitlements.canRegenerateImagesFree;
   bool get canCreateRoutineTextFree => entitlements.canCreateRoutineTextFree;
   bool get canUseAiPictures => entitlements.canUseAiPictures;

@@ -11,6 +11,7 @@ import '../domain/card_image_skipped_reason.dart';
 import 'routine_flow_state.dart';
 import 'routine_providers.dart';
 import 'routine_step_editing.dart';
+import 'routine_step_splitting.dart';
 
 final routineFlowProvider =
     NotifierProvider<RoutineFlowNotifier, RoutineFlowState>(
@@ -22,7 +23,7 @@ final routineFlowProvider =
 /// 어떤 단계도 예외를 던지지 않는다. repository가 실패를 흡수하므로
 /// 화면은 항상 다음 단계로 진행할 수 있다.
 class RoutineFlowNotifier extends Notifier<RoutineFlowState>
-    with RoutineStepEditing {
+    with RoutineStepEditing, RoutineStepSplitting {
   @override
   RoutineFlowState build() => const RoutineFlowState();
 

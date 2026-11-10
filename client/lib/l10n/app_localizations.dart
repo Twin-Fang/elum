@@ -8551,6 +8551,144 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요'**
   String get proTeaserCardLayoutBenefit;
+
+  /// 보호자 홈 권유 카드 닫기 x 낭독 글
+  ///
+  /// In ko, this message translates to:
+  /// **'괜찮아요'**
+  String get homeSuggestionDismissLabel;
+
+  /// 홈 권유 카드 제목: 같은 일과를 3일 이어서 보냈을 때 반복 정하기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'매일 자동으로 보낼까요?'**
+  String get homeSuggestionAutoSendTitle;
+
+  /// 홈 권유 카드 본문: 같은 일과를 이어서 보낸 날 수. routine 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다, days 는 이어서 보낸 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} {days}일째 보내셨어요'**
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days);
+
+  /// 홈 권유 카드 버튼: 반복 요일·시각 정하기
+  ///
+  /// In ko, this message translates to:
+  /// **'정하기'**
+  String get homeSuggestionAutoSendAction;
+
+  /// 홈 권유 카드 제목: 같은 일과를 5번 넘게 썼을 때 이야기 올리기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올려 볼까요?'**
+  String get homeSuggestionTalkShareTitle;
+
+  /// 홈 권유 카드 본문: 이야기에 올리면 다른 보호자가 가져다 쓸 수 있다는 뜻. routine 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자도 {routine}{batchim, select, yes{을} other{를}} 가져다 쓸 수 있어요'**
+  String homeSuggestionTalkShareBody(String routine, String batchim);
+
+  /// 홈 권유 카드 버튼: 그 일과로 이야기 올리기 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기'**
+  String get homeSuggestionTalkShareAction;
+
+  /// 홈 권유 카드 제목: 일과가 1개뿐이고 3일 넘게 썼을 때 일과 더 만들기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 더 만들어 볼까요?'**
+  String get homeSuggestionCreateMoreTitle;
+
+  /// 홈 권유 카드 본문: 다른 시간대 일과 예시
+  ///
+  /// In ko, this message translates to:
+  /// **'저녁이나 잠자기 전 일과는 어때요?'**
+  String get homeSuggestionCreateMoreBody;
+
+  /// 홈 권유 카드 버튼: 일과 만들기 시작
+  ///
+  /// In ko, this message translates to:
+  /// **'만들기'**
+  String get homeSuggestionCreateMoreAction;
+
+  /// 카드 수정 시트 칩: 카드 한 장을 AI 가 2~3장으로 나눈 안 받기 (Free 는 PRO 배지)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 카드 더 쉽게'**
+  String get cardSplitChip;
+
+  /// 카드 나누기 시트: 안을 받는 중
+  ///
+  /// In ko, this message translates to:
+  /// **'더 쉬운 단계로 나누고 있어요'**
+  String get cardSplitLoading;
+
+  /// 카드 나누기 시트 제목: 나눈 안을 보여 주며 묻는다
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 나눠 볼까요?'**
+  String get cardSplitSheetTitle;
+
+  /// 카드 나누기 시트 제목 아래 한 줄. title 은 원래 카드 제목, count 는 나눈 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{title} 카드를 작은 단계 {count}개로 나눠 봤어요'**
+  String cardSplitSheetDescription(String title, int count);
+
+  /// 나눌 것이 없는 카드일 때 제목 아래 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'행동이 하나라서 더 나누지 않았어요'**
+  String get cardSplitAlreadyShortDescription;
+
+  /// 카드 나누기 시트 안내: 새 카드 그림은 기본 그림
+  ///
+  /// In ko, this message translates to:
+  /// **'그림은 기본 그림으로 들어가요. 나중에 바꿀 수 있어요'**
+  String get cardSplitDefaultPictureNote;
+
+  /// 카드 나누기 시트 버튼(보조): 나누지 않고 닫기
+  ///
+  /// In ko, this message translates to:
+  /// **'그대로 두기'**
+  String get cardSplitKeepButton;
+
+  /// 카드 나누기 시트 버튼(주): 나눈 안 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 나누기'**
+  String get cardSplitApplyButton;
+
+  /// 카드 나누기 시트: 더 나눌 필요가 없는 카드
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 충분히 짧아요'**
+  String get cardSplitAlreadyShort;
+
+  /// 카드 나누기 실패 문구 (서버가 문구를 주지 않을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 나누지 못했어요. 잠시 뒤 다시 해 주세요'**
+  String get cardSplitFailedFallback;
+
+  /// 카드 나누기 실패 화면 버튼: 같은 일 다시 하기
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get cardSplitRetry;
+
+  /// 카드를 나눈 뒤 토스트. count 는 나뉜 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 {count}장으로 나눴어요'**
+  String cardSplitDoneToast(int count);
+
+  /// 혜택 줄: 카드 나누기
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장을 더 작게 나눠 줘요'**
+  String get planBenefitCardSplit;
 }
 
 class _AppLocalizationsDelegate

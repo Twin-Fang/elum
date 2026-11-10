@@ -4872,4 +4872,81 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get proTeaserCardLayoutBenefit =>
       '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+
+  @override
+  String get homeSuggestionDismissLabel => '大丈夫です';
+
+  @override
+  String get homeSuggestionAutoSendTitle => '毎日自動で送りますか？';
+
+  @override
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days) {
+    return '$routineを$days日続けて送っています';
+  }
+
+  @override
+  String get homeSuggestionAutoSendAction => '設定する';
+
+  @override
+  String get homeSuggestionTalkShareTitle => 'ストーリーに載せてみますか？';
+
+  @override
+  String homeSuggestionTalkShareBody(String routine, String batchim) {
+    return 'ほかの保護者も$routineを使えます';
+  }
+
+  @override
+  String get homeSuggestionTalkShareAction => '載せる';
+
+  @override
+  String get homeSuggestionCreateMoreTitle => '日課をもう一つ作りますか？';
+
+  @override
+  String get homeSuggestionCreateMoreBody => '夜や寝る前の日課はどうですか？';
+
+  @override
+  String get homeSuggestionCreateMoreAction => '作る';
+
+  @override
+  String get cardSplitChip => 'このカードをもっとやさしく';
+
+  @override
+  String get cardSplitLoading => 'やさしいステップに分けています';
+
+  @override
+  String get cardSplitSheetTitle => 'こう分けてみますか？';
+
+  @override
+  String cardSplitSheetDescription(String title, int count) {
+    return '「$title」を小さなステップ$countつに分けてみました';
+  }
+
+  @override
+  String get cardSplitAlreadyShortDescription => '行動が一つなので、これ以上分けませんでした';
+
+  @override
+  String get cardSplitDefaultPictureNote => '絵は基本の絵が入ります。あとで変えられます';
+
+  @override
+  String get cardSplitKeepButton => 'そのままにする';
+
+  @override
+  String get cardSplitApplyButton => 'この分け方にする';
+
+  @override
+  String get cardSplitAlreadyShort => 'もう十分短いです';
+
+  @override
+  String get cardSplitFailedFallback => 'カードを分けられませんでした。しばらくしてからもう一度お試しください';
+
+  @override
+  String get cardSplitRetry => 'もう一度';
+
+  @override
+  String cardSplitDoneToast(int count) {
+    return 'カードを$count枚に分けました';
+  }
+
+  @override
+  String get planBenefitCardSplit => 'カード1枚をより小さく分けます';
 }

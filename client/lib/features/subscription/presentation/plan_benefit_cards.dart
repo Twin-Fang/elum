@@ -164,6 +164,7 @@ String planBenefitLabel(
   PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
   PlanBenefit.routineSchedule => l10n.planBenefitRoutineSchedule,
   PlanBenefit.routineMemory => l10n.planBenefitRoutineMemory,
+  PlanBenefit.cardSplit => l10n.planBenefitCardSplit,
   PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
   PlanBenefit.freeRoutineText => l10n.planBenefitFreeRoutineText,
   PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,

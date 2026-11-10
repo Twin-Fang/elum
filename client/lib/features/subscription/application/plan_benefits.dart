@@ -8,6 +8,7 @@ bool isPlanBenefitGranted(PlanBenefit benefit, PlanEntitlements entitlements) =>
   PlanBenefit.weeklyReport => entitlements.canViewWeeklyReport,
   PlanBenefit.routineSchedule => entitlements.canScheduleRoutines,
   PlanBenefit.routineMemory => entitlements.canUseRoutineMemory,
+  PlanBenefit.cardSplit => entitlements.canSplitCards,
   PlanBenefit.guardianVoice => entitlements.canUseGuardianVoice,
   PlanBenefit.freeRoutineText => entitlements.canCreateRoutineTextFree,
   PlanBenefit.freeImageRegenerate => entitlements.canRegenerateImagesFree,

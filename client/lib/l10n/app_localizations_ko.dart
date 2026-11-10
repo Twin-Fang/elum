@@ -4874,4 +4874,83 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get proTeaserCardLayoutBenefit =>
       '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+
+  @override
+  String get homeSuggestionDismissLabel => '괜찮아요';
+
+  @override
+  String get homeSuggestionAutoSendTitle => '매일 자동으로 보낼까요?';
+
+  @override
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$routine$_temp0 $days일째 보내셨어요';
+  }
+
+  @override
+  String get homeSuggestionAutoSendAction => '정하기';
+
+  @override
+  String get homeSuggestionTalkShareTitle => '이야기에 올려 볼까요?';
+
+  @override
+  String homeSuggestionTalkShareBody(String routine, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '다른 보호자도 $routine$_temp0 가져다 쓸 수 있어요';
+  }
+
+  @override
+  String get homeSuggestionTalkShareAction => '올리기';
+
+  @override
+  String get homeSuggestionCreateMoreTitle => '일과를 더 만들어 볼까요?';
+
+  @override
+  String get homeSuggestionCreateMoreBody => '저녁이나 잠자기 전 일과는 어때요?';
+
+  @override
+  String get homeSuggestionCreateMoreAction => '만들기';
+
+  @override
+  String get cardSplitChip => '이 카드 더 쉽게';
+
+  @override
+  String get cardSplitLoading => '더 쉬운 단계로 나누고 있어요';
+
+  @override
+  String get cardSplitSheetTitle => '이렇게 나눠 볼까요?';
+
+  @override
+  String cardSplitSheetDescription(String title, int count) {
+    return '$title 카드를 작은 단계 $count개로 나눠 봤어요';
+  }
+
+  @override
+  String get cardSplitAlreadyShortDescription => '행동이 하나라서 더 나누지 않았어요';
+
+  @override
+  String get cardSplitDefaultPictureNote => '그림은 기본 그림으로 들어가요. 나중에 바꿀 수 있어요';
+
+  @override
+  String get cardSplitKeepButton => '그대로 두기';
+
+  @override
+  String get cardSplitApplyButton => '이렇게 나누기';
+
+  @override
+  String get cardSplitAlreadyShort => '이미 충분히 짧아요';
+
+  @override
+  String get cardSplitFailedFallback => '카드를 나누지 못했어요. 잠시 뒤 다시 해 주세요';
+
+  @override
+  String get cardSplitRetry => '다시 하기';
+
+  @override
+  String cardSplitDoneToast(int count) {
+    return '카드를 $count장으로 나눴어요';
+  }
+
+  @override
+  String get planBenefitCardSplit => '카드 한 장을 더 작게 나눠 줘요';
 }

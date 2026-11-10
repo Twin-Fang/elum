@@ -4866,4 +4866,81 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get proTeaserCardLayoutBenefit =>
       '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+
+  @override
+  String get homeSuggestionDismissLabel => '不用了';
+
+  @override
+  String get homeSuggestionAutoSendTitle => '要每天自动发送吗？';
+
+  @override
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days) {
+    return '$routine已经连续发送$days天了';
+  }
+
+  @override
+  String get homeSuggestionAutoSendAction => '去设置';
+
+  @override
+  String get homeSuggestionTalkShareTitle => '要发到故事里吗？';
+
+  @override
+  String homeSuggestionTalkShareBody(String routine, String batchim) {
+    return '其他监护人也可以使用$routine';
+  }
+
+  @override
+  String get homeSuggestionTalkShareAction => '发布';
+
+  @override
+  String get homeSuggestionCreateMoreTitle => '再做一个日常吗？';
+
+  @override
+  String get homeSuggestionCreateMoreBody => '晚上或睡前的日常怎么样？';
+
+  @override
+  String get homeSuggestionCreateMoreAction => '创建';
+
+  @override
+  String get cardSplitChip => '把这张卡片拆简单些';
+
+  @override
+  String get cardSplitLoading => '正在拆成更简单的步骤';
+
+  @override
+  String get cardSplitSheetTitle => '要这样拆分吗？';
+
+  @override
+  String cardSplitSheetDescription(String title, int count) {
+    return '把“$title”分成了$count个小步骤';
+  }
+
+  @override
+  String get cardSplitAlreadyShortDescription => '只有一个动作，所以没有再分';
+
+  @override
+  String get cardSplitDefaultPictureNote => '图片会使用默认图片，之后可以更换';
+
+  @override
+  String get cardSplitKeepButton => '保持原样';
+
+  @override
+  String get cardSplitApplyButton => '按此拆分';
+
+  @override
+  String get cardSplitAlreadyShort => '已经足够简短了';
+
+  @override
+  String get cardSplitFailedFallback => '未能拆分卡片，请稍后再试';
+
+  @override
+  String get cardSplitRetry => '重试';
+
+  @override
+  String cardSplitDoneToast(int count) {
+    return '已把卡片拆成$count张';
+  }
+
+  @override
+  String get planBenefitCardSplit => '把一张卡片拆得更小';
 }

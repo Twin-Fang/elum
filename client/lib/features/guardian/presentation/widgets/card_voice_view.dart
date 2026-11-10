@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/elum_row_card.dart';
 import '../../data/guardian_voice_api.dart';
 import '../../data/guardian_voice_recorder.dart';
 import 'card_voice_block.dart';
@@ -54,38 +55,38 @@ class CardVoiceView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardVoiceFrame(minHeight: CardVoiceBlock.minHeight.h, child: _row(context));
+    return ElumRowCardFrame(minHeight: CardVoiceBlock.minHeight.h, child: _row(context));
   }
 
   Widget _row(BuildContext context) {
     final l10n = context.l10n;
     switch (phase) {
       case CardVoicePhase.recording:
-        return CardVoiceRow(
+        return ElumRowCardRow(
           title: l10n.guardianVoiceRecording(elapsedSeconds),
           subtitle: l10n.guardianVoiceRecordingLimit(GuardianVoiceRules.maxDuration.inSeconds),
-          leading: const CardVoiceIcon(asset: AppAssets.iconMicrophone),
-          actions: [CardVoiceChip(label: l10n.guardianVoiceStop, iconAsset: AppAssets.iconStop, onTap: onStopRecording)],
+          leading: const ElumRowCardIcon(asset: AppAssets.iconMicrophone),
+          actions: [ElumRowCardChip(label: l10n.guardianVoiceStop, iconAsset: AppAssets.iconStop, onTap: onStopRecording)],
         );
       case CardVoicePhase.uploading:
-        return CardVoiceRow(title: l10n.guardianVoiceSaving, leading: const CardVoiceSpinner());
+        return ElumRowCardRow(title: l10n.guardianVoiceSaving, leading: const CardVoiceSpinner());
       case CardVoicePhase.micDenied:
-        return CardVoiceRow(
+        return ElumRowCardRow(
           title: l10n.guardianVoiceMicDeniedTitle,
           subtitle: l10n.guardianVoiceMicDeniedBody,
           actions: [
-            CardVoiceChip(label: l10n.guardianVoiceOpenSettings, onTap: onOpenSettings),
-            CardVoiceChip(label: l10n.commonConfirm, onTap: onDismissMicDenied),
+            ElumRowCardChip(label: l10n.guardianVoiceOpenSettings, onTap: onOpenSettings),
+            ElumRowCardChip(label: l10n.commonConfirm, onTap: onDismissMicDenied),
           ],
         );
       case CardVoicePhase.failed:
         final shown = failure ?? VoiceFailure.recordFailed;
-        return CardVoiceRow(
+        return ElumRowCardRow(
           title: l10n.guardianVoiceFailedTitle,
           // 제보를 받았을 때 어디서 터졌는지 찾는 식별자
           subtitle: '${shown.message} (${shown.code})',
           actions: [
-            CardVoiceChip(
+            ElumRowCardChip(
               label: canRetrySame ? l10n.guardianVoiceRetry : l10n.commonConfirm,
               iconAsset: canRetrySame ? AppAssets.iconRefresh : null,
               onTap: onFailureButton,
@@ -100,40 +101,40 @@ class CardVoiceView extends StatelessWidget {
   /// 녹음 전 · 녹음 있음 · Pro 끝남 (녹음 있음/없음)
   Widget _readyRow(BuildContext context) {
     final l10n = context.l10n;
-    final playChip = CardVoiceChip(
+    final playChip = ElumRowCardChip(
       label: isPlaying ? l10n.guardianVoiceStop : l10n.guardianVoicePlay,
       iconAsset: isPlaying ? AppAssets.iconStop : AppAssets.iconPlay,
       onTap: onTogglePlaying,
     );
-    final deleteChip = CardVoiceChip(label: l10n.guardianVoiceDelete, iconAsset: AppAssets.iconTrash, onTap: onDelete);
+    final deleteChip = ElumRowCardChip(label: l10n.guardianVoiceDelete, iconAsset: AppAssets.iconTrash, onTap: onDelete);
     if (voiceKey == null && !canRecord) {
       // Pro 가 끝난 뒤 녹음을 지웠다: 이제 할 일이 없다 (시트를 다시 열면 칸이 빠짐)
-      return CardVoiceRow(title: l10n.guardianVoicePlanEnded);
+      return ElumRowCardRow(title: l10n.guardianVoicePlanEnded);
     }
     if (voiceKey == null) {
-      return CardVoiceRow(
+      return ElumRowCardRow(
         title: l10n.guardianVoiceRecordAction,
         subtitle: l10n.guardianVoiceRecordHint,
         actions: [
-          CardVoiceChip(label: l10n.guardianVoiceRecordChip, iconAsset: AppAssets.iconMicrophone, onTap: onStartRecording),
+          ElumRowCardChip(label: l10n.guardianVoiceRecordChip, iconAsset: AppAssets.iconMicrophone, onTap: onStartRecording),
         ],
       );
     }
     if (!canRecord) {
       // Pro 가 끝남: 녹음은 남아 있고 듣기·지우기만 (다시 녹음 없음)
-      return CardVoiceRow(
+      return ElumRowCardRow(
         title: l10n.guardianVoicePlanEnded,
         subtitle: l10n.guardianVoicePlanEndedHint,
         actions: [playChip, deleteChip],
       );
     }
-    return CardVoiceRow(
+    return ElumRowCardRow(
       title: l10n.guardianVoiceSaved,
       actions: [
         playChip,
         // 칩 세 개가 한 줄에 들어가게 뒤 둘은 글자만
-        CardVoiceChip(label: l10n.guardianVoiceRerecord, onTap: onStartRecording),
-        CardVoiceChip(label: l10n.guardianVoiceDelete, onTap: onDelete),
+        ElumRowCardChip(label: l10n.guardianVoiceRerecord, onTap: onStartRecording),
+        ElumRowCardChip(label: l10n.guardianVoiceDelete, onTap: onDelete),
       ],
     );
   }

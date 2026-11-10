@@ -345,6 +345,24 @@ class InMemoryStorage implements LocalStorage {
     List<String> routineIds,
   ) async => _talkShareHintDismissedRoutineIds = routineIds;
 
+  Map<String, DateTime> _homeSuggestionShownAtByKind = const {};
+
+  @override
+  Map<String, DateTime> get homeSuggestionShownAtByKind => _homeSuggestionShownAtByKind;
+
+  @override
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind) async =>
+      _homeSuggestionShownAtByKind = shownAtByKind;
+
+  Set<String> _homeSuggestionDismissedKeys = const {};
+
+  @override
+  Set<String> get homeSuggestionDismissedKeys => _homeSuggestionDismissedKeys;
+
+  @override
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async =>
+      _homeSuggestionDismissedKeys = dismissedKeys;
+
   bool _isTalkGridView = false;
 
   @override
@@ -422,5 +440,7 @@ class InMemoryStorage implements LocalStorage {
     _cachedTodayOwner = null;
     _talkImportedSeenRoutineIds = const [];
     _talkShareHintDismissedRoutineIds = const [];
+    _homeSuggestionShownAtByKind = const {};
+    _homeSuggestionDismissedKeys = const {};
   }
 }

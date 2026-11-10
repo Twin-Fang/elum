@@ -10,6 +10,7 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../data/card_photo.dart';
 import 'card_photo_block.dart';
+import 'card_split_chip.dart';
 import 'card_voice_block.dart';
 import 'routine_flow_scaffold.dart' show dismissKeyboard;
 
@@ -238,6 +239,13 @@ class _CardEditSheetState extends State<CardEditSheet>
               padding: EdgeInsets.only(bottom: CardEditSheet._voiceGap.h),
               child: CardVoiceBlock(routineId: voice.routineId, stepId: voice.stepId),
             ),
+          ),
+        // 카드 나누기 칩: 그림 칸과 같은 조건(서버 카드), 키보드가 올라오면 접음
+        if (photo != null && !_isAdd)
+          Visibility(
+            visible: !keyboardOpen,
+            maintainState: true,
+            child: CardSplitChip(routineId: photo.routineId, stepId: photo.stepId),
           ),
         ElumSheetTextField(
           controller: _titleController,

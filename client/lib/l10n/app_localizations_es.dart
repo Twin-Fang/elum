@@ -4926,4 +4926,86 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get proTeaserCardLayoutBenefit =>
       '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+
+  @override
+  String get homeSuggestionDismissLabel => 'No, gracias';
+
+  @override
+  String get homeSuggestionAutoSendTitle =>
+      '¿Enviarla automáticamente cada día?';
+
+  @override
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days) {
+    return 'Has enviado $routine $days días seguidos';
+  }
+
+  @override
+  String get homeSuggestionAutoSendAction => 'Configurar';
+
+  @override
+  String get homeSuggestionTalkShareTitle => '¿La compartimos en Historias?';
+
+  @override
+  String homeSuggestionTalkShareBody(String routine, String batchim) {
+    return 'Otros tutores también pueden usar $routine';
+  }
+
+  @override
+  String get homeSuggestionTalkShareAction => 'Compartir';
+
+  @override
+  String get homeSuggestionCreateMoreTitle => '¿Creamos otra rutina?';
+
+  @override
+  String get homeSuggestionCreateMoreBody =>
+      '¿Qué tal una para la tarde o antes de dormir?';
+
+  @override
+  String get homeSuggestionCreateMoreAction => 'Crear';
+
+  @override
+  String get cardSplitChip => 'Hacer esta tarjeta más fácil';
+
+  @override
+  String get cardSplitLoading => 'Dividiéndola en pasos más fáciles';
+
+  @override
+  String get cardSplitSheetTitle => '¿La dividimos así?';
+
+  @override
+  String cardSplitSheetDescription(String title, int count) {
+    return 'Dividimos “$title” en $count pasos más pequeños';
+  }
+
+  @override
+  String get cardSplitAlreadyShortDescription =>
+      'Ya es una sola acción, así que la dejamos igual';
+
+  @override
+  String get cardSplitDefaultPictureNote =>
+      'Llevarán la imagen básica. Puedes cambiarla después';
+
+  @override
+  String get cardSplitKeepButton => 'Dejarla así';
+
+  @override
+  String get cardSplitApplyButton => 'Dividir así';
+
+  @override
+  String get cardSplitAlreadyShort => 'Ya es suficientemente corta';
+
+  @override
+  String get cardSplitFailedFallback =>
+      'No se pudo dividir la tarjeta. Inténtalo de nuevo en un momento';
+
+  @override
+  String get cardSplitRetry => 'Reintentar';
+
+  @override
+  String cardSplitDoneToast(int count) {
+    return 'Dividimos la tarjeta en $count';
+  }
+
+  @override
+  String get planBenefitCardSplit => 'Divide una tarjeta en otras más pequeñas';
 }

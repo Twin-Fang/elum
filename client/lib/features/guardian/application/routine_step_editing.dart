@@ -32,6 +32,9 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
   /// 없는 카드를 또 지우러 가면 안 된다.
   final _removedStepIds = <String>{};
 
+  /// 화면에서 뺐지만 서버에는 남은 카드 id (서버 응답에서 새 카드를 가릴 때 제외용)
+  Set<String> get pendingRemovedStepIds => Set.unmodifiable(_removedStepIds);
+
   /// 일과 하나의 최대 카드 수 — 서버 `RoutineService.STEP_MAX_COUNT` 와 같은 값이다.
   ///
   /// 서버는 **자기가 가진 카드**를 센다. 보호자가 화면에서 뺀 카드는 저장하기 전까지 서버에

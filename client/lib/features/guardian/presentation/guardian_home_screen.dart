@@ -1,4 +1,5 @@
 import '../../notification/application/home_notification_notice_provider.dart';
+import '../../../app/home_suggestion_host.dart';
 import '../../../app/notification_off_notice_host.dart';
 import 'dart:async';
 
@@ -138,6 +139,13 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
+  /// 권유 카드의 `만들기`: 홈 버튼과 같은 크레딧 확인 뒤 일과 만들기
+  Future<void> _startRoutineFromSuggestion() async {
+    final blockedSummary = await creditBlocksRoutineStart(ref);
+    if (!mounted) return;
+    await continueRoutineStart(context, ref, blockedSummary);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -201,6 +209,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
             ),
             SizedBox(height: _titleToList.h),
           ],
+          // 알림 카드가 없을 때만 보이는 권유 카드 (자동 보내기 · 이야기 올리기 · 일과 더 만들기)
+          HomeSuggestionHost(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           RoutineSectionTitle(
             iconAsset: AppAssets.iconTodayRoutine,
             label: context.l10n.guardianHomeTodayRoutine,

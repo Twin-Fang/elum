@@ -19,6 +19,9 @@ enum PlanBenefit {
   /// 이룸이별 AI 메모 (내가 고친 일과처럼 만들기)
   routineMemory,
 
+  /// 카드 한 장을 더 작은 2~3장으로 나눈 안 (AI)
+  cardSplit,
+
   /// 카드마다 보호자 목소리
   guardianVoice,
 
@@ -58,6 +61,7 @@ enum PlanBenefitGroup {
   readyRoutines([
     PlanBenefit.routineSchedule,
     PlanBenefit.routineMemory,
+    PlanBenefit.cardSplit,
   ]),
 
   /// 한 주를 한눈에: 주간 리포트 · 보호자 목소리
