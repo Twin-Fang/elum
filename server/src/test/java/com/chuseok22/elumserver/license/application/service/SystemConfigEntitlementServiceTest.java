@@ -42,6 +42,9 @@ class SystemConfigEntitlementServiceTest {
   @Mock
   private MemberProPromotion memberProPromotion;
 
+  @Mock
+  private PurchasedCreditChecker purchasedCreditChecker;
+
   @InjectMocks
   private SystemConfigEntitlementService entitlementService;
 
@@ -476,5 +479,44 @@ class SystemConfigEntitlementServiceTest {
     assertThat(proPlan.routineMemory()).isFalse();
     assertThat(proPlan.weeklyReport()).isTrue();
     assertThat(proPlan.adsRemoved()).isTrue();
+  }
+
+  // --- 구매 크레딧이 있으면 Free 도 AI 그림 ---
+
+  private void givenFreeWithAiImageOff() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(systemConfigService.getBoolean(ConfigKey.FREE_AI_IMAGE_GENERATION)).thenReturn(false);
+  }
+
+  @Test
+  @DisplayName("구매 크레딧이 남은 Free 는 AI 그림이 허용된다 — 막으면 산 크레딧으로 그림을 못 그린다")
+  void freeWithPurchasedCredit_isAllowedAiImage() {
+    givenFreeWithAiImageOff();
+    when(purchasedCreditChecker.hasUsablePurchasedCredit(MEMBER_ID)).thenReturn(true);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isTrue();
+    assertThatCode(() -> entitlementService.requireAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION))
+      .doesNotThrowAnyException();
+    assertThat(entitlementService.snapshot(MEMBER_ID).aiImageGeneration()).isTrue();
+  }
+
+  @Test
+  @DisplayName("구매 크레딧을 다 쓴 Free 는 AI 그림이 다시 거절된다")
+  void freeWithoutPurchasedCredit_isRejectedAiImage() {
+    givenFreeWithAiImageOff();
+    when(purchasedCreditChecker.hasUsablePurchasedCredit(MEMBER_ID)).thenReturn(false);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isFalse();
+    assertThat(entitlementService.snapshot(MEMBER_ID).aiImageGeneration()).isFalse();
+  }
+
+  @Test
+  @DisplayName("요금제가 AI 그림을 허용하면 구매분을 조회하지 않는다 — 내 정보 조회마다 불리는 길에 쿼리를 더하지 않는다")
+  void planAllowsAiImage_doesNotQueryPurchasedCredit() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(systemConfigService.getBoolean(ConfigKey.FREE_AI_IMAGE_GENERATION)).thenReturn(true);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isTrue();
+    org.mockito.Mockito.verifyNoInteractions(purchasedCreditChecker);
   }
 }

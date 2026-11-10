@@ -36,6 +36,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
   private final SubscriptionRepository subscriptionRepository;
   private final SystemConfigService systemConfigService;
   private final MemberProPromotion memberProPromotion;
+  private final PurchasedCreditChecker purchasedCreditChecker;
 
   @Override
   @Transactional(readOnly = true)
@@ -66,7 +67,15 @@ public class SystemConfigEntitlementService implements EntitlementService {
     if (flag == Entitlement.ADS_REMOVED && isAdsAlwaysShownMember(memberId)) {
       return false;
     }
+    if (flag == Entitlement.AI_IMAGE_GENERATION) {
+      return isAiImageAllowed(planOf(memberId), memberId);
+    }
     return isAllowed(planOf(memberId), flag);
+  }
+
+  // AI 그림: 요금제 권한이 있거나 구매 크레딧이 남아 있으면 (요금제가 꺼져 있을 때만 구매분을 조회)
+  private boolean isAiImageAllowed(PlanType plan, String memberId) {
+    return isAllowed(plan, Entitlement.AI_IMAGE_GENERATION) || purchasedCreditChecker.hasUsablePurchasedCredit(memberId);
   }
 
   @Override
@@ -118,20 +127,21 @@ public class SystemConfigEntitlementService implements EntitlementService {
   @Override
   public EntitlementSnapshot snapshot(String memberId) {
     PlanType plan = planOf(memberId);
-    return buildSnapshot(plan, !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED));
+    return buildSnapshot(plan, !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED),
+      isAiImageAllowed(plan, memberId));
   }
 
   /// 요금제 설정값 그대로 (광고 항상 노출 같은 회원별 예외 없음)
   @Override
   public EntitlementSnapshot planSnapshot(PlanType plan) {
-    return buildSnapshot(plan, isAllowed(plan, Entitlement.ADS_REMOVED));
+    return buildSnapshot(plan, isAllowed(plan, Entitlement.ADS_REMOVED), isAllowed(plan, Entitlement.AI_IMAGE_GENERATION));
   }
 
-  // 플랜 기준 권한 한 벌 (광고 제거만 부르는 쪽이 정함)
-  private EntitlementSnapshot buildSnapshot(PlanType plan, boolean isAdsRemoved) {
+  // 플랜 기준 권한 한 벌 (광고 제거·AI 그림은 회원별 값이라 부르는 쪽이 정함)
+  private EntitlementSnapshot buildSnapshot(PlanType plan, boolean isAdsRemoved, boolean isAiImageGenerationAllowed) {
     return new EntitlementSnapshot(
       plan,
-      isAllowed(plan, Entitlement.AI_IMAGE_GENERATION),
+      isAiImageGenerationAllowed,
       isAdsRemoved,
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_DAY),
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_WEEK),

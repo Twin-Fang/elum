@@ -63,6 +63,40 @@ public class HttpGooglePlayDeveloperClient implements GooglePlayDeveloperClient 
   }
 
   @Override
+  public Optional<JsonNode> fetchProductPurchase(
+    String packageName, String productId, String purchaseToken, String serviceAccountJson
+  ) {
+    URI uri = URI.create(API_BASE_URL + encode(packageName) + "/purchases/products/" + encode(productId)
+      + "/tokens/" + encode(purchaseToken));
+    HttpResponse<String> response = send(authorized(HttpRequest.newBuilder(uri), serviceAccountJson).GET().build());
+    if (NOT_FOUND_STATUSES.contains(response.statusCode())) {
+      return Optional.empty();
+    }
+    if (response.statusCode() != HTTP_OK) {
+      throw unavailable("products.get", response.statusCode());
+    }
+    try {
+      return Optional.of(DefaultJsonMapper.SHARED.readTree(response.body()));
+    } catch (IOException e) {
+      throw new StoreTemporarilyUnavailableException("google response unreadable", e);
+    }
+  }
+
+  @Override
+  public void consumeProduct(String packageName, String productId, String purchaseToken, String serviceAccountJson) {
+    URI uri = URI.create(API_BASE_URL + encode(packageName) + "/purchases/products/" + encode(productId)
+      + "/tokens/" + encode(purchaseToken) + ":consume");
+    HttpRequest request = authorized(HttpRequest.newBuilder(uri), serviceAccountJson)
+      .header("Content-Type", "application/json")
+      .POST(HttpRequest.BodyPublishers.ofString("{}"))
+      .build();
+    HttpResponse<String> response = send(request);
+    if (response.statusCode() != HTTP_OK && response.statusCode() != HTTP_NO_CONTENT) {
+      throw unavailable("products.consume", response.statusCode());
+    }
+  }
+
+  @Override
   public void acknowledge(String packageName, String productId, String purchaseToken, String serviceAccountJson) {
     URI uri = URI.create(API_BASE_URL + encode(packageName) + "/purchases/subscriptions/" + encode(productId)
       + "/tokens/" + encode(purchaseToken) + ":acknowledge");

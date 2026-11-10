@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.license.application.service.store;
 
+import com.chuseok22.elumserver.license.infrastructure.store.apple.AppleSignedDataVerifier.AppleVerifyContext;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigValueValidator;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -45,6 +46,11 @@ public class StoreSubscriptionSettings {
     } catch (NumberFormatException e) {
       return null;
     }
+  }
+
+  /// Apple 서명 검증 입력: 번들 ID · 앱 ID · Sandbox 허용 (구독·크레딧 구매가 같은 규칙)
+  public AppleVerifyContext appleVerifyContext() {
+    return new AppleVerifyContext(appleBundleId(), appleAppAppleId(), isAppleSandboxAllowed());
   }
 
   public Set<String> appleProductIds() {

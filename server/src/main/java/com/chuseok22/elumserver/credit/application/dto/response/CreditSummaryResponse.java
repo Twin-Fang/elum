@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.credit.application.dto.response;
 
+import com.chuseok22.elumserver.credit.core.CreditBreakdownKind;
 import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -48,8 +49,26 @@ public record CreditSummaryResponse(
   int freeImageRegeneratesLeftToday,
   @Schema(description = "크레딧 지급 주기 단위. WEEK(매주 월요일 0시) | MONTH(매달 1일 0시). 앱은 이 값으로 "
     + "'이번 주'·'이번 달', '월요일 0시'·'다음 달 1일' 문구를 고른다. 모르는 값이면 WEEK 로 본다", example = "MONTH")
-  CreditPeriodUnit periodUnit
+  CreditPeriodUnit periodUnit,
+  @Schema(description = "종류별 줄 (순서: PERIODIC, BONUS, PURCHASED). 유효한 묶음만 센다. PERIODIC 은 크레딧이 켜져 있으면 항상 한 줄, "
+    + "나머지는 남은 양이 있거나 이번 주기에 받은 것이 있을 때만. 합계 remaining = available + reserved")
+  List<BreakdownLine> breakdown
 ) {
+
+  @Schema(description = "크레딧 종류별 한 줄")
+  public record BreakdownLine(
+    @Schema(description = "PERIODIC 이번 주기 지급(주·달 모두) | BONUS 관리자 보너스·광고 보상·이벤트 | PURCHASED 구매", example = "PERIODIC")
+    CreditBreakdownKind kind,
+    @Schema(description = "이 종류로 받은 양 (유효한 묶음 합)", example = "10") int granted,
+    @Schema(description = "그중 쓴 양", example = "4") int used,
+    @Schema(description = "남은 양", example = "6") int remaining,
+    @Schema(description = "가장 먼저 끝나는 유효 묶음의 만료(서버 시간대 오프셋 포함). 만료가 없으면(구매) null",
+      example = "2026-12-01T00:00:00+09:00", nullable = true)
+    OffsetDateTime expiresAt
+  ) {
+
+  }
+
 
   @Schema(description = "행동별 단가")
   public record Costs(
@@ -73,6 +92,6 @@ public record CreditSummaryResponse(
   /// 정책이 꺼져 있을 때. 앱은 카드를 숨기고 아무것도 막지 않는다.
   public static CreditSummaryResponse disabled(int maxCardsPerRoutine, CreditPeriodUnit periodUnit) {
     return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0, 0),
-      maxCardsPerRoutine, List.of(), true, true, 0, periodUnit);
+      maxCardsPerRoutine, List.of(), true, true, 0, periodUnit, List.of());
   }
 }

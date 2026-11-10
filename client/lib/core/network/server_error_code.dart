@@ -173,6 +173,9 @@ enum ServerErrorCode {
 
   // 주간 AI 크레딧. 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
   aiCreditInsufficient('AI_CREDIT_INSUFFICIENT'),
+  // 크레딧 꾸러미 구매: 판매 꺼짐 403, 다른 회원에 이미 적립된 거래 400
+  creditPackSaleDisabled('CREDIT_PACK_SALE_DISABLED'),
+  creditPurchaseOwnedByOtherMember('CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER'),
   aiCreditJobInProgress('AI_CREDIT_JOB_IN_PROGRESS'),
   aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
   aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),

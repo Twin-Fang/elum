@@ -14,6 +14,8 @@ import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
+import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPurchase;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPurchaseRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
@@ -85,6 +87,11 @@ public final class CreditTestStore {
       .filter(g -> g.getAccountId().equals(inv.getArgument(0)) && g.getSource() == inv.getArgument(1)
         && !g.getValidFrom().isBefore(inv.<java.time.LocalDateTime>getArgument(2)))
       .count());
+    lenient().when(grantRepository.findValidForBreakdown(anyString(), any(java.time.LocalDateTime.class),
+      any(java.time.LocalDateTime.class))).thenAnswer(inv -> grants.stream()
+      .filter(g -> g.getAccountId().equals(inv.getArgument(0)) && g.isValidAt(inv.getArgument(1))
+        && (g.getRemaining() > 0 || !g.getValidFrom().isBefore(inv.<java.time.LocalDateTime>getArgument(2))))
+      .toList());
     lenient().when(grantRepository.findById(anyString())).thenAnswer(inv -> grants.stream()
       .filter(g -> g.getId().equals(inv.getArgument(0))).findFirst());
     lenient().when(grantRepository.save(any(AiCreditGrant.class))).thenAnswer(inv -> {
@@ -136,6 +143,32 @@ public final class CreditTestStore {
     lenient().when(ledgerRepository.sumDelta(anyString(), any(CreditLedgerType.class), any(), any())).thenAnswer(inv -> ledger.stream()
       .filter(l -> l.getAccountId().equals(inv.getArgument(0)) && l.getType() == inv.getArgument(1))
       .mapToLong(AiCreditLedger::getDelta).sum());
+  }
+
+  public final List<AiCreditPurchase> purchases = new ArrayList<>();
+
+  /// 구매 기록 저장소를 메모리 목록에 연결 (거래 유니크는 saveAndFlush 가 중복이면 예외로 흉내)
+  public void wirePurchases(AiCreditPurchaseRepository purchaseRepository) {
+    lenient().when(purchaseRepository.findByStoreAndTransactionId(any(), anyString())).thenAnswer(inv -> purchases.stream()
+      .filter(p -> p.getStore() == inv.getArgument(0) && p.getTransactionId().equals(inv.getArgument(1))).findFirst());
+    lenient().when(purchaseRepository.findByStoreAndTransactionIdForUpdate(any(), anyString())).thenAnswer(inv -> purchases.stream()
+      .filter(p -> p.getStore() == inv.getArgument(0) && p.getTransactionId().equals(inv.getArgument(1))).findFirst());
+    lenient().when(purchaseRepository.saveAndFlush(any(AiCreditPurchase.class))).thenAnswer(inv -> {
+      AiCreditPurchase purchase = inv.getArgument(0);
+      boolean isDuplicate = purchases.stream().anyMatch(p -> p != purchase
+        && p.getStore() == purchase.getStore() && p.getTransactionId().equals(purchase.getTransactionId()));
+      if (isDuplicate) {
+        throw new org.springframework.dao.DataIntegrityViolationException("uk_ai_credit_purchase_transaction");
+      }
+      if (purchase.getId() == null) {
+        purchase.setId(UUID.randomUUID().toString());
+      }
+      if (!purchases.contains(purchase)) {
+        purchases.add(purchase);
+      }
+      return purchase;
+    });
+    lenient().when(purchaseRepository.save(any(AiCreditPurchase.class))).thenAnswer(inv -> inv.getArgument(0));
   }
 
   /// 설정이 비어 있는(= 기본 WEEK) 주기 설정

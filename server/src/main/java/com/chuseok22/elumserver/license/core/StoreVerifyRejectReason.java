@@ -19,6 +19,8 @@ public enum StoreVerifyRejectReason {
   APP_MISMATCH(ErrorCode.SUBSCRIPTION_RECEIPT_INVALID),
   /// 자동 갱신 구독이 아닌 결제
   NOT_SUBSCRIPTION(ErrorCode.SUBSCRIPTION_RECEIPT_INVALID),
+  /// 소모성 상품이 아닌 결제 (크레딧 구매 확인에 구독 거래가 온 경우)
+  NOT_CONSUMABLE(ErrorCode.SUBSCRIPTION_RECEIPT_INVALID),
   /// 스토어에 없는 구매 (토큰 오류·다른 환경)
   PURCHASE_NOT_FOUND(ErrorCode.SUBSCRIPTION_RECEIPT_INVALID),
   /// 테스트 결제인데 테스트 결제 허용이 꺼짐

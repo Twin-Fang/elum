@@ -44,6 +44,7 @@ public class CreditQueryService {
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
   private final CreditReservationService reservationService;
+  private final CreditBreakdownService breakdownService;
   private final EntitlementService entitlementService;
   private final AiCreditJobRepository jobRepository;
   private final AiCreditLedgerRepository ledgerRepository;
@@ -54,23 +55,24 @@ public class CreditQueryService {
   @Autowired
   public CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
-    CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    CreditReservationService reservationService, CreditBreakdownService breakdownService,
+    EntitlementService entitlementService, AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     PlatformTransactionManager transactionManager
   ) {
-    this(policyService, accountService, reservationService, entitlementService, jobRepository, ledgerRepository,
-      transactionManager, Clock.systemDefaultZone());
+    this(policyService, accountService, reservationService, breakdownService, entitlementService, jobRepository,
+      ledgerRepository, transactionManager, Clock.systemDefaultZone());
   }
 
   CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
-    CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    CreditReservationService reservationService, CreditBreakdownService breakdownService,
+    EntitlementService entitlementService, AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     PlatformTransactionManager transactionManager, Clock clock
   ) {
     this.policyService = policyService;
     this.accountService = accountService;
     this.reservationService = reservationService;
+    this.breakdownService = breakdownService;
     this.entitlementService = entitlementService;
     this.jobRepository = jobRepository;
     this.ledgerRepository = ledgerRepository;
@@ -115,7 +117,8 @@ public class CreditQueryService {
       !snapshot.isFrozen() && balance.available() >= snapshot.routineCreateStartCost(),
       !snapshot.isFrozen() && balance.available() >= cardImage,
       snapshot.freeImageRegeneratesLeftToday(),
-      balance.period().unit()
+      balance.period().unit(),
+      snapshot.breakdown()
     );
   }
 
@@ -175,7 +178,9 @@ public class CreditQueryService {
         List<AiCreditJob> reserved = jobRepository.findByAccountIdAndStatus(account.getId(), CreditJobStatus.RESERVED);
         int freeRegeneratesLeft = reservationService.freeRegeneratesLeftToday(account, now);
         int routineCreateStartCost = reservationService.routineCreateStartCost(account, policy);
-        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft, routineCreateStartCost);
+        List<CreditSummaryResponse.BreakdownLine> breakdown = breakdownService.linesOf(
+          account.getId(), now, balance.period().start(), clock.getZone());
+        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft, routineCreateStartCost, breakdown);
       });
     } catch (CustomException e) {
       throw e;
@@ -192,7 +197,7 @@ public class CreditQueryService {
 
   private record Snapshot(
     CreditBalance balance, List<AiCreditJob> reservedJobs, boolean isFrozen, int freeImageRegeneratesLeftToday,
-    int routineCreateStartCost
+    int routineCreateStartCost, List<CreditSummaryResponse.BreakdownLine> breakdown
   ) {
 
   }

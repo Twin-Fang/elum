@@ -76,7 +76,7 @@ class CreditQueryServiceTest {
     CreditReservationService reservationService = new CreditReservationService(
       policyService, accountService, entitlementService, jobRepository, ledgerRepository,
       com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
-    service = new CreditQueryService(policyService, accountService, reservationService, entitlementService,
+    service = new CreditQueryService(policyService, accountService, reservationService, new CreditBreakdownService(grantRepository), entitlementService,
       jobRepository, ledgerRepository, tx, CLOCK);
 
     policy = AiCreditPolicy.disabledDefault();
@@ -306,7 +306,7 @@ class CreditQueryServiceTest {
       policyService, monthAccountService, entitlementService, jobRepository, ledgerRepository,
       com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
     CreditQueryService monthQueryService = new CreditQueryService(policyService, monthAccountService,
-      reservationService, entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
+      reservationService, new CreditBreakdownService(grantRepository), entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
 
     CreditSummaryResponse monthly = monthQueryService.getMine(MEMBER_ID);
 

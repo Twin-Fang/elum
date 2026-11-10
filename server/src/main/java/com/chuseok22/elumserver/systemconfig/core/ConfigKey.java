@@ -668,6 +668,27 @@ public enum ConfigKey {
     ConfigValueType.SELECT, List.of("WEEK", "MONTH"), "WEEK"
   ),
 
+  // 추가 크레딧 구매(소모성 상품). 판매는 기본 꺼짐 — 스토어 상품 등록·약관이 끝난 뒤에 켠다.
+  // 가격은 서버가 모른다(앱이 스토어에서 읽는다). 서버는 상품 ID 와 개수만 안다.
+  CREDIT_PACK_SALE_ENABLED(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 판매",
+    "켜야 꾸러미 목록이 내려가고 구매 확인(App Store·Google Play)이 적립된다. 끄면 목록은 비고 구매 확인은 거절된다. "
+      + "이미 산 크레딧은 그대로 쓸 수 있다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  CREDIT_PACK_PRODUCTS(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 상품",
+    "쉼표로 나눈 상품ID:크레딧 개수. 스토어에 등록한 소모성 상품 ID 와 같아야 한다 "
+      + "(App Store·Google Play 가 같은 ID). 이 목록에 없는 상품은 적립하지 않는다",
+    ConfigValueType.STRING, List.of(), "elum_credit_50:50,elum_credit_150:150,elum_credit_400:400",
+    ConfigFormat.CREDIT_PACK_LIST
+  ),
+  CREDIT_PACK_POPULAR_PRODUCT_ID(
+    ConfigGroup.AI_CREDIT, "인기 꾸러미 상품 ID",
+    "앱이 '인기!' 표시를 붙일 상품 ID. 꾸러미 목록에 없으면 표시하지 않는다",
+    ConfigValueType.STRING, List.of(), "elum_credit_150"
+  ),
+
   // --- 광고 보상 ---
   //
   // 보상형 광고를 끝까지 보면 AI 생성 크레딧을 준다. 크레딧은 곧 AI 비용이라 **기본값은 꺼짐**이다 —

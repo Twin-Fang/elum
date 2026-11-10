@@ -70,4 +70,29 @@ public interface AiCreditGrantRepository extends JpaRepository<AiCreditGrant, St
   List<AccountTotal> sumValidNonWeeklyRemainingByAccount(
     @Param("weekly") CreditGrantSource weekly, @Param("now") LocalDateTime now
   );
+
+  /**
+   * 요약의 종류별 줄이 쓸 묶음: 지금 유효하고, 남은 양이 있거나 이번 주기 시작 뒤에 받은 것.
+   * 다 쓴 옛 묶음(특히 만료 없는 구매분)은 빼서 읽는 양이 늘지 않는다.
+   */
+  @Query("""
+    select g from AiCreditGrant g
+    where g.accountId = :accountId
+      and g.validFrom <= :now and (g.expiresAt is null or g.expiresAt > :now)
+      and (g.remaining > 0 or g.validFrom >= :periodStart)
+    """)
+  List<AiCreditGrant> findValidForBreakdown(
+    @Param("accountId") String accountId, @Param("now") LocalDateTime now, @Param("periodStart") LocalDateTime periodStart
+  );
+
+  /// 이 회원에게 지금 쓸 수 있는 구매 묶음이 남아 있는가 (Free 의 AI 그림 허용 판정, 존재 여부만)
+  @Query("""
+    select count(g) > 0 from AiCreditGrant g, AiCreditAccount a
+    where a.id = g.accountId and a.memberId = :memberId
+      and g.source = :purchase and g.remaining > 0
+      and g.validFrom <= :now and (g.expiresAt is null or g.expiresAt > :now)
+    """)
+  boolean existsUsablePurchasedByMemberId(
+    @Param("memberId") String memberId, @Param("purchase") CreditGrantSource purchase, @Param("now") LocalDateTime now
+  );
 }

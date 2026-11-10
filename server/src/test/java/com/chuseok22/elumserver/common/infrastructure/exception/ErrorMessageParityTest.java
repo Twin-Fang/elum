@@ -53,6 +53,7 @@ class ErrorMessageParityTest {
       + ADDED_ROUTINE_MEMORY_CODES.size()
       + ADDED_PLAN_STORE_AND_REPORT_CODES.size()
       + ADDED_IMAGE_REGENERATE_CODES.size()
+      + ADDED_CREDIT_PURCHASE_CODES.size()
       + 1);
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
@@ -284,6 +285,25 @@ class ErrorMessageParityTest {
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
         .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
+    });
+  }
+
+  // 크레딧 꾸러미 구매가 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_CREDIT_PURCHASE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.CREDIT_PACK_SALE_DISABLED, "FORBIDDEN"),
+    Map.entry(ErrorCode.CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER, "BAD_REQUEST")));
+
+  @Test
+  @DisplayName("크레딧 구매 코드 2개는 golden 밖에서 상태와 ko·en 문구를 단언한다 — 문구가 빠지면 앱이 코드 이름을 그대로 보인다")
+  void creditPurchaseCodes_haveStatusAndMessages() {
+    assertThat(ADDED_CREDIT_PURCHASE_CODES).hasSize(2);
+    ADDED_CREDIT_PURCHASE_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
         .isNotBlank().isNotEqualTo(code.name());
     });

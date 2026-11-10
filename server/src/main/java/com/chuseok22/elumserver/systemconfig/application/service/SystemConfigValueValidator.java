@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import com.chuseok22.elumserver.systemconfig.core.ConfigFormat;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.chuseok22.elumserver.systemconfig.core.CreditPackListFormat;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.core.ServerAddressPolicy;
 import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
@@ -152,6 +153,7 @@ public final class SystemConfigValueValidator {
       case AD_UNIT_LIST -> checkListItems(value, AD_UNIT_PATTERN, "광고 단위 형식이 아니에요", false);
       case MEMBER_ID_LIST -> checkListItems(value, MEMBER_ID_PATTERN, "회원 ID 형식이 아니에요", true);
       case CONTENT_LOCALE_LIST -> checkContentLocales(value);
+      case CREDIT_PACK_LIST -> checkCreditPacks(value);
       case STORE_PRODUCT_ID_LIST -> checkListItems(value, STORE_PRODUCT_ID_PATTERN, "상품 ID 형식이 아니에요", true);
       // 비밀값은 위에서 처리 (STRING 에는 쓰지 않음)
       case SECRET_DOCUMENT -> ConfigValueCheck.accepted(value);
@@ -163,6 +165,14 @@ public final class SystemConfigValueValidator {
         ? ConfigValueCheck.accepted(value.trim())
         : ConfigValueCheck.rejected("허용된 서버 주소만 받아요: " + String.join(", ", ServerAddressPolicy.ALLOWED_API_HOSTS) + " (https, 경로 없이)");
     };
+  }
+
+  /// 꾸러미 목록: 상품ID:개수 항목마다 확인 > 정리된 목록 (비울 수 있음)
+  private static ConfigValueCheck checkCreditPacks(String value) {
+    String rejectReason = CreditPackListFormat.invalidReason(value);
+    return rejectReason == null
+      ? ConfigValueCheck.accepted(CreditPackListFormat.normalize(value))
+      : ConfigValueCheck.rejected(rejectReason);
   }
 
   /// 쉼표 목록: 항목마다 형식 확인 > 정리된 목록 (빈 목록은 비울 수 있는 형식만)

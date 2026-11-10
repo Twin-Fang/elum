@@ -60,8 +60,8 @@ class StoreSubscriptionServiceTest {
     when(settings.googleRtdnPushToken()).thenReturn(PUSH_TOKEN);
     Clock clock = Clock.systemDefaultZone();
     appleService = new AppleSubscriptionService(settings,
-      new AppleSignedDataVerifier(AppleJwsTestFixtures.trustedRoots()), statusClient, store.applier, clock);
-    googleService = new GoogleSubscriptionService(settings, playClient, store.applier, clock);
+      new AppleSignedDataVerifier(AppleJwsTestFixtures.trustedRoots()), statusClient, store.applier, mock(StoreConsumableRefundHandler.class), clock);
+    googleService = new GoogleSubscriptionService(settings, playClient, store.applier, mock(StoreConsumableRefundHandler.class), clock);
   }
 
   @Test

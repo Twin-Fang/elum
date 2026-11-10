@@ -309,7 +309,7 @@ public class CreditAccountService {
     return Sha256Hex.hexOf(provider + ":" + providerUserId);
   }
 
-  static AiCreditLedger ledgerLine(String accountId, CreditLedgerType type, int delta, int balanceAfter) {
+  public static AiCreditLedger ledgerLine(String accountId, CreditLedgerType type, int delta, int balanceAfter) {
     AiCreditLedger line = new AiCreditLedger();
     line.setAccountId(accountId);
     line.setType(type);
