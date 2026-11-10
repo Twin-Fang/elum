@@ -207,7 +207,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [_LinkTile(isBusy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
             _NotificationTile(isBusy: busy),
@@ -414,7 +414,7 @@ class _NotificationOffValue extends StatelessWidget {
   }
 }
 
-/// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
+/// `AI 메모리` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
 /// Free 는 판매 중일 때만 줄이 보이고 들어가면 Pro 미리 보기 — 살 수 없는 동안 잠긴 줄은 막힌 기능으로 읽혀 숨긴다
 class _RoutineMemoryTile extends ConsumerWidget {
   const _RoutineMemoryTile({required this.isBusy});

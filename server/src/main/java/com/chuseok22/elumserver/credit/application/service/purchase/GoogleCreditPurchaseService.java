@@ -67,10 +67,10 @@ public class GoogleCreditPurchaseService {
       }
       requirePaidAndAllowed(purchase, product);
 
-      CreditPurchaseResponse result = grantService.grantOnce(
+      CreditPurchaseResponse purchaseResponse = grantService.grantOnce(
         memberId, SubscriptionSource.GOOGLE_IAP, purchase.path("orderId").asText(), product);
       consumeIfNeeded(purchase, product, token, serviceAccountJson);
-      return result;
+      return purchaseResponse;
     } catch (StoreVerifyRejectedException e) {
       log.warn("[credit purchase] rejected 400 : {} : store=GOOGLE_IAP, member={}",
         e.getReason(), StoreLogValues.mask(memberId));

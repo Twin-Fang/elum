@@ -28,7 +28,7 @@ class WeeklyReportStatRow extends StatelessWidget {
       children: [
         for (final (index, stat) in stats.indexed) ...[
           if (index > 0) SizedBox(width: _gap.w),
-          Expanded(child: _StatBox(value: stat.value, label: stat.label)),
+          Expanded(child: _StatBox(count: stat.value, label: stat.label)),
         ],
       ],
     );
@@ -36,9 +36,9 @@ class WeeklyReportStatRow extends StatelessWidget {
 }
 
 class _StatBox extends StatelessWidget {
-  const _StatBox({required this.value, required this.label});
+  const _StatBox({required this.count, required this.label});
 
-  final int value;
+  final int count;
   final String label;
 
   @override
@@ -53,7 +53,7 @@ class _StatBox extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: WeeklyReportStatRow._padding.h, horizontal: context.space.xs.w),
         child: Column(
           children: [
-            Text('$value', style: context.typo.subtitle.copyWith(color: colors.textPrimary)),
+            Text('$count', style: context.typo.subtitle.copyWith(color: colors.textPrimary)),
             SizedBox(height: WeeklyReportStatRow._valueToLabel.h),
             Text(
               label,

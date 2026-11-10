@@ -76,9 +76,9 @@ public enum Entitlement {
     Kind.FLAG, "보호자 목소리 녹음",
     ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
   ),
-  // 이룸이별 AI 메모 + 확정 예시로 맞춤 쪼개기 (#1082). 서버가 일과 만들기에 넣고, 앱은 메모 화면을 연다
+  // 보호자별 AI 메모리 규칙 + 확정 예시로 맞춤 쪼개기. 서버가 일과 만들기에 넣고, 앱은 AI 메모리 화면을 연다
   ROUTINE_MEMORY(
-    Kind.FLAG, "AI 메모 (내가 고친 일과처럼 만들기)",
+    Kind.FLAG, "AI 메모리 (내가 고친 방식으로 만들기)",
     ConfigKey.FREE_ROUTINE_MEMORY, ConfigKey.PRO_ROUTINE_MEMORY
   ),
   // 그림 다시 그리기 0크레딧 (하루 한도는 IMAGE_REGENERATE_FREE_DAILY_CAP) (#1075)

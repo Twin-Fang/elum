@@ -33,7 +33,7 @@ Future<void> showMemoryObservationsAfterSend(BuildContext rootContext, String ro
     for (var attempt = 0; attempt < _maxPolls; attempt++) {
       final observations = await repository.fetchObservations(routineId);
       if (observations.status == MemoryObservationStatus.none) return;
-      final watching = [for (final item in observations.items) if (item.ruleStatus == MemoryRuleStatus.watching) item];
+      final watching = [for (final observation in observations.items) if (observation.ruleStatus == MemoryRuleStatus.watching) observation];
       if (observations.status == MemoryObservationStatus.ready) {
         if (watching.isEmpty || !rootContext.mounted) return;
         await showElumSheet<void>(context: rootContext, builder: (_) => _ObservationSheet(items: watching));
@@ -68,8 +68,8 @@ class _ObservationSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final item in visible) ...[
-            _ObservationCard(item: item),
+          for (final observation in visible) ...[
+            _ObservationCard(observation: observation),
             SizedBox(height: space.sm.h),
           ],
           if (restCount > 0)
@@ -88,9 +88,9 @@ class _ObservationSheet extends StatelessWidget {
 
 /// 카드 하나: `AI 메모리` > 바꾸기 전후 > 질문 > `항상 이렇게`(규칙으로 적용) · `이번만`(닫기). 적용하면 카드가 확정 문구로 바뀜
 class _ObservationCard extends ConsumerStatefulWidget {
-  const _ObservationCard({required this.item});
+  const _ObservationCard({required this.observation});
 
-  final MemoryObservation item;
+  final MemoryObservation observation;
 
   @override
   ConsumerState<_ObservationCard> createState() => _ObservationCardState();
@@ -104,7 +104,7 @@ class _ObservationCardState extends ConsumerState<_ObservationCard> {
   Future<void> _applyAlways() async {
     setState(() => _state = _CardState.saving);
     try {
-      await ref.read(routineMemoryRepositoryProvider).setRuleStatus(widget.item.ruleId, MemoryRuleStatus.active);
+      await ref.read(routineMemoryRepositoryProvider).setRuleStatus(widget.observation.ruleId, MemoryRuleStatus.active);
       ref.invalidate(routineMemoryControllerProvider);
       if (mounted) setState(() => _state = _CardState.applied);
     } catch (error, stack) {
@@ -120,7 +120,7 @@ class _ObservationCardState extends ConsumerState<_ObservationCard> {
     final colors = context.colors;
     final space = context.space;
     final l10n = context.l10n;
-    final item = widget.item;
+    final observation = widget.observation;
     return DecoratedBox(
       decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(space.cardRadius.r)),
       child: Padding(
@@ -134,20 +134,20 @@ class _ObservationCardState extends ConsumerState<_ObservationCard> {
               decoration: BoxDecoration(color: colors.buttonNeutral, borderRadius: BorderRadius.circular(space.sm.r)),
               child: Padding(
                 padding: EdgeInsets.all(space.sm.w),
-                child: item.before != null && item.after != null && item.before!.isNotEmpty
+                child: observation.before != null && observation.after != null && observation.before!.isNotEmpty
                     ? Text.rich(
                         TextSpan(children: [
-                          TextSpan(text: item.before, style: TextStyle(decoration: TextDecoration.lineThrough, color: colors.textSecondary)),
-                          TextSpan(text: ' → ${item.after}'),
+                          TextSpan(text: observation.before, style: TextStyle(decoration: TextDecoration.lineThrough, color: colors.textSecondary)),
+                          TextSpan(text: ' → ${observation.after}'),
                         ]),
                         style: context.typo.creditHistoryRowTitle.copyWith(color: colors.textPrimary),
                       )
-                    : Text(item.summary, style: context.typo.creditHistoryRowTitle.copyWith(color: colors.textPrimary)),
+                    : Text(observation.summary, style: context.typo.creditHistoryRowTitle.copyWith(color: colors.textPrimary)),
               ),
             ),
             SizedBox(height: space.sm.h),
             Text(
-              _state == _CardState.applied ? l10n.memoryObsDone : l10n.memoryObsAsk(item.type.observationPhrase(l10n)),
+              _state == _CardState.applied ? l10n.memoryObsDone : l10n.memoryObsAsk(observation.type.observationPhrase(l10n)),
               style: context.typo.creditBody.copyWith(color: colors.textPrimary),
             ),
             if (_state != _CardState.applied) ...[

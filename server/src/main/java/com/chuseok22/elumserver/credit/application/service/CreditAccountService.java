@@ -220,9 +220,9 @@ public class CreditAccountService {
   private static boolean isEnded(AiCreditGrant grant, CreditPeriod period, LocalDateTime now) {
     boolean expired = grant.getExpiresAt() != null && !now.isBefore(grant.getExpiresAt());
     // 다른 단위 키(전환 전 지급)는 원래 만료까지 유효하다 — 같은 단위의 지난 주기만 정리한다.
-    boolean pastPeriod = grant.getSource() == CreditGrantSource.WEEKLY
+    boolean isPastPeriod = grant.getSource() == CreditGrantSource.WEEKLY
       && (grant.getPeriodKey() == null || period.isOtherPeriodKeyOfSameUnit(grant.getPeriodKey()));
-    return expired || pastPeriod;
+    return expired || isPastPeriod;
   }
 
   /**

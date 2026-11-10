@@ -249,9 +249,9 @@ class _RoutineMemoryScreenState extends ConsumerState<RoutineMemoryScreen> {
   }
 
   Future<void> _addRule(BuildContext context, RoutineMemoryController controller) async {
-    final result = await showRoutineMemoryLineSheet(context);
-    if (result is! RoutineMemoryLineSaved || !context.mounted) return;
-    await _runSave(context, () => controller.addRule(result.text));
+    final lineSheetResult = await showRoutineMemoryLineSheet(context);
+    if (lineSheetResult is! RoutineMemoryLineSaved || !context.mounted) return;
+    await _runSave(context, () => controller.addRule(lineSheetResult.text));
   }
 
   /// 오른쪽 위 `···` 메뉴: 파일로 내보내기 · 메모리 모두 지우기 (파일에서 가져오기는 파일 고르기 패키지가 없어 뺌)

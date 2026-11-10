@@ -121,12 +121,12 @@ class CreditPurchaseCoordinator {
       }
       _flow.startVerifying();
       final attempt = await _request(update);
-      final result = attempt.value;
-      if (result == null) {
+      final verifyResponse = attempt.value;
+      if (verifyResponse == null) {
         _onVerifyFailed(update, attempt.failure);
         return;
       }
-      if (!result.status.isSettled) {
+      if (!verifyResponse.status.isSettled) {
         _lastUnsettledPurchase = update;
         _flow.needsRecheck(failureCode: CreditPurchaseErrorCode.verify);
         return;
@@ -135,8 +135,8 @@ class CreditPurchaseCoordinator {
       if (_lastUnsettledPurchase?.dedupeKey == update.dedupeKey) _lastUnsettledPurchase = null;
       refreshCreditSummary(_ref);
       // 같은 결제가 두 번 와서 이미 넣은 거래면 알림 띠 없이 조용히
-      if (result.status == CreditPurchaseStatus.granted) {
-        _flow.granted(result.grantedCredits);
+      if (verifyResponse.status == CreditPurchaseStatus.granted) {
+        _flow.granted(verifyResponse.grantedCredits);
       } else {
         _flow.settledSilently();
       }

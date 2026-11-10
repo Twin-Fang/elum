@@ -16,17 +16,17 @@ class CreditPackRepository {
 
   final Dio _dio;
 
-  static const _repo = 'CreditPackRepository';
+  static const _repositoryName = 'CreditPackRepository';
 
   /// 판매 스위치 + 꾸러미 (상품 id · 개수 · 인기)
-  Future<Attempt<CreditPackSale>> fetchPackSale() => guarded(_repo, 'fetchPackSale', () async {
+  Future<Attempt<CreditPackSale>> fetchPackSale() => guarded(_repositoryName, 'fetchPackSale', () async {
     final response = await _dio.get<Map<String, dynamic>>('/api/credits/packs');
     return CreditPackSale.parse(response.data);
   }, describe: (sale) => 'packs ${sale.packs.length} sale ${sale.isSaleEnabled}');
 
   /// App Store: `Transaction.jwsRepresentation`
   Future<Attempt<CreditPurchaseResult>> verifyApple(String signedTransaction) =>
-      guarded(_repo, 'verifyApple', () async {
+      guarded(_repositoryName, 'verifyApple', () async {
         final response = await _dio.post<Map<String, dynamic>>(
           '/api/credits/purchases/apple',
           data: {'signedTransaction': signedTransaction},
@@ -38,7 +38,7 @@ class CreditPackRepository {
   Future<Attempt<CreditPurchaseResult>> verifyGoogle({
     required String productId,
     required String purchaseToken,
-  }) => guarded(_repo, 'verifyGoogle', () async {
+  }) => guarded(_repositoryName, 'verifyGoogle', () async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/credits/purchases/google',
       data: {'productId': productId, 'purchaseToken': purchaseToken},

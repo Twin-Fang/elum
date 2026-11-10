@@ -453,9 +453,9 @@ public enum ConfigKey {
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
   PRO_ROUTINE_MEMORY(
-    ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",
-    "Pro가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 메모를 넣지도 갱신하지도 않는다 (메모는 남음)",
-    // 기본 꺼짐: 개인정보처리방침 개정(#1079) 시행 전이라 관리자가 켜기 전까지 메모를 만들지 않음
+    ConfigGroup.PLAN_PRO, "AI 메모리 (내가 고친 방식으로 만들기)",
+    "Pro가 보호자별 AI 메모리 규칙과 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 규칙을 찾지도 넣지도 않는다 (규칙은 남음)",
+    // 기본 꺼짐: 개인정보처리방침 개정 시행 전이라 관리자가 켜기 전까지 규칙을 만들지 않음
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   PRO_IMAGE_REGENERATE_FREE(

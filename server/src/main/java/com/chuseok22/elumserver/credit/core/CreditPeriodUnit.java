@@ -7,9 +7,7 @@ import lombok.Getter;
 
 /**
  * 크레딧 지급 주기 단위: 주(WEEK), 달(MONTH)
- *
- * <p>keyMarker 는 주기 키의 가운데 글자다({@code 2026-W39}, {@code 2026-M11}) — 단위마다 달라 두 단위의 키가 겹치지 않는다.
- * 이름(WEEK·MONTH)은 설정 값·요약 응답 {@code periodUnit} 으로 나가므로 바꾸지 않는다.
+ * keyMarker = 주기 키 가운데 글자 (2026-W39, 2026-M11 > 단위끼리 키 안 겹침), 이름은 설정 값·periodUnit 응답으로 나가 변경 금지
  */
 @Getter
 @AllArgsConstructor

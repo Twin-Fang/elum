@@ -30,8 +30,8 @@ public enum AiCallPurpose {
   PICTOGRAM_PICK("픽토그램 선택"),
   /// 지운 기능(일과 번역)의 목적. 새로 기록하지 않음, 저장된 호출 로그를 읽기 위해 남김
   ROUTINE_TRANSLATE("일과 번역"),
-  /// 이룸이별 AI 메모 갱신 (#1082, Pro). 하루 1번 묶어 부름. 일과 생성으로 세면 한도를 깎는다.
-  ROUTINE_MEMORY("AI 메모 갱신"),
+  /// AI 메모리 수정 찾기 (Pro): 일과를 고쳐 확정할 때 한 번. 일과 생성으로 세면 한도를 깎는다.
+  ROUTINE_MEMORY("AI 메모리 수정 찾기"),
   /// 주간 리포트 정리 글. 일과 생성 한도에는 세지 않고 하루 AI 비용 합계에만 센다. 크레딧 없음
   WEEKLY_REPORT_SUMMARY("주간 리포트 정리"),
   ;

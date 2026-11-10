@@ -85,8 +85,8 @@ class StoreConsumableRefundNotificationTest {
   void googleOneTimeVoided_triggersRecovery() {
     String notification = "{\"packageName\":\"" + BUNDLE_ID + "\",\"voidedPurchaseNotification\":"
       + "{\"purchaseToken\":\"tok\",\"orderId\":\"GPA.1111-2222-3333-44444\",\"productType\":2,\"refundType\":1}}";
-    String data = Base64.getEncoder().encodeToString(notification.getBytes(StandardCharsets.UTF_8));
-    String body = "{\"message\":{\"data\":\"" + data + "\",\"messageId\":\"m-" + Instant.now().toEpochMilli() + "\"},\"subscription\":\"s\"}";
+    String encodedNotification = Base64.getEncoder().encodeToString(notification.getBytes(StandardCharsets.UTF_8));
+    String body = "{\"message\":{\"data\":\"" + encodedNotification + "\",\"messageId\":\"m-" + Instant.now().toEpochMilli() + "\"},\"subscription\":\"s\"}";
 
     assertThat(googleService.handleNotification(PUSH_TOKEN, body)).isEqualTo(StoreNotificationOutcome.PROCESSED);
 

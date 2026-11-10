@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * 주간 리포트 월요일 알림: 지난주 마친 일과가 있는 이룸이 > 권한 있는 보호자 > 정리 글 만들기(없으면) > 알림 기록 > 푸시
- * 같은 주는 알림 묶음 키가 한 번만 보내게 막음 (재실행·두 서버가 겹쳐도 안전). 이룸이 하나의 실패는 그 이룸이만 건너뜀
- * 푸시 본문은 횟수만 (이름·일과 제목은 잠금 화면에 나가지 않게 넣지 않음)
+ * 같은 주 중복 발송은 알림 묶음 키로 차단 (재실행·서버 이중 실행 안전), 이룸이별 실패는 해당 이룸만 건너뜀
+ * 푸시 본문은 횟수만 (잠금 화면에 이름·일과 제목 노출 방지)
  */
 @Slf4j
 @Service
@@ -106,18 +106,18 @@ public class WeeklyReportPushService {
     if (recipientMemberIds.isEmpty()) {
       return false;
     }
-    Optional<WeeklyReportReader.ReportWithNickname> data = weeklyReportReader.aggregateWithNickname(profileId, lastWeek, today);
-    if (data.isEmpty() || data.get().report().completedRoutineCount() == 0) {
+    Optional<WeeklyReportReader.ReportWithNickname> reportWithNickname = weeklyReportReader.aggregateWithNickname(profileId, lastWeek, today);
+    if (reportWithNickname.isEmpty() || reportWithNickname.get().report().completedRoutineCount() == 0) {
       return false;
     }
     // 정리 글 만들기 (이미 있으면 그대로, AI 비용은 첫 보호자 계정으로)
-    weeklyReportSummaryService.summaryFor(profileId, data.get().nickname(), recipientMemberIds.get(0), lastWeek,
-      data.get().report(), data.get().language(), today);
+    weeklyReportSummaryService.summaryFor(profileId, reportWithNickname.get().nickname(), recipientMemberIds.get(0), lastWeek,
+      reportWithNickname.get().report(), reportWithNickname.get().language(), today);
 
     NotificationDraft draft = NotificationDraft.weeklyReportReady(profileId, lastWeek.start(), LocalDateTime.now(clock));
     List<RecordedNotification> recorded = notificationRecorder.record(draft, recipientMemberIds);
-    String counts = data.get().report().sentRoutineCount() + PushMessageFactory.WEEKLY_REPORT_COUNTS_DELIMITER
-      + data.get().report().completedRoutineCount();
+    String counts = reportWithNickname.get().report().sentRoutineCount() + PushMessageFactory.WEEKLY_REPORT_COUNTS_DELIMITER
+      + reportWithNickname.get().report().completedRoutineCount();
     pushDispatcher.dispatch(recorded, NotificationType.WEEKLY_REPORT_READY, counts);
     return recorded.stream().anyMatch(RecordedNotification::shouldPush);
   }
