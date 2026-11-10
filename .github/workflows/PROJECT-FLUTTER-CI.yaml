@@ -339,7 +339,7 @@ jobs:
     if: |
       needs.prepare.outputs.analyze_only != 'true' &&
       needs.prepare.outputs.enable_android == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare
 
     outputs:
@@ -356,6 +356,14 @@ jobs:
         with:
           script: |
             core.setOutput('time', Date.now().toString());
+
+      # debug APK 의 네이티브 라이브러리 병합이 러너 디스크를 다 씀 > 빌드에 안 쓰는 기본 도구를 먼저 지움
+      - name: Free runner disk space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/share/swift /usr/local/share/boost
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h /
 
       - name: Checkout repository
         uses: actions/checkout@v5
