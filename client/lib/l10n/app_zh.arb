@@ -228,5 +228,14 @@
   "cardSplitFailedFallback": "未能拆分卡片，请稍后再试",
   "cardSplitRetry": "重试",
   "cardSplitDoneToast": "已把卡片拆成{count}张",
-  "planBenefitCardSplit": "把一张卡片拆得更小"
+  "planBenefitCardSplit": "把一张卡片拆得更小",
+  "weeklyReportDonutLabel": "完成率",
+  "weeklyReportDonutSummary": "{sent, plural, other{{sent}个日程中完成了{completed}个}}",
+  "weeklyReportDonutSemantics": "{sent, plural, other{完成率百分之{percent}，{sent}个日程中完成了{completed}个}}",
+  "weeklyReportDaysSection": "按星期记录",
+  "weeklyReportDayBarSemantics": "{sent, plural, other{{weekday}：{sent}个日程中完成了{completed}个}}",
+  "weeklyReportDayBarEmptySemantics": "{weekday}：没有发送日程",
+  "weeklyReportTrendSection": "与过去几周对比",
+  "weeklyReportTrendWeekLabel": "{month}/{day}",
+  "weeklyReportTrendPointSemantics": "{count, plural, other{{month}月{day}日这一周完成了{count}个日程}}"
 }

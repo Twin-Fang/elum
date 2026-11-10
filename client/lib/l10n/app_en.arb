@@ -1001,5 +1001,14 @@
   "cardSplitFailedFallback": "We couldn't split the card. Please try again in a moment",
   "cardSplitRetry": "Try again",
   "cardSplitDoneToast": "Split the card into {count}",
-  "planBenefitCardSplit": "Splits one card into smaller ones"
+  "planBenefitCardSplit": "Splits one card into smaller ones",
+  "weeklyReportDonutLabel": "Completion rate",
+  "weeklyReportDonutSummary": "{sent, plural, other{{completed} of {sent} routines done}}",
+  "weeklyReportDonutSemantics": "{sent, plural, other{Completion rate {percent} percent, {completed} of {sent} routines done}}",
+  "weeklyReportDaysSection": "Daily record",
+  "weeklyReportDayBarSemantics": "{sent, plural, other{{weekday}: {completed} of {sent} routines done}}",
+  "weeklyReportDayBarEmptySemantics": "{weekday}: no routines sent",
+  "weeklyReportTrendSection": "Compared with past weeks",
+  "weeklyReportTrendWeekLabel": "{month}/{day}",
+  "weeklyReportTrendPointSemantics": "{count, plural, other{Week of {month}/{day}: {count} routines done}}"
 }

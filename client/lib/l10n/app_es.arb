@@ -228,5 +228,14 @@
   "cardSplitFailedFallback": "No se pudo dividir la tarjeta. Inténtalo de nuevo en un momento",
   "cardSplitRetry": "Reintentar",
   "cardSplitDoneToast": "Dividimos la tarjeta en {count}",
-  "planBenefitCardSplit": "Divide una tarjeta en otras más pequeñas"
+  "planBenefitCardSplit": "Divide una tarjeta en otras más pequeñas",
+  "weeklyReportDonutLabel": "Tasa de finalización",
+  "weeklyReportDonutSummary": "{sent, plural, other{{completed} de {sent} rutinas completadas}}",
+  "weeklyReportDonutSemantics": "{sent, plural, other{Tasa de finalización {percent} por ciento, {completed} de {sent} rutinas completadas}}",
+  "weeklyReportDaysSection": "Registro por día",
+  "weeklyReportDayBarSemantics": "{sent, plural, other{{weekday}: {completed} de {sent} rutinas completadas}}",
+  "weeklyReportDayBarEmptySemantics": "{weekday}: sin rutinas enviadas",
+  "weeklyReportTrendSection": "Comparación con semanas anteriores",
+  "weeklyReportTrendWeekLabel": "{day}/{month}",
+  "weeklyReportTrendPointSemantics": "{count, plural, other{Semana del {day}/{month}: {count} rutinas completadas}}"
 }

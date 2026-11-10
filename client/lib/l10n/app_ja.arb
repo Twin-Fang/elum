@@ -228,5 +228,14 @@
   "cardSplitFailedFallback": "カードを分けられませんでした。しばらくしてからもう一度お試しください",
   "cardSplitRetry": "もう一度",
   "cardSplitDoneToast": "カードを{count}枚に分けました",
-  "planBenefitCardSplit": "カード1枚をより小さく分けます"
+  "planBenefitCardSplit": "カード1枚をより小さく分けます",
+  "weeklyReportDonutLabel": "達成率",
+  "weeklyReportDonutSummary": "{sent, plural, other{ルーティン{sent}件中{completed}件を終えました}}",
+  "weeklyReportDonutSemantics": "{sent, plural, other{達成率{percent}パーセント、ルーティン{sent}件中{completed}件を終えました}}",
+  "weeklyReportDaysSection": "曜日ごとの記録",
+  "weeklyReportDayBarSemantics": "{sent, plural, other{{weekday}曜日 ルーティン{sent}件中{completed}件を終えました}}",
+  "weeklyReportDayBarEmptySemantics": "{weekday}曜日 送ったルーティンなし",
+  "weeklyReportTrendSection": "過去の週との比較",
+  "weeklyReportTrendWeekLabel": "{month}/{day}",
+  "weeklyReportTrendPointSemantics": "{count, plural, other{{month}月{day}日の週 ルーティン{count}件を終えました}}"
 }
