@@ -99,7 +99,7 @@
   "talkImportConfirm": "完了",
   "talkImportNoElumiTitle": "先にElumiをつなげてください",
   "talkImportNoElumiAction": "Elumiをつなげる",
-  "talkImportDone": "{elumiName}の日課管理に入れました",
+  "talkImportDone": "{routineTitle}を取り込みました",
   "talkImportGoToLibrary": "見に行く",
   "talkImportFailedTitle": "日課管理に入れられませんでした",
   "talkCommentsTitle": "コメント",

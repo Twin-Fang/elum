@@ -9,7 +9,6 @@ import '../layout/app_text_scale.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'elum_spinner.dart';
-import 'pro_badge.dart';
 
 /// 설정 목록의 한 줄. 항목이 늘어도 이 위젯만 반복하면 된다.
 ///
@@ -26,7 +25,6 @@ class SettingsTile extends StatelessWidget {
     this.showChevronWithValue = false,
     this.loading = false,
     this.isInCard = true,
-    this.shouldShowProBadge = false,
     this.valueChip,
   });
 
@@ -53,9 +51,6 @@ class SettingsTile extends StatelessWidget {
   /// false 는 옛 평면 줄(`1022:4467`, 높이 60)이다. 화살표는 둘 다 시안 `fi-br-angle-small` 이다.
   /// 새 화면은 [SettingsGroup] 안에 기본값(true)으로 쓴다.
   final bool isInCard;
-
-  /// 이름 뒤 [ProBadge]: Free 라 들어가면 Pro 미리 보기인 Pro 줄 (#1170)
-  final bool shouldShowProBadge;
 
   /// 오른쪽 값 자리에 글자 대신 그릴 칩 (내 요금제 `Free` · `PRO`, #1189). 있으면 [valueText] 대신 그림
   final Widget? valueChip;
@@ -100,10 +95,6 @@ class SettingsTile extends StatelessWidget {
         fontWeight: destructive && !isInCard ? FontWeight.w500 : null,
       ),
     );
-    final labelWithBadge = LabelWithProBadge(
-      label: labelText,
-      shouldShowProBadge: shouldShowProBadge,
-    );
     Widget buildValueText(TextAlign align) => Text(
           value ?? '',
           textAlign: align,
@@ -134,9 +125,9 @@ class SettingsTile extends StatelessWidget {
                     // 큰 글자: 값을 이름 아래로 내림 (옆 140 칸에서 값이 세 줄로 꺾이지 않게)
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [labelWithBadge, buildValueText(TextAlign.left)],
+                        children: [labelText, buildValueText(TextAlign.left)],
                       )
-                    : labelWithBadge,
+                    : labelText,
               ),
             ),
             if (loading)

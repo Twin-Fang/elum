@@ -362,7 +362,6 @@ class _RoutineMemoryTile extends ConsumerWidget {
     return SettingsTile(
       isInCard: true,
       label: context.l10n.guardianSettingsRoutineMemory,
-      shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineMemory),
       onTap: isBusy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }

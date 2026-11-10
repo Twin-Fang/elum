@@ -224,7 +224,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.myInfoMutedIcon,
     required this.routineTitleEditIcon,
     required this.toastBackground,
-    required this.toastBorder,
     required this.toastText,
     required this.toastAction,
     required this.settingsToggleOn,
@@ -910,16 +909,13 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 일과 제목 옆 연필 (Figma `1931:7372` fi-br-pencil #CACACA, 상세 시트 · 카드 확인)
   final Color routineTitleEditIcon;
 
-  /// 토스트 판 (시안 없음 > 팝업 결: 흰 판 · design-language §4-6)
+  /// 토스트 판: 어두운 판 (글자색 토큰 계열, Pro 시안 알림 띠)
   final Color toastBackground;
 
-  /// 토스트 테두리 1px (아이보리 바탕 위 흰 판 경계, design-language §3-4)
-  final Color toastBorder;
-
-  /// 토스트 문구
+  /// 토스트 문구: 어두운 판 위 밝은 글자
   final Color toastText;
 
-  /// 토스트 오른쪽 누르는 글자 (`보러 가기`) — 문구보다 굵게
+  /// 토스트 오른쪽 누르는 글자 (`보러 가기`): 강조색
   final Color toastAction;
 
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
@@ -1382,10 +1378,9 @@ class AppColors extends ThemeExtension<AppColors> {
     myInfoMetaText: Color(0xFF74757D),
     myInfoMutedIcon: Color(0xFFCACACA),
     routineTitleEditIcon: Color(0xFFCACACA),
-    toastBackground: Color(0xFFFFFFFF),
-    toastBorder: Color(0xFFEFEFEF),
-    toastText: Color(0xFF242634),
-    toastAction: Color(0xFF242634),
+    toastBackground: Color(0xFF242634),
+    toastText: Color(0xFFFFFFFF),
+    toastAction: Color(0xFFFCE551),
     settingsToggleOn: Color(0xFF55CFBA),
     settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
@@ -1660,7 +1655,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? myInfoMutedIcon,
     Color? routineTitleEditIcon,
     Color? toastBackground,
-    Color? toastBorder,
     Color? toastText,
     Color? toastAction,
     Color? settingsToggleOn,
@@ -1940,7 +1934,6 @@ class AppColors extends ThemeExtension<AppColors> {
       myInfoMutedIcon: myInfoMutedIcon ?? this.myInfoMutedIcon,
       routineTitleEditIcon: routineTitleEditIcon ?? this.routineTitleEditIcon,
       toastBackground: toastBackground ?? this.toastBackground,
-      toastBorder: toastBorder ?? this.toastBorder,
       toastText: toastText ?? this.toastText,
       toastAction: toastAction ?? this.toastAction,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
@@ -2398,7 +2391,6 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       toastBackground: Color.lerp(toastBackground, other.toastBackground, t)!,
-      toastBorder: Color.lerp(toastBorder, other.toastBorder, t)!,
       toastText: Color.lerp(toastText, other.toastText, t)!,
       toastAction: Color.lerp(toastAction, other.toastAction, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,

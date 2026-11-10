@@ -162,7 +162,6 @@ class GuardianMyInfoScreen extends ConsumerWidget {
           SettingsTile(
             isInCard: true,
             label: context.l10n.weeklyReportTitle,
-            shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.weeklyReport),
             onTap: () => context.push(Routes.guardianWeeklyReport),
           ),
         SettingsTile(

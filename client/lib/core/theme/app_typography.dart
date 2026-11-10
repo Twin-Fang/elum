@@ -150,7 +150,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.printCardDescription,
     required this.printCardNumber,
     required this.printFooter,
-    required this.printWatermark,
     required this.proPlanBadgeLabel,
     required this.proPlanHeadline,
     required this.proPlanSubline,
@@ -688,9 +687,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 인쇄 지면 아래 띠 (이룸 로고 옆 문구 · 그림 출처) (12/w500 Pretendard)
   final TextStyle printFooter;
-
-  /// Free 인쇄물 바탕 워터마크 글자 (20/w700 Pretendard)
-  final TextStyle printWatermark;
 
   // --- Pro 요금제 화면 · PRO 배지 · Pro 미리보기 (#1189, 디자이너 시안 전 임시 값) ---
 
@@ -1637,13 +1633,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
       height: 1.2,
       letterSpacing: 0,
     ),
-    printWatermark: TextStyle(
-      fontFamily: promptFontFamily,
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
-      height: 1.0,
-      letterSpacing: 0,
-    ),
     proPlanBadgeLabel: TextStyle(
       fontFamily: fontFamily,
       fontSize: 12,
@@ -1907,7 +1896,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? printCardDescription,
     TextStyle? printCardNumber,
     TextStyle? printFooter,
-    TextStyle? printWatermark,
     TextStyle? proPlanBadgeLabel,
     TextStyle? proPlanHeadline,
     TextStyle? proPlanSubline,
@@ -2069,7 +2057,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
       printCardDescription: printCardDescription ?? this.printCardDescription,
       printCardNumber: printCardNumber ?? this.printCardNumber,
       printFooter: printFooter ?? this.printFooter,
-      printWatermark: printWatermark ?? this.printWatermark,
       proPlanBadgeLabel: proPlanBadgeLabel ?? this.proPlanBadgeLabel,
       proPlanHeadline: proPlanHeadline ?? this.proPlanHeadline,
       proPlanSubline: proPlanSubline ?? this.proPlanSubline,
@@ -2275,7 +2262,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
       printCardDescription: TextStyle.lerp(printCardDescription, other.printCardDescription, t)!,
       printCardNumber: TextStyle.lerp(printCardNumber, other.printCardNumber, t)!,
       printFooter: TextStyle.lerp(printFooter, other.printFooter, t)!,
-      printWatermark: TextStyle.lerp(printWatermark, other.printWatermark, t)!,
       proPlanBadgeLabel: TextStyle.lerp(proPlanBadgeLabel, other.proPlanBadgeLabel, t)!,
       proPlanHeadline: TextStyle.lerp(proPlanHeadline, other.proPlanHeadline, t)!,
       proPlanSubline: TextStyle.lerp(proPlanSubline, other.proPlanSubline, t)!,

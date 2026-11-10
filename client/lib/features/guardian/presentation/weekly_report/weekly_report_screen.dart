@@ -153,7 +153,11 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
               fit: BoxFit.contain,
               child: RepaintBoundary(
                 key: _sharePageKey,
-                child: WeeklyReportSharePage(report: report, elumiName: elumiName),
+                child: WeeklyReportSharePage(
+                  report: report,
+                  elumiName: elumiName,
+                  hasWatermark: !ref.watch(planAccessProvider).canExportCardsWithoutWatermark,
+                ),
               ),
             ),
           ),

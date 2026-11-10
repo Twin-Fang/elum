@@ -99,7 +99,7 @@
   "talkImportConfirm": "Listo",
   "talkImportNoElumiTitle": "Conecta primero a tu Elumi",
   "talkImportNoElumiAction": "Conectar a Elumi",
-  "talkImportDone": "Añadida a las rutinas de {elumiName}",
+  "talkImportDone": "Se importó {routineTitle}",
   "talkImportGoToLibrary": "Ver",
   "talkImportFailedTitle": "No se pudo añadir a Rutinas",
   "talkCommentsTitle": "Comentarios",

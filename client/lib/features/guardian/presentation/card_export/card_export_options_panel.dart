@@ -88,7 +88,6 @@ class CardExportOptionsPanel extends StatelessWidget {
                 label: l10n.cardExportOrientationRow,
                 valueText: _orientationLabel(context, options.orientation),
                 showChevronWithValue: true,
-                shouldShowProBadge: _isLayoutLocked,
                 onTap: () => _pickOrientation(context),
               ),
               if (shouldShowPerPage)
@@ -96,14 +95,12 @@ class CardExportOptionsPanel extends StatelessWidget {
                   label: l10n.cardExportPerPageRow,
                   valueText: l10n.cardExportPerPage(options.cardsPerPage.count),
                   showChevronWithValue: true,
-                  shouldShowProBadge: _isLayoutLocked,
                   onTap: () => _pickCardsPerPage(context),
                 ),
               SettingsTile(
                 label: l10n.cardExportCardSizeRow,
                 valueText: _cardSizeLabel(context, options.cardSize),
                 showChevronWithValue: true,
-                shouldShowProBadge: _isLayoutLocked,
                 onTap: () => _pickCardSize(context),
               ),
             ],

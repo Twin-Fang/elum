@@ -51,7 +51,7 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         // 바닥에 붙이지 않고 띄운다. 하단 광고·홈 인디케이터와 붙어 보이지 않게.
         behavior: SnackBarBehavior.floating,
-        // 흰 판 + 1px 테두리 (시안 없음 > 팝업 결, design-language §4-6). 어두운 덩어리로 튀지 않게
+        // 어두운 판 + 밝은 글자 (Pro 시안 알림 띠)
         backgroundColor: colors.toastBackground,
         // body 는 줄 높이 1.0 이라 이름이 길어 두 줄이 되면 위아래 줄이 붙는다.
         contentTextStyle: typo.body.copyWith(color: colors.toastText, height: 1.4),
@@ -61,8 +61,7 @@ abstract final class AppTheme {
         actionOverflowThreshold: 0.4,
         insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: colors.toastBorder),
+          borderRadius: BorderRadius.circular(18),
         ),
         // 떠 있는 판의 옅은 그림자 (팝업 `4 4 6` 5% 에 가장 가까운 Material 높이)
         elevation: 2,

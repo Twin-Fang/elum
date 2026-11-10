@@ -14,8 +14,6 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../../../core/widgets/elum_floating_pill_button.dart';
 import '../../../../core/widgets/elum_spinner.dart';
-import '../../../member/application/plan_access.dart';
-import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/guardian_child_identity.dart';
 import '../../application/routine_schedule_controller.dart';
 import '../../application/routine_manage_coach_notifier.dart';
@@ -37,14 +35,12 @@ class LibraryManageHeader extends ConsumerWidget {
     final space = context.space;
     final isPhone = context.sizeClass == WindowSizeClass.compact;
     final identity = ref.watch(guardianChildIdentityProvider);
-    // 입구: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · Free 면 Pro 배지
-    final access = ref.watch(planAccessProvider);
+    // 입구: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때)
     final entries = <Widget>[
       if (ref.watch(canShowRoutineScheduleProvider))
         LibraryEntryPill(
           label: context.l10n.weeklyPlanEntry,
           iconAsset: AppAssets.iconCalendar,
-          shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineSchedule),
           onTap: () => context.push(Routes.guardianWeeklyPlan),
         ),
     ];

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/batchim.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/router/routes.dart';
@@ -29,7 +30,7 @@ import 'talk_import_group_grid.dart';
 /// 시트가 닫히며 돌려주는 값: 일과가 들어간 이룸이와 새 일과 id
 typedef _ImportOutcome = ({ProfileSummary profile, String routineId});
 
-/// "내 일과로": 글을 일과관리로 가져오는 시트 > 성공하면 완료 토스트 "{호칭} 일과관리에 넣었어요 · 보러 가기"
+/// "내 일과로": 글을 일과관리로 가져오는 시트 > 성공하면 완료 토스트 "{일과 이름}을(를) 가져왔어요 · 보러 가기"
 /// 피드·상세가 이 함수만 부른다. 실패는 시트 안에서 안내하고 시트를 유지한다
 Future<void> showTalkImportSheet(
   BuildContext context,
@@ -50,9 +51,11 @@ Future<void> showTalkImportSheet(
 
   showTalkImportDoneToast(
     messenger,
-    message: l10n.talkImportDone(outcome.profile.displayName),
+    message: l10n.talkImportDone(post.title, batchimOf(post.title)),
     actionLabel: l10n.talkImportGoToLibrary,
     onAction: () => _showImportedRoutine(container, router, outcome),
+    postId: post.id,
+    firstStep: post.previewSteps.firstOrNull,
   );
 }
 
