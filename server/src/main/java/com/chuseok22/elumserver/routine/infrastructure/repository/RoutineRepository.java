@@ -238,28 +238,34 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   List<String> findProfileIdsWithStatusBetween(
     @Param("status") RoutineStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-  // --- AI 메모 (#1082) ---
+  // --- AI 메모리 ---
 
-  /// 메모 갱신을 기다리는 이룸이: AI 처음 카드가 있고 아직 반영 안 한 확정·완료 일과가 있는 이룸이
+  /// 수정 찾기를 놓친 일과: AI 처음 카드가 있고 아직 반영 안 한 확정·완료 일과 중 안정된(settledBefore 이전 수정)·최근(recentAfter 이후) 것
   @Query("""
-    select distinct r.profile.id from Routine r
+    select r.id from Routine r
     where r.aiDraftCards is not null and r.memoryReflectedAt is null and r.status in :statuses
+      and r.updatedAt < :settledBefore and r.updatedAt > :recentAfter
+    order by r.updatedAt asc
     """)
-  List<String> findProfileIdsWithPendingMemoryEdits(@Param("statuses") Collection<RoutineStatus> statuses);
+  List<String> findIdsMissedByMemoryExtraction(
+    @Param("statuses") Collection<RoutineStatus> statuses, @Param("settledBefore") LocalDateTime settledBefore,
+    @Param("recentAfter") LocalDateTime recentAfter, Pageable pageable);
 
-  /// 한 이룸이의 반영 대기 일과 (최신순)
-  List<Routine> findAllByProfileIdAndAiDraftCardsIsNotNullAndMemoryReflectedAtIsNullAndStatusInOrderByCreatedAtDesc(
-    String profileId, Collection<RoutineStatus> statuses);
+  /// 수정 찾기 선점: 아직 반영 표시가 없을 때만 표시 (한 일과를 한 번만 처리). 바뀐 행 수 1 이면 선점 성공
+  @Modifying
+  @Query("update Routine r set r.memoryReflectedAt = :now where r.id = :routineId and r.memoryReflectedAt is null")
+  int claimMemoryExtraction(@Param("routineId") String routineId, @Param("now") LocalDateTime now);
 
-  /// 예시 후보: AI 처음 카드가 있는 확정·완료 일과 최근 10개 (반영 여부 무관)
-  List<Routine> findTop10ByProfileIdAndAiDraftCardsIsNotNullAndStatusInOrderByCreatedAtDesc(
-    String profileId, Collection<RoutineStatus> statuses);
+  /// 예시 후보: 그 보호자가 만든 AI 처음 카드가 있는 확정·완료 일과 최근 10개
+  List<Routine> findTop10ByProfileIdAndCreatedByAndAiDraftCardsIsNotNullAndStatusInOrderByCreatedAtDesc(
+    String profileId, String createdBy, Collection<RoutineStatus> statuses);
 
-  /// 메모 모두 지우기: 이 이룸이 일과의 AI 처음 카드 스냅샷을 비움 (예시·다음 갱신에 다시 쓰이지 않게). 바뀐 행 수
+  /// 메모리 모두 지우기: 이 보호자가 만든 이 이룸이 일과의 AI 처음 카드 사본을 비움 (다시 쓰이지 않게). 바뀐 행 수
   @Modifying
   @Query("""
     update Routine r set r.aiDraftCards = null, r.memoryReflectedAt = :now
-    where r.profile.id = :profileId and r.aiDraftCards is not null
+    where r.profile.id = :profileId and r.createdBy = :memberId and r.aiDraftCards is not null
     """)
-  int clearAiDraftCardsOfProfile(@Param("profileId") String profileId, @Param("now") LocalDateTime now);
+  int clearAiDraftCardsOfOwner(
+    @Param("profileId") String profileId, @Param("memberId") String memberId, @Param("now") LocalDateTime now);
 }

@@ -129,8 +129,8 @@ public class GuardianshipService {
     // 내가 만든 이 이룸이의 일과 — 승인 전(임시저장)도 함께 (E12). 단계는 cascade 로 함께 지워진다.
     // 이룸이가 지금 수행 중이면 이룸이 휴대폰의 다음 요청이 404 를 받는다 (E11).
     routineRepository.deleteAll(routineRepository.findAllByProfileIdAndCreatedBy(profileId, memberId));
-    // 이 이룸이 AI 메모 (#1082) — 나간 보호자가 고친 카드에서 배운 줄이 남지 않게 함께 돌보던 이룸이도 지움
-    routineMemoryService.forgetProfile(profileId);
+    // 나간 보호자의 AI 메모리 (이 이룸이에서 쓰던 규칙·근거·수정 기록·거절 기억). 다른 보호자의 메모리는 그대로
+    routineMemoryService.forgetMember(profileId, memberId);
 
     // 내가 붙인 이 이룸이의 휴대폰 — 연결을 끊고 그 기기 세션을 폐기한다 (E13). 남은 보호자가 다시 붙인다.
     List<DeviceLink> myPhones = deviceLinkRepository.findAllByMemberIdAndProfileId(memberId, profileId);

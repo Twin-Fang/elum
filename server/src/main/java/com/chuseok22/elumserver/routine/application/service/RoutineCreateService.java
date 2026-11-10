@@ -165,7 +165,7 @@ public class RoutineCreateService {
     AiCallContext.setContentLocale(contentLocale);
     // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
     AiCallContext.setCreditJobId(creditJobId);
-    // Pro AI 메모·확정 예시 (#1082). 준비 실패는 빈 계획 = 지금 하네스 그대로 (던지지 않음)
+    // Pro AI 메모리 규칙·확정 예시 (만드는 보호자 자신의 것만). 준비 실패는 빈 계획 = 지금 하네스 그대로 (던지지 않음)
     RoutinePersonalizationProvider.Plan personalizationPlan = routinePersonalizationProvider.planFor(
       caller.memberId(), profile.getId(), profile.getNickname(), contentLocale);
     AiCallContext.setRoutinePersonalization(personalizationPlan.personalization());
@@ -204,7 +204,7 @@ public class RoutineCreateService {
     routine.setRewardText(RoutineRules.trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
-    // AI 처음 카드 스냅샷 (Pro + 메모 켜짐만, 카드 글만 — 원문 없음). 확정 뒤 메모 갱신이 비교에 씀 (#1082)
+    // AI 처음 카드 사본 (Pro + 메모리 켜짐만, 카드 글만 — 원문 없음). 확정 뒤 수정 찾기가 비교에 씀
     if (personalizationPlan.isMemoryActive()) {
       routine.setAiDraftCards(RoutineMemoryJson.writeCards(generation.steps().stream()
         .map(step -> new RoutineCardText(step.title(), step.description()))
@@ -225,7 +225,8 @@ public class RoutineCreateService {
       releaseCredit(creditJobId, "일과 저장 실패", e);
       throw e;
     }
-    RoutineResponse response = withImageFailureFlag(RoutineResponse.from(saved.routine()), generation);
+    RoutineResponse response = withImageFailureFlag(RoutineResponse.from(saved.routine()), generation)
+      .withAppliedMemoryRuleCount(personalizationPlan.appliedRuleCount());
     CreditSettlement settlement = saved.settlement();
     if (settlement == null) {
       return response;

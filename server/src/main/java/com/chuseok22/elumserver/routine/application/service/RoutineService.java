@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.core.RoutineMemoryExtractionRequestedEvent;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -54,6 +55,10 @@ public class RoutineService {
     // (아이 홈은 scheduledAt이 오늘인 CONFIRMED만 조회하므로 이 갱신이 없으면 미리 만든 일과가 뜨지 않는다)
     routine.setScheduledAt(LocalDate.now().atTime(9, 0));
     publishRoutineSent(caller, routine);
+    // AI 가 만든 일과(처음 카드 사본 있음)면 커밋 뒤 비동기로 고친 것 찾기
+    if (routine.getAiDraftCards() != null) {
+      eventPublisher.publishEvent(new RoutineMemoryExtractionRequestedEvent(routine.getId()));
+    }
     return RoutineResponse.from(routine);
   }
 

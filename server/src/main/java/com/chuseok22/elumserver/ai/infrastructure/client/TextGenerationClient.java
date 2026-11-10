@@ -47,8 +47,9 @@ public interface TextGenerationClient {
   /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
   String pickPictogramJson(String stepTitle, String stepDescription);
 
-  /// AI 메모 갱신 (#1082). 입력은 처음 카드 <-> 확정 카드 비교 JSON(원문 없음), 반환값은 {"lines": [...]} JSON 문자열.
-  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 거르기·저장은 부르는 쪽(RoutineMemoryAi) 몫
+  /// AI 메모리 수정 찾기. 입력은 처음 카드 <-> 확정 카드 + 기존 규칙·거절 규칙 JSON(원문 없음),
+  /// 반환값은 {"matched": [규칙 id], "found": [{type, before, after, summary}]} JSON 문자열.
+  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 검증·세기·저장은 부르는 쪽(RoutineMemoryAi 와 서버 서비스) 몫
   String buildRoutineMemoryJson(String memoryUserContent);
 
   /// 주간 리포트 정리 글. 입력은 집계 JSON(제목·횟수만, 이름은 {userName}), 반환값은 {"lines": [...]} JSON 문자열.

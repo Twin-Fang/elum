@@ -23,6 +23,8 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   private static final String ROUTINE_STEPS_FIELD = "steps";
   private static final String QUESTIONS_FIELD = "questions";
   private static final String MEMORY_LINES_FIELD = "lines";
+  private static final String MEMORY_MATCHED_FIELD = "matched";
+  private static final String MEMORY_FOUND_FIELD = "found";
 
   private final List<TextGenerationClient> chain;
 
@@ -66,7 +68,7 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
 
   @Override
   public String buildRoutineMemoryJson(String memoryUserContent) {
-    return tryInOrder("memory", node -> node.path(MEMORY_LINES_FIELD).isArray(),
+    return tryInOrder("memory", node -> node.path(MEMORY_MATCHED_FIELD).isArray() && node.path(MEMORY_FOUND_FIELD).isArray(),
       client -> client.buildRoutineMemoryJson(memoryUserContent));
   }
 

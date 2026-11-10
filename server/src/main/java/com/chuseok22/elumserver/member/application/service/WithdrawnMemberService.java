@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
+import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseCleanupService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
@@ -58,6 +59,7 @@ public class WithdrawnMemberService {
   private final SystemConfigService systemConfigService;
   private final GuardianshipService guardianshipService;
   private final AiCreditAccountRepository aiCreditAccountRepository;
+  private final CreditPurchaseCleanupService creditPurchaseCleanupService;
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
@@ -161,6 +163,8 @@ public class WithdrawnMemberService {
     // 크레딧 계정도 행·원장은 운영 지표로 남기고 회원과 소셜 신원 해시를 뗀다. 1년 안의 재가입은
     // 같은 계정이 복원돼 사용량이 이어지고, 보관 기간이 지난 뒤에는 방침대로 식별값을 파기한다.
     aiCreditAccountRepository.detachMember(memberId);
+    // 크레딧 구매 기록은 계정에 묶여 남고(같은 거래 두 번 적립 방지) 회원 식별자만 뗀다
+    creditPurchaseCleanupService.detachMemberOf(memberId);
     // 일과 묶음은 함께 돌보는 이룸이에 남기고 만든 사람만 뗀다
     routineGroupService.detachCreatorOf(memberId);
 

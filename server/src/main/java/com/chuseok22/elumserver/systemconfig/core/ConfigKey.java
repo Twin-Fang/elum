@@ -486,6 +486,12 @@ public enum ConfigKey {
     "서비스 전체가 하루(한국 시각 0시 시작)에 AI에 쓸 추정 비용의 상한. 닿으면 새 일과 만들기를 멈추고, 카드 추가는 그림 없이 한다. 호출 기록의 추정치라 실제 청구와 다를 수 있다. -1이면 끄고, 0이면 새 일과 만들기와 추가 카드 그림을 바로 멈춘다",
     ConfigValueType.DECIMAL, List.of(), "-1"
   ),
+  ROUTINE_MEMORY_AUTO_APPLY_COUNT(
+    ConfigGroup.AI_BUDGET, "AI 메모리 자동 적용 횟수",
+    "같은 수정이 서로 다른 일과 이만큼에서 관찰되면 AI 메모리 규칙이 자동으로 적용(ACTIVE)된다. "
+      + "보호자가 직접 '항상 이렇게'를 누르면 횟수와 상관없이 적용. 다음 요청부터 반영. 2~10",
+    ConfigValueType.INTEGER, List.of(), "3", 2, 10
+  ),
 
   // --- 사용 한도·남용 방지 ---
   //

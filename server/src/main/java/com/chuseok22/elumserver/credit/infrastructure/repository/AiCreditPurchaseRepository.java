@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +24,9 @@ public interface AiCreditPurchaseRepository extends JpaRepository<AiCreditPurcha
 
   /// 계정의 구매 기록, 최근 것부터 (관리자 회원 상세)
   List<AiCreditPurchase> findByAccountIdOrderByCreatedAtDesc(String accountId);
+
+  /// 완전 삭제용: 구매 행(거래 id 멱등 키, 결제 기록)은 남기고 누구 것인지만 뗌 (member 외래키 없음)
+  @Modifying(flushAutomatically = true)
+  @Query("update AiCreditPurchase p set p.memberId = null where p.memberId = :memberId")
+  int detachMember(@Param("memberId") String memberId);
 }

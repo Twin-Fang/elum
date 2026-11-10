@@ -2,7 +2,6 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import com.chuseok22.elumserver.routine.core.RoutineCardText;
-import com.chuseok22.elumserver.routine.core.RoutineMemoryLine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,7 +11,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * AI 메모 JSON 칸 변환 (#1082): 메모 줄·지운 줄·카드 스냅샷 <-> JSON 문자열
+ * AI 처음 카드 사본 JSON 칸 변환: 카드 글 목록 <-> JSON 문자열
  * 읽기 실패는 빈 목록 (망가진 한 행 때문에 일과 만들기·화면이 멈추지 않게)
  */
 @Slf4j
@@ -22,22 +21,6 @@ final class RoutineMemoryJson {
   private static final String EMPTY_ARRAY = "[]";
 
   private RoutineMemoryJson() {
-  }
-
-  static List<RoutineMemoryLine> readLines(String json) {
-    return read(json, new TypeReference<List<RoutineMemoryLine>>() { }, "lines");
-  }
-
-  static String writeLines(List<RoutineMemoryLine> lines) {
-    return write(lines);
-  }
-
-  static List<String> readTexts(String json) {
-    return read(json, new TypeReference<List<String>>() { }, "dismissed");
-  }
-
-  static String writeTexts(List<String> texts) {
-    return write(texts);
   }
 
   static List<RoutineCardText> readCards(String json) {

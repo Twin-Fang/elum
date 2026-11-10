@@ -35,6 +35,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
+import com.chuseok22.elumserver.routine.core.RoutineMemoryExtractionRequestedEvent;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
@@ -1249,6 +1250,31 @@ class RoutineServiceTest {
     routineService.confirm(GUARDIAN, "routine-1");
 
     verify(eventPublisher).publishEvent(new RoutineSentEvent("routine-1", "profile-1", "member-1"));
+  }
+
+  @Test
+  @DisplayName("AI 처음 카드 사본이 있는 일과를 승인하면 수정 찾기 이벤트를 내고, 없으면 내지 않는다 — 찾기가 시작되지 않거나 모든 일과가 AI 로 간다")
+  void confirm_publishesMemoryExtractionOnlyWhenDraftCardsExist() {
+    Routine withDraft = confirmedRoutine(profileWithStars(0), 1);
+    withDraft.setStatus(RoutineStatus.PENDING_REVIEW);
+    withDraft.setAiDraftCards("[]");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(withDraft));
+
+    routineService.confirm(GUARDIAN, "routine-1");
+
+    verify(eventPublisher).publishEvent(new RoutineMemoryExtractionRequestedEvent("routine-1"));
+  }
+
+  @Test
+  @DisplayName("AI 처음 카드 사본이 없는 일과(Free·꺼짐)는 수정 찾기 이벤트를 내지 않는다")
+  void confirm_withoutDraftCards_doesNotPublishMemoryExtraction() {
+    Routine withoutDraft = confirmedRoutine(profileWithStars(0), 1);
+    withoutDraft.setStatus(RoutineStatus.PENDING_REVIEW);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(withoutDraft));
+
+    routineService.confirm(GUARDIAN, "routine-1");
+
+    verify(eventPublisher, never()).publishEvent(any(RoutineMemoryExtractionRequestedEvent.class));
   }
 
   @Test
