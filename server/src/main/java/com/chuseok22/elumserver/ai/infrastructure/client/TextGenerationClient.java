@@ -50,4 +50,8 @@ public interface TextGenerationClient {
   /// AI 메모 갱신 (#1082). 입력은 처음 카드 <-> 확정 카드 비교 JSON(원문 없음), 반환값은 {"lines": [...]} JSON 문자열.
   /// 지시문·스키마는 RoutineMemorySpec 한 곳. 거르기·저장은 부르는 쪽(RoutineMemoryAi) 몫
   String buildRoutineMemoryJson(String memoryUserContent);
+
+  /// 주간 리포트 정리 글. 입력은 집계 JSON(제목·횟수만, 이름은 {userName}), 반환값은 {"lines": [...]} JSON 문자열.
+  /// 지시문·스키마는 WeeklyReportSummarySpec 한 곳(언어는 AiCallContext 일과 언어). 거르기·저장은 부르는 쪽 몫
+  String buildWeeklyReportSummaryJson(String summaryUserContent);
 }

@@ -127,20 +127,22 @@ public class AiCallLogService {
       // 달라지는데 장당 고정값은 그것을 따라가지 못한다.
       case OPENAI_IMAGE -> openAiImageCostUsd(usage);
       case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
-      case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION, OPENAI_TEXT_PICTOGRAM, OPENAI_TEXT_TRANSLATE, OPENAI_TEXT_MEMORY -> textCostUsd(
+      case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION, OPENAI_TEXT_PICTOGRAM, OPENAI_TEXT_TRANSLATE, OPENAI_TEXT_MEMORY,
+        OPENAI_TEXT_WEEKLY_REPORT -> textCostUsd(
         usage,
         ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
         ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
       );
       // 입력에는 캐시 읽기·쓰기 토큰도 더해 온다 (ClaudeTextClient). 캐시 할인은 반영하지 않아 약간 높게 잡힘
-      case CLAUDE_TEXT_CREATE, CLAUDE_TEXT_QUESTION, CLAUDE_TEXT_PICTOGRAM, CLAUDE_TEXT_TRANSLATE, CLAUDE_TEXT_MEMORY -> textCostUsd(
+      case CLAUDE_TEXT_CREATE, CLAUDE_TEXT_QUESTION, CLAUDE_TEXT_PICTOGRAM, CLAUDE_TEXT_TRANSLATE, CLAUDE_TEXT_MEMORY,
+        CLAUDE_TEXT_WEEKLY_REPORT -> textCostUsd(
         usage,
         ConfigKey.PRICE_CLAUDE_TEXT_INPUT_PER_1M,
         ConfigKey.PRICE_CLAUDE_TEXT_OUTPUT_PER_1M
       );
       // 번역·AI 메모 갱신도 같은 Gemini 글 모델이다. 돈이 드는 호출은 전부 하루 비용 상한 합계에 잡혀야 한다.
       case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION, GEMINI_TEXT_IMAGE_PROMPT, GEMINI_TEXT_PICTOGRAM,
-        GEMINI_TEXT_TRANSLATE, GEMINI_TEXT_MEMORY -> {
+        GEMINI_TEXT_TRANSLATE, GEMINI_TEXT_MEMORY, GEMINI_TEXT_WEEKLY_REPORT -> {
         if (usage == null) {
           yield 0.0;
         }

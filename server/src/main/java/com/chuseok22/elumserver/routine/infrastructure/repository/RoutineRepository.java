@@ -192,6 +192,34 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 여러 묶음의 구성원을 한 번에 (묶음 목록, 묶음마다 따로 묻지 않음) (#806)
   List<Routine> findAllByGroupIdInOrderByGroupOrderAsc(Collection<String> groupIds);
+  // --- 주간 리포트 ---
+
+  /// 마친 일과가 있는 주를 가르기 위한 예정 시각 (최신순, 일과관리 복사본 제외). 호출부가 limit 으로 줄임
+  @Query("""
+    select r.scheduledAt from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+    order by r.scheduledAt desc
+    """)
+  List<LocalDateTime> findScheduledAtsByProfileIdAndStatus(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status,
+    org.springframework.data.domain.Pageable pageable);
+
+  /// 마친 일과 중 가장 이른 예정 시각 (없으면 null)
+  @Query("""
+    select min(r.scheduledAt) from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+    """)
+  LocalDateTime findEarliestScheduledAtByProfileIdAndStatus(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status);
+
+  /// 기간 안에 해당 상태 일과가 있는 이룸이 id (일과관리 복사본 제외)
+  @Query("""
+    select distinct r.profile.id from Routine r
+    where r.status = :status and r.scheduledAt between :from and :to and r.libraryOnly = false
+    """)
+  List<String> findProfileIdsWithStatusBetween(
+    @Param("status") RoutineStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
   // --- AI 메모 (#1082) ---
 
   /// 메모 갱신을 기다리는 이룸이: AI 처음 카드가 있고 아직 반영 안 한 확정·완료 일과가 있는 이룸이

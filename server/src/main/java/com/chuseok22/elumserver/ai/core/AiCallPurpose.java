@@ -32,6 +32,8 @@ public enum AiCallPurpose {
   ROUTINE_TRANSLATE("일과 번역"),
   /// 이룸이별 AI 메모 갱신 (#1082, Pro). 하루 1번 묶어 부름. 일과 생성으로 세면 한도를 깎는다.
   ROUTINE_MEMORY("AI 메모 갱신"),
+  /// 주간 리포트 정리 글. 일과 생성 한도에는 세지 않고 하루 AI 비용 합계에만 센다. 크레딧 없음
+  WEEKLY_REPORT_SUMMARY("주간 리포트 정리"),
   ;
 
   /// 관리자 그래프 범례 이름

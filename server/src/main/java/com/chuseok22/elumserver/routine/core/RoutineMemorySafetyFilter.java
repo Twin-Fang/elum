@@ -43,6 +43,15 @@ public final class RoutineMemorySafetyFilter {
     return rejectionReason(line) == null;
   }
 
+  /// 길이와 상관없이 금지 낱말·연락처가 들어 있는가 (주간 리포트 정리 글처럼 줄 길이 기준이 다른 곳이 씀)
+  public static boolean hasForbiddenTermOrContact(String text) {
+    if (text == null) {
+      return false;
+    }
+    String lowered = text.trim().toLowerCase(Locale.ROOT) + " ";
+    return FORBIDDEN_TERMS.stream().anyMatch(lowered::contains) || CONTACT_PATTERN.matcher(text).find();
+  }
+
   /// 거절 사유 (로그용 짧은 영문, 원문 없음). 통과면 null
   public static String rejectionReason(String line) {
     if (line == null || line.isBlank()) {

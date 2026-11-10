@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.response.WeeklyReportResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.WeeklyReportWeeksResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -32,6 +33,10 @@ public interface WeeklyReportControllerDocs {
       - `weekStart` 는 그 주 아무 날이어도 됩니다. 월요일로 맞춥니다. 없으면 이번 주입니다.
       - 기록이 없는 주는 200 + `sentRoutineCount = 0` 입니다 (앱이 빈 상태를 띄웁니다).
       - 원문·보상 문구·평가 문구는 싣지 않습니다.
+      - `summary`: AI 정리 글(`lines` 최대 3줄, 이룸이 이름 이미 들어 있음, `source` = `AI` | `FALLBACK`).
+        끝난 주에 마친 일과가 있을 때만 있고, 이번 주·마친 일과가 없는 주는 `null` 입니다.
+        `FALLBACK` 은 AI 스위치가 꺼졌거나 AI 가 실패해 서버가 집계로 만든 고정 문장입니다.
+      - 권한이 없어도 설정 `FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW` 가 켜져 있으면 마친 일과가 있는 가장 이른 주(`freePreviewWeekStart`) 한 주는 볼 수 있습니다.
       - 보호자 기기 전용입니다. 이룸이 기기 토큰은 403 `DEVICE_LINK_FORBIDDEN_FOR_ELUMI`.
 
       **403**: 요금제 권한 `WEEKLY_REPORT` 꺼짐 (`WEEKLY_REPORT_NOT_ALLOWED`)
@@ -60,5 +65,28 @@ public interface WeeklyReportControllerDocs {
     Authentication authentication,
     @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
     @Parameter(description = "그 주 아무 날 (yyyy-MM-dd). 없으면 이번 주", example = "2026-11-02") LocalDate weekStart
+  );
+
+  @Operation(
+    summary = "주간 리포트를 볼 수 있는 주 목록",
+    description = """
+      마친 일과가 있는 주의 월요일과 그 주에 마친 일과 수를 최신순 최대 26개 돌려줍니다 (서버 시간대 Asia/Seoul).
+
+      - 권한(`WEEKLY_REPORT`)과 무관하게 보호자면 볼 수 있습니다. 리포트 본문(`GET /api/routines/weekly-report`)만 잠깁니다.
+      - `freePreviewWeekStart`: Free 가 볼 수 있는 한 주. 미리 보기 설정이 꺼져 있거나, 이미 권한이 있거나, 마친 일과가 없으면 `null`.
+      - 보호자 기기 전용입니다. 이룸이 기기 토큰은 403 `DEVICE_LINK_FORBIDDEN_FOR_ELUMI`.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "조회 성공",
+      content = @Content(schema = @Schema(implementation = WeeklyReportWeeksResponse.class))
+    )
+  })
+  ResponseEntity<WeeklyReportWeeksResponse> getRecordedWeeks(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
   );
 }

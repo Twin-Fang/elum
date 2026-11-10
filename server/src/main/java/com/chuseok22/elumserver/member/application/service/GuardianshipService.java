@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRe
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.routine.application.service.RoutineMemoryService;
+import com.chuseok22.elumserver.routine.application.service.WeeklyReportSummaryService;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ public class GuardianshipService {
   private final ProfileInviteRepository profileInviteRepository;
   private final NotificationCleanupService notificationCleanupService;
   private final RoutineMemoryService routineMemoryService;
+  private final WeeklyReportSummaryService weeklyReportSummaryService;
 
   /**
    * 가입한 사람의 빈 이룸이를 만든다. 온보딩에서 이름·캐릭터를 채운다.
@@ -222,6 +224,8 @@ public class GuardianshipService {
     profileInviteRepository.deleteAllByProfileId(profileId);
     // 이 이룸이에 딸린 알림 (profile_id 에 외래키가 없어 직접 지움)
     notificationCleanupService.deleteAllOfProfile(profileId);
+    // 주간 리포트 정리 글 (표의 CASCADE 에 기대지 않고 직접 지움)
+    weeklyReportSummaryService.forgetProfile(profileId);
     profileRepository.delete(profile);
   }
 

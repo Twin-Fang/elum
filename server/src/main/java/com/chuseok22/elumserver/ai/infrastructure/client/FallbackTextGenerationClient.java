@@ -71,6 +71,12 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   }
 
   @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return tryInOrder("weekly report", node -> node.path(MEMORY_LINES_FIELD).isArray(),
+      client -> client.buildWeeklyReportSummaryJson(summaryUserContent));
+  }
+
+  @Override
   public String generateRoutineJsonForTest(String systemPrompt, String sampleInput) {
     return chain.get(0).generateRoutineJsonForTest(systemPrompt, sampleInput);
   }

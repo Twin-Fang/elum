@@ -297,6 +297,13 @@ public enum ConfigKey {
     "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  // 주간 리포트 권한이 없는 회원에게 그 이룸이의 첫 주(마친 일과가 있는 가장 이른 주) 한 주만 보여 줌. 짝이 되는 Pro 키는 없음
+  FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW(
+    ConfigGroup.PLAN_FREE, "주간 리포트 첫 주 미리 보기",
+    "켜면 주간 리포트 권한이 없는 회원도 이룸이의 첫 주(마친 일과가 있는 가장 이른 주) 한 주의 리포트를 볼 수 있다. "
+      + "다른 주는 그대로 잠긴다. 끄면 지금과 완전히 같다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   FREE_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_FREE, "요일별 반복 일과",
     "Free가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지",
@@ -818,6 +825,22 @@ public enum ConfigKey {
     ConfigGroup.SUBSCRIPTION_STORE, "Google Play 알림 토큰",
     "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
+  ),
+
+  // --- 주간 리포트 ---
+  //
+  // 둘 다 기본 꺼짐이라 배포만으로는 동작이 바뀌지 않는다.
+  WEEKLY_REPORT_AI_ENABLED(
+    ConfigGroup.WEEKLY_REPORT, "주간 리포트 AI 정리 글",
+    "켜면 끝난 주의 정리 글을 AI 가 쓴다(한 주 한 번 저장, 하루 AI 비용에 잡히고 크레딧은 받지 않는다). "
+      + "끄면 AI 를 부르지 않고 집계로 만든 고정 문장을 보여 준다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  WEEKLY_REPORT_PUSH_ENABLED(
+    ConfigGroup.WEEKLY_REPORT, "주간 리포트 월요일 알림",
+    "켜면 매주 월요일 아침(한국 시각 8시) 주간 리포트 권한이 있는 보호자에게 '한 주 리포트가 왔어요' 알림을 보낸다. "
+      + "지난주에 마친 일과가 있는 이룸이만, 같은 주는 한 번만 보낸다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
   // --- 관제소 연동 (#1229) ---

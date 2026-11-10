@@ -33,6 +33,9 @@ public enum AiCallType {
   GEMINI_TEXT_MEMORY("Gemini AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.GEMINI),
   OPENAI_TEXT_MEMORY("OpenAI AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.OPENAI),
   CLAUDE_TEXT_MEMORY("Claude AI 메모 갱신", AiCallPurpose.ROUTINE_MEMORY, AiProvider.CLAUDE),
+  GEMINI_TEXT_WEEKLY_REPORT("Gemini 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.GEMINI),
+  OPENAI_TEXT_WEEKLY_REPORT("OpenAI 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.OPENAI),
+  CLAUDE_TEXT_WEEKLY_REPORT("Claude 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.CLAUDE),
   ;
 
   private final String label;
