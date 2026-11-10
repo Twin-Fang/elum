@@ -39,21 +39,24 @@ class HomeSuggestionHost extends ConsumerWidget {
     final l10n = context.l10n;
     final routineTitle = suggestion.routine.displayTitle;
     final batchim = batchimOf(routineTitle);
-    final (iconAsset, title, body, actionLabel) = switch (suggestion.kind) {
+    final (iconAsset, tileAsset, title, body, actionLabel) = switch (suggestion.kind) {
       HomeSuggestionKind.autoSend => (
         AppAssets.iconCalendar,
+        AppAssets.homeNoticeAutoSend,
         l10n.homeSuggestionAutoSendTitle,
         l10n.homeSuggestionAutoSendBody(routineTitle, batchim, suggestion.sentDayCount),
         l10n.homeSuggestionAutoSendAction,
       ),
       HomeSuggestionKind.talkShare => (
         AppAssets.iconShare,
+        AppAssets.homeNoticeTalkShare,
         l10n.homeSuggestionTalkShareTitle,
         l10n.homeSuggestionTalkShareBody(routineTitle, batchim),
         l10n.homeSuggestionTalkShareAction,
       ),
       HomeSuggestionKind.createMore => (
         AppAssets.iconPlus,
+        AppAssets.homeNoticeCreateMore,
         l10n.homeSuggestionCreateMoreTitle,
         l10n.homeSuggestionCreateMoreBody,
         l10n.homeSuggestionCreateMoreAction,
@@ -68,6 +71,7 @@ class HomeSuggestionHost extends ConsumerWidget {
           title: title,
           body: body,
           actionLabel: actionLabel,
+          tileAsset: tileAsset,
           actionIconAsset: iconAsset,
           onAction: () async {
             await _openDestination(context, ref, suggestion);

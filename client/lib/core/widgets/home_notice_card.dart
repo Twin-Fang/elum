@@ -19,12 +19,16 @@ class HomeNoticeCard extends StatelessWidget {
     required this.onAction,
     required this.onDismiss,
     required this.dismissLabel,
+    required this.tileAsset,
     this.actionIconAsset,
   });
 
   final String title;
   final String body;
   final String actionLabel;
+
+  /// 왼쪽 타일 그림 (종류마다 다름)
+  final String tileAsset;
 
   /// 알약 버튼 앞 아이콘 (null 이면 글자만)
   final String? actionIconAsset;
@@ -36,11 +40,10 @@ class HomeNoticeCard extends StatelessWidget {
 
   static const _minHeight = 76.0;
 
-  /// 루미 타일 44 (모서리 12), 그림은 타일 아래로 살짝 잘림
+  /// 그림 타일 44 (모서리 12), 그림은 안쪽 여백 4로 전체가 보임
   static const _tileSize = 44.0;
   static const _tileRadius = 12.0;
-  static const _lumiWidth = 38.0;
-  static const _lumiTop = 7.0;
+  static const _tilePadding = 4.0;
   static const _tileToText = 12.0;
 
   /// 닫기 x: 보이는 크기 10, 누름 영역 36 (카드 오른쪽 위 모서리)
@@ -63,13 +66,8 @@ class HomeNoticeCard extends StatelessWidget {
                   width: _tileSize.w,
                   height: _tileSize.w,
                   color: colors.proPlanTileExtra,
-                  padding: EdgeInsets.only(top: _lumiTop.w),
-                  alignment: Alignment.topCenter,
-                  child: OverflowBox(
-                    alignment: Alignment.topCenter,
-                    maxHeight: double.infinity,
-                    child: Image.asset(AppAssets.notificationsEmptyLumi, width: _lumiWidth.w, excludeFromSemantics: true),
-                  ),
+                  padding: EdgeInsets.all(_tilePadding.w),
+                  child: Image.asset(tileAsset, fit: BoxFit.contain, excludeFromSemantics: true),
                 ),
               ),
               SizedBox(width: _tileToText.w),

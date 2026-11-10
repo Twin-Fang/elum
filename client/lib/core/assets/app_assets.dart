@@ -208,6 +208,12 @@ abstract final class AppAssets {
   /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
   static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
 
+  /// 홈 안내 카드 타일 그림 4종: 종(알림 꺼짐), 달력과 종이비행기(자동 보내기), 사진 액자(이야기 올리기), 크레용과 빈 카드(일과 더 만들기). 192×192, 투명 배경
+  static const homeNoticeBell = '$_images/home_notice_bell.png';
+  static const homeNoticeAutoSend = '$_images/home_notice_auto_send.png';
+  static const homeNoticeTalkShare = '$_images/home_notice_talk_share.png';
+  static const homeNoticeCreateMore = '$_images/home_notice_create_more.png';
+
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
