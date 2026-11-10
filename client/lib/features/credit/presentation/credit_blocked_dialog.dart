@@ -52,7 +52,7 @@ Future<void> showCreditBlockedDialog(
     // 실패가 아닌 한도 안내 > 아이콘 없음 · 붉은 버튼 없음 (§2-⑥ 겁주지 않는다, #1171)
     title: generating
         ? l10n.creditBlockedBusy
-        : l10n.creditBlockedExhausted(blocked.resetLabel),
+        : blocked.periodUnit.blockedExhausted(l10n, blocked.resetLabel),
     // 날짜가 끼어 길이가 바뀌는 문장 — 마지막 글자만 다음 줄로 떨어지지 않게 낱말 단위 (#1169)
     keepWordsInTitle: true,
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),

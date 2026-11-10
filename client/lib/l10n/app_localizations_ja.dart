@@ -71,11 +71,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get creditResetFallback => '다음 주 월요일 0시';
 
   @override
+  String get creditResetFallbackMonth => '다음 달 1일 0시';
+
+  @override
   String get creditBlockedBusy => '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요';
 
   @override
   String creditBlockedExhausted(String reset) {
     return '이번 주 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
+  }
+
+  @override
+  String creditBlockedExhaustedMonth(String reset) {
+    return '이번 달 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
   }
 
   @override
@@ -1612,7 +1620,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get creditCardTitle => '이번 주 AI 생성';
 
   @override
+  String get creditCardTitleMonth => '이번 달 AI 생성';
+
+  @override
   String get creditCardLoading => '이번 주 AI 생성 사용량을 불러오고 있어요';
+
+  @override
+  String get creditCardLoadingMonth => '이번 달 AI 생성 사용량을 불러오고 있어요';
 
   @override
   String get creditCardLoadFailed => '사용량을 불러오지 못했어요';
@@ -1625,6 +1639,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get creditExhausted => '이번 주 크레딧을 모두 사용했어요';
+
+  @override
+  String get creditExhaustedMonth => '이번 달 크레딧을 모두 사용했어요';
 
   @override
   String get creditExhaustedStillOk => '만든 일과 보기와 직접 고치기는 계속 할 수 있어요';
@@ -1680,6 +1697,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get creditWeeklyRefill => '매주 월요일 0시에 다시 채워져요.';
+
+  @override
+  String get creditMonthlyRefill => '매달 1일 0시에 다시 채워져요.';
 
   @override
   String get routineCreateButton => '새로운 일과 만들기';
@@ -3571,6 +3591,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
 
   @override
+  String get planBenefitMoreMonthlyCredits => '매달 크레딧을 더 많이 받아요';
+
+  @override
   String get planBenefitCardExportWithoutWatermark => '인쇄물 아래 띠 없이 깔끔해요';
 
   @override
@@ -3939,7 +3962,115 @@ class AppLocalizationsJa extends AppLocalizations {
   String get weeklyReportShareNote => '이룸 앱에 남은 완료 기록을 센 내용이에요';
 
   @override
-  String get weeklyReportSummaryEyebrow => '루미가 정리했어요';
+  String get weeklyReportRecordSection => '한 주 기록';
+
+  @override
+  String get weeklyReportInsightHighlightTitle => '잘한 것';
+
+  @override
+  String weeklyReportInsightHighlightFirst(String routine, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$routine$_temp0 이번 주에 처음 끝까지 했어요';
+  }
+
+  @override
+  String weeklyReportInsightHighlightEvery(
+    String routine,
+    String batchim,
+    int count,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$routine$_temp0 $count번 모두 끝까지 했어요';
+  }
+
+  @override
+  String weeklyReportInsightHighlightStreak(int days) {
+    return '$days일 이어서 일과를 끝냈어요';
+  }
+
+  @override
+  String weeklyReportInsightHighlightHint(String name) {
+    return '오늘 $name에게 말해 주세요';
+  }
+
+  @override
+  String get weeklyReportInsightStuckTitle => '자주 멈춘 곳';
+
+  @override
+  String weeklyReportInsightStuckLine(
+    String routine,
+    String step,
+    int sent,
+    int remained,
+  ) {
+    return '$routine의 $step에서 $sent번 중 $remained번 멈췄어요';
+  }
+
+  @override
+  String get weeklyReportInsightStuckShorten => '카드 글을 더 짧게 바꾸거나 둘로 나눠 볼 수 있어요';
+
+  @override
+  String get weeklyReportInsightStuckAddMedia => '목소리나 사진을 붙여 볼 수 있어요';
+
+  @override
+  String weeklyReportInsightStuckFix(String step) {
+    return '$step 카드 고치기';
+  }
+
+  @override
+  String get weeklyReportInsightStuckFixFailed => '고칠 일과를 열지 못했어요';
+
+  @override
+  String get weeklyReportInsightTrendTitle => '지난주와 달라진 점';
+
+  @override
+  String weeklyReportInsightTrendUp(int before, int after) {
+    return '끝낸 일과가 $before개에서 $after개로 늘었어요';
+  }
+
+  @override
+  String weeklyReportInsightTrendDown(int before, int after) {
+    return '끝낸 일과가 $before개에서 $after개가 됐어요';
+  }
+
+  @override
+  String weeklyReportInsightTrendSame(int after) {
+    return '지난주와 같이 $after개를 끝냈어요';
+  }
+
+  @override
+  String weeklyReportInsightTrendBarPrevious(int count) {
+    return '지난주 $count';
+  }
+
+  @override
+  String weeklyReportInsightTrendBarCurrent(int count) {
+    return '이번 주 $count';
+  }
+
+  @override
+  String get weeklyReportInsightDurationTitle => '걸린 시간';
+
+  @override
+  String weeklyReportInsightDurationLine(
+    String routine,
+    int before,
+    int after,
+  ) {
+    return '$routine에 걸린 시간이 $before분에서 $after분이 됐어요';
+  }
+
+  @override
+  String get weeklyReportInsightSlowestTitle => '가장 오래 머문 카드';
+
+  @override
+  String weeklyReportInsightSlowestLine(
+    String routine,
+    String step,
+    int minutes,
+  ) {
+    return '$routine의 $step에서 평균 $minutes분 머물렀어요';
+  }
 
   @override
   String get weeklyReportStatCompleted => '끝낸 일과';

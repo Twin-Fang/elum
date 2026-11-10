@@ -88,7 +88,7 @@ class PrintPage extends StatelessWidget {
   }
 }
 
-/// 아래 띠 한 줄: (Free) 왼쪽 이룸 로고 + 오른쪽 소개 글 · (그림 기호·이모지) 그림 출처
+/// 아래 띠: (Free) 왼쪽 이룸 로고 + 오른쪽 소개 글 한 줄, (그림 기호·이모지) 그 아래 줄에 그림 출처
 class _Footer extends StatelessWidget {
   const _Footer({
     required this.hasWatermark,
@@ -103,42 +103,48 @@ class _Footer extends StatelessWidget {
   /// 로고 높이 (포인트, 카드 한 장 이미지 폭 333 에서도 띠 한 줄에 들어가는 크기)
   static const _logoHeight = 24.0;
 
-  /// 출처 글이 차지할 몫 (Spacer 1 대비, 로고 띠보다 넓게)
-  static const _creditFlex = 4;
+  /// 띠 줄 > 출처 줄 사이
+  static const _creditTopGap = 2.0;
 
   @override
   Widget build(BuildContext context) {
     final style = context.typo.printFooter.copyWith(color: context.colors.textSecondary);
-    return Row(
+    final hasCredit = shouldShowPictogramCredit || shouldShowEmojiCredit;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (hasWatermark) ...[
-          SvgPicture.asset(AppAssets.logo, height: _logoHeight),
-          const SizedBox(width: 8),
-          // 소개 글은 한 줄 (좁으면 말줄임)
-          Expanded(
-            child: Text(
-              context.l10n.printBrandTagline,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: style,
-            ),
+        if (hasWatermark)
+          Row(
+            children: [
+              SvgPicture.asset(AppAssets.logo, height: _logoHeight),
+              const SizedBox(width: 8),
+              // 소개 글은 줄여 쓰지 않고 전부 보인다 (좁으면 줄바꿈)
+              Expanded(
+                child: Text(
+                  context.l10n.printBrandTagline,
+                  textAlign: TextAlign.end,
+                  style: style,
+                ),
+              ),
+            ],
           ),
-        ] else
-          const Spacer(),
-        // 출처 둘이면 한 줄에 이어 씀 (카드 이미지 폭이 좁아 넘치면 줄바꿈)
-        if (shouldShowPictogramCredit || shouldShowEmojiCredit)
-          Flexible(
-            flex: _creditFlex,
+        // 출처 둘이면 한 줄에 이어 쓰고, 좁으면 글자를 줄여 한 줄을 지킨다
+        if (hasCredit) ...[
+          if (hasWatermark) const SizedBox(height: _creditTopGap),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
             child: Text(
               [
                 if (shouldShowPictogramCredit) context.l10n.cardExportPictogramCredit,
                 if (shouldShowEmojiCredit) context.l10n.cardExportEmojiCredit,
               ].join(' · '),
-              textAlign: TextAlign.end,
+              maxLines: 1,
               style: style,
             ),
           ),
+        ],
       ],
     );
   }

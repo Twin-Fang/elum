@@ -7,9 +7,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
 import '../../../../core/widgets/elum_error_code_text.dart';
 import '../../../../core/widgets/elum_text_link.dart';
-import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../shared/models/routine.dart';
-import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/card_export_options.dart';
@@ -41,7 +39,7 @@ class CardExportPreview extends ConsumerWidget {
   /// 지면마다 굽기용 열쇠 ([sheets] 와 같은 차례, 화면이 들고 있음)
   final List<GlobalKey> sheetKeys;
   final bool hasWatermark;
-  /// 워터마크 줄 아래 `Pro 알아보기` 를 보이는가 (Pro 가 워터마크 없음을 줌 + 권유 대상)
+  /// 워터마크 안내 글을 보이는가 (Pro 가 워터마크 없음을 줌 + 권유 대상)
   final bool shouldPromoteNoWatermark;
   final ValueChanged<String> onToggleCard;
 
@@ -85,13 +83,6 @@ class CardExportPreview extends ConsumerWidget {
         if (hasWatermark && shouldPromoteNoWatermark) ...[
           SizedBox(height: 6.h),
           Text(l10n.cardExportWatermarkNotice, style: caption),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ProUpsellButton(
-              style: ProUpsellStyle.link,
-              onTap: () => openPlanPaywall(context, ref),
-            ),
-          ),
         ],
         if (options.format != CardExportFormat.cardImages) ...[
           SizedBox(height: 6.h),

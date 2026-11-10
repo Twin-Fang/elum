@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/date_labels.dart';
 import '../../../core/network/server_error_code.dart';
+import 'credit_period_unit.dart';
 
 /// 진행 중인 생성 작업 한 건 — `inProgress[]`.
 @immutable
@@ -43,6 +44,7 @@ class CreditSummary {
     this.inProgress = const [],
     this.canStartRoutine = true,
     this.canGenerateImage = true,
+    this.periodUnit = CreditPeriodUnit.week,
   });
 
   /// 크레딧 정책이 꺼져 있다 — 설정 카드를 그리지 않고 홈도 막지 않는다.
@@ -70,6 +72,9 @@ class CreditSummary {
   final List<CreditJob> inProgress;
   final bool canStartRoutine;
   final bool canGenerateImage;
+
+  /// 다시 채워지는 주기 (서버가 안 주면 주)
+  final CreditPeriodUnit periodUnit;
 
   factory CreditSummary.fromJson(Map<String, dynamic> json) {
     final enabled = json['enabled'];
@@ -125,6 +130,7 @@ class CreditSummary {
       canGenerateImage: json['canGenerateImage'] is bool
           ? json['canGenerateImage'] as bool
           : true,
+      periodUnit: CreditPeriodUnit.fromWire(json['periodUnit']),
     );
   }
 
@@ -145,7 +151,7 @@ class CreditSummary {
   /// `9월 28일(월) 0시` — 초기화 줄과 홈 막기 팝업이 함께 쓴다.
   String get resetLabel {
     final at = nextResetAt;
-    if (at == null) return appL10n.creditResetFallback;
+    if (at == null) return periodUnit.resetFallback(appL10n);
     return appL10n.resetAt(at);
   }
 

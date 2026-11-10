@@ -8,6 +8,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../credit/application/credit_costs.dart';
+import '../../credit/domain/credit_period_unit.dart';
 import '../../guardian/application/guardian_child_identity.dart';
 import '../../member/application/plan_access.dart';
 import '../application/plan_benefits.dart';
@@ -58,7 +60,7 @@ class PlanBenefitCards extends ConsumerWidget {
 }
 
 /// 묶음 카드 하나 (흰 판 · 모서리 20)
-class _BenefitGroupCard extends StatelessWidget {
+class _BenefitGroupCard extends ConsumerWidget {
   const _BenefitGroupCard({required this.section, required this.elumiName});
 
   final PlanBenefitSection section;
@@ -74,13 +76,14 @@ class _BenefitGroupCard extends StatelessWidget {
   static const _tileRadius = 12.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final periodUnit = ref.watch(creditPeriodUnitProvider);
     final group = section.group;
     final title = _title(l10n, group, elumiName);
     final detail = section.benefits
-        .map((benefit) => planBenefitLabel(l10n, benefit))
+        .map((benefit) => planBenefitLabel(l10n, benefit, periodUnit))
         .join('\n');
     return Container(
       padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
@@ -151,7 +154,11 @@ class _BenefitGroupCard extends StatelessWidget {
 }
 
 /// 혜택 하나 > 짧은 문장 (묶음 안에서 한 줄씩)
-String planBenefitLabel(AppLocalizations l10n, PlanBenefit benefit) => switch (benefit) {
+String planBenefitLabel(
+  AppLocalizations l10n,
+  PlanBenefit benefit,
+  CreditPeriodUnit periodUnit,
+) => switch (benefit) {
   PlanBenefit.aiImageStyles => l10n.planBenefitAiImageStyles,
   PlanBenefit.adsRemoved => l10n.planBenefitAdsRemoved,
   PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
@@ -160,7 +167,7 @@ String planBenefitLabel(AppLocalizations l10n, PlanBenefit benefit) => switch (b
   PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
   PlanBenefit.freeRoutineText => l10n.planBenefitFreeRoutineText,
   PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,
-  PlanBenefit.moreWeeklyCredits => l10n.planBenefitMoreWeeklyCredits,
+  PlanBenefit.moreWeeklyCredits => periodUnit.planBenefitMoreCredits(l10n),
   PlanBenefit.cardExportWithoutWatermark => l10n.planBenefitCardExportWithoutWatermark,
   PlanBenefit.cardExportAllThemes => l10n.planBenefitCardExportAllThemes,
   PlanBenefit.cardExportAllLayouts => l10n.planBenefitCardExportAllLayouts,

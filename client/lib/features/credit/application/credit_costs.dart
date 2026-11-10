@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../member/application/plan_access.dart';
 import '../data/credit_repository.dart';
+import '../domain/credit_period_unit.dart';
 
 /// 일과 하나를 만들 때(`routine`)와 카드 그림 한 장마다(`image`) 드는 크레딧.
 typedef CreditCosts = ({int routine, int image});
@@ -23,6 +24,11 @@ final creditCostsProvider = Provider.autoDispose<CreditCosts?>((ref) {
     image: summary?.cardImageCost ?? 1,
   );
 });
+
+/// 크레딧이 다시 채워지는 주기. 아직 못 받았거나 실패하면 주로 본다.
+final creditPeriodUnitProvider = Provider.autoDispose<CreditPeriodUnit>(
+  (ref) => ref.watch(creditSummaryProvider).value?.periodUnit ?? CreditPeriodUnit.week,
+);
 
 /// 일과 만들기 비용 미리 보기(그림 방식 띠)가 보는 단가: 글 무료 권한(Pro)이면 글 0, 그림은 그대로
 ///

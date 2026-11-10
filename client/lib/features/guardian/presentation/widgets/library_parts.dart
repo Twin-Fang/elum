@@ -50,10 +50,15 @@ class LibraryManageHeader extends ConsumerWidget {
     ];
     // 제목 + 사용법(코치마크) 다시 보기 `?`
     final title = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
           child: Text(
             context.l10n.guardianTabManage,
+            // 제목은 한 줄을 지킨다 (입구 알약이 줄어들어 자리를 내줌)
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
             style: context.typo.libraryTitle.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -100,8 +105,18 @@ class LibraryManageHeader extends ConsumerWidget {
           }
           return Row(
             children: [
-              Expanded(child: title),
-              for (final entry in entries) ...[entry, if (isPhone) SizedBox(width: space.xs.w)],
+              title,
+              // 제목이 먼저 자리를 잡고, 남는 폭 안에서 입구가 줄어든다
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(children: entries),
+                  ),
+                ),
+              ),
+              if (isPhone && entries.isNotEmpty) SizedBox(width: space.xs.w),
               ?badge,
             ],
           );

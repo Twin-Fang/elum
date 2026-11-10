@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'다음 주 월요일 0시'**
   String get creditResetFallback;
 
+  /// creditResetFallback 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 달 1일 0시'**
+  String get creditResetFallbackMonth;
+
   /// AI 일과를 만드는 중에 새로 만들려 할 때의 팝업 문장
   ///
   /// In ko, this message translates to:
@@ -193,6 +199,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
   String creditBlockedExhausted(String reset);
+
+  /// creditBlockedExhausted 의 월 단위 크레딧 문구. reset 은 다시 채워지는 시각
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
+  String creditBlockedExhaustedMonth(String reset);
 
   /// 광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수
   ///
@@ -3014,11 +3026,23 @@ abstract class AppLocalizations {
   /// **'이번 주 AI 생성'**
   String get creditCardTitle;
 
+  /// creditCardTitle 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 AI 생성'**
+  String get creditCardTitleMonth;
+
   /// AI 크레딧 카드가 불러오는 중일 때 낭독 문구
   ///
   /// In ko, this message translates to:
   /// **'이번 주 AI 생성 사용량을 불러오고 있어요'**
   String get creditCardLoading;
+
+  /// creditCardLoading 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 AI 생성 사용량을 불러오고 있어요'**
+  String get creditCardLoadingMonth;
 
   /// AI 크레딧 카드 조회가 실패했을 때 안내
   ///
@@ -3043,6 +3067,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이번 주 크레딧을 모두 사용했어요'**
   String get creditExhausted;
+
+  /// creditExhausted 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧을 모두 사용했어요'**
+  String get creditExhaustedMonth;
 
   /// AI 크레딧 카드에서 크레딧을 다 썼을 때 둘째 줄
   ///
@@ -3103,6 +3133,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'매주 월요일 0시에 다시 채워져요.'**
   String get creditWeeklyRefill;
+
+  /// creditWeeklyRefill 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일 0시에 다시 채워져요.'**
+  String get creditMonthlyRefill;
 
   /// 보호자 홈의 새 일과 만들기 버튼
   ///
@@ -6428,6 +6464,12 @@ abstract class AppLocalizations {
   /// **'매주 크레딧을 더 많이 받아요'**
   String get planBenefitMoreWeeklyCredits;
 
+  /// 혜택 줄: 월간 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 크레딧을 더 많이 받아요'**
+  String get planBenefitMoreMonthlyCredits;
+
   /// 혜택 줄: 워터마크 없음
   ///
   /// In ko, this message translates to:
@@ -6961,11 +7003,150 @@ abstract class AppLocalizations {
   /// **'이룸 앱에 남은 완료 기록을 센 내용이에요'**
   String get weeklyReportShareNote;
 
-  /// 주간 리포트 정리 글 카드 위 작은 제목
+  /// 주간 리포트: 숫자 3개 위 구역 제목
   ///
   /// In ko, this message translates to:
-  /// **'루미가 정리했어요'**
-  String get weeklyReportSummaryEyebrow;
+  /// **'한 주 기록'**
+  String get weeklyReportRecordSection;
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'잘한 것'**
+  String get weeklyReportInsightHighlightTitle;
+
+  /// 잘한 것: 일과를 처음 끝까지 함. routine 은 일과 이름, batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} 이번 주에 처음 끝까지 했어요'**
+  String weeklyReportInsightHighlightFirst(String routine, String batchim);
+
+  /// 잘한 것: 보낸 횟수를 모두 끝까지 함. batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} {count}번 모두 끝까지 했어요'**
+  String weeklyReportInsightHighlightEvery(
+    String routine,
+    String batchim,
+    int count,
+  );
+
+  /// 잘한 것: 연속으로 끝낸 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{days}일 이어서 일과를 끝냈어요'**
+  String weeklyReportInsightHighlightStreak(int days);
+
+  /// 잘한 것 아래 작은 글. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {name}에게 말해 주세요'**
+  String weeklyReportInsightHighlightHint(String name);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 멈춘 곳'**
+  String get weeklyReportInsightStuckTitle;
+
+  /// 자주 멈춘 곳 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}의 {step}에서 {sent}번 중 {remained}번 멈췄어요'**
+  String weeklyReportInsightStuckLine(
+    String routine,
+    String step,
+    int sent,
+    int remained,
+  );
+
+  /// 자주 멈춘 곳 아래 작은 글: 글을 줄이거나 나누기
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 글을 더 짧게 바꾸거나 둘로 나눠 볼 수 있어요'**
+  String get weeklyReportInsightStuckShorten;
+
+  /// 자주 멈춘 곳 아래 작은 글: 목소리·사진 붙이기
+  ///
+  /// In ko, this message translates to:
+  /// **'목소리나 사진을 붙여 볼 수 있어요'**
+  String get weeklyReportInsightStuckAddMedia;
+
+  /// 자주 멈춘 곳 버튼. 그 카드가 든 일과의 편집 화면으로 감
+  ///
+  /// In ko, this message translates to:
+  /// **'{step} 카드 고치기'**
+  String weeklyReportInsightStuckFix(String step);
+
+  /// 자주 멈춘 곳 버튼으로 일과를 못 열었을 때 실패 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'고칠 일과를 열지 못했어요'**
+  String get weeklyReportInsightStuckFixFailed;
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주와 달라진 점'**
+  String get weeklyReportInsightTrendTitle;
+
+  /// 지난주보다 늘었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과가 {before}개에서 {after}개로 늘었어요'**
+  String weeklyReportInsightTrendUp(int before, int after);
+
+  /// 지난주보다 줄었을 때 (단정하지 않는 말)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과가 {before}개에서 {after}개가 됐어요'**
+  String weeklyReportInsightTrendDown(int before, int after);
+
+  /// 지난주와 같을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주와 같이 {after}개를 끝냈어요'**
+  String weeklyReportInsightTrendSame(int after);
+
+  /// 달라진 점 막대 이름: 지난주 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 {count}'**
+  String weeklyReportInsightTrendBarPrevious(int count);
+
+  /// 달라진 점 막대 이름: 이번 주 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 {count}'**
+  String weeklyReportInsightTrendBarCurrent(int count);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'걸린 시간'**
+  String get weeklyReportInsightDurationTitle;
+
+  /// 일과 평균 걸린 시간 변화 (늘든 줄든 같은 말)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}에 걸린 시간이 {before}분에서 {after}분이 됐어요'**
+  String weeklyReportInsightDurationLine(String routine, int before, int after);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'가장 오래 머문 카드'**
+  String get weeklyReportInsightSlowestTitle;
+
+  /// 가장 오래 머문 카드 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}의 {step}에서 평균 {minutes}분 머물렀어요'**
+  String weeklyReportInsightSlowestLine(
+    String routine,
+    String step,
+    int minutes,
+  );
 
   /// 숫자 3개 중 첫째 이름: 이 주에 끝낸 일과 수
   ///

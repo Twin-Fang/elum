@@ -93,7 +93,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
-    required this.weeklyReportSummaryFill,
+    required this.weeklyReportInsightGoodFill,
+    required this.weeklyReportInsightGoodAccent,
+    required this.weeklyReportInsightStuckFill,
+    required this.weeklyReportInsightStuckAccent,
+    required this.weeklyReportInsightTrendFill,
+    required this.weeklyReportInsightTrendAccent,
     required this.catSelectedFill,
     required this.catSelectedBorder,
     required this.brandPeach,
@@ -467,8 +472,18 @@ class AppColors extends ThemeExtension<AppColors> {
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
   final Color foxSelectedBorder;
-  // 주간 리포트 루미 정리 글 판 (연보라, 시안 screens-v2)
-  final Color weeklyReportSummaryFill;
+  // 주간 리포트 돌아보기: 잘한 것 판 (민트)
+  final Color weeklyReportInsightGoodFill;
+  // 주간 리포트 돌아보기: 잘한 것 강조색 (제목 아이콘 원)
+  final Color weeklyReportInsightGoodAccent;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 판 (복숭아)
+  final Color weeklyReportInsightStuckFill;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 강조색
+  final Color weeklyReportInsightStuckAccent;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 판 (연보라)
+  final Color weeklyReportInsightTrendFill;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 강조색 (이번 주 막대 포함)
+  final Color weeklyReportInsightTrendAccent;
   final Color catSelectedFill;
   final Color catSelectedBorder;
 
@@ -1250,7 +1265,12 @@ class AppColors extends ThemeExtension<AppColors> {
     talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
-    weeklyReportSummaryFill: Color(0x66CED8FF),
+    weeklyReportInsightGoodFill: Color(0xFFE3F8F3),
+    weeklyReportInsightGoodAccent: Color(0xFF3FB7C9),
+    weeklyReportInsightStuckFill: Color(0xFFFFF1E6),
+    weeklyReportInsightStuckAccent: Color(0xFFEB9B73),
+    weeklyReportInsightTrendFill: Color(0xFFEEF0FF),
+    weeklyReportInsightTrendAccent: Color(0xFF9CADF1),
     catSelectedFill: Color(0xFFCED8FF),
     catSelectedBorder: Color(0xFF9CADF1),
     brandPeach: Color(0xFFFFC9BB),
@@ -1540,7 +1560,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
-    Color? weeklyReportSummaryFill,
+    Color? weeklyReportInsightGoodFill,
+    Color? weeklyReportInsightGoodAccent,
+    Color? weeklyReportInsightStuckFill,
+    Color? weeklyReportInsightStuckAccent,
+    Color? weeklyReportInsightTrendFill,
+    Color? weeklyReportInsightTrendAccent,
     Color? catSelectedFill,
     Color? catSelectedBorder,
     Color? brandPeach,
@@ -1818,7 +1843,12 @@ class AppColors extends ThemeExtension<AppColors> {
       talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
-      weeklyReportSummaryFill: weeklyReportSummaryFill ?? this.weeklyReportSummaryFill,
+      weeklyReportInsightGoodFill: weeklyReportInsightGoodFill ?? this.weeklyReportInsightGoodFill,
+      weeklyReportInsightGoodAccent: weeklyReportInsightGoodAccent ?? this.weeklyReportInsightGoodAccent,
+      weeklyReportInsightStuckFill: weeklyReportInsightStuckFill ?? this.weeklyReportInsightStuckFill,
+      weeklyReportInsightStuckAccent: weeklyReportInsightStuckAccent ?? this.weeklyReportInsightStuckAccent,
+      weeklyReportInsightTrendFill: weeklyReportInsightTrendFill ?? this.weeklyReportInsightTrendFill,
+      weeklyReportInsightTrendAccent: weeklyReportInsightTrendAccent ?? this.weeklyReportInsightTrendAccent,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
       catSelectedBorder: catSelectedBorder ?? this.catSelectedBorder,
       brandPeach: brandPeach ?? this.brandPeach,
@@ -2144,7 +2174,12 @@ class AppColors extends ThemeExtension<AppColors> {
         other.foxSelectedBorder,
         t,
       )!,
-      weeklyReportSummaryFill: Color.lerp(weeklyReportSummaryFill, other.weeklyReportSummaryFill, t)!,
+      weeklyReportInsightGoodFill: Color.lerp(weeklyReportInsightGoodFill, other.weeklyReportInsightGoodFill, t)!,
+      weeklyReportInsightGoodAccent: Color.lerp(weeklyReportInsightGoodAccent, other.weeklyReportInsightGoodAccent, t)!,
+      weeklyReportInsightStuckFill: Color.lerp(weeklyReportInsightStuckFill, other.weeklyReportInsightStuckFill, t)!,
+      weeklyReportInsightStuckAccent: Color.lerp(weeklyReportInsightStuckAccent, other.weeklyReportInsightStuckAccent, t)!,
+      weeklyReportInsightTrendFill: Color.lerp(weeklyReportInsightTrendFill, other.weeklyReportInsightTrendFill, t)!,
+      weeklyReportInsightTrendAccent: Color.lerp(weeklyReportInsightTrendAccent, other.weeklyReportInsightTrendAccent, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
       catSelectedBorder: Color.lerp(
         catSelectedBorder,

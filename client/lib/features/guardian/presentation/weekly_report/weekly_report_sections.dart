@@ -6,9 +6,10 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../domain/weekly_report.dart';
-import 'weekly_report_summary_card.dart';
+import 'weekly_report_insight_cards.dart';
+import 'weekly_report_stat_row.dart';
 
-/// 주간 리포트 본문: 정리 글(있을 때) > 숫자 3개 > 요일별 막대 > 일과별 기록 > 자주 남은 카드
+/// 주간 리포트 본문: 돌아보기 카드(있을 때) > `한 주 기록`: 숫자 3개 > 요일별 막대 > 일과별 기록 > 자주 남은 카드
 ///
 /// 사실(횟수)만 보여 준다 — 평가 문구·색으로 잘하고 못함을 가르지 않는다.
 class WeeklyReportSections extends StatelessWidget {
@@ -22,14 +23,21 @@ class WeeklyReportSections extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final summary = report.summary;
+    final insights = report.insights;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (summary != null) ...[
-          WeeklyReportSummaryCard(summary: summary),
+        if (insights != null) ...[
+          WeeklyReportInsightCards(insights: insights),
           SizedBox(height: _groupGap.h),
         ],
+        Padding(
+          padding: EdgeInsets.only(left: context.space.xs.w, bottom: context.space.xs.h),
+          child: Text(
+            l10n.weeklyReportRecordSection,
+            style: context.typo.settingsGroupLabel.copyWith(color: context.colors.settingsGroupLabel),
+          ),
+        ),
         WeeklyReportStatRow(report: report),
         SizedBox(height: _groupGap.h),
         _DayBars(days: report.days),

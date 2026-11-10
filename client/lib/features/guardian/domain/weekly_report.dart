@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'weekly_report_insights.dart';
+
 /// 이룸이 한 주 요약 — 서버 `GET /api/routines/weekly-report` (#1074)
 ///
 /// 완료 기록에서 센 사실만 담는다 (원문·보상 문구·평가 없음).
@@ -20,6 +22,7 @@ class WeeklyReport {
     required this.routines,
     required this.remainingSteps,
     this.summary,
+    this.insights,
   });
 
   final DateTime weekStart;
@@ -50,6 +53,9 @@ class WeeklyReport {
   /// 루미가 정리한 글 (이번 주·끝낸 일과 없는 주·옛 서버 응답이면 null)
   final WeeklyReportSummary? summary;
 
+  /// 돌아보기 카드 재료 (옛 서버 응답·모양이 다르면 null)
+  final WeeklyReportInsights? insights;
+
   /// 이 주에 보낸 일과가 있는가 (없으면 빈 상태 화면)
   bool get hasRecords => sentRoutineCount > 0;
 
@@ -68,6 +74,7 @@ class WeeklyReport {
       routines: _listOf(json['routines'], WeeklyReportRoutine.tryParse),
       remainingSteps: _listOf(json['remainingSteps'], WeeklyReportRemainingStep.tryParse),
       summary: WeeklyReportSummary.tryParse(json['summary']),
+      insights: WeeklyReportInsights.tryParse(json['insights']),
     );
   }
 }
