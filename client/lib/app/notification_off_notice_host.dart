@@ -48,6 +48,7 @@ class _NotificationOffNoticeHostState extends ConsumerState<NotificationOffNotic
       title: l10n.notificationOffNoticeTitle,
       body: l10n.notificationOffNoticeBody,
       actionLabel: l10n.notificationTurnOnDeviceNotification,
+      tileAsset: AppAssets.homeNoticeBell,
       actionIconAsset: AppAssets.iconBell,
       onAction: ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn,
       onDismiss: widget.onDismiss,
