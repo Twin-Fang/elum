@@ -41,6 +41,10 @@ class AiCallTypeTest {
     Map.entry(AiCallType.GEMINI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
     Map.entry(AiCallType.OPENAI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
     Map.entry(AiCallType.CLAUDE_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    // 주간 리포트 정리 글. 일과 생성으로 세면 리포트 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    Map.entry(AiCallType.OPENAI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    Map.entry(AiCallType.CLAUDE_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
     Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 

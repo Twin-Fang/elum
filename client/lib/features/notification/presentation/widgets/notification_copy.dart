@@ -31,6 +31,8 @@ String notificationHeadline(AppLocalizations l10n, AppNotification notification)
       return l10n.notificationTalkPostCommented(notification.count);
     case NotificationType.talkPostImported:
       return l10n.notificationTalkPostImported(notification.count);
+    case NotificationType.weeklyReportReady:
+      return l10n.notificationWeeklyReportReady;
   }
 }
 

@@ -33,8 +33,27 @@ public record WeeklyReportResponse(
   @Schema(description = "일과별 기록. 같은 원본에서 보낸 일과는 하나로 묶는다. 마친 횟수가 많은 순")
   List<RoutineSummary> routines,
   @Schema(description = "지난 날 일과에서 마치지 않은 채 남은 카드, 많이 남은 순 최대 3개. 오늘 일과는 아직 진행 중이라 세지 않는다")
-  List<RemainingStep> remainingSteps
+  List<RemainingStep> remainingSteps,
+  @Schema(description = "AI 정리 글. 끝난 주이고 마친 일과가 있을 때만 있고, 이번 주·기록 없는 주는 null", nullable = true)
+  Summary summary
 ) {
+
+  /// 집계 결과에 정리 글을 붙인 사본 (집계는 정리 글을 모름)
+  public WeeklyReportResponse withSummary(Summary newSummary) {
+    return new WeeklyReportResponse(weekStart, weekEnd, isCurrentWeek, sentRoutineCount, completedRoutineCount,
+      completionPercent, starsEarned, rewardReachedCount, longestCompletedDayStreak, days, routines, remainingSteps,
+      newSummary);
+  }
+
+  /// 정리 글: 한 줄씩(최대 3줄, 이룸이 이름 이미 끼워 넣음) + 출처 (AI 가 쓴 글 / 서버가 집계로 만든 고정 문장)
+  public record Summary(List<String> lines, SummarySource source) {
+
+  }
+
+  public enum SummarySource {
+    AI,
+    FALLBACK
+  }
 
   /// 하루 칸: 보낸 일과 수 · 마친 일과 수
   public record Day(LocalDate date, int sentCount, int completedCount) {

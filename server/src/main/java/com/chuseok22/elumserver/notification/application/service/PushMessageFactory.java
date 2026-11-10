@@ -30,6 +30,12 @@ public class PushMessageFactory {
   private static final String TITLE_KEY = "push.title";
   private static final String ROUTINE_COMPLETED_ONE_KEY = "push.routine_completed.one";
   private static final String ROUTINE_COMPLETED_MANY_KEY = "push.routine_completed.many";
+  private static final String WEEKLY_REPORT_TITLE_KEY = "push.weekly_report_ready.title";
+  private static final String WEEKLY_REPORT_BODY_KEY = "push.weekly_report_ready";
+  // 주간 리포트 본문 인자 구분자: "보낸 일과 수,마친 일과 수" (subjectTitle 칸을 빌려 씀, 저장하지 않음)
+  public static final String WEEKLY_REPORT_COUNTS_DELIMITER = ",";
+  // 앱이 눌렀을 때 주간 리포트 화면을 여는 data 키 (값은 주 시작일 yyyy-MM-dd)
+  static final String WEEK_START_DATA_KEY = "weekStart";
 
   // 이룸이 기기 알림: 알림 행 없이 보내므로 NotificationType 밖의 종류 (앱 push_message_router 와 같은 값)
   public static final String ELUMI_ROUTINE_ARRIVED_TYPE = "ELUMI_ROUTINE_ARRIVED";
@@ -55,7 +61,7 @@ public class PushMessageFactory {
     String subjectTitle) {
     NotificationType type = notification.getType();
     AppLocale locale = device.getLocale() == null ? AppLocale.EN : device.getLocale();
-    String title = text(locale, TITLE_KEY);
+    String title = text(locale, type == NotificationType.WEEKLY_REPORT_READY ? WEEKLY_REPORT_TITLE_KEY : TITLE_KEY);
     String body = buildBody(type, recorded.count(), locale, subjectTitle, notification.getGroupKey());
     return new PushMessage(device.getToken(), title, body, buildData(notification, type), notification.getGroupKey());
   }
@@ -77,6 +83,8 @@ public class PushMessageFactory {
         subjectTitle == null ? "" : subjectTitle, count);
       case TALK_POST_IMPORTED -> MessageFormat.format(text(locale, "push.talk_post_imported"),
         subjectTitle == null ? "" : subjectTitle, count);
+      // {0} 보낸 일과 수, {1} 마친 일과 수 (이름·일과 제목은 넣지 않음: 잠금 화면 노출)
+      case WEEKLY_REPORT_READY -> weeklyReportBody(locale, subjectTitle);
     };
   }
 
@@ -84,6 +92,13 @@ public class PushMessageFactory {
     int keyStart = groupKey == null ? -1 : groupKey.indexOf(':');
     return keyStart >= 0 && CreditPeriodUnit.fromPeriodKey(groupKey.substring(keyStart + 1))
       .filter(unit -> unit == CreditPeriodUnit.MONTH).isPresent();
+  }
+
+  private String weeklyReportBody(AppLocale locale, String sentAndCompletedCounts) {
+    String[] counts = sentAndCompletedCounts == null ? new String[0] : sentAndCompletedCounts.split(WEEKLY_REPORT_COUNTS_DELIMITER);
+    String sentCount = counts.length > 0 ? counts[0] : "0";
+    String completedCount = counts.length > 1 ? counts[1] : "0";
+    return MessageFormat.format(text(locale, WEEKLY_REPORT_BODY_KEY), sentCount, completedCount);
   }
 
   /** 이룸이 기기 일과 도착: 일과 제목은 넣지 않음 (잠금 화면 노출) */
@@ -115,6 +130,9 @@ public class PushMessageFactory {
     putIfPresent(pushData, "notificationId", notification.getId());
     putIfPresent(pushData, "profileId", notification.getProfileId());
     putIfPresent(pushData, "targetId", notification.getTargetId());
+    if (type == NotificationType.WEEKLY_REPORT_READY) {
+      putIfPresent(pushData, WEEK_START_DATA_KEY, notification.getTargetId());
+    }
     return pushData;
   }
 

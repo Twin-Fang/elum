@@ -52,7 +52,8 @@ final class WeeklyReportAggregator {
       longestCompletedDayStreak(days),
       days,
       toRoutineSummaries(routines),
-      toRemainingSteps(routines, today)
+      toRemainingSteps(routines, today),
+      null
     );
   }
 

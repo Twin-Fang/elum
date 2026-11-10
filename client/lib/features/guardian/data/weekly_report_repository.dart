@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../domain/weekly_report.dart';
+import '../domain/weekly_report_weeks.dart';
 
 /// 주간 리포트 API (#1074): 그 주 월요일 > 한 주 요약 (이룸이는 `X-Profile-Id` 헤더가 정함)
 class WeeklyReportRepository {
@@ -33,6 +34,22 @@ class WeeklyReportRepository {
     } catch (error) {
       // 화면이 에러 코드와 다시 하기를 그린다
       AppLogger.repositoryError('WeeklyReportRepository', 'fetchWeeklyReport', error);
+      return Attempt.failed(AppFailure.of(error));
+    }
+  }
+
+  /// 지난 리포트 주 목록 (최신순) + Free 미리 보기 주. 권한이 없어도 부를 수 있음
+  Future<Attempt<WeeklyReportWeeks>> fetchWeeks() async {
+    AppLogger.repositoryCall('WeeklyReportRepository', 'fetchWeeks', null);
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('$_path/weeks');
+      final body = response.data;
+      if (body == null) throw const FormatException('weekly report weeks empty body');
+      final weeks = WeeklyReportWeeks.fromJson(body);
+      AppLogger.repositorySuccess('WeeklyReportRepository', 'fetchWeeks', 'weeks ${weeks.weeks.length}');
+      return Attempt.ok(weeks);
+    } catch (error) {
+      AppLogger.repositoryError('WeeklyReportRepository', 'fetchWeeks', error);
       return Attempt.failed(AppFailure.of(error));
     }
   }

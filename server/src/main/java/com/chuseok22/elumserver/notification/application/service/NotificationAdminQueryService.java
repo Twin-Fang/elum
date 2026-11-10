@@ -49,7 +49,7 @@ public class NotificationAdminQueryService {
       .orElseGet(() -> new NotificationPushSettingAdminView(false, true, allTypesOn()));
   }
 
-  // 종류 7개 > 설정 칸 (PushDispatcher.isTypeEnabled 와 같은 짝)
+  // 종류 8개 > 설정 칸 (PushDispatcher.isTypeEnabled 와 같은 짝)
   private static Map<NotificationType, Boolean> typeSwitchesOf(NotificationSetting setting) {
     Map<NotificationType, Boolean> isTypeEnabledByType = new EnumMap<>(NotificationType.class);
     for (NotificationType type : NotificationType.values()) {
@@ -61,6 +61,7 @@ public class NotificationAdminQueryService {
         case FEEDBACK_RESOLVED -> setting.isFeedbackResolvedEnabled();
         case TALK_POST_COMMENTED -> setting.isTalkCommentedEnabled();
         case TALK_POST_IMPORTED -> setting.isTalkImportedEnabled();
+        case WEEKLY_REPORT_READY -> true;
       });
     }
     return isTypeEnabledByType;

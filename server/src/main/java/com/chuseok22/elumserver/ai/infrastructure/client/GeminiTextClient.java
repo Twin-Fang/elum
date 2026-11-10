@@ -105,6 +105,13 @@ public class GeminiTextClient implements TextGenerationClient {
       AiCallType.GEMINI_TEXT_MEMORY));
   }
 
+  @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return firstText(callGenerateContent(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, AiCallType.GEMINI_TEXT_WEEKLY_REPORT));
+  }
+
   // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.
   String buildPictogramPickUserContent(String stepTitle, String stepDescription) {
     Map<String, Object> input = new LinkedHashMap<>();

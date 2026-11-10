@@ -3,7 +3,6 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -24,11 +23,13 @@ import com.chuseok22.elumserver.routine.core.ReportWeek;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/// 주간 리포트(#1074): Free 403 · 미래 주 400 · 집계 규칙(완료율·별·연속·묶음·남은 카드)
+/// 주간 리포트(#1074): Free 403 · 첫 주 미리 보기 · 미래 주 400 · 집계 규칙(완료율·별·연속·묶음·남은 카드)
 @ExtendWith(MockitoExtension.class)
 class WeeklyReportServiceTest {
 
@@ -44,16 +45,20 @@ class WeeklyReportServiceTest {
   private static final String PROFILE_ID = "profile-1";
 
   @Mock
-  private RoutineRepository routineRepository;
+  private WeeklyReportReader weeklyReportReader;
+  @Mock
+  private WeeklyReportSummaryService weeklyReportSummaryService;
   @Mock
   private ProfileAccessGuard profileAccessGuard;
   @Mock
   private EntitlementService entitlementService;
+  @Mock
+  private SystemConfigService systemConfigService;
   @InjectMocks
   private WeeklyReportService weeklyReportService;
 
   @Test
-  @DisplayName("요금제에 주간 리포트가 없으면 403 WEEKLY_REPORT_NOT_ALLOWED 이고 일과를 읽지 않는다")
+  @DisplayName("요금제에 주간 리포트가 없고 미리 보기도 꺼져 있으면 403 WEEKLY_REPORT_NOT_ALLOWED 이고 일과를 읽지 않는다")
   void freePlan_isRejected() {
     givenProfile();
     doThrow(new CustomException(Entitlement.WEEKLY_REPORT.rejectionCode())).when(entitlementService).requireAllowed("member-1", Entitlement.WEEKLY_REPORT);
@@ -61,14 +66,15 @@ class WeeklyReportServiceTest {
     assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, null))
       .isInstanceOf(CustomException.class)
       .extracting("errorCode").isEqualTo(ErrorCode.WEEKLY_REPORT_NOT_ALLOWED);
-    verify(routineRepository, never())
-      .findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(any(), anyList(), any(), any());
+    verify(weeklyReportReader, never()).aggregate(any(), any(), any());
+    verify(weeklyReportReader, never()).findEarliestRecordedWeekStart(any());
   }
 
   @Test
   @DisplayName("이번 주보다 뒤의 주는 400 INVALID_INPUT_VALUE")
   void futureWeek_isRejected() {
     givenProfile();
+    givenProEntitlement();
 
     assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, LocalDate.now().plusWeeks(1)))
       .isInstanceOf(CustomException.class)
@@ -76,23 +82,68 @@ class WeeklyReportServiceTest {
   }
 
   @Test
-  @DisplayName("주 중간 날짜를 주면 그 주 월요일 0시 ~ 일요일 끝으로 조회하고, 일과관리 복사본은 세지 않는다")
-  void weekIsNormalizedToMonday_andLibraryCopiesExcluded() {
+  @DisplayName("주 중간 날짜를 주면 그 주 월요일로 맞춰 집계하고, 정리 글을 붙여 돌려준다")
+  void weekIsNormalizedToMonday_andSummaryAttached() {
     givenProfile();
+    givenProEntitlement();
     ReportWeek lastWeek = ReportWeek.containing(LocalDate.now().minusWeeks(1));
-    Routine libraryCopy = routine("copy", null, lastWeek.start(), RoutineStatus.COMPLETED, true);
-    libraryCopy.setLibraryOnly(true);
-    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-      eq(PROFILE_ID), anyList(), eq(lastWeek.startAt()), eq(lastWeek.lastMoment())))
-      .thenReturn(List.of(libraryCopy));
+    WeeklyReportResponse aggregated = WeeklyReportAggregator.aggregate(lastWeek, List.of(), LocalDate.now());
+    when(weeklyReportReader.aggregate(eq(PROFILE_ID), eq(lastWeek), any())).thenReturn(aggregated);
+    WeeklyReportResponse.Summary summary = new WeeklyReportResponse.Summary(
+      List.of("정리"), WeeklyReportResponse.SummarySource.FALLBACK);
+    when(weeklyReportSummaryService.summaryFor(eq(PROFILE_ID), any(), eq("member-1"), eq(lastWeek), eq(aggregated), any(), any()))
+      .thenReturn(summary);
 
     WeeklyReportResponse report = weeklyReportService.getWeeklyReport(GUARDIAN, lastWeek.start().plusDays(3));
 
     assertThat(report.weekStart()).isEqualTo(lastWeek.start());
-    assertThat(report.weekEnd()).isEqualTo(lastWeek.start().plusDays(6));
-    assertThat(report.isCurrentWeek()).isFalse();
-    assertThat(report.sentRoutineCount()).isZero();
-    assertThat(report.days()).hasSize(7);
+    assertThat(report.summary()).isEqualTo(summary);
+  }
+
+  @Test
+  @DisplayName("미리 보기가 켜져 있으면 권한 없는 회원도 마친 일과가 있는 가장 이른 주 한 주는 본다")
+  void freePlan_firstWeekPreviewOn_allowsEarliestWeekOnly() {
+    givenProfile();
+    when(systemConfigService.getBoolean(ConfigKey.FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW)).thenReturn(true);
+    ReportWeek firstWeek = ReportWeek.containing(LocalDate.now().minusWeeks(3));
+    when(weeklyReportReader.findEarliestRecordedWeekStart(PROFILE_ID)).thenReturn(Optional.of(firstWeek.start()));
+    when(weeklyReportReader.aggregate(eq(PROFILE_ID), eq(firstWeek), any()))
+      .thenReturn(WeeklyReportAggregator.aggregate(firstWeek, List.of(), LocalDate.now()));
+
+    assertThat(weeklyReportService.getWeeklyReport(GUARDIAN, firstWeek.start()).weekStart()).isEqualTo(firstWeek.start());
+
+    // 그 다음 주는 잠김 (지금처럼 403)
+    LocalDate secondWeekStart = firstWeek.start().plusWeeks(1);
+    assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, secondWeekStart))
+      .isInstanceOf(CustomException.class)
+      .extracting("errorCode").isEqualTo(ErrorCode.WEEKLY_REPORT_NOT_ALLOWED);
+  }
+
+  @Test
+  @DisplayName("미리 보기가 켜져 있어도 마친 일과가 하나도 없으면 어떤 주도 열리지 않는다")
+  void freePlan_firstWeekPreviewOn_noRecords_isRejected() {
+    givenProfile();
+    when(systemConfigService.getBoolean(ConfigKey.FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW)).thenReturn(true);
+    when(weeklyReportReader.findEarliestRecordedWeekStart(PROFILE_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> weeklyReportService.getWeeklyReport(GUARDIAN, null))
+      .isInstanceOf(CustomException.class)
+      .extracting("errorCode").isEqualTo(ErrorCode.WEEKLY_REPORT_NOT_ALLOWED);
+  }
+
+  @Test
+  @DisplayName("주 목록의 미리 보기 주는 설정이 켜지고 권한이 없을 때만 내려간다 (Pro 에게 잠금 표시가 뜨지 않게)")
+  void recordedWeeks_previewOnlyForFreeWithSwitchOn() {
+    givenProfile();
+    LocalDate firstWeekStart = ReportWeek.containing(LocalDate.now().minusWeeks(5)).start();
+    when(weeklyReportReader.listRecordedWeeks(PROFILE_ID)).thenReturn(List.of());
+    when(systemConfigService.getBoolean(ConfigKey.FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW)).thenReturn(true);
+    when(weeklyReportReader.findEarliestRecordedWeekStart(PROFILE_ID)).thenReturn(Optional.of(firstWeekStart));
+
+    assertThat(weeklyReportService.getRecordedWeeks(GUARDIAN).freePreviewWeekStart()).isEqualTo(firstWeekStart);
+
+    when(entitlementService.isAllowed("member-1", Entitlement.WEEKLY_REPORT)).thenReturn(true);
+    assertThat(weeklyReportService.getRecordedWeeks(GUARDIAN).freePreviewWeekStart()).isNull();
   }
 
   @Test
@@ -150,6 +201,10 @@ class WeeklyReportServiceTest {
     assertThat(report.longestCompletedDayStreak()).isZero();
     assertThat(report.routines()).isEmpty();
     assertThat(report.remainingSteps()).isEmpty();
+  }
+
+  private void givenProEntitlement() {
+    when(entitlementService.isAllowed("member-1", Entitlement.WEEKLY_REPORT)).thenReturn(true);
   }
 
   private void givenProfile() {

@@ -43,6 +43,8 @@ public enum ConfigGroup {
   SUBSCRIPTION_STORE("스토어 구독 결제"),
   // 관제소(suh-project-control)가 확인할 일을 모아 가는 연동 (#1229).
   CONTROL_TOWER("관제소 연동"),
+  // 주간 리포트 AI 정리 글과 월요일 알림 켜기.
+  WEEKLY_REPORT("주간 리포트"),
   ;
 
   private final String label;

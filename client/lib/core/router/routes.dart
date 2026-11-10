@@ -59,6 +59,10 @@ abstract final class Routes {
   /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
   static const guardianWeeklyReport = '/guardian/weekly-report';
 
+  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02` (null 이면 이번 주)
+  static String guardianWeeklyReportOf(String? weekStart) =>
+      weekStart == null ? guardianWeeklyReport : '$guardianWeeklyReport?weekStart=${Uri.encodeQueryComponent(weekStart)}';
+
   /// 주간 계획: 요일별 반복 일과 (#782)
   static const guardianWeeklyPlan = '/guardian/weekly-plan';
 

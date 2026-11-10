@@ -131,6 +131,14 @@ public class OpenAiTextClient implements TextGenerationClient {
   }
 
   @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return call(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, "weekly_report_summary", AiCallType.OPENAI_TEXT_WEEKLY_REPORT
+    );
+  }
+
+  @Override
   public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
     String userContent = geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
     return call(
