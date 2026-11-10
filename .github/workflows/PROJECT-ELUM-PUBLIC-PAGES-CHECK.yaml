@@ -12,7 +12,7 @@
 # 사람이 두 곳을 눈으로 맞추는 일은 반드시 빠진다. 그래서 값으로 묻는다.
 #
 # 언제 도는가
-# - 서버 동의 문서나 검사기를 고쳤을 때 (그 자리에서 바로 안다)
+# - 서버 동의 문서나 검사기를 고친 PR 이 열렸을 때, 그리고 main 에 모였을 때
 # - 매주 월요일 (gh-pages 는 이 저장소 밖에서 바뀔 수 있다 — push 로는 못 잡는다)
 # - 손으로 (workflow_dispatch)
 #
@@ -23,8 +23,9 @@
 name: PROJECT-ELUM-PUBLIC-PAGES-CHECK
 
 on:
+  # develop 은 같은 파일의 PR 검사로 이미 돈다 — main 에 모인 뒤 한 번만 더 본다
   push:
-    branches: [develop, main]
+    branches: [main]
     paths:
       - 'server/src/main/resources/consent/**'
       - 'tool/check_public_pages.py'

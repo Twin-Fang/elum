@@ -3,9 +3,9 @@
 # 버전 자동 관리 워크플로우 v2.1
 # ===================================================================
 #
-# [안전망] main(프로덕션)에 릴리스 PR을 거치지 않은 직접 push가 발생했을 때만
+# [안전망] deploy(프로덕션)에 릴리스 PR을 거치지 않은 직접 push가 발생했을 때만
 # patch 버전을 자동으로 증가시키고 모든 관련 파일을 동기화합니다.
-# 정상 릴리스(develop→main PR)의 버전 증가는 RELEASE-CHANGELOG이 머지 전에 수행하며,
+# 정상 릴리스(main→deploy PR)의 버전 증가는 RELEASE-CHANGELOG이 머지 전에 수행하며,
 # 그 머지 push는 version.yml 변경을 포함하므로 이 워크플로우는 가드에 의해 건너뜁니다.
 #
 # [의도적] 이 안전망은 semver 자동 승격(options.semver_auto, #546)을 적용하지 않고 항상 patch입니다.
@@ -37,9 +37,13 @@ concurrency:
   group: version-increment
   cancel-in-progress: false
 
+# 배포 브랜치 이름: 아래 on.push.branches 와 env.DEPLOY_BRANCH 를 같은 값으로 맞춘다 (on 에는 env 를 못 쓴다)
+env:
+  DEPLOY_BRANCH: "deploy"
+
 on:
   push:
-    branches: ["main"]
+    branches: ["deploy"]
     paths-ignore:
       - 'CHANGELOG.md'
       - 'CHANGELOG.json'
@@ -60,7 +64,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch || 'main' }}
+          ref: ${{ env.DEPLOY_BRANCH }}
 
       - name: 릴리스 머지 여부 확인 (안전망 가드)
         id: release_guard
@@ -77,7 +81,7 @@ jobs:
             echo "✅ 릴리스 머지 감지 (push에 version.yml 변경 포함) — 버전 증가 건너뜀"
           else
             echo "is_release_merge=false" >> $GITHUB_OUTPUT
-            echo "⚠️ main 직접 push 감지 — 안전망 버전 증가 실행"
+            echo "⚠️ deploy 직접 push 감지 — 안전망 버전 증가 실행"
           fi
 
       - name: 버전 관리 스크립트 권한 설정
@@ -168,7 +172,7 @@ jobs:
                   echo "⚠️ Push 실패, remote 변경사항 동기화 중..."
 
                   # remote에서 최신 변경사항 가져와서 rebase
-                  if git pull --rebase origin ${{ github.event.repository.default_branch || 'main' }}; then
+                  if git pull --rebase origin ${{ env.DEPLOY_BRANCH }}; then
                     echo "✅ Rebase 성공, 다시 push 시도..."
                   else
                     echo "❌ Rebase 실패, 충돌 해결 필요"

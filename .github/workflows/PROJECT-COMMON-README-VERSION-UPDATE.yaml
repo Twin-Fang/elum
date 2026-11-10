@@ -3,12 +3,12 @@
 # README 파일 버전 자동 업데이트 워크플로우
 # ===================================================================
 #
-# 이 워크플로우는 main 브랜치로 푸시가 발생할 때 README.md 파일의
+# 이 워크플로우는 deploy 브랜치로 푸시가 발생할 때 README.md 파일의
 # 버전 정보를 version_manager.sh를 통해 가져와 자동으로 업데이트합니다.
 #
 # ===================================================================
 # 작동 방식:
-# 1. main 브랜치 푸시 시 트리거
+# 1. deploy 브랜치 푸시 시 트리거
 # 2. version_manager.sh를 통해 최신 버전 정보 추출
 # 3. README.md 파일의 버전 정보 업데이트
 # 4. 변경사항 커밋 및 푸시
@@ -45,10 +45,12 @@ name: README VERSION UPDATE
 env:
   # 버전에 날짜 표시 여부 (true/false)
   SHOW_DATE: true  # 🔧 이 값을 false로 변경하면 날짜가 표시되지 않습니다
+  # 배포 브랜치 이름: 아래 on.push.branches 와 같은 값으로 맞춘다 (on 에는 env 를 못 쓴다)
+  DEPLOY_BRANCH: "deploy"
 
 on:
   push:
-    branches: ["main"]
+    branches: ["deploy"]
   # PAT 없이 릴리스한 경우 push 트리거가 발생하지 않으므로(#551) 릴리스 워크플로우가 직접 깨운다.
   workflow_dispatch:
 
@@ -66,7 +68,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch || 'main' }}
+          ref: ${{ env.DEPLOY_BRANCH }}
 
       - name: Git 설정
         run: |
@@ -249,7 +251,7 @@ jobs:
 
       - name: 변경사항 커밋 및 푸시
         run: |
-          DEFAULT_BRANCH="${{ github.event.repository.default_branch || 'main' }}"
+          DEFAULT_BRANCH="${{ env.DEPLOY_BRANCH }}"
           git add README.md
 
           if git diff --staged --quiet; then
