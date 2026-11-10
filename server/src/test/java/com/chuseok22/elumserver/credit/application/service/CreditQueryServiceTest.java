@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.credit.application.service;
 
+import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -69,6 +70,7 @@ class CreditQueryServiceTest {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     CreditAccountService accountService =
       new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
+        CreditTestStore.weekPeriodSettings(),
         org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
     PlatformTransactionManager tx = mock(PlatformTransactionManager.class);
     CreditReservationService reservationService = new CreditReservationService(
@@ -288,5 +290,31 @@ class CreditQueryServiceTest {
     org.mockito.Mockito.verify(ledgerRepository).findMemberIdsWithBalanceDepletedIn(
       java.util.List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE),
       period.start(), period.end());
+  }
+
+  @Test
+  @DisplayName("요약 응답이 주기 단위를 내려준다 — 앱이 '이번 주'·'이번 달' 문구를 못 고르면 달 주기에 월요일 안내가 뜬다")
+  void getMine_reportsPeriodUnit() {
+    assertThat(service.getMine(MEMBER_ID).periodUnit()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.WEEK);
+
+    PlatformTransactionManager tx = mock(PlatformTransactionManager.class);
+    CreditAccountService monthAccountService = new CreditAccountService(accountRepository, grantRepository,
+      jobRepository, ledgerRepository,
+      CreditTestStore.periodSettingsOf(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH),
+      org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
+    CreditReservationService reservationService = new CreditReservationService(
+      policyService, monthAccountService, entitlementService, jobRepository, ledgerRepository,
+      com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
+    CreditQueryService monthQueryService = new CreditQueryService(policyService, monthAccountService,
+      reservationService, entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
+
+    CreditSummaryResponse monthly = monthQueryService.getMine(MEMBER_ID);
+
+    assertThat(monthly.periodUnit()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH);
+    assertThat(monthly.periodStart()).isEqualTo(LocalDateTime.of(2026, 9, 1, 0, 0));
+    assertThat(monthly.nextResetAt()).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
+    // 주 단위로 받은 지급(W39)은 그대로 두고 이번 달 지급이 한 번 새로 생긴다 (정책 Free 100)
+    assertThat(monthly.weeklyGrant()).isEqualTo(100);
+    assertThat(store.grants).extracting(AiCreditGrant::getPeriodKey).containsExactly("2026-W39", "2026-M09");
   }
 }

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
@@ -18,6 +19,9 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +136,18 @@ public final class CreditTestStore {
     lenient().when(ledgerRepository.sumDelta(anyString(), any(CreditLedgerType.class), any(), any())).thenAnswer(inv -> ledger.stream()
       .filter(l -> l.getAccountId().equals(inv.getArgument(0)) && l.getType() == inv.getArgument(1))
       .mapToLong(AiCreditLedger::getDelta).sum());
+  }
+
+  /// 설정이 비어 있는(= 기본 WEEK) 주기 설정
+  public static CreditPeriodSettings weekPeriodSettings() {
+    return periodSettingsOf(CreditPeriodUnit.WEEK);
+  }
+
+  /// 단위를 고정한 주기 설정 (설정 키 CREDIT_PERIOD_UNIT 값을 그 이름으로 돌려주는 가짜)
+  public static CreditPeriodSettings periodSettingsOf(CreditPeriodUnit unit) {
+    SystemConfigService config = mock(SystemConfigService.class);
+    lenient().when(config.getString(ConfigKey.CREDIT_PERIOD_UNIT)).thenReturn(unit.name());
+    return new CreditPeriodSettings(config);
   }
 
   public AiCreditAccount account(String id, String memberId) {

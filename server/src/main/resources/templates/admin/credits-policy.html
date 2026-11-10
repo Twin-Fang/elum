@@ -7,7 +7,7 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
   <div>
     <h1 class="text-2xl font-bold">AI 크레딧 · 정책</h1>
-    <p class="text-base-content/60">주간 지급량·단가를 새 버전으로 발행합니다. 옛 버전은 고치지 않고 이력으로 남습니다.</p>
+    <p class="text-base-content/60" th:text="${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급량·단가를 새 버전으로 발행합니다. 옛 버전은 고치지 않고 이력으로 남습니다.'">주간 지급량·단가를 새 버전으로 발행합니다. 옛 버전은 고치지 않고 이력으로 남습니다.</p>
   </div>
 
   <nav th:replace="~{admin/fragments/credit-nav :: nav('policy')}"></nav>
@@ -23,7 +23,7 @@
               th:text="${current.enabled} ? '켜짐' : '꺼짐'">켜짐</span>
       </h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-        <div class="text-base-content/60">주간 지급 (Free / Pro)</div>
+        <div class="text-base-content/60" th:text="${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급 (Free / Pro)'">주간 지급 (Free / Pro)</div>
         <div th:text="${currentValues.freeGrant()} + ' / ' + ${currentValues.proGrant()}">100 / 100</div>
         <div class="text-base-content/60">단가 (글 / 그림 / 다시 그리기)</div>
         <div th:text="${currentValues.costRoutineText()} + ' / ' + ${currentValues.costCardImage()} + ' / ' + ${currentValues.costImageRegenerate()}">1 / 1 / 1</div>
@@ -49,19 +49,20 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
         <div class="text-base-content/60">대상 계정</div>
         <div th:text="${preview.targetAccounts()} + '개 (Free ' + ${preview.freeAccounts()} + ' · Pro ' + ${preview.proAccounts()} + ')'">0개</div>
-        <div class="text-base-content/60">주간 지급 총량</div>
+        <div class="text-base-content/60" th:text="${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급 총량'">주간 지급 총량</div>
         <div th:text="${preview.weeklyTotalBefore()} + ' → ' + ${preview.weeklyTotalAfter()} + ' (' + (${preview.weeklyTotalChange() >= 0} ? '+' : '') + ${preview.weeklyTotalChange()} + ')'">0 → 0</div>
-        <div class="text-base-content/60">주당 소진 계정(추정)</div>
+        <div class="text-base-content/60" th:text="${creditPeriodUnit?.periodNoun ?: '주'} + '당 소진 계정(추정)'">주당 소진 계정(추정)</div>
         <div th:text="${#numbers.formatDecimal(preview.exhaustedBefore(), 1, 1)} + ' → ' + ${#numbers.formatDecimal(preview.exhaustedAfter(), 1, 1)}">0 → 0</div>
-        <div class="text-base-content/60">크레딧당 원가(지난 4주)</div>
-        <div th:text="${preview.usdPerCredit() != null} ? '$' + ${#numbers.formatDecimal(preview.usdPerCredit(), 1, 4)} : '— (지난 4주 사용 없음)'">—</div>
-        <div class="text-base-content/60">예상 주간 USD</div>
+        <div class="text-base-content/60" th:text="'크레딧당 원가(' + '지난 4' + (${creditPeriodUnit?.periodNoun ?: '주'} == '달' ? '개월' : '주') + ')'">크레딧당 원가(지난 4주)</div>
+        <div th:text="${preview.usdPerCredit() != null} ? '$' + ${#numbers.formatDecimal(preview.usdPerCredit(), 1, 4)} : '— (' + '지난 4' + (${creditPeriodUnit?.periodNoun ?: '주'} == '달' ? '개월' : '주') + ' 사용 없음)'">—</div>
+        <div class="text-base-content/60" th:text="'예상 ' + ${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' USD'">예상 주간 USD</div>
         <div th:text="${preview.estimatedWeeklyUsdAfter() != null} ? '$' + ${#numbers.formatDecimal(preview.estimatedWeeklyUsdBefore(), 1, 2)} + ' → $' + ${#numbers.formatDecimal(preview.estimatedWeeklyUsdAfter(), 1, 2)} : '—'">—</div>
         <div class="text-base-content/60">적용 시점</div>
-        <div th:text="${preview.immediate()} ? '즉시 — 이번 주 지급 ' + ${preview.immediateAccounts()} + '개 계정을 ' + (${preview.immediateDelta() >= 0} ? '+' : '') + ${preview.immediateDelta()} + ' 만큼 맞춤(줄이면 남은 양까지만), 이번 주에 처음 받는 회원도 새 지급량' : '다음 주부터 — 이번 주 지급은 그대로(이번 주에 처음 받는 회원도 이전 지급량)'">다음 주부터</div>
+        <div th:text="${preview.immediate()} ? '즉시 — ' + ${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 지급 ' + ${preview.immediateAccounts()} + '개 계정을 ' + (${preview.immediateDelta() >= 0} ? '+' : '') + ${preview.immediateDelta()} + ' 만큼 맞춤(줄이면 남은 양까지만), ' + ${creditPeriodUnit?.currentLabel ?: '이번 주'} + '에 처음 받는 회원도 새 지급량' : '다음 ' + ${creditPeriodUnit?.periodNoun ?: '주'} + '부터 — ' + ${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 지급은 그대로(' + ${creditPeriodUnit?.currentLabel ?: '이번 주'} + '에 처음 받는 회원도 이전 지급량)'">다음 주부터</div>
       </div>
-      <p class="text-xs text-base-content/50">
-        소진·USD 추정은 지난 4주 계정별 주 수요(실제 차감 + 초과)를 새 지급량에 대 본 값이에요. 단가 변경은 수요에 반영하지 않아요.
+      <p class="text-xs text-base-content/50"
+         th:text="'소진·USD 추정은 ' + '지난 4' + (${creditPeriodUnit?.periodNoun ?: '주'} == '달' ? '개월' : '주') + ' 계정별 수요(실제 차감 + 초과)를 새 지급량에 대 본 값이에요. 단가 변경은 수요에 반영하지 않아요.'">
+        소진·USD 추정은 지난 4주 계정별 수요(실제 차감 + 초과)를 새 지급량에 대 본 값이에요. 단가 변경은 수요에 반영하지 않아요.
       </p>
 
       <div th:if="${preview.disabling()}" class="alert alert-error">
@@ -100,11 +101,11 @@
       <form th:action="@{/admin/credits/policy/preview}" method="post" class="space-y-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <label class="form-control">
-            <span class="label-text text-xs">Free 주간 지급</span>
+            <span class="label-text text-xs" th:text="'Free ' + ${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급'">Free 주간 지급</span>
             <input type="number" name="freeGrant" min="0" required th:value="${form.freeGrant()}" class="input input-bordered input-sm"/>
           </label>
           <label class="form-control">
-            <span class="label-text text-xs">Pro 주간 지급</span>
+            <span class="label-text text-xs" th:text="'Pro ' + ${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급'">Pro 주간 지급</span>
             <input type="number" name="proGrant" min="0" required th:value="${form.proGrant()}" class="input input-bordered input-sm"/>
           </label>
           <label class="form-control">
@@ -126,8 +127,8 @@
           <label class="form-control">
             <span class="label-text text-xs">적용 시점</span>
             <select name="grantApply" class="select select-bordered select-sm">
-              <option value="NEXT_PERIOD" th:selected="${form.grantApply() == null or form.grantApply() == 'NEXT_PERIOD'}">다음 주부터</option>
-              <option value="IMMEDIATE" th:selected="${form.grantApply() == 'IMMEDIATE'}">즉시 (이번 주 지급도 맞춤)</option>
+              <option value="NEXT_PERIOD" th:selected="${form.grantApply() == null or form.grantApply() == 'NEXT_PERIOD'}" th:text="'다음 ' + ${creditPeriodUnit?.periodNoun ?: '주'} + '부터'">다음 주부터</option>
+              <option value="IMMEDIATE" th:selected="${form.grantApply() == 'IMMEDIATE'}" th:text="'즉시 (' + ${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 지급도 맞춤)'">즉시 (이번 주 지급도 맞춤)</option>
             </select>
           </label>
           <label class="label cursor-pointer justify-start gap-2">
@@ -151,7 +152,7 @@
       <div class="overflow-x-auto">
         <table class="table table-sm">
           <thead>
-          <tr><th>버전</th><th>상태</th><th>시작</th><th>주간 지급</th><th>단가</th><th>TTL</th><th>적용</th><th>발행</th><th>사유</th></tr>
+          <tr><th>버전</th><th>상태</th><th>시작</th><th th:text="${creditPeriodUnit?.adjectiveLabel ?: '주간'} + ' 지급'">주간 지급</th><th>단가</th><th>TTL</th><th>적용</th><th>발행</th><th>사유</th></tr>
           </thead>
           <tbody>
           <th:block th:if="${history.isEmpty()}">

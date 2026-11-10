@@ -95,6 +95,7 @@ class AdminCreditServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     accountService = new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
+      CreditTestStore.weekPeriodSettings(),
       org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
 
     policy = AiCreditPolicy.disabledDefault();
@@ -432,5 +433,19 @@ class AdminCreditServiceTest {
   void perCredit_guardsZero() {
     assertThat(AdminCreditQueryService.perCredit(1.5, 0)).isNull();
     assertThat(AdminCreditQueryService.perCredit(1.5, 3)).isEqualTo(0.5);
+  }
+
+  @Test
+  @DisplayName("달 주기면 '이번 주기 끝' 만료가 다음 달 1일 0시다 — 주 끝으로 잡히면 관리자 보너스가 달 지급보다 먼저 사라진다")
+  void resolveExpiry_followsMonthPeriod() {
+    CreditAccountService monthAccountService = new CreditAccountService(accountRepository, grantRepository,
+      jobRepository, ledgerRepository,
+      CreditTestStore.periodSettingsOf(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH),
+      org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
+    AdminCreditService monthService = new AdminCreditService(new CreditPolicyService(policyRepository),
+      monthAccountService, accountRepository, grantRepository, jobRepository, ledgerRepository, memberRepository, CLOCK);
+
+    assertThat(monthService.resolveExpiry("WEEK_END", null)).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
+    assertThat(monthService.resolveExpiry(null, null)).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
   }
 }

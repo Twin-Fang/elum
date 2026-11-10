@@ -58,7 +58,7 @@ class CreditAccountServiceTest {
   @BeforeEach
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
-    service = new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, entityManager);
+    service = new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), entityManager);
     policy = AiCreditPolicy.disabledDefault();
     policy.setVersion(1);
     policy.setEnabled(true);

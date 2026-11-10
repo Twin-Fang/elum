@@ -22,6 +22,8 @@ public enum ConfigGroup {
   // 결제 전부터 쓴 회원에게 종료 시각까지 Pro 를 주는 선물.
   EXISTING_MEMBER_PRO_GIFT("기존 가입자 Pro 선물"),
   AI_BUDGET("AI 비용 상한"),
+  // AI 크레딧 지급 주기 (지급량·단가는 관리자 "크레딧 정책" 화면의 버전 정책이 따로 정한다).
+  AI_CREDIT("AI 크레딧"),
   // 호출 비용·남용 방지 한도: 요청 간격, 창당 횟수, 동시 실행 수.
   USAGE_LIMIT("사용 한도·남용 방지"),
   APP_CONTROL("앱 점검·버전"),

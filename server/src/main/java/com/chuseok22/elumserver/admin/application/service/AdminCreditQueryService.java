@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
@@ -38,10 +39,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.routine.application.service.AiDailyBudgetGuard;
 import java.time.Clock;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -52,8 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +74,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class AdminCreditQueryService {
-
-  private static final Pattern WEEK_KEY = Pattern.compile("(\\d{4})-W(\\d{2})");
 
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
@@ -143,30 +137,18 @@ public class AdminCreditQueryService {
   }
 
   /**
-   * 주 키(2026-W39)를 주기로 바꾼다. 비었거나 틀리면 이번 주, 미래 주면 이번 주로 되돌린다.
+   * 주기 키(2026-W39 · 2026-M11)를 주기로 바꾼다. 비었거나 틀리면 이번 주기, 미래 주기면 이번 주기로 되돌린다.
    */
   public CreditPeriod periodOf(String key) {
-    LocalDateTime now = LocalDateTime.now(clock);
-    CreditPeriod current = CreditPeriod.of(now);
-    if (key == null || key.isBlank()) {
-      return current;
-    }
-    Matcher matcher = WEEK_KEY.matcher(key.trim());
-    if (!matcher.matches()) {
-      return current;
-    }
-    try {
-      int year = Integer.parseInt(matcher.group(1));
-      int week = Integer.parseInt(matcher.group(2));
-      // ISO 주 연도의 1월 4일은 언제나 그 해 첫 주에 있다.
-      LocalDate monday = LocalDate.of(year, 1, 4)
-        .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, week)
-        .with(DayOfWeek.MONDAY);
-      CreditPeriod period = CreditPeriod.of(monday.atStartOfDay());
-      return period.start().isAfter(current.start()) ? current : period;
-    } catch (RuntimeException e) {
-      return current;
-    }
+    CreditPeriod current = accountService.currentPeriod(LocalDateTime.now(clock));
+    return CreditPeriod.fromKey(key)
+      .filter(period -> !period.start().isAfter(current.start()))
+      .orElse(current);
+  }
+
+  /// 지금 설정된 주기 단위 (관리자 화면 문구: 주간 · 월간)
+  public CreditPeriodUnit periodUnit() {
+    return accountService.periodUnit();
   }
 
   // --- 개요 ---
@@ -211,8 +193,8 @@ public class AdminCreditQueryService {
     long stuck = countStuckReservations(policy, now);
     long mismatch = jobRepository.countSettledWithoutCallLog(CreditJobStatus.SETTLED, period.start(), period.end());
 
-    CreditPeriod previousPeriod = CreditPeriod.of(period.start().minusWeeks(1));
-    String nextKey = current ? null : CreditPeriod.of(period.end()).key();
+    CreditPeriod previousPeriod = period.previous();
+    String nextKey = current ? null : period.next().key();
     return new AdminCreditOverview(period, previousPeriod.key(), nextKey, current, active, granted, bonus, used, reserved,
       remaining, overageJobs, overageCredits, released, exhausted, totalUsd, linkedUsd, perCredit(linkedUsd, used), models, kinds,
       stuck, mismatch, isBudgetReached(), policy);
@@ -433,7 +415,7 @@ public class AdminCreditQueryService {
     Set<String> wantedMemberIds = new HashSet<>(memberIds);
     LocalDateTime now = LocalDateTime.now(clock);
     Map<String, Long> remainingByMemberId = new HashMap<>();
-    for (AdminCreditWeekRow row : weekRows(CreditPeriod.of(now), now)) {
+    for (AdminCreditWeekRow row : weekRows(accountService.currentPeriod(now), now)) {
       if (row.memberId() != null && wantedMemberIds.contains(row.memberId())) {
         remainingByMemberId.put(row.memberId(), row.remaining());
       }
@@ -449,7 +431,7 @@ public class AdminCreditQueryService {
     }
     CreditBalance balance = accountService.balance(account, LocalDateTime.now(clock));
     return new AdminMemberCreditSummary(false, true, balance.available(), balance.weeklyGrant(),
-      balance.bonus(), balance.used(), account.isFrozen());
+      balance.bonus(), balance.used(), account.isFrozen(), balance.period().unit());
   }
 
   /// 비용 상한 도달 여부. 집계 실패는 가드가 false 로 돌려준다 — 경고 하나 때문에 개요가 깨지지 않게 여기서도 감싼다.

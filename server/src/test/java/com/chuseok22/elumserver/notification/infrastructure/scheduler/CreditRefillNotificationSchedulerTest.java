@@ -51,6 +51,24 @@ class CreditRefillNotificationSchedulerTest {
   @BeforeEach
   void setUp() {
     scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 200, mock(MigrationLock.class));
+    org.mockito.Mockito.lenient().when(creditQueryService.currentPeriod(NOW)).thenReturn(CreditPeriod.of(NOW));
+  }
+
+  @Test
+  @DisplayName("달 주기면 지난달에 다 쓴 보호자에게 이번 달 키로 알린다 — 주 단위로 지난 주를 찾으면 알림이 엉뚱한 사람에게 간다")
+  void monthPeriod_notifiesMembersDepletedLastMonth_withMonthKey() {
+    CreditPeriod thisMonth = CreditPeriod.of(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH, NOW);
+    when(creditQueryService.currentPeriod(NOW)).thenReturn(thisMonth);
+    when(creditQueryService.memberIdsDepletedIn(thisMonth.previous())).thenReturn(List.of("m1"));
+    List<RecordedNotification> recorded = List.of(new RecordedNotification("n1", "m1", 1, true));
+    when(notificationRecorder.record(any(NotificationDraft.class), eq(List.of("m1")))).thenReturn(recorded);
+
+    scheduler.run();
+
+    ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
+    verify(notificationRecorder).record(draft.capture(), eq(List.of("m1")));
+    org.assertj.core.api.Assertions.assertThat(draft.getValue().groupKey()).isEqualTo("CREDIT_REFILLED:2026-M10");
+    org.assertj.core.api.Assertions.assertThat(thisMonth.previous().key()).isEqualTo("2026-M09");
   }
 
   @Test

@@ -39,6 +39,18 @@ class PushMessageFactoryTest {
   }
 
   @Test
+  @DisplayName("크레딧 다시 채움은 주 키면 '이번 주', 달 키면 '이번 달' 문구를 쓴다 — 달 주기에 '이번 주'가 나가면 보호자가 오해한다")
+  void creditRefilled_copyFollowsPeriodKeyUnit() {
+    PushMessage weekly = factory.create(notification(NotificationType.CREDIT_REFILLED, "CREDIT_REFILLED:2026-W43"),
+      new RecordedNotification("n1", "m1", 1, true), device(AppLocale.KO));
+    PushMessage monthly = factory.create(notification(NotificationType.CREDIT_REFILLED, "CREDIT_REFILLED:2026-M11"),
+      new RecordedNotification("n1", "m1", 1, true), device(AppLocale.KO));
+
+    assertThat(weekly.body()).isEqualTo("이번 주 크레딧이 채워졌어요");
+    assertThat(monthly.body()).isEqualTo("이번 달 크레딧이 채워졌어요");
+  }
+
+  @Test
   @DisplayName("언어가 없으면 영어 문구로 대체한다")
   void unknownLocale_fallsBackToEn() {
     Notification notification = notification(NotificationType.CO_GUARDIAN_JOINED, "CO_GUARDIAN_JOINED:p1:m2");

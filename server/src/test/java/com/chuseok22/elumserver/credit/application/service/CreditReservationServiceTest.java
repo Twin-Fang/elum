@@ -80,7 +80,7 @@ class CreditReservationServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     accountService = new CreditAccountService(
-      accountRepository, grantRepository, jobRepository, ledgerRepository, mock(EntityManager.class));
+      accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), mock(EntityManager.class));
     // 트랜잭션 관리자는 목 — 트랜잭션 경계는 단위 테스트가 볼 수 없고, 안의 계산만 본다.
     service = new CreditReservationService(policyService, accountService, entitlementService,
       jobRepository, ledgerRepository, UsageLimitSettings.fromValues(Map.of(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP, FREE_REGENERATE_DAILY_CAP)),

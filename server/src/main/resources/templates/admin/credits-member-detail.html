@@ -37,7 +37,7 @@
       <div class="stat-desc">유효 묶음 남음 − 예약</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
-      <div class="stat-title text-sm">이번 주 지급</div>
+      <div class="stat-title text-sm" th:text="${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 지급'">이번 주 지급</div>
       <div class="stat-value text-2xl" th:text="${detail.balance().weeklyGrant()}">0</div>
       <div class="stat-desc" th:text="${detail.balance().period().key()}">2026-W39</div>
     </div>
@@ -46,7 +46,7 @@
       <div class="stat-value text-2xl" th:text="${detail.balance().bonus()}">0</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
-      <div class="stat-title text-sm">이번 주 사용</div>
+      <div class="stat-title text-sm" th:text="${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 사용'">이번 주 사용</div>
       <div class="stat-value text-2xl" th:text="${detail.balance().used()}">0</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
@@ -54,7 +54,8 @@
       <div class="stat-value text-2xl" th:text="${detail.balance().reserved()}">0</div>
     </div>
   </div>
-  <p th:if="${detail.balance() != null and detail.balance().weeklyGrant() == 0}" class="text-sm text-base-content/60">
+  <p th:if="${detail.balance() != null and detail.balance().weeklyGrant() == 0}" class="text-sm text-base-content/60"
+     th:text="${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 지급은 이 회원의 첫 조회·요청 때 만들어져요. 이 화면은 읽기만 하므로 지급을 만들지 않아요.'">
     이번 주 지급은 이 회원의 첫 조회·요청 때 만들어져요. 이 화면은 읽기만 하므로 지급을 만들지 않아요.
   </p>
 
@@ -133,7 +134,7 @@
         <label class="form-control">
           <span class="label-text text-xs">만료 (지급만)</span>
           <select name="expiryMode" class="select select-bordered select-sm">
-            <option value="WEEK_END" th:selected="${form.expiryMode() == null or form.expiryMode() == 'WEEK_END'}">이번 주 말</option>
+            <option value="WEEK_END" th:selected="${form.expiryMode() == null or form.expiryMode() == 'WEEK_END'}" th:text="${creditPeriodUnit?.currentLabel ?: '이번 주'} + ' 끝'">이번 주 끝</option>
             <option value="DATE" th:selected="${form.expiryMode() == 'DATE'}">날짜 지정</option>
             <option value="NONE" th:selected="${form.expiryMode() == 'NONE'}">무기한</option>
           </select>

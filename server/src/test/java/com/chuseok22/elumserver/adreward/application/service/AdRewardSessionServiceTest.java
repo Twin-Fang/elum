@@ -72,7 +72,7 @@ class AdRewardSessionServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     CreditAccountService accountService =
-      new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, entityManager);
+      new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), entityManager);
     service = new AdRewardSessionService(settings, sessionRepository, accountService, grantRepository, CLOCK);
 
     account = new AiCreditAccount();

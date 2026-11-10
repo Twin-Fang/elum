@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.entity.PushDevice;
@@ -55,18 +56,21 @@ public class PushMessageFactory {
     NotificationType type = notification.getType();
     AppLocale locale = device.getLocale() == null ? AppLocale.EN : device.getLocale();
     String title = text(locale, TITLE_KEY);
-    String body = buildBody(type, recorded.count(), locale, subjectTitle);
+    String body = buildBody(type, recorded.count(), locale, subjectTitle, notification.getGroupKey());
     return new PushMessage(device.getToken(), title, body, buildData(notification, type), notification.getGroupKey());
   }
 
-  private String buildBody(NotificationType type, int count, AppLocale locale, String subjectTitle) {
+  private String buildBody(NotificationType type, int count, AppLocale locale, String subjectTitle,
+    String groupKey) {
     return switch (type) {
       case ROUTINE_COMPLETED -> count >= 2
         ? MessageFormat.format(text(locale, ROUTINE_COMPLETED_MANY_KEY), count)
         : text(locale, ROUTINE_COMPLETED_ONE_KEY);
       case ROUTINE_SENT_BY_CO_GUARDIAN -> text(locale, "push.routine_sent");
       case CO_GUARDIAN_JOINED -> text(locale, "push.co_guardian_joined");
-      case CREDIT_REFILLED -> text(locale, "push.credit_refilled");
+      // 묶음 키 CREDIT_REFILLED:{주기 키} 의 주기가 달(2026-M11)이면 "이번 달" 문구
+      case CREDIT_REFILLED -> text(locale, isMonthlyPeriodGroupKey(groupKey)
+        ? "push.credit_refilled_month" : "push.credit_refilled");
       case FEEDBACK_RESOLVED -> text(locale, "push.feedback_resolved");
       // {0} 글 제목, {1} 댓글 수 또는 가져간 보호자 수
       case TALK_POST_COMMENTED -> MessageFormat.format(text(locale, "push.talk_post_commented"),
@@ -74,6 +78,12 @@ public class PushMessageFactory {
       case TALK_POST_IMPORTED -> MessageFormat.format(text(locale, "push.talk_post_imported"),
         subjectTitle == null ? "" : subjectTitle, count);
     };
+  }
+
+  private static boolean isMonthlyPeriodGroupKey(String groupKey) {
+    int keyStart = groupKey == null ? -1 : groupKey.indexOf(':');
+    return keyStart >= 0 && CreditPeriodUnit.fromPeriodKey(groupKey.substring(keyStart + 1))
+      .filter(unit -> unit == CreditPeriodUnit.MONTH).isPresent();
   }
 
   /** 이룸이 기기 일과 도착: 일과 제목은 넣지 않음 (잠금 화면 노출) */

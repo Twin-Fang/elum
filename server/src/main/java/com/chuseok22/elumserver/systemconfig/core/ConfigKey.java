@@ -648,6 +648,19 @@ public enum ConfigKey {
     ConfigValueType.INTEGER, List.of(), "7", 1, 30
   ),
 
+  // --- AI 크레딧 ---
+  //
+  // 지급·만료·사용량 집계·광고 보상 만료·관리자 보너스 기본 만료가 모두 이 주기를 따른다.
+  // 기본값 WEEK 는 배포만으로 동작이 바뀌지 않는다. MONTH 로 바꾸면 이미 준 주간 지급분은 원래 만료까지 쓰고
+  // 이번 달 지급이 달 주기 키로 새로 한 번 생긴다(바꾸는 주에만 조금 넉넉하다). 지급량은 크레딧 정책 새 버전으로 함께 바꾼다.
+  CREDIT_PERIOD_UNIT(
+    ConfigGroup.AI_CREDIT, "크레딧 지급 주기",
+    "WEEK 는 매주 월요일 0시, MONTH 는 매달 1일 0시(한국 시각)에 한 번 지급하고 남은 양은 사라진다. "
+      + "바꾸는 날 이미 받은 주간 지급분은 원래 끝나는 날까지 쓸 수 있다. 지급량(Free·Pro)은 크레딧 정책 화면에서 "
+      + "새 버전으로 함께 바꾼다. 다음 요청부터 반영",
+    ConfigValueType.SELECT, List.of("WEEK", "MONTH"), "WEEK"
+  ),
+
   // --- 광고 보상 ---
   //
   // 보상형 광고를 끝까지 보면 AI 생성 크레딧을 준다. 크레딧은 곧 AI 비용이라 **기본값은 꺼짐**이다 —
@@ -661,7 +674,7 @@ public enum ConfigKey {
   AD_REWARD_CREDITS_PER_VIEW(
     ConfigGroup.AD_REWARD, "시청 1회당 크레딧",
     "보상형 광고를 끝까지 볼 때마다 주는 크레딧(정수). 0 이하면 주지 않는다. 일과 하나 만드는 비용과 "
-      + "광고 수익을 견줘 정한다. 지급분은 이번 주 끝(다음 월요일 0시)에 사라진다",
+      + "광고 수익을 견줘 정한다. 지급분은 이번 주기 끝(주 단위면 다음 월요일 0시, 달 단위면 다음 달 1일 0시)에 사라진다",
     ConfigValueType.INTEGER, List.of(), "2", 0, 100
   ),
   AD_REWARD_DAILY_LIMIT(

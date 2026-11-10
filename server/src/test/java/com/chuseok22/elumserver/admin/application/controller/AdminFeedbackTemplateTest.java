@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminFeedbackSenderPanel;
@@ -76,7 +77,7 @@ class AdminFeedbackTemplateTest {
     succeededCall.setSuccess(true);
     succeededCall.setEstimatedCostUsd(0.0012);
     return new AdminFeedbackSenderPanel(false, true, memberId, "하늘보호자", MemberStatus.ACTIVE, PlanType.PRO,
-      new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, false),
+      new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, false, CreditPeriodUnit.WEEK),
       List.of(failedCall, succeededCall), LocalDateTime.of(2026, 10, 8, 17, 54, 44));
   }
 

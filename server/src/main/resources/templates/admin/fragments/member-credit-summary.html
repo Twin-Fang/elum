@@ -9,7 +9,7 @@
 <div th:fragment="creditSummaryCard(creditSummary, memberId)" class="card bg-base-100 shadow-md" data-member-credit-summary>
   <div class="card-body p-4 gap-3">
     <div class="flex items-center gap-2 flex-wrap">
-      <h2 class="card-title text-lg">AI 크레딧 (이번 주)</h2>
+      <h2 class="card-title text-lg" th:text="'AI 크레딧 (' + ${creditSummary.periodUnit()?.currentLabel ?: '이번 주'} + ')'">AI 크레딧 (이번 주)</h2>
       <span th:if="${creditSummary.isFrozen()}" class="badge badge-error badge-sm">동결</span>
       <a th:href="@{/admin/credits/members/{id}(id=${memberId})}" class="link link-primary text-sm ml-auto">자세히</a>
     </div>
@@ -25,7 +25,7 @@
         <div class="stat-value text-2xl" th:text="${#numbers.formatInteger(creditSummary.available(), 1, 'COMMA')}">0</div>
       </div>
       <div class="stat py-2">
-        <div class="stat-title">주간 지급</div>
+        <div class="stat-title" th:text="${creditSummary.periodUnit()?.adjectiveLabel ?: '주간'} + ' 지급'">주간 지급</div>
         <div class="stat-value text-2xl" th:text="${#numbers.formatInteger(creditSummary.weeklyGrant(), 1, 'COMMA')}">0</div>
       </div>
       <div class="stat py-2">
