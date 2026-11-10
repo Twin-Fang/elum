@@ -8,7 +8,7 @@ import '../theme/theme_context_ext.dart';
 
 /// PRO 배지 단일 부품: 둥근 금빛 그라데이션 알약 + 반짝 표시 + `PRO` (#1170 · #1189)
 ///
-/// Pro 입구 중 배지를 다는 곳(미리 보기 판 · 그림 방식 · 인쇄 선택지 · 카드 그림 칩 · 요금제 화면)은 모두 이것만 씀. 설정 줄 · 메뉴 줄 · 일과관리 입구 · 반복 줄에는 달지 않음
+/// Free 에게 보이는 Pro 입구(미리 보기 판 · 그림 방식 · 인쇄 디자인 칩 · 일과관리 입구 · 설정 줄 · 일과 메뉴 줄 · 반복 줄 · 카드 그림 칩 · 요금제 화면)는 모두 이것만 씀
 /// 금빛 토큰(`proPlanBadge*`)·문구(`planProBadge`)는 이 파일 밖에서 쓰지 않음 (tool/design_rules.yaml `restricted_tokens`)
 class ProBadge extends StatelessWidget {
   const ProBadge({super.key});
@@ -58,7 +58,7 @@ class ProBadge extends StatelessWidget {
 
 /// 글자 뒤 [ProBadge] 한 줄: 글자가 길면 글자만 줄고 배지는 남음. [shouldShowProBadge] 가 false 면 글자만
 ///
-/// 인쇄 선택지 · 카드 그림 칩이 같은 간격으로 씀
+/// 설정 줄 · 빠른 메뉴 줄 · 일과 상세 반복 줄 · 카드 그림 칩이 같은 간격으로 씀
 class LabelWithProBadge extends StatelessWidget {
   const LabelWithProBadge({
     super.key,

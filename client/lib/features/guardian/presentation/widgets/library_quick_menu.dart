@@ -8,6 +8,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../../shared/models/routine.dart';
 import 'anchored_quick_menu.dart';
@@ -214,6 +215,7 @@ class QuickMenuGroup<T> extends StatelessWidget {
                 icon: row.icon,
                 label: row.label,
                 isDanger: row.isDanger,
+                shouldShowProBadge: row.shouldShowProBadge,
                 onTap: () => Navigator.of(context).pop(row.value),
               ),
           ],
@@ -229,6 +231,7 @@ class _MenuRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.isDanger,
+    required this.shouldShowProBadge,
     required this.onTap,
   });
 
@@ -236,6 +239,7 @@ class _MenuRow extends StatelessWidget {
   final String icon;
   final String label;
   final bool isDanger;
+  final bool shouldShowProBadge;
   final VoidCallback onTap;
 
   static const _iconSize = 20.0;
@@ -271,13 +275,16 @@ class _MenuRow extends StatelessWidget {
               ),
               SizedBox(width: _iconToLabel.w),
               Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typo.settingsTileLabel.copyWith(
-                    color: labelColor,
+                child: LabelWithProBadge(
+                  label: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.typo.settingsTileLabel.copyWith(
+                      color: labelColor,
+                    ),
                   ),
+                  shouldShowProBadge: shouldShowProBadge,
                 ),
               ),
             ],
