@@ -4760,10 +4760,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardCandidateNewLabel => '새 그림';
 
   @override
-  String get cardCandidateKeepButton => '지금 그림 그대로';
-
-  @override
-  String get cardCandidateApplyButton => '새 그림으로 바꾸기';
+  String get cardCandidateSelectButton => '이 그림으로 하기';
 
   @override
   String get cardCandidateAppliedToast => '새 그림으로 바꿨어요';

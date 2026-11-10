@@ -181,6 +181,9 @@ abstract final class AppAssets {
   static const creditTicketTilted = '$_images/credit_ticket_tilted.png';
   static const creditTicketStack = '$_images/credit_ticket_stack.png';
 
+  /// 크레딧 소진 팝업의 루미 (빈 주머니를 들고 앉음, 옆에 표 한 장, 투명 배경)
+  static const creditEmptyLumi = '$_images/credit_empty_lumi.png';
+
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
 

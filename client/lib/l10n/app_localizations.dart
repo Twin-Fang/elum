@@ -8366,17 +8366,11 @@ abstract class AppLocalizations {
   /// **'새 그림'**
   String get cardCandidateNewLabel;
 
-  /// 새 그림 고르기 시트: 원래 그림을 두는 버튼
+  /// 그림 고르기 시트의 버튼 하나. 고른 그림(지금 그림 또는 새 그림)으로 정함
   ///
   /// In ko, this message translates to:
-  /// **'지금 그림 그대로'**
-  String get cardCandidateKeepButton;
-
-  /// 새 그림 고르기 시트: 새 그림으로 바꾸는 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'새 그림으로 바꾸기'**
-  String get cardCandidateApplyButton;
+  /// **'이 그림으로 하기'**
+  String get cardCandidateSelectButton;
 
   /// 새 그림으로 바꾸기 성공 토스트
   ///

@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/app_analytics.dart';
+import '../../../core/assets/app_assets.dart';
+import '../../../core/logger/app_logger.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -60,7 +62,8 @@ Future<void> showCreditBlockedDialog(
 
   final choice = await showElumDialog<_CreditBlockedChoice>(
     context: context,
-    // 실패가 아닌 한도 안내 > 아이콘 없음 · 붉은 버튼 없음 (§2-⑥ 겁주지 않는다, #1171)
+    // 실패가 아닌 한도 안내 > 경고 아이콘·붉은 버튼 없음 (§2-⑥ 겁주지 않는다). 다 썼을 때만 루미 그림
+    illustrationAsset: generating ? null : AppAssets.creditEmptyLumi,
     title: generating
         ? l10n.creditBlockedBusy
         : blocked.periodUnit.blockedExhausted(l10n, blocked.resetLabel),
@@ -110,7 +113,8 @@ enum _CreditBlockedChoice { watchAd, getMoreCredits, learnPro }
 Future<bool> _canBuyCredits(WidgetRef ref) async {
   try {
     return (await ref.read(creditPackOffersProvider.future)).isNotEmpty;
-  } catch (_) {
+  } catch (e, st) {
+    AppLogger.error('credit', e, st, {'step': 'creditPackOffers'});
     return false;
   }
 }
