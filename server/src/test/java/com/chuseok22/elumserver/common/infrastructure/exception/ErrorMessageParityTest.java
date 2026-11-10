@@ -51,6 +51,7 @@ class ErrorMessageParityTest {
       + ADDED_ROUTINE_SCHEDULE_CODES.size()
       + ADDED_GUARDIAN_VOICE_CODES.size()
       + ADDED_ROUTINE_MEMORY_CODES.size()
+      + ADDED_CARD_SPLIT_CODES.size()
       + ADDED_PLAN_STORE_AND_REPORT_CODES.size()
       + ADDED_IMAGE_REGENERATE_CODES.size()
       + ADDED_CREDIT_PURCHASE_CODES.size()
@@ -141,6 +142,21 @@ class ErrorMessageParityTest {
     for (ErrorCode code : ADDED_ROUTINE_MEMORY_CODES) {
       assertThat(GOLDEN).doesNotContainKey(code.name());
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
+  private static final java.util.List<ErrorCode> ADDED_CARD_SPLIT_CODES = java.util.List.of(
+    ErrorCode.CARD_SPLIT_PRO_REQUIRED, ErrorCode.CARD_SPLIT_FAILED);
+
+  @Test
+  @DisplayName("카드 나누기 코드는 golden 밖에서 상태와 ko·en 문구를 단언한다 — 문구가 빠지면 앱이 코드 이름을 그대로 보인다")
+  void cardSplitCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.CARD_SPLIT_PRO_REQUIRED.getStatus().name()).isEqualTo("FORBIDDEN");
+    assertThat(ErrorCode.CARD_SPLIT_FAILED.getStatus().name()).isEqualTo("BAD_GATEWAY");
+    for (ErrorCode code : ADDED_CARD_SPLIT_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이", "서버");
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
     }
   }

@@ -38,6 +38,14 @@ public class SystemConfigEntitlementService implements EntitlementService {
   private final MemberProPromotion memberProPromotion;
   private final PurchasedCreditChecker purchasedCreditChecker;
 
+  // 권한 묶음 호환 필드: 출시된 앱이 읽는 이름이라 남기고 값은 지금 운영 기본값으로 고정 (설정·판정 코드는 없음)
+  /// 이룸이 명수 (-1 무제한)
+  static final int LEGACY_PROFILE_MAX_COUNT = Entitlement.UNLIMITED;
+  /// 기록 보관 일수 (-1 무제한)
+  static final int LEGACY_HISTORY_RETENTION_DAYS = Entitlement.UNLIMITED;
+  /// 고품질 그림 (꺼짐)
+  static final boolean LEGACY_IMAGE_HIGH_QUALITY = false;
+
   @Override
   @Transactional(readOnly = true)
   public PlanType planOf(String memberId) {
@@ -146,8 +154,8 @@ public class SystemConfigEntitlementService implements EntitlementService {
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_DAY),
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_WEEK),
       limitOf(plan, Entitlement.ROUTINE_MAX_COUNT),
-      limitOf(plan, Entitlement.PROFILE_MAX_COUNT),
-      limitOf(plan, Entitlement.HISTORY_RETENTION_DAYS),
+      LEGACY_PROFILE_MAX_COUNT,
+      LEGACY_HISTORY_RETENTION_DAYS,
       isAllowed(plan, Entitlement.CARD_EXPORT_WITHOUT_WATERMARK),
       isAllowed(plan, Entitlement.CARD_EXPORT_ALL_THEMES),
       isAllowed(plan, Entitlement.CARD_EXPORT_ALL_LAYOUTS),
@@ -155,9 +163,10 @@ public class SystemConfigEntitlementService implements EntitlementService {
       isAllowed(plan, Entitlement.ROUTINE_SCHEDULE),
       isAllowed(plan, Entitlement.GUARDIAN_VOICE),
       isAllowed(plan, Entitlement.ROUTINE_MEMORY),
+      isAllowed(plan, Entitlement.CARD_SPLIT),
       isAllowed(plan, Entitlement.IMAGE_REGENERATE_FREE),
       isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE),
-      isAllowed(plan, Entitlement.IMAGE_HIGH_QUALITY)
+      LEGACY_IMAGE_HIGH_QUALITY
     );
   }
 

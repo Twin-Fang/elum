@@ -39,14 +39,6 @@ public enum Entitlement {
     Kind.LIMIT, "보유 일과 개수",
     ConfigKey.FREE_ROUTINE_MAX_COUNT, ConfigKey.PRO_ROUTINE_MAX_COUNT
   ),
-  PROFILE_MAX_COUNT(
-    Kind.LIMIT, "이룸이 명수",
-    ConfigKey.FREE_PROFILE_MAX_COUNT, ConfigKey.PRO_PROFILE_MAX_COUNT
-  ),
-  HISTORY_RETENTION_DAYS(
-    Kind.LIMIT, "기록 보관 일수",
-    ConfigKey.FREE_HISTORY_RETENTION_DAYS, ConfigKey.PRO_HISTORY_RETENTION_DAYS
-  ),
   // 카드 내보내기(이미지·인쇄)는 앱이 만든다 — 서버는 판정 값만 내려준다 (#1073)
   CARD_EXPORT_WITHOUT_WATERMARK(
     Kind.FLAG, "카드 내보내기 워터마크 없음",
@@ -81,6 +73,11 @@ public enum Entitlement {
     Kind.FLAG, "AI 메모리 (내가 고친 방식으로 만들기)",
     ConfigKey.FREE_ROUTINE_MEMORY, ConfigKey.PRO_ROUTINE_MEMORY
   ),
+  // 카드 한 장을 AI 가 2~3장으로 나눈 안 (이 카드 더 쉽게). 크레딧 없음, 꺼진 플랜은 CARD_SPLIT_PRO_REQUIRED 로 막는다
+  CARD_SPLIT(
+    Kind.FLAG, "이 카드 더 쉽게 (카드 나누기)",
+    ConfigKey.FREE_CARD_SPLIT, ConfigKey.PRO_CARD_SPLIT
+  ),
   // 그림 다시 그리기 0크레딧 (하루 한도는 IMAGE_REGENERATE_FREE_DAILY_CAP) (#1075)
   IMAGE_REGENERATE_FREE(
     Kind.FLAG, "그림 다시 그리기 무료",
@@ -90,11 +87,6 @@ public enum Entitlement {
   ROUTINE_CREATE_FREE(
     Kind.FLAG, "일과 생성 무료 (글 크레딧 없음)",
     ConfigKey.FREE_ROUTINE_CREATE_FREE, ConfigKey.PRO_ROUTINE_CREATE_FREE
-  ),
-  // OpenAI 그림 품질을 OPENAI_IMAGE_QUALITY_PRO 로 올림. Free·Pro 모두 기본 꺼짐 (#1075)
-  IMAGE_HIGH_QUALITY(
-    Kind.FLAG, "고품질 그림",
-    ConfigKey.FREE_IMAGE_HIGH_QUALITY, ConfigKey.PRO_IMAGE_HIGH_QUALITY
   ),
   ;
 
@@ -110,7 +102,7 @@ public enum Entitlement {
     return plan == PlanType.PRO ? proKey : freeKey;
   }
 
-  /// Pro 검문 거절 코드 표 (기능 5개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
+  /// Pro 검문 거절 코드 표 (기능 6개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
   public ErrorCode rejectionCode() {
     return switch (this) {
       case AI_IMAGE_GENERATION -> ErrorCode.AI_IMAGE_NOT_ALLOWED;
@@ -118,6 +110,7 @@ public enum Entitlement {
       case ROUTINE_SCHEDULE -> ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED;
       case GUARDIAN_VOICE -> ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED;
       case ROUTINE_MEMORY -> ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED;
+      case CARD_SPLIT -> ErrorCode.CARD_SPLIT_PRO_REQUIRED;
       default -> throw new IllegalStateException("no pro gate rejection code: " + this);
     };
   }

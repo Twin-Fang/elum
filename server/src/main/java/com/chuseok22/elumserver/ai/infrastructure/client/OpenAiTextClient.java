@@ -139,6 +139,14 @@ public class OpenAiTextClient implements TextGenerationClient {
   }
 
   @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return call(
+      CardSplitSpec.systemPromptFor(AiCallContext.currentContentLocale()), splitUserContent,
+      CardSplitSpec.RESPONSE_SCHEMA, "card_split", AiCallType.OPENAI_TEXT_CARD_SPLIT
+    );
+  }
+
+  @Override
   public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
     String userContent = geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
     return call(

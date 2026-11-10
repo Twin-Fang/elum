@@ -55,4 +55,8 @@ public interface TextGenerationClient {
   /// 주간 리포트 정리 글. 입력은 집계 JSON(제목·횟수만, 이름은 {userName}), 반환값은 {"lines": [...]} JSON 문자열.
   /// 지시문·스키마는 WeeklyReportSummarySpec 한 곳(언어는 AiCallContext 일과 언어). 거르기·저장은 부르는 쪽 몫
   String buildWeeklyReportSummaryJson(String summaryUserContent);
+
+  /// 카드 나누기(이 카드 더 쉽게). 입력은 카드 한 장의 제목·설명 JSON(이름은 자리표시), 반환값은 {"status", "cards": [...]} JSON 문자열.
+  /// 지시문·스키마는 CardSplitSpec 한 곳(언어는 AiCallContext 일과 언어). 검증·저장은 부르는 쪽 몫
+  String buildCardSplitJson(String splitUserContent);
 }

@@ -36,6 +36,9 @@ public enum AiCallType {
   GEMINI_TEXT_WEEKLY_REPORT("Gemini 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.GEMINI),
   OPENAI_TEXT_WEEKLY_REPORT("OpenAI 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.OPENAI),
   CLAUDE_TEXT_WEEKLY_REPORT("Claude 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.CLAUDE),
+  GEMINI_TEXT_CARD_SPLIT("Gemini 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.GEMINI),
+  OPENAI_TEXT_CARD_SPLIT("OpenAI 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.OPENAI),
+  CLAUDE_TEXT_CARD_SPLIT("Claude 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.CLAUDE),
   ;
 
   private final String label;

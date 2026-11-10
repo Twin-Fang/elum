@@ -150,6 +150,9 @@ public enum ErrorCode {
   // AI 메모 (#1082): Free 가 쓰기 API 를 부름 403, 진단·장애·정도·연락처가 든 줄 400
   ROUTINE_MEMORY_PRO_REQUIRED(HttpStatus.FORBIDDEN),
   ROUTINE_MEMORY_LINE_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  // 이 카드 더 쉽게: Free 가 부름 403, AI 실패·시간 초과·검증 어긋남 502
+  CARD_SPLIT_PRO_REQUIRED(HttpStatus.FORBIDDEN),
+  CARD_SPLIT_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.

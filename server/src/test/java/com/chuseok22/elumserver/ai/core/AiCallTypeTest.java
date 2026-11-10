@@ -45,6 +45,10 @@ class AiCallTypeTest {
     Map.entry(AiCallType.GEMINI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
     Map.entry(AiCallType.OPENAI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
     Map.entry(AiCallType.CLAUDE_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    // 카드 나누기 (이 카드 더 쉽게). 일과 생성으로 세면 나누기 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
+    Map.entry(AiCallType.OPENAI_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
+    Map.entry(AiCallType.CLAUDE_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
     Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 

@@ -23,6 +23,7 @@ public record EntitlementSnapshot(
   boolean routineSchedule,
   boolean guardianVoice,
   boolean routineMemory,
+  boolean cardSplit,
   boolean imageRegenerateFree,
   boolean routineCreateFree,
   boolean imageHighQuality

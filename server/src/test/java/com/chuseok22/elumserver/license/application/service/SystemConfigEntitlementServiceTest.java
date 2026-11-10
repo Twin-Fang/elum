@@ -195,14 +195,15 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("Pro 검문 거절 코드 표: 기능 5개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
+  @DisplayName("Pro 검문 거절 코드 표: 기능 6개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
   void rejectionCodeTable_mapsEachGatedEntitlement() {
     Map<Entitlement, ErrorCode> expectedRejectionCodes = Map.of(
       Entitlement.AI_IMAGE_GENERATION, ErrorCode.AI_IMAGE_NOT_ALLOWED,
       Entitlement.WEEKLY_REPORT, ErrorCode.WEEKLY_REPORT_NOT_ALLOWED,
       Entitlement.ROUTINE_SCHEDULE, ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED,
       Entitlement.GUARDIAN_VOICE, ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED,
-      Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED);
+      Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED,
+      Entitlement.CARD_SPLIT, ErrorCode.CARD_SPLIT_PRO_REQUIRED);
 
     expectedRejectionCodes.forEach((entitlement, code) -> {
       assertThat(entitlement.rejectionCode()).as(entitlement.name()).isEqualTo(code);
@@ -384,6 +385,40 @@ class SystemConfigEntitlementServiceTest {
   void routineMemory_isOffByDefaultForBothPlans() {
     assertThat(ConfigKey.FREE_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.PRO_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("카드 나누기 권한은 Free·Pro 모두 기본 꺼짐 — 배포만으로 AI 호출이 열리면 안 된다")
+  void cardSplit_isOffByDefaultForBothPlans() {
+    assertThat(ConfigKey.FREE_CARD_SPLIT.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_CARD_SPLIT.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("스냅샷 cardSplit 은 플랜 키를 읽는다 — Pro 켬이면 Pro 회원만 true")
+  void snapshot_cardSplitReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_SPLIT)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).cardSplit()).isTrue();
+    assertThat(entitlementService.planSnapshot(PlanType.FREE).cardSplit()).isFalse();
+  }
+
+  @Test
+  @DisplayName("지운 설정의 권한 필드는 이름을 남기고 값이 고정이다 — 설정 값을 켜 둬도 바뀌지 않는다 (출시된 앱 계약)")
+  void snapshot_removedLimitFieldsAreFixed() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(true);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(7);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.profileMaxCount()).isEqualTo(-1);
+    assertThat(snapshot.historyRetentionDays()).isEqualTo(-1);
+    assertThat(snapshot.imageHighQuality()).isFalse();
   }
 
   @Test

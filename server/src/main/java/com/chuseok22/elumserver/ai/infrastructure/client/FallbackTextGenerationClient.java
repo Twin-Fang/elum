@@ -23,6 +23,7 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   private static final String ROUTINE_STEPS_FIELD = "steps";
   private static final String QUESTIONS_FIELD = "questions";
   private static final String MEMORY_LINES_FIELD = "lines";
+  private static final String CARD_SPLIT_CARDS_FIELD = "cards";
   private static final String MEMORY_MATCHED_FIELD = "matched";
   private static final String MEMORY_FOUND_FIELD = "found";
 
@@ -76,6 +77,12 @@ final class FallbackTextGenerationClient implements TextGenerationClient {
   public String buildWeeklyReportSummaryJson(String summaryUserContent) {
     return tryInOrder("weekly report", node -> node.path(MEMORY_LINES_FIELD).isArray(),
       client -> client.buildWeeklyReportSummaryJson(summaryUserContent));
+  }
+
+  @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return tryInOrder("card split", node -> node.path(CARD_SPLIT_CARDS_FIELD).isArray(),
+      client -> client.buildCardSplitJson(splitUserContent));
   }
 
   @Override

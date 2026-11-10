@@ -86,12 +86,6 @@ public enum ConfigKey {
     "낮출수록 싸다",
     ConfigValueType.SELECT, List.of("low", "medium", "high"), "low"
   ),
-  // 고품질 그림 권한(IMAGE_HIGH_QUALITY)이 켜진 회원만 쓴다. 출력 토큰 low 272 > medium 1056 (약 4배)
-  OPENAI_IMAGE_QUALITY_PRO(
-    ConfigGroup.IMAGE_PROVIDER, "OpenAI 이미지 품질 (고품질 권한)",
-    "요금제 '고품질 그림' 권한이 켜진 회원의 그림 품질. 권한이 꺼져 있으면 위 'OpenAI 이미지 품질'을 쓴다",
-    ConfigValueType.SELECT, List.of("low", "medium", "high"), "medium"
-  ),
   FLUX_API_KEY(
     ConfigGroup.IMAGE_PROVIDER, "FLUX(fal.ai) API 키",
     "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
@@ -267,16 +261,6 @@ public enum ConfigKey {
     "Free가 동시에 가질 수 있는 일과 수. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
-  FREE_PROFILE_MAX_COUNT(
-    ConfigGroup.PLAN_FREE, "이룸이 명수",
-    "Free 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
-  FREE_HISTORY_RETENTION_DAYS(
-    ConfigGroup.PLAN_FREE, "기록 보관 일수",
-    "Free가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
   FREE_CARD_EXPORT_WITHOUT_WATERMARK(
     ConfigGroup.PLAN_FREE, "카드 내보내기 워터마크 없음",
     "Free가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지. 꺼두면 워터마크가 들어간다",
@@ -319,6 +303,11 @@ public enum ConfigKey {
     "Free가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 켜면 메모 갱신 AI 호출 비용이 든다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  FREE_CARD_SPLIT(
+    ConfigGroup.PLAN_FREE, "이 카드 더 쉽게 (카드 나누기)",
+    "Free가 카드 한 장을 AI 가 2~3장으로 나눈 안을 받아 적용할 수 있는지. 켜면 글 AI 호출 비용이 든다 (크레딧 없음)",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   // 다시 그리기 무료: 켜면 IMAGE_REGENERATE 단가 0 (하루 무료 횟수 IMAGE_REGENERATE_FREE_DAILY_CAP 까지) (#1075)
   FREE_IMAGE_REGENERATE_FREE(
     ConfigGroup.PLAN_FREE, "그림 다시 그리기 무료",
@@ -330,12 +319,6 @@ public enum ConfigKey {
     ConfigGroup.PLAN_FREE, "일과 생성 무료 (글 크레딧 없음)",
     "Free가 AI 일과 만들기의 글 몫을 크레딧 없이 할 수 있는지. 카드 그림은 그린 장수만큼 크레딧을 그대로 쓴다. "
       + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(FREE_ROUTINE_CREATE_PER_DAY)로 막는다",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
-  // 고품질 그림: 켜면 OpenAI 품질을 OPENAI_IMAGE_QUALITY_PRO 로 그린다 (그림 원가가 올라 기본 꺼짐)
-  FREE_IMAGE_HIGH_QUALITY(
-    ConfigGroup.PLAN_FREE, "고품질 그림",
-    "Free 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라간다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
@@ -412,16 +395,6 @@ public enum ConfigKey {
     "Pro가 동시에 가질 수 있는 일과 수. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
-  PRO_PROFILE_MAX_COUNT(
-    ConfigGroup.PLAN_PRO, "이룸이 명수",
-    "Pro 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
-  PRO_HISTORY_RETENTION_DAYS(
-    ConfigGroup.PLAN_PRO, "기록 보관 일수",
-    "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
   PRO_CARD_EXPORT_WITHOUT_WATERMARK(
     ConfigGroup.PLAN_PRO, "카드 내보내기 워터마크 없음",
     "Pro가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지",
@@ -458,6 +431,12 @@ public enum ConfigKey {
     // 기본 꺼짐: 개인정보처리방침 개정 시행 전이라 관리자가 켜기 전까지 규칙을 만들지 않음
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  PRO_CARD_SPLIT(
+    ConfigGroup.PLAN_PRO, "이 카드 더 쉽게 (카드 나누기)",
+    "Pro가 카드 한 장을 AI 가 2~3장으로 나눈 안을 받아 적용할 수 있는지. 끄면 안 받기·적용 모두 막는다",
+    // 기본 꺼짐: 출시 날 관리자가 켠다
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   PRO_IMAGE_REGENERATE_FREE(
     ConfigGroup.PLAN_PRO, "그림 다시 그리기 무료",
     "Pro가 카드 그림 다시 그리기를 크레딧 없이 할 수 있는지. 하루 무료 횟수를 넘으면 원래 단가를 쓴다",
@@ -468,12 +447,6 @@ public enum ConfigKey {
     "Pro가 AI 일과 만들기의 글 몫을 크레딧 없이 할 수 있는지. 카드 그림은 그린 장수만큼 크레딧을 그대로 쓴다. "
       + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(PRO_ROUTINE_CREATE_PER_DAY)로 막는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
-  ),
-  // 그림이 비싸 Pro 도 기본 꺼짐 — 원가 실측 뒤 관리자 화면에서 켠다
-  PRO_IMAGE_HIGH_QUALITY(
-    ConfigGroup.PLAN_PRO, "고품질 그림",
-    "Pro 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라가 기본은 꺼 둔다",
-    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
   // 서비스 전체 하루 AI 비용 상한.

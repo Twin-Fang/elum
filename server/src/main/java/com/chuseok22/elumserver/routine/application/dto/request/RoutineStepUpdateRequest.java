@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.dto.request;
 
+import com.chuseok22.elumserver.routine.core.RoutineStepTextLimits;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -13,11 +14,11 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "일과 카드 수정 요청 — 보낸 필드만 바뀐다")
 public record RoutineStepUpdateRequest(
 
-  @Size(max = 100, message = "카드 제목은 100자를 넘을 수 없어요.")
+  @Size(max = RoutineStepTextLimits.TITLE_MAX_LENGTH, message = "카드 제목은 100자를 넘을 수 없어요.")
   @Schema(description = "바꿀 카드 제목. 안 보내면 그대로 둔다", example = "옷을 입어요")
   String title,
 
-  @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없어요.")
+  @Size(max = RoutineStepTextLimits.DESCRIPTION_MAX_LENGTH, message = "카드 설명은 300자를 넘을 수 없어요.")
   @Schema(description = "바꿀 카드 설명. 안 보내면 그대로 둔다", example = "현관 우산꽂이에서 파란색 우산을 챙겨요.")
   String description,
 

@@ -34,6 +34,8 @@ public enum AiCallPurpose {
   ROUTINE_MEMORY("AI 메모리 수정 찾기"),
   /// 주간 리포트 정리 글. 일과 생성 한도에는 세지 않고 하루 AI 비용 합계에만 센다. 크레딧 없음
   WEEKLY_REPORT_SUMMARY("주간 리포트 정리"),
+  /// 이 카드 더 쉽게 (Pro): 카드 한 장을 2~3장으로 나눈 안. 일과 생성 한도에는 세지 않고 하루 AI 비용 합계에만 센다. 크레딧 없음
+  CARD_SPLIT("카드 나누기"),
   ;
 
   /// 관리자 그래프 범례 이름
