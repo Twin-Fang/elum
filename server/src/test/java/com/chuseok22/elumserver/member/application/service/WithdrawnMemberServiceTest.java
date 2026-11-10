@@ -91,6 +91,8 @@ class WithdrawnMemberServiceTest {
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  @Mock
+  private com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseCleanupService creditPurchaseCleanupService;
   @InjectMocks
   private WithdrawnMemberService withdrawnMemberService;
 
@@ -256,6 +258,7 @@ class WithdrawnMemberServiceTest {
     verify(aiCallLogRepository, never()).deleteAll();
     // 크레딧 계정도 행은 남기고 회원만 뗀다 — 재가입하면 신원으로 다시 붙어 주간 사용량이 이어진다 (#407).
     verify(aiCreditAccountRepository).detachMember("m1");
+    verify(creditPurchaseCleanupService).detachMemberOf("m1");
     verify(aiCreditAccountRepository, never()).deleteAll();
     // 탈퇴 때 지웠어야 할 것도 한 번 더 지운다 — 남아 있으면 계정 행이 외래키에 걸린다.
     // 이룸이는 나가기 규칙으로 — 함께 돌보는 이룸이는 남은 보호자에게 남긴다 (다중 보호자 4-3).

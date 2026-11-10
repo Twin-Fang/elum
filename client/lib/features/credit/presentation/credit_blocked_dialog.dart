@@ -5,11 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../core/analytics/app_analytics.dart';
+import '../../../core/assets/app_assets.dart';
+import '../../../core/logger/app_logger.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../member/application/plan_access.dart';
+import '../../subscription/application/credit_pack_catalog.dart';
 import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
@@ -42,6 +48,13 @@ Future<void> showCreditBlockedDialog(
   if (!context.mounted) return;
   // 다 써서 막혔을 때만 Pro 를 권함 (진행 중이라 막힌 것은 Pro 로도 안 풀림). 살 수 없으면 버튼 없음
   final canSuggestPro = !generating && ref.read(planAccessProvider).canPurchasePro;
+  // 크레딧 꾸러미를 팔 때만 `크레딧 더 받기` (진행 중이라 막힌 것은 사도 안 풀림). 값 조회가 실패하면 버튼 없음
+  final canBuyCredits = !generating && await _canBuyCredits(ref);
+  if (!context.mounted) return;
+  final getMoreAction = ElumDialogAction<_CreditBlockedChoice>(
+    label: l10n.creditGetMore,
+    value: _CreditBlockedChoice.getMoreCredits,
+  );
   final proAction = ElumDialogAction<_CreditBlockedChoice>(
     label: l10n.planLearnPro,
     value: _CreditBlockedChoice.learnPro,
@@ -49,10 +62,11 @@ Future<void> showCreditBlockedDialog(
 
   final choice = await showElumDialog<_CreditBlockedChoice>(
     context: context,
-    // 실패가 아닌 한도 안내 > 아이콘 없음 · 붉은 버튼 없음 (§2-⑥ 겁주지 않는다, #1171)
+    // 실패가 아닌 한도 안내 > 경고 아이콘·붉은 버튼 없음 (§2-⑥ 겁주지 않는다). 다 썼을 때만 루미 그림
+    illustrationAsset: generating ? null : AppAssets.creditEmptyLumi,
     title: generating
         ? l10n.creditBlockedBusy
-        : l10n.creditBlockedExhausted(blocked.resetLabel),
+        : blocked.periodUnit.blockedExhausted(l10n, blocked.resetLabel),
     // 날짜가 끼어 길이가 바뀌는 문장 — 마지막 글자만 다음 줄로 떨어지지 않게 낱말 단위 (#1169)
     keepWordsInTitle: true,
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
@@ -60,8 +74,9 @@ Future<void> showCreditBlockedDialog(
         ? [
             ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonConfirm,
-              tone: canSuggestPro ? ElumDialogTone.neutral : ElumDialogTone.primary,
+              tone: canSuggestPro || canBuyCredits ? ElumDialogTone.neutral : ElumDialogTone.primary,
             ),
+            if (canBuyCredits) getMoreAction,
             if (canSuggestPro) proAction,
           ]
         : [
@@ -74,6 +89,7 @@ Future<void> showCreditBlockedDialog(
               value: _CreditBlockedChoice.watchAd,
               centerLines: true,
             ),
+            if (canBuyCredits) getMoreAction,
             if (canSuggestPro) proAction,
           ],
   );
@@ -81,6 +97,8 @@ Future<void> showCreditBlockedDialog(
   switch (choice) {
     case _CreditBlockedChoice.watchAd:
       await _watchAd(context, ref, flow);
+    case _CreditBlockedChoice.getMoreCredits:
+      await context.push<void>(Routes.guardianMyCredit);
     case _CreditBlockedChoice.learnPro:
       await openPlanPaywall(context, ref);
     case null:
@@ -89,7 +107,17 @@ Future<void> showCreditBlockedDialog(
 }
 
 /// 크레딧 부족 팝업에서 고른 것 (닫기·확인은 null)
-enum _CreditBlockedChoice { watchAd, learnPro }
+enum _CreditBlockedChoice { watchAd, getMoreCredits, learnPro }
+
+/// 꾸러미를 지금 살 수 있는가 (스토어 값까지 불러온 뒤 판단, 실패하면 false)
+Future<bool> _canBuyCredits(WidgetRef ref) async {
+  try {
+    return (await ref.read(creditPackOffersProvider.future)).isNotEmpty;
+  } catch (e, st) {
+    AppLogger.error('credit', e, st, {'step': 'creditPackOffers'});
+    return false;
+  }
+}
 
 /// 광고를 보여 주고 서버가 지급했는지 확인한다. 끝나면 결과를 알리고 **홈에 남는다** —
 /// 일과 만들기로 자동으로 넘기지 않는다(받은 크레딧을 보고 보호자가 정한다).

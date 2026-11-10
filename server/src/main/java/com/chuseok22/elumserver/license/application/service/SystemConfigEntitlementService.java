@@ -7,8 +7,6 @@ import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
-import com.chuseok22.elumserver.member.application.service.MemberSignupTimeService;
-import com.chuseok22.elumserver.systemconfig.application.service.ConfigDateTime;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -37,8 +35,16 @@ public class SystemConfigEntitlementService implements EntitlementService {
 
   private final SubscriptionRepository subscriptionRepository;
   private final SystemConfigService systemConfigService;
-  private final MemberSignupTimeService memberSignupTimeService;
-  private final ExistingMemberProGift existingMemberProGift;
+  private final MemberProPromotion memberProPromotion;
+  private final PurchasedCreditChecker purchasedCreditChecker;
+
+  // 권한 묶음 호환 필드: 출시된 앱이 읽는 이름이라 남기고 값은 지금 운영 기본값으로 고정 (설정·판정 코드는 없음)
+  /// 이룸이 명수 (-1 무제한)
+  static final int LEGACY_PROFILE_MAX_COUNT = Entitlement.UNLIMITED;
+  /// 기록 보관 일수 (-1 무제한)
+  static final int LEGACY_HISTORY_RETENTION_DAYS = Entitlement.UNLIMITED;
+  /// 고품질 그림 (꺼짐)
+  static final boolean LEGACY_IMAGE_HIGH_QUALITY = false;
 
   @Override
   @Transactional(readOnly = true)
@@ -52,42 +58,13 @@ public class SystemConfigEntitlementService implements EntitlementService {
       if (subscription.isPresent() && subscription.get().effectivePlan(LocalDateTime.now()) == PlanType.PRO) {
         return PlanType.PRO;
       }
-      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물
-      if (subscription.map(Subscription::isUntouchedSignupFree).orElse(true)
-        && existingMemberProGift.giftEndsAt(memberId).isPresent()) {
-        return PlanType.PRO;
-      }
-      // 행이 없으면 Free (신규가입 PRO 이벤트 대상이면 Pro). 기존 회원을 옮기는 작업이 필요 없는 이유다.
-      return subscription.isPresent() ? PlanType.FREE : planOfMemberWithoutSubscription(memberId);
+      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물·신규가입 체험 (회수·스토어 행은 대상 아님)
+      boolean isPromotionCandidate = subscription.map(Subscription::isUntouchedSignupFree).orElse(true);
+      return isPromotionCandidate && memberProPromotion.findPromotion(memberId).isPresent()
+        ? PlanType.PRO
+        : PlanType.FREE;
     } catch (Exception e) {
       log.warn("구독 조회 실패 — Free로 계속 진행한다: memberId={}", memberId, e);
-      return PlanType.FREE;
-    }
-  }
-
-  // 구독 행 없는 회원: 신규가입 PRO 이벤트 대상이면 Pro, 아니면 Free (조회 시점 계산, DB 쓰기 없음)
-  private PlanType planOfMemberWithoutSubscription(String memberId) {
-    if (!systemConfigService.getBoolean(ConfigKey.SIGNUP_PRO_EVENT_ENABLED)) {
-      return PlanType.FREE;
-    }
-    try {
-      String startAtText = systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_START_AT);
-      String endAtText = systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_END_AT);
-      // 가입 기간이 비어 있으면 이벤트 꺼짐
-      if (startAtText.isBlank() || endAtText.isBlank()) {
-        return PlanType.FREE;
-      }
-      LocalDateTime signupWindowStart = ConfigDateTime.parse(startAtText);
-      LocalDateTime signupWindowEnd = ConfigDateTime.parse(endAtText);
-      int grantDays = systemConfigService.getInt(ConfigKey.SIGNUP_PRO_EVENT_GRANT_DAYS);
-      return memberSignupTimeService.findSignupAt(memberId)
-        .filter(signupAt -> !signupAt.isBefore(signupWindowStart) && !signupAt.isAfter(signupWindowEnd))
-        // 가입 시점 + 유지 일수 이전까지만
-        .filter(signupAt -> LocalDateTime.now().isBefore(signupAt.plusDays(grantDays)))
-        .map(signupAt -> PlanType.PRO)
-        .orElse(PlanType.FREE);
-    } catch (Exception e) {
-      log.warn("[signup pro event] evaluation failed, treating as FREE: memberId={}", memberId, e);
       return PlanType.FREE;
     }
   }
@@ -98,7 +75,15 @@ public class SystemConfigEntitlementService implements EntitlementService {
     if (flag == Entitlement.ADS_REMOVED && isAdsAlwaysShownMember(memberId)) {
       return false;
     }
+    if (flag == Entitlement.AI_IMAGE_GENERATION) {
+      return isAiImageAllowed(planOf(memberId), memberId);
+    }
     return isAllowed(planOf(memberId), flag);
+  }
+
+  // AI 그림: 요금제 권한이 있거나 구매 크레딧이 남아 있으면 (요금제가 꺼져 있을 때만 구매분을 조회)
+  private boolean isAiImageAllowed(PlanType plan, String memberId) {
+    return isAllowed(plan, Entitlement.AI_IMAGE_GENERATION) || purchasedCreditChecker.hasUsablePurchasedCredit(memberId);
   }
 
   @Override
@@ -150,38 +135,38 @@ public class SystemConfigEntitlementService implements EntitlementService {
   @Override
   public EntitlementSnapshot snapshot(String memberId) {
     PlanType plan = planOf(memberId);
-    return buildSnapshot(plan, !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED));
+    return buildSnapshot(plan, !isAdsAlwaysShownMember(memberId) && isAllowed(plan, Entitlement.ADS_REMOVED),
+      isAiImageAllowed(plan, memberId));
   }
 
   /// 요금제 설정값 그대로 (광고 항상 노출 같은 회원별 예외 없음)
   @Override
   public EntitlementSnapshot planSnapshot(PlanType plan) {
-    return buildSnapshot(plan, isAllowed(plan, Entitlement.ADS_REMOVED));
+    return buildSnapshot(plan, isAllowed(plan, Entitlement.ADS_REMOVED), isAllowed(plan, Entitlement.AI_IMAGE_GENERATION));
   }
 
-  // 플랜 기준 권한 한 벌 (광고 제거만 부르는 쪽이 정함)
-  private EntitlementSnapshot buildSnapshot(PlanType plan, boolean isAdsRemoved) {
+  // 플랜 기준 권한 한 벌 (광고 제거·AI 그림은 회원별 값이라 부르는 쪽이 정함)
+  private EntitlementSnapshot buildSnapshot(PlanType plan, boolean isAdsRemoved, boolean isAiImageGenerationAllowed) {
     return new EntitlementSnapshot(
       plan,
-      isAllowed(plan, Entitlement.AI_IMAGE_GENERATION),
+      isAiImageGenerationAllowed,
       isAdsRemoved,
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_DAY),
       limitOf(plan, Entitlement.ROUTINE_CREATE_PER_WEEK),
       limitOf(plan, Entitlement.ROUTINE_MAX_COUNT),
-      limitOf(plan, Entitlement.PROFILE_MAX_COUNT),
-      limitOf(plan, Entitlement.HISTORY_RETENTION_DAYS),
+      LEGACY_PROFILE_MAX_COUNT,
+      LEGACY_HISTORY_RETENTION_DAYS,
       isAllowed(plan, Entitlement.CARD_EXPORT_WITHOUT_WATERMARK),
       isAllowed(plan, Entitlement.CARD_EXPORT_ALL_THEMES),
       isAllowed(plan, Entitlement.CARD_EXPORT_ALL_LAYOUTS),
       isAllowed(plan, Entitlement.WEEKLY_REPORT),
-      isAllowed(plan, Entitlement.ROUTINE_TRANSLATE),
       isAllowed(plan, Entitlement.ROUTINE_SCHEDULE),
       isAllowed(plan, Entitlement.GUARDIAN_VOICE),
-      isAllowed(plan, Entitlement.ROUTINE_TEMPLATES),
       isAllowed(plan, Entitlement.ROUTINE_MEMORY),
+      isAllowed(plan, Entitlement.CARD_SPLIT),
       isAllowed(plan, Entitlement.IMAGE_REGENERATE_FREE),
       isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE),
-      isAllowed(plan, Entitlement.IMAGE_HIGH_QUALITY)
+      LEGACY_IMAGE_HIGH_QUALITY
     );
   }
 

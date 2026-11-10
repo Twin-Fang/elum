@@ -8,11 +8,14 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../credit/application/credit_costs.dart';
+import '../../credit/domain/credit_period_unit.dart';
+import '../../guardian/application/guardian_child_identity.dart';
 import '../../member/application/plan_access.dart';
 import '../application/plan_benefits.dart';
 import '../domain/plan_benefit.dart';
 
-/// 혜택 4묶음 (#1189 시안 A): 묶음마다 아이콘 타일 + 제목 + 한 줄(혜택을 ` · ` 로 이음) > 아래 "끝나도 그대로" 한 줄
+/// 혜택 4묶음 (#1189 시안 A): 묶음마다 아이콘 타일 + 제목 + 혜택 문장(한 줄에 하나) > 아래 "끝나도 그대로" 한 줄
 ///
 /// 서버 Pro 권한이 실제로 주는 것만 (#1165). 빈 묶음은 빠지고, 다 비면(운영이 Pro 권한을 다 끔) 통째로 그리지 않음
 class PlanBenefitCards extends ConsumerWidget {
@@ -34,12 +37,15 @@ class PlanBenefitCards extends ConsumerWidget {
       highlight: highlight,
     );
     if (sections.isEmpty) return const SizedBox.shrink();
+    // 첫 묶음 제목에 넣는 이룸이 호칭 (이름이 비면 일반 호칭)
+    final savedName = ref.watch(guardianChildIdentityProvider.select((identity) => identity.name));
+    final elumiName = savedName.isEmpty ? context.l10n.commonElumiName : savedName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final (index, section) in sections.indexed) ...[
           if (index > 0) SizedBox(height: _cardGap.h),
-          _BenefitGroupCard(section: section),
+          _BenefitGroupCard(section: section, elumiName: elumiName),
         ],
         SizedBox(height: _cardsToNotice.h),
         Text(
@@ -54,10 +60,11 @@ class PlanBenefitCards extends ConsumerWidget {
 }
 
 /// 묶음 카드 하나 (흰 판 · 모서리 20)
-class _BenefitGroupCard extends StatelessWidget {
-  const _BenefitGroupCard({required this.section});
+class _BenefitGroupCard extends ConsumerWidget {
+  const _BenefitGroupCard({required this.section, required this.elumiName});
 
   final PlanBenefitSection section;
+  final String elumiName;
 
   /// 안쪽 위아래 14 · 좌우 16 · 타일 > 글 12 · 제목 > 한 줄 4 · 타일 42 · 아이콘 24 · 타일 모서리 12
   static const _padV = 14.0;
@@ -69,13 +76,15 @@ class _BenefitGroupCard extends StatelessWidget {
   static const _tileRadius = 12.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final periodUnit = ref.watch(creditPeriodUnitProvider);
     final group = section.group;
+    final title = _title(l10n, group, elumiName);
     final detail = section.benefits
-        .map((benefit) => planBenefitLabel(l10n, benefit))
-        .join(l10n.planBenefitSeparator);
+        .map((benefit) => planBenefitLabel(l10n, benefit, periodUnit))
+        .join('\n');
     return Container(
       padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
       decoration: BoxDecoration(
@@ -102,8 +111,8 @@ class _BenefitGroupCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    keepWords(_title(l10n, group), locale: context.appLocale),
-                    semanticsLabel: _title(l10n, group),
+                    keepWords(title, locale: context.appLocale),
+                    semanticsLabel: title,
                     style: context.typo.proPlanBenefitTitle.copyWith(color: colors.textPrimary),
                   ),
                   SizedBox(height: _titleToDetail.h),
@@ -122,8 +131,8 @@ class _BenefitGroupCard extends StatelessWidget {
     );
   }
 
-  static String _title(AppLocalizations l10n, PlanBenefitGroup group) => switch (group) {
-    PlanBenefitGroup.prettierCards => l10n.planBenefitGroupCards,
+  static String _title(AppLocalizations l10n, PlanBenefitGroup group, String elumiName) => switch (group) {
+    PlanBenefitGroup.prettierCards => l10n.planBenefitGroupCards(elumiName),
     PlanBenefitGroup.readyRoutines => l10n.planBenefitGroupRoutines,
     PlanBenefitGroup.weekAtAGlance => l10n.planBenefitGroupWeek,
     PlanBenefitGroup.plentyWithoutAds => l10n.planBenefitGroupExtra,
@@ -144,19 +153,22 @@ class _BenefitGroupCard extends StatelessWidget {
   };
 }
 
-/// 혜택 하나 > 짧은 이름 (묶음 한 줄에 ` · ` 로 이어 붙임)
-String planBenefitLabel(AppLocalizations l10n, PlanBenefit benefit) => switch (benefit) {
+/// 혜택 하나 > 짧은 문장 (묶음 안에서 한 줄씩)
+String planBenefitLabel(
+  AppLocalizations l10n,
+  PlanBenefit benefit,
+  CreditPeriodUnit periodUnit,
+) => switch (benefit) {
   PlanBenefit.aiImageStyles => l10n.planBenefitAiImageStyles,
   PlanBenefit.adsRemoved => l10n.planBenefitAdsRemoved,
   PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
   PlanBenefit.routineSchedule => l10n.planBenefitRoutineSchedule,
   PlanBenefit.routineMemory => l10n.planBenefitRoutineMemory,
-  PlanBenefit.expertRoutines => l10n.planBenefitExpertRoutines,
+  PlanBenefit.cardSplit => l10n.planBenefitCardSplit,
   PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
-  PlanBenefit.routineTranslate => l10n.planBenefitRoutineTranslate,
   PlanBenefit.freeRoutineText => l10n.planBenefitFreeRoutineText,
   PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,
-  PlanBenefit.moreWeeklyCredits => l10n.planBenefitMoreWeeklyCredits,
+  PlanBenefit.moreWeeklyCredits => periodUnit.planBenefitMoreCredits(l10n),
   PlanBenefit.cardExportWithoutWatermark => l10n.planBenefitCardExportWithoutWatermark,
   PlanBenefit.cardExportAllThemes => l10n.planBenefitCardExportAllThemes,
   PlanBenefit.cardExportAllLayouts => l10n.planBenefitCardExportAllLayouts,

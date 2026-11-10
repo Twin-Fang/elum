@@ -28,7 +28,9 @@
     IMAGE_PROMPT_TRANSLATE: ['#e87ba4', '#d55181'],
     PICTOGRAM_PICK: ['#008300', '#008300'],
     ROUTINE_TRANSLATE: ['#7a5af5', '#8f74f7'],
-    ROUTINE_MEMORY: ['#8a63d2', '#9d7ae0']
+    ROUTINE_MEMORY: ['#8a63d2', '#9d7ae0'],
+    WEEKLY_REPORT_SUMMARY: ['#2a9db5', '#3bb0c9'],
+    CARD_SPLIT: ['#c2791c', '#d98d2f']
   };
   var FALLBACK_COLOR = ['#898781', '#898781'];
   // 축·격자 잉크 [라이트, 다크]

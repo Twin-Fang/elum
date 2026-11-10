@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/pro_badge.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/image_style.dart';
 import '../../../member/application/member_providers.dart';
@@ -18,6 +16,7 @@ import '../../application/routine_notifier.dart';
 import '../../application/card_photo_controller.dart';
 import '../../data/card_photo.dart';
 import '../../data/card_photo_picker.dart';
+import 'card_edit_chip.dart';
 import 'card_image.dart';
 import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
@@ -253,7 +252,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     if (!planAccess.canUseAiPictures) {
       if (!planAccess.shouldPromoteBenefit(PlanBenefit.aiImageStyles)) return null;
       // Pro 칩과 같은 행동 이름 + Pro 배지 (다른 Pro 입구와 같은 모양). 낭독만 `Pro로 다시 그리기`
-      return _Chip(
+      return CardEditChip(
         asset: AppAssets.iconRefresh,
         label: step.isAiPicture ? l10n.cardRegenerateChip : l10n.cardFirstDrawChip,
         semanticLabel: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,
@@ -261,7 +260,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
         onTap: _busy ? null : () => openProOnlyNotice(context, ref),
       );
     }
-    return _Chip(
+    return CardEditChip(
       asset: AppAssets.iconRefresh,
       label: step.isAiPicture ? l10n.cardRegenerateChip : l10n.cardFirstDrawChip,
       onTap: _busy ? null : () => _redraw(step),
@@ -286,7 +285,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
         spacing: space.xs,
         children: [
           ?_drawChip(context, step),
-          _Chip(
+          CardEditChip(
             key: CardPhotoBlock.chipTapKey,
             asset: AppAssets.iconCamera,
             label: context.l10n.cardPhotoChange,

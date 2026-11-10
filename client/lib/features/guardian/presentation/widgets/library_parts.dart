@@ -37,8 +37,7 @@ class LibraryManageHeader extends ConsumerWidget {
     final space = context.space;
     final isPhone = context.sizeClass == WindowSizeClass.compact;
     final identity = ref.watch(guardianChildIdentityProvider);
-    // 입구 2개: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · 전문가 일과 (Pro, 살 수 없는 동안 Free 에게는 숨김)
-    // 두 입구 같은 알약 · Free 면 Pro 배지 (#1170)
+    // 입구: 주간 계획 (Pro 이거나 정해 둔 반복이 있을 때) · Free 면 Pro 배지
     final access = ref.watch(planAccessProvider);
     final entries = <Widget>[
       if (ref.watch(canShowRoutineScheduleProvider))
@@ -48,20 +47,18 @@ class LibraryManageHeader extends ConsumerWidget {
           shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineSchedule),
           onTap: () => context.push(Routes.guardianWeeklyPlan),
         ),
-      if (access.shouldShowExpertRoutines)
-        LibraryEntryPill(
-          label: context.l10n.expertRoutineEntry,
-          iconAsset: AppAssets.iconBook,
-          shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.expertRoutines),
-          onTap: () => context.push(Routes.guardianExpertRoutines),
-        ),
     ];
     // 제목 + 사용법(코치마크) 다시 보기 `?`
     final title = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
           child: Text(
             context.l10n.guardianTabManage,
+            // 제목은 한 줄을 지킨다 (입구 알약이 줄어들어 자리를 내줌)
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
             style: context.typo.libraryTitle.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -108,8 +105,18 @@ class LibraryManageHeader extends ConsumerWidget {
           }
           return Row(
             children: [
-              Expanded(child: title),
-              for (final entry in entries) ...[entry, if (isPhone) SizedBox(width: space.xs.w)],
+              title,
+              // 제목이 먼저 자리를 잡고, 남는 폭 안에서 입구가 줄어든다
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(children: entries),
+                  ),
+                ),
+              ),
+              if (isPhone && entries.isNotEmpty) SizedBox(width: space.xs.w),
               ?badge,
             ],
           );

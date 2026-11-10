@@ -75,6 +75,7 @@ class ElumDialogAction<T> {
 /// 확장 지점은 셋이다.
 ///
 /// - [icon] 위쪽 원형 아이콘. 없으면 그 자리가 통째로 사라진다
+/// - [illustrationAsset] 위쪽 그림 (루미 등 PNG). 아이콘 대신 쓰며 실패가 아닌 안내에 둔다
 /// - [message] 제목 아래 설명. 없으면 생략한다
 /// - [actions] 버튼. 비우면 `확인` 하나가 선다. 두 개면 가로로 나눈다
 ///
@@ -90,6 +91,7 @@ Future<T?> showElumDialog<T>({
   required String title,
   String? message,
   ElumDialogIcon? icon,
+  String? illustrationAsset,
   List<ElumDialogAction<T>> actions = const [],
   bool barrierDismissible = false,
   bool keepWordsInMessage = false,
@@ -111,6 +113,7 @@ Future<T?> showElumDialog<T>({
       title: title,
       message: message,
       icon: icon,
+      illustrationAsset: illustrationAsset,
       actions: actions,
       keepWordsInMessage: keepWordsInMessage,
       keepWordsInTitle: keepWordsInTitle,
@@ -144,6 +147,7 @@ class ElumDialogCard<T> extends StatelessWidget {
     required this.title,
     this.message,
     this.icon,
+    this.illustrationAsset,
     this.actions = const [],
     this.keepWordsInMessage = false,
     this.keepWordsInTitle = false,
@@ -153,6 +157,9 @@ class ElumDialogCard<T> extends StatelessWidget {
   final String title;
   final String? message;
   final ElumDialogIcon? icon;
+
+  /// 위쪽 그림 자산 경로 (PNG). [icon] 이 있으면 아이콘이 먼저다
+  final String? illustrationAsset;
   final List<ElumDialogAction<T>> actions;
 
   /// 설명을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
@@ -169,6 +176,10 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   /// 아이콘 40 · 아이콘↔제목 20 · 제목 묶음↔버튼 32
   static const _iconSize = 40.0;
+
+  /// 그림 96 · 그림↔제목 12
+  static const _illustrationSize = 96.0;
+  static const _illustrationToTitle = 12.0;
   static const _iconToTitle = 20.0;
   static const _bodyToActions = 32.0;
 
@@ -203,6 +214,14 @@ class ElumDialogCard<T> extends StatelessWidget {
                 height: _iconSize.w,
               ),
               SizedBox(height: _iconToTitle.h),
+            ] else if (illustrationAsset case final asset?) ...[
+              Image.asset(
+                asset,
+                width: _illustrationSize.w,
+                height: _illustrationSize.w,
+                excludeFromSemantics: true,
+              ),
+              SizedBox(height: _illustrationToTitle.h),
             ],
             Text(
               keepWordsInTitle ? keepWords(title, locale: context.appLocale) : title,

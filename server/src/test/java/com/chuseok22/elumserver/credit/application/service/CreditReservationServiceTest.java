@@ -80,7 +80,7 @@ class CreditReservationServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     accountService = new CreditAccountService(
-      accountRepository, grantRepository, jobRepository, ledgerRepository, mock(EntityManager.class));
+      accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), mock(EntityManager.class));
     // 트랜잭션 관리자는 목 — 트랜잭션 경계는 단위 테스트가 볼 수 없고, 안의 계산만 본다.
     service = new CreditReservationService(policyService, accountService, entitlementService,
       jobRepository, ledgerRepository, UsageLimitSettings.fromValues(Map.of(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP, FREE_REGENERATE_DAILY_CAP)),
@@ -710,17 +710,5 @@ class CreditReservationServiceTest {
 
     assertThat(store.job(reservation.jobId()).orElseThrow().getStatus()).isEqualTo(CreditJobStatus.RELEASED);
     assertThat(available()).isEqualTo(5);
-  }
-
-  @Test
-  @DisplayName("일과 글 무료 권한은 번역에 쓰지 않는다 — 번역은 글 단가 그대로")
-  void routineTextFree_doesNotApplyToTranslate() {
-    weeklyRemaining(5);
-    givenFreeRoutineTextAllowed(true);
-
-    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_TRANSLATE, "translate-1", false);
-    CreditSettlement settlement = service.settle(reservation.jobId(), 4, 0, "routine-2", null);
-
-    assertThat(settlement.charged()).isEqualTo(1);
   }
 }

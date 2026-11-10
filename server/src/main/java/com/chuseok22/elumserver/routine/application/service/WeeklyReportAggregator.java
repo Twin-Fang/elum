@@ -52,7 +52,9 @@ final class WeeklyReportAggregator {
       longestCompletedDayStreak(days),
       days,
       toRoutineSummaries(routines),
-      toRemainingSteps(routines, today)
+      toRemainingSteps(routines, today),
+      null,
+      null
     );
   }
 
@@ -122,17 +124,17 @@ final class WeeklyReportAggregator {
   }
 
   /// 묶음 열쇠: 보낸 일과면 원본 ID, 원본·옛 일과면 자기 ID
-  private static String routineKey(Routine routine) {
+  static String routineKey(Routine routine) {
     return Objects.requireNonNullElse(routine.getSourceRoutineId(), routine.getId());
   }
 
   /// 카드 이름: 짧은 제목, 없으면(옛 카드) 설명
-  private static String stepLabel(RoutineStep step) {
+  static String stepLabel(RoutineStep step) {
     String title = step.getTitle();
     return title == null || title.isBlank() ? step.getDescription() : title;
   }
 
-  private static boolean isCompleted(Routine routine) {
+  static boolean isCompleted(Routine routine) {
     return routine.getStatus() == RoutineStatus.COMPLETED;
   }
 

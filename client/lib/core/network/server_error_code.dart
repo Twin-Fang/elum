@@ -50,6 +50,9 @@ enum ServerErrorCode {
   // AI 메모 (#1082): Pro 아님 · 진단·장애·정도가 든 줄
   routineMemoryProRequired('ROUTINE_MEMORY_PRO_REQUIRED'),
   routineMemoryLineNotAllowed('ROUTINE_MEMORY_LINE_NOT_ALLOWED'),
+  // 카드 나누기 (#1244): Pro 아님 · AI 실패·시간 초과·검증 어긋남
+  cardSplitProRequired('CARD_SPLIT_PRO_REQUIRED'),
+  cardSplitFailed('CARD_SPLIT_FAILED'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),
@@ -166,9 +169,6 @@ enum ServerErrorCode {
   profileCountLimitExceeded('PROFILE_COUNT_LIMIT_EXCEEDED'),
   // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
   weeklyReportNotAllowed('WEEKLY_REPORT_NOT_ALLOWED'),
-  // 일과 다른 언어로 만들기 (#1077). 앱은 Free 에게 입구를 숨겨 403 은 오래된 앱·직접 호출에서만 남
-  routineTranslateNotAllowed('ROUTINE_TRANSLATE_NOT_ALLOWED'),
-  routineTranslateFailed('ROUTINE_TRANSLATE_FAILED'),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -176,6 +176,9 @@ enum ServerErrorCode {
 
   // 주간 AI 크레딧. 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
   aiCreditInsufficient('AI_CREDIT_INSUFFICIENT'),
+  // 크레딧 꾸러미 구매: 판매 꺼짐 403, 다른 회원에 이미 적립된 거래 400
+  creditPackSaleDisabled('CREDIT_PACK_SALE_DISABLED'),
+  creditPurchaseOwnedByOtherMember('CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER'),
   aiCreditJobInProgress('AI_CREDIT_JOB_IN_PROGRESS'),
   aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
   aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),
@@ -294,11 +297,6 @@ enum ServerErrorCode {
   talkImageNotFound('TALK_IMAGE_NOT_FOUND'),
   talkLinkRoutineNotMine('TALK_LINK_ROUTINE_NOT_MINE'),
   talkLinkRoutineNotShareable('TALK_LINK_ROUTINE_NOT_SHAREABLE'),
-
-  // 전문가 일과: 내렸거나 없는 일과 404, Free 가져오기 403, 관리자 입력 오류 400
-  expertRoutineNotFound('EXPERT_ROUTINE_NOT_FOUND'),
-  expertRoutineProOnly('EXPERT_ROUTINE_PRO_ONLY'),
-  expertRoutineInvalid('EXPERT_ROUTINE_INVALID'),
 
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.

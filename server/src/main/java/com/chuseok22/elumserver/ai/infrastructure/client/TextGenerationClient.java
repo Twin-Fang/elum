@@ -1,8 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
-import com.chuseok22.elumserver.ai.core.RoutineTranslationDraft;
 import com.chuseok22.elumserver.ai.core.TextProvider;
-import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import java.util.List;
 import java.util.Set;
@@ -49,11 +47,16 @@ public interface TextGenerationClient {
   /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
   String pickPictogramJson(String stepTitle, String stepDescription);
 
-  /// 만든 일과의 글(제목·보상·카드 글)을 다른 언어로 (#1077). 반환값은 {"title","rewardText","steps":[{title,description}]} JSON 문자열.
-  /// 지시문·스키마는 RoutineTranslateSpec 한 벌. 단계 수·빈 글 검증은 부르는 쪽(RoutineTranslationAi) 몫이다.
-  String translateRoutineJson(RoutineTranslationDraft draft, AppLocale sourceLanguage, AppLocale targetLanguage);
-
-  /// AI 메모 갱신 (#1082). 입력은 처음 카드 <-> 확정 카드 비교 JSON(원문 없음), 반환값은 {"lines": [...]} JSON 문자열.
-  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 거르기·저장은 부르는 쪽(RoutineMemoryAi) 몫
+  /// AI 메모리 수정 찾기. 입력은 처음 카드 <-> 확정 카드 + 기존 규칙·거절 규칙 JSON(원문 없음),
+  /// 반환값은 {"matched": [규칙 id], "found": [{type, before, after, summary}]} JSON 문자열.
+  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 검증·세기·저장은 부르는 쪽(RoutineMemoryAi 와 서버 서비스) 몫
   String buildRoutineMemoryJson(String memoryUserContent);
+
+  /// 주간 리포트 정리 글. 입력은 집계 JSON(제목·횟수만, 이름은 {userName}), 반환값은 {"lines": [...]} JSON 문자열.
+  /// 지시문·스키마는 WeeklyReportSummarySpec 한 곳(언어는 AiCallContext 일과 언어). 거르기·저장은 부르는 쪽 몫
+  String buildWeeklyReportSummaryJson(String summaryUserContent);
+
+  /// 카드 나누기(이 카드 더 쉽게). 입력은 카드 한 장의 제목·설명 JSON(이름은 자리표시), 반환값은 {"status", "cards": [...]} JSON 문자열.
+  /// 지시문·스키마는 CardSplitSpec 한 곳(언어는 AiCallContext 일과 언어). 검증·저장은 부르는 쪽 몫
+  String buildCardSplitJson(String splitUserContent);
 }

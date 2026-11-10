@@ -99,6 +99,8 @@ public class PushDispatcher {
       case FEEDBACK_RESOLVED -> setting.isFeedbackResolvedEnabled();
       case TALK_POST_COMMENTED -> setting.isTalkCommentedEnabled();
       case TALK_POST_IMPORTED -> setting.isTalkImportedEnabled();
+      // 종류별 칸이 없음: 전체 끔만 따름
+      case WEEKLY_REPORT_READY -> true;
     };
   }
 }

@@ -44,6 +44,9 @@ palette_exceptions:
   completion: "쓰는 곳 없음 — 지울 후보"
   rewardBannerBg: "쓰는 곳 없음 — 지울 후보"
   proPlan: "Pro 요금제 화면 · PRO 배지 · Pro 미리보기 (#1189) — 디자이너 시안 전 임시 색 (HTML 시안 A), 시안이 나오면 다시 봄"
+  routineMemory: "AI 메모리 위 카드 · 줄 아이콘 색 — HTML 시안 memo-v4 (디자이너 시안 전), 시안이 나오면 다시 봄"
+  creditPack: "크레딧 꾸러미 칸 바탕 · 할인 알약 · 받기 버튼 — HTML 시안 credits-v15 (디자이너 시안 전), 시안이 나오면 다시 봄"
+  weeklyReportInsight: "주간 리포트 돌아보기 카드 판 · 강조색 — HTML 시안 report-v4 (디자이너 시안 전), 시안이 나오면 다시 봄"
 
 # 글자: 글꼴 · 굵기 · 크기 (시안에 나온 조합만, 축소된 부품 안 글자 13.4 · 10.7 은 뺌)
 typography:
@@ -103,8 +106,8 @@ restricted_tokens:
     allowed: [lib/core/widgets/pro_badge.dart]
     reason: "PRO 배지 문구 — ProBadge 에서만"
   # Pro 미리보기 민트 버튼 (#1189): ProUpsellButton 하나에서만
-  proPlanCtaStart: {allowed: [lib/core/theme/app_colors.dart, lib/core/widgets/pro_upsell_button.dart], reason: "Pro 권유 민트 버튼 — ProUpsellButton 에서만"}
-  proPlanCtaEnd: {allowed: [lib/core/theme/app_colors.dart, lib/core/widgets/pro_upsell_button.dart], reason: "Pro 권유 민트 버튼 — ProUpsellButton 에서만"}
+  proPlanCtaStart: {allowed: [lib/core/theme/app_colors.dart, lib/core/widgets/mint_gradient_button.dart], reason: "민트 그라데이션 CTA — MintGradientButton 에서만 (Pro 권유 · 크레딧 꾸러미가 함께 씀)"}
+  proPlanCtaEnd: {allowed: [lib/core/theme/app_colors.dart, lib/core/widgets/mint_gradient_button.dart], reason: "민트 그라데이션 CTA — MintGradientButton 에서만"}
   planTryFreeTrial:
     allowed: [lib/core/widgets/pro_upsell_button.dart]
     reason: "체험 권유 버튼 문구 — ProUpsellButton 에서만 (체험 판정은 watchProUpsellActions 한 곳)"

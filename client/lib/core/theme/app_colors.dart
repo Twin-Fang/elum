@@ -93,6 +93,27 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
+    required this.weeklyReportInsightGoodFill,
+    required this.weeklyReportInsightGoodAccent,
+    required this.weeklyReportInsightStuckFill,
+    required this.weeklyReportInsightStuckAccent,
+    required this.weeklyReportInsightTrendFill,
+    required this.weeklyReportInsightTrendAccent,
+    required this.creditKindPeriodic,
+    required this.creditKindBonus,
+    required this.creditKindPurchased,
+    required this.routineMemoryHeroStart,
+    required this.routineMemoryHeroEnd,
+    required this.routineMemoryIconWord,
+    required this.routineMemoryIconStructure,
+    required this.routineMemoryIconManual,
+    required this.creditPackTileMint,
+    required this.creditPackTilePeach,
+    required this.creditPackTileCream,
+    required this.creditPackPopularBorder,
+    required this.creditPackDiscountFill,
+    required this.proPlanFreeBadgeFill,
+    required this.proPlanFreeBadgeText,
     required this.catSelectedFill,
     required this.catSelectedBorder,
     required this.brandPeach,
@@ -224,7 +245,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.myInfoMutedIcon,
     required this.routineTitleEditIcon,
     required this.toastBackground,
-    required this.toastBorder,
     required this.toastText,
     required this.toastAction,
     required this.settingsToggleOn,
@@ -467,6 +487,48 @@ class AppColors extends ThemeExtension<AppColors> {
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
   final Color foxSelectedBorder;
+  // 주간 리포트 돌아보기: 잘한 것 판 (민트)
+  final Color weeklyReportInsightGoodFill;
+  // 주간 리포트 돌아보기: 잘한 것 강조색 (제목 아이콘 원)
+  final Color weeklyReportInsightGoodAccent;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 판 (복숭아)
+  final Color weeklyReportInsightStuckFill;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 강조색
+  final Color weeklyReportInsightStuckAccent;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 판 (연보라)
+  final Color weeklyReportInsightTrendFill;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 강조색 (이번 주 막대 포함)
+  final Color weeklyReportInsightTrendAccent;
+  // 내 크레딧: 주기 지급 종류 색 (게이지 조각 · 줄 그림 바탕)
+  final Color creditKindPeriodic;
+  // 내 크레딧: 보너스 종류 색
+  final Color creditKindBonus;
+  // 내 크레딧: 구매 종류 색
+  final Color creditKindPurchased;
+  // AI 메모리 위 카드 그라데이션 시작 (연보라)
+  final Color routineMemoryHeroStart;
+  // AI 메모리 위 카드 그라데이션 끝
+  final Color routineMemoryHeroEnd;
+  // AI 메모리 줄 아이콘 원: 낱말 바꾸기 (민트)
+  final Color routineMemoryIconWord;
+  // AI 메모리 줄 아이콘 원: 나누기 · 합치기 · 더하기 · 빼기 (주황)
+  final Color routineMemoryIconStructure;
+  // AI 메모리 줄 아이콘 원: 직접 적음 (검정)
+  final Color routineMemoryIconManual;
+  // 크레딧 꾸러미 칸 그림 바탕 (민트)
+  final Color creditPackTileMint;
+  // 크레딧 꾸러미 인기 칸 바탕 (복숭아)
+  final Color creditPackTilePeach;
+  // 크레딧 꾸러미 큰 꾸러미 그림 바탕 (크림)
+  final Color creditPackTileCream;
+  // 크레딧 꾸러미 인기 칸 테두리
+  final Color creditPackPopularBorder;
+  // 크레딧 꾸러미 할인율 알약 바탕
+  final Color creditPackDiscountFill;
+  // FREE 배지 바탕 (민트)
+  final Color proPlanFreeBadgeFill;
+  // FREE 배지 점 · 글자
+  final Color proPlanFreeBadgeText;
   final Color catSelectedFill;
   final Color catSelectedBorder;
 
@@ -910,16 +972,13 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 일과 제목 옆 연필 (Figma `1931:7372` fi-br-pencil #CACACA, 상세 시트 · 카드 확인)
   final Color routineTitleEditIcon;
 
-  /// 토스트 판 (시안 없음 > 팝업 결: 흰 판 · design-language §4-6)
+  /// 토스트 판: 어두운 판 (글자색 토큰 계열, Pro 시안 알림 띠)
   final Color toastBackground;
 
-  /// 토스트 테두리 1px (아이보리 바탕 위 흰 판 경계, design-language §3-4)
-  final Color toastBorder;
-
-  /// 토스트 문구
+  /// 토스트 문구: 어두운 판 위 밝은 글자
   final Color toastText;
 
-  /// 토스트 오른쪽 누르는 글자 (`보러 가기`) — 문구보다 굵게
+  /// 토스트 오른쪽 누르는 글자 (`보러 가기`): 강조색
   final Color toastAction;
 
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
@@ -1251,6 +1310,27 @@ class AppColors extends ThemeExtension<AppColors> {
     talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
+    weeklyReportInsightGoodFill: Color(0xFFE3F8F3),
+    weeklyReportInsightGoodAccent: Color(0xFF3FB7C9),
+    weeklyReportInsightStuckFill: Color(0xFFFFF1E6),
+    weeklyReportInsightStuckAccent: Color(0xFFEB9B73),
+    weeklyReportInsightTrendFill: Color(0xFFEEF0FF),
+    weeklyReportInsightTrendAccent: Color(0xFF9CADF1),
+    creditKindPeriodic: Color(0xFF55CFBA),
+    creditKindBonus: Color(0xFFEB9B73),
+    creditKindPurchased: Color(0xFF9CADF1),
+    routineMemoryHeroStart: Color(0xFFF4EEFF),
+    routineMemoryHeroEnd: Color(0xFFE4ECFF),
+    routineMemoryIconWord: Color(0xFF55CFBA),
+    routineMemoryIconStructure: Color(0xFFEB9B73),
+    routineMemoryIconManual: Color(0xFF242634),
+    creditPackTileMint: Color(0xFFE3F8F3),
+    creditPackTilePeach: Color(0xFFFFF1E6),
+    creditPackTileCream: Color(0xFFFFF7DA),
+    creditPackPopularBorder: Color(0xFFEB9B73),
+    creditPackDiscountFill: Color(0xFFFF8B22),
+    proPlanFreeBadgeFill: Color(0xFFE3F8F3),
+    proPlanFreeBadgeText: Color(0xFF3FB7C9),
     catSelectedFill: Color(0xFFCED8FF),
     catSelectedBorder: Color(0xFF9CADF1),
     brandPeach: Color(0xFFFFC9BB),
@@ -1382,10 +1462,9 @@ class AppColors extends ThemeExtension<AppColors> {
     myInfoMetaText: Color(0xFF74757D),
     myInfoMutedIcon: Color(0xFFCACACA),
     routineTitleEditIcon: Color(0xFFCACACA),
-    toastBackground: Color(0xFFFFFFFF),
-    toastBorder: Color(0xFFEFEFEF),
-    toastText: Color(0xFF242634),
-    toastAction: Color(0xFF242634),
+    toastBackground: Color(0xFF242634),
+    toastText: Color(0xFFFFFFFF),
+    toastAction: Color(0xFFFCE551),
     settingsToggleOn: Color(0xFF55CFBA),
     settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
@@ -1541,6 +1620,27 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
+    Color? weeklyReportInsightGoodFill,
+    Color? weeklyReportInsightGoodAccent,
+    Color? weeklyReportInsightStuckFill,
+    Color? weeklyReportInsightStuckAccent,
+    Color? weeklyReportInsightTrendFill,
+    Color? weeklyReportInsightTrendAccent,
+    Color? creditKindPeriodic,
+    Color? creditKindBonus,
+    Color? creditKindPurchased,
+    Color? routineMemoryHeroStart,
+    Color? routineMemoryHeroEnd,
+    Color? routineMemoryIconWord,
+    Color? routineMemoryIconStructure,
+    Color? routineMemoryIconManual,
+    Color? creditPackTileMint,
+    Color? creditPackTilePeach,
+    Color? creditPackTileCream,
+    Color? creditPackPopularBorder,
+    Color? creditPackDiscountFill,
+    Color? proPlanFreeBadgeFill,
+    Color? proPlanFreeBadgeText,
     Color? catSelectedFill,
     Color? catSelectedBorder,
     Color? brandPeach,
@@ -1660,7 +1760,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? myInfoMutedIcon,
     Color? routineTitleEditIcon,
     Color? toastBackground,
-    Color? toastBorder,
     Color? toastText,
     Color? toastAction,
     Color? settingsToggleOn,
@@ -1819,6 +1918,27 @@ class AppColors extends ThemeExtension<AppColors> {
       talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
+      weeklyReportInsightGoodFill: weeklyReportInsightGoodFill ?? this.weeklyReportInsightGoodFill,
+      weeklyReportInsightGoodAccent: weeklyReportInsightGoodAccent ?? this.weeklyReportInsightGoodAccent,
+      weeklyReportInsightStuckFill: weeklyReportInsightStuckFill ?? this.weeklyReportInsightStuckFill,
+      weeklyReportInsightStuckAccent: weeklyReportInsightStuckAccent ?? this.weeklyReportInsightStuckAccent,
+      weeklyReportInsightTrendFill: weeklyReportInsightTrendFill ?? this.weeklyReportInsightTrendFill,
+      weeklyReportInsightTrendAccent: weeklyReportInsightTrendAccent ?? this.weeklyReportInsightTrendAccent,
+      creditKindPeriodic: creditKindPeriodic ?? this.creditKindPeriodic,
+      creditKindBonus: creditKindBonus ?? this.creditKindBonus,
+      creditKindPurchased: creditKindPurchased ?? this.creditKindPurchased,
+      routineMemoryHeroStart: routineMemoryHeroStart ?? this.routineMemoryHeroStart,
+      routineMemoryHeroEnd: routineMemoryHeroEnd ?? this.routineMemoryHeroEnd,
+      routineMemoryIconWord: routineMemoryIconWord ?? this.routineMemoryIconWord,
+      routineMemoryIconStructure: routineMemoryIconStructure ?? this.routineMemoryIconStructure,
+      routineMemoryIconManual: routineMemoryIconManual ?? this.routineMemoryIconManual,
+      creditPackTileMint: creditPackTileMint ?? this.creditPackTileMint,
+      creditPackTilePeach: creditPackTilePeach ?? this.creditPackTilePeach,
+      creditPackTileCream: creditPackTileCream ?? this.creditPackTileCream,
+      creditPackPopularBorder: creditPackPopularBorder ?? this.creditPackPopularBorder,
+      creditPackDiscountFill: creditPackDiscountFill ?? this.creditPackDiscountFill,
+      proPlanFreeBadgeFill: proPlanFreeBadgeFill ?? this.proPlanFreeBadgeFill,
+      proPlanFreeBadgeText: proPlanFreeBadgeText ?? this.proPlanFreeBadgeText,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
       catSelectedBorder: catSelectedBorder ?? this.catSelectedBorder,
       brandPeach: brandPeach ?? this.brandPeach,
@@ -1940,7 +2060,6 @@ class AppColors extends ThemeExtension<AppColors> {
       myInfoMutedIcon: myInfoMutedIcon ?? this.myInfoMutedIcon,
       routineTitleEditIcon: routineTitleEditIcon ?? this.routineTitleEditIcon,
       toastBackground: toastBackground ?? this.toastBackground,
-      toastBorder: toastBorder ?? this.toastBorder,
       toastText: toastText ?? this.toastText,
       toastAction: toastAction ?? this.toastAction,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
@@ -2145,6 +2264,27 @@ class AppColors extends ThemeExtension<AppColors> {
         other.foxSelectedBorder,
         t,
       )!,
+      weeklyReportInsightGoodFill: Color.lerp(weeklyReportInsightGoodFill, other.weeklyReportInsightGoodFill, t)!,
+      weeklyReportInsightGoodAccent: Color.lerp(weeklyReportInsightGoodAccent, other.weeklyReportInsightGoodAccent, t)!,
+      weeklyReportInsightStuckFill: Color.lerp(weeklyReportInsightStuckFill, other.weeklyReportInsightStuckFill, t)!,
+      weeklyReportInsightStuckAccent: Color.lerp(weeklyReportInsightStuckAccent, other.weeklyReportInsightStuckAccent, t)!,
+      weeklyReportInsightTrendFill: Color.lerp(weeklyReportInsightTrendFill, other.weeklyReportInsightTrendFill, t)!,
+      weeklyReportInsightTrendAccent: Color.lerp(weeklyReportInsightTrendAccent, other.weeklyReportInsightTrendAccent, t)!,
+      creditKindPeriodic: Color.lerp(creditKindPeriodic, other.creditKindPeriodic, t)!,
+      creditKindBonus: Color.lerp(creditKindBonus, other.creditKindBonus, t)!,
+      creditKindPurchased: Color.lerp(creditKindPurchased, other.creditKindPurchased, t)!,
+      routineMemoryHeroStart: Color.lerp(routineMemoryHeroStart, other.routineMemoryHeroStart, t)!,
+      routineMemoryHeroEnd: Color.lerp(routineMemoryHeroEnd, other.routineMemoryHeroEnd, t)!,
+      routineMemoryIconWord: Color.lerp(routineMemoryIconWord, other.routineMemoryIconWord, t)!,
+      routineMemoryIconStructure: Color.lerp(routineMemoryIconStructure, other.routineMemoryIconStructure, t)!,
+      routineMemoryIconManual: Color.lerp(routineMemoryIconManual, other.routineMemoryIconManual, t)!,
+      creditPackTileMint: Color.lerp(creditPackTileMint, other.creditPackTileMint, t)!,
+      creditPackTilePeach: Color.lerp(creditPackTilePeach, other.creditPackTilePeach, t)!,
+      creditPackTileCream: Color.lerp(creditPackTileCream, other.creditPackTileCream, t)!,
+      creditPackPopularBorder: Color.lerp(creditPackPopularBorder, other.creditPackPopularBorder, t)!,
+      creditPackDiscountFill: Color.lerp(creditPackDiscountFill, other.creditPackDiscountFill, t)!,
+      proPlanFreeBadgeFill: Color.lerp(proPlanFreeBadgeFill, other.proPlanFreeBadgeFill, t)!,
+      proPlanFreeBadgeText: Color.lerp(proPlanFreeBadgeText, other.proPlanFreeBadgeText, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
       catSelectedBorder: Color.lerp(
         catSelectedBorder,
@@ -2398,7 +2538,6 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       toastBackground: Color.lerp(toastBackground, other.toastBackground, t)!,
-      toastBorder: Color.lerp(toastBorder, other.toastBorder, t)!,
       toastText: Color.lerp(toastText, other.toastText, t)!,
       toastAction: Color.lerp(toastAction, other.toastAction, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,

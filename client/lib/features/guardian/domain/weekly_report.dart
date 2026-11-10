@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'weekly_report_insights.dart';
+
 /// 이룸이 한 주 요약 — 서버 `GET /api/routines/weekly-report` (#1074)
 ///
 /// 완료 기록에서 센 사실만 담는다 (원문·보상 문구·평가 없음).
@@ -19,6 +21,8 @@ class WeeklyReport {
     required this.days,
     required this.routines,
     required this.remainingSteps,
+    this.summary,
+    this.insights,
   });
 
   final DateTime weekStart;
@@ -46,6 +50,12 @@ class WeeklyReport {
   /// 지난 날 마치지 않고 남은 카드 (많은 순 최대 3)
   final List<WeeklyReportRemainingStep> remainingSteps;
 
+  /// 루미가 정리한 글 (이번 주·끝낸 일과 없는 주·옛 서버 응답이면 null)
+  final WeeklyReportSummary? summary;
+
+  /// 돌아보기 카드 재료 (옛 서버 응답·모양이 다르면 null)
+  final WeeklyReportInsights? insights;
+
   /// 이 주에 보낸 일과가 있는가 (없으면 빈 상태 화면)
   bool get hasRecords => sentRoutineCount > 0;
 
@@ -63,7 +73,30 @@ class WeeklyReport {
       days: _listOf(json['days'], WeeklyReportDay.tryParse),
       routines: _listOf(json['routines'], WeeklyReportRoutine.tryParse),
       remainingSteps: _listOf(json['remainingSteps'], WeeklyReportRemainingStep.tryParse),
+      summary: WeeklyReportSummary.tryParse(json['summary']),
+      insights: WeeklyReportInsights.tryParse(json['insights']),
     );
+  }
+}
+
+/// 루미 정리 글: 줄 목록 (이름이 이미 들어 있음)
+@immutable
+class WeeklyReportSummary {
+  const WeeklyReportSummary({required this.lines});
+
+  final List<String> lines;
+
+  /// 줄을 이어 붙인 한 문단
+  String get paragraph => lines.join(' ');
+
+  /// 비었거나 모양이 다르면 null (정리 글 자리 없이 숫자부터)
+  static WeeklyReportSummary? tryParse(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final rawLines = raw['lines'];
+    if (rawLines is! List<dynamic>) return null;
+    final lines = rawLines.whereType<String>().map((line) => line.trim()).where((line) => line.isNotEmpty).toList();
+    if (lines.isEmpty) return null;
+    return WeeklyReportSummary(lines: lines);
   }
 }
 

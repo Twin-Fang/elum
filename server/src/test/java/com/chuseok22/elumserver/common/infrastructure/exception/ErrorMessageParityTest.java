@@ -47,13 +47,14 @@ class ErrorMessageParityTest {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
       + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size() + ADDED_NOTIFICATION_CODES.size()
       + ADDED_NICKNAME_CODES.size() + ADDED_TALK_CODES.size() + 1
-      + ADDED_MIGRATION_AND_LINK_CODES.size() + ADDED_ROUTINE_TRANSLATE_CODES.size()
+      + ADDED_MIGRATION_AND_LINK_CODES.size()
       + ADDED_ROUTINE_SCHEDULE_CODES.size()
       + ADDED_GUARDIAN_VOICE_CODES.size()
-      + ADDED_EXPERT_ROUTINE_CODES.size()
       + ADDED_ROUTINE_MEMORY_CODES.size()
+      + ADDED_CARD_SPLIT_CODES.size()
       + ADDED_PLAN_STORE_AND_REPORT_CODES.size()
       + ADDED_IMAGE_REGENERATE_CODES.size()
+      + ADDED_CREDIT_PURCHASE_CODES.size()
       + 1);
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
@@ -145,6 +146,21 @@ class ErrorMessageParityTest {
     }
   }
 
+  private static final java.util.List<ErrorCode> ADDED_CARD_SPLIT_CODES = java.util.List.of(
+    ErrorCode.CARD_SPLIT_PRO_REQUIRED, ErrorCode.CARD_SPLIT_FAILED);
+
+  @Test
+  @DisplayName("카드 나누기 코드는 golden 밖에서 상태와 ko·en 문구를 단언한다 — 문구가 빠지면 앱이 코드 이름을 그대로 보인다")
+  void cardSplitCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.CARD_SPLIT_PRO_REQUIRED.getStatus().name()).isEqualTo("FORBIDDEN");
+    assertThat(ErrorCode.CARD_SPLIT_FAILED.getStatus().name()).isEqualTo("BAD_GATEWAY");
+    for (ErrorCode code : ADDED_CARD_SPLIT_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이", "서버");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
+  }
+
   private static final java.util.List<ErrorCode> ADDED_NOTIFICATION_CODES = java.util.List.of(
     ErrorCode.PUSH_TOKEN_INVALID, ErrorCode.NOTIFICATION_NOT_FOUND);
 
@@ -178,24 +194,6 @@ class ErrorMessageParityTest {
     }
   }
 
-  // 다른 언어로 만들기(#1077)가 더한 코드와 HTTP 상태.
-  private static final Map<ErrorCode, String> ADDED_ROUTINE_TRANSLATE_CODES = Map.of(
-    ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED, "FORBIDDEN",
-    ErrorCode.ROUTINE_TRANSLATE_FAILED, "BAD_GATEWAY");
-
-  @Test
-  @DisplayName("다른 언어로 만들기 코드(#1077)는 golden 밖에서 상태와 ko·en 문구를 단언한다")
-  void routineTranslateCodes_areAssertedSeparately() {
-    ADDED_ROUTINE_TRANSLATE_CODES.forEach((code, status) -> {
-      assertThat(GOLDEN).doesNotContainKey(code.name());
-      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
-      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
-        .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
-      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
-        .isNotBlank().isNotEqualTo(code.name());
-    });
-  }
-
   // 이야기(보호자끼리 일과 나누기)가 더한 코드와 HTTP 상태.
   // 서버 이전(#1053 · #1062) 7개 + 일과 링크 보내기(#1002) 2개
   private static final Map<ErrorCode, String> ADDED_MIGRATION_AND_LINK_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
@@ -218,26 +216,6 @@ class ErrorMessageParityTest {
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
         .isNotBlank().isNotEqualTo(code.name());
-    });
-  }
-
-  // 전문가 일과(#1076)가 더한 코드와 HTTP 상태
-  private static final Map<ErrorCode, String> ADDED_EXPERT_ROUTINE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
-    Map.entry(ErrorCode.EXPERT_ROUTINE_NOT_FOUND, "NOT_FOUND"),
-    Map.entry(ErrorCode.EXPERT_ROUTINE_PRO_ONLY, "FORBIDDEN"),
-    Map.entry(ErrorCode.EXPERT_ROUTINE_INVALID, "BAD_REQUEST")));
-
-  @Test
-  @DisplayName("전문가 일과 코드 3개는 golden 밖에서 상태와 ko·en 문구를 단언한다")
-  void expertRoutineCodes_haveStatusAndMessages() {
-    assertThat(ADDED_EXPERT_ROUTINE_CODES).hasSize(3);
-    ADDED_EXPERT_ROUTINE_CODES.forEach((code, status) -> {
-      assertThat(GOLDEN).doesNotContainKey(code.name());
-      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
-      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
-        .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이").endsWith("요.");
-      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
-        .isNotBlank().isNotEqualTo(code.name()).isNotEqualTo(ErrorMessages.standard().of(code, AppLocale.KO));
     });
   }
 
@@ -323,6 +301,25 @@ class ErrorMessageParityTest {
       assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
       assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
         .isNotBlank().isNotEqualTo(code.name()).doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
+    });
+  }
+
+  // 크레딧 꾸러미 구매가 더한 코드와 HTTP 상태.
+  private static final Map<ErrorCode, String> ADDED_CREDIT_PURCHASE_CODES = new java.util.LinkedHashMap<>(Map.ofEntries(
+    Map.entry(ErrorCode.CREDIT_PACK_SALE_DISABLED, "FORBIDDEN"),
+    Map.entry(ErrorCode.CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER, "BAD_REQUEST")));
+
+  @Test
+  @DisplayName("크레딧 구매 코드 2개는 golden 밖에서 상태와 ko·en 문구를 단언한다 — 문구가 빠지면 앱이 코드 이름을 그대로 보인다")
+  void creditPurchaseCodes_haveStatusAndMessages() {
+    assertThat(ADDED_CREDIT_PURCHASE_CODES).hasSize(2);
+    ADDED_CREDIT_PURCHASE_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code)
+        .isNotBlank().isNotEqualTo(code.name());
       assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code)
         .isNotBlank().isNotEqualTo(code.name());
     });

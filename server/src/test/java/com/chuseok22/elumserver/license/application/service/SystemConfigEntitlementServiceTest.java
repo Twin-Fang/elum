@@ -15,7 +15,6 @@ import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.license.core.SubscriptionStatus;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
-import com.chuseok22.elumserver.member.application.service.MemberSignupTimeService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -41,10 +40,10 @@ class SystemConfigEntitlementServiceTest {
   private SystemConfigService systemConfigService;
 
   @Mock
-  private MemberSignupTimeService memberSignupTimeService;
+  private MemberProPromotion memberProPromotion;
 
   @Mock
-  private ExistingMemberProGift existingMemberProGift;
+  private PurchasedCreditChecker purchasedCreditChecker;
 
   @InjectMocks
   private SystemConfigEntitlementService entitlementService;
@@ -67,84 +66,7 @@ class SystemConfigEntitlementServiceTest {
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
   }
 
-  // --- 신규가입 PRO 이벤트 ---
-
-  private void givenEvent(boolean isEnabled, String startAt, String endAt, int grantDays) {
-    lenient().when(systemConfigService.getBoolean(ConfigKey.SIGNUP_PRO_EVENT_ENABLED)).thenReturn(isEnabled);
-    lenient().when(systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_START_AT)).thenReturn(startAt);
-    lenient().when(systemConfigService.getString(ConfigKey.SIGNUP_PRO_EVENT_END_AT)).thenReturn(endAt);
-    lenient().when(systemConfigService.getInt(ConfigKey.SIGNUP_PRO_EVENT_GRANT_DAYS)).thenReturn(grantDays);
-  }
-
-  private void givenNoSubscriptionSignedUpAt(LocalDateTime signupAt) {
-    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
-    lenient().when(memberSignupTimeService.findSignupAt(MEMBER_ID)).thenReturn(Optional.ofNullable(signupAt));
-  }
-
-  @Test
-  @DisplayName("이벤트가 꺼져 있으면 가입 기간 안이어도 Free다")
-  void signupEvent_disabled_isFree() {
-    givenEvent(false, "2026-01-01", "2099-01-01", 30);
-    givenNoSubscriptionSignedUpAt(LocalDateTime.now());
-
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  @Test
-  @DisplayName("가입 기간 안에 가입했고 유지 일수 안이면 Pro다")
-  void signupEvent_insideWindow_isPro() {
-    givenEvent(true, "2026-01-01T00:00", "2099-01-01 00:00", 7);
-    givenNoSubscriptionSignedUpAt(LocalDateTime.now().minusDays(1));
-
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
-  }
-
-  @Test
-  @DisplayName("가입 기간 밖(시작 전·종료 후)에 가입했으면 Free다")
-  void signupEvent_outsideWindow_isFree() {
-    givenEvent(true, "2026-01-01", "2026-02-01", 100000);
-    givenNoSubscriptionSignedUpAt(LocalDateTime.of(2025, 12, 31, 23, 59));
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-
-    givenNoSubscriptionSignedUpAt(LocalDateTime.of(2026, 2, 1, 0, 1));
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  @Test
-  @DisplayName("유지 일수가 지나면 Free로 돌아간다")
-  void signupEvent_grantExpired_isFree() {
-    givenEvent(true, "2026-01-01", "2099-01-01", 7);
-    givenNoSubscriptionSignedUpAt(LocalDateTime.now().minusDays(8));
-
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  @Test
-  @DisplayName("구독 행이 있으면 이벤트와 무관하게 기존 판정 그대로다")
-  void signupEvent_subscriptionRowWins() {
-    givenEvent(true, "2026-01-01", "2099-01-01", 30);
-    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(
-      subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, LocalDateTime.now().minusDays(1))));
-
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  @Test
-  @DisplayName("이벤트 설정 오류(날짜 형식·빈 기간·회원 조회 실패)는 Free로 폴백한다")
-  void signupEvent_errors_fallBackToFree() {
-    givenEvent(true, "어제", "2099-01-01", 30);
-    givenNoSubscriptionSignedUpAt(LocalDateTime.now());
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-
-    givenEvent(true, "", "", 30);
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-
-    givenEvent(true, "2026-01-01", "2099-01-01", 30);
-    when(memberSignupTimeService.findSignupAt(MEMBER_ID)).thenThrow(new RuntimeException("DB 장애"));
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  // --- 기존 가입자 Pro 선물 ---
+  // --- 선물·신규가입 체험 (구독 없이 받는 Pro) ---
 
   private Subscription signupFreeRow() {
     Subscription row = subscription(PlanType.FREE, SubscriptionStatus.ACTIVE, null);
@@ -152,40 +74,59 @@ class SystemConfigEntitlementServiceTest {
     return row;
   }
 
+  private void givenPromotion(Optional<MemberProPromotion.Promotion> promotion) {
+    lenient().when(memberProPromotion.findPromotion(MEMBER_ID)).thenReturn(promotion);
+  }
+
+  private static Optional<MemberProPromotion.Promotion> trialEndingIn30Days() {
+    return Optional.of(new MemberProPromotion.Promotion(SubscriptionSource.PROMO, LocalDateTime.now().plusDays(30)));
+  }
+
   @Test
-  @DisplayName("선물 대상이고 구독 행이 없으면 Pro 다")
-  void gift_appliesWithoutRow() {
+  @DisplayName("혜택 대상이고 구독 행이 없으면 Pro 다")
+  void promotion_appliesWithoutRow() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
-    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+    givenPromotion(trialEndingIn30Days());
 
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
   }
 
   @Test
-  @DisplayName("가입 때 만든 기본 Free 행이 있어도 선물을 받는다 — 행 없음만 보면 기존 회원 대부분이 못 받는다")
-  void gift_appliesToDefaultSignupRow() {
+  @DisplayName("가입 때 만든 기본 Free 행이 있어도 혜택을 받는다 — 행 없음만 보면 가입 체험을 아무도 못 받는다")
+  void promotion_appliesToDefaultSignupRow() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupFreeRow()));
-    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+    givenPromotion(trialEndingIn30Days());
 
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
   }
 
   @Test
-  @DisplayName("선물 대상이 아니면 기본 Free 행은 Free 그대로다")
-  void gift_notTarget_defaultRowStaysFree() {
+  @DisplayName("혜택 대상이 아니거나 기간이 끝났으면 기본 Free 행은 Free 그대로다")
+  void promotion_notTarget_defaultRowStaysFree() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupFreeRow()));
-    when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.empty());
+    givenPromotion(Optional.empty());
 
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
   }
 
   @Test
-  @DisplayName("관리자가 회수한 Free 행(MANUAL)은 선물을 받지 않는다 — 회수가 선물로 되살아나지 않게")
-  void gift_revokedManualRowDoesNotGetGift() {
+  @DisplayName("관리자가 회수한 Free 행(MANUAL)은 혜택을 받지 않는다 — 회수가 체험·선물로 되살아나지 않게")
+  void promotion_revokedManualRowDoesNotGetPromotion() {
     Subscription revoked = subscription(PlanType.FREE, SubscriptionStatus.ACTIVE, null);
     revoked.setSource(SubscriptionSource.MANUAL);
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(revoked));
-    lenient().when(existingMemberProGift.giftEndsAt(MEMBER_ID)).thenReturn(Optional.of(LocalDateTime.now().plusDays(30)));
+    givenPromotion(trialEndingIn30Days());
+
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
+  }
+
+  @Test
+  @DisplayName("스토어 구독이 끝나 Free 로 떨어진 행은 체험을 받지 않는다 — 결제 이력이 있는 회원은 구독이 우선이다")
+  void promotion_expiredStoreRowDoesNotGetPromotion() {
+    Subscription expiredStore = subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+    expiredStore.setSource(SubscriptionSource.APPLE_IAP);
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(expiredStore));
+    givenPromotion(trialEndingIn30Days());
 
     assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
   }
@@ -254,16 +195,15 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("Pro 검문 거절 코드 표: 기능 7개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
+  @DisplayName("Pro 검문 거절 코드 표: 기능 6개 > 각자의 403 코드 (앱이 코드로 안내 문구를 고름), 검문 대상 아닌 권한은 호출 오류")
   void rejectionCodeTable_mapsEachGatedEntitlement() {
     Map<Entitlement, ErrorCode> expectedRejectionCodes = Map.of(
       Entitlement.AI_IMAGE_GENERATION, ErrorCode.AI_IMAGE_NOT_ALLOWED,
       Entitlement.WEEKLY_REPORT, ErrorCode.WEEKLY_REPORT_NOT_ALLOWED,
-      Entitlement.ROUTINE_TRANSLATE, ErrorCode.ROUTINE_TRANSLATE_NOT_ALLOWED,
       Entitlement.ROUTINE_SCHEDULE, ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED,
       Entitlement.GUARDIAN_VOICE, ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED,
-      Entitlement.ROUTINE_TEMPLATES, ErrorCode.EXPERT_ROUTINE_PRO_ONLY,
-      Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED);
+      Entitlement.ROUTINE_MEMORY, ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED,
+      Entitlement.CARD_SPLIT, ErrorCode.CARD_SPLIT_PRO_REQUIRED);
 
     expectedRejectionCodes.forEach((entitlement, code) -> {
       assertThat(entitlement.rejectionCode()).as(entitlement.name()).isEqualTo(code);
@@ -415,21 +355,6 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("다른 언어로 만들기 권한은 플랜 키를 읽는다 — 다른 키를 읽으면 Pro 가 못 쓰거나 Free 가 쓴다 (#1077)")
-  void snapshot_routineTranslateReadsPlanKey() {
-    when(subscriptionRepository.findByMemberId(MEMBER_ID))
-      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
-    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
-    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
-    when(systemConfigService.getBoolean(ConfigKey.PRO_ROUTINE_TRANSLATE)).thenReturn(true);
-
-    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
-
-    assertThat(snapshot.routineTranslate()).isTrue();
-    assertThat(Entitlement.ROUTINE_TRANSLATE.configKeyFor(PlanType.FREE)).isEqualTo(ConfigKey.FREE_ROUTINE_TRANSLATE);
-  }
-
-  @Test
   @DisplayName("스냅샷의 요일별 반복 일과 권한은 플랜 키를 읽는다 (Free 기본 꺼짐 · Pro 켜짐)")
   void snapshot_routineScheduleReadsPlanKeys() {
     when(subscriptionRepository.findByMemberId(MEMBER_ID))
@@ -460,6 +385,40 @@ class SystemConfigEntitlementServiceTest {
   void routineMemory_isOffByDefaultForBothPlans() {
     assertThat(ConfigKey.FREE_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
     assertThat(ConfigKey.PRO_ROUTINE_MEMORY.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("카드 나누기 권한은 Free·Pro 모두 기본 꺼짐 — 배포만으로 AI 호출이 열리면 안 된다")
+  void cardSplit_isOffByDefaultForBothPlans() {
+    assertThat(ConfigKey.FREE_CARD_SPLIT.getDefaultValue()).isEqualTo("false");
+    assertThat(ConfigKey.PRO_CARD_SPLIT.getDefaultValue()).isEqualTo("false");
+  }
+
+  @Test
+  @DisplayName("스냅샷 cardSplit 은 플랜 키를 읽는다 — Pro 켬이면 Pro 회원만 true")
+  void snapshot_cardSplitReadsPlanKeys() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    when(systemConfigService.getBoolean(ConfigKey.PRO_CARD_SPLIT)).thenReturn(true);
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).cardSplit()).isTrue();
+    assertThat(entitlementService.planSnapshot(PlanType.FREE).cardSplit()).isFalse();
+  }
+
+  @Test
+  @DisplayName("지운 설정의 권한 필드는 이름을 남기고 값이 고정이다 — 설정 값을 켜 둬도 바뀌지 않는다 (출시된 앱 계약)")
+  void snapshot_removedLimitFieldsAreFixed() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(true);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(7);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.profileMaxCount()).isEqualTo(-1);
+    assertThat(snapshot.historyRetentionDays()).isEqualTo(-1);
+    assertThat(snapshot.imageHighQuality()).isFalse();
   }
 
   @Test
@@ -555,5 +514,44 @@ class SystemConfigEntitlementServiceTest {
     assertThat(proPlan.routineMemory()).isFalse();
     assertThat(proPlan.weeklyReport()).isTrue();
     assertThat(proPlan.adsRemoved()).isTrue();
+  }
+
+  // --- 구매 크레딧이 있으면 Free 도 AI 그림 ---
+
+  private void givenFreeWithAiImageOff() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(systemConfigService.getBoolean(ConfigKey.FREE_AI_IMAGE_GENERATION)).thenReturn(false);
+  }
+
+  @Test
+  @DisplayName("구매 크레딧이 남은 Free 는 AI 그림이 허용된다 — 막으면 산 크레딧으로 그림을 못 그린다")
+  void freeWithPurchasedCredit_isAllowedAiImage() {
+    givenFreeWithAiImageOff();
+    when(purchasedCreditChecker.hasUsablePurchasedCredit(MEMBER_ID)).thenReturn(true);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isTrue();
+    assertThatCode(() -> entitlementService.requireAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION))
+      .doesNotThrowAnyException();
+    assertThat(entitlementService.snapshot(MEMBER_ID).aiImageGeneration()).isTrue();
+  }
+
+  @Test
+  @DisplayName("구매 크레딧을 다 쓴 Free 는 AI 그림이 다시 거절된다")
+  void freeWithoutPurchasedCredit_isRejectedAiImage() {
+    givenFreeWithAiImageOff();
+    when(purchasedCreditChecker.hasUsablePurchasedCredit(MEMBER_ID)).thenReturn(false);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isFalse();
+    assertThat(entitlementService.snapshot(MEMBER_ID).aiImageGeneration()).isFalse();
+  }
+
+  @Test
+  @DisplayName("요금제가 AI 그림을 허용하면 구매분을 조회하지 않는다 — 내 정보 조회마다 불리는 길에 쿼리를 더하지 않는다")
+  void planAllowsAiImage_doesNotQueryPurchasedCredit() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(systemConfigService.getBoolean(ConfigKey.FREE_AI_IMAGE_GENERATION)).thenReturn(true);
+
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.AI_IMAGE_GENERATION)).isTrue();
+    org.mockito.Mockito.verifyNoInteractions(purchasedCreditChecker);
   }
 }

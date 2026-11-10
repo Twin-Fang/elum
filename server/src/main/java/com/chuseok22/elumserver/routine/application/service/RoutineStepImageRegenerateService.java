@@ -176,7 +176,7 @@ public class RoutineStepImageRegenerateService {
     }
   }
 
-  /// 그림 생성. 호출 기록·고품질 판정에 회원·크레딧 작업·일과 언어를 세움
+  /// 그림 생성. 호출 기록에 회원·크레딧 작업·일과 언어를 세움
   private GeneratedImage generate(String memberId, String creditJobId, DrawTarget target, String guardianRequest) {
     AiCallContext.setMemberId(memberId);
     AiCallContext.setCreditJobId(creditJobId);

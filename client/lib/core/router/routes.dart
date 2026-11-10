@@ -59,18 +59,12 @@ abstract final class Routes {
   /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
   static const guardianWeeklyReport = '/guardian/weekly-report';
 
+  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02` (null 이면 이번 주)
+  static String guardianWeeklyReportOf(String? weekStart) =>
+      weekStart == null ? guardianWeeklyReport : '$guardianWeeklyReport?weekStart=${Uri.encodeQueryComponent(weekStart)}';
+
   /// 주간 계획: 요일별 반복 일과 (#782)
   static const guardianWeeklyPlan = '/guardian/weekly-plan';
-
-  /// 전문가 일과 목록 (일과관리 > 전문가 일과, Pro). 탭 바를 덮는 화면이라 셸 밖에 둔다
-  static const guardianExpertRoutines = '/guardian/expert-routines';
-
-  /// 전문가 일과 미리 보기
-  static const guardianExpertRoutine = '/guardian/expert-routines/:expertRoutineId';
-
-  /// 전문가 일과 미리 보기 경로: `/guardian/expert-routines/{id}`
-  static String guardianExpertRoutineOf(String expertRoutineId) =>
-      '/guardian/expert-routines/${Uri.encodeComponent(expertRoutineId)}';
 
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
@@ -116,6 +110,9 @@ abstract final class Routes {
 
   /// 크레딧 사용 내역 (Figma `1589:8359`). 설정 크레딧 카드에서 들어온다.
   static const guardianCreditHistory = '/guardian/settings/credit-history';
+
+  /// 내 크레딧: 종류별 잔액 · 구독 안내 · 꾸러미 구매
+  static const guardianMyCredit = '/guardian/settings/my-credit';
 
   /// 함께하는 사람. 시안이 없어 임시 화면이다.
   static const guardianPeople = '/guardian/settings/people';

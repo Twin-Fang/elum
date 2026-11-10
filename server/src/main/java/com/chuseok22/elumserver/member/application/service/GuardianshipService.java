@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRe
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.routine.application.service.RoutineMemoryService;
+import com.chuseok22.elumserver.routine.application.service.WeeklyReportSummaryService;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ public class GuardianshipService {
   private final ProfileInviteRepository profileInviteRepository;
   private final NotificationCleanupService notificationCleanupService;
   private final RoutineMemoryService routineMemoryService;
+  private final WeeklyReportSummaryService weeklyReportSummaryService;
 
   /**
    * 가입한 사람의 빈 이룸이를 만든다. 온보딩에서 이름·캐릭터를 채운다.
@@ -127,8 +129,8 @@ public class GuardianshipService {
     // 내가 만든 이 이룸이의 일과 — 승인 전(임시저장)도 함께 (E12). 단계는 cascade 로 함께 지워진다.
     // 이룸이가 지금 수행 중이면 이룸이 휴대폰의 다음 요청이 404 를 받는다 (E11).
     routineRepository.deleteAll(routineRepository.findAllByProfileIdAndCreatedBy(profileId, memberId));
-    // 이 이룸이 AI 메모 (#1082) — 나간 보호자가 고친 카드에서 배운 줄이 남지 않게 함께 돌보던 이룸이도 지움
-    routineMemoryService.forgetProfile(profileId);
+    // 나간 보호자의 AI 메모리 (이 이룸이에서 쓰던 규칙·근거·수정 기록·거절 기억). 다른 보호자의 메모리는 그대로
+    routineMemoryService.forgetMember(profileId, memberId);
 
     // 내가 붙인 이 이룸이의 휴대폰 — 연결을 끊고 그 기기 세션을 폐기한다 (E13). 남은 보호자가 다시 붙인다.
     List<DeviceLink> myPhones = deviceLinkRepository.findAllByMemberIdAndProfileId(memberId, profileId);
@@ -222,6 +224,8 @@ public class GuardianshipService {
     profileInviteRepository.deleteAllByProfileId(profileId);
     // 이 이룸이에 딸린 알림 (profile_id 에 외래키가 없어 직접 지움)
     notificationCleanupService.deleteAllOfProfile(profileId);
+    // 주간 리포트 정리 글 (표의 CASCADE 에 기대지 않고 직접 지움)
+    weeklyReportSummaryService.forgetProfile(profileId);
     profileRepository.delete(profile);
   }
 

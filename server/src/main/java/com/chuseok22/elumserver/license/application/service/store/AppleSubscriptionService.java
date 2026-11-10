@@ -36,31 +36,35 @@ import org.springframework.stereotype.Service;
 public class AppleSubscriptionService {
 
   // StoreKit 2 JWS 는 3~5KB. 이보다 크면 형식 오류
-  static final int SIGNED_DATA_MAX_LENGTH = 16_384;
+  public static final int SIGNED_DATA_MAX_LENGTH = 16_384;
   private static final String EVENT_TYPE_SUBTYPE_DELIMITER = ".";
 
   private final StoreSubscriptionSettings settings;
   private final AppleSignedDataVerifier verifier;
   private final AppleSubscriptionStatusClient statusClient;
   private final StorePurchaseApplier applier;
+  private final StoreConsumableRefundHandler consumableRefundHandler;
   private final Clock clock;
 
   @Autowired
   public AppleSubscriptionService(
     StoreSubscriptionSettings settings, AppleSignedDataVerifier verifier,
-    AppleSubscriptionStatusClient statusClient, StorePurchaseApplier applier
+    AppleSubscriptionStatusClient statusClient, StorePurchaseApplier applier,
+    StoreConsumableRefundHandler consumableRefundHandler
   ) {
-    this(settings, verifier, statusClient, applier, Clock.systemDefaultZone());
+    this(settings, verifier, statusClient, applier, consumableRefundHandler, Clock.systemDefaultZone());
   }
 
   AppleSubscriptionService(
     StoreSubscriptionSettings settings, AppleSignedDataVerifier verifier,
-    AppleSubscriptionStatusClient statusClient, StorePurchaseApplier applier, Clock clock
+    AppleSubscriptionStatusClient statusClient, StorePurchaseApplier applier,
+    StoreConsumableRefundHandler consumableRefundHandler, Clock clock
   ) {
     this.settings = settings;
     this.verifier = verifier;
     this.statusClient = statusClient;
     this.applier = applier;
+    this.consumableRefundHandler = consumableRefundHandler;
     this.clock = clock;
   }
 
@@ -147,6 +151,10 @@ public class AppleSubscriptionService {
       return StoreNotificationOutcome.IGNORED;
     }
     JWSTransactionDecodedPayload transaction = verifier.verifyTransactionIn(data.getSignedTransactionInfo(), environment, context);
+    // 소모성 상품(크레딧 꾸러미)은 환불 알림만 받아 회수한다
+    if (transaction.getType() == Type.CONSUMABLE) {
+      return applyConsumableNotification(type, transaction);
+    }
     JWSRenewalInfoDecodedPayload renewal = data.getSignedRenewalInfo() == null
       ? null : verifier.verifyRenewalInfo(data.getSignedRenewalInfo(), environment, context);
     if (!isAllowedSubscription(transaction)) {
@@ -164,6 +172,16 @@ public class AppleSubscriptionService {
       snapshot, null, StorePurchaseTrigger.STORE_NOTIFICATION, eventType, notificationId));
     log.info("[subscription notify] applied : store=APPLE_IAP, type={}, result={}, purchase={}",
       eventType, outcome.result(), StoreLogValues.mask(snapshot.purchaseKey()));
+    return StoreNotificationOutcome.PROCESSED;
+  }
+
+  // 소모성 거래 알림: REFUND 만 회수 (그 밖의 알림은 받을 필요 없음)
+  private StoreNotificationOutcome applyConsumableNotification(NotificationTypeV2 type, JWSTransactionDecodedPayload transaction) {
+    if (type != NotificationTypeV2.REFUND || isBlank(transaction.getTransactionId())) {
+      log.info("[subscription notify] ignored : store=APPLE_IAP, type={}, consumable", type);
+      return StoreNotificationOutcome.IGNORED;
+    }
+    consumableRefundHandler.refund(SubscriptionSource.APPLE_IAP, transaction.getTransactionId());
     return StoreNotificationOutcome.PROCESSED;
   }
 

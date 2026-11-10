@@ -3,7 +3,7 @@
 # 릴리스 + 체인지로그 관리 워크플로우 (구 RELEASE-CHANGELOG)
 # ===================================================================
 #
-# 이 워크플로우는 main 브랜치로 릴리스 PR(develop→main)이 생성될 때 릴리스 노트를 만들어
+# 이 워크플로우는 deploy 브랜치로 릴리스 PR(main→deploy)이 생성될 때 릴리스 노트를 만들어
 # CHANGELOG.json / CHANGELOG.md를 업데이트하고 자동 머지합니다.
 #
 # 릴리스 노트 생성기(provider)는 version.yml options.changelog.provider로 고른다 (#455):
@@ -31,8 +31,8 @@
 # ===================================================================
 #
 # 작동 방식:
-# 1. main 브랜치로 릴리스 PR(develop→main) 생성 시 트리거
-# 1-1. PR head가 develop이 아니면 전체 파이프라인 스킵 (실수 feature PR 보호)
+# 1. deploy 브랜치로 릴리스 PR(main→deploy) 생성 시 트리거
+# 1-1. PR head가 main이 아니면 전체 파이프라인 스킵 (실수 feature PR 보호)
 # 2. PR 제목을 즉시 🚀 Deploy 형식으로 변경
 # 3. CodeRabbit Summary 요청 후 최대 10분 대기
 # 4. Summary 내용을 파싱하여 CHANGELOG 파일들 업데이트
@@ -49,7 +49,7 @@ name: RELEASE CHANGELOG
 on:
   pull_request_target:
     types: [opened]
-    branches: ["main"]
+    branches: ["deploy"]
 
 permissions:
   contents: write
@@ -61,9 +61,9 @@ jobs:
   # Job 1: CodeRabbit Summary 감지 및 파싱
   detect-and-parse:
     name: CodeRabbit Summary 감지 및 파싱
-    # head 가드: main이 default라 feature PR의 base가 main으로 잘못 열릴 수 있다.
-    # develop발 릴리스 PR만 automerge 파이프라인을 탄다. (후속 job은 needs 조건으로 연쇄 스킵)
-    if: github.event.pull_request.head.ref == 'develop'
+    # head 가드: 작업 PR의 base가 deploy로 잘못 열릴 수 있다.
+    # main발 릴리스 PR만 automerge 파이프라인을 탄다. (후속 job은 needs 조건으로 연쇄 스킵)
+    if: github.event.pull_request.head.ref == 'main'
     runs-on: ubuntu-latest
     outputs:
       summary_found: ${{ steps.detect_summary.outputs.summary_found }}
@@ -305,8 +305,9 @@ jobs:
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          # main(프로덕션) 대비 커밋을 분석하도록 origin/main 확보 — HEAD는 develop 체크아웃
+          # deploy(프로덕션) 대비 커밋을 분석하도록 base 확보 — HEAD는 PR head(main) 체크아웃
           git fetch origin "${{ github.event.pull_request.base.ref }}" 2>/dev/null || true
+          export COMMIT_RANGE="origin/${{ github.event.pull_request.base.ref }}..HEAD"
 
           echo "🪜 changelog provider 사다리 실행 (provider=$CHANGELOG_PROVIDER)"
           python3 .github/scripts/changelog_providers/ladder.py
@@ -392,8 +393,8 @@ jobs:
       - name: 릴리스 구간 커밋 수집
         if: steps.semver_options.outputs.semver_auto == 'true'
         run: |
-          git fetch origin main
-          git log --pretty=%s "origin/main..HEAD" > "$RUNNER_TEMP/commits.txt"
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          git log --pretty=%s "origin/${{ github.event.pull_request.base.ref }}..HEAD" > "$RUNNER_TEMP/commits.txt"
           echo "ℹ️ 수집된 커밋: $(wc -l < "$RUNNER_TEMP/commits.txt")줄"
 
       - name: 릴리스 버전 확정
@@ -477,11 +478,11 @@ jobs:
             REPO_NAME=$(basename "${{ github.repository }}")
             VERSION="${{ steps.bump_version.outputs.new_version }}"
 
-            # [skip ci] 미포함 의도: 이 커밋이 develop→main 머지로 main HEAD가 되어야
-            # 배포/동기화 워크플로우(CICD·NPM-PUBLISH·README-UPDATE·PLUGIN-SYNC)가 main push로 트리거된다.
+            # [skip ci] 미포함 의도: 이 커밋이 main→deploy 머지로 deploy HEAD가 되어야
+            # 배포/동기화 워크플로우(CICD·NPM-PUBLISH·README-UPDATE·PLUGIN-SYNC)가 deploy push로 트리거된다.
             # VERSION-CONTROL 안전망은 paths-ignore(version.yml) + release_guard(version.yml 변경 감지)로
             # 이 커밋을 릴리스로 인식해 재bump를 건너뛰므로 무한 루프가 없다.
-            # develop을 트리거로 쓰는 워크플로우는 없어 develop push에서 중복 CI도 발생하지 않는다.
+            # main을 트리거로 쓰는 워크플로우는 없어 main push에서 중복 CI도 발생하지 않는다.
             git commit -m "$REPO_NAME 버전 관리 : chore : v$VERSION 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR #${{ github.event.pull_request.number }})"
 
             # Race Condition 방지: pull-rebase 후 push (최대 3회 재시도)
@@ -559,16 +560,16 @@ jobs:
           git fetch origin $PR_HEAD
           git fetch origin $PR_BASE
 
-          # BASE 브랜치(main)로 체크아웃
+          # BASE 브랜치(deploy)로 체크아웃
           echo "📦 $PR_BASE 브랜치로 체크아웃 중..."
           git checkout $PR_BASE
           git pull origin $PR_BASE
 
-          # HEAD 브랜치(develop)의 최신 변경사항 다시 가져오기 (race condition 방지)
+          # HEAD 브랜치(main)의 최신 변경사항 다시 가져오기 (race condition 방지)
           echo "🔄 $PR_HEAD 브랜치의 최신 변경사항 가져오는 중..."
           git fetch origin $PR_HEAD
 
-          # HEAD 브랜치(develop)의 변경사항을 BASE(main)에 머지
+          # HEAD 브랜치(main)의 변경사항을 BASE(deploy)에 머지
           echo "🔀 $PR_HEAD의 변경사항을 $PR_BASE에 머지 중..."
           if git merge --no-edit origin/$PR_HEAD; then
             echo "✅ 머지 성공"
@@ -580,7 +581,7 @@ jobs:
             exit 1
           fi
 
-          # main 브랜치에 푸시 (다른 워크플로우 트리거)
+          # base(deploy) 브랜치에 푸시 (다른 워크플로우 트리거)
           # Race Condition 방지: pull-rebase 후 push (최대 3회 재시도)
           echo "🚀 $PR_BASE 브랜치에 푸시 중..."
           MAX_RETRIES=3

@@ -196,6 +196,12 @@ abstract interface class LocalStorage {
   DateTime? get pushPermissionNudgedAt;
   Future<void> setPushPermissionNudgedAt(DateTime at);
 
+  /// 보호자 홈 `알림이 꺼져 있어요` 띠를 닫은 시각 (닫으면 7일 숨김). 없으면 null
+  ///
+  /// 기기에 속하고 [clearAll] 이 지우지 않는다
+  DateTime? get homeNotificationNoticeDismissedAt;
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at);
+
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
   /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
@@ -251,6 +257,16 @@ abstract interface class LocalStorage {
   /// 일과 id 는 계정 안에서만 뜻이 있어 휴대폰에 속하고 [clearAll] 이 지우지 않는다
   List<String> get talkShareHintDismissedRoutineIds;
   Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
+
+  /// 보호자 홈 권유 카드: 종류 이름 > 마지막으로 보인 시각 (같은 종류는 한 달에 한 번까지)
+  ///
+  /// 일과·계정에 묶인 값이라 [clearAll] 이 지운다
+  Map<String, DateTime> get homeSuggestionShownAtByKind;
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind);
+
+  /// 보호자 홈 권유 카드를 닫은 기록 `{종류 이름}:{일과 id}` (다시 나오지 않음). [clearAll] 이 지운다
+  Set<String> get homeSuggestionDismissedKeys;
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys);
 
   /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
   ///

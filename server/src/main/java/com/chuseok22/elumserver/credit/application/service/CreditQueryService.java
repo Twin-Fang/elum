@@ -27,7 +27,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * 보호자에게 보여 줄 크레딧 요약과 "지금 시작할 수 있는가" 판정.
  *
- * <p>조회도 쓰기가 있다 — 이번 주 지급을 만들고 멈춘 예약을 푼다. 그래서 계정을 잠근 트랜잭션 안에서 한다.
+ * <p>조회도 쓰기가 있다 — 이번 주기 지급을 만들고 멈춘 예약을 푼다. 그래서 계정을 잠근 트랜잭션 안에서 한다.
  * 장부를 못 읽으면 막는다(fail-closed, AI_CREDIT_UNAVAILABLE) — 0 을 돌려주면 보호자는 다 썼다고 믿는다.
  */
 @Slf4j
@@ -44,6 +44,7 @@ public class CreditQueryService {
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
   private final CreditReservationService reservationService;
+  private final CreditBreakdownService breakdownService;
   private final EntitlementService entitlementService;
   private final AiCreditJobRepository jobRepository;
   private final AiCreditLedgerRepository ledgerRepository;
@@ -54,23 +55,24 @@ public class CreditQueryService {
   @Autowired
   public CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
-    CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    CreditReservationService reservationService, CreditBreakdownService breakdownService,
+    EntitlementService entitlementService, AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     PlatformTransactionManager transactionManager
   ) {
-    this(policyService, accountService, reservationService, entitlementService, jobRepository, ledgerRepository,
-      transactionManager, Clock.systemDefaultZone());
+    this(policyService, accountService, reservationService, breakdownService, entitlementService, jobRepository,
+      ledgerRepository, transactionManager, Clock.systemDefaultZone());
   }
 
   CreditQueryService(
     CreditPolicyService policyService, CreditAccountService accountService,
-    CreditReservationService reservationService, EntitlementService entitlementService,
-    AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
+    CreditReservationService reservationService, CreditBreakdownService breakdownService,
+    EntitlementService entitlementService, AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     PlatformTransactionManager transactionManager, Clock clock
   ) {
     this.policyService = policyService;
     this.accountService = accountService;
     this.reservationService = reservationService;
+    this.breakdownService = breakdownService;
     this.entitlementService = entitlementService;
     this.jobRepository = jobRepository;
     this.ledgerRepository = ledgerRepository;
@@ -86,7 +88,7 @@ public class CreditQueryService {
   public CreditSummaryResponse getMine(String memberId) {
     AiCreditPolicy policy = currentPolicy();
     if (!policy.isEnabled()) {
-      return CreditSummaryResponse.disabled(MAX_CARDS_PER_ROUTINE);
+      return CreditSummaryResponse.disabled(MAX_CARDS_PER_ROUTINE, accountService.periodUnit());
     }
     Snapshot snapshot = snapshot(memberId, policy);
     CreditBalance balance = snapshot.balance();
@@ -114,7 +116,9 @@ public class CreditQueryService {
       // 일과 시작 기준은 예약과 같은 값 (글 무료 권한이면 그림 한 장 단가)
       !snapshot.isFrozen() && balance.available() >= snapshot.routineCreateStartCost(),
       !snapshot.isFrozen() && balance.available() >= cardImage,
-      snapshot.freeImageRegeneratesLeftToday()
+      snapshot.freeImageRegeneratesLeftToday(),
+      balance.period().unit(),
+      snapshot.breakdown()
     );
   }
 
@@ -139,6 +143,11 @@ public class CreditQueryService {
     }
   }
 
+  /// 설정한 주기 단위로 now 가 든 주기 (다시 채움 알림이 지난 주기를 구할 때)
+  public CreditPeriod currentPeriod(LocalDateTime now) {
+    return accountService.currentPeriod(now);
+  }
+
   /// 주기 안에 사용·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, memberId 가 없는(완전 삭제된) 계정 제외)
   public List<String> memberIdsDepletedIn(CreditPeriod period) {
     return ledgerRepository.findMemberIdsWithBalanceDepletedIn(DEPLETING_LEDGER_TYPES, period.start(), period.end())
@@ -154,8 +163,8 @@ public class CreditQueryService {
     }
   }
 
-  /// 계정을 잠그고 멈춘 예약 정리 → 이번 주 지급 보장 → 잔액을 한 트랜잭션에서 읽는다.
-  /// 지급량은 주 시작 때 정책으로 정한다(grantPolicyFor) — 주 중간 NEXT_PERIOD 발행이 이번 주로 새지 않게.
+  /// 계정을 잠그고 멈춘 예약 정리 → 이번 주기 지급 보장 → 잔액을 한 트랜잭션에서 읽는다.
+  /// 지급량은 주기 시작 때 정책으로 정한다(grantPolicyFor) — 주기 중간 NEXT_PERIOD 발행이 이번 주기로 새지 않게.
   private Snapshot snapshot(String memberId, AiCreditPolicy policy) {
     Snapshot snapshot;
     try {
@@ -169,7 +178,9 @@ public class CreditQueryService {
         List<AiCreditJob> reserved = jobRepository.findByAccountIdAndStatus(account.getId(), CreditJobStatus.RESERVED);
         int freeRegeneratesLeft = reservationService.freeRegeneratesLeftToday(account, now);
         int routineCreateStartCost = reservationService.routineCreateStartCost(account, policy);
-        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft, routineCreateStartCost);
+        List<CreditSummaryResponse.BreakdownLine> breakdown = breakdownService.linesOf(
+          account.getId(), now, balance.period().start(), clock.getZone());
+        return new Snapshot(balance, reserved, account.isFrozen(), freeRegeneratesLeft, routineCreateStartCost, breakdown);
       });
     } catch (CustomException e) {
       throw e;
@@ -186,7 +197,7 @@ public class CreditQueryService {
 
   private record Snapshot(
     CreditBalance balance, List<AiCreditJob> reservedJobs, boolean isFrozen, int freeImageRegeneratesLeftToday,
-    int routineCreateStartCost
+    int routineCreateStartCost, List<CreditSummaryResponse.BreakdownLine> breakdown
   ) {
 
   }

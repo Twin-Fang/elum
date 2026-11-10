@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.Pr
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.core.RoutineCardText;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -98,13 +99,14 @@ class RoutineCreateServiceMemoryTest {
   }
 
   @Test
-  @DisplayName("Pro + 켜짐: AI 호출에 메모가 실리고, AI 처음 카드 글을 스냅샷으로 남기며, 끝나면 맥락을 비운다")
+  @DisplayName("Pro + 켜짐: AI 호출에 규칙이 실리고, AI 처음 카드 글을 사본으로 남기며, 응답에 넣은 규칙 수가 오고, 끝나면 맥락을 비운다")
   void activePlan_carriesMemoryAndStoresDraft() {
     when(routinePersonalizationProvider.planFor("member-1", "profile-1", "하늘이", AppLocale.KO))
-      .thenReturn(new RoutinePersonalizationProvider.Plan(true, PERSONALIZATION));
+      .thenReturn(new RoutinePersonalizationProvider.Plan(true, PERSONALIZATION, 1));
 
-    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
+    assertThat(response.appliedMemoryRuleCount()).isEqualTo(1);
     assertThat(seenByAi.get()).isEqualTo(PERSONALIZATION);
     assertThat(RoutineMemoryJson.readCards(savedRoutine().getAiDraftCards()))
       .containsExactly(new RoutineCardText("손을 닦아요", "비누로 손을 닦아요"));

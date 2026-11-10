@@ -31,28 +31,33 @@ public class GoogleSubscriptionService {
 
   static final int PURCHASE_TOKEN_MAX_LENGTH = StorePurchase.PURCHASE_KEY_MAX_LENGTH;
   static final int PRODUCT_ID_MAX_LENGTH = 150;
-  /// voidedPurchaseNotification.productType: 1 구독, 2 일회성 상품
+  /// voidedPurchaseNotification.productType: 1 구독, 2 일회성 상품(크레딧 꾸러미)
   private static final int VOIDED_PRODUCT_TYPE_SUBSCRIPTION = 1;
+  private static final int VOIDED_PRODUCT_TYPE_ONE_TIME = 2;
   private static final String VOIDED_EVENT_TYPE = "VOIDED_PURCHASE";
 
   private final StoreSubscriptionSettings settings;
   private final GooglePlayDeveloperClient playClient;
   private final StorePurchaseApplier applier;
+  private final StoreConsumableRefundHandler consumableRefundHandler;
   private final Clock clock;
 
   @Autowired
   public GoogleSubscriptionService(
-    StoreSubscriptionSettings settings, GooglePlayDeveloperClient playClient, StorePurchaseApplier applier
+    StoreSubscriptionSettings settings, GooglePlayDeveloperClient playClient, StorePurchaseApplier applier,
+    StoreConsumableRefundHandler consumableRefundHandler
   ) {
-    this(settings, playClient, applier, Clock.systemDefaultZone());
+    this(settings, playClient, applier, consumableRefundHandler, Clock.systemDefaultZone());
   }
 
   GoogleSubscriptionService(
-    StoreSubscriptionSettings settings, GooglePlayDeveloperClient playClient, StorePurchaseApplier applier, Clock clock
+    StoreSubscriptionSettings settings, GooglePlayDeveloperClient playClient, StorePurchaseApplier applier,
+    StoreConsumableRefundHandler consumableRefundHandler, Clock clock
   ) {
     this.settings = settings;
     this.playClient = playClient;
     this.applier = applier;
+    this.consumableRefundHandler = consumableRefundHandler;
     this.clock = clock;
   }
 
@@ -144,6 +149,9 @@ public class GoogleSubscriptionService {
     JsonNode notification = message.notification();
     JsonNode voided = notification.path("voidedPurchaseNotification");
     if (voided.isObject()) {
+      if (voided.path("productType").asInt(0) == VOIDED_PRODUCT_TYPE_ONE_TIME) {
+        return refundConsumable(voided);
+      }
       if (voided.path("productType").asInt(0) != VOIDED_PRODUCT_TYPE_SUBSCRIPTION || !voided.path("purchaseToken").isTextual()) {
         return StoreNotificationOutcome.IGNORED;
       }
@@ -159,6 +167,16 @@ public class GoogleSubscriptionService {
     }
     return applySubscriptionNotification(
       subscription.path("purchaseToken").asText(), subscription.path("notificationType").asInt(0), message.messageId());
+  }
+
+  // 일회성 상품 환불(voided): 주문 id 로 크레딧 구매 회수
+  private StoreNotificationOutcome refundConsumable(JsonNode voided) {
+    String orderId = voided.path("orderId").asText("");
+    if (orderId.isBlank()) {
+      return StoreNotificationOutcome.IGNORED;
+    }
+    consumableRefundHandler.refund(SubscriptionSource.GOOGLE_IAP, orderId);
+    return StoreNotificationOutcome.PROCESSED;
   }
 
   private StoreNotificationOutcome applySubscriptionNotification(String purchaseToken, int notificationType, String messageId) {

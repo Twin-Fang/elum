@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.routine.application.dto.request.CardSplitRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
@@ -10,10 +11,12 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRe
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.CardSplitSuggestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
+import com.chuseok22.elumserver.routine.application.service.CardSplitService;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
@@ -48,6 +51,7 @@ public class RoutineController implements RoutineControllerDocs {
 
   private final RoutineService routineService;
   private final RoutineStepEditService routineStepEditService;
+  private final CardSplitService cardSplitService;
   private final RoutineCreateService routineCreateService;
   private final RoutineQueryService routineQueryService;
   private final RoutineProgressService routineProgressService;
@@ -287,6 +291,28 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     Caller caller = Caller.from(authentication);
     RoutineResponse response = routineStepEditService.deleteStep(caller, routineId, stepId);
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
+  }
+
+  // 카드 글이 자유 텍스트라 민감정보가 섞일 수 있어 파라미터·결과를 로그에서 뺀다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/{routineId}/steps/{stepId}/split-suggestion")
+  public ResponseEntity<CardSplitSuggestionResponse> suggestCardSplit(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
+  ) {
+    return ResponseEntity.ok(cardSplitService.suggest(Caller.from(authentication), routineId, stepId));
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/{routineId}/steps/{stepId}/split")
+  public ResponseEntity<RoutineResponse> applyCardSplit(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @PathVariable String stepId,
+    @RequestBody CardSplitRequest request
+  ) {
+    Caller caller = Caller.from(authentication);
+    RoutineResponse response = cardSplitService.apply(caller, routineId, stepId, request);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 }

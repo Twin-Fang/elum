@@ -146,10 +146,12 @@ class OAuthLoginServiceTest {
     GuardianshipService guardianshipService = new GuardianshipService(
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository,
       profileInviteRepository, notificationCleanupService,
-      mock(com.chuseok22.elumserver.routine.application.service.RoutineMemoryService.class));
+      mock(com.chuseok22.elumserver.routine.application.service.RoutineMemoryService.class),
+      mock(com.chuseok22.elumserver.routine.application.service.WeeklyReportSummaryService.class));
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
+      mock(com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseCleanupService.class),
       adRewardSessionRepository, feedbackService, notificationCleanupService,
       mock(com.chuseok22.elumserver.talk.application.service.TalkCleanupService.class),
       mock(com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles.class), routineGroupService,

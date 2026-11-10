@@ -6,15 +6,23 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/weekly_report.dart';
 import '../card_export/print_page.dart';
 
-/// 선생님·치료사에게 보내는 한 장 (A4 595×842 포인트): 제목 > 숫자 4칸 > 월~일 > 일과별 > 남은 카드 > 출처
+/// 선생님·치료사에게 보내는 한 장 (A4 595×842 포인트): 제목 > 숫자 4칸 > 정리 글 > 월~일 > 일과별 > 남은 카드 > 출처
 /// 묶음 사이는 최소 [_blockGap] + 남는 높이를 고르게 나눔 (줄이 적어도 아래 절반이 비지 않게)
 ///
-/// 화면 미리 보기 = 굽는 파일 그대로. Pro 기능이라 워터마크 없음 · 원문·보상 문구 없음.
+/// 화면 미리 보기 = 굽는 파일 그대로. Pro 는 아래 띠 없음 · 원문·보상 문구 없음.
 class WeeklyReportSharePage extends StatelessWidget {
-  const WeeklyReportSharePage({super.key, required this.report, required this.elumiName});
+  const WeeklyReportSharePage({
+    super.key,
+    required this.report,
+    required this.elumiName,
+    required this.hasWatermark,
+  });
 
   final WeeklyReport report;
   final String elumiName;
+
+  /// Free: 아래 띠에 이룸 로고 + 소개 글 (인쇄물과 같은 띠)
+  final bool hasWatermark;
 
   /// 한 장에 넣는 일과 줄 수 (넘치면 마친 횟수 많은 순 앞부분만)
   static const maxRoutineRows = 8;
@@ -42,9 +50,10 @@ class WeeklyReportSharePage extends StatelessWidget {
     final primary = colors.textPrimary;
     final muted = colors.textSecondary;
     final routines = report.routines.take(maxRoutineRows).toList();
+    final summary = report.summary;
     return PrintPage(
       size: PrintPageSize.a4,
-      hasWatermark: false,
+      hasWatermark: hasWatermark,
       shouldShowPictogramCredit: false,
       margin: _pageMargin,
       child: Column(
@@ -75,6 +84,11 @@ class WeeklyReportSharePage extends StatelessWidget {
             l10n.weeklyReportCompletionSummary(report.sentRoutineCount, report.completedRoutineCount),
             style: typo.printCardDescription.copyWith(color: primary),
           ),
+          // 루미 정리 글 (있을 때만)
+          if (summary != null) ...[
+            const SizedBox(height: _blockGap),
+            _SummaryPanel(text: summary.paragraph),
+          ],
           ..._blockGapWithShare,
           // 월 ~ 일: 요일 + 마친/보낸 (테두리 판)
           DecoratedBox(
@@ -203,6 +217,35 @@ class _FactRow extends StatelessWidget {
           const SizedBox(width: _labelToValue),
           Text(valueText, style: style),
         ],
+      ),
+    );
+  }
+}
+
+/// 루미 정리 글 판: 테두리 r12, 줄이 길면 여섯 줄까지 (종이 칸이 넘치지 않게)
+class _SummaryPanel extends StatelessWidget {
+  const _SummaryPanel({required this.text});
+
+  final String text;
+
+  static const _maxLines = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: colors.border),
+        borderRadius: BorderRadius.circular(WeeklyReportSharePage._panelRadius),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(WeeklyReportSharePage._dayPanelPadding),
+        child: Text(
+          text,
+          maxLines: _maxLines,
+          overflow: TextOverflow.ellipsis,
+          style: context.typo.printCardDescription.copyWith(color: colors.textPrimary),
+        ),
       ),
     );
   }

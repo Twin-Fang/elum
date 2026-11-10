@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/idempotency_key.dart';
 import '../../../shared/models/routine.dart';
-import '../../credit/application/credit_summary_refresh.dart';
 import '../data/routine_library_api.dart';
 import 'routine_providers.dart';
 
@@ -34,19 +32,6 @@ class RoutineLibraryController {
   /// 복사본은 홈에 나오지 않지만 목록은 함께 다시 받는다 (한 곳에서 묶어 받기)
   Future<Attempt<Routine>> copy(String routineId) =>
       _refreshAfter(_api.copy(routineId));
-
-  /// 다른 언어로 만들기: 새 원본은 일과관리에 생기므로 목록을 다시 받는다 + 글 크레딧을 써 잔액도 다시
-  Future<Attempt<Routine>> translate(String routineId, String language) async {
-    final translateAttempt = await _refreshAfter(
-      _api.translate(
-        routineId,
-        language: language,
-        idempotencyKey: newIdempotencyKey(),
-      ),
-    );
-    if (translateAttempt.isOk) refreshCreditSummary(_ref);
-    return translateAttempt;
-  }
 
   /// 이름은 홈 목록에도 보이므로 함께 다시 받는다
   Future<Attempt<Routine>> rename(String routineId, String title) =>

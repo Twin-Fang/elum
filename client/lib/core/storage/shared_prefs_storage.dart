@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../logger/app_logger.dart';
@@ -58,6 +60,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
   static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
+  // 보호자 홈 알림 꺼짐 띠를 닫은 시각 (ISO-8601, 7일 숨김)
+  static const _kHomeNotificationNoticeDismissedAt = 'push.homeNoticeDismissedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
   static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
@@ -73,6 +77,10 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
   static const _kTalkShareHintDismissedRoutineIds =
       'talkShareHintDismissedRoutineIds';
+  // 보호자 홈 권유: 종류별 마지막 표시 시각 {종류 이름: ISO-8601} JSON
+  static const _kHomeSuggestionShownAtByKind = 'homeSuggestion.shownAtByKind';
+  // 보호자 홈 권유: 닫은 권유 `{종류 이름}:{일과 id}` 목록
+  static const _kHomeSuggestionDismissedKeys = 'homeSuggestion.dismissedKeys';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
 
@@ -100,6 +108,8 @@ class SharedPrefsStorage implements LocalStorage {
     _kCachedTodayOwner,
     _kTalkImportedSeenRoutineIds,
     _kTalkShareHintDismissedRoutineIds,
+    _kHomeSuggestionShownAtByKind,
+    _kHomeSuggestionDismissedKeys,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -112,6 +122,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kCachedStoreSellingOpen,
     _kHasAskedPushPermission,
     _kPushPermissionNudgedAt,
+    _kHomeNotificationNoticeDismissedAt,
     _kUpdateSuggestionShown,
     _kHomeCoachSeen,
     _kManageCoachSeen,
@@ -433,6 +444,19 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  DateTime? get homeNotificationNoticeDismissedAt {
+    final raw = _prefs.getString(_kHomeNotificationNoticeDismissedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kHomeNotificationNoticeDismissedAt, raw);
+    await _prefs.setString(_kHomeNotificationNoticeDismissedAt, raw);
+  }
+
+  @override
   String? get updateSuggestionShownRecord =>
       _prefs.getString(_kUpdateSuggestionShown);
 
@@ -481,6 +505,42 @@ class SharedPrefsStorage implements LocalStorage {
       _kTalkShareHintDismissedRoutineIds,
       routineIds,
     );
+  }
+
+  @override
+  Map<String, DateTime> get homeSuggestionShownAtByKind {
+    final raw = _prefs.getString(_kHomeSuggestionShownAtByKind);
+    if (raw == null) return const {};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return const {};
+      return {
+        for (final entry in decoded.entries) entry.key: ?DateTime.tryParse('${entry.value}'),
+      };
+    } on FormatException catch (e) {
+      // 깨진 값은 기록 없음으로 봄 (권유가 다시 나올 수 있을 뿐)
+      AppLogger.error('storage', e, null, {'key': _kHomeSuggestionShownAtByKind});
+      return const {};
+    }
+  }
+
+  @override
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind) async {
+    final raw = jsonEncode({
+      for (final entry in shownAtByKind.entries) entry.key: entry.value.toIso8601String(),
+    });
+    AppLogger.storageWrite(_kHomeSuggestionShownAtByKind, raw);
+    await _prefs.setString(_kHomeSuggestionShownAtByKind, raw);
+  }
+
+  @override
+  Set<String> get homeSuggestionDismissedKeys =>
+      (_prefs.getStringList(_kHomeSuggestionDismissedKeys) ?? const <String>[]).toSet();
+
+  @override
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async {
+    AppLogger.storageWrite(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
+    await _prefs.setStringList(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
   }
 
   @override

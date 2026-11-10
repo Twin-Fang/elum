@@ -6,7 +6,9 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../credit/application/credit_costs.dart';
 import '../../../credit/data/credit_repository.dart';
+import '../../../credit/domain/credit_period_unit.dart';
 import 'ai_credit_summary_view.dart';
 
 /// 보호자 설정의 `이번 주 AI 생성` 카드.
@@ -37,10 +39,11 @@ class AiCreditCard extends ConsumerWidget {
       AsyncData(value: final s) when !s.enabled => null,
       AsyncData(value: final s) => AiCreditSummaryView(summary: s),
       AsyncError(:final error) => _ErrorBody(
+        periodUnit: ref.watch(creditPeriodUnitProvider),
         failure: AppFailure.of(error),
         onRetry: () => ref.invalidate(creditSummaryProvider),
       ),
-      _ => const _LoadingBody(),
+      _ => _LoadingBody(periodUnit: ref.watch(creditPeriodUnitProvider)),
     };
     if (card == null) return const SizedBox.shrink();
 
@@ -92,20 +95,22 @@ class AiCreditFrame extends StatelessWidget {
 
 /// 불러오는 중. **숫자를 그리지 않는다** — 잠깐이라도 0 이 보이면 다 쓴 줄 안다.
 class _LoadingBody extends StatelessWidget {
-  const _LoadingBody();
+  const _LoadingBody({required this.periodUnit});
+
+  final CreditPeriodUnit periodUnit;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Semantics(
       key: AiCreditCard.loadingKey,
-      label: context.l10n.creditCardLoading,
+      label: periodUnit.cardLoading(context.l10n),
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            context.l10n.creditCardTitle,
+            periodUnit.cardTitle(context.l10n),
             style: context.typo.creditTitle.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: context.space.md),
@@ -118,8 +123,9 @@ class _LoadingBody extends StatelessWidget {
 
 /// 조회 실패 — 무엇이 안 됐는지 · 다시 하기 · 추적 코드.
 class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.failure, required this.onRetry});
+  const _ErrorBody({required this.periodUnit, required this.failure, required this.onRetry});
 
+  final CreditPeriodUnit periodUnit;
   final AppFailure failure;
   final VoidCallback onRetry;
 
@@ -142,7 +148,7 @@ class _ErrorBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.creditCardTitle,
+                periodUnit.cardTitle(context.l10n),
                 style: context.typo.creditTitle.copyWith(color: colors.textPrimary),
               ),
               SizedBox(height: space.xs),

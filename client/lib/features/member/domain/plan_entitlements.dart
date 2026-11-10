@@ -13,11 +13,10 @@ class PlanEntitlements {
     this.canUseAllCardDesignThemes = false,
     this.canUseAllCardExportLayouts = false,
     this.canViewWeeklyReport = false,
-    this.canTranslateRoutines = false,
     this.canScheduleRoutines = false,
     this.canUseGuardianVoice = false,
-    this.canImportExpertRoutines = false,
     this.canUseRoutineMemory = false,
+    this.canSplitCards = false,
     this.canRegenerateImagesFree = false,
     this.canCreateRoutineTextFree = false,
     this.canUseAiPictures = false,
@@ -34,11 +33,10 @@ class PlanEntitlements {
     canUseAllCardDesignThemes: true,
     canUseAllCardExportLayouts: true,
     canViewWeeklyReport: true,
-    canTranslateRoutines: true,
     canScheduleRoutines: true,
     canUseGuardianVoice: true,
-    canImportExpertRoutines: true,
     canUseRoutineMemory: true,
+    canSplitCards: true,
     canRegenerateImagesFree: true,
     canCreateRoutineTextFree: true,
     canUseAiPictures: true,
@@ -62,20 +60,17 @@ class PlanEntitlements {
   /// 주간 리포트를 볼 수 있는가 (`weeklyReport`)
   final bool canViewWeeklyReport;
 
-  /// 만든 일과를 다른 언어 사본으로 만들 수 있는가 (`routineTranslate`, 일과관리 메뉴 `다른 언어로 만들기`)
-  final bool canTranslateRoutines;
-
   /// 일과에 요일·시각을 정할 수 있는가 (`routineSchedule`: 반복 일과 · 주간 계획 · 이룸이 기기 알림, #782 · #1080)
   final bool canScheduleRoutines;
 
   /// 카드마다 보호자 목소리를 녹음할 수 있는가 (`guardianVoice`). 꺼져도 이미 한 녹음은 남고 이룸이는 기본 음성으로 듣는다
   final bool canUseGuardianVoice;
 
-  /// 전문가 일과를 일과관리로 가져올 수 있는가 (`routineTemplates`)
-  final bool canImportExpertRoutines;
-
   /// 이룸이별 AI 메모(내가 고친 일과처럼 만들기)를 쓸 수 있는가 (`routineMemory`)
   final bool canUseRoutineMemory;
+
+  /// 카드 한 장을 AI 가 2~3장으로 나눈 안을 받을 수 있는가 (`cardSplit`, 크레딧은 쓰지 않음)
+  final bool canSplitCards;
 
   /// 카드 그림 다시 그리기가 크레딧 없이 되는가 (`imageRegenerateFree`, 하루 한도를 넘으면 서버가 원래 단가로 받음)
   final bool canRegenerateImagesFree;
@@ -98,11 +93,10 @@ class PlanEntitlements {
       canUseAllCardDesignThemes: isEntitled('cardExportAllThemes'),
       canUseAllCardExportLayouts: isEntitled('cardExportAllLayouts'),
       canViewWeeklyReport: isEntitled('weeklyReport'),
-      canTranslateRoutines: isEntitled('routineTranslate'),
       canScheduleRoutines: isEntitled('routineSchedule'),
       canUseGuardianVoice: isEntitled('guardianVoice'),
-      canImportExpertRoutines: isEntitled('routineTemplates'),
       canUseRoutineMemory: isEntitled('routineMemory'),
+      canSplitCards: isEntitled('cardSplit'),
       canRegenerateImagesFree: isEntitled('imageRegenerateFree'),
       canCreateRoutineTextFree: isEntitled('routineCreateFree'),
       canUseAiPictures: isEntitled('aiImageGeneration'),
@@ -117,11 +111,10 @@ class PlanEntitlements {
     canUseAllCardDesignThemes,
     canUseAllCardExportLayouts,
     canViewWeeklyReport,
-    canTranslateRoutines,
     canScheduleRoutines,
     canUseGuardianVoice,
-    canImportExpertRoutines,
     canUseRoutineMemory,
+    canSplitCards,
     canRegenerateImagesFree,
     canCreateRoutineTextFree,
     canUseAiPictures,

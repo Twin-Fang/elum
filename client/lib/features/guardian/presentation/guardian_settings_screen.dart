@@ -1,3 +1,4 @@
+import '../../notification/application/device_notification_permission_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -206,16 +207,10 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [_LinkTile(isBusy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 알림, 암호, 그림 방식, AI 메모(Pro), 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.notificationSettingsTitle,
-              onTap: busy
-                  ? null
-                  : () => context.push(Routes.guardianNotificationSettings),
-            ),
+            _NotificationTile(isBusy: busy),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
@@ -346,7 +341,80 @@ class _ImageStyleTile extends ConsumerWidget {
   }
 }
 
-/// `AI 메모` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
+/// 알림 줄: 기기 알림이 꺼져 있으면 제목 아래 작은 글 + 어두운 알약 `켜기` (앱이 앞으로 돌아오면 다시 확인), 켜져 있으면 그대로
+class _NotificationTile extends ConsumerStatefulWidget {
+  const _NotificationTile({required this.isBusy});
+
+  final bool isBusy;
+
+  @override
+  ConsumerState<_NotificationTile> createState() => _NotificationTileState();
+}
+
+class _NotificationTileState extends ConsumerState<_NotificationTile> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(deviceNotificationPermissionControllerProvider.notifier).recheck();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isPermissionOff = ref.watch(deviceNotificationPermissionControllerProvider);
+    void openSettings() => context.push(Routes.guardianNotificationSettings);
+    return SettingsTile(
+      isInCard: true,
+      label: l10n.notificationSettingsTitle,
+      onTap: widget.isBusy ? null : openSettings,
+      // 기기 알림이 꺼져 있으면 값 자리에 `꺼짐` (켜는 곳은 알림 설정 화면의 띠)
+      valueChip: isPermissionOff ? const _NotificationOffValue() : null,
+      showChevronWithValue: true,
+    );
+  }
+}
+
+/// 알림 설정 줄의 `꺼짐` 값: 작은 점 + 글
+class _NotificationOffValue extends StatelessWidget {
+  const _NotificationOffValue();
+
+  static const _dotSize = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: _dotSize.w,
+          height: _dotSize.w,
+          decoration: BoxDecoration(color: colors.highlightBorder, shape: BoxShape.circle),
+        ),
+        SizedBox(width: context.space.xs.w / 2),
+        Text(
+          context.l10n.notificationOffValue,
+          style: context.typo.settingsTileLabel.copyWith(color: colors.highlightBorder),
+        ),
+      ],
+    );
+  }
+}
+
+/// `AI 메모리` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
 /// Free 는 판매 중일 때만 줄이 보이고 들어가면 Pro 미리 보기 — 살 수 없는 동안 잠긴 줄은 막힌 기능으로 읽혀 숨긴다
 class _RoutineMemoryTile extends ConsumerWidget {
   const _RoutineMemoryTile({required this.isBusy});

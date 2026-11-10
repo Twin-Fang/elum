@@ -12,7 +12,6 @@ import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
-import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
@@ -174,7 +173,7 @@ public class AdminCreditService {
   }
 
   /**
-   * 폼의 만료 선택을 시각으로 바꾼다. 이번 주 말 = 다음 월요일 0시, 날짜 = 그 날 끝(다음 날 0시), 무기한 = null.
+   * 폼의 만료 선택을 시각으로 바꾼다. 이번 주기 끝(WEEK_END) = 주 단위면 다음 월요일 0시, 달 단위면 다음 달 1일 0시, 날짜 = 그 날 끝(다음 날 0시), 무기한 = null.
    *
    * @throws CustomException 날짜를 고르고 비웠거나 형식이 틀릴 때 (ADMIN_CREDIT_EXPIRY_DATE_*)
    */
@@ -192,7 +191,7 @@ public class AdminCreditService {
           throw new CustomException(ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_INVALID, date);
         }
       }
-      default -> CreditPeriod.of(LocalDateTime.now(clock)).end();
+      default -> accountService.currentPeriod(LocalDateTime.now(clock)).end();
     };
   }
 

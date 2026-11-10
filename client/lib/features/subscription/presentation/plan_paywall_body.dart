@@ -8,6 +8,9 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../member/application/plan_access.dart';
+import '../../credit/application/credit_costs.dart';
+import '../../member/domain/plan_entitlements.dart';
+import '../application/plan_benefits.dart';
 import '../application/plan_purchase_notifier.dart';
 import '../application/plan_status_providers.dart';
 import '../application/plan_store_catalog.dart';
@@ -59,6 +62,8 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
     });
     final flow = ref.watch(planPurchaseStateProvider);
     final isPro = ref.watch(planAccessProvider.select((access) => access.isPro));
+    // 가입 체험 중이어도 구독을 시작할 수 있으면(살 수 있음) 고르는 화면을 보임
+    final canStartSubscription = ref.watch(isProTrialProvider) && ref.watch(planAccessProvider.select((access) => access.canPurchasePro));
     final l10n = context.l10n;
     final coordinator = ref.read(storePurchaseCoordinatorProvider);
     final close = Navigator.of(context).pop;
@@ -67,8 +72,8 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
       case PlanPurchasePhase.activated:
         return _message(PlanStateMessage(
           title: l10n.planActivatedTitle,
-          body: planStatusLabel(l10n, ref.watch(planStatusProvider)),
-          primaryLabel: l10n.commonConfirm,
+          body: _openedBenefitsText(l10n),
+          primaryLabel: l10n.planActivatedStart,
           onPrimary: close,
         ));
       case PlanPurchasePhase.waitingForStoreApproval:
@@ -103,8 +108,20 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
       case PlanPurchasePhase.idle:
       case PlanPurchasePhase.purchasing:
       case PlanPurchasePhase.failed:
-        return isPro ? _alreadyPro(context) : _offers(context, flow);
+        return isPro && !canStartSubscription ? _alreadyPro(context) : _offers(context, flow);
     }
+  }
+
+  /// 구독 직후 `새로 열린 혜택`: Free 때 못 쓰던 혜택 중 Pro 요금제가 주는 것 (혜택 묶음 데이터 그대로, 한 줄씩)
+  String _openedBenefitsText(AppLocalizations l10n) {
+    final access = ref.read(planAccessProvider);
+    final periodUnit = ref.read(creditPeriodUnitProvider);
+    final sections = proPlanBenefitSections(proPlan: access.proPlanEntitlements, current: PlanEntitlements.free);
+    final lines = [
+      for (final section in sections)
+        for (final benefit in section.benefits) planBenefitLabel(l10n, benefit, periodUnit),
+    ];
+    return lines.isEmpty ? planStatusLabel(l10n, ref.watch(planStatusProvider)) : lines.join('\n');
   }
 
   /// 결제 단계 안내 한 덩이 (바닥 버튼 없음, 안내가 버튼을 가짐)
@@ -162,6 +179,14 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (ref.watch(isProTrialProvider)) ...[
+                  Text(
+                    planStatusLabel(context.l10n, ref.watch(planStatusProvider)),
+                    textAlign: TextAlign.center,
+                    style: context.typo.settingsGroupLabel.copyWith(color: context.colors.textSecondary),
+                  ),
+                  SizedBox(height: space.sm.h),
+                ],
                 PlanBenefitCards(highlight: widget.highlight),
                 SizedBox(height: _sectionGap.h),
                 _offerSection(context, flow, catalogAsync, selected),

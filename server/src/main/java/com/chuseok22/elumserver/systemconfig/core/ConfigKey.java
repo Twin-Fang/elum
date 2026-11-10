@@ -86,12 +86,6 @@ public enum ConfigKey {
     "낮출수록 싸다",
     ConfigValueType.SELECT, List.of("low", "medium", "high"), "low"
   ),
-  // 고품질 그림 권한(IMAGE_HIGH_QUALITY)이 켜진 회원만 쓴다. 출력 토큰 low 272 > medium 1056 (약 4배)
-  OPENAI_IMAGE_QUALITY_PRO(
-    ConfigGroup.IMAGE_PROVIDER, "OpenAI 이미지 품질 (고품질 권한)",
-    "요금제 '고품질 그림' 권한이 켜진 회원의 그림 품질. 권한이 꺼져 있으면 위 'OpenAI 이미지 품질'을 쓴다",
-    ConfigValueType.SELECT, List.of("low", "medium", "high"), "medium"
-  ),
   FLUX_API_KEY(
     ConfigGroup.IMAGE_PROVIDER, "FLUX(fal.ai) API 키",
     "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
@@ -267,16 +261,6 @@ public enum ConfigKey {
     "Free가 동시에 가질 수 있는 일과 수. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
-  FREE_PROFILE_MAX_COUNT(
-    ConfigGroup.PLAN_FREE, "이룸이 명수",
-    "Free 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
-  FREE_HISTORY_RETENTION_DAYS(
-    ConfigGroup.PLAN_FREE, "기록 보관 일수",
-    "Free가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
   FREE_CARD_EXPORT_WITHOUT_WATERMARK(
     ConfigGroup.PLAN_FREE, "카드 내보내기 워터마크 없음",
     "Free가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지. 꺼두면 워터마크가 들어간다",
@@ -297,9 +281,11 @@ public enum ConfigKey {
     "Free가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
-  FREE_ROUTINE_TRANSLATE(
-    ConfigGroup.PLAN_FREE, "일과 다른 언어로 만들기",
-    "Free가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
+  // 주간 리포트 권한이 없는 회원에게 그 이룸이의 첫 주(마친 일과가 있는 가장 이른 주) 한 주만 보여 줌. 짝이 되는 Pro 키는 없음
+  FREE_WEEKLY_REPORT_FIRST_WEEK_PREVIEW(
+    ConfigGroup.PLAN_FREE, "주간 리포트 첫 주 미리 보기",
+    "켜면 주간 리포트 권한이 없는 회원도 이룸이의 첫 주(마친 일과가 있는 가장 이른 주) 한 주의 리포트를 볼 수 있다. "
+      + "다른 주는 그대로 잠긴다. 끄면 지금과 완전히 같다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   FREE_ROUTINE_SCHEDULE(
@@ -312,14 +298,14 @@ public enum ConfigKey {
     "Free가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
-  FREE_ROUTINE_TEMPLATES(
-    ConfigGroup.PLAN_FREE, "전문가 일과 가져오기",
-    "Free가 관리자가 검수한 전문가 일과를 일과관리로 가져올 수 있는지",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
   FREE_ROUTINE_MEMORY(
     ConfigGroup.PLAN_FREE, "AI 메모 (내가 고친 일과처럼 만들기)",
     "Free가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 켜면 메모 갱신 AI 호출 비용이 든다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_CARD_SPLIT(
+    ConfigGroup.PLAN_FREE, "이 카드 더 쉽게 (카드 나누기)",
+    "Free가 카드 한 장을 AI 가 2~3장으로 나눈 안을 받아 적용할 수 있는지. 켜면 글 AI 호출 비용이 든다 (크레딧 없음)",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   // 다시 그리기 무료: 켜면 IMAGE_REGENERATE 단가 0 (하루 무료 횟수 IMAGE_REGENERATE_FREE_DAILY_CAP 까지) (#1075)
@@ -333,12 +319,6 @@ public enum ConfigKey {
     ConfigGroup.PLAN_FREE, "일과 생성 무료 (글 크레딧 없음)",
     "Free가 AI 일과 만들기의 글 몫을 크레딧 없이 할 수 있는지. 카드 그림은 그린 장수만큼 크레딧을 그대로 쓴다. "
       + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(FREE_ROUTINE_CREATE_PER_DAY)로 막는다",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
-  // 고품질 그림: 켜면 OpenAI 품질을 OPENAI_IMAGE_QUALITY_PRO 로 그린다 (그림 원가가 올라 기본 꺼짐)
-  FREE_IMAGE_HIGH_QUALITY(
-    ConfigGroup.PLAN_FREE, "고품질 그림",
-    "Free 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라간다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
@@ -415,16 +395,6 @@ public enum ConfigKey {
     "Pro가 동시에 가질 수 있는 일과 수. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
-  PRO_PROFILE_MAX_COUNT(
-    ConfigGroup.PLAN_PRO, "이룸이 명수",
-    "Pro 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
-  PRO_HISTORY_RETENTION_DAYS(
-    ConfigGroup.PLAN_PRO, "기록 보관 일수",
-    "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
-    ConfigValueType.INTEGER, List.of(), "-1"
-  ),
   PRO_CARD_EXPORT_WITHOUT_WATERMARK(
     ConfigGroup.PLAN_PRO, "카드 내보내기 워터마크 없음",
     "Pro가 카드 이미지·인쇄물을 이룸 로고·워터마크 없이 받을 수 있는지",
@@ -445,11 +415,6 @@ public enum ConfigKey {
     "Pro가 이룸이의 한 주 요약(완료율·별·남은 카드)을 보고 한 장으로 보낼 수 있는지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
-  PRO_ROUTINE_TRANSLATE(
-    ConfigGroup.PLAN_PRO, "일과 다른 언어로 만들기",
-    "Pro가 만든 일과를 다른 언어 사본으로 만들 수 있는지 (글만 AI 번역, 그림 재사용, 글 크레딧 차감)",
-    ConfigValueType.BOOLEAN, List.of(), "true"
-  ),
   PRO_ROUTINE_SCHEDULE(
     ConfigGroup.PLAN_PRO, "요일별 반복 일과",
     "Pro가 일과에 요일·시각을 정해 그날 자동으로 보내고 이룸이 기기에 알림을 보낼 수 있는지. 꺼도 정해 둔 요일·시각은 지우지 않고 멈춘다",
@@ -460,15 +425,16 @@ public enum ConfigKey {
     "Pro가 카드마다 보호자 목소리를 녹음하고 이룸이 기기에서 그 녹음으로 읽어 줄 수 있는지. 끄면 녹음은 남고 이룸이는 기본 음성으로 듣는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
-  PRO_ROUTINE_TEMPLATES(
-    ConfigGroup.PLAN_PRO, "전문가 일과 가져오기",
-    "Pro가 관리자가 검수한 전문가 일과를 크레딧 없이 일과관리로 가져올 수 있는지",
-    ConfigValueType.BOOLEAN, List.of(), "true"
-  ),
   PRO_ROUTINE_MEMORY(
-    ConfigGroup.PLAN_PRO, "AI 메모 (내가 고친 일과처럼 만들기)",
-    "Pro가 이룸이별 AI 메모와 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 메모를 넣지도 갱신하지도 않는다 (메모는 남음)",
-    // 기본 꺼짐: 개인정보처리방침 개정(#1079) 시행 전이라 관리자가 켜기 전까지 메모를 만들지 않음
+    ConfigGroup.PLAN_PRO, "AI 메모리 (내가 고친 방식으로 만들기)",
+    "Pro가 보호자별 AI 메모리 규칙과 고쳐 확정한 지난 일과 예시로 맞춤 일과를 받을 수 있는지. 끄면 규칙을 찾지도 넣지도 않는다 (규칙은 남음)",
+    // 기본 꺼짐: 개인정보처리방침 개정 시행 전이라 관리자가 켜기 전까지 규칙을 만들지 않음
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  PRO_CARD_SPLIT(
+    ConfigGroup.PLAN_PRO, "이 카드 더 쉽게 (카드 나누기)",
+    "Pro가 카드 한 장을 AI 가 2~3장으로 나눈 안을 받아 적용할 수 있는지. 끄면 안 받기·적용 모두 막는다",
+    // 기본 꺼짐: 출시 날 관리자가 켠다
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   PRO_IMAGE_REGENERATE_FREE(
@@ -482,12 +448,6 @@ public enum ConfigKey {
       + "켜면 크레딧이 켜져 있어도 하루 일과 생성 횟수(PRO_ROUTINE_CREATE_PER_DAY)로 막는다",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
-  // 그림이 비싸 Pro 도 기본 꺼짐 — 원가 실측 뒤 관리자 화면에서 켠다
-  PRO_IMAGE_HIGH_QUALITY(
-    ConfigGroup.PLAN_PRO, "고품질 그림",
-    "Pro 카드 그림을 'OpenAI 이미지 품질 (고품질 권한)' 값으로 그릴지. 그림 원가가 올라가 기본은 꺼 둔다",
-    ConfigValueType.BOOLEAN, List.of(), "false"
-  ),
 
   // 서비스 전체 하루 AI 비용 상한.
   //
@@ -498,6 +458,12 @@ public enum ConfigKey {
     ConfigGroup.AI_BUDGET, "하루 AI 비용 상한 (USD)",
     "서비스 전체가 하루(한국 시각 0시 시작)에 AI에 쓸 추정 비용의 상한. 닿으면 새 일과 만들기를 멈추고, 카드 추가는 그림 없이 한다. 호출 기록의 추정치라 실제 청구와 다를 수 있다. -1이면 끄고, 0이면 새 일과 만들기와 추가 카드 그림을 바로 멈춘다",
     ConfigValueType.DECIMAL, List.of(), "-1"
+  ),
+  ROUTINE_MEMORY_AUTO_APPLY_COUNT(
+    ConfigGroup.AI_BUDGET, "AI 메모리 자동 적용 횟수",
+    "같은 수정이 서로 다른 일과 이만큼에서 관찰되면 AI 메모리 규칙이 자동으로 적용(ACTIVE)된다. "
+      + "보호자가 직접 '항상 이렇게'를 누르면 횟수와 상관없이 적용. 다음 요청부터 반영. 2~10",
+    ConfigValueType.INTEGER, List.of(), "3", 2, 10
   ),
 
   // --- 사용 한도·남용 방지 ---
@@ -668,6 +634,40 @@ public enum ConfigKey {
     ConfigValueType.INTEGER, List.of(), "7", 1, 30
   ),
 
+  // --- AI 크레딧 ---
+  //
+  // 지급·만료·사용량 집계·광고 보상 만료·관리자 보너스 기본 만료가 모두 이 주기를 따른다.
+  // 기본값 WEEK 는 배포만으로 동작이 바뀌지 않는다. MONTH 로 바꾸면 이미 준 주간 지급분은 원래 만료까지 쓰고
+  // 이번 달 지급이 달 주기 키로 새로 한 번 생긴다(바꾸는 주에만 조금 넉넉하다). 지급량은 크레딧 정책 새 버전으로 함께 바꾼다.
+  CREDIT_PERIOD_UNIT(
+    ConfigGroup.AI_CREDIT, "크레딧 지급 주기",
+    "WEEK 는 매주 월요일 0시, MONTH 는 매달 1일 0시(한국 시각)에 한 번 지급하고 남은 양은 사라진다. "
+      + "바꾸는 날 이미 받은 주간 지급분은 원래 끝나는 날까지 쓸 수 있다. 지급량(Free·Pro)은 크레딧 정책 화면에서 "
+      + "새 버전으로 함께 바꾼다. 다음 요청부터 반영",
+    ConfigValueType.SELECT, List.of("WEEK", "MONTH"), "WEEK"
+  ),
+
+  // 추가 크레딧 구매(소모성 상품). 판매는 기본 꺼짐 — 스토어 상품 등록·약관이 끝난 뒤에 켠다.
+  // 가격은 서버가 모른다(앱이 스토어에서 읽는다). 서버는 상품 ID 와 개수만 안다.
+  CREDIT_PACK_SALE_ENABLED(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 판매",
+    "켜야 꾸러미 목록이 내려가고 구매 확인(App Store·Google Play)이 적립된다. 끄면 목록은 비고 구매 확인은 거절된다. "
+      + "이미 산 크레딧은 그대로 쓸 수 있다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  CREDIT_PACK_PRODUCTS(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 상품",
+    "쉼표로 나눈 상품ID:크레딧 개수. 스토어에 등록한 소모성 상품 ID 와 같아야 한다 "
+      + "(App Store·Google Play 가 같은 ID). 이 목록에 없는 상품은 적립하지 않는다",
+    ConfigValueType.STRING, List.of(), "elum_credit_50:50,elum_credit_150:150,elum_credit_400:400",
+    ConfigFormat.CREDIT_PACK_LIST
+  ),
+  CREDIT_PACK_POPULAR_PRODUCT_ID(
+    ConfigGroup.AI_CREDIT, "인기 꾸러미 상품 ID",
+    "앱이 '인기!' 표시를 붙일 상품 ID. 꾸러미 목록에 없으면 표시하지 않는다",
+    ConfigValueType.STRING, List.of(), "elum_credit_150"
+  ),
+
   // --- 광고 보상 ---
   //
   // 보상형 광고를 끝까지 보면 AI 생성 크레딧을 준다. 크레딧은 곧 AI 비용이라 **기본값은 꺼짐**이다 —
@@ -681,7 +681,7 @@ public enum ConfigKey {
   AD_REWARD_CREDITS_PER_VIEW(
     ConfigGroup.AD_REWARD, "시청 1회당 크레딧",
     "보상형 광고를 끝까지 볼 때마다 주는 크레딧(정수). 0 이하면 주지 않는다. 일과 하나 만드는 비용과 "
-      + "광고 수익을 견줘 정한다. 지급분은 이번 주 끝(다음 월요일 0시)에 사라진다",
+      + "광고 수익을 견줘 정한다. 지급분은 이번 주기 끝(주 단위면 다음 월요일 0시, 달 단위면 다음 달 1일 0시)에 사라진다",
     ConfigValueType.INTEGER, List.of(), "2", 0, 100
   ),
   AD_REWARD_DAILY_LIMIT(
@@ -838,6 +838,22 @@ public enum ConfigKey {
     ConfigGroup.SUBSCRIPTION_STORE, "Google Play 알림 토큰",
     "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
+  ),
+
+  // --- 주간 리포트 ---
+  //
+  // 둘 다 기본 꺼짐이라 배포만으로는 동작이 바뀌지 않는다.
+  WEEKLY_REPORT_AI_ENABLED(
+    ConfigGroup.WEEKLY_REPORT, "주간 리포트 AI 정리 글",
+    "켜면 끝난 주의 정리 글을 AI 가 쓴다(한 주 한 번 저장, 하루 AI 비용에 잡히고 크레딧은 받지 않는다). "
+      + "끄면 AI 를 부르지 않고 집계로 만든 고정 문장을 보여 준다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  WEEKLY_REPORT_PUSH_ENABLED(
+    ConfigGroup.WEEKLY_REPORT, "주간 리포트 월요일 알림",
+    "켜면 매주 월요일 아침(한국 시각 8시) 주간 리포트 권한이 있는 보호자에게 '한 주 리포트가 왔어요' 알림을 보낸다. "
+      + "지난주에 마친 일과가 있는 이룸이만, 같은 주는 한 번만 보낸다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
   // --- 관제소 연동 (#1229) ---

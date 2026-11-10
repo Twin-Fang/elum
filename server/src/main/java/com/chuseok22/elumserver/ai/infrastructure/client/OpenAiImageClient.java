@@ -1,14 +1,11 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
-import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
-import com.chuseok22.elumserver.license.application.service.EntitlementService;
-import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -49,18 +46,16 @@ public class OpenAiImageClient implements ImageGenerationClient {
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
-  private final EntitlementService entitlementService;
 
   private final RestClient restClient;
 
   public OpenAiImageClient(RoutineImagePromptComposer promptComposer,
     GeminiRoutineImagePromptBuilder imagePromptBuilder, SystemConfigService systemConfigService,
-    AiCallLogService aiCallLogService, EntitlementService entitlementService, AiRestClientFactory restClientFactory) {
+    AiCallLogService aiCallLogService, AiRestClientFactory restClientFactory) {
     this.promptComposer = promptComposer;
     this.imagePromptBuilder = imagePromptBuilder;
     this.systemConfigService = systemConfigService;
     this.aiCallLogService = aiCallLogService;
-    this.entitlementService = entitlementService;
     this.restClient = restClientFactory.create(BASE_URL);
   }
 
@@ -141,25 +136,9 @@ public class OpenAiImageClient implements ImageGenerationClient {
     }
   }
 
-  /**
-   * 그림 품질: 고품질 권한(IMAGE_HIGH_QUALITY) 회원 > OPENAI_IMAGE_QUALITY_PRO, 그 외 > OPENAI_IMAGE_QUALITY
-   * 회원 미상(관리자 시험)·권한 판정 실패는 기본 품질 (비싼 쪽으로 새지 않게)
-   */
+  /// 그림 품질 (관리자 설정 OPENAI_IMAGE_QUALITY)
   String resolveQuality() {
-    String memberId = AiCallContext.currentMemberId();
-    if (memberId != null && !memberId.isBlank() && isHighQualityAllowed(memberId)) {
-      return systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY_PRO);
-    }
     return systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
-  }
-
-  private boolean isHighQualityAllowed(String memberId) {
-    try {
-      return entitlementService.isAllowed(memberId, Entitlement.IMAGE_HIGH_QUALITY);
-    } catch (RuntimeException e) {
-      log.warn("[openai image] high quality entitlement check failed, using default quality: memberId={}", memberId, e);
-      return false;
-    }
   }
 
   // 429(분당 한도)만 기다렸다 다시 보낸다 (그 외 오류는 같은 요청을 반복해도 결과가 같아 바로 던짐)

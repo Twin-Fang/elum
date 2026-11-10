@@ -2,7 +2,7 @@
 # Flutter Android Firebase App Distribution 배포
 # ===================================================================
 #
-# main 브랜치 푸시 시 Android APK를 빌드하고
+# deploy 브랜치 푸시 시 Android APK를 빌드하고
 # Firebase App Distribution에 자동 배포합니다.
 #
 # PlayStore CICD와 동일한 버전 검증 과정을 거친 후
@@ -53,7 +53,7 @@ permissions:
 
 on:
   push:
-    branches: ["main"]
+    branches: ["deploy"]
     # 앱 소스가 바뀔 때만 빌드한다. 서버(server/**)만 변경된 릴리스에서 앱이 재빌드·재배포되는 것을 막는다.
     # 릴리스 버전 커밋이 매번 client/pubspec.yaml(버전 라인)을 갱신하므로 그 파일만으로는 트리거하지
     # 않게 제외한다 — 실제 의존성 변경은 client/pubspec.lock도 함께 바뀌어 정상 트리거된다.
@@ -67,6 +67,8 @@ env:
   # ============================================
   # 프로젝트 이름
   APP_ARTIFACT_NAME: "elum"
+  # 배포 브랜치 이름: on.push.branches 와 같은 값으로 맞춘다 (on 에는 env 를 못 쓴다)
+  DEPLOY_BRANCH: "deploy"
   # Flutter/Java 버전
   FLUTTER_VERSION: "3.38.9"
   JAVA_VERSION: "17"
@@ -98,11 +100,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          ref: main
+          ref: ${{ env.DEPLOY_BRANCH }}
           fetch-depth: 0
 
       - name: Pull latest changes
-        run: git pull origin main
+        run: git pull origin ${{ env.DEPLOY_BRANCH }}
 
       - name: Create .env file
         env:
@@ -241,11 +243,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          ref: main
+          ref: ${{ env.DEPLOY_BRANCH }}
           fetch-depth: 0
 
       - name: Pull latest changes
-        run: git pull origin main
+        run: git pull origin ${{ env.DEPLOY_BRANCH }}
 
       # 프로젝트 파일들 다운로드
       - name: Download project files
@@ -577,7 +579,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          ref: main
+          ref: ${{ env.DEPLOY_BRANCH }}
           fetch-depth: 0
 
       # APK 파일 다운로드

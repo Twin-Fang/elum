@@ -8,7 +8,8 @@ import '../theme/theme_context_ext.dart';
 
 /// PRO 배지 단일 부품: 둥근 금빛 그라데이션 알약 + 반짝 표시 + `PRO` (#1170 · #1189)
 ///
-/// Free 에게 보이는 Pro 입구(미리 보기 판 · 그림 방식 · 인쇄 디자인 칩 · 일과관리 입구 · 설정 줄 · 일과 메뉴 줄 · 반복 줄 · 카드 그림 칩 · 요금제 화면)는 모두 이것만 씀
+/// Free 에게 보이는 Pro 입구(미리 보기 판 · 그림 방식 · 인쇄 디자인 칩 · 일과관리 입구 · 설정 줄 · 일과 메뉴 줄 · 반복 줄 · 카드 그림 칩 · 요금제 화면)와
+/// 내 크레딧 머리(Pro 회원의 요금제 태그)는 모두 이것만 씀
 /// 금빛 토큰(`proPlanBadge*`)·문구(`planProBadge`)는 이 파일 밖에서 쓰지 않음 (tool/design_rules.yaml `restricted_tokens`)
 class ProBadge extends StatelessWidget {
   const ProBadge({super.key});

@@ -150,6 +150,9 @@ public enum ErrorCode {
   // AI 메모 (#1082): Free 가 쓰기 API 를 부름 403, 진단·장애·정도·연락처가 든 줄 400
   ROUTINE_MEMORY_PRO_REQUIRED(HttpStatus.FORBIDDEN),
   ROUTINE_MEMORY_LINE_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  // 이 카드 더 쉽게: Free 가 부름 403, AI 실패·시간 초과·검증 어긋남 502
+  CARD_SPLIT_PRO_REQUIRED(HttpStatus.FORBIDDEN),
+  CARD_SPLIT_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.
@@ -174,9 +177,6 @@ public enum ErrorCode {
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
   WEEKLY_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN),
-  // 일과 다른 언어로 만들기 (#1077). 요금제에 없음 403 (앱은 Free 에게 입구를 숨김), AI 번역 실패 502 (사본을 만들지 않음)
-  ROUTINE_TRANSLATE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
-  ROUTINE_TRANSLATE_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -205,6 +205,10 @@ public enum ErrorCode {
   SUBSCRIPTION_PRODUCT_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
   SUBSCRIPTION_OWNED_BY_OTHER_MEMBER(HttpStatus.BAD_REQUEST),
   SUBSCRIPTION_STORE_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE),
+
+  // 크레딧 꾸러미 구매. 판매 꺼짐 403, 다른 계정에 적립된 거래 400 (영수증·환경·상품 오류는 위 SUBSCRIPTION_* 를 함께 씀)
+  CREDIT_PACK_SALE_DISABLED(HttpStatus.FORBIDDEN),
+  CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER(HttpStatus.BAD_REQUEST),
 
   // 비밀값(외부 API 키) 저장.
   SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE),
@@ -311,11 +315,6 @@ public enum ErrorCode {
   // 링크로 보내기: 남이 만든 일과 403, 공유 불가 일과(예시·지움·가져온 일과·승인 전) 400
   TALK_LINK_ROUTINE_NOT_MINE(HttpStatus.FORBIDDEN),
   TALK_LINK_ROUTINE_NOT_SHAREABLE(HttpStatus.BAD_REQUEST),
-
-  // 전문가 일과(#1076): 내렸거나 없는 일과 404, Free 가져오기 403, 관리자 입력 오류 400 (이유는 detail)
-  EXPERT_ROUTINE_NOT_FOUND(HttpStatus.NOT_FOUND),
-  EXPERT_ROUTINE_PRO_ONLY(HttpStatus.FORBIDDEN),
-  EXPERT_ROUTINE_INVALID(HttpStatus.BAD_REQUEST),
 
   ;
 

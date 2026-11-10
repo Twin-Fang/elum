@@ -35,9 +35,8 @@ class AiCreditSummaryView extends StatelessWidget {
   /// 막대 > 알릴 줄 > 다시 채워지는 날 사이 (Figma `1579:8122` gap 16)
   static const _sectionGap = 16.0;
 
-  /// 큰 숫자 옆 반짝임 (Figma `1579:8119` 20×24)와 숫자·단위 사이 (gap 4)
-  static const _sparkleWidth = 20.0;
-  static const _sparkleHeight = 24.0;
+  /// 큰 숫자 옆 크레딧 그림 (정사각)과 숫자·단위 사이 (gap 4)
+  static const _ticketSize = 32.0;
   static const _inlineGap = 4.0;
 
   @override
@@ -57,7 +56,7 @@ class AiCreditSummaryView extends StatelessWidget {
       // 적을 때 "끝까지 만들어지지만 0 이 될 수 있다"는 경고는 두지 않는다 — 숫자와
       // 막대로 충분하고, 경고 문구는 이상하고 불편하다.
       if (s.isExhausted) ...[
-        (context.l10n.creditExhausted, colors.textPrimary),
+        (s.periodUnit.exhausted(context.l10n), colors.textPrimary),
         (context.l10n.creditExhaustedStillOk, colors.textSecondary),
       ],
     ];
@@ -69,7 +68,7 @@ class AiCreditSummaryView extends StatelessWidget {
       container: true,
       excludeSemantics: true,
       label: [
-        context.l10n.creditCardTitle,
+        s.periodUnit.cardTitle(context.l10n),
         amount,
         for (final (text, _) in lines) text,
         reset,
@@ -94,14 +93,10 @@ class AiCreditSummaryView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SvgPicture.asset(
-                      AppAssets.iconSparkles,
-                      width: _sparkleWidth.w,
-                      height: _sparkleHeight.h,
-                      colorFilter: ColorFilter.mode(
-                        colors.creditNumberText,
-                        BlendMode.srcIn,
-                      ),
+                    Image.asset(
+                      AppAssets.creditTicket,
+                      width: _ticketSize.w,
+                      excludeFromSemantics: true,
                     ),
                     SizedBox(width: _inlineGap.w),
                     Text(
@@ -197,7 +192,7 @@ class CreditInfoButton extends ConsumerWidget {
         ? appL10n.creditCostLineTextFree(s.cardImageCost)
         : appL10n.creditCostLine(s.routineTextCost, s.cardImageCost),
     appL10n.creditCostKeepGoing,
-    appL10n.creditWeeklyRefill,
+    s.periodUnit.refillSentence(appL10n),
   ].join('\n');
 
   /// 제목 한 줄 높이 (글꼴 배율 반영). 본문이 이 아래에서 시작한다.
@@ -243,7 +238,7 @@ class CreditInfoButton extends ConsumerWidget {
               children: [
                 Flexible(
                   child: Text(
-                    context.l10n.creditCardTitle,
+                    summary.periodUnit.cardTitle(context.l10n),
                     style: context.typo.creditTitle.copyWith(
                       color: colors.textPrimary,
                     ),

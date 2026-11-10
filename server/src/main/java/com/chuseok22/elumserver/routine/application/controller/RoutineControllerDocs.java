@@ -12,7 +12,8 @@ public interface RoutineControllerDocs extends
   RoutineQueryDocs,
   RoutineManagementDocs,
   RoutineProgressDocs,
-  RoutineStepEditDocs {
+  RoutineStepEditDocs,
+  RoutineCardSplitDocs {
 
   // Swagger 태그: 이름·설명이 같아야 문서에서 한 묶음으로 합쳐짐
   String TAG_NAME = "Routine";

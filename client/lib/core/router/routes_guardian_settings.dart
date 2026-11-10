@@ -3,11 +3,12 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/consent_document_list_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/credit/presentation/credit_history_screen.dart';
+import '../../features/credit/presentation/my_credit_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
-import '../../features/guardian/presentation/routine_memory_screen.dart';
+import '../../features/guardian/presentation/memory/routine_memory_screen.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/guardian/presentation/weekly_report/weekly_report_screen.dart';
 import '../../features/guardian/presentation/weekly_plan_screen.dart';
@@ -29,7 +30,7 @@ import 'app_transitions.dart';
 import 'routes.dart';
 
 /// 보호자 설정·내정보 하위 화면 (하단 바를 덮음): 결제 확인 암호, 약관, 주간 리포트·계획, 라이선스, 이야기 차단·내 글,
-/// 설정, 연결 암호, 임시저장, 그림 방식, AI 메모, 의견, 알림·알림 설정, 크레딧 내역, 보호자·초대·이룸이 전환·정보, 연결 상태, 암호 바꾸기
+/// 설정, 연결 암호, 임시저장, 그림 방식, AI 메모리, 의견, 알림·알림 설정, 크레딧 내역, 보호자·초대·이룸이 전환·정보, 연결 상태, 암호 바꾸기
 List<RouteBase> guardianSettingsRoutes() => [
   // 결제 직전 보호자 확인: 화면 전환 암호 화면을 그대로 쓰고 맞으면 true 로 닫힌다
   GoRoute(
@@ -48,7 +49,7 @@ List<RouteBase> guardianSettingsRoutes() => [
     path: Routes.guardianWeeklyReport,
     pageBuilder: (context, state) => slidePage(
       state,
-      const WeeklyReportScreen(),
+      WeeklyReportScreen(initialWeekStart: DateTime.tryParse(state.uri.queryParameters['weekStart'] ?? '')),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),
@@ -132,6 +133,10 @@ List<RouteBase> guardianSettingsRoutes() => [
     path: Routes.guardianNotificationSettings,
     pageBuilder: (context, state) =>
         slidePage(state, const NotificationSettingsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianMyCredit,
+    pageBuilder: (context, state) => slidePage(state, const MyCreditScreen()),
   ),
   GoRoute(
     path: Routes.guardianCreditHistory,

@@ -4,12 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/routine_progress_ring.dart';
 import '../../../../core/widgets/settings_group.dart';
-import '../../../../core/widgets/settings_tile.dart';
 import '../../domain/weekly_report.dart';
+import 'weekly_report_insight_cards.dart';
+import 'weekly_report_stat_row.dart';
 
-/// 주간 리포트 본문 묶음 4개: 요약(완료율·하루 링) > 한 주 기록 > 일과별 > 남은 카드
+/// 주간 리포트 본문: 돌아보기 카드(있을 때) > `한 주 기록`: 숫자 3개 > 요일별 막대 > 일과별 기록 > 자주 남은 카드
 ///
 /// 사실(횟수)만 보여 준다 — 평가 문구·색으로 잘하고 못함을 가르지 않는다.
 class WeeklyReportSections extends StatelessWidget {
@@ -23,54 +23,36 @@ class WeeklyReportSections extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final insights = report.insights;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SummaryCard(report: report),
-        SizedBox(height: _groupGap.h),
-        SettingsGroup(
-          header: l10n.weeklyReportFactsSection,
-          children: [
-            SettingsTile(label: l10n.weeklyReportStars, valueText: l10n.weeklyReportCount(report.starsEarned), onTap: null),
-            SettingsTile(
-              label: l10n.weeklyReportRewards,
-              valueText: l10n.weeklyReportCount(report.rewardReachedCount),
-              onTap: null,
-            ),
-            SettingsTile(
-              label: l10n.weeklyReportStreak,
-              valueText: l10n.weeklyReportDays(report.longestCompletedDayStreak),
-              onTap: null,
-            ),
-          ],
+        if (insights != null) ...[
+          WeeklyReportInsightCards(insights: insights),
+          SizedBox(height: _groupGap.h),
+        ],
+        Padding(
+          padding: EdgeInsets.only(left: context.space.xs.w, bottom: context.space.xs.h),
+          child: Text(
+            l10n.weeklyReportRecordSection,
+            style: context.typo.settingsGroupLabel.copyWith(color: context.colors.settingsGroupLabel),
+          ),
         ),
+        WeeklyReportStatRow(report: report),
+        SizedBox(height: _groupGap.h),
+        _DayBars(days: report.days),
         if (report.routines.isNotEmpty) ...[
           SizedBox(height: _groupGap.h),
           SettingsGroup(
             header: l10n.weeklyReportRoutinesSection,
-            children: [
-              for (final routine in report.routines)
-                SettingsTile(
-                  label: routine.title,
-                  valueText: l10n.weeklyReportRoutineValue(routine.sentCount, routine.completedCount),
-                  onTap: null,
-                ),
-            ],
+            children: [for (final routine in report.routines) _RoutineRecordRow(routine: routine)],
           ),
         ],
         if (report.remainingSteps.isNotEmpty) ...[
           SizedBox(height: _groupGap.h),
           SettingsGroup(
             header: l10n.weeklyReportRemainingSection,
-            footer: l10n.weeklyReportRemainingFooter,
-            children: [
-              for (final step in report.remainingSteps)
-                SettingsTile(
-                  label: l10n.weeklyReportRemainingLabel(step.routineTitle, step.stepTitle),
-                  valueText: l10n.weeklyReportTimes(step.remainingCount),
-                  onTap: null,
-                ),
-            ],
+            children: [for (final step in report.remainingSteps) _RemainingCardRow(step: step)],
           ),
         ],
       ],
@@ -78,96 +60,160 @@ class WeeklyReportSections extends StatelessWidget {
   }
 }
 
-/// 요약 카드: 큰 숫자 하나(완료율) + 한 줄 + 월~일 링 7개 (흰 판 r20, 안쪽 20)
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.report});
+/// 요일별 막대 7개: 마친 비율만큼 민트, 마친 일과가 없거나 보낸 일과가 없으면 짧은 회색 막대
+class _DayBars extends StatelessWidget {
+  const _DayBars({required this.days});
 
-  final WeeklyReport report;
+  final List<WeeklyReportDay> days;
 
-  static const _padding = 20.0;
-  static const _numberToUnit = 8.0;
-  static const _numberToSummary = 8.0;
-  static const _summaryToDays = 20.0;
-  static const _weekdayToRing = 8.0;
+  static const _barAreaHeight = 96.0;
+  static const _barGap = 8.0;
+  static const _barRadius = 8.0;
+  static const _weekdayGap = 8.0;
+
+  /// 막대 높이 비율 하한: 마친 일이 있으면 [_doneMinFactor], 없으면 [_emptyFactor]
+  static const _doneMinFactor = 0.2;
+  static const _emptyFactor = 0.1;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
-    final muted = colors.settingsGroupLabel;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.settingsGroupBg,
-        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(_padding.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  l10n.weeklyReportPercent(report.completionPercent),
-                  style: context.typo.creditNumber.copyWith(color: colors.textPrimary),
-                ),
-                SizedBox(width: _numberToUnit.w),
-                Flexible(
-                  child: Text(l10n.weeklyReportCompletionLabel, style: context.typo.creditUnit.copyWith(color: muted)),
-                ),
-              ],
-            ),
-            SizedBox(height: _numberToSummary.h),
-            Text(
-              l10n.weeklyReportCompletionSummary(report.sentRoutineCount, report.completedRoutineCount),
-              style: context.typo.creditBody.copyWith(color: colors.settingsCardLabel),
-            ),
-            SizedBox(height: _summaryToDays.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final day in report.days)
-                  Column(
-                    children: [
-                      Text(l10n.weekdayShortOf(day.date), style: context.typo.creditCaption.copyWith(color: muted)),
-                      SizedBox(height: _weekdayToRing.h),
-                      _DayMark(day: day),
-                    ],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (final day in days)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: (_barGap / 2).w),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: _barAreaHeight.h,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: FractionallySizedBox(
+                        heightFactor: _heightFactorOf(day),
+                        widthFactor: 1,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: day.completedCount > 0 ? colors.routineRingProgress : colors.routineTileBg,
+                            borderRadius: BorderRadius.circular(_barRadius.r),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-              ],
+                  SizedBox(height: _weekdayGap.h),
+                  Text(
+                    context.l10n.weekdayShortOf(day.date),
+                    style: context.typo.creditCaption.copyWith(color: colors.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+      ],
+    );
+  }
+
+  double _heightFactorOf(WeeklyReportDay day) {
+    if (day.sentCount == 0 || day.completedCount == 0) return _emptyFactor;
+    return day.completionRatio.clamp(_doneMinFactor, 1.0);
+  }
+}
+
+/// 일과 한 줄: 이름 · `5번 중 4번` + 아래 진행 막대
+class _RoutineRecordRow extends StatelessWidget {
+  const _RoutineRecordRow({required this.routine});
+
+  final WeeklyReportRoutine routine;
+
+  static const _barHeight = 8.0;
+  static const _barRadius = 4.0;
+  static const _titleToBar = 8.0;
+  static const _padLeft = 20.0;
+  static const _padRight = 16.0;
+  static const _padVertical = 12.0;
+  static const _titleToValue = 12.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final ratio = routine.sentCount == 0 ? 0.0 : (routine.completedCount / routine.sentCount).clamp(0.0, 1.0);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(_padLeft.w, _padVertical.h, _padRight.w, _padVertical.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  routine.title,
+                  style: context.typo.settingsTileLabel.copyWith(color: colors.settingsCardLabel),
+                ),
+              ),
+              SizedBox(width: _titleToValue.w),
+              Text(
+                context.l10n.weeklyReportRoutineRatio(routine.sentCount, routine.completedCount),
+                style: context.typo.creditBody.copyWith(color: colors.textSecondary),
+              ),
+            ],
+          ),
+          SizedBox(height: _titleToBar.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(_barRadius.r),
+            child: SizedBox(
+              height: _barHeight.h,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: ColoredBox(color: colors.routineTileBg)),
+                  FractionallySizedBox(
+                    widthFactor: ratio,
+                    heightFactor: 1,
+                    child: ColoredBox(color: colors.routineRingProgress),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// 하루 표시: 보낸 일과가 있으면 진행 링(마친 비율), 없으면 `-` (링과 같은 자리)
-class _DayMark extends StatelessWidget {
-  const _DayMark({required this.day});
+/// 남은 카드 한 줄: 카드 이름 · `3번`
+class _RemainingCardRow extends StatelessWidget {
+  const _RemainingCardRow({required this.step});
 
-  final WeeklyReportDay day;
+  final WeeklyReportRemainingStep step;
 
-  /// 진행 링 지름 (RoutineProgressRing 40)
-  static const _ringSize = 40.0;
+  static const _padLeft = 20.0;
+  static const _padRight = 16.0;
+  static const _padVertical = 12.0;
+  static const _titleToValue = 12.0;
 
   @override
   Widget build(BuildContext context) {
-    if (day.sentCount == 0) {
-      return SizedBox(
-        width: _ringSize.w,
-        height: _ringSize.w,
-        child: Center(
-          child: Text(
-            context.l10n.weeklyReportDayNone,
-            style: context.typo.creditCaption.copyWith(color: context.colors.settingsGroupLabel),
+    final colors = context.colors;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(_padLeft.w, _padVertical.h, _padRight.w, _padVertical.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              step.stepTitle,
+              style: context.typo.settingsTileLabel.copyWith(color: colors.settingsCardLabel),
+            ),
           ),
-        ),
-      );
-    }
-    return RoutineProgressRing(progress: day.completionRatio);
+          SizedBox(width: _titleToValue.w),
+          Text(
+            context.l10n.weeklyReportTimes(step.remainingCount),
+            style: context.typo.creditBody.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
   }
 }

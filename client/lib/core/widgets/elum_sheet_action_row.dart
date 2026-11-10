@@ -16,6 +16,7 @@ class ElumSheetActionRow extends StatelessWidget {
     this.cancelLabel,
     this.onCancel,
     this.isLoading = false,
+    this.cancelWidth = _defaultCancelWidth,
   });
 
   final String confirmLabel;
@@ -32,7 +33,10 @@ class ElumSheetActionRow extends StatelessWidget {
   /// 확인 버튼 자리에 로딩을 그리고 둘 다 막는다
   final bool isLoading;
 
-  static const _cancelWidth = 100.0;
+  /// 취소 버튼 폭 (글이 길면 넓힘: 한 줄에 들어가게)
+  final double cancelWidth;
+
+  static const _defaultCancelWidth = 100.0;
   static const _buttonGap = 4.0;
 
   @override
@@ -63,7 +67,7 @@ class ElumSheetActionRow extends StatelessWidget {
     }
     return Row(
       children: [
-        SizedBox(width: _cancelWidth.w, child: cancelButton),
+        SizedBox(width: cancelWidth.w, child: cancelButton),
         SizedBox(width: _buttonGap.w),
         Expanded(child: confirmButton),
       ],

@@ -5,7 +5,6 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.PromptKey;
-import com.chuseok22.elumserver.ai.core.RoutineTranslationDraft;
 import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -124,21 +123,26 @@ public class OpenAiTextClient implements TextGenerationClient {
   }
 
   @Override
-  public String translateRoutineJson(
-    RoutineTranslationDraft draft, AppLocale sourceLanguage, AppLocale targetLanguage
-  ) {
-    return call(
-      RoutineTranslateSpec.systemPrompt(sourceLanguage, targetLanguage),
-      RoutineTranslateSpec.userContent(draft, sourceLanguage, targetLanguage),
-      RoutineTranslateSpec.schema(draft.steps().size()), "routine_translation", AiCallType.OPENAI_TEXT_TRANSLATE
-    );
-  }
-
-  @Override
   public String buildRoutineMemoryJson(String memoryUserContent) {
     return call(
       RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
       "routine_memory", AiCallType.OPENAI_TEXT_MEMORY
+    );
+  }
+
+  @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return call(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, "weekly_report_summary", AiCallType.OPENAI_TEXT_WEEKLY_REPORT
+    );
+  }
+
+  @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return call(
+      CardSplitSpec.systemPromptFor(AiCallContext.currentContentLocale()), splitUserContent,
+      CardSplitSpec.RESPONSE_SCHEMA, "card_split", AiCallType.OPENAI_TEXT_CARD_SPLIT
     );
   }
 

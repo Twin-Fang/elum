@@ -44,8 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AdminCreditPolicyService {
 
-  /// 정책 미리보기가 보는 지난 주 수.
-  static final int PREVIEW_WEEKS = 4;
+  /// 정책 미리보기가 보는 지난 주기 수 (주 또는 달).
+  static final int PREVIEW_PERIODS = 4;
 
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
@@ -96,7 +96,7 @@ public class AdminCreditPolicyService {
   }
 
   /**
-   * 새 정책을 발행한다. IMMEDIATE 면 이번 주 이미 준 주간 지급을 새 지급량으로 맞춘다.
+   * 새 정책을 발행한다. IMMEDIATE 면 이번 주기에 이미 준 지급을 새 지급량으로 맞춘다.
    *
    * <p>늘리면 차이만큼 더하고, 줄이면 남은 양까지만 뺀다(0 아래로 내려가지 않는다). 계정마다 잠근 뒤 묶음을
    * 읽어 그 사이 정산과 엇갈리지 않게 한다. 한 트랜잭션이라 도중에 실패하면 발행까지 함께 되돌린다.
@@ -117,7 +117,7 @@ public class AdminCreditPolicyService {
 
   private int applyToCurrentWeek(AiCreditPolicy published, String actor, String reason) {
     LocalDateTime now = LocalDateTime.now(clock);
-    CreditPeriod period = CreditPeriod.of(now);
+    CreditPeriod period = accountService.currentPeriod(now);
     Set<String> proMembers = proMemberIds(now);
     int adjusted = 0;
     for (String accountId : grantRepository.findAccountIdsByPeriodKeyAndSource(period.key(), CreditGrantSource.WEEKLY)) {
@@ -154,13 +154,13 @@ public class AdminCreditPolicyService {
   /**
    * 정책 발행의 영향을 추정한다. 아무것도 쓰지 않는다.
    *
-   * <p>지난 4주 계정별 주 수요(실제 차감 + 초과)를 새 지급량에 대 본다. 단가 변경은 수요에 반영하지 않는다 —
+   * <p>지난 4개 주기(주 또는 달) 계정별 수요(실제 차감 + 초과)를 새 지급량에 대 본다. 단가 변경은 수요에 반영하지 않는다 —
    * 수요는 옛 단가로 센 크레딧이다.
    */
   @Transactional(readOnly = true)
   public CreditPolicyPreview previewPolicy(PolicyDraft draft) {
     LocalDateTime now = LocalDateTime.now(clock);
-    CreditPeriod thisWeek = CreditPeriod.of(now);
+    CreditPeriod thisWeek = accountService.currentPeriod(now);
     AiCreditPolicy current = policyService.current();
     Set<String> proMembers = proMemberIds(now);
 
@@ -189,9 +189,16 @@ public class AdminCreditPolicyService {
     long usedOld = 0;
     long usedNew = 0;
     long usedTotal = 0;
-    for (int back = PREVIEW_WEEKS; back >= 1; back--) {
-      LocalDateTime from = thisWeek.start().minusWeeks(back);
-      LocalDateTime to = from.plusWeeks(1);
+    // 지난 PREVIEW_PERIODS 개 주기를 오래된 것부터 (주 단위면 주, 달 단위면 달)
+    CreditPeriod oldestPeriod = thisWeek;
+    for (int back = 0; back < PREVIEW_PERIODS; back++) {
+      oldestPeriod = oldestPeriod.previous();
+    }
+    CreditPeriod demandPeriod = oldestPeriod;
+    for (int back = PREVIEW_PERIODS; back >= 1; back--) {
+      LocalDateTime from = demandPeriod.start();
+      LocalDateTime to = demandPeriod.end();
+      demandPeriod = demandPeriod.next();
       Map<String, Long> demand = new HashMap<>();
       for (AccountTotal consumed : ledgerRepository.sumDeltaByAccount(CreditLedgerType.CONSUME, from, to)) {
         demand.merge(consumed.getAccountId(), -consumed.getTotal(), Long::sum);
@@ -215,7 +222,7 @@ public class AdminCreditPolicyService {
         usedNew += Math.min(want, newGrant);
       }
     }
-    double usd = aiCallLogRepository.sumCostBetween(thisWeek.start().minusWeeks(PREVIEW_WEEKS), thisWeek.start());
+    double usd = aiCallLogRepository.sumCostBetween(oldestPeriod.start(), thisWeek.start());
     Double usdPerCredit = AdminCreditQueryService.perCredit(usd, usedTotal);
 
     // IMMEDIATE 로 이번 주 지급을 고칠 계정과 총량 변화(읽기만).
@@ -247,11 +254,11 @@ public class AdminCreditPolicyService {
       proAccounts,
       freeAccounts * oldFree + proAccounts * oldPro,
       freeAccounts * newFree + proAccounts * newPro,
-      (double) exhaustedOld / PREVIEW_WEEKS,
-      (double) exhaustedNew / PREVIEW_WEEKS,
+      (double) exhaustedOld / PREVIEW_PERIODS,
+      (double) exhaustedNew / PREVIEW_PERIODS,
       usdPerCredit,
-      usdPerCredit == null ? null : usdPerCredit * usedOld / PREVIEW_WEEKS,
-      usdPerCredit == null ? null : usdPerCredit * usedNew / PREVIEW_WEEKS,
+      usdPerCredit == null ? null : usdPerCredit * usedOld / PREVIEW_PERIODS,
+      usdPerCredit == null ? null : usdPerCredit * usedNew / PREVIEW_PERIODS,
       immediate,
       immediateAccounts,
       immediateDelta,

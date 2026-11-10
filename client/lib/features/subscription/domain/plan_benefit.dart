@@ -19,14 +19,11 @@ enum PlanBenefit {
   /// 이룸이별 AI 메모 (내가 고친 일과처럼 만들기)
   routineMemory,
 
-  /// 전문가 일과 가져오기
-  expertRoutines,
+  /// 카드 한 장을 더 작은 2~3장으로 나눈 안 (AI)
+  cardSplit,
 
   /// 카드마다 보호자 목소리
   guardianVoice,
-
-  /// 만든 일과를 다른 언어 사본으로
-  routineTranslate,
 
   /// 일과 만들기 글 몫 크레딧 없이 (카드 그림은 그대로 듦)
   freeRoutineText,
@@ -60,12 +57,11 @@ enum PlanBenefitGroup {
     PlanBenefit.cardExportWithoutWatermark,
   ]),
 
-  /// 일과가 알아서 준비돼요: 반복 · 전문가 일과 · 다른 언어 · AI 메모
+  /// 일과가 알아서 준비돼요: 반복 · AI 메모
   readyRoutines([
     PlanBenefit.routineSchedule,
-    PlanBenefit.expertRoutines,
-    PlanBenefit.routineTranslate,
     PlanBenefit.routineMemory,
+    PlanBenefit.cardSplit,
   ]),
 
   /// 한 주를 한눈에: 주간 리포트 · 보호자 목소리

@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../data/push_device_repository.dart';
 import '../data/push_messaging_client.dart';
@@ -28,6 +29,9 @@ class PushTokenRegistrar {
 
   /// 이번 실행에서 서버 등록에 성공한 토큰 (같은 토큰 재등록 방지)
   String? _registeredToken;
+
+  /// 권한 꺼짐으로 서버 토큰을 이미 해제했는가 (앞으로 올 때마다 다시 해제하지 않게)
+  bool _hasReleasedTokenForDeniedPermission = false;
 
   /// 해제 후 ~ 다음 동기화 전: 토큰 갱신 이벤트로 되살아나지 않게 막음
   bool _isSuspended = false;
@@ -98,6 +102,12 @@ class PushTokenRegistrar {
   }
 
   Future<void> _registerCurrentToken() async {
+    // 이룸이 기기가 OS 알림을 꺼 뒀으면 서버의 이 기기 토큰을 해제 (서버가 알림 켜짐으로 보지 않게)
+    if (await _isPermissionDeniedOnElumiDevice()) {
+      if (!_hasReleasedTokenForDeniedPermission) await _unregisterServerTokenOnly();
+      return;
+    }
+    _hasReleasedTokenForDeniedPermission = false;
     if (!await _canRegister()) return;
     final String? token;
     try {
@@ -122,6 +132,31 @@ class PushTokenRegistrar {
       _registeredToken = token;
     } catch (e, st) {
       AppLogger.error('push', e, st, {'step': 'registerServer'});
+    }
+  }
+
+  /// 이룸이 기기 + 세션 + OS 알림 권한이 꺼짐으로 확인됐는가 (확인이 실패하면 false = 아무것도 바꾸지 않음)
+  Future<bool> _isPermissionDeniedOnElumiDevice() async {
+    if (_isSuspended || !_ref.read(localStorageProvider).isElumiDevice) return false;
+    if (!_ref.read(authSessionControllerProvider).hasSession) return false;
+    try {
+      return !(await _client.permissionStatus()).isGranted;
+    } catch (e, st) {
+      AppLogger.error('push', e, st, {'step': 'permissionStatusForElumi'});
+      return false;
+    }
+  }
+
+  /// 서버에 등록된 이 기기 토큰만 해제 (기기 토큰은 지우지 않음 > 권한을 다시 켜면 같은 토큰으로 다시 등록)
+  Future<void> _unregisterServerTokenOnly() async {
+    final token = await _tokenToUnregister();
+    if (token == null) return;
+    try {
+      await _ref.read(pushDeviceRepositoryProvider).unregister(token).timeout(_unregisterStepTimeout);
+      _registeredToken = null;
+      _hasReleasedTokenForDeniedPermission = true;
+    } catch (e, st) {
+      AppLogger.error('push', e, st, {'step': 'unregisterServerDenied'});
     }
   }
 

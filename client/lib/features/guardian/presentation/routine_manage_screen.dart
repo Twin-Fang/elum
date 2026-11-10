@@ -28,7 +28,6 @@ import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
 import 'routine_link_flow.dart';
 import 'routine_rename_flow.dart';
-import 'routine_translate_flow.dart';
 import 'widgets/library_arrange_exit_scope.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
@@ -147,8 +146,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await chooseGroupFor(routine);
       case LibraryMenuAction.copy:
         await _copy(routine);
-      case LibraryMenuAction.translate:
-        await _translate(routine);
       case LibraryMenuAction.shareToTalk:
         _shareToTalk(routine);
       case LibraryMenuAction.sendLink:
@@ -217,14 +214,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       fallback: l10n.routineLibraryActionFailedFallback,
       fallbackCode: 'E-LIB-COPY',
     );
-  }
-
-  /// 다른 언어로 만들기: 언어 시트 > 새 일과 > 격자를 그 칸으로 옮기고 상세를 연다 (실패는 흐름이 팝업)
-  Future<void> _translate(Routine routine) async {
-    final created = await translateRoutineWithSheet(context, ref, routine);
-    if (created == null || !mounted) return;
-    ref.read(libraryScrollTargetRoutineIdProvider.notifier).request(created.id);
-    await openRoutineDetail(created);
   }
 
   Future<void> _rename(Routine routine) => renameRoutineWithSheet(

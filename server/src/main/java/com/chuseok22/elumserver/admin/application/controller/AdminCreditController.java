@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.credit.application.service.PolicyDraft;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import java.security.Principal;
@@ -53,6 +54,12 @@ public class AdminCreditController {
   private final AdminCreditPolicyService policyService;
 
   // --- 개요 ---
+
+  /// 모든 크레딧 화면 문구가 쓰는 주기 단위(주간·월간). 못 읽으면 템플릿이 주 단위 문구로 대신한다.
+  @ModelAttribute("creditPeriodUnit")
+  public CreditPeriodUnit creditPeriodUnit() {
+    return queryService.periodUnit();
+  }
 
   @GetMapping("/admin/credits")
   public String overview(@RequestParam(name = "week", required = false) String week, Model model) {

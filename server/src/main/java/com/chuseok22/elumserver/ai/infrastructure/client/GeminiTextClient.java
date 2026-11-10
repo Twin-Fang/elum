@@ -11,7 +11,6 @@ import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
-import com.chuseok22.elumserver.ai.core.RoutineTranslationDraft;
 import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
@@ -100,20 +99,24 @@ public class GeminiTextClient implements TextGenerationClient {
   }
 
   @Override
-  public String translateRoutineJson(
-    RoutineTranslationDraft draft, AppLocale sourceLanguage, AppLocale targetLanguage
-  ) {
-    return firstText(callGenerateContent(
-      RoutineTranslateSpec.systemPrompt(sourceLanguage, targetLanguage),
-      RoutineTranslateSpec.userContent(draft, sourceLanguage, targetLanguage),
-      RoutineTranslateSpec.schema(draft.steps().size()), AiCallType.GEMINI_TEXT_TRANSLATE));
-  }
-
-  @Override
   public String buildRoutineMemoryJson(String memoryUserContent) {
     return firstText(callGenerateContent(
       RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
       AiCallType.GEMINI_TEXT_MEMORY));
+  }
+
+  @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return firstText(callGenerateContent(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, AiCallType.GEMINI_TEXT_WEEKLY_REPORT));
+  }
+
+  @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return firstText(callGenerateContent(
+      CardSplitSpec.systemPromptFor(AiCallContext.currentContentLocale()), splitUserContent,
+      CardSplitSpec.RESPONSE_SCHEMA, AiCallType.GEMINI_TEXT_CARD_SPLIT));
   }
 
   // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.

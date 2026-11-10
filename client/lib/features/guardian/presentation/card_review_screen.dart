@@ -1,3 +1,4 @@
+import 'memory/memory_applied_pill.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
 import '../../../core/widgets/elum_danger_confirm_dialog.dart';
+import 'memory/routine_memory_observation_sheet.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -209,11 +211,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
     final rootContext = Navigator.of(context, rootNavigator: true).context;
     final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
+    final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
     context.go(Routes.guardian);
     // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
     // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
     // ignore: use_build_context_synchronously
     unawaited(pushPermissionPrompt.maybeAsk(rootContext));
+    // 고쳐서 보냈으면 AI 메모리가 찾은 수정을 물어봄 (Pro + 켜짐일 때만, 실패해도 조용히)
+    // ignore: use_build_context_synchronously
+    if (savedRoutineId != null) unawaited(showMemoryObservationsAfterSend(rootContext, savedRoutineId));
   }
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
@@ -427,6 +433,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
             isReorderMode: _reorderMode,
             onTitleEditTap: renameRoutineInFlow,
           ),
+          // 이 일과에 AI 메모리 규칙이 적용됐으면 제목 아래 작은 알약 (누르면 AI 메모리)
+          if (!_reorderMode && (routine?.appliedMemoryRuleCount ?? 0) > 0) ...[
+            SizedBox(height: 8.h),
+            MemoryAppliedPill(count: routine!.appliedMemoryRuleCount),
+          ],
           SizedBox(height: 16.h),
           Expanded(
             child: _reorderMode

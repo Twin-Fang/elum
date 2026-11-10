@@ -16,7 +16,6 @@ const supportedAppLocales = <Locale>[
 /// 언어를 더 열 때는 그 언어 ARB 번역을 채운 뒤 여기에 한 줄 더한다.
 /// OS 앱별 언어 목록(iOS·Android)도 함께 더한다: `docs/store/locales/README.md` (`tool/check_native_locales.dart` 가 검사).
 /// [supportedAppLocales] 의 부분집합이다 — ARB 가 있어야 열 수 있다.
-/// 다른 언어로 만들기 대상 언어도 이 목록이다: 서버 `RoutineTranslationLanguages.TARGETS` 를 함께 고친다 (`CrossStackContractTest` 가 대조).
 const openedAppLocales = <Locale>[
   Locale('ko'),
   Locale('en'),

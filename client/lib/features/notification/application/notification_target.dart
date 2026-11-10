@@ -27,7 +27,8 @@ class NotificationTarget {
     return NotificationTarget(
       type: type,
       profileId: data['profileId'],
-      targetId: data['targetId'],
+      // 주간 리포트 푸시는 주 월요일을 weekStart 로도 보냄
+      targetId: data['targetId'] ?? data['weekStart'],
       notificationId: data['notificationId'],
     );
   }
@@ -37,7 +38,7 @@ class NotificationTarget {
   /// null 이면 이룸이와 무관하거나 접근할 수 없는 이룸이
   final String? profileId;
 
-  /// 이동할 대상의 id (이야기 알림은 글 id, 없으면 null)
+  /// 이동할 대상의 id (이야기 알림은 글 id, 주간 리포트는 주 월요일 `yyyy-MM-dd`, 없으면 null)
   final String? targetId;
 
   /// 푸시로 들어온 알림의 id (목록에서 온 이동에는 없음)

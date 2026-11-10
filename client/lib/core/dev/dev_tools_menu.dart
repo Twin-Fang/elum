@@ -31,6 +31,7 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
           children: [
             const _PlanOverrideRow(),
             const _StoreForcedRow(),
+            const _CreditPackSaleForcedRow(),
             const _ProTeaserForcedRow(),
             _Tile(
               icon: Icons.navigation_outlined,

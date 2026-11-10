@@ -20,11 +20,10 @@ public record EntitlementSnapshot(
   boolean cardExportAllThemes,
   boolean cardExportAllLayouts,
   boolean weeklyReport,
-  boolean routineTranslate,
   boolean routineSchedule,
   boolean guardianVoice,
-  boolean routineTemplates,
   boolean routineMemory,
+  boolean cardSplit,
   boolean imageRegenerateFree,
   boolean routineCreateFree,
   boolean imageHighQuality
