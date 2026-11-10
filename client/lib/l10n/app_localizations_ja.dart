@@ -9,18 +9,13 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '通知がオフです';
+  String get notificationOffNoticeTitle => '通知をオンにしますか？';
 
   @override
-  String notificationOffNoticeBody(String name, String batchim) {
-    return '$nameがルーティンを終えた知らせ、ストーリーのコメント、新機能のお知らせを受け取れません';
-  }
+  String get notificationOffNoticeBody => 'ルーティンが終わったらお知らせします';
 
   @override
-  String get notificationOffNoticeTurnOn => '通知をオンにする';
-
-  @override
-  String get notificationOffRowHint => 'オフのため知らせを受け取れません';
+  String get notificationOffValue => 'オフ';
 
   @override
   String get appTitle => '이룸';

@@ -9,18 +9,13 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '通知已关闭';
+  String get notificationOffNoticeTitle => '要开启通知吗？';
 
   @override
-  String notificationOffNoticeBody(String name, String batchim) {
-    return '无法收到$name完成日程的消息、故事评论和新功能消息';
-  }
+  String get notificationOffNoticeBody => '完成日程后会通知你';
 
   @override
-  String get notificationOffNoticeTurnOn => '开启通知';
-
-  @override
-  String get notificationOffRowHint => '已关闭，无法收到消息';
+  String get notificationOffValue => '已关闭';
 
   @override
   String get appTitle => '이룸';

@@ -1,6 +1,4 @@
-import '../../../core/widgets/app_pressable.dart';
 import '../../notification/application/device_notification_permission_controller.dart';
-import '../../../core/widgets/notification_off_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -378,35 +376,40 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Widge
     final l10n = context.l10n;
     final isPermissionOff = ref.watch(deviceNotificationPermissionControllerProvider);
     void openSettings() => context.push(Routes.guardianNotificationSettings);
-    if (!isPermissionOff) {
-      return SettingsTile(isInCard: true, label: l10n.notificationSettingsTitle, onTap: widget.isBusy ? null : openSettings);
-    }
-    final colors = context.colors;
-    return AppPressable(
+    return SettingsTile(
+      isInCard: true,
+      label: l10n.notificationSettingsTitle,
       onTap: widget.isBusy ? null : openSettings,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: SettingsTile.cardHeight.h),
-        child: Padding(
-          padding: EdgeInsets.only(left: SettingsTile.cardPadLeft.w, right: SettingsTile.cardPadRight.w, top: context.space.xs.h, bottom: context.space.xs.h),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.notificationSettingsTitle, style: context.typo.settingsTileLabel.copyWith(color: colors.settingsCardLabel)),
-                    Text(l10n.notificationOffRowHint, style: context.typo.creditCaption.copyWith(color: colors.highlightBorder)),
-                  ],
-                ),
-              ),
-              NotificationTurnOnPill(
-                label: l10n.notificationTurnOnDeviceNotification,
-                onTap: ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn,
-              ),
-            ],
-          ),
+      // 기기 알림이 꺼져 있으면 값 자리에 `꺼짐` (켜는 곳은 알림 설정 화면의 띠)
+      valueChip: isPermissionOff ? const _NotificationOffValue() : null,
+      showChevronWithValue: true,
+    );
+  }
+}
+
+/// 알림 설정 줄의 `꺼짐` 값: 작은 점 + 글
+class _NotificationOffValue extends StatelessWidget {
+  const _NotificationOffValue();
+
+  static const _dotSize = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: _dotSize.w,
+          height: _dotSize.w,
+          decoration: BoxDecoration(color: colors.highlightBorder, shape: BoxShape.circle),
         ),
-      ),
+        SizedBox(width: context.space.xs.w / 2),
+        Text(
+          context.l10n.notificationOffValue,
+          style: context.typo.settingsTileLabel.copyWith(color: colors.highlightBorder),
+        ),
+      ],
     );
   }
 }

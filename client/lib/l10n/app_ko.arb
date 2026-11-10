@@ -1,12 +1,10 @@
 {
-  "notificationOffNoticeTitle": "알림이 꺼져 있어요",
-  "@notificationOffNoticeTitle": {"description": "알림 꺼짐 안내 제목 (홈 띠 · 알림 화면 카드)"},
-  "notificationOffNoticeBody": "{name}{batchim, select, yes{이} other{가}} 일과를 끝낸 소식, 이야기 댓글, 새 기능 소식을 받을 수 없어요",
-  "@notificationOffNoticeBody": {"description": "알림 꺼짐 안내 본문. name 은 이룸이 호칭, batchim 은 한국어 조사 선택용(yes/no)", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
-  "notificationOffNoticeTurnOn": "알림 켜기",
-  "@notificationOffNoticeTurnOn": {"description": "알림 화면 카드 버튼"},
-  "notificationOffRowHint": "꺼져 있어 소식을 받을 수 없어요",
-  "@notificationOffRowHint": {"description": "설정의 알림 줄 제목 아래 작은 글 (기기 알림이 꺼졌을 때)"},
+  "notificationOffNoticeTitle": "알림을 켜 둘까요?",
+  "@notificationOffNoticeTitle": {"description": "보호자 홈 알림 꺼짐 카드 제목"},
+  "notificationOffNoticeBody": "일과를 끝내면 알려 드려요",
+  "@notificationOffNoticeBody": {"description": "보호자 홈 알림 꺼짐 카드 본문 (이룸이가 일과를 끝낸 알림을 받는다는 뜻)"},
+  "notificationOffValue": "꺼짐",
+  "@notificationOffValue": {"description": "설정의 알림 설정 줄 오른쪽 값 (기기 알림이 꺼졌을 때)"},
   "@@locale": "ko",
 
   "appTitle": "이룸",

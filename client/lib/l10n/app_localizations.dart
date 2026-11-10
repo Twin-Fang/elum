@@ -104,29 +104,23 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// 알림 꺼짐 안내 제목 (홈 띠 · 알림 화면 카드)
+  /// 보호자 홈 알림 꺼짐 카드 제목
   ///
   /// In ko, this message translates to:
-  /// **'알림이 꺼져 있어요'**
+  /// **'알림을 켜 둘까요?'**
   String get notificationOffNoticeTitle;
 
-  /// 알림 꺼짐 안내 본문. name 은 이룸이 호칭, batchim 은 한국어 조사 선택용(yes/no)
+  /// 보호자 홈 알림 꺼짐 카드 본문 (이룸이가 일과를 끝낸 알림을 받는다는 뜻)
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{이} other{가}} 일과를 끝낸 소식, 이야기 댓글, 새 기능 소식을 받을 수 없어요'**
-  String notificationOffNoticeBody(String name, String batchim);
+  /// **'일과를 끝내면 알려 드려요'**
+  String get notificationOffNoticeBody;
 
-  /// 알림 화면 카드 버튼
+  /// 설정의 알림 설정 줄 오른쪽 값 (기기 알림이 꺼졌을 때)
   ///
   /// In ko, this message translates to:
-  /// **'알림 켜기'**
-  String get notificationOffNoticeTurnOn;
-
-  /// 설정의 알림 줄 제목 아래 작은 글 (기기 알림이 꺼졌을 때)
-  ///
-  /// In ko, this message translates to:
-  /// **'꺼져 있어 소식을 받을 수 없어요'**
-  String get notificationOffRowHint;
+  /// **'꺼짐'**
+  String get notificationOffValue;
 
   /// 앱 이름. 운영체제의 앱 전환 화면에 보인다.
   ///

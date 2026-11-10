@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/notification_off_notice.dart';
 import '../../application/device_notification_permission_controller.dart';
 
 /// 기기 알림이 꺼져 있을 때만 보이는 띠: 종+사선 아이콘 + 한 줄 + 검정 `켜기` (시안 1732:8433)
@@ -33,10 +33,6 @@ class _DeviceNotificationPermissionBannerState
   static const _iconHeight = 20.0;
   static const _iconToTextGap = 12.0;
 
-  /// `켜기` 버튼 (높이 34, 좌우 20, 모서리 8)
-  static const _buttonHeight = 34.0;
-  static const _buttonPaddingH = 20.0;
-  static const _buttonRadius = 8.0;
   static const _textToButtonGap = 8.0;
 
   @override
@@ -90,22 +86,9 @@ class _DeviceNotificationPermissionBannerState
             ),
           ),
           SizedBox(width: _textToButtonGap.w),
-          AppPressable(
+          NotificationTurnOnButton(
+            label: l10n.notificationTurnOnDeviceNotification,
             onTap: controller.turnOn,
-            child: Container(
-              height: _buttonHeight.h,
-              padding: EdgeInsets.symmetric(horizontal: _buttonPaddingH.w),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.buttonEnabled,
-                borderRadius: BorderRadius.circular(_buttonRadius.r),
-              ),
-              child: Text(
-                l10n.notificationTurnOnDeviceNotification,
-                style: context.typo.notificationBannerButton
-                    .copyWith(color: colors.buttonEnabledText),
-              ),
-            ),
           ),
         ],
       ),

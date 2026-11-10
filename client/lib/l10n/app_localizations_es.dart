@@ -9,19 +9,13 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle =>
-      'Las notificaciones están desactivadas';
+  String get notificationOffNoticeTitle => '¿Activar notificaciones?';
 
   @override
-  String notificationOffNoticeBody(String name, String batchim) {
-    return 'No recibirás avisos cuando $name termine una rutina, comentarios de historias ni novedades';
-  }
+  String get notificationOffNoticeBody => 'Te avisamos al terminar una rutina';
 
   @override
-  String get notificationOffNoticeTurnOn => 'Activar notificaciones';
-
-  @override
-  String get notificationOffRowHint => 'Desactivadas: no recibes novedades';
+  String get notificationOffValue => 'Desactivadas';
 
   @override
   String get appTitle => '이룸';

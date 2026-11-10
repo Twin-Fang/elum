@@ -1,8 +1,7 @@
 {
-  "notificationOffNoticeTitle": "Las notificaciones están desactivadas",
-  "notificationOffNoticeBody": "No recibirás avisos cuando {name} termine una rutina, comentarios de historias ni novedades",
-  "notificationOffNoticeTurnOn": "Activar notificaciones",
-  "notificationOffRowHint": "Desactivadas: no recibes novedades",
+  "notificationOffNoticeTitle": "¿Activar notificaciones?",
+  "notificationOffNoticeBody": "Te avisamos al terminar una rutina",
+  "notificationOffValue": "Desactivadas",
   "@@locale": "es",
   "installationRetryMessage": "No se pudo comprobar el inicio de sesión. Inténtalo de nuevo.",
   "installationRetryButton": "Reintentar",

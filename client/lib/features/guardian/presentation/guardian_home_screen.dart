@@ -1,6 +1,5 @@
 import '../../notification/application/home_notification_notice_provider.dart';
 import '../../../app/notification_off_notice_host.dart';
-import '../../../core/widgets/notification_off_notice.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -195,10 +194,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 기기 알림이 꺼져 있으면 한 줄 안내 (닫으면 7일 숨김)
+          // 기기 알림이 꺼져 있으면 안내 카드 (닫으면 7일 숨김)
           if (!ref.watch(homeNotificationNoticeDismissalProvider)) ...[
             NotificationOffNoticeHost(
-              style: NotificationOffNoticeStyle.compact,
               onDismiss: ref.read(homeNotificationNoticeDismissalProvider.notifier).dismiss,
             ),
             SizedBox(height: _titleToList.h),

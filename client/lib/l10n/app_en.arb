@@ -1,8 +1,7 @@
 {
-  "notificationOffNoticeTitle": "Notifications are off",
-  "notificationOffNoticeBody": "You won't get news when {name} finishes a routine, story comments, or new feature updates",
-  "notificationOffNoticeTurnOn": "Turn on notifications",
-  "notificationOffRowHint": "Off, so you can't get updates",
+  "notificationOffNoticeTitle": "Turn on notifications?",
+  "notificationOffNoticeBody": "We'll tell you when a routine is done",
+  "notificationOffValue": "Off",
   "@@locale": "en",
   "appTitle": "elum",
   "commonConfirm": "OK",

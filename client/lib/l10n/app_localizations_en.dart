@@ -9,18 +9,14 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => 'Notifications are off';
+  String get notificationOffNoticeTitle => 'Turn on notifications?';
 
   @override
-  String notificationOffNoticeBody(String name, String batchim) {
-    return 'You won\'t get news when $name finishes a routine, story comments, or new feature updates';
-  }
+  String get notificationOffNoticeBody =>
+      'We\'ll tell you when a routine is done';
 
   @override
-  String get notificationOffNoticeTurnOn => 'Turn on notifications';
-
-  @override
-  String get notificationOffRowHint => 'Off, so you can\'t get updates';
+  String get notificationOffValue => 'Off';
 
   @override
   String get appTitle => 'elum';

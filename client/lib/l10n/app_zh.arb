@@ -1,8 +1,7 @@
 {
-  "notificationOffNoticeTitle": "通知已关闭",
-  "notificationOffNoticeBody": "无法收到{name}完成日程的消息、故事评论和新功能消息",
-  "notificationOffNoticeTurnOn": "开启通知",
-  "notificationOffRowHint": "已关闭，无法收到消息",
+  "notificationOffNoticeTitle": "要开启通知吗？",
+  "notificationOffNoticeBody": "完成日程后会通知你",
+  "notificationOffValue": "已关闭",
   "@@locale": "zh",
   "installationRetryMessage": "无法检查登录信息。请重试。",
   "installationRetryButton": "重试",

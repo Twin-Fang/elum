@@ -9,19 +9,13 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '알림이 꺼져 있어요';
+  String get notificationOffNoticeTitle => '알림을 켜 둘까요?';
 
   @override
-  String notificationOffNoticeBody(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '$name$_temp0 일과를 끝낸 소식, 이야기 댓글, 새 기능 소식을 받을 수 없어요';
-  }
+  String get notificationOffNoticeBody => '일과를 끝내면 알려 드려요';
 
   @override
-  String get notificationOffNoticeTurnOn => '알림 켜기';
-
-  @override
-  String get notificationOffRowHint => '꺼져 있어 소식을 받을 수 없어요';
+  String get notificationOffValue => '꺼짐';
 
   @override
   String get appTitle => '이룸';

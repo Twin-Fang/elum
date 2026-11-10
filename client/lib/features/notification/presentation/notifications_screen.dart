@@ -1,5 +1,3 @@
-import '../../../app/notification_off_notice_host.dart';
-import '../../../core/widgets/notification_off_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +7,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_segmented_tabs.dart';
 import '../application/unread_summary_provider.dart';
+import 'widgets/device_notification_permission_banner.dart';
 import 'widgets/notification_settings_gear_button.dart';
 import 'widgets/notice_history_tab.dart';
 import 'widgets/notification_list_tab.dart';
@@ -78,11 +77,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               if (index == _noticeTabIndex) _isNoticeTabOpened = true;
             }),
           ),
-          // 알림 탭 맨 위: 기기 알림이 꺼져 있으면 카드 (목록이 비어도 보임)
+          // 알림 탭 맨 위: 기기 알림이 꺼져 있으면 꺼짐 띠 (목록이 비어도 보임)
           if (_selectedTabIndex == _notificationTabIndex)
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-              child: const NotificationOffNoticeHost(style: NotificationOffNoticeStyle.card),
+              child: const DeviceNotificationPermissionBanner(),
             ),
           Expanded(
             child: IndexedStack(
