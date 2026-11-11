@@ -149,6 +149,11 @@ case "$MODE" in
     echo "ELUM_ENABLE_NETWORK_LOG=false" >> "$ENV_FILE"
     echo "ELUM_SKIP_ONBOARDING=false" >> "$ENV_FILE"
     echo "ELUM_USE_MOCK=false" >> "$ENV_FILE"
+    # 스토어에 나가는 빌드는 결제 화면을 넣는다 (Secret 에 줄이 없으면 앱 기본값 false 라 심사관이 구매 화면을 못 본다).
+    # 실제 판매 켜기·끄기는 서버 판매 스위치(SUBSCRIPTION_*_SELLING_ENABLED)가 한다. 이 빌드에서 빼려면 RELEASE_IAP_ENABLED=false
+    grep -v '^ELUM_IAP_ENABLED=' "$ENV_FILE" > "$ENV_FILE.tmp" || true
+    mv "$ENV_FILE.tmp" "$ENV_FILE"
+    echo "ELUM_IAP_ENABLED=${RELEASE_IAP_ENABLED:-true}" >> "$ENV_FILE"
     BUILD_FLAGS="${RELEASE_FLAGS[*]:-}"
     echo "✅ 배포 빌드 프로파일 적용"
     ;;
