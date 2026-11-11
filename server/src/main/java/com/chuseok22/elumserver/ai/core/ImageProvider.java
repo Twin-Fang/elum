@@ -16,9 +16,15 @@ public enum ImageProvider {
   GEMINI("Gemini", ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE),
   OPENAI("OpenAI", ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE),
   FLUX("FLUX (fal.ai)", ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE),
+  CLOUDFLARE("Cloudflare (klein-4b)", ConfigKey.PRICE_CLOUDFLARE_IMAGE_PER_IMAGE),
   ;
 
   private final String label;
   /// 장당 단가 설정 키. 제공자마다 달라 각 구현체가 자기 비용을 계산한다.
   private final ConfigKey priceKey;
+
+  /// 영어 장면 한 줄로 그리는 제공자인가 (FLUX·CLOUDFLARE: 한국어 설명을 못 알아들음)
+  public boolean usesEnglishScene() {
+    return this == FLUX || this == CLOUDFLARE;
+  }
 }

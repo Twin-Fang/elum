@@ -48,7 +48,8 @@ class CardImageGeneratorLocaleTest {
 
   @BeforeEach
   void setUp() {
-    generator = new CardImageGenerator(imageClientRouter, fluxImageClient, translator);
+    generator = new CardImageGenerator(imageClientRouter, translator);
+    lenient().when(imageClientRouter.englishScene(ImageProvider.FLUX)).thenReturn(Optional.of(fluxImageClient));
     lenient().when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
     lenient().when(fluxImageClient.available()).thenReturn(true);
     lenient().when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(Optional.of(openAiClient));

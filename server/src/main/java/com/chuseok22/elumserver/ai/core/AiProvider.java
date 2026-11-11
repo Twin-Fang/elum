@@ -14,6 +14,7 @@ public enum AiProvider {
   OPENAI("OpenAI"),
   CLAUDE("Claude"),
   FLUX("FLUX"),
+  CLOUDFLARE("Cloudflare"),
   LOCAL_LLM("로컬 LLM"),
   ;
 

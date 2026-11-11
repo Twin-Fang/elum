@@ -68,8 +68,8 @@ public enum ConfigKey {
 
   IMAGE_PROVIDER_SELECTED(
     ConfigGroup.IMAGE_PROVIDER, "사용할 제공자",
-    "카드 삽화를 생성할 제공자. 키가 없는 제공자는 고를 수 없다",
-    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI", "FLUX"), "GEMINI"
+    "카드 삽화를 생성할 제공자. 키가 없는 제공자는 고를 수 없다. CLOUDFLARE·FLUX 가 실패하면 그 카드만 OpenAI 로 그린다",
+    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI", "FLUX", "CLOUDFLARE"), "CLOUDFLARE"
   ),
   OPENAI_API_KEY(
     ConfigGroup.IMAGE_PROVIDER, "OpenAI API 키",
@@ -95,6 +95,22 @@ public enum ConfigKey {
     ConfigGroup.IMAGE_PROVIDER, "FLUX 모델",
     "fal.ai 모델 경로. 예: fal-ai/flux/schnell",
     ConfigValueType.STRING, List.of(), "fal-ai/flux/schnell"
+  ),
+  // Cloudflare Workers AI (#1258): 하루 10,000 neurons 무료(00:00 UTC 초기화), 넘으면 4006 으로 거절 > OpenAI
+  CLOUDFLARE_ACCOUNT_ID(
+    ConfigGroup.IMAGE_PROVIDER, "Cloudflare 계정 ID",
+    "dash.cloudflare.com 주소의 32자리 계정 ID",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  CLOUDFLARE_API_TOKEN(
+    ConfigGroup.IMAGE_PROVIDER, "Cloudflare API 토큰",
+    "Workers AI 권한만 준 토큰. 암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  CLOUDFLARE_IMAGE_MODEL(
+    ConfigGroup.IMAGE_PROVIDER, "Cloudflare 그림 모델",
+    "Workers AI 모델 ID. 예: @cf/black-forest-labs/flux-2-klein-4b",
+    ConfigValueType.STRING, List.of(), "@cf/black-forest-labs/flux-2-klein-4b"
   ),
   // OpenAI·Gemini 그림 지시문 언어. 운영 DB 프롬프트는 배포로 바뀌지 않으므로 전환도
   // 관리자 화면에서 한다. 기본값 KO 는 지금 동작 그대로다.
@@ -202,6 +218,12 @@ public enum ConfigKey {
     ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",
     "FLUX 이미지 1장 생성 요금. 비용 추정에 사용. fal 은 1MP 미만도 1MP 로 청구한다 (schnell $0.003/MP)",
     ConfigValueType.DECIMAL, List.of(), "0.003"
+  ),
+  // klein-4b 실측(#1257): 크기와 무관하게 1장 104.2 neurons x $0.011/1,000
+  PRICE_CLOUDFLARE_IMAGE_PER_IMAGE(
+    ConfigGroup.PRICING, "Cloudflare 이미지 단가 (USD/장)",
+    "Cloudflare 그림 1장 생성 요금. 비용 추정에 사용. 하루 10,000 neurons(약 95장)는 무료지만 유료 구간 단가로 잡는다",
+    ConfigValueType.DECIMAL, List.of(), "0.0011462"
   ),
   // 관리자 화면 비용 원화 환산 전용. 청구·한도 계산에는 쓰지 않는다.
   USD_TO_KRW_RATE(

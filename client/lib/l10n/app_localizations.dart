@@ -746,16 +746,16 @@ abstract class AppLocalizations {
   /// **'하는 동작을 선 그림으로 보여줘요'**
   String get imageStyleSymbolDescription;
 
-  /// 카드 그림 방식 이름 (Pro, AI 캐릭터 그림)
+  /// 카드 그림 방식 이름 (Pro, AI 만화 그림)
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터 그림'**
+  /// **'만화 그림'**
   String get imageStyleCharacterLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터가 직접 해 보여요'**
+  /// **'만화 속 아이가 직접 해 보여요'**
   String get imageStyleCharacterDescription;
 
   /// 카드 그림 방식 이름 (Pro, AI 실사 그림)
@@ -827,7 +827,7 @@ abstract class AppLocalizations {
   /// 캐릭터 고르기 화면 설명
   ///
   /// In ko, this message translates to:
-  /// **'선택한 친구가 카드 속 주인공이 되어 도와줘요'**
+  /// **'선택한 친구가 홈과 보상 화면에서 함께해요'**
   String get onboardingCharacterDescription;
 
   /// 카드 그림 방식 화면 제목
@@ -8465,13 +8465,13 @@ abstract class AppLocalizations {
   /// 머리 비교: Pro 카드 아래 작은 글 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Pro 캐릭터 그림'**
+  /// **'Pro 만화 그림'**
   String get planHeroProTag;
 
   /// 머리 비교 그림의 읽기 프로그램 문구 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요'**
+  /// **'Free는 이모지 카드, Pro는 만화 그림 카드예요'**
   String get planHeroCompareSemantics;
 
   /// 혜택 묶음 제목: 그림·다시 그리기·인쇄. elumiName 은 고른 이룸이 호칭 #1189

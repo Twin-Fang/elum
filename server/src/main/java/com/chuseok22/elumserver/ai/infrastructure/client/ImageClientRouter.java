@@ -48,6 +48,13 @@ public class ImageClientRouter {
     return clients.stream().filter(client -> client.provider() == provider).findFirst();
   }
 
+  /// 영어 장면으로 그리는 제공자(FLUX·CLOUDFLARE)의 클라이언트
+  public Optional<EnglishSceneImageClient> englishScene(ImageProvider provider) {
+    return of(provider)
+      .filter(EnglishSceneImageClient.class::isInstance)
+      .map(EnglishSceneImageClient.class::cast);
+  }
+
   /// 관리자 화면이 제공자별 상태(단가·키 유무·캐릭터 지원)를 나열할 때 쓴다.
   public List<ImageGenerationClient> all() {
     return clients;

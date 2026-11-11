@@ -78,6 +78,9 @@
             <option value="LULU">루루</option>
             <option value="POPO">포포</option>
           </select>
+          <!-- Cloudflare 는 캐릭터 대신 카드 그림 인물로 그린다 (#1258) -->
+          <p th:if="${prompt.promptKey.name() == 'FLUX_ROUTINE_IMAGE_PREFIX' or prompt.promptKey.name() == 'CARD_IMAGE_SUBJECT_CHILD'}"
+             class="text-xs opacity-70">FLUX·Cloudflare 가 같이 쓰는 화풍이에요. Cloudflare 를 고르면 캐릭터 대신 '카드 그림 인물: 만화 아이' 생김새로 그려서 위 캐릭터 선택은 반영되지 않아요.</p>
 
           <div class="flex gap-2">
             <button type="button" class="btn btn-outline btn-sm preview-btn"
