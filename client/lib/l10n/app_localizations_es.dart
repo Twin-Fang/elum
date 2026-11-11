@@ -378,10 +378,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get imageStyleSymbolDescription => '하는 동작을 선 그림으로 보여줘요';
 
   @override
-  String get imageStyleCharacterLabel => '캐릭터 그림';
+  String get imageStyleCharacterLabel => '만화 그림';
 
   @override
-  String get imageStyleCharacterDescription => '캐릭터가 직접 해 보여요';
+  String get imageStyleCharacterDescription => '만화 속 아이가 직접 해 보여요';
 
   @override
   String get imageStyleRealisticLabel => '사진 같은 그림';
@@ -433,7 +433,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
+  String get onboardingCharacterDescription => '선택한 친구가 홈과 보상 화면에서 함께해요';
 
   @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
@@ -4895,10 +4895,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planHeroFreeTag => 'Free 이모지';
 
   @override
-  String get planHeroProTag => 'Pro 캐릭터 그림';
+  String get planHeroProTag => 'Pro 만화 그림';
 
   @override
-  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요';
+  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 만화 그림 카드예요';
 
   @override
   String planBenefitGroupCards(String elumiName) {

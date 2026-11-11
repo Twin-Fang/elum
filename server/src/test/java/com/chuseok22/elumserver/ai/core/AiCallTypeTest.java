@@ -25,6 +25,7 @@ class AiCallTypeTest {
     Map.entry(AiCallType.GEMINI_IMAGE, AiCallPurpose.CARD_IMAGE),
     Map.entry(AiCallType.OPENAI_IMAGE, AiCallPurpose.CARD_IMAGE),
     Map.entry(AiCallType.FLUX_IMAGE, AiCallPurpose.CARD_IMAGE),
+    Map.entry(AiCallType.CLOUDFLARE_IMAGE, AiCallPurpose.CARD_IMAGE),
     // FLUX 용 영어 한 줄 번역. 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다 (#373).
     Map.entry(AiCallType.GEMINI_TEXT_IMAGE_PROMPT, AiCallPurpose.IMAGE_PROMPT_TRANSLATE),
     // 카드 직접 추가 시 픽토그램 고르기 (#247). 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다.

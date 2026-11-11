@@ -259,6 +259,12 @@ public final class PromptDefaults {
       "Flat vector illustration, simple picture-book style, thick dark brown outlines, flat soft pastel "
         + "colors, plain light cream background, no shading. Wordless image, no letters anywhere."),
 
+    // 카드 그림 인물: 성별이 드러나지 않는 만화 아이 (#1258 후보 4개 중 바가지 머리·주황 후드티)
+    // "Only one character: {이 값}. {장면}" 자리에 들어간다. 색 코드·글자 단어는 넣지 않는다
+    Map.entry(PromptKey.CARD_IMAGE_SUBJECT_CHILD,
+      "a simple cartoon child with a round head, short black bowl-cut hair, dot eyes, rosy cheeks, "
+        + "a plain orange hoodie and gray long pants"),
+
     // 영어 장면이 없는 카드만 탄다(보호자가 직접 추가한 카드). 싼 글 모델로 한 번, 짧게.
     Map.entry(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, """
       Write one short English scene line for an illustrator from the Korean step sentence in \

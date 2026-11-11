@@ -395,10 +395,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shows the action as a line drawing';
 
   @override
-  String get imageStyleCharacterLabel => 'Character';
+  String get imageStyleCharacterLabel => 'Cartoon';
 
   @override
-  String get imageStyleCharacterDescription => 'A character acts it out';
+  String get imageStyleCharacterDescription => 'A cartoon child acts it out';
 
   @override
   String get imageStyleRealisticLabel => 'Realistic';
@@ -452,7 +452,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingCharacterDescription =>
-      'The friend you pick is the star of the cards and helps along the way';
+      'The friend you pick joins you on the home and reward screens';
 
   @override
   String get onboardingImageStyleTitle =>
@@ -5092,11 +5092,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planHeroFreeTag => 'Free emoji';
 
   @override
-  String get planHeroProTag => 'Pro character picture';
+  String get planHeroProTag => 'Pro cartoon picture';
 
   @override
   String get planHeroCompareSemantics =>
-      'Free gives emoji cards, Pro gives character picture cards';
+      'Free gives emoji cards, Pro gives cartoon picture cards';
 
   @override
   String planBenefitGroupCards(String elumiName) {

@@ -19,6 +19,7 @@ public enum AiCallType {
   OPENAI_TEXT_QUESTION("OpenAI 추가 질문", AiCallPurpose.ROUTINE_QUESTION, AiProvider.OPENAI),
   OPENAI_IMAGE("OpenAI 이미지", AiCallPurpose.CARD_IMAGE, AiProvider.OPENAI),
   FLUX_IMAGE("FLUX 이미지", AiCallPurpose.CARD_IMAGE, AiProvider.FLUX),
+  CLOUDFLARE_IMAGE("Cloudflare 이미지", AiCallPurpose.CARD_IMAGE, AiProvider.CLOUDFLARE),
   LOCAL_LLM_DLP("로컬 LLM 민감정보 검사", AiCallPurpose.SENSITIVE_INFO_CHECK, AiProvider.LOCAL_LLM),
   GEMINI_TEXT_IMAGE_PROMPT("Gemini 그림 문장 번역", AiCallPurpose.IMAGE_PROMPT_TRANSLATE, AiProvider.GEMINI),
   GEMINI_TEXT_PICTOGRAM("Gemini 픽토그램 선택", AiCallPurpose.PICTOGRAM_PICK, AiProvider.GEMINI),
