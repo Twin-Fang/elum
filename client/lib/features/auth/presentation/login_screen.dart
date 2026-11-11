@@ -220,7 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool get _isIos => LoginScreen.debugPretendIos ?? Platform.isIOS;
 
   /// 애플 버튼을 그리는가 — iOS 에서만 뜬다 (심사 요건).
-  bool get _showApple => _isIos;
+  bool get _shouldShowApple => _isIos;
 
   @override
   Widget build(BuildContext context) {
@@ -237,8 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// 제공자 버튼 묶음. 시작 화면의 CTA가 있던 자리(화면 하단)에 얹는다.
   ///
-  /// 그림 위에 겹쳐 놓기 때문에 하단 페이드(`splashFade`, y=675~852) 위로 올라온다.
-  /// 셋으로 줄면서 페이드 영역 안에 거의 들어온다.
+  /// 그림 위에 겹쳐 놓기 때문에 몸통 하단 영역(y=675~852) 위로 올라온다.
   Widget _buttons(BuildContext context) {
     final isBusy = _pending != null;
 
@@ -294,7 +293,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             //
             // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
             // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
-            if (_showApple) ...[
+            if (_shouldShowApple) ...[
               SizedBox(height: _buttonGap.h),
 
               // ⚠️ 규격 위젯(`SignInWithAppleButton`) 대신 직접 그린다.

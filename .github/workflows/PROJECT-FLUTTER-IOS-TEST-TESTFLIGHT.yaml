@@ -5,10 +5,8 @@
 # 이 워크플로우는 기능 브랜치에서 수동으로 실행하여
 # 테스트용 iOS 빌드를 TestFlight에 배포합니다.
 #
-# ★ 마법사 우선 아키텍처 ★
-# - 빌드에 필요한 설정 파일들은 웹 마법사가 생성합니다
-# - 워크플로우는 마법사가 생성한 파일들을 그대로 사용합니다
-# - 마법사 경로: .github/util/flutter/ios-testflight-setup-wizard/index.html
+# ★ 레포 설정 파일 우선 ★
+# - 빌드 설정 파일(ios/fastlane/Fastfile, ios/ExportOptions.plist)은 레포에 커밋된 것을 그대로 사용
 #
 # 주요 특징:
 # - workflow_dispatch로 수동 실행 또는 repository_dispatch로 트리거
@@ -27,7 +25,7 @@
 #   1. flutter build ios --no-codesign (Flutter 빌드)
 #   2. xcodebuild archive (Xcode 아카이브 생성)
 #   3. xcodebuild -exportArchive (IPA 생성, ExportOptions.plist 사용)
-#   4. fastlane deploy (마법사 생성 Fastfile 사용, DEPLOY_MODE=store_only 고정 → TestFlight까지만)
+#   4. fastlane deploy (레포 Fastfile 사용, DEPLOY_MODE=store_only 고정 → TestFlight까지만)
 #
 # ===================================================================
 # 🔑 필수 GitHub Secrets
@@ -45,8 +43,7 @@
 # APP_STORE_CONNECT_API_KEY_BASE64: AuthKey_XXXXXX.p8 파일 (base64 인코딩)
 #
 # 📝 환경 설정 (선택):
-# ENV_FILE (선택): .env 파일 내용
-# SECRETS_XCCONFIG (선택): ios/Flutter/Secrets.xcconfig 내용
+# CLIENT_ENV_FILE: .env 파일 내용
 #
 # ===================================================================
 
@@ -236,7 +233,7 @@ jobs:
 
       - name: Create .env file
         env:
-          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE }}
         run: |
           printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
@@ -271,8 +268,7 @@ jobs:
       # .env를 읽어 gitignore된 xcconfig로 만든다. 이 스텝이 빠지면 값이 빈 채로
       # 빌드돼 카카오·네이버·구글 로그인이 조용히 실패한다.
       #
-      # 템플릿 원형은 `secrets.SECRETS_XCCONFIG`를 읽었지만 그 Secret은 이 레포에 없다.
-      # 없으면 빈 파일을 만들고 넘어가 **아무도 모른 채 스킴이 비었다** (이슈 #243).
+      # 별도 xcconfig 시크릿은 두지 않는다 (없으면 빈 파일로 넘어가 스킴이 조용히 빔).
       # 값의 단일 출처는 `.env` 하나로 못박는다.
       - name: Generate iOS social login secrets
         run: |
@@ -636,7 +632,7 @@ jobs:
 
       - name: Ensure .env file exists
         env:
-          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE }}
         run: |
           if [ ! -f "${{ env.ENV_FILE_PATH }}" ]; then
             printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
@@ -735,8 +731,7 @@ jobs:
           cd ios
           if [ ! -f "ExportOptions.plist" ]; then
             echo "❌ ios/ExportOptions.plist이 없습니다!"
-            echo "웹 마법사를 실행하여 설정 파일을 생성하세요:"
-            echo "  브라우저에서 .github/util/flutter/ios-testflight-setup-wizard/index.html 열기"
+            echo "ios/ 설정 파일을 레포에 커밋하세요"
             exit 1
           fi
           echo "✅ ExportOptions.plist 확인됨"
@@ -917,7 +912,7 @@ jobs:
             console.log(`❌ 진행 상황 업데이트 완료: IPA 빌드 실패`);
 
   # ===================================================================
-  # TestFlight 배포 (마법사 생성 Fastfile 사용)
+  # TestFlight 배포 (레포 Fastfile 사용)
   # ===================================================================
   deploy-testflight-test:
     name: TestFlight 테스트 배포
@@ -964,8 +959,7 @@ jobs:
         run: |
           if [ ! -f "ios/fastlane/Fastfile" ]; then
             echo "❌ ios/fastlane/Fastfile이 없습니다!"
-            echo "웹 마법사를 실행하여 설정 파일을 생성하세요:"
-            echo "  브라우저에서 .github/util/flutter/ios-testflight-setup-wizard/index.html 열기"
+            echo "ios/ 설정 파일을 레포에 커밋하세요"
             exit 1
           fi
           echo "✅ Fastfile 확인됨: ios/fastlane/Fastfile"
@@ -1018,12 +1012,12 @@ jobs:
           echo "🔧 API_KEY_PATH: $API_KEY_PATH"
           echo "🔧 DEPLOY_MODE: $DEPLOY_MODE / APP_IDENTIFIER: $APP_IDENTIFIER"
 
-          # Fastlane 실행 (마법사가 생성한 Fastfile 사용).
+          # Fastlane 실행 (레포 Fastfile 사용).
           #
           # ⚠️ lane 이름은 `deploy` 하나뿐이다 (이슈 #220).
           # 전에는 `upload_testflight`를 불렀는데 그런 lane이 없어
           # `Could not find lane 'ios upload_testflight'`로 매번 죽었다.
-          # 마법사가 까는 Fastfile을 손대는 대신 있는 lane을 쓴다 —
+          # Fastfile을 손대는 대신 있는 lane을 쓴다 —
           # Fastfile을 다시 깔면 손으로 더한 lane은 사라진다.
           cd ios
           # 출력을 파일에도 남긴다 — 거부 사유를 봇 댓글에 싣기 위해서다 (#452).

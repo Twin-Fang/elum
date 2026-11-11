@@ -1,0 +1,66 @@
+# ===================================================================
+# 서버 CI: develop PR 마다 서버 시험 전체 실행
+# ===================================================================
+#
+# 배포(PROJECT-SPRING-ELUM-NAS-CICD)는 -x test 로 시험을 건너뛴다.
+# 구조·계약·위생 규칙 시험(ArchitectureRulesTest, CrossStackContractTest, RepositoryHygieneRulesTest)이
+# 자동으로 도는 곳은 이 워크플로 하나다.
+#
+# 운영·로컬 설정 파일(application-prod.yml, application-dev.yml)은 넣지 않는다.
+# 통합 시험(*IT)은 ELUM_IT_DB_URL 이 없으면 건너뛴다.
+# ===================================================================
+
+name: PROJECT-Spring-CI
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+    # 앱 파일도 계약·위생 시험 대상
+    paths:
+      - 'server/**'
+      - 'client/lib/**'
+      - 'client/tool/**'
+      - '.github/**'
+      - 'scripts/**'
+      - 'docs/setup/**'
+  workflow_dispatch:
+
+concurrency:
+  group: spring-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JDK 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: 서버 시험
+        run: |
+          chmod +x gradlew
+          ./gradlew test --no-daemon
+
+      # 실패 원인 확인용 (성공·실패 공통)
+      - name: 시험 보고서 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-test-report
+          path: server/build/reports/tests/test
+          retention-days: 7

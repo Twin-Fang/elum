@@ -29,6 +29,7 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -85,6 +86,21 @@ class RoutineServiceCreditTest {
   @Mock private PictogramPicker pictogramPicker;
   @Mock private EnabledLocales enabledLocales;
 
+  // AI 메모 (#1082) — 기본은 꺼짐 (지금 하네스 그대로)
+  @Mock private RoutinePersonalizationProvider routinePersonalizationProvider;
+
+  @org.junit.jupiter.api.BeforeEach
+  void personalizationInactiveByDefault() {
+    org.mockito.Mockito.lenient()
+      .when(routinePersonalizationProvider.planFor(
+        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(),
+        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+      .thenReturn(RoutinePersonalizationProvider.Plan.INACTIVE);
+  }
+
+  // 목 기본 false = 그림을 그리는 요금제 (기존 시험 동작 그대로)
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
+
   @InjectMocks private RoutineCreateService routineCreateService;
 
   @BeforeEach
@@ -136,6 +152,57 @@ class RoutineServiceCreditTest {
     // 그림 수 = imagePath 가 있는 카드만 — 실패해 비어 있는 카드는 청구하지 않는다
     assertThat(response.credit()).isEqualTo(new RoutineResponse.CreditUsage(3, 2, 3, 97));
     verify(creditReservationService, never()).release(anyString(), anyString());
+  }
+
+  // 깨지면: Pro 그림이 실패해 픽토그램으로 바뀌어도 앱이 알 길이 없다 (#1172)
+  @Test
+  @DisplayName("AI 그림 일부를 못 그리면 응답 imageSkippedReason 이 AI_IMAGE_FAILED, 다 그리면 null")
+  void create_someImagesFailed_flagsImageSkippedReason() {
+    profile();
+    reserved("key-1");
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult("병원 다녀오기", List.of(
+        new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발", "img/b/1.png"),
+        new RoutineAiPipeline.GeneratedStep(2, "차 타요", "차", null)
+      ), "batch-1", 1));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(2, 0, 98)));
+
+    RoutineResponse failed = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    assertThat(failed.imageSkippedReason()).isEqualTo("AI_IMAGE_FAILED");
+    assertThat(failed.credit()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("그림을 다 붙이면 일과 만들기 응답 imageSkippedReason 은 null")
+  void create_allImagesDrawn_noImageSkippedReason() {
+    profile();
+    reserved("key-1");
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult("병원 다녀오기", List.of(
+        new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발", "img/b/1.png")), "batch-1", 0));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    assertThat(routineCreateService.create(GUARDIAN, REQUEST, "key-1").imageSkippedReason()).isNull();
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림이 없는 Free 의 새 일과는 그림 호출 없는 경로(PHOTO_ONLY)로 만든다 — 픽토그램만, 그림 몫 청구 없음")
+  void create_freeWithoutAiPicture_generatesWithoutPictures() {
+    Profile profile = profile();
+    profile.setImageStyle(ImageStyle.CARTOON);
+    reserved("key-1");
+    stubPipeline();
+    when(routineAiPicturePolicy.shouldSkipAiPicture("member-1")).thenReturn(true);
+    when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(),
+      eq(ImageStyle.PHOTO_ONLY), any());
   }
 
   @Test
@@ -405,5 +472,23 @@ class RoutineServiceCreditTest {
     routine.setStatus(com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus.PENDING_REVIEW);
     routine.setSteps(List.of());
     return routine;
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림이 없는 Free 라도 이모지 방식은 이모지 그대로 만든다 — 그림 기호로 바꾸지 않음 (#1149)")
+  void createUsesResolvedStyle() {
+    Profile profile = profile();
+    profile.setImageStyle(ImageStyle.EMOJI);
+    reserved("key-1");
+    stubPipeline();
+    // 이모지는 요금제 판정을 보지 않음 — Free 여도 그대로인지만 확인
+    lenient().when(routineAiPicturePolicy.shouldSkipAiPicture("member-1")).thenReturn(true);
+    when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), anyInt()))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
+
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
+
+    verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(),
+      eq(ImageStyle.EMOJI), any());
   }
 }

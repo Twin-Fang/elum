@@ -1,9 +1,11 @@
 package com.chuseok22.elumserver.credit.application.service;
 
+import com.chuseok22.elumserver.common.infrastructure.security.Sha256Hex;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
@@ -17,12 +19,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.core.PlanType;
 import jakarta.persistence.EntityManager;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -53,6 +51,7 @@ public class CreditAccountService {
   private final AiCreditGrantRepository grantRepository;
   private final AiCreditJobRepository jobRepository;
   private final AiCreditLedgerRepository ledgerRepository;
+  private final CreditPeriodSettings periodSettings;
   /// 잠근 뒤 행을 다시 읽는 데만 쓴다(lockAccountById).
   private final EntityManager entityManager;
 
@@ -93,6 +92,16 @@ public class CreditAccountService {
     return refreshed(account);
   }
 
+  /// 설정한 주기 단위로 now 가 든 주기. 지급·잔액·광고 보상 만료·관리자 보너스 만료가 모두 이 값을 쓴다.
+  public CreditPeriod currentPeriod(LocalDateTime now) {
+    return periodSettings.periodContaining(now);
+  }
+
+  /// 지금 설정된 주기 단위 (요약 응답 periodUnit)
+  public CreditPeriodUnit periodUnit() {
+    return periodSettings.unit();
+  }
+
   /// 행 잠금을 쥔 채로 DB 의 지금 상태로 덮는다. 잠금 안이라 읽은 뒤 바뀌지 않는다.
   private AiCreditAccount refreshed(AiCreditAccount account) {
     entityManager.refresh(account);
@@ -106,7 +115,7 @@ public class CreditAccountService {
   }
 
   /**
-   * 이번 주 주간 지급을 보장한다. 기한이 지난 묶음의 남은 양은 먼저 EXPIRE 로 정리한다(이월 없음).
+   * 이번 주기 지급을 보장한다(주 또는 달). 기한이 지난 묶음의 남은 양은 먼저 EXPIRE 로 정리한다(이월 없음).
    *
    * <p>배치 없이 그 주 첫 조회·요청 때 만든다 — 한 주 동안 안 쓰는 회원에게는 행을 만들지 않는다.
    * 계정 잠금 안이라 같은 주 두 번 만들 경쟁이 없고, (account_id, period_key) 유니크가 마지막 안전판이다.
@@ -117,17 +126,23 @@ public class CreditAccountService {
   }
 
   /**
-   * 지급량을 정할 정책을 주기로 고른다({@link CreditPolicyService#grantPolicyFor}). 지급 행이 이미 있으면
+   * 지급량을 정할 정책을 주기로 고른다({@link CreditPolicyService#grantPolicyFor}). Free 는 지급 행이 이미 있으면
    * 고르지 않는다 — 대부분의 요청이 여기서 끝나 정책 조회가 더 들지 않는다.
+   * 지급 행이 있어도 지금 요금제 몫이 더 크면 차이만 더함, 내려가면 그대로 (#1164)
    */
   @Transactional(propagation = Propagation.MANDATORY)
   public void ensureWeeklyGrant(
     AiCreditAccount account, Function<CreditPeriod, AiCreditPolicy> grantPolicyOf, PlanType plan, LocalDateTime now
   ) {
-    CreditPeriod period = CreditPeriod.of(now);
+    CreditPeriod period = currentPeriod(now);
     expireEndedGrants(account, period, now);
 
-    if (grantRepository.findByAccountIdAndPeriodKey(account.getId(), period.key()).isPresent()) {
+    Optional<AiCreditGrant> thisWeek = grantRepository.findByAccountIdAndPeriodKey(account.getId(), period.key());
+    if (thisWeek.isPresent()) {
+      // Free 는 가장 낮은 요금제라 올릴 일이 없음 (정책 조회 생략)
+      if (plan != PlanType.FREE) {
+        topUpToPlanAmount(account, thisWeek.get(), grantPolicyOf.apply(period), plan, period, now);
+      }
       return;
     }
     AiCreditPolicy policy = grantPolicyOf.apply(period);
@@ -148,11 +163,38 @@ public class CreditAccountService {
     AiCreditLedger line = ledgerLine(account.getId(), CreditLedgerType.GRANT, amount, balanceBefore + amount);
     line.setGrantId(saved.getId());
     line.setPolicyVersion(policy.getVersion());
-    line.setReason("주간 지급 " + period.key() + " (" + plan.name() + ")");
+    line.setReason(period.unit().getAdjectiveLabel() + " 지급 " + period.key() + " (" + plan.name() + ")");
     ledgerRepository.save(line);
   }
 
-  /** 기한이 지났거나 지난 주기의 주간 묶음에 남은 양을 0 으로 만들고 EXPIRE 를 남긴다. */
+  /**
+   * 이번 주 지급을 지금 요금제 몫까지 올림: 차이만큼 지급량·남은 양 +, GRANT 원장 1줄
+   * 이미 그 몫 이상이면 아무것도 하지 않음 (같은 주 재조회·왕복 전환에도 한 번만)
+   */
+  private void topUpToPlanAmount(
+    AiCreditAccount account, AiCreditGrant grant, AiCreditPolicy policy, PlanType plan, CreditPeriod period,
+    LocalDateTime now
+  ) {
+    int planAmount = policy.weeklyGrantFor(plan);
+    int shortfall = planAmount - grant.getAmount();
+    if (shortfall <= 0) {
+      return;
+    }
+    int balanceBefore = balance(account, now).available();
+    grant.setAmount(planAmount);
+    grant.setRemaining(grant.getRemaining() + shortfall);
+    grantRepository.save(grant);
+
+    AiCreditLedger line = ledgerLine(account.getId(), CreditLedgerType.GRANT, shortfall, balanceBefore + shortfall);
+    line.setGrantId(grant.getId());
+    line.setPolicyVersion(policy.getVersion());
+    line.setReason(period.unit().getAdjectiveLabel() + " 지급 보정 " + period.key() + " (" + plan.name() + ")");
+    ledgerRepository.save(line);
+    log.info("[credit period grant] topped up : accountId={}, plan={}, {} -> {}",
+      account.getId(), plan, planAmount - shortfall, planAmount);
+  }
+
+  /** 기한이 지났거나 같은 단위의 지난 주기 지급 묶음에 남은 양을 0 으로 만들고 EXPIRE 를 남긴다. */
   private void expireEndedGrants(AiCreditAccount account, CreditPeriod period, LocalDateTime now) {
     List<AiCreditGrant> ended = grantRepository.findByAccountIdAndRemainingGreaterThan(account.getId(), 0).stream()
       .filter(grant -> isEnded(grant, period, now))
@@ -177,8 +219,10 @@ public class CreditAccountService {
 
   private static boolean isEnded(AiCreditGrant grant, CreditPeriod period, LocalDateTime now) {
     boolean expired = grant.getExpiresAt() != null && !now.isBefore(grant.getExpiresAt());
-    boolean pastWeekly = grant.getSource() == CreditGrantSource.WEEKLY && !period.key().equals(grant.getPeriodKey());
-    return expired || pastWeekly;
+    // 다른 단위 키(전환 전 지급)는 원래 만료까지 유효하다 — 같은 단위의 지난 주기만 정리한다.
+    boolean isPastPeriod = grant.getSource() == CreditGrantSource.WEEKLY
+      && (grant.getPeriodKey() == null || period.isOtherPeriodKeyOfSameUnit(grant.getPeriodKey()));
+    return expired || isPastPeriod;
   }
 
   /**
@@ -187,7 +231,7 @@ public class CreditAccountService {
    * <p>트랜잭션을 따로 걸지 않는다. 예약·정산의 쓰기 트랜잭션 안에서 불려 방금 바꾼 묶음을 그대로 봐야 한다.
    */
   public CreditBalance balance(AiCreditAccount account, LocalDateTime now) {
-    CreditPeriod period = CreditPeriod.of(now);
+    CreditPeriod period = currentPeriod(now);
     List<AiCreditGrant> valid = spendableGrants(account.getId(), now);
     int remaining = valid.stream().mapToInt(AiCreditGrant::getRemaining).sum();
     int bonus = valid.stream()
@@ -262,17 +306,10 @@ public class CreditAccountService {
 
   /// sha256("{provider}:{providerUserId}") hex. V26 의 encode(sha256(convert_to(provider||':'||id,'UTF8')),'hex') 와 같다.
   public static String identityKey(String provider, String providerUserId) {
-    try {
-      byte[] digest = MessageDigest.getInstance("SHA-256")
-        .digest((provider + ":" + providerUserId).getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(digest);
-    } catch (NoSuchAlgorithmException e) {
-      // 모든 JVM 이 SHA-256 을 갖춘다(자바 표준 필수 알고리즘).
-      throw new IllegalStateException(e);
-    }
+    return Sha256Hex.hexOf(provider + ":" + providerUserId);
   }
 
-  static AiCreditLedger ledgerLine(String accountId, CreditLedgerType type, int delta, int balanceAfter) {
+  public static AiCreditLedger ledgerLine(String accountId, CreditLedgerType type, int delta, int balanceAfter) {
     AiCreditLedger line = new AiCreditLedger();
     line.setAccountId(accountId);
     line.setType(type);

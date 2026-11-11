@@ -78,7 +78,13 @@ class CreditHistoryRow extends StatelessWidget {
     final detail = isTitledUsage ? l10n.creditHistoryDetail(kindLabel, time) : time;
 
     final isGain = entry.delta > 0;
-    final deltaText = isGain ? '+${entry.delta}' : '${entry.delta}';
+    // 증감 0 은 무료 다시 그리기 줄뿐 (서버가 그 밖의 0 줄은 숨김)
+    final isFree = entry.delta == 0;
+    final deltaText = isFree
+        ? l10n.creditHistoryFree
+        : isGain
+        ? '+${entry.delta}'
+        : '${entry.delta}';
 
     return MergeSemantics(
       child: ConstrainedBox(

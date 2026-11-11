@@ -115,7 +115,7 @@ class NotificationRow extends StatelessWidget {
 }
 
 /// 종류 > 민트 네모 안 흰 아이콘
-/// 시안 있는 3종(완료·보냄·합류)은 Figma 에셋, 나머지 4종은 시안이 없어 같은 상자에 Material 아이콘
+/// 시안 있는 3종(완료·보냄·합류)은 Figma 에셋, 나머지 5종은 시안이 없어 같은 상자에 Material 아이콘
 class _NotificationTypeIcon extends StatelessWidget {
   const _NotificationTypeIcon({
     required this.type,
@@ -138,6 +138,7 @@ class _NotificationTypeIcon extends StatelessWidget {
         NotificationType.feedbackResolved => AppAssets.iconComment,
         NotificationType.talkPostCommented => AppAssets.iconComments,
         NotificationType.talkPostImported => AppAssets.iconDownload,
+        NotificationType.weeklyReportReady => AppAssets.iconCalendar,
       };
 
   @override

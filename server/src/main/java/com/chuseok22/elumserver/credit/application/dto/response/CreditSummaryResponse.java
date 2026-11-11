@@ -1,12 +1,14 @@
 package com.chuseok22.elumserver.credit.application.dto.response;
 
+import com.chuseok22.elumserver.credit.core.CreditBreakdownKind;
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * 보호자 설정 화면의 이번 주 AI 크레딧. 필드 이름은 앱 {@code CreditSummary} 가 그대로 읽는다.
+ * 보호자 설정 화면의 이번 주기(주 또는 달) AI 크레딧. 필드 이름은 앱 {@code CreditSummary} 가 그대로 읽는다.
  */
 @Schema(description = "내 AI 크레딧 요약")
 public record CreditSummaryResponse(
@@ -14,17 +16,17 @@ public record CreditSummaryResponse(
   boolean enabled,
   @Schema(description = "지금 쓸 수 있는 크레딧 = 유효 적립 남은 양 − 진행 중 예약", example = "72")
   int available,
-  @Schema(description = "이번 주 주간 지급량", example = "100")
+  @Schema(description = "이번 주기 지급량 (필드 이름은 옛 앱 호환을 위해 weeklyGrant 로 둔다. 주기 단위는 periodUnit)", example = "100")
   int weeklyGrant,
-  @Schema(description = "주간이 아닌 유효 적립(관리자 보너스 등)의 남은 양", example = "0")
+  @Schema(description = "주기 지급이 아닌 유효 적립(관리자 보너스 등)의 남은 양", example = "0")
   int bonus,
   @Schema(description = "이번 주기에 실제로 차감한 양", example = "28")
   int used,
   @Schema(description = "진행 중 작업이 잡아 둔 양", example = "0")
   int reserved,
-  @Schema(description = "이번 주기 시작(한국 시각 월요일 0시)", example = "2026-09-21T00:00:00", nullable = true)
+  @Schema(description = "이번 주기 시작(한국 시각. WEEK 면 월요일 0시, MONTH 면 1일 0시)", example = "2026-09-21T00:00:00", nullable = true)
   LocalDateTime periodStart,
-  @Schema(description = "다음 초기화(다음 월요일 0시)", example = "2026-09-28T00:00:00", nullable = true)
+  @Schema(description = "다음 초기화(WEEK 면 다음 월요일 0시, MONTH 면 다음 달 1일 0시)", example = "2026-09-28T00:00:00", nullable = true)
   LocalDateTime nextResetAt,
   // 시간대가 붙은 같은 순간. nextResetAt 은 시간대가 없어 해외 시간대 기기가 자기 시각으로
   // 읽었다. 기존 필드를 바꾸면 이미 깔린 앱이 시각을 틀리게 보이므로 새 필드로 더한다.
@@ -37,16 +39,43 @@ public record CreditSummaryResponse(
   int maxCardsPerRoutine,
   @Schema(description = "진행 중(예약) 작업")
   List<InProgress> inProgress,
-  @Schema(description = "지금 AI 일과를 시작할 수 있는가", example = "true")
+  @Schema(description = "지금 AI 일과를 시작할 수 있는가. 사용 가능 ≥ 일과 글 단가 "
+    + "(요금제 권한 ROUTINE_CREATE_FREE 면 그림 한 장 단가)", example = "true")
   boolean canStartRoutine,
   @Schema(description = "지금 수동 카드 그림을 만들 수 있는가", example = "true")
-  boolean canGenerateImage
+  boolean canGenerateImage,
+  @Schema(description = "오늘 남은 무료 그림 다시 그리기 횟수 (요금제 권한 IMAGE_REGENERATE_FREE). "
+    + "0 이면 다시 그리기는 costs.imageRegenerate 만큼 든다", example = "30")
+  int freeImageRegeneratesLeftToday,
+  @Schema(description = "크레딧 지급 주기 단위. WEEK(매주 월요일 0시) | MONTH(매달 1일 0시). 앱은 이 값으로 "
+    + "'이번 주'·'이번 달', '월요일 0시'·'다음 달 1일' 문구를 고른다. 모르는 값이면 WEEK 로 본다", example = "MONTH")
+  CreditPeriodUnit periodUnit,
+  @Schema(description = "종류별 줄 (순서: PERIODIC, BONUS, PURCHASED). 유효한 묶음만 센다. PERIODIC 은 크레딧이 켜져 있으면 항상 한 줄, "
+    + "나머지는 남은 양이 있거나 이번 주기에 받은 것이 있을 때만. 합계 remaining = available + reserved")
+  List<BreakdownLine> breakdown
 ) {
+
+  @Schema(description = "크레딧 종류별 한 줄")
+  public record BreakdownLine(
+    @Schema(description = "PERIODIC 이번 주기 지급(주·달 모두) | BONUS 관리자 보너스·광고 보상·이벤트 | PURCHASED 구매", example = "PERIODIC")
+    CreditBreakdownKind kind,
+    @Schema(description = "이 종류로 받은 양 (유효한 묶음 합)", example = "10") int granted,
+    @Schema(description = "그중 쓴 양", example = "4") int used,
+    @Schema(description = "남은 양", example = "6") int remaining,
+    @Schema(description = "가장 먼저 끝나는 유효 묶음의 만료(서버 시간대 오프셋 포함). 만료가 없으면(구매) null",
+      example = "2026-12-01T00:00:00+09:00", nullable = true)
+    OffsetDateTime expiresAt
+  ) {
+
+  }
+
 
   @Schema(description = "행동별 단가")
   public record Costs(
-    @Schema(description = "일과 글 1건", example = "1") int routineText,
-    @Schema(description = "AI 그림 1장", example = "1") int cardImage
+    @Schema(description = "일과 글 1건 (정책 단가. 요금제 권한 ROUTINE_CREATE_FREE 면 일과 생성 때만 0, 번역은 그대로)",
+      example = "1") int routineText,
+    @Schema(description = "AI 그림 1장", example = "1") int cardImage,
+    @Schema(description = "카드 그림 다시 그리기 1장 (무료 횟수가 남았으면 0 으로 예약)", example = "1") int imageRegenerate
   ) {
 
   }
@@ -61,8 +90,8 @@ public record CreditSummaryResponse(
   }
 
   /// 정책이 꺼져 있을 때. 앱은 카드를 숨기고 아무것도 막지 않는다.
-  public static CreditSummaryResponse disabled(int maxCardsPerRoutine) {
-    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0),
-      maxCardsPerRoutine, List.of(), true, true);
+  public static CreditSummaryResponse disabled(int maxCardsPerRoutine, CreditPeriodUnit periodUnit) {
+    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0, 0),
+      maxCardsPerRoutine, List.of(), true, true, 0, periodUnit, List.of());
   }
 }

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
@@ -289,7 +290,7 @@ class AdminFragmentRenderTest {
       AdminSubscriptionSummary.none(), List.of(), null);
 
     String loadedHtml = engine.process("admin/member-detail", contextWith(Map.of("member", detail,
-      "creditSummary", new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, true))));
+      "creditSummary", new AdminMemberCreditSummary(false, true, 1234, 300, 50, 120, true, CreditPeriodUnit.WEEK))));
     assertThat(loadedHtml).contains("data-member-credit-summary").contains("1,234").contains("동결")
       .contains("data-member-actions-menu").contains("크레딧 지급");
 

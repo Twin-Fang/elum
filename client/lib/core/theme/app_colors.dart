@@ -64,6 +64,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.goalSelectedFill,
     required this.goalSelectedBorder,
     required this.libraryNewOutline,
+    required this.weeklyPlanTodayChipBg,
+    required this.weeklyPlanTodayChipBorder,
     required this.talkOriginBandFill,
     required this.talkOriginBandAction,
     required this.talkCardBorder,
@@ -91,6 +93,27 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.talkNoteHint,
     required this.foxSelectedFill,
     required this.foxSelectedBorder,
+    required this.weeklyReportInsightGoodFill,
+    required this.weeklyReportInsightGoodAccent,
+    required this.weeklyReportInsightStuckFill,
+    required this.weeklyReportInsightStuckAccent,
+    required this.weeklyReportInsightTrendFill,
+    required this.weeklyReportInsightTrendAccent,
+    required this.creditKindPeriodic,
+    required this.creditKindBonus,
+    required this.creditKindPurchased,
+    required this.routineMemoryHeroStart,
+    required this.routineMemoryHeroEnd,
+    required this.routineMemoryIconWord,
+    required this.routineMemoryIconStructure,
+    required this.routineMemoryIconManual,
+    required this.creditPackTileMint,
+    required this.creditPackTilePeach,
+    required this.creditPackTileCream,
+    required this.creditPackPopularBorder,
+    required this.creditPackDiscountFill,
+    required this.proPlanFreeBadgeFill,
+    required this.proPlanFreeBadgeText,
     required this.catSelectedFill,
     required this.catSelectedBorder,
     required this.brandPeach,
@@ -222,7 +245,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.myInfoMutedIcon,
     required this.routineTitleEditIcon,
     required this.toastBackground,
-    required this.toastBorder,
     required this.toastText,
     required this.toastAction,
     required this.settingsToggleOn,
@@ -281,6 +303,36 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stepBadge4,
     required this.noticeImagePlaceholder,
     required this.noticeHideLabel,
+    required this.proPlanBadgeStart,
+    required this.proPlanBadgeEnd,
+    required this.proPlanBadgeText,
+    required this.proPlanBadgeOutline,
+    required this.proPlanCtaStart,
+    required this.proPlanCtaEnd,
+    required this.proPlanCtaText,
+    required this.proPlanCtaShadow,
+    required this.proPlanHeroGlow,
+    required this.proPlanProCardRing,
+    required this.proPlanProCardShadow,
+    required this.proPlanProPictureStart,
+    required this.proPlanProPictureEnd,
+    required this.proPlanFreePicture,
+    required this.proPlanCardShadow,
+    required this.proPlanArrow,
+    required this.proPlanSaveRibbon,
+    required this.proPlanSaveRibbonText,
+    required this.proPlanOptionBorder,
+    required this.proPlanOptionSelectedBorder,
+    required this.proPlanRadioBorder,
+    required this.proPlanBenefitDetail,
+    required this.proPlanTileCards,
+    required this.proPlanTileRoutines,
+    required this.proPlanTileWeek,
+    required this.proPlanTileExtra,
+    required this.proPlanCloseFill,
+    required this.proPlanFreeChipFill,
+    required this.proPlanFreeChipText,
+    required this.proPlanTeaserCardShadow,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -356,6 +408,12 @@ class AppColors extends ThemeExtension<AppColors> {
   // 일과 관리 격자의 `새 일과` 칸 테두리 (시안 1931:6923, #93DBCC 2px). 값이 goalSelectedBorder 와 같아도 쓰임이 달라 따로 둔다
   final Color libraryNewOutline;
 
+  /// 주간 계획 `오늘` 칩 바탕 (#B5EAEC 민트 연 — 지금 볼 것)
+  final Color weeklyPlanTodayChipBg;
+
+  /// 주간 계획 `오늘` 칩 테두리 (#93DBCC)
+  final Color weeklyPlanTodayChipBorder;
+
   // 가져온 일과 상세의 출처 띠 — 웜그레이 판 + 남색 글자 (안내 판 결)
   // 테두리·아이콘 원은 goalSelectedBorder 를 쓴다
   final Color talkOriginBandFill;
@@ -429,6 +487,48 @@ class AppColors extends ThemeExtension<AppColors> {
   // (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
   final Color foxSelectedFill;
   final Color foxSelectedBorder;
+  // 주간 리포트 돌아보기: 잘한 것 판 (민트)
+  final Color weeklyReportInsightGoodFill;
+  // 주간 리포트 돌아보기: 잘한 것 강조색 (제목 아이콘 원)
+  final Color weeklyReportInsightGoodAccent;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 판 (복숭아)
+  final Color weeklyReportInsightStuckFill;
+  // 주간 리포트 돌아보기: 자주 멈춘 곳 강조색
+  final Color weeklyReportInsightStuckAccent;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 판 (연보라)
+  final Color weeklyReportInsightTrendFill;
+  // 주간 리포트 돌아보기: 지난주와 달라진 점 강조색 (이번 주 막대 포함)
+  final Color weeklyReportInsightTrendAccent;
+  // 내 크레딧: 주기 지급 종류 색 (게이지 조각 · 줄 그림 바탕)
+  final Color creditKindPeriodic;
+  // 내 크레딧: 보너스 종류 색
+  final Color creditKindBonus;
+  // 내 크레딧: 구매 종류 색
+  final Color creditKindPurchased;
+  // AI 메모리 위 카드 그라데이션 시작 (연보라)
+  final Color routineMemoryHeroStart;
+  // AI 메모리 위 카드 그라데이션 끝
+  final Color routineMemoryHeroEnd;
+  // AI 메모리 줄 아이콘 원: 낱말 바꾸기 (민트)
+  final Color routineMemoryIconWord;
+  // AI 메모리 줄 아이콘 원: 나누기 · 합치기 · 더하기 · 빼기 (주황)
+  final Color routineMemoryIconStructure;
+  // AI 메모리 줄 아이콘 원: 직접 적음 (검정)
+  final Color routineMemoryIconManual;
+  // 크레딧 꾸러미 칸 그림 바탕 (민트)
+  final Color creditPackTileMint;
+  // 크레딧 꾸러미 인기 칸 바탕 (복숭아)
+  final Color creditPackTilePeach;
+  // 크레딧 꾸러미 큰 꾸러미 그림 바탕 (크림)
+  final Color creditPackTileCream;
+  // 크레딧 꾸러미 인기 칸 테두리
+  final Color creditPackPopularBorder;
+  // 크레딧 꾸러미 할인율 알약 바탕
+  final Color creditPackDiscountFill;
+  // FREE 배지 바탕 (민트)
+  final Color proPlanFreeBadgeFill;
+  // FREE 배지 점 · 글자
+  final Color proPlanFreeBadgeText;
   final Color catSelectedFill;
   final Color catSelectedBorder;
 
@@ -872,16 +972,13 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 일과 제목 옆 연필 (Figma `1931:7372` fi-br-pencil #CACACA, 상세 시트 · 카드 확인)
   final Color routineTitleEditIcon;
 
-  /// 토스트 판 (시안 없음 > 팝업 결: 흰 판 · design-language §4-6)
+  /// 토스트 판: 어두운 판 (글자색 토큰 계열, Pro 시안 알림 띠)
   final Color toastBackground;
 
-  /// 토스트 테두리 1px (아이보리 바탕 위 흰 판 경계, design-language §3-4)
-  final Color toastBorder;
-
-  /// 토스트 문구
+  /// 토스트 문구: 어두운 판 위 밝은 글자
   final Color toastText;
 
-  /// 토스트 오른쪽 누르는 글자 (`보러 가기`) — 문구보다 굵게
+  /// 토스트 오른쪽 누르는 글자 (`보러 가기`): 강조색
   final Color toastAction;
 
   /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
@@ -1060,6 +1157,98 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 제목·본문(순검정)보다 한 단계 흐리다. 누를 수 있지만 주 동작은 아니다.
   final Color noticeHideLabel;
 
+  // --- Pro 요금제 화면 · PRO 배지 · Pro 미리보기 (#1189, 디자이너 시안 전 임시 값) ---
+
+  /// PRO 배지 금빛 그라데이션 시작 (#1189 임시 시안)
+  final Color proPlanBadgeStart;
+
+  /// PRO 배지 금빛 그라데이션 끝
+  final Color proPlanBadgeEnd;
+
+  /// PRO 배지 글자 · 반짝 표시 (금빛 위 진한 갈색)
+  final Color proPlanBadgeText;
+
+  /// PRO 배지 안쪽 테두리 (갈색 15%)
+  final Color proPlanBadgeOutline;
+
+  /// Pro 미리보기 버튼 민트 그라데이션 시작
+  final Color proPlanCtaStart;
+
+  /// Pro 미리보기 버튼 민트 그라데이션 끝
+  final Color proPlanCtaEnd;
+
+  /// Pro 미리보기 버튼 글자
+  final Color proPlanCtaText;
+
+  /// Pro 미리보기 버튼 그림자 (35%)
+  final Color proPlanCtaShadow;
+
+  /// 요금제 화면 머리 민트 빛 (가운데 > 배경으로 사라짐)
+  final Color proPlanHeroGlow;
+
+  /// 머리 비교의 Pro 카드 민트 테두리
+  final Color proPlanProCardRing;
+
+  /// 머리 비교의 Pro 카드 민트 빛 (35%)
+  final Color proPlanProCardShadow;
+
+  /// Pro 카드 그림 자리 그라데이션 시작
+  final Color proPlanProPictureStart;
+
+  /// Pro 카드 그림 자리 그라데이션 끝
+  final Color proPlanProPictureEnd;
+
+  /// Free 카드 그림 자리
+  final Color proPlanFreePicture;
+
+  /// 요금제 화면 흰 카드 그림자 (8%)
+  final Color proPlanCardShadow;
+
+  /// Free > Pro 화살표
+  final Color proPlanArrow;
+
+  /// 1년 `N% 아껴요` 띠
+  final Color proPlanSaveRibbon;
+
+  /// 1년 `N% 아껴요` 띠 글자
+  final Color proPlanSaveRibbonText;
+
+  /// 기간 카드 테두리 (안 고름)
+  final Color proPlanOptionBorder;
+
+  /// 기간 카드 테두리 · 라디오 (고름)
+  final Color proPlanOptionSelectedBorder;
+
+  /// 기간 카드 라디오 (안 고름)
+  final Color proPlanRadioBorder;
+
+  /// 혜택 묶음 한 줄 · 미리보기 한 줄 글자
+  final Color proPlanBenefitDetail;
+
+  /// 혜택 아이콘 타일: 더 예쁜 카드
+  final Color proPlanTileCards;
+
+  /// 혜택 아이콘 타일: 일과가 알아서 준비돼요
+  final Color proPlanTileRoutines;
+
+  /// 혜택 아이콘 타일: 한 주를 한눈에
+  final Color proPlanTileWeek;
+
+  /// 혜택 아이콘 타일: 넉넉하게, 광고 없이
+  final Color proPlanTileExtra;
+
+  /// 요금제 화면 ✕ 원 (배경보다 한 단계 진하게, 스크롤된 글 위에서도 읽히게 불투명)
+  final Color proPlanCloseFill;
+
+  /// `Free` 요금제 칩 바탕 (내 요금제 줄)
+  final Color proPlanFreeChipFill;
+
+  /// `Free` 요금제 칩 글자
+  final Color proPlanFreeChipText;
+
+  /// Pro 미리보기 떠 있는 카드 그림자 (14%)
+  final Color proPlanTeaserCardShadow;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -1092,6 +1281,8 @@ class AppColors extends ThemeExtension<AppColors> {
     goalSelectedFill: Color(0xFFB5EAEC),
     goalSelectedBorder: Color(0xFF93DBCC),
     libraryNewOutline: Color(0xFF93DBCC),
+    weeklyPlanTodayChipBg: Color(0xFFB5EAEC),
+    weeklyPlanTodayChipBorder: Color(0xFF93DBCC),
     talkOriginBandFill: Color(0xFFEEE9E6),
     talkOriginBandAction: Color(0xFF242634),
     talkCardBorder: Color(0xFFEEE9E6),
@@ -1119,6 +1310,27 @@ class AppColors extends ThemeExtension<AppColors> {
     talkNoteHint: Color(0x66242634),
     foxSelectedFill: Color(0xFFFFDAC7),
     foxSelectedBorder: Color(0xFFEB9B73),
+    weeklyReportInsightGoodFill: Color(0xFFE3F8F3),
+    weeklyReportInsightGoodAccent: Color(0xFF3FB7C9),
+    weeklyReportInsightStuckFill: Color(0xFFFFF1E6),
+    weeklyReportInsightStuckAccent: Color(0xFFEB9B73),
+    weeklyReportInsightTrendFill: Color(0xFFEEF0FF),
+    weeklyReportInsightTrendAccent: Color(0xFF9CADF1),
+    creditKindPeriodic: Color(0xFF55CFBA),
+    creditKindBonus: Color(0xFFEB9B73),
+    creditKindPurchased: Color(0xFF9CADF1),
+    routineMemoryHeroStart: Color(0xFFF4EEFF),
+    routineMemoryHeroEnd: Color(0xFFE4ECFF),
+    routineMemoryIconWord: Color(0xFF55CFBA),
+    routineMemoryIconStructure: Color(0xFFEB9B73),
+    routineMemoryIconManual: Color(0xFF242634),
+    creditPackTileMint: Color(0xFFE3F8F3),
+    creditPackTilePeach: Color(0xFFFFF1E6),
+    creditPackTileCream: Color(0xFFFFF7DA),
+    creditPackPopularBorder: Color(0xFFEB9B73),
+    creditPackDiscountFill: Color(0xFFFF8B22),
+    proPlanFreeBadgeFill: Color(0xFFE3F8F3),
+    proPlanFreeBadgeText: Color(0xFF3FB7C9),
     catSelectedFill: Color(0xFFCED8FF),
     catSelectedBorder: Color(0xFF9CADF1),
     brandPeach: Color(0xFFFFC9BB),
@@ -1250,10 +1462,9 @@ class AppColors extends ThemeExtension<AppColors> {
     myInfoMetaText: Color(0xFF74757D),
     myInfoMutedIcon: Color(0xFFCACACA),
     routineTitleEditIcon: Color(0xFFCACACA),
-    toastBackground: Color(0xFFFFFFFF),
-    toastBorder: Color(0xFFEFEFEF),
-    toastText: Color(0xFF242634),
-    toastAction: Color(0xFF242634),
+    toastBackground: Color(0xFF242634),
+    toastText: Color(0xFFFFFFFF),
+    toastAction: Color(0xFFFCE551),
     settingsToggleOn: Color(0xFF55CFBA),
     settingsToggleOff: Color(0xFFD7D3D1),
     settingsGroupBg: Color(0xFFFFFFFF),
@@ -1310,6 +1521,36 @@ class AppColors extends ThemeExtension<AppColors> {
     stepBadge4: Color(0xFFECE0AE),
     noticeImagePlaceholder: Color(0xFFF7F2EF),
     noticeHideLabel: Color(0xFF74757D),
+    proPlanBadgeStart: Color(0xFFFFE27A),
+    proPlanBadgeEnd: Color(0xFFFFC97A),
+    proPlanBadgeText: Color(0xFF3B2B00),
+    proPlanBadgeOutline: Color(0x26A06E00),
+    proPlanCtaStart: Color(0xFF55CFBA),
+    proPlanCtaEnd: Color(0xFF3FB7C9),
+    proPlanCtaText: Color(0xFFFFFFFF),
+    proPlanCtaShadow: Color(0x593FB7C9),
+    proPlanHeroGlow: Color(0xFFD8F5EE),
+    proPlanProCardRing: Color(0xFF55CFBA),
+    proPlanProCardShadow: Color(0x5955CFBA),
+    proPlanProPictureStart: Color(0xFFEAFAF6),
+    proPlanProPictureEnd: Color(0xFFFFF6D6),
+    proPlanFreePicture: Color(0xFFEEE9E6),
+    proPlanCardShadow: Color(0x14242634),
+    proPlanArrow: Color(0xFF55CFBA),
+    proPlanSaveRibbon: Color(0xFFEB9B73),
+    proPlanSaveRibbonText: Color(0xFFFFFFFF),
+    proPlanOptionBorder: Color(0xFFEFEFEF),
+    proPlanOptionSelectedBorder: Color(0xFF242634),
+    proPlanRadioBorder: Color(0xFFCFCBC8),
+    proPlanBenefitDetail: Color(0xFF6C6E7A),
+    proPlanTileCards: Color(0xFFE3F8F3),
+    proPlanTileRoutines: Color(0xFFFFF1E6),
+    proPlanTileWeek: Color(0xFFFFF7DA),
+    proPlanTileExtra: Color(0xFFEEF0FF),
+    proPlanCloseFill: Color(0xFFEBE6E3),
+    proPlanFreeChipFill: Color(0xFFEEE9E6),
+    proPlanFreeChipText: Color(0xFF6C6E7A),
+    proPlanTeaserCardShadow: Color(0x24242634),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -1350,6 +1591,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? goalSelectedFill,
     Color? goalSelectedBorder,
     Color? libraryNewOutline,
+    Color? weeklyPlanTodayChipBg,
+    Color? weeklyPlanTodayChipBorder,
     Color? talkOriginBandFill,
     Color? talkOriginBandAction,
     Color? talkCardBorder,
@@ -1377,6 +1620,27 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? talkNoteHint,
     Color? foxSelectedFill,
     Color? foxSelectedBorder,
+    Color? weeklyReportInsightGoodFill,
+    Color? weeklyReportInsightGoodAccent,
+    Color? weeklyReportInsightStuckFill,
+    Color? weeklyReportInsightStuckAccent,
+    Color? weeklyReportInsightTrendFill,
+    Color? weeklyReportInsightTrendAccent,
+    Color? creditKindPeriodic,
+    Color? creditKindBonus,
+    Color? creditKindPurchased,
+    Color? routineMemoryHeroStart,
+    Color? routineMemoryHeroEnd,
+    Color? routineMemoryIconWord,
+    Color? routineMemoryIconStructure,
+    Color? routineMemoryIconManual,
+    Color? creditPackTileMint,
+    Color? creditPackTilePeach,
+    Color? creditPackTileCream,
+    Color? creditPackPopularBorder,
+    Color? creditPackDiscountFill,
+    Color? proPlanFreeBadgeFill,
+    Color? proPlanFreeBadgeText,
     Color? catSelectedFill,
     Color? catSelectedBorder,
     Color? brandPeach,
@@ -1496,7 +1760,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? myInfoMutedIcon,
     Color? routineTitleEditIcon,
     Color? toastBackground,
-    Color? toastBorder,
     Color? toastText,
     Color? toastAction,
     Color? settingsToggleOn,
@@ -1567,6 +1830,36 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stepBadge4,
     Color? noticeImagePlaceholder,
     Color? noticeHideLabel,
+    Color? proPlanBadgeStart,
+    Color? proPlanBadgeEnd,
+    Color? proPlanBadgeText,
+    Color? proPlanBadgeOutline,
+    Color? proPlanCtaStart,
+    Color? proPlanCtaEnd,
+    Color? proPlanCtaText,
+    Color? proPlanCtaShadow,
+    Color? proPlanHeroGlow,
+    Color? proPlanProCardRing,
+    Color? proPlanProCardShadow,
+    Color? proPlanProPictureStart,
+    Color? proPlanProPictureEnd,
+    Color? proPlanFreePicture,
+    Color? proPlanCardShadow,
+    Color? proPlanArrow,
+    Color? proPlanSaveRibbon,
+    Color? proPlanSaveRibbonText,
+    Color? proPlanOptionBorder,
+    Color? proPlanOptionSelectedBorder,
+    Color? proPlanRadioBorder,
+    Color? proPlanBenefitDetail,
+    Color? proPlanTileCards,
+    Color? proPlanTileRoutines,
+    Color? proPlanTileWeek,
+    Color? proPlanTileExtra,
+    Color? proPlanCloseFill,
+    Color? proPlanFreeChipFill,
+    Color? proPlanFreeChipText,
+    Color? proPlanTeaserCardShadow,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -1596,6 +1889,8 @@ class AppColors extends ThemeExtension<AppColors> {
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
       goalSelectedBorder: goalSelectedBorder ?? this.goalSelectedBorder,
       libraryNewOutline: libraryNewOutline ?? this.libraryNewOutline,
+      weeklyPlanTodayChipBg: weeklyPlanTodayChipBg ?? this.weeklyPlanTodayChipBg,
+      weeklyPlanTodayChipBorder: weeklyPlanTodayChipBorder ?? this.weeklyPlanTodayChipBorder,
       talkOriginBandFill: talkOriginBandFill ?? this.talkOriginBandFill,
       talkOriginBandAction: talkOriginBandAction ?? this.talkOriginBandAction,
       talkCardBorder: talkCardBorder ?? this.talkCardBorder,
@@ -1623,6 +1918,27 @@ class AppColors extends ThemeExtension<AppColors> {
       talkNoteHint: talkNoteHint ?? this.talkNoteHint,
       foxSelectedFill: foxSelectedFill ?? this.foxSelectedFill,
       foxSelectedBorder: foxSelectedBorder ?? this.foxSelectedBorder,
+      weeklyReportInsightGoodFill: weeklyReportInsightGoodFill ?? this.weeklyReportInsightGoodFill,
+      weeklyReportInsightGoodAccent: weeklyReportInsightGoodAccent ?? this.weeklyReportInsightGoodAccent,
+      weeklyReportInsightStuckFill: weeklyReportInsightStuckFill ?? this.weeklyReportInsightStuckFill,
+      weeklyReportInsightStuckAccent: weeklyReportInsightStuckAccent ?? this.weeklyReportInsightStuckAccent,
+      weeklyReportInsightTrendFill: weeklyReportInsightTrendFill ?? this.weeklyReportInsightTrendFill,
+      weeklyReportInsightTrendAccent: weeklyReportInsightTrendAccent ?? this.weeklyReportInsightTrendAccent,
+      creditKindPeriodic: creditKindPeriodic ?? this.creditKindPeriodic,
+      creditKindBonus: creditKindBonus ?? this.creditKindBonus,
+      creditKindPurchased: creditKindPurchased ?? this.creditKindPurchased,
+      routineMemoryHeroStart: routineMemoryHeroStart ?? this.routineMemoryHeroStart,
+      routineMemoryHeroEnd: routineMemoryHeroEnd ?? this.routineMemoryHeroEnd,
+      routineMemoryIconWord: routineMemoryIconWord ?? this.routineMemoryIconWord,
+      routineMemoryIconStructure: routineMemoryIconStructure ?? this.routineMemoryIconStructure,
+      routineMemoryIconManual: routineMemoryIconManual ?? this.routineMemoryIconManual,
+      creditPackTileMint: creditPackTileMint ?? this.creditPackTileMint,
+      creditPackTilePeach: creditPackTilePeach ?? this.creditPackTilePeach,
+      creditPackTileCream: creditPackTileCream ?? this.creditPackTileCream,
+      creditPackPopularBorder: creditPackPopularBorder ?? this.creditPackPopularBorder,
+      creditPackDiscountFill: creditPackDiscountFill ?? this.creditPackDiscountFill,
+      proPlanFreeBadgeFill: proPlanFreeBadgeFill ?? this.proPlanFreeBadgeFill,
+      proPlanFreeBadgeText: proPlanFreeBadgeText ?? this.proPlanFreeBadgeText,
       catSelectedFill: catSelectedFill ?? this.catSelectedFill,
       catSelectedBorder: catSelectedBorder ?? this.catSelectedBorder,
       brandPeach: brandPeach ?? this.brandPeach,
@@ -1744,7 +2060,6 @@ class AppColors extends ThemeExtension<AppColors> {
       myInfoMutedIcon: myInfoMutedIcon ?? this.myInfoMutedIcon,
       routineTitleEditIcon: routineTitleEditIcon ?? this.routineTitleEditIcon,
       toastBackground: toastBackground ?? this.toastBackground,
-      toastBorder: toastBorder ?? this.toastBorder,
       toastText: toastText ?? this.toastText,
       toastAction: toastAction ?? this.toastAction,
       settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
@@ -1816,6 +2131,36 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge4: stepBadge4 ?? this.stepBadge4,
       noticeImagePlaceholder: noticeImagePlaceholder ?? this.noticeImagePlaceholder,
       noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
+      proPlanBadgeStart: proPlanBadgeStart ?? this.proPlanBadgeStart,
+      proPlanBadgeEnd: proPlanBadgeEnd ?? this.proPlanBadgeEnd,
+      proPlanBadgeText: proPlanBadgeText ?? this.proPlanBadgeText,
+      proPlanBadgeOutline: proPlanBadgeOutline ?? this.proPlanBadgeOutline,
+      proPlanCtaStart: proPlanCtaStart ?? this.proPlanCtaStart,
+      proPlanCtaEnd: proPlanCtaEnd ?? this.proPlanCtaEnd,
+      proPlanCtaText: proPlanCtaText ?? this.proPlanCtaText,
+      proPlanCtaShadow: proPlanCtaShadow ?? this.proPlanCtaShadow,
+      proPlanHeroGlow: proPlanHeroGlow ?? this.proPlanHeroGlow,
+      proPlanProCardRing: proPlanProCardRing ?? this.proPlanProCardRing,
+      proPlanProCardShadow: proPlanProCardShadow ?? this.proPlanProCardShadow,
+      proPlanProPictureStart: proPlanProPictureStart ?? this.proPlanProPictureStart,
+      proPlanProPictureEnd: proPlanProPictureEnd ?? this.proPlanProPictureEnd,
+      proPlanFreePicture: proPlanFreePicture ?? this.proPlanFreePicture,
+      proPlanCardShadow: proPlanCardShadow ?? this.proPlanCardShadow,
+      proPlanArrow: proPlanArrow ?? this.proPlanArrow,
+      proPlanSaveRibbon: proPlanSaveRibbon ?? this.proPlanSaveRibbon,
+      proPlanSaveRibbonText: proPlanSaveRibbonText ?? this.proPlanSaveRibbonText,
+      proPlanOptionBorder: proPlanOptionBorder ?? this.proPlanOptionBorder,
+      proPlanOptionSelectedBorder: proPlanOptionSelectedBorder ?? this.proPlanOptionSelectedBorder,
+      proPlanRadioBorder: proPlanRadioBorder ?? this.proPlanRadioBorder,
+      proPlanBenefitDetail: proPlanBenefitDetail ?? this.proPlanBenefitDetail,
+      proPlanTileCards: proPlanTileCards ?? this.proPlanTileCards,
+      proPlanTileRoutines: proPlanTileRoutines ?? this.proPlanTileRoutines,
+      proPlanTileWeek: proPlanTileWeek ?? this.proPlanTileWeek,
+      proPlanTileExtra: proPlanTileExtra ?? this.proPlanTileExtra,
+      proPlanCloseFill: proPlanCloseFill ?? this.proPlanCloseFill,
+      proPlanFreeChipFill: proPlanFreeChipFill ?? this.proPlanFreeChipFill,
+      proPlanFreeChipText: proPlanFreeChipText ?? this.proPlanFreeChipText,
+      proPlanTeaserCardShadow: proPlanTeaserCardShadow ?? this.proPlanTeaserCardShadow,
     );
   }
 
@@ -1878,6 +2223,8 @@ class AppColors extends ThemeExtension<AppColors> {
         other.libraryNewOutline,
         t,
       )!,
+      weeklyPlanTodayChipBg: Color.lerp(weeklyPlanTodayChipBg, other.weeklyPlanTodayChipBg, t)!,
+      weeklyPlanTodayChipBorder: Color.lerp(weeklyPlanTodayChipBorder, other.weeklyPlanTodayChipBorder, t)!,
       talkOriginBandFill: Color.lerp(
         talkOriginBandFill,
         other.talkOriginBandFill,
@@ -1917,6 +2264,27 @@ class AppColors extends ThemeExtension<AppColors> {
         other.foxSelectedBorder,
         t,
       )!,
+      weeklyReportInsightGoodFill: Color.lerp(weeklyReportInsightGoodFill, other.weeklyReportInsightGoodFill, t)!,
+      weeklyReportInsightGoodAccent: Color.lerp(weeklyReportInsightGoodAccent, other.weeklyReportInsightGoodAccent, t)!,
+      weeklyReportInsightStuckFill: Color.lerp(weeklyReportInsightStuckFill, other.weeklyReportInsightStuckFill, t)!,
+      weeklyReportInsightStuckAccent: Color.lerp(weeklyReportInsightStuckAccent, other.weeklyReportInsightStuckAccent, t)!,
+      weeklyReportInsightTrendFill: Color.lerp(weeklyReportInsightTrendFill, other.weeklyReportInsightTrendFill, t)!,
+      weeklyReportInsightTrendAccent: Color.lerp(weeklyReportInsightTrendAccent, other.weeklyReportInsightTrendAccent, t)!,
+      creditKindPeriodic: Color.lerp(creditKindPeriodic, other.creditKindPeriodic, t)!,
+      creditKindBonus: Color.lerp(creditKindBonus, other.creditKindBonus, t)!,
+      creditKindPurchased: Color.lerp(creditKindPurchased, other.creditKindPurchased, t)!,
+      routineMemoryHeroStart: Color.lerp(routineMemoryHeroStart, other.routineMemoryHeroStart, t)!,
+      routineMemoryHeroEnd: Color.lerp(routineMemoryHeroEnd, other.routineMemoryHeroEnd, t)!,
+      routineMemoryIconWord: Color.lerp(routineMemoryIconWord, other.routineMemoryIconWord, t)!,
+      routineMemoryIconStructure: Color.lerp(routineMemoryIconStructure, other.routineMemoryIconStructure, t)!,
+      routineMemoryIconManual: Color.lerp(routineMemoryIconManual, other.routineMemoryIconManual, t)!,
+      creditPackTileMint: Color.lerp(creditPackTileMint, other.creditPackTileMint, t)!,
+      creditPackTilePeach: Color.lerp(creditPackTilePeach, other.creditPackTilePeach, t)!,
+      creditPackTileCream: Color.lerp(creditPackTileCream, other.creditPackTileCream, t)!,
+      creditPackPopularBorder: Color.lerp(creditPackPopularBorder, other.creditPackPopularBorder, t)!,
+      creditPackDiscountFill: Color.lerp(creditPackDiscountFill, other.creditPackDiscountFill, t)!,
+      proPlanFreeBadgeFill: Color.lerp(proPlanFreeBadgeFill, other.proPlanFreeBadgeFill, t)!,
+      proPlanFreeBadgeText: Color.lerp(proPlanFreeBadgeText, other.proPlanFreeBadgeText, t)!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
       catSelectedBorder: Color.lerp(
         catSelectedBorder,
@@ -2170,7 +2538,6 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       toastBackground: Color.lerp(toastBackground, other.toastBackground, t)!,
-      toastBorder: Color.lerp(toastBorder, other.toastBorder, t)!,
       toastText: Color.lerp(toastText, other.toastText, t)!,
       toastAction: Color.lerp(toastAction, other.toastAction, t)!,
       settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,
@@ -2262,6 +2629,36 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge4: Color.lerp(stepBadge4, other.stepBadge4, t)!,
       noticeImagePlaceholder: Color.lerp(noticeImagePlaceholder, other.noticeImagePlaceholder, t)!,
       noticeHideLabel: Color.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
+      proPlanBadgeStart: Color.lerp(proPlanBadgeStart, other.proPlanBadgeStart, t)!,
+      proPlanBadgeEnd: Color.lerp(proPlanBadgeEnd, other.proPlanBadgeEnd, t)!,
+      proPlanBadgeText: Color.lerp(proPlanBadgeText, other.proPlanBadgeText, t)!,
+      proPlanBadgeOutline: Color.lerp(proPlanBadgeOutline, other.proPlanBadgeOutline, t)!,
+      proPlanCtaStart: Color.lerp(proPlanCtaStart, other.proPlanCtaStart, t)!,
+      proPlanCtaEnd: Color.lerp(proPlanCtaEnd, other.proPlanCtaEnd, t)!,
+      proPlanCtaText: Color.lerp(proPlanCtaText, other.proPlanCtaText, t)!,
+      proPlanCtaShadow: Color.lerp(proPlanCtaShadow, other.proPlanCtaShadow, t)!,
+      proPlanHeroGlow: Color.lerp(proPlanHeroGlow, other.proPlanHeroGlow, t)!,
+      proPlanProCardRing: Color.lerp(proPlanProCardRing, other.proPlanProCardRing, t)!,
+      proPlanProCardShadow: Color.lerp(proPlanProCardShadow, other.proPlanProCardShadow, t)!,
+      proPlanProPictureStart: Color.lerp(proPlanProPictureStart, other.proPlanProPictureStart, t)!,
+      proPlanProPictureEnd: Color.lerp(proPlanProPictureEnd, other.proPlanProPictureEnd, t)!,
+      proPlanFreePicture: Color.lerp(proPlanFreePicture, other.proPlanFreePicture, t)!,
+      proPlanCardShadow: Color.lerp(proPlanCardShadow, other.proPlanCardShadow, t)!,
+      proPlanArrow: Color.lerp(proPlanArrow, other.proPlanArrow, t)!,
+      proPlanSaveRibbon: Color.lerp(proPlanSaveRibbon, other.proPlanSaveRibbon, t)!,
+      proPlanSaveRibbonText: Color.lerp(proPlanSaveRibbonText, other.proPlanSaveRibbonText, t)!,
+      proPlanOptionBorder: Color.lerp(proPlanOptionBorder, other.proPlanOptionBorder, t)!,
+      proPlanOptionSelectedBorder: Color.lerp(proPlanOptionSelectedBorder, other.proPlanOptionSelectedBorder, t)!,
+      proPlanRadioBorder: Color.lerp(proPlanRadioBorder, other.proPlanRadioBorder, t)!,
+      proPlanBenefitDetail: Color.lerp(proPlanBenefitDetail, other.proPlanBenefitDetail, t)!,
+      proPlanTileCards: Color.lerp(proPlanTileCards, other.proPlanTileCards, t)!,
+      proPlanTileRoutines: Color.lerp(proPlanTileRoutines, other.proPlanTileRoutines, t)!,
+      proPlanTileWeek: Color.lerp(proPlanTileWeek, other.proPlanTileWeek, t)!,
+      proPlanTileExtra: Color.lerp(proPlanTileExtra, other.proPlanTileExtra, t)!,
+      proPlanCloseFill: Color.lerp(proPlanCloseFill, other.proPlanCloseFill, t)!,
+      proPlanFreeChipFill: Color.lerp(proPlanFreeChipFill, other.proPlanFreeChipFill, t)!,
+      proPlanFreeChipText: Color.lerp(proPlanFreeChipText, other.proPlanFreeChipText, t)!,
+      proPlanTeaserCardShadow: Color.lerp(proPlanTeaserCardShadow, other.proPlanTeaserCardShadow, t)!,
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/assets/app_assets.dart';
 import 'svg_style_inliner.dart';
+import 'pictogram_catalog.dart';
 
 /// 픽토그램 SVG 를 읽는 로더.
 ///
@@ -21,7 +22,8 @@ class PictogramSvgLoader extends SvgLoader<String> {
   @override
   Future<String?> prepareMessage(BuildContext? context) {
     final b = bundle ?? (context != null ? DefaultAssetBundle.of(context) : rootBundle);
-    return b.loadString(AppAssets.pictogram(id));
+    // 이모지 그림은 assets/emoji, 그 외는 Mulberry (#1149)
+    return b.loadString(PictogramCatalog.isEmoji(id) ? AppAssets.emoji(id) : AppAssets.pictogram(id));
   }
 
   @override

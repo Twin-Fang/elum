@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.credit.application.service;
 
+import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,6 +25,7 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import java.time.Clock;
 import java.time.Instant;
@@ -68,11 +70,13 @@ class CreditQueryServiceTest {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     CreditAccountService accountService =
       new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
+        CreditTestStore.weekPeriodSettings(),
         org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
     PlatformTransactionManager tx = mock(PlatformTransactionManager.class);
     CreditReservationService reservationService = new CreditReservationService(
-      policyService, accountService, entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
-    service = new CreditQueryService(policyService, accountService, reservationService, entitlementService,
+      policyService, accountService, entitlementService, jobRepository, ledgerRepository,
+      com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
+    service = new CreditQueryService(policyService, accountService, reservationService, new CreditBreakdownService(grantRepository), entitlementService,
       jobRepository, ledgerRepository, tx, CLOCK);
 
     policy = AiCreditPolicy.disabledDefault();
@@ -108,7 +112,7 @@ class CreditQueryServiceTest {
     // 기기가 자기 시각으로 읽고 날짜를 틀리게 보였다. 같은 순간에 서버 시간대 오프셋을 붙인다.
     assertThat(summary.nextResetAtOffset()).isEqualTo(
       OffsetDateTime.parse("2026-09-28T00:00:00+09:00"));
-    assertThat(summary.costs()).isEqualTo(new CreditSummaryResponse.Costs(1, 2));
+    assertThat(summary.costs()).isEqualTo(new CreditSummaryResponse.Costs(1, 2, 1));
     assertThat(summary.maxCardsPerRoutine()).isEqualTo(10);
     assertThat(summary.inProgress()).singleElement().satisfies(job -> {
       assertThat(job.kind()).isEqualTo("ROUTINE_CREATE");
@@ -150,6 +154,42 @@ class CreditQueryServiceTest {
 
     assertThat(summary.canStartRoutine()).isTrue();
     assertThat(summary.canGenerateImage()).as("그림 단가 2 > 사용 가능 1").isFalse();
+  }
+
+  @Test
+  @DisplayName("일과 글 무료 권한이면 시작 기준이 그림 한 장 단가 — 잔액 1 < 그림 2 라 시작 불가, 단가 표시는 정책 그대로 (#1110)")
+  void getMine_routineTextFree_startNeedsOneImageCost() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 1);
+    // 같은 목에 다시 그리기 무료 질의도 오므로 lenient
+    lenient().when(entitlementService.isAllowed(MEMBER_ID, Entitlement.ROUTINE_CREATE_FREE)).thenReturn(true);
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.canStartRoutine()).isFalse();
+    assertThat(summary.costs().routineText()).as("번역이 쓰는 글 단가는 그대로").isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기 권한이 있으면 오늘 남은 무료 횟수 = 하루 한도 5 − 오늘 쓴 무료 횟수 (확인 시트의 'N회 남음')")
+  void getMine_freeRegeneratesLeft_whenEntitled() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 50);
+    when(entitlementService.isAllowed(MEMBER_ID, Entitlement.IMAGE_REGENERATE_FREE)).thenReturn(true);
+    store.reservedJob(ACCOUNT_ID, "regen-1", CreditJobKind.IMAGE_REGENERATE, 0, NOW.minusMinutes(1));
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.freeImageRegeneratesLeftToday()).isEqualTo(4);
+    assertThat(summary.costs().imageRegenerate()).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기 권한이 없으면(Free) 남은 무료 횟수 0 — 앱은 크레딧 단가를 보인다")
+  void getMine_freeRegeneratesLeft_zeroWithoutEntitlement() {
+    store.weekly(ACCOUNT_ID, NOW, 100, 50);
+
+    CreditSummaryResponse summary = service.getMine(MEMBER_ID);
+
+    assertThat(summary.freeImageRegeneratesLeftToday()).isZero();
   }
 
   @Test
@@ -250,5 +290,31 @@ class CreditQueryServiceTest {
     org.mockito.Mockito.verify(ledgerRepository).findMemberIdsWithBalanceDepletedIn(
       java.util.List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE),
       period.start(), period.end());
+  }
+
+  @Test
+  @DisplayName("요약 응답이 주기 단위를 내려준다 — 앱이 '이번 주'·'이번 달' 문구를 못 고르면 달 주기에 월요일 안내가 뜬다")
+  void getMine_reportsPeriodUnit() {
+    assertThat(service.getMine(MEMBER_ID).periodUnit()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.WEEK);
+
+    PlatformTransactionManager tx = mock(PlatformTransactionManager.class);
+    CreditAccountService monthAccountService = new CreditAccountService(accountRepository, grantRepository,
+      jobRepository, ledgerRepository,
+      CreditTestStore.periodSettingsOf(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH),
+      org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
+    CreditReservationService reservationService = new CreditReservationService(
+      policyService, monthAccountService, entitlementService, jobRepository, ledgerRepository,
+      com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings.fromDefaults(), tx, CLOCK);
+    CreditQueryService monthQueryService = new CreditQueryService(policyService, monthAccountService,
+      reservationService, new CreditBreakdownService(grantRepository), entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
+
+    CreditSummaryResponse monthly = monthQueryService.getMine(MEMBER_ID);
+
+    assertThat(monthly.periodUnit()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH);
+    assertThat(monthly.periodStart()).isEqualTo(LocalDateTime.of(2026, 9, 1, 0, 0));
+    assertThat(monthly.nextResetAt()).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
+    // 주 단위로 받은 지급(W39)은 그대로 두고 이번 달 지급이 한 번 새로 생긴다 (정책 Free 100)
+    assertThat(monthly.weeklyGrant()).isEqualTo(100);
+    assertThat(store.grants).extracting(AiCreditGrant::getPeriodKey).containsExactly("2026-W39", "2026-M09");
   }
 }

@@ -43,6 +43,38 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
   boolean existsByImagePathAndIdNot(String imagePath, String id);
 
   /**
+   * 카드가 쓰는 그림 열쇠 전체 (쓰지 않는 그림 정리용, #1216)
+   */
+  @Query("select s.imagePath from RoutineStep s where s.imagePath is not null")
+  List<String> findAllImagePaths();
+
+  /**
+   * 아직 png 인 카드 그림 열쇠 (webp 전환용, #1219). 복제한 일과가 같은 열쇠를 함께 써서 중복 제거
+   */
+  @Query("select distinct s.imagePath from RoutineStep s where s.imagePath like '%.png'")
+  List<String> findPngImagePaths(Pageable pageable);
+
+  // 다시 그리기 후보로 아직 쓰는 그림인가 (#1219, 옛 png 를 지우기 전 확인)
+  boolean existsByImageCandidatePath(String imageCandidatePath);
+
+  /**
+   * 같은 그림 열쇠를 가리키는 카드 모두 새 열쇠로 교체 (#1219). 0 이면 그새 그림이 바뀌었거나 카드가 지워짐
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.imagePath = :newImagePath where s.imagePath = :oldImagePath")
+  int replaceImagePath(@Param("oldImagePath") String oldImagePath, @Param("newImagePath") String newImagePath);
+
+  /**
+   * 카드가 쓰는 그림 후보 열쇠 전체 (쓰지 않는 그림 정리용, #1216)
+   */
+  @Query("select s.imageCandidatePath from RoutineStep s where s.imageCandidatePath is not null")
+  List<String> findAllImageCandidatePaths();
+
+  // 보호자 목소리 열쇠를 아직 가리키는 카드가 있는가 (일과 복제는 같은 열쇠를 공유, #787)
+  boolean existsByGuardianVoicePath(String guardianVoicePath);
+
+  /**
    * 음성 열쇠 저장 (트랜잭션 없는 대기열 스레드용 한 줄 UPDATE). 0 이면 그새 단계가 지워짐
    */
   @Transactional
@@ -77,6 +109,37 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
     + "where s.speechPath is null and s.description <> '' and r.language = :language "
     + "order by s.createdAt desc")
   List<String> findIdsMissingSpeech(@Param("language") AppLocale language, Pageable pageable);
+
+  /**
+   * 아직 WAV 로 저장된 음성 (압축 전환용, #1211). 최근 단계 먼저
+   */
+  @Query("select s.id as stepId, s.speechPath as speechPath from RoutineStep s "
+    + "where s.speechPath like '%.wav' order by s.createdAt desc")
+  List<StoredSpeechPath> findWavSpeechPaths(Pageable pageable);
+
+  /**
+   * 열쇠가 지금도 옛 열쇠일 때만 새 열쇠로 교체 (#1211). 0 이면 그새 글 수정·삭제로 열쇠가 바뀜
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.speechPath = :newSpeechPath where s.id = :stepId and s.speechPath = :oldSpeechPath")
+  int replaceSpeechPath(
+    @Param("stepId") String stepId, @Param("oldSpeechPath") String oldSpeechPath,
+    @Param("newSpeechPath") String newSpeechPath);
+
+  /// 저장된 음성 열쇠 projection: 단계 id, 열쇠
+  interface StoredSpeechPath {
+
+    String getStepId();
+
+    String getSpeechPath();
+  }
+
+  /**
+   * 카드가 쓰는 음성 열쇠 전체 (쓰지 않는 파일 정리용, #1212)
+   */
+  @Query("select s.speechPath from RoutineStep s where s.speechPath is not null")
+  List<String> findAllSpeechPaths();
 
   /// 음성 문장 재료 projection
   interface SpeechTextSource {

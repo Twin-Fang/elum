@@ -4,7 +4,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../shared/models/routine.dart';
 
-/// 일과관리(보관해 둔 원본) 서버 호출: 목록, 오늘 보내기, 복사, 이름 바꾸기, 지우기
+/// 일과관리(보관해 둔 원본) 서버 호출: 목록, 오늘 보내기, 복사, 다른 언어로 만들기, 이름 바꾸기, 지우기
 ///
 /// 모두 [Attempt] 로 돌려준다 — 화면이 실패 팝업과 에러 코드를 띄우고 목록은 그대로 둔다.
 class RoutineLibraryApi {
@@ -17,8 +17,8 @@ class RoutineLibraryApi {
   /// 원본 목록 (최신순). 서버가 복제본·숨긴 일과·임시저장을 이미 걸렀다.
   Future<Attempt<List<Routine>>> fetchLibrary() =>
       guarded(_repo, 'fetchLibrary', () async {
-        final res = await _dio.get<List<dynamic>>('/api/routines/library');
-        return (res.data ?? const <dynamic>[])
+        final response = await _dio.get<List<dynamic>>('/api/routines/library');
+        return (response.data ?? const <dynamic>[])
             .whereType<Map<String, dynamic>>()
             .map(Routine.fromJson)
             .toList();
@@ -33,20 +33,20 @@ class RoutineLibraryApi {
 
   Future<Attempt<Routine>> _post(String routineId, String op) =>
       guarded(_repo, op, () async {
-        final res = await _dio.post<Map<String, dynamic>>(
+        final response = await _dio.post<Map<String, dynamic>>(
           '/api/routines/$routineId/$op',
         );
-        return _routineOf(res.data);
+        return _routineOf(response.data);
       });
 
   /// 이름 바꾸기. 제목은 보호자가 쓴 글이라 로그에 남기지 않는다.
   Future<Attempt<Routine>> rename(String routineId, String title) =>
       guarded(_repo, 'rename', () async {
-        final res = await _dio.patch<Map<String, dynamic>>(
+        final response = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/$routineId/title',
           data: {'title': title},
         );
-        return _routineOf(res.data);
+        return _routineOf(response.data);
       });
 
   /// 칸 자리 저장: 격자의 모든 칸(낱개 일과·묶음)을 보여 줄 순서대로 보낸다 (#844)

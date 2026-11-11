@@ -136,6 +136,39 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
     }
   }
 
+  /// 계정이 바뀌기 전 대기열 전부 보내고 기다리기: 저장소 대기열 합치기 > 전송 > 체인이 빌 때까지 대기
+  ///
+  /// 지금 토큰(바뀌기 전 계정)으로 보냄. 남은 체크가 없으면 true, 못 보낸 것이 있으면 false
+  /// (대기열·기록은 그대로 둠, 호출부가 계정 전환을 멈춤)
+  Future<bool> sendPendingBeforeAccountSwitch() async {
+    _mergeStoredPending();
+    syncPending();
+    // 전송 중 다시 줄 선 것까지 (응답 사이 체크가 바뀌면 체인 끝에 다시 붙음)
+    Future<void> awaitedChain;
+    do {
+      awaitedChain = _syncChain;
+      await awaitedChain;
+      if (!ref.mounted) return false;
+    } while (!identical(awaitedChain, _syncChain));
+    return state.pending.isEmpty;
+  }
+
+  /// 아직 복원 안 된 저장소 대기열·기록을 메모리에 합치기 (이룸이 화면을 안 연 기기)
+  void _mergeStoredPending() {
+    final storedOnly = _store.pending.difference(state.pending);
+    if (storedOnly.isEmpty) return;
+    final progress = Map<String, RoutineProgressRecord>.from(state.progress);
+    for (final id in storedOnly) {
+      if (progress.containsKey(id)) continue;
+      final record = _store.load(id);
+      if (record != null) progress[id] = record;
+    }
+    state = state.copyWith(
+      progress: progress,
+      pending: {...state.pending, ...storedOnly},
+    );
+  }
+
   /// 로컬 기록이 없을 때의 출발점 — 서버가 준 완료 상태를 그대로 옮긴다.
   RoutineProgressRecord _fromServer(Routine routine) => RoutineProgressRecord(
     completed: routine.steps.where((s) => s.completed).map((s) => s.id).toSet(),
@@ -148,7 +181,15 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
 
   void _enqueue(String routineId) {
     if (!_queued.add(routineId)) return;
-    _syncChain = _syncChain.then((_) => _sync(routineId));
+    // 한 건 예외가 체인 전체를 막지 않게 (대기열은 남아 다음 기회에 다시 보냄)
+    _syncChain = _syncChain.then((_) => _sync(routineId)).catchError(
+      (Object error, StackTrace stack) => AppLogger.error(
+        '[sync] failed, queue kept',
+        error,
+        stack,
+        {'routineId': routineId},
+      ),
+    );
   }
 
   Future<void> _sync(String routineId) async {

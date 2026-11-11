@@ -33,6 +33,8 @@ enum ServerErrorCode {
   // ROUTINE
   routineAiGenerationFailed('ROUTINE_AI_GENERATION_FAILED'),
   routineStepLimitExceeded('ROUTINE_STEP_LIMIT_EXCEEDED'),
+  // 입력에 이룸이가 할 행동이 없다 (카드 0장). 다시 해도 같아 입력으로 돌려보낸다
+  routineInputNotActionable('ROUTINE_INPUT_NOT_ACTIONABLE'),
   routineNotFound('ROUTINE_NOT_FOUND'),
   routineAccessDenied('ROUTINE_ACCESS_DENIED'),
   routineInvalidStatus('ROUTINE_INVALID_STATUS'),
@@ -42,6 +44,15 @@ enum ServerErrorCode {
   routineGroupNotFound('ROUTINE_GROUP_NOT_FOUND'),
   routineGroupInvalidMember('ROUTINE_GROUP_INVALID_MEMBER'),
   routineGroupTooSmall('ROUTINE_GROUP_TOO_SMALL'),
+  // 요일별 반복 일과 (#782): 요금제 권한 없음 · 요일·시각 틀림
+  routineScheduleNotAllowed('ROUTINE_SCHEDULE_NOT_ALLOWED'),
+  routineScheduleInvalid('ROUTINE_SCHEDULE_INVALID'),
+  // AI 메모 (#1082): Pro 아님 · 진단·장애·정도가 든 줄
+  routineMemoryProRequired('ROUTINE_MEMORY_PRO_REQUIRED'),
+  routineMemoryLineNotAllowed('ROUTINE_MEMORY_LINE_NOT_ALLOWED'),
+  // 카드 나누기 (#1244): Pro 아님 · AI 실패·시간 초과·검증 어긋남
+  cardSplitProRequired('CARD_SPLIT_PRO_REQUIRED'),
+  cardSplitFailed('CARD_SPLIT_FAILED'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),
@@ -54,6 +65,21 @@ enum ServerErrorCode {
   routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
   routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
   routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
+  // 카드 그림 다시 그리기: AI 그림 카드 아님, 그림 생성 실패
+  routineStepImageNotRegeneratable('ROUTINE_STEP_IMAGE_NOT_REGENERATABLE'),
+  routineStepImageRegenerateFailed('ROUTINE_STEP_IMAGE_REGENERATE_FAILED'),
+  // 고를 새 그림 후보가 없음 (이미 골랐거나 버렸거나 다시 그려 바뀜)
+  routineStepImageCandidateNotFound('ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND'),
+  // 요금제에 AI 맞춤 그림이 없음 — 다시 그리기·그림 그리기 거절 (Pro 안내로 돌림)
+  aiImageNotAllowed('AI_IMAGE_NOT_ALLOWED'),
+  // 요금제에 AI 맞춤 그림이 없는데 캐릭터·사진 같은 그림 방식 저장 (#1149)
+  imageStyleNotAllowed('IMAGE_STYLE_NOT_ALLOWED'),
+  // 보호자 목소리 녹음: Pro 아님, 형식, 크기, 길이, 저장 실패
+  guardianVoiceNotAllowed('GUARDIAN_VOICE_NOT_ALLOWED'),
+  guardianVoiceInvalidType('GUARDIAN_VOICE_INVALID_TYPE'),
+  guardianVoiceTooLarge('GUARDIAN_VOICE_TOO_LARGE'),
+  guardianVoiceTooLong('GUARDIAN_VOICE_TOO_LONG'),
+  guardianVoiceSaveFailed('GUARDIAN_VOICE_SAVE_FAILED'),
   routineRequestTooFrequent('ROUTINE_REQUEST_TOO_FREQUENT'),
 
   // PROMPT
@@ -79,7 +105,6 @@ enum ServerErrorCode {
   migrationFileReadFailed('MIGRATION_FILE_READ_FAILED'),
   migrationStatusUnreadable('MIGRATION_STATUS_UNREADABLE'),
   migrationSyncRequestFailed('MIGRATION_SYNC_REQUEST_FAILED'),
-  migrationSettingsUnreadable('MIGRATION_SETTINGS_UNREADABLE'),
 
   // SYSTEM CONFIG
   systemConfigInvalidValue('SYSTEM_CONFIG_INVALID_VALUE'),
@@ -139,7 +164,11 @@ enum ServerErrorCode {
   // "내일 다시" 는 하루 한도에서만 맞는 말이다.
   routineCreateDailyLimitExceeded('ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED'),
   routineCountLimitExceeded('ROUTINE_COUNT_LIMIT_EXCEEDED'),
+  // 한도 집계 실패 > 막음(fail-closed), 다시 시도 가능 (#1192)
+  routineQuotaUnavailable('ROUTINE_QUOTA_UNAVAILABLE'),
   profileCountLimitExceeded('PROFILE_COUNT_LIMIT_EXCEEDED'),
+  // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
+  weeklyReportNotAllowed('WEEKLY_REPORT_NOT_ALLOWED'),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -147,6 +176,9 @@ enum ServerErrorCode {
 
   // 주간 AI 크레딧. 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
   aiCreditInsufficient('AI_CREDIT_INSUFFICIENT'),
+  // 크레딧 꾸러미 구매: 판매 꺼짐 403, 다른 회원에 이미 적립된 거래 400
+  creditPackSaleDisabled('CREDIT_PACK_SALE_DISABLED'),
+  creditPurchaseOwnedByOtherMember('CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER'),
   aiCreditJobInProgress('AI_CREDIT_JOB_IN_PROGRESS'),
   aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
   aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),
@@ -158,6 +190,14 @@ enum ServerErrorCode {
   adRewardAccountFrozen('AD_REWARD_ACCOUNT_FROZEN'),
   adRewardSessionNotFound('AD_REWARD_SESSION_NOT_FOUND'),
   adRewardUnavailable('AD_REWARD_UNAVAILABLE'),
+
+  // 스토어 구독 결제 (#1071). 꺼짐·설정 없음은 잠시 뒤 다시, 다른 계정에 묶인 구독은 그 계정으로 로그인 안내.
+  subscriptionStoreDisabled('SUBSCRIPTION_STORE_DISABLED'),
+  subscriptionReceiptInvalid('SUBSCRIPTION_RECEIPT_INVALID'),
+  subscriptionEnvironmentNotAllowed('SUBSCRIPTION_ENVIRONMENT_NOT_ALLOWED'),
+  subscriptionProductNotAllowed('SUBSCRIPTION_PRODUCT_NOT_ALLOWED'),
+  subscriptionOwnedByOtherMember('SUBSCRIPTION_OWNED_BY_OTHER_MEMBER'),
+  subscriptionStoreNotConfigured('SUBSCRIPTION_STORE_NOT_CONFIGURED'),
 
   // 비밀값(외부 API 키) 저장.
   secretMasterKeyMissing('SECRET_MASTER_KEY_MISSING'),

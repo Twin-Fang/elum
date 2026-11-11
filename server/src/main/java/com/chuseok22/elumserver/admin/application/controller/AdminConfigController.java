@@ -3,6 +3,9 @@ package com.chuseok22.elumserver.admin.application.controller;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
 import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
 import com.chuseok22.elumserver.admin.application.service.AdminTextProviderService;
+import com.chuseok22.elumserver.admin.application.service.ControlTowerAttentionService;
+import com.chuseok22.elumserver.admin.application.service.SettingsEditorService;
+import com.chuseok22.elumserver.admin.application.service.SettingsSection;
 import com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService;
 import com.chuseok22.elumserver.admin.application.service.PromptLocaleGate;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -18,11 +21,10 @@ import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigValueValidator;
-import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,28 +53,41 @@ public class AdminConfigController {
   private final SystemConfigOverviewService overviewService;
   private final MemberPickerService memberPickerService;
   private final AdminTextProviderService adminTextProviderService;
+  private final SettingsEditorService settingsEditorService;
+  private final ControlTowerAttentionService controlTowerAttentionService;
 
+  /// 시스템 설정: 지금 적용 중 요약 + 다른 화면 바로가기 + 관제소 연동 + 앱·회원·한도·메일 설정
   @GetMapping("/admin/settings")
   public String settings(Model model) {
-    // 표 행(최근 변경순) + 상단 요약 + Free/Pro 비교
-    List<SettingRow> rows = overviewService.buildRows();
-    model.addAttribute("rows", rows);
+    List<SettingRow> allRows = overviewService.buildRows();
     LocalDateTime now = LocalDateTime.now();
-    model.addAttribute("overview", overviewService.buildOverview(rows, now));
-    // "오늘 변경" 칩 기준일
-    model.addAttribute("today", now.toLocalDate());
-    // 필터 칩: 그룹 이름 > 표시 이름 (선언 순서)
-    Map<String, String> groupLabelByName = new LinkedHashMap<>();
-    rows.stream().sorted(java.util.Comparator.comparing(row -> ConfigGroup.valueOf(row.groupName()).ordinal()))
-      .forEach(row -> groupLabelByName.putIfAbsent(row.groupName(), row.groupLabel()));
-    model.addAttribute("groupLabelByName", groupLabelByName);
-    // "규칙에 어긋난 값" 칩: 저장 뒤 규칙이 바뀌어 지금 규칙에 맞지 않는 저장값 수
-    model.addAttribute("ruleWarningCount", rows.stream().filter(SettingRow::hasValidationWarning).count());
+    model.addAttribute("overview", overviewService.buildOverview(allRows, now));
+    model.addAttribute("sectionLinks", settingsEditorService.sectionLinksOf(allRows));
+    model.addAttribute("controlTowerPanel", controlTowerAttentionService.buildPanel());
+    model.addAttribute("editor", settingsEditorService.buildEditor(SettingsSection.SYSTEM, allRows, now.toLocalDate()));
+    return "admin/settings";
+  }
+
+  /// AI 설정: 이미지·텍스트 제공자 전환 + 모델·단가·비용 상한 설정
+  @GetMapping("/admin/settings/ai")
+  public String aiSettings(Model model) {
+    List<SettingRow> allRows = overviewService.buildRows();
+    model.addAttribute("editor", settingsEditorService.buildEditor(SettingsSection.AI, allRows, LocalDate.now()));
     model.addAttribute("imageProviders", imageProviderViews());
     // 텍스트: 시도 순서대로 + Claude 키 카드 (#1083)
     model.addAttribute("textProviders", adminTextProviderService.providerViews());
     model.addAttribute("claudeKeys", adminTextProviderService.claudeKeyViews());
-    return "admin/settings";
+    return "admin/settings-ai";
+  }
+
+  /// 요금제·구독: Free/Pro 비교 + 플랜 한도·이벤트·스토어 결제 설정
+  @GetMapping("/admin/settings/plans")
+  public String planSettings(Model model) {
+    List<SettingRow> allRows = overviewService.buildRows();
+    LocalDateTime now = LocalDateTime.now();
+    model.addAttribute("overview", overviewService.buildOverview(allRows, now));
+    model.addAttribute("editor", settingsEditorService.buildEditor(SettingsSection.PLAN, allRows, now.toLocalDate()));
+    return "admin/settings-plans";
   }
 
   /**
@@ -121,7 +136,7 @@ public class AdminConfigController {
     } catch (CustomException e) {
       redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + " 저장 실패: " + failureReason(e));
     }
-    return "redirect:/admin/settings";
+    return SettingsSection.of(key).redirectView();
   }
 
   /**
@@ -247,7 +262,7 @@ public class AdminConfigController {
   ) {
     systemConfigService.resetToDefault(key, actorOf(principal), reason);
     redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 기본값으로 복원했습니다.");
-    return "redirect:/admin/settings";
+    return SettingsSection.of(key).redirectView();
   }
 
   /// 이력의 변경자 — 로그인한 관리자 아이디. 세션이 없으면(테스트 등) 서비스가 system 으로 적는다.

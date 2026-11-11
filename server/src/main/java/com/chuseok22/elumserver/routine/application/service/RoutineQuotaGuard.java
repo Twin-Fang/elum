@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
  * 본다. 하루 한도는 하루에 터지는 비용을, 주간 한도는 한 주 총량을 묶는다.
  * 둘 다 -1 이면 꺼진다.
  *
- * <p><b>집계가 실패하면 통과시킨다.</b> 우리 DB 문제로 사용자가 앱을 못 쓰면 안 된다.
- * 한도를 못 세서 조금 더 쓰이는 쪽이, 멀쩡한 사용자가 막히는 쪽보다 낫다.
+ * <p>집계 실패 > 막음(fail-closed, {@code ROUTINE_QUOTA_UNAVAILABLE}, 다시 시도 가능).
+ * 일과 글 무료 요금제는 이 한도가 AI 글 비용의 유일한 방어선 (#1110, #1192). 무제한 한도는 세지 않음
  */
 @Slf4j
 @Component
@@ -66,7 +66,8 @@ public class RoutineQuotaGuard {
     PlanType plan = entitlementService.planOf(memberId);
     // 크레딧이 켜져 있으면 하루·주간 횟수는 보지 않는다 — 크레딧 예약이 대신 막는다.
     // 보유 일과 최대 수는 저장 공간 한도라 크레딧과 무관하게 남긴다.
-    if (!creditEnabled()) {
+    // 일과 글 무료 요금제는 크레딧이 글 몫을 못 묶으므로 크레딧이 켜져 있어도 횟수를 센다 (#1110)
+    if (!isCreditEnabled() || entitlementService.isAllowed(plan, Entitlement.ROUTINE_CREATE_FREE)) {
       // 주간을 먼저 본다. 주간이 다 찼는데 하루 한도로 거절하면 "내일 다시" 라고 안내하게
       // 되는데, 내일도 막힌다.
       guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_WEEK, weekStart(),
@@ -81,7 +82,7 @@ public class RoutineQuotaGuard {
    * 크레딧 정책이 켜져 있는가. 정책을 못 읽으면 꺼진 것으로 보고 횟수 한도를 건다 —
    * 한도 없이 열어 두는 쪽보다 낫고, 어차피 뒤이은 크레딧 예약이 장부 오류로 막는다.
    */
-  private boolean creditEnabled() {
+  private boolean isCreditEnabled() {
     try {
       return creditPolicyService.current().isEnabled();
     } catch (Exception e) {
@@ -103,15 +104,16 @@ public class RoutineQuotaGuard {
   private void guardCreateCount(
     String memberId, PlanType plan, Entitlement limit, LocalDateTime from, ErrorCode onExceeded
   ) {
+    if (isUnlimited(plan, limit)) {
+      return;
+    }
     long used;
     try {
       used = aiCallLogRepository
         .countByMemberIdAndCallTypeInAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
           memberId, AiCallType.routineCreateTypes(), from);
     } catch (Exception e) {
-      log.warn("일과 생성 사용량 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}, limit={}",
-        memberId, limit, e);
-      return;
+      throw quotaUnavailable(memberId, limit, e);
     }
     if (!entitlementService.isWithinLimit(plan, limit, used)) {
       log.info("일과 생성 한도 초과: memberId={}, limit={}, used={}", memberId, limit, used);
@@ -120,17 +122,30 @@ public class RoutineQuotaGuard {
   }
 
   private void guardOwnedCount(String memberId, PlanType plan) {
+    if (isUnlimited(plan, Entitlement.ROUTINE_MAX_COUNT)) {
+      return;
+    }
     long owned;
     try {
       owned = routineRepository.countByCreatedByAndIsExampleFalse(memberId);
     } catch (Exception e) {
-      log.warn("보유 일과 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}", memberId, e);
-      return;
+      throw quotaUnavailable(memberId, Entitlement.ROUTINE_MAX_COUNT, e);
     }
     if (!entitlementService.isWithinLimit(plan, Entitlement.ROUTINE_MAX_COUNT, owned)) {
       log.info("보유 일과 개수 한도 초과: memberId={}, owned={}", memberId, owned);
       throw new CustomException(ErrorCode.ROUTINE_COUNT_LIMIT_EXCEEDED);
     }
+  }
+
+  private boolean isUnlimited(PlanType plan, Entitlement limit) {
+    return entitlementService.limitOf(plan, limit) == Entitlement.UNLIMITED;
+  }
+
+  // 집계 실패 > 거절 (예외 원인은 로그에만)
+  private CustomException quotaUnavailable(String memberId, Entitlement limit, Exception cause) {
+    log.warn("[routine quota] rejected 503 : count failed, member={}, limit={}, cause={}",
+      memberId, limit, cause.getClass().getSimpleName(), cause);
+    return new CustomException(ErrorCode.ROUTINE_QUOTA_UNAVAILABLE);
   }
 
   /**

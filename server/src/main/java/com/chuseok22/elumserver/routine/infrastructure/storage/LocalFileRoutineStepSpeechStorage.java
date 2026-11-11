@@ -1,13 +1,17 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.TtsProperties;
+import com.chuseok22.elumserver.routine.core.SpeechAudioFormat;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +27,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LocalFileRoutineStepSpeechStorage implements RoutineStepSpeechStorage {
 
-  private static final String SPEECH_EXTENSION = ".wav";
-
   private final TtsProperties ttsProperties;
 
   @Override
-  public String save(String stepId, String textHash, byte[] wav) {
-    String key = stepId + "/" + textHash + SPEECH_EXTENSION;
+  public String save(String stepId, String textHash, byte[] audio, SpeechAudioFormat format) {
+    String key = format.keyOf(stepId, textHash);
     Path temp = null;
     try {
       Path file = resolve(key);
       Files.createDirectories(file.getParent());
       // 임시 파일에 다 쓴 뒤 옮김 (끊겨도 반쪽 파일이 열쇠 자리에 남지 않음)
       temp = Files.createTempFile(file.getParent(), ".speech-", ".tmp");
-      Files.write(temp, wav);
+      Files.write(temp, audio);
       try {
         Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
       } catch (AtomicMoveNotSupportedException e) {
@@ -74,9 +76,51 @@ public class LocalFileRoutineStepSpeechStorage implements RoutineStepSpeechStora
       return;
     }
     try {
-      Files.deleteIfExists(resolve(key));
+      Path file = resolve(key);
+      Files.deleteIfExists(file);
+      deleteIfEmptyStepFolder(file.getParent());
     } catch (IOException e) {
       log.warn("[routine speech] delete failed : key={}", key, e);
+    }
+  }
+
+  @Override
+  public List<String> listKeysModifiedBefore(Instant cutoff) {
+    Path base = base();
+    if (!Files.isDirectory(base)) {
+      return List.of();
+    }
+    try (Stream<Path> paths = Files.walk(base)) {
+      return paths.filter(Files::isRegularFile)
+        .filter(path -> isModifiedBefore(path, cutoff))
+        // 열쇠 = 저장 폴더 기준 상대 경로, 구분자 / ({stepId}/{해시}.wav)
+        .map(path -> base.relativize(path).toString().replace('\\', '/'))
+        .toList();
+    } catch (IOException e) {
+      throw new IllegalStateException("speech list failed", e);
+    }
+  }
+
+  private static boolean isModifiedBefore(Path path, Instant cutoff) {
+    try {
+      return Files.getLastModifiedTime(path).toInstant().isBefore(cutoff);
+    } catch (IOException e) {
+      // 시각을 못 읽으면 지우지 않는 쪽 (목록에서 뺌)
+      return false;
+    }
+  }
+
+  /// 단계 폴더가 비었으면 삭제 (저장 폴더 자체는 남김, 비어 있지 않으면 그대로)
+  private void deleteIfEmptyStepFolder(Path stepFolder) {
+    if (stepFolder == null || stepFolder.equals(base())) {
+      return;
+    }
+    try {
+      Files.deleteIfExists(stepFolder);
+    } catch (DirectoryNotEmptyException e) {
+      // 같은 단계의 다른 파일이 남아 있음 (정상)
+    } catch (IOException e) {
+      log.warn("[routine speech] empty folder delete failed : path={}", stepFolder);
     }
   }
 

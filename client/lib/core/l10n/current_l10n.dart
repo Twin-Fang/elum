@@ -19,9 +19,3 @@ void syncAppL10n(BuildContext context) {
   final found = Localizations.of<AppLocalizations>(context, AppLocalizations);
   if (found != null) _current = found;
 }
-
-/// 테스트가 통로를 직접 정하거나 `ko` 로 되돌린다.
-@visibleForTesting
-void setAppL10nForTest([AppLocalizations? value]) {
-  _current = value ?? lookupAppLocalizations(const Locale('ko'));
-}

@@ -14,10 +14,12 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../member/application/member_providers.dart';
+import '../../member/application/plan_access.dart';
 import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
 import 'widgets/my_info_elumi_group.dart';
 import 'widgets/my_info_nickname_card.dart';
+import '../../subscription/domain/plan_benefit.dart';
 
 /// 하단 바 내정보 칸의 첫 화면 (시안 1736:8780): AI 크레딧 > 닉네임 > 이룸이 > 바로가기
 ///
@@ -148,10 +150,21 @@ class GuardianMyInfoScreen extends ConsumerWidget {
     );
   }
 
-  /// 바로가기 5줄: 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
+  /// 바로가기 5~6줄: (주간 리포트) · 함께하는 사람 · 임시저장 · 내가 쓴 글 · 공지사항 · 숨긴 보호자
+  ///
+  /// 주간 리포트는 Pro 만. Free 는 판매 중이고 Pro 가 주간 리포트를 줄 때만 줄이 보이고 들어가면 Pro 미리 보기 (아니면 줄 자체가 없다)
   Widget _buildShortcuts(BuildContext context, WidgetRef ref) {
+    final access = ref.watch(planAccessProvider);
+    final shouldShowWeeklyReport = access.shouldShowEntryFor(PlanBenefit.weeklyReport);
     return SettingsGroup(
       children: [
+        if (shouldShowWeeklyReport)
+          SettingsTile(
+            isInCard: true,
+            label: context.l10n.weeklyReportTitle,
+            shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.weeklyReport),
+            onTap: () => context.push(Routes.guardianWeeklyReport),
+          ),
         SettingsTile(
           isInCard: true,
           label: context.l10n.guardianSettingsPeople,

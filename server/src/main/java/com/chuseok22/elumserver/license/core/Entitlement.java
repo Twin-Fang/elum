@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.license.core;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,13 +39,54 @@ public enum Entitlement {
     Kind.LIMIT, "보유 일과 개수",
     ConfigKey.FREE_ROUTINE_MAX_COUNT, ConfigKey.PRO_ROUTINE_MAX_COUNT
   ),
-  PROFILE_MAX_COUNT(
-    Kind.LIMIT, "이룸이 명수",
-    ConfigKey.FREE_PROFILE_MAX_COUNT, ConfigKey.PRO_PROFILE_MAX_COUNT
+  // 카드 내보내기(이미지·인쇄)는 앱이 만든다 — 서버는 판정 값만 내려준다 (#1073)
+  CARD_EXPORT_WITHOUT_WATERMARK(
+    Kind.FLAG, "카드 내보내기 워터마크 없음",
+    ConfigKey.FREE_CARD_EXPORT_WITHOUT_WATERMARK, ConfigKey.PRO_CARD_EXPORT_WITHOUT_WATERMARK
   ),
-  HISTORY_RETENTION_DAYS(
-    Kind.LIMIT, "기록 보관 일수",
-    ConfigKey.FREE_HISTORY_RETENTION_DAYS, ConfigKey.PRO_HISTORY_RETENTION_DAYS
+  CARD_EXPORT_ALL_THEMES(
+    Kind.FLAG, "카드 내보내기 디자인 테마 전부",
+    ConfigKey.FREE_CARD_EXPORT_ALL_THEMES, ConfigKey.PRO_CARD_EXPORT_ALL_THEMES
+  ),
+  // 꺼진 플랜은 카드 한 장씩 이미지만 (일과 한 장 · 오려 쓰는 카드 · 용지 방향 · 장수 · 카드 크기 잠금)
+  CARD_EXPORT_ALL_LAYOUTS(
+    Kind.FLAG, "카드 내보내기 형태·배치 전부",
+    ConfigKey.FREE_CARD_EXPORT_ALL_LAYOUTS, ConfigKey.PRO_CARD_EXPORT_ALL_LAYOUTS
+  ),
+  // 주간 리포트 조회 (#1074). 꺼진 플랜은 집계 API 가 WEEKLY_REPORT_NOT_ALLOWED 로 막는다
+  WEEKLY_REPORT(
+    Kind.FLAG, "주간 리포트",
+    ConfigKey.FREE_WEEKLY_REPORT, ConfigKey.PRO_WEEKLY_REPORT
+  ),
+  // 요일·시각 반복 일과 + 이룸이 기기 일과 시간 알림 (#782, #1080). 꺼지면 예약만 멈추고 지우지 않음
+  ROUTINE_SCHEDULE(
+    Kind.FLAG, "요일별 반복 일과·이룸이 기기 알림",
+    ConfigKey.FREE_ROUTINE_SCHEDULE, ConfigKey.PRO_ROUTINE_SCHEDULE
+  ),
+  // 보호자 목소리로 카드 읽기 (#787): 녹음 올리기 + 이룸이 기기 재생. 꺼지면 이룸이는 기본 음성, 녹음은 남김
+  GUARDIAN_VOICE(
+    Kind.FLAG, "보호자 목소리 녹음",
+    ConfigKey.FREE_GUARDIAN_VOICE, ConfigKey.PRO_GUARDIAN_VOICE
+  ),
+  // 보호자별 AI 메모리 규칙 + 확정 예시로 맞춤 쪼개기. 서버가 일과 만들기에 넣고, 앱은 AI 메모리 화면을 연다
+  ROUTINE_MEMORY(
+    Kind.FLAG, "AI 메모리 (내가 고친 방식으로 만들기)",
+    ConfigKey.FREE_ROUTINE_MEMORY, ConfigKey.PRO_ROUTINE_MEMORY
+  ),
+  // 카드 한 장을 AI 가 2~3장으로 나눈 안 (이 카드 더 쉽게). 크레딧 없음, 꺼진 플랜은 CARD_SPLIT_PRO_REQUIRED 로 막는다
+  CARD_SPLIT(
+    Kind.FLAG, "이 카드 더 쉽게 (카드 나누기)",
+    ConfigKey.FREE_CARD_SPLIT, ConfigKey.PRO_CARD_SPLIT
+  ),
+  // 그림 다시 그리기 0크레딧 (하루 한도는 IMAGE_REGENERATE_FREE_DAILY_CAP) (#1075)
+  IMAGE_REGENERATE_FREE(
+    Kind.FLAG, "그림 다시 그리기 무료",
+    ConfigKey.FREE_IMAGE_REGENERATE_FREE, ConfigKey.PRO_IMAGE_REGENERATE_FREE
+  ),
+  // 일과 만들기 글 몫 0크레딧, 카드 그림은 장수만큼 그대로 청구. 켜진 요금제는 크레딧이 켜져 있어도 하루·주당 횟수를 셈 (#1110)
+  ROUTINE_CREATE_FREE(
+    Kind.FLAG, "일과 생성 무료 (글 크레딧 없음)",
+    ConfigKey.FREE_ROUTINE_CREATE_FREE, ConfigKey.PRO_ROUTINE_CREATE_FREE
   ),
   ;
 
@@ -58,6 +100,19 @@ public enum Entitlement {
 
   public ConfigKey configKeyFor(PlanType plan) {
     return plan == PlanType.PRO ? proKey : freeKey;
+  }
+
+  /// Pro 검문 거절 코드 표 (기능 6개, 모두 403). 검문하지 않는 권한(광고·한도·품질 등)은 IllegalStateException
+  public ErrorCode rejectionCode() {
+    return switch (this) {
+      case AI_IMAGE_GENERATION -> ErrorCode.AI_IMAGE_NOT_ALLOWED;
+      case WEEKLY_REPORT -> ErrorCode.WEEKLY_REPORT_NOT_ALLOWED;
+      case ROUTINE_SCHEDULE -> ErrorCode.ROUTINE_SCHEDULE_NOT_ALLOWED;
+      case GUARDIAN_VOICE -> ErrorCode.GUARDIAN_VOICE_NOT_ALLOWED;
+      case ROUTINE_MEMORY -> ErrorCode.ROUTINE_MEMORY_PRO_REQUIRED;
+      case CARD_SPLIT -> ErrorCode.CARD_SPLIT_PRO_REQUIRED;
+      default -> throw new IllegalStateException("no pro gate rejection code: " + this);
+    };
   }
 
   public enum Kind {

@@ -12,7 +12,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/settings_tile.dart';
 
-/// 크레딧 카드 맨 아래 `크레딧 사용 내역 보기 >` 줄 (Figma `1532:7501`).
+/// 크레딧 카드 맨 아래 `내 크레딧 보기 >` 줄 (사용 내역은 내 크레딧 화면의 `쓴 내역`) (Figma `1532:7501`).
 ///
 /// 글자와 화살표는 시안 높이(24)이고, 누름 영역은 위아래 12씩 넓혀 48이다 — 위 간격(시안 16)에서
 /// 12를 덜고 카드 아래 여백([AiCreditFrame.padBottomWithHistoryLink])이 나머지를 받아 눈에 보이는 자리는 시안과 같다.
@@ -29,15 +29,15 @@ class CreditHistoryLink extends StatelessWidget {
     final colors = context.colors;
     return AppPressable(
       key: linkKey,
-      onTap: () => context.push(Routes.guardianCreditHistory),
-      semanticLabel: context.l10n.creditHistoryLink,
+      onTap: () => context.push(Routes.guardianMyCredit),
+      semanticLabel: context.l10n.creditMineLink,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: tapExtraVertical.h),
         child: Row(
           children: [
             Expanded(
               child: Text(
-                context.l10n.creditHistoryLink,
+                context.l10n.creditMineLink,
                 style: context.typo.settingsTileLabel.copyWith(
                   color: colors.settingsCardLabel,
                 ),

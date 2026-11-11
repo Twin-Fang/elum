@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,6 +87,10 @@ class RoutineStepImageCreditTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  // 목 기본 false = 그림을 그리는 요금제 (기존 시험 동작 그대로)
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
+
   @InjectMocks private RoutineStepEditService routineService;
 
   // --- 그림 채우기(RoutineStepImageFiller) 쪽 — 실물을 목 의존으로 만든다 ---
@@ -146,6 +151,34 @@ class RoutineStepImageCreditTest {
       eq("현관에서 우산을 챙겨요."), any(), any(), eq("job-7"), any());
     // 카드를 지금 저장해 id 를 받는다 — 그래야 그림 채우기·정산이 카드를 찾는다
     verify(routineStepRepository).save(any(RoutineStep.class));
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림이 없는 Free 는 카드만 저장하고 예약·그림 없이 까닭 AI_IMAGE_NOT_ALLOWED 를 싣는다 — 앱이 '그림 만드는 중'에 갇히지 않게")
+  void addStep_freeWithoutAiPicture_skipsImageWithPlanReason() {
+    Routine routine = givenRoutine();
+    when(routineAiPicturePolicy.shouldSkipAiPicture("member-1")).thenReturn(true);
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
+
+    assertThat(response.imageSkippedReason()).isEqualTo("AI_IMAGE_NOT_ALLOWED");
+    assertThat(routine.getSteps()).hasSize(2);
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
+  }
+
+  @Test
+  @DisplayName("이모지 방식은 그림 요청이 와도 예약·그림 없이 까닭 IMAGE_STYLE_PHOTO_ONLY, 이모지 세트에서 고른다 (#1149)")
+  void addStep_emojiStyle_skipsImageAndPicksFromEmojiSet() {
+    Routine routine = givenRoutine();
+    routine.getProfile().setImageStyle(ImageStyle.EMOJI);
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
+
+    assertThat(response.imageSkippedReason()).isEqualTo("IMAGE_STYLE_PHOTO_ONLY");
+    verify(pictogramPicker).pick(eq("member-1"), any(), any(), eq(PictogramSet.EMOJI));
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
   }
 
   @Test

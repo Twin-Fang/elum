@@ -104,6 +104,24 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// 보호자 홈 알림 꺼짐 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 켜 둘까요?'**
+  String get notificationOffNoticeTitle;
+
+  /// 보호자 홈 알림 꺼짐 카드 본문 (이룸이가 일과를 끝낸 알림을 받는다는 뜻)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 끝내면 알려 드려요'**
+  String get notificationOffNoticeBody;
+
+  /// 설정의 알림 설정 줄 오른쪽 값 (기기 알림이 꺼졌을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'꺼짐'**
+  String get notificationOffValue;
+
   /// 앱 이름. 운영체제의 앱 전환 화면에 보인다.
   ///
   /// In ko, this message translates to:
@@ -182,6 +200,12 @@ abstract class AppLocalizations {
   /// **'다음 주 월요일 0시'**
   String get creditResetFallback;
 
+  /// creditResetFallback 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 달 1일 0시'**
+  String get creditResetFallbackMonth;
+
   /// AI 일과를 만드는 중에 새로 만들려 할 때의 팝업 문장
   ///
   /// In ko, this message translates to:
@@ -191,8 +215,14 @@ abstract class AppLocalizations {
   /// 이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)
   ///
   /// In ko, this message translates to:
-  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}부터 다시 만들 수 있어요'**
+  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
   String creditBlockedExhausted(String reset);
+
+  /// creditBlockedExhausted 의 월 단위 크레딧 문구. reset 은 다시 채워지는 시각
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
+  String creditBlockedExhaustedMonth(String reset);
 
   /// 광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수
   ///
@@ -301,12 +331,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 후 다시 해주세요'**
   String get commonRetryLater;
-
-  /// 실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)
-  ///
-  /// In ko, this message translates to:
-  /// **'다시 시도 ({code})'**
-  String commonRetryWithCode(String code);
 
   /// 제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。
   ///
@@ -644,18 +668,6 @@ abstract class AppLocalizations {
   /// **'선택'**
   String get consentOptionalTag;
 
-  /// 약관 칩의 필수 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'[필수] {label}'**
-  String consentChipRequired(String label);
-
-  /// 약관 칩의 선택 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'[선택] {label}'**
-  String consentChipOptional(String label);
-
   /// 약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다
   ///
   /// In ko, this message translates to:
@@ -710,47 +722,53 @@ abstract class AppLocalizations {
   /// **'포포'**
   String get characterFoxName;
 
-  /// 서비스 에이전트(루미)의 종류 이름
+  /// 카드 그림 방식 이름 (Free, Twemoji)
   ///
   /// In ko, this message translates to:
-  /// **'병아리'**
-  String get agentChickLabel;
-
-  /// 카드 그림 방식 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'만화'**
-  String get imageStyleCartoonLabel;
+  /// **'이모지 그림'**
+  String get imageStyleEmojiLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터가 나오는 그림이에요'**
-  String get imageStyleCartoonDescription;
+  /// **'귀여운 이모지로 물건을 보여줘요'**
+  String get imageStyleEmojiDescription;
 
-  /// 카드 그림 방식 이름
+  /// 카드 그림 방식 이름 (Free, Mulberry 그림 기호)
   ///
   /// In ko, this message translates to:
-  /// **'실사'**
+  /// **'그림 기호'**
+  String get imageStyleSymbolLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'하는 동작을 선 그림으로 보여줘요'**
+  String get imageStyleSymbolDescription;
+
+  /// 카드 그림 방식 이름 (Pro, AI 캐릭터 그림)
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 그림'**
+  String get imageStyleCharacterLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터가 직접 해 보여요'**
+  String get imageStyleCharacterDescription;
+
+  /// 카드 그림 방식 이름 (Pro, AI 실사 그림)
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 같은 그림'**
   String get imageStyleRealisticLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'실제 물건 사진처럼 보여요'**
+  /// **'실제 물건처럼 보여요'**
   String get imageStyleRealisticDescription;
-
-  /// 카드 그림 방식 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'기본 그림'**
-  String get imageStylePhotoOnlyLabel;
-
-  /// 카드 그림 방식 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'간단한 그림 기호가 들어가요'**
-  String get imageStylePhotoOnlyDescription;
 
   /// 그림 방식 목록 위 크레딧 띠의 왼쪽 이름
   ///
@@ -761,13 +779,19 @@ abstract class AppLocalizations {
   /// 크레딧 띠 — 일과 하나를 만들 때 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{일과 {count}개}}'**
+  /// **'{count, plural, other{일과 하나에 {count}개}}'**
   String imageStyleCreditRoutine(int count);
+
+  /// 크레딧 띠 — 요금제 혜택으로 일과 글 몫에 크레딧이 들지 않을 때 (그림 한 장 단가는 따로 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글은 크레딧 없이'**
+  String get imageStyleCreditRoutineFree;
 
   /// 크레딧 띠 — 만화·실사에서 카드 그림 한 장마다 더 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{그림 한 장 {count}개}}'**
+  /// **'{count, plural, other{그림 한 장에 {count}개}}'**
   String imageStyleCreditImage(int count);
 
   /// 도움 목표 선택지
@@ -914,10 +938,10 @@ abstract class AppLocalizations {
   /// **'설정을 저장하지 못했어요'**
   String get pinSaveFailedTitle;
 
-  /// 설정 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  /// 온보딩 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내 (화면에 남아 시작하기로 다시 보냄)
   ///
   /// In ko, this message translates to:
-  /// **'설정 화면에서 다시 확인해주세요'**
+  /// **'잠시 후 시작하기를 다시 눌러주세요'**
   String get pinSaveFailedFallback;
 
   /// 이룸이 기기 설정 페이지 제목
@@ -991,6 +1015,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
   String get elumiSettingsWithdrawMessage;
+
+  /// 이룸이 화면 회원탈퇴 확인 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get elumiSettingsWithdrawAction;
 
   /// 이룸이 전용 기기에서 초대 링크를 열었을 때의 토스트
   ///
@@ -1310,6 +1340,30 @@ abstract class AppLocalizations {
   /// **'그만두기'**
   String get guardiansLeaveConfirmAction;
 
+  /// 마지막 보호자가 그만둘 때 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번 더 확인할게요'**
+  String get guardiansLeaveTypeTitle;
+
+  /// 마지막 보호자가 그만둘 때 둘째 단계 안내. phrase 는 guardiansLeaveTypePhrase
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이와 일과, 별이 모두 사라져요\n아래 칸에 \'{phrase}\'라고\n똑같이 입력해 주세요'**
+  String guardiansLeaveTypeMessage(String phrase);
+
+  /// 마지막 보호자가 그만둘 때 입력해야 하는 문구. 비교 원본이자 입력칸 안내 글 — 번역하면 그 언어 문구를 입력함
+  ///
+  /// In ko, this message translates to:
+  /// **'그만두기'**
+  String get guardiansLeaveTypePhrase;
+
+  /// 마지막 보호자 그만두기 둘째 단계 실행 버튼. 문구가 맞을 때만 켜짐
+  ///
+  /// In ko, this message translates to:
+  /// **'그만두기'**
+  String get guardiansLeaveTypeAction;
+
   /// 함께 돌보기 그만두기 실패 팝업 제목
   ///
   /// In ko, this message translates to:
@@ -1495,12 +1549,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'초대 코드를 만들지 못했어요'**
   String get inviteCodeIssueFailedFallback;
-
-  /// 초대 코드를 다시 만드는 칩
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드 다시 만들기'**
-  String get inviteCodeRetryChip;
 
   /// 링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다
   ///
@@ -2048,11 +2096,11 @@ abstract class AppLocalizations {
   /// **'보호자 {count}명이 내 글을 가져갔어요'**
   String notificationTalkPostImported(int count);
 
-  /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
+  /// 알림 줄: 월요일마다 오는 주간 리포트
   ///
   /// In ko, this message translates to:
-  /// **'설정'**
-  String get guardianHomeSettings;
+  /// **'지난주 리포트가 도착했어요'**
+  String get notificationWeeklyReportReady;
 
   /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
   ///
@@ -2252,6 +2300,18 @@ abstract class AppLocalizations {
   /// **'카드를 만들지 못했어요'**
   String get routineLoadingGenerateFailed;
 
+  /// 입력에 이룸이가 할 행동이 없어 카드 0장일 때의 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 일과인지 알려 주세요'**
+  String get routineLoadingInputNeededTitle;
+
+  /// 카드 0장 안내에서 입력 화면으로 돌아가는 버튼. 적은 글은 그대로 남는다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 적기'**
+  String get routineLoadingEditInput;
+
   /// 일과 만들기 로딩의 진행률을 낭독기가 읽는 문장
   ///
   /// In ko, this message translates to:
@@ -2285,25 +2345,25 @@ abstract class AppLocalizations {
   /// 줄을 밀면 나오는 삭제 버튼의 낭독 이름
   ///
   /// In ko, this message translates to:
-  /// **'임시저장 삭제'**
+  /// **'임시저장 지우기'**
   String get draftRoutinesDeleteLabel;
 
   /// 임시저장 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'임시저장을 삭제할까요?'**
+  /// **'임시저장을 지울까요?'**
   String get draftRoutinesDeleteConfirmTitle;
 
   /// 임시저장 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get draftRoutinesDeleteAction;
 
   /// 임시저장 삭제 실패 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'임시저장을 삭제하지 못했어요'**
+  /// **'임시저장을 지우지 못했어요'**
   String get draftRoutinesDeleteFailedTitle;
 
   /// 임시저장 삭제 실패 팝업의 기본 안내(서버 문구가 없을 때)
@@ -2312,10 +2372,10 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get draftRoutinesDeleteFailedFallback;
 
-  /// 보상을 안 정한 임시저장 줄의 보상 자리 글
+  /// 보상을 안 정한 임시저장 줄의 보상 자리 글. `완료 시` 말머리 없이 이 글만 보인다
   ///
   /// In ko, this message translates to:
-  /// **'미설정'**
+  /// **'보상 아직 안 정했어요'**
   String get draftRoutinesRewardUnset;
 
   /// 임시저장 줄의 보상 앞 말머리
@@ -2345,13 +2405,13 @@ abstract class AppLocalizations {
   /// 카드 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'카드를 삭제할까요?'**
+  /// **'카드를 지울까요?'**
   String get cardReviewDeleteConfirmTitle;
 
   /// 카드 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get cardReviewDeleteAction;
 
   /// 카드 소리 재생 실패 팝업 제목
@@ -2420,6 +2480,12 @@ abstract class AppLocalizations {
   /// **'그림을 만들지 못해 기본 그림을 넣었어요'**
   String get cardImageUnavailableToast;
 
+  /// 일과 만들기에서 AI 그림 일부를 못 그려 그림 기호로 둔 뒤 카드확인에 들어설 때 한 번 뜨는 토스트 (#1178). '이 카드 수정' = cardReviewToolEdit, 'AI 그림 그리기' = cardFirstDrawChip. 처음 그리기는 크레딧을 써서 무료라고 쓰지 않음
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요'**
+  String get cardImageMissingAfterCreateToast;
+
   /// 카드 순서 바꾸기 중 하단 버튼
   ///
   /// In ko, this message translates to:
@@ -2474,6 +2540,12 @@ abstract class AppLocalizations {
   /// **'만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요'**
   String get guardianSettingsWithdrawConfirmMessage;
 
+  /// 회원탈퇴 1단계 경고 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get guardianSettingsWithdrawConfirmAction;
+
   /// 회원탈퇴 실패 팝업 제목
   ///
   /// In ko, this message translates to:
@@ -2485,6 +2557,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 후 다시 시도해주세요'**
   String get guardianSettingsWithdrawFailedFallback;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. App Store 결제 Pro 가 자동 갱신 중일 때만 보임 — Apple 은 서버가 구독을 해지할 수 없음 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 구독은 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요'**
+  String get guardianSettingsWithdrawAppStoreSubscriptionNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Google Play 결제 Pro 가 자동 갱신 중일 때만 보임 — 탈퇴하면 서버가 자동 갱신을 해지함 (#1158)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요'**
+  String get guardianSettingsWithdrawGooglePlaySubscriptionNotice;
+
+  /// 회원탈퇴 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번 더 확인할게요'**
+  String get guardianSettingsWithdrawTypeTitle;
+
+  /// 회원탈퇴 둘째 단계 안내. phrase 는 guardianSettingsWithdrawTypePhrase (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'아래 칸에 \'{phrase}\'라고\n똑같이 입력해 주세요'**
+  String guardianSettingsWithdrawTypeMessage(String phrase);
+
+  /// 회원탈퇴 둘째 단계에서 입력해야 하는 문구. 비교 원본이자 입력칸 안내 글 — 번역하면 그 언어 문구를 입력함 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴'**
+  String get guardianSettingsWithdrawTypePhrase;
+
+  /// 회원탈퇴 둘째 단계 실행 버튼. 문구가 맞을 때만 켜짐 (#1155)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하기'**
+  String get guardianSettingsWithdrawTypeAction;
 
   /// 보호자 설정 화면 제목
   ///
@@ -2675,7 +2783,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면 아래 순서 변경 안내 한 줄
   ///
   /// In ko, this message translates to:
-  /// **'카드를 길게 눌러 순서를 변경하세요'**
+  /// **'카드를 길게 눌러 순서를 바꿀 수 있어요'**
   String get cardReviewReorderHint;
 
   /// 카드 검토 화면 도구 버튼. 순서 변경 모드를 켜고 끈다
@@ -2936,11 +3044,23 @@ abstract class AppLocalizations {
   /// **'이번 주 AI 생성'**
   String get creditCardTitle;
 
+  /// creditCardTitle 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 AI 생성'**
+  String get creditCardTitleMonth;
+
   /// AI 크레딧 카드가 불러오는 중일 때 낭독 문구
   ///
   /// In ko, this message translates to:
   /// **'이번 주 AI 생성 사용량을 불러오고 있어요'**
   String get creditCardLoading;
+
+  /// creditCardLoading 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 AI 생성 사용량을 불러오고 있어요'**
+  String get creditCardLoadingMonth;
 
   /// AI 크레딧 카드 조회가 실패했을 때 안내
   ///
@@ -2965,6 +3085,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이번 주 크레딧을 모두 사용했어요'**
   String get creditExhausted;
+
+  /// creditExhausted 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧을 모두 사용했어요'**
+  String get creditExhaustedMonth;
 
   /// AI 크레딧 카드에서 크레딧을 다 썼을 때 둘째 줄
   ///
@@ -3002,6 +3128,12 @@ abstract class AppLocalizations {
   /// **'AI 크레딧은 이렇게 줄어요'**
   String get creditCostTitle;
 
+  /// AI 크레딧 단가 안내 — 요금제 혜택으로 일과 글이 무료일 때. imageCost 는 카드 그림 한 장 단가(서버 값)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.'**
+  String creditCostLineTextFree(int imageCost);
+
   /// AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)
   ///
   /// In ko, this message translates to:
@@ -3020,6 +3152,12 @@ abstract class AppLocalizations {
   /// **'매주 월요일 0시에 다시 채워져요.'**
   String get creditWeeklyRefill;
 
+  /// creditWeeklyRefill 의 월 단위 크레딧 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일 0시에 다시 채워져요.'**
+  String get creditMonthlyRefill;
+
   /// 보호자 홈의 새 일과 만들기 버튼
   ///
   /// In ko, this message translates to:
@@ -3029,7 +3167,7 @@ abstract class AppLocalizations {
   /// 일과 줄을 밀었을 때 나오는 삭제 버튼 기본 글자
   ///
   /// In ko, this message translates to:
-  /// **'일과 삭제'**
+  /// **'일과 지우기'**
   String get routineSwipeDelete;
 
   /// 일과 줄을 밀었을 때 나오는 수정 버튼
@@ -3037,12 +3175,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과 수정'**
   String get routineSwipeEdit;
-
-  /// 일과 입력 화면의 추천 목록이 실패했을 때 한 줄(서버 문구가 우선)
-  ///
-  /// In ko, this message translates to:
-  /// **'추천을 불러오지 못했어요 · 다시 시도'**
-  String get routineSuggestLoadFailed;
 
   /// 일과 만들기 흐름 위쪽 집 버튼 낭독 이름
   ///
@@ -3191,7 +3323,7 @@ abstract class AppLocalizations {
   /// 보호자 홈에서 일과를 지우기 전 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과를 삭제할까요?'**
+  /// **'일과를 지울까요?'**
   String get todayRoutineDeleteConfirmTitle;
 
   /// 이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목
@@ -3209,13 +3341,13 @@ abstract class AppLocalizations {
   /// 보호자 홈 일과 삭제 확인 팝업의 삭제 버튼
   ///
   /// In ko, this message translates to:
-  /// **'삭제'**
+  /// **'지우기'**
   String get todayRoutineDeleteAction;
 
   /// 보호자 홈에서 일과 삭제가 실패했을 때 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과를 삭제하지 못했어요'**
+  /// **'일과를 지우지 못했어요'**
   String get todayRoutineDeleteFailedTitle;
 
   /// 보호자 홈에서 일과 삭제가 실패했을 때 서버 문구가 없을 때의 안내
@@ -3281,7 +3413,7 @@ abstract class AppLocalizations {
   /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요'**
+  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요'**
   String get homeCoachSwipe;
 
   /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
@@ -3461,7 +3593,7 @@ abstract class AppLocalizations {
   /// 화면 전환 암호 입력 화면의 제목(시안 문구)
   ///
   /// In ko, this message translates to:
-  /// **'비밀암호를 입력하세요'**
+  /// **'비밀암호를 입력해 주세요'**
   String get modeSwitchTitle;
 
   /// 화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내
@@ -3566,17 +3698,167 @@ abstract class AppLocalizations {
   /// **'이룸이 기기에서 열어주세요'**
   String get linkRejectedOnGuardianPhone;
 
+  /// 내 크레딧 화면 제목 · 설정의 요금제 묶음 아래 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 크레딧'**
+  String get myCreditTitle;
+
+  /// 내 크레딧 머리의 Free 요금제 태그 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'FREE'**
+  String get planFreeBadge;
+
+  /// 내 크레딧 위 카드 오른쪽 버튼: 크레딧 사용 내역 화면으로
+  ///
+  /// In ko, this message translates to:
+  /// **'쓴 내역'**
+  String get myCreditHistoryButton;
+
+  /// 내 크레딧 큰 숫자 옆 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'개'**
+  String get myCreditCountUnit;
+
+  /// 내 크레딧 종류 이름: 매주 채워지는 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'주간'**
+  String get myCreditKindPeriodicWeek;
+
+  /// 내 크레딧 종류 이름: 매달 채워지는 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'월간'**
+  String get myCreditKindPeriodicMonth;
+
+  /// 내 크레딧 종류 이름: 선물 · 광고 보상 · 이벤트
+  ///
+  /// In ko, this message translates to:
+  /// **'보너스'**
+  String get myCreditKindBonus;
+
+  /// 내 크레딧 종류 이름: 산 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'구매'**
+  String get myCreditKindPurchased;
+
+  /// 내 크레딧 주간 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'월요일에 다시 채워져요'**
+  String get myCreditRefillWeek;
+
+  /// 내 크레딧 월간 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 달 1일에 다시 채워져요'**
+  String get myCreditRefillMonth;
+
+  /// 내 크레딧 보너스 줄 끝나는 때
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일까지'**
+  String myCreditUntilDate(int month, int day);
+
+  /// 내 크레딧 구매 줄 끝나는 때 (제한 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'기간 제한 없음'**
+  String get myCreditNoExpiry;
+
+  /// 내 크레딧 구독 카드 위 작은 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'구독하면'**
+  String get myCreditSubscribeLabel;
+
+  /// 내 크레딧 구독 카드 설명 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림도 그리고 일과도 알아서 보내요'**
+  String get myCreditSubscribeBody;
+
+  /// 내 크레딧 꾸러미 구역 제목 (Free: 구독 카드 아래라 크레딧만 사는 것임을 말함)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧만 더 받기'**
+  String get myCreditPackLabelFree;
+
+  /// 내 크레딧 꾸러미 구역 제목 (Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 더 받기'**
+  String get myCreditPackLabelPro;
+
+  /// 크레딧 부족 팝업 버튼: 내 크레딧 화면의 꾸러미로
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 더 받기'**
+  String get creditGetMore;
+
+  /// 꾸러미 칸 오른쪽 위 할인율 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'-{percent}%'**
+  String myCreditPackDiscount(int percent);
+
+  /// 꾸러미 인기 칸 아래 걸친 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'인기!'**
+  String get myCreditPackPopular;
+
+  /// 꾸러미 구매 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개 받기}}'**
+  String myCreditPackBuy(int count);
+
+  /// 꾸러미 구매 버튼 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구매한 크레딧은 기간 제한이 없어요'**
+  String get myCreditPackNoExpiryNote;
+
+  /// 스토어 값을 못 불러왔을 때 꾸러미 자리 문구 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 값을 불러오지 못했어요'**
+  String get myCreditPackPriceFailed;
+
+  /// 꾸러미 칸 낭독 이름. price 는 스토어 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧 {count}개}}, {price}'**
+  String myCreditPackTileLabel(int count, String price);
+
+  /// 결제는 됐는데 서버가 아직 크레딧을 안 넣었을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 아직 받지 못했어요'**
+  String get myCreditPurchaseRecheckTitle;
+
+  /// 크레딧 구매 확인 대기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 끝났어요. 다시 결제하지 않고 확인만 하면 돼요'**
+  String get myCreditPurchaseRecheckBody;
+
   /// 크레딧 사용 내역 화면의 제목 (Figma 1589:8359)
   ///
   /// In ko, this message translates to:
   /// **'크레딧 사용 내역'**
   String get creditHistoryTitle;
 
-  /// 설정 크레딧 카드 맨 아래 줄. 누르면 사용 내역 화면으로 간다 (Figma 1532:7501)
+  /// 내 정보 크레딧 카드 맨 아래 줄: 내 크레딧 화면으로
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 사용 내역 보기'**
-  String get creditHistoryLink;
+  /// **'내 크레딧 보기'**
+  String get creditMineLink;
 
   /// 사용 내역의 날짜 머리글. 예: 10월 1일
   ///
@@ -3613,6 +3895,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'카드 그림 다시 만들기'**
   String get creditHistoryKindImageRegenerate;
+
+  /// 사용 내역 줄의 오른쪽 증감 자리 — 크레딧을 쓰지 않은 무료 다시 그리기·일과 글(요금제 혜택)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 없이'**
+  String get creditHistoryFree;
 
   /// 사용 내역 종류: 주간 지급 (Figma 1589:8444)
   ///
@@ -4244,12 +4532,6 @@ abstract class AppLocalizations {
   /// **'{date} 가입'**
   String guardianMyInfoJoinedOn(DateTime date);
 
-  /// 내정보 이룸이 목록 묶음 머리 글
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이'**
-  String get guardianMyInfoChildrenHeader;
-
   /// 내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시
   ///
   /// In ko, this message translates to:
@@ -4721,12 +5003,6 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'묶음에서 뺐어요'**
-  String get routineGroupRemovedOne;
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
   /// **'묶음을 풀었어요'**
   String get routineGroupUngrouped;
 
@@ -4735,12 +5011,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과를 다 빼서 묶음을 풀었어요'**
   String get routineGroupUngroupedEmpty;
-
-  /// 일과 묶음 (#807)
-  ///
-  /// In ko, this message translates to:
-  /// **'순서를 바꿨어요'**
-  String get routineGroupReordered;
 
   /// 일과 묶음 (#807)
   ///
@@ -5138,12 +5408,6 @@ abstract class AppLocalizations {
   /// **'아직 나눈 일과가 없어요'**
   String get talkEmptyTitle;
 
-  /// 이야기 칸 빈 상태 버튼: 올리기로 이동
-  ///
-  /// In ko, this message translates to:
-  /// **'첫 일과를 나눠 보세요'**
-  String get talkEmptyAction;
-
   /// 이야기 칸 분류 칩으로 거른 결과가 0건일 때 안내
   ///
   /// In ko, this message translates to:
@@ -5267,7 +5531,7 @@ abstract class AppLocalizations {
   /// 상세 카드 아래 버튼: 이미 가져온 글(다시 누르면 한 번 더 넣는다)
   ///
   /// In ko, this message translates to:
-  /// **'✓ 일과관리에 넣었어요'**
+  /// **'✓ 일과 관리에 넣었어요'**
   String get talkImportedButton;
 
   /// 상세 머리 줄 오른쪽 공유 아이콘의 읽기 이름: 이 글 링크를 메신저 등 앱 밖으로 보내기 (올리기와 다르다)
@@ -5330,11 +5594,11 @@ abstract class AppLocalizations {
   /// **'이룸이 연결하기'**
   String get talkImportNoElumiAction;
 
-  /// 가져온 직후 토스트. elumiName 은 고른 이룸이 호칭
+  /// 가져온 직후 토스트. routineTitle 은 가져온 일과 이름. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{elumiName} 일과관리에 넣었어요'**
-  String talkImportDone(String elumiName);
+  /// **'{routineTitle}{batchim, select, yes{을} other{를}} 가져왔어요'**
+  String talkImportDone(String routineTitle, String batchim);
 
   /// 가져온 직후 토스트의 버튼: 일과관리 칸으로 이동
   ///
@@ -5345,7 +5609,7 @@ abstract class AppLocalizations {
   /// 가져오기 실패 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 넣지 못했어요'**
+  /// **'일과 관리에 넣지 못했어요'**
   String get talkImportFailedTitle;
 
   /// 상세 화면: 댓글 목록 제목
@@ -5699,7 +5963,7 @@ abstract class AppLocalizations {
   /// 올릴 일과가 없을 때 설명. 예시는 고치면 올릴 수 있다 (#983)
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
+  /// **'일과 관리에 있는 내 일과만 올릴 수 있어요. 이미 올렸거나 이야기에서 가져온 일과는 빠져요. 예시 일과는 제목이나 카드를 고치면 올릴 수 있어요.'**
   String get talkSharePickEmptyHint;
 
   /// 올릴 일과 목록 실패 안내
@@ -5831,7 +6095,7 @@ abstract class AppLocalizations {
   /// 링크로 보내기 화면 안내: 링크를 받은 사람만 보고, 이야기에 안 올라가고, 나중에 끌 수 있다
   ///
   /// In ko, this message translates to:
-  /// **'링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과관리에서 링크를 끌 수 있어요'**
+  /// **'링크를 받은 사람만 볼 수 있어요. 이야기에는 올라가지 않아요.\n보낸 뒤에도 일과 관리에서 링크를 끌 수 있어요'**
   String get talkLinkConfirmGuide;
 
   /// 링크로 보내기 화면 안내: 이미 켜진 링크가 있어 같은 링크를 다시 보낼 때 (처음 보낸 모습 그대로)
@@ -6001,6 +6265,2478 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'목록을 불러오지 못했어요'**
   String get licenseLoadFailedMessage;
+
+  /// 일과 상세 시트 머리의 내려받기 버튼 낭독 이름 · 내보내기 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용으로 받기'**
+  String get cardExportOpen;
+
+  /// 내보내기 형태 고르기 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떻게 받을까요?'**
+  String get cardExportFormatSection;
+
+  /// 형태: A4 한 장에 일과 카드 전부
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장'**
+  String get cardExportFormatRoutineSheet;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'A4 한 장에 순서대로'**
+  String get cardExportFormatRoutineSheetCaption;
+
+  /// 형태: 자를 선이 있는 A4
+  ///
+  /// In ko, this message translates to:
+  /// **'오려 쓰는 카드'**
+  String get cardExportFormatCutCards;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'A4에 자를 선과 함께'**
+  String get cardExportFormatCutCardsCaption;
+
+  /// 형태: 카드마다 이미지 한 장
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장씩'**
+  String get cardExportFormatCardImages;
+
+  /// 형태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드마다 이미지 한 장'**
+  String get cardExportFormatCardImagesCaption;
+
+  /// 오려 쓰는 카드 장수 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 쪽에 몇 장 넣을까요?'**
+  String get cardExportPerPageSection;
+
+  /// 카드 문장을 넣을지 켜고 끄는 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 문장 넣기'**
+  String get cardExportIncludeText;
+
+  /// 디자인 테마 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 디자인'**
+  String get cardExportThemeSection;
+
+  /// 테마 이름: 앱 카드 그대로
+  ///
+  /// In ko, this message translates to:
+  /// **'기본'**
+  String get cardExportThemeBasic;
+
+  /// 테마 이름: 장식 없는 굵은 테두리
+  ///
+  /// In ko, this message translates to:
+  /// **'단순'**
+  String get cardExportThemeSimple;
+
+  /// 테마 이름: 흰 바탕 얇은 테두리
+  ///
+  /// In ko, this message translates to:
+  /// **'잉크 절약'**
+  String get cardExportThemeInkSaver;
+
+  /// 테마 이름: 그림까지 흑백
+  ///
+  /// In ko, this message translates to:
+  /// **'흑백'**
+  String get cardExportThemeMonochrome;
+
+  /// 테마 이름: 글자를 크게
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 글자'**
+  String get cardExportThemeLargeText;
+
+  /// Pro 배지 하나 (미리 보기 판·그림 방식·인쇄 선택지·카드 그림 칩·요금제 화면 공통, ProBadge, #1170)
+  ///
+  /// In ko, this message translates to:
+  /// **'PRO'**
+  String get planProBadge;
+
+  /// Free 가 Pro 테마를 눌렀을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 디자인이에요'**
+  String get cardExportProThemeLocked;
+
+  /// Free 미리 보기 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Free는 아래에 이룸 로고 띠가 들어가요'**
+  String get cardExportWatermarkNotice;
+
+  /// 미리 보기 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기'**
+  String get cardExportPreviewSection;
+
+  /// 그림 없는 카드가 있을 때 미리 보기 종이 밖 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림이 아직 없는 카드는 제목만 들어가요'**
+  String get cardExportMissingPicture;
+
+  /// 카드 그림 일부를 못 받았을 때 미리 보기 종이 밖 안내 (그 카드는 예시 그림·픽토그램·제목으로 대신)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{그림을 불러오지 못한 카드 {count}장은 다른 그림이나 제목으로 들어가요}}'**
+  String cardExportSomePicturesFailed(int count);
+
+  /// PDF 를 다른 앱으로 보낼 때 크기 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요'**
+  String get cardExportActualSizeHint;
+
+  /// 기기 인쇄 화면 열기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄하기'**
+  String get cardExportPrint;
+
+  /// 공유 시트 열기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get cardExportShare;
+
+  /// 그림을 받는 동안
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 준비하고 있어요'**
+  String get cardExportPreparing;
+
+  /// 그림 받기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림을 불러오지 못했어요'**
+  String get cardExportImageFailed;
+
+  /// 파일 만들기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 파일을 만들지 못했어요'**
+  String get cardExportRenderFailed;
+
+  /// 인쇄 화면을 못 열었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요'**
+  String get cardExportPrintFailed;
+
+  /// 카드 0장 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 없는 일과예요'**
+  String get cardExportNoCards;
+
+  /// 카드 한 장씩에서 모두 뺐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 카드를 하나 이상 골라 주세요'**
+  String get cardExportNoneSelected;
+
+  /// Free 인쇄물 아래 띠 오른쪽 한 줄 (로고 옆)
+  ///
+  /// In ko, this message translates to:
+  /// **'일상을 함께 | 이룸 행동카드'**
+  String get printBrandTagline;
+
+  /// 픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)
+  ///
+  /// In ko, this message translates to:
+  /// **'그림: Mulberry Symbols (CC BY-SA 4.0)'**
+  String get cardExportPictogramCredit;
+
+  /// 이모지 그림을 쓴 인쇄물 출처 표기 (라이선스 조건, #1149)
+  ///
+  /// In ko, this message translates to:
+  /// **'그림: Twemoji (CC BY 4.0)'**
+  String get cardExportEmojiCredit;
+
+  /// 오려 쓰는 카드 한 쪽 장수 (줄 값 · 시트 고르기)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}장}}'**
+  String cardExportPerPage(int count);
+
+  /// 인쇄용으로 받기 줄: 받는 형태 (누르면 형태 시트) #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'형태'**
+  String get cardExportFormatRow;
+
+  /// 인쇄용으로 받기 묶음 머리: 용지 방향 · 장수 · 카드 크기 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'배치'**
+  String get cardExportLayoutSection;
+
+  /// 인쇄용으로 받기 묶음 머리: 디자인 · 카드 문장 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'꾸밈'**
+  String get cardExportStyleSection;
+
+  /// 인쇄용으로 받기 줄: A4 세로·가로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'용지 방향'**
+  String get cardExportOrientationRow;
+
+  /// 용지 방향 고르기 시트 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'용지를 어떻게 놓을까요?'**
+  String get cardExportOrientationSheetTitle;
+
+  /// 용지 방향 값: 세로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'세로'**
+  String get cardExportOrientationPortrait;
+
+  /// 용지 방향 값: 가로 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'가로'**
+  String get cardExportOrientationLandscape;
+
+  /// 인쇄용으로 받기 줄: 오려 쓰는 카드 한 쪽 장수 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'한 장에'**
+  String get cardExportPerPageRow;
+
+  /// 인쇄용으로 받기 줄: 카드 크기 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 크기'**
+  String get cardExportCardSizeRow;
+
+  /// 카드 크기 고르기 시트 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 얼마나 크게 넣을까요?'**
+  String get cardExportCardSizeSheetTitle;
+
+  /// 카드 크기 값: 칸에 맞춰 가장 크게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'꽉 차게'**
+  String get cardExportCardSizeFit;
+
+  /// 카드 크기 값: 조금 작게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'보통'**
+  String get cardExportCardSizeMedium;
+
+  /// 카드 크기 값: 자를 여백을 넓게 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'작게'**
+  String get cardExportCardSizeSmall;
+
+  /// Pro 를 살 수 없을 때 잠긴 형태·배치를 누르면 뜨는 안내 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 형태예요'**
+  String get cardExportProLayoutLocked;
+
+  /// Free 인쇄용으로 받기 아래 Pro 안내 제목 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro면 원하는 대로 받을 수 있어요'**
+  String get cardExportUpsellTitle;
+
+  /// Free 인쇄용으로 받기 아래 Pro 안내 한 줄 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요'**
+  String get cardExportUpsellBody;
+
+  /// 결제 직전 보호자 암호 확인 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 보호자만 할 수 있어요'**
+  String get modeSwitchToPurchase;
+
+  /// 혜택 줄: AI 맞춤 그림 방식 (그림 방식에서 열면 맨 위)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드마다 AI가 그려 줘요'**
+  String get planBenefitAiImageStyles;
+
+  /// 혜택 줄: 광고 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 없이 써요'**
+  String get planBenefitAdsRemoved;
+
+  /// 혜택 줄: 주간 리포트
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트를 받아요'**
+  String get planBenefitWeeklyReport;
+
+  /// 혜택 줄: 반복 일과·주간 계획·이룸이 기기 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 정해 매일 보내요'**
+  String get planBenefitRoutineSchedule;
+
+  /// 혜택 줄: AI 메모
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 방식을 기억해요'**
+  String get planBenefitRoutineMemory;
+
+  /// 혜택 줄: 보호자 목소리
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 목소리로 카드를 읽어 줘요'**
+  String get planBenefitGuardianVoice;
+
+  /// 혜택 줄: 일과 생성 글 무료 (카드 그림은 장수만큼 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글은 크레딧 없이 써요'**
+  String get planBenefitFreeRoutineText;
+
+  /// 혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'마음에 안 들면 크레딧 없이 다시 그려요'**
+  String get planBenefitFreeImageRegenerate;
+
+  /// 혜택 줄: 주간 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 크레딧을 더 많이 받아요'**
+  String get planBenefitMoreWeeklyCredits;
+
+  /// 혜택 줄: 월간 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 크레딧을 더 많이 받아요'**
+  String get planBenefitMoreMonthlyCredits;
+
+  /// 혜택 줄: 워터마크 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄물 아래 띠 없이 깔끔해요'**
+  String get planBenefitCardExportWithoutWatermark;
+
+  /// 혜택 줄: 카드 디자인 테마
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄 디자인을 모두 골라요'**
+  String get planBenefitCardExportAllThemes;
+
+  /// 혜택 줄: 카드 내보내기 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 한 장, 오려 쓰는 카드로 인쇄해요'**
+  String get planBenefitCardExportAllLayouts;
+
+  /// 혜택 묶음 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나도 만든 일과와 그림은 그대로 남아요'**
+  String get planKeepContentNotice;
+
+  /// 구독 기간 이름: 1개월
+  ///
+  /// In ko, this message translates to:
+  /// **'1개월'**
+  String get planPeriodMonthly;
+
+  /// 구독 기간 이름: 1년
+  ///
+  /// In ko, this message translates to:
+  /// **'1년'**
+  String get planPeriodYearly;
+
+  /// 결제 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 시작하기'**
+  String get planSubscribe;
+
+  /// 스토어 가격 불러오는 중
+  ///
+  /// In ko, this message translates to:
+  /// **'가격을 불러오고 있어요'**
+  String get planPriceLoading;
+
+  /// 스토어 가격 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'가격을 불러오지 못했어요'**
+  String get planPriceFailed;
+
+  /// 구매 복원 글자 버튼 · 설정 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 복원'**
+  String get planRestore;
+
+  /// 이용약관 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'이용약관'**
+  String get planTermsOfUse;
+
+  /// 개인정보처리방침 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'개인정보처리방침'**
+  String get planPrivacyPolicy;
+
+  /// 스토어 구독 관리 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리'**
+  String get planManageSubscription;
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 자동 갱신 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신되고, 기간이 끝나기 전 24시간 안에 다음 요금이 청구돼요.'**
+  String get planLegalBillingAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 해지 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리와 해지는 기기 설정의 Apple ID > 구독에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.'**
+  String get planLegalCancelAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 자동 갱신 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'결제는 구매를 확인할 때 Google Play 계정으로 청구돼요. 해지하기 전까지 같은 기간과 가격으로 자동 갱신돼요.'**
+  String get planLegalBillingPlayStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 해지 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.'**
+  String get planLegalCancelPlayStore;
+
+  /// 무료 체험 기간 (스토어 값, 일 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일}}'**
+  String planTrialDays(int count);
+
+  /// 무료 체험 기간 (스토어 값, 주 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}주}}'**
+  String planTrialWeeks(int count);
+
+  /// 무료 체험 기간 (스토어 값, 달 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개월}}'**
+  String planTrialMonths(int count);
+
+  /// 무료 체험 기간 (스토어 값, 해 단위) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}년}}'**
+  String planTrialYears(int count);
+
+  /// 고른 상품에 체험이 있을 때 결제 버튼 #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 무료로 시작하기'**
+  String planStartFreeTrial(String trial);
+
+  /// 기간 고르기 아래: 고른 상품의 체험 종료일·첫 청구 (오늘 시작 기준) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험은 {date}에 끝나요. 해지하지 않으면 그날부터 {price}씩 청구돼요.'**
+  String planTrialEndsNotice(String date, String price);
+
+  /// 법적 문구 — #1079 확정 전 초안 · App Store 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.'**
+  String get planLegalTrialAppStore;
+
+  /// 법적 문구 — #1079 확정 전 초안 · Google Play 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 체험 중에 해지하면 요금이 청구되지 않아요.'**
+  String get planLegalTrialPlayStore;
+
+  /// 서버 확인 중 (서버라는 말은 쓰지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 확인하고 있어요'**
+  String get planVerifying;
+
+  /// 가족 공유 구매 요청 등 스토어가 결제를 미룸
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 허락을 요청했어요'**
+  String get planStorePendingTitle;
+
+  /// 구매 요청 대기 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요'**
+  String get planStorePendingBody;
+
+  /// 결제는 됐지만 아직 Pro가 안 켜짐
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 확인하고 있어요'**
+  String get planVerificationPendingTitle;
+
+  /// 확인 대기 설명 — 결제를 다시 요구하지 않음
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 결제하지 않아도 돼요. 앱을 다시 열면 한 번 더 확인해요'**
+  String get planVerificationPendingBody;
+
+  /// 확인 대기 상태에서 다시 확인
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 확인하기'**
+  String get planVerificationRetry;
+
+  /// Pro 구독 직후 열린 혜택 안내 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get planActivatedStart;
+
+  /// 결제 완료
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 시작했어요'**
+  String get planActivatedTitle;
+
+  /// 서버가 확인했지만 Pro 아님
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 켜지지 않았어요'**
+  String get planNotActivatedTitle;
+
+  /// Pro 미반영 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'스토어의 구독 상태를 확인해 주세요'**
+  String get planNotActivatedBody;
+
+  /// 이미 Pro 인 보호자가 요금제 화면을 엶
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 쓰고 있어요'**
+  String get planAlreadyProTitle;
+
+  /// 스토어 결제 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'결제하지 못했어요'**
+  String get planPurchaseFailedTitle;
+
+  /// 서버가 결제를 거부(400)했을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 이 계정에 연결하지 못했어요'**
+  String get planVerifyFailedTitle;
+
+  /// 회원 id 를 몰라 결제를 시작하지 못함
+  ///
+  /// In ko, this message translates to:
+  /// **'계정 정보를 확인하지 못했어요'**
+  String get planAccountFailedTitle;
+
+  /// 결제 실패 팝업 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get planFailedFallback;
+
+  /// 구매 복원 성공
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 되찾았어요'**
+  String get planRestoreDone;
+
+  /// 구매 복원: 활성 구독 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'되찾을 구독이 없어요'**
+  String get planRestoreNothing;
+
+  /// 구매 복원 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'구매를 복원하지 못했어요'**
+  String get planRestoreFailedTitle;
+
+  /// 구매 복원 중 대기 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 내역을 확인하고 있어요'**
+  String get planRestoring;
+
+  /// 스토어 구독 관리 화면 열기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 관리 화면을 열지 못했어요'**
+  String get planManageFailed;
+
+  /// 약관 링크 열기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 열지 못했어요'**
+  String get planLinkFailed;
+
+  /// 설정 > 내 요금제 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 요금제'**
+  String get planSettingsLabel;
+
+  /// 요금제 상태: 무료
+  ///
+  /// In ko, this message translates to:
+  /// **'Free'**
+  String get planStatusFree;
+
+  /// 요금제 상태: Pro (기간 제한 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro'**
+  String get planStatusPro;
+
+  /// 요금제 상태: 자동 갱신 예정
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro, {date}에 갱신돼요'**
+  String planStatusRenewing(String date);
+
+  /// 요금제 상태: 끝나는 날만 앎
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro, {date}까지'**
+  String planStatusUntil(String date);
+
+  /// 요금제 상태: 해지 예약
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro, {date}에 끝나요'**
+  String planStatusCancelScheduled(String date);
+
+  /// 요금제 상태: 결제 실패 유예 중
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro, 결제 확인이 필요해요'**
+  String get planStatusGracePeriod;
+
+  /// 요금제 상태: 가입 체험 중. days 는 끝나기까지 남은 날(1 이상)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험 중, {days}일 남았어요'**
+  String planStatusTrial(int days);
+
+  /// 요금제 상태: 가입 체험 마지막 날
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험 중, 오늘까지예요'**
+  String get planStatusTrialLastDay;
+
+  /// 요금제 상태: 기존 가입자 Pro 선물 (설정 줄 값)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물'**
+  String get planStatusGift;
+
+  /// 요금제 상태: 기존 가입자 Pro 선물, 끝나는 날까지
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물, {date}까지'**
+  String planStatusGiftUntil(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 자동 갱신 예정 (줄 값은 Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}에 갱신돼요'**
+  String planStatusRenewingFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 끝나는 날만 앎
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지 쓸 수 있어요'**
+  String planStatusUntilFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 해지 예약
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}에 끝나요'**
+  String planStatusCancelScheduledFooter(String date);
+
+  /// 설정 내 요금제 묶음 아래 한 줄: 결제 실패 유예 중
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 수단을 확인해 주세요'**
+  String get planStatusGracePeriodFooter;
+
+  /// 요금제 화면을 여는 버튼 문구 하나 (미리 보기 판·글자 링크·크레딧 부족 팝업 공통, ProUpsellButton, #1170)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 알아보기'**
+  String get planLearnPro;
+
+  /// 주간 리포트 화면 제목 · 내 정보 바로가기 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트'**
+  String get weeklyReportTitle;
+
+  /// 주간 리포트 주 범위. 예: 11월 2일 ~ 11월 8일
+  ///
+  /// In ko, this message translates to:
+  /// **'{startMonth}월 {startDay}일 ~ {endMonth}월 {endDay}일'**
+  String weeklyReportWeekRange(
+    int startMonth,
+    int startDay,
+    int endMonth,
+    int endDay,
+  );
+
+  /// 주 고르기 줄 · 이번 주일 때. range 는 weeklyReportWeekRange
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 · {range}'**
+  String weeklyReportThisWeekRange(String range);
+
+  /// 주 고르기 왼쪽 화살표 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 보기'**
+  String get weeklyReportPreviousWeek;
+
+  /// 주 고르기 오른쪽 화살표 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 주 보기'**
+  String get weeklyReportNextWeek;
+
+  /// 요약 카드 큰 숫자 옆 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 완료율'**
+  String get weeklyReportCompletionLabel;
+
+  /// 완료율 숫자
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}%'**
+  String weeklyReportPercent(int percent);
+
+  /// 요약 카드 한 줄 (사실만, 평가 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{보낸 일과 {sent}개 중 {completed}개를 마쳤어요}}'**
+  String weeklyReportCompletionSummary(int sent, int completed);
+
+  /// 하루 칸 · 그 날 보낸 일과가 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'-'**
+  String get weeklyReportDayNone;
+
+  /// 한 장 하루 칸 · 마친 일과/보낸 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'{completed}/{sent}'**
+  String weeklyReportDayCount(int completed, int sent);
+
+  /// 줄 이름 · 이 주에 마친 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 별'**
+  String get weeklyReportStars;
+
+  /// 줄 이름 · 보상을 정해 둔 일과 중 끝까지 마친 수
+  ///
+  /// In ko, this message translates to:
+  /// **'보상까지 간 일과'**
+  String get weeklyReportRewards;
+
+  /// 줄 이름 · 일과를 하나 이상 마친 날이 이어진 가장 긴 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'연속으로 마친 날'**
+  String get weeklyReportStreak;
+
+  /// 개수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개}}'**
+  String weeklyReportCount(int count);
+
+  /// 날 수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일}}'**
+  String weeklyReportDays(int count);
+
+  /// 일과별 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과별 기록'**
+  String get weeklyReportRoutinesSection;
+
+  /// 일과 줄 값 · 보낸 횟수 중 마친 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{sent}번 중 {completed}번 마침}}'**
+  String weeklyReportRoutineValue(int sent, int completed);
+
+  /// 지난 날 마치지 않고 남은 카드 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 남은 카드'**
+  String get weeklyReportRemainingSection;
+
+  /// 남은 카드 줄 이름 · 일과 이름 · 카드 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine} · {step}'**
+  String weeklyReportRemainingLabel(String routine, String step);
+
+  /// 남은 카드 횟수 값
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}번}}'**
+  String weeklyReportTimes(int count);
+
+  /// 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이 주에는 보낸 일과가 없어요'**
+  String get weeklyReportEmptyTitle;
+
+  /// 빈 상태 안내 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 보내면 이룸이가 마친 기록이 여기에 모여요'**
+  String get weeklyReportEmptyBody;
+
+  /// 불러오기 실패 문구 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트를 불러오지 못했어요'**
+  String get weeklyReportLoadFailed;
+
+  /// Pro 가 아닌 계정이 화면에 들어왔을 때 (입구는 숨김)
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트는 Pro에서 볼 수 있어요'**
+  String get weeklyReportNotIncluded;
+
+  /// 리포트 저장 시트: 한 장을 PNG 로 공유 시트에
+  ///
+  /// In ko, this message translates to:
+  /// **'이미지'**
+  String get weeklyReportShareImage;
+
+  /// 리포트 저장 시트: 한 장을 A4 PDF 로 공유 시트에
+  ///
+  /// In ko, this message translates to:
+  /// **'PDF'**
+  String get weeklyReportSharePdf;
+
+  /// 한 장 굽기 실패 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'보낼 한 장을 만들지 못했어요'**
+  String get weeklyReportShareFailed;
+
+  /// 보낼 한 장 제목 · 이룸이 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 한 주'**
+  String weeklyReportShareTitle(String name);
+
+  /// 보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸 앱에 남은 완료 기록을 센 내용이에요'**
+  String get weeklyReportShareNote;
+
+  /// 주간 리포트: 숫자 3개 위 구역 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 기록'**
+  String get weeklyReportRecordSection;
+
+  /// 주간 리포트 맨 위 도넛 옆 작은 제목: 완료율
+  ///
+  /// In ko, this message translates to:
+  /// **'완료율'**
+  String get weeklyReportDonutLabel;
+
+  /// 도넛 옆 한 줄: 보낸 일과 중 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  String weeklyReportDonutSummary(int sent, int completed);
+
+  /// 도넛 낭독 라벨: 완료율 퍼센트와 보낸 일과 중 끝낸 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{완료율 {percent}퍼센트, 일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  String weeklyReportDonutSemantics(int percent, int sent, int completed);
+
+  /// 요일별 막대 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'요일별 기록'**
+  String get weeklyReportDaysSection;
+
+  /// 요일 막대 낭독 라벨. weekday 는 짧은 요일 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{weekday}요일 일과 {sent}개 중 {completed}개 끝냄}}'**
+  String weeklyReportDayBarSemantics(String weekday, int sent, int completed);
+
+  /// 보낸 일과가 없는 요일 막대 낭독 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'{weekday}요일 보낸 일과 없음'**
+  String weeklyReportDayBarEmptySemantics(String weekday);
+
+  /// 주별 추이 선 그래프 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 주들과 견주기'**
+  String get weeklyReportTrendSection;
+
+  /// 주별 추이 아래 날짜 이름: 그 주 월요일 월/일
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}/{day}'**
+  String weeklyReportTrendWeekLabel(int month, int day);
+
+  /// 주별 추이 점 낭독 라벨: 그 주 월요일 날짜와 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{month}월 {day}일 주에 일과 {count}개 끝냄}}'**
+  String weeklyReportTrendPointSemantics(int month, int day, int count);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'잘한 것'**
+  String get weeklyReportInsightHighlightTitle;
+
+  /// 잘한 것: 일과를 처음 끝까지 함. routine 은 일과 이름, batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} 이번 주에 처음 끝까지 했어요'**
+  String weeklyReportInsightHighlightFirst(String routine, String batchim);
+
+  /// 잘한 것: 보낸 횟수를 모두 끝까지 함. batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} {count}번 모두 끝까지 했어요'**
+  String weeklyReportInsightHighlightEvery(
+    String routine,
+    String batchim,
+    int count,
+  );
+
+  /// 잘한 것: 연속으로 끝낸 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{days}일 이어서 일과를 끝냈어요'**
+  String weeklyReportInsightHighlightStreak(int days);
+
+  /// 잘한 것 아래 작은 글. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {name}에게 말해 주세요'**
+  String weeklyReportInsightHighlightHint(String name);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 멈춘 곳'**
+  String get weeklyReportInsightStuckTitle;
+
+  /// 자주 멈춘 곳 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}의 {step}에서 {sent}번 중 {remained}번 멈췄어요'**
+  String weeklyReportInsightStuckLine(
+    String routine,
+    String step,
+    int sent,
+    int remained,
+  );
+
+  /// 자주 멈춘 곳 아래 작은 글: 글을 줄이거나 나누기
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 글을 더 짧게 바꾸거나 둘로 나눠 볼 수 있어요'**
+  String get weeklyReportInsightStuckShorten;
+
+  /// 자주 멈춘 곳 아래 작은 글: 목소리·사진 붙이기
+  ///
+  /// In ko, this message translates to:
+  /// **'목소리나 사진을 붙여 볼 수 있어요'**
+  String get weeklyReportInsightStuckAddMedia;
+
+  /// 자주 멈춘 곳 버튼. 그 카드가 든 일과의 편집 화면으로 감
+  ///
+  /// In ko, this message translates to:
+  /// **'{step} 카드 고치기'**
+  String weeklyReportInsightStuckFix(String step);
+
+  /// 자주 멈춘 곳 버튼으로 일과를 못 열었을 때 실패 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'고칠 일과를 열지 못했어요'**
+  String get weeklyReportInsightStuckFixFailed;
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주와 달라진 점'**
+  String get weeklyReportInsightTrendTitle;
+
+  /// 지난주보다 늘었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과가 {before}개에서 {after}개로 늘었어요'**
+  String weeklyReportInsightTrendUp(int before, int after);
+
+  /// 지난주보다 줄었을 때 (단정하지 않는 말)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과가 {before}개에서 {after}개가 됐어요'**
+  String weeklyReportInsightTrendDown(int before, int after);
+
+  /// 지난주와 같을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주와 같이 {after}개를 끝냈어요'**
+  String weeklyReportInsightTrendSame(int after);
+
+  /// 달라진 점 막대 이름: 지난주 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 {count}'**
+  String weeklyReportInsightTrendBarPrevious(int count);
+
+  /// 달라진 점 막대 이름: 이번 주 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 {count}'**
+  String weeklyReportInsightTrendBarCurrent(int count);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'걸린 시간'**
+  String get weeklyReportInsightDurationTitle;
+
+  /// 일과 평균 걸린 시간 변화 (늘든 줄든 같은 말)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}에 걸린 시간이 {before}분에서 {after}분이 됐어요'**
+  String weeklyReportInsightDurationLine(String routine, int before, int after);
+
+  /// 주간 리포트 돌아보기 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'가장 오래 머문 카드'**
+  String get weeklyReportInsightSlowestTitle;
+
+  /// 가장 오래 머문 카드 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}의 {step}에서 평균 {minutes}분 머물렀어요'**
+  String weeklyReportInsightSlowestLine(
+    String routine,
+    String step,
+    int minutes,
+  );
+
+  /// 숫자 3개 중 첫째 이름: 이 주에 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과'**
+  String get weeklyReportStatCompleted;
+
+  /// 숫자 3개 중 셋째 이름: 마치지 않고 남은 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 카드'**
+  String get weeklyReportStatRemaining;
+
+  /// 일과별 기록 줄 오른쪽 값: 보낸 횟수 중 마친 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{sent, plural, other{{sent}번 중 {completed}번}}'**
+  String weeklyReportRoutineRatio(int sent, int completed);
+
+  /// 주간 리포트 아래 버튼: 누르면 PDF·이미지 고르기 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'리포트 저장하기'**
+  String get weeklyReportSave;
+
+  /// 리포트 저장 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'리포트를 어떻게 저장할까요?'**
+  String get weeklyReportSaveSheetTitle;
+
+  /// 주간 리포트 아래 글자 링크: 지난 리포트 목록 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트 보기'**
+  String get weeklyReportPastReports;
+
+  /// 지난 리포트 목록 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트'**
+  String get weeklyReportPastSheetTitle;
+
+  /// 지난 리포트 줄 오른쪽 값: 그 주에 끝낸 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{일과 {count}개 끝냄}}'**
+  String weeklyReportPastWeekValue(int count);
+
+  /// 지난 리포트 목록이 비었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 지난 리포트가 없어요'**
+  String get weeklyReportPastEmpty;
+
+  /// 지난 리포트 목록 불러오기 실패 (에러 코드와 다시 하기가 함께 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 리포트를 불러오지 못했어요'**
+  String get weeklyReportPastLoadFailed;
+
+  /// Free 에게 미리 보여 주는 주 리포트 위 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 리포트는 그냥 보여 드려요'**
+  String get weeklyReportFreePreviewNote;
+
+  /// 일과 상세 시트(일과관리) 반복 줄 — 아직 정하지 않았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'요일·시각 정하기'**
+  String get routineScheduleRowOff;
+
+  /// 반복 줄 접근성 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 요일과 시각'**
+  String get routineScheduleRowLabel;
+
+  /// 반복 줄 요약. days 는 요일 목록(예: 월·수·금) 또는 매일·평일·주말, time 은 기기 형식 시각 (예: 오전 8:00)
+  ///
+  /// In ko, this message translates to:
+  /// **'{days} {time}'**
+  String routineScheduleSummary(String days, String time);
+
+  /// 일곱 요일 모두 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'매일'**
+  String get routineScheduleEveryDay;
+
+  /// 월~금만 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'평일'**
+  String get routineScheduleWeekdaysOnly;
+
+  /// 토·일만 골랐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'주말'**
+  String get routineScheduleWeekendOnly;
+
+  /// 요일 목록 사이 구분 (예: 월·수·금)
+  ///
+  /// In ko, this message translates to:
+  /// **'·'**
+  String get routineScheduleDaySeparator;
+
+  /// 반복 줄·주간 계획 — 저장한 보호자의 Pro 가 끝나 반복이 멈춤 (예약은 남아 있음)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나 멈췄어요'**
+  String get routineSchedulePaused;
+
+  /// 주간 계획·반복 시트 — 멈춘 예약 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요'**
+  String get routineSchedulePausedNote;
+
+  /// 반복 요일·시각 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'언제 할까요?'**
+  String get routineScheduleSheetTitle;
+
+  /// 반복 요일·시각 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 요일마다 이 일과가 오늘 일과로 가요'**
+  String get routineScheduleSheetBody;
+
+  /// 반복 시트 — 요일 고르기 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'요일'**
+  String get routineScheduleDaysLabel;
+
+  /// 반복 시트 — 시각 바퀴 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'시각'**
+  String get routineScheduleTimeLabel;
+
+  /// 반복 시트 — 이룸이 기기 알림 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'그 시각에 이룸이 기기에 알리기'**
+  String get routineScheduleNotifyElumi;
+
+  /// 반복 시트·주간 계획 — 연결된 이룸이 기기에 알림 권한이 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기 알림이 꺼져 있어요'**
+  String get routineScheduleElumiNotificationOff;
+
+  /// 알림 꺼짐 안내 둘째 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기의 설정에서 이룸 알림을 켜 주세요'**
+  String get routineScheduleElumiNotificationOffHint;
+
+  /// 반복 시트·주간 계획 — 연결된 이룸이 기기가 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결하면 그 시각에 알림이 가요'**
+  String get routineScheduleElumiNoDevice;
+
+  /// 반복 시트 — 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get routineScheduleSave;
+
+  /// 반복 시트 — 끄기 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 끄기'**
+  String get routineScheduleTurnOff;
+
+  /// 반복 저장 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 저장했어요'**
+  String get routineScheduleSavedToast;
+
+  /// 반복 끄기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'반복을 껐어요'**
+  String get routineScheduleTurnedOffToast;
+
+  /// 반복 저장·끄기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요'**
+  String get routineScheduleSaveFailedTitle;
+
+  /// 반복 저장·끄기 실패 팝업 기본 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요'**
+  String get routineScheduleSaveFailedFallback;
+
+  /// 반복 시트 — 요일을 하나도 안 골랐을 때 저장 버튼 위 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'요일을 하나 이상 골라 주세요'**
+  String get routineSchedulePickDayHint;
+
+  /// 반복 시트 — Free(판매 중)라 저장 버튼이 꺼진 이유. 아래에 Pro 알아보기 입구
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 일과는 Pro에서 저장할 수 있어요'**
+  String get routineScheduleProNote;
+
+  /// 일과관리 머리 — 주간 계획 화면 입구 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획'**
+  String get weeklyPlanEntry;
+
+  /// 주간 계획 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획'**
+  String get weeklyPlanTitle;
+
+  /// 주간 계획 요일 묶음 제목. weekday 는 weekdayShort 결과
+  ///
+  /// In ko, this message translates to:
+  /// **'{weekday}요일'**
+  String weeklyPlanDayTitle(String weekday);
+
+  /// 주간 계획 — 오늘 요일 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get weeklyPlanToday;
+
+  /// 주간 계획 — 그 요일에 반복 일과가 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'정한 일과가 없어요'**
+  String get weeklyPlanEmptyDay;
+
+  /// 주간 계획 — 반복 일과가 하나도 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 요일을 정한 일과가 없어요'**
+  String get weeklyPlanEmptyTitle;
+
+  /// 주간 계획 빈 상태 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 관리에서 일과를 누르고 요일·시각을 정해 보세요'**
+  String get weeklyPlanEmptyBody;
+
+  /// 주간 계획 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 계획을 불러오지 못했어요'**
+  String get weeklyPlanLoadFailed;
+
+  /// 주간 계획 줄 — 이룸이 기기 알림을 끈 반복 일과
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 없음'**
+  String get weeklyPlanNotifyOff;
+
+  /// 주간 계획 줄 메타 사이 구분 (예: 오후 3:00 · 알림 없음)
+  ///
+  /// In ko, this message translates to:
+  /// **' · '**
+  String get weeklyPlanMetaSeparator;
+
+  /// 카드 수정 시트의 보호자 목소리 칸 — 녹음 전 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'내 목소리로 녹음하기'**
+  String get guardianVoiceRecordAction;
+
+  /// 카드 수정 시트의 보호자 목소리 칸 — 녹음 전 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 누르면 이 목소리가 들려요'**
+  String get guardianVoiceRecordHint;
+
+  /// 보호자 목소리를 녹음하는 동안 칸 글자. seconds 는 지난 초
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음하고 있어요 {seconds}초'**
+  String guardianVoiceRecording(int seconds);
+
+  /// 녹음하는 동안 칸 아래 줄 — 최대 길이 안내. seconds 는 최대 초
+  ///
+  /// In ko, this message translates to:
+  /// **'{seconds}초까지 녹음돼요'**
+  String guardianVoiceRecordingLimit(int seconds);
+
+  /// 녹음·미리 듣기를 멈추는 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'멈추기'**
+  String get guardianVoiceStop;
+
+  /// 보호자 목소리를 올리는 동안 칸 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 저장하고 있어요'**
+  String get guardianVoiceSaving;
+
+  /// 녹음이 있을 때 칸 글자 — 이룸이 화면에서 이 녹음이 나온다는 뜻
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음했어요'**
+  String get guardianVoiceSaved;
+
+  /// 녹음 미리 듣기 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'듣기'**
+  String get guardianVoicePlay;
+
+  /// 녹음을 새로 하는 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 녹음'**
+  String get guardianVoiceRerecord;
+
+  /// 녹음 지우기 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기'**
+  String get guardianVoiceDelete;
+
+  /// 녹음 지우기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 지울까요?'**
+  String get guardianVoiceDeleteConfirmTitle;
+
+  /// 녹음 지우기 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지우면 기본 목소리로 읽어 줘요'**
+  String get guardianVoiceDeleteConfirmMessage;
+
+  /// Pro 가 끝났는데 녹음이 남아 있을 때 칸 제목 — 녹음은 남아 있고 듣기·지우기만 된다
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 목소리로 읽어요'**
+  String get guardianVoicePlanEnded;
+
+  /// 마이크 권한이 막혔을 때 칸 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'마이크가 꺼져 있어요'**
+  String get guardianVoiceMicDeniedTitle;
+
+  /// 마이크 권한이 막혔을 때 칸 설명 — 앱은 계속 쓸 수 있다
+  ///
+  /// In ko, this message translates to:
+  /// **'켜기 전까지 기본 목소리로 읽어요'**
+  String get guardianVoiceMicDeniedBody;
+
+  /// 마이크 권한이 막혔을 때 기기 설정을 여는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get guardianVoiceOpenSettings;
+
+  /// 녹음 올리기·지우기·듣기 실패 때 칸 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 저장하지 못했어요'**
+  String get guardianVoiceFailedTitle;
+
+  /// 녹음 실패 안내의 다시 하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get guardianVoiceRetry;
+
+  /// 녹음이 너무 짧을 때 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요'**
+  String get guardianVoiceTooShort;
+
+  /// 녹음 시작·멈춤 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음하지 못했어요. 다시 해 주세요'**
+  String get guardianVoiceRecordFailed;
+
+  /// 녹음 파일이 1MB 를 넘을 때 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요'**
+  String get guardianVoiceTooLarge;
+
+  /// 녹음 미리 듣기 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 틀지 못했어요'**
+  String get guardianVoicePlayFailed;
+
+  /// 녹음 지우기 실패 사유
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음을 지우지 못했어요'**
+  String get guardianVoiceDeleteFailed;
+
+  /// 녹음 전 보호자 목소리 칸의 녹음 시작 버튼 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'녹음'**
+  String get guardianVoiceRecordChip;
+
+  /// Pro 가 끝났는데 녹음이 남아 있을 때 칸 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 끝나도 녹음은 남겨 뒀어요'**
+  String get guardianVoicePlanEndedHint;
+
+  /// 설정 줄 — 이룸이별 AI 메모 화면으로 (Pro)
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리'**
+  String get guardianSettingsRoutineMemory;
+
+  /// AI 메모리 위 카드 제목. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} AI 메모리'**
+  String memoryHeroTitle(String name);
+
+  /// AI 메모리 위 카드 설명 (다른 보호자와 공유하지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 방식을 기억해서 다음 일과를 그렇게 만들어요. 나만 봐요'**
+  String get memoryHeroBody;
+
+  /// 숫자 칸 이름: 적용 중인 규칙 수
+  ///
+  /// In ko, this message translates to:
+  /// **'적용 중'**
+  String get memoryStatApplied;
+
+  /// 숫자 칸 이름: 관찰 중인 규칙 수
+  ///
+  /// In ko, this message translates to:
+  /// **'관찰 중'**
+  String get memoryStatWatching;
+
+  /// 숫자 칸 이름: 일과를 고쳐 보낸 기록 수
+  ///
+  /// In ko, this message translates to:
+  /// **'수정 기록'**
+  String get memoryStatEdits;
+
+  /// 목록 머리: 적용 중 탭
+  ///
+  /// In ko, this message translates to:
+  /// **'적용 중인 규칙'**
+  String get memoryListAppliedHeader;
+
+  /// 목록 머리 오른쪽 작은 글: 적용 중 탭
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과에 쓰여요'**
+  String get memoryListAppliedHint;
+
+  /// 목록 머리: 관찰 중 탭
+  ///
+  /// In ko, this message translates to:
+  /// **'관찰 중인 규칙'**
+  String get memoryListWatchingHeader;
+
+  /// 목록 머리 오른쪽 작은 글: 관찰 중 탭
+  ///
+  /// In ko, this message translates to:
+  /// **'점이 다 차면 적용돼요'**
+  String get memoryListWatchingHint;
+
+  /// 목록 머리: 수정 기록 탭
+  ///
+  /// In ko, this message translates to:
+  /// **'고쳐서 보낸 기록'**
+  String get memoryListEditsHeader;
+
+  /// 규칙 줄 아래 작은 글: AI 가 찾은 규칙 (몇 개 일과에서 봤나)
+  ///
+  /// In ko, this message translates to:
+  /// **'AI가 찾음, 일과 {count}개'**
+  String memoryRuleByAi(int count);
+
+  /// 규칙 줄 아래 작은 글: 직접 적은 규칙
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 적음'**
+  String get memoryRuleByMe;
+
+  /// 수정 기록 줄: 카드 장수 변화
+  ///
+  /// In ko, this message translates to:
+  /// **'{before}장 → {after}장'**
+  String memoryEditCards(int before, int after);
+
+  /// 수정 기록 줄: 고친 글 수
+  ///
+  /// In ko, this message translates to:
+  /// **'글 {count}곳'**
+  String memoryEditTexts(int count);
+
+  /// 적용 중 탭 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'+ 규칙 직접 적기'**
+  String get memoryAddRule;
+
+  /// 맨 아래 스위치 이름 (서버 enabled)
+  ///
+  /// In ko, this message translates to:
+  /// **'고친 내용에서 자동으로 찾기'**
+  String get memoryAutoFind;
+
+  /// 자동 찾기 스위치 아래 작은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 수정이 일과 {count}개에서 반복되면 적용돼요'**
+  String memoryAutoFindNote(int count);
+
+  /// 규칙이 하나도 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 고쳐서 보내면 여기에 쌓여요'**
+  String get memoryEmptyTitle;
+
+  /// 수정 기록 탭이 비었을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 고쳐서 보낸 일과가 없어요'**
+  String get memoryEmptyEdits;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'낱말 바꾸기'**
+  String get memoryTypeWord;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 나누기'**
+  String get memoryTypeSplit;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 합치기'**
+  String get memoryTypeMerge;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 더하기'**
+  String get memoryTypeAdd;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 빼기'**
+  String get memoryTypeRemove;
+
+  /// 규칙 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 적은 규칙'**
+  String get memoryTypeManual;
+
+  /// 규칙 시트 버튼: 관찰 중 규칙을 바로 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 적용'**
+  String get memoryApplyNow;
+
+  /// 규칙 시트 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get memoryRuleDelete;
+
+  /// 규칙 시트 버튼: 직접 적은 규칙 글 고치기
+  ///
+  /// In ko, this message translates to:
+  /// **'수정'**
+  String get memoryRuleEdit;
+
+  /// 규칙 근거 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}, {month}월 {day}일'**
+  String memoryEvidenceLine(String routine, int month, int day);
+
+  /// AI 메모리 오른쪽 위 ··· 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'메뉴'**
+  String get memoryMenuLabel;
+
+  /// 오른쪽 위 메뉴
+  ///
+  /// In ko, this message translates to:
+  /// **'파일로 내보내기'**
+  String get memoryMenuExport;
+
+  /// 오른쪽 위 메뉴 (위험)
+  ///
+  /// In ko, this message translates to:
+  /// **'메모리 모두 지우기'**
+  String get memoryMenuClear;
+
+  /// 내보내기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모리를 내보내지 못했어요'**
+  String get memoryExportFailed;
+
+  /// 일과를 보낸 직후 카드 머리
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리'**
+  String get memoryObsTitle;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'낱말을 이렇게 바꾸셨어요'**
+  String get memoryObsWord;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 나누셨어요'**
+  String get memoryObsSplit;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 합치셨어요'**
+  String get memoryObsMerge;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 더하셨어요'**
+  String get memoryObsAdd;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 빼셨어요'**
+  String get memoryObsRemove;
+
+  /// 찾은 수정 종류에 맞는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 고치셨어요'**
+  String get memoryObsManual;
+
+  /// 일과를 보낸 직후 카드 질문
+  ///
+  /// In ko, this message translates to:
+  /// **'{phrase}. 다음 일과에도 이렇게 할까요?'**
+  String memoryObsAsk(String phrase);
+
+  /// 카드 버튼: 규칙으로 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'항상 이렇게'**
+  String get memoryObsAlways;
+
+  /// 카드 버튼: 카드 닫기
+  ///
+  /// In ko, this message translates to:
+  /// **'이번만'**
+  String get memoryObsOnce;
+
+  /// 항상 이렇게를 누른 뒤 카드 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 일과부터 이렇게 만들어요'**
+  String get memoryObsDone;
+
+  /// 보이는 최대 2개 밖의 나머지
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리에서 {count}개 더 보기'**
+  String memoryObsMore(int count);
+
+  /// 새 일과 결과 화면 제목 아래 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 메모리 규칙 {count}개 적용됨'**
+  String memoryAppliedPill(int count);
+
+  /// 메모 더하기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 더하기'**
+  String get routineMemoryAddSheetTitle;
+
+  /// 메모 고치기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 고치기'**
+  String get routineMemoryEditSheetTitle;
+
+  /// 메모 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'예: \'씻기\' 대신 \'손 닦기\'라고 써요'**
+  String get routineMemoryLineHint;
+
+  /// 메모 시트 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get routineMemorySave;
+
+  /// 메모 고치기 시트의 지우기 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이 줄 지우기'**
+  String get routineMemoryDeleteLine;
+
+  /// 모두 지우기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 모두 지울까요?'**
+  String get routineMemoryClearConfirmTitle;
+
+  /// 모두 지우기 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 메모는 되돌릴 수 없어요.'**
+  String get routineMemoryClearConfirmMessage;
+
+  /// AI 메모 모두 지우기 확인 팝업의 위험 버튼 (행동 이름, #1171)
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 지우기'**
+  String get routineMemoryClearConfirmAction;
+
+  /// AI 메모 불러오기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 불러오지 못했어요'**
+  String get routineMemoryLoadFailed;
+
+  /// AI 메모 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 저장하지 못했어요'**
+  String get routineMemorySaveFailedTitle;
+
+  /// AI 메모 저장 실패 기본 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요.'**
+  String get routineMemorySaveFailedFallback;
+
+  /// Pro 미리 보기가 실제 기록이 아닌 견본임을 알리는 배지
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 화면'**
+  String get proTeaserSampleLabel;
+
+  /// Pro 전용 기능을 Free 가 눌렀는데 앱에서 Pro 를 살 수 없을 때 안내 팝업 (실패 아님)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro에서 쓸 수 있는 기능이에요'**
+  String get proOnlyNoticeTitle;
+
+  /// 주간 리포트 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요'**
+  String get proTeaserWeeklyReportBenefit;
+
+  /// AI 메모 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요'**
+  String get proTeaserRoutineMemoryBenefit;
+
+  /// 인쇄용으로 받기 Pro 테마 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드를 여러 디자인으로 받을 수 있어요'**
+  String get proTeaserCardThemeBenefit;
+
+  /// 반복 일과·주간 계획 미리 보기 한 줄 혜택
+  ///
+  /// In ko, this message translates to:
+  /// **'매일 아침 일과를 새로 보내지 않아도 돼요'**
+  String get proTeaserWeeklyPlanBenefit;
+
+  /// 미리 보기 견본 일과 제목 1
+  ///
+  /// In ko, this message translates to:
+  /// **'아침 준비하기'**
+  String get proTeaserSampleRoutineMorning;
+
+  /// 미리 보기 견본 일과 제목 2
+  ///
+  /// In ko, this message translates to:
+  /// **'이 닦기'**
+  String get proTeaserSampleRoutineBrush;
+
+  /// 미리 보기 견본 일과 제목 3
+  ///
+  /// In ko, this message translates to:
+  /// **'가방 챙기기'**
+  String get proTeaserSampleRoutineBag;
+
+  /// 미리 보기 견본 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'양말 신기'**
+  String get proTeaserSampleStepSocks;
+
+  /// AI 메모 미리 보기 견본 줄 1
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 문장은 짧게 한 줄로 써요'**
+  String get proTeaserSampleMemoryShort;
+
+  /// AI 메모 미리 보기 견본 줄 2
+  ///
+  /// In ko, this message translates to:
+  /// **'옷 입기는 양말부터 시작해요'**
+  String get proTeaserSampleMemoryOrder;
+
+  /// AI 메모 미리 보기 견본 줄 3
+  ///
+  /// In ko, this message translates to:
+  /// **'보상은 스티커로 정해요'**
+  String get proTeaserSampleMemoryReward;
+
+  /// 카드 그림 위 AI 그림 다시 그리기 칩의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 그리기'**
+  String get cardRegenerateChip;
+
+  /// 다시 그리기 확인 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그릴까요?'**
+  String get cardRegenerateSheetTitle;
+
+  /// 다시 그리기 비용: Pro 하루 무료 횟수 안
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 없이, 오늘 {count}번 남았어요'**
+  String cardRegenerateCostProFree(int count);
+
+  /// 다시 그리기 비용: 크레딧이 꺼져 있거나 단가 0
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 쓰지 않아요'**
+  String get cardRegenerateCostFree;
+
+  /// 다시 그리기 비용: 크레딧 단가
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧 {count}개}}'**
+  String cardRegenerateCostCredits(int count);
+
+  /// 크레딧 비용 표시: 크레딧 그림 옆 개수 (낭독은 cardRegenerateCostCredits)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개}}'**
+  String creditCostCount(int count);
+
+  /// 다시 그리기 비용을 불러오지 못했을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 써요'**
+  String get cardRegenerateCostUnknown;
+
+  /// 다시 그리기 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 그리기'**
+  String get cardRegenerateConfirm;
+
+  /// 다시 그리는 동안 그림 위에 덮이는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그리고 있어요'**
+  String get cardRegenerateInProgress;
+
+  /// 다시 그리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 다시 그리지 못했어요'**
+  String get cardRegenerateFailedTitle;
+
+  /// 그림 없는 카드(픽토그램) 아래 AI 그림 처음 그리기 칩의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림 그리기'**
+  String get cardFirstDrawChip;
+
+  /// Free 에게 다시 그리기 칩 자리에 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardRegenerateChip + Pro 배지, 누르면 요금제 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 다시 그리기'**
+  String get cardRedrawProChip;
+
+  /// Free 에게 그림 없는 카드 아래 보이는 Pro 안내 칩의 낭독 이름 (보이는 글은 cardFirstDrawChip + Pro 배지, 누르면 요금제 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 AI 그림 그리기'**
+  String get cardFirstDrawProChip;
+
+  /// AI 그림 처음 그리기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림을 그릴까요?'**
+  String get cardFirstDrawSheetTitle;
+
+  /// 다시 그리기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요'**
+  String get cardRedrawSheetBody;
+
+  /// AI 그림 처음 그리기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'원하는 점을 적거나 골라 주세요. 새 그림을 보고 고를 수 있어요'**
+  String get cardFirstDrawSheetBody;
+
+  /// 다시 그리기 시트 요청 글 칸 라벨
+  ///
+  /// In ko, this message translates to:
+  /// **'고치고 싶은 점'**
+  String get cardRedrawRequestLabel;
+
+  /// 다시 그리기 시트 요청 글 칸 안내 (60자까지)
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 우산을 파란색으로'**
+  String get cardRedrawRequestHint;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'더 단순하게'**
+  String get cardRedrawHintSimpler;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'배경 빼기'**
+  String get cardRedrawHintNoBackground;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'사람 빼기'**
+  String get cardRedrawHintNoPeople;
+
+  /// 다시 그리기 요청 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'더 밝게'**
+  String get cardRedrawHintBrighter;
+
+  /// AI 그림 처음 그리기 시트 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'그리기'**
+  String get cardFirstDrawConfirm;
+
+  /// AI 그림 처음 그리는 동안 그림 위에 덮이는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'그림을 그리고 있어요'**
+  String get cardFirstDrawInProgress;
+
+  /// AI 그림 처음 그리기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 그림을 그리지 못했어요'**
+  String get cardFirstDrawFailedTitle;
+
+  /// 그리기·새 그림 받기 실패 팝업 기본 설명 (서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 해 볼까요? 크레딧은 쓰지 않았어요'**
+  String get cardRedrawFailedFallback;
+
+  /// 새 그림 고르기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 그림으로 할까요?'**
+  String get cardCandidateSheetTitle;
+
+  /// 새 그림 고르기 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 그림만 이룸이에게 보여요'**
+  String get cardCandidateSheetBody;
+
+  /// 새 그림 고르기 시트: 원래 그림(또는 픽토그램) 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 그림'**
+  String get cardCandidateCurrentLabel;
+
+  /// 새 그림 고르기 시트: 새로 그린 그림 이름과 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림'**
+  String get cardCandidateNewLabel;
+
+  /// 그림 고르기 시트의 버튼 하나. 고른 그림(지금 그림 또는 새 그림)으로 정함
+  ///
+  /// In ko, this message translates to:
+  /// **'이 그림으로 하기'**
+  String get cardCandidateSelectButton;
+
+  /// 새 그림으로 바꾸기 성공 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림으로 바꿨어요'**
+  String get cardCandidateAppliedToast;
+
+  /// 새로 그린 그림을 받지 못했을 때 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림을 불러오지 못했어요'**
+  String get cardCandidateLoadFailedTitle;
+
+  /// 새 그림으로 바꾸기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림으로 바꾸지 못했어요'**
+  String get cardCandidateApplyFailedTitle;
+
+  /// 요금제 화면 머리 제목 (#1189 시안 A · 용어표: 우리 아이 > 이룸이) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이만을 위한 카드로 바뀌어요'**
+  String get planHeroHeadline;
+
+  /// 요금제 화면 머리 설명 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 일과도 Pro로 만들면 이렇게 달라져요'**
+  String get planHeroSubline;
+
+  /// 머리 비교: Free 카드 아래 작은 글 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'Free 이모지'**
+  String get planHeroFreeTag;
+
+  /// 머리 비교: Pro 카드 아래 작은 글 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 캐릭터 그림'**
+  String get planHeroProTag;
+
+  /// 머리 비교 그림의 읽기 프로그램 문구 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요'**
+  String get planHeroCompareSemantics;
+
+  /// 혜택 묶음 제목: 그림·다시 그리기·인쇄. elumiName 은 고른 이룸이 호칭 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{elumiName}만의 카드 그림'**
+  String planBenefitGroupCards(String elumiName);
+
+  /// 혜택 묶음 제목: 반복·AI 메모 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'일과가 알아서 가요'**
+  String get planBenefitGroupRoutines;
+
+  /// 혜택 묶음 제목: 주간 리포트·보호자 목소리 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주를 정리해 드려요'**
+  String get planBenefitGroupWeek;
+
+  /// 혜택 묶음 제목: 크레딧·광고 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'더 넉넉하게'**
+  String get planBenefitGroupExtra;
+
+  /// 1년 기간 카드 위 띠 (1개월 × 12 대비, 내림) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}% 아껴요'**
+  String planYearlySaving(int percent);
+
+  /// 1년 기간 카드 설명 (1년 가격 ÷ 12, 스토어 통화) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'한 달에 {price} 꼴'**
+  String planMonthlyEquivalent(String price);
+
+  /// 1년 기간 카드 설명 (한 달 꼴 값을 모를 때) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'1년마다 자동 갱신'**
+  String get planRenewsYearly;
+
+  /// 1개월 기간 카드 설명 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'1개월마다 자동 갱신'**
+  String get planRenewsMonthly;
+
+  /// 기간 카드 가격 뒤 단위 · 버튼 아래 한 줄 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{period, select, yearly{/년} other{/월}}'**
+  String planPriceUnit(String period);
+
+  /// 요금제 화면 버튼 아래 한 줄 (App Store 체험, 스토어 값) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요'**
+  String planCtaTrialNoticeAppStore(String trial, String price, String unit);
+
+  /// 요금제 화면 버튼 아래 한 줄 (Google Play 체험, 스토어 값) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 체험 중 해지하면 청구되지 않아요'**
+  String planCtaTrialNoticePlayStore(String trial, String price, String unit);
+
+  /// 요금제 화면 버튼 아래 한 줄 (체험 없음) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{price}{unit} 자동 갱신돼요. 언제든 해지할 수 있어요'**
+  String planCtaRenewNotice(String price, String unit);
+
+  /// Pro 미리보기 버튼 (체험 대상일 때, ProUpsellButton 에서만) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'{trial} 무료로 써 보기'**
+  String planTryFreeTrial(String trial);
+
+  /// Pro 미리보기 카드 아래 글자 링크 (요금제 화면) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 혜택 모두 보기'**
+  String get planSeeAllBenefits;
+
+  /// 내 요금제 줄: PRO 배지 옆 (선물받은 Pro) #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'선물'**
+  String get planTierGift;
+
+  /// Pro 미리보기 제목: 주간 계획 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각만 정해 두면 그날 일과가 준비돼요'**
+  String get proTeaserWeeklyPlanTitle;
+
+  /// Pro 미리보기 제목: 주간 리포트 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주를 한 장으로 받아 봐요'**
+  String get proTeaserWeeklyReportTitle;
+
+  /// Pro 미리보기 제목: AI 메모 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이에게 맞춘 방식을 기억해요'**
+  String get proTeaserRoutineMemoryTitle;
+
+  /// Pro 미리보기 제목: 인쇄 디자인 #1189
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드를 더 예쁘게 받아요'**
+  String get proTeaserCardThemeTitle;
+
+  /// Pro 미리보기 제목: 인쇄 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용 카드를 원하는 대로 받아요'**
+  String get proTeaserCardLayoutTitle;
+
+  /// Pro 미리보기 한 줄: 인쇄 형태·배치 #1224
+  ///
+  /// In ko, this message translates to:
+  /// **'한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요'**
+  String get proTeaserCardLayoutBenefit;
+
+  /// 보호자 홈 권유 카드 닫기 x 낭독 글
+  ///
+  /// In ko, this message translates to:
+  /// **'괜찮아요'**
+  String get homeSuggestionDismissLabel;
+
+  /// 홈 권유 카드 제목: 같은 일과를 3일 이어서 보냈을 때 반복 정하기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'매일 자동으로 보낼까요?'**
+  String get homeSuggestionAutoSendTitle;
+
+  /// 홈 권유 카드 본문: 같은 일과를 이어서 보낸 날 수. routine 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다, days 는 이어서 보낸 날 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{routine}{batchim, select, yes{을} other{를}} {days}일째 보내셨어요'**
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days);
+
+  /// 홈 권유 카드 버튼: 반복 요일·시각 정하기
+  ///
+  /// In ko, this message translates to:
+  /// **'정하기'**
+  String get homeSuggestionAutoSendAction;
+
+  /// 홈 권유 카드 제목: 같은 일과를 5번 넘게 썼을 때 이야기 올리기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기에 올려 볼까요?'**
+  String get homeSuggestionTalkShareTitle;
+
+  /// 홈 권유 카드 본문: 이야기에 올리면 다른 보호자가 가져다 쓸 수 있다는 뜻. routine 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자도 {routine}{batchim, select, yes{을} other{를}} 가져다 쓸 수 있어요'**
+  String homeSuggestionTalkShareBody(String routine, String batchim);
+
+  /// 홈 권유 카드 버튼: 그 일과로 이야기 올리기 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기'**
+  String get homeSuggestionTalkShareAction;
+
+  /// 홈 권유 카드 제목: 일과가 1개뿐이고 3일 넘게 썼을 때 일과 더 만들기 권유
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 더 만들어 볼까요?'**
+  String get homeSuggestionCreateMoreTitle;
+
+  /// 홈 권유 카드 본문: 다른 시간대 일과 예시
+  ///
+  /// In ko, this message translates to:
+  /// **'저녁이나 잠자기 전 일과는 어때요?'**
+  String get homeSuggestionCreateMoreBody;
+
+  /// 홈 권유 카드 버튼: 일과 만들기 시작
+  ///
+  /// In ko, this message translates to:
+  /// **'만들기'**
+  String get homeSuggestionCreateMoreAction;
+
+  /// 카드 수정 시트 칩: 카드 한 장을 AI 가 2~3장으로 나눈 안 받기 (Free 는 PRO 배지)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 카드 더 쉽게'**
+  String get cardSplitChip;
+
+  /// 카드 나누기 시트: 안을 받는 중
+  ///
+  /// In ko, this message translates to:
+  /// **'더 쉬운 단계로 나누고 있어요'**
+  String get cardSplitLoading;
+
+  /// 카드 나누기 시트 제목: 나눈 안을 보여 주며 묻는다
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 나눠 볼까요?'**
+  String get cardSplitSheetTitle;
+
+  /// 카드 나누기 시트 제목 아래 한 줄. title 은 원래 카드 제목, count 는 나눈 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{title} 카드를 작은 단계 {count}개로 나눠 봤어요'**
+  String cardSplitSheetDescription(String title, int count);
+
+  /// 나눌 것이 없는 카드일 때 제목 아래 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'행동이 하나라서 더 나누지 않았어요'**
+  String get cardSplitAlreadyShortDescription;
+
+  /// 카드 나누기 시트 안내: 새 카드 그림은 기본 그림
+  ///
+  /// In ko, this message translates to:
+  /// **'그림은 기본 그림으로 들어가요. 나중에 바꿀 수 있어요'**
+  String get cardSplitDefaultPictureNote;
+
+  /// 카드 나누기 시트 버튼(보조): 나누지 않고 닫기
+  ///
+  /// In ko, this message translates to:
+  /// **'그대로 두기'**
+  String get cardSplitKeepButton;
+
+  /// 카드 나누기 시트 버튼(주): 나눈 안 적용
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 나누기'**
+  String get cardSplitApplyButton;
+
+  /// 카드 나누기 시트: 더 나눌 필요가 없는 카드
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 충분히 짧아요'**
+  String get cardSplitAlreadyShort;
+
+  /// 카드 나누기 실패 문구 (서버가 문구를 주지 않을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 나누지 못했어요. 잠시 뒤 다시 해 주세요'**
+  String get cardSplitFailedFallback;
+
+  /// 카드 나누기 실패 화면 버튼: 같은 일 다시 하기
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get cardSplitRetry;
+
+  /// 카드를 나눈 뒤 토스트. count 는 나뉜 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 {count}장으로 나눴어요'**
+  String cardSplitDoneToast(int count);
+
+  /// 혜택 줄: 카드 나누기
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장을 더 작게 나눠 줘요'**
+  String get planBenefitCardSplit;
 }
 
 class _AppLocalizationsDelegate

@@ -3,7 +3,6 @@ package com.chuseok22.elumserver.admin.application.service;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateSeeder;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -13,7 +12,6 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
-import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
@@ -46,7 +44,6 @@ public class AdminPromptService {
 
   private final PromptTemplateService promptTemplateService;
   private final PromptTemplateSeeder promptTemplateSeeder;
-  private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final GeminiTextClient geminiTextClient;
   private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;
@@ -104,8 +101,6 @@ public class AdminPromptService {
   // 항상 같은 결과를 내도록, <text> 태그나 JSON 래핑을 이 메서드가 직접 조립하지 않는다.
   public String preview(PromptKey key, String content, String sampleInput, CharacterType character) {
     return switch (key) {
-      case LOCAL_LLM_SENSITIVE_INFO_CHECK ->
-        "[System]\n" + content + "\n\n[User]\n" + sensitiveInfoGuardService.buildUserContent(sampleInput);
       case GEMINI_ROUTINE_CREATE_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
       case GEMINI_ROUTINE_QUESTION_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
@@ -143,10 +138,6 @@ public class AdminPromptService {
 
   public PromptTestResponse test(PromptKey key, String content, String sampleInput, CharacterType characterType) {
     return switch (key) {
-      case LOCAL_LLM_SENSITIVE_INFO_CHECK -> {
-        SensitiveInfoCheckResult result = sensitiveInfoGuardService.checkForTest(content, sampleInput);
-        yield new PromptTestResponse(result, null);
-      }
       case GEMINI_ROUTINE_CREATE_PREFIX -> {
         RoutineStepDraft draft = testGeminiText(content, sampleInput);
         yield new PromptTestResponse(draft, null);

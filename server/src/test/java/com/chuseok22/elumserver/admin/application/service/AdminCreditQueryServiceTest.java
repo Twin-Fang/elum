@@ -95,6 +95,7 @@ class AdminCreditQueryServiceTest {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     CreditAccountService accountService =
       new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
+      CreditTestStore.weekPeriodSettings(),
       org.mockito.Mockito.mock(jakarta.persistence.EntityManager.class));
     policy = AiCreditPolicy.disabledDefault();
     policy.setVersion(1);

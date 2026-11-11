@@ -14,8 +14,4 @@ public record LinkStatusResponse(
     example = "2026-09-18T10:40:00")
   LocalDateTime pendingExpiresAt
 ) {
-
-  public boolean hasLinkedDevice() {
-    return !devices.isEmpty();
-  }
 }

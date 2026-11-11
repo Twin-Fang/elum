@@ -29,6 +29,8 @@ class LoginController {
       _ref.read(authRepositoryProvider).signInWith(provider);
 
   /// 로그인 성공 뒤: 이전 계정 메모리 상태 버리기 > 새 계정으로 푸시 토큰 다시 등록
+  ///
+  /// 저장소의 계정 범위 값·일과 알림 예약은 로그인([AuthRepository])이 회원 id 를 비교해 이미 지웠다.
   Future<void> resetPreviousAccount() async {
     // 주기 갱신이 받아 둔 이전 계정 회원 정보 (남기면 그 이룸이 id 로 요청해 403)
     _ref.read(memberPrefetchProvider).discard();

@@ -94,7 +94,7 @@ public class RoutineStepSpeechProvider {
     if (storedSpeech.isPresent() || !isOnDemandEnabled()) {
       return storedSpeech;
     }
-    return synthesizeOnce(stepId).map(filled -> new StepSpeech(filled.speechKey(), filled.wav()));
+    return synthesizeOnce(stepId).map(filled -> new StepSpeech(filled.speechKey(), filled.audio()));
   }
 
   /// 사용 조건 2개: 설정 켜짐, AI 서버 키 있음

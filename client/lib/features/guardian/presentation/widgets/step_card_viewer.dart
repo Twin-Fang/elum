@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../child/data/speech_service.dart';
+import '../../../member/application/plan_access.dart';
 import 'action_card_view.dart';
 import '../../../../core/theme/card_layout.dart';
 
@@ -103,11 +104,12 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
   }
 
   /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
-  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
-    final routineId = widget.routineId;
-    if (routineId.isEmpty) return null;
-    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
-  }
+  // 보호자 목소리는 Pro 일 때만 (이룸이가 듣는 것과 맞춤)
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
+    widget.routineId,
+    card,
+    shouldIncludeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+  );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다 (카드확인과 같다).
   Future<void> _speak(ActionCard card) async {

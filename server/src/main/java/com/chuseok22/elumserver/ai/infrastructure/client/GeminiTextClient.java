@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
@@ -36,15 +37,15 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class GeminiTextClient implements TextGenerationClient {
 
-  // GeminiConfig(Task 1)와 LocalLlmConfig가 각각 RestClient 빈을 하나씩 등록해 타입이
-  // 같은 빈이 2개 존재하므로, 파라미터명-빈명 자동 매칭에만 기대지 않고 명시한다.
+  // RestClient 빈 여러 개 (빈 이름으로 명시)
   @Qualifier("geminiRestClient")
   private final RestClient geminiRestClient;
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
-  private final PictogramCatalog pictogramCatalog;
+  /// 그림 방식별 카탈로그. 호출 스레드의 세트(AiCallContext)로 고름 (#1149)
+  private final PictogramCatalogs pictogramCatalogs;
 
   // 공통 JSON 매퍼 (DefaultJsonMapper)
   private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
@@ -97,13 +98,34 @@ public class GeminiTextClient implements TextGenerationClient {
       GeminiPictogramPickSpec.pictogramPickSchema(locale), AiCallType.GEMINI_TEXT_PICTOGRAM));
   }
 
+  @Override
+  public String buildRoutineMemoryJson(String memoryUserContent) {
+    return firstText(callGenerateContent(
+      RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
+      AiCallType.GEMINI_TEXT_MEMORY));
+  }
+
+  @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return firstText(callGenerateContent(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, AiCallType.GEMINI_TEXT_WEEKLY_REPORT));
+  }
+
+  @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return firstText(callGenerateContent(
+      CardSplitSpec.systemPromptFor(AiCallContext.currentContentLocale()), splitUserContent,
+      CardSplitSpec.RESPONSE_SCHEMA, AiCallType.GEMINI_TEXT_CARD_SPLIT));
+  }
+
   // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.
   String buildPictogramPickUserContent(String stepTitle, String stepDescription) {
     Map<String, Object> input = new LinkedHashMap<>();
     input.put("task", "PICK_PICTOGRAM");
     input.put("stepTitle", stepTitle == null ? "" : stepTitle);
     input.put("stepDescription", stepDescription == null ? "" : stepDescription);
-    input.put("pictogramCatalog", pictogramCatalog.ids());
+    input.put("pictogramCatalog", currentPictogramCatalog().ids());
     return toJson(input);
   }
 
@@ -202,7 +224,9 @@ public class GeminiTextClient implements TextGenerationClient {
       new ChildProfileInput(
         NicknamePlaceholder.forAi(nickname, locale), supportGoals == null ? Set.of() : supportGoals),
       maskedAnswers,
-      pictogramCatalog.ids()
+      currentPictogramCatalog().ids(),
+      // Pro AI 메모·확정 예시 (#1082). 요청 스레드에 실린 것만, 없으면 필드째 빠짐 (세 제공자 공용 조립)
+      AiCallContext.currentRoutinePersonalization()
     );
     return toJson(input);
   }
@@ -313,7 +337,12 @@ public class GeminiTextClient implements TextGenerationClient {
 
   /// @param includeImagePromptEn 카드마다 영어 장면(imagePromptEn)을 필수로 받는다
   public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
-    return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !pictogramCatalog.isEmpty());
+    return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !currentPictogramCatalog().isEmpty());
+  }
+
+  /// 호출 스레드 세트 > 카탈로그 (세 제공자 공용 조립이라 여기 한 곳)
+  private PictogramCatalog currentPictogramCatalog() {
+    return pictogramCatalogs.of(AiCallContext.currentPictogramSet());
   }
 
   public Map<String, Object> questionResponseSchemaFor(Set<SupportGoal> supportGoals) {

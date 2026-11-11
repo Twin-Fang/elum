@@ -35,7 +35,7 @@ class ConsentDocumentScreen extends StatelessWidget {
   final ConsentItem item;
 
   /// 설정 묶음 시안의 뒤로가기 y와 머리↔본문 간격 (`1027:4831`).
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _headToBody = 40.0;
 
   /// 섹션 제목 위 여백. 앞 덩이와 붙어 있으면 어디서 장이 바뀌는지 안 보인다.

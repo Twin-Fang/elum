@@ -72,10 +72,58 @@ public final class AiCallContext {
   }
 
   // 요청 스레드는 풀에서 재사용되므로 진입점의 finally에서 반드시 비워야
-  // 다음 요청에 이전 회원·작업·언어가 새어 들어가지 않는다. 셋을 함께 비운다.
+  // 다음 요청에 이전 회원·작업·언어가 새어 들어가지 않는다. 모두 함께 비운다.
   public static void clear() {
     MEMBER_ID.remove();
     CREDIT_JOB_ID.remove();
     CONTENT_LOCALE.remove();
+    ROUTINE_PERSONALIZATION.remove();
+    PICTOGRAM_SET.remove();
+  }
+
+  /// 카드 그림 기호 세트 (#1149). 세 텍스트 제공자가 같은 입력 조립을 쓰므로 인자 대신 여기 실음. 비어 있으면 MULBERRY
+  private static final InheritableThreadLocal<PictogramSet> PICTOGRAM_SET = new InheritableThreadLocal<>();
+
+  /// null 을 넣으면 비움
+  public static void setPictogramSet(PictogramSet set) {
+    if (set == null) {
+      PICTOGRAM_SET.remove();
+    } else {
+      PICTOGRAM_SET.set(set);
+    }
+  }
+
+  public static PictogramSet currentPictogramSet() {
+    PictogramSet set = PICTOGRAM_SET.get();
+    return set == null ? PictogramSet.MULBERRY : set;
+  }
+
+  /// 세트를 세우고 action 실행 후 이전 값 복구 (예외 포함)
+  public static <T> T callWithPictogramSet(PictogramSet set, Supplier<T> action) {
+    PictogramSet previous = PICTOGRAM_SET.get();
+    setPictogramSet(set);
+    try {
+      return action.get();
+    } finally {
+      setPictogramSet(previous);
+    }
+  }
+
+  /// 일과 만들기 맞춤 정보 (#1082, Pro + AI 메모 켜짐). 언어와 같은 이유로 인자 대신 여기 실음. 비어 있으면 넣지 않음
+  private static final InheritableThreadLocal<RoutinePersonalization> ROUTINE_PERSONALIZATION =
+    new InheritableThreadLocal<>();
+
+  /// null 이나 빈 값을 넣으면 비움
+  public static void setRoutinePersonalization(RoutinePersonalization personalization) {
+    if (personalization == null || personalization.isEmpty()) {
+      ROUTINE_PERSONALIZATION.remove();
+    } else {
+      ROUTINE_PERSONALIZATION.set(personalization);
+    }
+  }
+
+  /// 없으면 null
+  public static RoutinePersonalization currentRoutinePersonalization() {
+    return ROUTINE_PERSONALIZATION.get();
   }
 }

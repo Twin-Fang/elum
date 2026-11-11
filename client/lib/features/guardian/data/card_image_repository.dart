@@ -13,7 +13,7 @@ import '../../../core/storage/card_image_disk_cache.dart';
 import 'card_photo.dart';
 import '../../../app/dio_provider.dart';
 
-/// 카드 이미지를 받아오고, 보호자가 고른 사진으로 바꾼다.
+/// 카드 이미지를 받아오고, 보호자가 고른 사진으로 바꾼다. (AI 그림 새로 그리기·고르기는 `CardImageCandidateApi`)
 ///
 /// 서버가 AI로 만든 그림을 인증된 요청에만 준다.
 /// `GET /api/routines/{routineId}/steps/{stepId}/image` → `image/png`
@@ -109,11 +109,11 @@ class CardImageRepository {
     required String imagePath,
   }) async {
     try {
-      final res = await _dio.get<List<int>>(
+      final response = await _dio.get<List<int>>(
         '/api/routines/$routineId/steps/$stepId/image',
         options: Options(responseType: ResponseType.bytes),
       );
-      final bytes = res.data;
+      final bytes = response.data;
       if (bytes == null || bytes.isEmpty) return null;
       return Uint8List.fromList(bytes);
     } catch (e) {
@@ -172,7 +172,7 @@ class CardImageRepository {
     if (mime == null) return const PhotoUploadResult.failed(PhotoFailure.type);
 
     try {
-      final res = await _dio.put<Map<String, dynamic>>(
+      final response = await _dio.put<Map<String, dynamic>>(
         '/api/routines/$routineId/steps/$stepId/image',
         data: FormData.fromMap({
           'image': MultipartFile.fromBytes(
@@ -185,7 +185,7 @@ class CardImageRepository {
         // 받는 쪽과 같은 값을 쓴다(사진은 수 MB 라 다른 요청보다 오래 걸린다).
         options: Options(sendTimeout: AppConfig.receiveTimeout),
       );
-      final body = res.data;
+      final body = response.data;
       if (body == null) {
         return PhotoUploadResult.failed(
           PhotoFailure.from(const AppFailure(fault: NetworkFault.app)),
@@ -212,6 +212,12 @@ final cardImageRepositoryProvider = Provider<CardImageRepository>(
     diskCache: ref.watch(cardImageDiskCacheProvider),
   ),
 );
+
+/// 서버에 그림을 물어볼 수 있는 카드인가.
+///
+/// 아직 서버에 저장되지 않은 카드는 이미지도 없다. 요청 자체를 하지 않는다.
+bool canFetchCardImage(String routineId, String stepId) =>
+    routineId.isNotEmpty && routineId != 'local' && stepId.isNotEmpty;
 
 /// 카드 한 장의 이미지.
 ///

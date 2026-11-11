@@ -9,7 +9,6 @@ import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -25,6 +24,7 @@ import '../../../core/widgets/elum_spinner.dart';
 import '../application/draft_routines_controller.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910 ·
 /// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262).
@@ -75,7 +75,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
       onBack: context.popOrHome,
       // 시안(`1045:4910`)도 같은 네비게이션 제목이다.
       title: context.l10n.draftRoutinesTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 하단 배너. 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
       bottomBanner: const AdBottomStripSlot(placement: AdPlacement.bannerDrafts),
@@ -150,25 +150,14 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
   /// 바로 지우면 잘못 밀어도 되돌릴 길이 없다. 서버는 일과 삭제 API 로 지운다(임시저장도
   /// 일과다). 실패하면 줄을 그대로 두고 에러 코드를 보여준다.
   Future<void> _delete(Routine routine) async {
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: context.l10n.draftRoutinesDeleteConfirmTitle,
-      icon: ElumDialogIcon.trash,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.draftRoutinesDeleteAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: context.l10n.draftRoutinesDeleteAction,
     );
-    // 바깥을 눌러 닫으면 null — 취소로 다룬다
-    if (confirmed != true || !mounted) return;
+    // 바깥을 눌러 닫으면 false — 취소로 다룬다
+    if (!confirmed || !mounted) return;
 
     // 같은 줄을 두 번 지우지 않게 줄 단위로 잠근다. 성공도 null 이라 기록으로 감싸
     // 진행 중이라 건너뛴 경우(result == null)와 가른다.
@@ -249,7 +238,7 @@ class _DraftTile extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
     final space = context.space;
-    // 보상을 안 정했으면 줄을 감추지 않고 `미설정` 이라 적는다 (시안 1274:9276).
+    // 보상을 안 정했으면 줄을 감추지 않고 `보상 아직 안 정했어요` 라 적는다 (시안 1274:9276, 말머리 없이 #1169).
     final reward = routine.hasReward
         ? routine.rewardDisplay
         : context.l10n.draftRoutinesRewardUnset;
@@ -293,15 +282,18 @@ class _DraftTile extends StatelessWidget {
                   SizedBox(height: _titleToMeta.h),
                   Row(
                     children: [
-                      Text(
-                        context.l10n.draftRoutinesRewardLabel,
-                        style: typo.routineTileMeta.copyWith(
-                          color: colors.routineTileLabel,
+                      // `완료 시` 말머리는 보상이 있을 때만 (없을 때 `완료 시 보상 아직…` 으로 읽히지 않게)
+                      if (routine.hasReward) ...[
+                        Text(
+                          context.l10n.draftRoutinesRewardLabel,
+                          style: typo.routineTileMeta.copyWith(
+                            color: colors.routineTileLabel,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: _labelGap.w),
+                        SizedBox(width: _labelGap.w),
+                      ],
                       Expanded(
-                        // 보상 글만 일과 언어다. `미설정` 은 화면 문구라 따르지 않는다.
+                        // 보상 글만 일과 언어다. 보상 없음 문구는 화면 문구라 따르지 않는다.
                         child: routine.hasReward
                             ? ContentLocale(
                                 language: routine.language,

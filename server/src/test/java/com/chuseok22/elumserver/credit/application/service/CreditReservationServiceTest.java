@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
+import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
@@ -26,12 +27,16 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +54,8 @@ class CreditReservationServiceTest {
   /// 2026-09-23(수) 15:00 한국 시각 — 2026-W39.
   private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-09-23T06:00:00Z"), ZoneId.of("Asia/Seoul"));
   private static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 23, 15, 0);
+  /// 무료 다시 그리기 하루 한도 (시험값 — 한도 도달을 짧게 보기 위해 작게)
+  private static final int FREE_REGENERATE_DAILY_CAP = 2;
 
   @Mock
   private AiCreditAccountRepository accountRepository;
@@ -73,10 +80,11 @@ class CreditReservationServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     accountService = new CreditAccountService(
-      accountRepository, grantRepository, jobRepository, ledgerRepository, mock(EntityManager.class));
+      accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), mock(EntityManager.class));
     // 트랜잭션 관리자는 목 — 트랜잭션 경계는 단위 테스트가 볼 수 없고, 안의 계산만 본다.
     service = new CreditReservationService(policyService, accountService, entitlementService,
-      jobRepository, ledgerRepository, mock(PlatformTransactionManager.class), CLOCK);
+      jobRepository, ledgerRepository, UsageLimitSettings.fromValues(Map.of(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP, FREE_REGENERATE_DAILY_CAP)),
+      mock(PlatformTransactionManager.class), CLOCK);
 
     policy = AiCreditPolicy.disabledDefault();
     policy.setVersion(1);
@@ -528,5 +536,179 @@ class CreditReservationServiceTest {
     CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
 
     assertThat(reservation.outcome()).isEqualTo(CreditReservation.Outcome.RESERVED);
+  }
+
+  // --- 무료 다시 그리기 (#1075) ---
+
+  private void givenFreeRegenerateAllowed(boolean isAllowed) {
+    lenient().when(entitlementService.isAllowed(MEMBER_ID, Entitlement.IMAGE_REGENERATE_FREE)).thenReturn(isAllowed);
+  }
+
+  private CreditReservation reserveRegenerate(String requestKey) {
+    return service.reserve(MEMBER_ID, CreditJobKind.IMAGE_REGENERATE, requestKey, false);
+  }
+
+  @Test
+  @DisplayName("다시 그리기 무료 권한이 있으면 다시 그리기가 0 크레딧이고 내역용 0 사용 줄이 남는다")
+  void regenerate_isFreeWhenEntitled() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    CreditReservation reservation = reserveRegenerate("regen-1");
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isZero();
+    assertThat(available()).isEqualTo(5);
+    assertThat(store.ledgerOf(CreditLedgerType.CONSUME)).singleElement().satisfies(line -> {
+      assertThat(line.getDelta()).isZero();
+      assertThat(line.getAction()).isEqualTo(com.chuseok22.elumserver.credit.core.CreditAction.IMAGE_REGENERATE);
+    });
+  }
+
+  @Test
+  @DisplayName("다시 그리기 무료 권한이 없으면(Free 기본) 원래 단가로 차감한다")
+  void regenerate_chargesNormallyWithoutEntitlement() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(false);
+
+    CreditReservation reservation = reserveRegenerate("regen-1");
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
+    assertThat(available()).isEqualTo(4);
+  }
+
+  @Test
+  @DisplayName("무료 다시 그리기는 하루 한도까지만 — 넘으면 원래 단가로 차감한다")
+  void regenerate_chargesNormallyAfterDailyCap() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    for (int i = 0; i < FREE_REGENERATE_DAILY_CAP; i++) {
+      CreditReservation free = reserveRegenerate("regen-" + i);
+      assertThat(service.settle(free.jobId(), 0, 1, "routine-1", "step-1").charged()).isZero();
+    }
+    CreditReservation overCap = reserveRegenerate("regen-over");
+    CreditSettlement settlement = service.settle(overCap.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
+    assertThat(available()).isEqualTo(4);
+  }
+
+  @Test
+  @DisplayName("반환된 무료 다시 그리기는 하루 한도에 세지 않는다 — 그림을 못 받았으니")
+  void regenerate_releasedJobDoesNotCountTowardCap() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    for (int i = 0; i < FREE_REGENERATE_DAILY_CAP; i++) {
+      service.release(reserveRegenerate("regen-" + i).jobId(), "그림 실패");
+    }
+    CreditReservation reservation = reserveRegenerate("regen-after-failures");
+
+    assertThat(store.job(reservation.jobId()).orElseThrow().getReserved()).isZero();
+  }
+
+  @Test
+  @DisplayName("무료 권한은 다시 그리기만 — 카드 그림 직접 만들기는 원래 단가로 차감한다")
+  void freeRegenerate_doesNotApplyToCardImage() {
+    weeklyRemaining(5);
+    givenFreeRegenerateAllowed(true);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.CARD_IMAGE, "card-1", false);
+    CreditSettlement settlement = service.settle(reservation.jobId(), 0, 1, "routine-1", "step-1");
+
+    assertThat(settlement.charged()).isEqualTo(1);
+  }
+
+  // --- 일과 생성 글 무료 (#1110) ---
+
+  private void givenFreeRoutineTextAllowed(boolean isAllowed) {
+    lenient().when(entitlementService.isAllowed(MEMBER_ID, Entitlement.ROUTINE_CREATE_FREE)).thenReturn(isAllowed);
+  }
+
+  @Test
+  @DisplayName("일과 글 무료 권한이면 그림만 청구한다 — 글 0 + 그림 3장 × 2 = 6, 글 0 사용 줄이 내역용으로 남는다")
+  void routineTextFree_chargesImagesOnly() {
+    policy.setActionCostsJson("{\"ROUTINE_TEXT\":3,\"CARD_IMAGE\":2,\"IMAGE_REGENERATE\":1}");
+    weeklyRemaining(20);
+    givenFreeRoutineTextAllowed(true);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
+    CreditSettlement settlement = service.settle(reservation.jobId(), 4, 3, "routine-1", null);
+
+    assertThat(settlement.charged()).isEqualTo(6);
+    assertThat(available()).isEqualTo(14);
+    AiCreditJob job = store.job(reservation.jobId()).orElseThrow();
+    assertThat(AiCreditPolicy.costFrom(job.getCostSnapshot(), CreditAction.ROUTINE_TEXT))
+      .isZero();
+    assertThat(store.ledgerOf(CreditLedgerType.CONSUME))
+      .filteredOn(line -> line.getDelta() == 0)
+      .singleElement()
+      .satisfies(line -> {
+        assertThat(line.getAction()).isEqualTo(CreditAction.ROUTINE_TEXT);
+        assertThat(line.getReason()).isEqualTo(CreditFreeRoutineTextAllowance.FREE_ROUTINE_TEXT_REASON);
+      });
+  }
+
+  @Test
+  @DisplayName("일과 글 무료라도 시작에는 그림 한 장 단가만큼 잔액이 있어야 한다 — 잔액 0 에서 그림이 초과로 새지 않게")
+  void routineTextFree_holdsOneImageCostAndRejectsWhenShort() {
+    policy.setActionCostsJson("{\"ROUTINE_TEXT\":3,\"CARD_IMAGE\":2,\"IMAGE_REGENERATE\":1}");
+    givenFreeRoutineTextAllowed(true);
+    weeklyRemaining(1);
+
+    assertRejectedWith(() -> service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true),
+      ErrorCode.AI_CREDIT_INSUFFICIENT);
+    assertThat(store.jobs).isEmpty();
+
+    store.grants.forEach(grant -> grant.setRemaining(2));
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
+    assertThat(store.job(reservation.jobId()).orElseThrow().getReserved()).isEqualTo(2);
+    assertThat(service.routineCreateStartCost(account, policy)).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("일과 글 무료인데 그림을 못 그렸으면 0 청구 — 잡아 둔 그림 한 장 몫은 풀린다")
+  void routineTextFree_noImages_chargesNothing() {
+    weeklyRemaining(5);
+    givenFreeRoutineTextAllowed(true);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
+    CreditSettlement settlement = service.settle(reservation.jobId(), 4, 0, "routine-1", null);
+
+    assertThat(settlement.charged()).isZero();
+    assertThat(settlement.overage()).isZero();
+    assertThat(available()).isEqualTo(5);
+  }
+
+  @Test
+  @DisplayName("일과 글 무료 권한이 꺼져 있으면(Free 기본·Pro 끔) 글 + 그림 그대로 청구 — 글 0 사용 줄도 없다")
+  void routineTextFree_off_chargesTextAndImages() {
+    policy.setActionCostsJson("{\"ROUTINE_TEXT\":3,\"CARD_IMAGE\":2,\"IMAGE_REGENERATE\":1}");
+    weeklyRemaining(20);
+    givenFreeRoutineTextAllowed(false);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
+    assertThat(store.job(reservation.jobId()).orElseThrow().getReserved()).isEqualTo(3);
+    CreditSettlement settlement = service.settle(reservation.jobId(), 4, 3, "routine-1", null);
+
+    assertThat(settlement.charged()).isEqualTo(3 + 2 * 3);
+    assertThat(service.routineCreateStartCost(account, policy)).isEqualTo(3);
+    assertThat(store.ledgerOf(CreditLedgerType.CONSUME)).noneMatch(line -> line.getDelta() == 0);
+  }
+
+  @Test
+  @DisplayName("일과 글 무료 작업도 실패하면 잡아 둔 몫을 그대로 돌려준다 — 반환 규칙은 같다")
+  void routineTextFree_releaseRestoresHold() {
+    weeklyRemaining(5);
+    givenFreeRoutineTextAllowed(true);
+
+    CreditReservation reservation = service.reserve(MEMBER_ID, CreditJobKind.ROUTINE_CREATE, "key-1", true);
+    assertThat(available()).isEqualTo(4);
+    service.release(reservation.jobId(), "AI 생성 실패");
+
+    assertThat(store.job(reservation.jobId()).orElseThrow().getStatus()).isEqualTo(CreditJobStatus.RELEASED);
+    assertThat(available()).isEqualTo(5);
   }
 }

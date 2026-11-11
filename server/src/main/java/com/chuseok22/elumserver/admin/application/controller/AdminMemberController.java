@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberAccess
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberCreditSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminStorePurchaseEventLine;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.format.AdminLogIds;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter;
@@ -17,6 +18,7 @@ import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.StorePurchaseHistoryService;
 import com.chuseok22.elumserver.member.application.service.MemberAdminMemoService;
 import com.chuseok22.elumserver.member.core.MemberAdminMemoSaveResult;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -46,6 +48,8 @@ public class AdminMemberController {
   private static final String LIST_PATH = "/admin/members";
   /// CSV 파일명 접두어: members_{yyyyMMdd}.csv
   private static final String CSV_FILE_PREFIX = "members";
+  /// 회원 상세에 보여 줄 스토어 거래 이력 수 (최신순)
+  private static final int STORE_EVENT_LIMIT = 20;
 
   private final AdminMemberService adminMemberService;
   private final AdminDateFormatter adminDateFormatter;
@@ -53,6 +57,7 @@ public class AdminMemberController {
   private final AdminMemberAccessService adminMemberAccessService;
   private final MemberAdminMemoService memberAdminMemoService;
   private final AdminAuditService adminAuditService;
+  private final StorePurchaseHistoryService storePurchaseHistoryService;
 
   /// 회원 목록: 검색어(q), 필터(AdminMemberList 정의 7개), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
@@ -91,7 +96,7 @@ public class AdminMemberController {
       AdminMemberList.csvColumns(adminDateFormatter), export.rows());
   }
 
-  /// 회원 상세 + 크레딧 요약 카드(탈퇴 회원은 없음) + 접속 정보(로그인 방식·마지막 앱 버전/OS) + 운영 메모 상한
+  /// 회원 상세 + 크레딧 요약 카드(탈퇴 회원은 없음) + 접속 정보(로그인 방식·마지막 앱 버전/OS) + 운영 메모 상한 + 스토어 거래 이력
   @GetMapping("/admin/members/{id}")
   public String detail(@PathVariable String id, Model model) {
     AdminMemberDetailResponse member = adminMemberService.getDetail(id);
@@ -100,6 +105,7 @@ public class AdminMemberController {
       model.addAttribute("creditSummary", memberCreditSummaryOf(id));
     }
     model.addAttribute("accessInfo", accessInfoOf(id));
+    model.addAttribute("storeEvents", storeEventsOf(id));
     model.addAttribute("adminMemoMaxLength", MemberAdminMemoService.MAX_ADMIN_MEMO_LENGTH);
     return "admin/member-detail";
   }
@@ -277,6 +283,18 @@ public class AdminMemberController {
     } catch (RuntimeException e) {
       log.warn("[admin members] access info failed : memberId={}", AdminLogIds.toLoggableId(memberId), e);
       return AdminMemberAccessInfo.failed();
+    }
+  }
+
+  /// 스토어 거래 이력 (실패하면 null > 화면에 안내만, 상세는 그대로)
+  private List<AdminStorePurchaseEventLine> storeEventsOf(String memberId) {
+    try {
+      return storePurchaseHistoryService.recentEventsOf(memberId, STORE_EVENT_LIMIT).stream()
+        .map(AdminStorePurchaseEventLine::from)
+        .toList();
+    } catch (RuntimeException e) {
+      log.warn("[admin members] store events failed : memberId={}", AdminLogIds.toLoggableId(memberId), e);
+      return null;
     }
   }
 

@@ -9,6 +9,8 @@ import '../../../core/network/server_error_code.dart';
 import '../../../shared/models/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../domain/guardian_account.dart';
+import '../domain/member_subscription.dart';
+import '../domain/plan_entitlements.dart';
 import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -17,12 +19,15 @@ import '../../../app/dio_provider.dart';
 @immutable
 class Member {
   const Member({
+    this.id,
     this.nickname,
     this.totalStars = 0,
     this.supportGoals = const [],
-    this.imageStyle = ImageStyle.cartoon,
+    this.imageStyle = ImageStyle.character,
     this.profiles = const [],
-    this.adsRemoved = false,
+    this.entitlements = PlanEntitlements.free,
+    this.proPlanEntitlements,
+    this.subscription,
     this.account,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
@@ -36,7 +41,7 @@ class Member {
   /// 선택한 도움 목표의 서버 enum 값
   final List<String> supportGoals;
 
-  /// 카드 그림 방식. 필드가 없거나 모르는 값이면 만화다 —
+  /// 카드 그림 방식. 필드가 없거나 모르는 값이면 캐릭터 그림이다 —
   /// 필드가 없거나 새 값이 와도 화면이 죽지 않는다.
   final ImageStyle imageStyle;
 
@@ -46,10 +51,17 @@ class Member {
   /// 짚은 이룸이(없으면 첫 이룸이)의 값이다.
   final List<ProfileSummary> profiles;
 
-  /// 이 계정의 요금제가 광고를 없애는가 (`entitlements.adsRemoved` · 요금제별 `*_ADS_REMOVED`).
-  ///
-  /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
-  final bool adsRemoved;
+  /// 보호자 회원 id (UUID 문자열). 스토어 결제에 실어 구매를 이 계정에 묶는다. 모르면 null
+  final String? id;
+
+  /// 서버 권한 묶음 (Pro 판정·Pro 기능별 사용 가능). 화면은 이것 대신 `planAccessProvider` 를 본다
+  final PlanEntitlements entitlements;
+
+  /// Pro 요금제가 지금 주는 권한 (`proPlanEntitlements`, #1165). 이전 서버면 null
+  final PlanEntitlements? proPlanEntitlements;
+
+  /// 내 요금제 표시용 구독 상태 (만료일·자동 갱신·유예). 이전 서버면 null
+  final MemberSubscription? subscription;
 
   /// 보호자 본인 표시 정보 (닉네임·가입 방법·가린 이메일·가입일). 내 정보 상단 카드용
   ///
@@ -68,10 +80,13 @@ class Member {
 
   /// 화면에 쓰이는 값이 모두 같은가. 주기 갱신이 같은 값으로 구독자를 다시 그리지 않게 하려는 비교다.
   bool sameAs(Member other) {
-    if (nickname != other.nickname ||
+    if (id != other.id ||
+        nickname != other.nickname ||
         totalStars != other.totalStars ||
         imageStyle != other.imageStyle ||
-        adsRemoved != other.adsRemoved ||
+        entitlements != other.entitlements ||
+        proPlanEntitlements != other.proPlanEntitlements ||
+        subscription != other.subscription ||
         account != other.account ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
@@ -94,6 +109,7 @@ class Member {
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
+      id: json['id'] is String ? json['id'] as String : null,
       nickname: json['nickname']?.toString(),
       totalStars: switch (json['totalStars']) {
         final int v => v,
@@ -112,10 +128,12 @@ class Member {
           list.map(ProfileSummary.tryParse).whereType<ProfileSummary>().toList(),
         _ => const <ProfileSummary>[],
       },
-      adsRemoved: switch (json['entitlements']) {
-        final Map<dynamic, dynamic> e => e['adsRemoved'] == true,
-        _ => false,
-      },
+      entitlements: PlanEntitlements.fromJson(json['entitlements']),
+      // 필드 없음(이전 서버) > null: 앱 기본 Pro 묶음으로 봄 (PlanAccess)
+      proPlanEntitlements: json['proPlanEntitlements'] is Map
+          ? PlanEntitlements.fromJson(json['proPlanEntitlements'])
+          : null,
+      subscription: MemberSubscription.tryParse(json['subscription']),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
       profilesKnown: json['profiles'] is List,
     );
@@ -136,8 +154,8 @@ class MemberRepository {
   Future<Member?> getMyInfo() async {
     try {
       return await logged<Member?>(_repo, 'getMyInfo', () async {
-        final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
-        final body = res.data;
+        final response = await _dio.get<Map<String, dynamic>>('/api/member/me');
+        final body = response.data;
         if (body == null) return null;
         return Member.fromJson(body);
       });
@@ -157,8 +175,8 @@ class MemberRepository {
   /// 어느 이룸이가 생겼는지 모르면 이어서 저장할 수 없다.
   Future<Attempt<Member>> createProfile() async {
     return guarded(_repo, 'createProfile', () async {
-      final res = await _dio.post<Map<String, dynamic>>('/api/member/profile');
-      final body = res.data;
+      final response = await _dio.post<Map<String, dynamic>>('/api/member/profile');
+      final body = response.data;
       final member = body == null ? null : Member.fromJson(body);
       if (member == null || member.profiles.isEmpty) {
         // 목록이 없으면 어느 이룸이가 생겼는지 몰라 실패로 본다
@@ -179,7 +197,7 @@ class MemberRepository {
     required List<String> exampleCategories,
   }) {
     return guarded(_repo, 'completeOnboarding', () async {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/member/onboarding',
         data: {
           'nickname': nickname,
@@ -190,7 +208,7 @@ class MemberRepository {
         },
         options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
       );
-      final body = res.data;
+      final body = response.data;
       final member = body == null ? null : Member.fromJson(body);
       if (member == null || member.profiles.isEmpty) {
         // 어느 이룸이에 저장됐는지 몰라 실패로 본다
@@ -233,11 +251,11 @@ class MemberRepository {
   /// 거절 4종: 형식 · 금지어 · 중복 · 7일 제한 (`NICKNAME_*`). 이룸이 호칭은 [updateNickname]
   Future<Attempt<Member>> updateGuardianNickname(String nickname) {
     return guarded(_repo, 'updateGuardianNickname', () async {
-      final res = await _dio.patch<Map<String, dynamic>>(
+      final response = await _dio.patch<Map<String, dynamic>>(
         '/api/member/account/nickname',
         data: {'nickname': nickname},
       );
-      final body = res.data;
+      final body = response.data;
       // 응답 모양이 다르면 저장 여부를 몰라 실패로 본다 (다시 받기로 맞춤)
       if (body == null) throw const AppFailure(fault: NetworkFault.app);
       return Member.fromJson(body);

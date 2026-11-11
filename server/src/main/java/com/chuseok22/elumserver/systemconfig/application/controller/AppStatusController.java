@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.systemconfig.application.controller;
 import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse;
 import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.ClientTuning;
 import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.ServerAddress;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.StoreSales;
 import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.VersionRequirement;
 import com.chuseok22.elumserver.systemconfig.application.service.MigrationLock;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -53,8 +54,25 @@ public class AppStatusController implements AppStatusControllerDocs {
         systemConfigService.getInt(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS),
         systemConfigService.getInt(ConfigKey.APP_DLP_MIN_DELAY_MS)
       ),
-      new ServerAddress(resolveNewApiBaseUrl())
+      new ServerAddress(resolveNewApiBaseUrl()),
+      new StoreSales(
+        isSellingOpen(ConfigKey.SUBSCRIPTION_APPLE_SELLING_ENABLED, ConfigKey.SUBSCRIPTION_APPLE_ENABLED),
+        isSellingOpen(ConfigKey.SUBSCRIPTION_GOOGLE_SELLING_ENABLED, ConfigKey.SUBSCRIPTION_GOOGLE_ENABLED)
+      )
     ));
+  }
+
+  /**
+   * 신규 판매 여부 = 판매 켜기 AND 구독 검증 켜기 (#1132)
+   * 검증이 꺼진 플랫폼은 결제 화면을 열지 않음. 설정을 못 읽으면 false (상태 응답은 계속 나감)
+   */
+  private boolean isSellingOpen(ConfigKey sellingKey, ConfigKey verificationKey) {
+    try {
+      return systemConfigService.getBoolean(sellingKey) && systemConfigService.getBoolean(verificationKey);
+    } catch (RuntimeException e) {
+      log.warn("[app status] store sales closed : config read failed ({})", sellingKey);
+      return false;
+    }
   }
 
   /**

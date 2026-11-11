@@ -54,7 +54,7 @@ public class CreditRefillNotificationScheduler {
     this.migrationLock = migrationLock;
   }
 
-  // 월요일 오전 9시(한국 시각): 새 주기 지급이 이미 시작된 뒤
+  // 월요일 오전 9시(한국 시각): 새 주기 지급이 이미 시작된 뒤 (달 주기면 첫 월요일에 한 번, 이후 같은 키라 건너뜀)
   @Scheduled(cron = "${elum.notification.credit-refill-cron:0 0 9 * * MON}", zone = NotificationTime.ZONE_ID_NAME)
   public void run() {
     if (migrationLock.isBlockingScheduledJob("CreditRefillNotificationScheduler")) {
@@ -72,8 +72,9 @@ public class CreditRefillNotificationScheduler {
 
   private void notifyDepletedMembers() {
     LocalDateTime now = LocalDateTime.now(clock);
-    CreditPeriod previousPeriod = CreditPeriod.of(now.minusWeeks(1));
-    String thisPeriodKey = CreditPeriod.of(now).key();
+    CreditPeriod thisPeriod = creditQueryService.currentPeriod(now);
+    CreditPeriod previousPeriod = thisPeriod.previous();
+    String thisPeriodKey = thisPeriod.key();
 
     List<String> memberIds = creditQueryService.memberIdsDepletedIn(previousPeriod);
     if (memberIds.isEmpty()) {

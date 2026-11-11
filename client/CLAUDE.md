@@ -59,10 +59,9 @@ fileKey  VSmGuv1iuOpLZmp6QeBHWr
 ### 서버 — API 원본
 
 ```
-Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
+Swagger  https://api.elum.suhsaechan.kr/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
 내부 로직  <repo>/server/src/main/java/com/chuseok22/elumserver/**
-배포 로그  http://chuseok22.synology.me:8888/containers/elum-back-blue/logs
-          http://chuseok22.synology.me:8888/containers/elum-back-green/logs   ← 둘 중 지금 떠 있는 쪽
+배포 로그  내 NAS docker logs elum-back-blue | elum-back-green   ← 둘 중 지금 떠 있는 쪽 (보는 법: server/CLAUDE.md)
 ```
 
 **Swagger는 "무엇을 받는가", `server/` 코드는 "왜 그런가"를 본다.**
@@ -84,18 +83,9 @@ Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(Op
 클라이언트에서 4xx·5xx를 받았을 때 **요청 코드를 먼저 의심하지 않는다.**
 요청이 서버까지 갔는지, 어느 계층에서 터졌는지는 배포 로그에 남아 있다.
 
-서버는 Blue/Green 배포라 컨테이너가 `elum-back-blue` · `elum-back-green` 중 하나로 떠 있다.
+서버는 내 NAS 의 Blue/Green 배포라 컨테이너가 `elum-back-blue` · `elum-back-green` 중 하나로 떠 있다.
 배포마다 서로 바뀌므로 **지금 떠 있는 쪽**으로 조회하고, 안 나오면 다른 쪽을 본다.
-
-```bash
-# 최근 로그 확인 (lines는 500 · 1000 · all 만 받는다)
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=500" | tail -50
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=500" | tail -50
-
-# 실시간으로 따라가며 재현
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=all&follow=true"
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=all&follow=true"
-```
+보는 법(SSH `docker logs`, 관리자 화면 `/admin/logs`)은 [server/CLAUDE.md](../server/CLAUDE.md) "배포 서버 로그 확인".
 
 로그에 요청 자체가 없으면 클라이언트(URL·헤더·토큰) 문제이고,
 요청은 찍혔는데 예외가 났으면 서버 문제다. **이 구분을 먼저 하고 고친다.**
@@ -534,7 +524,7 @@ context.typo.cardTitle.copyWith(color: ...)
 
 ### 6. 검증 — 앱 테스트는 두지 않는다 (2026-10-20, #848)
 
-앱 테스트(`client/test`)는 실행 비용에 비해 얻는 것이 적어 지웠다. 앱 쪽 검증은 아래 셋으로 한다.
+앱 테스트(`client/test`)는 실행 비용에 비해 얻는 것이 적어 지웠다. 앱 쪽 검증은 아래 표로 한다.
 
 | 무엇을 | 어떻게 | 어디서 |
 | --- | --- | --- |
@@ -543,6 +533,8 @@ context.typo.cardTitle.copyWith(color: ...)
 | 디자인 규칙 (시안 색 · 글자 조합 · 간격 · 모서리 · fi-br 아이콘 · Material 기본 부품) | `dart run tool/check_design_rules.dart` (원본 `tool/design_rules.yaml` · 동결 `tool/design_rules_allowed.txt` · 절차 `docs/design-language.md` §10) | 로컬 · Flutter CI |
 | 화면 문구 하드코딩 | `dart run tool/check_hangul_literals.dart lib` (0줄이어야 한다) | 로컬 · Flutter CI |
 | 네이티브 언어 등록 (OS 앱별 언어 목록 = 연 언어, iOS 권한 문구 키) | `dart run tool/check_native_locales.dart` (원본 `lib/core/l10n/app_locales.dart` `openedAppLocales` · 여는 순서 `docs/store/locales/README.md`) | 로컬 · Flutter CI |
+| 로컬 저장 키 범위 (키마다 계정 범위 · 기기 범위 분류) | `dart run tool/check_storage_scopes.dart` (원본 `lib/core/storage/shared_prefs_storage.dart` 분류 목록) | 로컬 · Flutter CI |
+| 안 쓰는 코드 (진입점에서 안 닿는 dart 파일 · 안 쓰는 ARB 키 · 안 쓰는 AppAssets 상수 · 이름이 안 나오는 에셋 파일) | `dart run tool/check_unused_code.dart` (예외는 스크립트 안 목록에 이유와 함께) | 로컬 |
 | 서버 계약 (에러 코드·공유 enum·연결 암호·의견 기록 표지) | 서버 `CrossStackContractTest` 가 앱 소스를 읽어 대조 | `cd server && ./gradlew test --tests '*CrossStackContractTest*'` |
 | 실제 동작 | 시뮬레이터·실기기에서 직접 띄워 확인 (`/pro-launch`) | 로컬 |
 
@@ -570,7 +562,6 @@ dart run build_runner build --delete-conflicting-outputs
 | 코드 생성 패키지 추가 실패 | analyzer 버전 충돌 → `--dry-run`으로 먼저 확인 |
 | 폰트가 안 나옴 | `pubspec.yaml` 선언 누락 → `FontManifest.json` 확인 |
 | 텍스트인 줄 알았는데 폰트가 없음 | 실은 이미지일 수 있다 → Figma 노드 타입 확인 |
-| 위젯 테스트에서 `.w` 에러 | `ScreenUtilInit` 누락 |
 | 화면 문구에 조사만 남음 | 사용자 입력이 빈 값 → 대체어 getter |
 
 > **새 문제를 해결했으면 [트러블슈팅 문서](./docs/troubleshooting.md)에 기록한다.**
@@ -602,6 +593,6 @@ flutter run
 
 ## 미확정 사항
 
-- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.chuseok22.com`)
+- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.suhsaechan.kr`)
 - 아동 모드 → 보호자 모드 전환 시 PIN 검증 로직 (온보딩에서 PIN 저장까지만 구현)
 - 캐릭터 에셋(여우/고양이 외 추가분) 확보 여부

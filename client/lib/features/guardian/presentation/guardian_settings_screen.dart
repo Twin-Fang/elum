@@ -1,3 +1,4 @@
+import '../../notification/application/device_notification_permission_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
-import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_type_confirm_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -21,9 +22,15 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
+import '../../member/application/plan_access.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
+import '../../subscription/application/plan_status_providers.dart';
+import '../../subscription/domain/withdraw_store_subscription_notice.dart';
+import 'widgets/plan_settings_group.dart';
+import '../../subscription/domain/plan_benefit.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -52,26 +59,15 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
     // 바텀시트로 따로 그려 두고 있었는데, 그러면 같은 확인을 앱이 두 가지
     // 모양으로 하게 된다 — 일과 삭제는 팝업, 로그아웃은 시트였다.
-    final ok = await showElumDialog<bool>(
-      context: context,
+    final ok = await confirmDangerousAction(
+      context,
       // 시안에 노란 변형이 없으므로 로그아웃도 시안 그대로 붉게 칠한다.
       // 되돌릴 수 없는 탈퇴와는 설명 문장 유무로 구분된다.
-      icon: ElumDialogIcon.alert,
+      icon: ElumDangerIcon.alert,
       title: context.l10n.guardianSettingsLogoutConfirmTitle,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.commonConfirm,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: context.l10n.guardianSettingsLogout,
     );
-    if (ok != true) return;
+    if (!ok) return;
     await _run(_logoutKey, () async {
       await ref.read(authSessionControllerProvider).logout();
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
@@ -79,34 +75,57 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     });
   }
 
+  /// 회원탈퇴: 경고 팝업 > `회원탈퇴` 입력 확인 > 탈퇴
   Future<void> _deleteAccount() async {
-    final ok = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
-      title: context.l10n.guardianSettingsWithdrawConfirmTitle,
+    final isWarningConfirmed = await _confirmWithdrawWarning();
+    if (!isWarningConfirmed || !mounted) return;
+    final isTypedConfirmed = await _confirmWithdrawByTyping();
+    if (!isTypedConfirmed || !mounted) return;
+    await _run(
+      _withdrawKey,
+      () => ref.read(authSessionControllerProvider).deleteAccount(),
+    );
+  }
+
+  /// 둘째 단계: `회원탈퇴` 입력이 맞아야 탈퇴하기가 켜짐
+  Future<bool> _confirmWithdrawByTyping() {
+    final l10n = context.l10n;
+    final requiredPhrase = l10n.guardianSettingsWithdrawTypePhrase;
+    return confirmByTyping(
+      context,
+      requiredPhrase: requiredPhrase,
+      title: l10n.guardianSettingsWithdrawTypeTitle,
+      message: l10n.guardianSettingsWithdrawTypeMessage(requiredPhrase),
+      actionLabel: l10n.guardianSettingsWithdrawTypeAction,
+    );
+  }
+
+  /// 첫 단계 경고. 스토어 결제 Pro 가 갱신 중이면 스토어별 해지 안내 한 줄 추가
+  Future<bool> _confirmWithdrawWarning() async {
+    final l10n = context.l10n;
+    final storeSubscriptionNotice = switch (ref.read(
+      withdrawStoreSubscriptionNoticeProvider,
+    )) {
+      WithdrawStoreSubscriptionNotice.none => null,
+      WithdrawStoreSubscriptionNotice.cancelledOnWithdraw =>
+        l10n.guardianSettingsWithdrawGooglePlaySubscriptionNotice,
+      WithdrawStoreSubscriptionNotice.cancelInStore =>
+        l10n.guardianSettingsWithdrawAppStoreSubscriptionNotice,
+    };
+    return confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
+      title: l10n.guardianSettingsWithdrawConfirmTitle,
       // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
       // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
       // 다시 들어오면 그대로지만 탈퇴는 되돌아오지 않는다. 되돌릴 수 없다는
       // 고지를 빼면 사용자가 잃는 것이 크다 (docs 예외처리 규칙).
       // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
-      message: context.l10n.guardianSettingsWithdrawConfirmMessage,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.commonConfirm,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
-    );
-    if (ok != true) return;
-    await _run(
-      _withdrawKey,
-      () => ref.read(authSessionControllerProvider).deleteAccount(),
+      message: [
+        l10n.guardianSettingsWithdrawConfirmMessage,
+        ?storeSubscriptionNotice,
+      ].join('\n'),
+      actionLabel: l10n.guardianSettingsWithdrawConfirmAction,
     );
   }
 
@@ -157,7 +176,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       // 뒤로가기 아래로 내려간다.
       title: context.l10n.guardianSettingsTitle,
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 설정에는 광고를 두지 않는다. 맨 아래 `회원탈퇴` 줄과 가까워 광고를 잘못 누르면 되돌릴 수 없는
       // 동작으로 이어질 수 있다. 시안에서 간격이 정해지기 전까지 뺀다.
@@ -172,35 +191,33 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     );
   }
 
-  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16.
-  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 연결 / 앱 사용 / 약관 및 정보 / 계정.
+  /// 설정 메인 시안(`1532:7501`, 맨 위 요금제 묶음은 #1070): 흰 묶음 카드 5개, 묶음 사이 16.
+  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 요금제 / 연결 / 앱 사용 / 약관 및 정보 / 계정.
   Widget _list(AppSpacing space) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
         SizedBox(height: 16.h),
+        // 요금제: 내 요금제 · 구매 복원 (설정 맨 위, 시안 #1070)
+        PlanSettingsGroup(isBusy: busy),
+        _groupGap,
         // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
-          children: [_LinkTile(busy: busy)],
+          children: [_LinkTile(isBusy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.notificationSettingsTitle,
-              onTap: busy
-                  ? null
-                  : () => context.push(Routes.guardianNotificationSettings),
-            ),
+            _NotificationTile(isBusy: busy),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),
-            _ImageStyleTile(busy: busy),
+            _ImageStyleTile(isBusy: busy),
+            _RoutineMemoryTile(isBusy: busy),
             const _HapticTile(),
             const _PraiseSoundTile(),
             const _ScreenAwakeTile(),
@@ -270,9 +287,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 /// **상태를 못 알아도 `연결하기`로 둔다** — 로딩·실패가 설정 화면을 막으면 안 된다. 연결된 보호자가
 /// 잘못 `연결하기`를 눌러도 새 암호만 만들어질 뿐 기존 연결은 그대로다(서버가 발급과 끊기를 나눈다).
 class _LinkTile extends ConsumerWidget {
-  const _LinkTile({required this.busy});
+  const _LinkTile({required this.isBusy});
 
-  final bool busy;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -290,7 +307,7 @@ class _LinkTile extends ConsumerWidget {
           : context.l10n.guardianSettingsLinkConnect,
       valueText: connected ? context.l10n.guardianSettingsLinkStatus : null,
       showChevronWithValue: connected,
-      onTap: busy
+      onTap: isBusy
           ? null
           : () async {
               // 열려 있는 동안 캐시가 남아 옛 값이 보인다 — 들어가기 전에 비워 새 값을 받게 한다
@@ -307,9 +324,9 @@ class _LinkTile extends ConsumerWidget {
 
 /// `그림 방식` 줄. 오른쪽에 지금 방식(`만화`)을 보여주고 누르면 선택 화면이 열린다.
 class _ImageStyleTile extends ConsumerWidget {
-  const _ImageStyleTile({required this.busy});
+  const _ImageStyleTile({required this.isBusy});
 
-  final bool busy;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -319,7 +336,102 @@ class _ImageStyleTile extends ConsumerWidget {
       label: context.l10n.guardianSettingsImageStyle,
       valueText: style.label,
       showChevronWithValue: true,
-      onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+      onTap: isBusy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// 알림 줄: 기기 알림이 꺼져 있으면 제목 아래 작은 글 + 어두운 알약 `켜기` (앱이 앞으로 돌아오면 다시 확인), 켜져 있으면 그대로
+class _NotificationTile extends ConsumerStatefulWidget {
+  const _NotificationTile({required this.isBusy});
+
+  final bool isBusy;
+
+  @override
+  ConsumerState<_NotificationTile> createState() => _NotificationTileState();
+}
+
+class _NotificationTileState extends ConsumerState<_NotificationTile> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(deviceNotificationPermissionControllerProvider.notifier).recheck();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isPermissionOff = ref.watch(deviceNotificationPermissionControllerProvider);
+    void openSettings() => context.push(Routes.guardianNotificationSettings);
+    return SettingsTile(
+      isInCard: true,
+      label: l10n.notificationSettingsTitle,
+      onTap: widget.isBusy ? null : openSettings,
+      // 기기 알림이 꺼져 있으면 값 자리에 `꺼짐` (켜는 곳은 알림 설정 화면의 띠)
+      valueChip: isPermissionOff ? const _NotificationOffValue() : null,
+      showChevronWithValue: true,
+    );
+  }
+}
+
+/// 알림 설정 줄의 `꺼짐` 값: 작은 점 + 글
+class _NotificationOffValue extends StatelessWidget {
+  const _NotificationOffValue();
+
+  static const _dotSize = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: _dotSize.w,
+          height: _dotSize.w,
+          decoration: BoxDecoration(color: colors.highlightBorder, shape: BoxShape.circle),
+        ),
+        SizedBox(width: context.space.xs.w / 2),
+        Text(
+          context.l10n.notificationOffValue,
+          style: context.typo.settingsTileLabel.copyWith(color: colors.highlightBorder),
+        ),
+      ],
+    );
+  }
+}
+
+/// `AI 메모리` 줄 (Pro). 지금 고른 이룸이의 메모 화면으로 간다.
+/// Free 는 판매 중일 때만 줄이 보이고 들어가면 Pro 미리 보기 — 살 수 없는 동안 잠긴 줄은 막힌 기능으로 읽혀 숨긴다
+class _RoutineMemoryTile extends ConsumerWidget {
+  const _RoutineMemoryTile({required this.isBusy});
+
+  final bool isBusy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final access = ref.watch(planAccessProvider);
+    if (!access.shouldShowEntryFor(PlanBenefit.routineMemory)) {
+      return const SizedBox.shrink();
+    }
+    return SettingsTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsRoutineMemory,
+      shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineMemory),
+      onTap: isBusy ? null : () => context.push(Routes.guardianRoutineMemory),
     );
   }
 }

@@ -11,6 +11,7 @@
   </div>
 
   <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
 
   <!-- 넓은 화면에서는 표 옆에 전체 미리보기를 둔다. 좁으면 아래로 내려간다. -->
   <div class="np-page">
@@ -121,6 +122,11 @@
       </div>
     </aside>
   </div>
+
+  <!-- 설정 칸 (컨트롤러가 늘 넣지만 없으면 이 화면만 그림). th:replace 가 th:if 보다 먼저라 바깥에서 거름 -->
+  <th:block th:if="${editor != null}">
+  <div th:replace="~{admin/fragments/settings-parts :: editor(${editor}, '공지 팝업 설정')}"></div>
+  </th:block>
 
   <!-- 레이아웃이 떠 가는 것은 이 <main> 하나뿐이다. 스크립트도 안에 둔다 (consent-edit.html 과 같은 이유). -->
   <script th:inline="javascript">

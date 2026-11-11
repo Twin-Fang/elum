@@ -1,6 +1,9 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -27,6 +30,16 @@ public interface RoutineImageStorage {
    */
   static boolean isGuardianUploadedPhoto(String key) {
     return key != null && GUARDIAN_UPLOADED_PHOTO_KEY.matcher(key).matches();
+  }
+
+  // 이야기에서 가져온 그림 열쇠의 파일 이름 앞부분: {stepId}/talk-{UUID}.{확장자} (saveImported)
+  String IMPORTED_FILE_PREFIX = "/talk-";
+
+  /**
+   * 열쇠가 AI 가 그린 그림인지 판정 (그림 없음·보호자 사진·가져온 그림은 false) — 다시 그리기 대상
+   */
+  static boolean isAiDrawn(String key) {
+    return key != null && !key.isBlank() && !isGuardianUploadedPhoto(key) && !key.contains(IMPORTED_FILE_PREFIX);
   }
 
   /**
@@ -71,6 +84,17 @@ public interface RoutineImageStorage {
   String saveImported(String stepId, ImageContent content);
 
   /**
+   * 다시 그린 AI 그림 한 장을 담고 <b>새 열쇠</b>를 돌려준다.
+   *
+   * <p>열쇠는 {@code {stepId}/ai-{UUID}.{확장자}} — 매번 바뀌어 앱 이미지 캐시가 새 그림을 받는다.
+   * {@code ai-} 접두라 보호자 사진 판정에 걸리지 않는다.
+   *
+   * @throws com.chuseok22.elumserver.common.infrastructure.exception.CustomException 쓰기에 실패하면
+   *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
+   */
+  String saveRegenerated(String stepId, GeneratedImage image);
+
+  /**
    * 열쇠 하나의 파일을 지운다.
    *
    * <p>없어도 조용히 끝나고, 지우다 실패해도 예외를 내지 않는다 — 지우는 시점엔 이미 본 작업이 끝났다.
@@ -79,6 +103,22 @@ public interface RoutineImageStorage {
   void delete(String key);
 
   ImageContent read(String key);
+
+  /**
+   * 저장된 그림 1장 > 옆에 webp 사본 저장 > 새 열쇠 (#1219, 옛 png 전환용). 옛 파일은 그대로 둠
+   * 파일이 없거나 변환 실패면 빈 값. 기본 구현은 전환하지 않음
+   */
+  default Optional<String> saveWebpCopy(String key) {
+    return Optional.empty();
+  }
+
+  /**
+   * 쓰지 않는 그림 정리 (#1216): 기준 시각보다 오래됐고 열쇠 목록에 없는 파일 삭제 > 빈 폴더 삭제 > 지운 개수
+   * 기본 구현은 아무것도 지우지 않음 (운영은 로컬 디스크 구현만 정리)
+   */
+  default int deleteUnreferenced(Collection<String> referencedKeys, Instant cutoff) {
+    return 0;
+  }
 
   record ImageContent(byte[] bytes, String contentType) {
 

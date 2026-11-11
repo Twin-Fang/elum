@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -32,7 +34,7 @@ class PictogramPickerLocaleTest {
     client = mock(TextGenerationClient.class);
     when(router.current()).thenReturn(client);
     picker = new PictogramPicker(
-      new PictogramCatalog(List.of("brush_teeth", FALLBACK), FALLBACK), router,
+      PictogramCatalogs.mulberryOnly(new PictogramCatalog(List.of("brush_teeth", FALLBACK), FALLBACK)), router,
       mock(AiDailyBudgetGuard.class), Duration.ofMillis(300));
   }
 
@@ -51,7 +53,7 @@ class PictogramPickerLocaleTest {
       return "{\"pictogramId\":\"brush_teeth\"}";
     });
 
-    assertThat(picker.pick("member-1", "Lávate los dientes", "")).isEqualTo("brush_teeth");
+    assertThat(picker.pick("member-1", "Lávate los dientes", "", PictogramSet.MULBERRY)).isEqualTo("brush_teeth");
 
     assertThat(seen.get()).isEqualTo(AppLocale.ES);
     // 호출한 쪽 스레드의 언어는 건드리지 않는다
@@ -67,7 +69,7 @@ class PictogramPickerLocaleTest {
       return "{\"pictogramId\":\"brush_teeth\"}";
     });
 
-    picker.pick("member-1", "양치해요", "");
+    picker.pick("member-1", "양치해요", "", PictogramSet.MULBERRY);
 
     assertThat(seen.get()).isEqualTo(AppLocale.KO);
   }
@@ -78,6 +80,6 @@ class PictogramPickerLocaleTest {
     AiCallContext.setContentLocale(AppLocale.ES);
     when(client.pickPictogramJson(any(), any())).thenThrow(new IllegalStateException("AI down"));
 
-    assertThat(picker.pick("member-1", "Lávate los dientes", "")).isEqualTo(FALLBACK);
+    assertThat(picker.pick("member-1", "Lávate los dientes", "", PictogramSet.MULBERRY)).isEqualTo(FALLBACK);
   }
 }

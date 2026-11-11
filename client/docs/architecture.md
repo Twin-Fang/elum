@@ -19,7 +19,7 @@ lib/
 │   │   └── app_router.dart         # go_router 정의
 │   ├── network/
 │   │   ├── dio_client.dart
-│   │   └── fallback_interceptor.dart   # AI 실패 시 fallback 체인
+│   │   └── failure_interceptor.dart    # 실패 응답 > AppFailure
 │   ├── storage/
 │   │   └── local_storage.dart      # shared_preferences 래퍼
 │   └── widgets/                    # 화면 간 재사용 위젯
@@ -67,9 +67,11 @@ presentation  →  application  →  domain
 ### 예시
 
 ```dart
-// application/onboarding_notifier.dart
-@riverpod
-class OnboardingNotifier extends _$OnboardingNotifier {
+// application/onboarding_notifier.dart (riverpod_generator 없이 직접 선언)
+final onboardingProvider =
+    NotifierProvider<OnboardingNotifier, OnboardingProfile>(OnboardingNotifier.new);
+
+class OnboardingNotifier extends Notifier<OnboardingProfile> {
   @override
   OnboardingProfile build() => const OnboardingProfile.empty();
 
@@ -85,7 +87,7 @@ class OnboardingNotifier extends _$OnboardingNotifier {
 class NameScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(onboardingNotifierProvider);
+    final profile = ref.watch(onboardingProvider);
     return ElumScaffold(
       child: ElumButton(
         label: '다음',
@@ -126,14 +128,14 @@ final routes = [
 | 칸 | 경로 | 화면 |
 | --- | --- | --- |
 | 홈 | `/guardian` | `GuardianHomeScreen` |
-| 일과관리 | `/guardian/manage` | 준비 중 (#797에서 일과 묶음) |
-| 이야기 | `/guardian/talk` | 준비 중 (#786) |
-| 내정보 | `/guardian/settings` | `GuardianSettingsScreen(isTabRoot: true)` — 뒤로가기 없음 |
+| 일과관리 | `/guardian/manage` | `RoutineManageScreen` |
+| 이야기 | `/guardian/talk` | `TalkFeedScreen` |
+| 내정보 | `/guardian/me` | `GuardianMyInfoScreen` (설정은 `/guardian/settings` 로 위에 덮음) |
 
 - **칸 순서·경로·아이콘·이름의 원본은 `GuardianTab` 하나**(`features/guardian/presentation/navigation/guardian_tab.dart`)다. 칸을 더하면 `GuardianTab` 값 하나, `routes_guardian.dart` 가지 하나, ARB 이름 하나를 늘린다.
 - **이동 막대는 창 폭으로 고른다.** `GuardianShell` 이 compact 는 하단 바(아이콘만), medium·expanded 는 왼쪽 옆 메뉴를 그린다. 숫자 비교 없이 `context.sizeClass` 만 쓴다.
 - **바를 덮는 화면은 가지 밖(루트)에 둔다.** 설정 하위 화면·일과 만들기 흐름은 `GoRoute` 를 가지 바깥에 두고 `push` 한다. 가지 안에 두면 바가 그대로 남는다.
-- **광고 띠는 틀(`GuardianShell`)이 바 아래에 둔다.** 내정보 칸은 `GuardianTab.isAdStripAllowed` 가 뺀다. 광고 모듈은 라우터가 틀에 넣어 준다(기능 간 import 규칙).
+- **광고 띠는 틀(`GuardianShell`)이 바 아래에 둔다.** 칸 4개 모두 둔다(로드 전·실패 시 높이 0). 광고 모듈은 라우터가 틀에 넣어 준다(기능 간 import 규칙).
 
 ## 서버 연동
 
@@ -147,15 +149,15 @@ final routes = [
 | --- | --- | --- |
 | `childNickname` | String | 실명 아님 |
 | `supportGoals` | List\<String\> | enum name |
-| `characterType` | String | |
-| `guardianPin` | String | ⚠️ `flutter_secure_storage` 권장 |
+| `cardCharacter` | String | |
+| `guardianPin` | String | 옛 값 지우기용만. 암호는 `flutter_secure_storage`(`GuardianLockStore`) |
 | `onboardingCompleted` | bool | redirect 판단용 |
 
 > **보호자가 입력한 일과 원문은 로컬에도 남기지 않는다.** (루트 docs 원칙 5번)
 
 ## 광고 (AdMob, #281)
 
-`lib/core/ads/`가 광고를 전담한다. 화면은 `AdBannerSlot` 하나만 안다.
+`lib/features/ads/`가 광고를 전담한다. 화면은 `AdBannerSlot`·`AdBottomStripSlot` 만 안다.
 
 | 파일 | 역할 |
 |---|---|
@@ -167,10 +169,10 @@ final routes = [
 
 지켜야 할 것.
 
-- **광고를 import할 수 있는 화면은 보호자 홈·임시저장뿐이다.** 설정은 맨 아래 `회원탈퇴` 줄과 가까워 광고를 뺐다. 이룸이 화면·일과 만들기
-  흐름·보상 연출·온보딩에는 광고 코드가 닿지 않는다. `test/ads/ad_boundary_test.dart`가 잠근다.
-- `google_mobile_ads`는 `core/ads` 안에서만 쓴다. 광고 요청에는 `nonPersonalizedAds` 외 사용자 정보를 넘기지 않는다.
-- **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.useTestAds`). 실제 ID는
+- **광고 자리는 보호자 화면 세 곳뿐이다**: 칸 틀 맨 아래 광고 띠(라우터가 넣음), 홈 지난 일과 목록 안 배너 한 개(`past_routine_section.dart`), 임시저장 하단 띠. 이룸이 화면·일과 만들기
+  흐름·보상 연출·온보딩에는 광고 코드가 닿지 않는다. 막는 시험은 없다(앱 시험 삭제, #848) — 리뷰로 지킨다.
+- `google_mobile_ads`는 `features/ads/data` 안에서만 쓴다. 광고 요청에는 `nonPersonalizedAds` 외 사용자 정보를 넘기지 않는다.
+- **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.shouldUseTestAds`). 실제 ID는
   릴리스 빌드의 `.env`로만 들어간다. 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
 - 하단 배너는 `ElumScaffold.bottomBanner`로 둔다. 홈의 목록 한가운데(오늘 일과와 지난 일과 사이)에는 배너를 두지 않는다 — 앱 디자인을 해쳐 뺐다. `AdBannerSlot.padding`은 광고가 뜬 뒤에만 적용돼 광고가 없으면 자리가 0이다. `bottomButton`·`belowButton`과 함께 쓰면 assert로 막힌다.
 - **`google_mobile_ads`는 `^7.0.0`(광고 SDK iOS 12.14)으로 고정한다.** 9.x(iOS 13.7)는 Xcode 26 미만에서

@@ -87,7 +87,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   bool _polling = false;
 
   /// 설정 묶음 시안의 머리: 뒤로가기 y=67, 제목 y=147.
-  static const _settingsBackTop = 67.0;
+  static const _settingsBackTop = ElumScaffold.settingsBackTop;
   static const _settingsTitleY = 147.0;
 
   @override

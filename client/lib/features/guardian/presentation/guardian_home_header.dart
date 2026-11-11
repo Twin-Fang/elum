@@ -15,7 +15,7 @@ import 'widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///
-/// 설정은 하단 바 내정보 칸으로 옮겼다 (#798). 태블릿은 로고·이룸이 화면 입구가 옆 메뉴에 있어 인사말만 그린다.
+/// 태블릿은 로고·이룸이 화면 입구가 옆 메뉴에 있어 인사말만 그림 (설정 입구는 내정보 칸, #798)
 class GuardianHomeHeader extends StatelessWidget {
   const GuardianHomeHeader({
     super.key,

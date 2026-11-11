@@ -36,13 +36,13 @@ class ProfileRepository {
   /// 초대 코드를 만든다. 이전에 만든 미사용 코드는 서버가 폐기한다 (E9).
   Future<Attempt<IssuedLinkCode>> issueInvite(String profileId) async {
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/profiles/$profileId/invites',
       );
-      final code = res.data?['code']?.toString();
+      final code = response.data?['code']?.toString();
       // 서버의 절대 시각이 아니라 **남은 초**를 쓴다 — 두 시계가 어긋나면 남은 시간이
       // 실제보다 길게 나온다 (연결 암호와 같은 이유).
-      final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
+      final seconds = (response.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
         // 코드 원문은 로그에 남기지 않는다. 있고 없고만 적는다.
         AppLogger.error('초대 코드 발급', '응답에 code/expiresInSeconds가 없습니다');
@@ -52,7 +52,7 @@ class ProfileRepository {
         IssuedLinkCode.fromNow(
           code: code,
           expiresInSeconds: seconds,
-          serverExpiresAt: DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''),
+          serverExpiresAt: DateTime.tryParse(response.data?['expiresAt']?.toString() ?? ''),
         ),
       );
     } catch (e) {
@@ -65,10 +65,10 @@ class ProfileRepository {
   /// 코드 원문은 서버에 없어 만료 시각만 돌려받는다 — 기억해 둔 코드와 같은 코드인지 가리는 데 쓴다.
   Future<Attempt<DateTime?>> pendingInviteExpiry(String profileId) async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         '/api/profiles/$profileId/invites/pending',
       );
-      return Attempt.ok(DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''));
+      return Attempt.ok(DateTime.tryParse(response.data?['expiresAt']?.toString() ?? ''));
     } catch (e) {
       AppLogger.error('초대 코드 확인', e);
       return Attempt.failed(AppFailure.of(e));
@@ -87,20 +87,20 @@ class ProfileRepository {
   }) async {
     final name = displayName?.trim();
     try {
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/profile-invites/redeem',
         data: {
           'code': LinkCode.normalize(rawCode),
           if (name != null && name.isNotEmpty) 'displayName': name,
         },
       );
-      final profile = ProfileSummary.tryParse(res.data?['profile']);
+      final profile = ProfileSummary.tryParse(response.data?['profile']);
       if (profile == null) {
         // 합류는 됐을 수 있지만 어느 이룸이인지 모르면 이어 갈 수 없다.
         AppLogger.error('초대 코드 넣기', '응답에 profile.id가 없습니다');
         return const Attempt.failed(AppFailure(fault: NetworkFault.app));
       }
-      final removed = switch (res.data?['removedProfileIds']) {
+      final removed = switch (response.data?['removedProfileIds']) {
         final List<dynamic> list => list.map((e) => e.toString()).toList(),
         _ => const <String>[],
       };
@@ -118,10 +118,10 @@ class ProfileRepository {
   /// 같게 그리면 나가기 확인이 "마지막 보호자"를 잘못 판단한다.
   Future<Attempt<List<Guardian>>> listGuardians(String profileId) async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         '/api/profiles/$profileId/guardians',
       );
-      final raw = res.data?['guardians'];
+      final raw = response.data?['guardians'];
       if (raw is! List) {
         AppLogger.error('함께하는 사람', '응답에 guardians가 없습니다');
         return const Attempt.failed(AppFailure(fault: NetworkFault.app));
@@ -142,14 +142,14 @@ class ProfileRepository {
     String? displayName,
   }) async {
     try {
-      final res = await _dio.patch<Map<String, dynamic>>(
+      final response = await _dio.patch<Map<String, dynamic>>(
         '/api/profiles/$profileId/guardians/me',
         data: {
           if (kind != null) 'kind': kind.apiValue,
           if (displayName != null) 'displayName': displayName.trim(),
         },
       );
-      final guardian = Guardian.tryParse(res.data);
+      final guardian = Guardian.tryParse(response.data);
       if (guardian == null) {
         AppLogger.error('내 이름 고치기', '응답에 id가 없습니다');
         return const Attempt.failed(AppFailure(fault: NetworkFault.app));

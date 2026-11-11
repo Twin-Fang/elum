@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.application.service;
 
+import com.chuseok22.elumserver.common.application.paging.AppCursorPageSize;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.common.locale.CurrentRegion;
@@ -36,9 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationQueryService {
 
-  static final int DEFAULT_PAGE_SIZE = 20;
-  static final int MAX_PAGE_SIZE = 50;
-
   /** cursor 구분자: "{lastOccurredAt ISO-8601}|{id}" */
   private static final String CURSOR_DELIMITER = "|";
 
@@ -52,7 +50,7 @@ public class NotificationQueryService {
    * cursor 형식이 틀리면 첫 쪽으로 본다
    */
   public NotificationPageResponse page(String memberId, String cursor, Integer size) {
-    int pageSize = size == null ? DEFAULT_PAGE_SIZE : Math.clamp(size, 1, MAX_PAGE_SIZE);
+    int pageSize = AppCursorPageSize.resolve(size);
     List<Notification> fetched = fetchAfter(memberId, parseCursor(cursor), pageSize + 1);
 
     // 다음 쪽 여부 (size+1 번째 행이 있으면 더 있음)

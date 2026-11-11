@@ -20,6 +20,8 @@ import '../../application/guardian_home_controller.dart';
 import '../../application/library_talk_import_state.dart';
 import '../routine_rename_flow.dart';
 import 'routine_reminder_row.dart';
+import 'routine_schedule_row.dart';
+import '../../application/routine_schedule_controller.dart';
 
 // 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
 const _isReminderRowVisible = false;
@@ -50,6 +52,9 @@ enum RoutineSheetAction {
 
   /// 일과관리 원본 — `⋯` 로 빠른 메뉴를 연다 (#834).
   more,
+
+  /// 인쇄용으로 받기 화면을 연다 (#1073). 화면은 부르는 쪽이 민다
+  export,
 }
 
 class RoutineDetailSheet extends ConsumerStatefulWidget {
@@ -243,6 +248,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     ? () => Navigator.of(context).pop(RoutineSheetAction.more)
                     : null,
                 onTitleEditTap: _canEdit ? _rename : null,
+                onExportTap: _steps.isEmpty
+                    ? null
+                    : () => Navigator.of(context).pop(RoutineSheetAction.export),
               ),
 
               // --- 스크롤: 단계 + 보상 ---
@@ -366,6 +374,12 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                           child: Column(
                             children: [
                               RoutineDetailRewardRow(routine: widget.routine),
+                              // 요일·시각 반복 (#782): 일과관리 원본만, Pro 이거나 정해 둔 예약이 있을 때 (멈춤 안내)
+                              if (widget.isLibrary &&
+                                  ref.watch(canShowRoutineScheduleProvider)) ...[
+                                SizedBox(height: 8.h),
+                                RoutineScheduleRow(routine: widget.routine),
+                              ],
                               // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
                               if (_isReminderRowVisible && !widget.isPast) ...[
                                 SizedBox(height: 8.h),

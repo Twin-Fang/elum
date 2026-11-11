@@ -7,7 +7,6 @@ import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessi
 import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
-import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
@@ -115,8 +114,8 @@ public class AdRewardGrantService {
     grant.setAmount(credits);
     grant.setRemaining(credits);
     grant.setValidFrom(now);
-    // 광고로 받은 크레딧이 무기한으로 쌓이지 않게 이번 주 끝에 사라진다.
-    grant.setExpiresAt(CreditPeriod.of(now).end());
+    // 광고로 받은 크레딧이 무기한으로 쌓이지 않게 이번 주기(주·달) 끝에 사라진다.
+    grant.setExpiresAt(accountService.currentPeriod(now).end());
     grant.setRefId("ad:" + callback.transactionId());
     AiCreditGrant saved = grantRepository.save(grant);
 

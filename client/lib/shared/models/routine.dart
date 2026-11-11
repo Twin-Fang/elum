@@ -106,6 +106,9 @@ abstract class Routine with _$Routine {
 
     /// 이야기에서 가져온 일과면 그 글 id, 아니면 null. 서버 `talkPostId`.
     String? talkPostId,
+
+    /// 이 일과를 만들 때 적용한 AI 메모리 규칙 수. 서버 `appliedMemoryRuleCount` (생성 응답에만 있음, 캐시에 넣지 않음)
+    @Default(0) int appliedMemoryRuleCount,
   }) = _Routine;
 
   const Routine._();
@@ -269,6 +272,7 @@ abstract class Routine with _$Routine {
       // bool 이 아니면 예시 아님 — 옛 응답·캐시에 배지가 붙지 않게
       isExample: json['isExample'] == true,
       talkPostId: _optionalId(json['talkPostId']),
+      appliedMemoryRuleCount: _asInt(json['appliedMemoryRuleCount']),
     );
   }
 

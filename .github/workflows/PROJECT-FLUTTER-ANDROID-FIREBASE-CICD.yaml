@@ -22,11 +22,8 @@
 # FIREBASE_SERVICE_ACCOUNT_JSON_BASE64: Firebase 서비스 계정 JSON (base64)
 #
 # 📝 환경 설정 (선택):
-# ENV_FILE 또는 ENV: .env 파일 내용 (둘 중 하나, ENV_FILE 우선)
+# CLIENT_ENV_FILE: .env 파일 내용
 # GOOGLE_SERVICES_JSON: Firebase google-services.json
-#
-# 🪄 빠른 설정: .github/util/flutter/firebase-wizard/firebase-wizard.html을
-#    브라우저에서 열어 5단계 마법사로 Firebase 배포를 자동 설정할 수 있습니다.
 #
 # ===================================================================
 #
@@ -111,7 +108,7 @@ jobs:
 
       - name: Create .env file
         env:
-          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE }}
         run: |
           printf '%s\n' "$ENV_CONTENT" > .env
           echo ".env file created"
@@ -262,7 +259,7 @@ jobs:
       # .env 파일 생성 (보안을 위해 아티팩트가 아닌 시크릿에서 생성)
       - name: Create .env file
         env:
-          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE }}
         run: |
           printf '%s\n' "$ENV_CONTENT" > .env
           echo "✅ .env 파일 생성됨 (크기: $(wc -c < .env) bytes)"

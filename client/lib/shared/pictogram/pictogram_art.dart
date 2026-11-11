@@ -7,7 +7,7 @@ import 'pictogram_svg_loader.dart';
 
 /// 사진·AI 그림이 없는 카드의 그림 자리에 그리는 **무료 픽토그램**.
 ///
-/// Mulberry Symbols(CC BY-SA 4.0)를 앱에 번들해 두고 서버가 준 `pictogramId` 로 고른다.
+/// Mulberry Symbols(CC BY-SA 4.0)·Twemoji(CC BY 4.0, `emoji_` id)를 앱에 번들해 두고 서버가 준 `pictogramId` 로 고른다.
 /// 오프라인에서도 보이고 인증·캐시가 필요 없다.
 ///
 /// ⚠️ **심볼을 변형하지 않는다.** 색을 바꾸거나 다른 그림과 합성하지 않고, 흰 바탕 위에

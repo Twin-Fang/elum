@@ -123,6 +123,30 @@ public class OpenAiTextClient implements TextGenerationClient {
   }
 
   @Override
+  public String buildRoutineMemoryJson(String memoryUserContent) {
+    return call(
+      RoutineMemorySpec.SYSTEM_PROMPT, memoryUserContent, RoutineMemorySpec.RESPONSE_SCHEMA,
+      "routine_memory", AiCallType.OPENAI_TEXT_MEMORY
+    );
+  }
+
+  @Override
+  public String buildWeeklyReportSummaryJson(String summaryUserContent) {
+    return call(
+      WeeklyReportSummarySpec.systemPromptFor(AiCallContext.currentContentLocale()), summaryUserContent,
+      WeeklyReportSummarySpec.RESPONSE_SCHEMA, "weekly_report_summary", AiCallType.OPENAI_TEXT_WEEKLY_REPORT
+    );
+  }
+
+  @Override
+  public String buildCardSplitJson(String splitUserContent) {
+    return call(
+      CardSplitSpec.systemPromptFor(AiCallContext.currentContentLocale()), splitUserContent,
+      CardSplitSpec.RESPONSE_SCHEMA, "card_split", AiCallType.OPENAI_TEXT_CARD_SPLIT
+    );
+  }
+
+  @Override
   public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
     String userContent = geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
     return call(

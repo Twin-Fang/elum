@@ -19,6 +19,8 @@ import 'grey_tile_shell.dart';
 import 'routine_loading_tile.dart';
 import 'routine_tile_gap.dart';
 import 'routine_summary_tile.dart';
+import 'routine_schedule_labels.dart';
+import '../../application/routine_schedule_controller.dart';
 import 'routine_swipe_actions.dart';
 import 'talk_share_hint_link.dart';
 import '../../../../core/state/busy_state_mixin.dart';
@@ -28,6 +30,8 @@ import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
 import '../../../../core/router/routes.dart';
+import '../card_export/open_card_export.dart';
+import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
@@ -126,12 +130,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       routine.hasStarted ||
       routineProgress(routine, ref.read(childRoutineProvider)) > 0;
 
-  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다.
+  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다 (아이콘 없음, #1171)
   Future<void> _showStartedNotice() => showElumDialog<void>(
     context: context,
     title: context.l10n.todayRoutineStartedTitle,
     message: context.l10n.todayRoutineStartedMessage,
-    icon: ElumDialogIcon.alert,
     code: 'E-DEL-STARTED',
     actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
@@ -152,24 +155,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       return;
     }
 
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: l10n.todayRoutineDeleteConfirmTitle,
-      icon: ElumDialogIcon.trash,
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.todayRoutineDeleteAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.todayRoutineDeleteAction,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     // 같은 일과를 두 번 지우면 서버가 거절해 실패 팝업이 뜬다 — 일과 단위로 잠근다.
     // 성공도 null 이라 기록으로 감싸 진행 중이라 건너뛴 경우(result == null)와 가른다.
@@ -233,7 +225,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       routine,
       isFinished: _isFinished(routine),
     );
-    if (action != RoutineSheetAction.edit || !mounted) return;
+    if (!mounted) return;
+    if (action == RoutineSheetAction.export) {
+      openCardExport(context, routine);
+      return;
+    }
+    if (action != RoutineSheetAction.edit) return;
     _edit(routine);
   }
 
@@ -367,6 +364,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
                   onEdit: () => _edit(routine),
                   child: RoutineSummaryTile(
                     routine: routine,
+                    // 오늘 요일에 켜진 반복이 있는 일과만 시각 (원본 일과의 예약)
+                    scheduleTimeLabel: todayScheduleTimeLabel(
+                      context,
+                      ref.watch(routineScheduleOfProvider(routine.sourceRoutineId ?? routine.id)),
+                      DateTime.now(),
+                    ),
                     progress: routineProgress(routine, progress),
                     creatorName: shouldShowCreator
                         ? routine.creatorDisplayName

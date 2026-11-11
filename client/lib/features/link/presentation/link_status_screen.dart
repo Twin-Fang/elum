@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_group.dart';
@@ -20,6 +19,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5).
 ///
@@ -66,25 +66,14 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
     final l10n = context.l10n;
     // 되돌릴 수 있다고 함께 말한다 — 번호를 다시 만들면 된다 (docs 원칙 ④).
     // 탈퇴처럼 무겁지 않으나 이룸이 휴대폰이 바로 일과를 못 보게 되므로 확인을 거친다.
-    final ok = await showElumDialog<bool>(
-      context: context,
-      icon: ElumDialogIcon.alert,
+    final ok = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.alert,
       title: l10n.linkStatusRevokeConfirmTitle,
       message: l10n.linkStatusRevokeConfirmMessage,
-      actions: [
-        ElumDialogAction(
-          label: l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: l10n.linkStatusRevokeConfirmAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: l10n.linkStatusRevokeConfirmAction,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
 
     final result = await runBusy(
       () => ref.read(linkStatusControllerProvider).revoke(device.linkId),
@@ -131,7 +120,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
       isBackEnabled: !busy,
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
       title: context.l10n.linkStatusTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       // 로딩·실패·빈 상태는 같은 자리(본문 가운데)에 둔다 — 바뀔 때 튀지 않게.
       child: status.when(

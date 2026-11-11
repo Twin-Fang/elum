@@ -108,9 +108,15 @@ class RoutineQuotaGuardTest {
   }
 
   private void limit(Entitlement entitlement, int value) {
+    lenient().when(entitlementService.limitOf(PlanType.FREE, entitlement)).thenReturn(value);
     lenient().when(entitlementService.isWithinLimit(eq(PlanType.FREE), eq(entitlement), anyLong()))
       .thenAnswer(invocation ->
         value == Entitlement.UNLIMITED || (long) invocation.getArgument(2) < value);
+  }
+
+  /// 보유 수 한도가 있음 (판정은 각 시험이 isWithinLimit 로 정함). 무제한이면 세지 않으므로 (#1192)
+  private void ownedLimitIsSet() {
+    lenient().when(entitlementService.limitOf(PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT)).thenReturn(3);
   }
 
   private static void assertRejectedWith(Runnable call, ErrorCode expected) {
@@ -232,6 +238,7 @@ class RoutineQuotaGuardTest {
   @DisplayName("보유 개수 한도를 넘으면 거부한다")
   void ownedLimitExceeded_throws() {
     limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    ownedLimitIsSet();
     when(routineRepository.countByCreatedByAndIsExampleFalse(MEMBER_ID)).thenReturn(3L);
     when(entitlementService.isWithinLimit(
       PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 3L)).thenReturn(false);
@@ -243,6 +250,7 @@ class RoutineQuotaGuardTest {
   @DisplayName("E42 보유 개수는 내가 만든 일과만 센다 — 함께 돌보는 사람이 만든 일과가 내 한도를 먹지 않는다")
   void e42_ownedCount_countsOnlyRoutinesICreated() {
     limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    ownedLimitIsSet();
     when(routineRepository.countByCreatedByAndIsExampleFalse(MEMBER_ID)).thenReturn(1L);
     when(entitlementService.isWithinLimit(
       PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 1L)).thenReturn(true);
@@ -255,6 +263,7 @@ class RoutineQuotaGuardTest {
   @DisplayName("보유 개수에 온보딩 예시 일과는 넣지 않는다 (#803) — 예시 때문에 첫 일과 만들기가 막히면 안 된다")
   void ownedCountExcludesExamples() {
     limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    ownedLimitIsSet();
     // 예시 8개가 있어도 예시를 뺀 집계는 0
     when(routineRepository.countByCreatedByAndIsExampleFalse(MEMBER_ID)).thenReturn(0L);
     when(entitlementService.isWithinLimit(PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 0L)).thenReturn(true);
@@ -267,6 +276,7 @@ class RoutineQuotaGuardTest {
   void e41_joinedFreeGuardian_isLimitedByOwnPlanAndOwnRoutines() {
     // 이룸이는 Pro 보호자(m-pro)의 것이고 무료 보호자(m1)가 초대로 합류했다. 가드는 이룸이가 아니라 만드는 사람만 받는다.
     limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    ownedLimitIsSet();
     when(routineRepository.countByCreatedByAndIsExampleFalse(MEMBER_ID)).thenReturn(3L);
     when(entitlementService.isWithinLimit(PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 3L)).thenReturn(false);
     lenient().when(entitlementService.planOf("m-pro")).thenReturn(PlanType.PRO);
@@ -277,17 +287,43 @@ class RoutineQuotaGuardTest {
     verify(routineRepository, never()).countByCreatedByAndIsExampleFalse("m-pro");
   }
 
-  @Test
-  @DisplayName("사용량 집계가 실패해도 사용자를 막지 않는다 — 우리 DB 문제로 앱을 못 쓰면 안 된다")
-  void usageQueryFails_passes() {
+  private void usageQueryFails() {
     lenient().when(aiCallLogRepository
         .countByMemberIdAndCallTypeInAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
           anyString(), anyCollection(), any(LocalDateTime.class)))
-      .thenThrow(new RuntimeException("DB 장애"));
+      .thenThrow(new RuntimeException("db down"));
+  }
+
+  private void ownedQueryFails() {
     lenient().when(routineRepository.countByCreatedByAndIsExampleFalse(anyString()))
-      .thenThrow(new RuntimeException("DB 장애"));
-    // 한도가 0 이어도 — 집계를 못 했으면 막을 근거가 없다.
-    limits(0, 0);
+      .thenThrow(new RuntimeException("db down"));
+  }
+
+  @Test
+  @DisplayName("생성 횟수를 못 세면 막는다 — 일과 글 무료 요금제에서는 이 한도가 AI 비용의 유일한 방어선 (#1192)")
+  void usageQueryFails_rejectsAsQuotaUnavailable() {
+    usageQueryFails();
+    limits(3, 10);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_QUOTA_UNAVAILABLE);
+  }
+
+  @Test
+  @DisplayName("보유 일과 수를 못 세면 막는다 (#1192)")
+  void ownedQueryFails_rejectsAsQuotaUnavailable() {
+    ownedQueryFails();
+    limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    limit(Entitlement.ROUTINE_MAX_COUNT, 3);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_QUOTA_UNAVAILABLE);
+  }
+
+  @Test
+  @DisplayName("한도가 모두 무제한이면 집계 없이 통과한다 — 세지 못해도 막을 이유가 없다 (#1192)")
+  void unlimitedPlan_passesWithoutCounting() {
+    usageQueryFails();
+    ownedQueryFails();
+    limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
 
     assertThatCode(() -> guard.guard(MEMBER_ID)).doesNotThrowAnyException();
   }
@@ -317,6 +353,17 @@ class RoutineQuotaGuardTest {
     limits(2, 5);
 
     assertThatCode(() -> guard.guard(MEMBER_ID)).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("일과 글 무료 요금제는 크레딧이 켜져 있어도 하루 횟수로 막는다 — 글 몫을 크레딧이 묶지 못한다 (#1110)")
+  void creditEnabled_routineTextFreePlan_keepsDailyLimit() {
+    creditEnabled();
+    when(entitlementService.isAllowed(PlanType.FREE, Entitlement.ROUTINE_CREATE_FREE)).thenReturn(true);
+    logged(2, AiCallType.GEMINI_TEXT_CREATE, TODAY);
+    limits(2, 10);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED);
   }
 
   @Test

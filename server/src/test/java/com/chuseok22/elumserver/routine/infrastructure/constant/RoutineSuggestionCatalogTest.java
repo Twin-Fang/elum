@@ -37,16 +37,18 @@ class RoutineSuggestionCatalogTest {
   }
 
   @Test
-  @DisplayName("추천 일과에 성인 사용자를 위한 항목이 포함된다")
-  void all_containsAdultEntries() {
-    // 자문 당시 추천 50개가 전부 아동·학교 전제였고,
-    // 회사에 다니는 성인 사용자에게 "학교에 가요"가 노출되는 문제가 실제로 있었다.
-    List<String> texts = RoutineSuggestionCatalog.ALL.stream()
-      .map(RoutineSuggestionResponse::text)
-      .toList();
+  @DisplayName("추천 일과에 성인 직장 항목이 들어가지 않는다")
+  void all_hasNoAdultWorkEntries() {
+    // 타겟이 발달장애아동으로 바뀜 (2026-10-26 명세 변경) > 출근·회사 칩은 보호자에게 엉뚱하게 보임 (#1226)
+    List<String> adultWorkWords = List.of("출근", "퇴근", "회사", "작업을 시작");
 
-    assertThat(texts).anyMatch(text -> text.contains("출근"));
-    assertThat(texts).anyMatch(text -> text.contains("센터"));
+    assertThat(RoutineSuggestionCatalog.ALL)
+      .allSatisfy(suggestion -> {
+        String combined = suggestion.text() + " " + suggestion.naturalLanguageExample();
+        assertThat(adultWorkWords)
+          .as("성인 직장 항목: %s", suggestion.text())
+          .noneMatch(combined::contains);
+      });
   }
 
   @Test

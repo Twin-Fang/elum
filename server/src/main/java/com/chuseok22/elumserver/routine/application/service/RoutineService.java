@@ -2,21 +2,19 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
-import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.core.RoutineMemoryExtractionRequestedEvent;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,6 +39,7 @@ public class RoutineService {
   private final RoutineRepository routineRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final RoutineGroupMembership routineGroupMembership;
   private final ApplicationEventPublisher eventPublisher;
 
@@ -56,6 +55,10 @@ public class RoutineService {
     // (아이 홈은 scheduledAt이 오늘인 CONFIRMED만 조회하므로 이 갱신이 없으면 미리 만든 일과가 뜨지 않는다)
     routine.setScheduledAt(LocalDate.now().atTime(9, 0));
     publishRoutineSent(caller, routine);
+    // AI 가 만든 일과(처음 카드 사본 있음)면 커밋 뒤 비동기로 고친 것 찾기
+    if (routine.getAiDraftCards() != null) {
+      eventPublisher.publishEvent(new RoutineMemoryExtractionRequestedEvent(routine.getId()));
+    }
     return RoutineResponse.from(routine);
   }
 
@@ -107,7 +110,7 @@ public class RoutineService {
     }
     // 묶음 구성원이면 묶음에서 빼고 비면 묶음 풀기 (#806)
     routineGroupMembership.leaveGroup(routine);
-    RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
+    RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, guardianVoiceFiles, routine);
   }
 
   /**

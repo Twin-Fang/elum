@@ -2,7 +2,7 @@ import '../../core/l10n/current_l10n.dart';
 
 /// 아이가 온보딩에서 고르는 "친구" — 생성된 행동 카드 속 주인공이 된다.
 ///
-/// 카드 이미지 콘텐츠의 일부이며, 서비스 화자(AgentPersona)와는 역할이 다르다.
+/// 카드 이미지 콘텐츠의 일부
 enum CardCharacter {
   // 순서가 화면 배치다 — 고양이가 왼쪽, 여우가 오른쪽.
   // enum 순서를 바꾸면 화면이 조용히 뒤집히므로 테스트로 고정해 뒀다.
@@ -41,14 +41,4 @@ enum CardCharacter {
     }
     return null;
   }
-}
-
-/// 서비스 에이전트 — 채팅(카드 생성 대화)에서 사용자에게 말을 거는 존재.
-///
-/// 선택 대상이 아니다. 카드 속 주인공으로 들어가서도 안 된다.
-/// CardCharacter와 한 타입으로 묶으면 병아리가 카드 주인공이 되는 버그가 가능해지므로 분리한다.
-enum AgentPersona {
-  chick;
-
-  String get label => appL10n.agentChickLabel;
 }

@@ -42,16 +42,16 @@ abstract final class AppConfig {
   }
 
   /// 운영 API 주소
-  static const productionApiBaseUrl = 'https://api.elum.chuseok22.com';
+  static const productionApiBaseUrl = 'https://api.elum.suhsaechan.kr';
 
   /// 빌드에 넣은 기본 주소 (`.env`, 없으면 운영)
   static String get defaultApiBaseUrl => _string('ELUM_API_BASE_URL', productionApiBaseUrl);
 
-  /// 운영 서버를 보고 있는가: 지금 주소가 운영 도메인 2개 중 하나 (개발자 도구 테스트 계정·서버 표시 판단)
+  /// 운영 서버를 보고 있는가: 지금 주소가 운영 도메인 (개발자 도구 테스트 계정·서버 표시 판단)
   static bool get isProductionApiServer =>
       ServerAddressPolicy.toAllowedApiBaseUrl(apiBaseUrl) != null;
 
-  /// 앱이 받는 이야기 공유 웹 링크 호스트: 운영 도메인 2개 + 지금 주소 호스트 (옛·새 도메인 링크 모두)
+  /// 앱이 받는 이야기 공유 웹 링크 호스트: 운영 도메인 + 지금 주소 호스트
   static Set<String> get acceptedWebLinkHosts {
     final currentHost = Uri.tryParse(apiBaseUrl)?.host.toLowerCase() ?? '';
     return {
@@ -111,10 +111,6 @@ abstract final class AppConfig {
 
   /// ⚠️ 유출되면 안 되는 값이다. `.env.example`에는 빈 값으로 둔다.
   static String get ttsApiKey => _string('ELUM_TTS_API_KEY', '');
-
-  /// AI DLP 요청 암호화 마스터 시크릿. 서버 `elum.aidlp.secret` 설정과 같은 값.
-  /// 암호화 인터셉터가 꺼져 있어 지금은 읽는 곳 없음 (`dio_client.dart`).
-  static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
 
   /// 문의를 받는 주소. 설정 화면의 `문의하기`가 보여준다.
   ///
@@ -183,6 +179,45 @@ abstract final class AppConfig {
         _ => null,
       };
 
+  // --- 인앱 구독 결제 ---
+
+  /// 이 빌드에 스토어 결제를 넣는가 (하드 킬). 꺼져 있으면 서버 판매 스위치와 무관하게 결제 화면·진입점이 없음 (#1132)
+  static bool get isInAppPurchaseEnabled => _bool('ELUM_IAP_ENABLED', false);
+
+  /// Pro 1개월 구독 상품 id. App Store Connect · Play Console · 서버 `SUBSCRIPTION_*_PRODUCT_IDS` 와 같아야 함
+  static String get iapProductMonthly =>
+      _string('ELUM_IAP_PRODUCT_MONTHLY', 'elum_pro_monthly');
+
+  /// Pro 1년 구독 상품 id
+  static String get iapProductYearly =>
+      _string('ELUM_IAP_PRODUCT_YEARLY', 'elum_pro_yearly');
+
+  /// 이용약관 주소. 비면 앱 안 약관 화면을 연다 (유료 약관 게시 전)
+  static String get termsOfUseUrl => _string('ELUM_TERMS_OF_USE_URL', '');
+
+  /// 개인정보처리방침 게시 주소 (consent_documents 본문과 같은 내용)
+  static String get privacyPolicyUrl => _string(
+    'ELUM_PRIVACY_POLICY_URL',
+    'https://twin-fang.github.io/elum/privacy.html',
+  );
+
+  /// 스토어 구독 관리 화면 주소. [productId] 가 있으면 Play 는 그 구독을 바로 연다
+  static Uri? subscriptionManagementUrl(
+    TargetPlatform platform, {
+    String? productId,
+  }) => switch (platform) {
+    TargetPlatform.iOS => Uri.https('apps.apple.com', '/account/subscriptions'),
+    TargetPlatform.android => Uri.https(
+      'play.google.com',
+      '/store/account/subscriptions',
+      {
+        'package': androidPackageId,
+        if (productId != null && productId.isNotEmpty) 'sku': productId,
+      },
+    ),
+    _ => null,
+  };
+
   // --- 소셜 로그인 ---
   // 콘솔에서 앱을 등록하고 받은 값이다. 받는 절차는
   // docs/setup/소셜로그인_설정가이드.md 참조.
@@ -195,14 +230,7 @@ abstract final class AppConfig {
   static String get kakaoNativeAppKey =>
       _string('ELUM_KAKAO_NATIVE_APP_KEY', '');
 
-  static String get naverClientId => _string('ELUM_NAVER_CLIENT_ID', '');
-
-  /// 네이버는 모바일 SDK가 시크릿을 요구한다. 앱에 들어갈 수밖에 없는 구조다.
-  static String get naverClientSecret =>
-      _string('ELUM_NAVER_CLIENT_SECRET', '');
-
-  /// 네이버 로그인 동의 화면에 표시되는 서비스 이름.
-  static String get naverClientName => _string('ELUM_NAVER_CLIENT_NAME', '이룸'); // l10n-ignore: 네이버 SDK 에 넘기는 앱 이름 기본값 — 계획 6(네이티브)
+  // 네이버 키(ELUM_NAVER_CLIENT_ID · SECRET · NAME)는 네이티브(Info.plist · build.gradle.kts)가 .env 에서 직접 읽음
 
   /// 구글 **웹** 클라이언트 ID. 안드로이드 클라이언트 ID가 아니다.
   /// 안드로이드에서 ID 토큰을 받으려면 serverClientId에 웹 ID를 넘겨야 한다.
@@ -263,14 +291,14 @@ abstract final class AppConfig {
   ///
   /// 릴리스 빌드에서만 false라 `.env`의 실제 광고 단위를 읽는다.
   /// 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
-  static bool get useTestAds => kDebugMode || kProfileMode || isDevBuild;
+  static bool get shouldUseTestAds => kDebugMode || kProfileMode || isDevBuild;
 
   /// 배치별 광고 단위 ID. 릴리스에서 `.env`에 값이 없으면 null이다.
   static String? adUnitId(AdPlacement placement, {required bool isIos}) =>
       AdIds.resolve(
         placement: placement,
         isIos: isIos,
-        useTestIds: useTestAds,
+        shouldUseTestIds: shouldUseTestAds,
         readEnv: (key) => _string(key, ''),
       );
 

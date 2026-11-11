@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'features/ads/data/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
+import 'core/app_status/store_selling.dart';
 import 'core/config/client_tuning.dart';
 import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
@@ -27,6 +28,7 @@ import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
+import 'features/subscription/application/plan_paywall_entry.dart';
 import 'features/talk/application/talk_post_link_intake.dart';
 import 'core/storage/local_storage.dart';
 import 'app/dio_provider.dart';
@@ -190,6 +192,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
+      // 끝나지 않은 스토어 결제를 서버에 다시 확인 (판매 스위치·로그인 조건은 안에서 봄)
+      startStorePurchaseSync(ref);
     });
     // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -220,6 +224,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 서버가 준 대기·연출 시간값을 받자마자 적용하고 다음 실행을 위해 저장한다.
     // 관리자 화면에서 고친 값이 앱을 다시 올리지 않아도 반영된다.
     ref.listen(appStatusProvider, (previous, next) {
+      // Pro 판매 스위치도 다음 실행용으로 저장 (#1132)
+      cacheServerStoreSelling(
+        next.value?.status.isStoreSellingOpen,
+        storage: ref.read(localStorageProvider),
+      );
       final tuning = next.value?.status.tuning;
       if (tuning == null) return;
       applyServerTuning(
@@ -261,6 +270,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
           // 견본 공지 팝업을 띄울 화면 (라우터 Navigator)
           navigatorContext: () =>
               _router.routerDelegate.navigatorKey.currentContext,
+          // 상태 복사에 담을 지금 화면 경로
+          currentLocation: () =>
+              _router.routerDelegate.currentConfiguration.uri.toString(),
           child: AppStatusGate(
             // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
             // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.

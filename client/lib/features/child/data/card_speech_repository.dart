@@ -10,15 +10,38 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../app/dio_provider.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/sound/audio_file_header.dart';
 import '../../../core/storage/card_image_disk_cache.dart';
 import '../../../shared/models/action_card.dart';
 
-/// 미리 만든 단계 음성 한 건의 위치: 일과, 단계, 음성 열쇠(서버 `speechPath`, 없으면 null)
-typedef StoredSpeechSource = ({String routineId, String stepId, String? speechPath});
+/// 카드 한 장의 저장 음성 위치: 일과, 단계, 서버 음성 열쇠(`speechPath`), 보호자 목소리 열쇠(`guardianVoicePath`). 없으면 null
+typedef StoredSpeechSource = ({
+  String routineId,
+  String stepId,
+  String? speechPath,
+  String? guardianVoicePath,
+});
+
+/// 카드 > 저장 음성 위치. 서버에 없는 일과(id 빈 값)는 null
+///
+/// [shouldIncludeGuardianVoice] false 면 보호자 목소리를 빼고 기본 음성만 (보호자 화면에서 Pro 가 아닐 때 — 이룸이가 듣는 것과 맞춤)
+StoredSpeechSource? storedSpeechOf(
+  String? routineId,
+  ActionCard card, {
+  bool shouldIncludeGuardianVoice = true,
+}) {
+  if (routineId == null || routineId.isEmpty) return null;
+  return (
+    routineId: routineId,
+    stepId: card.id,
+    speechPath: card.speechPath,
+    guardianVoicePath: shouldIncludeGuardianVoice ? card.guardianVoicePath : null,
+  );
+}
 
 /// 단계 음성 받기·파일 캐시 (#675): 캐시 확인 > 받기 > 검증 > 저장 > 같은 단계 옛 파일 삭제
 ///
-/// 위치 `{앱 지원 폴더}/card_images/speech/{stepId 해시}/{열쇠 해시}.wav`
+/// 위치 `{앱 지원 폴더}/card_images/speech/{stepId 해시}/{열쇠 해시}.m4a` (아직 wav 인 음성은 `.wav`, #1211)
 /// 카드 그림 캐시 폴더 아래라 로그아웃·탈퇴·세션 만료 때 [CardImageDiskCache.clear] 가 함께 지움.
 /// **절대 throw 하지 않음** — 실패하면 null, 호출부는 기기 음성으로 넘어감.
 class CardSpeechRepository {
@@ -39,7 +62,11 @@ class CardSpeechRepository {
   static const defaultDownloadTimeout = Duration(seconds: 8);
 
   static const _speechDirectoryName = 'speech';
-  static const _speechExtension = '.wav';
+  // 서버 열쇠 확장자 = 형식 (#1211). m4a 가 기본, 아직 전환 안 된 음성은 wav
+  static const _aacExtension = '.m4a';
+  static const _wavExtension = '.wav';
+  // m4a 를 받는다고 알림 (안 보내면 서버가 wav 로 되돌려 줌 = 옛 앱 호환)
+  static const _acceptSpeechFormats = 'audio/mp4, audio/wav;q=0.9';
   static const _tmpSuffix = '.tmp';
 
   // 서버 ETag = 음성 열쇠. 가진 열쇠를 If-None-Match 로 보내 같으면 304 (다시 받지 않음)
@@ -75,7 +102,12 @@ class CardSpeechRepository {
           await _deleteStepDirectory(card.id);
           continue;
         }
-        await fileFor((routineId: routineId, stepId: card.id, speechPath: speechPath));
+        await fileFor((
+          routineId: routineId,
+          stepId: card.id,
+          speechPath: speechPath,
+          guardianVoicePath: null,
+        ));
       } catch (e) {
         AppLogger.error('speech-cache', '미리 받기 실패(무시): $e');
       }
@@ -130,7 +162,7 @@ class CardSpeechRepository {
     final file = await _fileOf(stepId, speechPath);
     if (file == null || !await file.exists()) return null;
     final header = await _readHeader(file);
-    if (!looksLikeWav(header)) {
+    if (!looksLikeSpeechAudio(header)) {
       // 쓰다 끊긴 파일 > 지우고 다시 받음
       await _tryDelete(file);
       return null;
@@ -153,7 +185,10 @@ class CardSpeechRepository {
         options: Options(
           responseType: ResponseType.bytes,
           receiveTimeout: downloadTimeout,
-          headers: {if (knownKey != null) 'If-None-Match': '"$knownKey"'},
+          headers: {
+            'Accept': _acceptSpeechFormats,
+            if (knownKey != null) 'If-None-Match': '"$knownKey"',
+          },
           // 304 = 가진 것과 같음, 404 = 아직 없음 (정상 흐름이라 예외로 받지 않음)
           validateStatus: (status) => status == 200 || status == 304 || status == 404,
         ),
@@ -162,7 +197,7 @@ class CardSpeechRepository {
       if (response.statusCode == 404) return const _SpeechMissing();
       final bytes = Uint8List.fromList(response.data ?? const []);
       final speechKey = _keyFromEtag(response.headers.value(_etagHeader)) ?? source.speechPath;
-      if (speechKey == null || speechKey.isEmpty || !looksLikeWav(bytes)) {
+      if (speechKey == null || speechKey.isEmpty || !looksLikeSpeechAudio(bytes)) {
         AppLogger.error('speech-cache', '음성 응답이 올바르지 않아 버림 (${bytes.length}B)');
         return const _SpeechFailed();
       }
@@ -265,8 +300,12 @@ class CardSpeechRepository {
   Future<File?> _fileOf(String stepId, String speechKey) async {
     final dir = await _stepDirectory(stepId);
     if (dir == null) return null;
-    return File('${dir.path}${Platform.pathSeparator}${await _hashOf(speechKey)}$_speechExtension');
+    return File('${dir.path}${Platform.pathSeparator}${await _hashOf(speechKey)}${_extensionOf(speechKey)}');
   }
+
+  /// 열쇠 > 캐시 파일 확장자 (재생기가 확장자로 형식을 고름)
+  static String _extensionOf(String speechKey) =>
+      speechKey.endsWith(_aacExtension) ? _aacExtension : _wavExtension;
 
   static Future<String> _hashOf(String value) async {
     final hash = await Sha256().hash(utf8.encode(value));
@@ -276,7 +315,7 @@ class CardSpeechRepository {
   static Future<Uint8List> _readHeader(File file) async {
     final handle = await file.open();
     try {
-      return await handle.read(12);
+      return await handle.read(AudioFileHeader.headerLength);
     } finally {
       await handle.close();
     }
@@ -292,18 +331,10 @@ class CardSpeechRepository {
     }
   }
 
-  /// WAV 머리 `RIFF....WAVE` 확인 (HTML 오류 페이지 등을 걸러냄)
+  /// 음성 머리 확인: m4a `....ftyp` 또는 WAV `RIFF....WAVE` (HTML 오류 페이지 등을 걸러냄)
   @visibleForTesting
-  static bool looksLikeWav(Uint8List bytes) =>
-      bytes.length >= 12 &&
-      bytes[0] == 0x52 &&
-      bytes[1] == 0x49 &&
-      bytes[2] == 0x46 &&
-      bytes[3] == 0x46 &&
-      bytes[8] == 0x57 &&
-      bytes[9] == 0x41 &&
-      bytes[10] == 0x56 &&
-      bytes[11] == 0x45;
+  static bool looksLikeSpeechAudio(Uint8List bytes) =>
+      AudioFileHeader.isM4a(bytes) || AudioFileHeader.isWav(bytes);
 }
 
 /// 받기 결과 4가지: 받음, 같음(304), 없음(404), 실패

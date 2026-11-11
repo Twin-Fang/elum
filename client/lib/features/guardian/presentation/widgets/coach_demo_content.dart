@@ -25,31 +25,27 @@ class CoachDemoAnchoredMenu extends StatelessWidget {
     final l10n = context.l10n;
     // 값은 쓰지 않는다 (누를 수 없는 미리보기)
     final List<QuickMenuRow<int>> rows = [
-      (
+      QuickMenuRow(
         value: 0,
         icon: AppAssets.iconPaperPlane,
         label: l10n.routineLibrarySendToday,
-        isDanger: false,
       ),
-      (
+      QuickMenuRow(
         value: 1,
         icon: AppAssets.iconPencil,
         label: l10n.routineLibraryMenuRename,
-        isDanger: false,
       ),
-      (
+      QuickMenuRow(
         value: 2,
         icon: AppAssets.iconFolderAdd,
         label: l10n.routineGroupMenuAddToGroup,
-        isDanger: false,
       ),
-      (
+      QuickMenuRow(
         value: 3,
         icon: AppAssets.iconCopy,
         label: l10n.routineLibraryMenuCopy,
-        isDanger: false,
       ),
-      (
+      QuickMenuRow(
         value: 4,
         icon: AppAssets.iconTrash,
         label: l10n.routineLibraryMenuRemove,

@@ -119,7 +119,7 @@ strip_dev_keys() {
 # 운영 광고 단위는 `CLIENT_ENV_FILE`과 따로 시크릿 `CLIENT_ADMOB_ENV`에 둔다. 앱 전체 `.env`를 갈아끼우지 않고
 # 광고 줄만 바꿀 수 있어서다. 워크플로가 이 값을 환경변수 `CLIENT_ADMOB_ENV`로 넘기면 `.env`의 옛
 # `ELUM_ADMOB_` 줄을 지우고 이 값의 `ELUM_ADMOB_` 줄만 덧붙인다. 비어 있으면 아무것도 바꾸지 않는다.
-# 개발·테스트 빌드는 `AppConfig.useTestAds`가 구글 테스트 단위를 쓰므로 이 값이 들어가도 실광고는 나가지 않는다.
+# 개발·테스트 빌드는 `AppConfig.shouldUseTestAds`가 구글 테스트 단위를 쓰므로 이 값이 들어가도 실광고는 나가지 않는다.
 merge_admob_env() {
   [ -n "${CLIENT_ADMOB_ENV:-}" ] || return 0
   local tmp added
@@ -149,6 +149,11 @@ case "$MODE" in
     echo "ELUM_ENABLE_NETWORK_LOG=false" >> "$ENV_FILE"
     echo "ELUM_SKIP_ONBOARDING=false" >> "$ENV_FILE"
     echo "ELUM_USE_MOCK=false" >> "$ENV_FILE"
+    # 스토어에 나가는 빌드는 결제 화면을 넣는다 (Secret 에 줄이 없으면 앱 기본값 false 라 심사관이 구매 화면을 못 본다).
+    # 실제 판매 켜기·끄기는 서버 판매 스위치(SUBSCRIPTION_*_SELLING_ENABLED)가 한다. 이 빌드에서 빼려면 RELEASE_IAP_ENABLED=false
+    grep -v '^ELUM_IAP_ENABLED=' "$ENV_FILE" > "$ENV_FILE.tmp" || true
+    mv "$ENV_FILE.tmp" "$ENV_FILE"
+    echo "ELUM_IAP_ENABLED=${RELEASE_IAP_ENABLED:-true}" >> "$ENV_FILE"
     BUILD_FLAGS="${RELEASE_FLAGS[*]:-}"
     echo "✅ 배포 빌드 프로파일 적용"
     ;;

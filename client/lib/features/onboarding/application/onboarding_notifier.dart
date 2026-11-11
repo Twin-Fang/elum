@@ -166,39 +166,71 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     }
   }
 
-  /// 온보딩 완료 — 수집한 값을 로컬과 서버에 저장한다.
+  /// 온보딩 완료: 입력값 로컬 보관 > 서버 저장 > 완료 표시. null 이면 서버까지 저장됨
   ///
-  /// 로컬 저장은 즉시성(오프라인·화면 fallback)을, 서버 저장은 영속성(재설치·
-  /// 기기 변경 시 복원)을 담당한다.
-  ///
-  /// **온보딩 흐름은 막지 않는다.** 로컬에 저장돼 있으면 앱은 그대로 쓸 수 있고,
-  /// 여기서 앞을 막으면 서버가 잠깐 흔들릴 때 시작조차 못 한다.
-  /// 대신 **서버 저장이 온전했는지를 돌려준다** — 부르는 쪽이 알려야
-  /// 보호자가 "설정이 저장된 줄 알았는데 재설치하니 사라졌다"를 겪지 않는다.
+  /// **서버가 저장을 확인해야 완료다.** 서버 저장이 실패하면 완료 표시를 남기지 않고 실패를
+  /// 돌려준다 — 부르는 쪽은 이 화면에 남아 다시 시도하게 한다. 완료로 넘기면 다시 보낼 길이
+  /// 없어 서버에 빈 이름·기본 그림 방식(만화)·예시 일과 0건이 남는다.
+  /// 입력값은 실패해도 로컬에 남아 다시 누르거나 앱을 다시 켜도 그대로다.
   ///
   /// 서버 저장은 온보딩 완료 API 한 번 — 이룸이 확보·정보·예시 일과가 함께 저장되거나 함께 실패한다.
+  /// 서버가 멱등이라(이룸이 확보·예시 일과는 이미 있으면 건너뜀) 다시 보내도 중복이 생기지 않는다.
   /// 고른 이룸이 헤더를 싣지 않아, 지워진 이룸이 id 가 남은 재가입에서도 내 이룸이에 저장된다.
   ///
-  /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
-  /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다.
+  /// 실패하면 **처음 실패한 이유**를 돌려준다 — 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를
+  /// 화면이 그대로 띄운다.
   Future<AppFailure?> complete() async {
     // await 뒤 state 를 읽지 않게 먼저 잡음 (화면을 떠나 notifier 가 사라질 수 있음)
     final exampleCategoryCount = state.exampleCategories.length;
     final failure = await _saveCompletedOnboarding();
-    // 저장 실패여도 화면은 홈으로 넘어가므로 완료로 셈 (서버 저장 여부만 구분)
-    AppAnalytics.logOnboardingCompleted(
-      isServerSaved: failure == null,
-      exampleCategoryCount: exampleCategoryCount,
-    );
+    // 실패하면 온보딩에 남으므로 완료로 세지 않음
+    if (failure == null) {
+      AppAnalytics.logOnboardingCompleted(
+        isServerSaved: true,
+        exampleCategoryCount: exampleCategoryCount,
+      );
+    }
     return failure;
   }
 
-  /// 로컬 저장 > 코치마크 초기화 > 서버 저장. null 이면 셋 다 저장됨
+  /// 입력값 로컬 보관 > 서버 저장 > 완료 표시·코치마크 초기화. null 이면 모두 저장됨
   Future<AppFailure?> _saveCompletedOnboarding() async {
     // 저장하는 사이 서버 응답이 상태를 덮어도 사용자가 입력한 값이 나가도록 시작 시점 값을 고정한다.
     // 아니면 그림 방식이 기본값(만화)으로 저장돼 AI 그림 비용이 나간다.
     final input = state;
     final storage = ref.read(localStorageProvider);
+
+    // 입력값 로컬 보관 (서버 실패·재시작 뒤에도 입력 유지, 완료 표시는 서버 저장 뒤)
+    final localFailure = await _saveInputLocally(storage, input);
+    if (localFailure != null) return localFailure;
+
+    final serverFailure = await _saveOnServer(storage, input);
+    if (serverFailure != null) return serverFailure;
+
+    // 완료 표시 (서버 저장 확인 뒤에만)
+    try {
+      await storage.setOnboardingCompleted(true);
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] completed flag save failed (saved on server)', e, stack);
+      return AppFailure.of(e);
+    }
+
+    // 새로 시작한 보호자에게 코치마크 다시 보이기 (이 기기에서 전에 본 표시 지움)
+    try {
+      await storage.resetCoachMarks();
+      ref.invalidate(homeCoachProvider);
+      ref.invalidate(routineManageCoachProvider);
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] coach mark reset failed (flow continues)', e, stack);
+    }
+    return null;
+  }
+
+  /// 입력값(이름·목표·캐릭터·그림 방식·PIN) > 로컬 저장소. 완료 표시는 남기지 않음
+  Future<AppFailure?> _saveInputLocally(
+    LocalStorage storage,
+    OnboardingProfile input,
+  ) async {
     try {
       await storage.setNickname(input.childNickname);
       await storage.setGoals(
@@ -215,23 +247,19 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       await storage.setPendingExampleCategories(const []);
       await storage.setPendingExampleProfileId(null);
       await storage.setExampleSeedAttempts(0);
-      await storage.setOnboardingCompleted(true);
     } catch (e, stack) {
       AppLogger.error('[onboarding] local save failed', e, stack);
       // 잠금 저장이 실패했는데 홈으로 가면 보호자 화면의 경계가 사라진다.
       return AppFailure.of(e);
     }
+    return null;
+  }
 
-    // 새로 시작한 보호자에게 코치마크 다시 보이기 (이 기기에서 전에 본 표시 지움)
-    try {
-      await storage.resetCoachMarks();
-      ref.invalidate(homeCoachProvider);
-      ref.invalidate(routineManageCoachProvider);
-    } catch (e, stack) {
-      AppLogger.error('[onboarding] coach mark reset failed (flow continues)', e, stack);
-    }
-
-    // 서버 한 번 저장 (이룸이 확보·정보·예시 일과) > 저장된 이룸이를 고른 이룸이로
+  /// 서버 한 번 저장 (이룸이 확보·정보·예시 일과) > 저장된 이룸이를 고른 이룸이로. null 이면 저장됨
+  Future<AppFailure?> _saveOnServer(
+    LocalStorage storage,
+    OnboardingProfile input,
+  ) async {
     final member = ref.read(memberRepositoryProvider);
     final character = input.cardCharacter;
     final saved = await member.completeOnboarding(

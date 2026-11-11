@@ -124,12 +124,9 @@ class _ChildRoutineDetailScreenState
     super.dispose();
   }
 
-  /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
-  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
-    final routineId = _routine.id;
-    if (routineId.isEmpty) return null;
-    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
-  }
+  /// 저장 음성 위치: 보호자 목소리 · 미리 만든 단계 음성. 일과 id 가 없으면(저장 전) 기기 음성만
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) =>
+      storedSpeechOf(_routine.id, card);
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
   ///

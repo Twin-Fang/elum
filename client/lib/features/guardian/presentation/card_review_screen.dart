@@ -1,3 +1,4 @@
+import 'memory/memory_applied_pill.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,9 +11,9 @@ import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
+import '../../member/application/plan_access.dart';
 import '../application/card_review_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
@@ -20,6 +21,7 @@ import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
+import 'widgets/card_voice_block.dart';
 import 'widgets/card_review_coach_mark.dart';
 import 'widgets/card_review_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
@@ -28,6 +30,8 @@ import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
+import '../../../core/widgets/elum_danger_confirm_dialog.dart';
+import 'memory/routine_memory_observation_sheet.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -100,9 +104,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   @override
   void initState() {
     super.initState();
-    // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
+    // 첫 프레임 뒤: 소리 서비스 잡기, 만든 일과 그림 안내 (토스트는 Scaffold 가 선 뒤에 띄움)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _speech = ref.read(speechServiceProvider);
+      if (!mounted) return;
+      _speech = ref.read(speechServiceProvider);
+      showMissingAiImageNoticeIfPending();
     });
   }
 
@@ -118,36 +124,26 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   ///
   /// `✕` 가 곧바로 지우면 잘못 눌러도 되돌릴 길이 없다. 카드 그림은 AI 가 만든
   /// 것이라 다시 받으려면 크레딧이 든다. 일과 삭제 팝업과 같은 모양을 쓴다.
-  /// 바깥을 눌러 닫으면 null 이므로 취소로 다룬다.
+  /// 바깥을 눌러 닫으면 false 라 취소로 다룬다.
   Future<void> _confirmRemove(ActionCard card) async {
-    final confirmed = await showElumDialog<bool>(
-      context: context,
+    final confirmed = await confirmDangerousAction(
+      context,
+      icon: ElumDangerIcon.trash,
       title: context.l10n.cardReviewDeleteConfirmTitle,
-      icon: ElumDialogIcon.trash,
-      actions: [
-        ElumDialogAction(
-          label: context.l10n.commonCancel,
-          value: false,
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: context.l10n.cardReviewDeleteAction,
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
-      ],
+      actionLabel: context.l10n.cardReviewDeleteAction,
     );
     // 팝업이 떠 있는 사이 화면이 닫혔으면 건드리지 않는다
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     ref.read(routineFlowProvider.notifier).removeStep(card.id);
   }
 
   /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
-  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
-    final routineId = ref.read(routineFlowProvider).routine?.id;
-    if (routineId == null || routineId.isEmpty) return null;
-    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
-  }
+  // 보호자 목소리는 Pro 일 때만 (이룸이가 듣는 것과 맞춤)
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
+    ref.read(routineFlowProvider).routine?.id,
+    card,
+    shouldIncludeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+  );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
   ///
@@ -215,15 +211,23 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
     final rootContext = Navigator.of(context, rootNavigator: true).context;
     final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
+    final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
     context.go(Routes.guardian);
     // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
     // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
     // ignore: use_build_context_synchronously
     unawaited(pushPermissionPrompt.maybeAsk(rootContext));
+    // 고쳐서 보냈으면 AI 메모리가 찾은 수정을 물어봄 (Pro + 켜짐일 때만, 실패해도 조용히)
+    // ignore: use_build_context_synchronously
+    if (savedRoutineId != null) unawaited(showMemoryObservationsAfterSend(rootContext, savedRoutineId));
   }
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
   Future<void> _edit(ActionCard card) async {
+    final serverCard = CardPhotoTarget.of(
+      routineId: ref.read(routineFlowProvider).routine?.id ?? '',
+      stepId: card.id,
+    );
     final edited = await CardEditSheet.show(
       context,
       // displayTitle이 아니라 실제 title을 넘긴다. title이 없는 카드는
@@ -233,10 +237,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       title: card.title,
       description: card.description,
       // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다. 아니면 칩이 없다.
-      photo: CardPhotoTarget.of(
-        routineId: ref.read(routineFlowProvider).routine?.id ?? '',
-        stepId: card.id,
-      ),
+      photo: serverCard,
+      // 녹음 칸: 서버 카드이고 Pro 이거나 녹음이 남아 있을 때만 (Free 에게는 녹음 전 칸을 보이지 않음)
+      voice: CardVoiceBlock.isShownFor(
+        canUseGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+        guardianVoicePath: card.guardianVoicePath,
+      )
+          ? serverCard
+          : null,
     );
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
     if (edited == null || !mounted) return;
@@ -425,6 +433,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
             isReorderMode: _reorderMode,
             onTitleEditTap: renameRoutineInFlow,
           ),
+          // 이 일과에 AI 메모리 규칙이 적용됐으면 제목 아래 작은 알약 (누르면 AI 메모리)
+          if (!_reorderMode && (routine?.appliedMemoryRuleCount ?? 0) > 0) ...[
+            SizedBox(height: 8.h),
+            MemoryAppliedPill(count: routine!.appliedMemoryRuleCount),
+          ],
           SizedBox(height: 16.h),
           Expanded(
             child: _reorderMode

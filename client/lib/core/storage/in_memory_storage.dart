@@ -57,6 +57,7 @@ class InMemoryStorage implements LocalStorage {
   final Map<String, String> _progress = {};
   List<String> _pendingSync = const [];
   String? _cachedToday;
+  String? _cachedTodayOwner;
   String? _cachedConsent;
 
   @override
@@ -227,14 +228,24 @@ class InMemoryStorage implements LocalStorage {
       _pendingSync = ids;
 
   @override
-  String? get cachedTodayRoutinesJson => _cachedToday;
+  String? get cachedTodayRoutinesJson =>
+      _cachedTodayOwner == _accountMemberId ? _cachedToday : null;
 
   @override
-  Future<void> setCachedTodayRoutinesJson(String json) async =>
-      _cachedToday = json;
+  Future<void> setCachedTodayRoutinesJson(
+    String json, {
+    required String? ownerMemberId,
+  }) async {
+    if (ownerMemberId != _accountMemberId) return;
+    _cachedTodayOwner = ownerMemberId;
+    _cachedToday = json;
+  }
 
   @override
-  Future<void> clearCachedTodayRoutines() async => _cachedToday = null;
+  Future<void> clearCachedTodayRoutines() async {
+    _cachedToday = null;
+    _cachedTodayOwner = null;
+  }
 
   String? _cachedTuning;
 
@@ -244,6 +255,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setCachedClientTuningJson(String json) async =>
       _cachedTuning = json;
+
+  bool? _isCachedStoreSellingOpen;
+
+  @override
+  bool? get isCachedStoreSellingOpen => _isCachedStoreSellingOpen;
+
+  @override
+  Future<void> setCachedStoreSellingOpen(bool isOpen) async =>
+      _isCachedStoreSellingOpen = isOpen;
 
   @override
   String? get cachedConsentJson => _cachedConsent;
@@ -265,6 +285,14 @@ class InMemoryStorage implements LocalStorage {
 
   bool _hasAskedPushPermission = false;
   DateTime? _pushPermissionNudgedAt;
+  DateTime? _homeNotificationNoticeDismissedAt;
+
+  @override
+  DateTime? get homeNotificationNoticeDismissedAt => _homeNotificationNoticeDismissedAt;
+
+  @override
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async =>
+      _homeNotificationNoticeDismissedAt = at;
   String? _updateSuggestionShownRecord;
 
   @override
@@ -317,6 +345,24 @@ class InMemoryStorage implements LocalStorage {
     List<String> routineIds,
   ) async => _talkShareHintDismissedRoutineIds = routineIds;
 
+  Map<String, DateTime> _homeSuggestionShownAtByKind = const {};
+
+  @override
+  Map<String, DateTime> get homeSuggestionShownAtByKind => _homeSuggestionShownAtByKind;
+
+  @override
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind) async =>
+      _homeSuggestionShownAtByKind = shownAtByKind;
+
+  Set<String> _homeSuggestionDismissedKeys = const {};
+
+  @override
+  Set<String> get homeSuggestionDismissedKeys => _homeSuggestionDismissedKeys;
+
+  @override
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async =>
+      _homeSuggestionDismissedKeys = dismissedKeys;
+
   bool _isTalkGridView = false;
 
   @override
@@ -361,10 +407,21 @@ class InMemoryStorage implements LocalStorage {
     _selectedProfileId = null;
     _progress.clear();
     _cachedToday = null;
+    _cachedTodayOwner = null;
   }
 
   @override
   Future<void> clearAll() async {
+    // 연결 때 남기는 표식·역할·잠금까지 지움
+    _pin = null;
+    _elumi = false;
+    _elumiLinkLost = false;
+    _role = null;
+    await clearAccountForElumiLink();
+  }
+
+  @override
+  Future<void> clearAccountForElumiLink() async {
     _accountMemberId = null;
     _nickname = null;
     _goals = const [];
@@ -373,16 +430,17 @@ class InMemoryStorage implements LocalStorage {
     _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
-    _pin = null;
     _completed = false;
     _selectedProfileId = null;
     _accessToken = null;
-    _elumi = false;
-    _elumiLinkLost = false;
-    _role = null;
     _resumeElumiScreen = false;
     _progress.clear();
     _pendingSync = const [];
     _cachedToday = null;
+    _cachedTodayOwner = null;
+    _talkImportedSeenRoutineIds = const [];
+    _talkShareHintDismissedRoutineIds = const [];
+    _homeSuggestionShownAtByKind = const {};
+    _homeSuggestionDismissedKeys = const {};
   }
 }

@@ -23,13 +23,6 @@ public interface MemberDailyVisitRepository extends JpaRepository<MemberDailyVis
 
   long countByVisitDate(LocalDate visitDate);
 
-  /// 기간[from, to] 중복 없는 방문 회원 수
-  @Query("""
-    select count(distinct v.memberId) from MemberDailyVisit v
-    where v.visitDate between :from and :to
-    """)
-  long countDistinctMembersBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
-
   /// 방문 기록 시작일 (기록이 없으면 null)
   @Query("select min(v.visitDate) from MemberDailyVisit v")
   LocalDate findFirstVisitDate();
@@ -45,7 +38,7 @@ public interface MemberDailyVisitRepository extends JpaRepository<MemberDailyVis
     @Param("unit") String unit, @Param("from") LocalDate from, @Param("to") LocalDate to);
 
   /// 탈퇴·완전 삭제: 그 회원 방문 기록 전부
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Modifying(flushAutomatically = true)
   @Query("delete from MemberDailyVisit v where v.memberId = :memberId")
   int deleteAllByMemberId(@Param("memberId") String memberId);
 }

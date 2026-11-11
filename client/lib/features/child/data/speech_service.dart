@@ -10,8 +10,9 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/config/app_config.dart';
 import '../../../shared/models/action_card.dart';
 import 'card_speech_repository.dart';
+import 'guardian_voice_repository.dart';
 
-export 'card_speech_repository.dart' show StoredSpeechSource;
+export 'card_speech_repository.dart' show StoredSpeechSource, storedSpeechOf;
 
 /// 카드 문장을 소리로 읽어준다.
 ///
@@ -186,7 +187,7 @@ class RemoteSpeech implements SpeechService {
     }
 
     try {
-      final res = await _dio.post<List<int>>(
+      final response = await _dio.post<List<int>>(
         '${AppConfig.ttsBaseUrl}/tts',
         data: {
           // 길이 때문에 실패하느니 앞부분이라도 들리는 편이 낫다
@@ -200,7 +201,7 @@ class RemoteSpeech implements SpeechService {
         ),
       );
 
-      final bytes = res.data;
+      final bytes = response.data;
       if (bytes == null || bytes.isEmpty) return false;
 
       await _player.stop();
@@ -264,6 +265,50 @@ class StoredSpeech implements SpeechService {
   void dispose() => _player.dispose();
 }
 
+/// 보호자 목소리 재생: 녹음 열쇠가 있으면 서버 확인 > 캐시·받기 > 재생
+///
+/// 일과 언어와 상관없이 튼다 (보호자가 그 카드를 직접 읽은 소리). 열쇠가 없거나 서버가 막으면(Pro 끝남) false > 다음 순서로.
+class GuardianVoiceSpeech implements SpeechService {
+  GuardianVoiceSpeech({required GuardianVoiceRepository repository, AudioPlayer? player})
+      : _repository = repository,
+        _player = player ?? AudioPlayer();
+
+  final GuardianVoiceRepository _repository;
+  final AudioPlayer _player;
+
+  @override
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
+    final voiceKey = stored?.guardianVoicePath;
+    if (stored == null || voiceKey == null) return false;
+    try {
+      final file = await _repository.fileFor(
+        routineId: stored.routineId,
+        stepId: stored.stepId,
+        voiceKey: voiceKey,
+      );
+      if (file == null) return false;
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+      return true;
+    } catch (e) {
+      AppLogger.error('tts', '보호자 목소리 재생 실패 → 기본 음성: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<void> stop() async {
+    try {
+      await _player.stop();
+    } catch (e) {
+      AppLogger.error('tts', '보호자 목소리 정지 실패: $e');
+    }
+  }
+
+  @override
+  void dispose() => _player.dispose();
+}
+
 /// 순서대로 시도: 앞이 실패하면 다음 (안드로이드 저장 > 실시간 > 기기, 아이폰 기기 > 실시간)
 ///
 /// 어느 쪽이 울리는지 확신할 수 없어 **정지할 때 전부 멈춘다** — 하나만 멈추면 소리가 남는다.
@@ -296,7 +341,7 @@ class FallbackSpeech implements SpeechService {
   }
 }
 
-/// 플랫폼별 재생 순서
+/// 플랫폼별 재생 순서 (두 플랫폼 모두 보호자 목소리가 1순위)
 ///
 /// 안드로이드: 기기 목소리가 기종마다 쉬고 흔들려(#675) 미리 만든 음성 먼저, 없으면 서버 실시간 음성.
 /// 기기 엔진은 최후 수단 (#761: 저장 음성이 없을 때 기기 엔진이 이상한 소리를 냄).
@@ -304,11 +349,14 @@ class FallbackSpeech implements SpeechService {
 @visibleForTesting
 List<SpeechService> speechEnginesFor({
   required bool isAndroid,
+  required SpeechService guardianVoice,
   required SpeechService Function() createStored,
   required SpeechService device,
   required SpeechService remote,
 }) =>
-    isAndroid ? [createStored(), remote, device] : [device, remote];
+    isAndroid
+        ? [guardianVoice, createStored(), remote, device]
+        : [guardianVoice, device, remote];
 
 /// 일과 화면 진입 시 저장 음성 정리·미리 받기 (#675). 저장 음성을 쓰는 안드로이드만, 던지지 않음
 void prefetchStoredSpeech(WidgetRef ref, String routineId, List<ActionCard> cards) {
@@ -326,6 +374,7 @@ bool shouldShowSpeechFailure(String language) =>
 final speechServiceProvider = Provider<SpeechService>((ref) {
   final service = FallbackSpeech(speechEnginesFor(
     isAndroid: defaultTargetPlatform == TargetPlatform.android,
+    guardianVoice: GuardianVoiceSpeech(repository: ref.watch(guardianVoiceRepositoryProvider)),
     createStored: () => StoredSpeech(repository: ref.watch(cardSpeechRepositoryProvider)),
     device: DeviceSpeech(),
     remote: RemoteSpeech(),

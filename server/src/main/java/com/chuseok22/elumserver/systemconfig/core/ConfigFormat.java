@@ -29,6 +29,12 @@ public enum ConfigFormat {
   TEXT_PROVIDER_LIST(true, "쉼표로 나눈 제공자 이름 (GEMINI,OPENAI,CLAUDE)"),
   // Claude 키 목록 JSON (관리자 Claude 키 카드가 만든다). 직접 입력하지 않는다
   CLAUDE_KEY_LIST(true, "Claude 키 카드에서 관리"),
+  // 쉼표 목록: 스토어 상품 ID (영문·숫자·. _ -). 비우면 어떤 상품도 받지 않음
+  STORE_PRODUCT_ID_LIST(true, "쉼표로 나눈 상품 ID (영문·숫자·. _ -)"),
+  // 쉼표 목록: 상품 ID:개수 (예: elum_credit_50:50). 비우면 꾸러미 없음
+  CREDIT_PACK_LIST(true, "쉼표로 나눈 상품ID:크레딧 개수 (예: elum_credit_50:50,elum_credit_150:150)"),
+  // 긴 비밀값 (서비스 계정 JSON·.p8 개인 키). 일반 비밀값보다 긴 길이 허용
+  SECRET_DOCUMENT(false, "파일 내용 전체"),
   ;
 
   private final boolean isBlankAllowed;

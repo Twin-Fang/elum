@@ -11,7 +11,10 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
-@Tag(name = "Routine", description = "온보딩 예시 일과 API (#803). accessToken(Bearer) 인증이 필요합니다.")
+/**
+ * 온보딩 예시 일과 API 문서 (#803). Swagger 묶음은 RoutineControllerDocs 와 같음
+ */
+@Tag(name = RoutineControllerDocs.TAG_NAME, description = RoutineControllerDocs.TAG_DESCRIPTION)
 public interface RoutineExampleControllerDocs {
 
   @Operation(

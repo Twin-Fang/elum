@@ -13,6 +13,7 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/scroll_near_end.dart';
 import '../application/talk_feed_controller.dart';
 import '../application/talk_my_posts_controller.dart';
 import '../domain/talk_post.dart';
@@ -32,8 +33,6 @@ class TalkMyPostsScreen extends ConsumerStatefulWidget {
 class _TalkMyPostsScreenState extends ConsumerState<TalkMyPostsScreen> {
   final _scrollController = ScrollController();
 
-  /// 끝까지 이만큼 남으면 다음 쪽을 받는다
-  static const _loadMoreExtent = 320.0;
 
   /// 목록 위아래 · 카드 사이 (피드와 같은 8)
   static const _listPadV = 16.0;
@@ -54,7 +53,7 @@ class _TalkMyPostsScreenState extends ConsumerState<TalkMyPostsScreen> {
   }
 
   void _loadMoreNearEnd() {
-    if (_scrollController.position.extentAfter < _loadMoreExtent) {
+    if (_scrollController.isNearListEnd) {
       ref.read(talkMyPostsControllerProvider.notifier).loadMore();
     }
   }
@@ -70,7 +69,7 @@ class _TalkMyPostsScreenState extends ConsumerState<TalkMyPostsScreen> {
     return ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.talkMyPostsTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: switch (myPosts) {
         AsyncData(value: final state) when state.items.isEmpty =>

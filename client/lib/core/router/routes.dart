@@ -47,6 +47,25 @@ abstract final class Routes {
   /// 오픈소스 라이선스 (설정 > 약관 및 정보)
   static const guardianLicenses = '/guardian/licenses';
 
+  /// 카드 인쇄용으로 받기 (#1073). extra 로 Routine 을 넘긴다
+  static const guardianCardExport = '/guardian/card-export';
+
+  /// 결제 직전 보호자 암호 확인. 맞으면 true 로 닫힌다 (push 로 연다)
+  static const guardianPlanPin = '/guardian/plan/pin';
+
+  /// 약관 목록 (요금제 화면 `이용약관` 링크. 유료 약관 주소가 없을 때)
+  static const guardianTerms = '/guardian/terms';
+
+  /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
+  static const guardianWeeklyReport = '/guardian/weekly-report';
+
+  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02` (null 이면 이번 주)
+  static String guardianWeeklyReportOf(String? weekStart) =>
+      weekStart == null ? guardianWeeklyReport : '$guardianWeeklyReport?weekStart=${Uri.encodeQueryComponent(weekStart)}';
+
+  /// 주간 계획: 요일별 반복 일과 (#782)
+  static const guardianWeeklyPlan = '/guardian/weekly-plan';
+
   /// 숨긴 보호자 목록 (내 정보 > 숨긴 보호자)
   static const guardianTalkBlocks = '/guardian/talk/blocks';
 
@@ -86,8 +105,14 @@ abstract final class Routes {
   /// 그림 방식 선택. 시안이 없어 임시 화면이다.
   static const guardianImageStyle = '/guardian/settings/image-style';
 
+  /// 이룸이별 AI 메모 (Pro). 시안이 없어 설정 묶음 카드 모양을 따른다.
+  static const guardianRoutineMemory = '/guardian/settings/routine-memory';
+
   /// 크레딧 사용 내역 (Figma `1589:8359`). 설정 크레딧 카드에서 들어온다.
   static const guardianCreditHistory = '/guardian/settings/credit-history';
+
+  /// 내 크레딧: 종류별 잔액 · 구독 안내 · 꾸러미 구매
+  static const guardianMyCredit = '/guardian/settings/my-credit';
 
   /// 함께하는 사람. 시안이 없어 임시 화면이다.
   static const guardianPeople = '/guardian/settings/people';

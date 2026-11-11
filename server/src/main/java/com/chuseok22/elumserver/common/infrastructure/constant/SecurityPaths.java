@@ -56,13 +56,27 @@ public final class SecurityPaths {
    */
   public static final String API_ADS_SSV = "/api/ads/ssv";
   /**
-   * 수동 검증용으로 열어 둔 경로. <b>API 체인에서 누구도 부를 수 없게 막는다.</b>
+   * 스토어 결제 알림 (#1071): App Store Server Notifications V2, Google Play RTDN(Pub/Sub 푸시).
    *
-   * <p>API 체인의 마지막 규칙이 보호자 권한이라, 따로 막지 않으면 가입만 하면 누구나 로컬 LLM 을
-   * 돌리고 보낸 원문을 로그에 남길 수 있었다. API 체인에는 관리자 역할이 없으므로 "관리자만"이
-   * 아니라 전부 막는다. 관리자 프롬프트 시험 화면은 서비스를 직접 불러 이 경로를 쓰지 않는다.
+   * <p>토큰이 없다 — 스토어 서버가 부른다. **인증은 Apple 알림 서명, Google 푸시 주소의 token** 이다.
+   * 점검·이전 잠금 중에는 막는다(503 > 스토어가 다시 보낸다).
+   */
+  public static final String API_SUBSCRIPTION_APPLE_NOTIFICATIONS = "/api/subscriptions/apple/notifications";
+  public static final String API_SUBSCRIPTION_GOOGLE_NOTIFICATIONS = "/api/subscriptions/google/notifications";
+  /**
+   * 수동 검증용 경로 (지금 이 경로의 컨트롤러는 없음). <b>API 체인에서 누구도 부를 수 없게 막는다.</b>
+   *
+   * <p>API 체인의 마지막 규칙이 보호자 권한이라, 따로 막지 않으면 가입한 누구나 부를 수 있음.
+   * API 체인에는 관리자 역할이 없으므로 "관리자만"이 아니라 전부 막음. 관리자 프롬프트 시험 화면은 서비스를 직접 부름
    */
   public static final String API_INTERNAL_MATCHER = "/api/internal/**";
+  /**
+   * 관제소(suh-project-control)가 확인할 일을 모아 가는 곳 (#1229).
+   *
+   * <p><b>관리자·API 보안 체인 어디에도 걸리지 않는다</b>(/admin/**, /api/** 밖). 로그인·JWT 가 없고
+   * 인증은 컨트롤러가 X-Control-Token 을 환경 변수 토큰과 상수 시간 비교로 확인한다. 점검 중에도 연다.
+   */
+  public static final String CONTROL_ATTENTION = "/control/attention";
 
   private SecurityPaths() {
   }

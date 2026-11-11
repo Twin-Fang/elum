@@ -15,6 +15,7 @@ import '../application/routine_library_controller.dart';
 import '../application/routine_providers.dart';
 import '../domain/routine_group.dart';
 import 'widgets/library_entry_grid.dart' show LibraryMenuAnchor;
+import 'widgets/anchored_quick_menu.dart' show QuickMenuRow;
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_group_picker_sheet.dart';
 import 'widgets/routine_group_sheet.dart';
@@ -112,17 +113,15 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
       context,
       title: l10n.routineGroupCreateMenuTitle,
       rows: [
-        (
+        QuickMenuRow(
           value: false,
           icon: AppAssets.iconPlus,
           label: l10n.routineGroupCreateRoutine,
-          isDanger: false,
         ),
-        (
+        QuickMenuRow(
           value: true,
           icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
-          isDanger: false,
         ),
       ],
     );
@@ -160,17 +159,15 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
       title: l10n.routineGroupChooseTitle,
       rows: [
         for (final entry in groups)
-          (
+          QuickMenuRow(
             value: (group: entry.group),
             icon: AppAssets.iconFolder,
             label: entry.group.name,
-            isDanger: false,
           ),
-        (
+        QuickMenuRow(
           value: (group: null),
           icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
-          isDanger: false,
         ),
       ],
     );
@@ -262,9 +259,9 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
   /// 묶음 풀기 확인 > 풀기. 정리 상태 ⊖ 와 메뉴가 같이 쓴다
   Future<void> confirmUngroup(RoutineGroup group) async {
     final l10n = context.l10n;
+    // 잃는 것 없음 (일과는 낱개로 남음) > 아이콘 없는 일반 확인 (#1171)
     final isConfirmed = await showElumDialog<bool>(
       context: context,
-      icon: ElumDialogIcon.alert,
       title: l10n.routineGroupUngroupConfirmTitle,
       message: l10n.routineGroupUngroupConfirmMessage,
       keepWordsInMessage: true,

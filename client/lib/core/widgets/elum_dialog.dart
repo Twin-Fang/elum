@@ -9,6 +9,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'elum_error_code_text.dart';
 import '../theme/app_typography.dart';
 
 /// 팝업 위쪽에 놓이는 원형 아이콘.
@@ -74,6 +75,7 @@ class ElumDialogAction<T> {
 /// 확장 지점은 셋이다.
 ///
 /// - [icon] 위쪽 원형 아이콘. 없으면 그 자리가 통째로 사라진다
+/// - [illustrationAsset] 위쪽 그림 (루미 등 PNG). 아이콘 대신 쓰며 실패가 아닌 안내에 둔다
 /// - [message] 제목 아래 설명. 없으면 생략한다
 /// - [actions] 버튼. 비우면 `확인` 하나가 선다. 두 개면 가로로 나눈다
 ///
@@ -83,14 +85,17 @@ class ElumDialogAction<T> {
 /// [keepWordsInMessage] 를 켜면 설명을 **띄어쓰기에서만** 줄바꿈한다([keepWords]).
 /// 기본은 꺼 둔다 — 다른 팝업은 시안 대조가 글자 단위 줄에 맞춰져 있어, 앱 전체
 /// 규칙으로 바꾸면 골든이 함께 흔들린다 (보상 도움말에만 켠다).
+/// [keepWordsInTitle] 은 제목에 같은 규칙을 건다 — 날짜가 끼어 길이가 바뀌는 문장 제목용 (크레딧 소진 팝업, #1169).
 Future<T?> showElumDialog<T>({
   required BuildContext context,
   required String title,
   String? message,
   ElumDialogIcon? icon,
+  String? illustrationAsset,
   List<ElumDialogAction<T>> actions = const [],
   bool barrierDismissible = false,
   bool keepWordsInMessage = false,
+  bool keepWordsInTitle = false,
   String? code,
 }) {
   return showDialog<T>(
@@ -108,8 +113,10 @@ Future<T?> showElumDialog<T>({
       title: title,
       message: message,
       icon: icon,
+      illustrationAsset: illustrationAsset,
       actions: actions,
       keepWordsInMessage: keepWordsInMessage,
+      keepWordsInTitle: keepWordsInTitle,
       code: code,
     ),
   );
@@ -140,18 +147,26 @@ class ElumDialogCard<T> extends StatelessWidget {
     required this.title,
     this.message,
     this.icon,
+    this.illustrationAsset,
     this.actions = const [],
     this.keepWordsInMessage = false,
+    this.keepWordsInTitle = false,
     this.code,
   });
 
   final String title;
   final String? message;
   final ElumDialogIcon? icon;
+
+  /// 위쪽 그림 자산 경로 (PNG). [icon] 이 있으면 아이콘이 먼저다
+  final String? illustrationAsset;
   final List<ElumDialogAction<T>> actions;
 
   /// 설명을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
   final bool keepWordsInMessage;
+
+  /// 제목을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
+  final bool keepWordsInTitle;
 
   /// 추적용 식별자(`E-AUTH` 등). 문장 아래에 작은 글자로 적는다.
   ///
@@ -161,6 +176,10 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   /// 아이콘 40 · 아이콘↔제목 20 · 제목 묶음↔버튼 32
   static const _iconSize = 40.0;
+
+  /// 그림 96 · 그림↔제목 12
+  static const _illustrationSize = 96.0;
+  static const _illustrationToTitle = 12.0;
   static const _iconToTitle = 20.0;
   static const _bodyToActions = 32.0;
 
@@ -195,9 +214,19 @@ class ElumDialogCard<T> extends StatelessWidget {
                 height: _iconSize.w,
               ),
               SizedBox(height: _iconToTitle.h),
+            ] else if (illustrationAsset case final asset?) ...[
+              Image.asset(
+                asset,
+                width: _illustrationSize.w,
+                height: _illustrationSize.w,
+                excludeFromSemantics: true,
+              ),
+              SizedBox(height: _illustrationToTitle.h),
             ],
             Text(
-              title,
+              keepWordsInTitle ? keepWords(title, locale: context.appLocale) : title,
+              // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
+              semanticsLabel: keepWordsInTitle ? title : null,
               textAlign: TextAlign.center,
               // 앱 본문색이 아니라 시안 그대로 순검정이다.
               // 두 줄 문장은 시안 `로그인실패` 처럼 줄 간격을 벌린다.
@@ -220,13 +249,7 @@ class ElumDialogCard<T> extends StatelessWidget {
             ],
             if (code != null) ...[
               SizedBox(height: context.space.sm),
-              Text(
-                code!,
-                textAlign: TextAlign.center,
-                style: context.typo.bodySmall.paragraph.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
+              ElumErrorCodeText(code!),
             ],
             SizedBox(height: _bodyToActions.h),
             ElumDialogButtonRow(
@@ -368,22 +391,27 @@ class ElumDialogButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isEnabled = onTap != null;
     // 팝업 전용 토큰을 쓴다. `buttonNeutral`·`danger`는 설정 화면과 연결 암호도
     // 함께 쓰므로, 팝업을 시안에 맞추려고 그것을 건드리면 그쪽까지 바뀐다.
-    final (bg, fg) = switch (tone) {
-      ElumDialogTone.primary => (colors.checkDone, colors.surface),
-      ElumDialogTone.neutral => (
-        colors.dialogNeutral,
-        colors.dialogNeutralText,
-      ),
-      ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
-    };
+    // 꺼진 버튼(onTap null)은 하단 CTA 비활성 토큰 (입력 확인 전 탈퇴하기)
+    final (bg, fg) = !isEnabled
+        ? (colors.buttonDisabled, colors.buttonDisabledText)
+        : switch (tone) {
+            ElumDialogTone.primary => (colors.checkDone, colors.surface),
+            ElumDialogTone.neutral => (
+              colors.dialogNeutral,
+              colors.dialogNeutralText,
+            ),
+            ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
+          };
 
     // 버튼마다 제 접근성 노드를 세운다. 안 세우면 누르는 동작이 위쪽 노드로 합쳐져
     // 버튼의 영역이 제목·본문까지 덮는다 — 공지 `방침 보기`가 그렇다.
     return Semantics(
       container: true,
       button: true,
+      enabled: isEnabled,
       child: AppPressable(
         onTap: onTap,
         // Container 로 둔다 — 설정 화면 테스트가 버튼 문구 뒤의 면 색을 Container 로 찾는다.

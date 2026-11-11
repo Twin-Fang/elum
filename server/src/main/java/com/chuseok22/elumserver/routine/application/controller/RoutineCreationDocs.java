@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.common.infrastructure.constant.IdempotencyHeader;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
@@ -27,11 +28,11 @@ public interface RoutineCreationDocs {
   @Operation(
     summary = "일과 생성",
     description = """
-      부모가 입력한 자연어 일과를 받아 동기적으로 AI 파이프라인(로컬 LLM 마스킹 → Gemini 단계 세분화 → 단계별 이미지 생성)을 거쳐 PENDING_REVIEW 상태의 일과를 생성합니다.
+      부모가 입력한 자연어 일과를 받아 동기적으로 AI 파이프라인(텍스트 AI 단계 세분화 → 단계별 이미지 생성)을 거쳐 PENDING_REVIEW 상태의 일과를 생성합니다.
 
       **처리 로직**
-      1. 로컬 LLM 게이트로 원문의 민감정보를 마스킹합니다(마스킹 실패 시 fail-open으로 원문 그대로 진행).
-      2. 마스킹된 텍스트를 Gemini에 전달해 제목과 최대 10단계의 설명을 생성합니다.
+      1. 입력 원문은 가공하지 않습니다(로컬 마스킹 없음). 보호자에게 개인정보를 적지 않도록 화면에서 안내합니다.
+      2. 원문을 텍스트 AI에 전달해 제목과 최대 10단계의 설명을 생성합니다.
       3. 단계별로 Gemini 이미지 생성을 병렬 호출합니다. 한 단계가 일시적으로 실패하면 그
       단계만 1회 재시도하며, 재시도까지 실패하면 전체 요청이 실패합니다.
       4. 모든 단계가 성공적으로 생성된 뒤에만 일과를 저장합니다.
@@ -70,11 +71,11 @@ public interface RoutineCreationDocs {
     ),
     @ApiResponse(
       responseCode = "403",
-      description = "이번 주 크레딧 부족(AI_CREDIT_INSUFFICIENT) 또는 멈춘 계정(AI_CREDIT_ACCOUNT_FROZEN)",
+      description = "크레딧 부족(AI_CREDIT_INSUFFICIENT) 또는 멈춘 계정(AI_CREDIT_ACCOUNT_FROZEN)",
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요.\"}"
+          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"크레딧을 모두 사용했어요. 다시 채워지면 이어서 만들 수 있어요.\"}"
         )
       )
     ),
@@ -112,7 +113,7 @@ public interface RoutineCreationDocs {
   ResponseEntity<RoutineResponse> create(
     Authentication authentication,
     @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
-    @Parameter(in = ParameterIn.HEADER, name = "Idempotency-Key",
+    @Parameter(in = ParameterIn.HEADER, name = IdempotencyHeader.NAME,
       description = "생성 요청 멱등 키(255자 이하). 같은 키로 다시 보내면 AI를 다시 부르지 않는다. 빼면 서버가 만든다")
     String idempotencyKey,
     RoutineCreateRequest request
@@ -142,7 +143,7 @@ public interface RoutineCreationDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요.\"}"
+          value = "{\"errorCode\":\"AI_CREDIT_INSUFFICIENT\",\"errorMessage\":\"크레딧을 모두 사용했어요. 다시 채워지면 이어서 만들 수 있어요.\"}"
         )
       )
     ),

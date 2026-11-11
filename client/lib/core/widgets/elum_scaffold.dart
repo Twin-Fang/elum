@@ -59,8 +59,7 @@ class ElumScaffold extends StatelessWidget {
   /// 화면 맨 아래 광고 자리. 없으면 자리도 없다.
   ///
   /// [bottomButton]·[belowButton]과 함께 못 쓰게 assert로 막는다 — 광고가 하단 고정
-  /// 버튼을 가리면 심사 4.0에서 반려된다. 값이 `AdBottomStripSlot`이면 로드 전·실패 시
-  /// 높이 0이라 자리를 차지하지 않는다.
+  /// 버튼을 가리면 심사 4.0에서 반려된다. `AdBottomStripSlot`은 광고 계정이면 로드 전부터 높이 고정 (#1168).
   final Widget? bottomBanner;
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
@@ -103,11 +102,11 @@ class ElumScaffold extends StatelessWidget {
   /// 상자를 시안대로 두고 아이콘을 가운데 놓으면 둘 다 맞는다.
   static const _backBoxLeft = 16.0;
   static const _backBoxY = 79.0;
+
+  /// 설정 묶음 시안(`1022:4467` 등)의 뒤로가기 상자 y. 설정·약관·알림·연결 등 하위 화면이 [backTop] 으로 씀
+  static const settingsBackTop = 67.0;
   static const _backBoxSize = 40.0;
   static const _backIconSize = 24.0;
-
-  /// 뒤로가기 상자 하단 — [ElumHeader]가 제목 y를 여기서 이어 계산한다.
-  static const backBoxBottom = _backBoxY + _backBoxSize;
 
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///

@@ -19,7 +19,7 @@ class OpenSourceLicensesScreen extends StatelessWidget {
   const OpenSourceLicensesScreen({super.key});
 
   // 설정 계열 머리: 뒤로가기 y=67, 줄 x=16 (약관 목록과 같음)
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _horizontalPadding = 16.0;
   // 뒤로가기 하단(107) > 안내 글 (약관 목록 첫 묶음과 같음)
   static const _headToBody = 24.0;
@@ -56,6 +56,7 @@ class OpenSourceLicensesScreen extends StatelessWidget {
               header: l10n.licenseGroupArtwork,
               children: const [
                 _BundledLicenseTile(kind: BundledLicenseKind.mulberrySymbols),
+                _BundledLicenseTile(kind: BundledLicenseKind.twemoji),
               ],
             ),
             SizedBox(height: _groupGap.h),
@@ -111,6 +112,7 @@ class _BundledLicenseTile extends ConsumerWidget {
 
   String _toDisplayName(BuildContext context) => switch (kind) {
         BundledLicenseKind.mulberrySymbols => 'Mulberry Symbols',
+        BundledLicenseKind.twemoji => 'Twemoji',
         BundledLicenseKind.pretendard => 'Pretendard',
         BundledLicenseKind.tmoneyRoundWind => context.l10n.licenseFontTmoneyName,
       };
@@ -118,6 +120,7 @@ class _BundledLicenseTile extends ConsumerWidget {
   // 티머니는 자체 약관이라 종류 표시 없음
   String? get _licenseTypeLabel => switch (kind) {
         BundledLicenseKind.mulberrySymbols => 'CC BY-SA 4.0',
+        BundledLicenseKind.twemoji => 'CC BY 4.0',
         BundledLicenseKind.pretendard => 'OFL 1.1',
         BundledLicenseKind.tmoneyRoundWind => null,
       };

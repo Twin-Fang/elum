@@ -35,6 +35,8 @@ public enum ErrorCode {
   // ROUTINE
   ROUTINE_AI_GENERATION_FAILED(HttpStatus.BAD_GATEWAY),
   ROUTINE_STEP_LIMIT_EXCEEDED(HttpStatus.BAD_GATEWAY),
+  // AI 가 카드 0장으로 답함: 입력에 이룸이가 할 행동이 없음 (안내만, 크레딧 미차감)
+  ROUTINE_INPUT_NOT_ACTIONABLE(HttpStatus.UNPROCESSABLE_ENTITY),
   ROUTINE_NOT_FOUND(HttpStatus.NOT_FOUND),
   ROUTINE_ACCESS_DENIED(HttpStatus.FORBIDDEN),
   ROUTINE_INVALID_STATUS(HttpStatus.CONFLICT),
@@ -50,6 +52,21 @@ public enum ErrorCode {
   ROUTINE_STEP_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST),
   ROUTINE_STEP_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST),
   ROUTINE_STEP_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
+  // 카드 그림 다시 그리기·그림 그리기: 대상 아닌 카드(사진·가져온 그림·AI 그림이 아닌 방식·설명 없음), 그림 생성 실패
+  ROUTINE_STEP_IMAGE_NOT_REGENERATABLE(HttpStatus.CONFLICT),
+  ROUTINE_STEP_IMAGE_REGENERATE_FAILED(HttpStatus.SERVICE_UNAVAILABLE),
+  // 고를 새 그림 후보가 없음 (이미 골랐거나 버렸거나 다시 그려 바뀜)
+  ROUTINE_STEP_IMAGE_CANDIDATE_NOT_FOUND(HttpStatus.NOT_FOUND),
+  // 요금제에 AI 맞춤 그림이 없음 (Free · FREE_AI_IMAGE_GENERATION 꺼짐) — 다시 그리기·그림 그리기 거절
+  AI_IMAGE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  // 요금제에 AI 맞춤 그림이 없는데 캐릭터·사진 같은 그림 방식을 저장하려 함 (#1149)
+  IMAGE_STYLE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  // 보호자 목소리 녹음: Pro 아님, 형식(m4a), 크기(1MB), 길이(15초), 저장 실패
+  GUARDIAN_VOICE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  GUARDIAN_VOICE_INVALID_TYPE(HttpStatus.BAD_REQUEST),
+  GUARDIAN_VOICE_TOO_LARGE(HttpStatus.BAD_REQUEST),
+  GUARDIAN_VOICE_TOO_LONG(HttpStatus.BAD_REQUEST),
+  GUARDIAN_VOICE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
   ROUTINE_REQUEST_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS),
 
   // PROMPT
@@ -77,7 +94,6 @@ public enum ErrorCode {
   // 서버 이전 상태 화면 (#1062): 상태 JSON 이 깨짐, 요청 파일 쓰기 실패, 이전 설정 읽기 실패
   MIGRATION_STATUS_UNREADABLE(HttpStatus.INTERNAL_SERVER_ERROR),
   MIGRATION_SYNC_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
-  MIGRATION_SETTINGS_UNREADABLE(HttpStatus.INTERNAL_SERVER_ERROR),
 
   // SYSTEM CONFIG
   SYSTEM_CONFIG_INVALID_VALUE(HttpStatus.BAD_REQUEST),
@@ -128,6 +144,15 @@ public enum ErrorCode {
   ROUTINE_GROUP_INVALID_MEMBER(HttpStatus.BAD_REQUEST),
   // 묶음은 일과 1개 이상. 다 빼려면 묶음을 푼다
   ROUTINE_GROUP_TOO_SMALL(HttpStatus.BAD_REQUEST),
+  // 요일별 반복 일과 (#782, #1080): 요금제 권한 없음 403, 요일 0개·시각 형식 틀림 400
+  ROUTINE_SCHEDULE_NOT_ALLOWED(HttpStatus.FORBIDDEN),
+  ROUTINE_SCHEDULE_INVALID(HttpStatus.BAD_REQUEST),
+  // AI 메모 (#1082): Free 가 쓰기 API 를 부름 403, 진단·장애·정도·연락처가 든 줄 400
+  ROUTINE_MEMORY_PRO_REQUIRED(HttpStatus.FORBIDDEN),
+  ROUTINE_MEMORY_LINE_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  // 이 카드 더 쉽게: Free 가 부름 403, AI 실패·시간 초과·검증 어긋남 502
+  CARD_SPLIT_PRO_REQUIRED(HttpStatus.FORBIDDEN),
+  CARD_SPLIT_FAILED(HttpStatus.BAD_GATEWAY),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.
@@ -147,7 +172,11 @@ public enum ErrorCode {
   // "내일 다시" 는 하루 한도에서만 맞는 말이다.
   ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
   ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
+  // 한도 집계(생성 횟수·보유 수) 실패 > 막음(fail-closed), 다시 시도 가능 (#1192)
+  ROUTINE_QUOTA_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN),
+  // 요금제에 없는 기능 (#1074). 앱은 Free 에게 입구를 숨기므로 오래된 앱·직접 호출에서만 난다
+  WEEKLY_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN),
 
   // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
@@ -168,6 +197,18 @@ public enum ErrorCode {
   AD_REWARD_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND),
   // 장부를 못 읽으면 막는다(fail-closed).
   AD_REWARD_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
+
+  // 스토어 구독 결제 (#1071). 꺼짐 403, 영수증·환경·상품·다른 계정 400, 스토어 연결 설정 없음 503
+  SUBSCRIPTION_STORE_DISABLED(HttpStatus.FORBIDDEN),
+  SUBSCRIPTION_RECEIPT_INVALID(HttpStatus.BAD_REQUEST),
+  SUBSCRIPTION_ENVIRONMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  SUBSCRIPTION_PRODUCT_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+  SUBSCRIPTION_OWNED_BY_OTHER_MEMBER(HttpStatus.BAD_REQUEST),
+  SUBSCRIPTION_STORE_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE),
+
+  // 크레딧 꾸러미 구매. 판매 꺼짐 403, 다른 계정에 적립된 거래 400 (영수증·환경·상품 오류는 위 SUBSCRIPTION_* 를 함께 씀)
+  CREDIT_PACK_SALE_DISABLED(HttpStatus.FORBIDDEN),
+  CREDIT_PURCHASE_OWNED_BY_OTHER_MEMBER(HttpStatus.BAD_REQUEST),
 
   // 비밀값(외부 API 키) 저장.
   SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE),

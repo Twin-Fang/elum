@@ -10,7 +10,7 @@ import 'server_error_code.dart';
 /// 응답 자체가 없거나 서버 코드로 설명되지 않는 실패.
 ///
 /// 서버 코드 enum([ServerErrorCode])에 **넣지 않는다.** 그 enum 은 서버
-/// `ErrorCode.java` 와 1:1 이고 `server_error_sync_test.dart` 가 그것을 지킨다.
+/// `ErrorCode.java` 와 1:1 이고 서버 `CrossStackContractTest` 가 그것을 지킨다.
 /// 연결 실패는 서버가 모르는 일이므로 여기에 따로 둔다.
 enum NetworkFault {
   /// 인터넷이 없거나 서버에 닿지 못했다.

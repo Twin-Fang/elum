@@ -5,9 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../layout/app_text_scale.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'elum_spinner.dart';
+import 'pro_badge.dart';
 
 /// 설정 목록의 한 줄. 항목이 늘어도 이 위젯만 반복하면 된다.
 ///
@@ -24,6 +26,8 @@ class SettingsTile extends StatelessWidget {
     this.showChevronWithValue = false,
     this.loading = false,
     this.isInCard = true,
+    this.shouldShowProBadge = false,
+    this.valueChip,
   });
 
   final String label;
@@ -49,6 +53,12 @@ class SettingsTile extends StatelessWidget {
   /// false 는 옛 평면 줄(`1022:4467`, 높이 60)이다. 화살표는 둘 다 시안 `fi-br-angle-small` 이다.
   /// 새 화면은 [SettingsGroup] 안에 기본값(true)으로 쓴다.
   final bool isInCard;
+
+  /// 이름 뒤 [ProBadge]: Free 라 들어가면 Pro 미리 보기인 Pro 줄 (#1170)
+  final bool shouldShowProBadge;
+
+  /// 오른쪽 값 자리에 글자 대신 그릴 칩 (내 요금제 `Free` · `PRO`, #1189). 있으면 [valueText] 대신 그림
+  final Widget? valueChip;
 
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
@@ -79,6 +89,29 @@ class SettingsTile extends StatelessWidget {
         ? colors.settingsDestructive
         : (isInCard ? colors.settingsCardLabel : colors.textPrimary);
 
+    final isValueBelowLabel = valueChip == null && value != null && value.isNotEmpty && !loading && AppTextScale.isLargeTextOf(context);
+    final labelText = Text(
+      label,
+      style: context.typo.settingsTileLabel.copyWith(
+        // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
+        // 위험하다는 것을 동시에 전해야 한다.
+        color: labelColor,
+        // 평면 시안은 회원탈퇴만 굵다. 묶음 카드 시안은 모두 같은 굵기다.
+        fontWeight: destructive && !isInCard ? FontWeight.w500 : null,
+      ),
+    );
+    final labelWithBadge = LabelWithProBadge(
+      label: labelText,
+      shouldShowProBadge: shouldShowProBadge,
+    );
+    Widget buildValueText(TextAlign align) => Text(
+          value ?? '',
+          textAlign: align,
+          style: context.typo.settingsTileLabel.copyWith(
+            color: isInCard ? colors.settingsCardValue : colors.textPlaceholder,
+          ),
+        );
+
     // 시안 높이는 최소값이다. 글자가 커져 줄이 늘어나면 다음 줄을 밀어낸다.
     final row = ConstrainedBox(
       // 최소 높이를 Row 에 직접 걸어 기본 크기에서는 고정 높이와 같은 세로 가운데 배치가 된다.
@@ -97,37 +130,29 @@ class SettingsTile extends StatelessWidget {
               // 줄이 늘어날 때 위아래가 붙지 않게 글에만 여백을 둔다(기본 크기에서는 최소 높이 안).
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: _padV.h),
-                child: Text(
-                  label,
-                  style: context.typo.settingsTileLabel.copyWith(
-                    // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
-                    // 위험하다는 것을 동시에 전해야 한다.
-                    color: labelColor,
-                    // 평면 시안은 회원탈퇴만 굵다. 묶음 카드 시안은 모두 같은 굵기다.
-                    fontWeight: destructive && !isInCard ? FontWeight.w500 : null,
-                  ),
-                ),
+                child: isValueBelowLabel
+                    // 큰 글자: 값을 이름 아래로 내림 (옆 140 칸에서 값이 세 줄로 꺾이지 않게)
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [labelWithBadge, buildValueText(TextAlign.left)],
+                      )
+                    : labelWithBadge,
               ),
             ),
             if (loading)
               ElumSpinner(size: 20.w, color: colors.settingsChevron)
-            else ...[
-              if (value != null)
+            else if (valueChip case final chip?) ...[
+              chip,
+              if (showChevronWithValue) ...[SizedBox(width: cardValueGap.w), chevron],
+            ] else ...[
+              if (value != null && !isValueBelowLabel)
                 // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
                 ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: 140.w),
-                  child: Text(
-                    value,
-                    textAlign: TextAlign.right,
-                    style: context.typo.settingsTileLabel.copyWith(
-                      color: isInCard
-                          ? colors.settingsCardValue
-                          : colors.textPlaceholder,
-                    ),
-                  ),
+                  child: buildValueText(TextAlign.right),
                 ),
               if (value == null || showChevronWithValue) ...[
-                if (value != null)
+                if (value != null && !isValueBelowLabel)
                   SizedBox(width: (isInCard ? cardValueGap : 4).w),
                 chevron,
               ],

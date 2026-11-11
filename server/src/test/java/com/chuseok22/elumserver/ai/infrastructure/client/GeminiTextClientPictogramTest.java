@@ -1,5 +1,8 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.PictogramSet;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -56,9 +59,9 @@ class GeminiTextClientPictogramTest {
     when(systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE)).thenReturn(0.0);
     GeminiProperties properties = new GeminiProperties("key", null, "text-model", "image-model", 1000);
     client = new GeminiTextClient(restClient, properties, promptTemplateService, systemConfigService,
-      aiCallLogService, new PictogramCatalog(IDS, "go_,_to"));
+      aiCallLogService, PictogramCatalogs.mulberryOnly(new PictogramCatalog(IDS, "go_,_to")));
     clientWithoutCatalog = new GeminiTextClient(restClient, properties, promptTemplateService, systemConfigService,
-      aiCallLogService, PictogramCatalog.empty());
+      aiCallLogService, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
   }
 
   @SuppressWarnings("unchecked")
@@ -151,5 +154,24 @@ class GeminiTextClientPictogramTest {
       .contains("\"routineText\":\"양치\"", "\"pictogramCatalog\":\"[생략]\"", "\"x\":1")
       .doesNotContain("a,_to");
     org.assertj.core.api.Assertions.assertThat(GeminiTextClient.foldPictogramCatalog(null)).isNull();
+  }
+
+  @org.junit.jupiter.api.Test
+  @org.junit.jupiter.api.DisplayName("호출 스레드가 이모지 세트면 요청에 이모지 카탈로그를 싣는다 (#1149)")
+  void userContentCarriesCatalogOfContextSet() throws Exception {
+    GeminiTextClient emojiClient = new GeminiTextClient(mock(RestClient.class),
+      new GeminiProperties("key", null, "text-model", "image-model", 1000), mock(PromptTemplateService.class),
+      mock(SystemConfigService.class), aiCallLogService, new PictogramCatalogs(
+        new PictogramCatalog(IDS, "go_,_to"),
+        new PictogramCatalog(List.of("emoji_toothbrush", "emoji_star"), "emoji_star")));
+    AiCallContext.setPictogramSet(PictogramSet.EMOJI);
+    try {
+      JsonNode input = new ObjectMapper().readTree(
+        emojiClient.buildCreateRoutineUserContent("양치하기", "하늘이", Set.of(), List.of()));
+
+      assertThat(input.get("pictogramCatalog").toString()).contains("emoji_toothbrush").doesNotContain("brush_teeth\"");
+    } finally {
+      AiCallContext.clear();
+    }
   }
 }

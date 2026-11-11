@@ -8,11 +8,8 @@ import java.util.Set;
 /**
  * 일과·추가 질문 텍스트를 만드는 곳. 부르는 쪽은 어느 제공자인지 모른다.
  *
- * <p><b>왜 JSON 문자열을 돌려주나.</b> 호출부는 제공자 응답 객체에서
- * {@code candidates[0].content.parts[0].text}를 꺼내 곧바로 {@code ObjectMapper}에
- * 넘기고 있었다. 즉 실제로 필요한 것은 언제나 JSON 한 덩어리였다. 그 지점에서 잘라야
- * 제공자별 응답 타입이 호출부에서 사라진다 — 응답 객체를 인터페이스로 끌어올리면
- * 제공자를 늘릴 때마다 호출부가 함께 흔들린다.
+ * <p><b>왜 JSON 문자열을 돌려주나.</b> 호출부에 필요한 것은 언제나 JSON 한 덩어리라, 여기서 잘라야
+ * 제공자별 응답 타입이 호출부에서 사라짐 (응답 객체를 올리면 제공자를 늘릴 때마다 호출부가 흔들림)
  *
  * <p>스키마 강제는 각 구현체의 책임이다. Gemini는 {@code responseSchema},
  * OpenAI는 {@code json_schema}로 길이 제약까지 다르게 표현해야 하기 때문이다.
@@ -49,4 +46,17 @@ public interface TextGenerationClient {
   /// 직접 추가한 카드에 붙일 무료 픽토그램 고르기. 반환값은 {"pictogramId": "..."|null} JSON 문자열.
   /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
   String pickPictogramJson(String stepTitle, String stepDescription);
+
+  /// AI 메모리 수정 찾기. 입력은 처음 카드 <-> 확정 카드 + 기존 규칙·거절 규칙 JSON(원문 없음),
+  /// 반환값은 {"matched": [규칙 id], "found": [{type, before, after, summary}]} JSON 문자열.
+  /// 지시문·스키마는 RoutineMemorySpec 한 곳. 검증·세기·저장은 부르는 쪽(RoutineMemoryAi 와 서버 서비스) 몫
+  String buildRoutineMemoryJson(String memoryUserContent);
+
+  /// 주간 리포트 정리 글. 입력은 집계 JSON(제목·횟수만, 이름은 {userName}), 반환값은 {"lines": [...]} JSON 문자열.
+  /// 지시문·스키마는 WeeklyReportSummarySpec 한 곳(언어는 AiCallContext 일과 언어). 거르기·저장은 부르는 쪽 몫
+  String buildWeeklyReportSummaryJson(String summaryUserContent);
+
+  /// 카드 나누기(이 카드 더 쉽게). 입력은 카드 한 장의 제목·설명 JSON(이름은 자리표시), 반환값은 {"status", "cards": [...]} JSON 문자열.
+  /// 지시문·스키마는 CardSplitSpec 한 곳(언어는 AiCallContext 일과 언어). 검증·저장은 부르는 쪽 몫
+  String buildCardSplitJson(String splitUserContent);
 }

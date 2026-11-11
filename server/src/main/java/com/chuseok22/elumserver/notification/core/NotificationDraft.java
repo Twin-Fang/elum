@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 알림 한 건의 발생 내용: 종류, 이룸이, 눌렀을 때 갈 대상, 묶음 키, 묶음에 모을 대상 id, 발생 시각
- * 묶음 키 규칙은 정적 팩토리 7개에 고정 (같은 키 = 같은 줄)
+ * 묶음 키 규칙은 정적 팩토리 8개에 고정 (같은 키 = 같은 줄)
  */
 public record NotificationDraft(
   NotificationType type,
@@ -60,5 +60,12 @@ public record NotificationDraft(
   public static NotificationDraft talkPostImported(String postId, LocalDateTime now) {
     return new NotificationDraft(NotificationType.TALK_POST_IMPORTED, null, postId,
       "TALK_POST_IMPORTED:" + postId, null, now);
+  }
+
+  /** 주간 리포트 도착: 이룸이·주마다 한 줄이라 같은 주는 한 번만 (WEEKLY_REPORT_READY:{profileId}:{weekStart}), 누르면 갈 대상은 주 시작일 */
+  public static NotificationDraft weeklyReportReady(String profileId, LocalDate weekStart, LocalDateTime now) {
+    String weekStartText = GROUP_DATE_FORMAT.format(weekStart);
+    return new NotificationDraft(NotificationType.WEEKLY_REPORT_READY, profileId, weekStartText,
+      "WEEKLY_REPORT_READY:" + profileId + ":" + weekStartText, null, now);
   }
 }

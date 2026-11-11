@@ -18,7 +18,6 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreat
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.core.RoutineStepLimits;
-import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.core.RoutineStepSpeechText;
@@ -42,8 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoutineStepEditService {
 
-  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다.
+  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 그림 기호·이모지라 AI 그림을 만들지 않았다.
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
+  /// 카드 추가 응답 imageSkippedReason — 요금제에 AI 맞춤 그림이 없어 픽토그램만 둔다 (앱은 그림 기다림 표시 없음)
+  static final String IMAGE_SKIPPED_PLAN = ErrorCode.AI_IMAGE_NOT_ALLOWED.name();
 
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
@@ -53,6 +54,8 @@ public class RoutineStepEditService {
   private final CreditReservationService creditReservationService;
   private final PictogramPicker pictogramPicker;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final GuardianVoiceFiles guardianVoiceFiles;
+  private final RoutineAiPicturePolicy routineAiPicturePolicy;
 
   @Transactional
   public RoutineResponse updateStep(
@@ -151,6 +154,7 @@ public class RoutineStepEditService {
 
     steps.remove(targetStep);
     routineStepSpeechQueue.deleteStepsAfterCommit(List.of(targetStep.getId()));
+    guardianVoiceFiles.deleteUnreferencedAfterCommit(GuardianVoiceFiles.voiceKeysOf(List.of(targetStep)));
     renumberSteps(steps);
     refreshCompletionStatus(routine);
 
@@ -193,7 +197,7 @@ public class RoutineStepEditService {
     step.setRoutine(routine);
     step.setTitle(request.title().trim());
     step.setDescription(request.descriptionOrEmpty());
-    // 그림이 없어도(직접 사진·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다. 고르기는 절대 던지지 않는다.
+    // 그림이 없어도(그림 기호·이모지 방식·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다. 고르기는 절대 던지지 않는다.
     // 글 호출 단가 수준이라 크레딧을 잡지 않고, 그림 예약·건너뜀 판정(imageSkippedReason)과도 무관하다.
     // 보호자가 카드에 이룸이 이름을 적었을 수 있다 — 글 AI·그림 AI 로 나가는 값만 자리표시로 바꾸고 저장값은 그대로 둔다.
     String nickname = routine.getProfile().getNickname();
@@ -201,7 +205,8 @@ public class RoutineStepEditService {
     AppLocale language = routine.getLanguage() == null ? AppLocale.KO : routine.getLanguage();
     step.setPictogramId(AiCallContext.callWithContentLocale(language, () -> pictogramPicker.pick(
       caller.memberId(), NicknamePlaceholder.mask(step.getTitle(), nickname, language),
-      NicknamePlaceholder.mask(step.getDescription(), nickname, language))));
+      NicknamePlaceholder.mask(step.getDescription(), nickname, language),
+      ImageStyle.orDefault(routine.getProfile().getImageStyle()).pictogramSet())));
     // 맨 뒤에 붙인다. 뒤이어 renumberSteps가 1..N으로 정규화하므로
     // 기존 값이 비어 있거나 겹쳐 있어도 결과는 연속값이 된다.
     step.setStepOrder(steps.size() + 1);
@@ -220,15 +225,20 @@ public class RoutineStepEditService {
     // 단계 음성은 그림 여부와 무관하게 커밋 뒤 만듦 (#675)
     routineStepSpeechQueue.enqueueAfterCommit(step.getId());
 
-    // 직접 사진 방식: 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
+    // AI 그림이 아닌 방식(그림 기호·이모지): 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
     // 잡지 않으니 청구도 없다. 그림을 원했는데 안 나온 까닭을 클라가 알 수 있게 사유를 싣는다.
-    if (routine.getProfile().getImageStyle() == ImageStyle.PHOTO_ONLY) {
+    if (!ImageStyle.orDefault(routine.getProfile().getImageStyle()).drawsAiImages()) {
       RoutineResponse response = RoutineResponse.from(routine);
       return request.wantsImage() ? response.withImageSkippedReason(IMAGE_SKIPPED_PHOTO_ONLY) : response;
     }
 
     if (!request.wantsImage() || step.getDescription().isBlank()) {
       return RoutineResponse.from(routine);
+    }
+
+    // Free(AI 맞춤 그림 꺼짐): 예약·채우기 없이 픽토그램만. 까닭을 실어 앱이 "그림 만드는 중"을 띄우지 않게
+    if (routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())) {
+      return RoutineResponse.from(routine).withImageSkippedReason(IMAGE_SKIPPED_PLAN);
     }
 
     String creditJobId;

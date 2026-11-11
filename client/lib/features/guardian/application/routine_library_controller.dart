@@ -17,7 +17,7 @@ final routineLibraryControllerProvider = Provider<RoutineLibraryController>(
   (ref) => RoutineLibraryController(ref),
 );
 
-/// 일과관리 동작: 보내기, 복사하기, 이름 바꾸기, 지우기 > 성공하면 목록 다시 받기
+/// 일과관리 동작: 보내기, 복사하기, 다른 언어로 만들기, 이름 바꾸기, 지우기 > 성공하면 목록 다시 받기
 class RoutineLibraryController {
   RoutineLibraryController(this._ref);
 

@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.license.core.Entitlement;
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
@@ -10,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +25,8 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
+import com.chuseok22.elumserver.license.application.service.store.GoogleSubscriptionWithdrawalCanceler;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
@@ -88,8 +93,13 @@ class MemberServiceTest {
   private EntitlementService entitlementService;
 
   @Mock
+  private SubscriptionStatusService subscriptionStatusService;
+
+  @Mock
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  @Mock private GoogleSubscriptionWithdrawalCanceler googleSubscriptionWithdrawalCanceler;
   @InjectMocks
   private MemberService memberService;
 
@@ -157,6 +167,8 @@ class MemberServiceTest {
     verify(refreshTokenRepository).deleteAllByMemberId("member-1");
     verify(deviceLinkRepository).deleteAllByMemberId("member-1");
     verify(subscriptionRepository).deleteByMemberId("member-1");
+    // 스토어 결제는 우리 행을 지워도 계속 갱신된다 > Google 구독 해지를 커밋 뒤로 예약
+    verify(googleSubscriptionWithdrawalCanceler).cancelRenewalsAfterCommit("member-1");
     // 광고 보상 세션은 회원을 가리키는 운영 기록이라 탈퇴 즉시 지운다 (#463).
     verify(adRewardSessionRepository).deleteAllByMemberId("member-1");
     verify(feedbackService).deleteAllOf("member-1");
@@ -427,6 +439,7 @@ class MemberServiceTest {
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
+    when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(true);
 
     MemberResponse response = memberService.updateImageStyle(
       Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.REALISTIC));
@@ -484,5 +497,40 @@ class MemberServiceTest {
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of());
 
     assertThat(memberService.getMyInfo(Caller.guardian("member-1")).imageStyle()).isEqualTo(ImageStyle.CARTOON);
+  }
+
+  @Test
+  @DisplayName("AI 맞춤 그림 권한이 없으면 캐릭터 그림 저장은 403 IMAGE_STYLE_NOT_ALLOWED, 값은 그대로 (#1149)")
+  void updateImageStyleRejectsProStyleForFree() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setImageStyle(ImageStyle.EMOJI);
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(false);
+
+    assertThatThrownBy(() -> memberService.updateImageStyle(
+      Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.CARTOON)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.IMAGE_STYLE_NOT_ALLOWED));
+    assertThat(profile.getImageStyle()).isEqualTo(ImageStyle.EMOJI);
+  }
+
+  @Test
+  @DisplayName("권한이 없어도 이모지·그림 기호는 저장한다 (#1149)")
+  void updateImageStyleAllowsFreeStyleWithoutEntitlement() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
+    // 이모지는 권한을 보지 않음 — 꺼져 있어도 저장되는지만 확인
+    lenient().when(entitlementService.isAllowed("member-1", Entitlement.AI_IMAGE_GENERATION)).thenReturn(false);
+
+    memberService.updateImageStyle(Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.EMOJI));
+
+    assertThat(profile.getImageStyle()).isEqualTo(ImageStyle.EMOJI);
   }
 }

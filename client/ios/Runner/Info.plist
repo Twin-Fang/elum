@@ -51,6 +51,30 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<!-- UIScene 생명주기: iOS 27 SDK 빌드에서 없으면 실행 직후 종료
+	     창 1개, FlutterSceneDelegate 가 URL·유니버설 링크·생명주기를 플러그인과 라우터로 전달.
+	     앱 쪽 처리(네이버 로그인 콜백)는 ElumSceneBridgePlugin -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<!-- iPhone 은 세로만, iPad 는 네 방향 (이슈 #774).
 	     iPad 는 분할 보기를 지원하므로 UIRequiresFullScreen 을 쓰지 않는다. 창 크기는 앱이 폭 등급으로 처리한다. -->
 	<key>UIBackgroundModes</key>
@@ -80,6 +104,9 @@
 	<string>Elum uses the camera to take a photo to use as a card picture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Elum uses your photo library to choose a photo to use as a card picture.</string>
+	<!-- 보호자가 카드를 자기 목소리로 녹음한다 (Pro). 거부해도 카드는 기본 목소리로 읽힌다 -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Elum uses the microphone to record your voice reading a card.</string>
 	<!-- 소셜 로그인. 값은 ios/Flutter/Secrets.xcconfig가 채운다
 	     (tool/gen_ios_secrets.sh가 .env로 생성, 커밋 제외). -->
 	<key>CFBundleURLTypes</key>

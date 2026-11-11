@@ -101,7 +101,7 @@ public class OpenAiImageClient implements ImageGenerationClient {
 
   private GeneratedImage call(String prompt, CharacterType characterType) {
     String model = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_MODEL);
-    String quality = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
+    String quality = resolveQuality();
     String apiKey = systemConfigService.getSecret(ConfigKey.OPENAI_API_KEY);
 
     long startedAt = System.currentTimeMillis();
@@ -134,6 +134,11 @@ public class OpenAiImageClient implements ImageGenerationClient {
       aiCallLogService.recordFailure(AiCallType.OPENAI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
     }
+  }
+
+  /// 그림 품질 (관리자 설정 OPENAI_IMAGE_QUALITY)
+  String resolveQuality() {
+    return systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
   }
 
   // 429(분당 한도)만 기다렸다 다시 보낸다 (그 외 오류는 같은 요청을 반복해도 결과가 같아 바로 던짐)

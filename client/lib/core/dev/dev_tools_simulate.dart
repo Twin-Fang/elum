@@ -128,6 +128,8 @@ class _PushSimulationView extends ConsumerWidget {
         const _Message('보호자로 로그인한 상태에서만 이동합니다.\n'
             '배너는 알림 권한이 있어야 뜹니다. 이야기 알림은 글 id 가 없어 글 화면이 빈 상태로 열립니다.'),
         for (final type in NotificationType.values) _pushRow(context, ref, type.wire, type.name),
+        // 이룸이 기기 푸시: 이룸이 기기로 로그인한 상태에서 오늘 일과 목록을 새로 받는다 (일과 id 가 없어 홈에 머묾)
+        _pushRow(context, ref, ElumiPushOpener.routineTimeType, '이룸이 일과 시간 (이룸이 기기)'),
         // 앱이 모르는 종류 > 알림 목록으로 가는지
         _pushRow(context, ref, 'UNKNOWN_TYPE', '모르는 종류 (알림 목록으로)'),
       ],

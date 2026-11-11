@@ -2,7 +2,6 @@ package com.chuseok22.elumserver.routine.application.dto.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.chuseok22.elumserver.ai.application.dto.request.SensitiveInfoCheckRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -75,10 +74,4 @@ class RoutineRequestValidationTest {
     assertThat(validator.validate(new RoutineQuestionRequest("비 오는 날 학교 가기"))).isEmpty();
   }
 
-  @Test
-  @DisplayName("민감정보 검사 — 빈 텍스트는 걸린다 (이슈 #215)")
-  void sensitiveCheck_blankText_isRejected() {
-    assertThat(validator.validate(new SensitiveInfoCheckRequest(null))).isNotEmpty();
-    assertThat(validator.validate(new SensitiveInfoCheckRequest("홍길동 010-1234-5678"))).isEmpty();
-  }
 }

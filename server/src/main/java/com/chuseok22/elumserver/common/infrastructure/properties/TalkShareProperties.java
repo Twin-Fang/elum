@@ -20,7 +20,8 @@ public record TalkShareProperties(
   List<String> androidCertSha256
 ) {
 
-  private static final String DEFAULT_PUBLIC_BASE_URL = "https://api.elum.chuseok22.com";
+  // 운영 서버 (2026-11-05 내 NAS 로 전환, #1104). common 은 도메인을 import 하지 않아 ServerAddressPolicy.PRODUCTION_API_HOST 와 같은 서버 주소를 따로 둔다. 옛 도메인 /s/ 는 옛 서버가 이 주소로 넘긴다
+  private static final String DEFAULT_PUBLIC_BASE_URL = "https://api.elum.suhsaechan.kr";
   // gh-pages 소개 페이지의 미리보기 그림 (1200×630)
   private static final String DEFAULT_IMAGE_URL = "https://twin-fang.github.io/elum/assets/og.png";
   private static final String DEFAULT_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=kr.twinfang.elum";

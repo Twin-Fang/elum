@@ -32,6 +32,9 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
   /// 없는 카드를 또 지우러 가면 안 된다.
   final _removedStepIds = <String>{};
 
+  /// 화면에서 뺐지만 서버에는 남은 카드 id (서버 응답에서 새 카드를 가릴 때 제외용)
+  Set<String> get pendingRemovedStepIds => Set.unmodifiable(_removedStepIds);
+
   /// 일과 하나의 최대 카드 수 — 서버 `RoutineService.STEP_MAX_COUNT` 와 같은 값이다.
   ///
   /// 서버는 **자기가 가진 카드**를 센다. 보호자가 화면에서 뺀 카드는 저장하기 전까지 서버에
@@ -143,12 +146,12 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
         .fetchStepImagePath(routineId, stepId);
   }
 
-  /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다.
+  /// 카드 그림을 바꾼 뒤(사진·AI 다시 그리기·추가 카드 그림) 새 `imagePath` 와 AI 그림 여부를 반영한다.
   ///
   /// 서버 응답 전체를 쓰지 않고 **`imagePath` 만** 바꾼다 — 응답에는 카드 제목이 없어
   /// 통째로 덮으면 로컬 제목이 지워진다([updateStep] 과 같은 사정). 그 사이 지워진 카드면
   /// 아무것도 하지 않는다. 목록 캐시도 버려, 홈·이룸이 쪽이 새 열쇠를 받게 한다.
-  void applyStepImage(String stepId, String imagePath) {
+  void applyStepImage(String stepId, String imagePath, {required bool isAiPicture}) {
     final routine = state.routine;
     if (routine == null || !routine.steps.any((s) => s.id == stepId)) return;
 
@@ -156,7 +159,23 @@ mixin RoutineStepEditing on Notifier<RoutineFlowState> {
       routine: routine.copyWith(
         steps: [
           for (final s in routine.steps)
-            if (s.id == stepId) s.copyWith(imagePath: imagePath) else s,
+            if (s.id == stepId) s.copyWith(imagePath: imagePath, isAiPicture: isAiPicture) else s,
+        ],
+      ),
+    );
+    ref.refreshRoutines();
+  }
+
+  /// 보호자 목소리 열쇠 갈아 끼우기 (올림 > 새 열쇠, 지움 > null). 같은 카드의 다른 값은 그대로
+  void applyStepVoice(String stepId, String? guardianVoicePath) {
+    final routine = state.routine;
+    if (routine == null || !routine.steps.any((s) => s.id == stepId)) return;
+
+    state = state.copyWith(
+      routine: routine.copyWith(
+        steps: [
+          for (final step in routine.steps)
+            if (step.id == stepId) step.copyWith(guardianVoicePath: guardianVoicePath) else step,
         ],
       ),
     );

@@ -25,17 +25,6 @@ class NotificationSettings {
   final bool isTalkCommentedEnabled;
   final bool isTalkImportedEnabled;
 
-  static const allOn = NotificationSettings(
-    isAllEnabled: true,
-    isRoutineCompletedEnabled: true,
-    isRoutineSentEnabled: true,
-    isCoGuardianJoinedEnabled: true,
-    isCreditRefilledEnabled: true,
-    isFeedbackResolvedEnabled: true,
-    isTalkCommentedEnabled: true,
-    isTalkImportedEnabled: true,
-  );
-
   NotificationSettings copyWith({
     bool? isAllEnabled,
     bool? isRoutineCompletedEnabled,

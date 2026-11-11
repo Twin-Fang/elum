@@ -33,6 +33,22 @@ class AiCallTypeTest {
     Map.entry(AiCallType.CLAUDE_TEXT_CREATE, AiCallPurpose.ROUTINE_CREATE),
     Map.entry(AiCallType.CLAUDE_TEXT_QUESTION, AiCallPurpose.ROUTINE_QUESTION),
     Map.entry(AiCallType.CLAUDE_TEXT_PICTOGRAM, AiCallPurpose.PICTOGRAM_PICK),
+    // 만든 일과를 다른 언어로 (#1077). 일과 생성으로 세면 번역 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
+    Map.entry(AiCallType.OPENAI_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
+    Map.entry(AiCallType.CLAUDE_TEXT_TRANSLATE, AiCallPurpose.ROUTINE_TRANSLATE),
+    // AI 메모 갱신 (#1082). 일과 생성으로 세면 메모 갱신 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    Map.entry(AiCallType.OPENAI_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    Map.entry(AiCallType.CLAUDE_TEXT_MEMORY, AiCallPurpose.ROUTINE_MEMORY),
+    // 주간 리포트 정리 글. 일과 생성으로 세면 리포트 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    Map.entry(AiCallType.OPENAI_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    Map.entry(AiCallType.CLAUDE_TEXT_WEEKLY_REPORT, AiCallPurpose.WEEKLY_REPORT_SUMMARY),
+    // 카드 나누기 (이 카드 더 쉽게). 일과 생성으로 세면 나누기 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
+    Map.entry(AiCallType.OPENAI_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
+    Map.entry(AiCallType.CLAUDE_TEXT_CARD_SPLIT, AiCallPurpose.CARD_SPLIT),
     Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 

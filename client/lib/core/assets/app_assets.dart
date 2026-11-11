@@ -26,8 +26,15 @@ abstract final class AppAssets {
   /// 허용 id 는 `PictogramCatalog` 가 걸러 준다.
   static String pictogram(String id) => 'assets/pictograms/$id.svg';
 
+  /// 카드 그림 자리의 이모지 그림 — Twemoji v15.0.0 (CC BY 4.0, #1149).
+  ///
+  /// [id] 는 `emoji_` 로 시작하는 `pictogramId` (예 `emoji_toothbrush`). 원본 SVG 그대로 번들
+  /// (server/tool/emoji 생성물). 허용 id 는 `PictogramCatalog` 가 걸러 준다.
+  static String emoji(String id) => 'assets/emoji/$id.svg';
+
   /// 오픈소스 라이선스 전문 (#1046). Mulberry 는 그림과 같이 받은 원문을 그대로 씀
   static const licenseMulberrySymbols = 'assets/pictograms/LICENSE.txt';
+  static const licenseTwemoji = 'assets/emoji/LICENSE.txt';
   static const licensePretendard = 'assets/licenses/pretendard_ofl.txt';
   static const licenseTmoneyRoundWind = 'assets/licenses/tmoney_round_wind.txt';
 
@@ -75,20 +82,9 @@ abstract final class AppAssets {
   /// 일과 관리 칸을 고를 때 폴더 안에 그려졌다 사라지는 체크. 폴더(24×22)와 같은 viewBox라 그대로 겹친다
   static const navFolderCheck = '$_navIcons/nav_folder_check.svg';
 
-  /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
-  ///
-  /// 전용 그림 2종이 아직 없다. 도형을 코드로
-  /// 그리지 않기 위한 대타이므로, 에셋이 나오면 **이 두 줄만** 바꾸면 된다.
-  static const roleGuardianMock = '$_images/goal_icon_step_by_step.svg';
-  static const roleElumiMock = '$_images/goal_icon_independent.svg';
-
   /// 뒤로가기 (24×24). Figma `fi-br-angle-left`.
   /// Material 아이콘은 형태가 달라 쓰지 않는다.
   static const iconBack = '$_images/icon_back.svg';
-
-  /// 맞춤설정완료 전환 화면의 아이콘 (78×78).
-  /// Figma `온보딩_맞춤설정완료`(204:1042)의 Group 5.
-  static const setupDoneIcon = '$_images/setup_done_icon.svg';
 
   // --- 입력 필드 아이콘 ---
 
@@ -117,12 +113,6 @@ abstract final class AppAssets {
   /// Figma 393:4010 (262:5124 이미지 우상단).
   static const iconCardDelete = '$_images/icon_card_delete.svg';
 
-  /// 아이 홈의 체크 버튼 (88×88). 체크 전 빈 원.
-  static const childCheckEmpty = '$_images/child_check_empty.svg';
-
-  /// 완료 체크 배지 (40×40). 홈 일과 목록의 완료 표시.
-  static const iconCheckDone = '$_images/icon_check_done.svg';
-
   /// 보상 화면의 포포 일러스트 (117×104). Figma 334:4433.
   static const rewardPopo = '$_images/reward_popo.svg';
 
@@ -140,26 +130,15 @@ abstract final class AppAssets {
         RewardCharacter.ruru => rewardRuru,
       };
 
-  /// 아이 홈 우측 상단 캐릭터 배지 (68×68). **테두리가 없는 맨 일러스트다.**
-  @Deprecated('테두리가 빠져 있다. characterBadgeFramed를 쓴다.')
-  static const characterBadgeRuru = '$_images/character_badge_ruru.svg';
-
   /// 아이 홈 우측 상단 캐릭터 배지 (56×56). Figma 356:5106(고양이) · 382:3257(여우).
   ///
   /// 둥근 사각형 테두리 + 배경까지 포함한다. 캐릭터마다 **색이 다르다** —
   /// 고양이는 파랑(#9CADF1 / #CED8FF), 여우는 주황(#EB9B73 / #FFDAC7).
-  /// 테두리 없는 `characterBadgeRuru`를 쓰면 캐릭터만 덩그러니 뜬다.
   static String characterBadgeFramed(CardCharacter character) =>
       switch (character) {
         CardCharacter.cat => '$_images/character_badge_framed_ruru.svg',
         CardCharacter.fox => '$_images/character_badge_framed_popo.svg',
       };
-
-  /// 보호자 홈 "새로운 일과 만들기" 카드 아이콘 (47×51). Figma 217:2675.
-  ///
-  /// 보호자가 고른 캐릭터(고양이/여우)와 무관하게 **AI 마스코트 "루미" 병아리로 고정**이다.
-  /// [characterBadgeFramed]를 재사용하면 캐릭터에 따라 달라지므로 쓰지 않는다.
-  static const homeNewRoutineChick = '$_images/home_new_routine_chick.svg';
 
   /// 완료 체크 (10×10). Figma `fi-br-check`.
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
@@ -181,12 +160,6 @@ abstract final class AppAssets {
   /// 안드로이드에 없다. 윤곽선으로 뽑아 받았다.
   static const iconQuestionCircle = '$_images/icon_question_circle.svg';
 
-  /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
-  static const iconClock = '$_images/icon_clock.svg';
-
-  /// "secured by ELUM AI DLP" 배지의 자물쇠 (16×16). Figma `Component 7`(418:4049).
-  static const iconDlpLock = '$_images/icon_dlp_lock.svg';
-
   /// 준비 로딩 화면의 루미 캐릭터 (Figma `262:4675` `Group 26`).
   ///
   /// **`prepare` 화면에만 있다** — 카드 생성 로딩(262:4703)에는 없다.
@@ -196,6 +169,20 @@ abstract final class AppAssets {
   /// 버려 납작한 점만 남았고, 몸통 방사형 그라데이션 셋에도 `gradientTransform`
   /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다.
   static const lumiThinking = '$_images/lumi_thinking.png';
+
+  /// AI 메모리 위 카드 그림 (공책 든 루미, 투명 PNG 384)
+  static const routineMemoryHero = '$_images/routine_memory_hero.png';
+
+  /// 크레딧 그림 (투명 PNG 256): 정면 = 기본 · 주기 지급 / 보너스(주황) / 구매(보라) / 한 장(살짝 기움) / 여러 장.
+  /// 별은 이룸이 보상 그림이라 크레딧에는 쓰지 않는다.
+  static const creditTicket = '$_images/credit_ticket.png';
+  static const creditTicketBonus = '$_images/credit_ticket_bonus.png';
+  static const creditTicketPurchased = '$_images/credit_ticket_purchased.png';
+  static const creditTicketTilted = '$_images/credit_ticket_tilted.png';
+  static const creditTicketStack = '$_images/credit_ticket_stack.png';
+
+  /// 크레딧 소진 팝업의 루미 (빈 주머니를 들고 앉음, 옆에 표 한 장, 투명 배경)
+  static const creditEmptyLumi = '$_images/credit_empty_lumi.png';
 
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
@@ -221,24 +208,32 @@ abstract final class AppAssets {
   /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
   static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
 
-  /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
-  static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
-
-  /// 일과관리 빈 상태의 루미 (민트색 폴더를 듦, 1254×1254 투명 배경)
-  static const routinesEmptyLumi = '$_images/routines_empty_lumi.png';
+  /// 홈 안내 카드 타일 그림 4종: 종(알림 꺼짐), 달력과 종이비행기(자동 보내기), 사진 액자(이야기 올리기), 크레용과 빈 카드(일과 더 만들기). 192×192, 투명 배경
+  static const homeNoticeBell = '$_images/home_notice_bell.png';
+  static const homeNoticeAutoSend = '$_images/home_notice_auto_send.png';
+  static const homeNoticeTalkShare = '$_images/home_notice_talk_share.png';
+  static const homeNoticeCreateMore = '$_images/home_notice_create_more.png';
 
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
-  /// 그림 방식 선택의 `기본 그림` 예시. 이 방식의 카드에 실제로 들어가는 픽토그램을 그대로 보여 준다.
-  static final imageStyleBasic = pictogram('brush_teeth_,_to');
+  /// 그림 방식 선택의 `그림 기호`·`이모지 그림` 예시. 그 방식의 카드에 실제로 들어가는 그림을 같은 장면(이 닦기)으로 보여 준다.
+  static final imageStyleSymbol = pictogram('brush_teeth_,_to');
+  static final imageStyleEmoji = emoji('emoji_toothbrush');
 
-  /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
-  static const stageCheckDone = '$_images/stage_check_done.svg';
+  // --- 요금제 화면 (#1189 시안 A) ---
 
-  /// 로딩 체크리스트의 미완료 표시 (20×20). Figma 262:4698 `Ellipse 22` —
-  /// 채움 없이 테두리만 있는 원(rgba(36,38,52,0.6) 3px).
-  static const stageCheckPending = '$_images/stage_check_pending.svg';
+  /// 머리 비교 Free 카드: 이모지 그림 방식 카드에 실제로 들어가는 그림 (그림 방식 예시와 같은 장면)
+  static final planHeroFreePicture = imageStyleEmoji;
+
+  /// 머리 비교 Pro 카드: 예시 일과 `이 닦기` 캐릭터 그림 (새로 그리지 않음)
+  static final planHeroProPicture = exampleRoutineImage('brush_teeth');
+
+  /// 혜택 묶음 아이콘 4개 (Twemoji): 더 예쁜 카드 🎨 · 일과가 알아서 준비돼요 🗓️ · 한 주를 한눈에 📋 · 넉넉하게, 광고 없이 ✨
+  static final planBenefitIconCards = emoji('emoji_artist_palette');
+  static final planBenefitIconRoutines = emoji('emoji_spiral_calendar');
+  static final planBenefitIconWeek = emoji('emoji_clipboard');
+  static final planBenefitIconExtra = emoji('emoji_sparkles');
 
   // --- 시작 화면 (Figma `시작` 238:1808) ---
 
@@ -260,9 +255,6 @@ abstract final class AppAssets {
   /// 세로로 늘어나 민트가 아래로 밀린다 — 그래서 따로 받았다.
   static const splashChickBodyAos = '$_images/splash_chick_body_aos.png';
 
-  /// 몸통 하단 페이드 (393×177)
-  static const splashFade = '$_images/splash_fade.svg';
-
   /// 새싹 줄기 (113×111) — iOS 시안(`726:4742`). 구슬이 **왼쪽** 끝에 달린다.
   static const splashHill = '$_images/splash_hill.svg';
 
@@ -279,9 +271,6 @@ abstract final class AppAssets {
   /// 본체가 그 안 (30, 30)에 있다 — 본체를 시안 자리(67, 340)에 두려면
   /// 상자를 (37, 310)에 놓는다.
   static const splashOrb = '$_images/splash_orb.png';
-
-  @Deprecated('빛이 빠진다. splashOrb(PNG)를 쓴다.')
-  static const splashStar = '$_images/splash_star.svg';
 
   /// 병아리 **눈** (각 30×32) — **안드로이드 시안에만 있다.**
   ///
@@ -352,10 +341,7 @@ abstract final class AppAssets {
   static const iconTimePast = '$_images/icon_time_past.svg';
 
   /// `오늘 일과` 섹션 제목 아이콘 (18×18). Figma `오늘일과`(931:3880).
-  ///
-  /// **[iconClock]과 다른 파일이다.** 저쪽은 파랑(#9CADF1), 이쪽은 섹션
-  /// 라벨과 같은 회색(#74757D)이다. 모양이 같아 재사용했다가 색이 어긋난 채
-  /// 배포됐다 — 시안과 픽셀로 맞대보고서야 드러났다.
+  /// 색은 섹션 라벨과 같은 회색(#74757D)
   static const iconTodayRoutine = '$_images/icon_today_routine.svg';
 
   /// 홈 우상단 설정 톱니 (24×24). Figma `설정`(781:5992).
@@ -413,6 +399,10 @@ abstract final class AppAssets {
   static const iconFolder = '$_images/icon_folder.svg';
   static const iconFolderAdd = '$_images/icon_folder_add.svg';
   static const iconFolderMinus = '$_images/icon_folder_minus.svg';
+  // 보호자 목소리 녹음 칸: 녹음 시작, 녹음 멈춤, 미리 듣기 (fi-br-microphone · stop · play)
+  static const iconMicrophone = '$_images/icon_microphone.svg';
+  static const iconStop = '$_images/icon_stop.svg';
+  static const iconPlay = '$_images/icon_play.svg';
   static const iconCopy = '$_images/icon_copy.svg';
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';

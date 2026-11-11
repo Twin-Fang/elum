@@ -5,16 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../core/analytics/app_analytics.dart';
+import '../../../core/assets/app_assets.dart';
+import '../../../core/logger/app_logger.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../member/application/plan_access.dart';
+import '../../subscription/application/credit_pack_catalog.dart';
+import '../../subscription/application/plan_paywall_entry.dart';
 import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_summary.dart';
 import '../../../core/widgets/elum_spinner.dart';
+import '../../../core/widgets/show_failure.dart';
 
-/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기.
+/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기 + (살 수 있으면) `Pro 알아보기`.
 ///
 /// **광고를 제안하는 곳은 여기 하나다.** 일과 만들기 흐름 안·이룸이 화면·보상 연출에는
 /// 광고를 두지 않는다(설계 §2) — 이 안내는 흐름에 들어가기 **전**이라 허용된 자리다.
@@ -37,38 +46,77 @@ Future<void> showCreditBlockedDialog(
   final flow = ref.read(adRewardFlowProvider);
   final offer = generating ? null : await flow.offer();
   if (!context.mounted) return;
+  // 다 써서 막혔을 때만 Pro 를 권함 (진행 중이라 막힌 것은 Pro 로도 안 풀림). 살 수 없으면 버튼 없음
+  final canSuggestPro = !generating && ref.read(planAccessProvider).canPurchasePro;
+  // 크레딧 꾸러미를 팔 때만 `크레딧 더 받기` (진행 중이라 막힌 것은 사도 안 풀림). 값 조회가 실패하면 버튼 없음
+  final canBuyCredits = !generating && await _canBuyCredits(ref);
+  if (!context.mounted) return;
+  final getMoreAction = ElumDialogAction<_CreditBlockedChoice>(
+    label: l10n.creditGetMore,
+    value: _CreditBlockedChoice.getMoreCredits,
+  );
+  final proAction = ElumDialogAction<_CreditBlockedChoice>(
+    label: l10n.planLearnPro,
+    value: _CreditBlockedChoice.learnPro,
+  );
 
-  final wantsAd = await showElumDialog<bool>(
+  final choice = await showElumDialog<_CreditBlockedChoice>(
     context: context,
-    // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인.
-    icon: ElumDialogIcon.alert,
+    // 실패가 아닌 한도 안내 > 경고 아이콘·붉은 버튼 없음 (§2-⑥ 겁주지 않는다). 다 썼을 때만 루미 그림
+    illustrationAsset: generating ? null : AppAssets.creditEmptyLumi,
     title: generating
         ? l10n.creditBlockedBusy
-        : l10n.creditBlockedExhausted(blocked.resetLabel),
+        : blocked.periodUnit.blockedExhausted(l10n, blocked.resetLabel),
+    // 날짜가 끼어 길이가 바뀌는 문장 — 마지막 글자만 다음 줄로 떨어지지 않게 낱말 단위 (#1169)
+    keepWordsInTitle: true,
     message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
     actions: offer == null
         ? [
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonConfirm,
-              tone: ElumDialogTone.danger,
+              tone: canSuggestPro || canBuyCredits ? ElumDialogTone.neutral : ElumDialogTone.primary,
             ),
+            if (canBuyCredits) getMoreAction,
+            if (canSuggestPro) proAction,
           ]
         : [
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.commonClose,
-              value: false,
               tone: ElumDialogTone.neutral,
             ),
-            ElumDialogAction<bool>(
+            ElumDialogAction<_CreditBlockedChoice>(
               label: l10n.creditAdWatchMore,
-              value: true,
+              value: _CreditBlockedChoice.watchAd,
               centerLines: true,
             ),
+            if (canBuyCredits) getMoreAction,
+            if (canSuggestPro) proAction,
           ],
   );
-  if (wantsAd != true || !context.mounted) return;
+  if (!context.mounted) return;
+  switch (choice) {
+    case _CreditBlockedChoice.watchAd:
+      await _watchAd(context, ref, flow);
+    case _CreditBlockedChoice.getMoreCredits:
+      await context.push<void>(Routes.guardianMyCredit);
+    case _CreditBlockedChoice.learnPro:
+      await openPlanPaywall(context, ref);
+    case null:
+      return;
+  }
+}
 
-  await _watchAd(context, ref, flow);
+/// 크레딧 부족 팝업에서 고른 것 (닫기·확인은 null)
+enum _CreditBlockedChoice { watchAd, getMoreCredits, learnPro }
+
+/// 꾸러미를 지금 살 수 있는가 (스토어 값까지 불러온 뒤 판단, 실패하면 false)
+Future<bool> _canBuyCredits(WidgetRef ref) async {
+  try {
+    return (await ref.read(creditPackOffersProvider.future)).isNotEmpty;
+  } catch (e, st) {
+    AppLogger.error('credit', e, st, {'step': 'creditPackOffers'});
+    return false;
+  }
 }
 
 /// 광고를 보여 주고 서버가 지급했는지 확인한다. 끝나면 결과를 알리고 **홈에 남는다** —
@@ -108,15 +156,7 @@ Future<void> _watchAd(
   }
 
   final failure = result.failure!;
-  await showElumDialog<void>(
-    context: context,
-    icon: ElumDialogIcon.alert,
-    title: failure.sentence,
-    code: failure.code,
-    actions: [
-      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
-    ],
-  );
+  await showFailureMessage(context, sentence: failure.sentence, code: failure.code);
 }
 
 /// 광고 준비·지급 확인 중 대기 팝업. 닫을 수 없다 — 끝나면 흐름이 직접 닫는다.

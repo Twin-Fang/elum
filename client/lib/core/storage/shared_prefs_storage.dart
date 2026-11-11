@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../logger/app_logger.dart';
@@ -48,12 +50,18 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kProgressPrefix = 'progress.';
   static const _kPendingSync = 'progress.pending';
   static const _kCachedToday = 'cache.todayRoutines';
+  // 오늘 일과 캐시를 받은 회원 id (다른 회원이면 캐시를 읽지 않음)
+  static const _kCachedTodayOwner = 'cache.todayRoutinesOwner';
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
+  // 서버 Pro 판매 여부 마지막 값 (#1132)
+  static const _kCachedStoreSellingOpen = 'cache.storeSellingOpen';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
   static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
+  // 보호자 홈 알림 꺼짐 띠를 닫은 시각 (ISO-8601, 7일 숨김)
+  static const _kHomeNotificationNoticeDismissedAt = 'push.homeNoticeDismissedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
   static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
@@ -69,8 +77,70 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
   static const _kTalkShareHintDismissedRoutineIds =
       'talkShareHintDismissedRoutineIds';
+  // 보호자 홈 권유: 종류별 마지막 표시 시각 {종류 이름: ISO-8601} JSON
+  static const _kHomeSuggestionShownAtByKind = 'homeSuggestion.shownAtByKind';
+  // 보호자 홈 권유: 닫은 권유 `{종류 이름}:{일과 id}` 목록
+  static const _kHomeSuggestionDismissedKeys = 'homeSuggestion.dismissedKeys';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
+
+  // 키 범위 분류: 새 키는 아래 셋 중 하나에 반드시 넣음 (tool/check_storage_scopes.dart 가 검사)
+  // 계정 범위: 로그아웃·다른 계정 로그인([clearAll]) 때 지움
+  static const accountScopedKeys = [
+    _kAccountMemberId,
+    _kNickname,
+    _kGoals,
+    _kPendingExampleCategories,
+    _kExampleSeedAttempts,
+    _kPendingExampleProfileId,
+    _kCharacter,
+    _kImageStyle,
+    _kCompleted,
+    _kSelectedProfile,
+    _kPin,
+    _kElumiDevice,
+    _kElumiLinkLost,
+    _kSelectedRole,
+    _kResumeElumiScreen,
+    _kAccessToken,
+    _kPendingSync,
+    _kCachedToday,
+    _kCachedTodayOwner,
+    _kTalkImportedSeenRoutineIds,
+    _kTalkShareHintDismissedRoutineIds,
+    _kHomeSuggestionShownAtByKind,
+    _kHomeSuggestionDismissedKeys,
+  ];
+  static const accountScopedKeyPrefixes = [_kProgressPrefix];
+  // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
+  static const accountScopedKeysClearedByFeature = [_kRoutineReminders];
+  // 기기 범위: 계정이 바뀌어도 남김 (기기 설정·서버 설정 캐시·이 기기에서 본 안내)
+  static const deviceScopedKeys = [
+    _kLastProvider,
+    _kCachedConsent,
+    _kCachedTuning,
+    _kCachedStoreSellingOpen,
+    _kHasAskedPushPermission,
+    _kPushPermissionNudgedAt,
+    _kHomeNotificationNoticeDismissedAt,
+    _kUpdateSuggestionShown,
+    _kHomeCoachSeen,
+    _kManageCoachSeen,
+    _kGroupCoachSeen,
+    _kCardReviewCoachSeen,
+    _kChildHapticOn,
+    _kChildPraiseSoundOn,
+    _kChildScreenAwakeOn,
+    _kTalkGridView,
+  ];
+  static const deviceScopedKeyPrefixes = [_kNoticeHiddenPrefix];
+  // 계정 범위 중 이룸이 기기 연결([clearAccountForElumiLink]) 때 남김: 연결이 방금 쓴 표식·역할, 보호자 잠금
+  static const keptOnElumiLinkKeys = [
+    _kElumiDevice,
+    _kElumiLinkLost,
+    _kSelectedRole,
+    _kPin,
+  ];
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -271,19 +341,37 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
-  String? get cachedTodayRoutinesJson => _prefs.getString(_kCachedToday);
-
-  @override
-  Future<void> setCachedTodayRoutinesJson(String json) {
-    // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다. 그래도 값은 로그에 찍지 않는다.
-    AppLogger.storageWrite(_kCachedToday, '${json.length}B');
-    return _prefs.setString(_kCachedToday, json);
+  String? get cachedTodayRoutinesJson {
+    // 받은 회원 <-> 지금 회원 (다르면 캐시 없음으로 읽음)
+    if (_prefs.getString(_kCachedTodayOwner) != accountMemberId) return null;
+    return _prefs.getString(_kCachedToday);
   }
 
   @override
-  Future<void> clearCachedTodayRoutines() {
+  Future<void> setCachedTodayRoutinesJson(
+    String json, {
+    required String? ownerMemberId,
+  }) async {
+    // 받은 회원과 지금 회원이 다르면 쓰지 않음 (계정 전환 중 늦게 온 응답)
+    if (ownerMemberId != accountMemberId) {
+      AppLogger.storageWrite(_kCachedToday, 'skipped: owner changed');
+      return;
+    }
+    // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다. 그래도 값은 로그에 찍지 않는다.
+    AppLogger.storageWrite(_kCachedToday, '${json.length}B');
+    if (ownerMemberId == null) {
+      await _prefs.remove(_kCachedTodayOwner);
+    } else {
+      await _prefs.setString(_kCachedTodayOwner, ownerMemberId);
+    }
+    await _prefs.setString(_kCachedToday, json);
+  }
+
+  @override
+  Future<void> clearCachedTodayRoutines() async {
     AppLogger.storageDelete(_kCachedToday);
-    return _prefs.remove(_kCachedToday);
+    await _prefs.remove(_kCachedToday);
+    await _prefs.remove(_kCachedTodayOwner);
   }
 
   @override
@@ -293,6 +381,15 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setCachedClientTuningJson(String json) {
     AppLogger.storageWrite(_kCachedTuning, json);
     return _prefs.setString(_kCachedTuning, json);
+  }
+
+  @override
+  bool? get isCachedStoreSellingOpen => _prefs.getBool(_kCachedStoreSellingOpen);
+
+  @override
+  Future<void> setCachedStoreSellingOpen(bool isOpen) {
+    AppLogger.storageWrite(_kCachedStoreSellingOpen, isOpen);
+    return _prefs.setBool(_kCachedStoreSellingOpen, isOpen);
   }
 
   @override
@@ -347,6 +444,19 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  DateTime? get homeNotificationNoticeDismissedAt {
+    final raw = _prefs.getString(_kHomeNotificationNoticeDismissedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kHomeNotificationNoticeDismissedAt, raw);
+    await _prefs.setString(_kHomeNotificationNoticeDismissedAt, raw);
+  }
+
+  @override
   String? get updateSuggestionShownRecord =>
       _prefs.getString(_kUpdateSuggestionShown);
 
@@ -395,6 +505,42 @@ class SharedPrefsStorage implements LocalStorage {
       _kTalkShareHintDismissedRoutineIds,
       routineIds,
     );
+  }
+
+  @override
+  Map<String, DateTime> get homeSuggestionShownAtByKind {
+    final raw = _prefs.getString(_kHomeSuggestionShownAtByKind);
+    if (raw == null) return const {};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return const {};
+      return {
+        for (final entry in decoded.entries) entry.key: ?DateTime.tryParse('${entry.value}'),
+      };
+    } on FormatException catch (e) {
+      // 깨진 값은 기록 없음으로 봄 (권유가 다시 나올 수 있을 뿐)
+      AppLogger.error('storage', e, null, {'key': _kHomeSuggestionShownAtByKind});
+      return const {};
+    }
+  }
+
+  @override
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind) async {
+    final raw = jsonEncode({
+      for (final entry in shownAtByKind.entries) entry.key: entry.value.toIso8601String(),
+    });
+    AppLogger.storageWrite(_kHomeSuggestionShownAtByKind, raw);
+    await _prefs.setString(_kHomeSuggestionShownAtByKind, raw);
+  }
+
+  @override
+  Set<String> get homeSuggestionDismissedKeys =>
+      (_prefs.getStringList(_kHomeSuggestionDismissedKeys) ?? const <String>[]).toSet();
+
+  @override
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async {
+    AppLogger.storageWrite(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
+    await _prefs.setStringList(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
   }
 
   @override
@@ -532,7 +678,10 @@ class SharedPrefsStorage implements LocalStorage {
     }
     // 진행 기록·캐시도 이전 아이의 것이다
     for (final key in _prefs.getKeys().where(
-      (k) => k.startsWith(_kProgressPrefix) || k == _kCachedToday,
+      (k) =>
+          k.startsWith(_kProgressPrefix) ||
+          k == _kCachedToday ||
+          k == _kCachedTodayOwner,
     )) {
       await _prefs.remove(key);
     }
@@ -547,18 +696,25 @@ class SharedPrefsStorage implements LocalStorage {
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다.
     await _guardianLock.clear();
     if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
-    await clearChildProfile();
-    // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
-    // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다.
-    for (final key in [
-      _kAccountMemberId,
-      _kAccessToken,
-      _kElumiDevice,
-      _kElumiLinkLost,
-      _kSelectedRole,
-      // 다음에 로그인한 사람이 이룸이 화면에서 시작하면 안 된다
-      _kResumeElumiScreen,
-    ]) {
+    // 계정 범위 키 전부 (분류표 한 곳 · 역할·이룸이 표식 포함: 이룸이 기기의 로그아웃은 곧 연결 끊기)
+    await _removeAccountScopedKeys();
+  }
+
+  @override
+  Future<void> clearAccountForElumiLink() =>
+      _removeAccountScopedKeys(keptKeys: keptOnElumiLinkKeys);
+
+  /// 계정 범위 키·접두사 키 지우기 ([keptKeys] 제외, 로그아웃·연결 공통)
+  Future<void> _removeAccountScopedKeys({
+    List<String> keptKeys = const [],
+  }) async {
+    for (final key in accountScopedKeys) {
+      if (keptKeys.contains(key)) continue;
+      await _prefs.remove(key);
+    }
+    for (final key in _prefs.getKeys().where(
+      (k) => accountScopedKeyPrefixes.any(k.startsWith),
+    )) {
       await _prefs.remove(key);
     }
   }

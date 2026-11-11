@@ -1,5 +1,8 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
+import com.chuseok22.elumserver.license.core.Entitlement;
+import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
@@ -11,6 +14,8 @@ import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.consent.application.service.ConsentDocumentService;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.application.service.SubscriptionStatusService;
+import com.chuseok22.elumserver.license.application.service.store.GoogleSubscriptionWithdrawalCanceler;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
@@ -23,6 +28,7 @@ import com.chuseok22.elumserver.member.application.dto.response.GuardianAccountR
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
+import com.chuseok22.elumserver.member.core.ElumiNickname;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -30,6 +36,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisi
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
+import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -61,12 +68,15 @@ public class MemberService {
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final GoogleSubscriptionWithdrawalCanceler googleSubscriptionWithdrawalCanceler;
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
   private final NotificationCleanupService notificationCleanupService;
   private final TalkCleanupService talkCleanupService;
+  private final GuardianVoiceFiles guardianVoiceFiles;
   private final MemberDailyVisitRepository memberDailyVisitRepository;
   private final EntitlementService entitlementService;
+  private final SubscriptionStatusService subscriptionStatusService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
   private final ConsentDocumentService consentDocumentService;
 
@@ -119,7 +129,8 @@ public class MemberService {
   public MemberResponse updateNickname(Caller caller, MemberNicknameUpdateRequest request) {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-    profile.setNickname(request.nickname());
+    // 길이·제어 문자 검사 (온보딩도 이 길을 지남)
+    profile.setNickname(ElumiNickname.normalize(request.nickname()));
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
@@ -155,6 +166,12 @@ public class MemberService {
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
+  /// 이 그림 방식을 저장할 수 있는가: AI 그림 방식(캐릭터·실사)은 AI_IMAGE_GENERATION 필요 (#1149)
+  public boolean canUseImageStyle(String memberId, ImageStyle style) {
+    return !ImageStyle.orDefault(style).drawsAiImages()
+      || entitlementService.isAllowed(memberId, Entitlement.AI_IMAGE_GENERATION);
+  }
+
   /**
    * 카드 그림 방식을 바꾼다. 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
    *
@@ -168,16 +185,20 @@ public class MemberService {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
+    if (!canUseImageStyle(caller.memberId(), request.imageStyle())) {
+      throw new CustomException(ErrorCode.IMAGE_STYLE_NOT_ALLOWED);
+    }
     profile.setImageStyle(request.imageStyle());
     return toResponse(member, profile, profileAccessGuard.profilesOf(caller));
   }
 
   /**
-   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보
+   * 내 정보 응답 조립: 계정 + 당사자 + 이용 권한 + 보호자 표시 정보 + 요금제 상태 + Pro 요금제 권한
    */
   private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
-      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member));
+      member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member),
+      subscriptionStatusService.statusOf(member.getId()), entitlementService.planSnapshot(PlanType.PRO));
   }
 
   /**
@@ -304,6 +325,8 @@ public class MemberService {
     deviceLinkRepository.deleteAllByMemberId(memberId);
     // 구독. 되살릴 때 가입처럼 Free 로 새로 만든다.
     subscriptionRepository.deleteByMemberId(memberId);
+    // Google Play 구독 자동 갱신 해지: 커밋 뒤 별도 스레드 (실패해도 탈퇴는 그대로, App Store 는 앱에서 직접 해지 안내)
+    googleSubscriptionWithdrawalCanceler.cancelRenewalsAfterCommit(memberId);
     // 광고 보상 세션(nonce·transaction_id)은 회원을 가리키는 운영 기록이라 탈퇴에서 지운다. 받은 크레딧은 묶음·원장에 남는다.
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     // 의견 글과 앱 상태 기록. 개인 정보가 섞여 있을 수 있어 남기지 않는다.
@@ -312,6 +335,8 @@ public class MemberService {
     notificationCleanupService.deleteAllOf(memberId);
     // 이야기 글·댓글·반응·신고·차단·가져가기 기록. 남의 글 집계는 다시 센다.
     talkCleanupService.deleteAllOf(memberId);
+    // 보호자 목소리 녹음 파일 (개인정보). 카드 행은 위 나가기에서 지워지고 파일은 커밋 뒤 보호자 폴더째 삭제
+    guardianVoiceFiles.deleteAllOfAfterCommit(memberId);
     // 하루 방문 기록. 방침의 보관 항목이 아니라 남기지 않는다 (지난 방문 수에서도 빠짐).
     memberDailyVisitRepository.deleteAllByMemberId(memberId);
 

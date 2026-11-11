@@ -7,7 +7,7 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../guardian/application/routine_card_picture_provider.dart';
-import 'talk_bundled_card_art.dart';
+import '../../../../shared/example_card_image/bundled_card_art.dart';
 
 /// 올리기 미리보기용 카드 그림: 내 일과 카드 그림 > 번들 그림
 /// [isBlurred] 면 흐린 모습으로 보인다 (표시용일 뿐, 실제 블러는 서버가 사본에만 건다)
@@ -36,7 +36,7 @@ class TalkShareCardPicture extends ConsumerWidget {
     final card = this.card;
     if (card == null) return ColoredBox(color: context.colors.editChipBg);
 
-    Widget bundledArt() => TalkBundledCardArt(
+    Widget bundledArt() => BundledCardArt(
       label: label,
       pictogramId: card.pictogramId,
       exampleImageId: card.exampleImageId,

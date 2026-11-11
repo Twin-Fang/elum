@@ -72,6 +72,12 @@ class GuardianshipServiceTest {
   @Mock
   private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
 
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.RoutineMemoryService routineMemoryService;
+
+  @Mock
+  private com.chuseok22.elumserver.routine.application.service.WeeklyReportSummaryService weeklyReportSummaryService;
+
   @InjectMocks
   private GuardianshipService guardianshipService;
 
@@ -162,6 +168,8 @@ class GuardianshipServiceTest {
     verify(routineRepository).deleteAll(List.of(mineConfirmed, mineDraft));
     verify(routineRepository, never()).findAllByProfileId("p1");
     verify(profileRepository, never()).delete(p1);
+    // 나간 보호자의 AI 메모리만 지움 (남은 보호자의 메모리는 그대로)
+    verify(routineMemoryService).forgetMember("p1", "A");
   }
 
   @Test

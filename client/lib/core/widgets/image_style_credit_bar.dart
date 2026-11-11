@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../assets/app_assets.dart';
+import 'credit_cost_label.dart';
 import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
 import '../../shared/models/image_style.dart';
@@ -13,7 +12,7 @@ import '../../shared/models/image_style.dart';
 /// 목록과 한 덩어리로 읽히고, 방식을 바꿔도 높이가 그대로라 아래 카드가 움직이지 않는다.
 /// 시안에 없는 임시 모양이다.
 ///
-/// 숫자는 서버 단가를 쓴다 — 부르는 쪽이 `creditCostsProvider` 값을 [costs] 로 넘긴다.
+/// 숫자는 서버 단가를 쓴다 — 부르는 쪽이 `routineCreateCreditCostsProvider` 값을 [costs] 로 넘긴다.
 /// 크레딧 기능이 꺼져 있으면(null) 쓸 일이 없으니 띠를 감춘다.
 class ImageStyleCreditBar extends StatelessWidget {
   const ImageStyleCreditBar({
@@ -40,7 +39,10 @@ class ImageStyleCreditBar extends StatelessWidget {
     final routineCost = costs.routine;
     final imageCost = costs.image;
 
-    final routine = l10n.imageStyleCreditRoutine(routineCost);
+    // 글 무료(Pro 권한)면 단가 0 > `일과 무료`
+    final routine = routineCost == 0
+        ? l10n.imageStyleCreditRoutineFree
+        : l10n.imageStyleCreditRoutine(routineCost);
     final image = l10n.imageStyleCreditImage(imageCost);
     final label = l10n.imageStyleCreditLabel;
 
@@ -56,7 +58,7 @@ class ImageStyleCreditBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const _Coin(size: _coinSize),
+              const CreditTicketIcon(size: _coinSize),
               SizedBox(width: 10.w),
               Text(
                 label,
@@ -127,28 +129,6 @@ class _Cost extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 크레딧 표시 — 보라 반짝임 (시안 1736:8780 `✦ 90` 결, 원 없이).
-class _Coin extends StatelessWidget {
-  const _Coin({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final side = size.w;
-    return SvgPicture.asset(
-      AppAssets.iconSparkles,
-      width: side,
-      height: side,
-      colorFilter: ColorFilter.mode(
-        context.colors.creditNumberText,
-        BlendMode.srcIn,
-      ),
-      excludeFromSemantics: true,
     );
   }
 }

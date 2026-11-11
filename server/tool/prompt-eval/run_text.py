@@ -137,7 +137,7 @@ def main():
     prod = lib.load_prod_config()
     print(lib.describe_prod_config(prod))
     if prod["text"]["provider"] != "GEMINI":
-        raise SystemExit("텍스트 제공자 OPENAI 경로는 아직 하네스에 없음: 운영이 OPENAI 이면 먼저 구현한다")
+        raise SystemExit(f"운영 글 제공자 {prod['text']['provider']}: 이 하네스는 Gemini 전용 (행동카드는 run_cards.py)")
     config = load_variant(args.variant)
     settings = lib.load_gemini_settings()
     settings["text-model"] = prod["text"]["model"]       # 운영 모델 (application-dev.yml 값 대신)

@@ -7,7 +7,6 @@ import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
-import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
@@ -15,9 +14,9 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepo
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSettings;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,10 @@ public class CreditReservationService {
   private final EntitlementService entitlementService;
   private final AiCreditJobRepository jobRepository;
   private final AiCreditLedgerRepository ledgerRepository;
+  private final CreditFreeRegenerateAllowance freeRegenerateAllowance;
+  private final CreditFreeRoutineTextAllowance freeRoutineTextAllowance;
+  private final CreditReservationReturns reservationReturns;
+  private final CreditSettlementLedger settlementLedger;
   /// 예약: 호출자 트랜잭션이 있으면 합류(수동 카드 저장 안), 없으면 짧게 새로 연다(일과 생성 전).
   private final TransactionTemplate joinOrNew;
   /// 반환: 호출자가 롤백하는 중에도 반환은 남아야 한다.
@@ -58,22 +61,26 @@ public class CreditReservationService {
   public CreditReservationService(
     CreditPolicyService policyService, CreditAccountService accountService, EntitlementService entitlementService,
     AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
-    PlatformTransactionManager transactionManager
+    UsageLimitSettings usageLimitSettings, PlatformTransactionManager transactionManager
   ) {
     this(policyService, accountService, entitlementService, jobRepository, ledgerRepository,
-      transactionManager, Clock.systemDefaultZone());
+      usageLimitSettings, transactionManager, Clock.systemDefaultZone());
   }
 
   CreditReservationService(
     CreditPolicyService policyService, CreditAccountService accountService, EntitlementService entitlementService,
     AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
-    PlatformTransactionManager transactionManager, Clock clock
+    UsageLimitSettings usageLimitSettings, PlatformTransactionManager transactionManager, Clock clock
   ) {
     this.policyService = policyService;
     this.accountService = accountService;
     this.entitlementService = entitlementService;
     this.jobRepository = jobRepository;
     this.ledgerRepository = ledgerRepository;
+    this.freeRegenerateAllowance = new CreditFreeRegenerateAllowance(entitlementService, jobRepository, usageLimitSettings);
+    this.freeRoutineTextAllowance = new CreditFreeRoutineTextAllowance(entitlementService);
+    this.reservationReturns = new CreditReservationReturns(accountService, jobRepository, ledgerRepository, clock);
+    this.settlementLedger = new CreditSettlementLedger(accountService, ledgerRepository);
     this.joinOrNew = new TransactionTemplate(transactionManager);
     this.alwaysNew = new TransactionTemplate(transactionManager);
     this.alwaysNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -140,13 +147,19 @@ public class CreditReservationService {
     }
 
     // 멈춘 예약을 먼저 풀어야 그 예약 때문에 부족으로 막히지 않는다. 같은 키가 방금 만료됐다면 아래에서 다시 쓴다.
-    expireStaleLocked(account, policy, now);
+    reservationReturns.expireStaleLocked(account, policy, now);
     if (existing != null && existing.getStatus() == CreditJobStatus.RESERVED) {
       return ReserveResult.rejected(ErrorCode.AI_CREDIT_JOB_IN_PROGRESS);
     }
 
     accountService.ensureWeeklyGrant(account, policyService::grantPolicyFor, planOf(account), now);
-    int cost = policy.costOf(reserveAction(kind));
+    // 시작 때 단가 (무료 다시 그리기 대상이면 다시 그리기 단가만 0, 일과 글 무료 대상이면 글 단가만 0)
+    boolean isRoutineTextFree = freeRoutineTextAllowance.isRoutineTextFree(account, kind);
+    String costSnapshot = isRoutineTextFree
+      ? policy.actionCostsJsonWithFree(CreditAction.ROUTINE_TEXT)
+      : freeRegenerateAllowance.costSnapshotFor(account, kind, policy, now);
+    CreditAction holdAction = CreditFreeRoutineTextAllowance.holdActionOf(kind, isRoutineTextFree);
+    int cost = AiCreditPolicy.costFrom(costSnapshot, holdAction);
     int available = accountService.balance(account, now).available();
     if (available < cost) {
       return ReserveResult.rejected(ErrorCode.AI_CREDIT_INSUFFICIENT);
@@ -163,7 +176,7 @@ public class CreditReservationService {
     job.setCharged(0);
     job.setOverage(0);
     job.setPolicyVersion(policy.getVersion());
-    job.setCostSnapshot(policy.getActionCostsJson());
+    job.setCostSnapshot(costSnapshot);
     job.setStartedAt(now);
     job.setFinishedAt(null);
     job.setFailReason(null);
@@ -171,7 +184,7 @@ public class CreditReservationService {
 
     AiCreditLedger line = CreditAccountService.ledgerLine(account.getId(), CreditLedgerType.RESERVE, -cost, available - cost);
     line.setJobId(saved.getId());
-    line.setAction(reserveAction(kind));
+    line.setAction(holdAction);
     line.setPolicyVersion(policy.getVersion());
     ledgerRepository.save(line);
     return ReserveResult.of(CreditReservation.reserved(saved.getId()));
@@ -203,63 +216,18 @@ public class CreditReservationService {
       accountService.ensureWeeklyGrant(account, policyService::grantPolicyFor, planOf(account), now);
     }
 
-    int hold = job.getStatus() == CreditJobStatus.RESERVED ? job.getReserved() : 0;
-    int charge = chargeOf(job, imageCount);
-    int running = accountService.balance(account, now).available();
-
-    if (hold > 0) {
-      running += hold;
-      AiCreditLedger unhold = CreditAccountService.ledgerLine(accountId, CreditLedgerType.RELEASE, hold, running);
-      unhold.setJobId(jobId);
-      unhold.setPolicyVersion(job.getPolicyVersion());
-      unhold.setReason("정산 — 예약을 실제 차감으로 바꾼다");
-      ledgerRepository.save(unhold);
-    }
-
-    // 초과를 허용하지 않는 종류(그림 한 장)는 남은 만큼만 청구한다. 반환·만료 뒤 늦게 끝나 잔액이 모자라도
-    // 초과로 남기지 않는다 — 시작할 때 "잔액 안에서만"이라고 약속한 작업이다.
-    if (!job.getKind().overageAllowed()) {
-      charge = Math.min(charge, Math.max(0, running));
-    }
-    int left = Math.min(charge, running);
-    int deducted = 0;
-    List<AiCreditGrant> grants = accountService.spendableGrants(accountId, now);
-    for (AiCreditGrant grant : grants) {
-      if (left == 0) {
-        break;
-      }
-      int take = Math.min(left, grant.getRemaining());
-      grant.setRemaining(grant.getRemaining() - take);
-      left -= take;
-      deducted += take;
-      running -= take;
-      AiCreditLedger consume = CreditAccountService.ledgerLine(accountId, CreditLedgerType.CONSUME, -take, running);
-      consume.setJobId(jobId);
-      consume.setGrantId(grant.getId());
-      consume.setAction(reserveAction(job.getKind()));
-      consume.setPolicyVersion(job.getPolicyVersion());
-      ledgerRepository.save(consume);
-    }
-
-    int overage = charge - deducted;
-    if (overage > 0) {
-      AiCreditLedger over = CreditAccountService.ledgerLine(accountId, CreditLedgerType.OVERAGE, 0, running);
-      over.setJobId(jobId);
-      over.setPolicyVersion(job.getPolicyVersion());
-      over.setReason("초과 " + overage + " — 청구 " + charge + " 중 잔액이 모자라 차감하지 못한 몫");
-      ledgerRepository.save(over);
-    }
+    CreditSettlementLedger.SettledAmounts amounts = settlementLedger.writeLines(accountId, account, jobId, job, imageCount, now);
 
     job.setStatus(CreditJobStatus.SETTLED);
-    job.setCharged(deducted);
-    job.setOverage(overage);
+    job.setCharged(amounts.deducted());
+    job.setOverage(amounts.overage());
     job.setCardCount(cardCount);
     job.setImageCount(imageCount);
     job.setRoutineId(routineId);
     job.setStepId(stepId);
     job.setFinishedAt(now);
     jobRepository.save(job);
-    return new CreditSettlement(deducted, overage, Math.max(0, running));
+    return new CreditSettlement(amounts.deducted(), amounts.overage(), Math.max(0, amounts.balanceAfter()));
   }
 
   /**
@@ -290,34 +258,10 @@ public class CreditReservationService {
    */
   public void release(String jobId, String reason) {
     try {
-      alwaysNew.executeWithoutResult(status -> releaseLocked(jobId, reason));
+      alwaysNew.executeWithoutResult(status -> reservationReturns.releaseLocked(jobId, reason));
     } catch (RuntimeException e) {
       log.error("크레딧 예약 반환 실패 — TTL 만료가 복구한다: jobId={}, reason={}", jobId, reason, e);
     }
-  }
-
-  private void releaseLocked(String jobId, String reason) {
-    String accountId = jobRepository.findAccountIdById(jobId).orElse(null);
-    if (accountId == null) {
-      log.warn("반환할 크레딧 작업이 없다: jobId={}", jobId);
-      return;
-    }
-    AiCreditAccount account = accountService.lockAccountById(accountId);
-    AiCreditJob job = jobRepository.findById(jobId).orElse(null);
-    if (job == null || job.getStatus() != CreditJobStatus.RESERVED) {
-      return;
-    }
-    LocalDateTime now = LocalDateTime.now(clock);
-    int balanceAfter = accountService.balance(account, now).available() + job.getReserved();
-    job.setStatus(CreditJobStatus.RELEASED);
-    job.setFinishedAt(now);
-    job.setFailReason(reason);
-    jobRepository.save(job);
-    AiCreditLedger line = CreditAccountService.ledgerLine(accountId, CreditLedgerType.RELEASE, job.getReserved(), balanceAfter);
-    line.setJobId(jobId);
-    line.setPolicyVersion(job.getPolicyVersion());
-    line.setReason(reason);
-    ledgerRepository.save(line);
   }
 
   /**
@@ -328,50 +272,21 @@ public class CreditReservationService {
   @Transactional
   public int expireStale(String memberId) {
     AiCreditAccount account = accountService.lockAccount(memberId);
-    return expireStaleLocked(account, policyService.current(), LocalDateTime.now(clock));
+    return reservationReturns.expireStaleLocked(account, policyService.current(), LocalDateTime.now(clock));
   }
 
-  private int expireStaleLocked(AiCreditAccount account, AiCreditPolicy policy, LocalDateTime now) {
-    LocalDateTime threshold = now.minusMinutes(policy.getReservationTtlMinutes());
-    List<AiCreditJob> stale = jobRepository.findByAccountIdAndStatus(account.getId(), CreditJobStatus.RESERVED).stream()
-      .filter(job -> job.getStartedAt().isBefore(threshold))
-      .toList();
-    for (AiCreditJob job : stale) {
-      int balanceAfter = accountService.balance(account, now).available() + job.getReserved();
-      job.setStatus(CreditJobStatus.EXPIRED);
-      job.setFinishedAt(now);
-      job.setFailReason("예약 유지 시간(" + policy.getReservationTtlMinutes() + "분) 초과");
-      jobRepository.save(job);
-      AiCreditLedger line = CreditAccountService.ledgerLine(account.getId(), CreditLedgerType.RELEASE, job.getReserved(), balanceAfter);
-      line.setJobId(job.getId());
-      line.setPolicyVersion(job.getPolicyVersion());
-      line.setReason("멈춘 예약 자동 반환");
-      ledgerRepository.save(line);
-      log.warn("멈춘 크레딧 예약을 만료시켰다: accountId={}, jobId={}, startedAt={}",
-        account.getId(), job.getId(), job.getStartedAt());
-    }
-    return stale.size();
+  /**
+   * 오늘 남은 무료 다시 그리기 횟수 (크레딧 요약·예약 공통, 계산은 {@link CreditFreeRegenerateAllowance})
+   */
+  public int freeRegeneratesLeftToday(AiCreditAccount account, LocalDateTime now) {
+    return freeRegenerateAllowance.freeRegeneratesLeftToday(account, now);
   }
 
-  /// 예약량·원장 action 을 정하는 행동. 일과 생성은 글 단가만 예약한다(그림 수는 끝나야 안다).
-  private static CreditAction reserveAction(CreditJobKind kind) {
-    return switch (kind) {
-      case ROUTINE_CREATE -> CreditAction.ROUTINE_TEXT;
-      case CARD_IMAGE -> CreditAction.CARD_IMAGE;
-      case IMAGE_REGENERATE -> CreditAction.IMAGE_REGENERATE;
-    };
-  }
-
-  /// 시작 때 단가로 청구를 계산한다.
-  private static int chargeOf(AiCreditJob job, int imageCount) {
-    String costs = job.getCostSnapshot();
-    int images = Math.max(0, imageCount);
-    return switch (job.getKind()) {
-      case ROUTINE_CREATE -> AiCreditPolicy.costFrom(costs, CreditAction.ROUTINE_TEXT)
-        + AiCreditPolicy.costFrom(costs, CreditAction.CARD_IMAGE) * images;
-      case CARD_IMAGE -> AiCreditPolicy.costFrom(costs, CreditAction.CARD_IMAGE) * images;
-      case IMAGE_REGENERATE -> AiCreditPolicy.costFrom(costs, CreditAction.IMAGE_REGENERATE) * images;
-    };
+  /**
+   * 일과 생성 시작에 필요한 사용 가능량 (크레딧 요약·추가 질문 공통, 계산은 {@link CreditFreeRoutineTextAllowance})
+   */
+  public int routineCreateStartCost(AiCreditAccount account, AiCreditPolicy policy) {
+    return freeRoutineTextAllowance.routineCreateStartCost(account, policy);
   }
 
   private PlanType planOf(AiCreditAccount account) {

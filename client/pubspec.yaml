@@ -61,6 +61,10 @@ dependencies:
   kakao_flutter_sdk_user: ^2.0.1
   flutter_naver_login: ^2.1.1
   google_sign_in: ^7.2.0
+  # iOS scene 생명주기: 6.3.3 은 scene URL 처리 결과를 돌려주지 않아 카카오·네이버 콜백과
+  # 앱 링크(elum://)가 구글 플러그인에서 멈출 수 있음 > 결과를 돌려주는 6.3.4 로 고정
+  # (6.3.6+ 는 Flutter 3.41 필요, CI FLUTTER_VERSION 을 올릴 때 함께 풀기)
+  google_sign_in_ios: 6.3.4
   sign_in_with_apple: ^7.0.1
   flutter_secure_storage: ^11.2.0
   # 공지 팝업의 링크 버튼을 외부 브라우저로 연다 (이슈 #371). 앱에 링크를 여는 길이
@@ -85,6 +89,14 @@ dependencies:
   in_app_update: ^4.2.5
   firebase_crashlytics: ^6.0.0
   firebase_analytics: ^13.0.0
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  in_app_purchase: ^3.3.1
+  in_app_purchase_android: ^0.5.0
+  # App Store 무료 체험 대상·기간 조회 (#1166). in_app_purchase 가 이미 쓰는 판과 같게
+  in_app_purchase_storekit: ^0.4.13
+  # 보호자 목소리 녹음 (AAC m4a, 마이크 권한 요청 포함). 재생은 audioplayers 그대로
+  record: ^6.2.1
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").
@@ -176,6 +188,8 @@ flutter:
     # Mulberry Symbols 픽토그램 811개 + 라이선스 원문(CC BY-SA 4.0) + 카탈로그 (#469).
     # 파일명에 쉼표·밑줄이 있어 목록 등록이 아니라 폴더째 올린다. SVG 는 고치지 않는다.
     - assets/pictograms/
+    # Twemoji 이모지 그림 889개 + 라이선스(CC BY 4.0) + 카탈로그. server/tool/emoji 생성물, 손대지 않는다 (#1149)
+    - assets/emoji/
     # 온보딩 예시 일과 카드 이미지 31장 (루미, 512px WebP). 서버 exampleImageId 와 파일명이 같다 (#866)
     - assets/images/example_routines/
     # 이룸이 칭찬 소리 (#777)

@@ -9,6 +9,16 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get notificationOffNoticeTitle => 'Turn on notifications?';
+
+  @override
+  String get notificationOffNoticeBody =>
+      'We\'ll tell you when a routine is done';
+
+  @override
+  String get notificationOffValue => 'Off';
+
+  @override
   String get appTitle => 'elum';
 
   @override
@@ -71,12 +81,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditResetFallback => 'next Monday at 0:00';
 
   @override
+  String get creditResetFallbackMonth => '12:00 AM on the 1st of next month';
+
+  @override
   String get creditBlockedBusy =>
       'A routine is already being made.\nYou can make a new one once it\'s done';
 
   @override
   String creditBlockedExhausted(String reset) {
-    return 'You\'ve used all your credits this week.\nYou can make more from $reset';
+    return 'You\'ve used all your credits this week.\nCredits refill on $reset';
+  }
+
+  @override
+  String creditBlockedExhaustedMonth(String reset) {
+    return 'You\'ve used all your credits this month.\nThey refill on $reset';
   }
 
   @override
@@ -155,11 +173,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonRetryLater => 'Try again in a moment';
-
-  @override
-  String commonRetryWithCode(String code) {
-    return 'Try again ($code)';
-  }
 
   @override
   String get sentenceStop => '.';
@@ -340,16 +353,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentOptionalTag => 'Optional';
 
   @override
-  String consentChipRequired(String label) {
-    return '[Required] $label';
-  }
-
-  @override
-  String consentChipOptional(String label) {
-    return '[Optional] $label';
-  }
-
-  @override
   String consentDocumentMeta(String label, String version) {
     return '$label · Version $version';
   }
@@ -379,27 +382,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterFoxName => 'Popo';
 
   @override
-  String get agentChickLabel => 'Chick';
+  String get imageStyleEmojiLabel => 'Emoji';
 
   @override
-  String get imageStyleCartoonLabel => 'Cartoon';
+  String get imageStyleEmojiDescription => 'Shows things with cute emoji';
 
   @override
-  String get imageStyleCartoonDescription => 'Pictures with characters';
+  String get imageStyleSymbolLabel => 'Picture symbols';
+
+  @override
+  String get imageStyleSymbolDescription =>
+      'Shows the action as a line drawing';
+
+  @override
+  String get imageStyleCharacterLabel => 'Character';
+
+  @override
+  String get imageStyleCharacterDescription => 'A character acts it out';
 
   @override
   String get imageStyleRealisticLabel => 'Realistic';
 
   @override
-  String get imageStyleRealisticDescription =>
-      'Looks like photos of real things';
-
-  @override
-  String get imageStylePhotoOnlyLabel => 'My own photos';
-
-  @override
-  String get imageStylePhotoOnlyDescription =>
-      'Simple picture symbols are used';
+  String get imageStyleRealisticDescription => 'Looks like real things';
 
   @override
   String get imageStyleCreditLabel => 'Credits';
@@ -409,10 +414,13 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Routine $count',
+      other: 'Each routine $count',
     );
     return '$_temp0';
   }
+
+  @override
+  String get imageStyleCreditRoutineFree => 'Routine text is free';
 
   @override
   String imageStyleCreditImage(int count) {
@@ -504,7 +512,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinSaveFailedTitle => 'Couldn\'t save your settings';
 
   @override
-  String get pinSaveFailedFallback => 'Check again in settings';
+  String get pinSaveFailedFallback => 'Tap Start again in a moment';
 
   @override
   String get elumiSettingsTitle => 'Settings';
@@ -544,6 +552,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get elumiSettingsWithdrawMessage =>
       'Only this device is disconnected\nRoutines and stars stay on the guardian\'s device\nTo use it again, get a\nlink code from a guardian';
+
+  @override
+  String get elumiSettingsWithdrawAction => 'Delete account';
 
   @override
   String get inviteRejectedOnElumiDevice =>
@@ -733,6 +744,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansLeaveConfirmAction => 'Stop';
 
   @override
+  String get guardiansLeaveTypeTitle => 'One more check';
+
+  @override
+  String guardiansLeaveTypeMessage(String phrase) {
+    return 'Elumi, routines, and stars will all be gone.\nPlease type \'$phrase\'\nexactly as shown below';
+  }
+
+  @override
+  String get guardiansLeaveTypePhrase => 'Leave';
+
+  @override
+  String get guardiansLeaveTypeAction => 'Leave';
+
+  @override
   String get guardiansLeaveFailTitle => 'Couldn\'t leave';
 
   @override
@@ -844,9 +869,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteCodeIssueFailedFallback => 'Couldn\'t make the invite code';
-
-  @override
-  String get inviteCodeRetryChip => 'Make a new invite code';
 
   @override
   String get inviteEnterLinkInvalid =>
@@ -1182,7 +1204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get guardianHomeSettings => 'Settings';
+  String get notificationWeeklyReportReady => 'Last week\'s report is ready';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1291,6 +1313,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineLoadingGenerateFailed => 'Couldn\'t make the cards';
 
   @override
+  String get routineLoadingInputNeededTitle => 'Tell us what the routine is';
+
+  @override
+  String get routineLoadingEditInput => 'Write again';
+
+  @override
   String routineLoadingPercent(int percent) {
     return '$percent% done';
   }
@@ -1323,7 +1351,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get draftRoutinesDeleteFailedFallback => 'Try again in a moment';
 
   @override
-  String get draftRoutinesRewardUnset => 'Not set';
+  String get draftRoutinesRewardUnset => 'No reward yet';
 
   @override
   String get draftRoutinesRewardLabel => 'When done';
@@ -1381,6 +1409,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t make the picture, so we added a basic picture';
 
   @override
+  String get cardImageMissingAfterCreateToast =>
+      'Cards without a picture got a default one. You can draw an AI picture when you edit the card';
+
+  @override
   String get cardReviewReorderDone => 'Done';
 
   @override
@@ -1409,11 +1441,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'All routines and stars will be gone\nLogging in again won\'t bring them back';
 
   @override
+  String get guardianSettingsWithdrawConfirmAction => 'Delete account';
+
+  @override
   String get guardianSettingsWithdrawFailedTitle =>
       'Couldn\'t delete the account';
 
   @override
   String get guardianSettingsWithdrawFailedFallback => 'Try again in a moment';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreSubscriptionNotice =>
+      'Your Pro subscription continues after you delete your account.\nPlease cancel it yourself\nin the App Store';
+
+  @override
+  String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
+      'Deleting your account stops the next\npayment for your Google Play Pro subscription';
+
+  @override
+  String get guardianSettingsWithdrawTypeTitle => 'One more check';
+
+  @override
+  String guardianSettingsWithdrawTypeMessage(String phrase) {
+    return 'Please type \'$phrase\'\nexactly as shown below';
+  }
+
+  @override
+  String get guardianSettingsWithdrawTypePhrase => 'Delete account';
+
+  @override
+  String get guardianSettingsWithdrawTypeAction => 'Delete account';
 
   @override
   String get guardianSettingsTitle => 'Settings';
@@ -1660,7 +1717,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditCardTitle => 'AI this week';
 
   @override
+  String get creditCardTitleMonth => 'AI creations this month';
+
+  @override
   String get creditCardLoading => 'Loading this week\'s AI usage';
+
+  @override
+  String get creditCardLoadingMonth => 'Loading this month\'s AI usage';
 
   @override
   String get creditCardLoadFailed => 'Couldn\'t load usage';
@@ -1673,6 +1736,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditExhausted => 'You\'ve used all your credits this week';
+
+  @override
+  String get creditExhaustedMonth => 'You\'ve used all your credits this month';
 
   @override
   String get creditExhaustedStillOk =>
@@ -1700,6 +1766,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditCostTitle => 'How AI credits are used';
 
   @override
+  String creditCostLineTextFree(int imageCost) {
+    String _temp0 = intl.Intl.pluralLogic(
+      imageCost,
+      locale: localeName,
+      other: '$imageCost credits',
+      one: '$imageCost credit',
+    );
+    return 'Routine text is free. Each finished card picture uses $_temp0.';
+  }
+
+  @override
   String creditCostLine(int textCost, int imageCost) {
     String _temp0 = intl.Intl.pluralLogic(
       textCost,
@@ -1724,6 +1801,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditWeeklyRefill => 'Credits refill every Monday at 0:00.';
 
   @override
+  String get creditMonthlyRefill =>
+      'Refills at 12:00 AM on the 1st of every month.';
+
+  @override
   String get routineCreateButton => 'Make a new routine';
 
   @override
@@ -1731,10 +1812,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineSwipeEdit => 'Edit routine';
-
-  @override
-  String get routineSuggestLoadFailed =>
-      'Couldn\'t load suggestions · Try again';
 
   @override
   String get routineFlowHomeLabel => 'Go home';
@@ -2051,10 +2128,108 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s device';
 
   @override
+  String get myCreditTitle => 'My credits';
+
+  @override
+  String get planFreeBadge => 'FREE';
+
+  @override
+  String get myCreditHistoryButton => 'Usage history';
+
+  @override
+  String get myCreditCountUnit => '';
+
+  @override
+  String get myCreditKindPeriodicWeek => 'Weekly';
+
+  @override
+  String get myCreditKindPeriodicMonth => 'Monthly';
+
+  @override
+  String get myCreditKindBonus => 'Bonus';
+
+  @override
+  String get myCreditKindPurchased => 'Purchased';
+
+  @override
+  String get myCreditRefillWeek => 'Refills on Monday';
+
+  @override
+  String get myCreditRefillMonth => 'Refills on the 1st of next month';
+
+  @override
+  String myCreditUntilDate(int month, int day) {
+    return 'Until $month/$day';
+  }
+
+  @override
+  String get myCreditNoExpiry => 'No expiry';
+
+  @override
+  String get myCreditSubscribeLabel => 'When you subscribe';
+
+  @override
+  String get myCreditSubscribeBody =>
+      'Draw AI pictures and send routines automatically';
+
+  @override
+  String get myCreditPackLabelFree => 'Get more credits';
+
+  @override
+  String get myCreditPackLabelPro => 'Get more credits';
+
+  @override
+  String get creditGetMore => 'Get more credits';
+
+  @override
+  String myCreditPackDiscount(int percent) {
+    return '-$percent%';
+  }
+
+  @override
+  String get myCreditPackPopular => 'Popular!';
+
+  @override
+  String myCreditPackBuy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Get $count credits',
+      one: 'Get $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myCreditPackNoExpiryNote => 'Purchased credits never expire';
+
+  @override
+  String get myCreditPackPriceFailed => 'Couldn\'t load credit prices';
+
+  @override
+  String myCreditPackTileLabel(int count, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credits',
+      one: '$count credit',
+    );
+    return '$_temp0, $price';
+  }
+
+  @override
+  String get myCreditPurchaseRecheckTitle =>
+      'Your credits haven\'t arrived yet';
+
+  @override
+  String get myCreditPurchaseRecheckBody =>
+      'Your payment went through. You only need to check again, not pay again';
+
+  @override
   String get creditHistoryTitle => 'Credit history';
 
   @override
-  String get creditHistoryLink => 'View credit history';
+  String get creditMineLink => 'View my credits';
 
   @override
   String creditHistoryDay(int month, int day) {
@@ -2085,6 +2260,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditHistoryKindImageRegenerate => 'Remaking a card picture';
+
+  @override
+  String get creditHistoryFree => 'No credits used';
 
   @override
   String get creditHistoryKindWeeklyGrant =>
@@ -2454,9 +2632,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get guardianMyInfoChildrenHeader => 'Elumi';
-
-  @override
   String get guardianMyInfoActiveBadge => 'Viewing';
 
   @override
@@ -2718,17 +2893,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineGroupAdded => 'Added to bundle';
 
   @override
-  String get routineGroupRemovedOne => 'Removed from bundle';
-
-  @override
   String get routineGroupUngrouped => 'Bundle ungrouped';
 
   @override
   String get routineGroupUngroupedEmpty =>
       'All routines were taken out, so the bundle was ungrouped';
-
-  @override
-  String get routineGroupReordered => 'Order changed';
 
   @override
   String routineGroupSent(String name) {
@@ -2972,9 +3141,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkEmptyTitle => 'No routines shared yet';
 
   @override
-  String get talkEmptyAction => 'Share your first routine';
-
-  @override
   String get talkEmptyCategoryTitle =>
       'No routines shared in this category yet';
 
@@ -3111,8 +3277,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkImportNoElumiAction => 'Connect Elumi';
 
   @override
-  String talkImportDone(String elumiName) {
-    return 'Added to $elumiName\'s routines';
+  String talkImportDone(String routineTitle, String batchim) {
+    return 'Imported $routineTitle';
   }
 
   @override
@@ -3496,4 +3662,1605 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get licenseLoadFailedMessage => 'We couldn\'t load the list';
+
+  @override
+  String get cardExportOpen => 'Save for printing';
+
+  @override
+  String get cardExportFormatSection => 'How would you like it?';
+
+  @override
+  String get cardExportFormatRoutineSheet => 'One-page routine';
+
+  @override
+  String get cardExportFormatRoutineSheetCaption => 'In order on one A4 page';
+
+  @override
+  String get cardExportFormatCutCards => 'Cut-out cards';
+
+  @override
+  String get cardExportFormatCutCardsCaption => 'On A4 with cutting lines';
+
+  @override
+  String get cardExportFormatCardImages => 'One card at a time';
+
+  @override
+  String get cardExportFormatCardImagesCaption => 'One image per card';
+
+  @override
+  String get cardExportPerPageSection => 'How many cards per page?';
+
+  @override
+  String get cardExportIncludeText => 'Include card text';
+
+  @override
+  String get cardExportThemeSection => 'Card design';
+
+  @override
+  String get cardExportThemeBasic => 'Basic';
+
+  @override
+  String get cardExportThemeSimple => 'Simple';
+
+  @override
+  String get cardExportThemeInkSaver => 'Ink saver';
+
+  @override
+  String get cardExportThemeMonochrome => 'Black & white';
+
+  @override
+  String get cardExportThemeLargeText => 'Large text';
+
+  @override
+  String get planProBadge => 'Pro';
+
+  @override
+  String get cardExportProThemeLocked => 'This design is available with Pro';
+
+  @override
+  String get cardExportWatermarkNotice =>
+      'Free adds an Elumi logo strip at the bottom';
+
+  @override
+  String get cardExportPreviewSection => 'Preview';
+
+  @override
+  String get cardExportMissingPicture =>
+      'Cards without a picture show only the title';
+
+  @override
+  String cardExportSomePicturesFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count cards whose pictures couldn\'t load will use other pictures or their titles',
+      one:
+          '$count card whose picture couldn\'t load will use another picture or its title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportActualSizeHint =>
+      'When printing from another app, choose actual size';
+
+  @override
+  String get cardExportPrint => 'Print';
+
+  @override
+  String get cardExportShare => 'Send';
+
+  @override
+  String get cardExportPreparing => 'Getting your cards ready';
+
+  @override
+  String get cardExportImageFailed => 'Couldn\'t load the card picture';
+
+  @override
+  String get cardExportRenderFailed => 'Couldn\'t create the printable file';
+
+  @override
+  String get cardExportPrintFailed =>
+      'This device can\'t print. Please use Send instead';
+
+  @override
+  String get cardExportNoCards => 'This routine has no cards';
+
+  @override
+  String get cardExportNoneSelected =>
+      'Please choose at least one card to send';
+
+  @override
+  String get printBrandTagline => 'Every day, together | Elumi Behavior Cards';
+
+  @override
+  String get cardExportPictogramCredit =>
+      'Pictures: Mulberry Symbols (CC BY-SA 4.0)';
+
+  @override
+  String get cardExportEmojiCredit => 'Pictures: Twemoji (CC BY 4.0)';
+
+  @override
+  String cardExportPerPage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cards',
+      one: '$count card',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportFormatRow => 'Format';
+
+  @override
+  String get cardExportLayoutSection => 'Layout';
+
+  @override
+  String get cardExportStyleSection => 'Style';
+
+  @override
+  String get cardExportOrientationRow => 'Paper orientation';
+
+  @override
+  String get cardExportOrientationSheetTitle =>
+      'How should the paper be laid out?';
+
+  @override
+  String get cardExportOrientationPortrait => 'Portrait';
+
+  @override
+  String get cardExportOrientationLandscape => 'Landscape';
+
+  @override
+  String get cardExportPerPageRow => 'Per page';
+
+  @override
+  String get cardExportCardSizeRow => 'Card size';
+
+  @override
+  String get cardExportCardSizeSheetTitle => 'How big should the cards be?';
+
+  @override
+  String get cardExportCardSizeFit => 'Fill the page';
+
+  @override
+  String get cardExportCardSizeMedium => 'Medium';
+
+  @override
+  String get cardExportCardSizeSmall => 'Small';
+
+  @override
+  String get cardExportProLayoutLocked => 'This format is available with Pro';
+
+  @override
+  String get cardExportUpsellTitle => 'With Pro, save it your way';
+
+  @override
+  String get cardExportUpsellBody =>
+      'Pick a one-page routine, cut-out cards, several cards per page, landscape paper, and designs';
+
+  @override
+  String get modeSwitchToPurchase => 'Only a guardian can make purchases';
+
+  @override
+  String get planBenefitAiImageStyles => 'AI draws a picture for every card';
+
+  @override
+  String get planBenefitAdsRemoved => 'Use it without ads';
+
+  @override
+  String get planBenefitWeeklyReport => 'Get a weekly report';
+
+  @override
+  String get planBenefitRoutineSchedule =>
+      'Pick days and times and send every day';
+
+  @override
+  String get planBenefitRoutineMemory => 'Remember how I edit things';
+
+  @override
+  String get planBenefitGuardianVoice => 'Read cards aloud in your own voice';
+
+  @override
+  String get planBenefitFreeRoutineText => 'Routine text is free of credits';
+
+  @override
+  String get planBenefitFreeImageRegenerate =>
+      'Redraw a picture you don\'t like without credits';
+
+  @override
+  String get planBenefitMoreWeeklyCredits => 'Get more credits every week';
+
+  @override
+  String get planBenefitMoreMonthlyCredits => 'Get more credits every month';
+
+  @override
+  String get planBenefitCardExportWithoutWatermark =>
+      'Clean printouts with no strip at the bottom';
+
+  @override
+  String get planBenefitCardExportAllThemes => 'Choose from every print design';
+
+  @override
+  String get planBenefitCardExportAllLayouts =>
+      'Print a one-page routine or cut-out cards';
+
+  @override
+  String get planKeepContentNotice =>
+      'Routines and pictures you made stay even after Pro ends';
+
+  @override
+  String get planPeriodMonthly => '1 month';
+
+  @override
+  String get planPeriodYearly => '1 year';
+
+  @override
+  String get planSubscribe => 'Start subscription';
+
+  @override
+  String get planPriceLoading => 'Loading prices';
+
+  @override
+  String get planPriceFailed => 'Couldn\'t load prices';
+
+  @override
+  String get planRestore => 'Restore purchases';
+
+  @override
+  String get planTermsOfUse => 'Terms of Use';
+
+  @override
+  String get planPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get planManageSubscription => 'Manage subscription';
+
+  @override
+  String get planLegalBillingAppStore =>
+      'Payment is charged to your Apple ID account when you confirm the purchase. The subscription renews automatically at the same length and price unless you cancel at least 24 hours before the period ends, and your account is charged for the next period within 24 hours before it ends.';
+
+  @override
+  String get planLegalCancelAppStore =>
+      'You can manage and cancel your subscription in Settings > Apple ID > Subscriptions on your device. After you cancel, you can use Pro until the end of the paid period.';
+
+  @override
+  String get planLegalBillingPlayStore =>
+      'Payment is charged to your Google Play account when you confirm the purchase. The subscription renews automatically at the same length and price until you cancel.';
+
+  @override
+  String get planLegalCancelPlayStore =>
+      'You can manage and cancel your subscription in the Google Play Store under Payments & subscriptions > Subscriptions. After you cancel, you can use Pro until the end of the paid period.';
+
+  @override
+  String planTrialDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '$count day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '$count week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count months',
+      one: '$count month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planTrialYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count years',
+      one: '$count year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planStartFreeTrial(String trial) {
+    return 'Start $trial free';
+  }
+
+  @override
+  String planTrialEndsNotice(String date, String price) {
+    return 'Your free trial ends on $date. If you don\'t cancel, you\'ll be charged $price from that day.';
+  }
+
+  @override
+  String get planLegalTrialAppStore =>
+      'If you cancel at least 24 hours before the free trial ends, you won\'t be charged.';
+
+  @override
+  String get planLegalTrialPlayStore =>
+      'If you cancel during the free trial, you won\'t be charged.';
+
+  @override
+  String get planVerifying => 'Confirming your payment';
+
+  @override
+  String get planStorePendingTitle => 'Payment approval requested';
+
+  @override
+  String get planStorePendingBody =>
+      'Pro turns on once it\'s approved. You can close this screen';
+
+  @override
+  String get planVerificationPendingTitle => 'Confirming your payment';
+
+  @override
+  String get planVerificationPendingBody =>
+      'You don\'t need to pay again. We\'ll check once more when you reopen the app';
+
+  @override
+  String get planVerificationRetry => 'Check again';
+
+  @override
+  String get planActivatedStart => 'Get started';
+
+  @override
+  String get planActivatedTitle => 'Pro has started';
+
+  @override
+  String get planNotActivatedTitle => 'Pro isn\'t on yet';
+
+  @override
+  String get planNotActivatedBody =>
+      'Please check your subscription status in the store';
+
+  @override
+  String get planAlreadyProTitle => 'You\'re using Pro';
+
+  @override
+  String get planPurchaseFailedTitle => 'Couldn\'t complete the payment';
+
+  @override
+  String get planVerifyFailedTitle =>
+      'Couldn\'t link the payment to this account';
+
+  @override
+  String get planAccountFailedTitle => 'Couldn\'t check your account';
+
+  @override
+  String get planFailedFallback => 'Please try again in a moment';
+
+  @override
+  String get planRestoreDone => 'Pro is back';
+
+  @override
+  String get planRestoreNothing => 'There\'s no subscription to restore';
+
+  @override
+  String get planRestoreFailedTitle => 'Couldn\'t restore your purchase';
+
+  @override
+  String get planRestoring => 'Checking your purchases';
+
+  @override
+  String get planManageFailed => 'Couldn\'t open subscription management';
+
+  @override
+  String get planLinkFailed => 'Couldn\'t open the link';
+
+  @override
+  String get planSettingsLabel => 'My plan';
+
+  @override
+  String get planStatusFree => 'Free';
+
+  @override
+  String get planStatusPro => 'Pro';
+
+  @override
+  String planStatusRenewing(String date) {
+    return 'Pro, renews on $date';
+  }
+
+  @override
+  String planStatusUntil(String date) {
+    return 'Pro, until $date';
+  }
+
+  @override
+  String planStatusCancelScheduled(String date) {
+    return 'Pro, ends on $date';
+  }
+
+  @override
+  String get planStatusGracePeriod => 'Pro, payment needs checking';
+
+  @override
+  String planStatusTrial(int days) {
+    return 'Pro trial, $days days left';
+  }
+
+  @override
+  String get planStatusTrialLastDay => 'Pro trial, ends today';
+
+  @override
+  String get planStatusGift => 'Pro gift';
+
+  @override
+  String planStatusGiftUntil(String date) {
+    return 'Pro gift, until $date';
+  }
+
+  @override
+  String planStatusRenewingFooter(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String planStatusUntilFooter(String date) {
+    return 'You can use it until $date';
+  }
+
+  @override
+  String planStatusCancelScheduledFooter(String date) {
+    return 'Ends on $date';
+  }
+
+  @override
+  String get planStatusGracePeriodFooter => 'Please check your payment method';
+
+  @override
+  String get planLearnPro => 'Learn about Pro';
+
+  @override
+  String get weeklyReportTitle => 'Weekly report';
+
+  @override
+  String weeklyReportWeekRange(
+    int startMonth,
+    int startDay,
+    int endMonth,
+    int endDay,
+  ) {
+    return '$startMonth/$startDay - $endMonth/$endDay';
+  }
+
+  @override
+  String weeklyReportThisWeekRange(String range) {
+    return 'This week · $range';
+  }
+
+  @override
+  String get weeklyReportPreviousWeek => 'View last week';
+
+  @override
+  String get weeklyReportNextWeek => 'View next week';
+
+  @override
+  String get weeklyReportCompletionLabel => 'Routines completed';
+
+  @override
+  String weeklyReportPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String weeklyReportCompletionSummary(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: 'Finished $completed of $sent routines sent',
+      one: 'Finished $completed of $sent routine sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportDayNone => '-';
+
+  @override
+  String weeklyReportDayCount(int completed, int sent) {
+    return '$completed/$sent';
+  }
+
+  @override
+  String get weeklyReportStars => 'Stars earned';
+
+  @override
+  String get weeklyReportRewards => 'Routines that reached a reward';
+
+  @override
+  String get weeklyReportStreak => 'Days finished in a row';
+
+  @override
+  String weeklyReportCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count',
+      one: '$count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '$count day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportRoutinesSection => 'By routine';
+
+  @override
+  String weeklyReportRoutineValue(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: 'Finished $completed of $sent times',
+      one: 'Finished $completed of $sent time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportRemainingSection => 'Cards often left undone';
+
+  @override
+  String weeklyReportRemainingLabel(String routine, String step) {
+    return '$routine · $step';
+  }
+
+  @override
+  String weeklyReportTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '$count time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportEmptyTitle => 'No routines were sent this week';
+
+  @override
+  String get weeklyReportEmptyBody =>
+      'When you send routines, Elumi\'s finished records gather here';
+
+  @override
+  String get weeklyReportLoadFailed => 'Couldn\'t load the weekly report';
+
+  @override
+  String get weeklyReportNotIncluded =>
+      'The weekly report is available with Pro';
+
+  @override
+  String get weeklyReportShareImage => 'Image';
+
+  @override
+  String get weeklyReportSharePdf => 'PDF';
+
+  @override
+  String get weeklyReportShareFailed => 'Couldn\'t create the page to send';
+
+  @override
+  String weeklyReportShareTitle(String name) {
+    return '$name\'s week';
+  }
+
+  @override
+  String get weeklyReportShareNote =>
+      'Counted from the completion records in the Elumi app';
+
+  @override
+  String get weeklyReportRecordSection => 'This week\'s record';
+
+  @override
+  String get weeklyReportDonutLabel => 'Completion rate';
+
+  @override
+  String weeklyReportDonutSummary(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDonutSemantics(int percent, int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other:
+          'Completion rate $percent percent, $completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportDaysSection => 'Daily record';
+
+  @override
+  String weeklyReportDayBarSemantics(String weekday, int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$weekday: $completed of $sent routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeklyReportDayBarEmptySemantics(String weekday) {
+    return '$weekday: no routines sent';
+  }
+
+  @override
+  String get weeklyReportTrendSection => 'Compared with past weeks';
+
+  @override
+  String weeklyReportTrendWeekLabel(int month, int day) {
+    return '$month/$day';
+  }
+
+  @override
+  String weeklyReportTrendPointSemantics(int month, int day, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Week of $month/$day: $count routines done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportInsightHighlightTitle => 'What went well';
+
+  @override
+  String weeklyReportInsightHighlightFirst(String routine, String batchim) {
+    return 'Finished $routine all the way for the first time this week';
+  }
+
+  @override
+  String weeklyReportInsightHighlightEvery(
+    String routine,
+    String batchim,
+    int count,
+  ) {
+    return 'Finished $routine all the way every one of $count times';
+  }
+
+  @override
+  String weeklyReportInsightHighlightStreak(int days) {
+    return 'Finished routines $days days in a row';
+  }
+
+  @override
+  String weeklyReportInsightHighlightHint(String name) {
+    return 'Tell $name today';
+  }
+
+  @override
+  String get weeklyReportInsightStuckTitle => 'Where they often stop';
+
+  @override
+  String weeklyReportInsightStuckLine(
+    String routine,
+    String step,
+    int sent,
+    int remained,
+  ) {
+    return 'Stopped at $step in $routine $remained of $sent times';
+  }
+
+  @override
+  String get weeklyReportInsightStuckShorten =>
+      'You could shorten the card text or split it into two';
+
+  @override
+  String get weeklyReportInsightStuckAddMedia =>
+      'You could add a voice or a photo';
+
+  @override
+  String weeklyReportInsightStuckFix(String step) {
+    return 'Edit the $step card';
+  }
+
+  @override
+  String get weeklyReportInsightStuckFixFailed =>
+      'Couldn\'t open the routine to edit';
+
+  @override
+  String get weeklyReportInsightTrendTitle => 'Changes from last week';
+
+  @override
+  String weeklyReportInsightTrendUp(int before, int after) {
+    return 'Finished routines went up from $before to $after';
+  }
+
+  @override
+  String weeklyReportInsightTrendDown(int before, int after) {
+    return 'Finished routines went from $before to $after';
+  }
+
+  @override
+  String weeklyReportInsightTrendSame(int after) {
+    return 'Finished $after again, same as last week';
+  }
+
+  @override
+  String weeklyReportInsightTrendBarPrevious(int count) {
+    return 'Last week $count';
+  }
+
+  @override
+  String weeklyReportInsightTrendBarCurrent(int count) {
+    return 'This week $count';
+  }
+
+  @override
+  String get weeklyReportInsightDurationTitle => 'Time taken';
+
+  @override
+  String weeklyReportInsightDurationLine(
+    String routine,
+    int before,
+    int after,
+  ) {
+    return 'Time for $routine went from $before min to $after min';
+  }
+
+  @override
+  String get weeklyReportInsightSlowestTitle => 'Card they stayed on longest';
+
+  @override
+  String weeklyReportInsightSlowestLine(
+    String routine,
+    String step,
+    int minutes,
+  ) {
+    return 'Stayed $minutes min on average at $step in $routine';
+  }
+
+  @override
+  String get weeklyReportStatCompleted => 'Routines finished';
+
+  @override
+  String get weeklyReportStatRemaining => 'Cards left';
+
+  @override
+  String weeklyReportRoutineRatio(int sent, int completed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sent,
+      locale: localeName,
+      other: '$completed of $sent times',
+      one: '$completed of $sent time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportSave => 'Save report';
+
+  @override
+  String get weeklyReportSaveSheetTitle =>
+      'How would you like to save the report?';
+
+  @override
+  String get weeklyReportPastReports => 'View past reports';
+
+  @override
+  String get weeklyReportPastSheetTitle => 'Past reports';
+
+  @override
+  String weeklyReportPastWeekValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Finished $count routines',
+      one: 'Finished $count routine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportPastEmpty => 'No past reports yet';
+
+  @override
+  String get weeklyReportPastLoadFailed => 'Couldn\'t load past reports';
+
+  @override
+  String get weeklyReportFreePreviewNote => 'Your first report is on us';
+
+  @override
+  String get routineScheduleRowOff => 'Set days and time';
+
+  @override
+  String get routineScheduleRowLabel => 'Repeat days and time';
+
+  @override
+  String routineScheduleSummary(String days, String time) {
+    return '$days $time';
+  }
+
+  @override
+  String get routineScheduleEveryDay => 'Every day';
+
+  @override
+  String get routineScheduleWeekdaysOnly => 'Weekdays';
+
+  @override
+  String get routineScheduleWeekendOnly => 'Weekends';
+
+  @override
+  String get routineScheduleDaySeparator => '·';
+
+  @override
+  String get routineSchedulePaused => 'Paused because Pro ended';
+
+  @override
+  String get routineSchedulePausedNote =>
+      'Repeating paused because Pro ended. Your days and time are still saved';
+
+  @override
+  String get routineScheduleSheetTitle => 'When should it happen?';
+
+  @override
+  String get routineScheduleSheetBody =>
+      'On each day you pick, this routine goes to today\'s routines';
+
+  @override
+  String get routineScheduleDaysLabel => 'Days';
+
+  @override
+  String get routineScheduleTimeLabel => 'Time';
+
+  @override
+  String get routineScheduleNotifyElumi =>
+      'Notify Elumi\'s device at that time';
+
+  @override
+  String get routineScheduleElumiNotificationOff =>
+      'Notifications are off on Elumi\'s device';
+
+  @override
+  String get routineScheduleElumiNotificationOffHint =>
+      'Turn on Elumi notifications in the settings of Elumi\'s device';
+
+  @override
+  String get routineScheduleElumiNoDevice =>
+      'Once you connect Elumi\'s device, it gets a notification at that time';
+
+  @override
+  String get routineScheduleSave => 'Save';
+
+  @override
+  String get routineScheduleTurnOff => 'Turn off repeat';
+
+  @override
+  String get routineScheduleSavedToast => 'Saved the days and time';
+
+  @override
+  String get routineScheduleTurnedOffToast => 'Turned off repeat';
+
+  @override
+  String get routineScheduleSaveFailedTitle => 'Couldn\'t save';
+
+  @override
+  String get routineScheduleSaveFailedFallback =>
+      'Please try again in a moment';
+
+  @override
+  String get routineSchedulePickDayHint => 'Please choose at least one day';
+
+  @override
+  String get routineScheduleProNote =>
+      'Repeating routines can be saved with Pro';
+
+  @override
+  String get weeklyPlanEntry => 'Weekly plan';
+
+  @override
+  String get weeklyPlanTitle => 'Weekly plan';
+
+  @override
+  String weeklyPlanDayTitle(String weekday) {
+    return '$weekday';
+  }
+
+  @override
+  String get weeklyPlanToday => 'Today';
+
+  @override
+  String get weeklyPlanEmptyDay => 'No routines planned';
+
+  @override
+  String get weeklyPlanEmptyTitle => 'No routines have days set yet';
+
+  @override
+  String get weeklyPlanEmptyBody =>
+      'In Manage routines, tap a routine and set its days and time';
+
+  @override
+  String get weeklyPlanLoadFailed => 'Couldn\'t load the weekly plan';
+
+  @override
+  String get weeklyPlanNotifyOff => 'No notification';
+
+  @override
+  String get weeklyPlanMetaSeparator => ' · ';
+
+  @override
+  String get guardianVoiceRecordAction => 'Record in my voice';
+
+  @override
+  String get guardianVoiceRecordHint =>
+      'When a card is tapped, this voice plays';
+
+  @override
+  String guardianVoiceRecording(int seconds) {
+    return 'Recording ${seconds}s';
+  }
+
+  @override
+  String guardianVoiceRecordingLimit(int seconds) {
+    return 'Records up to ${seconds}s';
+  }
+
+  @override
+  String get guardianVoiceStop => 'Stop';
+
+  @override
+  String get guardianVoiceSaving => 'Saving your recording';
+
+  @override
+  String get guardianVoiceSaved => 'Recorded';
+
+  @override
+  String get guardianVoicePlay => 'Listen';
+
+  @override
+  String get guardianVoiceRerecord => 'Record again';
+
+  @override
+  String get guardianVoiceDelete => 'Delete';
+
+  @override
+  String get guardianVoiceDeleteConfirmTitle => 'Delete the recording?';
+
+  @override
+  String get guardianVoiceDeleteConfirmMessage =>
+      'If you delete it, the default voice reads the card';
+
+  @override
+  String get guardianVoicePlanEnded => 'Reading in the default voice';
+
+  @override
+  String get guardianVoiceMicDeniedTitle => 'The microphone is off';
+
+  @override
+  String get guardianVoiceMicDeniedBody =>
+      'Until you turn it on, the default voice reads the card';
+
+  @override
+  String get guardianVoiceOpenSettings => 'Open settings';
+
+  @override
+  String get guardianVoiceFailedTitle => 'Couldn\'t save the recording';
+
+  @override
+  String get guardianVoiceRetry => 'Try again';
+
+  @override
+  String get guardianVoiceTooShort => 'That\'s too short. Speak, then tap Stop';
+
+  @override
+  String get guardianVoiceRecordFailed => 'Couldn\'t record. Please try again';
+
+  @override
+  String get guardianVoiceTooLarge =>
+      'The recording is too large. Please record a shorter one';
+
+  @override
+  String get guardianVoicePlayFailed => 'Couldn\'t play the recording';
+
+  @override
+  String get guardianVoiceDeleteFailed => 'Couldn\'t delete the recording';
+
+  @override
+  String get guardianVoiceRecordChip => 'Record';
+
+  @override
+  String get guardianVoicePlanEndedHint =>
+      'Your recording is kept even after Pro ends';
+
+  @override
+  String get guardianSettingsRoutineMemory => 'AI memory';
+
+  @override
+  String memoryHeroTitle(String name) {
+    return '$name AI memory';
+  }
+
+  @override
+  String get memoryHeroBody =>
+      'It remembers how you edit and makes your next routines that way. Only you can see it';
+
+  @override
+  String get memoryStatApplied => 'In use';
+
+  @override
+  String get memoryStatWatching => 'Watching';
+
+  @override
+  String get memoryStatEdits => 'Edit history';
+
+  @override
+  String get memoryListAppliedHeader => 'Rules in use';
+
+  @override
+  String get memoryListAppliedHint => 'Used for new routines';
+
+  @override
+  String get memoryListWatchingHeader => 'Rules being watched';
+
+  @override
+  String get memoryListWatchingHint => 'Applied once the dots fill up';
+
+  @override
+  String get memoryListEditsHeader => 'Edited and sent';
+
+  @override
+  String memoryRuleByAi(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count routines',
+      one: '$count routine',
+    );
+    return 'Found by AI, $_temp0';
+  }
+
+  @override
+  String get memoryRuleByMe => 'Written by me';
+
+  @override
+  String memoryEditCards(int before, int after) {
+    return '$before → $after cards';
+  }
+
+  @override
+  String memoryEditTexts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count texts',
+      one: '$count text',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryAddRule => '+ Write a rule';
+
+  @override
+  String get memoryAutoFind => 'Find from my edits automatically';
+
+  @override
+  String memoryAutoFindNote(int count) {
+    return 'Applied when the same edit repeats in $count routines';
+  }
+
+  @override
+  String get memoryEmptyTitle =>
+      'When you edit and send routines, they gather here';
+
+  @override
+  String get memoryEmptyEdits => 'No edited routines have been sent yet';
+
+  @override
+  String get memoryTypeWord => 'Replace a word';
+
+  @override
+  String get memoryTypeSplit => 'Split a card';
+
+  @override
+  String get memoryTypeMerge => 'Merge cards';
+
+  @override
+  String get memoryTypeAdd => 'Add a card';
+
+  @override
+  String get memoryTypeRemove => 'Remove a card';
+
+  @override
+  String get memoryTypeManual => 'Rule I wrote';
+
+  @override
+  String get memoryApplyNow => 'Apply now';
+
+  @override
+  String get memoryRuleDelete => 'Delete';
+
+  @override
+  String get memoryRuleEdit => 'Edit';
+
+  @override
+  String memoryEvidenceLine(String routine, int month, int day) {
+    return '$routine, $month/$day';
+  }
+
+  @override
+  String get memoryMenuLabel => 'Menu';
+
+  @override
+  String get memoryMenuExport => 'Export as a file';
+
+  @override
+  String get memoryMenuClear => 'Clear all memory';
+
+  @override
+  String get memoryExportFailed => 'Couldn\'t export your memory';
+
+  @override
+  String get memoryObsTitle => 'AI memory';
+
+  @override
+  String get memoryObsWord => 'You changed a word like this';
+
+  @override
+  String get memoryObsSplit => 'You split a card';
+
+  @override
+  String get memoryObsMerge => 'You merged cards';
+
+  @override
+  String get memoryObsAdd => 'You added a card';
+
+  @override
+  String get memoryObsRemove => 'You removed a card';
+
+  @override
+  String get memoryObsManual => 'You edited it like this';
+
+  @override
+  String memoryObsAsk(String phrase) {
+    return '$phrase. Should we do this in the next routine too?';
+  }
+
+  @override
+  String get memoryObsAlways => 'Always do this';
+
+  @override
+  String get memoryObsOnce => 'Just this time';
+
+  @override
+  String get memoryObsDone => 'From the next routine, we\'ll make it this way';
+
+  @override
+  String memoryObsMore(int count) {
+    return 'See $count more in AI memory';
+  }
+
+  @override
+  String memoryAppliedPill(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count AI memory rules applied',
+      one: '$count AI memory rule applied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineMemoryAddSheetTitle => 'Add a note';
+
+  @override
+  String get routineMemoryEditSheetTitle => 'Edit note';
+
+  @override
+  String get routineMemoryLineHint =>
+      'e.g. Write \'wipe hands\' instead of \'wash up\'';
+
+  @override
+  String get routineMemorySave => 'Save';
+
+  @override
+  String get routineMemoryDeleteLine => 'Delete this line';
+
+  @override
+  String get routineMemoryClearConfirmTitle => 'Delete all notes?';
+
+  @override
+  String get routineMemoryClearConfirmMessage =>
+      'Deleted notes can\'t be brought back.';
+
+  @override
+  String get routineMemoryClearConfirmAction => 'Delete all';
+
+  @override
+  String get routineMemoryLoadFailed => 'Couldn\'t load notes';
+
+  @override
+  String get routineMemorySaveFailedTitle => 'Couldn\'t save the note';
+
+  @override
+  String get routineMemorySaveFailedFallback => 'Please try again in a moment.';
+
+  @override
+  String get proTeaserSampleLabel => 'Example screen';
+
+  @override
+  String get proOnlyNoticeTitle => 'This feature is available with Pro';
+
+  @override
+  String get proTeaserWeeklyReportBenefit =>
+      'Send a one-page summary of the routines done over the week';
+
+  @override
+  String get proTeaserRoutineMemoryBenefit =>
+      'Remember how you edit so the next routines fit better';
+
+  @override
+  String get proTeaserCardThemeBenefit =>
+      'Get printable cards in several designs';
+
+  @override
+  String get proTeaserWeeklyPlanBenefit =>
+      'No need to send the routine again every morning';
+
+  @override
+  String get proTeaserSampleRoutineMorning => 'Getting ready in the morning';
+
+  @override
+  String get proTeaserSampleRoutineBrush => 'Brush teeth';
+
+  @override
+  String get proTeaserSampleRoutineBag => 'Pack your bag';
+
+  @override
+  String get proTeaserSampleStepSocks => 'Put on socks';
+
+  @override
+  String get proTeaserSampleMemoryShort => 'Write card text short, in one line';
+
+  @override
+  String get proTeaserSampleMemoryOrder => 'Start getting dressed with socks';
+
+  @override
+  String get proTeaserSampleMemoryReward => 'Choose stickers as the reward';
+
+  @override
+  String get cardRegenerateChip => 'Redraw';
+
+  @override
+  String get cardRegenerateSheetTitle => 'Redraw the picture?';
+
+  @override
+  String cardRegenerateCostProFree(int count) {
+    return 'No credits, $count left today';
+  }
+
+  @override
+  String get cardRegenerateCostFree => 'Doesn\'t use credits';
+
+  @override
+  String cardRegenerateCostCredits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credits',
+      one: '$count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditCostCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count',
+      one: '$count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardRegenerateCostUnknown => 'Uses credits';
+
+  @override
+  String get cardRegenerateConfirm => 'Redraw';
+
+  @override
+  String get cardRegenerateInProgress => 'Redrawing the picture';
+
+  @override
+  String get cardRegenerateFailedTitle => 'Couldn\'t redraw the picture';
+
+  @override
+  String get cardFirstDrawChip => 'Draw AI picture';
+
+  @override
+  String get cardRedrawProChip => 'Redraw with Pro';
+
+  @override
+  String get cardFirstDrawProChip => 'Draw AI picture with Pro';
+
+  @override
+  String get cardFirstDrawSheetTitle => 'Draw an AI picture?';
+
+  @override
+  String get cardRedrawSheetBody =>
+      'Write or pick what you\'d like to change. Leave it blank to redraw as is';
+
+  @override
+  String get cardFirstDrawSheetBody =>
+      'Write or pick what you\'d like. You can choose after seeing the new picture';
+
+  @override
+  String get cardRedrawRequestLabel => 'What to change';
+
+  @override
+  String get cardRedrawRequestHint => 'e.g. Make the umbrella blue';
+
+  @override
+  String get cardRedrawHintSimpler => 'Simpler';
+
+  @override
+  String get cardRedrawHintNoBackground => 'No background';
+
+  @override
+  String get cardRedrawHintNoPeople => 'No people';
+
+  @override
+  String get cardRedrawHintBrighter => 'Brighter';
+
+  @override
+  String get cardFirstDrawConfirm => 'Draw';
+
+  @override
+  String get cardFirstDrawInProgress => 'Drawing the picture';
+
+  @override
+  String get cardFirstDrawFailedTitle => 'Couldn\'t draw the AI picture';
+
+  @override
+  String get cardRedrawFailedFallback =>
+      'Want to try again? No credits were used';
+
+  @override
+  String get cardCandidateSheetTitle => 'Which picture would you like?';
+
+  @override
+  String get cardCandidateSheetBody =>
+      'Only the picture you choose is shown to Elumi';
+
+  @override
+  String get cardCandidateCurrentLabel => 'Current';
+
+  @override
+  String get cardCandidateNewLabel => 'New';
+
+  @override
+  String get cardCandidateSelectButton => 'Use this picture';
+
+  @override
+  String get cardCandidateAppliedToast => 'Changed to the new picture';
+
+  @override
+  String get cardCandidateLoadFailedTitle => 'Couldn\'t load the new picture';
+
+  @override
+  String get cardCandidateApplyFailedTitle =>
+      'Couldn\'t change to the new picture';
+
+  @override
+  String get planHeroHeadline => 'Cards made just for Elumi';
+
+  @override
+  String get planHeroSubline =>
+      'Make the same routine with Pro and it looks like this';
+
+  @override
+  String get planHeroFreeTag => 'Free emoji';
+
+  @override
+  String get planHeroProTag => 'Pro character picture';
+
+  @override
+  String get planHeroCompareSemantics =>
+      'Free gives emoji cards, Pro gives character picture cards';
+
+  @override
+  String planBenefitGroupCards(String elumiName) {
+    return 'Card pictures made just for $elumiName';
+  }
+
+  @override
+  String get planBenefitGroupRoutines => 'Routines send themselves';
+
+  @override
+  String get planBenefitGroupWeek => 'We sum up the week for you';
+
+  @override
+  String get planBenefitGroupExtra => 'A little more room';
+
+  @override
+  String planYearlySaving(int percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String planMonthlyEquivalent(String price) {
+    return 'About $price a month';
+  }
+
+  @override
+  String get planRenewsYearly => 'Renews every year';
+
+  @override
+  String get planRenewsMonthly => 'Renews every month';
+
+  @override
+  String planPriceUnit(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'yearly': '/year',
+      'other': '/month',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
+    return 'After $trial, $price$unit is charged automatically. Cancel at least a day before it ends to avoid being charged';
+  }
+
+  @override
+  String planCtaTrialNoticePlayStore(String trial, String price, String unit) {
+    return 'After $trial, $price$unit is charged automatically. Cancel during the trial to avoid being charged';
+  }
+
+  @override
+  String planCtaRenewNotice(String price, String unit) {
+    return 'Renews automatically at $price$unit. Cancel anytime';
+  }
+
+  @override
+  String planTryFreeTrial(String trial) {
+    return 'Try $trial free';
+  }
+
+  @override
+  String get planSeeAllBenefits => 'See all Pro benefits';
+
+  @override
+  String get planTierGift => 'Gift';
+
+  @override
+  String get proTeaserWeeklyPlanTitle =>
+      'Set the days and time, and that day\'s routine is ready';
+
+  @override
+  String get proTeaserWeeklyReportTitle => 'Get the whole week on one page';
+
+  @override
+  String get proTeaserRoutineMemoryTitle => 'Remember what works for Elumi';
+
+  @override
+  String get proTeaserCardThemeTitle => 'Get prettier printable cards';
+
+  @override
+  String get proTeaserCardLayoutTitle => 'Get printable cards your way';
+
+  @override
+  String get proTeaserCardLayoutBenefit =>
+      'Choose several cards per page, landscape paper, or a one-page routine';
+
+  @override
+  String get homeSuggestionDismissLabel => 'No thanks';
+
+  @override
+  String get homeSuggestionAutoSendTitle => 'Send it automatically every day?';
+
+  @override
+  String homeSuggestionAutoSendBody(String routine, String batchim, int days) {
+    return 'You\'ve sent $routine $days days in a row';
+  }
+
+  @override
+  String get homeSuggestionAutoSendAction => 'Set up';
+
+  @override
+  String get homeSuggestionTalkShareTitle => 'Share it in Stories?';
+
+  @override
+  String homeSuggestionTalkShareBody(String routine, String batchim) {
+    return 'Other guardians can use $routine too';
+  }
+
+  @override
+  String get homeSuggestionTalkShareAction => 'Share';
+
+  @override
+  String get homeSuggestionCreateMoreTitle => 'Make another routine?';
+
+  @override
+  String get homeSuggestionCreateMoreBody =>
+      'How about one for the evening or bedtime?';
+
+  @override
+  String get homeSuggestionCreateMoreAction => 'Create';
+
+  @override
+  String get cardSplitChip => 'Make this card easier';
+
+  @override
+  String get cardSplitLoading => 'Splitting it into easier steps';
+
+  @override
+  String get cardSplitSheetTitle => 'Split it like this?';
+
+  @override
+  String cardSplitSheetDescription(String title, int count) {
+    return 'We split “$title” into $count smaller steps';
+  }
+
+  @override
+  String get cardSplitAlreadyShortDescription =>
+      'It is already one action, so we left it as is';
+
+  @override
+  String get cardSplitDefaultPictureNote =>
+      'Cards get the default picture. You can change it later';
+
+  @override
+  String get cardSplitKeepButton => 'Keep as is';
+
+  @override
+  String get cardSplitApplyButton => 'Split like this';
+
+  @override
+  String get cardSplitAlreadyShort => 'It\'s already short enough';
+
+  @override
+  String get cardSplitFailedFallback =>
+      'We couldn\'t split the card. Please try again in a moment';
+
+  @override
+  String get cardSplitRetry => 'Try again';
+
+  @override
+  String cardSplitDoneToast(int count) {
+    return 'Split the card into $count';
+  }
+
+  @override
+  String get planBenefitCardSplit => 'Splits one card into smaller ones';
 }

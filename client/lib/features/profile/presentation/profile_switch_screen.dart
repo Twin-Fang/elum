@@ -68,7 +68,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen>
       onBack: context.popOrHome,
       isBackEnabled: !busy,
       title: context.l10n.profileSwitchTitle,
-      backTop: 67,
+      backTop: ElumScaffold.settingsBackTop,
       horizontalPadding: 16,
       child: _content(async, active),
     );

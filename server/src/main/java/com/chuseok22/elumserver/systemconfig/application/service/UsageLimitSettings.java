@@ -45,6 +45,11 @@ public class UsageLimitSettings {
     return integerReader.applyAsInt(ConfigKey.ROUTINE_STEP_IMAGE_LIMIT_PER_10_MINUTES);
   }
 
+  /// 다시 그리기 무료 권한의 하루 무료 횟수 (0 이면 무료 없음)
+  public int imageRegenerateFreeDailyCap() {
+    return integerReader.applyAsInt(ConfigKey.IMAGE_REGENERATE_FREE_DAILY_CAP);
+  }
+
   public int feedbackDailyLimit() {
     return integerReader.applyAsInt(ConfigKey.FEEDBACK_DAILY_LIMIT);
   }

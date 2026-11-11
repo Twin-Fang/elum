@@ -19,7 +19,7 @@ public record RoutineResponse(
   @Schema(description = "일과 원문(마스킹 전)", example = "내일 오후 3시에 병원 가기")
   String rawInputText,
 
-  @Schema(description = "민감정보를 카테고리 태그로 치환한 텍스트(Gemini에 실제 전달된 값). 자동화 테스트가 없는 프로젝트 특성상, 마스킹이 실제로 적용됐는지 API 응답만으로 수동 검증할 수 있도록 노출한다.", example = "<이름>이랑 내일 오후 3시에 병원 가기")
+  @Schema(description = "AI 에 전달한 텍스트. 입력을 가공하지 않으므로 rawInputText 와 같다 (앱 호환으로 필드 유지)", example = "내일 오후 3시에 병원 가기")
   String sanitizedInputText,
 
   @Schema(description = "일과 수행 날짜/시각")
@@ -57,7 +57,8 @@ public record RoutineResponse(
   CreditUsage credit,
 
   @Schema(description = "카드 추가에서 그림을 만들지 않은 까닭 (#407). 그림을 요청했는데 크레딧이 모자라면 "
-    + "AI_CREDIT_INSUFFICIENT — 카드는 저장했다. 그 밖에는 null", example = "AI_CREDIT_INSUFFICIENT", nullable = true)
+    + "AI_CREDIT_INSUFFICIENT — 카드는 저장했다. 일과 만들기 응답은 AI 그림 일부를 못 그려 픽토그램으로 두면 "
+    + "AI_IMAGE_FAILED (#1172). 그 밖에는 null", example = "AI_CREDIT_INSUFFICIENT", nullable = true)
   String imageSkippedReason,
 
   /// 일과를 만든 보호자 ID. 응답에는 싣지 않는다 — forCaller 가 원문을 가릴지 판단하는 데만 쓴다.
@@ -112,8 +113,25 @@ public record RoutineResponse(
 
   @Schema(description = "이야기에서 가져와 만든 일과면 그 글 ID. 앱이 '이야기에서' 표시와 다시 나누기 막기에 쓴다. 아니면 null",
     nullable = true)
-  String talkPostId
+  String talkPostId,
+
+  @Schema(description = "이번 AI 일과 생성에 넣은 AI 메모리 규칙 수 (이 보호자의 적용 중 규칙). 일과 생성 응답에만 값이 있고 그 밖에는 0", example = "2")
+  int appliedMemoryRuleCount
 ) {
+
+  /// 메모리 규칙 수를 모르는 곳(일과 조회 등)의 생성자: 0
+  public RoutineResponse(String id, String title, String rawInputText, String sanitizedInputText,
+    LocalDateTime scheduledAt, String status, String revisionFeedback, LocalDateTime completedAt,
+    Integer completedStepCount, Integer totalStepCount, Integer progressPercent, String rewardText,
+    String rewardPresetKey, List<RoutineStepResponse> steps, CreditUsage credit, String imageSkippedReason,
+    String createdBy, Boolean createdByMe, String creatorName, String profileId, String language,
+    String sourceRoutineId, Boolean isExample, String groupId, Integer groupOrder, String sentGroupId,
+    String sentGroupName, Integer sentGroupOrder, Integer libraryOrder, String talkPostId) {
+    this(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback, completedAt,
+      completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps, credit,
+      imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, 0);
+  }
 
   /**
    * 생성 한 번의 크레딧 사용. 카드 확인 화면 머리의 "AI 그림 N장 · M크레딧 사용 · K 남음" 한 줄.
@@ -136,7 +154,15 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, appliedMemoryRuleCount);
+  }
+
+  /// 넣은 AI 메모리 규칙 수를 붙인 응답.
+  public RoutineResponse withAppliedMemoryRuleCount(int count) {
+    return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
+      completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, count);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
@@ -144,7 +170,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, reason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, appliedMemoryRuleCount);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답. 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -153,7 +179,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, appliedMemoryRuleCount);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -197,7 +223,7 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, null);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, null, appliedMemoryRuleCount);
   }
 
   /// 만든 사람 이름을 붙인 응답.
@@ -205,14 +231,14 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, appliedMemoryRuleCount);
   }
 
   private RoutineResponse withCreatedByMe(Boolean mine) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language, sourceRoutineId, isExample,
-      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId);
+      groupId, groupOrder, sentGroupId, sentGroupName, sentGroupOrder, libraryOrder, talkPostId, appliedMemoryRuleCount);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -257,7 +283,8 @@ public record RoutineResponse(
       routine.getSentGroupName(),
       routine.getSentGroupOrder(),
       routine.getLibraryOrder(),
-      routine.getTalkPostId()
+      routine.getTalkPostId(),
+      0
     );
   }
 }

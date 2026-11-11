@@ -10,6 +10,7 @@ import 'core/dev/dev_log_file.dart';
 import 'core/dev/dev_server_store.dart';
 import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
+import 'core/notifications/routine_reminder_reset_hook.dart';
 import 'core/push/push_unregister_hook.dart';
 import 'core/push/firebase_bootstrap.dart';
 import 'core/server_address/assigned_server_address_store.dart';
@@ -27,6 +28,7 @@ import 'features/auth/data/oauth_sdk.dart';
 import 'features/guardian/presentation/widgets/library_group_tile.dart';
 import 'features/guardian/presentation/widgets/library_routine_tile.dart';
 import 'features/notification/application/push_token_registrar.dart';
+import 'features/reminder/application/routine_reminder_controller.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
 
@@ -142,6 +144,12 @@ Future<void> main() async {
           pushUnregisterProvider.overrideWith(
             (ref) =>
                 ref.read(pushTokenRegistrarProvider).unregisterBeforeSignOut,
+          ),
+          // 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 일과 알림 예약 취소 (부를 때마다 지금 알림 상태를 읽음)
+          routineReminderResetProvider.overrideWith(
+            (ref) => () => ref
+                .read(routineReminderProvider.notifier)
+                .forgetPreviousAccountReminders(),
           ),
           // 이야기 올리기·가져오기의 일과 그림 (이야기 화면이 일과관리 화면 층을 직접 모르므로 여기서 연결)
           routineThumbnailBuilderProvider.overrideWithValue(

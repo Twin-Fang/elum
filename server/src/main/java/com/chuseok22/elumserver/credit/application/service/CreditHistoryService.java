@@ -135,7 +135,8 @@ public class CreditHistoryService {
 
   /// 원장 한 줄 > 보이는 줄 0~2개 (일과 사용은 글·그림 두 줄로 나뉜다)
   private List<Entry> toEntries(AiCreditLedger line, Lookup lookup) {
-    if (line.getDelta() == 0) {
+    // 증감 0 은 숨김 (무료 다시 그리기·일과 글 무료 사용 줄만 예외 — 앱이 "무료"로 보임)
+    if (line.getDelta() == 0 && !isFreeUsageLine(line)) {
       return List.of();
     }
     return switch (line.getType()) {
@@ -148,6 +149,12 @@ public class CreditHistoryService {
         line.getCreatedAt()));
       default -> List.of();
     };
+  }
+
+  /// 0 짜리 사용 줄 2종: 무료 다시 그리기(IMAGE_REGENERATE), 일과 글 무료(ROUTINE_TEXT, #1110)
+  private static boolean isFreeUsageLine(AiCreditLedger line) {
+    return line.getType() == CreditLedgerType.CONSUME
+      && (line.getAction() == CreditAction.IMAGE_REGENERATE || line.getAction() == CreditAction.ROUTINE_TEXT);
   }
 
   private static CreditHistoryKind grantKind(AiCreditLedger line, Lookup lookup) {
@@ -175,6 +182,11 @@ public class CreditHistoryService {
     LocalDateTime settledAt = line.getCreatedAt();
 
     CreditJobKind jobKind = job == null ? null : job.getKind();
+    // 일과 글 무료 줄 (0): 글 한 줄을 작업 시작 시각으로 "무료" 표시, 그림 몫은 따로 남은 차감 줄이 보임
+    if (jobKind == CreditJobKind.ROUTINE_CREATE && charged == 0) {
+      LocalDateTime startedAt = job.getStartedAt() == null ? settledAt : job.getStartedAt();
+      return List.of(entry(line.getId() + ":text", CreditHistoryKind.ROUTINE_TEXT, title, null, 0, startedAt));
+    }
     if (jobKind == CreditJobKind.ROUTINE_CREATE) {
       int textCost = AiCreditPolicy.costFrom(job.getCostSnapshot(), CreditAction.ROUTINE_TEXT);
       int textPart = Math.min(charged, textCost);

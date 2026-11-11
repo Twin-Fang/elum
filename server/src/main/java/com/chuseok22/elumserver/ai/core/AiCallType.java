@@ -26,6 +26,19 @@ public enum AiCallType {
   CLAUDE_TEXT_CREATE("Claude 루틴 생성", AiCallPurpose.ROUTINE_CREATE, AiProvider.CLAUDE),
   CLAUDE_TEXT_QUESTION("Claude 추가 질문", AiCallPurpose.ROUTINE_QUESTION, AiProvider.CLAUDE),
   CLAUDE_TEXT_PICTOGRAM("Claude 픽토그램 선택", AiCallPurpose.PICTOGRAM_PICK, AiProvider.CLAUDE),
+  // 일과 번역 3종: 지운 기능. 새로 기록하지 않음, 저장된 호출 로그를 읽기 위해 남김
+  GEMINI_TEXT_TRANSLATE("Gemini 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.GEMINI),
+  OPENAI_TEXT_TRANSLATE("OpenAI 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.OPENAI),
+  CLAUDE_TEXT_TRANSLATE("Claude 일과 번역", AiCallPurpose.ROUTINE_TRANSLATE, AiProvider.CLAUDE),
+  GEMINI_TEXT_MEMORY("Gemini AI 메모리 수정 찾기", AiCallPurpose.ROUTINE_MEMORY, AiProvider.GEMINI),
+  OPENAI_TEXT_MEMORY("OpenAI AI 메모리 수정 찾기", AiCallPurpose.ROUTINE_MEMORY, AiProvider.OPENAI),
+  CLAUDE_TEXT_MEMORY("Claude AI 메모리 수정 찾기", AiCallPurpose.ROUTINE_MEMORY, AiProvider.CLAUDE),
+  GEMINI_TEXT_WEEKLY_REPORT("Gemini 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.GEMINI),
+  OPENAI_TEXT_WEEKLY_REPORT("OpenAI 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.OPENAI),
+  CLAUDE_TEXT_WEEKLY_REPORT("Claude 주간 리포트 정리", AiCallPurpose.WEEKLY_REPORT_SUMMARY, AiProvider.CLAUDE),
+  GEMINI_TEXT_CARD_SPLIT("Gemini 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.GEMINI),
+  OPENAI_TEXT_CARD_SPLIT("OpenAI 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.OPENAI),
+  CLAUDE_TEXT_CARD_SPLIT("Claude 카드 나누기", AiCallPurpose.CARD_SPLIT, AiProvider.CLAUDE),
   ;
 
   private final String label;

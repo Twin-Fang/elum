@@ -1,5 +1,10 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
+import static org.mockito.Mockito.verifyNoInteractions;
+import java.util.concurrent.atomic.AtomicReference;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.PictogramSet;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
@@ -76,7 +81,7 @@ class RoutineAiPipelineTest {
     routineAiPipeline = new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, PictogramCatalog.empty());
+      routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
   }
@@ -276,6 +281,21 @@ class RoutineAiPipelineTest {
   }
 
   @Test
+  @DisplayName("ko 일과는 AI 가 틀린 목적격 조사를 저장 전에 바로잡는다 — 이름을 되돌린 뒤의 문장 기준 (#1190)")
+  void generateForCreate_fixesObjectParticleInKorean() {
+    String json = "{\"title\":\"손 씻기\",\"steps\":["
+      + "{\"order\":1,\"title\":\"수도꼭지을 닫아요\",\"description\":\"물컵를 챙겨요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "손 씻기", "하늘", Set.of(), null, CharacterType.LULU, ImageStyle.PHOTO_ONLY, "profile-1"
+    );
+
+    assertThat(result.steps().get(0).title()).isEqualTo("수도꼭지를 닫아요");
+    assertThat(result.steps().get(0).description()).isEqualTo("물컵을 챙겨요");
+  }
+
+  @Test
   @DisplayName("이름이 비어 있으면 AI 가 쓴 이룸이를 그대로 둔다 (#374 E1)")
   void generateForCreate_blankNickname_keepsPlaceholder() {
     String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
@@ -338,16 +358,16 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("Gemini가 빈 steps를 반환하면 ROUTINE_STEP_LIMIT_EXCEEDED를 던진다")
-  void generateForCreate_emptySteps_throwsStepLimitExceeded() {
-    String json = "{\"title\":\"제목\",\"steps\":[]}";
+  @DisplayName("AI가 빈 steps를 반환하면 ROUTINE_INPUT_NOT_ACTIONABLE을 던진다 (실패가 아니라 입력 안내)")
+  void generateForCreate_emptySteps_throwsInputNotActionable() {
+    String json = "{\"title\":\"어떤 일과인지 알려 주세요\",\"steps\":[]}";
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
       routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
-        .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
+        .isEqualTo(ErrorCode.ROUTINE_INPUT_NOT_ACTIONABLE));
   }
 
   @Test
@@ -366,6 +386,7 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps()).hasSize(1);
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+    assertThat(result.failedImageCount()).isZero();
     verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
   }
 
@@ -387,6 +408,29 @@ class RoutineAiPipelineTest {
     // 이미지가 없으므로 저장은 아예 호출되지 않는다.
     verify(routineImageStorage, never()).save(any(), any(), any());
     verify(imageGenerationClient, times(2)).generateCardImage(any(), any());
+    // 깨지면: Pro 그림 실패가 응답에 표시되지 않고 조용히 픽토그램으로 바뀐다 (#1172)
+    assertThat(result.failedImageCount()).isEqualTo(1);
+  }
+
+  // 깨지면: 그림 키가 없을 때 카드마다 같은 실패를 재시도해 시간과 로그만 늘어난다 (#1172)
+  @Test
+  @DisplayName("그림 제공자 키가 없으면 재시도 없이 카드마다 그림 없이 저장하고 실패 수를 센다")
+  void generateForCreate_providerUnavailable_skipsRetryAndCountsFailures() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":["
+      + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"},"
+      + "{\"order\":2,\"title\":\"신발을 신어요\",\"description\":\"신발을 신어요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+    when(imageClientRouter.current())
+      .thenThrow(new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE, "provider=OPENAI"));
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, ImageStyle.CARTOON, "profile-1"
+    );
+
+    assertThat(result.steps()).extracting(RoutineAiPipeline.GeneratedStep::imagePath).containsOnlyNulls();
+    assertThat(result.failedImageCount()).isEqualTo(2);
+    // 카드당 1번만 (재시도 없음)
+    verify(imageClientRouter, times(2)).current();
   }
 
   @Test
@@ -500,7 +544,7 @@ class RoutineAiPipelineTest {
     return new RoutineAiPipeline(
       textClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage, catalog);
+      routineImageStorage, PictogramCatalogs.mulberryOnly(catalog));
   }
 
   private final PictogramCatalog catalog =
@@ -574,5 +618,47 @@ class RoutineAiPipelineTest {
 
     assertThat(steps).hasSize(1);
     assertThat(steps.get(0).pictogramId()).isNull();
+  }
+
+  // ── 이모지 그림 방식 (#1149) ────────────────────────────────────────
+
+  private final PictogramCatalog emojiCatalog =
+    new PictogramCatalog(List.of("emoji_toothbrush", "emoji_star"), "emoji_star");
+
+  private List<RoutineAiPipeline.GeneratedStep> createEmoji(String stepsJson, AtomicReference<PictogramSet> seenSet) {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenAnswer(invocation -> {
+      seenSet.set(AiCallContext.currentPictogramSet());
+      return "{\"title\":\"아침\",\"steps\":[" + stepsJson + "]}";
+    });
+    RoutineAiPipeline pipeline = new RoutineAiPipeline(
+      textClientRouter,
+      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      routineImageStorage, new PictogramCatalogs(catalog, emojiCatalog));
+    return pipeline.generateForCreate(
+      "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.EMOJI, "profile-1").steps();
+  }
+
+  @Test
+  @DisplayName("이모지 방식은 이모지 카탈로그로 검증한다 — Mulberry id 는 이모지 폴백으로 바뀌고 AI 그림은 그리지 않는다")
+  void emojiStyleResolvesAgainstEmojiCatalog() {
+    AtomicReference<PictogramSet> seenSet = new AtomicReference<>();
+    var steps = createEmoji(
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"brush_teeth\"}", seenSet);
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo("emoji_star");
+    assertThat(steps.get(0).imagePath()).isNull();
+    assertThat(seenSet.get()).isEqualTo(PictogramSet.EMOJI);
+    assertThat(AiCallContext.currentPictogramSet()).isEqualTo(PictogramSet.MULBERRY);
+    verifyNoInteractions(imageGenerationClient);
+  }
+
+  @Test
+  @DisplayName("이모지 방식에서 이모지 카탈로그의 id 를 고르면 그대로 카드에 실린다")
+  void emojiStyleKeepsValidEmojiId() {
+    var steps = createEmoji(
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"emoji_toothbrush\"}",
+      new AtomicReference<>());
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo("emoji_toothbrush");
   }
 }

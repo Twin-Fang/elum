@@ -15,6 +15,7 @@ class ElumSheetTextField extends StatelessWidget {
     this.maxLines = 1,
     this.maxLength,
     this.isAutofocused = false,
+    this.shouldBlockLineBreaks = false,
     this.onChanged,
     this.onSubmitted,
   });
@@ -27,12 +28,18 @@ class ElumSheetTextField extends StatelessWidget {
   final int maxLines;
   final int? maxLength;
   final bool isAutofocused;
+
+  /// 줄바꿈 막기 (붙여넣은 개행 포함) · 키보드는 완료 키. 소리로 읽히는 한 문장 칸용
+  final bool shouldBlockLineBreaks;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
   /// 시안 실측: 라벨 > 칸 9 · 글 안쪽 24 · 라벨이 칸보다 8 안쪽(x=24)
   static const _labelToField = 9.0;
   static const _textInsetH = 24.0;
+
+  /// 글이 여러 줄로 커질 때 칸 위아래 여백 (한 줄이면 최소 높이 68 안이라 보이지 않음)
+  static const _textInsetV = 12.0;
   static const _labelInset = 8.0;
 
   @override
@@ -61,7 +68,7 @@ class ElumSheetTextField extends StatelessWidget {
         ],
         Container(
           constraints: BoxConstraints(minHeight: space.fieldH.h),
-          padding: EdgeInsets.symmetric(horizontal: _textInsetH.w),
+          padding: EdgeInsets.symmetric(horizontal: _textInsetH.w, vertical: _textInsetV.h),
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
             color: colors.surface,
@@ -75,10 +82,12 @@ class ElumSheetTextField extends StatelessWidget {
             autofocus: isAutofocused,
             minLines: 1,
             maxLines: maxLines,
-            textInputAction: maxLines == 1
+            textInputAction: maxLines == 1 || shouldBlockLineBreaks
                 ? TextInputAction.done
                 : TextInputAction.newline,
             inputFormatters: [
+              if (shouldBlockLineBreaks)
+                FilteringTextInputFormatter.deny(RegExp(r'\n')),
               if (maxLength != null)
                 LengthLimitingTextInputFormatter(maxLength),
             ],

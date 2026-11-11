@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,7 +58,7 @@ class GeminiTextClientLocaleTest {
     client = new GeminiTextClient(
       builder.build(), new GeminiProperties("key", null, "text-model", "image-model", 1000),
       promptTemplateService, systemConfigService, mock(AiCallLogService.class),
-      new PictogramCatalog(IDS, "go_,_to"));
+      PictogramCatalogs.mulberryOnly(new PictogramCatalog(IDS, "go_,_to")));
   }
 
   @AfterEach

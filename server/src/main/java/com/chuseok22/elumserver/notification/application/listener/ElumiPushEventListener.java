@@ -2,7 +2,9 @@ package com.chuseok22.elumserver.notification.application.listener;
 
 import com.chuseok22.elumserver.common.infrastructure.config.AsyncConfig;
 import com.chuseok22.elumserver.notification.application.service.ElumiPushDispatcher;
+import com.chuseok22.elumserver.notification.application.service.ElumiPushResult;
 import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
+import com.chuseok22.elumserver.notification.core.event.RoutineTimeArrivedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -11,7 +13,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * 이룸이 기기 푸시 이벤트 수신: 일과 보냄 > 일과 도착 알림
+ * 이룸이 기기 푸시 이벤트 수신 2개: 일과 보냄 > 일과 도착 알림, 반복 일과 시각 > 일과 시간 알림
  * 커밋 뒤 + 별도 스레드 (보호자 알림 기록과 따로 돌아 한쪽 실패가 다른 쪽을 막지 않음). 실패는 로그만
  */
 @Slf4j
@@ -32,6 +34,21 @@ public class ElumiPushEventListener {
       elumiPushDispatcher.dispatchRoutineArrived(event.profileId(), event.routineId());
     } catch (RuntimeException exception) {
       log.warn("[elumi push] failed routine arrived : {}", exception.getClass().getSimpleName());
+    }
+  }
+
+  @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void onRoutineTimeArrived(RoutineTimeArrivedEvent event) {
+    try {
+      ElumiPushResult pushResult = elumiPushDispatcher.dispatchRoutineTime(event.profileId(), event.routineId());
+      // 예약마다 결과 한 줄 (기기 0대·전부 실패도 남김: "알림이 안 왔다" 제보를 로그로 가름)
+      log.info("[routine schedule push] scheduleId={} devices={} sent={}", event.scheduleId(),
+        pushResult.deviceCount(), pushResult.sentCount());
+    } catch (RuntimeException exception) {
+      // 푸시 실패는 기록만 하고 다음 예약은 그대로 (차지한 날짜는 되돌리지 않음: 같은 날 다시 울리지 않게)
+      log.warn("[routine schedule push] failed : scheduleId={} {}", event.scheduleId(),
+        exception.getClass().getSimpleName());
     }
   }
 }

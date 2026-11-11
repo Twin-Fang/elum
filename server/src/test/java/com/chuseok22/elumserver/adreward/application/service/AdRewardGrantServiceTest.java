@@ -78,7 +78,7 @@ class AdRewardGrantServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     CreditAccountService accountService =
-      new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, entityManager);
+      new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository, CreditTestStore.weekPeriodSettings(), entityManager);
     service = new AdRewardGrantService(settings, sessionRepository, accountService, grantRepository, ledgerRepository, CLOCK);
 
     account = new AiCreditAccount();
@@ -400,5 +400,20 @@ class AdRewardGrantServiceTest {
     grant.setExpiresAt(LocalDateTime.of(2026, 10, 5, 0, 0));
     grant.setPeriodKey("2026-W40");
     return grant;
+  }
+
+  @Test
+  void 달_주기면_지급한_크레딧이_이번_달_끝에_만료된다() {
+    // 광고 보상이 주 끝에 사라지면 달 단위로 바꾼 뒤에도 사용자가 광고 크레딧을 일찍 잃는다
+    CreditAccountService monthService = new CreditAccountService(accountRepository, grantRepository, jobRepository,
+      ledgerRepository, CreditTestStore.periodSettingsOf(com.chuseok22.elumserver.credit.core.CreditPeriodUnit.MONTH),
+      entityManager);
+    service = new AdRewardGrantService(settings, sessionRepository, monthService, grantRepository, ledgerRepository, CLOCK);
+    pendingSession(NONCE);
+
+    service.grant(callback(NONCE, TX));
+
+    // 2026-09-30 이 든 달은 10-01 0시에 끝난다
+    assertThat(store.grants.get(0).getExpiresAt()).isEqualTo(LocalDateTime.of(2026, 10, 1, 0, 0));
   }
 }

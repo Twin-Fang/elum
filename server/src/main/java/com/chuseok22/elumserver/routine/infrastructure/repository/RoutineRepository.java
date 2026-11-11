@@ -5,9 +5,11 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -130,8 +132,26 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   long countByStatus(RoutineStatus status);
 
-  List<Routine> findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-    String profileId, List<RoutineStatus> statuses, LocalDateTime start, LocalDateTime end
+  /// 주간 리포트용: 기간 안 일과를 카드까지 한 번에 읽음 (카드를 일과마다 따로 읽지 않게)
+  @Query("""
+    select distinct r from Routine r left join fetch r.steps
+    where r.profile.id = :profileId and r.status in :statuses
+      and r.scheduledAt between :start and :end
+    order by r.scheduledAt asc
+    """)
+  List<Routine> findAllWithStepsByProfileIdAndStatusInAndScheduledAtBetween(
+    @Param("profileId") String profileId, @Param("statuses") List<RoutineStatus> statuses,
+    @Param("start") LocalDateTime start, @Param("end") LocalDateTime end
+  );
+
+  /// 주간 리포트용: 그 시각 전에 끝낸 적 있는 일과 묶음 열쇠 (원본 ID, 없으면 자기 ID. 일과관리 복사본 제외)
+  @Query("""
+    select distinct coalesce(r.sourceRoutineId, r.id) from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+      and r.scheduledAt < :before
+    """)
+  List<String> findCompletedRoutineKeysBefore(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status, @Param("before") LocalDateTime before
   );
 
   // 보호자 홈 "지난 일과" — 오늘 이전에 예정됐던 것만 최신순.
@@ -178,6 +198,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   /// 이 원본으로 보낸 일과가 기간 안에 있는가. 하루 한 번 보내기 확인 (#804)
   boolean existsBySourceRoutineIdAndScheduledAtBetween(String sourceRoutineId, LocalDateTime from, LocalDateTime to);
 
+  /// 이 원본으로 보낸 그날 일과 중 가장 최근 것. 반복 일과 알림이 가리킬 오늘 일과 (#1080)
+  Optional<Routine> findFirstBySourceRoutineIdAndScheduledAtBetweenOrderByCreatedAtDesc(String sourceRoutineId,
+    LocalDateTime from, LocalDateTime to);
+
   /// 이 원본으로 보낸 일과가 하나라도 있는가. 있으면 원본을 지우지 않고 숨긴다 (#804)
   boolean existsBySourceRoutineId(String sourceRoutineId);
 
@@ -186,4 +210,62 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 여러 묶음의 구성원을 한 번에 (묶음 목록, 묶음마다 따로 묻지 않음) (#806)
   List<Routine> findAllByGroupIdInOrderByGroupOrderAsc(Collection<String> groupIds);
+  // --- 주간 리포트 ---
+
+  /// 마친 일과가 있는 주를 가르기 위한 예정 시각 (최신순, 일과관리 복사본 제외). 호출부가 limit 으로 줄임
+  @Query("""
+    select r.scheduledAt from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+    order by r.scheduledAt desc
+    """)
+  List<LocalDateTime> findScheduledAtsByProfileIdAndStatus(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status,
+    org.springframework.data.domain.Pageable pageable);
+
+  /// 마친 일과 중 가장 이른 예정 시각 (없으면 null)
+  @Query("""
+    select min(r.scheduledAt) from Routine r
+    where r.profile.id = :profileId and r.status = :status and r.libraryOnly = false
+    """)
+  LocalDateTime findEarliestScheduledAtByProfileIdAndStatus(
+    @Param("profileId") String profileId, @Param("status") RoutineStatus status);
+
+  /// 기간 안에 해당 상태 일과가 있는 이룸이 id (일과관리 복사본 제외)
+  @Query("""
+    select distinct r.profile.id from Routine r
+    where r.status = :status and r.scheduledAt between :from and :to and r.libraryOnly = false
+    """)
+  List<String> findProfileIdsWithStatusBetween(
+    @Param("status") RoutineStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  // --- AI 메모리 ---
+
+  /// 수정 찾기를 놓친 일과: AI 처음 카드가 있고 아직 반영 안 한 확정·완료 일과 중 안정된(settledBefore 이전 수정)·최근(recentAfter 이후) 것
+  @Query("""
+    select r.id from Routine r
+    where r.aiDraftCards is not null and r.memoryReflectedAt is null and r.status in :statuses
+      and r.updatedAt < :settledBefore and r.updatedAt > :recentAfter
+    order by r.updatedAt asc
+    """)
+  List<String> findIdsMissedByMemoryExtraction(
+    @Param("statuses") Collection<RoutineStatus> statuses, @Param("settledBefore") LocalDateTime settledBefore,
+    @Param("recentAfter") LocalDateTime recentAfter, Pageable pageable);
+
+  /// 수정 찾기 선점: 아직 반영 표시가 없을 때만 표시 (한 일과를 한 번만 처리). 바뀐 행 수 1 이면 선점 성공
+  @Modifying
+  @Query("update Routine r set r.memoryReflectedAt = :now where r.id = :routineId and r.memoryReflectedAt is null")
+  int claimMemoryExtraction(@Param("routineId") String routineId, @Param("now") LocalDateTime now);
+
+  /// 예시 후보: 그 보호자가 만든 AI 처음 카드가 있는 확정·완료 일과 최근 10개
+  List<Routine> findTop10ByProfileIdAndCreatedByAndAiDraftCardsIsNotNullAndStatusInOrderByCreatedAtDesc(
+    String profileId, String createdBy, Collection<RoutineStatus> statuses);
+
+  /// 메모리 모두 지우기: 이 보호자가 만든 이 이룸이 일과의 AI 처음 카드 사본을 비움 (다시 쓰이지 않게). 바뀐 행 수
+  @Modifying
+  @Query("""
+    update Routine r set r.aiDraftCards = null, r.memoryReflectedAt = :now
+    where r.profile.id = :profileId and r.createdBy = :memberId and r.aiDraftCards is not null
+    """)
+  int clearAiDraftCardsOfOwner(
+    @Param("profileId") String profileId, @Param("memberId") String memberId, @Param("now") LocalDateTime now);
 }

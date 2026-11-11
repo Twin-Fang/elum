@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,7 +56,7 @@ class GeminiTextClientKoRequestPinTest {
     client = new GeminiTextClient(
       builder.build(), new GeminiProperties("key", null, "text-model", "image-model", 1000),
       promptTemplateService, systemConfigService, mock(AiCallLogService.class),
-      new PictogramCatalog(List.of("brush_teeth", "go_,_to"), "go_,_to"));
+      PictogramCatalogs.mulberryOnly(new PictogramCatalog(List.of("brush_teeth", "go_,_to"), "go_,_to")));
     server.expect(request -> sentBody.set(((MockClientHttpRequest) request).getBodyAsString(StandardCharsets.UTF_8)))
       .andRespond(withSuccess(OK, MediaType.APPLICATION_JSON));
   }

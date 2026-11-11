@@ -16,7 +16,7 @@ import 'license_text_screen.dart';
 class SoftwareLicensesScreen extends ConsumerWidget {
   const SoftwareLicensesScreen({super.key});
 
-  static const _backTop = 67.0;
+  static const _backTop = ElumScaffold.settingsBackTop;
   static const _horizontalPadding = 16.0;
   static const _headToBody = 24.0;
 

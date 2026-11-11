@@ -94,7 +94,7 @@ abstract final class CrashReporter {
             printDetails: false,
           )
           .ignore();
-    } catch (_) {}
+    } catch (_) {} // 오류 보고 실패가 앱을 다시 넘어뜨리지 않게
   }
 }
 

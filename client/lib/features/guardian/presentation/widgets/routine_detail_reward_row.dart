@@ -63,10 +63,7 @@ class RoutineDetailRewardRow extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16.r),
             ),
-            // 정하지 않았으면 별을 흐리게 — 채울 수 있는 자리임을 보여준다.
-            // **별은 흐리게 하지 않는다.** 시안(`980:5174`)의 별은 보상이 없을
-            // 때도 선명하다 — 흐리게 한 건 시안을 잘못 읽은 것이었다.
-            // 비었다는 것은 **글자가** 말해 준다.
+            // 별은 보상이 없어도 선명하게 (시안 `980:5174`). 비었다는 것은 글자가 말해 줌
             child: SvgPicture.asset(
               AppAssets.rewardBadgeStar,
               width: 25.w,

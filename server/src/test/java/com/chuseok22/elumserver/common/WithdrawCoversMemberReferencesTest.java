@@ -52,6 +52,12 @@ class WithdrawCoversMemberReferencesTest {
   /// 탈퇴와 완전 삭제는 이야기 글·댓글·반응·신고·차단 삭제를 이야기 정리 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다.
   private static final Path TALK_CLEANUP_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/talk/application/service/TalkCleanupService.java");
+  /// 나가기(GuardianshipService.leaveLocked)가 보호자의 AI 메모리 삭제를 메모리 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다.
+  private static final Path ROUTINE_MEMORY_SERVICE = SOURCE_ROOT.resolve(
+    "com/chuseok22/elumserver/routine/application/service/RoutineMemoryService.java");
+  /// 완전 삭제는 크레딧 구매 기록의 회원 식별자 떼기를 구매 정리 서비스에 맡긴다. 저장소 호출은 거기 있다.
+  private static final Path CREDIT_PURCHASE_CLEANUP_SERVICE = SOURCE_ROOT.resolve(
+    "com/chuseok22/elumserver/credit/application/service/purchase/CreditPurchaseCleanupService.java");
   private static final Path ROUTINE_GROUP_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/routine/application/service/RoutineGroupService.java");
 
@@ -60,6 +66,7 @@ class WithdrawCoversMemberReferencesTest {
     "AuthIdentity", "같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다 — 이메일은 비운다",
     "AiCallLog", "하루·주간 한도를 잇는다 — 식별자를 떼면 재가입한 계정의 사용량이 0 이 된다",
     "AiCreditAccount", "원장은 운영 지표로 남긴다 — purge 에서 member 참조와 신원 해시를 뗀다 (#407)",
+    "AiCreditPurchase", "구매 기록은 크레딧 계정에 묶여 남는다 — 재가입 때 구매분이 이어지고 같은 거래의 두 번 적립을 막는다. purge 에서 member 참조를 뗀다",
     "RoutineGroup", "묶음은 함께 돌보는 이룸이 것이라 남긴다 (V44, 외래키 없음) — purge 에서 만든 사람을 뗀다"
   );
 
@@ -124,8 +131,9 @@ class WithdrawCoversMemberReferencesTest {
     assertThat(purge).as("완전 삭제도 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
     assertThat(purge).as("완전 삭제는 묶음의 만든 사람을 뗀다").contains("routineGroupService.detachCreatorOf(");
     assertThat(purge).as("완전 삭제도 이야기 데이터를 지운다").contains("talkCleanupService.deleteAllOf(");
-    purge = purge + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE)
-      + serviceSource(ROUTINE_GROUP_SERVICE) + serviceSource(TALK_CLEANUP_SERVICE);
+    assertThat(purge).as("완전 삭제는 크레딧 구매 기록의 회원 식별자를 뗀다").contains("creditPurchaseCleanupService.detachMemberOf(");
+    purge = purge + serviceSource(CREDIT_PURCHASE_CLEANUP_SERVICE) + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE)
+      + serviceSource(ROUTINE_GROUP_SERVICE) + serviceSource(TALK_CLEANUP_SERVICE) + serviceSource(ROUTINE_MEMORY_SERVICE);
     List<String> uncovered = new ArrayList<>();
 
     for (String entity : entitiesReferencingMember()) {
@@ -172,8 +180,9 @@ class WithdrawCoversMemberReferencesTest {
     assertThat(withdraw).as("탈퇴는 의견을 지운다").contains("feedbackService.deleteAllOf(");
     assertThat(withdraw).as("탈퇴는 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
     assertThat(withdraw).as("탈퇴는 이야기 데이터를 지운다").contains("talkCleanupService.deleteAllOf(");
+    assertThat(guardianshipSource()).as("나가기는 보호자의 AI 메모리를 지운다").contains("routineMemoryService.forgetMember(");
     return withdraw + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE)
-      + serviceSource(TALK_CLEANUP_SERVICE);
+      + serviceSource(TALK_CLEANUP_SERVICE) + serviceSource(ROUTINE_MEMORY_SERVICE);
   }
 
   /// 나가기 서비스 전체(주석 뺀). 나가기·마지막 보호자 정리가 private 도우미에 나뉘어 있어 파일로 본다.

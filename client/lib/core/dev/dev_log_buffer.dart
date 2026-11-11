@@ -62,13 +62,4 @@ abstract final class DevLogBuffer {
 
   /// 클립보드 복사용 단일 문자열.
   static String asText() => _lines.join('\n');
-
-  /// 테스트에서 가로채기를 되돌린다. 다음 테스트가 오염되지 않게 한다.
-  @visibleForTesting
-  static void uninstall() {
-    if (_original == null) return;
-    debugPrint = _original!;
-    _original = null;
-    _lines.clear();
-  }
 }

@@ -10,6 +10,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
+import '../../member/domain/elumi_nickname_policy.dart';
 import '../application/name_controller.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -25,15 +26,20 @@ class NameScreen extends ConsumerStatefulWidget {
 }
 
 class _NameScreenState extends ConsumerState<NameScreen> {
-  late final TextEditingController _controller;
+  final _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 뒤로 왔을 때 이전 입력이 남아있어야 한다
-    _controller = TextEditingController(
-      text: ref.read(onboardingProvider).childNickname,
-    );
+    // 뒤로 왔을 때 이전 입력 되살리기 (첫 프레임 뒤: initState 의 ref.read 는 빌드 중 provider 일정을 건드려 예외)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _controller.text.isNotEmpty) return;
+      final savedNickname = ref.read(onboardingProvider).childNickname;
+      _controller.value = TextEditingValue(
+        text: savedNickname,
+        selection: TextSelection.collapsed(offset: savedNickname.length),
+      );
+    });
   }
 
   @override
@@ -121,7 +127,10 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             ElumTextField(
               controller: _controller,
               hintText: context.l10n.onboardingNameHint,
-              onChanged: ref.read(onboardingProvider.notifier).setNickname,
+              // 서버와 같은 상한 (공백 없는 긴 이름이 이룸이 화면을 깨뜨림 #1129)
+              maxLength: ElumiNicknamePolicy.maxLength,
+              // 입력 때 읽음 (빌드 중 ref.read 를 두지 않음)
+              onChanged: (nickname) => ref.read(onboardingProvider.notifier).setNickname(nickname),
               // 완료 키로도 다음 단계로 간다.
               //
               // 키보드가 하단 '다음'을 덮고 있어서, 이름을 다 치고도 무엇을 눌러야

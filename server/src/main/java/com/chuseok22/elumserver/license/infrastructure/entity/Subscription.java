@@ -24,8 +24,7 @@ import lombok.Setter;
  *
  * <p><b>이룸이(Profile)가 아니라 계정(Member)에 붙는다.</b> 돈을 내는 쪽이 보호자이고
  * 당사자는 로그인하지 않기 때문이다. 인앱결제도 Apple ID·Google 계정에 묶이지
- * 프로필에 묶이지 않는다. 기관이 여러 이룸이를 지원하는 경우는 별도 구독이 아니라
- * {@code PROFILE_MAX_COUNT} 권한으로 표현된다.
+ * 프로필에 묶이지 않는다.
  *
  * <p><b>행이 없으면 Free로 본다.</b> 이 규칙 덕분에 기존 회원을 옮기는 작업이 필요 없다.
  * 새로 가입하는 계정에는 가입 시점에 Free 행을 만들어 둔다 — 관리자 화면에서 모든
@@ -68,6 +67,11 @@ public class Subscription extends BaseEntity {
   /// 관리자가 켠 이유. 나중에 "이 계정은 왜 Pro지"에 답하려면 있어야 한다.
   @Column(length = 500)
   private String memo;
+
+  /// 가입 때 만든 기본 Free 행 그대로인가 (관리자 회수·스토어 결제 이력이 없음) — 행 없는 회원과 같게 봄
+  public boolean isUntouchedSignupFree() {
+    return source == SubscriptionSource.SIGNUP && plan == PlanType.FREE;
+  }
 
   /**
    * 지금 이 시각에 실제로 유효한 플랜.

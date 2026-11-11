@@ -47,7 +47,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 class AdminNoticeControllerTest {
 
   private final NoticeService noticeService = mock(NoticeService.class);
-  private final AdminNoticeController controller = new AdminNoticeController(noticeService);
+  private final AdminNoticeController controller = new AdminNoticeController(noticeService,
+    org.mockito.Mockito.mock(com.chuseok22.elumserver.admin.application.service.SettingsEditorService.class));
   private final Principal admin = () -> "kimchi";
 
   private ExtendedModelMap model;

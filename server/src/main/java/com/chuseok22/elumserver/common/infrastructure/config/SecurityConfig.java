@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.config;
 
 import com.chuseok22.elumserver.admin.infrastructure.security.AdminLoginAttemptFilter;
+import com.chuseok22.elumserver.admin.infrastructure.security.AdminLoginSuccessHandler;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
@@ -115,7 +116,8 @@ public class SecurityConfig {
         // loginPage()만으로는 POST 처리 URL이 기본값 "/login"으로 남는다.
         // admin/login.html의 폼이 "/admin/login"으로 제출하므로 명시적으로 맞춰준다.
         .loginProcessingUrl(SecurityPaths.ADMIN_LOGIN)
-        .defaultSuccessUrl(SecurityPaths.ADMIN_DASHBOARD, true)
+        // 성공하면 그 아이디의 시도 기록을 지우고 대시보드로 (실패만 센다, #1102)
+        .successHandler(new AdminLoginSuccessHandler(sharedStateStore))
         .permitAll()
       )
       .logout(logout -> logout
@@ -148,6 +150,9 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
         // Google 보상형 광고 콜백 — 인증은 서명이다
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_ADS_SSV).permitAll()
+        // 스토어 결제 알림 — 인증은 Apple 서명·Google 푸시 토큰이다 (#1071)
+        .requestMatchers(HttpMethod.POST, SecurityPaths.API_SUBSCRIPTION_APPLE_NOTIFICATIONS,
+          SecurityPaths.API_SUBSCRIPTION_GOOGLE_NOTIFICATIONS).permitAll()
         // 공지 팝업 — 읽기 전용, 인증 없음
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_NOTICES, SecurityPaths.API_APP_NOTICE_IMAGE).permitAll()
         // ── 이룸이 휴대폰이 할 수 있는 것 ──
@@ -161,8 +166,7 @@ public class SecurityConfig {
         // 이룸이 휴대폰도 푸시 토큰을 등록·해제한다. 이룸이 기기 구분은 서버가 토큰의 연결 ID 로 붙인다.
         .requestMatchers(HttpMethod.PUT, "/api/push-devices").hasAnyAuthority(ELUMI, GUARDIAN)
         .requestMatchers(HttpMethod.DELETE, "/api/push-devices/*").hasAnyAuthority(ELUMI, GUARDIAN)
-        // 수동 검증용 창구는 아무도 못 부른다. anyRequest 보다 앞에 둬야 한다 —
-        // 뒤에 두면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 로컬 LLM 을 돌릴 수 있다.
+        // 수동 검증용 창구는 아무도 못 부름. anyRequest 보다 앞 (뒤면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 부름)
         .requestMatchers(SecurityPaths.API_INTERNAL_MATCHER).denyAll()
         // 연결 암호 넣기(/api/device-links/redeem)도 여기 걸린다 — 이룸이 휴대폰도 로그인한 뒤에만 연결한다.
         .anyRequest().hasAuthority(GUARDIAN)

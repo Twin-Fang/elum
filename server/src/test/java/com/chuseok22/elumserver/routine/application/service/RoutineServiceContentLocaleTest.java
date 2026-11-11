@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.PictogramSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,6 +55,10 @@ class RoutineServiceContentLocaleTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
+  @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  // 목 기본 false = 그림을 그리는 요금제 (기존 시험 동작 그대로)
+  @Mock private RoutineAiPicturePolicy routineAiPicturePolicy;
+
   @InjectMocks private RoutineStepEditService routineService;
 
   @AfterEach
@@ -66,7 +71,7 @@ class RoutineServiceContentLocaleTest {
   void addStep_followsTheRoutineLanguage_notTheRequest() {
     Routine routine = givenRoutine(AppLocale.ES);
     AtomicReference<AppLocale> seenByPicker = new AtomicReference<>();
-    when(pictogramPicker.pick(any(), any(), any())).thenAnswer(invocation -> {
+    when(pictogramPicker.pick(any(), any(), any(), any())).thenAnswer(invocation -> {
       seenByPicker.set(AiCallContext.currentContentLocale());
       return "brush_teeth";
     });
@@ -91,18 +96,18 @@ class RoutineServiceContentLocaleTest {
   @DisplayName("카드 추가: 보호자가 카드에 적은 이름도 es 일과에서는 자리표시(Elumi)로 바뀌어 AI 로 나간다")
   void addStep_masksNicknameWithTheRoutineLanguage() {
     givenRoutine(AppLocale.ES);
-    when(pictogramPicker.pick(any(), any(), any())).thenReturn("brush_teeth");
+    when(pictogramPicker.pick(any(), any(), any(), any())).thenReturn("brush_teeth");
 
     routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("Paraguas de Haneul", "Haneul saca el paraguas", false));
 
-    verify(pictogramPicker).pick("member-1", "Paraguas de Elumi", "Elumi saca el paraguas");
+    verify(pictogramPicker).pick("member-1", "Paraguas de Elumi", "Elumi saca el paraguas", PictogramSet.MULBERRY);
   }
 
   @Test
   @DisplayName("카드 추가: 픽토그램 고르기가 던져도 일과 언어는 비워진다")
   void addStep_clearsLocaleWhenPickerThrows() {
     givenRoutine(AppLocale.ES);
-    when(pictogramPicker.pick(any(), any(), any())).thenThrow(new IllegalStateException("picker down"));
+    when(pictogramPicker.pick(any(), any(), any(), any())).thenThrow(new IllegalStateException("picker down"));
 
     try {
       routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("Paraguas", "", false));

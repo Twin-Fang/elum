@@ -10,25 +10,14 @@ import '../data/ad_strip_loader.dart';
 import '../application/ad_gate.dart';
 import '../../../core/config/ad_ids.dart';
 
-/// 화면 하단에 놓는 한 줄(44dp) 네이티브 광고 띠 자리.
+/// 화면 하단 한 줄(44dp) 네이티브 광고 띠: 자리 고정, 위 간격, 앱 색 토큰 띠 색
+/// 광고 계정이면 로드 전·실패에도 높이 유지 (늦게 떠 하단 바를 밀면 오클릭, #1168) · 광고 없앤 요금제·확인 전 0
 ///
-/// **로드 전·실패 시 높이 0이다.** 빈 자리를 남기지 않는다 — 광고가 없으면 화면은
-/// 본래 크기 그대로다. 로드에 성공하면 그 높이만큼 본문이 줄어든다(겹치지 않는다).
-/// 띠 색은 앱 색 토큰에서 만들어 로드 때 네이티브에 넘기고, 색이 바뀌면 다시 로드한다.
-///
-/// 실패하면 30초·60초 뒤 각 한 번만 다시 시도하고 그만둔다.
+/// 실패 시 30초·60초 뒤 한 번씩 재시도 후 중단 (빈 띠 유지). 색이 바뀌면 같은 자리에 다시 로드.
 class AdBottomStripSlot extends ConsumerStatefulWidget {
-  const AdBottomStripSlot({
-    super.key,
-    required this.placement,
-    this.padding = EdgeInsets.zero,
-  });
+  const AdBottomStripSlot({super.key, required this.placement});
 
   final AdPlacement placement;
-
-  /// **광고가 뜬 뒤에만** 배너 둘레에 두는 여백. 광고가 없으면 이 여백도 없다 — 목록 중간에 넣을 때 광고가
-  /// 없다고 빈 줄이 남지 않게 한다. 눌러도 되는 다른 요소와 떨어뜨리는 데도 쓴다(오클릭 방지).
-  final EdgeInsets padding;
 
   /// 테스트가 층을 찾는 키.
   static const stripKey = Key('광고 배너 층');
@@ -132,12 +121,11 @@ class _AdBottomStripSlotState extends ConsumerState<AdBottomStripSlot> {
       _isLoadStarted = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _load());
     }
-    final banner = _banner;
-    if (banner == null) return const SizedBox.shrink();
-    // 띠를 화면 폭 전체의 얇은 층에 담는다: 면 색 + 윗선으로 본문과 구분
+    // 띠를 화면 폭 전체의 얇은 층에 담는다: 위 간격 + 면 색 + 윗선으로 본문과 구분
     final colors = context.colors;
     return Padding(
-      padding: widget.padding,
+      // 하단 바·버튼 <-> 광고 사이 간격 (오클릭 방지)
+      padding: EdgeInsets.only(top: context.space.xs),
       child: DecoratedBox(
         key: AdBottomStripSlot.stripKey,
         decoration: BoxDecoration(
@@ -145,9 +133,10 @@ class _AdBottomStripSlotState extends ConsumerState<AdBottomStripSlot> {
           border: Border(top: BorderSide(color: colors.border)),
         ),
         child: SizedBox(
-          height: banner.height,
+          // 로드 전·후·실패 공통 높이 (광고가 떠도 위 요소가 움직이지 않음)
+          height: GoogleAdStripLoader.stripHeight,
           width: double.infinity,
-          child: banner.widget,
+          child: _banner?.widget,
         ),
       ),
     );

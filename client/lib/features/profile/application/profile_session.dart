@@ -119,6 +119,13 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     if (_isElumi) return;
     // 옛 서버는 목록을 주지 않는다. 모르는 것을 "없다"로 읽지 않는다 (E36).
     if (!member.profilesKnown) return;
+    // 늦게 온 이전 계정 회원 정보로 고른 이룸이를 되살리지 않음 (응답 회원 <-> 로그인 회원)
+    if (_isOtherAccount(member)) {
+      AppLogger.notifierCall('ProfileSessionNotifier', 'reconcile skipped', {
+        'reason': 'member of another account',
+      });
+      return;
+    }
     final profiles = member.profiles;
 
     if (profiles.isEmpty) {
@@ -153,6 +160,14 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     await ref
         .read(onboardingProvider.notifier)
         .applyServerProfile(target, goals: member.supportGoals);
+  }
+
+  /// 회원 정보가 지금 로그인한 계정 것이 아닌가 (둘 다 알 때만 판정)
+  bool _isOtherAccount(Member member) {
+    final loggedInMemberId = _storage?.accountMemberId;
+    final responseMemberId = member.id;
+    if (loggedInMemberId == null || responseMemberId == null) return false;
+    return loggedInMemberId != responseMemberId;
   }
 
   Future<Attempt<bool>>? _ensuring;
@@ -309,7 +324,14 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   /// 여러 요청이 한꺼번에 같은 실패를 받으면 이 메서드가 여러 번 불린다 — **지금 고른 이룸이를
   /// 잃은 경우에만** 움직여 한 번만 처리한다.
   void lost(String profileId) {
-    if (state.selectedId != profileId) return;
+    // 헤더는 저장소 값으로 나감: 메모리 선택만 보면 저장소에 남은 이전 계정 id 를 못 풀어 403 이 반복됨
+    final isSelectedInMemory = state.selectedId == profileId;
+    final isSelectedInStorage = _storage?.selectedProfileId == profileId;
+    if (!isSelectedInMemory && !isSelectedInStorage) return;
+    AppLogger.notifierCall('ProfileSessionNotifier', 'lost', {
+      'inMemory': isSelectedInMemory,
+      'inStorage': isSelectedInStorage,
+    });
     state = const ProfileSession();
     _storage?.clearSelectedProfileId().catchError((Object e, StackTrace stack) {
       AppLogger.error('[profile] lost profile selection clear failed', e, stack);
@@ -327,8 +349,18 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   ///
   /// 비밀암호는 지킨다. 이 휴대폰에서 이룸이 화면 → 보호자 화면으로 넘어올 때 쓰는 것이라
   /// 이룸이와 무관하다 (E45).
+  ///
+  /// 이미 온보딩 중(완료 표시 없음)이면 이룸이 값을 비우지 않는다 — 그 값은 지금 입력 중인
+  /// 이름·캐릭터·그림 방식이다. 이 상태는 새로 만든 메모리 상태(로그인 뒤)라 늦게 도착한
+  /// "이룸이 없음"(새 이룸이를 만들기 전 목록·요청 실패)으로도 들어오는데, 그때 비우면
+  /// 온보딩 저장에 빈 이름이 나가 400 이 된다.
   Future<void> _enterNoProfile() async {
     final storage = _storage;
+    if (storage != null && !storage.isOnboardingCompleted) {
+      state = const ProfileSession(noProfile: true);
+      await _refreshScoped();
+      return;
+    }
     if (storage != null) {
       try {
         await storage.clearChildProfile();

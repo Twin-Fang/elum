@@ -5,6 +5,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/device/device_name_reader.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/notifications/routine_reminder_reset_hook.dart';
 import '../../../core/push/push_unregister_hook.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
@@ -89,8 +90,10 @@ class DeviceLinkRepository {
     CardImageDiskCache? imageCache,
     DeviceNameReader deviceNameReader = readDeviceName,
     PushUnregister? unregisterPush,
+    RoutineReminderReset? resetRoutineReminders,
   })  : _deviceNameReader = deviceNameReader,
         _unregisterPush = unregisterPush,
+        _resetRoutineReminders = resetRoutineReminders,
         _dio = dio,
         _tokens = tokens,
         _storage = storage,
@@ -100,6 +103,9 @@ class DeviceLinkRepository {
 
   /// 이 기기가 이룸이 기기로 바뀌기 직전 보호자 푸시 토큰 해제
   final PushUnregister? _unregisterPush;
+
+  /// 이룸이 기기로 바뀔 때·스스로 연결 끊을 때 이 기기 일과 알림 예약 취소 (보호자 계정 일과 제목이 남지 않게)
+  final RoutineReminderReset? _resetRoutineReminders;
 
   final Dio _dio;
 
@@ -119,11 +125,11 @@ class DeviceLinkRepository {
   /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다.
   Future<Attempt<IssuedLinkCode>> issue() {
     return guarded(_repo, 'issue', () async {
-      final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
-      final code = res.data?['code']?.toString();
+      final response = await _dio.post<Map<String, dynamic>>('/api/device-links');
+      final code = response.data?['code']?.toString();
       // 서버의 절대 시각이 아니라 **남은 초**를 쓴다. 두 시계가 어긋나 있으면
       // 절대 시각을 그대로 믿을 때 남은 시간이 서버보다 길게 나온다.
-      final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
+      final seconds = (response.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
         // 암호를 못 읽으면 보여줄 것이 없어 앱 오류로 본다
         throw const AppFailure(fault: NetworkFault.app);
@@ -131,7 +137,7 @@ class DeviceLinkRepository {
       return IssuedLinkCode.fromNow(
         code: code,
         expiresInSeconds: seconds,
-        serverExpiresAt: DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''),
+        serverExpiresAt: DateTime.tryParse(response.data?['expiresAt']?.toString() ?? ''),
       );
     });
   }
@@ -141,8 +147,8 @@ class DeviceLinkRepository {
   /// 상태 화면이 빈 화면·무한 로딩 대신 `다시 시도`와 에러 코드를 보여줘야 한다.
   Future<Attempt<LinkStatus>> statusResult() {
     return guarded(_repo, 'statusResult', () async {
-      final res = await _dio.get<Map<String, dynamic>>('/api/device-links');
-      final data = res.data;
+      final response = await _dio.get<Map<String, dynamic>>('/api/device-links');
+      final data = response.data;
       return data == null ? LinkStatus.empty : LinkStatus.fromJson(data);
     });
   }
@@ -202,6 +208,7 @@ class DeviceLinkRepository {
       tokens: _tokens,
       storage: _storage,
       imageCache: _imageCache,
+      resetRoutineReminders: _resetRoutineReminders,
     );
     return null;
   }
@@ -227,7 +234,7 @@ class DeviceLinkRepository {
     try {
       // 이름은 부가 정보다 — 못 읽으면 보내지 않고 연결만 한다. 옛 서버는 모르는 필드를 무시한다.
       final deviceName = await _deviceNameReader();
-      final res = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         '/api/device-links/redeem',
         data: {
           'code': code,
@@ -235,8 +242,8 @@ class DeviceLinkRepository {
             'deviceName': deviceName,
         },
       );
-      final access = res.data?['accessToken']?.toString();
-      final refresh = res.data?['refreshToken']?.toString();
+      final access = response.data?['accessToken']?.toString();
+      final refresh = response.data?['refreshToken']?.toString();
       if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
         AppLogger.error('연결', '응답에 토큰이 없습니다');
         return const RedeemResult(RedeemOutcome.failed);
@@ -249,6 +256,12 @@ class DeviceLinkRepository {
       await _storage.setElumiDevice(true);
       // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다
       await _storage.setElumiLinkLost(false);
+      await _forgetPreLinkAccountStorage();
+      // 연결 전 보호자 계정의 일과 알림 (계정 범위 비우기가 남기는 키라 알림 기능이 예약 취소와 함께 비움)
+      await resetRoutineRemindersSafely(
+        _resetRoutineReminders,
+        reason: 'elumi link',
+      );
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
@@ -256,6 +269,17 @@ class DeviceLinkRepository {
     } catch (e) {
       AppLogger.error('연결', e);
       return RedeemResult(RedeemOutcome.failed, failure: AppFailure.of(e));
+    }
+  }
+
+  /// 연결 전 계정의 계정 범위 저장값 지우기 (회원 id·고른 이룸이·체크 기록·일과 캐시 등)
+  ///
+  /// 실패해도 연결은 성공으로 둠 (토큰이 이미 이룸이 세션이라 되돌릴 수 없음, 로그만 남김)
+  Future<void> _forgetPreLinkAccountStorage() async {
+    try {
+      await _storage.clearAccountForElumiLink();
+    } catch (e, stack) {
+      AppLogger.error('[link redeem] pre-link account storage not cleared', e, stack);
     }
   }
 
@@ -268,18 +292,18 @@ class DeviceLinkRepository {
   /// 실패해도 연결 자체는 성공이다 — 다음 화면에서 다시 조회할 기회가 있다.
   Future<void> _pullProfile() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
-      final nickname = res.data?['nickname']?.toString();
+      final response = await _dio.get<Map<String, dynamic>>('/api/member/me');
+      final nickname = response.data?['nickname']?.toString();
       if (nickname != null && nickname.isNotEmpty) {
         await _storage.setNickname(nickname);
       }
-      final character = res.data?['character']?.toString();
+      final character = response.data?['character']?.toString();
       if (character != null && character.isNotEmpty) {
         await _storage.setCharacter(character);
       }
       // 보호자가 정한 그림 방식. 없거나 모르는 값이면 담지 않는다 — 로컬이 비면
       // 읽는 쪽이 만화로 처리하므로 옛 서버·새 값이어도 연결은 그대로 성공한다.
-      final imageStyle = res.data?['imageStyle'];
+      final imageStyle = response.data?['imageStyle'];
       if (imageStyle is String &&
           ImageStyle.values.any((s) => s.apiValue == imageStyle)) {
         await _storage.setImageStyle(imageStyle);
@@ -323,6 +347,7 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
     storage: ref.watch(localStorageProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
     unregisterPush: () => ref.read(pushUnregisterProvider)(),
+    resetRoutineReminders: () => ref.read(routineReminderResetProvider)(),
   );
 });
 

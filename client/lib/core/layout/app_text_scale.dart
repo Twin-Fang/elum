@@ -20,6 +20,13 @@ class AppTextScale extends StatelessWidget {
   static const minSystemScaleFactor = 1.0;
   static const maxSystemScaleFactor = 2.0;
 
+  /// 이 배율부터 옆으로 놓던 글·버튼을 위아래로 쌓음 (옆에 두면 글이 한두 글자씩 꺾임). 폭 배율 상한 1.15 보다 큼
+  static const stackedLayoutScaleFactor = 1.3;
+
+  /// 큰 글자인가: 옆 배치 > 위아래 배치로 바꿀 때
+  static bool isLargeTextOf(BuildContext context) =>
+      MediaQuery.textScalerOf(context).scale(1) >= stackedLayoutScaleFactor;
+
   /// 앱 배율 위에 부품 비율을 곱한 배율 (작은 칸 안 글자를 토큰 그대로 줄일 때)
   /// 시스템 비선형 배율(안드로이드 14)과 상한을 그대로 둔다. `TextScaler.linear` 로 다시 만들지 않는다
   static TextScaler scaledBy(BuildContext context, double factor) =>

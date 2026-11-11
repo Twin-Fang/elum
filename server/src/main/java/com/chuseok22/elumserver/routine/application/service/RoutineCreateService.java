@@ -13,12 +13,14 @@ import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.core.RoutineCardText;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -51,6 +53,9 @@ public class RoutineCreateService {
   /// 반환 사유 최대 길이 — ai_credit_job.fail_reason 이 varchar(500) 다.
   private static final int RELEASE_REASON_MAX_LENGTH = 200;
 
+  /// 일과 만들기 응답 imageSkippedReason — AI 그림 카드 중 일부를 못 그려 픽토그램으로 둠
+  static final String IMAGE_SKIPPED_FAILED = "AI_IMAGE_FAILED";
+
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
@@ -61,6 +66,8 @@ public class RoutineCreateService {
   private final CreditReservationService creditReservationService;
   private final CreditQueryService creditQueryService;
   private final EnabledLocales enabledLocales;
+  private final RoutinePersonalizationProvider routinePersonalizationProvider;
+  private final RoutineAiPicturePolicy routineAiPicturePolicy;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -158,10 +165,20 @@ public class RoutineCreateService {
     AiCallContext.setContentLocale(contentLocale);
     // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
     AiCallContext.setCreditJobId(creditJobId);
+    // Pro AI 메모리 규칙·확정 예시 (만드는 보호자 자신의 것만). 준비 실패는 빈 계획 = 지금 하네스 그대로 (던지지 않음)
+    RoutinePersonalizationProvider.Plan personalizationPlan = routinePersonalizationProvider.planFor(
+      caller.memberId(), profile.getId(), profile.getNickname(), contentLocale);
+    AiCallContext.setRoutinePersonalization(personalizationPlan.personalization());
+    // Free(AI 맞춤 그림 꺼짐) + 캐릭터·실사 저장값은 그림 기호로 (그림 호출·청구 없음). 이모지·그림 기호는 그대로, 저장값은 유지 (#1149)
+    ImageStyle storedImageStyle = ImageStyle.orDefault(profile.getImageStyle());
+    ImageStyle imageStyleForCards =
+      storedImageStyle.drawsAiImages() && routineAiPicturePolicy.shouldSkipAiPicture(caller.memberId())
+        ? ImageStyle.PHOTO_ONLY
+        : storedImageStyle;
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
-        profile.getCharacter(), profile.getImageStyle(), profile.getId()
+        profile.getCharacter(), imageStyleForCards, profile.getId()
       );
     } catch (RuntimeException e) {
       // 만들지 못했으면 청구하지 않는다 — 예약을 돌려준다.
@@ -178,9 +195,7 @@ public class RoutineCreateService {
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다.
     routine.setSanitizedInputText(request.rawInputText());
     routine.setTitle(generation.title());
-    // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
-    // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
-    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다.
+    // scheduledAt 은 비워서 보낼 수 있음. DB 는 NOT NULL 이라 서버가 채움 (값을 요구하면 빠뜨린 호출이 AI 를 다 태운 뒤 DB 에서 터짐)
     routine.setScheduledAt(
       request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
     );
@@ -189,6 +204,12 @@ public class RoutineCreateService {
     routine.setRewardText(RoutineRules.trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
+    // AI 처음 카드 사본 (Pro + 메모리 켜짐만, 카드 글만 — 원문 없음). 확정 뒤 수정 찾기가 비교에 씀
+    if (personalizationPlan.isMemoryActive()) {
+      routine.setAiDraftCards(RoutineMemoryJson.writeCards(generation.steps().stream()
+        .map(step -> new RoutineCardText(step.title(), step.description()))
+        .toList()));
+    }
 
     // 청구할 그림 수 = 카드에 실제로 붙은 그림. 실패해 비어 있는 카드는 세지 않는다.
     int imageCount = (int) routine.getSteps().stream().filter(step -> step.getImagePath() != null).count();
@@ -204,13 +225,21 @@ public class RoutineCreateService {
       releaseCredit(creditJobId, "일과 저장 실패", e);
       throw e;
     }
-    RoutineResponse response = RoutineResponse.from(saved.routine());
+    RoutineResponse response = withImageFailureFlag(RoutineResponse.from(saved.routine()), generation)
+      .withAppliedMemoryRuleCount(personalizationPlan.appliedRuleCount());
     CreditSettlement settlement = saved.settlement();
     if (settlement == null) {
       return response;
     }
     return response.withCredit(new RoutineResponse.CreditUsage(
       saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
+  }
+
+  /// AI 그림이 하나라도 비면 응답 imageSkippedReason=AI_IMAGE_FAILED (조용히 픽토그램으로 바뀌지 않게, #1172)
+  private static RoutineResponse withImageFailureFlag(
+    RoutineResponse response, RoutineAiPipeline.RoutineGenerationResult generation
+  ) {
+    return generation.failedImageCount() > 0 ? response.withImageSkippedReason(IMAGE_SKIPPED_FAILED) : response;
   }
 
   /// 이번 요청이 만드는 일과의 콘텐츠 언어: 화면 언어 > 켜진 언어 목록에 비춰 결정 (요청 스레드 전용)

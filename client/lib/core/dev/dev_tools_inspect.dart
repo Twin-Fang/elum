@@ -1,88 +1,52 @@
 part of 'dev_tools_overlay.dart';
 
-/// 상태 덤프 — 내부 값을 전부 모아 보여주고, 복사·파일 내보내기를 준다.
+/// 전체 값 보기: 내부 값을 전부(토큰 전문) 화면에 보이고, 로그 파일까지 담아 내보냄
 ///
-/// 검수자가 문제를 만난 자리에서 그대로 넘길 수 있게 하는 것이 목적이다.
-/// 화면 캡처만으로는 어떤 값이 들어 있었는지 알 수 없다.
-class _DumpView extends StatefulWidget {
-  const _DumpView();
+/// 채팅에 붙일 짧은 보고서는 메뉴 맨 위 `상태·로그 복사` 가 맡음 (토큰 가림)
+class _DumpView extends ConsumerStatefulWidget {
+  const _DumpView({required this.currentLocation});
+
+  final String? Function() currentLocation;
 
   @override
-  State<_DumpView> createState() => _DumpViewState();
+  ConsumerState<_DumpView> createState() => _DumpViewState();
 }
 
-class _DumpViewState extends State<_DumpView> {
+class _DumpViewState extends ConsumerState<_DumpView> {
   String? _summary;
   String? _message;
-  bool _busy = false;
+  bool _isBusy = false;
 
-  /// ⚠️ `initState`가 아니라 여기서 읽는다.
-  ///
-  /// 덤프는 `MediaQuery`(화면 크기·글꼴 배율·다크모드)를 본다. `initState`에서
-  /// 상속 위젯을 읽으면 Flutter가 막는다 — 실제로 첫 구현에서 이것이 찍혔다.
-  ///
-  /// ```text
-  /// [기기] (수집 실패: dependOnInheritedWidgetOfExactType<MediaQuery>() was
-  /// called before initState() completed)
-  /// ```
+  /// `initState` 가 아니라 여기서 읽음 (덤프가 MediaQuery 를 봄 > initState 에서는 Flutter 가 막음)
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_summary == null) _load();
   }
 
+  // 요약만 먼저 보임 (로그 전체 최대 2MB 를 그리면 느림)
   Future<void> _load() async {
-    // 요약만 먼저 보여준다. 로그 전체(최대 2MB)를 화면에 그리면 느리다.
-    final text = await DevStateDump.summary(context);
+    final text = await DevStateDump.summary(
+      context: context,
+      liveSections: _readLiveSections(ref, widget.currentLocation),
+    );
     if (mounted) setState(() => _summary = text);
   }
 
-  /// 로그까지 붙인 전체를 만든다. 복사·내보내기가 공유한다.
-  Future<String> _full() => DevStateDump.full(mounted ? context : null);
-
-  Future<void> _copy() async {
-    setState(() => _busy = true);
-    try {
-      await Clipboard.setData(ClipboardData(text: await _full()));
-      _say('클립보드에 복사했습니다');
-    } catch (e) {
-      _say('복사하지 못했습니다: $e');
-    }
-  }
-
-  Future<void> _export() async {
-    // 아이패드 공유 팝오버 기준 (await 전에 잡는다)
-    final origin = shareOriginOf(context);
-    setState(() => _busy = true);
-    try {
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/${DevStateDump.fileName()}');
-      await file.writeAsString(await _full());
-      // 공유 시트를 띄운다. 사용자가 취소해도 예외가 아니라 그냥 닫힌다.
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text: 'elum 디버그 덤프',
-          sharePositionOrigin: origin,
-        ),
-      );
-      _say('내보냈습니다: ${file.path.split('/').last}');
-    } catch (e) {
-      _say('내보내지 못했습니다: $e');
-    }
-  }
-
-  void _say(String m) {
+  Future<void> _onExportPressed() async {
+    setState(() => _isBusy = true);
+    final (message, _) = await _exportFullDump(context, ref, widget.currentLocation);
     if (!mounted) return;
     setState(() {
-      _busy = false;
-      _message = m;
+      _isBusy = false;
+      _message = message;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_summary == null) {
+    final summary = _summary;
+    if (summary == null) {
       return const Padding(
         padding: EdgeInsets.all(32),
         child: Center(child: CircularProgressIndicator()),
@@ -92,38 +56,22 @@ class _DumpViewState extends State<_DumpView> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _busy ? null : _copy,
-                  icon: const Icon(Icons.copy, size: 18),
-                  label: const Text('복사'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _busy ? null : _export,
-                  icon: const Icon(Icons.ios_share, size: 18),
-                  label: const Text('내보내기'),
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _isBusy ? null : _onExportPressed,
+              icon: const Icon(Icons.ios_share, size: 18),
+              label: const Text('로그 파일까지 전부 내보내기'),
+            ),
           ),
         ),
-        if (_message != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(_message!, style: const TextStyle(fontSize: 12)),
-          ),
-        const SizedBox(height: 8),
+        _Message(_message ?? '토큰 전문이 들어 있어요. 채팅·이슈에는 메뉴 맨 위 `상태·로그 복사` 를 쓰세요'),
         Flexible(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: SelectableText(
-              _summary!,
+              summary,
               style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
             ),
           ),
@@ -133,44 +81,56 @@ class _DumpViewState extends State<_DumpView> {
   }
 }
 
-/// 최근 로그를 보여준다. 복사 버튼 포함.
-class _LogViewer extends StatelessWidget {
+/// 이번 실행 로그 실시간 보기 (새 줄이 아래, 열면 맨 아래부터)
+class _LogViewer extends StatefulWidget {
   const _LogViewer();
+
+  @override
+  State<_LogViewer> createState() => _LogViewerState();
+}
+
+class _LogViewerState extends State<_LogViewer> {
+  // 이 패널은 Navigator 밖이라 SnackBar 가 안 뜸 > 결과를 줄로 보임
+  String? _message;
+
+  Future<void> _onCopyPressed() async {
+    final lines = DevLogBuffer.lines;
+    final recentLines = lines.length > DevStateReport.logLineCount
+        ? lines.sublist(lines.length - DevStateReport.logLineCount)
+        : lines;
+    await Clipboard.setData(ClipboardData(text: recentLines.join('\n')));
+    if (!mounted) return;
+    setState(() => _message = '최근 로그 ${recentLines.length}줄을 복사했어요');
+  }
+
+  void _onClearPressed() {
+    DevLogBuffer.clear();
+    setState(() => _message = '화면 로그를 비웠어요 (파일 기록은 남음)');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton.icon(
-                onPressed: () async {
-                  await Clipboard.setData(
-                    ClipboardData(text: DevLogBuffer.asText()),
-                  );
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.maybeOf(
-                    context,
-                  )?.showSnackBar(const SnackBar(content: Text('로그를 복사했어요')));
-                },
-                icon: const Icon(Icons.copy, size: 18),
-                label: const Text('복사'),
-              ),
-              TextButton.icon(
-                onPressed: DevLogBuffer.clear,
-                icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('비우기'),
-              ),
-            ],
-          ),
+        _Message(_message ?? '새 로그가 아래에 쌓여요'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed: _onCopyPressed,
+              icon: const Icon(Icons.copy, size: 18),
+              label: const Text('최근 ${DevStateReport.logLineCount}줄 복사'),
+            ),
+            TextButton.icon(
+              onPressed: _onClearPressed,
+              icon: const Icon(Icons.delete_outline, size: 18),
+              label: const Text('비우기'),
+            ),
+          ],
         ),
         const Divider(height: 1),
         Flexible(
-          // 새 로그가 쌓이면 즉시 갱신한다
           child: ValueListenableBuilder<int>(
             valueListenable: DevLogBuffer.revision,
             builder: (context, _, _) {
@@ -181,18 +141,17 @@ class _LogViewer extends StatelessWidget {
                   child: Text('아직 로그가 없어요'),
                 );
               }
+              // reverse: 열자마자 최신 줄이 보이게 (index 0 = 최신)
               return ListView.builder(
                 shrinkWrap: true,
+                reverse: true,
                 padding: const EdgeInsets.all(12),
                 itemCount: lines.length,
-                itemBuilder: (context, i) => Padding(
+                itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: SelectableText(
-                    lines[i],
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontFamily: 'monospace',
-                    ),
+                    lines[lines.length - 1 - index],
+                    style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
                   ),
                 ),
               );
@@ -223,6 +182,8 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · PIN', Routes.onboardingPin),
     ('일과 · 보상 정하기', Routes.routineReward),
     ('보호자 홈', Routes.guardian),
+    // 주간 리포트(Pro). Free 는 입구가 없어 요금제 흉내와 함께 바로 띄워 본다
+    ('보호자 · 주간 리포트', Routes.guardianWeeklyReport),
     // 역할 선택. 정식 경로는 로그인 → 약관 → 여기다.
     // 실기기 검수에서 매번 소셜 로그인을 다시 하지 않도록 지름길을 둔다.
     ('역할 선택', Routes.roleSelect),

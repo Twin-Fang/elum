@@ -134,8 +134,15 @@ abstract interface class LocalStorage {
   Future<void> setPendingSyncRoutineIds(List<String> ids);
 
   /// 마지막으로 성공한 `/api/routines/today` 응답. 오프라인에서 목록을 띄우는 데 쓴다.
+  ///
+  /// 받은 회원([accountMemberId])에 묶음: 지금 회원과 다르면 읽기는 null, 쓰기는 건너뜀.
   String? get cachedTodayRoutinesJson;
-  Future<void> setCachedTodayRoutinesJson(String json);
+
+  /// [ownerMemberId]: 요청을 보낸 시점의 [accountMemberId] (응답 사이 계정이 바뀌면 버리려고)
+  Future<void> setCachedTodayRoutinesJson(
+    String json, {
+    required String? ownerMemberId,
+  });
 
   /// 오늘 일과 캐시만 지운다. 이룸이를 바꿀 때 쓴다 (E44).
   ///
@@ -156,6 +163,12 @@ abstract interface class LocalStorage {
   /// 앱이 뜰 때 서버에 닿기 전 첫 요청부터 이 값으로 돈다. 없으면 코드 기본값이다.
   String? get cachedClientTuningJson;
   Future<void> setCachedClientTuningJson(String json);
+
+  /// 마지막으로 서버에서 받은 Pro 판매 여부 (`/api/app/status` 의 `sales`, #1132). 받은 적 없으면 null
+  ///
+  /// 로그아웃해도 지우지 않음 (계정이 아니라 이 기기의 서버 설정)
+  bool? get isCachedStoreSellingOpen;
+  Future<void> setCachedStoreSellingOpen(bool isOpen);
 
   // --- 공지 "보지 않기" 기록 ---
   // 공지마다 `{revision, until}` JSON 한 줄. 판단은 feature 쪽 NoticeHideStore 가 한다 —
@@ -182,6 +195,12 @@ abstract interface class LocalStorage {
   /// 알림이 꺼진 기기에 7일마다 다시 권하려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다
   DateTime? get pushPermissionNudgedAt;
   Future<void> setPushPermissionNudgedAt(DateTime at);
+
+  /// 보호자 홈 `알림이 꺼져 있어요` 띠를 닫은 시각 (닫으면 7일 숨김). 없으면 null
+  ///
+  /// 기기에 속하고 [clearAll] 이 지우지 않는다
+  DateTime? get homeNotificationNoticeDismissedAt;
+  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at);
 
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
@@ -239,22 +258,40 @@ abstract interface class LocalStorage {
   List<String> get talkShareHintDismissedRoutineIds;
   Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
 
+  /// 보호자 홈 권유 카드: 종류 이름 > 마지막으로 보인 시각 (같은 종류는 한 달에 한 번까지)
+  ///
+  /// 일과·계정에 묶인 값이라 [clearAll] 이 지운다
+  Map<String, DateTime> get homeSuggestionShownAtByKind;
+  Future<void> setHomeSuggestionShownAtByKind(Map<String, DateTime> shownAtByKind);
+
+  /// 보호자 홈 권유 카드를 닫은 기록 `{종류 이름}:{일과 id}` (다시 나오지 않음). [clearAll] 이 지운다
+  Set<String> get homeSuggestionDismissedKeys;
+  Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys);
+
   /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
   ///
   /// 보기 취향이라 휴대폰에 속하고 [clearAll] 이 지우지 않는다
   bool get isTalkGridView;
   Future<void> setTalkGridView(bool isGridView);
 
-  /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
+  /// 일과 알림 설정 JSON (#777). 없으면 null
+  ///
+  /// 일과 제목이 들어 있어 계정 범위다. 예약과 함께 지워야 하므로 [clearAll] 이 남기고,
+  /// 다른 계정이 로그인하면 알림 기능이 예약 취소와 함께 비운다.
   String? get routineRemindersJson;
   Future<void> setRoutineRemindersJson(String json);
 
-  /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
+  /// 계정 범위 값 전부 지우기: 로그아웃·탈퇴·다른 계정 로그인
   ///
-  /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
-  /// 인터페이스에 두는 이유는 InMemoryStorage도 같은 동작을 보장해
-  /// 테스트로 검증할 수 있게 하기 위함이다.
+  /// 지우는 키는 `SharedPrefsStorage.accountScopedKeys` 분류표 한 곳이 정한다.
+  /// 기기 범위(언어·소리·안내 본 기록·서버 설정 캐시)는 남긴다.
   Future<void> clearAll();
+
+  /// 이룸이 기기로 연결된 직후 연결 전 계정 범위 값 지우기
+  ///
+  /// [clearAll] 과 같은 분류표를 쓰되 남기는 것 4개: 이룸이 기기 표식·연결 끊김 표식·역할(연결이 방금 씀),
+  /// 보호자 잠금(이룸이 기기에는 보호자 화면이 없음, 다른 계정 로그인 때 [clearAll] 이 지움)
+  Future<void> clearAccountForElumiLink();
 
   /// 아이 정보만 지운다. 토큰은 건드리지 않는다.
   ///

@@ -6,6 +6,7 @@ import '../assets/app_assets.dart';
 import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_button.dart';
+import 'elum_error_code_text.dart';
 import 'elum_text_link.dart';
 
 /// 실패를 실패로 보여주는 공통 화면.
@@ -125,18 +126,10 @@ class ElumErrorView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: typo.promptBody.copyWith(color: colors.promptMuted),
               ),
+            // 다시 시도 링크 > 에러 코드 줄 (링크 글에 코드를 섞지 않음, #1171)
             if (onRetry != null)
-              ElumTextLink(
-                label: errorCode == null
-                    ? context.l10n.commonRetry
-                    : context.l10n.commonRetryWithCode(errorCode!),
-                onTap: onRetry,
-              )
-            else if (errorCode != null)
-              Text(
-                errorCode!,
-                style: typo.promptBody.copyWith(color: colors.promptMuted),
-              ),
+              ElumTextLink(label: context.l10n.commonRetry, onTap: onRetry),
+            if (errorCode != null) ElumErrorCodeText(errorCode!),
           ],
         ),
       );
@@ -178,10 +171,7 @@ class ElumErrorView extends StatelessWidget {
           if (errorCode != null) ...[
             SizedBox(height: space.md),
             // 추적용 식별자 — 제보 시 원인을 짚는 유일한 단서다.
-            Text(
-              errorCode!,
-              style: typo.promptBody.copyWith(color: colors.promptMuted),
-            ),
+            ElumErrorCodeText(errorCode!),
           ],
         ],
       ),

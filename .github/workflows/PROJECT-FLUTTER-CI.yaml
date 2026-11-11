@@ -36,7 +36,7 @@
 # ==========================================================================================
 # 🔑 필수 GitHub Secrets
 # ==========================================================================================
-# ENV_FILE (선택): .env 파일 내용
+# CLIENT_ENV_FILE: .env 파일 내용
 #
 # ※ CI는 빌드 검증 목적이므로 서명/배포 관련 Secrets 불필요
 # ==========================================================================================
@@ -258,7 +258,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -296,7 +296,7 @@ jobs:
           flutter analyze --no-fatal-infos
           echo "✅ 코드 분석 완료"
 
-      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩, 디자인 규칙, 네이티브 언어 등록) — 앱 테스트를 지운 뒤 남은 강제 장치
+      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩, 디자인 규칙, 네이티브 언어 등록, 로컬 저장 키 범위 분류) — 앱 테스트를 지운 뒤 남은 강제 장치
       # 디자인 규칙 원본: tool/design_rules.yaml (Figma 화면 통계), 동결 목록: tool/design_rules_allowed.txt
       - name: Run rule checks
         id: rules
@@ -305,6 +305,8 @@ jobs:
           dart run tool/check_hangul_literals.dart lib
           dart run tool/check_design_rules.dart
           dart run tool/check_native_locales.dart
+          dart run tool/check_storage_scopes.dart
+          dart run tool/check_unused_code.dart
           echo "✅ 규칙 검사 완료"
 
       # 분석 결과 기록
@@ -337,7 +339,7 @@ jobs:
     if: |
       needs.prepare.outputs.analyze_only != 'true' &&
       needs.prepare.outputs.enable_android == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare
 
     outputs:
@@ -355,6 +357,14 @@ jobs:
           script: |
             core.setOutput('time', Date.now().toString());
 
+      # debug APK 의 네이티브 라이브러리 병합이 러너 디스크를 다 씀 > 빌드에 안 쓰는 기본 도구를 먼저 지움
+      - name: Free runner disk space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/share/swift /usr/local/share/boost
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h /
+
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -362,7 +372,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -532,7 +542,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 

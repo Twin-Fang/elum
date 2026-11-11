@@ -161,10 +161,9 @@ class _PinScreenState extends ConsumerState<PinScreen>
       return;
     }
 
-    // 로컬에는 저장돼 있어 앱은 그대로 쓸 수 있다. 다만 서버에 못 남겼다는 것을
-    // 알려야 "재설치했더니 설정이 사라졌다"를 나중에 겪지 않는다.
-    // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다**.
-    // 팝업을 닫은 뒤에 넘어간다 — 먼저 넘어가면 팝업이 홈 위에 남는다.
+    // 서버 저장 실패 > 이 화면에 남음 (입력·PIN 유지, `시작하기`를 다시 누르면 다시 보냄).
+    // 홈으로 넘기면 다시 보낼 길이 없어 서버에 빈 이름·기본 그림 방식이 남는다.
+    // 서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다.
     final failure = result.saveFailure;
     if (failure != null) {
       await showFailure(
@@ -174,7 +173,7 @@ class _PinScreenState extends ConsumerState<PinScreen>
         fallback: l10n.pinSaveFailedFallback,
         fallbackCode: 'E-PROFILE',
       );
-      if (!mounted) return;
+      return;
     }
     context.go(Routes.guardian);
   }
@@ -195,7 +194,7 @@ class _PinScreenState extends ConsumerState<PinScreen>
     final failure = await ref.read(onboardingProvider.notifier).complete();
     if (failure == null) {
       // 서버가 저장한 이룸이로 다시 맞춘다 (메모리의 옛 선택값·회원 정보 버림).
-      // 저장이 실패했으면 받지 않는다: 서버의 빈 값이 로컬 입력을 덮는다.
+      // 저장이 실패했으면 받지 않는다: 서버의 빈 값이 다시 보낼 입력을 덮는다.
       ref.invalidate(profileSessionProvider);
       ref.invalidate(memberProvider);
     }
