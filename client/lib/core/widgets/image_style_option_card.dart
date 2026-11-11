@@ -17,9 +17,8 @@ import '../../shared/models/image_style.dart';
 /// 모서리 20이고 왼쪽에 70×70 예시, 오른쪽에 20×20 라디오가 선다. 고르면 민트 면(`#B5EAEC`)과
 /// 2px 테두리(`#93DBCC`)로 바뀐다.
 ///
-/// 캐릭터 예시는 온보딩에서 고른 친구를 그린다(시안은 포포다). 고른 면이 민트색(`#93DBCC`)이고
-/// 고르지 않으면 바탕색이다. 사진 같은 그림은 시안의 사진 에셋, 이모지·그림 기호는 실제 카드에 들어가는
-/// 그림(이 닦기)이다. Pro 방식은 이름 옆에 [ProBadge] (잠금 판단은 호출부, #1149).
+/// 만화 그림 예시는 카드에 실제로 그려지는 만화 아이(이 닦기), 사진 같은 그림은 시안의 사진 에셋,
+/// 이모지·그림 기호는 실제 카드에 들어가는 그림(이 닦기)이다. Pro 방식은 이름 옆에 [ProBadge] (잠금 판단은 호출부, #1149).
 ///
 /// 세 화면(온보딩·보호자 설정·이룸이 정보 시트)이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
@@ -34,7 +33,7 @@ class ImageStyleOptionCard extends StatelessWidget {
   final ImageStyle style;
   final bool isSelected;
 
-  /// 캐릭터 예시에 그릴 캐릭터. 온보딩에서 고른 친구가 그대로 보이게 한다.
+  /// 고른 캐릭터 (지금 예시 그림은 캐릭터와 무관한 만화 아이. 캐릭터별 예시를 다시 열 자리)
   final CardCharacter character;
 
   /// 이름 옆 [ProBadge] 를 보이는가 (Free 에게 잠긴 Pro 방식)
@@ -107,7 +106,6 @@ class ImageStyleOptionCard extends StatelessWidget {
         children: [
           _Example(
             style: style,
-            character: character,
             isSelected: isSelected,
           ),
           SizedBox(width: _exampleToText.w),
@@ -162,32 +160,23 @@ class ImageStyleOptionCard extends StatelessWidget {
 class _Example extends StatelessWidget {
   const _Example({
     required this.style,
-    required this.character,
     required this.isSelected,
   });
 
   final ImageStyle style;
-  final CardCharacter character;
   final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final size = ImageStyleOptionCard._exampleSize.w;
 
     final Widget picture = switch (style) {
-      // 캐릭터: 고르면 민트 면, 아니면 바탕색 위에 캐릭터(57×57). 형태 있는 일러스트는
-      // 에셋이다 — 코드로 그리지 않는다.
-      ImageStyle.character => ColoredBox(
-        color: isSelected ? colors.goalSelectedBorder : colors.background,
-        child: Center(
-          child: SvgPicture.asset(
-            AppAssets.character(character),
-            width: 57.w,
-            height: 57.w,
-            fit: BoxFit.contain,
-          ),
-        ),
+      // 만화 그림: 카드에 실제로 그려지는 만화 아이 (서버 CardImageSubject.CHILD)
+      ImageStyle.character => Image.asset(
+        AppAssets.imageStyleCartoon,
+        fit: BoxFit.cover,
+        // 장식 그림이다 — 카드 이름이 이미 뜻을 말한다
+        excludeFromSemantics: true,
       ),
       ImageStyle.realistic => Image.asset(
         AppAssets.imageStyleRealistic,
