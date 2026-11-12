@@ -7,10 +7,18 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface NotificationDispatchRepository extends JpaRepository<NotificationDispatch, String> {
+
+  /// 회원의 발송 기록 전부 삭제 (탈퇴·완전 삭제, #1307)
+  @Transactional
+  @Modifying
+  @Query("delete from NotificationDispatch d where d.memberId = :memberId")
+  int deleteAllByMemberId(@Param("memberId") String memberId);
 
   /// 그 출처로 since 이후 받은 회원 id (하루 1개 상한)
   @Query("""
