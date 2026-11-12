@@ -1,0 +1,53 @@
+{
+  "title": "Rutinas para niños con TDAH: horario visual | ELUM",
+  "description": "Si olvida lo que tiene que hacer o se distrae a mitad, ver el orden ayuda. Cómo hacer un horario visual pensado para niños con TDAH.",
+  "heading": "TDAH y rutinas: que el orden se vea",
+  "lede": "Si \"¿cuántas veces te lo tengo que decir?\" se repite, quizá sea el momento de cambiar las palabras por un orden que se vea.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Las instrucciones habladas se olvidan pronto",
+      "paragraphs": [
+        "Cuando se oyen varias cosas a la vez, como \"lávate, vístete y prepara la mochila\", es fácil quedarse solo con la primera o distraerse con otra cosa a mitad de camino.",
+        "Si lo que hay que hacer está <b>delante de los ojos y no en la cabeza</b>, no hace falta depender de la memoria. Esa es la función del horario visual."
+      ]
+    },
+    {
+      "heading": "Cómo hacerlo",
+      "list": [
+        "<b>Una tarjeta cada vez.</b> Solo se ve en grande lo que toca ahora",
+        "<b>Corto.</b> De 3 a 5 tarjetas por rutina. Si es más larga, divídela en dos",
+        "<b>Que se vea el final.</b> Saber cuántas tarjetas quedan ayuda a seguir",
+        "<b>Marcar enseguida.</b> Al terminar, se marca y llega el elogio",
+        "<b>Recompensa cercana.</b> No dentro de una semana, sino justo al acabar la rutina"
+      ]
+    },
+    {
+      "heading": "También para los deberes y para ordenar",
+      "paragraphs": [
+        "Si divides \"haz los deberes\" en \"siéntate en el escritorio → abre la agenda → haz una página de matemáticas → guárdalo en la mochila\", empezar es más fácil. Lo más difícil suele ser <b>el primer paso</b>. Haz que la primera tarjeta sea muy fácil."
+      ]
+    },
+    {
+      "heading": "En ELUM",
+      "paragraphs": [
+        "En la pantalla de tu hijo o hija, las tarjetas aparecen en grande una a una, con voz que las lee, marcas y estrellas. Tú decides la rutina y la recompensa, y puedes ver cuánto ha hecho."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: empezar los deberes",
+    "items": [
+      {"emoji": "🪑", "title": "Siéntate en el escritorio", "body": "Acerca la silla y siéntate"},
+      {"emoji": "📒", "title": "Abre la agenda", "body": "Mira los deberes de hoy"},
+      {"emoji": "✏️", "title": "Haz una página", "body": "Solo una página de matemáticas"},
+      {"emoji": "🎒", "title": "Guárdalo en la mochila", "body": "Para llevarlo mañana"}
+    ],
+    "reward": "Al terminar, 10 minutos de bloques"
+  },
+  "faq": [
+    {"q": "No pasa las tarjetas y se pone a hacer otra cosa.", "a": "Prueba a usar menos tarjetas y a hacer más fácil la primera. Conviene dejar el dispositivo en un sitio con pocas distracciones."},
+    {"q": "Parece que se ha aburrido de la rutina y no quiere hacerla.", "a": "Prueba a cambiar la recompensa. Puede que ahora le gusten otras cosas. Cambiar un poco el orden o las imágenes de las tarjetas también la hace sentir nueva."}
+  ],
+  "related": ["learning-homework", "rewards"]
+}

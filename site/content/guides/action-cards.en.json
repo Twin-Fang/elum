@@ -1,0 +1,60 @@
+{
+  "title": "What are action cards? How to make a visual schedule | ELUM",
+  "description": "Action cards show one task per card with a picture. Learn why a visual schedule is easier to follow, plus steps and examples for making one at home.",
+  "heading": "What are action cards? How to make a visual schedule",
+  "lede": "Instead of saying \"hurry up and get ready,\" you show one thing to do right now, with a picture.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "What is an action card",
+      "paragraphs": [
+        "An action card is a picture card with <b>one action on one card</b>. A picture and a short sentence show \"what to do right now.\"",
+        "Put several cards in order and you have a <b>visual schedule</b>. Your child can see a daily routine, like getting ready in the morning, going to school or going to bed, from start to finish."
+      ]
+    },
+    {
+      "heading": "Why pictures and order make it easier",
+      "paragraphs": [
+        "Spoken words are gone the moment you hear them, but a picture stays. If your child forgets, they can look again.",
+        "Seeing what comes next helps your child get ready for it. Seeing where it ends helps a lot, too."
+      ],
+      "list": [
+        "Only one thing is shown at a time, so it's clear what to do first",
+        "You don't have to say the same thing over and over",
+        "Checking off a finished card shows your child they did it themselves"
+      ]
+    },
+    {
+      "heading": "How to make one at home",
+      "list": [
+        "<b>Pick one routine.</b> A short one you do every day works well. For example, brushing teeth in the morning",
+        "<b>Break it into small actions.</b> Instead of \"brush your teeth,\" write actions you can see, like \"put toothpaste on the brush\" and \"brush your top teeth\"",
+        "<b>Put one action on each card.</b> Keep the sentence short and choose a picture that brings the action to mind right away",
+        "<b>Choose a reward for the end.</b> Something small you can give right away works best, like a favorite snack or game",
+        "<b>Use it in the same place, in the same order.</b> After a few days, break any hard step into smaller ones"
+      ]
+    },
+    {
+      "heading": "Making them with ELUM",
+      "paragraphs": [
+        "In ELUM, write one line like \"brush teeth in the morning\" and you get step-by-step action cards. After you edit the sentences, pictures and order and save them, the cards appear one at a time on your child's screen. Each card is read aloud, and your child checks it off when done."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: brushing teeth in the morning",
+    "items": [
+      {"emoji": "🪥", "title": "Pick up your toothbrush", "body": "Find your own toothbrush"},
+      {"emoji": "🧴", "title": "Add toothpaste", "body": "Just a pea-sized amount"},
+      {"emoji": "😁", "title": "Brush your teeth", "body": "Top, bottom and inside"},
+      {"emoji": "🚰", "title": "Rinse your mouth", "body": "Rinse with water three times"}
+    ],
+    "reward": "All done: one sticker"
+  },
+  "faq": [
+    {"q": "Are action cards and a visual schedule different things?", "a": "An action card is a single card with one action. A visual schedule is those cards laid out in order. In ELUM, each routine is a visual schedule, and the cards inside it are action cards."},
+    {"q": "How many cards should I use?", "a": "Start with 3 to 5 cards. If one card looks hard, split it into two. When it gets easy, you can combine them again."},
+    {"q": "Can my child use it without reading?", "a": "Yes. The picture comes first, and ELUM reads each card's sentence aloud."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}

@@ -1,0 +1,47 @@
+{
+  "title": "Cómo elegir recompensas: pegatinas y fichas | ELUM",
+  "description": "Cómo elegir recompensas pequeñas e inmediatas, cómo usar una tabla de recompensas con pegatinas y estrellas, y cómo ir retirando las recompensas.",
+  "heading": "Cómo elegir recompensas: pequeñas, inmediatas y anunciadas",
+  "lede": "Una recompensa no es un soborno. Es una señal que dice \"lo has logrado\".",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Tres claves de una buena recompensa",
+      "list": [
+        "<b>Pequeña.</b> Tiene que poder darse cada día. Un bocado de merienda, su canción favorita, 5 minutos de juego",
+        "<b>Inmediata.</b> Dala justo cuando termina la rutina. Si se retrasa, cuesta entender por qué llega",
+        "<b>Anunciada.</b> Antes de empezar, muestra \"al terminar, ○○\". No es lo mismo que darla por sorpresa al final"
+      ]
+    },
+    {
+      "heading": "Qué usar como recompensa",
+      "paragraphs": [
+        "La mejor recompensa es <b>lo que a tu hijo o hija le gusta ahora</b>. Puede ser distinto de lo que a ti te parece bueno. Muéstrale dos o tres opciones y deja que elija."
+      ],
+      "list": [
+        "Para comer: un poco de su merienda favorita",
+        "Para hacer: columpiarse, jugar con bloques, 10 minutos de vídeo",
+        "Para compartir: un abrazo, chocar los cinco, leer un libro juntos",
+        "Para coleccionar: pegatinas, estrellas"
+      ]
+    },
+    {
+      "heading": "Coleccionar estrellas y pegatinas",
+      "paragraphs": [
+        "Consiste en dar una estrella por cada tarjeta terminada y canjear las estrellas reunidas por una recompensa mayor. En rutinas largas, donde el final parece lejano, da fuerzas a mitad de camino.",
+        "En ELUM, cada vez que se marca una tarjeta suena un elogio y aparece una estrella. Al terminar la rutina, se muestra en pantalla la recompensa que escribiste de antemano."
+      ]
+    },
+    {
+      "heading": "Ve retirando las recompensas poco a poco",
+      "paragraphs": [
+        "Cuando la rutina ya sea conocida, pasa de dar la recompensa cada vez a darla un día sí y otro no, y cambia los objetos por elogios. Cumple siempre la recompensa prometida y no la quites como castigo cuando no lo logre."
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "¿Puedo usar vídeos como recompensa?", "a": "Sí. Pero tiene que quedar claro cuándo termina. Fija un tiempo, como \"10 minutos de vídeo\", y usa un temporizador."},
+    {"q": "Sin recompensa no quiere hacer nada.", "a": "No quites la recompensa de golpe. Ve espaciándola poco a poco. También ayuda dividir la rutina en pasos más pequeños para que sea más fácil."}
+  ],
+  "related": ["aba-principles", "action-cards"]
+}

@@ -1,0 +1,55 @@
+{
+  "title": "Rutinas con pictogramas para anticipar el día | ELUM",
+  "description": "Cómo mostrar el día con imágenes a niños con discapacidades del desarrollo o en el espectro autista: crear el horario visual, avisar de cambios y ejemplos.",
+  "heading": "Discapacidades del desarrollo y horario visual: anticipar el día con imágenes",
+  "lede": "Saber qué viene después hace que el día sea mucho más tranquilo.",
+  "minutes": 5,
+  "sections": [
+    {
+      "heading": "Saber de antemano da seguridad",
+      "paragraphs": [
+        "Hay personas para quienes <b>las imágenes y el orden</b> son más claros que el texto o las palabras. Si muestras el día con imágenes, pueden comprobar por su cuenta qué toca hacer, qué viene después y cuándo termina.",
+        "No es lo mismo oír de repente \"nos vamos ya\" que haber visto antes el siguiente paso en una tarjeta. Se recibe de otra manera."
+      ]
+    },
+    {
+      "heading": "Cómo crear el horario visual",
+      "list": [
+        "<b>Divide el día en bloques.</b> Mañana, ir a la escuela, la vuelta a casa, hora de dormir",
+        "<b>Convierte cada bloque en una rutina.</b> De 3 a 6 tarjetas por rutina",
+        "<b>Una sola acción por tarjeta.</b> Usa siempre las mismas imágenes para que resulten familiares",
+        "<b>Usa también la voz que lee.</b> Oír la misma frase con la misma voz facilita entenderla",
+        "<b>Pon la recompensa al final.</b> Así queda claro dónde termina la rutina"
+      ]
+    },
+    {
+      "heading": "Cuando cambian los planes",
+      "paragraphs": [
+        "Para días distintos de lo habitual, como ir al médico o recibir visitas, muéstralo antes con tarjetas, <b>el día anterior</b>. Para un lugar nuevo, conviene incluir en orden qué se hará allí y cuándo termina.",
+        "En ELUM, si escribes algo como \"mañana vamos a vacunarnos\", se crean tarjetas con los pasos adecuados para esa situación."
+      ]
+    },
+    {
+      "heading": "Tú decides",
+      "paragraphs": [
+        "ELUM no pide diagnósticos ni tipos de discapacidad. Quien mejor sabe qué le resulta fácil y qué le cuesta a tu hijo o hija eres tú. Las tarjetas que crea la IA solo se muestran después de que las edites y revises."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: prepararse para dormir",
+    "items": [
+      {"emoji": "🛁", "title": "Báñate", "body": "Con agua calentita"},
+      {"emoji": "👚", "title": "Ponte el pijama", "body": "Cámbiate de ropa"},
+      {"emoji": "🪥", "title": "Cepíllate los dientes", "body": "Antes de dormir"},
+      {"emoji": "📖", "title": "Lee un cuento", "body": "Elegidlo y leedlo juntos"},
+      {"emoji": "🌙", "title": "Apaga la luz", "body": "Tápate y acuéstate"}
+    ],
+    "reward": "Al terminar, un abrazo"
+  },
+  "faq": [
+    {"q": "¿Qué tipo de imágenes conviene usar?", "a": "Depende de cada persona. A algunas les resultan cómodas las imágenes sencillas, como emojis o pictogramas, y a otras las que se parecen a la realidad, como una foto. En ELUM puedes elegir entre cuatro estilos de imagen."},
+    {"q": "¿Se puede usar también en la escuela o en un centro?", "a": "Sí. Puedes invitar a otros cuidadores para ver juntos las rutinas del mismo niño o niña, y también imprimir las tarjetas o enviarlas como imagen."}
+  ],
+  "related": ["action-cards", "aba-principles"]
+}

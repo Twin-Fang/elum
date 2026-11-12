@@ -1,0 +1,57 @@
+{
+  "title": "Principios ABA explicados fácil: 4 ideas para rutinas | ELUM",
+  "description": "Los principios básicos del ABA explicados para cuidadores: dividir en pasos, mostrar antes, ayudar y retirar la ayuda, y recompensar al momento.",
+  "heading": "Principios ABA: 4 ideas para las rutinas",
+  "lede": "No es una teoría difícil. Son cuatro ideas que puedes llevar directamente a las rutinas de cada día en casa.",
+  "minutes": 5,
+  "sections": [
+    {
+      "heading": "Qué es el ABA",
+      "paragraphs": [
+        "El ABA (Applied Behavior Analysis, Análisis Conductual Aplicado) es <b>una forma de observar lo que pasa antes y después de una conducta para crear un entorno donde sea más fácil aprender</b>.",
+        "La clave es buscar \"cómo hacerlo más fácil\" en lugar de reprochar \"por qué no lo hace\". Estas cuatro ideas se pueden usar tal cual en las rutinas de casa."
+      ]
+    },
+    {
+      "heading": "1. Divide en pasos pequeños",
+      "paragraphs": [
+        "\"Prepárate para ir a la escuela\" en realidad junta muchas acciones. Si lo divides en <b>acciones pequeñas que se ven</b>, como vestirse, cepillarse los dientes o preparar la mochila, solo hay que hacer una cada vez. A esto se le llama análisis de tareas."
+      ]
+    },
+    {
+      "heading": "2. Muestra antes lo que viene",
+      "paragraphs": [
+        "Si muestras con imágenes qué hay que hacer <b>antes de empezar</b>, es más fácil ponerse en marcha. Ver el siguiente paso también reduce la sensación de cambio repentino. Las tarjetas de acción y el horario visual cumplen esta función."
+      ]
+    },
+    {
+      "heading": "3. Ayuda y ve retirando la ayuda",
+      "paragraphs": [
+        "Al principio, señala con la mano o hazlo juntos. Cuando ya lo conozca, reduce la ayuda poco a poco. El objetivo es que, aunque no estés al lado, mire las tarjetas y <b>siga por su cuenta</b>."
+      ]
+    },
+    {
+      "heading": "4. Si lo logra, elogia y recompensa al momento",
+      "paragraphs": [
+        "Cuando algo bueno llega justo después de una acción, dan ganas de repetirla. El término técnico es refuerzo. En ELUM lo llamamos <b>recompensa</b>.",
+        "Elogia enseguida y de forma concreta. Mejor \"te has cepillado los dientes sin ayuda\" que \"muy bien\". Decide de antemano una recompensa pequeña que puedas dar al momento."
+      ]
+    },
+    {
+      "heading": "Así lo aplicamos en ELUM",
+      "list": [
+        "<b>Una acción por tarjeta</b>: la rutina que escribes se divide en pasos fáciles de seguir",
+        "<b>Imágenes y voz</b>: las frases cortas se muestran con una imagen y se leen en voz alta",
+        "<b>Marcas y estrellas</b>: al terminar cada tarjeta suena un elogio y se gana una estrella",
+        "<b>La recompensa que tú eliges</b>: al terminar la rutina aparece la pantalla con la recompensa acordada",
+        "<b>Lo más importante eres tú</b>: la rutina y la recompensa las decide quien mejor conoce a tu hijo o hija, es decir, tú"
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "¿El ABA es solo para profesionales?", "a": "Diseñar un plan adaptado a cada persona es tarea de profesionales. Pero ideas básicas como dividir en pasos, mostrar antes lo que viene y elogiar al momento también se pueden usar en las rutinas de casa. Si algo te preocupa, consúltalo con su docente o con un profesional."},
+    {"q": "Si doy recompensas, ¿dejará de hacerlo cuando no las haya?", "a": "Al principio dalas a menudo y, cuando ya lo conozca, ve espaciándolas poco a poco. También puedes ir cambiando los objetos por elogios o por juegos compartidos."},
+    {"q": "Usar ELUM, ¿es hacer ABA?", "a": "ELUM es una herramienta para el día a día diseñada a partir de los principios del ABA. No sustituye un diagnóstico ni un tratamiento."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}

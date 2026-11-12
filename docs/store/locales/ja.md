@@ -69,4 +69,4 @@ ELUMは、毎日の生活を助ける行動カードアプリです。一日の�
 ## 공개 주소
 
 - 개인정보처리방침: 일본어 게시본 없음(#531·#528). 열기 전에 정한다
-- 지원: https://twin-fang.github.io/elum/
+- 지원: https://elum.suhsaechan.kr/

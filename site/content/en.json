@@ -1,0 +1,124 @@
+{
+  "skipToContent": "Skip to content",
+  "languageMenu": "Change language",
+  "nav": {
+    "label": "Main menu",
+    "guides": "Guides",
+    "faq": "FAQ",
+    "download": "Get the app"
+  },
+  "footer": {
+    "label": "Footer menu",
+    "privacy": "Privacy Policy",
+    "delete": "Delete account and data",
+    "contact": "Contact us",
+    "notice": "ELUM supports everyday independence. It does not replace diagnosis or treatment."
+  },
+  "store": {
+    "appStore": "Download on the App Store",
+    "googlePlay": "Get it on Google Play"
+  },
+  "download": {
+    "title": "Turn today's routine into action cards",
+    "sub": "It's free to start. Your child sees cards only after a caregiver has checked them.",
+    "bar": "Get the ELUM app"
+  },
+  "home": {
+    "title": "ELUM | Visual schedule and action cards for routines",
+    "description": "A visual schedule app that turns routines into step-by-step action cards with pictures and voice. Made with developmental disabilities and ADHD in mind.",
+    "hero": {
+      "tag": "Action cards · Visual schedule",
+      "titleHtml": "Your child's day,<br/>one <em>action card</em> at a time",
+      "lede": "Write something like \"wash face and get dressed in the morning,\" and ELUM breaks it into easy steps on cards.",
+      "hint": "Free to start · iPhone · iPad · Android"
+    },
+    "demo": {
+      "label": "Three action cards finished in order, then a reward",
+      "routine": "Morning routine",
+      "cards": [
+        {"emoji": "🪥", "title": "Brush your teeth", "body": "Put toothpaste on the brush"},
+        {"emoji": "👕", "title": "Get dressed", "body": "Put on your top first"},
+        {"emoji": "🎒", "title": "Put on your backpack", "body": "Go to the front door"}
+      ],
+      "reward": "All done: a favorite snack"
+    },
+    "steps": {
+      "tag": "How it works",
+      "title": "Write, check, and do it together",
+      "items": [
+        {"title": "Describe the situation", "body": "One line is enough, the way you'd normally say it. You can also pick an example routine."},
+        {"title": "Check the cards", "body": "You edit and save the steps AI suggests. Only cards you've checked are shown."},
+        {"title": "Follow along, one by one", "body": "Your child looks at the picture, listens to the voice and checks it off. At the end comes the reward you chose."}
+      ]
+    },
+    "styles": {
+      "tag": "Card pictures",
+      "title": "Pictures that suit your child",
+      "sub": "Choose from four picture styles. You can switch anytime.",
+      "items": [
+        {"title": "Emoji pictures", "body": "Shows objects with friendly emoji"},
+        {"title": "Picture symbols", "body": "Shows the action as a line drawing"},
+        {"title": "Cartoon pictures", "body": "A cartoon child shows how it's done", "badge": "PRO"},
+        {"title": "Photo-like pictures", "body": "Looks like the real thing", "badge": "PRO"}
+      ]
+    },
+    "aba": {
+      "tag": "Design principles",
+      "title": "Easy to set up, theirs to do",
+      "sub": "ELUM is built on the principles of Applied Behavior Analysis (ABA).",
+      "items": [
+        {"title": "One action per card", "body": "Each card shows what to do, how to do it, and the reward at the end."},
+        {"title": "Short sentences, pictures and voice", "body": "Your child sees, listens and follows along one step at a time."},
+        {"title": "Praise and a star right away", "body": "It leads up to the reward the caregiver chose."}
+      ],
+      "link": "ABA principles made simple →"
+    },
+    "audience": {
+      "tag": "Who we had in mind",
+      "title": "When the order is clear, the day gets easier",
+      "items": [
+        {"title": "Mornings and evenings", "body": "Washing, getting dressed and getting ready for bed, in order"},
+        {"title": "School and study", "body": "Getting ready for school and homework, one step at a time"},
+        {"title": "Chores and doing it yourself", "body": "Tidying up and setting the table, even on their own"},
+        {"title": "Trying things outside", "body": "Look ahead at riding the bus or buying something"}
+      ]
+    },
+    "guides": {
+      "tag": "Guides",
+      "title": "New to action cards?",
+      "sub": "A plain guide to what action cards are and how to make and use them.",
+      "more": "See all guides →"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {"q": "What is ELUM?", "a": "ELUM is a visual schedule app that shows daily routines as action cards (picture sequence cards). A caregiver describes the situation, and ELUM breaks it into easy steps on cards. Your child then follows along one card at a time, looking at the pictures and listening to the voice."},
+        {"q": "Is it free?", "a": "Yes, it's free to start. You can make cards with Emoji pictures and Picture symbols for free. Cartoon pictures and Photo-like pictures, which AI draws for each card, and a few other features come with the Pro subscription."},
+        {"q": "Who is it for?", "a": "We had in mind people with developmental disabilities or on the autism spectrum who find pictures and sequences easier than words, people with ADHD or learning disabilities who want to see the order of tasks at a glance, and the parents, caregivers and teachers who help them through the day step by step."},
+        {"q": "Are AI-made cards shown right away?", "a": "No. Cards made by AI appear on your child's screen only after a caregiver checks and saves them. You can edit the sentences, pictures and order."},
+        {"q": "Do I need to enter a diagnosis or type of disability?", "a": "No. ELUM does not ask for a diagnosis or type of disability. What you write when making cards is sent to AI, so please don't include personal details like names or phone numbers. Learn more in our <a href=\"/privacy.html\">Privacy Policy</a>."},
+        {"q": "Do I need two devices?", "a": "No. You can switch between the caregiver screen and your child's screen on one device. If your child has their own device, you can also connect it."},
+        {"q": "How do I delete my account and data?", "a": "Delete your account in the app's settings. The steps are in our <a href=\"/delete.html\">account and data deletion guide</a>."}
+      ]
+    },
+    "contact": {
+      "title": "Have a question?",
+      "sub": "Tell us where you got stuck or what you'd like to see."
+    }
+  },
+  "guide": {
+    "indexTitle": "Action card and visual schedule guides | ELUM",
+    "indexDescription": "What action cards and visual schedules are, how to split routines with ABA ideas, how to pick rewards, plus morning and homework routine examples.",
+    "indexHeading": "Action card guides",
+    "indexSub": "Simple guides for caregivers making action cards for the first time.",
+    "breadcrumbHome": "ELUM",
+    "breadcrumbGuides": "Guides",
+    "minutes": "{n} min read",
+    "stepLabel": "{n}",
+    "faqHeading": "Frequently asked questions",
+    "related": "Read next",
+    "ctaTitle": "You can make this routine in ELUM right now",
+    "ctaSub": "Write one line and get step-by-step action cards.",
+    "notice": "This article is a guide for everyday routines. ELUM does not replace diagnosis or treatment."
+  }
+}

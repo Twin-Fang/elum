@@ -91,7 +91,7 @@ ELUM 的三步结构参考了 ABA（应用行为分析）的原理。
 
 ## 帮助与条款
 
-[帮助](https://twin-fang.github.io/elum/) · [隐私政策](https://twin-fang.github.io/elum/privacy.html) · [删除账号和数据](https://twin-fang.github.io/elum/delete.html)
+[帮助](https://elum.suhsaechan.kr/) · [隐私政策](https://elum.suhsaechan.kr/privacy.html) · [删除账号和数据](https://elum.suhsaechan.kr/delete.html)
 
 ## 团队
 

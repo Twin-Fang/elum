@@ -8,7 +8,7 @@ import 'link_code.dart';
 ///
 /// | 종류 | 모양 |
 /// | --- | --- |
-/// | 웹 링크 | `https://twin-fang.github.io/elum/link/#code=A7K3M9` |
+/// | 웹 링크 | `https://elum.suhsaechan.kr/link/#code=A7K3M9` |
 /// | 앱 주소 | `elum://link?code=A7K3M9` |
 ///
 /// 해석 규칙(조각·쿼리 모두 받기, 이중 인코딩, 길이 상한)은 [InviteLink] 와 한 부품이다. 코드는 자격증명이라
