@@ -59,6 +59,14 @@ class NotificationRepository {
         );
       });
 
+  /// 자동·운영자 알림을 눌러 앱을 열었음 기록 (알림 성과 열림률, #1275). 같은 발송은 서버가 처음 한 번만 셈
+  Future<void> reportDispatchOpened(String dispatchId) => _call('reportDispatchOpened', () async {
+        await _dio.post<void>(
+          '/api/notifications/dispatches/${Uri.encodeComponent(dispatchId)}/opened',
+          options: _guardianLevelOptions,
+        );
+      });
+
   Future<NotificationSettings> fetchSettings() =>
       _call('fetchSettings', () async {
         final response = await _dio.get<Map<String, dynamic>>(

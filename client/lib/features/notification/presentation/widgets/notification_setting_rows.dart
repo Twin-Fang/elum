@@ -9,7 +9,7 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../application/notification_settings_controller.dart';
 import '../../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 묶음 2개: 모든 알림 받기 카드 + 종류별 7개 카드 (시안 1732:8563)
+/// 알림 설정 스위치 묶음 2개: 모든 알림 받기 카드 + 종류별 카드 (시안 1732:8563, 자동 알림 3줄 #1275)
 class NotificationSettingRows extends ConsumerWidget {
   const NotificationSettingRows({
     super.key,
@@ -67,6 +67,9 @@ class NotificationSettingRows extends ConsumerWidget {
         NotificationSettingField.feedbackResolved => l10n.notificationSettingFeedbackResolved,
         NotificationSettingField.talkCommented => l10n.notificationSettingTalkCommented,
         NotificationSettingField.talkImported => l10n.notificationSettingTalkImported,
+        NotificationSettingField.routineNudge => l10n.notificationSettingRoutineNudge,
+        NotificationSettingField.suggestion => l10n.notificationSettingSuggestion,
+        NotificationSettingField.planReminder => l10n.notificationSettingPlanReminder,
       };
 
   @override

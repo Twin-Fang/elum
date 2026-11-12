@@ -84,20 +84,26 @@ public class PushDispatcher {
     }
   }
 
+  /// 운영자 알림 발송 (발송 기록·자동 종류 없음)
+  public AdminMessageDelivery dispatchAdminMessage(List<RecordedNotification> recorded, AdminMessage message) {
+    return dispatchAdminMessage(recorded, message, AdminMessagePushContext.none());
+  }
+
   /**
-   * 운영자 알림 발송: 새로 기록된 사람만 > 전체 끔 확인 > 보호자 기기마다 발송 > 무효 토큰 삭제 > 기기 결과 수
+   * 운영자 알림 발송: 새로 기록된 사람만 > 전체 끔·자동 종류 끔 확인 > 보호자 기기마다 발송(data 에 dispatchId) > 무효 토큰 삭제 > 기기 결과 수
    * 한 사람·한 기기의 실패는 실패 수로만 세고 나머지를 계속 보냄 (재시도 없음)
    */
-  public AdminMessageDelivery dispatchAdminMessage(List<RecordedNotification> recorded, AdminMessage message) {
+  public AdminMessageDelivery dispatchAdminMessage(List<RecordedNotification> recorded, AdminMessage message,
+    AdminMessagePushContext context) {
     AdminMessageDelivery.Counter counter = new AdminMessageDelivery.Counter();
     for (RecordedNotification notification : recorded) {
-      if (!notification.shouldPush() || !isPushEnabled(notification.recipientMemberId(), NotificationType.ADMIN_MESSAGE)) {
+      if (!notification.shouldPush() || !isAdminMessagePushEnabled(notification.recipientMemberId(), context)) {
         continue;
       }
       try {
-        sendAdminMessageToDevices(notification, message, counter);
+        sendAdminMessageToDevices(notification, message, context, counter);
       } catch (RuntimeException exception) {
-        counter.addFailedDevice();
+        counter.addFailedDevice(notification.recipientMemberId());
         log.warn("[admin message push] failed : {}", exception.getClass().getSimpleName());
       }
     }
@@ -105,19 +111,31 @@ public class PushDispatcher {
   }
 
   private void sendAdminMessageToDevices(RecordedNotification recorded, AdminMessage message,
-    AdminMessageDelivery.Counter counter) {
-    for (PushDevice device : pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(recorded.recipientMemberId())) {
-      PushResult pushResult = pushSender.send(pushMessageFactory.createAdminMessage(recorded, message, device));
+    AdminMessagePushContext context, AdminMessageDelivery.Counter counter) {
+    String memberId = recorded.recipientMemberId();
+    String dispatchId = context.dispatchIdOf(memberId);
+    for (PushDevice device : pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(memberId)) {
+      PushResult pushResult = pushSender.send(pushMessageFactory.createAdminMessage(recorded, message, device, dispatchId));
       if (pushResult == PushResult.SENT) {
-        counter.addSentDevice();
+        counter.addSentDevice(memberId);
         continue;
       }
-      counter.addFailedDevice();
+      counter.addFailedDevice(memberId);
       if (pushResult == PushResult.INVALID_TOKEN) {
         pushDeviceRepository.deleteByToken(device.getToken());
         log.info("[admin message push] invalid token removed : platform={}", device.getPlatform());
       }
     }
+  }
+
+  // 자동 알림이면 그 종류 칸까지, 아니면 전체 끔만 (설정 행 없으면 켜짐)
+  private boolean isAdminMessagePushEnabled(String memberId, AdminMessagePushContext context) {
+    if (context.autoType() == null) {
+      return isPushEnabled(memberId, NotificationType.ADMIN_MESSAGE);
+    }
+    return notificationSettingRepository.findById(memberId)
+      .map(setting -> AutoNotificationOptOut.isReceiving(setting, context.autoType()))
+      .orElse(true);
   }
 
   // 설정 행이 없으면 모두 켜짐. 전체 끔이면 종류별 값과 무관하게 꺼짐

@@ -214,6 +214,22 @@ abstract interface class LocalStorage {
   String? get lowCreditNoticeDismissedPeriod;
   Future<void> setLowCreditNoticeDismissedPeriod(String period);
 
+  /// 홈 `자동으로 보내 볼까요?` 카드(#1284)를 처음 보인 날 `yyyy-MM-dd`. 그날만 보이고 다음 날부터 안 보임. 없으면 null
+  ///
+  /// 계정에 속하고 [clearAll] 이 지움
+  String? get homeAutoSendUpsellFirstShownDay;
+  Future<void> setHomeAutoSendUpsellFirstShownDay(String day);
+
+  /// 홈 `자동으로 보내 볼까요?` 카드를 닫았거나 눌렀는가 (다시 안 보임). 계정에 속하고 [clearAll] 이 지움
+  bool get isHomeAutoSendUpsellClosed;
+  Future<void> setHomeAutoSendUpsellClosed(bool isClosed);
+
+  /// 홈에 저절로 보인 권유 카드 기록 `{yyyy-MM-dd}|{종류 이름}` (하루 1개 제한, #1284). 없으면 null
+  ///
+  /// 계정에 속하고 [clearAll] 이 지움
+  String? get homeUpsellShownRecord;
+  Future<void> setHomeUpsellShownRecord(String record);
+
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
   /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다

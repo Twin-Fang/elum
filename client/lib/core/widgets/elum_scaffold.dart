@@ -40,6 +40,7 @@ class ElumScaffold extends StatelessWidget {
     this.title,
     this.backTop,
     this.horizontalPadding,
+    this.isBottomButtonAboveKeyboard = false,
   }) : assert(
          bottomBanner == null || (bottomButton == null && belowButton == null),
          '하단 고정 버튼과 배너를 함께 쓰면 버튼을 가린다 — 배너는 버튼이 없는 화면에만 둔다',
@@ -95,6 +96,12 @@ class ElumScaffold extends StatelessWidget {
   /// 화면이 직접 Padding을 겹쳐 쓰면 기본 24가 그대로 남아 이중 여백이 된다.
   final double? horizontalPadding;
 
+  /// 키보드가 올라오면 하단 버튼·보조 동작을 키보드 바로 위로 올릴지 (입력 한 칸 화면: 이름 입력)
+  ///
+  /// 기본(false)은 버튼이 시안 자리에 남아 키보드 뒤로 숨는다. 입력이 끝나도 무엇을 누를지 안 보이는
+  /// 화면만 켠다. 본문 높이는 그만큼 줄어드므로 본문이 짧은 화면에만 쓴다
+  final bool isBottomButtonAboveKeyboard;
+
   /// Figma 뒤로가기 컴포넌트(`976:4549`) — **40×40 상자가 x=16, y=79** 에 놓인다.
   ///
   /// 상자 안에서 24×24 아이콘이 가운데에 오므로 획은 (24, 87)에서 시작한다.
@@ -126,6 +133,11 @@ class ElumScaffold extends StatelessWidget {
     final space = context.space;
     final safeTop = MediaQuery.paddingOf(context).top;
     final safeBottom = MediaQuery.paddingOf(context).bottom;
+    // 키보드 높이 (홈 인디케이터 포함). 버튼을 올리지 않는 화면은 0
+    final keyboardHeight = isBottomButtonAboveKeyboard
+        ? MediaQuery.viewInsetsOf(context).bottom
+        : 0.0;
+    final isKeyboardVisible = keyboardHeight > safeBottom;
 
     // Figma 절대 y를 SafeArea 기준으로 옮긴다. 음수면 0으로 막는다.
     double fromTop(double figmaY) => (figmaY.h - safeTop).clamp(0.0, figmaY.h);
@@ -165,7 +177,11 @@ class ElumScaffold extends StatelessWidget {
         // SafeArea를 쓰지 않는다 — Figma y가 화면 최상단 기준이라
         // 직접 보정해야 한다 (클래스 주석 참조).
         child: Padding(
-          padding: EdgeInsets.only(top: safeTop, bottom: safeBottom),
+          // 키보드가 떠 있으면 하단을 키보드 높이만큼 비워 버튼을 그 위에 세운다
+          padding: EdgeInsets.only(
+            top: safeTop,
+            bottom: isKeyboardVisible ? keyboardHeight : safeBottom,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -256,7 +272,11 @@ class ElumScaffold extends StatelessWidget {
                     space.md.h,
                     space.buttonMarginH.w,
                     // 아래에 보조 동작이 붙으면 그쪽이 하단 여백을 맡는다.
-                    belowButton == null ? ctaBottom : _belowGap.h,
+                    belowButton != null
+                        ? _belowGap.h
+                        : isKeyboardVisible
+                        ? space.sm.h
+                        : ctaBottom,
                   ),
                   child: bottomButton,
                 ),
@@ -266,7 +286,9 @@ class ElumScaffold extends StatelessWidget {
                     space.buttonMarginH.w,
                     0,
                     space.buttonMarginH.w,
-                    (_belowBottom.h - safeBottom).clamp(0.0, double.infinity),
+                    isKeyboardVisible
+                        ? space.sm.h
+                        : (_belowBottom.h - safeBottom).clamp(0.0, double.infinity),
                   ),
                   child: belowButton,
                 ),

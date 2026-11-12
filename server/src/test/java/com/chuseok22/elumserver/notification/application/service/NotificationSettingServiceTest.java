@@ -35,7 +35,7 @@ class NotificationSettingServiceTest {
 
     NotificationSettingResponse response = notificationSettingService.get("m1");
 
-    assertThat(response).isEqualTo(new NotificationSettingResponse(true, true, true, true, true, true, true, true));
+    assertThat(response).isEqualTo(new NotificationSettingResponse(true, true, true, true, true, true, true, true, true, true, true));
   }
 
   @Test
@@ -45,9 +45,9 @@ class NotificationSettingServiceTest {
     when(notificationSettingRepository.save(any(NotificationSetting.class))).thenAnswer(call -> call.getArgument(0));
 
     NotificationSettingResponse response = notificationSettingService.update("m1",
-      new NotificationSettingRequest(true, false, true, false, true, false, false, true));
+      new NotificationSettingRequest(true, false, true, false, true, false, false, true, null, null, null));
 
-    assertThat(response).isEqualTo(new NotificationSettingResponse(true, false, true, false, true, false, false, true));
+    assertThat(response).isEqualTo(new NotificationSettingResponse(true, false, true, false, true, false, false, true, true, true, true));
   }
 
   @Test
@@ -61,9 +61,33 @@ class NotificationSettingServiceTest {
     when(notificationSettingRepository.save(any(NotificationSetting.class))).thenAnswer(call -> call.getArgument(0));
 
     NotificationSettingResponse response = notificationSettingService.update("m1",
-      new NotificationSettingRequest(true, true, true, true, true, true, null, null));
+      new NotificationSettingRequest(true, true, true, true, true, true, null, null, null, null, null));
 
     assertThat(response.talkCommented()).isFalse();
     assertThat(response.talkImported()).isFalse();
+  }
+
+  @Test
+  @DisplayName("자동 알림 세 값: 옛 앱이 안 보내면(null) 끈 값을 그대로 두고, 새 앱이 보내면 그 값으로 바꾼다 (#1275)")
+  void update_autoNotificationFlags_nullKeepsStored_valueOverwrites() {
+    NotificationSetting stored = new NotificationSetting();
+    stored.setMemberId("m1");
+    stored.setRoutineNudgeEnabled(false);
+    stored.setSuggestionEnabled(false);
+    stored.setPlanReminderEnabled(false);
+    when(notificationSettingRepository.findById("m1")).thenReturn(Optional.of(stored));
+    when(notificationSettingRepository.save(any(NotificationSetting.class))).thenAnswer(call -> call.getArgument(0));
+
+    NotificationSettingResponse oldApp = notificationSettingService.update("m1",
+      new NotificationSettingRequest(true, true, true, true, true, true, null, null, null, null, null));
+    assertThat(oldApp.routineNudge()).isFalse();
+    assertThat(oldApp.suggestion()).isFalse();
+    assertThat(oldApp.planReminder()).isFalse();
+
+    NotificationSettingResponse newApp = notificationSettingService.update("m1",
+      new NotificationSettingRequest(true, true, true, true, true, true, null, null, true, false, true));
+    assertThat(newApp.routineNudge()).isTrue();
+    assertThat(newApp.suggestion()).isFalse();
+    assertThat(newApp.planReminder()).isTrue();
   }
 }

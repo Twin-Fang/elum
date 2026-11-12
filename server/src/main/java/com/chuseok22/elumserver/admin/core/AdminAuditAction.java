@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 동작 19개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
+ * 관리자 기록 동작 22개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
  * 크레딧 조정·예약 반환은 원장(actor·사유)에, 시스템 설정은 설정 변경 이력에 남아 여기서 기록하지 않음
  */
 @Getter
@@ -33,6 +33,11 @@ public enum AdminAuditAction {
   // 운영자 알림 (#1273). 대상 id = 운영자 알림 id, detail = 받는 사람 수·기기 결과·제목
   ADMIN_PUSH_SENT("알림 보내기", AdminAuditTargetType.ADMIN_MESSAGE, false),
   ADMIN_PUSH_TEST_SENT("알림 먼저 보내 보기", AdminAuditTargetType.ADMIN_MESSAGE, false),
+  // 자동 알림 규칙 저장 (#1275). 대상 id = 종류 이름(DAILY_ROUTINE_NUDGE 등), detail = 켜짐·시각·간격·화면·제목
+  AUTO_NOTIFICATION_RULE_UPDATED("자동 알림 규칙 저장", AdminAuditTargetType.AUTO_NOTIFICATION_RULE, false),
+  // 예약 발송 (#1275). 대상 id = 예약 id
+  SCHEDULED_PUSH_CREATED("알림 예약", AdminAuditTargetType.SCHEDULED_PUSH, false),
+  SCHEDULED_PUSH_CANCELED("알림 예약 취소", AdminAuditTargetType.SCHEDULED_PUSH, false),
   ;
 
   private final String label;

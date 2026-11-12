@@ -268,4 +268,61 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
     """)
   int clearAiDraftCardsOfOwner(
     @Param("profileId") String profileId, @Param("memberId") String memberId, @Param("now") LocalDateTime now);
+
+  // --- 자동 알림 (#1275) ---
+
+  /// 보낸 일과 요약 (보낸 보호자, 이룸이, 제목, 예정 시각)
+  interface SentRoutineRow {
+
+    String getMemberId();
+
+    String getProfileId();
+
+    String getTitle();
+
+    LocalDateTime getScheduledAt();
+  }
+
+  /**
+   * 어제 보냈는데 오늘 아직 안 보낸 보호자의 어제 일과 (최신순)
+   * 제외: 예시 일과, 일과관리 복사본, 임시저장, 반복 일과를 가진 보호자
+   */
+  @Query("""
+    select r.createdBy as memberId, r.profile.id as profileId, r.title as title, r.scheduledAt as scheduledAt
+    from Routine r
+    where r.libraryOnly = false and r.isExample = false and r.status in :statuses
+      and r.scheduledAt >= :yesterdayStart and r.scheduledAt < :todayStart
+      and not exists (
+        select t.id from Routine t
+        where t.createdBy = r.createdBy and t.libraryOnly = false and t.isExample = false
+          and t.status in :statuses and t.scheduledAt >= :todayStart and t.scheduledAt < :tomorrowStart)
+      and not exists (select s.id from RoutineSchedule s where s.ownerMemberId = r.createdBy)
+    order by r.scheduledAt desc
+    """)
+  List<SentRoutineRow> findSentYesterdayNotToday(@Param("statuses") Collection<RoutineStatus> statuses,
+    @Param("yesterdayStart") LocalDateTime yesterdayStart, @Param("todayStart") LocalDateTime todayStart,
+    @Param("tomorrowStart") LocalDateTime tomorrowStart);
+
+  /// since 이후 끝난 일과 중 그 이룸이의 첫 완료 (더 이른 완료가 없는 것)
+  @Query("""
+    select r.createdBy as memberId, r.profile.id as profileId, r.title as title, r.scheduledAt as scheduledAt
+    from Routine r
+    where r.status = :completed and r.completedAt >= :since and r.isExample = false and r.libraryOnly = false
+      and not exists (
+        select e.id from Routine e
+        where e.profile = r.profile and e.status = :completed and e.isExample = false and e.completedAt < r.completedAt)
+    """)
+  List<SentRoutineRow> findFirstCompletionsSince(@Param("completed") RoutineStatus completed,
+    @Param("since") LocalDateTime since);
+
+  /// 보호자마다 가장 최근에 보낸 일과 (최신순, 호출부가 회원별 첫 줄만 씀)
+  @Query("""
+    select r.createdBy as memberId, r.profile.id as profileId, r.title as title, r.scheduledAt as scheduledAt
+    from Routine r
+    where r.createdBy in :memberIds and r.libraryOnly = false and r.isExample = false and r.status in :statuses
+      and r.scheduledAt >= :since
+    order by r.scheduledAt desc
+    """)
+  List<SentRoutineRow> findRecentSentByMembers(@Param("memberIds") Collection<String> memberIds,
+    @Param("statuses") Collection<RoutineStatus> statuses, @Param("since") LocalDateTime since);
 }

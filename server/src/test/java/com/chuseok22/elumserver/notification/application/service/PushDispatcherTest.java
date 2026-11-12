@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.notification.core.AdminMessageRoute;
+import com.chuseok22.elumserver.notification.core.AutoNotificationType;
 import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
@@ -162,7 +163,8 @@ class PushDispatcherTest {
     AdminMessageDelivery delivery = dispatcher.dispatchAdminMessage(
       List.of(recorded, new RecordedNotification("n-off", "m-off", 1, true)), message);
 
-    assertThat(delivery).isEqualTo(new AdminMessageDelivery(1, 1));
+    assertThat(delivery.sentDeviceCount()).isEqualTo(1);
+    assertThat(delivery.failedDeviceCount()).isEqualTo(1);
     verify(pushDeviceRepository).deleteByToken("t2");
     ArgumentCaptor<PushMessage> sent = ArgumentCaptor.forClass(PushMessage.class);
     verify(pushSender, times(2)).send(sent.capture());
@@ -171,6 +173,32 @@ class PushDispatcherTest {
     assertThat(first.title()).isEqualTo("Pro 선물");
     assertThat(first.data()).containsEntry("type", "ADMIN_MESSAGE").containsEntry("route", "plan")
       .containsEntry("notificationId", "n1");
+  }
+
+  @Test
+  @DisplayName("자동 알림: 그 종류를 끈 회원에게는 푸시하지 않고, 받는 회원 푸시 data 에 dispatchId 를 싣는다 (#1275)")
+  void dispatchAdminMessage_autoType_respectsTypeOptOut_andCarriesDispatchId() {
+    NotificationSetting nudgeOff = new NotificationSetting();
+    nudgeOff.setRoutineNudgeEnabled(false);
+    when(notificationSettingRepository.findById("m-off")).thenReturn(Optional.of(nudgeOff));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull("m1")).thenReturn(List.of(device("t1")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull("m-off")).thenReturn(List.of(device("t-off")));
+    when(pushSender.send(any())).thenReturn(PushResult.SENT);
+    AdminMessage message = new AdminMessage();
+    message.setId("msg-1");
+    message.setTitle("오늘 일과");
+    message.setBody("보내 볼까요");
+    message.setRoute(AdminMessageRoute.HOME);
+
+    AdminMessageDelivery delivery = dispatcher.dispatchAdminMessage(
+      List.of(recorded, new RecordedNotification("n-off", "m-off", 1, true)), message,
+      new AdminMessagePushContext(java.util.Map.of("m1", "d-1", "m-off", "d-off"), AutoNotificationType.DAILY_ROUTINE_NUDGE));
+
+    ArgumentCaptor<PushMessage> sent = ArgumentCaptor.forClass(PushMessage.class);
+    verify(pushSender, times(1)).send(sent.capture());
+    assertThat(sent.getValue().token()).isEqualTo("t1");
+    assertThat(sent.getValue().data()).containsEntry("dispatchId", "d-1").containsEntry("type", "ADMIN_MESSAGE");
+    assertThat(delivery.deviceCountByMemberId()).containsOnlyKeys("m1");
   }
 
   private PushDevice device(String token) {
