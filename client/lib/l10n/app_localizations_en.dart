@@ -2326,6 +2326,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineTemplateOpen => 'Browse example routines';
 
   @override
+  String get routineImageStylePillLabel => 'Card pictures';
+
+  @override
+  String routineImageStylePillSemantics(String style) {
+    return 'Card picture style $style, tap to change';
+  }
+
+  @override
   String get routineTemplateSheetTitle => 'Example routines';
 
   @override
