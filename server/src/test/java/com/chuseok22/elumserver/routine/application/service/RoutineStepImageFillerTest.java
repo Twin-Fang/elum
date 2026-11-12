@@ -71,7 +71,7 @@ class RoutineStepImageFillerTest {
     // 제공자 고르기는 실제 CardImageGenerator 로 돈다. 고른 제공자가 FLUX 가 아니면(가짜 라우터는
     // null) 지금처럼 current() 로 간다.
     filler = new RoutineStepImageFiller(
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
       new RoutineStepImageThrottle(new InMemorySharedStateStore(), UsageLimitSettings.fromDefaults()),
       creditReservationService
@@ -197,6 +197,7 @@ class RoutineStepImageFillerTest {
   void flux_translatesAndUsesRoutineSeed() {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    when(imageClientRouter.englishScene(ImageProvider.FLUX)).thenReturn(java.util.Optional.of(fluxImageClient));
     when(fluxImageClient.available()).thenReturn(true);
     when(geminiTextClient.translateImagePrompt("현관에서 우산을 챙겨요."))
       .thenReturn("The character picks up an umbrella at the front door.");

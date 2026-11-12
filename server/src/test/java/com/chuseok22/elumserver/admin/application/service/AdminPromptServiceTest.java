@@ -3,12 +3,14 @@ package com.chuseok22.elumserver.admin.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxPromptBuilder;
+import com.chuseok22.elumserver.ai.infrastructure.client.CloudflareImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
@@ -52,6 +54,9 @@ class AdminPromptServiceTest {
 
   @Mock
   private FluxImageClient fluxImageClient;
+
+  @Mock
+  private CloudflareImageClient cloudflareImageClient;
 
   @Mock
   private FluxPromptBuilder fluxPromptBuilder;
@@ -132,6 +137,51 @@ class AdminPromptServiceTest {
 
     assertThat(response.imageDataUri()).startsWith("data:image/jpg;base64,");
     verify(imageClientRouter, never()).current();
+  }
+
+  @Test
+  @DisplayName("CLOUDFLARE 를 고른 때 FLUX 지시문 미리보기·시험은 Cloudflare 모양(카드 그림 인물)으로 — 운영과 다른 그림을 보고 고치지 않게")
+  void fluxPrefix_cloudflareSelected_usesCloudflare() {
+    when(imageClientRouter.selected()).thenReturn(com.chuseok22.elumserver.ai.core.ImageProvider.CLOUDFLARE);
+    when(imageClientRouter.englishScene(com.chuseok22.elumserver.ai.core.ImageProvider.CLOUDFLARE))
+      .thenReturn(java.util.Optional.of(cloudflareImageClient));
+    when(cloudflareImageClient.buildCartoonPrompt("Style.", "The character waves.", CharacterType.LULU))
+      .thenReturn("Style. Only one character: a child. The child waves.");
+    when(cloudflareImageClient.generateForTest("Style.", "The character waves.", CharacterType.LULU))
+      .thenReturn(new GeneratedImage(new byte[]{1}, "jpg"));
+
+    assertThat(adminPromptService.preview(
+      PromptKey.FLUX_ROUTINE_IMAGE_PREFIX, "Style.", "The character waves.", CharacterType.LULU))
+      .isEqualTo("Style. Only one character: a child. The child waves.");
+    adminPromptService.test(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX, "Style.", "The character waves.", CharacterType.LULU);
+
+    verify(cloudflareImageClient).generateForTest("Style.", "The character waves.", CharacterType.LULU);
+    verify(fluxImageClient, never()).generateForTest(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("인물 생김새 시험은 저장된 화풍 + 저장 전 생김새로 Cloudflare 가 그린다")
+  void subjectAppearance_testsWithCloudflare() {
+    when(cloudflareImageClient.available()).thenReturn(true);
+    when(promptTemplateService.getContent(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX)).thenReturn("Style.");
+    when(cloudflareImageClient.generateWithAppearanceForTest("Style.", "a kid in a red hoodie", "The character waves."))
+      .thenReturn(new GeneratedImage(new byte[]{1}, "jpg"));
+
+    PromptTestResponse response = adminPromptService.test(
+      PromptKey.CARD_IMAGE_SUBJECT_CHILD, "a kid in a red hoodie", "The character waves.", null);
+
+    assertThat(response.imageDataUri()).startsWith("data:image/jpg;base64,");
+  }
+
+  @Test
+  @DisplayName("Cloudflare 키가 없으면 인물 생김새 시험은 부르지 않고 IMAGE_PROVIDER_UNAVAILABLE — 빈 주소로 요청을 보내지 않는다")
+  void subjectAppearance_unavailable_keepsErrorCode() {
+    when(cloudflareImageClient.available()).thenReturn(false);
+
+    assertThatThrownBy(() -> adminPromptService.test(PromptKey.CARD_IMAGE_SUBJECT_CHILD, "a kid", "The character waves.", null))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE));
+    verify(cloudflareImageClient, never()).generateWithAppearanceForTest(any(), any(), any());
   }
 
   @Test

@@ -58,7 +58,7 @@ class RoutineStepImageFillerLocaleTest {
   @BeforeEach
   void setUp() {
     filler = new RoutineStepImageFiller(
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
       new RoutineStepImageThrottle(new InMemorySharedStateStore(), UsageLimitSettings.fromDefaults()), creditReservationService);
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);

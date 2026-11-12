@@ -395,10 +395,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shows the action as a line drawing';
 
   @override
-  String get imageStyleCharacterLabel => 'Character';
+  String get imageStyleCharacterLabel => 'Cartoon';
 
   @override
-  String get imageStyleCharacterDescription => 'A character acts it out';
+  String get imageStyleCharacterDescription => 'A cartoon child acts it out';
 
   @override
   String get imageStyleRealisticLabel => 'Realistic';
@@ -452,7 +452,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingCharacterDescription =>
-      'The friend you pick is the star of the cards and helps along the way';
+      'The friend you pick joins you on the home and reward screens';
 
   @override
   String get onboardingImageStyleTitle =>
@@ -3947,17 +3947,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planTrialWeeks(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count weeks',
-      one: '$count week',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String planTrialMonths(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3985,11 +3974,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planTrialEndsNotice(String date, String price) {
-    return 'Your free trial ends on $date. If you don\'t cancel, you\'ll be charged $price from that day.';
-  }
-
-  @override
   String get planLegalTrialAppStore =>
       'If you cancel at least 24 hours before the free trial ends, you won\'t be charged.';
 
@@ -4005,7 +3989,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planStorePendingBody =>
-      'Pro turns on once it\'s approved. You can close this screen';
+      'Pro turns on once it\'s approved. You can close this screen.';
 
   @override
   String get planVerificationPendingTitle => 'Confirming your payment';
@@ -5092,11 +5076,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planHeroFreeTag => 'Free emoji';
 
   @override
-  String get planHeroProTag => 'Pro character picture';
+  String get planHeroProTag => 'Pro cartoon picture';
 
   @override
   String get planHeroCompareSemantics =>
-      'Free gives emoji cards, Pro gives character picture cards';
+      'Free gives emoji cards, Pro gives cartoon picture cards';
 
   @override
   String planBenefitGroupCards(String elumiName) {
@@ -5118,15 +5102,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planMonthlyEquivalent(String price) {
-    return 'About $price a month';
-  }
-
-  @override
   String get planRenewsYearly => 'Renews every year';
 
   @override
   String get planRenewsMonthly => 'Renews every month';
+
+  @override
+  String planMonthlyEquivalentRenewsYearly(String price) {
+    return 'About $price a month · Renews every year';
+  }
 
   @override
   String planPriceUnit(String period) {
@@ -5139,7 +5123,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return 'After $trial, $price$unit is charged automatically. Cancel at least a day before it ends to avoid being charged';
+    return 'After $trial, $price$unit is charged automatically. Cancel at least 24 hours before it ends to avoid being charged';
   }
 
   @override

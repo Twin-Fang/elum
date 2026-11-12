@@ -50,7 +50,7 @@ class RoutineAiPipelineFallbackLocaleTest {
   void setUp() {
     pipeline = new RoutineAiPipeline(
       textClientRouter,
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
     // AI 가 실패하면 폴백 질문이 나간다

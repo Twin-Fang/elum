@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.infrastructure.client.CloudflareImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
@@ -45,6 +47,7 @@ class CardImageGeneratorTest {
 
   @Mock private ImageClientRouter imageClientRouter;
   @Mock private FluxImageClient fluxImageClient;
+  @Mock private CloudflareImageClient cloudflareImageClient;
   @Mock private ImageGenerationClient openAiClient;
   @Mock private GeminiTextClient translator;
 
@@ -52,7 +55,8 @@ class CardImageGeneratorTest {
 
   @BeforeEach
   void setUp() {
-    generator = new CardImageGenerator(imageClientRouter, fluxImageClient, translator);
+    generator = new CardImageGenerator(imageClientRouter, translator);
+    lenient().when(imageClientRouter.englishScene(ImageProvider.FLUX)).thenReturn(Optional.of(fluxImageClient));
     lenient().when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
     lenient().when(fluxImageClient.available()).thenReturn(true);
     lenient().when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(Optional.of(openAiClient));
@@ -191,6 +195,73 @@ class CardImageGeneratorTest {
 
     assertThat(generator.generate(request("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
     verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
+  }
+
+  /// Cloudflare 를 고른 상태 (프로필 캐릭터를 그리지 않는 영어 장면 제공자)
+  private void selectCloudflare() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.CLOUDFLARE);
+    when(imageClientRouter.englishScene(ImageProvider.CLOUDFLARE)).thenReturn(Optional.of(cloudflareImageClient));
+    lenient().when(cloudflareImageClient.available()).thenReturn(true);
+    lenient().when(cloudflareImageClient.shouldDropProfileCharacter()).thenReturn(true);
+  }
+
+  @Test
+  @DisplayName("CLOUDFLARE 도 영어 장면 경로 — 글 AI 장면을 그대로, 번역 없이, 일과 seed 로")
+  void cloudflare_usesEnglishScene() {
+    selectCloudflare();
+    when(cloudflareImageClient.generate(any(), any(), any())).thenReturn(FLUX_IMAGE);
+
+    assertThat(generator.generate(request("The character picks up a red umbrella."))).isSameAs(FLUX_IMAGE);
+
+    verify(cloudflareImageClient).generate("The character picks up a red umbrella.", CharacterType.LULU, FluxSeed.of(SEED_KEY));
+    verifyNoInteractions(translator, fluxImageClient);
+  }
+
+  @Test
+  @DisplayName("CLOUDFLARE 실패(한도 소진·NSFW 등)면 그 카드만 OpenAI 로, 캐릭터 없이 — 카드 그림에서 캐릭터를 뺀 결정을 지킨다")
+  void cloudflareFails_fallsBackToOpenAiWithoutCharacter() {
+    selectCloudflare();
+    when(cloudflareImageClient.generate(any(), any(), any()))
+      .thenThrow(new IllegalStateException("cloudflare daily free allocation used up"));
+
+    assertThat(generator.generate(request("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), isNull());
+  }
+
+  @Test
+  @DisplayName("CLOUDFLARE 키가 없으면 부르지 않고 OpenAI 로, 캐릭터 없이")
+  void cloudflareUnavailable_fallsBackToOpenAiWithoutCharacter() {
+    selectCloudflare();
+    when(cloudflareImageClient.available()).thenReturn(false);
+
+    assertThat(generator.generate(request("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
+    verify(cloudflareImageClient, never()).generate(any(), any(), any());
+    verify(openAiClient).generateCardImage(any(), isNull());
+  }
+
+  @Test
+  @DisplayName("CLOUDFLARE 하루 한도 소진 날은 번역(유료 글 호출)도 하지 않고 바로 OpenAI 로, 캐릭터 없이")
+  void cloudflareSkippedToday_noTranslation_fallsBackToOpenAi() {
+    selectCloudflare();
+    when(cloudflareImageClient.isTemporarilySkipped()).thenReturn(true);
+
+    // 영어 장면이 없는 카드 (보호자가 직접 추가) — 평소라면 번역부터 한다
+    assertThat(generator.generate(request(null))).isSameAs(OPENAI_IMAGE);
+
+    verifyNoInteractions(translator);
+    verify(cloudflareImageClient, never()).generate(any(), any(), any());
+    verify(openAiClient).generateCardImage(any(), isNull());
+  }
+
+  @Test
+  @DisplayName("실사 + CLOUDFLARE — 실사 번역 문장으로 그린다")
+  void cloudflareRealistic_usesTranslatedScene() {
+    selectCloudflare();
+    when(translator.translateRealisticImagePrompt("우산을 챙겨요")).thenReturn("A red umbrella on a plain light gray surface.");
+    when(cloudflareImageClient.generateRealistic(any(), any())).thenReturn(FLUX_IMAGE);
+
+    assertThat(generator.generate(realistic("The character picks up a red umbrella."))).isSameAs(FLUX_IMAGE);
+    verify(cloudflareImageClient).generateRealistic("A red umbrella on a plain light gray surface.", FluxSeed.of(SEED_KEY));
   }
 
   @Test

@@ -89,6 +89,18 @@ class AiCallLogServiceTest {
   }
 
   @Test
+  @DisplayName("Cloudflare 그림은 장당 단가 설정으로 비용을 잡는다 — 빠지면 관리자 비용 화면에서 0원으로 숨는다")
+  void recordSuccess_cloudflareImage_usesPerImagePrice() {
+    when(systemConfigService.getDouble(ConfigKey.PRICE_CLOUDFLARE_IMAGE_PER_IMAGE)).thenReturn(0.0011462);
+
+    aiCallLogService.recordSuccess(AiCallType.CLOUDFLARE_IMAGE, "@cf/black-forest-labs/flux-2-klein-4b", 6000, null);
+
+    ArgumentCaptor<AiCallLog> captor = ArgumentCaptor.forClass(AiCallLog.class);
+    verify(aiCallLogRepository).save(captor.capture());
+    assertThat(captor.getValue().getEstimatedCostUsd()).isEqualTo(0.0011462);
+  }
+
+  @Test
   @DisplayName("이미지 성공 기록은 장당 고정 단가로 비용을 계산한다")
   void recordSuccess_imageCall_usesPerImagePrice() {
     when(systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE)).thenReturn(0.039);

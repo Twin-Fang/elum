@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
-import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.EnglishSceneImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
@@ -25,11 +25,12 @@ import org.springframework.stereotype.Service;
  * 타도록 한 곳에 둔다.
  *
  * <ul>
- *   <li><b>FLUX 가 아니면 고른 제공자에 카드 설명, 제목, 영어 장면을 장면 정보로 싣는다.</b></li>
- *   <li><b>FLUX 면 영어 장면이 필요하다.</b> 글 AI 가 같은 호출에서 준 한 줄을 쓰고, 없으면(보호자가
+ *   <li><b>영어 장면 제공자(FLUX·CLOUDFLARE)가 아니면 고른 제공자에 카드 설명, 제목, 영어 장면을 장면 정보로 싣는다.</b></li>
+ *   <li><b>영어 장면 제공자면 영어 장면이 필요하다.</b> 글 AI 가 같은 호출에서 준 한 줄을 쓰고, 없으면(보호자가
  *       직접 추가한 카드) 싼 글 모델로 한 줄 번역한다. seed 는 일과마다 고정한다.</li>
- *   <li><b>FLUX 쪽 무엇이 실패해도 그 카드만 OpenAI 로</b> — 키 없음·번역 실패·에러·타임아웃·
- *       잔액 소진(402/403). 두 호출 모두 각 클라이언트가 호출 기록에 남긴다.</li>
+ *   <li><b>그쪽 무엇이 실패해도 그 카드만 OpenAI 로</b> — 키 없음·번역 실패·에러·타임아웃·
+ *       잔액·한도 소진. 두 호출 모두 각 클라이언트가 호출 기록에 남긴다.</li>
+ *   <li><b>프로필 캐릭터를 그리지 않는 제공자(CLOUDFLARE)에서 넘어간 카드는 OpenAI 도 캐릭터 없이 그린다.</b></li>
  * </ul>
  *
  * <p><b>품질 실패는 여기서 잡지 못한다.</b> schnell 이 동작을 못 그리거나 글자를 찍어도 API 는
@@ -47,7 +48,6 @@ public class CardImageGenerator {
   private static final int MAX_SCENE_LENGTH = 400;
 
   private final ImageClientRouter imageClientRouter;
-  private final FluxImageClient fluxImageClient;
   private final GeminiTextClient imagePromptTranslator;
 
   /**
@@ -97,13 +97,17 @@ public class CardImageGenerator {
     if (request.imageStyle() == ImageStyle.REALISTIC) {
       return generateRealistic(request);
     }
-    if (imageClientRouter.selected() != ImageProvider.FLUX) {
+    ImageProvider selected = imageClientRouter.selected();
+    if (selected == null || !selected.usesEnglishScene()) {
       return generateWithSafetyRetry(imageClientRouter.current(), request);
     }
-    if (!fluxImageClient.available()) {
-      log.warn("FLUX 를 골랐지만 키가 없다 — 이 카드는 OpenAI 로 그린다");
-      return fallbackToOpenAi(request, new IllegalStateException("FLUX 키가 없음"));
+    Optional<EnglishSceneImageClient> sceneClient = usableEnglishSceneClient(selected);
+    if (sceneClient.isEmpty()) {
+      log.info("[card image] {} unavailable or skipped today : fallback to OpenAI", selected);
+      return fallbackToOpenAi(request, imageClientRouter.englishScene(selected).orElse(null),
+        new IllegalStateException(selected + " 키가 없음"));
     }
+    EnglishSceneImageClient client = sceneClient.get();
 
     // 보호자 요청이 있으면 글 AI 장면 대신 설명 + 요청을 번역 (요청이 장면에 들어가게)
     String scene = request.guardianRequest() == null ? usableScene(request.imagePromptEn()) : null;
@@ -111,62 +115,73 @@ public class CardImageGenerator {
       try {
         scene = usableScene(imagePromptTranslator.translateImagePrompt(request.descriptionWithGuardianRequest()));
       } catch (Exception e) {
-        log.warn("FLUX 용 영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
-          LogTextLength.of(request.description()), e);
-        return fallbackToOpenAi(request, e);
+        log.warn("영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: provider={}, descriptionLength={}",
+          selected, LogTextLength.of(request.description()), e);
+        return fallbackToOpenAi(request, client, e);
       }
       if (scene == null) {
-        log.warn("번역 결과를 FLUX 에 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
-        return fallbackToOpenAi(request, new IllegalStateException("번역 결과를 쓸 수 없음"));
+        log.warn("번역 결과를 영어 장면으로 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
+        return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"));
       }
     }
 
     try {
-      return fluxImageClient.generate(scene, request.characterType(), FluxSeed.of(request.seedKey()));
+      return client.generate(scene, request.characterType(), FluxSeed.of(request.seedKey()));
     } catch (Exception e) {
-      log.warn("FLUX 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", LogTextLength.of(scene), e);
-      return fallbackToOpenAi(request, e);
+      log.warn("{} 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", selected, LogTextLength.of(scene), e);
+      return fallbackToOpenAi(request, client, e);
     }
   }
 
   /**
    * 실사 방식 — 캐릭터를 아예 쓰지 않는다(참조 이미지·생김새·"The character" 관례 없음).
    *
-   * <p>FLUX 는 글 AI 가 준 {@code imagePromptEn} 을 쓰지 않는다. 그 문장은 "The character …" 관례라 실사에
+   * <p>영어 장면 제공자(FLUX·CLOUDFLARE)는 글 AI 가 준 {@code imagePromptEn} 을 쓰지 않는다. 그 문장은 "The character …" 관례라 실사에
    * 캐릭터를 부른다. 그래서 카드마다 실사용 번역 지시문으로 물건·장소 문장을 새로 만든다. 실패하면 그 카드만
    * OpenAI 로 돌리는 규칙은 만화와 같다.
    */
   private GeneratedImage generateRealistic(CardImageRequest request) {
-    if (imageClientRouter.selected() != ImageProvider.FLUX) {
+    ImageProvider selected = imageClientRouter.selected();
+    if (selected == null || !selected.usesEnglishScene()) {
       return imageClientRouter.current().generateRealisticImage(request.descriptionWithGuardianRequest());
     }
-    if (!fluxImageClient.available()) {
-      log.warn("FLUX 를 골랐지만 키가 없다 — 이 실사 카드는 OpenAI 로 그린다");
-      return fallbackToOpenAi(request, new IllegalStateException("FLUX 키가 없음"));
+    Optional<EnglishSceneImageClient> sceneClient = usableEnglishSceneClient(selected);
+    if (sceneClient.isEmpty()) {
+      log.info("[card image] {} unavailable or skipped today : realistic fallback to OpenAI", selected);
+      return fallbackToOpenAi(request, imageClientRouter.englishScene(selected).orElse(null),
+        new IllegalStateException(selected + " 키가 없음"));
     }
+    EnglishSceneImageClient client = sceneClient.get();
 
     String scene;
     try {
       scene = usableScene(imagePromptTranslator.translateRealisticImagePrompt(request.descriptionWithGuardianRequest()));
     } catch (Exception e) {
-      log.warn("FLUX 용 실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
-        LogTextLength.of(request.description()), e);
-      return fallbackToOpenAi(request, e);
+      log.warn("실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: provider={}, descriptionLength={}",
+        selected, LogTextLength.of(request.description()), e);
+      return fallbackToOpenAi(request, client, e);
     }
     if (scene == null) {
-      log.warn("실사 번역 결과를 FLUX 에 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
-      return fallbackToOpenAi(request, new IllegalStateException("번역 결과를 쓸 수 없음"));
+      log.warn("실사 번역 결과를 영어 장면으로 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
+      return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"));
     }
 
     try {
-      return fluxImageClient.generateRealistic(scene, FluxSeed.of(request.seedKey()));
+      return client.generateRealistic(scene, FluxSeed.of(request.seedKey()));
     } catch (Exception e) {
-      log.warn("FLUX 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", LogTextLength.of(scene), e);
-      return fallbackToOpenAi(request, e);
+      log.warn("{} 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", selected, LogTextLength.of(scene), e);
+      return fallbackToOpenAi(request, client, e);
     }
   }
 
-  /// FLUX 에 넣을 수 있는 한 줄인가. 한글·가나·한자가 섞이면 schnell 이 사람을 그렸다.
+  /// 고른 영어 장면 제공자를 지금 쓸 수 있는가 (키 없음·한도 소진이면 empty > 번역 없이 바로 OpenAI)
+  private Optional<EnglishSceneImageClient> usableEnglishSceneClient(ImageProvider selected) {
+    return imageClientRouter.englishScene(selected)
+      .filter(ImageGenerationClient::available)
+      .filter(client -> !client.isTemporarilySkipped());
+  }
+
+  /// 영어 장면 제공자에 넣을 수 있는 한 줄인가. 한글·가나·한자가 섞이면 schnell 이 사람을 그렸다.
   private String usableScene(String raw) {
     if (raw == null) {
       return null;
@@ -178,23 +193,35 @@ public class CardImageGenerator {
     return line;
   }
 
+  /// 같은 카드에서 프로필 캐릭터만 뺀 요청 (OpenAI 가 캐릭터 없는 인물로 그림)
+  private static CardImageRequest withoutCharacter(CardImageRequest request) {
+    return new CardImageRequest(request.description(), request.imagePromptEn(), null, request.seedKey(),
+      request.imageStyle(), request.routineTitle(), request.stepTitle(), request.guardianRequest());
+  }
+
   /**
    * 그 카드만 OpenAI 로. OpenAI 도 못 쓰면 원래 실패를 그대로 올린다 — 부르는 쪽이 기본 그림으로
    * 덮는다(서비스 원칙 6).
    */
-  private GeneratedImage fallbackToOpenAi(CardImageRequest request, Exception cause) {
+  private GeneratedImage fallbackToOpenAi(
+    CardImageRequest request, EnglishSceneImageClient failedClient, Exception cause
+  ) {
     Optional<ImageGenerationClient> openAi =
       imageClientRouter.of(ImageProvider.OPENAI).filter(ImageGenerationClient::available);
     if (openAi.isEmpty()) {
       if (cause instanceof RuntimeException runtime) {
         throw runtime;
       }
-      throw new IllegalStateException("FLUX 실패, OpenAI 도 쓸 수 없음", cause);
+      throw new IllegalStateException("영어 장면 제공자 실패, OpenAI 도 쓸 수 없음", cause);
     }
-    if (request.imageStyle() == ImageStyle.REALISTIC) {
-      return openAi.get().generateRealisticImage(request.descriptionWithGuardianRequest());
+    // 카드 그림에서 캐릭터를 뺀 제공자(CLOUDFLARE)였으면 OpenAI 도 캐릭터 없이
+    CardImageRequest fallbackRequest = failedClient != null && failedClient.shouldDropProfileCharacter()
+      ? withoutCharacter(request)
+      : request;
+    if (fallbackRequest.imageStyle() == ImageStyle.REALISTIC) {
+      return openAi.get().generateRealisticImage(fallbackRequest.descriptionWithGuardianRequest());
     }
-    return generateWithSafetyRetry(openAi.get(), request);
+    return generateWithSafetyRetry(openAi.get(), fallbackRequest);
   }
 
   /**

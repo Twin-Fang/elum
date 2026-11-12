@@ -35,6 +35,13 @@ public class FluxPromptBuilder {
   public String build(String prefix, String sceneEn, CharacterType characterType) {
     String appearance = characterType == null ? NO_CHARACTER : characterType.getAppearanceEn();
     String subject = characterType == null ? NO_CHARACTER_SUBJECT : characterType.getSubjectEn();
+    return build(prefix, sceneEn, appearance, subject);
+  }
+
+  /**
+   * 화풍 + "Only one character: {생김새}." + 장면 (The character > The {subject})
+   */
+  public String build(String prefix, String sceneEn, String appearance, String subject) {
     String scene = WHITESPACE.matcher(sceneEn == null ? "" : sceneEn).replaceAll(" ").trim();
     scene = SUBJECT_CAPITAL.matcher(scene).replaceAll("The " + subject);
     scene = SUBJECT_LOWER.matcher(scene).replaceAll("the " + subject);
