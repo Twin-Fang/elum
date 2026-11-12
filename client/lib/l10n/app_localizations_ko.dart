@@ -3798,11 +3798,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String planTrialEndsNotice(String date, String price) {
-    return '무료 체험은 $date에 끝나요. 해지하지 않으면 그날부터 $price씩 청구돼요.';
-  }
-
-  @override
   String get planLegalTrialAppStore =>
       '무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.';
 
@@ -3816,7 +3811,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planStorePendingTitle => '결제 허락을 요청했어요';
 
   @override
-  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요';
+  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요.';
 
   @override
   String get planVerificationPendingTitle => '결제를 확인하고 있어요';
@@ -4867,15 +4862,15 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String planMonthlyEquivalent(String price) {
-    return '한 달에 $price 꼴';
-  }
-
-  @override
   String get planRenewsYearly => '1년마다 자동 갱신';
 
   @override
   String get planRenewsMonthly => '1개월마다 자동 갱신';
+
+  @override
+  String planMonthlyEquivalentRenewsYearly(String price) {
+    return '한 달에 $price 꼴 · 1년마다 자동 갱신';
+  }
 
   @override
   String planPriceUnit(String period) {
@@ -4888,7 +4883,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요';
+    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 24시간 전까지 해지하면 청구되지 않아요';
   }
 
   @override

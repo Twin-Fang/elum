@@ -6770,12 +6770,6 @@ abstract class AppLocalizations {
   /// **'{trial} 무료로 시작하기'**
   String planStartFreeTrial(String trial);
 
-  /// 기간 고르기 아래: 고른 상품의 체험 종료일·첫 청구 (오늘 시작 기준) #1166
-  ///
-  /// In ko, this message translates to:
-  /// **'무료 체험은 {date}에 끝나요. 해지하지 않으면 그날부터 {price}씩 청구돼요.'**
-  String planTrialEndsNotice(String date, String price);
-
   /// 법적 문구 — #1079 확정 전 초안 · App Store 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
   ///
   /// In ko, this message translates to:
@@ -6803,7 +6797,7 @@ abstract class AppLocalizations {
   /// 구매 요청 대기 설명
   ///
   /// In ko, this message translates to:
-  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요'**
+  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요.'**
   String get planStorePendingBody;
 
   /// 결제는 됐지만 아직 Pro가 안 켜짐
@@ -8504,12 +8498,6 @@ abstract class AppLocalizations {
   /// **'{percent}% 아껴요'**
   String planYearlySaving(int percent);
 
-  /// 1년 기간 카드 설명 (1년 가격 ÷ 12, 스토어 통화) #1189
-  ///
-  /// In ko, this message translates to:
-  /// **'한 달에 {price} 꼴'**
-  String planMonthlyEquivalent(String price);
-
   /// 1년 기간 카드 설명 (한 달 꼴 값을 모를 때) #1189
   ///
   /// In ko, this message translates to:
@@ -8522,6 +8510,12 @@ abstract class AppLocalizations {
   /// **'1개월마다 자동 갱신'**
   String get planRenewsMonthly;
 
+  /// 1년 기간 카드 설명: 한 달 꼴 값 + 갱신 주기 (1개월 카드와 맞춤) #1265
+  ///
+  /// In ko, this message translates to:
+  /// **'한 달에 {price} 꼴 · 1년마다 자동 갱신'**
+  String planMonthlyEquivalentRenewsYearly(String price);
+
   /// 기간 카드 가격 뒤 단위 · 버튼 아래 한 줄 #1189
   ///
   /// In ko, this message translates to:
@@ -8531,7 +8525,7 @@ abstract class AppLocalizations {
   /// 요금제 화면 버튼 아래 한 줄 (App Store 체험, 스토어 값) #1189
   ///
   /// In ko, this message translates to:
-  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요'**
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 24시간 전까지 해지하면 청구되지 않아요'**
   String planCtaTrialNoticeAppStore(String trial, String price, String unit);
 
   /// 요금제 화면 버튼 아래 한 줄 (Google Play 체험, 스토어 값) #1189

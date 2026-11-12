@@ -3985,11 +3985,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planTrialEndsNotice(String date, String price) {
-    return 'Your free trial ends on $date. If you don\'t cancel, you\'ll be charged $price from that day.';
-  }
-
-  @override
   String get planLegalTrialAppStore =>
       'If you cancel at least 24 hours before the free trial ends, you won\'t be charged.';
 
@@ -4005,7 +4000,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planStorePendingBody =>
-      'Pro turns on once it\'s approved. You can close this screen';
+      'Pro turns on once it\'s approved. You can close this screen.';
 
   @override
   String get planVerificationPendingTitle => 'Confirming your payment';
@@ -5118,15 +5113,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planMonthlyEquivalent(String price) {
-    return 'About $price a month';
-  }
-
-  @override
   String get planRenewsYearly => 'Renews every year';
 
   @override
   String get planRenewsMonthly => 'Renews every month';
+
+  @override
+  String planMonthlyEquivalentRenewsYearly(String price) {
+    return 'About $price a month · Renews every year';
+  }
 
   @override
   String planPriceUnit(String period) {
@@ -5139,7 +5134,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return 'After $trial, $price$unit is charged automatically. Cancel at least a day before it ends to avoid being charged';
+    return 'After $trial, $price$unit is charged automatically. Cancel at least 24 hours before it ends to avoid being charged';
   }
 
   @override

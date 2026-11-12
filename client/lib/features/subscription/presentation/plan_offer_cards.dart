@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/l10n/date_labels.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../application/plan_offer_labels.dart';
 import '../domain/plan_catalog.dart';
 
 /// 기간 고르기 (#1189 시안 A): 1년 > 1개월 카드. 1년에 `N% 아껴요` 띠 + `한 달에 X원 꼴` (스토어 가격으로 계산, 같은 통화일 때만)
-/// 고른 상품에 체험이 있으면 아래에 체험 끝나는 날·첫 청구 (#1166)
+/// 체험 안내는 결제 버튼 아래 한 줄과 법적 안내에만 둠 (#1265: 세 번 겹쳤음)
 class PlanOfferCards extends StatelessWidget {
   const PlanOfferCards({
     super.key,
@@ -25,17 +23,14 @@ class PlanOfferCards extends StatelessWidget {
   /// null 이면 고를 수 없음 (결제 진행 중)
   final ValueChanged<PlanPeriod>? onSelected;
 
-  /// 카드 사이 8 (띠가 있는 카드는 띠가 위로 튀어나온 만큼 더 띄움) · 카드 > 체험 안내 10
+  /// 카드 사이 8 (띠가 있는 카드는 띠가 위로 튀어나온 만큼 더 띄움)
   static const _cardGap = 8.0;
   static const _ribbonRoom = 10.0;
-  static const _cardsToTrialNotice = 10.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final savings = catalog.yearlySavings;
-    final selectedOffer = catalog.offerFor(selectedPeriod);
-    final selectedTrial = selectedOffer?.freeTrial;
     final onSelected = this.onSelected;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -52,27 +47,14 @@ class PlanOfferCards extends StatelessWidget {
             onTap: onSelected == null ? null : () => onSelected(offer.period),
           ),
         ],
-        if (selectedOffer != null && selectedTrial != null) ...[
-          SizedBox(height: _cardsToTrialNotice.h),
-          Text(
-            keepWords(_trialEndsNotice(l10n, selectedOffer, selectedTrial), locale: context.appLocale),
-            semanticsLabel: _trialEndsNotice(l10n, selectedOffer, selectedTrial),
-            textAlign: TextAlign.center,
-            style: context.typo.proPlanFinePrint.copyWith(color: context.colors.textSecondary),
-          ),
-        ],
       ],
     );
   }
 
-  /// 체험 끝나는 날 · 첫 청구 (오늘 시작 기준)
-  static String _trialEndsNotice(AppLocalizations l10n, PlanOffer offer, PlanFreeTrial trial) =>
-      l10n.planTrialEndsNotice(l10n.yearMonthDay(trial.endDateFrom(DateTime.now())), offer.priceLabel);
-
   /// 1년: 한 달 꼴(알면) · 자동 갱신, 1개월: 자동 갱신
   static String _captionOf(AppLocalizations l10n, PlanOffer offer, PlanYearlySavings? savings) =>
       switch (offer.period) {
-        PlanPeriod.yearly => savings == null ? l10n.planRenewsYearly : planMonthlyEquivalentLabel(l10n, savings),
+        PlanPeriod.yearly => savings == null ? l10n.planRenewsYearly : planMonthlyEquivalentRenewsYearlyLabel(l10n, savings),
         PlanPeriod.monthly => l10n.planRenewsMonthly,
       };
 

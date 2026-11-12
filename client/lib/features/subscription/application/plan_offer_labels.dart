@@ -22,10 +22,10 @@ String planPeriodName(AppLocalizations l10n, PlanPeriod period) => switch (perio
 /// 가격 뒤 단위 (`/년` · `/월`)
 String planPriceUnit(AppLocalizations l10n, PlanPeriod period) => l10n.planPriceUnit(period.name);
 
-/// 1년 ÷ 12 > 스토어 통화 모양 (`₩4,917` · `$3.33`, 통화 소수 자리에서 반올림)
-String planMonthlyEquivalentLabel(AppLocalizations l10n, PlanYearlySavings savings) {
+/// 1년 카드 설명: 1년 ÷ 12 > 스토어 통화 모양 (`₩4,917` · `$3.33`, 통화 소수 자리에서 반올림) + 갱신 주기
+String planMonthlyEquivalentRenewsYearlyLabel(AppLocalizations l10n, PlanYearlySavings savings) {
   final format = NumberFormat.simpleCurrency(locale: l10n.localeName, name: savings.currencyCode);
-  return l10n.planMonthlyEquivalent(format.format(savings.monthlyEquivalent));
+  return l10n.planMonthlyEquivalentRenewsYearly(format.format(savings.monthlyEquivalent));
 }
 
 /// 결제 버튼 아래 한 줄: 체험 > `7일 뒤 ₩59,000/년 자동 결제 · …해지 조건` (스토어별), 체험 없음 > `₩59,000/년 자동 갱신 · 언제든 해지`
