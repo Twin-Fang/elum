@@ -290,6 +290,15 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
             isRenameLoading: g.me && isBusy(_editKey),
           ),
         ],
+        // 여기 이름(이룸이 안 호칭)과 이야기 닉네임이 다른 값임을 알림 (#1304)
+        SizedBox(height: _rowGap.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: _headerInset.w),
+          child: KeptText(
+            context.l10n.guardiansNameScopeHint,
+            style: context.typo.peopleCaption.copyWith(color: context.colors.peopleTextSecondary),
+          ),
+        ),
         // 내 줄만 있으면 비어 보임 (무엇을 하면 되는지 아래에 알림)
         if (isAlone) ...[
           SizedBox(height: _rowGap.h),

@@ -802,6 +802,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'re looking after Elumi alone for now. Try inviting family or a teacher.';
 
   @override
+  String get guardiansNameScopeHint =>
+      'Only people caring together can see this name. In Stories, your nickname from My info is shown';
+
+  @override
   String get guardiansInviteAction => 'Invite another guardian';
 
   @override
@@ -1470,6 +1474,69 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
       'Deleting your account stops the next\npayment for your Google Play Pro subscription';
+
+  @override
+  String get guardianSettingsWithdrawProNotice =>
+      'Your Pro plan will also be removed';
+
+  @override
+  String guardianSettingsWithdrawProGiftNotice(String date) {
+    return 'Your Pro gift, usable until $date,\nwill also be removed';
+  }
+
+  @override
+  String get guardianSettingsWithdrawProTrialNotice =>
+      'Your Pro trial will also be removed';
+
+  @override
+  String guardianSettingsWithdrawCreditsNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count remaining credits',
+      one: '1 remaining credit',
+    );
+    return 'Your $_temp0 will also be removed';
+  }
+
+  @override
+  String guardianSettingsWithdrawCreditsWithPurchasedNotice(
+    int count,
+    int purchased,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count remaining credits',
+      one: '1 remaining credit',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      purchased,
+      locale: localeName,
+      other: '$purchased purchased credits',
+      one: '1 purchased credit',
+    );
+    return 'Your $_temp0 will also be removed\nThis includes $_temp1';
+  }
+
+  @override
+  String get guardianSettingsWithdrawCreditsUnknownNotice =>
+      'Your remaining credits will also be removed';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepTitle =>
+      'Please cancel your App Store subscription first';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepMessage =>
+      'Deleting your account alone keeps the payments going\nYou can still delete your account without cancelling';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepContinue => 'Continue';
+
+  @override
+  String get guardianSettingsWithdrawDone =>
+      'Your account has been deleted. Thank you for using Elum';
 
   @override
   String get guardianSettingsWithdrawTypeTitle => 'One more check';
@@ -4132,6 +4199,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planStatusGracePeriodFooter => 'Please check your payment method';
+
+  @override
+  String get planSheetNextPaymentLabel => 'Next payment';
+
+  @override
+  String get planSheetEndDateLabel => 'Ends on';
+
+  @override
+  String get planSheetStoreLabel => 'Paid with';
+
+  @override
+  String get planSheetStoreAppStore => 'App Store';
+
+  @override
+  String get planSheetStoreGooglePlay => 'Google Play';
+
+  @override
+  String planSheetRenewingNote(String date) {
+    return 'Unless you cancel, you\'ll be charged automatically on $date. You can cancel in Manage subscription';
+  }
+
+  @override
+  String get planSheetEndsToFreeNote =>
+      'When it ends, you\'ll switch to Free. You won\'t be charged automatically';
+
+  @override
+  String get planSheetUnlimitedNote => 'You can use Pro with no end date';
 
   @override
   String get planLearnPro => 'Learn about Pro';

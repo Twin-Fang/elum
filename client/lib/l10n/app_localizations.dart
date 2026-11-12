@@ -1424,6 +1424,12 @@ abstract class AppLocalizations {
   /// **'아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'**
   String get guardiansAloneHint;
 
+  /// 함께하는 사람 목록 아래 안내. 이룸이 안 호칭(display name)과 이야기 탭 닉네임이 다른 값임을 알림 (#1304)
+  ///
+  /// In ko, this message translates to:
+  /// **'여기 이름은 함께 돌보는 사람에게만 보여요. 이야기에는 내 정보의 닉네임이 보여요'**
+  String get guardiansNameScopeHint;
+
   /// 초대 코드 만들기로 가는 줄
   ///
   /// In ko, this message translates to:
@@ -2569,6 +2575,69 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요'**
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Pro 계정(선물·체험 외)일 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro도 함께 사라져요'**
+  String get guardianSettingsWithdrawProNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Pro 선물 계정일 때. date 는 마지막으로 쓸 수 있는 날 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지 쓸 수 있는\nPro 선물도 사라져요'**
+  String guardianSettingsWithdrawProGiftNotice(String date);
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 가입 체험 중일 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험도 함께 사라져요'**
+  String get guardianSettingsWithdrawProTrialNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 남은 크레딧이 있을 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧 {count, plural, other{{count}개}}도 사라져요'**
+  String guardianSettingsWithdrawCreditsNotice(int count);
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 남은 크레딧 중 결제로 산 크레딧이 있을 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧 {count, plural, other{{count}개}}도 사라져요\n산 크레딧 {purchased, plural, other{{purchased}개}}도 들어 있어요'**
+  String guardianSettingsWithdrawCreditsWithPurchasedNotice(
+    int count,
+    int purchased,
+  );
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 크레딧 수를 못 받았을 때 숫자 없이 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧도 모두 사라져요'**
+  String get guardianSettingsWithdrawCreditsUnknownNotice;
+
+  /// 회원탈퇴 전 안내 팝업 제목. App Store 결제 Pro 가 자동 갱신 중일 때 탈퇴 경고보다 먼저 보임 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱스토어 구독을 먼저 해지해 주세요'**
+  String get guardianSettingsWithdrawAppStoreStepTitle;
+
+  /// 회원탈퇴 전 App Store 구독 해지 안내 팝업 설명 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴만 하면 결제가 이어져요\n해지하지 않아도 탈퇴는 할 수 있어요'**
+  String get guardianSettingsWithdrawAppStoreStepMessage;
+
+  /// 회원탈퇴 전 App Store 구독 해지 안내 팝업의 회색 버튼. 해지하지 않고 탈퇴 경고로 넘어감 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'계속하기'**
+  String get guardianSettingsWithdrawAppStoreStepContinue;
+
+  /// 회원탈퇴가 끝나고 로그인 화면에 한 번 뜨는 알림 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴했어요. 그동안 이룸을 써 주셔서 고마워요'**
+  String get guardianSettingsWithdrawDone;
 
   /// 회원탈퇴 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치 (#1155)
   ///
@@ -7027,6 +7096,54 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'결제 수단을 확인해 주세요'**
   String get planStatusGracePeriodFooter;
+
+  /// 내 요금제 시트 표 줄 항목: 자동 갱신 구독의 다음 결제일 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 결제일'**
+  String get planSheetNextPaymentLabel;
+
+  /// 내 요금제 시트 표 줄 항목: Pro 가 끝나는 날 (해지 예약·선물·체험·기간제) (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나는 날'**
+  String get planSheetEndDateLabel;
+
+  /// 내 요금제 시트 표 줄 항목: 구독을 결제한 스토어 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'결제한 곳'**
+  String get planSheetStoreLabel;
+
+  /// 내 요금제 시트 결제한 곳 값: 애플 스토어 이름 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'App Store'**
+  String get planSheetStoreAppStore;
+
+  /// 내 요금제 시트 결제한 곳 값: 구글 스토어 이름 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Google Play'**
+  String get planSheetStoreGooglePlay;
+
+  /// 내 요금제 시트 설명 줄: 자동 갱신 중인 스토어 구독 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'해지하지 않으면 {date}에 자동으로 결제돼요. 해지는 구독 관리에서 할 수 있어요'**
+  String planSheetRenewingNote(String date);
+
+  /// 내 요금제 시트 설명 줄: 해지 예약·선물·체험·기간제 Pro 가 끝난 뒤 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나면 Free로 바뀌어요. 저절로 결제되지 않아요'**
+  String get planSheetEndsToFreeNote;
+
+  /// 내 요금제 시트 설명 줄: 끝나는 날이 없는 Pro (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'기간 제한 없이 Pro를 쓸 수 있어요'**
+  String get planSheetUnlimitedNote;
 
   /// 요금제 화면을 여는 버튼 문구 하나 (미리 보기 판·글자 링크·크레딧 부족 팝업 공통, ProUpsellButton, #1170)
   ///

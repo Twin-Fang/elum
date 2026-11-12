@@ -23,6 +23,9 @@ abstract interface class LocalStorage {
   String? get lastLoginProvider;
   Future<void> setLastLoginProvider(String v);
 
+  /// 지난 로그인 수단 지우기 (회원탈퇴 뒤 `최근 로그인` 배지가 지운 계정을 가리키지 않게, #1303)
+  Future<void> clearLastLoginProvider();
+
   List<String> get goals;
   Future<void> setGoals(List<String> v);
 
