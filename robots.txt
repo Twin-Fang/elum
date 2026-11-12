@@ -1,3 +1,2 @@
 User-agent: *
 Allow: /
-Sitemap: https://twin-fang.github.io/elum/sitemap.xml
