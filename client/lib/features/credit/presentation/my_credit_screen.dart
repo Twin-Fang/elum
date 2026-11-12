@@ -4,26 +4,30 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/haptics/tap_haptics.dart';
+import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/elum_text_link.dart';
 import '../../../core/widgets/free_badge.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../member/application/plan_access.dart';
 import '../../subscription/application/credit_purchase_notifier.dart';
+import '../application/credit_cost_guide_entry.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_purchase.dart';
 import '../domain/credit_summary.dart';
 import 'credit_purchase_actions.dart';
+import 'widgets/my_credit_activity.dart';
 import 'widgets/my_credit_balance_card.dart';
 import 'widgets/my_credit_pack_section.dart';
 import 'widgets/my_credit_subscribe_card.dart';
 
-/// 내 크레딧: 머리(제목 + 요금제 태그) > 종류별 잔액 카드 > (Free) 구독 카드 > 크레딧 꾸러미 구매
-///
-/// 상태: 불러오는 중 / 실패(다시 하기 + 코드) / 크레딧 꺼짐(빈 화면) / 잔액 + 구독·꾸러미.
-/// 꾸러미 구역이 실패하거나 꺼져도 위쪽 잔액은 그대로 보임
+/// 내 크레딧: 잔액 > 이번 주기 사용 막대 > 최근 쓴 내역 5줄 > (Free) 구독 카드 > 꾸러미 > `크레딧은 이렇게 써요`
+/// 상태 4개: 불러오는 중 · 실패(다시 하기 + 코드) · 꺼짐(빈 화면) · 정상 (꾸러미 실패와 무관하게 잔액은 보임)
 class MyCreditScreen extends ConsumerWidget {
   const MyCreditScreen({super.key});
 
@@ -77,6 +81,8 @@ class _Body extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final access = ref.watch(planAccessProvider);
+    // 묶음이 위에서부터 차례로 떠오름 (동작 줄이기면 바로 보임)
+    Widget stagger(int order, Widget child) => AppFadeSlideIn(delay: AppMotion.sectionStagger * order, child: child);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,17 +94,32 @@ class _Body extends ConsumerWidget {
             ],
           ),
           SizedBox(height: context.space.md.h),
-          MyCreditBalanceCard(summary: summary),
+          stagger(0, MyCreditBalanceCard(summary: summary)),
+          SizedBox(height: context.space.sm.h),
+          stagger(1, MyCreditUsageCard(summary: summary)),
+          SizedBox(height: _sectionGap.h),
+          stagger(2, const MyCreditRecentHistory()),
           if (access.shouldShowProTeaser) ...[
             SizedBox(height: _sectionGap.h),
-            Padding(
-              padding: EdgeInsets.only(left: context.space.xs.w, bottom: context.space.xs.h),
-              child: Text(context.l10n.myCreditSubscribeLabel, style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel)),
-            ),
-            const MyCreditSubscribeCard(),
+            stagger(3, Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: context.space.xs.w, bottom: context.space.xs.h),
+                  child: Text(context.l10n.myCreditSubscribeLabel, style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel)),
+                ),
+                const MyCreditSubscribeCard(),
+              ],
+            )),
           ],
           SizedBox(height: _sectionGap.h),
-          const MyCreditPackSection(),
+          stagger(4, const MyCreditPackSection()),
+          SizedBox(height: context.space.xs.h),
+          // 크레딧 안내 창 (내 요금제 기준 단가 · 지급량)
+          ElumTextLink(
+            label: context.l10n.myCreditGuideLink,
+            onTap: withTapHaptic(() => showCreditCostGuide(context, ref, summary)),
+          ),
           SizedBox(height: _bottomGap.h),
         ],
       ),

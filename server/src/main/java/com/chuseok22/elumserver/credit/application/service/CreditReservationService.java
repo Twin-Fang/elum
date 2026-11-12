@@ -283,6 +283,13 @@ public class CreditReservationService {
   }
 
   /**
+   * 무료 다시 그리기 하루 한도 설정값 (크레딧 요약 표시용, 권한과 무관)
+   */
+  public int freeRegenerateDailyCap() {
+    return freeRegenerateAllowance.dailyCap();
+  }
+
+  /**
    * 일과 생성 시작에 필요한 사용 가능량 (크레딧 요약·추가 질문 공통, 계산은 {@link CreditFreeRoutineTextAllowance})
    */
   public int routineCreateStartCost(AiCreditAccount account, AiCreditPolicy policy) {

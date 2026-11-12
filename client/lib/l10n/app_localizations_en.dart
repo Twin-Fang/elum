@@ -88,27 +88,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'A routine is already being made.\nYou can make a new one once it\'s done';
 
   @override
-  String creditBlockedExhausted(String reset) {
-    return 'You\'ve used all your credits this week.\nCredits refill on $reset';
-  }
-
-  @override
-  String creditBlockedExhaustedMonth(String reset) {
-    return 'You\'ve used all your credits this month.\nThey refill on $reset';
-  }
-
-  @override
-  String creditAdOffer(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Watch an ad to the end to get $count credits',
-      one: 'Watch an ad to the end to get $count credit',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String creditReceivedTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -118,12 +97,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get creditReceivedTitleNoCount => 'You got credits';
-
-  @override
-  String get creditAdWatchMore => 'Watch an ad to make more';
 
   @override
   String get adRewardPreparing => 'Getting the ad ready';
@@ -1761,48 +1734,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String aiCreditResetLine(String reset) {
     return 'Refills $reset';
   }
-
-  @override
-  String get creditCostTitle => 'How AI credits are used';
-
-  @override
-  String creditCostLineTextFree(int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost credits',
-      one: '$imageCost credit',
-    );
-    return 'Routine text is free. Each finished card picture uses $_temp0.';
-  }
-
-  @override
-  String creditCostLine(int textCost, int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      textCost,
-      locale: localeName,
-      other: '$textCost credits',
-      one: '$textCost credit',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost credits',
-      one: '$imageCost credit',
-    );
-    return 'Making the routine text uses $_temp0, and each card with a finished picture uses $_temp1.';
-  }
-
-  @override
-  String get creditCostKeepGoing =>
-      'A routine you start while you have credits is finished, even with many pictures.';
-
-  @override
-  String get creditWeeklyRefill => 'Credits refill every Monday at 0:00.';
-
-  @override
-  String get creditMonthlyRefill =>
-      'Refills at 12:00 AM on the 1st of every month.';
 
   @override
   String get routineCreateButton => 'Make a new routine';
@@ -3869,7 +3800,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitFreeImageRegenerate =>
-      'Redraw a picture you don\'t like without credits';
+      'Redraw pictures without credits, a set number of times a day';
+
+  @override
+  String planBenefitFreeImageRegenerateDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Redraw without credits up to $count times a day',
+      one: 'Redraw without credits up to $count time a day',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get planBenefitMoreWeeklyCredits => 'Get more credits every week';
@@ -5247,4 +5189,227 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitCardSplit => 'Splits one card into smaller ones';
+
+  @override
+  String get creditTopUpTitleExhausted =>
+      '🎟️ You\'ve used this week\'s credits';
+
+  @override
+  String get creditTopUpTitleExhaustedMonth =>
+      '🎟️ You\'ve used this month\'s credits';
+
+  @override
+  String get creditTopUpTitleShort => '🎟️ You\'re a little short on credits';
+
+  @override
+  String creditTopUpRefillAt(String reset) {
+    return 'They refill on $reset';
+  }
+
+  @override
+  String creditTopUpAdTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Watch an ad for $count credits',
+      one: 'Watch an ad for $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdTitleNoCount => 'Watch an ad for credits';
+
+  @override
+  String creditTopUpAdDetail(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: 'About 30 seconds, $remaining more today',
+      one: 'About 30 seconds, $remaining more today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdWatch => 'Watch ad';
+
+  @override
+  String get creditTopUpAdOff => 'Ads for credits aren\'t available right now';
+
+  @override
+  String get creditTopUpAdDailyLimit =>
+      'That\'s all for today. Come back tomorrow';
+
+  @override
+  String get creditTopUpAdCheckFailed =>
+      'Couldn\'t load ad info. Try again in a moment';
+
+  @override
+  String get creditTopUpPackLink => 'See credit packs';
+
+  @override
+  String get creditTopUpRoutineContinue => 'Keep making it';
+
+  @override
+  String get creditTopUpRedrawContinue => 'Keep drawing';
+
+  @override
+  String creditRewardTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '🎟️ You got $count credits',
+      one: '🎟️ You got $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditRewardTitleNoCount => '🎟️ You got credits';
+
+  @override
+  String creditRewardPlus(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get creditRewardReason => 'For watching the whole ad';
+
+  @override
+  String get creditRewardBalanceLabel => 'Credits now';
+
+  @override
+  String get lowCreditNoticeTitle => 'Credits are running low';
+
+  @override
+  String get lowCreditNoticeTitleEmpty => 'You\'re out of credits';
+
+  @override
+  String get lowCreditNoticeBody => 'Watch an ad to get more right away';
+
+  @override
+  String get lowCreditNoticeAction => 'Watch ad';
+
+  @override
+  String get creditGuideTitle => '🎟️ How credits work';
+
+  @override
+  String get creditGuideBasis => 'Based on your plan';
+
+  @override
+  String get creditGuideRoutineText => 'Routine text';
+
+  @override
+  String get creditGuideCardImage => '1 card picture';
+
+  @override
+  String get creditGuideRegenerate => 'Redraw a picture';
+
+  @override
+  String get creditGuideWeeklyGrant => 'Credits each week';
+
+  @override
+  String get creditGuideMonthlyGrant => 'Credits each month';
+
+  @override
+  String creditGuideCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credits',
+      one: '$count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideUnlimited => 'Unlimited';
+
+  @override
+  String creditGuideRegenerateFreeToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free left today',
+      one: '$count free left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideKeepGoing =>
+      'A routine you\'ve started always finishes, even if credits run short';
+
+  @override
+  String get creditGuideRefillWeek => 'Refills every Monday at 0:00';
+
+  @override
+  String get creditGuideRefillMonth =>
+      'Refills on the 1st of each month at 0:00';
+
+  @override
+  String creditGuideProFactBoth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'With Pro, routine text is unlimited and redraws are free $count times a day',
+      one:
+          'With Pro, routine text is unlimited and redraws are free $count time a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideProFactText => 'With Pro, routine text is unlimited';
+
+  @override
+  String creditGuideProFactRegenerate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'With Pro, redraws are free $count times a day',
+      one: 'With Pro, redraws are free $count time a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditGuideRegenerateFreeDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free a day',
+      one: '$count free a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideConfirm => 'Got it';
+
+  @override
+  String myCreditUsageWeek(int used, int available) {
+    return 'Used $used this week, $available left';
+  }
+
+  @override
+  String myCreditUsageMonth(int used, int available) {
+    return 'Used $used this month, $available left';
+  }
+
+  @override
+  String myCreditFreeRegenerateToday(int left, int cap) {
+    return '$left free redraws left today ($cap a day)';
+  }
+
+  @override
+  String get myCreditRecentTitle => 'Recent activity';
+
+  @override
+  String get myCreditSeeAllHistory => 'See all activity';
+
+  @override
+  String get myCreditGuideLink => 'How credits work';
 }

@@ -41,3 +41,9 @@ final routineCreateCreditCostsProvider = Provider.autoDispose<CreditCosts?>((ref
   );
   return canCreateRoutineTextFree ? (routine: 0, image: costs.image) : costs;
 });
+
+/// 무료 다시 그리기 하루 한도 (요금제 혜택 줄 `하루 N번까지`). 모르면(조회 전 · 실패 · 이전 서버 · 0) null > 숫자 없는 문구
+final freeImageRegenerateDailyCapProvider = Provider.autoDispose<int?>((ref) {
+  final cap = ref.watch(creditSummaryProvider).value?.freeImageRegenerateDailyCap ?? 0;
+  return cap > 0 ? cap : null;
+});
