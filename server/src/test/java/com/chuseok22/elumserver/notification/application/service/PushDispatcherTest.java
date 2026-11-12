@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.application.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -8,7 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.notification.core.AdminMessageRoute;
 import com.chuseok22.elumserver.notification.core.NotificationType;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.entity.NotificationSetting;
 import com.chuseok22.elumserver.notification.infrastructure.entity.PushDevice;
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -138,6 +142,35 @@ class PushDispatcherTest {
 
     assertThatCode(() -> dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED))
       .doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("운영자 알림: 전체 끔 회원은 건너뛰고, 무효 토큰은 지우며 실패로 세고, 앱이 쓸 type·route 를 싣는다")
+  void dispatchAdminMessage_skipsPushOff_countsResults_andCarriesRoute() {
+    NotificationSetting pushOff = new NotificationSetting();
+    pushOff.setAllEnabled(false);
+    when(notificationSettingRepository.findById("m-off")).thenReturn(Optional.of(pushOff));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull("m1")).thenReturn(List.of(device("t1"), device("t2")));
+    when(pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull("m-off")).thenReturn(List.of(device("t-off")));
+    when(pushSender.send(any())).thenReturn(PushResult.SENT, PushResult.INVALID_TOKEN);
+    AdminMessage message = new AdminMessage();
+    message.setId("msg-1");
+    message.setTitle("Pro 선물");
+    message.setBody("고마워요");
+    message.setRoute(AdminMessageRoute.PLAN);
+
+    AdminMessageDelivery delivery = dispatcher.dispatchAdminMessage(
+      List.of(recorded, new RecordedNotification("n-off", "m-off", 1, true)), message);
+
+    assertThat(delivery).isEqualTo(new AdminMessageDelivery(1, 1));
+    verify(pushDeviceRepository).deleteByToken("t2");
+    ArgumentCaptor<PushMessage> sent = ArgumentCaptor.forClass(PushMessage.class);
+    verify(pushSender, times(2)).send(sent.capture());
+    assertThat(sent.getAllValues()).extracting(PushMessage::token).containsExactly("t1", "t2");
+    PushMessage first = sent.getAllValues().get(0);
+    assertThat(first.title()).isEqualTo("Pro 선물");
+    assertThat(first.data()).containsEntry("type", "ADMIN_MESSAGE").containsEntry("route", "plan")
+      .containsEntry("notificationId", "n1");
   }
 
   private PushDevice device(String token) {

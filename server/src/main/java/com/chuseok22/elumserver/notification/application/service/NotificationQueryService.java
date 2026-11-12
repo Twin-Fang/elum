@@ -11,7 +11,9 @@ import com.chuseok22.elumserver.notification.application.dto.response.Notificati
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationPageResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.UnreadSummaryResponse;
 import com.chuseok22.elumserver.notification.core.NotificationType;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
+import com.chuseok22.elumserver.notification.infrastructure.repository.AdminMessageRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +48,7 @@ public class NotificationQueryService {
   private final ProfileGuardianService profileGuardianService;
   private final RoutineQueryService routineQueryService;
   private final NoticeHistoryService noticeHistoryService;
+  private final AdminMessageRepository adminMessageRepository;
 
   /**
    * 알림 목록 한 쪽: size+1 개 조회 > 이름·일과 제목 일괄 조회 > 응답 변환
@@ -119,14 +124,35 @@ public class NotificationQueryService {
     }
     Map<String, String> routineTitleById = routineQueryService.titlesOf(routineIds, profileNameById.keySet());
 
+    // 운영자 알림 내용 (지워졌으면 제목·본문 없음)
+    Map<String, AdminMessage> adminMessageById = adminMessagesOf(rows);
+
     return rows.stream().map(row -> {
       String routineId = routineIdOf(row);
+      AdminMessage adminMessage = row.getType() == NotificationType.ADMIN_MESSAGE && row.getTargetId() != null
+        ? adminMessageById.get(row.getTargetId()) : null;
       return new NotificationItemResponse(
         row.getId(), row.getType(), row.getProfileId(),
         profileNameById.get(row.getProfileId()), row.getTargetId(),
         routineId == null ? null : routineTitleById.get(routineId),
-        row.getCount(), row.getLastOccurredAt(), row.getReadAt() != null);
+        row.getCount(), row.getLastOccurredAt(), row.getReadAt() != null,
+        adminMessage == null ? null : adminMessage.getTitle(),
+        adminMessage == null ? null : adminMessage.getBody(),
+        adminMessage == null ? null : adminMessage.getRoute().getWire());
     }).toList();
+  }
+
+  // 한 쪽의 운영자 알림 id > 내용 (쿼리 1회, 없으면 조회 안 함)
+  private Map<String, AdminMessage> adminMessagesOf(List<Notification> rows) {
+    Set<String> messageIds = rows.stream()
+      .filter(row -> row.getType() == NotificationType.ADMIN_MESSAGE && row.getTargetId() != null)
+      .map(Notification::getTargetId)
+      .collect(Collectors.toSet());
+    if (messageIds.isEmpty()) {
+      return Map.of();
+    }
+    return adminMessageRepository.findAllById(messageIds).stream()
+      .collect(Collectors.toMap(AdminMessage::getId, Function.identity()));
   }
 
   /** 제목을 보여줄 일과 id: 일과 완료는 subjectIds 마지막(가장 최근), 공동 보호자가 보낸 일과는 targetId */

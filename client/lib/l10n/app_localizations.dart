@@ -2102,6 +2102,12 @@ abstract class AppLocalizations {
   /// **'지난주 리포트가 도착했어요'**
   String get notificationWeeklyReportReady;
 
+  /// 알림 줄: 운영자 알림의 제목을 못 받았을 때 (#1273)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸에서 알려 드려요'**
+  String get notificationAdminMessageFallback;
+
   /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:

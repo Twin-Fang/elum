@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 동작 17개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
+ * 관리자 기록 동작 19개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
  * 크레딧 조정·예약 반환은 원장(actor·사유)에, 시스템 설정은 설정 변경 이력에 남아 여기서 기록하지 않음
  */
 @Getter
@@ -30,6 +30,9 @@ public enum AdminAuditAction {
   MIGRATION_VERIFY_REQUESTED("정합성 검사 요청", AdminAuditTargetType.MIGRATION_SYNC, false),
   MIGRATION_SYNC_PAUSED("이전 동기화 멈춤", AdminAuditTargetType.MIGRATION_SYNC, false),
   MIGRATION_SYNC_RESUMED("이전 동기화 재개", AdminAuditTargetType.MIGRATION_SYNC, false),
+  // 운영자 알림 (#1273). 대상 id = 운영자 알림 id, detail = 받는 사람 수·기기 결과·제목
+  ADMIN_PUSH_SENT("알림 보내기", AdminAuditTargetType.ADMIN_MESSAGE, false),
+  ADMIN_PUSH_TEST_SENT("알림 먼저 보내 보기", AdminAuditTargetType.ADMIN_MESSAGE, false),
   ;
 
   private final String label;

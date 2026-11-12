@@ -88,6 +88,15 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, J
     """)
   List<MemberAiUsage> aggregateUsageByMemberIds(@Param("memberIds") List<String> memberIds);
 
+  /// 지금까지 AI 호출이 minimumCallCount 번 이상인 회원 id (회원 목록의 AI 호출 수와 같은 기준: 성공·실패 모두)
+  @Query("""
+    select l.memberId from AiCallLog l
+    where l.memberId is not null
+    group by l.memberId
+    having count(l) >= :minimumCallCount
+    """)
+  List<String> findMemberIdsWithCallCountAtLeast(@Param("minimumCallCount") long minimumCallCount);
+
   /// 기간 [from, to) 의 추정 비용 합. 0건이면 0.
   @Query("""
     select coalesce(sum(l.estimatedCostUsd), 0) from AiCallLog l

@@ -1136,6 +1136,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
 
   @override
+  String get notificationAdminMessageFallback => '이룸에서 알려 드려요';
+
+  @override
   String guardianHomeGreeting(String name) {
     return '안녕하세요,\n$name 보호자님 👋🏻';
   }

@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.notification.core.NotificationType;
 import java.time.LocalDateTime;
 
 /// 알림 목록 한 줄. profileName·routineTitle 은 지금 값이며, 지워졌거나 접근할 수 없으면 null
+/// title·body·route 는 운영자 알림(ADMIN_MESSAGE)만 값이 있음 (route: home, plan, myCredit)
 public record NotificationItemResponse(
   String id,
   NotificationType type,
@@ -13,7 +14,10 @@ public record NotificationItemResponse(
   String routineTitle,
   int count,
   LocalDateTime occurredAt,
-  boolean isRead
+  boolean isRead,
+  String title,
+  String body,
+  String route
 ) {
 
 }
