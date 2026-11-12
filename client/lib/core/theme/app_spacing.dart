@@ -105,7 +105,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     // Figma 실측 — 화면 최상단 기준 절대 y좌표
     headerTop: 131,
     ctaTop: 675,
-    headerToContent: 52,
+    // 설명 > 내용 32 (#1285: 시안 52 는 온보딩 목록이 한 화면을 넘겨 줄임)
+    headerToContent: 32,
     checkSize: 24,
     checkRadius: 8,
     iconSm: 20,

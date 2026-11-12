@@ -226,6 +226,12 @@ abstract final class AppAssets {
   /// 그림 방식 선택의 `만화 그림` 예시: 서버 카드 그림 인물(만화 아이)이 이 닦는 장면 (280×280, #1258)
   static const imageStyleCartoon = '$_images/image_style_cartoon.webp';
 
+  /// 온보딩 예시 분류 아이콘 4개 (192×192 투명 WebP, 이미지 하네스 3D 결, #1285)
+  static const exampleCategoryMorning = '$_images/example_category_morning.webp';
+  static const exampleCategorySchool = '$_images/example_category_school.webp';
+  static const exampleCategoryChores = '$_images/example_category_chores.webp';
+  static const exampleCategoryOutside = '$_images/example_category_outside.webp';
+
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
