@@ -4046,6 +4046,18 @@ abstract class AppLocalizations {
   /// **'예시 일과 둘러보기'**
   String get routineTemplateOpen;
 
+  /// 일과 만들기 입력칸 아래 그림 방식 알약의 앞 글자 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림'**
+  String get routineImageStylePillLabel;
+
+  /// 그림 방식 알약 낭독 문구 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 방식 {style}, 눌러서 바꾸기'**
+  String routineImageStylePillSemantics(String style);
+
   /// 예시 일과 시트 제목
   ///
   /// In ko, this message translates to:

@@ -605,6 +605,8 @@
   "reminderNotificationTitle": "ELUM",
   "reminderNotificationBody": "Time for {routineTitle}",
   "routineTemplateOpen": "Browse example routines",
+  "routineImageStylePillLabel": "Card pictures",
+  "routineImageStylePillSemantics": "Card picture style {style}, tap to change",
   "routineTemplateSheetTitle": "Example routines",
   "routineTemplateSheetBody": "Pick one and we'll fill in the text. Adjust it for your Elumi before sending",
   "routineTemplateBeginnerBadge": "Good for first-timers",

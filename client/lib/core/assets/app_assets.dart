@@ -435,7 +435,9 @@ abstract final class AppAssets {
   static const iconComments = '$_images/icon_comments.svg';
   static const iconCoins = '$_images/icon_coins.svg';
   static const iconPaperPlane = '$_images/icon_paper_plane.svg';
-  static const iconApps = '$_images/icon_apps.svg';
+
+  /// 일과 만들기 `예시 일과 둘러보기` 아이콘: 겹친 그림 카드 3장 (128×128 투명 WebP, 이미지 하네스 3D 결, #1287)
+  static const routineTemplateCards = '$_images/routine_template_cards.webp';
 
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.

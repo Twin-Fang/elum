@@ -2212,6 +2212,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineTemplateOpen => '예시 일과 둘러보기';
 
   @override
+  String get routineImageStylePillLabel => '카드 그림';
+
+  @override
+  String routineImageStylePillSemantics(String style) {
+    return '카드 그림 방식 $style, 눌러서 바꾸기';
+  }
+
+  @override
   String get routineTemplateSheetTitle => '예시 일과';
 
   @override
