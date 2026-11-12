@@ -91,7 +91,7 @@
 
 ## 도움말과 약관
 
-[도움말](https://twin-fang.github.io/elum/) · [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html) · [계정·데이터 삭제 안내](https://twin-fang.github.io/elum/delete.html)
+[도움말](https://elum.suhsaechan.kr/) · [개인정보처리방침](https://elum.suhsaechan.kr/privacy.html) · [계정·데이터 삭제 안내](https://elum.suhsaechan.kr/delete.html)
 
 ## 만든 사람들
 

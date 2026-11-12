@@ -12,6 +12,7 @@
 elum/
 ├── client/   # Flutter 앱 (보호자 모드 + 이룸이 모드)
 ├── server/   # Spring Boot 서비스 서버
+├── site/     # 소개 사이트 (elum.suhsaechan.kr · 생성기와 배포는 site/README.md)
 └── docs/     # 기획 · 설계 문서
 ```
 

@@ -97,7 +97,7 @@ AI가 만든 카드도 보호자가 확인한 뒤에만 아이에게 보여요.
 · 결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신돼요.
 · 구독 관리와 해지는 기기 설정 > Apple ID > 구독에서 할 수 있어요.
 · 이용약관(EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-· 개인정보처리방침: https://twin-fang.github.io/elum/privacy.html
+· 개인정보처리방침: https://elum.suhsaechan.kr/privacy.html
 ```
 
 ## 검색 노출에 대해

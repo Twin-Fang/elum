@@ -1,7 +1,7 @@
 # 02. 시스템 아키텍처
 
 > ⚠️ **현재 동작과 다른 문서예요.** 이 문서의 AI DLP Gateway(로컬 LLM 마스킹) 서술은 해커톤 POC 당시의 설계 기록이에요.
-> 2026-09-23부터 쓰지 않으며(#377), 보호자 입력은 가공 없이 AI 업체에 전달돼요. 현재 기준은 [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html)에 적혀 있어요.
+> 2026-09-23부터 쓰지 않으며(#377), 보호자 입력은 가공 없이 AI 업체에 전달돼요. 현재 기준은 [개인정보처리방침](https://elum.suhsaechan.kr/privacy.html)에 적혀 있어요.
 
 > 상태: 초안 (브레인스토밍 정리본) — 구성 요소와 역할 분담은 합의됨, 세부 스펙은 러프
 >
@@ -106,7 +106,7 @@ JSON 형식 행동 카드 생성
 
 - **정정(2026-10-29, #377):** 카드 글과 그림은 외부 AI 업체(Google LLC · OpenAI, L.L.C. · Features & Labels Inc.(fal), 모두 미국)가 만들고, 보호자가 쓴 문장은 **가공 없이 그대로** 전달된다. 로컬 LLM 과 AI DLP 는 2026-09-23 부터 쓰지 않는다(#377).
 - 이 절이 말하던 "로컬 LLM 이므로 데이터가 외부 서비스로 나가지 않는다"와 "AI DLP Gateway 는 유지한다"는 사실이 아니다.
-  현재 기준은 [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html)과 서버 `consent/overseas.txt` 다.
+  현재 기준은 [개인정보처리방침](https://elum.suhsaechan.kr/privacy.html)과 서버 `consent/overseas.txt` 다.
 
 ## 이미지 전략 (MVP 제약)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """게시된 공개 페이지와 서버 동의 문서가 어긋나지 않는지 본다.
 
-**왜 필요한가.** 방침이 두 곳에 산다 — 게시 페이지(`gh-pages`)와 서버가 들고 있는
+**왜 필요한가.** 방침이 두 곳에 산다 — 게시 페이지(`site/static/`, elum.suhsaechan.kr)와 서버가 들고 있는
 동의 문서(`server/src/main/resources/consent/`). 한쪽만 고치면 조용히 어긋난다.
 실제로 그렇게 어긋났다: 지원 페이지는 "원문은 따로 보관하지 않아요"라고 적어 두었는데
 서버는 원문을 저장하고 방침에도 보관한다고 적혀 있었다. **같은 사이트의 두 페이지가
@@ -10,7 +10,7 @@
 사람이 두 곳을 눈으로 맞추는 일은 반드시 빠진다. 그래서 값으로 묻는다.
 
     python3 tool/check_public_pages.py              # 게시된 주소를 받아 본다
-    python3 tool/check_public_pages.py --dir <경로>  # 로컬 gh-pages 작업본을 본다
+    python3 tool/check_public_pages.py --dir <경로>  # 로컬에서 만든 사이트 폴더를 본다 (site/build_site.py --out)
 
 어긋나면 종료 코드 1이다.
 """
@@ -24,7 +24,7 @@ import re
 import sys
 import urllib.request
 
-BASE = "https://twin-fang.github.io/elum"
+BASE = "https://elum.suhsaechan.kr"
 CONSENT = pathlib.Path(__file__).resolve().parent.parent / "server/src/main/resources/consent"
 
 PAGES = ("index.html", "privacy.html", "delete.html")
@@ -49,7 +49,7 @@ def load(name: str, local: pathlib.Path | None) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dir", type=pathlib.Path, help="로컬 gh-pages 작업본 경로")
+    ap.add_argument("--dir", type=pathlib.Path, help="로컬에서 만든 사이트 폴더 경로")
     args = ap.parse_args()
 
     pages: dict[str, str] = {}

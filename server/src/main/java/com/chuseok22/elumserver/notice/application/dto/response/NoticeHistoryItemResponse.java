@@ -22,7 +22,7 @@ public record NoticeHistoryItemResponse(
   @Schema(description = "버튼 문구. 버튼이 없으면 null", example = "자세히 보기")
   String buttonLabel,
 
-  @Schema(description = "버튼 https 링크. 버튼이 없으면 null", example = "https://twin-fang.github.io/elum/")
+  @Schema(description = "버튼 https 링크. 버튼이 없으면 null", example = "https://elum.suhsaechan.kr/")
   String buttonUrl,
 
   @Schema(description = "공지가 올라온 시각(한국 시각). 다시 보이게 고친 공지는 고친 시각", example = "2026-10-19T09:00:00")

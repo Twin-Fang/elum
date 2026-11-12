@@ -198,7 +198,7 @@ abstract final class AppConfig {
   /// 개인정보처리방침 게시 주소 (consent_documents 본문과 같은 내용)
   static String get privacyPolicyUrl => _string(
     'ELUM_PRIVACY_POLICY_URL',
-    'https://twin-fang.github.io/elum/privacy.html',
+    'https://elum.suhsaechan.kr/privacy.html',
   );
 
   /// 스토어 구독 관리 화면 주소. [productId] 가 있으면 Play 는 그 구독을 바로 연다

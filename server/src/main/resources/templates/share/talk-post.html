@@ -29,7 +29,7 @@
   <meta property="og:image" th:content="${imageUrl}"/>
   <meta name="twitter:card" content="summary_large_image"/>
 
-  <link rel="icon" href="https://twin-fang.github.io/elum/assets/lumi.svg"/>
+  <link rel="icon" href="https://elum.suhsaechan.kr/assets/lumi.svg"/>
   <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
 
@@ -143,8 +143,8 @@
 
 <header class="top">
   <div class="top-inner">
-    <a class="logo" href="https://twin-fang.github.io/elum/" rel="noopener">
-      <img src="https://twin-fang.github.io/elum/assets/logo.svg" alt="이룸 ELUM" width="60" height="22"/>
+    <a class="logo" href="https://elum.suhsaechan.kr/" rel="noopener">
+      <img src="https://elum.suhsaechan.kr/assets/logo.svg" alt="이룸 ELUM" width="60" height="22"/>
     </a>
     <a class="pill" th:href="${platform == 'android'} ? ${playStoreUrl} : ${appStoreUrl}" rel="noopener">앱 받기</a>
   </div>
@@ -154,7 +154,7 @@
   <!-- 볼 수 있는 글 -->
   <th:block th:if="${post != null}">
     <p class="from rise">
-      <img src="https://twin-fang.github.io/elum/assets/lumi.svg" alt=""/>
+      <img src="https://elum.suhsaechan.kr/assets/lumi.svg" alt=""/>
       <span th:if="${post.linkOnly}"><b>이룸</b>에서 만든 일과를 보냈어요</span>
       <span th:unless="${post.linkOnly}"><b>이룸 이야기</b>에 올라온 일과예요</span>
     </p>
@@ -196,7 +196,7 @@
 
   <!-- 없음·내려감·정지 회원 글·잘못된 주소 -->
   <section class="gone rise" th:if="${post == null}">
-    <img src="https://twin-fang.github.io/elum/assets/lumi.svg" alt=""/>
+    <img src="https://elum.suhsaechan.kr/assets/lumi.svg" alt=""/>
     <b>글을 찾을 수 없어요</b>
     <span>글쓴이가 내렸거나 주소가 맞지 않아요</span>
     <code>E-TALK-SHARE-GONE</code>
@@ -209,7 +209,7 @@
     <p class="lede">보호자가 말하듯 한 줄 적으면, 이룸이가 따라 하기 쉬운 그림 순서 카드로 만들어 줘요.</p>
     <div class="stage" aria-hidden="true">
       <div class="phone"><div class="screen">
-        <img src="https://twin-fang.github.io/elum/assets/promo/ko/child_card.webp" alt="" loading="lazy"/>
+        <img src="https://elum.suhsaechan.kr/assets/promo/ko/child_card.webp" alt="" loading="lazy"/>
       </div></div>
     </div>
     <ol class="steps">
@@ -238,7 +238,7 @@
     <p class="btn-hint" th:if="${post != null}">앱을 받은 뒤 이 링크를 다시 누르면 글이 열려요</p>
   </section>
 
-  <footer>이룸 ELUM · <a href="https://twin-fang.github.io/elum/privacy.html">개인정보처리방침</a></footer>
+  <footer>이룸 ELUM · <a href="https://elum.suhsaechan.kr/privacy.html">개인정보처리방침</a></footer>
 </main>
 
 <!-- 앱 자동 열기 1회: 같은 탭에서 이미 불렀으면 다시 부르지 않음 (앱 없음 > Android 는 ?app=0 으로 돌아옴, iOS 는 페이지 그대로) -->

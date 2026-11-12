@@ -1,6 +1,6 @@
 # 이룸 (ELUM) 문서
 
-이 폴더는 **개발 기록과 기획 자료**를 모아 둔 곳이에요. 앱을 쓰는 방법은 [도움말](https://twin-fang.github.io/elum/)을 봐 주세요.
+이 폴더는 **개발 기록과 기획 자료**를 모아 둔 곳이에요. 앱을 쓰는 방법은 [도움말](https://elum.suhsaechan.kr/)을 봐 주세요.
 
 > 01~07번 기획 문서는 해커톤 때 쓴 **초안**이에요. 이후 많이 바뀌어서 **지금 동작과 다를 수 있어요.**
 > 현재 기준은 아래 "지금 기준이 되는 문서"를 따라 주세요.
@@ -9,8 +9,8 @@
 
 | 무엇이 궁금한가요 | 어디를 보나요 |
 | --- | --- |
-| 앱 사용법, 문의 | [도움말](https://twin-fang.github.io/elum/) |
-| 개인정보를 어떻게 다루는지 | [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html) |
+| 앱 사용법, 문의 | [도움말](https://elum.suhsaechan.kr/) |
+| 개인정보를 어떻게 다루는지 | [개인정보처리방침](https://elum.suhsaechan.kr/privacy.html) |
 | 화면 문구, 말투, 디자인 규칙 | [08-design-principles.md](./08-design-principles.md) |
 | 앱 개발 규칙 | [client/CLAUDE.md](../client/CLAUDE.md) |
 | 서버 개발 규칙 | [server/CLAUDE.md](../server/CLAUDE.md) |

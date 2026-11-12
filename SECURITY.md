@@ -24,4 +24,4 @@
 
 ## 개인정보 요청은 다른 창구예요
 
-계정이나 데이터 삭제는 [계정·데이터 삭제 안내](https://twin-fang.github.io/elum/delete.html)를 따라 주세요.
+계정이나 데이터 삭제는 [계정·데이터 삭제 안내](https://elum.suhsaechan.kr/delete.html)를 따라 주세요.
