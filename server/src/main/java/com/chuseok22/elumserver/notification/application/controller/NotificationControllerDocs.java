@@ -89,4 +89,26 @@ public interface NotificationControllerDocs {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<Void> markAllRead(Authentication authentication);
+
+  @Operation(
+    summary = "푸시 열림 기록",
+    description = """
+      운영자·자동 알림 푸시를 눌러 앱을 열었을 때 부릅니다 (#1275). 푸시 data 의 `dispatchId` 를 그대로 보냅니다.
+
+      - 처음 열린 시각만 남기고, 두 번째부터는 아무것도 바꾸지 않고 204 입니다(여러 번 불러도 안전).
+      - 없거나 내 기록이 아니면 404 `NOTIFICATION_NOT_FOUND` 입니다(존재 여부를 알리지 않음).
+      - 알림 성과 화면의 열림률에만 쓰이며, 실패해도 앱 동작에는 영향이 없습니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "열림 기록 완료(이미 기록돼 있어도 204)"),
+    @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "403", description = "이룸이 권한으로는 부를 수 없음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "기록이 없거나 내 기록이 아님(NOTIFICATION_NOT_FOUND)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<Void> markDispatchOpened(Authentication authentication, String dispatchId);
 }

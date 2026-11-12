@@ -5623,4 +5623,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationIntroCreditRefilledMonth =>
       'When this month\'s credits are refilled';
+
+  @override
+  String get notificationOffNoticeHighlightRoutineDone =>
+      'When a routine is done';
+
+  @override
+  String get notificationOffNoticeHighlightCaregiver =>
+      'News from co-caregivers';
+
+  @override
+  String get notificationOffNoticeAction => 'Turn on notifications';
+
+  @override
+  String get homeAutoSendUpsellTitle =>
+      '⏰ Send routines automatically at the same time every day?';
+
+  @override
+  String get homeAutoSendUpsellBody =>
+      'Pick the days and time, and we\'ll send it to the child\'s device then';
+
+  @override
+  String get homeAutoSendUpsellAction => 'Learn more';
+
+  @override
+  String get notificationSettingRoutineNudge =>
+      'When today\'s routine hasn\'t been sent yet';
+
+  @override
+  String get notificationSettingSuggestion => 'New routine ideas';
+
+  @override
+  String get notificationSettingPlanReminder => 'Before your Pro gift ends';
 }

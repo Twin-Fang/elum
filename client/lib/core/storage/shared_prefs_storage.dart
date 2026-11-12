@@ -85,6 +85,11 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeSuggestionDismissedKeys = 'homeSuggestion.dismissedKeys';
   // 보호자 홈 크레딧 부족 카드를 닫은 주기: 그 주기의 다음 초기화 시각 (ISO-8601)
   static const _kLowCreditNoticeDismissedPeriod = 'credit.lowNoticeDismissedPeriod';
+  // 보호자 홈 자동 보내기 권유 카드: 처음 보인 날 (yyyy-MM-dd) · 닫음 여부
+  static const _kHomeAutoSendUpsellFirstShownDay = 'homeNotice.autoSendUpsellFirstShownDay';
+  static const _kHomeAutoSendUpsellClosed = 'homeNotice.autoSendUpsellClosed';
+  // 보호자 홈 권유 카드 하루 1개: {yyyy-MM-dd}|{종류 이름}
+  static const _kHomeUpsellShownRecord = 'homeNotice.upsellShownRecord';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
 
@@ -115,6 +120,9 @@ class SharedPrefsStorage implements LocalStorage {
     _kHomeSuggestionShownAtByKind,
     _kHomeSuggestionDismissedKeys,
     _kLowCreditNoticeDismissedPeriod,
+    _kHomeAutoSendUpsellFirstShownDay,
+    _kHomeAutoSendUpsellClosed,
+    _kHomeUpsellShownRecord,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -566,6 +574,33 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setLowCreditNoticeDismissedPeriod(String period) async {
     AppLogger.storageWrite(_kLowCreditNoticeDismissedPeriod, period);
     await _prefs.setString(_kLowCreditNoticeDismissedPeriod, period);
+  }
+
+  @override
+  String? get homeAutoSendUpsellFirstShownDay => _prefs.getString(_kHomeAutoSendUpsellFirstShownDay);
+
+  @override
+  Future<void> setHomeAutoSendUpsellFirstShownDay(String day) async {
+    AppLogger.storageWrite(_kHomeAutoSendUpsellFirstShownDay, day);
+    await _prefs.setString(_kHomeAutoSendUpsellFirstShownDay, day);
+  }
+
+  @override
+  bool get isHomeAutoSendUpsellClosed => _prefs.getBool(_kHomeAutoSendUpsellClosed) ?? false;
+
+  @override
+  Future<void> setHomeAutoSendUpsellClosed(bool isClosed) async {
+    AppLogger.storageWrite(_kHomeAutoSendUpsellClosed, '$isClosed');
+    await _prefs.setBool(_kHomeAutoSendUpsellClosed, isClosed);
+  }
+
+  @override
+  String? get homeUpsellShownRecord => _prefs.getString(_kHomeUpsellShownRecord);
+
+  @override
+  Future<void> setHomeUpsellShownRecord(String record) async {
+    AppLogger.storageWrite(_kHomeUpsellShownRecord, record);
+    await _prefs.setString(_kHomeUpsellShownRecord, record);
   }
 
   @override

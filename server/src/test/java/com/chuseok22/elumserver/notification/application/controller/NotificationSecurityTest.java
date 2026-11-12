@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.notification.application.service.NotificationQueryService;
+import com.chuseok22.elumserver.notification.application.service.NotificationDispatchService;
 import com.chuseok22.elumserver.notification.application.service.NotificationReadService;
 import com.chuseok22.elumserver.notification.application.service.NotificationSettingService;
 import com.chuseok22.elumserver.notification.application.service.PushDeviceService;
@@ -56,6 +57,8 @@ class NotificationSecurityTest {
   private NotificationQueryService notificationQueryService;
   @MockitoBean
   private NotificationReadService notificationReadService;
+  @MockitoBean
+  private NotificationDispatchService notificationDispatchService;
 
   // SecurityConfig 생성자가 요구하는 빈들
   @MockitoBean(name = "memberUserDetailsService")
@@ -158,5 +161,23 @@ class NotificationSecurityTest {
       .andExpect(status().isForbidden());
 
     verify(notificationSettingService, never()).update(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("보호자는 푸시 열림을 기록하고 204 를 받는다 — 내 회원 id 로만 기록 (#1275)")
+  void guardianToken_markDispatchOpened_204() throws Exception {
+    mockMvc.perform(post("/api/notifications/dispatches/d1/opened").with(user("g1").authorities(MEMBER, GUARDIAN)))
+      .andExpect(status().isNoContent());
+
+    verify(notificationDispatchService).markOpened(eq("g1"), eq("d1"));
+  }
+
+  @Test
+  @DisplayName("이룸이 기기 권한으로는 푸시 열림을 기록할 수 없다 (#1275)")
+  void elumiToken_markDispatchOpened_403() throws Exception {
+    mockMvc.perform(post("/api/notifications/dispatches/d1/opened").with(user("e1").authorities(MEMBER, ELUMI)))
+      .andExpect(status().isForbidden());
+
+    verify(notificationDispatchService, never()).markOpened(anyString(), anyString());
   }
 }

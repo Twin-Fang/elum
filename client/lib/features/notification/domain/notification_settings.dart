@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-/// 알림 설정: 푸시 여부 8개 (알림 목록은 설정과 무관하게 항상 쌓임)
+/// 알림 설정: 푸시 여부 11개 (알림 목록은 설정과 무관하게 항상 쌓임)
+/// 자동 알림 3개(#1275): 오늘 일과 권유, 새 일과 추천, 요금제 안내. 옛 서버는 안 줌 > 켜짐으로 읽음
 /// JSON 키는 서버 `NotificationSettingResponse` 그대로, 저장 행이 없으면 모두 켜짐
 @immutable
 class NotificationSettings {
@@ -13,6 +14,9 @@ class NotificationSettings {
     required this.isFeedbackResolvedEnabled,
     required this.isTalkCommentedEnabled,
     required this.isTalkImportedEnabled,
+    required this.isRoutineNudgeEnabled,
+    required this.isSuggestionEnabled,
+    required this.isPlanReminderEnabled,
   });
 
   /// 전체 푸시: false 면 종류별 값과 무관하게 푸시 없음
@@ -25,6 +29,15 @@ class NotificationSettings {
   final bool isTalkCommentedEnabled;
   final bool isTalkImportedEnabled;
 
+  /// 자동 알림: 어제 보낸 일과를 오늘 아직 안 보냈을 때
+  final bool isRoutineNudgeEnabled;
+
+  /// 자동 알림: 다시 찾기 · 이야기 인기 일과
+  final bool isSuggestionEnabled;
+
+  /// 자동 알림: Pro 선물·체험이 끝나기 전
+  final bool isPlanReminderEnabled;
+
   NotificationSettings copyWith({
     bool? isAllEnabled,
     bool? isRoutineCompletedEnabled,
@@ -34,6 +47,9 @@ class NotificationSettings {
     bool? isFeedbackResolvedEnabled,
     bool? isTalkCommentedEnabled,
     bool? isTalkImportedEnabled,
+    bool? isRoutineNudgeEnabled,
+    bool? isSuggestionEnabled,
+    bool? isPlanReminderEnabled,
   }) =>
       NotificationSettings(
         isAllEnabled: isAllEnabled ?? this.isAllEnabled,
@@ -50,6 +66,9 @@ class NotificationSettings {
             isTalkCommentedEnabled ?? this.isTalkCommentedEnabled,
         isTalkImportedEnabled:
             isTalkImportedEnabled ?? this.isTalkImportedEnabled,
+        isRoutineNudgeEnabled: isRoutineNudgeEnabled ?? this.isRoutineNudgeEnabled,
+        isSuggestionEnabled: isSuggestionEnabled ?? this.isSuggestionEnabled,
+        isPlanReminderEnabled: isPlanReminderEnabled ?? this.isPlanReminderEnabled,
       );
 
   /// 빠진 키는 켜짐으로 읽는다 (서버 기본값과 같음)
@@ -63,6 +82,9 @@ class NotificationSettings {
         isFeedbackResolvedEnabled: json['feedbackResolved'] != false,
         isTalkCommentedEnabled: json['talkCommented'] != false,
         isTalkImportedEnabled: json['talkImported'] != false,
+        isRoutineNudgeEnabled: json['routineNudge'] != false,
+        isSuggestionEnabled: json['suggestion'] != false,
+        isPlanReminderEnabled: json['planReminder'] != false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -74,6 +96,9 @@ class NotificationSettings {
         'feedbackResolved': isFeedbackResolvedEnabled,
         'talkCommented': isTalkCommentedEnabled,
         'talkImported': isTalkImportedEnabled,
+        'routineNudge': isRoutineNudgeEnabled,
+        'suggestion': isSuggestionEnabled,
+        'planReminder': isPlanReminderEnabled,
       };
 
   @override
@@ -86,7 +111,10 @@ class NotificationSettings {
       other.isCreditRefilledEnabled == isCreditRefilledEnabled &&
       other.isFeedbackResolvedEnabled == isFeedbackResolvedEnabled &&
       other.isTalkCommentedEnabled == isTalkCommentedEnabled &&
-      other.isTalkImportedEnabled == isTalkImportedEnabled;
+      other.isTalkImportedEnabled == isTalkImportedEnabled &&
+      other.isRoutineNudgeEnabled == isRoutineNudgeEnabled &&
+      other.isSuggestionEnabled == isSuggestionEnabled &&
+      other.isPlanReminderEnabled == isPlanReminderEnabled;
 
   @override
   int get hashCode => Object.hash(
@@ -98,5 +126,8 @@ class NotificationSettings {
         isFeedbackResolvedEnabled,
         isTalkCommentedEnabled,
         isTalkImportedEnabled,
+        isRoutineNudgeEnabled,
+        isSuggestionEnabled,
+        isPlanReminderEnabled,
       );
 }

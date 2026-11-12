@@ -270,8 +270,19 @@ class PushMessageRouter {
       tappedAt: DateTime.now(),
     );
     if (_isDuplicateOpen(open)) return;
+    unawaited(_reportDispatchOpened(data[PushMessage.dispatchIdKey]));
     _pendingOpen = open;
     unawaited(_openPending());
+  }
+
+  // 자동·운영자 알림을 눌러 열었음 기록 (화면 이동과 무관, 실패는 로그만)
+  Future<void> _reportDispatchOpened(String? dispatchId) async {
+    if (dispatchId == null || dispatchId.isEmpty) return;
+    try {
+      await _ref.read(notificationRepositoryProvider).reportDispatchOpened(dispatchId);
+    } catch (e, st) {
+      AppLogger.error('push', e, st, {'step': 'reportDispatchOpened'});
+    }
   }
 
   bool _isDuplicateOpen(PendingPushOpen open) {

@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 대상 종류 7개: 회원, 프롬프트, 의견, 로그 파일, 이전 파일, 이전 동기화, 운영자 알림
- * 대상 id 형식: 회원·의견 id(UUID), 프롬프트 "{PromptKey}:{언어 코드}", 로그 파일 경로, 이전 파일 종류 코드(routine-images 등), 이전 동기화 "migration-sync", 운영자 알림 id(UUID)
+ * 관리자 기록 대상 종류 9개: 회원, 프롬프트, 의견, 로그 파일, 이전 파일, 이전 동기화, 운영자 알림, 자동 알림 규칙, 예약 발송
+ * 대상 id 형식: 회원·의견 id(UUID), 프롬프트 "{PromptKey}:{언어 코드}", 로그 파일 경로, 이전 파일 종류 코드(routine-images 등), 이전 동기화 "migration-sync", 운영자 알림 id(UUID), 자동 알림 종류 이름, 예약 발송 id(UUID)
  */
 @Getter
 @AllArgsConstructor
@@ -18,6 +18,8 @@ public enum AdminAuditTargetType {
   MIGRATION_FILE("이전 파일"),
   MIGRATION_SYNC("이전 동기화"),
   ADMIN_MESSAGE("운영자 알림"),
+  AUTO_NOTIFICATION_RULE("자동 알림 규칙"),
+  SCHEDULED_PUSH("예약 발송"),
   ;
 
   /// 프롬프트 대상 id 의 키·언어 구분자: ROUTINE_CREATE:ko

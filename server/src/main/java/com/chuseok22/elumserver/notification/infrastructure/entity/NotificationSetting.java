@@ -45,4 +45,16 @@ public class NotificationSetting extends BaseEntity {
   // 이야기: 내 글을 누가 일과관리로 가져갔을 때
   @Column(name = "talk_imported_enabled", nullable = false, columnDefinition = "boolean not null default true")
   private boolean isTalkImportedEnabled = true;
+
+  // 자동 알림 (#1275): 오늘 일과 보내기
+  @Column(name = "routine_nudge_enabled", nullable = false, columnDefinition = "boolean not null default true")
+  private boolean isRoutineNudgeEnabled = true;
+
+  // 자동 알림 (#1275): 추천 (다시 찾기, 이야기 인기 일과)
+  @Column(name = "suggestion_enabled", nullable = false, columnDefinition = "boolean not null default true")
+  private boolean isSuggestionEnabled = true;
+
+  // 자동 알림 (#1275): 요금제 안내 (Pro 선물·체험 끝나기 전)
+  @Column(name = "plan_reminder_enabled", nullable = false, columnDefinition = "boolean not null default true")
+  private boolean isPlanReminderEnabled = true;
 }

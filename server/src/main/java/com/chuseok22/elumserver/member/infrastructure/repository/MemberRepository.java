@@ -133,6 +133,14 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     """)
   List<String> findIdsByKeyword(@Param("keyword") String keyword);
 
+  /// 자동 알림 (#1275): 이 상태로 마지막 활동이 [from, to) 인 회원 id (마지막 활동 = 인증 요청마다 60초 스로틀 갱신)
+  @Query("""
+    select m.id from Member m
+    where m.status = :status and m.lastActivityAt >= :from and m.lastActivityAt < :to
+    """)
+  List<String> findIdsByStatusAndLastActivityBetween(@Param("status") MemberStatus status,
+    @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
   /// 운영자 알림 조건 고르기: 이 상태로 joinedBefore 전에 가입한 회원 id (가입 오래된 순)
   @Query("select m.id from Member m where m.status = :status and m.createdAt < :joinedBefore order by m.createdAt asc")
   List<String> findIdsByStatusAndJoinedBefore(

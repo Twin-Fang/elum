@@ -104,16 +104,16 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// 보호자 홈 알림 꺼짐 카드 제목
+  /// 보호자 홈 알림 꺼짐 카드 제목 (앞 이모지 1개 포함, #1275)
   ///
   /// In ko, this message translates to:
-  /// **'알림을 켜 둘까요?'**
+  /// **'🔔 알림을 켜 둘까요?'**
   String get notificationOffNoticeTitle;
 
   /// 보호자 홈 알림 꺼짐 카드 본문 (이룸이가 일과를 끝낸 알림을 받는다는 뜻)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 끝내면 알려 드려요'**
+  /// **'이룸이가 일과를 끝내면 바로 알려 드려요'**
   String get notificationOffNoticeBody;
 
   /// 설정의 알림 설정 줄 오른쪽 값 (기기 알림이 꺼졌을 때)
@@ -9217,6 +9217,60 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이번 달 크레딧이 다시 채워졌을 때'**
   String get notificationIntroCreditRefilledMonth;
+
+  /// 보호자 홈 알림 꺼짐 카드: 받는 알림 알약 1 (짧게)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 마쳤을 때'**
+  String get notificationOffNoticeHighlightRoutineDone;
+
+  /// 보호자 홈 알림 꺼짐 카드: 받는 알림 알약 2 (공동 보호자가 보낸 일과·합류, 짧게)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보는 분 소식'**
+  String get notificationOffNoticeHighlightCaregiver;
+
+  /// 보호자 홈 알림 꺼짐 카드 버튼 (권한 요청 또는 기기 설정)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 켜기'**
+  String get notificationOffNoticeAction;
+
+  /// 보호자 홈 안내 카드 제목: 일과를 3개 이상 만든 Free 보호자에게 한 번 (반복 일과 Pro 미리 보기로 감, #1284)
+  ///
+  /// In ko, this message translates to:
+  /// **'⏰ 매일 같은 시각에 자동으로 보내 볼까요?'**
+  String get homeAutoSendUpsellTitle;
+
+  /// 보호자 홈 자동 보내기 안내 카드 한 문장 (반복 일과 기능 설명, 비교·할인 문구 금지)
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각을 정해 두면 그때 이룸이 기기로 보내 드려요'**
+  String get homeAutoSendUpsellBody;
+
+  /// 보호자 홈 자동 보내기 안내 카드 버튼 (주간 계획 화면의 Pro 미리 보기로 이동)
+  ///
+  /// In ko, this message translates to:
+  /// **'자세히 보기'**
+  String get homeAutoSendUpsellAction;
+
+  /// 알림 설정: 자동 알림 스위치 (어제 보낸 일과를 오늘 아직 안 보냈을 때 아침 알림, #1275)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 아직 안 보냈을 때'**
+  String get notificationSettingRoutineNudge;
+
+  /// 알림 설정: 자동 알림 스위치 (오래 안 열었을 때 · 이야기 인기 일과 소식)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과 추천'**
+  String get notificationSettingSuggestion;
+
+  /// 알림 설정: 자동 알림 스위치 (Pro 선물·체험 끝나기 7일 전 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물이 끝나기 전'**
+  String get notificationSettingPlanReminder;
 }
 
 class _AppLocalizationsDelegate
