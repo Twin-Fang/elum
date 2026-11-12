@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 
-/// 코치마크 시범 연출의 조각들 (손가락·링·메뉴 줄·토스트·묶음 모양)과 시간 계산
+/// 코치마크 시범 연출의 조각들 (손가락·링)과 시간 계산
 
 /// 한 주기를 도는 시범. 동작 줄이기면 [endScene] 지점의 멈춘 장면만 그린다.
 Widget buildCoachDemoLoop({
@@ -72,6 +72,13 @@ double coachDemoPulse(double t, double begin, double end) {
   final progress = coachDemoPhase(t, begin, end);
   return progress < 0.5 ? progress * 2 : (1 - progress) * 2;
 }
+
+/// 손가락·링을 놓을 자리: 대상 오른쪽 아래 모서리 (가운데에 두면 그림·글자를 덮는다, #1294)
+Offset coachDemoTouchPointOf(Rect target) =>
+    Offset(target.right - _touchInset, target.bottom - _touchInset);
+
+/// 모서리에서 대상 안으로 들어오는 거리 (손가락 30 중 안쪽에 걸치는 만큼)
+const _touchInset = 6.0;
 
 // --- 조각 ---
 

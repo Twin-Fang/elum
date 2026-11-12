@@ -216,6 +216,7 @@ class QuickMenuGroup<T> extends StatelessWidget {
                 label: row.label,
                 isDanger: row.isDanger,
                 shouldShowProBadge: row.shouldShowProBadge,
+                description: row.description,
                 onTap: () => Navigator.of(context).pop(row.value),
               ),
           ],
@@ -233,6 +234,7 @@ class _MenuRow extends StatelessWidget {
     required this.isDanger,
     required this.shouldShowProBadge,
     required this.onTap,
+    this.description,
   });
 
   /// `fi-br` 아이콘 SVG 경로
@@ -241,6 +243,9 @@ class _MenuRow extends StatelessWidget {
   final bool isDanger;
   final bool shouldShowProBadge;
   final VoidCallback onTap;
+
+  /// 글자 아래 회색 한 줄 (없으면 자리도 없다)
+  final String? description;
 
   static const _iconSize = 20.0;
   static const _iconToLabel = 12.0;
@@ -275,16 +280,35 @@ class _MenuRow extends StatelessWidget {
               ),
               SizedBox(width: _iconToLabel.w),
               Expanded(
-                child: LabelWithProBadge(
-                  label: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.typo.settingsTileLabel.copyWith(
-                      color: labelColor,
-                    ),
+                child: Padding(
+                  // 설명 줄이 있으면 두 줄이라 위아래 여백을 둔다 (한 줄이면 줄 높이가 맡는다)
+                  padding: EdgeInsets.symmetric(
+                    vertical: description == null ? 0 : context.space.sm.h,
                   ),
-                  shouldShowProBadge: shouldShowProBadge,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LabelWithProBadge(
+                        label: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.typo.settingsTileLabel.copyWith(
+                            color: labelColor,
+                          ),
+                        ),
+                        shouldShowProBadge: shouldShowProBadge,
+                      ),
+                      if (description case final description?)
+                        Text(
+                          description,
+                          style: context.typo.creditCaption.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],

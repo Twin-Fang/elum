@@ -16,7 +16,7 @@ import 'card_image.dart';
 /// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
-/// 이야기에서 가져온 일과는 이름 아래 `이야기에서`, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
+/// 이야기에서 가져온 일과는 그림 왼쪽 아래 `이야기에서` 알약, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
 class LibraryRoutineTile extends ConsumerWidget {
   const LibraryRoutineTile({
     super.key,
@@ -96,7 +96,20 @@ class LibraryRoutineTile extends ConsumerWidget {
                   Positioned(
                     top: -space.xs.h / 2,
                     right: -space.xs.w / 2,
-                    child: const _NewBadge(),
+                    child: _TileBadge(
+                      label: l10n.routineLibraryNewBadge,
+                      color: colors.checkDone,
+                    ),
+                  ),
+                // 이름 아래 줄로 두면 이름이 한 줄로 잘리고 글자가 붙어 보인다 (#1298)
+                if (isFromTalk)
+                  Positioned(
+                    left: -space.xs.w / 2,
+                    bottom: -space.xs.h / 2,
+                    child: _TileBadge(
+                      label: l10n.routineLibraryFromTalk,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 if (isSentToday)
                   Positioned(
@@ -107,8 +120,7 @@ class LibraryRoutineTile extends ConsumerWidget {
               ],
             ),
             SizedBox(height: space.xs.h),
-            // 이야기에서 온 일과는 이름 한 줄 + `이야기에서` 한 줄: 칸 높이(이름 두 줄)를 늘리지 않는다
-            // 이름은 낱말 단위로 줄바꿈 (큰 글자에서 `등교 준 / 비` 로 꺾이지 않게, 일과 언어 기준, #1169)
+            // 이름은 두 줄까지 (넘치면 …), 낱말 단위로 줄바꿈 (큰 글자에서 `등교 준 / 비` 로 꺾이지 않게, 일과 언어 기준, #1169)
             ContentLocale(
               language: routine.language,
               child: Text(
@@ -116,7 +128,7 @@ class LibraryRoutineTile extends ConsumerWidget {
                   routine.displayTitle,
                   locale: contentLocaleOf(routine.language),
                 ),
-                maxLines: isFromTalk ? 1 : 2,
+                maxLines: 2,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: context.typo.libraryTileLabel.copyWith(
@@ -124,16 +136,6 @@ class LibraryRoutineTile extends ConsumerWidget {
                 ),
               ),
             ),
-            if (isFromTalk)
-              Text(
-                l10n.routineLibraryFromTalk,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.libraryTileLabel.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
           ],
         ),
       ),
@@ -141,9 +143,12 @@ class LibraryRoutineTile extends ConsumerWidget {
   }
 }
 
-/// `새 일과` 칩 (시안 1931:6929: 민트 알약 + 흰 글자 10)
-class _NewBadge extends StatelessWidget {
-  const _NewBadge();
+/// 그림 모서리 알약: `새 일과`(민트, 시안 1931:6929) · `이야기에서`(회색). 흰 글자 10
+class _TileBadge extends StatelessWidget {
+  const _TileBadge({required this.label, required this.color});
+
+  final String label;
+  final Color color;
 
   static const _paddingH = 6.0;
   static const _paddingV = 4.0;
@@ -158,11 +163,11 @@ class _NewBadge extends StatelessWidget {
         vertical: _paddingV.h,
       ),
       decoration: BoxDecoration(
-        color: colors.checkDone,
+        color: color,
         borderRadius: BorderRadius.circular(_radius.r),
       ),
       child: Text(
-        context.l10n.routineLibraryNewBadge,
+        label,
         maxLines: 1,
         style: context.typo.libraryNewChipLabel.copyWith(color: colors.surface),
       ),

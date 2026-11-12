@@ -22,6 +22,7 @@ import '../../application/weekly_report_providers.dart';
 import '../../data/card_export_files.dart';
 import '../../domain/weekly_report.dart';
 import '../pro_teaser_samples.dart';
+import 'weekly_report_empty_card.dart';
 import 'weekly_report_past_weeks_sheet.dart';
 import 'weekly_report_save_sheet.dart';
 import 'weekly_report_sections.dart';
@@ -36,7 +37,7 @@ abstract final class WeeklyReportErrorCode {
 
 /// 주간 리포트 (Pro): 주 고르기 > 정리 글 · 숫자 · 요일별 · 일과별 · 남은 카드 > 저장하기 · 지난 리포트 보기
 ///
-/// 상태: 불러오는 중 / 보낸 일과 0건(빈 상태) / 실패(에러 코드 + 다시 하기) / 리포트.
+/// 상태: 불러오는 중 / 보낸 일과 0건(빈 카드) / 실패(에러 코드 + 다시 하기) / 리포트 (끝낸 일과 0건이면 숫자 대신 빈 카드, 저장 없음).
 /// Pro 가 아님: 미리 보기 주(서버가 정함)는 실제 리포트, 그 밖의 주는 판매 중이면 Pro 미리 보기 판 · 아니면 안내만.
 class WeeklyReportScreen extends ConsumerStatefulWidget {
   const WeeklyReportScreen({super.key, this.initialWeekStart});
@@ -92,7 +93,8 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     final isViewable = isFullAccess || isFreePreview;
     final reportAsync = isViewable && _isStartWeekApplied ? ref.watch(weeklyReportProvider(weekStart)) : null;
     final report = reportAsync?.value;
-    final canSave = report != null && report.hasRecords && !reportAsync!.isLoading;
+    // 끝낸 일과가 없는 주는 0만 가득한 리포트라 저장 버튼을 숨긴다 (#1302)
+    final canSave = report != null && report.completedRoutineCount > 0 && !reportAsync!.isLoading;
 
     return ElumScaffold(
       onBack: context.popOrHome,
@@ -164,7 +166,9 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
       return ElumStateBody(child: ElumErrorView(message: l10n.weeklyReportNotIncluded, compact: true));
     }
     return switch (reportAsync) {
-      AsyncData(value: final report) when !report.hasRecords => const ElumStateBody(child: _EmptyBody()),
+      AsyncData(value: final report) when !report.hasRecords => SingleChildScrollView(
+        child: WeeklyReportEmptyCard(title: l10n.weeklyReportEmptyTitle, description: l10n.weeklyReportEmptyBody),
+      ),
       AsyncData(value: final report) => _reportBody(context, report, isFreePreview: isFreePreview),
       AsyncError(:final error) => ElumStateBody(
         child: ElumErrorView.failure(
@@ -191,7 +195,15 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
             _FreePreviewNote(actions: canPromote ? actions : null),
             SizedBox(height: _sectionGap.h),
           ],
-          WeeklyReportSections(report: report),
+          WeeklyReportSections(
+            report: report,
+            noCompletionCard: WeeklyReportEmptyCard(
+              title: report.isCurrentWeek
+                  ? context.l10n.weeklyReportNoCompletionThisWeekTitle
+                  : context.l10n.weeklyReportNoCompletionPastWeekTitle,
+              description: context.l10n.weeklyReportNoCompletionBody,
+            ),
+          ),
           // 다 읽은 자리에서 다음 주도 받을지 묻기 (주간 리포트 혜택을 맨 위로 연 요금제 화면)
           if (canPromote) ...[
             SizedBox(height: _sectionGap.h),
@@ -285,32 +297,6 @@ class _FreePreviewNote extends StatelessWidget {
             freeTrialLabel: actions.freeTrialLabel,
             onTap: actions.onStart,
           ),
-      ],
-    );
-  }
-}
-
-/// 보낸 일과 0건: 글만 (보호자 빈 상태는 그림 없음)
-class _EmptyBody extends StatelessWidget {
-  const _EmptyBody();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          context.l10n.weeklyReportEmptyTitle,
-          textAlign: TextAlign.center,
-          style: context.typo.creditHistoryRowTitle.copyWith(color: colors.settingsCardLabel),
-        ),
-        SizedBox(height: context.space.xs),
-        Text(
-          context.l10n.weeklyReportEmptyBody,
-          textAlign: TextAlign.center,
-          style: context.typo.creditHistoryRowDetail.copyWith(color: colors.settingsGroupLabel),
-        ),
       ],
     );
   }

@@ -3242,6 +3242,24 @@ abstract class AppLocalizations {
   /// **'편집하기'**
   String get routineDetailEdit;
 
+  /// 오늘 일과 상세 시트 제목 아래: 이룸이가 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {done}/{total} 했어요'**
+  String routineDetailTodayProgress(int done, int total);
+
+  /// 지난 일과 상세 시트 제목 아래: 그날 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done}/{total} 했어요'**
+  String routineDetailPastProgress(int done, int total);
+
+  /// 일과 상세 시트 제목 오른쪽 버튼 글자: 인쇄용으로 받기 화면 열기 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용'**
+  String get routineDetailExportLabel;
+
   /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
   ///
   /// In ko, this message translates to:
@@ -3332,11 +3350,11 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get todayRoutineRerunFailedFallback;
 
-  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를) 로 쓴다)
+  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과에 담았어요'**
-  String todayRoutineCopied(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과에 담았어요'**
+  String todayRoutineCopied(String title, String batchim);
 
   /// 보호자 홈 지난 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내
   ///
@@ -3365,13 +3383,13 @@ abstract class AppLocalizations {
   /// 홈 코치마크 1단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'이룸이가 수행할 *새로운\n일과를 만들 수 있어요*'**
+  /// **'이룸이가 할 *새로운\n일과를 만들 수 있어요*'**
   String get homeCoachCreate;
 
   /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요'**
+  /// **'일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요'**
   String get homeCoachSwipe;
 
   /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
@@ -4742,11 +4760,11 @@ abstract class AppLocalizations {
   /// **'이야기에서 가져왔어요, 원래 글 보기'**
   String get routineDetailTalkOriginBandOpenLabel;
 
-  /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
+  /// 보내기 성공 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과로 보냈어요'**
-  String routineLibrarySent(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과로 보냈어요'**
+  String routineLibrarySent(String title, String batchim);
 
   /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
   ///
@@ -4922,6 +4940,12 @@ abstract class AppLocalizations {
   /// **'새 묶음 만들기'**
   String get routineGroupCreateGroup;
 
+  /// 만들기 시트 `새 묶음 만들기` 아래 회색 한 줄: 묶음이 무엇인지 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'여러 일과를 한 폴더에 모아요 (예: 아침 등교)'**
+  String get routineGroupCreateGroupDescription;
+
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
@@ -5084,23 +5108,11 @@ abstract class AppLocalizations {
   /// **'길게 눌렀다 *떼면* 메뉴가 열려요'**
   String get routineManageCoachLongPressMessage;
 
-  /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요'**
-  String get routineManageCoachSentMessage;
-
   /// 일과관리 묶음 코치마크 1단계 (#832)
   ///
   /// In ko, this message translates to:
   /// **'길게 누른 채 *움직이면* 정리 상태가 돼요\n다른 일과 위에 놓으면 *묶음*이 되고\n사이에 놓으면 자리를 옮겨요'**
   String get routineManageCoachDragMessage;
-
-  /// 일과관리 묶음 코치마크 2단계 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
-  String get routineManageCoachCreateGroupMessage;
 
   /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
   ///
@@ -7066,7 +7078,7 @@ abstract class AppLocalizations {
   /// 줄 이름 · 보상을 정해 둔 일과 중 끝까지 마친 수
   ///
   /// In ko, this message translates to:
-  /// **'보상까지 간 일과'**
+  /// **'보상을 받은 일과'**
   String get weeklyReportRewards;
 
   /// 줄 이름 · 일과를 하나 이상 마친 날이 이어진 가장 긴 날 수
@@ -7129,6 +7141,30 @@ abstract class AppLocalizations {
   /// **'일과를 보내면 이룸이가 마친 기록이 여기에 모여요'**
   String get weeklyReportEmptyBody;
 
+  /// 이번 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주는 아직 기록이 없어요'**
+  String get weeklyReportNoCompletionThisWeekTitle;
+
+  /// 지난 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 주에는 끝낸 일과가 없어요'**
+  String get weeklyReportNoCompletionPastWeekTitle;
+
+  /// 끝낸 일과가 0개인 주 빈 카드 설명 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 보내 볼까요?'**
+  String get weeklyReportNoCompletionBody;
+
+  /// 주간 리포트 빈 카드 버튼: 일과 관리 칸으로 이동 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 관리로 가기'**
+  String get weeklyReportGoToManage;
+
   /// 불러오기 실패 문구 (에러 코드와 다시 하기가 함께 보임)
   ///
   /// In ko, this message translates to:
@@ -7186,7 +7222,7 @@ abstract class AppLocalizations {
   /// 도넛 옆 한 줄: 보낸 일과 중 끝낸 일과 수
   ///
   /// In ko, this message translates to:
-  /// **'{sent, plural, other{일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  /// **'{sent, plural, other{{sent}개 중 {completed}개 끝냈어요}}'**
   String weeklyReportDonutSummary(int sent, int completed);
 
   /// 도넛 낭독 라벨: 완료율 퍼센트와 보낸 일과 중 끝낸 수
@@ -7379,7 +7415,7 @@ abstract class AppLocalizations {
   /// 숫자 3개 중 셋째 이름: 마치지 않고 남은 카드 수
   ///
   /// In ko, this message translates to:
-  /// **'남은 카드'**
+  /// **'아직 안 한 카드'**
   String get weeklyReportStatRemaining;
 
   /// 일과별 기록 줄 오른쪽 값: 보낸 횟수 중 마친 횟수

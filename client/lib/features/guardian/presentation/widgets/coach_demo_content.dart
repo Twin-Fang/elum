@@ -6,7 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'anchored_quick_menu.dart';
 
-/// 코치마크 시범 안에 그려지는 내용물: 메뉴 줄·만들기 선택지·토스트·묶음 모양.
+/// 코치마크 시범 안에 그려지는 내용물: 메뉴 줄·묶음 모양.
 /// 문구는 실제 화면과 같은 ARB 키를 쓴다 (따로 적으면 어긋난다).
 
 /// 칸 옆 메뉴 미리보기: 실제 길게 누르기 메뉴와 같은 판 · 폭 · 줄 높이 · 항목 5개 (지우기는 붉게)
@@ -57,25 +57,6 @@ class CoachDemoAnchoredMenu extends StatelessWidget {
       child: AnchoredQuickMenuPanel<int>(rows: rows),
     );
   }
-}
-
-class CoachDemoToast extends StatelessWidget {
-  const CoachDemoToast({super.key, required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-    decoration: BoxDecoration(
-      color: context.colors.textPrimary,
-      borderRadius: BorderRadius.circular(24.r),
-    ),
-    child: Text(
-      text,
-      style: context.typo.body.copyWith(color: context.colors.surface),
-    ),
-  );
 }
 
 class CoachDemoGhostTile extends StatelessWidget {

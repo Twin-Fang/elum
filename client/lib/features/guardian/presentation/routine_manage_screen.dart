@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/routes.dart';
@@ -177,7 +178,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     if (result == null || !mounted) return;
     final failure = result.failure;
     if (failure == null) {
-      showElumToast(context, l10n.routineLibrarySent(routine.displayTitle));
+      showElumToast(context, l10n.routineLibrarySent(routine.displayTitle, batchimOf(routine.displayTitle)));
       // 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
       unawaited(ref.read(pushPermissionPromptProvider).maybeAsk(context));
       return;

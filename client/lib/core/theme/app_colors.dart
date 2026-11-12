@@ -205,6 +205,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.coachScrim,
     required this.coachAccent,
     required this.coachText,
+    required this.coachBubble,
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
@@ -853,6 +854,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 코치마크 말풍선의 기본 글자 (흰색, 시안 1274:10400).
   final Color coachText;
 
+  /// 코치마크 안내 글 판 · 아래 점 띠 (진한 남색, #1294). 뒤 화면 글자와 겹쳐 읽히지 않게 깐다
+  final Color coachBubble;
+
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
@@ -1466,6 +1470,7 @@ class AppColors extends ThemeExtension<AppColors> {
     coachScrim: Color(0xBF000000),
     coachAccent: Color(0xFF55CFBA),
     coachText: Color(0xFFFFFFFF),
+    coachBubble: Color(0xF2242634),
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
     editChipLabel: Color(0xFF74757D),
@@ -1787,6 +1792,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? coachScrim,
     Color? coachAccent,
     Color? coachText,
+    Color? coachBubble,
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
@@ -2098,6 +2104,7 @@ class AppColors extends ThemeExtension<AppColors> {
       coachScrim: coachScrim ?? this.coachScrim,
       coachAccent: coachAccent ?? this.coachAccent,
       coachText: coachText ?? this.coachText,
+      coachBubble: coachBubble ?? this.coachBubble,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
@@ -2578,6 +2585,7 @@ class AppColors extends ThemeExtension<AppColors> {
       coachScrim: Color.lerp(coachScrim, other.coachScrim, t)!,
       coachAccent: Color.lerp(coachAccent, other.coachAccent, t)!,
       coachText: Color.lerp(coachText, other.coachText, t)!,
+      coachBubble: Color.lerp(coachBubble, other.coachBubble, t)!,
       starsNumberStart: Color.lerp(
         starsNumberStart,
         other.starsNumberStart,
