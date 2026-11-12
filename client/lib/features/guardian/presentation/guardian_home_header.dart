@@ -19,7 +19,7 @@ import 'widgets/notification_bell_button.dart';
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///
 /// 태블릿은 로고·이룸이 화면 입구가 옆 메뉴에 있어 인사말만 그림 (설정 입구는 내정보 칸, #798)
-/// 로고 옆(태블릿은 인사말 위)에 내 요금제 칩: Free · PRO · PRO 선물 (#1268)
+/// 로고 옆(태블릿은 인사말 위)에 내 요금제 칩: Free · PRO (선물·체험도 PRO 하나, 선물 구분은 내 정보·설정에서만, #1300)
 class GuardianHomeHeader extends ConsumerWidget {
   const GuardianHomeHeader({
     super.key,
@@ -66,7 +66,8 @@ class GuardianHomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final colors = context.colors;
-    final planChip = PlanTierChip(tier: planTierOf(ref.watch(planStatusProvider)));
+    final isPro = ref.watch(planStatusProvider.select((status) => status.isPro));
+    final planChip = PlanTierChip(tier: isPro ? PlanTier.pro : PlanTier.free);
 
     final topRowChildren = <Widget>[
       SizedBox(height: _top.h),

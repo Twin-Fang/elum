@@ -26,7 +26,7 @@ import 'widgets/my_credit_balance_card.dart';
 import 'widgets/my_credit_pack_section.dart';
 import 'widgets/my_credit_subscribe_card.dart';
 
-/// 내 크레딧: 잔액 > 이번 주기 사용 막대 > 최근 쓴 내역 5줄 > (Free) 구독 카드 > 꾸러미 > `크레딧은 이렇게 써요`
+/// 내 크레딧: 위 카드 하나(잔액 · 막대 · 채워지는 때 · 종류 · 다시 그리기) > 최근 쓴 내역 5줄 > (Free) 구독 카드 > 꾸러미 > `크레딧은 이렇게 써요`
 /// 상태 4개: 불러오는 중 · 실패(다시 하기 + 코드) · 꺼짐(빈 화면) · 정상 (꾸러미 실패와 무관하게 잔액은 보임)
 class MyCreditScreen extends ConsumerWidget {
   const MyCreditScreen({super.key});
@@ -95,13 +95,11 @@ class _Body extends ConsumerWidget {
           ),
           SizedBox(height: context.space.md.h),
           stagger(0, MyCreditBalanceCard(summary: summary)),
-          SizedBox(height: context.space.sm.h),
-          stagger(1, MyCreditUsageCard(summary: summary)),
           SizedBox(height: _sectionGap.h),
-          stagger(2, const MyCreditRecentHistory()),
+          stagger(1, const MyCreditRecentHistory()),
           if (access.shouldShowProTeaser) ...[
             SizedBox(height: _sectionGap.h),
-            stagger(3, Column(
+            stagger(2, Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
@@ -113,7 +111,7 @@ class _Body extends ConsumerWidget {
             )),
           ],
           SizedBox(height: _sectionGap.h),
-          stagger(4, const MyCreditPackSection()),
+          stagger(3, const MyCreditPackSection()),
           SizedBox(height: context.space.xs.h),
           // 크레딧 안내 창 (내 요금제 기준 단가 · 지급량)
           ElumTextLink(
