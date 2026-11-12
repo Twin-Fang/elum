@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/batchim.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/config/ad_ids.dart';
 import '../../../ads/presentation/ad_banner_slot.dart';
@@ -96,7 +97,11 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       return;
     }
     ref.refreshRoutines();
-    showElumToast(context, l10n.todayRoutineCopied(copy.value!.displayTitle));
+    final copiedTitle = copy.value!.displayTitle;
+    showElumToast(
+      context,
+      l10n.todayRoutineCopied(copiedTitle, batchimOf(copiedTitle)),
+    );
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/weekly_report.dart';
 import 'weekly_report_chart_card.dart';
@@ -26,6 +27,7 @@ class WeeklyReportSummaryDonut extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final percent = report.completionPercent;
+    final summary = l10n.weeklyReportDonutSummary(report.sentRoutineCount, report.completedRoutineCount);
     return Semantics(
       container: true,
       label: l10n.weeklyReportDonutSemantics(percent, report.sentRoutineCount, report.completedRoutineCount),
@@ -39,7 +41,8 @@ class WeeklyReportSummaryDonut extends StatelessWidget {
                 child: CustomPaint(
                   painter: WeeklyReportDonutPainter(
                     progress: percent / 100,
-                    trackColor: colors.routineRingTrack,
+                    // 빈 링은 아주 연한 회색: 0% 와 100% 가 한눈에 갈린다 (#1302)
+                    trackColor: colors.routineTileBg,
                     fillColor: colors.routineRingProgress,
                     strokeWidth: _donutStroke.w,
                   ),
@@ -62,8 +65,10 @@ class WeeklyReportSummaryDonut extends StatelessWidget {
                   children: [
                     Text(l10n.weeklyReportDonutLabel, style: context.typo.creditCaption.copyWith(color: colors.textSecondary)),
                     SizedBox(height: _labelToSummary.h),
+                    // 어절 단위로 줄바꿈 (`끝냈어` / `요` 로 꺾이지 않게, #1302)
                     Text(
-                      l10n.weeklyReportDonutSummary(report.sentRoutineCount, report.completedRoutineCount),
+                      keepWords(summary, locale: context.appLocale),
+                      semanticsLabel: summary,
                       style: context.typo.cardTitle.copyWith(color: colors.textPrimary, height: 1.3),
                     ),
                   ],

@@ -206,6 +206,33 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     );
   }
 
+  /// 머리 아래 진행 한 줄: 오늘 일과 `오늘 2/5 했어요`, 지난 일과 `2/5 했어요`. 일과관리 원본은 없음
+  String? _progressLabel(BuildContext context) {
+    if (widget.isLibrary || _steps.isEmpty) return null;
+    final doneCount = _steps.where((step) => step.completed).length;
+    final l10n = context.l10n;
+    return widget.isPast
+        ? l10n.routineDetailPastProgress(doneCount, _steps.length)
+        : l10n.routineDetailTodayProgress(doneCount, _steps.length);
+  }
+
+  /// 보상 줄 + (일과관리 원본) 요일·시각 줄 + (숨김) 알림 줄
+  Widget _buildSettingRows() => Column(
+    children: [
+      RoutineDetailRewardRow(routine: widget.routine),
+      // 요일·시각 반복 (#782): 일과관리 원본만, Pro 이거나 정해 둔 예약이 있을 때 (멈춤 안내)
+      if (widget.isLibrary && ref.watch(canShowRoutineScheduleProvider)) ...[
+        SizedBox(height: 8.h),
+        RoutineScheduleRow(routine: widget.routine),
+      ],
+      // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
+      if (_isReminderRowVisible && !widget.isPast) ...[
+        SizedBox(height: 8.h),
+        RoutineReminderRow(routine: widget.routine),
+      ],
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -248,6 +275,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     ? () => Navigator.of(context).pop(RoutineSheetAction.more)
                     : null,
                 onTitleEditTap: _canEdit ? _rename : null,
+                progressLabel: _progressLabel(context),
                 onExportTap: _steps.isEmpty
                     ? null
                     : () => Navigator.of(context).pop(RoutineSheetAction.export),
@@ -273,6 +301,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                             child: RoutineDetailTalkBanner(postId: talkPostId),
                           ),
                         ),
+                      // 보상 · 요일·시각 줄은 단계 위 (처음부터 보이게, 아래 버튼에 가리지 않게 #1298)
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        sliver: SliverToBoxAdapter(
+                          child: _buildSettingRows(),
+                        ),
+                      ),
                       SliverPadding(
                         // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
                         padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
@@ -339,6 +374,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                       child: RoutineDetailStepCard(
                                         step: step,
                                         index: index,
+                                        routineId: widget.routine.id,
                                         language: widget.routine.language,
                                         dragging: _draggingIndex == index,
                                         // 손잡이를 아예 그리지 않는다 (시안 980:4777)
@@ -360,33 +396,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                           ],
                         ),
                       ),
-                      SliverPadding(
-                        // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
-                        // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
-                        // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
-                        padding: EdgeInsets.fromLTRB(
-                          16.w,
-                          0,
-                          16.w,
-                          buttonBottom + buttonHeight + space.md,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: Column(
-                            children: [
-                              RoutineDetailRewardRow(routine: widget.routine),
-                              // 요일·시각 반복 (#782): 일과관리 원본만, Pro 이거나 정해 둔 예약이 있을 때 (멈춤 안내)
-                              if (widget.isLibrary &&
-                                  ref.watch(canShowRoutineScheduleProvider)) ...[
-                                SizedBox(height: 8.h),
-                                RoutineScheduleRow(routine: widget.routine),
-                              ],
-                              // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
-                              if (_isReminderRowVisible && !widget.isPast) ...[
-                                SizedBox(height: 8.h),
-                                RoutineReminderRow(routine: widget.routine),
-                              ],
-                            ],
-                          ),
+                      // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 끝까지 스크롤했을 때 마지막 단계가 버튼에 가리면 안 된다
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: buttonBottom + buttonHeight + space.md,
                         ),
                       ),
                     ],
