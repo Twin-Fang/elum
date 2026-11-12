@@ -39,11 +39,11 @@ class ImageStyleOptionCard extends StatelessWidget {
   /// Free 에게 잠긴 Pro 방식인가: 이름 옆 [ProBadge] · 라디오 대신 자물쇠 · 예시 흐림 (누르면 호출부가 요금제 안내)
   final bool isLocked;
 
-  /// 카드 높이 80 · 안쪽 여백 10 · 예시 60×60 r8 · 라디오 20×20 · 라디오 오른쪽 16.
-  /// (#1286: 시안 94·12·70 에서 줄임 — 온보딩에서 네 방식과 다음 버튼이 한 화면에 들어오게)
-  static const minHeight = 80.0;
+  /// 카드 높이 72 · 안쪽 여백 10 · 예시 52×52 r8 · 라디오 20×20 · 라디오 오른쪽 16.
+  /// (#1286: 시안 94·12·70 에서 줄임 — 온보딩에서 크레딧 띠·안내 + 네 방식 + 다음 버튼이 한 화면에 들어오게)
+  static const minHeight = 72.0;
   static const _inset = 10.0;
-  static const _exampleSize = 60.0;
+  static const _exampleSize = 52.0;
   static const _exampleRadius = 8.0;
   static const _radioSize = 20.0;
   static const _radioDot = 14.0;

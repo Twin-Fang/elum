@@ -37,8 +37,8 @@ import '../../member/application/plan_access.dart';
 class ImageStyleScreen extends ConsumerWidget {
   const ImageStyleScreen({super.key});
 
-  /// 카드 사이 12 (#1286: 크레딧 띠 + 네 방식 + 다음 버튼이 한 화면에 들어오게 시안 16 에서 줄임)
-  static const _cardGap = 12.0;
+  /// 카드 사이 8 (#1286: 크레딧 띠 + 네 방식 + 다음 버튼이 한 화면에 들어오게 시안 16 에서 줄임)
+  static const _cardGap = 8.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
