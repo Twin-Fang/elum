@@ -13,13 +13,13 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../../shared/models/character.dart';
-import '../../member/application/plan_access.dart';
+import '../../subscription/application/plan_status_providers.dart';
 import 'widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///
 /// 태블릿은 로고·이룸이 화면 입구가 옆 메뉴에 있어 인사말만 그림 (설정 입구는 내정보 칸, #798)
-/// Pro 회원: 로고 옆(태블릿은 인사말 위)에 PRO 배지 (#1268)
+/// 로고 옆(태블릿은 인사말 위)에 내 요금제 칩: Free · PRO · PRO 선물 (#1268)
 class GuardianHomeHeader extends ConsumerWidget {
   const GuardianHomeHeader({
     super.key,
@@ -50,8 +50,8 @@ class GuardianHomeHeader extends ConsumerWidget {
   static const _rowToGreeting = 11.0;
   static const _greetingToSubtitle = 12.0;
 
-  /// 로고 ↔ PRO 배지
-  static const _logoToProBadge = 8.0;
+  /// 로고 ↔ 요금제 칩
+  static const _logoToPlanChip = 8.0;
 
   /// 2배를 넘을 때만 막는다. 그 아래는 null 이라 시스템 값을 그대로 쓴다.
   static TextScaler? _greetingScaler(BuildContext context) {
@@ -66,7 +66,7 @@ class GuardianHomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final colors = context.colors;
-    final isPro = ref.watch(planAccessProvider).isPro;
+    final planChip = PlanTierChip(tier: planTierOf(ref.watch(planStatusProvider)));
 
     final topRowChildren = <Widget>[
       SizedBox(height: _top.h),
@@ -82,10 +82,8 @@ class GuardianHomeHeader extends ConsumerWidget {
                 width: _logoW.w,
                 height: _logoH.h,
               ),
-              if (isPro) ...[
-                SizedBox(width: _logoToProBadge.w),
-                const ProBadge(),
-              ],
+              SizedBox(width: _logoToPlanChip.w),
+              planChip,
             ],
           ),
           // 종 아이콘은 배지 왼쪽. 코치마크 키는 배지에만 건다.
@@ -131,9 +129,10 @@ class GuardianHomeHeader extends ConsumerWidget {
     ];
     final children = switch (part) {
       GuardianHomeHeaderPart.all => [...topRowChildren, ...greetingChildren],
-      // 머리 줄 없이 쓰면 인사말 위 간격(11)도 뺀다. Pro 배지는 인사말 위
+      // 머리 줄 없이 쓰면 인사말 위 간격(11)도 뺀다. 요금제 칩은 인사말 위
       GuardianHomeHeaderPart.greeting => [
-          if (isPro) ...[const ProBadge(), SizedBox(height: _rowToGreeting.h)],
+          planChip,
+          SizedBox(height: _rowToGreeting.h),
           ...greetingChildren.skip(1),
         ],
     };
