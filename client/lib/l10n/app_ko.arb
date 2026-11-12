@@ -376,8 +376,8 @@
   "goalIndependent": "혼자 끝까지 해내는 경험을 만들어요",
   "@goalIndependent": { "description": "도움 목표 선택지" },
 
-  "onboardingCharacterTitle": "{name}의 하루를 함께할\n친구를 골라주세요",
-  "@onboardingCharacterTitle": { "description": "캐릭터 고르기 화면 제목. name 은 이룸이 호칭", "placeholders": { "name": { "type": "String" } } },
+  "onboardingCharacterTitle": "{name}{batchim, select, yes{이의} other{의}} 하루를 함께할\n친구를 골라주세요",
+  "@onboardingCharacterTitle": { "description": "캐릭터 고르기 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } } },
 
   "onboardingCharacterDescription": "선택한 친구가 홈과 보상 화면에서 함께해요",
   "@onboardingCharacterDescription": { "description": "캐릭터 고르기 화면 설명" },
@@ -400,8 +400,8 @@
   "onboardingNameTitle": "이룸이를 어떻게\n불러드릴까요?",
   "@onboardingNameTitle": { "description": "이름 입력 화면 제목" },
 
-  "onboardingNameDescription": "정확한 실명이 아니어도 괜찮아요",
-  "@onboardingNameDescription": { "description": "이름 입력 화면 설명(개인정보 최소수집 안내)" },
+  "onboardingNameDescription": "이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요",
+  "@onboardingNameDescription": { "description": "이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다" },
 
   "onboardingNameHint": "이름을 입력해주세요",
   "@onboardingNameHint": { "description": "이름 입력칸 힌트" },
@@ -421,7 +421,7 @@
   "pinCreateTitle": "보호자님만 아는\n비밀암호를 만들어주세요",
   "@pinCreateTitle": { "description": "비밀암호 만들기 1단계 제목" },
 
-  "pinConfirmTitle": "암호를 한번 더\n입력해주세요",
+  "pinConfirmTitle": "암호를 한 번 더\n입력해주세요",
   "@pinConfirmTitle": { "description": "비밀암호 재입력 단계 제목" },
 
   "pinDescription": "보호자모드로 변경할 때 사용하는 암호예요",
@@ -562,16 +562,16 @@
   "linkCodeSettingsTitle": "이룸이 기기 연결",
   "@linkCodeSettingsTitle": { "description": "설정에서 연 연결 암호 화면의 제목" },
 
-  "linkCodeAskTitle": "{name}의 기기를\n연결할까요?",
+  "linkCodeAskTitle": "{name}{batchim, select, yes{이의} other{의}} 기기를\n연결할까요?",
   "@linkCodeAskTitle": {
-    "description": "보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭",
-    "placeholders": { "name": { "type": "String" } }
+    "description": "보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
   },
 
-  "linkCodeEnterHint": "{name}의 기기에서 아래 코드를 입력하세요",
+  "linkCodeEnterHint": "{name}{batchim, select, yes{이의} other{의}} 기기에서 아래 코드를 입력하세요",
   "@linkCodeEnterHint": {
-    "description": "연결 암호 화면의 설명. name 은 이룸이 호칭",
-    "placeholders": { "name": { "type": "String" } }
+    "description": "연결 암호 화면의 설명. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
   },
 
   "linkCodeIssueFailedFallback": "코드를 만들지 못했어요. 다시 해주세요",
@@ -1072,8 +1072,11 @@
   "pinChangeVerifyTitle": "지금 비밀암호를\n입력해주세요",
   "@pinChangeVerifyTitle": { "description": "비밀암호 바꾸기 1단계(지금 암호 확인) 큰 제목" },
 
-  "pinChangeCreateTitle": "보호자님만 아는\n비밀암호를 만들어주세요",
-  "@pinChangeCreateTitle": { "description": "비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)" },
+  "pinChangeCreateTitle": "이 기기에서 쓸\n비밀암호를 정해 주세요",
+  "@pinChangeCreateTitle": { "description": "다시 로그인한 기기에서 비밀암호를 만드는 입력 단계 큰 제목" },
+
+  "pinChangeCreateDescription": "비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요",
+  "@pinChangeCreateDescription": { "description": "다시 로그인한 기기에서 비밀암호를 새로 만드는 이유 안내 (잠금은 기기에만 저장된다)" },
 
   "pinModeHint": "보호자모드로 변경할 때 사용하는 암호예요",
   "@pinModeHint": { "description": "비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명" },
@@ -1081,10 +1084,10 @@
   "pinChangeEnterTitle": "새 비밀암호를\n입력해주세요",
   "@pinChangeEnterTitle": { "description": "비밀암호 바꾸기 2단계(새 암호) 큰 제목" },
 
-  "pinChangeCreateConfirmTitle": "암호를 한번 더\n입력해주세요",
+  "pinChangeCreateConfirmTitle": "암호를 한 번 더\n입력해주세요",
   "@pinChangeCreateConfirmTitle": { "description": "비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)" },
 
-  "pinChangeConfirmTitle": "비밀암호를 한번 더\n입력해주세요",
+  "pinChangeConfirmTitle": "비밀암호를 한 번 더\n입력해주세요",
   "@pinChangeConfirmTitle": { "description": "비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목" },
 
   "pinChangeConfirmHint": "이제 곧 비밀암호 변경이 끝나요",
@@ -1688,10 +1691,10 @@
     "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
   },
 
-  "childHomeEmptyTitle": "아직 {name}의\n일과가 없어요",
+  "childHomeEmptyTitle": "아직 {name}{batchim, select, yes{이의} other{의}}\n일과가 없어요",
   "@childHomeEmptyTitle": {
-    "description": "이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭",
-    "placeholders": { "name": { "type": "String" } }
+    "description": "이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
   },
 
   "childHomeEmptyHint": "보호자 화면에서 일과를 만들 수 있어요",
@@ -1783,6 +1786,14 @@
   "modeSwitchMismatch": "암호가 달라요. 다시 넣어주세요",
   "@modeSwitchMismatch": { "description": "화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내" },
   "modeSwitchPinLabel": "암호 넣기",
+  "pinForgotLink": "비밀암호를 잊었어요",
+  "@pinForgotLink": { "description": "비밀암호 입력 화면의 글자 버튼. 누르면 다시 로그인 안내 팝업이 뜬다" },
+  "pinForgotTitle": "비밀암호가 생각나지 않나요?",
+  "@pinForgotTitle": { "description": "비밀암호를 잊었을 때 팝업 제목" },
+  "pinForgotMessage": "보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요",
+  "@pinForgotMessage": { "description": "비밀암호를 잊었을 때 팝업 설명. 다시 로그인하면 이 기기의 잠금이 지워지고 새로 만든다" },
+  "pinForgotRelogin": "다시 로그인",
+  "@pinForgotRelogin": { "description": "비밀암호를 잊었을 때 팝업의 주 버튼. 이 기기에서 로그아웃하고 로그인 화면으로 간다" },
   "@modeSwitchPinLabel": { "description": "암호 점 영역을 낭독기가 읽는 이름(누르면 키패드가 올라온다)" },
   "modeSwitchReadFailedTitle": "암호를 확인하지 못했어요",
   "@modeSwitchReadFailedTitle": { "description": "저장된 암호를 읽지 못했을 때 팝업 제목" },
@@ -2223,8 +2234,8 @@
   "@routineDetailTalkOriginBandOpenLabel": { "description": "가져온 일과 상세 띠 전체의 화면 낭독 이름 (버튼)" },
   "routineLibrarySent": "{title}을(를) 오늘 일과로 보냈어요",
   "@routineLibrarySent": { "description": "보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))", "placeholders": { "title": { "type": "String" } } },
-  "onboardingExampleTitle": "{name}의 어떤 일을\n돕고 싶으세요?",
-  "@onboardingExampleTitle": { "description": "온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭", "placeholders": { "name": { "type": "String" } } },
+  "onboardingExampleTitle": "{name}{batchim, select, yes{이의} other{의}} 어떤 일을\n돕고 싶으세요?",
+  "@onboardingExampleTitle": { "description": "온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } } },
   "onboardingExampleDescription": "고른 분류의 예시 일과를 넣어 둘게요.\n여러 개 골라도 돼요.",
   "@onboardingExampleDescription": { "description": "온보딩 예시 일과 (#803)" },
   "onboardingExampleSkip": "건너뛰기",
@@ -3079,8 +3090,8 @@
   "@weeklyReportSharePdf": {"description": "리포트 저장 시트: 한 장을 A4 PDF 로 공유 시트에"},
   "weeklyReportShareFailed": "보낼 한 장을 만들지 못했어요",
   "@weeklyReportShareFailed": {"description": "한 장 굽기 실패 팝업"},
-  "weeklyReportShareTitle": "{name}의 한 주",
-  "@weeklyReportShareTitle": {"description": "보낼 한 장 제목 · 이룸이 이름", "placeholders": {"name": {"type": "String"}}},
+  "weeklyReportShareTitle": "{name}{batchim, select, yes{이의} other{의}} 한 주",
+  "@weeklyReportShareTitle": {"description": "보낼 한 장 제목 · 이룸이 이름. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
   "weeklyReportShareNote": "이룸 앱에 남은 완료 기록을 센 내용이에요",
   "@weeklyReportShareNote": {"description": "보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)"},
   "weeklyReportRecordSection": "한 주 기록",

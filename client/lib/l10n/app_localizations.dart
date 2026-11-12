@@ -788,11 +788,11 @@ abstract class AppLocalizations {
   /// **'혼자 끝까지 해내는 경험을 만들어요'**
   String get goalIndependent;
 
-  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭
+  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 하루를 함께할\n친구를 골라주세요'**
-  String onboardingCharacterTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 하루를 함께할\n친구를 골라주세요'**
+  String onboardingCharacterTitle(String name, String batchim);
 
   /// 캐릭터 고르기 화면 설명
   ///
@@ -836,10 +836,10 @@ abstract class AppLocalizations {
   /// **'이룸이를 어떻게\n불러드릴까요?'**
   String get onboardingNameTitle;
 
-  /// 이름 입력 화면 설명(개인정보 최소수집 안내)
+  /// 이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다
   ///
   /// In ko, this message translates to:
-  /// **'정확한 실명이 아니어도 괜찮아요'**
+  /// **'이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
   String get onboardingNameDescription;
 
   /// 이름 입력칸 힌트
@@ -881,7 +881,7 @@ abstract class AppLocalizations {
   /// 비밀암호 재입력 단계 제목
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinConfirmTitle;
 
   /// 비밀암호 화면 설명
@@ -1148,17 +1148,17 @@ abstract class AppLocalizations {
   /// **'이룸이 기기 연결'**
   String get linkCodeSettingsTitle;
 
-  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭
+  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기를\n연결할까요?'**
-  String linkCodeAskTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기를\n연결할까요?'**
+  String linkCodeAskTitle(String name, String batchim);
 
-  /// 연결 암호 화면의 설명. name 은 이룸이 호칭
+  /// 연결 암호 화면의 설명. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기에서 아래 코드를 입력하세요'**
-  String linkCodeEnterHint(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기에서 아래 코드를 입력하세요'**
+  String linkCodeEnterHint(String name, String batchim);
 
   /// 연결 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
   ///
@@ -2156,11 +2156,17 @@ abstract class AppLocalizations {
   /// **'지금 비밀암호를\n입력해주세요'**
   String get pinChangeVerifyTitle;
 
-  /// 비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)
+  /// 다시 로그인한 기기에서 비밀암호를 만드는 입력 단계 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'보호자님만 아는\n비밀암호를 만들어주세요'**
+  /// **'이 기기에서 쓸\n비밀암호를 정해 주세요'**
   String get pinChangeCreateTitle;
+
+  /// 다시 로그인한 기기에서 비밀암호를 새로 만드는 이유 안내 (잠금은 기기에만 저장된다)
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요'**
+  String get pinChangeCreateDescription;
 
   /// 비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명
   ///
@@ -2177,13 +2183,13 @@ abstract class AppLocalizations {
   /// 비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinChangeCreateConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'비밀암호를 한번 더\n입력해주세요'**
+  /// **'비밀암호를 한 번 더\n입력해주세요'**
   String get pinChangeConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계 설명
@@ -3386,11 +3392,11 @@ abstract class AppLocalizations {
   /// **'오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!'**
   String childHomeGreeting(String name, String batchim);
 
-  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭
+  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'아직 {name}의\n일과가 없어요'**
-  String childHomeEmptyTitle(String name);
+  /// **'아직 {name}{batchim, select, yes{이의} other{의}}\n일과가 없어요'**
+  String childHomeEmptyTitle(String name, String batchim);
 
   /// 일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)
   ///
@@ -3565,6 +3571,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'암호 넣기'**
   String get modeSwitchPinLabel;
+
+  /// 비밀암호 입력 화면의 글자 버튼. 누르면 다시 로그인 안내 팝업이 뜬다
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 잊었어요'**
+  String get pinForgotLink;
+
+  /// 비밀암호를 잊었을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호가 생각나지 않나요?'**
+  String get pinForgotTitle;
+
+  /// 비밀암호를 잊었을 때 팝업 설명. 다시 로그인하면 이 기기의 잠금이 지워지고 새로 만든다
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요'**
+  String get pinForgotMessage;
+
+  /// 비밀암호를 잊었을 때 팝업의 주 버튼. 이 기기에서 로그아웃하고 로그인 화면으로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 로그인'**
+  String get pinForgotRelogin;
 
   /// 저장된 암호를 읽지 못했을 때 팝업 제목
   ///
@@ -4748,11 +4778,11 @@ abstract class AppLocalizations {
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
-  String onboardingExampleTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name, String batchim);
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -7159,11 +7189,11 @@ abstract class AppLocalizations {
   /// **'보낼 한 장을 만들지 못했어요'**
   String get weeklyReportShareFailed;
 
-  /// 보낼 한 장 제목 · 이룸이 이름
+  /// 보낼 한 장 제목 · 이룸이 이름. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 한 주'**
-  String weeklyReportShareTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 한 주'**
+  String weeklyReportShareTitle(String name, String batchim);
 
   /// 보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)
   ///

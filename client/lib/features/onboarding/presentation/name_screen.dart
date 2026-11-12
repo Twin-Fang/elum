@@ -90,6 +90,8 @@ class _NameScreenState extends ConsumerState<NameScreen> {
       },
       child: ElumScaffold(
         onBack: _goBack,
+        // 키보드가 '다음'을 덮지 않게 버튼을 키보드 위로 올린다
+        isBottomButtonAboveKeyboard: true,
         bottomButton: ElumButton(
           label: context.l10n.commonNext,
           // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
@@ -118,7 +120,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             ElumHeader(
               // 시안(204:996) 문구 그대로. `부를까요`로 줄여 두었던 것을 되돌린다.
               title: context.l10n.onboardingNameTitle,
-              // 개인정보 최소수집 원칙의 UI 표현 — 삭제하지 않는다
+              // 이룸이 호칭 첫 소개 + 개인정보 최소수집 안내 (실명 아니어도 됨) — 삭제하지 않는다
               description: context.l10n.onboardingNameDescription,
               hasBackButton: true,
             ),
@@ -127,15 +129,13 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             ElumTextField(
               controller: _controller,
               hintText: context.l10n.onboardingNameHint,
+              // 들어오자마자 입력 (할 일이 이 칸 하나)
+              isAutofocused: true,
               // 서버와 같은 상한 (공백 없는 긴 이름이 이룸이 화면을 깨뜨림 #1129)
               maxLength: ElumiNicknamePolicy.maxLength,
               // 입력 때 읽음 (빌드 중 ref.read 를 두지 않음)
               onChanged: (nickname) => ref.read(onboardingProvider.notifier).setNickname(nickname),
-              // 완료 키로도 다음 단계로 간다.
-              //
-              // 키보드가 하단 '다음'을 덮고 있어서, 이름을 다 치고도 무엇을 눌러야
-              // 할지 보이지 않는다. 키보드를 내리는 것만으로는 그 사실을 알 수 없다.
-              // 이름이 비어 있으면 진행 조건을 만족하지 않으므로 닫기만 한다.
+              // 완료 키로도 다음 단계로 간다. 이름이 비어 있으면 키보드만 닫는다
               onSubmitted: (_) {
                 FocusScope.of(context).unfocus();
                 if (ref.read(onboardingProvider).canProceedFromName) _submit();
