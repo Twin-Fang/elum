@@ -1,6 +1,7 @@
 """안내 글: 목록 페이지 + 글 페이지 (본문 > 행동 카드 예시 > 자주 묻는 질문 > 이어 읽기 > 앱 받기)"""
 from site_config import GUIDE_IMAGES, GUIDE_SECTION_IMAGES, SITE_URL, Language
-from site_frame import build_download_section, build_store_buttons, escape, page_href, page_url, render_page
+from site_frame import (build_download_section, build_guide_cards, build_store_buttons, escape, page_href, page_url,
+                        render_page)
 from site_schema import article_schema, breadcrumb_schema, faq_schema, how_to_schema
 
 # 글을 처음 올린 날 (구조화 데이터 datePublished)
@@ -39,12 +40,7 @@ def build_card_example(cards: dict, step_label: str) -> str:
 
 def build_related(language: Language, guides: dict, slugs: list, heading: str) -> str:
     """이어 읽기 글 링크"""
-    links = ''.join(
-        f'<a class="guidecard" href="{page_href(language, f"guide/{slug}/")}">'
-        f'<img src="/assets/img/{GUIDE_IMAGES[slug]}" alt="" width="72" height="72" loading="lazy" decoding="async"/>'
-        f'<span><b>{escape(guides[slug]["heading"])}</b><small>{escape(guides[slug]["description"])}</small></span></a>'
-        for slug in slugs if slug in guides)
-    return f'<section class="related"><h2>{escape(heading)}</h2><div class="guidecards">{links}</div></section>'
+    return f'<section class="related"><h2>{escape(heading)}</h2>{build_guide_cards(language, guides, slugs)}</section>'
 
 
 def build_guide_page(language: Language, ui: dict, guides: dict, slug: str, modified_date: str) -> str:
@@ -105,17 +101,12 @@ def build_guide_index(language: Language, ui: dict, guides: dict) -> str:
     labels = ui['guide']
     path = 'guide/'
     trail = [(labels['breadcrumbHome'], page_href(language, '')), (labels['breadcrumbGuides'], page_href(language, path))]
-    cards = ''.join(
-        f'<a class="guidecard reveal" style="--i:{index}" href="{page_href(language, f"guide/{slug}/")}">'
-        f'<img src="/assets/img/{GUIDE_IMAGES[slug]}" alt="" width="72" height="72" loading="lazy" decoding="async"/>'
-        f'<span><b>{escape(guide["heading"])}</b><small>{escape(guide["description"])}</small></span></a>'
-        for index, (slug, guide) in enumerate(guides.items()))
     body = f"""<section class="guide-index">
   <div class="wrap narrow">
     {build_breadcrumb(trail)}
     <h1>{escape(labels['indexHeading'])}</h1>
     <p class="lede">{escape(labels['indexSub'])}</p>
-    <div class="guidecards wide">{cards}</div>
+    {build_guide_cards(language, guides, list(guides), "guidecards wide")}
   </div>
 </section>
 {build_download_section(ui)}"""

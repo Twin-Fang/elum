@@ -3,8 +3,8 @@ import html
 import json
 
 from site_config import (APP_STORE_ID, APP_STORE_URL, BUSINESS_NAME, BUSINESS_REGISTRATION_NUMBER,
-                         BUSINESS_REPRESENTATIVE, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, LANGUAGES, SITE_NAME,
-                         SITE_URL, Language)
+                         BUSINESS_REPRESENTATIVE, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, GUIDE_IMAGES, LANGUAGES,
+                         SITE_NAME, SITE_URL, Language)
 
 APPLE_ICON = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48'
               '-.02.06-.36 1.24-1.19 2.45-.72 1.05-1.46 2.09-2.63 2.11-1.15.02-1.52-.68-2.83-.68-1.32 0-1.73.66-2.82.7-1.13.04-1.99'
@@ -62,6 +62,16 @@ def build_language_menu(language: Language, path: str, ui: dict) -> str:
         for other in LANGUAGES)
     return (f'<details class="lang"><summary aria-label="{escape(ui["languageMenu"])}">'
             f'<span>{language.label}</span></summary><div class="lang-list">{options}</div></details>')
+
+
+def build_guide_cards(language: Language, guides: dict, slugs: list, class_name: str = 'guidecards') -> str:
+    """안내 글 카드 묶음 (그림 + 제목 + 설명). 첫 화면 · 목록 · 이어 읽기 공통"""
+    cards = ''.join(
+        f'<a class="guidecard reveal" style="--i:{index}" href="{page_href(language, f"guide/{slug}/")}">'
+        f'<img src="/assets/img/{GUIDE_IMAGES[slug]}" alt="" width="72" height="72" loading="lazy" decoding="async"/>'
+        f'<span><b>{escape(guides[slug]["heading"])}</b><small>{escape(guides[slug]["description"])}</small></span></a>'
+        for index, slug in enumerate(slugs) if slug in guides)
+    return f'<div class="{class_name}">{cards}</div>'
 
 
 def build_download_section(ui: dict) -> str:

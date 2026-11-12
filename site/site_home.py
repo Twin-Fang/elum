@@ -1,6 +1,7 @@
 """첫 화면: 머리(카드 시연 · 믿음 띠) > 쓰는 순서 > ABA 원리 4가지 > 보호자와 함께 > 그림 방식 > 이런 분께 > 안내 글 > 앱 받기 > 자주 묻는 질문 > 문의"""
-from site_config import ABA_PRINCIPLE_IMAGES, CONTACT_EMAIL, GUIDE_IMAGES, Language
-from site_frame import build_download_section, build_store_buttons, escape, page_href, page_url, render_page
+from site_config import ABA_PRINCIPLE_IMAGES, CONTACT_EMAIL, Language
+from site_frame import (build_download_section, build_guide_cards, build_store_buttons, escape, page_href, page_url,
+                        render_page)
 from site_schema import application_schema, faq_schema
 
 # 쓰는 순서 3칸 그림 · 그림 방식 4칸 그림 (문구 순서와 같은 순서)
@@ -25,7 +26,7 @@ def build_card_demo(demo: dict) -> str:
 </div>"""
 
 
-def build_tiles(items: list, images: list, class_name: str) -> str:
+def build_tiles(items: list, images: list) -> str:
     """그림 + 제목 + 한 줄 설명 타일 묶음"""
     return ''.join(
         f'<div class="tile reveal" style="--i:{index}">'
@@ -52,15 +53,6 @@ def build_principles(items: list) -> str:
 def build_badge(item: dict) -> str:
     """타일 제목 옆 작은 표시 (`PRO` 등, 없으면 빈 문자열)"""
     return f' <span class="badge">{escape(item["badge"])}</span>' if item.get('badge') else ''
-
-
-def build_guide_cards(language: Language, guides: dict, slugs: list) -> str:
-    """안내 글 카드 묶음 (그림 + 제목 + 설명)"""
-    return ''.join(
-        f'<a class="guidecard reveal" style="--i:{index}" href="{page_href(language, f"guide/{slug}/")}">'
-        f'<img src="/assets/img/{GUIDE_IMAGES[slug]}" alt="" width="72" height="72" loading="lazy" decoding="async"/>'
-        f'<span><b>{escape(guides[slug]["heading"])}</b><small>{escape(guides[slug]["description"])}</small></span></a>'
-        for index, slug in enumerate(slugs))
 
 
 def build_faq(items: list) -> str:
@@ -97,7 +89,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
   <div class="wrap">
     <p class="tag">{escape(home['steps']['tag'])}</p>
     <h2>{escape(home['steps']['title'])}</h2>
-    <div class="tiles three">{build_tiles(home['steps']['items'], STEP_IMAGES, 'step')}</div>
+    <div class="tiles three">{build_tiles(home['steps']['items'], STEP_IMAGES)}</div>
   </div>
 </section>
 
@@ -129,7 +121,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
     <p class="tag">{escape(home['styles']['tag'])}</p>
     <h2>{escape(home['styles']['title'])}</h2>
     <p class="sub">{escape(home['styles']['sub'])}</p>
-    <div class="tiles four pictures">{build_tiles(home['styles']['items'], STYLE_IMAGES, 'style')}</div>
+    <div class="tiles four pictures">{build_tiles(home['styles']['items'], STYLE_IMAGES)}</div>
   </div>
 </section>
 
@@ -137,7 +129,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
   <div class="wrap">
     <p class="tag">{escape(home['audience']['tag'])}</p>
     <h2>{escape(home['audience']['title'])}</h2>
-    <div class="tiles four">{build_tiles(home['audience']['items'], AUDIENCE_IMAGES, 'audience')}</div>
+    <div class="tiles four">{build_tiles(home['audience']['items'], AUDIENCE_IMAGES)}</div>
   </div>
 </section>
 
@@ -146,7 +138,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
     <p class="tag">{escape(home['guides']['tag'])}</p>
     <h2>{escape(home['guides']['title'])}</h2>
     <p class="sub">{escape(home['guides']['sub'])}</p>
-    <div class="guidecards">{build_guide_cards(language, guides, guide_slugs)}</div>
+    {build_guide_cards(language, guides, guide_slugs)}
     <a class="more" href="{page_href(language, 'guide/')}">{escape(home['guides']['more'])}</a>
   </div>
 </section>
