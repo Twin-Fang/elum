@@ -34,7 +34,6 @@
 | 폴더 | 담고 있는 것 |
 | --- | --- |
 | [meetings/](./meetings/) | 외부 자문과 회의 기록. 기획이 바뀐 근거 |
-| [hackathon/](./hackathon/) | 대회 일정, 제출물, 심사 기준 |
 | [figma/](./figma/) | 화면별 시안 캡처와 대조 자료 |
 | [setup/](./setup/) | 소셜 로그인 설정 기록 |
 | [superpowers/](./superpowers/) | 기능별 설계서와 구현 계획 |
