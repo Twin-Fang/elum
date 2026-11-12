@@ -1,7 +1,7 @@
 # ELUM
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## Latest Version : v2.90.0 (2026-11-12)
+## Latest Version : v2.91.0 (2026-11-12)
 
 **English** · [한국어](README.ko.md) · [简体中文](README.zh.md) · [日本語](README.ja.md)
 
