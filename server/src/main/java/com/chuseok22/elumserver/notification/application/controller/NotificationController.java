@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.notification.application.controller;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationPageResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.UnreadSummaryResponse;
+import com.chuseok22.elumserver.notification.application.service.NotificationDispatchService;
 import com.chuseok22.elumserver.notification.application.service.NotificationQueryService;
 import com.chuseok22.elumserver.notification.application.service.NotificationReadService;
 import com.chuseok22.logging.annotation.LogMonitoring;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/// 보호자 알림 목록·안 읽음 요약·읽음 처리. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
+/// 보호자 알림 목록·안 읽음 요약·읽음 처리·푸시 열림 기록. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
 @RequestMapping("/api/notifications")
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class NotificationController implements NotificationControllerDocs {
 
   private final NotificationQueryService notificationQueryService;
   private final NotificationReadService notificationReadService;
+  private final NotificationDispatchService notificationDispatchService;
 
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
   @GetMapping
@@ -50,6 +52,13 @@ public class NotificationController implements NotificationControllerDocs {
   @PostMapping("/read-all")
   public ResponseEntity<Void> markAllRead(Authentication authentication) {
     notificationReadService.markAllRead(Caller.from(authentication).memberId());
+    return ResponseEntity.noContent().build();
+  }
+
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @PostMapping("/dispatches/{dispatchId}/opened")
+  public ResponseEntity<Void> markDispatchOpened(Authentication authentication, @PathVariable String dispatchId) {
+    notificationDispatchService.markOpened(Caller.from(authentication).memberId(), dispatchId);
     return ResponseEntity.noContent().build();
   }
 }

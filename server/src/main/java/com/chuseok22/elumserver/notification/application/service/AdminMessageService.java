@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,24 +36,28 @@ public class AdminMessageService {
   private final PushDeviceRepository pushDeviceRepository;
   private final NotificationRecorder notificationRecorder;
   private final PushDispatcher pushDispatcher;
+  private final NotificationDispatchService notificationDispatchService;
   private final Clock clock;
 
   @Autowired
   public AdminMessageService(AdminMessageRepository adminMessageRepository,
     NotificationSettingRepository notificationSettingRepository, PushDeviceRepository pushDeviceRepository,
-    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher) {
+    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher,
+    NotificationDispatchService notificationDispatchService) {
     this(adminMessageRepository, notificationSettingRepository, pushDeviceRepository, notificationRecorder,
-      pushDispatcher, Clock.system(NotificationTime.ZONE_ID));
+      pushDispatcher, notificationDispatchService, Clock.system(NotificationTime.ZONE_ID));
   }
 
   AdminMessageService(AdminMessageRepository adminMessageRepository,
     NotificationSettingRepository notificationSettingRepository, PushDeviceRepository pushDeviceRepository,
-    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher, Clock clock) {
+    NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher,
+    NotificationDispatchService notificationDispatchService, Clock clock) {
     this.adminMessageRepository = adminMessageRepository;
     this.notificationSettingRepository = notificationSettingRepository;
     this.pushDeviceRepository = pushDeviceRepository;
     this.notificationRecorder = notificationRecorder;
     this.pushDispatcher = pushDispatcher;
+    this.notificationDispatchService = notificationDispatchService;
     this.clock = clock;
   }
 
@@ -74,12 +79,18 @@ public class AdminMessageService {
       deviceCount);
   }
 
+  /// 운영자 직접 보내기 (발송 기록 출처 ADMIN_MANUAL)
+  public AdminMessageSendResult send(String title, String body, AdminMessageRoute route,
+    Collection<String> recipientMemberIds) {
+    return send(title, body, route, recipientMemberIds, AdminMessageOrigin.adminManual());
+  }
+
   /**
-   * 보내기: 내용 저장 > 받는 사람마다 알림함 기록 (사람별 독립 커밋) > 푸시 (전체 끔 제외) > 결과 수
+   * 보내기: 내용 저장 > 받는 사람마다 알림함 기록 (사람별 독립 커밋) > 발송 기록 열기 > 푸시 (끈 사람 제외, data 에 dispatchId) > 기기 결과 기록 > 결과 수
    * 트랜잭션 없음: FCM 호출 동안 DB 연결을 잡지 않음 (PushDispatcher 와 같음)
    */
   public AdminMessageSendResult send(String title, String body, AdminMessageRoute route,
-    Collection<String> recipientMemberIds) {
+    Collection<String> recipientMemberIds, AdminMessageOrigin origin) {
     AdminMessage message = new AdminMessage();
     message.setTitle(title);
     message.setBody(body);
@@ -88,9 +99,13 @@ public class AdminMessageService {
 
     List<RecordedNotification> recorded = notificationRecorder.record(
       NotificationDraft.adminMessage(saved.getId(), LocalDateTime.now(clock)), List.copyOf(new HashSet<>(recipientMemberIds)));
-    AdminMessageDelivery delivery = pushDispatcher.dispatchAdminMessage(recorded, saved);
-    log.info("[admin message] sent : messageId={}, recorded={}, sentDevices={}, failedDevices={}",
-      saved.getId(), recorded.size(), delivery.sentDeviceCount(), delivery.failedDeviceCount());
+    Map<String, String> dispatchIdByMemberId = notificationDispatchService.open(origin, saved.getId(),
+      recorded.stream().map(RecordedNotification::recipientMemberId).toList());
+    AdminMessageDelivery delivery = pushDispatcher.dispatchAdminMessage(recorded, saved,
+      new AdminMessagePushContext(dispatchIdByMemberId, origin.autoType()));
+    notificationDispatchService.recordDeviceCounts(dispatchIdByMemberId, delivery);
+    log.info("[admin message] sent : messageId={}, source={}, recorded={}, sentDevices={}, failedDevices={}",
+      saved.getId(), origin.source(), recorded.size(), delivery.sentDeviceCount(), delivery.failedDeviceCount());
     return new AdminMessageSendResult(saved.getId(), recorded.size(), delivery.sentDeviceCount(),
       delivery.failedDeviceCount());
   }

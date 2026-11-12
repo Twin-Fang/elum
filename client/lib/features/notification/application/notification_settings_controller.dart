@@ -4,7 +4,7 @@ import '../../../core/logger/app_logger.dart';
 import '../data/notification_repository.dart';
 import '../domain/notification_settings.dart';
 
-/// 알림 설정 스위치 8개: 모든 알림 받기(all) + 종류별 7개
+/// 알림 설정 스위치 11개: 모든 알림 받기(all) + 종류별 10개 (자동 알림 3개 포함, #1275)
 /// all 은 "종류별이 전부 켜짐"을 뜻한다 — 켜면 전부 켜고, 끄면 전부 끔
 enum NotificationSettingField {
   all,
@@ -14,9 +14,12 @@ enum NotificationSettingField {
   creditRefilled,
   feedbackResolved,
   talkCommented,
-  talkImported;
+  talkImported,
+  routineNudge,
+  suggestion,
+  planReminder;
 
-  /// 종류별 7개 (all 제외)
+  /// 종류별 10개 (all 제외)
   static final types = values.where((field) => field != all).toList();
 }
 
@@ -31,10 +34,13 @@ extension NotificationSettingFieldValue on NotificationSettings {
         NotificationSettingField.feedbackResolved => isFeedbackResolvedEnabled,
         NotificationSettingField.talkCommented => isTalkCommentedEnabled,
         NotificationSettingField.talkImported => isTalkImportedEnabled,
+        NotificationSettingField.routineNudge => isRoutineNudgeEnabled,
+        NotificationSettingField.suggestion => isSuggestionEnabled,
+        NotificationSettingField.planReminder => isPlanReminderEnabled,
       };
 
   /// 화면에 보일 스위치 값 (서버 allEnabled 가 꺼져 있으면 실제로 푸시가 없으므로 전부 꺼짐)
-  /// all: 종류별 7개가 전부 켜졌을 때만 켜짐
+  /// all: 종류별이 전부 켜졌을 때만 켜짐
   bool valueOf(NotificationSettingField field) {
     if (!isAllEnabled) return false;
     if (field != NotificationSettingField.all) return _storedValueOf(field);
@@ -42,7 +48,7 @@ extension NotificationSettingFieldValue on NotificationSettings {
   }
 
   /// 스위치 하나 > 저장할 값 (allEnabled = 종류별 중 하나라도 켜짐)
-  /// all: 종류별 7개를 한꺼번에 같은 값으로
+  /// all: 종류별을 한꺼번에 같은 값으로
   NotificationSettings withValue(NotificationSettingField field, bool isOn) {
     bool nextValueOf(NotificationSettingField type) =>
         field == NotificationSettingField.all || field == type ? isOn : valueOf(type);
@@ -55,6 +61,9 @@ extension NotificationSettingFieldValue on NotificationSettings {
       isFeedbackResolvedEnabled: nextValueOf(NotificationSettingField.feedbackResolved),
       isTalkCommentedEnabled: nextValueOf(NotificationSettingField.talkCommented),
       isTalkImportedEnabled: nextValueOf(NotificationSettingField.talkImported),
+      isRoutineNudgeEnabled: nextValueOf(NotificationSettingField.routineNudge),
+      isSuggestionEnabled: nextValueOf(NotificationSettingField.suggestion),
+      isPlanReminderEnabled: nextValueOf(NotificationSettingField.planReminder),
     );
   }
 }

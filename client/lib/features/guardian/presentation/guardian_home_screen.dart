@@ -1,7 +1,4 @@
-import '../../notification/application/home_notification_notice_provider.dart';
-import '../../../app/home_suggestion_host.dart';
-import '../../../app/low_credit_notice_host.dart';
-import '../../../app/notification_off_notice_host.dart';
+import '../../../app/home_notice_slot.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -203,17 +200,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 기기 알림이 꺼져 있으면 안내 카드 (닫으면 7일 숨김)
-          if (!ref.watch(homeNotificationNoticeDismissalProvider)) ...[
-            NotificationOffNoticeHost(
-              onDismiss: ref.read(homeNotificationNoticeDismissalProvider.notifier).dismiss,
-            ),
-            SizedBox(height: _titleToList.h),
-          ],
-          // Free 크레딧이 일과 하나 값보다 적을 때 안내 카드 (닫으면 이번 크레딧 주기 동안 숨김)
-          const LowCreditNoticeHost(bottomGap: _titleToList),
-          // 알림 카드가 없을 때만 보이는 권유 카드 (자동 보내기 · 이야기 올리기 · 일과 더 만들기)
-          HomeSuggestionHost(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
+          // 안내 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)
+          HomeNoticeSlot(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           RoutineSectionTitle(
             iconAsset: AppAssets.iconTodayRoutine,
             label: context.l10n.guardianHomeTodayRoutine,

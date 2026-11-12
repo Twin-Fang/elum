@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('예약 발송', 'push-scheduled', ~{:: content})}">
+<body>
+
+<!-- 예약 발송 (#1275): 받는 사람(회원 고르기·조건) + 문구 + 보낼 시각 > 예약, 최근 50건 목록 > 기다림 취소
+     받는 사람은 보낼 때 다시 계산 (그 사이 정지·탈퇴 회원 제외). 거절은 화면 위 붉은 문구 -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6 max-w-5xl">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('예약 발송', '정한 날짜·시각에 알림을 보내요. 밤 9시 ~ 아침 8시와 지난 시각은 고를 수 없어요.')}"></div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <form method="post" th:action="@{/admin/push/scheduled}" class="card bg-base-100 shadow-md" data-schedule-form
+        data-confirm-title="알림 예약" data-confirm-message="이 시각에 알림을 보내도록 예약할까요?">
+    <div class="card-body space-y-4">
+      <h2 class="card-title text-base">새 예약</h2>
+      <input type="hidden" name="targetMode" value="MEMBERS" data-schedule-target-mode/>
+      <div class="join" role="group" aria-label="받는 사람 고르는 방식">
+        <button type="button" class="btn btn-sm join-item btn-active" data-schedule-mode="MEMBERS">회원 고르기</button>
+        <button type="button" class="btn btn-sm join-item" data-schedule-mode="CONDITION">조건으로 고르기</button>
+      </div>
+      <div data-schedule-mode-panel="MEMBERS">
+        <div data-schedule-member-picker class="space-y-2"></div>
+      </div>
+      <div data-schedule-mode-panel="CONDITION" class="hidden">
+        <div class="flex flex-wrap items-end gap-4">
+          <label class="form-control">
+            <div class="label"><span class="label-text">이날까지 가입</span></div>
+            <input type="date" name="joinedOnOrBefore" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <div class="label"><span class="label-text">AI 호출 몇 번 이상</span></div>
+            <input type="number" name="minimumAiCallCount" min="0" step="1" value="0" class="input input-bordered input-sm w-32"/>
+          </label>
+        </div>
+      </div>
+
+      <label class="form-control">
+        <div class="label"><span class="label-text">제목 <span class="text-error">*</span></span></div>
+        <input type="text" name="title" class="input input-bordered" th:maxlength="${titleMaxLength}" required/>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">본문 <span class="text-error">*</span></span></div>
+        <textarea name="body" class="textarea textarea-bordered h-24 text-sm" th:maxlength="${bodyMaxLength}" required></textarea>
+      </label>
+      <div class="flex flex-wrap items-end gap-4">
+        <label class="form-control">
+          <div class="label"><span class="label-text">누르면 갈 화면</span></div>
+          <select name="route" class="select select-bordered select-sm w-32">
+            <option th:each="route : ${routeOptions}" th:value="${route.wire}" th:text="${route.label}">홈</option>
+          </select>
+        </label>
+        <label class="form-control">
+          <div class="label"><span class="label-text">보낼 날짜·시각 (한국 시각)</span></div>
+          <input type="datetime-local" name="scheduledAt" class="input input-bordered input-sm" required/>
+        </label>
+        <button type="submit" class="btn btn-sm btn-primary">예약하기</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-base">최근 예약</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>보낼 시각</th>
+            <th>제목</th>
+            <th>방식</th>
+            <th>상태</th>
+            <th>결과</th>
+            <th>만든 사람</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <th:block th:if="${#lists.isEmpty(scheduledPushes)}">
+            <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(7, '아직 예약이 없어요')}"></tr>
+          </th:block>
+          <tr th:each="scheduled : ${scheduledPushes}">
+            <td class="whitespace-nowrap font-mono" th:text="${#temporals.format(scheduled.scheduledAt, 'yyyy-MM-dd HH:mm')}">시각</td>
+            <td th:text="${scheduled.title}">제목</td>
+            <td th:text="${scheduled.targetMode == 'CONDITION'} ? '조건' : '고른 회원'">방식</td>
+            <td><span th:replace="~{admin/fragments/admin-ui :: toneBadge(${scheduled.status.tone}, ${scheduled.status.label})}"></span></td>
+            <td class="whitespace-nowrap text-sm">
+              <span th:if="${scheduled.recipientCount != null}"
+                    th:text="'대상 ' + ${scheduled.recipientCount} + '명 · 기기 성공 ' + ${scheduled.sentDeviceCount} + ' 실패 ' + ${scheduled.failedDeviceCount}">결과</span>
+              <span th:if="${scheduled.failureReason != null}" class="text-error" th:text="${scheduled.failureReason}">사유</span>
+            </td>
+            <td th:text="${scheduled.createdBy}">관리자</td>
+            <td>
+              <form th:if="${scheduled.status.name() == 'PENDING'}" method="post"
+                    th:action="@{/admin/push/scheduled/{id}/cancel(id=${scheduled.id})}"
+                    data-confirm-title="예약 취소" data-confirm-message="이 예약을 취소할까요? 취소하면 보내지 않아요.">
+                <button type="submit" class="btn btn-ghost btn-xs">취소</button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/admin/js/settings-member-picker.js}"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var form = document.querySelector('[data-schedule-form]');
+      var targetModeInput = form.querySelector('[data-schedule-target-mode]');
+      var memberPicker = form.querySelector('[data-schedule-member-picker]');
+      var modeButtons = form.querySelectorAll('[data-schedule-mode]');
+      var modePanels = form.querySelectorAll('[data-schedule-mode-panel]');
+
+      // 회원 고르기 위젯 (숨은 입력 name=value 에 쉼표 목록)
+      window.elumSettingsMemberPicker.build(memberPicker, '');
+
+      modeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var mode = button.getAttribute('data-schedule-mode');
+          targetModeInput.value = mode;
+          modeButtons.forEach(function (other) { other.classList.toggle('btn-active', other === button); });
+          modePanels.forEach(function (panel) {
+            panel.classList.toggle('hidden', panel.getAttribute('data-schedule-mode-panel') !== mode);
+          });
+        });
+      });
+    })();
+  </script>
+</main>
+
+</body>
+</html>

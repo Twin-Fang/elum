@@ -7,10 +7,12 @@ import com.chuseok22.elumserver.admin.core.AdminAuditAction;
 import com.chuseok22.elumserver.admin.core.AdminPushOutcome;
 import com.chuseok22.elumserver.ai.application.service.AiCallLogQueryService;
 import com.chuseok22.elumserver.member.application.service.MemberAdminLookupService;
+import com.chuseok22.elumserver.notification.application.service.AdminMessageOrigin;
 import com.chuseok22.elumserver.notification.application.service.AdminMessageReach;
 import com.chuseok22.elumserver.notification.application.service.AdminMessageSendResult;
 import com.chuseok22.elumserver.notification.application.service.AdminMessageService;
 import com.chuseok22.elumserver.notification.core.AdminMessageRoute;
+import com.chuseok22.elumserver.notification.core.NotificationQuietHours;
 import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import java.time.Clock;
@@ -35,9 +37,6 @@ public class AdminPushService {
 
   // 한 번에 보낼 수 있는 최대 회원 수
   public static final int MAXIMUM_RECIPIENT_COUNT = 1000;
-  // 보내기를 막는 시간 [21:00, 다음 날 08:00) KST (먼저 보내 보기는 막지 않음)
-  static final LocalTime QUIET_HOURS_START = LocalTime.of(21, 0);
-  static final LocalTime QUIET_HOURS_END = LocalTime.of(8, 0);
   // 받는 사람 고르는 방식 2개: 고른 회원, 조건
   static final String TARGET_MODE_MEMBERS = "MEMBERS";
   static final String TARGET_MODE_CONDITION = "CONDITION";
@@ -116,10 +115,40 @@ public class AdminPushService {
     return sendAndRecord(request, route.get(), activeMemberIds, AdminAuditAction.ADMIN_PUSH_TEST_SENT);
   }
 
-  /// 지금(KST)이 보내기를 막는 시간인지
+  /// 지금(KST)이 보내기를 막는 시간인지 (먼저 보내 보기는 막지 않음)
   public boolean isQuietHoursNow() {
-    LocalTime now = LocalTime.now(clock);
-    return !now.isBefore(QUIET_HOURS_START) || now.isBefore(QUIET_HOURS_END);
+    return NotificationQuietHours.isQuietTime(LocalTime.now(clock));
+  }
+
+  /// 예약 만들 때 검사 (#1275): 내용 > 받는 사람 > 인원 (시각 검사는 부르는 쪽), 통과면 빈 값
+  public Optional<AdminPushOutcome> rejectionForSchedule(AdminPushRequest request) {
+    if (validMessageRouteOf(request).isEmpty()) {
+      return Optional.of(AdminPushOutcome.INVALID_MESSAGE);
+    }
+    TargetResolution targets = resolveTargets(request);
+    if (targets.rejection().isPresent()) {
+      return targets.rejection();
+    }
+    return recipientCountOutcomeOf(targets.memberIds().size());
+  }
+
+  /// 예약 보내기 (#1275): 내용 > 받는 사람 다시 계산 > 인원 > 발송(출처 예약). 야간 판단·관리자 기록은 부르는 쪽(예약 서비스)
+  public AdminPushSendResponse sendScheduled(AdminPushRequest request) {
+    Optional<AdminMessageRoute> route = validMessageRouteOf(request);
+    if (route.isEmpty()) {
+      return AdminPushSendResponse.rejected(AdminPushOutcome.INVALID_MESSAGE);
+    }
+    TargetResolution targets = resolveTargets(request);
+    if (targets.rejection().isPresent()) {
+      return AdminPushSendResponse.rejected(targets.rejection().get());
+    }
+    Optional<AdminPushOutcome> countRejection = recipientCountOutcomeOf(targets.memberIds().size());
+    if (countRejection.isPresent()) {
+      return AdminPushSendResponse.rejected(countRejection.get());
+    }
+    AdminMessageSendResult result = adminMessageService.send(request.title().strip(), request.body().strip(),
+      route.get(), targets.memberIds(), AdminMessageOrigin.adminScheduled());
+    return AdminPushSendResponse.sent(targets.memberIds().size(), result);
   }
 
   private AdminPushSendResponse sendAndRecord(AdminPushRequest request, AdminMessageRoute route,

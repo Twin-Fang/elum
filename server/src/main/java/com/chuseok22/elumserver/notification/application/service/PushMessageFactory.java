@@ -40,6 +40,8 @@ public class PushMessageFactory {
   static final String WEEK_START_DATA_KEY = "weekStart";
   // 운영자 알림을 눌렀을 때 갈 화면 data 키 (값은 AdminMessageRoute.wire, 앱 notification_target 과 같은 값)
   static final String ROUTE_DATA_KEY = "route";
+  // 발송 기록 id data 키 (#1275): 앱이 눌러 열면 POST /api/notifications/dispatches/{dispatchId}/opened
+  public static final String DISPATCH_ID_DATA_KEY = "dispatchId";
 
   // 이룸이 기기 알림: 알림 행 없이 보내므로 NotificationType 밖의 종류 (앱 push_message_router 와 같은 값)
   public static final String ELUMI_ROUTINE_ARRIVED_TYPE = "ELUMI_ROUTINE_ARRIVED";
@@ -109,7 +111,14 @@ public class PushMessageFactory {
 
   /** 운영자 알림: 관리자가 쓴 제목·본문 그대로 (기기 언어와 무관), data 에 알림 id·갈 화면 */
   public PushMessage createAdminMessage(RecordedNotification recorded, AdminMessage message, PushDevice device) {
+    return createAdminMessage(recorded, message, device, null);
+  }
+
+  /** 운영자·자동 알림: 위와 같고 data 에 발송 기록 id (없으면 키째 뺌, 옛 앱은 모르는 키를 무시) */
+  public PushMessage createAdminMessage(RecordedNotification recorded, AdminMessage message, PushDevice device,
+    String dispatchId) {
     Map<String, String> pushData = new HashMap<>();
+    putIfPresent(pushData, DISPATCH_ID_DATA_KEY, dispatchId);
     pushData.put("type", NotificationType.ADMIN_MESSAGE.name());
     putIfPresent(pushData, "notificationId", recorded.notificationId());
     putIfPresent(pushData, "targetId", message.getId());

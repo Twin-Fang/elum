@@ -9,10 +9,10 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '알림을 켜 둘까요?';
+  String get notificationOffNoticeTitle => '🔔 알림을 켜 둘까요?';
 
   @override
-  String get notificationOffNoticeBody => '일과를 끝내면 알려 드려요';
+  String get notificationOffNoticeBody => '이룸이가 일과를 끝내면 바로 알려 드려요';
 
   @override
   String get notificationOffValue => '꺼짐';
@@ -5335,4 +5335,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationIntroCreditRefilledMonth => '이번 달 크레딧이 다시 채워졌을 때';
+
+  @override
+  String get notificationOffNoticeHighlightRoutineDone => '일과를 마쳤을 때';
+
+  @override
+  String get notificationOffNoticeHighlightCaregiver => '함께 돌보는 분 소식';
+
+  @override
+  String get notificationOffNoticeAction => '알림 켜기';
+
+  @override
+  String get homeAutoSendUpsellTitle => '⏰ 매일 같은 시각에 자동으로 보내 볼까요?';
+
+  @override
+  String get homeAutoSendUpsellBody => '요일과 시각을 정해 두면 그때 이룸이 기기로 보내 드려요';
+
+  @override
+  String get homeAutoSendUpsellAction => '자세히 보기';
+
+  @override
+  String get notificationSettingRoutineNudge => '오늘 일과를 아직 안 보냈을 때';
+
+  @override
+  String get notificationSettingSuggestion => '새 일과 추천';
+
+  @override
+  String get notificationSettingPlanReminder => 'Pro 선물이 끝나기 전';
 }

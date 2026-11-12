@@ -1458,7 +1458,6 @@
   "proTeaserCardThemeTitle": "Get prettier printable cards",
   "proTeaserCardLayoutTitle": "Get printable cards your way",
   "proTeaserCardLayoutBenefit": "Choose several cards per page, landscape paper, or a one-page routine",
-
   "creditTopUpTitleExhausted": "🎟️ You've used this week's credits",
   "creditTopUpTitleExhaustedMonth": "🎟️ You've used this month's credits",
   "creditTopUpTitleShort": "🎟️ You're a little short on credits",
@@ -1524,5 +1523,14 @@
   "notificationIntroCaregiverRoutine": "When another caregiver sends a routine",
   "notificationIntroWeeklyReport": "When the weekly report is ready",
   "notificationIntroCreditRefilledWeek": "When this week's credits are refilled",
-  "notificationIntroCreditRefilledMonth": "When this month's credits are refilled"
+  "notificationIntroCreditRefilledMonth": "When this month's credits are refilled",
+  "notificationOffNoticeHighlightRoutineDone": "When a routine is done",
+  "notificationOffNoticeHighlightCaregiver": "News from co-caregivers",
+  "notificationOffNoticeAction": "Turn on notifications",
+  "homeAutoSendUpsellTitle": "⏰ Send routines automatically at the same time every day?",
+  "homeAutoSendUpsellBody": "Pick the days and time, and we'll send it to the child's device then",
+  "homeAutoSendUpsellAction": "Learn more",
+  "notificationSettingRoutineNudge": "When today's routine hasn't been sent yet",
+  "notificationSettingSuggestion": "New routine ideas",
+  "notificationSettingPlanReminder": "Before your Pro gift ends"
 }
