@@ -9,6 +9,7 @@ import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_fade_slide_in.dart';
 import 'elum_bottom_sheet.dart';
+import 'pro_badge.dart';
 
 /// 시트 공통 틀 (시안 1759:9649 · 1869:8838): 제목 > 설명 > 본문, 키보드가 올라와도 남은 높이 안에서 스크롤
 /// 제목 · 설명은 본문보다 8 안쪽(x=24)에서 시작하고, 본문은 시트 좌우 16 을 쓴다 (입력칸 · 버튼 361 폭)
@@ -17,11 +18,15 @@ class ElumSheetFrame extends StatelessWidget {
     super.key,
     this.title,
     this.description,
+    this.shouldShowProBadgeOnTitle = false,
     required this.child,
   });
 
   /// null 이면 제목 줄 없음 (메뉴 시트)
   final String? title;
+
+  /// 제목 옆 PRO 배지 (Free 가 Pro 기능 시트를 열었을 때, 맨 아래가 아니라 먼저 보이게)
+  final bool shouldShowProBadgeOnTitle;
 
   /// 제목 아래 한 줄 안내. null 이면 자리도 없다
   final String? description;
@@ -79,11 +84,14 @@ class ElumSheetFrame extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            title,
-                            style: typo.sheetTitle.copyWith(
-                              color: colors.sheetTitleText,
-                              height: 1.2,
+                          LabelWithProBadge(
+                            shouldShowProBadge: shouldShowProBadgeOnTitle,
+                            label: Text(
+                              title,
+                              style: typo.sheetTitle.copyWith(
+                                color: colors.sheetTitleText,
+                                height: 1.2,
+                              ),
                             ),
                           ),
                           if (description != null) ...[

@@ -98,11 +98,12 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
       case PlanPurchasePhase.notActivated:
         return _message(PlanStateMessage(
           title: l10n.planNotActivatedTitle,
-          body: l10n.planNotActivatedBody,
+          // 스토어마다 구독을 보는 길이 달라 그 기기 스토어의 경로와 버튼
+          body: isAppStoreDevice ? l10n.planNotActivatedBodyApple : l10n.planNotActivatedBodyGoogle,
           errorCode: _badgeOf(flow),
           secondaryLabel: l10n.commonClose,
           onSecondary: close,
-          primaryLabel: l10n.planManageSubscription,
+          primaryLabel: isAppStoreDevice ? l10n.planOpenAppStore : l10n.planOpenPlayStore,
           onPrimary: () => openSubscriptionManagement(context, ref),
         ));
       case PlanPurchasePhase.idle:
@@ -116,10 +117,12 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
   String _openedBenefitsText(AppLocalizations l10n) {
     final access = ref.read(planAccessProvider);
     final periodUnit = ref.read(creditPeriodUnitProvider);
+    final freeRegenerateDailyCap = ref.read(freeImageRegenerateDailyCapProvider);
     final sections = proPlanBenefitSections(proPlan: access.proPlanEntitlements, current: PlanEntitlements.free);
     final lines = [
       for (final section in sections)
-        for (final benefit in section.benefits) planBenefitLabel(l10n, benefit, periodUnit),
+        for (final benefit in section.benefits)
+          planBenefitLabel(l10n, benefit, periodUnit, freeRegenerateDailyCap: freeRegenerateDailyCap),
     ];
     return lines.isEmpty ? planStatusLabel(l10n, ref.watch(planStatusProvider)) : lines.join('\n');
   }

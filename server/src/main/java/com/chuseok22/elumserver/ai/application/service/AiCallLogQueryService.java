@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,5 +40,13 @@ public class AiCallLogQueryService {
       .map(cost -> new AiCreditJobCallSummary(
         cost.getCreditJobId(), cost.getCallCount(), cost.getSuccessCount(), cost.getTotalCostUsd()))
       .collect(Collectors.toMap(AiCreditJobCallSummary::creditJobId, summary -> summary, (first, second) -> first));
+  }
+
+  /// 지금까지 AI 호출이 minimumCallCount 번 이상인 회원 id (0 이하면 빈 집합: 조건 없음은 부르는 쪽이 판단)
+  public Set<String> findMemberIdsWithCallCountAtLeast(long minimumCallCount) {
+    if (minimumCallCount <= 0) {
+      return Set.of();
+    }
+    return Set.copyOf(aiCallLogRepository.findMemberIdsWithCallCountAtLeast(minimumCallCount));
   }
 }

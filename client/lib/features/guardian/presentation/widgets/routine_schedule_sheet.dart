@@ -143,10 +143,14 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
       color: colors.routineTileLabel,
     );
 
-    // 틀: 제목 > 설명 > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > (Pro 안내) > 저장 또는 Pro 버튼 > (있으면) 반복 끄기
+    // 틀: 제목(+ Free 면 PRO 배지) > 설명(+ Pro 안내) > (멈춤 안내) > 요일 > 시각 바퀴 > 알림 스위치(+ 기기 상태) > 저장 또는 Pro 버튼 > (있으면) 반복 끄기
     return ElumSheetFrame(
       title: l10n.routineScheduleSheetTitle,
-      description: l10n.routineScheduleSheetBody,
+      shouldShowProBadgeOnTitle: shouldShowProNote,
+      // Pro 전용인 것을 고르기 전에 먼저 알림 (맨 아래에 두면 다 고른 뒤에야 보임)
+      description: shouldShowProNote
+          ? '${l10n.routineScheduleSheetBody}\n${l10n.routineScheduleProNote}'
+          : l10n.routineScheduleSheetBody,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -190,14 +194,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
             ],
           ),
           SizedBox(height: space.lg.h),
-          if (shouldShowProNote) ...[
-            Text(
-              l10n.routineScheduleProNote,
-              textAlign: TextAlign.center,
-              style: noteStyle,
-            ),
-            SizedBox(height: space.xs.h),
-          ] else if (hasNoWeekday) ...[
+          if (!shouldShowProNote && hasNoWeekday) ...[
             Text(
               l10n.routineSchedulePickDayHint,
               textAlign: TextAlign.center,

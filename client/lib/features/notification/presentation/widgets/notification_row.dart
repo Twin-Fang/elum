@@ -45,12 +45,16 @@ class NotificationRow extends StatelessWidget {
   static const _unreadDotSize = 8.0;
   static const _nameToHeadlineGap = 4.0;
 
+  /// 운영자 알림 본문 최대 줄 수
+  static const _bodyMaxLines = 3;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
     final profileName = notification.profileName;
     final headline = notificationHeadline(context.l10n, notification);
+    final body = notification.type == NotificationType.adminMessage ? notification.body : null;
     final timeLabel = notificationTimeLabel(context, day, notification.occurredAt);
     final mutedStyle = typo.notificationRowTime.copyWith(color: colors.notificationMutedText);
 
@@ -92,6 +96,11 @@ class NotificationRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: typo.notificationRowText.copyWith(color: colors.notificationRowText),
                   ),
+                  // 운영자 알림 본문 (알림함에서 다시 읽게)
+                  if (body != null) ...[
+                    SizedBox(height: _nameToHeadlineGap.h),
+                    Text(body, maxLines: _bodyMaxLines, overflow: TextOverflow.ellipsis, style: mutedStyle),
+                  ],
                 ],
               ),
             ),
@@ -139,6 +148,7 @@ class _NotificationTypeIcon extends StatelessWidget {
         NotificationType.talkPostCommented => AppAssets.iconComments,
         NotificationType.talkPostImported => AppAssets.iconDownload,
         NotificationType.weeklyReportReady => AppAssets.iconCalendar,
+        NotificationType.adminMessage => AppAssets.iconBell,
       };
 
   @override

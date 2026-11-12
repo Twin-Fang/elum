@@ -190,6 +190,7 @@ class CreditQueryServiceTest {
     CreditSummaryResponse summary = service.getMine(MEMBER_ID);
 
     assertThat(summary.freeImageRegeneratesLeftToday()).isZero();
+    assertThat(summary.freeImageRegenerateDailyCap()).as("Free 도 요금제 혜택 문구용 한도 설정값을 받는다").isEqualTo(5);
   }
 
   @Test

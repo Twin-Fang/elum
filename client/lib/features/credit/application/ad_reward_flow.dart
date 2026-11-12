@@ -45,9 +45,9 @@ class AdRewardResult {
   bool get granted => failure == null;
 }
 
-/// 크레딧 소진 안내의 "광고 보고 더 만들기" 흐름 (설계 §7).
+/// 크레딧 시트 · 홈 안내 카드의 "광고 보고 크레딧 받기" 흐름 (설계 §7).
 ///
-/// 1. [offer] — 서버가 켜 두었고 오늘 횟수가 남았을 때만 버튼을 보인다.
+/// 1. [checkAvailability] — 서버가 켜 두었고 오늘 횟수가 남았을 때만 버튼을 켠다.
 /// 2. [run] — 세션 만들기 → 광고(nonce 를 customData 로) → **서버가 지급했는지 상태 조회**.
 ///
 /// **앱은 지급을 선언하지 않는다.** "봤다"고 알리는 API 가 없고, 서버가 SSV 콜백으로
@@ -72,19 +72,23 @@ class AdRewardFlow {
   final Duration pollInterval;
   final int maxPolls;
 
-  /// 버튼을 보일 때만 제안을, 아니면 null.
+  /// 광고 카드 상태: 기기가 광고를 못 띄우면 null (카드 숨김), 아니면 볼 수 있음 · 못 보는 이유
   ///
-  /// 모르면 숨긴다 — 광고를 못 띄우는 환경, 릴리스인데 `.env` 광고 단위가 빈 빌드,
-  /// 서버가 꺼 둔 설정, 조회 실패 모두 같다. 그래서 운영이 꺼져 있는 지금은 화면이 그대로다.
-  Future<AdRewardOffer?> offer() async {
+  /// 광고 없는 요금제 · 모바일 아님 · 광고 단위 빈 빌드 > null. 서버 꺼짐 · 오늘 다 받음 · 조회 실패 > 꺼진 카드
+  Future<AdRewardAvailability?> checkAvailability() async {
     if (!adsEnabled || !loader.isConfigured) return null;
     try {
       final offer = await repository.getOffer().timeout(adRewardOfferTimeout);
-      return offer.canOffer ? offer : null;
+      if (offer.canOffer) return AdRewardAvailability.available(offer);
+      return AdRewardAvailability.unavailable(
+        offer.enabled && offer.creditsPerView > 0
+            ? AdRewardUnavailableReason.dailyLimitReached
+            : AdRewardUnavailableReason.switchedOff,
+      );
     } catch (e) {
-      // 숨기는 것은 의도지만 실패가 묻히면 원인을 못 찾는다.
-      AppLogger.error('AdRewardFlow.offer (조회 실패 — 버튼을 숨긴다)', e);
-      return null;
+      // 카드는 꺼진 채 보이지만 실패가 묻히면 원인을 못 찾는다
+      AppLogger.error('AdRewardFlow.checkAvailability (조회 실패 — 버튼을 끈다)', e);
+      return const AdRewardAvailability.unavailable(AdRewardUnavailableReason.checkFailed);
     }
   }
 
@@ -203,4 +207,12 @@ final adRewardFlowProvider = Provider<AdRewardFlow>(
     loader: ref.watch(rewardedAdLoaderProvider),
     adsEnabled: ref.watch(adsEnabledProvider),
   ),
+);
+
+/// 광고 카드 상태 (크레딧 시트 · 홈 안내 카드 공통). 광고로 받은 뒤 invalidate > 오늘 남은 횟수 다시 받음
+///
+/// null 이면 이 기기는 광고를 못 띄움 > 카드 숨김. 저절로 다시 묻지 않음 (실패는 꺼진 카드로 보임)
+final adRewardAvailabilityProvider = FutureProvider.autoDispose<AdRewardAvailability?>(
+  (ref) => ref.watch(adRewardFlowProvider).checkAvailability(),
+  retry: (_, _) => null,
 );

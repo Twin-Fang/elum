@@ -88,27 +88,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'A routine is already being made.\nYou can make a new one once it\'s done';
 
   @override
-  String creditBlockedExhausted(String reset) {
-    return 'You\'ve used all your credits this week.\nCredits refill on $reset';
-  }
-
-  @override
-  String creditBlockedExhaustedMonth(String reset) {
-    return 'You\'ve used all your credits this month.\nThey refill on $reset';
-  }
-
-  @override
-  String creditAdOffer(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Watch an ad to the end to get $count credits',
-      one: 'Watch an ad to the end to get $count credit',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String creditReceivedTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -118,12 +97,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get creditReceivedTitleNoCount => 'You got credits';
-
-  @override
-  String get creditAdWatchMore => 'Watch an ad to make more';
 
   @override
   String get adRewardPreparing => 'Getting the ad ready';
@@ -141,7 +114,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adRewardSlow =>
-      'Checking your credits is taking a while.\nCheck My info in a moment';
+      'Checking your credits is taking a while.\nNo need to watch the ad again. Check My info → My credits';
 
   @override
   String get adRewardDailyLimit =>
@@ -463,6 +436,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can change this later in settings';
 
   @override
+  String onboardingImageStyleCreditIntroWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You get $count credits every week. Use them to make routines and pictures',
+      one:
+          'You get $count credit every week. Use it to make routines and pictures',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onboardingImageStyleCreditIntroMonth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You get $count credits every month. Use them to make routines and pictures',
+      one:
+          'You get $count credit every month. Use it to make routines and pictures',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingImageStyleCreditIntro =>
+      'Credits are used to make routines and pictures';
+
+  @override
   String get onboardingNameTitle => 'What should we\ncall Elumi?';
 
   @override
@@ -669,10 +672,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkEnterGuide =>
-      'You can find the code on the guardian\'s device in\nSettings → Connect Elumi\'s device';
+      'Find the code on the guardian\'s device at\nMy info → gear → Connect Elumi\'s device';
 
   @override
-  String get linkEnterGuidePath => 'Settings → Connect Elumi\'s device';
+  String get linkEnterGuidePath => 'My info → gear → Connect Elumi\'s device';
 
   @override
   String get linkEnterLinkLost =>
@@ -1197,14 +1200,17 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count guardians imported your post',
-      one: '$count guardian imported your post',
+      other: '$count guardians imported the routine in your post',
+      one: '$count guardian imported the routine in your post',
     );
     return '$_temp0';
   }
 
   @override
   String get notificationWeeklyReportReady => 'Last week\'s report is ready';
+
+  @override
+  String get notificationAdminMessageFallback => 'A message from ELUM';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1402,7 +1408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardImageNoCreditToast =>
-      'Not enough credits, so we added a basic picture';
+      'Not enough credits, so we added a basic picture. You can draw an AI picture when you edit this card';
 
   @override
   String get cardImageUnavailableToast =>
@@ -1761,48 +1767,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String aiCreditResetLine(String reset) {
     return 'Refills $reset';
   }
-
-  @override
-  String get creditCostTitle => 'How AI credits are used';
-
-  @override
-  String creditCostLineTextFree(int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost credits',
-      one: '$imageCost credit',
-    );
-    return 'Routine text is free. Each finished card picture uses $_temp0.';
-  }
-
-  @override
-  String creditCostLine(int textCost, int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      textCost,
-      locale: localeName,
-      other: '$textCost credits',
-      one: '$textCost credit',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost credits',
-      one: '$imageCost credit',
-    );
-    return 'Making the routine text uses $_temp0, and each card with a finished picture uses $_temp1.';
-  }
-
-  @override
-  String get creditCostKeepGoing =>
-      'A routine you start while you have credits is finished, even with many pictures.';
-
-  @override
-  String get creditWeeklyRefill => 'Credits refill every Monday at 0:00.';
-
-  @override
-  String get creditMonthlyRefill =>
-      'Refills at 12:00 AM on the 1st of every month.';
 
   @override
   String get routineCreateButton => 'Make a new routine';
@@ -2173,10 +2137,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Draw AI pictures and send routines automatically';
 
   @override
-  String get myCreditPackLabelFree => 'Get more credits';
+  String get myCreditPackLabelFree => 'Buy credits only';
 
   @override
-  String get myCreditPackLabelPro => 'Get more credits';
+  String get myCreditPackLabelPro => 'Buy more credits';
 
   @override
   String get creditGetMore => 'Get more credits';
@@ -2190,14 +2154,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myCreditPackPopular => 'Popular!';
 
   @override
-  String myCreditPackBuy(int count) {
+  String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Get $count credits',
-      one: 'Get $count credit',
+      other: 'Buy $count credits',
+      one: 'Buy $count credit',
     );
-    return '$_temp0';
+    return '$_temp0 ($price)';
   }
 
   @override
@@ -2278,10 +2242,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditHistoryKindOtherGrant => 'You received credits';
 
   @override
-  String get creditHistoryKindExpired => 'Last week\'s credits expired';
+  String get creditHistoryKindExpired =>
+      'Unused credits expired. Credits you bought stay';
 
   @override
-  String get creditHistoryKindAdjusted => 'Credits were adjusted';
+  String get creditHistoryKindAdjusted =>
+      'Credits changed due to a refund or an adjustment';
 
   @override
   String get creditHistoryKindUnknownSpend => 'You used credits';
@@ -3869,7 +3835,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitFreeImageRegenerate =>
-      'Redraw a picture you don\'t like without credits';
+      'Redraw pictures without credits, a set number of times a day';
+
+  @override
+  String planBenefitFreeImageRegenerateDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Redraw without credits up to $count times a day',
+      one: 'Redraw without credits up to $count time a day',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get planBenefitMoreWeeklyCredits => 'Get more credits every week';
@@ -4011,8 +3988,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planNotActivatedTitle => 'Pro isn\'t on yet';
 
   @override
-  String get planNotActivatedBody =>
-      'Please check your subscription status in the store';
+  String get planNotActivatedBodyApple =>
+      'Check your elum subscription in the App Store app → your photo at the top right → Subscriptions';
+
+  @override
+  String get planNotActivatedBodyGoogle =>
+      'Check your elum subscription in the Play Store app → profile at the top right → Payments & subscriptions → Subscriptions';
+
+  @override
+  String get planOpenAppStore => 'Check in the App Store';
+
+  @override
+  String get planOpenPlayStore => 'Check in the Play Store';
 
   @override
   String get planAlreadyProTitle => 'You\'re using Pro';
@@ -4035,6 +4022,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planRestoreNothing => 'There\'s no subscription to restore';
+
+  @override
+  String get planRestoreNothingHintApple =>
+      'Check that this device is signed in with the Apple ID you subscribed with. You also need to sign in to elum the same way you did when you subscribed';
+
+  @override
+  String get planRestoreNothingHintGoogle =>
+      'Check that the Play Store is signed in with the Google account you subscribed with. You also need to sign in to elum the same way you did when you subscribed';
 
   @override
   String get planRestoreFailedTitle => 'Couldn\'t restore your purchase';
@@ -4479,7 +4474,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportPastLoadFailed => 'Couldn\'t load past reports';
 
   @override
-  String get weeklyReportFreePreviewNote => 'Your first report is on us';
+  String get weeklyReportFreePreviewNote =>
+      'You can preview your first report without Pro';
+
+  @override
+  String get weeklyReportNextWeekUpsell => 'Get next week\'s report too';
 
   @override
   String get routineScheduleRowOff => 'Set days and time';
@@ -4904,6 +4903,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proOnlyNoticeTitle => 'This feature is available with Pro';
 
   @override
+  String get proOnlyFreeAlternative => 'Everything you use now keeps working';
+
+  @override
+  String get proOnlyFreeAlternativeAiImage =>
+      'For now, you can make cards with basic pictures or photos';
+
+  @override
+  String get proOnlyFreeAlternativeSchedule =>
+      'For now, you can send routines yourself';
+
+  @override
+  String get proOnlyFreeAlternativeVoice =>
+      'For now, cards are read in the default voice';
+
+  @override
+  String get proOnlyFreeAlternativeCardSplit =>
+      'For now, you can split it by adding cards yourself';
+
+  @override
+  String get proOnlyFreeAlternativeCardExport =>
+      'For now, you can print with the basic design';
+
+  @override
   String get proTeaserWeeklyReportBenefit =>
       'Send a one-page summary of the routines done over the week';
 
@@ -4961,6 +4983,50 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count credits',
       one: '$count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardRegenerateCostProUsedUp(int credits, int freeCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      credits,
+      locale: localeName,
+      other: 'Used all $freeCount free redraws today, uses $credits credits',
+      one: 'Used all $freeCount free redraws today, uses $credits credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardRegenerateProFact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro redraws for free up to $count times a day',
+      one: 'Pro redraws for free $count time a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardAddImageCost(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Drawing an AI picture uses $count credits',
+      one: 'Drawing an AI picture uses $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionCreditCostLine(String costs, int available) {
+    String _temp0 = intl.Intl.pluralLogic(
+      available,
+      locale: localeName,
+      other: '$costs, you have $available',
+      one: '$costs, you have $available',
     );
     return '$_temp0';
   }
@@ -5040,11 +5106,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Want to try again? No credits were used';
 
   @override
+  String get cardCandidateFailedFallback =>
+      'The new picture was already drawn, so used credits aren\'t returned. Please try again in a moment';
+
+  @override
   String get cardCandidateSheetTitle => 'Which picture would you like?';
 
   @override
   String get cardCandidateSheetBody =>
-      'Only the picture you choose is shown to Elumi';
+      'Only the picture you choose is shown to Elumi\nCredits already used aren\'t returned, whichever you choose';
 
   @override
   String get cardCandidateCurrentLabel => 'Current';
@@ -5148,6 +5218,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planTierGift => 'Gift';
 
   @override
+  String get myPlanProTitle => 'You\'re on Pro';
+
+  @override
+  String get myPlanGiftTitle => 'You got Pro as a gift';
+
+  @override
+  String get myPlanFreeTitle => 'You\'re on Free';
+
+  @override
+  String get myPlanFreeBodyWeek =>
+      'Make routines with the credits you get every week';
+
+  @override
+  String get myPlanFreeBodyMonth =>
+      'Make routines with the credits you get every month';
+
+  @override
   String get proTeaserWeeklyPlanTitle =>
       'Set the days and time, and that day\'s routine is ready';
 
@@ -5247,4 +5334,293 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitCardSplit => 'Splits one card into smaller ones';
+
+  @override
+  String get creditTopUpTitleExhausted =>
+      '🎟️ You\'ve used this week\'s credits';
+
+  @override
+  String get creditTopUpTitleExhaustedMonth =>
+      '🎟️ You\'ve used this month\'s credits';
+
+  @override
+  String get creditTopUpTitleShort => '🎟️ You\'re a little short on credits';
+
+  @override
+  String creditTopUpRefillAt(String reset) {
+    return 'They refill on $reset';
+  }
+
+  @override
+  String creditTopUpAdTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Watch an ad for $count credits',
+      one: 'Watch an ad for $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdTitleNoCount => 'Watch an ad for credits';
+
+  @override
+  String creditTopUpAdDetail(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: 'About 30 seconds, $remaining more today',
+      one: 'About 30 seconds, $remaining more today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdWatch => 'Watch ad';
+
+  @override
+  String get creditTopUpAdOff => 'Ads for credits aren\'t available right now';
+
+  @override
+  String get creditTopUpAdDailyLimit =>
+      'That\'s all for today. Come back tomorrow';
+
+  @override
+  String get creditTopUpAdCheckFailed =>
+      'Couldn\'t load ad info. Try again in a moment';
+
+  @override
+  String get creditTopUpPackLink => 'See credit packs';
+
+  @override
+  String get creditTopUpRoutineContinue => 'Keep making it';
+
+  @override
+  String get creditTopUpRedrawContinue => 'Keep drawing';
+
+  @override
+  String creditRewardTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '🎟️ You got $count credits',
+      one: '🎟️ You got $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditRewardTitleNoCount => '🎟️ You got credits';
+
+  @override
+  String creditRewardPlus(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get creditRewardReason => 'For watching the whole ad';
+
+  @override
+  String get creditRewardBalanceLabel => 'Credits now';
+
+  @override
+  String get lowCreditNoticeTitle => 'Credits are running low';
+
+  @override
+  String get lowCreditNoticeTitleEmpty => 'You\'re out of credits';
+
+  @override
+  String get lowCreditNoticeBody => 'Watch an ad to get more right away';
+
+  @override
+  String get lowCreditNoticeAction => 'Watch ad';
+
+  @override
+  String get creditGuideTitle => '🎟️ How credits work';
+
+  @override
+  String get creditGuideBasis => 'Based on your plan';
+
+  @override
+  String get creditGuideRoutineText => 'Routine text';
+
+  @override
+  String get creditGuideCardImage => '1 card picture';
+
+  @override
+  String get creditGuideRegenerate => 'Redraw a picture';
+
+  @override
+  String get creditGuideWeeklyGrant => 'Credits each week';
+
+  @override
+  String get creditGuideMonthlyGrant => 'Credits each month';
+
+  @override
+  String creditGuideCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credits',
+      one: '$count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideUnlimited => 'Unlimited';
+
+  @override
+  String creditGuideRegenerateFreeToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free left today',
+      one: '$count free left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideKeepGoing =>
+      'A routine you\'ve started always finishes, even if credits run short';
+
+  @override
+  String get creditGuideRefillWeek => 'Refills every Monday at 0:00';
+
+  @override
+  String get creditGuideRefillMonth =>
+      'Refills on the 1st of each month at 0:00';
+
+  @override
+  String creditGuideProFactBoth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'With Pro, routine text is unlimited and redraws are free $count times a day',
+      one:
+          'With Pro, routine text is unlimited and redraws are free $count time a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideProFactText => 'With Pro, routine text is unlimited';
+
+  @override
+  String creditGuideProFactRegenerate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'With Pro, redraws are free $count times a day',
+      one: 'With Pro, redraws are free $count time a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditGuideRegenerateFreeDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free a day',
+      one: '$count free a day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideConfirm => 'Got it';
+
+  @override
+  String myCreditUsageWeek(int used, int available) {
+    return 'Used $used this week, $available left';
+  }
+
+  @override
+  String myCreditUsageMonth(int used, int available) {
+    return 'Used $used this month, $available left';
+  }
+
+  @override
+  String myCreditFreeRegenerateToday(int left, int cap) {
+    return '$left free redraws left today ($cap a day)';
+  }
+
+  @override
+  String get myCreditRecentTitle => 'Recent activity';
+
+  @override
+  String get myCreditSeeAllHistory => 'See all activity';
+
+  @override
+  String get myCreditGuideLink => 'How credits work';
+
+  @override
+  String get abaIntroTitle => '🧩 Easy to prepare, done on their own';
+
+  @override
+  String get abaIntroSubtitle =>
+      'ELUM is built on the principles of Applied Behavior Analysis (ABA)';
+
+  @override
+  String get abaIntroCardTitle => 'One action per card';
+
+  @override
+  String get abaIntroCardBody =>
+      'What to do, how to do it, and the reward at the end';
+
+  @override
+  String get abaIntroVoiceTitle => 'Short sentences, pictures and voice';
+
+  @override
+  String get abaIntroVoiceBody =>
+      'Look, listen and follow along one step at a time';
+
+  @override
+  String get abaIntroStarTitle => 'Praise and stars right away';
+
+  @override
+  String get abaIntroStarBody => 'Plus the reward you chose';
+
+  @override
+  String get abaIntroGuardianTitle => '💛 You matter most';
+
+  @override
+  String get abaIntroGuardianBody =>
+      'You know your child best, so you set the routines and rewards. ELUM stays close so your child can keep going on their own';
+
+  @override
+  String get abaIntroStart => 'Get started';
+
+  @override
+  String get guardianSettingsAboutElum => 'How ELUM is designed';
+
+  @override
+  String get notificationIntroTitle => '🔔 Please turn on notifications';
+
+  @override
+  String get notificationIntroBody =>
+      'We\'ll let you know right away, so you never miss an update';
+
+  @override
+  String get notificationIntroRoutineDone =>
+      'When your ELUM user finishes a routine';
+
+  @override
+  String get notificationIntroCaregiverRoutine =>
+      'When another caregiver sends a routine';
+
+  @override
+  String get notificationIntroWeeklyReport => 'When the weekly report is ready';
+
+  @override
+  String get notificationIntroCreditRefilledWeek =>
+      'When this week\'s credits are refilled';
+
+  @override
+  String get notificationIntroCreditRefilledMonth =>
+      'When this month\'s credits are refilled';
 }

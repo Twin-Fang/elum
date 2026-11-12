@@ -7,7 +7,10 @@ enum NotificationType {
   feedbackResolved('FEEDBACK_RESOLVED'),
   talkPostCommented('TALK_POST_COMMENTED'),
   talkPostImported('TALK_POST_IMPORTED'),
-  weeklyReportReady('WEEKLY_REPORT_READY');
+  weeklyReportReady('WEEKLY_REPORT_READY'),
+
+  /// 관리자가 보낸 알림 (#1273): 제목·본문·갈 화면을 서버가 함께 줌
+  adminMessage('ADMIN_MESSAGE');
 
   const NotificationType(this.wire);
 

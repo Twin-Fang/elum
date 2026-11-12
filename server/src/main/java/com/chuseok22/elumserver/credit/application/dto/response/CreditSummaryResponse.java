@@ -52,7 +52,10 @@ public record CreditSummaryResponse(
   CreditPeriodUnit periodUnit,
   @Schema(description = "종류별 줄 (순서: PERIODIC, BONUS, PURCHASED). 유효한 묶음만 센다. PERIODIC 은 크레딧이 켜져 있으면 항상 한 줄, "
     + "나머지는 남은 양이 있거나 이번 주기에 받은 것이 있을 때만. 합계 remaining = available + reserved")
-  List<BreakdownLine> breakdown
+  List<BreakdownLine> breakdown,
+  @Schema(description = "무료 그림 다시 그리기 하루 한도 (시스템 설정 IMAGE_REGENERATE_FREE_DAILY_CAP, 요금제 권한과 무관한 설정값). "
+    + "앱은 요금제 혜택·크레딧 안내의 '하루 N번 무료' 문구에 쓴다. 0 이면 무료 없음", example = "10")
+  int freeImageRegenerateDailyCap
 ) {
 
   @Schema(description = "크레딧 종류별 한 줄")
@@ -92,6 +95,6 @@ public record CreditSummaryResponse(
   /// 정책이 꺼져 있을 때. 앱은 카드를 숨기고 아무것도 막지 않는다.
   public static CreditSummaryResponse disabled(int maxCardsPerRoutine, CreditPeriodUnit periodUnit) {
     return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0, 0),
-      maxCardsPerRoutine, List.of(), true, true, 0, periodUnit, List.of());
+      maxCardsPerRoutine, List.of(), true, true, 0, periodUnit, List.of(), 0);
   }
 }

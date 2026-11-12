@@ -86,26 +86,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get creditBlockedBusy => '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요';
 
   @override
-  String creditBlockedExhausted(String reset) {
-    return '이번 주 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
-  }
-
-  @override
-  String creditBlockedExhaustedMonth(String reset) {
-    return '이번 달 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
-  }
-
-  @override
-  String creditAdOffer(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '광고를 끝까지 보면 크레딧 $count개를 받아요',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String creditReceivedTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -114,12 +94,6 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get creditReceivedTitleNoCount => '크레딧을 받았어요';
-
-  @override
-  String get creditAdWatchMore => '광고 보고 더 만들기';
 
   @override
   String get adRewardPreparing => '광고를 준비하고 있어요';
@@ -134,7 +108,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get adRewardNotWatched => '광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요';
 
   @override
-  String get adRewardSlow => '크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요';
+  String get adRewardSlow =>
+      '크레딧 확인이 늦어지고 있어요.\n광고는 다시 안 봐도 돼요. 내 정보 → 내 크레딧 보기에서 확인해 주세요';
 
   @override
   String get adRewardDailyLimit => '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요';
@@ -442,6 +417,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingImageStyleDescription => '나중에 설정에서 바꿀 수 있어요';
 
   @override
+  String onboardingImageStyleCreditIntroWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크레딧은 매주 $count개 받아요. 일과와 그림을 만들 때 써요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onboardingImageStyleCreditIntroMonth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크레딧은 매달 $count개 받아요. 일과와 그림을 만들 때 써요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingImageStyleCreditIntro => '크레딧은 일과와 그림을 만들 때 써요';
+
+  @override
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
 
   @override
@@ -518,7 +516,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get elumiSettingsLogoutMessage =>
-      '이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+      '이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요';
 
   @override
   String get elumiSettingsLogoutFailTitle => '로그아웃하지 못했어요';
@@ -528,7 +526,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      '이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+      '이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요';
 
   @override
   String get elumiSettingsWithdrawAction => '탈퇴하기';
@@ -551,7 +549,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get linkStatusRevokeConfirmMessage =>
-      '이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요';
+      '이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 코드를 만들면 돼요';
 
   @override
   String get linkStatusRevokeConfirmAction => '연결 끊기';
@@ -622,7 +620,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get linkCodeIssueFailedFallback => '암호를 만들지 못했어요. 다시 해주세요';
+  String get linkCodeIssueFailedFallback => '코드를 만들지 못했어요. 다시 해주세요';
 
   @override
   String get linkCodeSuccessTitle => '기기 연결에 성공했어요!';
@@ -634,7 +632,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get linkCodeLater => '나중에 할게요';
 
   @override
-  String get linkCodeChangesAfter => '뒤에 코드가 바껴요';
+  String get linkCodeChangesAfter => '뒤에 코드가 바뀌어요';
 
   @override
   String get linkRetryChipLabel => '코드 다시 만들기';
@@ -643,25 +641,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get linkEnterTitle => '보호자에게서 받은 코드를\n입력해주세요';
 
   @override
-  String get linkEnterGuide => '코드는 보호자 기기의\n설정 → 이룸이 기기 연결하기에 있어요';
+  String get linkEnterGuide =>
+      '코드는 보호자 기기의 이 자리에 있어요\n내 정보 → 톱니바퀴 → 이룸이 기기 연결하기';
 
   @override
-  String get linkEnterGuidePath => '설정 → 이룸이 기기 연결하기';
+  String get linkEnterGuidePath => '내 정보 → 톱니바퀴 → 이룸이 기기 연결하기';
 
   @override
-  String get linkEnterLinkLost => '연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요';
+  String get linkEnterLinkLost => '연결이 끊어졌어요\n보호자에게 새 연결 코드를 받아 입력해주세요';
 
   @override
   String get linkEnterStartButton => '시작하기';
 
   @override
-  String get linkEnterInputLabel => '연결 암호 넣기';
+  String get linkEnterInputLabel => '연결 코드 넣기';
 
   @override
-  String get linkEnterWrongCode => '암호가 맞지 않아요';
+  String get linkEnterWrongCode => '코드가 맞지 않아요';
 
   @override
-  String get linkEnterExpired => '암호가 만료됐어요. 새 암호를 받아주세요';
+  String get linkEnterExpired => '코드가 만료됐어요. 새 코드를 받아주세요';
 
   @override
   String get linkEnterOffline => '연결하지 못했어요. 인터넷을 확인해주세요';
@@ -710,7 +709,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      '내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
+      '내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 코드를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
 
   @override
   String get guardiansLeaveConfirmAction => '그만두기';
@@ -1129,11 +1128,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String notificationTalkPostImported(int count) {
-    return '보호자 $count명이 내 글을 가져갔어요';
+    return '보호자 $count명이 내 글의 일과를 가져갔어요';
   }
 
   @override
   String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
+
+  @override
+  String get notificationAdminMessageFallback => '이룸에서 알려 드려요';
 
   @override
   String guardianHomeGreeting(String name) {
@@ -1324,7 +1326,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardImageGeneratingLabel => '그림을 만들고 있어요';
 
   @override
-  String get cardImageNoCreditToast => '크레딧이 모자라 기본 그림을 넣었어요';
+  String get cardImageNoCreditToast =>
+      '크레딧이 모자라 기본 그림을 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요';
 
   @override
   String get cardImageUnavailableToast => '그림을 만들지 못해 기본 그림을 넣었어요';
@@ -1674,43 +1677,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get creditCostTitle => 'AI 크레딧은 이렇게 줄어요';
-
-  @override
-  String creditCostLineTextFree(int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost개',
-    );
-    return '일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 $_temp0씩 써요.';
-  }
-
-  @override
-  String creditCostLine(int textCost, int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      textCost,
-      locale: localeName,
-      other: '$textCost개',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost개',
-    );
-    return '일과 글을 만들 때 $_temp0, 그림이 완성된 카드 1장마다 $_temp1씩 써요.';
-  }
-
-  @override
-  String get creditCostKeepGoing => '크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.';
-
-  @override
-  String get creditWeeklyRefill => '매주 월요일 0시에 다시 채워져요.';
-
-  @override
-  String get creditMonthlyRefill => '매달 1일 0시에 다시 채워져요.';
-
-  @override
   String get routineCreateButton => '새로운 일과 만들기';
 
   @override
@@ -2002,7 +1968,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get issuedCodeCopyFailedTitle => '복사하지 못했어요';
 
   @override
-  String get issuedCodeCopyFailedFallback => '화면에 보이는 암호를 직접 알려주세요';
+  String get issuedCodeCopyFailedFallback => '화면에 보이는 코드를 직접 알려주세요';
 
   @override
   String linkShareMessage(int minutes, String url, String code) {
@@ -2065,10 +2031,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get myCreditSubscribeBody => 'AI 그림도 그리고 일과도 알아서 보내요';
 
   @override
-  String get myCreditPackLabelFree => '크레딧만 더 받기';
+  String get myCreditPackLabelFree => '크레딧만 따로 사기';
 
   @override
-  String get myCreditPackLabelPro => '크레딧 더 받기';
+  String get myCreditPackLabelPro => '크레딧 더 사기';
 
   @override
   String get creditGetMore => '크레딧 더 받기';
@@ -2082,13 +2048,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get myCreditPackPopular => '인기!';
 
   @override
-  String myCreditPackBuy(int count) {
+  String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개 받기',
+      other: '$count개 사기',
     );
-    return '$_temp0';
+    return '$_temp0 ($price)';
   }
 
   @override
@@ -2159,10 +2125,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get creditHistoryKindOtherGrant => '크레딧을 받았어요';
 
   @override
-  String get creditHistoryKindExpired => '지난주 크레딧이 사라졌어요';
+  String get creditHistoryKindExpired => '기간이 지나 안 쓴 크레딧이 사라졌어요. 산 크레딧은 그대로예요';
 
   @override
-  String get creditHistoryKindAdjusted => '크레딧이 조정됐어요';
+  String get creditHistoryKindAdjusted => '환불이나 운영 조정으로 크레딧이 바뀌었어요';
 
   @override
   String get creditHistoryKindUnknownSpend => '크레딧을 썼어요';
@@ -3689,7 +3655,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이 써요';
 
   @override
-  String get planBenefitFreeImageRegenerate => '마음에 안 들면 크레딧 없이 다시 그려요';
+  String get planBenefitFreeImageRegenerate => '하루 정해진 횟수까지 크레딧 없이 다시 그려요';
+
+  @override
+  String planBenefitFreeImageRegenerateDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '하루 $count번까지 크레딧 없이 다시 그려요',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
@@ -3823,7 +3799,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planNotActivatedTitle => 'Pro가 켜지지 않았어요';
 
   @override
-  String get planNotActivatedBody => '스토어의 구독 상태를 확인해 주세요';
+  String get planNotActivatedBodyApple =>
+      'App Store 앱 → 오른쪽 위 내 사진 → 구독에서 이룸 구독을 확인해 주세요';
+
+  @override
+  String get planNotActivatedBodyGoogle =>
+      'Play 스토어 앱 → 오른쪽 위 프로필 → 결제 및 정기 결제 → 정기 결제에서 이룸 구독을 확인해 주세요';
+
+  @override
+  String get planOpenAppStore => 'App Store에서 확인하기';
+
+  @override
+  String get planOpenPlayStore => 'Play 스토어에서 확인하기';
 
   @override
   String get planAlreadyProTitle => 'Pro를 쓰고 있어요';
@@ -3845,6 +3832,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planRestoreNothing => '되찾을 구독이 없어요';
+
+  @override
+  String get planRestoreNothingHintApple =>
+      '구독할 때 쓴 Apple ID로 이 기기에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요';
+
+  @override
+  String get planRestoreNothingHintGoogle =>
+      '구독할 때 쓴 Google 계정이 Play 스토어에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요';
 
   @override
   String get planRestoreFailedTitle => '구매를 복원하지 못했어요';
@@ -4276,7 +4271,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weeklyReportPastLoadFailed => '지난 리포트를 불러오지 못했어요';
 
   @override
-  String get weeklyReportFreePreviewNote => '첫 리포트는 그냥 보여 드려요';
+  String get weeklyReportFreePreviewNote => '첫 리포트는 Pro 없이 미리 볼 수 있어요';
+
+  @override
+  String get weeklyReportNextWeekUpsell => '다음 주 리포트도 받아 보기';
 
   @override
   String get routineScheduleRowOff => '요일·시각 정하기';
@@ -4667,6 +4665,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
 
   @override
+  String get proOnlyFreeAlternative => '지금 쓰던 기능은 그대로 쓸 수 있어요';
+
+  @override
+  String get proOnlyFreeAlternativeAiImage => '지금은 기본 그림이나 사진으로 카드를 만들 수 있어요';
+
+  @override
+  String get proOnlyFreeAlternativeSchedule => '지금은 일과를 직접 보내면 돼요';
+
+  @override
+  String get proOnlyFreeAlternativeVoice => '지금은 기본 목소리로 카드를 읽어 줘요';
+
+  @override
+  String get proOnlyFreeAlternativeCardSplit => '지금은 카드를 직접 추가해서 나눌 수 있어요';
+
+  @override
+  String get proOnlyFreeAlternativeCardExport => '지금은 기본 디자인으로 인쇄할 수 있어요';
+
+  @override
   String get proTeaserWeeklyReportBenefit => '한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요';
 
   @override
@@ -4719,6 +4735,46 @@ class AppLocalizationsKo extends AppLocalizations {
       count,
       locale: localeName,
       other: '크레딧 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardRegenerateCostProUsedUp(int credits, int freeCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      credits,
+      locale: localeName,
+      other: '오늘 무료 $freeCount번을 다 썼어요, 크레딧 $credits개를 써요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardRegenerateProFact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro는 하루 $count번 무료로 다시 그려요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardAddImageCost(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'AI 그림을 그리면 크레딧 $count개를 써요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionCreditCostLine(String costs, int available) {
+    String _temp0 = intl.Intl.pluralLogic(
+      available,
+      locale: localeName,
+      other: '$costs, 지금 $available개 있어요',
     );
     return '$_temp0';
   }
@@ -4794,10 +4850,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardRedrawFailedFallback => '다시 해 볼까요? 크레딧은 쓰지 않았어요';
 
   @override
+  String get cardCandidateFailedFallback =>
+      '새 그림은 이미 그려서 쓴 크레딧은 돌아오지 않아요. 잠시 뒤 다시 해 주세요';
+
+  @override
   String get cardCandidateSheetTitle => '어떤 그림으로 할까요?';
 
   @override
-  String get cardCandidateSheetBody => '고른 그림만 이룸이에게 보여요';
+  String get cardCandidateSheetBody =>
+      '고른 그림만 이룸이에게 보여요\n어느 그림을 골라도 쓴 크레딧은 돌아오지 않아요';
 
   @override
   String get cardCandidateCurrentLabel => '지금 그림';
@@ -4898,6 +4959,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planTierGift => '선물';
 
   @override
+  String get myPlanProTitle => 'Pro로 쓰고 있어요';
+
+  @override
+  String get myPlanGiftTitle => 'Pro 선물을 받았어요';
+
+  @override
+  String get myPlanFreeTitle => 'Free로 쓰고 있어요';
+
+  @override
+  String get myPlanFreeBodyWeek => '매주 받는 크레딧으로 일과를 만들어요';
+
+  @override
+  String get myPlanFreeBodyMonth => '매달 받는 크레딧으로 일과를 만들어요';
+
+  @override
   String get proTeaserWeeklyPlanTitle => '요일과 시각만 정해 두면 그날 일과가 준비돼요';
 
   @override
@@ -4994,4 +5070,269 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planBenefitCardSplit => '카드 한 장을 더 작게 나눠 줘요';
+
+  @override
+  String get creditTopUpTitleExhausted => '🎟️ 이번 주 크레딧을 다 썼어요';
+
+  @override
+  String get creditTopUpTitleExhaustedMonth => '🎟️ 이번 달 크레딧을 다 썼어요';
+
+  @override
+  String get creditTopUpTitleShort => '🎟️ 크레딧이 조금 모자라요';
+
+  @override
+  String creditTopUpRefillAt(String reset) {
+    return '$reset에 다시 채워져요';
+  }
+
+  @override
+  String creditTopUpAdTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '광고 보고 크레딧 $count개 받기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdTitleNoCount => '광고 보고 크레딧 받기';
+
+  @override
+  String creditTopUpAdDetail(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '30초쯤 걸려요, 오늘 $remaining번 더 받을 수 있어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdWatch => '광고 보기';
+
+  @override
+  String get creditTopUpAdOff => '지금은 광고로 받을 수 없어요';
+
+  @override
+  String get creditTopUpAdDailyLimit => '오늘은 다 받았어요. 내일 다시 볼 수 있어요';
+
+  @override
+  String get creditTopUpAdCheckFailed => '광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요';
+
+  @override
+  String get creditTopUpPackLink => '크레딧 꾸러미 보기';
+
+  @override
+  String get creditTopUpRoutineContinue => '이어서 만들기';
+
+  @override
+  String get creditTopUpRedrawContinue => '이어서 그리기';
+
+  @override
+  String creditRewardTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '🎟️ 크레딧 $count개를 받았어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditRewardTitleNoCount => '🎟️ 크레딧을 받았어요';
+
+  @override
+  String creditRewardPlus(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get creditRewardReason => '광고를 끝까지 봐서 받았어요';
+
+  @override
+  String get creditRewardBalanceLabel => '지금 크레딧';
+
+  @override
+  String get lowCreditNoticeTitle => '크레딧이 조금 남았어요';
+
+  @override
+  String get lowCreditNoticeTitleEmpty => '크레딧을 다 썼어요';
+
+  @override
+  String get lowCreditNoticeBody => '광고를 보면 바로 더 받을 수 있어요';
+
+  @override
+  String get lowCreditNoticeAction => '광고 보고 받기';
+
+  @override
+  String get creditGuideTitle => '🎟️ 크레딧은 이렇게 써요';
+
+  @override
+  String get creditGuideBasis => '내 요금제 기준이에요';
+
+  @override
+  String get creditGuideRoutineText => '일과 글 만들기';
+
+  @override
+  String get creditGuideCardImage => '카드 그림 1장';
+
+  @override
+  String get creditGuideRegenerate => '그림 다시 그리기';
+
+  @override
+  String get creditGuideWeeklyGrant => '매주 받는 크레딧';
+
+  @override
+  String get creditGuideMonthlyGrant => '매달 받는 크레딧';
+
+  @override
+  String creditGuideCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideUnlimited => '제한 없음';
+
+  @override
+  String creditGuideRegenerateFreeToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '오늘 $count번 더 무료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideKeepGoing => '시작한 일과는 크레딧이 모자라도 끝까지 만들어져요';
+
+  @override
+  String get creditGuideRefillWeek => '매주 월요일 0시에 다시 채워져요';
+
+  @override
+  String get creditGuideRefillMonth => '매달 1일 0시에 다시 채워져요';
+
+  @override
+  String creditGuideProFactBoth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro는 일과 글이 제한 없고, 다시 그리기는 하루 $count번 무료예요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideProFactText => 'Pro는 일과 글이 제한 없어요';
+
+  @override
+  String creditGuideProFactRegenerate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro는 다시 그리기가 하루 $count번 무료예요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditGuideRegenerateFreeDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '하루 $count번 무료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideConfirm => '알겠어요';
+
+  @override
+  String myCreditUsageWeek(int used, int available) {
+    return '이번 주에 $used개 쓰고 $available개 남았어요';
+  }
+
+  @override
+  String myCreditUsageMonth(int used, int available) {
+    return '이번 달에 $used개 쓰고 $available개 남았어요';
+  }
+
+  @override
+  String myCreditFreeRegenerateToday(int left, int cap) {
+    return '오늘 무료 다시 그리기 $left번 남았어요 (하루 $cap번)';
+  }
+
+  @override
+  String get myCreditRecentTitle => '최근 쓴 내역';
+
+  @override
+  String get myCreditSeeAllHistory => '전체 내역 보기';
+
+  @override
+  String get myCreditGuideLink => '크레딧은 이렇게 써요';
+
+  @override
+  String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
+
+  @override
+  String get abaIntroSubtitle => '이룸은 응용행동분석(ABA)의 원리로 만들었어요';
+
+  @override
+  String get abaIntroCardTitle => '카드 한 장에 한 가지 행동';
+
+  @override
+  String get abaIntroCardBody => '무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지';
+
+  @override
+  String get abaIntroVoiceTitle => '짧은 문장, 그림과 목소리';
+
+  @override
+  String get abaIntroVoiceBody => '보고 들으며 하나씩 따라 해요';
+
+  @override
+  String get abaIntroStarTitle => '해내면 바로 칭찬과 별';
+
+  @override
+  String get abaIntroStarBody => '보호자님이 정한 보상까지 받아요';
+
+  @override
+  String get abaIntroGuardianTitle => '💛 가장 중요한 건 보호자님이에요';
+
+  @override
+  String get abaIntroGuardianBody =>
+      '아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요';
+
+  @override
+  String get abaIntroStart => '시작하기';
+
+  @override
+  String get guardianSettingsAboutElum => '이룸은 이렇게 만들었어요';
+
+  @override
+  String get notificationIntroTitle => '🔔 알림을 꼭 켜 주세요';
+
+  @override
+  String get notificationIntroBody => '켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요';
+
+  @override
+  String get notificationIntroRoutineDone => '이룸이가 일과를 마쳤을 때';
+
+  @override
+  String get notificationIntroCaregiverRoutine => '함께 돌보는 분이 일과를 보냈을 때';
+
+  @override
+  String get notificationIntroWeeklyReport => '주간 리포트가 나왔을 때';
+
+  @override
+  String get notificationIntroCreditRefilledWeek => '이번 주 크레딧이 다시 채워졌을 때';
+
+  @override
+  String get notificationIntroCreditRefilledMonth => '이번 달 크레딧이 다시 채워졌을 때';
 }

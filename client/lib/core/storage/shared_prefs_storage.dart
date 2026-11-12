@@ -60,6 +60,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
   static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
+  // 알림 켜기 안내 화면(온보딩 끝·업데이트 뒤 한 번)을 이 기기에서 봤는가
+  static const _kPushPermissionIntroSeen = 'push.permissionIntroSeen';
   // 보호자 홈 알림 꺼짐 띠를 닫은 시각 (ISO-8601, 7일 숨김)
   static const _kHomeNotificationNoticeDismissedAt = 'push.homeNoticeDismissedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
@@ -81,6 +83,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeSuggestionShownAtByKind = 'homeSuggestion.shownAtByKind';
   // 보호자 홈 권유: 닫은 권유 `{종류 이름}:{일과 id}` 목록
   static const _kHomeSuggestionDismissedKeys = 'homeSuggestion.dismissedKeys';
+  // 보호자 홈 크레딧 부족 카드를 닫은 주기: 그 주기의 다음 초기화 시각 (ISO-8601)
+  static const _kLowCreditNoticeDismissedPeriod = 'credit.lowNoticeDismissedPeriod';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
 
@@ -110,6 +114,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kTalkShareHintDismissedRoutineIds,
     _kHomeSuggestionShownAtByKind,
     _kHomeSuggestionDismissedKeys,
+    _kLowCreditNoticeDismissedPeriod,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -122,6 +127,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kCachedStoreSellingOpen,
     _kHasAskedPushPermission,
     _kPushPermissionNudgedAt,
+    _kPushPermissionIntroSeen,
     _kHomeNotificationNoticeDismissedAt,
     _kUpdateSuggestionShown,
     _kHomeCoachSeen,
@@ -444,6 +450,16 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isPushPermissionIntroSeen =>
+      _prefs.getBool(_kPushPermissionIntroSeen) ?? false;
+
+  @override
+  Future<void> setPushPermissionIntroSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kPushPermissionIntroSeen, '$isSeen');
+    await _prefs.setBool(_kPushPermissionIntroSeen, isSeen);
+  }
+
+  @override
   DateTime? get homeNotificationNoticeDismissedAt {
     final raw = _prefs.getString(_kHomeNotificationNoticeDismissedAt);
     return raw == null ? null : DateTime.tryParse(raw);
@@ -541,6 +557,15 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async {
     AppLogger.storageWrite(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
     await _prefs.setStringList(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
+  }
+
+  @override
+  String? get lowCreditNoticeDismissedPeriod => _prefs.getString(_kLowCreditNoticeDismissedPeriod);
+
+  @override
+  Future<void> setLowCreditNoticeDismissedPeriod(String period) async {
+    AppLogger.storageWrite(_kLowCreditNoticeDismissedPeriod, period);
+    await _prefs.setString(_kLowCreditNoticeDismissedPeriod, period);
   }
 
   @override

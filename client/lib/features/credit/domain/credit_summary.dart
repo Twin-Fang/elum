@@ -41,6 +41,7 @@ class CreditSummary {
     this.cardImageCost = 1,
     this.imageRegenerateCost = 1,
     this.freeImageRegeneratesLeftToday = 0,
+    this.freeImageRegenerateDailyCap = 0,
     this.maxCardsPerRoutine = 10,
     this.inProgress = const [],
     this.canStartRoutine = true,
@@ -70,6 +71,9 @@ class CreditSummary {
 
   /// 오늘 남은 무료 다시 그리기 횟수 (Pro 권한, 하루 한도). 0 이면 [imageRegenerateCost] 만큼 듦
   final int freeImageRegeneratesLeftToday;
+
+  /// 무료 다시 그리기 하루 한도 (서버 설정값, 요금제와 무관). 0 이면 모름 · 무료 없음
+  final int freeImageRegenerateDailyCap;
   final int maxCardsPerRoutine;
   final List<CreditJob> inProgress;
   final bool canStartRoutine;
@@ -116,6 +120,7 @@ class CreditSummary {
         json['freeImageRegeneratesLeftToday'],
         0,
       ),
+      freeImageRegenerateDailyCap: _optionalInt(json['freeImageRegenerateDailyCap'], 0),
       maxCardsPerRoutine: _optionalInt(json['maxCardsPerRoutine'], 10),
       inProgress: switch (json['inProgress']) {
         final List<dynamic> list => [

@@ -8,14 +8,19 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/pro_upsell_button.dart';
+import '../../credit/application/credit_costs.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
 import '../presentation/plan_actions.dart' as actions;
+import '../presentation/plan_benefit_cards.dart' show planBenefitLabel;
 import '../presentation/plan_paywall_sheet.dart';
 import '../domain/plan_benefit.dart';
 import 'plan_offer_labels.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
+
+// 혜택 한 줄 문구는 요금제 화면과 한 벌 (다른 기능이 presentation 을 직접 알지 않게)
+export '../presentation/plan_benefit_cards.dart' show planBenefitLabel;
 
 /// 다른 기능이 요금제 화면·구매 복원을 여는 입구 (보호자 화면 전용)
 ///
@@ -72,29 +77,65 @@ const _proOnlyRejectionCodes = {
 bool isProOnlyRejection(Object? failure) =>
     failure is AppFailure && _proOnlyRejectionCodes.contains(failure.server?.code);
 
-/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 · 아니면 안내 팝업 (실패 팝업 아님, [title] 없으면 공통 문구)
-Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref, {String? title}) async {
+/// Pro 기능 입구 누름 (Free): 판매 중 > 요금제 화면 ([benefit] 을 맨 위로) · 아니면 안내 팝업 (실패 팝업 아님, [title] 없으면 공통 문구)
+///
+/// 안내 팝업 본문: [benefit] 혜택 한 줄 > 지금 할 수 있는 길 한 줄 (막다른 확인 버튼만 남기지 않음)
+Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref, {String? title, PlanBenefit? benefit}) async {
   if (ref.read(planAccessProvider).canPurchasePro) {
-    await openPlanPaywall(context, ref);
+    await openPlanPaywall(context, ref, highlight: benefit);
     return;
   }
+  final l10n = context.l10n;
+  final benefitLine = benefit == null
+      ? null
+      : planBenefitLabel(
+          l10n,
+          benefit,
+          ref.read(creditPeriodUnitProvider),
+          freeRegenerateDailyCap: ref.read(freeImageRegenerateDailyCapProvider),
+        );
   await showElumDialog<void>(
     context: context,
-    title: title ?? context.l10n.proOnlyNoticeTitle,
-    actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
+    title: title ?? l10n.proOnlyNoticeTitle,
+    message: [?benefitLine, _proOnlyFreeAlternative(l10n, benefit)].join('\n'),
+    actions: [ElumDialogAction(label: l10n.commonConfirm)],
   );
+}
+
+/// Pro 없이 지금 할 수 있는 길 (기능별, 없으면 공통 문구)
+String _proOnlyFreeAlternative(AppLocalizations l10n, PlanBenefit? benefit) => switch (benefit) {
+  PlanBenefit.aiImageStyles => l10n.proOnlyFreeAlternativeAiImage,
+  PlanBenefit.routineSchedule => l10n.proOnlyFreeAlternativeSchedule,
+  PlanBenefit.guardianVoice => l10n.proOnlyFreeAlternativeVoice,
+  PlanBenefit.cardSplit => l10n.proOnlyFreeAlternativeCardSplit,
+  PlanBenefit.cardExportAllThemes || PlanBenefit.cardExportAllLayouts => l10n.proOnlyFreeAlternativeCardExport,
+  _ => l10n.proOnlyFreeAlternative,
+};
+
+/// 서버 Pro 거절 코드 > 그 기능의 혜택 (안내 팝업 · 요금제 화면 맨 위)
+PlanBenefit? _benefitOfRejection(Object? failure) {
+  if (failure is! AppFailure) return null;
+  return switch (failure.server?.code) {
+    ServerErrorCode.aiImageNotAllowed || ServerErrorCode.imageStyleNotAllowed => PlanBenefit.aiImageStyles,
+    ServerErrorCode.weeklyReportNotAllowed => PlanBenefit.weeklyReport,
+    ServerErrorCode.routineScheduleNotAllowed => PlanBenefit.routineSchedule,
+    ServerErrorCode.guardianVoiceNotAllowed => PlanBenefit.guardianVoice,
+    ServerErrorCode.routineMemoryProRequired => PlanBenefit.routineMemory,
+    ServerErrorCode.cardSplitProRequired => PlanBenefit.cardSplit,
+    _ => null,
+  };
 }
 
 /// Pro 전용 거절 처리: 요금제 판정 새로 받기 > Pro 안내. 처리했으면 true (호출부는 실패 팝업을 띄우지 않음)
 Future<bool> handleProOnlyRejection(BuildContext context, WidgetRef ref, Object? failure) async {
   if (!isProOnlyRejection(failure)) return false;
-  await showProOnlyNoticeAfterRejection(context, ref);
+  await showProOnlyNoticeAfterRejection(context, ref, benefit: _benefitOfRejection(failure));
   return true;
 }
 
 /// 서버 Pro 거절을 받은 뒤: 앱이 알던 판정이 틀렸음 (Pro 끝남 등) > 판정 새로 받기 (입구·미리 보기가 바로 맞게) > Pro 안내
-Future<void> showProOnlyNoticeAfterRejection(BuildContext context, WidgetRef ref) async {
+Future<void> showProOnlyNoticeAfterRejection(BuildContext context, WidgetRef ref, {PlanBenefit? benefit}) async {
   ref.invalidate(memberProvider);
   if (!context.mounted) return;
-  await openProOnlyNotice(context, ref);
+  await openProOnlyNotice(context, ref, benefit: benefit);
 }

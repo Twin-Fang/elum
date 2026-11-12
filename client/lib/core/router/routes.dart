@@ -12,6 +12,9 @@ abstract final class Routes {
   /// 약관 동의 뒤 보호자·이룸이가 갈라지는 지점 (명세 §4-3)
   static const roleSelect = '/role';
 
+  /// 이룸 설계 원리(ABA) 소개. 역할 선택에서 보호자를 고른 뒤, 이름 입력 앞에 한 번 선다 (#1277)
+  static const onboardingAbaIntro = '/onboarding/aba-intro';
+
   static const onboardingName = '/onboarding/name';
   static const onboardingExampleCategories = '/onboarding/example-categories';
   static const onboardingCharacter = '/onboarding/character';
@@ -20,6 +23,10 @@ abstract final class Routes {
   static const onboardingImageStyle = '/onboarding/image-style';
   static const onboardingPin = '/onboarding/pin';
   static const cardCompletion = '/onboarding/card-completion';
+
+  /// 알림 켜기 안내. 온보딩 끝(첫 홈 직전), 이미 가입한 보호자는 업데이트 뒤 홈에서 한 번 (#1275)
+  /// 알림이 이미 켜졌거나 본 적 있으면 서지 않는다 (`PushPermissionPrompt.shouldShowIntro`)
+  static const onboardingNotificationIntro = '/onboarding/notification-intro';
 
   /// 보호자 하단 바(폰)·옆 메뉴(태블릿) 4칸: 홈 · 일과관리 · 이야기 · 내정보 (#798)
   /// 칸 순서와 아이콘은 `GuardianTab` 한 곳이 정한다.
@@ -43,6 +50,9 @@ abstract final class Routes {
 
   /// 일과를 링크로 보내기 (사진 > 링크 만들기 > 공유 시트). extra 는 [TalkLinkShareRouteArgs]
   static const guardianTalkLinkShare = '/guardian/talk/link';
+
+  /// 이룸 설계 원리(ABA) 소개 다시 보기 (설정 > 약관 및 정보). 온보딩 소개와 같은 내용 (#1277)
+  static const guardianAboutElum = '/guardian/about-elum';
 
   /// 오픈소스 라이선스 (설정 > 약관 및 정보)
   static const guardianLicenses = '/guardian/licenses';

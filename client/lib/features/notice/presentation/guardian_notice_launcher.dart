@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/app_status/update_suggestion.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import '../application/notice_log.dart';
@@ -18,7 +20,7 @@ import 'notice_popup.dart';
 ///
 /// 홈의 **첫 프레임 뒤에** 묻는다. 공지를 기다리느라 홈이 늦게 뜨면 안 된다.
 ///
-/// 공지가 하나도 없고 홈 첫 안내를 본 뒤면 알림이 꺼진 기기에 알림 켜기를 권한다 (7일마다).
+/// 공지가 하나도 없고 홈 첫 안내를 본 뒤면 알림이 꺼진 기기에 알림 켜기를 권한다 (안내 화면 한 번, 그 뒤 7일마다 시트).
 ///
 /// 공지가 여럿이면 **차례로** 띄운다. 하나를 닫으면(닫기·링크·바깥) 다음이
 /// 이어서 뜬다. 한 팝업 안에서 넘기지 않으므로 `보지 않기`도 공지마다 따로 고른다.
@@ -52,9 +54,7 @@ class _GuardianNoticeLauncherState
       // 홈 첫 안내(코치마크)를 아직 안 본 실행도 건너뜀 (안내 위에 시트가 겹침)
       if (feed == null || feed.notices.isEmpty) {
         final isHomeCoachSeen = ref.read(localStorageProvider).isHomeCoachSeen;
-        if (mounted && isHomeCoachSeen) {
-          await ref.read(pushPermissionPromptProvider).maybeNudge(context);
-        }
+        if (mounted && isHomeCoachSeen) await _askNotificationPermission();
         return;
       }
 
@@ -93,6 +93,18 @@ class _GuardianNoticeLauncherState
       // 공지는 부가 기능이다. 무엇이 터져도 홈은 그대로 둔다 — 대신 흔적은 남긴다.
       AppLogger.error('notice', e, st, {'step': 'launch'});
     }
+  }
+
+  /// 알림 꺼진 기기에 켜기 권하기: 안내 화면을 아직 안 본 보호자(업데이트 전 가입)는 안내 화면 한 번, 그 뒤로는 7일마다 시트
+  Future<void> _askNotificationPermission() async {
+    final prompt = ref.read(pushPermissionPromptProvider);
+    if (await prompt.shouldShowIntro()) {
+      // 기다리는 사이 다른 화면·팝업이 앞에 왔으면 다음 실행에
+      if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
+      await context.push(Routes.onboardingNotificationIntro);
+      return;
+    }
+    if (mounted) await prompt.maybeNudge(context);
   }
 
   @override

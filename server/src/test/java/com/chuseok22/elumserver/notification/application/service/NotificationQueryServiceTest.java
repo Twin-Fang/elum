@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,11 +16,15 @@ import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationItemResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationPageResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.UnreadSummaryResponse;
+import com.chuseok22.elumserver.notification.core.AdminMessageRoute;
 import com.chuseok22.elumserver.notification.core.NotificationType;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
+import com.chuseok22.elumserver.notification.infrastructure.repository.AdminMessageRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,13 +54,15 @@ class NotificationQueryServiceTest {
   private RoutineQueryService routineQueryService;
   @Mock
   private NoticeHistoryService noticeHistoryService;
+  @Mock
+  private AdminMessageRepository adminMessageRepository;
 
   private NotificationQueryService notificationQueryService;
 
   @BeforeEach
   void setUp() {
     notificationQueryService = new NotificationQueryService(
-      notificationRepository, profileGuardianService, routineQueryService, noticeHistoryService);
+      notificationRepository, profileGuardianService, routineQueryService, noticeHistoryService, adminMessageRepository);
     when(profileGuardianService.profileNamesOf(anyString(), anyCollection())).thenReturn(Map.of());
     when(routineQueryService.titlesOf(anyCollection(), anyCollection())).thenReturn(Map.of());
   }
@@ -73,6 +80,30 @@ class NotificationQueryServiceTest {
 
     assertThat(page.items()).extracting(NotificationItemResponse::id).containsExactly("n-new", "n-old");
     assertThat(page.nextCursor()).isEqualTo(OLDER + "|n-old");
+  }
+
+  @Test
+  @DisplayName("운영자 알림 줄은 관리자가 쓴 제목·본문·갈 화면을 싣는다 (없으면 앱이 빈 줄을 보임), 지워진 알림은 제목 없이")
+  void page_adminMessage_carriesTitleBodyAndRoute() {
+    Notification sent = adminMessageRow("n-admin", "msg-1");
+    Notification missing = adminMessageRow("n-missing", "msg-gone");
+    when(notificationRepository.findByRecipientMemberIdOrderByLastOccurredAtDescIdDesc(eq(MEMBER_ID), any(Pageable.class)))
+      .thenReturn(List.of(sent, missing));
+    AdminMessage message = new AdminMessage();
+    message.setId("msg-1");
+    message.setTitle("Pro 선물");
+    message.setBody("고마워요");
+    message.setRoute(AdminMessageRoute.MY_CREDIT);
+    when(adminMessageRepository.findAllById(anyCollection())).thenReturn(List.of(message));
+    // 실제 profileNamesOf 는 HashMap (null 키 조회 허용)
+    when(profileGuardianService.profileNamesOf(anyString(), anyCollection())).thenReturn(new HashMap<>());
+
+    List<NotificationItemResponse> items = notificationQueryService.page(MEMBER_ID, null, 20).items();
+
+    assertThat(items).extracting(NotificationItemResponse::title, NotificationItemResponse::body,
+        NotificationItemResponse::route)
+      .containsExactly(tuple("Pro 선물", "고마워요", "myCredit"),
+        tuple(null, null, null));
   }
 
   @Test
@@ -208,5 +239,16 @@ class NotificationQueryServiceTest {
     notification.setSubjectIds(subjectIds);
     notification.setLastOccurredAt(occurredAt);
     return notification;
+  }
+
+  private static Notification adminMessageRow(String id, String messageId) {
+    Notification row = new Notification();
+    row.setId(id);
+    row.setRecipientMemberId(MEMBER_ID);
+    row.setType(NotificationType.ADMIN_MESSAGE);
+    row.setTargetId(messageId);
+    row.setGroupKey("ADMIN_MESSAGE:" + messageId);
+    row.setLastOccurredAt(NEWER);
+    return row;
   }
 }

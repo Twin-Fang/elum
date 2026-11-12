@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/consent_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/role_select_screen.dart';
+import '../../features/notification/presentation/notification_permission_intro_screen.dart';
+import '../../features/onboarding/presentation/aba_intro_screen.dart';
 import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/example_category_screen.dart';
@@ -58,6 +60,10 @@ List<RouteBase> entryRoutes() => [
   // --- 온보딩 ---
   // 단계 진행은 수평 슬라이드 — 즉시 교체는 motion.md 금지 사항이다.
   GoRoute(
+    path: Routes.onboardingAbaIntro,
+    pageBuilder: (context, state) => slidePage(state, const AbaIntroScreen(isFromSettings: false)),
+  ),
+  GoRoute(
     path: Routes.onboardingName,
     pageBuilder: (context, state) => slidePage(state, const NameScreen()),
   ),
@@ -82,6 +88,11 @@ List<RouteBase> entryRoutes() => [
   GoRoute(
     path: Routes.onboardingPin,
     pageBuilder: (context, state) => slidePage(state, const PinScreen()),
+  ),
+  // 온보딩 끝 알림 켜기 안내 (업데이트 뒤 홈에서도 push 로 연다)
+  GoRoute(
+    path: Routes.onboardingNotificationIntro,
+    pageBuilder: (context, state) => slidePage(state, const NotificationPermissionIntroScreen()),
   ),
   GoRoute(
     path: Routes.cardCompletion,

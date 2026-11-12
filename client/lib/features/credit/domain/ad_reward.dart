@@ -34,6 +34,21 @@ class AdRewardOffer {
   bool get canOffer => enabled && creditsPerView > 0 && remainingToday > 0;
 }
 
+/// 광고 카드를 끈 이유 3개: 서버 설정 꺼짐 · 오늘 다 받음 · 조회 실패
+enum AdRewardUnavailableReason { switchedOff, dailyLimitReached, checkFailed }
+
+/// 크레딧 시트 광고 카드 상태: 볼 수 있음([offer]) 또는 못 보는 이유([unavailableReason])
+@immutable
+class AdRewardAvailability {
+  const AdRewardAvailability.available(AdRewardOffer this.offer) : unavailableReason = null;
+  const AdRewardAvailability.unavailable(AdRewardUnavailableReason this.unavailableReason) : offer = null;
+
+  final AdRewardOffer? offer;
+  final AdRewardUnavailableReason? unavailableReason;
+
+  bool get canWatch => offer != null;
+}
+
 /// 시청 한 번을 서버에 묶는 세션 — `POST /api/credits/ad-rewards/sessions`.
 @immutable
 class AdRewardSession {

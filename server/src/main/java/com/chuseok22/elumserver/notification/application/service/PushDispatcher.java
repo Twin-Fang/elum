@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.notification.core.NotificationType;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.entity.NotificationSetting;
 import com.chuseok22.elumserver.notification.infrastructure.entity.PushDevice;
@@ -83,6 +84,42 @@ public class PushDispatcher {
     }
   }
 
+  /**
+   * 운영자 알림 발송: 새로 기록된 사람만 > 전체 끔 확인 > 보호자 기기마다 발송 > 무효 토큰 삭제 > 기기 결과 수
+   * 한 사람·한 기기의 실패는 실패 수로만 세고 나머지를 계속 보냄 (재시도 없음)
+   */
+  public AdminMessageDelivery dispatchAdminMessage(List<RecordedNotification> recorded, AdminMessage message) {
+    AdminMessageDelivery.Counter counter = new AdminMessageDelivery.Counter();
+    for (RecordedNotification notification : recorded) {
+      if (!notification.shouldPush() || !isPushEnabled(notification.recipientMemberId(), NotificationType.ADMIN_MESSAGE)) {
+        continue;
+      }
+      try {
+        sendAdminMessageToDevices(notification, message, counter);
+      } catch (RuntimeException exception) {
+        counter.addFailedDevice();
+        log.warn("[admin message push] failed : {}", exception.getClass().getSimpleName());
+      }
+    }
+    return counter.toDelivery();
+  }
+
+  private void sendAdminMessageToDevices(RecordedNotification recorded, AdminMessage message,
+    AdminMessageDelivery.Counter counter) {
+    for (PushDevice device : pushDeviceRepository.findAllByMemberIdAndLinkIdIsNull(recorded.recipientMemberId())) {
+      PushResult pushResult = pushSender.send(pushMessageFactory.createAdminMessage(recorded, message, device));
+      if (pushResult == PushResult.SENT) {
+        counter.addSentDevice();
+        continue;
+      }
+      counter.addFailedDevice();
+      if (pushResult == PushResult.INVALID_TOKEN) {
+        pushDeviceRepository.deleteByToken(device.getToken());
+        log.info("[admin message push] invalid token removed : platform={}", device.getPlatform());
+      }
+    }
+  }
+
   // 설정 행이 없으면 모두 켜짐. 전체 끔이면 종류별 값과 무관하게 꺼짐
   private boolean isPushEnabled(String memberId, NotificationType type) {
     return notificationSettingRepository.findById(memberId)
@@ -100,7 +137,7 @@ public class PushDispatcher {
       case TALK_POST_COMMENTED -> setting.isTalkCommentedEnabled();
       case TALK_POST_IMPORTED -> setting.isTalkImportedEnabled();
       // 종류별 칸이 없음: 전체 끔만 따름
-      case WEEKLY_REPORT_READY -> true;
+      case WEEKLY_REPORT_READY, ADMIN_MESSAGE -> true;
     };
   }
 }

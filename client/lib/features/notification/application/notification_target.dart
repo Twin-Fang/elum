@@ -11,6 +11,7 @@ class NotificationTarget {
     this.profileId,
     this.targetId,
     this.notificationId,
+    this.route,
   });
 
   factory NotificationTarget.fromNotification(AppNotification notification) =>
@@ -18,6 +19,7 @@ class NotificationTarget {
         type: notification.type,
         profileId: notification.profileId,
         targetId: notification.targetId,
+        route: notification.route,
       );
 
   /// 푸시 data 맵(문자열만) > 이동 대상 (type 이 비었거나 앱이 모르는 종류면 null)
@@ -30,6 +32,7 @@ class NotificationTarget {
       // 주간 리포트 푸시는 주 월요일을 weekStart 로도 보냄
       targetId: data['targetId'] ?? data['weekStart'],
       notificationId: data['notificationId'],
+      route: data['route'],
     );
   }
 
@@ -43,4 +46,7 @@ class NotificationTarget {
 
   /// 푸시로 들어온 알림의 id (목록에서 온 이동에는 없음)
   final String? notificationId;
+
+  /// 운영자 알림이 갈 화면 (`home` · `plan` · `myCredit`, 없거나 모르면 홈)
+  final String? route;
 }
