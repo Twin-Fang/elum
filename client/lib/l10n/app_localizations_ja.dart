@@ -403,8 +403,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get goalIndependent => '혼자 끝까지 해내는 경험을 만들어요';
 
   @override
-  String onboardingCharacterTitle(String name) {
-    return '$name의 하루를 함께할\n친구를 골라주세요';
+  String onboardingCharacterTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 하루를 함께할\n친구를 골라주세요';
   }
 
   @override
@@ -443,7 +444,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
 
   @override
-  String get onboardingNameDescription => '정확한 실명이 아니어도 괜찮아요';
+  String get onboardingNameDescription => '이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
 
   @override
   String get onboardingNameHint => '이름을 입력해주세요';
@@ -464,7 +465,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pinCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
 
   @override
-  String get pinConfirmTitle => '암호를 한번 더\n입력해주세요';
+  String get pinConfirmTitle => '암호를 한 번 더\n입력해주세요';
 
   @override
   String get pinDescription => '보호자모드로 변경할 때 사용하는 암호예요';
@@ -610,13 +611,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get linkCodeSettingsTitle => '이룸이 기기 연결';
 
   @override
-  String linkCodeAskTitle(String name) {
-    return '$name의 기기를\n연결할까요?';
+  String linkCodeAskTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 기기를\n연결할까요?';
   }
 
   @override
-  String linkCodeEnterHint(String name) {
-    return '$name의 기기에서 아래 코드를 입력하세요';
+  String linkCodeEnterHint(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 기기에서 아래 코드를 입력하세요';
   }
 
   @override
@@ -1170,7 +1173,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pinChangeVerifyTitle => '지금 비밀암호를\n입력해주세요';
 
   @override
-  String get pinChangeCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
+  String get pinChangeCreateTitle => '이 기기에서 쓸\n비밀암호를 정해 주세요';
+
+  @override
+  String get pinChangeCreateDescription => '비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요';
 
   @override
   String get pinModeHint => '보호자모드로 변경할 때 사용하는 암호예요';
@@ -1179,10 +1185,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pinChangeEnterTitle => '새 비밀암호를\n입력해주세요';
 
   @override
-  String get pinChangeCreateConfirmTitle => '암호를 한번 더\n입력해주세요';
+  String get pinChangeCreateConfirmTitle => '암호를 한 번 더\n입력해주세요';
 
   @override
-  String get pinChangeConfirmTitle => '비밀암호를 한번 더\n입력해주세요';
+  String get pinChangeConfirmTitle => '비밀암호를 한 번 더\n입력해주세요';
 
   @override
   String get pinChangeConfirmHint => '이제 곧 비밀암호 변경이 끝나요';
@@ -1817,8 +1823,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String childHomeEmptyTitle(String name) {
-    return '아직 $name의\n일과가 없어요';
+  String childHomeEmptyTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '아직 $name$_temp0\n일과가 없어요';
   }
 
   @override
@@ -1932,6 +1939,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modeSwitchPinLabel => '암호 넣기';
+
+  @override
+  String get pinForgotLink => '비밀암호를 잊었어요';
+
+  @override
+  String get pinForgotTitle => '비밀암호가 생각나지 않나요?';
+
+  @override
+  String get pinForgotMessage => '보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요';
+
+  @override
+  String get pinForgotRelogin => '다시 로그인';
 
   @override
   String get modeSwitchReadFailedTitle => '암호를 확인하지 못했어요';
@@ -2604,7 +2623,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name) {
+  String onboardingExampleTitle(String name, String batchim) {
     return '$nameの、どんなことを\n手伝いたいですか?';
   }
 
@@ -4046,8 +4065,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
 
   @override
-  String weeklyReportShareTitle(String name) {
-    return '$name의 한 주';
+  String weeklyReportShareTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 한 주';
   }
 
   @override

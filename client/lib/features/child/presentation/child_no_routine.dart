@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/character.dart';
 
@@ -62,7 +63,7 @@ class ChildNoRoutine extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: context.space.screenH),
             child: Text(
-              context.l10n.childHomeEmptyTitle(childName),
+              context.l10n.childHomeEmptyTitle(childName, batchimOf(childName)),
               textAlign: TextAlign.center,
               style: context.typo.greeting.copyWith(color: colors.textPrimary),
             ),

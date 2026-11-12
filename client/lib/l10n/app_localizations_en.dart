@@ -419,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Build the experience of finishing on their own';
 
   @override
-  String onboardingCharacterTitle(String name) {
+  String onboardingCharacterTitle(String name, String batchim) {
     return 'Choose a friend to\nspend $name\'s day with';
   }
 
@@ -469,7 +469,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNameTitle => 'What should we\ncall Elumi?';
 
   @override
-  String get onboardingNameDescription => 'It doesn\'t have to be a real name';
+  String get onboardingNameDescription =>
+      'In Elum, we call your child Elumi\nIt doesn\'t have to be a real name';
 
   @override
   String get onboardingNameHint => 'Enter a name';
@@ -639,12 +640,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkCodeSettingsTitle => 'Connect Elumi\'s device';
 
   @override
-  String linkCodeAskTitle(String name) {
+  String linkCodeAskTitle(String name, String batchim) {
     return 'Connect $name\'s\ndevice?';
   }
 
   @override
-  String linkCodeEnterHint(String name) {
+  String linkCodeEnterHint(String name, String batchim) {
     return 'Enter the code below on $name\'s device';
   }
 
@@ -1246,7 +1247,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinChangeVerifyTitle => 'Enter your\ncurrent passcode';
 
   @override
-  String get pinChangeCreateTitle => 'Create a passcode\nonly you know';
+  String get pinChangeCreateTitle => 'Set a passcode\nfor this device';
+
+  @override
+  String get pinChangeCreateDescription =>
+      'Each device has its own passcode\nIt can be the same as before';
 
   @override
   String get pinModeHint =>
@@ -1915,7 +1920,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String childHomeEmptyTitle(String name) {
+  String childHomeEmptyTitle(String name, String batchim) {
     return 'No routines\nfor $name yet';
   }
 
@@ -2034,6 +2039,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modeSwitchPinLabel => 'Enter passcode';
+
+  @override
+  String get pinForgotLink => 'I forgot the passcode';
+
+  @override
+  String get pinForgotTitle => 'Forgot the passcode?';
+
+  @override
+  String get pinForgotMessage =>
+      'Log in again with the guardian account\nto set a new passcode';
+
+  @override
+  String get pinForgotRelogin => 'Log in again';
 
   @override
   String get modeSwitchReadFailedTitle => 'Couldn\'t check the passcode';
@@ -2737,7 +2755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name) {
+  String onboardingExampleTitle(String name, String batchim) {
     return 'What would you like\nto help $name with?';
   }
 
@@ -4246,7 +4264,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportShareFailed => 'Couldn\'t create the page to send';
 
   @override
-  String weeklyReportShareTitle(String name) {
+  String weeklyReportShareTitle(String name, String batchim) {
     return '$name\'s week';
   }
 

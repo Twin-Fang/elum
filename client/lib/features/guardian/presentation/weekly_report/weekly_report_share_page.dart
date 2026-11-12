@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/batchim.dart';
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -59,7 +60,7 @@ class WeeklyReportSharePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.weeklyReportShareTitle(elumiName), style: typo.printPageTitle.copyWith(color: primary)),
+          Text(l10n.weeklyReportShareTitle(elumiName, batchimOf(elumiName)), style: typo.printPageTitle.copyWith(color: primary)),
           const SizedBox(height: _titleToRange),
           Text(
             l10n.weekRangeOf(report.weekStart, report.weekEnd),

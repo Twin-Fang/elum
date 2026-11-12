@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -77,6 +78,7 @@ class CharacterScreen extends ConsumerWidget {
               child: ElumHeader(
                 title: context.l10n.onboardingCharacterTitle(
                   profile.displayName,
+                  batchimOf(profile.displayName),
                 ),
                 description: context.l10n.onboardingCharacterDescription,
                 hasBackButton: true,
