@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 알림 한 건의 발생 내용: 종류, 이룸이, 눌렀을 때 갈 대상, 묶음 키, 묶음에 모을 대상 id, 발생 시각
- * 묶음 키 규칙은 정적 팩토리 8개에 고정 (같은 키 = 같은 줄)
+ * 묶음 키 규칙은 정적 팩토리 9개에 고정 (같은 키 = 같은 줄)
  */
 public record NotificationDraft(
   NotificationType type,
@@ -67,5 +67,16 @@ public record NotificationDraft(
     String weekStartText = GROUP_DATE_FORMAT.format(weekStart);
     return new NotificationDraft(NotificationType.WEEKLY_REPORT_READY, profileId, weekStartText,
       "WEEKLY_REPORT_READY:" + profileId + ":" + weekStartText, null, now);
+  }
+
+  /** 운영자 알림: 보낸 알림마다 한 줄이라 같은 알림은 한 번만 (ADMIN_MESSAGE:{messageId}), 누르면 갈 대상은 알림 id */
+  public static NotificationDraft adminMessage(String messageId, LocalDateTime now) {
+    return new NotificationDraft(NotificationType.ADMIN_MESSAGE, null, messageId,
+      adminMessageGroupKey(messageId), null, now);
+  }
+
+  /** 운영자 알림 묶음 키 (푸시 collapseKey 도 같은 값) */
+  public static String adminMessageGroupKey(String messageId) {
+    return "ADMIN_MESSAGE:" + messageId;
   }
 }

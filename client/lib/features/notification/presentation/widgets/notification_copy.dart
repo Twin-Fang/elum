@@ -33,6 +33,9 @@ String notificationHeadline(AppLocalizations l10n, AppNotification notification)
       return l10n.notificationTalkPostImported(notification.count);
     case NotificationType.weeklyReportReady:
       return l10n.notificationWeeklyReportReady;
+    case NotificationType.adminMessage:
+      // 관리자가 쓴 제목 그대로 (지워졌으면 공통 문구)
+      return notification.title ?? l10n.notificationAdminMessageFallback;
   }
 }
 

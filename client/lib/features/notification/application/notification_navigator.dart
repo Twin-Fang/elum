@@ -8,6 +8,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../member/application/member_providers.dart';
 import '../../profile/application/profile_session.dart';
 import '../../profile/domain/profile_summary.dart';
+import '../domain/admin_message_route.dart';
 import '../domain/notification_type.dart';
 import 'notification_target.dart';
 
@@ -102,6 +103,8 @@ class NotificationNavigator {
       case NotificationType.weeklyReportReady:
         // 알림의 주(월요일)로 열기, 없으면 이번 주 (권한이 없으면 화면이 Pro 미리 보기 판을 보임)
         context.push(Routes.guardianWeeklyReportOf(target.targetId));
+      case NotificationType.adminMessage:
+        _goToAdminMessageRoute(context, AdminMessageRoute.fromServer(target.route));
       case NotificationType.talkPostCommented:
       case NotificationType.talkPostImported:
         // 글 id 가 없으면 이야기 칸으로 (지워진 글은 상세 화면이 안내)
@@ -111,6 +114,18 @@ class NotificationNavigator {
         } else {
           context.push(Routes.guardianTalkPostOf(postId));
         }
+    }
+  }
+
+  // 운영자 알림 > 홈 · 요금제(설정 맨 위 요금제 묶음) · 내 크레딧
+  void _goToAdminMessageRoute(BuildContext context, AdminMessageRoute route) {
+    switch (route) {
+      case AdminMessageRoute.home:
+        context.go(Routes.guardian);
+      case AdminMessageRoute.plan:
+        context.push(Routes.guardianSettings);
+      case AdminMessageRoute.myCredit:
+        context.push(Routes.guardianMyCredit);
     }
   }
 }

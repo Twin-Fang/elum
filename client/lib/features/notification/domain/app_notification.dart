@@ -15,6 +15,9 @@ class AppNotification {
     this.profileName,
     this.targetId,
     this.routineTitle,
+    this.title,
+    this.body,
+    this.route,
   });
 
   final String id;
@@ -25,6 +28,11 @@ class AppNotification {
   final String? profileName;
   final String? targetId;
   final String? routineTitle;
+
+  /// 운영자 알림만: 관리자가 쓴 제목·본문, 눌렀을 때 갈 화면 (`home` · `plan` · `myCredit`)
+  final String? title;
+  final String? body;
+  final String? route;
 
   /// 묶인 건수 (일과 완료 등)
   final int count;
@@ -38,6 +46,9 @@ class AppNotification {
         profileName: profileName,
         targetId: targetId,
         routineTitle: routineTitle,
+        title: title,
+        body: body,
+        route: route,
         count: count,
         occurredAt: occurredAt,
         isRead: isRead ?? this.isRead,
@@ -61,6 +72,9 @@ class AppNotification {
       profileName: _readText(json['profileName']),
       targetId: _readText(json['targetId']),
       routineTitle: _readText(json['routineTitle']),
+      title: _readText(json['title']),
+      body: _readText(json['body']),
+      route: _readText(json['route']),
       count: json['count'] is num ? (json['count'] as num).toInt() : 1,
       occurredAt: occurredAt,
       isRead: json['isRead'] == true,

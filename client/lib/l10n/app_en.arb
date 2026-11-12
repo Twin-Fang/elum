@@ -1026,6 +1026,7 @@
   "guardiansLeaveTypePhrase": "Leave",
   "guardiansLeaveTypeAction": "Leave",
   "notificationWeeklyReportReady": "Last week's report is ready",
+  "notificationAdminMessageFallback": "A message from ELUM",
   "routineLoadingInputNeededTitle": "Tell us what the routine is",
   "routineLoadingEditInput": "Write again",
   "cardImageMissingAfterCreateToast": "Cards without a picture got a default one. You can draw an AI picture when you edit the card",

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('알림 보내기', 'push', ~{:: content})}">
+<body>
+
+<!-- 알림 보내기 (#1273): 받는 사람(회원 고르기·조건) > 미리 계산 > 문구 > 나에게 먼저 > 확인창 > 보내기
+     미리 계산·보내기는 /admin/push/api/* JSON. 거절은 문구 + E-PUSH 코드, 요청 실패는 E-PUSH-NET -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6 max-w-4xl">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('알림 보내기', '고른 회원의 알림함에 남기고 기기로 푸시를 보내요. 알림을 끈 회원·기기에는 푸시가 가지 않아요.')}"></div>
+
+  <div th:if="${isQuietHours}" class="alert alert-warning" role="status">
+    지금은 밤 9시 ~ 아침 8시라 보내기가 막혀 있어요. 나에게 먼저 보내 보기는 돼요.
+  </div>
+
+  <!-- 받는 사람 -->
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-4">
+      <h2 class="card-title text-base">받는 사람</h2>
+      <div class="join" role="group" aria-label="받는 사람 고르는 방식">
+        <button type="button" class="btn btn-sm join-item btn-active" data-push-mode="MEMBERS">회원 고르기</button>
+        <button type="button" class="btn btn-sm join-item" data-push-mode="CONDITION">조건으로 고르기</button>
+      </div>
+
+      <div data-push-mode-panel="MEMBERS" class="space-y-2">
+        <div data-push-member-picker class="space-y-2"></div>
+        <p class="text-xs text-base-content/60" th:text="'여러 명을 고를 수 있어요 (최대 ' + ${maximumRecipientCount} + '명). 정지·탈퇴 회원은 빠져요.'">설명</p>
+      </div>
+
+      <div data-push-mode-panel="CONDITION" class="hidden space-y-2">
+        <div class="flex flex-wrap items-end gap-4">
+          <label class="form-control">
+            <div class="label"><span class="label-text">이날까지 가입</span></div>
+            <input type="date" class="input input-bordered input-sm" data-push-joined-date/>
+          </label>
+          <label class="form-control">
+            <div class="label"><span class="label-text">AI 호출 몇 번 이상</span></div>
+            <input type="number" min="0" step="1" value="1" class="input input-bordered input-sm w-32" data-push-minimum-ai-calls/>
+          </label>
+        </div>
+        <p class="text-xs text-base-content/60">활성 회원만 들어가요. AI 호출 0 이면 가입일만 봐요.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" class="btn btn-sm btn-outline" data-push-preview>대상 다시 계산</button>
+        <span class="text-sm" data-push-preview-text aria-live="polite">받는 사람을 고르면 대상을 계산해요</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 문구 -->
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-4">
+      <h2 class="card-title text-base">무엇을 알릴까요</h2>
+      <label class="form-control">
+        <div class="label">
+          <span class="label-text">제목 <span class="text-error">*</span></span>
+          <span class="label-text-alt font-mono" data-push-count-for="title" th:text="'0/' + ${titleMaxLength}">0/50</span>
+        </div>
+        <input type="text" class="input input-bordered" th:maxlength="${titleMaxLength}" data-push-title
+               placeholder="🎁 Pro를 3개월 선물로 드렸어요"/>
+      </label>
+      <label class="form-control">
+        <div class="label">
+          <span class="label-text">본문 <span class="text-error">*</span></span>
+          <span class="label-text-alt font-mono" data-push-count-for="body" th:text="'0/' + ${bodyMaxLength}">0/300</span>
+        </div>
+        <textarea class="textarea textarea-bordered h-40 text-sm leading-relaxed" th:maxlength="${bodyMaxLength}"
+                  data-push-body placeholder="이룸을 아껴 써 주셔서 고마워요."></textarea>
+        <div class="label"><span class="label-text-alt">해요체로 써요. 관리자가 쓴 그대로 모든 언어 기기에 가요</span></div>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">누르면 갈 화면</span></div>
+        <select class="select select-bordered select-sm w-32" data-push-route>
+          <option th:each="route : ${routeOptions}" th:value="${route.wire}" th:text="${route.label}">홈</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 나에게 먼저 -->
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-4">
+      <h2 class="card-title text-base">나에게 먼저 보내 보기</h2>
+      <p class="text-sm text-base-content/60">내 회원 계정 한 명을 고르면 그 계정에만 보내요. 밤에도 보낼 수 있고, 로그인한 동안 기억해요.</p>
+      <div data-push-test-picker class="space-y-2" th:data-current="${testMemberId}"></div>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-sm btn-outline" data-push-send-test>나에게 먼저 보내 보기</button>
+        <button type="button" class="btn btn-sm btn-primary" data-push-send disabled>보내기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert hidden" role="status" data-push-result aria-live="polite"></div>
+
+  <script th:src="@{/admin/js/settings-member-picker.js}"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var PREVIEW_DELAY_MILLISECONDS = 400;
+      var NETWORK_ERROR_CODE = 'E-PUSH-NET';
+      var modeButtons = document.querySelectorAll('[data-push-mode]');
+      var modePanels = document.querySelectorAll('[data-push-mode-panel]');
+      var memberPicker = document.querySelector('[data-push-member-picker]');
+      var testPicker = document.querySelector('[data-push-test-picker]');
+      var joinedDateInput = document.querySelector('[data-push-joined-date]');
+      var minimumAiCallsInput = document.querySelector('[data-push-minimum-ai-calls]');
+      var previewButton = document.querySelector('[data-push-preview]');
+      var previewText = document.querySelector('[data-push-preview-text]');
+      var titleInput = document.querySelector('[data-push-title]');
+      var bodyInput = document.querySelector('[data-push-body]');
+      var routeSelect = document.querySelector('[data-push-route]');
+      var sendTestButton = document.querySelector('[data-push-send-test]');
+      var sendButton = document.querySelector('[data-push-send]');
+      var resultBox = document.querySelector('[data-push-result]');
+      var targetMode = 'MEMBERS';
+      var lastPreview = null;
+      var previewTimer = null;
+      var previewSequence = 0;
+      var isSending = false;
+
+      // 회원 고르기 위젯 2개 (설정 화면 위젯 재사용: 숨은 입력 하나에 쉼표 목록)
+      window.elumSettingsMemberPicker.build(memberPicker, '');
+      window.elumSettingsMemberPicker.build(testPicker, testPicker.getAttribute('data-current') || '');
+
+      function pickedIdsOf(widget) {
+        var hidden = widget.querySelector('input[type=hidden]');
+        return (hidden ? hidden.value : '').split(',').map(function (id) { return id.trim(); })
+          .filter(function (id) { return id; });
+      }
+
+      function csrfHeaders() {
+        var token = document.querySelector('meta[name=_csrf]');
+        var header = document.querySelector('meta[name=_csrf_header]');
+        var headers = {'Content-Type': 'application/json', Accept: 'application/json'};
+        if (token && header) headers[header.content] = token.content;
+        return headers;
+      }
+
+      // 요청 본문 (세 API 공통)
+      function requestBody() {
+        var minimumAiCalls = parseInt(minimumAiCallsInput.value, 10);
+        var testIds = pickedIdsOf(testPicker);
+        return {
+          targetMode: targetMode,
+          memberIds: pickedIdsOf(memberPicker),
+          joinedOnOrBefore: joinedDateInput.value || null,
+          minimumAiCallCount: isNaN(minimumAiCalls) ? null : minimumAiCalls,
+          title: titleInput.value,
+          body: bodyInput.value,
+          route: routeSelect.value,
+          testMemberId: testIds.length === 1 ? testIds[0] : null
+        };
+      }
+
+      // POST > {status, data} (거절 400 도 본문을 읽음, 그 밖의 실패는 throw)
+      function postJson(url) {
+        return fetch(url, {method: 'POST', headers: csrfHeaders(), body: JSON.stringify(requestBody())})
+          .then(function (response) {
+            var type = response.headers.get('content-type') || '';
+            if (response.redirected || type.indexOf('application/json') < 0) throw new Error('HTTP ' + response.status);
+            return response.json().then(function (data) {
+              if (!response.ok && !data.outcome) throw new Error((data.errorCode || 'HTTP') + ' ' + response.status);
+              return data;
+            });
+          });
+      }
+
+      function showResult(tone, text) {
+        resultBox.className = 'alert ' + (tone === 'success' ? 'alert-success' : tone === 'warning' ? 'alert-warning' : 'alert-error');
+        resultBox.textContent = text;
+      }
+
+      function rejectionText(data) {
+        return data.message + (data.errorCode ? ' (' + data.errorCode + ')' : '');
+      }
+
+      // 보내기 버튼: 미리 계산이 READY 이고 야간이 아니고 제목·본문이 있을 때만
+      function refreshSendButton() {
+        var hasText = titleInput.value.trim() && bodyInput.value.trim();
+        var isReady = lastPreview && lastPreview.outcome === 'READY' && !lastPreview.isQuietHours;
+        sendButton.disabled = isSending || !isReady || !hasText;
+        sendButton.textContent = isReady ? lastPreview.memberCount + '명에게 보내기' : '보내기';
+      }
+
+      // --- 미리 계산 ---
+      function renderPreview(data) {
+        lastPreview = data;
+        if (data.outcome === 'READY') {
+          previewText.className = 'text-sm';
+          previewText.textContent = '대상 ' + data.memberCount + '명 · 알림 켠 회원 ' + data.pushEnabledMemberCount
+            + '명 · 받을 기기 ' + data.deviceCount + '대';
+        } else {
+          previewText.className = 'text-sm text-error';
+          previewText.textContent = (data.memberCount ? '대상 ' + data.memberCount + '명 · ' : '') + rejectionText(data);
+        }
+        refreshSendButton();
+      }
+
+      function requestPreview() {
+        var sequence = ++previewSequence; // 늦게 온 옛 응답이 새 결과를 덮지 않게
+        lastPreview = null;
+        refreshSendButton();
+        previewText.className = 'text-sm text-base-content/60';
+        previewText.textContent = '계산하는 중이에요…';
+        postJson('/admin/push/api/preview').then(function (data) {
+          if (sequence === previewSequence) renderPreview(data);
+        }).catch(function (error) {
+          if (sequence !== previewSequence) return;
+          console.warn('[관리자] 알림 대상을 계산하지 못했어요', error);
+          previewText.className = 'text-sm text-error';
+          previewText.textContent = '대상을 계산하지 못했어요. 다시 계산해 주세요 (' + NETWORK_ERROR_CODE + ')';
+        });
+      }
+
+      function schedulePreview() {
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(requestPreview, PREVIEW_DELAY_MILLISECONDS);
+      }
+
+      // --- 보내기 ---
+      function sendTo(url, onSent) {
+        isSending = true;
+        refreshSendButton();
+        sendTestButton.disabled = true;
+        postJson(url).then(function (data) {
+          if (data.outcome !== 'SENT') {
+            showResult('error', rejectionText(data));
+            return;
+          }
+          onSent(data);
+        }).catch(function (error) {
+          console.warn('[관리자] 알림을 보내지 못했어요', error);
+          showResult('error', '보내지 못했어요. 관리자 기록·서버 로그를 확인한 뒤 다시 시도해 주세요 (' + NETWORK_ERROR_CODE + ')');
+        }).then(function () {
+          isSending = false;
+          sendTestButton.disabled = false;
+          refreshSendButton();
+        });
+      }
+
+      function sentText(data) {
+        return '알림함 ' + data.recordedMemberCount + '/' + data.recipientCount + '명 · 기기 성공 '
+          + data.sentDeviceCount + '대 · 실패 ' + data.failedDeviceCount + '대';
+      }
+
+      sendTestButton.addEventListener('click', function () {
+        if (pickedIdsOf(testPicker).length !== 1) {
+          showResult('error', '먼저 받아 볼 회원을 한 명만 골라 주세요 (E-PUSH-006)');
+          return;
+        }
+        sendTo('/admin/push/api/test', function (data) {
+          showResult('success', '먼저 보냈어요 · ' + sentText(data) + '. 기기에서 확인해 보세요');
+        });
+      });
+
+      sendButton.addEventListener('click', function () {
+        if (!lastPreview || lastPreview.outcome !== 'READY') return;
+        var message = '대상 ' + lastPreview.memberCount + '명 · 받을 기기 ' + lastPreview.deviceCount + '대\n\n'
+          + '제목: ' + titleInput.value.trim() + '\n본문: ' + bodyInput.value.trim() + '\n\n보내면 되돌릴 수 없어요.';
+        window.ElumAdminConfirm.ask({
+          title: '알림을 보낼까요?',
+          message: message,
+          acceptLabel: lastPreview.memberCount + '명에게 보내기',
+          isDanger: true
+        }).then(function (isConfirmed) {
+          if (!isConfirmed) return;
+          sendTo('/admin/push/api/send', function (data) {
+            showResult(data.failedDeviceCount > 0 ? 'warning' : 'success', '보냈어요 · ' + sentText(data));
+          });
+        });
+      });
+
+      // --- 입력 연결 ---
+      modeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          targetMode = button.getAttribute('data-push-mode');
+          modeButtons.forEach(function (other) { other.classList.toggle('btn-active', other === button); });
+          modePanels.forEach(function (panel) {
+            panel.classList.toggle('hidden', panel.getAttribute('data-push-mode-panel') !== targetMode);
+          });
+          schedulePreview();
+        });
+      });
+      // 고른 회원이 바뀌면 칩 상자(위젯 두 번째 칸)가 다시 그려짐 > 그때 다시 계산 (검색 결과 목록 변화는 무시)
+      var memberChipBox = memberPicker.children[1];
+      if (memberChipBox) {
+        new MutationObserver(schedulePreview).observe(memberChipBox, {childList: true, subtree: true});
+      } else {
+        console.warn('[관리자] 회원 고르기 칩 상자를 찾지 못해 대상 다시 계산 버튼으로만 계산해요 (E-PUSH-UI)');
+      }
+      joinedDateInput.addEventListener('change', schedulePreview);
+      minimumAiCallsInput.addEventListener('change', schedulePreview);
+      previewButton.addEventListener('click', requestPreview);
+
+      // 글자 수 표시 (배열을 [[ 로 붙여 쓰면 Thymeleaf 가 인라인 식으로 읽음)
+      [{input: titleInput, name: 'title'}, {input: bodyInput, name: 'body'}].forEach(function (field) {
+        var counter = document.querySelector('[data-push-count-for=' + field.name + ']');
+        field.input.addEventListener('input', function () {
+          counter.textContent = field.input.value.length + '/' + field.input.maxLength;
+          refreshSendButton();
+        });
+      });
+    })();
+  </script>
+</main>
+
+</body>
+</html>

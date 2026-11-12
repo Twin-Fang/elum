@@ -1207,6 +1207,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationWeeklyReportReady => 'Last week\'s report is ready';
 
   @override
+  String get notificationAdminMessageFallback => 'A message from ELUM';
+
+  @override
   String guardianHomeGreeting(String name) {
     return 'Hello,\n$name 👋🏻';
   }

@@ -2,7 +2,9 @@ package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
+import com.chuseok22.elumserver.notification.core.NotificationDraft;
 import com.chuseok22.elumserver.notification.core.NotificationType;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.entity.PushDevice;
 import com.chuseok22.elumserver.notification.infrastructure.push.PushMessage;
@@ -36,6 +38,8 @@ public class PushMessageFactory {
   public static final String WEEKLY_REPORT_COUNTS_DELIMITER = ",";
   // 앱이 눌렀을 때 주간 리포트 화면을 여는 data 키 (값은 주 시작일 yyyy-MM-dd)
   static final String WEEK_START_DATA_KEY = "weekStart";
+  // 운영자 알림을 눌렀을 때 갈 화면 data 키 (값은 AdminMessageRoute.wire, 앱 notification_target 과 같은 값)
+  static final String ROUTE_DATA_KEY = "route";
 
   // 이룸이 기기 알림: 알림 행 없이 보내므로 NotificationType 밖의 종류 (앱 push_message_router 와 같은 값)
   public static final String ELUMI_ROUTINE_ARRIVED_TYPE = "ELUMI_ROUTINE_ARRIVED";
@@ -85,6 +89,8 @@ public class PushMessageFactory {
         subjectTitle == null ? "" : subjectTitle, count);
       // {0} 보낸 일과 수, {1} 마친 일과 수 (이름·일과 제목은 넣지 않음: 잠금 화면 노출)
       case WEEKLY_REPORT_READY -> weeklyReportBody(locale, subjectTitle);
+      // 운영자 알림은 createAdminMessage 로 만듦 (관리자가 쓴 문구, 언어 묶음 없음)
+      case ADMIN_MESSAGE -> subjectTitle == null ? "" : subjectTitle;
     };
   }
 
@@ -99,6 +105,17 @@ public class PushMessageFactory {
     String sentCount = counts.length > 0 ? counts[0] : "0";
     String completedCount = counts.length > 1 ? counts[1] : "0";
     return MessageFormat.format(text(locale, WEEKLY_REPORT_BODY_KEY), sentCount, completedCount);
+  }
+
+  /** 운영자 알림: 관리자가 쓴 제목·본문 그대로 (기기 언어와 무관), data 에 알림 id·갈 화면 */
+  public PushMessage createAdminMessage(RecordedNotification recorded, AdminMessage message, PushDevice device) {
+    Map<String, String> pushData = new HashMap<>();
+    pushData.put("type", NotificationType.ADMIN_MESSAGE.name());
+    putIfPresent(pushData, "notificationId", recorded.notificationId());
+    putIfPresent(pushData, "targetId", message.getId());
+    putIfPresent(pushData, ROUTE_DATA_KEY, message.getRoute().getWire());
+    return new PushMessage(device.getToken(), message.getTitle(), message.getBody(), pushData,
+      NotificationDraft.adminMessageGroupKey(message.getId()));
   }
 
   /** 이룸이 기기 일과 도착: 일과 제목은 넣지 않음 (잠금 화면 노출) */
