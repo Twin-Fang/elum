@@ -99,9 +99,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.weeklyReportInsightStuckAccent,
     required this.weeklyReportInsightTrendFill,
     required this.weeklyReportInsightTrendAccent,
-    required this.creditKindPeriodic,
-    required this.creditKindBonus,
-    required this.creditKindPurchased,
     required this.routineMemoryHeroStart,
     required this.routineMemoryHeroEnd,
     required this.routineMemoryIconWord,
@@ -511,12 +508,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color weeklyReportInsightTrendFill;
   // 주간 리포트 돌아보기: 지난주와 달라진 점 강조색 (이번 주 막대 포함)
   final Color weeklyReportInsightTrendAccent;
-  // 내 크레딧: 주기 지급 종류 색 (게이지 조각 · 줄 그림 바탕)
-  final Color creditKindPeriodic;
-  // 내 크레딧: 보너스 종류 색
-  final Color creditKindBonus;
-  // 내 크레딧: 구매 종류 색
-  final Color creditKindPurchased;
   // AI 메모리 위 카드 그라데이션 시작 (연보라)
   final Color routineMemoryHeroStart;
   // AI 메모리 위 카드 그라데이션 끝
@@ -1364,9 +1355,6 @@ class AppColors extends ThemeExtension<AppColors> {
     weeklyReportInsightStuckAccent: Color(0xFFEB9B73),
     weeklyReportInsightTrendFill: Color(0xFFEEF0FF),
     weeklyReportInsightTrendAccent: Color(0xFF9CADF1),
-    creditKindPeriodic: Color(0xFF55CFBA),
-    creditKindBonus: Color(0xFFEB9B73),
-    creditKindPurchased: Color(0xFF9CADF1),
     routineMemoryHeroStart: Color(0xFFF4EEFF),
     routineMemoryHeroEnd: Color(0xFFE4ECFF),
     routineMemoryIconWord: Color(0xFF55CFBA),
@@ -1686,9 +1674,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? weeklyReportInsightStuckAccent,
     Color? weeklyReportInsightTrendFill,
     Color? weeklyReportInsightTrendAccent,
-    Color? creditKindPeriodic,
-    Color? creditKindBonus,
-    Color? creditKindPurchased,
     Color? routineMemoryHeroStart,
     Color? routineMemoryHeroEnd,
     Color? routineMemoryIconWord,
@@ -1996,9 +1981,6 @@ class AppColors extends ThemeExtension<AppColors> {
       weeklyReportInsightStuckAccent: weeklyReportInsightStuckAccent ?? this.weeklyReportInsightStuckAccent,
       weeklyReportInsightTrendFill: weeklyReportInsightTrendFill ?? this.weeklyReportInsightTrendFill,
       weeklyReportInsightTrendAccent: weeklyReportInsightTrendAccent ?? this.weeklyReportInsightTrendAccent,
-      creditKindPeriodic: creditKindPeriodic ?? this.creditKindPeriodic,
-      creditKindBonus: creditKindBonus ?? this.creditKindBonus,
-      creditKindPurchased: creditKindPurchased ?? this.creditKindPurchased,
       routineMemoryHeroStart: routineMemoryHeroStart ?? this.routineMemoryHeroStart,
       routineMemoryHeroEnd: routineMemoryHeroEnd ?? this.routineMemoryHeroEnd,
       routineMemoryIconWord: routineMemoryIconWord ?? this.routineMemoryIconWord,
@@ -2354,9 +2336,6 @@ class AppColors extends ThemeExtension<AppColors> {
       weeklyReportInsightStuckAccent: Color.lerp(weeklyReportInsightStuckAccent, other.weeklyReportInsightStuckAccent, t)!,
       weeklyReportInsightTrendFill: Color.lerp(weeklyReportInsightTrendFill, other.weeklyReportInsightTrendFill, t)!,
       weeklyReportInsightTrendAccent: Color.lerp(weeklyReportInsightTrendAccent, other.weeklyReportInsightTrendAccent, t)!,
-      creditKindPeriodic: Color.lerp(creditKindPeriodic, other.creditKindPeriodic, t)!,
-      creditKindBonus: Color.lerp(creditKindBonus, other.creditKindBonus, t)!,
-      creditKindPurchased: Color.lerp(creditKindPurchased, other.creditKindPurchased, t)!,
       routineMemoryHeroStart: Color.lerp(routineMemoryHeroStart, other.routineMemoryHeroStart, t)!,
       routineMemoryHeroEnd: Color.lerp(routineMemoryHeroEnd, other.routineMemoryHeroEnd, t)!,
       routineMemoryIconWord: Color.lerp(routineMemoryIconWord, other.routineMemoryIconWord, t)!,

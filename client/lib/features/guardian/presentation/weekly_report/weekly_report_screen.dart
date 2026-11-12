@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/batchim.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/layout/share_origin.dart';
 import '../../../../core/router/pop_or_home.dart';
@@ -243,7 +244,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
         // Free 는 아래 이룸 띠가 들어감 (인쇄물과 같은 판정)
         hasWatermark: !ref.read(planAccessProvider).canExportCardsWithoutWatermark,
       );
-      final stem = '${exportFileStem(l10n.weeklyReportShareTitle(elumiName))}_${_dateStamp(report.weekStart)}';
+      final stem = '${exportFileStem(l10n.weeklyReportShareTitle(elumiName, batchimOf(elumiName)))}_${_dateStamp(report.weekStart)}';
       switch (format) {
         case WeeklyReportSaveFormat.pdf:
           final pdf = await _files.buildA4Pdf([png]);

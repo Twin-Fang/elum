@@ -788,11 +788,11 @@ abstract class AppLocalizations {
   /// **'혼자 끝까지 해내는 경험을 만들어요'**
   String get goalIndependent;
 
-  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭
+  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 하루를 함께할\n친구를 골라주세요'**
-  String onboardingCharacterTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 하루를 함께할\n친구를 골라주세요'**
+  String onboardingCharacterTitle(String name, String batchim);
 
   /// 캐릭터 고르기 화면 설명
   ///
@@ -836,10 +836,10 @@ abstract class AppLocalizations {
   /// **'이룸이를 어떻게\n불러드릴까요?'**
   String get onboardingNameTitle;
 
-  /// 이름 입력 화면 설명(개인정보 최소수집 안내)
+  /// 이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다
   ///
   /// In ko, this message translates to:
-  /// **'정확한 실명이 아니어도 괜찮아요'**
+  /// **'이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
   String get onboardingNameDescription;
 
   /// 이름 입력칸 힌트
@@ -881,7 +881,7 @@ abstract class AppLocalizations {
   /// 비밀암호 재입력 단계 제목
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinConfirmTitle;
 
   /// 비밀암호 화면 설명
@@ -1148,17 +1148,17 @@ abstract class AppLocalizations {
   /// **'이룸이 기기 연결'**
   String get linkCodeSettingsTitle;
 
-  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭
+  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기를\n연결할까요?'**
-  String linkCodeAskTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기를\n연결할까요?'**
+  String linkCodeAskTitle(String name, String batchim);
 
-  /// 연결 암호 화면의 설명. name 은 이룸이 호칭
+  /// 연결 암호 화면의 설명. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기에서 아래 코드를 입력하세요'**
-  String linkCodeEnterHint(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기에서 아래 코드를 입력하세요'**
+  String linkCodeEnterHint(String name, String batchim);
 
   /// 연결 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
   ///
@@ -2156,11 +2156,17 @@ abstract class AppLocalizations {
   /// **'지금 비밀암호를\n입력해주세요'**
   String get pinChangeVerifyTitle;
 
-  /// 비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)
+  /// 다시 로그인한 기기에서 비밀암호를 만드는 입력 단계 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'보호자님만 아는\n비밀암호를 만들어주세요'**
+  /// **'이 기기에서 쓸\n비밀암호를 정해 주세요'**
   String get pinChangeCreateTitle;
+
+  /// 다시 로그인한 기기에서 비밀암호를 새로 만드는 이유 안내 (잠금은 기기에만 저장된다)
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요'**
+  String get pinChangeCreateDescription;
 
   /// 비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명
   ///
@@ -2177,13 +2183,13 @@ abstract class AppLocalizations {
   /// 비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinChangeCreateConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'비밀암호를 한번 더\n입력해주세요'**
+  /// **'비밀암호를 한 번 더\n입력해주세요'**
   String get pinChangeConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계 설명
@@ -3404,11 +3410,11 @@ abstract class AppLocalizations {
   /// **'오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!'**
   String childHomeGreeting(String name, String batchim);
 
-  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭
+  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'아직 {name}의\n일과가 없어요'**
-  String childHomeEmptyTitle(String name);
+  /// **'아직 {name}{batchim, select, yes{이의} other{의}}\n일과가 없어요'**
+  String childHomeEmptyTitle(String name, String batchim);
 
   /// 일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)
   ///
@@ -3584,6 +3590,30 @@ abstract class AppLocalizations {
   /// **'암호 넣기'**
   String get modeSwitchPinLabel;
 
+  /// 비밀암호 입력 화면의 글자 버튼. 누르면 다시 로그인 안내 팝업이 뜬다
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 잊었어요'**
+  String get pinForgotLink;
+
+  /// 비밀암호를 잊었을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호가 생각나지 않나요?'**
+  String get pinForgotTitle;
+
+  /// 비밀암호를 잊었을 때 팝업 설명. 다시 로그인하면 이 기기의 잠금이 지워지고 새로 만든다
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요'**
+  String get pinForgotMessage;
+
+  /// 비밀암호를 잊었을 때 팝업의 주 버튼. 이 기기에서 로그아웃하고 로그인 화면으로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 로그인'**
+  String get pinForgotRelogin;
+
   /// 저장된 암호를 읽지 못했을 때 팝업 제목
   ///
   /// In ko, this message translates to:
@@ -3686,18 +3716,6 @@ abstract class AppLocalizations {
   /// **'FREE'**
   String get planFreeBadge;
 
-  /// 내 크레딧 위 카드 오른쪽 버튼: 크레딧 사용 내역 화면으로
-  ///
-  /// In ko, this message translates to:
-  /// **'쓴 내역'**
-  String get myCreditHistoryButton;
-
-  /// 내 크레딧 큰 숫자 옆 단위
-  ///
-  /// In ko, this message translates to:
-  /// **'개'**
-  String get myCreditCountUnit;
-
   /// 내 크레딧 종류 이름: 매주 채워지는 크레딧
   ///
   /// In ko, this message translates to:
@@ -3719,32 +3737,8 @@ abstract class AppLocalizations {
   /// 내 크레딧 종류 이름: 산 크레딧
   ///
   /// In ko, this message translates to:
-  /// **'구매'**
+  /// **'산 크레딧'**
   String get myCreditKindPurchased;
-
-  /// 내 크레딧 주간 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'월요일에 다시 채워져요'**
-  String get myCreditRefillWeek;
-
-  /// 내 크레딧 월간 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'다음 달 1일에 다시 채워져요'**
-  String get myCreditRefillMonth;
-
-  /// 내 크레딧 보너스 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'{month}월 {day}일까지'**
-  String myCreditUntilDate(int month, int day);
-
-  /// 내 크레딧 구매 줄 끝나는 때 (제한 없음)
-  ///
-  /// In ko, this message translates to:
-  /// **'기간 제한 없음'**
-  String get myCreditNoExpiry;
 
   /// 내 크레딧 구독 카드 위 작은 제목
   ///
@@ -3902,17 +3896,41 @@ abstract class AppLocalizations {
   /// **'크레딧을 받았어요'**
   String get creditHistoryKindOtherGrant;
 
-  /// 사용 내역 종류: 만료. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  /// 사용 내역 줄 제목: 주간 크레딧 만료
   ///
   /// In ko, this message translates to:
-  /// **'기간이 지나 안 쓴 크레딧이 사라졌어요. 산 크레딧은 그대로예요'**
-  String get creditHistoryKindExpired;
+  /// **'지난 주 크레딧 정리'**
+  String get creditHistoryExpiredWeekTitle;
 
-  /// 사용 내역 종류: 운영 조정. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  /// 사용 내역 줄 제목: 월간 크레딧 만료
   ///
   /// In ko, this message translates to:
-  /// **'환불이나 운영 조정으로 크레딧이 바뀌었어요'**
-  String get creditHistoryKindAdjusted;
+  /// **'지난 달 크레딧 정리'**
+  String get creditHistoryExpiredMonthTitle;
+
+  /// 사용 내역 만료 줄 부제 (주간)
+  ///
+  /// In ko, this message translates to:
+  /// **'안 쓴 주간 크레딧은 넘어가지 않아요'**
+  String get creditHistoryExpiredWeekReason;
+
+  /// 사용 내역 만료 줄 부제 (월간)
+  ///
+  /// In ko, this message translates to:
+  /// **'안 쓴 월간 크레딧은 넘어가지 않아요'**
+  String get creditHistoryExpiredMonthReason;
+
+  /// 사용 내역 줄 제목: 운영 조정
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 조정'**
+  String get creditHistoryAdjustedTitle;
+
+  /// 사용 내역 조정 줄 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'환불이나 운영 조정이에요'**
+  String get creditHistoryAdjustedReason;
 
   /// 사용 내역 종류: 앱이 모르는 종류의 감소
   ///
@@ -4063,6 +4081,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'예시 일과 둘러보기'**
   String get routineTemplateOpen;
+
+  /// 일과 만들기 입력칸 아래 그림 방식 알약의 앞 글자 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림'**
+  String get routineImageStylePillLabel;
+
+  /// 그림 방식 알약 낭독 문구 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 방식 {style}, 눌러서 바꾸기'**
+  String routineImageStylePillSemantics(String style);
 
   /// 예시 일과 시트 제목
   ///
@@ -4766,11 +4796,11 @@ abstract class AppLocalizations {
   /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title, String batchim);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
-  String onboardingExampleTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name, String batchim);
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -7195,11 +7225,11 @@ abstract class AppLocalizations {
   /// **'보낼 한 장을 만들지 못했어요'**
   String get weeklyReportShareFailed;
 
-  /// 보낼 한 장 제목 · 이룸이 이름
+  /// 보낼 한 장 제목 · 이룸이 이름. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 한 주'**
-  String weeklyReportShareTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 한 주'**
+  String weeklyReportShareTitle(String name, String batchim);
 
   /// 보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)
   ///
@@ -9104,22 +9134,10 @@ abstract class AppLocalizations {
   /// **'알겠어요'**
   String get creditGuideConfirm;
 
-  /// 내 크레딧 막대 위 한 줄 (주 단위). used 는 이번 주 쓴 수, available 은 남은 수
+  /// Pro 다시 그리기 칩 (내 크레딧 위 카드). left 는 오늘 남은 횟수, cap 은 서버 하루 한도
   ///
   /// In ko, this message translates to:
-  /// **'이번 주에 {used}개 쓰고 {available}개 남았어요'**
-  String myCreditUsageWeek(int used, int available);
-
-  /// myCreditUsageWeek 의 월 단위 문구
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달에 {used}개 쓰고 {available}개 남았어요'**
-  String myCreditUsageMonth(int used, int available);
-
-  /// Pro 무료 다시 그리기 한 줄. left 는 오늘 남은 횟수, cap 은 서버 하루 한도
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘 무료 다시 그리기 {left}번 남았어요 (하루 {cap}번)'**
+  /// **'다시 그리기 오늘 {left}/{cap}번 무료'**
   String myCreditFreeRegenerateToday(int left, int cap);
 
   /// 내 크레딧 최근 내역 묶음 제목
@@ -9128,10 +9146,10 @@ abstract class AppLocalizations {
   /// **'최근 쓴 내역'**
   String get myCreditRecentTitle;
 
-  /// 최근 내역 아래 글자 버튼 (사용 내역 화면)
+  /// 최근 쓴 내역 머리글 오른쪽 글자 버튼 (사용 내역 화면)
   ///
   /// In ko, this message translates to:
-  /// **'전체 내역 보기'**
+  /// **'전체 보기'**
   String get myCreditSeeAllHistory;
 
   /// 내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)
@@ -9307,6 +9325,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro 선물이 끝나기 전'**
   String get notificationSettingPlanReminder;
+
+  /// 내 크레딧 위 카드 큰 숫자 바로 뒤 (100개 남았어요). 영어는 앞에 공백
+  ///
+  /// In ko, this message translates to:
+  /// **'개 남았어요'**
+  String get myCreditRemainingSuffix;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 
 /// OS 시스템 숫자 키패드를 띄우는 보이지 않는 입력 필드.
@@ -85,6 +86,109 @@ class PinDots extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// 점 아래 별도 줄의 틀림 안내: 진한 글씨, 경고색 없음 (아이도 보는 화면)
+///
+/// 안내가 없을 때도 한 줄 자리를 비워 둔다 — 안내가 뜰 때 아래 글자 버튼이 밀려 튀지 않게
+class PinErrorMessage extends StatelessWidget {
+  const PinErrorMessage({super.key, required this.message});
+
+  /// null 이면 안내 없음
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final isVisible = message != null;
+    return Padding(
+      padding: EdgeInsets.only(top: context.space.md.h),
+      // 바뀌면 낭독기가 바로 읽는다 (점만 흔들리면 화면을 못 보는 사용자는 모른다)
+      child: Semantics(
+        liveRegion: true,
+        child: AnimatedOpacity(
+          opacity: isVisible ? 1 : 0,
+          duration: AppMotion.fast,
+          child: Text(
+            message ?? ' ',
+            textAlign: TextAlign.center,
+            style: context.typo.body.copyWith(
+              color: context.colors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 암호 확인 중 점 깜박임 (확인이 끝날 때까지 반복)
+///
+/// 꺼져 있으면 자식을 그대로 둔다. 동작 줄이기가 켜져 있으면 깜박이지 않고 흐리게만 둔다
+class PinVerifyingPulse extends StatefulWidget {
+  const PinVerifyingPulse({
+    super.key,
+    required this.isVerifying,
+    required this.child,
+  });
+
+  final bool isVerifying;
+  final Widget child;
+
+  @override
+  State<PinVerifyingPulse> createState() => _PinVerifyingPulseState();
+}
+
+class _PinVerifyingPulseState extends State<PinVerifyingPulse>
+    with SingleTickerProviderStateMixin {
+  /// 깜박임 가장 흐린 불투명도 (점이 사라져 보이지 않을 만큼)
+  static const _dimmestOpacity = 0.35;
+
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: AppMotion.slow,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _syncPulse();
+  }
+
+  @override
+  void didUpdateWidget(PinVerifyingPulse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isVerifying != widget.isVerifying) _syncPulse();
+  }
+
+  /// 확인 중이면 흐린 쪽(0)부터 반복 (첫 프레임부터 흐려 보이게), 끝나면 멈춤
+  void _syncPulse() {
+    if (widget.isVerifying) {
+      _pulse
+        ..value = 0
+        ..repeat(reverse: true);
+    } else {
+      _pulse.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.isVerifying) return widget.child;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return Opacity(opacity: _dimmestOpacity, child: widget.child);
+    }
+    return FadeTransition(
+      opacity: Tween<double>(begin: _dimmestOpacity, end: 1).animate(_pulse),
+      child: widget.child,
     );
   }
 }

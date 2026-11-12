@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -315,14 +316,14 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
               // 설정 시안은 제목이 147에서 시작한다 — 뒤로가기 줄에 제목이 함께
               // 서면서 머리가 107에서 끝나기 때문이다.
               titleY: fromSettings ? _settingsTitleY : null,
-              title: context.l10n.linkCodeAskTitle(_elumiName),
+              title: context.l10n.linkCodeAskTitle(_elumiName, batchimOf(_elumiName)),
               // 서버가 이유를 알려줬으면 그 문구가 기본 문구를 이긴다.
               description:
                   _issueFailure?.describe(
                     context.l10n.linkCodeIssueFailedFallback,
                     'E-LINK-NEW',
                   ) ??
-                  context.l10n.linkCodeEnterHint(_elumiName),
+                  context.l10n.linkCodeEnterHint(_elumiName, batchimOf(_elumiName)),
             ),
             IssuedCodePanel(
               loading: _loading,

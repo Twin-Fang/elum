@@ -45,8 +45,10 @@ class ConsentAllAgreeButton extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
 
-    // 켜지면 채우고, 꺼지면 테두리만. 둘 다 같은 포인트색이라 상태가 이어져 보인다.
+    // 켜짐 = 민트 채움 + 흰 체크, 꺼짐 = 회색 테두리 + 회색 체크 (항목 체크 [ElumCheckCircle] 과 같은 규칙)
+    // 꺼짐을 민트로 두면 고르기 전부터 동의된 것처럼 보인다
     final point = colors.checkDone;
+    final idle = colors.consentCheckIdle;
 
     return AppPressable(
       onTap: onTap,
@@ -57,7 +59,10 @@ class ConsentAllAgreeButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: checked ? point : Colors.transparent,
           borderRadius: BorderRadius.circular(space.cardRadius.r),
-          border: Border.all(color: point, width: space.selectedBorderWidth),
+          border: Border.all(
+            color: checked ? point : idle,
+            width: space.selectedBorderWidth,
+          ),
         ),
         child: Row(
           children: [
@@ -73,7 +78,7 @@ class ConsentAllAgreeButton extends StatelessWidget {
                   width: _checkMarkW.w,
                   height: _checkMarkH.w,
                   colorFilter: ColorFilter.mode(
-                    checked ? colors.surface : point,
+                    checked ? colors.surface : idle,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -83,7 +88,7 @@ class ConsentAllAgreeButton extends StatelessWidget {
             Text(
               context.l10n.consentAllAgree,
               style: context.typo.consentAllAgree.copyWith(
-                color: checked ? colors.surface : point,
+                color: checked ? colors.surface : colors.textPrimary,
               ),
             ),
           ],
