@@ -116,7 +116,7 @@ class _RoutineImageStylePillState extends ConsumerState<RoutineImageStylePill> {
                 AppAssets.iconAngleSmall,
                 width: _chevronSize.w,
                 height: _chevronSize.w,
-                // 위쪽 화살표 에셋을 오른쪽으로 눕힘 (누르면 다른 곳이 열린다는 신호)
+                // 아래쪽 화살표 에셋을 오른쪽으로 돌림 (누르면 다른 곳이 열린다는 신호)
                 colorFilter: ColorFilter.mode(colors.textSecondary, BlendMode.srcIn),
               ).rotatedRight(),
             ],
@@ -150,6 +150,6 @@ class _StyleThumbnail extends StatelessWidget {
 }
 
 extension on Widget {
-  /// 위쪽 화살표 > 오른쪽 화살표 (90도)
-  Widget rotatedRight() => RotatedBox(quarterTurns: 1, child: this);
+  /// 아래쪽 화살표 > 오른쪽 화살표 (270도, 에셋 이름은 up 이지만 그림은 아래를 가리킴)
+  Widget rotatedRight() => RotatedBox(quarterTurns: 3, child: this);
 }
