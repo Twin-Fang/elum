@@ -2944,8 +2944,6 @@
   "@planLegalCancelPlayStore": {"description": "법적 문구 — #1079 확정 전 초안 · Google Play 해지 안내"},
   "planTrialDays": "{count, plural, other{{count}일}}",
   "@planTrialDays": {"description": "무료 체험 기간 (스토어 값, 일 단위) #1166", "placeholders": {"count": {"type": "int"}}},
-  "planTrialWeeks": "{count, plural, other{{count}주}}",
-  "@planTrialWeeks": {"description": "무료 체험 기간 (스토어 값, 주 단위) #1166", "placeholders": {"count": {"type": "int"}}},
   "planTrialMonths": "{count, plural, other{{count}개월}}",
   "@planTrialMonths": {"description": "무료 체험 기간 (스토어 값, 달 단위) #1166", "placeholders": {"count": {"type": "int"}}},
   "planTrialYears": "{count, plural, other{{count}년}}",

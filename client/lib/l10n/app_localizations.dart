@@ -6746,12 +6746,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{{count}일}}'**
   String planTrialDays(int count);
 
-  /// 무료 체험 기간 (스토어 값, 주 단위) #1166
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{{count}주}}'**
-  String planTrialWeeks(int count);
-
   /// 무료 체험 기간 (스토어 값, 달 단위) #1166
   ///
   /// In ko, this message translates to:

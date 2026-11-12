@@ -5,10 +5,10 @@ import '../domain/plan_catalog.dart';
 
 /// 요금제 화면 · Pro 미리 보기가 함께 쓰는 상품 문구 (가격·기간은 스토어 값 그대로, 앱이 다시 만들지 않음)
 
-/// 체험 기간 (`7일` · `1주` · `1개월` · `1년`, 스토어 단위 그대로)
+/// 체험 기간 (`7일` · `1개월` · `1년`, 주 단위는 일 수로: 1주 > 7일, #1268)
 String planTrialLabel(AppLocalizations l10n, PlanFreeTrial trial) => switch (trial.unit) {
   PlanTrialUnit.day => l10n.planTrialDays(trial.unitCount),
-  PlanTrialUnit.week => l10n.planTrialWeeks(trial.unitCount),
+  PlanTrialUnit.week => l10n.planTrialDays(trial.unitCount * DateTime.daysPerWeek),
   PlanTrialUnit.month => l10n.planTrialMonths(trial.unitCount),
   PlanTrialUnit.year => l10n.planTrialYears(trial.unitCount),
 };

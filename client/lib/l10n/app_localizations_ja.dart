@@ -3761,16 +3761,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String planTrialWeeks(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count주',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String planTrialMonths(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
