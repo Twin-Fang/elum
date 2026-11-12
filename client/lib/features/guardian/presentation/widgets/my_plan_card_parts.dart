@@ -175,7 +175,7 @@ class MyPlanMascot extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(color: haloColor, shape: BoxShape.circle),
         child: isPro
-            ? Image.asset(AppAssets.routineDoneLumi, width: _proPictureSize.w, height: _proPictureSize.w)
+            ? Image.asset(AppAssets.myPlanProLumi, width: _proPictureSize.w, height: _proPictureSize.w)
             : Image.asset(AppAssets.guardianProfileLumi, width: _freePictureSize.w, height: _freePictureSize.w),
       ),
     );

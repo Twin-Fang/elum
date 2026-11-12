@@ -242,6 +242,9 @@ abstract final class AppAssets {
   static final myPlanProEmoji = emoji('emoji_party_popper');
   static final myPlanGiftEmoji = emoji('emoji_wrapped_gift');
 
+  /// 내 정보 Pro 카드 그림: 왕관 쓴 루미 (384×384, 투명)
+  static const myPlanProLumi = '$_images/my_plan_pro_lumi.png';
+
   // --- 시작 화면 (Figma `시작` 238:1808) ---
 
   /// 이룸 로고 (164×60). Cloudsofa_namgim 폰트 대신 이 SVG를 쓴다.
