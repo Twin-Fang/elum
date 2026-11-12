@@ -9,6 +9,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../application/guardian_voice_controller.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/guardian_voice_api.dart';
@@ -136,7 +137,7 @@ class _CardVoiceBlockState extends ConsumerState<CardVoiceBlock> {
       // Pro 가 끝났음: 칸 실패 대신 Pro 안내 (판정이 새로 오면 칸이 '기본 목소리로 읽어요'로 바뀜)
       if (!mounted) return;
       setState(() => _phase = CardVoicePhase.ready);
-      await showProOnlyNoticeAfterRejection(context, ref);
+      await showProOnlyNoticeAfterRejection(context, ref, benefit: PlanBenefit.guardianVoice);
       return;
     }
     _fail(failure, retryBytes: failure.canRetrySame ? bytes : null);

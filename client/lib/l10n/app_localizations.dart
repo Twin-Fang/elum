@@ -212,41 +212,11 @@ abstract class AppLocalizations {
   /// **'이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'**
   String get creditBlockedBusy;
 
-  /// 이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
-  String creditBlockedExhausted(String reset);
-
-  /// creditBlockedExhausted 의 월 단위 크레딧 문구. reset 은 다시 채워지는 시각
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달 크레딧을 모두 사용했어요.\n{reset}에 다시 채워져요'**
-  String creditBlockedExhaustedMonth(String reset);
-
-  /// 광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{광고를 끝까지 보면 크레딧 {count}개를 받아요}}'**
-  String creditAdOffer(int count);
-
   /// 광고 시청 뒤 크레딧을 받았다는 팝업 제목. count 는 받은 수
   ///
   /// In ko, this message translates to:
   /// **'{count, plural, other{크레딧 {count}개를 받았어요}}'**
   String creditReceivedTitle(int count);
-
-  /// 받은 수를 모를 때의 팝업 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧을 받았어요'**
-  String get creditReceivedTitleNoCount;
-
-  /// 크레딧이 없을 때 광고를 보러 가는 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'광고 보고 더 만들기'**
-  String get creditAdWatchMore;
 
   /// 광고를 불러오는 동안의 대기 팝업
   ///
@@ -275,7 +245,7 @@ abstract class AppLocalizations {
   /// 시청은 끝났는데 지급 확인이 오지 않을 때의 안내
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요'**
+  /// **'크레딧 확인이 늦어지고 있어요.\n광고는 다시 안 봐도 돼요. 내 정보 → 내 크레딧 보기에서 확인해 주세요'**
   String get adRewardSlow;
 
   /// 하루 한도를 다 받았을 때의 안내
@@ -842,6 +812,24 @@ abstract class AppLocalizations {
   /// **'나중에 설정에서 바꿀 수 있어요'**
   String get onboardingImageStyleDescription;
 
+  /// 그림 방식 화면 크레딧 띠 아래 첫 설명 (주 단위). count 는 서버 지급량
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧은 매주 {count}개 받아요. 일과와 그림을 만들 때 써요}}'**
+  String onboardingImageStyleCreditIntroWeek(int count);
+
+  /// 그림 방식 화면 크레딧 띠 아래 첫 설명 (달 단위). count 는 서버 지급량
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧은 매달 {count}개 받아요. 일과와 그림을 만들 때 써요}}'**
+  String onboardingImageStyleCreditIntroMonth(int count);
+
+  /// 그림 방식 화면 크레딧 띠 아래 첫 설명 (지급량을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧은 일과와 그림을 만들 때 써요'**
+  String get onboardingImageStyleCreditIntro;
+
   /// 이름 입력 화면 제목
   ///
   /// In ko, this message translates to:
@@ -995,7 +983,7 @@ abstract class AppLocalizations {
   /// 로그아웃 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
+  /// **'이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요'**
   String get elumiSettingsLogoutMessage;
 
   /// 로그아웃 실패 팝업 제목
@@ -1013,7 +1001,7 @@ abstract class AppLocalizations {
   /// 회원탈퇴 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
+  /// **'이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요'**
   String get elumiSettingsWithdrawMessage;
 
   /// 이룸이 화면 회원탈퇴 확인 팝업의 위험 버튼 (행동 이름, #1171)
@@ -1055,7 +1043,7 @@ abstract class AppLocalizations {
   /// 연결 끊기 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요'**
+  /// **'이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 코드를 만들면 돼요'**
   String get linkStatusRevokeConfirmMessage;
 
   /// 연결 끊기 확인 팝업의 위험 버튼
@@ -1172,10 +1160,10 @@ abstract class AppLocalizations {
   /// **'{name}의 기기에서 아래 코드를 입력하세요'**
   String linkCodeEnterHint(String name);
 
-  /// 연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  /// 연결 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
   ///
   /// In ko, this message translates to:
-  /// **'암호를 만들지 못했어요. 다시 해주세요'**
+  /// **'코드를 만들지 못했어요. 다시 해주세요'**
   String get linkCodeIssueFailedFallback;
 
   /// 이룸이 기기가 연결됐을 때 팝업 제목
@@ -1199,7 +1187,7 @@ abstract class AppLocalizations {
   /// 연결 암호 남은 시간(09:59) 오른쪽에 붙는 안내
   ///
   /// In ko, this message translates to:
-  /// **'뒤에 코드가 바껴요'**
+  /// **'뒤에 코드가 바뀌어요'**
   String get linkCodeChangesAfter;
 
   /// 연결 암호 화면의 다시 만들기 칩(시안 그대로)
@@ -1217,19 +1205,19 @@ abstract class AppLocalizations {
   /// 이룸이 기기의 코드 입력 안내. linkEnterGuidePath 를 문장 안에 그대로 포함해야 밑줄이 그려진다
   ///
   /// In ko, this message translates to:
-  /// **'코드는 보호자 기기의\n설정 → 이룸이 기기 연결하기에 있어요'**
+  /// **'코드는 보호자 기기의 이 자리에 있어요\n내 정보 → 톱니바퀴 → 이룸이 기기 연결하기'**
   String get linkEnterGuide;
 
   /// linkEnterGuide 안에서 밑줄을 그을 부분. 안내문에 똑같이 들어 있어야 한다
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 이룸이 기기 연결하기'**
+  /// **'내 정보 → 톱니바퀴 → 이룸이 기기 연결하기'**
   String get linkEnterGuidePath;
 
   /// 연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명(다음 행동 포함)
   ///
   /// In ko, this message translates to:
-  /// **'연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요'**
+  /// **'연결이 끊어졌어요\n보호자에게 새 연결 코드를 받아 입력해주세요'**
   String get linkEnterLinkLost;
 
   /// 코드 입력 화면의 시작 버튼
@@ -1241,19 +1229,19 @@ abstract class AppLocalizations {
   /// 여섯 칸 입력 영역을 화면 낭독기가 읽는 이름
   ///
   /// In ko, this message translates to:
-  /// **'연결 암호 넣기'**
+  /// **'연결 코드 넣기'**
   String get linkEnterInputLabel;
 
-  /// 연결 암호 입력 실패(모양이 틀리거나 없는 암호)
+  /// 연결 코드 입력 실패(모양이 틀리거나 없는 코드)
   ///
   /// In ko, this message translates to:
-  /// **'암호가 맞지 않아요'**
+  /// **'코드가 맞지 않아요'**
   String get linkEnterWrongCode;
 
-  /// 연결 암호가 만료됐을 때
+  /// 연결 코드가 만료됐을 때
   ///
   /// In ko, this message translates to:
-  /// **'암호가 만료됐어요. 새 암호를 받아주세요'**
+  /// **'코드가 만료됐어요. 새 코드를 받아주세요'**
   String get linkEnterExpired;
 
   /// 연결 중 오프라인일 때 서버가 문구를 못 줄 때의 기본 안내
@@ -1331,7 +1319,7 @@ abstract class AppLocalizations {
   /// 다른 보호자가 남아 있을 때의 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
+  /// **'내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 코드를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
   String get guardiansLeaveConfirmMessageOthers;
 
   /// 함께 돌보기 그만두기 확인 팝업의 위험 버튼
@@ -2093,7 +2081,7 @@ abstract class AppLocalizations {
   /// 알림 줄: 내 이야기 글을 다른 보호자가 가져감(묶음). count 는 가져간 사람 수
   ///
   /// In ko, this message translates to:
-  /// **'보호자 {count}명이 내 글을 가져갔어요'**
+  /// **'보호자 {count}명이 내 글의 일과를 가져갔어요'**
   String notificationTalkPostImported(int count);
 
   /// 알림 줄: 월요일마다 오는 주간 리포트
@@ -2101,6 +2089,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지난주 리포트가 도착했어요'**
   String get notificationWeeklyReportReady;
+
+  /// 알림 줄: 운영자 알림의 제목을 못 받았을 때 (#1273)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸에서 알려 드려요'**
+  String get notificationAdminMessageFallback;
 
   /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
   ///
@@ -2471,7 +2465,7 @@ abstract class AppLocalizations {
   /// 카드 추가 때 크레딧이 모자라 AI 그림 대신 그림 기호를 넣었을 때 아래 토스트
   ///
   /// In ko, this message translates to:
-  /// **'크레딧이 모자라 기본 그림을 넣었어요'**
+  /// **'크레딧이 모자라 기본 그림을 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요'**
   String get cardImageNoCreditToast;
 
   /// 카드 추가 때 AI 그림을 만들지 못해 그림 기호로 남았을 때 아래 토스트
@@ -3122,42 +3116,6 @@ abstract class AppLocalizations {
   /// **'{reset}에 다시 채워져요'**
   String aiCreditResetLine(String reset);
 
-  /// AI 크레딧 안내 팝업 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'AI 크레딧은 이렇게 줄어요'**
-  String get creditCostTitle;
-
-  /// AI 크레딧 단가 안내 — 요금제 혜택으로 일과 글이 무료일 때. imageCost 는 카드 그림 한 장 단가(서버 값)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.'**
-  String creditCostLineTextFree(int imageCost);
-
-  /// AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과 글을 만들 때 {textCost, plural, other{{textCost}개}}, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.'**
-  String creditCostLine(int textCost, int imageCost);
-
-  /// AI 크레딧 안내 팝업의 둘째 문장
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.'**
-  String get creditCostKeepGoing;
-
-  /// AI 크레딧 안내 팝업의 셋째 문장
-  ///
-  /// In ko, this message translates to:
-  /// **'매주 월요일 0시에 다시 채워져요.'**
-  String get creditWeeklyRefill;
-
-  /// creditWeeklyRefill 의 월 단위 크레딧 문구
-  ///
-  /// In ko, this message translates to:
-  /// **'매달 1일 0시에 다시 채워져요.'**
-  String get creditMonthlyRefill;
-
   /// 보호자 홈의 새 일과 만들기 버튼
   ///
   /// In ko, this message translates to:
@@ -3677,7 +3635,7 @@ abstract class AppLocalizations {
   /// 코드·연결 암호 복사 실패 팝업의 할 일 안내
   ///
   /// In ko, this message translates to:
-  /// **'화면에 보이는 암호를 직접 알려주세요'**
+  /// **'화면에 보이는 코드를 직접 알려주세요'**
   String get issuedCodeCopyFailedFallback;
 
   /// 연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드
@@ -3785,13 +3743,13 @@ abstract class AppLocalizations {
   /// 내 크레딧 꾸러미 구역 제목 (Free: 구독 카드 아래라 크레딧만 사는 것임을 말함)
   ///
   /// In ko, this message translates to:
-  /// **'크레딧만 더 받기'**
+  /// **'크레딧만 따로 사기'**
   String get myCreditPackLabelFree;
 
   /// 내 크레딧 꾸러미 구역 제목 (Pro)
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 더 받기'**
+  /// **'크레딧 더 사기'**
   String get myCreditPackLabelPro;
 
   /// 크레딧 부족 팝업 버튼: 내 크레딧 화면의 꾸러미로
@@ -3812,11 +3770,11 @@ abstract class AppLocalizations {
   /// **'인기!'**
   String get myCreditPackPopular;
 
-  /// 꾸러미 구매 버튼
+  /// 꾸러미 결제 버튼. price 는 스토어 값
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{{count}개 받기}}'**
-  String myCreditPackBuy(int count);
+  /// **'{count, plural, other{{count}개 사기}} ({price})'**
+  String myCreditPackBuy(int count, String price);
 
   /// 꾸러미 구매 버튼 아래 안내
   ///
@@ -3929,13 +3887,13 @@ abstract class AppLocalizations {
   /// 사용 내역 종류: 만료. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
   ///
   /// In ko, this message translates to:
-  /// **'지난주 크레딧이 사라졌어요'**
+  /// **'기간이 지나 안 쓴 크레딧이 사라졌어요. 산 크레딧은 그대로예요'**
   String get creditHistoryKindExpired;
 
   /// 사용 내역 종류: 운영 조정. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
   ///
   /// In ko, this message translates to:
-  /// **'크레딧이 조정됐어요'**
+  /// **'환불이나 운영 조정으로 크레딧이 바뀌었어요'**
   String get creditHistoryKindAdjusted;
 
   /// 사용 내역 종류: 앱이 모르는 종류의 감소
@@ -6620,11 +6578,17 @@ abstract class AppLocalizations {
   /// **'일과 글은 크레딧 없이 써요'**
   String get planBenefitFreeRoutineText;
 
-  /// 혜택 줄: 다시 그리기 무료 (횟수는 관리자 설정이라 숫자를 적지 않음)
+  /// 혜택 줄: 다시 그리기 무료 (하루 한도를 모를 때)
   ///
   /// In ko, this message translates to:
-  /// **'마음에 안 들면 크레딧 없이 다시 그려요'**
+  /// **'하루 정해진 횟수까지 크레딧 없이 다시 그려요'**
   String get planBenefitFreeImageRegenerate;
+
+  /// 혜택 줄: 다시 그리기 무료. count 는 서버 하루 무료 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{하루 {count}번까지 크레딧 없이 다시 그려요}}'**
+  String planBenefitFreeImageRegenerateDaily(int count);
 
   /// 혜택 줄: 주간 크레딧
   ///
@@ -6830,11 +6794,29 @@ abstract class AppLocalizations {
   /// **'Pro가 켜지지 않았어요'**
   String get planNotActivatedTitle;
 
-  /// Pro 미반영 설명
+  /// 결제했는데 Pro 가 안 켜졌을 때 확인 경로 (iOS)
   ///
   /// In ko, this message translates to:
-  /// **'스토어의 구독 상태를 확인해 주세요'**
-  String get planNotActivatedBody;
+  /// **'App Store 앱 → 오른쪽 위 내 사진 → 구독에서 이룸 구독을 확인해 주세요'**
+  String get planNotActivatedBodyApple;
+
+  /// 결제했는데 Pro 가 안 켜졌을 때 확인 경로 (Android)
+  ///
+  /// In ko, this message translates to:
+  /// **'Play 스토어 앱 → 오른쪽 위 프로필 → 결제 및 정기 결제 → 정기 결제에서 이룸 구독을 확인해 주세요'**
+  String get planNotActivatedBodyGoogle;
+
+  /// Pro 가 안 켜졌을 때 스토어 구독 화면 열기 버튼 (iOS)
+  ///
+  /// In ko, this message translates to:
+  /// **'App Store에서 확인하기'**
+  String get planOpenAppStore;
+
+  /// Pro 가 안 켜졌을 때 스토어 구독 화면 열기 버튼 (Android)
+  ///
+  /// In ko, this message translates to:
+  /// **'Play 스토어에서 확인하기'**
+  String get planOpenPlayStore;
 
   /// 이미 Pro 인 보호자가 요금제 화면을 엶
   ///
@@ -6877,6 +6859,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'되찾을 구독이 없어요'**
   String get planRestoreNothing;
+
+  /// 구매 복원: 되찾을 구독이 없을 때 안내 (iOS)
+  ///
+  /// In ko, this message translates to:
+  /// **'구독할 때 쓴 Apple ID로 이 기기에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요'**
+  String get planRestoreNothingHintApple;
+
+  /// 구매 복원: 되찾을 구독이 없을 때 안내 (Android)
+  ///
+  /// In ko, this message translates to:
+  /// **'구독할 때 쓴 Google 계정이 Play 스토어에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요'**
+  String get planRestoreNothingHintGoogle;
 
   /// 구매 복원 실패 팝업 제목
   ///
@@ -7439,8 +7433,14 @@ abstract class AppLocalizations {
   /// Free 에게 미리 보여 주는 주 리포트 위 한 줄
   ///
   /// In ko, this message translates to:
-  /// **'첫 리포트는 그냥 보여 드려요'**
+  /// **'첫 리포트는 Pro 없이 미리 볼 수 있어요'**
   String get weeklyReportFreePreviewNote;
+
+  /// Free 첫 리포트 미리 보기 끝 버튼 (요금제 화면을 주간 리포트 혜택 위로 엶)
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 주 리포트도 받아 보기'**
+  String get weeklyReportNextWeekUpsell;
 
   /// 일과 상세 시트(일과관리) 반복 줄 — 아직 정하지 않았을 때
   ///
@@ -8162,6 +8162,42 @@ abstract class AppLocalizations {
   /// **'Pro에서 쓸 수 있는 기능이에요'**
   String get proOnlyNoticeTitle;
 
+  /// Pro 판매가 꺼져 요금제 화면을 못 열 때 안내 팝업 둘째 줄 (기능별 대안이 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 쓰던 기능은 그대로 쓸 수 있어요'**
+  String get proOnlyFreeAlternative;
+
+  /// Pro 안내 팝업 대안 (AI 그림)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 기본 그림이나 사진으로 카드를 만들 수 있어요'**
+  String get proOnlyFreeAlternativeAiImage;
+
+  /// Pro 안내 팝업 대안 (반복 일과)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 일과를 직접 보내면 돼요'**
+  String get proOnlyFreeAlternativeSchedule;
+
+  /// Pro 안내 팝업 대안 (보호자 목소리)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 기본 목소리로 카드를 읽어 줘요'**
+  String get proOnlyFreeAlternativeVoice;
+
+  /// Pro 안내 팝업 대안 (카드 나누기)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 카드를 직접 추가해서 나눌 수 있어요'**
+  String get proOnlyFreeAlternativeCardSplit;
+
+  /// Pro 안내 팝업 대안 (인쇄 디자인·모양)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 기본 디자인으로 인쇄할 수 있어요'**
+  String get proOnlyFreeAlternativeCardExport;
+
   /// 주간 리포트 미리 보기 한 줄 혜택
   ///
   /// In ko, this message translates to:
@@ -8257,6 +8293,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count, plural, other{크레딧 {count}개}}'**
   String cardRegenerateCostCredits(int count);
+
+  /// 다시 그리기 비용 (Pro, 오늘 무료 횟수를 다 씀). freeCount 는 하루 무료 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{credits, plural, other{오늘 무료 {freeCount}번을 다 썼어요, 크레딧 {credits}개를 써요}}'**
+  String cardRegenerateCostProUsedUp(int credits, int freeCount);
+
+  /// 다시 그리기 시트 (Free) 사실 한 줄. count 는 서버 하루 무료 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{Pro는 하루 {count}번 무료로 다시 그려요}}'**
+  String cardRegenerateProFact(int count);
+
+  /// 카드 추가 시트 버튼 위 비용 한 줄 (AI 그림 방식일 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{AI 그림을 그리면 크레딧 {count}개를 써요}}'**
+  String cardAddImageCost(int count);
+
+  /// 카드 만들기 버튼 아래 비용 한 줄. costs 는 imageStyleCreditRoutine(·Image) 를 쉼표로 이은 글, available 은 남은 크레딧
+  ///
+  /// In ko, this message translates to:
+  /// **'{available, plural, other{{costs}, 지금 {available}개 있어요}}'**
+  String questionCreditCostLine(String costs, int available);
 
   /// 크레딧 비용 표시: 크레딧 그림 옆 개수 (낭독은 cardRegenerateCostCredits)
   ///
@@ -8384,6 +8444,12 @@ abstract class AppLocalizations {
   /// **'다시 해 볼까요? 크레딧은 쓰지 않았어요'**
   String get cardRedrawFailedFallback;
 
+  /// 새 그림을 그린 뒤 받기·바꾸기 실패 팝업 기본 안내 (그리기는 끝나 크레딧을 이미 씀)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 그림은 이미 그려서 쓴 크레딧은 돌아오지 않아요. 잠시 뒤 다시 해 주세요'**
+  String get cardCandidateFailedFallback;
+
   /// 새 그림 고르기 시트 제목
   ///
   /// In ko, this message translates to:
@@ -8393,7 +8459,7 @@ abstract class AppLocalizations {
   /// 새 그림 고르기 시트 설명
   ///
   /// In ko, this message translates to:
-  /// **'고른 그림만 이룸이에게 보여요'**
+  /// **'고른 그림만 이룸이에게 보여요\n어느 그림을 골라도 쓴 크레딧은 돌아오지 않아요'**
   String get cardCandidateSheetBody;
 
   /// 새 그림 고르기 시트: 원래 그림(또는 픽토그램) 이름
@@ -8551,6 +8617,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'선물'**
   String get planTierGift;
+
+  /// 내 정보 내 요금제 카드 제목: Pro (구독, 기간 제한 없음) #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 쓰고 있어요'**
+  String get myPlanProTitle;
+
+  /// 내 정보 내 요금제 카드 제목: Pro 선물 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물을 받았어요'**
+  String get myPlanGiftTitle;
+
+  /// 내 정보 내 요금제 카드 제목: Free #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Free로 쓰고 있어요'**
+  String get myPlanFreeTitle;
+
+  /// 내 정보 내 요금제 카드 한 줄: Free, 주간 크레딧 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 받는 크레딧으로 일과를 만들어요'**
+  String get myPlanFreeBodyWeek;
+
+  /// 내 정보 내 요금제 카드 한 줄: Free, 월간 크레딧 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 받는 크레딧으로 일과를 만들어요'**
+  String get myPlanFreeBodyMonth;
 
   /// Pro 미리보기 제목: 주간 계획 #1189
   ///
@@ -8725,6 +8821,402 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'카드 한 장을 더 작게 나눠 줘요'**
   String get planBenefitCardSplit;
+
+  /// 크레딧 더 받기 시트 제목 (주 단위 크레딧을 다 썼을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'🎟️ 이번 주 크레딧을 다 썼어요'**
+  String get creditTopUpTitleExhausted;
+
+  /// creditTopUpTitleExhausted 의 월 단위 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'🎟️ 이번 달 크레딧을 다 썼어요'**
+  String get creditTopUpTitleExhaustedMonth;
+
+  /// 크레딧 더 받기 시트 제목 (남았지만 이번 일에 모자랄 때 · 잔액을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'🎟️ 크레딧이 조금 모자라요'**
+  String get creditTopUpTitleShort;
+
+  /// 크레딧 더 받기 시트 한 줄 설명. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)
+  ///
+  /// In ko, this message translates to:
+  /// **'{reset}에 다시 채워져요'**
+  String creditTopUpRefillAt(String reset);
+
+  /// 시트 광고 칸 제목. count 는 광고 한 번에 받는 크레딧 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{광고 보고 크레딧 {count}개 받기}}'**
+  String creditTopUpAdTitle(int count);
+
+  /// 시트 광고 칸 제목 (받는 수를 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 보고 크레딧 받기'**
+  String get creditTopUpAdTitleNoCount;
+
+  /// 광고 칸 설명. remaining 은 오늘 더 볼 수 있는 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{remaining, plural, other{30초쯤 걸려요, 오늘 {remaining}번 더 받을 수 있어요}}'**
+  String creditTopUpAdDetail(int remaining);
+
+  /// 광고 칸 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 보기'**
+  String get creditTopUpAdWatch;
+
+  /// 광고 보상이 꺼져 있어 버튼을 끈 이유
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 광고로 받을 수 없어요'**
+  String get creditTopUpAdOff;
+
+  /// 오늘 광고 횟수를 다 써서 버튼을 끈 이유
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 다 받았어요. 내일 다시 볼 수 있어요'**
+  String get creditTopUpAdDailyLimit;
+
+  /// 광고 제안 조회가 실패해 버튼을 끈 이유
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요'**
+  String get creditTopUpAdCheckFailed;
+
+  /// 시트의 꾸러미 화면 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 꾸러미 보기'**
+  String get creditTopUpPackLink;
+
+  /// 광고로 크레딧을 받은 뒤 일과 만들기를 다시 시도하는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서 만들기'**
+  String get creditTopUpRoutineContinue;
+
+  /// 광고로 크레딧을 받은 뒤 카드 그림 그리기를 다시 시도하는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서 그리기'**
+  String get creditTopUpRedrawContinue;
+
+  /// 광고 보상 받은 순간 창 제목. count 는 받은 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{🎟️ 크레딧 {count}개를 받았어요}}'**
+  String creditRewardTitle(int count);
+
+  /// 광고 보상 받은 순간 창 제목 (받은 수를 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'🎟️ 크레딧을 받았어요'**
+  String get creditRewardTitleNoCount;
+
+  /// 받는 순간 창의 받은 수 (큰 숫자, 0 에서 세며 올라감)
+  ///
+  /// In ko, this message translates to:
+  /// **'+{count}'**
+  String creditRewardPlus(int count);
+
+  /// 받은 순간 창 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 끝까지 봐서 받았어요'**
+  String get creditRewardReason;
+
+  /// 받은 순간 창 잔액 줄 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 크레딧'**
+  String get creditRewardBalanceLabel;
+
+  /// 홈 안내 카드 제목 (일과 하나 만들 만큼 안 남았을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧이 조금 남았어요'**
+  String get lowCreditNoticeTitle;
+
+  /// 홈 안내 카드 제목 (0 일 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 다 썼어요'**
+  String get lowCreditNoticeTitleEmpty;
+
+  /// 홈 크레딧 안내 카드 한 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 보면 바로 더 받을 수 있어요'**
+  String get lowCreditNoticeBody;
+
+  /// 홈 크레딧 안내 카드 버튼 (광고를 바로 띄움)
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 보고 받기'**
+  String get lowCreditNoticeAction;
+
+  /// 크레딧 안내 창 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'🎟️ 크레딧은 이렇게 써요'**
+  String get creditGuideTitle;
+
+  /// 크레딧 안내 창 한 줄 설명 (요금제 칩과 함께)
+  ///
+  /// In ko, this message translates to:
+  /// **'내 요금제 기준이에요'**
+  String get creditGuideBasis;
+
+  /// 크레딧 안내 표 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글 만들기'**
+  String get creditGuideRoutineText;
+
+  /// 크레딧 안내 표 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 1장'**
+  String get creditGuideCardImage;
+
+  /// 크레딧 안내 표 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 다시 그리기'**
+  String get creditGuideRegenerate;
+
+  /// 크레딧 안내 표 항목 (주 단위 지급량)
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 받는 크레딧'**
+  String get creditGuideWeeklyGrant;
+
+  /// 크레딧 안내 표 항목 (월 단위 지급량)
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 받는 크레딧'**
+  String get creditGuideMonthlyGrant;
+
+  /// 크레딧 안내 표 값: 크레딧 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개}}'**
+  String creditGuideCount(int count);
+
+  /// 크레딧 안내 표 값: 크레딧을 쓰지 않고 횟수 제한도 없음
+  ///
+  /// In ko, this message translates to:
+  /// **'제한 없음'**
+  String get creditGuideUnlimited;
+
+  /// Pro 다시 그리기 값: 오늘 남은 무료 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{오늘 {count}번 더 무료}}'**
+  String creditGuideRegenerateFreeToday(int count);
+
+  /// 크레딧 안내 설명 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'시작한 일과는 크레딧이 모자라도 끝까지 만들어져요'**
+  String get creditGuideKeepGoing;
+
+  /// 크레딧 안내 설명 줄 (주 단위)
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 월요일 0시에 다시 채워져요'**
+  String get creditGuideRefillWeek;
+
+  /// 크레딧 안내 설명 줄 (월 단위)
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일 0시에 다시 채워져요'**
+  String get creditGuideRefillMonth;
+
+  /// Free 에게 보이는 Pro 사실 한 줄 (비교 문구 금지). count 는 서버 하루 무료 다시 그리기 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{Pro는 일과 글이 제한 없고, 다시 그리기는 하루 {count}번 무료예요}}'**
+  String creditGuideProFactBoth(int count);
+
+  /// Free 에게 보이는 Pro 사실 한 줄 (글만)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro는 일과 글이 제한 없어요'**
+  String get creditGuideProFactText;
+
+  /// Free 에게 보이는 Pro 사실 한 줄 (다시 그리기만). count 는 서버 하루 무료 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{Pro는 다시 그리기가 하루 {count}번 무료예요}}'**
+  String creditGuideProFactRegenerate(int count);
+
+  /// Pro 다시 그리기 값: 서버 하루 무료 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{하루 {count}번 무료}}'**
+  String creditGuideRegenerateFreeDaily(int count);
+
+  /// 크레딧 안내 창 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'알겠어요'**
+  String get creditGuideConfirm;
+
+  /// 내 크레딧 막대 위 한 줄 (주 단위). used 는 이번 주 쓴 수, available 은 남은 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주에 {used}개 쓰고 {available}개 남았어요'**
+  String myCreditUsageWeek(int used, int available);
+
+  /// myCreditUsageWeek 의 월 단위 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달에 {used}개 쓰고 {available}개 남았어요'**
+  String myCreditUsageMonth(int used, int available);
+
+  /// Pro 무료 다시 그리기 한 줄. left 는 오늘 남은 횟수, cap 은 서버 하루 한도
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 무료 다시 그리기 {left}번 남았어요 (하루 {cap}번)'**
+  String myCreditFreeRegenerateToday(int left, int cap);
+
+  /// 내 크레딧 최근 내역 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'최근 쓴 내역'**
+  String get myCreditRecentTitle;
+
+  /// 최근 내역 아래 글자 버튼 (사용 내역 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 내역 보기'**
+  String get myCreditSeeAllHistory;
+
+  /// 내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧은 이렇게 써요'**
+  String get myCreditGuideLink;
+
+  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277
+  ///
+  /// In ko, this message translates to:
+  /// **'🧩 준비는 간편하게, 일상은 스스로'**
+  String get abaIntroTitle;
+
+  /// ABA 소개 화면 제목 아래 한 줄. 치료·효과 표현 금지, 기관 이름 금지
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸은 응용행동분석(ABA)의 원리로 만들었어요'**
+  String get abaIntroSubtitle;
+
+  /// ABA 소개 줄 1 제목 (카드 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장에 한 가지 행동'**
+  String get abaIntroCardTitle;
+
+  /// ABA 소개 줄 1 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지'**
+  String get abaIntroCardBody;
+
+  /// ABA 소개 줄 2 제목 (소리 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'짧은 문장, 그림과 목소리'**
+  String get abaIntroVoiceTitle;
+
+  /// ABA 소개 줄 2 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보고 들으며 하나씩 따라 해요'**
+  String get abaIntroVoiceBody;
+
+  /// ABA 소개 줄 3 제목 (별 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'해내면 바로 칭찬과 별'**
+  String get abaIntroStarTitle;
+
+  /// ABA 소개 줄 3 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자님이 정한 보상까지 받아요'**
+  String get abaIntroStarBody;
+
+  /// ABA 소개 아래 보호자 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'💛 가장 중요한 건 보호자님이에요'**
+  String get abaIntroGuardianTitle;
+
+  /// ABA 소개 아래 보호자 묶음 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요'**
+  String get abaIntroGuardianBody;
+
+  /// ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get abaIntroStart;
+
+  /// 설정 > 약관 및 정보 줄, ABA 소개 화면 다시 보기 (화면 제목으로도 씀)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸은 이렇게 만들었어요'**
+  String get guardianSettingsAboutElum;
+
+  /// 알림 켜기 안내 화면 제목 (온보딩 끝, 이미 가입한 보호자는 업데이트 뒤 한 번) #1275
+  ///
+  /// In ko, this message translates to:
+  /// **'🔔 알림을 꼭 켜 주세요'**
+  String get notificationIntroTitle;
+
+  /// 알림 켜기 안내 화면 제목 아래 한 줄 (왜 켜야 하는지)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요'**
+  String get notificationIntroBody;
+
+  /// 알림 켜기 안내: 받는 알림 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 마쳤을 때'**
+  String get notificationIntroRoutineDone;
+
+  /// 알림 켜기 안내: 받는 알림 2 (공동 보호자가 보낸 일과)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보는 분이 일과를 보냈을 때'**
+  String get notificationIntroCaregiverRoutine;
+
+  /// 알림 켜기 안내: 받는 알림 3
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트가 나왔을 때'**
+  String get notificationIntroWeeklyReport;
+
+  /// 알림 켜기 안내: 받는 알림 3 (주간 리포트 권한 없음, 주 단위 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 다시 채워졌을 때'**
+  String get notificationIntroCreditRefilledWeek;
+
+  /// 알림 켜기 안내: 받는 알림 3 (주간 리포트 권한 없음, 월 단위 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧이 다시 채워졌을 때'**
+  String get notificationIntroCreditRefilledMonth;
 }
 
 class _AppLocalizationsDelegate

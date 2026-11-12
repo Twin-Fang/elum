@@ -178,16 +178,29 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     };
   }
 
+  /// 리포트: (Free 미리 보기) 위 한 줄 > 섹션들 > (판매 중이면) 끝에 다음 주도 받아 보기
   Widget _reportBody(BuildContext context, WeeklyReport report, {required bool isFreePreview}) {
+    final actions = watchProUpsellActions(context, ref, highlight: PlanBenefit.weeklyReport);
+    // 살 수 있을 때만 권유 (판매 꺼짐이면 미리 보기 한 줄만)
+    final canPromote = isFreePreview && ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.weeklyReport);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isFreePreview) ...[
-            _FreePreviewNote(actions: watchProUpsellActions(context, ref, highlight: PlanBenefit.weeklyReport)),
+            _FreePreviewNote(actions: canPromote ? actions : null),
             SizedBox(height: _sectionGap.h),
           ],
           WeeklyReportSections(report: report),
+          // 다 읽은 자리에서 다음 주도 받을지 묻기 (주간 리포트 혜택을 맨 위로 연 요금제 화면)
+          if (canPromote) ...[
+            SizedBox(height: _sectionGap.h),
+            ProUpsellButton(
+              style: ProUpsellStyle.outlined,
+              label: context.l10n.weeklyReportNextWeekUpsell,
+              onTap: actions.onStart,
+            ),
+          ],
           SizedBox(height: _scrollBottomGap.h),
         ],
       ),
@@ -250,11 +263,12 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
       '${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
 }
 
-/// Free 미리 보기 주 위 한 줄 + Pro 안내 버튼
+/// Free 미리 보기 주 위 한 줄 + (판매 중이면) Pro 안내 버튼
 class _FreePreviewNote extends StatelessWidget {
   const _FreePreviewNote({required this.actions});
 
-  final ProUpsellActions actions;
+  /// null 이면 버튼 없음 (살 수 없음)
+  final ProUpsellActions? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -265,11 +279,12 @@ class _FreePreviewNote extends StatelessWidget {
           textAlign: TextAlign.center,
           style: context.typo.creditBody.copyWith(color: context.colors.textSecondary),
         ),
-        ProUpsellButton(
-          style: ProUpsellStyle.link,
-          freeTrialLabel: actions.freeTrialLabel,
-          onTap: actions.onStart,
-        ),
+        if (actions case final actions?)
+          ProUpsellButton(
+            style: ProUpsellStyle.link,
+            freeTrialLabel: actions.freeTrialLabel,
+            onTap: actions.onStart,
+          ),
       ],
     );
   }

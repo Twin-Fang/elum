@@ -5,9 +5,11 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_toast.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/action_card.dart';
+import '../../../credit/application/credit_top_up_entry.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../application/card_photo_controller.dart';
 import '../../application/routine_notifier.dart';
+import '../../domain/image_redraw_hint.dart';
 import 'card_image_candidate_sheet.dart';
 import 'card_regenerate_sheet.dart';
 
@@ -29,9 +31,28 @@ Future<void> runCardRedrawFlow({
   required ValueChanged<bool> onDrawingChanged,
 }) async {
   final isFirstPicture = !step.isAiPicture;
-  final request = await CardRegenerateSheet.show(context, isFirstPicture: isFirstPicture);
+  final request = await CardRegenerateSheet.show(context, ref, isFirstPicture: isFirstPicture);
   if (request == null || !context.mounted) return;
+  await _drawAndPick(
+    context: context,
+    ref: ref,
+    routineId: routineId,
+    step: step,
+    request: request,
+    onDrawingChanged: onDrawingChanged,
+  );
+}
 
+/// 같은 요청으로 그리기 > 새 그림 받기 > 고르기 > 바꾸기 (크레딧 부족이면 크레딧 더 받기 시트, 받으면 `이어서 그리기` 로 다시)
+Future<void> _drawAndPick({
+  required BuildContext context,
+  required WidgetRef ref,
+  required String routineId,
+  required ActionCard step,
+  required CardRedrawRequest request,
+  required ValueChanged<bool> onDrawingChanged,
+}) async {
+  final isFirstPicture = !step.isAiPicture;
   // await 뒤 시트가 사라져도 끝까지 반영할 수 있게 미리 잡아 둠
   final notifier = ref.read(routineFlowProvider.notifier);
   final controller = ref.read(cardPhotoControllerProvider);
@@ -52,6 +73,27 @@ Future<void> runCardRedrawFlow({
     final failureContext = targetContext();
     if (!failureContext.mounted) return;
     if (context.mounted && await handleProOnlyRejection(context, ref, drawResult.failure)) return;
+    if (context.mounted && isCreditInsufficientFailure(drawResult.failure)) {
+      await openCreditTopUpAfterShortage(
+        context,
+        ref,
+        retry: (
+          label: context.l10n.creditTopUpRedrawContinue,
+          run: () async {
+            if (!context.mounted) return;
+            await _drawAndPick(
+              context: context,
+              ref: ref,
+              routineId: routineId,
+              step: step,
+              request: request,
+              onDrawingChanged: onDrawingChanged,
+            );
+          },
+        ),
+      );
+      return;
+    }
     if (!failureContext.mounted) return;
     await showFailure(
       failureContext,
@@ -69,7 +111,8 @@ Future<void> runCardRedrawFlow({
       failureContext,
       null,
       title: failureContext.l10n.cardCandidateLoadFailedTitle,
-      fallback: failureContext.l10n.cardRedrawFailedFallback,
+      // 그리기는 끝나 크레딧을 이미 씀 (그리기 실패와 문구가 다름)
+      fallback: failureContext.l10n.cardCandidateFailedFallback,
       fallbackCode: cardCandidateErrorCode,
     );
     return;
@@ -108,7 +151,7 @@ Future<void> runCardRedrawFlow({
     failureContext,
     applyResult.failure,
     title: failureContext.l10n.cardCandidateApplyFailedTitle,
-    fallback: failureContext.l10n.cardRedrawFailedFallback,
+    fallback: failureContext.l10n.cardCandidateFailedFallback,
     fallbackCode: cardCandidateErrorCode,
   );
 }

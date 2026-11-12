@@ -285,6 +285,14 @@ class InMemoryStorage implements LocalStorage {
 
   bool _hasAskedPushPermission = false;
   DateTime? _pushPermissionNudgedAt;
+  bool _isPushPermissionIntroSeen = false;
+
+  @override
+  bool get isPushPermissionIntroSeen => _isPushPermissionIntroSeen;
+
+  @override
+  Future<void> setPushPermissionIntroSeen(bool isSeen) async =>
+      _isPushPermissionIntroSeen = isSeen;
   DateTime? _homeNotificationNoticeDismissedAt;
 
   @override
@@ -362,6 +370,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async =>
       _homeSuggestionDismissedKeys = dismissedKeys;
+
+  String? _lowCreditNoticeDismissedPeriod;
+
+  @override
+  String? get lowCreditNoticeDismissedPeriod => _lowCreditNoticeDismissedPeriod;
+
+  @override
+  Future<void> setLowCreditNoticeDismissedPeriod(String period) async =>
+      _lowCreditNoticeDismissedPeriod = period;
 
   bool _isTalkGridView = false;
 
@@ -442,5 +459,6 @@ class InMemoryStorage implements LocalStorage {
     _talkShareHintDismissedRoutineIds = const [];
     _homeSuggestionShownAtByKind = const {};
     _homeSuggestionDismissedKeys = const {};
+    _lowCreditNoticeDismissedPeriod = null;
   }
 }

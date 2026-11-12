@@ -5,14 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/l10n/current_l10n.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/elum_dialog.dart';
 import '../../../credit/domain/credit_summary.dart';
-import '../../../member/application/plan_access.dart';
+import '../../../credit/application/credit_cost_guide_entry.dart';
 import 'ai_credit_card.dart';
 import 'animated_credit_values.dart';
 import 'credit_history_link.dart';
@@ -168,7 +166,7 @@ class AiCreditSummaryView extends StatelessWidget {
   }
 }
 
-/// 제목 줄(`이번 주 AI 생성 ⓘ`): 제목 옆 물음표를 누르면 크레딧이 어떻게 줄어드는지 팝업으로 알린다.
+/// 제목 줄(`이번 주 AI 생성 ⓘ`): 제목 옆 물음표를 누르면 크레딧 안내 창 (내 요금제 기준 단가 · 지급량).
 ///
 /// 제목 줄 전체가 누름 영역이다 — 물음표 16 만으로는 작다. 그림은 보상 도움말의 물음표 원을 그대로 쓴다.
 class CreditInfoButton extends ConsumerWidget {
@@ -183,18 +181,6 @@ class CreditInfoButton extends ConsumerWidget {
   static const _gap = 6.0;
   static const _icon = 16.0;
 
-  /// 안내 팝업을 띄울 때 읽는다 — 값을 들고 있지 말고 부를 때마다 앱 언어로 푼다.
-  static String get title => appL10n.creditCostTitle;
-
-  /// 서버 단가로 적는다 — 운영에서 단가를 바꾸면 문구도 따라간다. 글 무료 권한(Pro)이면 그림 단가만
-  static String message(CreditSummary s, {required bool canCreateRoutineTextFree}) => [
-    canCreateRoutineTextFree
-        ? appL10n.creditCostLineTextFree(s.cardImageCost)
-        : appL10n.creditCostLine(s.routineTextCost, s.cardImageCost),
-    appL10n.creditCostKeepGoing,
-    s.periodUnit.refillSentence(appL10n),
-  ].join('\n');
-
   /// 제목 한 줄 높이 (글꼴 배율 반영). 본문이 이 아래에서 시작한다.
   static double titleRowHeight(BuildContext context) {
     final style = context.typo.creditTitle;
@@ -206,9 +192,6 @@ class CreditInfoButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final line = titleRowHeight(context);
-    final canCreateRoutineTextFree = ref.watch(
-      planAccessProvider.select((access) => access.canCreateRoutineTextFree),
-    );
     // 누름 영역이 제목 줄보다 높으므로 위로 겹쳐 올린다 (카드 위 안쪽 여백 안에서)
     final overhang = math.max(0.0, (box - line) / 2);
 
@@ -218,17 +201,7 @@ class CreditInfoButton extends ConsumerWidget {
         key: AiCreditCard.infoKey,
         scaleDown: AppPressable.scaleIcon,
         semanticLabel: context.l10n.creditInfoLabel,
-        onTap: () => showElumDialog<void>(
-          context: context,
-          title: title,
-          message: message(
-            summary,
-            canCreateRoutineTextFree: canCreateRoutineTextFree,
-          ),
-          barrierDismissible: true,
-          // 팝업 폭에서 낱말 가운데서 꺾이지 않게 한다 (보상 도움말과 같은 선택)
-          keepWordsInMessage: true,
-        ),
+        onTap: () => showCreditCostGuide(context, ref, summary),
         child: SizedBox(
           height: math.max(box, line),
           child: Align(

@@ -15,6 +15,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/network/server_error_code.dart';
+import '../../credit/application/credit_top_up_entry.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
@@ -195,6 +196,18 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     _tryNavigate();
   }
 
+  /// 크레딧 부족 > 크레딧 더 받기 시트. 광고로 받으면 받은 순간 창의 `이어서 만들기` 가 이 화면의 다시 하기
+  Future<void> _openCreditTopUp() => openCreditTopUpAfterShortage(
+    context,
+    ref,
+    retry: (
+      label: context.l10n.creditTopUpRoutineContinue,
+      run: () async {
+        if (mounted) await _retry();
+      },
+    ),
+  );
+
   /// 카드 생성. **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
   ///
   /// notifier에도 가드가 있지만 여기서 한 번 더 막는다 — 이 화면이 재생성되면
@@ -265,6 +278,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final flow = ref.watch(routineFlowProvider);
     if (flow.step == RoutineFlowStep.error) {
       final blocked = isCreditBlockingCode(flow.errorCode);
+      // 크레딧 부족만 받아서 풀 수 있음 (진행 중 · 동결은 크레딧을 받아도 같음) > 주 버튼이 `크레딧 더 받기`
+      final canTopUp = flow.errorCode == ServerErrorCode.aiCreditInsufficient.wire;
       // 입력에 할 행동이 없다: 오류가 아니라 안내. 다시 해도 같아 적은 글이 남은 입력 화면으로 보낸다
       final needsBetterInput =
           flow.errorCode == ServerErrorCode.routineInputNotActionable.wire;
@@ -285,17 +300,22 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         bottomButton: ElumButton(
           label: needsBetterInput
               ? context.l10n.routineLoadingEditInput
+              : canTopUp
+              ? context.l10n.creditGetMore
               : blocked
               ? context.l10n.routineLoadingHome
               : context.l10n.routineLoadingRetry,
           onPressed: needsBetterInput
               ? () => context.go(Routes.routineInput)
+              : canTopUp
+              ? _openCreditTopUp
               : blocked
               ? () => context.go(Routes.guardian)
               : _retry,
         ),
         // 다시 해도 같은 실패가 반복될 때 빠져나갈 길. 같은 무게의 버튼으로 두지 않는다.
-        belowButton: blocked
+        // 크레딧 부족은 받으러 가지 않을 때 홈으로 나갈 길로 둔다
+        belowButton: blocked && !canTopUp
             ? null
             : Center(
                 child: AppPressable(

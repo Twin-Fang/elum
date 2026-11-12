@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import java.time.LocalDateTime;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +53,30 @@ public class MemberAdminLookupService {
       return Optional.empty();
     }
     return memberRepository.findById(memberId);
+  }
+
+  /// 회원 id 목록 > 그중 활성 회원 id (정지·탈퇴·없는 회원은 빠짐, 순서 유지)
+  public List<String> findActiveMemberIds(Collection<String> memberIds) {
+    if (memberIds == null || memberIds.isEmpty()) {
+      return List.of();
+    }
+    Map<String, Member> memberById = new HashMap<>();
+    for (Member member : memberRepository.findAllById(memberIds)) {
+      memberById.put(member.getId(), member);
+    }
+    return memberIds.stream()
+      .distinct()
+      .filter(memberId -> memberById.containsKey(memberId)
+        && memberById.get(memberId).getStatus() == MemberStatus.ACTIVE)
+      .toList();
+  }
+
+  /// joinedBefore 전(미포함)에 가입한 활성 회원 id (가입 오래된 순)
+  public List<String> findActiveMemberIdsJoinedBefore(LocalDateTime joinedBefore) {
+    if (joinedBefore == null) {
+      return List.of();
+    }
+    return memberRepository.findIdsByStatusAndJoinedBefore(MemberStatus.ACTIVE, joinedBefore);
   }
 
   /// 회원 > 표시 이름 (보호자 닉네임, 없으면 아이디)

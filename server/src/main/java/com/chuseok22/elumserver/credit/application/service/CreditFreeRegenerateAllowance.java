@@ -69,7 +69,7 @@ class CreditFreeRegenerateAllowance {
     if (!hasFreeRegenerateEntitlement(account)) {
       return 0;
     }
-    int dailyCap = usageLimitSettings.imageRegenerateFreeDailyCap();
+    int dailyCap = dailyCap();
     if (dailyCap <= 0) {
       return 0;
     }
@@ -77,6 +77,11 @@ class CreditFreeRegenerateAllowance {
       account.getId(), CreditJobKind.IMAGE_REGENERATE, 0, FREE_REGENERATE_COUNTED_STATUSES,
       now.toLocalDate().atStartOfDay());
     return (int) Math.max(0, dailyCap - usedToday);
+  }
+
+  /// 무료 다시 그리기 하루 한도 설정값 (음수는 0)
+  int dailyCap() {
+    return Math.max(0, usageLimitSettings.imageRegenerateFreeDailyCap());
   }
 
   private boolean hasFreeRegenerateEntitlement(AiCreditAccount account) {

@@ -1,5 +1,6 @@
 import '../../notification/application/home_notification_notice_provider.dart';
 import '../../../app/home_suggestion_host.dart';
+import '../../../app/low_credit_notice_host.dart';
 import '../../../app/notification_off_notice_host.dart';
 import 'dart:async';
 
@@ -19,7 +20,7 @@ import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../../credit/domain/credit_summary.dart';
-import '../../credit/presentation/credit_blocked_dialog.dart';
+import '../../credit/application/credit_top_up_entry.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/guardian_child_identity.dart';
@@ -209,6 +210,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
             ),
             SizedBox(height: _titleToList.h),
           ],
+          // Free 크레딧이 일과 하나 값보다 적을 때 안내 카드 (닫으면 이번 크레딧 주기 동안 숨김)
+          const LowCreditNoticeHost(bottomGap: _titleToList),
           // 알림 카드가 없을 때만 보이는 권유 카드 (자동 보내기 · 이야기 올리기 · 일과 더 만들기)
           HomeSuggestionHost(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           RoutineSectionTitle(
@@ -360,8 +363,20 @@ Future<void> continueRoutineStart(
   CreditSummary? blocked,
 ) async {
   if (blocked != null) {
-    // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 제자리에 남는다.
-    await showCreditBlockedDialog(context, ref, blocked);
+    // 크레딧 더 받기 시트. 들어가지 않고 제자리에 남음 (광고로 받으면 `이어서 만들기` 로 다시 확인 후 시작)
+    await showCreditBlockedNotice(
+      context,
+      ref,
+      blocked,
+      retry: (
+        label: context.l10n.creditTopUpRoutineContinue,
+        run: () async {
+          final blockedAgain = await creditBlocksRoutineStart(ref);
+          if (!context.mounted) return;
+          await continueRoutineStart(context, ref, blockedAgain);
+        },
+      ),
+    );
     return;
   }
   ref.read(routineFlowProvider.notifier).reset();

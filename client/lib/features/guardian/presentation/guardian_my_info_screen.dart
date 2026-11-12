@@ -19,9 +19,10 @@ import '../../notification/application/unread_summary_provider.dart';
 import 'widgets/ai_credit_card.dart';
 import 'widgets/my_info_elumi_group.dart';
 import 'widgets/my_info_nickname_card.dart';
+import 'widgets/my_plan_card.dart';
 import '../../subscription/domain/plan_benefit.dart';
 
-/// 하단 바 내정보 칸의 첫 화면 (시안 1736:8780): AI 크레딧 > 닉네임 > 이룸이 > 바로가기
+/// 하단 바 내정보 칸의 첫 화면 (시안 1736:8780): 내 요금제 > AI 크레딧 > 닉네임 > 이룸이 > 바로가기
 ///
 /// 카드 묶음이 위에서부터 차례로 올라오며 나타남 (탭을 처음 열 때 한 번).
 /// 회원 정보를 못 받으면 이룸이 카드만 빠지고 나머지는 그대로 뜸 (화면이 회원 정보에 막히지 않게)
@@ -52,6 +53,8 @@ class GuardianMyInfoScreen extends ConsumerWidget {
 
     // 위에서부터 차례로 나타날 묶음 (크레딧이 꺼져 있으면 자리도 간격도 없음 > 카드가 아래 간격을 가짐)
     final sections = <Widget>[
+      const MyPlanCard(),
+      SizedBox(height: _groupGap.h),
       const AiCreditCard(),
       MyInfoNicknameCard(account: account),
       if (profiles != null && profiles.isNotEmpty) ...[

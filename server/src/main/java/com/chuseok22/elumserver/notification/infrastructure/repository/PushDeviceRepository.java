@@ -17,6 +17,9 @@ public interface PushDeviceRepository extends JpaRepository<PushDevice, String> 
   /// 보호자 기기만 (이룸이 기기는 같은 member_id 라 제외)
   List<PushDevice> findAllByMemberIdAndLinkIdIsNull(String memberId);
 
+  /// 보호자 기기만, 여러 회원 한 번에 (운영자 알림 대상 미리 계산)
+  List<PushDevice> findAllByMemberIdInAndLinkIdIsNull(Collection<String> memberIds);
+
   /// 이룸이 기기: 이 연결들에 붙은 기기 전부
   List<PushDevice> findAllByLinkIdIn(Collection<String> linkIds);
 

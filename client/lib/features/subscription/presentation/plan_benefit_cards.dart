@@ -80,10 +80,11 @@ class _BenefitGroupCard extends ConsumerWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final periodUnit = ref.watch(creditPeriodUnitProvider);
+    final freeRegenerateDailyCap = ref.watch(freeImageRegenerateDailyCapProvider);
     final group = section.group;
     final title = _title(l10n, group, elumiName);
     final detail = section.benefits
-        .map((benefit) => planBenefitLabel(l10n, benefit, periodUnit))
+        .map((benefit) => planBenefitLabel(l10n, benefit, periodUnit, freeRegenerateDailyCap: freeRegenerateDailyCap))
         .join('\n');
     return Container(
       padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
@@ -153,12 +154,13 @@ class _BenefitGroupCard extends ConsumerWidget {
   };
 }
 
-/// 혜택 하나 > 짧은 문장 (묶음 안에서 한 줄씩)
+/// 혜택 하나 > 짧은 문장 (묶음 안에서 한 줄씩). [freeRegenerateDailyCap] 은 서버 하루 무료 한도 (모르면 숫자 없는 문구)
 String planBenefitLabel(
   AppLocalizations l10n,
   PlanBenefit benefit,
-  CreditPeriodUnit periodUnit,
-) => switch (benefit) {
+  CreditPeriodUnit periodUnit, {
+  int? freeRegenerateDailyCap,
+}) => switch (benefit) {
   PlanBenefit.aiImageStyles => l10n.planBenefitAiImageStyles,
   PlanBenefit.adsRemoved => l10n.planBenefitAdsRemoved,
   PlanBenefit.weeklyReport => l10n.planBenefitWeeklyReport,
@@ -167,7 +169,10 @@ String planBenefitLabel(
   PlanBenefit.cardSplit => l10n.planBenefitCardSplit,
   PlanBenefit.guardianVoice => l10n.planBenefitGuardianVoice,
   PlanBenefit.freeRoutineText => l10n.planBenefitFreeRoutineText,
-  PlanBenefit.freeImageRegenerate => l10n.planBenefitFreeImageRegenerate,
+  PlanBenefit.freeImageRegenerate =>
+    freeRegenerateDailyCap == null
+        ? l10n.planBenefitFreeImageRegenerate
+        : l10n.planBenefitFreeImageRegenerateDaily(freeRegenerateDailyCap),
   PlanBenefit.moreWeeklyCredits => periodUnit.planBenefitMoreCredits(l10n),
   PlanBenefit.cardExportWithoutWatermark => l10n.planBenefitCardExportWithoutWatermark,
   PlanBenefit.cardExportAllThemes => l10n.planBenefitCardExportAllThemes,

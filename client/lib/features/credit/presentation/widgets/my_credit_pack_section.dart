@@ -20,7 +20,7 @@ import '../../domain/credit_purchase.dart';
 import '../credit_purchase_actions.dart';
 import 'my_credit_pack_tile.dart';
 
-/// 꾸러미 구역: 제목 > 칸 3개 > 받기 버튼 > 안내. 판매가 꺼졌거나 꾸러미가 비면 통째로 숨김
+/// 꾸러미 구역: 제목 > 칸 3개 > 사기 버튼(개수 + 값) > 안내. 판매가 꺼졌거나 꾸러미가 비면 통째로 숨김
 ///
 /// 상태: 값 불러오는 중 / 값 실패(`E-CREDIT-PACK-PRICE` + 다시 하기) / 고르는 중 / 결제·확인 중(버튼 로딩) / 확인 대기(`다시 확인하기`)
 class MyCreditPackSection extends ConsumerStatefulWidget {
@@ -100,7 +100,7 @@ class _MyCreditPackSectionState extends ConsumerState<MyCreditPackSection> {
     );
   }
 
-  /// 받기 버튼 + 안내. 결제는 됐는데 확인 전이면 `다시 확인하기` 안내로 바뀜 (다시 결제시키지 않음)
+  /// 사기 버튼 + 안내. 결제는 됐는데 확인 전이면 `다시 확인하기` 안내로 바뀜 (다시 결제시키지 않음)
   Widget _buyArea(BuildContext context, List<CreditPackOffer> offers) {
     final flow = ref.watch(creditPurchaseStateProvider);
     final l10n = context.l10n;
@@ -129,7 +129,7 @@ class _MyCreditPackSectionState extends ConsumerState<MyCreditPackSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MintGradientButton(
-          label: l10n.myCreditPackBuy(selected.pack.credits),
+          label: l10n.myCreditPackBuy(selected.pack.credits, selected.price.label),
           isLoading: flow.isBusy,
           onTap: flow.canStartPurchase
               ? () => confirmGuardianAndBuyCredits(context, ref, selected.pack)

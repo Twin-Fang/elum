@@ -60,8 +60,9 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
     switch (role) {
       // 양쪽 다 push다. 잘못 고른 사람이 **어느 쪽으로 갔든** 뒤로 돌아와야 한다.
       // go로 갈아끼우면 스택이 없어 pop이 실패한다.
+      // 보호자는 설정을 시작하기 전에 설계 원리 소개 한 장 (#1277)
       case AppRole.guardian:
-        context.push(Routes.onboardingName);
+        context.push(Routes.onboardingAbaIntro);
       case AppRole.elumi:
         context.push(Routes.linkEnter);
     }

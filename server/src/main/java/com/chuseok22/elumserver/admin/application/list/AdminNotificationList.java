@@ -69,6 +69,7 @@ public final class AdminNotificationList {
       case TALK_POST_COMMENTED -> "이야기 댓글";
       case TALK_POST_IMPORTED -> "이야기 가져감";
       case WEEKLY_REPORT_READY -> "주간 리포트";
+      case ADMIN_MESSAGE -> "운영자 알림";
     };
   }
 

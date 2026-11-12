@@ -6,6 +6,7 @@ import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/credit_cost_label.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../data/card_photo.dart';
@@ -36,9 +37,13 @@ class CardEditSheet extends StatefulWidget {
     this.onSubmit,
     this.photo,
     this.voice,
+    this.addImageCredits,
   });
 
   final CardSheetMode mode;
+
+  /// 추가 시트: 새 카드에 AI 그림을 그릴 때 드는 크레딧 (서버 단가). null 이면 비용 줄 없음 (그림 기호 방식 · 크레딧 꺼짐 · 모름)
+  final int? addImageCredits;
 
   /// 그림을 사진으로 바꿀 카드. **서버 id 가 있는 수정 시트에서만** 준다 —
   /// null 이면 그림 칸도 `사진 바꾸기` 칩도 없다(추가 시트·서버에 없는 카드).
@@ -99,10 +104,11 @@ class CardEditSheet extends StatefulWidget {
   static Future<({String title, String description})?> showAdd(
     BuildContext context, {
     required Future<bool> Function(String title, String description) onSubmit,
+    int? imageCredits,
   }) {
     return _open(
       context,
-      CardEditSheet(mode: CardSheetMode.add, onSubmit: onSubmit),
+      CardEditSheet(mode: CardSheetMode.add, onSubmit: onSubmit, addImageCredits: imageCredits),
     );
   }
 
@@ -204,11 +210,12 @@ class _CardEditSheetState extends State<CardEditSheet>
     );
   }
 
-  /// 제목 > (그림 칸) > (녹음 칸) > 제목 칸 > 설명 칸
+  /// 제목 > (그림 칸) > (녹음 칸) > 제목 칸 > 설명 칸 > (추가) AI 그림 비용 한 줄
   Widget _body(BuildContext context, {required bool keyboardOpen}) {
     final colors = context.colors;
     final photo = widget.photo;
     final voice = widget.voice;
+    final addImageCredits = _isAdd ? widget.addImageCredits : null;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -263,6 +270,14 @@ class _CardEditSheetState extends State<CardEditSheet>
           shouldBlockLineBreaks: true,
           onChanged: (_) => setState(() {}),
         ),
+        // 추가를 누르기 전에 그림 비용을 알림 (추가하면 서버가 바로 그리고 크레딧을 씀)
+        if (addImageCredits != null && addImageCredits > 0) ...[
+          SizedBox(height: CardEditSheet._fieldGap.h),
+          CreditCostLabel(
+            text: context.l10n.cardAddImageCost(addImageCredits),
+            style: context.typo.creditCaption.copyWith(color: colors.textSecondary),
+          ),
+        ],
       ],
     );
   }
