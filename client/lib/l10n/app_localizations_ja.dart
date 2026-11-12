@@ -1992,12 +1992,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planFreeBadge => 'FREE';
 
   @override
-  String get myCreditHistoryButton => '쓴 내역';
-
-  @override
-  String get myCreditCountUnit => '개';
-
-  @override
   String get myCreditKindPeriodicWeek => '주간';
 
   @override
@@ -2007,21 +2001,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get myCreditKindBonus => '보너스';
 
   @override
-  String get myCreditKindPurchased => '구매';
-
-  @override
-  String get myCreditRefillWeek => '월요일에 다시 채워져요';
-
-  @override
-  String get myCreditRefillMonth => '다음 달 1일에 다시 채워져요';
-
-  @override
-  String myCreditUntilDate(int month, int day) {
-    return '$month월 $day일까지';
-  }
-
-  @override
-  String get myCreditNoExpiry => '기간 제한 없음';
+  String get myCreditKindPurchased => '산 크레딧';
 
   @override
   String get myCreditSubscribeLabel => '구독하면';
@@ -2124,10 +2104,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get creditHistoryKindOtherGrant => '크레딧을 받았어요';
 
   @override
-  String get creditHistoryKindExpired => '기간이 지나 안 쓴 크레딧이 사라졌어요. 산 크레딧은 그대로예요';
+  String get creditHistoryExpiredWeekTitle => '지난 주 크레딧 정리';
 
   @override
-  String get creditHistoryKindAdjusted => '환불이나 운영 조정으로 크레딧이 바뀌었어요';
+  String get creditHistoryExpiredMonthTitle => '지난 달 크레딧 정리';
+
+  @override
+  String get creditHistoryExpiredWeekReason => '안 쓴 주간 크레딧은 넘어가지 않아요';
+
+  @override
+  String get creditHistoryExpiredMonthReason => '안 쓴 월간 크레딧은 넘어가지 않아요';
+
+  @override
+  String get creditHistoryAdjustedTitle => '크레딧 조정';
+
+  @override
+  String get creditHistoryAdjustedReason => '환불이나 운영 조정이에요';
 
   @override
   String get creditHistoryKindUnknownSpend => '크레딧을 썼어요';
@@ -5250,25 +5242,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get creditGuideConfirm => '알겠어요';
 
   @override
-  String myCreditUsageWeek(int used, int available) {
-    return '이번 주에 $used개 쓰고 $available개 남았어요';
-  }
-
-  @override
-  String myCreditUsageMonth(int used, int available) {
-    return '이번 달에 $used개 쓰고 $available개 남았어요';
-  }
-
-  @override
   String myCreditFreeRegenerateToday(int left, int cap) {
-    return '오늘 무료 다시 그리기 $left번 남았어요 (하루 $cap번)';
+    return '다시 그리기 오늘 $left/$cap번 무료';
   }
 
   @override
   String get myCreditRecentTitle => '최근 쓴 내역';
 
   @override
-  String get myCreditSeeAllHistory => '전체 내역 보기';
+  String get myCreditSeeAllHistory => '전체 보기';
 
   @override
   String get myCreditGuideLink => '크레딧은 이렇게 써요';
@@ -5357,4 +5339,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notificationSettingPlanReminder => 'Pro 선물이 끝나기 전';
+
+  @override
+  String get myCreditRemainingSuffix => '개 남았어요';
 }

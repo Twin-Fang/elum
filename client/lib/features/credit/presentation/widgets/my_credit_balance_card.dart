@@ -1,37 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/min_tap_target.dart';
+import '../../../../core/widgets/ai_credit_bar.dart';
+import '../../../../core/widgets/elum_guide_panel.dart';
+import '../../../member/application/plan_access.dart';
 import '../../domain/credit_breakdown.dart';
 import '../../domain/credit_period_unit.dart';
 import '../../domain/credit_summary.dart';
 import 'my_credit_kind_labels.dart';
 
-/// 내 크레딧 위 카드: 크레딧 그림 + 지금 쓸 수 있는 개수 + `쓴 내역` > 종류별 색 게이지 > 종류마다 한 줄
-///
-/// 가진 종류만 줄이 생긴다. 게이지 조각 길이는 남은 개수 비율 (남은 게 없으면 빈 막대)
-class MyCreditBalanceCard extends StatelessWidget {
+/// 내 크레딧 위 카드 하나: 표 그림 + `N개 남았어요` > 남은 비율 막대 > 다시 채워지는 때 > 아래 칸 (#1300)
+/// 아래 칸 2개 (있을 때만, 구분선 아래): 종류별 개수 (0 아닌 종류가 2개 이상) · Pro 오늘 다시 그리기 칩 (서버 하루 한도를 받았을 때)
+class MyCreditBalanceCard extends ConsumerWidget {
   const MyCreditBalanceCard({super.key, required this.summary});
 
   final CreditSummary summary;
 
   static const _padding = 20.0;
   static const _pictureSize = 44.0;
-  static const _gaugeHeight = 8.0;
-  static const _gaugeGap = 4.0;
-  static const _linePictureSize = 24.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final space = context.space;
-    final lines = summary.breakdownLines;
+    final l10n = context.l10n;
+    final canRegenerateImagesFree = ref.watch(planAccessProvider.select((access) => access.canRegenerateImagesFree));
+    final dailyCap = summary.freeImageRegenerateDailyCap;
+    final shouldShowRedrawChip = canRegenerateImagesFree && dailyCap > 0;
+    final heldLines = [for (final line in summary.breakdownLines) if (line.remaining > 0) line];
+    // 종류가 하나뿐이면 큰 숫자와 같은 값이라 숨김
+    final shouldShowBreakdown = heldLines.length > 1;
     return DecoratedBox(
       decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(space.cardRadius.r)),
       child: Padding(
@@ -39,8 +42,8 @@ class MyCreditBalanceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 표 그림 + 큰 숫자 + `개 남았어요` (숫자와 뒷말은 한 글줄이라 기준선이 맞음)
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(AppAssets.creditTicket, width: _pictureSize.w, excludeFromSemantics: true),
                 SizedBox(width: space.sm.w),
@@ -49,20 +52,40 @@ class MyCreditBalanceCard extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(text: '${summary.available}', style: context.typo.creditNumber),
-                        TextSpan(text: ' ${context.l10n.myCreditCountUnit}', style: context.typo.creditUnit),
+                        TextSpan(text: l10n.myCreditRemainingSuffix, style: context.typo.creditTitle),
                       ],
                     ),
                     style: TextStyle(color: colors.textPrimary),
                   ),
                 ),
-                const Spacer(),
-                _HistoryButton(),
               ],
             ),
             SizedBox(height: space.md.h),
-            _Gauge(lines: lines),
-            SizedBox(height: space.sm.h),
-            for (final line in lines) _LineRow(line: line, periodUnit: summary.periodUnit),
+            AiCreditBar(ratio: summary.remainingRatio, color: colors.creditBarFill),
+            SizedBox(height: space.xs.h),
+            Text(
+              l10n.aiCreditResetLine(summary.resetLabel),
+              style: context.typo.creditReset.copyWith(color: colors.creditMutedText),
+            ),
+            if (shouldShowBreakdown || shouldShowRedrawChip) ...[
+              SizedBox(height: space.xs.h),
+              const ElumGuideDivider(),
+              SizedBox(height: space.xs.h),
+            ],
+            if (shouldShowBreakdown)
+              Wrap(
+                spacing: space.md.w,
+                runSpacing: space.xs.h,
+                children: [
+                  for (final line in heldLines) _KindCount(line: line, periodUnit: summary.periodUnit),
+                ],
+              ),
+            if (shouldShowBreakdown && shouldShowRedrawChip) SizedBox(height: space.sm.h),
+            if (shouldShowRedrawChip)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _FreeRedrawChip(label: l10n.myCreditFreeRegenerateToday(summary.freeImageRegeneratesLeftToday, dailyCap)),
+              ),
           ],
         ),
       ),
@@ -70,93 +93,76 @@ class MyCreditBalanceCard extends StatelessWidget {
   }
 }
 
-/// `쓴 내역 ›` 알약: 크레딧 사용 내역 화면으로
-class _HistoryButton extends StatelessWidget {
-  static const _padH = 12.0;
-  static const _padV = 6.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return MinTapTarget(
-      child: AppPressable(
-        onTap: () => context.push(Routes.guardianCreditHistory),
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: colors.buttonNeutral, borderRadius: BorderRadius.circular(context.space.pillRadius.r)),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
-            child: Text(
-              '${context.l10n.myCreditHistoryButton} ›',
-              style: context.typo.chipLabel.copyWith(color: colors.buttonNeutralText),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 종류별 색을 이어 붙인 게이지
-class _Gauge extends StatelessWidget {
-  const _Gauge({required this.lines});
-
-  final List<CreditBreakdownLine> lines;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final segments = [for (final line in lines) if (line.remaining > 0) line];
-    final radius = BorderRadius.circular(MyCreditBalanceCard._gaugeHeight.r);
-    if (segments.isEmpty) {
-      return SizedBox(
-        height: MyCreditBalanceCard._gaugeHeight.h,
-        child: DecoratedBox(decoration: BoxDecoration(color: colors.creditBarTrack, borderRadius: radius)),
-      );
-    }
-    return SizedBox(
-      height: MyCreditBalanceCard._gaugeHeight.h,
-      child: Row(
-        children: [
-          for (final (index, line) in segments.indexed) ...[
-            if (index > 0) SizedBox(width: MyCreditBalanceCard._gaugeGap.w),
-            Expanded(
-              flex: line.remaining,
-              child: DecoratedBox(decoration: BoxDecoration(color: line.colorOf(colors), borderRadius: radius)),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// 종류 한 줄: 작은 그림, 이름, 끝나는 때, 남은 개수
-class _LineRow extends StatelessWidget {
-  const _LineRow({required this.line, required this.periodUnit});
+/// 종류 하나: 작은 표 그림 + 이름 + 남은 개수 (`주간 100`)
+class _KindCount extends StatelessWidget {
+  const _KindCount({required this.line, required this.periodUnit});
 
   final CreditBreakdownLine line;
   final CreditPeriodUnit periodUnit;
 
+  static const _pictureSize = 20.0;
+  static const _pictureToLabel = 4.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: context.space.xs.h / 2),
-      child: Row(
-        children: [
-          Image.asset(line.pictureAsset, width: MyCreditBalanceCard._linePictureSize.w, excludeFromSemantics: true),
-          SizedBox(width: context.space.xs.w),
-          Text(line.kindName(l10n, periodUnit), style: context.typo.creditTitle.copyWith(color: colors.textPrimary)),
-          SizedBox(width: context.space.xs.w),
-          Expanded(
-            child: Text(
-              line.endLabel(l10n, periodUnit),
-              style: context.typo.creditCaption.copyWith(color: colors.creditMutedText),
-              overflow: TextOverflow.ellipsis,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(line.pictureAsset, width: _pictureSize.w, excludeFromSemantics: true),
+        SizedBox(width: _pictureToLabel.w),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: '${line.kindName(context.l10n, periodUnit)} ',
+                style: context.typo.creditBody.copyWith(color: colors.textSecondary),
+              ),
+              TextSpan(text: '${line.remaining}', style: context.typo.creditUnit.copyWith(color: colors.textPrimary)),
+            ],
           ),
-          Text('${line.remaining}', style: context.typo.creditTitle.copyWith(color: colors.textPrimary)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Pro 오늘 다시 그리기 칩: 돌림 아이콘 + `다시 그리기 오늘 N/M번 무료` (큰 글자면 칩 안에서 통째로 꺾임)
+class _FreeRedrawChip extends StatelessWidget {
+  const _FreeRedrawChip({required this.label});
+
+  final String label;
+
+  static const _padH = 10.0;
+  static const _padV = 6.0;
+  static const _iconSize = 14.0;
+  static const _iconToLabel = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // 아이콘도 글자 배율을 따라 커짐 (큰 글자에서 점처럼 작아지지 않게)
+    final iconSize = MediaQuery.textScalerOf(context).scale(_iconSize.w);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
+      decoration: BoxDecoration(
+        color: colors.creditNoticeBg,
+        borderRadius: BorderRadius.circular(context.space.pillRadius.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            AppAssets.iconRefresh,
+            width: iconSize,
+            height: iconSize,
+            excludeFromSemantics: true,
+            colorFilter: ColorFilter.mode(colors.textSecondary, BlendMode.srcIn),
+          ),
+          SizedBox(width: _iconToLabel.w),
+          Flexible(
+            child: Text(label, style: context.typo.chipLabel.copyWith(color: colors.textSecondary)),
+          ),
         ],
       ),
     );

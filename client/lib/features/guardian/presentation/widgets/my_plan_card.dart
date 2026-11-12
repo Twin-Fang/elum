@@ -57,12 +57,15 @@ class _ProPlanFace extends ConsumerWidget {
     final l10n = context.l10n;
     final access = ref.watch(planAccessProvider);
     final periodUnit = ref.watch(creditPeriodUnitProvider);
+    // 다시 그리기 알약 `하루 N번까지` (서버 한도 모르면 숫자 없는 문구)
+    final freeRegenerateDailyCap = ref.watch(freeImageRegenerateDailyCapProvider);
     final title = _proTitleOf(l10n, status);
     // 체험은 제목이 곧 남은 날이라 아래 줄을 겹쳐 쓰지 않음
     final subline = status.isTrial ? null : planStatusFooter(l10n, status);
     final pillLabels = [
       for (final benefit in _pillBenefits)
-        if (access.canUseBenefit(benefit)) planBenefitLabel(l10n, benefit, periodUnit),
+        if (access.canUseBenefit(benefit))
+          planBenefitLabel(l10n, benefit, periodUnit, freeRegenerateDailyCap: freeRegenerateDailyCap),
     ];
     final radius = BorderRadius.circular(space.cardRadius.r);
 
