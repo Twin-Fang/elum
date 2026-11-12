@@ -42,6 +42,16 @@ public class NotificationSettingService {
     if (request.talkImported() != null) {
       setting.setTalkImportedEnabled(request.talkImported());
     }
+    // 자동 알림 세 값 (#1275): 옛 앱은 모름 (null = 그대로)
+    if (request.routineNudge() != null) {
+      setting.setRoutineNudgeEnabled(request.routineNudge());
+    }
+    if (request.suggestion() != null) {
+      setting.setSuggestionEnabled(request.suggestion());
+    }
+    if (request.planReminder() != null) {
+      setting.setPlanReminderEnabled(request.planReminder());
+    }
     return NotificationSettingResponse.from(notificationSettingRepository.save(setting));
   }
 }

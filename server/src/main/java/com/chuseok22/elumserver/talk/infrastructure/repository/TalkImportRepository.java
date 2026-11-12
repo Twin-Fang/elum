@@ -22,4 +22,12 @@ public interface TalkImportRepository extends JpaRepository<TalkImport, String> 
   @Query("delete from TalkImport i where i.memberId = :memberId or i.postId in "
     + "(select p.id from TalkPost p where p.authorMemberId = :memberId)")
   int deleteAllOfMemberOrOnPostsOf(@Param("memberId") String memberId);
+
+  /// since 이후 글마다 가져간 보호자 수 (많은 순, 호출부가 pageable 로 줄임)
+  @Query("""
+    select count(distinct i.memberId) from TalkImport i where i.createdAt >= :since
+    group by i.postId order by count(distinct i.memberId) desc
+    """)
+  List<Long> findImporterCountsPerPostSince(@Param("since") java.time.LocalDateTime since,
+    org.springframework.data.domain.Pageable pageable);
 }

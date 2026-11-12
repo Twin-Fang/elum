@@ -12,17 +12,21 @@ public record NotificationSettingResponse(
   @Schema(description = "크레딧 채움") boolean creditRefilled,
   @Schema(description = "의견 답변") boolean feedbackResolved,
   @Schema(description = "내 이야기 글에 댓글") boolean talkCommented,
-  @Schema(description = "내 이야기 글을 가져감") boolean talkImported
+  @Schema(description = "내 이야기 글을 가져감") boolean talkImported,
+  @Schema(description = "오늘 일과 보내기") boolean routineNudge,
+  @Schema(description = "추천 (다시 찾기, 이야기 인기 일과)") boolean suggestion,
+  @Schema(description = "요금제 안내 (Pro 선물·체험 끝나기 전)") boolean planReminder
 ) {
 
   /// 행이 없는 보호자의 기본값: 모두 켜짐
   public static NotificationSettingResponse allEnabledDefault() {
-    return new NotificationSettingResponse(true, true, true, true, true, true, true, true);
+    return new NotificationSettingResponse(true, true, true, true, true, true, true, true, true, true, true);
   }
 
   public static NotificationSettingResponse from(NotificationSetting setting) {
     return new NotificationSettingResponse(setting.isAllEnabled(), setting.isRoutineCompletedEnabled(),
       setting.isRoutineSentEnabled(), setting.isCoGuardianJoinedEnabled(), setting.isCreditRefilledEnabled(),
-      setting.isFeedbackResolvedEnabled(), setting.isTalkCommentedEnabled(), setting.isTalkImportedEnabled());
+      setting.isFeedbackResolvedEnabled(), setting.isTalkCommentedEnabled(), setting.isTalkImportedEnabled(),
+      setting.isRoutineNudgeEnabled(), setting.isSuggestionEnabled(), setting.isPlanReminderEnabled());
   }
 }

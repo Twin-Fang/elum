@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('알림 성과', 'push-performance', ~{:: content})}">
+<body>
+
+<!-- 알림 성과 (#1275): 줄 7개(자동 5종, 운영자 직접, 예약) × 7일·30일 받은 사람·도착·열림·열림률 + 끈 사람 수
+     도착 = 기기 1대 이상 성공, 열림 = 앱이 알림을 눌러 연 기록 (이 버전 이전 앱은 열림을 알리지 않아 0으로 보임) -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6 max-w-5xl">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('알림 성과', '자동 알림과 운영자 알림이 얼마나 도착하고 열렸는지 봐요. 열림률은 도착한 사람 중 알림을 눌러 앱을 연 비율이에요.')}"></div>
+
+  <div class="alert alert-info text-sm" role="note">
+    <span>알림을 통째로 끈 보호자 <b th:text="${allOffCount} + '명'">0명</b>. 열림은 새 버전 앱부터 기록돼요.</span>
+  </div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th rowspan="2">종류</th>
+            <th colspan="4" class="text-center" th:text="'최근 ' + ${shortPeriodDays} + '일'">최근 7일</th>
+            <th colspan="4" class="text-center" th:text="'최근 ' + ${longPeriodDays} + '일'">최근 30일</th>
+            <th rowspan="2">끈 사람</th>
+          </tr>
+          <tr>
+            <th>받음</th><th>도착</th><th>열림</th><th>열림률</th>
+            <th>받음</th><th>도착</th><th>열림</th><th>열림률</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="row : ${rows}">
+            <td class="whitespace-nowrap" th:text="${row.label()}">종류</td>
+            <td th:text="${row.shortPeriod().recipientCount()}">0</td>
+            <td th:text="${row.shortPeriod().deliveredCount()}">0</td>
+            <td th:text="${row.shortPeriod().openedCount()}">0</td>
+            <td th:text="${row.shortPeriod().openRatePercent() != null} ? ${row.shortPeriod().openRatePercent()} + '%' : '-'">-</td>
+            <td th:text="${row.longPeriod().recipientCount()}">0</td>
+            <td th:text="${row.longPeriod().deliveredCount()}">0</td>
+            <td th:text="${row.longPeriod().openedCount()}">0</td>
+            <td th:text="${row.longPeriod().openRatePercent() != null} ? ${row.longPeriod().openRatePercent()} + '%' : '-'">-</td>
+            <td th:text="${row.optOutCount() != null} ? ${row.optOutCount()} + '명' : '-'">-</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">다시 찾기와 이야기 인기 일과는 같은 '추천 알림' 설정을 써서 끈 사람 수가 같아요. 첫 일과 축하는 '일과 완료' 설정을 따라요.</p>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

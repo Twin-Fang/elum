@@ -122,7 +122,7 @@ public final class AdminAuditList {
     return auditLog.getTargetId() == null ? label : label + " " + auditLog.getTargetId();
   }
 
-  /// 대상 화면 주소: 삭제류·id 없음·로그 파일·이전 파일·이전 동기화·운영자 알림은 null
+  /// 대상 화면 주소: 삭제류·id 없음·로그 파일·이전 파일·이전 동기화·운영자 알림은 null, 자동 알림·예약은 목록 화면
   static String targetLinkOf(AdminAuditLog auditLog) {
     String targetId = auditLog.getTargetId();
     if (targetId == null || auditLog.getAction().isTargetRemoved()) {
@@ -132,6 +132,8 @@ public final class AdminAuditList {
       case MEMBER -> "/admin/members/" + encodePathSegment(targetId);
       case FEEDBACK -> "/admin/feedback/" + encodePathSegment(targetId);
       case PROMPT -> promptHistoryLinkOf(targetId);
+      case AUTO_NOTIFICATION_RULE -> "/admin/push/auto";
+      case SCHEDULED_PUSH -> "/admin/push/scheduled";
       case LOG_FILE, MIGRATION_FILE, MIGRATION_SYNC, ADMIN_MESSAGE -> null;
     };
   }

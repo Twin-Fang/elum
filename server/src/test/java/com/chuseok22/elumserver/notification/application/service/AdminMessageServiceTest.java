@@ -33,12 +33,13 @@ class AdminMessageServiceTest {
   private final PushDeviceRepository pushDeviceRepository = mock(PushDeviceRepository.class);
   private final NotificationRecorder notificationRecorder = mock(NotificationRecorder.class);
   private final PushDispatcher pushDispatcher = mock(PushDispatcher.class);
+  private final NotificationDispatchService notificationDispatchService = mock(NotificationDispatchService.class);
   private AdminMessageService service;
 
   @BeforeEach
   void setUp() {
     service = new AdminMessageService(adminMessageRepository, notificationSettingRepository, pushDeviceRepository,
-      notificationRecorder, pushDispatcher, Clock.fixed(Instant.parse("2026-11-12T05:00:00Z"), ZoneId.of("Asia/Seoul")));
+      notificationRecorder, pushDispatcher, notificationDispatchService, Clock.fixed(Instant.parse("2026-11-12T05:00:00Z"), ZoneId.of("Asia/Seoul")));
   }
 
   @Test
@@ -68,7 +69,7 @@ class AdminMessageServiceTest {
     });
     List<RecordedNotification> recorded = List.of(new RecordedNotification("n1", "m1", 1, true));
     when(notificationRecorder.record(any(), anyCollection())).thenReturn(recorded);
-    when(pushDispatcher.dispatchAdminMessage(any(), any())).thenReturn(new AdminMessageDelivery(2, 1));
+    when(pushDispatcher.dispatchAdminMessage(any(), any(), any())).thenReturn(new AdminMessageDelivery(2, 1));
 
     AdminMessageSendResult result = service.send("제목", "본문", AdminMessageRoute.HOME, List.of("m1", "m2"));
 

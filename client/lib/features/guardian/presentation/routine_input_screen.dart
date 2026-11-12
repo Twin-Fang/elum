@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'routine_input_field.dart';
 import 'routine_suggestion_chips.dart';
+import 'widgets/routine_image_style_pill.dart';
 import 'routine_template_sheet.dart';
 
 import 'package:flutter/material.dart';
@@ -148,7 +149,10 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                               .setRawInput,
                           onSubmit: _next,
                         ),
-                        SizedBox(height: _RoutineInputLayout.inputToChips),
+                        // 이번 일과의 그림 방식 + 그 자리에서 바꾸기 (#1287)
+                        SizedBox(height: space.md.h),
+                        const RoutineImageStylePill(),
+                        SizedBox(height: space.lg.h),
                         RoutineSuggestionChips(onTap: _fill),
                         SizedBox(height: space.md),
                         // 카테고리별 예시 일과 (#777)
@@ -189,12 +193,12 @@ class _TemplateButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              AppAssets.iconApps,
-              width: 20.w,
-              height: 20.w,
+            // 겹친 그림 카드 (네모·동그라미 격자 아이콘 대신, #1287)
+            Image.asset(
+              AppAssets.routineTemplateCards,
+              width: 24.w,
+              height: 24.w,
               excludeFromSemantics: true,
-              colorFilter: ColorFilter.mode(colors.textPrimary, BlendMode.srcIn),
             ),
             SizedBox(width: 6.w),
             Text(
@@ -293,8 +297,6 @@ class _RoutineInputLayout {
   /// 부제 끝(341) → 입력칸(389).
   static double get bodyToInput => 48.h;
 
-  /// 입력칸 끝(441) → 칩 묶음(489).
-  static double get inputToChips => 48.h;
 }
 
 /// sparkles + 제목 + 설명 (Figma 중앙정렬)

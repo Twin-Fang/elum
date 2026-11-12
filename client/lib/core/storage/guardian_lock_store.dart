@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
@@ -20,7 +21,7 @@ class GuardianLockStore {
   Future<void> _tail = Future.value();
 
   /// 반복 횟수. 암호가 숫자 4자리(1만 가지)라 반복을 늘려도 막는 힘이 거의 늘지 않고, 순수 Dart 계산이라
-  /// 입력 뒤 화면이 수 초 멈춘다. 오답 5회 잠금이 실제 방어다.
+  /// 입력 뒤 수 초 기다리게 된다. 오답 5회 잠금이 실제 방어다.
   static const iterations = 10000;
 
   /// 반복 횟수를 기록하지 않던 옛 기록의 값. 확인에 성공하면 [iterations] 로 다시 저장한다.
@@ -68,7 +69,11 @@ class GuardianLockStore {
     }));
   });
 
-  Future<List<int>> _derive(String pin, List<int> salt, int rounds) async =>
+  /// 암호 > 검증값 (PBKDF2). 순수 Dart 계산이라 별도 isolate 에서 돌려 입력 뒤 화면이 멈추지 않게 함
+  static Future<List<int>> _derive(String pin, List<int> salt, int rounds) =>
+      Isolate.run(() => _deriveVerifier(pin, salt, rounds));
+
+  static Future<List<int>> _deriveVerifier(String pin, List<int> salt, int rounds) async =>
       (await Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: rounds, bits: 256)
               .deriveKey(secretKey: SecretKey(utf8.encode(pin)), nonce: salt))
           .extractBytes();

@@ -380,6 +380,30 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setLowCreditNoticeDismissedPeriod(String period) async =>
       _lowCreditNoticeDismissedPeriod = period;
 
+  String? _homeAutoSendUpsellFirstShownDay;
+
+  @override
+  String? get homeAutoSendUpsellFirstShownDay => _homeAutoSendUpsellFirstShownDay;
+
+  @override
+  Future<void> setHomeAutoSendUpsellFirstShownDay(String day) async => _homeAutoSendUpsellFirstShownDay = day;
+
+  bool _isHomeAutoSendUpsellClosed = false;
+
+  @override
+  bool get isHomeAutoSendUpsellClosed => _isHomeAutoSendUpsellClosed;
+
+  @override
+  Future<void> setHomeAutoSendUpsellClosed(bool isClosed) async => _isHomeAutoSendUpsellClosed = isClosed;
+
+  String? _homeUpsellShownRecord;
+
+  @override
+  String? get homeUpsellShownRecord => _homeUpsellShownRecord;
+
+  @override
+  Future<void> setHomeUpsellShownRecord(String record) async => _homeUpsellShownRecord = record;
+
   bool _isTalkGridView = false;
 
   @override
@@ -460,5 +484,8 @@ class InMemoryStorage implements LocalStorage {
     _homeSuggestionShownAtByKind = const {};
     _homeSuggestionDismissedKeys = const {};
     _lowCreditNoticeDismissedPeriod = null;
+    _homeAutoSendUpsellFirstShownDay = null;
+    _isHomeAutoSendUpsellClosed = false;
+    _homeUpsellShownRecord = null;
   }
 }

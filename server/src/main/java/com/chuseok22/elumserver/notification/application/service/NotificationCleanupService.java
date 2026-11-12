@@ -1,9 +1,11 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.notification.infrastructure.repository.NoticeSeenRepository;
+import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationDispatchRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationSettingRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.PushDeviceRepository;
+import com.chuseok22.elumserver.notification.infrastructure.repository.ScheduledAdminPushRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +22,18 @@ public class NotificationCleanupService {
   private final PushDeviceRepository pushDeviceRepository;
   private final NotificationSettingRepository notificationSettingRepository;
   private final NoticeSeenRepository noticeSeenRepository;
+  private final NotificationDispatchRepository notificationDispatchRepository;
+  private final ScheduledAdminPushRepository scheduledAdminPushRepository;
 
-  /// 회원의 알림·푸시 기기·설정·공지 확인 기록 삭제 (행이 없어도 무방)
+  /// 회원의 알림·푸시 기기·설정·공지 확인·발송 기록 삭제 + 관리자 예약 대상에서 빼기 (행이 없어도 무방)
   @Transactional
   public void deleteAllOf(String memberId) {
     notificationRepository.deleteAllByRecipientMemberId(memberId);
     pushDeviceRepository.deleteAllByMemberId(memberId);
     notificationSettingRepository.deleteById(memberId);
     noticeSeenRepository.deleteById(memberId);
+    notificationDispatchRepository.deleteAllByMemberId(memberId);
+    scheduledAdminPushRepository.deleteMemberFromTargets(memberId);
   }
 
   /// 이룸이 프로필에 딸린 알림 삭제

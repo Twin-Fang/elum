@@ -144,6 +144,9 @@ abstract final class AppAssets {
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
   static const iconCheck = '$_images/icon_check.svg';
 
+  /// 잠금 (24×24, `fi-br-lock` 결). Free 에게 잠긴 Pro 선택지의 라디오 자리 (#1286)
+  static const iconLock = '$_images/icon_lock.svg';
+
   /// 동그란 체크 안의 **체크 표시만** (Figma `채크_라운드` 726:4866).
   ///
   /// `Icons.check` 글리프를 쓰면 안 된다 — 시안의 체크는 가로로 긴 벡터라
@@ -225,6 +228,12 @@ abstract final class AppAssets {
 
   /// 그림 방식 선택의 `만화 그림` 예시: 서버 카드 그림 인물(만화 아이)이 이 닦는 장면 (280×280, #1258)
   static const imageStyleCartoon = '$_images/image_style_cartoon.webp';
+
+  /// 온보딩 예시 분류 아이콘 4개 (192×192 투명 WebP, 이미지 하네스 3D 결, #1285)
+  static const exampleCategoryMorning = '$_images/example_category_morning.webp';
+  static const exampleCategorySchool = '$_images/example_category_school.webp';
+  static const exampleCategoryChores = '$_images/example_category_chores.webp';
+  static const exampleCategoryOutside = '$_images/example_category_outside.webp';
 
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
@@ -435,7 +444,9 @@ abstract final class AppAssets {
   static const iconComments = '$_images/icon_comments.svg';
   static const iconCoins = '$_images/icon_coins.svg';
   static const iconPaperPlane = '$_images/icon_paper_plane.svg';
-  static const iconApps = '$_images/icon_apps.svg';
+
+  /// 일과 만들기 `예시 일과 둘러보기` 아이콘: 겹친 그림 카드 3장 (128×128 투명 WebP, 이미지 하네스 3D 결, #1287)
+  static const routineTemplateCards = '$_images/routine_template_cards.webp';
 
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.

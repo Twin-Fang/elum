@@ -1,21 +1,22 @@
+import '../../core/assets/app_assets.dart';
 import '../../core/l10n/current_l10n.dart';
 
 /// 온보딩 예시 일과 분류 4개 (#803). 고른 분류마다 서버가 예시 일과 2개를 넣는다.
 ///
 /// [apiValue] 는 서버 `RoutineExampleCategory` enum name 과 같아야 한다 — 어긋나면 온보딩 저장에서 그 분류만 빠진다 (서버 CrossStackContractTest 가 대조).
 enum RoutineExampleCategory {
-  morningEvening('MORNING_EVENING', 'brush_teeth_,_to'),
-  schoolStudy('SCHOOL_STUDY', 'school_bag'),
-  houseSelf('HOUSE_SELF', 'tidy_up_,_to'),
-  outside('OUTSIDE', 'get_on_bus_,_to');
+  morningEvening('MORNING_EVENING', AppAssets.exampleCategoryMorning),
+  schoolStudy('SCHOOL_STUDY', AppAssets.exampleCategorySchool),
+  houseSelf('HOUSE_SELF', AppAssets.exampleCategoryChores),
+  outside('OUTSIDE', AppAssets.exampleCategoryOutside);
 
-  const RoutineExampleCategory(this.apiValue, this.pictogramId);
+  const RoutineExampleCategory(this.apiValue, this.iconAsset);
 
   /// 서버 전송용 값
   final String apiValue;
 
-  /// 선택 카드 아이콘 (assets/pictograms 의 id)
-  final String pictogramId;
+  /// 선택 카드 아이콘 (앱 그림 결 WebP, #1285)
+  final String iconAsset;
 
   /// 분류 이름. 호출 시점의 언어로 읽는다.
   String get label => switch (this) {

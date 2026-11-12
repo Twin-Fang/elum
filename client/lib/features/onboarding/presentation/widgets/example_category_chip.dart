@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine_example_category.dart';
-import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 
-/// 예시 분류 선택 항목 (#803): 픽토그램 + 분류 이름 + 한 줄 예
+/// 예시 분류 선택 항목 (#803): 분류 아이콘 + 분류 이름 + 한 줄 예
 ///
 /// 모양은 옛 목표 칩(Figma `온보딩_목표` 204:1002)을 따른다 — 344 폭 r20, 아이콘 40.
 /// 선택 로직은 SelectableGroup 이 갖고, 이 위젯은 보이는 모습만 책임진다.
@@ -24,7 +22,8 @@ class ExampleCategoryChip extends StatelessWidget {
   static const _horizontalPadding = 14.0;
   static const _verticalPadding = 12.0;
   static const _iconToText = 12.0;
-  static const _iconSize = 40.0;
+  /// 아이콘 48 (#1285: 3D 그림이라 40 에서는 작아 보임)
+  static const _iconSize = 48.0;
 
   final RoutineExampleCategory category;
   final bool isSelected;
@@ -54,15 +53,14 @@ class ExampleCategoryChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 픽토그램은 투명 배경 — 전용 로더로 `<style>` 색을 풀어 검게 나오지 않게
-          ExcludeSemantics(
-            child: SvgPicture(
-              PictogramSvgLoader(category.pictogramId),
-              width: _iconSize.w,
-              height: _iconSize.w,
-              errorBuilder: (context, error, stack) =>
-                  SizedBox.square(dimension: _iconSize.w),
-            ),
+          // 장식 그림 (분류 이름이 뜻을 말함)
+          Image.asset(
+            category.iconAsset,
+            width: _iconSize.w,
+            height: _iconSize.w,
+            excludeFromSemantics: true,
+            errorBuilder: (context, error, stack) =>
+                SizedBox.square(dimension: _iconSize.w),
           ),
           SizedBox(width: _iconToText.w),
           Expanded(
