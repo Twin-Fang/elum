@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-11T04:28:19Z",
-    "currentVersion": "2.88.0",
+    "lastUpdated": "2026-11-12T11:30:48Z",
+    "currentVersion": "2.89.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 328
+    "totalReleases": 329
   },
   "releases": [
+    {
+      "version": "2.89.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-12",
+      "pr_number": 1282,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈 화면에서 내 요금제(Free·PRO·PRO 선물)를 바로 볼 수 있어요\n  * 만화 그림 카드가 실제 카드와 같은 아이 그림으로 보여요\n\n* **개선**\n  * 무료 체험 버튼을 '7일 무료로 시작하기'로 바꿨어요\n  * 요금제 화면을 내려도 위쪽 닫기 버튼과 글자가 겹치지 않아요\n  * 무료 체험 해지 안내를 한 번만, 같은 말로 보여 줘요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈 화면에서 내 요금제(Free·PRO·PRO 선물)를 바로 볼 수 있어요",
+            "만화 그림 카드가 실제 카드와 같은 아이 그림으로 보여요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "무료 체험 버튼을 '7일 무료로 시작하기'로 바꿨어요",
+            "요금제 화면을 내려도 위쪽 닫기 버튼과 글자가 겹치지 않아요",
+            "무료 체험 해지 안내를 한 번만, 같은 말로 보여 줘요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.88.0",
       "project_type": "flutter",
