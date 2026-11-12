@@ -144,6 +144,9 @@ abstract final class AppAssets {
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
   static const iconCheck = '$_images/icon_check.svg';
 
+  /// 잠금 (24×24, `fi-br-lock` 결). Free 에게 잠긴 Pro 선택지의 라디오 자리 (#1286)
+  static const iconLock = '$_images/icon_lock.svg';
+
   /// 동그란 체크 안의 **체크 표시만** (Figma `채크_라운드` 726:4866).
   ///
   /// `Icons.check` 글리프를 쓰면 안 된다 — 시안의 체크는 가로로 긴 벡터라

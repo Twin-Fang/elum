@@ -18,7 +18,7 @@ import '../../shared/models/image_style.dart';
 /// 2px 테두리(`#93DBCC`)로 바뀐다.
 ///
 /// 만화 그림 예시는 카드에 실제로 그려지는 만화 아이(이 닦기), 사진 같은 그림은 시안의 사진 에셋,
-/// 이모지·그림 기호는 실제 카드에 들어가는 그림(이 닦기)이다. Pro 방식은 이름 옆에 [ProBadge] (잠금 판단은 호출부, #1149).
+/// 이모지·그림 기호는 실제 카드에 들어가는 그림(이 닦기)이다. 잠긴 Pro 방식은 이름 옆 [ProBadge] + 라디오 자리 자물쇠 + 예시 흐림 (잠금 판단은 호출부, #1149 · #1286).
 ///
 /// 세 화면(온보딩·보호자 설정·이룸이 정보 시트)이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
@@ -27,7 +27,7 @@ class ImageStyleOptionCard extends StatelessWidget {
     required this.style,
     required this.isSelected,
     this.character = CardCharacter.cat,
-    this.shouldShowProBadge = false,
+    this.isLocked = false,
   });
 
   final ImageStyle style;
@@ -36,13 +36,14 @@ class ImageStyleOptionCard extends StatelessWidget {
   /// 고른 캐릭터 (지금 예시 그림은 캐릭터와 무관한 만화 아이. 캐릭터별 예시를 다시 열 자리)
   final CardCharacter character;
 
-  /// 이름 옆 [ProBadge] 를 보이는가 (Free 에게 잠긴 Pro 방식)
-  final bool shouldShowProBadge;
+  /// Free 에게 잠긴 Pro 방식인가: 이름 옆 [ProBadge] · 라디오 대신 자물쇠 · 예시 흐림 (누르면 호출부가 요금제 안내)
+  final bool isLocked;
 
-  /// 시안 실측 — 카드 높이 94 · 안쪽 여백 12 · 예시 70×70 r8 · 라디오 20×20 · 라디오 오른쪽 16.
-  static const minHeight = 94.0;
-  static const _inset = 12.0;
-  static const _exampleSize = 70.0;
+  /// 카드 높이 80 · 안쪽 여백 10 · 예시 60×60 r8 · 라디오 20×20 · 라디오 오른쪽 16.
+  /// (#1286: 시안 94·12·70 에서 줄임 — 온보딩에서 네 방식과 다음 버튼이 한 화면에 들어오게)
+  static const minHeight = 80.0;
+  static const _inset = 10.0;
+  static const _exampleSize = 60.0;
   static const _exampleRadius = 8.0;
   static const _radioSize = 20.0;
   static const _radioDot = 14.0;
@@ -60,6 +61,9 @@ class ImageStyleOptionCard extends StatelessWidget {
 
   /// 이름과 Pro 배지 사이 (인쇄 디자인 Pro 배지와 같은 6)
   static const _titleToBadge = 6.0;
+
+  /// 잠긴 방식 예시 그림 불투명도 (고를 수 없다는 신호, 그림은 알아볼 만큼)
+  static const _lockedExampleOpacity = 0.55;
 
   /// 문장이 둘이면 문장 끝에서 줄을 나눈다 (시안 `1274:10078` — `...넣어요.` / `글은 ...`).
   ///
@@ -104,9 +108,12 @@ class ImageStyleOptionCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Example(
-            style: style,
-            isSelected: isSelected,
+          Opacity(
+            opacity: isLocked ? _lockedExampleOpacity : 1,
+            child: _Example(
+              style: style,
+              isSelected: isSelected,
+            ),
           ),
           SizedBox(width: _exampleToText.w),
           Expanded(
@@ -127,7 +134,7 @@ class ImageStyleOptionCard extends StatelessWidget {
                         color: colors.textPrimary,
                       ),
                     ),
-                    if (shouldShowProBadge) const ProBadge(),
+                    if (isLocked) const ProBadge(),
                   ],
                 ),
                 SizedBox(height: _titleToBody.h),
@@ -149,7 +156,7 @@ class ImageStyleOptionCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: _textToRadio.w),
-          _Radio(isSelected: isSelected),
+          isLocked ? const _LockMark() : _Radio(isSelected: isSelected),
         ],
       ),
     );
@@ -235,6 +242,24 @@ class _Radio extends StatelessWidget {
               ),
             )
           : null,
+    );
+  }
+}
+
+/// 잠긴 방식의 라디오 자리: 라디오와 같은 크기의 자물쇠 (회색, 고를 수 없음)
+class _LockMark extends StatelessWidget {
+  const _LockMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = ImageStyleOptionCard._radioSize.w;
+    return SvgPicture.asset(
+      AppAssets.iconLock,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(context.colors.routineTileLabel, BlendMode.srcIn),
+      // 이름 옆 PRO 배지가 이미 잠김을 말한다
+      excludeFromSemantics: true,
     );
   }
 }

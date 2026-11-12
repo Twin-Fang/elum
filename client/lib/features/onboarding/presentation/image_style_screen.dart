@@ -37,8 +37,8 @@ import '../../member/application/plan_access.dart';
 class ImageStyleScreen extends ConsumerWidget {
   const ImageStyleScreen({super.key});
 
-  /// 카드 사이 (시안 279 → 389 → 499, 카드 높이 94)
-  static const _cardGap = 16.0;
+  /// 카드 사이 12 (#1286: 크레딧 띠 + 네 방식 + 다음 버튼이 한 화면에 들어오게 시안 16 에서 줄임)
+  static const _cardGap = 12.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,9 +50,18 @@ class ImageStyleScreen extends ConsumerWidget {
     final planAccess = ref.watch(planAccessProvider);
     final creditCosts = ref.watch(routineCreateCreditCostsProvider);
 
+    // 잠긴 방식이 골라져 있으면(저장값이 Pro 방식인 Free) Free 기본값으로 되돌림 (#1286)
+    final isPickedLocked = isImageStyleLocked(profile.imageStyle, planAccess);
+    if (isPickedLocked) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => notifier.setImageStyle(ImageStyle.onboardingDefault),
+      );
+    }
+    final pickedStyle = isPickedLocked ? ImageStyle.onboardingDefault : profile.imageStyle;
+
     final group = SelectableGroup<ImageStyle>(
-      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: profile.imageStyle),
-      selected: {profile.imageStyle},
+      items: ImageStyle.values,
+      selected: {pickedStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
       gap: _cardGap.h,
@@ -67,7 +76,7 @@ class ImageStyleScreen extends ConsumerWidget {
         style: style,
         isSelected: isSelected,
         character: character,
-        shouldShowProBadge: isImageStyleLocked(style, planAccess),
+        isLocked: isImageStyleLocked(style, planAccess),
       ),
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
@@ -91,7 +100,7 @@ class ImageStyleScreen extends ConsumerWidget {
             ),
             SizedBox(height: space.headerToContent),
             ImageStyleCreditBar(
-              style: profile.imageStyle,
+              style: pickedStyle,
               costs: creditCosts,
             ),
             // 크레딧이 처음 나오는 자리: 얼마나 받고 어디에 쓰는지 한 줄 (크레딧이 꺼지면 띠와 함께 숨김)
@@ -104,7 +113,7 @@ class ImageStyleScreen extends ConsumerWidget {
             ],
             SizedBox(height: _cardGap.h),
             group,
-            SizedBox(height: 24.h),
+            SizedBox(height: space.md.h),
           ],
         ),
       ),

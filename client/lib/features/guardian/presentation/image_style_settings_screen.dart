@@ -94,7 +94,7 @@ class _ImageStyleSettingsScreenState
     final planAccess = ref.watch(planAccessProvider);
 
     final group = SelectableGroup<ImageStyle>(
-      items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: _pickedStyle),
+      items: ImageStyle.values,
       selected: {_pickedStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
@@ -111,7 +111,7 @@ class _ImageStyleSettingsScreenState
         style: style,
         isSelected: isSelected,
         character: character,
-        shouldShowProBadge: isImageStyleLocked(style, planAccess),
+        isLocked: isImageStyleLocked(style, planAccess),
       ),
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
