@@ -238,6 +238,10 @@ abstract final class AppAssets {
   static final planBenefitIconWeek = emoji('emoji_clipboard');
   static final planBenefitIconExtra = emoji('emoji_sparkles');
 
+  /// 내 정보 내 요금제 카드 제목 끝 이모지 (Twemoji): Pro 🎉 · Pro 선물 🎁
+  static final myPlanProEmoji = emoji('emoji_party_popper');
+  static final myPlanGiftEmoji = emoji('emoji_wrapped_gift');
+
   // --- 시작 화면 (Figma `시작` 238:1808) ---
 
   /// 이룸 로고 (164×60). Cloudsofa_namgim 폰트 대신 이 SVG를 쓴다.

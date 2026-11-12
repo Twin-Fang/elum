@@ -5148,6 +5148,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planTierGift => 'Gift';
 
   @override
+  String get myPlanProTitle => 'You\'re on Pro';
+
+  @override
+  String get myPlanGiftTitle => 'You got Pro as a gift';
+
+  @override
+  String get myPlanFreeTitle => 'You\'re on Free';
+
+  @override
+  String get myPlanFreeBodyWeek =>
+      'Make routines with the credits you get every week';
+
+  @override
+  String get myPlanFreeBodyMonth =>
+      'Make routines with the credits you get every month';
+
+  @override
   String get proTeaserWeeklyPlanTitle =>
       'Set the days and time, and that day\'s routine is ready';
 

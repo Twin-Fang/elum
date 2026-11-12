@@ -4898,6 +4898,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planTierGift => '선물';
 
   @override
+  String get myPlanProTitle => 'Pro로 쓰고 있어요';
+
+  @override
+  String get myPlanGiftTitle => 'Pro 선물을 받았어요';
+
+  @override
+  String get myPlanFreeTitle => 'Free로 쓰고 있어요';
+
+  @override
+  String get myPlanFreeBodyWeek => '매주 받는 크레딧으로 일과를 만들어요';
+
+  @override
+  String get myPlanFreeBodyMonth => '매달 받는 크레딧으로 일과를 만들어요';
+
+  @override
   String get proTeaserWeeklyPlanTitle => '요일과 시각만 정해 두면 그날 일과가 준비돼요';
 
   @override

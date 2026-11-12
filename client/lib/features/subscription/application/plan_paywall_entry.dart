@@ -17,6 +17,9 @@ import 'plan_offer_labels.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
 
+// 혜택 한 줄 문구는 요금제 화면과 한 벌 (다른 기능이 presentation 을 직접 알지 않게)
+export '../presentation/plan_benefit_cards.dart' show planBenefitLabel;
+
 /// 다른 기능이 요금제 화면·구매 복원을 여는 입구 (보호자 화면 전용)
 ///
 /// 다른 기능이 subscription 의 presentation 을 직접 알지 않게 하는 자리 (tool/check_layer_imports.dart)

@@ -8552,6 +8552,36 @@ abstract class AppLocalizations {
   /// **'선물'**
   String get planTierGift;
 
+  /// 내 정보 내 요금제 카드 제목: Pro (구독, 기간 제한 없음) #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 쓰고 있어요'**
+  String get myPlanProTitle;
+
+  /// 내 정보 내 요금제 카드 제목: Pro 선물 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 선물을 받았어요'**
+  String get myPlanGiftTitle;
+
+  /// 내 정보 내 요금제 카드 제목: Free #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'Free로 쓰고 있어요'**
+  String get myPlanFreeTitle;
+
+  /// 내 정보 내 요금제 카드 한 줄: Free, 주간 크레딧 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 받는 크레딧으로 일과를 만들어요'**
+  String get myPlanFreeBodyWeek;
+
+  /// 내 정보 내 요금제 카드 한 줄: Free, 월간 크레딧 #1268
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 받는 크레딧으로 일과를 만들어요'**
+  String get myPlanFreeBodyMonth;
+
   /// Pro 미리보기 제목: 주간 계획 #1189
   ///
   /// In ko, this message translates to:

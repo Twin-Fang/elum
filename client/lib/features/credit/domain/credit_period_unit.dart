@@ -42,4 +42,8 @@ enum CreditPeriodUnit {
   /// 요금제 혜택 줄
   String planBenefitMoreCredits(AppLocalizations l10n) =>
       isMonth ? l10n.planBenefitMoreMonthlyCredits : l10n.planBenefitMoreWeeklyCredits;
+
+  /// 내 정보 내 요금제 카드(Free) 한 줄
+  String myPlanFreeBody(AppLocalizations l10n) =>
+      isMonth ? l10n.myPlanFreeBodyMonth : l10n.myPlanFreeBodyWeek;
 }
