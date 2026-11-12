@@ -141,6 +141,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.glassSurface,
     required this.glassChip,
     required this.promptMuted,
+    required this.promptNotice,
     required this.glassShadow,
     required this.auroraMint,
     required this.auroraViolet,
@@ -625,6 +626,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 흐린 안내 문구 (rgba(36,38,52,0.4))
   final Color promptMuted;
+
+  /// 일과 입력 아래 개인정보 안내 (#74757D, 흰 바탕 대비 4.5:1 이상 · #1297)
+  final Color promptNotice;
 
   /// 유리 표면 그림자 (rgba(0,0,0,0.05))
   final Color glassShadow;
@@ -1393,6 +1397,7 @@ class AppColors extends ThemeExtension<AppColors> {
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
     glassChip: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
     promptMuted: Color(0x66242634), // rgba(36,38,52,0.4)
+    promptNotice: Color(0xFF74757D),
     glassShadow: Color(0x0D000000),
     auroraMint: Color(0xFF7BFFE5),
     auroraViolet: Color(0xFFD16FFF),
@@ -1711,6 +1716,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? glassSurface,
     Color? glassChip,
     Color? promptMuted,
+    Color? promptNotice,
     Color? glassShadow,
     Color? auroraMint,
     Color? auroraViolet,
@@ -2018,6 +2024,7 @@ class AppColors extends ThemeExtension<AppColors> {
       glassSurface: glassSurface ?? this.glassSurface,
       glassChip: glassChip ?? this.glassChip,
       promptMuted: promptMuted ?? this.promptMuted,
+      promptNotice: promptNotice ?? this.promptNotice,
       glassShadow: glassShadow ?? this.glassShadow,
       auroraMint: auroraMint ?? this.auroraMint,
       auroraViolet: auroraViolet ?? this.auroraViolet,
@@ -2391,6 +2398,7 @@ class AppColors extends ThemeExtension<AppColors> {
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
       glassChip: Color.lerp(glassChip, other.glassChip, t)!,
       promptMuted: Color.lerp(promptMuted, other.promptMuted, t)!,
+      promptNotice: Color.lerp(promptNotice, other.promptNotice, t)!,
       glassShadow: Color.lerp(glassShadow, other.glassShadow, t)!,
       auroraMint: Color.lerp(auroraMint, other.auroraMint, t)!,
       auroraViolet: Color.lerp(auroraViolet, other.auroraViolet, t)!,

@@ -1345,13 +1345,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineInputTitle => '오늘은 어떤 준비가\n필요한가요?';
 
   @override
-  String get routineInputSubtitle => 'AI 루미가 작은 행동 단계로 나눠드려요';
+  String get routineInputSubtitle => 'AI 도우미 루미가 작은 행동 단계로 나눠 줄게요';
 
   @override
   String get routineInputHint => '평소 이야기하듯 입력해주세요';
 
   @override
-  String get routineInputSend => '보내기';
+  String get routineInputPrivacyNotice => '이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요';
 
   @override
   String get guardianSettingsLogoutConfirmTitle => '로그아웃할까요?';

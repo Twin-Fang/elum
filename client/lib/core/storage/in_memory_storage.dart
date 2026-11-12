@@ -404,7 +404,7 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setHomeUpsellShownRecord(String record) async => _homeUpsellShownRecord = record;
 
-  bool _isTalkGridView = false;
+  bool _isTalkGridView = true;
 
   @override
   bool get isTalkGridView => _isTalkGridView;

@@ -1428,13 +1428,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineInputTitle => 'What does today\nneed?';
 
   @override
-  String get routineInputSubtitle => 'AI Lumi breaks it into small steps';
+  String get routineInputSubtitle =>
+      'Lumi, your AI helper, breaks it into small steps';
 
   @override
   String get routineInputHint => 'Write it the way you\'d say it';
 
   @override
-  String get routineInputSend => 'Send';
+  String get routineInputPrivacyNotice =>
+      'Please don\'t write personal details like names, schools, hospitals or diagnoses';
 
   @override
   String get guardianSettingsLogoutConfirmTitle => 'Log out?';
