@@ -3698,18 +3698,6 @@ abstract class AppLocalizations {
   /// **'FREE'**
   String get planFreeBadge;
 
-  /// 내 크레딧 위 카드 오른쪽 버튼: 크레딧 사용 내역 화면으로
-  ///
-  /// In ko, this message translates to:
-  /// **'쓴 내역'**
-  String get myCreditHistoryButton;
-
-  /// 내 크레딧 큰 숫자 옆 단위
-  ///
-  /// In ko, this message translates to:
-  /// **'개'**
-  String get myCreditCountUnit;
-
   /// 내 크레딧 종류 이름: 매주 채워지는 크레딧
   ///
   /// In ko, this message translates to:
@@ -3731,32 +3719,8 @@ abstract class AppLocalizations {
   /// 내 크레딧 종류 이름: 산 크레딧
   ///
   /// In ko, this message translates to:
-  /// **'구매'**
+  /// **'산 크레딧'**
   String get myCreditKindPurchased;
-
-  /// 내 크레딧 주간 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'월요일에 다시 채워져요'**
-  String get myCreditRefillWeek;
-
-  /// 내 크레딧 월간 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'다음 달 1일에 다시 채워져요'**
-  String get myCreditRefillMonth;
-
-  /// 내 크레딧 보너스 줄 끝나는 때
-  ///
-  /// In ko, this message translates to:
-  /// **'{month}월 {day}일까지'**
-  String myCreditUntilDate(int month, int day);
-
-  /// 내 크레딧 구매 줄 끝나는 때 (제한 없음)
-  ///
-  /// In ko, this message translates to:
-  /// **'기간 제한 없음'**
-  String get myCreditNoExpiry;
 
   /// 내 크레딧 구독 카드 위 작은 제목
   ///
@@ -3914,17 +3878,41 @@ abstract class AppLocalizations {
   /// **'크레딧을 받았어요'**
   String get creditHistoryKindOtherGrant;
 
-  /// 사용 내역 종류: 만료. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  /// 사용 내역 줄 제목: 주간 크레딧 만료
   ///
   /// In ko, this message translates to:
-  /// **'기간이 지나 안 쓴 크레딧이 사라졌어요. 산 크레딧은 그대로예요'**
-  String get creditHistoryKindExpired;
+  /// **'지난 주 크레딧 정리'**
+  String get creditHistoryExpiredWeekTitle;
 
-  /// 사용 내역 종류: 운영 조정. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  /// 사용 내역 줄 제목: 월간 크레딧 만료
   ///
   /// In ko, this message translates to:
-  /// **'환불이나 운영 조정으로 크레딧이 바뀌었어요'**
-  String get creditHistoryKindAdjusted;
+  /// **'지난 달 크레딧 정리'**
+  String get creditHistoryExpiredMonthTitle;
+
+  /// 사용 내역 만료 줄 부제 (주간)
+  ///
+  /// In ko, this message translates to:
+  /// **'안 쓴 주간 크레딧은 넘어가지 않아요'**
+  String get creditHistoryExpiredWeekReason;
+
+  /// 사용 내역 만료 줄 부제 (월간)
+  ///
+  /// In ko, this message translates to:
+  /// **'안 쓴 월간 크레딧은 넘어가지 않아요'**
+  String get creditHistoryExpiredMonthReason;
+
+  /// 사용 내역 줄 제목: 운영 조정
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 조정'**
+  String get creditHistoryAdjustedTitle;
+
+  /// 사용 내역 조정 줄 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'환불이나 운영 조정이에요'**
+  String get creditHistoryAdjustedReason;
 
   /// 사용 내역 종류: 앱이 모르는 종류의 감소
   ///
@@ -4075,6 +4063,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'예시 일과 둘러보기'**
   String get routineTemplateOpen;
+
+  /// 일과 만들기 입력칸 아래 그림 방식 알약의 앞 글자 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림'**
+  String get routineImageStylePillLabel;
+
+  /// 그림 방식 알약 낭독 문구 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 방식 {style}, 눌러서 바꾸기'**
+  String routineImageStylePillSemantics(String style);
 
   /// 예시 일과 시트 제목
   ///
@@ -9098,22 +9098,10 @@ abstract class AppLocalizations {
   /// **'알겠어요'**
   String get creditGuideConfirm;
 
-  /// 내 크레딧 막대 위 한 줄 (주 단위). used 는 이번 주 쓴 수, available 은 남은 수
+  /// Pro 다시 그리기 칩 (내 크레딧 위 카드). left 는 오늘 남은 횟수, cap 은 서버 하루 한도
   ///
   /// In ko, this message translates to:
-  /// **'이번 주에 {used}개 쓰고 {available}개 남았어요'**
-  String myCreditUsageWeek(int used, int available);
-
-  /// myCreditUsageWeek 의 월 단위 문구
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달에 {used}개 쓰고 {available}개 남았어요'**
-  String myCreditUsageMonth(int used, int available);
-
-  /// Pro 무료 다시 그리기 한 줄. left 는 오늘 남은 횟수, cap 은 서버 하루 한도
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘 무료 다시 그리기 {left}번 남았어요 (하루 {cap}번)'**
+  /// **'다시 그리기 오늘 {left}/{cap}번 무료'**
   String myCreditFreeRegenerateToday(int left, int cap);
 
   /// 내 크레딧 최근 내역 묶음 제목
@@ -9122,10 +9110,10 @@ abstract class AppLocalizations {
   /// **'최근 쓴 내역'**
   String get myCreditRecentTitle;
 
-  /// 최근 내역 아래 글자 버튼 (사용 내역 화면)
+  /// 최근 쓴 내역 머리글 오른쪽 글자 버튼 (사용 내역 화면)
   ///
   /// In ko, this message translates to:
-  /// **'전체 내역 보기'**
+  /// **'전체 보기'**
   String get myCreditSeeAllHistory;
 
   /// 내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)
@@ -9301,6 +9289,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro 선물이 끝나기 전'**
   String get notificationSettingPlanReminder;
+
+  /// 내 크레딧 위 카드 큰 숫자 바로 뒤 (100개 남았어요). 영어는 앞에 공백
+  ///
+  /// In ko, this message translates to:
+  /// **'개 남았어요'**
+  String get myCreditRemainingSuffix;
 }
 
 class _AppLocalizationsDelegate

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../application/credit_costs.dart';
 import '../../domain/credit_history.dart';
 import 'credit_history_labels.dart';
 
@@ -12,8 +14,8 @@ class CreditHistoryDayCard extends StatelessWidget {
 
   final CreditHistoryDay day;
 
-  /// 날짜 글자 왼쪽 여백과 날짜 > 카드 사이 (카드 y26 - 날짜 높이 14)
-  static const _dateInsetLeft = 20.0;
+  /// 날짜 글자 왼쪽 여백 (줄 안쪽 여백과 같음, 내 크레딧 `최근 쓴 내역` 머리글도 맞춤)과 날짜 > 카드 사이 (카드 y26 - 날짜 높이 14)
+  static const dateInsetLeft = 20.0;
   static const _dateToCardGap = 12.0;
 
   @override
@@ -23,7 +25,7 @@ class CreditHistoryDayCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: _dateInsetLeft.w),
+          padding: EdgeInsets.only(left: dateInsetLeft.w),
           child: Text(
             context.l10n.creditHistoryDay(day.date.month, day.date.day),
             style: context.typo.creditHistoryDate.copyWith(
@@ -48,10 +50,10 @@ class CreditHistoryDayCard extends StatelessWidget {
   }
 }
 
-/// 내역 한 줄: 왼쪽 위 제목, 아래 부제, 오른쪽 가운데 증감
+/// 내역 한 줄: 왼쪽 위 제목 > (만료·조정만) 이유 한 줄 > 시각, 오른쪽 가운데 증감
 ///
 /// 사용 줄은 일과 제목이 위에 서고(일과가 지워졌으면 종류가 대신 선다), 지급·만료·조정은 종류가 위에 선다.
-class CreditHistoryRow extends StatelessWidget {
+class CreditHistoryRow extends ConsumerWidget {
   const CreditHistoryRow({super.key, required this.entry});
 
   final CreditHistoryEntry entry;
@@ -61,13 +63,16 @@ class CreditHistoryRow extends StatelessWidget {
   static const _padH = 20.0;
   static const _padV = 16.0;
   static const _titleToDetailGap = 8.0;
+  static const _titleToReasonGap = 4.0;
   static const _textToDeltaGap = 12.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final kindLabel = creditHistoryKindLabel(l10n, entry);
+    final periodUnit = ref.watch(creditPeriodUnitProvider);
+    final kindLabel = creditHistoryKindLabel(l10n, entry, periodUnit);
+    final reason = creditHistoryReasonLabel(l10n, entry, periodUnit);
     final routineTitle = entry.routineTitle;
     final isTitledUsage = (entry.kind?.isUsage ?? false) && routineTitle != null;
 
@@ -106,6 +111,15 @@ class CreditHistoryRow extends StatelessWidget {
                         color: colors.settingsCardLabel,
                       ),
                     ),
+                    if (reason != null) ...[
+                      SizedBox(height: _titleToReasonGap.h),
+                      Text(
+                        reason,
+                        style: context.typo.creditHistoryRowReason.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: _titleToDetailGap.h),
                     Text(
                       detail,

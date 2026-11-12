@@ -2116,12 +2116,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planFreeBadge => 'FREE';
 
   @override
-  String get myCreditHistoryButton => 'Usage history';
-
-  @override
-  String get myCreditCountUnit => '';
-
-  @override
   String get myCreditKindPeriodicWeek => 'Weekly';
 
   @override
@@ -2131,21 +2125,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myCreditKindBonus => 'Bonus';
 
   @override
-  String get myCreditKindPurchased => 'Purchased';
-
-  @override
-  String get myCreditRefillWeek => 'Refills on Monday';
-
-  @override
-  String get myCreditRefillMonth => 'Refills on the 1st of next month';
-
-  @override
-  String myCreditUntilDate(int month, int day) {
-    return 'Until $month/$day';
-  }
-
-  @override
-  String get myCreditNoExpiry => 'No expiry';
+  String get myCreditKindPurchased => 'Bought';
 
   @override
   String get myCreditSubscribeLabel => 'When you subscribe';
@@ -2260,12 +2240,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditHistoryKindOtherGrant => 'You received credits';
 
   @override
-  String get creditHistoryKindExpired =>
-      'Unused credits expired. Credits you bought stay';
+  String get creditHistoryExpiredWeekTitle => 'Last week\'s credits cleared';
 
   @override
-  String get creditHistoryKindAdjusted =>
-      'Credits changed due to a refund or an adjustment';
+  String get creditHistoryExpiredMonthTitle => 'Last month\'s credits cleared';
+
+  @override
+  String get creditHistoryExpiredWeekReason =>
+      'Unused weekly credits don\'t carry over';
+
+  @override
+  String get creditHistoryExpiredMonthReason =>
+      'Unused monthly credits don\'t carry over';
+
+  @override
+  String get creditHistoryAdjustedTitle => 'Credit adjustment';
+
+  @override
+  String get creditHistoryAdjustedReason => 'From a refund or an adjustment';
 
   @override
   String get creditHistoryKindUnknownSpend => 'You used credits';
@@ -2350,6 +2342,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineTemplateOpen => 'Browse example routines';
+
+  @override
+  String get routineImageStylePillLabel => 'Card pictures';
+
+  @override
+  String routineImageStylePillSemantics(String style) {
+    return 'Card picture style $style, tap to change';
+  }
 
   @override
   String get routineTemplateSheetTitle => 'Example routines';
@@ -5553,25 +5553,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditGuideConfirm => 'Got it';
 
   @override
-  String myCreditUsageWeek(int used, int available) {
-    return 'Used $used this week, $available left';
-  }
-
-  @override
-  String myCreditUsageMonth(int used, int available) {
-    return 'Used $used this month, $available left';
-  }
-
-  @override
   String myCreditFreeRegenerateToday(int left, int cap) {
-    return '$left free redraws left today ($cap a day)';
+    return 'Redraws today: $left/$cap free';
   }
 
   @override
   String get myCreditRecentTitle => 'Recent activity';
 
   @override
-  String get myCreditSeeAllHistory => 'See all activity';
+  String get myCreditSeeAllHistory => 'See all';
 
   @override
   String get myCreditGuideLink => 'How credits work';
@@ -5673,4 +5663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationSettingPlanReminder => 'Before your Pro gift ends';
+
+  @override
+  String get myCreditRemainingSuffix => ' left';
 }
