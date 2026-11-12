@@ -1,0 +1,48 @@
+{
+  "title": "Task analysis: brushing, dressing, handwashing steps | ELUM",
+  "description": "When \"brush your teeth\" is too much, break it down. Use task analysis to turn brushing, dressing and handwashing into action card steps, with examples.",
+  "heading": "Task analysis: breaking routines into small steps",
+  "lede": "A task that's hard to do all at once isn't something your child can't do. It just hasn't been broken down enough yet.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "What is task analysis",
+      "paragraphs": [
+        "Task analysis means breaking one task into <b>small actions in order</b>. For example, \"wash your hands\" becomes \"turn on the water → add soap → rub → rinse → dry.\""
+      ]
+    },
+    {
+      "heading": "Tips for breaking it down well",
+      "list": [
+        "<b>Do it yourself as you write.</b> If you only picture it in your head, you'll miss steps",
+        "<b>Write actions you can see.</b> \"Rub the backs of your hands\" instead of \"get them clean\"",
+        "<b>One action per sentence.</b> If you need \"and,\" split it into two",
+        "<b>Break down only the steps that get stuck.</b> Steps your child does well can be combined",
+        "<b>Start with 3 to 7 cards.</b> If it's too long, split the routine in two"
+      ]
+    },
+    {
+      "heading": "How far should you break it down",
+      "paragraphs": [
+        "There's no single right answer. If your child can look at the card and <b>start on their own</b>, it's broken down enough. If they often stop at one card, try splitting just that card into two or three.",
+        "In ELUM, you can add cards, change the order and split a card into smaller steps right from the caregiver screen."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: washing hands",
+    "items": [
+      {"emoji": "🚰", "title": "Turn on the water", "body": "Wet your hands"},
+      {"emoji": "🧼", "title": "Add soap", "body": "Press the pump once"},
+      {"emoji": "👐", "title": "Rub your hands", "body": "Palms, backs, between fingers"},
+      {"emoji": "💧", "title": "Rinse", "body": "Until the bubbles are gone"},
+      {"emoji": "🧻", "title": "Dry with a towel", "body": "Wipe off the water"}
+    ],
+    "reward": "All done: a high five"
+  },
+  "faq": [
+    {"q": "How do I break down getting dressed?", "a": "Make one card each in this order: underwear → top → pants → socks. If buttons or zippers are hard, give that part its own card."},
+    {"q": "What if there are too many steps?", "a": "Split the routine in two. For example, make 'getting ready in the morning' into separate 'washing up' and 'getting dressed' routines."}
+  ],
+  "related": ["action-cards", "morning-routine"]
+}
