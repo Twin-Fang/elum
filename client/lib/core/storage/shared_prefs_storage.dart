@@ -81,6 +81,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeSuggestionShownAtByKind = 'homeSuggestion.shownAtByKind';
   // 보호자 홈 권유: 닫은 권유 `{종류 이름}:{일과 id}` 목록
   static const _kHomeSuggestionDismissedKeys = 'homeSuggestion.dismissedKeys';
+  // 보호자 홈 크레딧 부족 카드를 닫은 주기: 그 주기의 다음 초기화 시각 (ISO-8601)
+  static const _kLowCreditNoticeDismissedPeriod = 'credit.lowNoticeDismissedPeriod';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
 
@@ -110,6 +112,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kTalkShareHintDismissedRoutineIds,
     _kHomeSuggestionShownAtByKind,
     _kHomeSuggestionDismissedKeys,
+    _kLowCreditNoticeDismissedPeriod,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -541,6 +544,15 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async {
     AppLogger.storageWrite(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
     await _prefs.setStringList(_kHomeSuggestionDismissedKeys, dismissedKeys.toList());
+  }
+
+  @override
+  String? get lowCreditNoticeDismissedPeriod => _prefs.getString(_kLowCreditNoticeDismissedPeriod);
+
+  @override
+  Future<void> setLowCreditNoticeDismissedPeriod(String period) async {
+    AppLogger.storageWrite(_kLowCreditNoticeDismissedPeriod, period);
+    await _prefs.setString(_kLowCreditNoticeDismissedPeriod, period);
   }
 
   @override

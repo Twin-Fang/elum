@@ -118,7 +118,8 @@ public class CreditQueryService {
       !snapshot.isFrozen() && balance.available() >= cardImage,
       snapshot.freeImageRegeneratesLeftToday(),
       balance.period().unit(),
-      snapshot.breakdown()
+      snapshot.breakdown(),
+      reservationService.freeRegenerateDailyCap()
     );
   }
 

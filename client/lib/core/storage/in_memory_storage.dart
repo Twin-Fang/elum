@@ -363,6 +363,15 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys) async =>
       _homeSuggestionDismissedKeys = dismissedKeys;
 
+  String? _lowCreditNoticeDismissedPeriod;
+
+  @override
+  String? get lowCreditNoticeDismissedPeriod => _lowCreditNoticeDismissedPeriod;
+
+  @override
+  Future<void> setLowCreditNoticeDismissedPeriod(String period) async =>
+      _lowCreditNoticeDismissedPeriod = period;
+
   bool _isTalkGridView = false;
 
   @override
@@ -442,5 +451,6 @@ class InMemoryStorage implements LocalStorage {
     _talkShareHintDismissedRoutineIds = const [];
     _homeSuggestionShownAtByKind = const {};
     _homeSuggestionDismissedKeys = const {};
+    _lowCreditNoticeDismissedPeriod = null;
   }
 }

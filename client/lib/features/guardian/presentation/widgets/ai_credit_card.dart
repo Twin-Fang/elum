@@ -5,11 +5,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/ai_credit_bar.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../credit/application/credit_costs.dart';
 import '../../../credit/data/credit_repository.dart';
 import '../../../credit/domain/credit_period_unit.dart';
 import 'ai_credit_summary_view.dart';
+
+// 막대 부품은 core (내 크레딧 화면과 함께 씀). 이 파일을 import 하던 곳이 그대로 쓰게 다시 내보냄
+export '../../../../core/widgets/ai_credit_bar.dart';
 
 /// 보호자 설정의 `이번 주 AI 생성` 카드.
 ///
@@ -201,41 +205,6 @@ class _ErrorBody extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-/// 남은 비율 막대 — 숫자와 **함께** 보인다(이슈: 막대만으로는 양을 모른다).
-class AiCreditBar extends StatelessWidget {
-  const AiCreditBar({super.key, required this.ratio, required this.color});
-
-  final double ratio;
-  final Color color;
-
-  static const _height = 10.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = BorderRadius.circular((_height / 2).h);
-    return ClipRRect(
-      borderRadius: radius,
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: context.colors.creditBarTrack),
-        child: SizedBox(
-          height: _height.h,
-          width: double.infinity,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: ratio,
-              heightFactor: 1,
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: color, borderRadius: radius),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

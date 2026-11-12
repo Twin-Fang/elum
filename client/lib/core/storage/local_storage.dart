@@ -202,6 +202,12 @@ abstract interface class LocalStorage {
   DateTime? get homeNotificationNoticeDismissedAt;
   Future<void> setHomeNotificationNoticeDismissedAt(DateTime at);
 
+  /// 홈 `크레딧이 조금 남았어요` 카드를 닫은 크레딧 주기 (그 주기의 다음 초기화 시각 ISO-8601). 없으면 null
+  ///
+  /// 계정에 속하고 [clearAll] 이 지움
+  String? get lowCreditNoticeDismissedPeriod;
+  Future<void> setLowCreditNoticeDismissedPeriod(String period);
+
   /// 업데이트 권유를 마지막으로 띄운 기록 `{최신 버전}|{yyyy-MM-dd}`. 없으면 null
   ///
   /// 하루 한 번만 띄우려고 둔다. 기기에 속하고 [clearAll] 이 지우지 않는다

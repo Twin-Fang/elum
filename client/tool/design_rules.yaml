@@ -114,7 +114,6 @@ restricted_tokens:
   planLearnPro:
     allowed:
       - lib/core/widgets/pro_upsell_button.dart
-      - lib/features/credit/presentation/credit_blocked_dialog.dart  # 팝업 버튼은 ElumDialogAction 이라 위젯을 못 넣음 (문구 키만 공유)
     reason: "요금제 화면 여는 버튼 문구 — ProUpsellButton 에서만 (문구·모양이 화면마다 달라지지 않게)"
 
 # 공통 부품 안에서만 쓸 수 있는 코드 모양 (#1171). 화면은 부품을 부른다
@@ -128,6 +127,17 @@ restricted_patterns:
       lib/core/widgets/show_failure.dart: "실패 팝업의 붉은 확인"
       lib/core/widgets/elum_danger_confirm_dialog.dart: "위험 확인 한 번"
       lib/core/widgets/elum_type_confirm_dialog.dart: "입력 확인의 실행 버튼"
+  # 안내 창·시트 규칙 (docs/08-design-principles.md): 내용을 직접 그리는 창은 안내 뼈대(showElumGuideDialog)로만 새로 만든다
+  #   기존 창은 동결 — 늘리지 않고, 고칠 때 뼈대로 옮긴다
+  guide-dialog-skeleton:
+    pattern: 'showElumDialogContent\b'
+    allowed:
+      lib/core/widgets/elum_dialog.dart: "정의"
+      lib/core/widgets/elum_guide_panel.dart: "안내 뼈대 창 (showElumGuideDialog)"
+      lib/core/widgets/elum_type_confirm_dialog.dart: "입력 확인 창 (부품)"
+      lib/core/app_status/update_suggestion_prompt.dart: "업데이트 권유 (뼈대 이전 · 동결)"
+      lib/features/subscription/presentation/plan_actions.dart: "구매 진행 대기 (뼈대 이전 · 동결)"
+      lib/features/subscription/presentation/plan_paywall_sheet.dart: "요금제 화면 (뼈대 이전 · 동결)"
   dialog-alert-trash-icon:
     pattern: 'ElumDialogIcon\.(alert|trash)'
     allowed:

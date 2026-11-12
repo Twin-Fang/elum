@@ -29,15 +29,9 @@ enum CreditPeriodUnit {
   String resetFallback(AppLocalizations l10n) =>
       isMonth ? l10n.creditResetFallbackMonth : l10n.creditResetFallback;
 
-  /// 크레딧 부족 팝업 제목 (reset: 다시 채워지는 시각)
-  String blockedExhausted(AppLocalizations l10n, String reset) =>
-      isMonth
-          ? l10n.creditBlockedExhaustedMonth(reset)
-          : l10n.creditBlockedExhausted(reset);
-
-  /// 안내 팝업 셋째 문장
-  String refillSentence(AppLocalizations l10n) =>
-      isMonth ? l10n.creditMonthlyRefill : l10n.creditWeeklyRefill;
+  /// 크레딧 더 받기 시트 제목 (다 썼을 때)
+  String topUpExhaustedTitle(AppLocalizations l10n) =>
+      isMonth ? l10n.creditTopUpTitleExhaustedMonth : l10n.creditTopUpTitleExhausted;
 
   /// 요금제 혜택 줄
   String planBenefitMoreCredits(AppLocalizations l10n) =>

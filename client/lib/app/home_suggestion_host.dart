@@ -8,6 +8,7 @@ import '../core/l10n/batchim.dart';
 import '../core/l10n/l10n_context.dart';
 import '../core/router/routes.dart';
 import '../core/widgets/home_notice_card.dart';
+import '../features/credit/application/low_credit_notice.dart';
 import '../features/guardian/domain/home_suggestion.dart';
 import '../features/guardian/presentation/widgets/routine_schedule_sheet.dart';
 import '../features/member/application/plan_access.dart';
@@ -17,7 +18,7 @@ import '../features/subscription/application/plan_paywall_entry.dart';
 import '../features/subscription/domain/plan_benefit.dart';
 import 'home_suggestion_provider.dart';
 
-/// 보호자 홈의 권유 카드 자리: 알림 꺼짐 카드가 보이면 비우고, 아니면 권유 하나를 같은 모양으로 그림
+/// 보호자 홈의 권유 카드 자리: 알림 꺼짐 · 크레딧 부족 카드가 보이면 비우고, 아니면 권유 하나를 같은 모양으로 그림
 ///
 /// 누르면 종류별 이동: 자동 보내기 > 반복 시트(Free 는 요금제 화면), 이야기 올리기 > 올리기 화면, 일과 더 만들기 > [onCreateRoutine]
 class HomeSuggestionHost extends ConsumerWidget {
@@ -34,7 +35,9 @@ class HomeSuggestionHost extends ConsumerWidget {
     final isNotificationNoticeVisible =
         ref.watch(deviceNotificationPermissionControllerProvider) && !ref.watch(homeNotificationNoticeDismissalProvider);
     final suggestion = ref.watch(homeSuggestionProvider);
-    if (isNotificationNoticeVisible || suggestion == null) return const SizedBox.shrink();
+    // 안내 카드가 둘 넘게 쌓이지 않게: 크레딧 부족 카드가 보이면 권유는 쉼
+    final isLowCreditNoticeVisible = ref.watch(lowCreditNoticeProvider) != null;
+    if (isNotificationNoticeVisible || isLowCreditNoticeVisible || suggestion == null) return const SizedBox.shrink();
 
     final l10n = context.l10n;
     final routineTitle = suggestion.routine.displayTitle;

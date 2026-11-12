@@ -116,10 +116,12 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
   String _openedBenefitsText(AppLocalizations l10n) {
     final access = ref.read(planAccessProvider);
     final periodUnit = ref.read(creditPeriodUnitProvider);
+    final freeRegenerateDailyCap = ref.read(freeImageRegenerateDailyCapProvider);
     final sections = proPlanBenefitSections(proPlan: access.proPlanEntitlements, current: PlanEntitlements.free);
     final lines = [
       for (final section in sections)
-        for (final benefit in section.benefits) planBenefitLabel(l10n, benefit, periodUnit),
+        for (final benefit in section.benefits)
+          planBenefitLabel(l10n, benefit, periodUnit, freeRegenerateDailyCap: freeRegenerateDailyCap),
     ];
     return lines.isEmpty ? planStatusLabel(l10n, ref.watch(planStatusProvider)) : lines.join('\n');
   }

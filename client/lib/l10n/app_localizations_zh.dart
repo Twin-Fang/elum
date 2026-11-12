@@ -86,26 +86,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creditBlockedBusy => '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요';
 
   @override
-  String creditBlockedExhausted(String reset) {
-    return '이번 주 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
-  }
-
-  @override
-  String creditBlockedExhaustedMonth(String reset) {
-    return '이번 달 크레딧을 모두 사용했어요.\n$reset에 다시 채워져요';
-  }
-
-  @override
-  String creditAdOffer(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '광고를 끝까지 보면 크레딧 $count개를 받아요',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String creditReceivedTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -114,12 +94,6 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get creditReceivedTitleNoCount => '크레딧을 받았어요';
-
-  @override
-  String get creditAdWatchMore => '광고 보고 더 만들기';
 
   @override
   String get adRewardPreparing => '광고를 준비하고 있어요';
@@ -1675,43 +1649,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String aiCreditResetLine(String reset) {
     return '$reset에 다시 채워져요';
   }
-
-  @override
-  String get creditCostTitle => 'AI 크레딧은 이렇게 줄어요';
-
-  @override
-  String creditCostLineTextFree(int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost개',
-    );
-    return '일과 글은 크레딧 없이 만들고, 그림이 완성된 카드 1장마다 $_temp0씩 써요.';
-  }
-
-  @override
-  String creditCostLine(int textCost, int imageCost) {
-    String _temp0 = intl.Intl.pluralLogic(
-      textCost,
-      locale: localeName,
-      other: '$textCost개',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      imageCost,
-      locale: localeName,
-      other: '$imageCost개',
-    );
-    return '일과 글을 만들 때 $_temp0, 그림이 완성된 카드 1장마다 $_temp1씩 써요.';
-  }
-
-  @override
-  String get creditCostKeepGoing => '크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.';
-
-  @override
-  String get creditWeeklyRefill => '매주 월요일 0시에 다시 채워져요.';
-
-  @override
-  String get creditMonthlyRefill => '매달 1일 0시에 다시 채워져요.';
 
   @override
   String get routineCreateButton => '새로운 일과 만들기';
@@ -3684,7 +3621,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이 써요';
 
   @override
-  String get planBenefitFreeImageRegenerate => '마음에 안 들면 크레딧 없이 다시 그려요';
+  String get planBenefitFreeImageRegenerate => '하루 정해진 횟수까지 크레딧 없이 다시 그려요';
+
+  @override
+  String planBenefitFreeImageRegenerateDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '하루 $count번까지 크레딧 없이 다시 그려요',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
@@ -5002,4 +4949,211 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planBenefitCardSplit => '把一张卡片拆得更小';
+
+  @override
+  String get creditTopUpTitleExhausted => '🎟️ 이번 주 크레딧을 다 썼어요';
+
+  @override
+  String get creditTopUpTitleExhaustedMonth => '🎟️ 이번 달 크레딧을 다 썼어요';
+
+  @override
+  String get creditTopUpTitleShort => '🎟️ 크레딧이 조금 모자라요';
+
+  @override
+  String creditTopUpRefillAt(String reset) {
+    return '$reset에 다시 채워져요';
+  }
+
+  @override
+  String creditTopUpAdTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '광고 보고 크레딧 $count개 받기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdTitleNoCount => '광고 보고 크레딧 받기';
+
+  @override
+  String creditTopUpAdDetail(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '30초쯤 걸려요, 오늘 $remaining번 더 받을 수 있어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdWatch => '광고 보기';
+
+  @override
+  String get creditTopUpAdOff => '지금은 광고로 받을 수 없어요';
+
+  @override
+  String get creditTopUpAdDailyLimit => '오늘은 다 받았어요. 내일 다시 볼 수 있어요';
+
+  @override
+  String get creditTopUpAdCheckFailed => '광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요';
+
+  @override
+  String get creditTopUpPackLink => '크레딧 꾸러미 보기';
+
+  @override
+  String get creditTopUpRoutineContinue => '이어서 만들기';
+
+  @override
+  String get creditTopUpRedrawContinue => '이어서 그리기';
+
+  @override
+  String creditRewardTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '🎟️ 크레딧 $count개를 받았어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditRewardTitleNoCount => '🎟️ 크레딧을 받았어요';
+
+  @override
+  String creditRewardPlus(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get creditRewardReason => '광고를 끝까지 봐서 받았어요';
+
+  @override
+  String get creditRewardBalanceLabel => '지금 크레딧';
+
+  @override
+  String get lowCreditNoticeTitle => '크레딧이 조금 남았어요';
+
+  @override
+  String get lowCreditNoticeTitleEmpty => '크레딧을 다 썼어요';
+
+  @override
+  String get lowCreditNoticeBody => '광고를 보면 바로 더 받을 수 있어요';
+
+  @override
+  String get lowCreditNoticeAction => '광고 보고 받기';
+
+  @override
+  String get creditGuideTitle => '🎟️ 크레딧은 이렇게 써요';
+
+  @override
+  String get creditGuideBasis => '내 요금제 기준이에요';
+
+  @override
+  String get creditGuideRoutineText => '일과 글 만들기';
+
+  @override
+  String get creditGuideCardImage => '카드 그림 1장';
+
+  @override
+  String get creditGuideRegenerate => '그림 다시 그리기';
+
+  @override
+  String get creditGuideWeeklyGrant => '매주 받는 크레딧';
+
+  @override
+  String get creditGuideMonthlyGrant => '매달 받는 크레딧';
+
+  @override
+  String creditGuideCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideUnlimited => '제한 없음';
+
+  @override
+  String creditGuideRegenerateFreeToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '오늘 $count번 더 무료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideKeepGoing => '시작한 일과는 크레딧이 모자라도 끝까지 만들어져요';
+
+  @override
+  String get creditGuideRefillWeek => '매주 월요일 0시에 다시 채워져요';
+
+  @override
+  String get creditGuideRefillMonth => '매달 1일 0시에 다시 채워져요';
+
+  @override
+  String creditGuideProFactBoth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro는 일과 글이 제한 없고, 다시 그리기는 하루 $count번 무료예요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideProFactText => 'Pro는 일과 글이 제한 없어요';
+
+  @override
+  String creditGuideProFactRegenerate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pro는 다시 그리기가 하루 $count번 무료예요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditGuideRegenerateFreeDaily(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '하루 $count번 무료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditGuideConfirm => '알겠어요';
+
+  @override
+  String myCreditUsageWeek(int used, int available) {
+    return '이번 주에 $used개 쓰고 $available개 남았어요';
+  }
+
+  @override
+  String myCreditUsageMonth(int used, int available) {
+    return '이번 달에 $used개 쓰고 $available개 남았어요';
+  }
+
+  @override
+  String myCreditFreeRegenerateToday(int left, int cap) {
+    return '오늘 무료 다시 그리기 $left번 남았어요 (하루 $cap번)';
+  }
+
+  @override
+  String get myCreditRecentTitle => '최근 쓴 내역';
+
+  @override
+  String get myCreditSeeAllHistory => '전체 내역 보기';
+
+  @override
+  String get myCreditGuideLink => '크레딧은 이렇게 써요';
 }
