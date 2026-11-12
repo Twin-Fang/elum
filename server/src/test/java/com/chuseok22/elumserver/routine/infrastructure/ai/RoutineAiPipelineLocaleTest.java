@@ -55,7 +55,7 @@ class RoutineAiPipelineLocaleTest {
   void setUp() {
     pipeline = new RoutineAiPipeline(
       textClientRouter,
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);

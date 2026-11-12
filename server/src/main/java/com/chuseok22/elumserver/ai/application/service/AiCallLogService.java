@@ -127,6 +127,8 @@ public class AiCallLogService {
       // 달라지는데 장당 고정값은 그것을 따라가지 못한다.
       case OPENAI_IMAGE -> openAiImageCostUsd(usage);
       case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
+      // 하루 무료 한도 안은 실제 0 이지만 유료 단가로 보수적으로 잡는다
+      case CLOUDFLARE_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_CLOUDFLARE_IMAGE_PER_IMAGE);
       case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION, OPENAI_TEXT_PICTOGRAM, OPENAI_TEXT_TRANSLATE, OPENAI_TEXT_MEMORY,
         OPENAI_TEXT_WEEKLY_REPORT, OPENAI_TEXT_CARD_SPLIT -> textCostUsd(
         usage,

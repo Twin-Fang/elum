@@ -122,7 +122,7 @@ class PromptDefaultsTest {
     for (PromptKey key : PromptKey.values()) {
       assertThat(PromptDefaults.DEFAULTS.get(key)).as(key.name()).isNotBlank();
     }
-    assertThat(PromptDefaults.DEFAULTS).hasSize(8);
+    assertThat(PromptDefaults.DEFAULTS).hasSize(9);
   }
 
   @Test

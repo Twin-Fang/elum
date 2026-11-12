@@ -746,16 +746,16 @@ abstract class AppLocalizations {
   /// **'하는 동작을 선 그림으로 보여줘요'**
   String get imageStyleSymbolDescription;
 
-  /// 카드 그림 방식 이름 (Pro, AI 캐릭터 그림)
+  /// 카드 그림 방식 이름 (Pro, AI 만화 그림)
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터 그림'**
+  /// **'만화 그림'**
   String get imageStyleCharacterLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'캐릭터가 직접 해 보여요'**
+  /// **'만화 속 아이가 직접 해 보여요'**
   String get imageStyleCharacterDescription;
 
   /// 카드 그림 방식 이름 (Pro, AI 실사 그림)
@@ -827,7 +827,7 @@ abstract class AppLocalizations {
   /// 캐릭터 고르기 화면 설명
   ///
   /// In ko, this message translates to:
-  /// **'선택한 친구가 카드 속 주인공이 되어 도와줘요'**
+  /// **'선택한 친구가 홈과 보상 화면에서 함께해요'**
   String get onboardingCharacterDescription;
 
   /// 카드 그림 방식 화면 제목
@@ -6746,12 +6746,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{{count}일}}'**
   String planTrialDays(int count);
 
-  /// 무료 체험 기간 (스토어 값, 주 단위) #1166
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{{count}주}}'**
-  String planTrialWeeks(int count);
-
   /// 무료 체험 기간 (스토어 값, 달 단위) #1166
   ///
   /// In ko, this message translates to:
@@ -6769,12 +6763,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{trial} 무료로 시작하기'**
   String planStartFreeTrial(String trial);
-
-  /// 기간 고르기 아래: 고른 상품의 체험 종료일·첫 청구 (오늘 시작 기준) #1166
-  ///
-  /// In ko, this message translates to:
-  /// **'무료 체험은 {date}에 끝나요. 해지하지 않으면 그날부터 {price}씩 청구돼요.'**
-  String planTrialEndsNotice(String date, String price);
 
   /// 법적 문구 — #1079 확정 전 초안 · App Store 무료 체험 해지 안내 (체험 상품이 있을 때만) #1166
   ///
@@ -6803,7 +6791,7 @@ abstract class AppLocalizations {
   /// 구매 요청 대기 설명
   ///
   /// In ko, this message translates to:
-  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요'**
+  /// **'허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요.'**
   String get planStorePendingBody;
 
   /// 결제는 됐지만 아직 Pro가 안 켜짐
@@ -8465,13 +8453,13 @@ abstract class AppLocalizations {
   /// 머리 비교: Pro 카드 아래 작은 글 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Pro 캐릭터 그림'**
+  /// **'Pro 만화 그림'**
   String get planHeroProTag;
 
   /// 머리 비교 그림의 읽기 프로그램 문구 #1189
   ///
   /// In ko, this message translates to:
-  /// **'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요'**
+  /// **'Free는 이모지 카드, Pro는 만화 그림 카드예요'**
   String get planHeroCompareSemantics;
 
   /// 혜택 묶음 제목: 그림·다시 그리기·인쇄. elumiName 은 고른 이룸이 호칭 #1189
@@ -8504,12 +8492,6 @@ abstract class AppLocalizations {
   /// **'{percent}% 아껴요'**
   String planYearlySaving(int percent);
 
-  /// 1년 기간 카드 설명 (1년 가격 ÷ 12, 스토어 통화) #1189
-  ///
-  /// In ko, this message translates to:
-  /// **'한 달에 {price} 꼴'**
-  String planMonthlyEquivalent(String price);
-
   /// 1년 기간 카드 설명 (한 달 꼴 값을 모를 때) #1189
   ///
   /// In ko, this message translates to:
@@ -8522,6 +8504,12 @@ abstract class AppLocalizations {
   /// **'1개월마다 자동 갱신'**
   String get planRenewsMonthly;
 
+  /// 1년 기간 카드 설명: 한 달 꼴 값 + 갱신 주기 (1개월 카드와 맞춤) #1265
+  ///
+  /// In ko, this message translates to:
+  /// **'한 달에 {price} 꼴 · 1년마다 자동 갱신'**
+  String planMonthlyEquivalentRenewsYearly(String price);
+
   /// 기간 카드 가격 뒤 단위 · 버튼 아래 한 줄 #1189
   ///
   /// In ko, this message translates to:
@@ -8531,7 +8519,7 @@ abstract class AppLocalizations {
   /// 요금제 화면 버튼 아래 한 줄 (App Store 체험, 스토어 값) #1189
   ///
   /// In ko, this message translates to:
-  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요'**
+  /// **'{trial} 뒤 {price}{unit} 자동 결제돼요. 끝나기 24시간 전까지 해지하면 청구되지 않아요'**
   String planCtaTrialNoticeAppStore(String trial, String price, String unit);
 
   /// 요금제 화면 버튼 아래 한 줄 (Google Play 체험, 스토어 값) #1189

@@ -14,14 +14,6 @@ class PlanFreeTrial {
   final int unitCount;
   final PlanTrialUnit unit;
 
-  /// 체험이 끝나는 날 (오늘 시작 기준, 달·해는 달력으로 더함)
-  DateTime endDateFrom(DateTime start) => switch (unit) {
-    PlanTrialUnit.day => DateTime(start.year, start.month, start.day + unitCount),
-    PlanTrialUnit.week => DateTime(start.year, start.month, start.day + unitCount * DateTime.daysPerWeek),
-    PlanTrialUnit.month => DateTime(start.year, start.month + unitCount, start.day),
-    PlanTrialUnit.year => DateTime(start.year + unitCount, start.month, start.day),
-  };
-
   @override
   bool operator ==(Object other) =>
       other is PlanFreeTrial && other.unitCount == unitCount && other.unit == unit;

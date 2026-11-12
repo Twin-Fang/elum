@@ -20,6 +20,8 @@ public enum PromptKey {
   REALISTIC_ROUTINE_IMAGE_PREFIX("실사 그림 지시문 (영어 · 전 제공자)", false),
   // 실사용 영어 장면 번역. 'The character' 관례 없이 물건·장소 중심.
   REALISTIC_IMAGE_PROMPT_TRANSLATE("실사 그림 문장 번역", true),
+  // 카드 그림 인물(CardImageSubject.CHILD)의 영어 생김새. Cloudflare 만화 그림이 캐릭터 대신 쓴다 (#1258)
+  CARD_IMAGE_SUBJECT_CHILD("카드 그림 인물: 만화 아이 (영어 생김새)", false),
   ;
 
   private final String label;

@@ -32,7 +32,7 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-public class FluxImageClient implements ImageGenerationClient {
+public class FluxImageClient implements EnglishSceneImageClient {
 
   private static final String BASE_URL = "https://fal.run";
   // fal 은 한 장을 최소 1MP 로 청구한다 — 작게 그려도 싸지지 않는다.
@@ -101,18 +101,21 @@ public class FluxImageClient implements ImageGenerationClient {
    * @param sceneEn 카드의 영어 장면 한 줄("The character …")
    * @param seed    일과마다 고정한 seed. null 이면 fal 이 고른다
    */
+  @Override
   public GeneratedImage generate(String sceneEn, CharacterType characterType, Integer seed) {
     String prefix = promptTemplateService.getContent(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX);
     return call(fluxPromptBuilder.build(prefix, sceneEn, characterType), seed);
   }
 
   /// 실사: 실사 지시문 + 영어 장면. seed 규칙은 만화와 같다(일과마다 고정).
+  @Override
   public GeneratedImage generateRealistic(String sceneEn, Integer seed) {
     String prefix = promptTemplateService.getContent(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX);
     return call(fluxPromptBuilder.buildRealistic(prefix, sceneEn), seed);
   }
 
   /// 관리자 시험 전용: 저장된 지시문 대신 넘겨받은 것을 쓴다. seed 는 두지 않는다.
+  @Override
   public GeneratedImage generateForTest(String prefix, String sceneEn, CharacterType characterType) {
     return call(fluxPromptBuilder.build(prefix, sceneEn, characterType), null);
   }

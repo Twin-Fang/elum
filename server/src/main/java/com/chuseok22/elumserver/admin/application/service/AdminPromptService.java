@@ -6,6 +6,9 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.core.CardImageSubject;
+import com.chuseok22.elumserver.ai.infrastructure.client.CloudflareImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.EnglishSceneImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxPromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
@@ -49,6 +52,7 @@ public class AdminPromptService {
   private final ImageClientRouter imageClientRouter;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final FluxImageClient fluxImageClient;
+  private final CloudflareImageClient cloudflareImageClient;
   private final FluxPromptBuilder fluxPromptBuilder;
 
   public List<PromptTemplate> getAll() {
@@ -117,8 +121,15 @@ public class AdminPromptService {
         character != null && imageClientRouter.current().supportsCharacterReference(),
         ImagePromptLanguage.EN
       );
-      // FLUX 는 JSON 장면 정보 없이 짧은 영어 한 덩어리다. 샘플 입력은 영어 장면 한 줄로 받는다.
-      case FLUX_ROUTINE_IMAGE_PREFIX -> fluxPromptBuilder.build(content, sampleInput, character);
+      // 영어 장면 제공자(FLUX·CLOUDFLARE)는 JSON 장면 정보 없이 짧은 영어 한 덩어리. 샘플 입력은 영어 장면 한 줄
+      // CLOUDFLARE 를 고른 때는 프로필 캐릭터 대신 카드 그림 인물로 조립
+      case FLUX_ROUTINE_IMAGE_PREFIX -> imageClientRouter.selected() == ImageProvider.CLOUDFLARE
+        ? cloudflareImageClient.buildCartoonPrompt(content, sampleInput, character)
+        : fluxPromptBuilder.build(content, sampleInput, character);
+      // 인물 생김새: 저장된 화풍 + 이 생김새 + 샘플 장면 (Cloudflare 만화 그림 모양)
+      case CARD_IMAGE_SUBJECT_CHILD -> fluxPromptBuilder.build(
+        promptTemplateService.getContent(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX), sampleInput, content,
+        CardImageSubject.CHILD.getSubjectEn());
       case FLUX_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildTranslateUserContent(sampleInput);
       // 실사는 캐릭터가 없다 — 선택한 캐릭터가 있어도 무시하고 캐릭터 블록·참조 이미지 없이 만든다.
@@ -174,6 +185,11 @@ public class AdminPromptService {
         String line = testTranslate(content, sampleInput);
         yield new PromptTestResponse(Map.of("imagePromptEn", line), null);
       }
+      // 생김새는 Cloudflare 로 그려 본다 (지금 제공자와 무관, 한 번에 약 $0.0011)
+      case CARD_IMAGE_SUBJECT_CHILD -> {
+        String dataUri = testSubjectImage(content, sampleInput);
+        yield new PromptTestResponse(null, dataUri);
+      }
     };
   }
 
@@ -207,13 +223,38 @@ public class AdminPromptService {
 
   private String testFluxImage(String prefix, String sampleScene, CharacterType characterType) {
     try {
-      return toDataUri(fluxImageClient.generateForTest(prefix, sampleScene, characterType));
+      return toDataUri(englishSceneTestClient().generateForTest(prefix, sampleScene, characterType));
     } catch (CustomException e) {
       // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
       throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] FLUX 이미지 생성 실패: prefixLength={}, sampleInputLength={}",
         LogTextLength.of(prefix), LogTextLength.of(sampleScene), e);
+      throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
+    }
+  }
+
+  /// 영어 장면 지시문을 시험할 제공자: 지금 CLOUDFLARE·FLUX 를 골랐으면 그것, 아니면 FLUX
+  private EnglishSceneImageClient englishSceneTestClient() {
+    ImageProvider selected = imageClientRouter.selected();
+    if (selected == null || !selected.usesEnglishScene()) {
+      return fluxImageClient;
+    }
+    return imageClientRouter.englishScene(selected).orElse(fluxImageClient);
+  }
+
+  private String testSubjectImage(String appearance, String sampleScene) {
+    if (!cloudflareImageClient.available()) {
+      throw new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE, "provider=CLOUDFLARE");
+    }
+    try {
+      String prefix = promptTemplateService.getContent(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX);
+      return toDataUri(cloudflareImageClient.generateWithAppearanceForTest(prefix, appearance, sampleScene));
+    } catch (CustomException e) {
+      throw e;
+    } catch (Exception e) {
+      log.warn("[관리자 테스트] Cloudflare 인물 그림 실패: appearanceLength={}, sampleInputLength={}",
+        LogTextLength.of(appearance), LogTextLength.of(sampleScene), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
     }
   }
@@ -237,12 +278,13 @@ public class AdminPromptService {
   /**
    * 한국어·영어 그림 지시문을 시험할 제공자.
    *
-   * <p>FLUX 를 골라 두었으면 이 지시문들은 FLUX 가 아니라 <b>OpenAI fallback</b> 이 쓴다. FLUX 로
+   * <p>FLUX·CLOUDFLARE 를 골라 두었으면 이 지시문들은 그쪽이 아니라 <b>OpenAI fallback</b> 이 쓴다. 그쪽으로
    * 그리면 한국어 지시문을 받아 사람을 그린다. 그래서 그때는 OpenAI 로 시험한다.
    */
   private ImageGenerationClient promptTestImageClient() {
     ImageGenerationClient current = imageClientRouter.current();
-    if (current.provider() != ImageProvider.FLUX) {
+    ImageProvider provider = current.provider();
+    if (provider == null || !provider.usesEnglishScene()) {
       return current;
     }
     return imageClientRouter.of(ImageProvider.OPENAI)

@@ -378,10 +378,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get imageStyleSymbolDescription => '하는 동작을 선 그림으로 보여줘요';
 
   @override
-  String get imageStyleCharacterLabel => '캐릭터 그림';
+  String get imageStyleCharacterLabel => '만화 그림';
 
   @override
-  String get imageStyleCharacterDescription => '캐릭터가 직접 해 보여요';
+  String get imageStyleCharacterDescription => '만화 속 아이가 직접 해 보여요';
 
   @override
   String get imageStyleRealisticLabel => '사진 같은 그림';
@@ -433,7 +433,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
+  String get onboardingCharacterDescription => '선택한 친구가 홈과 보상 화면에서 함께해요';
 
   @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
@@ -3815,16 +3815,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String planTrialWeeks(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count주',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String planTrialMonths(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3850,11 +3840,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String planTrialEndsNotice(String date, String price) {
-    return '무료 체험은 $date에 끝나요. 해지하지 않으면 그날부터 $price씩 청구돼요.';
-  }
-
-  @override
   String get planLegalTrialAppStore =>
       '무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.';
 
@@ -3868,7 +3853,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planStorePendingTitle => '결제 허락을 요청했어요';
 
   @override
-  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요';
+  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요.';
 
   @override
   String get planVerificationPendingTitle => '결제를 확인하고 있어요';
@@ -4895,10 +4880,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planHeroFreeTag => 'Free 이모지';
 
   @override
-  String get planHeroProTag => 'Pro 캐릭터 그림';
+  String get planHeroProTag => 'Pro 만화 그림';
 
   @override
-  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 캐릭터 그림 카드예요';
+  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 만화 그림 카드예요';
 
   @override
   String planBenefitGroupCards(String elumiName) {
@@ -4920,15 +4905,15 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String planMonthlyEquivalent(String price) {
-    return '한 달에 $price 꼴';
-  }
-
-  @override
   String get planRenewsYearly => '1년마다 자동 갱신';
 
   @override
   String get planRenewsMonthly => '1개월마다 자동 갱신';
+
+  @override
+  String planMonthlyEquivalentRenewsYearly(String price) {
+    return '한 달에 $price 꼴 · 1년마다 자동 갱신';
+  }
 
   @override
   String planPriceUnit(String period) {
@@ -4941,7 +4926,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 하루 전까지 해지하면 청구되지 않아요';
+    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 24시간 전까지 해지하면 청구되지 않아요';
   }
 
   @override

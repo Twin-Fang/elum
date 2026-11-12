@@ -74,4 +74,12 @@ class FluxPromptBuilderTest {
     assertThat(builder.build("Style.", "The character waves.", CharacterType.POPO))
       .isEqualTo("Style. Only one character: " + CharacterType.POPO.getAppearanceEn() + ". The fox cub waves.");
   }
+
+  @org.junit.jupiter.api.Test
+  @org.junit.jupiter.api.DisplayName("생김새·주어를 직접 넘기면 그대로 조립 — Cloudflare 만화 아이 경로")
+  void build_withSubject_replacesCharacterWithChild() {
+    org.assertj.core.api.Assertions.assertThat(new FluxPromptBuilder()
+        .build("Style.", "The character brushes the teeth.", "a kid", "child"))
+      .isEqualTo("Style. Only one character: a kid. The child brushes the teeth.");
+  }
 }

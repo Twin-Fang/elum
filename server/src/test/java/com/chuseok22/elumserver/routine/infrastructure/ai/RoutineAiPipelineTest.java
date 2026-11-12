@@ -80,7 +80,7 @@ class RoutineAiPipelineTest {
     // FLUX 가 아니고, 지금처럼 current() 의 제공자로 그린다.
     routineAiPipeline = new RoutineAiPipeline(
       textClientRouter,
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, PictogramCatalogs.mulberryOnly(PictogramCatalog.empty()));
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
@@ -437,6 +437,7 @@ class RoutineAiPipelineTest {
   @DisplayName("FLUX 를 고르면 같은 글 호출에서 카드마다 영어 장면을 받아 그대로 FLUX 에 넘긴다 — seed 는 이 일과로 고정 (#373)")
   void generateForCreate_flux_passesEnglishSceneAndRoutineSeed() {
     when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    lenient().when(imageClientRouter.englishScene(ImageProvider.FLUX)).thenReturn(java.util.Optional.of(fluxImageClient));
     when(fluxImageClient.available()).thenReturn(true);
     String json = "{\"title\":\"비 오는 날 학교에 가요\",\"steps\":["
       + "{\"order\":1,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\","
@@ -508,6 +509,7 @@ class RoutineAiPipelineTest {
   @DisplayName("만화 + FLUX 는 영어 장면을 요청한다 — 기존 동작 그대로")
   void generateForCreate_cartoonFlux_asksForEnglishScene() {
     when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    lenient().when(imageClientRouter.englishScene(ImageProvider.FLUX)).thenReturn(java.util.Optional.of(fluxImageClient));
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
     when(fluxImageClient.available()).thenReturn(false);
     when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(java.util.Optional.of(imageGenerationClient));
@@ -543,7 +545,7 @@ class RoutineAiPipelineTest {
   private RoutineAiPipeline pipelineWith(PictogramCatalog catalog) {
     return new RoutineAiPipeline(
       textClientRouter,
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, PictogramCatalogs.mulberryOnly(catalog));
   }
 
@@ -632,7 +634,7 @@ class RoutineAiPipelineTest {
     });
     RoutineAiPipeline pipeline = new RoutineAiPipeline(
       textClientRouter,
-      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      new CardImageGenerator(imageClientRouter, geminiTextClient),
       routineImageStorage, new PictogramCatalogs(catalog, emojiCatalog));
     return pipeline.generateForCreate(
       "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.EMOJI, "profile-1").steps();
