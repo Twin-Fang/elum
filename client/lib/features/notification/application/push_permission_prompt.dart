@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/push_permission_sheet.dart';
@@ -15,7 +16,7 @@ final pushPermissionPromptProvider = Provider<PushPermissionPrompt>(
   PushPermissionPrompt.new,
 );
 
-/// 알림 권한 요청 한 곳: 안내 시트(첫 일과를 보낸 뒤 한 번) + 꺼진 기기에 다시 권하기(7일마다) + 설정 화면의 직접 요청
+/// 알림 권한 요청 한 곳: 안내 화면(온보딩 끝·업데이트 뒤 한 번) + 안내 시트(첫 일과를 보낸 뒤 한 번) + 꺼진 기기에 다시 권하기(7일마다) + 설정 화면의 직접 요청
 /// 요청은 모두 [PushMessagingClient] 한 경로 (iOS APNs 등록이 함께 일어남)
 class PushPermissionPrompt {
   PushPermissionPrompt(this._ref);
@@ -104,6 +105,28 @@ class PushPermissionPrompt {
       AppLogger.error('push', e, st, {'step': 'maybeNudge'});
     } finally {
       _isAsking = false;
+    }
+  }
+
+  /// 알림 켜기 안내 화면을 띄울 차례인가: 보호자 기기 + 안 봤음 + 알림 꺼짐
+  /// 권한 확인 실패는 false (안내 화면 없이 홈으로)
+  Future<bool> shouldShowIntro() async {
+    if (_storage.isElumiDevice || _storage.isPushPermissionIntroSeen) return false;
+    final status = await _readStatus();
+    return status != null && !status.isGranted;
+  }
+
+  /// 온보딩을 마친 뒤 첫 자리: 안내 화면 차례면 안내 화면, 아니면 보호자 홈
+  Future<String> resolveRouteAfterOnboarding() async =>
+      await shouldShowIntro() ? Routes.onboardingNotificationIntro : Routes.guardian;
+
+  /// 안내 화면을 띄운 순간 기록: 다시 안 띄움 + 홈 다시 권하기 시트가 7일 동안 겹치지 않게
+  Future<void> markIntroShown() async {
+    try {
+      await _storage.setPushPermissionIntroSeen(true);
+      await _storage.setPushPermissionNudgedAt(DateTime.now());
+    } catch (e, st) {
+      AppLogger.error('push', e, st, {'step': 'markIntroShown'});
     }
   }
 

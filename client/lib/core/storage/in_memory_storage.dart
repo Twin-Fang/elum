@@ -285,6 +285,14 @@ class InMemoryStorage implements LocalStorage {
 
   bool _hasAskedPushPermission = false;
   DateTime? _pushPermissionNudgedAt;
+  bool _isPushPermissionIntroSeen = false;
+
+  @override
+  bool get isPushPermissionIntroSeen => _isPushPermissionIntroSeen;
+
+  @override
+  Future<void> setPushPermissionIntroSeen(bool isSeen) async =>
+      _isPushPermissionIntroSeen = isSeen;
   DateTime? _homeNotificationNoticeDismissedAt;
 
   @override

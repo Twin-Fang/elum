@@ -18,6 +18,7 @@ import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/notification/presentation/notification_settings_screen.dart';
 import '../../features/notification/presentation/notifications_screen.dart';
+import '../../features/onboarding/presentation/aba_intro_screen.dart';
 import '../../features/profile/presentation/elumi_info_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
@@ -29,7 +30,7 @@ import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
-/// 보호자 설정·내정보 하위 화면 (하단 바를 덮음): 결제 확인 암호, 약관, 주간 리포트·계획, 라이선스, 이야기 차단·내 글,
+/// 보호자 설정·내정보 하위 화면 (하단 바를 덮음): 결제 확인 암호, 약관, 주간 리포트·계획, 설계 원리 소개, 라이선스, 이야기 차단·내 글,
 /// 설정, 연결 암호, 임시저장, 그림 방식, AI 메모리, 의견, 알림·알림 설정, 크레딧 내역, 보호자·초대·이룸이 전환·정보, 연결 상태, 암호 바꾸기
 List<RouteBase> guardianSettingsRoutes() => [
   // 결제 직전 보호자 확인: 화면 전환 암호 화면을 그대로 쓰고 맞으면 true 로 닫힌다
@@ -61,6 +62,10 @@ List<RouteBase> guardianSettingsRoutes() => [
       const WeeklyPlanScreen(),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
+  ),
+  GoRoute(
+    path: Routes.guardianAboutElum,
+    pageBuilder: (context, state) => slidePage(state, const AbaIntroScreen(isFromSettings: true)),
   ),
   GoRoute(
     path: Routes.guardianLicenses,

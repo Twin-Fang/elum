@@ -40,4 +40,8 @@ enum CreditPeriodUnit {
   /// 내 정보 내 요금제 카드(Free) 한 줄
   String myPlanFreeBody(AppLocalizations l10n) =>
       isMonth ? l10n.myPlanFreeBodyMonth : l10n.myPlanFreeBodyWeek;
+
+  /// 알림 켜기 안내 셋째 줄 (주간 리포트 권한 없을 때)
+  String notificationIntroCreditRefilled(AppLocalizations l10n) =>
+      isMonth ? l10n.notificationIntroCreditRefilledMonth : l10n.notificationIntroCreditRefilledWeek;
 }
