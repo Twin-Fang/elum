@@ -1,5 +1,9 @@
 package com.chuseok22.elumserver.admin.application.exception;
 
+import com.chuseok22.elumserver.admin.application.controller.AdminAutoNotificationController;
+import com.chuseok22.elumserver.admin.application.controller.AdminNotificationPerformanceController;
+import com.chuseok22.elumserver.admin.application.controller.AdminPushController;
+import com.chuseok22.elumserver.admin.application.controller.AdminScheduledPushController;
 import com.chuseok22.elumserver.admin.application.controller.AdminAdRewardController;
 import com.chuseok22.elumserver.admin.application.controller.AdminAuditController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConfigController;
@@ -59,6 +63,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
   AdminTalkController.class,
   AdminTextProviderController.class,
   AdminViewController.class,
+  // 알림 운영 화면 4개 (#1279·#1293 에서 생겨 빠졌던 것, #1307)
+  AdminPushController.class,
+  AdminScheduledPushController.class,
+  AdminAutoNotificationController.class,
+  AdminNotificationPerformanceController.class,
 })
 @Slf4j
 public class AdminViewExceptionHandler {
