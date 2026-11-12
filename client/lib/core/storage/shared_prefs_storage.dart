@@ -60,6 +60,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
   static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
+  // 알림 켜기 안내 화면(온보딩 끝·업데이트 뒤 한 번)을 이 기기에서 봤는가
+  static const _kPushPermissionIntroSeen = 'push.permissionIntroSeen';
   // 보호자 홈 알림 꺼짐 띠를 닫은 시각 (ISO-8601, 7일 숨김)
   static const _kHomeNotificationNoticeDismissedAt = 'push.homeNoticeDismissedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
@@ -125,6 +127,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kCachedStoreSellingOpen,
     _kHasAskedPushPermission,
     _kPushPermissionNudgedAt,
+    _kPushPermissionIntroSeen,
     _kHomeNotificationNoticeDismissedAt,
     _kUpdateSuggestionShown,
     _kHomeCoachSeen,
@@ -444,6 +447,16 @@ class SharedPrefsStorage implements LocalStorage {
     final raw = at.toIso8601String();
     AppLogger.storageWrite(_kPushPermissionNudgedAt, raw);
     await _prefs.setString(_kPushPermissionNudgedAt, raw);
+  }
+
+  @override
+  bool get isPushPermissionIntroSeen =>
+      _prefs.getBool(_kPushPermissionIntroSeen) ?? false;
+
+  @override
+  Future<void> setPushPermissionIntroSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kPushPermissionIntroSeen, '$isSeen');
+    await _prefs.setBool(_kPushPermissionIntroSeen, isSeen);
   }
 
   @override

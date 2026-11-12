@@ -5432,4 +5432,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myCreditGuideLink => 'How credits work';
+
+  @override
+  String get abaIntroTitle => '🧩 Easy to prepare, done on their own';
+
+  @override
+  String get abaIntroSubtitle =>
+      'ELUM is built on the principles of Applied Behavior Analysis (ABA)';
+
+  @override
+  String get abaIntroCardTitle => 'One action per card';
+
+  @override
+  String get abaIntroCardBody =>
+      'What to do, how to do it, and the reward at the end';
+
+  @override
+  String get abaIntroVoiceTitle => 'Short sentences, pictures and voice';
+
+  @override
+  String get abaIntroVoiceBody =>
+      'Look, listen and follow along one step at a time';
+
+  @override
+  String get abaIntroStarTitle => 'Praise and stars right away';
+
+  @override
+  String get abaIntroStarBody => 'Plus the reward you chose';
+
+  @override
+  String get abaIntroGuardianTitle => '💛 You matter most';
+
+  @override
+  String get abaIntroGuardianBody =>
+      'You know your child best, so you set the routines and rewards. ELUM stays close so your child can keep going on their own';
+
+  @override
+  String get abaIntroStart => 'Get started';
+
+  @override
+  String get guardianSettingsAboutElum => 'How ELUM is designed';
+
+  @override
+  String get notificationIntroTitle => '🔔 Please turn on notifications';
+
+  @override
+  String get notificationIntroBody =>
+      'We\'ll let you know right away, so you never miss an update';
+
+  @override
+  String get notificationIntroRoutineDone =>
+      'When your ELUM user finishes a routine';
+
+  @override
+  String get notificationIntroCaregiverRoutine =>
+      'When another caregiver sends a routine';
+
+  @override
+  String get notificationIntroWeeklyReport => 'When the weekly report is ready';
+
+  @override
+  String get notificationIntroCreditRefilledWeek =>
+      'When this week\'s credits are refilled';
+
+  @override
+  String get notificationIntroCreditRefilledMonth =>
+      'When this month\'s credits are refilled';
 }

@@ -8983,6 +8983,120 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'크레딧은 이렇게 써요'**
   String get myCreditGuideLink;
+
+  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277
+  ///
+  /// In ko, this message translates to:
+  /// **'🧩 준비는 간편하게, 일상은 스스로'**
+  String get abaIntroTitle;
+
+  /// ABA 소개 화면 제목 아래 한 줄. 치료·효과 표현 금지, 기관 이름 금지
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸은 응용행동분석(ABA)의 원리로 만들었어요'**
+  String get abaIntroSubtitle;
+
+  /// ABA 소개 줄 1 제목 (카드 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 한 장에 한 가지 행동'**
+  String get abaIntroCardTitle;
+
+  /// ABA 소개 줄 1 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지'**
+  String get abaIntroCardBody;
+
+  /// ABA 소개 줄 2 제목 (소리 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'짧은 문장, 그림과 목소리'**
+  String get abaIntroVoiceTitle;
+
+  /// ABA 소개 줄 2 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보고 들으며 하나씩 따라 해요'**
+  String get abaIntroVoiceBody;
+
+  /// ABA 소개 줄 3 제목 (별 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'해내면 바로 칭찬과 별'**
+  String get abaIntroStarTitle;
+
+  /// ABA 소개 줄 3 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자님이 정한 보상까지 받아요'**
+  String get abaIntroStarBody;
+
+  /// ABA 소개 아래 보호자 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'💛 가장 중요한 건 보호자님이에요'**
+  String get abaIntroGuardianTitle;
+
+  /// ABA 소개 아래 보호자 묶음 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요'**
+  String get abaIntroGuardianBody;
+
+  /// ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get abaIntroStart;
+
+  /// 설정 > 약관 및 정보 줄, ABA 소개 화면 다시 보기 (화면 제목으로도 씀)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸은 이렇게 만들었어요'**
+  String get guardianSettingsAboutElum;
+
+  /// 알림 켜기 안내 화면 제목 (온보딩 끝, 이미 가입한 보호자는 업데이트 뒤 한 번) #1275
+  ///
+  /// In ko, this message translates to:
+  /// **'🔔 알림을 꼭 켜 주세요'**
+  String get notificationIntroTitle;
+
+  /// 알림 켜기 안내 화면 제목 아래 한 줄 (왜 켜야 하는지)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요'**
+  String get notificationIntroBody;
+
+  /// 알림 켜기 안내: 받는 알림 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 마쳤을 때'**
+  String get notificationIntroRoutineDone;
+
+  /// 알림 켜기 안내: 받는 알림 2 (공동 보호자가 보낸 일과)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보는 분이 일과를 보냈을 때'**
+  String get notificationIntroCaregiverRoutine;
+
+  /// 알림 켜기 안내: 받는 알림 3
+  ///
+  /// In ko, this message translates to:
+  /// **'주간 리포트가 나왔을 때'**
+  String get notificationIntroWeeklyReport;
+
+  /// 알림 켜기 안내: 받는 알림 3 (주간 리포트 권한 없음, 주 단위 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 다시 채워졌을 때'**
+  String get notificationIntroCreditRefilledWeek;
+
+  /// 알림 켜기 안내: 받는 알림 3 (주간 리포트 권한 없음, 월 단위 크레딧)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 크레딧이 다시 채워졌을 때'**
+  String get notificationIntroCreditRefilledMonth;
 }
 
 class _AppLocalizationsDelegate

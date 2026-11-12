@@ -7,7 +7,7 @@ import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_guide_motion.dart';
 
-// 안내 창·시트 내용 줄 부품: 아이콘 타일 · 표 줄 · 세는 표 줄 · 설명 줄 · 구분선 (뼈대는 elum_guide_panel.dart)
+// 안내 창·시트 내용 줄 부품: 아이콘 타일 · 표 줄 · 세는 표 줄 · 설명 줄 · 항목 줄 · 구분선 (뼈대는 elum_guide_panel.dart)
 
 /// 줄 머리 아이콘 타일: 둥근 타일(32, 모서리 10) 위 선 아이콘 16 (홈 안내 카드 타일과 같은 바탕색)
 class ElumGuideIconTile extends StatelessWidget {
@@ -158,6 +158,51 @@ class ElumGuideNote extends StatelessWidget {
                 Expanded(child: Text(_keep(context, text), semanticsLabel: text, style: style)),
               ],
             ),
+    );
+  }
+}
+
+/// 항목 한 줄: 아이콘 타일 > 굵은 항목 + 아래 회색 설명 (설명 없으면 항목만)
+/// 값이 없는 소개 줄 (설계 원리 3줄, 받는 알림 목록)
+class ElumGuideFeatureRow extends StatelessWidget {
+  const ElumGuideFeatureRow({super.key, required this.iconAsset, required this.title, this.description});
+
+  final String iconAsset;
+  final String title;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final space = context.space;
+    final colors = context.colors;
+    final description = this.description;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: (space.xs / 2).h),
+      child: Row(
+        crossAxisAlignment: description == null ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        children: [
+          ElumGuideIconTile(iconAsset: iconAsset),
+          SizedBox(width: space.sm.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _keep(context, title),
+                  semanticsLabel: title,
+                  style: context.typo.creditBody.copyWith(color: colors.textPrimary, fontWeight: FontWeight.w600),
+                ),
+                if (description != null)
+                  Text(
+                    _keep(context, description),
+                    semanticsLabel: description,
+                    style: context.typo.creditBody.copyWith(color: colors.textSecondary),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
