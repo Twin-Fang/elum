@@ -31,7 +31,7 @@ Future<void> runCardRedrawFlow({
   required ValueChanged<bool> onDrawingChanged,
 }) async {
   final isFirstPicture = !step.isAiPicture;
-  final request = await CardRegenerateSheet.show(context, isFirstPicture: isFirstPicture);
+  final request = await CardRegenerateSheet.show(context, ref, isFirstPicture: isFirstPicture);
   if (request == null || !context.mounted) return;
   await _drawAndPick(
     context: context,
@@ -111,7 +111,8 @@ Future<void> _drawAndPick({
       failureContext,
       null,
       title: failureContext.l10n.cardCandidateLoadFailedTitle,
-      fallback: failureContext.l10n.cardRedrawFailedFallback,
+      // 그리기는 끝나 크레딧을 이미 씀 (그리기 실패와 문구가 다름)
+      fallback: failureContext.l10n.cardCandidateFailedFallback,
       fallbackCode: cardCandidateErrorCode,
     );
     return;
@@ -150,7 +151,7 @@ Future<void> _drawAndPick({
     failureContext,
     applyResult.failure,
     title: failureContext.l10n.cardCandidateApplyFailedTitle,
-    fallback: failureContext.l10n.cardRedrawFailedFallback,
+    fallback: failureContext.l10n.cardCandidateFailedFallback,
     fallbackCode: cardCandidateErrorCode,
   );
 }

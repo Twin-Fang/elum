@@ -41,6 +41,14 @@ enum CreditPeriodUnit {
   String myPlanFreeBody(AppLocalizations l10n) =>
       isMonth ? l10n.myPlanFreeBodyMonth : l10n.myPlanFreeBodyWeek;
 
+  /// 처음 보는 크레딧 설명 (온보딩 그림 방식): 지급량을 알면 `매주 N개 받아요`, 모르면 쓰임만
+  String creditIntro(AppLocalizations l10n, int? grantPerPeriod) {
+    if (grantPerPeriod == null) return l10n.onboardingImageStyleCreditIntro;
+    return isMonth
+        ? l10n.onboardingImageStyleCreditIntroMonth(grantPerPeriod)
+        : l10n.onboardingImageStyleCreditIntroWeek(grantPerPeriod);
+  }
+
   /// 알림 켜기 안내 셋째 줄 (주간 리포트 권한 없을 때)
   String notificationIntroCreditRefilled(AppLocalizations l10n) =>
       isMonth ? l10n.notificationIntroCreditRefilledMonth : l10n.notificationIntroCreditRefilledWeek;

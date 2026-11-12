@@ -17,6 +17,7 @@ import '../../member/application/plan_access.dart';
 import '../application/card_review_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/card_photo.dart';
+import '../application/credit_cost_preview.dart';
 import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
 import 'widgets/action_card_view.dart';
@@ -280,6 +281,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
     final added = await CardEditSheet.showAdd(
       context,
+      imageCredits: ref.read(creditCostPreviewProvider)?.imageCredits,
       onSubmit: (title, description) async {
         final outcome = await notifier.addStep(
           title: title,

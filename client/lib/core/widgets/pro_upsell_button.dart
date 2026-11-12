@@ -49,6 +49,7 @@ class ProUpsellButton extends StatelessWidget {
     required this.style,
     required this.onTap,
     this.freeTrialLabel,
+    this.label,
   });
 
   final ProUpsellStyle style;
@@ -59,15 +60,18 @@ class ProUpsellButton extends StatelessWidget {
   /// 체험 기간 글. 있으면 `{기간} 무료로 써 보기` (주 버튼 · 테두리 버튼)
   final String? freeTrialLabel;
 
+  /// 기능 다음 단계를 말하는 문구 (`다음 주 리포트도 받아 보기`). 있으면 체험·`Pro 알아보기` 문구 대신 씀
+  final String? label;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final freeTrialLabel = this.freeTrialLabel;
-    final startLabel = freeTrialLabel == null ? l10n.planLearnPro : l10n.planTryFreeTrial(freeTrialLabel);
+    final startLabel = label ?? (freeTrialLabel == null ? l10n.planLearnPro : l10n.planTryFreeTrial(freeTrialLabel));
     return switch (style) {
       ProUpsellStyle.filled => MintGradientButton(label: startLabel, onTap: onTap),
       ProUpsellStyle.outlined => _OutlinedUpsellButton(label: startLabel, onTap: onTap),
-      ProUpsellStyle.link => ElumTextLink(label: l10n.planLearnPro, onTap: onTap),
+      ProUpsellStyle.link => ElumTextLink(label: label ?? l10n.planLearnPro, onTap: onTap),
     };
   }
 }

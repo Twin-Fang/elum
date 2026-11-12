@@ -257,7 +257,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
         label: step.isAiPicture ? l10n.cardRegenerateChip : l10n.cardFirstDrawChip,
         semanticLabel: step.isAiPicture ? l10n.cardRedrawProChip : l10n.cardFirstDrawProChip,
         shouldShowProBadge: planAccess.shouldShowTeaserFor(PlanBenefit.aiImageStyles),
-        onTap: _busy ? null : () => openProOnlyNotice(context, ref),
+        onTap: _busy ? null : () => openProOnlyNotice(context, ref, benefit: PlanBenefit.aiImageStyles),
       );
     }
     return CardEditChip(

@@ -2,8 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/credit_repository.dart';
 
-/// 카드 그림 새로 그리기 1장에 드는 값: 오늘 남은 무료 다시 그리기(Pro) · 다시 그리기 단가 · 처음 그리기(카드 그림) 단가 · 크레딧 켜짐
-typedef ImageRegenerateCost = ({int freeLeftToday, int credits, int firstPictureCredits, bool isCreditEnabled});
+/// 카드 그림 새로 그리기 1장에 드는 값: 오늘 남은 무료 다시 그리기(Pro) · 하루 무료 한도(모르면 null) · 다시 그리기 단가 · 처음 그리기(카드 그림) 단가 · 크레딧 켜짐
+typedef ImageRegenerateCost = ({
+  int freeLeftToday,
+  int? freeDailyCap,
+  int credits,
+  int firstPictureCredits,
+  bool isCreditEnabled,
+});
 
 /// 다시 그리기 확인 시트가 보는 값 (크레딧 요약에서 꺼냄). 실패하면 시트가 "크레딧을 써요"로 그림
 ///
@@ -12,6 +18,7 @@ final imageRegenerateCostProvider = FutureProvider.autoDispose<ImageRegenerateCo
   final summary = await ref.watch(creditSummaryProvider.future);
   return (
     freeLeftToday: summary.enabled ? summary.freeImageRegeneratesLeftToday : 0,
+    freeDailyCap: summary.freeImageRegenerateDailyCap > 0 ? summary.freeImageRegenerateDailyCap : null,
     credits: summary.enabled ? summary.imageRegenerateCost : 0,
     firstPictureCredits: summary.enabled ? summary.cardImageCost : 0,
     isCreditEnabled: summary.enabled,

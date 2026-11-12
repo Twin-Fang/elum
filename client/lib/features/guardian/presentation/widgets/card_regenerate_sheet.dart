@@ -10,25 +10,37 @@ import '../../../../core/widgets/elum_sheet_action_row.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
 import '../../../../core/widgets/credit_cost_label.dart';
+import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../credit/application/image_regenerate_cost.dart';
+import '../../../member/application/plan_access.dart';
+import '../../../subscription/application/plan_paywall_entry.dart';
+import '../../../subscription/domain/plan_benefit.dart';
 import '../../domain/image_redraw_hint.dart';
 
-/// 고쳐서 다시 그리기 · AI 그림 그리기 시트: 제목 > 설명 > 고치고 싶은 점(60자) > 칩 4개 > 비용 한 줄 > 취소 · 그리기
+/// 고쳐서 다시 그리기 · AI 그림 그리기 시트: 제목 > 설명 > 고치고 싶은 점(60자) > 칩 4개 > 비용 한 줄 > (Free) Pro 사실 한 줄 > 취소 · 그리기
 ///
-/// 글·칩은 함께 쓸 수 있고, 둘 다 비면 같은 조건으로 다시 그림. 비용: 다시 그리기는 Pro 무료 횟수 > 크레딧 안 씀 > 크레딧 N개,
-/// 처음 그리기는 카드 그림 단가 (무료 횟수 밖). 비용을 못 받으면 `크레딧을 써요` 로 두고 진행은 막지 않음 (서버가 다시 판정)
+/// 글·칩은 함께 쓸 수 있고, 둘 다 비면 같은 조건으로 다시 그림. 비용: 다시 그리기는 Pro 무료 횟수 > (Pro) 무료 다 씀 + 크레딧 N개
+/// > 크레딧 안 씀 > 크레딧 N개, 처음 그리기는 카드 그림 단가 (무료 횟수 밖). 비용을 못 받으면 `크레딧을 써요` 로 두고 진행은 막지 않음
 class CardRegenerateSheet extends ConsumerStatefulWidget {
   const CardRegenerateSheet({super.key, required this.isFirstPicture});
 
   /// AI 그림이 없던 카드에 처음 그리는가 (제목·버튼·비용이 다름)
   final bool isFirstPicture;
 
-  /// 그리기를 누르면 요청, 취소·내려 닫음이면 null
-  static Future<CardRedrawRequest?> show(BuildContext context, {required bool isFirstPicture}) {
-    return showElumSheet<CardRedrawRequest>(
+  /// `Pro 알아보기` 를 눌러 닫힘 (시트가 닫힌 뒤 요금제 화면)
+  static const _planPaywallRequested = Object();
+
+  /// 그리기를 누르면 요청, 취소·내려 닫음 · `Pro 알아보기` 면 null
+  static Future<CardRedrawRequest?> show(BuildContext context, WidgetRef ref, {required bool isFirstPicture}) async {
+    final choice = await showElumSheet<Object>(
       context: context,
       builder: (_) => CardRegenerateSheet(isFirstPicture: isFirstPicture),
     );
+    if (identical(choice, _planPaywallRequested)) {
+      if (context.mounted) await openPlanPaywall(context, ref, highlight: PlanBenefit.freeImageRegenerate);
+      return null;
+    }
+    return choice is CardRedrawRequest ? choice : null;
   }
 
   @override
@@ -64,6 +76,9 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
     final space = context.space;
     final costAsync = ref.watch(imageRegenerateCostProvider);
     final isFirstPicture = widget.isFirstPicture;
+    final access = ref.watch(planAccessProvider);
+    final canUseFreeRedraw = access.canUseBenefit(PlanBenefit.freeImageRegenerate);
+    final proFactDailyCap = _proFactDailyCap(access, costAsync.value, isFirstPicture: isFirstPicture);
 
     return ElumSheetFrame(
       title: isFirstPicture ? l10n.cardFirstDrawSheetTitle : l10n.cardRegenerateSheetTitle,
@@ -93,7 +108,21 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
             ],
           ),
           SizedBox(height: space.md.h),
-          _costView(context, costAsync.value, isFirstPicture: isFirstPicture),
+          _costView(context, costAsync.value, isFirstPicture: isFirstPicture, canUseFreeRedraw: canUseFreeRedraw),
+          if (proFactDailyCap != null) ...[
+            SizedBox(height: space.xs.h),
+            Text(
+              l10n.cardRegenerateProFact(proFactDailyCap),
+              textAlign: TextAlign.center,
+              style: context.typo.creditCaption.copyWith(color: context.colors.textSecondary),
+            ),
+            // 요금제 화면을 열 수 있을 때만 (판매 꺼짐이면 사실 한 줄만)
+            if (ref.watch(canOpenPlanPaywallProvider))
+              ProUpsellButton(
+                style: ProUpsellStyle.link,
+                onTap: () => Navigator.of(context).pop(CardRegenerateSheet._planPaywallRequested),
+              ),
+          ],
           SizedBox(height: space.lg.h),
           ElumSheetActionRow(
             cancelLabel: l10n.commonCancel,
@@ -118,16 +147,31 @@ class _CardRegenerateSheetState extends ConsumerState<CardRegenerateSheet> {
     };
   }
 
-  /// 비용 > 한 줄: (다시 그리기만) 무료 횟수 남음 > 크레딧 안 씀 > 크레딧 N개 (모르면 크레딧을 써요)
-  /// 비용 한 줄: 크레딧 그림 + 숫자(`1개`) 또는 문구 (낭독은 `크레딧 1개`)
-  static Widget _costView(BuildContext context, ImageRegenerateCost? cost, {required bool isFirstPicture}) {
+  /// Free 사실 한 줄의 하루 무료 한도: 다시 그리기 + 무료 다시 그리기를 못 씀 + Pro 가 줌 + 서버 한도를 앎. 아니면 null (줄 숨김)
+  static int? _proFactDailyCap(PlanAccess access, ImageRegenerateCost? cost, {required bool isFirstPicture}) {
+    if (isFirstPicture || cost == null) return null;
+    if (access.canUseBenefit(PlanBenefit.freeImageRegenerate)) return null;
+    if (!access.isBenefitOfferedByPro(PlanBenefit.freeImageRegenerate)) return null;
+    return cost.freeDailyCap;
+  }
+
+  /// 비용 > 한 줄: (다시 그리기만) 무료 횟수 남음 > (Pro) 무료 다 씀 + 크레딧 N개 > 크레딧 안 씀 > 크레딧 N개 (모르면 크레딧을 써요)
+  /// 비용 한 줄: 크레딧 그림 + 숫자(`1개`) 또는 문구 (낭독은 `크레딧 1개`). 무료를 다 쓴 Pro 는 갑자기 숫자만 보이지 않게 문장 그대로
+  static Widget _costView(
+    BuildContext context,
+    ImageRegenerateCost? cost, {
+    required bool isFirstPicture,
+    required bool canUseFreeRedraw,
+  }) {
     final l10n = context.l10n;
-    final sentence = _costLabel(context, cost, isFirstPicture: isFirstPicture);
     final credits = cost == null ? 0 : (isFirstPicture ? cost.firstPictureCredits : cost.credits);
-    final isCountShown = cost != null &&
-        (isFirstPicture || cost.freeLeftToday <= 0) &&
-        cost.isCreditEnabled &&
-        credits > 0;
+    final isChargedInCredits = cost != null && cost.isCreditEnabled && credits > 0;
+    final freeDailyCap = cost?.freeDailyCap;
+    if (!isFirstPicture && canUseFreeRedraw && isChargedInCredits && cost.freeLeftToday <= 0 && freeDailyCap != null) {
+      return CreditCostLabel(text: l10n.cardRegenerateCostProUsedUp(credits, freeDailyCap));
+    }
+    final sentence = _costLabel(context, cost, isFirstPicture: isFirstPicture);
+    final isCountShown = isChargedInCredits && (isFirstPicture || cost.freeLeftToday <= 0);
     return CreditCostLabel(
       text: isCountShown ? l10n.creditCostCount(credits) : sentence,
       semanticLabel: sentence,
