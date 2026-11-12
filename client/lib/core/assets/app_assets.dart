@@ -458,12 +458,6 @@ abstract final class AppAssets {
   /// 일과 시트 보상 뱃지 안의 별 (Figma 963:4442, 25×24).
   static const rewardBadgeStar = '$_images/reward_badge_star.svg';
 
-  /// 아이 홈 빈 상태의 시무룩한 루루 (164×164). Figma 382:3220 `루루_슬픔`.
-  static const ruruSad = '$_images/ruru_sad.svg';
-
-  /// 아이 홈 빈 상태의 시무룩한 포포 (164×164). 여우 캐릭터를 골랐을 때 쓴다.
-  static const popoSad = '$_images/popo_sad.svg';
-
   /// 아이_별 화면 가운데 큰 별. Figma 364:8282 `Group 46` · 실제 264×255.
   ///
   /// **PNG인 이유** ⚠️ — 이 별은 세 겹(후광·그림자·안쪽 하이라이트)으로 되어 있고
