@@ -17,7 +17,7 @@ import '../domain/onboarding_profile.dart';
 import 'widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
-import '../../../core/router/routes.dart';
+import '../../notification/application/push_permission_prompt.dart';
 
 /// Figma `온보딩_비밀번호` — 보호자 모드 전환용 PIN을 만든다.
 ///
@@ -175,7 +175,10 @@ class _PinScreenState extends ConsumerState<PinScreen>
       );
       return;
     }
-    context.go(Routes.guardian);
+    // 첫 홈 직전 알림 켜기 안내 (켜져 있거나 본 적 있으면 바로 홈)
+    final nextRoute = await ref.read(pushPermissionPromptProvider).resolveRouteAfterOnboarding();
+    if (!mounted) return;
+    context.go(nextRoute);
   }
 
   /// 이룸이를 (없으면) 만들고 온보딩을 서버에 저장한다.

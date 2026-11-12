@@ -5272,4 +5272,62 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get myCreditGuideLink => '크레딧은 이렇게 써요';
+
+  @override
+  String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
+
+  @override
+  String get abaIntroSubtitle => '이룸은 응용행동분석(ABA)의 원리로 만들었어요';
+
+  @override
+  String get abaIntroCardTitle => '카드 한 장에 한 가지 행동';
+
+  @override
+  String get abaIntroCardBody => '무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지';
+
+  @override
+  String get abaIntroVoiceTitle => '짧은 문장, 그림과 목소리';
+
+  @override
+  String get abaIntroVoiceBody => '보고 들으며 하나씩 따라 해요';
+
+  @override
+  String get abaIntroStarTitle => '해내면 바로 칭찬과 별';
+
+  @override
+  String get abaIntroStarBody => '보호자님이 정한 보상까지 받아요';
+
+  @override
+  String get abaIntroGuardianTitle => '💛 가장 중요한 건 보호자님이에요';
+
+  @override
+  String get abaIntroGuardianBody =>
+      '아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요';
+
+  @override
+  String get abaIntroStart => '시작하기';
+
+  @override
+  String get guardianSettingsAboutElum => '이룸은 이렇게 만들었어요';
+
+  @override
+  String get notificationIntroTitle => '🔔 알림을 꼭 켜 주세요';
+
+  @override
+  String get notificationIntroBody => '켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요';
+
+  @override
+  String get notificationIntroRoutineDone => '이룸이가 일과를 마쳤을 때';
+
+  @override
+  String get notificationIntroCaregiverRoutine => '함께 돌보는 분이 일과를 보냈을 때';
+
+  @override
+  String get notificationIntroWeeklyReport => '주간 리포트가 나왔을 때';
+
+  @override
+  String get notificationIntroCreditRefilledWeek => '이번 주 크레딧이 다시 채워졌을 때';
+
+  @override
+  String get notificationIntroCreditRefilledMonth => '이번 달 크레딧이 다시 채워졌을 때';
 }

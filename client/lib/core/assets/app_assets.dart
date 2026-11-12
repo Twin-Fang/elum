@@ -426,6 +426,9 @@ abstract final class AppAssets {
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';
   static const iconBell = '$_images/icon_bell.svg';
+
+  /// 별 선 아이콘 (24, 다른 icon* 과 같은 viewBox). 안내 줄 머리 `해내면 바로 칭찬과 별` (#1277)
+  static const iconStar = '$_images/icon_star.svg';
   static const iconBellSlash = '$_images/icon_bell_slash.svg';
   static const iconMinusSmall = '$_images/icon_minus_small.svg';
   static const iconComment = '$_images/icon_comment.svg';
@@ -481,6 +484,9 @@ abstract final class AppAssets {
   /// 별의 투명도(초록 50%, 분홍 30%)도 그림에 구워져 있어 코드에서 또 주지 않는다.
   /// 윙크 하는 눈(8×3 획)만 시안이 따로 그려 SVG 로 얹는다.
   static const routineDoneLumi = '$_images/routine_done_lumi.png';
+
+  /// 행동카드를 든 루미 (512, 투명). ABA 소개 화면 그림 (#1277)
+  static const abaIntroLumi = '$_images/aba_intro_lumi.png';
   static const routineDoneWink = '$_images/routine_done_wink.svg';
   static const routineDoneStarGreen = '$_images/routine_done_star_green.png';
   static const routineDoneStarOrange = '$_images/routine_done_star_orange.png';

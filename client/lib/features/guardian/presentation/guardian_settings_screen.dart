@@ -224,9 +224,14 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보: 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
+        // 약관 및 정보: 설계 원리 소개 > 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
           children: [
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsAboutElum,
+              onTap: busy ? null : () => context.push(Routes.guardianAboutElum),
+            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsTerms,
