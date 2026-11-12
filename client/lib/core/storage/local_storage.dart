@@ -299,7 +299,7 @@ abstract interface class LocalStorage {
   Set<String> get homeSuggestionDismissedKeys;
   Future<void> setHomeSuggestionDismissedKeys(Set<String> dismissedKeys);
 
-  /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 크게 보기 (#959)
+  /// 이야기 상세를 한 눈에 보기로 여는지. 마지막 선택을 기억하고 기본은 한 눈에 보기 (#959, 전체 단계를 먼저 보이게 #1301)
   ///
   /// 보기 취향이라 휴대폰에 속하고 [clearAll] 이 지우지 않는다
   bool get isTalkGridView;

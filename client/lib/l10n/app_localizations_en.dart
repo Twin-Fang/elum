@@ -1437,13 +1437,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineInputTitle => 'What does today\nneed?';
 
   @override
-  String get routineInputSubtitle => 'AI Lumi breaks it into small steps';
+  String get routineInputSubtitle =>
+      'Lumi, your AI helper, breaks it into small steps';
 
   @override
   String get routineInputHint => 'Write it the way you\'d say it';
 
   @override
-  String get routineInputSend => 'Send';
+  String get routineInputPrivacyNotice =>
+      'Please don\'t write personal details like names, schools, hospitals or diagnoses';
 
   @override
   String get guardianSettingsLogoutConfirmTitle => 'Log out?';
@@ -1908,6 +1910,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineDetailEdit => 'Edit';
 
   @override
+  String routineDetailTodayProgress(int done, int total) {
+    return '$done/$total done today';
+  }
+
+  @override
+  String routineDetailPastProgress(int done, int total) {
+    return '$done/$total done';
+  }
+
+  @override
+  String get routineDetailExportLabel => 'Print';
+
+  @override
   String get routineDetailFinishedToday => 'This routine is done';
 
   @override
@@ -1954,7 +1969,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayRoutineRerunFailedFallback => 'Try again in a moment';
 
   @override
-  String todayRoutineCopied(String title) {
+  String todayRoutineCopied(String title, String batchim) {
     return 'Added $title to today\'s routines';
   }
 
@@ -1975,7 +1990,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeCoachCreate => 'You can make a *new routine\nfor Elumi to do*';
 
   @override
-  String get homeCoachSwipe => '*Swipe a routine left*\nto *edit or delete it*';
+  String get homeCoachSwipe => '*Slide a routine left*\nto *edit or delete it*';
 
   @override
   String get homeCoachSwitch =>
@@ -2817,7 +2832,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Imported from Community, view original post';
 
   @override
-  String routineLibrarySent(String title) {
+  String routineLibrarySent(String title, String batchim) {
     return 'Sent $title for today';
   }
 
@@ -2920,6 +2935,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineGroupCreateGroup => 'New bundle';
+
+  @override
+  String get routineGroupCreateGroupDescription =>
+      'Gather several routines in one folder (e.g. School morning)';
 
   @override
   String get routineGroupChooseTitle => 'Which bundle?';
@@ -3026,16 +3045,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Press and hold, then *let go* to open the menu';
 
   @override
-  String get routineManageCoachSentMessage =>
-      'Routines sent today get a *✓*\nThey go into today\'s routines on Home\nand stay here too';
-
-  @override
   String get routineManageCoachDragMessage =>
       'Press and hold, then *move* to start arranging\nDrop on another routine to make a *bundle*\nDrop between them to move it';
-
-  @override
-  String get routineManageCoachCreateGroupMessage =>
-      'If dragging is hard, use *+ New routine*\nand pick *New bundle* to group them';
 
   @override
   String get cardReviewCoachEditMessage =>
@@ -4274,7 +4285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportStars => 'Stars earned';
 
   @override
-  String get weeklyReportRewards => 'Routines that reached a reward';
+  String get weeklyReportRewards => 'Routines with a reward';
 
   @override
   String get weeklyReportStreak => 'Days finished in a row';
@@ -4342,6 +4353,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'When you send routines, Elumi\'s finished records gather here';
 
   @override
+  String get weeklyReportNoCompletionThisWeekTitle =>
+      'No records yet this week';
+
+  @override
+  String get weeklyReportNoCompletionPastWeekTitle =>
+      'No routines finished this week';
+
+  @override
+  String get weeklyReportNoCompletionBody => 'Send a routine for today?';
+
+  @override
+  String get weeklyReportGoToManage => 'Go to routines';
+
+  @override
   String get weeklyReportLoadFailed => 'Couldn\'t load the weekly report';
 
   @override
@@ -4377,7 +4402,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$completed of $sent routines done',
+      other: '$completed of $sent done',
     );
     return '$_temp0';
   }
@@ -4542,7 +4567,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportStatCompleted => 'Routines finished';
 
   @override
-  String get weeklyReportStatRemaining => 'Cards left';
+  String get weeklyReportStatRemaining => 'Cards not done yet';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {

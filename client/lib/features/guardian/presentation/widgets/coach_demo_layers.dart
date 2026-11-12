@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
@@ -43,19 +42,21 @@ Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
       media.padding.top,
       (menuBottomLimit - menuHeight).clamp(media.padding.top, double.infinity),
     );
-    final appear = coachDemoPhase(t, 0.5, 0.6);
+    // 메뉴를 일찍 띄워 오래 둔다: 말풍선 화살표가 메뉴 아래 끝에 붙어 있다
+    final appear = coachDemoPhase(t, 0.3, 0.38);
+    final touchPoint = coachDemoTouchPointOf(target);
     return Stack(
       children: [
         CoachDemoFinger(
-          center: target.center,
+          center: touchPoint,
           press:
-              coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.45, 0.5)),
+              coachDemoPhase(t, 0.05, 0.15) * (1 - coachDemoPhase(t, 0.25, 0.3)),
           appear:
-              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.5, 0.58)),
+              coachDemoPhase(t, 0, 0.05) * (1 - coachDemoPhase(t, 0.3, 0.36)),
         ),
         CoachDemoRing(
-          center: target.center,
-          spread: coachDemoPhase(t, 0.2, 0.45),
+          center: touchPoint,
+          spread: coachDemoPhase(t, 0.1, 0.28),
         ),
         Positioned(
           left: menuLeft,
@@ -66,54 +67,6 @@ Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
               scale: 0.92 + 0.08 * appear,
               alignment: isRoomOnRight ? Alignment.topLeft : Alignment.topRight,
               child: const CoachDemoAnchoredMenu(),
-            ),
-          ),
-        ),
-      ],
-    );
-  },
-);
-
-/// 보낸 뒤: ✓ 배지가 칸에 톡 붙고 실제 토스트 문구가 뜸
-Widget sentBadgeDemo(
-  BuildContext context,
-  Rect target, {
-  required String routineTitle,
-}) => buildCoachDemoLoop(
-  endScene: 0.85,
-  builder: (context, t) {
-    // 실제 칸: 그림 칸이 가운데 위에 있고, ✓ 는 그 오른쪽 아래 모서리에서 xs/2 만큼 삐져나온다
-    final iconSize = LibraryRoutineTile.iconSize.w;
-    final badgeSize = LibraryRoutineTile.badgeSize.w;
-    final overhang = context.space.xs.w / 2;
-    final iconRight = target.center.dx + iconSize / 2;
-    final iconBottom = target.top + iconSize;
-    return Stack(
-      children: [
-        Positioned(
-          left: iconRight + overhang - badgeSize,
-          top: iconBottom + overhang - badgeSize,
-          child: Transform.scale(
-            scale: Curves.elasticOut.transform(coachDemoPhase(t, 0.15, 0.4)),
-            child: LibrarySentBadge(size: badgeSize),
-          ),
-        ),
-        // 실제 알림처럼 화면 아래쪽에 뜬다 (위쪽은 말풍선 자리)
-        Positioned(
-          left: 0,
-          right: 0,
-          // 아래 점·안내 문구 바로 위 (말풍선은 칸 아래에 온다)
-          bottom:
-              MediaQuery.paddingOf(context).bottom +
-              CoachMarkOverlay.bottomReserve.h +
-              context.space.sm.h,
-          child: Opacity(
-            opacity:
-                coachDemoPhase(t, 0.35, 0.5) * (1 - coachDemoPhase(t, 0.9, 1)),
-            child: Center(
-              child: CoachDemoToast(
-                text: context.l10n.routineLibrarySent(routineTitle),
-              ),
             ),
           ),
         ),
@@ -207,24 +160,24 @@ Widget dragToGroupDemo(
   },
 );
 
-/// 버튼으로 묶기: + 일과 만들기 탭 (시트는 올리지 않는다: 말풍선과 안내 문구를 가린다)
-Widget createGroupDemo(BuildContext context, Rect target) =>
-    _pressWithRingDemo(target);
-
-/// 탭 한 번: 손가락이 누르고 링이 퍼짐 (누르기 · 버튼으로 묶기 공통)
+/// 탭 한 번: 손가락이 대상 모서리를 누르고 링이 퍼짐
 Widget _pressWithRingDemo(Rect target) => buildCoachDemoLoop(
   endScene: 0.5,
-  builder: (context, t) => Stack(
-    children: [
-      CoachDemoFinger(
-        center: target.center,
-        press: coachDemoPulse(t, 0.1, 0.25),
-        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.6, 0.7)),
-      ),
-      CoachDemoRing(
-        center: target.center,
-        spread: coachDemoPhase(t, 0.17, 0.5),
-      ),
-    ],
-  ),
+  builder: (context, t) {
+    final touchPoint = coachDemoTouchPointOf(target);
+    return Stack(
+      children: [
+        CoachDemoFinger(
+          center: touchPoint,
+          press: coachDemoPulse(t, 0.1, 0.25),
+          appear:
+              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.6, 0.7)),
+        ),
+        CoachDemoRing(
+          center: touchPoint,
+          spread: coachDemoPhase(t, 0.17, 0.5),
+        ),
+      ],
+    );
+  },
 );

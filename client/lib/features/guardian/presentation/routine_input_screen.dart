@@ -16,6 +16,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
@@ -25,15 +26,15 @@ import '../../../core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) — 자연어로 일과를 받는다.
 ///
-/// **하단 고정 CTA가 없다.** 전송은 입력창 안 화살표가 담당하며, 입력이 있을
-/// 때만 나타난다(Figma 262:4106). 이 화면군만 Pretendard를 쓴다.
+/// 루미 얼굴 > 제목 > 입력칸 > 개인정보 안내 > 칩, 하단 고정 `다음` 버튼 (#1297).
+/// 보내기는 다른 단계와 같은 하단 버튼 (입력칸 안 작은 원은 버튼으로 안 보임). 글이 비면 흐린 상태. 이 화면군만 Pretendard를 쓴다.
 class RoutineInputScreen extends ConsumerStatefulWidget {
   const RoutineInputScreen({super.key});
 
   /// 이 화면의 배경 색 — 민트·보라·노랑 (시안 `238:1728`).
   static const aurora = AuroraTone.input;
 
-  /// 전송 버튼. 입력이 있을 때만 존재하므로 테스트가 키로 찾는다.
+  /// 하단 `다음` 버튼
   static const sendButtonKey = Key('routineInputSend');
 
   @override
@@ -138,16 +139,28 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         //
                         // 시안(238:1643) 절대 y — 뒤로가기 79 ·
                         // 반짝임 185 · 제목 245 · 부제 323 · 입력칸 389 · 칩 489.
-                        SizedBox(height: _RoutineInputLayout.topToSparkles),
+                        SizedBox(height: _RoutineInputLayout.topToLumiFace),
                         const _Headline(),
                         SizedBox(height: _RoutineInputLayout.bodyToInput),
                         RoutineInputField(
                           controller: _controller,
-                          canSubmit: canSubmit,
                           onChanged: ref
                               .read(routineFlowProvider.notifier)
                               .setRawInput,
-                          onSubmit: _next,
+                        ),
+                        SizedBox(height: space.sm),
+                        // 개인정보 안내 (서비스 원칙 2: 적은 글은 그대로 AI 로 감, #377·#1297)
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: space.buttonMarginH,
+                          ),
+                          child: Text(
+                            context.l10n.routineInputPrivacyNotice,
+                            textAlign: TextAlign.center,
+                            style: context.typo.promptCaption.copyWith(
+                              color: context.colors.promptNotice,
+                            ),
+                          ),
                         ),
                         // 이번 일과의 그림 방식 + 그 자리에서 바꾸기 (#1287)
                         SizedBox(height: space.md.h),
@@ -161,11 +174,39 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                     ),
                   ),
                 ),
-                SizedBox(height: space.md),
+                _SubmitBar(canSubmit: canSubmit, onSubmit: _next),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 하단 고정 `다음` 버튼. 키보드가 올라오면 키보드 바로 위로 따라 올라간다
+/// (배경은 키보드에 밀리지 않게 스캐폴드가 늘지 않으므로 여기서 키보드 높이만큼 띄운다)
+class _SubmitBar extends StatelessWidget {
+  const _SubmitBar({required this.canSubmit, required this.onSubmit});
+
+  final bool canSubmit;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final space = context.space;
+    final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        space.buttonMarginH,
+        space.md,
+        space.buttonMarginH,
+        keyboardHeight > 0 ? keyboardHeight + space.sm : space.lg,
+      ),
+      child: ElumButton(
+        key: RoutineInputScreen.sendButtonKey,
+        label: context.l10n.commonNext,
+        onPressed: canSubmit ? onSubmit : null,
       ),
     );
   }
@@ -282,24 +323,24 @@ class _RoutineInputLayout {
   /// 뒤로가기 왼쪽 — 시안 16.
   static double get backLeft => 16.w;
 
-  /// 뒤로가기 줄(8 + 40) 아래부터 반짝임(185)까지 — 시안 계산 그대로 78.
+  /// 뒤로가기 줄(8 + 40) 아래부터 루미 얼굴까지 66.
   ///
-  /// 뒤로가기가 12 올라갔지만 반짝임은 185 제자리라 여기서 12 를 되돌려 준다.
-  ///
-  /// 시안은 뒤로가기만 두고 **아래 전부를 40 올렸다**(반짝임 185). 보상 설정(1082:4709)과
-  /// 같은 높이라 두 화면 사이에서 제목이 제자리에 선다. 두 원(오로라)도 같이 올라간다
-  /// (`AuroraPalette.inputTop`). 반짝임 SVG 크기 보정은 두지 않는다 — 양쪽 다 36이다.
-  static double get topToSparkles => 78.h;
+  /// 시안 반짝임(36) 자리 78 에서 루미 얼굴(48)과의 차이 12 를 뺀 값.
+  /// 제목이 보상 설정(1082:4709)과 같은 높이에 선다 (#1297).
+  static double get topToLumiFace => 66.h;
 
-  /// 반짝임 → 제목 — 시안 간격 24.
-  static double get sparklesToTitle => 24.h;
+  /// 루미 얼굴 한 변 (#1297)
+  static double get lumiFaceSize => 48.w;
+
+  /// 루미 얼굴 → 제목 — 시안 간격 24.
+  static double get lumiFaceToTitle => 24.h;
 
   /// 부제 끝(341) → 입력칸(389).
   static double get bodyToInput => 48.h;
 
 }
 
-/// sparkles + 제목 + 설명 (Figma 중앙정렬)
+/// 루미 얼굴 + 제목 + 설명 (Figma 중앙정렬). 부제가 `AI 도우미 루미` 를 처음 소개한다 (#1297)
 class _Headline extends StatelessWidget {
   const _Headline();
 
@@ -309,13 +350,13 @@ class _Headline extends StatelessWidget {
 
     return Column(
       children: [
-        // 30×36 비정사각형이라 가로 .w / 세로 .h
-        SvgPicture.asset(
-          AppAssets.iconSparklesLarge,
-          width: 30.w,
-          height: 36.h,
+        Image.asset(
+          AppAssets.guardianProfileLumi,
+          width: _RoutineInputLayout.lumiFaceSize,
+          height: _RoutineInputLayout.lumiFaceSize,
+          excludeFromSemantics: true,
         ),
-        SizedBox(height: _RoutineInputLayout.sparklesToTitle),
+        SizedBox(height: _RoutineInputLayout.lumiFaceToTitle),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다
           context.l10n.routineInputTitle,
@@ -323,10 +364,16 @@ class _Headline extends StatelessWidget {
           style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
         ),
         SizedBox(height: context.space.sm),
-        Text(
-          context.l10n.routineInputSubtitle,
-          textAlign: TextAlign.center,
-          style: context.typo.promptBody.copyWith(color: colors.promptMuted),
+        // 큰 글자에서 화면 끝에 붙지 않게 좌우 여백
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: context.space.buttonMarginH,
+          ),
+          child: Text(
+            context.l10n.routineInputSubtitle,
+            textAlign: TextAlign.center,
+            style: context.typo.promptBody.copyWith(color: colors.promptMuted),
+          ),
         ),
       ],
     );

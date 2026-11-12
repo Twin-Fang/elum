@@ -44,10 +44,9 @@ class _RoutineManageCoachStageState
   /// 코치마크 ✕ 가 차지하는 위쪽 높이 (안전영역 아래 8 + 버튼 40)
   static const _closeButtonSpace = 48.0;
 
-  /// 안내 화면의 칸: 예시 일과 첫째 · 둘째, `+ 일과 만들기`
+  /// 안내 화면의 칸: 예시 일과 첫째 · 둘째
   final _firstTileKey = GlobalKey();
   final _secondTileKey = GlobalKey();
-  final _createButtonKey = GlobalKey();
 
   /// 사라지는 연출이 끝날 때까지 직전 단계 목록을 들고 있는다
   List<RoutineManageCoachStep>? _retainedSteps;
@@ -105,24 +104,15 @@ class _RoutineManageCoachStageState
           demoBuilder: tapDemo,
         );
       case RoutineManageCoachStep.longPressRoutine:
+        final menuPointer = _menuPointer();
         return CoachMarkStep(
           target: _firstTileKey,
           message: l10n.routineManageCoachLongPressMessage,
           holeRadius: tileRadius,
           demoBuilder: longPressDemo,
-          // 칸 옆 메뉴가 칸보다 길게 내려오므로 말풍선은 메뉴 아래에
-          pointerGap: _menuOverhangBelowTile(),
-        );
-      case RoutineManageCoachStep.sentBadge:
-        return CoachMarkStep(
-          target: _firstTileKey,
-          message: l10n.routineManageCoachSentMessage,
-          holeRadius: tileRadius,
-          demoBuilder: (context, rect) => sentBadgeDemo(
-            context,
-            rect,
-            routineTitle: samples.first.displayTitle,
-          ),
+          // 화살표는 칸 옆에 열린 메뉴 아래 끝 가운데에 붙인다 (빈 곳을 가리키지 않게)
+          pointerAt: menuPointer.at,
+          pointerGap: menuPointer.gap,
         );
       case RoutineManageCoachStep.dragToGroup:
         return CoachMarkStep(
@@ -141,36 +131,25 @@ class _RoutineManageCoachStageState
             ],
           ),
         );
-      case RoutineManageCoachStep.createGroup:
-        return CoachMarkStep(
-          target: _createButtonKey,
-          message: l10n.routineManageCoachCreateGroupMessage,
-          // 알약 버튼: 높이 절반으로 깎아야 구멍 모서리가 버튼 밖으로 비치지 않음
-          holeRadius: CreateRoutineFab.height.h / 2,
-          demoBuilder: createGroupDemo,
-        );
     }
   }
 
-  /// 칸 옆 메뉴가 첫 칸 아래로 삐져나오는 길이 + 간격. 칸을 아직 못 쟀으면 0
-  double _menuOverhangBelowTile() {
+  /// 칸 옆 메뉴 아래 끝 가운데 (칸 기준): 가로 비율 · 칸 아래에서 내려간 길이. 칸을 아직 못 쟀으면 칸 가운데 아래
+  ///
+  /// 메뉴 자리는 [longPressDemo] 와 같다: 칸 오른쪽 끝 + sm 간격, 칸 위 끝에 맞춤
+  ({double at, double gap}) _menuPointer() {
     final box = _firstTileKey.currentContext?.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) return 0;
+    if (box is! RenderBox || !box.hasSize) return (at: 0.5, gap: 0);
+    final tileSize = box.size;
+    final menuWidth = CoachDemoAnchoredMenu.width.w;
     final menuHeight =
         CoachDemoAnchoredMenu.rowHeight.h * CoachDemoAnchoredMenu.rowCount;
-    final overhang = menuHeight - box.size.height;
-    return overhang > 0 ? overhang + context.space.sm.h : 0;
-  }
-
-  /// 예시 칸 줄 아래 끝 + 간격 (무대 좌표). 칸을 아직 못 쟀으면 null
-  double? _belowTileRow() {
-    final stageBox = context.findRenderObject();
-    final box = _firstTileKey.currentContext?.findRenderObject();
-    if (stageBox is! RenderBox || box is! RenderBox || !box.attached) {
-      return null;
-    }
-    final origin = box.localToGlobal(Offset.zero, ancestor: stageBox);
-    return origin.dy + box.size.height + context.space.xl.h;
+    final menuCenterX = tileSize.width + context.space.sm.w + menuWidth / 2;
+    final overhang = menuHeight - tileSize.height;
+    return (
+      at: menuCenterX / tileSize.width,
+      gap: overhang > 0 ? overhang : 0,
+    );
   }
 
   /// 둘째 칸 상자 (무대 좌표). 못 재면 첫 칸 오른쪽 옆으로 본다
@@ -233,13 +212,10 @@ class _RoutineManageCoachStageState
         Scaffold(
           backgroundColor: colors.background,
           floatingActionButtonLocation: CreateRoutineFab.location,
-          floatingActionButton: KeyedSubtree(
-            key: _createButtonKey,
-            child: CreateRoutineFab(
-              isBusy: false,
-              isArranging: isArrangingDemo,
-              onTap: () {},
-            ),
+          floatingActionButton: CreateRoutineFab(
+            isBusy: false,
+            isArranging: isArrangingDemo,
+            onTap: () {},
           ),
           body: SafeArea(
             child: Column(
@@ -263,8 +239,6 @@ class _RoutineManageCoachStageState
                 ],
                 index: state.isActive ? state.index : _retainedIndex,
                 visible: state.isActive,
-                // 점·문구를 위로 옮길 때 제목·칸 줄 아래에 둔다
-                footerTopOffset: _belowTileRow(),
                 onNext: notifier.next,
                 onClose: notifier.finish,
                 // 다 사라지면 무대를 닫는다 (본 것 저장은 띄운 쪽이 맡는다)

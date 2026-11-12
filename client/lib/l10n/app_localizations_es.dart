@@ -1371,13 +1371,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineInputTitle => '오늘은 어떤 준비가\n필요한가요?';
 
   @override
-  String get routineInputSubtitle => 'AI 루미가 작은 행동 단계로 나눠드려요';
+  String get routineInputSubtitle => 'AI 도우미 루미가 작은 행동 단계로 나눠 줄게요';
 
   @override
   String get routineInputHint => '평소 이야기하듯 입력해주세요';
 
   @override
-  String get routineInputSend => '보내기';
+  String get routineInputPrivacyNotice => '이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요';
 
   @override
   String get guardianSettingsLogoutConfirmTitle => '로그아웃할까요?';
@@ -1821,6 +1821,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineDetailEdit => '편집하기';
 
   @override
+  String routineDetailTodayProgress(int done, int total) {
+    return '오늘 $done/$total 했어요';
+  }
+
+  @override
+  String routineDetailPastProgress(int done, int total) {
+    return '$done/$total 했어요';
+  }
+
+  @override
+  String get routineDetailExportLabel => '인쇄용';
+
+  @override
   String get routineDetailFinishedToday => '다 끝낸 일과예요';
 
   @override
@@ -1866,8 +1879,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get todayRoutineRerunFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String todayRoutineCopied(String title) {
-    return '$title을(를) 오늘 일과에 담았어요';
+  String todayRoutineCopied(String title, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$title$_temp0 오늘 일과에 담았어요';
   }
 
   @override
@@ -1883,10 +1897,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get todayRoutinePastEmpty => '지난 일과가 없어요';
 
   @override
-  String get homeCoachCreate => '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*';
+  String get homeCoachCreate => '이룸이가 할 *새로운\n일과를 만들 수 있어요*';
 
   @override
-  String get homeCoachSwipe => '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요';
+  String get homeCoachSwipe => '일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요';
 
   @override
   String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
@@ -2697,8 +2711,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Traído de Historias, ver la publicación original';
 
   @override
-  String routineLibrarySent(String title) {
-    return '$title을(를) 오늘 일과로 보냈어요';
+  String routineLibrarySent(String title, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$title$_temp0 오늘 일과로 보냈어요';
   }
 
   @override
@@ -2803,6 +2818,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineGroupCreateGroup => '새 묶음 만들기';
 
   @override
+  String get routineGroupCreateGroupDescription =>
+      '여러 일과를 한 폴더에 모아요 (예: 아침 등교)';
+
+  @override
   String get routineGroupChooseTitle => '어느 묶음에 넣을까요?';
 
   @override
@@ -2905,16 +2924,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mantén pulsado y *suelta* para abrir el menú';
 
   @override
-  String get routineManageCoachSentMessage =>
-      'Las rutinas enviadas hoy llevan *✓*\nEntran en las rutinas de hoy en Inicio\ny aquí se quedan igual';
-
-  @override
   String get routineManageCoachDragMessage =>
       'Mantén pulsado y *mueve* para ordenar\nSuéltala sobre otra rutina para hacer un *grupo*\nSuéltala entre dos para cambiarla de lugar';
-
-  @override
-  String get routineManageCoachCreateGroupMessage =>
-      'Si arrastrar es difícil, usa *+ Nueva rutina*\ny elige *Nuevo grupo* para agruparlas';
 
   @override
   String get cardReviewCoachEditMessage =>
@@ -4126,7 +4137,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get weeklyReportStars => '받은 별';
 
   @override
-  String get weeklyReportRewards => '보상까지 간 일과';
+  String get weeklyReportRewards => '보상을 받은 일과';
 
   @override
   String get weeklyReportStreak => '연속으로 마친 날';
@@ -4187,6 +4198,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get weeklyReportEmptyBody => '일과를 보내면 이룸이가 마친 기록이 여기에 모여요';
+
+  @override
+  String get weeklyReportNoCompletionThisWeekTitle => '이번 주는 아직 기록이 없어요';
+
+  @override
+  String get weeklyReportNoCompletionPastWeekTitle => '이 주에는 끝낸 일과가 없어요';
+
+  @override
+  String get weeklyReportNoCompletionBody => '오늘 일과를 보내 볼까요?';
+
+  @override
+  String get weeklyReportGoToManage => '일과 관리로 가기';
 
   @override
   String get weeklyReportLoadFailed => '주간 리포트를 불러오지 못했어요';
@@ -4387,7 +4410,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get weeklyReportStatCompleted => '끝낸 일과';
 
   @override
-  String get weeklyReportStatRemaining => '남은 카드';
+  String get weeklyReportStatRemaining => '아직 안 한 카드';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {

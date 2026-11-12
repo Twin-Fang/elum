@@ -30,11 +30,11 @@ class CoachMarkOverlay extends StatefulWidget {
     required this.onNext,
     required this.onClose,
     required this.onDismissed,
-    this.footerTopOffset,
   });
 
-  /// 아래 점과 안내 문구가 차지하는 자리. 말풍선·시범 메뉴·토스트가 여기를 침범하지 않게 한다.
-  static const bottomReserve = 176.0;
+  /// 아래 진행 알약이 차지하는 자리 (안전영역 위, 알약 + 위아래 간격). 말풍선·시범 메뉴가 여기를 침범하지 않게 한다
+  static const bottomReserve =
+      CoachMarkFooter.bottomGap * 2 + CoachMarkFooter.height;
 
   final List<CoachMarkStep> steps;
   final int index;
@@ -50,9 +50,6 @@ class CoachMarkOverlay extends StatefulWidget {
 
   /// 사라지는 연출이 끝났을 때. 이제 위젯을 치워도 된다.
   final VoidCallback onDismissed;
-
-  /// 아래 점·문구를 위로 옮길 때 화면 맨 위에서 띄울 거리 (픽셀). 없으면 닫기 버튼 바로 아래
-  final double? footerTopOffset;
 
   @override
   State<CoachMarkOverlay> createState() => _CoachMarkOverlayState();
@@ -407,9 +404,8 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                           index: widget.index,
                           isLast: last,
                           isMotionReduced: reduce,
-                          // 대상이 아래 문구 자리에 닿으면 말풍선이 거기를 쓴다 — 문구를 위로 옮긴다
+                          // 대상이 아래 알약 자리에 닿으면 말풍선이 거기를 쓴다 — 알약을 ✕ 줄로 옮긴다
                           isAtTop: _isTargetInFooterZone(context),
-                          topOffset: widget.footerTopOffset,
                         ),
                         CoachMarkCloseButton(onClose: _close),
                       ],
@@ -423,7 +419,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     );
   }
 
-  /// 가리키는 대상이 아래 점·문구 자리(바닥 [CoachMarkOverlay.bottomReserve])에 걸치는가
+  /// 가리키는 대상이 아래 진행 알약 자리(바닥 [CoachMarkOverlay.bottomReserve])에 걸치는가
   bool _isTargetInFooterZone(BuildContext context) {
     final hole = _to;
     if (hole == null) return false;
@@ -434,7 +430,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
             CoachMarkOverlay.bottomReserve.h;
   }
 
-  /// 화살표 + 글. 아래에 자리가 모자라면 위에 놓고 화살표를 뒤집는다.
+  /// 화살표 + 글 판. 아래에 자리가 모자라면 위에 놓고 화살표를 뒤집는다.
   Widget _buildBubble(
     BuildContext context, {
     required CoachHole hole,
@@ -448,15 +444,18 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     final size = media.size;
     final arrow = Size(_arrowW.w, _arrowH.h);
     final gap = _arrowToText.h;
+    final colors = context.colors;
+    final panelPadding = context.space.md;
 
-    // 글 높이를 먼저 잰다 — 글자 크기를 키운 사람은 석 줄이 될 수 있다.
+    // 판 높이를 먼저 잰다 — 글자 크기를 키운 사람은 석 줄이 될 수 있다
     final painter = TextPainter(
       text: TextSpan(children: spans),
       textAlign: textAlign,
       textDirection: TextDirection.ltr,
       textScaler: media.textScaler,
-    )..layout(maxWidth: size.width - _sideMargin.w * 2);
-    final need = arrow.height + gap + painter.height;
+    )..layout(maxWidth: size.width - (_sideMargin.w + panelPadding.w) * 2);
+    final need =
+        arrow.height + gap + painter.height + panelPadding.h * 2;
     final roomBelow =
         size.height -
         media.padding.bottom -
@@ -503,10 +502,24 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
             ),
           ),
         ),
+        // 진한 판: 뒤 화면 글자와 겹쳐 읽히지 않게 (#1294)
         LayoutId(
           id: CoachBubbleLayout.textId,
           child: ExcludeSemantics(
-            child: Text.rich(TextSpan(children: spans), textAlign: textAlign),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: panelPadding.w,
+                vertical: panelPadding.h,
+              ),
+              decoration: BoxDecoration(
+                color: colors.coachBubble,
+                borderRadius: BorderRadius.circular(context.space.cardRadius.r),
+              ),
+              child: Text.rich(
+                TextSpan(children: spans),
+                textAlign: textAlign,
+              ),
+            ),
           ),
         ),
       ],
