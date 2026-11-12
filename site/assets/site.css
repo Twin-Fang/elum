@@ -54,14 +54,18 @@ section{padding:64px 0}
 .lang-list a:hover,.lang-list a[aria-current]{background:var(--tint)}
 
 /* 스토어 버튼 */
-.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
-.store{display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border-radius:16px;background:var(--ink);color:#fff;
-  font-size:15px;font-weight:700;text-decoration:none;transition:transform .15s ease}
+/* 두 버튼은 늘 같은 폭 · 같은 높이 (글자 길이가 달라도) */
+.cta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px;max-width:440px}
+.store{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:10px 14px;border-radius:16px;
+  background:var(--ink);color:#fff;font-size:15px;line-height:1.25;font-weight:700;text-align:center;text-decoration:none;
+  transition:transform .15s ease,box-shadow .15s ease}
+.store:hover{box-shadow:0 8px 20px rgba(36,38,52,.16)}
 .store:hover{transform:translateY(-2px)}
 .store svg{width:20px;height:20px;flex:none}
 .store[data-store="android"]{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 /* 기기에 맞는 스토어만 보임 (PC 는 둘 다) */
 [data-platform="ios"] .store[data-store="android"],[data-platform="android"] .store[data-store="ios"]{display:none}
+[data-platform="ios"] .cta,[data-platform="android"] .cta{grid-template-columns:1fr;max-width:260px}
 [data-platform="android"] .store[data-store="android"]{background:var(--ink);color:#fff;border:0}
 
 /* 첫 화면 */
@@ -92,6 +96,28 @@ section{padding:64px 0}
   animation:reward 12s 8.4s infinite both}
 @keyframes reward{0%{opacity:.35;transform:scale(.98)}8%,70%{opacity:1;transform:scale(1.03)}78%,100%{opacity:.35;transform:scale(.98)}}
 
+/* 믿음 띠 */
+.trust{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0;padding:0;list-style:none}
+.trust li{padding:7px 12px 7px 30px;border-radius:100px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:600;position:relative}
+.trust li::before{content:"";position:absolute;left:11px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--mint)}
+.trust li::after{content:"";position:absolute;left:15px;top:50%;width:3px;height:6px;margin-top:-4px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+
+/* ABA 원리 4가지 카드 */
+.principles{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:14px}
+.principle{position:relative;padding:24px 22px 22px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--line);
+  transition:transform .2s ease,box-shadow .2s ease,opacity .5s ease}
+.principle:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.principle .num{position:absolute;right:18px;top:16px;font-size:44px;line-height:1;font-weight:800;color:var(--tint);letter-spacing:-.04em}
+.principle img{width:76px;height:76px;object-fit:contain;margin-bottom:14px;animation:bob 5s ease-in-out infinite;animation-delay:calc(var(--i)*.6s)}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+.principle p{margin-top:6px;color:var(--muted);font-size:15px}
+.principle .inapp{margin-top:14px;padding:10px 12px 10px 34px;border-radius:12px;background:#EAF8F5;color:#1E6F63;font-size:14px;font-weight:600;position:relative}
+.principle .inapp::before{content:"";position:absolute;left:12px;top:13px;width:14px;height:14px;border-radius:4px;background:var(--mint)}
+
+/* 보호자와 함께 */
+.together-grid{display:grid;gap:24px;align-items:center}
+.together-grid>img{width:240px;margin:0 auto;animation:float 6s ease-in-out infinite}
+
 /* 타일 */
 .tiles{display:grid;gap:14px;margin-top:28px}
 .tile{padding:22px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--line)}
@@ -99,9 +125,6 @@ section{padding:64px 0}
 .tile p{margin-top:6px;color:var(--muted);font-size:15px}
 .pictures .tile img{width:84px;height:84px;border-radius:14px;background:var(--tint);padding:6px;object-fit:cover}
 
-/* ABA 원리 */
-.aba-grid{display:grid;gap:24px;align-items:center}
-.aba-grid>img{width:220px;margin:0 auto}
 .points{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:10px}
 .points li{padding:16px 18px;background:var(--surface);border-radius:16px;border:1px solid var(--line)}
 .points b{display:block;font-size:16px}
@@ -121,7 +144,7 @@ section{padding:64px 0}
 .download-box{display:grid;gap:18px;justify-items:center;text-align:center;padding:36px 22px;border-radius:var(--radius-lg);
   background:linear-gradient(135deg,#E9F8F4,#FFF6CC)}
 .download-box img{width:150px;border-radius:24px}
-.download-box .cta{justify-content:center}
+.download-box .cta{margin-left:auto;margin-right:auto}
 
 /* 자주 묻는 질문 */
 .faq{margin-top:24px;display:grid;gap:10px}
@@ -145,6 +168,12 @@ section{padding:64px 0}
 .guide section{padding:28px 0 0}
 .guide section h2{font-size:clamp(21px,4.2vw,26px)}
 .guide section p{margin-top:12px;font-size:17px}
+/* 그림이 붙은 소제목 덩이 (원리 카드) */
+.guide section.pictured{display:grid;grid-template-columns:64px 1fr;gap:16px;margin-top:20px;padding:20px;background:var(--surface);
+  border-radius:var(--radius);border:1px solid var(--line)}
+.guide section.pictured img{width:64px;height:64px;object-fit:contain}
+.guide section.pictured h2{font-size:20px}
+.guide section.pictured ul li{background:var(--tint)}
 .guide section ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
 .guide section ul li{padding:13px 16px 13px 40px;background:var(--surface);border-radius:14px;border:1px solid var(--line);position:relative;font-size:16px}
 .guide section ul li::before{content:"";position:absolute;left:16px;top:21px;width:10px;height:10px;border-radius:50%;background:var(--mint)}
@@ -158,7 +187,7 @@ section{padding:64px 0}
 .inline-cta{margin-top:32px;padding:22px;border-radius:var(--radius);background:var(--ink);color:#fff;display:grid;gap:4px}
 .inline-cta b{display:block;font-size:18px}
 .inline-cta>div>span{color:rgba(255,255,255,.72);font-size:14px}
-.inline-cta .cta{margin-top:14px}
+.inline-cta .cta{margin-top:14px;width:100%}
 .inline-cta .store{background:#fff;color:var(--ink);border:0}
 .notice{margin-top:28px;color:var(--muted);font-size:13px}
 .related{padding-top:28px}
@@ -170,13 +199,18 @@ section{padding:64px 0}
 .foot nav{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;font-weight:600}
 .foot nav a{text-decoration:none}
 .fine{color:var(--muted);font-size:12px}
+.business{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;color:var(--muted);font-size:12px}
+.business div{display:flex;gap:6px}
+.business dt{font-weight:600}
+.business dd{margin:0}
+.business a{text-decoration:none}
 
 /* 아래쪽 앱 받기 띠 (휴대 기기) */
 .getbar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;
   justify-content:space-between;gap:10px;padding:10px 10px 10px 18px;border-radius:20px;background:rgba(36,38,52,.94);color:#fff;
   box-shadow:0 12px 30px rgba(36,38,52,.28);font-weight:700;animation:rise .35s ease both}
 .getbar[hidden]{display:none}
-.getbar .cta{margin:0}
+.getbar .cta{margin:0;max-width:none;grid-template-columns:1fr}
 .getbar .store{padding:10px 14px;background:#fff;color:var(--ink);border:0;font-size:14px}
 @keyframes rise{from{transform:translateY(20px);opacity:0}}
 
@@ -191,16 +225,24 @@ section{padding:64px 0}
   .hero-visual{min-height:420px}
   .tiles.three{grid-template-columns:repeat(3,1fr)}
   .tiles.four{grid-template-columns:repeat(4,1fr)}
-  .aba-grid{grid-template-columns:300px 1fr;gap:48px}
-  .aba-grid>img{width:300px}
+  .principles{grid-template-columns:repeat(4,1fr)}
+  .together-grid{grid-template-columns:340px 1fr;gap:56px}
+  .together-grid>img{width:340px}
   .guidecards{grid-template-columns:repeat(2,1fr)}
   .download-box{grid-template-columns:auto 1fr;justify-items:start;text-align:left;padding:44px 48px;gap:36px}
-  .download-box .cta{justify-content:flex-start}
+  .download-box .cta{margin-left:0}
   .inline-cta{grid-template-columns:1fr auto;align-items:center}
-  .inline-cta .cta{margin-top:0}
+  .inline-cta .cta{margin-top:0;min-width:340px}
   .bottom{padding-bottom:40px}
 }
+@media (min-width:720px) and (max-width:1000px){
+  .principles{grid-template-columns:repeat(2,1fr)}
+}
 @media (max-width:719px){
+  .principles{grid-template-columns:repeat(2,1fr);gap:10px}
+  .principle{padding:18px 14px 14px}
+  .principle img{width:60px;height:60px}
+  .principle .num{font-size:32px;right:12px;top:10px}
   .top nav{display:none}
   .lang{margin-left:auto}
   .tiles.four{grid-template-columns:repeat(2,1fr)}

@@ -12,7 +12,13 @@
     "privacy": "Privacy Policy",
     "delete": "Delete account and data",
     "contact": "Contact us",
-    "notice": "ELUM supports everyday independence. It does not replace diagnosis or treatment."
+    "notice": "ELUM supports everyday independence. It does not replace diagnosis or treatment.",
+    "business": {
+      "name": "Business name",
+      "representative": "Representative",
+      "registration": "Business registration number",
+      "contact": "Contact"
+    }
   },
   "store": {
     "appStore": "Download on the App Store",
@@ -63,13 +69,14 @@
       ]
     },
     "aba": {
-      "tag": "Design principles",
-      "title": "Easy to set up, theirs to do",
-      "sub": "ELUM is built on the principles of Applied Behavior Analysis (ABA).",
+      "tag": "ABA principles",
+      "title": "ABA principles on every action card",
+      "sub": "We picked four ideas from Applied Behavior Analysis (ABA) that fit straight into daily routines and put them into each card.",
       "items": [
-        {"title": "One action per card", "body": "Each card shows what to do, how to do it, and the reward at the end."},
-        {"title": "Short sentences, pictures and voice", "body": "Your child sees, listens and follows along one step at a time."},
-        {"title": "Praise and a star right away", "body": "It leads up to the reward the caregiver chose."}
+        {"title": "Break it down", "body": "Split a big task into small actions you can see.", "app": "Your routine becomes step-by-step cards"},
+        {"title": "Show it first", "body": "Show what to do with a picture before it starts.", "app": "One card at a time, with picture and voice"},
+        {"title": "Help, then step back", "body": "Together at first, then a little less help as it gets familiar.", "app": "Your child follows the cards and keeps going"},
+        {"title": "Praise right away", "body": "Praise and a reward follow the moment it's done.", "app": "A star for each check, then the reward you set"}
       ],
       "link": "ABA principles made simple →"
     },
@@ -104,6 +111,24 @@
     "contact": {
       "title": "Have a question?",
       "sub": "Tell us where you got stuck or what you'd like to see."
+    },
+    "keywords": "visual schedule, picture schedule, action cards, visual schedule app, ABA at home, applied behavior analysis, autism visual schedule, ADHD routine, developmental disabilities, learning disabilities, task analysis, reward chart, morning routine chart",
+    "trust": [
+      "Free to start",
+      "No diagnosis asked",
+      "Only cards a caregiver has checked",
+      "5 languages"
+    ],
+    "together": {
+      "tag": "With the caregiver",
+      "title": "The app doesn't do it for you",
+      "sub": "ELUM is a tool. Setting the routine, staying close and giving praise are still the caregiver's part. ELUM is here to make that part a little lighter.",
+      "items": [
+        {"title": "You decide", "body": "You know best what is easy and what is hard. Edit the cards and the reward."},
+        {"title": "Same place, every day", "body": "A day or two is not enough to get used to it. Keep the same time and the same order."},
+        {"title": "Point to the card instead of talking", "body": "When your child stops, don't rush them. Look at the current card together. Praise right away when it's done."}
+      ],
+      "link": "See what caregivers do →"
     }
   },
   "guide": {
@@ -119,6 +144,7 @@
     "related": "Read next",
     "ctaTitle": "You can make this routine in ELUM right now",
     "ctaSub": "Write one line and get step-by-step action cards.",
-    "notice": "This article is a guide for everyday routines. ELUM does not replace diagnosis or treatment."
+    "notice": "This article is a guide for everyday routines. ELUM does not replace diagnosis or treatment.",
+    "indexKeywords": "action card guides, how to make a visual schedule, ABA principles, task analysis, how to choose rewards, morning routine for school, ADHD routine, picture schedule for autism, homework routine"
   }
 }

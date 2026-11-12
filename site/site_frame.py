@@ -2,8 +2,9 @@
 import html
 import json
 
-from site_config import (APP_STORE_ID, APP_STORE_URL, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, LANGUAGES,
-                         SITE_NAME, SITE_URL, Language)
+from site_config import (APP_STORE_ID, APP_STORE_URL, BUSINESS_NAME, BUSINESS_REGISTRATION_NUMBER,
+                         BUSINESS_REPRESENTATIVE, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, LANGUAGES, SITE_NAME,
+                         SITE_URL, Language)
 
 APPLE_ICON = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48'
               '-.02.06-.36 1.24-1.19 2.45-.72 1.05-1.46 2.09-2.63 2.11-1.15.02-1.52-.68-2.83-.68-1.32 0-1.73.66-2.82.7-1.13.04-1.99'
@@ -80,7 +81,7 @@ def build_download_section(ui: dict) -> str:
 
 def render_page(language: Language, ui: dict, path: str, title: str, description: str, body: str,
                 structured_data: list, og_image: str = 'assets/og.png', og_type: str = 'website',
-                is_translated: bool = True) -> str:
+                is_translated: bool = True, keywords: str = '') -> str:
     """페이지 1장: head(제목 · 설명 · 대표 주소 · 언어별 주소 · 공유 정보 · 구조화 데이터) + 머리 + 본문 + 바닥
 
     [is_translated] 가 False 면 언어별 주소를 싣지 않음 (한 언어만 있는 글)
@@ -89,6 +90,8 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
     nav = ui['nav']
     footer = ui['footer']
     alternates = build_alternate_links(path) if is_translated else ''
+    keywords_meta = f'<meta name="keywords" content="{escape(keywords)}"/>' if keywords else ''
+    business = footer['business']
     return f"""<!DOCTYPE html>
 <html lang="{language.hreflang}">
 <head>
@@ -96,6 +99,7 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>{escape(title)}</title>
 <meta name="description" content="{escape(description)}"/>
+{keywords_meta}
 <link rel="canonical" href="{url}"/>
 {alternates}
 <link rel="icon" href="/assets/lumi.svg"/>
@@ -142,7 +146,13 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
       <a href="mailto:{CONTACT_EMAIL}">{escape(footer['contact'])}</a>
     </nav>
     <p class="fine">{escape(footer['notice'])}</p>
-    <p class="fine">© Twin-Fang</p>
+    <dl class="business">
+      <div><dt>{escape(business['name'])}</dt><dd>{BUSINESS_NAME}</dd></div>
+      <div><dt>{escape(business['representative'])}</dt><dd>{BUSINESS_REPRESENTATIVE}</dd></div>
+      <div><dt>{escape(business['registration'])}</dt><dd>{BUSINESS_REGISTRATION_NUMBER}</dd></div>
+      <div><dt>{escape(business['contact'])}</dt><dd><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a></dd></div>
+    </dl>
+    <p class="fine">© 2026 {BUSINESS_NAME}</p>
   </div>
 </footer>
 

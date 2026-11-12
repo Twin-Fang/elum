@@ -15,6 +15,7 @@ site/
 ├── site_guides.py      # 안내 글 목록 · 글
 ├── site_schema.py      # 구조화 데이터 (JSON-LD)
 ├── prepare_images.py   # 원본 그림 > assets/img (원본이 바뀌었을 때만)
+├── art/                # 사이트 전용 그림 원본 (이미지 하네스 PNG)
 ├── content/
 │   ├── <언어>.json             # 공통 문구 + 첫 화면
 │   └── guides/<글>.<언어>.json  # 안내 글

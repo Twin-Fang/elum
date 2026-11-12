@@ -1,4 +1,4 @@
-"""사이트 그림 준비: 원본(스토어 홍보 그림 · 앱 에셋) > site/assets/img 의 가벼운 WebP
+"""사이트 그림 준비: 원본(스토어 홍보 그림 · 앱 에셋 · site/art 의 사이트 전용 그림) > site/assets/img 의 가벼운 WebP
 
 사용: python3 -I site/prepare_images.py   (원본 그림이 바뀌었을 때만. 결과는 커밋한다)
 필요: Pillow
@@ -13,6 +13,8 @@ TARGET_DIR = REPO_ROOT / 'site/assets/img'
 PROMO_ART = REPO_ROOT / 'docs/store/promo/art'
 APP_IMAGES = REPO_ROOT / 'client/assets/images'
 APP_ASSETS = REPO_ROOT / 'client/assets'
+# 사이트에만 쓰는 그림 원본 (이미지 하네스로 그린 512·768 PNG)
+SITE_ART = REPO_ROOT / 'site/art'
 
 # (원본, 결과 이름, 가로 픽셀, 투명 유지)
 RASTER_IMAGES = [
@@ -27,6 +29,11 @@ RASTER_IMAGES = [
     (APP_IMAGES / 'example_category_outside.webp', 'outside.webp', 192, True),
     (APP_IMAGES / 'image_style_cartoon.webp', 'style_cartoon.webp', 280, False),
     (APP_IMAGES / 'image_style_realistic.png', 'style_realistic.webp', 280, False),
+    (SITE_ART / 'aba_steps.png', 'aba_steps.webp', 256, True),
+    (SITE_ART / 'aba_show.png', 'aba_show.webp', 256, True),
+    (SITE_ART / 'aba_help.png', 'aba_help.webp', 256, True),
+    (SITE_ART / 'aba_reward.png', 'aba_reward.webp', 256, True),
+    (SITE_ART / 'together.png', 'together.webp', 720, True),
 ]
 # 그대로 복사하는 벡터 그림 (앱 그림 방식 예시와 같은 그림)
 VECTOR_IMAGES = [
