@@ -333,6 +333,17 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.proPlanFreeChipFill,
     required this.proPlanFreeChipText,
     required this.proPlanTeaserCardShadow,
+    required this.proPlanMyCardStart,
+    required this.proPlanMyCardEnd,
+    required this.proPlanMyCardBorder,
+    required this.proPlanMyCardShadow,
+    required this.proPlanMyCardHalo,
+    required this.proPlanMyCardSubText,
+    required this.proPlanMyCardPillFill,
+    required this.proPlanMyCardPillText,
+    required this.proPlanMyCardPillCheck,
+    required this.proPlanMyCardFree,
+    required this.proPlanMyCardFreeHalo,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -1249,6 +1260,39 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Pro 미리보기 떠 있는 카드 그림자 (14%)
   final Color proPlanTeaserCardShadow;
 
+  /// 내 정보 내 요금제 카드(Pro) 금빛 그라데이션 시작 (#1268 임시 값)
+  final Color proPlanMyCardStart;
+
+  /// 내 정보 내 요금제 카드(Pro) 금빛 그라데이션 끝
+  final Color proPlanMyCardEnd;
+
+  /// 내 정보 내 요금제 카드(Pro) 안쪽 테두리 (금빛 18%)
+  final Color proPlanMyCardBorder;
+
+  /// 내 정보 내 요금제 카드(Pro) 금빛 그림자 (14%)
+  final Color proPlanMyCardShadow;
+
+  /// 내 정보 내 요금제 카드(Pro) 루미 뒤 둥근 빛 (흰색 65%)
+  final Color proPlanMyCardHalo;
+
+  /// 내 정보 내 요금제 카드(Pro) 날짜 한 줄 글자 (금빛 위 갈색)
+  final Color proPlanMyCardSubText;
+
+  /// 내 정보 내 요금제 카드(Pro) 혜택 알약 바탕 (흰색 55%)
+  final Color proPlanMyCardPillFill;
+
+  /// 내 정보 내 요금제 카드(Pro) 혜택 알약 글자
+  final Color proPlanMyCardPillText;
+
+  /// 내 정보 내 요금제 카드(Pro) 혜택 알약 체크
+  final Color proPlanMyCardPillCheck;
+
+  /// 내 정보 내 요금제 카드(Free) 판
+  final Color proPlanMyCardFree;
+
+  /// 내 정보 내 요금제 카드(Free) 루미 뒤 둥근 자리
+  final Color proPlanMyCardFreeHalo;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -1551,6 +1595,17 @@ class AppColors extends ThemeExtension<AppColors> {
     proPlanFreeChipFill: Color(0xFFEEE9E6),
     proPlanFreeChipText: Color(0xFF6C6E7A),
     proPlanTeaserCardShadow: Color(0x24242634),
+    proPlanMyCardStart: Color(0xFFFFF8DE),
+    proPlanMyCardEnd: Color(0xFFFFE2A0),
+    proPlanMyCardBorder: Color(0x2ECB9500),
+    proPlanMyCardShadow: Color(0x24CB9500),
+    proPlanMyCardHalo: Color(0xA6FFFFFF),
+    proPlanMyCardSubText: Color(0xFF7A6526),
+    proPlanMyCardPillFill: Color(0x8CFFFFFF),
+    proPlanMyCardPillText: Color(0xFF574D2B),
+    proPlanMyCardPillCheck: Color(0xFFCB9500),
+    proPlanMyCardFree: Color(0xFFFFFFFF),
+    proPlanMyCardFreeHalo: Color(0xFFF7F2EF),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -1860,6 +1915,17 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? proPlanFreeChipFill,
     Color? proPlanFreeChipText,
     Color? proPlanTeaserCardShadow,
+    Color? proPlanMyCardStart,
+    Color? proPlanMyCardEnd,
+    Color? proPlanMyCardBorder,
+    Color? proPlanMyCardShadow,
+    Color? proPlanMyCardHalo,
+    Color? proPlanMyCardSubText,
+    Color? proPlanMyCardPillFill,
+    Color? proPlanMyCardPillText,
+    Color? proPlanMyCardPillCheck,
+    Color? proPlanMyCardFree,
+    Color? proPlanMyCardFreeHalo,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -2161,6 +2227,17 @@ class AppColors extends ThemeExtension<AppColors> {
       proPlanFreeChipFill: proPlanFreeChipFill ?? this.proPlanFreeChipFill,
       proPlanFreeChipText: proPlanFreeChipText ?? this.proPlanFreeChipText,
       proPlanTeaserCardShadow: proPlanTeaserCardShadow ?? this.proPlanTeaserCardShadow,
+      proPlanMyCardStart: proPlanMyCardStart ?? this.proPlanMyCardStart,
+      proPlanMyCardEnd: proPlanMyCardEnd ?? this.proPlanMyCardEnd,
+      proPlanMyCardBorder: proPlanMyCardBorder ?? this.proPlanMyCardBorder,
+      proPlanMyCardShadow: proPlanMyCardShadow ?? this.proPlanMyCardShadow,
+      proPlanMyCardHalo: proPlanMyCardHalo ?? this.proPlanMyCardHalo,
+      proPlanMyCardSubText: proPlanMyCardSubText ?? this.proPlanMyCardSubText,
+      proPlanMyCardPillFill: proPlanMyCardPillFill ?? this.proPlanMyCardPillFill,
+      proPlanMyCardPillText: proPlanMyCardPillText ?? this.proPlanMyCardPillText,
+      proPlanMyCardPillCheck: proPlanMyCardPillCheck ?? this.proPlanMyCardPillCheck,
+      proPlanMyCardFree: proPlanMyCardFree ?? this.proPlanMyCardFree,
+      proPlanMyCardFreeHalo: proPlanMyCardFreeHalo ?? this.proPlanMyCardFreeHalo,
     );
   }
 
@@ -2659,6 +2736,17 @@ class AppColors extends ThemeExtension<AppColors> {
       proPlanFreeChipFill: Color.lerp(proPlanFreeChipFill, other.proPlanFreeChipFill, t)!,
       proPlanFreeChipText: Color.lerp(proPlanFreeChipText, other.proPlanFreeChipText, t)!,
       proPlanTeaserCardShadow: Color.lerp(proPlanTeaserCardShadow, other.proPlanTeaserCardShadow, t)!,
+      proPlanMyCardStart: Color.lerp(proPlanMyCardStart, other.proPlanMyCardStart, t)!,
+      proPlanMyCardEnd: Color.lerp(proPlanMyCardEnd, other.proPlanMyCardEnd, t)!,
+      proPlanMyCardBorder: Color.lerp(proPlanMyCardBorder, other.proPlanMyCardBorder, t)!,
+      proPlanMyCardShadow: Color.lerp(proPlanMyCardShadow, other.proPlanMyCardShadow, t)!,
+      proPlanMyCardHalo: Color.lerp(proPlanMyCardHalo, other.proPlanMyCardHalo, t)!,
+      proPlanMyCardSubText: Color.lerp(proPlanMyCardSubText, other.proPlanMyCardSubText, t)!,
+      proPlanMyCardPillFill: Color.lerp(proPlanMyCardPillFill, other.proPlanMyCardPillFill, t)!,
+      proPlanMyCardPillText: Color.lerp(proPlanMyCardPillText, other.proPlanMyCardPillText, t)!,
+      proPlanMyCardPillCheck: Color.lerp(proPlanMyCardPillCheck, other.proPlanMyCardPillCheck, t)!,
+      proPlanMyCardFree: Color.lerp(proPlanMyCardFree, other.proPlanMyCardFree, t)!,
+      proPlanMyCardFreeHalo: Color.lerp(proPlanMyCardFreeHalo, other.proPlanMyCardFreeHalo, t)!,
     );
   }
 
