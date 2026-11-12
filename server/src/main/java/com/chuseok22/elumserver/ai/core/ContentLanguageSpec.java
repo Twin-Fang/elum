@@ -36,7 +36,8 @@ public record ContentLanguageSpec(
   public static final String KO_STEP_DESCRIPTION_HINT =
     "소리 내어 읽어줄 아주 짧은 한 문장. 공백 포함 12자 안팎, 행동 하나만. "
       + "'~고', '~해서', '~한 뒤', 쉼표로 행동을 잇지 않는다 (나쁜 예: '이불을 덮고 누워요', 좋은 예: '침대에 누워요'). "
-      + "title을 되풀이하지 않고 쉬운 말로 (예: '학교 갈 옷을 입어요')";
+      + "title의 행동을 더 자세히 풀어 쓴다. 끝 동사는 title과 같게, title에 없는 새 행동을 더하지 않는다 "
+      + "(예: title '옷을 입어요' > '학교 갈 옷을 입어요')";
 
   private static final ContentLanguageSpec KO = new ContentLanguageSpec(
     AppLocale.KO, "Korean",
