@@ -8,13 +8,15 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/ai_credit_bar.dart';
 import '../../../../core/widgets/elum_guide_panel.dart';
+import '../../../../core/widgets/free_badge.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../member/application/plan_access.dart';
 import '../../domain/credit_breakdown.dart';
 import '../../domain/credit_period_unit.dart';
 import '../../domain/credit_summary.dart';
 import 'my_credit_kind_labels.dart';
 
-/// 내 크레딧 위 카드 하나: 표 그림 + `N개 남았어요` > 남은 비율 막대 > 다시 채워지는 때 > 아래 칸 (#1300)
+/// 내 크레딧 위 카드 하나: 표 그림 + `N개 남았어요` + 요금제 배지(PRO/FREE, #1322) > 남은 비율 막대 > 다시 채워지는 때 > 아래 칸 (#1300)
 /// 아래 칸 2개 (있을 때만, 구분선 아래): 종류별 개수 (0 아닌 종류가 2개 이상) · Pro 오늘 다시 그리기 칩 (서버 하루 한도를 받았을 때)
 class MyCreditBalanceCard extends ConsumerWidget {
   const MyCreditBalanceCard({super.key, required this.summary});
@@ -30,6 +32,7 @@ class MyCreditBalanceCard extends ConsumerWidget {
     final space = context.space;
     final l10n = context.l10n;
     final canRegenerateImagesFree = ref.watch(planAccessProvider.select((access) => access.canRegenerateImagesFree));
+    final isPro = ref.watch(planAccessProvider.select((access) => access.isPro));
     final dailyCap = summary.freeImageRegenerateDailyCap;
     final shouldShowRedrawChip = canRegenerateImagesFree && dailyCap > 0;
     final heldLines = [for (final line in summary.breakdownLines) if (line.remaining > 0) line];
@@ -47,7 +50,7 @@ class MyCreditBalanceCard extends ConsumerWidget {
               children: [
                 Image.asset(AppAssets.creditTicket, width: _pictureSize.w, excludeFromSemantics: true),
                 SizedBox(width: space.sm.w),
-                Flexible(
+                Expanded(
                   child: Text.rich(
                     TextSpan(
                       children: [
@@ -58,6 +61,9 @@ class MyCreditBalanceCard extends ConsumerWidget {
                     style: TextStyle(color: colors.textPrimary),
                   ),
                 ),
+                SizedBox(width: space.sm.w),
+                // 내 요금제는 남은 개수 옆에서 함께 읽힘
+                isPro ? const ProBadge() : const FreeBadge(),
               ],
             ),
             SizedBox(height: space.md.h),

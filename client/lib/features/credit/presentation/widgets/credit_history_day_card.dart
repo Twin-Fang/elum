@@ -53,10 +53,12 @@ class CreditHistoryDayCard extends StatelessWidget {
 /// 내역 한 줄: 왼쪽 위 제목 > (만료·조정만) 이유 한 줄 > 시각, 오른쪽 가운데 증감
 ///
 /// 사용 줄은 일과 제목이 위에 서고(일과가 지워졌으면 종류가 대신 선다), 지급·만료·조정은 종류가 위에 선다.
+/// [isDateShown]: 날짜 머리글 없이 줄만 늘어놓을 때(내 크레딧 최근 내역) 시각 앞에 날짜 (`11월 10일 오후 1:07`)
 class CreditHistoryRow extends ConsumerWidget {
-  const CreditHistoryRow({super.key, required this.entry});
+  const CreditHistoryRow({super.key, required this.entry, this.isDateShown = false});
 
   final CreditHistoryEntry entry;
+  final bool isDateShown;
 
   /// 줄 높이 69 = 위아래 안쪽 16 + 제목 16 + 사이 8 + 부제 13 (Figma `1589:8379`)
   static const _minHeight = 69.0;
@@ -76,9 +78,12 @@ class CreditHistoryRow extends ConsumerWidget {
     final routineTitle = entry.routineTitle;
     final isTitledUsage = (entry.kind?.isUsage ?? false) && routineTitle != null;
 
-    final time = MaterialLocalizations.of(
+    final timeOfDay = MaterialLocalizations.of(
       context,
     ).formatTimeOfDay(TimeOfDay.fromDateTime(entry.occurredAt));
+    final time = isDateShown
+        ? l10n.creditHistoryDateTime(entry.occurredAt.month, entry.occurredAt.day, timeOfDay)
+        : timeOfDay;
     final title = isTitledUsage ? routineTitle : kindLabel;
     final detail = isTitledUsage ? l10n.creditHistoryDetail(kindLabel, time) : time;
 

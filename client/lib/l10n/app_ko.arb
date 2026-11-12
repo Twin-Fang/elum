@@ -1921,6 +1921,12 @@
     "placeholders": {"month": {"type": "int"}, "day": {"type": "int"}}
   },
 
+  "creditHistoryDateTime": "{month}월 {day}일 {time}",
+  "@creditHistoryDateTime": {
+    "description": "날짜 머리글 없이 줄만 늘어놓는 내역(내 크레딧 최근 쓴 내역)의 시각 줄. time 은 기기 시각 모양. 예: 11월 10일 오후 1:07",
+    "placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "time": {"type": "String"}}
+  },
+
   "creditHistoryDetail": "{kind}・{time}",
   "@creditHistoryDetail": {
     "description": "사용 내역 줄의 부제: 종류와 시각. 예: 카드 그림 4장・오전 11:23",
@@ -3845,8 +3851,6 @@
   "@myCreditRecentTitle": {"description": "내 크레딧 최근 내역 묶음 제목"},
   "myCreditSeeAllHistory": "전체 보기",
   "@myCreditSeeAllHistory": {"description": "최근 쓴 내역 머리글 오른쪽 글자 버튼 (사용 내역 화면)"},
-  "myCreditGuideLink": "크레딧은 이렇게 써요",
-  "@myCreditGuideLink": {"description": "내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)"},
   "abaIntroTitle": "🧩 준비는 간편하게, 일상은 스스로",
   "@abaIntroTitle": {"description": "ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277"},
   "abaIntroSubtitle": "이룸은 응용행동분석(ABA)의 원리로 만들었어요",

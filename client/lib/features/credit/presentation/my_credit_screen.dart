@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
-import '../../../core/widgets/elum_text_link.dart';
-import '../../../core/widgets/free_badge.dart';
-import '../../../core/widgets/pro_badge.dart';
 import '../../member/application/plan_access.dart';
 import '../../subscription/application/credit_purchase_notifier.dart';
 import '../application/credit_cost_guide_entry.dart';
@@ -26,7 +26,7 @@ import 'widgets/my_credit_balance_card.dart';
 import 'widgets/my_credit_pack_section.dart';
 import 'widgets/my_credit_subscribe_card.dart';
 
-/// 내 크레딧: 위 카드 하나(잔액 · 막대 · 채워지는 때 · 종류 · 다시 그리기) > 최근 쓴 내역 5줄 > (Free) 구독 카드 > 꾸러미 > `크레딧은 이렇게 써요`
+/// 내 크레딧: 제목 + 물음표(크레딧 안내 창) > 잔액 카드(요금제 배지 포함) > (Free) 구독 카드 > 꾸러미 > 최근 쓴 내역 카드 3줄 (#1322)
 /// 상태 4개: 불러오는 중 · 실패(다시 하기 + 코드) · 꺼짐(빈 화면) · 정상 (꾸러미 실패와 무관하게 잔액은 보임)
 class MyCreditScreen extends ConsumerWidget {
   const MyCreditScreen({super.key});
@@ -87,19 +87,12 @@ class _Body extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(child: Text(context.l10n.myCreditTitle, style: context.typo.libraryTitle.copyWith(color: colors.textPrimary))),
-              access.isPro ? const ProBadge() : const FreeBadge(),
-            ],
-          ),
+          _TitleWithGuideButton(summary: summary),
           SizedBox(height: context.space.md.h),
           stagger(0, MyCreditBalanceCard(summary: summary)),
-          SizedBox(height: _sectionGap.h),
-          stagger(1, const MyCreditRecentHistory()),
           if (access.shouldShowProTeaser) ...[
             SizedBox(height: _sectionGap.h),
-            stagger(2, Column(
+            stagger(1, Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
@@ -110,16 +103,50 @@ class _Body extends ConsumerWidget {
               ],
             )),
           ],
+          // 할 수 있는 행동(사기)을 지난 기록(내역)보다 먼저
           SizedBox(height: _sectionGap.h),
-          stagger(3, const MyCreditPackSection()),
-          SizedBox(height: context.space.xs.h),
-          // 크레딧 안내 창 (내 요금제 기준 단가 · 지급량)
-          ElumTextLink(
-            label: context.l10n.myCreditGuideLink,
-            onTap: withTapHaptic(() => showCreditCostGuide(context, ref, summary)),
-          ),
+          stagger(2, const MyCreditPackSection()),
+          SizedBox(height: _sectionGap.h),
+          stagger(3, const MyCreditRecentHistory()),
           SizedBox(height: _bottomGap.h),
         ],
+      ),
+    );
+  }
+}
+
+/// 제목 `내 크레딧` + 물음표: 누르면 크레딧 안내 창 (내 요금제 기준 단가 · 지급량). 제목 줄 전체가 누름 영역
+class _TitleWithGuideButton extends ConsumerWidget {
+  const _TitleWithGuideButton({required this.summary});
+
+  final CreditSummary summary;
+
+  static const _titleToIconGap = 6.0;
+  static const _iconSize = 20.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: AppPressable(
+        scaleDown: AppPressable.scaleIcon,
+        semanticLabel: context.l10n.creditInfoLabel,
+        onTap: withTapHaptic(() => showCreditCostGuide(context, ref, summary)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: Text(context.l10n.myCreditTitle, style: context.typo.libraryTitle.copyWith(color: colors.textPrimary))),
+            SizedBox(width: _titleToIconGap.w),
+            SvgPicture.asset(
+              AppAssets.iconQuestionCircle,
+              width: _iconSize.w,
+              height: _iconSize.w,
+              excludeFromSemantics: true,
+              colorFilter: ColorFilter.mode(colors.creditMutedText, BlendMode.srcIn),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -3905,6 +3905,12 @@ abstract class AppLocalizations {
   /// **'{month}월 {day}일'**
   String creditHistoryDay(int month, int day);
 
+  /// 날짜 머리글 없이 줄만 늘어놓는 내역(내 크레딧 최근 쓴 내역)의 시각 줄. time 은 기기 시각 모양. 예: 11월 10일 오후 1:07
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일 {time}'**
+  String creditHistoryDateTime(int month, int day, String time);
+
   /// 사용 내역 줄의 부제: 종류와 시각. 예: 카드 그림 4장・오전 11:23
   ///
   /// In ko, this message translates to:
@@ -9268,12 +9274,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'전체 보기'**
   String get myCreditSeeAllHistory;
-
-  /// 내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧은 이렇게 써요'**
-  String get myCreditGuideLink;
 
   /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277
   ///

@@ -2162,6 +2162,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String creditHistoryDateTime(int month, int day, String time) {
+    return '$month월 $day일 $time';
+  }
+
+  @override
   String creditHistoryDetail(String kind, String time) {
     return '$kind・$time';
   }
@@ -5387,9 +5392,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get myCreditSeeAllHistory => '전체 보기';
-
-  @override
-  String get myCreditGuideLink => '크레딧은 이렇게 써요';
 
   @override
   String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
