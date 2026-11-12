@@ -1147,7 +1147,6 @@
   "planLegalBillingPlayStore": "Payment is charged to your Google Play account when you confirm the purchase. The subscription renews automatically at the same length and price until you cancel.",
   "planLegalCancelPlayStore": "You can manage and cancel your subscription in the Google Play Store under Payments & subscriptions > Subscriptions. After you cancel, you can use Pro until the end of the paid period.",
   "planTrialDays": "{count, plural, one{{count} day} other{{count} days}}",
-  "planTrialWeeks": "{count, plural, one{{count} week} other{{count} weeks}}",
   "planTrialMonths": "{count, plural, one{{count} month} other{{count} months}}",
   "planTrialYears": "{count, plural, one{{count} year} other{{count} years}}",
   "planStartFreeTrial": "Start {trial} free",
