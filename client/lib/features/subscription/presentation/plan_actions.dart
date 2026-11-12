@@ -31,7 +31,10 @@ Future<void> confirmGuardianAndBuy(
   await ref.read(storePurchaseCoordinatorProvider).buy(offer);
 }
 
-/// 구매 복원: 대기 팝업 > 복원 > 결과 팝업 (되찾음 · 없음 · 실패 + 코드)
+/// 이 기기의 스토어가 App Store 인가 (스토어별 확인 경로 · 버튼 문구, 아니면 Play 스토어)
+bool get isAppStoreDevice => defaultTargetPlatform == TargetPlatform.iOS;
+
+/// 구매 복원: 대기 팝업 > 복원 > 결과 팝업 (되찾음 · 없음 + 확인할 계정 · 실패 + 코드)
 Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
   final l10n = context.l10n; // await 뒤 context 를 읽지 않으려고 미리 잡음
   unawaited(
@@ -56,6 +59,7 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
       await showElumDialog<void>(
         context: context,
         title: l10n.planRestoreNothing,
+        message: isAppStoreDevice ? l10n.planRestoreNothingHintApple : l10n.planRestoreNothingHintGoogle,
         actions: [ElumDialogAction(label: l10n.commonConfirm)],
       );
     case PlanRestoreResult.failed:

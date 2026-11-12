@@ -47,3 +47,17 @@ final freeImageRegenerateDailyCapProvider = Provider.autoDispose<int?>((ref) {
   final cap = ref.watch(creditSummaryProvider).value?.freeImageRegenerateDailyCap ?? 0;
   return cap > 0 ? cap : null;
 });
+
+/// 지금 남은 크레딧 (비용 한 줄 `지금 N개 있어요`). 크레딧이 꺼졌거나 모르면(조회 전 · 실패) null > 줄 숨김
+final availableCreditsProvider = Provider.autoDispose<int?>((ref) {
+  final summary = ref.watch(creditSummaryProvider).value;
+  if (summary == null || !summary.enabled) return null;
+  return summary.available;
+});
+
+/// 주기마다 받는 크레딧 (온보딩 첫 설명 `매주 N개 받아요`). 크레딧이 꺼졌거나 모르면 null > 숫자 없는 문구
+final creditGrantPerPeriodProvider = Provider.autoDispose<int?>((ref) {
+  final summary = ref.watch(creditSummaryProvider).value;
+  if (summary == null || !summary.enabled || summary.weeklyGrant <= 0) return null;
+  return summary.weeklyGrant;
+});

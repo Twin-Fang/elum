@@ -247,6 +247,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
       context,
       ref,
       title: lock == CardExportLock.layout ? context.l10n.cardExportProLayoutLocked : context.l10n.cardExportProThemeLocked,
+      benefit: benefit,
     );
   }
 

@@ -48,6 +48,7 @@ class ImageStyleScreen extends ConsumerWidget {
 
     final character = profile.cardCharacter ?? CardCharacter.cat;
     final planAccess = ref.watch(planAccessProvider);
+    final creditCosts = ref.watch(routineCreateCreditCostsProvider);
 
     final group = SelectableGroup<ImageStyle>(
       items: visibleImageStyles(planAccess, saved: profile.imageStyle, picked: profile.imageStyle),
@@ -91,8 +92,16 @@ class ImageStyleScreen extends ConsumerWidget {
             SizedBox(height: space.headerToContent),
             ImageStyleCreditBar(
               style: profile.imageStyle,
-              costs: ref.watch(routineCreateCreditCostsProvider),
+              costs: creditCosts,
             ),
+            // 크레딧이 처음 나오는 자리: 얼마나 받고 어디에 쓰는지 한 줄 (크레딧이 꺼지면 띠와 함께 숨김)
+            if (creditCosts != null) ...[
+              SizedBox(height: space.xs.h),
+              Text(
+                ref.watch(creditPeriodUnitProvider).creditIntro(context.l10n, ref.watch(creditGrantPerPeriodProvider)),
+                style: context.typo.creditCaption.copyWith(color: context.colors.textSecondary),
+              ),
+            ],
             SizedBox(height: _cardGap.h),
             group,
             SizedBox(height: 24.h),
