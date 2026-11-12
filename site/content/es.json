@@ -12,7 +12,13 @@
     "privacy": "Política de privacidad",
     "delete": "Eliminar cuenta y datos",
     "contact": "Contacto",
-    "notice": "ELUM es un servicio de apoyo a la autonomía en la vida diaria. No sustituye un diagnóstico ni un tratamiento."
+    "notice": "ELUM es un servicio de apoyo a la autonomía en la vida diaria. No sustituye un diagnóstico ni un tratamiento.",
+    "business": {
+      "name": "Razón social",
+      "representative": "Representante",
+      "registration": "Número de registro de empresa",
+      "contact": "Contacto"
+    }
   },
   "store": {
     "appStore": "Descargar en el App Store",
@@ -63,13 +69,14 @@
       ]
     },
     "aba": {
-      "tag": "Cómo está pensada",
-      "title": "Fácil de preparar, para hacerlo por su cuenta",
-      "sub": "ELUM se basa en los principios del Análisis Conductual Aplicado (ABA).",
+      "tag": "Principios ABA",
+      "title": "Los principios ABA en cada tarjeta de acción",
+      "sub": "Elegimos cuatro ideas del Análisis Conductual Aplicado (ABA) que se pueden usar directamente en las rutinas y las pusimos en cada tarjeta.",
       "items": [
-        {"title": "Una acción por tarjeta", "body": "Qué hacer, cómo hacerlo y la recompensa al terminar."},
-        {"title": "Frases cortas, imágenes y voz", "body": "Se mira, se escucha y se sigue paso a paso."},
-        {"title": "Elogio y estrella al momento", "body": "Y al final, la recompensa que tú elegiste."}
+        {"title": "Divide en pasos pequeños", "body": "Una tarea grande se divide en acciones pequeñas que se ven.", "app": "La rutina que escribes se convierte en tarjetas paso a paso"},
+        {"title": "Muestra antes", "body": "Lo que toca hacer se muestra con una imagen antes de empezar.", "app": "Una tarjeta cada vez, con imagen y voz"},
+        {"title": "Ayuda y retira la ayuda", "body": "Al principio juntos y, cuando ya lo conozca, un poco menos cada vez.", "app": "Mira las tarjetas y sigue por su cuenta"},
+        {"title": "Elogia al momento", "body": "El elogio y la recompensa llegan justo cuando lo logra.", "app": "Una estrella al marcar y, al final, la recompensa acordada"}
       ],
       "link": "Los principios ABA, explicados fácil →"
     },
@@ -104,6 +111,24 @@
     "contact": {
       "title": "¿Tienes alguna pregunta?",
       "sub": "Cuéntanos dónde te atascas o qué te gustaría encontrar."
+    },
+    "keywords": "horario visual, agenda visual, pictogramas, rutinas con pictogramas, tarjetas de acción, app de horario visual, ABA en casa, análisis conductual aplicado, autismo rutinas, TDAH rutinas, discapacidad del desarrollo, análisis de tareas, tabla de recompensas, rutina de la mañana",
+    "trust": [
+      "Empieza gratis",
+      "No pide diagnóstico",
+      "Solo se ven las tarjetas que revisas",
+      "5 idiomas"
+    ],
+    "together": {
+      "tag": "Contigo al lado",
+      "title": "La app no lo hace por ti",
+      "sub": "ELUM es una herramienta. Decidir la rutina, estar cerca y elogiar te toca a ti. ELUM está para que esa parte pese un poco menos.",
+      "items": [
+        {"title": "Tú decides", "body": "Nadie sabe mejor que tú qué le resulta fácil y qué le cuesta. Ajusta las tarjetas y la recompensa."},
+        {"title": "Cada día en el mismo sitio", "body": "Uno o dos días no bastan para acostumbrarse. Úsala a la misma hora y en el mismo orden."},
+        {"title": "Señala la tarjeta en lugar de repetir", "body": "Si se detiene, no le metas prisa. Mira a su lado la tarjeta que toca. Cuando lo logre, elogia enseguida."}
+      ],
+      "link": "Qué te toca hacer como cuidador →"
     }
   },
   "guide": {
@@ -119,6 +144,7 @@
     "related": "Sigue leyendo",
     "ctaTitle": "Puedes crear esta rutina en ELUM ahora mismo",
     "ctaSub": "Escribe una frase y se convierte en tarjetas de acción paso a paso.",
-    "notice": "Este artículo es una guía para las rutinas del día a día. ELUM no sustituye un diagnóstico ni un tratamiento."
+    "notice": "Este artículo es una guía para las rutinas del día a día. ELUM no sustituye un diagnóstico ni un tratamiento.",
+    "indexKeywords": "guías de tarjetas de acción, cómo hacer un horario visual, principios ABA, análisis de tareas, cómo elegir recompensas, rutina de la mañana para ir a la escuela, TDAH rutinas, horario visual autismo, rutina de deberes"
   }
 }

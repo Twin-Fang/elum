@@ -9,6 +9,11 @@ GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=kr.twinfang.elu
 CONTACT_EMAIL = 'chan4760@gmail.com'
 SITE_NAME = '이룸 ELUM'
 
+# 사업자 정보 (바닥 표시. passQL 사이트와 같은 사업자)
+BUSINESS_NAME = '콜리랩(KOLLYLAB)'
+BUSINESS_REPRESENTATIVE = '서새찬'
+BUSINESS_REGISTRATION_NUMBER = '331-37-01670'
+
 
 @dataclass(frozen=True)
 class Language:
@@ -33,7 +38,10 @@ DEFAULT_LANGUAGE = LANGUAGES[0]
 # 안내 글 주소 조각 (모든 언어가 같은 영문 조각). 순서 = 목록 순서
 GUIDE_SLUGS = [
     'action-cards',
+    'make-action-cards',
     'aba-principles',
+    'why-action-cards',
+    'caregiver-role',
     'task-analysis',
     'rewards',
     'morning-routine',
@@ -45,6 +53,9 @@ GUIDE_SLUGS = [
 # 안내 글 대표 그림 (assets/img 의 파일 이름)
 GUIDE_IMAGES = {
     'action-cards': 'cards.webp',
+    'make-action-cards': 'aba_show.webp',
+    'why-action-cards': 'aba_steps.webp',
+    'caregiver-role': 'together.webp',
     'aba-principles': 'lumi_cards.webp',
     'task-analysis': 'morning.webp',
     'rewards': 'lumi_crown.webp',
@@ -52,4 +63,13 @@ GUIDE_IMAGES = {
     'adhd-routine': 'outside.webp',
     'developmental-disability-routine': 'friends.webp',
     'learning-homework': 'chores.webp',
+}
+
+# ABA 원리 4가지 그림 (첫 화면 ABA 칸 · 안내 글 소제목 옆. 문구 순서와 같은 순서)
+ABA_PRINCIPLE_IMAGES = ['aba_steps.webp', 'aba_show.webp', 'aba_help.webp', 'aba_reward.webp']
+
+# 안내 글 소제목 옆 그림: 글 > {소제목 순서(0부터): 그림}
+GUIDE_SECTION_IMAGES = {
+    'aba-principles': {1: 'aba_steps.webp', 2: 'aba_show.webp', 3: 'aba_help.webp', 4: 'aba_reward.webp'},
+    'why-action-cards': {0: 'aba_show.webp', 1: 'aba_steps.webp', 2: 'aba_help.webp', 3: 'aba_reward.webp'},
 }

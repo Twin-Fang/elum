@@ -2,7 +2,8 @@
 import html
 import json
 
-from site_config import (APP_STORE_ID, APP_STORE_URL, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, LANGUAGES,
+from site_config import (APP_STORE_ID, APP_STORE_URL, BUSINESS_NAME, BUSINESS_REGISTRATION_NUMBER,
+                         BUSINESS_REPRESENTATIVE, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, GUIDE_IMAGES, LANGUAGES,
                          SITE_NAME, SITE_URL, Language)
 
 APPLE_ICON = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48'
@@ -63,6 +64,16 @@ def build_language_menu(language: Language, path: str, ui: dict) -> str:
             f'<span>{language.label}</span></summary><div class="lang-list">{options}</div></details>')
 
 
+def build_guide_cards(language: Language, guides: dict, slugs: list, class_name: str = 'guidecards') -> str:
+    """안내 글 카드 묶음 (그림 + 제목 + 설명). 첫 화면 · 목록 · 이어 읽기 공통"""
+    cards = ''.join(
+        f'<a class="guidecard reveal" style="--i:{index}" href="{page_href(language, f"guide/{slug}/")}">'
+        f'<img src="/assets/img/{GUIDE_IMAGES[slug]}" alt="" width="72" height="72" loading="lazy" decoding="async"/>'
+        f'<span><b>{escape(guides[slug]["heading"])}</b><small>{escape(guides[slug]["description"])}</small></span></a>'
+        for index, slug in enumerate(slugs) if slug in guides)
+    return f'<div class="{class_name}">{cards}</div>'
+
+
 def build_download_section(ui: dict) -> str:
     """글 끝 앱 받기 묶음"""
     download = ui['download']
@@ -80,7 +91,7 @@ def build_download_section(ui: dict) -> str:
 
 def render_page(language: Language, ui: dict, path: str, title: str, description: str, body: str,
                 structured_data: list, og_image: str = 'assets/og.png', og_type: str = 'website',
-                is_translated: bool = True) -> str:
+                is_translated: bool = True, keywords: str = '') -> str:
     """페이지 1장: head(제목 · 설명 · 대표 주소 · 언어별 주소 · 공유 정보 · 구조화 데이터) + 머리 + 본문 + 바닥
 
     [is_translated] 가 False 면 언어별 주소를 싣지 않음 (한 언어만 있는 글)
@@ -89,6 +100,8 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
     nav = ui['nav']
     footer = ui['footer']
     alternates = build_alternate_links(path) if is_translated else ''
+    keywords_meta = f'<meta name="keywords" content="{escape(keywords)}"/>' if keywords else ''
+    business = footer['business']
     return f"""<!DOCTYPE html>
 <html lang="{language.hreflang}">
 <head>
@@ -96,6 +109,7 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>{escape(title)}</title>
 <meta name="description" content="{escape(description)}"/>
+{keywords_meta}
 <link rel="canonical" href="{url}"/>
 {alternates}
 <link rel="icon" href="/assets/lumi.svg"/>
@@ -142,7 +156,13 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
       <a href="mailto:{CONTACT_EMAIL}">{escape(footer['contact'])}</a>
     </nav>
     <p class="fine">{escape(footer['notice'])}</p>
-    <p class="fine">© Twin-Fang</p>
+    <dl class="business">
+      <div><dt>{escape(business['name'])}</dt><dd>{BUSINESS_NAME}</dd></div>
+      <div><dt>{escape(business['representative'])}</dt><dd>{BUSINESS_REPRESENTATIVE}</dd></div>
+      <div><dt>{escape(business['registration'])}</dt><dd>{BUSINESS_REGISTRATION_NUMBER}</dd></div>
+      <div><dt>{escape(business['contact'])}</dt><dd><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a></dd></div>
+    </dl>
+    <p class="fine">© 2026 {BUSINESS_NAME}</p>
   </div>
 </footer>
 

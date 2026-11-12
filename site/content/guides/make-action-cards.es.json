@@ -1,0 +1,58 @@
+{
+  "title": "Cómo hacer tarjetas de acción en 3 minutos | ELUM",
+  "description": "No hace falta dibujar ni plastificar. La forma más fácil de crear tarjetas de acción con una sola frase y cinco consejos para que queden bien.",
+  "keywords": "cómo hacer tarjetas de acción, cómo hacer un horario visual, crear pictogramas, app de horario visual, rutinas con pictogramas, agenda visual para imprimir, app de pictogramas",
+  "heading": "Cómo hacer tarjetas de acción de forma fácil",
+  "lede": "Buscar imágenes, imprimir y plastificar se cambia por escribir una frase.",
+  "minutes": 3,
+  "sections": [
+    {
+      "heading": "Lo que pasa al hacerlas a mano",
+      "paragraphs": [
+        "Aunque sepas que las tarjetas de acción ayudan, prepararlas da trabajo. Entre elegir las imágenes, ajustar el tamaño, imprimir y recortar, una sola rutina se lleva una hora. Si la rutina cambia, toca empezar de cero.",
+        "Solo si son fáciles de hacer <b>se pueden usar durante mucho tiempo.</b>"
+      ]
+    },
+    {
+      "heading": "Los pasos en ELUM",
+      "list": [
+        "<b>Escribe una frase.</b> Como si hablaras, por ejemplo \"lavarse la cara y vestirse por la mañana\"",
+        "<b>Se crean las tarjetas.</b> La app divide la rutina en pasos fáciles de seguir y añade una imagen y una frase corta a cada uno",
+        "<b>Tú las revisas.</b> Edita las frases, cambia el orden y añade o quita tarjetas",
+        "<b>Elige la recompensa.</b> Escribe lo que recibirá al terminar todo",
+        "<b>Guarda y listo.</b> Aparecen una a una en la pantalla de tu hijo o hija y la app las lee en voz alta"
+      ]
+    },
+    {
+      "heading": "Consejos para hacer buenas tarjetas",
+      "list": [
+        "<b>Una sola acción.</b> Si en una tarjeta aparece una \"y\", divídela en dos",
+        "<b>Palabras que se ven.</b> Mejor \"frota el dorso de las manos\" que \"lávate bien\"",
+        "<b>En positivo.</b> Mejor \"camina\" que \"no corras\"",
+        "<b>Siempre la misma imagen.</b> Para la misma acción, la misma imagen resulta más familiar",
+        "<b>Empieza con 3 a 5 tarjetas.</b> Si va bien, añade más poco a poco"
+      ]
+    },
+    {
+      "heading": "También puedes usar tarjetas de papel",
+      "paragraphs": [
+        "Donde es difícil usar un dispositivo, el papel resulta cómodo. Las tarjetas que creas en ELUM se pueden exportar para imprimir y recortar."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: antes de salir",
+    "items": [
+      {"emoji": "🚽", "title": "Ve al baño", "body": "Ve antes de salir"},
+      {"emoji": "🧥", "title": "Ponte el abrigo", "body": "Sube la cremallera"},
+      {"emoji": "👟", "title": "Ponte los zapatos", "body": "Póntelos en la entrada"},
+      {"emoji": "🚪", "title": "Espera en la puerta", "body": "Salimos juntos"}
+    ],
+    "reward": "Al terminar, ir al parque"
+  },
+  "faq": [
+    {"q": "¿Puedo usar tal cual las tarjetas que crea la IA?", "a": "Primero léelas y ajústalas. ELUM solo muestra las tarjetas que tú revisas y guardas."},
+    {"q": "¿Se pueden crear gratis?", "a": "Sí. Las tarjetas con emojis y con pictogramas se crean sin coste."}
+  ],
+  "related": ["action-cards", "task-analysis"]
+}
