@@ -138,15 +138,18 @@ class _PlanPaywallBodyState extends ConsumerState<PlanPaywallBody> {
   );
 
   /// 이미 Pro: 지금 상태 + 구독 관리(스토어 결제일 때) + 구매 복원 링크
+  ///
+  /// 본문은 설정 묶음 아래 줄과 같은 말 (`11월 18일까지 쓸 수 있어요`). 알릴 날짜가 없으면 상태 이름 (#1265: 제목과 `Pro` 가 겹쳤음)
   Widget _alreadyPro(BuildContext context) {
     final l10n = context.l10n;
     final isStorePurchase = ref.watch(memberSubscriptionProvider)?.isStorePurchase ?? false;
+    final status = ref.watch(planStatusProvider);
     return _message(Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PlanStateMessage(
           title: l10n.planAlreadyProTitle,
-          body: planStatusLabel(l10n, ref.watch(planStatusProvider)),
+          body: planStatusFooter(l10n, status) ?? planStatusLabel(l10n, status),
           secondaryLabel: isStorePurchase ? l10n.commonClose : null,
           onSecondary: Navigator.of(context).pop,
           primaryLabel: isStorePurchase ? l10n.planManageSubscription : l10n.commonConfirm,
