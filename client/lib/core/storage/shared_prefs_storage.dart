@@ -604,7 +604,7 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
-  bool get isTalkGridView => _prefs.getBool(_kTalkGridView) ?? false;
+  bool get isTalkGridView => _prefs.getBool(_kTalkGridView) ?? true;
 
   @override
   Future<void> setTalkGridView(bool isGridView) async {

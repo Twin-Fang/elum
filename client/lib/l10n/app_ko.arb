@@ -1246,14 +1246,14 @@
   "routineInputTitle": "오늘은 어떤 준비가\n필요한가요?",
   "@routineInputTitle": { "description": "일과 입력 화면 큰 제목(줄바꿈은 디자인이 정한 대로)" },
 
-  "routineInputSubtitle": "AI 루미가 작은 행동 단계로 나눠드려요",
-  "@routineInputSubtitle": { "description": "일과 입력 화면 부제" },
+  "routineInputSubtitle": "AI 도우미 루미가 작은 행동 단계로 나눠 줄게요",
+  "@routineInputSubtitle": { "description": "일과 입력 화면 부제. 제목 위 루미 얼굴과 함께 루미가 누구인지 처음 소개하는 줄 — 온보딩 캐릭터(루루 등)와 헷갈리지 않게 'AI 도우미'를 붙인다 (#1297)" },
 
   "routineInputHint": "평소 이야기하듯 입력해주세요",
   "@routineInputHint": { "description": "일과 입력창 안내 글(포커스가 없을 때)" },
 
-  "routineInputSend": "보내기",
-  "@routineInputSend": { "description": "일과 입력창 전송 버튼의 낭독 이름" },
+  "routineInputPrivacyNotice": "이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요",
+  "@routineInputPrivacyNotice": { "description": "일과 입력칸 아래 개인정보 안내 (서비스 원칙 2, #1297). 적은 글은 가공 없이 AI 로 가므로 '가린다'·'지운다'고 쓰지 않는다 (#377)" },
 
   "guardianSettingsLogoutConfirmTitle": "로그아웃할까요?",
   "@guardianSettingsLogoutConfirmTitle": { "description": "로그아웃 확인 팝업 제목" },
@@ -2439,7 +2439,7 @@
   "@talkWriteButton": { "description": "이야기 칸 아래 가운데 떠 있는 버튼: 내 일과를 올리러 간다 (앞의 + 는 아이콘)" },
   "talkCategoryAll": "전체",
   "@talkCategoryAll": { "description": "이야기 분류 칩: 분류 없이 전체 보기" },
-  "talkPopularTitle": "이번 주에 많이 가져간 일과에요",
+  "talkPopularTitle": "이번 주에 많이 가져간 일과예요",
   "@talkPopularTitle": { "description": "이야기 칸 인기 줄 제목 (최근 7일)" },
   "talkPopularImportCount": "{count, plural, other{{count}명 가져감}}",
   "@talkPopularImportCount": {

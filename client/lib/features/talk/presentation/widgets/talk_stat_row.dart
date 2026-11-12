@@ -8,7 +8,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_meta_divider.dart';
 import '../../domain/talk_post.dart';
 
-/// 피드 카드 숫자 줄: 도움돼요 > 댓글 > 가져감 (아이콘 10 + 숫자 12, 시안 1783:6675)
+/// 피드 카드 숫자 줄: 도움돼요 > 댓글 > 가져감, 아이콘 + 이름 붙은 숫자 (`👍 도움돼요 2 · 💬 댓글 1 · ⬇ 2명 가져감`, #1301)
+/// 숫자만으로는 ⬇ 가 `가져감`인지 몰라 이름을 붙인다. 좁은 인기 카드에서는 줄을 넘겨 감싼다
 /// [authorName] 이 있으면 세로선 + 작성자 이름을 뒤에 붙인다 (최신 글 카드)
 class TalkStatRow extends StatelessWidget {
   const TalkStatRow({super.key, required this.post, this.authorName});
@@ -16,8 +17,9 @@ class TalkStatRow extends StatelessWidget {
   final TalkPostSummary post;
   final String? authorName;
 
-  /// 항목 사이 · 세로선 좌우 (시안: 도움돼요 0 > 댓글 35 > 가져감 65, 세로선 앞뒤 8)
-  static const _itemGap = 10.0;
+  /// 항목 사이 · 줄 사이 · 세로선 > 이름 · 세로선 높이
+  static const _itemGap = 12.0;
+  static const _lineGap = 6.0;
   static const _dividerGap = 8.0;
   static const _dividerHeight = 12.0;
 
@@ -25,85 +27,99 @@ class TalkStatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final authorName = this.authorName;
-    return Row(
+    return Wrap(
+      spacing: _itemGap.w,
+      runSpacing: _lineGap.h,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _StatItem(
+        TalkStatItem(
           iconAsset: AppAssets.iconThumbsUp,
-          count: post.helpfulCount,
-          semanticLabel: l10n.talkHelpfulCount(post.helpfulCount),
+          label: l10n.talkHelpfulCount(post.helpfulCount),
         ),
-        SizedBox(width: _itemGap.w),
-        _StatItem(
+        TalkStatItem(
           iconAsset: AppAssets.navComment,
-          count: post.commentCount,
-          semanticLabel: l10n.talkCommentCount(post.commentCount),
+          label: l10n.talkCommentCount(post.commentCount),
         ),
-        SizedBox(width: _itemGap.w),
-        _StatItem(
+        TalkStatItem(
           iconAsset: AppAssets.iconDownload,
-          count: post.importCount,
-          semanticLabel: l10n.talkPopularImportCount(post.importCount),
+          label: l10n.talkPopularImportCount(post.importCount),
         ),
-        if (authorName != null) ...[
-          SizedBox(width: _dividerGap.w),
-          ElumMetaDivider(
-            height: _dividerHeight,
-            color: context.colors.talkCardBorder,
-          ),
-          SizedBox(width: _dividerGap.w),
-          Flexible(
-            child: Text(
-              authorName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.talkMeta.copyWith(
-                color: context.colors.talkMetaText,
+        // 세로선 + 작성자 (자리가 모자라면 숫자 뒤 줄로 넘어간다)
+        if (authorName != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElumMetaDivider(
+                height: _dividerHeight,
+                color: context.colors.talkCardBorder,
               ),
-            ),
+              SizedBox(width: _dividerGap.w),
+              ConstrainedBox(
+                // 긴 닉네임은 말줄임
+                constraints: BoxConstraints(maxWidth: _authorMaxWidth.w),
+                child: Text(
+                  authorName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.typo.talkMeta.copyWith(
+                    color: context.colors.talkMetaText,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
       ],
     );
   }
+
+  /// 작성자 이름 최대 폭
+  static const _authorMaxWidth = 96.0;
 }
 
-/// 아이콘 + 숫자 한 쌍. 읽기 프로그램에는 `도움돼요 3` 처럼 이름과 함께 읽힌다
-class _StatItem extends StatelessWidget {
-  const _StatItem({
+/// 아이콘 + 이름 붙은 숫자 한 쌍 (`👍 도움돼요 2`). 피드 카드와 상세가 같이 쓴다
+class TalkStatItem extends StatelessWidget {
+  const TalkStatItem({
+    super.key,
     required this.iconAsset,
-    required this.count,
-    required this.semanticLabel,
+    required this.label,
+    this.iconSize = _defaultIconSize,
+    this.labelStyle,
   });
 
   final String iconAsset;
-  final int count;
-  final String semanticLabel;
+  final String label;
 
-  static const _iconSize = 10.0;
-  static const _iconToCount = 2.0;
+  /// 아이콘 한 변 (기본 14)
+  final double iconSize;
+
+  /// 글자 결. null 이면 피드 숫자 줄 결([AppTypography.talkStatLabel])
+  final TextStyle? labelStyle;
+
+  static const _defaultIconSize = 14.0;
+  static const _iconToLabel = 4.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Semantics(
-      label: semanticLabel,
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            iconAsset,
-            width: _iconSize.w,
-            height: _iconSize.w,
-            colorFilter: ColorFilter.mode(colors.talkMetaIcon, BlendMode.srcIn),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 아이콘은 글자와 같은 회색 (연회색 #CACACA 는 거의 안 보였다)
+        SvgPicture.asset(
+          iconAsset,
+          width: iconSize.w,
+          height: iconSize.w,
+          excludeFromSemantics: true,
+          colorFilter: ColorFilter.mode(colors.talkMetaText, BlendMode.srcIn),
+        ),
+        SizedBox(width: _iconToLabel.w),
+        Text(
+          label,
+          style: (labelStyle ?? context.typo.talkStatLabel).copyWith(
+            color: colors.talkMetaText,
           ),
-          SizedBox(width: _iconToCount.w),
-          Text(
-            '$count',
-            style: context.typo.talkMeta.copyWith(color: colors.talkMetaText),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

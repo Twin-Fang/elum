@@ -22,11 +22,13 @@ import 'talk_detail_actions.dart';
 import 'widgets/talk_comment_input.dart';
 import 'widgets/talk_comment_list.dart';
 import 'widgets/talk_detail_body.dart';
+import 'widgets/talk_detail_parts.dart';
 import 'widgets/talk_empty_line.dart';
 import 'widgets/talk_import_sheet.dart';
 import 'widgets/talk_top_bar.dart';
 
-/// 이야기 글 상세: 머리(뒤로 · 제목 · 신고 또는 ⋯ · 공유) > 본문(카드 · 가져오기) + 댓글 스크롤 > 하단 고정 댓글 입력
+/// 이야기 글 상세: 머리(뒤로 · 제목 · 신고 또는 ⋯ · 공유) > 본문(카드) + 댓글(입력줄 포함) 스크롤 > 하단 고정 `일과로 가져오기`
+/// 가져오기는 이 화면의 핵심 동작이라 스크롤 없이 보이게 고정 (#1301). 키보드가 올라오면 댓글 쓰는 중이라 숨긴다
 /// 상태: 받는 중 / 내려간 글(404) / 실패(다시 하기 + 에러 코드) / 본문
 class TalkDetailScreen extends ConsumerStatefulWidget {
   const TalkDetailScreen({super.key, required this.postId});
@@ -39,7 +41,6 @@ class TalkDetailScreen extends ConsumerStatefulWidget {
 
 class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   final _scrollController = ScrollController();
-
 
   /// 도움돼요 칩 > 구분 띠 16 · 띠 높이 7 · 띠 > 댓글 머리 16 (시안 1813:7718 · 1783:7172 실측, 칩·머리 줄 높이 1.0)
   static const _bodyToDivider = 16.0;
@@ -102,6 +103,10 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
   /// 공유 아이콘: 공개 글은 늘, 링크 글은 보낸 사람만 (받은 사람이 다시 퍼뜨리지 않게)
   bool _isShareVisible(TalkPostDetail post) => !post.isLinkOnly || post.isMine;
 
+  /// 키보드가 올라와 있는가 (댓글 쓰는 중이면 하단 가져오기 버튼을 내려 입력칸 자리를 비운다)
+  bool _isKeyboardVisible(BuildContext context) =>
+      MediaQuery.viewInsetsOf(context).bottom > 0;
+
   /// 글이 내려갔는가 (없는 글·내가 내린 글·꺼진 링크)
   bool _isPostGone(Object error) =>
       AppFailure.of(error).server?.code == ServerErrorCode.talkPostNotFound;
@@ -157,9 +162,12 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
                 _ => const ElumStateBody.loading(),
               },
             ),
-            // 링크 글은 댓글이 없다
-            if (post != null && !post.isLinkOnly)
-              TalkCommentInput(onSubmit: _actions.sendComment),
+            if (post != null && !_isKeyboardVisible(context))
+              _ImportBar(
+                isImported: post.isImportedByMe,
+                onPressed: () =>
+                    showTalkImportSheet(context, ref, post.toSummary()),
+              ),
           ],
         ),
       ),
@@ -183,8 +191,6 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
             TalkDetailBody(
               post: post,
               onHelpfulPressed: _actions.toggleHelpful,
-              onImportPressed: () =>
-                  showTalkImportSheet(context, ref, post.toSummary()),
             ),
             // 링크 글은 도움돼요·댓글이 없어 본문에서 끝난다
             if (!post.isLinkOnly) ..._commentSection(post),
@@ -207,6 +213,7 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
       TalkCommentList(
         commentCount: post.commentCount,
         comments: comments,
+        inputField: TalkCommentInput(onSubmit: _actions.sendComment),
         onCommentMenuRequested: _actions.openCommentMenu,
         onRetryPressed: () =>
             ref.invalidate(talkCommentControllerProvider(widget.postId)),
@@ -215,6 +222,43 @@ class _TalkDetailScreenState extends ConsumerState<TalkDetailScreen> {
             .retryLoadMore,
       ),
     ];
+  }
+}
+
+/// 하단 고정 `일과로 가져오기`: 바탕색 띠 + 위 경계선 + 버튼 (좌우 16 · 위아래 12)
+class _ImportBar extends StatelessWidget {
+  const _ImportBar({required this.isImported, required this.onPressed});
+
+  final bool isImported;
+  final VoidCallback onPressed;
+
+  static const _sideInset = 16.0;
+  static const _verticalInset = 12.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.background,
+        border: Border(
+          top: BorderSide(
+            color: colors.talkCardBorder,
+            width: context.space.borderWidth,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: _sideInset.w,
+          vertical: _verticalInset.h,
+        ),
+        child: TalkDetailImportButton(
+          isImported: isImported,
+          onPressed: onPressed,
+        ),
+      ),
+    );
   }
 }
 

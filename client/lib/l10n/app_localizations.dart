@@ -2504,10 +2504,10 @@ abstract class AppLocalizations {
   /// **'오늘은 어떤 준비가\n필요한가요?'**
   String get routineInputTitle;
 
-  /// 일과 입력 화면 부제
+  /// 일과 입력 화면 부제. 제목 위 루미 얼굴과 함께 루미가 누구인지 처음 소개하는 줄 — 온보딩 캐릭터(루루 등)와 헷갈리지 않게 'AI 도우미'를 붙인다 (#1297)
   ///
   /// In ko, this message translates to:
-  /// **'AI 루미가 작은 행동 단계로 나눠드려요'**
+  /// **'AI 도우미 루미가 작은 행동 단계로 나눠 줄게요'**
   String get routineInputSubtitle;
 
   /// 일과 입력창 안내 글(포커스가 없을 때)
@@ -2516,11 +2516,11 @@ abstract class AppLocalizations {
   /// **'평소 이야기하듯 입력해주세요'**
   String get routineInputHint;
 
-  /// 일과 입력창 전송 버튼의 낭독 이름
+  /// 일과 입력칸 아래 개인정보 안내 (서비스 원칙 2, #1297). 적은 글은 가공 없이 AI 로 가므로 '가린다'·'지운다'고 쓰지 않는다 (#377)
   ///
   /// In ko, this message translates to:
-  /// **'보내기'**
-  String get routineInputSend;
+  /// **'이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요'**
+  String get routineInputPrivacyNotice;
 
   /// 로그아웃 확인 팝업 제목
   ///
@@ -5387,7 +5387,7 @@ abstract class AppLocalizations {
   /// 이야기 칸 인기 줄 제목 (최근 7일)
   ///
   /// In ko, this message translates to:
-  /// **'이번 주에 많이 가져간 일과에요'**
+  /// **'이번 주에 많이 가져간 일과예요'**
   String get talkPopularTitle;
 
   /// 피드 카드 가져감 아이콘 숫자의 읽기 프로그램 문구: 일과관리로 가져간 보호자 수
