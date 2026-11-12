@@ -179,7 +179,7 @@ class _ImageStyleChoices extends StatelessWidget {
           builder: (context, ref, _) {
             final planAccess = ref.watch(planAccessProvider);
             return SelectableGroup<ImageStyle>(
-              items: visibleImageStyles(planAccess, saved: saved, picked: picked),
+              items: ImageStyle.values,
               selected: {picked},
               allowDeselect: false,
               gap: gap,
@@ -194,7 +194,7 @@ class _ImageStyleChoices extends StatelessWidget {
                 style: style,
                 isSelected: isSelected,
                 character: character,
-                shouldShowProBadge: isImageStyleLocked(style, planAccess),
+                isLocked: isImageStyleLocked(style, planAccess),
               ),
               semanticLabelOf: ImageStyleOptionCard.semanticLabel,
             );

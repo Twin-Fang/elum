@@ -6,11 +6,15 @@ import 'package:go_router/go_router.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/pin_forgot_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../../auth/application/auth_session_controller.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -39,7 +43,16 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   final _focusNode = FocusNode();
 
   /// 틀린 횟수. [AppShake]의 trigger로 쓴다 — 값이 바뀔 때마다 흔들린다.
+  /// 이 화면에서만 센다 (나갔다 오거나 앱을 다시 켜면 0)
   int _mismatchCount = 0;
+
+  /// 「비밀암호를 잊었어요」를 꺼내는 틀린 횟수 (처음부터 보이면 이룸이가 눌러 로그아웃할 수 있음. 5회면 잠김)
+  static const _mismatchCountBeforeRecovery = 3;
+
+  /// 잊었어요 글자 버튼을 보일지: 결제 확인이 아니고, 이 화면에서 여러 번 틀렸을 때만
+  bool get _shouldShowPinRecovery =>
+      widget.target.canOfferPinRecovery &&
+      _mismatchCount >= _mismatchCountBeforeRecovery;
 
   /// 암호가 틀렸는가. true면 설명 자리에 실패 안내를 보인다.
   /// 문구가 아니라 상태만 들고 있어야 앱 언어가 바뀌어도 새 언어로 읽힌다.
@@ -129,7 +142,10 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
 
   Future<void> _verify() async {
     if (_verifying || !_ready) return;
-    _verifying = true;
+    // 확인 중 표시 (점 깜박임). 확인 계산이 화면을 잠시 붙잡으므로 흐린 점을 먼저 한 프레임 그린다
+    setState(() => _verifying = true);
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
     final entered = _controller.text;
     bool isValid;
     try {
@@ -153,7 +169,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       }
       return;
     } finally {
-      _verifying = false;
+      if (mounted) setState(() => _verifying = false);
     }
     if (!mounted) return;
 
@@ -169,7 +185,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       return;
     }
 
-    // 틀렸다 — 점을 흔들고 문구로 알린다.
+    // 틀렸다 — 점을 흔들고 점 아래 줄에 문구로 알린다.
     // 입력만 조용히 비우면 틀린 것인지, 입력이 안 먹은 것인지, 화면이 멈춘
     // 것인지 구분할 수 없어 같은 암호를 다시 누르게 된다.
     //
@@ -189,6 +205,22 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         _mismatchCount++;
       });
     });
+  }
+
+  /// 비밀암호를 잊었을 때: 안내 팝업 > 다시 로그인 고르면 로그아웃(잠금도 지움) > 로그인 화면
+  ///
+  /// 보호자 계정으로 다시 로그인한 기기는 로그인 뒤 암호 만들기로 이어진다
+  Future<void> _onForgotPin() async {
+    playChildHaptic(context, ChildHapticKind.tap);
+    final isReloginChosen = await confirmPinForgotRelogin(context);
+    if (!isReloginChosen || !mounted) return;
+    try {
+      await ref.read(authSessionControllerProvider).logout();
+    } catch (e, stack) {
+      // 정리에 실패해도 로그인으로는 간다. 남은 세션은 다음 시작에 다시 정리된다
+      AppLogger.error('[mode switch] forgot pin logout failed', e, stack);
+    }
+    if (mounted) context.go(Routes.login);
   }
 
   /// 설명 하단(193) → 점(299). 시안 `309:2837` 실측.
@@ -226,10 +258,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           ElumHeader(
             // 시안 `309:2837` 문구 그대로
             title: context.l10n.modeSwitchTitle,
-            // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다.
-            description: _mismatch
-                ? context.l10n.modeSwitchMismatch
-                : widget.target.description,
+            // 틀림 안내는 설명 자리가 아니라 점 아래 줄에 둔다 (회색 설명 자리에서는 거의 안 보인다)
+            description: widget.target.description,
           ),
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
@@ -245,13 +275,28 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
               child: AppShake(
                 trigger: _mismatchCount,
                 haptic: false,
-                child: PinDots(
-                  length: OnboardingProfile.pinLength,
-                  filled: _controller.text.length,
+                child: PinVerifyingPulse(
+                  isVerifying: _verifying,
+                  child: PinDots(
+                    length: OnboardingProfile.pinLength,
+                    filled: _controller.text.length,
+                  ),
                 ),
               ),
             ),
           ),
+          PinErrorMessage(
+            message: _mismatch ? context.l10n.modeSwitchMismatch : null,
+          ),
+          if (_shouldShowPinRecovery) ...[
+            SizedBox(height: context.space.md.h),
+            Center(
+              child: ElumTextLink(
+                label: context.l10n.pinForgotLink,
+                onTap: _onForgotPin,
+              ),
+            ),
+          ],
           PinInputField(
             controller: _controller,
             focusNode: _focusNode,
@@ -281,6 +326,9 @@ enum ModeSwitchTarget {
 
   /// 보호자 쪽으로 들어가는 확인인가 (암호가 없으면 통과시키지 않는다)
   bool get isGuardianEntry => this != child;
+
+  /// 「비밀암호를 잊었어요」를 보일지. 결제 확인은 닫고 돌아가면 되므로 다시 로그인 길을 두지 않는다
+  bool get canOfferPinRecovery => this != purchase;
 
   /// 암호 안내 문구. 읽을 때 푼다 — 값으로 들고 있으면 앱 언어가 바뀐 뒤에도 옛 언어가 남는다.
   String get description => switch (this) {

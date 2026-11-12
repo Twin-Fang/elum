@@ -403,8 +403,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get goalIndependent => '혼자 끝까지 해내는 경험을 만들어요';
 
   @override
-  String onboardingCharacterTitle(String name) {
-    return '$name의 하루를 함께할\n친구를 골라주세요';
+  String onboardingCharacterTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 하루를 함께할\n친구를 골라주세요';
   }
 
   @override
@@ -443,7 +444,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
 
   @override
-  String get onboardingNameDescription => '정확한 실명이 아니어도 괜찮아요';
+  String get onboardingNameDescription => '이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
 
   @override
   String get onboardingNameHint => '이름을 입력해주세요';
@@ -464,7 +465,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pinCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
 
   @override
-  String get pinConfirmTitle => '암호를 한번 더\n입력해주세요';
+  String get pinConfirmTitle => '암호를 한 번 더\n입력해주세요';
 
   @override
   String get pinDescription => '보호자모드로 변경할 때 사용하는 암호예요';
@@ -610,13 +611,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get linkCodeSettingsTitle => '이룸이 기기 연결';
 
   @override
-  String linkCodeAskTitle(String name) {
-    return '$name의 기기를\n연결할까요?';
+  String linkCodeAskTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 기기를\n연결할까요?';
   }
 
   @override
-  String linkCodeEnterHint(String name) {
-    return '$name의 기기에서 아래 코드를 입력하세요';
+  String linkCodeEnterHint(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 기기에서 아래 코드를 입력하세요';
   }
 
   @override
@@ -1170,7 +1173,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pinChangeVerifyTitle => '지금 비밀암호를\n입력해주세요';
 
   @override
-  String get pinChangeCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
+  String get pinChangeCreateTitle => '이 기기에서 쓸\n비밀암호를 정해 주세요';
+
+  @override
+  String get pinChangeCreateDescription => '비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요';
 
   @override
   String get pinModeHint => '보호자모드로 변경할 때 사용하는 암호예요';
@@ -1179,10 +1185,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pinChangeEnterTitle => '새 비밀암호를\n입력해주세요';
 
   @override
-  String get pinChangeCreateConfirmTitle => '암호를 한번 더\n입력해주세요';
+  String get pinChangeCreateConfirmTitle => '암호를 한 번 더\n입력해주세요';
 
   @override
-  String get pinChangeConfirmTitle => '비밀암호를 한번 더\n입력해주세요';
+  String get pinChangeConfirmTitle => '비밀암호를 한 번 더\n입력해주세요';
 
   @override
   String get pinChangeConfirmHint => '이제 곧 비밀암호 변경이 끝나요';
@@ -1741,6 +1747,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineDetailEdit => '편집하기';
 
   @override
+  String routineDetailTodayProgress(int done, int total) {
+    return '오늘 $done/$total 했어요';
+  }
+
+  @override
+  String routineDetailPastProgress(int done, int total) {
+    return '$done/$total 했어요';
+  }
+
+  @override
+  String get routineDetailExportLabel => '인쇄용';
+
+  @override
   String get routineDetailFinishedToday => '다 끝낸 일과예요';
 
   @override
@@ -1786,8 +1805,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todayRoutineRerunFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String todayRoutineCopied(String title) {
-    return '$title을(를) 오늘 일과에 담았어요';
+  String todayRoutineCopied(String title, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$title$_temp0 오늘 일과에 담았어요';
   }
 
   @override
@@ -1803,10 +1823,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todayRoutinePastEmpty => '지난 일과가 없어요';
 
   @override
-  String get homeCoachCreate => '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*';
+  String get homeCoachCreate => '이룸이가 할 *새로운\n일과를 만들 수 있어요*';
 
   @override
-  String get homeCoachSwipe => '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요';
+  String get homeCoachSwipe => '일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요';
 
   @override
   String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
@@ -1818,8 +1838,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String childHomeEmptyTitle(String name) {
-    return '아직 $name의\n일과가 없어요';
+  String childHomeEmptyTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '아직 $name$_temp0\n일과가 없어요';
   }
 
   @override
@@ -1933,6 +1954,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modeSwitchPinLabel => '암호 넣기';
+
+  @override
+  String get pinForgotLink => '비밀암호를 잊었어요';
+
+  @override
+  String get pinForgotTitle => '비밀암호가 생각나지 않나요?';
+
+  @override
+  String get pinForgotMessage => '보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요';
+
+  @override
+  String get pinForgotRelogin => '다시 로그인';
 
   @override
   String get modeSwitchReadFailedTitle => '암호를 확인하지 못했어요';
@@ -2203,6 +2236,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineTemplateOpen => '예시 일과 둘러보기';
+
+  @override
+  String get routineImageStylePillLabel => '카드 그림';
+
+  @override
+  String routineImageStylePillSemantics(String style) {
+    return '카드 그림 방식 $style, 눌러서 바꾸기';
+  }
 
   @override
   String get routineTemplateSheetTitle => '예시 일과';
@@ -2593,13 +2634,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineDetailTalkOriginBandOpenLabel => '이야기에서 가져왔어요, 원래 글 보기';
 
   @override
-  String routineLibrarySent(String title) {
-    return '$title을(를) 오늘 일과로 보냈어요';
+  String routineLibrarySent(String title, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$title$_temp0 오늘 일과로 보냈어요';
   }
 
   @override
-  String onboardingExampleTitle(String name) {
-    return '$name의 어떤 일을\n돕고 싶으세요?';
+  String onboardingExampleTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 어떤 일을\n돕고 싶으세요?';
   }
 
   @override
@@ -2696,6 +2739,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineGroupCreateGroup => '새 묶음 만들기';
 
   @override
+  String get routineGroupCreateGroupDescription =>
+      '여러 일과를 한 폴더에 모아요 (예: 아침 등교)';
+
+  @override
   String get routineGroupChooseTitle => '어느 묶음에 넣을까요?';
 
   @override
@@ -2789,16 +2836,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineManageCoachLongPressMessage => '길게 눌렀다 *떼면* 메뉴가 열려요';
 
   @override
-  String get routineManageCoachSentMessage =>
-      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요';
-
-  @override
   String get routineManageCoachDragMessage =>
       '길게 누른 채 *움직이면* 정리 상태가 돼요\n다른 일과 위에 놓으면 *묶음*이 되고\n사이에 놓으면 자리를 옮겨요';
-
-  @override
-  String get routineManageCoachCreateGroupMessage =>
-      '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
 
   @override
   String get cardReviewCoachEditMessage =>
@@ -3963,7 +4002,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weeklyReportStars => '받은 별';
 
   @override
-  String get weeklyReportRewards => '보상까지 간 일과';
+  String get weeklyReportRewards => '보상을 받은 일과';
 
   @override
   String get weeklyReportStreak => '연속으로 마친 날';
@@ -4026,6 +4065,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weeklyReportEmptyBody => '일과를 보내면 이룸이가 마친 기록이 여기에 모여요';
 
   @override
+  String get weeklyReportNoCompletionThisWeekTitle => '이번 주는 아직 기록이 없어요';
+
+  @override
+  String get weeklyReportNoCompletionPastWeekTitle => '이 주에는 끝낸 일과가 없어요';
+
+  @override
+  String get weeklyReportNoCompletionBody => '오늘 일과를 보내 볼까요?';
+
+  @override
+  String get weeklyReportGoToManage => '일과 관리로 가기';
+
+  @override
   String get weeklyReportLoadFailed => '주간 리포트를 불러오지 못했어요';
 
   @override
@@ -4041,8 +4092,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
 
   @override
-  String weeklyReportShareTitle(String name) {
-    return '$name의 한 주';
+  String weeklyReportShareTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
+    return '$name$_temp0 한 주';
   }
 
   @override
@@ -4059,7 +4111,7 @@ class AppLocalizationsKo extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '일과 $sent개 중 $completed개를 끝냈어요',
+      other: '$sent개 중 $completed개 끝냈어요',
     );
     return '$_temp0';
   }
@@ -4222,7 +4274,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get weeklyReportStatCompleted => '끝낸 일과';
 
   @override
-  String get weeklyReportStatRemaining => '남은 카드';
+  String get weeklyReportStatRemaining => '아직 안 한 카드';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {

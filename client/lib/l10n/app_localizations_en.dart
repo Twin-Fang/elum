@@ -419,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Build the experience of finishing on their own';
 
   @override
-  String onboardingCharacterTitle(String name) {
+  String onboardingCharacterTitle(String name, String batchim) {
     return 'Choose a friend to\nspend $name\'s day with';
   }
 
@@ -469,7 +469,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNameTitle => 'What should we\ncall Elumi?';
 
   @override
-  String get onboardingNameDescription => 'It doesn\'t have to be a real name';
+  String get onboardingNameDescription =>
+      'In Elum, we call your child Elumi\nIt doesn\'t have to be a real name';
 
   @override
   String get onboardingNameHint => 'Enter a name';
@@ -639,12 +640,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkCodeSettingsTitle => 'Connect Elumi\'s device';
 
   @override
-  String linkCodeAskTitle(String name) {
+  String linkCodeAskTitle(String name, String batchim) {
     return 'Connect $name\'s\ndevice?';
   }
 
   @override
-  String linkCodeEnterHint(String name) {
+  String linkCodeEnterHint(String name, String batchim) {
     return 'Enter the code below on $name\'s device';
   }
 
@@ -1246,7 +1247,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinChangeVerifyTitle => 'Enter your\ncurrent passcode';
 
   @override
-  String get pinChangeCreateTitle => 'Create a passcode\nonly you know';
+  String get pinChangeCreateTitle => 'Set a passcode\nfor this device';
+
+  @override
+  String get pinChangeCreateDescription =>
+      'Each device has its own passcode\nIt can be the same as before';
 
   @override
   String get pinModeHint =>
@@ -1838,6 +1843,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineDetailEdit => 'Edit';
 
   @override
+  String routineDetailTodayProgress(int done, int total) {
+    return '$done/$total done today';
+  }
+
+  @override
+  String routineDetailPastProgress(int done, int total) {
+    return '$done/$total done';
+  }
+
+  @override
+  String get routineDetailExportLabel => 'Print';
+
+  @override
   String get routineDetailFinishedToday => 'This routine is done';
 
   @override
@@ -1884,7 +1902,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayRoutineRerunFailedFallback => 'Try again in a moment';
 
   @override
-  String todayRoutineCopied(String title) {
+  String todayRoutineCopied(String title, String batchim) {
     return 'Added $title to today\'s routines';
   }
 
@@ -1905,7 +1923,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeCoachCreate => 'You can make a *new routine\nfor Elumi to do*';
 
   @override
-  String get homeCoachSwipe => '*Swipe a routine left*\nto *edit or delete it*';
+  String get homeCoachSwipe => '*Slide a routine left*\nto *edit or delete it*';
 
   @override
   String get homeCoachSwitch =>
@@ -1917,7 +1935,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String childHomeEmptyTitle(String name) {
+  String childHomeEmptyTitle(String name, String batchim) {
     return 'No routines\nfor $name yet';
   }
 
@@ -2036,6 +2054,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modeSwitchPinLabel => 'Enter passcode';
+
+  @override
+  String get pinForgotLink => 'I forgot the passcode';
+
+  @override
+  String get pinForgotTitle => 'Forgot the passcode?';
+
+  @override
+  String get pinForgotMessage =>
+      'Log in again with the guardian account\nto set a new passcode';
+
+  @override
+  String get pinForgotRelogin => 'Log in again';
 
   @override
   String get modeSwitchReadFailedTitle => 'Couldn\'t check the passcode';
@@ -2326,6 +2357,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineTemplateOpen => 'Browse example routines';
+
+  @override
+  String get routineImageStylePillLabel => 'Card pictures';
+
+  @override
+  String routineImageStylePillSemantics(String style) {
+    return 'Card picture style $style, tap to change';
+  }
 
   @override
   String get routineTemplateSheetTitle => 'Example routines';
@@ -2726,12 +2765,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Imported from Community, view original post';
 
   @override
-  String routineLibrarySent(String title) {
+  String routineLibrarySent(String title, String batchim) {
     return 'Sent $title for today';
   }
 
   @override
-  String onboardingExampleTitle(String name) {
+  String onboardingExampleTitle(String name, String batchim) {
     return 'What would you like\nto help $name with?';
   }
 
@@ -2829,6 +2868,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineGroupCreateGroup => 'New bundle';
+
+  @override
+  String get routineGroupCreateGroupDescription =>
+      'Gather several routines in one folder (e.g. School morning)';
 
   @override
   String get routineGroupChooseTitle => 'Which bundle?';
@@ -2935,16 +2978,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Press and hold, then *let go* to open the menu';
 
   @override
-  String get routineManageCoachSentMessage =>
-      'Routines sent today get a *✓*\nThey go into today\'s routines on Home\nand stay here too';
-
-  @override
   String get routineManageCoachDragMessage =>
       'Press and hold, then *move* to start arranging\nDrop on another routine to make a *bundle*\nDrop between them to move it';
-
-  @override
-  String get routineManageCoachCreateGroupMessage =>
-      'If dragging is hard, use *+ New routine*\nand pick *New bundle* to group them';
 
   @override
   String get cardReviewCoachEditMessage =>
@@ -4156,7 +4191,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportStars => 'Stars earned';
 
   @override
-  String get weeklyReportRewards => 'Routines that reached a reward';
+  String get weeklyReportRewards => 'Routines with a reward';
 
   @override
   String get weeklyReportStreak => 'Days finished in a row';
@@ -4224,6 +4259,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'When you send routines, Elumi\'s finished records gather here';
 
   @override
+  String get weeklyReportNoCompletionThisWeekTitle =>
+      'No records yet this week';
+
+  @override
+  String get weeklyReportNoCompletionPastWeekTitle =>
+      'No routines finished this week';
+
+  @override
+  String get weeklyReportNoCompletionBody => 'Send a routine for today?';
+
+  @override
+  String get weeklyReportGoToManage => 'Go to routines';
+
+  @override
   String get weeklyReportLoadFailed => 'Couldn\'t load the weekly report';
 
   @override
@@ -4240,7 +4289,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportShareFailed => 'Couldn\'t create the page to send';
 
   @override
-  String weeklyReportShareTitle(String name) {
+  String weeklyReportShareTitle(String name, String batchim) {
     return '$name\'s week';
   }
 
@@ -4259,7 +4308,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$completed of $sent routines done',
+      other: '$completed of $sent done',
     );
     return '$_temp0';
   }
@@ -4424,7 +4473,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyReportStatCompleted => 'Routines finished';
 
   @override
-  String get weeklyReportStatRemaining => 'Cards left';
+  String get weeklyReportStatRemaining => 'Cards not done yet';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {

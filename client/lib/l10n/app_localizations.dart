@@ -788,11 +788,11 @@ abstract class AppLocalizations {
   /// **'혼자 끝까지 해내는 경험을 만들어요'**
   String get goalIndependent;
 
-  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭
+  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 하루를 함께할\n친구를 골라주세요'**
-  String onboardingCharacterTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 하루를 함께할\n친구를 골라주세요'**
+  String onboardingCharacterTitle(String name, String batchim);
 
   /// 캐릭터 고르기 화면 설명
   ///
@@ -836,10 +836,10 @@ abstract class AppLocalizations {
   /// **'이룸이를 어떻게\n불러드릴까요?'**
   String get onboardingNameTitle;
 
-  /// 이름 입력 화면 설명(개인정보 최소수집 안내)
+  /// 이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다
   ///
   /// In ko, this message translates to:
-  /// **'정확한 실명이 아니어도 괜찮아요'**
+  /// **'이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
   String get onboardingNameDescription;
 
   /// 이름 입력칸 힌트
@@ -881,7 +881,7 @@ abstract class AppLocalizations {
   /// 비밀암호 재입력 단계 제목
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinConfirmTitle;
 
   /// 비밀암호 화면 설명
@@ -1148,17 +1148,17 @@ abstract class AppLocalizations {
   /// **'이룸이 기기 연결'**
   String get linkCodeSettingsTitle;
 
-  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭
+  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기를\n연결할까요?'**
-  String linkCodeAskTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기를\n연결할까요?'**
+  String linkCodeAskTitle(String name, String batchim);
 
-  /// 연결 암호 화면의 설명. name 은 이룸이 호칭
+  /// 연결 암호 화면의 설명. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 기기에서 아래 코드를 입력하세요'**
-  String linkCodeEnterHint(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 기기에서 아래 코드를 입력하세요'**
+  String linkCodeEnterHint(String name, String batchim);
 
   /// 연결 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
   ///
@@ -2156,11 +2156,17 @@ abstract class AppLocalizations {
   /// **'지금 비밀암호를\n입력해주세요'**
   String get pinChangeVerifyTitle;
 
-  /// 비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)
+  /// 다시 로그인한 기기에서 비밀암호를 만드는 입력 단계 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'보호자님만 아는\n비밀암호를 만들어주세요'**
+  /// **'이 기기에서 쓸\n비밀암호를 정해 주세요'**
   String get pinChangeCreateTitle;
+
+  /// 다시 로그인한 기기에서 비밀암호를 새로 만드는 이유 안내 (잠금은 기기에만 저장된다)
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요'**
+  String get pinChangeCreateDescription;
 
   /// 비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명
   ///
@@ -2177,13 +2183,13 @@ abstract class AppLocalizations {
   /// 비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)
   ///
   /// In ko, this message translates to:
-  /// **'암호를 한번 더\n입력해주세요'**
+  /// **'암호를 한 번 더\n입력해주세요'**
   String get pinChangeCreateConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목
   ///
   /// In ko, this message translates to:
-  /// **'비밀암호를 한번 더\n입력해주세요'**
+  /// **'비밀암호를 한 번 더\n입력해주세요'**
   String get pinChangeConfirmTitle;
 
   /// 비밀암호 바꾸기 3단계 설명
@@ -3242,6 +3248,24 @@ abstract class AppLocalizations {
   /// **'편집하기'**
   String get routineDetailEdit;
 
+  /// 오늘 일과 상세 시트 제목 아래: 이룸이가 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {done}/{total} 했어요'**
+  String routineDetailTodayProgress(int done, int total);
+
+  /// 지난 일과 상세 시트 제목 아래: 그날 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done}/{total} 했어요'**
+  String routineDetailPastProgress(int done, int total);
+
+  /// 일과 상세 시트 제목 오른쪽 버튼 글자: 인쇄용으로 받기 화면 열기 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용'**
+  String get routineDetailExportLabel;
+
   /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
   ///
   /// In ko, this message translates to:
@@ -3332,11 +3356,11 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get todayRoutineRerunFailedFallback;
 
-  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를) 로 쓴다)
+  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과에 담았어요'**
-  String todayRoutineCopied(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과에 담았어요'**
+  String todayRoutineCopied(String title, String batchim);
 
   /// 보호자 홈 지난 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내
   ///
@@ -3365,13 +3389,13 @@ abstract class AppLocalizations {
   /// 홈 코치마크 1단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'이룸이가 수행할 *새로운\n일과를 만들 수 있어요*'**
+  /// **'이룸이가 할 *새로운\n일과를 만들 수 있어요*'**
   String get homeCoachCreate;
 
   /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요'**
+  /// **'일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요'**
   String get homeCoachSwipe;
 
   /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
@@ -3386,11 +3410,11 @@ abstract class AppLocalizations {
   /// **'오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!'**
   String childHomeGreeting(String name, String batchim);
 
-  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭
+  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'아직 {name}의\n일과가 없어요'**
-  String childHomeEmptyTitle(String name);
+  /// **'아직 {name}{batchim, select, yes{이의} other{의}}\n일과가 없어요'**
+  String childHomeEmptyTitle(String name, String batchim);
 
   /// 일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)
   ///
@@ -3565,6 +3589,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'암호 넣기'**
   String get modeSwitchPinLabel;
+
+  /// 비밀암호 입력 화면의 글자 버튼. 누르면 다시 로그인 안내 팝업이 뜬다
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 잊었어요'**
+  String get pinForgotLink;
+
+  /// 비밀암호를 잊었을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호가 생각나지 않나요?'**
+  String get pinForgotTitle;
+
+  /// 비밀암호를 잊었을 때 팝업 설명. 다시 로그인하면 이 기기의 잠금이 지워지고 새로 만든다
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요'**
+  String get pinForgotMessage;
+
+  /// 비밀암호를 잊었을 때 팝업의 주 버튼. 이 기기에서 로그아웃하고 로그인 화면으로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 로그인'**
+  String get pinForgotRelogin;
 
   /// 저장된 암호를 읽지 못했을 때 팝업 제목
   ///
@@ -4033,6 +4081,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'예시 일과 둘러보기'**
   String get routineTemplateOpen;
+
+  /// 일과 만들기 입력칸 아래 그림 방식 알약의 앞 글자 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림'**
+  String get routineImageStylePillLabel;
+
+  /// 그림 방식 알약 낭독 문구 #1287
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 방식 {style}, 눌러서 바꾸기'**
+  String routineImageStylePillSemantics(String style);
 
   /// 예시 일과 시트 제목
   ///
@@ -4730,17 +4790,17 @@ abstract class AppLocalizations {
   /// **'이야기에서 가져왔어요, 원래 글 보기'**
   String get routineDetailTalkOriginBandOpenLabel;
 
-  /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
+  /// 보내기 성공 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과로 보냈어요'**
-  String routineLibrarySent(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과로 보냈어요'**
+  String routineLibrarySent(String title, String batchim);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
-  String onboardingExampleTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name, String batchim);
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -4910,6 +4970,12 @@ abstract class AppLocalizations {
   /// **'새 묶음 만들기'**
   String get routineGroupCreateGroup;
 
+  /// 만들기 시트 `새 묶음 만들기` 아래 회색 한 줄: 묶음이 무엇인지 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'여러 일과를 한 폴더에 모아요 (예: 아침 등교)'**
+  String get routineGroupCreateGroupDescription;
+
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
@@ -5072,23 +5138,11 @@ abstract class AppLocalizations {
   /// **'길게 눌렀다 *떼면* 메뉴가 열려요'**
   String get routineManageCoachLongPressMessage;
 
-  /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요'**
-  String get routineManageCoachSentMessage;
-
   /// 일과관리 묶음 코치마크 1단계 (#832)
   ///
   /// In ko, this message translates to:
   /// **'길게 누른 채 *움직이면* 정리 상태가 돼요\n다른 일과 위에 놓으면 *묶음*이 되고\n사이에 놓으면 자리를 옮겨요'**
   String get routineManageCoachDragMessage;
-
-  /// 일과관리 묶음 코치마크 2단계 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
-  String get routineManageCoachCreateGroupMessage;
 
   /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
   ///
@@ -7054,7 +7108,7 @@ abstract class AppLocalizations {
   /// 줄 이름 · 보상을 정해 둔 일과 중 끝까지 마친 수
   ///
   /// In ko, this message translates to:
-  /// **'보상까지 간 일과'**
+  /// **'보상을 받은 일과'**
   String get weeklyReportRewards;
 
   /// 줄 이름 · 일과를 하나 이상 마친 날이 이어진 가장 긴 날 수
@@ -7117,6 +7171,30 @@ abstract class AppLocalizations {
   /// **'일과를 보내면 이룸이가 마친 기록이 여기에 모여요'**
   String get weeklyReportEmptyBody;
 
+  /// 이번 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주는 아직 기록이 없어요'**
+  String get weeklyReportNoCompletionThisWeekTitle;
+
+  /// 지난 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 주에는 끝낸 일과가 없어요'**
+  String get weeklyReportNoCompletionPastWeekTitle;
+
+  /// 끝낸 일과가 0개인 주 빈 카드 설명 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 보내 볼까요?'**
+  String get weeklyReportNoCompletionBody;
+
+  /// 주간 리포트 빈 카드 버튼: 일과 관리 칸으로 이동 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 관리로 가기'**
+  String get weeklyReportGoToManage;
+
   /// 불러오기 실패 문구 (에러 코드와 다시 하기가 함께 보임)
   ///
   /// In ko, this message translates to:
@@ -7147,11 +7225,11 @@ abstract class AppLocalizations {
   /// **'보낼 한 장을 만들지 못했어요'**
   String get weeklyReportShareFailed;
 
-  /// 보낼 한 장 제목 · 이룸이 이름
+  /// 보낼 한 장 제목 · 이룸이 이름. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 한 주'**
-  String weeklyReportShareTitle(String name);
+  /// **'{name}{batchim, select, yes{이의} other{의}} 한 주'**
+  String weeklyReportShareTitle(String name, String batchim);
 
   /// 보낼 한 장 아래 출처 한 줄 (평가가 아니라 기록이라는 뜻)
   ///
@@ -7174,7 +7252,7 @@ abstract class AppLocalizations {
   /// 도넛 옆 한 줄: 보낸 일과 중 끝낸 일과 수
   ///
   /// In ko, this message translates to:
-  /// **'{sent, plural, other{일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  /// **'{sent, plural, other{{sent}개 중 {completed}개 끝냈어요}}'**
   String weeklyReportDonutSummary(int sent, int completed);
 
   /// 도넛 낭독 라벨: 완료율 퍼센트와 보낸 일과 중 끝낸 수
@@ -7367,7 +7445,7 @@ abstract class AppLocalizations {
   /// 숫자 3개 중 셋째 이름: 마치지 않고 남은 카드 수
   ///
   /// In ko, this message translates to:
-  /// **'남은 카드'**
+  /// **'아직 안 한 카드'**
   String get weeklyReportStatRemaining;
 
   /// 일과별 기록 줄 오른쪽 값: 보낸 횟수 중 마친 횟수

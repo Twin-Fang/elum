@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../l10n/l10n_context.dart';
+import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_scaffold.dart';
 
@@ -79,8 +81,10 @@ class ElumHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: topGap),
+        // 낱말 중간에서 꺾이지 않게 (`일 / 을`, #1285). 낭독기에는 원문
         Text(
-          title,
+          keepWords(title, locale: context.appLocale),
+          semanticsLabel: title,
           style: context.typo.title.copyWith(color: context.colors.textPrimary),
         ),
         if (description != null) ...[

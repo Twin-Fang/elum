@@ -19,6 +19,7 @@ class RoutineDetailHeader extends StatelessWidget {
     this.onMoreTap,
     this.onTitleEditTap,
     this.onExportTap,
+    this.progressLabel,
   });
 
   final String title;
@@ -35,8 +36,11 @@ class RoutineDetailHeader extends StatelessWidget {
   /// 있으면 제목 옆 연필 > 이름 바꾸기 (고칠 수 있는 일과만)
   final VoidCallback? onTitleEditTap;
 
-  /// 있으면 제목 오른쪽에 내려받기 버튼 > 인쇄용으로 받기 (#1073)
+  /// 있으면 제목 오른쪽에 `인쇄용` 버튼 > 인쇄용으로 받기 (#1073)
   final VoidCallback? onExportTap;
+
+  /// 제목 아래 진행 한 줄 (`오늘 2/5 했어요`). 없으면 자리도 없다 (#1298)
+  final String? progressLabel;
 
   /// ⋯ 아이콘 한 변
   static const _moreIconSize = 24.0;
@@ -76,12 +80,8 @@ class RoutineDetailHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              if (onExportTap != null)
-                _HeaderIconButton(
-                  asset: AppAssets.iconDownload,
-                  semanticLabel: context.l10n.cardExportOpen,
-                  onTap: onExportTap!,
-                ),
+              if (onExportTap case final onExportTap?)
+                _ExportButton(onTap: onExportTap),
               if (onMoreTap != null)
                 AppPressable(
                   onTap: onMoreTap,
@@ -110,34 +110,58 @@ class RoutineDetailHeader extends StatelessWidget {
               style: context.typo.body.copyWith(color: colors.textSecondary),
             ),
           ],
+          if (progressLabel case final progressLabel?) ...[
+            SizedBox(height: 4.h),
+            Text(
+              progressLabel,
+              style: context.typo.body.copyWith(color: colors.textSecondary),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// 머리 오른쪽 아이콘 버튼 (⋯ 와 같은 크기 · 여백)
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.asset, required this.semanticLabel, required this.onTap});
+/// 머리 오른쪽 `인쇄용` 버튼: 아이콘 + 글자 (아이콘만으로는 「내려받기」로 읽힌다, #1298)
+class _ExportButton extends StatelessWidget {
+  const _ExportButton({required this.onTap});
 
-  final String asset;
-  final String semanticLabel;
   final VoidCallback onTap;
 
+  /// 아이콘 한 변 (글자 옆이라 ⋯ 보다 작게)
+  static const _iconSize = 18.0;
+  static const _iconToLabel = 4.0;
+
   @override
-  Widget build(BuildContext context) => AppPressable(
-    onTap: onTap,
-    scaleDown: AppPressable.scaleIcon,
-    semanticLabel: semanticLabel,
-    child: Padding(
-      padding: EdgeInsets.all(8.w),
-      child: SvgPicture.asset(
-        asset,
-        width: RoutineDetailHeader._moreIconSize.w,
-        height: RoutineDetailHeader._moreIconSize.w,
-        excludeFromSemantics: true,
-        colorFilter: ColorFilter.mode(context.colors.sheetTitleText, BlendMode.srcIn),
+  Widget build(BuildContext context) {
+    final color = context.colors.sheetTitleText;
+    return AppPressable(
+      onTap: onTap,
+      scaleDown: AppPressable.scaleIcon,
+      semanticLabel: context.l10n.cardExportOpen,
+      child: Padding(
+        padding: EdgeInsets.all(8.w),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              AppAssets.iconPrint,
+              width: _iconSize.w,
+              height: _iconSize.w,
+              excludeFromSemantics: true,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+            SizedBox(width: _iconToLabel.w),
+            ExcludeSemantics(
+              child: Text(
+                context.l10n.routineDetailExportLabel,
+                style: context.typo.body.copyWith(color: color),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

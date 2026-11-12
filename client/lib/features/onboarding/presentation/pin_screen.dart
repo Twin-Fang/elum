@@ -240,10 +240,7 @@ class _PinScreenState extends ConsumerState<PinScreen>
             title: _isConfirmStep
                 ? context.l10n.pinConfirmTitle
                 : context.l10n.pinCreateTitle,
-            // 불일치 안내는 상태가 아니라 플래그로 들고 있다가 그릴 때 문구를 읽는다(언어가 바뀌어도 맞는다)
-            description: _showMismatch
-                ? context.l10n.pinMismatch
-                : context.l10n.pinDescription,
+            description: context.l10n.pinDescription,
           ),
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
@@ -264,6 +261,10 @@ class _PinScreenState extends ConsumerState<PinScreen>
                 ),
               ),
             ),
+          ),
+          // 불일치 안내는 점 아래 줄. 플래그로 들고 있다가 그릴 때 문구를 읽는다(언어가 바뀌어도 맞는다)
+          PinErrorMessage(
+            message: _showMismatch ? context.l10n.pinMismatch : null,
           ),
           PinInputField(
             controller: _controller,

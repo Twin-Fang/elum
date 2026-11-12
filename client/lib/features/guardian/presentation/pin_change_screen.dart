@@ -11,6 +11,8 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/pin_forgot_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../application/pin_change_controller.dart';
@@ -109,9 +111,11 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
     final pin = _current;
     try {
       // null 이면 이미 확인 중이라 실행하지 않은 것.
-      final valid = await runBusy(
-        () => ref.read(pinChangeControllerProvider).verifyPin(pin),
-      );
+      // 확인 중 점 깜박임을 한 프레임 먼저 그린 뒤 확인한다 (확인 계산이 화면을 잠시 붙잡는다)
+      final valid = await runBusy(() async {
+        await WidgetsBinding.instance.endOfFrame;
+        return ref.read(pinChangeControllerProvider).verifyPin(pin);
+      });
       if (valid == null || !mounted) return;
       valid ? _next(_Step.enter) : _mismatch();
     } catch (e) {
@@ -188,9 +192,10 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
     _focusNode.requestFocus();
   }
 
-  /// 만들기를 그만두면 로그인도 함께 끝낸다. 화면만 로그인으로 가고 세션이 남으면
-  /// 앱을 다시 켤 때 잠금 없이 보호자 홈이 열린다.
-  Future<void> _leaveCreate() async {
+  /// 로그아웃 > 로그인 화면 (만들기 그만두기 · 암호 잊음 공통)
+  ///
+  /// 화면만 로그인으로 가고 세션이 남으면 앱을 다시 켤 때 잠금 없이 보호자 홈이 열린다.
+  Future<void> _logoutToLogin() async {
     final auth = ref.read(authSessionControllerProvider);
     try {
       await auth.logout();
@@ -199,6 +204,13 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
       AppLogger.error('암호 만들기 이탈 로그아웃', e);
     }
     if (mounted) context.go(Routes.login);
+  }
+
+  /// 지금 암호를 잊었을 때: 안내 팝업 > 다시 로그인 고르면 로그아웃(잠금도 지움) > 로그인 화면
+  Future<void> _onForgotPin() async {
+    final isReloginChosen = await confirmPinForgotRelogin(context);
+    if (!isReloginChosen || !mounted) return;
+    await _logoutToLogin();
   }
 
   Future<void> _save() async {
@@ -238,10 +250,10 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
   (String, String?) get _copy => switch (_step) {
     // 시안(`1027:4683`)은 설명이 없다
     _Step.verify => (context.l10n.pinChangeVerifyTitle, null),
+    // 다시 로그인한 기기: 왜 또 만드는지 (잠금은 기기마다 따로)
     _Step.enter when widget.createOnly => (
-      // 온보딩 비밀번호 화면(238:1909)과 같은 문구
       context.l10n.pinChangeCreateTitle,
-      context.l10n.pinModeHint,
+      context.l10n.pinChangeCreateDescription,
     ),
     _Step.enter => (context.l10n.pinChangeEnterTitle, context.l10n.pinModeHint),
     // 만들기는 온보딩 재입력(238:2767)과 같은 문구다
@@ -279,7 +291,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
     final change = !widget.createOnly;
     return ElumScaffold(
       // 저장 전 나가기는 잠금 없이 보호자 홈을 여는 통로가 될 수 없다.
-      onBack: widget.createOnly ? _leaveCreate : context.popOrHome,
+      onBack: widget.createOnly ? _logoutToLogin : context.popOrHome,
       title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다. 나타나는 것이 신호다.
@@ -296,9 +308,10 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
           ElumHeader(
             title: title,
             titleY: change ? _changeTitleY : null,
-            description: errorMessage ?? description,
-            // 틀림 안내만 붉다 (시안 `1274:9466` — #DA5050). 만들기는 온보딩처럼 보조색이다.
-            descriptionColor: errorMessage != null && !widget.createOnly
+            // 바꾸기의 틀림 안내는 설명 자리에 붉게 (시안 `1274:9466` — #DA5050).
+            // 만들기는 온보딩처럼 점 아래 줄(PinErrorMessage)
+            description: change ? (errorMessage ?? description) : description,
+            descriptionColor: errorMessage != null && change
                 ? context.colors.settingsDestructive
                 : null,
           ),
@@ -316,10 +329,24 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
               behavior: HitTestBehavior.opaque,
               child: AppShake(
                 trigger: _mismatchCount,
-                child: PinDots(length: _len, filled: _current.length),
+                child: PinVerifyingPulse(
+                  isVerifying: busy && _step == _Step.verify,
+                  child: PinDots(length: _len, filled: _current.length),
+                ),
               ),
             ),
           ),
+          if (!change) PinErrorMessage(message: errorMessage),
+          // 지금 암호를 묻는 단계에만 (잊었으면 다시 로그인해 새로 정한다)
+          if (_step == _Step.verify && _loaded) ...[
+            SizedBox(height: context.space.md.h),
+            Center(
+              child: ElumTextLink(
+                label: context.l10n.pinForgotLink,
+                onTap: busy ? null : _onForgotPin,
+              ),
+            ),
+          ],
           PinInputField(
             controller: _controller,
             focusNode: _focusNode,
