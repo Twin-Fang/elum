@@ -75,6 +75,9 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setLastLoginProvider(String v) async => _lastLoginProvider = v;
 
   @override
+  Future<void> clearLastLoginProvider() async => _lastLoginProvider = null;
+
+  @override
   List<String> get goals => _goals;
 
   @override

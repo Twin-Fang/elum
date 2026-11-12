@@ -11,11 +11,13 @@ import '../../../core/widgets/pro_upsell_button.dart';
 import '../../credit/application/credit_costs.dart';
 import '../../member/application/member_providers.dart';
 import '../../member/application/plan_access.dart';
+import '../presentation/my_plan_sheet.dart';
 import '../presentation/plan_actions.dart' as actions;
 import '../presentation/plan_benefit_cards.dart' show planBenefitLabel;
 import '../presentation/plan_paywall_sheet.dart';
 import '../domain/plan_benefit.dart';
 import 'plan_offer_labels.dart';
+import 'plan_status_providers.dart';
 import 'plan_store_catalog.dart';
 import 'store_purchase_coordinator.dart';
 
@@ -57,6 +59,32 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
   if (!ref.read(isPlanStoreConnectedProvider)) return;
   await actions.restorePlanPurchases(context, ref);
 }
+
+/// 설정 `내 요금제` 줄 누름 (#1303): Pro > 내 요금제 시트 > 고른 동작 · Free > 요금제 화면 (열 수 있을 때만)
+Future<void> openMyPlan(BuildContext context, WidgetRef ref) async {
+  if (!ref.read(planAccessProvider).isPro) {
+    await openPlanPaywall(context, ref);
+    return;
+  }
+  final choice = await showMyPlanSheet(
+    context,
+    canStartSubscription: ref.read(isProTrialProvider) && ref.read(canOpenPlanPaywallProvider),
+    canRestorePurchases: ref.read(isPlanStoreConnectedProvider),
+  );
+  if (choice == null || !context.mounted) return;
+  switch (choice) {
+    case MyPlanSheetChoice.manageSubscription:
+      await actions.openSubscriptionManagement(context, ref);
+    case MyPlanSheetChoice.startSubscription:
+      await openPlanPaywall(context, ref);
+    case MyPlanSheetChoice.restorePurchases:
+      await restorePlanPurchases(context, ref);
+  }
+}
+
+/// 결제한 스토어의 구독 관리 화면 열기 (회원탈퇴 전 해지 안내)
+Future<void> openStoreSubscriptionManagement(BuildContext context, WidgetRef ref) =>
+    actions.openSubscriptionManagement(context, ref);
 
 /// 앱 시작 때 구매 소식 듣기 시작 (끝나지 않은 결제를 서버에 다시 확인)
 void startStorePurchaseSync(WidgetRef ref) =>

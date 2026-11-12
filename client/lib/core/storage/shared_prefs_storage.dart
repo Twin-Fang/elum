@@ -193,6 +193,12 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> clearLastLoginProvider() {
+    AppLogger.storageWrite(_kLastProvider, null);
+    return _prefs.remove(_kLastProvider);
+  }
+
+  @override
   List<String> get goals {
     final value = _prefs.getStringList(_kGoals) ?? const [];
     AppLogger.storageRead(_kGoals, value);

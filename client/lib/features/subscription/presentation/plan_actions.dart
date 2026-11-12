@@ -15,6 +15,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../../member/domain/member_subscription.dart';
 import '../application/plan_status_providers.dart';
 import '../application/store_purchase_coordinator.dart';
 import '../domain/plan_catalog.dart';
@@ -74,11 +75,17 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
 }
 
 /// 스토어 구독 관리 화면 열기 (해지·결제 수단 변경은 스토어에서만 가능)
+/// 스토어는 결제한 곳 기준 (App Store 구독을 Android 기기에서 열어도 App Store), 모르면 이 기기 스토어
 Future<void> openSubscriptionManagement(BuildContext context, WidgetRef ref) async {
-  final productId = ref.read(memberSubscriptionProvider)?.productId;
+  final subscription = ref.read(memberSubscriptionProvider);
+  final storePlatform = switch (subscription?.source) {
+    SubscriptionSource.appleIap => TargetPlatform.iOS,
+    SubscriptionSource.googleIap => TargetPlatform.android,
+    _ => defaultTargetPlatform,
+  };
   final url = AppConfig.subscriptionManagementUrl(
-    defaultTargetPlatform,
-    productId: productId,
+    storePlatform,
+    productId: subscription?.productId,
   );
   final isOpened = url != null && await _openExternal(url, step: 'manage');
   if (isOpened || !context.mounted) return;

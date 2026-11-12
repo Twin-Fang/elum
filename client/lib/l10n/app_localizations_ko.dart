@@ -770,6 +770,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guardiansAloneHint => '아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요';
 
   @override
+  String get guardiansNameScopeHint =>
+      '여기 이름은 함께 돌보는 사람에게만 보여요. 이야기에는 내 정보의 닉네임이 보여요';
+
+  @override
   String get guardiansInviteAction => '다른 보호자 초대하기';
 
   @override
@@ -1386,6 +1390,61 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
       '탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요';
+
+  @override
+  String get guardianSettingsWithdrawProNotice => 'Pro도 함께 사라져요';
+
+  @override
+  String guardianSettingsWithdrawProGiftNotice(String date) {
+    return '$date까지 쓸 수 있는\nPro 선물도 사라져요';
+  }
+
+  @override
+  String get guardianSettingsWithdrawProTrialNotice => 'Pro 체험도 함께 사라져요';
+
+  @override
+  String guardianSettingsWithdrawCreditsNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+    );
+    return '남은 크레딧 $_temp0도 사라져요';
+  }
+
+  @override
+  String guardianSettingsWithdrawCreditsWithPurchasedNotice(
+    int count,
+    int purchased,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      purchased,
+      locale: localeName,
+      other: '$purchased개',
+    );
+    return '남은 크레딧 $_temp0도 사라져요\n산 크레딧 $_temp1도 들어 있어요';
+  }
+
+  @override
+  String get guardianSettingsWithdrawCreditsUnknownNotice => '남은 크레딧도 모두 사라져요';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepTitle => '앱스토어 구독을 먼저 해지해 주세요';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepMessage =>
+      '탈퇴만 하면 결제가 이어져요\n해지하지 않아도 탈퇴는 할 수 있어요';
+
+  @override
+  String get guardianSettingsWithdrawAppStoreStepContinue => '계속하기';
+
+  @override
+  String get guardianSettingsWithdrawDone => '탈퇴했어요. 그동안 이룸을 써 주셔서 고마워요';
 
   @override
   String get guardianSettingsWithdrawTypeTitle => '한 번 더 확인할게요';
@@ -3933,6 +3992,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get planStatusGracePeriodFooter => '결제 수단을 확인해 주세요';
+
+  @override
+  String get planSheetNextPaymentLabel => '다음 결제일';
+
+  @override
+  String get planSheetEndDateLabel => '끝나는 날';
+
+  @override
+  String get planSheetStoreLabel => '결제한 곳';
+
+  @override
+  String get planSheetStoreAppStore => 'App Store';
+
+  @override
+  String get planSheetStoreGooglePlay => 'Google Play';
+
+  @override
+  String planSheetRenewingNote(String date) {
+    return '해지하지 않으면 $date에 자동으로 결제돼요. 해지는 구독 관리에서 할 수 있어요';
+  }
+
+  @override
+  String get planSheetEndsToFreeNote => '끝나면 Free로 바뀌어요. 저절로 결제되지 않아요';
+
+  @override
+  String get planSheetUnlimitedNote => '기간 제한 없이 Pro를 쓸 수 있어요';
 
   @override
   String get planLearnPro => 'Pro 알아보기';
