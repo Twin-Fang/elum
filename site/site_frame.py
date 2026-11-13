@@ -129,6 +129,7 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
 <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
 <link rel="stylesheet" href="/assets/site.css"/>
+<link rel="stylesheet" href="/assets/showcase.css"/>
 </head>
 <body>
 <a class="skip" href="#main">{escape(ui['skipToContent'])}</a>

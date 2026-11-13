@@ -48,6 +48,66 @@
     });
   }
 
+  // 첫 화면 기기: 앱 화면 2장(적기, 확인) > 시연 영상(따라 하기 > 보상) 반복, 단계 칩·옆 그림을 같은 단계로 켬
+  var phoneScreen = document.querySelector('.phone-screen');
+  var flowVideo = phoneScreen && phoneScreen.querySelector('.flow');
+  if (phoneScreen && flowVideo && !isMotionReduced) {
+    var STILL_SCREEN_SECONDS = 3.5;
+    var stillScreens = phoneScreen.querySelectorAll('.still');
+    var stepChips = document.querySelectorAll('.phone-steps li');
+    var stepPops = document.querySelectorAll('.phone-stage .pop');
+    var rewardStartSeconds = parseFloat(flowVideo.getAttribute('data-reward-start')) || 0;
+    var currentStep = -1;
+    var sequenceTimer = 0;
+
+    var showScreen = function (screen) {
+      stillScreens.forEach(function (still) { still.classList.toggle('on', still === screen); });
+      flowVideo.classList.toggle('on', flowVideo === screen);
+    };
+    // 단계 칩·옆 그림 켜기 (칩 막대는 그 단계 길이만큼, 다시 켤 때 처음부터)
+    var showStep = function (stepIndex, durationSeconds) {
+      currentStep = stepIndex;
+      stepChips.forEach(function (chip, index) {
+        chip.classList.remove('on');
+        if (index === stepIndex) {
+          chip.style.setProperty('--dur', durationSeconds + 's');
+          void chip.offsetWidth;
+          chip.classList.add('on');
+        }
+      });
+      stepPops.forEach(function (pop, index) { pop.classList.toggle('on', index === stepIndex); });
+    };
+    var playFlowVideo = function () {
+      if (!flowVideo.src) flowVideo.src = flowVideo.getAttribute('data-src');
+      showScreen(flowVideo);
+      showStep(2, rewardStartSeconds);
+      flowVideo.currentTime = 0;
+      var playing = flowVideo.play();
+      // 자동 재생이 막히면 첫 장면 그림을 둔 채 순서만 이어 감
+      if (playing && playing.catch) {
+        playing.catch(function () { sequenceTimer = setTimeout(startSequence, rewardStartSeconds * 1000); });
+      }
+    };
+    var startSequence = function () {
+      clearTimeout(sequenceTimer);
+      phoneScreen.classList.add('playing');
+      showScreen(stillScreens[0]);
+      showStep(0, STILL_SCREEN_SECONDS);
+      sequenceTimer = setTimeout(function () {
+        showScreen(stillScreens[1]);
+        showStep(1, STILL_SCREEN_SECONDS);
+        sequenceTimer = setTimeout(playFlowVideo, STILL_SCREEN_SECONDS * 1000);
+      }, STILL_SCREEN_SECONDS * 1000);
+    };
+    flowVideo.addEventListener('timeupdate', function () {
+      if (currentStep === 2 && flowVideo.currentTime >= rewardStartSeconds) {
+        showStep(3, Math.max(1, (flowVideo.duration || rewardStartSeconds + 6) - rewardStartSeconds));
+      }
+    });
+    flowVideo.addEventListener('ended', startSequence);
+    startSequence();
+  }
+
   // 칸 제목 등장 연출: 칸이 화면에 들어오면 seen (움직임 줄이기 · 옛 브라우저는 연출 없음)
   var sections = document.querySelectorAll('main section, body > section');
   if (!isMotionReduced && 'IntersectionObserver' in window && sections.length) {
