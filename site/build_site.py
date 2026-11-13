@@ -23,7 +23,8 @@ from site_guides import build_guide_index, build_guide_page  # noqa: E402
 from site_home import build_home  # noqa: E402
 
 # 페이지 속 자산 주소 ("/assets/..." · '/assets/...') > 내용 해시를 붙여 캐시가 옛 파일을 주지 않게 함 (서버 캐시 7일)
-ASSET_REFERENCE_PATTERN = re.compile(r'(["\'])/assets/([^"\'?#\s]+)')
+# 공유 이미지(og:image)처럼 사이트 전체 주소로 쓴 것도 포함
+ASSET_REFERENCE_PATTERN = re.compile(r'(["\'])((?:' + re.escape(site_config.SITE_URL.rstrip('/')) + r')?)/assets/([^"\'?#\s]+)')
 ASSET_VERSION_LENGTH = 8
 
 # 사이트맵에 싣는 손으로 관리하는 페이지 (초대·연결 링크 페이지는 검색 제외라 싣지 않음)
@@ -52,17 +53,17 @@ def write_page(out_dir: pathlib.Path, language, path: str, page_html: str):
 
 
 def add_asset_versions(out_dir: pathlib.Path):
-    """모든 HTML 의 /assets/<파일> 주소 > /assets/<파일>?v=<내용 해시 8자리> (없는 파일은 그대로)"""
+    """모든 HTML 의 /assets/<파일> 주소(사이트 전체 주소 포함) > 뒤에 ?v=<내용 해시 8자리> (없는 파일은 그대로)"""
     version_by_path = {}
 
     def to_versioned_reference(match: re.Match) -> str:
-        quote, relative_path = match.group(1), match.group(2)
+        quote, site_prefix, relative_path = match.group(1), match.group(2), match.group(3)
         if relative_path not in version_by_path:
             asset_file = out_dir / 'assets' / relative_path
             version_by_path[relative_path] = (hashlib.sha1(asset_file.read_bytes()).hexdigest()[:ASSET_VERSION_LENGTH]
                                               if asset_file.is_file() else '')
         version = version_by_path[relative_path]
-        return f'{quote}/assets/{relative_path}' + (f'?v={version}' if version else '')
+        return f'{quote}{site_prefix}/assets/{relative_path}' + (f'?v={version}' if version else '')
 
     for page_file in out_dir.rglob('*.html'):
         page_html = page_file.read_text(encoding='utf-8')

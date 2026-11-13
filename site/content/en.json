@@ -34,10 +34,11 @@
     "description": "A visual schedule app that turns routines into step-by-step action cards with pictures and voice. Made with developmental disabilities and ADHD in mind.",
     "hero": {
       "tag": "Action cards · Visual schedule",
-      "titleHtml": "Your child's day,<br/>one <em>action card</em> at a time",
+      "titleHtml": "The whole day,<br/>one <em>action card</em> at a time",
       "lede": "Write something like \"wash face and get dressed in the morning,\" and ELUM breaks it into easy steps on cards.",
       "hint": "Free to start · iPhone · iPad · Android",
-      "phoneLabel": "ELUM app screens: write, check, then follow along"
+      "phoneLabel": "ELUM app screens: write, check, then follow along",
+      "praise": "Well done!"
     },
     "steps": {
       "tag": "How it works",

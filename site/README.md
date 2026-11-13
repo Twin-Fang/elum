@@ -36,6 +36,7 @@ site/
 | 안내 글 더하기 | `site_config.py` 의 `GUIDE_SLUGS` · `GUIDE_IMAGES` 에 한 줄 + 언어 5개 글 파일 |
 | 언어 더하기 | `site_config.py` 의 `LANGUAGES` 에 한 줄 + `content/<언어>.json` + 글 파일 전부 |
 | 방침 · 삭제 안내 고치기 | `static/privacy.html`, `static/delete.html` (서버 동의 문서와 맞는지 `tool/check_public_pages.py`) |
+| 공유 썸네일 | 사이트 폴더를 정적 서버로 열고 `/og/og.html?lang=<언어>` 를 1200x630 으로 캡처 > `static/assets/og.png`(한국어) · `og_<언어>.png`. 문구는 `content/<언어>.json` 의 hero 를 읽는다 |
 | 모양 고치기 | `assets/site.css` (색 · 간격은 앱 디자인 토큰과 같은 값) |
 
 문구 규칙은 스토어 등록정보와 같다 ([docs/store/store-listing.md](../docs/store/store-listing.md)): 효과를 약속하지 않고,

@@ -10,6 +10,8 @@ STYLE_IMAGES = ['style_emoji.svg', 'style_symbol.svg', 'style_cartoon.webp', 'st
 AUDIENCE_IMAGES = ['morning.webp', 'school.webp', 'chores.webp', 'outside.webp']
 # 단계마다 기기 옆에 튀어나오는 그림 (적기: 반짝임, 확인: 카드, 따라 하기: 별)
 PHONE_POP_IMAGES = ['pop_sparkles.svg', 'cards.webp', 'pop_star.webp']
+# 보호자 칸 3줄 제목 왼쪽 아이콘 (문구 순서: 보호자가 정해요, 매일 같은 자리에서, 말 대신 카드를 가리켜요)
+TOGETHER_ICONS = ['icon_guardian_decides.svg', 'icon_same_time.svg', 'icon_point_card.svg']
 # 첫 화면에 보이는 안내 글 수
 HOME_GUIDE_COUNT = 4
 
@@ -21,16 +23,26 @@ def build_app_screen(file_name: str, index: int) -> str:
             f'{loading_attribute} decoding="async"/>')
 
 
-def build_app_phone(language: Language, label: str, step_titles: list) -> str:
+def build_app_phone(language: Language, label: str, step_titles: list, praise: str) -> str:
     """기기 틀 + 앱 실제 화면 3장(적기 > 확인 > 따라 하기) + 같은 순서로 켜지는 단계 이름"""
     screens = ''.join(build_app_screen(to_app_screen_file_name(language.code, name), index)
                       for index, name in enumerate(APP_SCREEN_NAMES))
     steps = ''.join(f'<li style="--i:{index}">{escape(title)}</li>' for index, title in enumerate(step_titles))
     pops = ''.join(f'<img class="pop pop-{index}" src="/assets/img/{name}" alt="" width="64" height="64" style="--i:{index}"/>'
                    for index, name in enumerate(PHONE_POP_IMAGES))
-    return (f'<div class="phone-stage" aria-hidden="true">{pops}</div>'
+    praise_bubble = (f'<p class="praise" aria-hidden="true"><img src="/assets/img/pop_star.webp" alt="" width="28" height="28"/>'
+                     f'{escape(praise)}<i></i><i></i><i></i><i></i><i></i><i></i></p>')
+    return (f'<div class="phone-stage" aria-hidden="true">{pops}{praise_bubble}</div>'
             f'<div class="phone" role="img" aria-label="{escape(label)}"><div class="phone-screen">{screens}</div></div>'
             f'<ol class="phone-steps" aria-hidden="true">{steps}</ol>')
+
+
+def build_together_points(items: list) -> str:
+    """보호자 칸 3줄: 아이콘 + 제목 + 설명"""
+    return ''.join(
+        f'<li class="reveal" style="--i:{index}"><b><img class="point-icon" src="/assets/img/{TOGETHER_ICONS[index]}" alt="" '
+        f'width="20" height="20"/>{escape(item["title"])}</b><span>{escape(item["body"])}</span></li>'
+        for index, item in enumerate(items))
 
 
 def build_tiles(items: list, images: list) -> str:
@@ -80,7 +92,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
       <p class="hint">{escape(hero['hint'])}</p>
     </div>
     <div class="hero-visual">
-      {build_app_phone(language, hero['phoneLabel'], [item['title'] for item in home['steps']['items']])}
+      {build_app_phone(language, hero['phoneLabel'], [item['title'] for item in home['steps']['items']], hero['praise'])}
     </div>
   </div>
 </section>
@@ -110,7 +122,7 @@ def build_home(language: Language, ui: dict, guides: dict) -> str:
       <p class="tag">{escape(home['together']['tag'])}</p>
       <h2>{escape(home['together']['title'])}</h2>
       <p class="sub">{escape(home['together']['sub'])}</p>
-      <ul class="points">{''.join(f'<li class="reveal"><b>{escape(item["title"])}</b><span>{escape(item["body"])}</span></li>' for item in home['together']['items'])}</ul>
+      <ul class="points">{build_together_points(home['together']['items'])}</ul>
       <a class="more" href="{page_href(language, 'guide/caregiver-role/')}">{escape(home['together']['link'])}</a>
     </div>
   </div>

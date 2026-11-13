@@ -99,6 +99,20 @@ section{padding:64px 0}
 .pop-2{left:calc(50% + 112px);top:24%}
 @keyframes pop-in{0%{opacity:0;transform:scale(.4) translateY(14px) rotate(-12deg)}4%{opacity:1;transform:scale(1.15) rotate(6deg)}
   7%,26%{opacity:1;transform:scale(1) rotate(0)}31%,100%{opacity:0;transform:scale(.6) translateY(-10px)}}
+/* 칭찬 말풍선: 3번째 화면(따라 하기) 때 기기 위로 튀어오르고 별 6개가 퍼짐 */
+.praise{position:absolute;left:50%;top:58%;display:flex;align-items:center;gap:8px;margin:0;padding:12px 20px;border-radius:100px;
+  background:var(--surface);box-shadow:0 18px 40px -10px rgba(36,38,52,.35);font-size:20px;font-weight:800;white-space:nowrap;
+  transform:translate(-50%,0) scale(.4);opacity:0;animation:praise-pop 12s 8.6s infinite}
+.praise img{width:28px;height:28px}
+.praise i{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:var(--yellow);opacity:0;
+  animation:praise-burst 12s 8.7s infinite}
+.praise i:nth-of-type(2n){background:var(--mint)}
+.praise i:nth-of-type(3n){background:var(--peach)}
+.praise i:nth-of-type(1){--x:-90px;--y:-40px}.praise i:nth-of-type(2){--x:90px;--y:-44px}.praise i:nth-of-type(3){--x:-70px;--y:34px}
+.praise i:nth-of-type(4){--x:76px;--y:30px}.praise i:nth-of-type(5){--x:-10px;--y:-58px}.praise i:nth-of-type(6){--x:14px;--y:52px}
+@keyframes praise-pop{0%{opacity:0;transform:translate(-50%,0) scale(.4)}4%{opacity:1;transform:translate(-50%,0) scale(1.12)}
+  7%,24%{opacity:1;transform:translate(-50%,0) scale(1)}29%,100%{opacity:0;transform:translate(-50%,-12px) scale(.9)}}
+@keyframes praise-burst{0%{opacity:0;transform:translate(-50%,-50%)}3%{opacity:1}14%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.6)}100%{opacity:0}}
 .phone-steps{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0;padding:0;list-style:none}
 .phone-steps li{position:relative;overflow:hidden;padding:7px 14px;border-radius:100px;background:var(--surface);border:1px solid var(--line);color:var(--muted);
   font-size:13px;font-weight:700;animation:step-on 12s calc(var(--i)*4s) infinite}
@@ -133,7 +147,9 @@ section{padding:64px 0}
 
 .points{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:10px}
 .points li{padding:16px 18px;background:var(--surface);border-radius:16px;border:1px solid var(--line)}
-.points b{display:block;font-size:16px}
+.points b{display:flex;align-items:center;gap:10px;font-size:16px}
+.point-icon{flex:none;width:32px;height:32px;padding:7px;border-radius:10px;background:var(--mint-soft)}
+.points span{padding-left:42px}
 .points span{display:block;margin-top:2px;color:var(--muted);font-size:15px}
 
 /* 안내 글 카드 */
@@ -242,10 +258,6 @@ section{padding:64px 0}
 .principle .num{background:linear-gradient(160deg,var(--yellow),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.55}
 .principle:hover .num{opacity:1}
 .principle:hover{transform:translateY(-6px) rotate(.4deg)}
-.points li{position:relative;overflow:hidden}
-.points li::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--mint);transform:scaleY(0);transform-origin:top;
-  transition:transform .6s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*120ms + .2s)}
-.points li.in::before,.fx section.seen .points li::before{transform:none}
 .guidecard{position:relative;padding-right:40px}
 .guidecard::after{content:"→";position:absolute;right:16px;top:50%;transform:translate(-4px,-50%);opacity:0;color:var(--ink);font-weight:800;
   transition:transform .2s ease,opacity .2s ease}
@@ -262,10 +274,10 @@ section{padding:64px 0}
   section{padding:88px 0}
   .hero{padding:64px 0 56px}
   .hero-grid{grid-template-columns:1.05fr .95fr}
-  .phone{width:260px}
-  .pop-0{left:calc(50% - 210px)}
-  .pop-1{left:calc(50% - 220px)}
-  .pop-2{left:calc(50% + 140px)}
+  .phone{width:300px}
+  .pop-0{left:calc(50% - 230px)}
+  .pop-1{left:calc(50% - 240px)}
+  .pop-2{left:calc(50% + 160px)}
   .tiles.three{grid-template-columns:repeat(3,1fr)}
   .tiles.four{grid-template-columns:repeat(4,1fr)}
   .principles{grid-template-columns:repeat(4,1fr)}
