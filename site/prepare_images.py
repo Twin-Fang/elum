@@ -41,6 +41,8 @@ RASTER_IMAGES = [
     (SITE_ART / 'aba_reward.png', 'aba_reward.webp', 256, True),
     (SITE_ART / 'together.png', 'together.webp', 720, True),
     (APP_IMAGES / 'reward_star_green.png', 'pop_star.webp', 144, True),
+    # 공유 썸네일의 앱 아이콘 타일 (스토어 아이콘과 같은 그림)
+    (APP_ASSETS / 'icon/app_icon.png', 'app_icon.webp', 280, False),
 ] + [
     # 첫 화면 앱 화면 (언어 x 화면, site_config 가 원본)
     (PROMO_SCREENS / f'{language_code}/{screen_name}.png', to_app_screen_file_name(language_code, screen_name), 330, False)
@@ -48,6 +50,10 @@ RASTER_IMAGES = [
 ]
 # 그대로 복사하는 벡터 그림 (앱 그림 방식 예시와 같은 그림)
 VECTOR_IMAGES = [
+    # 보호자 칸 제목 아이콘 (앱 아이콘 그대로)
+    (APP_IMAGES / 'icon_pencil_edit.svg', 'icon_guardian_decides.svg'),
+    (APP_IMAGES / 'icon_calendar.svg', 'icon_same_time.svg'),
+    (APP_IMAGES / 'icon_playing_cards.svg', 'icon_point_card.svg'),
     (APP_IMAGES / 'icon_sparkles_large.svg', 'pop_sparkles.svg'),
     (APP_ASSETS / 'emoji/emoji_toothbrush.svg', 'style_emoji.svg'),
     (APP_ASSETS / 'pictograms/brush_teeth_,_to.svg', 'style_symbol.svg'),
