@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -182,7 +181,7 @@ class _RoutineDoneLumiMotionState extends State<RoutineDoneLumiMotion>
       }
     }
 
-    // 그룹 상자(Group 66): 시안 (116.55, 195), 152×160. 내보낸 그림과 눈웃음을 안에 얹는다.
+    // 그룹 상자(Group 66): 시안 (116.55, 195), 152×160. 내보낸 그림을 안에 얹는다 (눈 두 개가 그림에 있음).
     Widget lumi = Transform.translate(
       offset: Offset(0, breathOffset.w),
       child: Transform.rotate(
@@ -203,16 +202,6 @@ class _RoutineDoneLumiMotionState extends State<RoutineDoneLumiMotion>
                   AppAssets.routineDoneLumi,
                   width: 144.33.w,
                   height: 157.33.w,
-                ),
-              ),
-              // 눈웃음(시안 Vector 2, (207, 267))
-              Positioned(
-                left: (205.5 - 116.55).w,
-                top: (265.5 - 195).w,
-                child: SvgPicture.asset(
-                  AppAssets.routineDoneWink,
-                  width: 11.w,
-                  height: 6.w,
                 ),
               ),
             ],
