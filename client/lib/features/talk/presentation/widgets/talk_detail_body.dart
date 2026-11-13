@@ -15,19 +15,18 @@ import 'talk_detail_parts.dart';
 import 'talk_step_cards.dart';
 
 /// 상세 본문 (시안 1783:7172 · 1813:7718): 분류 · 카드 수 칩 > 제목 > 작성 정보 > 한마디
-/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 일과로 가져오기 > 도움돼요 칩 · 가져감 숫자 (링크 글은 가져오기까지)
+/// > 보기 전환 > 카드(크게 보기 | 한 눈에 보기) > 도움돼요 칩 · 가져감 숫자 (링크 글은 카드까지)
+/// `일과로 가져오기` 는 스크롤 없이 보이게 화면 아래 고정 (talk_detail_screen.dart, #1301)
 /// 보기 전환은 기기에 기억한다 (다른 글·다시 들어와도 마지막 선택, #959)
 class TalkDetailBody extends ConsumerStatefulWidget {
   const TalkDetailBody({
     super.key,
     required this.post,
     required this.onHelpfulPressed,
-    required this.onImportPressed,
   });
 
   final TalkPostDetail post;
   final VoidCallback onHelpfulPressed;
-  final VoidCallback onImportPressed;
 
   @override
   ConsumerState<TalkDetailBody> createState() => _TalkDetailBodyState();
@@ -36,7 +35,7 @@ class TalkDetailBody extends ConsumerStatefulWidget {
 class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
   late bool _isGridView = ref.read(localStorageProvider).isTalkGridView;
 
-  /// 머리 줄 > 칩 > 제목 > 작성 정보 > 한마디 > 전환 칩 > 카드 > 버튼 간격 (시안 20 · 12 · 12 · 24 · 24 · 24 · 32)
+  /// 머리 줄 > 칩 > 제목 > 작성 정보 > 한마디 > 전환 칩 > 카드 > 도움돼요 간격 (시안 20 · 12 · 12 · 24 · 24 · 24 · 32)
   /// 제목 > 작성 정보는 8: 제목 줄 높이 1.2 가 시안(1.0)보다 4 높아 그만큼 뺀다
   static const _headerToChips = 20.0;
   static const _chipGap = 8.0;
@@ -45,14 +44,10 @@ class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
   static const _postedToNote = 24.0;
   static const _noteToToggle = 24.0;
   static const _toggleToCards = 24.0;
-  static const _cardsToImport = 32.0;
-  static const _importToHelpful = 40.0;
+  static const _cardsToHelpful = 32.0;
 
   /// 도움돼요 칩 > 가져감 숫자 (시안 16)
   static const _helpfulToImportCount = 16.0;
-
-  /// 가져오기 버튼 좌우 (시안 16)
-  static const _buttonInset = 16.0;
 
   /// 보기 전환 > 기기에 저장 (저장 실패해도 화면 전환은 유지)
   void _toggleView() {
@@ -140,17 +135,9 @@ class _TalkDetailBodyState extends ConsumerState<TalkDetailBody> {
             isGridView: _isGridView,
           ),
         ),
-        SizedBox(height: _cardsToImport.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: _buttonInset.w),
-          child: TalkDetailImportButton(
-            isImported: post.isImportedByMe,
-            onPressed: widget.onImportPressed,
-          ),
-        ),
         // 도움돼요 칩 · 가져감 숫자 (댓글 수는 아래 댓글 머리에, 링크 글은 반응이 없어 뺀다)
         if (!post.isLinkOnly) ...[
-          SizedBox(height: _importToHelpful.h),
+          SizedBox(height: _cardsToHelpful.h),
           Padding(
             padding: textInset,
             child: Row(

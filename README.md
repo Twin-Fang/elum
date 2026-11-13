@@ -94,7 +94,7 @@ Korean is available today. English, Chinese, and Japanese are on the way.
 
 ## Help and policies
 
-[Help](https://twin-fang.github.io/elum/) · [Privacy Policy](https://twin-fang.github.io/elum/privacy.html) · [Delete your account and data](https://twin-fang.github.io/elum/delete.html)
+[Help](https://elum.suhsaechan.kr/) · [Privacy Policy](https://elum.suhsaechan.kr/privacy.html) · [Delete your account and data](https://elum.suhsaechan.kr/delete.html)
 
 ## Team
 

@@ -59,6 +59,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.talkPostTitle,
     required this.talkPostNote,
     required this.talkMeta,
+    required this.talkStatLabel,
     required this.talkCategoryLabel,
     required this.floatingPillLabel,
     required this.talkDetailTitle,
@@ -359,7 +360,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 일과관리 칸 이름 (Pretendard 400/12, 줄 높이 12 — 두 줄 24, 시안 1664:6876)
   final TextStyle libraryTileLabel;
 
-  /// 섹션 제목 `이번 주에 많이 가져간 일과에요` (Pretendard 600/16, 시안 1783:6663)
+  /// 섹션 제목 `이번 주에 많이 가져간 일과예요` (Pretendard 600/16, 시안 1783:6663)
   final TextStyle talkSectionTitle;
 
   /// 인기 카드 제목, 두 줄 (Pretendard 500/14 · 줄 높이 1.2, 시안 1783:6671)
@@ -373,6 +374,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 시간·숫자·작성자 (Pretendard 400/12, 시안 1783:6725)
   final TextStyle talkMeta;
+
+  /// 피드 카드 숫자 줄 `도움돼요 2 · 댓글 1 · 2명 가져감` (Pretendard 500/13). 시안 12 숫자만으로는 뜻을 몰라 글자를 붙이고 키움 (#1301)
+  final TextStyle talkStatLabel;
 
   /// 최신 글 카드 분류 칩 (Pretendard 500/12, 시안 1783:6727)
   final TextStyle talkCategoryLabel;
@@ -539,7 +543,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// promptBody(16/w500)와 굵기가 달라 별개 토큰이다.
   final TextStyle promptPlaceholder;
 
-  /// 일과 입력 하단 안내 "아이의 정보를 안전하게 보호해요" (12/w500 Pretendard, style_H3KJNZ).
+  /// 일과 입력칸 아래 개인정보 안내 (14/w500 Pretendard). 시안(style_H3KJNZ) 12는 50대 보호자에게 작아 14 (#1297).
   /// caption(12/w400 TmoneyRoundWind)과 폰트·굵기가 달라 별개 토큰이다.
   final TextStyle promptCaption;
 
@@ -1054,6 +1058,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    talkStatLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
     talkCategoryLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 12,
@@ -1358,9 +1368,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     ),
     promptCaption: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: FontWeight.w500,
-      height: 1.1,
+      height: 1.3,
     ),
     contactSheetTitle: TextStyle(
       fontFamily: promptFontFamily,
@@ -1815,6 +1825,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? talkPostTitle,
     TextStyle? talkPostNote,
     TextStyle? talkMeta,
+    TextStyle? talkStatLabel,
     TextStyle? talkCategoryLabel,
     TextStyle? floatingPillLabel,
     TextStyle? talkDetailTitle,
@@ -1977,6 +1988,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkPostTitle: talkPostTitle ?? this.talkPostTitle,
       talkPostNote: talkPostNote ?? this.talkPostNote,
       talkMeta: talkMeta ?? this.talkMeta,
+      talkStatLabel: talkStatLabel ?? this.talkStatLabel,
       talkCategoryLabel: talkCategoryLabel ?? this.talkCategoryLabel,
       floatingPillLabel: floatingPillLabel ?? this.floatingPillLabel,
       talkDetailTitle: talkDetailTitle ?? this.talkDetailTitle,
@@ -2158,6 +2170,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       talkPostTitle: TextStyle.lerp(talkPostTitle, other.talkPostTitle, t)!,
       talkPostNote: TextStyle.lerp(talkPostNote, other.talkPostNote, t)!,
       talkMeta: TextStyle.lerp(talkMeta, other.talkMeta, t)!,
+      talkStatLabel: TextStyle.lerp(talkStatLabel, other.talkStatLabel, t)!,
       talkCategoryLabel: TextStyle.lerp(talkCategoryLabel, other.talkCategoryLabel, t)!,
       floatingPillLabel: TextStyle.lerp(floatingPillLabel, other.floatingPillLabel, t)!,
       talkDetailTitle: TextStyle.lerp(talkDetailTitle, other.talkDetailTitle, t)!,

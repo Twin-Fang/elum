@@ -122,6 +122,8 @@ mixin LibraryGroupActions<T extends ConsumerStatefulWidget>
           value: true,
           icon: AppAssets.iconFolderAdd,
           label: l10n.routineGroupCreateGroup,
+          // 묶음이 무엇인지 처음 보는 사람을 위한 한 줄
+          description: l10n.routineGroupCreateGroupDescription,
         ),
       ],
     );

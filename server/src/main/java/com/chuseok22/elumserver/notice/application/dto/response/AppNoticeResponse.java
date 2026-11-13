@@ -32,7 +32,7 @@ public record AppNoticeResponse(
   public record Button(
     @Schema(description = "버튼 문구", example = "자세히 보기")
     String label,
-    @Schema(description = "https 링크", example = "https://twin-fang.github.io/elum/")
+    @Schema(description = "https 링크", example = "https://elum.suhsaechan.kr/")
     String url
   ) {
 

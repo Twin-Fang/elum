@@ -91,7 +91,7 @@ ELUM の 3 ステップの仕組みは、ABA（応用行動分析）の考え方
 
 ## ヘルプと規約
 
-[ヘルプ](https://twin-fang.github.io/elum/) · [プライバシーポリシー](https://twin-fang.github.io/elum/privacy.html) · [アカウントとデータの削除](https://twin-fang.github.io/elum/delete.html)
+[ヘルプ](https://elum.suhsaechan.kr/) · [プライバシーポリシー](https://elum.suhsaechan.kr/privacy.html) · [アカウントとデータの削除](https://elum.suhsaechan.kr/delete.html)
 
 ## チーム
 

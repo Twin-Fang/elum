@@ -1,0 +1,49 @@
+{
+  "title": "Análisis de tareas: dientes, vestirse y manos | ELUM",
+  "description": "Si \"lávate los dientes\" cuesta, divídelo más. Cómo usar el análisis de tareas para pasar dientes, vestirse y lavarse las manos a tarjetas de acción.",
+  "keywords": "análisis de tareas, ejemplos de análisis de tareas, pasos para cepillarse los dientes, pasos para vestirse, pasos para lavarse las manos, dividir tareas en pasos",
+  "heading": "Análisis de tareas: cómo dividir una rutina en pasos pequeños",
+  "lede": "Lo que cuesta hacer de una vez no es algo que no se pueda hacer. Es algo que todavía no se ha dividido lo suficiente.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Qué es el análisis de tareas",
+      "paragraphs": [
+        "El análisis de tareas consiste en dividir una tarea en <b>acciones pequeñas con un orden</b>. Por ejemplo, \"lávate las manos\" se convierte en \"abre el grifo → ponte jabón → frota → enjuaga → sécate\"."
+      ]
+    },
+    {
+      "heading": "Consejos para dividir bien",
+      "list": [
+        "<b>Hazlo tú mientras lo escribes.</b> Si solo lo imaginas, se escapan pasos",
+        "<b>Escribe acciones que se vean.</b> En lugar de \"bien limpias\", \"frota el dorso de las manos\"",
+        "<b>Una acción por frase.</b> Si aparece una \"y\", divídela en dos",
+        "<b>Divide más solo los pasos que cuestan.</b> Los que ya salen bien se pueden juntar",
+        "<b>Empieza con 3 a 7 tarjetas.</b> Si queda muy larga, divide la rutina en dos"
+      ]
+    },
+    {
+      "heading": "Hasta dónde dividir",
+      "paragraphs": [
+        "No hay una respuesta única. Si con la tarjeta <b>puede empezar sin ayuda</b>, ya está bastante dividido. Si se detiene a menudo en una tarjeta, prueba a dividir solo esa en dos o tres.",
+        "En ELUM puedes añadir tarjetas, cambiar el orden o dividir una tarjeta en otras más pequeñas directamente desde la pantalla del cuidador."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: lavarse las manos",
+    "items": [
+      {"emoji": "🚰", "title": "Abre el grifo", "body": "Moja las manos con agua"},
+      {"emoji": "🧼", "title": "Ponte jabón", "body": "Aprieta una vez"},
+      {"emoji": "👐", "title": "Frota las manos", "body": "Palmas, dorso y entre los dedos"},
+      {"emoji": "💧", "title": "Enjuágate", "body": "Hasta que no quede espuma"},
+      {"emoji": "🧻", "title": "Sécate con la toalla", "body": "Quita el agua de las manos"}
+    ],
+    "reward": "Al terminar, chócala"
+  },
+  "faq": [
+    {"q": "¿Cómo se divide vestirse?", "a": "Haz una tarjeta para cada prenda, en este orden: ropa interior → camiseta → pantalón → calcetines. Si los botones o la cremallera cuestan, sepáralos en una tarjeta aparte."},
+    {"q": "¿Y si salen demasiados pasos?", "a": "Divide la rutina en dos. Por ejemplo, separa \"prepararse por la mañana\" en dos rutinas: \"asearse\" y \"vestirse\"."}
+  ],
+  "related": ["action-cards", "morning-routine"]
+}

@@ -1,0 +1,56 @@
+{
+  "title": "Homework routine for learning disabilities | ELUM",
+  "description": "When your child hesitates over homework, make starting easier before cutting the amount. A homework routine for learning disabilities and slow learners.",
+  "keywords": "homework routine, learning disability homework, slow learner homework, homework habits, homework checklist for kids, how to start homework",
+  "heading": "Homework routine: start one step at a time",
+  "lede": "Your child may not dislike homework. They may just be stuck, not knowing where to begin.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "\"Do your homework\" is too big",
+      "paragraphs": [
+        "Homework hides <b>steps you can't see</b>, like opening the bag, finding the planner, reading what to do and taking out the right book. If these steps are hard, studying never even starts.",
+        "Bring the hidden steps out onto cards, and your child only has to do one at a time."
+      ]
+    },
+    {
+      "heading": "How to make a homework routine",
+      "list": [
+        "<b>Set the place first.</b> Same desk, same time, every day",
+        "<b>Make the first card very easy.</b> Just \"sit at your desk\" counts as starting",
+        "<b>Make the amount visible.</b> \"One page of math\" instead of \"do math\"",
+        "<b>Add a break card.</b> After each subject, drink water or stretch",
+        "<b>End with packing the bag.</b> Tomorrow morning gets easier"
+      ]
+    },
+    {
+      "heading": "When reading is hard",
+      "paragraphs": [
+        "If reading is a struggle, the card pictures and <b>the read-aloud voice</b> can help. ELUM reads each card's sentence aloud, and you can also record it in your own voice."
+      ]
+    },
+    {
+      "heading": "See what's done",
+      "paragraphs": [
+        "As checked cards add up, your child can see \"I did this much.\" Even on days when not everything gets done, praise what was done. Tomorrow, start from the next card."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: doing homework",
+    "items": [
+      {"emoji": "🪑", "title": "Sit at your desk", "body": "Sit in your usual spot"},
+      {"emoji": "📒", "title": "Check your planner", "body": "See what to do today"},
+      {"emoji": "📘", "title": "One reading page", "body": "Read it out loud"},
+      {"emoji": "🥤", "title": "Drink some water", "body": "Take a short break"},
+      {"emoji": "✏️", "title": "One math page", "body": "Work through it slowly"},
+      {"emoji": "🎒", "title": "Pack your bag", "body": "Put your homework in your bag"}
+    ],
+    "reward": "All done: 15 minutes of favorite play"
+  },
+  "faq": [
+    {"q": "Homework is different every day. What then?", "a": "Keep the frame the same, like 'sit → check → do it → pack the bag,' and change only the middle cards to fit that day."},
+    {"q": "It takes far too long.", "a": "Try making each card smaller. If 'one page' is too long, change it to 'three problems.' A size your child can finish comes first."}
+  ],
+  "related": ["adhd-routine", "task-analysis"]
+}

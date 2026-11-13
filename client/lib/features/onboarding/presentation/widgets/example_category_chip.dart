@@ -7,7 +7,7 @@ import '../../../../shared/models/routine_example_category.dart';
 
 /// 예시 분류 선택 항목 (#803): 분류 아이콘 + 분류 이름 + 한 줄 예
 ///
-/// 모양은 옛 목표 칩(Figma `온보딩_목표` 204:1002)을 따른다 — 344 폭 r20, 아이콘 40.
+/// 모양은 옛 목표 칩(Figma `온보딩_목표` 204:1002)을 따른다 — 344 폭 r20, 아이콘 48 (#1285).
 /// 선택 로직은 SelectableGroup 이 갖고, 이 위젯은 보이는 모습만 책임진다.
 class ExampleCategoryChip extends StatelessWidget {
   const ExampleCategoryChip({

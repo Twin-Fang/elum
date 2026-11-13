@@ -18,7 +18,7 @@ import 'my_plan_card_parts.dart';
 
 /// 내 정보 맨 위 내 요금제 카드: Pro 는 금빛 회원 카드(칩 > 제목 > 날짜 > 혜택 알약), Free 는 흰 카드(칩 > 제목 > 한 줄 > 권유 버튼)
 ///
-/// 요금제 화면을 열 수 있을 때만 누름(Pro 카드 전체 · Free 버튼). 못 열면 상태만 보임
+/// Pro 카드 전체는 늘 누름(내 요금제 시트). Free 버튼은 요금제 화면을 열 수 있을 때만, 못 열면 상태만 보임
 class MyPlanCard extends ConsumerWidget {
   const MyPlanCard({super.key});
 
@@ -27,7 +27,7 @@ class MyPlanCard extends ConsumerWidget {
     final status = ref.watch(planStatusProvider);
     final canOpenPaywall = ref.watch(canOpenPlanPaywallProvider);
     return status.isPro
-        ? _ProPlanFace(status: status, canOpenPaywall: canOpenPaywall)
+        ? _ProPlanFace(status: status)
         : _FreePlanFace(canOpenPaywall: canOpenPaywall);
   }
 }
@@ -39,12 +39,11 @@ const _pillBenefits = [
   PlanBenefit.freeImageRegenerate,
 ];
 
-/// Pro 금빛 카드: 누르면 요금제 화면 (구독 관리)
+/// Pro 금빛 카드: 누르면 내 요금제 시트 (날짜 · 결제한 곳 · 구독 관리, 판매와 무관, #1303)
 class _ProPlanFace extends ConsumerWidget {
-  const _ProPlanFace({required this.status, required this.canOpenPaywall});
+  const _ProPlanFace({required this.status});
 
   final PlanStatus status;
-  final bool canOpenPaywall;
 
   /// 그림자 아래 6 · 번짐 18
   static const _shadowOffsetY = 6.0;
@@ -126,11 +125,8 @@ class _ProPlanFace extends ConsumerWidget {
     );
 
     final summary = _semanticSummary(l10n, [title, ?subline, ...pillLabels]);
-    if (!canOpenPaywall) {
-      return Semantics(label: summary, excludeSemantics: true, child: face);
-    }
     return AppPressable(
-      onTap: () => openPlanPaywall(context, ref),
+      onTap: () => openMyPlan(context, ref),
       scaleDown: AppPressable.scaleCard,
       semanticLabel: summary,
       child: face,

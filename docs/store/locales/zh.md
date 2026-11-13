@@ -69,4 +69,4 @@ ELUM 是一款帮助日常生活的行为卡片应用。它用行为卡片（图
 ## 공개 주소
 
 - 개인정보처리방침: 중국어 게시본 없음(#531·#528). 열기 전에 정한다
-- 지원: https://twin-fang.github.io/elum/
+- 지원: https://elum.suhsaechan.kr/

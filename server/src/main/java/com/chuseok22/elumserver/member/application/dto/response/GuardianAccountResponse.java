@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Schema(description = "보호자 계정 표시 정보 (내 정보 상단 카드). 원본 이메일은 내려주지 않는다")
 public record GuardianAccountResponse(
 
-  @Schema(description = "보호자 닉네임 (가입 시 자동 생성), 아직 없으면 null", example = "가파른블록-1269")
+  @Schema(description = "보호자 닉네임 (가입 시 자동 생성: 보호자-숫자), 아직 없으면 null", example = "보호자-1269")
   String nickname,
 
   @Schema(description = "가입한 소셜 로그인 제공자. 아이디·비밀번호 가입이면 null", example = "KAKAO")

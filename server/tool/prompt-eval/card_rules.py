@@ -45,6 +45,10 @@ GUIDE_STATIC_HOLD = re.compile(r"^The character (stands and |sits and )?(holds|k
 # 보호자가 말하지 않은 채우기 카드
 FILLER_TITLES = re.compile(r"계속|제자리|원래 자리|내려놓")
 NEIGHBOR_SIMILARITY_LIMIT = 0.55
+# 보조 용언: 끝 동사 비교에서 앞 어절을 본다 ('앉아 있어요', '챙겨 둬요', '걸어 다녀요')
+AUXILIARY_VERBS = re.compile(r"있어요|둬요|두어요|놓아요|봐요|줘요|다녀요")
+# 앞 어절이 조사로 끝나면 보조 용언이 아니라 본동사 ('거울을 봐요')
+PARTICLE_ENDING = re.compile(r"(을|를|이|가|에|도|은|는|로|와|과|랑)$")
 GUIDE_DANGER = re.compile(r"\b(knife|blade|fire|flame|stove|blood|needle|syringe|injection)\b", re.I)
 
 
@@ -58,6 +62,22 @@ def _first_position(steps: list, keywords: list) -> int:
         if contains_any(f"{step.get('title', '')} {step.get('description', '')}", keywords):
             return position
     return -1
+
+
+def _final_verb(sentence: str) -> str:
+    """문장 끝 어절 > 비교용 동사 ('요'·문장부호 제거, 보조 용언 '앉아 있어요'는 앞 어절)"""
+    words = re.sub(r"[.!?\"'“”]", "", sentence).split()
+    if len(words) >= 2 and AUXILIARY_VERBS.fullmatch(words[-1]) and not PARTICLE_ENDING.search(words[-2]):
+        return words[-2]
+    return words[-1].removesuffix("요") if words else ""
+
+
+def is_same_action(title: str, description: str) -> bool:
+    """title 끝 동사 <-> description 끝 동사 (한쪽이 다른 쪽 끝에 붙은 꼴 '샤워를 해요' <-> '샤워해요' 허용)"""
+    title_verb, description_verb = _final_verb(title), _final_verb(description)
+    if not title_verb or not description_verb:
+        return True
+    return description_verb.endswith(title_verb) or title_verb.endswith(description_verb)
 
 
 def _grade_structure(card: dict, may_be_empty: bool) -> list:
@@ -88,6 +108,9 @@ def _grade_structure(card: dict, may_be_empty: bool) -> list:
             issues.append(("warn", "설명김", f"{len(description)}자: {description}"))
         if ACTION_CHAINING.search(description + " "):
             issues.append(("warn", "행동연결", description))
+        # 제목과 문장이 다른 행동 ('칫솔을 들어요' / '칫솔에 치약을 짜요', #1297)
+        if not is_same_action(title, description):
+            issues.append(("warn", "제목문장동사다름", f"{title} / {description}"))
         if VAGUE_ADVERBS.search(f"{title} {description} "):
             issues.append(("warn", "모호한부사", f"{title} / {description}"))
         if NEGATIVE_WORDS.search(f"{title} {description} "):

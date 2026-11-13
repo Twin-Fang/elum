@@ -1,0 +1,54 @@
+{
+  "title": "ADHD routine for kids: a visual schedule you can see | ELUM",
+  "description": "When tasks get forgotten or your child drifts off midway, making the order visible can help. How to make an ADHD routine chart with a visual schedule.",
+  "keywords": "ADHD routine, ADHD morning routine, ADHD homework routine, ADHD routine chart, visual schedule for ADHD, ADHD daily schedule for kids",
+  "heading": "ADHD and routines: make the order visible",
+  "lede": "If you keep hearing yourself say \"how many times do I have to tell you,\" it may be time to show the order instead of saying it.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Spoken instructions fade fast",
+      "paragraphs": [
+        "When your child hears several things at once, like \"wash up, get dressed and pack your bag,\" often only the first one sticks, or something else catches their eye halfway through.",
+        "When tasks are <b>in front of their eyes instead of in their head</b>, your child doesn't have to rely on memory. A visual schedule does that job."
+      ]
+    },
+    {
+      "heading": "How to make one",
+      "list": [
+        "<b>One card at a time.</b> Show only the task for right now, and show it big",
+        "<b>Keep it short.</b> 3 to 5 cards per routine. If it's longer, split it in two",
+        "<b>Show the end.</b> Seeing how many cards are left makes it easier to keep going",
+        "<b>Check it off right away.</b> Check the card and get praise the moment it's done",
+        "<b>Keep the reward close.</b> Right when the routine ends, not a week later"
+      ]
+    },
+    {
+      "heading": "Use it for homework and tidying up too",
+      "paragraphs": [
+        "Breaking \"do your homework\" into \"sit at your desk → open your planner → do one page of math → put it in your bag\" makes it easier to start. The hardest part is usually <b>the first step</b>. Make the first card very easy."
+      ]
+    },
+    {
+      "heading": "In ELUM",
+      "paragraphs": [
+        "On your child's screen, cards appear one at a time in a large size, with a voice that reads them aloud, a check mark and stars. You set the routines and rewards, and you can see how much has been done."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: starting homework",
+    "items": [
+      {"emoji": "🪑", "title": "Sit at your desk", "body": "Pull in your chair and sit"},
+      {"emoji": "📒", "title": "Open your planner", "body": "Check today's homework"},
+      {"emoji": "✏️", "title": "Do one page", "body": "Just one page of math"},
+      {"emoji": "🎒", "title": "Put it in your bag", "body": "Ready to take tomorrow"}
+    ],
+    "reward": "All done: 10 minutes of blocks"
+  },
+  "faq": [
+    {"q": "My child does something else instead of moving to the next card.", "a": "Try using fewer cards and making the first card easier. It also helps to keep the device in a spot with fewer distractions."},
+    {"q": "My child seems bored with the routine and doesn't want to do it.", "a": "Try changing the reward. What your child likes may have changed. Changing the card order or pictures a little can also make it feel new."}
+  ],
+  "related": ["learning-homework", "rewards"]
+}

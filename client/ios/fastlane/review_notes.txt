@@ -25,6 +25,6 @@ COMMUNITY (이야기 tab in the guardian bottom bar)
 Guardians share finished routines and import others'. Guardian-only content, never shown on the user screen. The first post or comment requires agreeing to the Community rules. Report: ⋯ > Report (신고하기). Block: ⋯ > Hide this guardian's posts (이 보호자 글 숨기기), restorable under My info > Hidden guardians. Our team reviews reports and removes rule-breaking content. Names are replaced with 이룸이 before posting.
 
 LINKS
-Privacy policy: https://twin-fang.github.io/elum/privacy.html
-Support: https://twin-fang.github.io/elum/
+Privacy policy: https://elum.suhsaechan.kr/privacy.html
+Support: https://elum.suhsaechan.kr/
 Contact: chan4760@gmail.com (same-day response)

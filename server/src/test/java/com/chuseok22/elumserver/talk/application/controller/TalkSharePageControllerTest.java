@@ -140,7 +140,7 @@ class TalkSharePageControllerTest {
       .andExpect(status().isNotFound())
       .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
-    assertThat(html).contains("E-TALK-SHARE-GONE").contains("twin-fang.github.io/elum/assets/og.png")
+    assertThat(html).contains("E-TALK-SHARE-GONE").contains("elum.suhsaechan.kr/assets/og.png")
       .doesNotContain("elum://talk").doesNotContain("<body data-auto-open");
   }
 
@@ -151,7 +151,7 @@ class TalkSharePageControllerTest {
 
     mockMvc.perform(get("/s/" + POST_ID + "/thumbnail"))
       .andExpect(status().isFound())
-      .andExpect(header().string(HttpHeaders.LOCATION, "https://twin-fang.github.io/elum/assets/og.png"));
+      .andExpect(header().string(HttpHeaders.LOCATION, "https://elum.suhsaechan.kr/assets/og.png"));
   }
 
   @Test
