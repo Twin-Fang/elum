@@ -68,6 +68,11 @@ GUIDE_IMAGES = {
 # ABA 원리 4가지 그림 (첫 화면 ABA 칸 · 안내 글 소제목 옆. 문구 순서와 같은 순서)
 ABA_PRINCIPLE_IMAGES = ['aba_steps.webp', 'aba_show.webp', 'aba_help.webp', 'aba_reward.webp']
 
+def to_og_image_path(language_code: str) -> str:
+    """언어 > 공유 썸네일 주소 (한국어 og.png, 그 외 og_<언어>.png · 원본 og/og.html)"""
+    return 'assets/og.png' if language_code == 'ko' else f'assets/og_{language_code}.png'
+
+
 # 첫 화면 기기 틀 속 앱 화면 (쓰는 순서 3칸과 같은 순서). 원본: docs/store/promo/screens/<언어>/<이름>.png
 APP_SCREEN_NAMES = ['input', 'card_review', 'child_card']
 # 앱 화면 캡처가 있는 언어 · 없는 언어는 영어 화면

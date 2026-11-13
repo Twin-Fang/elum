@@ -26,18 +26,19 @@
   },
   "download": {
     "title": "Empieza hoy con tarjetas de acción",
-    "sub": "Empieza gratis. Tu hijo o hija solo ve las tarjetas después de que tú las revises.",
+    "sub": "Empieza gratis. Elumi solo ve las tarjetas después de que tú las revises.",
     "bar": "Descargar ELUM"
   },
   "home": {
     "title": "ELUM | Horario visual con tarjetas de acción",
-    "description": "Convierte la rutina del día en tarjetas de acción con imágenes y voz. Un horario visual pensado para niños con TDAH o autismo y para sus cuidadores.",
+    "description": "Convierte la rutina del día en tarjetas de acción con imágenes y voz. Un horario visual pensado para personas con TDAH o autismo y para sus cuidadores.",
     "hero": {
       "tag": "Tarjetas de acción · Horario visual",
       "titleHtml": "La rutina del día en<br/><em>tarjetas de acción</em>, una a una",
       "lede": "Escribe algo como \"lavarse la cara y vestirse por la mañana\" y lo dividimos en pasos fáciles de seguir, cada uno en una tarjeta.",
       "hint": "Empieza gratis · iPhone · iPad · Android",
-      "phoneLabel": "Pantallas de la app ELUM: escribir, revisar y seguir paso a paso"
+      "phoneLabel": "Pantallas de la app ELUM: escribir, revisar y seguir paso a paso",
+      "praise": "¡Muy bien!"
     },
     "steps": {
       "tag": "Cómo funciona",
@@ -55,7 +56,7 @@
       "items": [
         {"title": "Imágenes con emojis", "body": "Muestran los objetos con emojis simpáticos"},
         {"title": "Pictogramas", "body": "Muestran la acción con dibujos de líneas"},
-        {"title": "Imágenes de dibujos animados", "body": "Un niño dibujado muestra cómo se hace", "badge": "PRO"},
+        {"title": "Imágenes de dibujos animados", "body": "Un personaje dibujado muestra cómo se hace", "badge": "PRO"},
         {"title": "Imágenes realistas", "body": "Muestran los objetos como son en la realidad", "badge": "PRO"}
       ]
     },
@@ -90,12 +91,12 @@
     "faq": {
       "title": "Preguntas frecuentes",
       "items": [
-        {"q": "¿Qué es ELUM?", "a": "Es una app de horario visual que muestra la rutina del día en tarjetas de acción (tarjetas con imágenes en orden). Tú escribes la situación, la app la divide en pasos fáciles de seguir y tu hijo o hija los hace uno a uno, mirando la imagen y escuchando la voz."},
+        {"q": "¿Qué es ELUM?", "a": "Es una app de horario visual que muestra la rutina del día en tarjetas de acción (tarjetas con imágenes en orden). Tú escribes la situación, la app la divide en pasos fáciles de seguir y Elumi los hace uno a uno, mirando la imagen y escuchando la voz."},
         {"q": "¿Es gratis?", "a": "Sí, puedes empezar gratis. Las tarjetas con emojis y con pictogramas se crean sin coste. Las imágenes de dibujos animados y las imágenes realistas que la IA dibuja para cada tarjeta, y algunas funciones más, forman parte de la suscripción Pro."},
         {"q": "¿Para quién está pensada?", "a": "La creamos pensando en personas con discapacidades del desarrollo o en el espectro autista, a quienes las imágenes y el orden les resultan más claros que el texto; en personas con TDAH o dificultades de aprendizaje que quieren ver de un vistazo el orden de lo que tienen que hacer; y en madres, padres, cuidadores y docentes que quieren acompañar la rutina del día paso a paso."},
-        {"q": "¿Las tarjetas que crea la IA se muestran directamente?", "a": "No. Las tarjetas que crea la IA solo aparecen en la pantalla del niño o la niña después de que tú las revises y guardes. Puedes cambiar las frases, las imágenes y el orden."},
+        {"q": "¿Las tarjetas que crea la IA se muestran directamente?", "a": "No. Las tarjetas que crea la IA solo aparecen en la pantalla de Elumi después de que tú las revises y guardes. Puedes cambiar las frases, las imágenes y el orden."},
         {"q": "¿Tengo que indicar un diagnóstico o un tipo de discapacidad?", "a": "No. ELUM no pide diagnósticos ni tipos de discapacidad. Lo que escribes para crear las tarjetas se envía a la IA, así que no incluyas datos personales como nombres o teléfonos. Tienes más información en la <a href=\"/privacy.html\">Política de privacidad</a>."},
-        {"q": "¿Necesito dos dispositivos?", "a": "No. En un solo dispositivo puedes alternar entre la pantalla del cuidador y la del niño o la niña. Si tiene su propio dispositivo, también puedes conectarlos."},
+        {"q": "¿Necesito dos dispositivos?", "a": "No. En un solo dispositivo puedes alternar entre la pantalla del cuidador y la de Elumi. Si tiene su propio dispositivo, también puedes conectarlos."},
         {"q": "¿Cómo elimino mi cuenta y mis datos?", "a": "Date de baja desde los ajustes de la app. Explicamos cómo en la página <a href=\"/delete.html\">Eliminar cuenta y datos</a>."}
       ]
     },

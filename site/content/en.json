@@ -26,7 +26,7 @@
   },
   "download": {
     "title": "Turn today's routine into action cards",
-    "sub": "It's free to start. Your child sees cards only after a caregiver has checked them.",
+    "sub": "It's free to start. Elumi sees cards only after a caregiver has checked them.",
     "bar": "Get the ELUM app"
   },
   "home": {
@@ -34,10 +34,11 @@
     "description": "A visual schedule app that turns routines into step-by-step action cards with pictures and voice. Made with developmental disabilities and ADHD in mind.",
     "hero": {
       "tag": "Action cards · Visual schedule",
-      "titleHtml": "Your child's day,<br/>one <em>action card</em> at a time",
+      "titleHtml": "The whole day,<br/>one <em>action card</em> at a time",
       "lede": "Write something like \"wash face and get dressed in the morning,\" and ELUM breaks it into easy steps on cards.",
       "hint": "Free to start · iPhone · iPad · Android",
-      "phoneLabel": "ELUM app screens: write, check, then follow along"
+      "phoneLabel": "ELUM app screens: write, check, then follow along",
+      "praise": "Well done!"
     },
     "steps": {
       "tag": "How it works",
@@ -45,17 +46,17 @@
       "items": [
         {"title": "Describe the situation", "body": "One line is enough, the way you'd normally say it. You can also pick an example routine."},
         {"title": "Check the cards", "body": "You edit and save the steps AI suggests. Only cards you've checked are shown."},
-        {"title": "Follow along, one by one", "body": "Your child looks at the picture, listens to the voice and checks it off. At the end comes the reward you chose."}
+        {"title": "Follow along, one by one", "body": "Elumi looks at the picture, listens to the voice and checks it off. At the end comes the reward you chose."}
       ]
     },
     "styles": {
       "tag": "Card pictures",
-      "title": "Pictures that suit your child",
+      "title": "Pictures that suit Elumi",
       "sub": "Choose from four picture styles. You can switch anytime.",
       "items": [
         {"title": "Emoji pictures", "body": "Shows objects with friendly emoji"},
         {"title": "Picture symbols", "body": "Shows the action as a line drawing"},
-        {"title": "Cartoon pictures", "body": "A cartoon child shows how it's done", "badge": "PRO"},
+        {"title": "Cartoon pictures", "body": "A cartoon character shows how it's done", "badge": "PRO"},
         {"title": "Photo-like pictures", "body": "Looks like the real thing", "badge": "PRO"}
       ]
     },
@@ -66,7 +67,7 @@
       "items": [
         {"title": "Break it down", "body": "Split a big task into small actions you can see.", "app": "Your routine becomes step-by-step cards"},
         {"title": "Show it first", "body": "Show what to do with a picture before it starts.", "app": "One card at a time, with picture and voice"},
-        {"title": "Help, then step back", "body": "Together at first, then a little less help as it gets familiar.", "app": "Your child follows the cards and keeps going"},
+        {"title": "Help, then step back", "body": "Together at first, then a little less help as it gets familiar.", "app": "Elumi follows the cards and keeps going"},
         {"title": "Praise right away", "body": "Praise and a reward follow the moment it's done.", "app": "A star for each check, then the reward you set"}
       ],
       "link": "ABA principles made simple →"
@@ -90,12 +91,12 @@
     "faq": {
       "title": "Frequently asked questions",
       "items": [
-        {"q": "What is ELUM?", "a": "ELUM is a visual schedule app that shows daily routines as action cards (picture sequence cards). A caregiver describes the situation, and ELUM breaks it into easy steps on cards. Your child then follows along one card at a time, looking at the pictures and listening to the voice."},
+        {"q": "What is ELUM?", "a": "ELUM is a visual schedule app that shows daily routines as action cards (picture sequence cards). A caregiver describes the situation, and ELUM breaks it into easy steps on cards. Elumi then follows along one card at a time, looking at the pictures and listening to the voice."},
         {"q": "Is it free?", "a": "Yes, it's free to start. You can make cards with Emoji pictures and Picture symbols for free. Cartoon pictures and Photo-like pictures, which AI draws for each card, and a few other features come with the Pro subscription."},
         {"q": "Who is it for?", "a": "We had in mind people with developmental disabilities or on the autism spectrum who find pictures and sequences easier than words, people with ADHD or learning disabilities who want to see the order of tasks at a glance, and the parents, caregivers and teachers who help them through the day step by step."},
-        {"q": "Are AI-made cards shown right away?", "a": "No. Cards made by AI appear on your child's screen only after a caregiver checks and saves them. You can edit the sentences, pictures and order."},
+        {"q": "Are AI-made cards shown right away?", "a": "No. Cards made by AI appear on the Elumi screen only after a caregiver checks and saves them. You can edit the sentences, pictures and order."},
         {"q": "Do I need to enter a diagnosis or type of disability?", "a": "No. ELUM does not ask for a diagnosis or type of disability. What you write when making cards is sent to AI, so please don't include personal details like names or phone numbers. Learn more in our <a href=\"/privacy.html\">Privacy Policy</a>."},
-        {"q": "Do I need two devices?", "a": "No. You can switch between the caregiver screen and your child's screen on one device. If your child has their own device, you can also connect it."},
+        {"q": "Do I need two devices?", "a": "No. You can switch between the caregiver screen and the Elumi screen on one device. If Elumi has their own device, you can also connect it."},
         {"q": "How do I delete my account and data?", "a": "Delete your account in the app's settings. The steps are in our <a href=\"/delete.html\">account and data deletion guide</a>."}
       ]
     },
@@ -111,7 +112,7 @@
       "items": [
         {"title": "You decide", "body": "You know best what is easy and what is hard. Edit the cards and the reward."},
         {"title": "Same place, every day", "body": "A day or two is not enough to get used to it. Keep the same time and the same order."},
-        {"title": "Point to the card instead of talking", "body": "When your child stops, don't rush them. Look at the current card together. Praise right away when it's done."}
+        {"title": "Point to the card instead of talking", "body": "When Elumi stops, don't rush them. Look at the current card together. Praise right away when it's done."}
       ],
       "link": "See what caregivers do →"
     }

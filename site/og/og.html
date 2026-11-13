@@ -1,0 +1,65 @@
+<!doctype html>
+<!-- 공유 썸네일 원본 (1200x630): 첫 화면과 같은 구성
+     /og/og.html?lang=ko|en|ja|zh|es 를 캡처 > static/assets/og.png(한국어) · og_<언어>.png (site/README.md)
+     문구는 content/<언어>.json 의 hero 를 그대로 읽음 (단일 원본) -->
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<style>
+  :root{--ink:#242634;--muted:#6B6F80;--cream:#F7F2EF;--yellow:#FFD629;--mint-soft:#B5EAEC}
+  *{box-sizing:border-box;margin:0}
+  body{width:1200px;height:630px;overflow:hidden;background:var(--cream);font-family:"Pretendard Variable",Pretendard,sans-serif;color:var(--ink)}
+  .stage{display:grid;grid-template-columns:1fr 520px;align-items:center;height:100%;padding:0 0 0 72px}
+  .logo{display:block;width:150px;height:150px;border-radius:34px;margin-bottom:26px;box-shadow:0 14px 30px -10px rgba(36,38,52,.3)}
+  .tag{display:inline-block;padding:8px 16px;border-radius:100px;background:var(--mint-soft);color:#1E6F63;font-size:20px;font-weight:700;margin-bottom:18px}
+  h1{font-size:58px;line-height:1.18;letter-spacing:-.035em;font-weight:800;word-break:keep-all}
+  h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--yellow) 62%)}
+  .lede{margin-top:20px;max-width:560px;font-size:22px;color:var(--muted);line-height:1.5;word-break:keep-all}
+  .visual{position:relative;height:100%}
+  /* 뒤 빛 (첫 화면 회전 빛과 같은 색) */
+  .glow{position:absolute;left:40px;top:40px;width:520px;height:520px;border-radius:50%;filter:blur(50px);opacity:.8;
+    background:conic-gradient(from 30deg,rgba(255,214,41,.6),rgba(85,207,186,.5),rgba(156,173,241,.5),rgba(255,201,187,.55),rgba(255,214,41,.6))}
+  /* 기기 3대: 앞 1대 크게(확인), 뒤 2대 겹쳐(적기 · 따라 하기) */
+  .phone{position:absolute;aspect-ratio:1320/2868;padding:9px;border-radius:44px;background:linear-gradient(145deg,#2B2E3B,#15161D);
+    box-shadow:0 40px 70px -20px rgba(36,38,52,.45)}
+  .phone img{width:100%;height:100%;object-fit:cover;border-radius:36px;display:block}
+  .phone.back-left{width:230px;left:30px;top:150px;transform:rotate(-9deg);opacity:.92}
+  .phone.back-right{width:230px;left:330px;top:120px;transform:rotate(9deg);opacity:.92}
+  .phone.front{width:300px;left:140px;top:60px;z-index:2}
+  .praise{position:absolute;z-index:3;left:40px;top:300px;display:flex;align-items:center;gap:10px;padding:14px 22px;border-radius:100px;background:#fff;
+    box-shadow:0 18px 40px -10px rgba(36,38,52,.35);font-size:26px;font-weight:800;white-space:nowrap}
+  .praise img{width:34px;height:34px}
+</style></head>
+<body><div class="stage">
+  <div>
+    <img class="logo" src="../assets/img/app_icon.webp" alt=""/>
+    <p class="tag" id="tag"></p>
+    <h1 id="title"></h1>
+    <p class="lede" id="lede"></p>
+  </div>
+  <div class="visual">
+    <div class="glow"></div>
+    <div class="phone back-left"><img id="screen-input" alt=""/></div>
+    <div class="phone back-right"><img id="screen-child" alt=""/></div>
+    <div class="phone front"><img id="screen-review" alt=""/></div>
+    <p class="praise"><img src="../assets/img/pop_star.webp" alt=""/><span id="praise"></span></p>
+  </div>
+</div>
+<script>
+  // 언어 > 문구(content/<언어>.json) · 앱 화면(캡처 있는 언어: ko, en, 나머지는 영어)
+  var language = new URLSearchParams(location.search).get('lang') || 'ko';
+  var screenLanguage = ['ko', 'en'].indexOf(language) >= 0 ? language : 'en';
+  document.documentElement.lang = language;
+  ['input', 'review', 'child'].forEach(function (key) {
+    var name = {input: 'input', review: 'card_review', child: 'child_card'}[key];
+    document.getElementById('screen-' + key).src = '../assets/img/screen_' + screenLanguage + '_' + name + '.webp';
+  });
+  fetch('../content/' + language + '.json').then(function (response) { return response.json(); }).then(function (content) {
+    var hero = content.home.hero;
+    document.getElementById('tag').textContent = hero.tag;
+    document.getElementById('title').innerHTML = hero.titleHtml;
+    document.getElementById('lede').textContent = hero.lede;
+    document.getElementById('praise').textContent = hero.praise;
+    document.body.setAttribute('data-ready', '1');
+  });
+</script>
+</body></html>
