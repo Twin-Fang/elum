@@ -92,6 +92,8 @@ cd /volume1/projects/elum/site && sudo /usr/local/bin/docker compose -p elum-sit
 
 ## 확인
 
+> 서버가 `/assets/` 를 7일 캐시한다. 생성기가 페이지 속 자산 주소마다 `?v=<내용 해시>` 를 붙이므로 파일 이름을 바꾸지 않아도 새 파일이 바로 보인다.
+
 ```bash
 curl -sI https://elum.suhsaechan.kr/                 # 200
 curl -sI https://elum.suhsaechan.kr/privacy.html     # 200 (스토어 등록 주소)
