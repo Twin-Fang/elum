@@ -49,8 +49,8 @@ project_paths:                # 타입별 프로젝트 폴더 (레포 루트 기
 metadata:
   last_updated: "2026-11-12 13:11:44"
   last_updated_by: "Cassiiopeia"
-  default_branch: "main"
-  deploy_branch: "develop"
+  default_branch: "deploy"   # 릴리스 PR base: push 되면 스토어 제출·서버 배포 (#1330)
+  development_branch: "main"   # 릴리스 PR head: develop 을 모으는 곳, 병합만으로는 배포 안 됨 (#1330)
   integrated_from: "projectops"
   integration_date: "2026-09-16"
   template:
