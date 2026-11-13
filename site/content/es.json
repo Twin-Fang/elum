@@ -38,7 +38,8 @@
       "lede": "Escribe algo como \"lavarse la cara y vestirse por la mañana\" y lo dividimos en pasos fáciles de seguir, cada uno en una tarjeta.",
       "hint": "Empieza gratis · iPhone · iPad · Android",
       "phoneLabel": "Pantallas de la app ELUM: escribir, revisar y seguir paso a paso",
-      "praise": "¡Muy bien!"
+      "praise": "¡Muy bien!",
+      "rewardStep": "Al final, la recompensa"
     },
     "steps": {
       "tag": "Cómo funciona",
@@ -105,6 +106,27 @@
       "sub": "Cuéntanos dónde te atascas o qué te gustaría encontrar."
     },
     "keywords": "horario visual, agenda visual, pictogramas, rutinas con pictogramas, tarjetas de acción, app de horario visual, ABA en casa, análisis conductual aplicado, autismo rutinas, TDAH rutinas, discapacidad del desarrollo, análisis de tareas, tabla de recompensas, rutina de la mañana",
+    "rewards": {
+      "tag": "Elogio y recompensa",
+      "title": "El momento del logro no se pierde",
+      "items": [
+        {
+          "title": "Marca una tarjeta y el elogio llega al instante",
+          "body": "Al terminar de cepillarse y marcar la tarjeta aparece una gran estrella y una voz dice \"¡Muy bien!\". El elogio llega justo cuando se gana."
+        },
+        {
+          "title": "Termina el día y llega la recompensa prometida",
+          "body": "Tras la última tarjeta aparece en pantalla la recompensa que fijaste. Basta con algo pequeño que puedas dar enseguida, como una gominola o diez minutos de juego."
+        },
+        {
+          "title": "Tú decides cuál es",
+          "body": "Las estrellas de la app son una celebración. La recompensa real la eliges y la das tú, que conoces mejor a Elumi."
+        }
+      ],
+      "ctaTitle": "Convierte la rutina de esta noche en tarjetas",
+      "ctaHint": "Empieza gratis. Escribe una línea y las tarjetas se crean.",
+      "link": "Cómo elegir recompensas →"
+    },
     "together": {
       "tag": "Contigo al lado",
       "title": "La app no lo hace por ti",

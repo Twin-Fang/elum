@@ -118,7 +118,7 @@ abstract final class AppConfig {
   /// 두 곳에 다른 주소를 두면 사용자가 어디로 보내야 하는지 헷갈리고,
   /// 한쪽만 고쳤을 때 조용히 어긋난다.
   static String get supportEmail =>
-      _string('ELUM_SUPPORT_EMAIL', 'chan4760@gmail.com');
+      _string('ELUM_SUPPORT_EMAIL', 'chan4760@naver.com');
 
   // --- 스토어 (강제 업데이트 화면이 보낸다) ---
   // `.env` 에 두지 않는다. 환경마다 달라지는 값이 아니라 앱 자체의 식별자라서,

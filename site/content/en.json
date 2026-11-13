@@ -38,7 +38,8 @@
       "lede": "Write something like \"wash face and get dressed in the morning,\" and ELUM breaks it into easy steps on cards.",
       "hint": "Free to start · iPhone · iPad · Android",
       "phoneLabel": "ELUM app screens: write, check, then follow along",
-      "praise": "Well done!"
+      "praise": "Well done!",
+      "rewardStep": "Then the reward"
     },
     "steps": {
       "tag": "How it works",
@@ -105,6 +106,27 @@
       "sub": "Tell us where you got stuck or what you'd like to see."
     },
     "keywords": "visual schedule, picture schedule, action cards, visual schedule app, ABA at home, applied behavior analysis, autism visual schedule, ADHD routine, developmental disabilities, learning disabilities, task analysis, reward chart, morning routine chart",
+    "rewards": {
+      "tag": "Praise and rewards",
+      "title": "The moment it is done, it gets noticed",
+      "items": [
+        {
+          "title": "Check a card, and praise comes right away",
+          "body": "Finish brushing, check the card, and a big star appears while a voice says \"Well done!\" The praise lands right when it is earned."
+        },
+        {
+          "title": "Finish the day, get the promised reward",
+          "body": "After the last card, the reward the caregiver set shows on screen. Something small you can give right away, like one jelly or ten minutes of play, is enough."
+        },
+        {
+          "title": "The caregiver decides what it is",
+          "body": "Stars in the app are a celebration. The real reward is chosen and handed over by the caregiver who knows Elumi best."
+        }
+      ],
+      "ctaTitle": "Turn tonight's routine into cards",
+      "ctaHint": "Free to start. Write one line and the cards are made.",
+      "link": "How to choose rewards →"
+    },
     "together": {
       "tag": "With the caregiver",
       "title": "The app doesn't do it for you",
