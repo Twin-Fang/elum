@@ -548,6 +548,7 @@
   "routineDoneTitle": "Routine done!",
   "routineDoneMessage": "Made for {name},\nwho finished everything",
   "routineDoneButton": "I did it!",
+  "routineDoneRewardCaption": "Today's reward",
   "modeSwitchToChild": "Enter the passcode to switch to Elumi mode",
   "modeSwitchToGuardian": "Enter the passcode to switch to Guardian mode",
   "modeSwitchTitle": "Enter your passcode",

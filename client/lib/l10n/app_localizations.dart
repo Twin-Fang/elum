@@ -3629,6 +3629,12 @@ abstract class AppLocalizations {
   /// **'해냈어요!'**
   String get routineDoneButton;
 
+  /// 일과 완료 화면 보상 위 작은 제목 (#1359)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘의 보상'**
+  String get routineDoneRewardCaption;
+
   /// 보호자 → 이룸이 화면 전환의 암호 안내
   ///
   /// In ko, this message translates to:

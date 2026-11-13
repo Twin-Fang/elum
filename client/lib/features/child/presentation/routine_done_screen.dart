@@ -13,14 +13,15 @@ import '../../../core/router/routes.dart';
 import '../../member/application/member_providers.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import 'widgets/routine_done_lumi_motion.dart';
+import 'widgets/routine_done_reward_reveal.dart';
 
 /// 이룸이가 일과를 **다 끝냈을 때** 한 번 뜨는 화면 (Figma `일과완료` 1274:9831).
 ///
 /// 카드 하나를 끝낼 때마다 뜨는 별 화면([RewardScreen])과 다르다. 마지막 카드의 별
 /// 화면을 닫으면 이어서 이 화면이 뜨고, 닫으면 이룸이 홈으로 돌아간다.
 ///
-/// 보호자가 정한 보상은 여기서 칩으로 보여 준다. **보상이 없으면 칩을 그리지 않는다** —
-/// 제목과 버튼 자리는 시안 좌표에 고정이라 칩이 빠져도 나머지는 움직이지 않는다.
+/// 보호자가 정한 보상은 여기서 선물 상자 칸([RoutineDoneRewardReveal])으로 보여 준다. **보상이 없으면 칸을 그리지 않는다** —
+/// 제목과 버튼 자리는 시안 좌표에 고정이라 칸이 빠져도 나머지는 움직이지 않는다.
 class RoutineDoneScreen extends ConsumerWidget {
   const RoutineDoneScreen({
     super.key,
@@ -28,7 +29,7 @@ class RoutineDoneScreen extends ConsumerWidget {
     this.isMotionEnabled = true,
   });
 
-  /// 보호자가 정한 보상. 비면 칩을 그리지 않는다.
+  /// 보호자가 정한 보상. 비면 보상 칸을 그리지 않는다.
   final ({String emoji, String text})? reward;
 
   /// false 면 등장·대기 움직임을 모두 끄고 정지 모양만 그린다 (시험용. 시스템 동작 줄이기도 같게 처리).
@@ -110,10 +111,15 @@ class RoutineDoneScreen extends ConsumerWidget {
                     _FadeIn(
                       isMotionOn: isMotionOn,
                       delay: AppMotion.emphasis + AppMotion.sceneStagger * 2,
-                      child: _RewardChip(
-                        text: reward.emoji.isEmpty
+                      child: RoutineDoneRewardReveal(
+                        rewardText: reward.emoji.isEmpty
                             ? reward.text
                             : '${reward.emoji} ${reward.text}',
+                        isMotionOn: isMotionOn,
+                        // 칸이 다 나타난 뒤 선물 상자가 튀어 오름
+                        delay: AppMotion.emphasis +
+                            AppMotion.sceneStagger * 2 +
+                            AppMotion.slow,
                       ),
                     ),
                   ],
@@ -146,39 +152,6 @@ class RoutineDoneScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// 보상 칩 (시안 `1291:10874` — 333×72, 모서리 8, `#EEE9E6` 30%, 글자 20/800 흰색).
-///
-/// 카드별 별 화면의 [RewardBanner]와 모양이 다르다(높이 48·`다하면` 문구).
-/// 이 화면의 칩은 이미 다 했으니 **보상 문구만** 보여 준다.
-class _RewardChip extends StatelessWidget {
-  const _RewardChip({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: 333.w,
-      height: 72.h,
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colors.routineTileBg.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Text(
-        text,
-        // 긴 보상은 두 줄까지 보이고 그 이상은 자른다 (명세 9-4).
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: context.typo.subtitle.copyWith(color: colors.surface),
       ),
     );
   }

@@ -193,6 +193,9 @@ abstract final class AppAssets {
   /// 광고 보상 받은 순간 큰 그림: 민트 표 + 반짝임 (투명 PNG 512, 튀어 오르고 둥실)
   static const creditRewardBurst = '$_images/credit_reward_burst.png';
 
+  /// 일과 완료 화면 보상 선물 상자 (이미지 하네스 3D, 소개 사이트 보상 칸과 같은 그림)
+  static const rewardGift = '$_images/reward_gift.png';
+
   /// 홈 크레딧 부족 안내 카드 타일: 표 한 장을 든 루미 (투명 PNG 384)
   static const creditLowLumi = '$_images/credit_low_lumi.png';
 

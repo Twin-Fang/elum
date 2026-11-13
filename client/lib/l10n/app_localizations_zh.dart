@@ -1977,6 +1977,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineDoneButton => '做到了!';
 
   @override
+  String get routineDoneRewardCaption => '今天的奖励';
+
+  @override
   String get modeSwitchToChild => '输入密码就会切换到Elumi模式';
 
   @override

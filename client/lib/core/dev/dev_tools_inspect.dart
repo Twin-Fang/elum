@@ -196,6 +196,7 @@ class _NavigateView extends StatelessWidget {
     ('이룸이 홈 · 일과 목록', Routes.child),
     ('이룸이 · 별 모으기', Routes.childStars),
     ('이룸이 · 보상', Routes.childReward),
+    ('이룸이 · 일과 완료', Routes.childRoutineDone),
   ];
 
   @override

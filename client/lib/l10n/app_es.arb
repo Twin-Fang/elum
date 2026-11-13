@@ -586,6 +586,7 @@
   "routineDoneTitle": "¡Rutina terminada!",
   "routineDoneMessage": "Preparado para {name},\nque lo terminó todo",
   "routineDoneButton": "¡Lo logré!",
+  "routineDoneRewardCaption": "Recompensa de hoy",
   "modeSwitchToChild": "Escribe la contraseña para cambiar al modo Elumi",
   "modeSwitchToGuardian": "Escribe la contraseña para cambiar al modo tutor",
   "modeSwitchTitle": "Escribe tu contraseña",
