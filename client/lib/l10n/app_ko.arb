@@ -1821,6 +1821,8 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "routineDoneButton": "해냈어요!",
+  "routineDoneRewardCaption": "오늘의 보상",
+  "@routineDoneRewardCaption": { "description": "일과 완료 화면 보상 위 작은 제목 (#1359)" },
   "@routineDoneButton": { "description": "일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)" },
 
   "modeSwitchToChild": "암호를 입력하면 이룸이 화면으로 바뀌어요",

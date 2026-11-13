@@ -2000,6 +2000,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineDoneButton => '해냈어요!';
 
   @override
+  String get routineDoneRewardCaption => '오늘의 보상';
+
+  @override
   String get modeSwitchToChild => '암호를 입력하면 이룸이 화면으로 바뀌어요';
 
   @override

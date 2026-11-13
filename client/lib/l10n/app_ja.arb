@@ -586,6 +586,7 @@
   "routineDoneTitle": "日課が終わりました！",
   "routineDoneMessage": "やることをすべてやりとげた\n{name}のために用意しました",
   "routineDoneButton": "できました！",
+  "routineDoneRewardCaption": "今日のごほうび",
   "modeSwitchToChild": "パスコードを入力するとElumiモードに切り替わります",
   "modeSwitchToGuardian": "パスコードを入力すると保護者モードに切り替わります",
   "modeSwitchTitle": "パスコードを入力してください",

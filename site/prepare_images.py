@@ -41,7 +41,7 @@ RASTER_IMAGES = [
     (SITE_ART / 'aba_steps.png', 'aba_steps.webp', 256, True),
     (SITE_ART / 'aba_show.png', 'aba_show.webp', 256, True),
     (SITE_ART / 'aba_help.png', 'aba_help.webp', 256, True),
-    (SITE_ART / 'aba_reward.png', 'aba_reward.webp', 256, True),
+    (APP_IMAGES / 'reward_gift.png', 'aba_reward.webp', 256, True),  # 앱 일과 완료 보상 그림과 같은 원본
     (SITE_ART / 'together.png', 'together.webp', 720, True),
     (APP_IMAGES / 'reward_star_green.png', 'pop_star.webp', 144, True),
     # 보호자 칸 제목 아이콘 (이미지 하네스 3D 아이콘: 연필, 달력, 카드 가리키기)

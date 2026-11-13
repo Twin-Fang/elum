@@ -2162,6 +2162,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineDoneButton => '¡Lo logré!';
 
   @override
+  String get routineDoneRewardCaption => 'Recompensa de hoy';
+
+  @override
   String get modeSwitchToChild =>
       'Escribe la contraseña para cambiar al modo Elumi';
 

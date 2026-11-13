@@ -1989,6 +1989,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineDoneButton => 'できました！';
 
   @override
+  String get routineDoneRewardCaption => '今日のごほうび';
+
+  @override
   String get modeSwitchToChild => 'パスコードを入力するとElumiモードに切り替わります';
 
   @override
