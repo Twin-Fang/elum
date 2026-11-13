@@ -493,12 +493,10 @@ abstract final class AppAssets {
   ///
   /// 캐릭터와 별은 후광·그라디언트가 구워진 PNG다 — SVG 필터는 렌더러가 버린다.
   /// 별의 투명도(초록 50%, 분홍 30%)도 그림에 구워져 있어 코드에서 또 주지 않는다.
-  /// 윙크 하는 눈(8×3 획)만 시안이 따로 그려 SVG 로 얹는다.
   static const routineDoneLumi = '$_images/routine_done_lumi.png';
 
   /// 행동카드를 든 루미 (512, 투명). ABA 소개 화면 그림 (#1277)
   static const abaIntroLumi = '$_images/aba_intro_lumi.png';
-  static const routineDoneWink = '$_images/routine_done_wink.svg';
   static const routineDoneStarGreen = '$_images/routine_done_star_green.png';
   static const routineDoneStarOrange = '$_images/routine_done_star_orange.png';
   static const routineDoneStarRed = '$_images/routine_done_star_red.png';
