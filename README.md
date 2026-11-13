@@ -90,7 +90,7 @@ The stars in the app are a way to celebrate progress. The real rewards, such as 
 
 ## Languages
 
-Korean is available today. English, Chinese, and Japanese are on the way.
+Korean, English, Japanese, Chinese, and Spanish.
 
 ## Help and policies
 
@@ -109,3 +109,5 @@ ELUM began at the 2026 hackathon 「장애 플러스 기술」 (Disability Plus 
 ## License
 
 © 2026 Team LUMLUM. All rights reserved. See [LICENSE](./LICENSE).
+
+This repository is public for viewing only, so we do not accept outside pull requests. Ideas and questions are welcome at chan4760@gmail.com.

@@ -1,13 +1,15 @@
 """이룸 소개 사이트 생성: 문구(content/*.json) + 틀 > 정적 사이트 폴더
 
 사용: python3 -I site/build_site.py --out <폴더> [--languages ko,en] [--date 2026-11-12]
-출력: 언어별 첫 화면 · 안내 글 목록 · 안내 글, sitemap.xml, robots.txt, assets/**, 손으로 관리하는 페이지(static/**)
+출력: 언어별 첫 화면 · 안내 글 목록 · 안내 글, sitemap.xml, robots.txt, assets/**, 손으로 관리하는 페이지(static/**). 자산 주소에 ?v=내용 해시
 필요: 파이썬 표준 라이브러리만 (그림은 prepare_images.py 가 미리 만들어 둔 assets/img 를 그대로 복사)
 """
 import argparse
 import datetime
+import hashlib
 import json
 import pathlib
+import re
 import shutil
 import sys
 
@@ -19,6 +21,10 @@ import site_config  # noqa: E402
 from site_frame import page_url  # noqa: E402
 from site_guides import build_guide_index, build_guide_page  # noqa: E402
 from site_home import build_home  # noqa: E402
+
+# 페이지 속 자산 주소 ("/assets/..." · '/assets/...') > 내용 해시를 붙여 캐시가 옛 파일을 주지 않게 함 (서버 캐시 7일)
+ASSET_REFERENCE_PATTERN = re.compile(r'(["\'])/assets/([^"\'?#\s]+)')
+ASSET_VERSION_LENGTH = 8
 
 # 사이트맵에 싣는 손으로 관리하는 페이지 (초대·연결 링크 페이지는 검색 제외라 싣지 않음)
 STATIC_SITEMAP_PATHS = ['privacy.html', 'delete.html']
@@ -43,6 +49,24 @@ def write_page(out_dir: pathlib.Path, language, path: str, page_html: str):
     target = out_dir / language.path_prefix / path / 'index.html'
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(page_html, encoding='utf-8')
+
+
+def add_asset_versions(out_dir: pathlib.Path):
+    """모든 HTML 의 /assets/<파일> 주소 > /assets/<파일>?v=<내용 해시 8자리> (없는 파일은 그대로)"""
+    version_by_path = {}
+
+    def to_versioned_reference(match: re.Match) -> str:
+        quote, relative_path = match.group(1), match.group(2)
+        if relative_path not in version_by_path:
+            asset_file = out_dir / 'assets' / relative_path
+            version_by_path[relative_path] = (hashlib.sha1(asset_file.read_bytes()).hexdigest()[:ASSET_VERSION_LENGTH]
+                                              if asset_file.is_file() else '')
+        version = version_by_path[relative_path]
+        return f'{quote}/assets/{relative_path}' + (f'?v={version}' if version else '')
+
+    for page_file in out_dir.rglob('*.html'):
+        page_html = page_file.read_text(encoding='utf-8')
+        page_file.write_text(ASSET_REFERENCE_PATTERN.sub(to_versioned_reference, page_html), encoding='utf-8')
 
 
 def build_sitemap(paths: list, modified_date: str) -> str:
@@ -93,6 +117,7 @@ def main():
         for slug in site_config.GUIDE_SLUGS:
             write_page(out_dir, language, f'guide/{slug}/', build_guide_page(language, ui, guides, slug, arguments.date))
 
+    add_asset_versions(out_dir)
     (out_dir / 'sitemap.xml').write_text(build_sitemap(translated_paths, arguments.date), encoding='utf-8')
     (out_dir / 'robots.txt').write_text(build_robots(), encoding='utf-8')
     page_count = len(translated_paths) * len(site_config.LANGUAGES)
