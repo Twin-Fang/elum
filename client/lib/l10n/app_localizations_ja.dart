@@ -18,43 +18,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationOffValue => 'オフ';
 
   @override
-  String get appTitle => '이룸';
+  String get appTitle => 'elum';
 
   @override
-  String get commonConfirm => '확인';
+  String get commonConfirm => 'OK';
 
   @override
-  String get commonCancel => '취소';
+  String get commonCancel => 'キャンセル';
 
   @override
-  String get commonClose => '닫기';
+  String get commonClose => '閉じる';
 
   @override
-  String get commonNext => '다음';
+  String get commonNext => '次へ';
 
   @override
-  String get commonRetry => '다시 시도';
+  String get commonRetry => 'もう一度試す';
 
   @override
   String dateYearMonthDay(int year, int month, int day) {
-    return '$year년 $month월 $day일';
+    return '$year年$month月$day日';
   }
 
   @override
   String dateMonthDaySince(int month, int day) {
-    return '$month월 $day일부터';
+    return '$month月$day日から';
   }
 
   @override
   String weekdayShort(String weekday) {
     String _temp0 = intl.Intl.selectLogic(weekday, {
-      'mon': '월',
-      'tue': '화',
-      'wed': '수',
-      'thu': '목',
-      'fri': '금',
-      'sat': '토',
-      'sun': '일',
+      'mon': '月',
+      'tue': '火',
+      'wed': '水',
+      'thu': '木',
+      'fri': '金',
+      'sat': '土',
+      'sun': '日',
       'other': '',
     });
     return '$_temp0';
@@ -62,7 +62,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String creditResetAt(int month, int day, String weekday, int hour) {
-    return '$month월 $day일($weekday) $hour시';
+    return '$month月$day日($weekday) $hour時';
   }
 
   @override
@@ -73,356 +73,355 @@ class AppLocalizationsJa extends AppLocalizations {
     int hour,
     int minute,
   ) {
-    return '$month월 $day일($weekday) $hour시 $minute분';
+    return '$month月$day日($weekday) $hour時$minute分';
   }
 
   @override
-  String get creditResetFallback => '다음 주 월요일 0시';
+  String get creditResetFallback => '来週月曜日の0時';
 
   @override
-  String get creditResetFallbackMonth => '다음 달 1일 0시';
+  String get creditResetFallbackMonth => '来月1日の0時';
 
   @override
-  String get creditBlockedBusy => '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요';
+  String get creditBlockedBusy => 'すでに日課を作っています。\n作り終わったら新しい日課を作れます';
 
   @override
   String creditReceivedTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧 $count개를 받았어요',
+      other: 'クレジットを$count個もらいました',
     );
     return '$_temp0';
   }
 
   @override
-  String get adRewardPreparing => '광고를 준비하고 있어요';
+  String get adRewardPreparing => '広告を準備しています';
 
   @override
-  String get adRewardConfirming => '크레딧을 확인하고 있어요';
+  String get adRewardConfirming => 'クレジットを確認しています';
 
   @override
-  String get adRewardLoadFailed => '지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요';
+  String get adRewardLoadFailed => '今は広告を読み込めません。\nしばらくしてからもう一度お試しください';
 
   @override
-  String get adRewardNotWatched => '광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요';
+  String get adRewardNotWatched => '広告を最後まで見るとクレジットをもらえます。\n最初からもう一度お試しください';
 
   @override
   String get adRewardSlow =>
-      '크레딧 확인이 늦어지고 있어요.\n광고는 다시 안 봐도 돼요. 내 정보 → 내 크레딧 보기에서 확인해 주세요';
+      'クレジットの確認に時間がかかっています。\n広告をもう一度見る必要はありません。マイ情報 → マイクレジットで確認してください';
 
   @override
-  String get adRewardDailyLimit => '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요';
+  String get adRewardDailyLimit => '今日、広告でもらえるクレジットはすべてもらいました。\n明日もう一度お試しください';
 
   @override
-  String get adRewardCheckAccount => '지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요';
+  String get adRewardCheckAccount => '今は広告でクレジットをもらえません。\nアカウントの状態を確認してください';
 
   @override
-  String get adRewardUnavailable => '지금은 광고로 크레딧을 받을 수 없어요.';
+  String get adRewardUnavailable => '今は広告でクレジットをもらえません。';
 
   @override
-  String get adRewardUnavailableRetry => '지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요';
+  String get adRewardUnavailableRetry =>
+      '今は広告でクレジットをもらえません。\nしばらくしてからもう一度お試しください';
 
   @override
-  String get adRewardFailed => '크레딧을 받지 못했어요.\n잠시 후 다시 해주세요';
+  String get adRewardFailed => 'クレジットをもらえませんでした。\nしばらくしてからもう一度お試しください';
 
   @override
-  String get commonPopupClose => '팝업 닫기';
+  String get commonPopupClose => 'ポップアップを閉じる';
 
   @override
-  String get commonBack => '뒤로 가기';
+  String get commonBack => '戻る';
 
   @override
-  String get commonScreenNotFound => '화면을 찾을 수 없어요';
+  String get commonScreenNotFound => '画面が見つかりません';
 
   @override
-  String get commonRetryLater => '잠시 후 다시 해주세요';
+  String get commonRetryLater => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get sentenceStop => '.';
+  String get sentenceStop => '。';
 
   @override
-  String get failureHintOffline => '인터넷 연결을 확인해주세요';
+  String get failureHintOffline => 'インターネット接続を確認してください';
 
   @override
-  String get failureHintTimeout => '연결이 느려요. 잠시 후 다시 해주세요';
+  String get failureHintTimeout => '接続が遅いです。しばらくしてからもう一度お試しください';
 
   @override
-  String get failureHintBadCertificate => '안전하지 않은 연결이에요. 다른 망에서 해주세요';
+  String get failureHintBadCertificate => '安全ではない接続です。別のネットワークでお試しください';
 
   @override
   String coachStepLabel(int index, int total, String message) {
-    return '안내 $index/$total. $message';
+    return 'ガイド $index/$total。$message';
   }
 
   @override
-  String get commonAd => '광고';
+  String get commonAd => '広告';
 
   @override
-  String get commonAppInfo => '앱 정보';
+  String get commonAppInfo => 'アプリ情報';
 
   @override
-  String get coachCloseHint => '안내 닫기';
+  String get coachCloseHint => 'ガイドを閉じる';
 
   @override
-  String get coachNextHint => '다음 안내';
+  String get coachNextHint => '次のガイド';
 
   @override
-  String get coachTapToClose => '화면을 누르면 닫혀요';
+  String get coachTapToClose => '画面をタップすると閉じます';
 
   @override
-  String get coachTapToNext => '화면을 누르면 다음으로 넘어가요';
+  String get coachTapToNext => '画面をタップすると次へ進みます';
 
   @override
-  String get loginSceneEyebrow => '오늘의 하루,';
+  String get loginSceneEyebrow => '今日の一日を、';
 
   @override
-  String get loginSceneTitle => '차근차근 함께해요';
+  String get loginSceneTitle => '一歩ずつ一緒に';
 
   @override
-  String get appStatusStoreOpenFailedTitle => '스토어를 열지 못했어요';
+  String get appStatusStoreOpenFailedTitle => 'ストアを開けませんでした';
 
   @override
-  String get appStatusStoreOpenFailedFallback => '스토어에서 이룸을 찾아 업데이트해주세요';
+  String get appStatusStoreOpenFailedFallback => 'ストアでelumを探してアップデートしてください';
 
   @override
-  String get appStatusMaintenanceTitle => '지금 점검 중이에요';
+  String get appStatusMaintenanceTitle => 'ただいまメンテナンス中です';
 
   @override
-  String get appStatusMaintenanceBody => '점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요';
+  String get appStatusMaintenanceBody => 'メンテナンスが終わるとまた使えます。\n少し後で確認してください';
 
   @override
-  String get appStatusRecheck => '다시 확인하기';
+  String get appStatusRecheck => 'もう一度確認する';
 
   @override
-  String get appStatusUpdateTitle => '지금 업데이트하고\n새로워진 이룸을 이용해보세요!';
+  String get appStatusUpdateTitle => '今すぐアップデートして\n新しくなったelumを使ってみましょう！';
 
   @override
-  String get appStatusUpdated => '업데이트했어요';
+  String get appStatusUpdated => 'アップデートしました';
 
   @override
-  String get appStatusGoUpdate => '업데이트하러 가기';
+  String get appStatusGoUpdate => 'アップデートする';
 
   @override
   String routineForeignCreator(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '$name$_temp0 만든 일과예요';
+    return '$nameさんが作った日課です';
   }
 
   @override
-  String get routineForeignCreatorUnknown => '다른 보호자가 만든 일과예요';
+  String get routineForeignCreatorUnknown => 'ほかの保護者が作った日課です';
 
   @override
-  String get routineDefaultTitle => '오늘의 일과';
+  String get routineDefaultTitle => '今日の日課';
 
   @override
-  String get rewardPresetSnack => '좋아하는 간식';
+  String get rewardPresetSnack => '好きなおやつ';
 
   @override
-  String get rewardPresetVideo => '유튜브 10분';
+  String get rewardPresetVideo => 'YouTube 10分';
 
   @override
-  String get rewardPresetPlay => '좋아하는 놀이';
+  String get rewardPresetPlay => '好きな遊び';
 
   @override
-  String get rewardPresetWalk => '산책';
+  String get rewardPresetWalk => '散歩';
 
   @override
-  String get rewardPresetCustom => '직접 입력';
+  String get rewardPresetCustom => '自分で入力';
 
   @override
-  String get roleGuardianWord => '보호자';
+  String get roleGuardianWord => '保護者';
 
   @override
-  String get roleElumiWord => '이룸이';
+  String get roleElumiWord => 'Elumi';
 
   @override
-  String get roleLabelSuffix => '가 사용해요';
+  String get roleLabelSuffix => 'が使います';
 
   @override
-  String get roleGuardianDescription => '일과를 만들고 관리해요';
+  String get roleGuardianDescription => '日課を作って管理します';
 
   @override
-  String get roleElumiDescription => '일과를 실천해요';
+  String get roleElumiDescription => '日課を実践します';
 
   @override
-  String get roleSelectTitle => '이 기기는 누가\n사용하나요?';
+  String get roleSelectTitle => 'この端末は誰が\n使いますか？';
 
   @override
-  String get roleSelectDescription => '보호자모드와 이룸이모드가 나눠져 있어요';
+  String get roleSelectDescription => '保護者モードとElumiモードに分かれています';
 
   @override
-  String get loginKakaoButton => '카카오로 로그인';
+  String get loginKakaoButton => 'Kakaoでログイン';
 
   @override
-  String get loginNaverButton => '네이버로 로그인';
+  String get loginNaverButton => 'NAVERでログイン';
 
   @override
-  String get loginAppleButton => 'Apple로 로그인';
+  String get loginAppleButton => 'Appleでログイン';
 
   @override
-  String get loginConnecting => '연결하고 있어요';
+  String get loginConnecting => '接続しています';
 
   @override
-  String get loginLastUsed => '최근 로그인';
+  String get loginLastUsed => '前回のログイン';
 
   @override
-  String get loginDuplicateTitle => '이미 가입된 계정이에요';
+  String get loginDuplicateTitle => 'すでに登録済みのアカウントです';
 
   @override
-  String get loginDuplicateFallback => '처음 쓰신 방법으로 로그인해주세요';
+  String get loginDuplicateFallback => '最初に使った方法でログインしてください';
 
   @override
-  String get loginOfflineTitle => '인터넷 연결을 확인해주세요';
+  String get loginOfflineTitle => 'インターネット接続を確認してください';
 
   @override
-  String get loginOfflineFallback => '연결한 뒤 다시 해주세요';
+  String get loginOfflineFallback => '接続してからもう一度お試しください';
 
   @override
-  String get loginFailedTitle => '로그인하지 못했어요';
+  String get loginFailedTitle => 'ログインできませんでした';
 
   @override
-  String get loginFailedFallback => '잠시 후 다시 시도해주세요';
+  String get loginFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get consentTitle => '약관에 동의해주세요';
+  String get consentTitle => '規約に同意してください';
 
   @override
-  String get consentLoading => '약관을 불러오고 있어요';
+  String get consentLoading => '規約を読み込んでいます';
 
   @override
-  String get consentSaving => '저장하고 있어요';
+  String get consentSaving => '保存しています';
 
   @override
-  String get consentSaveFailed => '동의를 저장하지 못했어요. 다시 해주세요';
+  String get consentSaveFailed => '同意を保存できませんでした。もう一度お試しください';
 
   @override
-  String get consentDescriptionReady => '항목을 눌러 상세 내용을 볼 수 있어요';
+  String get consentDescriptionReady => '項目をタップすると詳しい内容を見られます';
 
   @override
-  String get consentDescriptionNeeded => '서비스 사용을 위해 약관 동의가 필요해요';
+  String get consentDescriptionNeeded => 'サービスを使うには規約への同意が必要です';
 
   @override
-  String get consentAllAgree => '서비스 이용약관 전체 동의';
+  String get consentAllAgree => 'サービス利用規約にすべて同意';
 
   @override
-  String get consentRequiredTag => '필수';
+  String get consentRequiredTag => '必須';
 
   @override
-  String get consentOptionalTag => '선택';
+  String get consentOptionalTag => '任意';
 
   @override
   String consentDocumentMeta(String label, String version) {
-    return '$label · 버전 $version';
+    return '$label · バージョン $version';
   }
 
   @override
-  String get consentListTitle => '약관 및 개인정보처리방침';
+  String get consentListTitle => '利用規約とプライバシーポリシー';
 
   @override
-  String get consentGroupRequired => '필수항목';
+  String get consentGroupRequired => '必須項目';
 
   @override
-  String get consentGroupOptional => '선택항목';
+  String get consentGroupOptional => '任意項目';
 
   @override
-  String get commonElumiName => '이룸이';
+  String get commonElumiName => 'Elumi';
 
   @override
-  String get characterCatLabel => '고양이';
+  String get characterCatLabel => 'ネコ';
 
   @override
-  String get characterCatName => '루루';
+  String get characterCatName => 'ルル';
 
   @override
-  String get characterFoxLabel => '여우';
+  String get characterFoxLabel => 'キツネ';
 
   @override
-  String get characterFoxName => '포포';
+  String get characterFoxName => 'ポポ';
 
   @override
-  String get imageStyleEmojiLabel => '이모지 그림';
+  String get imageStyleEmojiLabel => '絵文字の絵';
 
   @override
-  String get imageStyleEmojiDescription => '귀여운 이모지로 물건을 보여줘요';
+  String get imageStyleEmojiDescription => 'かわいい絵文字で物を見せます';
 
   @override
-  String get imageStyleSymbolLabel => '그림 기호';
+  String get imageStyleSymbolLabel => '絵記号';
 
   @override
-  String get imageStyleSymbolDescription => '하는 동작을 선 그림으로 보여줘요';
+  String get imageStyleSymbolDescription => 'する動作を線画で見せます';
 
   @override
-  String get imageStyleCharacterLabel => '만화 그림';
+  String get imageStyleCharacterLabel => 'マンガの絵';
 
   @override
-  String get imageStyleCharacterDescription => '만화 속 아이가 직접 해 보여요';
+  String get imageStyleCharacterDescription => 'マンガの人物が実際にやって見せます';
 
   @override
-  String get imageStyleRealisticLabel => '사진 같은 그림';
+  String get imageStyleRealisticLabel => '写真のような絵';
 
   @override
-  String get imageStyleRealisticDescription => '실제 물건처럼 보여요';
+  String get imageStyleRealisticDescription => '本物の物のように見えます';
 
   @override
-  String get imageStyleCreditLabel => '크레딧';
+  String get imageStyleCreditLabel => 'クレジット';
 
   @override
   String imageStyleCreditRoutine(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '일과 하나에 $count개',
+      other: '日課1つにつき$count個',
     );
     return '$_temp0';
   }
 
   @override
-  String get imageStyleCreditRoutineFree => '일과 글은 크레딧 없이';
+  String get imageStyleCreditRoutineFree => '日課の文章はクレジットなしで作れます';
 
   @override
   String imageStyleCreditImage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '그림 한 장에 $count개',
+      other: '絵1枚につき$count個',
     );
     return '$_temp0';
   }
 
   @override
-  String get goalStepByStep => '해야 할 일을 순서대로 이해해요';
+  String get goalStepByStep => 'やることを順番に理解します';
 
   @override
-  String get goalPrepareItems => '필요한 준비물을 스스로 챙겨요';
+  String get goalPrepareItems => '必要な持ち物を自分でそろえます';
 
   @override
-  String get goalPrepareNew => '새로운 상황을 미리 준비해요';
+  String get goalPrepareNew => '新しい場面に前もって備えます';
 
   @override
-  String get goalIndependent => '혼자 끝까지 해내는 경험을 만들어요';
+  String get goalIndependent => '一人で最後までやり遂げる経験を作ります';
 
   @override
   String onboardingCharacterTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
-    return '$name$_temp0 하루를 함께할\n친구를 골라주세요';
+    return '$nameの一日を一緒に過ごす\n友だちを選んでください';
   }
 
   @override
-  String get onboardingCharacterDescription => '선택한 친구가 홈과 보상 화면에서 함께해요';
+  String get onboardingCharacterDescription => '選んだ友だちがホームとごほうび画面で一緒にいます';
 
   @override
-  String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
+  String get onboardingImageStyleTitle => 'カードの絵はどんな方法で\n作りますか？';
 
   @override
-  String get onboardingImageStyleDescription => '나중에 설정에서 바꿀 수 있어요';
+  String get onboardingImageStyleDescription => 'あとで設定で変えられます';
 
   @override
   String onboardingImageStyleCreditIntroWeek(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧은 매주 $count개 받아요. 일과와 그림을 만들 때 써요',
+      other: 'クレジットは毎週$count個もらえます。日課と絵を作るときに使います',
     );
     return '$_temp0';
   }
@@ -432,169 +431,167 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧은 매달 $count개 받아요. 일과와 그림을 만들 때 써요',
+      other: 'クレジットは毎月$count個もらえます。日課と絵を作るときに使います',
     );
     return '$_temp0';
   }
 
   @override
-  String get onboardingImageStyleCreditIntro => '크레딧은 일과와 그림을 만들 때 써요';
+  String get onboardingImageStyleCreditIntro => 'クレジットは日課と絵を作るときに使います';
 
   @override
-  String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
+  String get onboardingNameTitle => 'Elumiを何と\nお呼びしますか？';
 
   @override
-  String get onboardingNameDescription => '이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
+  String get onboardingNameDescription => 'elumでは使う人をElumiと呼びます\n本名でなくても大丈夫です';
 
   @override
-  String get onboardingNameHint => '이름을 입력해주세요';
+  String get onboardingNameHint => '名前を入力してください';
 
   @override
-  String get onboardingNameInviteLink => '초대 코드가 있어요';
+  String get onboardingNameInviteLink => '招待コードがあります';
 
   @override
-  String get onboardingCompletionTitle => '내용 정리가 모두\n완료됐어요';
+  String get onboardingCompletionTitle => '準備がすべて\n完了しました';
 
   @override
-  String get onboardingCompletionProgress => '100% 완료!';
+  String get onboardingCompletionProgress => '100% 完了！';
 
   @override
-  String get onboardingSplashLogoLabel => '이룸';
+  String get onboardingSplashLogoLabel => 'elum';
 
   @override
-  String get pinCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
+  String get pinCreateTitle => '保護者だけが知っている\nパスコードを作ってください';
 
   @override
-  String get pinConfirmTitle => '암호를 한 번 더\n입력해주세요';
+  String get pinConfirmTitle => 'パスコードをもう一度\n入力してください';
 
   @override
-  String get pinDescription => '보호자모드로 변경할 때 사용하는 암호예요';
+  String get pinDescription => '保護者モードに切り替えるときに使うパスコードです';
 
   @override
-  String get pinMismatch => '암호가 달라요. 다시 넣어주세요';
+  String get pinMismatch => 'パスコードが違います。もう一度入力してください';
 
   @override
-  String get pinInputSemanticLabel => '암호 넣기';
+  String get pinInputSemanticLabel => 'パスコードを入力';
 
   @override
-  String get pinStartButton => '시작하기';
+  String get pinStartButton => 'はじめる';
 
   @override
-  String get pinProfileCreateFailedTitle => '이룸이를 만들지 못했어요';
+  String get pinProfileCreateFailedTitle => 'Elumiを登録できませんでした';
 
   @override
-  String get pinProfileCreateFailedFallback => '잠시 후 다시 시도해주세요';
+  String get pinProfileCreateFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get pinSaveFailedTitle => '설정을 저장하지 못했어요';
+  String get pinSaveFailedTitle => '設定を保存できませんでした';
 
   @override
-  String get pinSaveFailedFallback => '잠시 후 시작하기를 다시 눌러주세요';
+  String get pinSaveFailedFallback => 'しばらくしてから「はじめる」をもう一度タップしてください';
 
   @override
-  String get elumiSettingsTitle => '설정';
+  String get elumiSettingsTitle => '設定';
 
   @override
-  String get elumiSettingsHapticLabel => '카드 체크 진동';
+  String get elumiSettingsHapticLabel => 'カードチェック時の振動';
 
   @override
-  String get elumiSettingsPraiseSoundLabel => '카드 체크 칭찬 소리';
+  String get elumiSettingsPraiseSoundLabel => 'カードチェック時のほめる音';
 
   @override
-  String get elumiSettingsScreenAwakeLabel => '카드 볼 때 화면 켜 두기';
+  String get elumiSettingsScreenAwakeLabel => 'カードを見るとき画面をつけたままにする';
 
   @override
-  String get elumiSettingsTermsLabel => '약관 및 개인정보처리방침';
+  String get elumiSettingsTermsLabel => '利用規約とプライバシーポリシー';
 
   @override
-  String get elumiSettingsLogoutLabel => '로그아웃';
+  String get elumiSettingsLogoutLabel => 'ログアウト';
 
   @override
-  String get elumiSettingsWithdrawLabel => '회원탈퇴';
+  String get elumiSettingsWithdrawLabel => '退会';
 
   @override
-  String get elumiSettingsLogoutTitle => '로그아웃할까요?';
+  String get elumiSettingsLogoutTitle => 'ログアウトしますか？';
 
   @override
   String get elumiSettingsLogoutMessage =>
-      '이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요';
+      'この端末の接続が切れます\nまた使うには保護者から\n接続コードをもらってください';
 
   @override
-  String get elumiSettingsLogoutFailTitle => '로그아웃하지 못했어요';
+  String get elumiSettingsLogoutFailTitle => 'ログアウトできませんでした';
 
   @override
-  String get elumiSettingsWithdrawTitle => '회원탈퇴할까요?';
+  String get elumiSettingsWithdrawTitle => '退会しますか？';
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      '이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 코드를 받아야 해요';
+      'この端末の接続だけが切れます\n日課と星は保護者の端末に残ります\nまた使うには保護者から\n接続コードをもらってください';
 
   @override
-  String get elumiSettingsWithdrawAction => '탈퇴하기';
+  String get elumiSettingsWithdrawAction => '退会する';
 
   @override
-  String get inviteRejectedOnElumiDevice =>
-      '이 기기에서는 초대를 받을 수 없어요\n보호자 기기에서 열어주세요';
+  String get inviteRejectedOnElumiDevice => 'この端末では招待を受けられません\n保護者の端末で開いてください';
 
   @override
-  String get elumiSettingsWithdrawFailTitle => '탈퇴하지 못했어요';
+  String get elumiSettingsWithdrawFailTitle => '退会できませんでした';
 
   @override
-  String get elumiSettingsExitFailedFallback => '잠시 후 다시 시도해주세요';
+  String get elumiSettingsExitFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get linkStatusTitle => '이룸이 기기';
+  String get linkStatusTitle => 'Elumiの端末';
 
   @override
-  String get linkStatusRevokeConfirmTitle => '연결을 끊을까요?';
+  String get linkStatusRevokeConfirmTitle => '接続を切りますか？';
 
   @override
   String get linkStatusRevokeConfirmMessage =>
-      '이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 코드를 만들면 돼요';
+      'Elumiの端末で日課を見られなくなります\nまた接続するには新しいコードを作ってください';
 
   @override
-  String get linkStatusRevokeConfirmAction => '연결 끊기';
+  String get linkStatusRevokeConfirmAction => '接続を切る';
 
   @override
-  String get linkStatusRevokeFailTitle => '연결을 끊지 못했어요';
+  String get linkStatusRevokeFailTitle => '接続を切れませんでした';
 
   @override
-  String get linkStatusRevokeFailedFallback => '잠시 후 다시 시도해주세요';
+  String get linkStatusRevokeFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get linkStatusRevoked => '연결을 끊었어요';
+  String get linkStatusRevoked => '接続を切りました';
 
   @override
-  String get linkStatusAlreadyRevoked => '이미 끊겨 있어요';
+  String get linkStatusAlreadyRevoked => 'すでに切れています';
 
   @override
-  String get linkStatusLoadFailedFallback => '연결 상태를 불러오지 못했어요';
+  String get linkStatusLoadFailedFallback => '接続状態を読み込めませんでした';
 
   @override
   String linkDeviceNumbered(int number) {
-    return '이룸이 기기 $number';
+    return 'Elumiの端末 $number';
   }
 
   @override
-  String get linkStatusConnected => '연결됨';
+  String get linkStatusConnected => '接続済み';
 
   @override
-  String get linkStatusRevokeButton => '연결 끊기';
+  String get linkStatusRevokeButton => '接続を切る';
 
   @override
-  String get linkStatusRevokeHint => '끊으면 이룸이 기기에서\n일과를 볼 수 없어요';
+  String get linkStatusRevokeHint => '切るとElumiの端末で\n日課を見られなくなります';
 
   @override
-  String get linkStatusEmpty => '연결된 기기가 없어요';
+  String get linkStatusEmpty => '接続された端末がありません';
 
   @override
   String linkStatusConnectedBy(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '$name$_temp0 연결';
+    return '$nameさんが接続';
   }
 
   @override
-  String get linkStatusConnectedByMe => '내가 연결';
+  String get linkStatusConnectedByMe => '自分が接続';
 
   @override
   String linkStatusConnectedByAndSince(String by, String since) {
@@ -602,477 +599,471 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get linkStatusAddAction => '+ 다른 기기 연결하기';
+  String get linkStatusAddAction => '+ ほかの端末を接続する';
 
   @override
-  String get linkStatusConnectAction => '이룸이 기기 연결하기';
+  String get linkStatusConnectAction => 'Elumiの端末を接続する';
 
   @override
-  String get linkCodeSettingsTitle => '이룸이 기기 연결';
+  String get linkCodeSettingsTitle => 'Elumiの端末を接続';
 
   @override
   String linkCodeAskTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
-    return '$name$_temp0 기기를\n연결할까요?';
+    return '$nameの端末を\n接続しますか？';
   }
 
   @override
   String linkCodeEnterHint(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
-    return '$name$_temp0 기기에서 아래 코드를 입력하세요';
+    return '$nameの端末で下のコードを入力してください';
   }
 
   @override
-  String get linkCodeIssueFailedFallback => '코드를 만들지 못했어요. 다시 해주세요';
+  String get linkCodeIssueFailedFallback => 'コードを作れませんでした。もう一度お試しください';
 
   @override
-  String get linkCodeSuccessTitle => '기기 연결에 성공했어요!';
+  String get linkCodeSuccessTitle => '端末の接続に成功しました！';
 
   @override
-  String get linkCodeStartButton => '시작하기';
+  String get linkCodeStartButton => 'はじめる';
 
   @override
-  String get linkCodeLater => '나중에 할게요';
+  String get linkCodeLater => 'あとで';
 
   @override
-  String get linkCodeChangesAfter => '뒤에 코드가 바뀌어요';
+  String get linkCodeChangesAfter => '後にコードが変わります';
 
   @override
-  String get linkRetryChipLabel => '코드 다시 만들기';
+  String get linkRetryChipLabel => 'コードを作り直す';
 
   @override
-  String get linkEnterTitle => '보호자에게서 받은 코드를\n입력해주세요';
+  String get linkEnterTitle => '保護者からもらったコードを\n入力してください';
 
   @override
-  String get linkEnterGuide =>
-      '코드는 보호자 기기의 이 자리에 있어요\n내 정보 → 톱니바퀴 → 이룸이 기기 연결하기';
+  String get linkEnterGuide => 'コードは保護者の端末のここにあります\nマイ情報 → 歯車 → Elumiの端末を接続する';
 
   @override
-  String get linkEnterGuidePath => '내 정보 → 톱니바퀴 → 이룸이 기기 연결하기';
+  String get linkEnterGuidePath => 'マイ情報 → 歯車 → Elumiの端末を接続する';
 
   @override
-  String get linkEnterLinkLost => '연결이 끊어졌어요\n보호자에게 새 연결 코드를 받아 입력해주세요';
+  String get linkEnterLinkLost => '接続が切れました\n保護者から新しい接続コードをもらって入力してください';
 
   @override
-  String get linkEnterStartButton => '시작하기';
+  String get linkEnterStartButton => 'はじめる';
 
   @override
-  String get linkEnterInputLabel => '연결 코드 넣기';
+  String get linkEnterInputLabel => '接続コードを入力';
 
   @override
-  String get linkEnterWrongCode => '코드가 맞지 않아요';
+  String get linkEnterWrongCode => 'コードが正しくありません';
 
   @override
-  String get linkEnterExpired => '코드가 만료됐어요. 새 코드를 받아주세요';
+  String get linkEnterExpired => 'コードの有効期限が切れました。新しいコードをもらってください';
 
   @override
-  String get linkEnterOffline => '연결하지 못했어요. 인터넷을 확인해주세요';
+  String get linkEnterOffline => '接続できませんでした。インターネットを確認してください';
 
   @override
-  String get linkEnterFailed => '연결하지 못했어요. 다시 해주세요';
+  String get linkEnterFailed => '接続できませんでした。もう一度お試しください';
 
   @override
-  String get commonGuardianName => '보호자';
+  String get commonGuardianName => '保護者';
 
   @override
-  String get guardianKindGuardian => '보호자';
+  String get guardianKindGuardian => '保護者';
 
   @override
-  String get guardianKindCaregiver => '선생님';
+  String get guardianKindCaregiver => '先生';
 
   @override
   String inviteShareMessage(int minutes, String url, String code) {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
-      other: '$minutes분',
+      other: '$minutes分',
     );
-    return '이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 $code';
+    return 'Elumiを一緒に見守りましょう。下のリンクをタップするとelumアプリに招待コードが入ります。\n招待コードは$_temp0間だけ使えます。\n\n$url\n\nリンクが開かない場合は、アプリで直接入力してください。\n招待コード $code';
   }
 
   @override
-  String get guardiansEditTitle => '내 이름 변경하기';
+  String get guardiansEditTitle => '自分の名前を変更する';
 
   @override
   String get guardiansEditDescription =>
-      '이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요';
+      'Elumiを一緒に見守る人に表示される名前です。\n本名でなくても大丈夫です';
 
   @override
-  String get guardiansEditNameHint => '엄마, 아빠, 선생님';
+  String get guardiansEditNameHint => 'ママ、パパ、先生';
 
   @override
-  String get guardiansEditSave => '저장하기';
+  String get guardiansEditSave => '保存する';
 
   @override
-  String get guardiansLeaveConfirmTitle => '함께 돌보기를 그만둘까요?';
+  String get guardiansLeaveConfirmTitle => '一緒に見守るのをやめますか？';
 
   @override
   String get guardiansLeaveConfirmMessageLast =>
-      '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요';
+      'ほかの保護者がいません\n抜けるとElumiと作った日課、集めた星がすべて消えます\n元に戻せません';
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      '내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 코드를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
+      '自分が接続したElumiの端末があれば接続が切れます\n残った保護者が新しい接続コードを作るとまた使えます\n自分が作った日課は消えます\nElumiとほかの保護者の日課・星はそのまま残ります';
 
   @override
-  String get guardiansLeaveConfirmAction => '그만두기';
+  String get guardiansLeaveConfirmAction => 'やめる';
 
   @override
-  String get guardiansLeaveTypeTitle => '한 번 더 확인할게요';
+  String get guardiansLeaveTypeTitle => 'もう一度確認します';
 
   @override
   String guardiansLeaveTypeMessage(String phrase) {
-    return '이룸이와 일과, 별이 모두 사라져요\n아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+    return 'Elumiと日課、星がすべて消えます\n下の欄に「$phrase」と\n同じように入力してください';
   }
 
   @override
-  String get guardiansLeaveTypePhrase => '그만두기';
+  String get guardiansLeaveTypePhrase => 'やめる';
 
   @override
-  String get guardiansLeaveTypeAction => '그만두기';
+  String get guardiansLeaveTypeAction => 'やめる';
 
   @override
-  String get guardiansLeaveFailTitle => '나가지 못했어요';
+  String get guardiansLeaveFailTitle => '抜けられませんでした';
 
   @override
-  String get guardiansLeaveFailedFallback => '잠시 후 다시 시도해주세요';
+  String get guardiansLeaveFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
   String guardiansLeft(String name) {
-    return '$name에서 나왔어요';
+    return '$nameから抜けました';
   }
 
   @override
-  String get guardiansNameEditFailTitle => '이름을 고치지 못했어요';
+  String get guardiansNameEditFailTitle => '名前を変更できませんでした';
 
   @override
-  String get guardiansNameEditFailedFallback => '잠시 후 다시 시도해주세요';
+  String get guardiansNameEditFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get guardiansTitle => '함께하는 사람';
+  String get guardiansTitle => '一緒に見守る人';
 
   @override
-  String get guardiansNoProfileMessage => '함께하는 사람을 볼 이룸이가 없어요';
+  String get guardiansNoProfileMessage => '一緒に見守る人を表示するElumiがいません';
 
   @override
-  String get guardiansNoProfileDescription => '이룸이를 먼저 등록해주세요';
+  String get guardiansNoProfileDescription => '先にElumiを登録してください';
 
   @override
-  String get guardiansIntro => '일과를 같이 만드는 가족이나 선생님이에요';
+  String get guardiansIntro => '日課を一緒に作る家族や先生です';
 
   @override
-  String get guardiansLoadFailedFallback => '함께하는 사람을 불러오지 못했어요';
+  String get guardiansLoadFailedFallback => '一緒に見守る人を読み込めませんでした';
 
   @override
-  String get guardiansEmptyMessage => '함께하는 사람을 찾지 못했어요';
+  String get guardiansEmptyMessage => '一緒に見守る人が見つかりませんでした';
 
   @override
-  String get guardiansAloneHint => '아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요';
+  String get guardiansAloneHint => '今は一人で見守っています。家族や先生を招待してみましょう';
 
   @override
   String get guardiansNameScopeHint =>
-      '여기 이름은 함께 돌보는 사람에게만 보여요. 이야기에는 내 정보의 닉네임이 보여요';
+      'ここの名前は一緒に見守る人にだけ表示されます。トークではマイ情報のニックネームが表示されます';
 
   @override
-  String get guardiansInviteAction => '다른 보호자 초대하기';
+  String get guardiansInviteAction => 'ほかの保護者を招待する';
 
   @override
-  String get guardiansEnterCodeAction => '받은 초대 코드 넣기';
+  String get guardiansEnterCodeAction => 'もらった招待コードを入力する';
 
   @override
-  String get guardiansLeaveAction => '함께 돌보기 그만두기';
+  String get guardiansLeaveAction => '一緒に見守るのをやめる';
 
   @override
-  String get guardiansLeaveHintAlone => '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요';
+  String get guardiansLeaveHintAlone => '一人で見守っているので、やめるとElumiと日課、星がすべて消えます';
 
   @override
-  String get guardiansLeaveHintWithOthers => '내가 만든 일과만 사라져요';
+  String get guardiansLeaveHintWithOthers => '自分が作った日課だけが消えます';
 
   @override
   String inviteCodeGuestJoinedTitle(String name) {
-    return '$name님이 함께하게 됐어요';
+    return '$nameさんが仲間になりました';
   }
 
   @override
-  String get guardiansMeBadge => '나';
+  String get guardiansMeBadge => '自分';
 
   @override
   String guardiansPeopleHeader(int count) {
-    return '함께 돌보는 사람 $count명';
+    return '一緒に見守る人 $count人';
   }
 
   @override
-  String get guardiansInviteHeader => '초대';
+  String get guardiansInviteHeader => '招待';
 
   @override
-  String get guardiansRenameAction => '이름 변경';
+  String get guardiansRenameAction => '名前を変更';
 
   @override
-  String get inviteCodeShareFailTitle => '링크를 보내지 못했어요';
+  String get inviteCodeShareFailTitle => 'リンクを送れませんでした';
 
   @override
-  String get inviteCodeShareFailFallback => '코드를 직접 알려주세요';
+  String get inviteCodeShareFailFallback => 'コードを直接伝えてください';
 
   @override
-  String get inviteCodeTitle => '초대 코드';
+  String get inviteCodeTitle => '招待コード';
 
   @override
-  String get inviteCodeShareButton => '링크로 보내기';
+  String get inviteCodeShareButton => 'リンクで送る';
 
   @override
-  String get inviteCodeHeaderTitle => '함께할 보호자에게\n코드를 알려주세요';
+  String get inviteCodeHeaderTitle => '一緒に見守る保護者に\nコードを伝えてください';
 
   @override
   String inviteCodeAsk(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '코드를 받은 분이 $name$_temp0 함께 돌봐요';
+    return 'コードを受け取った人が$nameを一緒に見守ります';
   }
 
   @override
-  String get inviteCodeNoProfileMessage => '함께 돌볼 이룸이가 없어요';
+  String get inviteCodeNoProfileMessage => '一緒に見守るElumiがいません';
 
   @override
-  String get inviteCodeNoProfileDescription => '이룸이를 먼저 등록해주세요';
+  String get inviteCodeNoProfileDescription => '先にElumiを登録してください';
 
   @override
-  String get inviteCodeIssueFailedFallback => '초대 코드를 만들지 못했어요';
+  String get inviteCodeIssueFailedFallback => '招待コードを作れませんでした';
 
   @override
   String get inviteEnterLinkInvalid =>
-      '초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)';
+      '招待リンクが正しくありません。送った人にもう一度もらってください (E-INV-LINK)';
 
   @override
-  String get inviteEnterFormInvalid => '초대 코드가 맞지 않아요 (E-INV-FORM)';
+  String get inviteEnterFormInvalid => '招待コードが正しくありません (E-INV-FORM)';
 
   @override
   String inviteJoined(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$name$_temp0 함께 돌보게 됐어요';
+    return '$nameを一緒に見守ることになりました';
   }
 
   @override
-  String get inviteEnterNotFound => '초대 코드가 맞지 않아요';
+  String get inviteEnterNotFound => '招待コードが正しくありません';
 
   @override
-  String get inviteEnterExpired => '초대 코드가 만료됐어요. 새 코드를 받아주세요';
+  String get inviteEnterExpired => '招待コードの有効期限が切れました。新しいコードをもらってください';
 
   @override
-  String get inviteEnterTooManyAttempts => '잠시 뒤에 다시 해주세요';
+  String get inviteEnterTooManyAttempts => '少し待ってからもう一度お試しください';
 
   @override
-  String get inviteEnterAlreadyGuardian => '이미 함께하고 있는 이룸이예요';
+  String get inviteEnterAlreadyGuardian => 'すでに一緒に見守っているElumiです';
 
   @override
-  String get inviteEnterForbiddenForElumi => '이룸이 기기에서는 할 수 없어요';
+  String get inviteEnterForbiddenForElumi => 'Elumiの端末ではできません';
 
   @override
-  String get inviteEnterInvalidInput => '초대 코드가 맞지 않아요';
+  String get inviteEnterInvalidInput => '招待コードが正しくありません';
 
   @override
-  String get inviteEnterOffline => '연결하지 못했어요. 인터넷을 확인해주세요';
+  String get inviteEnterOffline => '接続できませんでした。インターネットを確認してください';
 
   @override
-  String get inviteEnterOther => '연결하지 못했어요. 다시 해주세요';
+  String get inviteEnterOther => '接続できませんでした。もう一度お試しください';
 
   @override
-  String get inviteEnterConsentFailTitle => '초대 코드를 넣지 못했어요';
+  String get inviteEnterConsentFailTitle => '招待コードを入力できませんでした';
 
   @override
-  String get inviteEnterConsentFallback => '약관에 먼저 동의해주세요';
+  String get inviteEnterConsentFallback => '先に規約に同意してください';
 
   @override
-  String get inviteEnterStartButton => '시작하기';
+  String get inviteEnterStartButton => 'はじめる';
 
   @override
-  String get inviteEnterManualLink => '다른 코드 넣기';
+  String get inviteEnterManualLink => '別のコードを入力';
 
   @override
-  String get inviteEnterTitle => '초대 코드를\n입력해주세요';
+  String get inviteEnterTitle => '招待コードを\n入力してください';
 
   @override
   String get inviteEnterDescriptionFromLink =>
-      '링크로 받은 초대 코드예요. 맞으면 시작하기를 눌러주세요';
+      'リンクで受け取った招待コードです。正しければ「はじめる」をタップしてください';
 
   @override
   String get inviteEnterDescriptionManual =>
-      '코드는 함께하는 보호자 기기의\n내정보 → 함께하는 사람에 있어요';
+      'コードは一緒に見守る保護者の端末の\nマイ情報 → 一緒に見守る人にあります';
 
   @override
-  String get inviteEnterDescriptionPath => '내정보 → 함께하는 사람';
+  String get inviteEnterDescriptionPath => 'マイ情報 → 一緒に見守る人';
 
   @override
-  String get inviteEnterSemanticsFromLink => '링크로 받은 초대 코드';
+  String get inviteEnterSemanticsFromLink => 'リンクで受け取った招待コード';
 
   @override
-  String get inviteEnterSemanticsInput => '초대 코드 넣기';
+  String get inviteEnterSemanticsInput => '招待コードを入力';
 
   @override
-  String get profileSwitchChanged => '이룸이를 바꿨어요';
+  String get profileSwitchChanged => 'Elumiを切り替えました';
 
   @override
-  String get profileSwitchTitle => '이룸이 바꾸기';
+  String get profileSwitchTitle => 'Elumiを切り替える';
 
   @override
-  String get profileSwitchLoadFailedFallback => '이룸이 목록을 불러오지 못했어요';
+  String get profileSwitchLoadFailedFallback => 'Elumiの一覧を読み込めませんでした';
 
   @override
-  String get profileSwitchLoadFailedMessage => '이룸이 목록을 불러오지 못했어요';
+  String get profileSwitchLoadFailedMessage => 'Elumiの一覧を読み込めませんでした';
 
   @override
   String profileSwitchSelected(String name) {
-    return '$name, 지금 보는 이룸이';
+    return '$name、今見ているElumi';
   }
 
   @override
-  String get noticeHideWeek => '일주일간 보지 않기';
+  String get noticeHideWeek => '1週間表示しない';
 
   @override
   String noticeHideDays(int days) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days일간 보지 않기',
+      other: '$days日間表示しない',
     );
     return '$_temp0';
   }
 
   @override
   String noticeLinkOpenFailed(String code) {
-    return '링크를 열지 못했어요 ($code)';
+    return 'リンクを開けませんでした ($code)';
   }
 
   @override
-  String get noticeCloseBarrier => '공지 닫기';
+  String get noticeCloseBarrier => 'お知らせを閉じる';
 
   @override
-  String get cardPhotoTooLarge => '사진이 너무 커요. 다른 사진을 골라 주세요';
+  String get cardPhotoTooLarge => '写真が大きすぎます。別の写真を選んでください';
 
   @override
-  String get cardPhotoWrongType => 'JPG나 PNG 사진만 올릴 수 있어요';
+  String get cardPhotoWrongType => 'JPGかPNGの写真だけアップロードできます';
 
   @override
-  String get cardPhotoUnreadable => '사진을 읽지 못했어요. 다른 사진을 골라 주세요';
+  String get cardPhotoUnreadable => '写真を読み込めませんでした。別の写真を選んでください';
 
   @override
-  String get cardPhotoPickFailed => '사진을 가져오지 못했어요. 다시 해주세요';
+  String get cardPhotoPickFailed => '写真を取り込めませんでした。もう一度お試しください';
 
   @override
-  String get routineLoadingPrepareTitle => '루미가 내용을\n정리하고 있어요';
+  String get routineLoadingPrepareTitle => 'ルミが内容を\n整理しています';
 
   @override
-  String get routineLoadingGenerateTitle => '루미가 행동카드를\n만들고 있어요';
+  String get routineLoadingGenerateTitle => 'ルミが行動カードを\n作っています';
 
   @override
-  String get routineStageReviewSituation => '적어 주신 상황을 살펴보고 있어요';
+  String get routineStageReviewSituation => '書いてくれた状況を確認しています';
 
   @override
-  String get routineStageTidyEssentials => '꼭 필요한 내용만 정리해요';
+  String get routineStageTidyEssentials => '必要な内容だけを整理します';
 
   @override
-  String get routineStageThinkQuestions => '추가 질문을 생각하고 있어요';
+  String get routineStageThinkQuestions => '追加の質問を考えています';
 
   @override
-  String get routineStageReadRoutine => '오늘의 일과를 읽고 있어요';
+  String get routineStageReadRoutine => '今日の日課を読んでいます';
 
   @override
-  String get routineStageFindItems => '중요한 준비물을 찾고 있어요';
+  String get routineStageFindItems => '大事な持ち物を探しています';
 
   @override
-  String get routineStageOrderSteps => '순서를 정리하고 있어요';
+  String get routineStageOrderSteps => '順番を整理しています';
 
   @override
-  String get suggestionRainyText => '비 오는 날 등교';
+  String get suggestionRainyText => '雨の日の登校';
 
   @override
-  String get suggestionRainyPrompt => '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요';
+  String get suggestionRainyPrompt => '雨の日に傘を持って学校へ行くしたくをしたいです';
 
   @override
-  String get suggestionHospitalText => '병원 방문 준비';
+  String get suggestionHospitalText => '病院へ行く準備';
 
   @override
-  String get suggestionHospitalPrompt => '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요';
+  String get suggestionHospitalPrompt => 'Elumiと一緒に病院へ行くので、怖がらないように準備したいです';
 
   @override
-  String get suggestionTripText => '체험학습 준비';
+  String get suggestionTripText => '校外学習の準備';
 
   @override
-  String get suggestionTripPrompt => '체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요';
+  String get suggestionTripPrompt => '校外学習の日の朝に持っていく物を順番に伝えたいです';
 
   @override
-  String get suggestionNewPlaceText => '새로운 장소 방문';
+  String get suggestionNewPlaceText => '初めての場所へ行く';
 
   @override
-  String get suggestionNewPlacePrompt =>
-      '처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요';
+  String get suggestionNewPlacePrompt => '初めての場所へ行く前に、Elumiが心の準備をできるよう手伝いたいです';
 
   @override
-  String get suggestionAfterSchoolText => '여름방학 방과후 수업 준비';
+  String get suggestionAfterSchoolText => '夏休みの放課後教室の準備';
 
   @override
-  String get suggestionAfterSchoolPrompt => '방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요';
+  String get suggestionAfterSchoolPrompt => '休み中の放課後教室へ行く準備を順番に伝えたいです';
 
   @override
-  String get guardianHomeTodayRoutine => '오늘 일과';
+  String get guardianHomeTodayRoutine => '今日の日課';
 
   @override
-  String get guardianHomePastRoutine => '지난 일과';
+  String get guardianHomePastRoutine => '過去の日課';
 
   @override
-  String get guardianHomeGoChildScreen => '이룸이 화면으로 가기';
+  String get guardianHomeGoChildScreen => 'Elumi画面へ';
 
   @override
-  String get notificationBellLabel => '알림';
+  String get notificationBellLabel => '通知';
 
   @override
-  String get notificationBellUnreadLabel => '읽지 않은 알림이 있어요';
+  String get notificationBellUnreadLabel => '未読の通知があります';
 
   @override
-  String get notificationTabNotifications => '알림';
+  String get notificationTabNotifications => '通知';
 
   @override
-  String get notificationTabNotices => '공지사항';
+  String get notificationTabNotices => 'お知らせ';
 
   @override
-  String get notificationDayToday => '오늘';
+  String get notificationDayToday => '今日';
 
   @override
-  String get notificationDayYesterday => '어제';
+  String get notificationDayYesterday => '昨日';
 
   @override
-  String get notificationDayEarlier => '이전';
+  String get notificationDayEarlier => 'それ以前';
 
   @override
-  String get notificationMarkAllRead => '모두 읽음';
+  String get notificationMarkAllRead => 'すべて既読';
 
   @override
-  String get notificationEmpty => '아직 받은 알림이 없어요';
+  String get notificationEmpty => 'まだ通知はありません';
 
   @override
-  String get notificationNoticeEmpty => '아직 올라온 공지가 없어요';
+  String get notificationNoticeEmpty => 'まだお知らせはありません';
 
   @override
-  String get notificationNoticeFailed => '공지를 불러오지 못했어요';
+  String get notificationNoticeFailed => 'お知らせを読み込めませんでした';
 
   @override
-  String get notificationSettingsTitle => '알림 설정';
+  String get notificationSettingsTitle => '通知設定';
 
   @override
-  String get notificationSettingAll => '모든 알림 받기';
+  String get notificationSettingAll => 'すべての通知を受け取る';
 
   @override
-  String get notificationSettingRoutineCompleted => '이룸이가 일과를 끝냈을 때';
+  String get notificationSettingRoutineCompleted => 'Elumiが日課を終えたとき';
 
   @override
-  String get notificationSettingRoutineSent => '다른 보호자가 일과를 보냈을 때';
+  String get notificationSettingRoutineSent => 'ほかの保護者が日課を送ったとき';
 
   @override
-  String get notificationSettingCoGuardianJoined => '새 보호자가 함께할 때';
+  String get notificationSettingCoGuardianJoined => '新しい保護者が加わったとき';
 
   @override
-  String get notificationSettingCreditRefilled => '이번 주 크레딧이 채워졌을 때';
+  String get notificationSettingCreditRefilled => '今週のクレジットが補充されたとき';
 
   @override
-  String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
+  String get notificationSettingFeedbackResolved => 'ご意見に対応したとき';
 
   @override
   String get notificationSettingTalkCommented => 'トーク:自分の投稿にコメントがついたとき';
@@ -1081,52 +1072,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationSettingTalkImported => 'トーク:自分の投稿が持っていかれたとき';
 
   @override
-  String get notificationPermissionOff => '기기 알림이 꺼져 있어요';
+  String get notificationPermissionOff => '端末の通知がオフになっています';
 
   @override
-  String get notificationTurnOnDeviceNotification => '켜기';
+  String get notificationTurnOnDeviceNotification => 'オンにする';
 
   @override
-  String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
+  String get notificationSettingSaveFailed => '設定を保存できませんでした';
 
   @override
-  String get notificationSettingLoadFailed => '설정을 불러오지 못했어요';
+  String get notificationSettingLoadFailed => '設定を読み込めませんでした';
 
   @override
-  String get notificationListFailed => '알림을 불러오지 못했어요';
+  String get notificationListFailed => '通知を読み込めませんでした';
 
   @override
-  String get notificationProfileUnavailable => '이 이룸이의 알림은 더 볼 수 없어요';
+  String get notificationProfileUnavailable => 'このElumiの通知はもう見られません';
 
   @override
   String notificationRoutineCompletedOne(String title) {
-    return '\'$title\' 일과를 끝냈어요';
+    return '「$title」の日課を終えました';
   }
 
   @override
   String notificationRoutineCompletedMany(int count) {
-    return '일과 $count개를 끝냈어요';
+    return '日課を$count個終えました';
   }
 
   @override
-  String get notificationRoutineCompletedNoTitle => '일과를 끝냈어요';
+  String get notificationRoutineCompletedNoTitle => '日課を終えました';
 
   @override
   String notificationRoutineSent(String title) {
-    return '함께하는 보호자가 \'$title\' 일과를 보냈어요';
+    return '一緒に見守る保護者が「$title」の日課を送りました';
   }
 
   @override
-  String get notificationRoutineSentNoTitle => '함께하는 보호자가 새 일과를 보냈어요';
+  String get notificationRoutineSentNoTitle => '一緒に見守る保護者が新しい日課を送りました';
 
   @override
-  String get notificationCoGuardianJoined => '새 보호자가 함께하기 시작했어요';
+  String get notificationCoGuardianJoined => '新しい保護者が加わりました';
 
   @override
-  String get notificationCreditRefilled => '이번 주 크레딧이 채워졌어요';
+  String get notificationCreditRefilled => '今週のクレジットが補充されました';
 
   @override
-  String get notificationFeedbackResolved => '보내 주신 의견을 확인하고 처리했어요';
+  String get notificationFeedbackResolved => 'お送りいただいたご意見を確認し、対応しました';
 
   @override
   String notificationTalkPostCommented(int count) {
@@ -1139,198 +1130,198 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
+  String get notificationWeeklyReportReady => '先週のレポートが届きました';
 
   @override
-  String get notificationAdminMessageFallback => '이룸에서 알려 드려요';
+  String get notificationAdminMessageFallback => 'elumからのお知らせです';
 
   @override
   String guardianHomeGreeting(String name) {
-    return '안녕하세요,\n$name 보호자님 👋🏻';
+    return 'こんにちは、\n$nameの保護者さん 👋🏻';
   }
 
   @override
-  String get guardianHomeSubtitle => '오늘은 어떤 일과를 준비할까요?';
+  String get guardianHomeSubtitle => '今日はどんな日課を準備しますか？';
 
   @override
-  String get pinChangeMismatchCreate => '암호가 달라요. 다시 넣어주세요';
+  String get pinChangeMismatchCreate => 'パスコードが違います。もう一度入力してください';
 
   @override
-  String get pinChangeMismatch => '암호가 달라요. 다시 입력해주세요';
+  String get pinChangeMismatch => 'パスコードが違います。もう一度入力してください';
 
   @override
-  String get pinChangeCreateFailedTitle => '비밀암호를 만들지 못했어요';
+  String get pinChangeCreateFailedTitle => 'パスコードを作れませんでした';
 
   @override
-  String get pinChangeFailedTitle => '비밀암호를 바꾸지 못했어요';
+  String get pinChangeFailedTitle => 'パスコードを変更できませんでした';
 
   @override
-  String get pinChangeFailedFallback => '잠시 후 다시 시도해주세요';
+  String get pinChangeFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get pinChangeCreatedSnack => '비밀암호를 만들었어요';
+  String get pinChangeCreatedSnack => 'パスコードを作りました';
 
   @override
-  String get pinChangeChangedSnack => '비밀암호를 바꿨어요';
+  String get pinChangeChangedSnack => 'パスコードを変更しました';
 
   @override
-  String get pinChangeVerifyTitle => '지금 비밀암호를\n입력해주세요';
+  String get pinChangeVerifyTitle => '今のパスコードを\n入力してください';
 
   @override
-  String get pinChangeCreateTitle => '이 기기에서 쓸\n비밀암호를 정해 주세요';
+  String get pinChangeCreateTitle => 'この端末で使う\nパスコードを決めてください';
 
   @override
-  String get pinChangeCreateDescription => '비밀암호는 기기마다 따로 정해요\n예전 기기와 같아도 괜찮아요';
+  String get pinChangeCreateDescription => 'パスコードは端末ごとに決めます\n前の端末と同じでもかまいません';
 
   @override
-  String get pinModeHint => '보호자모드로 변경할 때 사용하는 암호예요';
+  String get pinModeHint => '保護者モードに切り替えるときに使うパスコードです';
 
   @override
-  String get pinChangeEnterTitle => '새 비밀암호를\n입력해주세요';
+  String get pinChangeEnterTitle => '新しいパスコードを\n入力してください';
 
   @override
-  String get pinChangeCreateConfirmTitle => '암호를 한 번 더\n입력해주세요';
+  String get pinChangeCreateConfirmTitle => 'パスコードをもう一度\n入力してください';
 
   @override
-  String get pinChangeConfirmTitle => '비밀암호를 한 번 더\n입력해주세요';
+  String get pinChangeConfirmTitle => 'パスコードをもう一度\n入力してください';
 
   @override
-  String get pinChangeConfirmHint => '이제 곧 비밀암호 변경이 끝나요';
+  String get pinChangeConfirmHint => 'もうすぐパスコードの変更が終わります';
 
   @override
-  String get pinChangeHeaderTitle => '비밀암호 변경하기';
+  String get pinChangeHeaderTitle => 'パスコードを変更する';
 
   @override
-  String get pinChangeSave => '저장하기';
+  String get pinChangeSave => '保存する';
 
   @override
-  String get pinChangeInputLabel => '암호 넣기';
+  String get pinChangeInputLabel => 'パスコードを入力';
 
   @override
-  String get rewardSaveFailedTitle => '보상을 저장하지 못했어요';
+  String get rewardSaveFailedTitle => 'ごほうびを保存できませんでした';
 
   @override
-  String get rewardSaveFailedFallback => '잠시 후 다시 시도해주세요';
+  String get rewardSaveFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get rewardWhyTitle => '보상이 왜 필요한가요?';
+  String get rewardWhyTitle => 'ごほうびはなぜ必要ですか？';
 
   @override
   String get rewardWhyMessage =>
-      '일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n정하지 않아도 일과는 만들 수 있어요.';
+      '日課のあとに楽しみがあると、Elumiは最後までやりとげる力がわきます。\n1か月後のプレゼントより、今日すぐあげられる小さなものがよく効きます。\n決めなくても日課は作れます。';
 
   @override
-  String get rewardHeadlineTitle => '일과가 끝나면\n어떤 보상을 줄까요?';
+  String get rewardHeadlineTitle => '日課が終わったら\nどんなごほうびをあげますか？';
 
   @override
-  String get rewardHeadlineBody => '일과를 완료하는 데 큰 동기가 될 거예요';
+  String get rewardHeadlineBody => '日課をやりとげる大きなやる気になります';
 
   @override
-  String get rewardLater => '나중에 할게요';
+  String get rewardLater => 'あとで決めます';
 
   @override
-  String get imageStyleChangedSnack => '그림 방식을 바꿨어요';
+  String get imageStyleChangedSnack => '絵のスタイルを変更しました';
 
   @override
-  String get imageStyleSaveFailedTitle => '그림 방식을 저장하지 못했어요';
+  String get imageStyleSaveFailedTitle => '絵のスタイルを保存できませんでした';
 
   @override
-  String get imageStyleSaveFailedFallback => '잠시 후 다시 시도해주세요';
+  String get imageStyleSaveFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get imageStyleTitle => '그림 방식';
+  String get imageStyleTitle => '絵のスタイル';
 
   @override
-  String get routineLoadingBlockedTitle => '지금은 만들 수 없어요';
+  String get routineLoadingBlockedTitle => '今は作れません';
 
   @override
-  String get routineLoadingPrepareFailed => '질문을 준비하지 못했어요';
+  String get routineLoadingPrepareFailed => '質問を準備できませんでした';
 
   @override
-  String get routineLoadingGenerateFailed => '카드를 만들지 못했어요';
+  String get routineLoadingGenerateFailed => 'カードを作れませんでした';
 
   @override
-  String get routineLoadingInputNeededTitle => '어떤 일과인지 알려 주세요';
+  String get routineLoadingInputNeededTitle => 'どんな日課か教えてください';
 
   @override
-  String get routineLoadingEditInput => '다시 적기';
+  String get routineLoadingEditInput => '書き直す';
 
   @override
   String routineLoadingPercent(int percent) {
-    return '$percent% 진행됐어요';
+    return '$percent% 進みました';
   }
 
   @override
-  String get routineLoadingRetry => '다시 하기';
+  String get routineLoadingRetry => 'もう一度';
 
   @override
-  String get routineLoadingHome => '홈으로';
+  String get routineLoadingHome => 'ホームへ';
 
   @override
-  String get draftRoutinesTitle => '임시저장';
+  String get draftRoutinesTitle => '下書き';
 
   @override
-  String get draftRoutinesLoadFailedFallback => '임시저장을 불러오지 못했어요';
+  String get draftRoutinesLoadFailedFallback => '下書きを読み込めませんでした';
 
   @override
-  String get draftRoutinesDeleteLabel => '임시저장 지우기';
+  String get draftRoutinesDeleteLabel => '下書きを消す';
 
   @override
-  String get draftRoutinesDeleteConfirmTitle => '임시저장을 지울까요?';
+  String get draftRoutinesDeleteConfirmTitle => '下書きを消しますか？';
 
   @override
-  String get draftRoutinesDeleteAction => '지우기';
+  String get draftRoutinesDeleteAction => '消す';
 
   @override
-  String get draftRoutinesDeleteFailedTitle => '임시저장을 지우지 못했어요';
+  String get draftRoutinesDeleteFailedTitle => '下書きを消せませんでした';
 
   @override
-  String get draftRoutinesDeleteFailedFallback => '잠시 후 다시 시도해주세요';
+  String get draftRoutinesDeleteFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get draftRoutinesRewardUnset => '보상 아직 안 정했어요';
+  String get draftRoutinesRewardUnset => 'ごほうびはまだ決めていません';
 
   @override
-  String get draftRoutinesRewardLabel => '완료 시';
+  String get draftRoutinesRewardLabel => '完了したら';
 
   @override
-  String get draftRoutinesResume => '이어서';
+  String get draftRoutinesResume => '続ける';
 
   @override
-  String get draftRoutinesEmptyTitle => '만들다 만 일과가 없어요';
+  String get draftRoutinesEmptyTitle => '作りかけの日課はありません';
 
   @override
-  String get draftRoutinesEmptyBody => '일과를 만들다 그만두면 여기에 남아요';
+  String get draftRoutinesEmptyBody => '日課を作る途中でやめると、ここに残ります';
 
   @override
-  String get cardReviewDeleteConfirmTitle => '카드를 지울까요?';
+  String get cardReviewDeleteConfirmTitle => 'カードを消しますか？';
 
   @override
-  String get cardReviewDeleteAction => '지우기';
+  String get cardReviewDeleteAction => '消す';
 
   @override
-  String get cardReviewSoundFailedTitle => '소리를 재생하지 못했어요';
+  String get cardReviewSoundFailedTitle => '音を再生できませんでした';
 
   @override
-  String get cardReviewSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
+  String get cardReviewSoundFailedFallback => '端末の音をオンにして、もう一度タップしてください';
 
   @override
-  String get cardReviewSaveFailedTitle => '일과를 저장하지 못했어요';
+  String get cardReviewSaveFailedTitle => '日課を保存できませんでした';
 
   @override
-  String get cardReviewSaveFailedFallback => '잠시 후 다시 시도해주세요';
+  String get cardReviewSaveFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get cardReviewEditFailedTitle => '고친 내용을 저장하지 못했어요';
+  String get cardReviewEditFailedTitle => '直した内容を保存できませんでした';
 
   @override
-  String get cardReviewEditFailedFallback => '잠시 후 다시 시도해주세요';
+  String get cardReviewEditFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get cardReviewAddFailedTitle => '카드를 추가하지 못했어요';
+  String get cardReviewAddFailedTitle => 'カードを追加できませんでした';
 
   @override
-  String get cardReviewAddFailedFallback => '잠시 후 다시 시도해주세요';
+  String get cardReviewAddFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
   String get cardImageGeneratingLabel => '絵を作っています';
@@ -1343,72 +1334,72 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cardImageMissingAfterCreateToast =>
-      '그림을 만들지 못한 카드는 기본 그림으로 넣었어요. 이 카드 수정에서 AI 그림을 그릴 수 있어요';
+      '絵を作れなかったカードには基本の絵を入れました。「このカードを編集」でAIの絵を描けます';
 
   @override
-  String get cardReviewReorderDone => '완료';
+  String get cardReviewReorderDone => '完了';
 
   @override
-  String get cardReviewSave => '카드 저장하기';
+  String get cardReviewSave => 'カードを保存する';
 
   @override
-  String get routineInputTitle => '오늘은 어떤 준비가\n필요한가요?';
+  String get routineInputTitle => '今日はどんな準備が\n必要ですか？';
 
   @override
-  String get routineInputSubtitle => 'AI 도우미 루미가 작은 행동 단계로 나눠 줄게요';
+  String get routineInputSubtitle => 'AIアシスタントのルミが小さな行動のステップに分けます';
 
   @override
-  String get routineInputHint => '평소 이야기하듯 입력해주세요';
+  String get routineInputHint => 'ふだん話すように入力してください';
 
   @override
-  String get routineInputPrivacyNotice => '이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요';
+  String get routineInputPrivacyNotice => '名前・学校・病院・診断名などの個人情報は書かないでください';
 
   @override
-  String get guardianSettingsLogoutConfirmTitle => '로그아웃할까요?';
+  String get guardianSettingsLogoutConfirmTitle => 'ログアウトしますか？';
 
   @override
-  String get guardianSettingsWithdrawConfirmTitle => '회원탈퇴할까요?';
+  String get guardianSettingsWithdrawConfirmTitle => '退会しますか？';
 
   @override
   String get guardianSettingsWithdrawConfirmMessage =>
-      '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요';
+      '作った日課と集めた星がすべて消えます\nもう一度ログインしても元に戻せません';
 
   @override
-  String get guardianSettingsWithdrawConfirmAction => '탈퇴하기';
+  String get guardianSettingsWithdrawConfirmAction => '退会する';
 
   @override
-  String get guardianSettingsWithdrawFailedTitle => '탈퇴하지 못했어요';
+  String get guardianSettingsWithdrawFailedTitle => '退会できませんでした';
 
   @override
-  String get guardianSettingsWithdrawFailedFallback => '잠시 후 다시 시도해주세요';
+  String get guardianSettingsWithdrawFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
   String get guardianSettingsWithdrawAppStoreSubscriptionNotice =>
-      'Pro 구독은 탈퇴해도 이어져요\n앱스토어에서\n직접 해지해 주세요';
+      'Proの購読は退会しても続きます\nApp Storeで\nご自身で解約してください';
 
   @override
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice =>
-      '탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요';
+      '退会すると、Google PlayのPro購読の\n次回の支払いを止めます';
 
   @override
-  String get guardianSettingsWithdrawProNotice => 'Pro도 함께 사라져요';
+  String get guardianSettingsWithdrawProNotice => 'Proも一緒になくなります';
 
   @override
   String guardianSettingsWithdrawProGiftNotice(String date) {
-    return '$date까지 쓸 수 있는\nPro 선물도 사라져요';
+    return '$dateまで使える\nProのプレゼントもなくなります';
   }
 
   @override
-  String get guardianSettingsWithdrawProTrialNotice => 'Pro 체험도 함께 사라져요';
+  String get guardianSettingsWithdrawProTrialNotice => 'Proのお試しも一緒になくなります';
 
   @override
   String guardianSettingsWithdrawCreditsNotice(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count個',
     );
-    return '남은 크레딧 $_temp0도 사라져요';
+    return '残りのクレジット$_temp0もなくなります';
   }
 
   @override
@@ -1419,130 +1410,133 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count個',
     );
     String _temp1 = intl.Intl.pluralLogic(
       purchased,
       locale: localeName,
-      other: '$purchased개',
+      other: '$purchased個',
     );
-    return '남은 크레딧 $_temp0도 사라져요\n산 크레딧 $_temp1도 들어 있어요';
+    return '残りのクレジット$_temp0もなくなります\n購入したクレジット$_temp1も含まれます';
   }
 
   @override
-  String get guardianSettingsWithdrawCreditsUnknownNotice => '남은 크레딧도 모두 사라져요';
+  String get guardianSettingsWithdrawCreditsUnknownNotice =>
+      '残りのクレジットもすべてなくなります';
 
   @override
-  String get guardianSettingsWithdrawAppStoreStepTitle => '앱스토어 구독을 먼저 해지해 주세요';
+  String get guardianSettingsWithdrawAppStoreStepTitle =>
+      '先にApp Storeの購読を解約してください';
 
   @override
   String get guardianSettingsWithdrawAppStoreStepMessage =>
-      '탈퇴만 하면 결제가 이어져요\n해지하지 않아도 탈퇴는 할 수 있어요';
+      '退会だけでは支払いが続きます\n解約しなくても退会はできます';
 
   @override
-  String get guardianSettingsWithdrawAppStoreStepContinue => '계속하기';
+  String get guardianSettingsWithdrawAppStoreStepContinue => '続ける';
 
   @override
-  String get guardianSettingsWithdrawDone => '탈퇴했어요. 그동안 이룸을 써 주셔서 고마워요';
+  String get guardianSettingsWithdrawDone =>
+      '退会しました。これまでelumを使っていただき、ありがとうございました';
 
   @override
-  String get guardianSettingsWithdrawTypeTitle => '한 번 더 확인할게요';
+  String get guardianSettingsWithdrawTypeTitle => 'もう一度確認します';
 
   @override
   String guardianSettingsWithdrawTypeMessage(String phrase) {
-    return '아래 칸에 \'$phrase\'라고\n똑같이 입력해 주세요';
+    return '下の欄に「$phrase」と\n同じように入力してください';
   }
 
   @override
-  String get guardianSettingsWithdrawTypePhrase => '회원탈퇴';
+  String get guardianSettingsWithdrawTypePhrase => '退会する';
 
   @override
-  String get guardianSettingsWithdrawTypeAction => '탈퇴하기';
+  String get guardianSettingsWithdrawTypeAction => '退会する';
 
   @override
-  String get guardianSettingsTitle => '설정';
+  String get guardianSettingsTitle => '設定';
 
   @override
-  String get guardianSettingsPeople => '함께하는 사람';
+  String get guardianSettingsPeople => '一緒に見守る人';
 
   @override
-  String get guardianSettingsDrafts => '임시저장';
+  String get guardianSettingsDrafts => '下書き';
 
   @override
-  String get guardianSettingsPinChange => '비밀암호 변경하기';
+  String get guardianSettingsPinChange => 'パスコードを変更する';
 
   @override
-  String get guardianSettingsTerms => '약관 및 개인정보처리방침';
+  String get guardianSettingsTerms => '利用規約とプライバシーポリシー';
 
   @override
-  String get guardianSettingsFeedback => '의견 보내기';
+  String get guardianSettingsFeedback => 'ご意見を送る';
 
   @override
-  String get feedbackTitle => '의견 보내기';
+  String get feedbackTitle => 'ご意見を送る';
 
   @override
-  String get feedbackHint => '불편했던 점을 편하게 적어 주세요';
+  String get feedbackHint => '使いにくかったことを気軽に書いてください';
 
   @override
-  String get feedbackIncludeLog => '앱 상태 기록과 기기 정보 보내기';
+  String get feedbackIncludeLog => 'アプリの状態記録と端末情報を送る';
 
   @override
-  String get feedbackSend => '보내기';
+  String get feedbackSend => '送る';
 
   @override
-  String get feedbackSent => '의견을 보냈어요';
+  String get feedbackSent => 'ご意見を送りました';
 
   @override
-  String get feedbackFailedTitle => '의견을 보내지 못했어요';
+  String get feedbackFailedTitle => 'ご意見を送れませんでした';
 
   @override
-  String get feedbackFailedFallback => '적은 글은 그대로 있어요. 잠시 후 다시 보내 주세요';
+  String get feedbackFailedFallback => '書いた内容はそのまま残っています。しばらくしてからもう一度送ってください';
 
   @override
-  String get guardianSettingsLogout => '로그아웃';
+  String get guardianSettingsLogout => 'ログアウト';
 
   @override
-  String get guardianSettingsWithdraw => '회원탈퇴';
+  String get guardianSettingsWithdraw => '退会';
 
   @override
-  String get guardianSettingsLinkConnected => '이룸이 기기';
+  String get guardianSettingsLinkConnected => 'Elumiの端末';
 
   @override
-  String get guardianSettingsLinkConnect => '이룸이 기기 연결하기';
+  String get guardianSettingsLinkConnect => 'Elumiの端末をつなげる';
 
   @override
-  String get guardianSettingsLinkStatus => '연결됨';
+  String get guardianSettingsLinkStatus => '接続済み';
 
   @override
-  String get guardianSettingsProfileSwitch => '이룸이 바꾸기';
+  String get guardianSettingsProfileSwitch => 'Elumiを切り替える';
 
   @override
-  String get guardianSettingsImageStyle => '그림 방식';
+  String get guardianSettingsImageStyle => '絵のスタイル';
 
   @override
-  String get guardianSettingsHaptic => '카드 체크 진동';
+  String get guardianSettingsHaptic => 'カードチェック時の振動';
 
   @override
-  String get guardianSettingsPraiseSound => '카드 체크 칭찬 소리';
+  String get guardianSettingsPraiseSound => 'カードチェック時のほめる音';
 
   @override
-  String get guardianSettingsScreenAwake => '카드 볼 때 화면 켜 두기';
+  String get guardianSettingsScreenAwake => 'カードを見るとき画面をつけておく';
 
   @override
-  String get questionMakeCards => '카드 만들기';
+  String get questionMakeCards => 'カードを作る';
 
   @override
-  String get questionCustomAdd => '+ 직접 입력하기';
+  String get questionCustomAdd => '+ 自分で入力する';
 
   @override
-  String get questionCustomHint => '직접 적어주세요';
+  String get questionCustomHint => 'ここに書いてください';
 
   @override
-  String get questionCustomClose => '직접 입력 닫기';
+  String get questionCustomClose => '自分で入力を閉じる';
 
   @override
   String questionClearLabel(String label) {
-    return '$label 지우기';
+    return '$labelを消す';
   }
 
   @override
@@ -1550,378 +1544,375 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '카드 $count개를 만들었어요',
+      other: 'カードを$count枚作りました',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardReviewRewardLead => '완료 시 ';
+  String get cardReviewRewardLead => '完了したら ';
 
   @override
-  String get cardReviewRewardSet => '보상 정하기';
+  String get cardReviewRewardSet => 'ごほうびを決める';
 
   @override
-  String get cardReviewReorderHint => '카드를 길게 눌러 순서를 바꿀 수 있어요';
+  String get cardReviewReorderHint => 'カードを長押しすると順番を変えられます';
 
   @override
-  String get cardReviewToolReorder => '카드 순서 변경';
+  String get cardReviewToolReorder => 'カードの順番を変更';
 
   @override
-  String get cardReviewToolEdit => '이 카드 수정';
+  String get cardReviewToolEdit => 'このカードを編集';
 
   @override
-  String get cardReviewToolAdd => '카드 추가';
+  String get cardReviewToolAdd => 'カードを追加';
 
   @override
-  String get cardReviewReorderTitle => '카드 순서 변경';
+  String get cardReviewReorderTitle => 'カードの順番を変更';
 
   @override
-  String get cardReviewReorderCancel => '순서 변경 취소';
+  String get cardReviewReorderCancel => '順番の変更をやめる';
 
   @override
-  String get cardReviewEmptyTitle => '만들어진 카드가 없어요';
+  String get cardReviewEmptyTitle => '作られたカードはありません';
 
   @override
-  String get cardReviewEmptyBody => '일과를 처음부터 다시 만들어 주세요';
+  String get cardReviewEmptyBody => '日課を最初から作り直してください';
 
   @override
-  String get cardReviewEmptyAction => '다시 만들기';
+  String get cardReviewEmptyAction => '作り直す';
 
   @override
-  String get cardMoveForward => '앞으로 옮기기';
+  String get cardMoveForward => '前に移す';
 
   @override
-  String get cardMoveBackward => '뒤로 옮기기';
+  String get cardMoveBackward => '後ろに移す';
 
   @override
-  String get cardSpeakStop => '읽기 멈추기';
+  String get cardSpeakStop => '読み上げを止める';
 
   @override
-  String get cardSpeak => '소리로 듣기';
+  String get cardSpeak => '音で聞く';
 
   @override
-  String get cardDeleteLabel => '이 카드 지우기';
+  String get cardDeleteLabel => 'このカードを消す';
 
   @override
-  String get cardAddPhoto => '사진 추가';
+  String get cardAddPhoto => '写真を追加';
 
   @override
-  String get cardViewerBarrierLabel => '카드 닫기';
+  String get cardViewerBarrierLabel => 'カードを閉じる';
 
   @override
-  String get cardViewerSoundFailedTitle => '소리를 재생하지 못했어요';
+  String get cardViewerSoundFailedTitle => '音を再生できませんでした';
 
   @override
-  String get cardViewerSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
+  String get cardViewerSoundFailedFallback => '端末の音をオンにして、もう一度タップしてください';
 
   @override
-  String get cardViewerClose => '카드 닫기';
+  String get cardViewerClose => 'カードを閉じる';
 
   @override
-  String get cardEditAddTitle => '새로운 카드 추가';
+  String get cardEditAddTitle => '新しいカードを追加';
 
   @override
-  String get cardEditTitle => '카드 수정';
+  String get cardEditTitle => 'カードを編集';
 
   @override
-  String get cardEditFieldTitle => '제목';
+  String get cardEditFieldTitle => 'タイトル';
 
   @override
-  String get cardEditTitleHint => '카드 제목을 적어주세요';
+  String get cardEditTitleHint => 'カードのタイトルを書いてください';
 
   @override
-  String get cardEditFieldDescription => '설명';
+  String get cardEditFieldDescription => '説明';
 
   @override
-  String get cardEditDescriptionHint => '카드 설명을 적어주세요';
+  String get cardEditDescriptionHint => 'カードの説明を書いてください';
 
   @override
-  String get cardEditAddAction => '추가하기';
+  String get cardEditAddAction => '追加する';
 
   @override
-  String get cardEditDoneAction => '완료';
+  String get cardEditDoneAction => '完了';
 
   @override
-  String get cardPhotoPermissionTake => '사진 찍기';
+  String get cardPhotoPermissionTake => '写真を撮る';
 
   @override
-  String get cardPhotoPermissionGallery => '갤러리에서 고르기';
+  String get cardPhotoPermissionGallery => 'ギャラリーから選ぶ';
 
   @override
-  String get cardPhotoPermissionOpenSettings => '설정 열기';
+  String get cardPhotoPermissionOpenSettings => '設定を開く';
 
   @override
-  String get cardPhotoPermissionCameraTitle => '카메라를 쓸 수 없어요';
+  String get cardPhotoPermissionCameraTitle => 'カメラを使えません';
 
   @override
-  String get cardPhotoPermissionGalleryTitle => '사진을 볼 수 없어요';
+  String get cardPhotoPermissionGalleryTitle => '写真を見られません';
 
   @override
-  String get cardPhotoPermissionCameraBody => '기기 설정에서 카메라를 켜면 사진을 찍을 수 있어요';
+  String get cardPhotoPermissionCameraBody => '端末の設定でカメラをオンにすると写真を撮れます';
 
   @override
-  String get cardPhotoPermissionGalleryBody => '기기 설정에서 사진 접근을 켜면 고를 수 있어요';
+  String get cardPhotoPermissionGalleryBody => '端末の設定で写真へのアクセスをオンにすると選べます';
 
   @override
-  String get cardPhotoSettingsFailedTitle => '설정을 열지 못했어요';
+  String get cardPhotoSettingsFailedTitle => '設定を開けませんでした';
 
   @override
-  String get cardPhotoSettingsFailedFallback => '기기 설정에서 직접 켜 주세요';
+  String get cardPhotoSettingsFailedFallback => '端末の設定から直接オンにしてください';
 
   @override
-  String get cardPhotoSourceTake => '사진 찍기';
+  String get cardPhotoSourceTake => '写真を撮る';
 
   @override
-  String get cardPhotoSourceGallery => '갤러리에서 고르기';
+  String get cardPhotoSourceGallery => 'ギャラリーから選ぶ';
 
   @override
   String cardPhotoUploadFailedDialog(String message) {
-    return '사진을 올리지 못했어요.\n$message';
+    return '写真をアップロードできませんでした。\n$message';
   }
 
   @override
-  String get cardPhotoChange => '사진 바꾸기';
+  String get cardPhotoChange => '写真を変える';
 
   @override
-  String get cardPhotoUploading => '사진을 올리고 있어요';
+  String get cardPhotoUploading => '写真をアップロードしています';
 
   @override
-  String get cardPhotoUploadFailed => '사진을 올리지 못했어요';
+  String get cardPhotoUploadFailed => '写真をアップロードできませんでした';
 
   @override
-  String get cardPhotoRetry => '다시 하기';
+  String get cardPhotoRetry => 'もう一度';
 
   @override
-  String get creditCardTitle => '이번 주 AI 생성';
+  String get creditCardTitle => '今週のAI作成';
 
   @override
-  String get creditCardTitleMonth => '이번 달 AI 생성';
+  String get creditCardTitleMonth => '今月のAI作成';
 
   @override
-  String get creditCardLoading => '이번 주 AI 생성 사용량을 불러오고 있어요';
+  String get creditCardLoading => '今週のAI作成の使用量を読み込んでいます';
 
   @override
-  String get creditCardLoadingMonth => '이번 달 AI 생성 사용량을 불러오고 있어요';
+  String get creditCardLoadingMonth => '今月のAI作成の使用量を読み込んでいます';
 
   @override
-  String get creditCardLoadFailed => '사용량을 불러오지 못했어요';
+  String get creditCardLoadFailed => '使用量を読み込めませんでした';
 
   @override
-  String get creditCardRetry => '다시 하기';
+  String get creditCardRetry => 'もう一度';
 
   @override
-  String get creditGenerating => '일과를 만들고 있어요';
+  String get creditGenerating => '日課を作っています';
 
   @override
-  String get creditExhausted => '이번 주 크레딧을 모두 사용했어요';
+  String get creditExhausted => '今週のクレジットをすべて使いました';
 
   @override
-  String get creditExhaustedMonth => '이번 달 크레딧을 모두 사용했어요';
+  String get creditExhaustedMonth => '今月のクレジットをすべて使いました';
 
   @override
-  String get creditExhaustedStillOk => '만든 일과 보기와 직접 고치기는 계속 할 수 있어요';
+  String get creditExhaustedStillOk => '作った日課を見ることと、自分で直すことは続けてできます';
 
   @override
-  String get creditInfoLabel => 'AI 크레딧 안내';
+  String get creditInfoLabel => 'AIクレジットのご案内';
 
   @override
   String creditAmountLeft(int available, int weekly) {
-    return '$available / $weekly 크레딧 남음';
+    return '残り $available / $weekly クレジット';
   }
 
   @override
   String creditAmountRest(int weekly) {
-    return ' / $weekly 크레딧 남음';
+    return ' / $weekly クレジット残り';
   }
 
   @override
   String aiCreditResetLine(String reset) {
-    return '$reset에 다시 채워져요';
+    return '$resetにまた補充されます';
   }
 
   @override
-  String get routineCreateButton => '새로운 일과 만들기';
+  String get routineCreateButton => '新しい日課を作る';
 
   @override
-  String get routineSwipeDelete => '일과 지우기';
+  String get routineSwipeDelete => '日課を消す';
 
   @override
-  String get routineSwipeEdit => '일과 수정';
+  String get routineSwipeEdit => '日課を編集';
 
   @override
-  String get routineFlowHomeLabel => '홈으로 가기';
+  String get routineFlowHomeLabel => 'ホームへ行く';
 
   @override
-  String get routineFlowDraftLabel => '임시저장';
+  String get routineFlowDraftLabel => '下書き';
 
   @override
-  String get routineFlowLeaveStay => '계속 만들기';
+  String get routineFlowLeaveStay => '作り続ける';
 
   @override
-  String get routineFlowLeaveConfirm => '나가기';
+  String get routineFlowLeaveConfirm => '出る';
 
   @override
-  String get routineLeaveDiscardTitle => '일과 만들기를 그만둘까요?';
+  String get routineLeaveDiscardTitle => '日課作りをやめますか？';
 
   @override
-  String get routineLeaveDiscardMessage => '지금 나가면 적은 내용은 남지 않아요';
+  String get routineLeaveDiscardMessage => '今出ると、書いた内容は残りません';
 
   @override
-  String get routineLeaveDraftWhenReadyTitle => '임시저장에 두고 나갈까요?';
+  String get routineLeaveDraftWhenReadyTitle => '下書きに残して出ますか？';
 
   @override
   String get routineLeaveDraftWhenReadyMessage =>
-      '카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요';
+      'カードができあがると下書きに残ります\nマイ情報から続きを作れます';
 
   @override
-  String get routineLeaveDraftTitle => '임시저장에 두고 나갈까요?';
+  String get routineLeaveDraftTitle => '下書きに残して出ますか？';
 
   @override
-  String get routineLeaveDraftMessage => '내정보의 임시저장에서\n이어서 만들 수 있어요';
+  String get routineLeaveDraftMessage => 'マイ情報の下書きから\n続きを作れます';
 
   @override
-  String get routineLeaveEditTitle => '저장하지 않고 나갈까요?';
+  String get routineLeaveEditTitle => '保存せずに出ますか？';
 
   @override
-  String get routineLeaveEditMessage => '뺀 카드는 저장하기를 눌러야 빠져요';
+  String get routineLeaveEditMessage => '外したカードは「保存する」を押すと外れます';
 
   @override
-  String get routineTileRewardLabel => '완료 시';
+  String get routineTileRewardLabel => '完了したら';
 
   @override
-  String get routineTileRerun => '일과 다시하기';
+  String get routineTileRerun => '日課をもう一度';
 
   @override
-  String get routineDetailReorderFailedTitle => '순서를 저장하지 못했어요';
+  String get routineDetailReorderFailedTitle => '順番を保存できませんでした';
 
   @override
-  String get routineDetailReorderFailedFallback => '잠시 후 다시 시도해주세요';
+  String get routineDetailReorderFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get routineDetailRerun => '일과 다시하기';
+  String get routineDetailRerun => '日課をもう一度';
 
   @override
-  String get routineDetailEdit => '편집하기';
+  String get routineDetailEdit => '編集する';
 
   @override
   String routineDetailTodayProgress(int done, int total) {
-    return '오늘 $done/$total 했어요';
+    return '今日 $done/$total できました';
   }
 
   @override
   String routineDetailPastProgress(int done, int total) {
-    return '$done/$total 했어요';
+    return '$done/$total できました';
   }
 
   @override
-  String get routineDetailExportLabel => '인쇄용';
+  String get routineDetailExportLabel => '印刷用';
 
   @override
-  String get routineDetailFinishedToday => '다 끝낸 일과예요';
+  String get routineDetailFinishedToday => 'すべて終わった日課です';
 
   @override
-  String get routineDetailOpenHint => '눌러서 카드 크게 보기';
+  String get routineDetailOpenHint => 'タップしてカードを大きく見る';
 
   @override
-  String get routineDetailNoReward => '일과 완료 후 보상이 없어요';
+  String get routineDetailNoReward => '日課のあとのごほうびはありません';
 
   @override
-  String get rewardInputHint => '예) 유튜브 10분 보기';
+  String get rewardInputHint => '例）動画を10分見る';
 
   @override
-  String get todayRoutineReorderFailedTitle => '순서를 저장하지 못했어요';
+  String get todayRoutineReorderFailedTitle => '順番を保存できませんでした';
 
   @override
-  String get todayRoutineReorderFailedFallback => '잠시 후 다시 시도해주세요';
+  String get todayRoutineReorderFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get todayRoutineDeleteConfirmTitle => '일과를 지울까요?';
+  String get todayRoutineDeleteConfirmTitle => '日課を消しますか？';
 
   @override
-  String get todayRoutineStartedTitle => '이룸이가 시작한 일과예요';
+  String get todayRoutineStartedTitle => 'Elumiが始めた日課です';
 
   @override
-  String get todayRoutineStartedMessage => '한 일이 기록으로 남도록 지울 수 없어요';
+  String get todayRoutineStartedMessage => 'やったことが記録に残るように、消すことはできません';
 
   @override
-  String get todayRoutineDeleteAction => '지우기';
+  String get todayRoutineDeleteAction => '消す';
 
   @override
-  String get todayRoutineDeleteFailedTitle => '일과를 지우지 못했어요';
+  String get todayRoutineDeleteFailedTitle => '日課を消せませんでした';
 
   @override
-  String get todayRoutineDeleteFailedFallback => '잠시 후 다시 시도해주세요';
+  String get todayRoutineDeleteFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get todayRoutineLoadFailedFallback => '일과를 불러오지 못했어요';
+  String get todayRoutineLoadFailedFallback => '日課を読み込めませんでした';
 
   @override
-  String get todayRoutineRerunFailedTitle => '일과를 다시 만들지 못했어요';
+  String get todayRoutineRerunFailedTitle => '日課を作り直せませんでした';
 
   @override
-  String get todayRoutineRerunFailedFallback => '잠시 후 다시 시도해주세요';
+  String get todayRoutineRerunFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
   String todayRoutineCopied(String title, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$title$_temp0 오늘 일과에 담았어요';
+    return '$titleを今日の日課に入れました';
   }
 
   @override
-  String get todayRoutinePastLoadFailedFallback => '지난 일과를 불러오지 못했어요';
+  String get todayRoutinePastLoadFailedFallback => '過去の日課を読み込めませんでした';
 
   @override
-  String get todayRoutineEmptyTitle => '아직 만든 일과가 없어요';
+  String get todayRoutineEmptyTitle => 'まだ作った日課はありません';
 
   @override
-  String get todayRoutineEmptyHint => '오늘의 첫 행동카드를 만들어보세요';
+  String get todayRoutineEmptyHint => '今日最初の行動カードを作ってみましょう';
 
   @override
-  String get todayRoutinePastEmpty => '지난 일과가 없어요';
+  String get todayRoutinePastEmpty => '過去の日課はありません';
 
   @override
-  String get homeCoachCreate => '이룸이가 할 *새로운\n일과를 만들 수 있어요*';
+  String get homeCoachCreate => 'Elumiがする*新しい\n日課を作れます*';
 
   @override
-  String get homeCoachSwipe => '일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요';
+  String get homeCoachSwipe => '日課を*左にスライドすると*\n*編集したり消したり*できます';
 
   @override
-  String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
+  String get homeCoachSwitch => 'キャラクターのアイコンを押すと\n*Elumiモードに切り替えられます*';
 
   @override
   String childHomeGreeting(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '오늘 $name$_temp0\n할 일들이에요. 힘내봐요!';
+    return '今日の$nameの\nやることです。がんばりましょう！';
   }
 
   @override
   String childHomeEmptyTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
-    return '아직 $name$_temp0\n일과가 없어요';
+    return '$nameの日課は\nまだありません';
   }
 
   @override
-  String get childHomeEmptyHint => '보호자 화면에서 일과를 만들 수 있어요';
+  String get childHomeEmptyHint => '保護者モードで日課を作れます';
 
   @override
-  String get childHomeEmptyHintDevice => '보호자 기기에서 일과를 만들 수 있어요';
+  String get childHomeEmptyHintDevice => '保護者の端末で日課を作れます';
 
   @override
-  String get childHomeToGuardianLabel => '보호자 화면으로 가기';
+  String get childHomeToGuardianLabel => '保護者モードへ行く';
 
   @override
-  String get childHomeSettingsLabel => '설정 열기';
+  String get childHomeSettingsLabel => '設定を開く';
 
   @override
-  String get childHomeRewardPrefix => '다하면';
+  String get childHomeRewardPrefix => 'できたら';
 
   @override
   String childStarsEarned(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!',
+      other: '星を$count個もらいました\nやることをやりとげて、もっと星を見つけましょう！',
     );
     return '$_temp0';
   }
@@ -1931,117 +1922,116 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '별 $count개 모았어요',
+      other: '星を$count個集めました',
     );
     return '$_temp0';
   }
 
   @override
   String childCardPagerLabel(int total, int index) {
-    return '카드 $total장 중 $index번째';
+    return 'カード$total枚のうち$index枚目';
   }
 
   @override
-  String get childDetailSoundFailedTitle => '소리를 재생하지 못했어요';
+  String get childDetailSoundFailedTitle => '音を再生できませんでした';
 
   @override
-  String get childDetailSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
+  String get childDetailSoundFailedFallback => '端末の音をオンにして、もう一度タップしてください';
 
   @override
-  String get childDetailCheckLabel => '다 했어요';
+  String get childDetailCheckLabel => 'できました';
 
   @override
-  String get rewardBannerPrefix => '다하면 ';
+  String get rewardBannerPrefix => 'できたら ';
 
   @override
-  String get rewardLumiTitle => '축하해요!';
+  String get rewardLumiTitle => 'おめでとう！';
 
   @override
   String rewardLumiMessage(String name) {
-    return '할 일을 해내서 루미가\n$name에게 별을 가져왔어요';
+    return 'やることができたので、ルミが\n$nameに星を持ってきました';
   }
 
   @override
-  String get rewardLumiButton => '오예!';
+  String get rewardLumiButton => 'やったー！';
 
   @override
-  String get rewardPopoTitle => '잘했어요!';
+  String get rewardPopoTitle => 'よくできました！';
 
   @override
   String rewardPopoMessage(String name) {
-    return '포포가 $name에게\n축하의 선물로 큰 별을 가져왔어요';
+    return 'ポポが$nameに\nお祝いのプレゼントとして大きな星を持ってきました';
   }
 
   @override
-  String get rewardPopoButton => '좋아요!';
+  String get rewardPopoButton => 'うれしい！';
 
   @override
-  String get rewardRuruTitle => '멋져요!';
+  String get rewardRuruTitle => 'すごいです！';
 
   @override
   String rewardRuruMessage(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '$name$_temp0 할 일을 해내서\n루루가 선물을 가져왔다고 해요';
+    return '$nameがやることをやりとげたので\nルルがプレゼントを持ってきました';
   }
 
   @override
-  String get rewardRuruButton => '신난다!';
+  String get rewardRuruButton => 'わーい！';
 
   @override
-  String get routineDoneTitle => '일과를 끝냈어요!';
+  String get routineDoneTitle => '日課が終わりました！';
 
   @override
   String routineDoneMessage(String name) {
-    return '할 일을 모두 해낸\n$name를 위해 준비했어요';
+    return 'やることをすべてやりとげた\n$nameのために用意しました';
   }
 
   @override
-  String get routineDoneButton => '해냈어요!';
+  String get routineDoneButton => 'できました！';
 
   @override
-  String get modeSwitchToChild => '암호를 입력하면 이룸이 화면으로 바뀌어요';
+  String get modeSwitchToChild => 'パスコードを入力するとElumiモードに切り替わります';
 
   @override
-  String get modeSwitchToGuardian => '암호를 입력하면 보호자 화면으로 바뀌어요';
+  String get modeSwitchToGuardian => 'パスコードを入力すると保護者モードに切り替わります';
 
   @override
-  String get modeSwitchTitle => '비밀암호를 입력해 주세요';
+  String get modeSwitchTitle => 'パスコードを入力してください';
 
   @override
-  String get modeSwitchMismatch => '암호가 달라요. 다시 넣어주세요';
+  String get modeSwitchMismatch => 'パスコードが違います。もう一度入力してください';
 
   @override
-  String get modeSwitchPinLabel => '암호 넣기';
+  String get modeSwitchPinLabel => 'パスコードを入力';
 
   @override
-  String get pinForgotLink => '비밀암호를 잊었어요';
+  String get pinForgotLink => 'パスコードを忘れました';
 
   @override
-  String get pinForgotTitle => '비밀암호가 생각나지 않나요?';
+  String get pinForgotTitle => 'パスコードを思い出せませんか？';
 
   @override
-  String get pinForgotMessage => '보호자 계정으로 다시 로그인하면\n새 비밀암호를 정할 수 있어요';
+  String get pinForgotMessage => '保護者アカウントでもう一度ログインすると\n新しいパスコードを決められます';
 
   @override
-  String get pinForgotRelogin => '다시 로그인';
+  String get pinForgotRelogin => 'もう一度ログイン';
 
   @override
-  String get modeSwitchReadFailedTitle => '암호를 확인하지 못했어요';
+  String get modeSwitchReadFailedTitle => 'パスコードを確認できませんでした';
 
   @override
-  String get modeSwitchReadFailedFallback => '잠시 후 다시 해주세요';
+  String get modeSwitchReadFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get modeSwitchBlockedTitle => '보호자 기기에서\n열어 주세요';
+  String get modeSwitchBlockedTitle => '保護者の端末で\n開いてください';
 
   @override
-  String get modeSwitchBlockedDescription => '이 기기에서는 보호자 화면을 열 수 없어요';
+  String get modeSwitchBlockedDescription => 'この端末では保護者モードを開けません';
 
   @override
-  String get modeSwitchBlockedBack => '돌아가기';
+  String get modeSwitchBlockedBack => '戻る';
 
   @override
-  String get installationRetryTitle => '잠깐 문제가 생겼어요';
+  String get installationRetryTitle => '少し問題が起きました';
 
   @override
   String get installationRetryMessage => 'ログイン情報を確認できませんでした。もう一度お試しください。';
@@ -2050,10 +2040,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get installationRetryButton => '再試行';
 
   @override
-  String get issuedCodeCopyButton => '코드 복사하기';
+  String get issuedCodeCopyButton => 'コードをコピーする';
 
   @override
-  String get issuedCodeCopied => '코드를 복사했어요';
+  String get issuedCodeCopied => 'コードをコピーしました';
 
   @override
   String get issuedCodeCopyFailedTitle => 'コピーできませんでした';
@@ -2066,49 +2056,49 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
-      other: '$minutes분',
+      other: '$minutes分',
     );
-    return '이룸이가 쓸 기기를 연결해요. 그 기기에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 $code';
+    return 'Elumiが使う端末をつなげます。その端末で下のリンクをタップすると、elumアプリに接続コードが入ります。\n接続コードは$_temp0間だけ使えます。\n\n$url\n\nリンクが開かないときは、アプリで直接入力してください。\n接続コード $code';
   }
 
   @override
-  String get linkRejectedAlreadyLinked => '이미 연결된 기기예요';
+  String get linkRejectedAlreadyLinked => 'すでにつながっている端末です';
 
   @override
-  String get linkRejectedOnGuardianPhone => '이룸이 기기에서 열어주세요';
+  String get linkRejectedOnGuardianPhone => 'Elumiの端末で開いてください';
 
   @override
-  String get myCreditTitle => '내 크레딧';
+  String get myCreditTitle => 'マイクレジット';
 
   @override
   String get planFreeBadge => 'FREE';
 
   @override
-  String get myCreditKindPeriodicWeek => '주간';
+  String get myCreditKindPeriodicWeek => '週間';
 
   @override
-  String get myCreditKindPeriodicMonth => '월간';
+  String get myCreditKindPeriodicMonth => '月間';
 
   @override
-  String get myCreditKindBonus => '보너스';
+  String get myCreditKindBonus => 'ボーナス';
 
   @override
-  String get myCreditKindPurchased => '산 크레딧';
+  String get myCreditKindPurchased => '購入したクレジット';
 
   @override
-  String get myCreditSubscribeLabel => '구독하면';
+  String get myCreditSubscribeLabel => '購読すると';
 
   @override
-  String get myCreditSubscribeBody => 'AI 그림도 그리고 일과도 알아서 보내요';
+  String get myCreditSubscribeBody => 'AIの絵も描けて、日課も自動で送ります';
 
   @override
-  String get myCreditPackLabelFree => '크레딧만 따로 사기';
+  String get myCreditPackLabelFree => 'クレジットだけ買う';
 
   @override
-  String get myCreditPackLabelPro => '크레딧 더 사기';
+  String get myCreditPackLabelPro => 'クレジットをもっと買う';
 
   @override
-  String get creditGetMore => '크레딧 더 받기';
+  String get creditGetMore => 'クレジットをもっともらう';
 
   @override
   String myCreditPackDiscount(int percent) {
@@ -2116,49 +2106,50 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '인기!';
+  String get myCreditPackPopular => '人気！';
 
   @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개 사기',
+      other: '$count個買う',
     );
-    return '$_temp0 ($price)';
+    return '$_temp0（$price）';
   }
 
   @override
-  String get myCreditPackNoExpiryNote => '구매한 크레딧은 기간 제한이 없어요';
+  String get myCreditPackNoExpiryNote => '購入したクレジットに期限はありません';
 
   @override
-  String get myCreditPackPriceFailed => '크레딧 값을 불러오지 못했어요';
+  String get myCreditPackPriceFailed => 'クレジットの価格を読み込めませんでした';
 
   @override
   String myCreditPackTileLabel(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧 $count개',
+      other: 'クレジット$count個',
     );
-    return '$_temp0, $price';
+    return '$_temp0、$price';
   }
 
   @override
-  String get myCreditPurchaseRecheckTitle => '크레딧을 아직 받지 못했어요';
+  String get myCreditPurchaseRecheckTitle => 'クレジットがまだ届いていません';
 
   @override
-  String get myCreditPurchaseRecheckBody => '결제는 끝났어요. 다시 결제하지 않고 확인만 하면 돼요';
+  String get myCreditPurchaseRecheckBody =>
+      'お支払いは終わっています。もう一度払わずに、確認するだけで大丈夫です';
 
   @override
-  String get creditHistoryTitle => '크레딧 사용 내역';
+  String get creditHistoryTitle => 'クレジットの利用履歴';
 
   @override
-  String get creditMineLink => '내 크레딧 보기';
+  String get creditMineLink => 'マイクレジットを見る';
 
   @override
   String creditHistoryDay(int month, int day) {
-    return '$month월 $day일';
+    return '$month月$day日';
   }
 
   @override
@@ -2167,387 +2158,387 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get creditHistoryKindRoutineText => '일과 글 만들기';
+  String get creditHistoryKindRoutineText => '日課の文を作る';
 
   @override
   String creditHistoryKindCardImages(int count) {
-    return '카드 그림 $count장';
+    return 'カードの絵 $count枚';
   }
 
   @override
-  String get creditHistoryKindCardImage => '카드 그림 만들기';
+  String get creditHistoryKindCardImage => 'カードの絵を作る';
 
   @override
-  String get creditHistoryKindImageRegenerate => '카드 그림 다시 만들기';
+  String get creditHistoryKindImageRegenerate => 'カードの絵を作り直す';
 
   @override
-  String get creditHistoryFree => '크레딧 없이';
+  String get creditHistoryFree => 'クレジットなし';
 
   @override
-  String get creditHistoryKindWeeklyGrant => '이번 주 크레딧을 채워드렸어요';
+  String get creditHistoryKindWeeklyGrant => '今週のクレジットを補充しました';
 
   @override
-  String get creditHistoryKindAdReward => '광고를 보고 받았어요';
+  String get creditHistoryKindAdReward => '広告を見てもらいました';
 
   @override
-  String get creditHistoryKindAdminBonus => '운영에서 보너스를 드렸어요';
+  String get creditHistoryKindAdminBonus => '運営からボーナスをお贈りしました';
 
   @override
-  String get creditHistoryKindOtherGrant => '크레딧을 받았어요';
+  String get creditHistoryKindOtherGrant => 'クレジットをもらいました';
 
   @override
-  String get creditHistoryExpiredWeekTitle => '지난 주 크레딧 정리';
+  String get creditHistoryExpiredWeekTitle => '先週のクレジットの整理';
 
   @override
-  String get creditHistoryExpiredMonthTitle => '지난 달 크레딧 정리';
+  String get creditHistoryExpiredMonthTitle => '先月のクレジットの整理';
 
   @override
-  String get creditHistoryExpiredWeekReason => '안 쓴 주간 크레딧은 넘어가지 않아요';
+  String get creditHistoryExpiredWeekReason => '使わなかった週間クレジットは繰り越されません';
 
   @override
-  String get creditHistoryExpiredMonthReason => '안 쓴 월간 크레딧은 넘어가지 않아요';
+  String get creditHistoryExpiredMonthReason => '使わなかった月間クレジットは繰り越されません';
 
   @override
-  String get creditHistoryAdjustedTitle => '크레딧 조정';
+  String get creditHistoryAdjustedTitle => 'クレジットの調整';
 
   @override
-  String get creditHistoryAdjustedReason => '환불이나 운영 조정이에요';
+  String get creditHistoryAdjustedReason => '返金または運営による調整です';
 
   @override
-  String get creditHistoryKindUnknownSpend => '크레딧을 썼어요';
+  String get creditHistoryKindUnknownSpend => 'クレジットを使いました';
 
   @override
-  String get creditHistoryEmptyTitle => '아직 사용한 크레딧이 없어요';
+  String get creditHistoryEmptyTitle => 'まだ使ったクレジットはありません';
 
   @override
-  String get creditHistoryEmptyBody => '일과를 만들면 여기에 기록돼요';
+  String get creditHistoryEmptyBody => '日課を作るとここに記録されます';
 
   @override
-  String get creditHistoryLoadFailed => '사용 내역을 불러오지 못했어요';
+  String get creditHistoryLoadFailed => '利用履歴を読み込めませんでした';
 
   @override
-  String get creditHistoryMoreFailed => '더 불러오지 못했어요';
+  String get creditHistoryMoreFailed => 'これ以上読み込めませんでした';
 
   @override
-  String get reminderRowLabel => '일과 알림';
+  String get reminderRowLabel => '日課のお知らせ';
 
   @override
-  String get reminderRowOff => '알림 없음';
+  String get reminderRowOff => 'お知らせなし';
 
   @override
   String reminderRowDaily(String time) {
-    return '매일 $time에 알려요';
+    return '毎日$timeにお知らせします';
   }
 
   @override
   String reminderRowOnce(String time) {
-    return '$time에 한 번 알려요';
+    return '$timeに1回お知らせします';
   }
 
   @override
-  String get reminderSheetTitle => '언제 알려 드릴까요?';
+  String get reminderSheetTitle => 'いつお知らせしますか？';
 
   @override
-  String get reminderSheetBody => '정한 시각에 이 기기로 알림이 와요';
+  String get reminderSheetBody => '決めた時刻にこの端末に通知が届きます';
 
   @override
-  String get reminderRepeatDaily => '매일 같은 시각에 알리기';
+  String get reminderRepeatDaily => '毎日同じ時刻にお知らせする';
 
   @override
-  String get reminderTurnOn => '알림 켜기';
+  String get reminderTurnOn => 'お知らせをオンにする';
 
   @override
-  String get reminderUpdate => '알림 시각 바꾸기';
+  String get reminderUpdate => 'お知らせの時刻を変える';
 
   @override
-  String get reminderTurnOff => '알림 끄기';
+  String get reminderTurnOff => 'お知らせをオフにする';
 
   @override
-  String get reminderSavedToast => '알림을 맞췄어요';
+  String get reminderSavedToast => 'お知らせを設定しました';
 
   @override
-  String get reminderClearedToast => '알림을 껐어요';
+  String get reminderClearedToast => 'お知らせをオフにしました';
 
   @override
-  String get reminderPermissionDeniedTitle => '알림이 꺼져 있어요';
+  String get reminderPermissionDeniedTitle => '通知がオフになっています';
 
   @override
   String get reminderPermissionDeniedBody =>
-      '기기 설정에서 이룸 알림을 허용하면 일과 시간을 알려 드려요';
+      '端末の設定でelumの通知を許可すると、日課の時間をお知らせします';
 
   @override
-  String get reminderFailedTitle => '알림을 맞추지 못했어요';
+  String get reminderFailedTitle => 'お知らせを設定できませんでした';
 
   @override
-  String get reminderFailedBody => '잠시 후 다시 해 주세요';
+  String get reminderFailedBody => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get reminderChannelName => '일과 알림';
+  String get reminderChannelName => '日課のお知らせ';
 
   @override
-  String get reminderNotificationTitle => '이룸';
+  String get reminderNotificationTitle => 'elum';
 
   @override
   String reminderNotificationBody(String routineTitle) {
-    return '$routineTitle 할 시간이에요';
+    return '$routineTitleの時間です';
   }
 
   @override
-  String get routineTemplateOpen => '예시 일과 둘러보기';
+  String get routineTemplateOpen => '例の日課を見てみる';
 
   @override
-  String get routineImageStylePillLabel => '카드 그림';
+  String get routineImageStylePillLabel => 'カードの絵';
 
   @override
   String routineImageStylePillSemantics(String style) {
-    return '카드 그림 방식 $style, 눌러서 바꾸기';
+    return 'カードの絵のスタイル $style、タップして変更';
   }
 
   @override
-  String get routineTemplateSheetTitle => '예시 일과';
+  String get routineTemplateSheetTitle => '例の日課';
 
   @override
-  String get routineTemplateSheetBody => '고르면 입력칸에 채워 드려요. 이룸이에게 맞게 고쳐서 보내세요';
+  String get routineTemplateSheetBody => '選ぶと入力欄に入れます。Elumiに合わせて直してから送ってください';
 
   @override
-  String get routineTemplateBeginnerBadge => '처음이라면 추천';
+  String get routineTemplateBeginnerBadge => 'はじめての方におすすめ';
 
   @override
-  String get routineTemplateCategorySelfCare => '생활 습관';
+  String get routineTemplateCategorySelfCare => '生活習慣';
 
   @override
-  String get routineTemplateCategorySelfCareHint => '양치 · 세수 · 옷 입기';
+  String get routineTemplateCategorySelfCareHint => '歯みがき・洗顔・着替え';
 
   @override
-  String get routineTemplateCategoryDailyFlow => '하루 순서';
+  String get routineTemplateCategoryDailyFlow => '一日の流れ';
 
   @override
   String get routineTemplateCategoryDailyFlowHint =>
-      '아침 준비 · 하교 후 · 잠자리 (여러 일을 차례로)';
+      '朝のしたく・下校後・寝る前（いくつかのことを順番に）';
 
   @override
-  String get routineTemplateCategoryHousehold => '집안일';
+  String get routineTemplateCategoryHousehold => '家事';
 
   @override
-  String get routineTemplateCategoryHouseholdHint => '방 정리 · 그릇 치우기 · 빨래 개기';
+  String get routineTemplateCategoryHouseholdHint => '部屋の片づけ・食器の片づけ・洗濯物たたみ';
 
   @override
-  String get routineTemplateCategoryCommunity => '바깥 활동';
+  String get routineTemplateCategoryCommunity => '外での活動';
 
   @override
-  String get routineTemplateCategoryCommunityHint => '버스 타기 · 물건 사기 · 병원 가기';
+  String get routineTemplateCategoryCommunityHint => 'バスに乗る・買い物・病院に行く';
 
   @override
-  String get routineTemplateCategoryLearning => '공부';
+  String get routineTemplateCategoryLearning => '勉強';
 
   @override
-  String get routineTemplateCategoryLearningHint => '숙제 시작 · 이름 쓰기 · 책 읽기';
+  String get routineTemplateCategoryLearningHint => '宿題を始める・名前を書く・本を読む';
 
   @override
-  String get routineTemplateCategoryFeelings => '감정·관계';
+  String get routineTemplateCategoryFeelings => '気持ち・人との関わり';
 
   @override
-  String get routineTemplateCategoryFeelingsHint => '감정 카드 · 인사 · 차례 기다리기';
+  String get routineTemplateCategoryFeelingsHint => '気持ちカード・あいさつ・順番を待つ';
 
   @override
-  String get routineTemplateBrushTeethText => '양치하기';
+  String get routineTemplateBrushTeethText => '歯みがき';
 
   @override
   String get routineTemplateBrushTeethPrompt =>
-      '이룸이가 혼자 양치를 해 보게 하고 싶어. 칫솔과 치약 꺼내기, 양치컵에 물 받기, 이 닦기, 헹구기, 정리하기까지 순서대로 알려 줘';
+      'Elumiがひとりで歯みがきできるようにしたいです。歯ブラシと歯みがき粉を出す、コップに水を入れる、歯をみがく、口をゆすぐ、片づけるまで順番に教えてください';
 
   @override
-  String get routineTemplateWashFaceText => '세수하기';
+  String get routineTemplateWashFaceText => '顔を洗う';
 
   @override
   String get routineTemplateWashFacePrompt =>
-      '이룸이가 아침에 혼자 세수를 해 보게 하고 싶어. 물 틀기, 얼굴 적시기, 비누 거품 내기, 헹구기, 수건으로 닦기, 로션 바르기까지 알려 줘';
+      'Elumiが朝ひとりで顔を洗えるようにしたいです。水を出す、顔をぬらす、せっけんを泡立てる、すすぐ、タオルでふく、ローションをぬるまで教えてください';
 
   @override
-  String get routineTemplateGetDressedText => '혼자 옷 입기';
+  String get routineTemplateGetDressedText => 'ひとりで着替える';
 
   @override
   String get routineTemplateGetDressedPrompt =>
-      '이룸이가 혼자 옷을 입어 보게 하고 싶어. 러닝셔츠, 티셔츠, 바지, 양말 순서로 하나씩 입는 걸 알려 줘';
+      'Elumiがひとりで服を着られるようにしたいです。肌着、Tシャツ、ズボン、くつ下の順にひとつずつ着るのを教えてください';
 
   @override
-  String get routineTemplateEatMealText => '밥 먹기';
+  String get routineTemplateEatMealText => 'ごはんを食べる';
 
   @override
   String get routineTemplateEatMealPrompt =>
-      '이룸이가 식사 시간에 스스로 해 보게 하고 싶어. 물 마시기, 자기 수저와 그릇 가져가기, 앉아서 먹기, 다 먹은 그릇 갖다 놓기까지 알려 줘';
+      'Elumiが食事の時間に自分でできるようにしたいです。水を飲む、自分のはしとお皿を持っていく、座って食べる、食べ終わったお皿を戻すまで教えてください';
 
   @override
-  String get routineTemplateBathTimeText => '목욕하기';
+  String get routineTemplateBathTimeText => 'お風呂に入る';
 
   @override
   String get routineTemplateBathTimePrompt =>
-      '이룸이가 목욕을 순서대로 해 보게 하고 싶어. 옷 벗기, 몸에 물 적시기, 머리 감기, 몸 씻기, 헹구기, 수건으로 닦고 옷 입기까지 알려 줘';
+      'Elumiが順番にお風呂に入れるようにしたいです。服を脱ぐ、体をぬらす、髪を洗う、体を洗う、すすぐ、タオルでふいて服を着るまで教えてください';
 
   @override
-  String get routineTemplateMorningRoutineText => '아침 등교 준비';
+  String get routineTemplateMorningRoutineText => '朝の登校じたく';
 
   @override
   String get routineTemplateMorningRoutinePrompt =>
-      '이룸이가 아침에 일어나서 학교 갈 때까지 할 일을 순서대로 하게 하고 싶어. 일어나기, 화장실 가기, 밥 먹기, 세수와 양치, 옷 입기, 가방 메고 신발 신기까지 알려 줘';
+      'Elumiが朝起きてから学校に行くまでのことを順番にできるようにしたいです。起きる、トイレに行く、ごはんを食べる、顔を洗って歯をみがく、服を着る、かばんを背負ってくつをはくまで教えてください';
 
   @override
-  String get routineTemplateAfterSchoolText => '학교 다녀와서';
+  String get routineTemplateAfterSchoolText => '学校から帰ったら';
 
   @override
   String get routineTemplateAfterSchoolPrompt =>
-      '이룸이가 학교에서 돌아오면 스스로 할 일을 하게 하고 싶어. 신발 정리하기, 손 씻기, 가방 제자리에 두기, 간식 먹기, 쉬는 시간 갖기까지 알려 줘';
+      'Elumiが学校から帰ったら自分でやることをできるようにしたいです。くつをそろえる、手を洗う、かばんを決まった場所に置く、おやつを食べる、休む時間をとるまで教えてください';
 
   @override
-  String get routineTemplateBedtimeText => '자기 전 준비';
+  String get routineTemplateBedtimeText => '寝る前のしたく';
 
   @override
   String get routineTemplateBedtimePrompt =>
-      '이룸이가 잠들기 전에 할 일을 순서대로 하게 하고 싶어. 양치하기, 잠옷 입기, 내일 가방 챙기기, 불 끄고 눕기까지 알려 줘';
+      'Elumiが寝る前にやることを順番にできるようにしたいです。歯みがき、パジャマに着替える、明日のかばんを用意する、電気を消して横になるまで教えてください';
 
   @override
-  String get routineTemplateGoingOutText => '외출 준비';
+  String get routineTemplateGoingOutText => 'お出かけのしたく';
 
   @override
   String get routineTemplateGoingOutPrompt =>
-      '이룸이가 밖에 나가기 전에 스스로 준비하게 하고 싶어. 화장실 다녀오기, 겉옷 입기, 물통과 휴대폰 챙기기, 신발 신기, 문 앞에서 기다리기까지 알려 줘';
+      'Elumiが外に出る前に自分でしたくできるようにしたいです。トイレに行く、上着を着る、水筒と携帯電話を持つ、くつをはく、ドアの前で待つまで教えてください';
 
   @override
-  String get routineTemplateTidyRoomText => '방 정리하기';
+  String get routineTemplateTidyRoomText => '部屋を片づける';
 
   @override
   String get routineTemplateTidyRoomPrompt =>
-      '이룸이가 놀고 난 뒤 방을 스스로 정리하게 하고 싶어. 장난감 모으기, 상자에 넣기, 책 꽂기, 옷 걸기까지 알려 줘';
+      'Elumiが遊んだあと自分で部屋を片づけられるようにしたいです。おもちゃを集める、箱に入れる、本を本棚に戻す、服をかけるまで教えてください';
 
   @override
-  String get routineTemplateClearDishesText => '먹은 그릇 정리하기';
+  String get routineTemplateClearDishesText => '食べたお皿を片づける';
 
   @override
   String get routineTemplateClearDishesPrompt =>
-      '이룸이가 밥을 다 먹고 그릇을 스스로 치우게 하고 싶어. 남은 음식 모으기, 그릇 들고 가기, 싱크대에 넣기, 식탁 닦기까지 알려 줘';
+      'Elumiが食べ終わったら自分でお皿を片づけられるようにしたいです。残った食べ物を集める、お皿を運ぶ、流しに入れる、テーブルをふくまで教えてください';
 
   @override
-  String get routineTemplateFoldLaundryText => '빨래 개기';
+  String get routineTemplateFoldLaundryText => '洗濯物をたたむ';
 
   @override
   String get routineTemplateFoldLaundryPrompt =>
-      '이룸이가 마른 빨래를 개서 정리해 보게 하고 싶어. 빨래 가져오기, 양말 짝 맞추기, 수건 접기, 옷 개기, 서랍에 넣기까지 알려 줘';
+      'Elumiが乾いた洗濯物をたたんで片づけられるようにしたいです。洗濯物を持ってくる、くつ下のペアを合わせる、タオルをたたむ、服をたたむ、引き出しにしまうまで教えてください';
 
   @override
-  String get routineTemplateTakeOutTrashText => '쓰레기 버리기';
+  String get routineTemplateTakeOutTrashText => 'ごみを捨てる';
 
   @override
   String get routineTemplateTakeOutTrashPrompt =>
-      '이룸이가 쓰레기를 나눠서 버리는 걸 해 보게 하고 싶어. 쓰레기 모으기, 종이와 플라스틱 나누기, 봉투 묶기, 정해진 곳에 버리기까지 알려 줘';
+      'Elumiがごみを分けて捨てられるようにしたいです。ごみを集める、紙とプラスチックを分ける、袋をしばる、決まった場所に捨てるまで教えてください';
 
   @override
-  String get routineTemplateRideBusText => '버스 타기';
+  String get routineTemplateRideBusText => 'バスに乗る';
 
   @override
   String get routineTemplateRideBusPrompt =>
-      '이룸이가 혼자 버스를 타 보는 연습을 하고 싶어. 정류장에서 번호 확인하기, 줄 서기, 교통카드 찍기, 자리에 앉기, 내릴 곳에서 벨 누르기까지 알려 줘';
+      'Elumiがひとりでバスに乗る練習をしたいです。バス停で番号を確かめる、列に並ぶ、交通系ICカードをタッチする、席に座る、降りる場所でボタンを押すまで教えてください';
 
   @override
-  String get routineTemplateBuyItemText => '편의점에서 물건 사기';
+  String get routineTemplateBuyItemText => 'コンビニで買い物をする';
 
   @override
   String get routineTemplateBuyItemPrompt =>
-      '이룸이가 편의점에서 혼자 물건을 사 보게 하고 싶어. 살 물건 찾기, 계산대에 줄 서기, 물건 올려놓기, 카드나 돈 내기, 영수증 받고 인사하기까지 알려 줘';
+      'Elumiがコンビニでひとりで買い物できるようにしたいです。買う物を探す、レジに並ぶ、品物を置く、カードかお金で払う、レシートを受け取ってあいさつするまで教えてください';
 
   @override
-  String get routineTemplateUseElevatorText => '엘리베이터로 층 찾아가기';
+  String get routineTemplateUseElevatorText => 'エレベーターで階へ行く';
 
   @override
   String get routineTemplateUseElevatorPrompt =>
-      '이룸이가 엘리베이터를 타고 정한 층에 혼자 가 보게 하고 싶어. 버튼 누르기, 문 열리면 타기, 숫자 버튼 누르기, 층 숫자 보기, 내리기까지 알려 줘';
+      'Elumiがエレベーターに乗って決めた階へひとりで行けるようにしたいです。ボタンを押す、ドアが開いたら乗る、数字のボタンを押す、階の数字を見る、降りるまで教えてください';
 
   @override
-  String get routineTemplateHospitalVisitText => '병원 다녀오기';
+  String get routineTemplateHospitalVisitText => '病院に行く';
 
   @override
   String get routineTemplateHospitalVisitPrompt =>
-      '이룸이가 병원에 가서 순서대로 진료를 받게 하고 싶어. 접수하기, 대기실에서 기다리기, 이름 부르면 들어가기, 진료 받기, 약 받고 인사하기까지 알려 줘';
+      'Elumiが病院で順番に診察を受けられるようにしたいです。受付をする、待合室で待つ、名前を呼ばれたら入る、診察を受ける、薬を受け取ってあいさつするまで教えてください';
 
   @override
-  String get routineTemplateStartHomeworkText => '숙제 시작하기';
+  String get routineTemplateStartHomeworkText => '宿題を始める';
 
   @override
   String get routineTemplateStartHomeworkPrompt =>
-      '이룸이가 숙제를 스스로 시작해서 끝내 보게 하고 싶어. 책상에 앉기, 공책과 연필 꺼내기, 숙제 하기, 다 하면 보여 주기, 가방에 넣기까지 알려 줘';
+      'Elumiが自分で宿題を始めて終えられるようにしたいです。机に座る、ノートとえんぴつを出す、宿題をする、終わったら見せる、かばんに入れるまで教えてください';
 
   @override
-  String get routineTemplateWriteNameText => '이름 쓰기 연습';
+  String get routineTemplateWriteNameText => '名前を書く練習';
 
   @override
   String get routineTemplateWriteNamePrompt =>
-      '이룸이가 연필을 바르게 잡고 자기 이름을 써 보게 하고 싶어. 연필 잡기, 종이 놓기, 이름 따라 쓰기, 혼자 써 보기, 정리하기까지 알려 줘';
+      'Elumiがえんぴつを正しく持って自分の名前を書けるようにしたいです。えんぴつを持つ、紙を置く、名前をなぞる、ひとりで書く、片づけるまで教えてください';
 
   @override
-  String get routineTemplateCountObjectsText => '수 세기 놀이';
+  String get routineTemplateCountObjectsText => '数をかぞえる遊び';
 
   @override
   String get routineTemplateCountObjectsPrompt =>
-      '이룸이가 물건을 하나씩 짚으며 수를 세는 연습을 하고 싶어. 물건 늘어놓기, 하나씩 손가락으로 짚기, 소리 내어 세기, 다 센 수 말하기까지 알려 줘';
+      'Elumiが物をひとつずつ指さして数をかぞえる練習をしたいです。物を並べる、ひとつずつ指でさす、声に出してかぞえる、全部でいくつか言うまで教えてください';
 
   @override
-  String get routineTemplateReadBookText => '책 읽는 시간';
+  String get routineTemplateReadBookText => '本を読む時間';
 
   @override
   String get routineTemplateReadBookPrompt =>
-      '이룸이가 책 읽는 시간을 스스로 가져 보게 하고 싶어. 책 고르기, 자리에 앉기, 한 쪽씩 넘기며 보기, 다 읽으면 책꽂이에 꽂기까지 알려 줘';
+      'Elumiが自分で本を読む時間をもてるようにしたいです。本を選ぶ、席に座る、1ページずつめくって見る、読み終わったら本棚に戻すまで教えてください';
 
   @override
-  String get routineTemplateEmotionCardText => '화가 날 때 감정 카드 꺼내기';
+  String get routineTemplateEmotionCardText => '怒ったときに気持ちカードを出す';
 
   @override
   String get routineTemplateEmotionCardPrompt =>
-      '이룸이가 친구 때문에 화가 날 때 소리 지르거나 밀지 않고 감정 카드를 꺼내 보여 주게 하고 싶어. 멈추기, 주머니에서 감정 카드 꺼내기, 지금 기분 카드 고르기, 선생님께 보여 주기까지 알려 줘';
+      'Elumiが友だちのことで怒ったとき、大声を出したり押したりせずに気持ちカードを出して見せられるようにしたいです。止まる、ポケットから気持ちカードを出す、今の気持ちのカードを選ぶ、先生に見せるまで教えてください';
 
   @override
-  String get routineTemplatePlayNicelyText => '친구와 사이좋게 놀기';
+  String get routineTemplatePlayNicelyText => '友だちと仲よく遊ぶ';
 
   @override
   String get routineTemplatePlayNicelyPrompt =>
-      '이룸이가 친구와 사이좋게 노는 연습을 하고 싶어. 같이 놀자고 말하기, 장난감 나눠 쓰기, 차례 지키기, 끝나면 고마워 말하기까지 알려 줘';
+      'Elumiが友だちと仲よく遊ぶ練習をしたいです。いっしょに遊ぼうと言う、おもちゃを貸し合う、順番を守る、終わったらありがとうと言うまで教えてください';
 
   @override
-  String get routineTemplateGreetingText => '인사하기';
+  String get routineTemplateGreetingText => 'あいさつする';
 
   @override
   String get routineTemplateGreetingPrompt =>
-      '이룸이가 사람을 만나면 먼저 인사하게 하고 싶어. 상대 얼굴 보기, 손 흔들기, 안녕하세요 말하기, 웃어 주기까지 알려 줘';
+      'Elumiが人に会ったら先にあいさつできるようにしたいです。相手の顔を見る、手をふる、こんにちはと言う、笑顔を見せるまで教えてください';
 
   @override
-  String get routineTemplateWaitTurnText => '차례 기다리기';
+  String get routineTemplateWaitTurnText => '順番を待つ';
 
   @override
   String get routineTemplateWaitTurnPrompt =>
-      '이룸이가 줄을 서서 자기 차례를 기다리는 연습을 하고 싶어. 줄 끝에 서기, 앞사람 뒤에서 기다리기, 내 차례 확인하기, 차례가 오면 하기까지 알려 줘';
+      'Elumiが列に並んで自分の順番を待つ練習をしたいです。列の最後に並ぶ、前の人のうしろで待つ、自分の番か確かめる、順番が来たらするまで教えてください';
 
   @override
-  String get routineTemplateAskHelpText => '도와 달라고 말하기';
+  String get routineTemplateAskHelpText => '手伝ってと言う';
 
   @override
   String get routineTemplateAskHelpPrompt =>
-      '이룸이가 혼자 하기 어려울 때 도움을 요청하게 하고 싶어. 멈추기, 가까운 어른 찾기, 도와주세요 말하기, 도움 받고 고맙습니다 말하기까지 알려 줘';
+      'Elumiがひとりでは難しいときに助けを求められるようにしたいです。止まる、近くの大人を探す、手伝ってくださいと言う、助けてもらったらありがとうございますと言うまで教えてください';
 
   @override
-  String get guardianTabHome => '홈';
+  String get guardianTabHome => 'ホーム';
 
   @override
-  String get guardianTabManage => '일과 관리';
+  String get guardianTabManage => '日課管理';
 
   @override
   String get guardianTabTalk => 'トーク';
 
   @override
-  String get guardianTabMe => '내 정보';
+  String get guardianTabMe => 'マイ情報';
 
   @override
-  String get guardianMyInfoProfileName => '보호자';
+  String get guardianMyInfoProfileName => '保護者';
 
   @override
-  String get guardianMyInfoEmailPrivate => '이메일 비공개';
+  String get guardianMyInfoEmailPrivate => 'メール非公開';
 
   @override
   String guardianMyInfoJoinedOn(DateTime date) {
@@ -2557,11 +2548,11 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     final String dateString = dateDateFormat.format(date);
 
-    return '$dateString 가입';
+    return '$dateString に登録';
   }
 
   @override
-  String get guardianMyInfoActiveBadge => '보는 중';
+  String get guardianMyInfoActiveBadge => '表示中';
 
   @override
   String get guardianNicknameEditLabel => 'ニックネームを変える';
@@ -2594,83 +2585,83 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guardianNicknameSaveFailed => 'ニックネームを変えられませんでした';
 
   @override
-  String get guardianSideNavCaption => '보호자 화면';
+  String get guardianSideNavCaption => '保護者モード';
 
   @override
-  String get guardianSideNavChildScreen => '이룸이 화면';
+  String get guardianSideNavChildScreen => 'Elumiモード';
 
   @override
-  String get routineLibraryEmptyTitle => '아직 만든 일과가 없어요';
+  String get routineLibraryEmptyTitle => 'まだ作った日課がありません';
 
   @override
-  String get routineLibraryEmptyBody => '아래 + 일과 만들기로 첫 일과를 만들어 보세요';
+  String get routineLibraryEmptyBody => '下の「+ 日課を作る」から最初の日課を作ってみましょう';
 
   @override
-  String get routineLibraryLoadFailedFallback => '일과를 불러오지 못했어요';
+  String get routineLibraryLoadFailedFallback => '日課を読み込めませんでした';
 
   @override
-  String get routineLibraryCreate => '새로 만들기';
+  String get routineLibraryCreate => '新しく作る';
 
   @override
-  String get routineLibrarySendToday => '오늘 보내기';
+  String get routineLibrarySendToday => '今日送る';
 
   @override
-  String get routineLibraryEditCards => '카드 고치기';
+  String get routineLibraryEditCards => 'カードを直す';
 
   @override
-  String get routineLibraryAlreadySent => '오늘 이미 보낸 일과예요';
+  String get routineLibraryAlreadySent => '今日はもう送った日課です';
 
   @override
-  String get routineLibrarySendFailedTitle => '보내지 못했어요';
+  String get routineLibrarySendFailedTitle => '送れませんでした';
 
   @override
-  String get routineLibraryActionFailedFallback => '잠시 뒤 다시 해 주세요';
+  String get routineLibraryActionFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get routineLibraryCopied => '복사본을 만들었어요';
+  String get routineLibraryCopied => 'コピーを作りました';
 
   @override
-  String get routineLibraryCopyFailedTitle => '복사하지 못했어요';
+  String get routineLibraryCopyFailedTitle => 'コピーできませんでした';
 
   @override
-  String get routineLibraryMenuRename => '이름 바꾸기';
+  String get routineLibraryMenuRename => '名前を変える';
 
   @override
-  String get routineLibraryMenuCopy => '복사하기';
+  String get routineLibraryMenuCopy => 'コピーする';
 
   @override
-  String get routineLibraryMenuRemove => '지우기';
+  String get routineLibraryMenuRemove => '削除する';
 
   @override
-  String get routineLibraryRenameHint => '일과 이름';
+  String get routineLibraryRenameHint => '日課の名前';
 
   @override
-  String get routineLibraryRenameSave => '저장하기';
+  String get routineLibraryRenameSave => '保存する';
 
   @override
-  String get routineLibraryRenamed => '이름을 바꿨어요';
+  String get routineLibraryRenamed => '名前を変えました';
 
   @override
-  String get routineLibraryRenameFailedTitle => '이름을 바꾸지 못했어요';
+  String get routineLibraryRenameFailedTitle => '名前を変えられませんでした';
 
   @override
-  String get routineLibraryRemoveConfirmTitle => '이 일과를 지울까요?';
+  String get routineLibraryRemoveConfirmTitle => 'この日課を削除しますか？';
 
   @override
   String get routineLibraryRemoveConfirmMessage =>
-      '일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
+      '日課管理から外れます。Elumiの記録はそのまま残ります';
 
   @override
-  String get routineLibraryRemoved => '일과를 지웠어요';
+  String get routineLibraryRemoved => '日課を削除しました';
 
   @override
-  String get routineLibraryRemoveFailedTitle => '지우지 못했어요';
+  String get routineLibraryRemoveFailedTitle => '削除できませんでした';
 
   @override
-  String get routineLibrarySentBadge => '오늘 보냈어요';
+  String get routineLibrarySentBadge => '今日送りました';
 
   @override
-  String get routineLibraryTileHint => '길게 누르면 메뉴가 열려요';
+  String get routineLibraryTileHint => '長押しするとメニューが開きます';
 
   @override
   String get routineLibraryFromTalk => 'トークから';
@@ -2692,8 +2683,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String routineLibrarySent(String title, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$title$_temp0 오늘 일과로 보냈어요';
+    return '$titleを今日の日課として送りました';
   }
 
   @override
@@ -2736,112 +2726,112 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exampleRoutinesFailed => '例の日課を入れられませんでした';
 
   @override
-  String get routineGroupMenuAddToGroup => '묶음에 넣기';
+  String get routineGroupMenuAddToGroup => 'グループに入れる';
 
   @override
-  String get routineGroupMenuReorder => '순서 바꾸기';
+  String get routineGroupMenuReorder => '順番を変える';
 
   @override
-  String get routineGroupMenuUngroup => '묶음 풀기';
+  String get routineGroupMenuUngroup => 'グループを解除';
 
   @override
   String routineGroupTileLabel(String name, int count) {
-    return '$name 묶음, 일과 $count개';
+    return '$name グループ、日課 $count件';
   }
 
   @override
-  String get routineGroupDefaultName => '새 묶음';
+  String get routineGroupDefaultName => '新しいグループ';
 
   @override
   String get routineGroupNameLabel => 'グループの名前';
 
   @override
-  String get routineGroupNameHint => '예시: 등교 전 준비';
+  String get routineGroupNameHint => '例：登校前のしたく';
 
   @override
-  String get routineGroupNewTitle => '새 묶음 만들기';
+  String get routineGroupNewTitle => '新しいグループを作る';
 
   @override
   String routineGroupAddTitle(String name) {
-    return '$name에 넣기';
+    return '$nameに入れる';
   }
 
   @override
-  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요';
+  String get routineGroupPickHintNew => '入れる日課を、表示したい順番にタップしてください';
 
   @override
-  String get routineGroupPickHint => '넣을 일과를 순서대로 눌러 주세요';
+  String get routineGroupPickHint => '入れる日課を順番にタップしてください';
 
   @override
-  String get routineGroupPickEmpty => '넣을 수 있는 일과가 없어요';
+  String get routineGroupPickEmpty => '入れられる日課がありません';
 
   @override
   String routineGroupPickConfirmNew(int count) {
-    return '$count개로 묶기';
+    return '$count件でグループにする';
   }
 
   @override
   String routineGroupPickConfirmAdd(int count) {
-    return '$count개 넣기';
+    return '$count件入れる';
   }
 
   @override
-  String get routineGroupCreateMenuTitle => '무엇을 만들까요?';
+  String get routineGroupCreateMenuTitle => '何を作りますか？';
 
   @override
-  String get routineGroupCreateRoutine => '새 일과 만들기';
+  String get routineGroupCreateRoutine => '新しい日課を作る';
 
   @override
-  String get routineGroupCreateGroup => '새 묶음 만들기';
+  String get routineGroupCreateGroup => '新しいグループを作る';
 
   @override
   String get routineGroupCreateGroupDescription =>
-      '여러 일과를 한 폴더에 모아요 (예: 아침 등교)';
+      'いくつかの日課をひとつのフォルダにまとめます（例：朝の登校）';
 
   @override
-  String get routineGroupChooseTitle => '어느 묶음에 넣을까요?';
+  String get routineGroupChooseTitle => 'どのグループに入れますか？';
 
   @override
   String routineGroupSheetCount(int count) {
-    return '일과 $count개';
+    return '日課 $count件';
   }
 
   @override
-  String get routineGroupSheetAdd => '일과 넣기';
+  String get routineGroupSheetAdd => '日課を入れる';
 
   @override
   String routineGroupSheetRemove(String title) {
-    return '$title 묶음에서 빼기';
+    return '$titleをグループから外す';
   }
 
   @override
-  String get routineGroupCreated => '묶음을 만들었어요';
+  String get routineGroupCreated => 'グループを作りました';
 
   @override
-  String get routineGroupAdded => '묶음에 넣었어요';
+  String get routineGroupAdded => 'グループに入れました';
 
   @override
-  String get routineGroupUngrouped => '묶음을 풀었어요';
+  String get routineGroupUngrouped => 'グループを解除しました';
 
   @override
-  String get routineGroupUngroupedEmpty => '일과를 다 빼서 묶음을 풀었어요';
+  String get routineGroupUngroupedEmpty => '日課をすべて外したので、グループを解除しました';
 
   @override
   String routineGroupSent(String name) {
-    return '$name 묶음을 오늘 일과로 보냈어요';
+    return '$name グループを今日の日課として送りました';
   }
 
   @override
-  String get routineGroupAllSentAlready => '묶음 안 일과를 오늘 모두 보냈어요';
+  String get routineGroupAllSentAlready => 'グループ内の日課は今日すべて送りました';
 
   @override
-  String get routineGroupActionFailedTitle => '묶음을 바꾸지 못했어요';
+  String get routineGroupActionFailedTitle => 'グループを変更できませんでした';
 
   @override
-  String get routineGroupUngroupConfirmTitle => '묶음을 풀까요?';
+  String get routineGroupUngroupConfirmTitle => 'グループを解除しますか？';
 
   @override
-  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과 관리에 그대로 남아요';
+  String get routineGroupUngroupConfirmMessage => '中の日課は日課管理にそのまま残ります';
 
   @override
   String routineGroupRemoveConfirmTitle(String title) {
@@ -2860,25 +2850,25 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get childHomeGroupAllDone => '다 했어요!';
+  String get childHomeGroupAllDone => 'できました！';
 
   @override
   String get routineTitleEdit => '日課の名前を変える';
 
   @override
-  String get routineDetailMore => '더 보기';
+  String get routineDetailMore => 'もっと見る';
 
   @override
-  String get libraryArrangeDone => '완료';
+  String get libraryArrangeDone => '完了';
 
   @override
-  String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
+  String get libraryArrangeRemove => '削除またはグループ解除';
 
   @override
-  String get routineGroupEditOrder => '편집';
+  String get routineGroupEditOrder => '編集';
 
   @override
-  String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
+  String get routineLibrarySendOnlyThis => 'この日課だけ今日送る';
 
   @override
   String routineGroupRowCardCount(int count) {
@@ -2897,54 +2887,54 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cardReviewCoachEditMessage =>
-      '보고 있는 카드의 *글과 그림*을 고쳐요\n그림은 *내 사진*으로 바꿀 수도 있어요';
+      '表示中のカードの*文と絵*を直します\n絵は*自分の写真*に変えることもできます';
 
   @override
   String get cardReviewCoachReorderMessage =>
-      '여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요';
+      'ここをタップしてからカードを*長押しして動かす*と\n順番が変わります';
 
   @override
   String get cardReviewCoachSaveMessage =>
-      '다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요';
+      '直し終わったら必ず*カードを保存*をタップしてください\nタップすると日課ができあがります';
 
   @override
-  String get coachHelpLabel => '사용법 보기';
+  String get coachHelpLabel => '使い方を見る';
 
   @override
-  String get pushPermissionSheetTitle => '이룸이가 일과를 끝내면 알려 드릴까요?';
+  String get pushPermissionSheetTitle => 'Elumiが日課を終えたらお知らせしますか？';
 
   @override
-  String get pushPermissionSheetBody => '다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요';
+  String get pushPermissionSheetBody => 'ほかの保護者からのお知らせやクレジットの案内も届きます';
 
   @override
-  String get pushPermissionAllow => '알림 받기';
+  String get pushPermissionAllow => '通知を受け取る';
 
   @override
-  String get pushPermissionLater => '나중에';
+  String get pushPermissionLater => 'あとで';
 
   @override
-  String get pushPermissionDenied => '알림 설정에서 언제든 켤 수 있어요';
+  String get pushPermissionDenied => '通知設定でいつでもオンにできます';
 
   @override
-  String get pushChannelGuardianUpdates => '보호자 알림';
+  String get pushChannelGuardianUpdates => '保護者向け通知';
 
   @override
-  String get pushPermissionNudgeTitle => '알림이 꺼져 있어요';
+  String get pushPermissionNudgeTitle => '通知がオフになっています';
 
   @override
-  String get pushPermissionNudgeBody => '켜 두면 이룸이가 일과를 끝냈을 때 바로 알려 드려요';
+  String get pushPermissionNudgeBody => 'オンにすると、Elumiが日課を終えたときすぐにお知らせします';
 
   @override
-  String get pushPermissionElumiTitle => '새 일과가 오면 알려 드릴까요?';
+  String get pushPermissionElumiTitle => '新しい日課が届いたらお知らせしますか？';
 
   @override
-  String get pushPermissionElumiBody => '보호자가 일과를 보내면 이 기기에 알림이 와요';
+  String get pushPermissionElumiBody => '保護者が日課を送ると、この端末に通知が届きます';
 
   @override
-  String get pushPermissionTurnOn => '알림 켜기';
+  String get pushPermissionTurnOn => '通知をオンにする';
 
   @override
-  String get pushChannelElumiRoutines => '새 일과 알림';
+  String get pushChannelElumiRoutines => '新しい日課の通知';
 
   @override
   String get signInProviderKakao => 'Kakao';
@@ -2978,40 +2968,40 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String elumiInfoTitle(String name) {
-    return '$name 정보';
+    return '$nameの情報';
   }
 
   @override
   String elumiInfoEditLabel(String name) {
-    return '$name 정보 고치기';
+    return '$nameの情報を直す';
   }
 
   @override
-  String get elumiInfoName => '이름';
+  String get elumiInfoName => '名前';
 
   @override
-  String get elumiInfoCharacter => '캐릭터';
+  String get elumiInfoCharacter => 'キャラクター';
 
   @override
-  String get elumiInfoCharacterSheetTitle => '캐릭터 바꾸기';
+  String get elumiInfoCharacterSheetTitle => 'キャラクターを変える';
 
   @override
-  String get elumiInfoImageStyleSheetTitle => '그림 방식 바꾸기';
+  String get elumiInfoImageStyleSheetTitle => '絵のスタイルを変える';
 
   @override
-  String get elumiInfoSave => '저장하기';
+  String get elumiInfoSave => '保存する';
 
   @override
-  String get elumiInfoSaved => '저장했어요';
+  String get elumiInfoSaved => '保存しました';
 
   @override
-  String get elumiInfoSaveFailedTitle => '저장하지 못했어요';
+  String get elumiInfoSaveFailedTitle => '保存できませんでした';
 
   @override
-  String get elumiInfoSaveFailedFallback => '잠시 후 다시 시도해주세요';
+  String get elumiInfoSaveFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get elumiInfoNotFound => '이룸이 정보를 불러오지 못했어요';
+  String get elumiInfoNotFound => 'Elumiの情報を読み込めませんでした';
 
   @override
   String get talkTitle => 'トーク';
@@ -3521,305 +3511,304 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineProgressRingDoneLabel => 'ぜんぶできました';
 
   @override
-  String get guardianSettingsLicenses => '오픈소스 라이선스';
+  String get guardianSettingsLicenses => 'オープンソースライセンス';
 
   @override
-  String get licenseScreenTitle => '오픈소스 라이선스';
+  String get licenseScreenTitle => 'オープンソースライセンス';
 
   @override
   String get licenseScreenGuide =>
-      '이룸은 아래 그림, 글꼴, 프로그램을 사용해 만들었어요. 항목을 누르면 라이선스 전문을 볼 수 있어요.';
+      'elumは下記の絵、フォント、プログラムを使って作りました。項目をタップするとライセンス全文を見られます。';
 
   @override
-  String get licenseGroupArtwork => '그림';
+  String get licenseGroupArtwork => '絵';
 
   @override
-  String get licenseGroupFonts => '글꼴';
+  String get licenseGroupFonts => 'フォント';
 
   @override
-  String get licenseGroupSoftware => '프로그램';
+  String get licenseGroupSoftware => 'プログラム';
 
   @override
-  String get licenseSoftwareListRow => '프로그램 목록 보기';
+  String get licenseSoftwareListRow => 'プログラム一覧を見る';
 
   @override
-  String get licenseFontTmoneyName => '티머니 둥근바람';
+  String get licenseFontTmoneyName => 'Tmoney RoundWind';
 
   @override
-  String get licenseLoadFailedMessage => '목록을 불러오지 못했어요';
+  String get licenseLoadFailedMessage => '一覧を読み込めませんでした';
 
   @override
-  String get cardExportOpen => '인쇄용으로 받기';
+  String get cardExportOpen => '印刷用に保存';
 
   @override
-  String get cardExportFormatSection => '어떻게 받을까요?';
+  String get cardExportFormatSection => 'どの形で保存しますか？';
 
   @override
-  String get cardExportFormatRoutineSheet => '일과 한 장';
+  String get cardExportFormatRoutineSheet => '日課を1枚に';
 
   @override
-  String get cardExportFormatRoutineSheetCaption => 'A4 한 장에 순서대로';
+  String get cardExportFormatRoutineSheetCaption => 'A4 1枚に順番どおり';
 
   @override
-  String get cardExportFormatCutCards => '오려 쓰는 카드';
+  String get cardExportFormatCutCards => '切って使うカード';
 
   @override
-  String get cardExportFormatCutCardsCaption => 'A4에 자를 선과 함께';
+  String get cardExportFormatCutCardsCaption => 'A4に切り取り線つき';
 
   @override
-  String get cardExportFormatCardImages => '카드 한 장씩';
+  String get cardExportFormatCardImages => 'カードを1枚ずつ';
 
   @override
-  String get cardExportFormatCardImagesCaption => '카드마다 이미지 한 장';
+  String get cardExportFormatCardImagesCaption => 'カードごとに画像1枚';
 
   @override
-  String get cardExportPerPageSection => '한 쪽에 몇 장 넣을까요?';
+  String get cardExportPerPageSection => '1ページに何枚入れますか？';
 
   @override
-  String get cardExportIncludeText => '카드 문장 넣기';
+  String get cardExportIncludeText => 'カードの文を入れる';
 
   @override
-  String get cardExportThemeSection => '카드 디자인';
+  String get cardExportThemeSection => 'カードのデザイン';
 
   @override
-  String get cardExportThemeBasic => '기본';
+  String get cardExportThemeBasic => '基本';
 
   @override
-  String get cardExportThemeSimple => '단순';
+  String get cardExportThemeSimple => 'シンプル';
 
   @override
-  String get cardExportThemeInkSaver => '잉크 절약';
+  String get cardExportThemeInkSaver => 'インク節約';
 
   @override
-  String get cardExportThemeMonochrome => '흑백';
+  String get cardExportThemeMonochrome => '白黒';
 
   @override
-  String get cardExportThemeLargeText => '큰 글자';
+  String get cardExportThemeLargeText => '大きい文字';
 
   @override
   String get planProBadge => 'PRO';
 
   @override
-  String get cardExportProThemeLocked => 'Pro에서 쓸 수 있는 디자인이에요';
+  String get cardExportProThemeLocked => 'Proで使えるデザインです';
 
   @override
-  String get cardExportWatermarkNotice => 'Free는 아래에 이룸 로고 띠가 들어가요';
+  String get cardExportWatermarkNotice => 'Freeでは下にelumのロゴ帯が入ります';
 
   @override
-  String get cardExportPreviewSection => '미리 보기';
+  String get cardExportPreviewSection => 'プレビュー';
 
   @override
-  String get cardExportMissingPicture => '그림이 아직 없는 카드는 제목만 들어가요';
+  String get cardExportMissingPicture => 'まだ絵がないカードはタイトルだけが入ります';
 
   @override
   String cardExportSomePicturesFailed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '그림을 불러오지 못한 카드 $count장은 다른 그림이나 제목으로 들어가요',
+      other: '絵を読み込めなかったカード$count枚は、別の絵かタイトルで入ります',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardExportActualSizeHint => '다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요';
+  String get cardExportActualSizeHint => 'ほかのアプリで印刷するときは「実際のサイズ」を選んでください';
 
   @override
-  String get cardExportPrint => '인쇄하기';
+  String get cardExportPrint => '印刷する';
 
   @override
-  String get cardExportShare => '보내기';
+  String get cardExportShare => '送る';
 
   @override
-  String get cardExportPreparing => '카드를 준비하고 있어요';
+  String get cardExportPreparing => 'カードを準備しています';
 
   @override
-  String get cardExportImageFailed => '카드 그림을 불러오지 못했어요';
+  String get cardExportImageFailed => 'カードの絵を読み込めませんでした';
 
   @override
-  String get cardExportRenderFailed => '인쇄용 파일을 만들지 못했어요';
+  String get cardExportRenderFailed => '印刷用ファイルを作れませんでした';
 
   @override
-  String get cardExportPrintFailed => '이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요';
+  String get cardExportPrintFailed => 'この端末では印刷できません。「送る」で保存してください';
 
   @override
-  String get cardExportNoCards => '카드가 없는 일과예요';
+  String get cardExportNoCards => 'カードがない日課です';
 
   @override
-  String get cardExportNoneSelected => '보낼 카드를 하나 이상 골라 주세요';
+  String get cardExportNoneSelected => '送るカードを1枚以上選んでください';
 
   @override
-  String get printBrandTagline => '일상을 함께 | 이룸 행동카드';
+  String get printBrandTagline => '毎日をいっしょに | elum 行動カード';
 
   @override
-  String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
+  String get cardExportPictogramCredit => '絵：Mulberry Symbols (CC BY-SA 4.0)';
 
   @override
-  String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
+  String get cardExportEmojiCredit => '絵：Twemoji (CC BY 4.0)';
 
   @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count장',
+      other: '$count枚',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardExportFormatRow => '형태';
+  String get cardExportFormatRow => '形式';
 
   @override
-  String get cardExportLayoutSection => '배치';
+  String get cardExportLayoutSection => '配置';
 
   @override
-  String get cardExportStyleSection => '꾸밈';
+  String get cardExportStyleSection => 'デザイン';
 
   @override
-  String get cardExportOrientationRow => '용지 방향';
+  String get cardExportOrientationRow => '用紙の向き';
 
   @override
-  String get cardExportOrientationSheetTitle => '용지를 어떻게 놓을까요?';
+  String get cardExportOrientationSheetTitle => '用紙をどの向きにしますか？';
 
   @override
-  String get cardExportOrientationPortrait => '세로';
+  String get cardExportOrientationPortrait => '縦';
 
   @override
-  String get cardExportOrientationLandscape => '가로';
+  String get cardExportOrientationLandscape => '横';
 
   @override
-  String get cardExportPerPageRow => '한 장에';
+  String get cardExportPerPageRow => '1枚に';
 
   @override
-  String get cardExportCardSizeRow => '카드 크기';
+  String get cardExportCardSizeRow => 'カードの大きさ';
 
   @override
-  String get cardExportCardSizeSheetTitle => '카드를 얼마나 크게 넣을까요?';
+  String get cardExportCardSizeSheetTitle => 'カードをどのくらいの大きさにしますか？';
 
   @override
-  String get cardExportCardSizeFit => '꽉 차게';
+  String get cardExportCardSizeFit => 'いっぱいに';
 
   @override
-  String get cardExportCardSizeMedium => '보통';
+  String get cardExportCardSizeMedium => 'ふつう';
 
   @override
-  String get cardExportCardSizeSmall => '작게';
+  String get cardExportCardSizeSmall => '小さく';
 
   @override
-  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 형태예요';
+  String get cardExportProLayoutLocked => 'Proで使える形式です';
 
   @override
-  String get cardExportUpsellTitle => 'Pro면 원하는 대로 받을 수 있어요';
+  String get cardExportUpsellTitle => 'Proなら好きな形で保存できます';
 
   @override
-  String get cardExportUpsellBody =>
-      '일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요';
+  String get cardExportUpsellBody => '日課を1枚に、切って使うカード、1枚に複数、横向きの用紙、デザインまで選べます';
 
   @override
-  String get modeSwitchToPurchase => '결제는 보호자만 할 수 있어요';
+  String get modeSwitchToPurchase => 'お支払いは保護者だけができます';
 
   @override
-  String get planBenefitAiImageStyles => '카드마다 AI가 그려 줘요';
+  String get planBenefitAiImageStyles => 'カードごとにAIが絵をかきます';
 
   @override
-  String get planBenefitAdsRemoved => '광고 없이 써요';
+  String get planBenefitAdsRemoved => '広告なしで使えます';
 
   @override
-  String get planBenefitWeeklyReport => '주간 리포트를 받아요';
+  String get planBenefitWeeklyReport => '週間レポートが届きます';
 
   @override
-  String get planBenefitRoutineSchedule => '요일과 시각을 정해 매일 보내요';
+  String get planBenefitRoutineSchedule => '曜日と時刻を決めて毎日送ります';
 
   @override
-  String get planBenefitRoutineMemory => '내가 고친 방식을 기억해요';
+  String get planBenefitRoutineMemory => '自分が直したやり方を覚えます';
 
   @override
-  String get planBenefitGuardianVoice => '보호자 목소리로 카드를 읽어 줘요';
+  String get planBenefitGuardianVoice => '保護者の声でカードを読み上げます';
 
   @override
-  String get planBenefitFreeRoutineText => '일과 글은 크레딧 없이 써요';
+  String get planBenefitFreeRoutineText => '日課の文はクレジットなしで作れます';
 
   @override
-  String get planBenefitFreeImageRegenerate => '하루 정해진 횟수까지 크레딧 없이 다시 그려요';
+  String get planBenefitFreeImageRegenerate => '1日の決まった回数まで、クレジットなしで絵をかき直せます';
 
   @override
   String planBenefitFreeImageRegenerateDaily(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '하루 $count번까지 크레딧 없이 다시 그려요',
+      other: '1日$count回まで、クレジットなしでかき直せます',
     );
     return '$_temp0';
   }
 
   @override
-  String get planBenefitMoreWeeklyCredits => '매주 크레딧을 더 많이 받아요';
+  String get planBenefitMoreWeeklyCredits => '毎週もっと多くのクレジットがもらえます';
 
   @override
-  String get planBenefitMoreMonthlyCredits => '매달 크레딧을 더 많이 받아요';
+  String get planBenefitMoreMonthlyCredits => '毎月もっと多くのクレジットがもらえます';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '인쇄물 아래 띠 없이 깔끔해요';
+  String get planBenefitCardExportWithoutWatermark => '印刷物の下に帯が入らずすっきりします';
 
   @override
-  String get planBenefitCardExportAllThemes => '인쇄 디자인을 모두 골라요';
+  String get planBenefitCardExportAllThemes => 'すべての印刷デザインから選べます';
 
   @override
-  String get planBenefitCardExportAllLayouts => '일과 한 장, 오려 쓰는 카드로 인쇄해요';
+  String get planBenefitCardExportAllLayouts => '日課を1枚に、切って使うカードで印刷できます';
 
   @override
-  String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
+  String get planKeepContentNotice => 'Proが終わっても、作った日課と絵はそのまま残ります';
 
   @override
-  String get planPeriodMonthly => '1개월';
+  String get planPeriodMonthly => '1か月';
 
   @override
-  String get planPeriodYearly => '1년';
+  String get planPeriodYearly => '1年';
 
   @override
-  String get planSubscribe => '구독 시작하기';
+  String get planSubscribe => 'サブスクリプションを始める';
 
   @override
-  String get planPriceLoading => '가격을 불러오고 있어요';
+  String get planPriceLoading => '価格を読み込んでいます';
 
   @override
-  String get planPriceFailed => '가격을 불러오지 못했어요';
+  String get planPriceFailed => '価格を読み込めませんでした';
 
   @override
-  String get planRestore => '구매 복원';
+  String get planRestore => '購入を復元';
 
   @override
-  String get planTermsOfUse => '이용약관';
+  String get planTermsOfUse => '利用規約';
 
   @override
-  String get planPrivacyPolicy => '개인정보처리방침';
+  String get planPrivacyPolicy => 'プライバシーポリシー';
 
   @override
-  String get planManageSubscription => '구독 관리';
+  String get planManageSubscription => 'サブスクリプションの管理';
 
   @override
   String get planLegalBillingAppStore =>
-      '결제는 구매를 확인할 때 Apple ID 계정으로 청구돼요. 기간이 끝나기 최소 24시간 전에 해지하지 않으면 같은 기간과 가격으로 자동 갱신되고, 기간이 끝나기 전 24시간 안에 다음 요금이 청구돼요.';
+      'お支払いは購入の確認時にApple IDアカウントに請求されます。期間終了の24時間以上前に解約しない限り、同じ期間・価格で自動更新され、期間終了前の24時間以内に次回分が請求されます。';
 
   @override
   String get planLegalCancelAppStore =>
-      '구독 관리와 해지는 기기 설정의 Apple ID > 구독에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+      'サブスクリプションの管理と解約は、端末の設定 > Apple ID > サブスクリプションでできます。解約しても残りの期間まではProを使えます。';
 
   @override
   String get planLegalBillingPlayStore =>
-      '결제는 구매를 확인할 때 Google Play 계정으로 청구돼요. 해지하기 전까지 같은 기간과 가격으로 자동 갱신돼요.';
+      'お支払いは購入の確認時にGoogle Playアカウントに請求されます。解約するまで同じ期間・価格で自動更新されます。';
 
   @override
   String get planLegalCancelPlayStore =>
-      '구독 관리와 해지는 Google Play 스토어의 결제 및 정기 결제 > 정기 결제에서 할 수 있어요. 해지해도 남은 기간까지는 Pro를 쓸 수 있어요.';
+      'サブスクリプションの管理と解約は、Google Playストアのお支払いと定期購入 > 定期購入でできます。解約しても残りの期間まではProを使えます。';
 
   @override
   String planTrialDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count일',
+      other: '$count日間',
     );
     return '$_temp0';
   }
@@ -3829,7 +3818,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개월',
+      other: '$countか月',
     );
     return '$_temp0';
   }
@@ -3839,108 +3828,107 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count년',
+      other: '$count年',
     );
     return '$_temp0';
   }
 
   @override
   String planStartFreeTrial(String trial) {
-    return '$trial 무료로 시작하기';
+    return '$trial無料で始める';
   }
 
   @override
-  String get planLegalTrialAppStore =>
-      '무료 체험이 끝나기 최소 24시간 전에 해지하면 요금이 청구되지 않아요.';
+  String get planLegalTrialAppStore => '無料体験が終わる24時間以上前に解約すれば、料金は請求されません。';
 
   @override
-  String get planLegalTrialPlayStore => '무료 체험 중에 해지하면 요금이 청구되지 않아요.';
+  String get planLegalTrialPlayStore => '無料体験中に解約すれば、料金は請求されません。';
 
   @override
-  String get planVerifying => '결제를 확인하고 있어요';
+  String get planVerifying => 'お支払いを確認しています';
 
   @override
-  String get planStorePendingTitle => '결제 허락을 요청했어요';
+  String get planStorePendingTitle => 'お支払いの承認をリクエストしました';
 
   @override
-  String get planStorePendingBody => '허락을 받으면 Pro가 켜져요. 이 화면은 닫아도 돼요.';
+  String get planStorePendingBody => '承認されるとProがオンになります。この画面は閉じてもかまいません。';
 
   @override
-  String get planVerificationPendingTitle => '결제를 확인하고 있어요';
+  String get planVerificationPendingTitle => 'お支払いを確認しています';
 
   @override
   String get planVerificationPendingBody =>
-      '다시 결제하지 않아도 돼요. 앱을 다시 열면 한 번 더 확인해요';
+      'もう一度支払う必要はありません。アプリを開き直すと、もう一度確認します';
 
   @override
-  String get planVerificationRetry => '다시 확인하기';
+  String get planVerificationRetry => 'もう一度確認する';
 
   @override
-  String get planActivatedStart => '시작하기';
+  String get planActivatedStart => '始める';
 
   @override
-  String get planActivatedTitle => 'Pro를 시작했어요';
+  String get planActivatedTitle => 'Proを始めました';
 
   @override
-  String get planNotActivatedTitle => 'Pro가 켜지지 않았어요';
+  String get planNotActivatedTitle => 'Proがオンになりませんでした';
 
   @override
   String get planNotActivatedBodyApple =>
-      'App Store 앱 → 오른쪽 위 내 사진 → 구독에서 이룸 구독을 확인해 주세요';
+      'App Storeアプリ → 右上の自分の写真 → サブスクリプションで、elumのサブスクリプションを確認してください';
 
   @override
   String get planNotActivatedBodyGoogle =>
-      'Play 스토어 앱 → 오른쪽 위 프로필 → 결제 및 정기 결제 → 정기 결제에서 이룸 구독을 확인해 주세요';
+      'Playストアアプリ → 右上のプロフィール → お支払いと定期購入 → 定期購入で、elumの定期購入を確認してください';
 
   @override
-  String get planOpenAppStore => 'App Store에서 확인하기';
+  String get planOpenAppStore => 'App Storeで確認する';
 
   @override
-  String get planOpenPlayStore => 'Play 스토어에서 확인하기';
+  String get planOpenPlayStore => 'Playストアで確認する';
 
   @override
-  String get planAlreadyProTitle => 'Pro를 쓰고 있어요';
+  String get planAlreadyProTitle => 'Proを利用中です';
 
   @override
-  String get planPurchaseFailedTitle => '결제하지 못했어요';
+  String get planPurchaseFailedTitle => 'お支払いできませんでした';
 
   @override
-  String get planVerifyFailedTitle => '결제를 이 계정에 연결하지 못했어요';
+  String get planVerifyFailedTitle => 'お支払いをこのアカウントにつなげられませんでした';
 
   @override
-  String get planAccountFailedTitle => '계정 정보를 확인하지 못했어요';
+  String get planAccountFailedTitle => 'アカウント情報を確認できませんでした';
 
   @override
-  String get planFailedFallback => '잠시 후 다시 시도해주세요';
+  String get planFailedFallback => 'しばらくしてからもう一度お試しください';
 
   @override
-  String get planRestoreDone => 'Pro를 되찾았어요';
+  String get planRestoreDone => 'Proを復元しました';
 
   @override
-  String get planRestoreNothing => '되찾을 구독이 없어요';
+  String get planRestoreNothing => '復元できるサブスクリプションがありません';
 
   @override
   String get planRestoreNothingHintApple =>
-      '구독할 때 쓴 Apple ID로 이 기기에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요';
+      '購入したときのApple IDでこの端末にログインしているか確認してください。elumにも購入したときと同じ方法でログインする必要があります';
 
   @override
   String get planRestoreNothingHintGoogle =>
-      '구독할 때 쓴 Google 계정이 Play 스토어에 로그인돼 있는지 확인해 주세요. 이룸에도 구독할 때와 같은 방법으로 로그인해야 해요';
+      '購入したときのGoogleアカウントでPlayストアにログインしているか確認してください。elumにも購入したときと同じ方法でログインする必要があります';
 
   @override
-  String get planRestoreFailedTitle => '구매를 복원하지 못했어요';
+  String get planRestoreFailedTitle => '購入を復元できませんでした';
 
   @override
-  String get planRestoring => '구매 내역을 확인하고 있어요';
+  String get planRestoring => '購入履歴を確認しています';
 
   @override
-  String get planManageFailed => '구독 관리 화면을 열지 못했어요';
+  String get planManageFailed => 'サブスクリプションの管理画面を開けませんでした';
 
   @override
-  String get planLinkFailed => '링크를 열지 못했어요';
+  String get planLinkFailed => 'リンクを開けませんでした';
 
   @override
-  String get planSettingsLabel => '내 요금제';
+  String get planSettingsLabel => 'マイプラン';
 
   @override
   String get planStatusFree => 'Free';
@@ -3950,64 +3938,64 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String planStatusRenewing(String date) {
-    return 'Pro, $date에 갱신돼요';
+    return 'Pro、$dateに更新されます';
   }
 
   @override
   String planStatusUntil(String date) {
-    return 'Pro, $date까지';
+    return 'Pro、$dateまで';
   }
 
   @override
   String planStatusCancelScheduled(String date) {
-    return 'Pro, $date에 끝나요';
+    return 'Pro、$dateに終了します';
   }
 
   @override
-  String get planStatusGracePeriod => 'Pro, 결제 확인이 필요해요';
+  String get planStatusGracePeriod => 'Pro、お支払いの確認が必要です';
 
   @override
   String planStatusTrial(int days) {
-    return 'Pro 체험 중, $days일 남았어요';
+    return 'Pro体験中、残り$days日です';
   }
 
   @override
-  String get planStatusTrialLastDay => 'Pro 체험 중, 오늘까지예요';
+  String get planStatusTrialLastDay => 'Pro体験中、今日までです';
 
   @override
-  String get planStatusGift => 'Pro 선물';
+  String get planStatusGift => 'Proプレゼント';
 
   @override
   String planStatusGiftUntil(String date) {
-    return 'Pro 선물, $date까지';
+    return 'Proプレゼント、$dateまで';
   }
 
   @override
   String planStatusRenewingFooter(String date) {
-    return '$date에 갱신돼요';
+    return '$dateに更新されます';
   }
 
   @override
   String planStatusUntilFooter(String date) {
-    return '$date까지 쓸 수 있어요';
+    return '$dateまで使えます';
   }
 
   @override
   String planStatusCancelScheduledFooter(String date) {
-    return '$date에 끝나요';
+    return '$dateに終了します';
   }
 
   @override
-  String get planStatusGracePeriodFooter => '결제 수단을 확인해 주세요';
+  String get planStatusGracePeriodFooter => 'お支払い方法を確認してください';
 
   @override
-  String get planSheetNextPaymentLabel => '다음 결제일';
+  String get planSheetNextPaymentLabel => '次回のお支払い日';
 
   @override
-  String get planSheetEndDateLabel => '끝나는 날';
+  String get planSheetEndDateLabel => '終了日';
 
   @override
-  String get planSheetStoreLabel => '결제한 곳';
+  String get planSheetStoreLabel => 'お支払い先';
 
   @override
   String get planSheetStoreAppStore => 'App Store';
@@ -4017,20 +4005,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String planSheetRenewingNote(String date) {
-    return '해지하지 않으면 $date에 자동으로 결제돼요. 해지는 구독 관리에서 할 수 있어요';
+    return '解約しない限り、$dateに自動でお支払いされます。解約はサブスクリプションの管理からできます';
   }
 
   @override
-  String get planSheetEndsToFreeNote => '끝나면 Free로 바뀌어요. 저절로 결제되지 않아요';
+  String get planSheetEndsToFreeNote => '終了するとFreeに切り替わります。自動でお支払いされることはありません';
 
   @override
-  String get planSheetUnlimitedNote => '기간 제한 없이 Pro를 쓸 수 있어요';
+  String get planSheetUnlimitedNote => '期限なしでProを使えます';
 
   @override
-  String get planLearnPro => 'Pro 알아보기';
+  String get planLearnPro => 'Proについて見る';
 
   @override
-  String get weeklyReportTitle => '주간 리포트';
+  String get weeklyReportTitle => '週間レポート';
 
   @override
   String weeklyReportWeekRange(
@@ -4039,22 +4027,22 @@ class AppLocalizationsJa extends AppLocalizations {
     int endMonth,
     int endDay,
   ) {
-    return '$startMonth월 $startDay일 ~ $endMonth월 $endDay일';
+    return '$startMonth月$startDay日～$endMonth月$endDay日';
   }
 
   @override
   String weeklyReportThisWeekRange(String range) {
-    return '이번 주 · $range';
+    return '今週 · $range';
   }
 
   @override
-  String get weeklyReportPreviousWeek => '지난주 보기';
+  String get weeklyReportPreviousWeek => '先週を見る';
 
   @override
-  String get weeklyReportNextWeek => '다음 주 보기';
+  String get weeklyReportNextWeek => '次の週を見る';
 
   @override
-  String get weeklyReportCompletionLabel => '일과 완료율';
+  String get weeklyReportCompletionLabel => '日課の達成率';
 
   @override
   String weeklyReportPercent(int percent) {
@@ -4066,7 +4054,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '보낸 일과 $sent개 중 $completed개를 마쳤어요',
+      other: '送った日課$sent件のうち$completed件を終えました',
     );
     return '$_temp0';
   }
@@ -4080,20 +4068,20 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportStars => '받은 별';
+  String get weeklyReportStars => 'もらった星';
 
   @override
-  String get weeklyReportRewards => '보상을 받은 일과';
+  String get weeklyReportRewards => 'ごほうびをもらった日課';
 
   @override
-  String get weeklyReportStreak => '연속으로 마친 날';
+  String get weeklyReportStreak => '連続で終えた日';
 
   @override
   String weeklyReportCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count件',
     );
     return '$_temp0';
   }
@@ -4103,26 +4091,26 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count일',
+      other: '$count日',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportRoutinesSection => '일과별 기록';
+  String get weeklyReportRoutinesSection => '日課ごとの記録';
 
   @override
   String weeklyReportRoutineValue(int sent, int completed) {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$sent번 중 $completed번 마침',
+      other: '$sent回中$completed回終えました',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportRemainingSection => '자주 남은 카드';
+  String get weeklyReportRemainingSection => 'よく残ったカード';
 
   @override
   String weeklyReportRemainingLabel(String routine, String step) {
@@ -4134,55 +4122,54 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count번',
+      other: '$count回',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportEmptyTitle => '이 주에는 보낸 일과가 없어요';
+  String get weeklyReportEmptyTitle => 'この週は送った日課がありません';
 
   @override
-  String get weeklyReportEmptyBody => '일과를 보내면 이룸이가 마친 기록이 여기에 모여요';
+  String get weeklyReportEmptyBody => '日課を送ると、Elumiが終えた記録がここに集まります';
 
   @override
-  String get weeklyReportNoCompletionThisWeekTitle => '이번 주는 아직 기록이 없어요';
+  String get weeklyReportNoCompletionThisWeekTitle => '今週はまだ記録がありません';
 
   @override
-  String get weeklyReportNoCompletionPastWeekTitle => '이 주에는 끝낸 일과가 없어요';
+  String get weeklyReportNoCompletionPastWeekTitle => 'この週は終えた日課がありません';
 
   @override
-  String get weeklyReportNoCompletionBody => '오늘 일과를 보내 볼까요?';
+  String get weeklyReportNoCompletionBody => '今日の日課を送ってみましょうか？';
 
   @override
-  String get weeklyReportGoToManage => '일과 관리로 가기';
+  String get weeklyReportGoToManage => '日課管理へ';
 
   @override
-  String get weeklyReportLoadFailed => '주간 리포트를 불러오지 못했어요';
+  String get weeklyReportLoadFailed => '週間レポートを読み込めませんでした';
 
   @override
-  String get weeklyReportNotIncluded => '주간 리포트는 Pro에서 볼 수 있어요';
+  String get weeklyReportNotIncluded => '週間レポートはProで見られます';
 
   @override
-  String get weeklyReportShareImage => '이미지';
+  String get weeklyReportShareImage => '画像';
 
   @override
   String get weeklyReportSharePdf => 'PDF';
 
   @override
-  String get weeklyReportShareFailed => '보낼 한 장을 만들지 못했어요';
+  String get weeklyReportShareFailed => '送るページを作れませんでした';
 
   @override
   String weeklyReportShareTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이의', 'other': '의'});
-    return '$name$_temp0 한 주';
+    return '$nameの1週間';
   }
 
   @override
-  String get weeklyReportShareNote => '이룸 앱에 남은 완료 기록을 센 내용이에요';
+  String get weeklyReportShareNote => 'elumアプリに残った完了記録を数えた内容です';
 
   @override
-  String get weeklyReportRecordSection => '한 주 기록';
+  String get weeklyReportRecordSection => '1週間の記録';
 
   @override
   String get weeklyReportDonutLabel => '達成率';
@@ -4244,12 +4231,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportInsightHighlightTitle => '잘한 것';
+  String get weeklyReportInsightHighlightTitle => 'よくできたこと';
 
   @override
   String weeklyReportInsightHighlightFirst(String routine, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$routine$_temp0 이번 주에 처음 끝까지 했어요';
+    return '今週はじめて$routineを最後までできました';
   }
 
   @override
@@ -4258,22 +4244,21 @@ class AppLocalizationsJa extends AppLocalizations {
     String batchim,
     int count,
   ) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$routine$_temp0 $count번 모두 끝까지 했어요';
+    return '$routineを$count回すべて最後までできました';
   }
 
   @override
   String weeklyReportInsightHighlightStreak(int days) {
-    return '$days일 이어서 일과를 끝냈어요';
+    return '$days日続けて日課を終えました';
   }
 
   @override
   String weeklyReportInsightHighlightHint(String name) {
-    return '오늘 $name에게 말해 주세요';
+    return '今日、$nameに伝えてあげてください';
   }
 
   @override
-  String get weeklyReportInsightStuckTitle => '자주 멈춘 곳';
+  String get weeklyReportInsightStuckTitle => 'よく止まったところ';
 
   @override
   String weeklyReportInsightStuckLine(
@@ -4282,53 +4267,53 @@ class AppLocalizationsJa extends AppLocalizations {
     int sent,
     int remained,
   ) {
-    return '$routine의 $step에서 $sent번 중 $remained번 멈췄어요';
+    return '$routineの$stepで$sent回中$remained回止まりました';
   }
 
   @override
-  String get weeklyReportInsightStuckShorten => '카드 글을 더 짧게 바꾸거나 둘로 나눠 볼 수 있어요';
+  String get weeklyReportInsightStuckShorten => 'カードの文をもっと短くするか、2つに分けてみましょう';
 
   @override
-  String get weeklyReportInsightStuckAddMedia => '목소리나 사진을 붙여 볼 수 있어요';
+  String get weeklyReportInsightStuckAddMedia => '声や写真をつけてみましょう';
 
   @override
   String weeklyReportInsightStuckFix(String step) {
-    return '$step 카드 고치기';
+    return '$stepのカードを直す';
   }
 
   @override
-  String get weeklyReportInsightStuckFixFailed => '고칠 일과를 열지 못했어요';
+  String get weeklyReportInsightStuckFixFailed => '直す日課を開けませんでした';
 
   @override
-  String get weeklyReportInsightTrendTitle => '지난주와 달라진 점';
+  String get weeklyReportInsightTrendTitle => '先週と変わったこと';
 
   @override
   String weeklyReportInsightTrendUp(int before, int after) {
-    return '끝낸 일과가 $before개에서 $after개로 늘었어요';
+    return '終えた日課が$before個から$after個に増えました';
   }
 
   @override
   String weeklyReportInsightTrendDown(int before, int after) {
-    return '끝낸 일과가 $before개에서 $after개가 됐어요';
+    return '終えた日課が$before個から$after個になりました';
   }
 
   @override
   String weeklyReportInsightTrendSame(int after) {
-    return '지난주와 같이 $after개를 끝냈어요';
+    return '先週と同じく$after個終えました';
   }
 
   @override
   String weeklyReportInsightTrendBarPrevious(int count) {
-    return '지난주 $count';
+    return '先週 $count';
   }
 
   @override
   String weeklyReportInsightTrendBarCurrent(int count) {
-    return '이번 주 $count';
+    return '今週 $count';
   }
 
   @override
-  String get weeklyReportInsightDurationTitle => '걸린 시간';
+  String get weeklyReportInsightDurationTitle => 'かかった時間';
 
   @override
   String weeklyReportInsightDurationLine(
@@ -4336,11 +4321,11 @@ class AppLocalizationsJa extends AppLocalizations {
     int before,
     int after,
   ) {
-    return '$routine에 걸린 시간이 $before분에서 $after분이 됐어요';
+    return '$routineにかかった時間が$before分から$after分になりました';
   }
 
   @override
-  String get weeklyReportInsightSlowestTitle => '가장 오래 머문 카드';
+  String get weeklyReportInsightSlowestTitle => 'いちばん長くとどまったカード';
 
   @override
   String weeklyReportInsightSlowestLine(
@@ -4348,64 +4333,64 @@ class AppLocalizationsJa extends AppLocalizations {
     String step,
     int minutes,
   ) {
-    return '$routine의 $step에서 평균 $minutes분 머물렀어요';
+    return '$routineの$stepで平均$minutes分とどまりました';
   }
 
   @override
-  String get weeklyReportStatCompleted => '끝낸 일과';
+  String get weeklyReportStatCompleted => '終えた日課';
 
   @override
-  String get weeklyReportStatRemaining => '아직 안 한 카드';
+  String get weeklyReportStatRemaining => 'まだのカード';
 
   @override
   String weeklyReportRoutineRatio(int sent, int completed) {
     String _temp0 = intl.Intl.pluralLogic(
       sent,
       locale: localeName,
-      other: '$sent번 중 $completed번',
+      other: '$sent回中$completed回',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportSave => '리포트 저장하기';
+  String get weeklyReportSave => 'レポートを保存';
 
   @override
-  String get weeklyReportSaveSheetTitle => '리포트를 어떻게 저장할까요?';
+  String get weeklyReportSaveSheetTitle => 'レポートをどう保存しますか？';
 
   @override
-  String get weeklyReportPastReports => '지난 리포트 보기';
+  String get weeklyReportPastReports => '過去のレポートを見る';
 
   @override
-  String get weeklyReportPastSheetTitle => '지난 리포트';
+  String get weeklyReportPastSheetTitle => '過去のレポート';
 
   @override
   String weeklyReportPastWeekValue(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '일과 $count개 끝냄',
+      other: '日課を$count個終えました',
     );
     return '$_temp0';
   }
 
   @override
-  String get weeklyReportPastEmpty => '아직 지난 리포트가 없어요';
+  String get weeklyReportPastEmpty => 'まだ過去のレポートはありません';
 
   @override
-  String get weeklyReportPastLoadFailed => '지난 리포트를 불러오지 못했어요';
+  String get weeklyReportPastLoadFailed => '過去のレポートを読み込めませんでした';
 
   @override
-  String get weeklyReportFreePreviewNote => '첫 리포트는 Pro 없이 미리 볼 수 있어요';
+  String get weeklyReportFreePreviewNote => '最初のレポートはProなしで見られます';
 
   @override
-  String get weeklyReportNextWeekUpsell => '다음 주 리포트도 받아 보기';
+  String get weeklyReportNextWeekUpsell => '来週のレポートも受け取る';
 
   @override
-  String get routineScheduleRowOff => '요일·시각 정하기';
+  String get routineScheduleRowOff => '曜日・時刻を決める';
 
   @override
-  String get routineScheduleRowLabel => '반복 요일과 시각';
+  String get routineScheduleRowLabel => 'くり返す曜日と時刻';
 
   @override
   String routineScheduleSummary(String days, String time) {
@@ -4413,453 +4398,453 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get routineScheduleEveryDay => '매일';
+  String get routineScheduleEveryDay => '毎日';
 
   @override
-  String get routineScheduleWeekdaysOnly => '평일';
+  String get routineScheduleWeekdaysOnly => '平日';
 
   @override
-  String get routineScheduleWeekendOnly => '주말';
+  String get routineScheduleWeekendOnly => '週末';
 
   @override
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro가 끝나 멈췄어요';
+  String get routineSchedulePaused => 'Proが終わり、止まりました';
 
   @override
   String get routineSchedulePausedNote =>
-      'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요';
+      'Proが終わったため、くり返しを止めました。決めた曜日と時刻はそのまま残っています';
 
   @override
-  String get routineScheduleSheetTitle => '언제 할까요?';
+  String get routineScheduleSheetTitle => 'いつしますか？';
 
   @override
-  String get routineScheduleSheetBody => '고른 요일마다 이 일과가 오늘 일과로 가요';
+  String get routineScheduleSheetBody => '選んだ曜日ごとに、この日課が今日の日課になります';
 
   @override
-  String get routineScheduleDaysLabel => '요일';
+  String get routineScheduleDaysLabel => '曜日';
 
   @override
-  String get routineScheduleTimeLabel => '시각';
+  String get routineScheduleTimeLabel => '時刻';
 
   @override
-  String get routineScheduleNotifyElumi => '그 시각에 이룸이 기기에 알리기';
+  String get routineScheduleNotifyElumi => 'その時刻にElumiの端末へ知らせる';
 
   @override
-  String get routineScheduleElumiNotificationOff => '이룸이 기기 알림이 꺼져 있어요';
+  String get routineScheduleElumiNotificationOff => 'Elumiの端末の通知がオフになっています';
 
   @override
   String get routineScheduleElumiNotificationOffHint =>
-      '이룸이 기기의 설정에서 이룸 알림을 켜 주세요';
+      'Elumiの端末の設定で、elumの通知をオンにしてください';
 
   @override
-  String get routineScheduleElumiNoDevice => '이룸이 기기를 연결하면 그 시각에 알림이 가요';
+  String get routineScheduleElumiNoDevice => 'Elumiの端末をつなぐと、その時刻に通知が届きます';
 
   @override
-  String get routineScheduleSave => '저장하기';
+  String get routineScheduleSave => '保存';
 
   @override
-  String get routineScheduleTurnOff => '반복 끄기';
+  String get routineScheduleTurnOff => 'くり返しをオフにする';
 
   @override
-  String get routineScheduleSavedToast => '요일과 시각을 저장했어요';
+  String get routineScheduleSavedToast => '曜日と時刻を保存しました';
 
   @override
-  String get routineScheduleTurnedOffToast => '반복을 껐어요';
+  String get routineScheduleTurnedOffToast => 'くり返しをオフにしました';
 
   @override
-  String get routineScheduleSaveFailedTitle => '저장하지 못했어요';
+  String get routineScheduleSaveFailedTitle => '保存できませんでした';
 
   @override
-  String get routineScheduleSaveFailedFallback => '잠시 뒤 다시 해 주세요';
+  String get routineScheduleSaveFailedFallback => '少し待ってから、もう一度お試しください';
 
   @override
-  String get routineSchedulePickDayHint => '요일을 하나 이상 골라 주세요';
+  String get routineSchedulePickDayHint => '曜日を1つ以上選んでください';
 
   @override
-  String get routineScheduleProNote => '반복 일과는 Pro에서 저장할 수 있어요';
+  String get routineScheduleProNote => 'くり返しの日課はProで保存できます';
 
   @override
-  String get weeklyPlanEntry => '주간 계획';
+  String get weeklyPlanEntry => '週間計画';
 
   @override
-  String get weeklyPlanTitle => '주간 계획';
+  String get weeklyPlanTitle => '週間計画';
 
   @override
   String weeklyPlanDayTitle(String weekday) {
-    return '$weekday요일';
+    return '$weekday曜日';
   }
 
   @override
-  String get weeklyPlanToday => '오늘';
+  String get weeklyPlanToday => '今日';
 
   @override
-  String get weeklyPlanEmptyDay => '정한 일과가 없어요';
+  String get weeklyPlanEmptyDay => '決まった日課はありません';
 
   @override
-  String get weeklyPlanEmptyTitle => '아직 요일을 정한 일과가 없어요';
+  String get weeklyPlanEmptyTitle => 'まだ曜日を決めた日課はありません';
 
   @override
-  String get weeklyPlanEmptyBody => '일과 관리에서 일과를 누르고 요일·시각을 정해 보세요';
+  String get weeklyPlanEmptyBody => '日課管理で日課をタップして、曜日・時刻を決めてみましょう';
 
   @override
-  String get weeklyPlanLoadFailed => '주간 계획을 불러오지 못했어요';
+  String get weeklyPlanLoadFailed => '週間計画を読み込めませんでした';
 
   @override
-  String get weeklyPlanNotifyOff => '알림 없음';
+  String get weeklyPlanNotifyOff => '通知なし';
 
   @override
-  String get weeklyPlanMetaSeparator => ' · ';
+  String get weeklyPlanMetaSeparator => '  ·  ';
 
   @override
-  String get guardianVoiceRecordAction => '내 목소리로 녹음하기';
+  String get guardianVoiceRecordAction => '自分の声で録音する';
 
   @override
-  String get guardianVoiceRecordHint => '카드를 누르면 이 목소리가 들려요';
+  String get guardianVoiceRecordHint => 'カードをタップすると、この声が流れます';
 
   @override
   String guardianVoiceRecording(int seconds) {
-    return '녹음하고 있어요 $seconds초';
+    return '録音中 $seconds秒';
   }
 
   @override
   String guardianVoiceRecordingLimit(int seconds) {
-    return '$seconds초까지 녹음돼요';
+    return '$seconds秒まで録音できます';
   }
 
   @override
-  String get guardianVoiceStop => '멈추기';
+  String get guardianVoiceStop => '止める';
 
   @override
-  String get guardianVoiceSaving => '녹음을 저장하고 있어요';
+  String get guardianVoiceSaving => '録音を保存しています';
 
   @override
-  String get guardianVoiceSaved => '녹음했어요';
+  String get guardianVoiceSaved => '録音しました';
 
   @override
-  String get guardianVoicePlay => '듣기';
+  String get guardianVoicePlay => '聞く';
 
   @override
-  String get guardianVoiceRerecord => '다시 녹음';
+  String get guardianVoiceRerecord => '録音し直す';
 
   @override
-  String get guardianVoiceDelete => '지우기';
+  String get guardianVoiceDelete => '消す';
 
   @override
-  String get guardianVoiceDeleteConfirmTitle => '녹음을 지울까요?';
+  String get guardianVoiceDeleteConfirmTitle => '録音を消しますか？';
 
   @override
-  String get guardianVoiceDeleteConfirmMessage => '지우면 기본 목소리로 읽어 줘요';
+  String get guardianVoiceDeleteConfirmMessage => '消すと、標準の声で読み上げます';
 
   @override
-  String get guardianVoicePlanEnded => '기본 목소리로 읽어요';
+  String get guardianVoicePlanEnded => '標準の声で読み上げます';
 
   @override
-  String get guardianVoiceMicDeniedTitle => '마이크가 꺼져 있어요';
+  String get guardianVoiceMicDeniedTitle => 'マイクがオフになっています';
 
   @override
-  String get guardianVoiceMicDeniedBody => '켜기 전까지 기본 목소리로 읽어요';
+  String get guardianVoiceMicDeniedBody => 'オンにするまでは、標準の声で読み上げます';
 
   @override
-  String get guardianVoiceOpenSettings => '설정 열기';
+  String get guardianVoiceOpenSettings => '設定を開く';
 
   @override
-  String get guardianVoiceFailedTitle => '녹음을 저장하지 못했어요';
+  String get guardianVoiceFailedTitle => '録音を保存できませんでした';
 
   @override
-  String get guardianVoiceRetry => '다시 하기';
+  String get guardianVoiceRetry => 'もう一度';
 
   @override
-  String get guardianVoiceTooShort => '너무 짧아요. 말한 뒤에 멈추기를 눌러 주세요';
+  String get guardianVoiceTooShort => '短すぎます。話してから「止める」をタップしてください';
 
   @override
-  String get guardianVoiceRecordFailed => '녹음하지 못했어요. 다시 해 주세요';
+  String get guardianVoiceRecordFailed => '録音できませんでした。もう一度お試しください';
 
   @override
-  String get guardianVoiceTooLarge => '녹음 파일이 너무 커요. 조금 짧게 다시 녹음해 주세요';
+  String get guardianVoiceTooLarge => '録音ファイルが大きすぎます。少し短く録音し直してください';
 
   @override
-  String get guardianVoicePlayFailed => '녹음을 틀지 못했어요';
+  String get guardianVoicePlayFailed => '録音を再生できませんでした';
 
   @override
-  String get guardianVoiceDeleteFailed => '녹음을 지우지 못했어요';
+  String get guardianVoiceDeleteFailed => '録音を消せませんでした';
 
   @override
-  String get guardianVoiceRecordChip => '녹음';
+  String get guardianVoiceRecordChip => '録音';
 
   @override
-  String get guardianVoicePlanEndedHint => 'Pro가 끝나도 녹음은 남겨 뒀어요';
+  String get guardianVoicePlanEndedHint => 'Proが終わっても録音は残してあります';
 
   @override
-  String get guardianSettingsRoutineMemory => 'AI 메모리';
+  String get guardianSettingsRoutineMemory => 'AIメモリー';
 
   @override
   String memoryHeroTitle(String name) {
-    return '$name AI 메모리';
+    return '$nameのAIメモリー';
   }
 
   @override
-  String get memoryHeroBody => '내가 고친 방식을 기억해서 다음 일과를 그렇게 만들어요. 나만 봐요';
+  String get memoryHeroBody => 'あなたの直し方を覚えて、次の日課をそのように作ります。見られるのはあなただけです';
 
   @override
-  String get memoryStatApplied => '적용 중';
+  String get memoryStatApplied => '適用中';
 
   @override
-  String get memoryStatWatching => '관찰 중';
+  String get memoryStatWatching => '観察中';
 
   @override
-  String get memoryStatEdits => '수정 기록';
+  String get memoryStatEdits => '修正記録';
 
   @override
-  String get memoryListAppliedHeader => '적용 중인 규칙';
+  String get memoryListAppliedHeader => '適用中のルール';
 
   @override
-  String get memoryListAppliedHint => '새 일과에 쓰여요';
+  String get memoryListAppliedHint => '新しい日課に使われます';
 
   @override
-  String get memoryListWatchingHeader => '관찰 중인 규칙';
+  String get memoryListWatchingHeader => '観察中のルール';
 
   @override
-  String get memoryListWatchingHint => '점이 다 차면 적용돼요';
+  String get memoryListWatchingHint => '点がすべて埋まると適用されます';
 
   @override
-  String get memoryListEditsHeader => '고쳐서 보낸 기록';
+  String get memoryListEditsHeader => '直して送った記録';
 
   @override
   String memoryRuleByAi(int count) {
-    return 'AI가 찾음, 일과 $count개';
+    return 'AIが発見、日課$count個';
   }
 
   @override
-  String get memoryRuleByMe => '내가 적음';
+  String get memoryRuleByMe => '自分で書いたもの';
 
   @override
   String memoryEditCards(int before, int after) {
-    return '$before장 → $after장';
+    return '$before枚 → $after枚';
   }
 
   @override
   String memoryEditTexts(int count) {
-    return '글 $count곳';
+    return '文$countか所';
   }
 
   @override
-  String get memoryAddRule => '+ 규칙 직접 적기';
+  String get memoryAddRule => '+ ルールを自分で書く';
 
   @override
-  String get memoryAutoFind => '고친 내용에서 자동으로 찾기';
+  String get memoryAutoFind => '直した内容から自動で見つける';
 
   @override
   String memoryAutoFindNote(int count) {
-    return '같은 수정이 일과 $count개에서 반복되면 적용돼요';
+    return '同じ修正が日課$count個でくり返されると適用されます';
   }
 
   @override
-  String get memoryEmptyTitle => '일과를 고쳐서 보내면 여기에 쌓여요';
+  String get memoryEmptyTitle => '日課を直して送ると、ここにたまります';
 
   @override
-  String get memoryEmptyEdits => '아직 고쳐서 보낸 일과가 없어요';
+  String get memoryEmptyEdits => 'まだ直して送った日課はありません';
 
   @override
-  String get memoryTypeWord => '낱말 바꾸기';
+  String get memoryTypeWord => '言葉を変える';
 
   @override
-  String get memoryTypeSplit => '카드 나누기';
+  String get memoryTypeSplit => 'カードを分ける';
 
   @override
-  String get memoryTypeMerge => '카드 합치기';
+  String get memoryTypeMerge => 'カードをまとめる';
 
   @override
-  String get memoryTypeAdd => '카드 더하기';
+  String get memoryTypeAdd => 'カードを足す';
 
   @override
-  String get memoryTypeRemove => '카드 빼기';
+  String get memoryTypeRemove => 'カードを外す';
 
   @override
-  String get memoryTypeManual => '직접 적은 규칙';
+  String get memoryTypeManual => '自分で書いたルール';
 
   @override
-  String get memoryApplyNow => '지금 적용';
+  String get memoryApplyNow => '今すぐ適用';
 
   @override
-  String get memoryRuleDelete => '삭제';
+  String get memoryRuleDelete => '削除';
 
   @override
-  String get memoryRuleEdit => '수정';
+  String get memoryRuleEdit => '編集';
 
   @override
   String memoryEvidenceLine(String routine, int month, int day) {
-    return '$routine, $month월 $day일';
+    return '$routine、$month月$day日';
   }
 
   @override
-  String get memoryMenuLabel => '메뉴';
+  String get memoryMenuLabel => 'メニュー';
 
   @override
-  String get memoryMenuExport => '파일로 내보내기';
+  String get memoryMenuExport => 'ファイルに書き出す';
 
   @override
-  String get memoryMenuClear => '메모리 모두 지우기';
+  String get memoryMenuClear => 'メモリーをすべて消す';
 
   @override
-  String get memoryExportFailed => '메모리를 내보내지 못했어요';
+  String get memoryExportFailed => 'メモリーを書き出せませんでした';
 
   @override
-  String get memoryObsTitle => 'AI 메모리';
+  String get memoryObsTitle => 'AIメモリー';
 
   @override
-  String get memoryObsWord => '낱말을 이렇게 바꾸셨어요';
+  String get memoryObsWord => '言葉をこのように変えました';
 
   @override
-  String get memoryObsSplit => '카드를 나누셨어요';
+  String get memoryObsSplit => 'カードを分けました';
 
   @override
-  String get memoryObsMerge => '카드를 합치셨어요';
+  String get memoryObsMerge => 'カードをまとめました';
 
   @override
-  String get memoryObsAdd => '카드를 더하셨어요';
+  String get memoryObsAdd => 'カードを足しました';
 
   @override
-  String get memoryObsRemove => '카드를 빼셨어요';
+  String get memoryObsRemove => 'カードを外しました';
 
   @override
-  String get memoryObsManual => '이렇게 고치셨어요';
+  String get memoryObsManual => 'このように直しました';
 
   @override
   String memoryObsAsk(String phrase) {
-    return '$phrase. 다음 일과에도 이렇게 할까요?';
+    return '$phrase。次の日課でもこうしますか？';
   }
 
   @override
-  String get memoryObsAlways => '항상 이렇게';
+  String get memoryObsAlways => 'いつもこうする';
 
   @override
-  String get memoryObsOnce => '이번만';
+  String get memoryObsOnce => '今回だけ';
 
   @override
-  String get memoryObsDone => '다음 일과부터 이렇게 만들어요';
+  String get memoryObsDone => '次の日課からこのように作ります';
 
   @override
   String memoryObsMore(int count) {
-    return 'AI 메모리에서 $count개 더 보기';
+    return 'AIメモリーでさらに$count個見る';
   }
 
   @override
   String memoryAppliedPill(int count) {
-    return 'AI 메모리 규칙 $count개 적용됨';
+    return 'AIメモリーのルールを$count個適用しました';
   }
 
   @override
-  String get routineMemoryAddSheetTitle => '메모 더하기';
+  String get routineMemoryAddSheetTitle => 'メモを足す';
 
   @override
-  String get routineMemoryEditSheetTitle => '메모 고치기';
+  String get routineMemoryEditSheetTitle => 'メモを直す';
 
   @override
-  String get routineMemoryLineHint => '예: \'씻기\' 대신 \'손 닦기\'라고 써요';
+  String get routineMemoryLineHint => '例：「洗う」ではなく「手をふく」と書きます';
 
   @override
-  String get routineMemorySave => '저장하기';
+  String get routineMemorySave => '保存';
 
   @override
-  String get routineMemoryDeleteLine => '이 줄 지우기';
+  String get routineMemoryDeleteLine => 'この行を消す';
 
   @override
-  String get routineMemoryClearConfirmTitle => '메모를 모두 지울까요?';
+  String get routineMemoryClearConfirmTitle => 'メモをすべて消しますか？';
 
   @override
-  String get routineMemoryClearConfirmMessage => '지운 메모는 되돌릴 수 없어요.';
+  String get routineMemoryClearConfirmMessage => '消したメモは元に戻せません。';
 
   @override
-  String get routineMemoryClearConfirmAction => '모두 지우기';
+  String get routineMemoryClearConfirmAction => 'すべて消す';
 
   @override
-  String get routineMemoryLoadFailed => '메모를 불러오지 못했어요';
+  String get routineMemoryLoadFailed => 'メモを読み込めませんでした';
 
   @override
-  String get routineMemorySaveFailedTitle => '메모를 저장하지 못했어요';
+  String get routineMemorySaveFailedTitle => 'メモを保存できませんでした';
 
   @override
-  String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
+  String get routineMemorySaveFailedFallback => '少し待ってから、もう一度お試しください。';
 
   @override
-  String get proTeaserSampleLabel => '예시 화면';
+  String get proTeaserSampleLabel => 'サンプル画面';
 
   @override
-  String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
+  String get proOnlyNoticeTitle => 'Proで使える機能です';
 
   @override
-  String get proOnlyFreeAlternative => '지금 쓰던 기능은 그대로 쓸 수 있어요';
+  String get proOnlyFreeAlternative => '今使っている機能はそのまま使えます';
 
   @override
-  String get proOnlyFreeAlternativeAiImage => '지금은 기본 그림이나 사진으로 카드를 만들 수 있어요';
+  String get proOnlyFreeAlternativeAiImage => '今は基本の絵や写真でカードを作れます';
 
   @override
-  String get proOnlyFreeAlternativeSchedule => '지금은 일과를 직접 보내면 돼요';
+  String get proOnlyFreeAlternativeSchedule => '今は日課を自分で送れば大丈夫です';
 
   @override
-  String get proOnlyFreeAlternativeVoice => '지금은 기본 목소리로 카드를 읽어 줘요';
+  String get proOnlyFreeAlternativeVoice => '今は標準の声でカードを読み上げます';
 
   @override
-  String get proOnlyFreeAlternativeCardSplit => '지금은 카드를 직접 추가해서 나눌 수 있어요';
+  String get proOnlyFreeAlternativeCardSplit => '今はカードを自分で足して分けられます';
 
   @override
-  String get proOnlyFreeAlternativeCardExport => '지금은 기본 디자인으로 인쇄할 수 있어요';
+  String get proOnlyFreeAlternativeCardExport => '今は基本のデザインで印刷できます';
 
   @override
-  String get proTeaserWeeklyReportBenefit => '한 주 동안 해낸 일과를 한 장으로 정리해 보낼 수 있어요';
+  String get proTeaserWeeklyReportBenefit => '1週間でできた日課を1枚にまとめて送れます';
 
   @override
-  String get proTeaserRoutineMemoryBenefit => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
+  String get proTeaserRoutineMemoryBenefit => 'あなたの直し方を覚えて、次の日課をもっとぴったりに作ります';
 
   @override
-  String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
+  String get proTeaserCardThemeBenefit => '印刷用カードをいろいろなデザインで受け取れます';
 
   @override
-  String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
+  String get proTeaserWeeklyPlanBenefit => '毎朝、日課を送り直さなくて大丈夫です';
 
   @override
-  String get proTeaserSampleRoutineMorning => '아침 준비하기';
+  String get proTeaserSampleRoutineMorning => '朝のしたく';
 
   @override
-  String get proTeaserSampleRoutineBrush => '이 닦기';
+  String get proTeaserSampleRoutineBrush => '歯みがき';
 
   @override
-  String get proTeaserSampleRoutineBag => '가방 챙기기';
+  String get proTeaserSampleRoutineBag => 'かばんの準備';
 
   @override
-  String get proTeaserSampleStepSocks => '양말 신기';
+  String get proTeaserSampleStepSocks => 'くつしたをはく';
 
   @override
-  String get proTeaserSampleMemoryShort => '카드 문장은 짧게 한 줄로 써요';
+  String get proTeaserSampleMemoryShort => 'カードの文は短く1行で書きます';
 
   @override
-  String get proTeaserSampleMemoryOrder => '옷 입기는 양말부터 시작해요';
+  String get proTeaserSampleMemoryOrder => '着替えはくつしたから始めます';
 
   @override
-  String get proTeaserSampleMemoryReward => '보상은 스티커로 정해요';
+  String get proTeaserSampleMemoryReward => 'ごほうびはシールにします';
 
   @override
-  String get cardRegenerateChip => '다시 그리기';
+  String get cardRegenerateChip => '描き直す';
 
   @override
-  String get cardRegenerateSheetTitle => '그림을 다시 그릴까요?';
+  String get cardRegenerateSheetTitle => '絵を描き直しますか？';
 
   @override
   String cardRegenerateCostProFree(int count) {
-    return '크레딧 없이, 오늘 $count번 남았어요';
+    return 'クレジットなし、今日はあと$count回です';
   }
 
   @override
-  String get cardRegenerateCostFree => '크레딧을 쓰지 않아요';
+  String get cardRegenerateCostFree => 'クレジットを使いません';
 
   @override
   String cardRegenerateCostCredits(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '크레딧 $count개',
+      other: 'クレジット$count個',
     );
     return '$_temp0';
   }
@@ -4869,7 +4854,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       credits,
       locale: localeName,
-      other: '오늘 무료 $freeCount번을 다 썼어요, 크레딧 $credits개를 써요',
+      other: '今日の無料$freeCount回を使い切りました。クレジットを$credits個使います',
     );
     return '$_temp0';
   }
@@ -4879,7 +4864,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Pro는 하루 $count번 무료로 다시 그려요',
+      other: 'Proは1日$count回まで無料で描き直せます',
     );
     return '$_temp0';
   }
@@ -4889,7 +4874,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'AI 그림을 그리면 크레딧 $count개를 써요',
+      other: 'AIの絵を描くとクレジットを$count個使います',
     );
     return '$_temp0';
   }
@@ -4899,7 +4884,7 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       available,
       locale: localeName,
-      other: '$costs, 지금 $available개 있어요',
+      other: '$costs、今$available個あります',
     );
     return '$_temp0';
   }
@@ -4909,213 +4894,213 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count個',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardRegenerateCostUnknown => '크레딧을 써요';
+  String get cardRegenerateCostUnknown => 'クレジットを使います';
 
   @override
-  String get cardRegenerateConfirm => '다시 그리기';
+  String get cardRegenerateConfirm => '描き直す';
 
   @override
-  String get cardRegenerateInProgress => '그림을 다시 그리고 있어요';
+  String get cardRegenerateInProgress => '絵を描き直しています';
 
   @override
-  String get cardRegenerateFailedTitle => '그림을 다시 그리지 못했어요';
+  String get cardRegenerateFailedTitle => '絵を描き直せませんでした';
 
   @override
-  String get cardFirstDrawChip => 'AI 그림 그리기';
+  String get cardFirstDrawChip => 'AIの絵を描く';
 
   @override
-  String get cardRedrawProChip => 'Pro로 다시 그리기';
+  String get cardRedrawProChip => 'Proで描き直す';
 
   @override
-  String get cardFirstDrawProChip => 'Pro로 AI 그림 그리기';
+  String get cardFirstDrawProChip => 'ProでAIの絵を描く';
 
   @override
-  String get cardFirstDrawSheetTitle => 'AI 그림을 그릴까요?';
+  String get cardFirstDrawSheetTitle => 'AIの絵を描きますか？';
 
   @override
-  String get cardRedrawSheetBody => '고치고 싶은 점을 적거나 골라 주세요. 비워 두면 그대로 다시 그려요';
+  String get cardRedrawSheetBody => '直したいところを書くか選んでください。空のままなら、そのまま描き直します';
 
   @override
-  String get cardFirstDrawSheetBody => '원하는 점을 적거나 골라 주세요. 새 그림을 보고 고를 수 있어요';
+  String get cardFirstDrawSheetBody => '希望を書くか選んでください。新しい絵を見てから選べます';
 
   @override
-  String get cardRedrawRequestLabel => '고치고 싶은 점';
+  String get cardRedrawRequestLabel => '直したいところ';
 
   @override
-  String get cardRedrawRequestHint => '예: 우산을 파란색으로';
+  String get cardRedrawRequestHint => '例：かさを青に';
 
   @override
-  String get cardRedrawHintSimpler => '더 단순하게';
+  String get cardRedrawHintSimpler => 'もっとシンプルに';
 
   @override
-  String get cardRedrawHintNoBackground => '배경 빼기';
+  String get cardRedrawHintNoBackground => '背景なし';
 
   @override
-  String get cardRedrawHintNoPeople => '사람 빼기';
+  String get cardRedrawHintNoPeople => '人なし';
 
   @override
-  String get cardRedrawHintBrighter => '더 밝게';
+  String get cardRedrawHintBrighter => 'もっと明るく';
 
   @override
-  String get cardFirstDrawConfirm => '그리기';
+  String get cardFirstDrawConfirm => '描く';
 
   @override
-  String get cardFirstDrawInProgress => '그림을 그리고 있어요';
+  String get cardFirstDrawInProgress => '絵を描いています';
 
   @override
-  String get cardFirstDrawFailedTitle => 'AI 그림을 그리지 못했어요';
+  String get cardFirstDrawFailedTitle => 'AIの絵を描けませんでした';
 
   @override
-  String get cardRedrawFailedFallback => '다시 해 볼까요? 크레딧은 쓰지 않았어요';
+  String get cardRedrawFailedFallback => 'もう一度やってみましょうか？クレジットは使っていません';
 
   @override
   String get cardCandidateFailedFallback =>
-      '새 그림은 이미 그려서 쓴 크레딧은 돌아오지 않아요. 잠시 뒤 다시 해 주세요';
+      '新しい絵はすでに描いたので、使ったクレジットは戻りません。少し待ってから、もう一度お試しください';
 
   @override
-  String get cardCandidateSheetTitle => '어떤 그림으로 할까요?';
+  String get cardCandidateSheetTitle => 'どの絵にしますか？';
 
   @override
   String get cardCandidateSheetBody =>
-      '고른 그림만 이룸이에게 보여요\n어느 그림을 골라도 쓴 크레딧은 돌아오지 않아요';
+      '選んだ絵だけがElumiに見えます\nどの絵を選んでも、使ったクレジットは戻りません';
 
   @override
-  String get cardCandidateCurrentLabel => '지금 그림';
+  String get cardCandidateCurrentLabel => '今の絵';
 
   @override
-  String get cardCandidateNewLabel => '새 그림';
+  String get cardCandidateNewLabel => '新しい絵';
 
   @override
-  String get cardCandidateSelectButton => '이 그림으로 하기';
+  String get cardCandidateSelectButton => 'この絵にする';
 
   @override
-  String get cardCandidateAppliedToast => '새 그림으로 바꿨어요';
+  String get cardCandidateAppliedToast => '新しい絵に変えました';
 
   @override
-  String get cardCandidateLoadFailedTitle => '새 그림을 불러오지 못했어요';
+  String get cardCandidateLoadFailedTitle => '新しい絵を読み込めませんでした';
 
   @override
-  String get cardCandidateApplyFailedTitle => '새 그림으로 바꾸지 못했어요';
+  String get cardCandidateApplyFailedTitle => '新しい絵に変えられませんでした';
 
   @override
-  String get planHeroHeadline => '이룸이만을 위한 카드로 바뀌어요';
+  String get planHeroHeadline => 'Elumiだけのカードに変わります';
 
   @override
-  String get planHeroSubline => '같은 일과도 Pro로 만들면 이렇게 달라져요';
+  String get planHeroSubline => '同じ日課もProで作るとこんなに変わります';
 
   @override
-  String get planHeroFreeTag => 'Free 이모지';
+  String get planHeroFreeTag => 'Free 絵文字';
 
   @override
-  String get planHeroProTag => 'Pro 만화 그림';
+  String get planHeroProTag => 'Pro マンガの絵';
 
   @override
-  String get planHeroCompareSemantics => 'Free는 이모지 카드, Pro는 만화 그림 카드예요';
+  String get planHeroCompareSemantics => 'Freeは絵文字のカード、Proはマンガの絵のカードです';
 
   @override
   String planBenefitGroupCards(String elumiName) {
-    return '$elumiName만의 카드 그림';
+    return '$elumiNameだけのカードの絵';
   }
 
   @override
-  String get planBenefitGroupRoutines => '일과가 알아서 가요';
+  String get planBenefitGroupRoutines => '日課が自動で届きます';
 
   @override
-  String get planBenefitGroupWeek => '한 주를 정리해 드려요';
+  String get planBenefitGroupWeek => '1週間をまとめてお届けします';
 
   @override
-  String get planBenefitGroupExtra => '더 넉넉하게';
+  String get planBenefitGroupExtra => 'もっとたっぷり';
 
   @override
   String planYearlySaving(int percent) {
-    return '$percent% 아껴요';
+    return '$percent%おトク';
   }
 
   @override
-  String get planRenewsYearly => '1년마다 자동 갱신';
+  String get planRenewsYearly => '1年ごとに自動更新';
 
   @override
-  String get planRenewsMonthly => '1개월마다 자동 갱신';
+  String get planRenewsMonthly => '1か月ごとに自動更新';
 
   @override
   String planMonthlyEquivalentRenewsYearly(String price) {
-    return '한 달에 $price 꼴 · 1년마다 자동 갱신';
+    return '1か月あたり約$price · 1年ごとに自動更新';
   }
 
   @override
   String planPriceUnit(String period) {
     String _temp0 = intl.Intl.selectLogic(period, {
-      'yearly': '/년',
-      'other': '/월',
+      'yearly': '/年',
+      'other': '/月',
     });
     return '$_temp0';
   }
 
   @override
   String planCtaTrialNoticeAppStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 끝나기 24시간 전까지 해지하면 청구되지 않아요';
+    return '$trialの後、$price$unitが自動で支払われます。終了の24時間前までに解約すれば請求されません';
   }
 
   @override
   String planCtaTrialNoticePlayStore(String trial, String price, String unit) {
-    return '$trial 뒤 $price$unit 자동 결제돼요. 체험 중 해지하면 청구되지 않아요';
+    return '$trialの後、$price$unitが自動で支払われます。体験中に解約すれば請求されません';
   }
 
   @override
   String planCtaRenewNotice(String price, String unit) {
-    return '$price$unit 자동 갱신돼요. 언제든 해지할 수 있어요';
+    return '$price$unitで自動更新されます。いつでも解約できます';
   }
 
   @override
   String planTryFreeTrial(String trial) {
-    return '$trial 무료로 써 보기';
+    return '$trial無料で試す';
   }
 
   @override
-  String get planSeeAllBenefits => 'Pro 혜택 모두 보기';
+  String get planSeeAllBenefits => 'Proの特典をすべて見る';
 
   @override
-  String get planTierGift => '선물';
+  String get planTierGift => 'ギフト';
 
   @override
-  String get myPlanProTitle => 'Pro로 쓰고 있어요';
+  String get myPlanProTitle => 'Proを使っています';
 
   @override
-  String get myPlanGiftTitle => 'Pro 선물을 받았어요';
+  String get myPlanGiftTitle => 'Proのギフトを受け取りました';
 
   @override
-  String get myPlanFreeTitle => 'Free로 쓰고 있어요';
+  String get myPlanFreeTitle => 'Freeを使っています';
 
   @override
-  String get myPlanFreeBodyWeek => '매주 받는 크레딧으로 일과를 만들어요';
+  String get myPlanFreeBodyWeek => '毎週もらえるクレジットで日課を作ります';
 
   @override
-  String get myPlanFreeBodyMonth => '매달 받는 크레딧으로 일과를 만들어요';
+  String get myPlanFreeBodyMonth => '毎月もらえるクレジットで日課を作ります';
 
   @override
-  String get proTeaserWeeklyPlanTitle => '요일과 시각만 정해 두면 그날 일과가 준비돼요';
+  String get proTeaserWeeklyPlanTitle => '曜日と時刻を決めておけば、その日の日課が用意されます';
 
   @override
-  String get proTeaserWeeklyReportTitle => '한 주를 한 장으로 받아 봐요';
+  String get proTeaserWeeklyReportTitle => '1週間を1枚で受け取れます';
 
   @override
-  String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
+  String get proTeaserRoutineMemoryTitle => 'Elumiに合ったやり方を覚えます';
 
   @override
-  String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
+  String get proTeaserCardThemeTitle => '印刷用カードをもっとかわいく受け取れます';
 
   @override
-  String get proTeaserCardLayoutTitle => '인쇄용 카드를 원하는 대로 받아요';
+  String get proTeaserCardLayoutTitle => '印刷用カードを好きな形で受け取れます';
 
   @override
   String get proTeaserCardLayoutBenefit =>
-      '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+      '1枚に複数のカード、横向きの用紙、日課を1枚にまとめた形で受け取れます';
 
   @override
   String get homeSuggestionDismissLabel => '大丈夫です';
@@ -5195,17 +5180,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planBenefitCardSplit => 'カード1枚をより小さく分けます';
 
   @override
-  String get creditTopUpTitleExhausted => '🎟️ 이번 주 크레딧을 다 썼어요';
+  String get creditTopUpTitleExhausted => '🎟️ 今週のクレジットを使い切りました';
 
   @override
-  String get creditTopUpTitleExhaustedMonth => '🎟️ 이번 달 크레딧을 다 썼어요';
+  String get creditTopUpTitleExhaustedMonth => '🎟️ 今月のクレジットを使い切りました';
 
   @override
-  String get creditTopUpTitleShort => '🎟️ 크레딧이 조금 모자라요';
+  String get creditTopUpTitleShort => '🎟️ クレジットが少し足りません';
 
   @override
   String creditTopUpRefillAt(String reset) {
-    return '$reset에 다시 채워져요';
+    return '$resetにまた補充されます';
   }
 
   @override
@@ -5213,57 +5198,57 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '광고 보고 크레딧 $count개 받기',
+      other: '広告を見てクレジットを$count個もらう',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditTopUpAdTitleNoCount => '광고 보고 크레딧 받기';
+  String get creditTopUpAdTitleNoCount => '広告を見てクレジットをもらう';
 
   @override
   String creditTopUpAdDetail(int remaining) {
     String _temp0 = intl.Intl.pluralLogic(
       remaining,
       locale: localeName,
-      other: '30초쯤 걸려요, 오늘 $remaining번 더 받을 수 있어요',
+      other: '30秒ほどかかります。今日はあと$remaining回もらえます',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditTopUpAdWatch => '광고 보기';
+  String get creditTopUpAdWatch => '広告を見る';
 
   @override
-  String get creditTopUpAdOff => '지금은 광고로 받을 수 없어요';
+  String get creditTopUpAdOff => '今は広告でもらえません';
 
   @override
-  String get creditTopUpAdDailyLimit => '오늘은 다 받았어요. 내일 다시 볼 수 있어요';
+  String get creditTopUpAdDailyLimit => '今日の分はすべてもらいました。明日また見られます';
 
   @override
-  String get creditTopUpAdCheckFailed => '광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요';
+  String get creditTopUpAdCheckFailed => '広告の情報を読み込めませんでした。少し待ってから、もう一度開いてください';
 
   @override
-  String get creditTopUpPackLink => '크레딧 꾸러미 보기';
+  String get creditTopUpPackLink => 'クレジットパックを見る';
 
   @override
-  String get creditTopUpRoutineContinue => '이어서 만들기';
+  String get creditTopUpRoutineContinue => '続けて作る';
 
   @override
-  String get creditTopUpRedrawContinue => '이어서 그리기';
+  String get creditTopUpRedrawContinue => '続けて描く';
 
   @override
   String creditRewardTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '🎟️ 크레딧 $count개를 받았어요',
+      other: '🎟️ クレジットを$count個もらいました',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditRewardTitleNoCount => '🎟️ 크레딧을 받았어요';
+  String get creditRewardTitleNoCount => '🎟️ クレジットをもらいました';
 
   @override
   String creditRewardPlus(int count) {
@@ -5271,95 +5256,95 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get creditRewardReason => '광고를 끝까지 봐서 받았어요';
+  String get creditRewardReason => '広告を最後まで見たのでもらえました';
 
   @override
-  String get creditRewardBalanceLabel => '지금 크레딧';
+  String get creditRewardBalanceLabel => '今のクレジット';
 
   @override
-  String get lowCreditNoticeTitle => '크레딧이 조금 남았어요';
+  String get lowCreditNoticeTitle => 'クレジットが残り少なくなりました';
 
   @override
-  String get lowCreditNoticeTitleEmpty => '크레딧을 다 썼어요';
+  String get lowCreditNoticeTitleEmpty => 'クレジットを使い切りました';
 
   @override
-  String get lowCreditNoticeBody => '광고를 보면 바로 더 받을 수 있어요';
+  String get lowCreditNoticeBody => '広告を見ると、すぐにもっともらえます';
 
   @override
-  String get lowCreditNoticeAction => '광고 보고 받기';
+  String get lowCreditNoticeAction => '広告を見てもらう';
 
   @override
-  String get creditGuideTitle => '🎟️ 크레딧은 이렇게 써요';
+  String get creditGuideTitle => '🎟️ クレジットの使い方';
 
   @override
-  String get creditGuideBasis => '내 요금제 기준이에요';
+  String get creditGuideBasis => 'あなたのプランの基準です';
 
   @override
-  String get creditGuideRoutineText => '일과 글 만들기';
+  String get creditGuideRoutineText => '日課の文を作る';
 
   @override
-  String get creditGuideCardImage => '카드 그림 1장';
+  String get creditGuideCardImage => 'カードの絵 1枚';
 
   @override
-  String get creditGuideRegenerate => '그림 다시 그리기';
+  String get creditGuideRegenerate => '絵を描き直す';
 
   @override
-  String get creditGuideWeeklyGrant => '매주 받는 크레딧';
+  String get creditGuideWeeklyGrant => '毎週もらえるクレジット';
 
   @override
-  String get creditGuideMonthlyGrant => '매달 받는 크레딧';
+  String get creditGuideMonthlyGrant => '毎月もらえるクレジット';
 
   @override
   String creditGuideCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count개',
+      other: '$count個',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditGuideUnlimited => '제한 없음';
+  String get creditGuideUnlimited => '制限なし';
 
   @override
   String creditGuideRegenerateFreeToday(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '오늘 $count번 더 무료',
+      other: '今日はあと$count回無料',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditGuideKeepGoing => '시작한 일과는 크레딧이 모자라도 끝까지 만들어져요';
+  String get creditGuideKeepGoing => '始めた日課は、クレジットが足りなくても最後まで作られます';
 
   @override
-  String get creditGuideRefillWeek => '매주 월요일 0시에 다시 채워져요';
+  String get creditGuideRefillWeek => '毎週月曜日0時にまた補充されます';
 
   @override
-  String get creditGuideRefillMonth => '매달 1일 0시에 다시 채워져요';
+  String get creditGuideRefillMonth => '毎月1日0時にまた補充されます';
 
   @override
   String creditGuideProFactBoth(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Pro는 일과 글이 제한 없고, 다시 그리기는 하루 $count번 무료예요',
+      other: 'Proは日課の文が制限なしで、描き直しは1日$count回無料です',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditGuideProFactText => 'Pro는 일과 글이 제한 없어요';
+  String get creditGuideProFactText => 'Proは日課の文が制限なしです';
 
   @override
   String creditGuideProFactRegenerate(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Pro는 다시 그리기가 하루 $count번 무료예요',
+      other: 'Proは描き直しが1日$count回無料です',
     );
     return '$_temp0';
   }
@@ -5369,113 +5354,113 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '하루 $count번 무료',
+      other: '1日$count回無料',
     );
     return '$_temp0';
   }
 
   @override
-  String get creditGuideConfirm => '알겠어요';
+  String get creditGuideConfirm => 'わかりました';
 
   @override
   String myCreditFreeRegenerateToday(int left, int cap) {
-    return '다시 그리기 오늘 $left/$cap번 무료';
+    return '描き直し 今日$left/$cap回無料';
   }
 
   @override
-  String get myCreditRecentTitle => '최근 쓴 내역';
+  String get myCreditRecentTitle => '最近使った履歴';
 
   @override
-  String get myCreditSeeAllHistory => '전체 보기';
+  String get myCreditSeeAllHistory => 'すべて見る';
 
   @override
-  String get myCreditGuideLink => '크레딧은 이렇게 써요';
+  String get myCreditGuideLink => 'クレジットの使い方';
 
   @override
-  String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
+  String get abaIntroTitle => '🧩 準備はかんたんに、毎日は自分の力で';
 
   @override
-  String get abaIntroSubtitle => '이룸은 응용행동분석(ABA)의 원리로 만들었어요';
+  String get abaIntroSubtitle => 'elumは応用行動分析（ABA）の原理で作りました';
 
   @override
-  String get abaIntroCardTitle => '카드 한 장에 한 가지 행동';
+  String get abaIntroCardTitle => 'カード1枚に1つの行動';
 
   @override
-  String get abaIntroCardBody => '무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지';
+  String get abaIntroCardBody => '何をするか、どうするか、終わったらもらえるごほうびまで';
 
   @override
-  String get abaIntroVoiceTitle => '짧은 문장, 그림과 목소리';
+  String get abaIntroVoiceTitle => '短い文、絵と声';
 
   @override
-  String get abaIntroVoiceBody => '보고 들으며 하나씩 따라 해요';
+  String get abaIntroVoiceBody => '見て聞きながら、1つずつまねしてやります';
 
   @override
-  String get abaIntroStarTitle => '해내면 바로 칭찬과 별';
+  String get abaIntroStarTitle => 'できたらすぐにほめ言葉と星';
 
   @override
-  String get abaIntroStarBody => '보호자님이 정한 보상까지 받아요';
+  String get abaIntroStarBody => '保護者が決めたごほうびももらえます';
 
   @override
-  String get abaIntroGuardianTitle => '💛 가장 중요한 건 보호자님이에요';
+  String get abaIntroGuardianTitle => '💛 いちばん大切なのは保護者です';
 
   @override
   String get abaIntroGuardianBody =>
-      '아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요';
+      'Elumiをいちばんよく知る保護者が日課とごほうびを決め、elumはElumiが自分で続けられるようにそばで手伝います';
 
   @override
-  String get abaIntroStart => '시작하기';
+  String get abaIntroStart => 'はじめる';
 
   @override
-  String get guardianSettingsAboutElum => '이룸은 이렇게 만들었어요';
+  String get guardianSettingsAboutElum => 'elumはこうして作りました';
 
   @override
-  String get notificationIntroTitle => '🔔 알림을 꼭 켜 주세요';
+  String get notificationIntroTitle => '🔔 通知をぜひオンにしてください';
 
   @override
-  String get notificationIntroBody => '켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요';
+  String get notificationIntroBody => 'オンにしておくと、Elumiの知らせを逃さずすぐにお知らせします';
 
   @override
-  String get notificationIntroRoutineDone => '이룸이가 일과를 마쳤을 때';
+  String get notificationIntroRoutineDone => 'Elumiが日課を終えたとき';
 
   @override
-  String get notificationIntroCaregiverRoutine => '함께 돌보는 분이 일과를 보냈을 때';
+  String get notificationIntroCaregiverRoutine => '一緒に見守る人が日課を送ったとき';
 
   @override
-  String get notificationIntroWeeklyReport => '주간 리포트가 나왔을 때';
+  String get notificationIntroWeeklyReport => '週間レポートができたとき';
 
   @override
-  String get notificationIntroCreditRefilledWeek => '이번 주 크레딧이 다시 채워졌을 때';
+  String get notificationIntroCreditRefilledWeek => '今週のクレジットが補充されたとき';
 
   @override
-  String get notificationIntroCreditRefilledMonth => '이번 달 크레딧이 다시 채워졌을 때';
+  String get notificationIntroCreditRefilledMonth => '今月のクレジットが補充されたとき';
 
   @override
-  String get notificationOffNoticeHighlightRoutineDone => '일과를 마쳤을 때';
+  String get notificationOffNoticeHighlightRoutineDone => '日課を終えたとき';
 
   @override
-  String get notificationOffNoticeHighlightCaregiver => '함께 돌보는 분 소식';
+  String get notificationOffNoticeHighlightCaregiver => '一緒に見守る人からの知らせ';
 
   @override
-  String get notificationOffNoticeAction => '알림 켜기';
+  String get notificationOffNoticeAction => '通知をオンにする';
 
   @override
-  String get homeAutoSendUpsellTitle => '⏰ 매일 같은 시각에 자동으로 보내 볼까요?';
+  String get homeAutoSendUpsellTitle => '⏰ 毎日同じ時刻に自動で送ってみませんか？';
 
   @override
-  String get homeAutoSendUpsellBody => '요일과 시각을 정해 두면 그때 이룸이 기기로 보내 드려요';
+  String get homeAutoSendUpsellBody => '曜日と時刻を決めておくと、その時にElumiの端末へ送ります';
 
   @override
-  String get homeAutoSendUpsellAction => '자세히 보기';
+  String get homeAutoSendUpsellAction => 'くわしく見る';
 
   @override
-  String get notificationSettingRoutineNudge => '오늘 일과를 아직 안 보냈을 때';
+  String get notificationSettingRoutineNudge => '今日の日課をまだ送っていないとき';
 
   @override
-  String get notificationSettingSuggestion => '새 일과 추천';
+  String get notificationSettingSuggestion => '新しい日課のおすすめ';
 
   @override
-  String get notificationSettingPlanReminder => 'Pro 선물이 끝나기 전';
+  String get notificationSettingPlanReminder => 'Proのギフトが終わる前';
 
   @override
-  String get myCreditRemainingSuffix => '개 남았어요';
+  String get myCreditRemainingSuffix => '個残っています';
 }
