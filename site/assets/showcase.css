@@ -16,9 +16,8 @@
 /* 기기 속 화면: 지금 장면(.on)만 보이고 옆으로 밀리며 바뀜. JS 없으면 첫 장면이 그대로 */
 .phone-screen>.still,.phone-screen>.flow{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:translateX(12%) scale(.98);
   transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
-.phone-screen>.still:first-child{opacity:1;transform:none}
-.phone-screen.playing>.still:first-child{opacity:0;transform:translateX(-12%) scale(.98)}
-.phone-screen.playing>.on{opacity:1;transform:none}
+/* 재생 전: 첫 장면 / 재생 중: 지금 장면(.on)만 */
+.phone-screen:not(.playing)>.still:first-child,.phone-screen.playing>.on{opacity:1;transform:none}
 
 /* 단계 칩 4개: 지금 단계(.on)만 진하게, 아래 막대가 그 단계 길이(--dur)만큼 참 */
 .phone-steps{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:420px;margin:0;padding:0;list-style:none}
