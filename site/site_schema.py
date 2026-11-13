@@ -1,4 +1,4 @@
-"""구조화 데이터(JSON-LD): 앱 · 자주 묻는 질문 · 글 · 경로 · 만드는 순서"""
+"""구조화 데이터(JSON-LD): 사이트 · 앱 · 자주 묻는 질문 · 글 · 경로 · 만드는 순서"""
 import html
 import re
 
@@ -10,6 +10,15 @@ ORGANIZATION = {'@type': 'Organization', 'name': 'Twin-Fang', 'url': SITE_URL}
 def plain_text(text: str) -> str:
     """HTML 문구 > 평문"""
     return html.unescape(re.sub(r'<[^>]+>', '', text))
+
+
+def website_schema(language_code: str, url: str) -> dict:
+    """사이트 이름 (검색 결과에 주소 대신 `이룸 ELUM` 으로 보이게)"""
+    return {
+        '@context': 'https://schema.org', '@type': 'WebSite',
+        'name': SITE_NAME, 'alternateName': ['이룸', 'ELUM'], 'url': url, 'inLanguage': language_code,
+        'publisher': ORGANIZATION,
+    }
 
 
 def application_schema(language_code: str, description: str, url: str) -> dict:

@@ -36,17 +36,8 @@
       "tag": "Tarjetas de acción · Horario visual",
       "titleHtml": "La rutina del día en<br/><em>tarjetas de acción</em>, una a una",
       "lede": "Escribe algo como \"lavarse la cara y vestirse por la mañana\" y lo dividimos en pasos fáciles de seguir, cada uno en una tarjeta.",
-      "hint": "Empieza gratis · iPhone · iPad · Android"
-    },
-    "demo": {
-      "label": "Tres tarjetas de acción completadas una tras otra y la recompensa al final",
-      "routine": "Por la mañana",
-      "cards": [
-        {"emoji": "🪥", "title": "Cepíllate los dientes", "body": "Pon pasta en el cepillo"},
-        {"emoji": "👕", "title": "Vístete", "body": "Primero la camiseta"},
-        {"emoji": "🎒", "title": "Ponte la mochila", "body": "Ve a la puerta"}
-      ],
-      "reward": "Al terminar, su merienda favorita"
+      "hint": "Empieza gratis · iPhone · iPad · Android",
+      "phoneLabel": "Pantallas de la app ELUM: escribir, revisar y seguir paso a paso"
     },
     "steps": {
       "tag": "Cómo funciona",
@@ -113,12 +104,6 @@
       "sub": "Cuéntanos dónde te atascas o qué te gustaría encontrar."
     },
     "keywords": "horario visual, agenda visual, pictogramas, rutinas con pictogramas, tarjetas de acción, app de horario visual, ABA en casa, análisis conductual aplicado, autismo rutinas, TDAH rutinas, discapacidad del desarrollo, análisis de tareas, tabla de recompensas, rutina de la mañana",
-    "trust": [
-      "Empieza gratis",
-      "No pide diagnóstico",
-      "Solo se ven las tarjetas que revisas",
-      "5 idiomas"
-    ],
     "together": {
       "tag": "Contigo al lado",
       "title": "La app no lo hace por ti",

@@ -11,6 +11,8 @@ from PIL import Image
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 TARGET_DIR = REPO_ROOT / 'site/assets/img'
 PROMO_ART = REPO_ROOT / 'docs/store/promo/art'
+# 스토어 홍보용 앱 실제 화면 캡처 (1320x2868)
+PROMO_SCREENS = REPO_ROOT / 'docs/store/promo/screens'
 APP_IMAGES = REPO_ROOT / 'client/assets/images'
 APP_ASSETS = REPO_ROOT / 'client/assets'
 # 사이트에만 쓰는 그림 원본 (이미지 하네스로 그린 512·768 PNG)
@@ -18,7 +20,12 @@ SITE_ART = REPO_ROOT / 'site/art'
 
 # (원본, 결과 이름, 가로 픽셀, 투명 유지)
 RASTER_IMAGES = [
-    (PROMO_ART / 'hero.png', 'hero.webp', 1344, False),
+    (PROMO_SCREENS / 'ko/input.png', 'screen_ko_input.webp', 330, False),
+    (PROMO_SCREENS / 'ko/card_review.png', 'screen_ko_card_review.webp', 330, False),
+    (PROMO_SCREENS / 'ko/child_card.png', 'screen_ko_child_card.webp', 330, False),
+    (PROMO_SCREENS / 'en/input.png', 'screen_en_input.webp', 330, False),
+    (PROMO_SCREENS / 'en/card_review.png', 'screen_en_card_review.webp', 330, False),
+    (PROMO_SCREENS / 'en/child_card.png', 'screen_en_child_card.webp', 330, False),
     (PROMO_ART / 'scene_06.png', 'friends.webp', 480, False),
     (APP_IMAGES / 'aba_intro_lumi.png', 'lumi_cards.webp', 512, True),
     (APP_IMAGES / 'my_plan_pro_lumi.png', 'lumi_crown.webp', 384, True),
@@ -34,9 +41,11 @@ RASTER_IMAGES = [
     (SITE_ART / 'aba_help.png', 'aba_help.webp', 256, True),
     (SITE_ART / 'aba_reward.png', 'aba_reward.webp', 256, True),
     (SITE_ART / 'together.png', 'together.webp', 720, True),
+    (APP_IMAGES / 'reward_star_green.png', 'pop_star.webp', 144, True),
 ]
 # 그대로 복사하는 벡터 그림 (앱 그림 방식 예시와 같은 그림)
 VECTOR_IMAGES = [
+    (APP_IMAGES / 'icon_sparkles_large.svg', 'pop_sparkles.svg'),
     (APP_ASSETS / 'emoji/emoji_toothbrush.svg', 'style_emoji.svg'),
     (APP_ASSETS / 'pictograms/brush_teeth_,_to.svg', 'style_symbol.svg'),
 ]
