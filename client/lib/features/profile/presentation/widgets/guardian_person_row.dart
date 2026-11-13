@@ -11,7 +11,7 @@ import '../../domain/guardian_member.dart';
 /// 내 줄의 이름 변경 버튼 키 (테스트 · 문구와 무관하게 찾기 위함)
 const guardianRenameButtonKey = ValueKey('guardianRenameButton');
 
-/// 함께하는 사람 한 줄: 이름, 나 배지, 구분 칩, (내 줄만) 이름 변경 버튼.
+/// 함께하는 사람 한 줄: 나 배지, 이름, 구분 칩(이름과 다를 때만), (내 줄만) 이름 변경 버튼.
 /// 줄 자체는 누르지 않음 (할 수 있는 일은 버튼으로만 보임)
 class GuardianPersonRow extends StatelessWidget {
   const GuardianPersonRow({
@@ -53,7 +53,7 @@ class GuardianPersonRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 읽기 순서: 이름 > 나 > 구분. 좁으면 칩이 다음 줄로 내려감
+          // 읽기 순서: 나 > 이름 > 구분. 좁으면 칩이 다음 줄로 내려감
           Expanded(
             child: MergeSemantics(
               child: Wrap(
@@ -61,37 +61,26 @@ class GuardianPersonRow extends StatelessWidget {
                 runSpacing: _chipToChipGap.h,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
+                  if (guardian.me)
+                    ElumLabelChip(
+                      label: context.l10n.guardiansMeBadge,
+                      background: colors.peopleMeBadgeBg,
+                      foreground: colors.peopleMeBadgeText,
+                    ),
                   Text(
                     guardian.label,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.typo.peopleRowName.copyWith(color: colors.peopleTextPrimary),
                   ),
-                  // 아주 큰 글자에서 칩 둘이 한 줄에 못 들어가면 칩끼리도 줄을 바꿈
-                  Wrap(
-                    spacing: _chipToChipGap.w,
-                    runSpacing: _chipToChipGap.h,
-                    children: [
-                      if (guardian.me)
-                        ElumLabelChip(
-                          label: context.l10n.guardiansMeBadge,
-                          background: colors.peopleMeBadgeBg,
-                          foreground: colors.peopleMeBadgeText,
-                        ),
-                      ElumLabelChip(
-                        label: guardian.kind.label,
-                        background: isCaregiver
-                            ? colors.peopleCaregiverChipBg
-                            : colors.peopleGuardianChipBg,
-                        foreground: isCaregiver
-                            ? colors.peopleCaregiverChipText
-                            : colors.peopleGuardianChipText,
-                        border: isCaregiver
-                            ? colors.peopleCaregiverChipBorder
-                            : colors.peopleGuardianChipBorder,
-                      ),
-                    ],
-                  ),
+                  // 이름이 곧 구분 이름(`보호자` · `선생님`)이면 같은 말이 두 번 나와 칩 생략 (#1304)
+                  if (guardian.label != guardian.kind.label)
+                    ElumLabelChip(
+                      label: guardian.kind.label,
+                      background: isCaregiver ? colors.peopleCaregiverChipBg : colors.peopleGuardianChipBg,
+                      foreground: isCaregiver ? colors.peopleCaregiverChipText : colors.peopleGuardianChipText,
+                      border: isCaregiver ? colors.peopleCaregiverChipBorder : colors.peopleGuardianChipBorder,
+                    ),
                 ],
               ),
             ),

@@ -1,0 +1,61 @@
+{
+  "title": "Tarjetas de acción: cómo hacer un horario visual | ELUM",
+  "description": "Las tarjetas de acción muestran una tarea por tarjeta con una imagen. Por qué un horario visual es más fácil de seguir, cómo hacerlo en casa y ejemplos.",
+  "keywords": "tarjetas de acción, qué son las tarjetas de acción, horario visual, agenda visual, pictogramas, cómo hacer un horario visual, rutinas con pictogramas",
+  "heading": "Qué son las tarjetas de acción y cómo hacer un horario visual",
+  "lede": "En lugar de decir \"date prisa\", muestras con una imagen la única cosa que toca hacer ahora.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Qué son las tarjetas de acción",
+      "paragraphs": [
+        "Una tarjeta de acción es una tarjeta con imagen que contiene <b>una sola acción</b>. Con una imagen y una frase corta muestra \"qué hay que hacer ahora\".",
+        "Si pones varias en orden, tienes un <b>horario visual</b>. Así se ve de principio a fin una rutina que se repite cada día, como prepararse por la mañana, ir a la escuela o irse a dormir."
+      ]
+    },
+    {
+      "heading": "Por qué ayudan las imágenes y el orden",
+      "paragraphs": [
+        "Las palabras desaparecen en cuanto se dicen, pero la imagen se queda. Si se olvida algo, basta con volver a mirar.",
+        "Ver de antemano lo que viene después ayuda a prepararse. También ayuda mucho ver dónde termina."
+      ],
+      "list": [
+        "Se muestra una sola cosa cada vez, así no hay dudas sobre por dónde empezar",
+        "No tienes que repetir lo mismo una y otra vez",
+        "Al marcar cada tarjeta terminada, se ve lo que ha logrado por su cuenta"
+      ]
+    },
+    {
+      "heading": "Cómo hacerlo en casa",
+      "list": [
+        "<b>Elige una rutina.</b> Mejor una corta que se haga cada día. Por ejemplo, cepillarse los dientes por la mañana",
+        "<b>Divídela en acciones pequeñas.</b> En lugar de \"lávate los dientes\", escribe acciones que se vean, como \"pon pasta en el cepillo\" o \"cepilla los dientes de arriba\"",
+        "<b>Pon una acción en cada tarjeta.</b> Frases cortas e imágenes que recuerden la acción a primera vista",
+        "<b>Decide la recompensa del final.</b> Mejor algo pequeño que puedas dar enseguida, como una merienda o un juego que le guste",
+        "<b>Úsalas en el mismo sitio y en el mismo orden.</b> Pruébalas unos días y divide más los pasos que cuesten"
+      ]
+    },
+    {
+      "heading": "Si las creas con ELUM",
+      "paragraphs": [
+        "En ELUM basta con escribir \"cepillarse los dientes por la mañana\" para obtener tarjetas de acción paso a paso. Cuando editas las frases, las imágenes y el orden y las guardas, aparecen una a una en la pantalla de tu hijo o hija. La app lee cada tarjeta en voz alta y, al terminar, se marca."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: cepillarse los dientes",
+    "items": [
+      {"emoji": "🪥", "title": "Toma el cepillo", "body": "Busca tu cepillo y tómalo"},
+      {"emoji": "🧴", "title": "Pon la pasta", "body": "Solo un poquito, como un guisante"},
+      {"emoji": "😁", "title": "Cepíllate los dientes", "body": "Arriba, abajo y por dentro"},
+      {"emoji": "🚰", "title": "Enjuágate la boca", "body": "Con agua, tres veces"}
+    ],
+    "reward": "Al terminar, una pegatina"
+  },
+  "faq": [
+    {"q": "¿Son lo mismo las tarjetas de acción y el horario visual?", "a": "Una tarjeta de acción es una sola tarjeta con una acción. El horario visual es el conjunto de esas tarjetas puestas en orden. En ELUM, cada rutina es un horario visual y las tarjetas que contiene son tarjetas de acción."},
+    {"q": "¿Cuántas tarjetas conviene usar?", "a": "Al principio, de 3 a 5. Si una parece difícil, divídela en dos. Cuando resulte fácil, puedes juntarlas."},
+    {"q": "¿Sirve si todavía no sabe leer?", "a": "Sí. Lo primero que se ve es la imagen, y ELUM lee en voz alta la frase de cada tarjeta."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}

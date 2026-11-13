@@ -20,12 +20,16 @@ class QuickMenuRow<T> {
     required this.label,
     this.isDanger = false,
     this.shouldShowProBadge = false,
+    this.description,
   });
 
   final T value;
   final String icon;
   final String label;
   final bool isDanger;
+
+  /// 글자 아래 회색 한 줄 설명 (시트 메뉴만, 칸 옆 메뉴는 그리지 않음). 낯선 동작에만 쓴다 (#1298)
+  final String? description;
 
   /// 글자 뒤 [ProBadge]: Free 라 누르면 Pro 안내로 가는 줄 (`PlanAccess.shouldShowTeaserFor`)
   final bool shouldShowProBadge;

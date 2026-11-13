@@ -1,0 +1,10 @@
+[
+{"id":"m01","demand":"양치","style":"초단문","text":"아침에 혼자 양치하기","goals":[],"must":[["칫솔","치약","양치","이를"]],"max_steps":5},
+{"id":"m02","demand":"옷입기","style":"초단문","text":"옷 입기","goals":["INDEPENDENT"],"must":[["옷","바지","윗옷"]],"max_steps":5},
+{"id":"m03","demand":"가방챙기기","style":"초단문","text":"학교 가방 챙기기","goals":["PREPARE_ITEMS"],"must":[["가방"]],"max_steps":5},
+{"id":"m04","demand":"준비물","style":"구체지시","text":"수영 가방에 수영복 물안경 수건 챙기기","goals":["PREPARE_ITEMS"],"must":[["수영복"],["물안경"],["수건"]],"max_steps":5},
+{"id":"m05","demand":"저녁씻기","style":"장문정상","text":"저녁 먹고 샤워하고 잠옷 입고 로션 바르고 자기","goals":["STEP_BY_STEP"],"must":[["샤워","씻"],["잠옷"],["로션"]],"order":[[["샤워","씻"],["잠옷"]]],"max_steps":6},
+{"id":"m06","demand":"외출","style":"초단문","text":"신발 신고 나가기","goals":[],"must":[["신발"]],"max_steps":5},
+{"id":"m07","demand":"손씻기","style":"초단문","text":"밖에 다녀오면 손 씻기","goals":["INDEPENDENT"],"must":[["손"]],"max_steps":5},
+{"id":"m08","demand":"치과","style":"구체지시","text":"치과 가서 의자에 눕고 입 크게 벌리기","goals":["PREPARE_NEW"],"must":[["의자"],["입"]],"order":[[["의자"],["입"]]],"max_steps":5}
+]

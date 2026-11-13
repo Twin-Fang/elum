@@ -41,10 +41,10 @@ class ChildNoRoutine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // 캐릭터별 일러스트·글로우 — 고양이는 파랑, 여우는 주황 (Figma 343:4543)
-    final (glowColor, sadAsset) = switch (character) {
-      CardCharacter.cat => (colors.catSelectedFill, AppAssets.ruruSad),
-      CardCharacter.fox => (colors.foxSelectedFill, AppAssets.popoSad),
+    // 캐릭터별 글로우 — 고양이는 파랑, 여우는 주황 (Figma 343:4543). 그림은 웃는 얼굴 (#1295)
+    final glowColor = switch (character) {
+      CardCharacter.cat => colors.catSelectedFill,
+      CardCharacter.fox => colors.foxSelectedFill,
     };
 
     // 작은 화면·큰 글꼴에서도 넘치지 않게 스크롤로 감싼다.
@@ -116,7 +116,7 @@ class ChildNoRoutine extends StatelessWidget {
                   ),
                 ),
                 // 시무룩한 캐릭터 — 형태가 있는 일러스트는 반드시 에셋
-                SvgPicture.asset(sadAsset, width: 164.w, height: 164.w),
+                SvgPicture.asset(AppAssets.character(character), width: 164.w, height: 164.w),
               ],
             ),
           ),

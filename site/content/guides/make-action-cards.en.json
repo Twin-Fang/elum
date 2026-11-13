@@ -1,0 +1,58 @@
+{
+  "title": "How to make action cards in 3 minutes | ELUM",
+  "description": "No drawing or laminating needed. The easiest way to make action cards from one line of text, plus five tips for making good cards.",
+  "keywords": "how to make action cards, make a visual schedule, picture schedule maker, visual schedule app, routine cards for kids, printable routine cards, action card app",
+  "heading": "How to make action cards the easy way",
+  "lede": "Finding pictures, printing and laminating turns into writing one line.",
+  "minutes": 3,
+  "sections": [
+    {
+      "heading": "What happens when you make them by hand",
+      "paragraphs": [
+        "Even when you know action cards are useful, making them is a chore. Choosing pictures, fitting the size, printing and cutting can take an hour for one routine. When the routine changes, you start over.",
+        "Cards need to be easy to make so you can <b>keep using them.</b>"
+      ]
+    },
+    {
+      "heading": "The steps in ELUM",
+      "list": [
+        "<b>Write one line.</b> Write it the way you'd normally say it, like \"wash face and get dressed in the morning\"",
+        "<b>The cards are made.</b> ELUM breaks it into easy steps and adds a picture and a short sentence to each",
+        "<b>The caregiver checks them.</b> Edit the sentences, change the order, and add or remove cards",
+        "<b>Choose a reward.</b> Write down what your child gets when everything is done",
+        "<b>Save, and that's it.</b> The cards appear one at a time on your child's screen and are read aloud"
+      ]
+    },
+    {
+      "heading": "Tips for making good cards",
+      "list": [
+        "<b>One action only.</b> If a card has \"and\" in it, split it into two",
+        "<b>Words you can see.</b> \"Rub the backs of your hands\" instead of \"wash well\"",
+        "<b>Say what to do.</b> \"Walk\" instead of \"don't run\"",
+        "<b>Keep the same picture.</b> The same picture for the same action is easier to recognize",
+        "<b>Start with 3 to 5 cards.</b> Add more little by little when it goes well"
+      ]
+    },
+    {
+      "heading": "You can use paper cards too",
+      "paragraphs": [
+        "In places where a device is hard to use, paper is handy. You can export the cards you make in ELUM for printing and cut them out."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: getting ready to go out",
+    "items": [
+      {"emoji": "🚽", "title": "Use the toilet", "body": "Go before we leave"},
+      {"emoji": "🧥", "title": "Put on your jacket", "body": "Pull up the zipper"},
+      {"emoji": "👟", "title": "Put on your shoes", "body": "Put them on at the front door"},
+      {"emoji": "🚪", "title": "Wait by the door", "body": "We go out together"}
+    ],
+    "reward": "All done: go to the playground"
+  },
+  "faq": [
+    {"q": "Can I use AI-made cards as they are?", "a": "Please read them first and edit them. ELUM shows only the cards a caregiver has checked and saved."},
+    {"q": "Can I make them for free?", "a": "Yes. You can make cards with Emoji pictures and Picture symbols for free."}
+  ],
+  "related": ["action-cards", "task-analysis"]
+}

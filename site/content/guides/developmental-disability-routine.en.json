@@ -1,0 +1,56 @@
+{
+  "title": "Daily visual schedule for developmental disabilities | ELUM",
+  "description": "How to show the day ahead in pictures for kids with developmental disabilities or autism: making a picture schedule, handling changes, and examples.",
+  "keywords": "autism visual schedule, picture schedule for autism, developmental disability routine, daily routine for autistic child, visual schedule for developmental disabilities, preparing for changes in routine",
+  "heading": "Developmental disabilities and a daily schedule: show it ahead in pictures",
+  "lede": "Knowing what comes next can make the whole day feel calmer.",
+  "minutes": 5,
+  "sections": [
+    {
+      "heading": "Knowing ahead helps",
+      "paragraphs": [
+        "Some people find <b>pictures and order</b> easier to understand than words or speech. When you show the day in pictures, your child can check for themselves what to do, what comes next and when it ends.",
+        "Hearing \"time to go\" out of nowhere feels very different from having seen the next step on a card ahead of time."
+      ]
+    },
+    {
+      "heading": "Steps to make a daily schedule",
+      "list": [
+        "<b>Split the day into a few parts.</b> Getting ready in the morning, going to school, coming home, bedtime",
+        "<b>Make each part a routine.</b> 3 to 6 cards per routine",
+        "<b>Only one action per card.</b> Use the same pictures every time so they become familiar",
+        "<b>Use the read-aloud voice too.</b> Hearing the same sentence in the same voice makes it easier to understand",
+        "<b>Add a reward at the end.</b> It makes the end of the routine clear"
+      ]
+    },
+    {
+      "heading": "When plans change",
+      "paragraphs": [
+        "For days that are different from usual, like a doctor's visit or guests coming over, show the cards <b>the day before</b>. For a new place, it helps to lay out in order what will happen there and when it ends.",
+        "In ELUM, write something like \"going for a vaccination tomorrow,\" and ELUM breaks it into steps that fit the situation and makes cards."
+      ]
+    },
+    {
+      "heading": "You decide",
+      "paragraphs": [
+        "ELUM does not ask for a diagnosis or type of disability. You know your child best, including what's easy and what's hard. Cards made by AI are shown only after you edit and check them."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: getting ready for bed",
+    "items": [
+      {"emoji": "🛁", "title": "Take a bath", "body": "Wash with warm water"},
+      {"emoji": "👚", "title": "Put on pajamas", "body": "Change into your pajamas"},
+      {"emoji": "🪥", "title": "Brush your teeth", "body": "Brush before bed"},
+      {"emoji": "📖", "title": "Read one book", "body": "Pick one together and read"},
+      {"emoji": "🌙", "title": "Turn off the light", "body": "Get under the blanket"}
+    ],
+    "reward": "All done: a hug"
+  },
+  "faq": [
+    {"q": "What kind of pictures work best?", "a": "It's different for everyone. Some find simple pictures like emoji or picture symbols easier, and others prefer pictures that look like the real thing. In ELUM, you can choose from four picture styles."},
+    {"q": "Can we use it at school or a center too?", "a": "Yes. You can invite another caregiver to see your child's routines together, and you can print cards or send them as images."}
+  ],
+  "related": ["action-cards", "aba-principles"]
+}

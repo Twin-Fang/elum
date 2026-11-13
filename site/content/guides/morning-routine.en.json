@@ -1,0 +1,58 @@
+{
+  "title": "Morning routine chart for school: visual schedule | ELUM",
+  "description": "A morning routine chart for school days that means fewer \"hurry up\"s. How to set the order, what to do the night before, and action card examples.",
+  "keywords": "morning routine chart, morning routine for school, school morning checklist, getting ready for school, morning routine for kids, visual morning routine",
+  "heading": "Making a morning routine chart for school",
+  "lede": "Mornings feel rushed not because there's so much to do, but because you have to decide what comes next every single time.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Set the order once",
+      "paragraphs": [
+        "The morning routine is the same every day. Once you set the order and make it into cards, <b>the cards tell your child what to do next</b>, so you don't have to say each step."
+      ],
+      "list": [
+        "Write the steps in the order you actually do them at home (wash → clothes → breakfast → bag)",
+        "Put steps that take a long time near the start",
+        "Make the last card a clear finish, like \"go to the front door\""
+      ]
+    },
+    {
+      "heading": "Get half of it done the night before",
+      "list": [
+        "Lay out tomorrow's clothes in one place",
+        "Pack the bag ahead of time and leave it by the front door",
+        "Before bed, flip through tomorrow's routine cards together once"
+      ]
+    },
+    {
+      "heading": "Using it in the morning",
+      "paragraphs": [
+        "Keep the device in the same spot every day, and let your child check off each card when it's done. When your child stops, <b>point to the card</b> instead of hurrying them with words.",
+        "When everything is done, give the reward you chose right away. Since there's not much time before school, something short like one favorite song works well."
+      ]
+    },
+    {
+      "heading": "Rainy days and gym days",
+      "paragraphs": [
+        "For days that are different from usual, make one more routine. In ELUM, write something like \"get ready for school on a rainy day,\" and you get cards that include an umbrella and rain boots."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Action card example: getting ready for school",
+    "items": [
+      {"emoji": "🚿", "title": "Wash your face", "body": "Wash and dry your face"},
+      {"emoji": "👕", "title": "Get dressed", "body": "Put on the clothes laid out"},
+      {"emoji": "🍚", "title": "Eat breakfast", "body": "Sit at the table to eat"},
+      {"emoji": "🪥", "title": "Brush your teeth", "body": "Brush top and bottom"},
+      {"emoji": "🎒", "title": "Put on your backpack", "body": "Go to the front door"}
+    ],
+    "reward": "All done: one favorite song"
+  },
+  "faq": [
+    {"q": "Every morning, my child gets stuck on one step for a long time.", "a": "Try splitting that step into two or three cards. If getting dressed is hard, make separate cards for the top, pants and socks."},
+    {"q": "What about weekends?", "a": "You can make a separate weekend routine. Keeping the same steps, like washing up and getting dressed, helps the routine stay familiar."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}

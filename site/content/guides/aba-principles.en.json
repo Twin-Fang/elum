@@ -1,0 +1,58 @@
+{
+  "title": "ABA principles made simple: 4 ideas for routines | ELUM",
+  "description": "The basics of ABA (Applied Behavior Analysis) in plain words: break tasks down, show them first, help then step back, and reward right away in routines.",
+  "keywords": "ABA, applied behavior analysis, ABA principles, ABA at home, task analysis, reinforcement, prompting, prompt fading",
+  "heading": "ABA principles: 4 ideas to use in daily routines",
+  "lede": "This isn't hard theory. These are four ideas you can bring straight into the routines you do at home every day.",
+  "minutes": 5,
+  "sections": [
+    {
+      "heading": "What is ABA",
+      "paragraphs": [
+        "ABA (Applied Behavior Analysis) is <b>a way of looking at what happens before and after a behavior to set up an environment where learning is easier</b>.",
+        "The key is to ask \"how can we make this easier to do\" instead of blaming with \"why won't they do it.\" The four ideas below work in home routines just as they are."
+      ]
+    },
+    {
+      "heading": "1. Break it into small steps",
+      "paragraphs": [
+        "\"Get ready for school\" is really many actions bundled together. When you break it into <b>small actions you can see</b>, like getting dressed, brushing teeth and packing a bag, your child only has to do one at a time. This is called task analysis."
+      ]
+    },
+    {
+      "heading": "2. Show it first",
+      "paragraphs": [
+        "Showing what to do with a picture <b>before it starts</b> makes it easier to begin. When the next step is visible, changes feel less sudden. Action cards and a visual schedule do this job."
+      ]
+    },
+    {
+      "heading": "3. Help, then step back little by little",
+      "paragraphs": [
+        "At first, point to the card or do it together. As your child gets used to it, give a little less help each time. The goal is for your child to look at the cards and <b>keep going on their own</b>, even when you're not right there."
+      ]
+    },
+    {
+      "heading": "4. Praise and reward right away",
+      "paragraphs": [
+        "When something good follows right after an action, your child wants to do it again. The technical term is reinforcement. In ELUM, we call it a <b>reward</b>.",
+        "Praise right away, and be specific. \"You brushed your teeth by yourself\" is better than \"good job.\" Choose a small reward you can give right away, and decide on it ahead of time."
+      ]
+    },
+    {
+      "heading": "How ELUM puts this into practice",
+      "list": [
+        "<b>One action per card</b>: the routine you write is broken into easy steps to follow",
+        "<b>Pictures and voice</b>: short sentences are shown with a picture and read aloud",
+        "<b>Check marks and stars</b>: each finished card brings a sound of praise and a star",
+        "<b>A reward the caregiver chooses</b>: when the routine is done, the reward you set appears on screen",
+        "<b>You matter most</b>: routines and rewards are set by the caregiver, who knows your child best"
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Can only professionals do ABA?", "a": "Making a plan tailored to one person is work for professionals. But the basic ideas, like breaking tasks down, showing them first and praising right away, can be used in home routines too. If you have concerns, please talk with your child's teacher or a professional."},
+    {"q": "If I give rewards, will my child stop when there's no reward?", "a": "Give rewards often at first, then space them out little by little as the routine becomes familiar. You can also move from objects to praise or playing together."},
+    {"q": "Does using ELUM mean we're doing ABA?", "a": "ELUM is an everyday tool designed with ABA principles in mind. It does not replace diagnosis or treatment."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}

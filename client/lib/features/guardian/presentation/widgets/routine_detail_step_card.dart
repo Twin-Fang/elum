@@ -10,8 +10,11 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
+import 'card_image.dart';
 
-/// 단계 카드 — 제목·설명 + 완료 표시 + 순서 손잡이. 순서 바꾸기는 이 카드만 옮긴다.
+/// 단계 카드 — 그림 + 제목·설명 + 순서 손잡이. 순서 바꾸기는 이 카드만 옮긴다.
+///
+/// 완료 ✓ 는 두지 않는다: 보호자 화면에서 누를 일이 없어 「누르면 체크」로 읽힌다 (#1298). 진행은 머리의 `오늘 2/5 했어요` 한 줄이 맡는다
 ///
 /// **손잡이는 길게 눌러야 잡힌다**. 닿는 즉시 끌리게 두면 목록을 스크롤하려던
 /// 손가락이 손잡이를 스치는 것만으로 순서가 바뀐다. 고칠 생각이 없었는데 일과가
@@ -25,6 +28,7 @@ class RoutineDetailStepCard extends StatefulWidget {
     super.key,
     required this.step,
     required this.index,
+    required this.routineId,
     this.language = 'ko',
     this.dragging = false,
     this.reorderable = true,
@@ -34,10 +38,17 @@ class RoutineDetailStepCard extends StatefulWidget {
   final ActionCard step;
   final int index;
 
+  /// 그림 조회용 일과 id
+  final String routineId;
+
+  /// 단계 그림 한 변 · 모서리 (#1298)
+  static const thumbnailSize = 40.0;
+  static const _thumbnailRadius = 10.0;
+
   /// 카드 제목·설명의 언어(일과 언어).
   final String language;
 
-  /// 글 자리를 눌렀을 때 — 카드를 크게 연다. 손잡이와 체크는 따로 받는다.
+  /// 글 자리를 눌렀을 때 — 카드를 크게 연다. 손잡이는 따로 받는다.
   final VoidCallback? onOpen;
 
   /// 지금 끌려가는 중인가. 끌기가 시작되면 이 카드는 시트 위의 사본으로 다시
@@ -69,6 +80,13 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
 
   /// 다 들렸을 때 커지는 비율. 그림자가 주된 신호이고 크기는 거들 뿐이라 작게 준다.
   static const _liftScale = 0.03;
+
+  /// 설명이 있고 제목과 다른가 (같으면 같은 말이 두 번 보인다)
+  bool get _hasDistinctDescription {
+    final description = widget.step.description.trim();
+    return description.isNotEmpty &&
+        description != widget.step.displayTitle.trim();
+  }
 
   void _onLiftStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_announced) {
@@ -154,6 +172,11 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                   foregroundDecoration: _outline(t, colors.checkDone),
                   child: Row(
                     children: [
+                      _StepThumbnail(
+                        routineId: widget.routineId,
+                        step: widget.step,
+                      ),
+                      SizedBox(width: context.space.sm.w),
                       Expanded(
                         child: GestureDetector(
                           // 글자 사이 빈 곳도 눌리게 한다. 손잡이는 이 바깥이라 끌기와 겹치지 않는다.
@@ -178,7 +201,8 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                                       color: colors.sheetTitleText,
                                     ),
                                   ),
-                                  if (widget.step.description.isNotEmpty) ...[
+                                  // 제목과 같은 문장은 한 번만 (#1298)
+                                  if (_hasDistinctDescription) ...[
                                     // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
                                     SizedBox(height: 8.h),
                                     Text(
@@ -200,14 +224,8 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
                           ),
                         ),
                       ),
-                      // 시안(963:4239)은 글 오른쪽 끝(227)과 체크(231) 사이가 4다.
-                      SizedBox(width: 4.w),
-                      // 이룸이가 해낸 결과를 보여줄 뿐 여기서 체크하지 않는다.
-                      // 보호자가 대신 체크하면 "이룸이가 해냈다"는 기록이 아니게 된다.
-                      _CompletionMark(completed: widget.step.completed),
                       // 손잡이가 없으면 그 자리의 여백도 없다 (시안 980:4777)
                       if (widget.reorderable) ...[
-                        // 시안 체크 끝(271) → 손잡이(281) 사이 10
                         SizedBox(width: 10.w),
                         // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는
                         // Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다.
@@ -262,44 +280,33 @@ class _RoutineDetailStepCardState extends State<RoutineDetailStepCard>
   }
 }
 
-class _CompletionMark extends StatelessWidget {
-  const _CompletionMark({required this.completed});
+/// 단계 그림 썸네일 (40, 둥근 모서리). 그림이 없으면 빈 판
+class _StepThumbnail extends StatelessWidget {
+  const _StepThumbnail({required this.routineId, required this.step});
 
-  final bool completed;
-
-  /// 시안(956:4084 `채크_라운드`) — 원 40 · 안의 체크 21.82×16.26.
-  /// 원본 컴포넌트가 20 기준 10.91×8.13 이라 그 비율 그대로다.
-  static const _size = 40.0;
-  static const _markW = 21.82;
-  static const _markH = 16.26;
+  final String routineId;
+  final ActionCard step;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    // 시안(`채크_라운드` 726:4881)은 두 상태를 이렇게 나눈다.
-    // 미완료도 투명이 아니라 배경색으로 칠하고 테두리를 따로 둔다 — 투명하게 두면
-    // 카드 위에서 동그라미가 사라져 "누를 곳"으로 읽히지 않는다.
-    return Container(
-      width: _size.w,
-      height: _size.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: completed ? colors.checkDone : colors.background,
-        border: completed
-            ? null
-            : Border.all(color: colors.checkIdleBorder, width: 2.w),
+    final size = RoutineDetailStepCard.thumbnailSize.w;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(
+        RoutineDetailStepCard._thumbnailRadius.w,
       ),
-      // **글리프가 아니라 에셋이다.** `Icons.check` 는 정사각형이라 시안의
-      // 가로로 긴 체크와 모양이 다르다 (client/CLAUDE.md §2).
-      child: SvgPicture.asset(
-        AppAssets.iconCheckMark,
-        width: _markW.w,
-        height: _markH.w,
-        colorFilter: ColorFilter.mode(
-          completed ? colors.surface : colors.checkIdleBorder,
-          BlendMode.srcIn,
+      child: ColoredBox(
+        color: context.colors.surface,
+        child: SizedBox.square(
+          dimension: size,
+          child: CardImage(
+            routineId: routineId,
+            stepId: step.id,
+            imagePath: step.imagePath,
+            pictogramId: step.pictogramId,
+            exampleImageId: step.exampleImageId,
+            pictogramLabel: step.title,
+            emptyBuilder: (_) => const SizedBox.shrink(),
+          ),
         ),
       ),
     );

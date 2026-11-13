@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
-import '../../../core/widgets/elum_type_confirm_dialog.dart';
+import '../../../core/widgets/elum_toast.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -26,8 +26,8 @@ import '../../member/application/plan_access.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
-import '../../subscription/application/plan_status_providers.dart';
-import '../../subscription/domain/withdraw_store_subscription_notice.dart';
+import '../../credit/application/withdraw_credit_loss.dart';
+import 'withdraw_confirm_flow.dart';
 import 'widgets/plan_settings_group.dart';
 import '../../subscription/domain/plan_benefit.dart';
 import '../../../core/widgets/elum_danger_confirm_dialog.dart';
@@ -75,57 +75,16 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     });
   }
 
-  /// 회원탈퇴: 경고 팝업 > `회원탈퇴` 입력 확인 > 탈퇴
+  /// 회원탈퇴: 크레딧 조회(줄에 진행 표시) > 확인 단계(withdraw_confirm_flow) > 탈퇴 > 로그인 화면에 끝 알림
   Future<void> _deleteAccount() async {
-    final isWarningConfirmed = await _confirmWithdrawWarning();
-    if (!isWarningConfirmed || !mounted) return;
-    final isTypedConfirmed = await _confirmWithdrawByTyping();
-    if (!isTypedConfirmed || !mounted) return;
+    final creditLookup = await runBusy(() => readWithdrawCreditLoss(ref), key: _withdrawKey);
+    if (creditLookup == null || !mounted) return;
+    final isConfirmed = await confirmWithdraw(context, ref, creditLookup: creditLookup);
+    if (!isConfirmed || !mounted) return;
     await _run(
       _withdrawKey,
       () => ref.read(authSessionControllerProvider).deleteAccount(),
-    );
-  }
-
-  /// 둘째 단계: `회원탈퇴` 입력이 맞아야 탈퇴하기가 켜짐
-  Future<bool> _confirmWithdrawByTyping() {
-    final l10n = context.l10n;
-    final requiredPhrase = l10n.guardianSettingsWithdrawTypePhrase;
-    return confirmByTyping(
-      context,
-      requiredPhrase: requiredPhrase,
-      title: l10n.guardianSettingsWithdrawTypeTitle,
-      message: l10n.guardianSettingsWithdrawTypeMessage(requiredPhrase),
-      actionLabel: l10n.guardianSettingsWithdrawTypeAction,
-    );
-  }
-
-  /// 첫 단계 경고. 스토어 결제 Pro 가 갱신 중이면 스토어별 해지 안내 한 줄 추가
-  Future<bool> _confirmWithdrawWarning() async {
-    final l10n = context.l10n;
-    final storeSubscriptionNotice = switch (ref.read(
-      withdrawStoreSubscriptionNoticeProvider,
-    )) {
-      WithdrawStoreSubscriptionNotice.none => null,
-      WithdrawStoreSubscriptionNotice.cancelledOnWithdraw =>
-        l10n.guardianSettingsWithdrawGooglePlaySubscriptionNotice,
-      WithdrawStoreSubscriptionNotice.cancelInStore =>
-        l10n.guardianSettingsWithdrawAppStoreSubscriptionNotice,
-    };
-    return confirmDangerousAction(
-      context,
-      icon: ElumDangerIcon.alert,
-      title: l10n.guardianSettingsWithdrawConfirmTitle,
-      // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
-      // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
-      // 다시 들어오면 그대로지만 탈퇴는 되돌아오지 않는다. 되돌릴 수 없다는
-      // 고지를 빼면 사용자가 잃는 것이 크다 (docs 예외처리 규칙).
-      // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
-      message: [
-        l10n.guardianSettingsWithdrawConfirmMessage,
-        ?storeSubscriptionNotice,
-      ].join('\n'),
-      actionLabel: l10n.guardianSettingsWithdrawConfirmAction,
+      doneMessage: context.l10n.guardianSettingsWithdrawDone,
     );
   }
 
@@ -150,7 +109,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
   /// 동작이 **실제로 됐는지**를 받아 분기한다. 됐으면 로컬이 비었으니 이 화면에
   /// 남을 수 없어 로그인으로 보내고, 안 됐으면 바뀐 것이 없으니 이 자리에 머문
   /// 채로 알린다.
-  Future<void> _run(String key, Future<AppFailure?> Function() action) async {
+  Future<void> _run(String key, Future<AppFailure?> Function() action, {String? doneMessage}) async {
+    // 화면을 옮긴 뒤에도 알림을 띄울 수 있게 앱 공통 알림 자리를 미리 잡음
+    final messenger = ScaffoldMessenger.maybeOf(context);
     // 결과가 null(성공)과 구분되도록 레코드로 감싼다. 바깥이 null 이면 진행 중이라 실행하지 않은 것.
     final result = await runBusy(() async => (await action(),), key: key);
     if (result == null || !mounted) return;
@@ -160,6 +121,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       // 회원 정보 캐시는 **다음 로그인에서** 버린다 (LoginScreen). 여기서 버리면
       // 이 화면이 아직 떠 있는 동안 회원 정보를 다시 받아 지운 선택을 되살린다.
       context.go(Routes.login);
+      if (doneMessage != null) showElumToastOn(messenger, doneMessage);
     } else {
       _tellFailed(failure);
     }

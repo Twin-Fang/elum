@@ -90,17 +90,20 @@ def main():
     parser.add_argument("--repeat", type=int, default=1, help="입력당 호출 수 (결과 흔들림 확인)")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--resume", default="", help="이 실행 폴더 이름에서 이어서: 저장된 호출은 건너뜀 (중단 대비)")
+    parser.add_argument("--java-ref", default=card_request.JAVA_REF,
+                        help="스키마·보강을 읽을 git ref (빈 값: 작업 폴더 자바 소스로 시험)")
     parser.add_argument("--yes", action="store_true")
     args = parser.parse_args()
 
     cases = select_cases(args)
+    card_request.JAVA_REF = args.java_ref or None
     call_count = len(cases) * args.repeat
     session = card_request.AdminSession()
     settings = session.read_settings(PROVIDER_SETTING_KEYS)
     production_prompt = session.read_prompt("GEMINI_ROUTINE_CREATE_PREFIX")
     print(f"[운영 값] {json.dumps(settings, ensure_ascii=False)}")
     print(f"[조건] 모델 {card_request.TEXT_MODEL}/{card_request.TEXT_EFFORT}, 지시문 운영 DB {len(production_prompt)}자, "
-          f"변형 {args.variant}, 스키마·보강 {card_request.JAVA_REF}")
+          f"변형 {args.variant}, 스키마·보강 {card_request.JAVA_REF or '작업 폴더'}")
     print(f"[계획] 입력 {len(cases)}건 x {args.repeat} = {call_count}회, 추정 ${call_count * ESTIMATED_COST_PER_CALL_USD:.2f}")
     if not args.yes:
         print("--yes 를 붙이면 실행")

@@ -1424,6 +1424,12 @@ abstract class AppLocalizations {
   /// **'아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'**
   String get guardiansAloneHint;
 
+  /// 함께하는 사람 목록 아래 안내. 이룸이 안 호칭(display name)과 이야기 탭 닉네임이 다른 값임을 알림 (#1304)
+  ///
+  /// In ko, this message translates to:
+  /// **'여기 이름은 함께 돌보는 사람에게만 보여요. 이야기에는 내 정보의 닉네임이 보여요'**
+  String get guardiansNameScopeHint;
+
   /// 초대 코드 만들기로 가는 줄
   ///
   /// In ko, this message translates to:
@@ -2504,10 +2510,10 @@ abstract class AppLocalizations {
   /// **'오늘은 어떤 준비가\n필요한가요?'**
   String get routineInputTitle;
 
-  /// 일과 입력 화면 부제
+  /// 일과 입력 화면 부제. 제목 위 루미 얼굴과 함께 루미가 누구인지 처음 소개하는 줄 — 온보딩 캐릭터(루루 등)와 헷갈리지 않게 'AI 도우미'를 붙인다 (#1297)
   ///
   /// In ko, this message translates to:
-  /// **'AI 루미가 작은 행동 단계로 나눠드려요'**
+  /// **'AI 도우미 루미가 작은 행동 단계로 나눠 줄게요'**
   String get routineInputSubtitle;
 
   /// 일과 입력창 안내 글(포커스가 없을 때)
@@ -2516,11 +2522,11 @@ abstract class AppLocalizations {
   /// **'평소 이야기하듯 입력해주세요'**
   String get routineInputHint;
 
-  /// 일과 입력창 전송 버튼의 낭독 이름
+  /// 일과 입력칸 아래 개인정보 안내 (서비스 원칙 2, #1297). 적은 글은 가공 없이 AI 로 가므로 '가린다'·'지운다'고 쓰지 않는다 (#377)
   ///
   /// In ko, this message translates to:
-  /// **'보내기'**
-  String get routineInputSend;
+  /// **'이름·학교·병원·진단명 같은 개인정보는 적지 말아 주세요'**
+  String get routineInputPrivacyNotice;
 
   /// 로그아웃 확인 팝업 제목
   ///
@@ -2569,6 +2575,69 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'탈퇴하면 플레이스토어 Pro 구독의\n다음 결제를 멈춰요'**
   String get guardianSettingsWithdrawGooglePlaySubscriptionNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Pro 계정(선물·체험 외)일 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro도 함께 사라져요'**
+  String get guardianSettingsWithdrawProNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. Pro 선물 계정일 때. date 는 마지막으로 쓸 수 있는 날 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지 쓸 수 있는\nPro 선물도 사라져요'**
+  String guardianSettingsWithdrawProGiftNotice(String date);
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 가입 체험 중일 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro 체험도 함께 사라져요'**
+  String get guardianSettingsWithdrawProTrialNotice;
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 남은 크레딧이 있을 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧 {count, plural, other{{count}개}}도 사라져요'**
+  String guardianSettingsWithdrawCreditsNotice(int count);
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 남은 크레딧 중 결제로 산 크레딧이 있을 때 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧 {count, plural, other{{count}개}}도 사라져요\n산 크레딧 {purchased, plural, other{{purchased}개}}도 들어 있어요'**
+  String guardianSettingsWithdrawCreditsWithPurchasedNotice(
+    int count,
+    int purchased,
+  );
+
+  /// 회원탈퇴 확인 팝업에 덧붙이는 줄. 크레딧 수를 못 받았을 때 숫자 없이 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧도 모두 사라져요'**
+  String get guardianSettingsWithdrawCreditsUnknownNotice;
+
+  /// 회원탈퇴 전 안내 팝업 제목. App Store 결제 Pro 가 자동 갱신 중일 때 탈퇴 경고보다 먼저 보임 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱스토어 구독을 먼저 해지해 주세요'**
+  String get guardianSettingsWithdrawAppStoreStepTitle;
+
+  /// 회원탈퇴 전 App Store 구독 해지 안내 팝업 설명 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴만 하면 결제가 이어져요\n해지하지 않아도 탈퇴는 할 수 있어요'**
+  String get guardianSettingsWithdrawAppStoreStepMessage;
+
+  /// 회원탈퇴 전 App Store 구독 해지 안내 팝업의 회색 버튼. 해지하지 않고 탈퇴 경고로 넘어감 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'계속하기'**
+  String get guardianSettingsWithdrawAppStoreStepContinue;
+
+  /// 회원탈퇴가 끝나고 로그인 화면에 한 번 뜨는 알림 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴했어요. 그동안 이룸을 써 주셔서 고마워요'**
+  String get guardianSettingsWithdrawDone;
 
   /// 회원탈퇴 둘째 단계(글자 입력 확인) 팝업 제목. 시안 없는 임시 배치 (#1155)
   ///
@@ -3248,6 +3317,24 @@ abstract class AppLocalizations {
   /// **'편집하기'**
   String get routineDetailEdit;
 
+  /// 오늘 일과 상세 시트 제목 아래: 이룸이가 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {done}/{total} 했어요'**
+  String routineDetailTodayProgress(int done, int total);
+
+  /// 지난 일과 상세 시트 제목 아래: 그날 끝낸 카드 수 / 전체 카드 수 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done}/{total} 했어요'**
+  String routineDetailPastProgress(int done, int total);
+
+  /// 일과 상세 시트 제목 오른쪽 버튼 글자: 인쇄용으로 받기 화면 열기 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'인쇄용'**
+  String get routineDetailExportLabel;
+
   /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
   ///
   /// In ko, this message translates to:
@@ -3338,11 +3425,11 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get todayRoutineRerunFailedFallback;
 
-  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를) 로 쓴다)
+  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과에 담았어요'**
-  String todayRoutineCopied(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과에 담았어요'**
+  String todayRoutineCopied(String title, String batchim);
 
   /// 보호자 홈 지난 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내
   ///
@@ -3371,13 +3458,13 @@ abstract class AppLocalizations {
   /// 홈 코치마크 1단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'이룸이가 수행할 *새로운\n일과를 만들 수 있어요*'**
+  /// **'이룸이가 할 *새로운\n일과를 만들 수 있어요*'**
   String get homeCoachCreate;
 
   /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 지울* 수 있어요'**
+  /// **'일과를 *왼쪽으로 밀면*\n*수정하거나 지울* 수 있어요'**
   String get homeCoachSwipe;
 
   /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
@@ -4772,11 +4859,11 @@ abstract class AppLocalizations {
   /// **'이야기에서 가져왔어요, 원래 글 보기'**
   String get routineDetailTalkOriginBandOpenLabel;
 
-  /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
+  /// 보내기 성공 알림. title 은 일과 제목, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{title}을(를) 오늘 일과로 보냈어요'**
-  String routineLibrarySent(String title);
+  /// **'{title}{batchim, select, yes{을} other{를}} 오늘 일과로 보냈어요'**
+  String routineLibrarySent(String title, String batchim);
 
   /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭. batchim 은 받침 있는 이름 뒤에 '이'를 붙이는 한국어 호칭 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
@@ -4952,6 +5039,12 @@ abstract class AppLocalizations {
   /// **'새 묶음 만들기'**
   String get routineGroupCreateGroup;
 
+  /// 만들기 시트 `새 묶음 만들기` 아래 회색 한 줄: 묶음이 무엇인지 (#1298)
+  ///
+  /// In ko, this message translates to:
+  /// **'여러 일과를 한 폴더에 모아요 (예: 아침 등교)'**
+  String get routineGroupCreateGroupDescription;
+
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
@@ -5114,23 +5207,11 @@ abstract class AppLocalizations {
   /// **'길게 눌렀다 *떼면* 메뉴가 열려요'**
   String get routineManageCoachLongPressMessage;
 
-  /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고\n여기 일과는 그대로 남아요'**
-  String get routineManageCoachSentMessage;
-
   /// 일과관리 묶음 코치마크 1단계 (#832)
   ///
   /// In ko, this message translates to:
   /// **'길게 누른 채 *움직이면* 정리 상태가 돼요\n다른 일과 위에 놓으면 *묶음*이 되고\n사이에 놓으면 자리를 옮겨요'**
   String get routineManageCoachDragMessage;
-
-  /// 일과관리 묶음 코치마크 2단계 (#832)
-  ///
-  /// In ko, this message translates to:
-  /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
-  String get routineManageCoachCreateGroupMessage;
 
   /// 카드 검토 코치마크 — 이 카드 수정 버튼. 수정 시트의 사진 칩 이름(사진 추가·바꾸기)이 그림 유무로 갈려 버튼 이름을 쓰지 않는다
   ///
@@ -5375,7 +5456,7 @@ abstract class AppLocalizations {
   /// 이야기 칸 인기 줄 제목 (최근 7일)
   ///
   /// In ko, this message translates to:
-  /// **'이번 주에 많이 가져간 일과에요'**
+  /// **'이번 주에 많이 가져간 일과예요'**
   String get talkPopularTitle;
 
   /// 피드 카드 가져감 아이콘 숫자의 읽기 프로그램 문구: 일과관리로 가져간 보호자 수
@@ -7016,6 +7097,54 @@ abstract class AppLocalizations {
   /// **'결제 수단을 확인해 주세요'**
   String get planStatusGracePeriodFooter;
 
+  /// 내 요금제 시트 표 줄 항목: 자동 갱신 구독의 다음 결제일 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 결제일'**
+  String get planSheetNextPaymentLabel;
+
+  /// 내 요금제 시트 표 줄 항목: Pro 가 끝나는 날 (해지 예약·선물·체험·기간제) (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나는 날'**
+  String get planSheetEndDateLabel;
+
+  /// 내 요금제 시트 표 줄 항목: 구독을 결제한 스토어 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'결제한 곳'**
+  String get planSheetStoreLabel;
+
+  /// 내 요금제 시트 결제한 곳 값: 애플 스토어 이름 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'App Store'**
+  String get planSheetStoreAppStore;
+
+  /// 내 요금제 시트 결제한 곳 값: 구글 스토어 이름 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'Google Play'**
+  String get planSheetStoreGooglePlay;
+
+  /// 내 요금제 시트 설명 줄: 자동 갱신 중인 스토어 구독 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'해지하지 않으면 {date}에 자동으로 결제돼요. 해지는 구독 관리에서 할 수 있어요'**
+  String planSheetRenewingNote(String date);
+
+  /// 내 요금제 시트 설명 줄: 해지 예약·선물·체험·기간제 Pro 가 끝난 뒤 (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나면 Free로 바뀌어요. 저절로 결제되지 않아요'**
+  String get planSheetEndsToFreeNote;
+
+  /// 내 요금제 시트 설명 줄: 끝나는 날이 없는 Pro (#1303)
+  ///
+  /// In ko, this message translates to:
+  /// **'기간 제한 없이 Pro를 쓸 수 있어요'**
+  String get planSheetUnlimitedNote;
+
   /// 요금제 화면을 여는 버튼 문구 하나 (미리 보기 판·글자 링크·크레딧 부족 팝업 공통, ProUpsellButton, #1170)
   ///
   /// In ko, this message translates to:
@@ -7096,7 +7225,7 @@ abstract class AppLocalizations {
   /// 줄 이름 · 보상을 정해 둔 일과 중 끝까지 마친 수
   ///
   /// In ko, this message translates to:
-  /// **'보상까지 간 일과'**
+  /// **'보상을 받은 일과'**
   String get weeklyReportRewards;
 
   /// 줄 이름 · 일과를 하나 이상 마친 날이 이어진 가장 긴 날 수
@@ -7159,6 +7288,30 @@ abstract class AppLocalizations {
   /// **'일과를 보내면 이룸이가 마친 기록이 여기에 모여요'**
   String get weeklyReportEmptyBody;
 
+  /// 이번 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주는 아직 기록이 없어요'**
+  String get weeklyReportNoCompletionThisWeekTitle;
+
+  /// 지난 주 리포트에 끝낸 일과가 0개일 때 빈 카드 제목 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 주에는 끝낸 일과가 없어요'**
+  String get weeklyReportNoCompletionPastWeekTitle;
+
+  /// 끝낸 일과가 0개인 주 빈 카드 설명 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 보내 볼까요?'**
+  String get weeklyReportNoCompletionBody;
+
+  /// 주간 리포트 빈 카드 버튼: 일과 관리 칸으로 이동 (#1302)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 관리로 가기'**
+  String get weeklyReportGoToManage;
+
   /// 불러오기 실패 문구 (에러 코드와 다시 하기가 함께 보임)
   ///
   /// In ko, this message translates to:
@@ -7216,7 +7369,7 @@ abstract class AppLocalizations {
   /// 도넛 옆 한 줄: 보낸 일과 중 끝낸 일과 수
   ///
   /// In ko, this message translates to:
-  /// **'{sent, plural, other{일과 {sent}개 중 {completed}개를 끝냈어요}}'**
+  /// **'{sent, plural, other{{sent}개 중 {completed}개 끝냈어요}}'**
   String weeklyReportDonutSummary(int sent, int completed);
 
   /// 도넛 낭독 라벨: 완료율 퍼센트와 보낸 일과 중 끝낸 수
@@ -7409,7 +7562,7 @@ abstract class AppLocalizations {
   /// 숫자 3개 중 셋째 이름: 마치지 않고 남은 카드 수
   ///
   /// In ko, this message translates to:
-  /// **'남은 카드'**
+  /// **'아직 안 한 카드'**
   String get weeklyReportStatRemaining;
 
   /// 일과별 기록 줄 오른쪽 값: 보낸 횟수 중 마친 횟수

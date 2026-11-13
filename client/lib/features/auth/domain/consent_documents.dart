@@ -15,7 +15,7 @@
 /// 아무것도 없어 가입이 막힌다.** 그 상황에서만 쓰인다.
 ///
 /// 서버의 `resources/consent/*.txt`는 이 파일에서 기계로 떠낸 것이고,
-/// 게시된 개인정보처리방침(twin-fang.github.io/elum/privacy.html)과도
+/// 게시된 개인정보처리방침(elum.suhsaechan.kr/privacy.html)과도
 /// **내용이 같아야 한다.** 한쪽만 고치면 심사에서 불일치로 지적받는다.
 library;
 

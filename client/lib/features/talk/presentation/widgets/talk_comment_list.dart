@@ -15,7 +15,7 @@ import '../../domain/talk_screen_codes.dart';
 import 'talk_detail_parts.dart';
 import 'talk_top_bar.dart';
 
-/// 댓글 영역(스크롤 안에 이어 붙이는 조각): 머리 `댓글  N` > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
+/// 댓글 영역(스크롤 안에 이어 붙이는 조각): 머리 `댓글  N` > 입력줄([inputField]) > 댓글(오래된 순) > 끝 상태(받는 중·재시도)
 /// 빈 상태·첫 쪽 실패도 여기서 그린다. 댓글 ⋯ 버튼이나 길게 누르기로 [onCommentMenuRequested]
 class TalkCommentList extends StatelessWidget {
   const TalkCommentList({
@@ -25,7 +25,11 @@ class TalkCommentList extends StatelessWidget {
     required this.onCommentMenuRequested,
     required this.onRetryPressed,
     required this.onRetryLoadMorePressed,
+    this.inputField,
   });
+
+  /// 머리 아래 댓글 입력줄. 화면 아래는 `일과로 가져오기` 고정 버튼 자리라 여기 둔다 (#1301). 좌우 여백은 입력줄이 직접 둔다
+  final Widget? inputField;
 
   /// 머리 숫자. 목록을 못 받아도 보이게 글 응답의 댓글 수를 쓴다
   final int commentCount;
@@ -58,24 +62,27 @@ class TalkCommentList extends StatelessWidget {
       color: context.colors.talkMetaText,
     );
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: _cardInset.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 머리 `댓글  3` (시안 1830:7916 · 1830:7917, 글자는 화면 여백 24 줄)
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: _headerInset.w),
-            child: Row(
-              children: [
-                Text(l10n.talkCommentsTitle, style: headerStyle),
-                SizedBox(width: _titleToCount.w),
-                Text('$commentCount', style: headerStyle),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 머리 `댓글  3` (시안 1830:7916 · 1830:7917, 글자는 화면 여백 24 줄)
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: (_cardInset + _headerInset).w,
           ),
-          SizedBox(height: _headerToComments.h),
-          switch (comments) {
+          child: Row(
+            children: [
+              Text(l10n.talkCommentsTitle, style: headerStyle),
+              SizedBox(width: _titleToCount.w),
+              Text('$commentCount', style: headerStyle),
+            ],
+          ),
+        ),
+        ?inputField,
+        SizedBox(height: _headerToComments.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: _cardInset.w),
+          child: switch (comments) {
             AsyncData(value: final state) when state.items.isEmpty =>
               _MessageLine(text: l10n.talkCommentsEmpty),
             AsyncData(value: final state) => Column(
@@ -133,8 +140,8 @@ class TalkCommentList extends StatelessWidget {
               ),
             ),
           },
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

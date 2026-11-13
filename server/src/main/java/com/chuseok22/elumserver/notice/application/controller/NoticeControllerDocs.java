@@ -46,7 +46,7 @@ public interface NoticeControllerDocs {
                 "title": "베타 기간에는 **하루 3개**까지 만들 수 있어요",
                 "body": "더 많이 만들 수 있게 준비하고 있어요.\\n조금만 기다려 주세요.",
                 "imageUrl": "/api/app/notices/3f1c2a9e-5b7d-4c1e-9a2b-6d8e0f1a2b3c/image?v=9a8b7c6d",
-                "button": { "label": "자세히 보기", "url": "https://twin-fang.github.io/elum/" }
+                "button": { "label": "자세히 보기", "url": "https://elum.suhsaechan.kr/" }
               },
               {
                 "id": "7d0e1f2a-3b4c-5d6e-7f8a-9b0c1d2e3f4a",

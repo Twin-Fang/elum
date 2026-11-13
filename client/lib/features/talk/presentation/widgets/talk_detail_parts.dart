@@ -7,8 +7,9 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_meta_divider.dart';
+import 'talk_stat_row.dart';
 
-// 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼, 가져감 숫자. 배치는 talk_detail_body.dart
+// 이야기 상세 조각: 작성 정보 줄, 보기 전환 칩, 가져오기 버튼, 도움돼요 버튼, 가져감 숫자. 배치는 talk_detail_body.dart · 가져오기 버튼은 talk_detail_screen.dart 하단 고정
 
 /// 작성 정보: 작성자 | 10/21 오후 11:42 (시안 1813:7497, 댓글 칸도 같은 줄)
 class TalkDetailPostedRow extends StatelessWidget {
@@ -125,7 +126,7 @@ class TalkDetailViewToggle extends StatelessWidget {
   }
 }
 
-/// 카드 아래 `⬇ 일과로 가져오기` (360×66, 반지름 18, 시안 1813:7658)
+/// 화면 아래 고정 `⬇ 일과로 가져오기` (360×66, 반지름 18, 시안 1813:7658 · 하단 고정 #1301)
 /// 이미 가져온 글은 `✓ 일과관리에 넣었어요` (다시 누르면 한 번 더 넣는다)
 class TalkDetailImportButton extends StatelessWidget {
   const TalkDetailImportButton({
@@ -258,41 +259,21 @@ class TalkHelpfulButton extends StatelessWidget {
   }
 }
 
-/// 가져감 숫자 (시안 1813:7861): 다운로드 아이콘 16 + 숫자. 누르는 칸이 아니다
-/// 읽기 프로그램에는 `3명 가져감` 처럼 이름과 함께 읽힌다
+/// 가져감 숫자 `⬇ 3명 가져감` (시안 1813:7861 아이콘 16). 누르는 칸이 아니다
+/// 숫자만으로는 무엇의 숫자인지 몰라 이름을 붙인다 (#1301)
 class TalkImportCountLabel extends StatelessWidget {
   const TalkImportCountLabel({super.key, required this.count});
 
   final int count;
 
-  /// 시안: 아이콘 16, 아이콘 > 숫자 4
+  /// 시안 아이콘 16
   static const _iconSize = 16.0;
-  static const _iconToCount = 4.0;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Semantics(
-      label: context.l10n.talkPopularImportCount(count),
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            AppAssets.iconDownload,
-            width: _iconSize.w,
-            height: _iconSize.w,
-            colorFilter: ColorFilter.mode(colors.talkMetaIcon, BlendMode.srcIn),
-          ),
-          SizedBox(width: _iconToCount.w),
-          Text(
-            '$count',
-            style: context.typo.talkDetailStatLabel.copyWith(
-              color: colors.talkMetaText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => TalkStatItem(
+    iconAsset: AppAssets.iconDownload,
+    label: context.l10n.talkPopularImportCount(count),
+    iconSize: _iconSize,
+    labelStyle: context.typo.talkDetailStatLabel,
+  );
 }

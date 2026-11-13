@@ -510,6 +510,8 @@ class AuthRepository {
       imageCache: _imageCache,
       resetRoutineReminders: _resetRoutineReminders,
     );
+    // 기기 범위라 clearAll 이 남기는 값: 지운 계정의 `최근 로그인` 배지 제거 (#1303)
+    await _storage.clearLastLoginProvider();
     return null;
   }
 }

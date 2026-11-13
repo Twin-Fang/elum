@@ -12,7 +12,8 @@ import '../../link/domain/link_code.dart';
 ///
 /// | 종류 | 모양 | 쓰임 |
 /// | --- | --- | --- |
-/// | 웹 링크 | `https://twin-fang.github.io/elum/invite/#code=A7K3M9` | 공유 시트로 보내는 것. 메신저가 링크로 알아본다 |
+/// | 웹 링크 | `https://elum.suhsaechan.kr/invite/#code=A7K3M9` | 공유 시트로 보내는 것. 메신저가 링크로 알아본다 |
+/// | 옛 웹 링크 | `https://twin-fang.github.io/elum/invite/#code=A7K3M9` | 옛 버전 앱이 만든 링크. 받기만 한다 (#1316) |
 /// | 앱 주소 | `elum://invite?code=A7K3M9` | 안내 페이지의 `앱에서 열기`가 부른다 |
 ///
 /// **웹 링크는 코드를 조각(`#`)에 둔다.** 조각은 브라우저가 서버로 보내지 않아 게시 사이트의 접속 기록·
@@ -45,9 +46,13 @@ class InviteLink {
   /// 앱 주소의 호스트이자 웹 링크 경로의 마지막 조각.
   static const _segment = 'invite';
 
-  /// 게시 사이트(`gh-pages`)의 호스트. **스트링 비교로 정확히 맞는 것만** 받는다 — `…github.io.evil.com`
-  /// 같은 겉모습만 닮은 주소를 걸러야 한다.
-  static const webHost = 'twin-fang.github.io';
+  /// 소개 사이트 호스트 (site/site_config.py 의 SITE_URL 과 같은 값). **스트링 비교로 정확히 맞는 것만** 받는다 —
+  /// `…suhsaechan.kr.evil.com` 같은 겉모습만 닮은 주소를 걸러야 한다.
+  static const webHost = 'elum.suhsaechan.kr';
+
+  /// 옛 게시 사이트(GitHub Pages) 호스트와 그 아래 경로 첫 조각: 옛 버전 앱이 만든 링크를 계속 받음 (#1316)
+  static const legacyWebHost = 'twin-fang.github.io';
+  static const _legacyPathPrefix = 'elum';
 
   /// 값 하나의 길이 상한. 우리 코드는 여섯 글자이고, 공백·하이픈·인코딩을 끼워도 이보다 길 수 없다.
   /// 이보다 길면 디코딩하지 않고 버린다 — 수만 자짜리 입력을 두 번 푸는 일을 막는다.
@@ -91,19 +96,22 @@ class InviteLink {
       case appScheme:
         return segments.length == 1 && segments.first == target;
       case 'https':
-        return uri.host.toLowerCase() == webHost && _isWebPath(segments, target);
+        final host = uri.host.toLowerCase();
+        return (host == webHost && _isOnlySegment(segments, target)) ||
+            (host == legacyWebHost && _isLegacyWebPath(segments, target));
       case '':
         // 플랫폼이 호스트를 떼고 경로만 넘기는 경우 (안드로이드 초기 라우트 등)
         return uri.host.isEmpty &&
-            (_isWebPath(segments, target) || _isOnlySegment(segments, target));
+            (_isLegacyWebPath(segments, target) || _isOnlySegment(segments, target));
       default:
         // http, 소셜 로그인 콜백 스킴 등은 건드리지 않는다
         return false;
     }
   }
 
-  static bool _isWebPath(List<String> segments, String target) =>
-      segments.length == 2 && segments[0] == 'elum' && segments[1] == target;
+  /// 옛 웹 링크 경로 (`/elum/invite`)
+  static bool _isLegacyWebPath(List<String> segments, String target) =>
+      segments.length == 2 && segments[0] == _legacyPathPrefix && segments[1] == target;
 
   static bool _isOnlySegment(List<String> segments, String target) =>
       segments.length == 1 && segments.first == target;
@@ -158,7 +166,7 @@ class InviteLink {
 
   /// [shareUrl] 의 자리 지정판 — 연결 암호 링크가 쓴다.
   static String shareUrlFor(String segment, String code) =>
-      'https://$webHost/elum/$segment/#code=${_checked(code)}';
+      'https://$webHost/$segment/#code=${_checked(code)}';
 
   /// 안내 페이지의 `앱에서 열기` 가 부르는 앱 주소 (페이지 쪽 문자열과 같은 모양이어야 한다).
   static String appUrl(String code) => appUrlFor(_segment, code);

@@ -141,6 +141,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.glassSurface,
     required this.glassChip,
     required this.promptMuted,
+    required this.promptNotice,
     required this.glassShadow,
     required this.auroraMint,
     required this.auroraViolet,
@@ -202,6 +203,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.coachScrim,
     required this.coachAccent,
     required this.coachText,
+    required this.coachBubble,
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
@@ -626,6 +628,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 흐린 안내 문구 (rgba(36,38,52,0.4))
   final Color promptMuted;
 
+  /// 일과 입력 아래 개인정보 안내 (#74757D, 흰 바탕 대비 4.5:1 이상 · #1297)
+  final Color promptNotice;
+
   /// 유리 표면 그림자 (rgba(0,0,0,0.05))
   final Color glassShadow;
 
@@ -843,6 +848,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 코치마크 말풍선의 기본 글자 (흰색, 시안 1274:10400).
   final Color coachText;
+
+  /// 코치마크 안내 글 판 · 아래 점 띠 (진한 남색, #1294). 뒤 화면 글자와 겹쳐 읽히지 않게 깐다
+  final Color coachBubble;
 
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
@@ -1393,6 +1401,7 @@ class AppColors extends ThemeExtension<AppColors> {
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
     glassChip: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
     promptMuted: Color(0x66242634), // rgba(36,38,52,0.4)
+    promptNotice: Color(0xFF74757D),
     glassShadow: Color(0x0D000000),
     auroraMint: Color(0xFF7BFFE5),
     auroraViolet: Color(0xFFD16FFF),
@@ -1454,6 +1463,7 @@ class AppColors extends ThemeExtension<AppColors> {
     coachScrim: Color(0xBF000000),
     coachAccent: Color(0xFF55CFBA),
     coachText: Color(0xFFFFFFFF),
+    coachBubble: Color(0xF2242634),
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
     editChipLabel: Color(0xFF74757D),
@@ -1711,6 +1721,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? glassSurface,
     Color? glassChip,
     Color? promptMuted,
+    Color? promptNotice,
     Color? glassShadow,
     Color? auroraMint,
     Color? auroraViolet,
@@ -1772,6 +1783,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? coachScrim,
     Color? coachAccent,
     Color? coachText,
+    Color? coachBubble,
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
@@ -2018,6 +2030,7 @@ class AppColors extends ThemeExtension<AppColors> {
       glassSurface: glassSurface ?? this.glassSurface,
       glassChip: glassChip ?? this.glassChip,
       promptMuted: promptMuted ?? this.promptMuted,
+      promptNotice: promptNotice ?? this.promptNotice,
       glassShadow: glassShadow ?? this.glassShadow,
       auroraMint: auroraMint ?? this.auroraMint,
       auroraViolet: auroraViolet ?? this.auroraViolet,
@@ -2080,6 +2093,7 @@ class AppColors extends ThemeExtension<AppColors> {
       coachScrim: coachScrim ?? this.coachScrim,
       coachAccent: coachAccent ?? this.coachAccent,
       coachText: coachText ?? this.coachText,
+      coachBubble: coachBubble ?? this.coachBubble,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
@@ -2391,6 +2405,7 @@ class AppColors extends ThemeExtension<AppColors> {
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
       glassChip: Color.lerp(glassChip, other.glassChip, t)!,
       promptMuted: Color.lerp(promptMuted, other.promptMuted, t)!,
+      promptNotice: Color.lerp(promptNotice, other.promptNotice, t)!,
       glassShadow: Color.lerp(glassShadow, other.glassShadow, t)!,
       auroraMint: Color.lerp(auroraMint, other.auroraMint, t)!,
       auroraViolet: Color.lerp(auroraViolet, other.auroraViolet, t)!,
@@ -2557,6 +2572,7 @@ class AppColors extends ThemeExtension<AppColors> {
       coachScrim: Color.lerp(coachScrim, other.coachScrim, t)!,
       coachAccent: Color.lerp(coachAccent, other.coachAccent, t)!,
       coachText: Color.lerp(coachText, other.coachText, t)!,
+      coachBubble: Color.lerp(coachBubble, other.coachBubble, t)!,
       starsNumberStart: Color.lerp(
         starsNumberStart,
         other.starsNumberStart,

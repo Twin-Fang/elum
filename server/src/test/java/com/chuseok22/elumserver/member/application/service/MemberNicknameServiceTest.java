@@ -26,7 +26,18 @@ class MemberNicknameServiceTest {
 
     String nickname = new MemberNicknameService(memberRepository).generateUniqueNickname();
 
-    assertThat(nickname).matches(".+-\\d{8}");
+    assertThat(nickname).matches("보호자-[1-9]\\d{7}");
+  }
+
+  // 깨지면: 가입하자마자 "평생의피겨스케이팅-8024" 같은 장난스러운 이름이 이야기 탭에 나감 (#1304)
+  @Test
+  @DisplayName("새 닉네임은 보호자-4자리 숫자 모양이다")
+  void generatesGuardianPrefixedNickname() {
+    when(memberRepository.existsByNickname(anyString())).thenReturn(false);
+
+    String nickname = new MemberNicknameService(memberRepository).generateUniqueNickname();
+
+    assertThat(nickname).matches("보호자-[1-9]\\d{3}");
   }
 
   // 깨지면: 다시 로그인하거나 기동할 때마다 보호자 닉네임이 바뀜

@@ -83,7 +83,7 @@ class _ImageStyleSettingsScreenState
     );
   }
 
-  /// 크레딧 띠 · 카드 사이 (온보딩 그림 방식 1274:9883 과 같음)
+  /// 크레딧 띠 · 카드 사이 16 (시안 1274:9883. 온보딩은 한 화면에 넣으려 8, #1286)
   static const _cardGap = 16.0;
 
   @override

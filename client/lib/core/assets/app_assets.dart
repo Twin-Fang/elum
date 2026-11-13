@@ -385,6 +385,9 @@ abstract final class AppAssets {
   /// 이야기 카드 가져간 수 앞 (10×10 #CACACA). Figma `fi-br-download`(1783:6306).
   static const iconDownload = '$_images/icon_download.svg';
 
+  /// 프린터 (24×24, 굵은 선): 일과 상세 「인쇄용」 버튼
+  static const iconPrint = '$_images/icon_print.svg';
+
   /// 이야기 상세 머리 줄 공유하기 (20×20 #74757D). Figma `fi-br-upload`(1877:9863).
   static const iconShare = '$_images/icon_share.svg';
 
@@ -454,12 +457,6 @@ abstract final class AppAssets {
 
   /// 일과 시트 보상 뱃지 안의 별 (Figma 963:4442, 25×24).
   static const rewardBadgeStar = '$_images/reward_badge_star.svg';
-
-  /// 아이 홈 빈 상태의 시무룩한 루루 (164×164). Figma 382:3220 `루루_슬픔`.
-  static const ruruSad = '$_images/ruru_sad.svg';
-
-  /// 아이 홈 빈 상태의 시무룩한 포포 (164×164). 여우 캐릭터를 골랐을 때 쓴다.
-  static const popoSad = '$_images/popo_sad.svg';
 
   /// 아이_별 화면 가운데 큰 별. Figma 364:8282 `Group 46` · 실제 264×255.
   ///

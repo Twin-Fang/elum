@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
 
-/// 일과관리 코치마크가 가리키는 순서 (기본 3단계 + 묶음 2단계)
+/// 일과관리 코치마크가 가리키는 순서 (기본 2단계 + 묶음 1단계, 3장까지)
+///
+/// 버튼으로 묶기는 만들기 시트의 `새 묶음 만들기` 설명 줄이 맡는다
 enum RoutineManageCoachStep {
   /// 일과 칸 누르기 > 상세 시트
   tapRoutine,
@@ -11,26 +13,16 @@ enum RoutineManageCoachStep {
   /// 일과 칸 길게 누르기 > 빠른 메뉴
   longPressRoutine,
 
-  /// 오늘 보낸 칸의 ✓ 배지
-  sentBadge,
-
   /// 일과를 끌어 다른 일과 위에 놓아 묶기
   dragToGroup,
-
-  /// `+ 일과 만들기` > 새 묶음 만들기
-  createGroup,
 }
 
 /// 기본 단계 묶음 / 묶음 단계 묶음 — "봤음"도 이 단위로 따로 남긴다
 const _basicSteps = [
   RoutineManageCoachStep.tapRoutine,
   RoutineManageCoachStep.longPressRoutine,
-  RoutineManageCoachStep.sentBadge,
 ];
-const _groupSteps = [
-  RoutineManageCoachStep.dragToGroup,
-  RoutineManageCoachStep.createGroup,
-];
+const _groupSteps = [RoutineManageCoachStep.dragToGroup];
 
 /// 코치마크 진행 상태. [steps]가 비어 있으면 꺼진 상태다.
 class RoutineManageCoachState {
@@ -102,7 +94,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     );
   }
 
-  /// 다시 보기: 봤어도 다섯 단계를 모두 켠다. 봤음 기록은 바꾸지 않는다 (이미 true)
+  /// 다시 보기: 봤어도 모든 단계를 켠다. 봤음 기록은 바꾸지 않는다 (이미 true)
   void replay() {
     if (state.isActive) return;
     _turnOn(const [..._basicSteps, ..._groupSteps]);

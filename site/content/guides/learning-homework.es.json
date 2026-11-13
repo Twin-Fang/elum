@@ -1,0 +1,56 @@
+{
+  "title": "Rutina de deberes y dificultades de aprendizaje | ELUM",
+  "description": "Si duda mucho antes de los deberes, primero facilita el inicio. Cómo crear una rutina de deberes pensada para dificultades de aprendizaje.",
+  "keywords": "rutina de deberes, dificultades de aprendizaje deberes, aprendizaje lento, hábito de estudio, rutina de tareas escolares, cómo empezar los deberes",
+  "heading": "Rutina de deberes: empezar paso a paso",
+  "lede": "Quizá no es que no le gusten los deberes, sino que no sabe por dónde empezar y se queda parado.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "\"Haz los deberes\" es una orden demasiado grande",
+      "paragraphs": [
+        "Dentro de los deberes hay <b>pasos invisibles</b>, como abrir la mochila, buscar la agenda, leer qué hay que hacer o sacar los libros necesarios. Si estos pasos ya cuestan, el estudio ni siquiera empieza.",
+        "Si sacas esos pasos ocultos y los pones en tarjetas, solo hay que hacer uno cada vez."
+      ]
+    },
+    {
+      "heading": "Cómo crear la rutina de deberes",
+      "list": [
+        "<b>Primero, el sitio.</b> Siempre el mismo escritorio, a la misma hora",
+        "<b>La primera tarjeta, muy fácil.</b> Con \"siéntate en el escritorio\" ya ha empezado",
+        "<b>Que se vea la cantidad.</b> En lugar de \"haz matemáticas\", \"una página de matemáticas\"",
+        "<b>Incluye tarjetas de descanso.</b> Al terminar una asignatura, beber agua o estirarse",
+        "<b>Al final, preparar la mochila.</b> La mañana siguiente será más fácil"
+      ]
+    },
+    {
+      "heading": "Cuando leer cuesta",
+      "paragraphs": [
+        "Si leer le resulta difícil, ayudan las imágenes de las tarjetas y <b>la voz que las lee</b>. ELUM lee en voz alta la frase de cada tarjeta, y también puedes grabarla con tu propia voz."
+      ]
+    },
+    {
+      "heading": "Ver lo que ya se ha hecho",
+      "paragraphs": [
+        "Cuando se acumulan las tarjetas marcadas, se ve \"todo esto he hecho\". Los días en que no termine todo, elogia lo que sí hizo. Mañana puede seguir desde la siguiente tarjeta."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: hacer los deberes",
+    "items": [
+      {"emoji": "🪑", "title": "Siéntate en el escritorio", "body": "En tu sitio de siempre"},
+      {"emoji": "📒", "title": "Mira la agenda", "body": "Mira qué toca hoy"},
+      {"emoji": "📘", "title": "Una página de lectura", "body": "Lee en voz alta"},
+      {"emoji": "🥤", "title": "Bebe agua", "body": "Descansa un momento"},
+      {"emoji": "✏️", "title": "Una página de matemáticas", "body": "Hazla con calma"},
+      {"emoji": "🎒", "title": "Prepara la mochila", "body": "Guarda los deberes"}
+    ],
+    "reward": "Al terminar, 15 minutos de su juego favorito"
+  },
+  "faq": [
+    {"q": "¿Y si los deberes cambian cada día?", "a": "Mantén la estructura, como \"sentarse → mirar → hacer → preparar la mochila\", y cambia solo las tarjetas del medio según el día."},
+    {"q": "Tarda muchísimo.", "a": "Prueba a reducir la cantidad de cada tarjeta. Si \"una página\" es mucho, cámbialo por \"tres ejercicios\". Lo primero es un tamaño que pueda terminar."}
+  ],
+  "related": ["adhd-routine", "task-analysis"]
+}

@@ -1,0 +1,58 @@
+{
+  "title": "Rutina de la mañana para la escuela: horario visual | ELUM",
+  "description": "Una rutina de la mañana para ir a la escuela con menos \"date prisa\". Cómo decidir el orden, qué dejar listo la noche anterior y ejemplos de tarjetas.",
+  "keywords": "rutina de la mañana, rutina de la mañana para niños, prepararse para ir a la escuela, rutina antes del colegio, horario visual de la mañana, pictogramas rutina de la mañana",
+  "heading": "Cómo hacer una rutina de la mañana para ir a la escuela",
+  "lede": "Las mañanas no son caóticas por tener muchas cosas que hacer, sino porque cada vez hay que decidir qué viene después.",
+  "minutes": 4,
+  "sections": [
+    {
+      "heading": "Decide el orden una sola vez",
+      "paragraphs": [
+        "La rutina de la mañana es igual cada día. Si decides el orden una vez y lo pasas a tarjetas, no tienes que ir diciendo cada paso: <b>las tarjetas indican lo siguiente.</b>"
+      ],
+      "list": [
+        "Escríbelo en el orden real de tu casa (asearse → vestirse → desayunar → mochila)",
+        "Pon al principio los pasos que llevan más tiempo",
+        "Que la última tarjeta tenga un final claro, como \"ve a la puerta\""
+      ]
+    },
+    {
+      "heading": "Deja la mitad lista la noche anterior",
+      "list": [
+        "Saca la ropa de mañana y déjala en un mismo sitio",
+        "Prepara la mochila y déjala junto a la puerta",
+        "Antes de dormir, repasad juntos las tarjetas de la rutina de mañana"
+      ]
+    },
+    {
+      "heading": "Cómo usarla por la mañana",
+      "paragraphs": [
+        "Deja el dispositivo siempre en el mismo sitio y que marque cada tarjeta al terminarla. Si se queda parado, en lugar de meter prisa con palabras, <b>señala la tarjeta con la mano</b>.",
+        "Al terminar, da enseguida la recompensa acordada. Antes de ir a la escuela hay poco tiempo, así que mejor algo corto, como su canción favorita."
+      ]
+    },
+    {
+      "heading": "Días de lluvia y días de educación física",
+      "paragraphs": [
+        "Para los días distintos de lo habitual, crea otra rutina. En ELUM, si escribes algo como \"prepararse para la escuela un día de lluvia\", se crean tarjetas que incluyen el paraguas y las botas de agua."
+      ]
+    }
+  ],
+  "cards": {
+    "title": "Ejemplo de tarjetas de acción: prepararse para la escuela",
+    "items": [
+      {"emoji": "🚿", "title": "Lávate la cara", "body": "Lávala y sécala"},
+      {"emoji": "👕", "title": "Vístete", "body": "Ponte la ropa preparada"},
+      {"emoji": "🍚", "title": "Desayuna", "body": "Siéntate a la mesa y come"},
+      {"emoji": "🪥", "title": "Cepíllate los dientes", "body": "Arriba y abajo"},
+      {"emoji": "🎒", "title": "Ponte la mochila", "body": "Ve a la puerta"}
+    ],
+    "reward": "Al terminar, su canción favorita"
+  },
+  "faq": [
+    {"q": "Cada mañana se queda mucho tiempo parado en un paso.", "a": "Prueba a dividir ese paso en dos o tres tarjetas. Si vestirse cuesta, haz tarjetas separadas para la camiseta, el pantalón y los calcetines."},
+    {"q": "¿Y los fines de semana?", "a": "Puedes crear una rutina aparte para el fin de semana. Si mantienes iguales los pasos comunes, como asearse y vestirse, se conserva lo ya conocido."}
+  ],
+  "related": ["task-analysis", "rewards"]
+}
