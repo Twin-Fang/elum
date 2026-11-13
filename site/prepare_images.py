@@ -5,8 +5,13 @@
 """
 import pathlib
 import shutil
+import sys
 
 from PIL import Image
+
+# -I(격리 모드)로 실행하면 스크립트 폴더가 import 경로에 없음
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from site_config import APP_SCREEN_LANGUAGES, APP_SCREEN_NAMES, to_app_screen_file_name  # noqa: E402
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 TARGET_DIR = REPO_ROOT / 'site/assets/img'
@@ -20,12 +25,6 @@ SITE_ART = REPO_ROOT / 'site/art'
 
 # (원본, 결과 이름, 가로 픽셀, 투명 유지)
 RASTER_IMAGES = [
-    (PROMO_SCREENS / 'ko/input.png', 'screen_ko_input.webp', 330, False),
-    (PROMO_SCREENS / 'ko/card_review.png', 'screen_ko_card_review.webp', 330, False),
-    (PROMO_SCREENS / 'ko/child_card.png', 'screen_ko_child_card.webp', 330, False),
-    (PROMO_SCREENS / 'en/input.png', 'screen_en_input.webp', 330, False),
-    (PROMO_SCREENS / 'en/card_review.png', 'screen_en_card_review.webp', 330, False),
-    (PROMO_SCREENS / 'en/child_card.png', 'screen_en_child_card.webp', 330, False),
     (PROMO_ART / 'scene_06.png', 'friends.webp', 480, False),
     (APP_IMAGES / 'aba_intro_lumi.png', 'lumi_cards.webp', 512, True),
     (APP_IMAGES / 'my_plan_pro_lumi.png', 'lumi_crown.webp', 384, True),
@@ -42,6 +41,10 @@ RASTER_IMAGES = [
     (SITE_ART / 'aba_reward.png', 'aba_reward.webp', 256, True),
     (SITE_ART / 'together.png', 'together.webp', 720, True),
     (APP_IMAGES / 'reward_star_green.png', 'pop_star.webp', 144, True),
+] + [
+    # 첫 화면 앱 화면 (언어 x 화면, site_config 가 원본)
+    (PROMO_SCREENS / f'{language_code}/{screen_name}.png', to_app_screen_file_name(language_code, screen_name), 330, False)
+    for language_code in APP_SCREEN_LANGUAGES for screen_name in APP_SCREEN_NAMES
 ]
 # 그대로 복사하는 벡터 그림 (앱 그림 방식 예시와 같은 그림)
 VECTOR_IMAGES = [

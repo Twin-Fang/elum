@@ -1,7 +1,7 @@
 """이룸 소개 사이트 생성: 문구(content/*.json) + 틀 > 정적 사이트 폴더
 
 사용: python3 -I site/build_site.py --out <폴더> [--languages ko,en] [--date 2026-11-12]
-출력: 언어별 첫 화면 · 안내 글 목록 · 안내 글, sitemap.xml, robots.txt, assets/**, 손으로 관리하는 페이지(static/**)
+출력: 언어별 첫 화면 · 안내 글 목록 · 안내 글, sitemap.xml, robots.txt, assets/**, 손으로 관리하는 페이지(static/**). 자산 주소에 ?v=내용 해시
 필요: 파이썬 표준 라이브러리만 (그림은 prepare_images.py 가 미리 만들어 둔 assets/img 를 그대로 복사)
 """
 import argparse
