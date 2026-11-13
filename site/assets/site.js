@@ -28,14 +28,19 @@
   // 첫 화면 기기 틀: 마우스 위치 따라 살짝 기울기 (마우스 있는 PC · 움직임 줄이기 아닐 때만)
   var phone = document.querySelector('.phone');
   var heroVisual = document.querySelector('.hero-visual');
+  // 기울기 폭 (마우스가 끝에서 끝으로 갈 때 바뀌는 각도) · 가운데일 때 기본 각도
+  var TILT_RANGE_Y_DEGREES = 16;
+  var TILT_BASE_Y_DEGREES = -4;
+  var TILT_RANGE_X_DEGREES = 10;
+  var TILT_BASE_X_DEGREES = 2;
   var hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
   if (phone && heroVisual && hasFinePointer && !isMotionReduced) {
     heroVisual.addEventListener('pointermove', function (event) {
       var box = heroVisual.getBoundingClientRect();
       var ratioX = (event.clientX - box.left) / box.width - 0.5;
       var ratioY = (event.clientY - box.top) / box.height - 0.5;
-      phone.style.setProperty('--tilt-y', (ratioX * 16 - 4).toFixed(2) + 'deg');
-      phone.style.setProperty('--tilt-x', (-ratioY * 10 + 2).toFixed(2) + 'deg');
+      phone.style.setProperty('--tilt-y', (ratioX * TILT_RANGE_Y_DEGREES + TILT_BASE_Y_DEGREES).toFixed(2) + 'deg');
+      phone.style.setProperty('--tilt-x', (-ratioY * TILT_RANGE_X_DEGREES + TILT_BASE_X_DEGREES).toFixed(2) + 'deg');
     });
     heroVisual.addEventListener('pointerleave', function () {
       phone.style.removeProperty('--tilt-y');

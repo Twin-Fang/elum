@@ -68,6 +68,19 @@ GUIDE_IMAGES = {
 # ABA 원리 4가지 그림 (첫 화면 ABA 칸 · 안내 글 소제목 옆. 문구 순서와 같은 순서)
 ABA_PRINCIPLE_IMAGES = ['aba_steps.webp', 'aba_show.webp', 'aba_help.webp', 'aba_reward.webp']
 
+# 첫 화면 기기 틀 속 앱 화면 (쓰는 순서 3칸과 같은 순서). 원본: docs/store/promo/screens/<언어>/<이름>.png
+APP_SCREEN_NAMES = ['input', 'card_review', 'child_card']
+# 앱 화면 캡처가 있는 언어 · 없는 언어는 영어 화면
+APP_SCREEN_LANGUAGES = ['ko', 'en']
+APP_SCREEN_FALLBACK_LANGUAGE = 'en'
+
+
+def to_app_screen_file_name(language_code: str, screen_name: str) -> str:
+    """언어 · 화면 이름 > assets/img 의 앱 화면 파일 이름 (캡처 없는 언어는 영어)"""
+    screen_language = language_code if language_code in APP_SCREEN_LANGUAGES else APP_SCREEN_FALLBACK_LANGUAGE
+    return f'screen_{screen_language}_{screen_name}.webp'
+
+
 # 안내 글 소제목 옆 그림: 글 > {소제목 순서(0부터): 그림}
 GUIDE_SECTION_IMAGES = {
     'aba-principles': {1: 'aba_steps.webp', 2: 'aba_show.webp', 3: 'aba_help.webp', 4: 'aba_reward.webp'},

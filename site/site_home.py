@@ -1,5 +1,5 @@
 """첫 화면: 머리(앱 화면 넘김) > 쓰는 순서 > ABA 원리 4가지 > 보호자와 함께 > 그림 방식 > 이런 분께 > 안내 글 > 앱 받기 > 자주 묻는 질문 > 문의"""
-from site_config import ABA_PRINCIPLE_IMAGES, CONTACT_EMAIL, Language
+from site_config import ABA_PRINCIPLE_IMAGES, APP_SCREEN_NAMES, CONTACT_EMAIL, Language, to_app_screen_file_name
 from site_frame import (build_download_section, build_guide_cards, build_store_buttons, escape, page_href, page_url,
                         render_page)
 from site_schema import application_schema, faq_schema, website_schema
@@ -8,23 +8,23 @@ from site_schema import application_schema, faq_schema, website_schema
 STEP_IMAGES = ['cards.webp', 'lumi_cards.webp', 'lumi_crown.webp']
 STYLE_IMAGES = ['style_emoji.svg', 'style_symbol.svg', 'style_cartoon.webp', 'style_realistic.webp']
 AUDIENCE_IMAGES = ['morning.webp', 'school.webp', 'chores.webp', 'outside.webp']
-# 첫 화면 기기 틀 속 앱 화면 (쓰는 순서 3칸과 같은 순서) · 화면 캡처가 있는 언어, 나머지는 영어
-APP_SCREEN_NAMES = ['input', 'card_review', 'child_card']
-APP_SCREEN_LANGUAGES = {'ko', 'en'}
-APP_SCREEN_FALLBACK_LANGUAGE = 'en'
 # 단계마다 기기 옆에 튀어나오는 그림 (적기: 반짝임, 확인: 카드, 따라 하기: 별)
 PHONE_POP_IMAGES = ['pop_sparkles.svg', 'cards.webp', 'pop_star.webp']
 # 첫 화면에 보이는 안내 글 수
 HOME_GUIDE_COUNT = 4
 
 
+def build_app_screen(file_name: str, index: int) -> str:
+    """기기 틀 속 앱 화면 1장 (첫 장만 먼저 불러옴, 나머지는 늦게)"""
+    loading_attribute = 'fetchpriority="high"' if index == 0 else 'loading="lazy"'
+    return (f'<img src="/assets/img/{file_name}" alt="" width="330" height="717" style="--i:{index}" '
+            f'{loading_attribute} decoding="async"/>')
+
+
 def build_app_phone(language: Language, label: str, step_titles: list) -> str:
     """기기 틀 + 앱 실제 화면 3장(적기 > 확인 > 따라 하기) + 같은 순서로 켜지는 단계 이름"""
-    screen_language = language.code if language.code in APP_SCREEN_LANGUAGES else APP_SCREEN_FALLBACK_LANGUAGE
-    screens = ''.join(
-        f'<img src="/assets/img/screen_{screen_language}_{name}.webp" alt="" width="330" height="717" style="--i:{index}"'
-        f'{" fetchpriority=\"high\"" if index == 0 else " loading=\"lazy\""} decoding="async"/>'
-        for index, name in enumerate(APP_SCREEN_NAMES))
+    screens = ''.join(build_app_screen(to_app_screen_file_name(language.code, name), index)
+                      for index, name in enumerate(APP_SCREEN_NAMES))
     steps = ''.join(f'<li style="--i:{index}">{escape(title)}</li>' for index, title in enumerate(step_titles))
     pops = ''.join(f'<img class="pop pop-{index}" src="/assets/img/{name}" alt="" width="64" height="64" style="--i:{index}"/>'
                    for index, name in enumerate(PHONE_POP_IMAGES))
