@@ -2107,6 +2107,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineDoneButton => 'I did it!';
 
   @override
+  String get routineDoneRewardCaption => 'Today\'s reward';
+
+  @override
   String get modeSwitchToChild => 'Enter the passcode to switch to Elumi mode';
 
   @override

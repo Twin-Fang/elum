@@ -586,6 +586,7 @@
   "routineDoneTitle": "完成日常了!",
   "routineDoneMessage": "为完成了所有事情的\n{name}准备的",
   "routineDoneButton": "做到了!",
+  "routineDoneRewardCaption": "今天的奖励",
   "modeSwitchToChild": "输入密码就会切换到Elumi模式",
   "modeSwitchToGuardian": "输入密码就会切换到监护人模式",
   "modeSwitchTitle": "请输入密码",
