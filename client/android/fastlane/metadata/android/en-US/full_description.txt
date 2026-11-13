@@ -1,0 +1,37 @@
+ELUM is a visual schedule maker. It turns the day's routine into action cards (picture sequence cards) shown one at a time, and it is an educational tool for people with autism, ADHD, learning disabilities and other developmental disabilities, and for the guardians and teachers who support them.
+
+When a guardian writes a situation such as "wash up and get dressed in the morning", AI splits it into easy steps and creates action cards. No more cutting and laminating picture cards by hand. Cards appear on Elumi's screen only after the guardian has checked them.
+
+■ Designed with ABA (applied behavior analysis) principles
+· Each action card shows what to do, how to do it, and the reward at the end
+· Short, clear sentences, a picture for every step and a voice that reads it out loud
+· Praise sounds, stars and the reward the guardian chose, every time a step is done
+· Break tasks into small steps, show them ahead of time, praise right away: the ABA way, on one card
+
+■ Made with these people in mind
+· People with developmental or intellectual disabilities, or on the autism spectrum, who find pictures and order easier than text
+· People with ADHD or learning disabilities who want to see the order of tasks at a glance
+· Parents and guardians who want to go through the day step by step
+· Special education (SPED) teachers, speech therapists, occupational therapists and ABA therapists who use visual schedules, first-then boards and social stories in class or sessions
+
+■ One action per card
+Each card holds just one action. It shows a picture and a short sentence, and reads it out loud. Check it off when it's done, and get the reward you set at the end, like a reward chart built into the routine.
+
+■ Part of everyday life
+Turn the things you do every day into a visual schedule: getting ready for school, morning routines, washing and brushing teeth, getting dressed, getting ready to go out, bedtime routines and tidying up. Use the same action cards at home, at school and in therapy sessions.
+
+■ Guardian screen and Elumi screen
+· Guardian screen: make routines, edit action cards and change their order. See how much was done today
+· Elumi screen: see today's tasks one action card at a time and check them off
+· Going back from the Elumi screen to the guardian screen needs a passcode
+· Link two devices and the routines the guardian makes show up on Elumi's phone or tablet
+· Invite family or teachers to look after routines together
+
+■ Daily routines in one go
+Reuse past routines as they are, so routines you repeat every day are easy to prepare.
+
+■ Please don't enter personal information
+What you write when making cards is sent to AI. Please don't enter anything that can identify a person, such as names, phone numbers or addresses. What we collect and how we handle it is in the in-app settings and the privacy policy.
+
+ELUM does not replace diagnosis or therapy. It is a tool that supports everyday life and learning together with guardians and teachers.
+For questions, use Send feedback in the app's settings.

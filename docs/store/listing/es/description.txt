@@ -1,0 +1,37 @@
+ELUM es una app para crear agendas visuales. Muestra la rutina del día con tarjetas de acción (tarjetas de secuencia con imágenes, como pictogramas) una a una, y es una herramienta educativa para personas con autismo (TEA), TDAH, dificultades de aprendizaje y otras discapacidades del desarrollo, y para las familias y docentes que las acompañan.
+
+Cuando la persona responsable escribe una situación como "lavarse la cara y vestirse por la mañana", la IA la divide en pasos fáciles de seguir y crea las tarjetas de acción. Ya no hace falta recortar y plastificar pictogramas a mano. Las tarjetas aparecen en la pantalla de Elumi solo después de que la persona responsable las revisa.
+
+■ Diseñado con los principios ABA (análisis aplicado de la conducta)
+· Cada tarjeta muestra qué hacer, cómo hacerlo y la recompensa al terminar
+· Frases cortas y claras, una imagen en cada paso y una voz que la lee en alto
+· Sonidos de felicitación, estrellas y la recompensa elegida cada vez que se completa un paso
+· Dividir la tarea en pasos pequeños, anticipar y felicitar al momento: el método ABA en una tarjeta
+
+■ Pensado para estas personas
+· Personas con discapacidad del desarrollo o intelectual, o dentro del espectro autista, que entienden mejor las imágenes y el orden que el texto
+· Personas con TDAH o dificultades de aprendizaje que quieren ver el orden de las tareas de un vistazo
+· Madres, padres y familias que quieren acompañar el día paso a paso
+· Docentes de educación especial (NEE), logopedas, terapeutas ocupacionales y terapeutas ABA que usan agendas visuales y anticipación en clase o en sesión
+
+■ Una acción por tarjeta
+Cada tarjeta tiene una sola acción. Se muestra con una imagen y una frase corta, y se lee en voz alta. Al terminarla se marca, y al completar toda la rutina se recibe la recompensa acordada.
+
+■ Para el día a día
+Convierte lo que haces cada día en una agenda visual: prepararse para el colegio, la rutina de la mañana, lavarse y cepillarse los dientes, vestirse, prepararse para salir, la rutina antes de dormir y ordenar. Usa las mismas tarjetas en casa, en el colegio y en terapia.
+
+■ Pantalla de la familia y pantalla de Elumi
+· Pantalla de la familia: crea rutinas, edita tarjetas de acción y cambia su orden. Mira cuánto se hizo hoy
+· Pantalla de Elumi: ve las tareas de hoy tarjeta por tarjeta y márcalas
+· Para volver de la pantalla de Elumi a la de la familia se necesita una contraseña
+· Conecta dos dispositivos y las rutinas aparecerán en el móvil o la tableta de Elumi
+· Invita a familiares o docentes para acompañar las rutinas juntos
+
+■ Rutinas diarias en un momento
+Reutiliza rutinas anteriores tal cual, así preparar la agenda de cada día es muy fácil.
+
+■ No escribas datos personales
+Lo que escribes al crear las tarjetas se envía a la IA. No escribas nada que permita identificar a una persona, como nombres, teléfonos o direcciones. Qué datos recogemos y cómo los tratamos está en los ajustes de la app y en la política de privacidad.
+
+ELUM no sustituye un diagnóstico ni una terapia. Es una herramienta que apoya la vida diaria y el aprendizaje junto con familias y docentes.
+Para consultas, usa Send feedback en los ajustes de la app (por ahora la app está en inglés y coreano).

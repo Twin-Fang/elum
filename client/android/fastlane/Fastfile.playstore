@@ -64,7 +64,8 @@ platform :android do
       aab: ENV["AAB_PATH"],                        # AAB 파일 경로
       json_key: ENV["GOOGLE_PLAY_JSON_KEY"],       # Service Account JSON 경로
       skip_upload_apk: true,                       # APK 업로드 안함
-      skip_upload_metadata: true,                  # 메타데이터 업로드 안함
+      # 제목·간단한 설명·자세한 설명 (5개 언어) 업로드 — 원본 docs/store/listing, 생성 docs/store/build_store_metadata.py (#1351)
+      skip_upload_metadata: false,
       skip_upload_images: true,                    # 이미지 업로드 안함
       skip_upload_screenshots: true,               # 스크린샷 업로드 안함
       skip_upload_changelogs: false,               # Changelog 업로드 (metadata 디렉토리에서 자동 인식)
