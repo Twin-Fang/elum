@@ -110,4 +110,4 @@ ELUM began at the 2026 hackathon 「장애 플러스 기술」 (Disability Plus 
 
 © 2026 Team LUMLUM. All rights reserved. See [LICENSE](./LICENSE).
 
-This repository is public for viewing only, so we do not accept outside pull requests. Ideas and questions are welcome at chan4760@gmail.com.
+This repository is public for viewing only, so we do not accept outside pull requests. Ideas and questions are welcome at chan4760@naver.com.

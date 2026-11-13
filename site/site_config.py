@@ -6,7 +6,7 @@ SITE_URL = 'https://elum.suhsaechan.kr/'
 APP_STORE_URL = 'https://apps.apple.com/kr/app/id6792970508'
 APP_STORE_ID = '6792970508'
 GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=kr.twinfang.elum'
-CONTACT_EMAIL = 'chan4760@gmail.com'
+CONTACT_EMAIL = 'chan4760@naver.com'
 SITE_NAME = '이룸 ELUM'
 
 # 사업자 정보 (바닥 표시. passQL 사이트와 같은 사업자)
@@ -80,10 +80,30 @@ APP_SCREEN_LANGUAGES = ['ko', 'en']
 APP_SCREEN_FALLBACK_LANGUAGE = 'en'
 
 
+# 첫 화면 기기 영상 (앱 시연 영상, 원본: docs/store/promo/video/<언어>/elumi_flow.mp4) · 캡처 있는 언어와 같음
+# 보상 화면이 시작되는 초 (영상마다 다름, 단계 칩 "끝내면 보상" 이 켜지는 시점)
+APP_FLOW_REWARD_START_SECONDS = {'ko': 17.0, 'en': 20.25}
+# 영상에서 뽑은 장면 그림 (site/art/flow/flow_<언어>_<이름>.png): 첫 프레임, 칭찬 별, 보상
+APP_FLOW_FRAME_NAMES = ['poster', 'praise', 'reward']
+
+
+def to_app_screen_language(language_code: str) -> str:
+    """언어 > 앱 화면·영상 언어 (캡처 없는 언어는 영어)"""
+    return language_code if language_code in APP_SCREEN_LANGUAGES else APP_SCREEN_FALLBACK_LANGUAGE
+
+
 def to_app_screen_file_name(language_code: str, screen_name: str) -> str:
     """언어 · 화면 이름 > assets/img 의 앱 화면 파일 이름 (캡처 없는 언어는 영어)"""
-    screen_language = language_code if language_code in APP_SCREEN_LANGUAGES else APP_SCREEN_FALLBACK_LANGUAGE
-    return f'screen_{screen_language}_{screen_name}.webp'
+    return f'screen_{to_app_screen_language(language_code)}_{screen_name}.webp'
+
+
+# 이런 분들 칸 4개(아침·저녁, 학교·공부, 집안일, 밖에서)마다 보여 줄 앱 예시 행동 카드 3장 (client/assets/images/example_routines)
+AUDIENCE_EXAMPLE_CARDS = [
+    ['wash_face', 'brush_teeth', 'get_dressed'],
+    ['wear_backpack', 'sit_at_desk', 'write_homework'],
+    ['set_utensils', 'wipe_table', 'fold_blanket'],
+    ['wait_for_bus', 'board_bus', 'pay_money'],
+]
 
 
 # 안내 글 소제목 옆 그림: 글 > {소제목 순서(0부터): 그림}
