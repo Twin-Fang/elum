@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-13T00:42:26Z",
-    "currentVersion": "2.92.0",
+    "lastUpdated": "2026-11-13T12:41:27Z",
+    "currentVersion": "2.92.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 332
+    "totalReleases": 333
   },
   "releases": [
+    {
+      "version": "2.92.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-13",
+      "pr_number": 1347,
+      "raw_summary": "## 릴리스 노트\n\n* **개선**\n  * 루미 그림을 더 보기 좋게 개선했어요\n  * 일과 완료, 크레딧, Pro, 오류 화면의 루미가 더 또렷해졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "루미 그림을 더 보기 좋게 개선했어요",
+            "일과 완료, 크레딧, Pro, 오류 화면의 루미가 더 또렷해졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.92.0",
       "project_type": "flutter",
