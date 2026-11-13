@@ -1,32 +1,32 @@
 # 언어별 스토어 문구와 네이티브 언어 등록
 
 > 이슈 [#527](https://github.com/Twin-Fang/elum/issues/527) · 상위 #521 · 설계 `docs/superpowers/specs/2026-10-29-native-store-locales-design.md`
-> 한국어 원본은 [`../store-listing.md`](../store-listing.md). 번역 용어는 [`docs/i18n/glossary.md`](../../i18n/glossary.md).
+> 기준은 [`../store-listing.md`](../store-listing.md), 스토어 문구 원본은 [`../listing/`](../listing/) (#1351). 번역 용어는 [`docs/i18n/glossary.md`](../../i18n/glossary.md).
 
-## 지금 상태 (2026-10-29)
+## 지금 상태 (2026-11-13)
 
 | 언어 | 앱 화면 | OS 앱별 언어 목록 | iOS 권한 문구 | 스토어 문구 |
 |---|---|---|---|---|
-| ko | 열림 | 등록 | `ios/Runner/ko.lproj` | 콘솔에 있음 (`store-listing.md`) |
-| en | 열림 | 등록 | `ios/Runner/en.lproj` | **초안** [`en.md`](./en.md) — 콘솔에 없음 |
-| ja | 닫힘 | 안 함 | 대기 `ios/staged_locales/ja.lproj` | **초안** [`ja.md`](./ja.md) |
-| zh (간체) | 닫힘 | 안 함 | 대기 `ios/staged_locales/zh-Hans.lproj` | **초안** [`zh.md`](./zh.md) |
-| es | 닫힘 | 안 함 | 대기 `ios/staged_locales/es.lproj` | **초안** [`es.md`](./es.md) |
+| ko | 열림 | 등록 | `ios/Runner/ko.lproj` | [`../listing/ko`](../listing/ko) · 배포 때 자동 업로드 |
+| en | 열림 | 등록 | `ios/Runner/en.lproj` | [`../listing/en`](../listing/en) · 배포 때 자동 업로드 |
+| ja | 닫힘 | 안 함 | 대기 `ios/staged_locales/ja.lproj` | [`../listing/ja`](../listing/ja) · 배포 때 자동 업로드 (검색 노출용, #1351) |
+| zh (간체) | 닫힘 | 안 함 | 대기 `ios/staged_locales/zh-Hans.lproj` | [`../listing/zh`](../listing/zh) · 같음 |
+| es | 닫힘 | 안 함 | 대기 `ios/staged_locales/es.lproj` | [`../listing/es`](../listing/es) · 같음 |
 
-- **초안은 사람 검수 전이다.** 이 폴더는 어떤 배포도 읽지 않는다. 검수한 뒤 콘솔에 넣는다.
-- 검수 때 함께 볼 것: 한국어 원본 끝 문장 "앱 설정 화면의 **문의하기**에서 주소를 확인" 의 `문의하기` 는 지금 앱 설정에 없다(가장 가까운 항목은 `의견 보내기`). 초안은 원본을 그대로 옮겼다. 원본을 고치면 초안도 함께 고친다.
-- 앱 이름은 모든 언어에서 `이룸` 이다. 현지 표기(영문 `elum`/`ELUM`, 일본어 가타카나 등)는 정하지 않았다(계획 D2). 정하면 iOS `InfoPlist.strings` 의 `CFBundleDisplayName` 과 Android `values-<언어>/strings.xml` 의 `app_name` 에 넣는다.
+- 스토어 문구 원본은 `../listing/<언어>/` 다(#1351). 예전 초안(`en.md` 등)은 원본으로 옮기고 지웠다.
+- ja·zh·es 는 **스토어 문구만 먼저** 올린다. 그 나라 검색에 걸리게 하려는 것이고, 앱을 열면 영어 화면이 뜬다. 번역은 원어민 검수 전이다.
+- 앱 이름(홈 화면)은 모든 언어에서 `이룸` 이다. 스토어 이름은 `ELUM` + 그 나라 검색어로 쓴다.
 
-## 업로드 경로 — 초안을 넣지 않는 곳 ⚠️
+## 업로드 경로
 
 | 파일 | 누가 올리나 | 결과 |
 |---|---|---|
-| `client/ios/fastlane/metadata/<로케일>/*.txt` | iOS 배포 `store_prepare`·`store_submit` 의 `deliver` (`skip_metadata: false`) | 폴더가 있는 언어는 **그대로 올라가고 새 로컬라이제이션이 생긴다**. 지금은 배포 때 `ko/release_notes.txt` 만 만들어 쓴다(`DELIVER_LOCALES` 기본 `ko`) |
+| `client/ios/fastlane/metadata/<로케일>/*.txt` | iOS 배포 `store_prepare`·`store_submit` 의 `deliver` (`skip_metadata: false`) | 이름·부제·키워드·설명·프로모션 문구·방침 주소·새로운 기능. 생성: `docs/store/build_store_metadata.py`. `DELIVER_LOCALES`(기본 `ko`)만 새로운 기능을 CHANGELOG 로 덧쓴다 |
 | `client/ios/fastlane/review_notes.txt` | 같은 `deliver` | 심사 노트(Notes)를 매번 덮어쓴다. 레포가 원본 |
-| `client/android/fastlane/metadata/android/<로케일>/changelogs/` | Play 배포 `upload_to_play_store` (`skip_upload_changelogs: false`) | 출시 노트가 올라간다. 지금은 워크플로가 `ko-KR` 만 만든다 |
-| Play 이름·설명 | 없음 (`skip_upload_metadata: true`) | Play Console 에서 손으로 넣는다 |
+| `client/android/fastlane/metadata/android/<로케일>/*.txt` | Play 배포 `upload_to_play_store` (`skip_upload_metadata: false`) | 제목·간단한 설명·자세한 설명. 생성: 같은 스크립트 |
+| `client/android/fastlane/metadata/android/ko-KR/changelogs/` | 같은 Play 배포 | 출시 노트. 워크플로가 `ko-KR` 만 만든다 |
 
-검수 전 문구를 위 경로에 두면 다음 배포에서 그대로 스토어에 나간다. 이 폴더(`docs/store/locales/`)에만 둔다.
+생성본은 손으로 고치지 않는다. 원본을 고치고 스크립트를 돌린다.
 
 ## 로케일 코드
 
@@ -64,7 +64,7 @@
 2. iOS: `client/ios/staged_locales/<lproj>` 를 `client/ios/Runner/` 로 옮기고 Xcode 에서 `InfoPlist.strings` 의 Localization 에 그 언어를 켠다(`project.pbxproj` 의 `knownRegions` 와 variant 가 생긴다). `Info.plist` 의 `CFBundleLocalizations` 에 코드를 더한다.
 3. Android: `res/xml/locales_config.xml` 에 `<locale android:name="..."/>` 를 더한다.
 4. `cd client && dart run tool/check_native_locales.dart` 가 0건인지 본다.
-5. 스토어: 이 폴더의 초안을 검수한 뒤 App Store Connect·Play Console 에 그 언어를 추가하고 넣는다(스크린샷 포함). 배포로 자동 업로드하려면 그 언어 폴더를 업로드 경로에 만들고 `DELIVER_LOCALES` 와 Android 출시 노트 폴더를 그 PR 에서 함께 고친다.
+5. 스토어: 문구는 이미 `../listing/<언어>/` 로 올라가 있다. 원어민 검수를 반영하고, 그 언어 스크린샷을 넣고, 새로운 기능을 CHANGELOG 로 쓰려면 `DELIVER_LOCALES` 와 Android 출시 노트 폴더를 그 PR 에서 함께 고친다.
 6. 심사 노트(`review_notes.txt`)의 언어 문장에 그 언어를 더한다.
 
 ## 심사 노트와 언어

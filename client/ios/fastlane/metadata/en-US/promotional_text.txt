@@ -1,0 +1,1 @@
+Make visual schedules in seconds. Write the situation, AI turns it into step-by-step action cards, and Elumi follows each card with pictures and voice.

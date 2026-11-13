@@ -77,9 +77,10 @@ platform :ios do
       UI.message("📝 whatsNew 출처: #{override_notes.empty? ? 'CHANGELOG' : 'STORE_WHATS_NEW_OVERRIDE 덮어쓰기'}")
 
       # whatsNew 메타를 절대경로로 생성 (상대경로는 fastlane CWD와 어긋나 공란 → 제출 거부).
-      # release_notes.txt만 만들고 다른 메타는 안 만듦 → ASC 기존 메타(설명/키워드 등) 보존.
+      # 스토어 문구(이름·부제·키워드·설명, 5개 언어)는 레포 {APP_ROOT}/ios/fastlane/metadata 가 원본 (#1351)
+      #   생성: docs/store/build_store_metadata.py · DELIVER_LOCALES(기본 ko)만 whatsNew 를 CHANGELOG 로 덧씀
       workspace = ENV["GITHUB_WORKSPACE"] || Dir.pwd
-      metadata_path = File.join(workspace, "ios", "fastlane", "metadata")
+      metadata_path = File.join(workspace, ENV["APP_ROOT"] || ".", "ios", "fastlane", "metadata")
       require "fileutils"
       # ⚠️ 로케일 디렉토리명은 deliver가 인정하는 코드만 (ko 유효, ko-KR 무효).
       locales = (ENV["DELIVER_LOCALES"] || "ko").split(",").map(&:strip).reject(&:empty?)
