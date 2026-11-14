@@ -1,0 +1,62 @@
+Artículo 1 (Objeto)
+Las presentes condiciones establecen las condiciones y los procedimientos de uso del servicio ELUM (이룸) prestado por Twin-Fang (en adelante, la «Empresa»),
+así como los derechos y obligaciones de la Empresa y de los usuarios.
+
+Artículo 2 (Contenido del servicio)
+ELUM es una aplicación que ayuda a las personas con discapacidad del desarrollo a realizar sus rutinas. Cuando el tutor introduce una situación,
+la IA crea tarjetas paso a paso, que aparecen en la pantalla de la persona usuaria después de que el tutor las revise.
+
+- Los resultados creados por la IA solo son visibles para la persona usuaria si el tutor los aprueba.
+- Cada tarjeta contiene una sola acción.
+- ELUM no proporciona tratamiento ni diagnóstico. No sustituye la consulta con un profesional.
+
+Artículo 3 (Cuenta)
+1. La cuenta se crea mediante el inicio de sesión con Kakao, Naver, Google o Apple.
+2. Se crea una cuenta distinta por cada medio de inicio de sesión. Si inicia sesión con otro medio,
+   no se mostrará la información de la cuenta anterior.
+3. La cuenta la utiliza el tutor. La persona usuaria no inicia sesión por separado.
+
+Artículo 4 (Obligaciones del usuario)
+1. No introducirá información de terceros sin autorización.
+2. No utilizará el servicio para fines distintos de su uso normal ni enviará solicitudes
+   excesivas mediante métodos automatizados.
+
+Artículo 5 (Modificación e interrupción del servicio)
+La Empresa puede modificar o interrumpir el contenido del servicio. Los cambios importantes se notificarán
+con antelación dentro de la aplicación. La Empresa no otorgará compensación alguna
+por la interrupción de servicios prestados de forma gratuita.
+
+Artículo 5-2 (Publicidad)
+1. El servicio puede incluir publicidad. La publicidad se muestra a través del servicio publicitario de Google LLC
+   (Google AdMob) en la pantalla del tutor (inicio, lista de borradores, información sobre créditos) en formato de banner,
+   nativo o con recompensa (anuncios que otorgan créditos si se ven hasta el final), y no se muestra en la pantalla de Elumi
+   ni durante el proceso de creación de rutinas. Si ve un anuncio con recompensa hasta el final, puede recibir la cantidad
+   de créditos que determine el servicio.
+2. Para mostrar la publicidad y medir su rendimiento, la información indicada en la política de privacidad
+   se transmite a Google.
+3. El contenido de la publicidad lo determina el anunciante, y la Empresa no asume
+   responsabilidad alguna por los productos o servicios contenidos en la publicidad.
+
+Artículo 5-3 (Origen de las imágenes)
+1. Algunas de las imágenes de las tarjetas del servicio utilizan Mulberry Symbols (https://mulberrysymbols.org).
+   Son imágenes gratuitas que pueden utilizarse con la condición de reconocer la autoría y compartir bajo las mismas condiciones (CC BY-SA 4.0),
+   y la Empresa las utiliza tal cual, sin modificar su color ni su forma.
+2. Atribución: Mulberry Symbols by Steve Lee are licenced under the Creative Commons
+   Attribution-ShareAlike 4.0 License. See https://mulberrysymbols.org for details
+3. Copyright 2018-2026 Steve Lee
+4. El texto completo de la licencia puede consultarse en https://creativecommons.org/licenses/by-sa/4.0/.
+
+Artículo 6 (Exención de responsabilidad)
+1. La Empresa no será responsable cuando no pueda prestar el servicio por causas ajenas a su control,
+   como desastres naturales o fallos de comunicación.
+2. El contenido de las tarjetas creadas por la IA es material de referencia. El tutor lo revisa y lo utiliza,
+   y la Empresa no asume responsabilidad alguna por sus resultados.
+
+Artículo 7 (Consultas)
+Las consultas sobre el servicio se reciben en chan4760@naver.com.
+
+Disposiciones adicionales — Las presentes condiciones se aplican a partir del 17 de septiembre de 2026.
+- Publicado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se añadió el Artículo 5-2 sobre publicidad.
+- Publicado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se añadió el Artículo 5-3 sobre el origen de las imágenes.
+
+Esta traducción se proporciona solo por conveniencia. Si difiere de la versión en coreano, prevalecerá la versión en coreano.

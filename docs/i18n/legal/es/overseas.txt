@@ -1,0 +1,42 @@
+Al crear tarjetas de rutina, la siguiente información se transmite al extranjero.
+
+Destinatarios               Google LLC (policies.google.com/privacy)
+                            OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+                            Features & Labels Inc. (fal.ai/legal/privacy-policy)
+País de destino             Estados Unidos
+Momento de la transferencia Cada vez que se crea una tarjeta (transmisión a través de la red)
+Método de la transferencia  Transmisión cifrada mediante HTTPS
+
+Datos transferidos
+- La descripción de la situación escrita por el tutor y las respuestas a las preguntas adicionales
+- El nombre con el que se llama a Elumi (apodo)
+- Los objetivos de apoyo seleccionados
+
+Finalidad de la transferencia
+- Generación de las frases de las tarjetas de rutina
+- Generación de las imágenes de las tarjetas
+
+Periodo de conservación y uso
+Se tratan conforme a las políticas de las empresas destinatarias, y ELUM (이룸) no conserva la solicitud original
+después de recibir la respuesta.
+
+No incluya datos personales en la descripción de la situación
+Las frases escritas por el tutor se transmiten tal cual, sin procesar. No escriba información
+que permita identificar a una persona, como nombres, números de teléfono o direcciones.
+
+Derecho a negarse a otorgar el consentimiento
+Usted puede negarse a otorgar este consentimiento. No obstante, dado que la creación de tarjetas con IA es la función
+principal de ELUM, si se niega no podrá utilizar el servicio.
+
+[Transferencia internacional relacionada con la publicidad]
+- Destinatario                    Google LLC (policies.google.com/privacy)
+- País de destino                 Estados Unidos
+- Momento y método                Se transmite mediante HTTPS cada vez que se carga un anuncio en la pantalla del tutor
+- Datos transferidos              Identificador de publicidad, dirección IP (ubicación aproximada), información del dispositivo y de la aplicación, información de uso de la publicidad,
+                                  información de cierres inesperados y diagnóstico de rendimiento
+- Finalidad de la transferencia   Publicación de anuncios, medición del rendimiento publicitario, prevención del uso fraudulento
+- Periodo de conservación         Conforme a las políticas de Google
+El identificador de publicidad puede rechazarse o restablecerse mediante el método indicado anteriormente, y su rechazo no afecta
+al uso del servicio.
+
+Esta traducción se proporciona solo por conveniencia. Si difiere de la versión en coreano, prevalecerá la versión en coreano.

@@ -11,6 +11,21 @@
   <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
   <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
+  <!-- 언어 탭: 약관은 (키, 언어)마다 한 행 (#1379). 게시됨 = 필수 4종이 모두 있어 앱에 그 언어로 나감 -->
+  <div th:if="${locales != null}" class="tabs tabs-boxed overflow-x-auto flex-nowrap">
+    <a th:each="entry : ${locales}"
+       th:href="@{/admin/consents(locale=${entry.code})}"
+       class="tab"
+       th:classappend="${entry.code == (selectedLocale ?: 'ko')} ? 'tab-active' : ''">
+      <span th:text="${entry.label}">한국어 (ko)</span>
+      <span class="badge badge-xs ml-1"
+            th:classappend="${entry.isPublished} ? 'badge-success' : 'badge-ghost'"
+            th:text="${entry.isPublished} ? '게시됨' : 'ko로 대체'"></span>
+      <span class="badge badge-xs badge-warning ml-1" th:if="${entry.missingCount > 0}"
+            th:text="${entry.missingCount} + '개 없음'"></span>
+    </a>
+  </div>
+
   <div class="card bg-base-200">
     <div class="card-body space-y-1 text-sm">
       <p>
@@ -22,10 +37,15 @@
         앱은 받은 내용을 저장해 두고 평소엔 그것을 읽습니다.
         서버를 못 봐도 앱에 담긴 기본값으로 화면이 뜨므로 가입이 막히지 않습니다.
       </p>
-      <!-- 약관 언어 (#531): 지금은 ko 원본만 편집. 다른 언어 본문은 법무 확인(#528) 후 연다 -->
-      <p class="text-base-content/60">
-        이 화면의 약관은 <b>한국어(ko)</b> 원본입니다. 다른 언어 휴대폰에도 그 언어 약관이 생길 때까지 이 한국어 약관이 나갑니다.
-        다른 언어 본문은 법무 확인 뒤에 엽니다.
+      <!-- 약관 언어 (#1379): ko 원본 + 번역본 4개. 필수 4종이 다 있는 언어만 게시, 아니면 ko 로 대체 -->
+      <p class="text-base-content/60" th:if="${selectedLocale == null or selectedLocale == 'ko'}">
+        이 탭의 약관은 <b>한국어(ko)</b> 원본입니다. 번역본은 이 원본을 옮긴 것이며, 번역본 끝의 조항대로 한국어가 우선합니다.
+      </p>
+      <p class="text-base-content/60" th:unless="${selectedLocale == null or selectedLocale == 'ko'}">
+        이 탭은 <b th:text="${selectedLocale}">en</b> 번역본입니다. 필수 항목 4개가 모두 있어야 이 언어 기기에 나가고,
+        하나라도 없으면 한국어 약관이 나갑니다. 새로 만든 번역본의 버전은 같은 항목의 ko 원본 버전을 따릅니다.
+        <span th:if="${isSelectedLocalePublished}" class="badge badge-success badge-sm">지금 이 언어로 나가는 중</span>
+        <span th:unless="${isSelectedLocalePublished}" class="badge badge-ghost badge-sm">지금은 한국어로 대체 중</span>
       </p>
     </div>
   </div>
@@ -45,7 +65,7 @@
       <tbody>
       <!-- th:replace 가 th:if 보다 먼저 실행된다. 한 태그에 두면 조건이 무시되고
            데이터가 있어도 빈 줄이 함께 그려진다. 조건을 바깥으로 뺀다. -->
-      <th:block th:if="${documents.isEmpty()}">
+      <th:block th:if="${documents.isEmpty() and (missingKeys == null or missingKeys.isEmpty())}">
         <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '약관 문서가 없어요. 서버를 다시 시작하면 기본값으로 채워집니다')}"></tr>
       </th:block>
       <tr th:each="doc : ${documents}">
@@ -64,8 +84,26 @@
         <td class="whitespace-nowrap text-xs"
             th:text="${@adminDate.format(doc.updatedAt)}">수정</td>
         <td class="whitespace-nowrap">
-          <a th:href="@{/admin/consents/{key}(key=${doc.consentKey})}" class="btn btn-primary btn-xs">고치기</a>
-          <a th:href="@{/admin/consents/{key}/history(key=${doc.consentKey})}" class="btn btn-ghost btn-xs">이력</a>
+          <a th:href="@{/admin/consents/{key}(key=${doc.consentKey},locale=${doc.locale})}" class="btn btn-primary btn-xs">고치기</a>
+          <a th:href="@{/admin/consents/{key}/history(key=${doc.consentKey},locale=${doc.locale})}" class="btn btn-ghost btn-xs">이력</a>
+        </td>
+      </tr>
+      <!-- 그 언어에 아직 없는 약관: 저장하면 새로 만듦 (ko 는 기동 시 채워지므로 보통 비어 있음) -->
+      <tr th:each="missingKey : ${missingKeys}" class="opacity-70">
+        <td>
+          <div class="font-semibold whitespace-nowrap"><span th:text="${missingKey.label}">항목</span>
+            <span class="badge badge-warning badge-xs font-mono" th:text="${selectedLocale}">en</span></div>
+          <div class="text-xs text-base-content/60">아직 이 언어 약관이 없어요</div>
+        </td>
+        <td>
+          <span th:if="${missingKey.required}" class="badge badge-primary badge-sm whitespace-nowrap">필수</span>
+          <span th:unless="${missingKey.required}" class="badge badge-ghost badge-sm whitespace-nowrap">선택</span>
+        </td>
+        <td class="font-mono whitespace-nowrap">-</td>
+        <td class="whitespace-nowrap text-xs">-</td>
+        <td class="whitespace-nowrap text-xs">-</td>
+        <td class="whitespace-nowrap">
+          <a th:href="@{/admin/consents/{key}(key=${missingKey},locale=${selectedLocale})}" class="btn btn-secondary btn-xs">만들기</a>
         </td>
       </tr>
       </tbody>
