@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('언어 현황', 'locales', ~{:: content})}">
+<body>
+
+<!-- 언어 현황 (읽기 전용): 언어별 준비 표 > 빈 키 목록 > 푸시 문구 ko <-> 고른 언어 -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('언어 현황',
+       '언어마다 서버 문구·프롬프트·약관·공지가 얼마나 준비됐는지 한눈에 봅니다. 고치기는 각 관리 화면에서 합니다.')}"></div>
+
+  <div class="card bg-base-200">
+    <div class="card-body space-y-1 text-sm text-base-content/60">
+      <p>문구 파일 3종(에러·일과·푸시)은 <b>ko 파일의 키</b>가 기준입니다. 빈 키가 있으면 대신 나가는 문구는 파일마다 다릅니다.</p>
+      <!-- 대체 순서 3종: ErrorMessages(요청 > en > ko), RoutinePhrases(완성된 한 벌: 요청 > en > ko), PushMessageFactory(요청 > en > 키 이름) -->
+      <ul class="list-disc space-y-1 pl-5">
+        <li>에러 문구: en 문구, en 에도 없으면 ko 문구</li>
+        <li>일과 문구: 한 언어라도 빈 키가 있으면 그 언어 전체 대신 en 한 벌(en 도 미완성이면 ko 한 벌)</li>
+        <li>푸시 문구: en 문구, en 에도 없으면 <b>키 이름</b>(예: push.routine_sent)이 그대로 알림에 나감</li>
+      </ul>
+      <p>일과 문구는 서버 기동 검사와 같은 기준입니다. 빈 키가 있는 언어는 '일과 생성 가능 언어'에서 켤 수 없습니다.</p>
+      <p>'확인 못 함'은 DB 조회에 실패한 칸입니다. 새로고침해도 같으면 서버 로그를 봅니다. (E-LOC-001)</p>
+    </div>
+  </div>
+
+  <!-- 칸 8개: 언어, 일과 생성, 에러 문구, 일과 문구, 푸시 문구, 프롬프트 행, 약관 버전, 공지 -->
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+      <tr>
+        <th>언어</th>
+        <th>일과 생성</th>
+        <th>에러 문구</th>
+        <th>일과 문구</th>
+        <th>푸시 문구</th>
+        <th>프롬프트 행</th>
+        <th>약관 (게시 버전)</th>
+        <th>공지</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="row : ${rows}">
+        <td class="whitespace-nowrap font-semibold" th:text="${row.label}">한국어 (ko)</td>
+        <td>
+          <span class="badge badge-sm whitespace-nowrap"
+                th:classappend="${row.isContentEnabled} ? 'badge-success' : 'badge-ghost'"
+                th:text="${row.isContentEnabled} ? '켜짐' : '꺼짐'">켜짐</span>
+        </td>
+        <td th:replace="~{admin/locales :: bundleCell(${row.errorMessages})}"></td>
+        <td th:replace="~{admin/locales :: bundleCell(${row.routinePhrases})}"></td>
+        <td th:replace="~{admin/locales :: bundleCell(${row.pushMessages})}"></td>
+        <td class="whitespace-nowrap">
+          <th:block th:if="${row.hasPromptStatus()}">
+            <span class="font-mono" th:text="${row.promptRowCount} + ' / ' + ${row.promptRequiredCount}">10 / 10</span>
+            <span class="badge badge-xs ml-1"
+                  th:classappend="${row.isPromptComplete()} ? 'badge-success' : 'badge-warning'"
+                  th:text="${row.isPromptComplete()} ? '다 있음' : '행 없음'">다 있음</span>
+          </th:block>
+          <span th:unless="${row.hasPromptStatus()}" class="badge badge-error badge-xs">확인 못 함</span>
+        </td>
+        <td class="text-xs">
+          <th:block th:if="${row.consentVersions != null}">
+            <div th:each="consent : ${row.consentVersions}" class="whitespace-nowrap">
+              <span th:text="${consent.label}">이용약관</span>
+              <span th:if="${consent.hasVersion()}" class="font-mono" th:text="${consent.version}">2026-11-01</span>
+              <span th:unless="${consent.hasVersion()}" class="text-base-content/50">없음</span>
+            </div>
+            <span th:if="${row.isConsentServedInLocale != null and row.isConsentServedInLocale}"
+                  class="badge badge-success badge-xs">이 언어로 나감</span>
+            <span th:if="${row.isConsentServedInLocale != null and !row.isConsentServedInLocale}"
+                  class="badge badge-ghost badge-xs">ko 로 대신 나감</span>
+          </th:block>
+          <span th:if="${row.consentVersions == null}" class="badge badge-error badge-xs">확인 못 함</span>
+        </td>
+        <td class="whitespace-nowrap">
+          <th:block th:if="${row.noticeCount != null}">
+            <span class="font-mono" th:text="${row.noticeCount}">3</span>건
+            <span class="text-xs text-base-content/60" th:text="'(게시 중 ' + ${row.liveNoticeCount} + ')'">(게시 중 1)</span>
+          </th:block>
+          <span th:if="${row.noticeCount == null}" class="badge badge-error badge-xs">확인 못 함</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 빈 키가 있는 언어만: 파일별 빈 키 이름 -->
+  <div class="card bg-base-200">
+    <div class="card-body text-sm space-y-2">
+      <h2 class="card-title text-base">빈 키</h2>
+      <th:block th:each="row : ${rows}">
+        <th:block th:replace="~{admin/locales :: missingKeyList(${row.label}, '에러 문구', ${row.errorMessages})}"></th:block>
+        <th:block th:replace="~{admin/locales :: missingKeyList(${row.label}, '일과 문구', ${row.routinePhrases})}"></th:block>
+        <th:block th:replace="~{admin/locales :: missingKeyList(${row.label}, '푸시 문구', ${row.pushMessages})}"></th:block>
+      </th:block>
+      <p class="text-base-content/60">목록에 없는 파일은 빈 키가 없습니다.</p>
+    </div>
+  </div>
+
+  <!-- 푸시 문구 보기: 언어 탭 > 키, ko 문구, 고른 언어 문구 -->
+  <section class="space-y-3">
+    <h2 class="text-xl font-bold">푸시 문구 보기</h2>
+    <p class="text-sm text-base-content/60">i18n/push-messages 파일을 그대로 보여 줍니다. {0}, {1} 자리에는 서버가 숫자나 글 제목을 넣습니다.</p>
+    <div class="tabs tabs-boxed overflow-x-auto flex-nowrap">
+      <a th:each="entry : ${pushLocales}"
+         th:href="@{/admin/locales(pushLocale=${entry.code})}"
+         class="tab"
+         th:classappend="${entry.code == selectedPushLocale} ? 'tab-active' : ''"
+         th:text="${entry.label}">English (en)</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead>
+        <tr>
+          <th>키</th>
+          <th>한국어 (ko)</th>
+          <th th:text="${selectedPushLocale}">en</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:if="${pushRows.isEmpty()}">
+          <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(3, 'ko 푸시 문구 파일을 읽지 못했어요 (E-LOC-002)')}"></tr>
+        </th:block>
+        <tr th:each="push : ${pushRows}">
+          <td class="font-mono text-xs whitespace-nowrap" th:text="${push.key}">push.title</td>
+          <td class="whitespace-pre-wrap" th:text="${push.koText}">이룸</td>
+          <td class="whitespace-pre-wrap">
+            <span th:unless="${push.isMissing()}" th:text="${push.selectedText}">ELUM</span>
+            <span th:if="${push.isMissing()}" class="badge badge-warning badge-xs"
+                  th:text="${selectedPushLocale == 'en'} ? '없음 (키 이름이 나감)' : '없음 (en 으로 나감)'">없음</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- 문구 파일 칸: 채운 키 수 + 빈 키 수 배지 -->
+<td th:fragment="bundleCell(bundle)" class="whitespace-nowrap">
+  <span class="font-mono" th:text="${bundle.keyCount()}">12</span>개
+  <span class="badge badge-xs ml-1"
+        th:classappend="${bundle.isComplete()} ? 'badge-success' : 'badge-warning'"
+        th:text="${bundle.isComplete()} ? '다 있음' : '빈 키 ' + ${bundle.missingCount()}">다 있음</span>
+</td>
+
+<!-- 빈 키 목록 한 덩어리 (빈 키가 없으면 그리지 않음) -->
+<details th:fragment="missingKeyList(localeLabel, fileLabel, bundle)" th:if="${!bundle.isComplete()}">
+  <summary class="cursor-pointer">
+    <span th:text="${localeLabel} + ' · ' + ${fileLabel}">English (en) · 에러 문구</span>
+    <span class="badge badge-warning badge-xs ml-1" th:text="${bundle.missingCount()}">3</span>
+  </summary>
+  <p class="font-mono text-xs break-all" th:text="${#strings.listJoin(bundle.missingKeys(), ', ')}">KEY_A, KEY_B</p>
+</details>
+
+</body>
+</html>
