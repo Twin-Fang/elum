@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-14T13:42:46Z",
-    "currentVersion": "2.98.0",
+    "lastUpdated": "2026-11-14T23:11:14Z",
+    "currentVersion": "2.99.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 343
+    "totalReleases": 344
   },
   "releases": [
+    {
+      "version": "2.99.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-14",
+      "pr_number": 1426,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 상황에 맞는 보호자 가이드를 알려 드려요\n\n* **개선**\n  * 홈·일과 만들기·주간 리포트·설정에 그림과 움직임을 더했어요\n  * 카드 확인 화면에서 행동 카드 개념을 함께 알려 드려요\n  * 일본어·중국어·스페인어 화면을 다듬었어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "상황에 맞는 보호자 가이드를 알려 드려요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "홈·일과 만들기·주간 리포트·설정에 그림과 움직임을 더했어요",
+            "카드 확인 화면에서 행동 카드 개념을 함께 알려 드려요",
+            "일본어·중국어·스페인어 화면을 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.98.0",
       "project_type": "flutter",
