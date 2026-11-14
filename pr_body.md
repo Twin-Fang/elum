@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **개선**
-  * 일과를 다 끝내면 선물 상자와 함께 오늘의 보상을 보여 줘요
+* **버그 수정**
+  * 일과를 다 끝냈을 때 루미 얼굴이 어색하게 보이던 문제를 고쳤어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
