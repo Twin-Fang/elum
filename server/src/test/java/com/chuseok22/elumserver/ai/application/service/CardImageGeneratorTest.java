@@ -368,4 +368,67 @@ class CardImageGeneratorTest {
     assertThatThrownBy(() -> generator.generate(photoOnly)).isInstanceOf(IllegalStateException.class);
     verifyNoInteractions(fluxImageClient, translator, openAiClient);
   }
+
+  // 다시 그리기 (#1384): 보호자 요청 + 요청 반영 영어 장면
+  private static final String GUARDIAN_REQUEST = "Guardian note: 남색 교복을 입혀 줘";
+  private static final String REDRAW_SCENE = "The character, wearing a navy school uniform, picks up a red umbrella.";
+
+  private CardImageGenerator.CardImageRequest redrawRequest() {
+    return new CardImageGenerator.CardImageRequest("우산을 챙겨요", "The character picks up a red umbrella.",
+      CharacterType.LULU, SEED_KEY, ImageStyle.CARTOON, "비 오는 날 학교에 가요", "우산 챙기기", GUARDIAN_REQUEST);
+  }
+
+  @Test
+  @DisplayName("다시 그리기는 Cloudflare 의 요청 반영 경로로 — 옷·머리 요청이 기본 생김새에 지지 않게 (#1384)")
+  void cloudflareRedraw_usesGuardianRequestPath() {
+    selectCloudflare();
+    when(translator.translateImagePrompt("우산을 챙겨요 (" + GUARDIAN_REQUEST + ")")).thenReturn(REDRAW_SCENE);
+    when(cloudflareImageClient.generateWithGuardianRequest(any(), any(), any())).thenReturn(FLUX_IMAGE);
+
+    assertThat(generator.generate(redrawRequest())).isSameAs(FLUX_IMAGE);
+
+    verify(cloudflareImageClient).generateWithGuardianRequest(REDRAW_SCENE, CharacterType.LULU, FluxSeed.of(SEED_KEY));
+    verify(cloudflareImageClient, never()).generate(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("다시 그리기에서 Cloudflare 가 실패하면 OpenAI 도 같은 요청 반영 장면으로 — 예비 그림이 요청을 무시하지 않게 (#1384)")
+  void cloudflareRedrawFails_openAiUsesSameRedrawScene() {
+    selectCloudflare();
+    when(translator.translateImagePrompt(anyString())).thenReturn(REDRAW_SCENE);
+    when(cloudflareImageClient.generateWithGuardianRequest(any(), any(), any()))
+      .thenThrow(new IllegalStateException("cloudflare image failed"));
+
+    assertThat(generator.generate(redrawRequest())).isSameAs(OPENAI_IMAGE);
+
+    verify(openAiClient).generateCardImage(argThat(scene -> REDRAW_SCENE.equals(scene.stepDescription())
+      && GUARDIAN_REQUEST.equals(scene.guardianRequest()) && scene.stepTitle() == null && scene.sceneDetail() == null),
+      isNull());
+  }
+
+  @Test
+  @DisplayName("Cloudflare 한도 소진 날의 다시 그리기도 요청을 번역해 OpenAI 에 같은 장면으로 (#1384)")
+  void cloudflareSkippedRedraw_translatesForOpenAi() {
+    selectCloudflare();
+    when(cloudflareImageClient.isTemporarilySkipped()).thenReturn(true);
+    when(translator.translateImagePrompt(anyString())).thenReturn(REDRAW_SCENE);
+
+    assertThat(generator.generate(redrawRequest())).isSameAs(OPENAI_IMAGE);
+
+    verify(openAiClient).generateCardImage(argThat(scene -> REDRAW_SCENE.equals(scene.stepDescription())), isNull());
+    verify(cloudflareImageClient, never()).generateWithGuardianRequest(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("다시 그리기 장면 번역이 실패하면 OpenAI 는 지금처럼 원래 설명 + 요청으로 — 다시 그리기가 멈추지 않게 (#1384)")
+  void cloudflareSkippedRedraw_translationFails_usesOriginalDescription() {
+    selectCloudflare();
+    when(cloudflareImageClient.isTemporarilySkipped()).thenReturn(true);
+    when(translator.translateImagePrompt(anyString())).thenThrow(new IllegalStateException("번역 실패"));
+
+    assertThat(generator.generate(redrawRequest())).isSameAs(OPENAI_IMAGE);
+
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())
+      && GUARDIAN_REQUEST.equals(scene.guardianRequest())), isNull());
+  }
 }
