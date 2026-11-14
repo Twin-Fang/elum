@@ -1,23 +1,17 @@
 package com.chuseok22.elumserver.routine.infrastructure.constant;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.ClasspathLocaleBundle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 서버가 만들어 내려보내는 일과 문구 — AI 추가 질문 폴백, 홈 추천 일과.
@@ -29,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
  * <p>서버가 뜰 때 {@code RoutinePhrasesStartupGuard} 가 켜진 언어의 한 벌을 검사해, 비어 있으면 서버를 세우지 않는다 —
  * AI 가 실패하는 순간에 문구도 없는 일을 막는다.
  */
-@Slf4j
 public final class RoutinePhrases {
 
   private static final String RESOURCE = "i18n/routine-phrases_%s.properties";
@@ -199,22 +192,9 @@ public final class RoutinePhrases {
     return value == null || value.isBlank();
   }
 
+  // 못 읽은 파일은 빈 파일과 같음 > 대체 순서로 넘어가고, 켜진 언어면 기동 검사가 막음
   private static Map<String, String> loadFromClasspath(AppLocale locale) {
-    String path = RESOURCE.formatted(locale.code());
-    try (InputStream in = RoutinePhrases.class.getClassLoader().getResourceAsStream(path)) {
-      if (in == null) {
-        return Map.of();
-      }
-      Properties properties = new Properties();
-      properties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
-      Map<String, String> map = new HashMap<>();
-      properties.stringPropertyNames().forEach(key -> map.put(key, properties.getProperty(key)));
-      return map;
-    } catch (IOException e) {
-      // 못 읽은 파일은 빈 파일과 같다 — 대체 순서로 넘어가고, 켜진 언어면 기동 검사가 막는다.
-      log.warn("[RoutinePhrases] 문구 파일을 읽지 못했습니다: {}", path, e);
-      return Map.of();
-    }
+    return ClasspathLocaleBundle.load(RESOURCE, locale);
   }
 
   /** AI 가 질문을 못 만들었을 때 쓰는 고정 질문. */

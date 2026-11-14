@@ -84,10 +84,16 @@ public class PromptTemplateService {
       .toList();
   }
 
-  // 그 언어에 있어야 하는데 없는 행: ko 는 모든 키, 그 밖은 언어별 행이 필요한 키만 (그림 지시문은 ko 행 하나)
-  public List<PromptKey> missingKeys(AppLocale locale) {
+  // 그 언어에 있어야 하는 키: ko 는 모든 키, 그 밖은 언어별 행이 필요한 키만 (그림 지시문은 ko 행 하나)
+  public List<PromptKey> requiredKeys(AppLocale locale) {
     return Arrays.stream(PromptKey.values())
       .filter(key -> locale == AppLocale.KO || key.isLocalized())
+      .toList();
+  }
+
+  // 그 언어에 있어야 하는데 없는 행
+  public List<PromptKey> missingKeys(AppLocale locale) {
+    return requiredKeys(locale).stream()
       .filter(key -> promptTemplateRepository.findByPromptKeyAndLocale(key, locale.code()).isEmpty())
       .toList();
   }
