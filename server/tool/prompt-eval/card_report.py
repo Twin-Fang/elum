@@ -8,7 +8,7 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import card_rules
+import card_language
 
 VERDICT_ORDER = {"error": 0, "fail": 1, "warn": 2, "pass": 3}
 INPUT_PREVIEW_LENGTH = 400
@@ -117,7 +117,7 @@ def regrade_run(folder: Path):
             continue
         record = json.loads(path.read_text(encoding="utf-8"))
         if "card" in record:
-            record["grade"] = card_rules.grade_card(cases[record["id"]], record["card"])
+            record["grade"] = card_language.grade_card_for_case(cases[record["id"]], record["card"])
             path.write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
         records.append(record)
     summary = write_report(records, folder, folder.parent.name, {})

@@ -1,0 +1,6 @@
+
+
+[Extra checks]
+- Each description holds one action only. Do not join two actions or a condition with "and", "then", "while", "when", commas, or the {outputLanguage} equivalents. For example, "Sit on the chair and wait" is wrong; "Wait on the chair" is right.
+- Write every title and description only in {outputLanguage}. Do not mix in words from other languages (only imagePromptEn is in English).
+- Put the steps in the real order of doing.
