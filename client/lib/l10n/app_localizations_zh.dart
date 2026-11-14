@@ -5546,4 +5546,173 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationEmptyOpenSettings => '通知设置';
+
+  @override
+  String get lockScreenSettingsTitle => '锁屏卡片';
+
+  @override
+  String get lockScreenGuardianTitle => 'Elumi今天的日常';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '下一个: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '今天的日常都完成了';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '今天没有发送日常';
+
+  @override
+  String get lockScreenStaleMessage => '打开应用查看今天的日常';
+
+  @override
+  String get lockScreenOpenApp => '打开应用';
+
+  @override
+  String get lockScreenPauseOneHour => '暂停1小时';
+
+  @override
+  String get lockScreenElumiStart => '开始';
+
+  @override
+  String get lockScreenElumiNowLabel => '这是现在要做的事';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '打开屏幕就能马上看到Elumi今天的日常';
+
+  @override
+  String get lockScreenElumiIntroTitle => '到了日常时间，打开屏幕就会大大地显示现在要做的一张卡片';
+
+  @override
+  String get lockScreenIntroNoAdsNote => '锁屏上不会出现广告和付款，随时可以关闭';
+
+  @override
+  String get lockScreenIntervalTitle => '多久显示一次？';
+
+  @override
+  String get lockScreenIntervalEveryTime => '每次打开';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '每$minutes分钟';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '每$hours小时';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '权限 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '必需';
+
+  @override
+  String get lockScreenPermissionRecommended => '建议';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '在其他应用上层显示';
+
+  @override
+  String get lockScreenPermissionOverlayReason => '请在列表中点elum并允许。在锁屏上显示卡片时需要';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '允许通知';
+
+  @override
+  String get lockScreenPermissionNotificationReason => '显示卡片已开启的安静通知';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => '不进行电池优化';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '防止设备停止此功能';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => '添加到永不休眠的应用';
+
+  @override
+  String get lockScreenPermissionSamsungReason => '三星设备还需要再设置一次';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      '请在 电池 > 后台使用限制 > 永不休眠的应用 中点+添加elum';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '打开设置';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '已添加';
+
+  @override
+  String get lockScreenPermissionSkip => '跳过';
+
+  @override
+  String get lockScreenTurnOn => '开启锁屏卡片';
+
+  @override
+  String get lockScreenTurnOff => '关闭锁屏卡片';
+
+  @override
+  String get lockScreenEnableFailed => '无法开启锁屏卡片，请再次检查权限';
+
+  @override
+  String get lockScreenSetupDoneTitle => '准备好了!';
+
+  @override
+  String get lockScreenSetupDoneBody => '现在试着关闭再打开屏幕';
+
+  @override
+  String get lockScreenSetupComplete => '完成';
+
+  @override
+  String get lockScreenEnabledStatus => '锁屏卡片已开启';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '暂停到 $time';
+  }
+
+  @override
+  String get lockScreenPreviewAction => '预览';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '刷牙';
+
+  @override
+  String get lockScreenPreviewSampleCard => '在牙刷上挤牙膏';
+
+  @override
+  String get lockScreenPreviewNotice => '预览中按钮不起作用';
+
+  @override
+  String get lockScreenIntroTitle => '📱 在锁屏上直接查看';
+
+  @override
+  String get lockScreenIntroBody => '打开屏幕，不用打开应用也能看到Elumi今天完成了几个';
+
+  @override
+  String get lockScreenIntroTurnOn => '开启试试';
+
+  @override
+  String get lockScreenIntroLater => '以后再说';
+
+  @override
+  String get lockScreenOnValue => '开启';
+
+  @override
+  String get lockScreenPermissionMissingValue => '需要权限';
+
+  @override
+  String get modeSwitchToLockScreen => '只有监护人可以更改锁屏卡片';
 }

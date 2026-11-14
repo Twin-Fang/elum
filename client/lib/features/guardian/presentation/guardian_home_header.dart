@@ -14,6 +14,7 @@ import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../../shared/models/character.dart';
 import '../../subscription/application/plan_status_providers.dart';
+import 'widgets/coach_help_button.dart';
 import 'widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
@@ -27,7 +28,11 @@ class GuardianHomeHeader extends ConsumerWidget {
     required this.character,
     required this.modeKey,
     this.part = GuardianHomeHeaderPart.all,
+    this.onCoachReplay,
   });
+
+  /// 코치마크 다시 보기 `?` (null 이면 버튼 없음)
+  final VoidCallback? onCoachReplay;
 
   /// 그릴 부분. 폰은 머리 줄 + 인사말, 태블릿은 인사말만
   final GuardianHomeHeaderPart part;
@@ -45,6 +50,9 @@ class GuardianHomeHeader extends ConsumerWidget {
 
   /// 종 그림 ↔ 캐릭터 배지 (Figma 265+24 → 313)
   static const _bellToBadgeGap = 24.0;
+
+  /// `?` ↔ 종 (종 누름 영역 여백이 있어 좁게)
+  static const _helpToBellGap = 16.0;
 
   /// 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
   static const _rowToGreeting = 11.0;
@@ -91,6 +99,10 @@ class GuardianHomeHeader extends ConsumerWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (onCoachReplay != null) ...[
+                CoachHelpButton(onTap: onCoachReplay!),
+                SizedBox(width: _helpToBellGap.w),
+              ],
               const NotificationBellButton(),
               // 종 그림 끝 ↔ 배지 24 (누르는 영역 여백만큼 뺌)
               SizedBox(
