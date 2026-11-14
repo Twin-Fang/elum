@@ -6016,6 +6016,71 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notificationEmptyOpenSettings => 'Ajustes de notificaciones';
 
   @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Si hoy sigue, serán $count días',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    return '$name sigue terminando sus rutinas día tras día';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => 'Llegó el resumen de la semana';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Esta semana terminó $count rutinas',
+      one: 'Esta semana terminó 1 rutina',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => 'Sigamos con Elumi esta semana';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Ver detalles con Pro';
+
+  @override
   String get lockScreenSettingsTitle => 'Tarjeta en la pantalla de bloqueo';
 
   @override

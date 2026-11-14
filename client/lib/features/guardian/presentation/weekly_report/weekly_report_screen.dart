@@ -24,6 +24,7 @@ import '../../data/card_export_files.dart';
 import '../../domain/weekly_report.dart';
 import '../pro_teaser_samples.dart';
 import 'weekly_report_empty_card.dart';
+import 'weekly_report_notification_summary.dart';
 import 'weekly_report_past_weeks_sheet.dart';
 import 'weekly_report_save_sheet.dart';
 import 'weekly_report_sections.dart';
@@ -40,11 +41,15 @@ abstract final class WeeklyReportErrorCode {
 ///
 /// 상태: 불러오는 중 / 보낸 일과 0건(빈 카드) / 실패(에러 코드 + 다시 하기) / 리포트 (끝낸 일과 0건이면 숫자 대신 빈 카드, 저장 없음).
 /// Pro 가 아님: 미리 보기 주(서버가 정함)는 실제 리포트, 그 밖의 주는 판매 중이면 Pro 미리 보기 판 · 아니면 안내만.
+/// 알림에서 들어온 Free: 알림의 주는 판매 판 대신 요약 카드 (주를 옮기면 위 규칙대로)
 class WeeklyReportScreen extends ConsumerStatefulWidget {
-  const WeeklyReportScreen({super.key, this.initialWeekStart});
+  const WeeklyReportScreen({super.key, this.initialWeekStart, this.isFromNotification = false});
 
   /// 알림에서 들어올 때 먼저 보여 줄 주 (그 날이 든 주). null 이면 이번 주
   final DateTime? initialWeekStart;
+
+  /// 알림(푸시 · 알림 목록)에서 들어옴
+  final bool isFromNotification;
 
   @override
   ConsumerState<WeeklyReportScreen> createState() => _WeeklyReportScreenState();
@@ -65,6 +70,9 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
 
   // 알림 주 · 사용자가 고른 주 · 미리 보기 주로 이미 맞췄으면 다시 옮기지 않음
   late bool _hasWeekBeenChosen = widget.initialWeekStart != null;
+
+  // 알림으로 들어와 아직 주를 옮기지 않음: Free 에게 판매 판 대신 요약
+  late bool _isNotificationLanding = widget.isFromNotification;
 
   @override
   void initState() {
@@ -119,11 +127,11 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
               weekStart: weekStart,
               isCurrentWeek: !weekNotifier.canShowNextWeek,
               onPreviousWeek: () {
-                _hasWeekBeenChosen = true;
+                _markWeekChosen();
                 weekNotifier.showPreviousWeek();
               },
               onNextWeek: () {
-                _hasWeekBeenChosen = true;
+                _markWeekChosen();
                 weekNotifier.showNextWeek();
               },
             ),
@@ -134,6 +142,12 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
       ),
     );
   }
+
+  /// 사용자가 주를 옮김: 미리 보기 주로 다시 옮기지 않고 알림 요약도 끝
+  void _markWeekChosen() => setState(() {
+    _hasWeekBeenChosen = true;
+    _isNotificationLanding = false;
+  });
 
   /// 미리 보기 주가 정해지면 그 주로 (알림·사용자가 주를 정했으면 그대로)
   void _showFreePreviewWeek(DateTime? freePreviewWeekStart) {
@@ -154,7 +168,15 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
     // Pro 가 아님: 앱 판정 또는 서버 Pro 거절(WEEKLY_REPORT_NOT_ALLOWED) > 실패 대신 미리 보기·안내
     final isNotIncluded = !isViewable || (reportAsync?.hasError == true && isProOnlyRejection(reportAsync?.error));
     if (isNotIncluded) {
-      if (ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.weeklyReport)) {
+      final canPromote = ref.watch(planAccessProvider).shouldPromoteBenefit(PlanBenefit.weeklyReport);
+      // 알림으로 들어온 주: 판매 판 없이 요약 + 조용한 보조 버튼 (누를 때만 요금제 안내)
+      if (_isNotificationLanding) {
+        return WeeklyReportNotificationSummary(
+          weekStart: weekStart,
+          onSeeDetails: canPromote ? watchProUpsellActions(context, ref, highlight: PlanBenefit.weeklyReport).onStart : null,
+        );
+      }
+      if (canPromote) {
         return SingleChildScrollView(
           child: ProTeaser(
             title: l10n.proTeaserWeeklyReportTitle,
@@ -224,7 +246,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
   Future<void> _openPastWeeks() async {
     final selectedWeekStart = await showWeeklyReportPastWeeksSheet(context);
     if (selectedWeekStart == null || !mounted) return;
-    _hasWeekBeenChosen = true;
+    _markWeekChosen();
     ref.read(weeklyReportWeekProvider.notifier).showWeekOf(selectedWeekStart);
   }
 

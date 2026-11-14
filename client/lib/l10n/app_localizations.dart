@@ -9653,6 +9653,60 @@ abstract class AppLocalizations {
   /// **'알림 설정'**
   String get notificationEmptyOpenSettings;
 
+  /// 보호자 홈 연속 기록 칩. count 는 이룸이가 이어서 일과를 마친 일수(2 이상)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 연속}}'**
+  String streakChipDays(int count);
+
+  /// 보호자 홈 연속 기록 칩 아래 한 줄 (오늘 아직 안 마쳤을 때). count 는 오늘 마치면 되는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{오늘도 이어 가면 {count}일이에요}}'**
+  String streakAtRiskLine(int count);
+
+  /// 연속 기록 축하 창 제목 (3, 7, 14, 30일). count 는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 연속 해냈어요}}'**
+  String streakMilestoneTitle(int count);
+
+  /// 연속 기록 축하 창 한 줄. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이가} other{가}} 꾸준히 일과를 마치고 있어요'**
+  String streakMilestoneReason(String name, String batchim);
+
+  /// 이룸이 홈 연속 기록 판 큰 글 (재촉하지 않고 해낸 것만). count 는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 이어서 했어요}}'**
+  String childStreakDays(int count);
+
+  /// 알림으로 주간 리포트에 들어온 Free 보호자 요약 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 기록이 도착했어요'**
+  String get weeklyReportNotificationTitle;
+
+  /// 알림 요약 카드 한 줄. count 는 그 주에 마친 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{이 주에 일과 {count}개를 마쳤어요}}'**
+  String weeklyReportNotificationCompleted(int count);
+
+  /// 알림 요약 카드 한 줄 (마친 수를 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주도 이룸이와 함께 해 봐요'**
+  String get weeklyReportNotificationNoCount;
+
+  /// 알림 요약 카드 아래 보조 버튼 (누르면 요금제 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 자세히 보기'**
+  String get weeklyReportNotificationProDetail;
+
   /// 설정 줄 이름 · 잠금화면 카드 설정 화면 제목 (Android)
   ///
   /// In ko, this message translates to:

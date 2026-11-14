@@ -1,8 +1,10 @@
-/// 운영자 알림을 눌렀을 때 갈 화면 3개: 서버 `AdminMessageRoute.wire` 와 같은 값
+/// 운영자·자동 알림을 눌렀을 때 갈 화면 4개: 서버 `AdminMessageRoute.wire` 와 같은 값
 enum AdminMessageRoute {
   home('home'),
   plan('plan'),
-  myCredit('myCredit');
+  myCredit('myCredit'),
+  // 이룸이 기기 연결 (연결 코드 화면, 이미 붙어 있으면 연결 상태 화면)
+  deviceLink('deviceLink');
 
   const AdminMessageRoute(this.wire);
 

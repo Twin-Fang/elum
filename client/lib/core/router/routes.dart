@@ -71,9 +71,19 @@ abstract final class Routes {
   /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
   static const guardianWeeklyReport = '/guardian/weekly-report';
 
-  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02` (null 이면 이번 주)
-  static String guardianWeeklyReportOf(String? weekStart) =>
-      weekStart == null ? guardianWeeklyReport : '$guardianWeeklyReport?weekStart=${Uri.encodeQueryComponent(weekStart)}';
+  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02&from=notification`
+  /// weekStart null 이면 이번 주. 알림에서 열면 from=notification (Free 에게 판매 판 대신 요약)
+  static String guardianWeeklyReportOf(String? weekStart, {bool isFromNotification = false}) {
+    final queryParameters = {
+      'weekStart': ?weekStart,
+      if (isFromNotification) weeklyReportFromQuery: weeklyReportFromNotificationValue,
+    };
+    return Uri(path: guardianWeeklyReport, queryParameters: queryParameters.isEmpty ? null : queryParameters).toString();
+  }
+
+  /// [guardianWeeklyReport] 의 진입 쿼리: `from=notification` 이면 알림에서 들어옴
+  static const weeklyReportFromQuery = 'from';
+  static const weeklyReportFromNotificationValue = 'notification';
 
   /// 주간 계획: 요일별 반복 일과 (#782)
   static const guardianWeeklyPlan = '/guardian/weekly-plan';
