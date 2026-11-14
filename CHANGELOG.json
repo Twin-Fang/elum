@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-14T03:33:20Z",
-    "currentVersion": "2.94.0",
+    "lastUpdated": "2026-11-14T05:23:42Z",
+    "currentVersion": "2.95.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 337
+    "totalReleases": 338
   },
   "releases": [
+    {
+      "version": "2.95.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-14",
+      "pr_number": 1385,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 보호자가 쓴 언어 그대로 행동카드 문구를 만들어요\n  * 알림과 서버 안내 문구를 일본어·중국어·스페인어로도 준비했어요\n\n* **개선**\n  * App Store 스크린샷도 검색어 중심 문구로 자동으로 바뀌어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "보호자가 쓴 언어 그대로 행동카드 문구를 만들어요",
+            "알림과 서버 안내 문구를 일본어·중국어·스페인어로도 준비했어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "App Store 스크린샷도 검색어 중심 문구로 자동으로 바뀌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.94.0",
       "project_type": "flutter",
