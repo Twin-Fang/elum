@@ -28,7 +28,7 @@ ASSET_REFERENCE_PATTERN = re.compile(r'(["\'])((?:' + re.escape(site_config.SITE
 ASSET_VERSION_LENGTH = 8
 
 # 사이트맵에 싣는 손으로 관리하는 페이지 (초대·연결 링크 페이지는 검색 제외라 싣지 않음)
-STATIC_SITEMAP_PATHS = ['privacy.html', 'delete.html']
+STATIC_SITEMAP_PATHS = [*(site_config.to_privacy_path(language.code) for language in site_config.LANGUAGES), 'delete.html']
 
 
 def load_json(path: pathlib.Path) -> dict:

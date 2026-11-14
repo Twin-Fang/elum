@@ -3,3 +3,5 @@
 "NSPhotoLibraryUsageDescription" = "카드 그림으로 쓸 사진을 고르려고 사진 보관함을 사용해요";
 "NSMicrophoneUsageDescription" = "카드를 내 목소리로 녹음하려고 마이크를 사용해요";
 "NSUserTrackingUsageDescription" = "보호자 화면에 알맞은 광고를 보여드리는 데 사용해요. 이룸이의 정보는 사용하지 않아요.";
+/* 홈 화면 앱 이름: 한국어 이룸, 그 밖의 언어 ELUM (#1419) */
+"CFBundleDisplayName" = "이룸";

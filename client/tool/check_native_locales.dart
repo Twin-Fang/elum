@@ -2,7 +2,7 @@
 //
 // 규칙 (원본: lib/core/l10n/app_locales.dart openedAppLocales)
 // - OS 앱별 언어 목록에는 연 언어만: iOS lproj·pbxproj·CFBundleLocalizations, Android locales_config 가 모두 같은 목록
-// - iOS 권한 문구 키(NS…UsageDescription)는 번들 lproj·대기 lproj(ios/staged_locales) 모두 빠짐없이, 빈 값 없이
+// - iOS 권한 문구 키(NS…UsageDescription)·앱 이름(CFBundleDisplayName)은 번들 lproj·대기 lproj(ios/staged_locales) 모두 빠짐없이, 빈 값 없이
 // - 대기 언어는 연 언어와 겹치지 않음 (열었으면 Runner 로 옮겨야 함)
 import 'dart:io';
 
@@ -58,6 +58,15 @@ Set<String> readUsageDescriptionKeys(String plist) => {
     r'<key>(NS\w+UsageDescription)</key>',
   ).allMatches(plist))
     match.group(1)!,
+};
+
+/// 언어별로 덮어쓰는 앱 이름 키 (홈 화면 이름: 한국어 이룸, 그 밖 ELUM, #1419)
+const _localizedAppNameKey = 'CFBundleDisplayName';
+
+/// lproj 마다 있어야 하는 키: 권한 문구 + Info.plist 에 있으면 앱 이름
+Set<String> readLocalizedKeys(String plist) => {
+  ...readUsageDescriptionKeys(plist),
+  if (plist.contains('<key>$_localizedAppNameKey</key>')) _localizedAppNameKey,
 };
 
 /// pbxproj knownRegions (Base 제외)
@@ -202,8 +211,8 @@ List<String> collectViolations() {
     );
   }
 
-  // 권한 문구 키 (번들·대기 공통)
-  final requiredKeys = readUsageDescriptionKeys(plist);
+  // 권한 문구·앱 이름 키 (번들·대기 공통)
+  final requiredKeys = readLocalizedKeys(plist);
   for (final (directoryPath, regions) in [
     (_iosRunnerPath, bundledRegions),
     (_iosStagedPath, stagedRegions),

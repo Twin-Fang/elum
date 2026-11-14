@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 홈 화면 앱 이름: 한국어(기본 values) 이룸, 그 밖의 언어 ELUM (#1419) -->
+    <string name="app_name">ELUM</string>
     <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->
     <string name="lock_screen_channel_name">Lock screen card</string>
     <string name="lock_screen_channel_description">A quiet notification shown while the lock screen card is on</string>
