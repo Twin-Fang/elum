@@ -12,6 +12,14 @@ public interface EnglishSceneImageClient extends ImageGenerationClient {
   /// 만화: 화풍 + 인물 생김새 + 영어 장면. seed 는 일과마다 고정 (null 이면 제공자가 고름)
   GeneratedImage generate(String sceneEn, CharacterType characterType, Integer seed);
 
+  /**
+   * 다시 그리기(보호자 요청 반영 장면): 기본은 generate 와 같음
+   * 인물 생김새를 장면에 맞게 줄이는 제공자(CLOUDFLARE)만 덮어씀 (#1384)
+   */
+  default GeneratedImage generateWithGuardianRequest(String sceneEn, CharacterType characterType, Integer seed) {
+    return generate(sceneEn, characterType, seed);
+  }
+
   /// 실사: 실사 지시문 + 영어 장면 (인물 없음)
   GeneratedImage generateRealistic(String sceneEn, Integer seed);
 
