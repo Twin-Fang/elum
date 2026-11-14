@@ -82,6 +82,22 @@ class HomeCoachNotifier extends Notifier<HomeCoachState> {
     return true;
   }
 
+  /// 다시 보기 (`?` 버튼): 봤어도 모든 단계를 켬. 봤음 기록은 그대로. 켰으면 true
+  bool replay({required bool hasSwipeTarget, bool hasModeTarget = true}) {
+    if (state.active) return false;
+    state = HomeCoachState(
+      steps: [
+        HomeCoachStep.createRoutine,
+        if (hasSwipeTarget) HomeCoachStep.swipeRoutine,
+        if (hasModeTarget) HomeCoachStep.switchMode,
+      ],
+    );
+    AppLogger.notifierCall('HomeCoachNotifier', 'replay', {
+      'steps': state.steps.length,
+    });
+    return true;
+  }
+
   /// 다음 단계로. 마지막이면 끝낸다.
   void next() {
     if (!state.active) return;

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/lock_screen/lock_screen_bridge.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/device/device_name_reader.dart';
 import '../../../core/logger/app_logger.dart';
@@ -224,6 +225,8 @@ class DeviceLinkRepository {
   ///
   /// [lost] 가 true 면 `연결이 끊어졌어요`를 다음 연결 화면에서 말한다. 스스로 끊은 것은 false 다.
   Future<void> releaseThisPhone({required bool lost}) async {
+    // 끊긴 이룸이의 일과가 잠금화면에 남지 않게
+    await clearLockScreenForSignOut();
     await _tokens.clear();
     await _storage.clearChildProfile();
     await _storage.setElumiLinkLost(lost);

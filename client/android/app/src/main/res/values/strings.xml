@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- 홈 화면 앱 이름: 모든 언어 같은 값 (현지 표기 미정, #527). 언어별 값은 values-<언어>/ 에 둔다 -->
-    <string name="app_name">이룸</string>
+    <!-- values-<언어>/ 가 잠금화면 알림 문구만 들고 있어 앱 이름 번역 누락 경고는 끈다 -->
+    <string name="app_name" tools:ignore="MissingTranslation">이룸</string>
+    <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->
+    <string name="lock_screen_channel_name">잠금화면 카드</string>
+    <string name="lock_screen_channel_description">잠금화면 카드를 켜 둔 동안 보이는 조용한 알림이에요</string>
+    <string name="lock_screen_notification_title">이룸 잠금화면 카드</string>
+    <string name="lock_screen_notification_idle">화면을 켜면 오늘 일과를 보여 줘요</string>
+    <string name="lock_screen_notification_progress">오늘 이룸이 일과 %1$d/%2$d</string>
+    <string name="lock_screen_notification_elumi">일과 시간에 화면을 켜면 지금 할 카드를 보여 줘요</string>
+    <string name="lock_screen_notification_paused">%1$s까지 쉬고 있어요</string>
+    <string name="lock_screen_action_show_now">지금 보기</string>
+    <string name="lock_screen_action_pause">1시간 쉬기</string>
+    <string name="lock_screen_action_resume">다시 켜기</string>
 </resources>

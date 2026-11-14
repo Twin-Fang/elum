@@ -221,6 +221,15 @@ abstract final class Routes {
 
   /// 모드 전환 PIN. `?to=child|guardian`으로 방향을 준다.
   static const modeSwitch = '/mode-switch';
+
+  /// 잠금화면 카드 설정 (Android, 보호자 설정 · 이룸이 설정 공통, 카드 종류는 기기 역할로)
+  static const lockScreenSettings = '/lock-screen';
+
+  /// 이룸이 기기 잠금화면 카드 설정 전 보호자 암호 확인 (맞으면 true 로 닫힘, ModeSwitchTarget.lockScreen.name 과 같은 값)
+  static const lockScreenGuardianCheck = '$modeSwitch?to=lockScreen';
+
+  /// 잠금화면 카드 미리 보기 (견본 요약)
+  static const lockScreenPreview = '/lock-screen/preview';
 }
 
 /// [Routes.guardianTalkLinkShare] 의 extra: 보낼 일과 id, 이미 켜진 링크가 있는가
