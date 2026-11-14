@@ -22,4 +22,9 @@ public record ConsentEditForm(
     return new ConsentEditForm(
       document.getLabel(), document.getSummary(), document.getBody(), false, today, "");
   }
+
+  /** 번역본 새로 만들기: 칸은 비워 둠 (ko 문구가 그대로 저장되는 실수 방지) */
+  public static ConsentEditForm empty(String today) {
+    return new ConsentEditForm("", "", "", false, today, "");
+  }
 }

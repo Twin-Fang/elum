@@ -6,11 +6,11 @@
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
   <div class="flex flex-wrap items-center gap-2">
-    <a th:href="@{/admin/consents}" class="btn btn-ghost btn-sm">← 목록</a>
+    <a th:href="@{/admin/consents(locale=${selectedLocale})}" class="btn btn-ghost btn-sm">← 목록</a>
     <h1 class="text-2xl font-bold">
       <span th:text="${document.label}">항목</span> 변경 이력
     </h1>
-    <a th:href="@{/admin/consents/{key}(key=${document.consentKey})}"
+    <a th:href="@{/admin/consents/{key}(key=${document.consentKey},locale=${selectedLocale})}"
        class="btn btn-primary btn-sm ml-auto">고치기</a>
   </div>
 
