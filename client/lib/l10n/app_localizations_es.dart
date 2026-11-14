@@ -485,12 +485,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingNameInviteLink => 'Tengo un código de invitación';
 
   @override
-  String get onboardingCompletionTitle => 'Todo está\nlisto';
-
-  @override
-  String get onboardingCompletionProgress => '¡100 % listo!';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -2028,13 +2022,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get todayRoutinePastLoadFailedFallback =>
       'No se pudieron cargar las rutinas pasadas';
-
-  @override
-  String get todayRoutineEmptyTitle => 'Aún no hay rutinas';
-
-  @override
-  String get todayRoutineEmptyHint =>
-      'Crea tus primeras tarjetas de acción de hoy';
 
   @override
   String get todayRoutinePastEmpty => 'No hay rutinas pasadas';
@@ -5590,29 +5577,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Mira un anuncio y recibe $count créditos',
-      one: 'Mira un anuncio y recibe $count crédito',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => 'Mira un anuncio y recibe créditos';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: 'Unos 30 segundos, puedes recibir $remaining veces más hoy',
-      one: 'Unos 30 segundos, puedes recibir $remaining vez más hoy',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => 'Ver anuncio';
@@ -5624,6 +5589,47 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get creditTopUpAdDailyLimit =>
       'Ya recibiste todos los de hoy. Vuelve mañana';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'De 15 a 30 segundos, mira hasta el final y recibe $count créditos',
+      one: 'De 15 a 30 segundos, mira hasta el final y recibe $count crédito',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: 'Puedes recibir $remaining veces más hoy',
+      one: 'Puedes recibir $remaining vez más hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => 'Ahora no hay anuncios disponibles';
+
+  @override
+  String get proFeatureMarkLabel => 'Ver más';
+
+  @override
+  String get proExplainAiImageStylesReason =>
+      'Dibujos que encajan con cada tarjeta, más fáciles de reconocer para Elumi';
+
+  @override
+  String get proExplainCardSplitReason =>
+      'Las tareas difíciles se dividen en pasos pequeños que Elumi sigue uno a uno';
+
+  @override
+  String get proExplainFreeImageRegenerateReason =>
+      'Corrige el dibujo hasta que te guste sin preocuparte por los créditos';
 
   @override
   String get creditTopUpAdCheckFailed =>
@@ -5653,15 +5659,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ Recibiste créditos';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => 'Por ver el anuncio completo';
-
-  @override
-  String get creditRewardBalanceLabel => 'Créditos ahora';
 
   @override
   String get lowCreditNoticeTitle => 'Te quedan pocos créditos';
@@ -5790,37 +5788,42 @@ class AppLocalizationsEs extends AppLocalizations {
   String get myCreditGuideLink => 'Así funcionan los créditos';
 
   @override
-  String get abaIntroTitle => '🧩 Fácil de preparar, cada día por su cuenta';
+  String get abaIntroTitle => 'Fácil de preparar,\ncada día por su cuenta';
 
   @override
   String get abaIntroSubtitle =>
-      'elum se basa en los principios del Análisis Aplicado de Conducta (ABA)';
+      'Basado en el Análisis Aplicado de Conducta (ABA)';
 
   @override
-  String get abaIntroCardTitle => 'Una acción por tarjeta';
+  String get abaIntroStepsTitle => 'Divide en pasos';
 
   @override
-  String get abaIntroCardBody =>
-      'Qué hacer, cómo hacerlo y la recompensa al terminar';
+  String get abaIntroStepsBody => 'Tarjetas paso a paso';
 
   @override
-  String get abaIntroVoiceTitle => 'Frases cortas, imágenes y voz';
+  String get abaIntroShowTitle => 'Muestra antes';
 
   @override
-  String get abaIntroVoiceBody => 'Mira, escucha y sigue paso a paso';
+  String get abaIntroShowBody => 'Con imagen y voz';
 
   @override
-  String get abaIntroStarTitle => 'Elogios y estrellas al momento';
+  String get abaIntroHelpTitle => 'Ayuda y retira';
 
   @override
-  String get abaIntroStarBody => 'Y además la recompensa que elegiste';
+  String get abaIntroHelpBody => 'Sigue por su cuenta';
 
   @override
-  String get abaIntroGuardianTitle => '💛 Lo más importante eres tú';
+  String get abaIntroRewardTitle => 'Elogia rápido';
+
+  @override
+  String get abaIntroRewardBody => 'Estrella y premio';
+
+  @override
+  String get abaIntroGuardianTitle => 'Lo más importante eres tú';
 
   @override
   String get abaIntroGuardianBody =>
-      'Tú conoces mejor a Elumi, así que tú eliges las rutinas y las recompensas. elum acompaña a Elumi para que pueda seguir por su cuenta';
+      'Tú eliges las rutinas y las recompensas, y elum acompaña a Elumi';
 
   @override
   String get abaIntroStart => 'Empezar';
@@ -5889,4 +5892,378 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => ' restantes';
+
+  @override
+  String get commonGoHome => 'Ir al inicio';
+
+  @override
+  String get onboardingLinkStepTitle => '¿Vinculamos el dispositivo de Elumi?';
+
+  @override
+  String get linkDeviceBenefitLine =>
+      'Las rutinas que envíes aparecen al instante en el dispositivo de Elumi';
+
+  @override
+  String get onboardingLinkStepConnectNow => 'Vincular ahora';
+
+  @override
+  String get onboardingLinkStepEnterCode =>
+      'Solo ingresa el código de vínculo en el dispositivo de Elumi';
+
+  @override
+  String get onboardingLinkStepManyDevices =>
+      'Puedes vincular más de un dispositivo';
+
+  @override
+  String get onboardingLinkStepLaterInSettings =>
+      'También puedes vincularlo luego en Ajustes';
+
+  @override
+  String get homeNextStepMakeTitle => 'Crea tu primera rutina';
+
+  @override
+  String get homeNextStepMakeBody =>
+      'Escribe qué hacer y lo convertimos en tarjetas de acción';
+
+  @override
+  String get homeNextStepMakeAction => 'Crear rutina';
+
+  @override
+  String get homeNextStepSendTitle => 'Tienes una rutina a medias';
+
+  @override
+  String get homeNextStepSendBody =>
+      'Revisa las tarjetas y guarda para enviarla al dispositivo de Elumi';
+
+  @override
+  String get homeNextStepSendAction => 'Continuar';
+
+  @override
+  String get homeNextStepLinkTitle => 'Vincula el dispositivo de Elumi';
+
+  @override
+  String get homeNextStepWaitTitle => 'Ahora le toca a Elumi';
+
+  @override
+  String get elumiFinishNotifyLine => 'Te avisaremos cuando Elumi termine';
+
+  @override
+  String get routineSentTitle => 'Enviado al dispositivo de Elumi';
+
+  @override
+  String get routineSentReasonNotLinked =>
+      'Vincula un dispositivo y aparecerá al instante en el de Elumi';
+
+  @override
+  String get routineSentLinkDevice => 'Vincular dispositivo';
+
+  @override
+  String get routineSentPreviewElumi => 'Ver la pantalla de Elumi';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$name terminó una rutina';
+  }
+
+  @override
+  String get routineDonePraiseHint => 'Dale un elogio enseguida';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count estrellas',
+      one: '$count estrella',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'y $count más',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => 'No encontramos esta rutina';
+
+  @override
+  String get routineDoneNotFoundHint => 'Se borró o es de otro Elumi';
+
+  @override
+  String get routineDoneLoadFailed => 'No pudimos cargar la rutina terminada';
+
+  @override
+  String get todayRoutineEmptyNotSent => 'Aún no has enviado rutinas';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => 'Hoy no has enviado rutinas';
+
+  @override
+  String get todayRoutineEmptyTodayBody =>
+      'Envía al instante una rutina guardada desde Rutinas';
+
+  @override
+  String get notificationEmptyBody =>
+      'Aquí te avisaremos cuando Elumi termine una rutina';
+
+  @override
+  String get notificationEmptyOpenSettings => 'Ajustes de notificaciones';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Si hoy sigue, serán $count días',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    return '$name sigue terminando sus rutinas día tras día';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días seguidos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => 'Llegó el resumen de la semana';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Esta semana terminó $count rutinas',
+      one: 'Esta semana terminó 1 rutina',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => 'Sigamos con Elumi esta semana';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Ver detalles con Pro';
+
+  @override
+  String get lockScreenSettingsTitle => 'Tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenGuardianTitle => 'Rutinas de Elumi hoy';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return 'Siguiente: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone =>
+      'Las rutinas de hoy están todas hechas';
+
+  @override
+  String get lockScreenGuardianNoRoutine => 'Hoy no se envió ninguna rutina';
+
+  @override
+  String get lockScreenStaleMessage =>
+      'Abre la app para ver las rutinas de hoy';
+
+  @override
+  String get lockScreenOpenApp => 'Abrir la app';
+
+  @override
+  String get lockScreenPauseOneHour => 'Pausar 1 hora';
+
+  @override
+  String get lockScreenElumiStart => 'Empezar';
+
+  @override
+  String get lockScreenElumiNowLabel => 'Esto es lo que toca ahora';
+
+  @override
+  String get lockScreenGuardianIntroTitle =>
+      'Al encender la pantalla verás enseguida las rutinas de Elumi de hoy';
+
+  @override
+  String get lockScreenElumiIntroTitle =>
+      'A la hora de la rutina, al encender la pantalla se ve en grande la tarjeta que toca ahora';
+
+  @override
+  String get lockScreenIntroNoAdsNote =>
+      'En la pantalla de bloqueo no aparecen anuncios ni pagos. Puedes desactivarla cuando quieras';
+
+  @override
+  String get lockScreenIntervalTitle => '¿Cada cuánto se muestra?';
+
+  @override
+  String get lockScreenIntervalEveryTime => 'Cada vez';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return 'Cada $minutes min';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return 'Cada $hours h';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return 'Permisos $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => 'Obligatorio';
+
+  @override
+  String get lockScreenPermissionRecommended => 'Recomendado';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => 'Mostrar sobre otras apps';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      'Toca elum en la lista y permítelo. Hace falta para mostrar la tarjeta sobre la pantalla de bloqueo';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => 'Permitir notificaciones';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      'Muestra un aviso silencioso mientras la tarjeta está activada';
+
+  @override
+  String get lockScreenPermissionBatteryTitle =>
+      'Excluir de la optimización de batería';
+
+  @override
+  String get lockScreenPermissionBatteryReason =>
+      'Evita que el dispositivo detenga la función';
+
+  @override
+  String get lockScreenPermissionSamsungTitle =>
+      'Añadir a apps que nunca entran en suspensión';
+
+  @override
+  String get lockScreenPermissionSamsungReason =>
+      'Los dispositivos Samsung necesitan un paso más';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      'En Batería > Límites de uso en segundo plano > Apps que nunca entran en suspensión, toca + y añade elum';
+
+  @override
+  String get lockScreenPermissionOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get lockScreenPermissionConfirmDone => 'Ya lo añadí';
+
+  @override
+  String get lockScreenPermissionSkip => 'Omitir';
+
+  @override
+  String get lockScreenTurnOn => 'Activar la tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenTurnOff =>
+      'Desactivar la tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenEnableFailed =>
+      'No se pudo activar la tarjeta. Revisa los permisos otra vez';
+
+  @override
+  String get lockScreenSetupDoneTitle => '¡Listo!';
+
+  @override
+  String get lockScreenSetupDoneBody =>
+      'Prueba a apagar y encender la pantalla ahora';
+
+  @override
+  String get lockScreenSetupComplete => 'Listo';
+
+  @override
+  String get lockScreenEnabledStatus =>
+      'La tarjeta de la pantalla de bloqueo está activada';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return 'En pausa hasta las $time';
+  }
+
+  @override
+  String get lockScreenPreviewAction => 'Vista previa';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => 'Lavarse los dientes';
+
+  @override
+  String get lockScreenPreviewSampleCard => 'Pon pasta en el cepillo';
+
+  @override
+  String get lockScreenPreviewNotice =>
+      'Los botones no funcionan en la vista previa';
+
+  @override
+  String get lockScreenIntroTitle => '📱 Míralo en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenIntroBody =>
+      'Al encender la pantalla verás cuántas rutinas hizo Elumi hoy, sin abrir la app';
+
+  @override
+  String get lockScreenIntroTurnOn => 'Activarla';
+
+  @override
+  String get lockScreenIntroLater => 'Más tarde';
+
+  @override
+  String get lockScreenOnValue => 'Activada';
+
+  @override
+  String get lockScreenPermissionMissingValue => 'Falta permiso';
+
+  @override
+  String get modeSwitchToLockScreen =>
+      'Solo un tutor puede cambiar la tarjeta de la pantalla de bloqueo';
 }

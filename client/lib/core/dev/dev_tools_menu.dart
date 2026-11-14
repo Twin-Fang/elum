@@ -47,6 +47,12 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
               isValueChanged: forcedLocale != null,
               onTap: () => widget.onSelect(_DevView.locale),
             ),
+            _Tile(
+              icon: Icons.palette_outlined,
+              label: '디자인 기반 미리 보기',
+              subtitle: '공통 모션·작은 카드·하이라이트·보상 축하·3D 그림 세트 (#1407)',
+              onTap: () => widget.onSelect(_DevView.designShowcase),
+            ),
           ],
         ),
         _Group(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/assets/app_assets.dart';
-import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/elum_guide_panel.dart';
 import '../../../core/widgets/pro_badge.dart';
@@ -72,7 +71,7 @@ class CreditCostGuide extends ConsumerWidget {
         if (access.shouldShowProTeaser)
           ProUpsellButton(
             style: ProUpsellStyle.link,
-            onTap: withTapHaptic(() => Navigator.of(context).pop(CreditCostGuideChoice.learnPro)),
+            onTap: () => Navigator.of(context).pop(CreditCostGuideChoice.learnPro),
           ),
       ],
     );

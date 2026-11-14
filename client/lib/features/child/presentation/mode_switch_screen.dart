@@ -11,7 +11,7 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/pin_forgot_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../auth/application/auth_session_controller.dart';
@@ -291,9 +291,10 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           if (_shouldShowPinRecovery) ...[
             SizedBox(height: context.space.md.h),
             Center(
-              child: ElumTextLink(
+              child: ElumSecondaryButton(
                 label: context.l10n.pinForgotLink,
                 onTap: _onForgotPin,
+                isCompact: true,
               ),
             ),
           ],
@@ -317,7 +318,10 @@ enum ModeSwitchTarget {
   guardian(Routes.guardian),
 
   /// 결제 직전 보호자 확인 (`Routes.guardianPlanPin`). 화면을 옮기지 않고 true 로 닫힌다
-  purchase(null);
+  purchase(null),
+
+  /// 이룸이 기기 잠금화면 카드 설정 전 보호자 확인. 화면을 옮기지 않고 true 로 닫힌다
+  lockScreen(null);
 
   const ModeSwitchTarget(this.route);
 
@@ -328,13 +332,14 @@ enum ModeSwitchTarget {
   bool get isGuardianEntry => this != child;
 
   /// 「비밀암호를 잊었어요」를 보일지. 결제 확인은 닫고 돌아가면 되므로 다시 로그인 길을 두지 않는다
-  bool get canOfferPinRecovery => this != purchase;
+  bool get canOfferPinRecovery => this != purchase && this != lockScreen;
 
   /// 암호 안내 문구. 읽을 때 푼다 — 값으로 들고 있으면 앱 언어가 바뀐 뒤에도 옛 언어가 남는다.
   String get description => switch (this) {
     ModeSwitchTarget.child => appL10n.modeSwitchToChild,
     ModeSwitchTarget.guardian => appL10n.modeSwitchToGuardian,
     ModeSwitchTarget.purchase => appL10n.modeSwitchToPurchase,
+    ModeSwitchTarget.lockScreen => appL10n.modeSwitchToLockScreen,
   };
 
   /// 쿼리 파라미터에서 복원한다. 모르는 값이면 아이 화면으로 본다.

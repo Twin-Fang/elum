@@ -874,8 +874,15 @@ public enum ConfigKey {
   WEEKLY_REPORT_PUSH_ENABLED(
     ConfigGroup.WEEKLY_REPORT, "주간 리포트 월요일 알림",
     "켜면 매주 월요일 아침(한국 시각 8시) 주간 리포트 권한이 있는 보호자에게 '한 주 리포트가 왔어요' 알림을 보낸다. "
-      + "지난주에 마친 일과가 있는 이룸이만, 같은 주는 한 번만 보낸다",
+      + "지난주에 마친 일과가 있는 이룸이만, 같은 주는 한 번만 보낸다. Free 보호자 포함 여부는 '주간 리포트 알림 Free 포함'",
     ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  // 위 알림 스위치가 켜졌을 때만 의미 있음. 리포트 화면 잠금(FREE_WEEKLY_REPORT)과 별개 (#1409)
+  WEEKLY_REPORT_PUSH_FREE_ENABLED(
+    ConfigGroup.WEEKLY_REPORT, "주간 리포트 알림 Free 포함",
+    "켜면 주간 리포트 권한이 없는 Free 보호자에게도 월요일 요약 알림(보낸·마친 일과 수)을 보낸다. "
+      + "리포트 화면은 그대로 요금제 권한을 따르고, Free 만 받는 이룸이는 AI 정리 글을 만들지 않는다. 끄면 권한 있는 보호자에게만 보낸다",
+    ConfigValueType.BOOLEAN, List.of(), "true"
   ),
 
   // --- 관제소 연동 (#1229) ---

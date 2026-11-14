@@ -22,7 +22,9 @@ abstract final class Routes {
   /// 카드 그림 방식. 캐릭터 다음, 비밀암호 앞. 건너뛸 수 있다.
   static const onboardingImageStyle = '/onboarding/image-style';
   static const onboardingPin = '/onboarding/pin';
-  static const cardCompletion = '/onboarding/card-completion';
+
+  /// 이룸이 기기 연결 단계. 비밀암호(초대 합류) 뒤, 알림 켜기 안내 앞. 기기가 이미 붙어 있으면 서지 않음
+  static const onboardingLinkDevice = '/onboarding/link-device';
 
   /// 알림 켜기 안내. 온보딩 끝(첫 홈 직전), 이미 가입한 보호자는 업데이트 뒤 홈에서 한 번 (#1275)
   /// 알림이 이미 켜졌거나 본 적 있으면 서지 않는다 (`PushPermissionPrompt.shouldShowIntro`)
@@ -69,9 +71,19 @@ abstract final class Routes {
   /// 주간 리포트 (#1074, Pro). 내 정보 바로가기에서 연다
   static const guardianWeeklyReport = '/guardian/weekly-report';
 
-  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02` (null 이면 이번 주)
-  static String guardianWeeklyReportOf(String? weekStart) =>
-      weekStart == null ? guardianWeeklyReport : '$guardianWeeklyReport?weekStart=${Uri.encodeQueryComponent(weekStart)}';
+  /// 주간 리포트의 그 주: `/guardian/weekly-report?weekStart=2026-11-02&from=notification`
+  /// weekStart null 이면 이번 주. 알림에서 열면 from=notification (Free 에게 판매 판 대신 요약)
+  static String guardianWeeklyReportOf(String? weekStart, {bool isFromNotification = false}) {
+    final queryParameters = {
+      'weekStart': ?weekStart,
+      if (isFromNotification) weeklyReportFromQuery: weeklyReportFromNotificationValue,
+    };
+    return Uri(path: guardianWeeklyReport, queryParameters: queryParameters.isEmpty ? null : queryParameters).toString();
+  }
+
+  /// [guardianWeeklyReport] 의 진입 쿼리: `from=notification` 이면 알림에서 들어옴
+  static const weeklyReportFromQuery = 'from';
+  static const weeklyReportFromNotificationValue = 'notification';
 
   /// 주간 계획: 요일별 반복 일과 (#782)
   static const guardianWeeklyPlan = '/guardian/weekly-plan';
@@ -172,8 +184,30 @@ abstract final class Routes {
   static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
 
+  /// 첫 일과 보내기 축하 (카드 확인 저장 · 일과관리 보내기). extra 는 [RoutineSentRouteArgs]
+  static const guardianRoutineSent = '/guardian/routine-sent';
+
+  /// 이룸이가 끝낸 일과 축하: `?routineId=` (완료 알림이 연다)
+  static const guardianRoutineDone = '/guardian/routine-done';
+
+  /// [guardianRoutineDone] 의 일과 id 쿼리 이름
+  static const routineDoneRoutineIdQuery = 'routineId';
+
+  /// 끝낸 일과 축하 경로: `/guardian/routine-done?routineId={id}`
+  static String guardianRoutineDoneOf(String routineId) => Uri(
+    path: guardianRoutineDone,
+    queryParameters: {routineDoneRoutineIdQuery: routineId},
+  ).toString();
+
   /// 연결 암호 만들기 (보호자). 온보딩 직후와 설정에서 들어온다.
   static const linkCode = '/guardian/link';
+
+  /// [linkCode] 의 진입 쿼리: `from=onboarding` 이면 `나중에 할게요` 가 있고 끝나면 온보딩을 이어 감
+  static const linkCodeFromQuery = 'from';
+  static const linkCodeFromOnboardingValue = 'onboarding';
+
+  /// 온보딩 연결 단계에서 여는 연결 암호 화면
+  static const linkCodeFromOnboarding = '$linkCode?$linkCodeFromQuery=$linkCodeFromOnboardingValue';
 
   /// 연결 암호 넣기 (이룸이 휴대폰). **로그인 전에 서는 화면이다.**
   static const linkEnter = '/link/enter';
@@ -197,7 +231,19 @@ abstract final class Routes {
 
   /// 모드 전환 PIN. `?to=child|guardian`으로 방향을 준다.
   static const modeSwitch = '/mode-switch';
+
+  /// 잠금화면 카드 설정 (Android, 보호자 설정 · 이룸이 설정 공통, 카드 종류는 기기 역할로)
+  static const lockScreenSettings = '/lock-screen';
+
+  /// 이룸이 기기 잠금화면 카드 설정 전 보호자 암호 확인 (맞으면 true 로 닫힘, ModeSwitchTarget.lockScreen.name 과 같은 값)
+  static const lockScreenGuardianCheck = '$modeSwitch?to=lockScreen';
+
+  /// 잠금화면 카드 미리 보기 (견본 요약)
+  static const lockScreenPreview = '/lock-screen/preview';
 }
 
 /// [Routes.guardianTalkLinkShare] 의 extra: 보낼 일과 id, 이미 켜진 링크가 있는가
 typedef TalkLinkShareRouteArgs = ({String routineId, bool hasActiveLink});
+
+/// [Routes.guardianRoutineSent] 의 extra: 보낸 일과 id (보낸 뒤 AI 메모 확인용, 없으면 null)
+typedef RoutineSentRouteArgs = ({String? routineId});

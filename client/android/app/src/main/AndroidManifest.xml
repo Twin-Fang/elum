@@ -9,6 +9,7 @@
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <!-- 일과 알림 (#777): 재부팅 뒤 예약 다시 걸기. 알림 권한(POST_NOTIFICATIONS)은 플러그인이 선언 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- 잠금화면 카드 권한(SYSTEM_ALERT_WINDOW, FOREGROUND_SERVICE, FOREGROUND_SERVICE_SPECIAL_USE)은 Play 특수 용도 신고 승인 뒤 되돌린다 (#1420) -->
 
     <!-- 앱 이름은 res/values/strings.xml app_name. 앱별 언어 목록(Android 13+)은 res/xml/locales_config.xml:
          연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527). Android 12 이하는 기기 언어를 따른다 -->
@@ -69,6 +70,7 @@
                 <data android:scheme="https" android:host="api.elum.suhsaechan.kr" android:pathPrefix="/s/"/>
             </intent-filter>
         </activity>
+        <!-- 잠금화면 카드 화면·서비스·부팅 수신기 선언은 Play 특수 용도 신고 승인 뒤 되돌린다 (#1420, 원본은 #1410 커밋 c44d3477) -->
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
              스킴 값은 build.gradle.kts가 .env의 네이티브 앱 키로 채운다.

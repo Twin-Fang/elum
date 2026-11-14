@@ -20,6 +20,7 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
+import '../application/first_send_celebration.dart';
 import '../application/library_entries.dart';
 import '../application/library_talk_import_state.dart';
 import '../application/routine_library_controller.dart';
@@ -35,6 +36,7 @@ import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
+import 'widgets/routine_sent_toast.dart';
 import 'card_export/open_card_export.dart';
 import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 
@@ -172,13 +174,25 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       showElumToast(context, l10n.routineLibraryAlreadySent);
       return;
     }
+    // 첫 보내기 판정은 보내기 전에 (보낸 뒤에는 오늘 목록에 새 일과가 섞임)
+    final firstSendCelebration = ref.read(firstSendCelebrationProvider);
+    final isFirstSend = firstSendCelebration.isFirstSendBeforeSending();
     final result = await runBusy(
       () => ref.read(routineLibraryControllerProvider).sendToday(routine.id),
     );
     if (result == null || !mounted) return;
     final failure = result.failure;
     if (failure == null) {
-      showElumToast(context, l10n.routineLibrarySent(routine.displayTitle, batchimOf(routine.displayTitle)));
+      unawaited(firstSendCelebration.markSent());
+      // 첫 보내기: 축하 화면 (알림 권한 안내는 축하에서 홈으로 갈 때)
+      if (isFirstSend) {
+        unawaited(context.push(Routes.guardianRoutineSent, extra: (routineId: null)));
+        return;
+      }
+      showRoutineSentToastOn(
+        ScaffoldMessenger.maybeOf(context),
+        l10n.routineLibrarySent(routine.displayTitle, batchimOf(routine.displayTitle)),
+      );
       // 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
       unawaited(ref.read(pushPermissionPromptProvider).maybeAsk(context));
       return;

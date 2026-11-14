@@ -8,7 +8,7 @@ import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
-import 'app_fade_slide_in.dart';
+import 'app_reveal.dart';
 
 /// 로그인 장면의 배치값 한 벌. Figma 좌표(393×852)를 그대로 담는다.
 ///
@@ -342,7 +342,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                   constraints: BoxConstraints(
                     minHeight: (layout.titleTop - layout.captionTop).h,
                   ),
-                  child: AppFadeSlideIn(
+                  child: AppReveal(
                     child: _fitLine(
                       context,
                       context.l10n.loginSceneEyebrow,
@@ -357,7 +357,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                   constraints: BoxConstraints(
                     minHeight: (layout.logoTop - layout.titleTop).h,
                   ),
-                  child: AppFadeSlideIn(
+                  child: AppReveal(
                     child: _fitLine(
                       context,
                       context.l10n.loginSceneTitle,
@@ -373,7 +373,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: EdgeInsets.only(left: 115.w),
-                    child: AppFadeSlideIn(
+                    child: AppReveal(
                       delay: AppMotion.sceneStagger,
                       child: SvgPicture.asset(AppAssets.logo, width: 164.w),
                     ),

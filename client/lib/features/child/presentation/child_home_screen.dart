@@ -28,6 +28,8 @@ import '../../../shared/models/character.dart';
 import '../application/child_home_entries.dart';
 import '../application/child_routine_notifier.dart';
 import '../application/routine_auto_refresh.dart';
+import '../../../app/lock_screen_snapshot_sync.dart';
+import 'widgets/child_streak_row.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../member/application/member_providers.dart';
 import '../../guardian/application/routine_providers.dart';
@@ -116,7 +118,8 @@ class ChildHomeScreen extends ConsumerWidget {
           ? ScreenLayoutKind.adaptive
           : ScreenLayoutKind.contentColumn,
       // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신
-      child: RoutineAutoRefresh(
+      // 지금 할 카드 요약을 잠금화면 카드에 맞춤 (이룸이 기기)
+      child: LockScreenSnapshotSync(child: RoutineAutoRefresh(
         child: Scaffold(
           backgroundColor: context.colors.background,
           body: SafeArea(
@@ -150,7 +153,15 @@ class ChildHomeScreen extends ConsumerWidget {
                       const ChildHomeTopBar(),
                       Expanded(
                         child: ChildHomeLandscapeBody(
-                          greeting: greetingText,
+                          // 인사말 아래 연속 기록 판 (2일 이상일 때만)
+                          greeting: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              greetingText,
+                              ChildStreakRow(topGap: space.md),
+                            ],
+                          ),
                           character: character,
                           routineList: _RoutineList(routines: routines),
                           listScrollWrapper: withPullToRefresh,
@@ -173,6 +184,11 @@ class ChildHomeScreen extends ConsumerWidget {
                               horizontal: space.screenH,
                             ),
                             child: greetingText,
+                          ),
+                          // 인사말 아래 연속 기록 판 (2일 이상일 때만, 숨으면 자리 없음)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: space.md),
+                            child: ChildStreakRow(topGap: space.md),
                           ),
                           // 세로 태블릿: 인사말 아래 장면 띠 (폰은 없음)
                           if (metrics.isScaleOverridden) ...[
@@ -204,7 +220,7 @@ class ChildHomeScreen extends ConsumerWidget {
                   ),
           ),
         ),
-      ),
+      )),
     );
   }
 }

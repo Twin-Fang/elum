@@ -444,19 +444,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
 
   @override
-  String get onboardingNameDescription => '이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
+  String get onboardingNameDescription =>
+      '이룸에서는 쓰는 사람을 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
 
   @override
   String get onboardingNameHint => '이름을 입력해주세요';
 
   @override
   String get onboardingNameInviteLink => '초대 코드가 있어요';
-
-  @override
-  String get onboardingCompletionTitle => '내용 정리가 모두\n완료됐어요';
-
-  @override
-  String get onboardingCompletionProgress => '100% 완료!';
 
   @override
   String get onboardingSplashLogoLabel => '이룸';
@@ -1871,12 +1866,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todayRoutinePastLoadFailedFallback => '지난 일과를 불러오지 못했어요';
-
-  @override
-  String get todayRoutineEmptyTitle => '아직 만든 일과가 없어요';
-
-  @override
-  String get todayRoutineEmptyHint => '오늘의 첫 행동카드를 만들어보세요';
 
   @override
   String get todayRoutinePastEmpty => '지난 일과가 없어요';
@@ -5218,27 +5207,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '광고 보고 크레딧 $count개 받기',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => '광고 보고 크레딧 받기';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: '30초쯤 걸려요, 오늘 $remaining번 더 받을 수 있어요',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => '광고 보기';
@@ -5248,6 +5217,42 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get creditTopUpAdDailyLimit => '오늘은 다 받았어요. 내일 다시 볼 수 있어요';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15~30초, 끝까지 보면 크레딧 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '오늘 $remaining번 더 받을 수 있어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => '지금은 볼 수 있는 광고가 없어요';
+
+  @override
+  String get proFeatureMarkLabel => '자세히 보기';
+
+  @override
+  String get proExplainAiImageStylesReason => '카드 글에 맞는 그림이라 이룸이가 더 쉽게 알아봐요';
+
+  @override
+  String get proExplainCardSplitReason => '어려운 행동을 작은 단계로 나눠 한 걸음씩 따라 할 수 있어요';
+
+  @override
+  String get proExplainFreeImageRegenerateReason =>
+      '그림이 마음에 들 때까지 크레딧 걱정 없이 고칠 수 있어요';
 
   @override
   String get creditTopUpAdCheckFailed => '광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요';
@@ -5275,15 +5280,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ 크레딧을 받았어요';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => '광고를 끝까지 봐서 받았어요';
-
-  @override
-  String get creditRewardBalanceLabel => '지금 크레딧';
 
   @override
   String get lowCreditNoticeTitle => '크레딧이 조금 남았어요';
@@ -5401,35 +5398,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get myCreditGuideLink => '크레딧은 이렇게 써요';
 
   @override
-  String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
+  String get abaIntroTitle => '준비는 간편하게,\n일상은 스스로';
 
   @override
-  String get abaIntroSubtitle => '이룸은 응용행동분석(ABA)의 원리로 만들었어요';
+  String get abaIntroSubtitle => '응용행동분석(ABA) 원리로 만들었어요';
 
   @override
-  String get abaIntroCardTitle => '카드 한 장에 한 가지 행동';
+  String get abaIntroStepsTitle => '작게 나눠요';
 
   @override
-  String get abaIntroCardBody => '무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지';
+  String get abaIntroStepsBody => '일과를 단계 카드로';
 
   @override
-  String get abaIntroVoiceTitle => '짧은 문장, 그림과 목소리';
+  String get abaIntroShowTitle => '미리 보여 줘요';
 
   @override
-  String get abaIntroVoiceBody => '보고 들으며 하나씩 따라 해요';
+  String get abaIntroShowBody => '그림과 목소리로';
 
   @override
-  String get abaIntroStarTitle => '해내면 바로 칭찬과 별';
+  String get abaIntroHelpTitle => '도와주고 줄여요';
 
   @override
-  String get abaIntroStarBody => '보호자님이 정한 보상까지 받아요';
+  String get abaIntroHelpBody => '스스로 이어 가게';
 
   @override
-  String get abaIntroGuardianTitle => '💛 가장 중요한 건 보호자님이에요';
+  String get abaIntroRewardTitle => '바로 칭찬해요';
 
   @override
-  String get abaIntroGuardianBody =>
-      '아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요';
+  String get abaIntroRewardBody => '별과 정한 보상';
+
+  @override
+  String get abaIntroGuardianTitle => '가장 중요한 건 보호자님이에요';
+
+  @override
+  String get abaIntroGuardianBody => '일과와 보상은 보호자님이 정하고, 이룸은 곁에서 도와요';
 
   @override
   String get abaIntroStart => '시작하기';
@@ -5487,4 +5489,353 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '개 남았어요';
+
+  @override
+  String get commonGoHome => '홈으로';
+
+  @override
+  String get onboardingLinkStepTitle => '이룸이 기기를 연결할까요?';
+
+  @override
+  String get linkDeviceBenefitLine => '보낸 일과가 이룸이 기기에 바로 떠요';
+
+  @override
+  String get onboardingLinkStepConnectNow => '지금 연결하기';
+
+  @override
+  String get onboardingLinkStepEnterCode => '이룸이 기기에서 연결 코드만 넣으면 돼요';
+
+  @override
+  String get onboardingLinkStepManyDevices => '기기 여러 대를 연결할 수 있어요';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => '나중에 설정에서도 연결할 수 있어요';
+
+  @override
+  String get homeNextStepMakeTitle => '첫 일과를 만들어 볼까요?';
+
+  @override
+  String get homeNextStepMakeBody => '할 일을 적으면 행동 카드로 바꿔 드려요';
+
+  @override
+  String get homeNextStepMakeAction => '일과 만들기';
+
+  @override
+  String get homeNextStepSendTitle => '만들던 일과가 있어요';
+
+  @override
+  String get homeNextStepSendBody => '카드를 확인하고 저장하면 이룸이 기기로 가요';
+
+  @override
+  String get homeNextStepSendAction => '이어서 만들기';
+
+  @override
+  String get homeNextStepLinkTitle => '이룸이 기기를 연결해요';
+
+  @override
+  String get homeNextStepWaitTitle => '이제 이룸이 차례예요';
+
+  @override
+  String get elumiFinishNotifyLine => '이룸이가 끝내면 알려 드려요';
+
+  @override
+  String get routineSentTitle => '이룸이 기기로 보냈어요';
+
+  @override
+  String get routineSentReasonNotLinked => '기기를 연결하면 이룸이 기기에 바로 떠요';
+
+  @override
+  String get routineSentLinkDevice => '기기 연결하기';
+
+  @override
+  String get routineSentPreviewElumi => '이룸이 화면 미리 보기';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 일과를 끝냈어요';
+  }
+
+  @override
+  String get routineDonePraiseHint => '끝낸 걸 바로 칭찬해 주세요';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '별 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '외 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '일과를 찾지 못했어요';
+
+  @override
+  String get routineDoneNotFoundHint => '지워졌거나 다른 이룸이의 일과예요';
+
+  @override
+  String get routineDoneLoadFailed => '끝낸 일과를 불러오지 못했어요';
+
+  @override
+  String get todayRoutineEmptyNotSent => '아직 보낸 일과가 없어요';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '오늘 보낸 일과가 없어요';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '만들어 둔 일과를 일과관리에서 바로 보낼 수 있어요';
+
+  @override
+  String get notificationEmptyBody => '이룸이가 일과를 끝내면 여기로 알려 드려요';
+
+  @override
+  String get notificationEmptyOpenSettings => '알림 설정';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '오늘도 이어 가면 $count일이에요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속 해냈어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이가', 'other': '가'});
+    return '$name$_temp0 꾸준히 일과를 마치고 있어요';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 이어서 했어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => '한 주 기록이 도착했어요';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 주에 일과 $count개를 마쳤어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => '이번 주도 이룸이와 함께 해 봐요';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Pro로 자세히 보기';
+
+  @override
+  String get lockScreenSettingsTitle => '잠금화면 카드';
+
+  @override
+  String get lockScreenGuardianTitle => '오늘 이룸이 일과';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '다음 할 일: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '오늘 일과를 다 끝냈어요';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '오늘 보낸 일과가 없어요';
+
+  @override
+  String get lockScreenStaleMessage => '앱을 열어 오늘 일과를 확인해요';
+
+  @override
+  String get lockScreenOpenApp => '앱 열기';
+
+  @override
+  String get lockScreenPauseOneHour => '1시간 쉬기';
+
+  @override
+  String get lockScreenElumiStart => '시작하기';
+
+  @override
+  String get lockScreenElumiNowLabel => '지금 할 일이에요';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '화면을 켜면 오늘 이룸이 일과를 바로 보여 줘요';
+
+  @override
+  String get lockScreenElumiIntroTitle => '일과 시간에 화면을 켜면 지금 할 카드 한 장을 크게 보여 줘요';
+
+  @override
+  String get lockScreenIntroNoAdsNote => '잠금화면에는 광고와 결제가 나오지 않아요. 언제든 끌 수 있어요';
+
+  @override
+  String get lockScreenIntervalTitle => '얼마나 자주 보여 줄까요';
+
+  @override
+  String get lockScreenIntervalEveryTime => '켤 때마다';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '$minutes분마다';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '$hours시간마다';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '권한 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '필수';
+
+  @override
+  String get lockScreenPermissionRecommended => '권장';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '다른 앱 위에 표시';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      '목록에서 이룸을 눌러 허용해 주세요. 잠금화면 위에 카드를 띄울 때 필요해요';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '알림 허용';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      '카드가 켜져 있다는 조용한 알림을 보여 줘요';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => '배터리 최적화 제외';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '기기가 기능을 멈추지 않게 해요';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => '절전 예외 앱에 추가';
+
+  @override
+  String get lockScreenPermissionSamsungReason => '삼성 기기는 한 번 더 필요해요';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      '배터리 > 백그라운드 사용 제한 > 절전 예외 앱에서 +를 눌러 이룸을 추가해 주세요';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '설정 열기';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '추가했어요';
+
+  @override
+  String get lockScreenPermissionSkip => '건너뛰기';
+
+  @override
+  String get lockScreenTurnOn => '잠금화면 카드 켜기';
+
+  @override
+  String get lockScreenTurnOff => '잠금화면 카드 끄기';
+
+  @override
+  String get lockScreenEnableFailed => '잠금화면 카드를 켜지 못했어요. 권한을 다시 확인해 주세요';
+
+  @override
+  String get lockScreenSetupDoneTitle => '준비 끝!';
+
+  @override
+  String get lockScreenSetupDoneBody => '지금 화면을 껐다 켜 보세요';
+
+  @override
+  String get lockScreenSetupComplete => '완료';
+
+  @override
+  String get lockScreenEnabledStatus => '잠금화면 카드가 켜져 있어요';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '$time까지 쉬고 있어요';
+  }
+
+  @override
+  String get lockScreenPreviewAction => '미리 보기';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '양치하기';
+
+  @override
+  String get lockScreenPreviewSampleCard => '칫솔에 치약을 짜요';
+
+  @override
+  String get lockScreenPreviewNotice => '미리 보기에서는 버튼이 동작하지 않아요';
+
+  @override
+  String get lockScreenIntroTitle => '📱 잠금화면에서 바로 봐요';
+
+  @override
+  String get lockScreenIntroBody => '기기 화면을 켜면 앱을 열지 않아도 오늘 이룸이가 몇 개를 했는지 보여요';
+
+  @override
+  String get lockScreenIntroTurnOn => '켜 보기';
+
+  @override
+  String get lockScreenIntroLater => '나중에';
+
+  @override
+  String get lockScreenOnValue => '켜짐';
+
+  @override
+  String get lockScreenPermissionMissingValue => '권한 필요';
+
+  @override
+  String get modeSwitchToLockScreen => '잠금화면 카드는 보호자만 바꿀 수 있어요';
 }

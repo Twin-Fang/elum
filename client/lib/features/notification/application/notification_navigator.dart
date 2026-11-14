@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../../link/application/linked_device_check.dart';
 import '../../member/application/member_providers.dart';
 import '../../profile/application/profile_session.dart';
 import '../../profile/domain/profile_summary.dart';
@@ -32,7 +33,7 @@ class NotificationNavigator {
     try {
       final isProfileReady = await _selectProfileIfNeeded(context, target.profileId);
       if (!isProfileReady || !context.mounted) return;
-      _goTo(context, target);
+      await _goTo(context, target);
     } finally {
       _isOpening = false;
     }
@@ -89,9 +90,16 @@ class NotificationNavigator {
     return profiles?.where((profile) => profile.id == profileId).firstOrNull;
   }
 
-  void _goTo(BuildContext context, NotificationTarget target) {
+  Future<void> _goTo(BuildContext context, NotificationTarget target) async {
     switch (target.type) {
       case NotificationType.routineCompleted:
+        // 끝낸 일과 축하 화면 (지금 화면 위에 쌓아 닫으면 제자리). 일과 id 가 없으면 홈
+        final routineId = target.targetId;
+        if (routineId == null) {
+          context.go(Routes.guardian);
+        } else {
+          context.push(Routes.guardianRoutineDoneOf(routineId));
+        }
       case NotificationType.routineSentByCoGuardian:
         context.go(Routes.guardian);
       case NotificationType.coGuardianJoined:
@@ -102,9 +110,10 @@ class NotificationNavigator {
         break; // 이동할 화면 없음
       case NotificationType.weeklyReportReady:
         // 알림의 주(월요일)로 열기, 없으면 이번 주 (권한이 없으면 화면이 Pro 미리 보기 판을 보임)
-        context.push(Routes.guardianWeeklyReportOf(target.targetId));
+        // 알림으로 들어왔다고 알려 Free 면 판매 판 대신 요약을 먼저 보임
+        context.push(Routes.guardianWeeklyReportOf(target.targetId, isFromNotification: true));
       case NotificationType.adminMessage:
-        _goToAdminMessageRoute(context, AdminMessageRoute.fromServer(target.route));
+        await _goToAdminMessageRoute(context, AdminMessageRoute.fromServer(target.route));
       case NotificationType.talkPostCommented:
       case NotificationType.talkPostImported:
         // 글 id 가 없으면 이야기 칸으로 (지워진 글은 상세 화면이 안내)
@@ -117,8 +126,8 @@ class NotificationNavigator {
     }
   }
 
-  // 운영자 알림 > 홈 · 요금제(설정 맨 위 요금제 묶음) · 내 크레딧
-  void _goToAdminMessageRoute(BuildContext context, AdminMessageRoute route) {
+  // 운영자 알림 > 홈 · 요금제(설정 맨 위 요금제 묶음) · 내 크레딧 · 기기 연결
+  Future<void> _goToAdminMessageRoute(BuildContext context, AdminMessageRoute route) async {
     switch (route) {
       case AdminMessageRoute.home:
         context.go(Routes.guardian);
@@ -126,6 +135,15 @@ class NotificationNavigator {
         context.push(Routes.guardianSettings);
       case AdminMessageRoute.myCredit:
         context.push(Routes.guardianMyCredit);
+      case AdminMessageRoute.deviceLink:
+        await _goToDeviceLink(context);
     }
+  }
+
+  /// 기기 연결 알림: 이미 붙어 있으면 연결 상태, 아니거나 모르면(조회 실패) 연결 코드 화면
+  Future<void> _goToDeviceLink(BuildContext context) async {
+    final hasLinkedDevice = await _ref.read(linkedDeviceCheckProvider)();
+    if (!context.mounted) return;
+    context.push(hasLinkedDevice == true ? Routes.guardianLinkStatus : Routes.linkCode);
   }
 }

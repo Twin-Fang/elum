@@ -50,7 +50,11 @@ List<RouteBase> guardianSettingsRoutes() => [
     path: Routes.guardianWeeklyReport,
     pageBuilder: (context, state) => slidePage(
       state,
-      WeeklyReportScreen(initialWeekStart: DateTime.tryParse(state.uri.queryParameters['weekStart'] ?? '')),
+      WeeklyReportScreen(
+        initialWeekStart: DateTime.tryParse(state.uri.queryParameters['weekStart'] ?? ''),
+        isFromNotification:
+            state.uri.queryParameters[Routes.weeklyReportFromQuery] == Routes.weeklyReportFromNotificationValue,
+      ),
       layoutKind: ScreenLayoutKind.contentColumn,
     ),
   ),
@@ -94,7 +98,7 @@ List<RouteBase> guardianSettingsRoutes() => [
       state,
       LinkCodeScreen(
         // 온보딩에서 들어왔을 때만 `나중에 할게요`를 보여준다.
-        fromOnboarding: state.uri.queryParameters['from'] == 'onboarding',
+        fromOnboarding: state.uri.queryParameters[Routes.linkCodeFromQuery] == Routes.linkCodeFromOnboardingValue,
       ),
     ),
   ),

@@ -205,6 +205,16 @@ abstract interface class LocalStorage {
   bool get isPushPermissionIntroSeen;
   Future<void> setPushPermissionIntroSeen(bool isSeen);
 
+  /// 첫 일과 보내기 축하 화면을 이 계정에서 띄웠는가 (두 번째부터는 가벼운 알림만)
+  ///
+  /// 계정에 속해 [clearAll] 이 지운다
+  bool get hasCelebratedFirstSend;
+  Future<void> setHasCelebratedFirstSend(bool hasCelebrated);
+
+  /// 연속 기록 축하를 띄운 기록 `{이룸이 id}:{일수}` (같은 이룸이·같은 일수는 한 번만). 계정에 속해 [clearAll] 이 지운다
+  Set<String> get celebratedStreakMilestoneKeys;
+  Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys);
+
   /// 보호자 홈 `알림이 꺼져 있어요` 띠를 닫은 시각 (닫으면 7일 숨김). 없으면 null
   ///
   /// 기기에 속하고 [clearAll] 이 지우지 않는다

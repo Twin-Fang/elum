@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/assets/app_assets.dart';
-import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/elum_guide_panel.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../member/domain/member_subscription.dart';
 import '../application/plan_status_providers.dart';
@@ -81,11 +80,11 @@ class MyPlanSheet extends ConsumerWidget {
       },
       secondaryActions: [
         if (canRestorePurchases)
-          ElumTextLink(
+          ElumSecondaryButton(
             label: l10n.planRestore,
-            onTap: withTapHaptic(() => choose(MyPlanSheetChoice.restorePurchases)),
+            onTap: () => choose(MyPlanSheetChoice.restorePurchases),
           ),
-        ElumTextLink(label: l10n.commonClose, onTap: withTapHaptic(() => Navigator.of(context).pop())),
+        ElumSecondaryButton(label: l10n.commonClose, onTap: () => Navigator.of(context).pop()),
       ],
     );
   }

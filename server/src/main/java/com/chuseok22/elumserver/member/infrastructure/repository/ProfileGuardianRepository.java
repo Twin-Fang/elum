@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -85,4 +87,14 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
     + "from ProfileGuardian g where g.member.id = :memberId and g.profile.id in :profileIds")
   List<ProfileName> findProfileNamesByMemberIdAndProfileIdIn(
     @Param("memberId") String memberId, @Param("profileIds") Collection<String> profileIds);
+
+  /// 리텐션 알림 (#1409): 온보딩을 마친(이룸이 이름 있음) 활성 보호자 중 [from, to) 에 가입한 사람
+  @Query("""
+    select distinct g.member.id from ProfileGuardian g
+    where g.member.status = :status and g.profile.nickname is not null
+      and g.member.createdAt >= :from and g.member.createdAt < :to
+    """)
+  List<String> findOnboardedMemberIdsJoinedBetween(
+    @Param("status") MemberStatus status,
+    @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

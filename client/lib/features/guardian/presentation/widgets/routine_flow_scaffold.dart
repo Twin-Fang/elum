@@ -102,11 +102,11 @@ class RoutineFlowScaffold extends ConsumerWidget {
   /// 코치마크가 떠 있을 때: 뒤로가기는 코치마크의 PopScope 가 받아 안내만 닫는다
   final bool shouldIgnoreSystemBack;
 
-  /// CTA 하단(741) ↔ 보조 동작(765) 간격. 시안 실측 (`ElumScaffold`와 같다).
-  static const _belowGap = 24.0;
+  /// CTA 하단(741) ↔ 보조 버튼(753) 간격 (`ElumScaffold`와 같다, #1401)
+  static const _belowGap = 12.0;
 
-  /// 보조 동작 하단(781)에서 프레임 하단(852)까지.
-  static const _belowBottom = 71.0;
+  /// 보조 버튼 하단(801)에서 프레임 하단(852)까지 (CTA 자리 675 그대로)
+  static const _belowBottom = 51.0;
 
   /// 여기서 흐름을 떠나면 무엇이 남는가 — 나가기 전에 그것을 말하고 묻는다.
   /// null 이면 잃을 것이 없어 묻지 않는다.
@@ -224,7 +224,7 @@ class RoutineFlowScaffold extends ConsumerWidget {
                       // 시안 자리에 고정할 때는 `ElumScaffold`와 같은 식으로
                       // 역산한다 — 프레임 하단(852)에서 CTA 하단(741)까지 111을
                       // 두되 기기 홈인디케이터만큼은 뺀다. 아래에 보조 동작이
-                      // 붙으면 그 줄(781)부터 잰다.
+                      // 붙으면 그 버튼 하단(801)부터 잰다.
                       bottomFigmaInset != null
                           ? (bottomFigmaInset!.h -
                                     MediaQuery.paddingOf(context).bottom)

@@ -40,8 +40,9 @@ Future<void> watchAdRewardAndCelebrate(
   final result = await flow.run(onStage: (s) => stage.value = s);
   // 대기 팝업 닫기 (부른 화면이 사라졌어도 루트에 남지 않게)
   rootNavigator.pop();
-  // 오늘 남은 횟수가 바뀜 (성공·실패 공통)
+  // 오늘 남은 횟수가 바뀌고 불러 둔 광고는 썼음 > 둘 다 다시 받음 (성공·실패 공통)
   ref.invalidate(adRewardAvailabilityProvider);
+  ref.invalidate(rewardedAdPreloadProvider);
   if (!context.mounted) return;
 
   final failure = result.failure;

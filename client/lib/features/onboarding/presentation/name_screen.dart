@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
@@ -97,22 +96,11 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
           onPressed: canSubmit ? _submit : null,
         ),
-        // 다른 보호자가 이미 만든 이룸이에 합류하는 길 (Figma 1532:7112, y=765).
-        // 연결 암호의 `나중에 할게요`와 같은 모양이다. 합류하면 이룸이 등록은 건너뛴다.
-        belowButton: Center(
-          child: AppPressable(
-            onTap: () => context.push(Routes.inviteEnter),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.space.xs.h),
-              child: Text(
-                context.l10n.onboardingNameInviteLink,
-                style: context.typo.linkLater.copyWith(
-                  color: context.colors.linkLaterLabel,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
+        // 다른 보호자가 이미 만든 이룸이에 합류하는 길 (Figma 1532:7112).
+        // 연결 암호의 `나중에 할게요`와 같은 보조 버튼이다. 합류하면 이룸이 등록은 건너뛴다.
+        belowButton: ElumSecondaryButton(
+          label: context.l10n.onboardingNameInviteLink,
+          onTap: () => context.push(Routes.inviteEnter),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

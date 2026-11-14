@@ -5,10 +5,10 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/role_select_screen.dart';
 import '../../features/notification/presentation/notification_permission_intro_screen.dart';
 import '../../features/onboarding/presentation/aba_intro_screen.dart';
-import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/example_category_screen.dart';
 import '../../features/onboarding/presentation/image_style_screen.dart';
+import '../../features/onboarding/presentation/link_device_step_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
@@ -89,16 +89,14 @@ List<RouteBase> entryRoutes() => [
     path: Routes.onboardingPin,
     pageBuilder: (context, state) => slidePage(state, const PinScreen()),
   ),
+  // 이룸이 기기 연결 단계 (비밀암호·초대 합류 뒤, 기기가 이미 붙어 있으면 건너뜀)
+  GoRoute(
+    path: Routes.onboardingLinkDevice,
+    pageBuilder: (context, state) => slidePage(state, const LinkDeviceStepScreen()),
+  ),
   // 온보딩 끝 알림 켜기 안내 (업데이트 뒤 홈에서도 push 로 연다)
   GoRoute(
     path: Routes.onboardingNotificationIntro,
     pageBuilder: (context, state) => slidePage(state, const NotificationPermissionIntroScreen()),
-  ),
-  GoRoute(
-    path: Routes.cardCompletion,
-    builder: (context, state) => const AdaptivePageFrame(
-      kind: ScreenLayoutKind.phoneColumn,
-      child: CardCompletionScreen(),
-    ),
   ),
 ];

@@ -452,12 +452,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingNameInviteLink => '招待コードがあります';
 
   @override
-  String get onboardingCompletionTitle => '準備がすべて\n完了しました';
-
-  @override
-  String get onboardingCompletionProgress => '100% 完了！';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -1863,12 +1857,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get todayRoutinePastLoadFailedFallback => '過去の日課を読み込めませんでした';
-
-  @override
-  String get todayRoutineEmptyTitle => 'まだ作った日課はありません';
-
-  @override
-  String get todayRoutineEmptyHint => '今日最初の行動カードを作ってみましょう';
 
   @override
   String get todayRoutinePastEmpty => '過去の日課はありません';
@@ -5197,27 +5185,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '広告を見てクレジットを$count個もらう',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => '広告を見てクレジットをもらう';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: '30秒ほどかかります。今日はあと$remaining回もらえます',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => '広告を見る';
@@ -5227,6 +5195,41 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get creditTopUpAdDailyLimit => '今日の分はすべてもらいました。明日また見られます';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15〜30秒、最後まで見るとクレジット$count個',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '今日はあと$remaining回もらえます',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => '今見られる広告がありません';
+
+  @override
+  String get proFeatureMarkLabel => 'くわしく見る';
+
+  @override
+  String get proExplainAiImageStylesReason => 'カードの内容に合った絵なので、Elumiがわかりやすくなります';
+
+  @override
+  String get proExplainCardSplitReason => '難しい行動を小さなステップに分けて、一歩ずつまねできます';
+
+  @override
+  String get proExplainFreeImageRegenerateReason => '気に入るまでクレジットを気にせず絵を直せます';
 
   @override
   String get creditTopUpAdCheckFailed => '広告の情報を読み込めませんでした。少し待ってから、もう一度開いてください';
@@ -5254,15 +5257,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ クレジットをもらいました';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => '広告を最後まで見たのでもらえました';
-
-  @override
-  String get creditRewardBalanceLabel => '今のクレジット';
 
   @override
   String get lowCreditNoticeTitle => 'クレジットが残り少なくなりました';
@@ -5380,35 +5375,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get myCreditGuideLink => 'クレジットの使い方';
 
   @override
-  String get abaIntroTitle => '🧩 準備はかんたんに、毎日は自分の力で';
+  String get abaIntroTitle => '準備はかんたんに、\n毎日は自分の力で';
 
   @override
-  String get abaIntroSubtitle => 'elumは応用行動分析（ABA）の原理で作りました';
+  String get abaIntroSubtitle => '応用行動分析（ABA）の考え方で作りました';
 
   @override
-  String get abaIntroCardTitle => 'カード1枚に1つの行動';
+  String get abaIntroStepsTitle => '小さく分けます';
 
   @override
-  String get abaIntroCardBody => '何をするか、どうするか、終わったらもらえるごほうびまで';
+  String get abaIntroStepsBody => '日課を段階カードに';
 
   @override
-  String get abaIntroVoiceTitle => '短い文、絵と声';
+  String get abaIntroShowTitle => '前もって見せます';
 
   @override
-  String get abaIntroVoiceBody => '見て聞きながら、1つずつまねしてやります';
+  String get abaIntroShowBody => '絵と音声で';
 
   @override
-  String get abaIntroStarTitle => 'できたらすぐにほめ言葉と星';
+  String get abaIntroHelpTitle => '手助けを減らす';
 
   @override
-  String get abaIntroStarBody => '保護者が決めたごほうびももらえます';
+  String get abaIntroHelpBody => '自分で進めるように';
 
   @override
-  String get abaIntroGuardianTitle => '💛 いちばん大切なのは保護者です';
+  String get abaIntroRewardTitle => 'すぐにほめます';
 
   @override
-  String get abaIntroGuardianBody =>
-      'Elumiをいちばんよく知る保護者が日課とごほうびを決め、elumはElumiが自分で続けられるようにそばで手伝います';
+  String get abaIntroRewardBody => '星と決めたごほうび';
+
+  @override
+  String get abaIntroGuardianTitle => 'いちばん大切なのは保護者です';
+
+  @override
+  String get abaIntroGuardianBody => '日課とごほうびは保護者が決め、elumが手伝います';
 
   @override
   String get abaIntroStart => 'はじめる';
@@ -5466,4 +5466,351 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '個残っています';
+
+  @override
+  String get commonGoHome => 'ホームへ';
+
+  @override
+  String get onboardingLinkStepTitle => 'Elumiの端末をつなぎますか？';
+
+  @override
+  String get linkDeviceBenefitLine => '送った日課がElumiの端末にすぐ表示されます';
+
+  @override
+  String get onboardingLinkStepConnectNow => '今つなぐ';
+
+  @override
+  String get onboardingLinkStepEnterCode => 'Elumiの端末で接続コードを入れるだけです';
+
+  @override
+  String get onboardingLinkStepManyDevices => '複数の端末をつなげます';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => 'あとで設定からもつなげます';
+
+  @override
+  String get homeNextStepMakeTitle => '最初の日課を作ってみましょう';
+
+  @override
+  String get homeNextStepMakeBody => 'やることを書くと行動カードにします';
+
+  @override
+  String get homeNextStepMakeAction => '日課を作る';
+
+  @override
+  String get homeNextStepSendTitle => '作りかけの日課があります';
+
+  @override
+  String get homeNextStepSendBody => 'カードを確認して保存するとElumiの端末に届きます';
+
+  @override
+  String get homeNextStepSendAction => '続けて作る';
+
+  @override
+  String get homeNextStepLinkTitle => 'Elumiの端末をつなぎましょう';
+
+  @override
+  String get homeNextStepWaitTitle => '次はElumiの番です';
+
+  @override
+  String get elumiFinishNotifyLine => 'Elumiが終えたらお知らせします';
+
+  @override
+  String get routineSentTitle => 'Elumiの端末に送りました';
+
+  @override
+  String get routineSentReasonNotLinked => '端末をつなぐとElumiの端末にすぐ表示されます';
+
+  @override
+  String get routineSentLinkDevice => '端末をつなぐ';
+
+  @override
+  String get routineSentPreviewElumi => 'Elumi画面を見てみる';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$nameが日課を終えました';
+  }
+
+  @override
+  String get routineDonePraiseHint => '終えたことをすぐにほめてあげましょう';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '星$count個',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ほか$count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '日課が見つかりません';
+
+  @override
+  String get routineDoneNotFoundHint => '削除されたか、別のElumiの日課です';
+
+  @override
+  String get routineDoneLoadFailed => '終えた日課を読み込めませんでした';
+
+  @override
+  String get todayRoutineEmptyNotSent => 'まだ送った日課はありません';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '今日送った日課はありません';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '作っておいた日課を日課管理からすぐ送れます';
+
+  @override
+  String get notificationEmptyBody => 'Elumiが日課を終えるとここでお知らせします';
+
+  @override
+  String get notificationEmptyOpenSettings => '通知設定';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日連続',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '今日も続ければ$count日です',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日連続でできました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    return '$nameは毎日こつこつ日課を終えています';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日続けてできました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => '1週間の記録が届きました';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'この週は日課を$count個終えました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => '今週もElumiと一緒にやってみましょう';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Proで詳しく見る';
+
+  @override
+  String get lockScreenSettingsTitle => 'ロック画面カード';
+
+  @override
+  String get lockScreenGuardianTitle => '今日のElumiの日課';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '次: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '今日の日課はすべて終わりました';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '今日送った日課はありません';
+
+  @override
+  String get lockScreenStaleMessage => 'アプリを開いて今日の日課を確認しましょう';
+
+  @override
+  String get lockScreenOpenApp => 'アプリを開く';
+
+  @override
+  String get lockScreenPauseOneHour => '1時間休む';
+
+  @override
+  String get lockScreenElumiStart => 'はじめる';
+
+  @override
+  String get lockScreenElumiNowLabel => '今やることです';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '画面をつけると、今日のElumiの日課をすぐ表示します';
+
+  @override
+  String get lockScreenElumiIntroTitle => '日課の時間に画面をつけると、今やるカードを1枚大きく表示します';
+
+  @override
+  String get lockScreenIntroNoAdsNote => 'ロック画面に広告やお支払いは表示されません。いつでもオフにできます';
+
+  @override
+  String get lockScreenIntervalTitle => 'どのくらいの頻度で表示しますか';
+
+  @override
+  String get lockScreenIntervalEveryTime => 'つけるたびに';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '$minutes分ごと';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '$hours時間ごと';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '権限 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '必須';
+
+  @override
+  String get lockScreenPermissionRecommended => 'おすすめ';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '他のアプリの上に表示';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      '一覧でelumを押して許可してください。ロック画面の上にカードを表示するときに必要です';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '通知を許可';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      'カードがオンになっていることを静かな通知で表示します';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => 'バッテリー最適化の対象外にする';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '端末が機能を止めないようにします';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => 'スリープしないアプリに追加';
+
+  @override
+  String get lockScreenPermissionSamsungReason => 'Samsungの端末はもう1つ必要です';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      'バッテリー > バックグラウンドでの使用制限 > スリープしないアプリで+を押してelumを追加してください';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '設定を開く';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '追加しました';
+
+  @override
+  String get lockScreenPermissionSkip => 'スキップ';
+
+  @override
+  String get lockScreenTurnOn => 'ロック画面カードをオンにする';
+
+  @override
+  String get lockScreenTurnOff => 'ロック画面カードをオフにする';
+
+  @override
+  String get lockScreenEnableFailed => 'ロック画面カードをオンにできませんでした。権限をもう一度確認してください';
+
+  @override
+  String get lockScreenSetupDoneTitle => '準備完了!';
+
+  @override
+  String get lockScreenSetupDoneBody => '今、画面を消してからつけてみてください';
+
+  @override
+  String get lockScreenSetupComplete => '完了';
+
+  @override
+  String get lockScreenEnabledStatus => 'ロック画面カードはオンです';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '$timeまで休んでいます';
+  }
+
+  @override
+  String get lockScreenPreviewAction => 'プレビュー';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '歯みがき';
+
+  @override
+  String get lockScreenPreviewSampleCard => '歯ブラシに歯みがき粉をつけます';
+
+  @override
+  String get lockScreenPreviewNotice => 'プレビューではボタンは動きません';
+
+  @override
+  String get lockScreenIntroTitle => '📱 ロック画面ですぐ見られます';
+
+  @override
+  String get lockScreenIntroBody => '画面をつけると、アプリを開かなくても今日Elumiがいくつやったか分かります';
+
+  @override
+  String get lockScreenIntroTurnOn => 'オンにしてみる';
+
+  @override
+  String get lockScreenIntroLater => 'あとで';
+
+  @override
+  String get lockScreenOnValue => 'オン';
+
+  @override
+  String get lockScreenPermissionMissingValue => '権限が必要';
+
+  @override
+  String get modeSwitchToLockScreen => 'ロック画面カードは保護者だけが変更できます';
 }

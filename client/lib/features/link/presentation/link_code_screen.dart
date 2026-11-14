@@ -8,12 +8,12 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../onboarding/application/onboarding_exit_route.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/issued_code_memory.dart';
@@ -23,7 +23,6 @@ import '../domain/link_status.dart';
 import 'widgets/issued_code_actions.dart';
 import 'widgets/issued_code_panel.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/router/routes.dart';
 
 /// 연결 암호 만들기: 보호자 휴대폰이 이룸이 휴대폰에 알려 줄 6글자 암호를 만든다.
 ///
@@ -231,7 +230,12 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   String _shareMessage(IssuedLinkCode issued) =>
       LinkCodeLink.shareMessage(issued.code, validFor: issued.remaining());
 
-  void _goHome() => context.go(Routes.guardian);
+  /// 온보딩에서 연 화면의 `시작하기` · `나중에 할게요`: 알림 켜기 안내 차례면 안내, 아니면 홈
+  Future<void> _continueOnboarding() async {
+    final nextRoute = await ref.read(onboardingExitRouteProvider).resolveAfterLinkStep();
+    if (!mounted) return;
+    context.go(nextRoute);
+  }
 
   /// 이룸이 이름. 비어 있으면 `이룸이`로 대신한다 — 온보딩을 건너뛰고 설정에서
   /// 바로 들어오면 이름이 없을 수 있다. `의`는 받침과 무관해 그냥 붙는다.
@@ -242,8 +246,6 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
     final issued = _issued;
     // 설정에서 들어온 화면은 머리와 하단이 통째로 다르다 (클래스 주석의 표).
     final fromSettings = !widget.fromOnboarding;
@@ -274,35 +276,16 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
                 SizedBox(height: _onboardingButtonGap.h),
                 ElumButton(
                   label: context.l10n.linkCodeStartButton,
-                  onPressed: _linked ? _goHome : null,
+                  onPressed: _linked ? _continueOnboarding : null,
                 ),
               ],
             ),
-      // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
+      // `나중에 할게요`는 CTA 아래 보조 버튼으로 붙는다.
       //
       // **연결된 뒤에도 남는다** — 시안 `732:5850`이 그렇게 그려져 있다.
       // 누르면 `시작하기`와 같은 곳으로 가므로 숨겨 봐야 얻는 것이 없다.
-      //
-      // **높이를 못 박지 않는다.** 16 으로 고정하면 글꼴을 키울 때 글자 아래가 잘리고
-      // 경고도 안 난다. 글자 높이가 곧 자리이며 글꼴 1.0 에서는 시안 자리(765)와 같다.
-      // 누름 영역은 옆으로만 넓힌다 — 위아래로 넓히면 CTA 를 밀어 올린다.
       belowButton: widget.fromOnboarding
-          ? Center(
-              child: AppPressable(
-                onTap: _goHome,
-                child: Padding(
-                  // 옆 여백은 전과 같은 8 — 바꾸면 글자가 반 픽셀 옮겨 골든이 흔들린다.
-                  padding: EdgeInsets.symmetric(horizontal: space.xs.h),
-                  child: Text(
-                    context.l10n.linkCodeLater,
-                    style: context.typo.linkLater.copyWith(
-                      color: colors.linkLaterLabel,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-            )
+          ? ElumSecondaryButton(label: context.l10n.linkCodeLater, onTap: _continueOnboarding)
           : null,
       // 글꼴을 키우면(2.0) 제목 두 줄·설명·암호·타이머·칩이 한 화면을 넘는다.
       // 고정 높이 칸에 두면 아래가 넘쳐 잘리므로 스크롤로 끝까지 볼 수 있게 한다

@@ -1,3 +1,4 @@
+import '../lock_screen/lock_screen_bridge.dart';
 import '../notifications/routine_reminder_reset_hook.dart';
 import 'card_image_disk_cache.dart';
 import 'local_storage.dart';
@@ -9,6 +10,7 @@ import 'token_store.dart';
 /// - 캐시(보호자가 올린 사진 포함)는 지운 뒤에 돌아온다. 끝났다고 알린 뒤에 남아 있으면 안 된다.
 /// - 밖에서 끊긴 경우는 표식을 남겨야 하므로 `DeviceLinkRepository.releaseThisPhone` 을 쓴다.
 /// - 일과 알림 예약도 취소한다 (저장값 비우기가 남기는 알림 목록 키를 알림 기능이 함께 비움, 실패해도 계속)
+/// - 잠금화면 카드도 끄고 요약을 지운다 (일과 제목이 잠금화면에 남지 않게)
 Future<void> wipeLocalAccount({
   required TokenStore tokens,
   required LocalStorage storage,
@@ -20,6 +22,7 @@ Future<void> wipeLocalAccount({
     resetRoutineReminders,
     reason: 'account wipe',
   );
+  await clearLockScreenForSignOut();
   await tokens.clear();
   await storage.clearAll();
   await imageCache?.clear();

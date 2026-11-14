@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->
+    <string name="lock_screen_channel_name">Lock screen card</string>
+    <string name="lock_screen_channel_description">A quiet notification shown while the lock screen card is on</string>
+    <string name="lock_screen_notification_title">elum lock screen card</string>
+    <string name="lock_screen_notification_idle">Turn on the screen to see today\'s routines</string>
+    <string name="lock_screen_notification_progress">Elumi\'s routines today %1$d/%2$d</string>
+    <string name="lock_screen_notification_elumi">At routine time, turn on the screen to see the card to do now</string>
+    <string name="lock_screen_notification_paused">Paused until %1$s</string>
+    <string name="lock_screen_action_show_now">Show now</string>
+    <string name="lock_screen_action_pause">Pause 1 hour</string>
+    <string name="lock_screen_action_resume">Turn back on</string>
+</resources>

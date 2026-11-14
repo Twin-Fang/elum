@@ -7,15 +7,14 @@ import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/text/keep_words.dart';
-import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../link/domain/link_code.dart';
 import '../../link/presentation/widgets/code_entry_field.dart';
-import '../../notification/application/push_permission_prompt.dart';
+import '../../onboarding/application/onboarding_exit_route.dart';
 import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
 import '../application/invite_enter_controller.dart';
@@ -270,8 +269,8 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final joined = context.l10n.inviteJoined(name, batchimOf(name));
     // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
     final messenger = ScaffoldMessenger.maybeOf(context);
-    // 첫 홈 직전 알림 켜기 안내 (켜져 있거나 본 적 있으면 바로 홈)
-    final nextRoute = await ref.read(pushPermissionPromptProvider).resolveRouteAfterOnboarding();
+    // 합류한 이룸이에 기기가 이미 붙어 있으면 연결 단계 건너뜀 > 알림 켜기 안내 > 홈
+    final nextRoute = await ref.read(onboardingExitRouteProvider).resolveAfterProfileReady();
     if (!mounted) return;
     context.go(nextRoute);
     showElumToastOn(messenger, joined);
@@ -351,9 +350,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
     return ElumScaffold(
       onBack: context.popOrHome,
       isBackEnabled: !_sending,
@@ -364,20 +360,9 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
       ),
       // 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 길
       belowButton: _fromLink
-          ? Center(
-              child: AppPressable(
-                onTap: _sending ? null : _useManualInput,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: space.xs.h),
-                  child: Text(
-                    context.l10n.inviteEnterManualLink,
-                    style: context.typo.linkLater.copyWith(
-                      color: colors.linkLaterLabel,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
+          ? ElumSecondaryButton(
+              label: context.l10n.inviteEnterManualLink,
+              onTap: _sending ? null : _useManualInput,
             )
           : null,
       child: SingleChildScrollView(

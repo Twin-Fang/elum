@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/lock_screen_settings_tile.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
@@ -137,6 +138,18 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
     container.forgetLinkedProfile();
   }
 
+  /// 잠금화면 카드 설정: 이 기기에 보호자 암호가 있으면 확인 뒤 (이룸이가 혼자 끄고 켜지 않게)
+  /// 암호가 없는 이룸이 전용 기기는 설정 화면 자체가 보호자가 다루는 곳이라 바로 연다
+  Future<void> _openLockScreenSettings() async {
+    final hasPin = await ref.read(elumiSettingsControllerProvider).hasGuardianPin();
+    if (!mounted) return;
+    if (hasPin) {
+      final isConfirmed = await context.push<bool>(Routes.lockScreenGuardianCheck);
+      if (isConfirmed != true || !mounted) return;
+    }
+    await context.push(Routes.lockScreenSettings);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElumScaffold(
@@ -177,6 +190,11 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
                   value: ref.watch(childScreenAwakeOnProvider),
                   onChanged: (on) =>
                       ref.read(childScreenAwakeOnProvider.notifier).set(on),
+                ),
+                // 잠금화면 카드 (Android 만): 이 기기에 보호자 암호가 있으면 확인 뒤 염
+                LockScreenSettingsTile(
+                  isEnabled: !busy,
+                  onOpen: _openLockScreenSettings,
                 ),
               ],
             ),

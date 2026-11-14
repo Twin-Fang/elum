@@ -173,7 +173,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get coachTapToNext => '点一下屏幕进入下一步';
 
   @override
-  String get loginSceneEyebrow => '今天的一天,';
+  String get loginSceneEyebrow => '今天的一天，';
 
   @override
   String get loginSceneTitle => '一步一步一起来';
@@ -194,7 +194,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appStatusRecheck => '再次确认';
 
   @override
-  String get appStatusUpdateTitle => '现在更新,\n体验全新的elum吧!';
+  String get appStatusUpdateTitle => '现在更新，\n体验全新的elum吧！';
 
   @override
   String get appStatusUpdated => '已经更新了';
@@ -244,7 +244,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleElumiDescription => '完成日常';
 
   @override
-  String get roleSelectTitle => '这台设备\n由谁使用?';
+  String get roleSelectTitle => '这台设备\n由谁使用？';
 
   @override
   String get roleSelectDescription => '分为监护人模式和Elumi模式';
@@ -409,7 +409,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingCharacterDescription => '选好的朋友会在首页和奖励页面陪着你';
 
   @override
-  String get onboardingImageStyleTitle => '卡片图片要用\n哪种方式制作?';
+  String get onboardingImageStyleTitle => '卡片图片要用\n哪种方式制作？';
 
   @override
   String get onboardingImageStyleDescription => '以后可以在设置中修改';
@@ -438,22 +438,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingImageStyleCreditIntro => '积分在制作日常和图片时使用';
 
   @override
-  String get onboardingNameTitle => '要怎么称呼\nElumi呢?';
+  String get onboardingNameTitle => '要怎么称呼\nElumi呢？';
 
   @override
-  String get onboardingNameDescription => '在elum里,我们把使用的人叫作Elumi\n不用真实姓名也可以';
+  String get onboardingNameDescription => '在elum里，我们把使用的人叫作Elumi\n不用真实姓名也可以';
 
   @override
   String get onboardingNameHint => '请输入名字';
 
   @override
   String get onboardingNameInviteLink => '我有邀请码';
-
-  @override
-  String get onboardingCompletionTitle => '内容已经\n全部整理好了';
-
-  @override
-  String get onboardingCompletionProgress => '100% 完成!';
 
   @override
   String get onboardingSplashLogoLabel => 'elum';
@@ -510,20 +504,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get elumiSettingsWithdrawLabel => '注销账号';
 
   @override
-  String get elumiSettingsLogoutTitle => '要退出登录吗?';
+  String get elumiSettingsLogoutTitle => '要退出登录吗？';
 
   @override
-  String get elumiSettingsLogoutMessage => '这台设备会断开连接\n想再次使用,需要\n向监护人领取连接码';
+  String get elumiSettingsLogoutMessage => '这台设备会断开连接\n想再次使用，需要\n向监护人领取连接码';
 
   @override
   String get elumiSettingsLogoutFailTitle => '没能退出登录';
 
   @override
-  String get elumiSettingsWithdrawTitle => '要注销账号吗?';
+  String get elumiSettingsWithdrawTitle => '要注销账号吗？';
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      '只会断开这台设备的连接\n日常和星星会保留在监护人的设备上\n想再次使用,需要\n向监护人领取连接码';
+      '只会断开这台设备的连接\n日常和星星会保留在监护人的设备上\n想再次使用，需要\n向监护人领取连接码';
 
   @override
   String get elumiSettingsWithdrawAction => '注销';
@@ -541,11 +535,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get linkStatusTitle => 'Elumi的设备';
 
   @override
-  String get linkStatusRevokeConfirmTitle => '要断开连接吗?';
+  String get linkStatusRevokeConfirmTitle => '要断开连接吗？';
 
   @override
   String get linkStatusRevokeConfirmMessage =>
-      'Elumi的设备将看不到日常\n想重新连接,制作新的连接码就可以';
+      'Elumi的设备将看不到日常\n想重新连接，制作新的连接码就可以';
 
   @override
   String get linkStatusRevokeConfirmAction => '断开连接';
@@ -577,7 +571,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get linkStatusRevokeButton => '断开连接';
 
   @override
-  String get linkStatusRevokeHint => '断开后,Elumi的设备\n将看不到日常';
+  String get linkStatusRevokeHint => '断开后，Elumi的设备\n将看不到日常';
 
   @override
   String get linkStatusEmpty => '没有已连接的设备';
@@ -606,7 +600,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String linkCodeAskTitle(String name, String batchim) {
-    return '要连接$name的\n设备吗?';
+    return '要连接$name的\n设备吗？';
   }
 
   @override
@@ -618,7 +612,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get linkCodeIssueFailedFallback => '没能生成连接码。请再试一次';
 
   @override
-  String get linkCodeSuccessTitle => '设备连接成功!';
+  String get linkCodeSuccessTitle => '设备连接成功！';
 
   @override
   String get linkCodeStartButton => '开始';
@@ -678,7 +672,7 @@ class AppLocalizationsZh extends AppLocalizations {
       locale: localeName,
       other: '$minutes分钟',
     );
-    return '一起照顾Elumi吧。点击下面的链接,elum应用里会自动填好邀请码。\n邀请码只能在$_temp0内使用。\n\n$url\n\n如果链接打不开,请在应用里直接输入。\n邀请码 $code';
+    return '一起照顾Elumi吧。点击下面的链接，elum应用里会自动填好邀请码。\n邀请码只能在$_temp0内使用。\n\n$url\n\n如果链接打不开，请在应用里直接输入。\n邀请码 $code';
   }
 
   @override
@@ -694,15 +688,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardiansEditSave => '保存';
 
   @override
-  String get guardiansLeaveConfirmTitle => '要停止一起照顾吗?';
+  String get guardiansLeaveConfirmTitle => '要停止一起照顾吗？';
 
   @override
   String get guardiansLeaveConfirmMessageLast =>
-      '没有一起照顾的监护人\n离开后,和Elumi一起做的日常、攒的星星都会消失\n无法恢复';
+      '没有一起照顾的监护人\n离开后，和Elumi一起做的日常、攒的星星都会消失\n无法恢复';
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      '如果有我连接的Elumi设备,连接会断开\n需要其他监护人制作新的连接码才能再次使用\n我做的日常会消失\nElumi和其他监护人的日常、星星都会保留';
+      '如果有我连接的Elumi设备，连接会断开\n需要其他监护人制作新的连接码才能再次使用\n我做的日常会消失\nElumi和其他监护人的日常、星星都会保留';
 
   @override
   String get guardiansLeaveConfirmAction => '停止';
@@ -772,7 +766,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardiansLeaveAction => '停止一起照顾';
 
   @override
-  String get guardiansLeaveHintAlone => '只有你一个人在照顾,停止后Elumi、日常和星星都会消失';
+  String get guardiansLeaveHintAlone => '只有你一个人在照顾，停止后Elumi、日常和星星都会消失';
 
   @override
   String get guardiansLeaveHintWithOthers => '只有我做的日常会消失';
@@ -904,7 +898,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String profileSwitchSelected(String name) {
-    return '$name,正在查看的Elumi';
+    return '$name，正在查看的Elumi';
   }
 
   @override
@@ -974,7 +968,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get suggestionHospitalText => '去医院的准备';
 
   @override
-  String get suggestionHospitalPrompt => '要和Elumi一起去医院,想提前准备好让Elumi不害怕';
+  String get suggestionHospitalPrompt => '要和Elumi一起去医院，想提前准备好让Elumi不害怕';
 
   @override
   String get suggestionTripText => '校外实践的准备';
@@ -986,7 +980,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get suggestionNewPlaceText => '去新的地方';
 
   @override
-  String get suggestionNewPlacePrompt => '想在去第一次去的地方之前,帮Elumi做好心理准备';
+  String get suggestionNewPlacePrompt => '想在去第一次去的地方之前，帮Elumi做好心理准备';
 
   @override
   String get suggestionAfterSchoolText => '暑假课后班的准备';
@@ -1129,11 +1123,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String guardianHomeGreeting(String name) {
-    return '你好,\n$name的监护人 👋🏻';
+    return '你好，\n$name的监护人 👋🏻';
   }
 
   @override
-  String get guardianHomeSubtitle => '今天要准备什么日常呢?';
+  String get guardianHomeSubtitle => '今天要准备什么日常呢？';
 
   @override
   String get pinChangeMismatchCreate => '密码不一致。请重新输入';
@@ -1196,14 +1190,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rewardSaveFailedFallback => '请稍后再试';
 
   @override
-  String get rewardWhyTitle => '为什么需要奖励?';
+  String get rewardWhyTitle => '为什么需要奖励？';
 
   @override
   String get rewardWhyMessage =>
-      '完成日常后有期待的东西,Elumi就会有坚持到底的力量。\n比起一个月后的礼物,今天就能给的小东西更有效。\n不设置奖励也可以制作日常。';
+      '完成日常后有期待的东西，Elumi就会有坚持到底的力量。\n比起一个月后的礼物，今天就能给的小东西更有效。\n不设置奖励也可以制作日常。';
 
   @override
-  String get rewardHeadlineTitle => '日常完成后\n要给什么奖励?';
+  String get rewardHeadlineTitle => '日常完成后\n要给什么奖励？';
 
   @override
   String get rewardHeadlineBody => '会成为完成日常的很大动力';
@@ -1259,7 +1253,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get draftRoutinesDeleteLabel => '删除草稿';
 
   @override
-  String get draftRoutinesDeleteConfirmTitle => '要删除草稿吗?';
+  String get draftRoutinesDeleteConfirmTitle => '要删除草稿吗？';
 
   @override
   String get draftRoutinesDeleteAction => '删除';
@@ -1283,10 +1277,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get draftRoutinesEmptyTitle => '没有做到一半的日常';
 
   @override
-  String get draftRoutinesEmptyBody => '制作日常中途停下,会保留在这里';
+  String get draftRoutinesEmptyBody => '制作日常中途停下，会保留在这里';
 
   @override
-  String get cardReviewDeleteConfirmTitle => '要删除卡片吗?';
+  String get cardReviewDeleteConfirmTitle => '要删除卡片吗？';
 
   @override
   String get cardReviewDeleteAction => '删除';
@@ -1319,10 +1313,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardImageGeneratingLabel => '正在制作图片';
 
   @override
-  String get cardImageNoCreditToast => '积分不够,已放入默认图片';
+  String get cardImageNoCreditToast => '积分不够，已放入默认图片';
 
   @override
-  String get cardImageUnavailableToast => '图片没能做好,已放入默认图片';
+  String get cardImageUnavailableToast => '图片没能做好，已放入默认图片';
 
   @override
   String get cardImageMissingAfterCreateToast =>
@@ -1335,7 +1329,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardReviewSave => '保存卡片';
 
   @override
-  String get routineInputTitle => '今天需要\n做什么准备?';
+  String get routineInputTitle => '今天需要\n做什么准备？';
 
   @override
   String get routineInputSubtitle => 'AI助手Lumi会帮你分成小的行动步骤';
@@ -1347,10 +1341,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineInputPrivacyNotice => '请不要填写姓名、学校、医院、诊断名称等个人信息';
 
   @override
-  String get guardianSettingsLogoutConfirmTitle => '要退出登录吗?';
+  String get guardianSettingsLogoutConfirmTitle => '要退出登录吗？';
 
   @override
-  String get guardianSettingsWithdrawConfirmTitle => '要注销账号吗?';
+  String get guardianSettingsWithdrawConfirmTitle => '要注销账号吗？';
 
   @override
   String get guardianSettingsWithdrawConfirmMessage =>
@@ -1745,25 +1739,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineFlowLeaveConfirm => '离开';
 
   @override
-  String get routineLeaveDiscardTitle => '要停止制作日常吗?';
+  String get routineLeaveDiscardTitle => '要停止制作日常吗？';
 
   @override
-  String get routineLeaveDiscardMessage => '现在离开的话,写的内容不会保留';
+  String get routineLeaveDiscardMessage => '现在离开的话，写的内容不会保留';
 
   @override
-  String get routineLeaveDraftWhenReadyTitle => '要存为草稿再离开吗?';
+  String get routineLeaveDraftWhenReadyTitle => '要存为草稿再离开吗？';
 
   @override
   String get routineLeaveDraftWhenReadyMessage => '卡片做好后会保留在草稿里\n可以在我的信息中继续制作';
 
   @override
-  String get routineLeaveDraftTitle => '要存为草稿再离开吗?';
+  String get routineLeaveDraftTitle => '要存为草稿再离开吗？';
 
   @override
   String get routineLeaveDraftMessage => '可以在我的信息的草稿中\n继续制作';
 
   @override
-  String get routineLeaveEditTitle => '不保存就离开吗?';
+  String get routineLeaveEditTitle => '不保存就离开吗？';
 
   @override
   String get routineLeaveEditMessage => '删掉的卡片要点保存才会移除';
@@ -1818,13 +1812,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayRoutineReorderFailedFallback => '请稍后再试';
 
   @override
-  String get todayRoutineDeleteConfirmTitle => '要删除日常吗?';
+  String get todayRoutineDeleteConfirmTitle => '要删除日常吗？';
 
   @override
   String get todayRoutineStartedTitle => '这是Elumi已经开始的日常';
 
   @override
-  String get todayRoutineStartedMessage => '为了保留做过的记录,无法删除';
+  String get todayRoutineStartedMessage => '为了保留做过的记录，无法删除';
 
   @override
   String get todayRoutineDeleteAction => '删除';
@@ -1853,12 +1847,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayRoutinePastLoadFailedFallback => '没能加载过去的日常';
 
   @override
-  String get todayRoutineEmptyTitle => '还没有做好的日常';
-
-  @override
-  String get todayRoutineEmptyHint => '来做今天的第一张行为卡片吧';
-
-  @override
   String get todayRoutinePastEmpty => '没有过去的日常';
 
   @override
@@ -1872,7 +1860,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String childHomeGreeting(String name, String batchim) {
-    return '这是$name今天\n要做的事。加油!';
+    return '这是$name今天\n要做的事。加油！';
   }
 
   @override
@@ -1900,7 +1888,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '得到了$count颗星星\n完成要做的事,找到更多星星吧!',
+      other: '得到了$count颗星星\n完成要做的事，找到更多星星吧！',
     );
     return '$_temp0';
   }
@@ -1933,18 +1921,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rewardBannerPrefix => '做完后 ';
 
   @override
-  String get rewardLumiTitle => '恭喜!';
+  String get rewardLumiTitle => '恭喜！';
 
   @override
   String rewardLumiMessage(String name) {
-    return '完成了要做的事,Lumi\n给$name带来了星星';
+    return '完成了要做的事，Lumi\n给$name带来了星星';
   }
 
   @override
-  String get rewardLumiButton => '耶!';
+  String get rewardLumiButton => '耶！';
 
   @override
-  String get rewardPopoTitle => '做得好!';
+  String get rewardPopoTitle => '做得好！';
 
   @override
   String rewardPopoMessage(String name) {
@@ -1952,21 +1940,21 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get rewardPopoButton => '太好了!';
+  String get rewardPopoButton => '太好了！';
 
   @override
-  String get rewardRuruTitle => '真棒!';
+  String get rewardRuruTitle => '真棒！';
 
   @override
   String rewardRuruMessage(String name, String batchim) {
-    return '$name完成了要做的事,\nRuru说带来了礼物';
+    return '$name完成了要做的事，\nRuru说带来了礼物';
   }
 
   @override
-  String get rewardRuruButton => '好开心!';
+  String get rewardRuruButton => '好开心！';
 
   @override
-  String get routineDoneTitle => '完成日常了!';
+  String get routineDoneTitle => '完成日常了！';
 
   @override
   String routineDoneMessage(String name) {
@@ -1974,7 +1962,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get routineDoneButton => '做到了!';
+  String get routineDoneButton => '做到了！';
 
   @override
   String get routineDoneRewardCaption => '今天的奖励';
@@ -1998,7 +1986,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pinForgotLink => '忘记密码了';
 
   @override
-  String get pinForgotTitle => '想不起密码了吗?';
+  String get pinForgotTitle => '想不起密码了吗？';
 
   @override
   String get pinForgotMessage => '用监护人账号重新登录\n就能设置新密码';
@@ -2049,7 +2037,7 @@ class AppLocalizationsZh extends AppLocalizations {
       locale: localeName,
       other: '$minutes分钟',
     );
-    return '来连接Elumi要用的设备吧。在那台设备上点击下面的链接,elum应用里会自动填好连接码。\n连接码只能在$_temp0内使用。\n\n$url\n\n如果链接打不开,请在应用里直接输入。\n连接码 $code';
+    return '来连接Elumi要用的设备吧。在那台设备上点击下面的链接，elum应用里会自动填好连接码。\n连接码只能在$_temp0内使用。\n\n$url\n\n如果链接打不开，请在应用里直接输入。\n连接码 $code';
   }
 
   @override
@@ -2080,7 +2068,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myCreditSubscribeLabel => '订阅后';
 
   @override
-  String get myCreditSubscribeBody => '可以画AI图片,日常也会自动发送';
+  String get myCreditSubscribeBody => '可以画AI图片，日常也会自动发送';
 
   @override
   String get myCreditPackLabelFree => '单独购买积分';
@@ -2097,7 +2085,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '热门!';
+  String get myCreditPackPopular => '热门！';
 
   @override
   String myCreditPackBuy(int count, String price) {
@@ -2129,7 +2117,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myCreditPurchaseRecheckTitle => '还没收到积分';
 
   @override
-  String get myCreditPurchaseRecheckBody => '已经付款成功。不用再付款,只要再确认一次就好';
+  String get myCreditPurchaseRecheckBody => '已经付款成功。不用再付款，只要再确认一次就好';
 
   @override
   String get creditHistoryTitle => '积分使用记录';
@@ -2226,10 +2214,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get reminderSheetTitle => '什么时候提醒你?';
+  String get reminderSheetTitle => '什么时候提醒你？';
 
   @override
-  String get reminderSheetBody => '到设定时间,这台设备会收到通知';
+  String get reminderSheetBody => '到设定时间，这台设备会收到通知';
 
   @override
   String get reminderRepeatDaily => '每天同一时间提醒';
@@ -2253,7 +2241,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reminderPermissionDeniedTitle => '通知已关闭';
 
   @override
-  String get reminderPermissionDeniedBody => '在设备设置中允许elum通知,就能提醒你日常时间';
+  String get reminderPermissionDeniedBody => '在设备设置中允许elum通知，就能提醒你日常时间';
 
   @override
   String get reminderFailedTitle => '没能设置提醒';
@@ -2280,7 +2268,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String routineImageStylePillSemantics(String style) {
-    return '卡片图片方式 $style,点一下更换';
+    return '卡片图片方式 $style，点一下更换';
   }
 
   @override
@@ -2369,7 +2357,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get routineTemplateMorningRoutinePrompt =>
-      '想让Elumi从早上起床到去上学,按顺序做好要做的事。请告诉我:起床、上厕所、吃饭、洗脸刷牙、穿衣服、背书包穿鞋';
+      '想让Elumi从早上起床到去上学，按顺序做好要做的事。请告诉我:起床、上厕所、吃饭、洗脸刷牙、穿衣服、背书包穿鞋';
 
   @override
   String get routineTemplateAfterSchoolText => '放学回家后';
@@ -2460,7 +2448,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get routineTemplateWriteNamePrompt =>
-      '想让Elumi正确握笔,写自己的名字。请告诉我:握铅笔、放好纸、照着描名字、自己写一遍、收拾好';
+      '想让Elumi正确握笔，写自己的名字。请告诉我:握铅笔、放好纸、照着描名字、自己写一遍、收拾好';
 
   @override
   String get routineTemplateCountObjectsText => '数数游戏';
@@ -2481,7 +2469,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get routineTemplateEmotionCardPrompt =>
-      '想让Elumi因为朋友生气时,不大喊也不推人,而是拿出情绪卡片给人看。请告诉我:停下来、从口袋里拿出情绪卡片、选出现在心情的卡片、给老师看';
+      '想让Elumi因为朋友生气时，不大喊也不推人，而是拿出情绪卡片给人看。请告诉我:停下来、从口袋里拿出情绪卡片、选出现在心情的卡片、给老师看';
 
   @override
   String get routineTemplatePlayNicelyText => '和朋友好好玩';
@@ -2559,7 +2547,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianNicknameSheetSave => '保存';
 
   @override
-  String get guardianNicknameInvalidFormat => '可以使用韩文、英文、数字、连字符,2~16个字';
+  String get guardianNicknameInvalidFormat => '可以使用韩文、英文、数字、连字符，2~16个字';
 
   @override
   String guardianNicknameChangeableFrom(String since) {
@@ -2582,7 +2570,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryEmptyTitle => '还没有做好的日常';
 
   @override
-  String get routineLibraryEmptyBody => '点下面的 + 制作日常,做第一个日常吧';
+  String get routineLibraryEmptyBody => '点下面的 + 制作日常，做第一个日常吧';
 
   @override
   String get routineLibraryLoadFailedFallback => '没能加载日常';
@@ -2633,7 +2621,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineLibraryRenameFailedTitle => '没能修改名称';
 
   @override
-  String get routineLibraryRemoveConfirmTitle => '要删除这个日常吗?';
+  String get routineLibraryRemoveConfirmTitle => '要删除这个日常吗？';
 
   @override
   String get routineLibraryRemoveConfirmMessage => '会从日常管理中移除。Elumi做过的记录会保留';
@@ -2666,7 +2654,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineDetailTalkOriginPostGone => '已下架的帖子';
 
   @override
-  String get routineDetailTalkOriginBandOpenLabel => '来自故事区,查看原帖';
+  String get routineDetailTalkOriginBandOpenLabel => '来自故事区，查看原帖';
 
   @override
   String routineLibrarySent(String title, String batchim) {
@@ -2722,7 +2710,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String routineGroupTileLabel(String name, int count) {
-    return '$name分组,$count个日常';
+    return '$name分组，$count个日常';
   }
 
   @override
@@ -2762,7 +2750,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get routineGroupCreateMenuTitle => '要制作什么?';
+  String get routineGroupCreateMenuTitle => '要制作什么？';
 
   @override
   String get routineGroupCreateRoutine => '制作新日常';
@@ -2774,7 +2762,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineGroupCreateGroupDescription => '把几个日常放进一个文件夹 (例如:早上上学)';
 
   @override
-  String get routineGroupChooseTitle => '要放入哪个分组?';
+  String get routineGroupChooseTitle => '要放入哪个分组？';
 
   @override
   String routineGroupSheetCount(int count) {
@@ -2799,7 +2787,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineGroupUngrouped => '已解散分组';
 
   @override
-  String get routineGroupUngroupedEmpty => '日常都已移出,分组已解散';
+  String get routineGroupUngroupedEmpty => '日常都已移出，分组已解散';
 
   @override
   String routineGroupSent(String name) {
@@ -2813,14 +2801,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineGroupActionFailedTitle => '没能修改分组';
 
   @override
-  String get routineGroupUngroupConfirmTitle => '要解散分组吗?';
+  String get routineGroupUngroupConfirmTitle => '要解散分组吗？';
 
   @override
   String get routineGroupUngroupConfirmMessage => '里面的日常会保留在日常管理里';
 
   @override
   String routineGroupRemoveConfirmTitle(String title) {
-    return '要把$title移出分组吗?';
+    return '要把$title移出分组吗？';
   }
 
   @override
@@ -2835,7 +2823,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get childHomeGroupAllDone => '都做完了!';
+  String get childHomeGroupAllDone => '都做完了！';
 
   @override
   String get routineTitleEdit => '修改日常名称';
@@ -2864,11 +2852,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineManageCoachTapMessage => '*点一下*日常就能看卡片';
 
   @override
-  String get routineManageCoachLongPressMessage => '长按后*松开*,就会打开菜单';
+  String get routineManageCoachLongPressMessage => '长按后*松开*，就会打开菜单';
 
   @override
   String get routineManageCoachDragMessage =>
-      '长按并*移动*,就会进入整理状态\n放到其他日常上会变成*分组*\n放到中间会换位置';
+      '长按并*移动*，就会进入整理状态\n放到其他日常上会变成*分组*\n放到中间会换位置';
 
   @override
   String get cardReviewCoachEditMessage => '修改正在看的卡片的*文字和图片*\n图片也可以换成*自己的照片*';
@@ -2883,7 +2871,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get coachHelpLabel => '查看使用方法';
 
   @override
-  String get pushPermissionSheetTitle => 'Elumi完成日常时要通知你吗?';
+  String get pushPermissionSheetTitle => 'Elumi完成日常时要通知你吗？';
 
   @override
   String get pushPermissionSheetBody => '也会通知其他监护人的消息和积分提醒';
@@ -2904,13 +2892,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushPermissionNudgeTitle => '通知已关闭';
 
   @override
-  String get pushPermissionNudgeBody => '开启后,Elumi完成日常时会马上通知你';
+  String get pushPermissionNudgeBody => '开启后，Elumi完成日常时会马上通知你';
 
   @override
-  String get pushPermissionElumiTitle => '有新日常时要通知你吗?';
+  String get pushPermissionElumiTitle => '有新日常时要通知你吗？';
 
   @override
-  String get pushPermissionElumiBody => '监护人发来日常时,这台设备会收到通知';
+  String get pushPermissionElumiBody => '监护人发来日常时，这台设备会收到通知';
 
   @override
   String get pushPermissionTurnOn => '开启通知';
@@ -3129,7 +3117,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkImportSheetTitle => '拿来当日常';
 
   @override
-  String get talkImportSheetHint => '加入日常后,可以按Elumi的情况修改';
+  String get talkImportSheetHint => '加入日常后，可以按Elumi的情况修改';
 
   @override
   String get talkImportElumiLabel => 'Elumi';
@@ -3189,7 +3177,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkFailedFallback => '请稍后再试';
 
   @override
-  String get talkCommentDeleteTitle => '要删除评论吗?';
+  String get talkCommentDeleteTitle => '要删除评论吗？';
 
   @override
   String get talkCommentDeleteAction => '删除';
@@ -3213,7 +3201,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkMoreLabel => '更多';
 
   @override
-  String get talkTakeDownTitle => '要下架这个帖子吗?';
+  String get talkTakeDownTitle => '要下架这个帖子吗？';
 
   @override
   String get talkTakeDownMessage => '下架的帖子其他监护人就看不到了。';
@@ -3268,7 +3256,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String talkBlockTitle(String nickname) {
-    return '要隐藏$nickname的帖子吗?';
+    return '要隐藏$nickname的帖子吗？';
   }
 
   @override
@@ -3306,7 +3294,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkRulesTitle => '故事区使用规则';
 
   @override
-  String get talkRulesIntro => '为了让监护人之间安全地分享,请遵守这三条。';
+  String get talkRulesIntro => '为了让监护人之间安全地分享，请遵守这三条。';
 
   @override
   String get talkRulesPrivacy => '请不要露出脸、名字、学校、家庭住址';
@@ -3318,7 +3306,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkRulesNoDiagnosis => '请不要写诊断名称或医院信息';
 
   @override
-  String get talkRulesAgreeCheck => '我已阅读以上规则,会遵守';
+  String get talkRulesAgreeCheck => '我已阅读以上规则，会遵守';
 
   @override
   String get talkRulesAgreeButton => '同意并继续';
@@ -3330,7 +3318,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkShareTitle => '发到故事区';
 
   @override
-  String get talkSharePickTitle => '要分享哪个日常?';
+  String get talkSharePickTitle => '要分享哪个日常？';
 
   @override
   String get talkSharePickEmpty => '没有可以发布的日常';
@@ -3346,10 +3334,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkSharePreviewFailed => '没能加载要发布的内容';
 
   @override
-  String get talkSharePhotoTitle => '照片要怎么发布?';
+  String get talkSharePhotoTitle => '照片要怎么发布？';
 
   @override
-  String get talkSharePhotoGuide => '如果能看到脸、名字、家庭住址,请模糊处理。\nAI做的图片会原样发布';
+  String get talkSharePhotoGuide => '如果能看到脸、名字、家庭住址，请模糊处理。\nAI做的图片会原样发布';
 
   @override
   String get talkSharePhotoBlur => '模糊';
@@ -3400,7 +3388,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get talkLinkTurnOff => '关闭链接';
 
   @override
-  String get talkLinkConfirmTitle => '要用链接发送这个日程吗?';
+  String get talkLinkConfirmTitle => '要用链接发送这个日程吗？';
 
   @override
   String get talkLinkConfirmGuide => '只有收到链接的人才能看到，不会发到故事区。\n发送后也可以在日程管理里关闭链接';
@@ -3410,7 +3398,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '已经发送过链接。会按第一次发送时的样子再次发送同一个链接。\n要发送修改后的内容，请先关闭链接再重新发送';
 
   @override
-  String get talkLinkPhotoTitle => '照片要怎么发送?';
+  String get talkLinkPhotoTitle => '照片要怎么发送？';
 
   @override
   String get talkLinkPhotoGuide => '如果能看到脸、名字或住址，请模糊处理。\nAI生成的图片会原样显示';
@@ -3433,7 +3421,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get talkLinkTurnOffTitle => '要关闭链接吗?';
+  String get talkLinkTurnOffTitle => '要关闭链接吗？';
 
   @override
   String get talkLinkTurnOffMessage => '收到链接的人将无法再查看。已经拿去的日程会保留';
@@ -3519,7 +3507,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportOpen => '下载打印版';
 
   @override
-  String get cardExportFormatSection => '要怎么下载?';
+  String get cardExportFormatSection => '要怎么下载？';
 
   @override
   String get cardExportFormatRoutineSheet => '一页日常';
@@ -3540,7 +3528,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportFormatCardImagesCaption => '每张卡片一张图片';
 
   @override
-  String get cardExportPerPageSection => '每页放几张?';
+  String get cardExportPerPageSection => '每页放几张？';
 
   @override
   String get cardExportIncludeText => '加入卡片文字';
@@ -3583,13 +3571,13 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '有$count张卡片没能加载图片,会用其他图片或标题代替',
+      other: '有$count张卡片没能加载图片，会用其他图片或标题代替',
     );
     return '$_temp0';
   }
 
   @override
-  String get cardExportActualSizeHint => '在其他应用中打印时,请选择实际大小';
+  String get cardExportActualSizeHint => '在其他应用中打印时，请选择实际大小';
 
   @override
   String get cardExportPrint => '打印';
@@ -3647,7 +3635,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportOrientationRow => '纸张方向';
 
   @override
-  String get cardExportOrientationSheetTitle => '纸张要怎么放?';
+  String get cardExportOrientationSheetTitle => '纸张要怎么放？';
 
   @override
   String get cardExportOrientationPortrait => '纵向';
@@ -3662,7 +3650,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportCardSizeRow => '卡片大小';
 
   @override
-  String get cardExportCardSizeSheetTitle => '卡片要放多大?';
+  String get cardExportCardSizeSheetTitle => '卡片要放多大？';
 
   @override
   String get cardExportCardSizeFit => '铺满';
@@ -3680,7 +3668,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportUpsellTitle => '有Pro就能按想要的方式下载';
 
   @override
-  String get cardExportUpsellBody => '一页日常、剪下来用的卡片、一页多张、横向纸张,连设计都能选';
+  String get cardExportUpsellBody => '一页日常、剪下来用的卡片、一页多张、横向纸张，连设计都能选';
 
   @override
   String get modeSwitchToPurchase => '只有监护人可以付款';
@@ -3695,7 +3683,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitWeeklyReport => '接收每周报告';
 
   @override
-  String get planBenefitRoutineSchedule => '定好星期和时间,每天发送';
+  String get planBenefitRoutineSchedule => '定好星期和时间，每天发送';
 
   @override
   String get planBenefitRoutineMemory => '记住我修改的方式';
@@ -3726,7 +3714,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitMoreMonthlyCredits => '每月获得更多积分';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '打印件底部没有标志条,干净整洁';
+  String get planBenefitCardExportWithoutWatermark => '打印件底部没有标志条，干净整洁';
 
   @override
   String get planBenefitCardExportAllThemes => '可以选择所有打印设计';
@@ -3735,7 +3723,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitCardExportAllLayouts => '可以打印一页日常、剪下来用的卡片';
 
   @override
-  String get planKeepContentNotice => 'Pro结束后,做好的日常和图片也会保留';
+  String get planKeepContentNotice => 'Pro结束后，做好的日常和图片也会保留';
 
   @override
   String get planPeriodMonthly => '1个月';
@@ -3766,19 +3754,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planLegalBillingAppStore =>
-      '确认购买时将从Apple ID账户扣款。如果在当前周期结束前至少24小时未取消,订阅将按相同周期和价格自动续订,并在周期结束前24小时内收取下一期费用。';
+      '确认购买时将从Apple ID账户扣款。如果在当前周期结束前至少24小时未取消，订阅将按相同周期和价格自动续订，并在周期结束前24小时内收取下一期费用。';
 
   @override
   String get planLegalCancelAppStore =>
-      '可以在设备设置的Apple ID > 订阅中管理和取消订阅。取消后,剩余期间内仍可使用Pro。';
+      '可以在设备设置的Apple ID > 订阅中管理和取消订阅。取消后，剩余期间内仍可使用Pro。';
 
   @override
   String get planLegalBillingPlayStore =>
-      '确认购买时将从Google Play账户扣款。在取消之前,订阅将按相同周期和价格自动续订。';
+      '确认购买时将从Google Play账户扣款。在取消之前，订阅将按相同周期和价格自动续订。';
 
   @override
   String get planLegalCancelPlayStore =>
-      '可以在Google Play商店的付款和订阅 > 订阅中管理和取消订阅。取消后,剩余期间内仍可使用Pro。';
+      '可以在Google Play商店的付款和订阅 > 订阅中管理和取消订阅。取消后，剩余期间内仍可使用Pro。';
 
   @override
   String planTrialDays(int count) {
@@ -3816,10 +3804,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get planLegalTrialAppStore => '如果在免费体验结束前至少24小时取消,就不会收费。';
+  String get planLegalTrialAppStore => '如果在免费体验结束前至少24小时取消，就不会收费。';
 
   @override
-  String get planLegalTrialPlayStore => '在免费体验期间取消,就不会收费。';
+  String get planLegalTrialPlayStore => '在免费体验期间取消，就不会收费。';
 
   @override
   String get planVerifying => '正在确认付款';
@@ -3919,7 +3907,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String planStatusUntil(String date) {
-    return 'Pro,到$date';
+    return 'Pro，到$date';
   }
 
   @override
@@ -3928,22 +3916,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get planStatusGracePeriod => 'Pro,需要确认付款';
+  String get planStatusGracePeriod => 'Pro，需要确认付款';
 
   @override
   String planStatusTrial(int days) {
-    return 'Pro体验中,还剩$days天';
+    return 'Pro体验中，还剩$days天';
   }
 
   @override
-  String get planStatusTrialLastDay => 'Pro体验中,今天截止';
+  String get planStatusTrialLastDay => 'Pro体验中，今天截止';
 
   @override
   String get planStatusGift => 'Pro礼物';
 
   @override
   String planStatusGiftUntil(String date) {
-    return 'Pro礼物,到$date';
+    return 'Pro礼物，到$date';
   }
 
   @override
@@ -3981,7 +3969,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String planSheetRenewingNote(String date) {
-    return '如果不取消,将在$date自动付款。可以在管理订阅中取消';
+    return '如果不取消，将在$date自动付款。可以在管理订阅中取消';
   }
 
   @override
@@ -4107,7 +4095,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get weeklyReportEmptyTitle => '这一周没有发送日常';
 
   @override
-  String get weeklyReportEmptyBody => '发送日常后,Elumi完成的记录会汇集在这里';
+  String get weeklyReportEmptyBody => '发送日常后，Elumi完成的记录会汇集在这里';
 
   @override
   String get weeklyReportNoCompletionThisWeekTitle => '本周还没有记录';
@@ -4116,7 +4104,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get weeklyReportNoCompletionPastWeekTitle => '这一周没有完成的日常';
 
   @override
-  String get weeklyReportNoCompletionBody => '要发送今天的日常吗?';
+  String get weeklyReportNoCompletionBody => '要发送今天的日常吗？';
 
   @override
   String get weeklyReportGoToManage => '去日常管理';
@@ -4247,7 +4235,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get weeklyReportInsightStuckShorten => '可以把卡片文字改短一些,或者分成两张';
+  String get weeklyReportInsightStuckShorten => '可以把卡片文字改短一些，或者分成两张';
 
   @override
   String get weeklyReportInsightStuckAddMedia => '可以加上声音或照片试试';
@@ -4332,7 +4320,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get weeklyReportSave => '保存报告';
 
   @override
-  String get weeklyReportSaveSheetTitle => '要怎么保存报告?';
+  String get weeklyReportSaveSheetTitle => '要怎么保存报告？';
 
   @override
   String get weeklyReportPastReports => '查看过去的报告';
@@ -4386,16 +4374,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro已结束,已暂停';
+  String get routineSchedulePaused => 'Pro已结束，已暂停';
 
   @override
-  String get routineSchedulePausedNote => 'Pro已结束,重复已暂停。设置好的星期和时间仍然保留';
+  String get routineSchedulePausedNote => 'Pro已结束，重复已暂停。设置好的星期和时间仍然保留';
 
   @override
-  String get routineScheduleSheetTitle => '什么时候做?';
+  String get routineScheduleSheetTitle => '什么时候做？';
 
   @override
-  String get routineScheduleSheetBody => '在选好的每个星期几,这个日常会成为今天的日常';
+  String get routineScheduleSheetBody => '在选好的每个星期几，这个日常会成为今天的日常';
 
   @override
   String get routineScheduleDaysLabel => '星期';
@@ -4413,7 +4401,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineScheduleElumiNotificationOffHint => '请在Elumi设备的设置中开启elum通知';
 
   @override
-  String get routineScheduleElumiNoDevice => '连接Elumi的设备后,到时间会收到通知';
+  String get routineScheduleElumiNoDevice => '连接Elumi的设备后，到时间会收到通知';
 
   @override
   String get routineScheduleSave => '保存';
@@ -4460,7 +4448,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get weeklyPlanEmptyTitle => '还没有设置星期的日常';
 
   @override
-  String get weeklyPlanEmptyBody => '在日常管理中点一个日常,设置星期和时间吧';
+  String get weeklyPlanEmptyBody => '在日常管理中点一个日常，设置星期和时间吧';
 
   @override
   String get weeklyPlanLoadFailed => '没能加载每周计划';
@@ -4506,7 +4494,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianVoiceDelete => '删除';
 
   @override
-  String get guardianVoiceDeleteConfirmTitle => '要删除录音吗?';
+  String get guardianVoiceDeleteConfirmTitle => '要删除录音吗？';
 
   @override
   String get guardianVoiceDeleteConfirmMessage => '删除后会用默认声音朗读';
@@ -4559,7 +4547,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get memoryHeroBody => '记住你修改的方式,下次就按这个方式制作日常。只有你能看到';
+  String get memoryHeroBody => '记住你修改的方式，下次就按这个方式制作日常。只有你能看到';
 
   @override
   String get memoryStatApplied => '使用中';
@@ -4587,7 +4575,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String memoryRuleByAi(int count) {
-    return 'AI发现,$count个日常';
+    return 'AI发现，$count个日常';
   }
 
   @override
@@ -4615,7 +4603,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get memoryEmptyTitle => '修改日常后发送,就会积累在这里';
+  String get memoryEmptyTitle => '修改日常后发送，就会积累在这里';
 
   @override
   String get memoryEmptyEdits => '还没有修改后发送的日常';
@@ -4687,7 +4675,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String memoryObsAsk(String phrase) {
-    return '$phrase。下一个日常也这样做吗?';
+    return '$phrase。下一个日常也这样做吗？';
   }
 
   @override
@@ -4725,7 +4713,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineMemoryDeleteLine => '删除这一行';
 
   @override
-  String get routineMemoryClearConfirmTitle => '要删除全部备注吗?';
+  String get routineMemoryClearConfirmTitle => '要删除全部备注吗？';
 
   @override
   String get routineMemoryClearConfirmMessage => '删除的备注无法恢复。';
@@ -4770,7 +4758,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get proTeaserWeeklyReportBenefit => '可以把一周完成的日常整理成一页发送';
 
   @override
-  String get proTeaserRoutineMemoryBenefit => '记住你修改的方式,让下一个日常更合适';
+  String get proTeaserRoutineMemoryBenefit => '记住你修改的方式，让下一个日常更合适';
 
   @override
   String get proTeaserCardThemeBenefit => '可以下载多种设计的打印卡片';
@@ -4803,11 +4791,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardRegenerateChip => '重新画';
 
   @override
-  String get cardRegenerateSheetTitle => '要重新画图片吗?';
+  String get cardRegenerateSheetTitle => '要重新画图片吗？';
 
   @override
   String cardRegenerateCostProFree(int count) {
-    return '不用积分,今天还剩$count次';
+    return '不用积分，今天还剩$count次';
   }
 
   @override
@@ -4828,7 +4816,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       credits,
       locale: localeName,
-      other: '今天的$freeCount次免费已用完,将使用$credits个积分',
+      other: '今天的$freeCount次免费已用完，将使用$credits个积分',
     );
     return '$_temp0';
   }
@@ -4858,7 +4846,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       available,
       locale: localeName,
-      other: '$costs,现在有$available个',
+      other: '$costs，现在有$available个',
     );
     return '$_temp0';
   }
@@ -4895,7 +4883,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardFirstDrawProChip => '用Pro画AI图片';
 
   @override
-  String get cardFirstDrawSheetTitle => '要画AI图片吗?';
+  String get cardFirstDrawSheetTitle => '要画AI图片吗？';
 
   @override
   String get cardRedrawSheetBody => '请写下或选择想修改的地方。留空就按原样重新画';
@@ -4931,16 +4919,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardFirstDrawFailedTitle => '没能画AI图片';
 
   @override
-  String get cardRedrawFailedFallback => '要再试一次吗?积分没有被使用';
+  String get cardRedrawFailedFallback => '要再试一次吗？积分没有被使用';
 
   @override
-  String get cardCandidateFailedFallback => '新图片已经画好,用掉的积分不会退还。请稍后再试';
+  String get cardCandidateFailedFallback => '新图片已经画好，用掉的积分不会退还。请稍后再试';
 
   @override
-  String get cardCandidateSheetTitle => '要用哪张图片?';
+  String get cardCandidateSheetTitle => '要用哪张图片？';
 
   @override
-  String get cardCandidateSheetBody => '只有选中的图片会给Elumi看\n不管选哪张,用掉的积分都不会退还';
+  String get cardCandidateSheetBody => '只有选中的图片会给Elumi看\n不管选哪张，用掉的积分都不会退还';
 
   @override
   String get cardCandidateCurrentLabel => '现在的图片';
@@ -4964,7 +4952,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planHeroHeadline => '变成专为Elumi制作的卡片';
 
   @override
-  String get planHeroSubline => '同样的日常,用Pro制作会变成这样';
+  String get planHeroSubline => '同样的日常，用Pro制作会变成这样';
 
   @override
   String get planHeroFreeTag => 'Free 表情符号';
@@ -4973,7 +4961,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planHeroProTag => 'Pro 漫画图';
 
   @override
-  String get planHeroCompareSemantics => 'Free是表情符号卡片,Pro是漫画图卡片';
+  String get planHeroCompareSemantics => 'Free是表情符号卡片，Pro是漫画图卡片';
 
   @override
   String planBenefitGroupCards(String elumiName) {
@@ -5056,7 +5044,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myPlanFreeBodyMonth => '用每月获得的积分制作日常';
 
   @override
-  String get proTeaserWeeklyPlanTitle => '只要设好星期和时间,当天的日常就会准备好';
+  String get proTeaserWeeklyPlanTitle => '只要设好星期和时间，当天的日常就会准备好';
 
   @override
   String get proTeaserWeeklyReportTitle => '把一周整理成一页来看';
@@ -5165,27 +5153,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '看广告获得$count个积分',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => '看广告获得积分';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: '大约30秒,今天还能领$remaining次',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => '看广告';
@@ -5195,6 +5163,41 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get creditTopUpAdDailyLimit => '今天已经领完了。明天可以再看';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15到30秒，看完可得$count个积分',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '今天还能领$remaining次',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => '现在没有可看的广告';
+
+  @override
+  String get proFeatureMarkLabel => '了解详情';
+
+  @override
+  String get proExplainAiImageStylesReason => '图片和卡片内容相符，Elumi更容易看懂';
+
+  @override
+  String get proExplainCardSplitReason => '把难的行动拆成小步骤，Elumi可以一步一步跟着做';
+
+  @override
+  String get proExplainFreeImageRegenerateReason => '不用担心积分，可以改到满意为止';
 
   @override
   String get creditTopUpAdCheckFailed => '没能加载广告信息。请稍后再打开';
@@ -5222,15 +5225,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ 获得了积分';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => '看完了广告获得';
-
-  @override
-  String get creditRewardBalanceLabel => '现在的积分';
 
   @override
   String get lowCreditNoticeTitle => '积分快用完了';
@@ -5289,7 +5284,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get creditGuideKeepGoing => '已经开始的日常,积分不够也会做完';
+  String get creditGuideKeepGoing => '已经开始的日常，积分不够也会做完';
 
   @override
   String get creditGuideRefillWeek => '每周一0点重新补满';
@@ -5302,7 +5297,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Pro的日常文字不限,重新画每天免费$count次',
+      other: 'Pro的日常文字不限，重新画每天免费$count次',
     );
     return '$_temp0';
   }
@@ -5348,34 +5343,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myCreditGuideLink => '积分这样用';
 
   @override
-  String get abaIntroTitle => '🧩 准备很轻松,日常自己来';
+  String get abaIntroTitle => '准备很轻松，\n日常自己来';
 
   @override
-  String get abaIntroSubtitle => 'elum是根据应用行为分析(ABA)的原理制作的';
+  String get abaIntroSubtitle => '根据应用行为分析（ABA）原理制作';
 
   @override
-  String get abaIntroCardTitle => '一张卡片一个行动';
+  String get abaIntroStepsTitle => '拆小';
 
   @override
-  String get abaIntroCardBody => '做什么、怎么做,还有做完后的奖励';
+  String get abaIntroStepsBody => '把日常拆成步骤卡片';
 
   @override
-  String get abaIntroVoiceTitle => '简短的句子,图片和声音';
+  String get abaIntroShowTitle => '提前展示';
 
   @override
-  String get abaIntroVoiceBody => '边看边听,一步一步跟着做';
+  String get abaIntroShowBody => '用图片和声音';
 
   @override
-  String get abaIntroStarTitle => '做到了马上表扬和给星星';
+  String get abaIntroHelpTitle => '先帮忙，再减少';
 
   @override
-  String get abaIntroStarBody => '还能得到监护人定的奖励';
+  String get abaIntroHelpBody => '让Elumi自己接着做';
 
   @override
-  String get abaIntroGuardianTitle => '💛 最重要的是监护人';
+  String get abaIntroRewardTitle => '马上表扬';
 
   @override
-  String get abaIntroGuardianBody => '最了解Elumi的监护人来定日常和奖励,elum在身边帮助Elumi自己坚持下去';
+  String get abaIntroRewardBody => '星星和定好的奖励';
+
+  @override
+  String get abaIntroGuardianTitle => '最重要的是监护人';
+
+  @override
+  String get abaIntroGuardianBody => '日常和奖励由监护人来定，elum在身边帮忙';
 
   @override
   String get abaIntroStart => '开始';
@@ -5387,7 +5388,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationIntroTitle => '🔔 请一定要开启通知';
 
   @override
-  String get notificationIntroBody => '开启后,Elumi的消息会马上通知你,不会错过';
+  String get notificationIntroBody => '开启后，Elumi的消息会马上通知你，不会错过';
 
   @override
   String get notificationIntroRoutineDone => 'Elumi完成日常时';
@@ -5414,10 +5415,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationOffNoticeAction => '开启通知';
 
   @override
-  String get homeAutoSendUpsellTitle => '⏰ 要每天在同一时间自动发送吗?';
+  String get homeAutoSendUpsellTitle => '⏰ 要每天在同一时间自动发送吗？';
 
   @override
-  String get homeAutoSendUpsellBody => '设好星期和时间,到时就会发送到Elumi的设备';
+  String get homeAutoSendUpsellBody => '设好星期和时间，到时就会发送到Elumi的设备';
 
   @override
   String get homeAutoSendUpsellAction => '查看详情';
@@ -5433,4 +5434,349 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '个积分可用';
+
+  @override
+  String get commonGoHome => '回到首页';
+
+  @override
+  String get onboardingLinkStepTitle => '要连接Elumi的设备吗？';
+
+  @override
+  String get linkDeviceBenefitLine => '发送的日常会马上出现在Elumi的设备上';
+
+  @override
+  String get onboardingLinkStepConnectNow => '现在连接';
+
+  @override
+  String get onboardingLinkStepEnterCode => '只要在Elumi的设备上输入连接码';
+
+  @override
+  String get onboardingLinkStepManyDevices => '可以连接多台设备';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => '之后也可以在设置里连接';
+
+  @override
+  String get homeNextStepMakeTitle => '来做第一个日常吧';
+
+  @override
+  String get homeNextStepMakeBody => '写下要做的事，我们会把它变成行动卡片';
+
+  @override
+  String get homeNextStepMakeAction => '制作日常';
+
+  @override
+  String get homeNextStepSendTitle => '有还没做完的日常';
+
+  @override
+  String get homeNextStepSendBody => '确认卡片并保存后，就会发到Elumi的设备';
+
+  @override
+  String get homeNextStepSendAction => '继续制作';
+
+  @override
+  String get homeNextStepLinkTitle => '连接Elumi的设备';
+
+  @override
+  String get homeNextStepWaitTitle => '接下来轮到Elumi了';
+
+  @override
+  String get elumiFinishNotifyLine => 'Elumi完成后会通知你';
+
+  @override
+  String get routineSentTitle => '已发送到Elumi的设备';
+
+  @override
+  String get routineSentReasonNotLinked => '连接设备后会马上出现在Elumi的设备上';
+
+  @override
+  String get routineSentLinkDevice => '连接设备';
+
+  @override
+  String get routineSentPreviewElumi => '预览Elumi画面';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$name完成了日常';
+  }
+
+  @override
+  String get routineDonePraiseHint => '完成后请马上表扬';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count颗星',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '还有$count个',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '找不到这个日常';
+
+  @override
+  String get routineDoneNotFoundHint => '可能已删除，或属于其他Elumi';
+
+  @override
+  String get routineDoneLoadFailed => '无法加载完成的日常';
+
+  @override
+  String get todayRoutineEmptyNotSent => '还没有发送过日常';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '今天还没有发送日常';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '可以在日常管理里马上发送做好的日常';
+
+  @override
+  String get notificationEmptyBody => 'Elumi完成日常后会在这里通知你';
+
+  @override
+  String get notificationEmptyOpenSettings => '通知设置';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续$count天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '今天继续就是$count天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续$count天做到了',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    return '$name每天都在坚持完成日常';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已经连续做了$count天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => '一周记录已送达';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '这一周完成了$count个日常',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => '这周也和Elumi一起加油吧';
+
+  @override
+  String get weeklyReportNotificationProDetail => '用Pro查看详情';
+
+  @override
+  String get lockScreenSettingsTitle => '锁屏卡片';
+
+  @override
+  String get lockScreenGuardianTitle => 'Elumi今天的日常';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '下一个: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '今天的日常都完成了';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '今天没有发送日常';
+
+  @override
+  String get lockScreenStaleMessage => '打开应用查看今天的日常';
+
+  @override
+  String get lockScreenOpenApp => '打开应用';
+
+  @override
+  String get lockScreenPauseOneHour => '暂停1小时';
+
+  @override
+  String get lockScreenElumiStart => '开始';
+
+  @override
+  String get lockScreenElumiNowLabel => '这是现在要做的事';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '打开屏幕就能马上看到Elumi今天的日常';
+
+  @override
+  String get lockScreenElumiIntroTitle => '到了日常时间，打开屏幕就会大大地显示现在要做的一张卡片';
+
+  @override
+  String get lockScreenIntroNoAdsNote => '锁屏上不会出现广告和付款，随时可以关闭';
+
+  @override
+  String get lockScreenIntervalTitle => '多久显示一次？';
+
+  @override
+  String get lockScreenIntervalEveryTime => '每次打开';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '每$minutes分钟';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '每$hours小时';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '权限 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '必需';
+
+  @override
+  String get lockScreenPermissionRecommended => '建议';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '在其他应用上层显示';
+
+  @override
+  String get lockScreenPermissionOverlayReason => '请在列表中点elum并允许。在锁屏上显示卡片时需要';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '允许通知';
+
+  @override
+  String get lockScreenPermissionNotificationReason => '显示卡片已开启的安静通知';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => '不进行电池优化';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '防止设备停止此功能';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => '添加到永不休眠的应用';
+
+  @override
+  String get lockScreenPermissionSamsungReason => '三星设备还需要再设置一次';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      '请在 电池 > 后台使用限制 > 永不休眠的应用 中点+添加elum';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '打开设置';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '已添加';
+
+  @override
+  String get lockScreenPermissionSkip => '跳过';
+
+  @override
+  String get lockScreenTurnOn => '开启锁屏卡片';
+
+  @override
+  String get lockScreenTurnOff => '关闭锁屏卡片';
+
+  @override
+  String get lockScreenEnableFailed => '无法开启锁屏卡片，请再次检查权限';
+
+  @override
+  String get lockScreenSetupDoneTitle => '准备好了!';
+
+  @override
+  String get lockScreenSetupDoneBody => '现在试着关闭再打开屏幕';
+
+  @override
+  String get lockScreenSetupComplete => '完成';
+
+  @override
+  String get lockScreenEnabledStatus => '锁屏卡片已开启';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '暂停到 $time';
+  }
+
+  @override
+  String get lockScreenPreviewAction => '预览';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '刷牙';
+
+  @override
+  String get lockScreenPreviewSampleCard => '在牙刷上挤牙膏';
+
+  @override
+  String get lockScreenPreviewNotice => '预览中按钮不起作用';
+
+  @override
+  String get lockScreenIntroTitle => '📱 在锁屏上直接查看';
+
+  @override
+  String get lockScreenIntroBody => '打开屏幕，不用打开应用也能看到Elumi今天完成了几个';
+
+  @override
+  String get lockScreenIntroTurnOn => '开启试试';
+
+  @override
+  String get lockScreenIntroLater => '以后再说';
+
+  @override
+  String get lockScreenOnValue => '开启';
+
+  @override
+  String get lockScreenPermissionMissingValue => '需要权限';
+
+  @override
+  String get modeSwitchToLockScreen => '只有监护人可以更改锁屏卡片';
 }

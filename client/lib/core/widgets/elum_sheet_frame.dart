@@ -7,7 +7,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
-import 'app_fade_slide_in.dart';
+import 'app_reveal.dart';
 import 'elum_bottom_sheet.dart';
 import 'pro_badge.dart';
 
@@ -77,7 +77,7 @@ class ElumSheetFrame extends StatelessWidget {
               children: [
                 if (title != null) ...[
                   // 머리: 제목 > 설명 (시트가 올라오는 동안 살짝 늦게 떠오른다)
-                  AppFadeSlideIn(
+                  AppReveal(
                     offset: 8,
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: _textInset.w),
@@ -111,7 +111,7 @@ class ElumSheetFrame extends StatelessWidget {
                   ),
                   SizedBox(height: _headerToBody.h),
                 ],
-                AppFadeSlideIn(
+                AppReveal(
                   delay: const Duration(
                     milliseconds: AppMotion.staggerDelayMs * 2,
                   ),

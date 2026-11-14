@@ -430,6 +430,19 @@ placeholder  #DADADA "이름을 입력해주세요" (중앙 정렬, x=90)
 
 동작 줄이기가 켜져 있으면 흔들지 않고 햅틱만 남긴다. 적용처: PIN 재입력 불일치.
 
+### 작은 카드 · 하이라이트 띠 — 시안 전 (#1407, 개편 단계 0)
+
+홈 안내·가이드 팁·빈 상태처럼 작은 자리를 한 모양으로 맞추는 부품. 화면 적용은 개편 단계 1~5에서 한다.
+개발자 도구 > `디자인 기반 미리 보기`에서 실제 토큰으로 본다.
+
+| 부품 | 모양 | 토큰 |
+| --- | --- | --- |
+| `ElumInfoCard` | 3D 그림(왼쪽 56 · 위 96) + 굵은 제목 + 회색 한 줄 + (선택) 민트 행동 알약 · 닫기 x. 흰 판 · 모서리 20 · 옅은 그림자 · 눌림(카드 0.985) | `infoCardShadow` · `infoHighlightMint*` |
+| `ElumHighlight` | 연한 민트/피치 띠 + 3D 아이콘 32 + 한 줄. 모서리 16 | `infoHighlightMintFill` · `infoHighlightPeachFill` |
+| `ElumEmptyState` | 빈 상태 · 실패 · 오프라인 공통 (#1408). 3D 그림(화면 160 · 칸 안 96, 톡 튐) + 제목 + (한 줄) + (행동 1개: 화면은 채운 버튼, 칸 안은 보조 버튼) + (에러 코드). `ElumErrorView` 전체 화면도 이것을 씀 | `textPrimary` · `textSecondary` · `promptMuted` |
+
+그림은 `AppAssets.featureIcon*`(256) · `emptyState*` · `celebration*`(512) 3D 세트를 쓴다 (이미지 하네스, 루미 규칙).
+
 ## Figma에 없는 화면을 만들 때 ⚠️
 
 로그인·약관 동의처럼 **디자인 원본이 없는 화면**이 생기면 아래를 따른다.

@@ -32,6 +32,9 @@ import 'features/reminder/application/routine_reminder_controller.dart';
 import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
 
+// 잠금화면 엔진 진입점을 앱 빌드에 포함 (main 에서 닿지 않는 라이브러리는 AOT 컴파일에서 빠짐)
+export 'main_lock_screen.dart' show lockScreenMain;
+
 Future<void> main() async {
   AppLogger.appStarted();
 

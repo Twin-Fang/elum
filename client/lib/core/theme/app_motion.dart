@@ -1,4 +1,4 @@
-import 'package:flutter/animation.dart';
+import 'package:flutter/widgets.dart';
 
 /// 모션 토큰 — duration·curve의 단일 출처.
 ///
@@ -88,6 +88,11 @@ abstract final class AppMotion {
   /// 버튼 눌림 복귀 (살짝 튕긴다)
   static const springOut = ElasticOutCurve(0.5);
 
+  /// 톡 튀어나오는 등장 (AppPopIn · 축하 그림): 끝을 살짝 넘었다가 제자리
+  ///
+  /// [springOut] 은 잔진동이 길어 등장에 쓰면 흔들려 보인다. 이 곡선은 한 번만 넘는다.
+  static const springPop = Cubic(0.34, 1.56, 0.64, 1);
+
   // --- stagger ---
 
   /// 리스트 아이템이 순차 등장하는 간격.
@@ -112,4 +117,39 @@ abstract final class AppMotion {
   /// 500 안에서는 숫자가 건너뛰어 "바뀌었다"만 보이고 "얼마나 줄었다"가 안 보인다.
   /// 아무것도 막지 않는 연출이라 기다림이 생기지 않는다.
   static const valueChange = Duration(milliseconds: 800);
+
+  /// 세며 올라가는 숫자 (AppCountUp): [valueChange] 와 같은 호흡
+  static const countUp = valueChange;
+
+  // --- 순차 등장 · 눌림 · 축하 (#1407) ---
+
+  /// 순차 등장(AppReveal) 한 칸 간격 (index × 50ms)
+  ///
+  /// [staggerDelayMs](30)는 카드 단위로는 한꺼번에 뜬 것처럼 보이고, [sceneStagger](120)는 길다.
+  static const staggerStep = Duration(milliseconds: 50);
+
+  /// 순차 등장 index 상한 (긴 목록도 마지막 칸이 400ms 안에 출발)
+  static const maxStaggerIndex = 8;
+
+  /// 순차 등장 아래에서 올라오는 거리 (논리 px)
+  static const revealSlideDistance = 16.0;
+
+  /// 톡 튀어나오는 등장 시작 크기 (AppPopIn: 0.7 > 1)
+  static const popInStartScale = 0.7;
+
+  /// 누름 축소 비율 (버튼). AppPressable.scaleButton 원본
+  static const pressScale = 0.97;
+
+  /// 보상 축하(AppCelebration) 전체: 그림 튐 > 빛 쓸기 > 이유 한 줄 > 게이지 차오름
+  ///
+  /// [emphasis](500)를 넘긴다. 네 단계가 차례로 읽혀야 하는 브랜드 핵심 순간이고, 아무것도 막지 않는다
+  /// (확인 버튼은 처음부터 눌림).
+  static const celebrationSequence = Duration(milliseconds: 1800);
+
+  /// 순차 등장 지연 (index 상한 적용)
+  static Duration staggerDelayOf(int index) => staggerStep * index.clamp(0, maxStaggerIndex);
+
+  /// 기기 "동작 줄이기" 켜짐 여부 (켜지면 연출 없이 끝 모습)
+  static bool isReducedMotionOf(BuildContext context) =>
+      MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 }

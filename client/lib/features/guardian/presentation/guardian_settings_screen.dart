@@ -1,3 +1,4 @@
+import '../../../app/lock_screen_settings_tile.dart';
 import '../../notification/application/device_notification_permission_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,10 +170,15 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [_LinkTile(isBusy: busy)],
         ),
         _groupGap,
-        // 앱 설정: 알림, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
+        // 앱 설정: 알림, 잠금화면 카드, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
         SettingsGroup(
           children: [
             _NotificationTile(isBusy: busy),
+            // 잠금화면 카드 (Android 만, 그 밖은 자리 없음)
+            LockScreenSettingsTile(
+              isEnabled: !busy,
+              onOpen: () => context.push(Routes.lockScreenSettings),
+            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,

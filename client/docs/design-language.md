@@ -267,7 +267,7 @@ y=131~  흰 묶음 카드 r20 (x=16, 폭 361, 묶음 사이 16)
 - 실측 (시트 윗변 기준, `1759:9649` · `1869:8838` 두 장 일치): 손잡이 40×4 `#CACACA`(위 16) → **제목 위 40** Pretendard 700/20 검정 x=24
   → **제목 > 설명 24** 400/16 검정 → **설명 > 본문 24** → 흰 입력칸 68 r20 · 1px `#EFEFEF` (라벨은 칸 위 회색, 안내는 칸 안) → **칸 > 버튼 40** → 바닥 22.
 - 버튼 둘이면 `취소` 100 `#D7D3D1` + 사이 4 + 남색 확인. 보조 동작(나중에·끄기)은 밑줄 친 회색 글자 버튼.
-- 코드: `showElumSheet` + **`ElumSheetFrame`**(틀) · `ElumSheetTextField`(입력칸) · `ElumSheetActionRow`(버튼 둘) · `ElumTextLink`(글자 버튼) · `ElumButton`. 시트마다 틀을 손으로 짜지 않는다.
+- 코드: `showElumSheet` + **`ElumSheetFrame`**(틀) · `ElumSheetTextField`(입력칸) · `ElumSheetActionRow`(버튼 둘) · `ElumSecondaryButton`(보조 버튼) · `ElumButton`. 시트마다 틀을 손으로 짜지 않는다.
 - 목록을 고르는 시트(긴 목록)는 버튼을 목록 위에 띄우고 위로 바탕색 그라데이션을 깐다 (`1877:9740`, 코드 `routine_group_picker_sheet.dart`).
 
 ### 4-6. 팝업

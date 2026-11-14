@@ -5,9 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
-import 'elum_guide_motion.dart';
 
-// 안내 창·시트 내용 줄 부품: 아이콘 타일 · 표 줄 · 세는 표 줄 · 설명 줄 · 항목 줄 · 구분선 (뼈대는 elum_guide_panel.dart)
+// 안내 창·시트 내용 줄 부품: 아이콘 타일 · 표 줄 · 설명 줄 · 항목 줄 · 구분선 (뼈대는 elum_guide_panel.dart)
 
 /// 줄 머리 아이콘 타일: 둥근 타일(32, 모서리 10) 위 선 아이콘 16 (홈 안내 카드 타일과 같은 바탕색)
 class ElumGuideIconTile extends StatelessWidget {
@@ -76,31 +75,6 @@ class ElumGuideRow extends StatelessWidget {
     iconAsset: iconAsset,
     label: label,
     value: Text(value, textAlign: TextAlign.end, style: _valueStyle(context)),
-  );
-}
-
-/// 표 한 줄, 값이 [from] > [to] 로 세며 바뀜 (잔액 등). [format] 은 숫자 > 표시 글
-class ElumGuideCountUpRow extends StatelessWidget {
-  const ElumGuideCountUpRow({
-    super.key,
-    required this.iconAsset,
-    required this.label,
-    required this.from,
-    required this.to,
-    required this.format,
-  });
-
-  final String iconAsset;
-  final String label;
-  final int from;
-  final int to;
-  final String Function(int value) format;
-
-  @override
-  Widget build(BuildContext context) => _GuideRowFrame(
-    iconAsset: iconAsset,
-    label: label,
-    value: ElumGuideCountUpText(from: from, to: to, format: format, style: _valueStyle(context)),
   );
 }
 

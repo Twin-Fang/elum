@@ -17,6 +17,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
@@ -212,7 +213,7 @@ class _SubmitBar extends StatelessWidget {
   }
 }
 
-/// 예시 일과 시트를 여는 글자 버튼
+/// 예시 일과 시트를 여는 글자 폭 보조 버튼 (추천 칩 아래 흐르는 내용 안)
 class _TemplateButton extends StatelessWidget {
   const _TemplateButton({required this.onPressed});
 
@@ -222,35 +223,17 @@ class _TemplateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppPressable(
+    return ElumSecondaryButton(
       key: buttonKey,
+      label: context.l10n.routineTemplateOpen,
       onTap: onPressed,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: context.space.md,
-          vertical: context.space.sm,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 겹친 그림 카드 (네모·동그라미 격자 아이콘 대신, #1287)
-            Image.asset(
-              AppAssets.routineTemplateCards,
-              width: 24.w,
-              height: 24.w,
-              excludeFromSemantics: true,
-            ),
-            SizedBox(width: 6.w),
-            Text(
-              context.l10n.routineTemplateOpen,
-              style: context.typo.chipLabel.copyWith(
-                color: colors.textPrimary,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
+      isCompact: true,
+      // 겹친 그림 카드 (네모·동그라미 격자 아이콘 대신, #1287)
+      leading: Image.asset(
+        AppAssets.routineTemplateCards,
+        width: 24.w,
+        height: 24.w,
+        excludeFromSemantics: true,
       ),
     );
   }

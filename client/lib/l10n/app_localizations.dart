@@ -839,7 +839,7 @@ abstract class AppLocalizations {
   /// 이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다
   ///
   /// In ko, this message translates to:
-  /// **'이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
+  /// **'이룸에서는 쓰는 사람을 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
   String get onboardingNameDescription;
 
   /// 이름 입력칸 힌트
@@ -853,18 +853,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'초대 코드가 있어요'**
   String get onboardingNameInviteLink;
-
-  /// 온보딩 완료 화면 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'내용 정리가 모두\n완료됐어요'**
-  String get onboardingCompletionTitle;
-
-  /// 온보딩 완료 화면의 진행도 문구
-  ///
-  /// In ko, this message translates to:
-  /// **'100% 완료!'**
-  String get onboardingCompletionProgress;
 
   /// 스플래시 로고를 화면 낭독기가 읽는 이름
   ///
@@ -3436,18 +3424,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지난 일과를 불러오지 못했어요'**
   String get todayRoutinePastLoadFailedFallback;
-
-  /// 보호자 홈 오늘 일과가 0건일 때 첫 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'아직 만든 일과가 없어요'**
-  String get todayRoutineEmptyTitle;
-
-  /// 보호자 홈 오늘 일과가 0건일 때 둘째 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘의 첫 행동카드를 만들어보세요'**
-  String get todayRoutineEmptyHint;
 
   /// 보호자 홈 지난 일과가 0건일 때 줄
   ///
@@ -9035,23 +9011,11 @@ abstract class AppLocalizations {
   /// **'{reset}에 다시 채워져요'**
   String creditTopUpRefillAt(String reset);
 
-  /// 시트 광고 칸 제목. count 는 광고 한 번에 받는 크레딧 수
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{광고 보고 크레딧 {count}개 받기}}'**
-  String creditTopUpAdTitle(int count);
-
   /// 시트 광고 칸 제목 (받는 수를 모를 때)
   ///
   /// In ko, this message translates to:
   /// **'광고 보고 크레딧 받기'**
   String get creditTopUpAdTitleNoCount;
-
-  /// 광고 칸 설명. remaining 은 오늘 더 볼 수 있는 횟수
-  ///
-  /// In ko, this message translates to:
-  /// **'{remaining, plural, other{30초쯤 걸려요, 오늘 {remaining}번 더 받을 수 있어요}}'**
-  String creditTopUpAdDetail(int remaining);
 
   /// 광고 칸 버튼
   ///
@@ -9070,6 +9034,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'오늘은 다 받았어요. 내일 다시 볼 수 있어요'**
   String get creditTopUpAdDailyLimit;
+
+  /// 광고 칸 설명: 걸리는 시간과 받는 크레딧. count 는 서버 지급량(한 번에)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{15~30초, 끝까지 보면 크레딧 {count}개}}'**
+  String creditTopUpAdDuration(int count);
+
+  /// 광고 칸 아래 작은 줄. remaining 은 오늘 더 볼 수 있는 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{remaining, plural, other{오늘 {remaining}번 더 받을 수 있어요}}'**
+  String creditTopUpAdRemaining(int remaining);
+
+  /// 크레딧 시트: 광고를 미리 불러오지 못해 광고 칸 대신 보이는 이유 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 볼 수 있는 광고가 없어요'**
+  String get creditTopUpAdNoFill;
+
+  /// 흐름 안 PRO 배지 옆 작은 글. 누르면 Pro 기능 설명 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'자세히 보기'**
+  String get proFeatureMarkLabel;
+
+  /// Pro 기능 설명 시트: AI 맞춤 그림이 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 글에 맞는 그림이라 이룸이가 더 쉽게 알아봐요'**
+  String get proExplainAiImageStylesReason;
+
+  /// Pro 기능 설명 시트: 카드 나누기가 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'어려운 행동을 작은 단계로 나눠 한 걸음씩 따라 할 수 있어요'**
+  String get proExplainCardSplitReason;
+
+  /// Pro 기능 설명 시트: 크레딧 없이 다시 그리기가 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'그림이 마음에 들 때까지 크레딧 걱정 없이 고칠 수 있어요'**
+  String get proExplainFreeImageRegenerateReason;
 
   /// 광고 제안 조회가 실패해 버튼을 끈 이유
   ///
@@ -9107,23 +9113,11 @@ abstract class AppLocalizations {
   /// **'🎟️ 크레딧을 받았어요'**
   String get creditRewardTitleNoCount;
 
-  /// 받는 순간 창의 받은 수 (큰 숫자, 0 에서 세며 올라감)
-  ///
-  /// In ko, this message translates to:
-  /// **'+{count}'**
-  String creditRewardPlus(int count);
-
   /// 받은 순간 창 한 줄 설명
   ///
   /// In ko, this message translates to:
   /// **'광고를 끝까지 봐서 받았어요'**
   String get creditRewardReason;
-
-  /// 받은 순간 창 잔액 줄 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'지금 크레딧'**
-  String get creditRewardBalanceLabel;
 
   /// 홈 안내 카드 제목 (일과 하나 만들 만큼 안 남았을 때)
   ///
@@ -9281,64 +9275,76 @@ abstract class AppLocalizations {
   /// **'크레딧은 이렇게 써요'**
   String get myCreditGuideLink;
 
-  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277
+  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기). 두 줄, 이모지 없음
   ///
   /// In ko, this message translates to:
-  /// **'🧩 준비는 간편하게, 일상은 스스로'**
+  /// **'준비는 간편하게,\n일상은 스스로'**
   String get abaIntroTitle;
 
   /// ABA 소개 화면 제목 아래 한 줄. 치료·효과 표현 금지, 기관 이름 금지
   ///
   /// In ko, this message translates to:
-  /// **'이룸은 응용행동분석(ABA)의 원리로 만들었어요'**
+  /// **'응용행동분석(ABA) 원리로 만들었어요'**
   String get abaIntroSubtitle;
 
-  /// ABA 소개 줄 1 제목 (카드 아이콘)
+  /// ABA 원리 칸 1 제목 (작게 나누기 그림). 소개 사이트 home.aba 와 같은 말
   ///
   /// In ko, this message translates to:
-  /// **'카드 한 장에 한 가지 행동'**
-  String get abaIntroCardTitle;
+  /// **'작게 나눠요'**
+  String get abaIntroStepsTitle;
 
-  /// ABA 소개 줄 1 설명
+  /// ABA 원리 칸 1 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지'**
-  String get abaIntroCardBody;
+  /// **'일과를 단계 카드로'**
+  String get abaIntroStepsBody;
 
-  /// ABA 소개 줄 2 제목 (소리 아이콘)
+  /// ABA 원리 칸 2 제목 (미리 보여 주기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'짧은 문장, 그림과 목소리'**
-  String get abaIntroVoiceTitle;
+  /// **'미리 보여 줘요'**
+  String get abaIntroShowTitle;
 
-  /// ABA 소개 줄 2 설명
+  /// ABA 원리 칸 2 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'보고 들으며 하나씩 따라 해요'**
-  String get abaIntroVoiceBody;
+  /// **'그림과 목소리로'**
+  String get abaIntroShowBody;
 
-  /// ABA 소개 줄 3 제목 (별 아이콘)
+  /// ABA 원리 칸 3 제목 (도와주고 줄이기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'해내면 바로 칭찬과 별'**
-  String get abaIntroStarTitle;
+  /// **'도와주고 줄여요'**
+  String get abaIntroHelpTitle;
 
-  /// ABA 소개 줄 3 설명
+  /// ABA 원리 칸 3 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'보호자님이 정한 보상까지 받아요'**
-  String get abaIntroStarBody;
+  /// **'스스로 이어 가게'**
+  String get abaIntroHelpBody;
 
-  /// ABA 소개 아래 보호자 묶음 제목
+  /// ABA 원리 칸 4 제목 (바로 칭찬하기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'💛 가장 중요한 건 보호자님이에요'**
+  /// **'바로 칭찬해요'**
+  String get abaIntroRewardTitle;
+
+  /// ABA 원리 칸 4 설명 한 줄 (짧게)
+  ///
+  /// In ko, this message translates to:
+  /// **'별과 정한 보상'**
+  String get abaIntroRewardBody;
+
+  /// ABA 소개 아래 민트 상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'가장 중요한 건 보호자님이에요'**
   String get abaIntroGuardianTitle;
 
-  /// ABA 소개 아래 보호자 묶음 설명
+  /// ABA 소개 아래 민트 상자 설명
   ///
   /// In ko, this message translates to:
-  /// **'아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요'**
+  /// **'일과와 보상은 보호자님이 정하고, 이룸은 곁에서 도와요'**
   String get abaIntroGuardianBody;
 
   /// ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로
@@ -9454,6 +9460,564 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'개 남았어요'**
   String get myCreditRemainingSuffix;
+
+  /// 축하·안내 화면에서 보호자 홈으로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'홈으로'**
+  String get commonGoHome;
+
+  /// 온보딩 이룸이 기기 연결 단계 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결할까요?'**
+  String get onboardingLinkStepTitle;
+
+  /// 기기 연결 이유 한 줄 (온보딩 연결 단계 설명 · 홈 다음에 할 일 연결 카드)
+  ///
+  /// In ko, this message translates to:
+  /// **'보낸 일과가 이룸이 기기에 바로 떠요'**
+  String get linkDeviceBenefitLine;
+
+  /// 온보딩 연결 단계 주 버튼 (연결 코드 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 연결하기'**
+  String get onboardingLinkStepConnectNow;
+
+  /// 온보딩 연결 단계 소개 줄 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기에서 연결 코드만 넣으면 돼요'**
+  String get onboardingLinkStepEnterCode;
+
+  /// 온보딩 연결 단계 소개 줄 2
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 여러 대를 연결할 수 있어요'**
+  String get onboardingLinkStepManyDevices;
+
+  /// 온보딩 연결 단계 소개 줄 3
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 설정에서도 연결할 수 있어요'**
+  String get onboardingLinkStepLaterInSettings;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 일과를 만들어 볼까요?'**
+  String get homeNextStepMakeTitle;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 적으면 행동 카드로 바꿔 드려요'**
+  String get homeNextStepMakeBody;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 행동 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 만들기'**
+  String get homeNextStepMakeAction;
+
+  /// 홈 다음에 할 일: 임시저장 이어서 만들기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'만들던 일과가 있어요'**
+  String get homeNextStepSendTitle;
+
+  /// 홈 다음에 할 일: 임시저장 이어서 만들기 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 확인하고 저장하면 이룸이 기기로 가요'**
+  String get homeNextStepSendBody;
+
+  /// 홈 다음에 할 일: 임시저장 목록으로 가는 행동 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서 만들기'**
+  String get homeNextStepSendAction;
+
+  /// 홈 다음에 할 일: 기기 연결 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결해요'**
+  String get homeNextStepLinkTitle;
+
+  /// 홈 다음에 할 일: 보내고 연결까지 마친 뒤 첫 완료 기다리기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이제 이룸이 차례예요'**
+  String get homeNextStepWaitTitle;
+
+  /// 첫 완료 기다리기 한 줄 (홈 다음에 할 일 · 보내기 축하)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 끝내면 알려 드려요'**
+  String get elumiFinishNotifyLine;
+
+  /// 일과 보내기 축하 제목 · 두 번째부터의 보내기 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기로 보냈어요'**
+  String get routineSentTitle;
+
+  /// 보내기 축하 한 줄 (기기 연결 전)
+  ///
+  /// In ko, this message translates to:
+  /// **'기기를 연결하면 이룸이 기기에 바로 떠요'**
+  String get routineSentReasonNotLinked;
+
+  /// 기기 연결 화면으로 가는 버튼 (보내기 축하 · 홈 다음에 할 일)
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 연결하기'**
+  String get routineSentLinkDevice;
+
+  /// 이룸이 화면으로 가는 버튼 (보내기 축하 · 홈 다음에 할 일)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면 미리 보기'**
+  String get routineSentPreviewElumi;
+
+  /// 끝낸 일과 축하 제목. name 은 이룸이 이름, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 일과를 끝냈어요'**
+  String guardianRoutineDoneTitle(String name, String batchim);
+
+  /// 끝낸 일과 축하 한 줄 (보호자가 직접 칭찬하도록)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 걸 바로 칭찬해 주세요'**
+  String get routineDonePraiseHint;
+
+  /// 끝낸 일과 축하: 받은 별 수 (끝낸 카드 1장 = 별 1개)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{별 {count}개}}'**
+  String routineDoneStars(int count);
+
+  /// 끝낸 일과 축하: 이름을 다 못 보인 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{외 {count}개}}'**
+  String routineDoneMoreRoutines(int count);
+
+  /// 끝낸 일과 축하: 알림의 일과가 목록에 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 찾지 못했어요'**
+  String get routineDoneNotFound;
+
+  /// 끝낸 일과 축하: 일과를 못 찾았을 때 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지워졌거나 다른 이룸이의 일과예요'**
+  String get routineDoneNotFoundHint;
+
+  /// 끝낸 일과 축하: 목록을 못 받았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과를 불러오지 못했어요'**
+  String get routineDoneLoadFailed;
+
+  /// 보호자 홈 오늘 일과 0건 + 다음에 할 일 카드가 보일 때 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 보낸 일과가 없어요'**
+  String get todayRoutineEmptyNotSent;
+
+  /// 보호자 홈 오늘 일과 0건 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보낸 일과가 없어요'**
+  String get todayRoutineEmptyTodayTitle;
+
+  /// 보호자 홈 오늘 일과 0건 빈 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'만들어 둔 일과를 일과관리에서 바로 보낼 수 있어요'**
+  String get todayRoutineEmptyTodayBody;
+
+  /// 알림 0건 빈 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝내면 여기로 알려 드려요'**
+  String get notificationEmptyBody;
+
+  /// 알림 0건 빈 상태 행동 (알림 설정 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정'**
+  String get notificationEmptyOpenSettings;
+
+  /// 보호자 홈 연속 기록 칩. count 는 이룸이가 이어서 일과를 마친 일수(2 이상)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 연속}}'**
+  String streakChipDays(int count);
+
+  /// 보호자 홈 연속 기록 칩 아래 한 줄 (오늘 아직 안 마쳤을 때). count 는 오늘 마치면 되는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{오늘도 이어 가면 {count}일이에요}}'**
+  String streakAtRiskLine(int count);
+
+  /// 연속 기록 축하 창 제목 (3, 7, 14, 30일). count 는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 연속 해냈어요}}'**
+  String streakMilestoneTitle(int count);
+
+  /// 연속 기록 축하 창 한 줄. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이가} other{가}} 꾸준히 일과를 마치고 있어요'**
+  String streakMilestoneReason(String name, String batchim);
+
+  /// 이룸이 홈 연속 기록 판 큰 글 (재촉하지 않고 해낸 것만). count 는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}일 이어서 했어요}}'**
+  String childStreakDays(int count);
+
+  /// 알림으로 주간 리포트에 들어온 Free 보호자 요약 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'한 주 기록이 도착했어요'**
+  String get weeklyReportNotificationTitle;
+
+  /// 알림 요약 카드 한 줄. count 는 그 주에 마친 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{이 주에 일과 {count}개를 마쳤어요}}'**
+  String weeklyReportNotificationCompleted(int count);
+
+  /// 알림 요약 카드 한 줄 (마친 수를 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주도 이룸이와 함께 해 봐요'**
+  String get weeklyReportNotificationNoCount;
+
+  /// 알림 요약 카드 아래 보조 버튼 (누르면 요금제 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 자세히 보기'**
+  String get weeklyReportNotificationProDetail;
+
+  /// 설정 줄 이름 · 잠금화면 카드 설정 화면 제목 (Android)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드'**
+  String get lockScreenSettingsTitle;
+
+  /// 보호자 잠금화면 카드: 진행 수 위 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 이룸이 일과'**
+  String get lockScreenGuardianTitle;
+
+  /// 보호자 잠금화면 카드: 끝낸 일과 수/오늘 일과 수 (큰 숫자)
+  ///
+  /// In ko, this message translates to:
+  /// **'{doneCount}/{totalCount}'**
+  String lockScreenGuardianCount(int doneCount, int totalCount);
+
+  /// 보호자 잠금화면 카드: 아직 안 끝낸 첫 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 할 일: {routineTitle}'**
+  String lockScreenGuardianNext(String routineTitle);
+
+  /// 보호자 잠금화면 카드: 오늘 일과를 모두 끝냈을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 다 끝냈어요'**
+  String get lockScreenGuardianAllDone;
+
+  /// 보호자 잠금화면 카드: 오늘 일과가 0개일 때
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보낸 일과가 없어요'**
+  String get lockScreenGuardianNoRoutine;
+
+  /// 잠금화면 카드: 오늘 요약이 없거나 어제 것일 때 (잠금화면은 네트워크를 쓰지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱을 열어 오늘 일과를 확인해요'**
+  String get lockScreenStaleMessage;
+
+  /// 잠금화면 카드 주 버튼 (잠금을 푼 뒤 홈으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 열기'**
+  String get lockScreenOpenApp;
+
+  /// 보호자 잠금화면 카드 보조 버튼 (1시간 동안 안 띄움)
+  ///
+  /// In ko, this message translates to:
+  /// **'1시간 쉬기'**
+  String get lockScreenPauseOneHour;
+
+  /// 이룸이 잠금화면 카드 주 버튼 (잠금을 푼 뒤 그 일과 카드로)
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get lockScreenElumiStart;
+
+  /// 이룸이 잠금화면 카드: 카드 글 아래 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 할 일이에요'**
+  String get lockScreenElumiNowLabel;
+
+  /// 잠금화면 카드 설정 위 소개 카드 제목 (보호자 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'화면을 켜면 오늘 이룸이 일과를 바로 보여 줘요'**
+  String get lockScreenGuardianIntroTitle;
+
+  /// 잠금화면 카드 설정 위 소개 카드 제목 (이룸이 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 시간에 화면을 켜면 지금 할 카드 한 장을 크게 보여 줘요'**
+  String get lockScreenElumiIntroTitle;
+
+  /// 잠금화면 카드 소개 한 줄 (정책 안내: 광고·결제 없음, 기본 꺼짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면에는 광고와 결제가 나오지 않아요. 언제든 끌 수 있어요'**
+  String get lockScreenIntroNoAdsNote;
+
+  /// 잠금화면 카드 설정: 띄우는 간격 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'얼마나 자주 보여 줄까요'**
+  String get lockScreenIntervalTitle;
+
+  /// 잠금화면 간격 칩: 화면을 켤 때마다
+  ///
+  /// In ko, this message translates to:
+  /// **'켤 때마다'**
+  String get lockScreenIntervalEveryTime;
+
+  /// 잠금화면 간격 칩: 분 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'{minutes}분마다'**
+  String lockScreenIntervalMinutes(int minutes);
+
+  /// 잠금화면 간격 칩: 시간 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'{hours}시간마다'**
+  String lockScreenIntervalHours(int hours);
+
+  /// 잠금화면 권한 단계 진행 글 (막대 위)
+  ///
+  /// In ko, this message translates to:
+  /// **'권한 {doneCount}/{totalCount}'**
+  String lockScreenSetupProgress(int doneCount, int totalCount);
+
+  /// 권한 단계 칩: 꼭 필요한 권한
+  ///
+  /// In ko, this message translates to:
+  /// **'필수'**
+  String get lockScreenPermissionRequired;
+
+  /// 권한 단계 칩: 권장(건너뛸 수 있음)
+  ///
+  /// In ko, this message translates to:
+  /// **'권장'**
+  String get lockScreenPermissionRecommended;
+
+  /// 권한 단계: 다른 앱 위에 표시 (Android 시스템 메뉴 이름)
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 앱 위에 표시'**
+  String get lockScreenPermissionOverlayTitle;
+
+  /// 권한 단계 이유: 다른 앱 위에 표시 (설정이 앱 목록으로 열림)
+  ///
+  /// In ko, this message translates to:
+  /// **'목록에서 이룸을 눌러 허용해 주세요. 잠금화면 위에 카드를 띄울 때 필요해요'**
+  String get lockScreenPermissionOverlayReason;
+
+  /// 권한 단계: 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 허용'**
+  String get lockScreenPermissionNotificationTitle;
+
+  /// 권한 단계 이유: 알림 (포그라운드 서비스 상태 알림)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 켜져 있다는 조용한 알림을 보여 줘요'**
+  String get lockScreenPermissionNotificationReason;
+
+  /// 권한 단계: 배터리 최적화 제외
+  ///
+  /// In ko, this message translates to:
+  /// **'배터리 최적화 제외'**
+  String get lockScreenPermissionBatteryTitle;
+
+  /// 권한 단계 이유: 배터리 최적화 제외
+  ///
+  /// In ko, this message translates to:
+  /// **'기기가 기능을 멈추지 않게 해요'**
+  String get lockScreenPermissionBatteryReason;
+
+  /// 권한 단계: 삼성 절전 예외 앱 (삼성 기기만)
+  ///
+  /// In ko, this message translates to:
+  /// **'절전 예외 앱에 추가'**
+  String get lockScreenPermissionSamsungTitle;
+
+  /// 권한 단계 이유: 삼성 절전 예외
+  ///
+  /// In ko, this message translates to:
+  /// **'삼성 기기는 한 번 더 필요해요'**
+  String get lockScreenPermissionSamsungReason;
+
+  /// 권한 단계: 삼성 설정에서 돌아온 뒤 경로 안내 (메뉴 이름은 One UI 기준)
+  ///
+  /// In ko, this message translates to:
+  /// **'배터리 > 백그라운드 사용 제한 > 절전 예외 앱에서 +를 눌러 이룸을 추가해 주세요'**
+  String get lockScreenPermissionSamsungHint;
+
+  /// 권한 단계 버튼: 그 권한 설정 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get lockScreenPermissionOpenSettings;
+
+  /// 권한 단계 버튼: 결과를 읽을 수 없는 삼성 단계를 사용자가 끝냈다고 확인
+  ///
+  /// In ko, this message translates to:
+  /// **'추가했어요'**
+  String get lockScreenPermissionConfirmDone;
+
+  /// 권한 단계 버튼: 권장 단계 건너뛰기
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get lockScreenPermissionSkip;
+
+  /// 필수 권한이 모두 켜졌을 때 직접 켜기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드 켜기'**
+  String get lockScreenTurnOn;
+
+  /// 켜진 상태: 끄기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드 끄기'**
+  String get lockScreenTurnOff;
+
+  /// 켜기 실패 팝업 문장 (코드 E-LOCK-ENABLE 함께)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드를 켜지 못했어요. 권한을 다시 확인해 주세요'**
+  String get lockScreenEnableFailed;
+
+  /// 권한을 모두 마치고 켰을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'준비 끝!'**
+  String get lockScreenSetupDoneTitle;
+
+  /// 권한을 모두 마치고 켰을 때 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 화면을 껐다 켜 보세요'**
+  String get lockScreenSetupDoneBody;
+
+  /// 권한 단계를 마친 뒤 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get lockScreenSetupComplete;
+
+  /// 켜진 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드가 켜져 있어요'**
+  String get lockScreenEnabledStatus;
+
+  /// 켜진 상태 한 줄: 1시간 쉬는 중 (시각)
+  ///
+  /// In ko, this message translates to:
+  /// **'{time}까지 쉬고 있어요'**
+  String lockScreenPausedUntil(String time);
+
+  /// 잠금화면 카드 미리 보기 버튼 (설정·소개 시트)
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기'**
+  String get lockScreenPreviewAction;
+
+  /// 미리 보기 견본 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'양치하기'**
+  String get lockScreenPreviewSampleRoutine;
+
+  /// 미리 보기 견본 카드 글 (이룸이 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'칫솔에 치약을 짜요'**
+  String get lockScreenPreviewSampleCard;
+
+  /// 미리 보기에서 버튼을 눌렀을 때 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기에서는 버튼이 동작하지 않아요'**
+  String get lockScreenPreviewNotice;
+
+  /// 잠금화면 소개 시트 제목 (이룸이 첫 완료 뒤 1회 + 7일 뒤 1회, 앞 이모지 1개)
+  ///
+  /// In ko, this message translates to:
+  /// **'📱 잠금화면에서 바로 봐요'**
+  String get lockScreenIntroTitle;
+
+  /// 잠금화면 소개 시트 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 화면을 켜면 앱을 열지 않아도 오늘 이룸이가 몇 개를 했는지 보여요'**
+  String get lockScreenIntroBody;
+
+  /// 잠금화면 소개 시트 주 버튼 (설정 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 보기'**
+  String get lockScreenIntroTurnOn;
+
+  /// 잠금화면 소개 시트 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get lockScreenIntroLater;
+
+  /// 설정의 잠금화면 카드 줄 오른쪽 값 (켜짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜짐'**
+  String get lockScreenOnValue;
+
+  /// 설정의 잠금화면 카드 줄 오른쪽 값 (켜 두었는데 권한이 빠짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'권한 필요'**
+  String get lockScreenPermissionMissingValue;
+
+  /// 이룸이 기기에서 잠금화면 카드 설정 전 보호자 암호 확인 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드는 보호자만 바꿀 수 있어요'**
+  String get modeSwitchToLockScreen;
 }
 
 class _AppLocalizationsDelegate

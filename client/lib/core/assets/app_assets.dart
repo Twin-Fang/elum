@@ -187,23 +187,14 @@ abstract final class AppAssets {
   /// 크레딧 소진 팝업의 루미 (빈 주머니를 들고 앉음, 옆에 표 한 장, 투명 배경)
   static const creditEmptyLumi = '$_images/credit_empty_lumi.png';
 
-  /// 크레딧 시트 광고 칸 타일: 루미 + 재생 화면 + 표 (투명 PNG 384)
-  static const creditAdRewardLumi = '$_images/credit_ad_reward_lumi.png';
-
   /// 광고 보상 받은 순간 큰 그림: 민트 표 + 반짝임 (투명 PNG 512, 튀어 오르고 둥실)
   static const creditRewardBurst = '$_images/credit_reward_burst.png';
 
   /// 일과 완료 화면 보상 선물 상자 (이미지 하네스 3D, 소개 사이트 보상 칸과 같은 그림)
   static const rewardGift = '$_images/reward_gift.png';
 
-  /// 홈 크레딧 부족 안내 카드 타일: 표 한 장을 든 루미 (투명 PNG 384)
-  static const creditLowLumi = '$_images/credit_low_lumi.png';
-
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
-
-  /// 일시적인 오류 안내 화면의 루미 (민트색 돋보기로 살펴봄, 1254×1254, 투명 배경).
-  static const temporaryErrorLumi = '$_images/temporary_error_lumi.png';
 
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
@@ -441,9 +432,6 @@ abstract final class AppAssets {
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';
   static const iconBell = '$_images/icon_bell.svg';
-
-  /// 별 선 아이콘 (24, 다른 icon* 과 같은 viewBox). 안내 줄 머리 `해내면 바로 칭찬과 별` (#1277)
-  static const iconStar = '$_images/icon_star.svg';
   static const iconBellSlash = '$_images/icon_bell_slash.svg';
   static const iconMinusSmall = '$_images/icon_minus_small.svg';
   static const iconComment = '$_images/icon_comment.svg';
@@ -502,4 +490,44 @@ abstract final class AppAssets {
   static const routineDoneStarRed = '$_images/routine_done_star_red.png';
   static const routineDoneStarPink = '$_images/routine_done_star_pink.png';
   static const routineDoneStarPurple = '$_images/routine_done_star_purple.png';
+
+  /// ABA 소개 원리 칸 그림 4장 (256, 투명 · 소개 사이트 그림과 같은 원본)
+  static const abaTileSteps = '$_images/aba_tile_steps.png';
+  static const abaTileShow = '$_images/aba_tile_show.png';
+  static const abaTileHelp = '$_images/aba_tile_help.png';
+  static const abaTileReward = '$_images/aba_tile_reward.png';
+
+  // --- 3D 그림 세트 (#1407, 이미지 하네스 docs/image-harness · 루미 규칙) ---
+  // 빈 상태 6 · 축하 4: 512×512 투명 PNG / 기능 아이콘 12: 256×256 투명 PNG
+  // 쓰는 곳: ElumInfoCard · ElumHighlight · AppCelebration (화면 적용은 개편 단계 1~5)
+  static const emptyStateNoRoutines = '$_images/empty_state_no_routines.png';
+  static const emptyStateNotLinked = '$_images/empty_state_not_linked.png';
+  static const emptyStateReportWeek = '$_images/empty_state_report_week.png';
+  static const emptyStateNoNotifications = '$_images/empty_state_no_notifications.png';
+  static const emptyStateError = '$_images/empty_state_error.png';
+  static const emptyStateOffline = '$_images/empty_state_offline.png';
+  static const celebrationFirstRoutine = '$_images/celebration_first_routine.png';
+  static const celebrationSentToDevice = '$_images/celebration_sent_to_device.png';
+  static const celebrationElumiCompleted = '$_images/celebration_elumi_completed.png';
+  static const celebrationStreak = '$_images/celebration_streak.png';
+  static const featureIconSchedule = '$_images/feature_icon_schedule.png';
+  static const featureIconNotification = '$_images/feature_icon_notification.png';
+  static const featureIconReward = '$_images/feature_icon_reward.png';
+  static const featureIconWeeklyReport = '$_images/feature_icon_weekly_report.png';
+  static const featureIconGuide = '$_images/feature_icon_guide.png';
+  static const featureIconLinkDevice = '$_images/feature_icon_link_device.png';
+  static const featureIconStreak = '$_images/feature_icon_streak.png';
+  static const featureIconStar = '$_images/feature_icon_star.png';
+  static const featureIconCalendar = '$_images/feature_icon_calendar.png';
+  static const featureIconLockScreen = '$_images/feature_icon_lock_screen.png';
+  static const featureIconAdPlay = '$_images/feature_icon_ad_play.png';
+  static const featureIconHelp = '$_images/feature_icon_help.png';
+
+  /// 세트 목록 (개발자 도구 그림 미리 보기가 차례로 펼침)
+  static const emptyStateIllustrations = [emptyStateNoRoutines, emptyStateNotLinked, emptyStateReportWeek, emptyStateNoNotifications, emptyStateError, emptyStateOffline];
+  static const celebrationIllustrations = [celebrationFirstRoutine, celebrationSentToDevice, celebrationElumiCompleted, celebrationStreak];
+  static const featureIcons = [
+    featureIconSchedule, featureIconNotification, featureIconReward, featureIconWeeklyReport, featureIconGuide, featureIconLinkDevice,
+    featureIconStreak, featureIconStar, featureIconCalendar, featureIconLockScreen, featureIconAdPlay, featureIconHelp,
+  ];
 }
