@@ -31,6 +31,17 @@ class ContentLanguageSpecTest {
   }
 
   @Test
+  @DisplayName("ko 도 영어 틀용 어조·길이·예시 칸이 차 있다 (질문 예시는 ko 질문 지시문이 따로 있어 비움, #1375)")
+  void ko_templateFieldsFilled() {
+    ContentLanguageSpec ko = ContentLanguageSpec.of(AppLocale.KO);
+
+    assertThat(ko.englishName()).isEqualTo("Korean");
+    assertThat(java.util.List.of(ko.toneGuide(), ko.stepTitleLength(), ko.descriptionLength(), ko.stepTitleExamples(),
+      ko.descriptionExamples(), ko.routineTitleExamples())).allSatisfy(text -> assertThat(text).isNotBlank());
+    assertThat(ko.toneGuide()).contains("요");
+  }
+
+  @Test
   @DisplayName("다섯 언어 모두 사양이 있고 자기 언어를 가리킨다")
   void everyLocaleHasSpec() {
     for (AppLocale locale : AppLocale.values()) {

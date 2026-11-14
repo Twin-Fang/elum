@@ -50,9 +50,29 @@ class MultilingualPromptDefaultsTest {
     assertThat(prompt).contains(NicknamePlaceholder.placeholderFor(locale));
     assertThat(prompt).contains(spec.toneGuide()).contains(spec.stepTitleLength()).contains(spec.descriptionLength());
     assertThat(prompt).contains("routineText").contains("additionalAnswers").contains("supportGoals");
-    assertThat(prompt).contains("Never include diagnoses");
-    assertThat(prompt).contains("JSON Schema");
+    assertThat(prompt).contains("Never write a diagnosis");
+    assertThat(prompt).contains("imagePromptEn");
     assertThat(HANGUL.matcher(prompt).find()).as("한글이 섞이면 안 된다").isFalse();
+  }
+
+  @Test
+  @DisplayName("영어 틀은 ko 로도 빈칸 없이 펼쳐진다 — ko 를 같은 틀로 옮길 때 쓸 값이 있다 (#1375)")
+  void createPrompt_expandsForKo() {
+    ContentLanguageSpec ko = ContentLanguageSpec.of(AppLocale.KO);
+    String prompt = MultilingualPromptDefaults.createPromptFor(AppLocale.KO);
+
+    assertThat(prompt).doesNotContain("{").doesNotContain("}");
+    assertThat(prompt).contains("in Korean").contains(NicknamePlaceholder.PLACEHOLDER);
+    assertThat(prompt).contains(ko.toneGuide()).contains(ko.stepTitleExamples()).contains(ko.descriptionExamples());
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("일과 생성 지시문은 운영 ko 의 안전 규칙을 담는다 — 칼·불은 어른과 함께, 사정 설명의 약은 카드로 만들지 않음, 벌 금지")
+  void createPrompt_keepsSafetyRules(AppLocale locale) {
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, locale).orElseThrow();
+
+    assertThat(prompt).contains("\"with an adult\"").contains("Medicine mentioned in the background").contains("Never write punishment");
   }
 
   @ParameterizedTest
