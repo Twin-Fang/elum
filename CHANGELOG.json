@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-14T05:23:42Z",
-    "currentVersion": "2.95.0",
+    "lastUpdated": "2026-11-14T05:28:00Z",
+    "currentVersion": "2.96.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 338
+    "totalReleases": 339
   },
   "releases": [
+    {
+      "version": "2.96.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-14",
+      "pr_number": 1388,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 앱을 일본어·중국어·스페인어로도 쓸 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "앱을 일본어·중국어·스페인어로도 쓸 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.95.0",
       "project_type": "flutter",
