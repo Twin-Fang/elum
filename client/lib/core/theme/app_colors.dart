@@ -106,6 +106,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.routineMemoryIconManual,
     required this.creditPackTileMint,
     required this.creditPackTilePeach,
+    required this.infoHighlightMintFill,
+    required this.infoHighlightMintAccent,
+    required this.infoHighlightPeachFill,
+    required this.infoHighlightPeachAccent,
+    required this.infoCardShadow,
+    required this.celebrationGlow,
+    required this.celebrationGaugeTrack,
+    required this.celebrationGaugeFill,
     required this.creditPackTileCream,
     required this.creditPackPopularBorder,
     required this.creditPackDiscountFill,
@@ -523,6 +531,22 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color creditPackTileMint;
   // 크레딧 꾸러미 인기 칸 바탕 (복숭아)
   final Color creditPackTilePeach;
+  // 작은 카드·하이라이트 띠 민트 바탕 (ElumHighlight, #1407)
+  final Color infoHighlightMintFill;
+  // 민트 띠 아이콘 원 · 행동 글자
+  final Color infoHighlightMintAccent;
+  // 하이라이트 띠 피치 바탕
+  final Color infoHighlightPeachFill;
+  // 피치 띠 강조
+  final Color infoHighlightPeachAccent;
+  // 작은 카드 그림자 (보라 기 8%, 떠 있는 느낌만)
+  final Color infoCardShadow;
+  // 보상 축하 그림 뒤 빛 (민트 55%)
+  final Color celebrationGlow;
+  // 보상 축하 게이지 빈 칸
+  final Color celebrationGaugeTrack;
+  // 보상 축하 게이지 찬 칸
+  final Color celebrationGaugeFill;
   // 크레딧 꾸러미 큰 꾸러미 그림 바탕 (크림)
   final Color creditPackTileCream;
   // 크레딧 꾸러미 인기 칸 테두리
@@ -1366,6 +1390,14 @@ class AppColors extends ThemeExtension<AppColors> {
     routineMemoryIconManual: Color(0xFF242634),
     creditPackTileMint: Color(0xFFE3F8F3),
     creditPackTilePeach: Color(0xFFFFF1E6),
+    infoHighlightMintFill: Color(0xFFE3F8F3),
+    infoHighlightMintAccent: Color(0xFF40BBA6),
+    infoHighlightPeachFill: Color(0xFFFFF1E6),
+    infoHighlightPeachAccent: Color(0xFFEB9B73),
+    infoCardShadow: Color(0x14230D60),
+    celebrationGlow: Color(0x8C7BFFE5),
+    celebrationGaugeTrack: Color(0xFFEFEFEF),
+    celebrationGaugeFill: Color(0xFF55CFBA),
     creditPackTileCream: Color(0xFFFFF7DA),
     creditPackPopularBorder: Color(0xFFEB9B73),
     creditPackDiscountFill: Color(0xFFFF8B22),
@@ -1686,6 +1718,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? routineMemoryIconManual,
     Color? creditPackTileMint,
     Color? creditPackTilePeach,
+    Color? infoHighlightMintFill,
+    Color? infoHighlightMintAccent,
+    Color? infoHighlightPeachFill,
+    Color? infoHighlightPeachAccent,
+    Color? infoCardShadow,
+    Color? celebrationGlow,
+    Color? celebrationGaugeTrack,
+    Color? celebrationGaugeFill,
     Color? creditPackTileCream,
     Color? creditPackPopularBorder,
     Color? creditPackDiscountFill,
@@ -1994,6 +2034,14 @@ class AppColors extends ThemeExtension<AppColors> {
       routineMemoryIconManual: routineMemoryIconManual ?? this.routineMemoryIconManual,
       creditPackTileMint: creditPackTileMint ?? this.creditPackTileMint,
       creditPackTilePeach: creditPackTilePeach ?? this.creditPackTilePeach,
+      infoHighlightMintFill: infoHighlightMintFill ?? this.infoHighlightMintFill,
+      infoHighlightMintAccent: infoHighlightMintAccent ?? this.infoHighlightMintAccent,
+      infoHighlightPeachFill: infoHighlightPeachFill ?? this.infoHighlightPeachFill,
+      infoHighlightPeachAccent: infoHighlightPeachAccent ?? this.infoHighlightPeachAccent,
+      infoCardShadow: infoCardShadow ?? this.infoCardShadow,
+      celebrationGlow: celebrationGlow ?? this.celebrationGlow,
+      celebrationGaugeTrack: celebrationGaugeTrack ?? this.celebrationGaugeTrack,
+      celebrationGaugeFill: celebrationGaugeFill ?? this.celebrationGaugeFill,
       creditPackTileCream: creditPackTileCream ?? this.creditPackTileCream,
       creditPackPopularBorder: creditPackPopularBorder ?? this.creditPackPopularBorder,
       creditPackDiscountFill: creditPackDiscountFill ?? this.creditPackDiscountFill,
@@ -2350,6 +2398,14 @@ class AppColors extends ThemeExtension<AppColors> {
       routineMemoryIconManual: Color.lerp(routineMemoryIconManual, other.routineMemoryIconManual, t)!,
       creditPackTileMint: Color.lerp(creditPackTileMint, other.creditPackTileMint, t)!,
       creditPackTilePeach: Color.lerp(creditPackTilePeach, other.creditPackTilePeach, t)!,
+      infoHighlightMintFill: Color.lerp(infoHighlightMintFill, other.infoHighlightMintFill, t)!,
+      infoHighlightMintAccent: Color.lerp(infoHighlightMintAccent, other.infoHighlightMintAccent, t)!,
+      infoHighlightPeachFill: Color.lerp(infoHighlightPeachFill, other.infoHighlightPeachFill, t)!,
+      infoHighlightPeachAccent: Color.lerp(infoHighlightPeachAccent, other.infoHighlightPeachAccent, t)!,
+      infoCardShadow: Color.lerp(infoCardShadow, other.infoCardShadow, t)!,
+      celebrationGlow: Color.lerp(celebrationGlow, other.celebrationGlow, t)!,
+      celebrationGaugeTrack: Color.lerp(celebrationGaugeTrack, other.celebrationGaugeTrack, t)!,
+      celebrationGaugeFill: Color.lerp(celebrationGaugeFill, other.celebrationGaugeFill, t)!,
       creditPackTileCream: Color.lerp(creditPackTileCream, other.creditPackTileCream, t)!,
       creditPackPopularBorder: Color.lerp(creditPackPopularBorder, other.creditPackPopularBorder, t)!,
       creditPackDiscountFill: Color.lerp(creditPackDiscountFill, other.creditPackDiscountFill, t)!,

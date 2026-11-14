@@ -487,7 +487,7 @@ flowchart LR
 **움직임**
 
 - 누르는 모든 버튼, 카드, 줄은 `AppPressable` 눌림(살짝 줄었다 돌아옴)과 가벼운 햅틱(`core/haptics/tap_haptics.dart`)을 쓴다.
-- 창·시트가 열리면 머리, 내용, 버튼 묶음이 위에서부터 차례로 떠오른다 (`AppFadeSlideIn`, 간격 `AppMotion.sectionStagger`). 뼈대가 해 준다.
+- 창·시트가 열리면 머리, 내용, 버튼 묶음이 위에서부터 차례로 떠오른다 (`AppReveal`, 간격 `AppMotion.sectionStagger`). 뼈대가 해 준다.
 - 숫자가 바뀌면 세며 바뀐다 (`ElumGuideCountUpText`, `AppMotion.valueChange`). 받은 크레딧 `+N`, 잔액이 그렇다.
 - 받은 순간 그림은 튀어 오른 뒤 위아래로 두 번 둥실하고 멈춘다 (`ElumGuideRewardIllustration`, `celebrationEntrance` 다음 `float`).
 - 홈 안내 카드는 아래에서 살짝 올라오며 나타나고, 닫으면 접히며 사라진다.

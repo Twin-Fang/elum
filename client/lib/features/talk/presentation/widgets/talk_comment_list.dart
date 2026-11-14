@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
@@ -91,7 +91,7 @@ class TalkCommentList extends StatelessWidget {
                 for (var index = 0; index < state.items.length; index++) ...[
                   if (index > 0) SizedBox(height: _commentGap.h),
                   // 첫 화면 댓글만 차례로 떠오른다 (뒤 쪽은 기다리지 않게 늦춤 상한)
-                  AppFadeSlideIn(
+                  AppReveal(
                     key: ValueKey(state.items[index].id),
                     offset: 8,
                     delay: Duration(

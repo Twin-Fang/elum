@@ -6,7 +6,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
-import 'app_fade_slide_in.dart';
+import 'app_reveal.dart';
 import 'elum_bottom_sheet.dart';
 import 'elum_dialog.dart';
 import 'elum_sheet_frame.dart';
@@ -72,7 +72,7 @@ class ElumGuidePanel extends StatelessWidget {
     final primaryAction = this.primaryAction;
     final sectionGap = _sectionGap(context);
     // 묶음 3개(머리 · 내용 · 버튼)가 위에서부터 차례로 떠오름 (동작 줄이기면 바로 보임)
-    Widget stagger(int order, List<Widget> children) => AppFadeSlideIn(
+    Widget stagger(int order, List<Widget> children) => AppReveal(
       delay: AppMotion.sectionStagger * order,
       offset: _staggerOffset,
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children),

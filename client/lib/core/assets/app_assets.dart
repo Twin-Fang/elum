@@ -505,4 +505,38 @@ abstract final class AppAssets {
   static const abaTileShow = '$_images/aba_tile_show.png';
   static const abaTileHelp = '$_images/aba_tile_help.png';
   static const abaTileReward = '$_images/aba_tile_reward.png';
+
+  // --- 3D 그림 세트 (#1407, 이미지 하네스 docs/image-harness · 루미 규칙) ---
+  // 빈 상태 6 · 축하 4: 512×512 투명 PNG / 기능 아이콘 12: 256×256 투명 PNG
+  // 쓰는 곳: ElumInfoCard · ElumHighlight · AppCelebration (화면 적용은 개편 단계 1~5)
+  static const emptyStateNoRoutines = '$_images/empty_state_no_routines.png';
+  static const emptyStateNotLinked = '$_images/empty_state_not_linked.png';
+  static const emptyStateReportWeek = '$_images/empty_state_report_week.png';
+  static const emptyStateNoNotifications = '$_images/empty_state_no_notifications.png';
+  static const emptyStateError = '$_images/empty_state_error.png';
+  static const emptyStateOffline = '$_images/empty_state_offline.png';
+  static const celebrationFirstRoutine = '$_images/celebration_first_routine.png';
+  static const celebrationSentToDevice = '$_images/celebration_sent_to_device.png';
+  static const celebrationElumiCompleted = '$_images/celebration_elumi_completed.png';
+  static const celebrationStreak = '$_images/celebration_streak.png';
+  static const featureIconSchedule = '$_images/feature_icon_schedule.png';
+  static const featureIconNotification = '$_images/feature_icon_notification.png';
+  static const featureIconReward = '$_images/feature_icon_reward.png';
+  static const featureIconWeeklyReport = '$_images/feature_icon_weekly_report.png';
+  static const featureIconGuide = '$_images/feature_icon_guide.png';
+  static const featureIconLinkDevice = '$_images/feature_icon_link_device.png';
+  static const featureIconStreak = '$_images/feature_icon_streak.png';
+  static const featureIconStar = '$_images/feature_icon_star.png';
+  static const featureIconCalendar = '$_images/feature_icon_calendar.png';
+  static const featureIconLockScreen = '$_images/feature_icon_lock_screen.png';
+  static const featureIconAdPlay = '$_images/feature_icon_ad_play.png';
+  static const featureIconHelp = '$_images/feature_icon_help.png';
+
+  /// 세트 목록 (개발자 도구 그림 미리 보기가 차례로 펼침)
+  static const emptyStateIllustrations = [emptyStateNoRoutines, emptyStateNotLinked, emptyStateReportWeek, emptyStateNoNotifications, emptyStateError, emptyStateOffline];
+  static const celebrationIllustrations = [celebrationFirstRoutine, celebrationSentToDevice, celebrationElumiCompleted, celebrationStreak];
+  static const featureIcons = [
+    featureIconSchedule, featureIconNotification, featureIconReward, featureIconWeeklyReport, featureIconGuide, featureIconLinkDevice,
+    featureIconStreak, featureIconStar, featureIconCalendar, featureIconLockScreen, featureIconAdPlay, featureIconHelp,
+  ];
 }

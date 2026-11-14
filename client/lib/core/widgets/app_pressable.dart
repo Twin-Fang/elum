@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+import '../theme/app_motion.dart';
+
 /// 눌림 반응 공통 위젯.
 ///
 /// 버튼·카드·아이콘의 터치 피드백을 한 곳에서 통일한다. 위젯마다 제각각이면
@@ -45,7 +47,7 @@ class AppPressable extends StatefulWidget {
   final String? semanticLabel;
 
   /// 버튼 (CTA·FAB 등 전형적인 버튼)
-  static const scaleButton = 0.97;
+  static const scaleButton = AppMotion.pressScale;
 
   /// 카드·리스트 아이템 (면적이 넓어 조금만 줄여도 충분하다)
   static const scaleCard = 0.985;

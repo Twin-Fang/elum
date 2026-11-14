@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -147,7 +147,7 @@ class _RulesPanel extends StatelessWidget {
         children: [
           for (var index = 0; index < rules.length; index++) ...[
             if (index > 0) SizedBox(height: _ruleGap.h),
-            AppFadeSlideIn(
+            AppReveal(
               offset: 8,
               delay: Duration(
                 milliseconds:

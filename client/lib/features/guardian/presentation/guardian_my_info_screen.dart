@@ -9,7 +9,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_fade_slide_in.dart';
+import '../../../core/widgets/app_reveal.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
@@ -99,7 +99,7 @@ class GuardianMyInfoScreen extends ConsumerWidget {
         if (section is SizedBox)
           section
         else
-          AppFadeSlideIn(
+          AppReveal(
             delay: AppMotion.sectionStagger * order++,
             child: section,
           ),
