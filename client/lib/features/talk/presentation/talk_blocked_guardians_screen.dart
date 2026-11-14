@@ -6,7 +6,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_fade_slide_in.dart';
+import '../../../core/widgets/app_reveal.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_empty_illustration.dart';
 import '../../../core/widgets/elum_error_view.dart';
@@ -57,7 +57,7 @@ class TalkBlockedGuardiansScreen extends ConsumerWidget {
           itemCount: entries.length,
           separatorBuilder: (_, _) => SizedBox(height: _rowGap.h),
           // 처음 보이는 줄만 차례로 떠오른다 (늦춤 상한)
-          itemBuilder: (context, index) => AppFadeSlideIn(
+          itemBuilder: (context, index) => AppReveal(
             key: ValueKey(entries[index].blockId),
             offset: 8,
             delay: Duration(

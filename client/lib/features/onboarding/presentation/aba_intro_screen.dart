@@ -8,7 +8,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_fade_slide_in.dart';
+import '../../../core/widgets/app_reveal.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import 'widgets/aba_intro_parts.dart';
@@ -27,7 +27,7 @@ class AbaIntroScreen extends StatelessWidget {
     final space = context.space;
     // 등장 순서: 머리 0 > 칸 1~4 > 보호자 상자 5
     Widget appear(int order, Widget child) =>
-        AppFadeSlideIn(delay: AppMotion.sceneStagger * order, duration: AppMotion.slow, curve: AppMotion.decelerate, child: child);
+        AppReveal(delay: AppMotion.sceneStagger * order, duration: AppMotion.slow, curve: AppMotion.decelerate, child: child);
     final principles = [
       AbaPrincipleTile(asset: AppAssets.abaTileSteps, title: l10n.abaIntroStepsTitle, body: l10n.abaIntroStepsBody),
       AbaPrincipleTile(asset: AppAssets.abaTileShow, title: l10n.abaIntroShowTitle, body: l10n.abaIntroShowBody),

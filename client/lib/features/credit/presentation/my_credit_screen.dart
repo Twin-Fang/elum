@@ -6,7 +6,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_fade_slide_in.dart';
+import '../../../core/widgets/app_reveal.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
@@ -81,7 +81,7 @@ class _Body extends ConsumerWidget {
     final colors = context.colors;
     final access = ref.watch(planAccessProvider);
     // 묶음이 위에서부터 차례로 떠오름 (동작 줄이기면 바로 보임)
-    Widget stagger(int order, Widget child) => AppFadeSlideIn(delay: AppMotion.sectionStagger * order, child: child);
+    Widget stagger(int order, Widget child) => AppReveal(delay: AppMotion.sectionStagger * order, child: child);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

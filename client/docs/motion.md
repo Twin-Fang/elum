@@ -112,6 +112,7 @@ offset(t) = A · e^(−λt) · sin(2π·c·t)
 | 토큰 | 값 | 용도 |
 | --- | --- | --- |
 | `staggerDelayMs` | 30ms | 리스트 아이템이 순차 등장하는 간격 |
+| `staggerStep` · `maxStaggerIndex` | 50ms · 8 | `AppReveal` 순번 간격 · 상한 (#1407) |
 
 리스트가 **동시에 팍 뜨지 않게** 한다. `index * staggerDelayMs`로 지연을 준다.
 
@@ -160,10 +161,25 @@ damping ratio = damping / (2 × √(mass × stiffness))
 카드 전체가 `AppPressable`인데 안에 메뉴 버튼이 있으면, 메뉴를 눌러도 **카드가 같이 줄어든다.**
 버튼을 `AppPressable` 바깥 형제로 빼거나 `Stack > Positioned`로 분리한다.
 
-### AppFadeSlideIn — 등장
+### AppReveal — 등장
 
-opacity 0→1 + 아래에서 살짝 올라오기. `delay`로 stagger를 만든다.
-기본값은 `normal`(300ms) + `entry` curve.
+opacity 0→1 + 아래에서 16px 올라오기. 지연 = `delay` + `index` × `staggerStep`(50ms, index 상한 8).
+기본값은 `normal`(300ms) + `entry` curve. 목록은 `revealInOrder([...])`로 감싸면 빈 간격을 빼고 순번을 매긴다.
+
+### AppPopIn · AppCountUp · AppCelebration (#1407)
+
+| 위젯 | 움직임 | 토큰 |
+| --- | --- | --- |
+| `AppPopIn` | 0.7배·투명 > 끝을 살짝 넘었다가 1배 | `emphasis` · `springPop` |
+| `AppCountUp` | 숫자를 from > to 로 셈 | `countUp`(=`valueChange` 800) · `decelerate` |
+| `AppCelebration` | 그림 튐 > 뒤 빛 번짐·그림 위 빛 쓸기 > 제목·이유 한 줄 > 이전 → 이후 게이지, 시작 햅틱 | `celebrationSequence`(1800) |
+
+모두 동작 줄이기면 끝 모습으로 바로 보인다 (`AppMotion.isReducedMotionOf`).
+
+### 화면 코드의 `Duration(` · `Curves.` 금지 (#1407)
+
+`tool/check_design_rules.dart` 의 `motion-literal` 규칙이 `lib/features/**/presentation/**` 에서 잡는다.
+이미 있던 53곳은 `design_rules_allowed.txt` 에 동결했다 — 늘리지 않고, 손대는 김에 토큰으로 옮긴다.
 
 ### AppSkeleton — 로딩 → 콘텐츠
 
@@ -342,7 +358,7 @@ final reduceMotion = MediaQuery.disableAnimationsOf(context);
 | --- | --- |
 | `AppMotion` 토큰 | 적용 중 (`sceneStagger` 추가 — 장면 연출용 120ms) |
 | `AppPressable` | 적용 중 |
-| `AppFadeSlideIn` | **구현 완료** (`core/widgets/app_fade_slide_in.dart`) — 시작 화면 적용 |
+| `AppReveal` | **구현 완료** (`core/widgets/app_reveal.dart`) — 시작 화면 적용 |
 | `AppSkeleton` | 도입 예정 |
 | 페이지 전환 규칙 | **온보딩 구간 적용** (`core/router/app_transitions.dart` — slidePage/fadePage). 그 외 구간 미적용 |
 

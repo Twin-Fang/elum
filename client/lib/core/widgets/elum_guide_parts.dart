@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
-import 'elum_guide_motion.dart';
+import 'app_count_up.dart';
 
 // 안내 창·시트 내용 줄 부품: 아이콘 타일 · 표 줄 · 세는 표 줄 · 설명 줄 · 항목 줄 · 구분선 (뼈대는 elum_guide_panel.dart)
 
@@ -100,7 +100,7 @@ class ElumGuideCountUpRow extends StatelessWidget {
   Widget build(BuildContext context) => _GuideRowFrame(
     iconAsset: iconAsset,
     label: label,
-    value: ElumGuideCountUpText(from: from, to: to, format: format, style: _valueStyle(context)),
+    value: AppCountUp(from: from, to: to, format: format, style: _valueStyle(context)),
   );
 }
 

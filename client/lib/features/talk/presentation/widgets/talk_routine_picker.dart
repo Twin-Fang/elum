@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_empty_illustration.dart';
@@ -66,7 +66,7 @@ class TalkRoutinePicker extends ConsumerWidget {
           SizedBox(height: _headingToList.h),
           for (var index = 0; index < routines.length; index++) ...[
             if (index > 0) SizedBox(height: _rowGap.h),
-            AppFadeSlideIn(
+            AppReveal(
               key: ValueKey(routines[index].id),
               offset: 8,
               delay: Duration(

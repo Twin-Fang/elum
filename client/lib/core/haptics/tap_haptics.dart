@@ -13,3 +13,6 @@ VoidCallback? withTapHaptic(VoidCallback? onTap) {
     onTap();
   };
 }
+
+/// 보상 축하 햅틱 (중간 세기 한 번): AppCelebration 등장 순간
+void playCelebrationHaptic() => unawaited(HapticFeedback.mediumImpact());

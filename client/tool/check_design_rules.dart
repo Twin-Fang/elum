@@ -1,7 +1,7 @@
 // 디자인 규칙 검사기. `dart run tool/check_design_rules.dart` 로 돌리고, CI 는 Flutter CI 의 규칙 검사 단계가 돌린다.
 //
 // 규칙 원본은 `tool/design_rules.yaml` (Figma 화면 통계에서 뽑은 허용 값) 한 곳이다.
-// 규칙 11개
+// 규칙 12개
 // - palette: 색 토큰 값이 시안 색에 있다
 // - type-token: 글자 토큰의 글꼴 · 굵기 · 크기 조합이 시안에 있다
 // - color-literal · material-color: 화면 코드는 색을 토큰으로만 쓴다
@@ -12,6 +12,7 @@
 // - restricted-token: 쓰는 곳을 묶어 둔 토큰(그림 색)을 화면에서 쓰지 않는다
 // - restricted-pattern: 공통 부품만 쓸 수 있는 코드 모양 (위험 버튼 톤 · 실패/삭제 아이콘 > 확인·실패 팝업 부품 · 밑줄 글자 > ElumSecondaryButton, #1171 · #1401)
 // - text-scale: 글자 배율은 AppTextScale 한 곳 (`.sp` · noScaling · 숫자 배율 · 옛 textScaleFactor 금지, yaml `text_scale_owners` 만 예외)
+// - motion-literal: 화면 코드(yaml `motion_literal_scope`)는 `Duration(` · `Curves.` 대신 AppMotion 토큰만 (#1407)
 // 시안 실측으로 확인한 단계 밖 값은 yaml `measured_exceptions` 에 근거 노드와 함께 둔다
 //
 // 이미 있는 위반은 `tool/design_rules_allowed.txt` 에 동결한다. 줄을 지울 수는 있어도 더하지 않는다.
@@ -93,6 +94,8 @@ class DesignRules {
             allowed: Set<String>.from(((entry.value as YamlMap)['allowed'] as YamlMap).keys),
           ),
       ],
+      motionLiteralPathPrefix = (yaml['motion_literal_scope'] as YamlMap)['path_prefix'] as String,
+      motionLiteralPathSegment = (yaml['motion_literal_scope'] as YamlMap)['path_segment'] as String,
       measuredExceptions = {
         for (final item in (yaml['measured_exceptions'] as YamlList?) ?? YamlList())
           '${item['rule']}  ${item['path']}  ${item['value']}',
@@ -121,6 +124,13 @@ class DesignRules {
 
   /// 시안 실측으로 확인한 예외 (동결 키와 같은 모양)
   final Set<String> measuredExceptions;
+
+  /// motion-literal 검사 범위: 이 접두로 시작하고 이 조각을 품은 경로 (기능 화면 코드)
+  final String motionLiteralPathPrefix;
+  final String motionLiteralPathSegment;
+
+  bool isMotionLiteralScope(String path) =>
+      path.startsWith(motionLiteralPathPrefix) && path.contains(motionLiteralPathSegment);
 
   static Set<String> _hexSet(Object? list) => {
     for (final value in list as YamlList) (value as String).toUpperCase(),
@@ -166,6 +176,8 @@ final _spacingConstant = RegExp(
 );
 final _radiusCall = RegExp(r'(?:BorderRadius|Radius)\.circular\(\s*([\d.]+)');
 final _radiusConstant = RegExp(r'static const _?\w*[Rr]adius\w*\s*=\s*([\d.]+)\s*;');
+// 화면 코드의 시간 · 곡선 직접 사용 (Duration.zero 는 값이 아니라 "없음"이라 뺌)
+final _motionLiteral = RegExp(r'\bDuration\(|\bCurves\.\w+');
 final _numberLiteral = RegExp(r'(?<![\w.])(\d+(?:\.\d+)?)(?=\s*(?:\.(?:w|h|r|sp)\b|[,)\s]|$))');
 
 String _formatNumber(double value) =>
@@ -177,6 +189,7 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
   final isTheme = path.startsWith(_themeDir);
   final isMaterialWrapper = rules.materialWrappers.contains(path);
   final isTextScaleOwner = rules.textScaleOwners.contains(path);
+  final isMotionLiteralScope = rules.isMotionLiteralScope(path);
   final materialWidget = RegExp(
     r'(?<![\w.])(' + rules.materialWidgets.join('|') + r')(?:\.\w+)?\(',
   );
@@ -209,6 +222,11 @@ List<Violation> scanSource(String path, String source, DesignRules rules) {
     if (!isMaterialWrapper) {
       for (final match in materialWidget.allMatches(line)) {
         add('material-widget', match.group(1)!);
+      }
+    }
+    if (isMotionLiteralScope) {
+      for (final match in _motionLiteral.allMatches(line)) {
+        add('motion-literal', match.group(0)!);
       }
     }
     _checkNumbers(line, rules, add);

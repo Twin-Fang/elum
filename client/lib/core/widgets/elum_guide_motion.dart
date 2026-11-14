@@ -6,8 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../l10n/l10n_context.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
+import 'app_count_up.dart';
 
-// 안내 창·시트 움직임 부품: 그림 · 받는 순간 그림(튀어 오름 > 둥실) · 세며 바뀌는 숫자
+// 안내 창·시트 움직임 부품: 그림 · 받는 순간 그림(튀어 오름 > 둥실). 세며 바뀌는 숫자는 AppCountUp
 // 시간·곡선은 AppMotion 토큰만, 기기 "동작 줄이기"면 모두 바로 끝 모습
 
 /// 그림 크기 2단계: 창 96 · 시트 120
@@ -97,40 +98,13 @@ class _ElumGuideRewardIllustrationState extends State<ElumGuideRewardIllustratio
           child: image,
         ),
         if (widget.amount > 0)
-          ElumGuideCountUpText(
+          AppCountUp(
             from: 0,
             to: widget.amount,
             format: context.l10n.creditRewardPlus,
             style: context.typo.creditNumber.copyWith(color: context.colors.creditNumberText),
           ),
       ],
-    );
-  }
-}
-
-/// [from] > [to] 로 세며 바뀌는 숫자 글 (값 변화 시간 · 감속 곡선)
-class ElumGuideCountUpText extends StatelessWidget {
-  const ElumGuideCountUpText({
-    super.key,
-    required this.from,
-    required this.to,
-    required this.format,
-    required this.style,
-  });
-
-  final int from;
-  final int to;
-  final String Function(int value) format;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    if (MediaQuery.disableAnimationsOf(context) || from == to) return Text(format(to), style: style);
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: from.toDouble(), end: to.toDouble()),
-      duration: AppMotion.valueChange,
-      curve: AppMotion.decelerate,
-      builder: (context, value, _) => Text(format(value.round()), style: style),
     );
   }
 }

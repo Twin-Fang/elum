@@ -34,6 +34,7 @@ enum _DevView {
   networkFault('요청 실패 흉내'),
   navigate('화면 이동'),
   locale('언어 강제'),
+  designShowcase('디자인 기반 미리 보기'),
   logs('로그'),
   dump('전체 값 보기'),
   confirmReset('회원을 삭제할까요?'),
@@ -182,6 +183,10 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             onNavigate: widget.onNavigate,
           ),
         _DevView.locale => const _LocaleView(),
+        _DevView.designShowcase => const SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: DevDesignShowcase(),
+          ),
         _DevView.logs => const _LogViewer(),
         _DevView.dump => _DumpView(currentLocation: widget.currentLocation),
         _DevView.confirmReset => _ConfirmResetView(

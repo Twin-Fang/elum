@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
 /// 이야기 빈 상태 · 안내 (보호자 화면 빈 상태 결): 그림 없이 제목 > 설명 > (있으면) 알약 버튼
@@ -67,7 +67,7 @@ class TalkEmptyMessage extends StatelessWidget {
       ],
     );
 
-    return AppFadeSlideIn(
+    return AppReveal(
       offset: 8,
       child: isInPanel
           ? Container(

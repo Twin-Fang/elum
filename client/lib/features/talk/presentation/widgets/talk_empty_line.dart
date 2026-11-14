@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_fade_slide_in.dart';
+import '../../../../core/widgets/app_reveal.dart';
 
 /// 이야기 빈 상태 줄 (홈 빈 상태 결 217:2655 — 361×68 웜그레이 r20): 그림·버튼 없이 글만, 목록 첫 줄 자리
 /// 피드 0건 · 내려간 글 · 숨긴 보호자 0명이 함께 쓴다
@@ -21,7 +21,7 @@ class TalkEmptyLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AppFadeSlideIn(
+    return AppReveal(
       offset: 8,
       child: Container(
         constraints: BoxConstraints(minHeight: _minHeight.h),

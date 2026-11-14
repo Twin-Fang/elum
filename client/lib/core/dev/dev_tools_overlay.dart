@@ -41,6 +41,7 @@ import 'dev_plan_override.dart';
 import '../layout/share_origin.dart';
 import '../network/app_failure.dart';
 import 'app_restart.dart';
+import 'dev_design_showcase.dart';
 import 'dev_log_buffer.dart';
 import 'dev_log_file.dart';
 import 'dev_server_store.dart';
