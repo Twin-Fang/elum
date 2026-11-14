@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -52,6 +53,9 @@ class ExampleCategoryScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
+              // 단계 그림: 달력 3D (하루 일과 예시)
+              illustrationAsset: AppAssets.featureIconCalendar,
+              shouldRevealOnEnter: true,
               title: context.l10n.onboardingExampleTitle(name, batchimOf(name)),
               description: context.l10n.onboardingExampleDescription,
               hasBackButton: true,

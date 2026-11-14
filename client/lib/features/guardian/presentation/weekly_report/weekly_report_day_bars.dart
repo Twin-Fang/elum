@@ -6,13 +6,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/app_animated_fraction.dart';
 import '../../domain/weekly_report.dart';
 import 'weekly_report_chart_card.dart';
 
 /// 요일별 막대 7개: 보낸 일과(연한 색) 위에 끝낸 일과(민트)를 겹침, 위에 `끝낸/보낸`, 오늘 요일은 굵게
 ///
-/// 막대 높이는 그 주 가장 많이 보낸 날 기준. 보낸 일과가 0인 날은 낮은 회색 받침만.
+/// 막대 높이는 그 주 가장 많이 보낸 날 기준 (월요일부터 차례로 바닥에서 자람). 보낸 일과가 0인 날은 낮은 회색 받침만.
 class WeeklyReportDayBars extends StatelessWidget {
   const WeeklyReportDayBars({super.key, required this.days, this.today});
 
@@ -40,12 +42,13 @@ class WeeklyReportDayBars extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          for (final day in days)
+          for (final (index, day) in days.indexed)
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: (_barGap / 2).w),
                 child: _DayBar(
                   day: day,
+                  index: index,
                   sentFactor: _sentFactorOf(day, maxSentCount),
                   isToday: DateUtils.isSameDay(day.date, todayDate),
                 ),
@@ -63,9 +66,12 @@ class WeeklyReportDayBars extends StatelessWidget {
 }
 
 class _DayBar extends StatelessWidget {
-  const _DayBar({required this.day, required this.sentFactor, required this.isToday});
+  const _DayBar({required this.day, required this.index, required this.sentFactor, required this.isToday});
 
   final WeeklyReportDay day;
+
+  /// 요일 순번 (왼쪽부터 차례로 자람)
+  final int index;
   final double sentFactor;
   final bool isToday;
 
@@ -98,10 +104,15 @@ class _DayBar extends StatelessWidget {
               height: WeeklyReportDayBars._barAreaHeight.h,
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: FractionallySizedBox(
-                  heightFactor: sentFactor,
-                  widthFactor: 1,
-                  child: _stackedBar(colors, hasSent),
+                // 바닥에서 자람 (요일마다 순차 지연)
+                child: AppAnimatedFraction(
+                  value: sentFactor,
+                  delay: AppMotion.staggerDelayOf(index),
+                  builder: (context, fraction) => FractionallySizedBox(
+                    heightFactor: fraction,
+                    widthFactor: 1,
+                    child: _stackedBar(colors, hasSent),
+                  ),
                 ),
               ),
             ),

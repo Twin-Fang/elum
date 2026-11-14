@@ -83,6 +83,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kTalkImportedSeenRoutineIds = 'talkImportedSeenRoutineIds';
   static const _kTalkShareHintDismissedRoutineIds =
       'talkShareHintDismissedRoutineIds';
+  // 가이드 팁: 닫은 안내 글 slug 목록
+  static const _kDismissedGuideTipSlugs = 'guideTip.dismissedSlugs';
   // 보호자 홈 권유: 종류별 마지막 표시 시각 {종류 이름: ISO-8601} JSON
   static const _kHomeSuggestionShownAtByKind = 'homeSuggestion.shownAtByKind';
   // 보호자 홈 권유: 닫은 권유 `{종류 이름}:{일과 id}` 목록
@@ -158,6 +160,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kChildPraiseSoundOn,
     _kChildScreenAwakeOn,
     _kTalkGridView,
+    _kDismissedGuideTipSlugs,
   ];
   static const deviceScopedKeyPrefixes = [_kNoticeHiddenPrefix];
   // 계정 범위 중 이룸이 기기 연결([clearAccountForElumiLink]) 때 남김: 연결이 방금 쓴 표식·역할, 보호자 잠금
@@ -566,6 +569,15 @@ class SharedPrefsStorage implements LocalStorage {
       _kTalkShareHintDismissedRoutineIds,
       routineIds,
     );
+  }
+
+  @override
+  List<String> get dismissedGuideTipSlugs => _prefs.getStringList(_kDismissedGuideTipSlugs) ?? const [];
+
+  @override
+  Future<void> setDismissedGuideTipSlugs(List<String> slugs) {
+    AppLogger.storageWrite(_kDismissedGuideTipSlugs, slugs);
+    return _prefs.setStringList(_kDismissedGuideTipSlugs, slugs);
   }
 
   @override

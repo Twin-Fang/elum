@@ -2819,11 +2819,11 @@ abstract class AppLocalizations {
   /// **'{label} 지우기'**
   String questionClearLabel(String label);
 
-  /// 카드 검토 화면 머리. count 는 만들어진 카드 수
+  /// 카드 검토 화면 머리: 한 카드 한 행동 원칙을 함께 알림. count 는 만들어진 카드 수
   ///
   /// In ko, this message translates to:
-  /// **'{count, plural, other{카드 {count}개를 만들었어요}}'**
-  String cardReviewMade(int count);
+  /// **'{count, plural, other{한 장에 행동 하나씩, 카드 {count}개를 만들었어요}}'**
+  String cardReviewMadeOneAction(int count);
 
   /// 카드 검토 화면 보상 줄의 앞말. 뒤에 보상 글이 이어 붙으므로 끝의 공백을 유지한다
   ///
@@ -10018,6 +10018,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠금화면 카드는 보호자만 바꿀 수 있어요'**
   String get modeSwitchToLockScreen;
+
+  /// 보호자 가이드 팁 제목: 사이트 안내 글 action-cards (사이트 글 제목을 줄인 것)
+  ///
+  /// In ko, this message translates to:
+  /// **'행동 카드란?'**
+  String get guideTipActionCardsTitle;
+
+  /// 보호자 가이드 팁 회색 한 줄: 왜 읽을지
+  ///
+  /// In ko, this message translates to:
+  /// **'한 장에 행동 하나, 3분이면 읽어요'**
+  String get guideTipActionCardsBody;
+
+  /// 보호자 가이드 팁 제목: 사이트 안내 글 make-action-cards
+  ///
+  /// In ko, this message translates to:
+  /// **'행동 카드 쉽게 만드는 법'**
+  String get guideTipMakeActionCardsTitle;
+
+  /// 보호자 가이드 팁 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'좋은 카드를 만드는 요령 다섯 가지예요'**
+  String get guideTipMakeActionCardsBody;
+
+  /// 보호자 가이드 팁 제목: 사이트 안내 글 caregiver-role
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자가 할 일 5가지'**
+  String get guideTipCaregiverRoleTitle;
+
+  /// 보호자 가이드 팁 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 일과에 자리 잡게 돕는 법이에요'**
+  String get guideTipCaregiverRoleBody;
+
+  /// 보호자 가이드 팁 제목: 사이트 안내 글 task-analysis
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 작은 단계로 나누는 법'**
+  String get guideTipTaskAnalysisTitle;
+
+  /// 보호자 가이드 팁 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'양치, 옷 입기 예시로 알려 드려요'**
+  String get guideTipTaskAnalysisBody;
+
+  /// 보호자 가이드 팁 제목: 사이트 안내 글 rewards
+  ///
+  /// In ko, this message translates to:
+  /// **'보상 정하는 법'**
+  String get guideTipRewardsTitle;
+
+  /// 보호자 가이드 팁 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'작게, 바로, 미리 정하면 쉬워요'**
+  String get guideTipRewardsBody;
+
+  /// 보호자 가이드 팁 닫기 x 낭독 글 (닫으면 다시 안 보임)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 가이드 닫기'**
+  String get guideTipDismissLabel;
+
+  /// 가이드 팁을 눌렀는데 외부 브라우저를 못 열었을 때 실패 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'가이드를 열지 못했어요'**
+  String get guideTipOpenFailed;
+
+  /// 가이드 팁 카드 행동 알약 (사이트 안내 글 열기)
+  ///
+  /// In ko, this message translates to:
+  /// **'읽어 보기'**
+  String get guideTipReadAction;
 }
 
 class _AppLocalizationsDelegate

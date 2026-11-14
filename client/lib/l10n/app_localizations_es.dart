@@ -1680,12 +1680,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String cardReviewMade(int count) {
+  String cardReviewMadeOneAction(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Creaste $count tarjetas',
-      one: 'Creaste $count tarjeta',
+      other: 'Creaste $count tarjetas, una acción en cada una',
+      one: 'Creaste $count tarjeta, una acción en cada una',
     );
     return '$_temp0';
   }
@@ -6266,4 +6266,48 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get modeSwitchToLockScreen =>
       'Solo un tutor puede cambiar la tarjeta de la pantalla de bloqueo';
+
+  @override
+  String get guideTipActionCardsTitle => '¿Qué son las tarjetas de acción?';
+
+  @override
+  String get guideTipActionCardsBody =>
+      'Una acción por tarjeta. Se lee en 3 minutos';
+
+  @override
+  String get guideTipMakeActionCardsTitle =>
+      'Cómo hacer tarjetas de acción fácil';
+
+  @override
+  String get guideTipMakeActionCardsBody =>
+      'Cinco consejos para que queden bien';
+
+  @override
+  String get guideTipCaregiverRoleTitle => '5 cosas que te tocan a ti';
+
+  @override
+  String get guideTipCaregiverRoleBody =>
+      'Para que las tarjetas formen parte del día';
+
+  @override
+  String get guideTipTaskAnalysisTitle =>
+      'Dividir una rutina en pasos pequeños';
+
+  @override
+  String get guideTipTaskAnalysisBody => 'Con ejemplos de dientes y vestirse';
+
+  @override
+  String get guideTipRewardsTitle => 'Cómo elegir recompensas';
+
+  @override
+  String get guideTipRewardsBody => 'Pequeñas, inmediatas y anunciadas';
+
+  @override
+  String get guideTipDismissLabel => 'Ocultar esta guía';
+
+  @override
+  String get guideTipOpenFailed => 'No se pudo abrir la guía';
+
+  @override
+  String get guideTipReadAction => 'Leer';
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../core/assets/app_assets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n/l10n_context.dart';
@@ -34,6 +36,7 @@ class LockScreenSettingsTile extends ConsumerWidget {
         : context.l10n.notificationOffValue;
     return SettingsTile(
       label: context.l10n.lockScreenSettingsTitle,
+      leadingIllustrationAsset: AppAssets.featureIconLockScreen,
       valueText: valueText,
       showChevronWithValue: true,
       onTap: isEnabled

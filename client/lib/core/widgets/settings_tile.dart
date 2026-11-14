@@ -28,6 +28,8 @@ class SettingsTile extends StatelessWidget {
     this.isInCard = true,
     this.shouldShowProBadge = false,
     this.valueChip,
+    this.leadingIllustrationAsset,
+    this.shouldReserveLeadingSlot = false,
   });
 
   final String label;
@@ -59,6 +61,16 @@ class SettingsTile extends StatelessWidget {
 
   /// 오른쪽 값 자리에 글자 대신 그릴 칩 (내 요금제 `Free` · `PRO`, #1189). 있으면 [valueText] 대신 그림
   final Widget? valueChip;
+
+  /// 이름 왼쪽 작은 3D 그림 (AppAssets.featureIcon* 등, 주요 줄만). null 이면 없음
+  final String? leadingIllustrationAsset;
+
+  /// 그림은 없지만 같은 묶음의 그림 줄과 글 시작을 맞추려고 그림 자리만 비움
+  final bool shouldReserveLeadingSlot;
+
+  /// 왼쪽 3D 그림 28 · 그림 > 이름 12
+  static const leadingIllustrationSize = 28.0;
+  static const leadingIllustrationGap = 12.0;
 
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
@@ -126,6 +138,10 @@ class SettingsTile extends StatelessWidget {
             : EdgeInsets.symmetric(horizontal: _padH.w),
         child: Row(
           children: [
+            if (leadingIllustrationAsset != null || shouldReserveLeadingSlot) ...[
+              _leadingIllustration(),
+              SizedBox(width: leadingIllustrationGap.w),
+            ],
             Expanded(
               // 줄이 늘어날 때 위아래가 붙지 않게 글에만 여백을 둔다(기본 크기에서는 최소 높이 안).
               child: Padding(
@@ -169,6 +185,14 @@ class SettingsTile extends StatelessWidget {
       return MergeSemantics(child: row);
     }
     return AppPressable(onTap: loading ? null : onTap, child: row);
+  }
+
+  /// 왼쪽 그림 자리 (그림이 없으면 같은 크기 빈칸)
+  Widget _leadingIllustration() {
+    final asset = leadingIllustrationAsset;
+    final size = leadingIllustrationSize.w;
+    if (asset == null) return SizedBox(width: size, height: size);
+    return Image.asset(asset, width: size, height: size, fit: BoxFit.contain, excludeFromSemantics: true);
   }
 }
 

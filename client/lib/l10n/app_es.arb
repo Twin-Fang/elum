@@ -451,7 +451,7 @@
   "questionCustomHint": "Escríbelo aquí",
   "questionCustomClose": "Cerrar escritura",
   "questionClearLabel": "Borrar {label}",
-  "cardReviewMade": "{count, plural, one{Creaste {count} tarjeta} other{Creaste {count} tarjetas}}",
+  "cardReviewMadeOneAction": "{count, plural, one{Creaste {count} tarjeta, una acción en cada una} other{Creaste {count} tarjetas, una acción en cada una}}",
   "cardReviewRewardLead": "Al terminar: ",
   "cardReviewRewardSet": "Elegir una recompensa",
   "cardReviewReorderHint": "Mantén pulsada una tarjeta para cambiar el orden",
@@ -1649,5 +1649,18 @@
   "lockScreenIntroLater": "Más tarde",
   "lockScreenOnValue": "Activada",
   "lockScreenPermissionMissingValue": "Falta permiso",
-  "modeSwitchToLockScreen": "Solo un tutor puede cambiar la tarjeta de la pantalla de bloqueo"
+  "modeSwitchToLockScreen": "Solo un tutor puede cambiar la tarjeta de la pantalla de bloqueo",
+  "guideTipActionCardsTitle": "¿Qué son las tarjetas de acción?",
+  "guideTipActionCardsBody": "Una acción por tarjeta. Se lee en 3 minutos",
+  "guideTipMakeActionCardsTitle": "Cómo hacer tarjetas de acción fácil",
+  "guideTipMakeActionCardsBody": "Cinco consejos para que queden bien",
+  "guideTipCaregiverRoleTitle": "5 cosas que te tocan a ti",
+  "guideTipCaregiverRoleBody": "Para que las tarjetas formen parte del día",
+  "guideTipTaskAnalysisTitle": "Dividir una rutina en pasos pequeños",
+  "guideTipTaskAnalysisBody": "Con ejemplos de dientes y vestirse",
+  "guideTipRewardsTitle": "Cómo elegir recompensas",
+  "guideTipRewardsBody": "Pequeñas, inmediatas y anunciadas",
+  "guideTipDismissLabel": "Ocultar esta guía",
+  "guideTipOpenFailed": "No se pudo abrir la guía",
+  "guideTipReadAction": "Leer"
 }

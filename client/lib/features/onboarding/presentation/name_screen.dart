@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -106,6 +107,9 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
+              // 단계 그림: 별 3D (이룸이를 부를 이름)
+              illustrationAsset: AppAssets.featureIconStar,
+              shouldRevealOnEnter: true,
               // 시안(204:996) 문구 그대로. `부를까요`로 줄여 두었던 것을 되돌린다.
               title: context.l10n.onboardingNameTitle,
               // 이룸이 호칭 첫 소개 + 개인정보 최소수집 안내 (실명 아니어도 됨) — 삭제하지 않는다

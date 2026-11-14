@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/state/busy_state_mixin.dart';
@@ -233,6 +234,9 @@ class _PinScreenState extends ConsumerState<PinScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
+            // 단계 그림: 자물쇠 3D (보호자 화면 잠금)
+            illustrationAsset: AppAssets.featureIconLockScreen,
+            shouldRevealOnEnter: true,
             // Figma 238:2767 — 재입력 단계의 제목
             // 시안 문구 그대로 쓴다 (238:2767 · 238:2924).
             // `보호자모드`·코드는 **시안 문구를 따른다** (기기만 휴대폰으로 바꾼다).

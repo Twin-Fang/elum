@@ -19,6 +19,7 @@ import '../application/routine_notifier.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_create_cost_line.dart';
 import 'widgets/routine_flow_scaffold.dart';
+import 'widgets/routine_flow_step_icon.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../application/routine_flow_state.dart';
@@ -121,12 +122,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
             // 만큼 띄워야 화면 중간에서 시작한다 — 그냥 쌓으면 전부 위로 몰린다.
             //
             // 질문이 2개 이상 오면 스크롤이 필요하므로 Stack 대신 여백을 쓴다.
-            SizedBox(height: (225 - 111).h),
-            SvgPicture.asset(
-              AppAssets.iconSparklesLarge,
-              width: 30.w,
-              height: 36.h,
-            ),
+            // 단계 그림: 전구 말풍선 3D (반짝임 자리, 제목 높이 그대로)
+            SizedBox(height: (225 - 111 - RoutineFlowStepIcon.extraHeightOverSparkles).h),
+            const RoutineFlowStepIcon(illustrationAsset: AppAssets.featureIconHelp),
             // sparkles 하단(261) → 제목(285)
             SizedBox(height: 24.h),
             for (final (index, item) in questions.indexed) ...[

@@ -451,7 +451,7 @@
   "questionCustomHint": "ここに書いてください",
   "questionCustomClose": "自分で入力を閉じる",
   "questionClearLabel": "{label}を消す",
-  "cardReviewMade": "{count, plural, other{カードを{count}枚作りました}}",
+  "cardReviewMadeOneAction": "{count, plural, other{1枚に行動1つずつ、カードを{count}枚作りました}}",
   "cardReviewRewardLead": "完了したら ",
   "cardReviewRewardSet": "ごほうびを決める",
   "cardReviewReorderHint": "カードを長押しすると順番を変えられます",
@@ -1649,5 +1649,18 @@
   "lockScreenIntroLater": "あとで",
   "lockScreenOnValue": "オン",
   "lockScreenPermissionMissingValue": "権限が必要",
-  "modeSwitchToLockScreen": "ロック画面カードは保護者だけが変更できます"
+  "modeSwitchToLockScreen": "ロック画面カードは保護者だけが変更できます",
+  "guideTipActionCardsTitle": "行動カードとは？",
+  "guideTipActionCardsBody": "1枚に行動ひとつ。3分で読めます",
+  "guideTipMakeActionCardsTitle": "行動カードのかんたんなつくり方",
+  "guideTipMakeActionCardsBody": "よいカードをつくる5つのコツです",
+  "guideTipCaregiverRoleTitle": "保護者がする5つのこと",
+  "guideTipCaregiverRoleBody": "カードを毎日の中に根づかせる方法です",
+  "guideTipTaskAnalysisTitle": "日課を小さなステップに分ける方法",
+  "guideTipTaskAnalysisBody": "歯みがきや着替えの例で紹介します",
+  "guideTipRewardsTitle": "ごほうびの決め方",
+  "guideTipRewardsBody": "小さく、すぐに、前もって決めます",
+  "guideTipDismissLabel": "このガイドを閉じる",
+  "guideTipOpenFailed": "ガイドを開けませんでした",
+  "guideTipReadAction": "読んでみる"
 }
