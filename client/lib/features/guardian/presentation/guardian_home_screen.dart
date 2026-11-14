@@ -33,6 +33,7 @@ import 'widgets/create_routine_button.dart';
 import 'widgets/coach_mark_start_gate.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/home_next_step_card.dart';
+import 'widgets/home_streak_chip.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/past_routine_section.dart';
 import 'widgets/today_routine_section.dart';
@@ -227,6 +228,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 이룸이 연속 기록 불꽃 (2일 이상일 때만)
+          const HomeStreakChip(bottomGap: _titleToList),
           // 첫날 흐름 「다음에 할 일」 한 장 (안내 카드보다 먼저, 첫 완료 뒤 사라짐)
           HomeNextStepCard(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           // 안내 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)

@@ -1587,5 +1587,15 @@
   "todayRoutineEmptyTodayTitle": "Hoy no has enviado rutinas",
   "todayRoutineEmptyTodayBody": "Envía al instante una rutina guardada desde Rutinas",
   "notificationEmptyBody": "Aquí te avisaremos cuando Elumi termine una rutina",
-  "notificationEmptyOpenSettings": "Ajustes de notificaciones"
+  "notificationEmptyOpenSettings": "Ajustes de notificaciones",
+
+  "streakChipDays": "{count, plural, other{{count} días seguidos}}",
+  "streakAtRiskLine": "{count, plural, other{Si hoy sigue, serán {count} días}}",
+  "streakMilestoneTitle": "{count, plural, other{{count} días seguidos}}",
+  "streakMilestoneReason": "{name} sigue terminando sus rutinas día tras día",
+  "childStreakDays": "{count, plural, other{{count} días seguidos}}",
+  "weeklyReportNotificationTitle": "Llegó el resumen de la semana",
+  "weeklyReportNotificationCompleted": "{count, plural, =1{Esta semana terminó 1 rutina} other{Esta semana terminó {count} rutinas}}",
+  "weeklyReportNotificationNoCount": "Sigamos con Elumi esta semana",
+  "weeklyReportNotificationProDetail": "Ver detalles con Pro"
 }

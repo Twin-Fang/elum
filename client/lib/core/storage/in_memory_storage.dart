@@ -305,6 +305,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setHasCelebratedFirstSend(bool hasCelebrated) async =>
       _hasCelebratedFirstSend = hasCelebrated;
+
+  Set<String> _celebratedStreakMilestoneKeys = const {};
+
+  @override
+  Set<String> get celebratedStreakMilestoneKeys => _celebratedStreakMilestoneKeys;
+
+  @override
+  Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys) async =>
+      _celebratedStreakMilestoneKeys = celebratedKeys;
   DateTime? _homeNotificationNoticeDismissedAt;
 
   @override
@@ -516,5 +525,6 @@ class InMemoryStorage implements LocalStorage {
     _homeAutoSendUpsellFirstShownDay = null;
     _isHomeAutoSendUpsellClosed = false;
     _homeUpsellShownRecord = null;
+    _celebratedStreakMilestoneKeys = const {};
   }
 }

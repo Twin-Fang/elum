@@ -5602,4 +5602,69 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationEmptyOpenSettings => '알림 설정';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '오늘도 이어 가면 $count일이에요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속 해냈어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이가', 'other': '가'});
+    return '$name$_temp0 꾸준히 일과를 마치고 있어요';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 이어서 했어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => '한 주 기록이 도착했어요';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 주에 일과 $count개를 마쳤어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => '이번 주도 이룸이와 함께 해 봐요';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Pro로 자세히 보기';
 }

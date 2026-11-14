@@ -28,6 +28,7 @@ import '../../../shared/models/character.dart';
 import '../application/child_home_entries.dart';
 import '../application/child_routine_notifier.dart';
 import '../application/routine_auto_refresh.dart';
+import 'widgets/child_streak_row.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../member/application/member_providers.dart';
 import '../../guardian/application/routine_providers.dart';
@@ -150,7 +151,15 @@ class ChildHomeScreen extends ConsumerWidget {
                       const ChildHomeTopBar(),
                       Expanded(
                         child: ChildHomeLandscapeBody(
-                          greeting: greetingText,
+                          // 인사말 아래 연속 기록 판 (2일 이상일 때만)
+                          greeting: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              greetingText,
+                              ChildStreakRow(topGap: space.md),
+                            ],
+                          ),
                           character: character,
                           routineList: _RoutineList(routines: routines),
                           listScrollWrapper: withPullToRefresh,
@@ -173,6 +182,11 @@ class ChildHomeScreen extends ConsumerWidget {
                               horizontal: space.screenH,
                             ),
                             child: greetingText,
+                          ),
+                          // 인사말 아래 연속 기록 판 (2일 이상일 때만, 숨으면 자리 없음)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: space.md),
+                            child: ChildStreakRow(topGap: space.md),
                           ),
                           // 세로 태블릿: 인사말 아래 장면 띠 (폰은 없음)
                           if (metrics.isScaleOverridden) ...[

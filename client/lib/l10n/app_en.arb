@@ -1596,5 +1596,15 @@
   "todayRoutineEmptyTodayTitle": "No routines sent today",
   "todayRoutineEmptyTodayBody": "Send a saved routine right away from Routines",
   "notificationEmptyBody": "We'll tell you here when Elumi finishes a routine",
-  "notificationEmptyOpenSettings": "Notification settings"
+  "notificationEmptyOpenSettings": "Notification settings",
+
+  "streakChipDays": "{count, plural, other{{count}-day streak}}",
+  "streakAtRiskLine": "{count, plural, other{Keep it going today for {count} days}}",
+  "streakMilestoneTitle": "{count, plural, other{{count} days in a row}}",
+  "streakMilestoneReason": "{name} keeps finishing routines day after day",
+  "childStreakDays": "{count, plural, other{{count} days in a row}}",
+  "weeklyReportNotificationTitle": "Your weekly summary is here",
+  "weeklyReportNotificationCompleted": "{count, plural, =1{1 routine finished this week} other{{count} routines finished this week}}",
+  "weeklyReportNotificationNoCount": "Keep going with Elumi this week",
+  "weeklyReportNotificationProDetail": "See details with Pro"
 }

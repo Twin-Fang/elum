@@ -8,6 +8,7 @@ import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../shared/models/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
+import '../domain/elumi_streak.dart';
 import '../domain/guardian_account.dart';
 import '../domain/member_subscription.dart';
 import '../domain/plan_entitlements.dart';
@@ -29,6 +30,7 @@ class Member {
     this.proPlanEntitlements,
     this.subscription,
     this.account,
+    this.streak = ElumiStreak.none,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
 
@@ -68,6 +70,9 @@ class Member {
   /// `account` 필드가 없는 이전 서버면 null — 카드가 "이메일 비공개"로 잘못 보이지 않게 정보 줄을 뺀다.
   final GuardianAccount? account;
 
+  /// 위 당사자 이룸이의 연속 기록 (Free 포함). 필드 없는 이전 서버면 0일
+  final ElumiStreak streak;
+
   final bool? _profilesKnown;
 
   /// 응답에 이룸이 목록이 **있었는가.** 다중 보호자 이전 서버는 필드가 없다 — 그때 빈
@@ -88,6 +93,7 @@ class Member {
         proPlanEntitlements != other.proPlanEntitlements ||
         subscription != other.subscription ||
         account != other.account ||
+        streak != other.streak ||
         profilesKnown != other.profilesKnown ||
         !listEquals(supportGoals, other.supportGoals) ||
         profiles.length != other.profiles.length) {
@@ -135,6 +141,7 @@ class Member {
           : null,
       subscription: MemberSubscription.tryParse(json['subscription']),
       account: json['account'] is Map ? GuardianAccount.fromMemberJson(json) : null,
+      streak: ElumiStreak.fromMemberJson(json),
       profilesKnown: json['profiles'] is List,
     );
   }

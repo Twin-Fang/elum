@@ -5578,4 +5578,68 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notificationEmptyOpenSettings => '通知設定';
+
+  @override
+  String streakChipDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日連続',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakAtRiskLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '今日も続ければ$count日です',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日連続でできました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String streakMilestoneReason(String name, String batchim) {
+    return '$nameは毎日こつこつ日課を終えています';
+  }
+
+  @override
+  String childStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count日続けてできました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationTitle => '1週間の記録が届きました';
+
+  @override
+  String weeklyReportNotificationCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'この週は日課を$count個終えました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyReportNotificationNoCount => '今週もElumiと一緒にやってみましょう';
+
+  @override
+  String get weeklyReportNotificationProDetail => 'Proで詳しく見る';
 }

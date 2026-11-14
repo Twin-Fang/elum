@@ -96,6 +96,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeUpsellShownRecord = 'homeNotice.upsellShownRecord';
   // 첫 일과 보내기 축하 화면을 띄웠는가 (true 면 다음부터 가벼운 알림)
   static const _kFirstSendCelebrated = 'celebration.firstSendShown';
+  // 연속 기록 축하를 띄운 `{이룸이 id}:{일수}` 목록
+  static const _kCelebratedStreakMilestones = 'celebration.streakMilestones';
   // 이야기 상세 보기: true 한 눈에 보기, false 크게 보기
   static const _kTalkGridView = 'talk.isGridView';
 
@@ -130,6 +132,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kHomeAutoSendUpsellClosed,
     _kHomeUpsellShownRecord,
     _kFirstSendCelebrated,
+    _kCelebratedStreakMilestones,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -489,6 +492,16 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHasCelebratedFirstSend(bool hasCelebrated) async {
     AppLogger.storageWrite(_kFirstSendCelebrated, '$hasCelebrated');
     await _prefs.setBool(_kFirstSendCelebrated, hasCelebrated);
+  }
+
+  @override
+  Set<String> get celebratedStreakMilestoneKeys =>
+      (_prefs.getStringList(_kCelebratedStreakMilestones) ?? const <String>[]).toSet();
+
+  @override
+  Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys) async {
+    AppLogger.storageWrite(_kCelebratedStreakMilestones, celebratedKeys.toList());
+    await _prefs.setStringList(_kCelebratedStreakMilestones, celebratedKeys.toList());
   }
 
   @override
