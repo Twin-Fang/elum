@@ -9,6 +9,10 @@
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <!-- 일과 알림 (#777): 재부팅 뒤 예약 다시 걸기. 알림 권한(POST_NOTIFICATIONS)은 플러그인이 선언 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- 잠금화면 카드 (기본 꺼짐, 사용자가 켬): 잠금 위 표시, 상태 알림 서비스 (재부팅 재시작은 위 RECEIVE_BOOT_COMPLETED) -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 
     <!-- 앱 이름은 res/values/strings.xml app_name. 앱별 언어 목록(Android 13+)은 res/xml/locales_config.xml:
          연 언어만 (lib/core/l10n/app_locales.dart openedAppLocales, #527). Android 12 이하는 기기 언어를 따른다 -->
@@ -69,6 +73,38 @@
                 <data android:scheme="https" android:host="api.elum.suhsaechan.kr" android:pathPrefix="/s/"/>
             </intent-filter>
         </activity>
+        <!-- 잠금화면 카드 화면: 별도 태스크·최근 앱 제외, 잠금 위 표시. 엔진은 서비스가 데운 캐시 엔진 -->
+        <activity
+            android:name=".lockscreen.LockScreenActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:taskAffinity="kr.twinfang.elum.lockscreen"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/NormalTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize"
+            tools:targetApi="o_mr1" />
+        <!-- 잠금화면 카드 상태 알림 서비스: 화면 꺼짐 감지 > 카드 화면 띄움 (Play 앱 콘텐츠 포그라운드 서비스 신고: 특수 용도) -->
+        <service
+            android:name=".lockscreen.LockScreenService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Shows today's routine card over the lock screen when the user turns the screen on: routine progress for the guardian, or the one card to do now for the person with developmental disabilities. Off by default; the user turns it on in settings, sees an ongoing notification, and can pause for one hour or turn it off anytime. No ads or payments are shown on the lock screen." />
+        </service>
+        <!-- 재부팅·앱 업데이트 후 잠금화면 서비스 재시작 (LockScreenBootReceiver.restartActions 와 같은 목록) -->
+        <receiver
+            android:name=".lockscreen.LockScreenBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
              스킴 값은 build.gradle.kts가 .env의 네이티브 앱 키로 채운다.

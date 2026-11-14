@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->
+    <string name="lock_screen_channel_name">Tarjeta en la pantalla de bloqueo</string>
+    <string name="lock_screen_channel_description">Aviso silencioso que se muestra mientras la tarjeta de la pantalla de bloqueo está activada</string>
+    <string name="lock_screen_notification_title">Tarjeta de elum en la pantalla de bloqueo</string>
+    <string name="lock_screen_notification_idle">Enciende la pantalla para ver las rutinas de hoy</string>
+    <string name="lock_screen_notification_progress">Rutinas de Elumi hoy %1$d/%2$d</string>
+    <string name="lock_screen_notification_elumi">A la hora de la rutina, enciende la pantalla para ver la tarjeta que toca ahora</string>
+    <string name="lock_screen_notification_paused">En pausa hasta las %1$s</string>
+    <string name="lock_screen_action_show_now">Ver ahora</string>
+    <string name="lock_screen_action_pause">Pausar 1 hora</string>
+    <string name="lock_screen_action_resume">Volver a activar</string>
+</resources>

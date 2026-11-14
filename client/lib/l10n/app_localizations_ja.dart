@@ -5642,4 +5642,175 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get weeklyReportNotificationProDetail => 'Proで詳しく見る';
+
+  @override
+  String get lockScreenSettingsTitle => 'ロック画面カード';
+
+  @override
+  String get lockScreenGuardianTitle => '今日のElumiの日課';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '次: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '今日の日課はすべて終わりました';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '今日送った日課はありません';
+
+  @override
+  String get lockScreenStaleMessage => 'アプリを開いて今日の日課を確認しましょう';
+
+  @override
+  String get lockScreenOpenApp => 'アプリを開く';
+
+  @override
+  String get lockScreenPauseOneHour => '1時間休む';
+
+  @override
+  String get lockScreenElumiStart => 'はじめる';
+
+  @override
+  String get lockScreenElumiNowLabel => '今やることです';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '画面をつけると、今日のElumiの日課をすぐ表示します';
+
+  @override
+  String get lockScreenElumiIntroTitle => '日課の時間に画面をつけると、今やるカードを1枚大きく表示します';
+
+  @override
+  String get lockScreenIntroNoAdsNote => 'ロック画面に広告やお支払いは表示されません。いつでもオフにできます';
+
+  @override
+  String get lockScreenIntervalTitle => 'どのくらいの頻度で表示しますか';
+
+  @override
+  String get lockScreenIntervalEveryTime => 'つけるたびに';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '$minutes分ごと';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '$hours時間ごと';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '権限 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '必須';
+
+  @override
+  String get lockScreenPermissionRecommended => 'おすすめ';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '他のアプリの上に表示';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      '一覧でelumを押して許可してください。ロック画面の上にカードを表示するときに必要です';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '通知を許可';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      'カードがオンになっていることを静かな通知で表示します';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => 'バッテリー最適化の対象外にする';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '端末が機能を止めないようにします';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => 'スリープしないアプリに追加';
+
+  @override
+  String get lockScreenPermissionSamsungReason => 'Samsungの端末はもう1つ必要です';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      'バッテリー > バックグラウンドでの使用制限 > スリープしないアプリで+を押してelumを追加してください';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '設定を開く';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '追加しました';
+
+  @override
+  String get lockScreenPermissionSkip => 'スキップ';
+
+  @override
+  String get lockScreenTurnOn => 'ロック画面カードをオンにする';
+
+  @override
+  String get lockScreenTurnOff => 'ロック画面カードをオフにする';
+
+  @override
+  String get lockScreenEnableFailed => 'ロック画面カードをオンにできませんでした。権限をもう一度確認してください';
+
+  @override
+  String get lockScreenSetupDoneTitle => '準備完了!';
+
+  @override
+  String get lockScreenSetupDoneBody => '今、画面を消してからつけてみてください';
+
+  @override
+  String get lockScreenSetupComplete => '完了';
+
+  @override
+  String get lockScreenEnabledStatus => 'ロック画面カードはオンです';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '$timeまで休んでいます';
+  }
+
+  @override
+  String get lockScreenPreviewAction => 'プレビュー';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '歯みがき';
+
+  @override
+  String get lockScreenPreviewSampleCard => '歯ブラシに歯みがき粉をつけます';
+
+  @override
+  String get lockScreenPreviewNotice => 'プレビューではボタンは動きません';
+
+  @override
+  String get lockScreenIntroTitle => '📱 ロック画面ですぐ見られます';
+
+  @override
+  String get lockScreenIntroBody => '画面をつけると、アプリを開かなくても今日Elumiがいくつやったか分かります';
+
+  @override
+  String get lockScreenIntroTurnOn => 'オンにしてみる';
+
+  @override
+  String get lockScreenIntroLater => 'あとで';
+
+  @override
+  String get lockScreenOnValue => 'オン';
+
+  @override
+  String get lockScreenPermissionMissingValue => '権限が必要';
+
+  @override
+  String get modeSwitchToLockScreen => 'ロック画面カードは保護者だけが変更できます';
 }

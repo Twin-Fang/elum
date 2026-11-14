@@ -1,4 +1,5 @@
 import '../../../app/home_notice_slot.dart';
+import '../../../app/lock_screen_snapshot_sync.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../../credit/application/credit_top_up_entry.dart';
+import '../../lock_screen/application/lock_screen_intro_entry.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/guardian_child_identity.dart';
@@ -141,6 +143,34 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
+  /// 코치마크 다시 보기 (`?`): 맨 위로 되돌린 뒤 모든 단계
+  void _replayCoach() {
+    final hasSwipeTarget = ref
+        .read(homeRoutinesProvider)
+        .any((r) => r.isEditableByMe);
+    final started = ref
+        .read(homeCoachProvider.notifier)
+        .replay(hasSwipeTarget: hasSwipeTarget);
+    if (started && _scroll.hasClients) _scroll.jumpTo(0);
+  }
+
+  /// 잠금화면 소개 (이룸이가 일과를 한 번이라도 끝낸 뒤, 홈이 맨 위·코치마크 꺼짐일 때만 판단 위임)
+  void _maybeShowLockScreenIntro() {
+    if (!mounted) return;
+    final isHomeOnTop = ModalRoute.of(context)?.isCurrent ?? false;
+    if (!isHomeOnTop || ref.read(homeCoachProvider).active) return;
+    final hasElumiCompletedRoutine = ref
+        .read(homeRoutinesProvider)
+        .any((routine) => routine.isFinished);
+    unawaited(
+      maybeShowLockScreenIntro(
+        context,
+        ref,
+        hasElumiCompletedRoutine: hasElumiCompletedRoutine,
+      ),
+    );
+  }
+
   /// 별점 요청 판단이 도는 중인가 (프레임마다 겹쳐 부르지 않게)
   bool _isStoreReviewCheckRunning = false;
 
@@ -198,6 +228,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _maybeStartCoach();
         _maybeRequestStoreReview();
+        _maybeShowLockScreenIntro();
       });
     }
 
@@ -210,6 +241,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       part: isPhone
           ? GuardianHomeHeaderPart.all
           : GuardianHomeHeaderPart.greeting,
+      onCoachReplay: _replayCoach,
     );
     // 태블릿 세로는 인사말이 맨 위라 상태 표시줄에 붙지 않게 숨 쉴 자리를 둔다 (폰은 머리 줄이 있다)
     final header = isPhone
@@ -326,16 +358,19 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
           ? ScreenLayoutKind.adaptive
           : ScreenLayoutKind.contentColumn,
       child: RoutineAutoRefresh(
-        child: Stack(
-          children: [
-            scaffold,
-            // 처음 들어왔을 때만 뜨는 안내. 막은 루트 오버레이에 그려 하단 바까지 덮는다
-            HomeCoachMark(
-              createKey: _createKey,
-              swipeKey: _swipeKey,
-              modeKey: _modeKey,
-            ),
-          ],
+        // 오늘 진행 요약을 잠금화면 카드·iOS 위젯에 맞춤
+        child: LockScreenSnapshotSync(
+          child: Stack(
+            children: [
+              scaffold,
+              // 처음 들어왔을 때만 뜨는 안내. 막은 루트 오버레이에 그려 하단 바까지 덮는다
+              HomeCoachMark(
+                createKey: _createKey,
+                swipeKey: _swipeKey,
+                modeKey: _modeKey,
+              ),
+            ],
+          ),
         ),
       ),
     );

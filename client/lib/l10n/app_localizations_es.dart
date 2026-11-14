@@ -6079,4 +6079,191 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get weeklyReportNotificationProDetail => 'Ver detalles con Pro';
+
+  @override
+  String get lockScreenSettingsTitle => 'Tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenGuardianTitle => 'Rutinas de Elumi hoy';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return 'Siguiente: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone =>
+      'Las rutinas de hoy están todas hechas';
+
+  @override
+  String get lockScreenGuardianNoRoutine => 'Hoy no se envió ninguna rutina';
+
+  @override
+  String get lockScreenStaleMessage =>
+      'Abre la app para ver las rutinas de hoy';
+
+  @override
+  String get lockScreenOpenApp => 'Abrir la app';
+
+  @override
+  String get lockScreenPauseOneHour => 'Pausar 1 hora';
+
+  @override
+  String get lockScreenElumiStart => 'Empezar';
+
+  @override
+  String get lockScreenElumiNowLabel => 'Esto es lo que toca ahora';
+
+  @override
+  String get lockScreenGuardianIntroTitle =>
+      'Al encender la pantalla verás enseguida las rutinas de Elumi de hoy';
+
+  @override
+  String get lockScreenElumiIntroTitle =>
+      'A la hora de la rutina, al encender la pantalla se ve en grande la tarjeta que toca ahora';
+
+  @override
+  String get lockScreenIntroNoAdsNote =>
+      'En la pantalla de bloqueo no aparecen anuncios ni pagos. Puedes desactivarla cuando quieras';
+
+  @override
+  String get lockScreenIntervalTitle => '¿Cada cuánto se muestra?';
+
+  @override
+  String get lockScreenIntervalEveryTime => 'Cada vez';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return 'Cada $minutes min';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return 'Cada $hours h';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return 'Permisos $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => 'Obligatorio';
+
+  @override
+  String get lockScreenPermissionRecommended => 'Recomendado';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => 'Mostrar sobre otras apps';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      'Toca elum en la lista y permítelo. Hace falta para mostrar la tarjeta sobre la pantalla de bloqueo';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => 'Permitir notificaciones';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      'Muestra un aviso silencioso mientras la tarjeta está activada';
+
+  @override
+  String get lockScreenPermissionBatteryTitle =>
+      'Excluir de la optimización de batería';
+
+  @override
+  String get lockScreenPermissionBatteryReason =>
+      'Evita que el dispositivo detenga la función';
+
+  @override
+  String get lockScreenPermissionSamsungTitle =>
+      'Añadir a apps que nunca entran en suspensión';
+
+  @override
+  String get lockScreenPermissionSamsungReason =>
+      'Los dispositivos Samsung necesitan un paso más';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      'En Batería > Límites de uso en segundo plano > Apps que nunca entran en suspensión, toca + y añade elum';
+
+  @override
+  String get lockScreenPermissionOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get lockScreenPermissionConfirmDone => 'Ya lo añadí';
+
+  @override
+  String get lockScreenPermissionSkip => 'Omitir';
+
+  @override
+  String get lockScreenTurnOn => 'Activar la tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenTurnOff =>
+      'Desactivar la tarjeta en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenEnableFailed =>
+      'No se pudo activar la tarjeta. Revisa los permisos otra vez';
+
+  @override
+  String get lockScreenSetupDoneTitle => '¡Listo!';
+
+  @override
+  String get lockScreenSetupDoneBody =>
+      'Prueba a apagar y encender la pantalla ahora';
+
+  @override
+  String get lockScreenSetupComplete => 'Listo';
+
+  @override
+  String get lockScreenEnabledStatus =>
+      'La tarjeta de la pantalla de bloqueo está activada';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return 'En pausa hasta las $time';
+  }
+
+  @override
+  String get lockScreenPreviewAction => 'Vista previa';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => 'Lavarse los dientes';
+
+  @override
+  String get lockScreenPreviewSampleCard => 'Pon pasta en el cepillo';
+
+  @override
+  String get lockScreenPreviewNotice =>
+      'Los botones no funcionan en la vista previa';
+
+  @override
+  String get lockScreenIntroTitle => '📱 Míralo en la pantalla de bloqueo';
+
+  @override
+  String get lockScreenIntroBody =>
+      'Al encender la pantalla verás cuántas rutinas hizo Elumi hoy, sin abrir la app';
+
+  @override
+  String get lockScreenIntroTurnOn => 'Activarla';
+
+  @override
+  String get lockScreenIntroLater => 'Más tarde';
+
+  @override
+  String get lockScreenOnValue => 'Activada';
+
+  @override
+  String get lockScreenPermissionMissingValue => 'Falta permiso';
+
+  @override
+  String get modeSwitchToLockScreen =>
+      'Solo un tutor puede cambiar la tarjeta de la pantalla de bloqueo';
 }

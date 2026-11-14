@@ -9706,6 +9706,318 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Pro로 자세히 보기'**
   String get weeklyReportNotificationProDetail;
+
+  /// 설정 줄 이름 · 잠금화면 카드 설정 화면 제목 (Android)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드'**
+  String get lockScreenSettingsTitle;
+
+  /// 보호자 잠금화면 카드: 진행 수 위 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 이룸이 일과'**
+  String get lockScreenGuardianTitle;
+
+  /// 보호자 잠금화면 카드: 끝낸 일과 수/오늘 일과 수 (큰 숫자)
+  ///
+  /// In ko, this message translates to:
+  /// **'{doneCount}/{totalCount}'**
+  String lockScreenGuardianCount(int doneCount, int totalCount);
+
+  /// 보호자 잠금화면 카드: 아직 안 끝낸 첫 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 할 일: {routineTitle}'**
+  String lockScreenGuardianNext(String routineTitle);
+
+  /// 보호자 잠금화면 카드: 오늘 일과를 모두 끝냈을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과를 다 끝냈어요'**
+  String get lockScreenGuardianAllDone;
+
+  /// 보호자 잠금화면 카드: 오늘 일과가 0개일 때
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보낸 일과가 없어요'**
+  String get lockScreenGuardianNoRoutine;
+
+  /// 잠금화면 카드: 오늘 요약이 없거나 어제 것일 때 (잠금화면은 네트워크를 쓰지 않음)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱을 열어 오늘 일과를 확인해요'**
+  String get lockScreenStaleMessage;
+
+  /// 잠금화면 카드 주 버튼 (잠금을 푼 뒤 홈으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 열기'**
+  String get lockScreenOpenApp;
+
+  /// 보호자 잠금화면 카드 보조 버튼 (1시간 동안 안 띄움)
+  ///
+  /// In ko, this message translates to:
+  /// **'1시간 쉬기'**
+  String get lockScreenPauseOneHour;
+
+  /// 이룸이 잠금화면 카드 주 버튼 (잠금을 푼 뒤 그 일과 카드로)
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get lockScreenElumiStart;
+
+  /// 이룸이 잠금화면 카드: 카드 글 아래 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 할 일이에요'**
+  String get lockScreenElumiNowLabel;
+
+  /// 잠금화면 카드 설정 위 소개 카드 제목 (보호자 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'화면을 켜면 오늘 이룸이 일과를 바로 보여 줘요'**
+  String get lockScreenGuardianIntroTitle;
+
+  /// 잠금화면 카드 설정 위 소개 카드 제목 (이룸이 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 시간에 화면을 켜면 지금 할 카드 한 장을 크게 보여 줘요'**
+  String get lockScreenElumiIntroTitle;
+
+  /// 잠금화면 카드 소개 한 줄 (정책 안내: 광고·결제 없음, 기본 꺼짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면에는 광고와 결제가 나오지 않아요. 언제든 끌 수 있어요'**
+  String get lockScreenIntroNoAdsNote;
+
+  /// 잠금화면 카드 설정: 띄우는 간격 고르기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'얼마나 자주 보여 줄까요'**
+  String get lockScreenIntervalTitle;
+
+  /// 잠금화면 간격 칩: 화면을 켤 때마다
+  ///
+  /// In ko, this message translates to:
+  /// **'켤 때마다'**
+  String get lockScreenIntervalEveryTime;
+
+  /// 잠금화면 간격 칩: 분 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'{minutes}분마다'**
+  String lockScreenIntervalMinutes(int minutes);
+
+  /// 잠금화면 간격 칩: 시간 단위
+  ///
+  /// In ko, this message translates to:
+  /// **'{hours}시간마다'**
+  String lockScreenIntervalHours(int hours);
+
+  /// 잠금화면 권한 단계 진행 글 (막대 위)
+  ///
+  /// In ko, this message translates to:
+  /// **'권한 {doneCount}/{totalCount}'**
+  String lockScreenSetupProgress(int doneCount, int totalCount);
+
+  /// 권한 단계 칩: 꼭 필요한 권한
+  ///
+  /// In ko, this message translates to:
+  /// **'필수'**
+  String get lockScreenPermissionRequired;
+
+  /// 권한 단계 칩: 권장(건너뛸 수 있음)
+  ///
+  /// In ko, this message translates to:
+  /// **'권장'**
+  String get lockScreenPermissionRecommended;
+
+  /// 권한 단계: 다른 앱 위에 표시 (Android 시스템 메뉴 이름)
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 앱 위에 표시'**
+  String get lockScreenPermissionOverlayTitle;
+
+  /// 권한 단계 이유: 다른 앱 위에 표시 (설정이 앱 목록으로 열림)
+  ///
+  /// In ko, this message translates to:
+  /// **'목록에서 이룸을 눌러 허용해 주세요. 잠금화면 위에 카드를 띄울 때 필요해요'**
+  String get lockScreenPermissionOverlayReason;
+
+  /// 권한 단계: 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 허용'**
+  String get lockScreenPermissionNotificationTitle;
+
+  /// 권한 단계 이유: 알림 (포그라운드 서비스 상태 알림)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 켜져 있다는 조용한 알림을 보여 줘요'**
+  String get lockScreenPermissionNotificationReason;
+
+  /// 권한 단계: 배터리 최적화 제외
+  ///
+  /// In ko, this message translates to:
+  /// **'배터리 최적화 제외'**
+  String get lockScreenPermissionBatteryTitle;
+
+  /// 권한 단계 이유: 배터리 최적화 제외
+  ///
+  /// In ko, this message translates to:
+  /// **'기기가 기능을 멈추지 않게 해요'**
+  String get lockScreenPermissionBatteryReason;
+
+  /// 권한 단계: 삼성 절전 예외 앱 (삼성 기기만)
+  ///
+  /// In ko, this message translates to:
+  /// **'절전 예외 앱에 추가'**
+  String get lockScreenPermissionSamsungTitle;
+
+  /// 권한 단계 이유: 삼성 절전 예외
+  ///
+  /// In ko, this message translates to:
+  /// **'삼성 기기는 한 번 더 필요해요'**
+  String get lockScreenPermissionSamsungReason;
+
+  /// 권한 단계: 삼성 설정에서 돌아온 뒤 경로 안내 (메뉴 이름은 One UI 기준)
+  ///
+  /// In ko, this message translates to:
+  /// **'배터리 > 백그라운드 사용 제한 > 절전 예외 앱에서 +를 눌러 이룸을 추가해 주세요'**
+  String get lockScreenPermissionSamsungHint;
+
+  /// 권한 단계 버튼: 그 권한 설정 화면 열기
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get lockScreenPermissionOpenSettings;
+
+  /// 권한 단계 버튼: 결과를 읽을 수 없는 삼성 단계를 사용자가 끝냈다고 확인
+  ///
+  /// In ko, this message translates to:
+  /// **'추가했어요'**
+  String get lockScreenPermissionConfirmDone;
+
+  /// 권한 단계 버튼: 권장 단계 건너뛰기
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get lockScreenPermissionSkip;
+
+  /// 필수 권한이 모두 켜졌을 때 직접 켜기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드 켜기'**
+  String get lockScreenTurnOn;
+
+  /// 켜진 상태: 끄기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드 끄기'**
+  String get lockScreenTurnOff;
+
+  /// 켜기 실패 팝업 문장 (코드 E-LOCK-ENABLE 함께)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드를 켜지 못했어요. 권한을 다시 확인해 주세요'**
+  String get lockScreenEnableFailed;
+
+  /// 권한을 모두 마치고 켰을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'준비 끝!'**
+  String get lockScreenSetupDoneTitle;
+
+  /// 권한을 모두 마치고 켰을 때 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 화면을 껐다 켜 보세요'**
+  String get lockScreenSetupDoneBody;
+
+  /// 권한 단계를 마친 뒤 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get lockScreenSetupComplete;
+
+  /// 켜진 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드가 켜져 있어요'**
+  String get lockScreenEnabledStatus;
+
+  /// 켜진 상태 한 줄: 1시간 쉬는 중 (시각)
+  ///
+  /// In ko, this message translates to:
+  /// **'{time}까지 쉬고 있어요'**
+  String lockScreenPausedUntil(String time);
+
+  /// 잠금화면 카드 미리 보기 버튼 (설정·소개 시트)
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기'**
+  String get lockScreenPreviewAction;
+
+  /// 미리 보기 견본 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'양치하기'**
+  String get lockScreenPreviewSampleRoutine;
+
+  /// 미리 보기 견본 카드 글 (이룸이 기기)
+  ///
+  /// In ko, this message translates to:
+  /// **'칫솔에 치약을 짜요'**
+  String get lockScreenPreviewSampleCard;
+
+  /// 미리 보기에서 버튼을 눌렀을 때 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'미리 보기에서는 버튼이 동작하지 않아요'**
+  String get lockScreenPreviewNotice;
+
+  /// 잠금화면 소개 시트 제목 (이룸이 첫 완료 뒤 1회 + 7일 뒤 1회, 앞 이모지 1개)
+  ///
+  /// In ko, this message translates to:
+  /// **'📱 잠금화면에서 바로 봐요'**
+  String get lockScreenIntroTitle;
+
+  /// 잠금화면 소개 시트 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 화면을 켜면 앱을 열지 않아도 오늘 이룸이가 몇 개를 했는지 보여요'**
+  String get lockScreenIntroBody;
+
+  /// 잠금화면 소개 시트 주 버튼 (설정 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜 보기'**
+  String get lockScreenIntroTurnOn;
+
+  /// 잠금화면 소개 시트 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get lockScreenIntroLater;
+
+  /// 설정의 잠금화면 카드 줄 오른쪽 값 (켜짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'켜짐'**
+  String get lockScreenOnValue;
+
+  /// 설정의 잠금화면 카드 줄 오른쪽 값 (켜 두었는데 권한이 빠짐)
+  ///
+  /// In ko, this message translates to:
+  /// **'권한 필요'**
+  String get lockScreenPermissionMissingValue;
+
+  /// 이룸이 기기에서 잠금화면 카드 설정 전 보호자 암호 확인 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금화면 카드는 보호자만 바꿀 수 있어요'**
+  String get modeSwitchToLockScreen;
 }
 
 class _AppLocalizationsDelegate

@@ -5667,4 +5667,175 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get weeklyReportNotificationProDetail => 'Pro로 자세히 보기';
+
+  @override
+  String get lockScreenSettingsTitle => '잠금화면 카드';
+
+  @override
+  String get lockScreenGuardianTitle => '오늘 이룸이 일과';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return '다음 할 일: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => '오늘 일과를 다 끝냈어요';
+
+  @override
+  String get lockScreenGuardianNoRoutine => '오늘 보낸 일과가 없어요';
+
+  @override
+  String get lockScreenStaleMessage => '앱을 열어 오늘 일과를 확인해요';
+
+  @override
+  String get lockScreenOpenApp => '앱 열기';
+
+  @override
+  String get lockScreenPauseOneHour => '1시간 쉬기';
+
+  @override
+  String get lockScreenElumiStart => '시작하기';
+
+  @override
+  String get lockScreenElumiNowLabel => '지금 할 일이에요';
+
+  @override
+  String get lockScreenGuardianIntroTitle => '화면을 켜면 오늘 이룸이 일과를 바로 보여 줘요';
+
+  @override
+  String get lockScreenElumiIntroTitle => '일과 시간에 화면을 켜면 지금 할 카드 한 장을 크게 보여 줘요';
+
+  @override
+  String get lockScreenIntroNoAdsNote => '잠금화면에는 광고와 결제가 나오지 않아요. 언제든 끌 수 있어요';
+
+  @override
+  String get lockScreenIntervalTitle => '얼마나 자주 보여 줄까요';
+
+  @override
+  String get lockScreenIntervalEveryTime => '켤 때마다';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return '$minutes분마다';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return '$hours시간마다';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return '권한 $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => '필수';
+
+  @override
+  String get lockScreenPermissionRecommended => '권장';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => '다른 앱 위에 표시';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      '목록에서 이룸을 눌러 허용해 주세요. 잠금화면 위에 카드를 띄울 때 필요해요';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => '알림 허용';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      '카드가 켜져 있다는 조용한 알림을 보여 줘요';
+
+  @override
+  String get lockScreenPermissionBatteryTitle => '배터리 최적화 제외';
+
+  @override
+  String get lockScreenPermissionBatteryReason => '기기가 기능을 멈추지 않게 해요';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => '절전 예외 앱에 추가';
+
+  @override
+  String get lockScreenPermissionSamsungReason => '삼성 기기는 한 번 더 필요해요';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      '배터리 > 백그라운드 사용 제한 > 절전 예외 앱에서 +를 눌러 이룸을 추가해 주세요';
+
+  @override
+  String get lockScreenPermissionOpenSettings => '설정 열기';
+
+  @override
+  String get lockScreenPermissionConfirmDone => '추가했어요';
+
+  @override
+  String get lockScreenPermissionSkip => '건너뛰기';
+
+  @override
+  String get lockScreenTurnOn => '잠금화면 카드 켜기';
+
+  @override
+  String get lockScreenTurnOff => '잠금화면 카드 끄기';
+
+  @override
+  String get lockScreenEnableFailed => '잠금화면 카드를 켜지 못했어요. 권한을 다시 확인해 주세요';
+
+  @override
+  String get lockScreenSetupDoneTitle => '준비 끝!';
+
+  @override
+  String get lockScreenSetupDoneBody => '지금 화면을 껐다 켜 보세요';
+
+  @override
+  String get lockScreenSetupComplete => '완료';
+
+  @override
+  String get lockScreenEnabledStatus => '잠금화면 카드가 켜져 있어요';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return '$time까지 쉬고 있어요';
+  }
+
+  @override
+  String get lockScreenPreviewAction => '미리 보기';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => '양치하기';
+
+  @override
+  String get lockScreenPreviewSampleCard => '칫솔에 치약을 짜요';
+
+  @override
+  String get lockScreenPreviewNotice => '미리 보기에서는 버튼이 동작하지 않아요';
+
+  @override
+  String get lockScreenIntroTitle => '📱 잠금화면에서 바로 봐요';
+
+  @override
+  String get lockScreenIntroBody => '기기 화면을 켜면 앱을 열지 않아도 오늘 이룸이가 몇 개를 했는지 보여요';
+
+  @override
+  String get lockScreenIntroTurnOn => '켜 보기';
+
+  @override
+  String get lockScreenIntroLater => '나중에';
+
+  @override
+  String get lockScreenOnValue => '켜짐';
+
+  @override
+  String get lockScreenPermissionMissingValue => '권한 필요';
+
+  @override
+  String get modeSwitchToLockScreen => '잠금화면 카드는 보호자만 바꿀 수 있어요';
 }

@@ -5979,4 +5979,185 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeklyReportNotificationProDetail => 'See details with Pro';
+
+  @override
+  String get lockScreenSettingsTitle => 'Lock screen card';
+
+  @override
+  String get lockScreenGuardianTitle => 'Elumi\'s routines today';
+
+  @override
+  String lockScreenGuardianCount(int doneCount, int totalCount) {
+    return '$doneCount/$totalCount';
+  }
+
+  @override
+  String lockScreenGuardianNext(String routineTitle) {
+    return 'Next: $routineTitle';
+  }
+
+  @override
+  String get lockScreenGuardianAllDone => 'All of today\'s routines are done';
+
+  @override
+  String get lockScreenGuardianNoRoutine => 'No routines sent today';
+
+  @override
+  String get lockScreenStaleMessage =>
+      'Open the app to check today\'s routines';
+
+  @override
+  String get lockScreenOpenApp => 'Open app';
+
+  @override
+  String get lockScreenPauseOneHour => 'Pause 1 hour';
+
+  @override
+  String get lockScreenElumiStart => 'Start';
+
+  @override
+  String get lockScreenElumiNowLabel => 'This is what to do now';
+
+  @override
+  String get lockScreenGuardianIntroTitle =>
+      'See Elumi\'s routines for today as soon as you turn on the screen';
+
+  @override
+  String get lockScreenElumiIntroTitle =>
+      'At routine time, turning on the screen shows one big card to do now';
+
+  @override
+  String get lockScreenIntroNoAdsNote =>
+      'No ads or payments appear on the lock screen. You can turn it off anytime';
+
+  @override
+  String get lockScreenIntervalTitle => 'How often should it appear?';
+
+  @override
+  String get lockScreenIntervalEveryTime => 'Every time';
+
+  @override
+  String lockScreenIntervalMinutes(int minutes) {
+    return 'Every $minutes min';
+  }
+
+  @override
+  String lockScreenIntervalHours(int hours) {
+    return 'Every $hours hr';
+  }
+
+  @override
+  String lockScreenSetupProgress(int doneCount, int totalCount) {
+    return 'Permissions $doneCount/$totalCount';
+  }
+
+  @override
+  String get lockScreenPermissionRequired => 'Required';
+
+  @override
+  String get lockScreenPermissionRecommended => 'Recommended';
+
+  @override
+  String get lockScreenPermissionOverlayTitle => 'Display over other apps';
+
+  @override
+  String get lockScreenPermissionOverlayReason =>
+      'Tap elum in the list and allow it. It\'s needed to show the card over the lock screen';
+
+  @override
+  String get lockScreenPermissionNotificationTitle => 'Allow notifications';
+
+  @override
+  String get lockScreenPermissionNotificationReason =>
+      'Shows a quiet notification while the card is on';
+
+  @override
+  String get lockScreenPermissionBatteryTitle =>
+      'Exclude from battery optimization';
+
+  @override
+  String get lockScreenPermissionBatteryReason =>
+      'Keeps the device from stopping the feature';
+
+  @override
+  String get lockScreenPermissionSamsungTitle => 'Add to never sleeping apps';
+
+  @override
+  String get lockScreenPermissionSamsungReason =>
+      'Samsung devices need one more step';
+
+  @override
+  String get lockScreenPermissionSamsungHint =>
+      'In Battery > Background usage limits > Never sleeping apps, tap + and add elum';
+
+  @override
+  String get lockScreenPermissionOpenSettings => 'Open settings';
+
+  @override
+  String get lockScreenPermissionConfirmDone => 'I added it';
+
+  @override
+  String get lockScreenPermissionSkip => 'Skip';
+
+  @override
+  String get lockScreenTurnOn => 'Turn on lock screen card';
+
+  @override
+  String get lockScreenTurnOff => 'Turn off lock screen card';
+
+  @override
+  String get lockScreenEnableFailed =>
+      'Couldn\'t turn on the lock screen card. Please check the permissions again';
+
+  @override
+  String get lockScreenSetupDoneTitle => 'All set!';
+
+  @override
+  String get lockScreenSetupDoneBody => 'Try turning the screen off and on now';
+
+  @override
+  String get lockScreenSetupComplete => 'Done';
+
+  @override
+  String get lockScreenEnabledStatus => 'The lock screen card is on';
+
+  @override
+  String lockScreenPausedUntil(String time) {
+    return 'Paused until $time';
+  }
+
+  @override
+  String get lockScreenPreviewAction => 'Preview';
+
+  @override
+  String get lockScreenPreviewSampleRoutine => 'Brush teeth';
+
+  @override
+  String get lockScreenPreviewSampleCard => 'Put toothpaste on the toothbrush';
+
+  @override
+  String get lockScreenPreviewNotice => 'Buttons don\'t work in the preview';
+
+  @override
+  String get lockScreenIntroTitle => '📱 See it right on the lock screen';
+
+  @override
+  String get lockScreenIntroBody =>
+      'Turn on the screen to see how many routines Elumi did today, without opening the app';
+
+  @override
+  String get lockScreenIntroTurnOn => 'Turn it on';
+
+  @override
+  String get lockScreenIntroLater => 'Later';
+
+  @override
+  String get lockScreenOnValue => 'On';
+
+  @override
+  String get lockScreenPermissionMissingValue => 'Permission needed';
+
+  @override
+  String get modeSwitchToLockScreen =>
+      'Only a guardian can change the lock screen card';
 }

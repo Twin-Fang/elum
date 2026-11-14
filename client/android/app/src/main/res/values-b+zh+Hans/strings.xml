@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->
+    <string name="lock_screen_channel_name">锁屏卡片</string>
+    <string name="lock_screen_channel_description">锁屏卡片开启期间显示的安静通知</string>
+    <string name="lock_screen_notification_title">elum 锁屏卡片</string>
+    <string name="lock_screen_notification_idle">打开屏幕就能看到今天的日常</string>
+    <string name="lock_screen_notification_progress">Elumi今天的日常 %1$d/%2$d</string>
+    <string name="lock_screen_notification_elumi">到了日常时间，打开屏幕就能看到现在要做的卡片</string>
+    <string name="lock_screen_notification_paused">暂停到 %1$s</string>
+    <string name="lock_screen_action_show_now">现在查看</string>
+    <string name="lock_screen_action_pause">暂停1小时</string>
+    <string name="lock_screen_action_resume">重新开启</string>
+</resources>

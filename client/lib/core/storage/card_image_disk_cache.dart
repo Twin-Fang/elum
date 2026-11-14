@@ -77,6 +77,18 @@ class CardImageDiskCache {
     return File('${dir.path}${Platform.pathSeparator}$name');
   }
 
+  /// 디스크에 있는 그림 파일 경로 (잠금화면 카드처럼 네트워크 없이 파일로 그릴 때). 없으면 null
+  Future<String?> existingFilePath(String imagePath) async {
+    try {
+      final file = await _fileFor(imagePath);
+      if (file == null || !await file.exists()) return null;
+      return file.path;
+    } catch (e) {
+      AppLogger.error('card-cache', 'existing file lookup failed : $e');
+      return null;
+    }
+  }
+
   /// 디스크에 있는 그림. 없거나 깨졌으면 null (깨진 파일은 지운다).
   Future<Uint8List?> read(String imagePath) async {
     try {
