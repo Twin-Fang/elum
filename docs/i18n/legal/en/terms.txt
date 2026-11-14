@@ -1,0 +1,62 @@
+Article 1 (Purpose)
+These Terms set out the conditions and procedures for using the ELUM (이룸) service provided by Twin-Fang (the "Company"),
+and the rights and obligations of the Company and users.
+
+Article 2 (Description of the Service)
+ELUM is an app that helps individuals with developmental disabilities carry out their routines. When a guardian enters a situation,
+AI creates step-by-step cards, which appear on the individual's screen after the guardian has reviewed them.
+
+- Results created by AI are shown to the individual only after the guardian approves them.
+- Each card contains only one action.
+- ELUM does not provide treatment or diagnosis. It does not replace consultation with a professional.
+
+Article 3 (Accounts)
+1. Accounts are created by signing in with Kakao, Naver, Google, or Apple.
+2. A separate account is created for each sign-in method. If you sign in with a different method,
+   the information in your previous account will not be shown.
+3. Accounts are used by guardians. The individual does not sign in separately.
+
+Article 4 (Obligations of Users)
+1. Users shall not enter other people's information without authorization.
+2. Users shall not use the service for purposes other than its normal use, or send excessive
+   requests by automated means.
+
+Article 5 (Changes to and Suspension of the Service)
+The Company may change or suspend the content of the service. Important changes will be announced in advance
+within the app. The Company does not provide separate compensation for the suspension of services
+provided free of charge.
+
+Article 5-2 (Advertising)
+1. The service may include advertisements. Advertisements are displayed through Google LLC's advertising service
+   (Google AdMob) on the Guardian mode screens (Home, drafts list, credit information) in banner,
+   native, and rewarded formats (ads that grant credits when watched to the end), and are not displayed on the Elumi mode screen or
+   during the routine creation process. If you watch a rewarded ad to the end, you may receive the number of credits
+   set by the service.
+2. To display advertisements and measure their performance, the information described in the Privacy Policy is
+   transferred to Google.
+3. The content of advertisements is determined by advertisers, and the Company is not responsible for the products or services
+   contained in advertisements.
+
+Article 5-3 (Image Sources)
+1. Some of the card images in the service use Mulberry Symbols (https://mulberrysymbols.org).
+   These are free images that may be used under the condition of crediting the creator and sharing under the same terms (CC BY-SA 4.0),
+   and the Company uses them as they are, without changing their colors or shapes.
+2. Attribution: Mulberry Symbols by Steve Lee are licenced under the Creative Commons
+   Attribution-ShareAlike 4.0 License. See https://mulberrysymbols.org for details
+3. Copyright 2018-2026 Steve Lee
+4. The full text of the license is available at https://creativecommons.org/licenses/by-sa/4.0/ .
+
+Article 6 (Disclaimer)
+1. The Company is not liable where it is unable to provide the service due to causes beyond its control,
+   such as natural disasters or telecommunications failures.
+2. The content of cards created by AI is reference material. Guardians review and use it,
+   and the Company is not responsible for the results.
+
+Article 7 (Inquiries)
+Inquiries regarding the service are received at chan4760@naver.com.
+
+Addendum — These Terms apply from September 17, 2026.
+- Announced October 1, 2026, effective October 8 — Article 5-2 on advertising was added.
+- Announced October 1, 2026, effective October 8 — Article 5-3 on image sources was added.
+
+This translation is provided for convenience. If it differs from the Korean version, the Korean version prevails.

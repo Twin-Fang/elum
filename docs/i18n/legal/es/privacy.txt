@@ -1,0 +1,230 @@
+0. Quién introduce la información y quién otorga el consentimiento
+
+En ELUM (이룸), el tutor crea la cuenta e introduce la información de Elumi en su nombre. A un mismo Elumi
+pueden estar vinculados varios tutores (incluidos familiares y trabajadores sociales), y todos los tutores vinculados
+introducen la información de Elumi y consultan juntos las rutinas. Elumi no crea una cuenta ni
+inicia sesión directamente.
+
+Para introducir la información en su nombre, cada tutor debe encontrarse en uno de los siguientes supuestos.
+- Si Elumi es menor de 14 años cumplidos (만 14세): es su representante legal (법정대리인) (padre, madre o curador (후견인)).
+  Este consentimiento sustituye el consentimiento del representante legal exigido por la Ley de Protección de Datos Personales de Corea (개인정보 보호법).
+- Si Elumi es mayor de edad y se ha iniciado una curatela (후견): es el curador pleno (성년후견인) o el
+  curador limitado (한정후견인) designado por el tribunal.
+- Si Elumi es mayor de edad y no se ha iniciado una curatela: introduce la información en su nombre con el consentimiento
+  del propio Elumi. En principio, una persona mayor de edad puede otorgar su consentimiento por sí misma y, en este caso, el tutor
+  no es su representante legal.
+
+Cualquier tutor vinculado puede corregir la información de Elumi en la aplicación, y se conserva el valor
+modificado en último lugar. Las rutinas solo pueden ser modificadas o eliminadas por el tutor que las creó.
+
+1. Datos que se recopilan
+
+[Cuenta]
+- Proveedor de inicio de sesión (Kakao, Naver, Google, Apple) e identificador de miembro emitido por el proveedor
+- Dirección de correo electrónico
+- Apodo del tutor (se crea automáticamente al registrarse y el tutor puede cambiarlo)
+- Fecha y hora del último inicio de sesión, número de inicios de sesión
+
+[Mantenimiento de la sesión]
+- Valor transformado del token de mantenimiento de la sesión, identificador del dispositivo
+
+[Información de Elumi] — La introduce directamente el tutor
+- El nombre con el que se llama a Elumi (apodo)
+- Personaje seleccionado
+- Objetivos de apoyo
+
+[Rutinas]
+- La descripción de la situación introducida por el tutor y las respuestas a las preguntas adicionales
+- Título y pasos de las tarjetas creadas, fecha y hora previstas de realización, recompensa, fecha y hora de finalización
+
+[Registros de uso]
+- Tipo de llamada a la IA, modelo utilizado, tiempo de respuesta, volumen procesado, coste estimado
+
+[Enviar comentarios] — Solo cuando el tutor envía comentarios desde Ajustes
+- El texto del comentario escrito por el tutor
+- Versión de la aplicación, sistema operativo
+- Registro de estado de la aplicación (puede elegir si enviarlo; está activado de forma predeterminada) — Es el registro de la actividad
+  reciente de la aplicación e incluye el contenido de las solicitudes y respuestas intercambiadas con el servidor, los cambios de pantalla y los errores.
+  El contenido de las respuestas puede incluir información de la aplicación, como el nombre con el que se llama a Elumi o el contenido de las rutinas.
+  El token de inicio de sesión y el código de acceso se ocultan antes del envío.
+- Información del teléfono (se envía junto con el registro de estado de la aplicación mediante la misma casilla y está activada de forma predeterminada)
+  — Origen de instalación de la aplicación (si se instaló desde la tienda), valor de la clave de firma de la aplicación, número aleatorio generado
+  por la aplicación al instalarse, fabricante, modelo y versión del sistema operativo del teléfono, zona horaria y región, tipo de
+  conexión de red, tipo de compilación y tiempo de ejecución de la aplicación, estado del modo de ahorro de energía, espacio de almacenamiento disponible,
+  si KakaoTalk está instalado y su versión, valores de configuración del inicio de sesión de Kakao, último error de inicio de sesión social.
+  El número único del teléfono (IMEI, número de serie), el identificador de publicidad, la ubicación, los contactos y la lista de otras aplicaciones
+  instaladas no se recopilan para esta finalidad.
+
+[Historias] — Solo cuando el tutor comparte una rutina en Historias o reacciona
+- Título de la rutina compartida, frases de las tarjetas, imágenes de las tarjetas (en las fotos tomadas por el tutor se puede elegir
+  si difuminarlas), texto escrito por el tutor, categoría
+- Registros de comentarios, «Me ayudó» y rutinas llevadas
+- Registros de denuncias y de tutores ocultados
+
+[Publicidad — Recopilada directamente por Google en la pantalla del tutor]
+- Identificador de publicidad (identificador de publicidad de iOS, ID de publicidad de Android)
+- Dirección IP y ubicación aproximada basada en ella
+- Información del dispositivo y de la aplicación (sistema operativo, modelo del dispositivo, versión de la aplicación)
+- Información de uso de la publicidad, como impresiones y clics en anuncios
+- Información de cierres inesperados de la aplicación y diagnóstico de rendimiento
+
+2. Datos que no se recopilan
+No se recopilan diagnósticos, tipo o grado de discapacidad, número de registro de residente, datos de contacto, dirección, información de ubicación precisa (GPS),
+ni información de acceso a la galería de fotos o a los contactos. La transmisión a Google de la ubicación aproximada basada en la dirección IP
+en el proceso de mostrar publicidad se rige por lo indicado en el apartado de publicidad anterior.
+La personalización se realiza únicamente a partir de los «objetivos de apoyo» elegidos por el tutor.
+
+3. Finalidades del uso
+- Identificación de miembros y mantenimiento de la sesión
+- Creación y personalización de las tarjetas de rutina
+- Registro de la realización y otorgamiento de recompensas
+- Operación del servicio y respuesta a incidencias
+- Revisión de los comentarios enviados por los tutores e identificación de la causa de los problemas
+- Prestación de la función para que los tutores compartan rutinas e intercambien reacciones en Historias, y revisión de denuncias
+- Publicación de anuncios, medición del rendimiento publicitario, prevención del uso fraudulento (Google)
+
+[Alcance de la publicación del contenido compartido en Historias]
+Las rutinas, los textos y los comentarios compartidos en Historias son visibles para otros tutores que hayan iniciado sesión, y otros tutores
+pueden llevárselos como rutinas propias. Como autor se muestra el apodo del tutor; el correo electrónico y
+la información de inicio de sesión no se muestran. El nombre con el que se llama a Elumi se publica sustituido por «Elumi».
+Procure que en las fotos no se vean rostros, etiquetas con nombres ni direcciones.
+
+4. Periodo de conservación
+- Al darse de baja como miembro, la dirección de correo electrónico, la fecha y hora del último inicio de sesión y el número de inicios de sesión, el token de inicio de sesión y las
+  rutinas creadas por ese tutor se destruyen sin demora.
+- La información de Elumi y la información de vinculación del teléfono de Elumi se conservan si hay otros tutores vinculados,
+  y se destruyen cuando ya no quede ningún tutor vinculado. Las estrellas reunidas por Elumi y las rutinas creadas por otros
+  tutores se mantienen tal cual.
+- El texto de los comentarios, el registro de estado de la aplicación y la información del teléfono se destruyen sin demora al darse de baja como miembro. Incluso antes de ello,
+  pueden eliminarse una vez concluida la revisión del problema.
+- Las rutinas, los textos y los comentarios compartidos en Historias, así como los registros de reacciones, denuncias y ocultaciones, se destruyen sin demora cuando el tutor los retira o
+  al darse de baja como miembro. Las rutinas que otro tutor ya se haya llevado permanecen como rutinas
+  de ese tutor.
+- Cuando la normativa establezca un periodo de conservación distinto, se conservarán durante dicho periodo.
+
+[Información conservada durante 1 año tras la baja]
+La siguiente información se conserva durante 1 año a partir de la fecha de baja y después se destruye.
+- Valores de identificación de la cuenta (proveedor de inicio de sesión social y su número de identificación de miembro, ID del servicio) y registros de uso de las funciones de IA
+  (fecha, hora y número de usos) — Se conservan para impedir el uso fraudulento consistente en obtener repetidamente el límite de uso gratuito
+  mediante la baja y un nuevo registro.
+- Si se registró con un ID del servicio, el valor transformado de la contraseña — Se conserva para verificar la identidad y restaurar la cuenta anterior
+  si vuelve a iniciar sesión con el mismo ID dentro de este periodo.
+- Registros de consentimiento de las condiciones (si se otorgó el consentimiento, fecha y hora del consentimiento, versión del documento aceptado) — Se conservan para acreditar a qué y cuándo
+  se otorgó el consentimiento.
+
+Durante su conservación, esta información no se utiliza para fines distintos de los indicados anteriormente. Si dentro de este periodo
+vuelve a registrarse con la misma cuenta, la cuenta anterior se restaura vacía y los registros de uso
+continúan. La información de Elumi y las rutinas no se restauran, y el consentimiento de las condiciones se solicita de nuevo.
+Si solicita la eliminación inmediata de la información conservada, se destruirá sin demora.
+
+Cuando finalice el periodo de conservación y se proceda a su destrucción, los registros de llamadas a la IA (tipo de llamada, modelo, tiempo de respuesta, volumen procesado,
+coste) se desvinculan del miembro para que no se pueda saber de quién son y se conservan únicamente como estadísticas
+de operación del servicio. Estos registros no contienen el contenido de las rutinas ni la información de Elumi.
+
+5. Derechos del tutor
+Cualquier tutor vinculado puede corregir la información de Elumi en la aplicación, y las rutinas pueden ser eliminadas por el
+tutor que las creó. El tutor puede cancelar la vinculación con Elumi (salir) en la aplicación.
+Puede solicitar la eliminación mediante la baja como miembro. También se atenderán las solicitudes enviadas a chan4760@naver.com, y tras la baja
+también puede solicitar a esta dirección la eliminación inmediata de la información conservada.
+
+6. Derecho a negarse a otorgar el consentimiento
+Usted puede negarse a otorgar este consentimiento. No obstante, no podrá crear una cuenta ni tarjetas de rutina y,
+por lo tanto, no podrá utilizar el servicio.
+
+7. Medidas para garantizar la seguridad
+- Las contraseñas se almacenan transformadas de forma que no puedan descifrarse.
+- Del token de mantenimiento de la sesión no se almacena el original, sino solo su valor transformado, y en cada renovación
+  se sustituye por un valor nuevo. Si se vuelve a recibir un token ya utilizado, se considera robado y
+  se cierran todas las sesiones de la cuenta correspondiente.
+- Todas las comunicaciones entre el servidor y la aplicación se cifran (HTTPS).
+
+8. Encargo del tratamiento
+Al crear tarjetas de rutina, se encarga el tratamiento a las siguientes empresas.
+- Google LLC — Generación de las frases de las tarjetas, generación de las imágenes de las tarjetas
+- OpenAI, L.L.C. — Generación de las frases de las tarjetas, generación de las imágenes de las tarjetas
+- Features & Labels Inc. (fal) — Generación de las imágenes de las tarjetas
+
+La información que se encarga es la descripción de la situación escrita por el tutor y las respuestas a las preguntas adicionales, el nombre con el que se llama
+a Elumi (apodo) y los objetivos de apoyo seleccionados. Las frases escritas por el tutor se transmiten tal cual, sin procesar,
+por lo que no escriba información que permita identificar a una persona, como nombres, números de teléfono o direcciones.
+
+ELUM opera el servidor directamente y no lo encarga a terceros.
+
+[Servicio de publicidad]
+En la pantalla del tutor se muestra publicidad mediante el servicio publicitario de Google LLC (Google AdMob).
+- La publicidad aparece en la pantalla del tutor (inicio, lista de borradores, información sobre créditos) en formato de banner, nativo o con recompensa
+  (anuncios que otorgan créditos si se ven hasta el final), y no aparece en la pantalla de Elumi ni durante el proceso
+  de creación de rutinas.
+- La información introducida en la aplicación, como el nombre, las rutinas o el contenido de las tarjetas de Elumi, no se utiliza para la publicidad ni se transmite
+  a Google.
+- En iOS, puede rechazarlo en el aviso de permiso de rastreo que aparece en la primera ejecución y, si lo rechaza,
+  se mostrarán anuncios no personalizados. Puede cambiarlo en Ajustes > Privacidad y seguridad > Rastreo.
+  Si rechaza el rastreo en iOS, no se utiliza el identificador de publicidad y solo se muestran anuncios
+  no personalizados.
+- En Android, puede restablecer o eliminar el ID de publicidad en Ajustes > Google > Anuncios.
+- La forma en que Google utiliza la información publicitaria puede consultarse en
+  policies.google.com/technologies/partner-sites.
+
+9. Transferencia internacional
+Las empresas anteriores se encuentran en Estados Unidos, por lo que los datos personales se transfieren al extranjero.
+- Destinatarios                   Google LLC (policies.google.com/privacy)
+                                  OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+                                  Features & Labels Inc. (fal.ai/legal/privacy-policy)
+- País de destino                 Estados Unidos
+- Momento y método                Se transmite cifrado mediante HTTPS cada vez que se crea una tarjeta
+- Datos transferidos              La descripción de la situación escrita por el tutor y las respuestas a las preguntas adicionales, el nombre con el que
+                                  se llama a Elumi (apodo), los objetivos de apoyo seleccionados
+- Finalidad de la transferencia   Generación de las frases de las tarjetas de rutina, generación de las imágenes de las tarjetas
+- Periodo de conservación         Conforme a las políticas de las empresas destinatarias; ELUM no conserva la solicitud original
+                                  después de recibir la respuesta
+
+Usted puede negarse a la transferencia. No obstante, dado que la creación de tarjetas con IA es la función principal de ELUM,
+si se niega no podrá utilizar el servicio.
+
+[Transferencia internacional relacionada con la publicidad]
+- Destinatario                    Google LLC (policies.google.com/privacy)
+- País de destino                 Estados Unidos
+- Momento y método                Se transmite mediante HTTPS cada vez que se carga un anuncio en la pantalla del tutor
+- Datos transferidos              Identificador de publicidad, dirección IP (ubicación aproximada), información del dispositivo y de la aplicación, información de uso de la publicidad,
+                                  información de cierres inesperados y diagnóstico de rendimiento
+- Finalidad de la transferencia   Publicación de anuncios, medición del rendimiento publicitario, prevención del uso fraudulento
+- Periodo de conservación         Conforme a las políticas de Google
+El identificador de publicidad puede rechazarse o restablecerse mediante el método indicado anteriormente, y su rechazo no afecta
+al uso del servicio.
+
+10. Responsable de la protección de datos personales
+- Nombre del servicio        ELUM (이룸)
+- Operador                   Twin-Fang
+- Responsable de protección  Suh Saechan (서새찬)
+- Contacto                   chan4760@naver.com
+
+Si necesita asesoramiento por una vulneración de datos personales, puede dirigirse a los siguientes organismos.
+- Centro de Denuncias de Infracciones de Datos Personales (개인정보침해신고센터) privacy.kisa.or.kr / 118 (sin prefijo)
+- Comité de Mediación de Conflictos sobre Datos Personales (개인정보 분쟁조정위원회) www.kopico.go.kr / 1833-6972
+- División de Investigación Cibernética de la Fiscalía Suprema (대검찰청 사이버수사과) 1301
+- Oficina de Investigación Cibernética de la Agencia Nacional de Policía (경찰청 사이버수사국) ecrm.police.go.kr / 182
+
+11. Fecha de entrada en vigor
+Esta política se aplica a partir del 27 de octubre de 2026.
+- Publicado el 20 de octubre de 2026, en vigor desde el 27 de octubre — Se añadieron el apodo del tutor y los datos recibidos en Historias (compartir
+  rutinas entre tutores), el alcance de su publicación y el periodo de conservación.
+- Publicado el 19 de octubre de 2026, en vigor desde el 26 de octubre — Se añadió a los datos recopilados la información del teléfono que se recibe junto con
+  el registro de estado de la aplicación en «Enviar comentarios» de Ajustes (origen de instalación, valor de la clave de firma de la aplicación, modelo y versión del sistema operativo del teléfono,
+  valores de configuración del inicio de sesión de Kakao, etc.), y se aclaró que el número único del teléfono y el identificador
+  de publicidad no se recopilan para esta finalidad.
+- Publicado el 16 de octubre de 2026, en vigor desde el 23 de octubre — Se añadieron las ubicaciones donde aparece la publicidad (inicio, lista
+  de borradores, información sobre créditos) y sus formatos (banner, nativo, con recompensa), la visualización de anuncios cuando se rechaza el rastreo en iOS
+  y el enlace a la información sobre el uso que Google hace de la información publicitaria.
+- Publicado el 15 de octubre de 2026, en vigor desde el 22 de octubre — Se añadieron el texto de los comentarios y el registro de estado de la aplicación recibidos mediante «Enviar comentarios» de Ajustes
+  a los datos recopilados, las finalidades del uso y el periodo de conservación.
+- Publicado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se modificaron el sujeto que introduce la información, el periodo de conservación en caso de baja y los derechos del tutor
+  para adaptarlos a la estructura en la que varios tutores cuidan juntos de un mismo Elumi.
+- Publicado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se añadieron los datos que Google recopila para la publicidad en la pantalla del tutor (Google AdMob),
+  las finalidades del uso y la transferencia internacional. Se aclaró, con referencia al GPS, la frase según la cual no se recopila
+  información de ubicación precisa.
+- Publicado el 23 de septiembre de 2026, en vigor desde el 30 de septiembre — Se añadió Features & Labels
+  Inc. a las empresas de transferencia internacional y se modificó el tratamiento para que las frases escritas por el tutor se transmitan tal cual, sin ocultar nada.
+- Publicado el 24 de septiembre de 2026, en vigor desde el 1 de octubre — Se modificó el periodo de conservación para conservar durante 1 año tras la baja los valores de identificación de la cuenta, los registros
+  de uso de las funciones de IA, el valor transformado de la contraseña y los registros de consentimiento de las condiciones.
+
+Esta traducción se proporciona solo por conveniencia. Si difiere de la versión en coreano, prevalecerá la versión en coreano.

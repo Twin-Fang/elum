@@ -1,0 +1,42 @@
+When routine cards are created, the information below is transferred overseas.
+
+Recipients              Google LLC (policies.google.com/privacy)
+                        OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+                        Features & Labels Inc. (fal.ai/legal/privacy-policy)
+Destination country     United States
+Time of transfer        Each time a card is created (transmitted over the network)
+Method of transfer      HTTPS encrypted transmission
+
+Items transferred
+- The situation description and answers to follow-up questions written by the guardian
+- The name used to call the Elumi (nickname)
+- The selected support goals
+
+Purposes of transfer
+- Generating the text of routine cards
+- Generating card images
+
+Retention and use period
+Handled in accordance with the recipient companies' policies; ELUM (이룸) does not retain the original request
+after receiving the response.
+
+Please do not include personal information in the situation description
+Sentences written by the guardian are transferred as they are, without modification. Please do not include information that can identify
+a person, such as names, phone numbers, or addresses.
+
+Right to refuse consent
+You may refuse this consent. However, because creating cards with AI is a core feature of ELUM,
+you cannot use the service if you refuse.
+
+[Overseas Transfer Related to Advertising]
+- Recipient             Google LLC (policies.google.com/privacy)
+- Destination country   United States
+- Time and method       Transmitted via HTTPS each time an ad is loaded on the Guardian mode screen
+- Items transferred     Advertising identifier, IP address (approximate location), device and app information, ad usage information,
+                        crash and performance diagnostic information
+- Purposes              Ad serving, ad performance measurement, fraud prevention
+- Retention period      In accordance with Google's policies
+You can refuse or reset the advertising identifier using the methods described above, and refusing does not affect
+your use of the service.
+
+This translation is provided for convenience. If it differs from the Korean version, the Korean version prevails.

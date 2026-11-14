@@ -1,0 +1,31 @@
+{
+  "_source": "server/src/main/java/com/chuseok22/elumserver/consent/core/ConsentKey.java (Korean label/summary)",
+  "en": {
+    "terms": { "label": "Terms of Service", "summary": "How you use ELUM and what we guarantee" },
+    "privacy": { "label": "Collection and Use of Personal Information", "summary": "What we collect and how long we keep it" },
+    "overseas": { "label": "Transfer of Personal Information Abroad", "summary": "When you make a card, information is sent to AI services abroad" },
+    "age": { "label": "I am 14 years of age or older", "summary": "We confirm the age of the guardian creating the account" },
+    "marketing": { "label": "Receive Service News", "summary": "Get updates on new features and announcements" }
+  },
+  "ja": {
+    "terms": { "label": "サービス利用規約", "summary": "ELUMの使い方と、保証する内容" },
+    "privacy": { "label": "個人情報の収集・利用", "summary": "何を集め、いつまで保管するか" },
+    "overseas": { "label": "個人情報の国外移転", "summary": "カードを作るときに海外のAIサービスへ送られます" },
+    "age": { "label": "満14歳以上です", "summary": "アカウントを作成する保護者の年齢を確認します" },
+    "marketing": { "label": "サービスのお知らせを受け取る", "summary": "新機能やご案内を受け取れます" }
+  },
+  "zh": {
+    "terms": { "label": "服务使用条款", "summary": "如何使用ELUM，以及我们保障什么" },
+    "privacy": { "label": "个人信息收集与使用", "summary": "收集哪些信息，保存到什么时候" },
+    "overseas": { "label": "个人信息的境外转移", "summary": "制作卡片时会传送给境外AI服务" },
+    "age": { "label": "我已满14周岁", "summary": "确认创建账户的监护人的年龄" },
+    "marketing": { "label": "接收服务消息", "summary": "可以接收新功能和相关通知" }
+  },
+  "es": {
+    "terms": { "label": "Términos de servicio", "summary": "Cómo se usa ELUM y qué garantizamos" },
+    "privacy": { "label": "Recopilación y uso de datos personales", "summary": "Qué recopilamos y durante cuánto tiempo lo conservamos" },
+    "overseas": { "label": "Transferencia internacional de datos personales", "summary": "Al crear una tarjeta, los datos se envían a servicios de IA en el extranjero" },
+    "age": { "label": "Tengo 14 años cumplidos o más", "summary": "Confirmamos la edad del tutor que crea la cuenta" },
+    "marketing": { "label": "Recibir novedades del servicio", "summary": "Puede recibir información sobre nuevas funciones y avisos" }
+  }
+}
