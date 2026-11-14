@@ -100,13 +100,21 @@ class MultilingualPromptDefaultsTest {
 
   @ParameterizedTest
   @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
-  @DisplayName("그림 문장 번역 지시문은 'Korean step sentence' 를 일과 언어 이름으로 바꾼다 — 나머지 규칙은 ko 와 같다")
+  @DisplayName("실사 번역 지시문은 'Korean step sentence' 를 일과 언어 이름으로 바꾼다 — 나머지 규칙은 ko 와 같다")
   void translatePrompts_nameTheSourceLanguage(AppLocale locale) {
     String name = ContentLanguageSpec.of(locale).englishName();
-    for (PromptKey key : new PromptKey[]{PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE}) {
-      String prompt = MultilingualPromptDefaults.forLocale(key, locale).orElseThrow();
-      assertThat(prompt).contains(name + " step sentence").doesNotContain("Korean");
-      assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(key).replace("Korean step sentence", name + " step sentence"));
-    }
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE, locale).orElseThrow();
+    assertThat(prompt).contains(name + " step sentence").doesNotContain("Korean");
+    assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE)
+      .replace("Korean step sentence", name + " step sentence"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("만화 그림 번역 지시문은 입력 언어를 가리지 않아 모든 언어가 ko 와 같은 글 (#1378)")
+  void fluxTranslatePrompt_isLanguageAgnostic(AppLocale locale) {
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, locale).orElseThrow();
+    assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE));
+    assertThat(prompt).contains("any language").contains("Guardian note").doesNotContain("Korean");
   }
 }
