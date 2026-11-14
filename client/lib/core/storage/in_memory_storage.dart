@@ -296,6 +296,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setPushPermissionIntroSeen(bool isSeen) async =>
       _isPushPermissionIntroSeen = isSeen;
+
+  bool _hasCelebratedFirstSend = false;
+
+  @override
+  bool get hasCelebratedFirstSend => _hasCelebratedFirstSend;
+
+  @override
+  Future<void> setHasCelebratedFirstSend(bool hasCelebrated) async =>
+      _hasCelebratedFirstSend = hasCelebrated;
   DateTime? _homeNotificationNoticeDismissedAt;
 
   @override

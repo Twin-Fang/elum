@@ -1,37 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/router/routes.dart';
+import '../../../../core/widgets/elum_empty_state.dart';
 
-/// 알림이 하나도 없을 때: 루미 그림 + 안내 문구 (로딩·실패와 다른 화면)
+/// 알림이 하나도 없을 때: 알림 없음 3D 그림 + 문구 + 어떤 알림이 오는지 한 줄 + 알림 설정 (로딩·실패와 다른 화면)
 class NotificationsEmptyBody extends StatelessWidget {
   const NotificationsEmptyBody({super.key});
 
-  static const _illustrationSize = 160.0;
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          AppAssets.notificationsEmptyLumi,
-          width: _illustrationSize.w,
-          height: _illustrationSize.w,
-          fit: BoxFit.contain,
-          excludeFromSemantics: true,
-        ),
-        SizedBox(height: context.space.lg),
-        Text(
-          context.l10n.notificationEmpty,
-          textAlign: TextAlign.center,
-          style: context.typo.creditHistoryRowTitle.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-      ],
+    final l10n = context.l10n;
+    return ElumEmptyState(
+      illustrationAsset: AppAssets.emptyStateNoNotifications,
+      title: l10n.notificationEmpty,
+      body: l10n.notificationEmptyBody,
+      actionLabel: l10n.notificationEmptyOpenSettings,
+      onAction: () => context.push(Routes.guardianNotificationSettings),
     );
   }
 }

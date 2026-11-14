@@ -5,7 +5,9 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/card_export/card_export_screen.dart';
+import '../../features/guardian/presentation/routine_done_celebration_screen.dart';
 import '../../features/guardian/presentation/routine_manage_screen.dart';
+import '../../features/guardian/presentation/routine_sent_celebration_screen.dart';
 import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import '../../features/talk/presentation/talk_detail_screen.dart';
 import '../../features/talk/presentation/talk_feed_screen.dart';
@@ -119,6 +121,27 @@ List<RouteBase> guardianRoutes() => [
         layoutKind: ScreenLayoutKind.contentColumn,
       );
     },
+  ),
+  // 첫 일과 보내기 축하: 하단 바를 덮는 맥락 전환이라 fade. extra 가 없으면 일과 id 없이 (AI 메모 확인 생략)
+  GoRoute(
+    path: Routes.guardianRoutineSent,
+    pageBuilder: (context, state) {
+      final args = state.extra is RoutineSentRouteArgs ? state.extra as RoutineSentRouteArgs : null;
+      return fadePage(
+        state,
+        RoutineSentCelebrationScreen(routineId: args?.routineId),
+      );
+    },
+  ),
+  // 끝낸 일과 축하 (완료 알림): 일과 id 가 없으면 화면이 지워진 일과 안내를 보임
+  GoRoute(
+    path: Routes.guardianRoutineDone,
+    pageBuilder: (context, state) => slidePage(
+      state,
+      RoutineDoneCelebrationScreen(
+        routineId: state.uri.queryParameters[Routes.routineDoneRoutineIdQuery] ?? '',
+      ),
+    ),
   ),
   // 전문가 일과 목록·미리 보기: 하단 바를 덮는 화면
   // 인쇄용으로 받기: extra 가 일과가 아니면 카드 없는 일과 화면(안내)이 뜬다

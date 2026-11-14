@@ -92,6 +92,13 @@ class NotificationNavigator {
   void _goTo(BuildContext context, NotificationTarget target) {
     switch (target.type) {
       case NotificationType.routineCompleted:
+        // 끝낸 일과 축하 화면 (지금 화면 위에 쌓아 닫으면 제자리). 일과 id 가 없으면 홈
+        final routineId = target.targetId;
+        if (routineId == null) {
+          context.go(Routes.guardian);
+        } else {
+          context.push(Routes.guardianRoutineDoneOf(routineId));
+        }
       case NotificationType.routineSentByCoGuardian:
         context.go(Routes.guardian);
       case NotificationType.coGuardianJoined:

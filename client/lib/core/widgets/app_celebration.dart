@@ -211,6 +211,7 @@ class _AppCelebrationState extends State<AppCelebration> with SingleTickerProvid
 
   Widget _reason(BuildContext context) => KeptText(
     widget.reasonText,
+    textAlign: TextAlign.center,
     style: context.typo.creditBody.copyWith(color: context.colors.textSecondary),
   );
 

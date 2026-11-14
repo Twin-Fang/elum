@@ -485,12 +485,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingNameInviteLink => 'Tengo un código de invitación';
 
   @override
-  String get onboardingCompletionTitle => 'Todo está\nlisto';
-
-  @override
-  String get onboardingCompletionProgress => '¡100 % listo!';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -2028,13 +2022,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get todayRoutinePastLoadFailedFallback =>
       'No se pudieron cargar las rutinas pasadas';
-
-  @override
-  String get todayRoutineEmptyTitle => 'Aún no hay rutinas';
-
-  @override
-  String get todayRoutineEmptyHint =>
-      'Crea tus primeras tarjetas de acción de hoy';
 
   @override
   String get todayRoutinePastEmpty => 'No hay rutinas pasadas';
@@ -5905,4 +5892,126 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => ' restantes';
+
+  @override
+  String get commonGoHome => 'Ir al inicio';
+
+  @override
+  String get onboardingLinkStepTitle => '¿Vinculamos el dispositivo de Elumi?';
+
+  @override
+  String get linkDeviceBenefitLine =>
+      'Las rutinas que envíes aparecen al instante en el dispositivo de Elumi';
+
+  @override
+  String get onboardingLinkStepConnectNow => 'Vincular ahora';
+
+  @override
+  String get onboardingLinkStepEnterCode =>
+      'Solo ingresa el código de vínculo en el dispositivo de Elumi';
+
+  @override
+  String get onboardingLinkStepManyDevices =>
+      'Puedes vincular más de un dispositivo';
+
+  @override
+  String get onboardingLinkStepLaterInSettings =>
+      'También puedes vincularlo luego en Ajustes';
+
+  @override
+  String get homeNextStepMakeTitle => 'Crea tu primera rutina';
+
+  @override
+  String get homeNextStepMakeBody =>
+      'Escribe qué hacer y lo convertimos en tarjetas de acción';
+
+  @override
+  String get homeNextStepMakeAction => 'Crear rutina';
+
+  @override
+  String get homeNextStepSendTitle => 'Tienes una rutina a medias';
+
+  @override
+  String get homeNextStepSendBody =>
+      'Revisa las tarjetas y guarda para enviarla al dispositivo de Elumi';
+
+  @override
+  String get homeNextStepSendAction => 'Continuar';
+
+  @override
+  String get homeNextStepLinkTitle => 'Vincula el dispositivo de Elumi';
+
+  @override
+  String get homeNextStepWaitTitle => 'Ahora le toca a Elumi';
+
+  @override
+  String get elumiFinishNotifyLine => 'Te avisaremos cuando Elumi termine';
+
+  @override
+  String get routineSentTitle => 'Enviado al dispositivo de Elumi';
+
+  @override
+  String get routineSentReasonNotLinked =>
+      'Vincula un dispositivo y aparecerá al instante en el de Elumi';
+
+  @override
+  String get routineSentLinkDevice => 'Vincular dispositivo';
+
+  @override
+  String get routineSentPreviewElumi => 'Ver la pantalla de Elumi';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$name terminó una rutina';
+  }
+
+  @override
+  String get routineDonePraiseHint => 'Dale un elogio enseguida';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count estrellas',
+      one: '$count estrella',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'y $count más',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => 'No encontramos esta rutina';
+
+  @override
+  String get routineDoneNotFoundHint => 'Se borró o es de otro Elumi';
+
+  @override
+  String get routineDoneLoadFailed => 'No pudimos cargar la rutina terminada';
+
+  @override
+  String get todayRoutineEmptyNotSent => 'Aún no has enviado rutinas';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => 'Hoy no has enviado rutinas';
+
+  @override
+  String get todayRoutineEmptyTodayBody =>
+      'Envía al instante una rutina guardada desde Rutinas';
+
+  @override
+  String get notificationEmptyBody =>
+      'Aquí te avisaremos cuando Elumi termine una rutina';
+
+  @override
+  String get notificationEmptyOpenSettings => 'Ajustes de notificaciones';
 }

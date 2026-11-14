@@ -33,6 +33,8 @@ import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/theme/card_layout.dart';
 import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 import 'memory/routine_memory_observation_sheet.dart';
+import 'widgets/routine_sent_toast.dart';
+import '../application/first_send_celebration.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -189,7 +191,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
   Future<void> _save() => runBusy(_saveNow);
 
+  /// 서버 임시저장 상태: 저장하면 승인되어 이룸이 기기로 감
+  static const _draftStatus = 'PENDING_REVIEW';
+
   Future<void> _saveNow() async {
+    // 보내기인가 (임시저장 승인) · 첫 보내기인가: 저장 전에 판정 (저장 뒤에는 목록에 이 일과가 섞임)
+    final firstSendCelebration = ref.read(firstSendCelebrationProvider);
+    final isSending = ref.read(routineFlowProvider).routine?.status == _draftStatus;
+    final isFirstSend = isSending && firstSendCelebration.isFirstSendBeforeSending();
     // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
     // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다.
     final failure = await ref.read(routineFlowProvider.notifier).save();
@@ -209,11 +218,21 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       );
       return;
     }
+    final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
+    if (isSending) unawaited(firstSendCelebration.markSent());
+    // 첫 보내기: 축하 화면 (알림 권한 안내 · AI 메모 확인은 축하에서 홈으로 갈 때)
+    if (isFirstSend) {
+      context.go(Routes.guardianRoutineSent, extra: (routineId: savedRoutineId));
+      return;
+    }
     // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
     final rootContext = Navigator.of(context, rootNavigator: true).context;
     final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
-    final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final sentMessage = context.l10n.routineSentTitle;
     context.go(Routes.guardian);
+    // 두 번째 보내기부터는 체크가 튀는 가벼운 알림 (이미 보낸 일과 고치기는 알림 없음)
+    if (isSending) showRoutineSentToastOn(messenger, sentMessage);
     // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
     // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
     // ignore: use_build_context_synchronously

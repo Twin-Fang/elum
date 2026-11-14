@@ -68,8 +68,8 @@ class _AppPopInState extends State<AppPopIn> with SingleTickerProviderStateMixin
     return AnimatedBuilder(
       animation: _controller,
       child: widget.child,
+      // 끝난 뒤에도 같은 모양 유지 (모양이 바뀌면 child 상태가 새로 만들어짐)
       builder: (context, child) {
-        if (_controller.isCompleted) return child!;
         return Opacity(
           opacity: _opacity.value.clamp(0.0, 1.0),
           child: Transform.scale(scale: _scale.value, child: child),

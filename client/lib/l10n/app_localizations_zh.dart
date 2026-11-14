@@ -450,12 +450,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingNameInviteLink => '我有邀请码';
 
   @override
-  String get onboardingCompletionTitle => '内容已经\n全部整理好了';
-
-  @override
-  String get onboardingCompletionProgress => '100% 完成！';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -1851,12 +1845,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get todayRoutinePastLoadFailedFallback => '没能加载过去的日常';
-
-  @override
-  String get todayRoutineEmptyTitle => '还没有做好的日常';
-
-  @override
-  String get todayRoutineEmptyHint => '来做今天的第一张行为卡片吧';
 
   @override
   String get todayRoutinePastEmpty => '没有过去的日常';
@@ -5446,4 +5434,116 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '个积分可用';
+
+  @override
+  String get commonGoHome => '回到首页';
+
+  @override
+  String get onboardingLinkStepTitle => '要连接Elumi的设备吗？';
+
+  @override
+  String get linkDeviceBenefitLine => '发送的日常会马上出现在Elumi的设备上';
+
+  @override
+  String get onboardingLinkStepConnectNow => '现在连接';
+
+  @override
+  String get onboardingLinkStepEnterCode => '只要在Elumi的设备上输入连接码';
+
+  @override
+  String get onboardingLinkStepManyDevices => '可以连接多台设备';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => '之后也可以在设置里连接';
+
+  @override
+  String get homeNextStepMakeTitle => '来做第一个日常吧';
+
+  @override
+  String get homeNextStepMakeBody => '写下要做的事，我们会把它变成行动卡片';
+
+  @override
+  String get homeNextStepMakeAction => '制作日常';
+
+  @override
+  String get homeNextStepSendTitle => '有还没做完的日常';
+
+  @override
+  String get homeNextStepSendBody => '确认卡片并保存后，就会发到Elumi的设备';
+
+  @override
+  String get homeNextStepSendAction => '继续制作';
+
+  @override
+  String get homeNextStepLinkTitle => '连接Elumi的设备';
+
+  @override
+  String get homeNextStepWaitTitle => '接下来轮到Elumi了';
+
+  @override
+  String get elumiFinishNotifyLine => 'Elumi完成后会通知你';
+
+  @override
+  String get routineSentTitle => '已发送到Elumi的设备';
+
+  @override
+  String get routineSentReasonNotLinked => '连接设备后会马上出现在Elumi的设备上';
+
+  @override
+  String get routineSentLinkDevice => '连接设备';
+
+  @override
+  String get routineSentPreviewElumi => '预览Elumi画面';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$name完成了日常';
+  }
+
+  @override
+  String get routineDonePraiseHint => '完成后请马上表扬';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count颗星',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '还有$count个',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '找不到这个日常';
+
+  @override
+  String get routineDoneNotFoundHint => '可能已删除，或属于其他Elumi';
+
+  @override
+  String get routineDoneLoadFailed => '无法加载完成的日常';
+
+  @override
+  String get todayRoutineEmptyNotSent => '还没有发送过日常';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '今天还没有发送日常';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '可以在日常管理里马上发送做好的日常';
+
+  @override
+  String get notificationEmptyBody => 'Elumi完成日常后会在这里通知你';
+
+  @override
+  String get notificationEmptyOpenSettings => '通知设置';
 }

@@ -5,7 +5,7 @@ import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
-import 'elum_button.dart';
+import 'elum_empty_state.dart';
 import 'elum_error_code_text.dart';
 import 'elum_secondary_button.dart';
 
@@ -31,6 +31,7 @@ class ElumErrorView extends StatelessWidget {
     this.actionLabel,
     this.compact = false,
     this.isRetrying = false,
+    this.isUnreachable = false,
   });
 
   /// 무엇을 못 했는지. 해요체·긍정형으로 쓴다 (예: '일과를 불러오지 못했어요').
@@ -57,6 +58,12 @@ class ElumErrorView extends StatelessWidget {
 
   /// 다시 시도 중: 버튼은 남기되 눌리지 않고 스피너를 보여준다 (전체 화면 모드만).
   final bool isRetrying;
+
+  /// 서버에 닿지 못한 실패인가 (오프라인 · 시간 초과): 전체 화면 그림이 오프라인 그림으로 바뀜
+  final bool isUnreachable;
+
+  /// 전체 화면 좌우 여백
+  static const _screenHorizontalPadding = 32.0;
 
   /// 잡은 예외에서 바로 만든다 — **문구·코드 판정을 [AppFailure] 에 맡긴다.**
   ///
@@ -91,6 +98,7 @@ class ElumErrorView extends StatelessWidget {
       onRetry: onRetry,
       compact: compact,
       isRetrying: isRetrying,
+      isUnreachable: failure.isUnreachable,
     );
   }
 
@@ -138,45 +146,17 @@ class ElumErrorView extends StatelessWidget {
       );
     }
 
+    // 화면 한 장: 빈 상태와 같은 모양 (오류 · 오프라인 3D 그림 > 무엇이 안 됐는지 > 할 일 > 버튼 > 코드)
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 32.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            AppAssets.temporaryErrorLumi,
-            width: 160.w,
-            height: 160.w,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(height: space.lg),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            // AI 흐름 질문(30)이 아니라 일반 화면 제목 크기 (Tmoney 800/20)
-            style: typo.subtitle.copyWith(color: colors.textPrimary),
-          ),
-          SizedBox(height: space.sm),
-          Text(
-            description ?? context.l10n.commonRetryLater,
-            textAlign: TextAlign.center,
-            style: typo.promptBody.copyWith(color: colors.promptMuted),
-          ),
-          if (onRetry != null) ...[
-            SizedBox(height: space.lg),
-            ElumButton(
-              label: actionLabel ?? context.l10n.commonRetry,
-              onPressed: onRetry,
-              loading: isRetrying,
-            ),
-          ],
-          if (errorCode != null) ...[
-            SizedBox(height: space.md),
-            // 추적용 식별자 — 제보 시 원인을 짚는 유일한 단서다.
-            ElumErrorCodeText(errorCode!),
-          ],
-        ],
+      padding: EdgeInsets.symmetric(horizontal: _screenHorizontalPadding.w),
+      child: ElumEmptyState(
+        illustrationAsset: isUnreachable ? AppAssets.emptyStateOffline : AppAssets.emptyStateError,
+        title: message,
+        body: description ?? context.l10n.commonRetryLater,
+        actionLabel: onRetry == null ? null : actionLabel ?? context.l10n.commonRetry,
+        onAction: onRetry,
+        isActionLoading: isRetrying,
+        errorCode: errorCode,
       ),
     );
   }

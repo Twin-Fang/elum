@@ -22,7 +22,9 @@ abstract final class Routes {
   /// 카드 그림 방식. 캐릭터 다음, 비밀암호 앞. 건너뛸 수 있다.
   static const onboardingImageStyle = '/onboarding/image-style';
   static const onboardingPin = '/onboarding/pin';
-  static const cardCompletion = '/onboarding/card-completion';
+
+  /// 이룸이 기기 연결 단계. 비밀암호(초대 합류) 뒤, 알림 켜기 안내 앞. 기기가 이미 붙어 있으면 서지 않음
+  static const onboardingLinkDevice = '/onboarding/link-device';
 
   /// 알림 켜기 안내. 온보딩 끝(첫 홈 직전), 이미 가입한 보호자는 업데이트 뒤 홈에서 한 번 (#1275)
   /// 알림이 이미 켜졌거나 본 적 있으면 서지 않는다 (`PushPermissionPrompt.shouldShowIntro`)
@@ -172,8 +174,30 @@ abstract final class Routes {
   static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
 
+  /// 첫 일과 보내기 축하 (카드 확인 저장 · 일과관리 보내기). extra 는 [RoutineSentRouteArgs]
+  static const guardianRoutineSent = '/guardian/routine-sent';
+
+  /// 이룸이가 끝낸 일과 축하: `?routineId=` (완료 알림이 연다)
+  static const guardianRoutineDone = '/guardian/routine-done';
+
+  /// [guardianRoutineDone] 의 일과 id 쿼리 이름
+  static const routineDoneRoutineIdQuery = 'routineId';
+
+  /// 끝낸 일과 축하 경로: `/guardian/routine-done?routineId={id}`
+  static String guardianRoutineDoneOf(String routineId) => Uri(
+    path: guardianRoutineDone,
+    queryParameters: {routineDoneRoutineIdQuery: routineId},
+  ).toString();
+
   /// 연결 암호 만들기 (보호자). 온보딩 직후와 설정에서 들어온다.
   static const linkCode = '/guardian/link';
+
+  /// [linkCode] 의 진입 쿼리: `from=onboarding` 이면 `나중에 할게요` 가 있고 끝나면 온보딩을 이어 감
+  static const linkCodeFromQuery = 'from';
+  static const linkCodeFromOnboardingValue = 'onboarding';
+
+  /// 온보딩 연결 단계에서 여는 연결 암호 화면
+  static const linkCodeFromOnboarding = '$linkCode?$linkCodeFromQuery=$linkCodeFromOnboardingValue';
 
   /// 연결 암호 넣기 (이룸이 휴대폰). **로그인 전에 서는 화면이다.**
   static const linkEnter = '/link/enter';
@@ -201,3 +225,6 @@ abstract final class Routes {
 
 /// [Routes.guardianTalkLinkShare] 의 extra: 보낼 일과 id, 이미 켜진 링크가 있는가
 typedef TalkLinkShareRouteArgs = ({String routineId, bool hasActiveLink});
+
+/// [Routes.guardianRoutineSent] 의 extra: 보낸 일과 id (보낸 뒤 AI 메모 확인용, 없으면 null)
+typedef RoutineSentRouteArgs = ({String? routineId});
