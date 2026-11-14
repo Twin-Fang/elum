@@ -187,17 +187,11 @@ abstract final class AppAssets {
   /// 크레딧 소진 팝업의 루미 (빈 주머니를 들고 앉음, 옆에 표 한 장, 투명 배경)
   static const creditEmptyLumi = '$_images/credit_empty_lumi.png';
 
-  /// 크레딧 시트 광고 칸 타일: 루미 + 재생 화면 + 표 (투명 PNG 384)
-  static const creditAdRewardLumi = '$_images/credit_ad_reward_lumi.png';
-
   /// 광고 보상 받은 순간 큰 그림: 민트 표 + 반짝임 (투명 PNG 512, 튀어 오르고 둥실)
   static const creditRewardBurst = '$_images/credit_reward_burst.png';
 
   /// 일과 완료 화면 보상 선물 상자 (이미지 하네스 3D, 소개 사이트 보상 칸과 같은 그림)
   static const rewardGift = '$_images/reward_gift.png';
-
-  /// 홈 크레딧 부족 안내 카드 타일: 표 한 장을 든 루미 (투명 PNG 384)
-  static const creditLowLumi = '$_images/credit_low_lumi.png';
 
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';

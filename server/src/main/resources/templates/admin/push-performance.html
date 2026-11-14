@@ -3,7 +3,8 @@
       th:replace="~{admin/fragments/admin-layout :: page('알림 성과', 'push-performance', ~{:: content})}">
 <body>
 
-<!-- 알림 성과 (#1275): 줄 7개(자동 5종, 운영자 직접, 예약) × 7일·30일 받은 사람·도착·열림·열림률 + 끈 사람 수
+<!-- 알림 성과 (#1275): 줄 11개(자동 9종, 운영자 직접, 예약) × 7일·30일 받은 사람·도착·열림·열림률 + 끈 사람 수
+     자동 규칙별 효과 (#1409): 최근 7일 보냄·열림·24시간 안 복귀 (복귀 = 열림, 마지막 활동, 다음 날 방문 중 하나)
      도착 = 기기 1대 이상 성공, 열림 = 앱이 알림을 눌러 연 기록 (이 버전 이전 앱은 열림을 알리지 않아 0으로 보임) -->
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6 max-w-5xl">
   <div th:replace="~{admin/fragments/admin-ui :: pageHeader('알림 성과', '자동 알림과 운영자 알림이 얼마나 도착하고 열렸는지 봐요. 열림률은 도착한 사람 중 알림을 눌러 앱을 연 비율이에요.')}"></div>
@@ -44,7 +45,34 @@
           </tbody>
         </table>
       </div>
-      <p class="text-xs text-base-content/60">다시 찾기와 이야기 인기 일과는 같은 '추천 알림' 설정을 써서 끈 사람 수가 같아요. 첫 일과 축하는 '일과 완료' 설정을 따라요.</p>
+      <p class="text-xs text-base-content/60">다시 찾기, 이야기 인기 일과, 기기 연결 안내는 같은 '추천 알림' 설정을 써서 끈 사람 수가 같아요. 첫 일과 축하, 보낸 일과 시작 전, 연속 기록은 '일과 완료' 설정을, 첫 일과 만들기 안내는 '일과 보내기' 설정을 따라요.</p>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-base" th:text="'자동 규칙별 효과 (최근 ' + ${effectPeriodDays} + '일)'">자동 규칙별 효과 (최근 7일)</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>규칙</th><th>보냄</th><th>열림</th><th>열림률</th>
+            <th th:text="${returnWindowHours} + '시간 안 복귀'">24시간 안 복귀</th><th>복귀율</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="row : ${effectRows}">
+            <td class="whitespace-nowrap" th:text="${row.label()}">규칙</td>
+            <td th:text="${row.sentCount()}">0</td>
+            <td th:text="${row.openedCount()}">0</td>
+            <td th:text="${row.openRatePercent() != null} ? ${row.openRatePercent()} + '%' : '-'">-</td>
+            <td th:text="${row.returnedCount()}">0</td>
+            <td th:text="${row.returnRatePercent() != null} ? ${row.returnRatePercent()} + '%' : '-'">-</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">보냄은 알림함에 기록한 사람 수예요. 복귀는 알림을 열었거나, 보낸 뒤 24시간 안에 앱을 쓴 기록이 있거나, 보낸 다음 날 방문한 사람이에요. 방문은 날짜로만 남아 다음 날 방문은 24시간을 조금 넘을 수 있어요. 보낸 지 하루가 안 된 알림은 복귀가 아직 덜 잡혀요.</p>
     </div>
   </div>
 </main>

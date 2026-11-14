@@ -5480,29 +5480,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Watch an ad for $count credits',
-      one: 'Watch an ad for $count credit',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => 'Watch an ad for credits';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: 'About 30 seconds, $remaining more today',
-      one: 'About 30 seconds, $remaining more today',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => 'Watch ad';
@@ -5513,6 +5491,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get creditTopUpAdDailyLimit =>
       'That\'s all for today. Come back tomorrow';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15 to 30 seconds, watch to the end for $count credits',
+      one: '15 to 30 seconds, watch to the end for $count credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '$remaining more today',
+      one: '$remaining more today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => 'No ads are available right now';
+
+  @override
+  String get proFeatureMarkLabel => 'Learn more';
+
+  @override
+  String get proExplainAiImageStylesReason =>
+      'Pictures that match each card are easier for Elumi to recognize';
+
+  @override
+  String get proExplainCardSplitReason =>
+      'Hard tasks become small steps Elumi can follow one at a time';
+
+  @override
+  String get proExplainFreeImageRegenerateReason =>
+      'Fix a picture until you like it without worrying about credits';
 
   @override
   String get creditTopUpAdCheckFailed =>
@@ -5542,15 +5560,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ You got credits';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => 'For watching the whole ad';
-
-  @override
-  String get creditRewardBalanceLabel => 'Credits now';
 
   @override
   String get lowCreditNoticeTitle => 'Credits are running low';

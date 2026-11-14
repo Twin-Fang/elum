@@ -59,4 +59,25 @@ public interface NotificationDispatchRepository extends JpaRepository<Notificati
 
     Long getOpenedCount();
   }
+
+  /// 발송 한 줄 투영 (알림 효과 #1409): 받는 사람, 자동 종류, 보낸 시각, 연 시각(없으면 null)
+  interface DispatchOutcomeRow {
+
+    String getMemberId();
+
+    AutoNotificationType getAutoType();
+
+    LocalDateTime getSentAt();
+
+    LocalDateTime getOpenedAt();
+  }
+
+  /// 그 출처로 since 이후 보낸 발송 기록 전부
+  @Query("""
+    select d.memberId as memberId, d.autoType as autoType, d.sentAt as sentAt, d.openedAt as openedAt
+    from NotificationDispatch d
+    where d.source = :source and d.sentAt >= :since
+    """)
+  List<DispatchOutcomeRow> findOutcomesBySourceSince(@Param("source") NotificationDispatchSource source,
+    @Param("since") LocalDateTime since);
 }

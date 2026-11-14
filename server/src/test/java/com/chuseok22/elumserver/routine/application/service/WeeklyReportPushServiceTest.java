@@ -77,7 +77,7 @@ class WeeklyReportPushServiceTest {
   }
 
   @Test
-  @DisplayName("주간 리포트 권한이 있는 보호자에게만 알림을 기록한다 — Free 보호자에게 못 여는 리포트 알림이 가지 않게")
+  @DisplayName("Free 포함 설정이 꺼져 있으면 주간 리포트 권한이 있는 보호자에게만 알림을 기록한다")
   void onlyEntitledGuardiansAreNotified() {
     givenPushOnWithProfiles("p1");
     when(profileGuardianService.guardianMemberIdsOf("p1")).thenReturn(List.of("pro-guardian", "free-guardian"));
@@ -109,6 +109,40 @@ class WeeklyReportPushServiceTest {
 
     verify(weeklyReportSummaryService, never()).summaryFor(any(), any(), any(), any(), any(), any(), any());
     verify(notificationRecorder, never()).record(any(), anyCollection());
+  }
+
+  @Test
+  @DisplayName("Free 포함 설정이 켜지면 Free 보호자도 요약 알림을 받고, 권한 보호자가 있을 때만 그 계정으로 정리 글을 만든다 (#1409)")
+  void freeIncluded_notifiesFreeGuardiansAndSummarizesWithEntitledAccount() {
+    givenPushOnWithProfiles("p1");
+    when(systemConfigService.getBoolean(ConfigKey.WEEKLY_REPORT_PUSH_FREE_ENABLED)).thenReturn(true);
+    when(profileGuardianService.guardianMemberIdsOf("p1")).thenReturn(List.of("free-guardian", "pro-guardian"));
+    when(entitlementService.isAllowed("pro-guardian", Entitlement.WEEKLY_REPORT)).thenReturn(true);
+    givenCompletedWeek("p1");
+    when(notificationRecorder.record(any(), anyCollection())).thenReturn(List.of(new RecordedNotification("n1", "free-guardian", 1, true)));
+
+    weeklyReportPushService.runOnce();
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
+    verify(notificationRecorder).record(any(), recipients.capture());
+    assertThat(recipients.getValue()).containsExactly("free-guardian", "pro-guardian");
+    verify(weeklyReportSummaryService).summaryFor(eq("p1"), any(), eq("pro-guardian"), any(), any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("Free 포함이어도 Free 보호자만 있으면 알림만 보내고 AI 정리 글은 만들지 않는다 — 못 여는 화면 글에 비용이 나가지 않게")
+  void freeIncluded_onlyFreeGuardians_skipsSummary() {
+    givenPushOnWithProfiles("p1");
+    when(systemConfigService.getBoolean(ConfigKey.WEEKLY_REPORT_PUSH_FREE_ENABLED)).thenReturn(true);
+    when(profileGuardianService.guardianMemberIdsOf("p1")).thenReturn(List.of("free-guardian"));
+    givenCompletedWeek("p1");
+    when(notificationRecorder.record(any(), anyCollection())).thenReturn(List.of(new RecordedNotification("n1", "free-guardian", 1, true)));
+
+    weeklyReportPushService.runOnce();
+
+    verify(weeklyReportSummaryService, never()).summaryFor(any(), any(), any(), any(), any(), any(), any());
+    verify(pushDispatcher).dispatch(any(), eq(NotificationType.WEEKLY_REPORT_READY), eq("4,2"));
   }
 
   @Test

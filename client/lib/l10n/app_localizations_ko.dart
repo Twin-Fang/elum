@@ -5207,27 +5207,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '광고 보고 크레딧 $count개 받기',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => '광고 보고 크레딧 받기';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: '30초쯤 걸려요, 오늘 $remaining번 더 받을 수 있어요',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => '광고 보기';
@@ -5237,6 +5217,42 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get creditTopUpAdDailyLimit => '오늘은 다 받았어요. 내일 다시 볼 수 있어요';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15~30초, 끝까지 보면 크레딧 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '오늘 $remaining번 더 받을 수 있어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => '지금은 볼 수 있는 광고가 없어요';
+
+  @override
+  String get proFeatureMarkLabel => '자세히 보기';
+
+  @override
+  String get proExplainAiImageStylesReason => '카드 글에 맞는 그림이라 이룸이가 더 쉽게 알아봐요';
+
+  @override
+  String get proExplainCardSplitReason => '어려운 행동을 작은 단계로 나눠 한 걸음씩 따라 할 수 있어요';
+
+  @override
+  String get proExplainFreeImageRegenerateReason =>
+      '그림이 마음에 들 때까지 크레딧 걱정 없이 고칠 수 있어요';
 
   @override
   String get creditTopUpAdCheckFailed => '광고 정보를 불러오지 못했어요. 잠시 후 다시 열어 주세요';
@@ -5264,15 +5280,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ 크레딧을 받았어요';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => '광고를 끝까지 봐서 받았어요';
-
-  @override
-  String get creditRewardBalanceLabel => '지금 크레딧';
 
   @override
   String get lowCreditNoticeTitle => '크레딧이 조금 남았어요';

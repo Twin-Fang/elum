@@ -34,8 +34,8 @@ class AdRewardOffer {
   bool get canOffer => enabled && creditsPerView > 0 && remainingToday > 0;
 }
 
-/// 광고 카드를 끈 이유 3개: 서버 설정 꺼짐 · 오늘 다 받음 · 조회 실패
-enum AdRewardUnavailableReason { switchedOff, dailyLimitReached, checkFailed }
+/// 광고 칸 대신 이유를 보이는 경우 4개: 서버 설정 꺼짐 · 오늘 다 받음 · 조회 실패 · 미리 불러 둔 광고 없음
+enum AdRewardUnavailableReason { switchedOff, dailyLimitReached, checkFailed, noAdLoaded }
 
 /// 크레딧 시트 광고 카드 상태: 볼 수 있음([offer]) 또는 못 보는 이유([unavailableReason])
 @immutable
@@ -45,8 +45,33 @@ class AdRewardAvailability {
 
   final AdRewardOffer? offer;
   final AdRewardUnavailableReason? unavailableReason;
+}
 
-  bool get canWatch => offer != null;
+/// 크레딧 시트 광고 칸 단계 5개: 확인 중 · 광고 불러오는 중 · 바로 볼 수 있음 · 못 봄(이유) · 이 기기에 없음
+enum AdRewardOfferPhase { checking, loadingAd, ready, unavailable, hidden }
+
+/// 광고 칸 상태: 단계 + (불러오는 중 · 볼 수 있음) 제안 또는 (못 봄) 이유
+@immutable
+class AdRewardOfferState {
+  const AdRewardOfferState._(this.phase, {this.offer, this.unavailableReason});
+
+  const AdRewardOfferState.checking() : this._(AdRewardOfferPhase.checking);
+  const AdRewardOfferState.hidden() : this._(AdRewardOfferPhase.hidden);
+  const AdRewardOfferState.loadingAd(AdRewardOffer offer) : this._(AdRewardOfferPhase.loadingAd, offer: offer);
+  const AdRewardOfferState.ready(AdRewardOffer offer) : this._(AdRewardOfferPhase.ready, offer: offer);
+  const AdRewardOfferState.unavailable(AdRewardUnavailableReason reason)
+    : this._(AdRewardOfferPhase.unavailable, unavailableReason: reason);
+
+  final AdRewardOfferPhase phase;
+  final AdRewardOffer? offer;
+  final AdRewardUnavailableReason? unavailableReason;
+
+  /// 누르면 바로 광고가 뜨는가 (미리 불러 둔 광고 있음)
+  bool get isReady => phase == AdRewardOfferPhase.ready;
+
+  /// 광고 칸을 보이는가 (확인 중 · 불러오는 중 · 볼 수 있음). 아니면 이유 줄 또는 아무것도 없음
+  bool get isAdCardVisible =>
+      phase == AdRewardOfferPhase.checking || phase == AdRewardOfferPhase.loadingAd || isReady;
 }
 
 /// 시청 한 번을 서버에 묶는 세션 — `POST /api/credits/ad-rewards/sessions`.

@@ -14,7 +14,7 @@ import 'card_split_sheet.dart';
 
 /// 카드 수정 시트의 `이 카드 더 쉽게` 칩 (서버 카드만)
 ///
-/// Free: PRO 배지, 누르면 요금제 화면 (살 수 없는 동안은 숨김). Pro: 배지 없이 나누기 시트
+/// Free: PRO 배지, 누르면 Pro 기능 설명 시트 (살 수 없는 동안은 숨김). Pro: 배지 없이 나누기 시트
 /// 나눴으면 고치던 카드가 사라졌으니 수정 시트도 닫고 토스트
 class CardSplitChip extends ConsumerWidget {
   const CardSplitChip({super.key, required this.routineId, required this.stepId});
@@ -45,7 +45,7 @@ class CardSplitChip extends ConsumerWidget {
 
   Future<void> _onTapped(BuildContext context, WidgetRef ref) async {
     if (!ref.read(planAccessProvider).canSplitCards) {
-      await openPlanPaywall(context, ref, highlight: PlanBenefit.cardSplit);
+      await explainProFeature(context, ref, benefit: PlanBenefit.cardSplit);
       return;
     }
     // 시트가 닫힌 뒤에도 토스트를 띄울 수 있게 미리 잡아 둠

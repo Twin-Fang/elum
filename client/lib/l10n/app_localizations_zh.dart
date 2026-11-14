@@ -5153,27 +5153,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '看广告获得$count个积分',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => '看广告获得积分';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: '大约30秒，今天还能领$remaining次',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => '看广告';
@@ -5183,6 +5163,41 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get creditTopUpAdDailyLimit => '今天已经领完了。明天可以再看';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '15到30秒，看完可得$count个积分',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '今天还能领$remaining次',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => '现在没有可看的广告';
+
+  @override
+  String get proFeatureMarkLabel => '了解详情';
+
+  @override
+  String get proExplainAiImageStylesReason => '图片和卡片内容相符，Elumi更容易看懂';
+
+  @override
+  String get proExplainCardSplitReason => '把难的行动拆成小步骤，Elumi可以一步一步跟着做';
+
+  @override
+  String get proExplainFreeImageRegenerateReason => '不用担心积分，可以改到满意为止';
 
   @override
   String get creditTopUpAdCheckFailed => '没能加载广告信息。请稍后再打开';
@@ -5210,15 +5225,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ 获得了积分';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => '看完了广告获得';
-
-  @override
-  String get creditRewardBalanceLabel => '现在的积分';
 
   @override
   String get lowCreditNoticeTitle => '积分快用完了';

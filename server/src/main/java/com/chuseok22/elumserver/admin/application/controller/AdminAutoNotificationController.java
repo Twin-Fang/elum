@@ -2,14 +2,22 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminAuditService;
 import com.chuseok22.elumserver.admin.core.AdminAuditAction;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.notification.application.service.AutoNotificationCopyResolver;
+import com.chuseok22.elumserver.notification.application.service.AutoNotificationCopyResolver.RenderedCopy;
 import com.chuseok22.elumserver.notification.application.service.AutoNotificationRuleService;
 import com.chuseok22.elumserver.notification.application.service.AutoNotificationRuleService.RuleUpdate;
 import com.chuseok22.elumserver.notification.application.service.AutoNotificationRuleService.RuleUpdateResult;
 import com.chuseok22.elumserver.notification.application.service.AutoNotificationTemplate;
 import com.chuseok22.elumserver.notification.core.AdminMessageRoute;
 import com.chuseok22.elumserver.notification.core.AutoNotificationType;
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
+import com.chuseok22.elumserver.notification.infrastructure.entity.AutoNotificationRule;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -21,7 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/// 자동 알림 관리 화면 (#1275): 종류별 켜기·문구·시각·간격 저장 (저장마다 관리자 기록)
+/// 자동 알림 관리 화면 (#1275): 종류별 켜기·문구·시각·간격 저장 (저장마다 관리자 기록), 다른 언어 기본 문구 미리 보기 (#1409)
 @Controller
 @RequiredArgsConstructor
 public class AdminAutoNotificationController {
@@ -31,10 +39,18 @@ public class AdminAutoNotificationController {
 
   private final AutoNotificationRuleService autoNotificationRuleService;
   private final AdminAuditService adminAuditService;
+  private final AutoNotificationCopyResolver autoNotificationCopyResolver;
 
   @GetMapping(PAGE_PATH)
   public String page(Model model) {
-    model.addAttribute("rules", autoNotificationRuleService.findAll());
+    List<AutoNotificationRule> rules = autoNotificationRuleService.findAll();
+    LocalDate today = LocalDate.now(NotificationTime.ZONE_ID);
+    // 종류 이름 > (언어 > 기본 문구): ko 외 언어는 문구 파일 기본값이라 여기서 고치지 않음
+    Map<String, Map<AppLocale, RenderedCopy>> otherLocalePreviewsByType = new LinkedHashMap<>();
+    rules.forEach(rule -> otherLocalePreviewsByType.put(rule.getType().name(),
+      autoNotificationCopyResolver.previewOtherLocales(rule, today)));
+    model.addAttribute("rules", rules);
+    model.addAttribute("otherLocalePreviewsByType", otherLocalePreviewsByType);
     model.addAttribute("routeOptions", List.of(AdminMessageRoute.values()));
     model.addAttribute("templateVariables", AutoNotificationTemplate.VARIABLES);
     model.addAttribute("titleMaxLength", AdminMessage.TITLE_MAX_LENGTH);

@@ -5577,29 +5577,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String creditTopUpAdTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Mira un anuncio y recibe $count créditos',
-      one: 'Mira un anuncio y recibe $count crédito',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get creditTopUpAdTitleNoCount => 'Mira un anuncio y recibe créditos';
-
-  @override
-  String creditTopUpAdDetail(int remaining) {
-    String _temp0 = intl.Intl.pluralLogic(
-      remaining,
-      locale: localeName,
-      other: 'Unos 30 segundos, puedes recibir $remaining veces más hoy',
-      one: 'Unos 30 segundos, puedes recibir $remaining vez más hoy',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get creditTopUpAdWatch => 'Ver anuncio';
@@ -5611,6 +5589,47 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get creditTopUpAdDailyLimit =>
       'Ya recibiste todos los de hoy. Vuelve mañana';
+
+  @override
+  String creditTopUpAdDuration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'De 15 a 30 segundos, mira hasta el final y recibe $count créditos',
+      one: 'De 15 a 30 segundos, mira hasta el final y recibe $count crédito',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditTopUpAdRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: 'Puedes recibir $remaining veces más hoy',
+      one: 'Puedes recibir $remaining vez más hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditTopUpAdNoFill => 'Ahora no hay anuncios disponibles';
+
+  @override
+  String get proFeatureMarkLabel => 'Ver más';
+
+  @override
+  String get proExplainAiImageStylesReason =>
+      'Dibujos que encajan con cada tarjeta, más fáciles de reconocer para Elumi';
+
+  @override
+  String get proExplainCardSplitReason =>
+      'Las tareas difíciles se dividen en pasos pequeños que Elumi sigue uno a uno';
+
+  @override
+  String get proExplainFreeImageRegenerateReason =>
+      'Corrige el dibujo hasta que te guste sin preocuparte por los créditos';
 
   @override
   String get creditTopUpAdCheckFailed =>
@@ -5640,15 +5659,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get creditRewardTitleNoCount => '🎟️ Recibiste créditos';
 
   @override
-  String creditRewardPlus(int count) {
-    return '+$count';
-  }
-
-  @override
   String get creditRewardReason => 'Por ver el anuncio completo';
-
-  @override
-  String get creditRewardBalanceLabel => 'Créditos ahora';
 
   @override
   String get lowCreditNoticeTitle => 'Te quedan pocos créditos';
