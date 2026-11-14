@@ -32,9 +32,9 @@ python3 docs/store/build_store_metadata.py --check  # 생성본이 원본과 같
 
 ## 스크린샷 (#1369)
 
-- 문구 원본 `promo/copy.{ko,en}.json` → `python3 -I promo/render_store_images.py --to-play-metadata` (playwright·Pillow 필요)
+- 문구 원본 `promo/copy.{ko,en}.json` → `python3 -I promo/render_store_images.py --to-play-metadata --to-ios-metadata` (playwright·Pillow 필요)
 - **Play**: 휴대폰 스크린샷·대표 그래픽(ko-KR·en-US)이 배포 때 자동으로 바뀐다. ja·zh·es 는 기본 언어(ko) 이미지가 보인다
-- **App Store**: 자동 업로드를 켜지 않는다 — 덮어쓰기가 iPad 스크린샷까지 지운다. `promo/out/<언어>/ios_6.9`·`ios_6.5` 를 콘솔에 올린다
+- **App Store**: `--to-ios-metadata` 로 6.9형(ko·en-US)을 `client/ios/fastlane/screenshots/` 에 두면 배포 때 **iPhone 세트만** 비우고 새로 올린다 (Fastfile `clear_iphone_screenshot_sets`). iPad 스크린샷은 건드리지 않는다 — deliver 의 `overwrite_screenshots` 는 iPad 까지 지워 쓰지 않는다
 - 첫 두 장의 큰 글씨에 검색어(`행동카드 만들기`, `발달장애·ADHD`)를 둔다. 검색 결과에서 이름 다음으로 보이는 글이다
 
 ## 반영 시점

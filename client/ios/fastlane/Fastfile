@@ -111,6 +111,13 @@ platform :ios do
       # 심사 자동 제출이면 먼저 심사 대기 중인 옛 제출을 내린다 (대기 중이면 빌드를 못 바꿔 deliver 실패)
       cancel_waiting_review_submissions(app_id: app_id) if submit_to_appstore
 
+      # iPhone 스크린샷 교체 준비: 레포 PNG 있으면 iPhone 세트만 비움 (iPad 유지, #1369)
+      #   생성: docs/store/promo/render_store_images.py --to-ios-metadata · 실패하면 이번엔 스크린샷 건너뜀
+      screenshots_path = File.join(workspace, ENV["APP_ROOT"] || ".", "ios", "fastlane", "screenshots")
+      should_upload_screenshots = clear_iphone_screenshot_sets(
+        app_id: app_id, app_version: app_ver, screenshots_path: screenshots_path
+      )
+
       deliver(
         api_key: api_key,
         app_identifier: app_id,
@@ -124,7 +131,10 @@ platform :ios do
         skip_binary_upload: true,
         skip_metadata: false,
         metadata_path: metadata_path,
-        skip_screenshots: true,
+        skip_screenshots: !should_upload_screenshots,
+        screenshots_path: screenshots_path,
+        # 전부 지우는 overwrite 는 iPad 까지 지움 > 끄고 위에서 iPhone 세트만 비움
+        overwrite_screenshots: false,
         precheck_include_in_app_purchases: false,
         # 광고 식별자(IDFA) 답변 — 광고 SDK(google_mobile_ads)와 ATT 안내가 들어 있어 "사용함"이어야 한다.
         # false 로 두면 바이너리의 IDFA 참조와 어긋나 심사에서 반려된다(#281).
@@ -144,6 +154,45 @@ platform :ios do
       end
     else
       puts "⏭️  store_only(testflight_only) 모드 — App Store 단계 건너뜀 (TestFlight 업로드만 완료)"
+    end
+  end
+
+  desc "편집 중 버전의 iPhone 스크린샷 세트만 비움 (iPad 유지) > 올려도 되면 true (#1369)"
+  private_lane :clear_iphone_screenshot_sets do |options|
+    screenshots_path = options[:screenshots_path]
+    # iPhone 세트 (6.9형·6.5형): 레포 6.9형으로 교체, 작은 iPhone 은 Apple 이 줄여 씀
+    iphone_display_types = %w[APP_IPHONE_67 APP_IPHONE_65]
+    # 레포에 PNG 있는 로케일만 대상 (ko, en-US …)
+    target_locales = Dir.glob(File.join(screenshots_path, "*"))
+                        .select { |dir| File.directory?(dir) && Dir.glob(File.join(dir, "*.png")).any? }
+                        .map { |dir| File.basename(dir) }
+    if target_locales.empty?
+      UI.message("⏭️  스크린샷 없음 — App Store 스크린샷 그대로")
+      next false
+    end
+
+    begin
+      app = Spaceship::ConnectAPI::App.find(options[:app_id])
+      UI.user_error!("App Store Connect 에서 앱을 찾지 못했습니다: #{options[:app_id]}") if app.nil?
+      platform = Spaceship::ConnectAPI::Platform::IOS
+      # 새 버전은 이전 버전 스크린샷을 복사해 생김 > 먼저 만들어 두고 그 안에서 지움
+      app.ensure_version!(options[:app_version], platform: platform)
+      version = app.get_edit_app_store_version(platform: platform)
+      UI.user_error!("편집 중인 버전 없음: #{options[:app_version]}") if version.nil?
+
+      version.get_app_store_version_localizations.each do |localization|
+        next unless target_locales.include?(localization.locale)
+        localization.get_app_screenshot_sets.each do |screenshot_set|
+          next unless iphone_display_types.include?(screenshot_set.screenshot_display_type)
+          UI.message("🗑️  iPhone 스크린샷 비움: #{localization.locale} #{screenshot_set.screenshot_display_type}")
+          screenshot_set.delete!
+        end
+      end
+      true
+    rescue StandardError => e
+      # 지우기 실패 상태로 올리면 중복으로 쌓임 > 이번 배포는 스크린샷만 건너뜀 (메타·심사는 계속)
+      UI.important("⚠️  iPhone 스크린샷 교체 건너뜀: #{e.message}")
+      false
     end
   end
 
