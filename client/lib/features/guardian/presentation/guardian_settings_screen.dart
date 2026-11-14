@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
+import '../../../core/widgets/app_reveal.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
@@ -154,31 +156,39 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     );
   }
 
-  /// 설정 메인 시안(`1532:7501`, 맨 위 요금제 묶음은 #1070): 흰 묶음 카드 5개, 묶음 사이 16.
-  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 요금제 / 연결 / 앱 사용 / 약관 및 정보 / 계정.
+  /// 설정 메인 (시안 `1532:7501` 기반): 흰 묶음 카드 5개, 묶음 사이 16.
+  /// 요금제 / 주요 기능(3D 그림) / 앱 설정 / 약관 및 정보 / 계정. 묶음이 위에서부터 차례로 떠오름
   Widget _list(AppSpacing space) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      children: revealInOrder([
         // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
         SizedBox(height: 16.h),
         // 요금제: 내 요금제 · 구매 복원 (설정 맨 위, 시안 #1070)
         PlanSettingsGroup(isBusy: busy),
         _groupGap,
-        // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
-        SettingsGroup(
-          children: [_LinkTile(isBusy: busy)],
-        ),
-        _groupGap,
-        // 앱 설정: 알림, 잠금화면 카드, 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
+        // 주요 기능 (왼쪽 3D 그림): 이룸이 기기 연결, 알림, 잠금화면 카드, 이룸 설계 원리 소개
         SettingsGroup(
           children: [
+            _LinkTile(isBusy: busy),
             _NotificationTile(isBusy: busy),
             // 잠금화면 카드 (Android 만, 그 밖은 자리 없음)
             LockScreenSettingsTile(
               isEnabled: !busy,
               onOpen: () => context.push(Routes.lockScreenSettings),
             ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsAboutElum,
+              leadingIllustrationAsset: AppAssets.featureIconGuide,
+              onTap: busy ? null : () => context.push(Routes.guardianAboutElum),
+            ),
+          ],
+        ),
+        _groupGap,
+        // 앱 설정: 암호, 그림 방식, AI 메모리(Pro), 이룸이 화면 진동과 소리
+        SettingsGroup(
+          children: [
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
@@ -192,14 +202,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보: 설계 원리 소개 > 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
+        // 약관 및 정보: 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.guardianSettingsAboutElum,
-              onTap: busy ? null : () => context.push(Routes.guardianAboutElum),
-            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsTerms,
@@ -246,7 +251,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         SizedBox(height: space.lg),
-      ],
+      ]),
     );
   }
 
@@ -275,6 +280,7 @@ class _LinkTile extends ConsumerWidget {
 
     return SettingsTile(
       isInCard: true,
+      leadingIllustrationAsset: AppAssets.featureIconLinkDevice,
       label: connected
           ? context.l10n.guardianSettingsLinkConnected
           : context.l10n.guardianSettingsLinkConnect,
@@ -352,6 +358,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Widge
     return SettingsTile(
       isInCard: true,
       label: l10n.notificationSettingsTitle,
+      leadingIllustrationAsset: AppAssets.featureIconNotification,
       onTap: widget.isBusy ? null : openSettings,
       // 기기 알림이 꺼져 있으면 값 자리에 `꺼짐` (켜는 곳은 알림 설정 화면의 띠)
       valueChip: isPermissionOff ? const _NotificationOffValue() : null,

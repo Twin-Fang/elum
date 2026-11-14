@@ -391,6 +391,15 @@ class InMemoryStorage implements LocalStorage {
     List<String> routineIds,
   ) async => _talkShareHintDismissedRoutineIds = routineIds;
 
+  // 기기 범위라 clearAll 이 지우지 않음
+  List<String> _dismissedGuideTipSlugs = const [];
+
+  @override
+  List<String> get dismissedGuideTipSlugs => _dismissedGuideTipSlugs;
+
+  @override
+  Future<void> setDismissedGuideTipSlugs(List<String> slugs) async => _dismissedGuideTipSlugs = slugs;
+
   Map<String, DateTime> _homeSuggestionShownAtByKind = const {};
 
   @override

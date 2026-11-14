@@ -17,9 +17,7 @@ import 'routine_title_edit_label.dart';
 ///
 /// 화면 파일이 300줄을 넘지 않게 나눴다. 좌표는 시안(393×852) 그대로다.
 
-/// 머리 — 회색 반짝임 + `카드 N개를 만들었어요` (시안 1173:5592).
-///
-/// 시안은 `카드 5개를 만들었어요`로 이미 능동형이다.
+/// 머리 — 회색 반짝임 + `한 장에 행동 하나씩, 카드 N개를 만들었어요` (시안 1173:5592 + 한 카드 한 행동 원칙)
 class CardReviewHead extends StatelessWidget {
   const CardReviewHead({super.key, required this.count});
 
@@ -33,7 +31,7 @@ class CardReviewHead extends StatelessWidget {
         SvgPicture.asset(AppAssets.iconSparklesHead, width: 18.w, height: 22.w),
         SizedBox(width: 12.w),
         Text(
-          context.l10n.cardReviewMade(count),
+          context.l10n.cardReviewMadeOneAction(count),
           style: context.typo.promptBody.copyWith(
             color: context.colors.promptMuted,
           ),

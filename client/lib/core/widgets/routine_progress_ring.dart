@@ -4,15 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../theme/app_colors.dart';
+
 import '../assets/app_assets.dart';
 import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
+import 'app_animated_fraction.dart';
+import 'app_pop_in.dart';
 
 /// 일과 진행률 링 (Figma 356:4688 / 356:5079 — 40×40, stroke 4).
 ///
 /// 보호자 홈과 아이 홈의 일과 타일이 함께 쓴다.
 /// - 진행 중: 트랙(#C9D6D4) 위에 진행분(#55CFBA)을 그리고 가운데 `NN%`
 /// - 100%: 링 대신 채워진 체크 원 (Figma `채크_라운드` 726:4882 — 체크 21.82×16.26 정가운데)
+/// - 등장: 진행분은 0에서 차오르며 숫자도 함께 셈, 체크 원은 톡 튐 (동작 줄이기면 바로 끝 모습)
 class RoutineProgressRing extends StatelessWidget {
   const RoutineProgressRing({
     super.key,
@@ -46,7 +51,7 @@ class RoutineProgressRing extends StatelessWidget {
           ? context.l10n.routineProgressRingDoneLabel
           : context.l10n.routineProgressRingPercentLabel(percent),
       child: ExcludeSemantics(
-        child: _buildRing(context, value, isDone, percent),
+        child: _buildRing(context, value, isDone),
       ),
     );
   }
@@ -55,7 +60,6 @@ class RoutineProgressRing extends StatelessWidget {
     BuildContext context,
     double value,
     bool isDone,
-    int percent,
   ) {
     final colors = context.colors;
     // 원형이라 가로세로 모두 .w — 화면비가 달라도 원은 원이어야 한다
@@ -63,50 +67,54 @@ class RoutineProgressRing extends StatelessWidget {
       width: _size.w,
       height: _size.w,
       child: isDone
-          ? DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors.routineRingProgress,
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.childCheckMark,
-                  width: _checkWidth.w,
-                  height: _checkHeight.w,
-                  colorFilter: ColorFilter.mode(
-                    doneCheckColor ?? colors.surface,
-                    BlendMode.srcIn,
-                  ),
-                  excludeFromSemantics: true,
-                ),
-              ),
-            )
-          : CustomPaint(
-              painter: _RingPainter(
-                progress: value,
-                track: colors.routineRingTrack,
-                fill: colors.routineRingProgress,
-                strokeWidth: _stroke.w,
-              ),
-              child: Center(
-                // 글자가 커져도 `25`/`%` 로 쪼개지지 않게 한 덩어리로 줄여 담는다.
-                // 링 안쪽 지름이 고정이라 키울 자리가 없다.
-                child: Padding(
-                  padding: EdgeInsets.all(_stroke.w),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '$percent%',
-                      maxLines: 1,
-                      softWrap: false,
-                      style: context.typo.ringPercent.copyWith(
-                        color: colors.routineRingProgress,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+          ? AppPopIn(child: _doneCheck(colors))
+          : AppAnimatedFraction(
+              value: value,
+              builder: (context, fraction) => _progressRing(context, fraction),
             ),
+    );
+  }
+
+  /// 다 함: 채워진 체크 원
+  Widget _doneCheck(AppColors colors) => DecoratedBox(
+    decoration: BoxDecoration(shape: BoxShape.circle, color: colors.routineRingProgress),
+    child: Center(
+      child: SvgPicture.asset(
+        AppAssets.childCheckMark,
+        width: _checkWidth.w,
+        height: _checkHeight.w,
+        colorFilter: ColorFilter.mode(doneCheckColor ?? colors.surface, BlendMode.srcIn),
+        excludeFromSemantics: true,
+      ),
+    ),
+  );
+
+  /// 진행 중: 트랙 + 진행 호 + 가운데 `NN%` (차오르는 비율 [fraction] 기준)
+  Widget _progressRing(BuildContext context, double fraction) {
+    final colors = context.colors;
+    return CustomPaint(
+      painter: _RingPainter(
+        progress: fraction,
+        track: colors.routineRingTrack,
+        fill: colors.routineRingProgress,
+        strokeWidth: _stroke.w,
+      ),
+      child: Center(
+        // 글자가 커져도 `25`/`%` 로 쪼개지지 않게 한 덩어리로 줄여 담는다.
+        // 링 안쪽 지름이 고정이라 키울 자리가 없다.
+        child: Padding(
+          padding: EdgeInsets.all(_stroke.w),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${(fraction * 100).round()}%',
+              maxLines: 1,
+              softWrap: false,
+              style: context.typo.ringPercent.copyWith(color: colors.routineRingProgress),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

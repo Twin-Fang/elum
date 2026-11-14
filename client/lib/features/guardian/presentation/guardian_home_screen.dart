@@ -1,4 +1,3 @@
-import '../../../app/home_notice_slot.dart';
 import '../../../app/lock_screen_snapshot_sync.dart';
 import 'dart:async';
 
@@ -7,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
@@ -18,8 +16,6 @@ import '../../../core/layout/window_size_class.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
-import '../../credit/domain/credit_summary.dart';
-import '../../credit/application/credit_top_up_entry.dart';
 import '../../lock_screen/application/lock_screen_intro_entry.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
@@ -28,20 +24,15 @@ import '../application/example_routine_seeder.dart';
 import '../application/home_routines.dart';
 import '../application/store_review_prompter.dart';
 import '../application/home_coach_notifier.dart';
-import '../application/routine_notifier.dart';
 import 'guardian_home_header.dart';
 import 'guardian_home_landscape_body.dart';
-import 'widgets/create_routine_button.dart';
+import 'guardian_home_sections.dart';
+import 'routine_start_entry.dart';
+import '../../../core/widgets/app_reveal.dart';
+import '../application/routine_providers.dart';
 import 'widgets/coach_mark_start_gate.dart';
 import 'widgets/home_coach_mark.dart';
-import 'widgets/home_next_step_card.dart';
-import 'widgets/home_streak_chip.dart';
-import 'widgets/routine_summary_tile.dart';
-import 'widgets/past_routine_section.dart';
-import 'widgets/today_routine_section.dart';
-import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/state/busy_state_mixin.dart';
 
 /// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인).
 ///
@@ -70,12 +61,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
   /// Figma 실측 — 카드·버튼은 화면 끝에서 16, 글은 24
   static const _listInset = 16.0;
 
-  /// 머리말 묶음 ↔ 만들기 버튼 32 · 버튼 ↔ 일과 40 · 섹션 사이 32 · 제목 ↔ 카드 8
+  /// 머리말 묶음 ↔ 만들기 버튼 32 · 버튼 ↔ 일과 40
   static const _toCreateButton = 32.0;
   static const _toSections = 40.0;
-  static const _betweenSections = 32.0;
-
-  static const _titleToList = 8.0;
 
   /// 홈이 이만큼 맨 앞에 머물러야 시작한다. 공지 팝업이 연달아 뜰 때 앞 팝업이 닫히고
   /// 다음 팝업이 올라오는 찰나에 홈이 잠깐 맨 앞이 된다 — 그때 시작하면 다음 팝업이
@@ -253,34 +241,12 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
     final createButton = Padding(
       padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-      child: KeyedSubtree(key: _createKey, child: const _StartRoutineButton()),
+      child: KeyedSubtree(key: _createKey, child: const StartRoutineButton()),
     );
-    final sections = Padding(
-      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 이룸이 연속 기록 불꽃 (2일 이상일 때만)
-          const HomeStreakChip(bottomGap: _titleToList),
-          // 첫날 흐름 「다음에 할 일」 한 장 (안내 카드보다 먼저, 첫 완료 뒤 사라짐)
-          HomeNextStepCard(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
-          // 안내 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)
-          HomeNoticeSlot(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
-          RoutineSectionTitle(
-            iconAsset: AppAssets.iconTodayRoutine,
-            label: context.l10n.guardianHomeTodayRoutine,
-          ),
-          SizedBox(height: _titleToList.h),
-          TodayRoutineSection(coachKey: _swipeKey),
-          SizedBox(height: _betweenSections.h),
-          RoutineSectionTitle(
-            iconAsset: AppAssets.iconTimePast,
-            label: context.l10n.guardianHomePastRoutine,
-          ),
-          SizedBox(height: _titleToList.h),
-          const PastRoutineSection(),
-        ],
-      ),
+    final sections = GuardianHomeSections(
+      swipeKey: _swipeKey,
+      onCreateRoutine: _startRoutineFromSuggestion,
+      horizontalInset: _listInset,
     );
 
     // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
@@ -332,13 +298,14 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
                         padding: EdgeInsets.only(bottom: space.xl),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                          // 인사 > 만들기 버튼 > 본문 칸이 차례로 떠오름
+                          children: revealInOrder([
                             header,
                             SizedBox(height: _toCreateButton.h),
                             createButton,
                             SizedBox(height: _toSections.h),
                             sections,
-                          ],
+                          ]),
                         ),
                       ),
                     ),
@@ -375,67 +342,4 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       ),
     );
   }
-}
-
-/// `새로운 일과 만들기` + 시작 전 크레딧 확인.
-///
-/// 확인을 기다리는 동안 한 번 더 누르면 입력 화면이 두 번 쌓였다. 확인 중에는
-/// 누름을 무시한다. 확인은 [creditStartCheckTimeout] 안에 끝나 오래 막히지 않는다.
-class _StartRoutineButton extends ConsumerStatefulWidget {
-  const _StartRoutineButton();
-
-  @override
-  ConsumerState<_StartRoutineButton> createState() =>
-      _StartRoutineButtonState();
-}
-
-class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton>
-    with BusyStateMixin<_StartRoutineButton> {
-  @override
-  Widget build(BuildContext context) =>
-      CreateRoutineButton(onTap: _startRoutine, loading: busy);
-
-  /// 일과 만들기 시작. 이전 입력이 남아 있으면 안 되므로 항상 초기화한다.
-  ///
-  /// 이번 주 크레딧을 다 썼으면 들어가지 않고 알린다 — 입력·질문·보상까지
-  /// 다 적은 뒤 마지막에 막히면 적은 것이 헛수고가 된다.
-  Future<void> _startRoutine() async {
-    // 확인하는 동안만 잠근다. 결과가 null 일 수 있어 기록으로 감싸 건너뛴 경우와 가른다.
-    final check = await runBusy(
-      () async => (blocked: await creditBlocksRoutineStart(ref)),
-    );
-    if (check == null || !mounted) return;
-    await continueRoutineStart(context, ref, check.blocked);
-  }
-}
-
-/// 크레딧 확인을 마친 뒤 일과 만들기로 들어간다 (홈 · 일과관리 `+ 일과 만들기` 공통)
-///
-/// 막혔으면 안내만 띄우고 제자리에 남는다. 아니면 흐름 초기화 > 입력 화면.
-Future<void> continueRoutineStart(
-  BuildContext context,
-  WidgetRef ref,
-  CreditSummary? blocked,
-) async {
-  if (blocked != null) {
-    // 크레딧 더 받기 시트. 들어가지 않고 제자리에 남음 (광고로 받으면 `이어서 만들기` 로 다시 확인 후 시작)
-    await showCreditBlockedNotice(
-      context,
-      ref,
-      blocked,
-      retry: (
-        label: context.l10n.creditTopUpRoutineContinue,
-        run: () async {
-          final blockedAgain = await creditBlocksRoutineStart(ref);
-          if (!context.mounted) return;
-          await continueRoutineStart(context, ref, blockedAgain);
-        },
-      ),
-    );
-    return;
-  }
-  ref.read(routineFlowProvider.notifier).reset();
-  // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
-  // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
-  context.push(Routes.routineInput);
 }

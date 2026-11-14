@@ -412,7 +412,7 @@
   "questionCustomHint": "Write it here",
   "questionCustomClose": "Close writing",
   "questionClearLabel": "Clear {label}",
-  "cardReviewMade": "{count, plural, one{Made {count} card} other{Made {count} cards}}",
+  "cardReviewMadeOneAction": "{count, plural, one{Made {count} card, one action per card} other{Made {count} cards, one action per card}}",
   "cardReviewRewardLead": "When done: ",
   "cardReviewRewardSet": "Set a reward",
   "cardReviewReorderHint": "Press and hold a card to change the order",
@@ -1658,5 +1658,18 @@
   "lockScreenIntroLater": "Later",
   "lockScreenOnValue": "On",
   "lockScreenPermissionMissingValue": "Permission needed",
-  "modeSwitchToLockScreen": "Only a guardian can change the lock screen card"
+  "modeSwitchToLockScreen": "Only a guardian can change the lock screen card",
+  "guideTipActionCardsTitle": "What are action cards?",
+  "guideTipActionCardsBody": "One action per card. A 3-minute read",
+  "guideTipMakeActionCardsTitle": "How to make action cards the easy way",
+  "guideTipMakeActionCardsBody": "Five tips for making good cards",
+  "guideTipCaregiverRoleTitle": "5 things caregivers do",
+  "guideTipCaregiverRoleBody": "How to help cards become part of the day",
+  "guideTipTaskAnalysisTitle": "Breaking routines into small steps",
+  "guideTipTaskAnalysisBody": "With brushing and dressing examples",
+  "guideTipRewardsTitle": "How to choose rewards",
+  "guideTipRewardsBody": "Small, right away, decided ahead",
+  "guideTipDismissLabel": "Hide this guide",
+  "guideTipOpenFailed": "Couldn't open the guide",
+  "guideTipReadAction": "Read"
 }

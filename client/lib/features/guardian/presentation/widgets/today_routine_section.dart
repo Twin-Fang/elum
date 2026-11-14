@@ -25,6 +25,7 @@ import 'routine_swipe_actions.dart';
 import 'talk_share_hint_link.dart';
 import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
@@ -338,7 +339,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
           padding: EdgeInsets.only(
             bottom: index == routines.length - 1 ? 0 : routineTileGap.h,
           ),
-          child: Column(
+          // 줄마다 위에서부터 차례로 떠오름 (처음 그려질 때 한 번)
+          child: AppReveal(
+            index: index,
+            child: Column(
             children: [
               ReorderableDelayedDragStartListener(
                 // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
@@ -400,6 +404,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
               // 끝낸 일과 카드 아래 이야기 공유 링크 (조건은 위젯이 판단)
               if (_isFinished(routine)) TalkShareHintLink(routine: routine),
             ],
+          ),
           ),
         );
       },

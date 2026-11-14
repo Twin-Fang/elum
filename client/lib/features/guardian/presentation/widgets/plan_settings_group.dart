@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/assets/app_assets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -33,6 +35,7 @@ class PlanSettingsGroup extends ConsumerWidget {
         SettingsTile(
           isInCard: true,
           label: l10n.planSettingsLabel,
+          leadingIllustrationAsset: AppAssets.featureIconStar,
           // 글자보다 모양으로 Free · Pro 차이를 보여 줌 (읽기 프로그램은 값 글자를 읽음)
           valueText: planStatusShortLabel(l10n, status),
           valueChip: PlanTierChip(tier: planTierOf(status)),
@@ -42,12 +45,14 @@ class PlanSettingsGroup extends ConsumerWidget {
         SettingsTile(
           isInCard: true,
           label: l10n.myCreditTitle,
+          leadingIllustrationAsset: AppAssets.creditTicket,
           onTap: isBusy ? null : () => context.push(Routes.guardianMyCredit),
         ),
         if (isStoreConnected)
           SettingsTile(
             isInCard: true,
             label: l10n.planRestore,
+            shouldReserveLeadingSlot: true,
             onTap: isBusy ? null : () => restorePlanPurchases(context, ref),
           ),
       ],

@@ -94,6 +94,7 @@ class ImageStyleScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
+              shouldRevealOnEnter: true,
               title: context.l10n.onboardingImageStyleTitle,
               description: context.l10n.onboardingImageStyleDescription,
               hasBackButton: true,

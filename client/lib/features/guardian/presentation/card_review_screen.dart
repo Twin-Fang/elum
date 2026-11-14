@@ -11,6 +11,7 @@ import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/app_pop_in.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
 import '../../member/application/plan_access.dart';
@@ -482,7 +483,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
                       padding: EdgeInsets.symmetric(
                         horizontal: (CardReviewScreen._cardGap / 2).w,
                       ),
-                      child: ActionCardView(
+                      // 카드가 도착하면 한 장씩 톡 튀어나옴 (처음 그려질 때 한 번)
+                      child: AppPopIn(
+                        key: ValueKey('pop-${cards[index].id}'),
+                        delay: AppMotion.staggerDelayOf(index),
+                        child: ActionCardView(
                         key: ValueKey(cards[index].id),
                         card: cards[index],
                         index: index,
@@ -497,6 +502,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
                         onDelete: cards.length > 1
                             ? () => _confirmRemove(cards[index])
                             : null,
+                      ),
                       ),
                     ),
                   ),

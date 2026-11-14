@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/app_animated_fraction.dart';
+import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../domain/weekly_report.dart';
 import '../../domain/weekly_report_trend.dart';
@@ -38,9 +40,10 @@ class WeeklyReportSections extends StatelessWidget {
     final insights = report.insights;
     final sampleTrendPoints = this.sampleTrendPoints;
     final noCompletionCard = report.completedRoutineCount == 0 ? this.noCompletionCard : null;
+    // 묶음이 위에서부터 차례로 떠오름 (빈 간격은 순번에서 빠짐)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      children: revealInOrder([
         WeeklyReportSummaryDonut(report: report),
         SizedBox(height: _groupGap.h),
         if (noCompletionCard != null) ...[
@@ -83,7 +86,7 @@ class WeeklyReportSections extends StatelessWidget {
             children: [for (final step in report.remainingSteps) _RemainingCardRow(step: step)],
           ),
         ],
-      ],
+      ]),
     );
   }
 }
@@ -140,10 +143,14 @@ class _RoutineRecordRow extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(child: ColoredBox(color: colors.routineTileBg)),
-                  FractionallySizedBox(
-                    widthFactor: ratio,
-                    heightFactor: 1,
-                    child: ColoredBox(color: _barColorOf(colors, ratio)),
+                  // 왼쪽에서 차오름
+                  AppAnimatedFraction(
+                    value: ratio,
+                    builder: (context, fraction) => FractionallySizedBox(
+                      widthFactor: fraction,
+                      heightFactor: 1,
+                      child: ColoredBox(color: _barColorOf(colors, ratio)),
+                    ),
                   ),
                 ],
               ),
