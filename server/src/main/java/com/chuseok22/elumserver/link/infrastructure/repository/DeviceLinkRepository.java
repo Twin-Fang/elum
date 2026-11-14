@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface DeviceLinkRepository extends JpaRepository<DeviceLink, String> {
 
@@ -27,4 +29,11 @@ public interface DeviceLinkRepository extends JpaRepository<DeviceLink, String> 
 
   /** 관리자 회원 상세: 이룸이들의 연결·발급 기록 전부 (최신순) */
   List<DeviceLink> findAllByProfileIdInOrderByCreatedAtDesc(Collection<String> profileIds);
+
+  /** 리텐션 알림 (#1409): 이 이룸이들 중 이룸이 기기가 지금 연결된(암호를 썼고 안 끊긴) 이룸이 id */
+  @Query("""
+    select distinct d.profileId from DeviceLink d
+    where d.profileId in :profileIds and d.redeemedAt is not null and d.revokedAt is null
+    """)
+  List<String> findLinkedProfileIdsAmong(@Param("profileIds") Collection<String> profileIds);
 }

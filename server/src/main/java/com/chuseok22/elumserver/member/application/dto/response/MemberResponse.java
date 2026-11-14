@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import com.chuseok22.elumserver.routine.core.ElumiStreak;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,7 +63,15 @@ public record MemberResponse(
 
   @Schema(description = "Pro 요금제가 지금 주는 권한 (회원과 무관한 설정값). 앱 요금제 화면의 혜택 줄·Free 미리 보기를 "
     + "이 값으로 그려 꺼진 Pro 권한을 팔지 않는다 (#1165). 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
-  EntitlementSnapshot proPlanEntitlements
+  EntitlementSnapshot proPlanEntitlements,
+
+  @Schema(description = "위 당사자 항목 이룸이의 연속 기록: 이어서 일과를 마친 일수 (#1409). 하루 유예라 오늘 안 마쳤어도 "
+    + "어제까지 이어졌으면 유지, 이룸이가 없거나 기록이 없으면 0. 요금제와 무관. 기존 클라이언트는 이 필드를 무시한다.", example = "3")
+  int currentStreakDays,
+
+  @Schema(description = "연속 기록이 있는데 오늘 아직 일과를 안 마쳐 오늘이 지나면 끊기는지 (#1409). "
+    + "기존 클라이언트는 이 필드를 무시한다.", example = "true")
+  boolean isStreakAtRiskToday
 ) {
 
   /**
@@ -76,8 +85,11 @@ public record MemberResponse(
    */
   public static MemberResponse from(
     Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements,
-    GuardianAccountResponse account, MemberSubscriptionStatus subscription, EntitlementSnapshot proPlanEntitlements
+    GuardianAccountResponse account, MemberSubscriptionStatus subscription, EntitlementSnapshot proPlanEntitlements,
+    ElumiStreak streak
   ) {
+    // 기록을 못 구했으면(null) 기록 없음으로: 홈 화면이 null 을 만나지 않게
+    ElumiStreak currentStreak = streak == null ? ElumiStreak.NONE : streak;
     return new MemberResponse(
       member.getId(),
       member.getUsername(),
@@ -93,7 +105,9 @@ public record MemberResponse(
       profile == null ? ImageStyle.CARTOON : profile.getImageStyle(),
       account,
       subscription,
-      proPlanEntitlements
+      proPlanEntitlements,
+      currentStreak.currentStreakDays(),
+      currentStreak.isStreakAtRiskToday()
     );
   }
 }

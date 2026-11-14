@@ -19,6 +19,7 @@ import com.chuseok22.elumserver.notification.infrastructure.entity.NotificationS
 import com.chuseok22.elumserver.notification.infrastructure.repository.AutoNotificationRuleRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationDispatchRepository;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationSettingRepository;
+import com.chuseok22.elumserver.notification.infrastructure.repository.PushDeviceRepository;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,12 +38,15 @@ class AutoNotificationRunnerTest {
   private final NotificationSettingRepository settingRepository = mock(NotificationSettingRepository.class);
   private final NotificationDispatchRepository dispatchRepository = mock(NotificationDispatchRepository.class);
   private final AdminMessageService adminMessageService = mock(AdminMessageService.class);
+  // 기기 없음 > ko (규칙의 한국어 틀 그대로)
+  private final AutoNotificationCopyResolver copyResolver =
+    new AutoNotificationCopyResolver(mock(PushDeviceRepository.class));
 
   private AutoNotificationRunner runnerAt(String seoulDateTime) {
     LocalDateTime local = LocalDateTime.parse(seoulDateTime);
     Clock clock = Clock.fixed(local.atZone(SEOUL).toInstant(), SEOUL);
     return new AutoNotificationRunner(ruleRepository, candidateFinder, settingRepository, dispatchRepository,
-      adminMessageService, clock);
+      adminMessageService, copyResolver, clock);
   }
 
   @Test

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.infrastructure.repository;
 import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberDailyVisit;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -41,4 +42,18 @@ public interface MemberDailyVisitRepository extends JpaRepository<MemberDailyVis
   @Modifying(flushAutomatically = true)
   @Query("delete from MemberDailyVisit v where v.memberId = :memberId")
   int deleteAllByMemberId(@Param("memberId") String memberId);
+
+  /// 방문 한 줄 투영: 회원, 방문 날짜
+  interface MemberVisitRow {
+
+    String getMemberId();
+
+    LocalDate getVisitDate();
+  }
+
+  /// 알림 효과 (#1409): 이 회원들의 since 이후 방문 날짜
+  @Query("select v.memberId as memberId, v.visitDate as visitDate from MemberDailyVisit v "
+    + "where v.memberId in :memberIds and v.visitDate >= :since")
+  List<MemberVisitRow> findVisitsSince(@Param("memberIds") java.util.Collection<String> memberIds,
+    @Param("since") LocalDate since);
 }

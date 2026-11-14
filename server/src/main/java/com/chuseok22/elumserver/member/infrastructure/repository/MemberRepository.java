@@ -201,4 +201,16 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     """)
   List<String> findIdsByKeywordPattern(
     @Param("keyword") String keyword, @Param("pattern") String pattern, Pageable pageable);
+
+  /// 회원 id·마지막 활동 시각 투영
+  interface MemberLastActivityRow {
+
+    String getId();
+
+    LocalDateTime getLastActivityAt();
+  }
+
+  /// 알림 효과 (#1409): 이 회원들의 마지막 활동 시각
+  @Query("select m.id as id, m.lastActivityAt as lastActivityAt from Member m where m.id in :memberIds")
+  List<MemberLastActivityRow> findLastActivitiesByIdIn(@Param("memberIds") Collection<String> memberIds);
 }

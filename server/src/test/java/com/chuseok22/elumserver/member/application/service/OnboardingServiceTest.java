@@ -52,7 +52,7 @@ class OnboardingServiceTest {
     member.setId("member-1");
     Profile own = new Profile();
     own.setId("p-own");
-    MemberResponse ensured = MemberResponse.from(member, own, List.of(own), null, null, null, null);
+    MemberResponse ensured = MemberResponse.from(member, own, List.of(own), null, null, null, null, null);
     when(memberService.createProfile(any())).thenReturn(ensured);
   }
 
