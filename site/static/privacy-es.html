@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="canonical" href="https://elum.suhsaechan.kr/privacy-es.html"/>
+<title>ELUM (이룸) — Política de privacidad</title>
+<meta name="description" content="Información sobre los datos personales que recopila ELUM (이룸) y cómo los trata."/>
+<link rel="icon" href="./assets/lumi.svg"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="이룸 ELUM"/>
+<meta property="og:locale" content="es_419"/>
+<meta property="og:image" content="https://elum.suhsaechan.kr/assets/og.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<style>
+:root{
+  --bg:#F7F2EF; --ink:#242634; --muted:#6B6C78; --faint:rgba(36,38,52,.45);
+  --line:rgba(36,38,52,.09); --card:#fff; --accent:#FF8B26; --soft:#FFF7EE;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; --r:26px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.7;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:820px;margin:0 auto;padding:0 28px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+a{color:var(--ink)}
+
+header.site{position:sticky;top:0;z-index:20;background:rgba(247,242,239,.86);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;height:68px;gap:18px;max-width:1120px;margin:0 auto;padding:0 28px}
+.brand img{height:26px;display:block}
+nav{margin-left:auto;display:flex;gap:26px}
+nav a{font-size:14px;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+
+.doc{padding-top:64px;padding-bottom:40px}
+h1{margin:12px 0 0;font-size:clamp(30px,4.4vw,44px);line-height:1.14;letter-spacing:-.03em;font-weight:800}
+h2{margin:44px 0 12px;font-size:20px;letter-spacing:-.02em;font-weight:800;
+  padding-top:22px;border-top:1px solid var(--line)}
+h2:first-of-type{border-top:0;padding-top:0}
+p{margin:12px 0}
+ul{margin:12px 0;padding-left:20px}
+li{margin:6px 0}
+strong{font-weight:700}
+
+/* 본문에서 가져온 규칙 — 표와 안내 상자 */
+.meta{color:var(--faint);font-size:13px;margin:6px 0 0;font-family:var(--mono)}
+.lead{background:var(--soft);border-left:3px solid var(--accent);
+  padding:18px 20px;border-radius:0 14px 14px 0;margin:26px 0 0}
+.table-scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+th{background:rgba(36,38,52,.03);font-weight:700}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:.92em;background:rgba(36,38,52,.06);padding:2px 6px;border-radius:6px}
+
+.backlink{display:inline-flex;align-items:center;gap:8px;margin-top:48px;
+  border:1px solid var(--line);background:var(--card);border-radius:999px;
+  padding:12px 20px;text-decoration:none;font-weight:700;font-size:15px}
+.backlink:hover{transform:translateY(-1px)}
+
+footer.site{border-top:1px solid var(--line);padding:32px 0 60px;color:var(--faint);font-size:13px;margin-top:20px}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:16px;max-width:1120px;margin:0 auto;padding:0 28px}
+.fl img{height:18px;opacity:.85}
+
+@media (max-width:880px){ nav{display:none} .doc{padding-top:44px;padding-bottom:28px} }
+
+/* 휴대폰 폭: 좌우 여백 확보, 표는 카드로 쌓기 (가로 스크롤 없이 읽히게) */
+@media (max-width:640px){
+  .wrap,.bar,.fl{padding-left:20px;padding-right:20px}
+  .stack{overflow:visible;border:0;background:none;border-radius:0}
+  .stack table,.stack tbody,.stack tr,.stack td{display:block;width:100%;min-width:0}
+  .stack thead{display:none}
+  .stack tr{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 16px;margin:0 0 12px}
+  .stack td{border:0;padding:10px 0}
+  .stack td+td{border-top:1px solid var(--line)}
+  .stack td::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  .stack td:first-child{font-weight:700}
+  .stack td:first-child::before{display:none}
+  .kv table,.kv tbody,.kv tr,.kv th,.kv td{display:block;width:100%;min-width:0}
+  .kv tr{border-bottom:1px solid var(--line)}
+  .kv tr:last-child{border-bottom:0}
+  .kv th{border:0;background:none;padding:12px 16px 0;font-size:12px;color:var(--muted)}
+  .kv td{border:0;padding:2px 16px 12px}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="./"><img src="./assets/logo.svg" alt="이룸 ELUM"/></a>
+    <nav>
+      <a href="./#faq">Preguntas frecuentes</a>
+      <a href="./#contact">Contacto</a>
+      <a href="./privacy.html">Política de privacidad</a>
+      <a href="./delete.html">Eliminar cuenta</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap doc">
+  <div class="tag">Privacy</div>
+  <h1>Política de privacidad</h1>
+  <p class="notice"><strong>Esta es una traducción al español con fines informativos. Si difiere del <a href="/privacy.html">original en coreano</a>, prevalece el original en coreano.</strong></p>
+  <p class="meta">Entrada en vigor: 12 de noviembre de 2026 · Última revisión: 5 de noviembre de 2026</p>
+
+<p class="lead">
+  ELUM es una aplicación que ayuda a las personas con discapacidad del desarrollo (en adelante, “Elumi”) a realizar sus rutinas diarias: el tutor crea tarjetas y Elumi
+  pasa el día siguiendo esas tarjetas. ELUM <strong>no recopila diagnósticos ni tipos de discapacidad.</strong>
+  La personalización se realiza únicamente con los “objetivos de apoyo” que elige el tutor.
+</p>
+
+<h2>1. Datos personales que se recopilan</h2>
+
+<p>Durante el uso del servicio se recopilan y almacenan los siguientes datos.</p>
+
+<div class="table-scroll stack">
+<table>
+  <thead>
+    <tr><th>Categoría</th><th>Datos</th><th>Momento de la recopilación</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td data-label="Categoría">Inicio de sesión con redes sociales</td>
+      <td data-label="Datos">Proveedor de inicio de sesión (Kakao, Naver, Google, Apple), identificador de miembro emitido por el proveedor, dirección de correo electrónico</td>
+      <td data-label="Momento de la recopilación">Al iniciar sesión con una red social</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Apodo del tutor</td>
+      <td data-label="Datos">Apodo del tutor (se crea automáticamente al registrarse y el tutor puede cambiarlo)</td>
+      <td data-label="Momento de la recopilación">Se genera automáticamente al registrarse; cuando el tutor lo cambia</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Mantenimiento de la sesión</td>
+      <td data-label="Datos">Valor transformado del token para mantener la sesión iniciada, identificador del dispositivo</td>
+      <td data-label="Momento de la recopilación">Al iniciar sesión</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Datos de Elumi</td>
+      <td data-label="Datos">Nombre con el que se llamará a Elumi (apodo), personaje elegido, objetivos de apoyo, cantidad de estrellas obtenidas</td>
+      <td data-label="Momento de la recopilación">Cuando el tutor los ingresa en la configuración inicial o en Ajustes</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Rutinas</td>
+      <td data-label="Datos">Descripción de la situación y respuestas a preguntas adicionales ingresadas por el tutor, título y pasos de la rutina, fecha y hora programadas,
+          contenido de la recompensa, fecha y hora de finalización</td>
+      <td data-label="Momento de la recopilación">Al crear y realizar rutinas</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Registro de uso</td>
+      <td data-label="Datos">Tipo de llamada a la IA, modelo utilizado, tiempo de respuesta, volumen procesado, costo estimado</td>
+      <td data-label="Momento de la recopilación">Se registra automáticamente al crear tarjetas</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Enviar opinión</td>
+      <td data-label="Datos">Texto del comentario escrito por el tutor, versión de la app, sistema operativo, registro del estado de la app (se puede elegir si se envía y viene activado al principio:
+          es un registro reciente del funcionamiento de la app que contiene las solicitudes y respuestas intercambiadas con el servidor, la navegación entre pantallas y los errores, y puede incluir información de la app
+          como el nombre con el que se llama a Elumi o el contenido de las rutinas. El token de inicio de sesión y el código secreto se ocultan antes del envío),
+          información del teléfono (se envía junto con el registro del estado de la app mediante la misma casilla y viene activada al principio: desde dónde se instaló la app (si se instaló desde la tienda),
+          valor de la clave de firma de la app, número aleatorio generado por la app al instalarse, fabricante, modelo y versión del sistema operativo del teléfono, zona horaria y región,
+          tipo de conexión de red, tipo de compilación de la app y tiempo de ejecución, si el modo de bajo consumo está activado, espacio de almacenamiento disponible, si KakaoTalk está instalado y su versión,
+          valores de configuración del inicio de sesión con Kakao, último error de inicio de sesión con redes sociales. Para este fin no se recopilan el número único del teléfono (IMEI, número de serie), el identificador de publicidad, la ubicación, los contactos
+          ni la lista de otras apps instaladas)</td>
+      <td data-label="Momento de la recopilación">Solo cuando el tutor envía comentarios desde Ajustes</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Historias</td>
+      <td data-label="Datos">Título de la rutina compartida, frases de las tarjetas, imágenes de las tarjetas (el tutor puede elegir si difumina las fotos que tomó), texto escrito por el tutor, clasificación,
+          comentarios, “Me ayudó”, registro de rutinas llevadas, denuncias, registro de tutores ocultados</td>
+      <td data-label="Momento de la recopilación">Solo cuando el tutor comparte una rutina en Historias o reacciona</td>
+    </tr>
+    <tr>
+      <td data-label="Categoría">Publicidad<br>(Google la recopila directamente en la pantalla del tutor)</td>
+      <td data-label="Datos">Identificador de publicidad (identificador de publicidad de iOS, ID de publicidad de Android), dirección IP y ubicación aproximada basada en ella,
+          información del dispositivo y de la app (sistema operativo, modelo del dispositivo, versión de la app), información de uso de la publicidad, como impresiones y clics,
+          información de cierres inesperados de la app y de diagnóstico de rendimiento</td>
+      <td data-label="Momento de la recopilación">Cuando se cargan anuncios en la pantalla del tutor</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  Los siguientes datos <strong>no se recopilan:</strong> diagnósticos, tipo o grado de discapacidad, número de registro de residente (número de identificación nacional),
+  datos de contacto, dirección, información de ubicación precisa (GPS), información de acceso a la galería de fotos o a los contactos.
+  La transmisión a Google de la ubicación aproximada basada en la dirección IP durante la visualización de anuncios es la indicada en el apartado de publicidad anterior.
+</p>
+
+<h2>2. Finalidades del tratamiento de los datos personales</h2>
+
+<ul>
+  <li><strong>Identificación del miembro y mantenimiento de la sesión</strong> — datos de la cuenta, identificador de inicio de sesión con redes sociales, token para mantener la sesión iniciada</li>
+  <li><strong>Creación y personalización de las tarjetas de rutina</strong> — nombre, personaje y objetivos de apoyo de Elumi, descripción de la situación ingresada por el tutor</li>
+  <li><strong>Registro de realización y entrega de recompensas</strong> — si la rutina se completó, cantidad de estrellas</li>
+  <li><strong>Operación del servicio y respuesta a fallas</strong> — registro de uso, registro de errores</li>
+  <li><strong>Revisión de los comentarios enviados por el tutor e identificación de la causa de los problemas</strong> — texto del comentario, registro del estado de la app, información del teléfono</li>
+  <li><strong>Función de Historias para que los tutores compartan rutinas e intercambien reacciones entre sí, y revisión de denuncias</strong> — apodo del tutor, datos de Historias</li>
+  <li><strong>Publicación de anuncios, medición del rendimiento publicitario y prevención del uso fraudulento</strong> — Google utiliza los datos del apartado de publicidad</li>
+</ul>
+
+<h3>Alcance de la publicación de lo compartido en Historias</h3>
+<p>
+  Las rutinas, textos y comentarios compartidos en Historias son visibles para otros tutores que hayan iniciado sesión, y otros tutores pueden llevárselos como rutinas propias.
+  Como autor se muestra el apodo del tutor; el correo electrónico y la información de inicio de sesión no se muestran.
+  El nombre con el que se llama a Elumi se publica reemplazado por “Elumi”. Procure que en las fotos no se vean rostros, etiquetas con nombres ni direcciones.
+</p>
+
+<h2>3. Período de conservación y uso de los datos personales</h2>
+<ul>
+  <li>Al darse de baja, la dirección de correo electrónico, la fecha y hora del último inicio de sesión y el número de inicios de sesión, el token para mantener la sesión y las rutinas creadas por ese tutor
+    <strong>se destruyen sin demora</strong>.</li>
+  <li>Los datos de Elumi y los datos de conexión del teléfono de Elumi se conservan si hay otro tutor conectado, y se destruyen
+    cuando ya no queda ningún tutor conectado. Las estrellas que reunió Elumi y las rutinas creadas por otros tutores se conservan tal como están.</li>
+  <li>El texto de los comentarios, el registro del estado de la app y la información del teléfono <strong>se destruyen sin demora</strong> al darse de baja. Incluso antes, pueden eliminarse una vez terminada la revisión del problema.</li>
+  <li>Las rutinas, textos y comentarios compartidos en Historias, así como los registros de reacciones, denuncias y ocultamientos, <strong>se destruyen sin demora</strong> cuando el tutor los retira o se da de baja.
+    Las rutinas que otro tutor ya se haya llevado se conservan como rutinas de ese tutor.</li>
+  <li>Si la legislación establece un período de conservación distinto, los datos se conservan durante ese período.</li>
+</ul>
+<h3>Datos que se conservan durante 1 año después de la baja</h3>
+<p>Los siguientes datos <strong>se conservan durante 1 año a partir de la fecha de baja y luego se destruyen</strong>.</p>
+<div class="table-scroll">
+<table>
+  <thead>
+    <tr><th>Datos conservados</th><th>Finalidad de la conservación</th><th>Período de conservación</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Valores de identificación de la cuenta — proveedor de inicio de sesión con redes sociales y número de identificación del miembro en ese proveedor, ID del servicio</td>
+      <td rowspan="2">Prevención del uso fraudulento consistente en obtener repetidamente el límite de uso gratuito mediante bajas y nuevos registros</td>
+      <td rowspan="4">1 año a partir de la fecha de baja</td>
+    </tr>
+    <tr>
+      <td>Registro de uso de las funciones de IA — fecha, hora y número de usos</td>
+    </tr>
+    <tr>
+      <td>Valor transformado de la contraseña (si se registró con un ID del servicio)</td>
+      <td>Verificación de identidad y restauración de la cuenta anterior al volver a iniciar sesión con el mismo ID</td>
+    </tr>
+    <tr>
+      <td>Registro de aceptación de los términos — si se aceptaron, fecha y hora de aceptación, versión del documento aceptado</td>
+      <td>Constancia de qué se aceptó y cuándo</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li>Durante la conservación, estos datos <strong>no se utilizan para ninguna finalidad distinta de las indicadas arriba.</strong></li>
+  <li>
+    Si vuelve a registrarse con la misma cuenta dentro de este período, la cuenta anterior <strong>se restaura vacía</strong> y el registro de uso continúa.
+    Los datos de Elumi y las rutinas no se restauran, y la aceptación de los términos se solicita de nuevo.
+  </li>
+  <li>
+    Si solicita la eliminación inmediata de los datos conservados, se destruyen sin demora
+    (<a href="mailto:chan4760@naver.com">chan4760@naver.com</a>, <a href="./delete.html">información sobre la eliminación de la cuenta y los datos</a>).
+  </li>
+  <li>
+    Al destruirse al término del período de conservación, el registro de llamadas a la IA (tipo de llamada, modelo, tiempo de respuesta, volumen procesado, costo) se desvincula del miembro
+    de modo que no pueda saberse de quién es, y se conserva únicamente como estadística de operación del servicio.
+    <strong>Este registro no incluye el contenido de las rutinas ni los datos de Elumi.</strong>
+  </li>
+</ul>
+
+<h2>4. Suministro de datos personales a terceros</h2>
+
+<p>ELUM no suministra a terceros los datos personales de los usuarios, salvo en los siguientes casos.</p>
+
+<ul>
+  <li>Cuando el usuario haya dado su consentimiento previo</li>
+  <li>Cuando un organismo de investigación lo requiera conforme a la ley y mediante un procedimiento legítimo</li>
+</ul>
+
+<p>
+  Los anuncios de la pantalla del tutor los recopila Google directamente en la app (ver más abajo, 5. Servicio de publicidad).
+  ELUM no entrega los datos de los usuarios a Google con fines publicitarios.
+</p>
+
+<h2>5. Encargo del tratamiento de datos personales</h2>
+
+<p>Para crear las tarjetas, se encarga el tratamiento a las siguientes empresas.</p>
+
+<div class="table-scroll stack">
+<table>
+  <thead>
+    <tr><th>Encargado</th><th>Tarea encargada</th><th>Datos transmitidos</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td data-label="Encargado">Google LLC<br>(Gemini API)</td>
+      <td data-label="Tarea encargada">Generación de las frases de las tarjetas de rutina, generación de las imágenes de las tarjetas</td>
+      <td data-label="Datos transmitidos">Descripción de la situación y respuestas a preguntas adicionales escritas por el tutor, apodo de Elumi, objetivos de apoyo</td>
+    </tr>
+    <tr>
+      <td data-label="Encargado">OpenAI, L.L.C.</td>
+      <td data-label="Tarea encargada">Generación de las frases de las tarjetas de rutina, generación de las imágenes de las tarjetas</td>
+      <td data-label="Datos transmitidos">Descripción de la situación y respuestas a preguntas adicionales escritas por el tutor, apodo de Elumi, objetivos de apoyo</td>
+    </tr>
+    <tr>
+      <td data-label="Encargado">Features &amp; Labels Inc.<br>(fal)</td>
+      <td data-label="Tarea encargada">Generación de las imágenes de las tarjetas</td>
+      <td data-label="Datos transmitidos">Descripción de la acción de una tarjeta</td>
+    </tr>
+    <tr>
+      <td data-label="Encargado">Anthropic, PBC<br>(Claude API)</td>
+      <td data-label="Tarea encargada">Generación de las frases de las tarjetas de rutina</td>
+      <td data-label="Datos transmitidos">Descripción de la situación y respuestas a preguntas adicionales escritas por el tutor, apodo de Elumi, objetivos de apoyo</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Servicio de publicidad (Google AdMob)</h3>
+
+<p>En la pantalla del tutor se muestran anuncios mediante el servicio de publicidad de Google LLC (Google AdMob).</p>
+
+<ul>
+  <li>Los anuncios aparecen en la <strong>pantalla del tutor (inicio, lista de borradores, información de créditos)</strong> en formato de banner, nativo y bonificado (anuncios que otorgan créditos si se ven hasta el final),
+      y no aparecen en la pantalla de Elumi ni durante la creación de rutinas.</li>
+  <li><strong>La información ingresada en la app</strong>, como el nombre de Elumi, las rutinas y el contenido de las tarjetas, <strong>no se usa para publicidad ni se transmite a Google.</strong></li>
+  <li>En iOS, puede rechazarlo en el aviso de permiso de rastreo que aparece al abrir la app por primera vez; si lo rechaza, se muestran anuncios no personalizados.
+      Puede cambiarlo en Ajustes &gt; Privacidad y seguridad &gt; Rastreo.
+      Si rechaza el rastreo en iOS, no se utiliza el identificador de publicidad y solo se muestran anuncios no personalizados.</li>
+  <li>En Android, puede restablecer o eliminar el ID de publicidad en Configuración &gt; Google &gt; Anuncios.</li>
+  <li>Puede consultar cómo utiliza Google la información publicitaria en
+      <a href="https://policies.google.com/technologies/partner-sites">policies.google.com/technologies/partner-sites</a> .</li>
+</ul>
+
+<h3>No escriba datos personales en la descripción de la situación</h3>
+
+<p>
+  La descripción de la situación y las respuestas a preguntas adicionales escritas por el tutor se transmiten a las empresas mencionadas <strong>tal cual, sin procesar</strong>.
+  No escriba información que permita identificar a una persona, como nombres, números de teléfono o direcciones. El texto original también se conserva en el servidor de ELUM
+  para que el tutor pueda revisarlo y corregirlo más adelante.
+</p>
+
+<h2>6. Transferencia internacional de datos personales</h2>
+
+<p>Los encargados mencionados se encuentran en Estados Unidos, por lo que, al crear tarjetas, los datos personales se transfieren al extranjero.</p>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr>
+      <th>Destinatarios</th>
+      <td>
+        Google LLC (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)<br>
+        OpenAI, L.L.C. (<a href="https://openai.com/policies/privacy-policy">openai.com/policies/privacy-policy</a>)<br>
+        Features &amp; Labels Inc. (<a href="https://fal.ai/legal/privacy-policy">fal.ai/legal/privacy-policy</a>)<br>
+        Anthropic, PBC (<a href="https://www.anthropic.com/legal/privacy">anthropic.com/legal/privacy</a>)
+      </td>
+    </tr>
+    <tr><th>País de destino</th><td>Estados Unidos</td></tr>
+    <tr><th>Momento y método de la transferencia</th><td>Cada vez que se crea una tarjeta, se transmiten cifrados mediante HTTPS</td></tr>
+    <tr><th>Datos transferidos</th><td>Descripción de la situación y respuestas a preguntas adicionales escritas por el tutor, apodo de Elumi, objetivos de apoyo</td></tr>
+    <tr><th>Finalidad de la transferencia</th><td>Generación de las frases de las tarjetas de rutina, generación de las imágenes de las tarjetas</td></tr>
+    <tr>
+      <th>Período de conservación y uso</th>
+      <td>Según la política de la empresa receptora; ELUM no conserva la solicitud original después de recibir la respuesta</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  Usted puede rechazar la transferencia. Sin embargo, como crear tarjetas con IA es la función principal de ELUM,
+  si la rechaza no podrá utilizar el servicio.
+</p>
+
+<h3>Transferencia internacional relacionada con la publicidad</h3>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr>
+      <th>Destinatario</th>
+      <td>Google LLC (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)</td>
+    </tr>
+    <tr><th>País de destino</th><td>Estados Unidos</td></tr>
+    <tr><th>Momento y método de la transferencia</th><td>Cada vez que se cargan anuncios en la pantalla del tutor, se transmiten mediante HTTPS</td></tr>
+    <tr>
+      <th>Datos transferidos</th>
+      <td>Identificador de publicidad, dirección IP (ubicación aproximada), información del dispositivo y de la app, información de uso de la publicidad, información de cierres inesperados y de diagnóstico de rendimiento</td>
+    </tr>
+    <tr><th>Finalidad de la transferencia</th><td>Publicación de anuncios, medición del rendimiento publicitario, prevención del uso fraudulento</td></tr>
+    <tr><th>Período de conservación y uso</th><td>Según la política de Google</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  El identificador de publicidad puede rechazarse o restablecerse con los métodos indicados en el punto 5, Servicio de publicidad,
+  y rechazarlo no afecta el uso del servicio.
+</p>
+
+<h2>7. Datos personales de menores de 14 años</h2>
+
+<p>
+  Quien crea y utiliza la cuenta en ELUM es el <strong>tutor (representante legal)</strong>.
+  A un mismo Elumi pueden conectarse varios tutores (incluidos familiares y trabajadores sociales), y todos los tutores conectados ingresan los datos de Elumi
+  y ven las rutinas en conjunto. Elumi no crea una cuenta ni inicia sesión directamente.
+  Para ingresar los datos en su nombre, cada tutor debe encontrarse en alguno de los supuestos indicados en la app (representante legal, curador o consentimiento del propio Elumi).
+</p>
+<p>
+  El nombre (apodo), el personaje y los objetivos de apoyo de Elumi <strong>los ingresa directamente el tutor</strong>.
+  Es decir, no se recopilan datos personales directamente del menor, y solo se tratan dentro del alcance de lo ingresado por el representante legal.
+  Cualquier tutor conectado puede modificar estos datos en la app, y se conserva el último valor modificado. Las rutinas solo pueden ser
+  modificadas o eliminadas por el tutor que las creó.
+</p>
+
+<h2>8. Derechos del titular de los datos y forma de ejercerlos</h2>
+
+<ul>
+  <li>Los usuarios y sus representantes legales pueden consultar, modificar y eliminar en cualquier momento sus propios datos y los de Elumi.</li>
+  <li>Puede modificarlos directamente en la pantalla de Ajustes de la app o solicitar su eliminación dándose de baja. El tutor puede desvincular
+    (salir de) la conexión con Elumi desde la app.</li>
+  <li>También se atienden las solicitudes enviadas por correo electrónico (<a href="mailto:chan4760@naver.com">chan4760@naver.com</a>), y en esa misma dirección puede solicitar la eliminación inmediata de los datos conservados después de la baja.</li>
+</ul>
+
+<h2>9. Destrucción de los datos personales</h2>
+
+<p>
+  Cuando vence el período de conservación o se cumple la finalidad del tratamiento, los datos se destruyen sin demora.
+  Los archivos electrónicos se eliminan mediante un método que impide su recuperación y, si existieran copias impresas, se trituran o incineran.
+</p>
+
+<h2>10. Medidas para garantizar la seguridad de los datos personales</h2>
+
+<ul>
+  <li>El token para mantener la sesión iniciada no se almacena en su forma original; solo se conserva su valor transformado y se reemplaza por uno nuevo cada vez que se renueva.</li>
+  <li>Si se vuelve a presentar un token ya utilizado, se considera robado y se cierran todas las sesiones de la cuenta correspondiente.</li>
+  <li>Todas las comunicaciones entre el servidor y la app se cifran (HTTPS).</li>
+  <li>Se limita al mínimo el número de personas que pueden acceder a los datos personales.</li>
+</ul>
+
+<h2>11. Responsable de la protección de datos personales</h2>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr><th>Nombre del servicio</th><td>이룸(ELUM)</td></tr>
+    <tr><th>Operador</th><td>Twin-Fang</td></tr>
+    <tr><th>Responsable de protección</th><td>서새찬</td></tr>
+    <tr><th>Contacto</th><td><a href="mailto:chan4760@naver.com">chan4760@naver.com</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  Si necesita asesoría por una vulneración de sus datos personales, puede comunicarse con los siguientes organismos.
+</p>
+
+<ul>
+  <li>개인정보침해신고센터 (Centro de Denuncias de Vulneraciones de Datos Personales) — privacy.kisa.or.kr / 118 (sin código de área)</li>
+  <li>개인정보 분쟁조정위원회 (Comité de Mediación de Controversias sobre Datos Personales) — www.kopico.go.kr / 1833-6972</li>
+  <li>대검찰청 사이버수사과 (División de Investigación Cibernética de la Fiscalía Suprema) — 1301</li>
+  <li>경찰청 사이버수사국 (Oficina de Investigación Cibernética de la Agencia Nacional de Policía) — ecrm.police.go.kr / 182</li>
+</ul>
+
+<h2>12. Modificación de la política de privacidad</h2>
+
+<p>
+  Si esta política cambia, el contenido de los cambios y la fecha de entrada en vigor se publicarán en esta página.
+  Los cambios importantes se anunciarán a partir de 7 días antes de su entrada en vigor.
+</p>
+
+<h3>Historial de cambios</h3>
+
+<ul>
+  <li>Anunciado el 23 de septiembre de 2026, en vigor desde el 30 de septiembre — Se agregó Features &amp; Labels Inc. (fal), empresa que crea las imágenes de las tarjetas,
+    como encargado del tratamiento y destinatario de transferencias internacionales. Los únicos datos transmitidos son la descripción de la acción de una tarjeta.</li>
+  <li>Anunciado el 23 de septiembre de 2026, en vigor desde el 30 de septiembre — Se eliminó el paso que ocultaba automáticamente los datos personales en las frases escritas por el tutor,
+    por lo que la descripción de la situación y las respuestas a preguntas adicionales se transmiten sin procesar. Se agregó un aviso para que no se escriban datos personales.</li>
+  <li>Anunciado el 24 de septiembre de 2026, en vigor desde el 1 de octubre — Para impedir la obtención fraudulenta repetida del límite de uso gratuito, se modificó el período de conservación de modo que, después de la baja, los valores de identificación de la cuenta y
+    el registro de uso de las funciones de IA se conservan durante 1 año y, durante el mismo período, se conservan el valor transformado de la contraseña (restauración del mismo ID) y el registro de aceptación de los términos (constancia de la aceptación).
+    Si se vuelve a registrar dentro de 1 año, la cuenta anterior se restaura vacía.</li>
+  <li>Anunciado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se agregaron los datos que recopila Google para la publicidad de la pantalla del tutor (Google AdMob),
+    sus finalidades de uso y la transferencia internacional. Se aclaró el texto que indica que no se recopila información de ubicación precisa (GPS).</li>
+  <li>Anunciado el 1 de octubre de 2026, en vigor desde el 8 de octubre — Se modificaron quién ingresa los datos,
+    el período de conservación al darse de baja y los derechos del tutor, para adaptarlos a la estructura en la que varios tutores cuidan juntos a un mismo Elumi.</li>
+  <li>Anunciado el 15 de octubre de 2026, en vigor desde el 22 de octubre — Se agregaron el texto de los comentarios y el registro del estado de la app recibidos mediante Enviar opinión de Ajustes
+    a los datos recopilados, las finalidades de uso y el período de conservación.</li>
+  <li>Anunciado el 16 de octubre de 2026, en vigor desde el 23 de octubre — Se agregaron las ubicaciones donde aparecen los anuncios (inicio, lista de borradores, información de créditos) y sus formatos (banner, nativo, bonificado),
+    la visualización de anuncios cuando se rechaza el rastreo en iOS y el enlace con información sobre el uso que hace Google de la información publicitaria.</li>
+  <li>Anunciado el 19 de octubre de 2026, en vigor desde el 26 de octubre — Se agregó a los datos recopilados la información del teléfono que se recibe junto con el registro del estado de la app en Enviar opinión de Ajustes (origen de la instalación, valor de la clave de firma de la app,
+    modelo y versión del sistema operativo del teléfono, valores de configuración del inicio de sesión con Kakao, etc.), y se aclaró que para este fin no se recopilan el número único del teléfono ni el identificador de publicidad.</li>
+  <li>Anunciado el 20 de octubre de 2026, en vigor desde el 27 de octubre — Se agregaron el apodo del tutor y los datos recibidos en Historias (compartir rutinas entre tutores),
+    su alcance de publicación y el período de conservación.</li>
+  <li>Anunciado el 5 de noviembre de 2026, en vigor desde el 12 de noviembre — Se agregó Anthropic, PBC (Estados Unidos), empresa que crea las frases de las tarjetas,
+    como encargado del tratamiento y destinatario de transferencias internacionales. Los datos encargados y la finalidad no cambian.</li>
+</ul>
+
+  <a class="backlink" href="./">← Volver a la ayuda</a>
+</div>
+
+<footer class="site">
+  <div class="fl">
+    <img src="./assets/logo.svg" alt="이룸 ELUM"/>
+    <a href="./" style="color:var(--muted);text-decoration:none">Ayuda</a>
+    <a href="./delete.html" style="color:var(--muted);text-decoration:none">Eliminar cuenta</a>
+    <span class="tag" style="margin-left:auto">Twin-Fang</span>
+  </div>
+</footer>
+
+</body>
+</html>

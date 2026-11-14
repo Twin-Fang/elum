@@ -18,8 +18,11 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/reward_preset.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
+import '../domain/guide_tip.dart';
 import 'widgets/aurora_background.dart';
+import 'widgets/guide_tip_card.dart';
 import 'widgets/reward_chip.dart';
+import 'widgets/routine_flow_step_icon.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../application/reward_setup_controller.dart';
@@ -219,13 +222,9 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: _RewardLayout.topToSparkles),
-            // 30×36 비정사각형이라 가로 .w / 세로 .h
-            SvgPicture.asset(
-              AppAssets.iconSparklesLarge,
-              width: 30.w,
-              height: 36.h,
-            ),
+            // 단계 그림: 별 3D (반짝임 자리, 제목 높이 그대로 · 선물 그림은 아래 가이드 팁이 씀)
+            SizedBox(height: _RewardLayout.topToSparkles - RoutineFlowStepIcon.extraHeightOverSparkles.h),
+            const RoutineFlowStepIcon(illustrationAsset: AppAssets.featureIconStar),
             SizedBox(height: _RewardLayout.sparklesToTitle),
             const _Headline(),
             SizedBox(height: _RewardLayout.bodyToInput),
@@ -246,6 +245,16 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
                 onTap: _pickRecent,
               ),
               orElse: () => const SizedBox.shrink(),
+            ),
+            // 가이드 팁: 보상 정하는 법
+            GuideTipSlot(
+              placement: GuideTipPlacement.rewardSetup,
+              padding: EdgeInsets.fromLTRB(
+                context.space.buttonMarginH,
+                context.space.lg.h,
+                context.space.buttonMarginH,
+                0,
+              ),
             ),
             SizedBox(height: context.space.lg),
           ],

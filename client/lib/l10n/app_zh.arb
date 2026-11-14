@@ -451,7 +451,7 @@
   "questionCustomHint": "请自己填写",
   "questionCustomClose": "关闭自己填写",
   "questionClearLabel": "清除{label}",
-  "cardReviewMade": "{count, plural, other{做好了{count}张卡片}}",
+  "cardReviewMadeOneAction": "{count, plural, other{每张一个行动，做好了{count}张卡片}}",
   "cardReviewRewardLead": "完成时 ",
   "cardReviewRewardSet": "设置奖励",
   "cardReviewReorderHint": "长按卡片可以调整顺序",
@@ -1649,5 +1649,18 @@
   "lockScreenIntroLater": "以后再说",
   "lockScreenOnValue": "开启",
   "lockScreenPermissionMissingValue": "需要权限",
-  "modeSwitchToLockScreen": "只有监护人可以更改锁屏卡片"
+  "modeSwitchToLockScreen": "只有监护人可以更改锁屏卡片",
+  "guideTipActionCardsTitle": "什么是行为卡片？",
+  "guideTipActionCardsBody": "一张卡片一个行动，3 分钟读完",
+  "guideTipMakeActionCardsTitle": "行为卡片怎么做",
+  "guideTipMakeActionCardsBody": "做出好卡片的五个要点",
+  "guideTipCaregiverRoleTitle": "家长要做的 5 件事",
+  "guideTipCaregiverRoleBody": "让行为卡片在日常中用得下去",
+  "guideTipTaskAnalysisTitle": "把日常流程拆成小步骤",
+  "guideTipTaskAnalysisBody": "附刷牙、穿衣服的示例",
+  "guideTipRewardsTitle": "怎样定奖励",
+  "guideTipRewardsBody": "小一点，马上给，提前说",
+  "guideTipDismissLabel": "关闭这条指南",
+  "guideTipOpenFailed": "无法打开指南",
+  "guideTipReadAction": "去看看"
 }

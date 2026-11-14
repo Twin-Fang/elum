@@ -3,4 +3,4 @@
 · 确认购买时将从你的 Apple ID 账户扣款。除非在当前周期结束前至少 24 小时取消，否则订阅将按相同周期和价格自动续期。
 · 可在设备的设置 > Apple ID > 订阅中管理或取消订阅。
 · 使用条款（EULA）：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-· 隐私政策：https://elum.suhsaechan.kr/privacy.html
+· 隐私政策：https://elum.suhsaechan.kr/privacy-zh.html

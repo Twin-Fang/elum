@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- 홈 화면 앱 이름: 모든 언어 같은 값 (현지 표기 미정, #527). 언어별 값은 values-<언어>/ 에 둔다 -->
+    <!-- 홈 화면 앱 이름: 기본(한국어) 이룸, en·ja·zh·es 는 values-<언어>/ 의 ELUM (#1419) -->
     <!-- values-<언어>/ 가 잠금화면 알림 문구만 들고 있어 앱 이름 번역 누락 경고는 끈다 -->
     <string name="app_name" tools:ignore="MissingTranslation">이룸</string>
     <!-- 잠금화면 카드 상태 알림 (LockScreenNotification): 채널 이름·설명, 제목, 본문 4종, 액션 3개. 다른 언어는 values-<언어>/ -->

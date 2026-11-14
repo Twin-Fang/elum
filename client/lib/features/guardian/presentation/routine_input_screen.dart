@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'routine_input_field.dart';
 import 'routine_suggestion_chips.dart';
+import 'widgets/guide_tip_card.dart';
 import 'widgets/routine_image_style_pill.dart';
 import 'routine_template_sheet.dart';
 
@@ -19,9 +20,11 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_secondary_button.dart';
 import '../application/routine_notifier.dart';
+import '../domain/guide_tip.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_backdrop.dart';
+import 'widgets/routine_flow_step_icon.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 
@@ -140,7 +143,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         //
                         // 시안(238:1643) 절대 y — 뒤로가기 79 ·
                         // 반짝임 185 · 제목 245 · 부제 323 · 입력칸 389 · 칩 489.
-                        SizedBox(height: _RoutineInputLayout.topToLumiFace),
+                        SizedBox(height: _RoutineInputLayout.topToLumiFace - RoutineFlowStepIcon.extraHeightOverLumiFace.h),
                         const _Headline(),
                         SizedBox(height: _RoutineInputLayout.bodyToInput),
                         RoutineInputField(
@@ -171,6 +174,11 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         SizedBox(height: space.md),
                         // 카테고리별 예시 일과 (#777)
                         _TemplateButton(onPressed: _openTemplates),
+                        // 가이드 팁: 한 줄 쓰는 요령 > 단계 나누기
+                        GuideTipSlot(
+                          placement: GuideTipPlacement.routineInput,
+                          padding: EdgeInsets.fromLTRB(space.buttonMarginH, space.lg.h, space.buttonMarginH, 0),
+                        ),
                       ],
                     ),
                   ),
@@ -312,9 +320,6 @@ class _RoutineInputLayout {
   /// 제목이 보상 설정(1082:4709)과 같은 높이에 선다 (#1297).
   static double get topToLumiFace => 66.h;
 
-  /// 루미 얼굴 한 변 (#1297)
-  static double get lumiFaceSize => 48.w;
-
   /// 루미 얼굴 → 제목 — 시안 간격 24.
   static double get lumiFaceToTitle => 24.h;
 
@@ -333,12 +338,8 @@ class _Headline extends StatelessWidget {
 
     return Column(
       children: [
-        Image.asset(
-          AppAssets.guardianProfileLumi,
-          width: _RoutineInputLayout.lumiFaceSize,
-          height: _RoutineInputLayout.lumiFaceSize,
-          excludeFromSemantics: true,
-        ),
+        // 단계 그림: AI 도우미 루미 얼굴 (질문 · 보상 단계 그림과 같은 자리 · 크기)
+        const RoutineFlowStepIcon(illustrationAsset: AppAssets.guardianProfileLumi),
         SizedBox(height: _RoutineInputLayout.lumiFaceToTitle),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다

@@ -3,4 +3,4 @@
 ・お支払いは購入確定時にApple IDアカウントに請求されます。期間終了の24時間前までに解約しない限り、同じ期間と価格で自動更新されます。
 ・サブスクリプションの管理と解約は、端末の設定 > Apple ID > サブスクリプションから行えます。
 ・利用規約（EULA）：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-・プライバシーポリシー：https://elum.suhsaechan.kr/privacy.html
+・プライバシーポリシー：https://elum.suhsaechan.kr/privacy-ja.html

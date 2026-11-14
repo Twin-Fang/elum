@@ -3,10 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
+import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
+import 'app_pop_in.dart';
+import 'app_reveal.dart';
 import 'elum_scaffold.dart';
 
-/// 화면 상단 제목 블록 — 온보딩 6개 화면이 동일한 리듬을 공유한다.
+/// 화면 상단 제목 블록 — 온보딩 6개 화면이 동일한 리듬을 공유한다. (선택) 제목 옆 3D 그림 · 들어올 때 차례로 떠오름
 ///
 /// Figma 실측 (화면 최상단 기준, 전 프레임 공통):
 /// - 뒤로가기 y=79, 40×40 → 하단 119 (`976:4549`)
@@ -25,6 +28,8 @@ class ElumHeader extends StatelessWidget {
     this.titleY,
     this.underlinedInDescription,
     this.descriptionColor,
+    this.illustrationAsset,
+    this.shouldRevealOnEnter = false,
   });
 
   /// 2줄로 줄바꿈된 제목. 줄바꿈 위치는 디자인이 정한 대로 전달한다.
@@ -52,6 +57,16 @@ class ElumHeader extends StatelessWidget {
   /// 설명 글자색. 기본은 보조색이다. 비밀암호 변경의 틀림 안내(`1274:9466`)가 붉은색을 쓴다.
   final Color? descriptionColor;
 
+  /// 제목 오른쪽 3D 그림 (온보딩 단계 그림, 톡 튐). null 이면 제목만
+  final String? illustrationAsset;
+
+  /// 들어올 때 제목 > 설명이 차례로 떠오름 (온보딩 단계 화면)
+  final bool shouldRevealOnEnter;
+
+  /// 제목 옆 3D 그림 한 변 · 제목 > 그림 간격
+  static const _illustrationSize = 64.0;
+  static const _titleToIllustration = 12.0;
+
   /// Figma 제목 y좌표 (화면 최상단 기준)
   static const _titleY = 131.0;
 
@@ -77,19 +92,43 @@ class ElumHeader extends StatelessWidget {
         ? (y - consumedTop).h
         : (y.h - safeTop).clamp(0.0, y.h);
 
+    // 낱말 중간에서 꺾이지 않게 (`일 / 을`, #1285). 낭독기에는 원문
+    final titleText = Text(
+      keepWords(title, locale: context.appLocale),
+      semanticsLabel: title,
+      style: context.typo.title.copyWith(color: context.colors.textPrimary),
+    );
+    final illustration = illustrationAsset;
+    final titleRow = illustration == null
+        ? titleText
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: titleText),
+              SizedBox(width: _titleToIllustration.w),
+              AppPopIn(
+                delay: AppMotion.staggerStep,
+                child: Image.asset(
+                  illustration,
+                  width: _illustrationSize.w,
+                  height: _illustrationSize.w,
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ],
+          );
+    Widget revealed(int index, Widget child) =>
+        shouldRevealOnEnter ? AppReveal(index: index, child: child) : child;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: topGap),
-        // 낱말 중간에서 꺾이지 않게 (`일 / 을`, #1285). 낭독기에는 원문
-        Text(
-          keepWords(title, locale: context.appLocale),
-          semanticsLabel: title,
-          style: context.typo.title.copyWith(color: context.colors.textPrimary),
-        ),
+        revealed(0, titleRow),
         if (description != null) ...[
           SizedBox(height: _titleToDescription.h),
-          _description(context),
+          revealed(1, _description(context)),
         ],
       ],
     );

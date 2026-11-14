@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/app_count_up.dart';
 import '../../domain/weekly_report.dart';
 
 /// 한 주 숫자 5개 (흰 판 r20: 한 색 아이콘 > 값 > 이름)
@@ -82,7 +83,13 @@ class _StatBox extends StatelessWidget {
               colorFilter: ColorFilter.mode(colors.textSecondary, BlendMode.srcIn),
             ),
             SizedBox(height: _iconToCount.h),
-            Text('$count', style: context.typo.subtitle.copyWith(color: colors.textPrimary)),
+            // 0 부터 세며 올라감
+            AppCountUp(
+              from: 0,
+              to: count,
+              format: (value) => '$value',
+              style: context.typo.subtitle.copyWith(color: colors.textPrimary),
+            ),
             SizedBox(height: _countToLabel.h),
             Text(
               label,

@@ -1635,12 +1635,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cardReviewMade(int count) {
+  String cardReviewMadeOneAction(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Made $count cards',
-      one: 'Made $count card',
+      other: 'Made $count cards, one action per card',
+      one: 'Made $count card, one action per card',
     );
     return '$_temp0';
   }
@@ -6160,4 +6160,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get modeSwitchToLockScreen =>
       'Only a guardian can change the lock screen card';
+
+  @override
+  String get guideTipActionCardsTitle => 'What are action cards?';
+
+  @override
+  String get guideTipActionCardsBody => 'One action per card. A 3-minute read';
+
+  @override
+  String get guideTipMakeActionCardsTitle =>
+      'How to make action cards the easy way';
+
+  @override
+  String get guideTipMakeActionCardsBody => 'Five tips for making good cards';
+
+  @override
+  String get guideTipCaregiverRoleTitle => '5 things caregivers do';
+
+  @override
+  String get guideTipCaregiverRoleBody =>
+      'How to help cards become part of the day';
+
+  @override
+  String get guideTipTaskAnalysisTitle => 'Breaking routines into small steps';
+
+  @override
+  String get guideTipTaskAnalysisBody => 'With brushing and dressing examples';
+
+  @override
+  String get guideTipRewardsTitle => 'How to choose rewards';
+
+  @override
+  String get guideTipRewardsBody => 'Small, right away, decided ahead';
+
+  @override
+  String get guideTipDismissLabel => 'Hide this guide';
+
+  @override
+  String get guideTipOpenFailed => 'Couldn\'t open the guide';
+
+  @override
+  String get guideTipReadAction => 'Read';
 }

@@ -76,6 +76,7 @@ class CharacterScreen extends ConsumerWidget {
                 horizontal: _headerExtraInset,
               ),
               child: ElumHeader(
+                shouldRevealOnEnter: true,
                 title: context.l10n.onboardingCharacterTitle(
                   profile.displayName,
                   batchimOf(profile.displayName),

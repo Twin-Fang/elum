@@ -3,3 +3,5 @@
 "NSPhotoLibraryUsageDescription" = "カードの絵に使う写真を選ぶために、写真ライブラリを使います。";
 "NSMicrophoneUsageDescription" = "カードを自分の声で録音するために、マイクを使います。";
 "NSUserTrackingUsageDescription" = "保護者画面に合った広告を表示するために使います。Elumiの情報は使いません。";
+/* 홈 화면 앱 이름: 한국어 이룸, 그 밖의 언어 ELUM (#1419) */
+"CFBundleDisplayName" = "ELUM";

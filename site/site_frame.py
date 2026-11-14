@@ -4,7 +4,7 @@ import json
 
 from site_config import (APP_STORE_ID, APP_STORE_URL, BUSINESS_NAME, BUSINESS_REGISTRATION_NUMBER,
                          BUSINESS_REPRESENTATIVE, CONTACT_EMAIL, DEFAULT_LANGUAGE, GOOGLE_PLAY_URL, GUIDE_IMAGES, LANGUAGES,
-                         SITE_NAME, SITE_URL, Language, to_og_image_path)
+                         SITE_NAME, SITE_URL, Language, to_og_image_path, to_privacy_path)
 
 APPLE_ICON = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c.02 2.6 2.28 3.47 2.3 3.48'
               '-.02.06-.36 1.24-1.19 2.45-.72 1.05-1.46 2.09-2.63 2.11-1.15.02-1.52-.68-2.83-.68-1.32 0-1.73.66-2.82.7-1.13.04-1.99'
@@ -154,7 +154,7 @@ def render_page(language: Language, ui: dict, path: str, title: str, description
     <img src="/assets/logo.svg" alt="{SITE_NAME}" width="80" height="24" loading="lazy"/>
     <nav aria-label="{escape(footer['label'])}">
       <a href="{page_href(language, 'guide/')}">{escape(nav['guides'])}</a>
-      <a href="/privacy.html">{escape(footer['privacy'])}</a>
+      <a href="/{to_privacy_path(language.code)}">{escape(footer['privacy'])}</a>
       <a href="/delete.html">{escape(footer['delete'])}</a>
       <a href="mailto:{CONTACT_EMAIL}">{escape(footer['contact'])}</a>
     </nav>
