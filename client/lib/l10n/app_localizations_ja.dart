@@ -5380,7 +5380,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get myCreditGuideLink => 'クレジットの使い方';
 
   @override
-  String get abaIntroTitle => '🧩 準備はかんたんに、毎日は自分の力で';
+  String get abaIntroTitle => '🧩 準備はかんたんに、\n毎日は自分の力で';
 
   @override
   String get abaIntroSubtitle => 'elumは応用行動分析（ABA）の原理で作りました';

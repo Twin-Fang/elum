@@ -400,7 +400,7 @@
   "onboardingNameTitle": "이룸이를 어떻게\n불러드릴까요?",
   "@onboardingNameTitle": { "description": "이름 입력 화면 제목" },
 
-  "onboardingNameDescription": "이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요",
+  "onboardingNameDescription": "이룸에서는 쓰는 사람을 이룸이라고 불러요\n실명이 아니어도 괜찮아요",
   "@onboardingNameDescription": { "description": "이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다" },
 
   "onboardingNameHint": "이름을 입력해주세요",
@@ -3867,7 +3867,7 @@
   "@abaIntroStarBody": {"description": "ABA 소개 줄 3 설명"},
   "abaIntroGuardianTitle": "💛 가장 중요한 건 보호자님이에요",
   "@abaIntroGuardianTitle": {"description": "ABA 소개 아래 보호자 묶음 제목"},
-  "abaIntroGuardianBody": "아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요",
+  "abaIntroGuardianBody": "이룸이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 이룸이가 스스로 이어 갈 수 있게 곁에서 도와요",
   "@abaIntroGuardianBody": {"description": "ABA 소개 아래 보호자 묶음 설명"},
   "abaIntroStart": "시작하기",
   "@abaIntroStart": {"description": "ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로"},

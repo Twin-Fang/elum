@@ -444,7 +444,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
 
   @override
-  String get onboardingNameDescription => '이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
+  String get onboardingNameDescription =>
+      '이룸에서는 쓰는 사람을 이룸이라고 불러요\n실명이 아니어도 괜찮아요';
 
   @override
   String get onboardingNameHint => '이름을 입력해주세요';
@@ -5429,7 +5430,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get abaIntroGuardianBody =>
-      '아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요';
+      '이룸이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 이룸이가 스스로 이어 갈 수 있게 곁에서 도와요';
 
   @override
   String get abaIntroStart => '시작하기';
