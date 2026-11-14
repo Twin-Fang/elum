@@ -23,10 +23,29 @@ class CardImageAppearanceTest {
   }
 
   @Test
-  @DisplayName("머리 요청 다시 그리기 — 기본 머리만 빠지고 옷·얼굴 묘사는 유지")
-  void hairRedraw_dropsOnlyHair() {
+  @DisplayName("머리 요청 다시 그리기 — 기본 머리 모양만 빠지고 머리색·옷·얼굴은 유지 (#1396 색이 바뀌던 문제)")
+  void hairRedraw_dropsHairShapeKeepsColor() {
     String appearance = CardImageAppearance.forScene(DEFAULT_CHILD,
-      "The character with long pigtail hair brushes the teeth.", true);
+      "The character with very short buzz-cut hair brushes the teeth.", true);
+
+    assertThat(appearance).isEqualTo(
+      "a simple cartoon child with a round head, black hair, dot eyes, rosy cheeks, a plain orange hoodie and gray long pants");
+  }
+
+  @Test
+  @DisplayName("머리 요청 + 다른 물건 색 — 옷 색 낱말은 머리색 변경으로 보지 않음")
+  void hairRedrawWithClothingColor_keepsHairColor() {
+    String appearance = CardImageAppearance.forScene(DEFAULT_CHILD,
+      "The character with short hair holds a red umbrella.", true);
+
+    assertThat(appearance).contains("black hair");
+  }
+
+  @Test
+  @DisplayName("머리색을 바꾸는 요청 — 기본 머리 조각을 색까지 뺌")
+  void hairColorRedraw_dropsWholeHair() {
+    String appearance = CardImageAppearance.forScene(DEFAULT_CHILD,
+      "The character with long brown pigtail hair brushes the teeth.", true);
 
     assertThat(appearance)
       .isEqualTo("a simple cartoon child with a round head, dot eyes, rosy cheeks, a plain orange hoodie and gray long pants");
