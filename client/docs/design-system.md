@@ -439,6 +439,7 @@ placeholder  #DADADA "이름을 입력해주세요" (중앙 정렬, x=90)
 | --- | --- | --- |
 | `ElumInfoCard` | 3D 그림(왼쪽 56 · 위 96) + 굵은 제목 + 회색 한 줄 + (선택) 민트 행동 알약 · 닫기 x. 흰 판 · 모서리 20 · 옅은 그림자 · 눌림(카드 0.985) | `infoCardShadow` · `infoHighlightMint*` |
 | `ElumHighlight` | 연한 민트/피치 띠 + 3D 아이콘 32 + 한 줄. 모서리 16 | `infoHighlightMintFill` · `infoHighlightPeachFill` |
+| `ElumEmptyState` | 빈 상태 · 실패 · 오프라인 공통 (#1408). 3D 그림(화면 160 · 칸 안 96, 톡 튐) + 제목 + (한 줄) + (행동 1개: 화면은 채운 버튼, 칸 안은 보조 버튼) + (에러 코드). `ElumErrorView` 전체 화면도 이것을 씀 | `textPrimary` · `textSecondary` · `promptMuted` |
 
 그림은 `AppAssets.featureIcon*`(256) · `emptyState*` · `celebration*`(512) 3D 세트를 쓴다 (이미지 하네스, 루미 규칙).
 

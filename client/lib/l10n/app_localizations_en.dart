@@ -479,12 +479,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNameInviteLink => 'I have an invite code';
 
   @override
-  String get onboardingCompletionTitle => 'Everything is\nready';
-
-  @override
-  String get onboardingCompletionProgress => '100% done!';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -1976,12 +1970,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get todayRoutinePastLoadFailedFallback =>
       'Couldn\'t load past routines';
-
-  @override
-  String get todayRoutineEmptyTitle => 'No routines yet';
-
-  @override
-  String get todayRoutineEmptyHint => 'Make your first action cards for today';
 
   @override
   String get todayRoutinePastEmpty => 'No past routines';
@@ -5792,4 +5780,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => ' left';
+
+  @override
+  String get commonGoHome => 'Go home';
+
+  @override
+  String get onboardingLinkStepTitle => 'Link Elumi\'s device?';
+
+  @override
+  String get linkDeviceBenefitLine =>
+      'Routines you send show up on Elumi\'s device right away';
+
+  @override
+  String get onboardingLinkStepConnectNow => 'Link now';
+
+  @override
+  String get onboardingLinkStepEnterCode =>
+      'Just enter the link code on Elumi\'s device';
+
+  @override
+  String get onboardingLinkStepManyDevices =>
+      'You can link more than one device';
+
+  @override
+  String get onboardingLinkStepLaterInSettings =>
+      'You can also link later in Settings';
+
+  @override
+  String get homeNextStepMakeTitle => 'Make your first routine';
+
+  @override
+  String get homeNextStepMakeBody =>
+      'Write what to do and we turn it into action cards';
+
+  @override
+  String get homeNextStepMakeAction => 'Make a routine';
+
+  @override
+  String get homeNextStepSendTitle => 'You have a routine in progress';
+
+  @override
+  String get homeNextStepSendBody =>
+      'Check the cards and save to send it to Elumi\'s device';
+
+  @override
+  String get homeNextStepSendAction => 'Continue';
+
+  @override
+  String get homeNextStepLinkTitle => 'Link Elumi\'s device';
+
+  @override
+  String get homeNextStepWaitTitle => 'Now it\'s Elumi\'s turn';
+
+  @override
+  String get elumiFinishNotifyLine => 'We\'ll let you know when Elumi finishes';
+
+  @override
+  String get routineSentTitle => 'Sent to Elumi\'s device';
+
+  @override
+  String get routineSentReasonNotLinked =>
+      'Link a device and it shows up on Elumi\'s device right away';
+
+  @override
+  String get routineSentLinkDevice => 'Link a device';
+
+  @override
+  String get routineSentPreviewElumi => 'Preview Elumi mode';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$name finished a routine';
+  }
+
+  @override
+  String get routineDonePraiseHint => 'Give praise for it right away';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stars',
+      one: '$count star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => 'Couldn\'t find this routine';
+
+  @override
+  String get routineDoneNotFoundHint =>
+      'It was deleted or belongs to another Elumi';
+
+  @override
+  String get routineDoneLoadFailed => 'Couldn\'t load the finished routine';
+
+  @override
+  String get todayRoutineEmptyNotSent => 'No routines sent yet';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => 'No routines sent today';
+
+  @override
+  String get todayRoutineEmptyTodayBody =>
+      'Send a saved routine right away from Routines';
+
+  @override
+  String get notificationEmptyBody =>
+      'We\'ll tell you here when Elumi finishes a routine';
+
+  @override
+  String get notificationEmptyOpenSettings => 'Notification settings';
 }

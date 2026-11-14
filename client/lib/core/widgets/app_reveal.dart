@@ -66,9 +66,8 @@ class _AppRevealState extends State<AppReveal> with SingleTickerProviderStateMix
     return AnimatedBuilder(
       animation: _progress,
       builder: (context, child) {
-        final value = _progress.value;
-        // 등장이 끝나면 Opacity·Transform 없이 child만
-        if (value >= 1) return child!;
+        final value = _progress.value.clamp(0.0, 1.0);
+        // 끝난 뒤에도 같은 모양 유지 (불투명 1 은 레이어 없음). 모양이 바뀌면 child 상태가 새로 만들어져 숫자 셈 등이 처음부터 다시 돎
         return Opacity(
           opacity: value,
           child: Transform.translate(

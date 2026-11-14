@@ -94,7 +94,7 @@ List<RouteBase> guardianSettingsRoutes() => [
       state,
       LinkCodeScreen(
         // 온보딩에서 들어왔을 때만 `나중에 할게요`를 보여준다.
-        fromOnboarding: state.uri.queryParameters['from'] == 'onboarding',
+        fromOnboarding: state.uri.queryParameters[Routes.linkCodeFromQuery] == Routes.linkCodeFromOnboardingValue,
       ),
     ),
   ),

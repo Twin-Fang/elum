@@ -6,6 +6,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_empty_state.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_state_body.dart';
@@ -29,7 +30,6 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
 
   static const _sidePadding = 16.0;
   static const _cardGap = 12.0;
-  static const _emptyIllustrationSize = 160.0;
 
   /// 목록 실패·당겨서 새로고침 실패 공통 에러 코드
   static const _screenErrorCode = 'E-NOTICE-HISTORY';
@@ -118,27 +118,9 @@ class _NoticeHistoryTabState extends ConsumerState<NoticeHistoryTab> {
     );
   }
 
-  // 알림 탭 빈 화면과 같은 모양 (루미 그림 + 문구)
-  Widget _emptyBody(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          AppAssets.notificationsEmptyLumi,
-          width: _emptyIllustrationSize.w,
-          height: _emptyIllustrationSize.w,
-          fit: BoxFit.contain,
-          excludeFromSemantics: true,
-        ),
-        SizedBox(height: context.space.lg),
-        Text(
-          context.l10n.notificationNoticeEmpty,
-          textAlign: TextAlign.center,
-          style: context.typo.creditHistoryRowTitle.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
+  // 알림 탭 빈 화면과 같은 모양 (알림 없음 3D 그림 + 문구)
+  Widget _emptyBody(BuildContext context) => ElumEmptyState(
+    illustrationAsset: AppAssets.emptyStateNoNotifications,
+    title: context.l10n.notificationNoticeEmpty,
+  );
 }

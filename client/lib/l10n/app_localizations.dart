@@ -854,18 +854,6 @@ abstract class AppLocalizations {
   /// **'초대 코드가 있어요'**
   String get onboardingNameInviteLink;
 
-  /// 온보딩 완료 화면 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'내용 정리가 모두\n완료됐어요'**
-  String get onboardingCompletionTitle;
-
-  /// 온보딩 완료 화면의 진행도 문구
-  ///
-  /// In ko, this message translates to:
-  /// **'100% 완료!'**
-  String get onboardingCompletionProgress;
-
   /// 스플래시 로고를 화면 낭독기가 읽는 이름
   ///
   /// In ko, this message translates to:
@@ -3436,18 +3424,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지난 일과를 불러오지 못했어요'**
   String get todayRoutinePastLoadFailedFallback;
-
-  /// 보호자 홈 오늘 일과가 0건일 때 첫 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'아직 만든 일과가 없어요'**
-  String get todayRoutineEmptyTitle;
-
-  /// 보호자 홈 오늘 일과가 0건일 때 둘째 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'오늘의 첫 행동카드를 만들어보세요'**
-  String get todayRoutineEmptyHint;
 
   /// 보호자 홈 지난 일과가 0건일 때 줄
   ///
@@ -9466,6 +9442,198 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'개 남았어요'**
   String get myCreditRemainingSuffix;
+
+  /// 축하·안내 화면에서 보호자 홈으로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'홈으로'**
+  String get commonGoHome;
+
+  /// 온보딩 이룸이 기기 연결 단계 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결할까요?'**
+  String get onboardingLinkStepTitle;
+
+  /// 기기 연결 이유 한 줄 (온보딩 연결 단계 설명 · 홈 다음에 할 일 연결 카드)
+  ///
+  /// In ko, this message translates to:
+  /// **'보낸 일과가 이룸이 기기에 바로 떠요'**
+  String get linkDeviceBenefitLine;
+
+  /// 온보딩 연결 단계 주 버튼 (연결 코드 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 연결하기'**
+  String get onboardingLinkStepConnectNow;
+
+  /// 온보딩 연결 단계 소개 줄 1
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기에서 연결 코드만 넣으면 돼요'**
+  String get onboardingLinkStepEnterCode;
+
+  /// 온보딩 연결 단계 소개 줄 2
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 여러 대를 연결할 수 있어요'**
+  String get onboardingLinkStepManyDevices;
+
+  /// 온보딩 연결 단계 소개 줄 3
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 설정에서도 연결할 수 있어요'**
+  String get onboardingLinkStepLaterInSettings;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 일과를 만들어 볼까요?'**
+  String get homeNextStepMakeTitle;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 적으면 행동 카드로 바꿔 드려요'**
+  String get homeNextStepMakeBody;
+
+  /// 홈 다음에 할 일: 첫 일과 만들기 행동 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 만들기'**
+  String get homeNextStepMakeAction;
+
+  /// 홈 다음에 할 일: 임시저장 이어서 만들기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'만들던 일과가 있어요'**
+  String get homeNextStepSendTitle;
+
+  /// 홈 다음에 할 일: 임시저장 이어서 만들기 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 확인하고 저장하면 이룸이 기기로 가요'**
+  String get homeNextStepSendBody;
+
+  /// 홈 다음에 할 일: 임시저장 목록으로 가는 행동 알약
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서 만들기'**
+  String get homeNextStepSendAction;
+
+  /// 홈 다음에 할 일: 기기 연결 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기를 연결해요'**
+  String get homeNextStepLinkTitle;
+
+  /// 홈 다음에 할 일: 보내고 연결까지 마친 뒤 첫 완료 기다리기 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이제 이룸이 차례예요'**
+  String get homeNextStepWaitTitle;
+
+  /// 첫 완료 기다리기 한 줄 (홈 다음에 할 일 · 보내기 축하)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 끝내면 알려 드려요'**
+  String get elumiFinishNotifyLine;
+
+  /// 일과 보내기 축하 제목 · 두 번째부터의 보내기 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기로 보냈어요'**
+  String get routineSentTitle;
+
+  /// 보내기 축하 한 줄 (기기 연결 전)
+  ///
+  /// In ko, this message translates to:
+  /// **'기기를 연결하면 이룸이 기기에 바로 떠요'**
+  String get routineSentReasonNotLinked;
+
+  /// 기기 연결 화면으로 가는 버튼 (보내기 축하 · 홈 다음에 할 일)
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 연결하기'**
+  String get routineSentLinkDevice;
+
+  /// 이룸이 화면으로 가는 버튼 (보내기 축하 · 홈 다음에 할 일)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면 미리 보기'**
+  String get routineSentPreviewElumi;
+
+  /// 끝낸 일과 축하 제목. name 은 이룸이 이름, batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 일과를 끝냈어요'**
+  String guardianRoutineDoneTitle(String name, String batchim);
+
+  /// 끝낸 일과 축하 한 줄 (보호자가 직접 칭찬하도록)
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 걸 바로 칭찬해 주세요'**
+  String get routineDonePraiseHint;
+
+  /// 끝낸 일과 축하: 받은 별 수 (끝낸 카드 1장 = 별 1개)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{별 {count}개}}'**
+  String routineDoneStars(int count);
+
+  /// 끝낸 일과 축하: 이름을 다 못 보인 일과 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{외 {count}개}}'**
+  String routineDoneMoreRoutines(int count);
+
+  /// 끝낸 일과 축하: 알림의 일과가 목록에 없을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 찾지 못했어요'**
+  String get routineDoneNotFound;
+
+  /// 끝낸 일과 축하: 일과를 못 찾았을 때 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지워졌거나 다른 이룸이의 일과예요'**
+  String get routineDoneNotFoundHint;
+
+  /// 끝낸 일과 축하: 목록을 못 받았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'끝낸 일과를 불러오지 못했어요'**
+  String get routineDoneLoadFailed;
+
+  /// 보호자 홈 오늘 일과 0건 + 다음에 할 일 카드가 보일 때 회색 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 보낸 일과가 없어요'**
+  String get todayRoutineEmptyNotSent;
+
+  /// 보호자 홈 오늘 일과 0건 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보낸 일과가 없어요'**
+  String get todayRoutineEmptyTodayTitle;
+
+  /// 보호자 홈 오늘 일과 0건 빈 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'만들어 둔 일과를 일과관리에서 바로 보낼 수 있어요'**
+  String get todayRoutineEmptyTodayBody;
+
+  /// 알림 0건 빈 상태 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝내면 여기로 알려 드려요'**
+  String get notificationEmptyBody;
+
+  /// 알림 0건 빈 상태 행동 (알림 설정 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정'**
+  String get notificationEmptyOpenSettings;
 }
 
 class _AppLocalizationsDelegate

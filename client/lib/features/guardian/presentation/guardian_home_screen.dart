@@ -32,6 +32,7 @@ import 'guardian_home_landscape_body.dart';
 import 'widgets/create_routine_button.dart';
 import 'widgets/coach_mark_start_gate.dart';
 import 'widgets/home_coach_mark.dart';
+import 'widgets/home_next_step_card.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/past_routine_section.dart';
 import 'widgets/today_routine_section.dart';
@@ -160,7 +161,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     }
   }
 
-  /// 권유 카드의 `만들기`: 홈 버튼과 같은 크레딧 확인 뒤 일과 만들기
+  /// 권유 카드 · 다음에 할 일의 `만들기`: 홈 버튼과 같은 크레딧 확인 뒤 일과 만들기
   Future<void> _startRoutineFromSuggestion() async {
     final blockedSummary = await creditBlocksRoutineStart(ref);
     if (!mounted) return;
@@ -226,6 +227,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 첫날 흐름 「다음에 할 일」 한 장 (안내 카드보다 먼저, 첫 완료 뒤 사라짐)
+          HomeNextStepCard(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           // 안내 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)
           HomeNoticeSlot(onCreateRoutine: _startRoutineFromSuggestion, bottomGap: _titleToList),
           RoutineSectionTitle(

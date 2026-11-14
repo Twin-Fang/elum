@@ -452,12 +452,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingNameInviteLink => '招待コードがあります';
 
   @override
-  String get onboardingCompletionTitle => '準備がすべて\n完了しました';
-
-  @override
-  String get onboardingCompletionProgress => '100% 完了！';
-
-  @override
   String get onboardingSplashLogoLabel => 'elum';
 
   @override
@@ -1863,12 +1857,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get todayRoutinePastLoadFailedFallback => '過去の日課を読み込めませんでした';
-
-  @override
-  String get todayRoutineEmptyTitle => 'まだ作った日課はありません';
-
-  @override
-  String get todayRoutineEmptyHint => '今日最初の行動カードを作ってみましょう';
 
   @override
   String get todayRoutinePastEmpty => '過去の日課はありません';
@@ -5471,4 +5459,116 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '個残っています';
+
+  @override
+  String get commonGoHome => 'ホームへ';
+
+  @override
+  String get onboardingLinkStepTitle => 'Elumiの端末をつなぎますか？';
+
+  @override
+  String get linkDeviceBenefitLine => '送った日課がElumiの端末にすぐ表示されます';
+
+  @override
+  String get onboardingLinkStepConnectNow => '今つなぐ';
+
+  @override
+  String get onboardingLinkStepEnterCode => 'Elumiの端末で接続コードを入れるだけです';
+
+  @override
+  String get onboardingLinkStepManyDevices => '複数の端末をつなげます';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => 'あとで設定からもつなげます';
+
+  @override
+  String get homeNextStepMakeTitle => '最初の日課を作ってみましょう';
+
+  @override
+  String get homeNextStepMakeBody => 'やることを書くと行動カードにします';
+
+  @override
+  String get homeNextStepMakeAction => '日課を作る';
+
+  @override
+  String get homeNextStepSendTitle => '作りかけの日課があります';
+
+  @override
+  String get homeNextStepSendBody => 'カードを確認して保存するとElumiの端末に届きます';
+
+  @override
+  String get homeNextStepSendAction => '続けて作る';
+
+  @override
+  String get homeNextStepLinkTitle => 'Elumiの端末をつなぎましょう';
+
+  @override
+  String get homeNextStepWaitTitle => '次はElumiの番です';
+
+  @override
+  String get elumiFinishNotifyLine => 'Elumiが終えたらお知らせします';
+
+  @override
+  String get routineSentTitle => 'Elumiの端末に送りました';
+
+  @override
+  String get routineSentReasonNotLinked => '端末をつなぐとElumiの端末にすぐ表示されます';
+
+  @override
+  String get routineSentLinkDevice => '端末をつなぐ';
+
+  @override
+  String get routineSentPreviewElumi => 'Elumi画面を見てみる';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    return '$nameが日課を終えました';
+  }
+
+  @override
+  String get routineDonePraiseHint => '終えたことをすぐにほめてあげましょう';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '星$count個',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ほか$count件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '日課が見つかりません';
+
+  @override
+  String get routineDoneNotFoundHint => '削除されたか、別のElumiの日課です';
+
+  @override
+  String get routineDoneLoadFailed => '終えた日課を読み込めませんでした';
+
+  @override
+  String get todayRoutineEmptyNotSent => 'まだ送った日課はありません';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '今日送った日課はありません';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '作っておいた日課を日課管理からすぐ送れます';
+
+  @override
+  String get notificationEmptyBody => 'Elumiが日課を終えるとここでお知らせします';
+
+  @override
+  String get notificationEmptyOpenSettings => '通知設定';
 }

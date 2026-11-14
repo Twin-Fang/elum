@@ -454,12 +454,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingNameInviteLink => '초대 코드가 있어요';
 
   @override
-  String get onboardingCompletionTitle => '내용 정리가 모두\n완료됐어요';
-
-  @override
-  String get onboardingCompletionProgress => '100% 완료!';
-
-  @override
   String get onboardingSplashLogoLabel => '이룸';
 
   @override
@@ -1872,12 +1866,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todayRoutinePastLoadFailedFallback => '지난 일과를 불러오지 못했어요';
-
-  @override
-  String get todayRoutineEmptyTitle => '아직 만든 일과가 없어요';
-
-  @override
-  String get todayRoutineEmptyHint => '오늘의 첫 행동카드를 만들어보세요';
 
   @override
   String get todayRoutinePastEmpty => '지난 일과가 없어요';
@@ -5493,4 +5481,117 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '개 남았어요';
+
+  @override
+  String get commonGoHome => '홈으로';
+
+  @override
+  String get onboardingLinkStepTitle => '이룸이 기기를 연결할까요?';
+
+  @override
+  String get linkDeviceBenefitLine => '보낸 일과가 이룸이 기기에 바로 떠요';
+
+  @override
+  String get onboardingLinkStepConnectNow => '지금 연결하기';
+
+  @override
+  String get onboardingLinkStepEnterCode => '이룸이 기기에서 연결 코드만 넣으면 돼요';
+
+  @override
+  String get onboardingLinkStepManyDevices => '기기 여러 대를 연결할 수 있어요';
+
+  @override
+  String get onboardingLinkStepLaterInSettings => '나중에 설정에서도 연결할 수 있어요';
+
+  @override
+  String get homeNextStepMakeTitle => '첫 일과를 만들어 볼까요?';
+
+  @override
+  String get homeNextStepMakeBody => '할 일을 적으면 행동 카드로 바꿔 드려요';
+
+  @override
+  String get homeNextStepMakeAction => '일과 만들기';
+
+  @override
+  String get homeNextStepSendTitle => '만들던 일과가 있어요';
+
+  @override
+  String get homeNextStepSendBody => '카드를 확인하고 저장하면 이룸이 기기로 가요';
+
+  @override
+  String get homeNextStepSendAction => '이어서 만들기';
+
+  @override
+  String get homeNextStepLinkTitle => '이룸이 기기를 연결해요';
+
+  @override
+  String get homeNextStepWaitTitle => '이제 이룸이 차례예요';
+
+  @override
+  String get elumiFinishNotifyLine => '이룸이가 끝내면 알려 드려요';
+
+  @override
+  String get routineSentTitle => '이룸이 기기로 보냈어요';
+
+  @override
+  String get routineSentReasonNotLinked => '기기를 연결하면 이룸이 기기에 바로 떠요';
+
+  @override
+  String get routineSentLinkDevice => '기기 연결하기';
+
+  @override
+  String get routineSentPreviewElumi => '이룸이 화면 미리 보기';
+
+  @override
+  String guardianRoutineDoneTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 일과를 끝냈어요';
+  }
+
+  @override
+  String get routineDonePraiseHint => '끝낸 걸 바로 칭찬해 주세요';
+
+  @override
+  String routineDoneStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '별 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routineDoneMoreRoutines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '외 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get routineDoneNotFound => '일과를 찾지 못했어요';
+
+  @override
+  String get routineDoneNotFoundHint => '지워졌거나 다른 이룸이의 일과예요';
+
+  @override
+  String get routineDoneLoadFailed => '끝낸 일과를 불러오지 못했어요';
+
+  @override
+  String get todayRoutineEmptyNotSent => '아직 보낸 일과가 없어요';
+
+  @override
+  String get todayRoutineEmptyTodayTitle => '오늘 보낸 일과가 없어요';
+
+  @override
+  String get todayRoutineEmptyTodayBody => '만들어 둔 일과를 일과관리에서 바로 보낼 수 있어요';
+
+  @override
+  String get notificationEmptyBody => '이룸이가 일과를 끝내면 여기로 알려 드려요';
+
+  @override
+  String get notificationEmptyOpenSettings => '알림 설정';
 }

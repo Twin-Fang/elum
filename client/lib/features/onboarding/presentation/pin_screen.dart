@@ -12,12 +12,12 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../profile/application/profile_session.dart';
+import '../application/onboarding_exit_route.dart';
 import '../application/onboarding_notifier.dart';
 import '../domain/onboarding_profile.dart';
 import 'widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
-import '../../notification/application/push_permission_prompt.dart';
 
 /// Figma `온보딩_비밀번호` — 보호자 모드 전환용 PIN을 만든다.
 ///
@@ -175,8 +175,8 @@ class _PinScreenState extends ConsumerState<PinScreen>
       );
       return;
     }
-    // 첫 홈 직전 알림 켜기 안내 (켜져 있거나 본 적 있으면 바로 홈)
-    final nextRoute = await ref.read(pushPermissionPromptProvider).resolveRouteAfterOnboarding();
+    // 이룸이 기기 연결 단계 > 알림 켜기 안내 > 홈 (붙어 있으면 연결 단계 건너뜀)
+    final nextRoute = await ref.read(onboardingExitRouteProvider).resolveAfterProfileReady();
     if (!mounted) return;
     context.go(nextRoute);
   }
