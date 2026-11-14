@@ -66,8 +66,9 @@ platform :android do
       skip_upload_apk: true,                       # APK 업로드 안함
       # 제목·간단한 설명·자세한 설명 (5개 언어) 업로드 — 원본 docs/store/listing, 생성 docs/store/build_store_metadata.py (#1351)
       skip_upload_metadata: false,
-      skip_upload_images: true,                    # 이미지 업로드 안함
-      skip_upload_screenshots: true,               # 스크린샷 업로드 안함
+      # 대표 그래픽·휴대폰 스크린샷 (ko-KR·en-US) — 생성 docs/store/promo/render_store_images.py --to-play-metadata (#1369)
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
       skip_upload_changelogs: false,               # Changelog 업로드 (metadata 디렉토리에서 자동 인식)
       # release_status: 'draft',                   # ⚠️ Draft App(미출시)일 때 사용 - completed/프로덕션 승급 불가
       release_status: 'completed',                 # 정식 출시(Published App) 이후 completed로 즉시 배포

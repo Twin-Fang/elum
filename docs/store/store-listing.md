@@ -30,6 +30,13 @@ python3 docs/store/build_store_metadata.py --check  # 생성본이 원본과 같
 | `ios_subscription_notice.txt` | App Store 설명 끝 구독 안내 (EULA 링크 필수, #1081) | 설명과 합쳐 4000 |
 | `ios_release_notes.txt` | 한국어 외 언어의 App Store 새로운 기능 고정 문구 (한국어는 CHANGELOG) | 4000 |
 
+## 스크린샷 (#1369)
+
+- 문구 원본 `promo/copy.{ko,en}.json` → `python3 -I promo/render_store_images.py --to-play-metadata` (playwright·Pillow 필요)
+- **Play**: 휴대폰 스크린샷·대표 그래픽(ko-KR·en-US)이 배포 때 자동으로 바뀐다. ja·zh·es 는 기본 언어(ko) 이미지가 보인다
+- **App Store**: 자동 업로드를 켜지 않는다 — 덮어쓰기가 iPad 스크린샷까지 지운다. `promo/out/<언어>/ios_6.9`·`ios_6.5` 를 콘솔에 올린다
+- 첫 두 장의 큰 글씨에 검색어(`행동카드 만들기`, `발달장애·ADHD`)를 둔다. 검색 결과에서 이름 다음으로 보이는 글이다
+
 ## 반영 시점
 
 - **배포(deploy) 때 자동으로 올라간다.** iOS `deliver` 가 이름·부제·키워드·설명·프로모션 문구·방침 주소를, Play `supply` 가 제목·간단한 설명·자세한 설명을 올린다.

@@ -4,7 +4,7 @@
   "tagline": "Daily routines, one action card at a time",
   "featureGraphic": {
     "title": "Daily routines,\none card at a time",
-    "subtitle": "Guardians make them, Elumi follows along",
+    "subtitle": "Visual schedule maker for autism & ADHD",
     "screen": "child_card",
     "art": "hero"
   },
@@ -12,7 +12,7 @@
     {
       "id": "01_card",
       "screen": "child_card",
-      "eyebrow": "Action cards",
+      "eyebrow": "Visual schedule for autism & ADHD",
       "title": "Daily routines,\none card at a time",
       "subtitle": "Pictures and short sentences\nshow today's steps in order",
       "theme": "peach",
@@ -21,8 +21,8 @@
     {
       "id": "02_input",
       "screen": "input",
-      "eyebrow": "Make a routine",
-      "title": "Write one line,\nget action cards",
+      "eyebrow": "Action card maker",
+      "title": "Write one line,\nAI makes the cards",
       "subtitle": "Type it the way you'd say it,\nand it's split into small, easy steps",
       "theme": "butter",
       "art": "scene_02"
@@ -40,8 +40,8 @@
       "id": "04_elumi",
       "screen": "child_home",
       "eyebrow": "Elumi's screen",
-      "title": "Today's steps at a glance\non Elumi's phone",
-      "subtitle": "Link two phones and new routines\nshow up right away",
+      "title": "Today's steps at a glance\non Elumi's device",
+      "subtitle": "Link two devices and new routines\nshow up right away",
       "theme": "lavender",
       "art": "scene_04"
     },
