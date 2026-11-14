@@ -10,7 +10,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_guide_panel.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../credit/application/credit_costs.dart';
 import '../../member/application/plan_access.dart';
 import '../application/device_notification_permission_controller.dart';
@@ -69,7 +69,7 @@ class _NotificationPermissionIntroScreenState extends ConsumerState<Notification
       },
       child: ElumScaffold(
         bottomButton: ElumButton(label: l10n.pushPermissionTurnOn, loading: _isTurningOn, onPressed: _turnOn),
-        belowButton: ElumTextLink(label: l10n.pushPermissionLater, onTap: _isTurningOn ? null : _leave),
+        belowButton: ElumSecondaryButton(label: l10n.pushPermissionLater, onTap: _isTurningOn ? null : _leave),
         // 남는 높이에서는 가운데, 큰 글자에서 길어지면 스크롤
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(

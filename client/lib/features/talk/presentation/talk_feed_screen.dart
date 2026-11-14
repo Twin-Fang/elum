@@ -10,7 +10,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/scroll_near_end.dart';
 import '../../guardian/domain/routine_template.dart';
@@ -309,9 +309,10 @@ class _EmptyLatest extends StatelessWidget {
           if (isCategoryFiltered) ...[
             SizedBox(height: _lineToLink.h),
             Center(
-              child: ElumTextLink(
+              child: ElumSecondaryButton(
                 label: l10n.talkEmptyCategoryAction,
                 onTap: onShowAllPressed,
+                isCompact: true,
               ),
             ),
           ],

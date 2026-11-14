@@ -6,7 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_check_circle.dart';
 import '../../../../core/widgets/elum_error_code_text.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/card_export_pictures.dart';
 import '../../data/card_export_files.dart';
@@ -69,9 +69,10 @@ class CardExportPreview extends ConsumerWidget {
           Text(l10n.cardExportSomePicturesFailed(pictures.failedCount), style: caption),
           Align(
             alignment: Alignment.centerLeft,
-            child: ElumTextLink(
+            child: ElumSecondaryButton(
               label: l10n.commonRetry,
               onTap: () => retryCardExportPictures(ref, routine, pictures),
+              isCompact: true,
             ),
           ),
           const ElumErrorCodeText(CardExportErrorCode.image, textAlign: TextAlign.left),

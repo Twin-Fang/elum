@@ -10,7 +10,7 @@
 // - material-widget: 테두리 버튼 · ListTile · Divider 같은 Material 기본 부품 금지 (공통 위젯 안 감싸기만 허용)
 // - spacing · radius: 숫자로 쓴 간격 · 모서리가 시안 단계 안에 있다
 // - restricted-token: 쓰는 곳을 묶어 둔 토큰(그림 색)을 화면에서 쓰지 않는다
-// - restricted-pattern: 공통 부품만 쓸 수 있는 코드 모양 (위험 버튼 톤 · 실패/삭제 아이콘 > 확인·실패 팝업 부품, #1171)
+// - restricted-pattern: 공통 부품만 쓸 수 있는 코드 모양 (위험 버튼 톤 · 실패/삭제 아이콘 > 확인·실패 팝업 부품 · 밑줄 글자 > ElumSecondaryButton, #1171 · #1401)
 // - text-scale: 글자 배율은 AppTextScale 한 곳 (`.sp` · noScaling · 숫자 배율 · 옛 textScaleFactor 금지, yaml `text_scale_owners` 만 예외)
 // 시안 실측으로 확인한 단계 밖 값은 yaml `measured_exceptions` 에 근거 노드와 함께 둔다
 //

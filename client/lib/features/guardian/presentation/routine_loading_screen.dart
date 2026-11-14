@@ -12,8 +12,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../credit/application/credit_top_up_entry.dart';
 import '../../credit/domain/credit_summary.dart';
@@ -317,21 +317,9 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         // 크레딧 부족은 받으러 가지 않을 때 홈으로 나갈 길로 둔다
         belowButton: blocked && !canTopUp
             ? null
-            : Center(
-                child: AppPressable(
-                  onTap: () => context.go(Routes.guardian),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: context.space.md),
-                    child: Text(
-                      context.l10n.routineLoadingHome,
-                      style: context.typo.linkLater.copyWith(
-                        color: colors.linkLaterLabel,
-                        decoration: TextDecoration.underline,
-                        decorationColor: colors.linkLaterLabel,
-                      ),
-                    ),
-                  ),
-                ),
+            : ElumSecondaryButton(
+                label: context.l10n.routineLoadingHome,
+                onTap: () => context.go(Routes.guardian),
               ),
         child: RoutineFailureBody(
           // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다.

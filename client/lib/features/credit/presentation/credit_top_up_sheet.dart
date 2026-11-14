@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/assets/app_assets.dart';
-import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_guide_panel.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../member/application/plan_access.dart';
 import '../../subscription/application/credit_pack_catalog.dart';
 import '../../subscription/application/plan_paywall_entry.dart';
@@ -68,8 +67,8 @@ class CreditTopUpSheet extends ConsumerWidget {
       ],
       secondaryActions: [
         if (canSeePacks)
-          ElumTextLink(label: l10n.creditTopUpPackLink, onTap: withTapHaptic(() => choose(CreditTopUpChoice.seePacks))),
-        ElumTextLink(label: l10n.commonClose, onTap: withTapHaptic(() => Navigator.of(context).pop())),
+          ElumSecondaryButton(label: l10n.creditTopUpPackLink, onTap: () => choose(CreditTopUpChoice.seePacks)),
+        ElumSecondaryButton(label: l10n.commonClose, onTap: () => Navigator.of(context).pop()),
       ],
     );
   }

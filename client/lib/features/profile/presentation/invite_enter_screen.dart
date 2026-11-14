@@ -7,9 +7,8 @@ import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/text/keep_words.dart';
-import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -351,9 +350,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
     return ElumScaffold(
       onBack: context.popOrHome,
       isBackEnabled: !_sending,
@@ -364,20 +360,9 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
       ),
       // 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 길
       belowButton: _fromLink
-          ? Center(
-              child: AppPressable(
-                onTap: _sending ? null : _useManualInput,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: space.xs.h),
-                  child: Text(
-                    context.l10n.inviteEnterManualLink,
-                    style: context.typo.linkLater.copyWith(
-                      color: colors.linkLaterLabel,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
+          ? ElumSecondaryButton(
+              label: context.l10n.inviteEnterManualLink,
+              onTap: _sending ? null : _useManualInput,
             )
           : null,
       child: SingleChildScrollView(

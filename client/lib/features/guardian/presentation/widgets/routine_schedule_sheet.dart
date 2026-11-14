@@ -7,7 +7,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../../../core/widgets/elum_toast.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../core/widgets/settings_group.dart';
@@ -218,7 +218,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
             ),
           if (_existing != null) ...[
             SizedBox(height: space.xs.h),
-            ElumTextLink(
+            ElumSecondaryButton(
               key: RoutineScheduleSheet.turnOffButtonKey,
               label: l10n.routineScheduleTurnOff,
               onTap: _isSaving ? null : _turnOff,

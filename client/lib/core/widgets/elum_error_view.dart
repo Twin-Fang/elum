@@ -7,7 +7,7 @@ import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_button.dart';
 import 'elum_error_code_text.dart';
-import 'elum_text_link.dart';
+import 'elum_secondary_button.dart';
 
 /// 실패를 실패로 보여주는 공통 화면.
 ///
@@ -126,9 +126,12 @@ class ElumErrorView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: typo.promptBody.copyWith(color: colors.promptMuted),
               ),
-            // 다시 시도 링크 > 에러 코드 줄 (링크 글에 코드를 섞지 않음, #1171)
-            if (onRetry != null)
-              ElumTextLink(label: context.l10n.commonRetry, onTap: onRetry),
+            // 다시 시도 버튼 > 에러 코드 줄 (링크 글에 코드를 섞지 않음, #1171)
+            if (onRetry != null) ...[
+              // 판이 문구에 붙지 않게 위 xs
+              SizedBox(height: space.xs.h),
+              ElumSecondaryButton(label: context.l10n.commonRetry, onTap: onRetry, isCompact: true),
+            ],
             if (errorCode != null) ElumErrorCodeText(errorCode!),
           ],
         ),

@@ -362,7 +362,7 @@ flowchart LR
 | PRO 배지 | 둥근 금빛 그라데이션 알약 + 반짝 표시 + `PRO` | `ProBadge` · `LabelWithProBadge` 만 |
 | 요금제 화면 | 머리(Free 카드 → Pro 카드) > 혜택 4묶음 > 기간 카드(1년 기본 · `N% 아껴요` · `한 달에 X원 꼴`) > 작은 법적 안내 · 바닥 고정 주 버튼 + 한 줄 · 위 ✕ | `showPlanPaywall` |
 | Pro 미리보기 | 또렷한 견본 > 아래로 사라짐 > 떠 있는 카드(PRO · `예시 화면` · 제목 · 한 줄 · 민트 버튼 · `Pro 혜택 모두 보기`) | `ProTeaser` + `watchProUpsellActions` |
-| 권유 버튼 | 민트 그라데이션 (미리보기) · 밑줄 글자 (보조 안내) | `ProUpsellButton` 만 |
+| 권유 버튼 | 민트 그라데이션 (미리보기) · 글자 폭 보조 버튼 (보조 안내) | `ProUpsellButton` 만 |
 | 내 요금제 줄 값 | Free 회색 알약 · PRO 배지 · PRO 배지 + `선물` | `PlanTierChip` |
 
 - 혜택은 서버 Pro 권한이 실제로 주는 것만 보인다 (#1165). 빈 묶음은 빠진다.
@@ -450,7 +450,7 @@ flowchart LR
 4. 한 줄 설명: 한 문장, 회색
 5. 내용 줄: 표 줄 `ElumGuideRow` (아이콘 타일, 항목, 오른쪽 값), 설명 줄 `ElumGuideNote`, 구분선 `ElumGuideDivider`, 고를 길 칸
 6. 주 버튼 1개: 채운 민트 (`ElumGuideAction`)
-7. 보조: 글자 버튼 (`ElumTextLink`, `Pro 알아보기` 링크, 닫기)
+7. 보조: 연한 회색 보조 버튼 (`ElumSecondaryButton`, `Pro 알아보기`, 닫기). 밑줄 글자 링크는 쓰지 않는다 (#1401)
 
 간격은 토큰만 쓴다: 그림 > 제목 16(`space.md`), 제목 > 설명 8(`space.xs`), 머리 > 내용 > 버튼은 시트 24(`space.lg`), 창 16(`space.md`).
 
@@ -461,7 +461,7 @@ flowchart LR
 
 **버튼 위계**
 
-- 채운 버튼은 한 화면에 하나다. 시트에서 광고 칸의 `광고 보기` 가 채운 버튼이면 Pro 칸은 테두리 버튼(`ProUpsellStyle.outlined`), 꾸러미와 닫기는 글자 버튼이다.
+- 채운 버튼은 한 화면에 하나다. 시트에서 광고 칸의 `광고 보기` 가 채운 버튼이면 Pro 칸은 테두리 버튼(`ProUpsellStyle.outlined`), 꾸러미와 닫기는 보조 버튼이다.
 - 받은 순간 창, 안내 창은 `알겠어요`, `이어서 만들기` 같은 주 버튼 하나만 둔다.
 
 **아이콘과 이모지**

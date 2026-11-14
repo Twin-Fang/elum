@@ -52,7 +52,7 @@ class ElumGuidePanel extends StatelessWidget {
   /// 채운 주 버튼 (한 화면에 하나). 내용 칸이 제 버튼을 가지면 null
   final ElumGuideAction? primaryAction;
 
-  /// 보조 동작 (글자 버튼 · 닫기)
+  /// 보조 동작 (보조 버튼 · 닫기)
   final List<Widget> secondaryActions;
 
   /// 묶음이 떠오르는 거리
@@ -104,13 +104,13 @@ class ElumGuidePanel extends StatelessWidget {
         ]),
         // 내용 줄
         if (content.isNotEmpty) stagger(1, [SizedBox(height: sectionGap.h), ...content]),
-        // 버튼: 주 버튼 1개 > 보조 글자 버튼
+        // 버튼: 주 버튼 1개 > 보조 버튼 (판끼리 붙지 않게 사이 xs)
         stagger(2, [
           if (primaryAction != null) ...[
             SizedBox(height: sectionGap.h),
             ElumDialogButton(label: primaryAction.label, onTap: withTapHaptic(primaryAction.onTap)),
           ],
-          if (secondaryActions.isNotEmpty) ...[SizedBox(height: space.xs.h), ...secondaryActions],
+          for (final secondaryAction in secondaryActions) ...[SizedBox(height: space.xs.h), secondaryAction],
         ]),
       ],
     );

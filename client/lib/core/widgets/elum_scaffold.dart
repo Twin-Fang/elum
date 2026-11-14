@@ -122,11 +122,11 @@ class ElumScaffold extends StatelessWidget {
   /// (Home Indicator 상단 y=831 기준으로 계산하면 21만큼 아래로 밀린다.)
   static const _frameHeight = 852.0;
 
-  /// CTA 하단(741) ↔ 보조 동작(765) 간격. 시안 실측.
-  static const _belowGap = 24.0;
+  /// CTA 하단(741) ↔ 보조 버튼(753) 간격 (#1401: 보조 버튼 판 48 이 생겨 한 묶음으로 12)
+  static const _belowGap = 12.0;
 
-  /// 보조 동작 하단(781)에서 프레임 하단(852)까지.
-  static const _belowBottom = 71.0;
+  /// 보조 버튼 하단(801)에서 프레임 하단(852)까지 (CTA 자리 675 그대로)
+  static const _belowBottom = 51.0;
 
   @override
   Widget build(BuildContext context) {

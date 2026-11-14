@@ -11,7 +11,7 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_state_body.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/scroll_near_end.dart';
 import '../application/talk_comment_controller.dart';
@@ -293,9 +293,10 @@ class _GoneBody extends StatelessWidget {
           TalkEmptyLine(title: l10n.talkPostGoneTitle),
           SizedBox(height: _lineToLink.h),
           Center(
-            child: ElumTextLink(
+            child: ElumSecondaryButton(
               label: l10n.talkPostGoneBack,
               onTap: onBackPressed,
+              isCompact: true,
             ),
           ),
           SizedBox(height: _lineToLink.h),

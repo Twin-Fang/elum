@@ -12,7 +12,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../../member/application/plan_access.dart';
 import '../../application/routine_memory_controller.dart';
 import '../../data/routine_memory_repository.dart';
@@ -73,7 +73,7 @@ class _ObservationSheet extends StatelessWidget {
             SizedBox(height: space.sm.h),
           ],
           if (restCount > 0)
-            ElumTextLink(
+            ElumSecondaryButton(
               label: context.l10n.memoryObsMore(restCount),
               onTap: () {
                 Navigator.of(context).pop();

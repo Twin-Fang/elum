@@ -2,11 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_meta_divider.dart';
+import '../../../core/widgets/min_tap_target.dart';
 import '../application/plan_offer_labels.dart';
 import '../domain/plan_catalog.dart';
 
@@ -114,7 +117,8 @@ class PlanLegalNotice extends StatelessWidget {
   }
 }
 
-/// 글자 버튼 줄: 이용약관 · 개인정보처리방침 · 구매 복원 (가격을 못 불러와도 늘 보임)
+/// 바닥 작은 글자 줄: 이용약관 | 개인정보처리방침 | 구매 복원 (가격을 못 불러와도 늘 보임)
+/// 스토어 심사 필수 링크라 버튼 판 없이 작은 글자 + 세로선 (보조 버튼과 무게를 나눔, #1401)
 class PlanLinksRow extends StatelessWidget {
   const PlanLinksRow({
     super.key,
@@ -130,14 +134,48 @@ class PlanLinksRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    const divider = ElumMetaDivider(height: _dividerHeight);
     return Wrap(
       alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       spacing: context.space.xs.w,
       children: [
-        ElumTextLink(label: l10n.planTermsOfUse, onTap: onTermsTap),
-        ElumTextLink(label: l10n.planPrivacyPolicy, onTap: onPrivacyTap),
-        ElumTextLink(label: l10n.planRestore, onTap: onRestoreTap),
+        _PlanFooterLink(label: l10n.planTermsOfUse, onTap: onTermsTap),
+        divider,
+        _PlanFooterLink(label: l10n.planPrivacyPolicy, onTap: onPrivacyTap),
+        divider,
+        _PlanFooterLink(label: l10n.planRestore, onTap: onRestoreTap),
       ],
+    );
+  }
+
+  /// 글자 사이 세로선 높이 (글자 14 보다 살짝 낮게)
+  static const _dividerHeight = 12.0;
+}
+
+/// 바닥 작은 글자 하나 (14 · 회색, 누름 영역 44)
+class _PlanFooterLink extends StatelessWidget {
+  const _PlanFooterLink({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: onTap != null,
+      child: AppPressable(
+        onTap: withTapHaptic(onTap),
+        child: MinTapTarget(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: context.typo.helpLink.copyWith(color: context.colors.linkLaterLabel),
+          ),
+        ),
+      ),
     );
   }
 }
