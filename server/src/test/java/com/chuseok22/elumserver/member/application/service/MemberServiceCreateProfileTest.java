@@ -55,6 +55,7 @@ class MemberServiceCreateProfileTest {
   @Mock private com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository aiCallLogRepository;
 
   @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  @Mock private com.chuseok22.elumserver.routine.application.service.ElumiStreakService elumiStreakService;
   @InjectMocks private MemberService memberService;
 
   private final Caller guardian = Caller.guardian("member-1");

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 주간 리포트 월요일 알림: 지난주 마친 일과가 있는 이룸이 > 권한 있는 보호자 > 정리 글 만들기(없으면) > 알림 기록 > 푸시
+ * 주간 리포트 월요일 알림: 지난주 마친 일과가 있는 이룸이 > 받는 보호자(권한 있는 보호자 + 설정이 켜졌으면 Free) > 정리 글 만들기(권한 있는 보호자가 있을 때만) > 알림 기록 > 푸시
  * 같은 주 중복 발송은 알림 묶음 키로 차단 (재실행·서버 이중 실행 안전), 이룸이별 실패는 해당 이룸만 건너뜀
  * 푸시 본문은 횟수만 (잠금 화면에 이름·일과 제목 노출 방지)
  */
@@ -99,10 +99,13 @@ public class WeeklyReportPushService {
 
   /// 이룸이 하나: 새로 알림을 보낼 사람이 있었으면 true
   private boolean notifyProfile(String profileId, ReportWeek lastWeek, LocalDate today) {
-    // 받는 사람: 이룸이를 함께 돌보는 보호자 중 주간 리포트 권한이 있는 사람
-    List<String> recipientMemberIds = profileGuardianService.guardianMemberIdsOf(profileId).stream()
+    // 받는 사람: 이룸이를 함께 돌보는 보호자 중 권한 있는 사람, Free 포함 설정이면 나머지도 (요약 알림만)
+    List<String> guardianMemberIds = profileGuardianService.guardianMemberIdsOf(profileId);
+    List<String> entitledMemberIds = guardianMemberIds.stream()
       .filter(memberId -> entitlementService.isAllowed(memberId, Entitlement.WEEKLY_REPORT))
       .toList();
+    List<String> recipientMemberIds = systemConfigService.getBoolean(ConfigKey.WEEKLY_REPORT_PUSH_FREE_ENABLED)
+      ? guardianMemberIds : entitledMemberIds;
     if (recipientMemberIds.isEmpty()) {
       return false;
     }
@@ -110,9 +113,11 @@ public class WeeklyReportPushService {
     if (reportWithNickname.isEmpty() || reportWithNickname.get().report().completedRoutineCount() == 0) {
       return false;
     }
-    // 정리 글 만들기 (이미 있으면 그대로, AI 비용은 첫 보호자 계정으로)
-    weeklyReportSummaryService.summaryFor(profileId, reportWithNickname.get().nickname(), recipientMemberIds.get(0), lastWeek,
-      reportWithNickname.get().report(), reportWithNickname.get().language(), today);
+    // 정리 글 만들기: 리포트 화면을 열 수 있는 보호자가 있을 때만 (이미 있으면 그대로, AI 비용은 첫 권한 보호자 계정으로)
+    if (!entitledMemberIds.isEmpty()) {
+      weeklyReportSummaryService.summaryFor(profileId, reportWithNickname.get().nickname(), entitledMemberIds.get(0),
+        lastWeek, reportWithNickname.get().report(), reportWithNickname.get().language(), today);
+    }
 
     NotificationDraft draft = NotificationDraft.weeklyReportReady(profileId, lastWeek.start(), LocalDateTime.now(clock));
     List<RecordedNotification> recorded = notificationRecorder.record(draft, recipientMemberIds);

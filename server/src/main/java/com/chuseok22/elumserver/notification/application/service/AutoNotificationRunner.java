@@ -1,10 +1,10 @@
 package com.chuseok22.elumserver.notification.application.service;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.notification.core.AutoNotificationType;
 import com.chuseok22.elumserver.notification.core.NotificationDispatchSource;
 import com.chuseok22.elumserver.notification.core.NotificationQuietHours;
 import com.chuseok22.elumserver.notification.core.NotificationTime;
-import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.AutoNotificationRule;
 import com.chuseok22.elumserver.notification.infrastructure.entity.NotificationSetting;
 import com.chuseok22.elumserver.notification.infrastructure.repository.AutoNotificationRuleRepository;
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 자동 알림 한 번 실행 (#1275): 야간이면 멈춤 > 켜진 규칙을 차례대로 > 시각·오늘 선점 > 받을 사람 > 거르기 > 문구 > 보내기
+ * 자동 알림 한 번 실행 (#1275): 야간이면 멈춤 > 켜진 규칙을 차례대로 > 시각·오늘 선점 > 받을 사람 > 거르기 > 받는 사람 언어로 문구 > 보내기
  * 거르기 4개: 알림 끔(전체·종류), 같은 종류 최소 간격(첫 일과는 평생 한 번), 하루 1개(자동 알림 전체, 운영자 발송 제외)
  */
 @Slf4j
@@ -43,27 +43,31 @@ public class AutoNotificationRunner {
   private final NotificationSettingRepository notificationSettingRepository;
   private final NotificationDispatchRepository notificationDispatchRepository;
   private final AdminMessageService adminMessageService;
+  private final AutoNotificationCopyResolver autoNotificationCopyResolver;
   private final Clock clock;
 
   @Autowired
   public AutoNotificationRunner(AutoNotificationRuleRepository autoNotificationRuleRepository,
     AutoNotificationCandidateFinder autoNotificationCandidateFinder,
     NotificationSettingRepository notificationSettingRepository,
-    NotificationDispatchRepository notificationDispatchRepository, AdminMessageService adminMessageService) {
+    NotificationDispatchRepository notificationDispatchRepository, AdminMessageService adminMessageService,
+    AutoNotificationCopyResolver autoNotificationCopyResolver) {
     this(autoNotificationRuleRepository, autoNotificationCandidateFinder, notificationSettingRepository,
-      notificationDispatchRepository, adminMessageService, Clock.system(NotificationTime.ZONE_ID));
+      notificationDispatchRepository, adminMessageService, autoNotificationCopyResolver,
+      Clock.system(NotificationTime.ZONE_ID));
   }
 
   AutoNotificationRunner(AutoNotificationRuleRepository autoNotificationRuleRepository,
     AutoNotificationCandidateFinder autoNotificationCandidateFinder,
     NotificationSettingRepository notificationSettingRepository,
     NotificationDispatchRepository notificationDispatchRepository, AdminMessageService adminMessageService,
-    Clock clock) {
+    AutoNotificationCopyResolver autoNotificationCopyResolver, Clock clock) {
     this.autoNotificationRuleRepository = autoNotificationRuleRepository;
     this.autoNotificationCandidateFinder = autoNotificationCandidateFinder;
     this.notificationSettingRepository = notificationSettingRepository;
     this.notificationDispatchRepository = notificationDispatchRepository;
     this.adminMessageService = adminMessageService;
+    this.autoNotificationCopyResolver = autoNotificationCopyResolver;
     this.clock = clock;
   }
 
@@ -99,10 +103,12 @@ public class AutoNotificationRunner {
       }
     }
     List<AutoNotificationCandidate> candidates = filterReceivable(rule, autoNotificationCandidateFinder.find(type, now), now);
+    Map<String, AppLocale> localeByMemberId = autoNotificationCopyResolver.localesOf(
+      candidates.stream().map(AutoNotificationCandidate::memberId).toList());
     int sentMemberCount = 0;
     for (AutoNotificationCandidate candidate : candidates) {
       try {
-        sendTo(rule, candidate);
+        sendTo(rule, candidate, localeByMemberId.getOrDefault(candidate.memberId(), AppLocale.KO));
         sentMemberCount++;
       } catch (RuntimeException exception) {
         log.warn("[auto notification] send failed type={} : {}", type, exception.getClass().getSimpleName());
@@ -165,11 +171,10 @@ public class AutoNotificationRunner {
     return found;
   }
 
-  // 문구 > 운영자 알림으로 한 사람에게 (알림함 제목·본문이 사람마다 다름)
-  private void sendTo(AutoNotificationRule rule, AutoNotificationCandidate candidate) {
-    String title = AutoNotificationTemplate.render(rule.getTitleTemplate(), candidate, AdminMessage.TITLE_MAX_LENGTH);
-    String message = AutoNotificationTemplate.render(rule.getBodyTemplate(), candidate, AdminMessage.BODY_MAX_LENGTH);
-    adminMessageService.send(title, message, rule.getRoute(), List.of(candidate.memberId()),
+  // 받는 사람 언어 문구 > 운영자 알림으로 한 사람에게 (알림함 제목·본문이 사람마다 다름)
+  private void sendTo(AutoNotificationRule rule, AutoNotificationCandidate candidate, AppLocale locale) {
+    AutoNotificationCopyResolver.RenderedCopy copy = autoNotificationCopyResolver.render(rule, candidate, locale);
+    adminMessageService.send(copy.title(), copy.body(), rule.getRoute(), List.of(candidate.memberId()),
       AdminMessageOrigin.autoRule(rule.getType()));
   }
 

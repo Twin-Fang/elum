@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 알림 성과 (#1275): 줄 7개(자동 5종, 운영자 직접, 예약) × 기간 2개(7일, 30일) 받은 사람·도착·열림·열림률 + 칸별 끈 사람 수
+ * 알림 성과 (#1275): 줄 11개(자동 9종, 운영자 직접, 예약) × 기간 2개(7일, 30일) 받은 사람·도착·열림·열림률 + 칸별 끈 사람 수
  * 도착 = 기기 1대 이상 발송 성공, 열림 = 앱이 dispatchId 로 알린 열림
  */
 @Service
@@ -94,16 +94,16 @@ public class NotificationPerformanceService {
       .orElse(PeriodCounts.EMPTY);
   }
 
-  // 칸 4개 (AutoNotificationOptOut 과 같은 짝)
+  // 칸 4개 (짝은 AutoNotificationOptOut.groupOf)
   private static Long optOutCountOf(OptOutCounts counts, AutoNotificationType type) {
     if (counts == null) {
       return 0L;
     }
-    return zeroIfNull(switch (type) {
-      case DAILY_ROUTINE_NUDGE -> counts.getRoutineNudgeOffCount();
-      case COMEBACK, TALK_POPULAR -> counts.getSuggestionOffCount();
-      case PRO_GIFT_ENDING -> counts.getPlanReminderOffCount();
-      case FIRST_ROUTINE_DONE -> counts.getRoutineCompletedOffCount();
+    return zeroIfNull(switch (AutoNotificationOptOut.groupOf(type)) {
+      case ROUTINE_NUDGE -> counts.getRoutineNudgeOffCount();
+      case SUGGESTION -> counts.getSuggestionOffCount();
+      case PLAN_REMINDER -> counts.getPlanReminderOffCount();
+      case ROUTINE_COMPLETED -> counts.getRoutineCompletedOffCount();
     });
   }
 
