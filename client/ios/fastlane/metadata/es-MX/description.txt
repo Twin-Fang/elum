@@ -34,11 +34,11 @@ Reutiliza rutinas anteriores tal cual, así preparar la agenda de cada día es m
 Lo que escribes al crear las tarjetas se envía a la IA. No escribas nada que permita identificar a una persona, como nombres, teléfonos o direcciones. Qué datos recogemos y cómo los tratamos está en los ajustes de la app y en la política de privacidad.
 
 ELUM no sustituye un diagnóstico ni una terapia. Es una herramienta que apoya la vida diaria y el aprendizaje junto con familias y docentes.
-Para consultas, usa Send feedback en los ajustes de la app (por ahora la app está en inglés y coreano).
+Para consultas, usa Enviar opinión en los ajustes de la app.
 
 ■ Suscripción ELUM Pro
 · ELUM Pro es una suscripción de renovación automática, mensual o anual. La primera suscripción incluye 7 días de prueba gratis.
 · El pago se carga en tu cuenta de Apple ID al confirmar la compra. La suscripción se renueva automáticamente por el mismo periodo y precio salvo que la canceles al menos 24 horas antes de que termine el periodo actual.
 · Gestiona o cancela la suscripción en Ajustes > Apple ID > Suscripciones.
 · Términos de uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-· Política de privacidad: https://elum.suhsaechan.kr/privacy.html
+· Política de privacidad: https://elum.suhsaechan.kr/privacy-es.html

@@ -34,4 +34,4 @@ Reutiliza rutinas anteriores tal cual, así preparar la agenda de cada día es m
 Lo que escribes al crear las tarjetas se envía a la IA. No escribas nada que permita identificar a una persona, como nombres, teléfonos o direcciones. Qué datos recogemos y cómo los tratamos está en los ajustes de la app y en la política de privacidad.
 
 ELUM no sustituye un diagnóstico ni una terapia. Es una herramienta que apoya la vida diaria y el aprendizaje junto con familias y docentes.
-Para consultas, usa Send feedback en los ajustes de la app (por ahora la app está en inglés y coreano).
+Para consultas, usa Enviar opinión en los ajustes de la app.

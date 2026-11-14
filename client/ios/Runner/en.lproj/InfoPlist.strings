@@ -3,3 +3,5 @@
 "NSPhotoLibraryUsageDescription" = "Elum uses your photo library to choose a photo to use as a card picture.";
 "NSMicrophoneUsageDescription" = "Elum uses the microphone to record your voice reading a card.";
 "NSUserTrackingUsageDescription" = "This is used to show ads that fit the guardian screen. Elumi's information is not used.";
+/* 홈 화면 앱 이름: 한국어 이룸, 그 밖의 언어 ELUM (#1419) */
+"CFBundleDisplayName" = "ELUM";

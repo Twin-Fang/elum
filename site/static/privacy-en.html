@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="canonical" href="https://elum.suhsaechan.kr/privacy-en.html"/>
+<title>ELUM (이룸) — Privacy Policy</title>
+<meta name="description" content="Explains the personal information ELUM (이룸) collects and how it is processed."/>
+<link rel="icon" href="./assets/lumi.svg"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="이룸 ELUM"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:image" content="https://elum.suhsaechan.kr/assets/og.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<style>
+:root{
+  --bg:#F7F2EF; --ink:#242634; --muted:#6B6C78; --faint:rgba(36,38,52,.45);
+  --line:rgba(36,38,52,.09); --card:#fff; --accent:#FF8B26; --soft:#FFF7EE;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; --r:26px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.7;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:820px;margin:0 auto;padding:0 28px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+a{color:var(--ink)}
+
+header.site{position:sticky;top:0;z-index:20;background:rgba(247,242,239,.86);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;height:68px;gap:18px;max-width:1120px;margin:0 auto;padding:0 28px}
+.brand img{height:26px;display:block}
+nav{margin-left:auto;display:flex;gap:26px}
+nav a{font-size:14px;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+
+.doc{padding-top:64px;padding-bottom:40px}
+h1{margin:12px 0 0;font-size:clamp(30px,4.4vw,44px);line-height:1.14;letter-spacing:-.03em;font-weight:800}
+h2{margin:44px 0 12px;font-size:20px;letter-spacing:-.02em;font-weight:800;
+  padding-top:22px;border-top:1px solid var(--line)}
+h2:first-of-type{border-top:0;padding-top:0}
+p{margin:12px 0}
+ul{margin:12px 0;padding-left:20px}
+li{margin:6px 0}
+strong{font-weight:700}
+
+/* 본문에서 가져온 규칙 — 표와 안내 상자 */
+.meta{color:var(--faint);font-size:13px;margin:6px 0 0;font-family:var(--mono)}
+.lead{background:var(--soft);border-left:3px solid var(--accent);
+  padding:18px 20px;border-radius:0 14px 14px 0;margin:26px 0 0}
+.table-scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+th{background:rgba(36,38,52,.03);font-weight:700}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--mono);font-size:.92em;background:rgba(36,38,52,.06);padding:2px 6px;border-radius:6px}
+
+.backlink{display:inline-flex;align-items:center;gap:8px;margin-top:48px;
+  border:1px solid var(--line);background:var(--card);border-radius:999px;
+  padding:12px 20px;text-decoration:none;font-weight:700;font-size:15px}
+.backlink:hover{transform:translateY(-1px)}
+
+footer.site{border-top:1px solid var(--line);padding:32px 0 60px;color:var(--faint);font-size:13px;margin-top:20px}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:16px;max-width:1120px;margin:0 auto;padding:0 28px}
+.fl img{height:18px;opacity:.85}
+
+@media (max-width:880px){ nav{display:none} .doc{padding-top:44px;padding-bottom:28px} }
+
+/* 휴대폰 폭: 좌우 여백 확보, 표는 카드로 쌓기 (가로 스크롤 없이 읽히게) */
+@media (max-width:640px){
+  .wrap,.bar,.fl{padding-left:20px;padding-right:20px}
+  .stack{overflow:visible;border:0;background:none;border-radius:0}
+  .stack table,.stack tbody,.stack tr,.stack td{display:block;width:100%;min-width:0}
+  .stack thead{display:none}
+  .stack tr{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 16px;margin:0 0 12px}
+  .stack td{border:0;padding:10px 0}
+  .stack td+td{border-top:1px solid var(--line)}
+  .stack td::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  .stack td:first-child{font-weight:700}
+  .stack td:first-child::before{display:none}
+  .kv table,.kv tbody,.kv tr,.kv th,.kv td{display:block;width:100%;min-width:0}
+  .kv tr{border-bottom:1px solid var(--line)}
+  .kv tr:last-child{border-bottom:0}
+  .kv th{border:0;background:none;padding:12px 16px 0;font-size:12px;color:var(--muted)}
+  .kv td{border:0;padding:2px 16px 12px}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="./"><img src="./assets/logo.svg" alt="이룸 ELUM"/></a>
+    <nav>
+      <a href="./#faq">FAQ</a>
+      <a href="./#contact">Contact</a>
+      <a href="./privacy.html">Privacy Policy</a>
+      <a href="./delete.html">Delete Account</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap doc">
+  <div class="tag">Privacy</div>
+  <h1>Privacy Policy</h1>
+<p class="notice"><strong>This is an English translation for reference. If it differs from the <a href="/privacy.html">Korean original</a>, the Korean original prevails.</strong></p>
+  <p class="meta">Effective November 12, 2026 · Last revised November 5, 2026</p>
+
+<p class="lead">
+  ELUM is an app that helps people with developmental disabilities (hereinafter “Elumi”) carry out their daily routines: a guardian creates cards, and the Elumi follows those cards
+  through the day. ELUM <strong>does not collect diagnoses or disability types.</strong>
+  Personalization is based only on the 'support goals' selected by the guardian.
+</p>
+
+<h2>1. Personal Information Collected</h2>
+
+<p>The following information is collected and stored while you use the service.</p>
+
+<div class="table-scroll stack">
+<table>
+  <thead>
+    <tr><th>Category</th><th>Items</th><th>When collected</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td data-label="Category">Social sign-in</td>
+      <td data-label="Items">Sign-in provider (Kakao, Naver, Google, Apple), member identifier issued by the provider, email address</td>
+      <td data-label="When collected">When you use social sign-in</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Guardian nickname</td>
+      <td data-label="Items">Guardian nickname (created automatically at sign-up; the guardian can change it)</td>
+      <td data-label="When collected">Created automatically at sign-up, and when the guardian changes it</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Staying signed in</td>
+      <td data-label="Items">Transformed value of the token used to keep you signed in, device identifier</td>
+      <td data-label="When collected">At sign-in</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Elumi information</td>
+      <td data-label="Items">The name the Elumi is called by (nickname), selected character, support goals, number of stars earned</td>
+      <td data-label="When collected">Entered by the guardian during onboarding or in Settings</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Routines</td>
+      <td data-label="Items">Situation description and answers to follow-up questions entered by the guardian, routine titles and steps, scheduled date and time,
+          reward details, completion date and time</td>
+      <td data-label="When collected">When routines are created and carried out</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Usage records</td>
+      <td data-label="Items">AI call type, model used, response time, throughput, estimated cost</td>
+      <td data-label="When collected">Recorded automatically when cards are created</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Send feedback</td>
+      <td data-label="Items">Feedback text written by the guardian, app version, operating system, app status log (you can choose whether to send it; it is on by default —
+          a record of recent app activity containing requests and responses exchanged with the server, screen navigation and errors; it may also contain
+          information within the app, such as the name used to call the Elumi and routine content. Sign-in tokens and passcodes are masked before sending),
+          phone information (sent together under the same checkbox as the app status log; on by default — where the app was installed from (whether it was installed from a store),
+          app signing key value, a random number generated by the app at installation, phone manufacturer, model and operating system version, time zone and region,
+          network connection type, app build type and running time, whether low power mode is on, remaining storage space, whether KakaoTalk is installed and its version,
+          Kakao sign-in setting values, last social sign-in error. Phone unique numbers (IMEI, serial number), advertising identifiers, location, contacts
+          and the list of other installed apps are not collected for this purpose)</td>
+      <td data-label="When collected">Only when the guardian sends feedback from Settings</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Community</td>
+      <td data-label="Items">Title, card text and card images of the shared routine (for photos taken by the guardian, the guardian can choose whether to blur them), text written by the guardian, category,
+          comments, "Helpful" reactions, records of taking routines, reports, records of hiding guardians</td>
+      <td data-label="When collected">Only when the guardian shares a routine or reacts in Community</td>
+    </tr>
+    <tr>
+      <td data-label="Category">Advertising<br>(collected directly by Google in Guardian mode)</td>
+      <td data-label="Items">Advertising identifier (iOS advertising identifier, Android advertising ID), IP address and approximate location based on it,
+          device and app information (operating system, device model, app version), ad usage information such as ad impressions and clicks,
+          app crash and performance diagnostic information</td>
+      <td data-label="When collected">When ads are loaded in Guardian mode</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  We <strong>do not collect</strong> the following: diagnoses, disability type or grade, resident registration numbers,
+  contact information, addresses, precise location information (GPS), or photo library or contacts access information.
+  The transfer to Google of approximate location based on the IP address in the course of displaying ads is as described in the advertising item above.
+</p>
+
+<h2>2. Purposes of Processing Personal Information</h2>
+
+<ul>
+  <li><strong>Identifying members and keeping them signed in</strong> — account information, social sign-in identifier, token used to keep you signed in</li>
+  <li><strong>Creating and personalizing routine cards</strong> — the Elumi's name, character and support goals, situation description entered by the guardian</li>
+  <li><strong>Recording completion and providing rewards</strong> — whether routines were completed, number of stars</li>
+  <li><strong>Operating the service and responding to failures</strong> — usage records, error records</li>
+  <li><strong>Reviewing feedback sent by guardians and identifying the cause of problems</strong> — feedback text, app status log, phone information</li>
+  <li><strong>Providing the Community feature, where guardians share routines and react to each other, and reviewing reports</strong> — guardian nickname, Community items</li>
+  <li><strong>Serving ads, measuring ad performance and preventing fraud</strong> — Google uses the advertising items</li>
+</ul>
+
+<h3>Who can see what you share in Community</h3>
+<p>
+  Routines, posts and comments shared in Community are visible to other signed-in guardians, and other guardians can take them as their own routines.
+  Your guardian nickname is shown as the author; your email address and sign-in information are not shown.
+  The name used to call the Elumi is replaced with 'Elumi' when posted. Please make sure faces, name tags and addresses are not visible in photos.
+</p>
+
+<h2>3. Retention and Use Period of Personal Information</h2>
+<ul>
+  <li>When a member withdraws, the email address, date and time of most recent sign-in and number of sign-ins, tokens used to keep the member signed in, and the routines created by that guardian
+    are <strong>destroyed without delay</strong>.</li>
+  <li>Elumi information and Elumi phone link information remain if another guardian is still linked, and are destroyed
+    once no linked guardian remains. Stars collected by the Elumi and routines created by other guardians remain as they are.</li>
+  <li>Feedback text, app status logs and phone information are <strong>destroyed without delay</strong> when the member withdraws. They may be deleted earlier, once the problem has been reviewed.</li>
+  <li>Routines, posts and comments shared in Community, and records of reactions, reports and hiding, are <strong>destroyed without delay</strong> when the guardian takes them down or withdraws.
+    Routines that other guardians have already taken remain as those guardians' routines.</li>
+  <li>Where a law sets a separate retention period, the information is kept for that period.</li>
+</ul>
+<h3>Information kept for 1 year after withdrawal</h3>
+<p>The following information is <strong>kept for 1 year from the date of withdrawal and then destroyed</strong>.</p>
+<div class="table-scroll">
+<table>
+  <thead>
+    <tr><th>Item kept</th><th>Purpose</th><th>Retention period</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Account identifiers — social sign-in provider and its member identification number, service ID</td>
+      <td rowspan="2">Preventing abuse by receiving the free usage allowance repeatedly through withdrawal and re-registration</td>
+      <td rowspan="4">1 year from the date of withdrawal</td>
+    </tr>
+    <tr>
+      <td>AI feature usage records — date, time and number of uses</td>
+    </tr>
+    <tr>
+      <td>Transformed value of the password (if you signed up with a service ID)</td>
+      <td>Verifying identity and restoring the previous account when you sign in again with the same ID</td>
+    </tr>
+    <tr>
+      <td>Records of consent to the terms — whether consent was given, date and time of consent, version of the document consented to</td>
+      <td>Proof of what was consented to and when</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li>While kept, this information is <strong>not used for any purpose other than those stated above.</strong></li>
+  <li>
+    If you sign up again with the same account within this period, the previous account is <strong>restored in an empty state</strong> and the usage records continue.
+    Elumi information and routines are not restored, and consent to the terms is obtained again.
+  </li>
+  <li>
+    If you request immediate deletion of the information being kept, it is destroyed without delay
+    (<a href="mailto:chan4760@naver.com">chan4760@naver.com</a>, <a href="./delete.html">Account and data deletion guide</a>).
+  </li>
+  <li>
+    When records are destroyed at the end of the retention period, the AI call records (call type, model, response time, throughput, cost) are unlinked from the member
+    so that it cannot be known whose records they are, and are kept only as service operation statistics.
+    <strong>These records do not include routine content or Elumi information.</strong>
+  </li>
+</ul>
+
+<h2>4. Provision of Personal Information to Third Parties</h2>
+
+<p>ELUM does not provide users' personal information to third parties, except in the following cases.</p>
+
+<ul>
+  <li>When the user has given prior consent</li>
+  <li>When an investigative agency requests it through lawful procedures under the law</li>
+</ul>
+
+<p>
+  Ads in Guardian mode are collected directly by Google from the app (see 5. Advertising service below).
+  ELUM does not hand users' information over to Google for advertising.
+</p>
+
+<h2>5. Entrustment of Personal Information Processing</h2>
+
+<p>To create cards, we entrust processing to the following companies.</p>
+
+<div class="table-scroll stack">
+<table>
+  <thead>
+    <tr><th>Trustee</th><th>Entrusted task</th><th>Information transferred</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td data-label="Trustee">Google LLC<br>(Gemini API)</td>
+      <td data-label="Entrusted task">Generating routine card text, generating card images</td>
+      <td data-label="Information transferred">Situation description and answers to follow-up questions written by the guardian, the Elumi's nickname, support goals</td>
+    </tr>
+    <tr>
+      <td data-label="Trustee">OpenAI, L.L.C.</td>
+      <td data-label="Entrusted task">Generating routine card text, generating card images</td>
+      <td data-label="Information transferred">Situation description and answers to follow-up questions written by the guardian, the Elumi's nickname, support goals</td>
+    </tr>
+    <tr>
+      <td data-label="Trustee">Features &amp; Labels Inc.<br>(fal)</td>
+      <td data-label="Entrusted task">Generating card images</td>
+      <td data-label="Information transferred">The action description for a single card</td>
+    </tr>
+    <tr>
+      <td data-label="Trustee">Anthropic, PBC<br>(Claude API)</td>
+      <td data-label="Entrusted task">Generating routine card text</td>
+      <td data-label="Information transferred">Situation description and answers to follow-up questions written by the guardian, the Elumi's nickname, support goals</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Advertising service (Google AdMob)</h3>
+
+<p>In Guardian mode, ads are displayed through Google LLC's advertising service (Google AdMob).</p>
+
+<ul>
+  <li>Ads appear in <strong>Guardian mode (Home, the drafts list, the credits notice)</strong> as banner, native and rewarded ads (ads that give credits when watched to the end),
+      and do not appear in Elumi mode or while creating a routine.</li>
+  <li><strong>Information entered in the app</strong>, such as the Elumi's name, routines and card content, <strong>is not used for ads or passed to Google.</strong></li>
+  <li>On iOS, you can decline in the tracking permission prompt shown at first launch; if you decline, non-personalized ads are shown.
+      You can change this in Settings &gt; Privacy &amp; Security &gt; Tracking.
+      If you decline tracking on iOS, the advertising identifier is not used and only non-personalized ads are shown.</li>
+  <li>On Android, you can reset or delete your advertising ID in Settings &gt; Google &gt; Ads.</li>
+  <li>How Google uses advertising information is described at
+      <a href="https://policies.google.com/technologies/partner-sites">policies.google.com/technologies/partner-sites</a>.</li>
+</ul>
+
+<h3>Please do not include personal information in situation descriptions</h3>
+
+<p>
+  Situation descriptions and answers to follow-up questions written by the guardian are sent to the companies above <strong>as they are, without modification</strong>.
+  Please do not write information that can identify a person, such as names, phone numbers or addresses. The original text is also kept on the ELUM server
+  so that the guardian can check and edit it later.
+</p>
+
+<h2>6. Overseas Transfer of Personal Information</h2>
+
+<p>The trustees above are located in the United States, so personal information is transferred overseas when cards are created.</p>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr>
+      <th>Recipients</th>
+      <td>
+        Google LLC (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)<br>
+        OpenAI, L.L.C. (<a href="https://openai.com/policies/privacy-policy">openai.com/policies/privacy-policy</a>)<br>
+        Features &amp; Labels Inc. (<a href="https://fal.ai/legal/privacy-policy">fal.ai/legal/privacy-policy</a>)<br>
+        Anthropic, PBC (<a href="https://www.anthropic.com/legal/privacy">anthropic.com/legal/privacy</a>)
+      </td>
+    </tr>
+    <tr><th>Destination country</th><td>United States</td></tr>
+    <tr><th>Time and method of transfer</th><td>Sent encrypted over HTTPS each time a card is created</td></tr>
+    <tr><th>Items transferred</th><td>Situation description and answers to follow-up questions written by the guardian, the Elumi's nickname, support goals</td></tr>
+    <tr><th>Purpose of transfer</th><td>Generating routine card text, generating card images</td></tr>
+    <tr>
+      <th>Retention and use period</th>
+      <td>Subject to the policies of the receiving company; ELUM does not keep the original request after receiving the response</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  You may refuse the transfer. However, because creating cards with AI is ELUM's core feature,
+  you will not be able to use the service if you refuse.
+</p>
+
+<h3>Overseas transfer related to advertising</h3>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr>
+      <th>Recipient</th>
+      <td>Google LLC (<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>)</td>
+    </tr>
+    <tr><th>Destination country</th><td>United States</td></tr>
+    <tr><th>Time and method of transfer</th><td>Sent over HTTPS each time an ad is loaded in Guardian mode</td></tr>
+    <tr>
+      <th>Items transferred</th>
+      <td>Advertising identifier, IP address (approximate location), device and app information, ad usage information, crash and performance diagnostic information</td>
+    </tr>
+    <tr><th>Purpose of transfer</th><td>Serving ads, measuring ad performance, preventing fraud</td></tr>
+    <tr><th>Retention and use period</th><td>Subject to Google's policies</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  You can refuse or reset the advertising identifier in the ways described in 5. Advertising service above,
+  and refusing does not affect your use of the service.
+</p>
+
+<h2>7. Personal Information of Persons Under 14 (만 14세 미만 아동)</h2>
+
+<p>
+  The party who creates and uses an account in ELUM is the <strong>guardian (legal representative)</strong>.
+  Multiple guardians (including family members and social workers) can be linked to one Elumi, and all linked guardians enter the Elumi's information and
+  view routines together. The Elumi does not create an account and does not sign in directly.
+  To enter information on the Elumi's behalf, each guardian must fall under one of the grounds shown in the app (legal representative, legal guardian (후견인), or consent of the Elumi themselves).
+</p>
+<p>
+  The Elumi's name (nickname), character and support goals are <strong>entered directly by the guardian</strong>.
+  In other words, we do not collect personal information from the person under 14 themselves, and we process it only within the scope entered by the legal representative.
+  Any linked guardian can edit this information in the app, and the most recently changed value is kept. A routine can be edited or deleted
+  only by the guardian who created it.
+</p>
+
+<h2>8. Rights of Data Subjects and How to Exercise Them</h2>
+
+<ul>
+  <li>Users and legal representatives can view, edit or delete their own and the Elumi's information at any time.</li>
+  <li>You can edit it directly in the app's Settings, or request deletion by withdrawing your membership. A guardian can unlink
+    (leave) an Elumi in the app.</li>
+  <li>Requests by email (<a href="mailto:chan4760@naver.com">chan4760@naver.com</a>) are also handled, and you can also request immediate deletion of information kept after withdrawal at this address.</li>
+</ul>
+
+<h2>9. Destruction of Personal Information</h2>
+
+<p>
+  When the retention period has passed or the purpose of processing has been achieved, the information is destroyed without delay.
+  Electronic files are deleted in a way that makes recovery impossible, and any printed materials are shredded or incinerated.
+</p>
+
+<h2>10. Measures to Ensure the Security of Personal Information</h2>
+
+<ul>
+  <li>Tokens used to keep you signed in are not stored in their original form; only a transformed value is kept, and it is replaced with a new value each time it is renewed.</li>
+  <li>If a token that has already been used is presented again, we treat it as stolen and end all signed-in sessions for that account.</li>
+  <li>All communication between the server and the app is encrypted (HTTPS).</li>
+  <li>The number of people who can access personal information is kept to a minimum.</li>
+</ul>
+
+<h2>11. Privacy Officer</h2>
+
+<div class="table-scroll kv">
+<table>
+  <tbody>
+    <tr><th>Service name</th><td>이룸(ELUM)</td></tr>
+    <tr><th>Operator</th><td>Twin-Fang</td></tr>
+    <tr><th>Privacy officer</th><td>서새찬 (Seo Saechan)</td></tr>
+    <tr><th>Contact</th><td><a href="mailto:chan4760@naver.com">chan4760@naver.com</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  If you need counseling about a personal information infringement, you can contact the organizations below.
+</p>
+
+<ul>
+  <li>개인정보침해신고센터 (Personal Information Infringement Report Center) — privacy.kisa.or.kr / 118 (no area code)</li>
+  <li>개인정보 분쟁조정위원회 (Personal Information Dispute Mediation Committee) — www.kopico.go.kr / 1833-6972</li>
+  <li>대검찰청 사이버수사과 (Supreme Prosecutors' Office, Cyber Investigation Division) — 1301</li>
+  <li>경찰청 사이버수사국 (Korean National Police Agency, Cyber Investigation Bureau) — ecrm.police.go.kr / 182</li>
+</ul>
+
+<h2>12. Changes to This Privacy Policy</h2>
+
+<p>
+  If this policy changes, we post the changes and the effective date on this page.
+  Important changes are announced starting 7 days before they take effect.
+</p>
+
+<h3>Change history</h3>
+
+<ul>
+  <li>Announced September 23, 2026, effective September 30 — Added Features &amp; Labels Inc. (fal), a company that creates card images,
+    as a recipient of entrusted processing and overseas transfer. The only information sent is the action description for a single card.</li>
+  <li>Announced September 23, 2026, effective September 30 — Removed the step that automatically masked personal information in text written by the guardian,
+    so situation descriptions and answers to follow-up questions are sent without modification. Added guidance not to write personal information.</li>
+  <li>Announced September 24, 2026, effective October 1 — To prevent repeatedly and improperly receiving the free usage allowance, changed the retention period so that account identifiers and
+    AI feature usage records are kept for 1 year after withdrawal, and for the same period the transformed password value (to restore the same ID) and records of consent to the terms (proof of consent)
+    are kept. If you sign up again within 1 year, the previous account is restored in an empty state.</li>
+  <li>Announced October 1, 2026, effective October 8 — Added the items Google collects for ads in Guardian mode (Google AdMob),
+    the purposes of use, and the overseas transfer. Made clear that precise location information (GPS) is not collected.</li>
+  <li>Announced October 1, 2026, effective October 8 — Revised who enters information, the retention period upon withdrawal, and the rights of guardians
+    to fit the structure in which several guardians care for one Elumi together.</li>
+  <li>Announced October 15, 2026, effective October 22 — Added the feedback text and app status log received through Send feedback in Settings
+    to the items collected, purposes of use and retention periods.</li>
+  <li>Announced October 16, 2026, effective October 23 — Added where ads appear (Home, the drafts list, the credits notice) and their formats (banner, native, rewarded),
+    how ads are shown when tracking is declined on iOS, and a link explaining how Google uses advertising information.</li>
+  <li>Announced October 19, 2026, effective October 26 — Added to the items collected the phone information received together with the app status log through Send feedback in Settings (installation source, app signing key value,
+    phone model and operating system version, Kakao sign-in setting values, etc.), and made clear that phone unique numbers and advertising identifiers are not collected for this purpose.</li>
+  <li>Announced October 20, 2026, effective October 27 — Added guardian nicknames and the items received in Community (sharing routines between guardians),
+    who can see them, and their retention periods.</li>
+  <li>Announced November 5, 2026, effective November 12 — Added Anthropic, PBC (United States), a company that creates card text,
+    as a recipient of entrusted processing and overseas transfer. The information entrusted and the purpose remain the same.</li>
+</ul>
+
+  <a class="backlink" href="./">← Back to Help</a>
+</div>
+
+<footer class="site">
+  <div class="fl">
+    <img src="./assets/logo.svg" alt="이룸 ELUM"/>
+    <a href="./" style="color:var(--muted);text-decoration:none">Help</a>
+    <a href="./delete.html" style="color:var(--muted);text-decoration:none">Delete Account</a>
+    <span class="tag" style="margin-left:auto">Twin-Fang</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -37,6 +37,11 @@ python3 docs/store/build_store_metadata.py --check  # 생성본이 원본과 같
 - **App Store**: `--to-ios-metadata` 로 6.9형(ko·en-US)을 `client/ios/fastlane/screenshots/` 에 두면 배포 때 **iPhone 세트만** 비우고 새로 올린다 (Fastfile `clear_iphone_screenshot_sets`). iPad 스크린샷은 건드리지 않는다 — deliver 의 `overwrite_screenshots` 는 iPad 까지 지워 쓰지 않는다
 - 첫 두 장의 큰 글씨에 검색어(`행동카드 만들기`, `발달장애·ADHD`)를 둔다. 검색 결과에서 이름 다음으로 보이는 글이다
 
+## 개인정보처리방침 주소 (#1419)
+
+- 한국어 원본 `site/static/privacy.html`, 번역본 `privacy-{en,ja,zh,es}.html` (맨 위에 "한국어 원문 우선" 문장). 원본을 고치면 번역본도 함께 고친다
+- 주소 규칙 원본은 `site/site_config.py` `to_privacy_path` — 사이트 하단·FAQ 링크, 사이트맵, App Store 방침 주소(`privacy_url.txt`)가 모두 이것을 쓴다. 구독 안내(`ios_subscription_notice.txt`)의 주소는 손으로 맞춘다
+
 ## 반영 시점
 
 - **배포(deploy) 때 자동으로 올라간다.** iOS `deliver` 가 이름·부제·키워드·설명·프로모션 문구·방침 주소를, Play `supply` 가 제목·간단한 설명·자세한 설명을 올린다.

@@ -3,3 +3,5 @@
 "NSPhotoLibraryUsageDescription" = "Usamos tu fototeca para elegir una foto que usarás como imagen de la tarjeta.";
 "NSMicrophoneUsageDescription" = "Usamos el micrófono para grabar tu voz leyendo una tarjeta.";
 "NSUserTrackingUsageDescription" = "Se usa para mostrar anuncios adecuados en la pantalla del tutor. No se usa la información de Elumi.";
+/* 홈 화면 앱 이름: 한국어 이룸, 그 밖의 언어 ELUM (#1419) */
+"CFBundleDisplayName" = "ELUM";

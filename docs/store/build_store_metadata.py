@@ -42,9 +42,15 @@ IOS_SUBSCRIPTION_NOTICE_FILE = 'ios_subscription_notice.txt'
 # 가이드라인 3.1.2: 자동 갱신 구독 설명에 EULA 링크 필수 (#1081)
 APPLE_EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
 
-# 모든 로케일 공통 주소 (언어별 방침 페이지 없음)
-PRIVACY_POLICY_URL = 'https://elum.suhsaechan.kr/privacy.html'
-SUPPORT_URL = 'https://elum.suhsaechan.kr/'
+# 방침 주소: 언어별 번역본 (ko 원본, 그 밖 privacy-<언어>.html) — 규칙 원본은 site/site_config.py (#1419)
+sys.path.insert(0, str(REPOSITORY_ROOT / 'site'))
+import site_config  # noqa: E402
+
+SUPPORT_URL = site_config.SITE_URL
+
+
+def to_privacy_policy_url(language: str) -> str:
+    return site_config.SITE_URL + site_config.to_privacy_path(language)
 
 # 효과를 약속하는 문장 (검색어로 쓰는 '치료' 단어 자체는 허용, 앱이 치료한다는 문장만 차단)
 EFFICACY_CLAIM_PATTERN = re.compile(
@@ -124,7 +130,7 @@ def build_output_files() -> dict[Path, str]:
         output_files[ios_directory / 'keywords.txt'] = read_source_text(language_directory, 'ios_keywords.txt')
         output_files[ios_directory / 'promotional_text.txt'] = read_source_text(language_directory, 'ios_promotional_text.txt')
         output_files[ios_directory / 'description.txt'] = build_ios_description(language_directory)
-        output_files[ios_directory / 'privacy_url.txt'] = PRIVACY_POLICY_URL
+        output_files[ios_directory / 'privacy_url.txt'] = to_privacy_policy_url(language)
         output_files[ios_directory / 'support_url.txt'] = SUPPORT_URL
         if (language_directory / 'ios_release_notes.txt').is_file():
             output_files[ios_directory / 'release_notes.txt'] = read_source_text(language_directory, 'ios_release_notes.txt')
