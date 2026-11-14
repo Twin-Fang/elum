@@ -15,13 +15,16 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,6 +47,8 @@ public class ConsentDocumentService {
     SAVED,
     /** 내용을 바꾸고 버전도 올렸다. */
     SAVED_AND_BUMPED,
+    /** 그 언어에 없던 번역본을 새로 만들었다. 버전은 ko 원본 버전이다. */
+    CREATED,
   }
 
   /** 게시 판정에 필요한 필수 약관 4종 (ConsentKey.required 기준) */
@@ -73,7 +78,7 @@ public class ConsentDocumentService {
 
   /**
    * 요청 언어 > 실제로 내줄 약관 언어: 게시본(필수 4종 모두 있음)이 있으면 그 언어, 없으면 ko
-   * en 으로 대체하지 않음 (법무 확인 안 된 번역으로 동의받지 않음, #521·#528). ko 는 원본이라 그대로
+   * en 으로 대체하지 않음 (요청 언어가 아닌 번역으로 동의받지 않음, #521). 번역본은 관리자 화면에서 게시(#1379)
    */
   public AppLocale resolvePublishedLocale(AppLocale requested) {
     if (requested == null || requested == AppLocale.KO) {
@@ -100,6 +105,19 @@ public class ConsentDocumentService {
   public ConsentDocument get(ConsentKey key, AppLocale locale) {
     return consentDocumentRepository.findByConsentKeyAndLocale(key, locale.code())
       .orElseThrow(() -> new CustomException(ErrorCode.CONSENT_DOCUMENT_NOT_FOUND));
+  }
+
+  /** (키, 언어) 한 편. 번역본은 아직 없을 수 있음 */
+  public Optional<ConsentDocument> find(ConsentKey key, AppLocale locale) {
+    return consentDocumentRepository.findByConsentKeyAndLocale(key, locale.code());
+  }
+
+  /** 그 언어에 아직 없는 약관 (ConsentKey 선언 순서) */
+  public List<ConsentKey> missingKeys(AppLocale locale) {
+    Set<ConsentKey> present = getAll(locale).stream()
+      .map(ConsentDocument::getConsentKey)
+      .collect(Collectors.toCollection(() -> EnumSet.noneOf(ConsentKey.class)));
+    return Arrays.stream(ConsentKey.values()).filter(key -> !present.contains(key)).toList();
   }
 
   public List<ConsentDocumentHistory> getHistory(ConsentKey key, AppLocale locale) {
@@ -132,13 +150,29 @@ public class ConsentDocumentService {
       .orElse("");
   }
 
+  /** ko 원본 고치기 ({@link #update(ConsentKey, AppLocale, String, String, String, boolean, String, String, String)}) */
+  @Transactional
+  public UpdateResult update(
+    ConsentKey key,
+    String label,
+    String summary,
+    String body,
+    boolean bumpVersion,
+    String newVersion,
+    String changedBy,
+    String reason
+  ) {
+    return update(key, AppLocale.KO, label, summary, body, bumpVersion, newVersion, changedBy, reason);
+  }
+
   /**
    * 약관을 고친다. <b>고치기 직전 내용을 먼저 이력으로 남긴다</b> — 같은 트랜잭션이라
    * 이력 없는 덮어쓰기가 생길 수 없다.
    *
    * <p>필수 여부는 받지 않는다. 법이 정한 값이라 {@link ConsentKey#isRequired()} 를 따른다.
    *
-   * <p>편집 대상은 ko 원본만 (다른 언어 본문은 #528 법무 확인 후 연다).
+   * <p>언어 5개 모두 편집 (번역본 게시 #1379, 번역 끝에 한국어 우선 조항). 검증·이력 규칙은 언어 무관하게 같음.
+   * ko 가 아닌 언어에 행이 없으면 새로 만든다: 버전 = 같은 키 ko 원본 현재 버전, bumpVersion 무시, 이력 없음(직전 내용 없음).
    *
    * @param bumpVersion 켰을 때만 버전을 올린다. 오타를 고칠 때마다 올리면 회원마다 어떤
    *                    문구에 동의했는지 가리기 어려워지므로 관리자가 고르게 둔다.
@@ -147,6 +181,7 @@ public class ConsentDocumentService {
   @Transactional
   public UpdateResult update(
     ConsentKey key,
+    AppLocale locale,
     String label,
     String summary,
     String body,
@@ -178,7 +213,13 @@ public class ConsentDocumentService {
       throw new CustomException(ErrorCode.CONSENT_FIELD_TOO_LONG);
     }
 
-    ConsentDocument document = get(key, AppLocale.KO);
+    Optional<ConsentDocument> existing = find(key, locale);
+    if (existing.isEmpty() && locale != AppLocale.KO) {
+      return createTranslation(key, locale, normalizedLabel, normalizedSummary, normalizedBody, changedBy, reason);
+    }
+    // ko 행이 없으면 CONSENT_DOCUMENT_NOT_FOUND (ko 는 기동 시딩 대상이라 새로 만들지 않음)
+    ConsentDocument document = existing.orElseThrow(
+      () -> new CustomException(ErrorCode.CONSENT_DOCUMENT_NOT_FOUND));
     String bumpTo = bumpVersion ? validateNewVersion(document.getVersion(), newVersion) : null;
 
     boolean contentChanged = !normalizedBody.equals(document.getBody())
@@ -201,6 +242,28 @@ public class ConsentDocumentService {
     document.setVersion(bumpTo);
     document.setPublishedAt(LocalDateTime.now());
     return UpdateResult.SAVED_AND_BUMPED;
+  }
+
+  /** 번역본 새 행: ko 원본 버전 조회 > 저장 (ko 원본이 없으면 CONSENT_DOCUMENT_NOT_FOUND) */
+  private UpdateResult createTranslation(
+    ConsentKey key, AppLocale locale, String label, String summary, String body, String changedBy, String reason
+  ) {
+    String sourceKoVersion = get(key, AppLocale.KO).getVersion();
+    consentDocumentRepository.save(
+      ConsentDocument.newTranslation(key, locale, sourceKoVersion, label, summary, body));
+    // 직전 내용이 없어 이력 행이 없으므로 만든 사람·사유는 로그에 남김
+    log.info("[consent translation] created : key={} locale={} version={} by={} reason={}",
+      key, locale.code(), sourceKoVersion, sanitizeForLog(changedBy), sanitizeForLog(reason));
+    return UpdateResult.CREATED;
+  }
+
+  /** 로그용 값 정리 (제어문자 > ?, 100자 제한) */
+  private static String sanitizeForLog(String value) {
+    if (value == null) {
+      return "";
+    }
+    String cleaned = value.strip().replaceAll("\\p{Cntrl}", "?");
+    return cleaned.length() > 100 ? cleaned.substring(0, 100) : cleaned;
   }
 
   /**

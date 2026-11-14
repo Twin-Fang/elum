@@ -70,4 +70,23 @@ public class ConsentDocument extends BaseEntity {
   /** 이 버전이 적용된 시각. 버전을 올릴 때만 갱신한다. */
   @Column(nullable = false)
   private LocalDateTime publishedAt;
+
+  /**
+   * 번역본 새 행: 버전은 옮긴 ko 원본 버전 그대로, 필수 여부는 ConsentKey
+   * (번역이 어느 ko 문구를 옮겼는지 버전으로 맞춤)
+   */
+  public static ConsentDocument newTranslation(
+    ConsentKey key, AppLocale locale, String sourceKoVersion, String label, String summary, String body
+  ) {
+    ConsentDocument document = new ConsentDocument();
+    document.setConsentKey(key);
+    document.setLocale(locale.code());
+    document.setVersion(sourceKoVersion);
+    document.setLabel(label);
+    document.setSummary(summary);
+    document.setBody(body);
+    document.setRequired(key.isRequired());
+    document.setPublishedAt(LocalDateTime.now());
+    return document;
+  }
 }
