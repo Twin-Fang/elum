@@ -23,6 +23,14 @@ public record CardImageAppearance(List<String> clothingClauses, List<String> hai
   // 생김새 조각이 머리인가 ("short black bowl-cut hair" 등)
   private static final Pattern HAIR_CLAUSE = Pattern.compile(
     "\\b(hair|haircut|bowl-cut|bangs|ponytail|braids?)\\b", Pattern.CASE_INSENSITIVE);
+  // 머리색 낱말 (머리 요청 때 색만 남겨 인물이 달라지지 않게, #1396)
+  private static final Pattern HAIR_COLOR = Pattern.compile(
+    "\\b(black|brown|blonde|blond|red|ginger|gray|grey|white|silver)\\b", Pattern.CASE_INSENSITIVE);
+  // 장면이 머리색을 바꾸는가: 색 낱말 뒤 두 낱말 안에 hair ("long brown pigtail hair"). "red raincoat" 은 아님
+  private static final Pattern SCENE_HAIR_COLOR = Pattern.compile(
+    "\\b(black|brown|blonde|blond|red|ginger|gray|grey|white|silver)\\b(\\s+[\\w-]+){0,2}\\s+hair\\b",
+    Pattern.CASE_INSENSITIVE);
+  private static final String HAIR_NOUN = " hair";
   // 생김새 조각 구분자: DB 값의 쉼표 나열 "a, b, c"
   private static final String CLAUSE_DELIMITER = ",";
   private static final String CLAUSE_JOINER = ", ";
@@ -46,7 +54,13 @@ public record CardImageAppearance(List<String> clothingClauses, List<String> hai
     if (!isClothingChanged && !isHairChanged) {
       return defaultAppearance;
     }
-    String assembled = parse(defaultAppearance).assemble(!isClothingChanged, !isHairChanged);
+    CardImageAppearance parsed = parse(defaultAppearance);
+    // 머리 요청: 모양·길이만 빼고 색은 남김 (장면이 머리색을 직접 말하면 색도 뺌, #1396)
+    CardImageAppearance adjusted = isHairChanged && !SCENE_HAIR_COLOR.matcher(sceneEn).find()
+      ? parsed.withHairColorOnly()
+      : parsed;
+    boolean shouldIncludeHair = !isHairChanged || adjusted != parsed;
+    String assembled = adjusted.assemble(!isClothingChanged, shouldIncludeHair);
     // 나머지 조각이 없어 다 빠지면 기본 그대로 (빈 생김새로 그리지 않음)
     return assembled.isBlank() ? defaultAppearance : assembled;
   }
@@ -85,6 +99,20 @@ public record CardImageAppearance(List<String> clothingClauses, List<String> hai
       }
     }
     return new CardImageAppearance(clothing, hair, others);
+  }
+
+  /**
+   * 머리 조각 > 색만 남긴 조각 ("short black bowl-cut hair" > "black hair"). 색이 없으면 머리 조각 없음
+   */
+  CardImageAppearance withHairColorOnly() {
+    List<String> colorOnly = new ArrayList<>();
+    for (String clause : hairClauses) {
+      var matcher = HAIR_COLOR.matcher(clause);
+      if (matcher.find()) {
+        colorOnly.add(matcher.group(1).toLowerCase() + HAIR_NOUN);
+      }
+    }
+    return new CardImageAppearance(clothingClauses, colorOnly, otherClauses);
   }
 
   /**
