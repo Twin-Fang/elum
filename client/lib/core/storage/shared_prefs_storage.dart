@@ -70,6 +70,10 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
+  // 스토어 별점 요청: 끝난 일과를 본 날짜 목록 (yyyy-MM-dd)
+  static const _kStoreReviewCompletedDays = 'storeReview.completedDays';
+  // 스토어 별점 창을 띄웠는가 (true 면 다시 묻지 않음)
+  static const _kStoreReviewRequested = 'storeReview.requested';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   static const _kChildScreenAwakeOn = 'screen.childAwakeOn';
@@ -142,6 +146,8 @@ class SharedPrefsStorage implements LocalStorage {
     _kManageCoachSeen,
     _kGroupCoachSeen,
     _kCardReviewCoachSeen,
+    _kStoreReviewCompletedDays,
+    _kStoreReviewRequested,
     _kChildHapticOn,
     _kChildPraiseSoundOn,
     _kChildScreenAwakeOn,
@@ -635,6 +641,26 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setCardReviewCoachSeen(bool isSeen) async {
     AppLogger.storageWrite(_kCardReviewCoachSeen, '$isSeen');
     await _prefs.setBool(_kCardReviewCoachSeen, isSeen);
+  }
+
+  @override
+  List<String> get storeReviewCompletedDays =>
+      _prefs.getStringList(_kStoreReviewCompletedDays) ?? const [];
+
+  @override
+  Future<void> setStoreReviewCompletedDays(List<String> days) async {
+    AppLogger.storageWrite(_kStoreReviewCompletedDays, days.join(','));
+    await _prefs.setStringList(_kStoreReviewCompletedDays, days);
+  }
+
+  @override
+  bool get hasRequestedStoreReview =>
+      _prefs.getBool(_kStoreReviewRequested) ?? false;
+
+  @override
+  Future<void> setHasRequestedStoreReview(bool isRequested) async {
+    AppLogger.storageWrite(_kStoreReviewRequested, '$isRequested');
+    await _prefs.setBool(_kStoreReviewRequested, isRequested);
   }
 
   @override

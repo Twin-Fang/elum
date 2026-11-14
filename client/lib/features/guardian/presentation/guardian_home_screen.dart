@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/logger/app_logger.dart';
 import '../../../core/widgets/elum_pull_to_refresh.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
@@ -23,6 +24,7 @@ import '../../profile/application/profile_session.dart';
 import '../application/guardian_child_identity.dart';
 import '../application/example_routine_seeder.dart';
 import '../application/home_routines.dart';
+import '../application/store_review_prompter.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import 'guardian_home_header.dart';
@@ -137,6 +139,27 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
+  /// 별점 요청 판단이 도는 중인가 (프레임마다 겹쳐 부르지 않게)
+  bool _isStoreReviewCheckRunning = false;
+
+  /// 스토어 별점 요청: 홈이 맨 위·코치마크 꺼짐일 때만 판단 위임 (#1352)
+  Future<void> _maybeRequestStoreReview() async {
+    if (!mounted || _isStoreReviewCheckRunning) return;
+    final isHomeOnTop = ModalRoute.of(context)?.isCurrent ?? false;
+    if (!isHomeOnTop || ref.read(homeCoachProvider).active) return;
+    _isStoreReviewCheckRunning = true;
+    try {
+      await ref
+          .read(storeReviewPrompterProvider)
+          .recordAndMaybeRequest(now: DateTime.now());
+    } catch (error) {
+      // 저장소 실패여도 홈은 그대로 (다음 진입 때 다시 판단)
+      AppLogger.error('StoreReview.prompt', error);
+    } finally {
+      _isStoreReviewCheckRunning = false;
+    }
+  }
+
   /// 권유 카드의 `만들기`: 홈 버튼과 같은 크레딧 확인 뒤 일과 만들기
   Future<void> _startRoutineFromSuggestion() async {
     final blockedSummary = await creditBlocksRoutineStart(ref);
@@ -170,7 +193,10 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     final loaded = ref.watch(todayRoutinesProvider).hasValue;
     ref.watch(homeRoutinesProvider);
     if (loaded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartCoach());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeStartCoach();
+        _maybeRequestStoreReview();
+      });
     }
 
     final coachActive = ref.watch(homeCoachProvider.select((s) => s.active));

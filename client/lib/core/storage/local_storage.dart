@@ -246,6 +246,14 @@ abstract interface class LocalStorage {
   bool get isHomeCoachSeen;
   Future<void> setHomeCoachSeen(bool v);
 
+  /// 스토어 별점 요청: 보호자 홈에서 끝난 일과를 본 날짜들 (yyyy-MM-dd, 기기 범위, #1352)
+  List<String> get storeReviewCompletedDays;
+  Future<void> setStoreReviewCompletedDays(List<String> days);
+
+  /// 스토어 별점 창을 이 기기에서 이미 띄웠는가 (한 번만 요청)
+  bool get hasRequestedStoreReview;
+  Future<void> setHasRequestedStoreReview(bool isRequested);
+
   /// 일과관리 코치마크(누르기·길게 누르기·보낸 뒤 ✓)를 봤는가. 계정이 아니라 기기에 속한다
   bool get isManageCoachSeen;
   Future<void> setManageCoachSeen(bool isSeen);

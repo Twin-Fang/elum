@@ -1,6 +1,6 @@
 """스토어 홍보 이미지 생성: 문구(copy.*.json) + 실측 화면(screens/) + 그림(art/) > 규격별 PNG
 
-사용: python3 -I render_store_images.py [--language ko|en] [--screens-fallback 폴더]
+사용: python3 -I render_store_images.py [--language ko|en] [--screens-fallback 폴더] [--to-play-metadata]
 출력: out/{언어}/{규격}/{슬라이드 id}.png, out/{언어}/feature_graphic.png
 필요: playwright(chromium), Pillow
 """
@@ -8,6 +8,7 @@ import argparse
 import json
 import pathlib
 import re
+import shutil
 import sys
 
 from PIL import Image
@@ -253,16 +254,41 @@ def render_language(language: str, screens_fallback: pathlib.Path | None) -> lis
     return outputs
 
 
+# Play 배포가 올리는 이미지 폴더 (supply: 종류별로 기존 것을 지우고 교체, #1369)
+PLAY_IMAGES_DIR_FORMAT = 'client/android/fastlane/metadata/android/{locale}/images'
+PLAY_LOCALE_BY_LANGUAGE = {'ko': 'ko-KR', 'en': 'en-US'}
+
+
+def copy_to_play_metadata(language: str) -> list[pathlib.Path]:
+    """생성본 > Play 업로드 폴더 (휴대폰 스크린샷 + 대표 그래픽), 이전 스크린샷은 지움"""
+    images_dir = REPO_ROOT / PLAY_IMAGES_DIR_FORMAT.format(locale=PLAY_LOCALE_BY_LANGUAGE[language])
+    screenshots_dir = images_dir / 'phoneScreenshots'
+    screenshots_dir.mkdir(parents=True, exist_ok=True)
+    for old_file in screenshots_dir.glob('*.png'):
+        old_file.unlink()
+    copied_files = []
+    for source in sorted((PROMO_DIR / 'out' / language / 'android_phone').glob('*.png')):
+        copied_files.append(pathlib.Path(shutil.copy2(source, screenshots_dir / source.name)))
+    copied_files.append(pathlib.Path(shutil.copy2(
+        PROMO_DIR / 'out' / language / 'feature_graphic.png', images_dir / 'featureGraphic.png')))
+    return copied_files
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--language', choices=['ko', 'en'], action='append')
     parser.add_argument('--screens-fallback', type=pathlib.Path,
                         help='실측 화면이 없을 때 쓸 임시 화면 폴더 (배치 확인용)')
+    parser.add_argument('--to-play-metadata', action='store_true',
+                        help='생성 뒤 Play 배포 업로드 폴더에 복사 (다음 deploy 때 올라감)')
     arguments = parser.parse_args()
     for language in arguments.language or ['ko', 'en']:
         for out_file in render_language(language, arguments.screens_fallback):
             with Image.open(out_file) as image:
                 print(f'{out_file.relative_to(PROMO_DIR)} {image.size[0]}x{image.size[1]}')
+        if arguments.to_play_metadata:
+            for copied_file in copy_to_play_metadata(language):
+                print(f'copied {copied_file.relative_to(REPO_ROOT)}')
 
 
 if __name__ == '__main__':
