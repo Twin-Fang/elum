@@ -1,6 +1,6 @@
 """스토어 홍보 이미지 생성: 문구(copy.*.json) + 실측 화면(screens/) + 그림(art/) > 규격별 PNG
 
-사용: python3 -I render_store_images.py [--language ko|en] [--screens-fallback 폴더] [--to-play-metadata]
+사용: python3 -I render_store_images.py [--language ko|en] [--screens-fallback 폴더] [--to-play-metadata] [--to-ios-metadata]
 출력: out/{언어}/{규격}/{슬라이드 id}.png, out/{언어}/feature_graphic.png
 필요: playwright(chromium), Pillow
 """
@@ -274,6 +274,23 @@ def copy_to_play_metadata(language: str) -> list[pathlib.Path]:
     return copied_files
 
 
+# App Store 배포가 올리는 iPhone 스크린샷 폴더 (Fastfile 이 iPhone 세트만 지우고 교체, iPad 는 유지, #1369)
+# 6.9형만 둔다: Apple 이 작은 iPhone 크기는 6.9형을 줄여 씀
+IOS_SCREENSHOTS_DIR_FORMAT = 'client/ios/fastlane/screenshots/{locale}'
+IOS_LOCALE_BY_LANGUAGE = {'ko': 'ko', 'en': 'en-US'}
+IOS_UPLOAD_SIZE = 'ios_6.9'
+
+
+def copy_to_ios_metadata(language: str) -> list[pathlib.Path]:
+    """생성본(6.9형) > App Store 업로드 폴더, 이전 파일은 지움"""
+    screenshots_dir = REPO_ROOT / IOS_SCREENSHOTS_DIR_FORMAT.format(locale=IOS_LOCALE_BY_LANGUAGE[language])
+    screenshots_dir.mkdir(parents=True, exist_ok=True)
+    for old_file in screenshots_dir.glob('*.png'):
+        old_file.unlink()
+    return [pathlib.Path(shutil.copy2(source, screenshots_dir / source.name))
+            for source in sorted((PROMO_DIR / 'out' / language / IOS_UPLOAD_SIZE).glob('*.png'))]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--language', choices=['ko', 'en'], action='append')
@@ -281,6 +298,8 @@ def main():
                         help='실측 화면이 없을 때 쓸 임시 화면 폴더 (배치 확인용)')
     parser.add_argument('--to-play-metadata', action='store_true',
                         help='생성 뒤 Play 배포 업로드 폴더에 복사 (다음 deploy 때 올라감)')
+    parser.add_argument('--to-ios-metadata', action='store_true',
+                        help='생성 뒤 App Store 배포 업로드 폴더에 6.9형 복사 (다음 deploy 때 iPhone 스크린샷만 교체)')
     arguments = parser.parse_args()
     for language in arguments.language or ['ko', 'en']:
         for out_file in render_language(language, arguments.screens_fallback):
@@ -288,6 +307,9 @@ def main():
                 print(f'{out_file.relative_to(PROMO_DIR)} {image.size[0]}x{image.size[1]}')
         if arguments.to_play_metadata:
             for copied_file in copy_to_play_metadata(language):
+                print(f'copied {copied_file.relative_to(REPO_ROOT)}')
+        if arguments.to_ios_metadata:
+            for copied_file in copy_to_ios_metadata(language):
                 print(f'copied {copied_file.relative_to(REPO_ROOT)}')
 
 

@@ -59,3 +59,61 @@ python3 run_cards.py --variant v7_try_make --case-file chips --repeat 3 --worker
 - 호출 방식이 서버의 `output_config`와 다를 수 있어, 최종안은 운영 경로로 다시 확인한다.
 - `--resume`은 프롬프트를 고치지 않았을 때만 쓴다. 고쳤으면 새 실행으로 돌린다.
 - 동시 호출이 많으면 컴퓨터 메모리가 부족해진다. `--workers`는 4 이하로 둔다.
+
+## 다국어 행동카드 평가 (#1375)
+
+영어 지시문 하나로 ko·ja·zh·es 카드를 만들 수 있는지 본다. 카드 글은 보호자가 쓴 언어(입력 `lang`)로 나와야 한다.
+
+| 파일 | 역할 |
+|---|---|
+| `card_cases_multilang.json` | 16개 입력 x 4개 언어 (id 끝 `_ko/_ja/_zh/_es`, `base_id` 로 묶음). 기대 낱말은 언어마다 옮김, `safety_must` 는 꼭 들어갈 안전 낱말 |
+| `card_language.py` | 출력 언어 판정(한글 > ko, 가나 > ja, 한자만 > zh, 라틴 + 스페인어 표지 > es), ja·zh·es 길이·어미·금지어·호칭, 안전 위반 수 |
+| `card_multilang_report.py` | 실행 폴더 여러 개 > 언어 x 변형 표(언어 일치, 규칙 위반, 빈 카드, 안전 위반, 평균 토큰) + 나쁜 출력 목록 |
+| `variants/cards/_supplement_en.txt` | 영어 틀에 붙이는 보강 (서버 한국어 보강 `ROUTINE_CREATE_SUPPLEMENT` 를 영어로, `{outputLanguage}` 자리) |
+| `variants/cards/en_harness_v1.full.txt` | 운영 ko 지시문을 영어로 옮기고 언어 자리를 둔 안 |
+
+변형:
+- `prod`: 오늘 하네스 그대로 (운영 ko 지시문 + 한국어 보강 + ko 스키마). 입력 언어와 상관없이 같은 요청
+- `en_template`: 서버 영어 틀 `MultilingualPromptDefaults.CREATE_TEMPLATE` 을 입력 언어의 `ContentLanguageSpec` 으로 채움 + 영어 보강 + 그 언어 스키마·호칭(ko `이룸이`, 그 밖 `Elumi`)
+- `{outputLanguage}` 자리가 있는 `이름.full.txt`: `en_template` 과 같은 방식으로 언어마다 채움
+- 서버 `ContentLanguageSpec` KO 는 어조·예시 칸이 비어 있어, 영어 틀을 ko 에 쓸 때는 `card_request.KO_TEMPLATE_FILL` 임시값을 쓴다
+
+```bash
+python3 run_cards.py --variant prod --case-file card_cases_multilang.json --repeat 2 --workers 3          # 호출 수만
+python3 run_cards.py --variant prod --case-file card_cases_multilang.json --repeat 2 --workers 3 --yes
+python3 run_cards.py --variant en_template --case-file card_cases_multilang.json --repeat 2 --workers 3 --yes
+python3 card_multilang_report.py results/cards/prod__medium__multilang/<실행> results/cards/en_template__medium__multilang/<실행>
+```
+
+- 토큰은 `claude -p --output-format json` 의 `usage` (입력 = 새 입력 + 캐시 쓰기 + 캐시 읽기, 출력은 thinking 포함). 입력의 대부분은 픽토그램 목록이라 지시문 차이는 `지시문 글자` 칸으로 본다.
+- `claude -p` 는 temperature 를 지정할 수 없다 (운영은 0). 반복 호출로 흔들림을 본다.
+- 서버 반영 뒤(#1375): `MultilingualPromptDefaults.CREATE_TEMPLATE` 이 `en_harness_v1` 과 같은 글이고(원본은 서버), Claude 보강도 `{outputLanguage}` 자리가 있는 영어다.
+  `--java-ref ""` 로 작업 폴더 자바를 읽으면 `en_template` = v1, 보강도 서버 문구를 읽는다. 옛 ref(origin/develop)에서는 `_supplement_en.txt`(서버 문구 사본)를 쓴다.
+- `card_multilang_report.py` 는 lang 없는 옛 입력 세트(holdout2 등) 실행 폴더도 받는다 (언어는 ko 로 판정).
+
+## 카드 그림·다시 그리기 E2E (#1378)
+
+운영 관리자 시험 엔드포인트(`/admin/prompts/{key}/test`, 그림만 그리고 저장 안 함)로 운영 서버가 운영 설정 그대로 그린다.
+운영 그림 제공자는 2026-11-11부터 `CLOUDFLARE`(klein-4b, 실패 시 OpenAI 캐릭터 없이)라 경로 두 개를 본다.
+
+| 경로 | 운영과 같은 조립 |
+|---|---|
+| `cf` | 카드 설명(+ ` (Guardian note: 요청)`) > `FLUX_IMAGE_PROMPT_TRANSLATE` 번역 > `FLUX_ROUTINE_IMAGE_PREFIX` + 카드 인물 생김새 + 장면. seed 는 못 넘김(관리자 시험은 seed 없음) |
+| `oa` | `ROUTINE_IMAGE_PREFIX_EN` + 장면 JSON(캐릭터 없음). 제목·영어 장면·보호자 요청은 관리자 시험이 못 실어 지시문 끝에 운영 JSON 을 붙임(뒤에 설명만 든 JSON 이 한 번 더 붙는 차이) |
+
+| 파일 | 역할 |
+|---|---|
+| `redraw_cases.json` | 카드 7종 x 일과 언어 5개, 보호자 요청 10개 |
+| `run_redraw.py` | 장수 계획·실행·컨택트 시트·seed 재현 (`results/redraw_e2e/<변형>/`) |
+| `variants/redraw/*.json` | 개선안: 지시문 본문 교체, 옷·머리 요청 시 기본 옷 뺀 생김새, OpenAI 다시 그리기 영어 장면 |
+
+```bash
+python3 run_redraw.py plan                                     # 장수만 (호출 없음)
+python3 run_redraw.py run --path cf --max-images 61 --yes      # Cloudflare 무료 한도(하루 약 95장)를 오늘 사용량으로 확인 후 실행
+python3 run_redraw.py run --variant fix --path oa --groups redraw --redraw-ids r3_cup --max-images 3 --yes
+python3 run_redraw.py sheet --variant prod                     # verdicts.json(사람 판정)이 있으면 타일 아래에 표시
+python3 run_redraw.py seedcheck --yes                          # 같은 seed·같은 문장 2장 (.env.local Cloudflare 토큰)
+```
+
+- 그림 호출은 비용이 나가 `--yes`와 `--max-images`가 모두 있어야 돈다. 이미 그린 장은 건너뛴다.
+- Gemini 그림은 쓰지 않는다. 번역은 운영과 같은 Gemini 글 모델(운영 크레딧)이다.
