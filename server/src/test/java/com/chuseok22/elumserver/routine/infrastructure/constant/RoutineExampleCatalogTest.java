@@ -31,23 +31,23 @@ class RoutineExampleCatalogTest {
     for (RoutineExample example : RoutineExampleCatalog.ALL) {
       for (RoutineExampleStep step : example.steps()) {
         assertThat(pictograms.contains(step.pictogramId()))
-          .as(example.titleKo() + " / " + step.textKo() + " -> " + step.pictogramId())
+          .as(example.title().ko() + " / " + step.text().ko() + " -> " + step.pictogramId())
           .isTrue();
       }
     }
   }
 
   @Test
-  @DisplayName("제목·카드 문장이 ko·en 모두 비어 있지 않고 카드가 3장 이상이다")
+  @DisplayName("제목·카드 문장이 다섯 언어 모두 비어 있지 않고 카드가 3장 이상이다")
   void noBlankText() {
     for (RoutineExample example : RoutineExampleCatalog.ALL) {
-      assertThat(example.titleKo()).isNotBlank();
-      assertThat(example.titleEn()).isNotBlank();
+      assertThat(example.title().ko()).isNotBlank();
+      assertAllLanguagesFilled(example.title());
       assertThat(example.scheduledTime()).isNotNull();
-      assertThat(example.steps()).as(example.titleKo()).hasSizeGreaterThanOrEqualTo(3);
+      assertThat(example.steps()).as(example.title().ko()).hasSizeGreaterThanOrEqualTo(3);
       for (RoutineExampleStep step : example.steps()) {
-        assertThat(step.textKo()).isNotBlank();
-        assertThat(step.textEn()).isNotBlank();
+        assertThat(step.text().ko()).isNotBlank();
+        assertAllLanguagesFilled(step.text());
       }
     }
   }
@@ -60,7 +60,7 @@ class RoutineExampleCatalogTest {
     boolean canCheckFiles = Files.isDirectory(assetDirectory);
     for (RoutineExample example : RoutineExampleCatalog.ALL) {
       for (RoutineExampleStep step : example.steps()) {
-        String label = example.titleKo() + " / " + step.textKo();
+        String label = example.title().ko() + " / " + step.text().ko();
         assertThat(step.exampleImageId()).as(label).matches("[a-z_]+");
         if (canCheckFiles) {
           assertThat(Files.exists(assetDirectory.resolve(step.exampleImageId() + ".webp")))
@@ -76,9 +76,18 @@ class RoutineExampleCatalogTest {
     Map<String, Set<String>> textsByImage = new HashMap<>();
     for (RoutineExample example : RoutineExampleCatalog.ALL) {
       for (RoutineExampleStep step : example.steps()) {
-        textsByImage.computeIfAbsent(step.exampleImageId(), key -> new HashSet<>()).add(step.textKo());
+        textsByImage.computeIfAbsent(step.exampleImageId(), key -> new HashSet<>()).add(step.text().ko());
       }
     }
     textsByImage.forEach((imageId, texts) -> assertThat(texts).as(imageId).hasSize(1));
+  }
+
+  /** 다섯 언어 문장이 모두 있음 (비면 영어로 대체돼 일본어 일과에 영어 글이 섞임) */
+  private static void assertAllLanguagesFilled(LocalizedText text) {
+    assertThat(text.ko()).isNotBlank();
+    assertThat(text.en()).as(text.ko() + " en").isNotBlank();
+    assertThat(text.ja()).as(text.ko() + " ja").isNotBlank();
+    assertThat(text.zh()).as(text.ko() + " zh").isNotBlank();
+    assertThat(text.es()).as(text.ko() + " es").isNotBlank();
   }
 }

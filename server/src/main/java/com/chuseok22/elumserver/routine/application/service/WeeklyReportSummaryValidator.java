@@ -36,7 +36,17 @@ final class WeeklyReportSummaryValidator {
     // 영어: advice, judgement, effect, cause
     "should", "try ", "consider", "recommend", "suggest", "need to", "needs to", "must ", "you could", "let's",
     "great job", "well done", "good job", "excellent", "impressive", "unfortunately", "worry", "improve", "progress",
-    "effect", "because", "due to", "thanks to", "therapy", "treatment", "diagnos", "disorder", "disabilit", "autis"
+    "effect", "because", "due to", "thanks to", "therapy", "treatment", "diagnos", "disorder", "disabilit", "autis",
+    // 일본어: 권유·평가·원인·효과·진단
+    "しましょう", "してください", "てみて", "おすすめ", "すべき", "必要", "よくできました", "すごい", "素晴らしい", "えらい",
+    "残念", "心配", "改善", "向上", "成長", "効果", "おかげ", "原因", "診断", "障害", "治療", "自閉",
+    // 중국어(간체): 권유·평가·원인·효과·진단
+    "应该", "建议", "试试", "推荐", "需要", "做得好", "真棒", "很棒", "优秀", "遗憾", "担心", "进步", "提高", "改善", "效果",
+    "因为", "由于", "多亏", "原因", "成长", "诊断", "障碍", "治疗", "自闭",
+    // 스페인어: 권유·평가·원인·효과·진단
+    "deberías", "debería", "intenta", "considera", "recomend", "suger", "necesita", "muy bien", "buen trabajo", "excelente",
+    "lamentablemente", "preocup", "mejora", "progres", "efecto", "porque", "debido a", "gracias a", "terapia", "tratamiento",
+    "diagnós", "trastorno", "discapacidad", "autis"
   );
 
   private WeeklyReportSummaryValidator() {

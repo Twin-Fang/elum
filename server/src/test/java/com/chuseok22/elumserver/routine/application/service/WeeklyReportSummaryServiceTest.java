@@ -166,14 +166,14 @@ class WeeklyReportSummaryServiceTest {
   }
 
   @Test
-  @DisplayName("ko 외 언어 요청은 영어 글(en)로 저장·조회한다 — 지시문과 고정 문장이 ko·en 뿐이라")
-  void nonKoreanRequest_usesEnglishSummary() {
-    when(weeklyReportSummaryStore.find(PROFILE_ID, ENDED_WEEK.start(), "en")).thenReturn(Optional.empty());
+  @DisplayName("일본어 요청은 일본어 글(ja)로 저장·조회한다 — 일본어 보호자에게 영어 정리 글이 가지 않게")
+  void japaneseRequest_usesJapaneseSummary() {
+    when(weeklyReportSummaryStore.find(PROFILE_ID, ENDED_WEEK.start(), "ja")).thenReturn(Optional.empty());
     when(systemConfigService.getBoolean(ConfigKey.WEEKLY_REPORT_AI_ENABLED)).thenReturn(false);
 
     Summary summary = summaryFor(AppLocale.JA);
 
-    assertThat(summary.lines().get(0)).isEqualTo("하늘이 completed 2 of 4 routines during the week.");
+    assertThat(summary.lines().get(0)).isEqualTo("하늘이は今週、日課4個のうち2個を終えました。");
   }
 
   private void givenAiOn() {

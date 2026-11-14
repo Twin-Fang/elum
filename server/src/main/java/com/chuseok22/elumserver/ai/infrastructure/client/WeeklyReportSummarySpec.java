@@ -17,9 +17,19 @@ final class WeeklyReportSummarySpec {
   private WeeklyReportSummarySpec() {
   }
 
-  /// 일과 언어 > 지시문 (ko 는 한국어, 그 밖은 영어 — 영어 지시문은 en 문장을 씀)
+  /// 일과 언어 > 지시문 (ko 는 한국어 지시문, 그 밖은 영어 지시문 + 출력 언어 한 줄)
   static String systemPromptFor(AppLocale locale) {
-    return locale == AppLocale.KO ? SYSTEM_PROMPT_KO : SYSTEM_PROMPT_EN;
+    return locale == AppLocale.KO ? SYSTEM_PROMPT_KO : SYSTEM_PROMPT_EN.formatted(outputLanguageOf(locale));
+  }
+
+  /// 영어 지시문의 출력 언어 이름 (ja · zh · es 도 같은 영어 지시문을 씀)
+  static String outputLanguageOf(AppLocale locale) {
+    return switch (locale) {
+      case JA -> "Japanese (polite です/ます)";
+      case ZH -> "Simplified Chinese";
+      case ES -> "neutral Latin American Spanish (tú)";
+      default -> "English";
+    };
   }
 
   static final String SYSTEM_PROMPT_KO = """
@@ -57,7 +67,7 @@ final class WeeklyReportSummarySpec {
     - remainingSteps: cards left unfinished (routine title, card title, times left).
 
     [How to write]
-    - Write only record facts that appear in the input. Plain, polite English, at most three sentences, one sentence per item of the lines array.
+    - Write only record facts that appear in the input. Write in plain, polite %s, at most three sentences, one sentence per item of the lines array.
     - Copy numbers exactly as given. Never calculate, round, or invent a number.
     - To name the child, write "{userName}" exactly as it is. Do not change or inflect it.
     - Use routine and card titles exactly as they appear in the input.

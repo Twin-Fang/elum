@@ -117,14 +117,17 @@ def main():
     parser.add_argument("--character", default="", choices=["", "LULU", "POPO"], help="모든 케이스를 한 캐릭터로 고정 (비교 실험용)")
     parser.add_argument("--yes", action="store_true", help="추정 비용을 확인하고 실행")
     parser.add_argument("--allow-gemini-image", action="store_true",
-                        help="사용자가 Gemini 이미지로 테스트하라고 명시했을 때만. 운영 그림 제공자는 OpenAI")
+                        help="사용자가 Gemini 이미지로 테스트하라고 명시했을 때만. 운영 그림 제공자는 Cloudflare")
     args = parser.parse_args()
 
     prod = lib.load_prod_config()
     print(lib.describe_prod_config(prod))
     # Gemini 그림은 명시 허락이 있을 때만 (루트 CLAUDE.md "AI 호출 테스트는 운영 서버 기준으로만")
     if prod["image"]["provider"] == "GEMINI" and not args.allow_gemini_image:
-        sys.exit("Gemini 그림 금지: 운영 그림 제공자는 OpenAI. 사용자가 명시했을 때만 --allow-gemini-image")
+        sys.exit("Gemini 그림 금지: 운영 그림 제공자는 Cloudflare. 사용자가 명시했을 때만 --allow-gemini-image")
+    # 이 도구는 OpenAI·Gemini 경로만 앎: Cloudflare 운영 시험은 run_redraw.py (아래 else 가 Gemini 로 빠지지 않게)
+    if prod["image"]["provider"] not in ("OPENAI", "GEMINI"):
+        sys.exit(f"{prod['image']['provider']} 그림은 run_redraw.py 로 시험 (이 도구는 OPENAI·GEMINI 만 지원)")
     config = load_image_config(args.variant, prod)
     case_ids = args.cases.split(",")
     records = {

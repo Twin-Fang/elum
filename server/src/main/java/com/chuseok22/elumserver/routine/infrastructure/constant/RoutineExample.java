@@ -4,12 +4,11 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * 예시 일과 1개: 분류, 제목(ko·en), 오늘 예정 시각, 카드 목록
+ * 예시 일과 1개: 분류, 제목(다섯 언어), 오늘 예정 시각, 카드 목록
  */
 public record RoutineExample(
   RoutineExampleCategory category,
-  String titleKo,
-  String titleEn,
+  LocalizedText title,
   LocalTime scheduledTime,
   List<RoutineExampleStep> steps
 ) {

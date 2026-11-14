@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.ClasspathLocaleBundle;
 import com.chuseok22.elumserver.credit.core.CreditPeriodUnit;
 import com.chuseok22.elumserver.notification.core.NotificationDraft;
 import com.chuseok22.elumserver.notification.core.NotificationType;
@@ -8,14 +9,9 @@ import com.chuseok22.elumserver.notification.infrastructure.entity.AdminMessage;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
 import com.chuseok22.elumserver.notification.infrastructure.entity.PushDevice;
 import com.chuseok22.elumserver.notification.infrastructure.push.PushMessage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -55,7 +51,7 @@ public class PushMessageFactory {
   static final String ELUMI_ROUTINES_CHANNEL_ID = "elumi_routines";
 
   // 언어별 문구 캐시
-  private final Map<AppLocale, Properties> bundleByLocale = new ConcurrentHashMap<>();
+  private final Map<AppLocale, Map<String, String>> bundleByLocale = new ConcurrentHashMap<>();
 
   /** 알림 행 + 기록 결과 + 받는 기기 > 푸시 메시지 */
   public PushMessage create(Notification notification, RecordedNotification recorded, PushDevice device) {
@@ -170,28 +166,15 @@ public class PushMessageFactory {
 
   // 언어 > en 순서로 키를 찾음
   private String text(AppLocale locale, String key) {
-    String text = bundle(locale).getProperty(key);
+    String text = bundle(locale).get(key);
     if (text == null && locale != AppLocale.EN) {
       log.warn("[notification push] missing copy key : {}", key);
-      text = bundle(AppLocale.EN).getProperty(key);
+      text = bundle(AppLocale.EN).get(key);
     }
     return text == null ? key : text;
   }
 
-  private Properties bundle(AppLocale locale) {
-    return bundleByLocale.computeIfAbsent(locale, this::loadBundle);
-  }
-
-  private Properties loadBundle(AppLocale locale) {
-    Properties properties = new Properties();
-    String resource = BUNDLE_RESOURCE.formatted(locale.code());
-    try (InputStream stream = getClass().getClassLoader().getResourceAsStream(resource)) {
-      if (stream != null) {
-        properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
-      }
-    } catch (IOException exception) {
-      log.warn("[notification push] copy bundle unreadable : {}", resource);
-    }
-    return properties;
+  private Map<String, String> bundle(AppLocale locale) {
+    return bundleByLocale.computeIfAbsent(locale, key -> ClasspathLocaleBundle.load(BUNDLE_RESOURCE, key));
   }
 }
