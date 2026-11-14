@@ -156,4 +156,46 @@ class RoutineCreateServiceContentLocaleTest {
     assertThat(AiCallContext.currentMemberId()).isNull();
     assertThat(AiCallContext.currentContentLocale()).isEqualTo(AppLocale.KO);
   }
+
+  @Test
+  @DisplayName("일과 만들기: 보호자가 쓴 언어가 켜져 있으면 화면 언어와 달라도 그 언어로 AI 를 부르고 routine.language 에 저장한다 (#1375)")
+  void create_usesTheLanguageTheGuardianTyped() {
+    when(enabledLocales.resolveContentLocale(any())).thenReturn(AppLocale.EN);
+    when(enabledLocales.current()).thenReturn(Set.of(AppLocale.KO, AppLocale.EN, AppLocale.JA));
+    givenProfile(Set.of());
+    when(creditReservationService.reserve("member-1", CreditJobKind.ROUTINE_CREATE, "key-1", true))
+      .thenReturn(CreditReservation.reserved("job-1"));
+    AtomicReference<AppLocale> seenByAi = new AtomicReference<>();
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any())).thenAnswer(invocation -> {
+      seenByAi.set(AiCallContext.currentContentLocale());
+      return new RoutineAiPipeline.RoutineGenerationResult("学校に行きます", List.of(
+        new RoutineAiPipeline.GeneratedStep(1, "服を着ます", "学校に行く服を着ます", "img/b/1.png")), "batch-1");
+    });
+    when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), eq(1)))
+      .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(3, 0, 97)));
+
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest("明日、学校に行く", null, null, null, null), "key-1");
+
+    assertThat(seenByAi.get()).isEqualTo(AppLocale.JA);
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    verify(routineCreationWriter).save(eq("member-1"), eq("profile-1"), saved.capture(), eq("job-1"), eq(1));
+    assertThat(saved.getValue().getLanguage()).isEqualTo(AppLocale.JA);
+  }
+
+  @Test
+  @DisplayName("추가 질문: 보호자가 쓴 언어가 꺼져 있으면 지금처럼 화면 언어 기준 값을 쓴다 (#1375)")
+  void generateQuestion_disabledTypedLanguageFallsBack() {
+    when(enabledLocales.resolveContentLocale(any())).thenReturn(AppLocale.EN);
+    when(enabledLocales.current()).thenReturn(Set.of(AppLocale.KO, AppLocale.EN));
+    givenProfile(Set.of(SupportGoal.PREPARE_ITEMS));
+    AtomicReference<AppLocale> seenByAi = new AtomicReference<>();
+    when(routineAiPipeline.generateQuestion(any(), any(), any())).thenAnswer(invocation -> {
+      seenByAi.set(AiCallContext.currentContentLocale());
+      return new RoutineAiPipeline.RoutineQuestionResult(List.of());
+    });
+
+    routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("明天去学校"));
+
+    assertThat(seenByAi.get()).isEqualTo(AppLocale.EN);
+  }
 }

@@ -191,12 +191,13 @@ def question_response_schema(goal_count: int, hints: dict = None) -> dict:
     }
 
 
-def create_user_content(routine_text: str, support_goals: list, answers: list, should_include_catalog: bool = True) -> str:
-    """RoutineCreateAiInput JSON (이름은 서버가 '이룸이' 자리표시로 바꿔 보낸다)"""
+def create_user_content(routine_text: str, support_goals: list, answers: list, should_include_catalog: bool = True,
+                        nickname: str = "이룸이") -> str:
+    """RoutineCreateAiInput JSON (이름은 서버가 자리표시로 바꿔 보낸다: ko '이룸이', 그 밖 'Elumi')"""
     payload = {
         "task": "CREATE_ROUTINE",
         "routineText": routine_text,
-        "childProfile": {"nickname": "이룸이", "supportGoals": support_goals},
+        "childProfile": {"nickname": nickname, "supportGoals": support_goals},
         "additionalAnswers": answers,
         "pictogramCatalog": pictogram_ids() if should_include_catalog else [],
     }

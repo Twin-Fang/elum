@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.InputLanguageDetector;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -89,7 +90,7 @@ public class RoutineCreateService {
     // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
     // 다른 회원에게 새어 들어가지 않게 한다.
     // 질문도 일과가 될 언어로 묻는다 (create 와 같은 값). 계산이 던져도 맥락이 남지 않게 set 앞에서 한다.
-    AppLocale contentLocale = contentLocaleForRequest();
+    AppLocale contentLocale = contentLocaleForInput(request.rawInputText());
     AiCallContext.setMemberId(caller.memberId());
     AiCallContext.setContentLocale(contentLocale);
     try {
@@ -159,8 +160,8 @@ public class RoutineCreateService {
     // 입력 글과 답변은 가공하지 않고 넘긴다 — 로컬 마스킹은 실패 시 원문을 넘기는 fail-open 이라 보장이 못 되고 호출마다 수 초가 걸린다.
     List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
-    // 일과 언어: AI 호출과 routine.language 가 이 한 값을 쓴다 (AI 호출 전에 정함)
-    AppLocale contentLocale = contentLocaleForRequest();
+    // 일과 언어: AI 호출과 routine.language 가 이 한 값을 쓴다 (AI 호출 전에 정함, 보호자가 쓴 언어 우선)
+    AppLocale contentLocale = contentLocaleForInput(request.rawInputText());
     AiCallContext.setMemberId(caller.memberId());
     AiCallContext.setContentLocale(contentLocale);
     // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
@@ -245,6 +246,12 @@ public class RoutineCreateService {
   /// 이번 요청이 만드는 일과의 콘텐츠 언어: 화면 언어 > 켜진 언어 목록에 비춰 결정 (요청 스레드 전용)
   AppLocale contentLocaleForRequest() {
     return enabledLocales.resolveContentLocale(CurrentLocale.get());
+  }
+
+  /// 보호자 입력 글자 체계 > 켜진 일과 언어 (판정이 안 되거나 꺼진 언어면 화면 언어 기준 값, #1375)
+  AppLocale contentLocaleForInput(String rawInputText) {
+    return InputLanguageDetector.resolve(
+      rawInputText, CurrentLocale.get(), enabledLocales.current(), contentLocaleForRequest());
   }
 
   /// 앱이 보낸 멱등 키. 없으면(구버전 앱) 서버가 만든다.
