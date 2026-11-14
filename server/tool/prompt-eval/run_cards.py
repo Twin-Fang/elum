@@ -67,6 +67,14 @@ def select_cases(args) -> list:
     return cases
 
 
+def read_localized_supplement(language: str) -> str:
+    """언어별 보강: 서버 보강에 출력 언어 자리가 있으면 그것(원본), 옛 ref 면 _supplement_en.txt (서버 문구의 사본)"""
+    server_supplement = card_request.read_java_string(card_request.CLAUDE_TEXT_CLIENT, "ROUTINE_CREATE_SUPPLEMENT")
+    if LANGUAGE_SLOT in server_supplement:
+        return card_request.read_supplement(language)
+    return "\n\n" + card_request.fill_language_slots(ENGLISH_SUPPLEMENT_FILE.read_text(encoding="utf-8"), language)
+
+
 def build_prompt_bundles(variant: str, production_prompt: str, languages: set) -> dict:
     """언어 > (지시문, 스키마, 호칭). 운영·덧붙임 변형은 언어와 상관없이 ko 하나 (오늘 하네스와 같음)"""
     full_file = VARIANT_FOLDER / f"{variant}.full.txt"
@@ -74,10 +82,8 @@ def build_prompt_bundles(variant: str, production_prompt: str, languages: set) -
     if variant == EN_TEMPLATE_VARIANT:
         full_text = card_request.read_multilingual_create_template()
     if full_text is not None and LANGUAGE_SLOT in full_text:
-        supplement = ENGLISH_SUPPLEMENT_FILE.read_text(encoding="utf-8")
         return {language: (card_request.build_replaced_system_prompt(
-                    card_request.fill_language_slots(full_text, language),
-                    "\n\n" + card_request.fill_language_slots(supplement, language)),
+                    card_request.fill_language_slots(full_text, language), read_localized_supplement(language)),
                     card_request.build_routine_schema(language), card_request.nickname_for(language))
                 for language in languages}
     if full_text is not None:

@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.AiFailureKind;
 import com.chuseok22.elumserver.ai.core.ClaudeApiKey;
+import com.chuseok22.elumserver.ai.core.ContentLanguageSpec;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
@@ -42,17 +43,29 @@ public class ClaudeTextClient implements TextGenerationClient {
   private static final String EFFORT_UNSET = "UNSET";
   /**
    * 일과 만들기 지시문 뒤에 붙이는 Claude 전용 보강 (운영 DB 지시문과 무관하게 코드에서 붙음)
-   * 실측(#1083): Haiku 5.5 가 description 에 "앉아서 기다려요"·"잡고 밀어요"처럼 두 동작을 잇는 일이 31단계 중 3번 > 보강
+   * 실측(#1083): Haiku 5.5 가 description 에 두 동작을 잇는 일 > 보강. {outputLanguage} 는 요청의 일과 언어로 채움 (#1375)
    */
   static final String ROUTINE_CREATE_SUPPLEMENT = """
 
-    [추가 확인 규칙]
-    - description 에는 동작 하나만 씁니다. "~아서/~어서"(앉아서 기다려요), "~고"(잡고 밀어요), "~며", \
-    "~ㄹ 때"(자를 때 앉아요)로 두 동작이나 조건을 잇지 않습니다. \
-    예: "의자에 앉아서 기다려요"(X) → "의자에서 기다려요"(O), "손잡이를 잡고 카트를 밀어요"(X) → \
-    "두 손으로 카트를 밀어요"(O).
-    - title·description 은 한국어로만 씁니다. 한자·일본어·영어 낱말을 섞지 않습니다(imagePromptEn 만 영어).
-    - 단계는 실제로 하는 순서대로 놓습니다.""";
+
+    [Extra checks]
+    - Each description holds one action only. Do not join two actions or a condition with "and", "then", "while", \
+    "when", commas, or the {outputLanguage} equivalents. For example, "Sit on the chair and wait" is wrong; \
+    "Wait on the chair" is right.
+    - Write every title and description only in {outputLanguage}. Do not mix in words from other languages \
+    (only imagePromptEn is in English).
+    - Put the steps in the real order of doing.""";
+
+  private static final String OUTPUT_LANGUAGE_SLOT = "{outputLanguage}";
+
+  /// 보강 문구 > 일과 언어 이름을 채운 문구 (예: Japanese)
+  static String routineCreateSupplementFor(AppLocale locale) {
+    return ROUTINE_CREATE_SUPPLEMENT.replace(OUTPUT_LANGUAGE_SLOT, ContentLanguageSpec.of(locale).englishName());
+  }
+
+  private static String routineCreateSupplementForCurrentLocale() {
+    return routineCreateSupplementFor(AiCallContext.currentContentLocale());
+  }
 
   private final GeminiTextClient geminiTextClient;
   private final PromptTemplateService promptTemplateService;
@@ -94,7 +107,7 @@ public class ClaudeTextClient implements TextGenerationClient {
     boolean includeImagePromptEn
   ) {
     return call(
-      promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX) + ROUTINE_CREATE_SUPPLEMENT,
+      promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX) + routineCreateSupplementForCurrentLocale(),
       geminiTextClient.buildCreateRoutineUserContent(sanitizedInputText, nickname, supportGoals, answers),
       geminiTextClient.responseSchema(includeImagePromptEn), AiCallType.CLAUDE_TEXT_CREATE
     );
@@ -113,7 +126,7 @@ public class ClaudeTextClient implements TextGenerationClient {
   @Override
   public String generateRoutineJsonForTest(String systemPrompt, String sampleInput) {
     return call(
-      systemPrompt + ROUTINE_CREATE_SUPPLEMENT,
+      systemPrompt + routineCreateSupplementForCurrentLocale(),
       geminiTextClient.buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of()),
       geminiTextClient.responseSchema(true), AiCallType.CLAUDE_TEXT_CREATE
     );

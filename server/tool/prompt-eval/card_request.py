@@ -29,8 +29,8 @@ GLOBAL_NICKNAME = "Elumi"
 LANGUAGE_SPEC_FIELDS = ["englishName", "routineTitleHint", "stepTitleHint", "stepDescriptionHint", "toneGuide",
                         "stepTitleLength", "descriptionLength", "stepTitleExamples", "descriptionExamples",
                         "routineTitleExamples", "questionExamples"]
-# 영어 틀을 ko 에 쓸 때 채울 값: 서버 ContentLanguageSpec KO 는 어조·예시가 비어 있음 > 하네스 임시값 (#1375)
-# 채택하면 ContentLanguageSpec KO 로 옮긴다 (운영 ko 지시문의 카드 문장 규칙과 같은 뜻)
+# 영어 틀을 ko 에 쓸 때 채울 값: 옛 ref(ContentLanguageSpec KO 어조 칸이 빈 서버)에서만 씀 (#1375)
+# 서버 ContentLanguageSpec KO 에 같은 값이 들어감 > 그 ref 에서는 자바 값을 그대로 읽음
 KO_TEMPLATE_FILL = {
     "toneGuide": "- Write every title and description in the polite Korean '~해요' style, ending in \"요\", "
                  "such as \"옷을 입어요\". Never end with a noun or \"~하기\".\n"
@@ -172,7 +172,7 @@ def read_language_spec(language: str) -> dict:
     for field, value in spec.items():
         if re.fullmatch(r"KO_[A-Z_]+", value):
             spec[field] = read_java_string(LANGUAGE_SPEC, value)
-    if language == "ko":
+    if language == "ko" and not spec["toneGuide"]:
         spec.update(KO_TEMPLATE_FILL)
     return spec
 
@@ -218,9 +218,15 @@ def build_routine_schema(language: str = "ko") -> dict:
     })
 
 
+def read_supplement(language: str = "ko") -> str:
+    """서버 Claude 보강 (출력 언어 자리가 있으면 그 언어 이름으로 채움, #1375)"""
+    supplement = read_java_string(CLAUDE_TEXT_CLIENT, "ROUTINE_CREATE_SUPPLEMENT")
+    return supplement.replace("{outputLanguage}", read_language_spec(language)["englishName"])
+
+
 def build_system_prompt(production_prompt: str, variant_text: str = "") -> str:
     """운영 지시문 + (시험할 추가 지시) + Claude 보강. 서버와 같은 순서"""
-    supplement = read_java_string(CLAUDE_TEXT_CLIENT, "ROUTINE_CREATE_SUPPLEMENT")
+    supplement = read_supplement()
     middle = f"\n\n{variant_text.strip()}" if variant_text.strip() else ""
     return production_prompt + middle + supplement
 
@@ -228,7 +234,7 @@ def build_system_prompt(production_prompt: str, variant_text: str = "") -> str:
 def build_replaced_system_prompt(full_prompt: str, supplement: str = None) -> str:
     """지시문 전체 교체 변형 + Claude 보강 (supplement 없으면 서버 한국어 보강)"""
     if supplement is None:
-        supplement = read_java_string(CLAUDE_TEXT_CLIENT, "ROUTINE_CREATE_SUPPLEMENT")
+        supplement = read_supplement()
     return full_prompt.strip() + supplement
 
 

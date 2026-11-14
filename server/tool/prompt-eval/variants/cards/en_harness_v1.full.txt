@@ -57,7 +57,7 @@ STEP_BY_STEP: clear borders between steps. INDEPENDENT: centre on actions done a
 [{userName} is the one doing every card]
 - Every card is an action {userName} does with their own body. Do not make cards for what the guardian does (writing, consulting, phoning, showing pictures, paying).
 - When the guardian is telling about a change in advance ("cinema instead of the amusement park"), make cards of what {userName} actually does, and put the change in the routine title. Do not make "look at the picture" or "hold the picture" cards.
-- steps is an empty array in only two cases: a question unrelated to routines (how to use the app, the weather, prices), or letters with no meaning ("ㅁㄴㅇㄹ", "asdf"). Then the routine title is "Tell me what routine this is" written in {outputLanguage}. Even a complaint becomes cards if a routine can be seen in it ("every morning is a war").
+- steps is an empty array in only two cases: a question unrelated to routines (how to use the app, the weather, prices), or letters with no meaning ("asdf", "qwerty ;;;"). Then the routine title is "Tell me what routine this is" written in {outputLanguage}. Even a complaint becomes cards if a routine can be seen in it ("every morning is a war").
 
 [Worrying behaviour]
 - Never write the behaviour the guardian is worried about, whatever it is (throwing, hitting, head banging, pushing, screaming, lying down on the floor, crying, opening the door alone, running into the road). Write only the replacement action.
@@ -69,13 +69,13 @@ STEP_BY_STEP: clear borders between steps. INDEPENDENT: centre on actions done a
 [Medicine, body, dangerous things]
 - Make a medicine card only when the guardian wrote taking medicine as {userName}'s action. Medicine mentioned in the background ("takes medicine for ADHD") is not a card. Medicine listed as an item to pack gets only a packing card. Never write about changing doses or hiding medicine in food.
 - Periods, toilet, and changing clothes are written calmly, as they are.
-- A step that uses something that can hurt (knife, gas fire, stove) says "with an adult" (in {outputLanguage}) in the description.
+- A step that uses something that can hurt (knife, gas fire, stove) says "with an adult" (in {outputLanguage}, or with the adult the guardian named) in the description.
 - A road-crossing card writes the signal or looking actions if the guardian mentioned them. Do not carry over hurried wording ("zoom", "dash").
 
 [Keep the guardian's words]
-- Keep the item names the guardian used and any quoted words they want said ("No!", "Let's play together"), translated into {outputLanguage} only if they were written in another language.
+- Keep the item names and people the guardian used (if they wrote "mom", write mom, not "an adult") and any quoted words they want said ("No!", "Let's play together"), translated into {outputLanguage} only if they were written in another language.
 - For routines that pack many items, group items by kind into 3 to 5 cards, never 6 or more ("Put in the things for studying", "Put in the clothes to wear"). No meaningless group cards like "Put in more stationery" or "Other things".
-- Do not invent technical terms the guardian did not use ("dentist chair", not "treatment chair").
+- Do not invent technical or medical terms the guardian did not use ("dentist chair", not "treatment chair"; no "treatment" or "therapy" unless the guardian wrote it).
 - Never write a diagnosis, age, school year, school name, phone number, or family situation in any field.
 
 [imagePromptEn picture guide]

@@ -87,3 +87,6 @@ python3 card_multilang_report.py results/cards/prod__medium__multilang/<실행> 
 
 - 토큰은 `claude -p --output-format json` 의 `usage` (입력 = 새 입력 + 캐시 쓰기 + 캐시 읽기, 출력은 thinking 포함). 입력의 대부분은 픽토그램 목록이라 지시문 차이는 `지시문 글자` 칸으로 본다.
 - `claude -p` 는 temperature 를 지정할 수 없다 (운영은 0). 반복 호출로 흔들림을 본다.
+- 서버 반영 뒤(#1375): `MultilingualPromptDefaults.CREATE_TEMPLATE` 이 `en_harness_v1` 과 같은 글이고(원본은 서버), Claude 보강도 `{outputLanguage}` 자리가 있는 영어다.
+  `--java-ref ""` 로 작업 폴더 자바를 읽으면 `en_template` = v1, 보강도 서버 문구를 읽는다. 옛 ref(origin/develop)에서는 `_supplement_en.txt`(서버 문구 사본)를 쓴다.
+- `card_multilang_report.py` 는 lang 없는 옛 입력 세트(holdout2 등) 실행 폴더도 받는다 (언어는 ko 로 판정).
