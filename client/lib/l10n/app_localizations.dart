@@ -9035,23 +9035,11 @@ abstract class AppLocalizations {
   /// **'{reset}에 다시 채워져요'**
   String creditTopUpRefillAt(String reset);
 
-  /// 시트 광고 칸 제목. count 는 광고 한 번에 받는 크레딧 수
-  ///
-  /// In ko, this message translates to:
-  /// **'{count, plural, other{광고 보고 크레딧 {count}개 받기}}'**
-  String creditTopUpAdTitle(int count);
-
   /// 시트 광고 칸 제목 (받는 수를 모를 때)
   ///
   /// In ko, this message translates to:
   /// **'광고 보고 크레딧 받기'**
   String get creditTopUpAdTitleNoCount;
-
-  /// 광고 칸 설명. remaining 은 오늘 더 볼 수 있는 횟수
-  ///
-  /// In ko, this message translates to:
-  /// **'{remaining, plural, other{30초쯤 걸려요, 오늘 {remaining}번 더 받을 수 있어요}}'**
-  String creditTopUpAdDetail(int remaining);
 
   /// 광고 칸 버튼
   ///
@@ -9070,6 +9058,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'오늘은 다 받았어요. 내일 다시 볼 수 있어요'**
   String get creditTopUpAdDailyLimit;
+
+  /// 광고 칸 설명: 걸리는 시간과 받는 크레딧. count 는 서버 지급량(한 번에)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{15~30초, 끝까지 보면 크레딧 {count}개}}'**
+  String creditTopUpAdDuration(int count);
+
+  /// 광고 칸 아래 작은 줄. remaining 은 오늘 더 볼 수 있는 횟수
+  ///
+  /// In ko, this message translates to:
+  /// **'{remaining, plural, other{오늘 {remaining}번 더 받을 수 있어요}}'**
+  String creditTopUpAdRemaining(int remaining);
+
+  /// 크레딧 시트: 광고를 미리 불러오지 못해 광고 칸 대신 보이는 이유 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 볼 수 있는 광고가 없어요'**
+  String get creditTopUpAdNoFill;
+
+  /// 흐름 안 PRO 배지 옆 작은 글. 누르면 Pro 기능 설명 시트
+  ///
+  /// In ko, this message translates to:
+  /// **'자세히 보기'**
+  String get proFeatureMarkLabel;
+
+  /// Pro 기능 설명 시트: AI 맞춤 그림이 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 글에 맞는 그림이라 이룸이가 더 쉽게 알아봐요'**
+  String get proExplainAiImageStylesReason;
+
+  /// Pro 기능 설명 시트: 카드 나누기가 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'어려운 행동을 작은 단계로 나눠 한 걸음씩 따라 할 수 있어요'**
+  String get proExplainCardSplitReason;
+
+  /// Pro 기능 설명 시트: 크레딧 없이 다시 그리기가 왜 좋은지 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'그림이 마음에 들 때까지 크레딧 걱정 없이 고칠 수 있어요'**
+  String get proExplainFreeImageRegenerateReason;
 
   /// 광고 제안 조회가 실패해 버튼을 끈 이유
   ///
@@ -9107,23 +9137,11 @@ abstract class AppLocalizations {
   /// **'🎟️ 크레딧을 받았어요'**
   String get creditRewardTitleNoCount;
 
-  /// 받는 순간 창의 받은 수 (큰 숫자, 0 에서 세며 올라감)
-  ///
-  /// In ko, this message translates to:
-  /// **'+{count}'**
-  String creditRewardPlus(int count);
-
   /// 받은 순간 창 한 줄 설명
   ///
   /// In ko, this message translates to:
   /// **'광고를 끝까지 봐서 받았어요'**
   String get creditRewardReason;
-
-  /// 받은 순간 창 잔액 줄 항목
-  ///
-  /// In ko, this message translates to:
-  /// **'지금 크레딧'**
-  String get creditRewardBalanceLabel;
 
   /// 홈 안내 카드 제목 (일과 하나 만들 만큼 안 남았을 때)
   ///

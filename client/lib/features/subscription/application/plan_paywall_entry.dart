@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
@@ -15,6 +16,7 @@ import '../presentation/my_plan_sheet.dart';
 import '../presentation/plan_actions.dart' as actions;
 import '../presentation/plan_benefit_cards.dart' show planBenefitLabel;
 import '../presentation/plan_paywall_sheet.dart';
+import '../presentation/pro_feature_explain_sheet.dart';
 import '../domain/plan_benefit.dart';
 import 'plan_offer_labels.dart';
 import 'plan_status_providers.dart';
@@ -129,6 +131,43 @@ Future<void> openProOnlyNotice(BuildContext context, WidgetRef ref, {String? tit
     actions: [ElumDialogAction(label: l10n.commonConfirm)],
   );
 }
+
+/// 흐름 안 Pro 입구 누름 (카드 검토 · 그림 방식, Free): 설명 시트 먼저 > `Pro 알아보기` 를 골랐을 때만 요금제 화면 ([benefit] 맨 위)
+///
+/// 요금제 화면으로 바로 넘기지 않음 (하던 일을 가로채지 않게). 살 수 없는 동안은 버튼 없이 지금 할 수 있는 길 한 줄
+Future<void> explainProFeature(BuildContext context, WidgetRef ref, {required PlanBenefit benefit}) async {
+  final l10n = context.l10n;
+  final canLearnPro = ref.read(planAccessProvider).canPurchasePro;
+  final isLearnProChosen = await showProFeatureExplainSheet(
+    context,
+    illustrationAsset: _explainIllustrationOf(benefit),
+    title: planBenefitLabel(
+      l10n,
+      benefit,
+      ref.read(creditPeriodUnitProvider),
+      freeRegenerateDailyCap: ref.read(freeImageRegenerateDailyCapProvider),
+    ),
+    description: _explainReasonOf(l10n, benefit),
+    freeAlternativeLine: canLearnPro ? null : _proOnlyFreeAlternative(l10n, benefit),
+    canLearnPro: canLearnPro,
+  );
+  if (!isLearnProChosen || !context.mounted) return;
+  await openPlanPaywall(context, ref, highlight: benefit);
+}
+
+/// 설명 시트 그림: 카드 나누기 > 책, 그 외 (그림 · 다시 그리기) > 별
+String _explainIllustrationOf(PlanBenefit benefit) => switch (benefit) {
+  PlanBenefit.cardSplit => AppAssets.featureIconGuide,
+  _ => AppAssets.featureIconStar,
+};
+
+/// 설명 시트 왜 좋은지 한 줄 (흐름 안 입구 3개만, 그 외 null)
+String? _explainReasonOf(AppLocalizations l10n, PlanBenefit benefit) => switch (benefit) {
+  PlanBenefit.aiImageStyles => l10n.proExplainAiImageStylesReason,
+  PlanBenefit.cardSplit => l10n.proExplainCardSplitReason,
+  PlanBenefit.freeImageRegenerate => l10n.proExplainFreeImageRegenerateReason,
+  _ => null,
+};
 
 /// Pro 없이 지금 할 수 있는 길 (기능별, 없으면 공통 문구)
 String _proOnlyFreeAlternative(AppLocalizations l10n, PlanBenefit? benefit) => switch (benefit) {

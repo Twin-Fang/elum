@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../haptics/tap_haptics.dart';
 import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
+import 'app_pressable.dart';
 
 /// PRO 배지 단일 부품: 둥근 금빛 그라데이션 알약 + 반짝 표시 + `PRO` (#1170 · #1189)
 ///
@@ -85,6 +87,39 @@ class LabelWithProBadge extends StatelessWidget {
         SizedBox(width: _labelToBadge.w),
         const ProBadge(),
       ],
+    );
+  }
+}
+
+/// 흐름 안 Pro 표시: [ProBadge] + 회색 `자세히 보기` (누르면 부르는 쪽이 Pro 기능 설명 시트, 햅틱 포함)
+///
+/// 하던 일(카드 검토 등) 안에서 요금제 화면으로 바로 넘기지 않는 작은 입구. 누름 영역은 최소 높이 36
+class ProFeatureMark extends StatelessWidget {
+  const ProFeatureMark({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  /// 배지 > 글자 간격 · 최소 누름 높이
+  static const _badgeToLabel = 6.0;
+  static const _minTapHeight = 36.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.l10n.proFeatureMarkLabel;
+    return AppPressable(
+      onTap: withTapHaptic(onTap),
+      semanticLabel: '${context.l10n.planProBadge} $label',
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: _minTapHeight.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ProBadge(),
+            SizedBox(width: _badgeToLabel.w),
+            Text(label, style: context.typo.creditCaption.copyWith(color: context.colors.textSecondary)),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -216,3 +216,28 @@ final adRewardAvailabilityProvider = FutureProvider.autoDispose<AdRewardAvailabi
   (ref) => ref.watch(adRewardFlowProvider).checkAvailability(),
   retry: (_, _) => null,
 );
+
+/// 보상형 광고 미리 불러 두기 (크레딧 시트 · 홈 크레딧 부족 카드가 볼 때만). 준비됐으면 true
+///
+/// 불러 둔 광고는 로더가 들고 있어 시트를 닫아도 남음. 광고를 본 뒤 invalidate > 다음 광고를 다시 불러옴
+final rewardedAdPreloadProvider = FutureProvider.autoDispose<bool>(
+  (ref) => ref.watch(rewardedAdLoaderProvider).preload(),
+  retry: (_, _) => null,
+);
+
+/// 광고 칸 상태: 서버 제안 확인 > (볼 수 있으면) 광고 미리 불러 두기 > 바로 볼 수 있음 · 못 보는 이유
+///
+/// 광고를 못 불러오면 칸 대신 이유 줄 (누른 뒤 빈 대기 화면을 만들지 않음). 미리 불러 두기는 볼 수 있을 때만 시작
+final adRewardOfferStateProvider = Provider.autoDispose<AdRewardOfferState>((ref) {
+  final availability = ref.watch(adRewardAvailabilityProvider);
+  if (!availability.hasValue) return const AdRewardOfferState.checking();
+  final value = availability.value;
+  if (value == null) return const AdRewardOfferState.hidden();
+  final offer = value.offer;
+  if (offer == null) return AdRewardOfferState.unavailable(value.unavailableReason ?? AdRewardUnavailableReason.checkFailed);
+  return switch (ref.watch(rewardedAdPreloadProvider)) {
+    AsyncData(value: true) => AdRewardOfferState.ready(offer),
+    AsyncData() || AsyncError() => const AdRewardOfferState.unavailable(AdRewardUnavailableReason.noAdLoaded),
+    _ => AdRewardOfferState.loadingAd(offer),
+  };
+});
