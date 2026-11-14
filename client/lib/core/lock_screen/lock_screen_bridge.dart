@@ -90,11 +90,14 @@ typedef LockScreenIntroRecord = ({int shownCount, DateTime? lastShownAt});
 /// 네이티브 잠금화면 채널(elum/lock_screen) 래퍼: Android 전용, 그 외 플랫폼은 아무것도 하지 않음
 /// 네이티브 > Dart 신호 2개: 잠금화면 표시(잠금 엔진), 이동 경로(앱 엔진)
 class LockScreenBridge {
+  /// 잠금화면 카드 출시 여부: Play 특수 용도 포그라운드 서비스 신고 승인 전까지 꺼 둠 (#1420, 켤 때 매니페스트 선언도 되돌림)
+  static const bool isLockScreenShipped = false;
+
   LockScreenBridge({MethodChannel? channel, bool? isSupported})
     : _channel = channel ?? const MethodChannel(_channelName),
       isLockScreenSupported =
           isSupported ??
-          (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+          (isLockScreenShipped && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     if (isLockScreenSupported) _channel.setMethodCallHandler(_onNativeCall);
   }
 
