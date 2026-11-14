@@ -333,6 +333,23 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
 
+  List<String> _storeReviewCompletedDays = const [];
+  bool _hasRequestedStoreReview = false;
+
+  @override
+  List<String> get storeReviewCompletedDays => _storeReviewCompletedDays;
+
+  @override
+  Future<void> setStoreReviewCompletedDays(List<String> days) async =>
+      _storeReviewCompletedDays = List.unmodifiable(days);
+
+  @override
+  bool get hasRequestedStoreReview => _hasRequestedStoreReview;
+
+  @override
+  Future<void> setHasRequestedStoreReview(bool isRequested) async =>
+      _hasRequestedStoreReview = isRequested;
+
   @override
   bool get isManageCoachSeen => _isManageCoachSeen;
 
