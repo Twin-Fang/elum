@@ -8,8 +8,8 @@ import com.chuseok22.elumserver.common.locale.AppLocale;
  * <p>스키마 설명(responseSchema 의 description)은 운영 DB 가 아니라 코드라 배포로 바로 바뀐다. 프롬프트 행이
  * 어떤 언어로 대체돼도 스키마 설명은 일과 언어를 말하므로, 행이 빠진 사고에서도 출력 언어를 한 번 더 붙잡는다.
  *
- * <p>{@code ko} 는 지금 코드의 문장 그대로다(ko 요청 본문 불변). 나머지 필드(어조·예시)는 {@code ko} 가
- * 쓰지 않는다 — ko 프롬프트 행은 DB 에 있는 한국어 지시문 그대로이기 때문이다.
+ * <p>{@code ko} 스키마 문구는 지금 코드의 문장 그대로다(ko 요청 본문 불변). ko 어조·예시 칸은 영어 틀을 ko 에도
+ * 쓸 때를 위한 값이다 — 지금 ko 프롬프트 행은 DB 의 한국어 지시문이라 쓰이지 않는다 (#1375).
  *
  * @param englishName 프롬프트·스키마에서 출력 언어를 가리키는 영어 이름
  * @param toneGuide   프롬프트 [Sentence style] 절에 들어가는 어조 줄(영어로 쓴 지시). 줄마다 "- " 로 시작한다
@@ -39,10 +39,21 @@ public record ContentLanguageSpec(
       + "title의 행동을 더 자세히 풀어 쓴다. 끝 동사는 title과 같게, title에 없는 새 행동을 더하지 않는다 "
       + "(예: title '옷을 입어요' > '학교 갈 옷을 입어요')";
 
+  // 어조·예시: 운영 ko 지시문의 [카드 문장] 규칙과 같은 뜻 (영어 틀용, #1375). 질문 예시는 ko 질문 지시문이 따로 있어 비움
   private static final ContentLanguageSpec KO = new ContentLanguageSpec(
     AppLocale.KO, "Korean",
     KO_ROUTINE_TITLE_HINT, KO_STEP_TITLE_HINT, KO_STEP_DESCRIPTION_HINT,
-    "", "", "", "", "", "", "");
+    "- Write every title and description in the polite Korean '~해요' style, ending in \"요\", such as \"옷을 입어요\". "
+      + "Never end with a noun or \"~하기\".\n"
+      + "- Use plain everyday Korean words only; no hanja, no Japanese or English words, no baby talk, nothing that hints at age.\n"
+      + "- One action per sentence; do not join actions with \"~고\", \"~해서\", \"~한 뒤\", \"~며\" or commas.",
+    "2 to 4 Korean words (어절), a \"~해요\" label",
+    "about 12 Korean characters including spaces, never more than 16",
+    "\"옷을 입어요\", \"양말을 챙겨요\", \"칫솔을 챙겨요\"",
+    "title \"옷을 입어요\" -> description \"학교 갈 옷을 입어요\"; "
+      + "title \"칫솔을 챙겨요\" -> description \"가방에 넣을 칫솔을 챙겨요\"",
+    "\"비 오는 날 학교에 가요\", \"이를 닦고 잠자리에 들어요\"",
+    "");
 
   private static final ContentLanguageSpec EN = new ContentLanguageSpec(
     AppLocale.EN, "English",

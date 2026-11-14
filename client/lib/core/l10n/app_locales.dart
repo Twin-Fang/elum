@@ -19,4 +19,7 @@ const supportedAppLocales = <Locale>[
 const openedAppLocales = <Locale>[
   Locale('ko'),
   Locale('en'),
+  Locale('ja'),
+  Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+  Locale('es'),
 ];

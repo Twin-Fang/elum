@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.CardImageAppearance;
 import com.chuseok22.elumserver.ai.core.CardImageSubject;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
@@ -119,6 +120,13 @@ public class CloudflareImageClient implements EnglishSceneImageClient {
       characterType), seed);
   }
 
+  /// 다시 그리기(보호자 요청): 장면이 옷·머리·안경을 말하면 기본 옷·머리 뺀 생김새로 (#1384)
+  @Override
+  public GeneratedImage generateWithGuardianRequest(String sceneEn, CharacterType characterType, Integer seed) {
+    return call(buildCartoonPrompt(promptTemplateService.getContent(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX), sceneEn,
+      characterType, true), seed);
+  }
+
   @Override
   public GeneratedImage generateRealistic(String sceneEn, Integer seed) {
     String prefix = promptTemplateService.getContent(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX);
@@ -138,8 +146,17 @@ public class CloudflareImageClient implements EnglishSceneImageClient {
 
   /// 화풍 + 카드 그림 인물 생김새 + 장면 (프로필 캐릭터 생김새는 쓰지 않음)
   public String buildCartoonPrompt(String prefix, String sceneEn, CharacterType characterType) {
+    return buildCartoonPrompt(prefix, sceneEn, characterType, false);
+  }
+
+  /// 화풍 + 생김새(보호자 요청 + 옷·머리 장면이면 몸만) + 장면
+  String buildCartoonPrompt(String prefix, String sceneEn, CharacterType characterType, boolean hasGuardianRequest) {
     CardImageSubject subject = CardImageSubject.forProfileCharacter(characterType);
-    String appearance = promptTemplateService.getContent(subject.getAppearanceKey());
+    String defaultAppearance = promptTemplateService.getContent(subject.getAppearanceKey());
+    String appearance = CardImageAppearance.forScene(defaultAppearance, sceneEn, hasGuardianRequest);
+    if (!appearance.equals(defaultAppearance)) {
+      log.info("[cloudflare image] redraw look change : default clothes and hair dropped");
+    }
     return fluxPromptBuilder.build(prefix, sceneEn, appearance, subject.getSubjectEn());
   }
 

@@ -105,7 +105,7 @@ public class CardImageGenerator {
     if (sceneClient.isEmpty()) {
       log.info("[card image] {} unavailable or skipped today : fallback to OpenAI", selected);
       return fallbackToOpenAi(request, imageClientRouter.englishScene(selected).orElse(null),
-        new IllegalStateException(selected + " 키가 없음"));
+        new IllegalStateException(selected + " 키가 없음"), translateRedrawSceneOrNull(request));
     }
     EnglishSceneImageClient client = sceneClient.get();
 
@@ -117,19 +117,24 @@ public class CardImageGenerator {
       } catch (Exception e) {
         log.warn("영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: provider={}, descriptionLength={}",
           selected, LogTextLength.of(request.description()), e);
-        return fallbackToOpenAi(request, client, e);
+        return fallbackToOpenAi(request, client, e, null);
       }
       if (scene == null) {
         log.warn("번역 결과를 영어 장면으로 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
-        return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"));
+        return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"), null);
       }
     }
 
     try {
-      return client.generate(scene, request.characterType(), FluxSeed.of(request.seedKey()));
+      // 다시 그리기는 요청이 바꾼 옷·머리를 생김새에서 빼는 경로로 (#1384)
+      Integer seed = FluxSeed.of(request.seedKey());
+      return request.guardianRequest() == null
+        ? client.generate(scene, request.characterType(), seed)
+        : client.generateWithGuardianRequest(scene, request.characterType(), seed);
     } catch (Exception e) {
       log.warn("{} 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", selected, LogTextLength.of(scene), e);
-      return fallbackToOpenAi(request, client, e);
+      // 다시 그리기면 Cloudflare 와 같은 요청 반영 장면을 OpenAI 에도 (첫 그림은 기존대로)
+      return fallbackToOpenAi(request, client, e, request.guardianRequest() == null ? null : scene);
     }
   }
 
@@ -149,7 +154,7 @@ public class CardImageGenerator {
     if (sceneClient.isEmpty()) {
       log.info("[card image] {} unavailable or skipped today : realistic fallback to OpenAI", selected);
       return fallbackToOpenAi(request, imageClientRouter.englishScene(selected).orElse(null),
-        new IllegalStateException(selected + " 키가 없음"));
+        new IllegalStateException(selected + " 키가 없음"), null);
     }
     EnglishSceneImageClient client = sceneClient.get();
 
@@ -159,18 +164,18 @@ public class CardImageGenerator {
     } catch (Exception e) {
       log.warn("실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: provider={}, descriptionLength={}",
         selected, LogTextLength.of(request.description()), e);
-      return fallbackToOpenAi(request, client, e);
+      return fallbackToOpenAi(request, client, e, null);
     }
     if (scene == null) {
       log.warn("실사 번역 결과를 영어 장면으로 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
-      return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"));
+      return fallbackToOpenAi(request, client, new IllegalStateException("번역 결과를 쓸 수 없음"), null);
     }
 
     try {
       return client.generateRealistic(scene, FluxSeed.of(request.seedKey()));
     } catch (Exception e) {
       log.warn("{} 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", selected, LogTextLength.of(scene), e);
-      return fallbackToOpenAi(request, client, e);
+      return fallbackToOpenAi(request, client, e, null);
     }
   }
 
@@ -179,6 +184,27 @@ public class CardImageGenerator {
     return imageClientRouter.englishScene(selected)
       .filter(ImageGenerationClient::available)
       .filter(client -> !client.isTemporarilySkipped());
+  }
+
+  /**
+   * 다시 그리기 OpenAI 예비용 영어 장면: 설명 + 보호자 요청 번역 (Cloudflare 와 같은 번역)
+   * 보호자 요청 없으면 null, 번역 실패·쓸 수 없는 결과도 null > 기존처럼 원래 설명으로 그림
+   */
+  private String translateRedrawSceneOrNull(CardImageRequest request) {
+    if (request.guardianRequest() == null || request.imageStyle() == ImageStyle.REALISTIC) {
+      return null;
+    }
+    try {
+      String scene = usableScene(imagePromptTranslator.translateImagePrompt(request.descriptionWithGuardianRequest()));
+      if (scene == null) {
+        log.warn("[card image] redraw scene unusable : fallback to OpenAI with original description");
+      }
+      return scene;
+    } catch (Exception e) {
+      log.warn("[card image] redraw scene translate failed : fallback to OpenAI with original description, descriptionLength={}",
+        LogTextLength.of(request.description()), e);
+      return null;
+    }
   }
 
   /// 영어 장면 제공자에 넣을 수 있는 한 줄인가. 한글·가나·한자가 섞이면 schnell 이 사람을 그렸다.
@@ -202,9 +228,11 @@ public class CardImageGenerator {
   /**
    * 그 카드만 OpenAI 로. OpenAI 도 못 쓰면 원래 실패를 그대로 올린다 — 부르는 쪽이 기본 그림으로
    * 덮는다(서비스 원칙 6).
+   *
+   * @param redrawSceneEn 다시 그리기의 요청 반영 영어 장면 (Cloudflare 와 같은 문장). 없으면 null > 원래 설명
    */
   private GeneratedImage fallbackToOpenAi(
-    CardImageRequest request, EnglishSceneImageClient failedClient, Exception cause
+    CardImageRequest request, EnglishSceneImageClient failedClient, Exception cause, String redrawSceneEn
   ) {
     Optional<ImageGenerationClient> openAi =
       imageClientRouter.of(ImageProvider.OPENAI).filter(ImageGenerationClient::available);
@@ -221,7 +249,8 @@ public class CardImageGenerator {
     if (fallbackRequest.imageStyle() == ImageStyle.REALISTIC) {
       return openAi.get().generateRealisticImage(fallbackRequest.descriptionWithGuardianRequest());
     }
-    return generateWithSafetyRetry(openAi.get(), fallbackRequest);
+    CardScene scene = redrawSceneEn == null ? toCardScene(fallbackRequest) : toRedrawCardScene(fallbackRequest, redrawSceneEn);
+    return generateWithSafetyRetry(openAi.get(), fallbackRequest, scene);
   }
 
   /**
@@ -229,8 +258,12 @@ public class CardImageGenerator {
    * 거절 사유는 로그로 남김 (원문 제외), 제목이 없는 카드나 재시도도 거절이면 그대로 던져 기본 그림으로 대체
    */
   private GeneratedImage generateWithSafetyRetry(ImageGenerationClient client, CardImageRequest request) {
+    return generateWithSafetyRetry(client, request, toCardScene(request));
+  }
+
+  private GeneratedImage generateWithSafetyRetry(ImageGenerationClient client, CardImageRequest request, CardScene scene) {
     try {
-      return client.generateCardImage(toCardScene(request), request.characterType());
+      return client.generateCardImage(scene, request.characterType());
     } catch (RuntimeException rejected) {
       if (!ImageSafetyRejection.isRejection(rejected) || request.stepTitle() == null || request.stepTitle().isBlank()) {
         throw rejected;
@@ -247,6 +280,14 @@ public class CardImageGenerator {
         throw retryFailed;
       }
     }
+  }
+
+  /**
+   * 다시 그리기 장면 (#1384): 요청 반영 영어 장면을 stepDescription 으로, 제목·원래 설명은 뺌 (#1378 fix_oa_scene)
+   * guardianRequest 도 함께 실어 요청 규칙(GuardianRequestImageRules)이 우선 적용되게
+   */
+  static CardScene toRedrawCardScene(CardImageRequest request, String redrawSceneEn) {
+    return new CardScene(null, null, redrawSceneEn, null, request.guardianRequest());
   }
 
   /// 글 AI 의 영어 장면은 한 줄·영어일 때만 싣는다 (그림 지시문 JSON 의 sceneDetail)

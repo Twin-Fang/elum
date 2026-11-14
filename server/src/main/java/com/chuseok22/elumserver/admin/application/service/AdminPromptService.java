@@ -101,6 +101,10 @@ public class AdminPromptService {
     return promptTemplateService.missingKeys(locale);
   }
 
+  public List<PromptKey> requiredKeys(AppLocale locale) {
+    return promptTemplateService.requiredKeys(locale);
+  }
+
   // 각 클라이언트의 실제 프롬프트 조립 메서드를 그대로 재사용한다 — preview와 실제 호출이
   // 항상 같은 결과를 내도록, <text> 태그나 JSON 래핑을 이 메서드가 직접 조립하지 않는다.
   public String preview(PromptKey key, String content, String sampleInput, CharacterType character) {

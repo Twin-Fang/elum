@@ -41,6 +41,9 @@ class CloudflareImageClientTest {
   private static final String MODEL = "@cf/black-forest-labs/flux-2-klein-4b";
   private static final String RUN_URL = "https://api.cloudflare.com/client/v4/accounts/" + ACCOUNT_ID + "/ai/run/" + MODEL;
   private static final String CHILD = "a simple cartoon child with short black bowl-cut hair";
+  // 운영 기본 생김새 (PromptDefaults CARD_IMAGE_SUBJECT_CHILD 와 같은 모양)
+  private static final String FULL_CHILD = "a simple cartoon child with a round head, short black bowl-cut hair, "
+    + "dot eyes, rosy cheeks, a plain orange hoodie and gray long pants";
 
   private final PromptTemplateService promptTemplateService = mock(PromptTemplateService.class);
   private final SystemConfigService systemConfigService = mock(SystemConfigService.class);
@@ -81,6 +84,21 @@ class CloudflareImageClientTest {
 
     assertThat(prompt).isEqualTo("Flat vector. Only one character: " + CHILD + ". The child brushes the teeth.");
     assertThat(prompt).doesNotContain("kitten").doesNotContain(CharacterType.LULU.getAppearanceEn());
+  }
+
+  @Test
+  @DisplayName("다시 그리기 장면이 옷을 바꾸면 기본 옷만 빼고 머리·얼굴은 그대로 — 인물이 갑자기 달라지지 않게 (#1384)")
+  void redrawClothingScene_dropsOnlyDefaultClothing() {
+    when(promptTemplateService.getContent(PromptKey.CARD_IMAGE_SUBJECT_CHILD)).thenReturn(FULL_CHILD);
+
+    String redraw = client.buildCartoonPrompt("Flat vector.",
+      "The character, wearing a navy school uniform, picks up an umbrella.", CharacterType.LULU, true);
+    String firstDrawing = client.buildCartoonPrompt("Flat vector.",
+      "The character, wearing a navy school uniform, picks up an umbrella.", CharacterType.LULU, false);
+
+    assertThat(redraw).isEqualTo("Flat vector. Only one character: a simple cartoon child with a round head, "
+      + "short black bowl-cut hair, dot eyes, rosy cheeks. The child, wearing a navy school uniform, picks up an umbrella.");
+    assertThat(firstDrawing).contains(FULL_CHILD);
   }
 
   @Test

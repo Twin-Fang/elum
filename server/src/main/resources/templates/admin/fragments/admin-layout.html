@@ -124,7 +124,7 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
-  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 요금제·구독, 광고 보상, 의견, 이야기, 알림 묶음: 보내기·예약·자동·성과·기록) / 콘텐츠(공지, 전문가 일과, 약관, 프롬프트) / 시스템(설정, AI 설정, 모니터링, 서버 로그, 관리자 기록, 서버 이전, API 문서)
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 요금제·구독, 광고 보상, 의견, 이야기, 알림 묶음: 보내기·예약·자동·성과·기록) / 콘텐츠(공지, 전문가 일과, 약관, 프롬프트, 언어 현황) / 시스템(설정, AI 설정, 모니터링, 서버 로그, 관리자 기록, 서버 이전, API 문서)
        배지: 검토 대기 일과 · 새 의견 · 이야기 신고 · AI 이상 · 서버 오류 (아래 스크립트가 채운다) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
@@ -160,6 +160,7 @@
         <li><a th:href="@{/admin/notices}" th:classappend="${active == 'notices'} ? 'active'">공지 관리</a></li>
         <li><a th:href="@{/admin/consents}" th:classappend="${active == 'consents'} ? 'active'">약관 관리</a></li>
         <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
+        <li><a th:href="@{/admin/locales}" th:classappend="${active == 'locales'} ? 'active'">언어 현황</a></li>
       </ul>
     </li>
     <li data-menu-group="system">

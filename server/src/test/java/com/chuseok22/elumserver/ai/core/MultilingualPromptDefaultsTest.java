@@ -50,9 +50,29 @@ class MultilingualPromptDefaultsTest {
     assertThat(prompt).contains(NicknamePlaceholder.placeholderFor(locale));
     assertThat(prompt).contains(spec.toneGuide()).contains(spec.stepTitleLength()).contains(spec.descriptionLength());
     assertThat(prompt).contains("routineText").contains("additionalAnswers").contains("supportGoals");
-    assertThat(prompt).contains("Never include diagnoses");
-    assertThat(prompt).contains("JSON Schema");
+    assertThat(prompt).contains("Never write a diagnosis");
+    assertThat(prompt).contains("imagePromptEn");
     assertThat(HANGUL.matcher(prompt).find()).as("한글이 섞이면 안 된다").isFalse();
+  }
+
+  @Test
+  @DisplayName("영어 틀은 ko 로도 빈칸 없이 펼쳐진다 — ko 를 같은 틀로 옮길 때 쓸 값이 있다 (#1375)")
+  void createPrompt_expandsForKo() {
+    ContentLanguageSpec ko = ContentLanguageSpec.of(AppLocale.KO);
+    String prompt = MultilingualPromptDefaults.createPromptFor(AppLocale.KO);
+
+    assertThat(prompt).doesNotContain("{").doesNotContain("}");
+    assertThat(prompt).contains("in Korean").contains(NicknamePlaceholder.PLACEHOLDER);
+    assertThat(prompt).contains(ko.toneGuide()).contains(ko.stepTitleExamples()).contains(ko.descriptionExamples());
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("일과 생성 지시문은 운영 ko 의 안전 규칙을 담는다 — 칼·불은 어른과 함께, 사정 설명의 약은 카드로 만들지 않음, 벌 금지")
+  void createPrompt_keepsSafetyRules(AppLocale locale) {
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, locale).orElseThrow();
+
+    assertThat(prompt).contains("\"with an adult\"").contains("Medicine mentioned in the background").contains("Never write punishment");
   }
 
   @ParameterizedTest
@@ -80,13 +100,21 @@ class MultilingualPromptDefaultsTest {
 
   @ParameterizedTest
   @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
-  @DisplayName("그림 문장 번역 지시문은 'Korean step sentence' 를 일과 언어 이름으로 바꾼다 — 나머지 규칙은 ko 와 같다")
+  @DisplayName("실사 번역 지시문은 'Korean step sentence' 를 일과 언어 이름으로 바꾼다 — 나머지 규칙은 ko 와 같다")
   void translatePrompts_nameTheSourceLanguage(AppLocale locale) {
     String name = ContentLanguageSpec.of(locale).englishName();
-    for (PromptKey key : new PromptKey[]{PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE}) {
-      String prompt = MultilingualPromptDefaults.forLocale(key, locale).orElseThrow();
-      assertThat(prompt).contains(name + " step sentence").doesNotContain("Korean");
-      assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(key).replace("Korean step sentence", name + " step sentence"));
-    }
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE, locale).orElseThrow();
+    assertThat(prompt).contains(name + " step sentence").doesNotContain("Korean");
+    assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE)
+      .replace("Korean step sentence", name + " step sentence"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AppLocale.class, names = "KO", mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("만화 그림 번역 지시문은 입력 언어를 가리지 않아 모든 언어가 ko 와 같은 글 (#1378)")
+  void fluxTranslatePrompt_isLanguageAgnostic(AppLocale locale) {
+    String prompt = MultilingualPromptDefaults.forLocale(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, locale).orElseThrow();
+    assertThat(prompt).isEqualTo(PromptDefaults.DEFAULTS.get(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE));
+    assertThat(prompt).contains("any language").contains("Guardian note").doesNotContain("Korean");
   }
 }
