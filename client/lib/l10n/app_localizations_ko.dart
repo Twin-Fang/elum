@@ -5402,35 +5402,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get myCreditGuideLink => '크레딧은 이렇게 써요';
 
   @override
-  String get abaIntroTitle => '🧩 준비는 간편하게, 일상은 스스로';
+  String get abaIntroTitle => '준비는 간편하게,\n일상은 스스로';
 
   @override
-  String get abaIntroSubtitle => '이룸은 응용행동분석(ABA)의 원리로 만들었어요';
+  String get abaIntroSubtitle => '응용행동분석(ABA) 원리로 만들었어요';
 
   @override
-  String get abaIntroCardTitle => '카드 한 장에 한 가지 행동';
+  String get abaIntroStepsTitle => '작게 나눠요';
 
   @override
-  String get abaIntroCardBody => '무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지';
+  String get abaIntroStepsBody => '일과를 단계 카드로';
 
   @override
-  String get abaIntroVoiceTitle => '짧은 문장, 그림과 목소리';
+  String get abaIntroShowTitle => '미리 보여 줘요';
 
   @override
-  String get abaIntroVoiceBody => '보고 들으며 하나씩 따라 해요';
+  String get abaIntroShowBody => '그림과 목소리로';
 
   @override
-  String get abaIntroStarTitle => '해내면 바로 칭찬과 별';
+  String get abaIntroHelpTitle => '도와주고 줄여요';
 
   @override
-  String get abaIntroStarBody => '보호자님이 정한 보상까지 받아요';
+  String get abaIntroHelpBody => '스스로 이어 가게';
 
   @override
-  String get abaIntroGuardianTitle => '💛 가장 중요한 건 보호자님이에요';
+  String get abaIntroRewardTitle => '바로 칭찬해요';
 
   @override
-  String get abaIntroGuardianBody =>
-      '이룸이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 이룸이가 스스로 이어 갈 수 있게 곁에서 도와요';
+  String get abaIntroRewardBody => '별과 정한 보상';
+
+  @override
+  String get abaIntroGuardianTitle => '가장 중요한 건 보호자님이에요';
+
+  @override
+  String get abaIntroGuardianBody => '일과와 보상은 보호자님이 정하고, 이룸은 곁에서 도와요';
 
   @override
   String get abaIntroStart => '시작하기';

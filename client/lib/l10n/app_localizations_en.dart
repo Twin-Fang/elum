@@ -470,7 +470,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingNameDescription =>
-      'In Elum, we call your child Elumi\nIt doesn\'t have to be a real name';
+      'In elum, the person using the app is called Elumi\nIt doesn\'t have to be a real name';
 
   @override
   String get onboardingNameHint => 'Enter a name';
@@ -5689,38 +5689,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myCreditGuideLink => 'How credits work';
 
   @override
-  String get abaIntroTitle => '🧩 Easy to prepare, done on their own';
+  String get abaIntroTitle => 'Easy to prepare,\ndone on their own';
 
   @override
   String get abaIntroSubtitle =>
-      'ELUM is built on the principles of Applied Behavior Analysis (ABA)';
+      'Built on Applied Behavior Analysis (ABA) principles';
 
   @override
-  String get abaIntroCardTitle => 'One action per card';
+  String get abaIntroStepsTitle => 'Break it down';
 
   @override
-  String get abaIntroCardBody =>
-      'What to do, how to do it, and the reward at the end';
+  String get abaIntroStepsBody => 'Step-by-step cards';
 
   @override
-  String get abaIntroVoiceTitle => 'Short sentences, pictures and voice';
+  String get abaIntroShowTitle => 'Show it first';
 
   @override
-  String get abaIntroVoiceBody =>
-      'Look, listen and follow along one step at a time';
+  String get abaIntroShowBody => 'Pictures and voice';
 
   @override
-  String get abaIntroStarTitle => 'Praise and stars right away';
+  String get abaIntroHelpTitle => 'Help, then less';
 
   @override
-  String get abaIntroStarBody => 'Plus the reward you chose';
+  String get abaIntroHelpBody => 'So Elumi keeps going';
 
   @override
-  String get abaIntroGuardianTitle => '💛 You matter most';
+  String get abaIntroRewardTitle => 'Praise quickly';
+
+  @override
+  String get abaIntroRewardBody => 'Stars, then rewards';
+
+  @override
+  String get abaIntroGuardianTitle => 'You matter most';
 
   @override
   String get abaIntroGuardianBody =>
-      'You know your child best, so you set the routines and rewards. ELUM stays close so your child can keep going on their own';
+      'You set the routines and rewards, and elum stays close to help Elumi';
 
   @override
   String get abaIntroStart => 'Get started';
@@ -5771,7 +5775,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeAutoSendUpsellBody =>
-      'Pick the days and time, and we\'ll send it to the child\'s device then';
+      'Pick the days and time, and we\'ll send it to Elumi\'s device then';
 
   @override
   String get homeAutoSendUpsellAction => 'Learn more';

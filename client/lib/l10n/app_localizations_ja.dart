@@ -5380,35 +5380,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get myCreditGuideLink => 'クレジットの使い方';
 
   @override
-  String get abaIntroTitle => '🧩 準備はかんたんに、\n毎日は自分の力で';
+  String get abaIntroTitle => '準備はかんたんに、\n毎日は自分の力で';
 
   @override
-  String get abaIntroSubtitle => 'elumは応用行動分析（ABA）の原理で作りました';
+  String get abaIntroSubtitle => '応用行動分析（ABA）の考え方で作りました';
 
   @override
-  String get abaIntroCardTitle => 'カード1枚に1つの行動';
+  String get abaIntroStepsTitle => '小さく分けます';
 
   @override
-  String get abaIntroCardBody => '何をするか、どうするか、終わったらもらえるごほうびまで';
+  String get abaIntroStepsBody => '日課を段階カードに';
 
   @override
-  String get abaIntroVoiceTitle => '短い文、絵と声';
+  String get abaIntroShowTitle => '前もって見せます';
 
   @override
-  String get abaIntroVoiceBody => '見て聞きながら、1つずつまねしてやります';
+  String get abaIntroShowBody => '絵と音声で';
 
   @override
-  String get abaIntroStarTitle => 'できたらすぐにほめ言葉と星';
+  String get abaIntroHelpTitle => '手助けを減らす';
 
   @override
-  String get abaIntroStarBody => '保護者が決めたごほうびももらえます';
+  String get abaIntroHelpBody => '自分で進めるように';
 
   @override
-  String get abaIntroGuardianTitle => '💛 いちばん大切なのは保護者です';
+  String get abaIntroRewardTitle => 'すぐにほめます';
 
   @override
-  String get abaIntroGuardianBody =>
-      'Elumiをいちばんよく知る保護者が日課とごほうびを決め、elumはElumiが自分で続けられるようにそばで手伝います';
+  String get abaIntroRewardBody => '星と決めたごほうび';
+
+  @override
+  String get abaIntroGuardianTitle => 'いちばん大切なのは保護者です';
+
+  @override
+  String get abaIntroGuardianBody => '日課とごほうびは保護者が決め、elumが手伝います';
 
   @override
   String get abaIntroStart => 'はじめる';

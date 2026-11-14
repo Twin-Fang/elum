@@ -9281,64 +9281,76 @@ abstract class AppLocalizations {
   /// **'크레딧은 이렇게 써요'**
   String get myCreditGuideLink;
 
-  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기) #1277
+  /// ABA 소개 화면 제목 (온보딩 역할 선택 다음, 설정 다시 보기). 두 줄, 이모지 없음
   ///
   /// In ko, this message translates to:
-  /// **'🧩 준비는 간편하게, 일상은 스스로'**
+  /// **'준비는 간편하게,\n일상은 스스로'**
   String get abaIntroTitle;
 
   /// ABA 소개 화면 제목 아래 한 줄. 치료·효과 표현 금지, 기관 이름 금지
   ///
   /// In ko, this message translates to:
-  /// **'이룸은 응용행동분석(ABA)의 원리로 만들었어요'**
+  /// **'응용행동분석(ABA) 원리로 만들었어요'**
   String get abaIntroSubtitle;
 
-  /// ABA 소개 줄 1 제목 (카드 아이콘)
+  /// ABA 원리 칸 1 제목 (작게 나누기 그림). 소개 사이트 home.aba 와 같은 말
   ///
   /// In ko, this message translates to:
-  /// **'카드 한 장에 한 가지 행동'**
-  String get abaIntroCardTitle;
+  /// **'작게 나눠요'**
+  String get abaIntroStepsTitle;
 
-  /// ABA 소개 줄 1 설명
+  /// ABA 원리 칸 1 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'무엇을 할지, 어떻게 할지, 다 하면 받을 보상까지'**
-  String get abaIntroCardBody;
+  /// **'일과를 단계 카드로'**
+  String get abaIntroStepsBody;
 
-  /// ABA 소개 줄 2 제목 (소리 아이콘)
+  /// ABA 원리 칸 2 제목 (미리 보여 주기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'짧은 문장, 그림과 목소리'**
-  String get abaIntroVoiceTitle;
+  /// **'미리 보여 줘요'**
+  String get abaIntroShowTitle;
 
-  /// ABA 소개 줄 2 설명
+  /// ABA 원리 칸 2 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'보고 들으며 하나씩 따라 해요'**
-  String get abaIntroVoiceBody;
+  /// **'그림과 목소리로'**
+  String get abaIntroShowBody;
 
-  /// ABA 소개 줄 3 제목 (별 아이콘)
+  /// ABA 원리 칸 3 제목 (도와주고 줄이기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'해내면 바로 칭찬과 별'**
-  String get abaIntroStarTitle;
+  /// **'도와주고 줄여요'**
+  String get abaIntroHelpTitle;
 
-  /// ABA 소개 줄 3 설명
+  /// ABA 원리 칸 3 설명 한 줄 (짧게)
   ///
   /// In ko, this message translates to:
-  /// **'보호자님이 정한 보상까지 받아요'**
-  String get abaIntroStarBody;
+  /// **'스스로 이어 가게'**
+  String get abaIntroHelpBody;
 
-  /// ABA 소개 아래 보호자 묶음 제목
+  /// ABA 원리 칸 4 제목 (바로 칭찬하기 그림)
   ///
   /// In ko, this message translates to:
-  /// **'💛 가장 중요한 건 보호자님이에요'**
+  /// **'바로 칭찬해요'**
+  String get abaIntroRewardTitle;
+
+  /// ABA 원리 칸 4 설명 한 줄 (짧게)
+  ///
+  /// In ko, this message translates to:
+  /// **'별과 정한 보상'**
+  String get abaIntroRewardBody;
+
+  /// ABA 소개 아래 민트 상자 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'가장 중요한 건 보호자님이에요'**
   String get abaIntroGuardianTitle;
 
-  /// ABA 소개 아래 보호자 묶음 설명
+  /// ABA 소개 아래 민트 상자 설명
   ///
   /// In ko, this message translates to:
-  /// **'이룸이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 이룸이가 스스로 이어 갈 수 있게 곁에서 도와요'**
+  /// **'일과와 보상은 보호자님이 정하고, 이룸은 곁에서 도와요'**
   String get abaIntroGuardianBody;
 
   /// ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로
