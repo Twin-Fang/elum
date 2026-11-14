@@ -5488,4 +5488,40 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '개 남았어요';
+
+  @override
+  String get guideTipActionCardsTitle => '행동 카드란?';
+
+  @override
+  String get guideTipActionCardsBody => '한 장에 행동 하나, 3분이면 읽어요';
+
+  @override
+  String get guideTipMakeActionCardsTitle => '행동 카드 쉽게 만드는 법';
+
+  @override
+  String get guideTipMakeActionCardsBody => '좋은 카드를 만드는 요령 다섯 가지예요';
+
+  @override
+  String get guideTipCaregiverRoleTitle => '보호자가 할 일 5가지';
+
+  @override
+  String get guideTipCaregiverRoleBody => '카드가 일과에 자리 잡게 돕는 법이에요';
+
+  @override
+  String get guideTipTaskAnalysisTitle => '일과를 작은 단계로 나누는 법';
+
+  @override
+  String get guideTipTaskAnalysisBody => '양치, 옷 입기 예시로 알려 드려요';
+
+  @override
+  String get guideTipRewardsTitle => '보상 정하는 법';
+
+  @override
+  String get guideTipRewardsBody => '작게, 바로, 미리 정하면 쉬워요';
+
+  @override
+  String get guideTipDismissLabel => '이 가이드 닫기';
+
+  @override
+  String get guideTipOpenFailed => '가이드를 열지 못했어요';
 }

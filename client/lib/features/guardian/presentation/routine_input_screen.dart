@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'routine_input_field.dart';
 import 'routine_suggestion_chips.dart';
+import 'widgets/guide_tip_card.dart';
 import 'widgets/routine_image_style_pill.dart';
 import 'routine_template_sheet.dart';
 
@@ -18,6 +19,7 @@ import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../application/routine_notifier.dart';
+import '../domain/guide_tip.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_backdrop.dart';
@@ -170,6 +172,11 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         SizedBox(height: space.md),
                         // 카테고리별 예시 일과 (#777)
                         _TemplateButton(onPressed: _openTemplates),
+                        // 가이드 팁: 한 줄 쓰는 요령 > 단계 나누기
+                        GuideTipSlot(
+                          placement: GuideTipPlacement.routineInput,
+                          padding: EdgeInsets.fromLTRB(space.buttonMarginH, space.lg.h, space.buttonMarginH, 0),
+                        ),
                       ],
                     ),
                   ),

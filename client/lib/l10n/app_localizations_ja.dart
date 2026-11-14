@@ -5466,4 +5466,40 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '個残っています';
+
+  @override
+  String get guideTipActionCardsTitle => '行動カードとは？';
+
+  @override
+  String get guideTipActionCardsBody => '1枚に行動ひとつ。3分で読めます';
+
+  @override
+  String get guideTipMakeActionCardsTitle => '行動カードのかんたんなつくり方';
+
+  @override
+  String get guideTipMakeActionCardsBody => 'よいカードをつくる5つのコツです';
+
+  @override
+  String get guideTipCaregiverRoleTitle => '保護者がする5つのこと';
+
+  @override
+  String get guideTipCaregiverRoleBody => 'カードを毎日の中に根づかせる方法です';
+
+  @override
+  String get guideTipTaskAnalysisTitle => '日課を小さなステップに分ける方法';
+
+  @override
+  String get guideTipTaskAnalysisBody => '歯みがきや着替えの例で紹介します';
+
+  @override
+  String get guideTipRewardsTitle => 'ごほうびの決め方';
+
+  @override
+  String get guideTipRewardsBody => '小さく、すぐに、前もって決めます';
+
+  @override
+  String get guideTipDismissLabel => 'このガイドを閉じる';
+
+  @override
+  String get guideTipOpenFailed => 'ガイドを開けませんでした';
 }

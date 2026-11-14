@@ -297,6 +297,12 @@ abstract interface class LocalStorage {
   List<String> get talkShareHintDismissedRoutineIds;
   Future<void> setTalkShareHintDismissedRoutineIds(List<String> routineIds);
 
+  /// 보호자 화면 가이드 팁을 닫은 안내 글 주소 조각(slug) 목록. 닫은 팁은 다시 안 보임
+  ///
+  /// 이 기기에서 본 안내라 [clearAll] 이 지우지 않는다
+  List<String> get dismissedGuideTipSlugs;
+  Future<void> setDismissedGuideTipSlugs(List<String> slugs);
+
   /// 보호자 홈 권유 카드: 종류 이름 > 마지막으로 보인 시각 (같은 종류는 한 달에 한 번까지)
   ///
   /// 일과·계정에 묶인 값이라 [clearAll] 이 지운다

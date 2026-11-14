@@ -502,4 +502,10 @@ abstract final class AppAssets {
   static const routineDoneStarRed = '$_images/routine_done_star_red.png';
   static const routineDoneStarPink = '$_images/routine_done_star_pink.png';
   static const routineDoneStarPurple = '$_images/routine_done_star_purple.png';
+
+  /// 보호자 가이드 팁 왼쪽 3D 그림 4개 (사이트 ABA 그림과 같은 원본): 카드, 단계, 도움, 보상
+  static const guideTipPictureCard = '$_images/guide_picture_card.png';
+  static const guideTipSteps = '$_images/guide_steps.png';
+  static const guideTipHelpingHand = '$_images/guide_helping_hand.png';
+  static const guideTipReward = '$_images/guide_reward.png';
 }

@@ -1553,5 +1553,17 @@
   "notificationSettingRoutineNudge": "今日の日課をまだ送っていないとき",
   "notificationSettingSuggestion": "新しい日課のおすすめ",
   "notificationSettingPlanReminder": "Proのギフトが終わる前",
-  "myCreditRemainingSuffix": "個残っています"
+  "myCreditRemainingSuffix": "個残っています",
+  "guideTipActionCardsTitle": "行動カードとは？",
+  "guideTipActionCardsBody": "1枚に行動ひとつ。3分で読めます",
+  "guideTipMakeActionCardsTitle": "行動カードのかんたんなつくり方",
+  "guideTipMakeActionCardsBody": "よいカードをつくる5つのコツです",
+  "guideTipCaregiverRoleTitle": "保護者がする5つのこと",
+  "guideTipCaregiverRoleBody": "カードを毎日の中に根づかせる方法です",
+  "guideTipTaskAnalysisTitle": "日課を小さなステップに分ける方法",
+  "guideTipTaskAnalysisBody": "歯みがきや着替えの例で紹介します",
+  "guideTipRewardsTitle": "ごほうびの決め方",
+  "guideTipRewardsBody": "小さく、すぐに、前もって決めます",
+  "guideTipDismissLabel": "このガイドを閉じる",
+  "guideTipOpenFailed": "ガイドを開けませんでした"
 }

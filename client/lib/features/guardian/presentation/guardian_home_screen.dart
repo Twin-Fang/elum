@@ -1,3 +1,4 @@
+import '../../../app/home_notice_priority.dart';
 import '../../../app/home_notice_slot.dart';
 import 'dart:async';
 
@@ -29,7 +30,9 @@ import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import 'guardian_home_header.dart';
 import 'guardian_home_landscape_body.dart';
+import '../domain/guide_tip.dart';
 import 'widgets/create_routine_button.dart';
+import 'widgets/guide_tip_card.dart';
 import 'widgets/coach_mark_start_gate.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
@@ -234,6 +237,14 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
           ),
           SizedBox(height: _titleToList.h),
           TodayRoutineSection(coachKey: _swipeKey),
+          // 가이드 팁 (오늘 일과 아래, 위 안내 카드가 떠 있으면 숨겨 카드는 한 번에 하나)
+          Consumer(
+            builder: (context, ref, _) => GuideTipSlot(
+              placement: GuideTipPlacement.guardianHome,
+              isSuppressed: ref.watch(homeNoticeChoiceProvider) != null,
+              padding: EdgeInsets.only(top: _betweenSections.h),
+            ),
+          ),
           SizedBox(height: _betweenSections.h),
           RoutineSectionTitle(
             iconAsset: AppAssets.iconTimePast,

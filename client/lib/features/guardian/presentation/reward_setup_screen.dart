@@ -17,7 +17,9 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/reward_preset.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
+import '../domain/guide_tip.dart';
 import 'widgets/aurora_background.dart';
+import 'widgets/guide_tip_card.dart';
 import 'widgets/reward_chip.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -244,6 +246,16 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
                 onTap: _pickRecent,
               ),
               orElse: () => const SizedBox.shrink(),
+            ),
+            // 가이드 팁: 보상 정하는 법
+            GuideTipSlot(
+              placement: GuideTipPlacement.rewardSetup,
+              padding: EdgeInsets.fromLTRB(
+                context.space.buttonMarginH,
+                context.space.lg.h,
+                context.space.buttonMarginH,
+                0,
+              ),
             ),
             SizedBox(height: context.space.lg),
           ],

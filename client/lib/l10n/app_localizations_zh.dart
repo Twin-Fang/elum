@@ -5433,4 +5433,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get myCreditRemainingSuffix => '个积分可用';
+
+  @override
+  String get guideTipActionCardsTitle => '什么是行为卡片？';
+
+  @override
+  String get guideTipActionCardsBody => '一张卡片一个行动，3 分钟读完';
+
+  @override
+  String get guideTipMakeActionCardsTitle => '行为卡片怎么做';
+
+  @override
+  String get guideTipMakeActionCardsBody => '做出好卡片的五个要点';
+
+  @override
+  String get guideTipCaregiverRoleTitle => '家长要做的 5 件事';
+
+  @override
+  String get guideTipCaregiverRoleBody => '让行为卡片在日常中用得下去';
+
+  @override
+  String get guideTipTaskAnalysisTitle => '把日常流程拆成小步骤';
+
+  @override
+  String get guideTipTaskAnalysisBody => '附刷牙、穿衣服的示例';
+
+  @override
+  String get guideTipRewardsTitle => '怎样定奖励';
+
+  @override
+  String get guideTipRewardsBody => '小一点，马上给，提前说';
+
+  @override
+  String get guideTipDismissLabel => '关闭这条指南';
+
+  @override
+  String get guideTipOpenFailed => '无法打开指南';
 }

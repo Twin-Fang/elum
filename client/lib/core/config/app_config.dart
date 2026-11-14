@@ -195,6 +195,9 @@ abstract final class AppConfig {
   /// 이용약관 주소. 비면 앱 안 약관 화면을 연다 (유료 약관 게시 전)
   static String get termsOfUseUrl => _string('ELUM_TERMS_OF_USE_URL', '');
 
+  /// 소개 사이트 주소 (끝에 / 포함). site/site_config.py `SITE_URL` 과 같은 값, 안내 글 링크의 뿌리
+  static const siteBaseUrl = 'https://elum.suhsaechan.kr/';
+
   /// 개인정보처리방침 게시 주소 (consent_documents 본문과 같은 내용)
   static String get privacyPolicyUrl => _string(
     'ELUM_PRIVACY_POLICY_URL',

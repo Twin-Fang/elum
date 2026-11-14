@@ -1562,5 +1562,17 @@
   "notificationSettingRoutineNudge": "When today's routine hasn't been sent yet",
   "notificationSettingSuggestion": "New routine ideas",
   "notificationSettingPlanReminder": "Before your Pro gift ends",
-  "myCreditRemainingSuffix": " left"
+  "myCreditRemainingSuffix": " left",
+  "guideTipActionCardsTitle": "What are action cards?",
+  "guideTipActionCardsBody": "One action per card. A 3-minute read",
+  "guideTipMakeActionCardsTitle": "How to make action cards the easy way",
+  "guideTipMakeActionCardsBody": "Five tips for making good cards",
+  "guideTipCaregiverRoleTitle": "5 things caregivers do",
+  "guideTipCaregiverRoleBody": "How to help cards become part of the day",
+  "guideTipTaskAnalysisTitle": "Breaking routines into small steps",
+  "guideTipTaskAnalysisBody": "With brushing and dressing examples",
+  "guideTipRewardsTitle": "How to choose rewards",
+  "guideTipRewardsBody": "Small, right away, decided ahead",
+  "guideTipDismissLabel": "Hide this guide",
+  "guideTipOpenFailed": "Couldn't open the guide"
 }
