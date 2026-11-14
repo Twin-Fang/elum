@@ -195,7 +195,7 @@ public final class MultilingualPromptDefaults {
   /**
    * 그 언어 행의 기본값. 이 언어에 행이 없는 키(언어 중립 키)는 비어 있다.
    *
-   * <p>그림 문장 번역 두 키는 이미 영어 지시문이라 "Korean step sentence" 한 구절만 일과 언어 이름으로 바꾼다.
+   * <p>그림 문장 번역 두 키는 이미 영어 지시문이라 "Korean step sentence" 한 구절만 일과 언어 이름으로 바꾼다 (만화 번역은 그 구절이 없어 ko 와 같은 글, #1378).
    */
   public static Optional<String> forLocale(PromptKey key, AppLocale locale) {
     if (locale == AppLocale.KO) {

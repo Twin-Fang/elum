@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.CardScene;
+import com.chuseok22.elumserver.ai.core.GuardianRequestImageRules;
 import com.chuseok22.elumserver.ai.core.ImageCardLayoutRules;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
@@ -133,5 +134,21 @@ class RoutineImagePromptComposerTest {
 
     assertThat(withRequest).contains("\"guardianRequest\":\"Use brighter, lighter colors. Guardian note: 파란 옷\"");
     assertThat(withoutRequest).doesNotContain("guardianRequest");
+  }
+
+  @Test
+  @DisplayName("보호자 요청이 있을 때만 요청 규칙을 붙인다 — 첫 그림 지시문은 그대로, 다시 그리기는 요청이 장면·물건 규칙을 이긴다 (#1384)")
+  void guardianRequestRules_onlyOnRedraw() {
+    language("EN");
+
+    String redraw = composer.compose(
+      new CardScene(null, null, "The character, wearing a navy school uniform, picks up an umbrella.", null,
+        "Guardian note: 남색 교복"), null, false);
+    String firstDrawing = composer.compose(new CardScene(null, null, "우산을 챙겨요", null), null, false);
+
+    assertThat(redraw).startsWith("English rules\n\n" + GuardianRequestImageRules.EN + "\n\nScene info:\n")
+      .contains("\"stepDescription\":\"The character, wearing a navy school uniform, picks up an umbrella.\"")
+      .contains("\"guardianRequest\":\"Guardian note: 남색 교복\"");
+    assertThat(firstDrawing).doesNotContain("[Guardian request]").doesNotContain("[Water]");
   }
 }
