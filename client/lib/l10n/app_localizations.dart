@@ -839,7 +839,7 @@ abstract class AppLocalizations {
   /// 이름 입력 화면 설명. 이룸이라는 호칭을 처음 소개하고 개인정보 최소수집을 안내한다
   ///
   /// In ko, this message translates to:
-  /// **'이룸에서는 아이를 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
+  /// **'이룸에서는 쓰는 사람을 이룸이라고 불러요\n실명이 아니어도 괜찮아요'**
   String get onboardingNameDescription;
 
   /// 이름 입력칸 힌트
@@ -9338,7 +9338,7 @@ abstract class AppLocalizations {
   /// ABA 소개 아래 보호자 묶음 설명
   ///
   /// In ko, this message translates to:
-  /// **'아이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 아이가 스스로 이어 갈 수 있게 곁에서 도와요'**
+  /// **'이룸이를 가장 잘 아는 보호자님이 일과와 보상을 정하고, 이룸은 이룸이가 스스로 이어 갈 수 있게 곁에서 도와요'**
   String get abaIntroGuardianBody;
 
   /// ABA 소개 화면(온보딩) 주 버튼 > 이룸이 이름 입력으로
