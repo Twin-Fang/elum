@@ -25,6 +25,9 @@
 	<array>
 		<string>en</string>
 		<string>ko</string>
+		<string>ja</string>
+		<string>zh-Hans</string>
+		<string>es</string>
 	</array>
 	<!-- 홈 화면에 보이는 이름. 한국어만 지원하는 서비스라 한글로 둔다 (이슈 #289). -->
 	<key>CFBundleDisplayName</key>

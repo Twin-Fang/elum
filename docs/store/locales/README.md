@@ -9,9 +9,9 @@
 |---|---|---|---|---|
 | ko | 열림 | 등록 | `ios/Runner/ko.lproj` | [`../listing/ko`](../listing/ko) · 배포 때 자동 업로드 |
 | en | 열림 | 등록 | `ios/Runner/en.lproj` | [`../listing/en`](../listing/en) · 배포 때 자동 업로드 |
-| ja | 닫힘 | 안 함 | 대기 `ios/staged_locales/ja.lproj` | [`../listing/ja`](../listing/ja) · 배포 때 자동 업로드 (검색 노출용, #1351) |
-| zh (간체) | 닫힘 | 안 함 | 대기 `ios/staged_locales/zh-Hans.lproj` | [`../listing/zh`](../listing/zh) · 같음 |
-| es | 닫힘 | 안 함 | 대기 `ios/staged_locales/es.lproj` | [`../listing/es`](../listing/es) · 같음 |
+| ja | 열림 (#1376) | 등록 | `ios/Runner/ja.lproj` | [`../listing/ja`](../listing/ja) · 배포 때 자동 업로드 (검색 노출용, #1351) |
+| zh (간체) | 열림 (#1376) | 등록 | `ios/Runner/zh-Hans.lproj` | [`../listing/zh`](../listing/zh) · 같음 |
+| es | 열림 (#1376) | 등록 | `ios/Runner/es.lproj` | [`../listing/es`](../listing/es) · 같음 |
 
 - 스토어 문구 원본은 `../listing/<언어>/` 다(#1351). 예전 초안(`en.md` 등)은 원본으로 옮기고 지웠다.
 - ja·zh·es 는 **스토어 문구만 먼저** 올린다. 그 나라 검색에 걸리게 하려는 것이고, 앱을 열면 영어 화면이 뜬다. 번역은 원어민 검수 전이다.
