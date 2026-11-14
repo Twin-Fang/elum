@@ -1,6 +1,11 @@
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
 ## 릴리스 노트
 
-* **개선**
-  * 루미 그림을 더 보기 좋게 개선했어요
-  * 일과 완료, 크레딧, Pro, 오류 화면의 루미가 더 또렷해졌어요
+* **버그 수정**
+  * 일과를 다 끝냈을 때 루미 얼굴이 어색하게 보이던 문제를 고쳤어요
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
