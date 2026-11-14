@@ -1,4 +1,4 @@
-ELUM (이룸) turns a guardian's plain-language description of a daily routine into simple step-by-step cards for a person with a developmental disability. Screens follow the device language (Korean or English). Button names are in English with the Korean label in parentheses.
+ELUM (이룸) turns a guardian's plain-language description of a daily routine into simple step-by-step cards for a person with a developmental disability. Screens follow the device language (Korean, English, Japanese, Simplified Chinese or Spanish). Button names are in English with the Korean label in parentheses.
 
 HOW TO SIGN IN
 Tap "Log in with Apple" (Apple로 로그인) on the first screen and use your own Apple ID. Kakao and Naver sign-in are also offered, but we cannot hand over a shared account. Only what Sign in with Apple returns is requested. The account can be deleted in My info (내 정보) > gear icon (설정) > Delete account (회원탈퇴).
