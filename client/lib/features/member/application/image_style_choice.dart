@@ -8,7 +8,7 @@ import 'member_providers.dart';
 import 'plan_access.dart';
 
 /// 그림 방식 고르기 공통 (#1149): 온보딩 · 보호자 설정 · 이룸이 정보 시트가 같은 규칙
-/// 네 방식은 늘 보임 (#1286). Pro 방식(만화·사진 같은 그림)은 AI 맞춤 그림 권한이 있어야 고름, 없으면 잠금 > 요금제 화면
+/// 네 방식은 늘 보임 (#1286). Pro 방식(만화·사진 같은 그림)은 AI 맞춤 그림 권한이 있어야 고름, 없으면 잠금 > Pro 기능 설명 시트
 
 /// 잠긴 방식인가 (Pro 배지 표시): Pro 방식 + AI 맞춤 그림 권한 없음
 bool isImageStyleLocked(ImageStyle style, PlanAccess access) =>
@@ -16,11 +16,11 @@ bool isImageStyleLocked(ImageStyle style, PlanAccess access) =>
 
 /// 누른 방식 > 실제로 고를 값 (null 이면 고른 값 그대로)
 ///
-/// 잠긴 방식: 요금제 화면(그림 혜택 맨 위, 판매 중이 아니면 Pro 안내 팝업) > 닫힌 뒤 새 권한으로 다시 판정 > Pro 가 됐으면 누른 방식
+/// 잠긴 방식: Pro 기능 설명 시트 (`Pro 알아보기` 면 그림 혜택 맨 위 요금제 화면) > 닫힌 뒤 새 권한으로 다시 판정 > Pro 가 됐으면 누른 방식
 /// 결제 없이 닫으면 null
 Future<ImageStyle?> chooseImageStyle(BuildContext context, WidgetRef ref, ImageStyle tapped) async {
   if (!isImageStyleLocked(tapped, ref.read(planAccessProvider))) return tapped;
-  await openProOnlyNotice(context, ref, benefit: PlanBenefit.aiImageStyles);
+  await explainProFeature(context, ref, benefit: PlanBenefit.aiImageStyles);
   if (!context.mounted) return null;
   // 결제 직후 회원 정보를 다시 받는 중이면 끝날 때까지 기다림 (옛 Free 판정으로 거절하지 않게)
   try {

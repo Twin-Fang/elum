@@ -29,16 +29,15 @@ final lowCreditNoticeDismissalProvider =
 
 /// 홈 크레딧 부족 카드 (보이면 값, 아니면 null)
 ///
-/// 조건 4개: Free · 크레딧 켜짐이고 남은 양 < [lowCreditRoutineEstimate] · 광고로 지금 받을 수 있음 · 이번 주기에 닫지 않음.
-/// 잔액·광고 조회가 끝나지 않았거나 실패하면 안 보임 (안내일 뿐이라 실패를 띄우지 않음)
+/// 조건 4개: Free · 크레딧 켜짐이고 남은 양 < [lowCreditRoutineEstimate] · 광고를 미리 불러 둠 · 이번 주기에 닫지 않음.
+/// 잔액·광고 조회가 끝나지 않았거나 실패하면 안 보임 (안내일 뿐이라 실패를 띄우지 않음). 앞 조건이 맞을 때만 광고를 불러옴
 final lowCreditNoticeProvider = Provider.autoDispose<LowCreditNotice?>((ref) {
   if (ref.watch(planAccessProvider).isPro) return null;
   final summary = ref.watch(creditSummaryProvider).value;
   if (summary == null || !summary.enabled || summary.available >= lowCreditRoutineEstimate) return null;
   final period = creditPeriodKeyOf(summary);
   if (ref.watch(lowCreditNoticeDismissalProvider) == period) return null;
-  final availability = ref.watch(adRewardAvailabilityProvider).value;
-  if (availability == null || !availability.canWatch) return null;
+  if (!ref.watch(adRewardOfferStateProvider).isReady) return null;
   return (available: summary.available, period: period);
 });
 
