@@ -78,15 +78,15 @@ class RoutineExampleServiceTest {
 
     RoutineExample first = RoutineExampleCatalog.of(RoutineExampleCategory.MORNING_EVENING).get(0);
     Routine morning = saved.get(0);
-    assertThat(morning.getTitle()).isEqualTo(first.titleKo());
+    assertThat(morning.getTitle()).isEqualTo(first.title().ko());
     assertThat(morning.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(morning.getIsExample()).isTrue();
     assertThat(morning.getCreatedBy()).isEqualTo("member-1");
     assertThat(morning.getProfile()).isSameAs(profile);
     assertThat(morning.getScheduledAt()).isEqualTo(LocalDate.now().atTime(first.scheduledTime()));
-    assertThat(morning.getRawInputText()).isEqualTo(first.titleKo());
+    assertThat(morning.getRawInputText()).isEqualTo(first.title().ko());
     assertThat(morning.getSteps()).extracting(RoutineStep::getTitle)
-      .containsExactlyElementsOf(first.steps().stream().map(s -> s.textKo()).toList());
+      .containsExactlyElementsOf(first.steps().stream().map(s -> s.text().ko()).toList());
     assertThat(morning.getSteps()).extracting(RoutineStep::getPictogramId)
       .containsExactlyElementsOf(first.steps().stream().map(s -> s.pictogramId()).toList());
     assertThat(morning.getSteps()).extracting(RoutineStep::getExampleImageId)
@@ -94,7 +94,7 @@ class RoutineExampleServiceTest {
     assertThat(morning.getSteps()).extracting(RoutineStep::getStepOrder).containsExactly(1, 2, 3, 4, 5);
     // description 은 NOT NULL 컬럼 — 비면 저장이 실패한다
     assertThat(morning.getSteps()).extracting(RoutineStep::getDescription)
-      .containsExactlyElementsOf(first.steps().stream().map(s -> s.textKo()).toList());
+      .containsExactlyElementsOf(first.steps().stream().map(s -> s.text().ko()).toList());
     // 기존 일과 뒤로, 카탈로그 순서대로
     assertThat(saved).extracting(Routine::getDisplayOrder).containsExactly(6, 7, 8, 9);
     verify(routineStepSpeechQueue).enqueueAfterCommit(anyList());
@@ -111,16 +111,16 @@ class RoutineExampleServiceTest {
   }
 
   @Test
-  @DisplayName("콘텐츠 언어가 한국어가 아니면 영어 문장 · EN — 일본어 일과에 영어 글이 들어가 음성이 어긋나지 않게")
-  void otherContentLocaleUsesEnglishText() {
+  @DisplayName("콘텐츠 언어가 일본어면 일본어 문장 · JA — 일과 언어와 글 언어가 같아야 음성이 맞음")
+  void japaneseContentLocaleUsesJapaneseText() {
     when(enabledLocales.resolveContentLocale(any())).thenReturn(AppLocale.JA);
 
     routineExampleService.create(GUARDIAN, List.of("OUTSIDE"));
 
     Routine bus = captureSaved().get(0);
-    assertThat(bus.getLanguage()).isEqualTo(AppLocale.EN);
-    assertThat(bus.getTitle()).isEqualTo("Taking the bus");
-    assertThat(bus.getSteps().get(0).getTitle()).isEqualTo("Walk to the bus stop");
+    assertThat(bus.getLanguage()).isEqualTo(AppLocale.JA);
+    assertThat(bus.getTitle()).isEqualTo("バスに乗る");
+    assertThat(bus.getSteps().get(0).getTitle()).isEqualTo("バス停に行きます");
   }
 
   @Test

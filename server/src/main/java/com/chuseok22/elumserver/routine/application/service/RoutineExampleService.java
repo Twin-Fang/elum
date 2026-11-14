@@ -56,10 +56,8 @@ public class RoutineExampleService {
       return List.of();
     }
 
-    // 문장 언어: 한국어 화면이면 ko, 그 외는 en (ja·zh·es 문장 없음)
-    AppLocale language = enabledLocales.resolveContentLocale(CurrentLocale.get()) == AppLocale.KO
-      ? AppLocale.KO
-      : AppLocale.EN;
+    // 문장 언어: 켜진 콘텐츠 언어 그대로 (예시 문장은 다섯 언어 모두 있음)
+    AppLocale language = enabledLocales.resolveContentLocale(CurrentLocale.get());
     int nextDisplayOrder = routineRepository.maxDisplayOrder(profile.getId()) + 1;
 
     List<Routine> routines = new ArrayList<>();
@@ -100,8 +98,7 @@ public class RoutineExampleService {
    */
   private Routine toRoutine(RoutineExample example, String memberId, Profile profile, AppLocale language,
     int displayOrder) {
-    boolean isKorean = language == AppLocale.KO;
-    String title = isKorean ? example.titleKo() : example.titleEn();
+    String title = example.title().in(language);
 
     Routine routine = new Routine();
     routine.setProfile(profile);
@@ -123,7 +120,7 @@ public class RoutineExampleService {
       RoutineStep step = new RoutineStep();
       step.setRoutine(routine);
       step.setStepOrder(order++);
-      String text = isKorean ? exampleStep.textKo() : exampleStep.textEn();
+      String text = exampleStep.text().in(language);
       step.setTitle(text);
       // 카드 문장이 한 줄뿐이라 설명도 같은 문장 (NOT NULL)
       step.setDescription(text);
