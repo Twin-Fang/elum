@@ -5,13 +5,18 @@ import com.chuseok22.elumserver.license.application.service.SubscriptionStatusSe
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.member.application.service.MemberAdminLookupService;
+import com.chuseok22.elumserver.link.application.service.DeviceLinkStatusQueryService;
 import com.chuseok22.elumserver.member.application.service.MemberEngagementQueryService;
+import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notification.core.AutoNotificationType;
+import com.chuseok22.elumserver.routine.application.service.ElumiStreakService;
+import com.chuseok22.elumserver.routine.application.service.ElumiStreakService.ProfileStreak;
 import com.chuseok22.elumserver.routine.application.service.RoutineEngagementQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineEngagementQueryService.SentRoutineSummary;
 import com.chuseok22.elumserver.talk.application.service.TalkPopularityService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 자동 알림 종류별 받을 사람 고르기 (#1275): 조건 조회 > 활성 회원만 > 문구 값(이룸이 이름·일과·날짜) 채우기
+ * 자동 알림 종류별 받을 사람 고르기 (#1275, 리텐션 4종 #1409): 조건 조회 > 활성 회원만 > 문구 값(이룸이 이름·일과·날짜) 채우기
  * 하루 상한·간격·끄기는 AutoNotificationRunner 몫. "앱을 연 때" = Member.lastActivityAt
  */
 @Component
@@ -39,6 +44,12 @@ public class AutoNotificationCandidateFinder {
   static final int PRO_ENDING_ACTIVE_DAYS = 90;
   // 첫 일과 축하: 이 시간 안에 끝난 첫 일과 (야간 동안 쌓인 것까지)
   static final int FIRST_ROUTINE_LOOKBACK_HOURS = 24;
+  // 첫 일과 만들기 안내: 가입 뒤 이 날째에 한 번씩 (가입 다음 날 = 1)
+  static final List<Integer> ONBOARDED_NUDGE_DAYS_AFTER_SIGNUP = List.of(1, 3);
+  // 연속 기록 이어 가기: 어제까지 이 일수 이상 이어진 이룸이
+  static final int STREAK_AT_RISK_MINIMUM_DAYS = 2;
+  // 기기 연결 안내: 처음 보낸 일과가 이 일수 안(오늘 제외)에 만들어진 보호자 (상한에 밀린 날 다음 날 다시 시도)
+  static final int LINK_PENDING_WINDOW_DAYS = 3;
   // {일과} 값을 찾는 최근 기간
   static final int RECENT_ROUTINE_DAYS = 30;
   // 기간 상한을 열어 둘 때 쓰는 여유 (지금 + 1일)
@@ -52,6 +63,9 @@ public class AutoNotificationCandidateFinder {
   private final MemberAdminLookupService memberAdminLookupService;
   private final TalkPopularityService talkPopularityService;
   private final SubscriptionStatusService subscriptionStatusService;
+  private final ElumiStreakService elumiStreakService;
+  private final DeviceLinkStatusQueryService deviceLinkStatusQueryService;
+  private final ProfileGuardianService profileGuardianService;
 
   /// 종류 > 받을 사람 (활성 회원만, 문구 값 채움)
   public List<AutoNotificationCandidate> find(AutoNotificationType type, LocalDateTime now) {
@@ -64,7 +78,49 @@ public class AutoNotificationCandidateFinder {
         now.minusDays(COMEBACK_GIVE_UP_DAYS), now.minusDays(COMEBACK_INACTIVE_DAYS)), Map.of(), now);
       case TALK_POPULAR -> findTalkPopular(now);
       case PRO_GIFT_ENDING -> findProEnding(now);
+      case ONBOARDED_NO_ROUTINE -> findOnboardedWithoutRoutine(now);
+      case SENT_NOT_DONE -> withValues(onlyLinked(
+        routineEngagementQueryService.findMembersSentTodayWithoutProgress(now.toLocalDate()), true));
+      case STREAK_AT_RISK -> findStreakAtRisk(now.toLocalDate());
+      case LINK_PENDING -> withValues(onlyLinked(routineEngagementQueryService.findMembersFirstSentBetween(
+        now.toLocalDate().atStartOfDay().minusDays(LINK_PENDING_WINDOW_DAYS), now.toLocalDate().atStartOfDay()), false));
     };
+  }
+
+  // 가입 1일째·3일째 온보딩 마친 보호자 > 일과를 만든 적 있는 사람 빼기
+  private List<AutoNotificationCandidate> findOnboardedWithoutRoutine(LocalDateTime now) {
+    List<String> joinedMemberIds = new ArrayList<>();
+    for (int daysAfterSignup : ONBOARDED_NUDGE_DAYS_AFTER_SIGNUP) {
+      LocalDateTime signupDayStart = now.toLocalDate().minusDays(daysAfterSignup).atStartOfDay();
+      joinedMemberIds.addAll(memberEngagementQueryService.findActiveOnboardedMemberIdsJoinedBetween(signupDayStart,
+        signupDayStart.plusDays(1)));
+    }
+    Set<String> creatorIds = routineEngagementQueryService.findCreatorIdsAmong(joinedMemberIds);
+    return withValues(joinedMemberIds.stream().filter(memberId -> !creatorIds.contains(memberId)).toList(),
+      Map.of(), now);
+  }
+
+  // 오늘 끊길 수 있는 이룸이 > 그 이룸이의 보호자 전부 (문구의 이름은 그 이룸이)
+  private List<AutoNotificationCandidate> findStreakAtRisk(LocalDate today) {
+    List<SentRoutineSummary> guardianRows = new ArrayList<>();
+    for (ProfileStreak streak : elumiStreakService.findProfilesAtRiskToday(today, STREAK_AT_RISK_MINIMUM_DAYS)) {
+      for (String guardianMemberId : profileGuardianService.guardianMemberIdsOf(streak.profileId())) {
+        guardianRows.add(new SentRoutineSummary(guardianMemberId, streak.profileId(), null));
+      }
+    }
+    return withValues(guardianRows);
+  }
+
+  // 그 일과의 이룸이 기기 연결 상태로 거르기 (shouldBeLinked: true 연결된 것만, false 연결 안 된 것만)
+  private List<SentRoutineSummary> onlyLinked(List<SentRoutineSummary> routines, boolean shouldBeLinked) {
+    if (routines.isEmpty()) {
+      return routines;
+    }
+    Set<String> linkedProfileIds = deviceLinkStatusQueryService.findLinkedProfileIds(
+      routines.stream().map(SentRoutineSummary::profileId).toList());
+    return routines.stream()
+      .filter(routine -> linkedProfileIds.contains(routine.profileId()) == shouldBeLinked)
+      .toList();
   }
 
   private List<AutoNotificationCandidate> findTalkPopular(LocalDateTime now) {
@@ -79,14 +135,14 @@ public class AutoNotificationCandidateFinder {
   // 최근 연 보호자마다 지금 요금제 확인 > Pro 혜택이 정확히 7일 뒤(KST 날짜) 끝나는 사람 (그날 하루만 맞아 혜택마다 한 번)
   private List<AutoNotificationCandidate> findProEnding(LocalDateTime now) {
     LocalDate endingDate = now.toLocalDate().plusDays(PRO_ENDING_DAYS_BEFORE);
-    Map<String, String> dateTextByMemberId = new HashMap<>();
+    Map<String, LocalDate> endingDateByMemberId = new HashMap<>();
     for (String memberId : memberIdsLastActiveBetween(now.minusDays(PRO_ENDING_ACTIVE_DAYS), now.plusDays(OPEN_END_DAYS))) {
       MemberSubscriptionStatus status = subscriptionStatusService.statusOf(memberId);
       if (isEndingOn(status, endingDate)) {
-        dateTextByMemberId.put(memberId, AutoNotificationTemplate.toKoreanMonthDay(endingDate));
+        endingDateByMemberId.put(memberId, endingDate);
       }
     }
-    return withValues(List.copyOf(dateTextByMemberId.keySet()), dateTextByMemberId, now);
+    return withValues(List.copyOf(endingDateByMemberId.keySet()), endingDateByMemberId, now);
   }
 
   static boolean isEndingOn(MemberSubscriptionStatus status, LocalDate endingDate) {
@@ -112,8 +168,8 @@ public class AutoNotificationCandidateFinder {
       .toList();
   }
 
-  // 회원으로 고른 사람: 첫 이룸이 이름, 최근 보낸 일과 제목, 날짜 글자(있으면)
-  private List<AutoNotificationCandidate> withValues(List<String> memberIds, Map<String, String> dateTextByMemberId,
+  // 회원으로 고른 사람: 첫 이룸이 이름, 최근 보낸 일과 제목, 날짜(있으면)
+  private List<AutoNotificationCandidate> withValues(List<String> memberIds, Map<String, LocalDate> dateByMemberId,
     LocalDateTime now) {
     if (memberIds.isEmpty()) {
       return List.of();
@@ -125,7 +181,7 @@ public class AutoNotificationCandidateFinder {
       SentRoutineSummary latestRoutine = latestRoutineByMemberId.get(memberId);
       return new AutoNotificationCandidate(memberId,
         childNameOf(profileNamesByMemberId.get(memberId), latestRoutine == null ? null : latestRoutine.profileId()),
-        latestRoutine == null ? null : latestRoutine.routineTitle(), dateTextByMemberId.get(memberId));
+        latestRoutine == null ? null : latestRoutine.routineTitle(), dateByMemberId.get(memberId));
     }).toList();
   }
 

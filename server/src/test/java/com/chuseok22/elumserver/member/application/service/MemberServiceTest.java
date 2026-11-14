@@ -99,6 +99,7 @@ class MemberServiceTest {
   private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @Mock private GuardianVoiceFiles guardianVoiceFiles;
+  @Mock private com.chuseok22.elumserver.routine.application.service.ElumiStreakService elumiStreakService;
   @Mock private GoogleSubscriptionWithdrawalCanceler googleSubscriptionWithdrawalCanceler;
   @InjectMocks
   private MemberService memberService;

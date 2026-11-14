@@ -325,4 +325,83 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
     """)
   List<SentRoutineRow> findRecentSentByMembers(@Param("memberIds") Collection<String> memberIds,
     @Param("statuses") Collection<RoutineStatus> statuses, @Param("since") LocalDateTime since);
+
+  // --- 리텐션 자동 알림·연속 기록 (#1409) ---
+
+  /**
+   * 오늘 보낸 확정 일과 중, 그 이룸이가 오늘 일과·카드를 하나도 안 마친 것 (최신순, 보호자당 첫 줄만 씀)
+   * 제외: 예시 일과, 일과관리 복사본. 이룸이 기기 연결 여부는 호출부가 거름
+   */
+  @Query("""
+    select r.createdBy as memberId, r.profile.id as profileId, r.title as title, r.scheduledAt as scheduledAt
+    from Routine r
+    where r.status = :confirmed and r.isExample = false and r.libraryOnly = false
+      and r.scheduledAt >= :todayStart and r.scheduledAt < :tomorrowStart
+      and not exists (
+        select c.id from Routine c
+        where c.profile = r.profile and c.completedAt >= :todayStart and c.completedAt < :tomorrowStart)
+      and not exists (
+        select s.id from RoutineStep s
+        where s.routine.profile = r.profile and s.completedAt >= :todayStart and s.completedAt < :tomorrowStart)
+    order by r.scheduledAt desc
+    """)
+  List<SentRoutineRow> findSentTodayWithoutProgress(@Param("confirmed") RoutineStatus confirmed,
+    @Param("todayStart") LocalDateTime todayStart, @Param("tomorrowStart") LocalDateTime tomorrowStart);
+
+  /// 이 보호자들 중 일과를 하나라도 만든 사람 (예시 제외, 임시저장 포함)
+  @Query("select distinct r.createdBy from Routine r where r.createdBy in :memberIds and r.isExample = false")
+  List<String> findCreatorIdsAmong(@Param("memberIds") Collection<String> memberIds);
+
+  /**
+   * 처음 보낸 일과가 [from, to) 에 만들어진 보호자의 그 일과 (만든 차례, 호출부가 보호자당 첫 줄만 씀)
+   * 제외: 예시 일과, 일과관리 복사본, 그 이룸이가 마친 일과가 있는 경우(같은 기기 이룸이 화면으로 쓰는 중)
+   */
+  @Query("""
+    select r.createdBy as memberId, r.profile.id as profileId, r.title as title, r.scheduledAt as scheduledAt
+    from Routine r
+    where r.status in :statuses and r.isExample = false and r.libraryOnly = false
+      and r.createdAt >= :from and r.createdAt < :to
+      and not exists (
+        select e.id from Routine e
+        where e.createdBy = r.createdBy and e.status in :statuses and e.isExample = false and e.libraryOnly = false
+          and e.createdAt < :from)
+      and not exists (select c.id from Routine c where c.profile = r.profile and c.status = :completed)
+    order by r.createdAt asc
+    """)
+  List<SentRoutineRow> findFirstSentBetween(@Param("statuses") Collection<RoutineStatus> statuses,
+    @Param("completed") RoutineStatus completed, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  /// 이룸이 한 명의 일과를 마친 시각 (since 이후, 일과관리 복사본 제외)
+  @Query("""
+    select r.completedAt from Routine r
+    where r.profile.id = :profileId and r.status = :completed and r.libraryOnly = false
+      and r.completedAt >= :since
+    """)
+  List<LocalDateTime> findCompletedAtsByProfileSince(@Param("profileId") String profileId,
+    @Param("completed") RoutineStatus completed, @Param("since") LocalDateTime since);
+
+  /// 이룸이·마친 시각 한 줄
+  interface ProfileCompletionRow {
+
+    String getProfileId();
+
+    LocalDateTime getCompletedAt();
+  }
+
+  /// 여러 이룸이의 일과를 마친 시각 (since 이후, 일과관리 복사본 제외)
+  @Query("""
+    select r.profile.id as profileId, r.completedAt as completedAt from Routine r
+    where r.profile.id in :profileIds and r.status = :completed and r.libraryOnly = false
+      and r.completedAt >= :since
+    """)
+  List<ProfileCompletionRow> findCompletedAtsByProfilesSince(@Param("profileIds") Collection<String> profileIds,
+    @Param("completed") RoutineStatus completed, @Param("since") LocalDateTime since);
+
+  /// [from, to) 에 일과를 마친 이룸이 id
+  @Query("""
+    select distinct r.profile.id from Routine r
+    where r.status = :completed and r.libraryOnly = false and r.completedAt >= :from and r.completedAt < :to
+    """)
+  List<String> findProfileIdsCompletedBetween(@Param("completed") RoutineStatus completed,
+    @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

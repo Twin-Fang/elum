@@ -24,7 +24,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class PushMessageFactory {
 
-  private static final String BUNDLE_RESOURCE = "i18n/push-messages_%s.properties";
+  // 푸시 문구 파일 (자동 알림 다국어 문구도 같은 파일, AutoNotificationCopyResolver)
+  static final String BUNDLE_RESOURCE = "i18n/push-messages_%s.properties";
   private static final String TITLE_KEY = "push.title";
   private static final String ROUTINE_COMPLETED_ONE_KEY = "push.routine_completed.one";
   private static final String ROUTINE_COMPLETED_MANY_KEY = "push.routine_completed.many";

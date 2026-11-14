@@ -36,6 +36,7 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisi
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import com.chuseok22.elumserver.talk.application.service.TalkCleanupService;
+import com.chuseok22.elumserver.routine.application.service.ElumiStreakService;
 import com.chuseok22.elumserver.routine.application.service.GuardianVoiceFiles;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -79,6 +80,7 @@ public class MemberService {
   private final SubscriptionStatusService subscriptionStatusService;
   private final GuardianNicknameChangeService guardianNicknameChangeService;
   private final ConsentDocumentService consentDocumentService;
+  private final ElumiStreakService elumiStreakService;
 
   /**
    * 내 정보. 헤더로 이룸이를 짚었으면 그 이룸이(연결 안 됐으면 403), 아니면 가장 먼저 연결된 이룸이.
@@ -198,7 +200,8 @@ public class MemberService {
   private MemberResponse toResponse(Member member, Profile profile, List<Profile> profiles) {
     return MemberResponse.from(
       member, profile, profiles, entitlementService.snapshot(member.getId()), toGuardianAccount(member),
-      subscriptionStatusService.statusOf(member.getId()), entitlementService.planSnapshot(PlanType.PRO));
+      subscriptionStatusService.statusOf(member.getId()), entitlementService.planSnapshot(PlanType.PRO),
+      elumiStreakService.streakOf(profile == null ? null : profile.getId()));
   }
 
   /**
