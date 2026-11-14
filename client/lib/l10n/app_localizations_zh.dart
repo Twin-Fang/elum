@@ -5348,34 +5348,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myCreditGuideLink => '积分这样用';
 
   @override
-  String get abaIntroTitle => '🧩 准备很轻松，日常自己来';
+  String get abaIntroTitle => '准备很轻松，\n日常自己来';
 
   @override
-  String get abaIntroSubtitle => 'elum是根据应用行为分析(ABA)的原理制作的';
+  String get abaIntroSubtitle => '根据应用行为分析（ABA）原理制作';
 
   @override
-  String get abaIntroCardTitle => '一张卡片一个行动';
+  String get abaIntroStepsTitle => '拆小';
 
   @override
-  String get abaIntroCardBody => '做什么、怎么做，还有做完后的奖励';
+  String get abaIntroStepsBody => '把日常拆成步骤卡片';
 
   @override
-  String get abaIntroVoiceTitle => '简短的句子，图片和声音';
+  String get abaIntroShowTitle => '提前展示';
 
   @override
-  String get abaIntroVoiceBody => '边看边听，一步一步跟着做';
+  String get abaIntroShowBody => '用图片和声音';
 
   @override
-  String get abaIntroStarTitle => '做到了马上表扬和给星星';
+  String get abaIntroHelpTitle => '先帮忙，再减少';
 
   @override
-  String get abaIntroStarBody => '还能得到监护人定的奖励';
+  String get abaIntroHelpBody => '让Elumi自己接着做';
 
   @override
-  String get abaIntroGuardianTitle => '💛 最重要的是监护人';
+  String get abaIntroRewardTitle => '马上表扬';
 
   @override
-  String get abaIntroGuardianBody => '最了解Elumi的监护人来定日常和奖励，elum在身边帮助Elumi自己坚持下去';
+  String get abaIntroRewardBody => '星星和定好的奖励';
+
+  @override
+  String get abaIntroGuardianTitle => '最重要的是监护人';
+
+  @override
+  String get abaIntroGuardianBody => '日常和奖励由监护人来定，elum在身边帮忙';
 
   @override
   String get abaIntroStart => '开始';

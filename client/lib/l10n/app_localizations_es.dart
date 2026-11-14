@@ -5790,37 +5790,42 @@ class AppLocalizationsEs extends AppLocalizations {
   String get myCreditGuideLink => 'Así funcionan los créditos';
 
   @override
-  String get abaIntroTitle => '🧩 Fácil de preparar, cada día por su cuenta';
+  String get abaIntroTitle => 'Fácil de preparar,\ncada día por su cuenta';
 
   @override
   String get abaIntroSubtitle =>
-      'elum se basa en los principios del Análisis Aplicado de Conducta (ABA)';
+      'Basado en el Análisis Aplicado de Conducta (ABA)';
 
   @override
-  String get abaIntroCardTitle => 'Una acción por tarjeta';
+  String get abaIntroStepsTitle => 'Divide en pasos';
 
   @override
-  String get abaIntroCardBody =>
-      'Qué hacer, cómo hacerlo y la recompensa al terminar';
+  String get abaIntroStepsBody => 'Tarjetas paso a paso';
 
   @override
-  String get abaIntroVoiceTitle => 'Frases cortas, imágenes y voz';
+  String get abaIntroShowTitle => 'Muestra antes';
 
   @override
-  String get abaIntroVoiceBody => 'Mira, escucha y sigue paso a paso';
+  String get abaIntroShowBody => 'Con imagen y voz';
 
   @override
-  String get abaIntroStarTitle => 'Elogios y estrellas al momento';
+  String get abaIntroHelpTitle => 'Ayuda y retira';
 
   @override
-  String get abaIntroStarBody => 'Y además la recompensa que elegiste';
+  String get abaIntroHelpBody => 'Sigue por su cuenta';
 
   @override
-  String get abaIntroGuardianTitle => '💛 Lo más importante eres tú';
+  String get abaIntroRewardTitle => 'Elogia rápido';
+
+  @override
+  String get abaIntroRewardBody => 'Estrella y premio';
+
+  @override
+  String get abaIntroGuardianTitle => 'Lo más importante eres tú';
 
   @override
   String get abaIntroGuardianBody =>
-      'Tú conoces mejor a Elumi, así que tú eliges las rutinas y las recompensas. elum acompaña a Elumi para que pueda seguir por su cuenta';
+      'Tú eliges las rutinas y las recompensas, y elum acompaña a Elumi';
 
   @override
   String get abaIntroStart => 'Empezar';

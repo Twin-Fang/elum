@@ -441,9 +441,6 @@ abstract final class AppAssets {
   static const iconEnvelope = '$_images/icon_envelope.svg';
   static const iconBook = '$_images/icon_book.svg';
   static const iconBell = '$_images/icon_bell.svg';
-
-  /// 별 선 아이콘 (24, 다른 icon* 과 같은 viewBox). 안내 줄 머리 `해내면 바로 칭찬과 별` (#1277)
-  static const iconStar = '$_images/icon_star.svg';
   static const iconBellSlash = '$_images/icon_bell_slash.svg';
   static const iconMinusSmall = '$_images/icon_minus_small.svg';
   static const iconComment = '$_images/icon_comment.svg';
@@ -502,4 +499,10 @@ abstract final class AppAssets {
   static const routineDoneStarRed = '$_images/routine_done_star_red.png';
   static const routineDoneStarPink = '$_images/routine_done_star_pink.png';
   static const routineDoneStarPurple = '$_images/routine_done_star_purple.png';
+
+  /// ABA 소개 원리 칸 그림 4장 (256, 투명 · 소개 사이트 그림과 같은 원본)
+  static const abaTileSteps = '$_images/aba_tile_steps.png';
+  static const abaTileShow = '$_images/aba_tile_show.png';
+  static const abaTileHelp = '$_images/aba_tile_help.png';
+  static const abaTileReward = '$_images/aba_tile_reward.png';
 }
