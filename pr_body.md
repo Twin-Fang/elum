@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 카드 그림을 다시 그릴 때 옷·머리 요청이 제대로 반영돼요
+* **새 기능**
+  * 약관을 영어·일본어·중국어·스페인어로도 볼 수 있어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
