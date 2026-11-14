@@ -40,14 +40,14 @@
 # - 버전은 항상 높은 버전으로 자동 동기화됩니다
 # ===================================================================
 
-version: "2.97.1"
-version_code: 381 # app build number
+version: "2.98.0"
+version_code: 382 # app build number
 project_types: ["flutter","spring"]   # 멀티타입 배열 — 첫 항목이 primary, 직접 편집 가능
 project_paths:                # 타입별 프로젝트 폴더 (레포 루트 기준 상대경로)
   flutter: "client"   # client/pubspec.yaml
   spring: "server"   # server/build.gradle
 metadata:
-  last_updated: "2026-11-14 08:22:27"
+  last_updated: "2026-11-14 13:42:45"
   last_updated_by: "Cassiiopeia"
   default_branch: "deploy"   # 릴리스 PR base: push 되면 스토어 제출·서버 배포 (#1330)
   development_branch: "main"   # 릴리스 PR head: develop 을 모으는 곳, 병합만으로는 배포 안 됨 (#1330)
