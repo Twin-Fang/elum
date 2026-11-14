@@ -9,10 +9,13 @@
   "verified": true
  },
  "image": {
-  "provider": "OPENAI",
+  "provider": "CLOUDFLARE",
+  "cloudflare_model": "@cf/black-forest-labs/flux-2-klein-4b",
+  "fallback_provider": "OPENAI",
   "openai_model": "gpt-image-1-mini",
   "openai_quality": "low",
   "prompt_language": "EN",
+  "_변경": "2026-11-11 IMAGE_PROVIDER_SELECTED OPENAI > CLOUDFLARE (설정 이력 #1258), 2026-11-14 확인",
   "verified": true
  },
  "prompts": {

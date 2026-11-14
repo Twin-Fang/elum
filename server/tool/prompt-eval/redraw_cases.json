@@ -1,0 +1,63 @@
+{
+ "_설명": "#1378 카드 그림·다시 그리기 E2E 시험 입력. cards = 카드 글(일과 언어별), redraws = 보호자 다시 그리기 요청(60자 이하)",
+ "cards": {
+  "brush_teeth": {
+   "ko": ["아침 준비", "이 닦기", "칫솔로 이를 닦아요"],
+   "en": ["Morning routine", "Brush teeth", "Brush your teeth with a toothbrush"],
+   "ja": ["朝のじゅんび", "歯みがき", "歯ブラシで歯をみがきます"],
+   "zh": ["早上准备", "刷牙", "用牙刷刷牙"],
+   "es": ["Rutina de la mañana", "Cepillarse los dientes", "Me cepillo los dientes con el cepillo"]
+  },
+  "wash_hands": {
+   "ko": ["아침 준비", "손 씻기", "비누로 손을 씻어요"],
+   "en": ["Morning routine", "Wash hands", "Wash your hands with soap"],
+   "ja": ["朝のじゅんび", "手あらい", "せっけんで手をあらいます"],
+   "zh": ["早上准备", "洗手", "用肥皂洗手"],
+   "es": ["Rutina de la mañana", "Lavarse las manos", "Me lavo las manos con jabón"]
+  },
+  "raincoat": {
+   "ko": ["학교 가기", "우비 입기", "비 오는 날 우비를 입어요"],
+   "en": ["Going to school", "Put on raincoat", "Put on your raincoat on a rainy day"],
+   "ja": ["学校へ行く", "レインコートを着る", "雨の日はレインコートを着ます"],
+   "zh": ["去上学", "穿雨衣", "下雨天穿上雨衣"],
+   "es": ["Ir a la escuela", "Ponerse el impermeable", "Me pongo el impermeable cuando llueve"]
+  },
+  "pack_bag": {
+   "ko": ["학교 가기", "가방 챙기기", "학교 갈 가방을 챙겨요"],
+   "en": ["Going to school", "Pack bag", "Pack your school bag"],
+   "ja": ["学校へ行く", "かばんの準備", "学校のかばんを準備します"],
+   "zh": ["去上学", "整理书包", "整理上学的书包"],
+   "es": ["Ir a la escuela", "Preparar la mochila", "Preparo la mochila para la escuela"]
+  },
+  "ride_bus": {
+   "ko": ["학교 가기", "버스 타기", "버스에 올라타요"],
+   "en": ["Going to school", "Ride the bus", "Get on the bus"],
+   "ja": ["学校へ行く", "バスに乗る", "バスに乗ります"],
+   "zh": ["去上学", "坐公交车", "上公交车"],
+   "es": ["Ir a la escuela", "Subir al autobús", "Me subo al autobús"]
+  },
+  "wipe_table": {
+   "ko": ["저녁 정리", "식탁 닦기", "행주로 식탁을 닦아요"],
+   "en": ["Evening tidy-up", "Wipe the table", "Wipe the table with a cloth"],
+   "ja": ["夜のかたづけ", "テーブルをふく", "ふきんでテーブルをふきます"],
+   "zh": ["晚上整理", "擦桌子", "用抹布擦桌子"],
+   "es": ["Ordenar por la noche", "Limpiar la mesa", "Limpio la mesa con un trapo"]
+  },
+  "umbrella": {
+   "ko": ["학교 가기", "우산 쓰기", "우산을 쓰고 걸어가요"],
+   "es": ["Ir a la escuela", "Usar el paraguas", "Camino con el paraguas abierto"]
+  }
+ },
+ "redraws": [
+  {"id": "r1_red_raincoat", "card": "raincoat", "lang": "ko", "text": "빨간 우비로 바꿔 주세요", "check": "raincoat is red"},
+  {"id": "r2_uniform", "card": "pack_bag", "lang": "ko", "text": "교복을 입은 모습으로 그려 주세요", "check": "wears a school uniform (not the orange hoodie)"},
+  {"id": "r3_cup", "card": "umbrella", "lang": "ko", "text": "우산 대신 컵을 들고 있게 해 주세요", "check": "holds a cup, no umbrella"},
+  {"id": "r4_short_hair", "card": "brush_teeth", "lang": "ko", "text": "머리를 아주 짧게 깎은 모습으로 해 주세요", "check": "very short (buzz) hair"},
+  {"id": "r5_glasses", "card": "wipe_table", "lang": "ko", "text": "안경을 쓴 모습으로 그려 주세요", "check": "wears glasses"},
+  {"id": "r6_remove_soap", "card": "wash_hands", "lang": "ko", "text": "비누는 빼 주세요", "check": "no soap in the picture"},
+  {"id": "r7_ja_yellow", "card": "raincoat", "lang": "ja", "text": "黄色いレインコートにしてください", "check": "raincoat is yellow"},
+  {"id": "r8_zh_uniform", "card": "pack_bag", "lang": "zh", "text": "请画成穿校服的样子", "check": "wears a school uniform"},
+  {"id": "r9_es_cup", "card": "umbrella", "lang": "es", "text": "Que sostenga una taza en vez del paraguas", "check": "holds a cup, no umbrella"}
+ ],
+ "faucet_redraw": {"id": "rf_faucet", "card": "wash_hands", "lang": "ko", "text": "물은 손이 아니라 수도꼭지에서 나와야 해요", "check": "water comes from a faucet, not from hands; two hands only"}
+}

@@ -59,3 +59,30 @@ python3 run_cards.py --variant v7_try_make --case-file chips --repeat 3 --worker
 - 호출 방식이 서버의 `output_config`와 다를 수 있어, 최종안은 운영 경로로 다시 확인한다.
 - `--resume`은 프롬프트를 고치지 않았을 때만 쓴다. 고쳤으면 새 실행으로 돌린다.
 - 동시 호출이 많으면 컴퓨터 메모리가 부족해진다. `--workers`는 4 이하로 둔다.
+
+## 카드 그림·다시 그리기 E2E (#1378)
+
+운영 관리자 시험 엔드포인트(`/admin/prompts/{key}/test`, 그림만 그리고 저장 안 함)로 운영 서버가 운영 설정 그대로 그린다.
+운영 그림 제공자는 2026-11-11부터 `CLOUDFLARE`(klein-4b, 실패 시 OpenAI 캐릭터 없이)라 경로 두 개를 본다.
+
+| 경로 | 운영과 같은 조립 |
+|---|---|
+| `cf` | 카드 설명(+ ` (Guardian note: 요청)`) > `FLUX_IMAGE_PROMPT_TRANSLATE` 번역 > `FLUX_ROUTINE_IMAGE_PREFIX` + 카드 인물 생김새 + 장면. seed 는 못 넘김(관리자 시험은 seed 없음) |
+| `oa` | `ROUTINE_IMAGE_PREFIX_EN` + 장면 JSON(캐릭터 없음). 제목·영어 장면·보호자 요청은 관리자 시험이 못 실어 지시문 끝에 운영 JSON 을 붙임(뒤에 설명만 든 JSON 이 한 번 더 붙는 차이) |
+
+| 파일 | 역할 |
+|---|---|
+| `redraw_cases.json` | 카드 7종 x 일과 언어 5개, 보호자 요청 10개 |
+| `run_redraw.py` | 장수 계획·실행·컨택트 시트·seed 재현 (`results/redraw_e2e/<변형>/`) |
+| `variants/redraw/*.json` | 개선안: 지시문 본문 교체, 옷·머리 요청 시 기본 옷 뺀 생김새, OpenAI 다시 그리기 영어 장면 |
+
+```bash
+python3 run_redraw.py plan                                     # 장수만 (호출 없음)
+python3 run_redraw.py run --path cf --max-images 61 --yes      # Cloudflare 무료 한도(하루 약 95장)를 오늘 사용량으로 확인 후 실행
+python3 run_redraw.py run --variant fix --path oa --groups redraw --redraw-ids r3_cup --max-images 3 --yes
+python3 run_redraw.py sheet --variant prod                     # verdicts.json(사람 판정)이 있으면 타일 아래에 표시
+python3 run_redraw.py seedcheck --yes                          # 같은 seed·같은 문장 2장 (.env.local Cloudflare 토큰)
+```
+
+- 그림 호출은 비용이 나가 `--yes`와 `--max-images`가 모두 있어야 돈다. 이미 그린 장은 건너뛴다.
+- Gemini 그림은 쓰지 않는다. 번역은 운영과 같은 Gemini 글 모델(운영 크레딧)이다.
