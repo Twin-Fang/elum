@@ -11,7 +11,7 @@ import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
 import '../../../../core/widgets/elum_state_body.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../../../core/widgets/pro_teaser.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -109,7 +109,7 @@ class _WeeklyReportScreenState extends ConsumerState<WeeklyReportScreen> {
               onPressed: _isSaving ? null : () => _save(report),
             )
           : null,
-      belowButton: isViewable ? ElumTextLink(label: l10n.weeklyReportPastReports, onTap: _openPastWeeks) : null,
+      belowButton: isViewable ? ElumSecondaryButton(label: l10n.weeklyReportPastReports, onTap: _openPastWeeks) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

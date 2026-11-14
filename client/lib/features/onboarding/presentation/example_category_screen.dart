@@ -7,8 +7,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
@@ -29,7 +29,6 @@ class ExampleCategoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
-    final colors = context.colors;
     final name = profile.displayName;
 
     return ElumScaffold(
@@ -40,24 +39,13 @@ class ExampleCategoryScreen extends ConsumerWidget {
             ? () => context.push(Routes.onboardingCharacter)
             : null,
       ),
-      // 건너뛰기 — 연결 암호 화면의 "나중에 하기"와 같은 글자 버튼
-      belowButton: Center(
-        child: AppPressable(
-          onTap: () {
-            notifier.clearExampleCategories();
-            context.push(Routes.onboardingCharacter);
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.space.xs),
-            child: Text(
-              context.l10n.onboardingExampleSkip,
-              style: context.typo.linkLater.copyWith(
-                color: colors.linkLaterLabel,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
+      // 건너뛰기 — 연결 암호 화면의 "나중에 하기"와 같은 보조 버튼
+      belowButton: ElumSecondaryButton(
+        label: context.l10n.onboardingExampleSkip,
+        onTap: () {
+          notifier.clearExampleCategories();
+          context.push(Routes.onboardingCharacter);
+        },
       ),
       child: SingleChildScrollView(
         child: Column(

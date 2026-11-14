@@ -11,7 +11,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_code_text.dart';
 import '../../../../core/widgets/elum_spinner.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../../../core/widgets/min_tap_target.dart';
 import '../../application/credit_history_notifier.dart';
 import '../../domain/credit_history.dart';
@@ -52,7 +52,7 @@ class MyCreditRecentHistory extends ConsumerWidget {
         children: [
           Text(l10n.creditHistoryLoadFailed, textAlign: TextAlign.center, style: mutedStyle),
           ElumErrorCodeText(AppFailure.of(error).badgeOr(_failureCode)),
-          ElumTextLink(label: l10n.creditCardRetry, onTap: withTapHaptic(() => ref.invalidate(creditHistoryProvider))),
+          ElumSecondaryButton(label: l10n.creditCardRetry, onTap: () => ref.invalidate(creditHistoryProvider), isCompact: true),
         ],
       ),
       _ => Center(child: ElumSpinner(size: _spinnerSize.w, color: colors.creditHistoryMutedText)),

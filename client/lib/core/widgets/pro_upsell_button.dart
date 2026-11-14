@@ -5,9 +5,9 @@ import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'mint_gradient_button.dart';
-import 'elum_text_link.dart';
+import 'elum_secondary_button.dart';
 
-/// 요금제 화면을 여는 버튼 모양 3개: 미리 보기 판의 주 버튼 · 다른 주 버튼 아래 테두리 버튼 · 화면 안 보조 안내의 글자 링크
+/// 요금제 화면을 여는 버튼 모양 3개: 미리 보기 판의 주 버튼 · 다른 주 버튼 아래 테두리 버튼 · 화면 안 보조 안내의 작은 보조 버튼
 enum ProUpsellStyle {
   /// 민트 그라데이션 버튼 (미리 보기 판 `ProTeaser`)
   filled,
@@ -15,7 +15,7 @@ enum ProUpsellStyle {
   /// 민트 테두리 버튼 (크레딧 더 받기 시트: 광고 버튼보다 한 단계 낮은 무게)
   outlined,
 
-  /// 밑줄 글자 (워터마크 안내 · 반복 시트처럼 다른 주 버튼 아래 보조 안내)
+  /// 글자 폭 보조 버튼 (워터마크 안내 · 반복 시트처럼 사실 한 줄 아래 보조 안내)
   link,
 }
 
@@ -71,7 +71,7 @@ class ProUpsellButton extends StatelessWidget {
     return switch (style) {
       ProUpsellStyle.filled => MintGradientButton(label: startLabel, onTap: onTap),
       ProUpsellStyle.outlined => _OutlinedUpsellButton(label: startLabel, onTap: onTap),
-      ProUpsellStyle.link => ElumTextLink(label: label ?? l10n.planLearnPro, onTap: onTap),
+      ProUpsellStyle.link => ElumSecondaryButton(label: label ?? l10n.planLearnPro, onTap: onTap, isCompact: true),
     };
   }
 }

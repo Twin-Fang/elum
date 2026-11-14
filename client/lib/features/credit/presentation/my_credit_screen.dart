@@ -4,14 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/haptics/tap_haptics.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_state_body.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/free_badge.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../member/application/plan_access.dart';
@@ -114,9 +113,9 @@ class _Body extends ConsumerWidget {
           stagger(3, const MyCreditPackSection()),
           SizedBox(height: context.space.xs.h),
           // 크레딧 안내 창 (내 요금제 기준 단가 · 지급량)
-          ElumTextLink(
+          ElumSecondaryButton(
             label: context.l10n.myCreditGuideLink,
-            onTap: withTapHaptic(() => showCreditCostGuide(context, ref, summary)),
+            onTap: () => showCreditCostGuide(context, ref, summary),
           ),
           SizedBox(height: _bottomGap.h),
         ],

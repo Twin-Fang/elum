@@ -11,7 +11,7 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/elum_text_link.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/pin_forgot_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../auth/application/auth_session_controller.dart';
@@ -291,9 +291,10 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           if (_shouldShowPinRecovery) ...[
             SizedBox(height: context.space.md.h),
             Center(
-              child: ElumTextLink(
+              child: ElumSecondaryButton(
                 label: context.l10n.pinForgotLink,
                 onTap: _onForgotPin,
+                isCompact: true,
               ),
             ),
           ],

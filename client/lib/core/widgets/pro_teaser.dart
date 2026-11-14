@@ -5,7 +5,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_label_chip.dart';
-import 'elum_text_link.dart';
+import 'elum_secondary_button.dart';
 import 'pro_badge.dart';
 import 'pro_upsell_button.dart';
 
@@ -131,7 +131,7 @@ class ProTeaser extends StatelessWidget {
             onTap: actions.onStart,
           ),
           SizedBox(height: _buttonToLink.h),
-          ElumTextLink(label: l10n.planSeeAllBenefits, onTap: actions.onSeeAllBenefits),
+          ElumSecondaryButton(label: l10n.planSeeAllBenefits, onTap: actions.onSeeAllBenefits),
         ],
       ),
     );

@@ -13,6 +13,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_secondary_button.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/reward_preset.dart';
 import '../../../shared/models/routine.dart';
@@ -212,8 +213,9 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
           ),
         ],
       ),
-      // 건너뛰기를 버튼으로 두지 않는다 — 같은 무게면 무엇이 주 동작인지 흐려진다.
-      belowButton: Center(child: _LaterLink(onTap: _later)),
+      // `나중에 할게요` — CTA 아래 빠져나가는 길 (시안 `1082:4764`)
+      // 주 버튼과 같은 무게로 두지 않는다 — 연한 보조 버튼이라 주 동작이 흐려지지 않음
+      belowButton: ElumSecondaryButton(label: context.l10n.rewardLater, onTap: _later),
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -393,41 +395,6 @@ class _HelpLink extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// `나중에 할게요` — CTA 아래 빠져나가는 길 (시안 `1082:4764`, y=765).
-///
-/// **높이를 못 박지 않는다.** 16 으로 고정하면 글꼴을 키울 때 글자 아래가 잘리고,
-/// OverflowBox 로 넓힌 누름 영역은 부모 상자 밖이라 눌러도 받지 못한다.
-/// 글자 높이가 곧 자리다 — 글꼴 1.0 에서는 16 그대로라 시안 자리(765)가 같고,
-/// 커지면 자리도 함께 커진다. 누름 영역은 **옆으로만** 넓힌다 (세로를 넓히면 자리가
-/// 바뀐다).
-class _LaterLink extends StatelessWidget {
-  const _LaterLink({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: space.md.w),
-        child: Text(
-          context.l10n.rewardLater,
-          textAlign: TextAlign.center,
-          style: context.typo.linkLater.copyWith(
-            color: colors.linkLaterLabel,
-            decoration: TextDecoration.underline,
-            decorationColor: colors.linkLaterLabel,
-          ),
-        ),
       ),
     );
   }

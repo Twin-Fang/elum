@@ -6,7 +6,7 @@ import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_sheet_frame.dart';
 import '../../../../core/widgets/elum_sheet_text_field.dart';
-import '../../../../core/widgets/elum_text_link.dart';
+import '../../../../core/widgets/elum_secondary_button.dart';
 import '../../domain/routine_memory.dart';
 
 /// 메모 줄 시트 결과: 저장(새 글) 또는 지우기
@@ -48,9 +48,9 @@ class _RoutineMemoryLineSheet extends StatefulWidget {
 class _RoutineMemoryLineSheetState extends State<_RoutineMemoryLineSheet> {
   late final _controller = TextEditingController(text: widget.currentText ?? '');
 
-  /// 입력칸 > 저장 버튼 (이름 바꾸기 시트와 같은 40) · 저장 > 지우기 글자 버튼
+  /// 입력칸 > 저장 버튼 (이름 바꾸기 시트와 같은 40) · 저장 > 지우기 보조 버튼 (한 묶음 12)
   static const _fieldToButton = 40.0;
-  static const _buttonToLink = 16.0;
+  static const _buttonToLink = 12.0;
   static const _fieldMaxLines = 2;
 
   bool get _isEditing => widget.currentText != null;
@@ -92,7 +92,7 @@ class _RoutineMemoryLineSheetState extends State<_RoutineMemoryLineSheet> {
           ElumButton(label: l10n.routineMemorySave, onPressed: _canSave ? _save : null),
           if (_isEditing) ...[
             SizedBox(height: _buttonToLink.h),
-            ElumTextLink(
+            ElumSecondaryButton(
               label: l10n.routineMemoryDeleteLine,
               onTap: () => Navigator.of(context).pop(const RoutineMemoryLineDeleted()),
             ),
