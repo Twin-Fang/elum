@@ -86,7 +86,7 @@ public class AdminPromptController {
       return back;
     }
     try {
-      adminPromptService.update(key, target, request.content(), principal == null ? null : principal.getName());
+      adminPromptService.update(key, target, request.content(), AdminActor.nameOf(principal));
     } catch (CustomException e) {
       String reason = e.getErrorCode() == ErrorCode.PROMPT_TEMPLATE_NOT_FOUND
         ? "이 언어에는 아직 없는 프롬프트예요. 위의 '기본값으로 행 만들기'를 먼저 눌러 주세요. (E-PRM-002)"

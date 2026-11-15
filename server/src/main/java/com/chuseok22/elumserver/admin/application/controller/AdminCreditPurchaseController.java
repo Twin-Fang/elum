@@ -70,7 +70,7 @@ public class AdminCreditPurchaseController {
         "회수하지 못했어요: 사유를 200자 안으로 적어 주세요 (" + REVOKE_REASON_REQUIRED_CODE + ")");
       return "redirect:" + LIST_PATH;
     }
-    ConsumableRefundOutcome outcome = purchaseService.revoke(purchaseId, actorOf(principal), reason);
+    ConsumableRefundOutcome outcome = purchaseService.revoke(purchaseId, AdminActor.nameOf(principal), reason);
     if (outcome.result() == ConsumableRefundResult.UNKNOWN) {
       redirectAttributes.addFlashAttribute("errorMessage", "회수하지 못했어요: 구매 기록이 없어요 (" + REVOKE_NOT_FOUND_CODE + ")");
     } else if (outcome.result() == ConsumableRefundResult.ALREADY_REFUNDED) {
@@ -85,7 +85,7 @@ public class AdminCreditPurchaseController {
   @PostMapping(LIST_PATH + "/refund-recheck")
   public String runRecheck(Principal principal, RedirectAttributes redirectAttributes) {
     try {
-      List<StoreRefundCheckRun> runs = purchaseService.runRecheckNow(actorOf(principal));
+      List<StoreRefundCheckRun> runs = purchaseService.runRecheckNow(AdminActor.nameOf(principal));
       redirectAttributes.addFlashAttribute("message", "환불 재확인을 마쳤어요. " + summaryOf(runs));
     } catch (RuntimeException e) {
       log.error("[refund recheck] admin run failed : cause={}", e.getClass().getSimpleName(), e);
@@ -112,10 +112,5 @@ public class AdminCreditPurchaseController {
     } catch (IllegalArgumentException e) {
       return null;
     }
-  }
-
-  /// 원장 actor: 로그인한 관리자 아이디 (세션이 없으면 null > 시스템)
-  private static String actorOf(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

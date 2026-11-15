@@ -32,7 +32,7 @@ public class AppleCreditPurchaseService {
   private final CreditPurchaseGrantService grantService;
 
   /**
-   * @throws CustomException 판매·스토어 꺼짐 403, 서명·거래 종류·상품·다른 계정 거래 400
+   * @throws CustomException 판매(전체·App Store 스위치)·스토어 꺼짐 403, 서명·거래 종류·상품·다른 계정 거래 400
    */
   public CreditPurchaseResponse verify(String memberId, String signedTransaction) {
     if (!packCatalog.isSaleEnabled(SubscriptionSource.APPLE_IAP)) {

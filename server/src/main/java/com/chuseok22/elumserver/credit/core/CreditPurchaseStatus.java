@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum CreditPurchaseStatus {
   /// 적립됨
   GRANTED("적립"),
-  /// 스토어가 환불함 (남은 양을 회수한 뒤)
+  /// 회수됨: 스토어 환불 알림 · 환불 재확인 · 관리자 회수 (남은 양을 회수한 뒤, 계기는 refund_origin)
   REFUNDED("환불"),
   ;
 

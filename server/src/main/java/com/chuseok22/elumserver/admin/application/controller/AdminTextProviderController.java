@@ -31,63 +31,63 @@ public class AdminTextProviderController {
   public String addToChain(@RequestParam("provider") TextProvider provider, Principal principal,
     RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, provider.getLabel() + " 을(를) 제공자 순서에 넣었어요.",
-      () -> adminTextProviderService.addToChain(provider, actorOf(principal)));
+      () -> adminTextProviderService.addToChain(provider, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/text-chain/remove")
   public String removeFromChain(@RequestParam("provider") TextProvider provider, Principal principal,
     RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, provider.getLabel() + " 을(를) 제공자 순서에서 뺐어요.",
-      () -> adminTextProviderService.removeFromChain(provider, actorOf(principal)));
+      () -> adminTextProviderService.removeFromChain(provider, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/text-chain/move")
   public String moveInChain(@RequestParam("provider") TextProvider provider,
     @RequestParam("direction") String direction, Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "제공자 순서를 바꿨어요.",
-      () -> adminTextProviderService.moveInChain(provider, DIRECTION_UP.equals(direction), actorOf(principal)));
+      () -> adminTextProviderService.moveInChain(provider, DIRECTION_UP.equals(direction), AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/add")
   public String addClaudeKey(@RequestParam("nickname") String nickname, @RequestParam("apiKey") String apiKey,
     Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "Claude 키를 추가했어요.",
-      () -> adminTextProviderService.addClaudeKey(nickname, apiKey, actorOf(principal)));
+      () -> adminTextProviderService.addClaudeKey(nickname, apiKey, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/{keyId}/delete")
   public String removeClaudeKey(@PathVariable String keyId, Principal principal,
     RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "Claude 키를 지웠어요.",
-      () -> adminTextProviderService.removeClaudeKey(keyId, actorOf(principal)));
+      () -> adminTextProviderService.removeClaudeKey(keyId, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/{keyId}/move")
   public String moveClaudeKey(@PathVariable String keyId, @RequestParam("direction") String direction,
     Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "Claude 키 순서를 바꿨어요.",
-      () -> adminTextProviderService.moveClaudeKey(keyId, DIRECTION_UP.equals(direction), actorOf(principal)));
+      () -> adminTextProviderService.moveClaudeKey(keyId, DIRECTION_UP.equals(direction), AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/{keyId}/enabled")
   public String setClaudeKeyEnabled(@PathVariable String keyId, @RequestParam("enabled") boolean isEnabled,
     Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, isEnabled ? "Claude 키를 켰어요." : "Claude 키를 껐어요.",
-      () -> adminTextProviderService.setClaudeKeyEnabled(keyId, isEnabled, actorOf(principal)));
+      () -> adminTextProviderService.setClaudeKeyEnabled(keyId, isEnabled, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/{keyId}/replace")
   public String replaceClaudeKey(@PathVariable String keyId, @RequestParam("apiKey") String apiKey,
     Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "Claude 키 값을 바꿨어요.",
-      () -> adminTextProviderService.replaceClaudeKey(keyId, apiKey, actorOf(principal)));
+      () -> adminTextProviderService.replaceClaudeKey(keyId, apiKey, AdminActor.nameOf(principal)));
   }
 
   @PostMapping("/admin/settings/claude-keys/{keyId}/rename")
   public String renameClaudeKey(@PathVariable String keyId, @RequestParam("nickname") String nickname,
     Principal principal, RedirectAttributes redirectAttributes) {
     return run(redirectAttributes, "Claude 키 별명을 바꿨어요.",
-      () -> adminTextProviderService.renameClaudeKey(keyId, nickname, actorOf(principal)));
+      () -> adminTextProviderService.renameClaudeKey(keyId, nickname, AdminActor.nameOf(principal)));
   }
 
   /// 실행 > 성공 문구 또는 실패 사유를 알림으로 (설정 화면과 같은 E-CFG 코드)
@@ -108,9 +108,5 @@ public class AdminTextProviderController {
       default -> (e.getDetail() == null || e.getDetail().isBlank() ? "값이 올바르지 않습니다." : e.getDetail())
         + " (E-CFG-001)";
     };
-  }
-
-  private static String actorOf(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

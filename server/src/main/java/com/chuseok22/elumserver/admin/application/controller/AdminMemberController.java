@@ -91,7 +91,7 @@ public class AdminMemberController {
       log.info("[admin csv] rejected members : total={} over limit", export.totalCount());
       return AdminCsvExporter.redirectOverLimit(LIST_PATH, query, export.totalCount(), request, response);
     }
-    log.info("[admin csv] exported members : rows={}, admin={}", export.rows().size(), actorOf(principal));
+    log.info("[admin csv] exported members : rows={}, admin={}", export.rows().size(), AdminActor.nameOf(principal));
     return AdminCsvExporter.toAttachment(CSV_FILE_PREFIX, LocalDate.now(),
       AdminMemberList.csvColumns(adminDateFormatter), export.rows());
   }
@@ -123,7 +123,7 @@ public class AdminMemberController {
   ) {
     String detailPath = "redirect:/admin/members/" + id;
     int memoLength = adminMemo == null ? 0 : adminMemo.length();
-    MemberAdminMemoSaveResult result = memberAdminMemoService.saveAdminMemo(id, adminMemo, actorOf(principal));
+    MemberAdminMemoSaveResult result = memberAdminMemoService.saveAdminMemo(id, adminMemo, AdminActor.nameOf(principal));
     switch (result) {
       case REJECTED_TOO_LONG -> {
         log.info("[admin members] memo rejected : memberId={}, length={} over limit",
@@ -137,7 +137,7 @@ public class AdminMemberController {
       }
       case SAVED, CLEARED -> {
         log.info("[admin members] memo saved : memberId={}, length={}, admin={}",
-          AdminLogIds.toLoggableId(id), memoLength, actorOf(principal));
+          AdminLogIds.toLoggableId(id), memoLength, AdminActor.nameOf(principal));
         // 관리자 기록: 메모 원문 대신 글자 수만
         adminAuditService.record(AdminAuditAction.MEMBER_MEMO_SAVED, id,
           AdminAuditService.memoSavedDetailOf(result == MemberAdminMemoSaveResult.CLEARED ? 0 : memoLength));
@@ -183,7 +183,7 @@ public class AdminMemberController {
     // 사이 탈퇴한 계정에도 그 안내가 떠 원인이 가려지고 로그에도 남지 않는다.
     // 올려 보내면 AdminViewExceptionHandler 가 정지·강제 로그아웃과 같은 409 안내를 내고 로그에 남긴다.
     try {
-      adminMemberService.grantPro(id, days, reason, actorOf(principal));
+      adminMemberService.grantPro(id, days, reason, AdminActor.nameOf(principal));
     } catch (CustomException e) {
       if (e.getErrorCode() != ErrorCode.INVALID_INPUT_VALUE) {
         throw e;
@@ -207,7 +207,7 @@ public class AdminMemberController {
     Principal principal,
     RedirectAttributes redirectAttributes
   ) {
-    adminMemberService.revokePro(id, reason, actorOf(principal));
+    adminMemberService.revokePro(id, reason, AdminActor.nameOf(principal));
     adminAuditService.record(AdminAuditAction.PRO_REVOKED, id, null);
     redirectAttributes.addFlashAttribute("message", "Pro를 회수했습니다. 이 계정은 Free로 돌아갑니다.");
     return "redirect:/admin/members/" + id;
@@ -220,7 +220,7 @@ public class AdminMemberController {
    */
   @PostMapping("/admin/members/{id}/purge")
   public String purge(@PathVariable String id, Principal principal, RedirectAttributes redirectAttributes) {
-    adminMemberService.purgeNow(id, principal == null ? null : principal.getName());
+    adminMemberService.purgeNow(id, AdminActor.nameOf(principal));
     adminAuditService.record(AdminAuditAction.WITHDRAWN_MEMBER_PURGED, id, null);
     redirectAttributes.addFlashAttribute("message",
       "탈퇴 계정을 완전히 지웠어요. 남아 있던 계정 식별값을 지우고 AI 이용 기록에서 회원을 뗐어요.");
@@ -248,7 +248,7 @@ public class AdminMemberController {
   ) {
     // 끊긴 연결만 화면에서 안내 (상세를 열어 둔 사이 보호자가 끊은 경우). 그 밖의 예외는 공통 오류 화면으로
     try {
-      adminMemberService.unlinkDevice(id, linkId, actorOf(principal));
+      adminMemberService.unlinkDevice(id, linkId, AdminActor.nameOf(principal));
     } catch (CustomException e) {
       if (e.getErrorCode() != ErrorCode.DEVICE_LINK_NOT_CONNECTED) {
         throw e;
@@ -308,10 +308,5 @@ public class AdminMemberController {
         AdminLogIds.toLoggableId(memberId), e);
       return AdminMemberCreditSummary.loadFailed();
     }
-  }
-
-  // 세션 로그인 이름. 없으면 null 로 넘겨 서비스가 unknown 으로 남긴다
-  private String actorOf(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

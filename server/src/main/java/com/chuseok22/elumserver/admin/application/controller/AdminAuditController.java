@@ -67,7 +67,7 @@ public class AdminAuditController {
       return AdminCsvExporter.redirectOverLimit(AdminAuditList.LIST_PATH, query, export.totalCount(), request, response);
     }
     log.info("[admin csv] exported audit : rows={}, admin={}", export.rows().size(),
-      principal == null ? null : principal.getName());
+      AdminActor.nameOf(principal));
     return AdminCsvExporter.toAttachment(CSV_FILE_PREFIX, LocalDate.now(),
       AdminAuditList.csvColumns(adminDateFormatter), export.rows());
   }

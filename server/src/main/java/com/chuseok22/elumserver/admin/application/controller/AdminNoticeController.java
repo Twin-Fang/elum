@@ -114,7 +114,7 @@ public class AdminNoticeController {
     RedirectAttributes redirectAttributes
   ) {
     try {
-      AppNotice saved = noticeService.create(form.toInput(), image, name(principal));
+      AppNotice saved = noticeService.create(form.toInput(), image, AdminActor.nameOf(principal));
       redirectAttributes.addFlashAttribute("message", "'" + plainTitle(saved) + "' 공지를 만들었어요."
         + (saved.isEnabled() ? "" : " 꺼 둔 채라 앱에는 아직 나가지 않아요."));
       return LIST;
@@ -137,7 +137,7 @@ public class AdminNoticeController {
   ) {
     try {
       AppNotice saved = noticeService.update(id, form.toInput(), form.isBumpRevision(), image,
-        form.isRemoveImage(), name(principal));
+        form.isRemoveImage(), AdminActor.nameOf(principal));
       redirectAttributes.addFlashAttribute("message", "'" + plainTitle(saved) + "' 공지를 저장했어요."
         + (form.isBumpRevision() ? " 숨긴 보호자에게도 다시 보여요." : ""));
       return LIST;
@@ -155,7 +155,7 @@ public class AdminNoticeController {
     Principal principal,
     RedirectAttributes redirectAttributes
   ) {
-    AppNotice saved = noticeService.setEnabled(id, enabled, name(principal));
+    AppNotice saved = noticeService.setEnabled(id, enabled, AdminActor.nameOf(principal));
     redirectAttributes.addFlashAttribute("message", "'" + plainTitle(saved) + "' 공지를 "
       + (enabled ? "켰어요. 게시 기간 안이면 앱에 나가요." : "껐어요. 다음에 앱을 켜는 보호자부터 안 보여요."));
     return LIST;
@@ -280,9 +280,5 @@ public class AdminNoticeController {
   /** 안내 문구에 쓰는 제목. 강조 표기는 걷어낸다 — "'**하루 3개**' 공지를…"는 읽기 어렵다. */
   private static String plainTitle(AppNotice notice) {
     return NoticeEmphasis.visibleText(notice.getTitle());
-  }
-
-  private static String name(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

@@ -83,7 +83,7 @@ public class AdminFeedbackController {
       return AdminCsvExporter.redirectOverLimit(LIST_PATH, query, export.totalCount(), request, response);
     }
     log.info("[admin csv] exported feedback : rows={}, admin={}", export.rows().size(),
-      principal == null ? null : principal.getName());
+      AdminActor.nameOf(principal));
     return AdminCsvExporter.toAttachment(CSV_FILE_PREFIX, LocalDate.now(),
       AdminFeedbackList.csvColumns(adminDateFormatter), export.rows());
   }
@@ -120,7 +120,7 @@ public class AdminFeedbackController {
       redirectAttributes.addFlashAttribute("errorMessage", "알 수 없는 처리 상태예요. 화면을 새로 고친 뒤 다시 골라 주세요.");
       return "redirect:" + destination;
     }
-    feedbackService.changeStatus(id, nextStatus, principal == null ? null : principal.getName());
+    feedbackService.changeStatus(id, nextStatus, AdminActor.nameOf(principal));
     redirectAttributes.addFlashAttribute("message", "처리 상태를 '" + nextStatus.getLabel() + "'(으)로 바꿨어요.");
     return "redirect:" + destination;
   }
@@ -139,7 +139,7 @@ public class AdminFeedbackController {
     String detailPath = LIST_PATH + "/" + id;
     int noteLength = adminNote == null ? 0 : adminNote.length();
     FeedbackAdminNoteSaveResult result =
-      feedbackService.saveAdminNote(id, adminNote, principal == null ? null : principal.getName());
+      feedbackService.saveAdminNote(id, adminNote, AdminActor.nameOf(principal));
     if (result == FeedbackAdminNoteSaveResult.REJECTED_TOO_LONG) {
       log.info("[admin feedback] note rejected : id={}, length={} over limit", AdminLogIds.toLoggableId(id), noteLength);
       redirectAttributes.addFlashAttribute("errorMessage",

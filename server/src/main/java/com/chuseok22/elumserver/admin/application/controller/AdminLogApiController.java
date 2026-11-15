@@ -136,7 +136,7 @@ public class AdminLogApiController {
   ) {
     LogSearchResponse result = adminLogSearchService.search(path, level, q, from, limit);
     log.info("[admin csv] exported server logs : rows={}, matched={}, admin={}",
-      result.entries().size(), result.matched(), principal == null ? null : principal.getName());
+      result.entries().size(), result.matched(), AdminActor.nameOf(principal));
     return AdminCsvExporter.toAttachment(AdminLogSearchCsv.CSV_FILE_PREFIX, LocalDate.now(),
       AdminLogSearchCsv.csvColumns(), result.entries());
   }

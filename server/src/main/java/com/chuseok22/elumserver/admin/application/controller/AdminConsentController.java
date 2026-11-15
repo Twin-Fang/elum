@@ -136,7 +136,7 @@ public class AdminConsentController {
     try {
       result = consentDocumentService.update(
         key, target, label, summary, body, bumpVersion, newVersion,
-        principal == null ? null : principal.getName(), reason);
+        AdminActor.nameOf(principal), reason);
     } catch (CustomException e) {
       addEditModel(model, key, target, consentDocumentService.find(key, target),
         new ConsentEditForm(label, summary, body, bumpVersion, newVersion, reason));
