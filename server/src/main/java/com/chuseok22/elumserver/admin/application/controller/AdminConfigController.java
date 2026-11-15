@@ -110,7 +110,7 @@ public class AdminConfigController {
   ) {
     try {
       rejectValueNotReady(key, value);
-      systemConfigService.update(key, value, actorOf(principal), reason);
+      systemConfigService.update(key, value, AdminActor.nameOf(principal), reason);
       return Map.of("ok", true, "message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
       // reason: 입력칸 옆에 그대로 보일 이유 (입력값은 화면에 그대로 둠)
@@ -131,7 +131,7 @@ public class AdminConfigController {
       // 키 없는 제공자로 바꾸면 그 순간부터 카드 생성이 전부 실패한다. 화면 버튼이
       // 먼저 막지만, 요청을 직접 보내면 뚫리므로 여기서 한 번 더 막는다.
       rejectValueNotReady(key, value);
-      systemConfigService.update(key, value, actorOf(principal), reason);
+      systemConfigService.update(key, value, AdminActor.nameOf(principal), reason);
       redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
       redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + " 저장 실패: " + failureReason(e));
@@ -260,13 +260,8 @@ public class AdminConfigController {
     Principal principal,
     RedirectAttributes redirectAttributes
   ) {
-    systemConfigService.resetToDefault(key, actorOf(principal), reason);
+    systemConfigService.resetToDefault(key, AdminActor.nameOf(principal), reason);
     redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 기본값으로 복원했습니다.");
     return SettingsSection.of(key).redirectView();
-  }
-
-  /// 이력의 변경자 — 로그인한 관리자 아이디. 세션이 없으면(테스트 등) 서비스가 system 으로 적는다.
-  private static String actorOf(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

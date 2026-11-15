@@ -56,7 +56,7 @@ ProUpsellActions watchProUpsellActions(BuildContext context, WidgetRef ref, {Pla
   );
 }
 
-/// 구매 복원 (설정 줄, 판매 스위치와 무관)
+/// 구매 복원 (내 크레딧 화면 줄 · Pro 내 요금제 시트, 판매 스위치와 무관)
 Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
   if (!ref.read(isPlanStoreConnectedProvider)) return;
   await actions.restorePlanPurchases(context, ref);

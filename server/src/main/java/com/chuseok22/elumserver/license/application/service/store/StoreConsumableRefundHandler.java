@@ -8,8 +8,7 @@ import java.util.List;
 
 /**
  * 소모성 상품(크레딧 꾸러미) 환불을 받는 쪽: 회수, 환불 취소 재적립, 재확인 대상 거래 목록
- * 스토어 알림 수신·서명 검증·재확인 호출은 license 가 하고, 크레딧 장부는 구현체(credit)가 다룬다
- * 거래 id 는 Apple transactionId · Google orderId
+ * 알림 수신·검증·재확인 호출은 license, 크레딧 장부는 구현체(credit). 거래 id: Apple transactionId · Google orderId
  */
 public interface StoreConsumableRefundHandler {
 

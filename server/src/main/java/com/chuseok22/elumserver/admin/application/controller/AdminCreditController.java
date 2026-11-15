@@ -133,7 +133,7 @@ public class AdminCreditController {
       LocalDateTime expiresAt = type == CreditAdjustType.GRANT
         ? creditService.resolveExpiry(form.expiryModeOrDefault(), form.expiryDate()) : null;
       CreditAdjustPreview applied = creditService.adjust(
-        memberId, type, form.parsedAmount(), expiresAt, actorOf(principal), form.reason());
+        memberId, type, form.parsedAmount(), expiresAt, AdminActor.nameOf(principal), form.reason());
       redirectAttributes.addFlashAttribute("message",
         type.getLabel() + " 반영했어요. " + applied.summary().replace(", 즉시 적용", ""));
     } catch (CustomException e) {
@@ -154,7 +154,7 @@ public class AdminCreditController {
     RedirectAttributes redirectAttributes
   ) {
     try {
-      creditService.manualRelease(jobId, actorOf(principal), reason);
+      creditService.manualRelease(jobId, AdminActor.nameOf(principal), reason);
       redirectAttributes.addFlashAttribute("message", "예약을 반환했어요. 잔액이 바로 돌아가요.");
     } catch (CustomException e) {
       redirectAttributes.addFlashAttribute("errorMessage", failureText("반환하지 못했어요", e));
@@ -189,7 +189,7 @@ public class AdminCreditController {
     @ModelAttribute CreditPolicyForm form, Principal principal, RedirectAttributes redirectAttributes
   ) {
     try {
-      PublishResult result = policyService.publishPolicy(form.toDraft(), actorOf(principal));
+      PublishResult result = policyService.publishPolicy(form.toDraft(), AdminActor.nameOf(principal));
       String applied = AiCreditPolicy.GRANT_APPLY_IMMEDIATE.equals(result.policy().getGrantApply())
         ? " 이번 주 지급을 " + result.adjustedAccounts() + "개 계정에 바로 맞췄어요. 이번 주에 처음 받는 회원도 새 지급량이에요."
         : " 새 지급량은 다음 주부터 적용돼요. 이번 주는 이번 주에 처음 받는 회원도 이전 지급량이에요.";
@@ -278,10 +278,5 @@ public class AdminCreditController {
       return "/admin/credits/jobs";
     }
     return UriComponentsBuilder.fromUriString(back).build().toUriString();
-  }
-
-  /// 원장 actor — 로그인한 관리자 아이디. 세션이 없으면(테스트 등) 서비스가 admin 으로 적는다.
-  private static String actorOf(Principal principal) {
-    return principal == null ? null : principal.getName();
   }
 }

@@ -78,7 +78,7 @@ public class AdminMonitoringController {
       return AdminCsvExporter.redirectOverLimit(LIST_PATH, query, export.totalCount(), request, response);
     }
     log.info("[admin csv] exported ai calls : rows={}, admin={}", export.rows().size(),
-      principal == null ? null : principal.getName());
+      AdminActor.nameOf(principal));
     return AdminCsvExporter.toAttachment(CSV_FILE_PREFIX, LocalDate.now(),
       AdminMonitoringList.csvColumns(adminDateFormatter), export.rows());
   }

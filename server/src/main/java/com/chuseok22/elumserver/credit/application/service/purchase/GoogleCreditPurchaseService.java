@@ -40,7 +40,7 @@ public class GoogleCreditPurchaseService {
   private final CreditPurchaseGrantService grantService;
 
   /**
-   * @throws CustomException 판매·스토어 꺼짐 403, 형식·상품·테스트 결제·취소된 구매·다른 계정 거래 400, 서비스 계정 없음 503
+   * @throws CustomException 판매(전체·Google Play 스위치)·스토어 꺼짐 403, 형식·상품·테스트 결제·취소된 구매·다른 계정 거래 400, 서비스 계정 없음 503
    */
   public CreditPurchaseResponse verify(String memberId, String productId, String purchaseToken) {
     if (!packCatalog.isSaleEnabled(SubscriptionSource.GOOGLE_IAP)) {
