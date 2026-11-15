@@ -4,7 +4,7 @@
 // 소셜 로그인은 자동화할 수 없고 서버 토큰은 만료되므로, 저장소·토큰·일과 목록을 메모리 데이터로 바꿔 끼운다.
 // 앱 번들에 들어가지 않는다 (lib 밖).
 //
-// 실행: flutter run -t tool/preview/tablet_preview_main.dart -d <기기> --dart-define=PREVIEW_ROLE=child|guardian
+// 실행: flutter run -t tool/preview/tablet_preview_main.dart -d <기기> --dart-define=PREVIEW_ROLE=child|guardian --dart-define=PREVIEW_LANGUAGE=ko|en|ja|zh|es
 import 'package:dio/dio.dart';
 import 'package:elum/app.dart';
 import 'package:elum/app/dio_provider.dart';
@@ -13,16 +13,23 @@ import 'package:elum/core/layout/orientation_policy.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/domain/guide_tip.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/shared/models/action_card.dart';
-import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'fake_dio.dart';
+import 'preview_demo_data.dart';
+
+/// 데모 문구 언어: ko·en·ja·zh·es (기기 언어도 같은 언어로 맞춰 찍음, #1419)
+const _previewLanguage = String.fromEnvironment(
+  'PREVIEW_LANGUAGE',
+  defaultValue: 'ko',
+);
 
 /// 어느 화면으로 시작할지: child(이룸이 기기) | guardian(보호자 홈) | login(로그인 전) | onboarding(로그인 뒤 가입 절차)
 const _previewRole = String.fromEnvironment(
@@ -35,17 +42,24 @@ Future<void> main() async {
   await OrientationPolicy.apply();
   await AppConfig.load();
 
+  final demo = toPreviewDemoData(_previewLanguage);
   final isChild = _previewRole == 'child';
   final isSignedIn = _previewRole != 'login';
   final isOnboarded = _previewRole == 'child' || _previewRole == 'guardian';
   final storage = InMemoryStorage(
     onboardingCompleted: isOnboarded,
-    nickname: isOnboarded ? '하늘이' : null,
+    nickname: isOnboarded ? demo.nickname : null,
     character: isOnboarded ? 'cat' : null,
     pin: isOnboarded ? '1234' : null,
     elumiDevice: isChild,
   );
   if (_previewRole == 'guardian') await storage.setSelectedRole('guardian');
+  // 스토어 스크린샷: 홈 안내 카드(가이드 팁·알림 켜기)·코치마크를 미리 닫아 둠
+  await storage.setDismissedGuideTipSlugs([
+    for (final tip in GuideTip.values) tip.slug,
+  ]);
+  await storage.setHomeNotificationNoticeDismissedAt(DateTime.now());
+  await storage.setHomeCoachSeen(true);
 
   final tokens = isSignedIn
       ? InMemoryTokenStore(
@@ -56,7 +70,7 @@ Future<void> main() async {
   final dio = Dio(BaseOptions(baseUrl: 'https://preview.local'))
     // 진행률 저장은 성공으로 둔다 (404 면 "일과가 사라졌다"로 보고 홈으로 돌아간다)
     ..httpClientAdapter = FakeAdapter({
-      for (final routine in _demoRoutines)
+      for (final routine in demo.routines)
         'PUT /api/routines/${routine.id}/progress': const <String, Object?>{},
     });
 
@@ -64,73 +78,18 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         localStorageProvider.overrideWithValue(storage),
+        // 스토어 스크린샷에 광고가 찍히지 않게 끔
+        adsEnabledProvider.overrideWithValue(false),
         tokenStoreProvider.overrideWithValue(tokens),
         dioProvider.overrideWithValue(dio),
-        myRoutinesProvider.overrideWith((ref) async => _demoRoutines),
-        todayRoutinesProvider.overrideWith((ref) async => _demoRoutines),
+        myRoutinesProvider.overrideWith((ref) async => demo.routines),
+        todayRoutinesProvider.overrideWith((ref) async => demo.routines),
         pastRoutinesProvider.overrideWith((ref) async => const []),
         memberProvider.overrideWith(
-          (ref) async => Member(nickname: '하늘이', totalStars: 15),
+          (ref) async => Member(nickname: demo.nickname, totalStars: 15),
         ),
       ],
       child: const ElumApp(),
     ),
   );
 }
-
-ActionCard _card(
-  String id,
-  int order,
-  String title,
-  String description,
-  String pictogramId,
-) => ActionCard(
-  id: id,
-  stepOrder: order,
-  title: title,
-  description: description,
-  pictogramId: pictogramId,
-);
-
-final _demoRoutines = <Routine>[
-  Routine(
-    id: 'r1',
-    title: '아침에 학교 갈 준비',
-    status: 'CONFIRMED',
-    rewardText: '젤리 먹기',
-    rewardPresetKey: 'SNACK',
-    progressPercent: 25,
-    completedStepCount: 1,
-    totalStepCount: 4,
-    steps: [
-      _card('r1c1', 1, '세수해요', '물로 얼굴을 깨끗이 씻어요', 'wash_face_,_to'),
-      _card('r1c2', 2, '옷을 입어요', '학교에 갈 옷을 차례대로 입어요', 'put_on_coat_,_to'),
-      _card('r1c3', 3, '가방을 챙겨요', '책과 필통을 가방에 넣어요', 'school_bag'),
-      _card('r1c4', 4, '신발을 신어요', '현관에서 신발을 신어요', 'shoe_-_mans'),
-    ],
-  ),
-  Routine(
-    id: 'r2',
-    title: '저녁 먹기 전 손 씻기',
-    status: 'CONFIRMED',
-    progressPercent: 0,
-    totalStepCount: 3,
-    steps: [
-      _card('r2c1', 1, '손을 적셔요', '물을 틀고 손을 적셔요', 'wash_hands_,_to'),
-      _card('r2c2', 2, '비누칠을 해요', '손바닥과 손등을 비벼요', 'soap'),
-      _card('r2c3', 3, '헹구고 닦아요', '물로 헹구고 수건으로 닦아요', 'towel'),
-    ],
-  ),
-  Routine(
-    id: 'r3',
-    title: '잠자기 전 정리',
-    status: 'COMPLETED',
-    progressPercent: 100,
-    completedStepCount: 2,
-    totalStepCount: 2,
-    steps: [
-      _card('r3c1', 1, '이를 닦아요', '칫솔로 이를 구석구석 닦아요', 'brush_teeth_,_to'),
-      _card('r3c2', 2, '불을 꺼요', '잘 자요, 불을 꺼요', 'turn_off_,_to'),
-    ],
-  ),
-];
