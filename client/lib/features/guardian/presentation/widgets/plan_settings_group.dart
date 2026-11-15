@@ -11,11 +11,10 @@ import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../../subscription/application/plan_status_providers.dart';
-import '../../../subscription/application/plan_store_catalog.dart';
 
-/// 설정 맨 위 요금제 묶음: `내 요금제` 줄(Free · Pro) + `내 크레딧` + `구매 복원` > 아래 한 줄(갱신일 · 해지 예약 · 결제 확인 필요)
+/// 설정 맨 위 요금제 묶음: `내 요금제` 줄(Free · Pro) + `내 크레딧` > 아래 한 줄(갱신일 · 해지 예약 · 결제 확인 필요)
 ///
-/// `내 요금제` 줄: Pro > 내 요금제 시트(날짜 · 결제한 곳 · 구독 관리, #1303), Free > 요금제 화면. Free 인데 판매 중 아니면 상태만 보임. 구매 복원은 스토어 연동이면 판매와 무관하게 보임 (#1132)
+/// `내 요금제` 줄: Pro > 내 요금제 시트(날짜 · 결제한 곳 · 구독 관리, #1303), Free > 요금제 화면. Free 인데 판매 중 아니면 상태만 보임. 구매 복원은 내 크레딧 화면 · Pro 내 요금제 시트
 class PlanSettingsGroup extends ConsumerWidget {
   const PlanSettingsGroup({super.key, required this.isBusy});
 
@@ -28,7 +27,6 @@ class PlanSettingsGroup extends ConsumerWidget {
     final status = ref.watch(planStatusProvider);
     // Pro 는 늘 내 요금제 시트 (판매와 무관), Free 는 요금제 화면을 열 수 있을 때만 누름
     final canOpenMyPlan = status.isPro || ref.watch(canOpenPlanPaywallProvider);
-    final isStoreConnected = ref.watch(isPlanStoreConnectedProvider);
     return SettingsGroup(
       footer: planStatusFooter(l10n, status),
       children: [
@@ -48,13 +46,6 @@ class PlanSettingsGroup extends ConsumerWidget {
           leadingIllustrationAsset: AppAssets.creditTicket,
           onTap: isBusy ? null : () => context.push(Routes.guardianMyCredit),
         ),
-        if (isStoreConnected)
-          SettingsTile(
-            isInCard: true,
-            label: l10n.planRestore,
-            shouldReserveLeadingSlot: true,
-            onTap: isBusy ? null : () => restorePlanPurchases(context, ref),
-          ),
       ],
     );
   }

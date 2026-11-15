@@ -26,7 +26,7 @@ public interface CreditPurchaseControllerDocs {
     description = """
       판매 중인 꾸러미(상품 ID·개수)를 돌려줍니다. **가격은 서버가 모릅니다** — 앱이 스토어에서 상품 ID로 읽습니다.
 
-      판매 스위치(`CREDIT_PACK_SALE_ENABLED`)가 꺼져 있으면 `isSaleEnabled=false` 와 빈 `packs` 입니다.
+      `platform`(ios, android, 선택)을 보내면 스토어별 스위치(`CREDIT_PACK_APPLE_SALE_ENABLED`, `CREDIT_PACK_GOOGLE_SALE_ENABLED`)도 봅니다. 판매 스위치가 모두 꺼져 있으면 `isSaleEnabled=false` 와 빈 `packs` 입니다.
       `isPopular` 는 설정 `CREDIT_PACK_POPULAR_PRODUCT_ID` 와 같은 상품에만 true 입니다.
       """
   )
@@ -37,7 +37,7 @@ public interface CreditPurchaseControllerDocs {
     @ApiResponse(responseCode = "401", description = "accessToken이 없거나 유효하지 않음",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
-  ResponseEntity<CreditPacksResponse> getPacks();
+  ResponseEntity<CreditPacksResponse> getPacks(String platform);
 
   @Operation(
     summary = "App Store 크레딧 구매 확인 · 적립",

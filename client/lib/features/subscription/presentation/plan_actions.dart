@@ -18,6 +18,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../member/domain/member_subscription.dart';
 import '../application/plan_status_providers.dart';
 import '../application/store_purchase_coordinator.dart';
+import '../data/store_billing_client.dart';
 import '../domain/plan_catalog.dart';
 import '../domain/plan_error_code.dart';
 
@@ -71,6 +72,31 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
         fallback: l10n.planFailedFallback,
         fallbackCode: PlanErrorCode.restore,
       );
+  }
+}
+
+/// 프로모션 코드 입력: iOS 는 App Store 코드 시트, Android 는 Play 코드 입력 화면 (받은 상품은 구매 소식으로 와서 서버 확인)
+Future<void> openStoreCodeRedemption(BuildContext context, WidgetRef ref) async {
+  final isOpened = isAppStoreDevice
+      ? await _presentAppStoreCodeSheet(ref)
+      : await _openExternal(AppConfig.playCodeRedemptionUrl, step: 'redeem');
+  if (isOpened || !context.mounted) return;
+  await showFailure(
+    context,
+    null,
+    fallback: context.l10n.planRedeemCodeFailed,
+    fallbackCode: PlanErrorCode.redeemCode,
+  );
+}
+
+/// App Store 코드 시트 띄우기. 띄웠으면 true
+Future<bool> _presentAppStoreCodeSheet(WidgetRef ref) async {
+  try {
+    await ref.read(storeBillingClientProvider).presentCodeRedemptionSheet();
+    return true;
+  } catch (error, stack) {
+    AppLogger.error('[plan redeem] code sheet failed', error, stack);
+    return false;
   }
 }
 

@@ -51,7 +51,7 @@ class CreditPurchaseStoreServiceTest {
 
   @BeforeEach
   void setUp() {
-    when(packCatalog.isSaleEnabled()).thenReturn(true);
+    when(packCatalog.isSaleEnabled(any())).thenReturn(true);
     when(settings.isAppleEnabled()).thenReturn(true);
     when(settings.isGoogleEnabled()).thenReturn(true);
     when(settings.appleVerifyContext()).thenReturn(new AppleVerifyContext(BUNDLE_ID, APP_APPLE_ID, true));
@@ -70,11 +70,20 @@ class CreditPurchaseStoreServiceTest {
   @Test
   @DisplayName("판매가 꺼져 있으면 두 스토어 모두 구매 확인을 거절한다 — 켜기 전에 들어온 결제로 적립되지 않는다")
   void saleOff_rejectsBothStores() {
-    when(packCatalog.isSaleEnabled()).thenReturn(false);
+    when(packCatalog.isSaleEnabled(any())).thenReturn(false);
 
     assertErrorCode(() -> appleService.verify(MEMBER_ID, "jws"), ErrorCode.CREDIT_PACK_SALE_DISABLED);
     assertErrorCode(() -> googleService.verify(MEMBER_ID, PRODUCT_ID, "token"), ErrorCode.CREDIT_PACK_SALE_DISABLED);
     verifyNoInteractions(grantService, playClient);
+  }
+
+  @Test
+  @DisplayName("Google 만 켜져 있으면 App Store 구매 확인은 거절한다 — iOS 상품 심사 전 결제로 적립되지 않는다 (#1427)")
+  void googleOnlySale_rejectsApple() {
+    when(packCatalog.isSaleEnabled(SubscriptionSource.APPLE_IAP)).thenReturn(false);
+
+    assertErrorCode(() -> appleService.verify(MEMBER_ID, "jws"), ErrorCode.CREDIT_PACK_SALE_DISABLED);
+    verifyNoInteractions(grantService);
   }
 
   // --- Apple ---

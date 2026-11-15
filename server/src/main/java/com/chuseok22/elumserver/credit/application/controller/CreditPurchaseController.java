@@ -10,12 +10,15 @@ import com.chuseok22.elumserver.credit.application.service.purchase.GoogleCredit
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import lombok.RequiredArgsConstructor;
+import com.chuseok22.elumserver.license.core.SubscriptionSource;
+import java.util.Locale;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /// 추가 크레딧 구매: 꾸러미 목록, 스토어 결제 확인·적립. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
@@ -30,8 +33,20 @@ public class CreditPurchaseController implements CreditPurchaseControllerDocs {
 
   @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
   @GetMapping("/packs")
-  public ResponseEntity<CreditPacksResponse> getPacks() {
-    return ResponseEntity.ok(packQueryService.getPacks());
+  public ResponseEntity<CreditPacksResponse> getPacks(@RequestParam(value = "platform", required = false) String platform) {
+    return ResponseEntity.ok(packQueryService.getPacks(toStore(platform)));
+  }
+
+  /// 앱 platform 값 > 스토어 (ios > App Store, android > Google Play, 그 외·없음 > null)
+  private static SubscriptionSource toStore(String platform) {
+    if (platform == null) {
+      return null;
+    }
+    return switch (platform.trim().toLowerCase(Locale.ROOT)) {
+      case "ios" -> SubscriptionSource.APPLE_IAP;
+      case "android" -> SubscriptionSource.GOOGLE_IAP;
+      default -> null;
+    };
   }
 
   // 영수증 JWS·구매 토큰이 들어 있어 파라미터를 남기지 않는다

@@ -62,6 +62,13 @@ Future<void> restorePlanPurchases(BuildContext context, WidgetRef ref) async {
   await actions.restorePlanPurchases(context, ref);
 }
 
+/// 프로모션 코드 입력 (내 크레딧 화면 줄). 받은 상품을 처리하도록 구매 소식 듣기를 먼저 켬
+Future<void> openStoreCodeRedemption(BuildContext context, WidgetRef ref) async {
+  if (!ref.read(isPlanStoreConnectedProvider)) return;
+  unawaited(ref.read(storePurchaseCoordinatorProvider).start());
+  await actions.openStoreCodeRedemption(context, ref);
+}
+
 /// 설정 `내 요금제` 줄 누름 (#1303): Pro > 내 요금제 시트 > 고른 동작 · Free > 요금제 화면 (열 수 있을 때만)
 Future<void> openMyPlan(BuildContext context, WidgetRef ref) async {
   if (!ref.read(planAccessProvider).isPro) {

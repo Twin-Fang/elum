@@ -1521,8 +1521,6 @@
   "creditGuideRegenerateFreeDaily": "{count, plural, one{{count} gratis al día} other{{count} gratis al día}}",
   "creditGuideConfirm": "Entendido",
   "myCreditFreeRegenerateToday": "Volver a dibujar hoy: {left}/{cap} gratis",
-  "myCreditRecentTitle": "Uso reciente",
-  "myCreditSeeAllHistory": "Ver todo",
   "myCreditGuideLink": "Así funcionan los créditos",
   "abaIntroTitle": "Fácil de preparar,\ncada día por su cuenta",
   "abaIntroSubtitle": "Basado en el Análisis Aplicado de Conducta (ABA)",
