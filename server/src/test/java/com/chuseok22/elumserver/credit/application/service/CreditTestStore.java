@@ -15,7 +15,9 @@ import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPurchase;
+import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditRefundHold;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPurchaseRepository;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditRefundHoldRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
@@ -169,6 +171,21 @@ public final class CreditTestStore {
       return purchase;
     });
     lenient().when(purchaseRepository.save(any(AiCreditPurchase.class))).thenAnswer(inv -> inv.getArgument(0));
+  }
+
+  public final List<AiCreditRefundHold> refundHolds = new ArrayList<>();
+
+  /// 먼저 온 환불 보류 저장소를 메모리 목록에 붙임
+  public void wireRefundHolds(AiCreditRefundHoldRepository holdRepository) {
+    lenient().when(holdRepository.findByStoreAndTransactionId(any(), anyString())).thenAnswer(inv -> refundHolds.stream()
+      .filter(h -> h.getStore() == inv.getArgument(0) && h.getTransactionId().equals(inv.getArgument(1))).findFirst());
+    lenient().when(holdRepository.save(any(AiCreditRefundHold.class))).thenAnswer(inv -> {
+      AiCreditRefundHold hold = inv.getArgument(0);
+      if (!refundHolds.contains(hold)) {
+        refundHolds.add(hold);
+      }
+      return hold;
+    });
   }
 
   /// 설정이 비어 있는(= 기본 WEEK) 주기 설정

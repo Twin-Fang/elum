@@ -7,6 +7,7 @@ import com.apple.itunes.storekit.model.LastTransactionsItem;
 import com.apple.itunes.storekit.model.Status;
 import com.apple.itunes.storekit.model.StatusResponse;
 import com.apple.itunes.storekit.model.SubscriptionGroupIdentifierItem;
+import com.apple.itunes.storekit.model.TransactionInfoResponse;
 import com.chuseok22.elumserver.license.application.service.store.StoreLogValues;
 import com.chuseok22.elumserver.license.application.service.store.StoreSubscriptionSettings.AppleServerApiCredentials;
 import com.chuseok22.elumserver.license.application.service.store.StoreTemporarilyUnavailableException;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * App Store Server API 구독 상태 조회 (Get All Subscription Statuses, Apple 공식 라이브러리)
+ * App Store Server API 조회 (Get All Subscription Statuses, Get Transaction Info, Apple 공식 라이브러리)
  * 404 > 없는 거래(빈 값), 그 외 실패 > 확인 중. 클라이언트는 (환경, 인증값, 번들) 별로 1개만 만들어 재사용
  */
 @Slf4j
@@ -56,6 +57,32 @@ public class StoreKitAppleSubscriptionStatusClient implements AppleSubscriptionS
       throw new StoreTemporarilyUnavailableException("apple api client error", e);
     }
     return findTransaction(response, originalTransactionId);
+  }
+
+  @Override
+  public Optional<String> fetchSignedTransaction(
+    String transactionId, StoreEnvironment environment, String bundleId, AppleServerApiCredentials credentials
+  ) {
+    TransactionInfoResponse response;
+    try {
+      response = clientOf(environment, bundleId, credentials).getTransactionInfo(transactionId);
+    } catch (APIException e) {
+      if (e.getHttpStatusCode() == HTTP_NOT_FOUND) {
+        return Optional.empty();
+      }
+      log.warn("[refund recheck] apple api failed : status={}, apiError={}, transaction={}",
+        e.getHttpStatusCode(), e.getRawApiError(), StoreLogValues.mask(transactionId));
+      throw new StoreTemporarilyUnavailableException("apple api status " + e.getHttpStatusCode(), e);
+    } catch (IOException e) {
+      throw new StoreTemporarilyUnavailableException("apple api io failure", e);
+    } catch (RuntimeException e) {
+      log.error("[refund recheck] apple api client error : {}", e.getClass().getSimpleName());
+      throw new StoreTemporarilyUnavailableException("apple api client error", e);
+    }
+    if (response == null || response.getSignedTransactionInfo() == null) {
+      return Optional.empty();
+    }
+    return Optional.of(response.getSignedTransactionInfo());
   }
 
   // 구독 그룹 > 마지막 거래 목록에서 같은 originalTransactionId 찾기

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('AI 크레딧 · 구매·환불', 'credits', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold">AI 크레딧 · 구매·환불</h1>
+    <p class="text-base-content/60">크레딧 꾸러미 구매 한 건씩 스토어·거래 id·환불 상태를 봅니다. 알림을 놓친 환불은 아래 환불 재확인이 다시 찾아요.</p>
+  </div>
+
+  <nav th:replace="~{admin/fragments/credit-nav :: nav('purchases')}"></nav>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}">완료</div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
+
+  <!-- 환불 재확인: 26시간 넘게 성공이 없거나 마지막 실행이 실패한 스토어 경고 (매일 재확인이 켜졌을 때만) -->
+  <div th:each="store : ${recheck.attentionStores()}" class="alert alert-warning" role="alert" data-refund-recheck-attention>
+    <span th:text="${store.label} + ' 환불 재확인이 26시간 넘게 성공하지 않았거나 마지막 실행이 실패했어요. 아래 실행 기록의 실패 사유를 보고 지금 확인을 눌러 주세요. (ADMIN-REFUND-RECHECK-STALE)'">
+      App Store 결제 환불 재확인이 26시간 넘게 성공하지 않았어요.</span>
+  </div>
+
+  <section class="card bg-base-200 shadow">
+    <div class="card-body gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="card-title text-base">환불 재확인</h2>
+        <span th:if="${recheck.isScheduleEnabled()}" class="badge badge-success badge-sm">매일 04:50 켜짐</span>
+        <span th:unless="${recheck.isScheduleEnabled()}" class="badge badge-ghost badge-sm">매일 실행 꺼짐</span>
+        <form th:action="@{/admin/credits/purchases/refund-recheck}" method="post" class="ml-auto"
+              data-confirm-title="환불 재확인" data-confirm-message="Google Play·App Store 에 환불을 지금 다시 물어볼까요? 찾은 환불은 바로 회수돼요.">
+          <button type="submit" class="btn btn-primary btn-sm">지금 확인</button>
+        </form>
+      </div>
+      <p class="text-xs text-base-content/60">
+        Google 은 취소 구매 목록(최근 30일)과 주문 환불 상태, App Store 는 거래 조회로 환불을 다시 찾아 크레딧 남은 양과 Pro 를 회수해요.
+        매일 실행은 요금제·구독 설정의 <a class="link" th:href="@{/admin/settings/plans#setting=STORE_REFUND_RECHECK_ENABLED}">스토어 환불 매일 재확인</a>에서 켜요.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="table table-xs">
+          <thead>
+          <tr>
+            <th>시작</th><th>스토어</th><th>방식</th>
+            <th class="text-right">취소 목록</th><th class="text-right">확인</th><th class="text-right">환불</th><th class="text-right">회수</th>
+            <th>결과</th>
+          </tr>
+          </thead>
+          <tbody>
+          <th:block th:if="${recheck.recentRuns().isEmpty()}">
+            <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(8, '아직 실행 기록이 없어요')}"></tr>
+          </th:block>
+          <tr th:each="run : ${recheck.recentRuns()}">
+            <td class="whitespace-nowrap" th:text="${@adminDate.format(run.startedAt)}">2026-11-16 04:50</td>
+            <td th:text="${run.store.label}">Google Play 결제</td>
+            <td>
+              <span th:text="${run.trigger.label}">매일 자동</span>
+              <span th:if="${run.requestedBy != null}" class="text-base-content/50" th:text="'(' + ${run.requestedBy} + ')'">(admin)</span>
+            </td>
+            <td class="text-right" th:text="${run.voidedCount}">0</td>
+            <td class="text-right" th:text="${run.checkedCount}">0</td>
+            <td class="text-right" th:text="${run.refundedCount}">0</td>
+            <td class="text-right" th:classappend="${run.revokedCount > 0} ? 'text-warning font-semibold'" th:text="${run.revokedCount}">0</td>
+            <td>
+              <span th:if="${run.succeeded}" class="badge badge-success badge-sm">성공</span>
+              <span th:unless="${run.succeeded}" class="badge badge-error badge-sm" th:text="${run.failureReason.label}">거래 조회 실패</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <form method="get" th:action="@{/admin/credits/purchases}" class="flex flex-wrap items-end gap-2">
+    <label class="form-control">
+      <span class="label-text text-xs">스토어</span>
+      <select name="store" class="select select-bordered select-sm">
+        <option value="" th:selected="${filter.store() == null}">전체</option>
+        <option th:each="store : ${stores}" th:value="${store.name()}" th:text="${store.label}"
+                th:selected="${filter.store() == store}">App Store 결제</option>
+      </select>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">상태</span>
+      <select name="status" class="select select-bordered select-sm">
+        <option value="" th:selected="${filter.status() == null}">전체</option>
+        <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.label}"
+                th:selected="${filter.status() == status}">환불</option>
+      </select>
+    </label>
+    <label class="form-control">
+      <span class="label-text text-xs">거래 id · 회원 id</span>
+      <input type="text" name="q" th:value="${q}" maxlength="255" placeholder="완전히 같은 값" class="input input-bordered input-sm w-72"/>
+    </label>
+    <button type="submit" class="btn btn-primary btn-sm">찾기</button>
+    <a th:href="@{/admin/credits/purchases}" class="btn btn-ghost btn-sm">초기화</a>
+    <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${rows.totalElements}">0</span>건</span>
+  </form>
+
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+      <tr>
+        <th>구매</th><th>회원</th><th>스토어</th><th>상품</th><th class="text-right">크레딧</th>
+        <th>거래 id</th><th>상태</th><th>환불</th><th>회수</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:if="${rows.isEmpty()}">
+        <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(9, '조건에 맞는 구매가 없어요')}"></tr>
+      </th:block>
+      <tr th:each="row : ${rows.content}" th:with="purchase=${row.purchase()}">
+        <td class="text-xs whitespace-nowrap" th:text="${@adminDate.format(purchase.createdAt)}">2026-11-16 10:00</td>
+        <td class="text-xs">
+          <th:block th:if="${purchase.memberId != null}">
+            <a th:href="@{/admin/members/{id}(id=${purchase.memberId})}" class="link link-hover" th:title="${purchase.memberId}"
+               th:text="${row.memberDisplayName() != null ? #strings.abbreviate(row.memberDisplayName(), 20) : '(없는 회원)'}">닉네임</a>
+            <a th:href="@{/admin/credits/members/{id}(id=${purchase.memberId})}" class="link link-hover text-base-content/50">· 크레딧</a>
+          </th:block>
+          <span th:if="${purchase.memberId == null}" class="text-base-content/40">(탈퇴)</span>
+        </td>
+        <td class="text-xs" th:text="${purchase.store.label}">App Store 결제</td>
+        <td class="text-xs font-mono" th:text="${purchase.productId}">elum_credit_150</td>
+        <td class="text-right" th:text="${purchase.credits}">150</td>
+        <td class="text-xs font-mono">
+          <a th:href="@{/admin/credits/purchases(q=${purchase.transactionId})}" class="link link-hover"
+             th:title="${purchase.transactionId}" th:text="${#strings.abbreviate(purchase.transactionId, 28)}">2000000000000001</a>
+        </td>
+        <td>
+          <span class="badge badge-sm" th:classappend="${purchase.status.name() == 'REFUNDED'} ? 'badge-error' : 'badge-success'"
+                th:text="${purchase.status.label}">적립</span>
+        </td>
+        <td class="text-xs whitespace-nowrap">
+          <th:block th:if="${purchase.refundedAt != null}">
+            <div th:text="${@adminDate.format(purchase.refundedAt)}">2026-11-16 11:00</div>
+            <div class="text-base-content/60">
+              <span th:if="${purchase.refundOrigin != null}" th:text="${purchase.refundOrigin.label}">스토어 알림</span>
+              <span th:text="'· 회수 ' + ${purchase.recoveredCredits}">· 회수 120</span>
+            </div>
+          </th:block>
+          <span th:if="${purchase.refundedAt == null}" class="text-base-content/40">-</span>
+        </td>
+        <td>
+          <form th:if="${row.isRevocable()}" th:action="@{/admin/credits/purchases/{id}/revoke(id=${purchase.id})}"
+                method="post" class="flex gap-1"
+                data-confirm-title="구매 회수" data-confirm-message="이 구매의 남은 크레딧을 회수하고 환불로 표시할까요? 이미 쓴 크레딧은 되돌리지 않아요.">
+            <input type="text" name="reason" required maxlength="200" placeholder="회수 사유"
+                   class="input input-bordered input-sm w-32"/>
+            <button type="submit" class="btn btn-warning btn-sm">회수</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center gap-2" th:if="${rows.totalPages > 1}">
+    <a th:if="${rows.hasPrevious()}" class="btn btn-sm"
+       th:href="@{/admin/credits/purchases(page=${rows.number - 1}, store=${filter.store() != null ? filter.store().name() : ''}, status=${filter.status() != null ? filter.status().name() : ''}, q=${q})}">이전</a>
+    <span class="text-sm" th:text="${rows.number + 1} + ' / ' + ${rows.totalPages}">1 / 1</span>
+    <a th:if="${rows.hasNext()}" class="btn btn-sm"
+       th:href="@{/admin/credits/purchases(page=${rows.number + 1}, store=${filter.store() != null ? filter.store().name() : ''}, status=${filter.status() != null ? filter.status().name() : ''}, q=${q})}">다음</a>
+  </div>
+
+  <p class="text-xs text-base-content/60">
+    회수는 구매 묶음의 남은 양만 0으로 맞춰요. 이미 쓴 크레딧은 되돌리지 않아요.
+    스토어 알림(환불·환불 취소·환불 요청)은 <a class="link" th:href="@{/admin/members}">회원 상세</a>의 스토어 거래 이력에 남아요.
+  </p>
+</main>
+</body>
+</html>

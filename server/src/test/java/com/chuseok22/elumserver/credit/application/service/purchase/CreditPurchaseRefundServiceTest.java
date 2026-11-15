@@ -15,6 +15,9 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPurchaseRepository;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditRefundHoldRepository;
+import com.chuseok22.elumserver.license.core.ConsumableRefundResult;
+import com.chuseok22.elumserver.license.core.StoreRefundOrigin;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import jakarta.persistence.EntityManager;
 import java.time.Clock;
@@ -28,7 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/// 환불 회수: 남은 양만 회수, 이미 쓴 양은 건드리지 않음, 같은 환불은 한 번만
+/// 환불 회수: 남은 양만 회수, 이미 쓴 양은 건드리지 않음, 같은 환불은 한 번만, 환불 취소는 회수분 재적립, 모르는 거래는 알림만 보류
 @ExtendWith(MockitoExtension.class)
 class CreditPurchaseRefundServiceTest {
 
@@ -47,6 +50,8 @@ class CreditPurchaseRefundServiceTest {
   @Mock
   private AiCreditPurchaseRepository purchaseRepository;
   @Mock
+  private AiCreditRefundHoldRepository holdRepository;
+  @Mock
   private EntityManager entityManager;
 
   private final CreditTestStore store = new CreditTestStore();
@@ -59,9 +64,11 @@ class CreditPurchaseRefundServiceTest {
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     store.wirePurchases(purchaseRepository);
+    store.wireRefundHolds(holdRepository);
     accountService = new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
       CreditTestStore.weekPeriodSettings(), entityManager);
-    service = new CreditPurchaseRefundService(accountService, purchaseRepository, grantRepository, ledgerRepository, CLOCK);
+    service = new CreditPurchaseRefundService(accountService, purchaseRepository, grantRepository, ledgerRepository,
+      holdRepository, CLOCK);
     account = store.account("acc-a", "member-a");
   }
 
@@ -88,7 +95,7 @@ class CreditPurchaseRefundServiceTest {
   void refund_recoversOnlyRemaining() {
     AiCreditGrant grant = givenPurchaseWithRemaining(18);
 
-    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID);
+    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
 
     assertThat(grant.getRemaining()).isZero();
     assertThat(grant.getAmount()).isEqualTo(50);
@@ -107,8 +114,8 @@ class CreditPurchaseRefundServiceTest {
   void refundTwice_recoversOnce() {
     givenPurchaseWithRemaining(18);
 
-    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID);
-    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID);
+    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
+    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
 
     assertThat(store.ledgerOf(CreditLedgerType.ADJUST)).hasSize(1);
     assertThat(accountService.balance(account, NOW).available()).isEqualTo(6);
@@ -119,7 +126,7 @@ class CreditPurchaseRefundServiceTest {
   void refund_afterFullyUsed_marksRefundedWithoutLedger() {
     AiCreditGrant grant = givenPurchaseWithRemaining(0);
 
-    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID);
+    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
 
     assertThat(grant.getRemaining()).isZero();
     assertThat(store.ledgerOf(CreditLedgerType.ADJUST)).isEmpty();
@@ -128,13 +135,52 @@ class CreditPurchaseRefundServiceTest {
   }
 
   @Test
-  @DisplayName("모르는 거래의 환불 알림은 아무것도 바꾸지 않는다")
-  void refund_unknownTransaction_doesNothing() {
+  @DisplayName("모르는 거래의 환불 알림은 보류만 하고 장부는 건드리지 않는다 — 버리면 나중에 확인된 구매가 회수되지 않는다")
+  void refund_unknownTransaction_isHeld() {
     givenPurchaseWithRemaining(18);
 
-    service.refund(SubscriptionSource.GOOGLE_IAP, "GPA.0000-0000-0000-00000");
+    var outcome = service.refund(SubscriptionSource.GOOGLE_IAP, "GPA.0000-0000-0000-00000", StoreRefundOrigin.STORE_NOTIFICATION);
 
+    assertThat(outcome.result()).isEqualTo(ConsumableRefundResult.HELD);
+    assertThat(store.refundHolds).singleElement().satisfies(hold -> assertThat(hold.isPending()).isTrue());
     assertThat(purchase.getStatus()).isEqualTo(CreditPurchaseStatus.GRANTED);
     assertThat(store.ledger).isEmpty();
+  }
+
+  @Test
+  @DisplayName("재확인 경로의 모르는 거래는 보류하지 않는다 — 다른 앱·구독 주문이 보류로 쌓이지 않게")
+  void refund_unknownTransactionFromRecheck_isNotHeld() {
+    var outcome = service.refund(SubscriptionSource.GOOGLE_IAP, "GPA.0000-0000-0000-00000", StoreRefundOrigin.REFUND_RECHECK);
+
+    assertThat(outcome.result()).isEqualTo(ConsumableRefundResult.UNKNOWN);
+    assertThat(store.refundHolds).isEmpty();
+  }
+
+  @Test
+  @DisplayName("환불 취소(REFUND_REVERSED)는 회수한 양만큼 같은 묶음에 다시 적립한다 — 안 하면 돈을 낸 보호자가 크레딧을 잃는다")
+  void reverseRefund_regrantsRecovered() {
+    AiCreditGrant grant = givenPurchaseWithRemaining(18);
+    service.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
+
+    var outcome = service.reverseRefund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID);
+
+    assertThat(outcome.result()).isEqualTo(ConsumableRefundResult.REVERSED);
+    assertThat(grant.getRemaining()).isEqualTo(18);
+    assertThat(purchase.getStatus()).isEqualTo(CreditPurchaseStatus.GRANTED);
+    assertThat(purchase.getRefundedAt()).isNull();
+    assertThat(purchase.getRecoveredCredits()).isZero();
+    assertThat(store.ledgerOf(CreditLedgerType.ADJUST)).extracting(line -> line.getDelta()).containsExactly(-18, 18);
+    assertThat(accountService.balance(account, NOW).available()).isEqualTo(24);
+  }
+
+  @Test
+  @DisplayName("보류 중인 환불이 취소되면 보류를 풀어 나중에 확인된 구매를 회수하지 않는다")
+  void reverseRefund_ofHeldRefund_releasesHold() {
+    service.refund(SubscriptionSource.APPLE_IAP, "9000000000000001", StoreRefundOrigin.STORE_NOTIFICATION);
+
+    var outcome = service.reverseRefund(SubscriptionSource.APPLE_IAP, "9000000000000001");
+
+    assertThat(outcome.result()).isEqualTo(ConsumableRefundResult.HOLD_RELEASED);
+    assertThat(store.refundHolds).singleElement().satisfies(hold -> assertThat(hold.isPending()).isFalse());
   }
 }

@@ -9,7 +9,7 @@ import com.chuseok22.elumserver.license.infrastructure.repository.StorePurchaseE
 import java.time.LocalDateTime;
 
 /**
- * 스토어 거래 이력 한 줄 쓰기 2종: 구독 상태 반영(앱 검증·알림) · 환불 회수 알림
+ * 스토어 거래 이력 한 줄 쓰기 3종: 구독 상태 반영(앱 검증·알림) · 구독 환불 회수 · 소모성 상품(크레딧 꾸러미) 환불 알림
  * 외부 값(알림 종류·id·거래 id·사유)은 열 길이로 자름. StorePurchaseApplier 가 만들어 씀
  */
 class StorePurchaseEventRecorder {
@@ -46,15 +46,42 @@ class StorePurchaseEventRecorder {
     SubscriptionSource store, String purchaseKey, StorePurchase purchase, String eventType, String externalEventId,
     StorePurchaseEventResult result, String memberId, LocalDateTime now
   ) {
+    recordRevocationEvent(store, purchaseKey, purchase, StorePurchaseTrigger.STORE_NOTIFICATION, eventType, externalEventId,
+      result, memberId, now);
+  }
+
+  void recordRevocationEvent(
+    SubscriptionSource store, String purchaseKey, StorePurchase purchase, StorePurchaseTrigger trigger, String eventType,
+    String externalEventId, StorePurchaseEventResult result, String memberId, LocalDateTime now
+  ) {
     StorePurchaseEvent event = new StorePurchaseEvent();
     event.setStore(store);
     event.setPurchaseKey(purchaseKey);
     event.setMemberId(memberId);
-    event.setTrigger(StorePurchaseTrigger.STORE_NOTIFICATION);
+    event.setTrigger(trigger);
     event.setEventType(truncate(eventType, StorePurchaseEvent.EVENT_TYPE_MAX_LENGTH));
     event.setExternalEventId(truncate(externalEventId, TRANSACTION_ID_MAX_LENGTH));
     event.setResult(result);
     event.setStateAfter(purchase == null ? null : purchase.getState());
+    event.setOccurredAt(now);
+    storePurchaseEventRepository.save(event);
+  }
+
+  /// 소모성 거래 이력: 구매 키·거래 id 모두 거래 id (Apple transactionId · Google orderId)
+  void recordConsumableEvent(
+    SubscriptionSource store, String transactionId, String memberId, StorePurchaseTrigger trigger, String eventType,
+    String externalEventId, StorePurchaseEventResult result, String reason, LocalDateTime now
+  ) {
+    StorePurchaseEvent event = new StorePurchaseEvent();
+    event.setStore(store);
+    event.setPurchaseKey(truncate(transactionId, StorePurchase.PURCHASE_KEY_MAX_LENGTH));
+    event.setMemberId(memberId);
+    event.setTrigger(trigger);
+    event.setEventType(truncate(eventType, StorePurchaseEvent.EVENT_TYPE_MAX_LENGTH));
+    event.setExternalEventId(truncate(externalEventId, TRANSACTION_ID_MAX_LENGTH));
+    event.setTransactionId(truncate(transactionId, TRANSACTION_ID_MAX_LENGTH));
+    event.setResult(result);
+    event.setReason(truncate(reason, StorePurchaseEvent.REASON_MAX_LENGTH));
     event.setOccurredAt(now);
     storePurchaseEventRepository.save(event);
   }

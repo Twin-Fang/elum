@@ -20,6 +20,8 @@ public enum StorePurchaseEventResult {
   UNBOUND("회원 미연결"),
   /// 다른 회원에 묶인 구매 등으로 거부
   REJECTED("거부"),
+  /// 기록만 하는 알림 (App Store 환불 요청 CONSUMPTION_REQUEST)
+  RECEIVED("접수"),
   ;
 
   private final String label;

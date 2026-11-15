@@ -13,6 +13,8 @@
      th:classappend="${tab == 'members'} ? 'tab-active'">회원별</a>
   <a th:href="@{/admin/credits/jobs}" role="tab" class="tab"
      th:classappend="${tab == 'jobs'} ? 'tab-active'">작업 탐색</a>
+  <a th:href="@{/admin/credits/purchases}" role="tab" class="tab"
+     th:classappend="${tab == 'purchases'} ? 'tab-active'">구매·환불</a>
   <a th:href="@{/admin/credits/policy}" role="tab" class="tab"
      th:classappend="${tab == 'policy'} ? 'tab-active'">정책</a>
 </nav>

@@ -29,7 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * 스토어 거래 하나를 크레딧으로 적립: 꾸러미 확인 > 계정 잠금 > 기존 기록 확인 > 묶음·구매 기록·원장 저장
+ * 스토어 거래 하나를 크레딧으로 적립: 꾸러미 확인 > 계정 잠금 > 기존 기록 확인 > 묶음·구매 기록·원장 저장 > 보류한 환불 회수
  * 적립 묶음은 PURCHASE · 만료 없음 · refId 가 거래 id. 같은 거래는 한 번만 (기록 확인 + 거래 유니크)
  */
 @Slf4j
@@ -41,6 +41,7 @@ public class CreditPurchaseGrantService {
   private final AiCreditPurchaseRepository purchaseRepository;
   private final AiCreditGrantRepository grantRepository;
   private final AiCreditLedgerRepository ledgerRepository;
+  private final CreditPurchaseRefundService refundService;
   private final TransactionTemplate transaction;
   private final Clock clock;
 
@@ -48,22 +49,23 @@ public class CreditPurchaseGrantService {
   public CreditPurchaseGrantService(
     CreditPackCatalog packCatalog, CreditAccountService accountService, AiCreditPurchaseRepository purchaseRepository,
     AiCreditGrantRepository grantRepository, AiCreditLedgerRepository ledgerRepository,
-    PlatformTransactionManager transactionManager
+    CreditPurchaseRefundService refundService, PlatformTransactionManager transactionManager
   ) {
-    this(packCatalog, accountService, purchaseRepository, grantRepository, ledgerRepository, transactionManager,
-      Clock.systemDefaultZone());
+    this(packCatalog, accountService, purchaseRepository, grantRepository, ledgerRepository, refundService,
+      transactionManager, Clock.systemDefaultZone());
   }
 
   CreditPurchaseGrantService(
     CreditPackCatalog packCatalog, CreditAccountService accountService, AiCreditPurchaseRepository purchaseRepository,
     AiCreditGrantRepository grantRepository, AiCreditLedgerRepository ledgerRepository,
-    PlatformTransactionManager transactionManager, Clock clock
+    CreditPurchaseRefundService refundService, PlatformTransactionManager transactionManager, Clock clock
   ) {
     this.packCatalog = packCatalog;
     this.accountService = accountService;
     this.purchaseRepository = purchaseRepository;
     this.grantRepository = grantRepository;
     this.ledgerRepository = ledgerRepository;
+    this.refundService = refundService;
     this.transaction = new TransactionTemplate(transactionManager);
     this.clock = clock;
   }
@@ -125,6 +127,11 @@ public class CreditPurchaseGrantService {
     line.setReason("크레딧 구매 " + productId);
     ledgerRepository.save(line);
     log.info("[credit purchase] granted : store={}, product={}, credits={}", store, productId, pack.credits());
+    // 환불 알림이 먼저 와 보류됐던 거래: 적립 직후 같은 트랜잭션에서 회수 (새로 준 것 없음으로 응답)
+    if (refundService.applyHeldRefund(purchase)) {
+      return new CreditPurchaseResponse(
+        CreditPurchaseResultStatus.ALREADY_GRANTED, 0, accountService.balance(account, now).available());
+    }
     return new CreditPurchaseResponse(CreditPurchaseResultStatus.GRANTED, pack.credits(), balanceBefore + pack.credits());
   }
 

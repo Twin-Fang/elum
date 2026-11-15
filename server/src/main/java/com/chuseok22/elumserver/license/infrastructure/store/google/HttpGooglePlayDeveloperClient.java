@@ -14,6 +14,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +42,16 @@ public class HttpGooglePlayDeveloperClient implements GooglePlayDeveloperClient 
   // 해지 유형: 사용자 요청 해지 (다음 갱신만 멈춤, 사용자가 스토어에서 되살릴 수 있음)
   private static final String CANCEL_REQUEST_BODY =
     "{\"cancellationContext\":{\"cancellationType\":\"USER_REQUESTED_STOP_RENEWALS\"}}";
+  // voidedpurchases.list type=1: 일회성 상품 + 구독 (기본 0 은 일회성 상품만)
+  private static final int VOIDED_TYPE_INCLUDING_SUBSCRIPTIONS = 1;
+  // 한 번에 받는 취소 구매 수 (API 최대 1,000)
+  private static final int VOIDED_PAGE_SIZE = 1000;
+  // 끝없는 페이지 방지: 1,000건 x 50쪽
+  private static final int VOIDED_MAX_PAGES = 50;
+  // orders.batchGet 한 번에 물을 주문 수 (API 최대 1,000, 주소 길이 여유로 100)
+  private static final int ORDER_BATCH_SIZE = 100;
+  // Order.state: 전액 환불 (부분 환불 PARTIALLY_REFUNDED 는 회수하지 않음)
+  private static final String ORDER_STATE_REFUNDED = "REFUNDED";
 
   private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
   // 서비스 계정 JSON 이 바뀔 때만 새로 읽는다 (토큰 캐시를 살리려고)
@@ -121,6 +134,66 @@ public class HttpGooglePlayDeveloperClient implements GooglePlayDeveloperClient 
     if (response.statusCode() != HTTP_OK && response.statusCode() != HTTP_NO_CONTENT) {
       throw unavailable("subscriptionsv2.cancel", response.statusCode());
     }
+  }
+
+  @Override
+  public List<VoidedPurchase> listVoidedPurchases(String packageName, long startTimeMillis, String serviceAccountJson) {
+    List<VoidedPurchase> voidedPurchases = new ArrayList<>();
+    String pageToken = null;
+    // 끝 페이지까지 (nextPageToken 이 없을 때까지)
+    for (int page = 0; page < VOIDED_MAX_PAGES; page++) {
+      String uri = API_BASE_URL + encode(packageName) + "/purchases/voidedpurchases?startTime=" + startTimeMillis
+        + "&type=" + VOIDED_TYPE_INCLUDING_SUBSCRIPTIONS + "&maxResults=" + VOIDED_PAGE_SIZE
+        + (pageToken == null ? "" : "&token=" + encode(pageToken));
+      JsonNode body = getJson(URI.create(uri), "voidedpurchases.list", serviceAccountJson);
+      for (JsonNode voided : body.path("voidedPurchases")) {
+        voidedPurchases.add(new VoidedPurchase(textOrNull(voided.path("purchaseToken")), textOrNull(voided.path("orderId"))));
+      }
+      pageToken = textOrNull(body.path("tokenPagination").path("nextPageToken"));
+      if (pageToken == null) {
+        return voidedPurchases;
+      }
+    }
+    log.warn("[refund recheck] google voided list truncated : pages={}", VOIDED_MAX_PAGES);
+    return voidedPurchases;
+  }
+
+  @Override
+  public Set<String> findRefundedOrderIds(String packageName, Collection<String> orderIds, String serviceAccountJson) {
+    List<String> orderIdList = List.copyOf(orderIds);
+    Set<String> refundedOrderIds = new HashSet<>();
+    // 주문 100건씩 나눠 조회
+    for (int from = 0; from < orderIdList.size(); from += ORDER_BATCH_SIZE) {
+      StringBuilder uri = new StringBuilder(API_BASE_URL + encode(packageName) + "/orders:batchGet?");
+      for (String orderId : orderIdList.subList(from, Math.min(from + ORDER_BATCH_SIZE, orderIdList.size()))) {
+        uri.append("orderIds=").append(encode(orderId)).append('&');
+      }
+      JsonNode body = getJson(URI.create(uri.substring(0, uri.length() - 1)), "orders.batchGet", serviceAccountJson);
+      for (JsonNode order : body.path("orders")) {
+        String orderId = textOrNull(order.path("orderId"));
+        if (orderId != null && ORDER_STATE_REFUNDED.equals(order.path("state").asText(""))) {
+          refundedOrderIds.add(orderId);
+        }
+      }
+    }
+    return refundedOrderIds;
+  }
+
+  // 목록 조회 GET: 200 > JSON, 그 밖은 확인 중 (목록 API 라 없는 토큰 개념 없음)
+  private JsonNode getJson(URI uri, String operation, String serviceAccountJson) {
+    HttpResponse<String> response = send(authorized(HttpRequest.newBuilder(uri), serviceAccountJson).GET().build());
+    if (response.statusCode() != HTTP_OK) {
+      throw unavailable(operation, response.statusCode());
+    }
+    try {
+      return DefaultJsonMapper.SHARED.readTree(response.body());
+    } catch (IOException e) {
+      throw new StoreTemporarilyUnavailableException("google response unreadable", e);
+    }
+  }
+
+  private static String textOrNull(JsonNode node) {
+    return node.isTextual() && !node.asText().isBlank() ? node.asText() : null;
   }
 
   private HttpRequest.Builder authorized(HttpRequest.Builder builder, String serviceAccountJson) {
