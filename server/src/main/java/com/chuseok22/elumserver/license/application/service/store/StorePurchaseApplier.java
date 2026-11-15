@@ -147,6 +147,41 @@ public class StorePurchaseApplier {
     return new StoreApplyOutcome(eventResult, purchase, isChanged);
   }
 
+  /**
+   * 환불 재확인 회수: 아는 구매이고 아직 회수 전일 때만 > 회수 > 회원 구독 다시 계산 > 거래 이력(계기 REFUND_RECHECK)
+   * 모르는·이미 회수한 구매는 아무것도 남기지 않음 (매일 같은 환불 목록을 다시 받아도 이력이 쌓이지 않게)
+   *
+   * @return 이번에 회수했으면 true
+   */
+  @Transactional
+  public boolean revokeIfNotRevoked(SubscriptionSource store, String purchaseKey, String eventType) {
+    Optional<StorePurchase> existing = storePurchaseRepository.findForUpdate(store, purchaseKey);
+    if (existing.isEmpty() || existing.get().getState() == StorePurchaseState.REVOKED) {
+      return false;
+    }
+    LocalDateTime now = LocalDateTime.now(clock);
+    StorePurchase purchase = existing.get();
+    purchase.setState(StorePurchaseState.REVOKED);
+    if (purchase.getRevokedAt() == null) {
+      purchase.setRevokedAt(now);
+    }
+    storePurchaseRepository.save(purchase);
+    syncMember(purchase.getMemberId(), now);
+    eventRecorder.recordRevocationEvent(store, purchaseKey, purchase, StorePurchaseTrigger.REFUND_RECHECK, eventType, null,
+      StorePurchaseEventResult.APPLIED, purchase.getMemberId(), now);
+    return true;
+  }
+
+  /// 소모성 상품(크레딧 꾸러미) 알림·재확인 결과를 거래 이력에 1줄 (externalEventId 로 같은 알림 중복 차단)
+  @Transactional
+  public void recordConsumableEvent(
+    SubscriptionSource store, String transactionId, String memberId, StorePurchaseTrigger trigger, String eventType,
+    String externalEventId, StorePurchaseEventResult result, String reason
+  ) {
+    eventRecorder.recordConsumableEvent(store, transactionId, memberId, trigger, eventType, externalEventId, result, reason,
+      LocalDateTime.now(clock));
+  }
+
   /// Google 구매 확인(acknowledge) 완료 기록
   @Transactional
   public void markAcknowledged(SubscriptionSource store, String purchaseKey) {

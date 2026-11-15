@@ -26,6 +26,11 @@ public class StoreSubscriptionSettings {
     return isFlagOn(ConfigKey.SUBSCRIPTION_GOOGLE_ENABLED);
   }
 
+  /// 매일 환불 재확인 켜짐 (관리자 "지금 확인"은 이 값과 관계없음)
+  public boolean isRefundRecheckEnabled() {
+    return isFlagOn(ConfigKey.STORE_REFUND_RECHECK_ENABLED);
+  }
+
   public boolean isAppleSandboxAllowed() {
     return isFlagOn(ConfigKey.SUBSCRIPTION_APPLE_ALLOW_SANDBOX);
   }

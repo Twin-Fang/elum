@@ -861,6 +861,15 @@ public enum ConfigKey {
     "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
   ),
+  // 매일 04:50 (한국 시각) 환불 재확인 (#1428). 기본 꺼짐이라 배포만으로는 스토어 API 를 부르지 않는다.
+  // 관리자 "지금 확인" 버튼은 이 값과 관계없이 돈다. Google 은 서비스 계정에 주문·취소 조회 권한이 있어야 한다.
+  STORE_REFUND_RECHECK_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "스토어 환불 매일 재확인",
+    "켜면 매일 새벽 4시 50분에 알림을 놓친 환불을 다시 찾아 크레딧 꾸러미·Pro 를 회수한다. "
+      + "Google 은 취소 구매 목록과 주문 상태, App Store 는 Server API 거래 조회(Issuer ID·Key ID·개인 키 필요). "
+      + "키가 없거나 스토어가 꺼져 있으면 그 스토어는 건너뛰고 이유를 실행 기록에 남긴다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
 
   // --- 주간 리포트 ---
   //

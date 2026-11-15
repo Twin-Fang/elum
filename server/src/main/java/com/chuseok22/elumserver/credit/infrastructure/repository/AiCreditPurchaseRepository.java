@@ -1,17 +1,21 @@
 package com.chuseok22.elumserver.credit.infrastructure.repository;
 
+import com.chuseok22.elumserver.credit.core.CreditPurchaseStatus;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPurchase;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AiCreditPurchaseRepository extends JpaRepository<AiCreditPurchase, String> {
+public interface AiCreditPurchaseRepository
+  extends JpaRepository<AiCreditPurchase, String>, JpaSpecificationExecutor<AiCreditPurchase> {
 
   Optional<AiCreditPurchase> findByStoreAndTransactionId(SubscriptionSource store, String transactionId);
 
@@ -20,6 +24,19 @@ public interface AiCreditPurchaseRepository extends JpaRepository<AiCreditPurcha
   @Query("select p from AiCreditPurchase p where p.store = :store and p.transactionId = :transactionId")
   Optional<AiCreditPurchase> findByStoreAndTransactionIdForUpdate(
     @Param("store") SubscriptionSource store, @Param("transactionId") String transactionId
+  );
+
+  /// 관리자 건별 회수용: 같은 구매를 알림·재확인과 동시에 바꾸지 않게 행 잠금
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select p from AiCreditPurchase p where p.id = :id")
+  Optional<AiCreditPurchase> findByIdForUpdate(@Param("id") String id);
+
+  /// 환불 재확인 대상: 스토어·상태·적립 시각 이후 거래 id
+  @Query("select p.transactionId from AiCreditPurchase p"
+    + " where p.store = :store and p.status = :status and p.createdAt >= :since")
+  List<String> findTransactionIds(
+    @Param("store") SubscriptionSource store, @Param("status") CreditPurchaseStatus status,
+    @Param("since") LocalDateTime since
   );
 
   /// 계정의 구매 기록, 최근 것부터 (관리자 회원 상세)

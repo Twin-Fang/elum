@@ -39,7 +39,7 @@ public class GoogleSubscriptionService {
   private final StoreSubscriptionSettings settings;
   private final GooglePlayDeveloperClient playClient;
   private final StorePurchaseApplier applier;
-  private final StoreConsumableRefundHandler consumableRefundHandler;
+  private final ConsumableNotificationApplier consumableApplier;
   private final Clock clock;
 
   @Autowired
@@ -57,7 +57,7 @@ public class GoogleSubscriptionService {
     this.settings = settings;
     this.playClient = playClient;
     this.applier = applier;
-    this.consumableRefundHandler = consumableRefundHandler;
+    this.consumableApplier = new ConsumableNotificationApplier(consumableRefundHandler, applier);
     this.clock = clock;
   }
 
@@ -150,7 +150,7 @@ public class GoogleSubscriptionService {
     JsonNode voided = notification.path("voidedPurchaseNotification");
     if (voided.isObject()) {
       if (voided.path("productType").asInt(0) == VOIDED_PRODUCT_TYPE_ONE_TIME) {
-        return refundConsumable(voided);
+        return refundConsumable(voided, message.messageId());
       }
       if (voided.path("productType").asInt(0) != VOIDED_PRODUCT_TYPE_SUBSCRIPTION || !voided.path("purchaseToken").isTextual()) {
         return StoreNotificationOutcome.IGNORED;
@@ -169,14 +169,13 @@ public class GoogleSubscriptionService {
       subscription.path("purchaseToken").asText(), subscription.path("notificationType").asInt(0), message.messageId());
   }
 
-  // 일회성 상품 환불(voided): 주문 id 로 크레딧 구매 회수
-  private StoreNotificationOutcome refundConsumable(JsonNode voided) {
+  // 일회성 상품 환불(voided): 주문 id 로 크레딧 구매 회수 (모르는 주문은 보류) > 거래 이력
+  private StoreNotificationOutcome refundConsumable(JsonNode voided, String messageId) {
     String orderId = voided.path("orderId").asText("");
     if (orderId.isBlank()) {
       return StoreNotificationOutcome.IGNORED;
     }
-    consumableRefundHandler.refund(SubscriptionSource.GOOGLE_IAP, orderId);
-    return StoreNotificationOutcome.PROCESSED;
+    return consumableApplier.applyRefund(SubscriptionSource.GOOGLE_IAP, orderId, VOIDED_EVENT_TYPE, messageId);
   }
 
   private StoreNotificationOutcome applySubscriptionNotification(String purchaseToken, int notificationType, String messageId) {
