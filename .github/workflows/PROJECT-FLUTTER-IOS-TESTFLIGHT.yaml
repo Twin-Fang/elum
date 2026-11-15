@@ -20,8 +20,8 @@
 # 🔐 Apple 인증서 & 프로비저닝 프로파일:
 # APPLE_CERTIFICATE_BASE64: .p12 인증서 (base64 인코딩)
 # APPLE_CERTIFICATE_PASSWORD: .p12 인증서 비밀번호
-# APPLE_PROVISIONING_PROFILE_V2_BASE64: 앱(kr.twinfang.elum) .mobileprovision (base64, App Group 포함)
-# IOS_PROVISIONING_PROFILE_V2_NAME: 앱 프로비저닝 프로파일 이름
+# APPLE_PROVISIONING_PROFILE_BASE64: 앱(kr.twinfang.elum) .mobileprovision (base64, App Group 포함)
+# IOS_PROVISIONING_PROFILE_NAME: 앱 프로비저닝 프로파일 이름
 # APPLE_WIDGET_PROVISIONING_PROFILE_BASE64: 홈 화면 위젯(kr.twinfang.elum.homewidget) .mobileprovision (base64)
 # IOS_WIDGET_PROVISIONING_PROFILE_NAME: 위젯 프로비저닝 프로파일 이름
 # (프로필은 타깃별로 project.pbxproj Release 설정이 고르고, xcodebuild 에서 덮어쓰지 않음, #1410)
@@ -423,8 +423,8 @@ jobs:
       - name: Install Provisioning Profiles
         env:
           # 앱(Runner) · 홈 화면 위젯 확장 프로필 2개 (#1410). 이름은 project.pbxproj Release 서명 설정과 같아야 함
-          APP_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_V2_BASE64 }}
-          APP_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_V2_NAME }}
+          APP_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APP_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
           WIDGET_PROFILE_BASE64: ${{ secrets.APPLE_WIDGET_PROVISIONING_PROFILE_BASE64 }}
           WIDGET_PROFILE_NAME: ${{ secrets.IOS_WIDGET_PROVISIONING_PROFILE_NAME }}
         run: |
