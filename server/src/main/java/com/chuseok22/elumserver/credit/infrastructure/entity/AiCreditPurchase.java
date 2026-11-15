@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.credit.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
 import com.chuseok22.elumserver.credit.core.CreditPurchaseStatus;
+import com.chuseok22.elumserver.license.core.StoreRefundOrigin;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 크레딧 구매 한 건: 스토어 거래 id 하나당 한 행(멱등 키), 만든 적립 묶음, 환불 여부
+ * 크레딧 구매 한 건: 스토어 거래 id 하나당 한 행(멱등 키), 만든 적립 묶음, 환불 여부·회수량·회수 계기
  * (store, transaction_id) 유니크가 같은 거래의 두 번 적립을 마지막으로 막는다.
  */
 @Entity
@@ -66,4 +67,13 @@ public class AiCreditPurchase extends BaseEntity {
 
   @Column(name = "refunded_at")
   private LocalDateTime refundedAt;
+
+  /// 환불 때 회수한 양 (환불 취소면 이만큼 다시 적립). 환불 전·취소 뒤 0
+  @Column(name = "recovered_credits", nullable = false)
+  private int recoveredCredits;
+
+  /// 환불을 반영한 계기 (환불 전·취소 뒤 null)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "refund_origin", length = 30)
+  private StoreRefundOrigin refundOrigin;
 }

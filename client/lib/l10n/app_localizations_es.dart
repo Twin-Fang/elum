@@ -4051,6 +4051,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planPriceFailed => 'No se pudieron cargar los precios';
 
   @override
+  String get planRedeemCode => '프로모션 코드 입력';
+
+  @override
+  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+
+  @override
   String get planRestore => 'Restaurar compras';
 
   @override
@@ -5777,12 +5783,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String myCreditFreeRegenerateToday(int left, int cap) {
     return 'Volver a dibujar hoy: $left/$cap gratis';
   }
-
-  @override
-  String get myCreditRecentTitle => 'Uso reciente';
-
-  @override
-  String get myCreditSeeAllHistory => 'Ver todo';
 
   @override
   String get myCreditGuideLink => 'Así funcionan los créditos';

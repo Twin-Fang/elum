@@ -677,6 +677,19 @@ public enum ConfigKey {
       + "이미 산 크레딧은 그대로 쓸 수 있다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  // 플랫폼별 판매 (#1427): 앱이 platform 을 보낼 때만 봄. 옛 앱(platform 없음)은 위 CREDIT_PACK_SALE_ENABLED 만 봄
+  CREDIT_PACK_APPLE_SALE_ENABLED(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 판매 (App Store)",
+    "켜면 iOS 앱(platform=ios 를 보내는 버전부터)에 꾸러미가 보이고 App Store 구매 확인이 적립된다. "
+      + "크레딧 꾸러미 판매가 켜져 있어도 판매된다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  CREDIT_PACK_GOOGLE_SALE_ENABLED(
+    ConfigGroup.AI_CREDIT, "크레딧 꾸러미 판매 (Google Play)",
+    "켜면 Android 앱(platform=android 를 보내는 버전부터)에 꾸러미가 보이고 Google Play 구매 확인이 적립된다. "
+      + "크레딧 꾸러미 판매가 켜져 있어도 판매된다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
   CREDIT_PACK_PRODUCTS(
     ConfigGroup.AI_CREDIT, "크레딧 꾸러미 상품",
     "쉼표로 나눈 상품ID:크레딧 개수. 스토어에 등록한 소모성 상품 ID 와 같아야 한다 "
@@ -860,6 +873,15 @@ public enum ConfigKey {
     ConfigGroup.SUBSCRIPTION_STORE, "Google Play 알림 토큰",
     "Pub/Sub 푸시 주소 끝의 ?token= 값. 비어 있으면 알림을 모두 거절한다",
     ConfigValueType.SECRET, List.of(), ""
+  ),
+  // 매일 04:50 (한국 시각) 환불 재확인 (#1428). 기본 꺼짐이라 배포만으로는 스토어 API 를 부르지 않는다.
+  // 관리자 "지금 확인" 버튼은 이 값과 관계없이 돈다. Google 은 서비스 계정에 주문·취소 조회 권한이 있어야 한다.
+  STORE_REFUND_RECHECK_ENABLED(
+    ConfigGroup.SUBSCRIPTION_STORE, "스토어 환불 매일 재확인",
+    "켜면 매일 새벽 4시 50분에 알림을 놓친 환불을 다시 찾아 크레딧 꾸러미·Pro 를 회수한다. "
+      + "Google 은 취소 구매 목록과 주문 상태, App Store 는 Server API 거래 조회(Issuer ID·Key ID·개인 키 필요). "
+      + "키가 없거나 스토어가 꺼져 있으면 그 스토어는 건너뛰고 이유를 실행 기록에 남긴다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
   ),
 
   // --- 주간 리포트 ---

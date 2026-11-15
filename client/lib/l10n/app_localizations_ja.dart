@@ -3767,6 +3767,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planPriceFailed => '価格を読み込めませんでした';
 
   @override
+  String get planRedeemCode => '프로모션 코드 입력';
+
+  @override
+  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+
+  @override
   String get planRestore => '購入を復元';
 
   @override
@@ -5364,12 +5370,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String myCreditFreeRegenerateToday(int left, int cap) {
     return '描き直し 今日$left/$cap回無料';
   }
-
-  @override
-  String get myCreditRecentTitle => '最近使った履歴';
-
-  @override
-  String get myCreditSeeAllHistory => 'すべて見る';
 
   @override
   String get myCreditGuideLink => 'クレジットの使い方';

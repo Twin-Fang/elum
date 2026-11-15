@@ -205,6 +205,9 @@ abstract final class AppConfig {
   );
 
   /// 스토어 구독 관리 화면 주소. [productId] 가 있으면 Play 는 그 구독을 바로 연다
+  /// Play 스토어 코드 입력 화면 (프로모션 코드, Android)
+  static final playCodeRedemptionUrl = Uri.https('play.google.com', '/redeem');
+
   static Uri? subscriptionManagementUrl(
     TargetPlatform platform, {
     String? productId,

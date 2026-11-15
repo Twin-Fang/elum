@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
 import '../../credit/domain/credit_pack.dart';
 import '../domain/plan_catalog.dart';
@@ -161,6 +162,10 @@ class StoreBillingClient {
     }
     await _store.completePurchase(purchase);
   }
+
+  /// iOS 코드 입력 시트 (App Store 프로모션 코드): 받은 상품은 [purchaseUpdates] 로 옴. Android 는 Play 코드 입력 주소를 엶 (plan_actions)
+  Future<void> presentCodeRedemptionSheet() =>
+      _store.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>().presentCodeRedemptionSheet();
 
   /// 구매 복원: 결과는 [purchaseUpdates] 로 `restored` 가 옴 (되찾을 것이 없으면 아무것도 안 옴)
   Future<void> restore() => _store.restorePurchases();

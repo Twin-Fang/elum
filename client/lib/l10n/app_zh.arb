@@ -1521,8 +1521,6 @@
   "creditGuideRegenerateFreeDaily": "{count, plural, other{每天免费{count}次}}",
   "creditGuideConfirm": "知道了",
   "myCreditFreeRegenerateToday": "今天重新画免费 {left}/{cap}次",
-  "myCreditRecentTitle": "最近使用记录",
-  "myCreditSeeAllHistory": "查看全部",
   "myCreditGuideLink": "积分这样用",
   "abaIntroTitle": "准备很轻松，\n日常自己来",
   "abaIntroSubtitle": "根据应用行为分析（ABA）原理制作",

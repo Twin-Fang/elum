@@ -6749,7 +6749,19 @@ abstract class AppLocalizations {
   /// **'가격을 불러오지 못했어요'**
   String get planPriceFailed;
 
-  /// 구매 복원 글자 버튼 · 설정 줄
+  /// 내 크레딧 화면 줄: 스토어 프로모션 코드 입력 (iOS 코드 시트, Android Play 코드 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'프로모션 코드 입력'**
+  String get planRedeemCode;
+
+  /// 프로모션 코드 입력 화면 열기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 입력 화면을 열지 못했어요'**
+  String get planRedeemCodeFailed;
+
+  /// 구매 복원 줄 · 내 크레딧 화면 아래 묶음, Pro 내 요금제 시트
   ///
   /// In ko, this message translates to:
   /// **'구매 복원'**
@@ -9256,18 +9268,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다시 그리기 오늘 {left}/{cap}번 무료'**
   String myCreditFreeRegenerateToday(int left, int cap);
-
-  /// 내 크레딧 최근 내역 묶음 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'최근 쓴 내역'**
-  String get myCreditRecentTitle;
-
-  /// 최근 쓴 내역 머리글 오른쪽 글자 버튼 (사용 내역 화면)
-  ///
-  /// In ko, this message translates to:
-  /// **'전체 보기'**
-  String get myCreditSeeAllHistory;
 
   /// 내 크레딧 맨 아래 글자 버튼 (크레딧 안내 창)
   ///
