@@ -21,6 +21,9 @@ abstract final class PlanErrorCode {
   /// 스토어 구독 관리 화면을 열지 못함
   static const manage = 'E-PLAN-MANAGE';
 
+  /// 스토어 코드 입력 화면을 열지 못함
+  static const redeemCode = 'E-PLAN-REDEEM';
+
   /// 약관·개인정보처리방침 링크를 열지 못함
   static const legalLink = 'E-PLAN-LINK';
 }

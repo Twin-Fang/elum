@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.credit.application.service.purchase;
 
+import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.CreditPackListFormat;
@@ -21,11 +22,27 @@ public class CreditPackCatalog {
 
   private final SystemConfigService config;
 
-  public boolean isSaleEnabled() {
+  /// 판매 켜짐: 전체 스위치 OR 스토어별 스위치. [store] 가 null(옛 앱, 플랫폼 모름)이면 전체 스위치만 봄 (#1427)
+  public boolean isSaleEnabled(SubscriptionSource store) {
+    if (readFlag(ConfigKey.CREDIT_PACK_SALE_ENABLED)) {
+      return true;
+    }
+    if (store == null) {
+      return false;
+    }
+    return switch (store) {
+      case APPLE_IAP -> readFlag(ConfigKey.CREDIT_PACK_APPLE_SALE_ENABLED);
+      case GOOGLE_IAP -> readFlag(ConfigKey.CREDIT_PACK_GOOGLE_SALE_ENABLED);
+      default -> false;
+    };
+  }
+
+  /// 스위치 읽기 실패는 꺼짐 (돈이 걸린 기능이라 막는 쪽)
+  private boolean readFlag(ConfigKey key) {
     try {
-      return config.getBoolean(ConfigKey.CREDIT_PACK_SALE_ENABLED);
+      return config.getBoolean(key);
     } catch (RuntimeException e) {
-      log.warn("[credit pack] sale flag unreadable, treated as off : {}", e.getClass().getSimpleName());
+      log.warn("[credit pack] sale flag unreadable, treated as off : key={}, {}", key, e.getClass().getSimpleName());
       return false;
     }
   }

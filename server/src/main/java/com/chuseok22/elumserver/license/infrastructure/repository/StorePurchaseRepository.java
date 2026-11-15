@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.license.infrastructure.repository;
 
+import com.chuseok22.elumserver.license.core.StorePurchaseState;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
+import java.util.Collection;
 import com.chuseok22.elumserver.license.infrastructure.entity.StorePurchase;
 import jakarta.persistence.LockModeType;
 import java.util.List;
@@ -18,4 +20,7 @@ public interface StorePurchaseRepository extends JpaRepository<StorePurchase, St
   Optional<StorePurchase> findForUpdate(@Param("store") SubscriptionSource store, @Param("purchaseKey") String purchaseKey);
 
   List<StorePurchase> findByMemberId(String memberId);
+
+  /// 환불 재확인 대상: 스토어별 Pro 를 주는 상태(ACTIVE·유예)이고 회수 전인 구매
+  List<StorePurchase> findByStoreAndStateInAndRevokedAtIsNull(SubscriptionSource store, Collection<StorePurchaseState> states);
 }

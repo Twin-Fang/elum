@@ -3972,6 +3972,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planPriceFailed => 'Couldn\'t load prices';
 
   @override
+  String get planRedeemCode => 'Redeem code';
+
+  @override
+  String get planRedeemCodeFailed => 'Couldn\'t open code redemption';
+
+  @override
   String get planRestore => 'Restore purchases';
 
   @override
@@ -5676,12 +5682,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String myCreditFreeRegenerateToday(int left, int cap) {
     return 'Redraws today: $left/$cap free';
   }
-
-  @override
-  String get myCreditRecentTitle => 'Recent activity';
-
-  @override
-  String get myCreditSeeAllHistory => 'See all';
 
   @override
   String get myCreditGuideLink => 'How credits work';

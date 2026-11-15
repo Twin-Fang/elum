@@ -13,8 +13,10 @@ import 'package:elum/core/layout/orientation_policy.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/domain/guide_tip.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/features/member/data/member_repository.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +54,12 @@ Future<void> main() async {
     elumiDevice: isChild,
   );
   if (_previewRole == 'guardian') await storage.setSelectedRole('guardian');
+  // 스토어 스크린샷: 홈 안내 카드(가이드 팁·알림 켜기)·코치마크를 미리 닫아 둠
+  await storage.setDismissedGuideTipSlugs([
+    for (final tip in GuideTip.values) tip.slug,
+  ]);
+  await storage.setHomeNotificationNoticeDismissedAt(DateTime.now());
+  await storage.setHomeCoachSeen(true);
 
   final tokens = isSignedIn
       ? InMemoryTokenStore(
@@ -70,6 +78,8 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         localStorageProvider.overrideWithValue(storage),
+        // 스토어 스크린샷에 광고가 찍히지 않게 끔
+        adsEnabledProvider.overrideWithValue(false),
         tokenStoreProvider.overrideWithValue(tokens),
         dioProvider.overrideWithValue(dio),
         myRoutinesProvider.overrideWith((ref) async => demo.routines),

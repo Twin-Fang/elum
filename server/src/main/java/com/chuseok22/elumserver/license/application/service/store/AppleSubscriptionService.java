@@ -43,7 +43,7 @@ public class AppleSubscriptionService {
   private final AppleSignedDataVerifier verifier;
   private final AppleSubscriptionStatusClient statusClient;
   private final StorePurchaseApplier applier;
-  private final StoreConsumableRefundHandler consumableRefundHandler;
+  private final ConsumableNotificationApplier consumableApplier;
   private final Clock clock;
 
   @Autowired
@@ -64,7 +64,7 @@ public class AppleSubscriptionService {
     this.verifier = verifier;
     this.statusClient = statusClient;
     this.applier = applier;
-    this.consumableRefundHandler = consumableRefundHandler;
+    this.consumableApplier = new ConsumableNotificationApplier(consumableRefundHandler, applier);
     this.clock = clock;
   }
 
@@ -142,7 +142,7 @@ public class AppleSubscriptionService {
     NotificationTypeV2 type = payload.getNotificationType();
     String notificationId = payload.getNotificationUUID();
     Data data = payload.getData();
-    // 연결 시험 알림·구독 거래가 없는 알림(요약·소비 요청 등)
+    // 연결 시험 알림·거래가 없는 알림(요약 등)
     if (type == NotificationTypeV2.TEST || data == null || data.getSignedTransactionInfo() == null) {
       log.info("[subscription notify] ignored : store=APPLE_IAP, type={}", type);
       return StoreNotificationOutcome.IGNORED;
@@ -151,9 +151,9 @@ public class AppleSubscriptionService {
       return StoreNotificationOutcome.IGNORED;
     }
     JWSTransactionDecodedPayload transaction = verifier.verifyTransactionIn(data.getSignedTransactionInfo(), environment, context);
-    // 소모성 상품(크레딧 꾸러미)은 환불 알림만 받아 회수한다
+    // 소모성 상품(크레딧 꾸러미)은 환불·환불 취소·환불 요청 알림만 받는다
     if (transaction.getType() == Type.CONSUMABLE) {
-      return applyConsumableNotification(type, transaction);
+      return applyConsumableNotification(type, transaction, notificationId);
     }
     JWSRenewalInfoDecodedPayload renewal = data.getSignedRenewalInfo() == null
       ? null : verifier.verifyRenewalInfo(data.getSignedRenewalInfo(), environment, context);
@@ -175,14 +175,26 @@ public class AppleSubscriptionService {
     return StoreNotificationOutcome.PROCESSED;
   }
 
-  // 소모성 거래 알림: REFUND 만 회수 (그 밖의 알림은 받을 필요 없음)
-  private StoreNotificationOutcome applyConsumableNotification(NotificationTypeV2 type, JWSTransactionDecodedPayload transaction) {
-    if (type != NotificationTypeV2.REFUND || isBlank(transaction.getTransactionId())) {
-      log.info("[subscription notify] ignored : store=APPLE_IAP, type={}, consumable", type);
+  // 소모성 거래 알림 3종: REFUND 회수, REFUND_REVERSED 재적립, CONSUMPTION_REQUEST 기록만 (그 밖은 무시)
+  private StoreNotificationOutcome applyConsumableNotification(
+    NotificationTypeV2 type, JWSTransactionDecodedPayload transaction, String notificationId
+  ) {
+    String transactionId = transaction.getTransactionId();
+    if (isBlank(transactionId)) {
+      log.info("[subscription notify] ignored : store=APPLE_IAP, type={}, consumable without transaction id", type);
       return StoreNotificationOutcome.IGNORED;
     }
-    consumableRefundHandler.refund(SubscriptionSource.APPLE_IAP, transaction.getTransactionId());
-    return StoreNotificationOutcome.PROCESSED;
+    if (type == NotificationTypeV2.REFUND) {
+      return consumableApplier.applyRefund(SubscriptionSource.APPLE_IAP, transactionId, String.valueOf(type), notificationId);
+    }
+    if (type == NotificationTypeV2.REFUND_REVERSED) {
+      return consumableApplier.applyRefundReversed(SubscriptionSource.APPLE_IAP, transactionId, String.valueOf(type), notificationId);
+    }
+    if (type == NotificationTypeV2.CONSUMPTION_REQUEST) {
+      return consumableApplier.recordConsumptionRequest(SubscriptionSource.APPLE_IAP, transactionId, notificationId);
+    }
+    log.info("[subscription notify] ignored : store=APPLE_IAP, type={}, consumable", type);
+    return StoreNotificationOutcome.IGNORED;
   }
 
   // API 키가 있으면 Apple 에 최신 상태를 다시 물어 대체 (앱이 보낸 옛 영수증·환불 전 영수증 방지)

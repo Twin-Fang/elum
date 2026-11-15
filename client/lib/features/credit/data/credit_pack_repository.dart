@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/dio_provider.dart';
@@ -20,7 +21,11 @@ class CreditPackRepository {
 
   /// 판매 스위치 + 꾸러미 (상품 id · 개수 · 인기)
   Future<Attempt<CreditPackSale>> fetchPackSale() => guarded(_repositoryName, 'fetchPackSale', () async {
-    final response = await _dio.get<Map<String, dynamic>>('/api/credits/packs');
+    // 서버가 스토어별 판매 스위치를 고르도록 플랫폼을 보냄 (#1427)
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/api/credits/packs',
+      queryParameters: {'platform': defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android'},
+    );
     return CreditPackSale.parse(response.data);
   }, describe: (sale) => 'packs ${sale.packs.length} sale ${sale.isSaleEnabled}');
 

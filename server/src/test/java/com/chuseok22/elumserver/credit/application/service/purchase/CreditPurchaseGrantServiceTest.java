@@ -24,6 +24,9 @@ import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditGrantRe
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditJobRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditLedgerRepository;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPurchaseRepository;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditRefundHoldRepository;
+import com.chuseok22.elumserver.credit.core.CreditPurchaseStatus;
+import com.chuseok22.elumserver.license.core.StoreRefundOrigin;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -43,7 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 
-/// 크레딧 구매 적립: 같은 거래는 한 번만, 다른 회원 거래·꾸러미 밖 상품은 거절, 구매분은 만료 없음
+/// 크레딧 구매 적립: 같은 거래는 한 번만, 다른 회원 거래·꾸러미 밖 상품은 거절, 구매분은 만료 없음, 먼저 온 환불은 적립 직후 회수
 @ExtendWith(MockitoExtension.class)
 class CreditPurchaseGrantServiceTest {
 
@@ -64,23 +67,29 @@ class CreditPurchaseGrantServiceTest {
   @Mock
   private AiCreditPurchaseRepository purchaseRepository;
   @Mock
+  private AiCreditRefundHoldRepository holdRepository;
+  @Mock
   private EntityManager entityManager;
 
   private final CreditTestStore store = new CreditTestStore();
   private CreditAccountService accountService;
   private CreditPurchaseGrantService service;
+  private CreditPurchaseRefundService refundService;
 
   @BeforeEach
   void setUp() {
     store.wire(accountRepository, grantRepository, jobRepository, ledgerRepository);
     store.wirePurchases(purchaseRepository);
+    store.wireRefundHolds(holdRepository);
     accountService = new CreditAccountService(accountRepository, grantRepository, jobRepository, ledgerRepository,
       CreditTestStore.weekPeriodSettings(), entityManager);
     SystemConfigService config = mock(SystemConfigService.class);
     lenient().when(config.getBoolean(ConfigKey.CREDIT_PACK_SALE_ENABLED)).thenReturn(true);
     lenient().when(config.getString(ConfigKey.CREDIT_PACK_PRODUCTS)).thenReturn(ConfigKey.CREDIT_PACK_PRODUCTS.getDefaultValue());
+    refundService = new CreditPurchaseRefundService(accountService, purchaseRepository, grantRepository, ledgerRepository,
+      holdRepository, CLOCK);
     service = new CreditPurchaseGrantService(new CreditPackCatalog(config), accountService, purchaseRepository,
-      grantRepository, ledgerRepository, mock(PlatformTransactionManager.class), CLOCK);
+      grantRepository, ledgerRepository, refundService, mock(PlatformTransactionManager.class), CLOCK);
     store.account("acc-a", "member-a");
     store.account("acc-b", "member-b");
   }
@@ -103,6 +112,24 @@ class CreditPurchaseGrantServiceTest {
     assertThat(store.grants).hasSize(1);
     assertThat(store.purchases).hasSize(1);
     assertThat(store.ledgerOf(CreditLedgerType.GRANT)).singleElement().satisfies(line -> assertThat(line.getDelta()).isEqualTo(150));
+  }
+
+  @Test
+  @DisplayName("구매 확인보다 먼저 온 환불은 적립 직후 회수한다 — 버리면 환불받은 결제로 크레딧이 남는다")
+  void heldRefund_isAppliedOnVerify() {
+    refundService.refund(SubscriptionSource.APPLE_IAP, TRANSACTION_ID, StoreRefundOrigin.STORE_NOTIFICATION);
+
+    CreditPurchaseResponse response = buy("member-a", TRANSACTION_ID);
+
+    assertThat(response.status()).isEqualTo(CreditPurchaseResultStatus.ALREADY_GRANTED);
+    assertThat(response.grantedCredits()).isZero();
+    assertThat(response.available()).isZero();
+    assertThat(store.purchases).singleElement().satisfies(purchase -> {
+      assertThat(purchase.getStatus()).isEqualTo(CreditPurchaseStatus.REFUNDED);
+      assertThat(purchase.getRecoveredCredits()).isEqualTo(150);
+    });
+    assertThat(store.refundHolds).singleElement().satisfies(hold -> assertThat(hold.isPending()).isFalse());
+    assertThat(store.ledgerOf(CreditLedgerType.ADJUST)).singleElement().satisfies(line -> assertThat(line.getDelta()).isEqualTo(-150));
   }
 
   @Test
