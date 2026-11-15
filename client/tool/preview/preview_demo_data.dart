@@ -145,14 +145,19 @@ PreviewDemoData toPreviewDemoData(String languageCode) {
   final language = _textsByLanguage.containsKey(languageCode)
       ? languageCode
       : 'en';
-  ActionCard cardAt(String routineId, int cardIndex, int stepOrder) =>
-      ActionCard(
-        id: '${routineId}c$stepOrder',
-        stepOrder: stepOrder,
-        title: texts.cards[cardIndex].$1,
-        description: texts.cards[cardIndex].$2,
-        pictogramId: _pictogramIds[cardIndex],
-      );
+  ActionCard cardAt(
+    String routineId,
+    int cardIndex,
+    int stepOrder, {
+    bool isCompleted = false,
+  }) => ActionCard(
+    id: '${routineId}c$stepOrder',
+    stepOrder: stepOrder,
+    title: texts.cards[cardIndex].$1,
+    description: texts.cards[cardIndex].$2,
+    pictogramId: _pictogramIds[cardIndex],
+    completed: isCompleted,
+  );
 
   return PreviewDemoData(
     nickname: texts.nickname,
@@ -169,7 +174,7 @@ PreviewDemoData toPreviewDemoData(String languageCode) {
         language: language,
         steps: [
           for (var index = 0; index < 4; index++)
-            cardAt('r1', index, index + 1),
+            cardAt('r1', index, index + 1, isCompleted: index == 0),
         ],
       ),
       Routine(
@@ -194,7 +199,7 @@ PreviewDemoData toPreviewDemoData(String languageCode) {
         language: language,
         steps: [
           for (var index = 7; index < 9; index++)
-            cardAt('r3', index, index - 6),
+            cardAt('r3', index, index - 6, isCompleted: true),
         ],
       ),
     ],
