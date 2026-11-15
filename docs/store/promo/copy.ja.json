@@ -1,0 +1,67 @@
+{
+  "language": "ja",
+  "brand": "ELUM",
+  "tagline": "毎日の日課を、行動カードで一枚ずつ",
+  "featureGraphic": {
+    "title": "毎日の日課を\n行動カードで一枚ずつ",
+    "subtitle": "発達障害・ADHDのための絵カードづくり",
+    "screen": "child_card",
+    "art": "hero"
+  },
+  "slides": [
+    {
+      "id": "01_card",
+      "screen": "child_card",
+      "eyebrow": "発達障害・ADHDの視覚支援",
+      "title": "毎日の日課を\n行動カードで一枚ずつ",
+      "subtitle": "絵と短い文で\n今日やることを順番に見せます",
+      "theme": "peach",
+      "art": "scene_01"
+    },
+    {
+      "id": "02_input",
+      "screen": "input",
+      "eyebrow": "行動カードづくり",
+      "title": "一行書くだけで\nAIが絵カードを作ります",
+      "subtitle": "話すように書くと\n小さなステップに分けてくれます",
+      "theme": "butter",
+      "art": "scene_02"
+    },
+    {
+      "id": "03_review",
+      "screen": "card_review",
+      "eyebrow": "保護者の確認",
+      "title": "保護者が確認したカードだけ\nElumiに届きます",
+      "subtitle": "絵と文を直したり\n順番を変えたりできます",
+      "theme": "mint",
+      "art": "scene_03"
+    },
+    {
+      "id": "04_elumi",
+      "screen": "child_home",
+      "eyebrow": "Elumiの画面",
+      "title": "Elumiの端末で\n今日やることがひと目で",
+      "subtitle": "端末を2台つなぐと\n作った日課がすぐ届きます",
+      "theme": "lavender",
+      "art": "scene_04"
+    },
+    {
+      "id": "05_reward",
+      "screen": "reward",
+      "eyebrow": "星とごほうび",
+      "title": "できたら星、\n最後までできたらごほうび",
+      "subtitle": "ルミ・ルル・ポポが\nいっしょに喜びます",
+      "theme": "sky",
+      "art": "scene_05"
+    },
+    {
+      "id": "06_together",
+      "screen": "guardian_home",
+      "eyebrow": "いっしょに見守る",
+      "title": "家族や先生と\n一日をいっしょに",
+      "subtitle": "招待して同じ日課を見守り\n前の日課はすぐ使い直せます",
+      "theme": "cream",
+      "art": "scene_06"
+    }
+  ]
+}

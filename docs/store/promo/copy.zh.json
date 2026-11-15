@@ -1,0 +1,67 @@
+{
+  "language": "zh",
+  "brand": "ELUM",
+  "tagline": "每天的日程，用行为卡片一张一张展示",
+  "featureGraphic": {
+    "title": "每天的日程\n用行为卡片一张一张",
+    "subtitle": "为自闭症、ADHD制作图片卡",
+    "screen": "child_card",
+    "art": "hero"
+  },
+  "slides": [
+    {
+      "id": "01_card",
+      "screen": "child_card",
+      "eyebrow": "自闭症·ADHD 视觉日程",
+      "title": "每天的日程\n用行为卡片一张一张",
+      "subtitle": "用图片和短句\n按顺序展示今天要做的事",
+      "theme": "peach",
+      "art": "scene_01"
+    },
+    {
+      "id": "02_input",
+      "screen": "input",
+      "eyebrow": "制作行为卡片",
+      "title": "写一句话\nAI 就生成图片卡",
+      "subtitle": "像说话一样写下来\n就会拆成简单的小步骤",
+      "theme": "butter",
+      "art": "scene_02"
+    },
+    {
+      "id": "03_review",
+      "screen": "card_review",
+      "eyebrow": "监护人确认",
+      "title": "只有监护人确认过的卡片\n才会给 Elumi",
+      "subtitle": "可以修改图片和文字\n调整顺序",
+      "theme": "mint",
+      "art": "scene_03"
+    },
+    {
+      "id": "04_elumi",
+      "screen": "child_home",
+      "eyebrow": "Elumi 画面",
+      "title": "在 Elumi 的设备上\n一眼看清今天的事",
+      "subtitle": "连接两台设备\n日程马上出现",
+      "theme": "lavender",
+      "art": "scene_04"
+    },
+    {
+      "id": "05_reward",
+      "screen": "reward",
+      "eyebrow": "星星和奖励",
+      "title": "完成一步得星星\n全部完成得奖励",
+      "subtitle": "露米、露露、波波\n一起为你高兴",
+      "theme": "sky",
+      "art": "scene_05"
+    },
+    {
+      "id": "06_together",
+      "screen": "guardian_home",
+      "eyebrow": "一起照看",
+      "title": "和家人、老师\n一起照看每一天",
+      "subtitle": "邀请大家一起看日程\n以前的日程一键再用",
+      "theme": "cream",
+      "art": "scene_06"
+    }
+  ]
+}

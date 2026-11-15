@@ -1,6 +1,6 @@
 """스토어 홍보 이미지 생성: 문구(copy.*.json) + 실측 화면(screens/) + 그림(art/) > 규격별 PNG
 
-사용: python3 -I render_store_images.py [--language ko|en] [--screens-fallback 폴더] [--to-play-metadata] [--to-ios-metadata]
+사용: python3 -I render_store_images.py [--language ko|en|ja|zh|es] [--screens-fallback 폴더] [--to-play-metadata] [--to-ios-metadata]
 출력: out/{언어}/{규격}/{슬라이드 id}.png, out/{언어}/feature_graphic.png
 필요: playwright(chromium), Pillow
 """
@@ -33,6 +33,12 @@ LAYOUT_WIDTH_CSS = 440
 # 스토어 문구 금지어: 의료·효과 암시, 연령 암시 (docs/store/store-listing.md)
 FORBIDDEN_WORDS_KO = ['치료', '진단', '교정', '훈련', '증상', '완화', '재활', '연습', '효과', '예방',
                       '극복', '향상', '호전', '의료', '처방', '아이', '아동']
+# ja·zh·es 화면 문구 금지어 (효과·의료 암시, #1419)
+FORBIDDEN_WORDS_BY_LANGUAGE_EXTRA = {
+    'ja': ['治療', '診断', '訓練', '症状', '効果', '医療'],
+    'zh': ['治疗', '诊断', '训练', '症状', '疗效', '医疗'],
+    'es': ['terapia', 'tratamiento', 'diagnóstico', 'cura', 'síntoma', 'médic'],
+}
 FORBIDDEN_WORDS_EN = ['therapy', 'treat', 'diagnos', 'cure', 'symptom', 'medical', 'clinical',
                       'improve', 'training', 'child', 'kid']
 
@@ -65,7 +71,7 @@ def collect_visible_text(node) -> list[str]:
 def find_forbidden_words(copy: dict) -> list[str]:
     """화면에 보이는 문구에서 금지어 찾기 > 발견 목록"""
     text = '\n'.join(collect_visible_text(copy))
-    words = FORBIDDEN_WORDS_KO if copy['language'] == 'ko' else FORBIDDEN_WORDS_EN
+    words = FORBIDDEN_WORDS_KO if copy['language'] == 'ko' else FORBIDDEN_WORDS_BY_LANGUAGE_EXTRA.get(copy['language'], FORBIDDEN_WORDS_EN)
     return [word for word in words if re.search(word, text, re.IGNORECASE)]
 
 
@@ -256,7 +262,7 @@ def render_language(language: str, screens_fallback: pathlib.Path | None) -> lis
 
 # Play 배포가 올리는 이미지 폴더 (supply: 종류별로 기존 것을 지우고 교체, #1369)
 PLAY_IMAGES_DIR_FORMAT = 'client/android/fastlane/metadata/android/{locale}/images'
-PLAY_LOCALE_BY_LANGUAGE = {'ko': 'ko-KR', 'en': 'en-US'}
+PLAY_LOCALE_BY_LANGUAGE = {'ko': 'ko-KR', 'en': 'en-US', 'ja': 'ja-JP', 'zh': 'zh-CN', 'es': 'es-419'}
 
 
 def copy_to_play_metadata(language: str) -> list[pathlib.Path]:
@@ -277,7 +283,7 @@ def copy_to_play_metadata(language: str) -> list[pathlib.Path]:
 # App Store 배포가 올리는 iPhone 스크린샷 폴더 (Fastfile 이 iPhone 세트만 지우고 교체, iPad 는 유지, #1369)
 # 6.9형만 둔다: Apple 이 작은 iPhone 크기는 6.9형을 줄여 씀
 IOS_SCREENSHOTS_DIR_FORMAT = 'client/ios/fastlane/screenshots/{locale}'
-IOS_LOCALE_BY_LANGUAGE = {'ko': 'ko', 'en': 'en-US'}
+IOS_LOCALE_BY_LANGUAGE = {'ko': 'ko', 'en': 'en-US', 'ja': 'ja', 'zh': 'zh-Hans', 'es': 'es-MX'}
 IOS_UPLOAD_SIZE = 'ios_6.9'
 
 
@@ -293,7 +299,7 @@ def copy_to_ios_metadata(language: str) -> list[pathlib.Path]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--language', choices=['ko', 'en'], action='append')
+    parser.add_argument('--language', choices=['ko', 'en', 'ja', 'zh', 'es'], action='append')
     parser.add_argument('--screens-fallback', type=pathlib.Path,
                         help='실측 화면이 없을 때 쓸 임시 화면 폴더 (배치 확인용)')
     parser.add_argument('--to-play-metadata', action='store_true',

@@ -1,0 +1,67 @@
+{
+  "language": "es",
+  "brand": "ELUM",
+  "tagline": "La rutina diaria, una tarjeta de acción cada vez",
+  "featureGraphic": {
+    "title": "La rutina diaria,\nuna tarjeta cada vez",
+    "subtitle": "Agenda visual para autismo y TDAH",
+    "screen": "child_card",
+    "art": "hero"
+  },
+  "slides": [
+    {
+      "id": "01_card",
+      "screen": "child_card",
+      "eyebrow": "Agenda visual para autismo y TDAH",
+      "title": "La rutina diaria,\nuna tarjeta cada vez",
+      "subtitle": "Imágenes y frases cortas\nmuestran los pasos en orden",
+      "theme": "peach",
+      "art": "scene_01"
+    },
+    {
+      "id": "02_input",
+      "screen": "input",
+      "eyebrow": "Crea tarjetas de acción",
+      "title": "Escribe una línea,\nla IA crea las tarjetas",
+      "subtitle": "Escríbelo como lo dirías\ny se divide en pasos sencillos",
+      "theme": "butter",
+      "art": "scene_02"
+    },
+    {
+      "id": "03_review",
+      "screen": "card_review",
+      "eyebrow": "Revisión de la familia",
+      "title": "Solo las tarjetas revisadas\nllegan a Elumi",
+      "subtitle": "Edita imágenes y textos\no cambia el orden",
+      "theme": "mint",
+      "art": "scene_03"
+    },
+    {
+      "id": "04_elumi",
+      "screen": "child_home",
+      "eyebrow": "Pantalla de Elumi",
+      "title": "Los pasos de hoy\nen el dispositivo de Elumi",
+      "subtitle": "Conecta dos dispositivos\ny las rutinas llegan al instante",
+      "theme": "lavender",
+      "art": "scene_04"
+    },
+    {
+      "id": "05_reward",
+      "screen": "reward",
+      "eyebrow": "Estrellas y premios",
+      "title": "Una estrella por paso,\nun premio al final",
+      "subtitle": "Lumi, Ruru y Popo\nlo celebran contigo",
+      "theme": "sky",
+      "art": "scene_05"
+    },
+    {
+      "id": "06_together",
+      "screen": "guardian_home",
+      "eyebrow": "Mejor en equipo",
+      "title": "Acompaña el día\ncon familia y docentes",
+      "subtitle": "Invita a otros a compartir rutinas\ny reutiliza las anteriores",
+      "theme": "cream",
+      "art": "scene_06"
+    }
+  ]
+}
