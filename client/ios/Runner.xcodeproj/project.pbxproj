@@ -7,19 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A828000000000000000000B1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A828000000000000000000A1 /* GoogleService-Info.plist */; };
-		A674000000000000000000B1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A674000000000000000000C1 /* InfoPlist.strings */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		1F203213B3401344CA3855FD /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E54D87CD03593FB71632B963 /* Pods_Runner.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		EA1C0F352E9D000100A1C0DE /* StripNativeAdFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */; };
-		EA1C0F392E9D000100A1C0DE /* ElumSceneBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */; };
 		7BAC9FE5EF9A764D32B0DE85 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A156091E90EBDB2B9ABC7B9E /* Pods_RunnerTests.framework */; };
+		7D0BB8C055B33FC9E3EC3719 /* ElumHomeWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 48B9A4E6129BC76940318A71 /* ElumHomeWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9039BE278D7C3836954312AB /* ElumHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4D012288B6FC6042949759 /* ElumHomeWidget.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A00F5D4FA97011A8E2C0758E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88F588959CFA3868C81C036 /* SwiftUI.framework */; };
+		A674000000000000000000B1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A674000000000000000000C1 /* InfoPlist.strings */; };
+		A828000000000000000000B1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A828000000000000000000A1 /* GoogleService-Info.plist */; };
+		D8E069670F817E9D59D2662D /* HomeWidgetChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C98F75CF98F9F07A0E3F062 /* HomeWidgetChannel.swift */; };
+		EA1C0F352E9D000100A1C0DE /* StripNativeAdFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */; };
+		EA1C0F392E9D000100A1C0DE /* ElumSceneBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */; };
+		F0D308E981AAADEBF11EE39B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 145D292B19BAD3C112C82574 /* WidgetKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,9 +35,27 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		F7A9EEFCEB6ADECB8F563670 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AB4263AFE2D14BBC94A019C;
+			remoteInfo = ElumHomeWidget;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1FC8085E0689EBE35D152615 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7D0BB8C055B33FC9E3EC3719 /* ElumHomeWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,24 +69,21 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A828000000000000000000A1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		A674000000000000000000D1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A674000000000000000000D2 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A674000000000000000000D3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A674000000000000000000D4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		A674000000000000000000D5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = ElumHomeWidget.xcconfig; sourceTree = "<group>"; };
+		145D292B19BAD3C112C82574 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		15C047296D03CD8DE3B5A38E /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		394767EC570E77ACBFD8F21E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		3D79AE2058D20F50B84C38E1 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		3F1B8D8EDC8B286570A655C0 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		48B9A4E6129BC76940318A71 /* ElumHomeWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ElumHomeWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C98F75CF98F9F07A0E3F062 /* HomeWidgetChannel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeWidgetChannel.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StripNativeAdFactory.swift; sourceTree = "<group>"; };
-		EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElumSceneBridgePlugin.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		83B7F19745CCE88D93496B39 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		8EBB1DEB3F8EE64630042809 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
@@ -74,12 +94,32 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9D4D012288B6FC6042949759 /* ElumHomeWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ElumHomeWidget.swift; sourceTree = "<group>"; };
 		A156091E90EBDB2B9ABC7B9E /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A674000000000000000000D1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A674000000000000000000D2 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A674000000000000000000D3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A674000000000000000000D4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		A674000000000000000000D5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A828000000000000000000A1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		A88F588959CFA3868C81C036 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		BCF42FC73E14396C01A4DECF /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E54D87CD03593FB71632B963 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StripNativeAdFactory.swift; sourceTree = "<group>"; };
+		EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElumSceneBridgePlugin.swift; sourceTree = "<group>"; };
+		EB7BC94865B6A557E72C3A95 /* ElumHomeWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = ElumHomeWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		354188B2B1D45EA71FDAFC77 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0D308E981AAADEBF11EE39B /* WidgetKit.framework in Frameworks */,
+				A00F5D4FA97011A8E2C0758E /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -105,6 +145,18 @@
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 			);
 			path = RunnerTests;
+			sourceTree = "<group>";
+		};
+		3752610F93EAD27A3B677B17 /* ElumHomeWidget */ = {
+			isa = PBXGroup;
+			children = (
+				9D4D012288B6FC6042949759 /* ElumHomeWidget.swift */,
+				394767EC570E77ACBFD8F21E /* Info.plist */,
+				EB7BC94865B6A557E72C3A95 /* ElumHomeWidget.entitlements */,
+				0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */,
+			);
+			name = ElumHomeWidget;
+			path = ElumHomeWidget;
 			sourceTree = "<group>";
 		};
 		7BFDB5D4DE9009210CF17A59 /* Pods */ = {
@@ -141,6 +193,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				7BFDB5D4DE9009210CF17A59 /* Pods */,
 				A6B29601502E61A5EAE43F70 /* Frameworks */,
+				3752610F93EAD27A3B677B17 /* ElumHomeWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -149,6 +202,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				48B9A4E6129BC76940318A71 /* ElumHomeWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,6 +222,7 @@
 				EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */,
 				EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				6C98F75CF98F9F07A0E3F062 /* HomeWidgetChannel.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -177,6 +232,8 @@
 			children = (
 				E54D87CD03593FB71632B963 /* Pods_Runner.framework */,
 				A156091E90EBDB2B9ABC7B9E /* Pods_RunnerTests.framework */,
+				145D292B19BAD3C112C82574 /* WidgetKit.framework */,
+				A88F588959CFA3868C81C036 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -203,6 +260,23 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		5AB4263AFE2D14BBC94A019C /* ElumHomeWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95741A38C56A4569E470C713 /* Build configuration list for PBXNativeTarget "ElumHomeWidget" */;
+			buildPhases = (
+				CA49523E04D4B7CF2EE5A036 /* Sources */,
+				354188B2B1D45EA71FDAFC77 /* Frameworks */,
+				4D4D9A32E4FCAF0C4032D363 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ElumHomeWidget;
+			productName = ElumHomeWidget;
+			productReference = 48B9A4E6129BC76940318A71 /* ElumHomeWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -213,6 +287,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				1FC8085E0689EBE35D152615 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				E1878EE741A069A28760F54E /* [CP] Embed Pods Frameworks */,
 				AA4F7D925A0AD13FEA82284B /* [CP] Copy Pods Resources */,
@@ -220,6 +295,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6A7B8BCD4E324E80570C3D06 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -239,6 +315,10 @@
 					331C8080294A63A400263BE5 = {
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					5AB4263AFE2D14BBC94A019C = {
+						CreatedOnToolsVersion = 15.1;
+						DevelopmentTeam = CUK22HY6YC;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -265,12 +345,20 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				5AB4263AFE2D14BBC94A019C /* ElumHomeWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		331C807F294A63A400263BE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D4D9A32E4FCAF0C4032D363 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -421,6 +509,15 @@
 				EA1C0F352E9D000100A1C0DE /* StripNativeAdFactory.swift in Sources */,
 				EA1C0F392E9D000100A1C0DE /* ElumSceneBridgePlugin.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				D8E069670F817E9D59D2662D /* HomeWidgetChannel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA49523E04D4B7CF2EE5A036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9039BE278D7C3836954312AB /* ElumHomeWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,21 +529,15 @@
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
 		};
+		6A7B8BCD4E324E80570C3D06 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ElumHomeWidget;
+			target = 5AB4263AFE2D14BBC94A019C /* ElumHomeWidget */;
+			targetProxy = F7A9EEFCEB6ADECB8F563670 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		A674000000000000000000C1 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A674000000000000000000D1 /* en */,
-				A674000000000000000000D2 /* ko */,
-				A674000000000000000000D3 /* ja */,
-				A674000000000000000000D4 /* zh-Hans */,
-				A674000000000000000000D5 /* es */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -463,9 +554,51 @@
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
+		A674000000000000000000C1 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A674000000000000000000D1 /* en */,
+				A674000000000000000000D2 /* ko */,
+				A674000000000000000000D3 /* ja */,
+				A674000000000000000000D4 /* zh-Hans */,
+				A674000000000000000000D5 /* es */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		187D53632FB3E29BADE53C17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = ElumHomeWidget/ElumHomeWidget.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = CUK22HY6YC;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = kr.twinfang.elum.homewidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Elum HomeWidget AppStore Distribution";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -588,6 +721,34 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
+			};
+			name = Profile;
+		};
+		84A117E38A6E8295B670C599 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = ElumHomeWidget/ElumHomeWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CUK22HY6YC;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = kr.twinfang.elum.homewidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Profile;
 		};
@@ -733,6 +894,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = CUK22HY6YC;
 				ENABLE_BITCODE = NO;
@@ -743,11 +906,39 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.twinfang.elum;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Elum AppStore Distribution V2";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		DB80EBB0A6DC031B9D417DC8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = ElumHomeWidget/ElumHomeWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CUK22HY6YC;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = kr.twinfang.elum.homewidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -758,6 +949,16 @@
 				331C8088294A63A400263BE5 /* Debug */,
 				331C8089294A63A400263BE5 /* Release */,
 				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95741A38C56A4569E470C713 /* Build configuration list for PBXNativeTarget "ElumHomeWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				187D53632FB3E29BADE53C17 /* Release */,
+				DB80EBB0A6DC031B9D417DC8 /* Debug */,
+				84A117E38A6E8295B670C599 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -40,6 +40,8 @@ import UserNotifications
         do { result(try Self.installationId()) }
         catch { result(FlutterError(code: "E-INSTALL", message: "Installation marker unavailable", details: nil)) }
       }
+    // 홈 화면 위젯 오늘 요약 저장 채널 (#1410)
+    HomeWidgetChannel.register(messenger: engineBridge.applicationRegistrar.messenger())
   }
 
   private static func installationId() throws -> String {

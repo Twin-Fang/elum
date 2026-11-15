@@ -8,8 +8,11 @@
     <string>CUK22HY6YC</string>
     <key>provisioningProfiles</key>
     <dict>
+        <!-- 이름은 project.pbxproj Release PROVISIONING_PROFILE_SPECIFIER 와 같게 (#1410) -->
         <key>kr.twinfang.elum</key>
-        <string>Elum AppStore Distribution</string>
+        <string>Elum AppStore Distribution V2</string>
+        <key>kr.twinfang.elum.homewidget</key>
+        <string>Elum HomeWidget AppStore Distribution</string>
     </dict>
     <key>signingStyle</key>
     <string>manual</string>
