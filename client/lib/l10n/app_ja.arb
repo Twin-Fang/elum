@@ -1521,8 +1521,6 @@
   "creditGuideRegenerateFreeDaily": "{count, plural, other{1日{count}回無料}}",
   "creditGuideConfirm": "わかりました",
   "myCreditFreeRegenerateToday": "描き直し 今日{left}/{cap}回無料",
-  "myCreditRecentTitle": "最近使った履歴",
-  "myCreditSeeAllHistory": "すべて見る",
   "myCreditGuideLink": "クレジットの使い方",
   "abaIntroTitle": "準備はかんたんに、\n毎日は自分の力で",
   "abaIntroSubtitle": "応用行動分析（ABA）の考え方で作りました",

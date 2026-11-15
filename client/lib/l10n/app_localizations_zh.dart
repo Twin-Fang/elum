@@ -3741,6 +3741,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planPriceFailed => '没能加载价格';
 
   @override
+  String get planRedeemCode => '프로모션 코드 입력';
+
+  @override
+  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+
+  @override
   String get planRestore => '恢复购买';
 
   @override
@@ -5332,12 +5338,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String myCreditFreeRegenerateToday(int left, int cap) {
     return '今天重新画免费 $left/$cap次';
   }
-
-  @override
-  String get myCreditRecentTitle => '最近使用记录';
-
-  @override
-  String get myCreditSeeAllHistory => '查看全部';
 
   @override
   String get myCreditGuideLink => '积分这样用';
