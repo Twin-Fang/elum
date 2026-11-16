@@ -5530,7 +5530,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeNextStepSendAction => '이어서 만들기';
 
   @override
-  String get homeNextStepLinkTitle => '이룸이 기기를 연결해요';
+  String get homeNextStepLinkTitle => '이룸이 기기도 연결해 볼까요?';
+
+  @override
+  String get homeNextStepLinkBody =>
+      '연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요';
 
   @override
   String get homeNextStepWaitTitle => '이제 이룸이 차례예요';

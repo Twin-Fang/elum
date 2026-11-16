@@ -3913,7 +3913,7 @@
   "@onboardingLinkStepTitle": {"description": "온보딩 이룸이 기기 연결 단계 제목"},
 
   "linkDeviceBenefitLine": "보낸 일과가 이룸이 기기에 바로 떠요",
-  "@linkDeviceBenefitLine": {"description": "기기 연결 이유 한 줄 (온보딩 연결 단계 설명 · 홈 다음에 할 일 연결 카드)"},
+  "@linkDeviceBenefitLine": {"description": "기기 연결 이유 한 줄 (온보딩 연결 단계 설명)"},
 
   "onboardingLinkStepConnectNow": "지금 연결하기",
   "@onboardingLinkStepConnectNow": {"description": "온보딩 연결 단계 주 버튼 (연결 코드 화면으로)"},
@@ -3945,8 +3945,10 @@
   "homeNextStepSendAction": "이어서 만들기",
   "@homeNextStepSendAction": {"description": "홈 다음에 할 일: 임시저장 목록으로 가는 행동 알약"},
 
-  "homeNextStepLinkTitle": "이룸이 기기를 연결해요",
-  "@homeNextStepLinkTitle": {"description": "홈 다음에 할 일: 기기 연결 제목"},
+  "homeNextStepLinkTitle": "이룸이 기기도 연결해 볼까요?",
+  "@homeNextStepLinkTitle": {"description": "홈 다음에 할 일: 기기 연결 권유 제목 (권유형, 닫을 수 있음 #1435)"},
+  "homeNextStepLinkBody": "연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요",
+  "@homeNextStepLinkBody": {"description": "홈 다음에 할 일: 기기 연결 권유 한 줄 (연결 이점 + 이 기기에서 이룸이 화면으로 써도 됨)"},
 
   "homeNextStepWaitTitle": "이제 이룸이 차례예요",
   "@homeNextStepWaitTitle": {"description": "홈 다음에 할 일: 보내고 연결까지 마친 뒤 첫 완료 기다리기 제목"},

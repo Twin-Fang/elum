@@ -9473,7 +9473,7 @@ abstract class AppLocalizations {
   /// **'이룸이 기기를 연결할까요?'**
   String get onboardingLinkStepTitle;
 
-  /// 기기 연결 이유 한 줄 (온보딩 연결 단계 설명 · 홈 다음에 할 일 연결 카드)
+  /// 기기 연결 이유 한 줄 (온보딩 연결 단계 설명)
   ///
   /// In ko, this message translates to:
   /// **'보낸 일과가 이룸이 기기에 바로 떠요'**
@@ -9539,11 +9539,17 @@ abstract class AppLocalizations {
   /// **'이어서 만들기'**
   String get homeNextStepSendAction;
 
-  /// 홈 다음에 할 일: 기기 연결 제목
+  /// 홈 다음에 할 일: 기기 연결 권유 제목 (권유형, 닫을 수 있음 #1435)
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 기기를 연결해요'**
+  /// **'이룸이 기기도 연결해 볼까요?'**
   String get homeNextStepLinkTitle;
+
+  /// 홈 다음에 할 일: 기기 연결 권유 한 줄 (연결 이점 + 이 기기에서 이룸이 화면으로 써도 됨)
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요'**
+  String get homeNextStepLinkBody;
 
   /// 홈 다음에 할 일: 보내고 연결까지 마친 뒤 첫 완료 기다리기 제목
   ///

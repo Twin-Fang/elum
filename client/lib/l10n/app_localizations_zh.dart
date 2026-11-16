@@ -5475,7 +5475,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeNextStepSendAction => '继续制作';
 
   @override
-  String get homeNextStepLinkTitle => '连接Elumi的设备';
+  String get homeNextStepLinkTitle => '也连接Elumi的设备吗？';
+
+  @override
+  String get homeNextStepLinkBody => '连接后，发送的日常会马上出现在那台设备上。也可以在这台设备上用Elumi画面';
 
   @override
   String get homeNextStepWaitTitle => '接下来轮到Elumi了';

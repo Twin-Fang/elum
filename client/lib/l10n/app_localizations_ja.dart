@@ -5507,7 +5507,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeNextStepSendAction => '続けて作る';
 
   @override
-  String get homeNextStepLinkTitle => 'Elumiの端末をつなぎましょう';
+  String get homeNextStepLinkTitle => 'Elumiの端末もつなぎますか？';
+
+  @override
+  String get homeNextStepLinkBody =>
+      'つなぐと送った日課がその端末にすぐ表示されます。この端末のElumi画面で使ってもかまいません';
 
   @override
   String get homeNextStepWaitTitle => '次はElumiの番です';

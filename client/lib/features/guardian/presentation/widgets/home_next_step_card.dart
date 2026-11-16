@@ -45,6 +45,11 @@ class HomeNextStepCard extends ConsumerWidget {
           body: content.body,
           actionLabel: content.actionLabel,
           onAction: content.onAction,
+          // 기기 연결만 권유라 닫을 수 있음 (나머지 단계는 첫날 흐름 그대로)
+          onClose: step == HomeNextStep.linkDevice
+              ? () => ref.read(isLinkDeviceSuggestionDismissedProvider.notifier).dismiss()
+              : null,
+          closeLabel: step == HomeNextStep.linkDevice ? context.l10n.commonClose : null,
         ),
       ),
     );
@@ -71,7 +76,7 @@ class HomeNextStepCard extends ConsumerWidget {
       HomeNextStep.linkDevice => (
         illustrationAsset: AppAssets.featureIconLinkDevice,
         title: l10n.homeNextStepLinkTitle,
-        body: l10n.linkDeviceBenefitLine,
+        body: l10n.homeNextStepLinkBody,
         actionLabel: l10n.routineSentLinkDevice,
         onAction: () => _linkDevice(context, ref),
       ),

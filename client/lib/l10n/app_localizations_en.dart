@@ -5837,7 +5837,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeNextStepSendAction => 'Continue';
 
   @override
-  String get homeNextStepLinkTitle => 'Link Elumi\'s device';
+  String get homeNextStepLinkTitle => 'Want to link Elumi\'s device too?';
+
+  @override
+  String get homeNextStepLinkBody =>
+      'Once linked, routines you send show up there right away. You can also use Elumi mode on this device';
 
   @override
   String get homeNextStepWaitTitle => 'Now it\'s Elumi\'s turn';
