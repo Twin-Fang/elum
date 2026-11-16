@@ -5840,8 +5840,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeNextStepLinkTitle => 'Want to link Elumi\'s device too?';
 
   @override
-  String get homeNextStepLinkBody =>
-      'Once linked, routines you send show up there right away. You can also use Elumi mode on this device';
+  String get homeNextStepLinkBody => 'You can also use just one device';
 
   @override
   String get homeNextStepLinkDecline => 'I\'ll use this device';

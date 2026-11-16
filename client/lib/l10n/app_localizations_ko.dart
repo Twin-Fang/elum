@@ -5533,8 +5533,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeNextStepLinkTitle => '이룸이 기기도 연결해 볼까요?';
 
   @override
-  String get homeNextStepLinkBody =>
-      '연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요';
+  String get homeNextStepLinkBody => '한 기기에서도 사용 가능해요';
 
   @override
   String get homeNextStepLinkDecline => '이 기기에서 쓸게요';

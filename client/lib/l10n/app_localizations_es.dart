@@ -5943,8 +5943,7 @@ class AppLocalizationsEs extends AppLocalizations {
       '¿Vinculamos también el dispositivo de Elumi?';
 
   @override
-  String get homeNextStepLinkBody =>
-      'Al vincularlo, las rutinas que envíes aparecen allí al instante. También puedes usar la pantalla de Elumi en este dispositivo';
+  String get homeNextStepLinkBody => 'También puedes usar un solo dispositivo';
 
   @override
   String get homeNextStepLinkDecline => 'Usaré este dispositivo';

@@ -5,6 +5,9 @@ import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'elum_spinner.dart';
 
+/// 버튼 높이 2가지: 하단 CTA 66 · 카드 안 48 (보조 버튼과 같은 높이, #1435)
+enum ElumButtonSize { regular, small }
+
 /// 하단 CTA 버튼. Figma 컴포넌트셋 `일반 버튼`(187:299)에 대응한다.
 ///
 /// 360×66 / radius 18 / 텍스트 22·w800.
@@ -18,6 +21,7 @@ class ElumButton extends StatelessWidget {
     this.labelColor,
     this.labelStyle,
     this.loading = false,
+    this.size = ElumButtonSize.regular,
   });
 
   final String label;
@@ -40,6 +44,9 @@ class ElumButton extends StatelessWidget {
   /// 그대로 두면 보호자는 반응이 없는 줄 알고 다시 눌러 같은 요청이 두 번 간다.
   final bool loading;
 
+  /// 높이: regular 66 (화면 하단) · small 48 (안내 카드 안, 글자 linkLater)
+  final ElumButtonSize size;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -58,7 +65,7 @@ class ElumButton extends StatelessWidget {
         onTap: loading ? null : onPressed,
         child: Container(
           width: double.infinity,
-          constraints: BoxConstraints(minHeight: space.buttonH.h),
+          constraints: BoxConstraints(minHeight: _minHeight(context).h),
           padding: EdgeInsets.symmetric(vertical: space.xs.h),
           decoration: BoxDecoration(
             color:
@@ -70,7 +77,7 @@ class ElumButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: (labelStyle ?? context.typo.button).copyWith(
+            style: (labelStyle ?? (size == ElumButtonSize.small ? context.typo.linkLater : context.typo.button)).copyWith(
               color:
                   labelColor ??
                   (isEnabled
@@ -97,5 +104,11 @@ class ElumButton extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// regular 66 · small 48 (= xl + md, ElumSecondaryButton 과 같음)
+  double _minHeight(BuildContext context) {
+    final space = context.space;
+    return size == ElumButtonSize.small ? space.xl + space.md : space.buttonH;
   }
 }

@@ -1579,7 +1579,7 @@
   "homeNextStepSendBody": "Check the cards and save to send it to Elumi's device",
   "homeNextStepSendAction": "Continue",
   "homeNextStepLinkTitle": "Want to link Elumi's device too?",
-  "homeNextStepLinkBody": "Once linked, routines you send show up there right away. You can also use Elumi mode on this device",
+  "homeNextStepLinkBody": "You can also use just one device",
   "homeNextStepLinkDecline": "I'll use this device",
   "homeNextStepWaitTitle": "Now it's Elumi's turn",
   "elumiFinishNotifyLine": "We'll let you know when Elumi finishes",

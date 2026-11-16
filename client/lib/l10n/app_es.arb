@@ -1568,7 +1568,7 @@
   "homeNextStepSendBody": "Revisa las tarjetas y guarda para enviarla al dispositivo de Elumi",
   "homeNextStepSendAction": "Continuar",
   "homeNextStepLinkTitle": "¿Vinculamos también el dispositivo de Elumi?",
-  "homeNextStepLinkBody": "Al vincularlo, las rutinas que envíes aparecen allí al instante. También puedes usar la pantalla de Elumi en este dispositivo",
+  "homeNextStepLinkBody": "También puedes usar un solo dispositivo",
   "homeNextStepLinkDecline": "Usaré este dispositivo",
   "homeNextStepWaitTitle": "Ahora le toca a Elumi",
   "elumiFinishNotifyLine": "Te avisaremos cuando Elumi termine",

@@ -1568,7 +1568,7 @@
   "homeNextStepSendBody": "カードを確認して保存するとElumiの端末に届きます",
   "homeNextStepSendAction": "続けて作る",
   "homeNextStepLinkTitle": "Elumiの端末もつなぎますか？",
-  "homeNextStepLinkBody": "つなぐと送った日課がその端末にすぐ表示されます。この端末のElumi画面で使ってもかまいません",
+  "homeNextStepLinkBody": "1台の端末でも使えます",
   "homeNextStepLinkDecline": "この端末で使います",
   "homeNextStepWaitTitle": "次はElumiの番です",
   "elumiFinishNotifyLine": "Elumiが終えたらお知らせします",
