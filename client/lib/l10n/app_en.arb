@@ -1580,6 +1580,7 @@
   "homeNextStepSendAction": "Continue",
   "homeNextStepLinkTitle": "Want to link Elumi's device too?",
   "homeNextStepLinkBody": "Once linked, routines you send show up there right away. You can also use Elumi mode on this device",
+  "homeNextStepLinkDecline": "I'll use this device",
   "homeNextStepWaitTitle": "Now it's Elumi's turn",
   "elumiFinishNotifyLine": "We'll let you know when Elumi finishes",
   "routineSentTitle": "Sent to Elumi's device",

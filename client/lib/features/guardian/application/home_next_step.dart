@@ -91,7 +91,7 @@ class LinkDeviceSuggestionDismissalNotifier extends Notifier<bool> {
   @override
   bool build() => ref.read(localStorageProvider).isLinkDeviceSuggestionDismissed;
 
-  /// 닫기(x): 화면에서 먼저 넘기고 저장
+  /// 거절 ("이 기기에서 쓸게요"): 화면에서 먼저 넘기고 저장
   Future<void> dismiss() async {
     if (state) return;
     state = true;

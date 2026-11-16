@@ -5514,6 +5514,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'つなぐと送った日課がその端末にすぐ表示されます。この端末のElumi画面で使ってもかまいません';
 
   @override
+  String get homeNextStepLinkDecline => 'この端末で使います';
+
+  @override
   String get homeNextStepWaitTitle => '次はElumiの番です';
 
   @override

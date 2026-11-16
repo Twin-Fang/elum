@@ -1569,6 +1569,7 @@
   "homeNextStepSendAction": "继续制作",
   "homeNextStepLinkTitle": "也连接Elumi的设备吗？",
   "homeNextStepLinkBody": "连接后，发送的日常会马上出现在那台设备上。也可以在这台设备上用Elumi画面",
+  "homeNextStepLinkDecline": "就用这台设备",
   "homeNextStepWaitTitle": "接下来轮到Elumi了",
   "elumiFinishNotifyLine": "Elumi完成后会通知你",
   "routineSentTitle": "已发送到Elumi的设备",

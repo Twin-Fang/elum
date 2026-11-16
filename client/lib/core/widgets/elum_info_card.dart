@@ -11,7 +11,7 @@ import 'kept_text.dart';
 /// 작은 안내 카드 그림 자리 2가지: 왼쪽 (목록·홈 안내) · 위 (빈 상태·소개)
 enum ElumInfoCardLayout { leading, top }
 
-/// 작은 안내 카드: 3D 그림 + 굵은 제목 + 회색 한 줄 + (선택) 행동 알약 · 닫기 x
+/// 작은 안내 카드: 3D 그림 + 굵은 제목 + 회색 한 줄 + (선택) 행동 알약 · 거절 글 버튼 · 닫기 x
 /// 흰 판 · 모서리 20 · 옅은 그림자. [onTap] 이 있으면 카드 전체가 눌림 (햅틱 포함)
 class ElumInfoCard extends StatelessWidget {
   const ElumInfoCard({
@@ -25,6 +25,8 @@ class ElumInfoCard extends StatelessWidget {
     this.onTap,
     this.onClose,
     this.closeLabel,
+    this.declineLabel,
+    this.onDecline,
   }) : assert(onClose == null || closeLabel != null, 'closeLabel 은 닫기 x 낭독 글이라 onClose 와 함께 준다'); // l10n-ignore: assert 메시지
 
   /// 3D 그림 PNG (AppAssets.featureIcon* · emptyState* · celebration*)
@@ -46,6 +48,11 @@ class ElumInfoCard extends StatelessWidget {
   final VoidCallback? onClose;
   final String? closeLabel;
 
+  /// 권유 거절 글 버튼 (회색 굵은 글, 알약 아래): 권유 카드를 x 대신 선택지로 닫을 때 (#1435)
+  /// onDecline 과 함께 있을 때만 보임 · 예: "이 기기에서 쓸게요"
+  final String? declineLabel;
+  final VoidCallback? onDecline;
+
   /// 그림 크기: 왼쪽 56 · 위 96
   static const _leadingArtSize = 56.0;
   static const _topArtSize = 96.0;
@@ -66,6 +73,7 @@ class ElumInfoCard extends StatelessWidget {
   static const _closeTextGap = 20.0;
 
   bool get _hasAction => actionLabel != null && onAction != null;
+  bool get _hasDecline => declineLabel != null && onDecline != null;
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +157,7 @@ class ElumInfoCard extends StatelessWidget {
           SizedBox(height: context.space.xs.h),
           _ActionPill(label: actionLabel!, onTap: withTapHaptic(onAction)!),
         ],
+        if (_hasDecline) _DeclineTextButton(label: declineLabel!, onTap: withTapHaptic(onDecline)!),
       ],
     );
   }
@@ -199,6 +208,40 @@ class _ActionPill extends StatelessWidget {
         child: Text(
           label,
           style: context.typo.creditBody.copyWith(color: colors.infoHighlightMintAccent, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
+/// 권유 거절 글 버튼: 회색 굵은 글 · 누름 영역 높이 36
+class _DeclineTextButton extends StatelessWidget {
+  const _DeclineTextButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  /// 누름 영역 최소 높이 · 글 좌우 여백
+  static const _minTapHeight = 36.0;
+  static const _horizontalPadding = 12.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AppPressable(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: _minTapHeight.h),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: _horizontalPadding.w),
+          child: Center(
+            widthFactor: 1,
+            child: Text(
+              label,
+              // 밑줄 링크 금지 (#1401) > 회색 굵은 글로 버튼임을 보임
+              style: context.typo.creditBody.copyWith(color: colors.textSecondary, fontWeight: FontWeight.w600),
+            ),
+          ),
         ),
       ),
     );

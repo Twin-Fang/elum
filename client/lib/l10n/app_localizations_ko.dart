@@ -5537,6 +5537,9 @@ class AppLocalizationsKo extends AppLocalizations {
       '연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요';
 
   @override
+  String get homeNextStepLinkDecline => '이 기기에서 쓸게요';
+
+  @override
   String get homeNextStepWaitTitle => '이제 이룸이 차례예요';
 
   @override

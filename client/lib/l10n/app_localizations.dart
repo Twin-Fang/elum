@@ -9539,7 +9539,7 @@ abstract class AppLocalizations {
   /// **'이어서 만들기'**
   String get homeNextStepSendAction;
 
-  /// 홈 다음에 할 일: 기기 연결 권유 제목 (권유형, 닫을 수 있음 #1435)
+  /// 홈 다음에 할 일: 기기 연결 권유 제목 (권유형, 거절 글 버튼으로 닫음 #1435)
   ///
   /// In ko, this message translates to:
   /// **'이룸이 기기도 연결해 볼까요?'**
@@ -9550,6 +9550,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'연결하면 보낸 일과가 그 기기에 바로 떠요. 이 기기에서 이룸이 화면으로 써도 돼요'**
   String get homeNextStepLinkBody;
+
+  /// 홈 다음에 할 일: 기기 연결 권유 거절 글 버튼 (누르면 카드 닫고 다음 단계, #1435)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기기에서 쓸게요'**
+  String get homeNextStepLinkDecline;
 
   /// 홈 다음에 할 일: 보내고 연결까지 마친 뒤 첫 완료 기다리기 제목
   ///
