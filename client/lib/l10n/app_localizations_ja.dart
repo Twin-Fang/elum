@@ -5858,4 +5858,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '読んでみる';
+
+  @override
+  String get cardReviewScheduleSend => '요일과 시각 정해서 보내기';
+
+  @override
+  String get routineScheduleSaveAndSend => '저장하고 보내기';
+
+  @override
+  String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '아직 $name$_temp0 카드를 안 해 봤어요';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody => '이룸이 화면을 열어 첫 카드를 함께 해 봐요';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => '이룸이 화면 열기';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
 }

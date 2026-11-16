@@ -4,14 +4,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/batchim.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/widgets/app_reveal.dart';
 import '../../../../core/widgets/elum_info_card.dart';
 import '../../../link/application/linked_device_check.dart';
+import '../../application/guardian_child_identity.dart';
 import '../../application/home_next_step.dart';
 
-/// 「다음에 할 일」 카드 한 장 (홈 맨 위, 안내 카드보다 먼저): 3D 그림 + 제목 + 한 줄 + 행동 1개
+/// 「다음에 할 일」 카드 한 장 (홈 맨 위, 안내 카드보다 먼저): 3D 그림 + 제목 + 한 줄 + 행동 1개 (+ 보조 1개 · 닫기 x)
 /// 단계가 바뀌면 새 카드가 떠오름. none 이면 자리 없음. 판매·광고 없음
 class HomeNextStepCard extends ConsumerWidget {
   const HomeNextStepCard({super.key, required this.onCreateRoutine, required this.bottomGap});
@@ -45,10 +47,12 @@ class HomeNextStepCard extends ConsumerWidget {
           body: content.body,
           actionLabel: content.actionLabel,
           onAction: content.onAction,
-          // 기기 연결만 권유라 거절 글 버튼으로 닫을 수 있음 (나머지 단계는 첫날 흐름 그대로)
-          declineLabel: step == HomeNextStep.linkDevice ? context.l10n.homeNextStepLinkDecline : null,
-          onDecline: step == HomeNextStep.linkDevice
-              ? () => ref.read(isLinkDeviceSuggestionDismissedProvider.notifier).dismiss()
+          declineLabel: content.secondary?.label,
+          onDecline: content.secondary?.onTap,
+          // 첫 체험 권유만 x 로 닫음 (7일 숨김)
+          closeLabel: step == HomeNextStep.encourageFirstTry ? context.l10n.commonClose : null,
+          onClose: step == HomeNextStep.encourageFirstTry
+              ? () => ref.read(firstTryEncourageDismissedAtProvider.notifier).dismiss()
               : null,
         ),
       ),
@@ -65,6 +69,7 @@ class HomeNextStepCard extends ConsumerWidget {
         body: l10n.homeNextStepMakeBody,
         actionLabel: l10n.homeNextStepMakeAction,
         onAction: onCreateRoutine,
+        secondary: null,
       ),
       HomeNextStep.sendFirstRoutine => (
         illustrationAsset: AppAssets.emptyStateNoRoutines,
@@ -72,6 +77,7 @@ class HomeNextStepCard extends ConsumerWidget {
         body: l10n.homeNextStepSendBody,
         actionLabel: l10n.homeNextStepSendAction,
         onAction: () => context.push(Routes.guardianDrafts),
+        secondary: null,
       ),
       HomeNextStep.linkDevice => (
         illustrationAsset: AppAssets.featureIconLinkDevice,
@@ -79,6 +85,11 @@ class HomeNextStepCard extends ConsumerWidget {
         body: l10n.homeNextStepLinkBody,
         actionLabel: l10n.routineSentLinkDevice,
         onAction: () => _linkDevice(context, ref),
+        // 기기 연결은 권유라 거절 글 버튼으로 닫을 수 있음
+        secondary: (
+          label: l10n.homeNextStepLinkDecline,
+          onTap: () => ref.read(isLinkDeviceSuggestionDismissedProvider.notifier).dismiss(),
+        ),
       ),
       HomeNextStep.waitFirstCompletion => (
         illustrationAsset: AppAssets.celebrationSentToDevice,
@@ -86,17 +97,37 @@ class HomeNextStepCard extends ConsumerWidget {
         body: l10n.elumiFinishNotifyLine,
         actionLabel: l10n.routineSentPreviewElumi,
         onAction: () => context.go(Routes.child),
+        secondary: null,
       ),
+      HomeNextStep.encourageFirstTry => _encourageFirstTryContent(context, ref),
       HomeNextStep.none => null,
     };
   }
+
+  /// 첫 체험 권유: 이룸이 화면 열기 (홈 캐릭터 배지와 같은 길) + 기기가 없다고 확인됐을 때만 기기 연결
+  _NextStepContent _encourageFirstTryContent(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final name = ref.watch(guardianChildIdentityProvider).name;
+    final isDeviceLinked = ref.watch(hasLinkedDeviceProvider);
+    return (
+      illustrationAsset: AppAssets.celebrationSentToDevice,
+      title: l10n.homeNextStepFirstTryTitle(name, batchimOf(name)),
+      body: l10n.homeNextStepFirstTryBody,
+      actionLabel: l10n.homeNextStepFirstTryOpenElumi,
+      onAction: () => context.go(Routes.child),
+      secondary: isDeviceLinked == false
+          ? (label: l10n.homeNextStepFirstTryLinkDevice, onTap: () => _linkDevice(context, ref))
+          : null,
+    );
+  }
 }
 
-/// 카드 한 장 내용
+/// 카드 한 장 내용 (보조 버튼은 행동 아래 회색 버튼, 없으면 null)
 typedef _NextStepContent = ({
   String illustrationAsset,
   String title,
   String body,
   String actionLabel,
   VoidCallback onAction,
+  ({String label, VoidCallback onTap})? secondary,
 });

@@ -26,9 +26,12 @@ import '../../../subscription/domain/plan_benefit.dart';
 /// 이룸이 기기 알림이 꺼져 있거나 기기가 없으면 스위치 아래에 한 줄로 알린다. Pro 가 끝나 멈췄으면 그 사실과
 /// 남아 있다는 것을 먼저 말하고, 저장은 막되 끄기는 둔다.
 class RoutineScheduleSheet extends ConsumerStatefulWidget {
-  const RoutineScheduleSheet({super.key, required this.routine});
+  const RoutineScheduleSheet({super.key, required this.routine, this.shouldReturnWithoutSaving = false});
 
   final Routine routine;
+
+  /// true: 서버에 저장하지 않고 고른 값을 돌려주며 닫음 (카드 확인의 예약 보내기, 끄기 버튼 없음)
+  final bool shouldReturnWithoutSaving;
 
   /// 처음 열 때 (예약이 없을 때): 평일 오전 8시 — 등교 준비가 가장 흔하다
   static const defaultWeekdays = {1, 2, 3, 4, 5};
@@ -45,6 +48,13 @@ class RoutineScheduleSheet extends ConsumerStatefulWidget {
       showElumSheet<void>(
         context: context,
         builder: (_) => RoutineScheduleSheet(routine: routine),
+      );
+
+  /// 요일·시각만 고르기: 고른 반복 / 닫으면 null (저장은 부르는 쪽이 일과 저장 뒤에)
+  static Future<RoutineSchedule?> pick(BuildContext context, Routine routine) =>
+      showElumSheet<RoutineSchedule>(
+        context: context,
+        builder: (_) => RoutineScheduleSheet(routine: routine, shouldReturnWithoutSaving: true),
       );
 
   @override
@@ -69,20 +79,22 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     if (!_weekdays.remove(weekday)) _weekdays.add(weekday);
   });
 
-  /// 저장: 서버 저장 > 토스트·닫기 / 실패 팝업(코드) — 시트는 닫지 않고 고른 값을 둔다
+  /// 저장: (고르기만이면 값 들고 닫기) 서버 저장 > 토스트·닫기 / 실패 팝업(코드) — 시트는 닫지 않고 고른 값을 둔다
   Future<void> _save() async {
+    final schedule = RoutineSchedule(
+      routineId: widget.routine.id,
+      weekdays: {..._weekdays},
+      hour: _hour,
+      minute: _minute,
+      isNotifyEnabled: _isNotifyEnabled,
+    );
+    // 고르기만: 저장 없이 고른 값 들고 닫기
+    if (widget.shouldReturnWithoutSaving) {
+      Navigator.of(context).pop(schedule);
+      return;
+    }
     setState(() => _isSaving = true);
-    final failure = await ref
-        .read(routineScheduleControllerProvider)
-        .save(
-          RoutineSchedule(
-            routineId: widget.routine.id,
-            weekdays: {..._weekdays},
-            hour: _hour,
-            minute: _minute,
-            isNotifyEnabled: _isNotifyEnabled,
-          ),
-        );
+    final failure = await ref.read(routineScheduleControllerProvider).save(schedule);
     if (!mounted) return;
     setState(() => _isSaving = false);
     if (failure != null) {
@@ -109,18 +121,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     Navigator.of(context).pop();
   }
 
-  /// 실패 팝업 (서버 Pro 거절이면 실패 대신 Pro 안내)
-  Future<void> _showFailure(Object failure) async {
-    if (await handleProOnlyRejection(context, ref, failure)) return;
-    if (!mounted) return;
-    await showFailure(
-    context,
-    failure,
-    title: context.l10n.routineScheduleSaveFailedTitle,
-    fallback: context.l10n.routineScheduleSaveFailedFallback,
-    fallbackCode: 'E-SCHEDULE',
-  );
-  }
+  Future<void> _showFailure(Object failure) => showRoutineScheduleSaveFailure(context, ref, failure);
 
   @override
   Widget build(BuildContext context) {
@@ -212,11 +213,11 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
           else
             ElumButton(
               key: RoutineScheduleSheet.saveButtonKey,
-              label: l10n.routineScheduleSave,
+              label: widget.shouldReturnWithoutSaving ? l10n.routineScheduleSaveAndSend : l10n.routineScheduleSave,
               loading: _isSaving,
               onPressed: _isSaving || hasNoWeekday || !canSchedule ? null : _save,
             ),
-          if (_existing != null) ...[
+          if (_existing != null && !widget.shouldReturnWithoutSaving) ...[
             SizedBox(height: space.xs.h),
             ElumSecondaryButton(
               key: RoutineScheduleSheet.turnOffButtonKey,
@@ -228,4 +229,17 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
       ),
     );
   }
+}
+
+/// 반복 저장 실패 팝업 (서버 Pro 거절이면 실패 대신 Pro 안내) · 반복 시트와 카드 확인 예약 보내기 공통
+Future<void> showRoutineScheduleSaveFailure(BuildContext context, WidgetRef ref, Object failure) async {
+  if (await handleProOnlyRejection(context, ref, failure)) return;
+  if (!context.mounted) return;
+  await showFailure(
+    context,
+    failure,
+    title: context.l10n.routineScheduleSaveFailedTitle,
+    fallback: context.l10n.routineScheduleSaveFailedFallback,
+    fallbackCode: 'E-SCHEDULE',
+  );
 }

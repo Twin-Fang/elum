@@ -6207,4 +6207,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideTipReadAction => 'Read';
+
+  @override
+  String get cardReviewScheduleSend => 'Pick days and time to send';
+
+  @override
+  String get routineScheduleSaveAndSend => 'Save and send';
+
+  @override
+  String get routineSentViewOnElumiScreen => 'View on Elumi screen';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    return '$name hasn\'t tried the cards yet';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody =>
+      'Open the Elumi screen and try the first card together';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => 'Open Elumi screen';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => 'Link Elumi\'s device';
 }

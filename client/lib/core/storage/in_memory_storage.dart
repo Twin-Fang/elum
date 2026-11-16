@@ -360,6 +360,14 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed) async =>
       _isLinkDeviceSuggestionDismissed = isDismissed;
 
+  DateTime? _firstTryEncourageDismissedAt;
+
+  @override
+  DateTime? get firstTryEncourageDismissedAt => _firstTryEncourageDismissedAt;
+
+  @override
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at) async => _firstTryEncourageDismissedAt = at;
+
   List<String> _storeReviewCompletedDays = const [];
   bool _hasRequestedStoreReview = false;
 
@@ -544,5 +552,6 @@ class InMemoryStorage implements LocalStorage {
     _isHomeAutoSendUpsellClosed = false;
     _homeUpsellShownRecord = null;
     _celebratedStreakMilestoneKeys = const {};
+    _firstTryEncourageDismissedAt = null;
   }
 }

@@ -21,6 +21,8 @@ import '../data/card_photo.dart';
 import '../application/credit_cost_preview.dart';
 import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
+import 'card_review_schedule_send.dart';
+import '../domain/routine_schedule.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_voice_block.dart';
@@ -70,7 +72,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     with
         BusyStateMixin<CardReviewScreen>,
         CardReviewAddedImage<CardReviewScreen>,
-        CardReviewRename<CardReviewScreen> {
+        CardReviewRename<CardReviewScreen>,
+        CardReviewScheduleSend<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -192,10 +195,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
   Future<void> _save() => runBusy(_saveNow);
 
+  @override
+  Future<void> sendWithRepeatSchedule(RoutineSchedule repeatSchedule) =>
+      runBusy(() => _saveNow(repeatSchedule: repeatSchedule));
+
   /// 서버 임시저장 상태: 저장하면 승인되어 이룸이 기기로 감
   static const _draftStatus = 'PENDING_REVIEW';
 
-  Future<void> _saveNow() async {
+  /// 저장(보내기) > (예약 보내기면) 반복 저장 > 첫 보내기 축하 또는 홈
+  Future<void> _saveNow({RoutineSchedule? repeatSchedule}) async {
     // 보내기인가 (임시저장 승인) · 첫 보내기인가: 저장 전에 판정 (저장 뒤에는 목록에 이 일과가 섞임)
     final firstSendCelebration = ref.read(firstSendCelebrationProvider);
     final isSending = ref.read(routineFlowProvider).routine?.status == _draftStatus;
@@ -221,6 +229,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     }
     final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
     if (isSending) unawaited(firstSendCelebration.markSent());
+    // 반복은 일과가 원본으로 저장된 뒤에만 정할 수 있음 (실패해도 일과는 보낸 채 이어 감)
+    if (repeatSchedule != null) await saveRepeatScheduleAfterSend(savedRoutineId, repeatSchedule);
+    if (!mounted) return;
     // 첫 보내기: 축하 화면 (알림 권한 안내 · AI 메모 확인은 축하에서 홈으로 갈 때)
     if (isFirstSend) {
       context.go(Routes.guardianRoutineSent, extra: (routineId: savedRoutineId));
@@ -439,6 +450,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
           loading: busy,
         ),
       ),
+      // 저장 버튼 아래 예약 보내기 (순서 변경 중에는 없음)
+      belowButton: _reorderMode ? null : buildScheduleSendButton(),
       aurora: CardReviewScreen.aurora,
       child: Column(
         children: [

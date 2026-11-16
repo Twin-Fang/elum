@@ -4153,5 +4153,19 @@
   "guideTipOpenFailed": "가이드를 열지 못했어요",
   "@guideTipOpenFailed": {"description": "가이드 팁을 눌렀는데 외부 브라우저를 못 열었을 때 실패 팝업 문장"},
   "guideTipReadAction": "읽어 보기",
-  "@guideTipReadAction": {"description": "가이드 팁 카드 행동 알약 (사이트 안내 글 열기)"}
+  "@guideTipReadAction": {"description": "가이드 팁 카드 행동 알약 (사이트 안내 글 열기)"},
+  "cardReviewScheduleSend": "요일과 시각 정해서 보내기",
+  "@cardReviewScheduleSend": {"description": "카드 확인 저장 버튼 아래 보조 버튼: 반복 요일과 시각을 고른 뒤 저장하고 보냄 (Free 는 PRO 배지 > Pro 안내)"},
+  "routineScheduleSaveAndSend": "저장하고 보내기",
+  "@routineScheduleSaveAndSend": {"description": "카드 확인에서 연 반복 시트의 주 버튼: 고른 반복으로 일과를 저장하고 보냄"},
+  "routineSentViewOnElumiScreen": "이룸이 화면에서 보기",
+  "@routineSentViewOnElumiScreen": {"description": "첫 보내기 축하 주 버튼: 이 기기를 이룸이 화면으로 바꿔 보낸 일과를 바로 보기"},
+  "homeNextStepFirstTryTitle": "아직 {name}{batchim, select, yes{이} other{가}} 카드를 안 해 봤어요",
+  "@homeNextStepFirstTryTitle": {"description": "홈 다음에 할 일: 보내고 하루 지나도 카드 체크가 없을 때 제목. name 은 이룸이 이름, batchim 은 받침 여부", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
+  "homeNextStepFirstTryBody": "이룸이 화면을 열어 첫 카드를 함께 해 봐요",
+  "@homeNextStepFirstTryBody": {"description": "홈 다음에 할 일: 첫 체험 권유 한 줄"},
+  "homeNextStepFirstTryOpenElumi": "이룸이 화면 열기",
+  "@homeNextStepFirstTryOpenElumi": {"description": "홈 다음에 할 일: 첫 체험 권유 주 버튼 (이 기기를 이룸이 화면으로)"},
+  "homeNextStepFirstTryLinkDevice": "이룸이 기기 연결",
+  "@homeNextStepFirstTryLinkDevice": {"description": "홈 다음에 할 일: 첫 체험 권유 보조 버튼 (이룸이 기기가 연결 안 됐을 때만)"}
 }

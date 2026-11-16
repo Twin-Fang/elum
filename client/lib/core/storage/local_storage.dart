@@ -260,6 +260,10 @@ abstract interface class LocalStorage {
   bool get isLinkDeviceSuggestionDismissed;
   Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed);
 
+  /// 보호자 홈 첫 체험 권유(보내고 하루 지나도 체크 없음)를 닫은 시각. 7일 숨김 (계정 범위, 없으면 null)
+  DateTime? get firstTryEncourageDismissedAt;
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at);
+
   /// 스토어 별점 요청: 보호자 홈에서 끝난 일과를 본 날짜들 (yyyy-MM-dd, 기기 범위, #1352)
   List<String> get storeReviewCompletedDays;
   Future<void> setStoreReviewCompletedDays(List<String> days);

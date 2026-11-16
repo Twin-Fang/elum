@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_celebration.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -16,8 +18,8 @@ import '../../link/application/linked_device_check.dart';
 import '../../notification/application/push_permission_prompt.dart';
 import 'memory/routine_memory_observation_sheet.dart';
 
-/// 첫 일과 보내기 축하: 그림 튐 > 빛 > `이룸이 기기로 보냈어요` > 한 줄 > 다음 행동 + `홈으로`
-/// 다음 행동 2가지: 기기 없음 > 기기 연결하기 · 붙어 있음 > 이룸이 화면 미리 보기 (모르면 홈으로만)
+/// 첫 일과 보내기 축하: 그림 튐 > 빛 > `이룸이 기기로 보냈어요` > 한 줄 > `이룸이 화면에서 보기` > (기기 없음) 기기 연결하기 > `홈으로`
+/// 이룸이 화면에서 보기는 연결 여부와 무관 (한 기기로 쓰는 보호자도 바로 건네 줌, 돌아올 땐 비밀암호)
 /// 축하는 화면 안에서만 (연결 상태 조회가 실패해도 축하는 그대로)
 class RoutineSentCelebrationScreen extends ConsumerWidget {
   const RoutineSentCelebrationScreen({super.key, this.routineId});
@@ -46,14 +48,7 @@ class RoutineSentCelebrationScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isDeviceLinked = ref.watch(hasLinkedDeviceProvider);
-    final homeButton = isDeviceLinked == null
-        ? ElumButton(label: l10n.commonGoHome, onPressed: () => _goHome(context, ref))
-        : null;
-    final nextActionButton = switch (isDeviceLinked) {
-      null => null,
-      false => ElumButton(label: l10n.routineSentLinkDevice, onPressed: () => _linkDevice(context, ref)),
-      true => ElumButton(label: l10n.routineSentPreviewElumi, onPressed: () => context.go(Routes.child)),
-    };
+    final homeButton = ElumSecondaryButton(label: l10n.commonGoHome, onTap: () => _goHome(context, ref));
     return PopScope(
       // 시스템 뒤로가기 = 홈으로 (축하 화면은 go 로 열려 돌아갈 곳이 없을 수 있음)
       canPop: false,
@@ -61,10 +56,19 @@ class RoutineSentCelebrationScreen extends ConsumerWidget {
         if (!didPop) _goHome(context, ref);
       },
       child: ElumScaffold(
-        bottomButton: nextActionButton ?? homeButton,
-        belowButton: nextActionButton == null
-            ? null
-            : ElumSecondaryButton(label: l10n.commonGoHome, onTap: () => _goHome(context, ref)),
+        // 이 기기를 이룸이 화면으로 (홈 캐릭터 배지와 같은 길)
+        bottomButton: ElumButton(label: l10n.routineSentViewOnElumiScreen, onPressed: () => context.go(Routes.child)),
+        belowButton: isDeviceLinked == false
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElumSecondaryButton(label: l10n.routineSentLinkDevice, onTap: () => _linkDevice(context, ref)),
+                  SizedBox(height: context.space.xs.h),
+                  homeButton,
+                ],
+              )
+            : homeButton,
         child: ElumStateBody(
           child: AppCelebration(
             illustrationAsset: AppAssets.celebrationSentToDevice,

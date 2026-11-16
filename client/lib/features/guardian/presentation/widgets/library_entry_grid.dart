@@ -50,6 +50,7 @@ class LibraryEntryGrid extends StatefulWidget {
     this.onScrollTargetHandled,
     this.sharedPostIdBySourceRoutineId = const {},
     this.linkPostIdBySourceRoutineId = const {},
+    this.shouldReserveScheduleLine = false,
   });
 
   final List<LibraryEntry> entries;
@@ -99,6 +100,9 @@ class LibraryEntryGrid extends StatefulWidget {
 
   /// 켜진 링크(원본 일과 id > 링크 글 id): 미리보기 메뉴의 `링크 끄기` 줄 판단
   final Map<String, String> linkPostIdBySourceRoutineId;
+
+  /// 칸마다 반복 한 줄 자리를 둘지 (켜진 반복이 하나라도 있을 때, 칸 높이를 모두 같게)
+  final bool shouldReserveScheduleLine;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();

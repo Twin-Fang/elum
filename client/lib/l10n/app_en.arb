@@ -1673,5 +1673,12 @@
   "guideTipRewardsBody": "Small, right away, decided ahead",
   "guideTipDismissLabel": "Hide this guide",
   "guideTipOpenFailed": "Couldn't open the guide",
-  "guideTipReadAction": "Read"
+  "guideTipReadAction": "Read",
+  "cardReviewScheduleSend": "Pick days and time to send",
+  "routineScheduleSaveAndSend": "Save and send",
+  "routineSentViewOnElumiScreen": "View on Elumi screen",
+  "homeNextStepFirstTryTitle": "{name} hasn't tried the cards yet",
+  "homeNextStepFirstTryBody": "Open the Elumi screen and try the first card together",
+  "homeNextStepFirstTryOpenElumi": "Open Elumi screen",
+  "homeNextStepFirstTryLinkDevice": "Link Elumi's device"
 }

@@ -152,11 +152,12 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     return LibraryGridGeometry(
       columns: columns,
       tileWidth: (width - paddingX * 2 - spacingX * (columns - 1)) / columns,
-      // 그림 칸 + 이름 두 줄이 들어가는 높이 (글자 크기 설정 반영)
+      // 그림 칸 + 이름 두 줄 (+ 반복 한 줄)이 들어가는 높이 (글자 크기 설정 반영)
       tileHeight:
           LibraryRoutineTile.iconSize.w +
           space.xs.h +
-          _twoLineLabelHeight(context),
+          _twoLineLabelHeight(context) +
+          (widget.shouldReserveScheduleLine ? LibraryRoutineTile.scheduleLineHeightOf(context) : 0),
       iconSize: LibraryRoutineTile.iconSize.w,
       spacingX: spacingX,
       spacingY: space.md.h,

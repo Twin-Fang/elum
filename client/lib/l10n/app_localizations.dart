@@ -10108,6 +10108,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'읽어 보기'**
   String get guideTipReadAction;
+
+  /// 카드 확인 저장 버튼 아래 보조 버튼: 반복 요일과 시각을 고른 뒤 저장하고 보냄 (Free 는 PRO 배지 > Pro 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'요일과 시각 정해서 보내기'**
+  String get cardReviewScheduleSend;
+
+  /// 카드 확인에서 연 반복 시트의 주 버튼: 고른 반복으로 일과를 저장하고 보냄
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하고 보내기'**
+  String get routineScheduleSaveAndSend;
+
+  /// 첫 보내기 축하 주 버튼: 이 기기를 이룸이 화면으로 바꿔 보낸 일과를 바로 보기
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면에서 보기'**
+  String get routineSentViewOnElumiScreen;
+
+  /// 홈 다음에 할 일: 보내고 하루 지나도 카드 체크가 없을 때 제목. name 은 이룸이 이름, batchim 은 받침 여부
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 {name}{batchim, select, yes{이} other{가}} 카드를 안 해 봤어요'**
+  String homeNextStepFirstTryTitle(String name, String batchim);
+
+  /// 홈 다음에 할 일: 첫 체험 권유 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면을 열어 첫 카드를 함께 해 봐요'**
+  String get homeNextStepFirstTryBody;
+
+  /// 홈 다음에 할 일: 첫 체험 권유 주 버튼 (이 기기를 이룸이 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면 열기'**
+  String get homeNextStepFirstTryOpenElumi;
+
+  /// 홈 다음에 할 일: 첫 체험 권유 보조 버튼 (이룸이 기기가 연결 안 됐을 때만)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 기기 연결'**
+  String get homeNextStepFirstTryLinkDevice;
 }
 
 class _AppLocalizationsDelegate

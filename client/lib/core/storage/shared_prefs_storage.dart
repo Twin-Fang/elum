@@ -69,6 +69,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeCoachSeen = 'coach.homeSeen';
   // 보호자 홈 기기 연결 권유 닫음 (true 닫음)
   static const _kLinkDeviceSuggestionDismissed = 'home.linkDeviceSuggestionDismissed';
+  // 보호자 홈 첫 체험 권유를 닫은 시각 (ISO-8601, 7일 숨김)
+  static const _kFirstTryEncourageDismissedAt = 'home.firstTryEncourageDismissedAt';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
@@ -137,6 +139,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kHomeUpsellShownRecord,
     _kFirstSendCelebrated,
     _kCelebratedStreakMilestones,
+    _kFirstTryEncourageDismissedAt,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -549,6 +552,19 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed) async {
     AppLogger.storageWrite(_kLinkDeviceSuggestionDismissed, '$isDismissed');
     await _prefs.setBool(_kLinkDeviceSuggestionDismissed, isDismissed);
+  }
+
+  @override
+  DateTime? get firstTryEncourageDismissedAt {
+    final raw = _prefs.getString(_kFirstTryEncourageDismissedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kFirstTryEncourageDismissedAt, raw);
+    await _prefs.setString(_kFirstTryEncourageDismissedAt, raw);
   }
 
   @override
