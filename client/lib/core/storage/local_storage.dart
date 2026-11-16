@@ -256,6 +256,10 @@ abstract interface class LocalStorage {
   bool get isHomeCoachSeen;
   Future<void> setHomeCoachSeen(bool v);
 
+  /// 보호자 홈 「다음에 할 일」 기기 연결 권유를 닫았는가 (기기 범위, [clearAll] 이 지우지 않음, #1435)
+  bool get isLinkDeviceSuggestionDismissed;
+  Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed);
+
   /// 스토어 별점 요청: 보호자 홈에서 끝난 일과를 본 날짜들 (yyyy-MM-dd, 기기 범위, #1352)
   List<String> get storeReviewCompletedDays;
   Future<void> setStoreReviewCompletedDays(List<String> days);

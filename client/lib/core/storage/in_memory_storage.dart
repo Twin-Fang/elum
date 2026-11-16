@@ -351,6 +351,15 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
 
+  bool _isLinkDeviceSuggestionDismissed = false;
+
+  @override
+  bool get isLinkDeviceSuggestionDismissed => _isLinkDeviceSuggestionDismissed;
+
+  @override
+  Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed) async =>
+      _isLinkDeviceSuggestionDismissed = isDismissed;
+
   List<String> _storeReviewCompletedDays = const [];
   bool _hasRequestedStoreReview = false;
 

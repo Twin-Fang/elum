@@ -67,6 +67,8 @@ class SharedPrefsStorage implements LocalStorage {
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
   static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
+  // 보호자 홈 기기 연결 권유 닫음 (true 닫음)
+  static const _kLinkDeviceSuggestionDismissed = 'home.linkDeviceSuggestionDismissed';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
@@ -151,6 +153,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kHomeNotificationNoticeDismissedAt,
     _kUpdateSuggestionShown,
     _kHomeCoachSeen,
+    _kLinkDeviceSuggestionDismissed,
     _kManageCoachSeen,
     _kGroupCoachSeen,
     _kCardReviewCoachSeen,
@@ -537,6 +540,15 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHomeCoachSeen(bool v) async {
     AppLogger.storageWrite(_kHomeCoachSeen, '$v');
     await _prefs.setBool(_kHomeCoachSeen, v);
+  }
+
+  @override
+  bool get isLinkDeviceSuggestionDismissed => _prefs.getBool(_kLinkDeviceSuggestionDismissed) ?? false;
+
+  @override
+  Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed) async {
+    AppLogger.storageWrite(_kLinkDeviceSuggestionDismissed, '$isDismissed');
+    await _prefs.setBool(_kLinkDeviceSuggestionDismissed, isDismissed);
   }
 
   @override

@@ -6,12 +6,14 @@ import '../assets/app_assets.dart';
 import '../haptics/tap_haptics.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'elum_button.dart';
+import 'elum_secondary_button.dart';
 import 'kept_text.dart';
 
 /// 작은 안내 카드 그림 자리 2가지: 왼쪽 (목록·홈 안내) · 위 (빈 상태·소개)
 enum ElumInfoCardLayout { leading, top }
 
-/// 작은 안내 카드: 3D 그림 + 굵은 제목 + 회색 한 줄 + (선택) 행동 알약 · 닫기 x
+/// 작은 안내 카드: 3D 그림 + 굵은 제목 + 회색 한 줄 + (선택) 행동 알약 또는 행동·거절 버튼 2개 · 닫기 x
 /// 흰 판 · 모서리 20 · 옅은 그림자. [onTap] 이 있으면 카드 전체가 눌림 (햅틱 포함)
 class ElumInfoCard extends StatelessWidget {
   const ElumInfoCard({
@@ -25,6 +27,8 @@ class ElumInfoCard extends StatelessWidget {
     this.onTap,
     this.onClose,
     this.closeLabel,
+    this.declineLabel,
+    this.onDecline,
   }) : assert(onClose == null || closeLabel != null, 'closeLabel 은 닫기 x 낭독 글이라 onClose 와 함께 준다'); // l10n-ignore: assert 메시지
 
   /// 3D 그림 PNG (AppAssets.featureIcon* · emptyState* · celebration*)
@@ -46,6 +50,11 @@ class ElumInfoCard extends StatelessWidget {
   final VoidCallback? onClose;
   final String? closeLabel;
 
+  /// 권유 거절 버튼 (#1435): 있으면 행동이 알약 대신 버튼 2개(주 48 · 보조 48, 위아래)로 바뀜
+  /// 권유 카드를 x 대신 선택지로 닫을 때 · onDecline 과 함께 있을 때만 · 예: "이 기기에서 쓸게요"
+  final String? declineLabel;
+  final VoidCallback? onDecline;
+
   /// 그림 크기: 왼쪽 56 · 위 96
   static const _leadingArtSize = 56.0;
   static const _topArtSize = 96.0;
@@ -66,6 +75,7 @@ class ElumInfoCard extends StatelessWidget {
   static const _closeTextGap = 20.0;
 
   bool get _hasAction => actionLabel != null && onAction != null;
+  bool get _hasDecline => declineLabel != null && onDecline != null;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +155,10 @@ class ElumInfoCard extends StatelessWidget {
         alignment == CrossAxisAlignment.center
             ? Text(body, textAlign: textAlign, style: typo.creditBody.copyWith(color: colors.textSecondary))
             : KeptText(body, style: typo.creditBody.copyWith(color: colors.textSecondary)),
-        if (_hasAction) ...[
+        if (_hasDecline) ...[
+          SizedBox(height: context.space.md.h),
+          _choiceButtons(context),
+        ] else if (_hasAction) ...[
           SizedBox(height: context.space.xs.h),
           _ActionPill(label: actionLabel!, onTap: withTapHaptic(onAction)!),
         ],
@@ -153,7 +166,23 @@ class ElumInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _closeButton(BuildContext context) {
+  /// 권유 선택 버튼 2개 (폭 가득, 위아래): 행동(주 버튼 48) > 거절(보조 버튼 48)
+  Widget _choiceButtons(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        children: [
+          if (_hasAction) ...[
+            ElumButton(label: actionLabel!, onPressed: withTapHaptic(onAction), size: ElumButtonSize.small),
+            SizedBox(height: context.space.xs.h),
+          ],
+          ElumSecondaryButton(label: declineLabel!, onTap: onDecline),
+        ],
+      ),
+    );
+  }
+
+    Widget _closeButton(BuildContext context) {
     return AppPressable(
       onTap: withTapHaptic(onClose),
       scaleDown: AppPressable.scaleIcon,

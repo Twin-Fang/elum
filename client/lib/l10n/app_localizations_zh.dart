@@ -5475,7 +5475,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeNextStepSendAction => '继续制作';
 
   @override
-  String get homeNextStepLinkTitle => '连接Elumi的设备';
+  String get homeNextStepLinkTitle => '也连接Elumi的设备吗？';
+
+  @override
+  String get homeNextStepLinkBody => '一台设备也能用';
+
+  @override
+  String get homeNextStepLinkDecline => '就用这台设备';
 
   @override
   String get homeNextStepWaitTitle => '接下来轮到Elumi了';

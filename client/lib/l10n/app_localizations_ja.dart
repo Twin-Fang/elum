@@ -5507,7 +5507,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeNextStepSendAction => '続けて作る';
 
   @override
-  String get homeNextStepLinkTitle => 'Elumiの端末をつなぎましょう';
+  String get homeNextStepLinkTitle => 'Elumiの端末もつなぎますか？';
+
+  @override
+  String get homeNextStepLinkBody => '1台の端末でも使えます';
+
+  @override
+  String get homeNextStepLinkDecline => 'この端末で使います';
 
   @override
   String get homeNextStepWaitTitle => '次はElumiの番です';

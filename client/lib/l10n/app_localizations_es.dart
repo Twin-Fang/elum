@@ -5939,7 +5939,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeNextStepSendAction => 'Continuar';
 
   @override
-  String get homeNextStepLinkTitle => 'Vincula el dispositivo de Elumi';
+  String get homeNextStepLinkTitle =>
+      '¿Vinculamos también el dispositivo de Elumi?';
+
+  @override
+  String get homeNextStepLinkBody => 'También puedes usar un solo dispositivo';
+
+  @override
+  String get homeNextStepLinkDecline => 'Usaré este dispositivo';
 
   @override
   String get homeNextStepWaitTitle => 'Ahora le toca a Elumi';
