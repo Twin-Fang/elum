@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 관리자 기록 동작 22개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
+ * 관리자 기록 동작 24개 (#653): 표시 이름, 대상 종류, 동작 뒤 대상이 사라지는지(링크를 걸지 않음)
  * 크레딧 조정·예약 반환은 원장(actor·사유)에, 시스템 설정은 설정 변경 이력에 남아 여기서 기록하지 않음
  */
 @Getter
@@ -18,6 +18,9 @@ public enum AdminAuditAction {
   PRO_REVOKED("Pro 회수", AdminAuditTargetType.MEMBER, false),
   DEVICE_UNLINKED("이룸이 기기 연결 해제", AdminAuditTargetType.MEMBER, false),
   MEMBER_MEMO_SAVED("회원 메모 저장", AdminAuditTargetType.MEMBER, false),
+  // 계정 종류 (#1436). detail = 전 종류 > 새 종류, 확인은 분류 제안의 "일반 맞음"
+  MEMBER_ACCOUNT_KIND_CHANGED("계정 종류 변경", AdminAuditTargetType.MEMBER, false),
+  MEMBER_ACCOUNT_KIND_REVIEWED("계정 종류 일반 확인", AdminAuditTargetType.MEMBER, false),
   WITHDRAWN_MEMBER_PURGED("탈퇴 계정 즉시 삭제", AdminAuditTargetType.MEMBER, true),
   PROMPT_UPDATED("프롬프트 저장", AdminAuditTargetType.PROMPT, false),
   FEEDBACK_NOTE_SAVED("의견 메모 저장", AdminAuditTargetType.FEEDBACK, false),

@@ -1,7 +1,9 @@
 package com.chuseok22.elumserver.admin.application.dto.response;
 
+import com.chuseok22.elumserver.admin.application.format.AdminAccountKindBadges;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -39,7 +41,11 @@ public record AdminMemberDetailResponse(
   /// 관리자 운영 메모와 마지막 저장 시각·관리자 (#656, 없으면 null)
   String adminMemo,
   LocalDateTime adminMemoChangedAt,
-  String adminMemoChangedBy
+  String adminMemoChangedBy,
+  /// 계정 종류와 마지막 변경 시각·관리자 (#1436, 바꾼 적 없으면 null)
+  MemberAccountKind accountKind,
+  LocalDateTime accountKindChangedAt,
+  String accountKindChangedBy
 ) {
 
   /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null
@@ -75,7 +81,10 @@ public record AdminMemberDetailResponse(
       AdminMemberConnections.empty(),
       member.getAdminMemo(),
       member.getAdminMemoChangedAt(),
-      member.getAdminMemoChangedBy()
+      member.getAdminMemoChangedBy(),
+      member.getAccountKind(),
+      member.getAccountKindChangedAt(),
+      member.getAccountKindChangedBy()
     );
   }
 
@@ -84,8 +93,19 @@ public record AdminMemberDetailResponse(
     return new AdminMemberDetailResponse(
       id, username, nickname, character, status, supportGoals, totalStars, createdAt, lastLoginAt, lastActivityAt,
       loginCount, aiCallCount, totalTokens, estimatedCostUsd, routines, recentAiCalls, subscription, planHistory,
-      withdrawnAt, retentionExpiresAt, newConnections, adminMemo, adminMemoChangedAt, adminMemoChangedBy
+      withdrawnAt, retentionExpiresAt, newConnections, adminMemo, adminMemoChangedAt, adminMemoChangedBy,
+      accountKind, accountKindChangedAt, accountKindChangedBy
     );
+  }
+
+  /// 계정 종류 배지 색 (일반이면 null: 배지 없음)
+  public String accountKindTone() {
+    return AdminAccountKindBadges.toneOf(accountKind);
+  }
+
+  /// 계정 종류 선택지 4개 (일반, 내부, 테스트, 스토어 심사)
+  public List<MemberAccountKind> accountKindOptions() {
+    return List.of(MemberAccountKind.values());
   }
 
   /// 가장 최근 요금제 변경. 이력이 없으면 null (화면의 "마지막 변경" 표시용)

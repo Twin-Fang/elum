@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -122,7 +121,7 @@ class AdminMemberServiceTest {
 
   private SearchCall stubSearchAndCapture(Page<Member> result, Runnable search) {
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(result);
     search.run();
     ArgumentCaptor<Boolean> hasKeyword = ArgumentCaptor.forClass(Boolean.class);
@@ -137,7 +136,7 @@ class AdminMemberServiceTest {
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
     verify(memberRepository).searchForAdmin(hasKeyword.capture(), pattern.capture(), statuses.capture(),
       planFilter.capture(), any(), any(), any(), hasLastActivePeriod.capture(), lastActiveFrom.capture(),
-      lastActiveTo.capture(), hasProvider.capture(), providers.capture(), pageable.capture());
+      lastActiveTo.capture(), hasProvider.capture(), providers.capture(), any(), pageable.capture());
     return new SearchCall(hasKeyword.getValue(), pattern.getValue(), statuses.getValue(),
       planFilter.getValue(), hasLastActivePeriod.getValue(), lastActiveFrom.getValue(), lastActiveTo.getValue(),
       hasProvider.getValue(), providers.getValue(), pageable.getValue());
@@ -186,7 +185,7 @@ class AdminMemberServiceTest {
   void search_attachesAggregates() {
     Member member = member("m1", "parent1");
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(routineRepository.countByMemberIds(List.of("m1")))
       .thenReturn(List.of(routineCount("m1", 3)));
@@ -225,7 +224,7 @@ class AdminMemberServiceTest {
   @DisplayName("이룸이·보호자 수와 로그인 제공자를 집계 1회씩으로 붙이고, 이룸이가 없는 회원은 0 으로 둔다")
   void search_attachesGuardianshipAndProviders() {
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member("m1", "parent1"), member("m2", "parent2"))));
     when(profileGuardianRepository.countGuardianshipByMemberIds(List.of("m1", "m2")))
       .thenReturn(List.of(guardianshipCount("m1", 2, 3)));
@@ -326,7 +325,7 @@ class AdminMemberServiceTest {
     Page<Member> empty = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(8, 20), 41);
     Page<Member> last = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(2, 20), 41);
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(empty, last);
 
     Page<AdminMemberResponse> result = adminMemberService.search(query(null, Map.of(), null, "9"));
@@ -335,7 +334,7 @@ class AdminMemberServiceTest {
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
     verify(memberRepository, org.mockito.Mockito.times(2))
       .searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(), any(),
-        anyBoolean(), any(), pageable.capture());
+        anyBoolean(), any(), any(), pageable.capture());
     assertThat(pageable.getAllValues().get(1).getPageNumber()).isEqualTo(2);
   }
 
@@ -357,7 +356,7 @@ class AdminMemberServiceTest {
     change.setChangedAt(LocalDateTime.of(2026, 10, 18, 9, 0));
     change.setChangedBy("admin1");
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(proMember, freeMember)));
     when(subscriptionService.findAllByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", pro, "m2", expiredPro));
     when(subscriptionHistoryService.latestByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", change));
@@ -458,7 +457,7 @@ class AdminMemberServiceTest {
     LocalDateTime withdrawnAt = LocalDateTime.of(2026, 9, 23, 10, 0);
     Member member = withdrawnMember("m9", withdrawnAt);
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(withdrawnMemberService.retentionExpiresAt(member)).thenReturn(withdrawnAt.plusDays(365));
 
@@ -475,8 +474,7 @@ class AdminMemberServiceTest {
   @DisplayName("S6 대시보드 회원 수와 최근 활동 회원 수에서 탈퇴 계정을 뺀다")
   void dashboardCounts_excludeWithdrawn() {
     when(memberRepository.countByStatusNot(MemberStatus.WITHDRAWN)).thenReturn(7L);
-    when(memberRepository.countByLastActivityAtAfterAndStatusNot(any(LocalDateTime.class),
-      eq(MemberStatus.WITHDRAWN))).thenReturn(3L);
+    when(memberRepository.countCountedActiveAfter(any(LocalDateTime.class))).thenReturn(3L);
 
     assertThat(adminMemberService.count()).isEqualTo(7L);
     assertThat(adminMemberService.countActiveWithinDays(7)).isEqualTo(3L);
@@ -564,7 +562,7 @@ class AdminMemberServiceTest {
     g2.setMember(member);
     g2.setProfile(later);
     when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(), any(), anyBoolean(), any(),
-      any(), anyBoolean(), any(), any(Pageable.class)))
+      any(), anyBoolean(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(profileGuardianRepository.findAllWithProfileByMemberIdIn(List.of("m1"))).thenReturn(List.of(g1, g2));
 

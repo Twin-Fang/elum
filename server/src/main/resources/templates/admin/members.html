@@ -47,6 +47,8 @@
         </div>
       </div>
     </div>
+    <!-- 가입·방문 추이는 일반 계정만 센다 (#1436). 아래 목록은 모든 계정, 계정 종류 필터로 거른다 -->
+    <p th:replace="~{admin/fragments/usage-analytics-parts :: excludedNote}"></p>
 
     <!-- 검색·필터(가입일·최근 활동 기간은 필터 바의 날짜 칸) + 적용된 조건 칩 + CSV (현재 조건 그대로) -->
     <div class="flex items-center gap-3 flex-wrap">

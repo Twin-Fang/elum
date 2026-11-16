@@ -291,6 +291,9 @@
       </div>
     </div>
 
+    <!-- 계정 종류 (#1436): 일반이 아니면 관리자 숫자에서 빠짐 -->
+    <div th:replace="~{admin/fragments/member-account-kind :: accountKindCard(${member})}"></div>
+
     <!-- 운영 메모 (#656): 관리자끼리만 봄. 2,000자 상한·비우면 지움 (의견 메모와 같은 규칙). 탈퇴 계정은 보관 항목이 아니라 없음 -->
     <div th:if="${member.status().name() != 'WITHDRAWN'}" class="card bg-base-100 shadow-md border border-base-300"
          data-member-admin-memo>
