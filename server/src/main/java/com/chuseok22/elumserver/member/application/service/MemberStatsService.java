@@ -2,7 +2,6 @@ package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
 import com.chuseok22.elumserver.common.application.stats.StatsBucketUnit;
-import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.time.LocalDate;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 회원 통계: 가입·탈퇴·방문 칸별 건수, 지금 접속 중, 오늘·기간 방문 수
+ * 회원 통계: 가입·탈퇴·방문 칸별 건수, 지금 접속 중, 오늘·기간 방문 수 (모두 일반 계정만 #1436)
  * 칸 채우기(빈 날 0)는 부르는 쪽(관리자 추이) 책임
  */
 @Service
@@ -49,16 +48,14 @@ public class MemberStatsService {
 
   /** 지금 접속 중 (최근 5분 활동, 탈퇴 제외) */
   public long countOnline(LocalDateTime now) {
-    return memberRepository.countByLastActivityAtAfterAndStatusNot(
-      now.minusMinutes(ONLINE_WITHIN_MINUTES), MemberStatus.WITHDRAWN);
+    return memberRepository.countCountedActiveAfter(now.minusMinutes(ONLINE_WITHIN_MINUTES));
   }
 
   public long countVisitsOn(LocalDate date) {
-    return memberDailyVisitRepository.countByVisitDate(date);
+    return memberDailyVisitRepository.countCountedByVisitDate(date);
   }
 
   public long countJoinedOn(LocalDate date) {
-    return memberRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
-      date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+    return memberRepository.countCountedJoinedBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
   }
 }

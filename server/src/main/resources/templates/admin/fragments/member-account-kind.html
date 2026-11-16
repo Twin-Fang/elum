@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  회원 상세 계정 종류 카드 (#1436): 지금 종류 배지 + 선택·저장 + 마지막 변경. 일반이 아니면 관리자 숫자에서 빠진다
+-->
+<body>
+
+<div th:fragment="accountKindCard(member)" class="card bg-base-100 shadow-md border border-base-300" data-member-account-kind>
+  <div class="card-body space-y-2">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h2 class="card-title text-lg">계정 종류
+        <th:block th:if="${member.accountKindTone() != null}">
+          <span th:replace="~{admin/fragments/admin-ui :: toneBadge(${member.accountKindTone()}, ${member.accountKind().label})}"></span>
+        </th:block>
+      </h2>
+      <span th:replace="~{admin/fragments/admin-list :: lastChangedOr(${member.accountKindChangedAt()}, ${member.accountKindChangedBy()}, '바꾼 적 없음')}"></span>
+    </div>
+    <form th:action="@{/admin/members/{id}/account-kind(id=${member.id()})}" method="post"
+          class="flex flex-wrap items-end gap-2">
+      <select name="accountKind" class="select select-bordered select-sm" aria-label="계정 종류">
+        <option th:each="kind : ${member.accountKindOptions()}" th:value="${kind.name()}" th:text="${kind.label}"
+                th:selected="${kind == member.accountKind()}">일반</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">종류 저장</button>
+    </form>
+    <p class="text-xs text-base-content/60">내부·테스트·스토어 심사 계정은 가입·방문 숫자와 사용 분석에서 빠져요. 바꾸면 관리자 기록에 전후 종류가 남아요</p>
+  </div>
+</div>
+
+</body>
+</html>

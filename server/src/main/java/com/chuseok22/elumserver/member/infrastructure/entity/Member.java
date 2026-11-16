@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -117,6 +118,24 @@ public class Member extends BaseEntity {
 
   @Column(name = "admin_memo_changed_by")
   private String adminMemoChangedBy;
+
+  // --- 계정 종류 (V77, #1436) ---
+  // 관리자 숫자는 NORMAL 만 셈. 내부·테스트·스토어 심사 계정은 관리자가 손으로 분류
+  @Enumerated(EnumType.STRING)
+  @Column(name = "account_kind", nullable = false, length = 20,
+    columnDefinition = "varchar(20) not null default 'NORMAL'")
+  private MemberAccountKind accountKind = MemberAccountKind.NORMAL;
+
+  // 마지막으로 종류를 바꾼 시각과 관리자. 바꾼 적 없으면 null
+  @Column(name = "account_kind_changed_at")
+  private LocalDateTime accountKindChangedAt;
+
+  @Column(name = "account_kind_changed_by")
+  private String accountKindChangedBy;
+
+  // 분류 제안에서 "일반 맞음"으로 확인한 시각. 있으면 제안에 다시 안 띄움
+  @Column(name = "account_kind_reviewed_at")
+  private LocalDateTime accountKindReviewedAt;
 
   /// 동의를 받기 전 상태로 돌린다. 탈퇴 계정을 되살릴 때 동의를 다시 받기 위해 쓴다.
   /// 옛 동의 시각을 남기면 새로 동의받지 않았는데도 동의한 것처럼 보인다.

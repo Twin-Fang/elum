@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -215,10 +216,9 @@ public class AdminMemberService {
     return memberRepository.countByStatus(MemberStatus.SUSPENDED);
   }
 
-  // 최근 7일 내 활동(lastActivityAt) 기록이 있는 회원수 — 대시보드 활성 회원 지표.
+  // 최근 7일 내 활동(lastActivityAt) 기록이 있는 회원수 (탈퇴 제외, 일반 계정만) — 대시보드 활성 회원 지표.
   public long countActiveWithinDays(int days) {
-    return memberRepository.countByLastActivityAtAfterAndStatusNot(
-      LocalDateTime.now().minusDays(days), MemberStatus.WITHDRAWN);
+    return memberRepository.countCountedActiveAfter(LocalDateTime.now().minusDays(days));
   }
 
   // 계정 정지 — 로그인과 API 사용(MemberAccessGuard)이 모두 차단된다.
@@ -269,7 +269,7 @@ public class AdminMemberService {
     return findMembers(query, PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query)));
   }
 
-  // 조건 > 회원 페이지 (목록·CSV 공통). 제공자 필터가 없으면 in 이 비지 않게 전체 제공자를 넘김
+  // 조건 > 회원 페이지 (목록·CSV 공통). 제공자·계정 종류 필터가 없으면 in 이 비지 않게 전체 값을 넘김
   private Page<Member> findMembers(AdminListQuery query, Pageable pageable) {
     String statusFilter = query.filters().get(AdminMemberList.FILTER_STATUS);
     List<MemberStatus> statuses = statusFilter == null
@@ -278,11 +278,15 @@ public class AdminMemberService {
     String planFilter = query.filters().getOrDefault(AdminMemberList.FILTER_PLAN, PLAN_FILTER_ALL);
     OAuthProvider provider = AdminMemberList.providerOf(query);
     List<OAuthProvider> providers = provider == null ? List.of(OAuthProvider.values()) : List.of(provider);
+    MemberAccountKind accountKind = AdminMemberList.accountKindOf(query);
+    List<MemberAccountKind> accountKinds = accountKind == null
+      ? List.of(MemberAccountKind.values())
+      : List.of(accountKind);
     return memberRepository.searchForAdmin(
       query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(),
       AdminMemberList.joinedFromOf(query), AdminMemberList.joinedToExclusiveOf(query),
       AdminMemberList.hasLastActivePeriod(query), AdminMemberList.lastActiveFromOf(query),
-      AdminMemberList.lastActiveToExclusiveOf(query), provider != null, providers, pageable);
+      AdminMemberList.lastActiveToExclusiveOf(query), provider != null, providers, accountKinds, pageable);
   }
 
   // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다

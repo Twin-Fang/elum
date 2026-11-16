@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  사용 분석 조각 (#1436). 대시보드와 사용 분석 화면이 함께 씀
+  loadFailed: 칸 실패 안내 + 에러 코드 / excludedNote: 일반 계정만 센다는 작은 글씨 / dashboardUsage: 대시보드 사용 칸 3개
+-->
+<body>
+
+<p th:fragment="loadFailed(section)" class="text-sm text-error" data-analytics-load-failed
+   th:text="'불러오지 못했어요 (' + ${section.errorCode()} + ')'">불러오지 못했어요</p>
+
+<p th:fragment="excludedNote" class="text-xs text-base-content/50" data-account-kind-excluded-note>내부·테스트·심사 계정 제외</p>
+
+<!-- 대시보드: 요약 한 줄(사용 분석 링크) · 최근 가입 10명 · 최근 활동 20줄. 일과 원문·제목은 보이지 않는다 -->
+<div th:fragment="dashboardUsage(overview)" class="space-y-4" data-dashboard-usage>
+  <div class="card bg-base-200 shadow" data-usage-headline th:with="headline=${overview.headline()}">
+    <div class="card-body p-4 gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="font-semibold">사용 요약</h2>
+        <a th:href="@{/admin/analytics}" class="link link-hover text-sm ml-auto">사용 분석 보기</a>
+      </div>
+      <th:block th:if="${headline.isLoadFailed()}">
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${headline})}"></p>
+      </th:block>
+      <div th:unless="${headline.isLoadFailed()}" class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+        <a th:href="@{/admin/analytics}" class="link link-hover">
+          이번 주 쓴 사람 <b th:text="${headline.value().weeklyActiveCount()} + '명'">0명</b></a>
+        <a th:href="@{/admin/analytics}" class="link link-hover">
+          7일 리텐션 <b th:text="${headline.value().sevenDayRetentionPercent() == null ? '-' : headline.value().sevenDayRetentionPercent() + '%'}">-</b>
+          <span class="text-xs text-base-content/60"
+                th:text="'(최근 4주 가입 중 7일 지난 ' + ${headline.value().retentionCohortSize()} + '명 기준)'">(기준)</span></a>
+        <a th:href="@{/admin/analytics}" class="link link-hover">
+          이번 주 카드 체크 <b th:text="${headline.value().cardCheckCount()} + '장'">0장</b></a>
+      </div>
+      <p th:replace="~{admin/fragments/usage-analytics-parts :: excludedNote}"></p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+    <div class="card bg-base-200 shadow" data-recent-signups th:with="signups=${overview.recentSignups()}">
+      <div class="card-body p-4 gap-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-semibold">최근 가입 10명</h2>
+          <a th:href="@{/admin/members}" class="link link-hover text-sm ml-auto">회원 관리</a>
+        </div>
+        <th:block th:if="${signups.isLoadFailed()}">
+          <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${signups})}"></p>
+        </th:block>
+        <th:block th:if="${!signups.isLoadFailed() and signups.value().isEmpty()}">
+          <div th:replace="~{admin/fragments/admin-ui :: emptyState('아직 가입한 사람이 없어요')}"></div>
+        </th:block>
+        <div th:if="${!signups.isLoadFailed() and !signups.value().isEmpty()}" class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead><tr><th>가입</th><th>회원</th><th>로그인</th><th class="text-right">일과</th><th>기기</th><th>마지막 활동</th></tr></thead>
+            <tbody>
+            <tr th:each="signup : ${signups.value()}" class="hover">
+              <td class="whitespace-nowrap" th:text="${@adminDate.format(signup.createdAt())}">시각</td>
+              <td>
+                <a th:href="@{/admin/members/{id}(id=${signup.memberId()})}" class="link link-hover"
+                   th:text="${signup.displayName()}">회원</a>
+                <th:block th:if="${signup.accountKindTone() != null}">
+                  <span th:replace="~{admin/fragments/admin-ui :: toneBadge(${signup.accountKindTone()}, ${signup.accountKindLabel()})}"></span>
+                </th:block>
+              </td>
+              <td th:text="${signup.loginMethodText()}">애플</td>
+              <td class="text-right" th:text="${signup.routineCount()}">0</td>
+              <td th:text="${signup.hasLinkedDevice()} ? '연결' : '-'">-</td>
+              <td class="whitespace-nowrap" th:text="${@adminDate.format(signup.lastActivityAt())}">-</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-200 shadow" data-recent-activities th:with="activities=${overview.recentActivities()}">
+      <div class="card-body p-4 gap-2">
+        <h2 class="font-semibold">최근 활동 20줄</h2>
+        <th:block th:if="${activities.isLoadFailed()}">
+          <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${activities})}"></p>
+        </th:block>
+        <th:block th:if="${!activities.isLoadFailed() and activities.value().isEmpty()}">
+          <div th:replace="~{admin/fragments/admin-ui :: emptyState('최근 30일 활동이 없어요')}"></div>
+        </th:block>
+        <ul th:if="${!activities.isLoadFailed() and !activities.value().isEmpty()}" class="space-y-1 text-sm">
+          <li th:each="activity : ${activities.value()}" class="flex flex-wrap gap-2">
+            <span class="text-base-content/60 whitespace-nowrap" th:text="${@adminDate.format(activity.occurredAt())}">시각</span>
+            <a th:href="@{/admin/members/{id}(id=${activity.memberId()})}" class="link link-hover"
+               th:text="${activity.displayName()}">회원</a>
+            <span th:text="${activity.description()}">가입</span>
+          </li>
+        </ul>
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: excludedNote}"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

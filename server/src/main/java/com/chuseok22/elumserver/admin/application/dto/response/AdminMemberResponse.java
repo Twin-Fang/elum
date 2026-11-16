@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
 import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -42,7 +43,9 @@ public record AdminMemberResponse(
   long profileCount,
   long guardianCount,
   /// 연결된 로그인 제공자 (제공자 순서 고정). 목록 보강 전에는 빈 목록
-  List<OAuthProvider> loginProviders
+  List<OAuthProvider> loginProviders,
+  /// 계정 종류 (#1436, 일반이 아니면 목록에 배지)
+  MemberAccountKind accountKind
 ) {
 
   public AdminMemberResponse {
@@ -79,7 +82,8 @@ public record AdminMemberResponse(
       lastPlanChange == null ? null : lastPlanChange.getChangedBy(),
       0,
       0,
-      List.of()
+      List.of(),
+      member.getAccountKind()
     );
   }
 
@@ -90,6 +94,6 @@ public record AdminMemberResponse(
     return new AdminMemberResponse(id, username, nickname, character, status, supportGoals, totalStars,
       routineCount, aiCallCount, totalTokens, estimatedCostUsd, lastActivityAt, createdAt, withdrawnAt,
       retentionExpiresAt, plan, planExpiresAt, planLastChangedAt, planLastChangedBy,
-      profileCountToSet, guardianCountToSet, loginProvidersToSet);
+      profileCountToSet, guardianCountToSet, loginProvidersToSet, accountKind);
   }
 }

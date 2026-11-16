@@ -75,6 +75,14 @@
       </div>
     </div>
 
+    <!-- 위 숫자와 아래 가입·방문 추이는 일반 계정만 센다 (#1436) -->
+    <p th:replace="~{admin/fragments/usage-analytics-parts :: excludedNote}"></p>
+
+    <!-- 사용 요약 · 최근 가입 · 최근 활동 (#1436, 칸별 독립 실패) -->
+    <th:block th:if="${usageOverview != null}">
+      <div th:replace="~{admin/fragments/usage-analytics-parts :: dashboardUsage(${usageOverview})}"></div>
+    </th:block>
+
     <!-- AI 상태: 실제 호출 기록으로 판정 (잔액 숫자는 제공자 화면에서만 보인다) -->
     <div class="card bg-base-200 shadow">
       <div class="card-body p-4 gap-3">

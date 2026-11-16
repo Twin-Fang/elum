@@ -105,7 +105,7 @@
   <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
 </th>
 
-<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크, 숫자 열은 우측 정렬. rows 는 AdminListRow 목록 -->
+<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크, cellTones 지정 칸은 배지, 숫자 열은 우측 정렬. rows 는 AdminListRow 목록 -->
 <div th:fragment="table(definition, query, rows)" class="overflow-x-auto">
   <table class="table table-sm">
     <thead>
@@ -119,7 +119,10 @@
         <th:block th:with="cellLink=${columnStat.first and row.linkUrl != null ? row.linkUrl : row.cellLinks.get(column.key)}">
           <a th:if="${cellLink != null}" th:href="${cellLink}" class="link link-hover"
              th:text="${row.cells.get(column.key)}">값</a>
-          <span th:unless="${cellLink != null}" th:text="${row.cells.get(column.key)}">값</span>
+          <th:block th:if="${cellLink == null and row.cellTones.containsKey(column.key)}">
+            <span th:replace="~{admin/fragments/admin-ui :: toneBadge(${row.cellTones.get(column.key)}, ${row.cells.get(column.key)})}"></span>
+          </th:block>
+          <span th:if="${cellLink == null and !row.cellTones.containsKey(column.key)}" th:text="${row.cells.get(column.key)}">값</span>
         </th:block>
       </td>
     </tr>

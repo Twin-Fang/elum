@@ -8,6 +8,7 @@
  *   data-days       일별 기본 일수
  *   data-metric     count · cost · failure  — [data-trend-metric] 선택이 바꾼다
  *   data-click-link 막대 클릭 시 이동 주소. {from} {to} 를 칸 첫날·끝날로 바꾼다
+ *   data-error-code 조회 실패 시 보일 에러 코드 (없으면 E-ADMIN-STATS)
  * 카드 안 요소: canvas[data-trend-canvas], [data-trend-status], [data-trend-table], input[data-trend-from|to]
  *
  * 실패 시 그래프 자리에 문구 + 에러 코드 + 다시 시도 (E-ADMIN-STATS 조회 실패, E-ADMIN-CHART 차트 파일 없음)
@@ -30,7 +31,12 @@
     ROUTINE_TRANSLATE: ['#7a5af5', '#8f74f7'],
     ROUTINE_MEMORY: ['#8a63d2', '#9d7ae0'],
     WEEKLY_REPORT_SUMMARY: ['#2a9db5', '#3bb0c9'],
-    CARD_SPLIT: ['#c2791c', '#d98d2f']
+    CARD_SPLIT: ['#c2791c', '#d98d2f'],
+    // 사용 분석 주별 추이 (#1436)
+    SIGNUPS: ['#2a78d6', '#3987e5'],
+    WEEKLY_ACTIVE: ['#1baf7a', '#199e70'],
+    ROUTINES_MADE: ['#eb6834', '#d95926'],
+    CARD_CHECKS: ['#7a5af5', '#8f74f7']
   };
   var FALLBACK_COLOR = ['#898781', '#898781'];
   // 축·격자 잉크 [라이트, 다크]
@@ -80,7 +86,9 @@
     var toInput = card.querySelector('[data-trend-to]');
     if (fromInput && fromInput.value) params.set('from', fromInput.value);
     if (toInput && toInput.value) params.set('to', toInput.value);
-    return card.dataset.endpoint + '?' + params.toString();
+    // 주소에 이미 조건이 있으면(사용 분석 기간 등) & 로 잇는다
+    var separator = card.dataset.endpoint.indexOf('?') >= 0 ? '&' : '?';
+    return card.dataset.endpoint + separator + params.toString();
   }
 
   function showStatus(card, message, errorCode) {
@@ -237,7 +245,7 @@
       })
       .catch(function (error) {
         console.warn('[관리자] 추이 그래프를 불러오지 못했어요', card.dataset.endpoint, error);
-        showStatus(card, '그래프를 불러오지 못했어요', ERROR_FETCH);
+        showStatus(card, '그래프를 불러오지 못했어요', card.dataset.errorCode || ERROR_FETCH);
       });
   }
 

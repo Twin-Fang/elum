@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('사용 분석', 'analytics', ~{:: content})}">
+<body>
+
+<!-- 사용 분석 (#1436): 기간·모두 포함 > 가입 단계 > 가입 주차 리텐션 > 주별 추이 > 마지막 활동·플랫폼 > 분류 제안. 칸별 독립 실패 -->
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6"
+      th:with="period=${analytics.period()}">
+  <div>
+    <h1 class="text-2xl font-bold">사용 분석</h1>
+    <p class="text-base-content/60">사람이 남는지, 어디서 빠지는지 봐요. 기간 안 가입자 기준이고, 주는 월요일부터 세요.</p>
+  </div>
+
+  <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
+
+  <!-- 기간 4·8·12주 + 모두 포함 켜고 끄기 (주소로 유지) -->
+  <div class="flex flex-wrap items-center gap-2" data-analytics-period>
+    <div class="join" role="group" aria-label="기간">
+      <a th:each="weeks : ${period.allowedWeekOptions()}" th:href="@{${period.analyticsPathFor(weeks)}}"
+         class="btn btn-sm join-item" th:classappend="${weeks == period.weeks()} ? 'btn-active'"
+         th:text="'최근 ' + ${weeks} + '주'">최근 8주</a>
+    </div>
+    <a th:href="@{${period.includeAllTogglePath()}}"
+       class="btn btn-sm" th:classappend="${period.isIncludingAllAccounts()} ? 'btn-warning' : 'btn-ghost'"
+       data-analytics-include-all
+       th:text="${period.isIncludingAllAccounts()} ? '모두 포함해서 보는 중 (끄기)' : '모두 포함해서 보기'">모두 포함해서 보기</a>
+    <th:block th:unless="${period.isIncludingAllAccounts()}">
+      <p th:replace="~{admin/fragments/usage-analytics-parts :: excludedNote}"></p>
+    </th:block>
+  </div>
+
+  <!-- 가입 단계: 단계별 인원 · 가입 대비 막대 · 이전 단계 대비 -->
+  <div class="card bg-base-200 shadow" data-analytics-funnel th:with="funnel=${analytics.funnel()}">
+    <div class="card-body p-4 gap-3">
+      <h2 class="font-semibold">가입 단계</h2>
+      <th:block th:if="${funnel.isLoadFailed()}">
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${funnel})}"></p>
+      </th:block>
+      <th:block th:if="${!funnel.isLoadFailed() and funnel.value().isEmpty()}">
+        <div th:replace="~{admin/fragments/admin-ui :: emptyState('이 기간에 가입한 사람이 없어요')}"></div>
+      </th:block>
+      <ul th:if="${!funnel.isLoadFailed() and !funnel.value().isEmpty()}" class="space-y-2">
+        <li th:each="stage : ${funnel.value().stages()}" class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="font-semibold" th:text="${stage.label()}">가입</span>
+            <span th:text="${stage.count()} + '명 (' + ${stage.percentOfSignups()} + '%)'">0명</span>
+            <span th:if="${stage.percentOfPrevious() != null}" class="text-xs text-base-content/60"
+                  th:text="'이전 단계의 ' + ${stage.percentOfPrevious()} + '%'">이전 단계</span>
+          </div>
+          <div class="flex h-3 w-full overflow-hidden rounded-full bg-base-300">
+            <div class="bg-primary" th:style="'width:' + ${stage.percentOfSignups()} + '%'"></div>
+          </div>
+        </li>
+      </ul>
+      <p class="text-xs text-base-content/60">일과 만듦은 예시 일과 제외, 카드 체크는 이룸이가 카드를 한 장이라도 마친 것, 기기 연결은 연결 코드를 쓴 것, 스토어 결제는 스토어 구독이나 크레딧 구매예요</p>
+    </div>
+  </div>
+
+  <!-- 가입 주차 리텐션: 가입 주별로 1·2·4주 뒤 그 주에 방문한 비율 -->
+  <div class="card bg-base-200 shadow" data-analytics-retention th:with="cohorts=${analytics.retentionCohorts()}">
+    <div class="card-body p-4 gap-2">
+      <h2 class="font-semibold">가입 주차별 리텐션</h2>
+      <th:block th:if="${cohorts.isLoadFailed()}">
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${cohorts})}"></p>
+      </th:block>
+      <th:block th:if="${!cohorts.isLoadFailed() and cohorts.value().isEmpty()}">
+        <div th:replace="~{admin/fragments/admin-ui :: emptyState('이 기간에 가입한 사람이 없어요')}"></div>
+      </th:block>
+      <div th:if="${!cohorts.isLoadFailed() and !cohorts.value().isEmpty()}" class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>가입 주</th>
+            <th class="text-right">가입</th>
+            <th th:each="weeksLater : ${retentionWeeksLater}" class="text-right" th:text="${weeksLater} + '주 뒤'">1주 뒤</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="cohort : ${cohorts.value()}" class="hover">
+            <td th:text="${cohort.weekLabel()}">11/10 주</td>
+            <td class="text-right" th:text="${cohort.cohortSize()} + '명'">0명</td>
+            <td th:each="cell : ${cohort.cells()}" class="text-right"
+                th:classappend="${cell.percent() == null} ? 'text-base-content/50'" th:text="${cell.text()}">-</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">그 주(월~일)에 앱을 한 번이라도 연 비율이에요. 아직 안 끝난 주는 -, 방문 기록을 시작하기(10/21) 전 주는 기록 전이에요</p>
+    </div>
+  </div>
+
+  <!-- 주별 추이: 기존 추이 그래프 부품 (신규 가입 · 주간 활성 · 일과 만듦 · 카드 체크) -->
+  <div class="card bg-base-200 shadow" data-trend-chart data-type="line" data-analytics-trends
+       th:attr="data-endpoint=@{${period.weeklyUsageEndpoint()}},data-error-code=${analytics.weeklyTrendErrorCode()}">
+    <div class="card-body p-4 gap-2">
+      <h2 class="font-semibold">주별 추이</h2>
+      <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-64')}"></th:block>
+      <p class="text-xs text-base-content/60">주간 활성은 그 주에 앱을 연 사람 수예요. 방문 기록을 시작한 주부터 그려져요</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- 마지막 활동 분포: 이탈 규모 (탈퇴 제외) -->
+    <div class="card bg-base-200 shadow" data-analytics-last-activity
+         th:with="distribution=${analytics.lastActivityDistribution()}">
+      <div class="card-body p-4 gap-2">
+        <h2 class="font-semibold">마지막 활동</h2>
+        <th:block th:if="${distribution.isLoadFailed()}">
+          <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${distribution})}"></p>
+        </th:block>
+        <th:block th:if="${!distribution.isLoadFailed()}">
+          <div th:replace="~{admin/analytics :: labeledCounts(${distribution.value()}, '회원이 없어요')}"></div>
+        </th:block>
+        <p class="text-xs text-base-content/60">기간과 상관없이 지금 회원 전체(탈퇴 제외)예요</p>
+      </div>
+    </div>
+
+    <!-- 플랫폼: 알림 기기 기준 -->
+    <div class="card bg-base-200 shadow" data-analytics-platform th:with="platforms=${analytics.platformMemberCounts()}">
+      <div class="card-body p-4 gap-2">
+        <h2 class="font-semibold">플랫폼</h2>
+        <th:block th:if="${platforms.isLoadFailed()}">
+          <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${platforms})}"></p>
+        </th:block>
+        <th:block th:if="${!platforms.isLoadFailed()}">
+          <div th:replace="~{admin/analytics :: labeledCounts(${platforms.value()}, '알림 기기를 등록한 회원이 없어요')}"></div>
+        </th:block>
+        <p class="text-xs text-base-content/60">알림 기기를 등록한 회원 수예요. 두 기기를 다 쓰면 양쪽에 세요</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 분류 제안: 규칙에 맞는 일반 계정. 자동으로 바꾸지 않고 관리자가 버튼으로 정한다 -->
+  <div class="card bg-base-200 shadow" data-analytics-suggestions th:with="suggestions=${analytics.suggestions()}">
+    <div class="card-body p-4 gap-2">
+      <h2 class="font-semibold">분류 제안</h2>
+      <th:block th:if="${suggestions.isLoadFailed()}">
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${suggestions})}"></p>
+      </th:block>
+      <th:block th:if="${!suggestions.isLoadFailed() and suggestions.value().isEmpty()}">
+        <div th:replace="~{admin/fragments/admin-ui :: emptyState('제안할 계정이 없어요')}"></div>
+      </th:block>
+      <div th:if="${!suggestions.isLoadFailed() and !suggestions.value().isEmpty()}" class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead><tr><th>회원</th><th>가입</th><th>제안</th><th>이유</th><th></th></tr></thead>
+          <tbody>
+          <tr th:each="suggestion : ${suggestions.value()}" class="hover">
+            <td><a th:href="@{/admin/members/{id}(id=${suggestion.memberId()})}" class="link link-hover"
+                   th:text="${suggestion.displayName()}">회원</a></td>
+            <td class="whitespace-nowrap" th:text="${@adminDate.format(suggestion.createdAt())}">가입</td>
+            <td th:text="${suggestion.suggestedKind().label}">스토어 심사</td>
+            <td class="text-xs" th:text="${suggestion.reason()}">이유</td>
+            <td class="flex flex-wrap gap-2">
+              <form th:action="@{/admin/analytics/suggestions/{id}/classify(id=${suggestion.memberId()})}" method="post">
+                <input type="hidden" name="accountKind" th:value="${suggestion.suggestedKind().name()}"/>
+                <input type="hidden" name="weeks" th:value="${period.weeks()}"/>
+                <input type="hidden" name="includeAll" th:value="${period.isIncludingAllAccounts()}"/>
+                <button type="submit" class="btn btn-primary btn-xs"
+                        th:text="${suggestion.suggestedKind().label} + '(으)로 분류'">분류</button>
+              </form>
+              <form th:action="@{/admin/analytics/suggestions/{id}/dismiss(id=${suggestion.memberId()})}" method="post">
+                <input type="hidden" name="weeks" th:value="${period.weeks()}"/>
+                <input type="hidden" name="includeAll" th:value="${period.isIncludingAllAccounts()}"/>
+                <button type="submit" class="btn btn-ghost btn-xs">일반 맞음</button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">스토어 심사 의심: Apple 로그인 + 이메일 가리기 + 직접 만든 일과 0개 + 방문 1일 이하 + 가입 7일 지남. 내부 의심: 관리자 메모에 내부·테스트. 일반 맞음을 누르면 다시 제안하지 않아요</p>
+    </div>
+  </div>
+
+  <th:block th:replace="~{admin/fragments/admin-chart :: scripts}"></th:block>
+</main>
+
+<!-- 이름·인원·비율 목록 (마지막 활동·플랫폼 공통). 모두 0명이면 빈 상태 -->
+<div th:fragment="labeledCounts(counts, emptyMessage)">
+  <th:block th:if="${counts.?[count() > 0].isEmpty()}">
+    <div th:replace="~{admin/fragments/admin-ui :: emptyState(${emptyMessage})}"></div>
+  </th:block>
+  <ul th:unless="${counts.?[count() > 0].isEmpty()}" class="space-y-2">
+    <li th:each="count : ${counts}" class="space-y-1">
+      <div class="flex items-center gap-2 text-sm">
+        <span th:text="${count.label()}">1일 안</span>
+        <span class="ml-auto" th:text="${count.count()} + '명 (' + ${count.percent()} + '%)'">0명</span>
+      </div>
+      <div class="flex h-2 w-full overflow-hidden rounded-full bg-base-300">
+        <div class="bg-primary" th:style="'width:' + ${count.percent()} + '%'"></div>
+      </div>
+    </li>
+  </ul>
+</div>
+</body>
+</html>

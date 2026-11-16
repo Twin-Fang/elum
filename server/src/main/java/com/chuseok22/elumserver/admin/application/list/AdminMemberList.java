@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.list;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.format.AdminAccountKindBadges;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Filter;
 import com.chuseok22.elumserver.admin.application.list.AdminCsvExporter.CsvColumn;
@@ -8,6 +9,7 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Colum
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Option;
 import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import java.time.LocalDate;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 회원 목록 선언: 열, 검색(회원 id 조각·아이디·보호자 닉네임·이룸이 호칭), 필터 7개(요금제, 상태, 로그인 제공자, 가입일·최근 활동 기간), 정렬 허용 열, 응답 > 표 행·CSV 변환
+ * 회원 목록 선언: 열, 검색(회원 id 조각·아이디·보호자 닉네임·이룸이 호칭), 필터 8개(요금제, 상태, 로그인 제공자, 계정 종류, 가입일·최근 활동 기간), 정렬 허용 열, 응답 > 표 행·CSV 변환
  * 정렬은 isSortable 열만 허용되고 그 밖은 기본 정렬(가입일 최신순)로 돌아감
  */
 public final class AdminMemberList {
@@ -35,6 +37,8 @@ public final class AdminMemberList {
   public static final String FILTER_LAST_ACTIVE_TO = "activeTo";
   /// 필터 키: 로그인 제공자 (그 제공자 신원이 연결된 회원, 여러 제공자를 붙인 회원은 각각에 나옴)
   public static final String FILTER_PROVIDER = "provider";
+  /// 필터 키: 계정 종류 (#1436, 일반·내부·테스트·스토어 심사)
+  public static final String FILTER_ACCOUNT_KIND = "accountKind";
   /// 기간 필터가 없을 때 쿼리에 넣는 끝값 (null 바인딩 대신)
   private static final LocalDateTime UNBOUNDED_PERIOD_FROM = LocalDateTime.of(2000, 1, 1, 0, 0);
   private static final LocalDateTime UNBOUNDED_PERIOD_TO = LocalDateTime.of(9999, 1, 1, 0, 0);
@@ -48,6 +52,8 @@ public final class AdminMemberList {
   private static final String COLUMN_LOGIN_PROVIDERS = "loginProviders";
   private static final String COLUMN_PROFILE_COUNT = "profileCount";
   private static final String COLUMN_GUARDIAN_COUNT = "guardianCount";
+  /// 계정 종류 열: 일반이 아니면 배지
+  private static final String COLUMN_ACCOUNT_KIND = "accountKind";
   /// 크레딧 열: 이번 주 지금 사용 가능량, 칸 링크는 회원 크레딧 상세
   private static final String COLUMN_CURRENT_WEEK_CREDIT = "currentWeekCredit";
   private static final String CREDIT_DETAIL_PATH = "/admin/credits/members/";
@@ -60,6 +66,7 @@ public final class AdminMemberList {
       new Column(SORT_USERNAME, "닉네임 / 아이디", true),
       new Column(SORT_PLAN, "요금제", true),
       new Column("status", "상태", false),
+      new Column(COLUMN_ACCOUNT_KIND, "계정 종류", false),
       new Column(COLUMN_LOGIN_PROVIDERS, "로그인", false),
       Column.numeric(COLUMN_PROFILE_COUNT, "이룸이", false),
       Column.numeric(COLUMN_GUARDIAN_COUNT, "보호자(본인 포함)", false),
@@ -85,6 +92,8 @@ public final class AdminMemberList {
         new Option(MemberStatus.WITHDRAWN.name(), MemberStatus.WITHDRAWN.getLabel()))),
       new Filter(FILTER_PROVIDER, "로그인", Arrays.stream(OAuthProvider.values())
         .map(provider -> new Option(provider.name(), providerLabel(provider))).toList()),
+      new Filter(FILTER_ACCOUNT_KIND, "계정 종류", Arrays.stream(MemberAccountKind.values())
+        .map(kind -> new Option(kind.name(), kind.getLabel())).toList()),
       Filter.date(FILTER_JOINED_FROM, "가입일 시작"),
       Filter.date(FILTER_JOINED_TO, "가입일 끝"),
       Filter.date(FILTER_LAST_ACTIVE_FROM, "최근 활동 시작"),
@@ -129,6 +138,11 @@ public final class AdminMemberList {
     return value == null ? null : OAuthProvider.valueOf(value);
   }
 
+  /// 계정 종류 필터 (없으면 null: 정의로 보정된 값만 들어옴)
+  public static MemberAccountKind accountKindOf(AdminListQuery query) {
+    return MemberAccountKind.fromParameterOrNull(query.filters().get(FILTER_ACCOUNT_KIND));
+  }
+
   /// 로그인 제공자 > 표시 이름
   public static String providerLabel(OAuthProvider provider) {
     return switch (provider) {
@@ -145,7 +159,7 @@ public final class AdminMemberList {
   }
 
   /**
-   * 응답 > 표 한 행 (첫 칸 회원 상세 링크, 크레딧 칸 회원 크레딧 상세 링크)
+   * 응답 > 표 한 행 (첫 칸 회원 상세 링크, 크레딧 칸 회원 크레딧 상세 링크, 일반 아닌 계정 종류 배지)
    *
    * @param currentWeekRemainingCredit 이번 주 남은 크레딧, 이번 주 기록 없음·조회 실패면 null ("-")
    */
@@ -157,6 +171,7 @@ public final class AdminMemberList {
     cells.put(SORT_USERNAME, displayName + " (" + member.username() + ")");
     cells.put(SORT_PLAN, planText(member, dateFormatter));
     cells.put("status", statusText(member, dateFormatter));
+    cells.put(COLUMN_ACCOUNT_KIND, member.accountKind() == null ? BLANK_TEXT : member.accountKind().getLabel());
     cells.put(COLUMN_LOGIN_PROVIDERS, providersText(member));
     cells.put(COLUMN_PROFILE_COUNT, String.valueOf(member.profileCount()));
     cells.put(COLUMN_GUARDIAN_COUNT, String.valueOf(member.guardianCount()));
@@ -171,8 +186,10 @@ public final class AdminMemberList {
     cells.put(SORT_LAST_ACTIVITY, dateFormatter.format(member.lastActivityAt()));
     cells.put(SORT_CREATED_AT, dateFormatter.format(member.createdAt()));
     cells.put(COLUMN_PLAN_LAST_CHANGED, lastChangedText(member, dateFormatter));
+    String accountKindTone = AdminAccountKindBadges.toneOf(member.accountKind());
     return new AdminListRow("/admin/members/" + member.id(), cells,
-      Map.of(COLUMN_CURRENT_WEEK_CREDIT, CREDIT_DETAIL_PATH + member.id()));
+      Map.of(COLUMN_CURRENT_WEEK_CREDIT, CREDIT_DETAIL_PATH + member.id()),
+      accountKindTone == null ? Map.of() : Map.of(COLUMN_ACCOUNT_KIND, accountKindTone));
   }
 
   /**

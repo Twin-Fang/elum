@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.infrastructure.repository;
 
 import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
@@ -52,6 +53,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
    * @param joinedFrom  가입일 기간 시작(포함). 필터가 없으면 아주 이른 날 (null 바인딩을 피하려고 늘 값을 넣음)
    * @param hasLastActivePeriod false 면 최근 활동 기간을 보지 않음 (활동 기록 없는 회원도 나옴)
    * @param hasProvider false 면 로그인 제공자를 보지 않음. providers 는 늘 1개 이상 (빈 in 을 피함)
+   * @param accountKinds 계정 종류 (필터가 없으면 전체 종류, 늘 1개 이상 #1436)
    */
   @Query("""
     select m from Member m
@@ -68,6 +70,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
           select 1 from AuthIdentity a
           where a.memberId = m.id and a.provider in :providers
         ))
+      and m.accountKind in :accountKinds
       and (:hasKeyword = false
         or lower(m.id) like lower(:pattern) escape '\\'
         or lower(m.username) like lower(:pattern) escape '\\'
@@ -89,6 +92,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @Param("hasLastActivePeriod") boolean hasLastActivePeriod, @Param("lastActiveFrom") LocalDateTime lastActiveFrom,
     @Param("lastActiveToExclusive") LocalDateTime lastActiveToExclusive,
     @Param("hasProvider") boolean hasProvider, @Param("providers") Collection<OAuthProvider> providers,
+    @Param("accountKinds") Collection<MemberAccountKind> accountKinds,
     Pageable pageable
   );
 
@@ -99,7 +103,12 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   long countByStatusNot(MemberStatus status);
 
-  long countByLastActivityAtAfterAndStatusNot(LocalDateTime after, MemberStatus status);
+  /// 마지막 활동이 after 이후인 회원 수 (탈퇴 제외, 일반 계정만 #1436)
+  @Query(value = """
+    select count(*) from member m
+    where m.last_activity_at > :after and m.status <> 'WITHDRAWN'
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL, nativeQuery = true)
+  long countCountedActiveAfter(@Param("after") LocalDateTime after);
 
   /**
    * 보관 기간이 지난 탈퇴 계정. 완전 삭제 스케줄러가 쓴다.
@@ -147,25 +156,31 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @Param("status") MemberStatus status, @Param("joinedBefore") LocalDateTime joinedBefore
   );
 
-  /// 기간[from, to) 가입 수 (탈퇴 회원 포함 — 그날 가입한 사실은 남음)
-  long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime from, LocalDateTime to);
-
-  /// 기간[from, to) 칸별 가입 수 (unit: day, month)
+  /// 기간[from, to) 가입 수 (탈퇴 회원 포함 — 그날 가입한 사실은 남음, 일반 계정만 #1436)
   @Query(value = """
-    select to_char(date_trunc(cast(:unit as text), created_at), 'YYYY-MM-DD') as bucket, count(*) as total
-    from member
-    where created_at >= :from and created_at < :to
-    group by 1
+    select count(*) from member m
+    where m.created_at >= :from and m.created_at < :to
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL, nativeQuery = true)
+  long countCountedJoinedBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+  /// 기간[from, to) 칸별 가입 수 (unit: day, month, 일반 계정만)
+  @Query(value = """
+    select to_char(date_trunc(cast(:unit as text), m.created_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member m
+    where m.created_at >= :from and m.created_at < :to
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL + """
+     group by 1
     """, nativeQuery = true)
   List<StatsBucketCount> countJoinedByBucket(
     @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-  /// 기간[from, to) 칸별 탈퇴 수 (되살린 계정은 탈퇴 시각이 비어 빠짐)
+  /// 기간[from, to) 칸별 탈퇴 수 (되살린 계정은 탈퇴 시각이 비어 빠짐, 일반 계정만)
   @Query(value = """
-    select to_char(date_trunc(cast(:unit as text), withdrawn_at), 'YYYY-MM-DD') as bucket, count(*) as total
-    from member
-    where withdrawn_at >= :from and withdrawn_at < :to
-    group by 1
+    select to_char(date_trunc(cast(:unit as text), m.withdrawn_at), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member m
+    where m.withdrawn_at >= :from and m.withdrawn_at < :to
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL + """
+     group by 1
     """, nativeQuery = true)
   List<StatsBucketCount> countWithdrawnByBucket(
     @Param("unit") String unit, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);

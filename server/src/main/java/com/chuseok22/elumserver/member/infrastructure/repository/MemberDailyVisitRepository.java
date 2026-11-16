@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
 import com.chuseok22.elumserver.common.application.stats.StatsBucketCount;
+import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberDailyVisit;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -22,18 +23,26 @@ public interface MemberDailyVisitRepository extends JpaRepository<MemberDailyVis
   int insertIfAbsent(
     @Param("id") String id, @Param("memberId") String memberId, @Param("visitDate") LocalDate visitDate);
 
-  long countByVisitDate(LocalDate visitDate);
+  /// 그날 방문 수 (일반 계정만 #1436)
+  @Query(value = """
+    select count(*) from member_daily_visit v
+    join member m on m.id = v.member_id
+    where v.visit_date = :visitDate
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL, nativeQuery = true)
+  long countCountedByVisitDate(@Param("visitDate") LocalDate visitDate);
 
   /// 방문 기록 시작일 (기록이 없으면 null)
   @Query("select min(v.visitDate) from MemberDailyVisit v")
   LocalDate findFirstVisitDate();
 
-  /// 기간[from, to] 칸별 방문 수 (unit: day, month)
+  /// 기간[from, to] 칸별 방문 수 (unit: day, month, 일반 계정만)
   @Query(value = """
-    select to_char(date_trunc(cast(:unit as text), visit_date), 'YYYY-MM-DD') as bucket, count(*) as total
-    from member_daily_visit
-    where visit_date between :from and :to
-    group by 1
+    select to_char(date_trunc(cast(:unit as text), v.visit_date), 'YYYY-MM-DD') as bucket, count(*) as total
+    from member_daily_visit v
+    join member m on m.id = v.member_id
+    where v.visit_date between :from and :to
+      and\s""" + MemberAccountKind.COUNTED_MEMBER_SQL + """
+     group by 1
     """, nativeQuery = true)
   List<StatsBucketCount> countByBucket(
     @Param("unit") String unit, @Param("from") LocalDate from, @Param("to") LocalDate to);
