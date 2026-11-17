@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('AI 크레딧 · 꾸러미', 'credits', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold">AI 크레딧 · 꾸러미</h1>
+    <p class="text-base-content/60">스토어별 판매를 켜고 끄고, 꾸러미 상품을 바꿔요. 바꾸면 최대 30초 안에 모든 서버에 반영돼요. 가격과 할인율은 스토어가 정해서 여기서는 바꾸지 않아요.</p>
+  </div>
+
+  <nav th:replace="~{admin/fragments/credit-nav :: nav('packs')}"></nav>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}">완료</div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}">오류</div>
+  <div th:each="code : ${view.failedCodes()}" class="alert alert-warning" role="alert">
+    <span th:text="'이 칸을 읽지 못했어요. 새로고침해도 같으면 코드를 알려 주세요. (' + ${code} + ')'">읽지 못했어요</span>
+  </div>
+
+  <!-- 판매 현황: 스토어별 켜기·끄기 (사유 필수), 전체 스위치는 읽기 전용 -->
+  <section class="card bg-base-200 shadow" th:if="${view.sale() != null}">
+    <div class="card-body gap-3">
+      <h2 class="card-title text-base">판매 현황</h2>
+      <div th:each="storeSale : ${view.sale().stores()}" class="flex flex-wrap items-center gap-3" data-pack-store>
+        <span class="w-28 font-medium" th:text="${storeSale.label()}">App Store 결제</span>
+        <span th:if="${storeSale.isEnabled()}" class="badge badge-success">판매 중</span>
+        <span th:unless="${storeSale.isEnabled()}" class="badge badge-ghost">꺼짐</span>
+        <form th:action="@{/admin/credits/packs/sale}" method="post" class="ml-auto flex flex-wrap items-center gap-2"
+              th:attr="data-confirm-title=${storeSale.isEnabled()} ? '판매 끄기' : '판매 켜기',
+                       data-confirm-message=${storeSale.isEnabled()} ? (${storeSale.label()} + ' 판매를 끌까요? 이미 산 크레딧은 그대로 쓸 수 있어요.') : (${storeSale.label()} + ' 판매를 켤까요? 앱에 꾸러미가 보이고 구매가 적립돼요.')">
+          <input type="hidden" name="store" th:value="${storeSale.store()}">
+          <input type="hidden" name="enabled" th:value="${!storeSale.isEnabled()}">
+          <input type="text" name="reason" maxlength="200" required placeholder="사유 (200자 이내)" class="input input-bordered input-sm w-64">
+          <button type="submit" class="btn btn-sm" th:classappend="${storeSale.isEnabled()} ? 'btn-error' : 'btn-primary'"
+                  th:text="${storeSale.isEnabled()} ? '끄기' : '켜기'">끄기</button>
+        </form>
+      </div>
+      <p class="text-xs text-base-content/60">App Store는 앱이 스토어를 알려 주는 새 버전(iOS 2.101.0 이상)에만 적용돼요.</p>
+      <div class="flex items-center gap-2 text-sm">
+        <span class="w-28 font-medium">전체 스위치</span>
+        <span th:if="${view.sale().isAllSaleEnabled()}" class="badge badge-warning">켜짐 (모든 스토어와 옛 앱에서 판매)</span>
+        <span th:unless="${view.sale().isAllSaleEnabled()}" class="badge badge-ghost">꺼짐</span>
+        <span class="text-xs text-base-content/60">읽기 전용. 바꾸려면 AI 설정에서 바꿔요.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 점검 -->
+  <section class="card bg-base-200 shadow" th:if="${view.findings() != null}">
+    <div class="card-body gap-2">
+      <h2 class="card-title text-base">점검</h2>
+      <ul class="space-y-1 text-sm">
+        <li th:each="finding : ${view.findings()}" data-pack-finding>
+          <span th:if="${finding.isWarning()}" class="badge badge-warning badge-sm mr-1">확인</span>
+          <span th:unless="${finding.isWarning()}" class="badge badge-success badge-sm mr-1">정상</span>
+          <span th:text="${finding.message()}">이상 없어요</span>
+        </li>
+      </ul>
+      <p class="text-xs text-base-content/60">스토어에 등록한 상품 ID와 아래 목록이 같은지는 서버가 확인하지 못해요. App Store Connect와 Play Console에서 직접 맞춰 보세요.</p>
+    </div>
+  </section>
+
+  <!-- 상품 편집: 미리보기 > 저장 -->
+  <section class="card bg-base-200 shadow">
+    <div class="card-body gap-3">
+      <h2 class="card-title text-base">꾸러미 상품</h2>
+      <form id="pack-products-form" th:action="@{/admin/credits/packs/preview}" method="post" class="space-y-3">
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead><tr><th>상품 ID</th><th class="w-32">크레딧 개수</th></tr></thead>
+            <tbody>
+              <tr th:each="row : ${draftRows}" data-pack-row>
+                <td><input type="text" name="productId" th:value="${row.productId()}" maxlength="150" class="input input-bordered input-sm w-full font-mono" placeholder="elum_credit_50"></td>
+                <td><input type="text" name="credits" th:value="${row.credits()}" inputmode="numeric" maxlength="5" class="input input-bordered input-sm w-full" placeholder="50"></td>
+              </tr>
+              <tr data-pack-row>
+                <td><input type="text" name="productId" maxlength="150" class="input input-bordered input-sm w-full font-mono" placeholder="새 상품 ID"></td>
+                <td><input type="text" name="credits" inputmode="numeric" maxlength="5" class="input input-bordered input-sm w-full" placeholder="개수"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <label class="form-control max-w-md">
+          <span class="label-text text-sm">인기 상품 ID (목록에 있는 상품 중 하나, 비우면 인기 표시 없음)</span>
+          <input type="text" name="popularProductId" th:value="${popularProductId}" maxlength="150" class="input input-bordered input-sm font-mono">
+        </label>
+        <p class="text-xs text-base-content/60">줄을 지우려면 두 칸을 모두 비워요. 상품 ID는 스토어에 등록한 소모성 상품 ID와 같아야 구매가 적립돼요.</p>
+
+        <div th:if="${isPreviewShown}" class="rounded-box border border-base-300 bg-base-100 p-3 space-y-2" data-pack-preview>
+          <div class="text-sm font-medium">앱에서 이렇게 보여요 (가격과 할인율은 스토어 값으로 표시돼요)</div>
+          <div class="flex flex-wrap gap-2">
+            <div th:each="previewRow : ${previewRows}" class="rounded-box border px-4 py-2 text-center"
+                 th:classappend="${previewRow.isPopular()} ? 'border-warning' : 'border-base-300'">
+              <div class="text-lg font-bold" th:text="${previewRow.credits()}">100</div>
+              <div class="text-xs font-mono" th:text="${previewRow.productId()}">elum_credit_100</div>
+              <span th:if="${previewRow.isPopular()}" class="badge badge-error badge-sm">인기!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="submit" class="btn btn-sm btn-outline">미리보기</button>
+          <input type="text" name="reason" maxlength="200" placeholder="저장 사유 (200자 이내)" class="input input-bordered input-sm w-64">
+          <button type="submit" th:formaction="@{/admin/credits/packs/save}" class="btn btn-sm btn-primary">저장</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 최근 7일 -->
+  <section class="card bg-base-200 shadow" th:if="${view.activity() != null}">
+    <div class="card-body gap-1">
+      <h2 class="card-title text-base">최근 7일</h2>
+      <p class="text-sm" data-pack-activity>
+        구매 <span th:text="${view.activity().purchaseCount()}">0</span>건 · 환불 <span th:text="${view.activity().refundCount()}">0</span>건
+        <a class="link ml-2" th:href="@{/admin/credits/purchases}">구매·환불 보기</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- 변경 이력 -->
+  <section class="card bg-base-200 shadow" th:if="${view.histories() != null}">
+    <div class="card-body gap-2">
+      <h2 class="card-title text-base">최근 변경 이력</h2>
+      <p th:if="${view.histories().isEmpty()}" class="text-sm text-base-content/60">아직 바꾼 기록이 없어요.</p>
+      <div th:unless="${view.histories().isEmpty()}" class="overflow-x-auto">
+        <table class="table table-xs">
+          <thead><tr><th>시각</th><th>설정</th><th>이전</th><th>이후</th><th>바꾼 사람</th><th>사유</th></tr></thead>
+          <tbody>
+            <tr th:each="history : ${view.histories()}" data-pack-history>
+              <td th:text="${#temporals.format(history.changedAt(), 'MM-dd HH:mm')}">11-16 08:30</td>
+              <td th:text="${history.keyLabel()}">설정</td>
+              <td class="font-mono max-w-48 truncate" th:text="${history.oldValue()}">false</td>
+              <td class="font-mono max-w-48 truncate" th:text="${history.newValue()}">true</td>
+              <td th:text="${history.changedBy()}">admin</td>
+              <td th:text="${history.reason()}">사유</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
