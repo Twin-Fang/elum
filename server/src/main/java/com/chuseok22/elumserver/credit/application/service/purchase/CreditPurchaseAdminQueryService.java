@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPurchase;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPurchaseRepository;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,20 @@ public class CreditPurchaseAdminQueryService {
   @Transactional(readOnly = true)
   public Page<AiCreditPurchase> search(PurchaseFilter filter, Pageable pageable) {
     return purchaseRepository.findAll(specificationOf(filter), pageable);
+  }
+
+  /// 기간 안(since 이후) 새로 생긴 구매 건수
+  @Transactional(readOnly = true)
+  public long countCreatedSince(LocalDateTime since) {
+    return purchaseRepository.count((root, query, builder) -> builder.greaterThanOrEqualTo(root.get("createdAt"), since));
+  }
+
+  /// 기간 안(since 이후) 환불로 처리된 구매 건수
+  @Transactional(readOnly = true)
+  public long countRefundedSince(LocalDateTime since) {
+    return purchaseRepository.count((root, query, builder) -> builder.and(
+      builder.equal(root.get("status"), CreditPurchaseStatus.REFUNDED),
+      builder.greaterThanOrEqualTo(root.get("refundedAt"), since)));
   }
 
   // 빈 조건은 건너뜀 (검색어는 앞뒤 공백 제거 후 완전 일치)

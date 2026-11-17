@@ -3648,12 +3648,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get printBrandTagline => '일상을 함께 | 이룸 행동카드';
 
   @override
-  String get cardExportPictogramCredit => '그림: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => '그림: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
