@@ -74,22 +74,22 @@
     <label class="form-control">
       <span class="label-text text-xs">스토어</span>
       <select name="store" class="select select-bordered select-sm">
-        <option value="" th:selected="${filter.store() == null}">전체</option>
-        <option th:each="store : ${stores}" th:value="${store.name()}" th:text="${store.label}"
-                th:selected="${filter.store() == store}">App Store 결제</option>
+        <option value="" th:selected="${query.filters.get('store') == null}">전체</option>
+        <option th:each="option : ${storeOptions}" th:value="${option.value}" th:text="${option.label}"
+                th:selected="${option.value == query.filters.get('store')}">App Store 결제</option>
       </select>
     </label>
     <label class="form-control">
       <span class="label-text text-xs">상태</span>
       <select name="status" class="select select-bordered select-sm">
-        <option value="" th:selected="${filter.status() == null}">전체</option>
-        <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.label}"
-                th:selected="${filter.status() == status}">환불</option>
+        <option value="" th:selected="${query.filters.get('status') == null}">전체</option>
+        <option th:each="option : ${statusOptions}" th:value="${option.value}" th:text="${option.label}"
+                th:selected="${option.value == query.filters.get('status')}">환불</option>
       </select>
     </label>
     <label class="form-control">
       <span class="label-text text-xs">거래 id · 회원 id</span>
-      <input type="text" name="q" th:value="${q}" maxlength="255" placeholder="완전히 같은 값" class="input input-bordered input-sm w-72"/>
+      <input type="text" name="q" th:value="${query.q}" maxlength="100" placeholder="완전히 같은 값" class="input input-bordered input-sm w-72"/>
     </label>
     <button type="submit" class="btn btn-primary btn-sm">찾기</button>
     <a th:href="@{/admin/credits/purchases}" class="btn btn-ghost btn-sm">초기화</a>
@@ -153,13 +153,7 @@
     </table>
   </div>
 
-  <div class="flex items-center gap-2" th:if="${rows.totalPages > 1}">
-    <a th:if="${rows.hasPrevious()}" class="btn btn-sm"
-       th:href="@{/admin/credits/purchases(page=${rows.number - 1}, store=${filter.store() != null ? filter.store().name() : ''}, status=${filter.status() != null ? filter.status().name() : ''}, q=${q})}">이전</a>
-    <span class="text-sm" th:text="${rows.number + 1} + ' / ' + ${rows.totalPages}">1 / 1</span>
-    <a th:if="${rows.hasNext()}" class="btn btn-sm"
-       th:href="@{/admin/credits/purchases(page=${rows.number + 1}, store=${filter.store() != null ? filter.store().name() : ''}, status=${filter.status() != null ? filter.status().name() : ''}, q=${q})}">다음</a>
-  </div>
+  <div th:replace="~{admin/fragments/admin-list :: pager(${rows}, @{${pagerBaseUrl}})}"></div>
 
   <p class="text-xs text-base-content/60">
     회수는 구매 묶음의 남은 양만 0으로 맞춰요. 이미 쓴 크레딧은 되돌리지 않아요.
