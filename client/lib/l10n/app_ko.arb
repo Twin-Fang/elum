@@ -1885,8 +1885,6 @@
   "@creditGetMore": {"description": "크레딧 부족 팝업 버튼: 내 크레딧 화면의 꾸러미로"},
   "myCreditPackDiscount": "-{percent}%",
   "@myCreditPackDiscount": {"description": "꾸러미 칸 오른쪽 위 할인율 알약", "placeholders": {"percent": {"type": "int"}}},
-  "myCreditPackPopular": "인기!",
-  "@myCreditPackPopular": {"description": "꾸러미 인기 칸 아래 걸친 알약"},
   "myCreditPackBuy": "{count, plural, other{{count}개 사기}} ({price})",
   "@myCreditPackBuy": {"description": "꾸러미 결제 버튼. price 는 스토어 값", "placeholders": {"count": {"type": "int"}, "price": {"type": "String"}}},
   "myCreditPackNoExpiryNote": "구매한 크레딧은 기간 제한이 없어요",
