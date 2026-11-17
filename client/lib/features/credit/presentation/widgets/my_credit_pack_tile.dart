@@ -53,6 +53,8 @@ class MyCreditPackTile extends StatelessWidget {
       child: AppPressable(
         onTap: onTap,
         child: Stack(
+          // 부모(Expanded 슬롯) 너비를 칸이 그대로 받음 (기본값이면 내용 너비로 줄어 왼쪽에 붙음, #1440)
+          fit: StackFit.passthrough,
           clipBehavior: Clip.none,
           children: [
             DecoratedBox(
