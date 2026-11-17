@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-16T08:06:14Z",
-    "currentVersion": "2.102.0",
+    "lastUpdated": "2026-11-17T03:52:34Z",
+    "currentVersion": "2.103.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 347
+    "totalReleases": 348
   },
   "releases": [
+    {
+      "version": "2.103.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-17",
+      "pr_number": 1451,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 내 크레딧의 꾸러미 칸이 화면 너비에 맞게 가지런히 보여요\n  * 처음 들어가면 홈에 알림 카드만 보여서 화면이 간단해요\n  * 카드를 그림으로 받을 때 아래에 붙던 그림 출처 줄이 빠졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "내 크레딧의 꾸러미 칸이 화면 너비에 맞게 가지런히 보여요",
+            "처음 들어가면 홈에 알림 카드만 보여서 화면이 간단해요",
+            "카드를 그림으로 받을 때 아래에 붙던 그림 출처 줄이 빠졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.102.0",
       "project_type": "flutter",
