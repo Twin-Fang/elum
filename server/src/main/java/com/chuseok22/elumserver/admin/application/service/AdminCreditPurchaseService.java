@@ -1,7 +1,9 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditPurchaseRow;
-import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
+import com.chuseok22.elumserver.admin.application.list.AdminCreditPurchaseList;
+import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseAdminQueryService;
 import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseAdminQueryService.PurchaseFilter;
 import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseRefundService;
@@ -16,9 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,11 +32,11 @@ public class AdminCreditPurchaseService {
   private final StoreRefundRecheckService recheckService;
   private final AdminMemberFilter memberFilter;
 
-  /// 구매 목록 한 쪽: 최근 구매부터 (동률은 id 로 고정)
-  public Page<AdminCreditPurchaseRow> search(PurchaseFilter filter, int page) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE,
-      Sort.by(Sort.Order.desc("createdAt"), Sort.Order.asc("id")));
-    Page<AiCreditPurchase> purchases = purchaseQueryService.search(filter, pageable);
+  /// 구매 목록 한 쪽: 조건 검색(범위 밖 페이지 보정) > 회원 표시 이름
+  public Page<AdminCreditPurchaseRow> search(AdminListQuery query) {
+    PurchaseFilter filter = AdminCreditPurchaseList.filterOf(query);
+    Page<AiCreditPurchase> purchases = AdminListPaging.fetchWithPageCorrection(query,
+      corrected -> purchaseQueryService.search(filter, AdminCreditPurchaseList.pageableOf(corrected)));
     Map<String, String> displayNameById = memberFilter.displayNamesOf(purchases.getContent().stream()
       .map(AiCreditPurchase::getMemberId).filter(Objects::nonNull).distinct().toList());
     return purchases.map(purchase -> new AdminCreditPurchaseRow(purchase, displayNameById.get(purchase.getMemberId())));

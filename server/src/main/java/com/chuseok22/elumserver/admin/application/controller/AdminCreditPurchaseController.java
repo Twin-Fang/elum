@@ -1,14 +1,14 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.list.AdminCreditPurchaseList;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditPurchaseService;
-import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseAdminQueryService.PurchaseFilter;
-import com.chuseok22.elumserver.credit.core.CreditPurchaseStatus;
 import com.chuseok22.elumserver.license.application.service.store.StoreConsumableRefundHandler.ConsumableRefundOutcome;
 import com.chuseok22.elumserver.license.core.ConsumableRefundResult;
-import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.license.infrastructure.entity.StoreRefundCheckRun;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 관리자 AI 크레딧 > 구매·환불 (#1428): 크레딧 꾸러미 구매 목록·필터, 건별 수동 회수, 스토어 환불 재확인 기록·지금 확인
- * 필터 값은 문자열로 받아 직접 해석 (틀린 값은 필터 없음으로, 400 화면 대신)
+ * 목록 조건은 공통 AdminListQuery 로 받음 (틀린 값은 필터 없음으로 보정, 400 화면 대신)
  */
 @Slf4j
 @Controller
@@ -38,21 +38,17 @@ public class AdminCreditPurchaseController {
 
   private final AdminCreditPurchaseService purchaseService;
 
+  /// 목록: 검색어(q, 거래 id·회원 id 완전 일치), 필터(store, status), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping(LIST_PATH)
-  public String list(
-    @RequestParam(name = "store", required = false) String store,
-    @RequestParam(name = "status", required = false) String status,
-    @RequestParam(name = "q", required = false) String q,
-    @RequestParam(name = "page", defaultValue = "0") int page,
-    Model model
-  ) {
-    PurchaseFilter filter = new PurchaseFilter(enumOf(SubscriptionSource.class, store),
-      enumOf(CreditPurchaseStatus.class, status), q);
-    model.addAttribute("rows", purchaseService.search(filter, page));
-    model.addAttribute("filter", filter);
-    model.addAttribute("q", q == null ? "" : q);
-    model.addAttribute("stores", List.of(SubscriptionSource.APPLE_IAP, SubscriptionSource.GOOGLE_IAP));
-    model.addAttribute("statuses", CreditPurchaseStatus.values());
+  public String list(@RequestParam Map<String, String> parameters, Model model) {
+    AdminListQuery query = AdminListQuery.fromParameters(parameters, AdminCreditPurchaseList.DEFINITION);
+    model.addAttribute("rows", purchaseService.search(query));
+    model.addAttribute("query", query);
+    model.addAttribute("definition", AdminCreditPurchaseList.DEFINITION);
+    model.addAttribute("storeOptions", AdminCreditPurchaseList.STORE_OPTIONS);
+    model.addAttribute("statusOptions", AdminCreditPurchaseList.STATUS_OPTIONS);
+    // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
+    model.addAttribute("pagerBaseUrl", LIST_PATH + query.toQueryString(query.sort(), 1));
     model.addAttribute("recheck", purchaseService.recheckOverview());
     return "admin/credits-purchases";
   }
@@ -101,16 +97,5 @@ public class AdminCreditPurchaseController {
         ? "회수 " + run.getRevokedCount() + "건"
         : "실패(" + run.getFailureReason().getLabel() + "), 회수 " + run.getRevokedCount() + "건"))
       .collect(Collectors.joining(" · "));
-  }
-
-  private static <E extends Enum<E>> E enumOf(Class<E> type, String raw) {
-    if (raw == null || raw.isBlank()) {
-      return null;
-    }
-    try {
-      return Enum.valueOf(type, raw.trim());
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
   }
 }
