@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../app/home_notice_priority.dart';
 import '../../../app/home_notice_slot.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
@@ -16,7 +17,7 @@ import 'widgets/routine_summary_tile.dart';
 import 'widgets/today_routine_section.dart';
 
 /// 보호자 홈 본문 칸: 연속 기록 > 안내 한 장 (다음에 할 일 또는 가이드 팁) > 알림 한 장 > 오늘 일과 > 지난 일과
-/// 안내 카드는 한 번에 하나 (다음에 할 일이 있으면 가이드 팁은 숨김). 칸마다 위에서부터 차례로 떠오름
+/// 안내 카드는 한 번에 하나 (다음에 할 일 또는 알림 켜기 카드가 있으면 가이드 팁은 숨김). 칸마다 위에서부터 차례로 떠오름
 class GuardianHomeSections extends ConsumerWidget {
   const GuardianHomeSections({super.key, required this.swipeKey, required this.onCreateRoutine, required this.horizontalInset});
 
@@ -40,6 +41,8 @@ class GuardianHomeSections extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasNextStep = ref.watch(homeNextStepProvider) != HomeNextStep.none;
+    // 알림 켜기 카드가 떠 있으면 가이드 팁은 뒤로 (첫 화면을 알림 한 장으로, 코치마크 대상이 밀리지 않게 #1441)
+    final isNotificationOffNoticeShown = ref.watch(homeNoticeChoiceProvider)?.kind == HomeNoticeKind.notificationOff;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalInset.w),
       child: Column(
@@ -52,7 +55,7 @@ class GuardianHomeSections extends ConsumerWidget {
           // 가이드 팁: 다음에 할 일이 끝난 뒤에만 그 자리 아래 하나
           GuideTipSlot(
             placement: GuideTipPlacement.guardianHome,
-            isSuppressed: hasNextStep,
+            isSuppressed: hasNextStep || isNotificationOffNoticeShown,
             padding: EdgeInsets.only(bottom: _cardToSection.h),
           ),
           // 알림 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)
