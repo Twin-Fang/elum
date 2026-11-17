@@ -352,7 +352,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                             fit: StackFit.expand,
                             children: [
                               if (_move.isCompleted)
-                                step.demoBuilder!(context, _to!.rect),
+                                step.demoBuilder!(context, _to!),
                             ],
                           ),
                         ),

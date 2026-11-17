@@ -11,6 +11,9 @@ enum CardReviewCoachStep {
   /// `카드 순서 변경` > 길게 눌러 끌기 (카드 1장이면 뺌)
   reorderCards,
 
+  /// `예약` > 요일과 시각을 정하면 그때마다 저절로 보냄 (예약 도구가 없으면 뺌)
+  schedule,
+
   /// `카드 저장하기`
   save,
 }
@@ -46,33 +49,49 @@ class CardReviewCoachNotifier extends Notifier<CardReviewCoachState> {
     return const CardReviewCoachState();
   }
 
-  /// 카드 수 > 보여 줄 단계 (1장이면 순서를 바꿀 수 없어 순서 변경을 뺀다)
-  static List<CardReviewCoachStep> stepsFor(int cardCount) => [
+  /// 카드 수 · 예약 도구 > 보여 줄 단계 (1장이면 순서 변경, 예약 도구가 없으면 예약을 뺀다)
+  static List<CardReviewCoachStep> stepsFor({
+    required int cardCount,
+    required bool hasScheduleTool,
+  }) => [
     CardReviewCoachStep.editCard,
     if (cardCount > 1) CardReviewCoachStep.reorderCards,
+    if (hasScheduleTool) CardReviewCoachStep.schedule,
     CardReviewCoachStep.save,
   ];
 
   /// 안 봤으면 켠다 (켰으면 true). 읽지 못하면 **봤다고 친다** — 매번 뜨는 안내를 막는다
-  bool maybeStart({required int cardCount}) {
+  ///
+  /// 전체를 안 봤으면 전체, 전체는 봤는데 예약 단계만 안 봤으면 예약 단계 하나만 (#1439)
+  bool maybeStart({required int cardCount, required bool hasScheduleTool}) {
     if (state.isActive || _hasShownThisRun) return false;
     final bool isSeen;
+    final bool isScheduleSeen;
     try {
-      isSeen = ref.read(localStorageProvider).isCardReviewCoachSeen;
+      final storage = ref.read(localStorageProvider);
+      isSeen = storage.isCardReviewCoachSeen;
+      isScheduleSeen = storage.isCardReviewScheduleCoachSeen;
     } catch (e) {
       AppLogger.error('CardReviewCoach.read', e);
       return false;
     }
-    if (isSeen) return false;
+    final List<CardReviewCoachStep> steps;
+    if (!isSeen) {
+      steps = stepsFor(cardCount: cardCount, hasScheduleTool: hasScheduleTool);
+    } else if (hasScheduleTool && !isScheduleSeen) {
+      steps = const [CardReviewCoachStep.schedule];
+    } else {
+      return false;
+    }
     _hasShownThisRun = true;
-    _turnOn(stepsFor(cardCount));
+    _turnOn(steps);
     return true;
   }
 
   /// 다시 보기 (`?` 버튼): 봤어도 켠다. 봤음 기록은 바꾸지 않는다
-  void replay({required int cardCount}) {
+  void replay({required int cardCount, required bool hasScheduleTool}) {
     if (state.isActive) return;
-    _turnOn(stepsFor(cardCount));
+    _turnOn(stepsFor(cardCount: cardCount, hasScheduleTool: hasScheduleTool));
   }
 
   void _turnOn(List<CardReviewCoachStep> steps) {
@@ -96,9 +115,13 @@ class CardReviewCoachNotifier extends Notifier<CardReviewCoachState> {
   /// 못 남겨도 이번 실행에서는 [_hasShownThisRun] 이 다시 뜨는 것을 막는다.
   Future<void> finish() async {
     if (!state.isActive) return;
+    // 예약 단계는 그 단계를 띄운 경우에만 봤다고 남김 (도구가 없던 사람은 다음에 이 단계만 봄)
+    final hasShownSchedule = state.steps.contains(CardReviewCoachStep.schedule);
     state = const CardReviewCoachState();
     try {
-      await ref.read(localStorageProvider).setCardReviewCoachSeen(true);
+      final storage = ref.read(localStorageProvider);
+      await storage.setCardReviewCoachSeen(true);
+      if (hasShownSchedule) await storage.setCardReviewScheduleCoachSeen(true);
     } catch (e) {
       AppLogger.error('CardReviewCoach.write', e);
     }

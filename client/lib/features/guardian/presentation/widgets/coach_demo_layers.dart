@@ -4,25 +4,99 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
+import '../../../../core/widgets/coach_mark_parts.dart';
 import 'coach_demo_content.dart';
 import 'coach_demo_parts.dart';
 import 'library_routine_tile.dart';
+import 'routine_sent_toast.dart';
 
 /// 일과관리 코치마크 시범 연출. 구멍 위에 얹혀 **그림만** 그린다 (터치·서버·일과 데이터는 건드리지 않음)
 ///
 /// 모두 `CoachMarkStep.demoBuilder` 에 꽂을 수 있게 [Positioned] 를 돌려준다.
 /// 한 주기는 [AppMotion.coachDemoLoop]. 동작 줄이기면 멈춘 마지막 장면만 그린다.
 
-/// 누르기: 손가락이 칸을 누르고 링이 퍼짐 (시트는 올리지 않는다: 어두운 막 위에 밝은 시트만 튀어 보인다)
-Widget tapDemo(BuildContext context, Rect target) =>
-    _pressWithRingDemo(target);
+/// 누르기: 대상 모양 그대로 눌렸다가 번짐 (시트는 올리지 않는다: 어두운 막 위에 밝은 시트만 튀어 보인다)
+Widget tapDemo(BuildContext context, CoachHole hole) => buildCoachDemoLoop(
+  endScene: _tapPeak,
+  builder: (context, t) => _tapPress(hole, t),
+);
 
-/// 길게 눌렀다 떼기: 꾹 누르면 링이 퍼지고, 손을 떼면 칸 옆에 메뉴가 뜬다 (끌지 않으면 메뉴)
+/// 누르기 한 번의 눌림 꼭대기 (동작 줄이기 멈춤 장면: 대상 테두리가 또렷한 순간)
+const _tapPeak = 0.15;
+
+/// 누르기 한 번: 0.05~0.25 눌렀다 뗌, 0.12~0.45 번짐
+Widget _tapPress(CoachHole hole, double t) => CoachDemoPressOutline(
+  rect: hole.rect,
+  radius: hole.radius,
+  press: coachDemoPulse(t, 0.05, 0.25),
+  ripple: coachDemoPhase(t, 0.12, 0.45),
+);
+
+/// 예약: 누른 뒤 도구 겉면이 고른 반복 요약(`평일 오전 8:00`)으로 바뀌어 머묾 > 끝에 되돌아감
+///
+/// [pickedFace] 는 요약이 적힌 도구 겉면 (실제 도구와 같은 부품)
+Widget scheduleTapDemo(
+  BuildContext context,
+  CoachHole hole, {
+  required Widget pickedFace,
+}) => buildCoachDemoLoop(
+  endScene: 0.6,
+  builder: (context, t) {
+    final appear = coachDemoPhase(t, 0.3, 0.4) * (1 - coachDemoPhase(t, 0.9, 1));
+    return Stack(
+      children: [
+        Positioned.fromRect(
+          rect: hole.rect,
+          child: Opacity(
+            opacity: appear,
+            child: Transform.scale(
+              scale: 0.92 + 0.08 * AppMotion.springPop.transform(appear),
+              child: pickedFace,
+            ),
+          ),
+        ),
+        _tapPress(hole, t),
+      ],
+    );
+  },
+);
+
+/// 저장: 누른 뒤 버튼 오른쪽 안에 보내기 체크(보낸 뒤 토스트와 같은 그림)가 톡 튀어나와 머묾
+Widget sendTapDemo(BuildContext context, CoachHole hole) => buildCoachDemoLoop(
+  endScene: 0.6,
+  builder: (context, t) {
+    final checkSize = _sentCheckSize.w;
+    final isCheckShown = t >= 0.3 && t < 0.9;
+    return Stack(
+      children: [
+        _tapPress(hole, t),
+        // 이름은 가운데라 오른쪽 안쪽에 둠 (버튼 밖·화면 끝으로 나가지 않음)
+        if (isCheckShown)
+          Positioned(
+            left: hole.rect.right - context.space.md.w - checkSize,
+            top: hole.rect.center.dy - checkSize / 2,
+            child: ClipOval(
+              child: SizedBox.square(
+                dimension: checkSize,
+                child: const RoutineSentCheck(),
+              ),
+            ),
+          ),
+      ],
+    );
+  },
+);
+
+/// 보내기 체크 판 지름 (토스트 앞 판과 같은 38)
+const _sentCheckSize = 38.0;
+
+/// 길게 눌렀다 떼기: 꾹 누르면 대상 모양이 번지고, 손을 떼면 칸 옆에 메뉴가 뜬다 (끌지 않으면 메뉴)
 ///
 /// 메뉴는 칸 카드 오른쪽 끝에서 띄운다. 화면 오른쪽 끝을 넘으면 칸 왼쪽으로 돌린다.
-Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
+Widget longPressDemo(BuildContext context, CoachHole hole) => buildCoachDemoLoop(
   endScene: 0.85,
   builder: (context, t) {
+    final target = hole.rect;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final menuWidth = CoachDemoAnchoredMenu.width.w;
     final gap = context.space.sm.w;
@@ -44,19 +118,15 @@ Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
     );
     // 메뉴를 일찍 띄워 오래 둔다: 말풍선 화살표가 메뉴 아래 끝에 붙어 있다
     final appear = coachDemoPhase(t, 0.3, 0.38);
-    final touchPoint = coachDemoTouchPointOf(target);
     return Stack(
       children: [
-        CoachDemoFinger(
-          center: touchPoint,
+        // 꾹 누름: 눌린 채 머물다 0.25~0.3 에 뗌
+        CoachDemoPressOutline(
+          rect: target,
+          radius: hole.radius,
           press:
               coachDemoPhase(t, 0.05, 0.15) * (1 - coachDemoPhase(t, 0.25, 0.3)),
-          appear:
-              coachDemoPhase(t, 0, 0.05) * (1 - coachDemoPhase(t, 0.3, 0.36)),
-        ),
-        CoachDemoRing(
-          center: touchPoint,
-          spread: coachDemoPhase(t, 0.1, 0.28),
+          ripple: coachDemoPhase(t, 0.1, 0.28),
         ),
         Positioned(
           left: menuLeft,
@@ -149,33 +219,15 @@ Widget dragToGroupDemo(
             ),
           ),
         ),
-        CoachDemoFinger(
-          center: moving.center,
+        // 잡은 그림 칸 테두리 (칸과 같은 모서리, 놓으면 사라짐)
+        CoachDemoPressOutline(
+          rect: Rect.fromCenter(
+            center: moving.center,
+            width: moving.width * (1 + 0.12 * lift),
+            height: moving.height * (1 + 0.12 * lift),
+          ),
+          radius: LibraryRoutineTile.iconRadius.w,
           press: lift * (1 - drop),
-          appear:
-              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),
-        ),
-      ],
-    );
-  },
-);
-
-/// 탭 한 번: 손가락이 대상 모서리를 누르고 링이 퍼짐
-Widget _pressWithRingDemo(Rect target) => buildCoachDemoLoop(
-  endScene: 0.5,
-  builder: (context, t) {
-    final touchPoint = coachDemoTouchPointOf(target);
-    return Stack(
-      children: [
-        CoachDemoFinger(
-          center: touchPoint,
-          press: coachDemoPulse(t, 0.1, 0.25),
-          appear:
-              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.6, 0.7)),
-        ),
-        CoachDemoRing(
-          center: touchPoint,
-          spread: coachDemoPhase(t, 0.17, 0.5),
         ),
       ],
     );

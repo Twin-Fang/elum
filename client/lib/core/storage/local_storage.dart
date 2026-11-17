@@ -284,7 +284,11 @@ abstract interface class LocalStorage {
   bool get isCardReviewCoachSeen;
   Future<void> setCardReviewCoachSeen(bool isSeen);
 
-  /// 코치마크 4종(홈·일과관리·묶음·카드 검토)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
+  /// 카드 검토 코치마크 예약 단계를 봤는가 (앞 단계를 이미 본 사람에게 이 단계만 한 번)
+  bool get isCardReviewScheduleCoachSeen;
+  Future<void> setCardReviewScheduleCoachSeen(bool isSeen);
+
+  /// 코치마크(홈·일과관리·묶음·카드 검토·카드 검토 예약 단계)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
   Future<void> resetCoachMarks();
 
 

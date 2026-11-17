@@ -14,7 +14,6 @@ class ElumSecondaryButton extends StatelessWidget {
     required this.onTap,
     this.isCompact = false,
     this.leading,
-    this.trailing,
   });
 
   final String label;
@@ -28,16 +27,12 @@ class ElumSecondaryButton extends StatelessWidget {
   /// 글자 앞 작은 그림 (예시 일과 열기의 겹친 카드)
   final Widget? leading;
 
-  /// 글자 뒤 작은 표지 (Free 에게 보이는 PRO 배지)
-  final Widget? trailing;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
     final isEnabled = onTap != null;
     final leading = this.leading;
-    final trailing = this.trailing;
     final labelText = Text(
       label,
       textAlign: TextAlign.center,
@@ -63,15 +58,15 @@ class ElumSecondaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(space.buttonRadius.r),
           ),
           alignment: isCompact ? null : Alignment.center,
-          child: leading == null && trailing == null
+          child: leading == null
               ? (isCompact ? Center(widthFactor: 1, heightFactor: 1, child: labelText) : labelText)
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (leading != null) ...[leading, SizedBox(width: space.xs.w)],
+                    leading,
+                    SizedBox(width: space.xs.w),
                     Flexible(child: labelText),
-                    if (trailing != null) ...[SizedBox(width: space.xs.w), trailing],
                   ],
                 ),
         ),

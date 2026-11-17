@@ -6319,12 +6319,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guideTipReadAction => 'Leer';
 
   @override
-  String get cardReviewScheduleSend => '요일과 시각 정해서 보내기';
-
-  @override
-  String get routineScheduleSaveAndSend => '저장하고 보내기';
-
-  @override
   String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
 
   @override
@@ -6341,4 +6335,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
+
+  @override
+  String get cardReviewToolSchedule => '예약';
+
+  @override
+  String get cardReviewCoachScheduleMessage =>
+      '*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요';
+
+  @override
+  String get routineSchedulePickDone => '이렇게 정하기';
+
+  @override
+  String get routineSchedulePickClear => '예약 안 하기';
 }

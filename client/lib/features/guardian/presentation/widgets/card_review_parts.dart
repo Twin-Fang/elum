@@ -9,6 +9,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/widgets/pro_badge.dart';
 import '../../../../core/theme/card_layout.dart';
 import '../../../../shared/models/routine.dart';
 import 'routine_title_edit_label.dart';
@@ -206,9 +207,9 @@ class CardReviewReorderHint extends StatelessWidget {
   }
 }
 
-/// 도구 버튼 3개 — `카드 순서 변경` · `이 카드 수정` · `카드 추가` (시안 1173:5574).
+/// 도구 버튼 3~4개 — `순서 변경` · `이 카드 수정` · `카드 추가` (시안 1173:5574) · `예약` (#1439, 보일 때만)
 ///
-/// 순서 변경 모드에서는 `카드 순서 변경` 만 눌린 색이고 나머지 둘은 흐려진 채
+/// 순서 변경 모드에서는 `순서 변경` 만 눌린 색이고 나머지는 흐려진 채
 /// 눌리지 않는다 (시안 1197:5798, 투명도 0.4). 눌린 버튼을 다시 누르면 모드를 나온다.
 class CardReviewToolRow extends StatelessWidget {
   const CardReviewToolRow({
@@ -220,116 +221,192 @@ class CardReviewToolRow extends StatelessWidget {
     required this.onAdd,
     this.reorderKey,
     this.editKey,
+    this.schedule,
   });
 
   /// 도구 버튼 모서리 반지름 (코치마크 구멍도 같은 값)
   static const buttonRadius = 18.0;
 
-  /// 코치마크가 가리킬 `카드 순서 변경` · `이 카드 수정` 버튼
+  /// 줄 폭 (시안 110 × 3 + 8 × 2) · 버튼 사이
+  static const _rowWidth = 346.0;
+  static const _buttonGap = 8.0;
+
+  /// 코치마크가 가리킬 `순서 변경` · `이 카드 수정` 버튼
   final GlobalKey? reorderKey;
   final GlobalKey? editKey;
 
   final bool reorderMode;
   final VoidCallback onReorder;
 
-  /// 모드 안에서 눌린 `카드 순서 변경` 을 다시 눌렀을 때 — `완료` 와 같다.
+  /// 모드 안에서 눌린 `순서 변경` 을 다시 눌렀을 때 — `완료` 와 같다.
   final VoidCallback onFinishReorder;
   final VoidCallback onEdit;
   final VoidCallback onAdd;
 
+  /// 넷째 `예약` 도구. null 이면 버튼 3개
+  final CardReviewScheduleTool? schedule;
+
   @override
   Widget build(BuildContext context) {
+    final schedule = this.schedule;
+    final buttonCount = schedule == null ? 3 : 4;
+    final buttonWidth = (_rowWidth - _buttonGap * (buttonCount - 1)) / buttonCount;
     return SizedBox(
-      // 110 × 3 + 8 × 2
-      width: 346.w,
+      width: _rowWidth.w,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _ToolButton(
             key: reorderKey,
-            icon: AppAssets.iconInterlining,
-            label: context.l10n.cardReviewToolReorder,
-            pressed: reorderMode,
+            width: buttonWidth,
+            face: CardReviewToolFace(
+              icon: AppAssets.iconInterlining,
+              label: context.l10n.cardReviewToolReorder,
+              isPressed: reorderMode,
+            ),
             // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
             // 막아 두면 `완료`·`✕` 로만 나올 수 있어 불편하다.
             onTap: reorderMode ? onFinishReorder : onReorder,
           ),
           _ToolButton(
             key: editKey,
-            icon: AppAssets.iconPencilEdit,
-            label: context.l10n.cardReviewToolEdit,
-            dimmed: reorderMode,
+            width: buttonWidth,
+            face: CardReviewToolFace(
+              icon: AppAssets.iconPencilEdit,
+              label: context.l10n.cardReviewToolEdit,
+            ),
+            isDimmed: reorderMode,
             onTap: reorderMode ? null : onEdit,
           ),
           _ToolButton(
-            icon: AppAssets.iconPlus,
-            label: context.l10n.cardReviewToolAdd,
-            dimmed: reorderMode,
+            width: buttonWidth,
+            face: CardReviewToolFace(
+              icon: AppAssets.iconPlus,
+              label: context.l10n.cardReviewToolAdd,
+            ),
+            isDimmed: reorderMode,
             onTap: reorderMode ? null : onAdd,
           ),
+          if (schedule != null)
+            _ToolButton(
+              key: schedule.coachKey,
+              width: buttonWidth,
+              face: CardReviewToolFace(
+                icon: AppAssets.iconCalendar,
+                label: schedule.label,
+              ),
+              isDimmed: reorderMode,
+              shouldShowProBadge: schedule.shouldShowProBadge,
+              onTap: reorderMode ? null : schedule.onTap,
+            ),
         ],
       ),
     );
   }
 }
 
-class _ToolButton extends StatelessWidget {
-  const _ToolButton({
+/// 넷째 `예약` 도구: 이름(고른 반복이 있으면 요약) · Free 표지 · 누름 · 코치마크 대상
+typedef CardReviewScheduleTool = ({
+  String label,
+  bool shouldShowProBadge,
+  VoidCallback? onTap,
+  GlobalKey? coachKey,
+});
+
+/// 도구 버튼 겉면: 그림 16 > 8 > 이름 한 줄 (코치마크 예약 시범도 같은 겉면을 그림)
+class CardReviewToolFace extends StatelessWidget {
+  const CardReviewToolFace({
     super.key,
     required this.icon,
     required this.label,
-    required this.onTap,
-    this.pressed = false,
-    this.dimmed = false,
+    this.isPressed = false,
   });
 
   final String icon;
   final String label;
-  final VoidCallback? onTap;
 
   /// 눌린 색 (#D7D3D1)
-  final bool pressed;
-
-  /// 흐리게 (투명도 0.4)
-  final bool dimmed;
+  final bool isPressed;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: isPressed ? colors.editChipPressedBg : colors.editChipBg,
+        borderRadius: BorderRadius.circular(CardReviewToolRow.buttonRadius.r),
+      ),
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(horizontal: _labelSidePadding.w),
+      // 글꼴을 키우거나 반복 요약이 길어도 버튼 밖으로 넘치지 않게 줄인다
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(icon, width: 16.w, height: 16.w),
+            SizedBox(height: 8.h),
+            Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              style: context.typo.editChipLabel.copyWith(
+                color: colors.editChipLabel,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  /// 이름 좌우 최소 여백 (4칸일 때 글자가 모서리에 붙지 않게)
+  static const _labelSidePadding = 4.0;
+}
+
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({
+    super.key,
+    required this.width,
+    required this.face,
+    required this.onTap,
+    this.isDimmed = false,
+    this.shouldShowProBadge = false,
+  });
+
+  /// 버튼 폭 (시안 좌표, 줄 폭을 버튼 수로 나눈 값)
+  final double width;
+  final CardReviewToolFace face;
+  final VoidCallback? onTap;
+
+  /// 흐리게 (투명도 0.4)
+  final bool isDimmed;
+
+  /// Free 에게 오른쪽 위 PRO 배지
+  final bool shouldShowProBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = SizedBox(width: width.w, height: 60.h, child: face);
     return Opacity(
-      opacity: dimmed ? 0.4 : 1,
+      opacity: isDimmed ? 0.4 : 1,
       child: AppPressable(
         onTap: onTap,
-        semanticLabel: label,
-        child: Container(
-          width: 110.w,
-          height: 60.h,
-          decoration: BoxDecoration(
-            color: pressed ? colors.editChipPressedBg : colors.editChipBg,
-            borderRadius: BorderRadius.circular(CardReviewToolRow.buttonRadius.r),
-          ),
-          alignment: Alignment.center,
-          // 글꼴을 키워도 버튼 밖으로 넘치지 않게 줄인다
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(icon, width: 16.w, height: 16.w),
-                SizedBox(height: 8.h),
-                Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
-                  style: context.typo.editChipLabel.copyWith(
-                    color: colors.editChipLabel,
+        semanticLabel: face.label,
+        child: shouldShowProBadge
+            ? Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  button,
+                  // 버튼 위로 걸쳐 그림·이름을 덮지 않게 둠
+                  Positioned(
+                    top: -context.space.sm.h,
+                    right: 0,
+                    child: const ProBadge(),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                ],
+              )
+            : button,
       ),
     );
   }

@@ -2846,7 +2846,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면 도구 버튼. 순서 변경 모드를 켜고 끈다
   ///
   /// In ko, this message translates to:
-  /// **'카드 순서 변경'**
+  /// **'순서 변경'**
   String get cardReviewToolReorder;
 
   /// 카드 검토 화면 도구 버튼. 지금 보는 카드를 고친다
@@ -5207,10 +5207,10 @@ abstract class AppLocalizations {
   /// **'여기를 누른 뒤 카드를 *길게 눌러 끌면*\n순서가 바뀌어요'**
   String get cardReviewCoachReorderMessage;
 
-  /// 카드 검토 코치마크 마지막 단계 — 저장 버튼. 버튼 이름은 cardReviewSave 와 같아야 한다
+  /// 카드 검토 코치마크 마지막 단계 — 저장 버튼. 누르면 바로 이룸이에게 보낸다는 것을 알림. 버튼 이름은 cardReviewSave 와 같아야 한다
   ///
   /// In ko, this message translates to:
-  /// **'다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요'**
+  /// **'다 고쳤으면 *카드 저장하기*를 눌러요\n누르면 *바로 이룸이에게* 보내요'**
   String get cardReviewCoachSaveMessage;
 
   /// ? 버튼의 낭독 이름 (카드 검토 상단바, 일과관리 머리). 누르면 그 화면의 코치마크를 다시 띄운다
@@ -10109,18 +10109,6 @@ abstract class AppLocalizations {
   /// **'읽어 보기'**
   String get guideTipReadAction;
 
-  /// 카드 확인 저장 버튼 아래 보조 버튼: 반복 요일과 시각을 고른 뒤 저장하고 보냄 (Free 는 PRO 배지 > Pro 안내)
-  ///
-  /// In ko, this message translates to:
-  /// **'요일과 시각 정해서 보내기'**
-  String get cardReviewScheduleSend;
-
-  /// 카드 확인에서 연 반복 시트의 주 버튼: 고른 반복으로 일과를 저장하고 보냄
-  ///
-  /// In ko, this message translates to:
-  /// **'저장하고 보내기'**
-  String get routineScheduleSaveAndSend;
-
   /// 첫 보내기 축하 주 버튼: 이 기기를 이룸이 화면으로 바꿔 보낸 일과를 바로 보기
   ///
   /// In ko, this message translates to:
@@ -10150,6 +10138,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이 기기 연결'**
   String get homeNextStepFirstTryLinkDevice;
+
+  /// 카드 검토 화면 넷째 도구 버튼: 반복 요일과 시각을 골라 두면 카드 저장하기 뒤 반복도 저장 (고른 뒤에는 반복 요약이 이름 자리에 나옴, Free 는 PRO 배지 > Pro 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'예약'**
+  String get cardReviewToolSchedule;
+
+  /// 카드 검토 코치마크 — 예약 도구. 앞 단계를 이미 본 보호자에게는 이 단계만 한 번 나온다
+  ///
+  /// In ko, this message translates to:
+  /// **'*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요'**
+  String get cardReviewCoachScheduleMessage;
+
+  /// 카드 확인 예약 도구로 연 반복 시트의 주 버튼: 고른 반복을 기억만 하고 닫음 (카드 저장하기 때 함께 저장)
+  ///
+  /// In ko, this message translates to:
+  /// **'이렇게 정하기'**
+  String get routineSchedulePickDone;
+
+  /// 카드 확인 예약 도구로 연 반복 시트의 보조 버튼: 앞서 고른 반복을 빼고 닫음 (이미 고른 값이 있을 때만)
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 안 하기'**
+  String get routineSchedulePickClear;
 }
 
 class _AppLocalizationsDelegate

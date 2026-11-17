@@ -3,22 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
 import '../../../../core/widgets/coach_mark_step.dart';
 import '../../application/card_review_coach_notifier.dart';
+import '../../domain/routine_schedule.dart';
 import 'card_review_parts.dart';
 import 'coach_mark_start_gate.dart';
 import 'coach_demo_layers.dart';
+import 'routine_schedule_labels.dart';
+import 'routine_schedule_sheet.dart';
 
-/// 코치마크가 가리킬 버튼: `이 카드 수정` · `카드 순서 변경` · `카드 저장하기`
+/// 코치마크가 가리킬 버튼: `이 카드 수정` · `순서 변경` · `예약` · `카드 저장하기`
 class CardReviewCoachKeys {
   final edit = GlobalKey();
   final reorder = GlobalKey();
+  final schedule = GlobalKey();
   final save = GlobalKey();
 }
 
-/// 카드 검토 코치마크: 수정 > 순서 변경 > 저장 (시안 없음, 홈 코치마크 모양)
+/// 카드 검토 코치마크: 수정 > 순서 변경 > 예약 > 저장 (시안 없음, 홈 코치마크 모양)
 ///
 /// 실제 화면 위 루트 오버레이에 막을 그린다. 가리킬 버튼은 화면이 [CardReviewCoachKeys] 로 넘긴다.
 /// 처음 한 번 스스로 켜고, `?` 다시 보기는 화면이 notifier 의 replay 를 부른다.
@@ -27,6 +32,7 @@ class CardReviewCoachMark extends ConsumerStatefulWidget {
     super.key,
     required this.keys,
     required this.cardCount,
+    required this.hasScheduleTool,
     required this.canStart,
   });
 
@@ -34,6 +40,9 @@ class CardReviewCoachMark extends ConsumerStatefulWidget {
 
   /// 단계 구성에 쓴다 (1장이면 순서 변경 단계 없음)
   final int cardCount;
+
+  /// 단계 구성에 쓴다 (예약 도구가 없으면 예약 단계 없음)
+  final bool hasScheduleTool;
 
   /// 지금 처음 안내를 켜도 되는 화면 상태인가 (순서 변경 모드가 아님)
   final bool canStart;
@@ -85,10 +94,23 @@ class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark>
   @override
   void onCoachMarkStartReady() {
     // 기다리는 사이 순서 변경 모드로 들어갔을 수 있다
-    if (widget.canStart) _notifier.maybeStart(cardCount: widget.cardCount);
+    if (widget.canStart) {
+      _notifier.maybeStart(
+        cardCount: widget.cardCount,
+        hasScheduleTool: widget.hasScheduleTool,
+      );
+    }
   }
 
-  /// 단계 > 가리킬 버튼과 글 (모두 누르기 시범)
+  /// 예약 시범에 보일 반복 (반복 시트 처음 값: 평일 오전 8시)
+  static const _sampleRepeatSchedule = RoutineSchedule(
+    routineId: '',
+    weekdays: RoutineScheduleSheet.defaultWeekdays,
+    hour: RoutineScheduleSheet.defaultHour,
+    minute: RoutineScheduleSheet.defaultMinute,
+  );
+
+  /// 단계 > 가리킬 버튼과 글 (수정·순서 변경은 누르기, 예약은 누른 뒤 요약으로 바뀜, 저장은 누른 뒤 보내기 체크)
   CoachMarkStep _stepFor(CardReviewCoachStep step, BuildContext context) {
     final l10n = context.l10n;
     return switch (step) {
@@ -104,11 +126,24 @@ class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark>
         holeRadius: CardReviewToolRow.buttonRadius.r,
         demoBuilder: tapDemo,
       ),
+      CardReviewCoachStep.schedule => CoachMarkStep(
+        target: widget.keys.schedule,
+        message: l10n.cardReviewCoachScheduleMessage,
+        holeRadius: CardReviewToolRow.buttonRadius.r,
+        demoBuilder: (context, hole) => scheduleTapDemo(
+          context,
+          hole,
+          pickedFace: CardReviewToolFace(
+            icon: AppAssets.iconCalendar,
+            label: routineScheduleSummaryLabel(context, _sampleRepeatSchedule),
+          ),
+        ),
+      ),
       CardReviewCoachStep.save => CoachMarkStep(
         target: widget.keys.save,
         message: l10n.cardReviewCoachSaveMessage,
         holeRadius: context.space.buttonRadius.r,
-        demoBuilder: tapDemo,
+        demoBuilder: sendTapDemo,
       ),
     };
   }

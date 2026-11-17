@@ -26,12 +26,20 @@ import '../../../subscription/domain/plan_benefit.dart';
 /// 이룸이 기기 알림이 꺼져 있거나 기기가 없으면 스위치 아래에 한 줄로 알린다. Pro 가 끝나 멈췄으면 그 사실과
 /// 남아 있다는 것을 먼저 말하고, 저장은 막되 끄기는 둔다.
 class RoutineScheduleSheet extends ConsumerStatefulWidget {
-  const RoutineScheduleSheet({super.key, required this.routine, this.shouldReturnWithoutSaving = false});
+  const RoutineScheduleSheet({
+    super.key,
+    required this.routine,
+    this.shouldReturnWithoutSaving = false,
+    this.pickedSchedule,
+  });
 
   final Routine routine;
 
-  /// true: 서버에 저장하지 않고 고른 값을 돌려주며 닫음 (카드 확인의 예약 보내기, 끄기 버튼 없음)
+  /// true: 서버에 저장하지 않고 고른 값을 돌려주며 닫음 (카드 확인의 예약 도구, 반복 끄기 대신 예약 안 하기)
   final bool shouldReturnWithoutSaving;
+
+  /// 고르기만일 때 이 화면에서 앞서 고른 값 (시트를 다시 열면 그 값으로 시작, 있으면 예약 안 하기 버튼)
+  final RoutineSchedule? pickedSchedule;
 
   /// 처음 열 때 (예약이 없을 때): 평일 오전 8시 — 등교 준비가 가장 흔하다
   static const defaultWeekdays = {1, 2, 3, 4, 5};
@@ -50,12 +58,19 @@ class RoutineScheduleSheet extends ConsumerStatefulWidget {
         builder: (_) => RoutineScheduleSheet(routine: routine),
       );
 
-  /// 요일·시각만 고르기: 고른 반복 / 닫으면 null (저장은 부르는 쪽이 일과 저장 뒤에)
-  static Future<RoutineSchedule?> pick(BuildContext context, Routine routine) =>
-      showElumSheet<RoutineSchedule>(
-        context: context,
-        builder: (_) => RoutineScheduleSheet(routine: routine, shouldReturnWithoutSaving: true),
-      );
+  /// 요일·시각만 고르기 결과 3가지: 고른 반복 / (schedule: null) 예약 안 하기 / null 그냥 닫음 (저장은 부르는 쪽이 일과 저장 뒤에)
+  static Future<RoutineSchedulePick?> pick(
+    BuildContext context,
+    Routine routine, {
+    RoutineSchedule? pickedSchedule,
+  }) => showElumSheet<RoutineSchedulePick>(
+    context: context,
+    builder: (_) => RoutineScheduleSheet(
+      routine: routine,
+      shouldReturnWithoutSaving: true,
+      pickedSchedule: pickedSchedule,
+    ),
+  );
 
   @override
   ConsumerState<RoutineScheduleSheet> createState() =>
@@ -67,12 +82,15 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     routineScheduleOfProvider(widget.routine.id),
   );
 
+  /// 처음 보일 값: 이 화면에서 앞서 고른 값 > 저장된 반복 > 기본값
+  late final RoutineSchedule? _initial = widget.pickedSchedule ?? _existing;
+
   late final Set<int> _weekdays = {
-    ...(_existing?.weekdays ?? RoutineScheduleSheet.defaultWeekdays),
+    ...(_initial?.weekdays ?? RoutineScheduleSheet.defaultWeekdays),
   };
-  late int _hour = _existing?.hour ?? RoutineScheduleSheet.defaultHour;
-  late int _minute = _existing?.minute ?? RoutineScheduleSheet.defaultMinute;
-  late bool _isNotifyEnabled = _existing?.isNotifyEnabled ?? true;
+  late int _hour = _initial?.hour ?? RoutineScheduleSheet.defaultHour;
+  late int _minute = _initial?.minute ?? RoutineScheduleSheet.defaultMinute;
+  late bool _isNotifyEnabled = _initial?.isNotifyEnabled ?? true;
   var _isSaving = false;
 
   void _toggleWeekday(int weekday) => setState(() {
@@ -90,7 +108,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
     );
     // 고르기만: 저장 없이 고른 값 들고 닫기
     if (widget.shouldReturnWithoutSaving) {
-      Navigator.of(context).pop(schedule);
+      Navigator.of(context).pop<RoutineSchedulePick>((schedule: schedule));
       return;
     }
     setState(() => _isSaving = true);
@@ -213,7 +231,7 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
           else
             ElumButton(
               key: RoutineScheduleSheet.saveButtonKey,
-              label: widget.shouldReturnWithoutSaving ? l10n.routineScheduleSaveAndSend : l10n.routineScheduleSave,
+              label: widget.shouldReturnWithoutSaving ? l10n.routineSchedulePickDone : l10n.routineScheduleSave,
               loading: _isSaving,
               onPressed: _isSaving || hasNoWeekday || !canSchedule ? null : _save,
             ),
@@ -225,11 +243,22 @@ class _RoutineScheduleSheetState extends ConsumerState<RoutineScheduleSheet> {
               onTap: _isSaving ? null : _turnOff,
             ),
           ],
+          // 고르기만: 앞서 고른 예약을 빼고 닫기 (서버는 건드리지 않음)
+          if (widget.shouldReturnWithoutSaving && widget.pickedSchedule != null) ...[
+            SizedBox(height: space.xs.h),
+            ElumSecondaryButton(
+              label: l10n.routineSchedulePickClear,
+              onTap: () => Navigator.of(context).pop<RoutineSchedulePick>((schedule: null)),
+            ),
+          ],
         ],
       ),
     );
   }
 }
+
+/// 고르기만 시트 결과: 고른 반복, 또는 null(예약 안 하기)
+typedef RoutineSchedulePick = ({RoutineSchedule? schedule});
 
 /// 반복 저장 실패 팝업 (서버 Pro 거절이면 실패 대신 Pro 안내) · 반복 시트와 카드 확인 예약 보내기 공통
 Future<void> showRoutineScheduleSaveFailure(BuildContext context, WidgetRef ref, Object failure) async {
