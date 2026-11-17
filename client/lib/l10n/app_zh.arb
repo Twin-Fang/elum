@@ -1066,8 +1066,6 @@
   "cardExportNoCards": "这个日常没有卡片",
   "cardExportNoneSelected": "请至少选择一张要发送的卡片",
   "printBrandTagline": "一起过好每一天 | elum 行为卡片",
-  "cardExportPictogramCredit": "图片: Mulberry Symbols (CC BY-SA 4.0)",
-  "cardExportEmojiCredit": "图片: Twemoji (CC BY 4.0)",
   "cardExportPerPage": "{count, plural, other{{count}张}}",
   "cardExportFormatRow": "形式",
   "cardExportLayoutSection": "排版",

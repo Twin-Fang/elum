@@ -3607,12 +3607,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get printBrandTagline => '一起过好每一天 | elum 行为卡片';
 
   @override
-  String get cardExportPictogramCredit => '图片: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => '图片: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

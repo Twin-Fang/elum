@@ -1066,8 +1066,6 @@
   "cardExportNoCards": "Esta rutina no tiene tarjetas",
   "cardExportNoneSelected": "Elige al menos una tarjeta para enviar",
   "printBrandTagline": "Cada día, juntos | Tarjetas de acción de elum",
-  "cardExportPictogramCredit": "Imágenes: Mulberry Symbols (CC BY-SA 4.0)",
-  "cardExportEmojiCredit": "Imágenes: Twemoji (CC BY 4.0)",
   "cardExportPerPage": "{count, plural, one{{count} tarjeta} other{{count} tarjetas}}",
   "cardExportFormatRow": "Formato",
   "cardExportLayoutSection": "Diseño de página",

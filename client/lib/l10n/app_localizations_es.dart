@@ -3901,13 +3901,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cada día, juntos | Tarjetas de acción de elum';
 
   @override
-  String get cardExportPictogramCredit =>
-      'Imágenes: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => 'Imágenes: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
