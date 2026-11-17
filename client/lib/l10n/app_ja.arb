@@ -1066,8 +1066,6 @@
   "cardExportNoCards": "カードがない日課です",
   "cardExportNoneSelected": "送るカードを1枚以上選んでください",
   "printBrandTagline": "毎日をいっしょに | elum 行動カード",
-  "cardExportPictogramCredit": "絵：Mulberry Symbols (CC BY-SA 4.0)",
-  "cardExportEmojiCredit": "絵：Twemoji (CC BY 4.0)",
   "cardExportPerPage": "{count, plural, other{{count}枚}}",
   "cardExportFormatRow": "形式",
   "cardExportLayoutSection": "配置",

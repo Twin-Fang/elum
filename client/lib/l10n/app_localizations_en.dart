@@ -3828,13 +3828,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printBrandTagline => 'Every day, together | Elumi Behavior Cards';
 
   @override
-  String get cardExportPictogramCredit =>
-      'Pictures: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => 'Pictures: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

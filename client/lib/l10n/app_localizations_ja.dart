@@ -3633,12 +3633,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get printBrandTagline => '毎日をいっしょに | elum 行動カード';
 
   @override
-  String get cardExportPictogramCredit => '絵：Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => '絵：Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

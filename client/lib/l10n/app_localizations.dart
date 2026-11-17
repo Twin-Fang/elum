@@ -6509,18 +6509,6 @@ abstract class AppLocalizations {
   /// **'일상을 함께 | 이룸 행동카드'**
   String get printBrandTagline;
 
-  /// 픽토그램을 쓴 인쇄물 출처 표기 (라이선스 조건)
-  ///
-  /// In ko, this message translates to:
-  /// **'그림: Mulberry Symbols (CC BY-SA 4.0)'**
-  String get cardExportPictogramCredit;
-
-  /// 이모지 그림을 쓴 인쇄물 출처 표기 (라이선스 조건, #1149)
-  ///
-  /// In ko, this message translates to:
-  /// **'그림: Twemoji (CC BY 4.0)'**
-  String get cardExportEmojiCredit;
-
   /// 오려 쓰는 카드 한 쪽 장수 (줄 값 · 시트 고르기)
   ///
   /// In ko, this message translates to:
