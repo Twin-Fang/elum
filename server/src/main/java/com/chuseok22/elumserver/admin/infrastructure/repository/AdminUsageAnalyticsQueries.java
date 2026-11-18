@@ -52,7 +52,7 @@ public class AdminUsageAnalyticsQueries {
         select 1 from device_link d where d.member_id = m.id and d.redeemed_at is not null)) as device_linked_count,
       count(*) filter (where exists (
           select 1 from subscription sub where sub.member_id = m.id and sub.source in (:storeSources))
-        or exists (select 1 from ai_credit_purchase p where p.member_id = m.id)) as store_paid_count
+        or exists (select 1 from ai_credit_purchase purchase where purchase.member_id = m.id)) as store_paid_count
     from member m
     where m.created_at >= :from and m.created_at < :to and\s""" + COUNTED_MEMBER;
 
@@ -145,8 +145,8 @@ public class AdminUsageAnalyticsQueries {
       select 'DEVICE_LINKED', d.member_id, d.redeemed_at, 1
       from device_link d where d.redeemed_at >= :since
       union all
-      select 'STORE_PURCHASE', p.member_id, p.created_at, 1
-      from ai_credit_purchase p where p.member_id is not null and p.created_at >= :since
+      select 'STORE_PURCHASE', purchase.member_id, purchase.created_at, 1
+      from ai_credit_purchase purchase where purchase.member_id is not null and purchase.created_at >= :since
       union all
       select 'STORE_PURCHASE', sub.member_id, sub.started_at, 1
       from subscription sub where sub.source in (:storeSources) and sub.started_at >= :since

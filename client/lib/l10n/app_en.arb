@@ -1067,7 +1067,6 @@
   "myCreditPackLabelPro": "Buy more credits",
   "creditGetMore": "Get more credits",
   "myCreditPackDiscount": "-{percent}%",
-  "myCreditPackPopular": "Popular!",
   "myCreditPackBuy": "{count, plural, one{Buy {count} credit} other{Buy {count} credits}} ({price})",
   "myCreditPackNoExpiryNote": "Purchased credits never expire",
   "myCreditPackPriceFailed": "Couldn't load credit prices",
