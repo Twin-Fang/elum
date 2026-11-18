@@ -13,4 +13,30 @@
     <string name="lock_screen_action_show_now">Show now</string>
     <string name="lock_screen_action_pause">Pause 1 hour</string>
     <string name="lock_screen_action_resume">Turn back on</string>
+    <!-- 홈 위젯 3종 (#1465): 이름·설명, 루미 한마디 8상태(보호자·이룸이 기기), 다음 일과, 연속·별, 그림 설명 -->
+    <string name="widget_today_name">Today with Lumi</string>
+    <string name="widget_today_description">Shows Lumi\'s mood and today\'s routine progress</string>
+    <string name="widget_now_name">Card to do now</string>
+    <string name="widget_now_description">Shows the card to do now in big</string>
+    <string name="widget_streak_name">Stars and streak</string>
+    <string name="widget_streak_description">Shows your streak days and stars collected</string>
+    <string name="widget_message_stale_guardian">Let\'s check today\'s routines with Lumi!</string>
+    <string name="widget_message_stale_elumi">Let\'s see today\'s to-dos with Lumi!</string>
+    <string name="widget_message_empty_guardian">Shall we make today\'s routine?</string>
+    <string name="widget_message_empty_elumi">Today is a rest day</string>
+    <string name="widget_message_done_guardian">All of today\'s routines are done!</string>
+    <string name="widget_message_done_elumi">All done today! Amazing</string>
+    <string name="widget_message_night">Let\'s do it together tomorrow</string>
+    <string name="widget_message_evening">Lumi is waiting for you</string>
+    <string name="widget_message_morning_guardian">Good morning! Routines today: %1$d</string>
+    <string name="widget_message_morning_elumi">Good morning! To-dos today: %1$d</string>
+    <string name="widget_message_ready_guardian">Today\'s routines are waiting: %1$d</string>
+    <string name="widget_message_ready_elumi">Ready to start? To-dos: %1$d</string>
+    <string name="widget_message_progress_guardian">%1$d/%2$d done today</string>
+    <string name="widget_message_progress_elumi">Doing great! %1$d/%2$d</string>
+    <string name="widget_next_routine">Next · %1$s</string>
+    <string name="widget_streak_days">%1$d-day streak</string>
+    <string name="widget_star_count">Stars: %1$d</string>
+    <string name="widget_lumi_description">Lumi</string>
+    <string name="widget_card_picture_description">Card picture</string>
 </resources>

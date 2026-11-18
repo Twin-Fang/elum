@@ -11,15 +11,20 @@ import java.io.File
 import java.util.UUID
 import kr.twinfang.elum.lockscreen.LockScreenChannel
 import kr.twinfang.elum.lockscreen.LockScreenRoutes
+import kr.twinfang.elum.widget.ElumWidgetChannel
+import kr.twinfang.elum.widget.ElumWidgetRoutes
 
 // 네이버 SDK가 요구하는 FragmentActivity를 유지한다.
 class MainActivity : FlutterFragmentActivity() {
     // 잠금화면 채널: 새 intent 의 이동 경로를 Dart 에 바로 전달할 때 씀
     private var lockScreenChannel: MethodChannel? = null
+    // 홈 위젯 채널 (#1465): 떠 있을 때 위젯을 누르면 경로를 Dart 에 바로 전달
+    private var homeWidgetChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // 엔진 준비 전에 받아 둠 > Dart 시작 후 takePendingRoute 로 꺼냄
         rememberLockScreenRoute(intent)
+        ElumWidgetRoutes.consumeRoute(intent)?.let { ElumWidgetRoutes.pendingRoute = it }
         super.onCreate(savedInstanceState)
     }
 
@@ -27,6 +32,7 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        ElumWidgetRoutes.consumeRoute(intent)?.let { ElumWidgetChannel.openRoute(homeWidgetChannel, it) }
         val route = intent.getStringExtra(LockScreenRoutes.EXTRA_ROUTE) ?: return
         intent.removeExtra(LockScreenRoutes.EXTRA_ROUTE)
         lockScreenChannel?.invokeMethod(LockScreenChannel.METHOD_OPEN_ROUTE, route)
@@ -50,6 +56,8 @@ class MainActivity : FlutterFragmentActivity() {
         AppDiagnosticsChannel.register(flutterEngine, this)
         lockScreenChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LockScreenChannel.CHANNEL_NAME)
             .apply { setMethodCallHandler(LockScreenChannel(applicationContext) { this@MainActivity }) }
+        homeWidgetChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ElumWidgetChannel.CHANNEL_NAME)
+            .apply { setMethodCallHandler(ElumWidgetChannel(applicationContext)) }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elum/installation")
             .setMethodCallHandler { call, result ->
                 if (call.method != "getInstallationId") { result.notImplemented() }
@@ -77,6 +85,8 @@ class MainActivity : FlutterFragmentActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         lockScreenChannel?.setMethodCallHandler(null)
         lockScreenChannel = null
+        homeWidgetChannel?.setMethodCallHandler(null)
+        homeWidgetChannel = null
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, StripNativeAdFactory.FACTORY_ID)
         super.cleanUpFlutterEngine(flutterEngine)
     }

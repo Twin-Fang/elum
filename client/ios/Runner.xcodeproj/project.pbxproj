@@ -25,6 +25,10 @@
 		EA1C0F352E9D000100A1C0DE /* StripNativeAdFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */; };
 		EA1C0F392E9D000100A1C0DE /* ElumSceneBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */; };
 		F0D308E981AAADEBF11EE39B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 145D292B19BAD3C112C82574 /* WidgetKit.framework */; };
+		2D1B15731F61C844FCF12BC1 /* ElumWidgetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255D029A7C7C876B262F2F31 /* ElumWidgetModel.swift */; };
+		E11A9681DEE6518324E56E64 /* ElumWidgetText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */; };
+		35AA5533771431A121B16003 /* ElumWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */; };
+		F658C043229B1FF52B279552 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69BE54FF00569624326076C3 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +112,10 @@
 		EA1C0F342E9D000100A1C0DE /* StripNativeAdFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StripNativeAdFactory.swift; sourceTree = "<group>"; };
 		EA1C0F382E9D000100A1C0DE /* ElumSceneBridgePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElumSceneBridgePlugin.swift; sourceTree = "<group>"; };
 		EB7BC94865B6A557E72C3A95 /* ElumHomeWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = ElumHomeWidget.entitlements; sourceTree = "<group>"; };
+		255D029A7C7C876B262F2F31 /* ElumWidgetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetModel.swift; sourceTree = "<group>"; };
+		360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetText.swift; sourceTree = "<group>"; };
+		5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetViews.swift; sourceTree = "<group>"; };
+		69BE54FF00569624326076C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +159,10 @@
 			isa = PBXGroup;
 			children = (
 				9D4D012288B6FC6042949759 /* ElumHomeWidget.swift */,
+				255D029A7C7C876B262F2F31 /* ElumWidgetModel.swift */,
+				360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */,
+				5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */,
+				69BE54FF00569624326076C3 /* Assets.xcassets */,
 				394767EC570E77ACBFD8F21E /* Info.plist */,
 				EB7BC94865B6A557E72C3A95 /* ElumHomeWidget.entitlements */,
 				0F392121A628432DF9DA423D /* ElumHomeWidget.xcconfig */,
@@ -362,6 +374,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F658C043229B1FF52B279552 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +530,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D1B15731F61C844FCF12BC1 /* ElumWidgetModel.swift in Sources */,
+				E11A9681DEE6518324E56E64 /* ElumWidgetText.swift in Sources */,
+				35AA5533771431A121B16003 /* ElumWidgetViews.swift in Sources */,
 				9039BE278D7C3836954312AB /* ElumHomeWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -582,7 +598,7 @@
 				ENABLE_BITCODE = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -736,7 +752,7 @@
 				ENABLE_BITCODE = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -925,7 +941,7 @@
 				ENABLE_BITCODE = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ElumHomeWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

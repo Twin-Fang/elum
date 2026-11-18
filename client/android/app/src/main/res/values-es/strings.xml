@@ -13,4 +13,30 @@
     <string name="lock_screen_action_show_now">Ver ahora</string>
     <string name="lock_screen_action_pause">Pausar 1 hora</string>
     <string name="lock_screen_action_resume">Volver a activar</string>
+    <!-- 홈 위젯 3종 (#1465): 이름·설명, 루미 한마디 8상태(보호자·이룸이 기기), 다음 일과, 연속·별, 그림 설명 -->
+    <string name="widget_today_name">Hoy con Lumi</string>
+    <string name="widget_today_description">Muestra la cara de Lumi y el avance de las rutinas de hoy</string>
+    <string name="widget_now_name">Tarjeta de ahora</string>
+    <string name="widget_now_description">Muestra en grande la tarjeta que toca ahora</string>
+    <string name="widget_streak_name">Estrellas y racha</string>
+    <string name="widget_streak_description">Muestra los días seguidos y las estrellas reunidas</string>
+    <string name="widget_message_stale_guardian">¿Vemos las rutinas de hoy con Lumi?</string>
+    <string name="widget_message_stale_elumi">¿Vemos lo que toca hoy con Lumi?</string>
+    <string name="widget_message_empty_guardian">¿Creamos la rutina de hoy?</string>
+    <string name="widget_message_empty_elumi">Hoy es día de descanso</string>
+    <string name="widget_message_done_guardian">¡Las rutinas de hoy están hechas!</string>
+    <string name="widget_message_done_elumi">¡Hoy lo hiciste todo! Genial</string>
+    <string name="widget_message_night">Mañana lo hacemos juntos otra vez</string>
+    <string name="widget_message_evening">Lumi te está esperando</string>
+    <string name="widget_message_morning_guardian">¡Buenos días! Rutinas de hoy: %1$d</string>
+    <string name="widget_message_morning_elumi">¡Buenos días! Tareas de hoy: %1$d</string>
+    <string name="widget_message_ready_guardian">Rutinas de hoy esperando: %1$d</string>
+    <string name="widget_message_ready_elumi">¿Empezamos? Tareas: %1$d</string>
+    <string name="widget_message_progress_guardian">Hoy: %1$d/%2$d hechas</string>
+    <string name="widget_message_progress_elumi">¡Muy bien! %1$d/%2$d</string>
+    <string name="widget_next_routine">Siguiente · %1$s</string>
+    <string name="widget_streak_days">%1$d días seguidos</string>
+    <string name="widget_star_count">Estrellas: %1$d</string>
+    <string name="widget_lumi_description">Lumi</string>
+    <string name="widget_card_picture_description">Imagen de la tarjeta</string>
 </resources>

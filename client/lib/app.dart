@@ -24,6 +24,7 @@ import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
 import 'features/lock_screen/application/lock_screen_route_opener.dart';
+import 'core/lock_screen/home_widget_bridge.dart';
 import 'core/lock_screen/lock_screen_bridge.dart';
 import 'features/guardian/application/routine_providers.dart';
 import 'features/notification/application/push_message_router.dart';
@@ -133,6 +134,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
 
   /// 잠금화면·알림에서 연 경로 구독 (Android, 앱 수명 동안)
   StreamSubscription<String>? _lockScreenRouteSubscription;
+  StreamSubscription<String>? _homeWidgetRouteSubscription;
 
   /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -210,6 +212,13 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
         loadTodayRoutines: () => ref.read(todayRoutinesProvider.future),
       );
+      // 홈 화면 위젯을 눌러 연 경로 (iOS·Android, #1465)
+      _homeWidgetRouteSubscription = startHomeWidgetRouteOpener(
+        bridge: ref.read(homeWidgetBridgeProvider),
+        router: _router,
+        isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+        loadTodayRoutines: () => ref.read(todayRoutinesProvider.future),
+      );
     });
     // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -227,6 +236,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   @override
   void dispose() {
     _lockScreenRouteSubscription?.cancel();
+    _homeWidgetRouteSubscription?.cancel();
     _router.routerDelegate.removeListener(_onRouteChanged);
     super.dispose();
   }

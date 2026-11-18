@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 지금 할 카드 중 (4x2): 카드 그림 왼쪽 | 일과 제목 · 카드 글 · n/m 칩 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/widget_panel_padding">
+
+    <ImageView
+        android:id="@+id/widget_card_image"
+        android:layout_width="@dimen/widget_card_picture_medium"
+        android:layout_height="@dimen/widget_card_picture_medium"
+        android:background="@drawable/widget_picture_background"
+        android:contentDescription="@string/widget_card_picture_description"
+        android:padding="@dimen/widget_gap_small"
+        android:scaleType="fitCenter"
+        android:src="@drawable/lumi_holding_card" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/widget_panel_padding"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_routine_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/widget_today_name"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="@dimen/widget_text_caption"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_card_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/widget_gap_small"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@string/widget_now_name"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="@dimen/widget_text_card_medium"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_count_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/widget_gap"
+            android:background="@drawable/widget_chip_background"
+        android:paddingStart="@dimen/widget_chip_padding_horizontal"
+        android:paddingTop="@dimen/widget_chip_padding_vertical"
+        android:paddingEnd="@dimen/widget_chip_padding_horizontal"
+        android:paddingBottom="@dimen/widget_chip_padding_vertical"
+        android:text="@string/widget_preview_count"
+        android:textColor="@color/widget_chip_text"
+        android:textSize="@dimen/widget_text_caption"
+        android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

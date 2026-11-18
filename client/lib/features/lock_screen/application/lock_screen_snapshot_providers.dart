@@ -5,11 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/lock_screen/home_widget_bridge.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/card_image_disk_cache.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import '../../child/application/child_routine_notifier.dart';
 import '../../guardian/application/home_routines.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../member/application/elumi_streak_providers.dart';
+import '../../member/application/member_providers.dart';
 import '../../reminder/application/routine_reminder_controller.dart';
 import '../domain/lock_screen_snapshot_builder.dart';
 import 'lock_screen_providers.dart';
@@ -28,12 +31,18 @@ final lockScreenSnapshotProvider = Provider<LockScreenSnapshot>((ref) {
       if (reminders[routine.id] ?? reminders[routine.sourceRoutineId] case final reminder?)
         routine.id: (hour: reminder.hour, minute: reminder.minute),
   };
+  final member = ref.watch(memberProvider).value;
   return LockScreenSnapshotBuilder.build(
     mode: mode,
     routines: routines,
     isCardDone: (routine, card) => _isCardDone(routine, card, childProgress),
     reminderTimeByRoutineId: reminderTimeByRoutineId,
     now: DateTime.now(),
+  ).copyWithWidgetExtras(
+    // 위젯 머리 이름 · 별과 연속 (회원 정보를 못 받았으면 0)
+    elumiName: ref.watch(localStorageProvider).nickname,
+    streakDays: ref.watch(elumiStreakProvider).days,
+    starCount: member?.totalStars ?? 0,
   );
 });
 
@@ -60,10 +69,8 @@ Future<void> pushLockScreenSnapshot(
   try {
     final completeSnapshot = await _withCardImageFile(ref, snapshot);
     await ref.read(lockScreenBridgeProvider).updateSnapshot(completeSnapshot);
-    // iOS 위젯은 보호자 진행 요약만 (이룸이 기기는 위젯을 쓰지 않음)
-    if (snapshot.mode == LockScreenMode.guardian) {
-      await ref.read(homeWidgetBridgeProvider).updateSnapshot(completeSnapshot);
-    }
+    // iOS 위젯: 보호자·이룸이 기기 모두 (위젯 3종이 mode 로 문구를 고름, #1465)
+    await ref.read(homeWidgetBridgeProvider).updateSnapshot(completeSnapshot);
   } catch (error, stackTrace) {
     AppLogger.error('lock screen snapshot', error, stackTrace);
   }

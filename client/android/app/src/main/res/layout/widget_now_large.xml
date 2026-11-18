@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 지금 할 카드 대 (4x4): 일과 제목 · n/m 칩 > 큰 카드 그림 > 큰 카드 글 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_panel_padding">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/widget_routine_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/widget_today_name"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="@dimen/widget_text_caption"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_count_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/widget_gap"
+            android:background="@drawable/widget_chip_background"
+        android:paddingStart="@dimen/widget_chip_padding_horizontal"
+        android:paddingTop="@dimen/widget_chip_padding_vertical"
+        android:paddingEnd="@dimen/widget_chip_padding_horizontal"
+        android:paddingBottom="@dimen/widget_chip_padding_vertical"
+        android:text="@string/widget_preview_count"
+        android:textColor="@color/widget_chip_text"
+        android:textSize="@dimen/widget_text_caption"
+        android:textStyle="bold" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/widget_card_image"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:layout_weight="1"
+        android:background="@drawable/widget_picture_background"
+        android:contentDescription="@string/widget_card_picture_description"
+        android:padding="@dimen/widget_gap"
+        android:scaleType="fitCenter"
+        android:src="@drawable/lumi_holding_card" />
+
+    <TextView
+        android:id="@+id/widget_card_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/widget_now_name"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="@dimen/widget_text_card_large"
+        android:textStyle="bold" />
+</LinearLayout>

@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "filename": "lumi_hello.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

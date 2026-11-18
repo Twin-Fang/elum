@@ -70,6 +70,40 @@
                 <data android:scheme="https" android:host="api.elum.suhsaechan.kr" android:pathPrefix="/s/"/>
             </intent-filter>
         </activity>
+        <!-- 홈 위젯 3종 (#1465): 오늘 루미 · 지금 할 카드 · 별과 연속. 권한·서비스 없이 요약 JSON 만 읽음 (kr.twinfang.elum.widget) -->
+        <receiver
+            android:name=".widget.ElumTodayWidget"
+            android:exported="true"
+            android:label="@string/widget_today_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/elum_today_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.ElumNowCardWidget"
+            android:exported="true"
+            android:label="@string/widget_now_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/elum_now_card_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.ElumStreakWidget"
+            android:exported="true"
+            android:label="@string/widget_streak_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/elum_streak_widget_info" />
+        </receiver>
         <!-- 잠금화면 카드 화면·서비스·부팅 수신기 선언은 Play 특수 용도 신고 승인 뒤 되돌린다 (#1420, 원본은 #1410 커밋 c44d3477) -->
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.

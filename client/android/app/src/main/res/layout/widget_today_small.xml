@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 오늘 루미 소 (2x2): 루미 > 한마디 > 진행 막대 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_panel_padding">
+
+    <ImageView
+        android:id="@+id/widget_lumi_image"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/widget_lumi_small"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/widget_lumi_description"
+        android:scaleType="fitStart"
+        android:src="@drawable/lumi_hello" />
+
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/widget_message_stale_guardian"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="@dimen/widget_text_body"
+        android:textStyle="bold" />
+
+    <!-- 남는 높이를 채워 진행 막대를 바닥에 붙임 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <include layout="@layout/widget_progress_row" />
+</LinearLayout>

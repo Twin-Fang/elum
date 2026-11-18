@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:go_router/go_router.dart';
 
+import '../../../core/lock_screen/home_widget_bridge.dart';
 import '../../../core/lock_screen/lock_screen_bridge.dart';
 import '../../../core/lock_screen/lock_screen_routes.dart';
 import '../../../core/logger/app_logger.dart';
@@ -17,8 +18,45 @@ StreamSubscription<String>? startLockScreenRouteOpener({
   required Future<List<Routine>> Function() loadTodayRoutines,
 }) {
   if (!bridge.isLockScreenSupported) return null;
+  return _startRouteOpener(
+    source: 'lock screen',
+    takePendingRoute: bridge.takePendingRoute,
+    openedRoutes: bridge.openedRoutes,
+    router: router,
+    isElumiDevice: isElumiDevice,
+    loadTodayRoutines: loadTodayRoutines,
+  );
+}
+
+/// 홈 화면 위젯에서 누른 경로 > 앱 화면 (잠금화면과 같은 경로 값, #1465)
+StreamSubscription<String>? startHomeWidgetRouteOpener({
+  required HomeWidgetBridge bridge,
+  required GoRouter router,
+  required bool Function() isElumiDevice,
+  required Future<List<Routine>> Function() loadTodayRoutines,
+}) {
+  if (!bridge.isSupported) return null;
+  return _startRouteOpener(
+    source: 'widget',
+    takePendingRoute: bridge.takePendingRoute,
+    openedRoutes: bridge.openedRoutes,
+    router: router,
+    isElumiDevice: isElumiDevice,
+    loadTodayRoutines: loadTodayRoutines,
+  );
+}
+
+/// 경로 열기 공통: 막 켠 앱의 남은 경로 1회 > 떠 있는 동안 들어오는 경로
+StreamSubscription<String> _startRouteOpener({
+  required String source,
+  required Future<String?> Function() takePendingRoute,
+  required Stream<String> openedRoutes,
+  required GoRouter router,
+  required bool Function() isElumiDevice,
+  required Future<List<Routine>> Function() loadTodayRoutines,
+}) {
   void open(String route) {
-    AppLogger.info('[lock screen] open route : $route');
+    AppLogger.info('[$source] open route : $route');
     final routineId = LockScreenRoutes.routineIdOf(route);
     if (routineId != null) {
       router.go(Routes.child);
@@ -31,11 +69,11 @@ StreamSubscription<String>? startLockScreenRouteOpener({
   }
 
   unawaited(
-    bridge.takePendingRoute().then((route) {
+    takePendingRoute().then((route) {
       if (route != null) _openWhenHomeReady(router, () => open(route));
     }),
   );
-  return bridge.openedRoutes.listen(open);
+  return openedRoutes.listen(open);
 }
 
 /// 오늘 일과에서 찾아 카드 화면 열기 (못 받거나 없으면 이룸이 홈에 머묾)

@@ -17,6 +17,9 @@
 - **Always two eyes, both fully visible, symmetric, facing the viewer (front or slight 3/4 at most).** Never a side profile that hides one eye. Exception: a wink when the brief asks for it.
 - Face: eyes and beak sit in the upper middle of the body, beak is a small orange triangle. No mouth line, no teeth, no eyebrows unless the brief asks for an emotion.
 - Proportion: body about 1.25x taller than wide, head and body are one shape, arms short, feet small. Do not stretch, squash or make the head separate.
+- Chubby, not tall: height only 1.15-1.25x the width (2026-11-18 owner: many existing Lumis came out too tall).
+- Color: mostly warm yellow; mint only as a light, small fade near the feet (owner: less green).
+- Full character sheet and the 16-pose set: characters/lumi.md
 - **Draw only Lumi unless the brief names another character.** Never add an extra small creature, baby, child or companion.
 
 ## Redrawing an existing asset (#1332)
