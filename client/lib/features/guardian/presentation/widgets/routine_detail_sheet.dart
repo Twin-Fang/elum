@@ -65,9 +65,13 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     this.isFinished = false,
     this.isLibrary = false,
     this.isInGroup = false,
+    this.onAction,
   });
 
   final Routine routine;
+
+  /// 버튼을 눌렀을 때 받는 쪽. null 이면 시트를 닫으며 돌려줌, 있으면 화면 칸 안 상세(가로 태블릿 홈 #1455)
+  final ValueChanged<RoutineSheetAction>? onAction;
 
   /// 일과관리 칸에서 연 원본인가 (#805). 아래 버튼이 `카드 고치기` · `오늘 보내기` 둘이 된다.
   final bool isLibrary;
@@ -164,6 +168,16 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다.
   bool get _canEdit =>
       !widget.isPast && !widget.isFinished && widget.routine.isEditableByMe;
+
+  /// 버튼 결과 전달: 화면 칸이면 받는 쪽에, 시트면 닫으며 돌려줌
+  void _finish(RoutineSheetAction action) {
+    final onAction = widget.onAction;
+    if (onAction != null) {
+      onAction(action);
+      return;
+    }
+    Navigator.of(context).pop(action);
+  }
 
   /// 제목 옆 연필: 이름 시트 > 저장 > 시트 제목 바꾸기
   Future<void> _rename() async {
@@ -272,13 +286,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     : widget.routine.foreignCreatorLabel,
                 // 일과관리에서 연 시트만 — 길게 누르기를 모르는 사람이 메뉴를 찾는 길 (#834)
                 onMoreTap: widget.isLibrary
-                    ? () => Navigator.of(context).pop(RoutineSheetAction.more)
+                    ? () => _finish(RoutineSheetAction.more)
                     : null,
                 onTitleEditTap: _canEdit ? _rename : null,
                 progressLabel: _progressLabel(context),
                 onExportTap: _steps.isEmpty
                     ? null
-                    : () => Navigator.of(context).pop(RoutineSheetAction.export),
+                    : () => _finish(RoutineSheetAction.export),
               ),
 
               // --- 스크롤: 단계 + 보상 ---
@@ -446,6 +460,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                   ? _LibraryActions(
                       isEditable: widget.routine.isEditableByMe,
                       isInGroup: widget.isInGroup,
+                      onAction: _finish,
                     )
                   : ElumButton(
                       label: widget.isPast
@@ -457,7 +472,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                       // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
                       onPressed: _finishedToday
                           ? null
-                          : () => Navigator.of(context).pop(
+                          : () => _finish(
                               widget.isPast
                                   ? RoutineSheetAction.rerun
                                   : RoutineSheetAction.edit,
@@ -492,10 +507,11 @@ class _StepItemKey extends GlobalObjectKey {
 ///
 /// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
 class _LibraryActions extends StatelessWidget {
-  const _LibraryActions({required this.isEditable, required this.isInGroup});
+  const _LibraryActions({required this.isEditable, required this.isInGroup, required this.onAction});
 
   final bool isEditable;
   final bool isInGroup;
+  final ValueChanged<RoutineSheetAction> onAction;
 
   /// 두 버튼 사이 (시트 버튼 둘 결)
   static const _buttonGap = 4.0;
@@ -509,7 +525,7 @@ class _LibraryActions extends StatelessWidget {
           ? context.l10n.routineLibrarySendOnlyThis
           : context.l10n.routineLibrarySendToday,
       labelStyle: labelStyle,
-      onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
+      onPressed: () => onAction(RoutineSheetAction.send),
     );
     if (!isEditable) return sendButton;
     return Row(
@@ -521,7 +537,7 @@ class _LibraryActions extends StatelessWidget {
             labelStyle: labelStyle,
             backgroundColor: colors.buttonNeutral,
             labelColor: colors.buttonNeutralText,
-            onPressed: () => Navigator.of(context).pop(RoutineSheetAction.edit),
+            onPressed: () => onAction(RoutineSheetAction.edit),
           ),
         ),
         SizedBox(width: _buttonGap.w),

@@ -315,14 +315,6 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys) async =>
       _celebratedStreakMilestoneKeys = celebratedKeys;
-  DateTime? _homeNotificationNoticeDismissedAt;
-
-  @override
-  DateTime? get homeNotificationNoticeDismissedAt => _homeNotificationNoticeDismissedAt;
-
-  @override
-  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async =>
-      _homeNotificationNoticeDismissedAt = at;
   String? _updateSuggestionShownRecord;
 
   @override

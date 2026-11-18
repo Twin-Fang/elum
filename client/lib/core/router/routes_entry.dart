@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/consent_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/role_select_screen.dart';
-import '../../features/notification/presentation/notification_permission_intro_screen.dart';
 import '../../features/onboarding/presentation/aba_intro_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/example_category_screen.dart';
@@ -93,10 +92,5 @@ List<RouteBase> entryRoutes() => [
   GoRoute(
     path: Routes.onboardingLinkDevice,
     pageBuilder: (context, state) => slidePage(state, const LinkDeviceStepScreen()),
-  ),
-  // 온보딩 끝 알림 켜기 안내 (업데이트 뒤 홈에서도 push 로 연다)
-  GoRoute(
-    path: Routes.onboardingNotificationIntro,
-    pageBuilder: (context, state) => slidePage(state, const NotificationPermissionIntroScreen()),
   ),
 ];

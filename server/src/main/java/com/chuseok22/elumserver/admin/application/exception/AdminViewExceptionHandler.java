@@ -4,12 +4,17 @@ import com.chuseok22.elumserver.admin.application.controller.AdminAutoNotificati
 import com.chuseok22.elumserver.admin.application.controller.AdminNotificationPerformanceController;
 import com.chuseok22.elumserver.admin.application.controller.AdminPushController;
 import com.chuseok22.elumserver.admin.application.controller.AdminScheduledPushController;
+import com.chuseok22.elumserver.admin.application.controller.AdminAccountKindController;
 import com.chuseok22.elumserver.admin.application.controller.AdminAdRewardController;
+import com.chuseok22.elumserver.admin.application.controller.AdminAnalyticsController;
 import com.chuseok22.elumserver.admin.application.controller.AdminAuditController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConfigController;
 import com.chuseok22.elumserver.admin.application.controller.AdminConsentController;
 import com.chuseok22.elumserver.admin.application.controller.AdminCreditController;
+import com.chuseok22.elumserver.admin.application.controller.AdminCreditPackController;
+import com.chuseok22.elumserver.admin.application.controller.AdminCreditPurchaseController;
 import com.chuseok22.elumserver.admin.application.controller.AdminFeedbackController;
+import com.chuseok22.elumserver.admin.application.controller.AdminLocaleStatusController;
 import com.chuseok22.elumserver.admin.application.controller.AdminLogController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMemberController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMonitoringController;
@@ -46,12 +51,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * 그쪽이 HTML을 받게 된다.
  */
 @ControllerAdvice(assignableTypes = {
+  AdminAccountKindController.class,
   AdminAdRewardController.class,
+  AdminAnalyticsController.class,
   AdminAuditController.class,
   AdminConfigController.class,
   AdminConsentController.class,
   AdminCreditController.class,
+  AdminCreditPackController.class,
+  AdminCreditPurchaseController.class,
   AdminFeedbackController.class,
+  AdminLocaleStatusController.class,
   AdminLogController.class,
   AdminMemberController.class,
   AdminMonitoringController.class,

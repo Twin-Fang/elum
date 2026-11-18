@@ -9,12 +9,6 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '通知をオンにしますか？';
-
-  @override
-  String get notificationOffNoticeBody => 'ルーティンが終わったらお知らせします';
-
-  @override
   String get notificationOffValue => 'オフ';
 
   @override
@@ -2097,9 +2091,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '人気！';
-
-  @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3633,12 +3624,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get printBrandTagline => '毎日をいっしょに | elum 行動カード';
 
   @override
-  String get cardExportPictogramCredit => '絵：Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => '絵：Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3767,10 +3752,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planPriceFailed => '価格を読み込めませんでした';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => 'プロモーションコードを入力';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => 'コード入力画面を開けませんでした';
 
   @override
   String get planRestore => '購入を復元';
@@ -5417,7 +5402,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guardianSettingsAboutElum => 'elumはこうして作りました';
 
   @override
-  String get notificationIntroTitle => '🔔 通知をぜひオンにしてください';
+  String get notificationIntroTitle => '通知をぜひオンにしてください';
 
   @override
   String get notificationIntroBody => 'オンにしておくと、Elumiの知らせを逃さずすぐにお知らせします';
@@ -5436,15 +5421,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notificationIntroCreditRefilledMonth => '今月のクレジットが補充されたとき';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone => '日課を終えたとき';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver => '一緒に見守る人からの知らせ';
-
-  @override
-  String get notificationOffNoticeAction => '通知をオンにする';
 
   @override
   String get homeAutoSendUpsellTitle => '⏰ 毎日同じ時刻に自動で送ってみませんか？';
@@ -5860,33 +5836,48 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guideTipReadAction => '読んでみる';
 
   @override
-  String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
+  String get routineSentViewOnElumiScreen => 'Elumi画面で見る';
 
   @override
   String homeNextStepFirstTryTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '아직 $name$_temp0 카드를 안 해 봤어요';
+    return '$nameはまだカードを試していません';
   }
 
   @override
-  String get homeNextStepFirstTryBody => '이룸이 화면을 열어 첫 카드를 함께 해 봐요';
+  String get homeNextStepFirstTryBody => 'Elumi画面を開いて最初のカードを一緒にやってみましょう';
 
   @override
-  String get homeNextStepFirstTryOpenElumi => '이룸이 화면 열기';
+  String get homeNextStepFirstTryOpenElumi => 'Elumi画面を開く';
 
   @override
-  String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
+  String get homeNextStepFirstTryLinkDevice => 'Elumiの機器を連結';
 
   @override
-  String get cardReviewToolSchedule => '예약';
+  String get cardReviewToolSchedule => '予約';
 
   @override
   String get cardReviewCoachScheduleMessage =>
-      '*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요';
+      '*曜日と時刻*を決めておくと\nそのたびに*Elumiへ自動で*送ります';
 
   @override
-  String get routineSchedulePickDone => '이렇게 정하기';
+  String get routineSchedulePickDone => 'これで決める';
 
   @override
-  String get routineSchedulePickClear => '예약 안 하기';
+  String get routineSchedulePickClear => '予約しない';
+
+  @override
+  String get guardianSettingsGuides => '保護者ガイド';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi 今日 $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return '今日の日課$total件のうち$done件を終えました。タップでElumi画面へ';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle => '日課をタップするとここにカードが表示されます';
 }

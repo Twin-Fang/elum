@@ -215,12 +215,6 @@ abstract interface class LocalStorage {
   Set<String> get celebratedStreakMilestoneKeys;
   Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys);
 
-  /// 보호자 홈 `알림이 꺼져 있어요` 띠를 닫은 시각 (닫으면 7일 숨김). 없으면 null
-  ///
-  /// 기기에 속하고 [clearAll] 이 지우지 않는다
-  DateTime? get homeNotificationNoticeDismissedAt;
-  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at);
-
   /// 홈 `크레딧이 조금 남았어요` 카드를 닫은 크레딧 주기 (그 주기의 다음 초기화 시각 ISO-8601). 없으면 null
   ///
   /// 계정에 속하고 [clearAll] 이 지움

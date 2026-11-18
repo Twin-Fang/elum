@@ -9,12 +9,6 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '要开启通知吗？';
-
-  @override
-  String get notificationOffNoticeBody => '完成日程后会通知你';
-
-  @override
   String get notificationOffValue => '已关闭';
 
   @override
@@ -2085,9 +2079,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '热门！';
-
-  @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3607,12 +3598,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get printBrandTagline => '一起过好每一天 | elum 行为卡片';
 
   @override
-  String get cardExportPictogramCredit => '图片: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => '图片: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3741,10 +3726,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planPriceFailed => '没能加载价格';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => '输入优惠码';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => '无法打开兑换码页面';
 
   @override
   String get planRestore => '恢复购买';
@@ -5385,7 +5370,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSettingsAboutElum => 'elum是这样设计的';
 
   @override
-  String get notificationIntroTitle => '🔔 请一定要开启通知';
+  String get notificationIntroTitle => '请一定要开启通知';
 
   @override
   String get notificationIntroBody => '开启后，Elumi的消息会马上通知你，不会错过';
@@ -5404,15 +5389,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationIntroCreditRefilledMonth => '本月积分重新补满时';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone => '完成日常时';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver => '一起照顾的人的消息';
-
-  @override
-  String get notificationOffNoticeAction => '开启通知';
 
   @override
   String get homeAutoSendUpsellTitle => '⏰ 要每天在同一时间自动发送吗？';
@@ -5826,33 +5802,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guideTipReadAction => '去看看';
 
   @override
-  String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
+  String get routineSentViewOnElumiScreen => '在Elumi画面查看';
 
   @override
   String homeNextStepFirstTryTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '아직 $name$_temp0 카드를 안 해 봤어요';
+    return '$name还没有试过卡片';
   }
 
   @override
-  String get homeNextStepFirstTryBody => '이룸이 화면을 열어 첫 카드를 함께 해 봐요';
+  String get homeNextStepFirstTryBody => '打开Elumi画面，一起试试第一张卡片';
 
   @override
-  String get homeNextStepFirstTryOpenElumi => '이룸이 화면 열기';
+  String get homeNextStepFirstTryOpenElumi => '打开Elumi画面';
 
   @override
-  String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
+  String get homeNextStepFirstTryLinkDevice => '连接Elumi的设备';
 
   @override
-  String get cardReviewToolSchedule => '예약';
+  String get cardReviewToolSchedule => '预约';
 
   @override
-  String get cardReviewCoachScheduleMessage =>
-      '*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요';
+  String get cardReviewCoachScheduleMessage => '设定好*星期和时间*\n到时就会*自动发送给Elumi*';
 
   @override
-  String get routineSchedulePickDone => '이렇게 정하기';
+  String get routineSchedulePickDone => '就这样设定';
 
   @override
-  String get routineSchedulePickClear => '예약 안 하기';
+  String get routineSchedulePickClear => '不预约';
+
+  @override
+  String get guardianSettingsGuides => '看护者指南';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi 今天 $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return '今天完成了$total个日程中的$done个。点击去Elumi模式';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle => '点击日程即可在这里查看卡片';
 }

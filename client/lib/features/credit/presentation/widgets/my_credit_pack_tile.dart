@@ -8,7 +8,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../domain/credit_pack.dart';
 
-/// 꾸러미 칸 한 개: 그림 > 개수 > (원래 값 줄 그음) > 값. 할인율은 오른쪽 위, 인기는 아래 가운데에 걸친 알약
+/// 꾸러미 칸 한 개: 그림 > 개수 > (원래 값 줄 그음) > 값. 할인율은 오른쪽 위에 걸친 알약
 ///
 /// 그림은 작은 꾸러미부터 한 장 / 두 장 겹침 / 여러 장 (칸 순서로 정함)
 class MyCreditPackTile extends StatelessWidget {
@@ -37,6 +37,9 @@ class MyCreditPackTile extends StatelessWidget {
   static const _borderWidth = 2.0;
   static const _pillOverhang = 10.0;
 
+  /// 할인 알약이 칸 오른쪽 끝에서 안쪽으로 들어온 만큼 (바깥으로 걸치면 맨 오른쪽 칸에서 화면 가장자리에 잘림, #1440)
+  static const _discountPillInset = 6.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -53,6 +56,8 @@ class MyCreditPackTile extends StatelessWidget {
       child: AppPressable(
         onTap: onTap,
         child: Stack(
+          // 부모(Expanded 슬롯) 너비를 칸이 그대로 받음 (기본값이면 내용 너비로 줄어 왼쪽에 붙음, #1440)
+          fit: StackFit.passthrough,
           clipBehavior: Clip.none,
           children: [
             DecoratedBox(
@@ -93,15 +98,8 @@ class MyCreditPackTile extends StatelessWidget {
             if (discountPercent != null)
               Positioned(
                 top: -_pillOverhang.h,
-                right: -_pillOverhang.w / 2,
+                right: _discountPillInset.w,
                 child: _Pill(label: l10n.myCreditPackDiscount(discountPercent), fill: colors.creditPackDiscountFill),
-              ),
-            if (isPopular)
-              Positioned(
-                bottom: -_pillOverhang.h,
-                left: 0,
-                right: 0,
-                child: Center(child: _Pill(label: l10n.myCreditPackPopular, fill: colors.danger)),
               ),
           ],
         ),
@@ -112,7 +110,7 @@ class MyCreditPackTile extends StatelessWidget {
   Color _pictureFill(AppColors colors) => index == 0 ? colors.creditPackTileMint : colors.creditPackTileCream;
 }
 
-/// 둥근 알약 (할인율 · 인기)
+/// 둥근 알약 (할인율)
 class _Pill extends StatelessWidget {
   const _Pill({required this.label, required this.fill});
 

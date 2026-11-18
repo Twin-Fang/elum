@@ -26,9 +26,6 @@ abstract final class Routes {
   /// 이룸이 기기 연결 단계. 비밀암호(초대 합류) 뒤, 알림 켜기 안내 앞. 기기가 이미 붙어 있으면 서지 않음
   static const onboardingLinkDevice = '/onboarding/link-device';
 
-  /// 알림 켜기 안내. 온보딩 끝(첫 홈 직전), 이미 가입한 보호자는 업데이트 뒤 홈에서 한 번 (#1275)
-  /// 알림이 이미 켜졌거나 본 적 있으면 서지 않는다 (`PushPermissionPrompt.shouldShowIntro`)
-  static const onboardingNotificationIntro = '/onboarding/notification-intro';
 
   /// 보호자 하단 바(폰)·옆 메뉴(태블릿) 4칸: 홈 · 일과관리 · 이야기 · 내정보 (#798)
   /// 칸 순서와 아이콘은 `GuardianTab` 한 곳이 정한다.
@@ -55,6 +52,14 @@ abstract final class Routes {
 
   /// 이룸 설계 원리(ABA) 소개 다시 보기 (설정 > 약관 및 정보). 온보딩 소개와 같은 내용 (#1277)
   static const guardianAboutElum = '/guardian/about-elum';
+
+  /// 보호자 가이드 목록 (설정 > 약관 및 정보, #1455)
+  static const guardianGuides = '/guardian/guides';
+
+  /// 가이드 글 앱 안 읽기: `?slug={GuideTip.slug}`
+  static const guardianGuideArticle = '/guardian/guides/article';
+  static const guideSlugQuery = 'slug';
+  static String guardianGuideArticleOf(String slug) => '$guardianGuideArticle?$guideSlugQuery=$slug';
 
   /// 오픈소스 라이선스 (설정 > 약관 및 정보)
   static const guardianLicenses = '/guardian/licenses';

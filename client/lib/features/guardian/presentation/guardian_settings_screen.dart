@@ -202,7 +202,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
-        // 약관 및 정보: 약관 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
+        // 약관 및 정보: 약관 > 보호자 가이드 > 의견 보내기 > 오픈소스 라이선스 > 앱 정보 (사용법 다시 보기는 일과관리 `?` 버튼, #1001)
         SettingsGroup(
           children: [
             SettingsTile(
@@ -215,6 +215,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
                         builder: (_) => const ConsentDocumentListScreen(),
                       ),
                     ),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsGuides,
+              onTap: busy ? null : () => context.push(Routes.guardianGuides),
             ),
             SettingsTile(
               isInCard: true,

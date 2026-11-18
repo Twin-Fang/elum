@@ -9,12 +9,6 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '¿Activar notificaciones?';
-
-  @override
-  String get notificationOffNoticeBody => 'Te avisamos al terminar una rutina';
-
-  @override
   String get notificationOffValue => 'Desactivadas';
 
   @override
@@ -2278,9 +2272,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '¡Popular!';
-
-  @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3901,13 +3892,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cada día, juntos | Tarjetas de acción de elum';
 
   @override
-  String get cardExportPictogramCredit =>
-      'Imágenes: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => 'Imágenes: Twemoji (CC BY 4.0)';
-
-  @override
   String cardExportPerPage(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -4051,10 +4035,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planPriceFailed => 'No se pudieron cargar los precios';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => 'Canjear código';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => 'No se pudo abrir el canje de código';
 
   @override
   String get planRestore => 'Restaurar compras';
@@ -5832,7 +5816,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianSettingsAboutElum => 'Cómo está hecho elum';
 
   @override
-  String get notificationIntroTitle => '🔔 Activa las notificaciones';
+  String get notificationIntroTitle => 'Activa las notificaciones';
 
   @override
   String get notificationIntroBody =>
@@ -5856,17 +5840,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationIntroCreditRefilledMonth =>
       'Cuando se recargan los créditos de este mes';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone =>
-      'Cuando termina una rutina';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver =>
-      'Novedades de los otros tutores';
-
-  @override
-  String get notificationOffNoticeAction => 'Activar notificaciones';
 
   @override
   String get homeAutoSendUpsellTitle =>
@@ -6319,33 +6292,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guideTipReadAction => 'Leer';
 
   @override
-  String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
+  String get routineSentViewOnElumiScreen => 'Ver en la pantalla de Elumi';
 
   @override
   String homeNextStepFirstTryTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
-    return '아직 $name$_temp0 카드를 안 해 봤어요';
+    return '$name aún no ha probado las tarjetas';
   }
 
   @override
-  String get homeNextStepFirstTryBody => '이룸이 화면을 열어 첫 카드를 함께 해 봐요';
+  String get homeNextStepFirstTryBody =>
+      'Abre la pantalla de Elumi y prueben juntos la primera tarjeta';
 
   @override
-  String get homeNextStepFirstTryOpenElumi => '이룸이 화면 열기';
+  String get homeNextStepFirstTryOpenElumi => 'Abrir pantalla de Elumi';
 
   @override
-  String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
+  String get homeNextStepFirstTryLinkDevice =>
+      'Vincular el dispositivo de Elumi';
 
   @override
-  String get cardReviewToolSchedule => '예약';
+  String get cardReviewToolSchedule => 'Programar';
 
   @override
   String get cardReviewCoachScheduleMessage =>
-      '*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요';
+      'Elige *días y una hora*\ny se *enviará a Elumi automáticamente* cada vez';
 
   @override
-  String get routineSchedulePickDone => '이렇게 정하기';
+  String get routineSchedulePickDone => 'Fijar así';
 
   @override
-  String get routineSchedulePickClear => '예약 안 하기';
+  String get routineSchedulePickClear => 'No programar';
+
+  @override
+  String get guardianSettingsGuides => 'Guías para cuidadores';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi hoy $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return 'Elumi terminó $done de $total rutinas hoy. Toca para ir al modo Elumi';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle =>
+      'Toca una rutina para ver aquí sus tarjetas';
 }

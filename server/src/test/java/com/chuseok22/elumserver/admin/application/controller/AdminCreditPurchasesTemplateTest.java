@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditPurchaseRow;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditPurchaseService.RecheckOverview;
-import com.chuseok22.elumserver.credit.application.service.purchase.CreditPurchaseAdminQueryService.PurchaseFilter;
+import com.chuseok22.elumserver.admin.application.list.AdminCreditPurchaseList;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.credit.core.CreditPurchaseStatus;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPurchase;
 import com.chuseok22.elumserver.license.core.StoreRefundCheckFailureReason;
@@ -43,10 +44,11 @@ class AdminCreditPurchasesTemplateTest {
     Map<String, Object> variables = new HashMap<>();
     variables.put("rows", new PageImpl<>(List.of(
       new AdminCreditPurchaseRow(granted, "하늘이 보호자"), new AdminCreditPurchaseRow(refunded, null))));
-    variables.put("filter", new PurchaseFilter(null, null, null));
-    variables.put("q", "");
-    variables.put("stores", List.of(SubscriptionSource.APPLE_IAP, SubscriptionSource.GOOGLE_IAP));
-    variables.put("statuses", CreditPurchaseStatus.values());
+    variables.put("query", AdminListQuery.of(null, Map.of(), null, null, AdminCreditPurchaseList.DEFINITION));
+    variables.put("definition", AdminCreditPurchaseList.DEFINITION);
+    variables.put("storeOptions", AdminCreditPurchaseList.STORE_OPTIONS);
+    variables.put("statusOptions", AdminCreditPurchaseList.STATUS_OPTIONS);
+    variables.put("pagerBaseUrl", "/admin/credits/purchases?sort=createdAt,desc");
     variables.put("recheck", new RecheckOverview(true, List.of(failedRun), List.of(SubscriptionSource.APPLE_IAP)));
     String html = renderer.render("admin/credits-purchases", variables);
 

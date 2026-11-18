@@ -64,3 +64,13 @@ final shouldShowRoutineCreatorProvider = Provider<bool>((ref) {
   final past = ref.watch(pastRoutinesProvider).value ?? const <Routine>[];
   return [...today, ...past].any((routine) => routine.isMadeByOtherGuardian);
 });
+
+/// 이룸이 오늘 진행: 다 끝낸 일과 수 / 오늘 일과 수 (기기 기록 포함, 홈 상단 알약 #1455)
+typedef ElumiTodayProgress = ({int finishedRoutineCount, int totalRoutineCount});
+
+final elumiTodayProgressProvider = Provider<ElumiTodayProgress>((ref) {
+  final routines = ref.watch(homeRoutinesProvider);
+  final progress = ref.watch(childRoutineProvider);
+  final finishedCount = routines.where((routine) => routineProgress(routine, progress) >= 1).length;
+  return (finishedRoutineCount: finishedCount, totalRoutineCount: routines.length);
+});

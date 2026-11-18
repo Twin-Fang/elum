@@ -9,13 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => 'Turn on notifications?';
-
-  @override
-  String get notificationOffNoticeBody =>
-      'We\'ll tell you when a routine is done';
-
-  @override
   String get notificationOffValue => 'Off';
 
   @override
@@ -2222,9 +2215,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => 'Popular!';
-
-  @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3826,13 +3816,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get printBrandTagline => 'Every day, together | Elumi Behavior Cards';
-
-  @override
-  String get cardExportPictogramCredit =>
-      'Pictures: Mulberry Symbols (CC BY-SA 4.0)';
-
-  @override
-  String get cardExportEmojiCredit => 'Pictures: Twemoji (CC BY 4.0)';
 
   @override
   String cardExportPerPage(int count) {
@@ -5731,7 +5714,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSettingsAboutElum => 'How ELUM is designed';
 
   @override
-  String get notificationIntroTitle => '🔔 Please turn on notifications';
+  String get notificationIntroTitle => 'Please turn on notifications';
 
   @override
   String get notificationIntroBody =>
@@ -5755,17 +5738,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationIntroCreditRefilledMonth =>
       'When this month\'s credits are refilled';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone =>
-      'When a routine is done';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver =>
-      'News from co-caregivers';
-
-  @override
-  String get notificationOffNoticeAction => 'Turn on notifications';
 
   @override
   String get homeAutoSendUpsellTitle =>
@@ -6238,4 +6210,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineSchedulePickClear => 'Don\'t schedule';
+
+  @override
+  String get guardianSettingsGuides => 'Caregiver guides';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi today $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return 'Elumi finished $done of $total routines today. Tap to go to Elumi mode';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle =>
+      'Tap a routine to see its cards here';
 }
