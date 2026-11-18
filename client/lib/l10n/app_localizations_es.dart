@@ -1695,13 +1695,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mantén pulsada una tarjeta para cambiar el orden';
 
   @override
-  String get cardReviewToolReorder => 'Cambiar el orden de las tarjetas';
+  String get cardReviewToolReorder => 'Reordenar';
 
   @override
-  String get cardReviewToolEdit => 'Editar esta tarjeta';
+  String get cardReviewToolEdit => 'Editar tarjeta';
 
   @override
-  String get cardReviewToolAdd => 'Añadir una tarjeta';
+  String get cardReviewToolAdd => 'Añadir tarjeta';
 
   @override
   String get cardReviewReorderTitle => 'Cambiar el orden de las tarjetas';
@@ -3106,7 +3106,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cardReviewCoachSaveMessage =>
-      'Cuando termines, toca *Guardar tarjetas*\nLa rutina queda lista solo al guardar';
+      'Cuando termines, toca *Guardar tarjetas*\nSe envía a *Elumi enseguida*';
 
   @override
   String get coachHelpLabel => 'Cómo se usa';
