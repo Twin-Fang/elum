@@ -41,9 +41,7 @@ Future<T?> showElumSheet<T>({
 /// 옆 패널로 열 창인가: 가로 태블릿이고 높이가 넉넉할 때 (분할 보기처럼 낮으면 시트)
 bool shouldUseSidePanel(BuildContext context) {
   final metrics = context.layoutMetrics;
-  return metrics.isScaleOverridden &&
-      metrics.isLandscape &&
-      !metrics.isShortHeight;
+  return metrics.hasTwoPanes;
 }
 
 /// 오른쪽에서 밀려 나오는 옆 패널 (높이 전체, 폭 토큰). 바깥을 누르면 닫힌다

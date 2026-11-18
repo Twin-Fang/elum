@@ -26,7 +26,10 @@ import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_voice_block.dart';
 import 'widgets/card_review_coach_mark.dart';
+import '../../../core/layout/layout_context_ext.dart';
+import '../../../shared/models/routine.dart';
 import 'widgets/card_review_parts.dart';
+import 'widgets/card_review_wide_body.dart';
 import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
@@ -37,6 +40,8 @@ import '../../../core/widgets/elum_danger_confirm_dialog.dart';
 import 'memory/routine_memory_observation_sheet.dart';
 import 'widgets/routine_sent_toast.dart';
 import '../application/first_send_celebration.dart';
+
+part 'card_review_screen_parts.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -77,11 +82,25 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
   /// 순서가 바뀐 뒤 엉뚱한 카드에 서 있으므로, 나오는 쪽이 서 있을 카드를 정해 준다.
-  static PageController _newController(int page) => PageController(
-    initialPage: page,
-    viewportFraction: CardReviewScreen._viewportFraction,
-    keepPage: false,
-  );
+  static PageController _newController(int page, {bool isWide = false}) =>
+      PageController(
+        initialPage: page,
+        // 두 칸(가로 태블릿)은 카드가 칸 높이에 맞춰 한 장씩, 폰은 옆 카드가 걸침
+        viewportFraction: isWide ? 1 : CardReviewScreen._viewportFraction,
+        keepPage: false,
+      );
+
+  /// 지금 컨트롤러가 두 칸용인가 (회전으로 바뀌면 보던 카드에서 새로 만듦)
+  bool _isControllerWide = false;
+
+  void _syncControllerToLayout(bool isWide) {
+    if (_isControllerWide == isWide) return;
+    _isControllerWide = isWide;
+    final previous = _controller;
+    _controller = _newController(_currentIndex, isWide: isWide);
+    // 그리는 중에 붙어 있는 컨트롤러를 바로 버리지 않음 (다음 프레임에)
+    WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+  }
 
   /// 순서 변경 모드 (시안 1197:5798). 같은 화면이 모드로 바뀐다.
   var _reorderMode = false;
@@ -148,7 +167,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   StoredSpeechSource? _storedSpeechOf(ActionCard card) => storedSpeechOf(
     ref.read(routineFlowProvider).routine?.id,
     card,
-    shouldIncludeGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
+    shouldIncludeGuardianVoice: ref
+        .read(planAccessProvider)
+        .canUseGuardianVoice,
   );
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
@@ -197,59 +218,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   /// 서버 임시저장 상태: 저장하면 승인되어 이룸이 기기로 감
   static const _draftStatus = 'PENDING_REVIEW';
 
-  /// 저장(보내기) > (예약 도구로 고른 반복이 있으면) 반복 저장 > 첫 보내기 축하 또는 홈
-  Future<void> _saveNow() async {
-    final repeatSchedule = pickedRepeatSchedule;
-    // 보내기인가 (임시저장 승인) · 첫 보내기인가: 저장 전에 판정 (저장 뒤에는 목록에 이 일과가 섞임)
-    final firstSendCelebration = ref.read(firstSendCelebrationProvider);
-    final isSending = ref.read(routineFlowProvider).routine?.status == _draftStatus;
-    final isFirstSend = isSending && firstSendCelebration.isFirstSendBeforeSending();
-    // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
-    // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다.
-    final failure = await ref.read(routineFlowProvider.notifier).save();
-
-    if (!mounted) return;
-
-    // **실패하면 홈으로 보내지 않는다.** 홈으로 가면 저장된 것처럼 보이는데,
-    // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
-    // 앱이 아니라 이룸이다.
-    if (failure != null) {
-      showFailure(
-        context,
-        failure,
-        title: context.l10n.cardReviewSaveFailedTitle,
-        fallback: context.l10n.cardReviewSaveFailedFallback,
-        fallbackCode: 'E-CONFIRM',
-      );
-      return;
-    }
-    final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
-    if (isSending) unawaited(firstSendCelebration.markSent());
-    // 반복은 일과가 원본으로 저장된 뒤에만 정할 수 있음 (실패해도 일과는 보낸 채 이어 감)
-    if (repeatSchedule != null) await saveRepeatScheduleAfterSend(savedRoutineId, repeatSchedule);
-    if (!mounted) return;
-    // 첫 보내기: 축하 화면 (알림 권한 안내 · AI 메모 확인은 축하에서 홈으로 갈 때)
-    if (isFirstSend) {
-      context.go(Routes.guardianRoutineSent, extra: (routineId: savedRoutineId));
-      return;
-    }
-    // 홈으로 가면 이 화면이 사라지므로 맨 위 네비게이터 컨텍스트와 안내 객체를 먼저 잡는다
-    final rootContext = Navigator.of(context, rootNavigator: true).context;
-    final pushPermissionPrompt = ref.read(pushPermissionPromptProvider);
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    final sentMessage = context.l10n.routineSentTitle;
-    context.go(Routes.guardian);
-    // 두 번째 보내기부터는 체크가 튀는 가벼운 알림 (이미 보낸 일과 고치기는 알림 없음)
-    if (isSending) showRoutineSentToastOn(messenger, sentMessage);
-    // 첫 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
-    // 맨 위 네비게이터는 이 화면보다 오래 살고, maybeAsk 가 mounted 를 다시 확인함
-    // ignore: use_build_context_synchronously
-    unawaited(pushPermissionPrompt.maybeAsk(rootContext));
-    // 고쳐서 보냈으면 AI 메모리가 찾은 수정을 물어봄 (Pro + 켜짐일 때만, 실패해도 조용히)
-    // ignore: use_build_context_synchronously
-    if (savedRoutineId != null) unawaited(showMemoryObservationsAfterSend(rootContext, savedRoutineId));
-  }
-
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
   Future<void> _edit(ActionCard card) async {
     final serverCard = CardPhotoTarget.of(
@@ -267,10 +235,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다. 아니면 칩이 없다.
       photo: serverCard,
       // 녹음 칸: 서버 카드이고 Pro 이거나 녹음이 남아 있을 때만 (Free 에게는 녹음 전 칸을 보이지 않음)
-      voice: CardVoiceBlock.isShownFor(
-        canUseGuardianVoice: ref.read(planAccessProvider).canUseGuardianVoice,
-        guardianVoicePath: card.guardianVoicePath,
-      )
+      voice:
+          CardVoiceBlock.isShownFor(
+            canUseGuardianVoice: ref
+                .read(planAccessProvider)
+                .canUseGuardianVoice,
+            guardianVoicePath: card.guardianVoicePath,
+          )
           ? serverCard
           : null,
     );
@@ -410,6 +381,51 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       );
     }
 
+    // 가로 태블릿 두 칸: 왼쪽 머리 · 카드 | 오른쪽 보상 · 도구 · 저장 (#1457)
+    final isWideLayout = context.layoutMetrics.hasTwoPanes;
+    _syncControllerToLayout(isWideLayout);
+    final saveButton = _buildSaveButton();
+    // 크기 0 — 막은 루트 오버레이에 그린다. 모드가 바뀌어도 같은 자리에 둔다
+    final coachMark = CardReviewCoachMark(
+      keys: _coachKeys,
+      cardCount: cards.length,
+      hasScheduleTool: hasScheduleTool,
+      canStart: !_reorderMode,
+    );
+    final headingBlock = _buildHeadingBlock(routine);
+    final cardsView = _buildCardsView(
+      cards: cards,
+      routine: routine,
+      routineId: routineId,
+      isWideLayout: isWideLayout,
+    );
+    final rewardRow = _reorderMode
+        ? const CardReviewReorderHint()
+        : CardReviewRewardRow(
+            reward: routine?.hasReward ?? false ? routine?.rewardDisplay : null,
+            rewardLanguage: routine?.language ?? 'ko',
+            onTap: () => context.push(Routes.routineReward, extra: true),
+          );
+    final toolRow = CardReviewToolRow(
+      reorderKey: _coachKeys.reorder,
+      editKey: _coachKeys.edit,
+      reorderMode: _reorderMode,
+      onReorder: _enterReorder,
+      // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다
+      onFinishReorder: _finishReorder,
+      // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
+      onEdit: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
+      onAdd: _add,
+      schedule: hasScheduleTool
+          ? (
+              isActive: isScheduleToolActive,
+              shouldShowProBadge: shouldShowScheduleProBadge,
+              onTap: busy ? null : openScheduleTool,
+              coachKey: _coachKeys.schedule,
+            )
+          : null,
+    );
+
     return RoutineFlowScaffold(
       // 순서 변경 중에는 나가도 잃을 것이 없다 — 뒤로는 모드만 닫는다(되돌림 포함).
       // 그 밖에는 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다.
@@ -436,128 +452,40 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
         cardReviewCoachProvider.select((state) => state.isActive),
       ),
       // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56
-      bottomFigmaInset: 56,
-      bottomButton: KeyedSubtree(
-        key: _coachKeys.save,
-        child: ElumButton(
-          label: _reorderMode
-              ? context.l10n.cardReviewReorderDone
-              : context.l10n.cardReviewSave,
-          onPressed: _reorderMode ? _finishReorder : _save,
-          loading: busy,
-          // 고른 반복은 저장 버튼 둘째 줄 (카드 높이 그대로, #1457)
-          caption: switch (pickedScheduleSummary) {
-            final scheduleSummary? when !_reorderMode && shouldShowScheduleTool =>
-              context.l10n.cardReviewSaveWithSchedule(scheduleSummary),
-            _ => null,
-          },
-        ),
-      ),
+      bottomFigmaInset: isWideLayout ? null : 56,
+      // 두 칸은 저장 버튼이 오른쪽 칸 안에 (아래 고정 버튼 없음)
+      bottomButton: isWideLayout ? null : saveButton,
       aurora: CardReviewScreen.aurora,
-      child: Column(
-        children: [
-          // 크기 0 — 막은 루트 오버레이에 그린다. 모드가 바뀌어도 같은 자리에 둔다
-          CardReviewCoachMark(
-            keys: _coachKeys,
-            cardCount: cards.length,
-            hasScheduleTool: hasScheduleTool,
-            canStart: !_reorderMode,
-          ),
-          // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
-          SizedBox(height: 12.h),
-          CardReviewHeading(
-            routine: routine,
-            isReorderMode: _reorderMode,
-            onTitleEditTap: renameRoutineInFlow,
-          ),
-          // 이 일과에 AI 메모리 규칙이 적용됐으면 제목 아래 작은 알약 (누르면 AI 메모리)
-          if (!_reorderMode && (routine?.appliedMemoryRuleCount ?? 0) > 0) ...[
-            SizedBox(height: 8.h),
-            MemoryAppliedPill(count: routine!.appliedMemoryRuleCount),
-          ],
-          SizedBox(height: 16.h),
-          Expanded(
-            child: _reorderMode
-                ? CardReviewReorderList(
-                    cards: cards,
-                    routineId: routineId,
-                    language: routine?.language ?? 'ko',
-                    cardWidth: CardReviewScreen._cardWidth,
-                    cardGap: CardReviewScreen._cardGap,
-                    onReorder: notifier.moveStep,
-                    initialIndex: _indexAtEnter,
-                    onFocusChanged: (index) => _reorderFocus = index,
-                  )
-                : PageView.builder(
-                    controller: _controller,
-                    itemCount: cards.length,
-                    // 카드를 넘기면 수정 버튼의 대상도 바뀐다
-                    onPageChanged: (index) =>
-                        setState(() => _currentIndex = index),
-                    itemBuilder: (context, index) => Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: (CardReviewScreen._cardGap / 2).w,
-                      ),
-                      // 카드가 도착하면 한 장씩 톡 튀어나옴 (처음 그려질 때 한 번)
-                      child: AppPopIn(
-                        key: ValueKey('pop-${cards[index].id}'),
-                        delay: AppMotion.staggerDelayOf(index),
-                        child: ActionCardView(
-                        key: ValueKey(cards[index].id),
-                        card: cards[index],
-                        index: index,
-                        routineId: routineId,
-                        language: routine?.language ?? 'ko',
-                        onSpeak: () => _speak(cards[index]),
-                        isSpeaking: _speakingId == cards[index].id,
-                        isImageGenerating: isAddedCardImageGenerating(
-                          cards[index].id,
-                        ),
-                        // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
-                        onDelete: cards.length > 1
-                            ? () => _confirmRemove(cards[index])
-                            : null,
-                      ),
-                      ),
-                    ),
-                  ),
-          ),
-          // 카드 끝 571 → 보상 줄 587
-          SizedBox(height: 16.h),
-          if (_reorderMode)
-            const CardReviewReorderHint()
-          else
-            CardReviewRewardRow(
-              reward: routine?.hasReward ?? false
-                  ? routine!.rewardDisplay
-                  : null,
-              rewardLanguage: routine?.language ?? 'ko',
-              onTap: () => context.push(Routes.routineReward, extra: true),
+      child: isWideLayout
+          ? CardReviewWideBody(
+              coachMark: coachMark,
+              heading: headingBlock,
+              cards: cardsView,
+              rewardRow: rewardRow,
+              toolRow: toolRow,
+              saveButton: saveButton,
+            )
+          : Column(
+              children: [
+                coachMark,
+                // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
+                SizedBox(height: 12.h),
+                headingBlock,
+                SizedBox(height: 16.h),
+                Expanded(child: cardsView),
+                // 카드 끝 571 → 보상 줄 587
+                SizedBox(height: 16.h),
+                rewardRow,
+                // 보상 줄 끝 633 → 도구 버튼 654
+                SizedBox(height: 21.h),
+                toolRow,
+              ],
             ),
-          // 보상 줄 끝 633 → 도구 버튼 654
-          SizedBox(height: 21.h),
-          CardReviewToolRow(
-            reorderKey: _coachKeys.reorder,
-            editKey: _coachKeys.edit,
-            reorderMode: _reorderMode,
-            onReorder: _enterReorder,
-            // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다
-            onFinishReorder: _finishReorder,
-            // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
-            onEdit: () =>
-                _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
-            onAdd: _add,
-            schedule: hasScheduleTool
-                ? (
-                    isActive: isScheduleToolActive,
-                    shouldShowProBadge: shouldShowScheduleProBadge,
-                    onTap: busy ? null : openScheduleTool,
-                    coachKey: _coachKeys.schedule,
-                  )
-                : null,
-          ),
-        ],
-      ),
     );
   }
+
+
+  /// 카드를 넘김: 수정 버튼의 대상도 바뀜
+  void _onCardPageChanged(int index) => setState(() => _currentIndex = index);
+
 }
