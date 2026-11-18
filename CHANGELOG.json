@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-18T12:57:21Z",
-    "currentVersion": "2.105.0",
+    "lastUpdated": "2026-11-18T13:25:11Z",
+    "currentVersion": "2.105.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 351
+    "totalReleases": 352
   },
   "releases": [
+    {
+      "version": "2.105.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-18",
+      "pr_number": 1479,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈 화면 위젯을 더했어요 (오늘 루미 · 지금 할 카드 · 별과 연속)\n  * iPhone 잠금화면에서도 오늘 진행을 볼 수 있어요\n\n* **개선**\n  * 지금 할 카드 위젯에 카드 그림이 바로 보여요\n  * 카드 확인 화면 문구를 일본어·중국어·스페인어로 다듬었어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈 화면 위젯을 더했어요 (오늘 루미 · 지금 할 카드 · 별과 연속)",
+            "iPhone 잠금화면에서도 오늘 진행을 볼 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "지금 할 카드 위젯에 카드 그림이 바로 보여요",
+            "카드 확인 화면 문구를 일본어·중국어·스페인어로 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.105.0",
       "project_type": "flutter",
