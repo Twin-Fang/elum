@@ -6241,10 +6241,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap a routine to see its cards here';
 
   @override
-  String cardReviewScheduleLine(String summary) {
-    return 'Sends to Elumi every $summary';
+  String cardReviewSaveWithSchedule(String summary) {
+    return 'Sends every $summary once saved';
   }
-
-  @override
-  String get cardReviewScheduleChange => 'Change';
 }

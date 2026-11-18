@@ -1674,6 +1674,5 @@
   "routineSchedulePickClear": "No programar",
   "planRedeemCode": "Canjear código",
   "planRedeemCodeFailed": "No se pudo abrir el canje de código",
-  "cardReviewScheduleLine": "Se envía a Elumi: {summary}",
-  "cardReviewScheduleChange": "Cambiar"
+  "cardReviewSaveWithSchedule": "Al guardar, se envía: {summary}"
 }

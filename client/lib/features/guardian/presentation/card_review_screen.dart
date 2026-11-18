@@ -22,7 +22,6 @@ import '../application/credit_cost_preview.dart';
 import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
 import 'card_review_schedule_send.dart';
-import 'widgets/card_review_schedule_line.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_voice_block.dart';
@@ -197,9 +196,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
   /// 서버 임시저장 상태: 저장하면 승인되어 이룸이 기기로 감
   static const _draftStatus = 'PENDING_REVIEW';
-
-  /// 도구 줄 > 고른 반복 한 줄
-  static const _toolRowToScheduleLine = 8.0;
 
   /// 저장(보내기) > (예약 도구로 고른 반복이 있으면) 반복 저장 > 첫 보내기 축하 또는 홈
   Future<void> _saveNow() async {
@@ -449,6 +445,12 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
               : context.l10n.cardReviewSave,
           onPressed: _reorderMode ? _finishReorder : _save,
           loading: busy,
+          // 고른 반복은 저장 버튼 둘째 줄 (카드 높이 그대로, #1457)
+          caption: switch (pickedScheduleSummary) {
+            final scheduleSummary? when !_reorderMode && shouldShowScheduleTool =>
+              context.l10n.cardReviewSaveWithSchedule(scheduleSummary),
+            _ => null,
+          },
         ),
       ),
       aurora: CardReviewScreen.aurora,
@@ -554,18 +556,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
                   )
                 : null,
           ),
-          // 고른 반복은 도구 칸이 아니라 아래 한 줄로 (칸 크기 그대로, 글이 길면 줄만 늘어남 #1457)
-          if (pickedScheduleSummary case final scheduleSummary? when hasScheduleTool) ...[
-            SizedBox(height: _toolRowToScheduleLine.h),
-            // 도구 줄과 같은 폭
-            SizedBox(
-              width: CardReviewToolRow.rowWidth.w,
-              child: CardReviewScheduleLine(
-                summary: scheduleSummary,
-                onChange: busy ? null : openScheduleTool,
-              ),
-            ),
-          ],
         ],
       ),
     );
