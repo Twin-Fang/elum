@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'coach_mark_parts.dart';
+
 /// 말풍선 글을 어느 쪽에 맞출지.
 enum CoachMarkAlign { center, end }
 
@@ -49,7 +51,7 @@ class CoachMarkStep {
   final List<Rect> Function(Rect target)? partsOf;
   final double partRadius;
 
-  /// 구멍 위에 얹는 시범 층 (손가락·시트 미리보기 등). 구멍이 자리를 잡은 뒤에 그려지고
-  /// 터치는 막지 않는다. 대상 상자를 받아 **`Positioned` 를 돌려준다.** 없으면 그리지 않는다.
-  final Widget Function(BuildContext context, Rect targetRect)? demoBuilder;
+  /// 구멍 위에 얹는 시범 층 (누름 표시·메뉴 미리보기 등). 구멍이 자리를 잡은 뒤에 그려지고
+  /// 터치는 막지 않는다. 구멍(상자·모서리)을 받아 **`Positioned` 를 돌려준다.** 없으면 그리지 않는다.
+  final Widget Function(BuildContext context, CoachHole hole)? demoBuilder;
 }

@@ -11,9 +11,11 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_talk_import_state.dart';
+import '../../application/routine_schedule_controller.dart';
 import 'card_image.dart';
+import 'routine_schedule_labels.dart';
 
-/// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + 오늘 보냈으면 ✓ (#805)
+/// 일과관리 격자 한 칸: 첫 카드 그림 + 이름 + (반복이 켜져 있으면) 반복 한 줄 + 오늘 보냈으면 ✓ (#805)
 ///
 /// 누르면 상세, 길게 누르면 빠른 메뉴. 휴대폰 바탕화면 앱 아이콘처럼 보이게 둔다.
 /// 이야기에서 가져온 일과는 그림 왼쪽 아래 `이야기에서` 알약, 아직 안 열어 봤으면 민트 테두리 + `새 일과` 칩 (민트 = 안 읽음).
@@ -43,6 +45,25 @@ class LibraryRoutineTile extends ConsumerWidget {
   /// 안 열어 본 가져온 일과의 테두리 두께
   static const _newOutlineWidth = 2.0;
 
+  /// 이름 > 반복 한 줄 간격
+  static const _titleToScheduleGap = 2.0;
+
+  /// 반복 한 줄 글자 (작은 칩 글자와 같은 10)
+  static TextStyle scheduleLineStyleOf(BuildContext context) => context.typo.libraryNewChipLabel;
+
+  /// 반복 한 줄이 차지하는 높이 (간격 포함, 글자 배율 반영) · 격자 칸 높이 계산용
+  static double scheduleLineHeightOf(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'A', style: scheduleLineStyleOf(context)),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final measured = painter.height;
+    painter.dispose();
+    return _titleToScheduleGap.h + measured;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
@@ -52,8 +73,14 @@ class LibraryRoutineTile extends ConsumerWidget {
     final isNew =
         isFromTalk &&
         !ref.watch(talkImportedSeenRoutineIdsProvider).contains(routine.id);
+    // 켜진 반복만 한 줄 (멈춘 반복은 상세 시트에서 안내)
+    final schedule = ref.watch(routineScheduleOfProvider(routine.id));
+    final scheduleSummary = schedule == null || schedule.isPaused
+        ? null
+        : routineScheduleSummaryLabel(context, schedule);
     final label = [
       routine.displayTitle,
+      ?scheduleSummary,
       if (isFromTalk) l10n.routineLibraryFromTalk,
       if (isNew) l10n.routineLibraryNewBadge,
       if (isSentToday) l10n.routineLibrarySentBadge,
@@ -136,6 +163,16 @@ class LibraryRoutineTile extends ConsumerWidget {
                 ),
               ),
             ),
+            if (scheduleSummary != null) ...[
+              SizedBox(height: _titleToScheduleGap.h),
+              Text(
+                scheduleSummary,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: scheduleLineStyleOf(context).copyWith(color: colors.textSecondary),
+              ),
+            ],
           ],
         ),
       ),

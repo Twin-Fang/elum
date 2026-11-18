@@ -40,6 +40,12 @@ final routineScheduleOfProvider = Provider.family<RoutineSchedule?, String>(
       ref.watch(routineSchedulePlanProvider).value?.scheduleOf(routineId),
 );
 
+/// 켜진(멈추지 않은) 반복이 하나라도 있는가: 일과관리 격자가 칸마다 반복 한 줄 자리를 둘지
+final hasActiveRoutineScheduleProvider = Provider<bool>((ref) {
+  final schedules = ref.watch(routineSchedulePlanProvider).value?.schedules ?? const [];
+  return schedules.any((schedule) => !schedule.isPaused);
+});
+
 final routineScheduleControllerProvider = Provider<RoutineScheduleController>(
   RoutineScheduleController.new,
 );

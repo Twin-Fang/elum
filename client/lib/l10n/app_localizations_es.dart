@@ -4035,10 +4035,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planPriceFailed => 'No se pudieron cargar los precios';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => 'Canjear código';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => 'No se pudo abrir el canje de código';
 
   @override
   String get planRestore => 'Restaurar compras';
@@ -6290,6 +6290,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guideTipReadAction => 'Leer';
+
+  @override
+  String get routineSentViewOnElumiScreen => 'Ver en la pantalla de Elumi';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    return '$name aún no ha probado las tarjetas';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody =>
+      'Abre la pantalla de Elumi y prueben juntos la primera tarjeta';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => 'Abrir pantalla de Elumi';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice =>
+      'Vincular el dispositivo de Elumi';
+
+  @override
+  String get cardReviewToolSchedule => 'Programar';
+
+  @override
+  String get cardReviewCoachScheduleMessage =>
+      'Elige *días y una hora*\ny se *enviará a Elumi automáticamente* cada vez';
+
+  @override
+  String get routineSchedulePickDone => 'Fijar así';
+
+  @override
+  String get routineSchedulePickClear => 'No programar';
 
   @override
   String get guardianSettingsGuides => 'Guías para cuidadores';

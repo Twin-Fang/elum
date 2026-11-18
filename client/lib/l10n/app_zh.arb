@@ -1658,5 +1658,16 @@
   "guardianSettingsGuides": "看护者指南",
   "guardianHomeElumiTodayProgress": "Elumi 今天 {done}/{total}",
   "guardianHomeElumiTodayProgressSemantics": "今天完成了{total}个日程中的{done}个。点击去Elumi模式",
-  "guardianHomeDetailEmptyTitle": "点击日程即可在这里查看卡片"
+  "guardianHomeDetailEmptyTitle": "点击日程即可在这里查看卡片",
+  "routineSentViewOnElumiScreen": "在Elumi画面查看",
+  "homeNextStepFirstTryTitle": "{name}还没有试过卡片",
+  "homeNextStepFirstTryBody": "打开Elumi画面，一起试试第一张卡片",
+  "homeNextStepFirstTryOpenElumi": "打开Elumi画面",
+  "homeNextStepFirstTryLinkDevice": "连接Elumi的设备",
+  "cardReviewToolSchedule": "预约",
+  "cardReviewCoachScheduleMessage": "设定好*星期和时间*\n到时就会*自动发送给Elumi*",
+  "routineSchedulePickDone": "就这样设定",
+  "routineSchedulePickClear": "不预约",
+  "planRedeemCode": "输入优惠码",
+  "planRedeemCodeFailed": "无法打开兑换码页面"
 }

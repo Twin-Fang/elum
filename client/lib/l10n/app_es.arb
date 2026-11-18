@@ -1658,5 +1658,16 @@
   "guardianSettingsGuides": "Guías para cuidadores",
   "guardianHomeElumiTodayProgress": "Elumi hoy {done}/{total}",
   "guardianHomeElumiTodayProgressSemantics": "Elumi terminó {done} de {total} rutinas hoy. Toca para ir al modo Elumi",
-  "guardianHomeDetailEmptyTitle": "Toca una rutina para ver aquí sus tarjetas"
+  "guardianHomeDetailEmptyTitle": "Toca una rutina para ver aquí sus tarjetas",
+  "routineSentViewOnElumiScreen": "Ver en la pantalla de Elumi",
+  "homeNextStepFirstTryTitle": "{name} aún no ha probado las tarjetas",
+  "homeNextStepFirstTryBody": "Abre la pantalla de Elumi y prueben juntos la primera tarjeta",
+  "homeNextStepFirstTryOpenElumi": "Abrir pantalla de Elumi",
+  "homeNextStepFirstTryLinkDevice": "Vincular el dispositivo de Elumi",
+  "cardReviewToolSchedule": "Programar",
+  "cardReviewCoachScheduleMessage": "Elige *días y una hora*\ny se *enviará a Elumi automáticamente* cada vez",
+  "routineSchedulePickDone": "Fijar así",
+  "routineSchedulePickClear": "No programar",
+  "planRedeemCode": "Canjear código",
+  "planRedeemCodeFailed": "No se pudo abrir el canje de código"
 }

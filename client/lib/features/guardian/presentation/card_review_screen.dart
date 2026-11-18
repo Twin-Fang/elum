@@ -21,6 +21,7 @@ import '../data/card_photo.dart';
 import '../application/credit_cost_preview.dart';
 import 'card_review_added_image.dart';
 import 'card_review_rename.dart';
+import 'card_review_schedule_send.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_voice_block.dart';
@@ -39,7 +40,7 @@ import '../application/first_send_celebration.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
-/// 하단은 도구 버튼 3개(순서 변경 · 수정 · 추가)이고 순서 변경은 같은 화면이 모드로 바뀐다.
+/// 하단은 도구 버튼 3~4개(순서 변경 · 수정 · 추가 · 예약)이고 순서 변경은 같은 화면이 모드로 바뀐다.
 ///
 /// AI가 만든 카드를 보호자가 확인하고 저장한다. **승인 전에는 아동에게
 /// 노출되지 않는다** (docs 원칙 3번).
@@ -70,7 +71,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     with
         BusyStateMixin<CardReviewScreen>,
         CardReviewAddedImage<CardReviewScreen>,
-        CardReviewRename<CardReviewScreen> {
+        CardReviewRename<CardReviewScreen>,
+        CardReviewScheduleSend<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -195,7 +197,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
   /// 서버 임시저장 상태: 저장하면 승인되어 이룸이 기기로 감
   static const _draftStatus = 'PENDING_REVIEW';
 
+  /// 저장(보내기) > (예약 도구로 고른 반복이 있으면) 반복 저장 > 첫 보내기 축하 또는 홈
   Future<void> _saveNow() async {
+    final repeatSchedule = pickedRepeatSchedule;
     // 보내기인가 (임시저장 승인) · 첫 보내기인가: 저장 전에 판정 (저장 뒤에는 목록에 이 일과가 섞임)
     final firstSendCelebration = ref.read(firstSendCelebrationProvider);
     final isSending = ref.read(routineFlowProvider).routine?.status == _draftStatus;
@@ -221,6 +225,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     }
     final savedRoutineId = ref.read(routineFlowProvider).routine?.id;
     if (isSending) unawaited(firstSendCelebration.markSent());
+    // 반복은 일과가 원본으로 저장된 뒤에만 정할 수 있음 (실패해도 일과는 보낸 채 이어 감)
+    if (repeatSchedule != null) await saveRepeatScheduleAfterSend(savedRoutineId, repeatSchedule);
+    if (!mounted) return;
     // 첫 보내기: 축하 화면 (알림 권한 안내 · AI 메모 확인은 축하에서 홈으로 갈 때)
     if (isFirstSend) {
       context.go(Routes.guardianRoutineSent, extra: (routineId: savedRoutineId));
@@ -386,6 +393,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     final cards = routine?.steps ?? const <ActionCard>[];
     final routineId = routine?.id ?? '';
     final notifier = ref.read(routineFlowProvider.notifier);
+    final hasScheduleTool = shouldShowScheduleTool;
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
@@ -422,7 +430,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       showDraftAction: !_reorderMode,
       onHelp: () => ref
           .read(cardReviewCoachProvider.notifier)
-          .replay(cardCount: cards.length),
+          .replay(cardCount: cards.length, hasScheduleTool: hasScheduleTool),
       // 코치마크 중 뒤로가기는 안내만 닫는다 (나가기 확인을 띄우지 않음)
       shouldIgnoreSystemBack: ref.watch(
         cardReviewCoachProvider.select((state) => state.isActive),
@@ -446,6 +454,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
           CardReviewCoachMark(
             keys: _coachKeys,
             cardCount: cards.length,
+            hasScheduleTool: hasScheduleTool,
             canStart: !_reorderMode,
           ),
           // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
@@ -532,6 +541,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
             onEdit: () =>
                 _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
             onAdd: _add,
+            schedule: hasScheduleTool
+                ? (
+                    label: scheduleToolLabel,
+                    shouldShowProBadge: shouldShowScheduleProBadge,
+                    onTap: busy ? null : openScheduleTool,
+                    coachKey: _coachKeys.schedule,
+                  )
+                : null,
           ),
         ],
       ),

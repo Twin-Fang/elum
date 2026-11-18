@@ -119,10 +119,10 @@ class _RoutineManageCoachStageState
           target: _firstTileKey,
           message: l10n.routineManageCoachDragMessage,
           holeRadius: tileRadius,
-          demoBuilder: (context, firstRect) => dragToGroupDemo(
+          demoBuilder: (context, firstHole) => dragToGroupDemo(
             context,
-            firstRect,
-            _secondTileRect(firstRect),
+            firstHole.rect,
+            _secondTileRect(firstHole.rect),
             ghost: LibraryRoutineThumbnail(routine: samples.first),
             // 놓으면 생기는 묶음 칸: 끈 일과 + 받은 일과
             groupItems: [

@@ -1555,7 +1555,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardReviewReorderHint => '카드를 길게 눌러 순서를 바꿀 수 있어요';
 
   @override
-  String get cardReviewToolReorder => '카드 순서 변경';
+  String get cardReviewToolReorder => '순서 변경';
 
   @override
   String get cardReviewToolEdit => '이 카드 수정';
@@ -2891,7 +2891,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cardReviewCoachSaveMessage =>
-      '다 고쳤으면 꼭 *카드 저장하기*를 눌러요\n눌러야 일과가 완성돼요';
+      '다 고쳤으면 *카드 저장하기*를 눌러요\n누르면 *바로 이룸이에게* 보내요';
 
   @override
   String get coachHelpLabel => '사용법 보기';
@@ -5859,6 +5859,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '읽어 보기';
+
+  @override
+  String get routineSentViewOnElumiScreen => '이룸이 화면에서 보기';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '아직 $name$_temp0 카드를 안 해 봤어요';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody => '이룸이 화면을 열어 첫 카드를 함께 해 봐요';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => '이룸이 화면 열기';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => '이룸이 기기 연결';
+
+  @override
+  String get cardReviewToolSchedule => '예약';
+
+  @override
+  String get cardReviewCoachScheduleMessage =>
+      '*요일과 시각*을 정해 두면\n그때마다 *이룸이에게 저절로* 보내요';
+
+  @override
+  String get routineSchedulePickDone => '이렇게 정하기';
+
+  @override
+  String get routineSchedulePickClear => '예약 안 하기';
 
   @override
   String get guardianSettingsGuides => '보호자 가이드';

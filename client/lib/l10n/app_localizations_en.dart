@@ -1649,13 +1649,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Press and hold a card to change the order';
 
   @override
-  String get cardReviewToolReorder => 'Reorder cards';
+  String get cardReviewToolReorder => 'Reorder';
 
   @override
-  String get cardReviewToolEdit => 'Edit this card';
+  String get cardReviewToolEdit => 'Edit card';
 
   @override
-  String get cardReviewToolAdd => 'Add a card';
+  String get cardReviewToolAdd => 'Add card';
 
   @override
   String get cardReviewReorderTitle => 'Reorder cards';
@@ -3039,7 +3039,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardReviewCoachSaveMessage =>
-      'When you\'re done, be sure to tap *Save cards*\nThe routine is finished only after saving';
+      'When you\'re done, tap *Save cards*\nIt goes to *Elumi right away*';
 
   @override
   String get coachHelpLabel => 'How to use';
@@ -6179,6 +6179,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideTipReadAction => 'Read';
+
+  @override
+  String get routineSentViewOnElumiScreen => 'View on Elumi screen';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    return '$name hasn\'t tried the cards yet';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody =>
+      'Open the Elumi screen and try the first card together';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => 'Open Elumi screen';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => 'Link Elumi\'s device';
+
+  @override
+  String get cardReviewToolSchedule => 'Schedule';
+
+  @override
+  String get cardReviewCoachScheduleMessage =>
+      'Pick *days and a time*\nand it\'s *sent to Elumi automatically* each time';
+
+  @override
+  String get routineSchedulePickDone => 'Set schedule';
+
+  @override
+  String get routineSchedulePickClear => 'Don\'t schedule';
 
   @override
   String get guardianSettingsGuides => 'Caregiver guides';

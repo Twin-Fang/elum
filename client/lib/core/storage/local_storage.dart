@@ -254,6 +254,10 @@ abstract interface class LocalStorage {
   bool get isLinkDeviceSuggestionDismissed;
   Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed);
 
+  /// 보호자 홈 첫 체험 권유(보내고 하루 지나도 체크 없음)를 닫은 시각. 7일 숨김 (계정 범위, 없으면 null)
+  DateTime? get firstTryEncourageDismissedAt;
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at);
+
   /// 스토어 별점 요청: 보호자 홈에서 끝난 일과를 본 날짜들 (yyyy-MM-dd, 기기 범위, #1352)
   List<String> get storeReviewCompletedDays;
   Future<void> setStoreReviewCompletedDays(List<String> days);
@@ -274,7 +278,11 @@ abstract interface class LocalStorage {
   bool get isCardReviewCoachSeen;
   Future<void> setCardReviewCoachSeen(bool isSeen);
 
-  /// 코치마크 4종(홈·일과관리·묶음·카드 검토)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
+  /// 카드 검토 코치마크 예약 단계를 봤는가 (앞 단계를 이미 본 사람에게 이 단계만 한 번)
+  bool get isCardReviewScheduleCoachSeen;
+  Future<void> setCardReviewScheduleCoachSeen(bool isSeen);
+
+  /// 코치마크(홈·일과관리·묶음·카드 검토·카드 검토 예약 단계)의 본 표시를 지운다. 온보딩을 새로 마친 보호자에게 안내를 다시 보이기
   Future<void> resetCoachMarks();
 
 

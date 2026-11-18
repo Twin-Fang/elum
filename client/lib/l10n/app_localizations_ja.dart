@@ -3752,10 +3752,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planPriceFailed => '価格を読み込めませんでした';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => 'プロモーションコードを入力';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => 'コード入力画面を開けませんでした';
 
   @override
   String get planRestore => '購入を復元';
@@ -5834,6 +5834,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '読んでみる';
+
+  @override
+  String get routineSentViewOnElumiScreen => 'Elumi画面で見る';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    return '$nameはまだカードを試していません';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody => 'Elumi画面を開いて最初のカードを一緒にやってみましょう';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => 'Elumi画面を開く';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => 'Elumiの機器を連結';
+
+  @override
+  String get cardReviewToolSchedule => '予約';
+
+  @override
+  String get cardReviewCoachScheduleMessage =>
+      '*曜日と時刻*を決めておくと\nそのたびに*Elumiへ自動で*送ります';
+
+  @override
+  String get routineSchedulePickDone => 'これで決める';
+
+  @override
+  String get routineSchedulePickClear => '予約しない';
 
   @override
   String get guardianSettingsGuides => '保護者ガイド';

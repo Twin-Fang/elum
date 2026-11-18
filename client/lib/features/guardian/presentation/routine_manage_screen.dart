@@ -22,6 +22,7 @@ import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../application/first_send_celebration.dart';
 import '../application/library_entries.dart';
+import '../application/routine_schedule_controller.dart';
 import '../application/library_talk_import_state.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
@@ -370,6 +371,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         sharedPostIdBySourceRoutineId: sharedPostIdBySourceRoutineId,
         linkPostIdBySourceRoutineId: linkPostIdBySourceRoutineId,
         onScrollTargetHandled: _clearScrollTarget,
+        shouldReserveScheduleLine: ref.watch(hasActiveRoutineScheduleProvider),
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,

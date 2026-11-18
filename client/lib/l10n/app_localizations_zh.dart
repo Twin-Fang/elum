@@ -3726,10 +3726,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planPriceFailed => '没能加载价格';
 
   @override
-  String get planRedeemCode => '프로모션 코드 입력';
+  String get planRedeemCode => '输入优惠码';
 
   @override
-  String get planRedeemCodeFailed => '코드 입력 화면을 열지 못했어요';
+  String get planRedeemCodeFailed => '无法打开兑换码页面';
 
   @override
   String get planRestore => '恢复购买';
@@ -5800,6 +5800,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '去看看';
+
+  @override
+  String get routineSentViewOnElumiScreen => '在Elumi画面查看';
+
+  @override
+  String homeNextStepFirstTryTitle(String name, String batchim) {
+    return '$name还没有试过卡片';
+  }
+
+  @override
+  String get homeNextStepFirstTryBody => '打开Elumi画面，一起试试第一张卡片';
+
+  @override
+  String get homeNextStepFirstTryOpenElumi => '打开Elumi画面';
+
+  @override
+  String get homeNextStepFirstTryLinkDevice => '连接Elumi的设备';
+
+  @override
+  String get cardReviewToolSchedule => '预约';
+
+  @override
+  String get cardReviewCoachScheduleMessage => '设定好*星期和时间*\n到时就会*自动发送给Elumi*';
+
+  @override
+  String get routineSchedulePickDone => '就这样设定';
+
+  @override
+  String get routineSchedulePickClear => '不预约';
 
   @override
   String get guardianSettingsGuides => '看护者指南';

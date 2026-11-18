@@ -40,6 +40,7 @@ class InMemoryStorage implements LocalStorage {
   bool _isManageCoachSeen;
   bool _isGroupCoachSeen;
   bool _isCardReviewCoachSeen;
+  bool _isCardReviewScheduleCoachSeen = true;
   List<String> _talkImportedSeenRoutineIds = const [];
   List<String> _talkShareHintDismissedRoutineIds = const [];
 
@@ -352,6 +353,14 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setLinkDeviceSuggestionDismissed(bool isDismissed) async =>
       _isLinkDeviceSuggestionDismissed = isDismissed;
 
+  DateTime? _firstTryEncourageDismissedAt;
+
+  @override
+  DateTime? get firstTryEncourageDismissedAt => _firstTryEncourageDismissedAt;
+
+  @override
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at) async => _firstTryEncourageDismissedAt = at;
+
   List<String> _storeReviewCompletedDays = const [];
   bool _hasRequestedStoreReview = false;
 
@@ -476,11 +485,19 @@ class InMemoryStorage implements LocalStorage {
       _isCardReviewCoachSeen = isSeen;
 
   @override
+  bool get isCardReviewScheduleCoachSeen => _isCardReviewScheduleCoachSeen;
+
+  @override
+  Future<void> setCardReviewScheduleCoachSeen(bool isSeen) async =>
+      _isCardReviewScheduleCoachSeen = isSeen;
+
+  @override
   Future<void> resetCoachMarks() async {
     _homeCoachSeen = false;
     _isManageCoachSeen = false;
     _isGroupCoachSeen = false;
     _isCardReviewCoachSeen = false;
+    _isCardReviewScheduleCoachSeen = false;
   }
 
   @override
@@ -536,5 +553,6 @@ class InMemoryStorage implements LocalStorage {
     _isHomeAutoSendUpsellClosed = false;
     _homeUpsellShownRecord = null;
     _celebratedStreakMilestoneKeys = const {};
+    _firstTryEncourageDismissedAt = null;
   }
 }

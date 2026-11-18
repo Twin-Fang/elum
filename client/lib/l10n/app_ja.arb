@@ -1658,5 +1658,16 @@
   "guardianSettingsGuides": "保護者ガイド",
   "guardianHomeElumiTodayProgress": "Elumi 今日 {done}/{total}",
   "guardianHomeElumiTodayProgressSemantics": "今日の日課{total}件のうち{done}件を終えました。タップでElumi画面へ",
-  "guardianHomeDetailEmptyTitle": "日課をタップするとここにカードが表示されます"
+  "guardianHomeDetailEmptyTitle": "日課をタップするとここにカードが表示されます",
+  "routineSentViewOnElumiScreen": "Elumi画面で見る",
+  "homeNextStepFirstTryTitle": "{name}はまだカードを試していません",
+  "homeNextStepFirstTryBody": "Elumi画面を開いて最初のカードを一緒にやってみましょう",
+  "homeNextStepFirstTryOpenElumi": "Elumi画面を開く",
+  "homeNextStepFirstTryLinkDevice": "Elumiの機器を連結",
+  "cardReviewToolSchedule": "予約",
+  "cardReviewCoachScheduleMessage": "*曜日と時刻*を決めておくと\nそのたびに*Elumiへ自動で*送ります",
+  "routineSchedulePickDone": "これで決める",
+  "routineSchedulePickClear": "予約しない",
+  "planRedeemCode": "プロモーションコードを入力",
+  "planRedeemCodeFailed": "コード入力画面を開けませんでした"
 }

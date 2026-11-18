@@ -67,9 +67,13 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeCoachSeen = 'coach.homeSeen';
   // 보호자 홈 기기 연결 권유 닫음 (true 닫음)
   static const _kLinkDeviceSuggestionDismissed = 'home.linkDeviceSuggestionDismissed';
+  // 보호자 홈 첫 체험 권유를 닫은 시각 (ISO-8601, 7일 숨김)
+  static const _kFirstTryEncourageDismissedAt = 'home.firstTryEncourageDismissedAt';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kCardReviewCoachSeen = 'coach.cardReviewSeen';
+  // 카드 검토 코치마크 예약 단계를 봤는가 (true 봄, 앞 단계를 본 사람에게 이 단계만 한 번 #1439)
+  static const _kCardReviewScheduleCoachSeen = 'coach.cardReviewScheduleSeen';
   // 스토어 별점 요청: 끝난 일과를 본 날짜 목록 (yyyy-MM-dd)
   static const _kStoreReviewCompletedDays = 'storeReview.completedDays';
   // 스토어 별점 창을 띄웠는가 (true 면 다시 묻지 않음)
@@ -135,6 +139,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kHomeUpsellShownRecord,
     _kFirstSendCelebrated,
     _kCelebratedStreakMilestones,
+    _kFirstTryEncourageDismissedAt,
   ];
   static const accountScopedKeyPrefixes = [_kProgressPrefix];
   // 계정 범위지만 기기 알림 예약과 묶여 [clearAll]·[clearAccountForElumiLink] 가 남김: 다른 계정 로그인·로그아웃·탈퇴·이룸이 기기 연결 때 알림 기능이 예약 취소와 함께 비움 (`routineReminderResetProvider`)
@@ -154,6 +159,7 @@ class SharedPrefsStorage implements LocalStorage {
     _kManageCoachSeen,
     _kGroupCoachSeen,
     _kCardReviewCoachSeen,
+    _kCardReviewScheduleCoachSeen,
     _kStoreReviewCompletedDays,
     _kStoreReviewRequested,
     _kChildHapticOn,
@@ -536,6 +542,19 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  DateTime? get firstTryEncourageDismissedAt {
+    final raw = _prefs.getString(_kFirstTryEncourageDismissedAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setFirstTryEncourageDismissedAt(DateTime at) async {
+    final raw = at.toIso8601String();
+    AppLogger.storageWrite(_kFirstTryEncourageDismissedAt, raw);
+    await _prefs.setString(_kFirstTryEncourageDismissedAt, raw);
+  }
+
+  @override
   bool get isManageCoachSeen => _prefs.getBool(_kManageCoachSeen) ?? false;
 
   @override
@@ -677,6 +696,16 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isCardReviewScheduleCoachSeen =>
+      _prefs.getBool(_kCardReviewScheduleCoachSeen) ?? false;
+
+  @override
+  Future<void> setCardReviewScheduleCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kCardReviewScheduleCoachSeen, '$isSeen');
+    await _prefs.setBool(_kCardReviewScheduleCoachSeen, isSeen);
+  }
+
+  @override
   List<String> get storeReviewCompletedDays =>
       _prefs.getStringList(_kStoreReviewCompletedDays) ?? const [];
 
@@ -703,6 +732,7 @@ class SharedPrefsStorage implements LocalStorage {
       _kManageCoachSeen,
       _kGroupCoachSeen,
       _kCardReviewCoachSeen,
+      _kCardReviewScheduleCoachSeen,
     ]) {
       AppLogger.storageWrite(key, 'reset');
       await _prefs.remove(key);
