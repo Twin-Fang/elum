@@ -3827,12 +3827,6 @@ abstract class AppLocalizations {
   /// **'-{percent}%'**
   String myCreditPackDiscount(int percent);
 
-  /// 꾸러미 인기 칸 아래 걸친 알약
-  ///
-  /// In ko, this message translates to:
-  /// **'인기!'**
-  String get myCreditPackPopular;
-
   /// 꾸러미 결제 버튼. price 는 스토어 값
   ///
   /// In ko, this message translates to:

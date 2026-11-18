@@ -619,7 +619,6 @@
   "myCreditPackLabelPro": "クレジットをもっと買う",
   "creditGetMore": "クレジットをもっともらう",
   "myCreditPackDiscount": "-{percent}%",
-  "myCreditPackPopular": "人気！",
   "myCreditPackBuy": "{count, plural, other{{count}個買う}}（{price}）",
   "myCreditPackNoExpiryNote": "購入したクレジットに期限はありません",
   "myCreditPackPriceFailed": "クレジットの価格を読み込めませんでした",
