@@ -1682,5 +1682,7 @@
   "guardianSettingsGuides": "Caregiver guides",
   "guardianHomeElumiTodayProgress": "Elumi today {done}/{total}",
   "guardianHomeElumiTodayProgressSemantics": "Elumi finished {done} of {total} routines today. Tap to go to Elumi mode",
-  "guardianHomeDetailEmptyTitle": "Tap a routine to see its cards here"
+  "guardianHomeDetailEmptyTitle": "Tap a routine to see its cards here",
+  "cardReviewScheduleLine": "Sends to Elumi every {summary}",
+  "cardReviewScheduleChange": "Change"
 }

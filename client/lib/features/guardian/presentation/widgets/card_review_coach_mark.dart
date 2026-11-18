@@ -8,12 +8,9 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
 import '../../../../core/widgets/coach_mark_step.dart';
 import '../../application/card_review_coach_notifier.dart';
-import '../../domain/routine_schedule.dart';
 import 'card_review_parts.dart';
 import 'coach_mark_start_gate.dart';
 import 'coach_demo_layers.dart';
-import 'routine_schedule_labels.dart';
-import 'routine_schedule_sheet.dart';
 
 /// 코치마크가 가리킬 버튼: `이 카드 수정` · `순서 변경` · `예약` · `카드 저장하기`
 class CardReviewCoachKeys {
@@ -102,13 +99,6 @@ class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark>
     }
   }
 
-  /// 예약 시범에 보일 반복 (반복 시트 처음 값: 평일 오전 8시)
-  static const _sampleRepeatSchedule = RoutineSchedule(
-    routineId: '',
-    weekdays: RoutineScheduleSheet.defaultWeekdays,
-    hour: RoutineScheduleSheet.defaultHour,
-    minute: RoutineScheduleSheet.defaultMinute,
-  );
 
   /// 단계 > 가리킬 버튼과 글 (수정·순서 변경은 누르기, 예약은 누른 뒤 요약으로 바뀜, 저장은 누른 뒤 보내기 체크)
   CoachMarkStep _stepFor(CardReviewCoachStep step, BuildContext context) {
@@ -135,7 +125,8 @@ class _CardReviewCoachMarkState extends ConsumerState<CardReviewCoachMark>
           hole,
           pickedFace: CardReviewToolFace(
             icon: AppAssets.iconCalendar,
-            label: routineScheduleSummaryLabel(context, _sampleRepeatSchedule),
+            label: context.l10n.cardReviewToolSchedule,
+            isActive: true,
           ),
         ),
       ),

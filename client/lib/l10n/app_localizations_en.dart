@@ -6239,4 +6239,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guardianHomeDetailEmptyTitle =>
       'Tap a routine to see its cards here';
+
+  @override
+  String cardReviewScheduleLine(String summary) {
+    return 'Sends to Elumi every $summary';
+  }
+
+  @override
+  String get cardReviewScheduleChange => 'Change';
 }

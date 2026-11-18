@@ -1673,5 +1673,7 @@
   "routineSchedulePickDone": "Fijar así",
   "routineSchedulePickClear": "No programar",
   "planRedeemCode": "Canjear código",
-  "planRedeemCodeFailed": "No se pudo abrir el canje de código"
+  "planRedeemCodeFailed": "No se pudo abrir el canje de código",
+  "cardReviewScheduleLine": "Se envía a Elumi: {summary}",
+  "cardReviewScheduleChange": "Cambiar"
 }

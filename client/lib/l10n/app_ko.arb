@@ -4175,5 +4175,9 @@
   "guardianHomeElumiTodayProgressSemantics": "이룸이가 오늘 일과 {total}개 중 {done}개를 마쳤어요. 누르면 이룸이 화면으로 가요",
   "@guardianHomeElumiTodayProgressSemantics": {"description": "홈 상단 진행 알약 낭독 글", "placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
   "guardianHomeDetailEmptyTitle": "일과를 누르면 여기에서 카드를 볼 수 있어요",
-  "@guardianHomeDetailEmptyTitle": {"description": "가로 태블릿 홈 오른쪽 상세 칸: 고른 일과가 없을 때 (#1455)"}
+  "@guardianHomeDetailEmptyTitle": {"description": "가로 태블릿 홈 오른쪽 상세 칸: 고른 일과가 없을 때 (#1455)"},
+  "cardReviewScheduleLine": "{summary}마다 이룸이에게 보내요",
+  "@cardReviewScheduleLine": {"description": "카드 확인 도구 줄 아래: 예약 도구로 고른 반복 한 줄 (summary 는 반복 요약, 예: 평일 오전 8:00) #1457", "placeholders": {"summary": {"type": "String"}}},
+  "cardReviewScheduleChange": "바꾸기",
+  "@cardReviewScheduleChange": {"description": "고른 반복 한 줄 오른쪽 글 버튼: 반복 고르기 시트 다시 열기"}
 }
