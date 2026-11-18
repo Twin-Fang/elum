@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ import '../app_status/app_status_repository.dart';
 import '../app_status/store_selling.dart';
 import '../config/app_config.dart';
 import '../l10n/app_locales.dart';
+import '../lock_screen/home_widget_bridge.dart';
 import '../logger/app_logger.dart';
 import '../logger/crash_reporter.dart';
 import '../router/routes.dart';

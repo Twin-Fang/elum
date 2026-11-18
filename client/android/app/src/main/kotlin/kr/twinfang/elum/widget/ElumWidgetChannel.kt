@@ -24,6 +24,8 @@ class ElumWidgetChannel(private val context: Context) : MethodChannel.MethodCall
             }
             "takePendingRoute" -> result.success(ElumWidgetRoutes.takePendingRoute())
             "takeWidgetChecks" -> result.success(preferences.takeCheckOutboxJson())
+            // 개발자 도구: 홈 화면에 위젯 고정 요청 (런처가 "추가" 창을 띄움, 지원 안 하면 false)
+            "requestPinWidget" -> result.success(requestPinWidget(call.argument<String>("kind")))
             else -> result.notImplemented()
         }
     }
@@ -69,5 +71,17 @@ class ElumWidgetChannel(private val context: Context) : MethodChannel.MethodCall
                 ElumWidgetRoutes.pendingRoute = route
             }
         }
+    }
+
+    // kind: today | now_card | streak > 그 위젯 공급자
+    private fun requestPinWidget(kind: String?): Boolean {
+        val provider = when (kind) {
+            "now_card" -> ElumNowCardWidget::class.java
+            "streak" -> ElumStreakWidget::class.java
+            else -> ElumTodayWidget::class.java
+        }
+        val manager = android.appwidget.AppWidgetManager.getInstance(context)
+        if (!manager.isRequestPinAppWidgetSupported) return false
+        return manager.requestPinAppWidget(android.content.ComponentName(context, provider), null, null)
     }
 }

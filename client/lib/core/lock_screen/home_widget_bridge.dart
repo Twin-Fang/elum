@@ -72,6 +72,10 @@ class HomeWidgetBridge {
     }
   }
 
+  /// 개발자 도구: 홈 화면에 위젯 고정 요청 (Android, kind: today · now_card · streak) · 런처가 지원하면 true
+  Future<bool> requestPinWidget(String kind) async =>
+      await _invoke<bool>('requestPinWidget', {'kind': kind}) ?? false;
+
   /// 위젯을 눌러 앱을 켠 경우의 경로 (꺼내면 비움, 없으면 null)
   Future<String?> takePendingRoute() => _invoke<String>('takePendingRoute');
 
