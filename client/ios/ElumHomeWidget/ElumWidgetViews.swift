@@ -92,7 +92,7 @@ struct ElumTodayView: View {
 
   var body: some View {
     let snapshot = entry.snapshot
-    let lumi = LumiImage(name: entry.mood.imageName(isElumiDevice: entry.isElumiDevice), size: isMedium ? 112 : 58)
+    let lumi = LumiImage(name: entry.mood.imageName(isElumiDevice: entry.isElumiDevice), size: isMedium ? 112 : 76)
     let message = Text(ElumWidgetText.message(for: entry))
       .font(.system(size: isMedium ? 17 : 14, weight: .bold))
       .foregroundColor(ElumWidgetColor.primaryText(scheme))
