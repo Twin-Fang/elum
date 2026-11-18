@@ -5767,26 +5767,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonGoHome => 'Go home';
 
   @override
-  String get onboardingLinkStepTitle => 'Link Elumi\'s device?';
+  String get onboardingDeviceUsageTitle => 'Which device will\nElumi use?';
 
   @override
-  String get linkDeviceBenefitLine =>
-      'Routines you send show up on Elumi\'s device right away';
+  String get onboardingDeviceUsageDescription =>
+      'You can also link a device later in Settings';
 
   @override
-  String get onboardingLinkStepConnectNow => 'Link now';
+  String get onboardingDeviceUsageOtherWord => 'Another device';
 
   @override
-  String get onboardingLinkStepEnterCode =>
-      'Just enter the link code on Elumi\'s device';
+  String get onboardingDeviceUsageOtherSuffix => ' for Elumi';
 
   @override
-  String get onboardingLinkStepManyDevices =>
-      'You can link more than one device';
+  String get onboardingDeviceUsageOtherDescription =>
+      'Enter a link code on Elumi\'s device';
 
   @override
-  String get onboardingLinkStepLaterInSettings =>
-      'You can also link later in Settings';
+  String get onboardingDeviceUsageThisWord => 'This device';
+
+  @override
+  String get onboardingDeviceUsageThisSuffix => ', shared';
+
+  @override
+  String get onboardingDeviceUsageThisDescription =>
+      'Switch back and forth with Guardian mode';
+
+  @override
+  String get onboardingDeviceUsageLater => 'Decide later';
+
+  @override
+  String get onboardingDeviceUsageReturnHint =>
+      'To go back to Guardian mode, tap the character at the top right';
 
   @override
   String get homeNextStepMakeTitle => 'Make your first routine';

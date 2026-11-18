@@ -9419,41 +9419,65 @@ abstract class AppLocalizations {
   /// **'홈으로'**
   String get commonGoHome;
 
-  /// 온보딩 이룸이 기기 연결 단계 제목
+  /// 온보딩 마지막 단계 제목 (#1473, 이룸이가 쓸 기기 고르기)
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 기기를 연결할까요?'**
-  String get onboardingLinkStepTitle;
+  /// **'이룸이는 어느 기기로\n쓰나요?'**
+  String get onboardingDeviceUsageTitle;
 
-  /// 기기 연결 이유 한 줄 (온보딩 연결 단계 설명)
+  /// 온보딩 기기 고르기 설명 한 줄
   ///
   /// In ko, this message translates to:
-  /// **'보낸 일과가 이룸이 기기에 바로 떠요'**
-  String get linkDeviceBenefitLine;
+  /// **'나중에 설정에서 기기를 연결할 수도 있어요'**
+  String get onboardingDeviceUsageDescription;
 
-  /// 온보딩 연결 단계 주 버튼 (연결 코드 화면으로)
+  /// 기기 고르기 카드 1 제목의 색 다른 앞부분 (뒤에 OtherSuffix 가 붙음)
   ///
   /// In ko, this message translates to:
-  /// **'지금 연결하기'**
-  String get onboardingLinkStepConnectNow;
+  /// **'다른 기기'**
+  String get onboardingDeviceUsageOtherWord;
 
-  /// 온보딩 연결 단계 소개 줄 1
+  /// 기기 고르기 카드 1 제목 나머지
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 기기에서 연결 코드만 넣으면 돼요'**
-  String get onboardingLinkStepEnterCode;
+  /// **'에서 써요'**
+  String get onboardingDeviceUsageOtherSuffix;
 
-  /// 온보딩 연결 단계 소개 줄 2
+  /// 기기 고르기 카드 1 설명 (고르면 연결 코드 화면)
   ///
   /// In ko, this message translates to:
-  /// **'기기 여러 대를 연결할 수 있어요'**
-  String get onboardingLinkStepManyDevices;
+  /// **'이룸이 기기에 연결 코드를 넣어요'**
+  String get onboardingDeviceUsageOtherDescription;
 
-  /// 온보딩 연결 단계 소개 줄 3
+  /// 기기 고르기 카드 2 제목의 색 다른 앞부분 (뒤에 ThisSuffix 가 붙음)
   ///
   /// In ko, this message translates to:
-  /// **'나중에 설정에서도 연결할 수 있어요'**
-  String get onboardingLinkStepLaterInSettings;
+  /// **'이 기기'**
+  String get onboardingDeviceUsageThisWord;
+
+  /// 기기 고르기 카드 2 제목 나머지
+  ///
+  /// In ko, this message translates to:
+  /// **'를 같이 써요'**
+  String get onboardingDeviceUsageThisSuffix;
+
+  /// 기기 고르기 카드 2 설명 (고르면 이룸이 화면이 열림)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 화면과 바꿔 가며 써요'**
+  String get onboardingDeviceUsageThisDescription;
+
+  /// 기기 고르기 건너뛰기 글자 (보호자 홈으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 정할게요'**
+  String get onboardingDeviceUsageLater;
+
+  /// 이 기기를 고르고 이룸이 화면이 열릴 때 뜨는 토스트 (오른쪽 위 캐릭터 배지 > 비밀암호)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 화면으로 돌아올 땐 오른쪽 위 캐릭터를 눌러요'**
+  String get onboardingDeviceUsageReturnHint;
 
   /// 홈 다음에 할 일: 첫 일과 만들기 제목
   ///
