@@ -38,12 +38,11 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
     );
   }
 
-  /// 카드 넘기기 (순서 변경 중엔 순서 목록). 두 칸은 칸 높이에 맞춘 폰 카드 비율로 가운데
+  /// 카드 넘기기 (순서 변경 중엔 순서 목록). 태블릿은 이룸이 태블릿 카드
   Widget _buildCardsView({
     required List<ActionCard> cards,
     required Routine? routine,
     required String routineId,
-    required bool isWideLayout,
   }) {
     final notifier = ref.read(routineFlowProvider.notifier);
     if (_reorderMode) {
@@ -64,30 +63,44 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
       // 카드를 넘기면 수정 버튼의 대상도 바뀐다
       onPageChanged: _onCardPageChanged,
       itemBuilder: (context, index) {
+        // 태블릿(세로 · 가로)은 이룸이 태블릿과 같은 카드: 넓으면 그림 왼쪽 · 글 오른쪽, 길면 그림이 높이를 채움 (빈 곳 없음)
+        final isTabletCard = context.layoutMetrics.isScaleOverridden;
+        final cardBody = isTabletCard
+            ? ActionCardTabletView(
+                key: ValueKey(cards[index].id),
+                card: cards[index],
+                index: index,
+                routineId: routineId,
+                language: routine?.language ?? 'ko',
+                onSpeak: () => _speak(cards[index]),
+                isSpeaking: _speakingId == cards[index].id,
+                action: null,
+                isImageGenerating: isAddedCardImageGenerating(cards[index].id),
+                // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
+                onDelete: cards.length > 1 ? () => _confirmRemove(cards[index]) : null,
+              )
+            : ActionCardView(
+                key: ValueKey(cards[index].id),
+                card: cards[index],
+                index: index,
+                routineId: routineId,
+                language: routine?.language ?? 'ko',
+                onSpeak: () => _speak(cards[index]),
+                isSpeaking: _speakingId == cards[index].id,
+                isImageGenerating: isAddedCardImageGenerating(cards[index].id),
+                onDelete: cards.length > 1 ? () => _confirmRemove(cards[index]) : null,
+              );
         // 카드가 도착하면 한 장씩 톡 튀어나옴 (처음 그려질 때 한 번)
         final card = AppPopIn(
           key: ValueKey('pop-${cards[index].id}'),
           delay: AppMotion.staggerDelayOf(index),
-          child: ActionCardView(
-            key: ValueKey(cards[index].id),
-            card: cards[index],
-            index: index,
-            routineId: routineId,
-            language: routine?.language ?? 'ko',
-            onSpeak: () => _speak(cards[index]),
-            isSpeaking: _speakingId == cards[index].id,
-            isImageGenerating: isAddedCardImageGenerating(cards[index].id),
-            // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
-            onDelete: cards.length > 1
-                ? () => _confirmRemove(cards[index])
-                : null,
-          ),
+          child: cardBody,
         );
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: (CardReviewScreen._cardGap / 2).w,
           ),
-          child: isWideLayout ? CardReviewWideCardSlot(child: card) : card,
+          child: card,
         );
       },
     );

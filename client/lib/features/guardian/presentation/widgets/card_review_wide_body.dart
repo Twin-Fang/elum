@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/layout/layout_context_ext.dart';
-import '../../../../core/theme/card_layout.dart';
 
-/// 카드 확인 가로 태블릿 두 칸 (#1457): 왼쪽 머리 · 카드 크게 | 오른쪽 보상 · 도구 · 저장 (아래 맞춤)
+/// 카드 확인 가로 태블릿 두 칸 (#1457): 왼쪽 머리 · 넓은 카드가 칸을 채움 | 오른쪽 보상 · 도구 · 저장 (아래 맞춤)
 /// 폰 · 세로 태블릿은 화면이 한 열로 그대로 그림
 class CardReviewWideBody extends StatelessWidget {
   const CardReviewWideBody({
@@ -38,9 +37,11 @@ class CardReviewWideBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final layout = context.layout;
+    final pageMargin = layout.pageMarginFor(context.sizeClass).w;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SizedBox(width: pageMargin),
         Expanded(
           child: Column(
             children: [
@@ -69,28 +70,8 @@ class CardReviewWideBody extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: layout.pageMarginFor(context.sizeClass).w),
+        SizedBox(width: pageMargin),
       ],
     );
   }
-}
-
-/// 두 칸의 카드 한 장: 칸 높이에 맞춰 폰 카드 비율(가로 : 세로)로 가운데 (넓은 칸에서 카드가 옆으로 늘지 않게)
-class CardReviewWideCardSlot extends StatelessWidget {
-  const CardReviewWideCardSlot({super.key, required this.child});
-
-  final Widget child;
-
-  /// 폰 시안 카드 333 × 410 (카드 y161 ~ 571)
-  static const _cardAspect = CardLayout.cardWidth / _phoneCardHeight;
-  static const _phoneCardHeight = 410.0;
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final widthByHeight = constraints.maxHeight * _cardAspect;
-      final width = widthByHeight < constraints.maxWidth ? widthByHeight : constraints.maxWidth;
-      return Center(child: SizedBox(width: width, child: child));
-    },
-  );
 }
