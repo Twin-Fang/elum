@@ -619,7 +619,6 @@
   "myCreditPackLabelPro": "再买一些积分",
   "creditGetMore": "获取更多积分",
   "myCreditPackDiscount": "-{percent}%",
-  "myCreditPackPopular": "热门！",
   "myCreditPackBuy": "{count, plural, other{购买{count}个}} ({price})",
   "myCreditPackNoExpiryNote": "购买的积分没有期限",
   "myCreditPackPriceFailed": "没能加载积分价格",

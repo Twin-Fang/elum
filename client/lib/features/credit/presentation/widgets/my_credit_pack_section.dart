@@ -36,7 +36,7 @@ class _MyCreditPackSectionState extends ConsumerState<MyCreditPackSection> {
 
   static const _tileGap = 10.0;
 
-  /// 칸 위 할인율 · 아래 인기 알약이 칸 밖으로 걸치는 만큼의 여백
+  /// 칸 위로 할인율 알약이 걸치는 만큼의 여백 (칸 위쪽에만 둠)
   static const _pillRoom = 12.0;
 
   @override
@@ -60,7 +60,7 @@ class _MyCreditPackSectionState extends ConsumerState<MyCreditPackSection> {
           ),
           SizedBox(height: space.md.h + _pillRoom.h),
           _tiles(context, offers),
-          SizedBox(height: space.md.h + _pillRoom.h),
+          SizedBox(height: space.md.h),
           _buyArea(context, offers),
         ],
       ),
