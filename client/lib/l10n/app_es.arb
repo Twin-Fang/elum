@@ -617,7 +617,6 @@
   "myCreditPackLabelPro": "Comprar más créditos",
   "creditGetMore": "Conseguir más créditos",
   "myCreditPackDiscount": "-{percent}%",
-  "myCreditPackPopular": "¡Popular!",
   "myCreditPackBuy": "{count, plural, one{Comprar {count} crédito} other{Comprar {count} créditos}} ({price})",
   "myCreditPackNoExpiryNote": "Los créditos comprados no caducan",
   "myCreditPackPriceFailed": "No se pudieron cargar los precios de los créditos",

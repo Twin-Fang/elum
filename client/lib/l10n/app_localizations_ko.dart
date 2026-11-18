@@ -2103,9 +2103,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get myCreditPackPopular => '인기!';
-
-  @override
   String myCreditPackBuy(int count, String price) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
