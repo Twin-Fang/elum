@@ -277,9 +277,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     // 가로 태블릿은 왼쪽 목록 | 오른쪽 상세, 낮은 창(분할 보기)은 한 열로 접는다
     final metrics = context.layoutMetrics;
     final hasTwoPanes =
-        metrics.isScaleOverridden &&
-        metrics.isLandscape &&
-        !metrics.isShortHeight;
+        metrics.hasTwoPanes;
     // 세로 태블릿(두 칸 아님): 화면 폭을 다 쓰고 오늘 일과 2열 (#1455)
     final isTabletSingleColumn = !isPhone && !hasTwoPanes;
     // 두 칸은 칸 자체가 여백을 가져 안쪽 여백 없음

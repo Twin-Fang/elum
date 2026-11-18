@@ -108,9 +108,7 @@ class ChildHomeScreen extends ConsumerWidget {
     // 가로 태블릿은 왼쪽 인사말·오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열 스크롤로 접는다
     final metrics = context.layoutMetrics;
     final hasTwoPanes =
-        metrics.isScaleOverridden &&
-        metrics.isLandscape &&
-        !metrics.isShortHeight;
+        metrics.hasTwoPanes;
 
     // 태블릿에서 두 칸이 아니면 가운데 열(폭 상한)에 담는다. 폰은 그대로 지나간다
     return AdaptivePageFrame(
