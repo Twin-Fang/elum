@@ -5754,18 +5754,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lockScreenPreviewNotice => '预览中按钮不起作用';
 
   @override
-  String get lockScreenIntroTitle => '📱 在锁屏上直接查看';
-
-  @override
-  String get lockScreenIntroBody => '打开屏幕，不用打开应用也能看到Elumi今天完成了几个';
-
-  @override
-  String get lockScreenIntroTurnOn => '开启试试';
-
-  @override
-  String get lockScreenIntroLater => '以后再说';
-
-  @override
   String get lockScreenOnValue => '开启';
 
   @override

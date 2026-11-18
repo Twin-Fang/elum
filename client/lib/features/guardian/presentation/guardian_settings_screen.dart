@@ -1,4 +1,3 @@
-import '../../../app/lock_screen_settings_tile.dart';
 import '../../notification/application/device_notification_permission_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -167,16 +166,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
         // 요금제: 내 요금제 · 구매 복원 (설정 맨 위, 시안 #1070)
         PlanSettingsGroup(isBusy: busy),
         _groupGap,
-        // 주요 기능 (왼쪽 3D 그림): 이룸이 기기 연결, 알림, 잠금화면 카드, 이룸 설계 원리 소개
+        // 주요 기능 (왼쪽 3D 그림): 이룸이 기기 연결, 알림, 이룸 설계 원리 소개 (잠금화면 카드는 이룸이 기기 설정에서만, #1465)
         SettingsGroup(
           children: [
             _LinkTile(isBusy: busy),
             _NotificationTile(isBusy: busy),
-            // 잠금화면 카드 (Android 만, 그 밖은 자리 없음)
-            LockScreenSettingsTile(
-              isEnabled: !busy,
-              onOpen: () => context.push(Routes.lockScreenSettings),
-            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsAboutElum,

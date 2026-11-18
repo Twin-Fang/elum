@@ -5788,18 +5788,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lockScreenPreviewNotice => 'プレビューではボタンは動きません';
 
   @override
-  String get lockScreenIntroTitle => '📱 ロック画面ですぐ見られます';
-
-  @override
-  String get lockScreenIntroBody => '画面をつけると、アプリを開かなくても今日Elumiがいくつやったか分かります';
-
-  @override
-  String get lockScreenIntroTurnOn => 'オンにしてみる';
-
-  @override
-  String get lockScreenIntroLater => 'あとで';
-
-  @override
   String get lockScreenOnValue => 'オン';
 
   @override
