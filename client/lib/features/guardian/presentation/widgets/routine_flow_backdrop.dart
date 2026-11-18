@@ -24,14 +24,14 @@ class RoutineFlowBackdrop extends StatelessWidget {
     super.key,
     required this.tone,
     required this.child,
-    this.isWideOnTwoPanes = false,
+    this.isWideOnTablet = false,
   });
 
   /// 지금 맨 위 화면의 색. 라우터가 위치로 정한다 (`routineFlowToneOf`).
   final AuroraTone tone;
 
-  /// 두 칸 창(가로 태블릿)에서 폰 비율 열 대신 화면 폭을 그대로 넘기는가 (카드 확인 두 칸 #1457). 라우터가 위치로 정한다
-  final bool isWideOnTwoPanes;
+  /// 태블릿(세로 · 가로)에서 폰 비율 열 대신 화면 폭을 그대로 넘기는가 (카드 확인 태블릿 배치 #1457). 라우터가 위치로 정한다
+  final bool isWideOnTablet;
 
   /// 흐름의 Navigator.
   final Widget child;
@@ -47,11 +47,11 @@ class RoutineFlowBackdrop extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(child: AuroraBackground(tone: tone)),
-          // 태블릿에서는 화면(글자·버튼)만 폰 비율 열에 담고 배경은 전폭으로 둔다 (두 칸 화면은 가로 태블릿에서 전폭)
+          // 태블릿에서는 화면(글자·버튼)만 폰 비율 열에 담고 배경은 전폭으로 둔다 (카드 확인은 태블릿에서 전폭)
           Positioned.fill(
             child: _BackdropScope(
               child: AdaptivePageFrame(
-                kind: isWideOnTwoPanes && context.layoutMetrics.hasTwoPanes
+                kind: isWideOnTablet && context.layoutMetrics.isScaleOverridden
                     ? ScreenLayoutKind.adaptive
                     : ScreenLayoutKind.phoneColumn,
                 isBackgroundPainted: false,

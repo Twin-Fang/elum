@@ -28,8 +28,8 @@ List<RouteBase> routineFlowRoutes() => [
       state,
       RoutineFlowBackdrop(
         tone: routineFlowToneOf(state.uri.path),
-        // 카드 확인만 가로 태블릿에서 두 칸 (#1457)
-        isWideOnTwoPanes: state.uri.path == Routes.routineReview,
+        // 카드 확인만 태블릿에서 자기 배치 (세로 한 열 · 가로 두 칸, #1457)
+        isWideOnTablet: state.uri.path == Routes.routineReview,
         child: child,
       ),
       layoutKind: ScreenLayoutKind.adaptive,
