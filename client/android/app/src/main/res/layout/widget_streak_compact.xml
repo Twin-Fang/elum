@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 별과 연속 2x1: 루미 왼쪽 | n일 연속 · 별 k개 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/widget_panel_padding"
+    android:paddingTop="@dimen/widget_gap"
+    android:paddingEnd="@dimen/widget_panel_padding"
+    android:paddingBottom="@dimen/widget_gap">
+
+    <ImageView
+        android:id="@+id/widget_lumi_image"
+        android:layout_width="@dimen/widget_lumi_streak_compact"
+        android:layout_height="@dimen/widget_lumi_streak_compact"
+        android:contentDescription="@string/widget_lumi_description"
+        android:scaleType="fitCenter"
+        android:src="@drawable/lumi_streak_flame" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/widget_gap"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_streak_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/widget_streak_name"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="@dimen/widget_text_body"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_star_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="@dimen/widget_text_caption"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

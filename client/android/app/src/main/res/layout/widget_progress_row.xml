@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 진행 막대 + n/m 한 줄 (오늘 루미 소·중 공통, ElumWidgetViews.bindProgress) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_progress_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/widget_progress_height"
+        android:layout_weight="1"
+        android:indeterminate="false"
+        android:max="3"
+        android:progress="2"
+        android:progressDrawable="@drawable/widget_progress_drawable" />
+
+    <TextView
+        android:id="@+id/widget_progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/widget_gap"
+        android:text="@string/widget_preview_count"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="@dimen/widget_text_caption"
+        android:textStyle="bold" />
+</LinearLayout>

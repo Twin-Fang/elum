@@ -14,4 +14,33 @@
     <string name="lock_screen_action_show_now">지금 보기</string>
     <string name="lock_screen_action_pause">1시간 쉬기</string>
     <string name="lock_screen_action_resume">다시 켜기</string>
+    <!-- 홈 위젯 3종 (#1465): 이름·설명, 루미 한마디 8상태(보호자·이룸이 기기), 다음 일과, 연속·별, 그림 설명 -->
+    <!-- n/m 숫자 (언어 공통) · 미리보기 숫자 -->
+    <string name="widget_progress_count" translatable="false">%1$d/%2$d</string>
+    <string name="widget_preview_count" translatable="false">2/3</string>
+    <string name="widget_today_name">오늘 루미</string>
+    <string name="widget_today_description">루미 표정과 오늘 일과 진행을 보여 줘요</string>
+    <string name="widget_now_name">지금 할 카드</string>
+    <string name="widget_now_description">지금 할 카드를 크게 보여 줘요</string>
+    <string name="widget_streak_name">별과 연속</string>
+    <string name="widget_streak_description">연속으로 한 날과 모은 별을 보여 줘요</string>
+    <string name="widget_message_stale_guardian">루미랑 오늘 일과 볼까요?</string>
+    <string name="widget_message_stale_elumi">루미랑 오늘 할 일 볼까요?</string>
+    <string name="widget_message_empty_guardian">오늘 일과를 만들어 볼까요?</string>
+    <string name="widget_message_empty_elumi">오늘은 쉬는 날이에요</string>
+    <string name="widget_message_done_guardian">오늘 일과를 다 했어요!</string>
+    <string name="widget_message_done_elumi">오늘 다 했어요! 최고예요</string>
+    <string name="widget_message_night">내일 또 같이 해요</string>
+    <string name="widget_message_evening">루미가 기다리고 있어요</string>
+    <string name="widget_message_morning_guardian">좋은 아침! 오늘 일과 %1$d개</string>
+    <string name="widget_message_morning_elumi">좋은 아침! 오늘 할 일 %1$d개</string>
+    <string name="widget_message_ready_guardian">오늘 일과 %1$d개가 기다려요</string>
+    <string name="widget_message_ready_elumi">시작해 볼까요? 할 일 %1$d개</string>
+    <string name="widget_message_progress_guardian">오늘 %1$d/%2$d 했어요</string>
+    <string name="widget_message_progress_elumi">잘하고 있어요! %1$d/%2$d</string>
+    <string name="widget_next_routine">다음 · %1$s</string>
+    <string name="widget_streak_days">%1$d일 연속</string>
+    <string name="widget_star_count">별 %1$d개</string>
+    <string name="widget_lumi_description">루미</string>
+    <string name="widget_card_picture_description">카드 그림</string>
 </resources>

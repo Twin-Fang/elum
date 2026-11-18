@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 지금 할 카드 소 (2x2): 카드 그림(오른쪽 위 n/m 칩) > 카드 글 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_panel_padding">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/widget_card_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/widget_picture_background"
+            android:contentDescription="@string/widget_card_picture_description"
+            android:padding="@dimen/widget_gap_small"
+            android:scaleType="fitCenter"
+            android:src="@drawable/lumi_holding_card" />
+
+        <TextView
+            android:id="@+id/widget_count_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="@dimen/widget_gap_small"
+            android:background="@drawable/widget_chip_background"
+        android:paddingStart="@dimen/widget_chip_padding_horizontal"
+        android:paddingTop="@dimen/widget_chip_padding_vertical"
+        android:paddingEnd="@dimen/widget_chip_padding_horizontal"
+        android:paddingBottom="@dimen/widget_chip_padding_vertical"
+        android:text="@string/widget_preview_count"
+        android:textColor="@color/widget_chip_text"
+        android:textSize="@dimen/widget_text_caption"
+        android:textStyle="bold" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/widget_card_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/widget_now_name"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="@dimen/widget_text_body"
+        android:textStyle="bold" />
+</LinearLayout>

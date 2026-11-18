@@ -86,7 +86,7 @@ class LockScreenElumiCard {
 }
 
 /// 오늘 일과 요약: 앱이 홈 목록을 받을 때마다 네이티브에 저장 > 잠금화면·알림·iOS 위젯이 네트워크 없이 읽음
-/// 담는 것 5개: 날짜, 끝낸 수/전체 수, 다음 일과 제목, 이룸이 지금 할 카드, 이룸이 카드 띄울 시간대
+/// 담는 것 6개: 날짜, 끝낸 수/전체 수, 다음 일과 제목, 이룸이 지금 할 카드, 이룸이 카드 띄울 시간대, 위젯용 이름·연속·별(#1465)
 /// 원문 입력·개인정보 없음 (일과 제목·카드 글만)
 @immutable
 class LockScreenSnapshot {
@@ -98,6 +98,9 @@ class LockScreenSnapshot {
     this.nextRoutineTitle,
     this.elumiCard,
     this.activeWindows = const [],
+    this.elumiName,
+    this.streakDays = 0,
+    this.starCount = 0,
   });
 
   final LockScreenMode mode;
@@ -112,6 +115,13 @@ class LockScreenSnapshot {
   /// 이룸이 카드 띄울 시간대 (시작·끝)
   final List<({DateTime start, DateTime end})> activeWindows;
 
+  /// 위젯 머리에 보일 이룸이 이름 (없으면 null)
+  final String? elumiName;
+
+  /// 이어서 일과를 마친 일수 · 모은 별 수 (위젯 「별과 연속」, 모르면 0)
+  final int streakDays;
+  final int starCount;
+
   bool get isAllDone => totalCount > 0 && doneCount >= totalCount;
 
   /// [now] 날짜의 요약인가 (어제 받아 둔 요약은 "앱을 열어 확인" 으로 대신함)
@@ -122,16 +132,32 @@ class LockScreenSnapshot {
       '${time.month.toString().padLeft(2, '0')}-'
       '${time.day.toString().padLeft(2, '0')}';
 
-  LockScreenSnapshot copyWithElumiCard(LockScreenElumiCard? card) =>
-      LockScreenSnapshot(
-        mode: mode,
-        dateKey: dateKey,
-        doneCount: doneCount,
-        totalCount: totalCount,
-        nextRoutineTitle: nextRoutineTitle,
-        elumiCard: card,
-        activeWindows: activeWindows,
-      );
+  LockScreenSnapshot copyWithElumiCard(LockScreenElumiCard? card) => _copyWith(elumiCard: card);
+
+  /// 위젯용 이름·연속·별 채우기 (요약 빌더는 일과만 봄)
+  LockScreenSnapshot copyWithWidgetExtras({
+    required String? elumiName,
+    required int streakDays,
+    required int starCount,
+  }) => _copyWith(elumiName: elumiName, streakDays: streakDays, starCount: starCount);
+
+  LockScreenSnapshot _copyWith({
+    LockScreenElumiCard? elumiCard,
+    String? elumiName,
+    int? streakDays,
+    int? starCount,
+  }) => LockScreenSnapshot(
+    mode: mode,
+    dateKey: dateKey,
+    doneCount: doneCount,
+    totalCount: totalCount,
+    nextRoutineTitle: nextRoutineTitle,
+    elumiCard: elumiCard ?? this.elumiCard,
+    activeWindows: activeWindows,
+    elumiName: elumiName ?? this.elumiName,
+    streakDays: streakDays ?? this.streakDays,
+    starCount: starCount ?? this.starCount,
+  );
 
   String toJsonString() => jsonEncode({
     'mode': mode.wireName,
@@ -147,6 +173,9 @@ class LockScreenSnapshot {
           window.end.millisecondsSinceEpoch,
         ],
     ],
+    'elumiName': elumiName,
+    'streakDays': streakDays,
+    'starCount': starCount,
   });
 
   /// 깨졌거나 비었으면 null (잠금화면은 "앱을 열어 확인" 으로 대신함)
@@ -165,6 +194,9 @@ class LockScreenSnapshot {
         nextRoutineTitle: _stringOrNull(decoded['nextRoutineTitle']),
         elumiCard: LockScreenElumiCard.fromJson(decoded['elumiCard']),
         activeWindows: _windowsOf(decoded['activeWindows']),
+        elumiName: _stringOrNull(decoded['elumiName']),
+        streakDays: _intOrZero(decoded['streakDays']),
+        starCount: _intOrZero(decoded['starCount']),
       );
     } catch (_) {
       return null;

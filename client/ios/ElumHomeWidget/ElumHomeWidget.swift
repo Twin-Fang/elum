@@ -1,171 +1,123 @@
 import SwiftUI
 import WidgetKit
 
-// 이룸 홈 화면 위젯 (보호자): 오늘 이룸이 일과 진행 수 · 진행 막대 · 다음 할 일
-// 데이터: 앱(Flutter HomeWidgetBridge > HomeWidgetChannel)이 App Group UserDefaults 에 쓴 오늘 요약 JSON
-// 요약이 없거나 어제 것이면 "앱을 열어 오늘 일과를 확인해요" (위젯은 네트워크를 쓰지 않음)
+// 이룸 위젯 묶음 (#1410, #1465): 홈 화면 3종(오늘 루미 · 지금 할 카드 · 별과 연속) + 잠금화면 1종
+// 데이터: 앱이 App Group 에 쓴 오늘 요약 JSON (ElumWidgetModel.swift) · 위젯은 네트워크를 쓰지 않음
+// 누르면 elum://widget?route=... > 앱이 그 화면을 엶 (Runner HomeWidgetChannel)
 
-/// App Group · 저장 키 (HomeWidgetChannel.swift 와 같은 값)
-enum ElumHomeWidgetStore {
-  static let appGroupId = "group.kr.twinfang.elum"
-  static let snapshotKey = "elum.lockScreenSnapshot"
-}
-
-/// 오늘 요약 (Dart LockScreenSnapshot.toJson 중 위젯이 쓰는 키만)
-struct ElumRoutineSnapshot: Decodable {
-  let dateKey: String
-  let doneCount: Int
-  let totalCount: Int
-  let nextRoutineTitle: String?
-
-  /// 오늘 날짜의 요약인가 (yyyy-MM-dd, 기기 시간대)
-  var isToday: Bool {
-    let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "en_US_POSIX")
-    formatter.dateFormat = "yyyy-MM-dd"
-    return dateKey == formatter.string(from: Date())
-  }
-
-  static func load() -> ElumRoutineSnapshot? {
-    guard
-      let json = UserDefaults(suiteName: ElumHomeWidgetStore.appGroupId)?
-        .string(forKey: ElumHomeWidgetStore.snapshotKey),
-      let data = json.data(using: .utf8)
-    else { return nil }
-    return try? JSONDecoder().decode(ElumRoutineSnapshot.self, from: data)
+@main
+struct ElumWidgetBundle: WidgetBundle {
+  var body: some Widget {
+    ElumTodayWidget()
+    ElumNowCardWidget()
+    ElumStreakWidget()
+    ElumLockScreenWidget()
   }
 }
 
-struct ElumRoutineEntry: TimelineEntry {
-  let date: Date
-  let snapshot: ElumRoutineSnapshot?
-}
+/// 「오늘 루미」: 루미 표정 + 한마디 + 진행 (보호자 · 이룸이 기기 공통) · 누르면 홈
+struct ElumTodayWidget: Widget {
+  // kind 는 바꾸지 않음 (#1410 에서 이미 놓은 위젯이 그대로 이어지게)
+  private let kind = "ElumHomeWidget"
 
-/// 타임라인: 지금 요약 1개 + 30분 뒤 다시 읽기 (앱이 요약을 바꾸면 reloadAllTimelines 로 바로 갱신)
-struct ElumRoutineProvider: TimelineProvider {
-  // 다시 읽는 간격 (자정이 지나면 "앱을 열어 확인" 으로 바뀌게)
-  private let refreshInterval: TimeInterval = 30 * 60
-
-  func placeholder(in context: Context) -> ElumRoutineEntry {
-    ElumRoutineEntry(
-      date: Date(),
-      snapshot: ElumRoutineSnapshot(dateKey: "", doneCount: 2, totalCount: 3, nextRoutineTitle: nil)
-    )
-  }
-
-  func getSnapshot(in context: Context, completion: @escaping (ElumRoutineEntry) -> Void) {
-    completion(ElumRoutineEntry(date: Date(), snapshot: ElumRoutineSnapshot.load()))
-  }
-
-  func getTimeline(in context: Context, completion: @escaping (Timeline<ElumRoutineEntry>) -> Void) {
-    let now = Date()
-    let entry = ElumRoutineEntry(date: now, snapshot: ElumRoutineSnapshot.load())
-    completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(refreshInterval))))
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { entry in
+      ElumWidgetPanel { family in
+        ElumTodayView(entry: entry, isMedium: family == .systemMedium)
+      }
+      .widgetURL(ElumWidgetRoute.url())
+    }
+    .configurationDisplayName(ElumWidgetText.text("today.name"))
+    .description(ElumWidgetText.text("today.description"))
+    .supportedFamilies([.systemSmall, .systemMedium])
   }
 }
 
-/// 위젯 문구 5개 언어 (기기 언어 > 없으면 한국어). 앱 ARB 의 lockScreen* 문구와 같은 뜻
-enum ElumWidgetText {
-  private static let table: [String: [String: String]] = [
-    "ko": ["title": "오늘 이룸이 일과", "next": "다음 할 일: %@", "allDone": "오늘 일과를 다 끝냈어요",
-           "none": "오늘 보낸 일과가 없어요", "stale": "앱을 열어 오늘 일과를 확인해요",
-           "name": "오늘 일과", "description": "이룸이가 오늘 일과를 몇 개 했는지 보여 줘요"],
-    "en": ["title": "Elumi's routines today", "next": "Next: %@", "allDone": "All of today's routines are done",
-           "none": "No routines sent today", "stale": "Open the app to check today's routines",
-           "name": "Today's routines", "description": "Shows how many routines Elumi did today"],
-    "ja": ["title": "今日のElumiの日課", "next": "次: %@", "allDone": "今日の日課はすべて終わりました",
-           "none": "今日送った日課はありません", "stale": "アプリを開いて今日の日課を確認しましょう",
-           "name": "今日の日課", "description": "Elumiが今日いくつ日課をやったか表示します"],
-    "zh": ["title": "Elumi今天的日常", "next": "下一个: %@", "allDone": "今天的日常都完成了",
-           "none": "今天没有发送日常", "stale": "打开应用查看今天的日常",
-           "name": "今天的日常", "description": "显示Elumi今天完成了几个日常"],
-    "es": ["title": "Rutinas de Elumi hoy", "next": "Siguiente: %@", "allDone": "Las rutinas de hoy están todas hechas",
-           "none": "Hoy no se envió ninguna rutina", "stale": "Abre la app para ver las rutinas de hoy",
-           "name": "Rutinas de hoy", "description": "Muestra cuántas rutinas hizo Elumi hoy"],
-  ]
+/// 「지금 할 카드」: 이룸이가 지금 할 카드 한 장 (없으면 오늘 루미) · 누르면 그 일과 카드
+struct ElumNowCardWidget: Widget {
+  private let kind = "ElumNowCardWidget"
 
-  static func text(_ key: String) -> String {
-    let language = Locale.preferredLanguages.first.map { String($0.prefix(2)) } ?? "ko"
-    return table[language]?[key] ?? table["ko"]?[key] ?? ""
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { entry in
+      ElumWidgetPanel { family in
+        ElumNowCardView(entry: entry, family: family)
+      }
+      .widgetURL(ElumWidgetRoute.url(routineId: entry.snapshot?.elumiCard?.routineId))
+    }
+    .configurationDisplayName(ElumWidgetText.text("nowCard.name"))
+    .description(ElumWidgetText.text("nowCard.description"))
+    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
   }
 }
 
-struct ElumRoutineWidgetView: View {
-  let entry: ElumRoutineEntry
+/// 「별과 연속」: 모은 별 + 연속 기록 · 누르면 홈
+struct ElumStreakWidget: Widget {
+  private let kind = "ElumStreakWidget"
 
-  // 앱 토큰과 같은 색: 민트(routineRingProgress) · 트랙 · 진한 글자 · 회색 글자
-  private let mint = Color(red: 0x55 / 255, green: 0xCF / 255, blue: 0xBA / 255)
-  private let track = Color(red: 0xEE / 255, green: 0xE9 / 255, blue: 0xE6 / 255)
-  private let primaryText = Color(red: 0x1A / 255, green: 0x24 / 255, blue: 0x2B / 255)
-  private let secondaryText = Color(red: 0x74 / 255, green: 0x75 / 255, blue: 0x7D / 255)
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { entry in
+      ElumWidgetPanel { _ in
+        ElumStreakView(entry: entry)
+      }
+      .widgetURL(ElumWidgetRoute.url())
+    }
+    .configurationDisplayName(ElumWidgetText.text("streak.name"))
+    .description(ElumWidgetText.text("streak.description"))
+    .supportedFamilies([.systemSmall])
+  }
+}
+
+/// 잠금화면 「오늘 진행」 (iOS 16+): 원형 링 · 직사각형 · 한 줄
+struct ElumLockScreenWidget: Widget {
+  private let kind = "ElumLockScreenWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { entry in
+      ElumLockScreenFamilyView(entry: entry)
+        .widgetURL(ElumWidgetRoute.url())
+    }
+    .configurationDisplayName(ElumWidgetText.text("lock.name"))
+    .description(ElumWidgetText.text("lock.description"))
+    .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline])
+  }
+}
+
+/// 잠금화면 위젯: 지금 크기를 읽어 본문에 넘김 (잠금화면은 시스템 배경)
+private struct ElumLockScreenFamilyView: View {
+  let entry: ElumWidgetEntry
+  @Environment(\.widgetFamily) private var family
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text(ElumWidgetText.text("title"))
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundColor(secondaryText)
-      if let snapshot = entry.snapshot, snapshot.isToday, snapshot.totalCount > 0 {
-        Text("\(snapshot.doneCount)/\(snapshot.totalCount)")
-          .font(.system(size: 30, weight: .heavy))
-          .foregroundColor(primaryText)
-        progressBar(done: snapshot.doneCount, total: snapshot.totalCount)
-        Text(message(for: snapshot))
-          .font(.system(size: 13, weight: .medium))
-          .foregroundColor(primaryText)
-          .lineLimit(2)
-      } else {
-        Spacer(minLength: 0)
-        Text(entry.snapshot?.isToday == true ? ElumWidgetText.text("none") : ElumWidgetText.text("stale"))
-          .font(.system(size: 14, weight: .medium))
-          .foregroundColor(primaryText)
-          .lineLimit(3)
-      }
-      Spacer(minLength: 0)
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    .widgetBackground(Color.white)
+    ElumLockScreenView(entry: entry, family: family)
+      .elumAccessoryBackground()
+  }
+}
+
+/// 홈 화면 위젯 판: 다크모드에 맞는 판 색 + 지금 크기를 본문에 넘김
+private struct ElumWidgetPanel<Content: View>: View {
+  let content: (WidgetFamily) -> Content
+  @Environment(\.widgetFamily) private var family
+  @Environment(\.colorScheme) private var scheme
+
+  init(@ViewBuilder content: @escaping (WidgetFamily) -> Content) {
+    self.content = content
   }
 
-  private func message(for snapshot: ElumRoutineSnapshot) -> String {
-    if snapshot.doneCount >= snapshot.totalCount { return ElumWidgetText.text("allDone") }
-    guard let next = snapshot.nextRoutineTitle else { return "" }
-    return String(format: ElumWidgetText.text("next"), next)
-  }
-
-  private func progressBar(done: Int, total: Int) -> some View {
-    GeometryReader { geometry in
-      ZStack(alignment: .leading) {
-        Capsule().fill(track)
-        Capsule().fill(mint)
-          .frame(width: geometry.size.width * CGFloat(done) / CGFloat(max(total, 1)))
-      }
-    }
-    .frame(height: 8)
+  var body: some View {
+    content(family)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .elumWidgetBackground(ElumWidgetColor.panel(scheme))
   }
 }
 
 private extension View {
-  /// iOS 17+ 위젯 배경 (그 아래는 일반 배경)
+  /// 잠금화면 위젯 배경 (iOS 17+ 는 containerBackground 필수)
   @ViewBuilder
-  func widgetBackground(_ color: Color) -> some View {
+  func elumAccessoryBackground() -> some View {
     if #available(iOSApplicationExtension 17.0, *) {
-      containerBackground(color, for: .widget)
+      containerBackground(.clear, for: .widget)
     } else {
-      padding().background(color)
+      self
     }
-  }
-}
-
-@main
-struct ElumHomeWidget: Widget {
-  private let kind = "ElumHomeWidget"
-
-  var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: ElumRoutineProvider()) { entry in
-      ElumRoutineWidgetView(entry: entry)
-    }
-    .configurationDisplayName(ElumWidgetText.text("name"))
-    .description(ElumWidgetText.text("description"))
-    .supportedFamilies([.systemSmall, .systemMedium])
   }
 }

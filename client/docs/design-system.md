@@ -228,6 +228,13 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 
 > 캐릭터 SVG 안에서만 쓰인다. UI 컴포넌트에 끌어 쓰지 않는다.
 
+
+### 루미 캐릭터 (#1465)
+
+루미 생김새·말투·표정 16종 기준은 [`docs/image-harness/characters/lumi.md`](../../docs/image-harness/characters/lumi.md) 하나에 둔다.
+그림은 `client/assets/images/lumi/lumi_<이름>.webp` (앱) · iOS 위젯 `ElumHomeWidget/Assets.xcassets` · Android `res/drawable-nodpi/lumi_<이름>.webp` 로 같은 원본에서 만든다.
+화면 코드에서 경로를 직접 쓰지 않고 `AppAssets.lumi*` 를 쓴다. 슬프거나 화난 루미는 없다.
+
 ## 타이포그래피 (AppTypography)
 
 폰트 패밀리: **`TmoneyRoundWind`** (둥근 고딕 — 아동 친화적)

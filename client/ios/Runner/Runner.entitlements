@@ -14,5 +14,10 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<!-- 홈 화면 위젯과 오늘 요약을 나누는 공유 저장소 (ElumHomeWidget.entitlements 와 같은 값, #1410) -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.kr.twinfang.elum</string>
+	</array>
 </dict>
 </plist>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 홈 위젯 간격·모서리·글 크기 (레이아웃 6종 공통) -->
+    <dimen name="widget_corner_radius">24dp</dimen>
+    <dimen name="widget_picture_corner_radius">16dp</dimen>
+    <dimen name="widget_panel_padding">14dp</dimen>
+    <dimen name="widget_gap">8dp</dimen>
+    <dimen name="widget_gap_small">4dp</dimen>
+    <dimen name="widget_progress_height">8dp</dimen>
+    <dimen name="widget_progress_radius">4dp</dimen>
+    <dimen name="widget_chip_padding_horizontal">8dp</dimen>
+    <dimen name="widget_chip_padding_vertical">2dp</dimen>
+    <dimen name="widget_lumi_small">72dp</dimen>
+    <dimen name="widget_lumi_medium">104dp</dimen>
+    <dimen name="widget_lumi_streak_compact">44dp</dimen>
+    <dimen name="widget_card_picture_medium">96dp</dimen>
+    <dimen name="widget_text_caption">12sp</dimen>
+    <dimen name="widget_text_body">15sp</dimen>
+    <dimen name="widget_text_title">18sp</dimen>
+    <dimen name="widget_text_card_medium">20sp</dimen>
+    <dimen name="widget_text_card_large">26sp</dimen>
+</resources>

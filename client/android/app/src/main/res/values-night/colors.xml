@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 홈 위젯 다크: 판 #23252F, 글 흰색 (#1465 설계) -->
+    <color name="widget_panel_background">#23252F</color>
+    <color name="widget_text_primary">#FFFFFF</color>
+    <color name="widget_text_secondary">#A9ABB8</color>
+    <color name="widget_progress_track">#3A3D4A</color>
+    <color name="widget_picture_background">#2E313D</color>
+</resources>

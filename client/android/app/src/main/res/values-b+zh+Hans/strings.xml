@@ -13,4 +13,30 @@
     <string name="lock_screen_action_show_now">现在查看</string>
     <string name="lock_screen_action_pause">暂停1小时</string>
     <string name="lock_screen_action_resume">重新开启</string>
+    <!-- 홈 위젯 3종 (#1465): 이름·설명, 루미 한마디 8상태(보호자·이룸이 기기), 다음 일과, 연속·별, 그림 설명 -->
+    <string name="widget_today_name">今天的Lumi</string>
+    <string name="widget_today_description">显示Lumi的表情和今天日常的进度</string>
+    <string name="widget_now_name">现在要做的卡片</string>
+    <string name="widget_now_description">把现在要做的卡片放大显示</string>
+    <string name="widget_streak_name">星星和连续</string>
+    <string name="widget_streak_description">显示连续完成的天数和收集的星星</string>
+    <string name="widget_message_stale_guardian">和Lumi一起看看今天的日常吧？</string>
+    <string name="widget_message_stale_elumi">和Lumi一起看看今天要做的事吧？</string>
+    <string name="widget_message_empty_guardian">来制作今天的日常吧？</string>
+    <string name="widget_message_empty_elumi">今天是休息日</string>
+    <string name="widget_message_done_guardian">今天的日常都完成了！</string>
+    <string name="widget_message_done_elumi">今天都完成了！真棒</string>
+    <string name="widget_message_night">明天也一起做吧</string>
+    <string name="widget_message_evening">Lumi在等你哦</string>
+    <string name="widget_message_morning_guardian">早上好！今天的日常 %1$d个</string>
+    <string name="widget_message_morning_elumi">早上好！今天要做的事 %1$d个</string>
+    <string name="widget_message_ready_guardian">今天有 %1$d个日常在等着</string>
+    <string name="widget_message_ready_elumi">开始吧？要做的事 %1$d个</string>
+    <string name="widget_message_progress_guardian">今天完成了 %1$d/%2$d</string>
+    <string name="widget_message_progress_elumi">做得很好！%1$d/%2$d</string>
+    <string name="widget_next_routine">下一个 · %1$s</string>
+    <string name="widget_streak_days">连续%1$d天</string>
+    <string name="widget_star_count">星星 %1$d颗</string>
+    <string name="widget_lumi_description">Lumi</string>
+    <string name="widget_card_picture_description">卡片图片</string>
 </resources>

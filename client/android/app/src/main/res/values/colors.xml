@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 홈 위젯 색 (#1465 설계, 앱 토큰과 같은 값). 다크는 values-night/colors.xml -->
+    <color name="widget_panel_background">#FFFFFF</color>
+    <color name="widget_text_primary">#242634</color>
+    <color name="widget_text_secondary">#898B98</color>
+    <color name="widget_progress_mint">#55CFBA</color>
+    <color name="widget_progress_track">#EEE9E6</color>
+    <color name="widget_accent_yellow">#FFD629</color>
+    <!-- 노랑 칩 위 글: 라이트·다크 모두 진한 글 -->
+    <color name="widget_chip_text">#242634</color>
+    <!-- 카드 그림 뒤 판 -->
+    <color name="widget_picture_background">#F8F5F3</color>
+</resources>

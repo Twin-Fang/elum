@@ -34,8 +34,11 @@
 # 🔐 Apple 인증서 & 프로비저닝 프로파일:
 # APPLE_CERTIFICATE_BASE64: .p12 인증서 (base64 인코딩)
 # APPLE_CERTIFICATE_PASSWORD: .p12 인증서 비밀번호
-# APPLE_PROVISIONING_PROFILE_BASE64: .mobileprovision 파일 (base64 인코딩)
-# IOS_PROVISIONING_PROFILE_NAME: 프로비저닝 프로파일 이름
+# APPLE_PROVISIONING_PROFILE_BASE64: 앱(kr.twinfang.elum) .mobileprovision (base64, App Group 포함)
+# IOS_PROVISIONING_PROFILE_NAME: 앱 프로비저닝 프로파일 이름
+# APPLE_WIDGET_PROVISIONING_PROFILE_BASE64: 홈 화면 위젯(kr.twinfang.elum.homewidget) .mobileprovision (base64)
+# IOS_WIDGET_PROVISIONING_PROFILE_NAME: 위젯 프로비저닝 프로파일 이름
+# (프로필은 타깃별로 project.pbxproj Release 설정이 고르고, xcodebuild 에서 덮어쓰지 않음, #1410)
 #
 # 🔐 App Store Connect API:
 # APP_STORE_CONNECT_API_KEY_ID: API Key ID (10자리)
@@ -716,15 +719,36 @@ jobs:
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
 
-      - name: Install Provisioning Profile
+      - name: Install Provisioning Profiles
         env:
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          # 앱(Runner) · 홈 화면 위젯 확장 프로필 2개 (#1410). 이름은 project.pbxproj Release 서명 설정과 같아야 함
+          APP_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APP_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+          WIDGET_PROFILE_BASE64: ${{ secrets.APPLE_WIDGET_PROVISIONING_PROFILE_BASE64 }}
+          WIDGET_PROFILE_NAME: ${{ secrets.IOS_WIDGET_PROVISIONING_PROFILE_NAME }}
         run: |
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > profile.mobileprovision
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-          uuid=$(grep -A1 -a "UUID" profile.mobileprovision | grep string | sed -e "s/<string>//" -e "s/<\/string>//" -e "s/[[:space:]]//g")
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$uuid.mobileprovision
+          install_profile() {
+            local label="$1" encoded="$2" expected_name="$3"
+            if [ -z "$encoded" ]; then
+              echo "❌ $label 프로필 Secret 이 비어 있습니다"
+              exit 1
+            fi
+            echo "$encoded" | base64 --decode > "$label.mobileprovision"
+            local plist uuid name
+            plist=$(security cms -D -i "$label.mobileprovision")
+            uuid=$(echo "$plist" | plutil -extract UUID raw -)
+            name=$(echo "$plist" | plutil -extract Name raw -)
+            # 프로필 이름 <-> Secret 이름 (project.pbxproj PROVISIONING_PROFILE_SPECIFIER 가 이 이름을 찾음)
+            if [ -n "$expected_name" ] && [ "$name" != "$expected_name" ]; then
+              echo "❌ $label 프로필 이름이 다릅니다: '$name' (기대: '$expected_name')"
+              exit 1
+            fi
+            cp "$label.mobileprovision" ~/Library/MobileDevice/Provisioning\ Profiles/$uuid.mobileprovision
+            echo "✅ $label 프로필 설치: $name"
+          }
+          install_profile app "$APP_PROFILE_BASE64" "$APP_PROFILE_NAME"
+          install_profile widget "$WIDGET_PROFILE_BASE64" "$WIDGET_PROFILE_NAME"
 
       - name: Verify ExportOptions.plist
         run: |
@@ -750,7 +774,6 @@ jobs:
 
       - name: Create Archive
         env:
-          IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
           # xcode-select만으로는 서브프로세스에 전파되지 않아 명시적으로 지정
           DEVELOPER_DIR: /Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer
         run: |
@@ -761,7 +784,6 @@ jobs:
             -destination 'generic/platform=iOS' \
             archive \
             CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_NAME" \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export IPA

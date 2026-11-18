@@ -1,15 +1,79 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-15T22:49:38Z",
-    "currentVersion": "2.101.0",
+    "lastUpdated": "2026-11-18T00:58:12Z",
+    "currentVersion": "2.103.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 346
+    "totalReleases": 349
   },
   "releases": [
+    {
+      "version": "2.103.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-18",
+      "pr_number": 1467,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 내 크레딧의 꾸러미 칸에서 할인 표시가 오른쪽에서 잘리지 않아요\n  * 꾸러미 칸 아래에 붙던 인기 표시를 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "내 크레딧의 꾸러미 칸에서 할인 표시가 오른쪽에서 잘리지 않아요",
+            "꾸러미 칸 아래에 붙던 인기 표시를 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.103.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-17",
+      "pr_number": 1451,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 내 크레딧의 꾸러미 칸이 화면 너비에 맞게 가지런히 보여요\n  * 처음 들어가면 홈에 알림 카드만 보여서 화면이 간단해요\n  * 카드를 그림으로 받을 때 아래에 붙던 그림 출처 줄이 빠졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "내 크레딧의 꾸러미 칸이 화면 너비에 맞게 가지런히 보여요",
+            "처음 들어가면 홈에 알림 카드만 보여서 화면이 간단해요",
+            "카드를 그림으로 받을 때 아래에 붙던 그림 출처 줄이 빠졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.102.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-16",
+      "pr_number": 1438,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이룸이 기기 연결은 원할 때만 할 수 있게 바꿨어요\n  * 내 크레딧 화면을 더 보기 쉽게 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이룸이 기기 연결은 원할 때만 할 수 있게 바꿨어요",
+            "내 크레딧 화면을 더 보기 쉽게 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.101.0",
       "project_type": "flutter",
