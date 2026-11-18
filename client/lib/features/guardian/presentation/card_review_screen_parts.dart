@@ -38,12 +38,11 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
     );
   }
 
-  /// 카드 넘기기 (순서 변경 중엔 순서 목록). 두 칸은 칸 높이에 맞춘 폰 카드 비율로 가운데
+  /// 카드 넘기기 (순서 변경 중엔 순서 목록). 태블릿도 폰 카드 비율 그대로
   Widget _buildCardsView({
     required List<ActionCard> cards,
     required Routine? routine,
     required String routineId,
-    required bool isWideLayout,
   }) {
     final notifier = ref.read(routineFlowProvider.notifier);
     if (_reorderMode) {
@@ -64,30 +63,34 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
       // 카드를 넘기면 수정 버튼의 대상도 바뀐다
       onPageChanged: _onCardPageChanged,
       itemBuilder: (context, index) {
+        final cardBody = ActionCardView(
+          key: ValueKey(cards[index].id),
+          card: cards[index],
+          index: index,
+          routineId: routineId,
+          language: routine?.language ?? 'ko',
+          onSpeak: () => _speak(cards[index]),
+          isSpeaking: _speakingId == cards[index].id,
+          isImageGenerating: isAddedCardImageGenerating(cards[index].id),
+          // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
+          onDelete: cards.length > 1
+              ? () => _confirmRemove(cards[index])
+              : null,
+        );
         // 카드가 도착하면 한 장씩 톡 튀어나옴 (처음 그려질 때 한 번)
         final card = AppPopIn(
           key: ValueKey('pop-${cards[index].id}'),
           delay: AppMotion.staggerDelayOf(index),
-          child: ActionCardView(
-            key: ValueKey(cards[index].id),
-            card: cards[index],
-            index: index,
-            routineId: routineId,
-            language: routine?.language ?? 'ko',
-            onSpeak: () => _speak(cards[index]),
-            isSpeaking: _speakingId == cards[index].id,
-            isImageGenerating: isAddedCardImageGenerating(cards[index].id),
-            // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
-            onDelete: cards.length > 1
-                ? () => _confirmRemove(cards[index])
-                : null,
-          ),
+          child: cardBody,
         );
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: (CardReviewScreen._cardGap / 2).w,
           ),
-          child: isWideLayout ? CardReviewWideCardSlot(child: card) : card,
+          // 태블릿은 폰 카드 비율 그대로 칸에 맞춰 가운데 (카드 모양은 늘 폰과 같게 #1457)
+          child: context.layoutMetrics.isScaleOverridden
+              ? CardReviewPhoneRatioCardSlot(child: card)
+              : card,
         );
       },
     );
@@ -99,7 +102,8 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
     // 보내기인가 (임시저장 승인) · 첫 보내기인가: 저장 전에 판정 (저장 뒤에는 목록에 이 일과가 섞임)
     final firstSendCelebration = ref.read(firstSendCelebrationProvider);
     final isSending =
-        ref.read(routineFlowProvider).routine?.status == _CardReviewScreenState._draftStatus;
+        ref.read(routineFlowProvider).routine?.status ==
+        _CardReviewScreenState._draftStatus;
     final isFirstSend =
         isSending && firstSendCelebration.isFirstSendBeforeSending();
     // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
@@ -151,5 +155,33 @@ extension _CardReviewScreenParts on _CardReviewScreenState {
     // 고쳐서 보냈으면 AI 메모리가 찾은 수정을 물어봄 (Pro + 켜짐일 때만, 실패해도 조용히)
     // ignore: use_build_context_synchronously
     if (savedRoutineId != null) unawaited(showMemoryObservationsAfterSend(rootContext, savedRoutineId));
+  }
+
+  /// 도구 줄: 순서 변경 · 이 카드 수정 · 카드 추가 · (예약). 크기는 폰 · 태블릿 세로 · 가로
+  Widget _buildToolRow({
+    required List<ActionCard> cards,
+    required bool hasScheduleTool,
+    required CardReviewToolSize size,
+  }) {
+    return CardReviewToolRow(
+      size: size,
+      reorderKey: _coachKeys.reorder,
+      editKey: _coachKeys.edit,
+      reorderMode: _reorderMode,
+      onReorder: _enterReorder,
+      // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다
+      onFinishReorder: _finishReorder,
+      // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
+      onEdit: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
+      onAdd: _add,
+      schedule: hasScheduleTool
+          ? (
+              isActive: isScheduleToolActive,
+              shouldShowProBadge: shouldShowScheduleProBadge,
+              onTap: busy ? null : openScheduleTool,
+              coachKey: _coachKeys.schedule,
+            )
+          : null,
+    );
   }
 }

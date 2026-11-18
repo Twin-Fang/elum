@@ -5,6 +5,7 @@ import Foundation
 enum ElumWidgetText {
   private static let table: [String: [String: String]] = [
     "ko": [
+      "list.name": "오늘 일과 목록", "list.description": "오늘 일과를 한눈에 봐요", "create.name": "빠른 만들기", "create.description": "바로 새 일과를 만들어요", "create.action": "새 일과 만들기", "list.header": "오늘 일과",
       "check.done": "다 했어요", "check.praise": "잘했어요!", "check.continue": "앱에서 이어서 해요",
       "stale.guardian": "루미랑 오늘 일과 볼까요?", "stale.elumi": "루미랑 오늘 할 일 볼까요?",
       "empty.guardian": "오늘 일과를 만들어 볼까요?", "empty.elumi": "오늘은 쉬는 날이에요",
@@ -20,6 +21,7 @@ enum ElumWidgetText {
       "lock.name": "오늘 진행", "lock.description": "잠금화면에서 오늘 진행을 봐요",
     ],
     "en": [
+      "list.name": "Today's routines", "list.description": "See today's routines at a glance", "create.name": "Quick create", "create.description": "Make a new routine right away", "create.action": "New routine", "list.header": "Today",
       "check.done": "Done", "check.praise": "Great job!", "check.continue": "Continue in the app",
       "stale.guardian": "Check today's routines with Lumi?", "stale.elumi": "See today's plan with Lumi?",
       "empty.guardian": "Shall we make a routine today?", "empty.elumi": "Today is a rest day",
@@ -35,6 +37,7 @@ enum ElumWidgetText {
       "lock.name": "Today's Progress", "lock.description": "See today's progress on the Lock Screen",
     ],
     "ja": [
+      "list.name": "今日の日課リスト", "list.description": "今日の日課をひと目で見られます", "create.name": "すぐ作る", "create.description": "すぐに新しい日課を作れます", "create.action": "新しい日課", "list.header": "今日の日課",
       "check.done": "できた", "check.praise": "よくできました！", "check.continue": "アプリで続けよう",
       "stale.guardian": "ルミと今日の日課を見ますか？", "stale.elumi": "ルミと今日やることを見よう",
       "empty.guardian": "今日の日課を作ってみませんか？", "empty.elumi": "今日はお休みの日です",
@@ -50,6 +53,7 @@ enum ElumWidgetText {
       "lock.name": "今日の進み", "lock.description": "ロック画面で今日の進みを見られます",
     ],
     "zh": [
+      "list.name": "今天的日常列表", "list.description": "一眼看到今天的日常", "create.name": "快速新建", "create.description": "马上新建日常", "create.action": "新建日常", "list.header": "今天的日常",
       "check.done": "完成了", "check.praise": "做得好！", "check.continue": "在应用里继续",
       "stale.guardian": "和Lumi一起看看今天的日常？", "stale.elumi": "和Lumi一起看看今天要做的事？",
       "empty.guardian": "今天来做个日常吧？", "empty.elumi": "今天是休息日",
@@ -65,6 +69,7 @@ enum ElumWidgetText {
       "lock.name": "今天的进度", "lock.description": "在锁定屏幕上查看今天的进度",
     ],
     "es": [
+      "list.name": "Rutinas de hoy", "list.description": "Mira de un vistazo las rutinas de hoy", "create.name": "Crear rápido", "create.description": "Crea una rutina nueva al momento", "create.action": "Nueva rutina", "list.header": "Hoy",
       "check.done": "¡Listo!", "check.praise": "¡Muy bien!", "check.continue": "Sigue en la app",
       "stale.guardian": "¿Vemos las rutinas de hoy con Lumi?", "stale.elumi": "¿Vemos lo de hoy con Lumi?",
       "empty.guardian": "¿Creamos una rutina hoy?", "empty.elumi": "Hoy es día de descanso",

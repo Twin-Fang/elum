@@ -6237,19 +6237,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Los botones no funcionan en la vista previa';
 
   @override
-  String get lockScreenIntroTitle => '📱 Míralo en la pantalla de bloqueo';
-
-  @override
-  String get lockScreenIntroBody =>
-      'Al encender la pantalla verás cuántas rutinas hizo Elumi hoy, sin abrir la app';
-
-  @override
-  String get lockScreenIntroTurnOn => 'Activarla';
-
-  @override
-  String get lockScreenIntroLater => 'Más tarde';
-
-  @override
   String get lockScreenOnValue => 'Activada';
 
   @override

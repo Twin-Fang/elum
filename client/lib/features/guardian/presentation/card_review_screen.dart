@@ -30,6 +30,7 @@ import '../../../core/layout/layout_context_ext.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/card_review_parts.dart';
 import 'widgets/card_review_wide_body.dart';
+import '../../../core/widgets/coach_mark_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
@@ -383,7 +384,10 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
     // 가로 태블릿 두 칸: 왼쪽 머리 · 카드 | 오른쪽 보상 · 도구 · 저장 (#1457)
     final isWideLayout = context.layoutMetrics.hasTwoPanes;
-    _syncControllerToLayout(isWideLayout);
+    // 태블릿 세로: 폰 기둥 대신 화면 폭을 쓰는 한 열 (카드 크게 · 큰 버튼)
+    final isTabletPortrait = context.layoutMetrics.isScaleOverridden && !isWideLayout;
+    final isTabletLayout = isWideLayout || isTabletPortrait;
+    _syncControllerToLayout(isTabletLayout);
     final saveButton = _buildSaveButton();
     // 크기 0 — 막은 루트 오버레이에 그린다. 모드가 바뀌어도 같은 자리에 둔다
     final coachMark = CardReviewCoachMark(
@@ -397,7 +401,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       cards: cards,
       routine: routine,
       routineId: routineId,
-      isWideLayout: isWideLayout,
     );
     final rewardRow = _reorderMode
         ? const CardReviewReorderHint()
@@ -406,25 +409,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
             rewardLanguage: routine?.language ?? 'ko',
             onTap: () => context.push(Routes.routineReward, extra: true),
           );
-    final toolRow = CardReviewToolRow(
-      reorderKey: _coachKeys.reorder,
-      editKey: _coachKeys.edit,
-      reorderMode: _reorderMode,
-      onReorder: _enterReorder,
-      // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다
-      onFinishReorder: _finishReorder,
-      // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
-      onEdit: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
-      onAdd: _add,
-      schedule: hasScheduleTool
-          ? (
-              isActive: isScheduleToolActive,
-              shouldShowProBadge: shouldShowScheduleProBadge,
-              onTap: busy ? null : openScheduleTool,
-              coachKey: _coachKeys.schedule,
-            )
-          : null,
-    );
+    // 도구 크기: 폰 한 줄 · 태블릿 세로 큰 한 줄 · 가로 두 칸 큰 2×2
+    final toolSize = isWideLayout
+        ? CardReviewToolSize.largeGrid
+        : isTabletPortrait
+        ? CardReviewToolSize.largeRow
+        : CardReviewToolSize.regular;
+    final toolRow = _buildToolRow(cards: cards, hasScheduleTool: hasScheduleTool, size: toolSize);
 
     return RoutineFlowScaffold(
       // 순서 변경 중에는 나가도 잃을 것이 없다 — 뒤로는 모드만 닫는다(되돌림 포함).
@@ -452,11 +443,21 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
         cardReviewCoachProvider.select((state) => state.isActive),
       ),
       // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56
-      bottomFigmaInset: isWideLayout ? null : 56,
-      // 두 칸은 저장 버튼이 오른쪽 칸 안에 (아래 고정 버튼 없음)
-      bottomButton: isWideLayout ? null : saveButton,
+      bottomFigmaInset: isTabletLayout ? null : 56,
+      // 태블릿은 저장 버튼이 배치 안에 (아래 고정 버튼 없음)
+      bottomButton: isTabletLayout ? null : saveButton,
       aurora: CardReviewScreen.aurora,
-      child: isWideLayout
+      child: isTabletPortrait
+          ? CardReviewTabletPortraitBody(
+              coachMark: coachMark,
+              heading: headingBlock,
+              cards: cardsView,
+              rewardRow: rewardRow,
+              toolRow: toolRow,
+              saveButton: saveButton,
+              pageDots: _reorderMode ? null : CoachDots(count: cards.length, index: _currentIndex),
+            )
+          : isWideLayout
           ? CardReviewWideBody(
               coachMark: coachMark,
               heading: headingBlock,
@@ -464,6 +465,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
               rewardRow: rewardRow,
               toolRow: toolRow,
               saveButton: saveButton,
+              pageDots: _reorderMode ? null : CoachDots(count: cards.length, index: _currentIndex),
             )
           : Column(
               children: [

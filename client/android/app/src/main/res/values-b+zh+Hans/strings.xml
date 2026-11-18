@@ -42,4 +42,13 @@
     <string name="widget_check_done">完成了</string>
     <string name="widget_check_praise">做得好！</string>
     <string name="widget_continue_in_app">在应用里继续</string>
+    <string name="widget_routine_list_name">今天的日常列表</string>
+    <string name="widget_routine_list_description">一眼看到今天的日常</string>
+    <string name="widget_routine_list_header">今天的日常</string>
+    <string name="widget_quick_create_name">快速新建</string>
+    <string name="widget_quick_create_description">马上新建一个日常</string>
+    <string name="widget_quick_create_button">新建日常</string>
+    <string name="widget_preview_routine_1">早上准备</string>
+    <string name="widget_preview_routine_2">去上学</string>
+    <string name="widget_preview_routine_3">睡前准备</string>
 </resources>

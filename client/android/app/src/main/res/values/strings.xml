@@ -46,4 +46,17 @@
     <string name="widget_check_done">다 했어요</string>
     <string name="widget_check_praise">잘했어요!</string>
     <string name="widget_continue_in_app">앱에서 이어서 해요</string>
+    <!-- 오늘 일과 목록 · 빠른 만들기 위젯 (#1465): 이름·설명, 머리, 만들기 알약, 미리보기 일과 제목 3개 -->
+    <string name="widget_routine_list_name">오늘 일과 목록</string>
+    <string name="widget_routine_list_description">오늘 일과를 한눈에 봐요</string>
+    <string name="widget_routine_list_header">오늘 일과</string>
+    <string name="widget_quick_create_name">빠른 만들기</string>
+    <string name="widget_quick_create_description">바로 새 일과를 만들어요</string>
+    <string name="widget_quick_create_button">새 일과 만들기</string>
+    <string name="widget_preview_routine_1">아침 준비하기</string>
+    <string name="widget_preview_routine_2">학교 가기</string>
+    <string name="widget_preview_routine_3">잠자기 준비</string>
+    <!-- 미리보기 줄 숫자 (언어 공통) -->
+    <string name="widget_preview_count_done" translatable="false">3/3</string>
+    <string name="widget_preview_count_none" translatable="false">0/2</string>
 </resources>

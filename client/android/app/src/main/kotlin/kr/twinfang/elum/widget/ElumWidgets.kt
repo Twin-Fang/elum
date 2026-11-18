@@ -6,16 +6,18 @@ import android.content.Context
 import android.util.Log
 
 /**
- * 홈 위젯 3종 묶음: 전부 다시 그리기 (요약 저장 직후 채널이 부름)
+ * 홈 위젯 5종 묶음: 전부 다시 그리기 (요약 저장 직후 채널이 부름)
  */
 object ElumWidgets {
     const val LOG_TAG = "ElumWidget"
 
-    // 위젯 3종: 새 위젯을 더하면 여기 한 줄
+    // 위젯 5종: 새 위젯을 더하면 여기 한 줄
     private val providers: List<ElumWidgetProvider> = listOf(
         ElumTodayWidget(),
         ElumNowCardWidget(),
         ElumStreakWidget(),
+        ElumRoutineListWidget(),
+        ElumQuickCreateWidget(),
     )
 
     fun updateAll(context: Context) {

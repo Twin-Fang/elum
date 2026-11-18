@@ -13,11 +13,11 @@ import android.widget.RemoteViews
 import kr.twinfang.elum.MainActivity
 
 /**
- * 위젯 3종 공통: 갱신 시점(주기·크기 변경·요약 저장) > 상태 읽기 > 크기별 레이아웃 > 누르면 앱 경로
+ * 홈 위젯 공통: 갱신 시점(주기·크기 변경·요약 저장) > 상태 읽기 > 크기별 레이아웃 > 누르면 앱 경로
  * API 31+ 는 크기별 RemoteViews 묶음(런처가 고름), 그 아래는 지금 크기로 하나 고름
  */
 abstract class ElumWidgetProvider : AppWidgetProvider() {
-    // 로그·탭 출처 이름 (today, now_card, streak)
+    // 로그·탭 출처 이름 (today, now_card, streak, routine_list, quick_create)
     abstract val sourceName: String
 
     // 크기 단계별 최소 크기 (dp, 작은 것부터)

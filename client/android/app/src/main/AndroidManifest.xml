@@ -70,7 +70,7 @@
                 <data android:scheme="https" android:host="api.elum.suhsaechan.kr" android:pathPrefix="/s/"/>
             </intent-filter>
         </activity>
-        <!-- 홈 위젯 3종 (#1465): 오늘 루미 · 지금 할 카드 · 별과 연속. 권한·서비스 없이 요약 JSON 만 읽음 (kr.twinfang.elum.widget) -->
+        <!-- 홈 위젯 5종 (#1465): 오늘 루미 · 지금 할 카드 · 별과 연속 · 오늘 일과 목록 · 빠른 만들기. 권한·서비스 없이 요약 JSON 만 읽음 (kr.twinfang.elum.widget) -->
         <receiver
             android:name=".widget.ElumTodayWidget"
             android:exported="true"
@@ -103,6 +103,28 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/elum_streak_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.ElumRoutineListWidget"
+            android:exported="true"
+            android:label="@string/widget_routine_list_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/elum_routine_list_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.ElumQuickCreateWidget"
+            android:exported="true"
+            android:label="@string/widget_quick_create_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/elum_quick_create_widget_info" />
         </receiver>
         <!-- 지금 할 카드 위젯 "다 했어요" 수신기 (#1465 2단계): 위젯 PendingIntent 명시 intent 만 받음 -->
         <receiver

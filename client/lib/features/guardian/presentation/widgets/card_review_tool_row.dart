@@ -23,7 +23,11 @@ class CardReviewToolRow extends StatelessWidget {
     this.reorderKey,
     this.editKey,
     this.schedule,
+    this.size = CardReviewToolSize.regular,
   });
+
+  /// 버튼 크기 · 배치 (폰 한 줄 / 태블릿 큰 한 줄 / 가로 태블릿 큰 2×2)
+  final CardReviewToolSize size;
 
   /// 도구 버튼 모서리 반지름 (코치마크 구멍도 같은 값)
   static const buttonRadius = 18.0;
@@ -49,63 +53,113 @@ class CardReviewToolRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final schedule = this.schedule;
-    final buttonCount = schedule == null ? 3 : 4;
-    final buttonWidth =
-        (rowWidth - _buttonGap * (buttonCount - 1)) / buttonCount;
+    final buttons = _buttons(context);
+    if (size == CardReviewToolSize.largeGrid) return _grid(buttons);
+    if (size == CardReviewToolSize.largeRow) return _wideRow(buttons);
+    final gapCount = buttons.length - 1;
+    final buttonWidth = (rowWidth - _buttonGap * gapCount) / buttons.length;
     return SizedBox(
       width: rowWidth.w,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _ToolButton(
-            key: reorderKey,
-            width: buttonWidth,
-            face: CardReviewToolFace(
-              icon: AppAssets.iconInterlining,
-              label: context.l10n.cardReviewToolReorder,
-              isPressed: reorderMode,
-            ),
-            // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
-            // 막아 두면 `완료`·`✕` 로만 나올 수 있어 불편하다.
-            onTap: reorderMode ? onFinishReorder : onReorder,
-          ),
-          _ToolButton(
-            key: editKey,
-            width: buttonWidth,
-            face: CardReviewToolFace(
-              icon: AppAssets.iconPencilEdit,
-              label: context.l10n.cardReviewToolEdit,
-            ),
-            isDimmed: reorderMode,
-            onTap: reorderMode ? null : onEdit,
-          ),
-          _ToolButton(
-            width: buttonWidth,
-            face: CardReviewToolFace(
-              icon: AppAssets.iconPlus,
-              label: context.l10n.cardReviewToolAdd,
-            ),
-            isDimmed: reorderMode,
-            onTap: reorderMode ? null : onAdd,
-          ),
-          if (schedule != null)
-            _ToolButton(
-              key: schedule.coachKey,
-              width: buttonWidth,
-              face: CardReviewToolFace(
-                icon: AppAssets.iconCalendar,
-                label: context.l10n.cardReviewToolSchedule,
-                isActive: schedule.isActive,
-              ),
-              isDimmed: reorderMode,
-              shouldShowProBadge: schedule.shouldShowProBadge,
-              onTap: reorderMode ? null : schedule.onTap,
-            ),
-        ],
+        children: [for (final build in buttons) build(buttonWidth.w)],
       ),
     );
   }
+
+  /// 세로 태블릿 큰 한 줄: 칸 폭을 버튼 수로 나눔
+  Widget _wideRow(List<Widget Function(double width)> buttons) => LayoutBuilder(
+    builder: (context, constraints) {
+      final cellWidth = (constraints.maxWidth - _buttonGap.w * (buttons.length - 1)) / buttons.length;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [for (final build in buttons) build(cellWidth)],
+      );
+    },
+  );
+
+  /// 가로 태블릿 2×2: 칸 폭을 반씩, 큰 칸
+  Widget _grid(List<Widget Function(double width)> buttons) => LayoutBuilder(
+    builder: (context, constraints) {
+      final cellWidth = (constraints.maxWidth - _buttonGap.w) / 2;
+      return Wrap(
+        spacing: _buttonGap.w,
+        runSpacing: _buttonGap.w,
+        children: [for (final build in buttons) build(cellWidth)],
+      );
+    },
+  );
+
+  /// 도구 버튼들 (폭을 받아 그림): 순서 변경 · 이 카드 수정 · 카드 추가 · (예약)
+  List<Widget Function(double width)> _buttons(BuildContext context) {
+    final schedule = this.schedule;
+    final isLarge = size != CardReviewToolSize.regular;
+    final height = size.buttonHeight;
+    return [
+      (width) => _ToolButton(
+        key: reorderKey,
+        width: width,
+        height: height,
+        face: CardReviewToolFace(
+          icon: AppAssets.iconInterlining,
+          label: context.l10n.cardReviewToolReorder,
+          isPressed: reorderMode,
+          isLarge: isLarge,
+        ),
+        // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
+        onTap: reorderMode ? onFinishReorder : onReorder,
+      ),
+      (width) => _ToolButton(
+        key: editKey,
+        width: width,
+        height: height,
+        face: CardReviewToolFace(
+          icon: AppAssets.iconPencilEdit,
+          label: context.l10n.cardReviewToolEdit,
+          isLarge: isLarge,
+        ),
+        isDimmed: reorderMode,
+        onTap: reorderMode ? null : onEdit,
+      ),
+      (width) => _ToolButton(
+        width: width,
+        height: height,
+        face: CardReviewToolFace(
+          icon: AppAssets.iconPlus,
+          label: context.l10n.cardReviewToolAdd,
+          isLarge: isLarge,
+        ),
+        isDimmed: reorderMode,
+        onTap: reorderMode ? null : onAdd,
+      ),
+      if (schedule != null)
+        (width) => _ToolButton(
+          key: schedule.coachKey,
+          width: width,
+          height: height,
+          face: CardReviewToolFace(
+            icon: AppAssets.iconCalendar,
+            label: context.l10n.cardReviewToolSchedule,
+            isActive: schedule.isActive,
+            isLarge: isLarge,
+          ),
+          isDimmed: reorderMode,
+          shouldShowProBadge: schedule.shouldShowProBadge,
+          onTap: reorderMode ? null : schedule.onTap,
+        ),
+    ];
+  }
+}
+
+/// 도구 버튼 크기 3가지: 폰 한 줄 60 · 태블릿 세로 큰 한 줄 76 · 태블릿 가로 큰 2×2 92 (#1457)
+enum CardReviewToolSize {
+  regular(60),
+  largeRow(76),
+  largeGrid(92);
+
+  const CardReviewToolSize(this.buttonHeight);
+
+  final double buttonHeight;
 }
 
 /// 넷째 `예약` 도구: 켜짐(반복을 골라 둠) · Free 표지 · 누름 · 코치마크 대상
@@ -124,7 +178,11 @@ class CardReviewToolFace extends StatelessWidget {
     required this.label,
     this.isPressed = false,
     this.isActive = false,
+    this.isLarge = false,
   });
+
+  /// 태블릿 큰 칸: 그림 24 · 글 한 단계 큼
+  final bool isLarge;
 
   final String icon;
   final String label;
@@ -134,6 +192,12 @@ class CardReviewToolFace extends StatelessWidget {
 
   /// 켜진 도구 (예약을 골라 둠): 바탕은 그대로, 이름 진하게 + 오른쪽 위 진한 체크 점 (칸 크기·이름 그대로)
   final bool isActive;
+
+  /// 그림 크기 (폰 16 · 태블릿 큰 칸 24)
+  static const _iconSize = 16.0;
+  static const _iconToLabel = 8.0;
+  static const _largeIconToLabel = 10.0;
+  static const _largeIconSize = 24.0;
 
   /// 체크 점 크기 · 체크 그림 · 위·오른쪽 여백
   static const _activeDotSize = 16.0;
@@ -160,16 +224,16 @@ class CardReviewToolFace extends StatelessWidget {
             // 도구 아이콘은 같은 색 (그림 원본 색이 달라도 네 칸이 한 벌로 보이게)
             SvgPicture.asset(
               icon,
-              width: 16.w,
-              height: 16.w,
+              width: (isLarge ? _largeIconSize : _iconSize).w,
+              height: (isLarge ? _largeIconSize : _iconSize).w,
               colorFilter: ColorFilter.mode(colors.textPrimary, BlendMode.srcIn),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: (isLarge ? _largeIconToLabel : _iconToLabel).h),
             Text(
               label,
               maxLines: 1,
               softWrap: false,
-              style: context.typo.editChipLabel.copyWith(
+              style: (isLarge ? context.typo.body : context.typo.editChipLabel).copyWith(
                 color: labelColor,
                 fontWeight: isActive ? FontWeight.w800 : null,
               ),
@@ -214,14 +278,16 @@ class _ToolButton extends StatelessWidget {
   const _ToolButton({
     super.key,
     required this.width,
+    required this.height,
     required this.face,
     required this.onTap,
     this.isDimmed = false,
     this.shouldShowProBadge = false,
   });
 
-  /// 버튼 폭 (시안 좌표, 줄 폭을 버튼 수로 나눈 값)
+  /// 버튼 폭 (화면 픽셀, 줄 폭을 버튼 수로 나눈 값) · 높이 (393 기준)
   final double width;
+  final double height;
   final CardReviewToolFace face;
   final VoidCallback? onTap;
 
@@ -233,7 +299,7 @@ class _ToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = SizedBox(width: width.w, height: 60.h, child: face);
+    final button = SizedBox(width: width, height: height.h, child: face);
     return Opacity(
       opacity: isDimmed ? 0.4 : 1,
       child: AppPressable(

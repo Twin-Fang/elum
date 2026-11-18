@@ -5813,18 +5813,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get lockScreenPreviewNotice => '미리 보기에서는 버튼이 동작하지 않아요';
 
   @override
-  String get lockScreenIntroTitle => '📱 잠금화면에서 바로 봐요';
-
-  @override
-  String get lockScreenIntroBody => '기기 화면을 켜면 앱을 열지 않아도 오늘 이룸이가 몇 개를 했는지 보여요';
-
-  @override
-  String get lockScreenIntroTurnOn => '켜 보기';
-
-  @override
-  String get lockScreenIntroLater => '나중에';
-
-  @override
   String get lockScreenOnValue => '켜짐';
 
   @override

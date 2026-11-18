@@ -47,6 +47,15 @@ class _DevMenuState extends ConsumerState<_DevMenu> {
               isValueChanged: forcedLocale != null,
               onTap: () => widget.onSelect(_DevView.locale),
             ),
+            // Android 위젯 실측용: 런처 끌어다 놓기 없이 바로 고정 (#1465)
+            if (defaultTargetPlatform == TargetPlatform.android)
+              for (final (kind, label) in const [('today', '오늘 루미'), ('now_card', '지금 할 카드'), ('streak', '별과 연속')])
+                _Tile(
+                  icon: Icons.widgets_outlined,
+                  label: '홈 화면에 위젯 추가: $label',
+                  subtitle: 'Android 위젯 고정 요청 (런처가 추가 창을 띄움)',
+                  onTap: () => ref.read(homeWidgetBridgeProvider).requestPinWidget(kind),
+                ),
             _Tile(
               icon: Icons.palette_outlined,
               label: '디자인 기반 미리 보기',

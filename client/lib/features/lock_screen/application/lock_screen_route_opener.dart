@@ -31,12 +31,14 @@ StreamSubscription<String>? startLockScreenRouteOpener({
 
 /// 홈 화면 위젯에서 누른 경로 > 앱 화면 (잠금화면과 같은 경로 값, #1465)
 /// `check:<일과>:<카드>`(마지막 카드 "다 했어요"): 그 카드를 체크하고 일과 카드 화면을 엶 > 앱의 칭찬 흐름
+/// `create`(빠른 만들기): 보호자 기기면 일과 만들기 시작
 StreamSubscription<String>? startHomeWidgetRouteOpener({
   required HomeWidgetBridge bridge,
   required GoRouter router,
   required bool Function() isElumiDevice,
   required Future<List<Routine>> Function() loadTodayRoutines,
   required bool Function(Routine routine, ActionCard card) markCardChecked,
+  required Future<void> Function() startRoutineCreation,
 }) {
   if (!bridge.isSupported) return null;
   return _startRouteOpener(
@@ -47,6 +49,7 @@ StreamSubscription<String>? startHomeWidgetRouteOpener({
     isElumiDevice: isElumiDevice,
     loadTodayRoutines: loadTodayRoutines,
     markCardChecked: markCardChecked,
+    startRoutineCreation: startRoutineCreation,
   );
 }
 
@@ -59,6 +62,7 @@ StreamSubscription<String> _startRouteOpener({
   required bool Function() isElumiDevice,
   required Future<List<Routine>> Function() loadTodayRoutines,
   bool Function(Routine routine, ActionCard card)? markCardChecked,
+  Future<void> Function()? startRoutineCreation,
 }) {
   void open(String route) {
     AppLogger.info('[$source] open route : $route');
@@ -74,7 +78,13 @@ StreamSubscription<String> _startRouteOpener({
       unawaited(_pushRoutineDetail(router, routineId, loadTodayRoutines));
       return;
     }
-    if (route == LockScreenRoutes.home) {
+    if (route == LockScreenRoutes.create && !isElumiDevice() && startRoutineCreation != null) {
+      // 홈의 [새 일과 만들기] 와 같은 길 (크레딧 확인 > 흐름 초기화 > 입력 화면)
+      router.go(Routes.guardian);
+      _openWhenHomeReady(router, () => unawaited(startRoutineCreation()));
+      return;
+    }
+    if (route == LockScreenRoutes.home || route == LockScreenRoutes.create) {
       router.go(isElumiDevice() ? Routes.child : Routes.guardian);
     }
   }
