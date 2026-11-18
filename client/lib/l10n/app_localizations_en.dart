@@ -6129,19 +6129,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lockScreenPreviewNotice => 'Buttons don\'t work in the preview';
 
   @override
-  String get lockScreenIntroTitle => '📱 See it right on the lock screen';
-
-  @override
-  String get lockScreenIntroBody =>
-      'Turn on the screen to see how many routines Elumi did today, without opening the app';
-
-  @override
-  String get lockScreenIntroTurnOn => 'Turn it on';
-
-  @override
-  String get lockScreenIntroLater => 'Later';
-
-  @override
   String get lockScreenOnValue => 'On';
 
   @override

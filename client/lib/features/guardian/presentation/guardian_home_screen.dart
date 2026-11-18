@@ -16,7 +16,6 @@ import '../../../core/layout/window_size_class.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
-import '../../lock_screen/application/lock_screen_intro_entry.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/guardian_child_identity.dart';
@@ -176,23 +175,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
-  /// 잠금화면 소개 (이룸이가 일과를 한 번이라도 끝낸 뒤, 홈이 맨 위·코치마크 꺼짐일 때만 판단 위임)
-  void _maybeShowLockScreenIntro() {
-    if (!mounted) return;
-    final isHomeOnTop = ModalRoute.of(context)?.isCurrent ?? false;
-    if (!isHomeOnTop || ref.read(homeCoachProvider).active) return;
-    final hasElumiCompletedRoutine = ref
-        .read(homeRoutinesProvider)
-        .any((routine) => routine.isFinished);
-    unawaited(
-      maybeShowLockScreenIntro(
-        context,
-        ref,
-        hasElumiCompletedRoutine: hasElumiCompletedRoutine,
-      ),
-    );
-  }
-
   /// 별점 요청 판단이 도는 중인가 (프레임마다 겹쳐 부르지 않게)
   bool _isStoreReviewCheckRunning = false;
 
@@ -250,7 +232,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _maybeStartCoach();
         _maybeRequestStoreReview();
-        _maybeShowLockScreenIntro();
       });
     }
 

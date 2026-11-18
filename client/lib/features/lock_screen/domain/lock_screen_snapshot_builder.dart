@@ -55,6 +55,16 @@ abstract final class LockScreenSnapshotBuilder {
               isCardDone,
             )
           : null,
+      // 위젯 「오늘 일과 목록」 (#1465): 오늘 순서대로 최대 4줄
+      routines: [
+        for (final routine in routines.take(LockScreenSnapshot.maximumRoutineRows))
+          LockScreenRoutineRow(
+            id: routine.id,
+            title: routine.displayTitle,
+            doneCards: routine.steps.where((card) => isCardDone(routine, card)).length,
+            totalCards: routine.steps.length,
+          ),
+      ],
       activeWindows: mode == LockScreenMode.elumi
           ? [for (final windows in windowsByRoutineId.values) ...windows]
           : const [],

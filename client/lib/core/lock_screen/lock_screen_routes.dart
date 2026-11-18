@@ -2,6 +2,9 @@
 /// 값 4종: home(지금 역할의 홈), routine:<일과 id>(이룸이 일과 시작), check:<일과 id>:<카드 id>(위젯 마지막 카드 체크 > 칭찬), settings_lock_screen
 abstract final class LockScreenRoutes {
   static const String home = 'home';
+
+  /// 위젯 「빠른 만들기」: 보호자 홈 > 일과 입력 (이룸이 기기는 홈, #1465)
+  static const String create = 'create';
   static const String settings = 'settings_lock_screen';
   static const String _routinePrefix = 'routine:';
 

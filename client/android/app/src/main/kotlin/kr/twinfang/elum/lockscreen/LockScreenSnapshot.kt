@@ -3,7 +3,7 @@ package kr.twinfang.elum.lockscreen
 import org.json.JSONObject
 
 /**
- * 오늘 일과 요약 (잠금화면 서비스·알림·홈 위젯이 읽는 부분): 날짜, 끝낸 수/전체 수, 이룸이 카드, 시간대, 이름·연속·별
+ * 오늘 일과 요약 (잠금화면 서비스·알림·홈 위젯이 읽는 부분): 날짜, 끝낸 수/전체 수, 이룸이 카드, 시간대, 이름·연속·별, 일과 목록
  * 원본 JSON 은 Dart LockScreenSnapshot.toJson (키 이름 같게, 없는 키는 기본값)
  */
 data class LockScreenSnapshot(
@@ -20,6 +20,8 @@ data class LockScreenSnapshot(
     val elumiName: String? = null,
     val streakDays: Int = 0,
     val starCount: Int = 0,
+    // 오늘 일과 순서대로 최대 4개 (오늘 일과 목록 위젯, 옛 요약에는 없음 > 빈 목록)
+    val routines: List<LockScreenRoutineRow> = emptyList(),
 ) {
     val hasElumiCard: Boolean
         get() = elumiCard != null
@@ -58,6 +60,7 @@ data class LockScreenSnapshot(
                     elumiName = root.optStringOrNull("elumiName"),
                     streakDays = root.optInt("streakDays", 0).coerceAtLeast(0),
                     starCount = root.optInt("starCount", 0).coerceAtLeast(0),
+                    routines = LockScreenRoutineRow.parseList(root),
                 )
             } catch (_: Exception) {
                 null
@@ -117,6 +120,44 @@ data class LockScreenElumiCard(
                 if (cards.size >= MAX_UPCOMING_CARD_COUNT) break
             }
             return cards
+        }
+    }
+}
+
+/** 오늘 일과 한 줄: id, 제목, 끝낸 카드 수/전체 카드 수 (Dart LockScreenSnapshot.routines 항목) */
+data class LockScreenRoutineRow(
+    val id: String,
+    val title: String,
+    val doneCards: Int,
+    val totalCards: Int,
+) {
+    // 카드가 있고 다 끝냄 (카드 0개는 다 한 것으로 보지 않음)
+    val isDone: Boolean
+        get() = totalCards > 0 && doneCards >= totalCards
+
+    companion object {
+        // 요약에 담기는 일과 최대 개수 (Dart 와 같음)
+        const val MAX_ROUTINE_ROW_COUNT = 4
+
+        // id 없는 항목은 건너뜀, 끝낸 수는 0..전체 로 자름
+        fun parseList(root: JSONObject): List<LockScreenRoutineRow> {
+            val array = root.optJSONArray("routines") ?: return emptyList()
+            val routines = mutableListOf<LockScreenRoutineRow>()
+            for (index in 0 until array.length()) {
+                val routineJson = array.optJSONObject(index) ?: continue
+                val id = routineJson.optStringOrNull("id") ?: continue
+                val totalCards = routineJson.optInt("totalCards", 0).coerceAtLeast(0)
+                routines.add(
+                    LockScreenRoutineRow(
+                        id = id,
+                        title = routineJson.optStringOrNull("title").orEmpty(),
+                        doneCards = routineJson.optInt("doneCards", 0).coerceIn(0, totalCards),
+                        totalCards = totalCards,
+                    ),
+                )
+                if (routines.size >= MAX_ROUTINE_ROW_COUNT) break
+            }
+            return routines
         }
     }
 }

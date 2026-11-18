@@ -84,9 +84,6 @@ class LockScreenSettings {
   }
 }
 
-/// 소개 시트 노출 기록 (네이티브 저장, Android 전용 기능이라 기기 저장소와 따로 둠)
-typedef LockScreenIntroRecord = ({int shownCount, DateTime? lastShownAt});
-
 /// 네이티브 잠금화면 채널(elum/lock_screen) 래퍼: Android 전용, 그 외 플랫폼은 아무것도 하지 않음
 /// 네이티브 > Dart 신호 2개: 잠금화면 표시(잠금 엔진), 이동 경로(앱 엔진)
 class LockScreenBridge {
@@ -184,19 +181,6 @@ class LockScreenBridge {
 
   /// 잠금화면 "1시간 쉬기": 쉬기 시작 > 잠금화면 닫기
   Future<void> pauseOneHour() => _invoke<void>('pauseOneHour');
-
-  Future<LockScreenIntroRecord> readIntroRecord() async {
-    final map = await _invoke<Map<Object?, Object?>>('getIntroRecord');
-    final lastShownAtMillis = map?['lastShownAtMillis'];
-    return (
-      shownCount: (map?['shownCount'] as int?) ?? 0,
-      lastShownAt: lastShownAtMillis is int && lastShownAtMillis > 0
-          ? DateTime.fromMillisecondsSinceEpoch(lastShownAtMillis)
-          : null,
-    );
-  }
-
-  Future<void> recordIntroShown() => _invoke<void>('recordIntroShown');
 
   /// Dart 준비 전에 온 표시 요청 (잠금 엔진 시작 때 1회)
   Future<bool> consumePendingShow() async =>

@@ -55,3 +55,10 @@
 
 ## 측정
 위젯을 누르면 앱이 `[widget] open route : <route> from <widget>` 로그를 남긴다. 설치 수·누른 수 서버 집계는 2단계.
+
+## 위젯 2종 추가 (2026-11-19): 오늘 일과 목록 · 빠른 만들기
+- 요약 JSON 추가 필드 `routines`: `[{"id","title","doneCards","totalCards"}]` (오늘 일과 순서대로 최대 4개, 없으면 `[]`).
+- 경로 추가 `create`: 보호자 홈 > 일과 입력 화면 (`Routes.routineInput`). 이룸이 기기에서는 `home` 과 같게 처리.
+- **오늘 일과 목록** (중·대): 머리 = 작은 루미(상태 그림) + "오늘 일과" + 전체 `doneCount/totalCount`. 줄마다 일과 제목 + 작은 진행 막대 + `doneCards/totalCards`, 다 한 줄은 민트 체크. 중 3줄 · 대 4줄. 일과 없음 = 빈 상태(보호자 `lumi_new_routine` "오늘 일과를 만들어 볼까요?" · 이룸이 `lumi_resting` "오늘은 쉬는 날이에요"). 누르면: 줄 > 이룸이 기기 `routine:<id>` · 보호자 `home`, 그 밖 > `home`. 이름 "오늘 일과 목록" / 설명 "오늘 일과를 한눈에 봐요".
+- **빠른 만들기** (소): `lumi_new_routine` + "새 일과 만들기" 민트 알약. 누르면 `create`. 이름 "빠른 만들기" / 설명 "바로 새 일과를 만들어요". (이룸이 기기에서도 그대로 보이되 누르면 홈)
+- 5개 언어 문구 (en/ja/zh/es): 오늘 일과 목록 = Today's routines / 今日の日課リスト / 今天的日常列表 / Rutinas de hoy · 새 일과 만들기 = New routine / 新しい日課 / 新建日常 / Nueva rutina · 빠른 만들기 = Quick create / すぐ作る / 快速新建 / Crear rápido · 설명들은 자연스럽게 번역.

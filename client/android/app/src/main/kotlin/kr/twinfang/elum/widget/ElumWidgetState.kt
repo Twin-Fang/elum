@@ -7,6 +7,7 @@ import java.util.Calendar
 import java.util.Locale
 import kr.twinfang.elum.R
 import kr.twinfang.elum.lockscreen.LockScreenElumiCard
+import kr.twinfang.elum.lockscreen.LockScreenRoutineRow
 import kr.twinfang.elum.lockscreen.LockScreenSnapshot
 
 /**
@@ -50,6 +51,10 @@ class ElumWidgetState private constructor(
     // 오늘 요약 + 다 하지 않았을 때만 다음 일과 제목
     val nextRoutineTitle: String?
         get() = snapshot?.nextRoutineTitle?.takeIf { shouldShowProgress && lumiState != LumiState.DONE }
+
+    // 오늘 일과 목록 (오늘 요약 + 일과 있음일 때만, 그 밖은 빈 목록 > 루미 상태 화면)
+    val todayRoutines: List<LockScreenRoutineRow>
+        get() = if (shouldShowProgress) snapshot?.routines.orEmpty() else emptyList()
 
     // 오늘 요약 + 카드 있음 + 다 하지 않음 > 지금 할 카드 (그 밖은 루미 상태 화면)
     val nowCard: LockScreenElumiCard?

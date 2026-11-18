@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-// 이룸 위젯 묶음 (#1410, #1465): 홈 화면 3종(오늘 루미 · 지금 할 카드 · 별과 연속) + 잠금화면 1종
+// 이룸 위젯 묶음 (#1410, #1465): 홈 화면 5종(오늘 루미 · 지금 할 카드 · 별과 연속 · 오늘 일과 목록 · 빠른 만들기) + 잠금화면 1종
 // 데이터: 앱이 App Group 에 쓴 오늘 요약 JSON (ElumWidgetModel.swift) · 위젯은 네트워크를 쓰지 않음
 // 누르면 elum://widget?route=... > 앱이 그 화면을 엶 (Runner HomeWidgetChannel)
 
@@ -11,7 +11,43 @@ struct ElumWidgetBundle: WidgetBundle {
     ElumTodayWidget()
     ElumNowCardWidget()
     ElumStreakWidget()
+    ElumRoutineListWidget()
+    ElumQuickCreateWidget()
     ElumLockScreenWidget()
+  }
+}
+
+/// 「오늘 일과 목록」: 오늘 일과 줄마다 진행 · 줄을 누르면 그 일과(이룸이 기기) · 그 밖은 홈 (#1465)
+struct ElumRoutineListWidget: Widget {
+  private let kind = "ElumRoutineListWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { entry in
+      ElumWidgetPanel { family in
+        ElumRoutineListView(entry: entry, family: family)
+      }
+      .widgetURL(ElumWidgetRoute.url())
+    }
+    .configurationDisplayName(ElumWidgetText.text("list.name"))
+    .description(ElumWidgetText.text("list.description"))
+    .supportedFamilies([.systemMedium, .systemLarge])
+  }
+}
+
+/// 「빠른 만들기」: 누르면 일과 만들기 시작 (이룸이 기기는 홈)
+struct ElumQuickCreateWidget: Widget {
+  private let kind = "ElumQuickCreateWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: ElumWidgetProvider()) { _ in
+      ElumWidgetPanel { _ in
+        ElumQuickCreateView()
+      }
+      .widgetURL(ElumWidgetRoute.createURL())
+    }
+    .configurationDisplayName(ElumWidgetText.text("create.name"))
+    .description(ElumWidgetText.text("create.description"))
+    .supportedFamilies([.systemSmall])
   }
 }
 

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/lock_screen/lock_screen_bridge.dart';
-import '../../../core/lock_screen/lock_screen_intro_rule.dart';
 import '../../../core/lock_screen/lock_screen_snapshot.dart';
 import '../../../core/storage/local_storage.dart';
 
@@ -97,28 +96,3 @@ class LockScreenStateNotifier extends AsyncNotifier<LockScreenState> {
     await refresh();
   }
 }
-
-/// 소개 시트를 지금 띄울지 (네이티브 노출 기록 + 판정 규칙)
-Future<bool> shouldShowLockScreenIntro(
-  WidgetRef ref, {
-  required bool hasElumiCompletedRoutine,
-}) async {
-  if (!ref.read(isLockScreenAvailableProvider)) return false;
-  final bridge = ref.read(lockScreenBridgeProvider);
-  final (settings, introRecord) = await (
-    bridge.getSettings(),
-    bridge.readIntroRecord(),
-  ).wait;
-  return LockScreenIntroRule.shouldShow(
-    isAvailable: true,
-    isEnabled: settings.isEnabled,
-    hasElumiCompletedRoutine: hasElumiCompletedRoutine,
-    shownCount: introRecord.shownCount,
-    lastShownAt: introRecord.lastShownAt,
-    now: DateTime.now(),
-  );
-}
-
-/// 소개 시트 노출 기록 (띄우기 전에 기록: 닫는 방법과 무관하게 횟수 셈)
-void recordLockScreenIntroShown(WidgetRef ref) =>
-    unawaited(ref.read(lockScreenBridgeProvider).recordIntroShown());
