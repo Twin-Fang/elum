@@ -29,6 +29,8 @@ import 'widgets/card_review_coach_mark.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/card_review_parts.dart';
+import 'widgets/card_review_phone_ratio_card_slot.dart';
+import 'widgets/card_review_tablet_portrait_body.dart';
 import 'widgets/card_review_wide_body.dart';
 import '../../../core/widgets/coach_mark_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
@@ -442,7 +444,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       shouldIgnoreSystemBack: ref.watch(
         cardReviewCoachProvider.select((state) => state.isActive),
       ),
-      // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56
+      // 폰 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56 (태블릿은 배치 안에)
       bottomFigmaInset: isTabletLayout ? null : 56,
       // 태블릿은 저장 버튼이 배치 안에 (아래 고정 버튼 없음)
       bottomButton: isTabletLayout ? null : saveButton,
