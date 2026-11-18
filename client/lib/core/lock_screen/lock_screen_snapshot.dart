@@ -17,6 +17,53 @@ enum LockScreenMode {
   );
 }
 
+/// 위젯이 체크한 뒤 앱 없이 보여 줄 다음 카드 한 장 (#1465 2단계)
+@immutable
+class LockScreenUpcomingCard {
+  const LockScreenUpcomingCard({
+    required this.cardId,
+    required this.cardText,
+    this.imageFilePath,
+    this.pictogramId,
+    this.exampleImageId,
+  });
+
+  final String cardId;
+  final String cardText;
+  final String? imageFilePath;
+  final String? pictogramId;
+  final String? exampleImageId;
+
+  LockScreenUpcomingCard copyWithImageFilePath(String? path) => LockScreenUpcomingCard(
+    cardId: cardId,
+    cardText: cardText,
+    imageFilePath: path,
+    pictogramId: pictogramId,
+    exampleImageId: exampleImageId,
+  );
+
+  Map<String, Object?> toJson() => {
+    'cardId': cardId,
+    'cardText': cardText,
+    'imageFilePath': imageFilePath,
+    'pictogramId': pictogramId,
+    'exampleImageId': exampleImageId,
+  };
+
+  static LockScreenUpcomingCard? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final cardId = json['cardId'];
+    if (cardId is! String || cardId.isEmpty) return null;
+    return LockScreenUpcomingCard(
+      cardId: cardId,
+      cardText: _stringOrEmpty(json['cardText']),
+      imageFilePath: _stringOrNull(json['imageFilePath']),
+      pictogramId: _stringOrNull(json['pictogramId']),
+      exampleImageId: _stringOrNull(json['exampleImageId']),
+    );
+  }
+}
+
 /// 이룸이 지금 할 카드 한 장: 일과 id·제목, 카드 글, 그림 (기기 파일 > 번들 그림 > 빈 칸)
 @immutable
 class LockScreenElumiCard {
@@ -29,6 +76,8 @@ class LockScreenElumiCard {
     this.imageFilePath,
     this.pictogramId,
     this.exampleImageId,
+    this.remainingCount = 1,
+    this.upcomingCards = const [],
   });
 
   final String routineId;
@@ -46,6 +95,26 @@ class LockScreenElumiCard {
   final String? pictogramId;
   final String? exampleImageId;
 
+  /// 이 일과에서 남은 카드 수 (지금 카드 포함) · 위젯 체크 뒤 보여 줄 다음 카드 (최대 [maximumUpcomingCards]장)
+  final int remainingCount;
+  final List<LockScreenUpcomingCard> upcomingCards;
+
+  // 위젯이 앱 없이 넘겨 볼 다음 카드 수 (설계 2026-11-18-widget-card-check-design.md)
+  static const maximumUpcomingCards = 2;
+
+  LockScreenElumiCard copyWithUpcomingCards(List<LockScreenUpcomingCard> cards) => LockScreenElumiCard(
+    routineId: routineId,
+    cardId: cardId,
+    routineTitle: routineTitle,
+    cardText: cardText,
+    contentLanguage: contentLanguage,
+    imageFilePath: imageFilePath,
+    pictogramId: pictogramId,
+    exampleImageId: exampleImageId,
+    remainingCount: remainingCount,
+    upcomingCards: cards,
+  );
+
   LockScreenElumiCard copyWithImageFilePath(String? path) => LockScreenElumiCard(
     routineId: routineId,
     cardId: cardId,
@@ -55,6 +124,8 @@ class LockScreenElumiCard {
     imageFilePath: path,
     pictogramId: pictogramId,
     exampleImageId: exampleImageId,
+    remainingCount: remainingCount,
+    upcomingCards: upcomingCards,
   );
 
   Map<String, Object?> toJson() => {
@@ -66,6 +137,8 @@ class LockScreenElumiCard {
     'imageFilePath': imageFilePath,
     'pictogramId': pictogramId,
     'exampleImageId': exampleImageId,
+    'remainingCount': remainingCount,
+    'upcomingCards': [for (final card in upcomingCards) card.toJson()],
   };
 
   static LockScreenElumiCard? fromJson(Object? json) {
@@ -81,6 +154,11 @@ class LockScreenElumiCard {
       imageFilePath: _stringOrNull(json['imageFilePath']),
       pictogramId: _stringOrNull(json['pictogramId']),
       exampleImageId: _stringOrNull(json['exampleImageId']),
+      remainingCount: json['remainingCount'] is int ? json['remainingCount'] as int : 1,
+      upcomingCards: [
+        if (json['upcomingCards'] case final List cards)
+          for (final card in cards) ?LockScreenUpcomingCard.fromJson(card),
+      ],
     );
   }
 }

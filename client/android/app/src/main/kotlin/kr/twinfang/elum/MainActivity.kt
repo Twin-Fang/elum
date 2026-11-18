@@ -58,6 +58,8 @@ class MainActivity : FlutterFragmentActivity() {
             .apply { setMethodCallHandler(LockScreenChannel(applicationContext) { this@MainActivity }) }
         homeWidgetChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ElumWidgetChannel.CHANNEL_NAME)
             .apply { setMethodCallHandler(ElumWidgetChannel(applicationContext)) }
+            // 위젯 체크 수신기가 떠 있는 앱에 widgetChecksAdded 를 보낼 채널
+            .also { ElumWidgetChannel.attachLiveChannel(it) }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elum/installation")
             .setMethodCallHandler { call, result ->
                 if (call.method != "getInstallationId") { result.notImplemented() }
@@ -85,6 +87,7 @@ class MainActivity : FlutterFragmentActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         lockScreenChannel?.setMethodCallHandler(null)
         lockScreenChannel = null
+        ElumWidgetChannel.detachLiveChannel(homeWidgetChannel)
         homeWidgetChannel?.setMethodCallHandler(null)
         homeWidgetChannel = null
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, StripNativeAdFactory.FACTORY_ID)

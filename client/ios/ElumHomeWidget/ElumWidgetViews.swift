@@ -173,33 +173,65 @@ struct ElumNowCardView: View {
   @Environment(\.colorScheme) private var scheme
 
   var body: some View {
-    if let card = entry.snapshot?.elumiCard, entry.mood != .stale, entry.mood != .done {
-      content(card: card)
-    } else if family == .systemLarge {
-      // 대 크기에 중 배치를 쓰면 아래가 텅 빔 > 루미 가운데 크게
-      ElumTodayLargeView(entry: entry)
-    } else {
-      ElumTodayView(entry: entry, isMedium: family != .systemSmall)
+    // 이룸이 기기: 위젯에서 체크한 카드는 건너뛰고 다음 카드 (#1465 2단계)
+    switch entry.checkMode {
+    case .queue(let shown), .openAppToCheck(let shown):
+      if let card = entry.snapshot?.elumiCard { content(card: card, shown: shown) }
+    case .continueInApp:
+      continueInAppView
+    case .none:
+      if let card = entry.snapshot?.elumiCard, entry.mood != .stale, entry.mood != .done {
+        content(card: card, shown: ElumWidgetShownCard(cardId: card.cardId, cardText: card.cardText ?? "", imageFilePath: card.imageFilePath))
+      } else if family == .systemLarge {
+        // 대 크기에 중 배치를 쓰면 아래가 텅 빔 > 루미 가운데 크게
+        ElumTodayLargeView(entry: entry)
+      } else {
+        ElumTodayView(entry: entry, isMedium: family != .systemSmall)
+      }
     }
   }
 
+  // 받아 둔 다음 카드를 다 넘김 > 앱에서 이어서 (누르면 그 일과)
+  private var continueInAppView: some View {
+    VStack(spacing: 8) {
+      Spacer(minLength: 0)
+      LumiImage(name: "lumi_cheer", size: family == .systemSmall ? 70 : 96)
+      Text(ElumWidgetText.text("check.praise"))
+        .font(.system(size: 15, weight: .heavy))
+        .foregroundColor(ElumWidgetColor.primaryText(scheme))
+      Text(ElumWidgetText.text("check.continue"))
+        .font(.system(size: 13, weight: .medium))
+        .foregroundColor(ElumWidgetColor.secondaryText)
+        .lineLimit(2)
+        .multilineTextAlignment(.center)
+      Spacer(minLength: 0)
+    }
+    .frame(maxWidth: .infinity)
+  }
+
   @ViewBuilder
-  private func content(card: ElumWidgetCard) -> some View {
-    let picture = cardPicture(card: card)
-    let cardText = Text(card.cardText ?? "")
+  private func content(card: ElumWidgetCard, shown: ElumWidgetShownCard) -> some View {
+    let picture = cardPicture(imageFilePath: shown.imageFilePath)
+    let cardText = Text(shown.cardText)
       .font(.system(size: family == .systemLarge ? 24 : (family == .systemMedium ? 19 : 15), weight: .heavy))
       .foregroundColor(ElumWidgetColor.primaryText(scheme))
       .lineLimit(2)
       .minimumScaleFactor(0.8)
-    let routineTitle = Text(card.routineTitle ?? "")
-      .font(.system(size: 12, weight: .medium))
-      .foregroundColor(ElumWidgetColor.secondaryText)
+    // 방금 체크했으면 일과 제목 자리에 칭찬 한마디
+    let isPraising = ElumWidgetCheckStore.isRecentlyChecked(at: entry.date)
+    let subline = Text(isPraising ? ElumWidgetText.text("check.praise") : (card.routineTitle ?? ""))
+      .font(.system(size: 12, weight: isPraising ? .heavy : .medium))
+      .foregroundColor(isPraising ? ElumWidgetColor.mint : ElumWidgetColor.secondaryText)
       .lineLimit(1)
     switch family {
     case .systemSmall:
       VStack(alignment: .leading, spacing: 6) {
         picture.frame(maxWidth: .infinity, maxHeight: .infinity)
-        cardText
+        HStack(spacing: 6) {
+          cardText
+          Spacer(minLength: 0)
+          checkButton(card: card, shown: shown, isCompact: true)
+        }
       }
     case .systemMedium:
       HStack(spacing: 14) {
@@ -207,7 +239,8 @@ struct ElumNowCardView: View {
         VStack(alignment: .leading, spacing: 6) {
           progressChip
           cardText
-          routineTitle
+          subline
+          checkButton(card: card, shown: shown, isCompact: false)
         }
         Spacer(minLength: 0)
       }
@@ -222,17 +255,58 @@ struct ElumNowCardView: View {
         }
         picture.frame(maxWidth: .infinity, maxHeight: .infinity)
         cardText
-        routineTitle
+        HStack {
+          subline
+          Spacer(minLength: 0)
+          checkButton(card: card, shown: shown, isCompact: false)
+        }
       }
     }
   }
 
+  /// 「다 했어요」: 남은 카드 2장 이상 > 위젯 안에서 체크(iOS 17+) · 마지막 카드 > 앱 열어 체크 (작은 크기는 위젯 전체가 앱 열기)
+  @ViewBuilder
+  private func checkButton(card: ElumWidgetCard, shown: ElumWidgetShownCard, isCompact: Bool) -> some View {
+    let label = checkButtonLabel(isCompact: isCompact)
+    switch entry.checkMode {
+    case .queue:
+      if #available(iOSApplicationExtension 17.0, *) {
+        Button(intent: ElumCheckCardIntent(routineId: card.routineId, cardId: shown.cardId, dateKey: entry.snapshot?.dateKey ?? "")) {
+          label
+        }
+        .buttonStyle(.plain)
+      }
+    case .openAppToCheck:
+      if family != .systemSmall {
+        Link(destination: ElumWidgetRoute.checkURL(routineId: card.routineId, cardId: shown.cardId)) { label }
+      }
+    default:
+      EmptyView()
+    }
+  }
+
+  // 민트 둥근 버튼 (작은 크기는 체크 표시만)
+  private func checkButtonLabel(isCompact: Bool) -> some View {
+    Group {
+      if isCompact {
+        Image(systemName: "checkmark").font(.system(size: 14, weight: .heavy))
+          .frame(width: 32, height: 32)
+      } else {
+        Text(ElumWidgetText.text("check.done")).font(.system(size: 14, weight: .heavy))
+          .padding(.horizontal, 14).padding(.vertical, 7)
+      }
+    }
+    .foregroundColor(.white)
+    .background(Capsule().fill(ElumWidgetColor.mint))
+    .accessibilityLabel(ElumWidgetText.text("check.done"))
+  }
+
   // 그림: 카드 그림 사본 > 없으면 카드를 든 루미 (흰 판 위 둥근 칸)
-  private func cardPicture(card: ElumWidgetCard) -> some View {
+  private func cardPicture(imageFilePath: String?) -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 16, style: .continuous)
         .fill(scheme == .dark ? Color.white.opacity(0.08) : Color(red: 0xF7 / 255, green: 0xF2 / 255, blue: 0xEF / 255))
-      if let image = ElumCardImageLoader.load(card.imageFilePath) {
+      if let image = ElumCardImageLoader.load(imageFilePath) {
         Image(uiImage: image).resizable().scaledToFit().padding(6)
       } else {
         Image("lumi_holding_card").resizable().scaledToFit().padding(8)

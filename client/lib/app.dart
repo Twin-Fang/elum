@@ -23,7 +23,9 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
+import 'features/child/application/child_routine_notifier.dart';
 import 'features/lock_screen/application/lock_screen_route_opener.dart';
+import 'features/lock_screen/application/widget_check_processor.dart';
 import 'core/lock_screen/home_widget_bridge.dart';
 import 'core/lock_screen/lock_screen_bridge.dart';
 import 'features/guardian/application/routine_providers.dart';
@@ -135,6 +137,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   /// 잠금화면·알림에서 연 경로 구독 (Android, 앱 수명 동안)
   StreamSubscription<String>? _lockScreenRouteSubscription;
   StreamSubscription<String>? _homeWidgetRouteSubscription;
+  WidgetCheckProcessor? _widgetCheckProcessor;
 
   /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -218,7 +221,17 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         router: _router,
         isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
         loadTodayRoutines: () => ref.read(todayRoutinesProvider.future),
+        markCardChecked: (routine, card) =>
+            ref.read(childRoutineProvider.notifier).markCheckedFromWidget(routine: routine, card: card),
       );
+      // 위젯에서 체크해 둔 카드 > 진행 기록 (이룸이 기기, #1465 2단계)
+      _widgetCheckProcessor = WidgetCheckProcessor(
+        bridge: ref.read(homeWidgetBridgeProvider),
+        isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+        loadTodayRoutines: () => ref.read(todayRoutinesProvider.future),
+        markChecked: (routine, card) =>
+            ref.read(childRoutineProvider.notifier).markCheckedFromWidget(routine: routine, card: card),
+      )..start();
     });
     // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -237,6 +250,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   void dispose() {
     _lockScreenRouteSubscription?.cancel();
     _homeWidgetRouteSubscription?.cancel();
+    _widgetCheckProcessor?.dispose();
     _router.routerDelegate.removeListener(_onRouteChanged);
     super.dispose();
   }

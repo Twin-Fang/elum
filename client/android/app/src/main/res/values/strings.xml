@@ -43,4 +43,7 @@
     <string name="widget_star_count">별 %1$d개</string>
     <string name="widget_lumi_description">루미</string>
     <string name="widget_card_picture_description">카드 그림</string>
+    <string name="widget_check_done">다 했어요</string>
+    <string name="widget_check_praise">잘했어요!</string>
+    <string name="widget_continue_in_app">앱에서 이어서 해요</string>
 </resources>
