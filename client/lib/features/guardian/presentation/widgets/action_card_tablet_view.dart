@@ -15,7 +15,7 @@ import 'action_card_speaker_glyph.dart';
 import 'card_image.dart';
 import 'default_card_art.dart';
 
-/// 태블릿 큰 행동 카드: 그림 + 번호·제목 + 소리·설명 + 카드 안 [action] 자리 (#789)
+/// 태블릿 큰 행동 카드: 그림 + 번호·제목 + 소리·설명 + 카드 안 [action] 자리 (#789) · 보호자 카드 확인도 같은 카드 (#1457)
 ///
 /// 카드가 가로로 넓으면 왼쪽 그림·오른쪽 글, 세로로 길면 위 그림·아래 글로 스스로 바꾼다.
 /// 이룸이 상세는 [action] 에 체크 버튼을 넣어 무엇을 체크하는지 카드와 묶는다 (폰 시안 `1197:6775` 는 카드 아래 — 폰은 [ActionCardView] 그대로).
@@ -29,6 +29,8 @@ class ActionCardTabletView extends ConsumerWidget {
     required this.isSpeaking,
     required this.onSpeak,
     required this.action,
+    this.onDelete,
+    this.isImageGenerating = false,
   });
 
   final ActionCard card;
@@ -44,6 +46,12 @@ class ActionCardTabletView extends ConsumerWidget {
 
   /// 카드 오른쪽 아래 자리 (이룸이 상세의 체크 버튼). null 이면 비운다
   final Widget? action;
+
+  /// 그림 오른쪽 위 지우기 (보호자 카드 확인, null 이면 없음 #1457)
+  final VoidCallback? onDelete;
+
+  /// 더한 카드의 그림을 만드는 중 (보호자 카드 확인)
+  final bool isImageGenerating;
 
   /// 가로형으로 그릴 카드 폭:높이 경계
   static const _landscapeAspectMin = 1.15;
@@ -94,6 +102,8 @@ class ActionCardTabletView extends ConsumerWidget {
       pictogramId: card.pictogramId,
       exampleImageId: card.exampleImageId,
       pictogramLabel: card.displayTitle,
+      onDelete: onDelete,
+      isImageGenerating: isImageGenerating,
       emptyBuilder: (context) =>
           DefaultCardTitleArt(title: card.displayTitle, color: palette.border),
     );

@@ -397,7 +397,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
       cards: cards,
       routine: routine,
       routineId: routineId,
-      isWideLayout: isWideLayout,
     );
     final rewardRow = _reorderMode
         ? const CardReviewReorderHint()
