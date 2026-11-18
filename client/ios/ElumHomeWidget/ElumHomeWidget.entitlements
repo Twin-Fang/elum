@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 앱이 쓴 오늘 요약을 읽는 공유 저장소 (Runner.entitlements · ElumHomeWidgetStore.appGroupId 와 같은 값) -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.kr.twinfang.elum</string>
+	</array>
+</dict>
+</plist>

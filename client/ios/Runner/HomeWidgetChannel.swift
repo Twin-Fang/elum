@@ -1,10 +1,8 @@
 import Flutter
 import WidgetKit
 
-// 앱(Runner) 타깃에 넣을 채널: Dart HomeWidgetBridge(elum/home_widget) > App Group UserDefaults 저장 > 위젯 새로 그림
-// 지금은 어느 타깃에도 들어 있지 않음 (위젯 확장·App Group 을 Xcode 에서 붙인 뒤 Runner 에 추가)
-// 등록: AppDelegate.didInitializeImplicitFlutterEngine 에서
-//   HomeWidgetChannel.register(messenger: engineBridge.applicationRegistrar.messenger())
+// 앱(Runner) 채널: Dart HomeWidgetBridge(elum/home_widget) > App Group UserDefaults 저장 > 위젯 새로 그림
+// 등록: AppDelegate.didInitializeImplicitFlutterEngine (App Group 은 Runner.entitlements, #1410)
 enum HomeWidgetChannel {
   static let channelName = "elum/home_widget"
   // ElumHomeWidget.swift ElumHomeWidgetStore 와 같은 값
