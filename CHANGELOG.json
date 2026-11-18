@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-18T11:40:03Z",
-    "currentVersion": "2.104.0",
+    "lastUpdated": "2026-11-18T12:57:21Z",
+    "currentVersion": "2.105.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 350
+    "totalReleases": 351
   },
   "releases": [
+    {
+      "version": "2.105.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-18",
+      "pr_number": 1478,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 처음 시작할 때 이룸이가 쓸 기기를 고를 수 있어요\n  * 이 기기를 같이 쓰면 바로 이룸이 화면을 열어 볼 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "처음 시작할 때 이룸이가 쓸 기기를 고를 수 있어요",
+            "이 기기를 같이 쓰면 바로 이룸이 화면을 열어 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.104.0",
       "project_type": "flutter",
