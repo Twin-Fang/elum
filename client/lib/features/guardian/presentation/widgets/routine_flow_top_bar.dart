@@ -32,7 +32,7 @@ class RoutineFlowTopBar extends StatelessWidget {
   /// 오른쪽 `?` (사용법 다시 보기). null 이면 그리지 않는다 — 카드 검토 화면만 넘긴다
   final VoidCallback? onHelp;
 
-  /// `?` ↔ `임시저장` 누름 영역 사이
+  /// `?` ↔ 임시저장 그림 버튼 사이
   static const _helpToDraftGap = 16.0;
 
   @override
