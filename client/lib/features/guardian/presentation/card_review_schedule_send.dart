@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/l10n/l10n_context.dart';
 import '../../member/application/plan_access.dart';
 import '../../subscription/application/plan_paywall_entry.dart';
 import '../../subscription/domain/plan_benefit.dart';
@@ -29,12 +28,13 @@ mixin CardReviewScheduleSend<T extends ConsumerStatefulWidget>
   bool get shouldShowScheduleProBadge =>
       ref.watch(planAccessProvider).shouldShowTeaserFor(PlanBenefit.routineSchedule);
 
-  /// 예약 도구 이름: 고른 반복이 있으면 요약(`평일 오전 8:00`), 없으면 `예약`
-  String get scheduleToolLabel {
+  /// 예약 도구가 켜졌는가 (반복을 골라 둠)
+  bool get isScheduleToolActive => pickedRepeatSchedule != null;
+
+  /// 고른 반복 요약 (`평일 오전 8:00`). 안 골랐으면 null
+  String? get pickedScheduleSummary {
     final picked = pickedRepeatSchedule;
-    return picked == null
-        ? context.l10n.cardReviewToolSchedule
-        : routineScheduleSummaryLabel(context, picked);
+    return picked == null ? null : routineScheduleSummaryLabel(context, picked);
   }
 
   /// 누름: Pro 아님 > Pro 안내 / Pro > 반복 고르기 > 고른 값 기억 (예약 안 하기면 비움, 그냥 닫으면 그대로)

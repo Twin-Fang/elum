@@ -5857,4 +5857,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guardianHomeDetailEmptyTitle => '点击日程即可在这里查看卡片';
+
+  @override
+  String cardReviewScheduleLine(String summary) {
+    return '每$summary发送给Elumi';
+  }
+
+  @override
+  String get cardReviewScheduleChange => '修改';
 }

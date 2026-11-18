@@ -5918,4 +5918,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guardianHomeDetailEmptyTitle => '일과를 누르면 여기에서 카드를 볼 수 있어요';
+
+  @override
+  String cardReviewScheduleLine(String summary) {
+    return '$summary마다 이룸이에게 보내요';
+  }
+
+  @override
+  String get cardReviewScheduleChange => '바꾸기';
 }
