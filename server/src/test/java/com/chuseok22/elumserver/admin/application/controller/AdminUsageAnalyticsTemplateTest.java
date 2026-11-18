@@ -21,6 +21,7 @@ import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.admin.application.service.AdminUsageAnalyticsService;
+import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FirstDayActivationCounts;
 import com.chuseok22.elumserver.member.core.MemberAccountKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -54,6 +55,7 @@ class AdminUsageAnalyticsTemplateTest {
       .doesNotContain("data-account-kind-excluded-note");
     assertThat(html).contains("일과 만듦", "29명 (56%)", "이전 단계의 56%", "width:56%");
     assertThat(html).contains("11/10 주", "33% (1명)", "기록 전", ">-<");
+    assertThat(html).contains("첫날 한 일별 재방문", "이룸이 기기 연결", "67% (2/3명)", "이룸이 카드 체크", "아무것도 안 함", "16명");
     assertThat(html).contains("/admin/analytics/api/weekly-usage?weeks=4&amp;includeAll=true",
       "data-error-code=\"E-ADMIN-ANALYTICS-TRENDS\"");
     assertThat(html).contains("30일 넘음", "iOS");
@@ -69,13 +71,15 @@ class AdminUsageAnalyticsTemplateTest {
       AdminAnalyticsPeriod.of(null, null, TODAY),
       AdminAnalyticsSection.failed(AdminAnalyticsSectionName.FUNNEL.errorCode()),
       AdminAnalyticsSection.loaded(List.of()),
+      AdminAnalyticsSection.failed(AdminAnalyticsSectionName.FIRST_DAY_ACTIVATION.errorCode()),
       AdminAnalyticsSection.loaded(AdminLabeledCount.withPercents(List.of("1일 안"), List.of(0L))),
       AdminAnalyticsSection.failed(AdminAnalyticsSectionName.PLATFORM.errorCode()),
       AdminAnalyticsSection.loaded(List.of()));
 
     String html = renderAnalytics(view);
 
-    assertThat(html).contains("불러오지 못했어요 (E-ADMIN-ANALYTICS-FUNNEL)", "불러오지 못했어요 (E-ADMIN-ANALYTICS-PLATFORM)");
+    assertThat(html).contains("불러오지 못했어요 (E-ADMIN-ANALYTICS-FUNNEL)", "불러오지 못했어요 (E-ADMIN-ANALYTICS-PLATFORM)",
+      "불러오지 못했어요 (E-ADMIN-ANALYTICS-FIRST-DAY-ACTIVATION)");
     assertThat(html).contains("이 기간에 가입한 사람이 없어요", "회원이 없어요", "제안할 계정이 없어요");
     assertThat(html).contains("data-account-kind-excluded-note", "/admin/analytics?weeks=8&amp;includeAll=true");
   }
@@ -148,6 +152,8 @@ class AdminUsageAnalyticsTemplateTest {
       period,
       AdminAnalyticsSection.loaded(AdminUsageAnalyticsService.toFunnel(List.of(52L, 29L, 11L, 6L, 0L))),
       AdminAnalyticsSection.loaded(List.of(cohort)),
+      AdminAnalyticsSection.loaded(AdminUsageAnalyticsService.toFirstDayActivationGroups(List.of(
+        new FirstDayActivationCounts("DEVICE_LINKED", 3, 3, 2), new FirstDayActivationCounts("NOTHING", 16, 0, 0)))),
       AdminAnalyticsSection.loaded(AdminLabeledCount.withPercents(
         List.of("1일 안", "30일 넘음"), List.of(3L, 9L))),
       AdminAnalyticsSection.loaded(AdminLabeledCount.withPercents(List.of("iOS", "Android"), List.of(5L, 2L))),
