@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 오늘 루미 대 (4x4, 지금 할 카드 위젯에 카드가 없을 때): 루미 가운데 크게 > 이름 · 한마디 · 진행 막대 · 다음 일과 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_panel_padding">
+
+    <ImageView
+        android:id="@+id/widget_lumi_image"
+        android:layout_width="@dimen/widget_lumi_large"
+        android:layout_height="@dimen/widget_lumi_large"
+        android:contentDescription="@string/widget_lumi_description"
+        android:scaleType="fitCenter"
+        android:src="@drawable/lumi_hello" />
+
+    <TextView
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/app_name"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="@dimen/widget_text_caption"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap_small"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/widget_message_stale_guardian"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="@dimen/widget_text_card_large"
+        android:textStyle="bold" />
+
+    <include
+        layout="@layout/widget_progress_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap" />
+
+    <!-- 다음 일과 (없으면 숨김, ElumWidgetViews.bindNextRoutine) -->
+    <TextView
+        android:id="@+id/widget_next_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/widget_gap_small"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="@dimen/widget_text_caption"
+        android:visibility="gone" />
+</LinearLayout>

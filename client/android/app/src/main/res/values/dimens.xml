@@ -12,6 +12,8 @@
     <dimen name="widget_chip_padding_vertical">2dp</dimen>
     <dimen name="widget_lumi_small">72dp</dimen>
     <dimen name="widget_lumi_medium">104dp</dimen>
+    <!-- 지금 할 카드 대 · 카드 없을 때 가운데 루미 -->
+    <dimen name="widget_lumi_large">150dp</dimen>
     <dimen name="widget_lumi_streak_compact">44dp</dimen>
     <dimen name="widget_card_picture_medium">96dp</dimen>
     <dimen name="widget_text_caption">12sp</dimen>

@@ -134,6 +134,38 @@ struct ElumTodayView: View {
   }
 }
 
+/// 「오늘 루미」 큰 화면 (지금 할 카드 대 · 카드 없을 때): 루미 가운데 크게 > 이름 · 한마디 · 진행 · 다음 할 일
+struct ElumTodayLargeView: View {
+  let entry: ElumWidgetEntry
+  @Environment(\.colorScheme) private var scheme
+
+  var body: some View {
+    let snapshot = entry.snapshot
+    VStack(spacing: 8) {
+      Spacer(minLength: 0)
+      LumiImage(name: entry.mood.imageName(isElumiDevice: entry.isElumiDevice), size: 150)
+      ElumWidgetHeader(entry: entry)
+      Text(ElumWidgetText.message(for: entry))
+        .font(.system(size: 22, weight: .heavy))
+        .foregroundColor(ElumWidgetColor.primaryText(scheme))
+        .multilineTextAlignment(.center)
+        .lineLimit(2)
+        .minimumScaleFactor(0.85)
+      if let snapshot = snapshot, entry.mood != .stale, snapshot.totalCount > 0 {
+        ElumProgressBar(done: snapshot.doneCount, total: snapshot.totalCount)
+      }
+      if let title = snapshot?.nextRoutineTitle, entry.mood == .progress || entry.mood == .ready || entry.mood == .morning {
+        Text(String(format: ElumWidgetText.text("next"), title))
+          .font(.system(size: 13, weight: .medium))
+          .foregroundColor(ElumWidgetColor.secondaryText)
+          .lineLimit(1)
+      }
+      Spacer(minLength: 0)
+    }
+    .frame(maxWidth: .infinity)
+  }
+}
+
 /// 「지금 할 카드」 본문: 카드가 있으면 그림 + 카드 글, 없으면 「오늘 루미」 와 같은 화면
 struct ElumNowCardView: View {
   let entry: ElumWidgetEntry
@@ -143,6 +175,9 @@ struct ElumNowCardView: View {
   var body: some View {
     if let card = entry.snapshot?.elumiCard, entry.mood != .stale, entry.mood != .done {
       content(card: card)
+    } else if family == .systemLarge {
+      // 대 크기에 중 배치를 쓰면 아래가 텅 빔 > 루미 가운데 크게
+      ElumTodayLargeView(entry: entry)
     } else {
       ElumTodayView(entry: entry, isMedium: family != .systemSmall)
     }

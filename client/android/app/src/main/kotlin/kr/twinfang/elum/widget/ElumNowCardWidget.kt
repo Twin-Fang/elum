@@ -18,7 +18,13 @@ class ElumNowCardWidget : ElumWidgetProvider() {
 
     override fun buildViews(context: Context, state: ElumWidgetState, sizeStepIndex: Int): RemoteViews {
         val card = state.nowCard
-            ?: return ElumWidgetViews.buildTodayViews(context, state, isMedium = sizeStepIndex >= MEDIUM_STEP_INDEX)
+            ?: return ElumWidgetViews.buildTodayViews(
+                context,
+                state,
+                isMedium = sizeStepIndex == MEDIUM_STEP_INDEX,
+                // 대 크기에 중 배치를 쓰면 아래가 텅 빔 > 루미 가운데 크게
+                isLarge = sizeStepIndex > MEDIUM_STEP_INDEX,
+            )
         val layout = when (sizeStepIndex) {
             SMALL_STEP_INDEX -> R.layout.widget_now_small
             MEDIUM_STEP_INDEX -> R.layout.widget_now_medium

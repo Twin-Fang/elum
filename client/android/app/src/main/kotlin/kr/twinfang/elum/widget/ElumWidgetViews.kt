@@ -45,13 +45,17 @@ object ElumWidgetViews {
         views.setTextViewText(R.id.widget_next_text, context.getString(R.string.widget_next_routine, title))
     }
 
-    /** 오늘 루미 화면 (Today 위젯 · 카드 없을 때 Now 위젯): 소 레이아웃은 머리·다음 일과 칸 없음 */
-    fun buildTodayViews(context: Context, state: ElumWidgetState, isMedium: Boolean): RemoteViews {
-        val layout = if (isMedium) R.layout.widget_today_medium else R.layout.widget_today_small
+    /** 오늘 루미 화면 (Today 위젯 · 카드 없을 때 Now 위젯): 소 레이아웃은 머리·다음 일과 칸 없음 · 대는 루미 가운데 크게 */
+    fun buildTodayViews(context: Context, state: ElumWidgetState, isMedium: Boolean, isLarge: Boolean = false): RemoteViews {
+        val layout = when {
+            isLarge -> R.layout.widget_today_large
+            isMedium -> R.layout.widget_today_medium
+            else -> R.layout.widget_today_small
+        }
         val views = RemoteViews(context.packageName, layout)
         bindLumi(context, views, state)
         bindProgress(context, views, state)
-        if (isMedium) {
+        if (isMedium || isLarge) {
             bindHeader(context, views, state)
             bindNextRoutine(context, views, state)
         }
