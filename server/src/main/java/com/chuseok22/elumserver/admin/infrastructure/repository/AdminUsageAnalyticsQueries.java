@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.infrastructure.repository;
 
+import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FirstDayActivationCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FunnelCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.HeadlineCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.LastActivityCounts;
@@ -21,7 +22,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * 사용 분석 집계 SQL 한곳 (#1436, Postgres native): 가입 단계, 가입 주차 리텐션, 주별 추이, 마지막 활동 분포, 플랫폼,
+ * 사용 분석 집계 SQL 한곳 (#1436, Postgres native): 가입 단계, 가입 주차 리텐션, 첫날 한 일별 재방문, 주별 추이, 마지막 활동 분포, 플랫폼,
  * 대시보드 요약·최근 가입·최근 활동, 분류 제안 후보. 외부 BI(Metabase 등)로 옮길 때 이 SQL 을 그대로 가져감
  * 계정 종류 조건은 COUNTED_MEMBER 한 줄 (:isIncludingAllAccounts 가 true 면 전체). 일과 원문·제목은 읽지 않음
  */
@@ -63,6 +64,37 @@ public class AdminUsageAnalyticsQueries {
     + returnedInWeekCount(4, "week4_returned_count")
     + " from member m where m.created_at >= :from and m.created_at < :to and " + COUNTED_MEMBER
     + " group by 1 order by 1 desc";
+
+  // 첫날 한 일 묶음 4개 (AdminFirstDayActivationKind 이름과 같음, 위에서부터 먼저 맞는 하나). 기기 연결은 가입 단계 표처럼 보호자 본인 기준
+  // 7일 재방문 대상: 가입 다음 날 ~ 7일째가 다 지났고(:today 전) 그 기간이 방문 기록 시작일(:trackingStartDate) 뒤
+  private static final String FIRST_DAY_ACTIVATION_SQL = """
+    select activation.activation_kind,
+      count(*) as member_count,
+      count(*) filter (where activation.is_matured) as matured_count,
+      count(*) filter (where activation.is_matured and activation.is_retained) as retained_count
+    from (
+      select
+        case
+          when exists (select 1 from device_link d where d.member_id = m.id
+            and d.redeemed_at is not null and d.redeemed_at < m.created_at + interval '1 day') then 'DEVICE_LINKED'
+          when exists (select 1 from profile_guardian g
+            join routine r on r.profile_id = g.profile_id
+            join routine_step s on s.routine_id = r.id
+            where g.member_id = m.id and s.completed_at is not null
+              and s.completed_at < m.created_at + interval '1 day') then 'CARD_CHECKED'
+          when exists (select 1 from routine r where r.created_by = m.id and r.is_example = false
+            and r.created_at < m.created_at + interval '1 day') then 'ROUTINE_MADE'
+          else 'NOTHING'
+        end as activation_kind,
+        (cast(m.created_at as date) + 7 < :today
+          and cast(m.created_at as date) + 1 >= :trackingStartDate) as is_matured,
+        exists (select 1 from member_daily_visit v where v.member_id = m.id
+          and v.visit_date > cast(m.created_at as date) and v.visit_date <= cast(m.created_at as date) + 7) as is_retained
+      from member m
+      where m.created_at >= :from and m.created_at < :to and\s""" + COUNTED_MEMBER + """
+    ) activation
+    group by activation.activation_kind
+    """;
 
   // 줄 key 4개: SIGNUPS 신규 가입, WEEKLY_ACTIVE 주간 활성, ROUTINES_MADE 일과 만듦(예시 제외), CARD_CHECKS 카드 체크
   private static final String WEEKLY_USAGE_SQL = """
@@ -190,6 +222,21 @@ public class AdminUsageAnalyticsQueries {
       (row, index) -> new RetentionCohortCounts(
         row.getObject("cohort_week_start", LocalDate.class), row.getLong("cohort_size"),
         row.getLong("week1_returned_count"), row.getLong("week2_returned_count"), row.getLong("week4_returned_count")));
+  }
+
+  /**
+   * 기간[from, to) 가입자 > 첫날 한 일 묶음별 인원과 7일 재방문 (기록 있는 묶음만)
+   * trackingStartDate: 방문 기록 시작일. 기록이 없으면 today 를 넘겨 대상 0명으로 만듦
+   */
+  public List<FirstDayActivationCounts> countFirstDayActivations(
+    LocalDateTime from, LocalDateTime to, boolean isIncludingAllAccounts, LocalDate today, LocalDate trackingStartDate
+  ) {
+    MapSqlParameterSource parameters = periodParameters(from, to, isIncludingAllAccounts)
+      .addValue("today", today)
+      .addValue("trackingStartDate", trackingStartDate);
+    return jdbcTemplate.query(FIRST_DAY_ACTIVATION_SQL, parameters, (row, index) -> new FirstDayActivationCounts(
+      row.getString("activation_kind"), row.getLong("member_count"), row.getLong("matured_count"),
+      row.getLong("retained_count")));
   }
 
   /** 기간[from, to) 주별 추이 4줄 (기록 있는 칸만) */

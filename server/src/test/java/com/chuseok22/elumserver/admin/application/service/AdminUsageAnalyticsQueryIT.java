@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsQueries;
+import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FirstDayActivationCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FunnelCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.RetentionCohortCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.SuggestionCandidate;
@@ -151,6 +152,28 @@ class AdminUsageAnalyticsQueryIT {
 
     assertThat(normalOnly).containsExactly(new RetentionCohortCounts(COHORT_WEEK, 3, 1, 1, 1));
     assertThat(includingAll).containsExactly(new RetentionCohortCounts(COHORT_WEEK, 4, 2, 1, 1));
+  }
+
+  @Test
+  @DisplayName("첫날 한 일별 재방문: 기기 연결 > 카드 체크 > 일과만 > 아무것도 순으로 한 묶음에만, 8일 안 지난 가입자는 대상 아님")
+  void firstDayActivation_groupsByFirstDayActionWithSevenDayReturn() {
+    // A(첫날 연결, 8일째 방문 = 7일 밖), B(첫날 일과, 15일째 방문), C(예시 일과만 = 아무것도). today 는 가입 주 + 30일, 기록 시작은 가입 주
+    Map<String, FirstDayActivationCounts> countsByKind = usageAnalyticsQueries.countFirstDayActivations(
+        cohortFrom(), cohortTo(), false, COHORT_WEEK.plusDays(30), COHORT_WEEK).stream()
+      .collect(Collectors.toMap(FirstDayActivationCounts::activationKind, count -> count));
+    visit(routineOnly, COHORT_WEEK.plusDays(3));
+    Map<String, FirstDayActivationCounts> afterVisit = usageAnalyticsQueries.countFirstDayActivations(
+        cohortFrom(), cohortTo(), false, COHORT_WEEK.plusDays(30), COHORT_WEEK).stream()
+      .collect(Collectors.toMap(FirstDayActivationCounts::activationKind, count -> count));
+    List<FirstDayActivationCounts> notMatured = usageAnalyticsQueries.countFirstDayActivations(
+      cohortFrom(), cohortTo(), false, COHORT_WEEK.plusDays(5), COHORT_WEEK);
+
+    assertThat(countsByKind).containsOnlyKeys("DEVICE_LINKED", "ROUTINE_MADE", "NOTHING");
+    assertThat(countsByKind.get("DEVICE_LINKED")).isEqualTo(new FirstDayActivationCounts("DEVICE_LINKED", 1, 1, 0));
+    assertThat(countsByKind.get("ROUTINE_MADE")).isEqualTo(new FirstDayActivationCounts("ROUTINE_MADE", 1, 1, 0));
+    assertThat(countsByKind.get("NOTHING")).isEqualTo(new FirstDayActivationCounts("NOTHING", 1, 1, 0));
+    assertThat(afterVisit.get("ROUTINE_MADE").retainedCount()).isEqualTo(1);
+    assertThat(notMatured).allSatisfy(count -> assertThat(count.maturedCount()).isZero());
   }
 
   @Test

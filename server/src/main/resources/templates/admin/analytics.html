@@ -3,7 +3,7 @@
       th:replace="~{admin/fragments/admin-layout :: page('사용 분석', 'analytics', ~{:: content})}">
 <body>
 
-<!-- 사용 분석 (#1436): 기간·모두 포함 > 가입 단계 > 가입 주차 리텐션 > 주별 추이 > 마지막 활동·플랫폼 > 분류 제안. 칸별 독립 실패 -->
+<!-- 사용 분석 (#1436): 기간·모두 포함 > 가입 단계 > 가입 주차 리텐션 > 첫날 한 일별 재방문 > 주별 추이 > 마지막 활동·플랫폼 > 분류 제안. 칸별 독립 실패 -->
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6"
       th:with="period=${analytics.period()}">
   <div>
@@ -87,6 +87,40 @@
         </table>
       </div>
       <p class="text-xs text-base-content/60">그 주(월~일)에 앱을 한 번이라도 연 비율이에요. 아직 안 끝난 주는 -, 방문 기록을 시작하기(10/21) 전 주는 기록 전이에요</p>
+    </div>
+  </div>
+
+  <!-- 첫날 한 일별 재방문 (#1471): 가입 뒤 24시간 안에 한 일 4묶음 > 인원 · 7일 재방문 -->
+  <div class="card bg-base-200 shadow" data-analytics-first-day-activation
+       th:with="activationGroups=${analytics.firstDayActivationGroups()}">
+    <div class="card-body p-4 gap-2">
+      <h2 class="font-semibold">첫날 한 일별 재방문</h2>
+      <th:block th:if="${activationGroups.isLoadFailed()}">
+        <p th:replace="~{admin/fragments/usage-analytics-parts :: loadFailed(${activationGroups})}"></p>
+      </th:block>
+      <th:block th:if="${!activationGroups.isLoadFailed() and activationGroups.value().isEmpty()}">
+        <div th:replace="~{admin/fragments/admin-ui :: emptyState('이 기간에 가입한 사람이 없어요')}"></div>
+      </th:block>
+      <div th:if="${!activationGroups.isLoadFailed() and !activationGroups.value().isEmpty()}" class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>첫날 한 일</th>
+            <th class="text-right">가입</th>
+            <th class="text-right">7일 안 재방문</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="group : ${activationGroups.value()}" class="hover">
+            <td th:text="${group.label()}">이룸이 기기 연결</td>
+            <td class="text-right" th:text="${group.memberCount()} + '명'">0명</td>
+            <td class="text-right" th:classappend="${group.retainedPercent() == null} ? 'text-base-content/50'"
+                th:text="${group.retainedText()}">-</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-base-content/60">가입 뒤 24시간 안에 한 일로 나눠요. 위에서부터 먼저 맞는 한 줄에만 세요(카드 체크는 기기 연결 없이 한 기기에서 쓴 경우). 재방문은 가입 다음 날부터 7일 안에 앱을 연 비율이고, 가입 뒤 8일이 안 지났거나 방문 기록(10/21) 전 가입자는 대상에서 빼요. 인원이 적으면 방향만 봐요</p>
     </div>
   </div>
 

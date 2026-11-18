@@ -5,7 +5,9 @@ import com.chuseok22.elumserver.admin.application.analytics.AdminAnalyticsPeriod
 import com.chuseok22.elumserver.admin.application.analytics.AdminAnalyticsSection;
 import com.chuseok22.elumserver.admin.application.analytics.AdminAnalyticsSectionLoader;
 import com.chuseok22.elumserver.admin.application.analytics.AdminAnalyticsSectionName;
+import com.chuseok22.elumserver.admin.application.analytics.AdminFirstDayActivationKind;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminAccountKindSuggestion;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminFirstDayActivationGroup;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminLabeledCount;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRetentionCohort;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRetentionCohort.Cell;
@@ -15,6 +17,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminUsageAnalyti
 import com.chuseok22.elumserver.admin.application.dto.response.AdminUsageFunnel;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminUsageFunnel.Stage;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsQueries;
+import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FirstDayActivationCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.FunnelCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.LastActivityCounts;
 import com.chuseok22.elumserver.admin.infrastructure.repository.AdminUsageAnalyticsRows.PlatformMemberCounts;
@@ -35,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 사용 분석 화면 (#1436): 가입 단계 > 가입 주차 리텐션 > 마지막 활동 분포 > 플랫폼 > 분류 제안, 주별 추이 JSON
+ * 사용 분석 화면 (#1436): 가입 단계 > 가입 주차 리텐션 > 첫날 한 일별 재방문(#1471) > 마지막 활동 분포 > 플랫폼 > 분류 제안, 주별 추이 JSON
  * 집계 SQL 은 AdminUsageAnalyticsQueries, 여기서는 비율·문구·빈 칸 채우기. 분류 제안 외 칸은 60초 캐시, 칸별 독립 실패
  */
 @Service
@@ -74,13 +77,15 @@ public class AdminUsageAnalyticsService {
     this.sectionLoader = new AdminAnalyticsSectionLoader(currentMilliseconds);
   }
 
-  /** 화면 칸 5개 (각각 실패해도 나머지는 보임) */
+  /** 화면 칸 6개 (각각 실패해도 나머지는 보임) */
   public AdminUsageAnalyticsView loadView(AdminAnalyticsPeriod period, LocalDateTime now) {
     String cacheKey = period.cacheKey();
     return new AdminUsageAnalyticsView(
       period,
       sectionLoader.loadCached(AdminAnalyticsSectionName.FUNNEL, cacheKey, () -> loadFunnel(period)),
       sectionLoader.loadCached(AdminAnalyticsSectionName.RETENTION, cacheKey, () -> loadRetentionCohorts(period)),
+      sectionLoader.loadCached(AdminAnalyticsSectionName.FIRST_DAY_ACTIVATION, cacheKey,
+        () -> loadFirstDayActivationGroups(period)),
       sectionLoader.loadCached(AdminAnalyticsSectionName.LAST_ACTIVITY, cacheKey,
         () -> loadLastActivityDistribution(period, now)),
       sectionLoader.loadCached(AdminAnalyticsSectionName.PLATFORM, cacheKey, () -> loadPlatformMemberCounts(period)),
@@ -134,6 +139,31 @@ public class AdminUsageAnalyticsService {
     }
     return new AdminRetentionCohort(WEEK_LABEL_FORMATTER.format(counts.cohortWeekStart()) + " 주",
       counts.cohortSize(), cells);
+  }
+
+  private List<AdminFirstDayActivationGroup> loadFirstDayActivationGroups(AdminAnalyticsPeriod period) {
+    LocalDate trackingStartDate = memberStatsService.findVisitTrackingStartDate();
+    List<FirstDayActivationCounts> counts = usageAnalyticsQueries.countFirstDayActivations(period.from(),
+      period.toExclusive(), period.isIncludingAllAccounts(), period.today(),
+      trackingStartDate == null ? period.today() : trackingStartDate);
+    return toFirstDayActivationGroups(counts);
+  }
+
+  /** 묶음별 숫자 > 4줄 고정 순서 (없는 묶음 0명, 모두 0명이면 빈 목록) */
+  public static List<AdminFirstDayActivationGroup> toFirstDayActivationGroups(List<FirstDayActivationCounts> counts) {
+    Map<String, FirstDayActivationCounts> countsByKind = new HashMap<>();
+    counts.forEach(count -> countsByKind.put(count.activationKind(), count));
+    if (counts.stream().allMatch(count -> count.memberCount() == 0)) {
+      return List.of();
+    }
+    List<AdminFirstDayActivationGroup> groups = new ArrayList<>();
+    for (AdminFirstDayActivationKind kind : AdminFirstDayActivationKind.values()) {
+      FirstDayActivationCounts count = countsByKind.getOrDefault(kind.name(),
+        new FirstDayActivationCounts(kind.name(), 0, 0, 0));
+      groups.add(AdminFirstDayActivationGroup.of(kind.label(), count.memberCount(), count.maturedCount(),
+        count.retainedCount()));
+    }
+    return groups;
   }
 
   private List<AdminLabeledCount> loadLastActivityDistribution(AdminAnalyticsPeriod period, LocalDateTime now) {
