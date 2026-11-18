@@ -14,6 +14,7 @@ import '../../guardian/application/routine_providers.dart';
 import '../../member/application/elumi_streak_providers.dart';
 import '../../member/application/member_providers.dart';
 import '../../reminder/application/routine_reminder_controller.dart';
+import '../data/bundled_card_art_file.dart';
 import '../domain/lock_screen_snapshot_builder.dart';
 import 'lock_screen_providers.dart';
 
@@ -76,7 +77,7 @@ Future<void> pushLockScreenSnapshot(
   }
 }
 
-/// 이룸이 카드 그림: 기기에 받아 둔 파일 경로만 (잠금화면은 네트워크를 쓰지 않음)
+/// 이룸이 카드 그림 파일: 받아 둔 그림 > 없으면 번들 예시·픽토그램 파일 (잠금화면·위젯은 네트워크를 쓰지 않음)
 Future<LockScreenSnapshot> _withCardImageFile(
   Ref ref,
   LockScreenSnapshot snapshot,
@@ -92,10 +93,13 @@ Future<LockScreenSnapshot> _withCardImageFile(
       .where((step) => step.id == card.cardId)
       .firstOrNull
       ?.imagePath;
-  if (imagePath == null || imagePath.isEmpty) return snapshot;
-  final filePath = await ref
-      .read(cardImageDiskCacheProvider)
-      .existingFilePath(imagePath);
+  // 올린 그림 없음 > 예시 그림·픽토그램을 위젯이 읽을 파일로 (#1465)
+  final filePath = (imagePath == null || imagePath.isEmpty)
+      ? await ref
+            .read(bundledCardArtFileProvider)
+            .filePathOf(exampleImageId: card.exampleImageId, pictogramId: card.pictogramId)
+      : await ref.read(cardImageDiskCacheProvider).existingFilePath(imagePath);
+  if (filePath == null) return snapshot;
   return snapshot.copyWithElumiCard(card.copyWithImageFilePath(filePath));
 }
 
