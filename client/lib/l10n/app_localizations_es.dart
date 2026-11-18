@@ -6353,10 +6353,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Toca una rutina para ver aquí sus tarjetas';
 
   @override
-  String cardReviewScheduleLine(String summary) {
-    return 'Se envía a Elumi: $summary';
+  String cardReviewSaveWithSchedule(String summary) {
+    return 'Al guardar, se envía: $summary';
   }
-
-  @override
-  String get cardReviewScheduleChange => 'Cambiar';
 }

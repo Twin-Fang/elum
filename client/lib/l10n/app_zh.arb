@@ -1674,6 +1674,5 @@
   "routineSchedulePickClear": "不预约",
   "planRedeemCode": "输入优惠码",
   "planRedeemCodeFailed": "无法打开兑换码页面",
-  "cardReviewScheduleLine": "每{summary}发送给Elumi",
-  "cardReviewScheduleChange": "修改"
+  "cardReviewSaveWithSchedule": "保存后每{summary}发送"
 }

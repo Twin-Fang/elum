@@ -132,11 +132,10 @@ class CardReviewToolFace extends StatelessWidget {
   /// 눌린 색 (#D7D3D1)
   final bool isPressed;
 
-  /// 켜진 도구 (예약을 골라 둠): 민트 바탕·테두리 + 오른쪽 위 체크 (칸 크기·이름은 그대로)
+  /// 켜진 도구 (예약을 골라 둠): 바탕은 그대로, 이름 진하게 + 오른쪽 위 진한 체크 점 (칸 크기·이름 그대로)
   final bool isActive;
 
-  /// 켜짐 테두리 두께 · 체크 점 크기 · 체크 그림
-  static const _activeBorderWidth = 2.0;
+  /// 체크 점 크기 · 체크 그림 · 위·오른쪽 여백
   static const _activeDotSize = 16.0;
   static const _activeCheckSize = 10.0;
   static const _activeDotInset = 4.0;
@@ -144,26 +143,11 @@ class CardReviewToolFace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final iconColor = isActive
-        ? colors.infoHighlightMintAccent
-        : colors.textPrimary;
-    final labelColor = isActive
-        ? colors.infoHighlightMintAccent
-        : colors.editChipLabel;
+    final labelColor = isActive ? colors.textPrimary : colors.editChipLabel;
     final face = Container(
       decoration: BoxDecoration(
-        color: isActive
-            ? colors.infoHighlightMintFill
-            : isPressed
-            ? colors.editChipPressedBg
-            : colors.editChipBg,
+        color: isPressed ? colors.editChipPressedBg : colors.editChipBg,
         borderRadius: BorderRadius.circular(CardReviewToolRow.buttonRadius.r),
-        border: isActive
-            ? Border.all(
-                color: colors.infoHighlightMintAccent,
-                width: _activeBorderWidth,
-              )
-            : null,
       ),
       alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: _labelSidePadding.w),
@@ -178,14 +162,17 @@ class CardReviewToolFace extends StatelessWidget {
               icon,
               width: 16.w,
               height: 16.w,
-              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(colors.textPrimary, BlendMode.srcIn),
             ),
             SizedBox(height: 8.h),
             Text(
               label,
               maxLines: 1,
               softWrap: false,
-              style: context.typo.editChipLabel.copyWith(color: labelColor),
+              style: context.typo.editChipLabel.copyWith(
+                color: labelColor,
+                fontWeight: isActive ? FontWeight.w800 : null,
+              ),
             ),
           ],
         ),
@@ -204,7 +191,7 @@ class CardReviewToolFace extends StatelessWidget {
             height: _activeDotSize.w,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: colors.infoHighlightMintAccent,
+              color: colors.textPrimary,
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
