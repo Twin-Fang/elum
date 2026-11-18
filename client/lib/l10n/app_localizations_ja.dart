@@ -5447,22 +5447,34 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonGoHome => 'ホームへ';
 
   @override
-  String get onboardingLinkStepTitle => 'Elumiの端末をつなぎますか？';
+  String get onboardingDeviceUsageTitle => 'Elumiはどの端末で\n使いますか？';
 
   @override
-  String get linkDeviceBenefitLine => '送った日課がElumiの端末にすぐ表示されます';
+  String get onboardingDeviceUsageDescription => 'あとで設定から端末をつなぐこともできます';
 
   @override
-  String get onboardingLinkStepConnectNow => '今つなぐ';
+  String get onboardingDeviceUsageOtherWord => '別の端末';
 
   @override
-  String get onboardingLinkStepEnterCode => 'Elumiの端末で接続コードを入れるだけです';
+  String get onboardingDeviceUsageOtherSuffix => 'で使います';
 
   @override
-  String get onboardingLinkStepManyDevices => '複数の端末をつなげます';
+  String get onboardingDeviceUsageOtherDescription => 'Elumiの端末で接続コードを入れます';
 
   @override
-  String get onboardingLinkStepLaterInSettings => 'あとで設定からもつなげます';
+  String get onboardingDeviceUsageThisWord => 'この端末';
+
+  @override
+  String get onboardingDeviceUsageThisSuffix => 'を一緒に使います';
+
+  @override
+  String get onboardingDeviceUsageThisDescription => '保護者モードと切り替えて使います';
+
+  @override
+  String get onboardingDeviceUsageLater => 'あとで決めます';
+
+  @override
+  String get onboardingDeviceUsageReturnHint => '保護者モードに戻るときは右上のキャラクターをタップします';
 
   @override
   String get homeNextStepMakeTitle => '最初の日課を作ってみましょう';

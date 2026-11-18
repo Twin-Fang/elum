@@ -5470,22 +5470,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commonGoHome => '홈으로';
 
   @override
-  String get onboardingLinkStepTitle => '이룸이 기기를 연결할까요?';
+  String get onboardingDeviceUsageTitle => '이룸이는 어느 기기로\n쓰나요?';
 
   @override
-  String get linkDeviceBenefitLine => '보낸 일과가 이룸이 기기에 바로 떠요';
+  String get onboardingDeviceUsageDescription => '나중에 설정에서 기기를 연결할 수도 있어요';
 
   @override
-  String get onboardingLinkStepConnectNow => '지금 연결하기';
+  String get onboardingDeviceUsageOtherWord => '다른 기기';
 
   @override
-  String get onboardingLinkStepEnterCode => '이룸이 기기에서 연결 코드만 넣으면 돼요';
+  String get onboardingDeviceUsageOtherSuffix => '에서 써요';
 
   @override
-  String get onboardingLinkStepManyDevices => '기기 여러 대를 연결할 수 있어요';
+  String get onboardingDeviceUsageOtherDescription => '이룸이 기기에 연결 코드를 넣어요';
 
   @override
-  String get onboardingLinkStepLaterInSettings => '나중에 설정에서도 연결할 수 있어요';
+  String get onboardingDeviceUsageThisWord => '이 기기';
+
+  @override
+  String get onboardingDeviceUsageThisSuffix => '를 같이 써요';
+
+  @override
+  String get onboardingDeviceUsageThisDescription => '보호자 화면과 바꿔 가며 써요';
+
+  @override
+  String get onboardingDeviceUsageLater => '나중에 정할게요';
+
+  @override
+  String get onboardingDeviceUsageReturnHint => '보호자 화면으로 돌아올 땐 오른쪽 위 캐릭터를 눌러요';
 
   @override
   String get homeNextStepMakeTitle => '첫 일과를 만들어 볼까요?';

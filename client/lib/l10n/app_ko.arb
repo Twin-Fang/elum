@@ -3893,23 +3893,35 @@
   "commonGoHome": "홈으로",
   "@commonGoHome": {"description": "축하·안내 화면에서 보호자 홈으로 가는 버튼"},
 
-  "onboardingLinkStepTitle": "이룸이 기기를 연결할까요?",
-  "@onboardingLinkStepTitle": {"description": "온보딩 이룸이 기기 연결 단계 제목"},
+  "onboardingDeviceUsageTitle": "이룸이는 어느 기기로\n쓰나요?",
+  "@onboardingDeviceUsageTitle": {"description": "온보딩 마지막 단계 제목 (#1473, 이룸이가 쓸 기기 고르기)"},
 
-  "linkDeviceBenefitLine": "보낸 일과가 이룸이 기기에 바로 떠요",
-  "@linkDeviceBenefitLine": {"description": "기기 연결 이유 한 줄 (온보딩 연결 단계 설명)"},
+  "onboardingDeviceUsageDescription": "나중에 설정에서 기기를 연결할 수도 있어요",
+  "@onboardingDeviceUsageDescription": {"description": "온보딩 기기 고르기 설명 한 줄"},
 
-  "onboardingLinkStepConnectNow": "지금 연결하기",
-  "@onboardingLinkStepConnectNow": {"description": "온보딩 연결 단계 주 버튼 (연결 코드 화면으로)"},
+  "onboardingDeviceUsageOtherWord": "다른 기기",
+  "@onboardingDeviceUsageOtherWord": {"description": "기기 고르기 카드 1 제목의 색 다른 앞부분 (뒤에 OtherSuffix 가 붙음)"},
 
-  "onboardingLinkStepEnterCode": "이룸이 기기에서 연결 코드만 넣으면 돼요",
-  "@onboardingLinkStepEnterCode": {"description": "온보딩 연결 단계 소개 줄 1"},
+  "onboardingDeviceUsageOtherSuffix": "에서 써요",
+  "@onboardingDeviceUsageOtherSuffix": {"description": "기기 고르기 카드 1 제목 나머지"},
 
-  "onboardingLinkStepManyDevices": "기기 여러 대를 연결할 수 있어요",
-  "@onboardingLinkStepManyDevices": {"description": "온보딩 연결 단계 소개 줄 2"},
+  "onboardingDeviceUsageOtherDescription": "이룸이 기기에 연결 코드를 넣어요",
+  "@onboardingDeviceUsageOtherDescription": {"description": "기기 고르기 카드 1 설명 (고르면 연결 코드 화면)"},
 
-  "onboardingLinkStepLaterInSettings": "나중에 설정에서도 연결할 수 있어요",
-  "@onboardingLinkStepLaterInSettings": {"description": "온보딩 연결 단계 소개 줄 3"},
+  "onboardingDeviceUsageThisWord": "이 기기",
+  "@onboardingDeviceUsageThisWord": {"description": "기기 고르기 카드 2 제목의 색 다른 앞부분 (뒤에 ThisSuffix 가 붙음)"},
+
+  "onboardingDeviceUsageThisSuffix": "를 같이 써요",
+  "@onboardingDeviceUsageThisSuffix": {"description": "기기 고르기 카드 2 제목 나머지"},
+
+  "onboardingDeviceUsageThisDescription": "보호자 화면과 바꿔 가며 써요",
+  "@onboardingDeviceUsageThisDescription": {"description": "기기 고르기 카드 2 설명 (고르면 이룸이 화면이 열림)"},
+
+  "onboardingDeviceUsageLater": "나중에 정할게요",
+  "@onboardingDeviceUsageLater": {"description": "기기 고르기 건너뛰기 글자 (보호자 홈으로)"},
+
+  "onboardingDeviceUsageReturnHint": "보호자 화면으로 돌아올 땐 오른쪽 위 캐릭터를 눌러요",
+  "@onboardingDeviceUsageReturnHint": {"description": "이 기기를 고르고 이룸이 화면이 열릴 때 뜨는 토스트 (오른쪽 위 캐릭터 배지 > 비밀암호)"},
 
   "homeNextStepMakeTitle": "첫 일과를 만들어 볼까요?",
   "@homeNextStepMakeTitle": {"description": "홈 다음에 할 일: 첫 일과 만들기 제목"},

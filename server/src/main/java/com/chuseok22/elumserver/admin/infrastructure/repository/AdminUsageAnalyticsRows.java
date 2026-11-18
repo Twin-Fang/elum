@@ -25,6 +25,10 @@ public final class AdminUsageAnalyticsRows {
   ) {
   }
 
+  /** 첫날 한 일 묶음 하나 (#1471): 묶음 key(AdminFirstDayActivationKind 이름), 인원, 7일 재방문 대상·인원 */
+  public record FirstDayActivationCounts(String activationKind, long memberCount, long maturedCount, long retainedCount) {
+  }
+
   /** 주별 추이 한 칸: 줄 key(SIGNUPS 등), 주 첫날(월요일), 건수 */
   public record WeeklyCount(String seriesKey, LocalDate weekStart, long total) {
   }

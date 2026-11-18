@@ -5415,22 +5415,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commonGoHome => '回到首页';
 
   @override
-  String get onboardingLinkStepTitle => '要连接Elumi的设备吗？';
+  String get onboardingDeviceUsageTitle => 'Elumi用哪台\n设备？';
 
   @override
-  String get linkDeviceBenefitLine => '发送的日常会马上出现在Elumi的设备上';
+  String get onboardingDeviceUsageDescription => '之后也可以在设置中连接设备';
 
   @override
-  String get onboardingLinkStepConnectNow => '现在连接';
+  String get onboardingDeviceUsageOtherWord => '另一台设备';
 
   @override
-  String get onboardingLinkStepEnterCode => '只要在Elumi的设备上输入连接码';
+  String get onboardingDeviceUsageOtherSuffix => '上使用';
 
   @override
-  String get onboardingLinkStepManyDevices => '可以连接多台设备';
+  String get onboardingDeviceUsageOtherDescription => '在Elumi的设备上输入连接码';
 
   @override
-  String get onboardingLinkStepLaterInSettings => '之后也可以在设置里连接';
+  String get onboardingDeviceUsageThisWord => '这台设备';
+
+  @override
+  String get onboardingDeviceUsageThisSuffix => '一起用';
+
+  @override
+  String get onboardingDeviceUsageThisDescription => '和监护人页面切换着用';
+
+  @override
+  String get onboardingDeviceUsageLater => '以后再决定';
+
+  @override
+  String get onboardingDeviceUsageReturnHint => '要回到监护人页面，请点右上角的角色';
 
   @override
   String get homeNextStepMakeTitle => '来做第一个日常吧';

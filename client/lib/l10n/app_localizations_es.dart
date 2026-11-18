@@ -5870,26 +5870,38 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonGoHome => 'Ir al inicio';
 
   @override
-  String get onboardingLinkStepTitle => '¿Vinculamos el dispositivo de Elumi?';
+  String get onboardingDeviceUsageTitle => '¿Qué dispositivo\nusará Elumi?';
 
   @override
-  String get linkDeviceBenefitLine =>
-      'Las rutinas que envíes aparecen al instante en el dispositivo de Elumi';
+  String get onboardingDeviceUsageDescription =>
+      'También puedes vincular un dispositivo más tarde en Ajustes';
 
   @override
-  String get onboardingLinkStepConnectNow => 'Vincular ahora';
+  String get onboardingDeviceUsageOtherWord => 'Otro dispositivo';
 
   @override
-  String get onboardingLinkStepEnterCode =>
-      'Solo ingresa el código de vínculo en el dispositivo de Elumi';
+  String get onboardingDeviceUsageOtherSuffix => ' para Elumi';
 
   @override
-  String get onboardingLinkStepManyDevices =>
-      'Puedes vincular más de un dispositivo';
+  String get onboardingDeviceUsageOtherDescription =>
+      'Ingresa el código de vínculo en el dispositivo de Elumi';
 
   @override
-  String get onboardingLinkStepLaterInSettings =>
-      'También puedes vincularlo luego en Ajustes';
+  String get onboardingDeviceUsageThisWord => 'Este dispositivo';
+
+  @override
+  String get onboardingDeviceUsageThisSuffix => ', compartido';
+
+  @override
+  String get onboardingDeviceUsageThisDescription =>
+      'Alterna con la pantalla del tutor';
+
+  @override
+  String get onboardingDeviceUsageLater => 'Decidir más tarde';
+
+  @override
+  String get onboardingDeviceUsageReturnHint =>
+      'Para volver a la pantalla del tutor, toca el personaje de arriba a la derecha';
 
   @override
   String get homeNextStepMakeTitle => 'Crea tu primera rutina';
