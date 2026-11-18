@@ -1673,5 +1673,6 @@
   "routineSchedulePickDone": "これで決める",
   "routineSchedulePickClear": "予約しない",
   "planRedeemCode": "プロモーションコードを入力",
-  "planRedeemCodeFailed": "コード入力画面を開けませんでした"
+  "planRedeemCodeFailed": "コード入力画面を開けませんでした",
+  "cardReviewSaveWithSchedule": "保存すると{summary}に送ります"
 }

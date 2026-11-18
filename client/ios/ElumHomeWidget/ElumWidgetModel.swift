@@ -13,7 +13,18 @@ enum ElumWidgetStore {
 /// 이룸이 지금 할 카드 (요약 JSON elumiCard 중 위젯이 쓰는 키만)
 struct ElumWidgetCard: Decodable {
   let routineId: String
+  let cardId: String
   let routineTitle: String?
+  let cardText: String?
+  let imageFilePath: String?
+  // 2단계: 남은 카드 수(지금 카드 포함) · 체크 뒤 넘겨 볼 다음 카드 (옛 요약이면 nil)
+  let remainingCount: Int?
+  let upcomingCards: [ElumWidgetUpcomingCard]?
+}
+
+/// 위젯이 체크 뒤 보여 줄 다음 카드 (요약 JSON elumiCard.upcomingCards 항목)
+struct ElumWidgetUpcomingCard: Decodable {
+  let cardId: String
   let cardText: String?
   let imageFilePath: String?
 }
@@ -147,7 +158,15 @@ struct ElumWidgetProvider: TimelineProvider {
 /// 위젯 > 앱 경로 URL (Runner HomeWidgetChannel.open 이 받음, 값은 Android 잠금화면 경로와 같음)
 enum ElumWidgetRoute {
   static func url(routineId: String? = nil) -> URL {
-    let route = routineId.map { "routine:\($0)" } ?? "home"
+    url(route: routineId.map { "routine:\($0)" } ?? "home")
+  }
+
+  /// 마지막 카드 "다 했어요": 앱이 그 카드를 체크하고 칭찬 흐름을 이어 감 (#1465 2단계)
+  static func checkURL(routineId: String, cardId: String) -> URL {
+    url(route: "check:\(routineId):\(cardId)")
+  }
+
+  private static func url(route: String) -> URL {
     var components = URLComponents()
     components.scheme = "elum"
     components.host = "widget"

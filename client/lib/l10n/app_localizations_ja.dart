@@ -5892,4 +5892,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get guardianHomeDetailEmptyTitle => '日課をタップするとここにカードが表示されます';
+
+  @override
+  String cardReviewSaveWithSchedule(String summary) {
+    return '保存すると$summaryに送ります';
+  }
 }

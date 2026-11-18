@@ -67,6 +67,9 @@ class LayoutMetrics {
 
   final AppLayout layout;
 
+  /// 두 칸으로 나눌 창인가: 태블릿 가로 + 높이 넉넉 (분할 보기처럼 낮으면 한 열). 홈 · 옆 패널 · 카드 확인이 같은 기준
+  bool get hasTwoPanes => isScaleOverridden && isLandscape && !isShortHeight;
+
   /// ScreenUtil 에 줄 디자인 크기. `창 / s` 로 두면 `.w` 와 `.h` 가 모두 s 가 된다
   Size designSizeFor(Size baseDesignSize) {
     if (!isScaleOverridden) return baseDesignSize;

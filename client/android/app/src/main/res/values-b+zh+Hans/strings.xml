@@ -39,4 +39,7 @@
     <string name="widget_star_count">星星 %1$d颗</string>
     <string name="widget_lumi_description">Lumi</string>
     <string name="widget_card_picture_description">卡片图片</string>
+    <string name="widget_check_done">完成了</string>
+    <string name="widget_check_praise">做得好！</string>
+    <string name="widget_continue_in_app">在应用里继续</string>
 </resources>

@@ -4,7 +4,7 @@ import android.content.Intent
 import android.util.Log
 
 /**
- * 홈 위젯 > 앱 이동 경로: MainActivity intent extra 키와 값 (값은 잠금화면과 같은 home, routine:<일과 id>)
+ * 홈 위젯 > 앱 이동 경로: MainActivity intent extra 키와 값 (값은 잠금화면과 같은 home, routine:<일과 id>, check:<일과 id>:<카드 id>)
  * 앱이 꺼져 있으면 pendingRoute 에 두고 Dart takePendingRoute 가 꺼냄
  */
 object ElumWidgetRoutes {
@@ -13,11 +13,17 @@ object ElumWidgetRoutes {
     const val EXTRA_SOURCE = "elum_widget_source"
     const val ROUTE_HOME = "home"
     private const val ROUTE_ROUTINE_PREFIX = "routine:"
+    // 마지막 카드 체크: 앱이 그 카드를 체크하고 일과 화면을 엶 (Dart LockScreenRoutes 와 같은 모양)
+    private const val ROUTE_CHECK_PREFIX = "check:"
+    private const val ROUTE_SEPARATOR = ":"
 
     @Volatile
     var pendingRoute: String? = null
 
     fun routineRoute(routineId: String): String = ROUTE_ROUTINE_PREFIX + routineId
+
+    fun checkRoute(routineId: String, cardId: String): String =
+        ROUTE_CHECK_PREFIX + routineId + ROUTE_SEPARATOR + cardId
 
     fun takePendingRoute(): String? {
         val route = pendingRoute

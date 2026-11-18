@@ -6239,4 +6239,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guardianHomeDetailEmptyTitle =>
       'Tap a routine to see its cards here';
+
+  @override
+  String cardReviewSaveWithSchedule(String summary) {
+    return 'Sends every $summary once saved';
+  }
 }

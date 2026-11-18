@@ -10162,6 +10162,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과를 누르면 여기에서 카드를 볼 수 있어요'**
   String get guardianHomeDetailEmptyTitle;
+
+  /// 카드 확인 저장 버튼 둘째 줄: 예약 도구로 고른 반복 (summary 예: 평일 오전 8:00) #1457
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하면 {summary}마다 보내요'**
+  String cardReviewSaveWithSchedule(String summary);
 }
 
 class _AppLocalizationsDelegate

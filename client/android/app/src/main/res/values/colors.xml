@@ -9,6 +9,8 @@
     <color name="widget_accent_yellow">#FFD629</color>
     <!-- 노랑 칩 위 글: 라이트·다크 모두 진한 글 -->
     <color name="widget_chip_text">#242634</color>
+    <!-- 위젯 "다 했어요" 버튼 글 (민트 배경 위, 라이트·다크 공통) -->
+    <color name="widget_check_button_text">#FFFFFF</color>
     <!-- 카드 그림 뒤 판 -->
     <color name="widget_picture_background">#F8F5F3</color>
 </resources>

@@ -7,6 +7,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import 'coach_help_button.dart';
+import 'top_bar_icon_button.dart';
 
 /// 뒤로가기 + 홈 (Figma x=24 / x=72, y=87)
 class RoutineFlowTopBar extends StatelessWidget {
@@ -32,7 +33,7 @@ class RoutineFlowTopBar extends StatelessWidget {
   final VoidCallback? onHelp;
 
   /// `?` ↔ `임시저장` 누름 영역 사이
-  static const _helpToDraftGap = 4.0;
+  static const _helpToDraftGap = 16.0;
 
   @override
   Widget build(BuildContext context) {
@@ -114,39 +115,13 @@ class RoutineFlowTopBar extends StatelessWidget {
             SizedBox(width: (showDraft ? _helpToDraftGap : 16.0).w),
           ],
           if (showDraft) ...[
-            // 시안 1173:5589 — 터치 영역 72×40 @ x=305(오른쪽 여백 16), 글자 16/w600.
-            // 자리는 아이콘 높이 그대로 두고 **그 위로** 40 높이 누름 영역을 덮는다.
+            // 임시저장: `?` 와 같은 크기·색 그림 버튼 (오른쪽 여백 16)
             Padding(
               padding: EdgeInsets.only(right: 16.w),
-              child: AppPressable(
-                onTap: onDraft,
+              child: TopBarIconButton(
+                iconAsset: AppAssets.iconDraftSave,
                 semanticLabel: context.l10n.routineFlowDraftLabel,
-                child: SizedBox(
-                  width: 72.w,
-                  height: 24.w,
-                  child: OverflowBox(
-                    maxWidth: 72.w,
-                    maxHeight: 40.w,
-                    child: SizedBox(
-                      width: 72.w,
-                      height: 40.w,
-                      // 글꼴을 키우면 `임시저 / 장` 으로 꺾여 둘째 줄이 잘린다 — 한 줄로 줄인다
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            context.l10n.routineFlowDraftLabel,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: context.typo.topBarAction.copyWith(
-                              color: context.colors.topBarActionText,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                onTap: onDraft,
               ),
             ),
           ],

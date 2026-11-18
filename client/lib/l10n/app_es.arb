@@ -1673,5 +1673,6 @@
   "routineSchedulePickDone": "Fijar así",
   "routineSchedulePickClear": "No programar",
   "planRedeemCode": "Canjear código",
-  "planRedeemCodeFailed": "No se pudo abrir el canje de código"
+  "planRedeemCodeFailed": "No se pudo abrir el canje de código",
+  "cardReviewSaveWithSchedule": "Al guardar, se envía: {summary}"
 }

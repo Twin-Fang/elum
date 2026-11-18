@@ -66,15 +66,26 @@ data class LockScreenSnapshot(
     }
 }
 
-/** 이룸이 지금 할 카드 한 장 (Dart LockScreenElumiCard, routineId 없으면 카드 없음으로 봄) */
+/**
+ * 이룸이 지금 할 카드 한 장 (Dart LockScreenElumiCard, routineId 없으면 카드 없음으로 봄)
+ * 위젯 체크용 cardId·남은 수·다음 카드 (#1465 2단계, 옛 요약에는 없음 > 빈 값·0·빈 목록)
+ */
 data class LockScreenElumiCard(
     val routineId: String,
     val routineTitle: String,
     val cardText: String,
     // 기기에 받아 둔 카드 그림 파일 절대 경로 (없으면 null)
     val imageFilePath: String?,
+    val cardId: String = "",
+    // 이 일과에서 남은 카드 수 (지금 카드 포함, 0 이면 모름)
+    val remainingCount: Int = 0,
+    // 지금 카드 다음 카드 (최대 2장)
+    val upcomingCards: List<LockScreenUpcomingCard> = emptyList(),
 ) {
     companion object {
+        // 요약에 담기는 다음 카드 최대 장수 (Dart 와 같음)
+        private const val MAX_UPCOMING_CARD_COUNT = 2
+
         fun parse(json: JSONObject?): LockScreenElumiCard? {
             if (json == null) return null
             val routineId = json.optStringOrNull("routineId") ?: return null
@@ -83,10 +94,39 @@ data class LockScreenElumiCard(
                 routineTitle = json.optStringOrNull("routineTitle").orEmpty(),
                 cardText = json.optStringOrNull("cardText").orEmpty(),
                 imageFilePath = json.optStringOrNull("imageFilePath"),
+                cardId = json.optStringOrNull("cardId").orEmpty(),
+                remainingCount = json.optInt("remainingCount", 0).coerceAtLeast(0),
+                upcomingCards = parseUpcomingCards(json),
             )
+        }
+
+        // cardId 없는 항목은 건너뜀
+        private fun parseUpcomingCards(json: JSONObject): List<LockScreenUpcomingCard> {
+            val array = json.optJSONArray("upcomingCards") ?: return emptyList()
+            val cards = mutableListOf<LockScreenUpcomingCard>()
+            for (index in 0 until array.length()) {
+                val cardJson = array.optJSONObject(index) ?: continue
+                val cardId = cardJson.optStringOrNull("cardId") ?: continue
+                cards.add(
+                    LockScreenUpcomingCard(
+                        cardId = cardId,
+                        cardText = cardJson.optStringOrNull("cardText").orEmpty(),
+                        imageFilePath = cardJson.optStringOrNull("imageFilePath"),
+                    ),
+                )
+                if (cards.size >= MAX_UPCOMING_CARD_COUNT) break
+            }
+            return cards
         }
     }
 }
+
+/** 지금 카드 다음 카드 한 장 (위젯이 앱 없이 넘겨 보여 줌, 그림 id 는 Android 에서 안 씀) */
+data class LockScreenUpcomingCard(
+    val cardId: String,
+    val cardText: String,
+    val imageFilePath: String?,
+)
 
 // JSON null·빈 문자열 > null (optString 은 null 을 "null" 문자열로 돌려줌)
 private fun JSONObject.optStringOrNull(key: String): String? {

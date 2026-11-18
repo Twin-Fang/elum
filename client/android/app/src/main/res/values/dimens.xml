@@ -16,6 +16,9 @@
     <dimen name="widget_lumi_large">150dp</dimen>
     <dimen name="widget_lumi_streak_compact">44dp</dimen>
     <dimen name="widget_card_picture_medium">96dp</dimen>
+    <!-- 위젯 "다 했어요" 버튼 위아래 여백 · 칭찬 줄 루미 크기 -->
+    <dimen name="widget_check_button_padding_vertical">6dp</dimen>
+    <dimen name="widget_check_praise_lumi">20dp</dimen>
     <dimen name="widget_text_caption">12sp</dimen>
     <dimen name="widget_text_body">15sp</dimen>
     <dimen name="widget_text_title">18sp</dimen>

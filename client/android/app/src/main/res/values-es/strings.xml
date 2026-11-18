@@ -39,4 +39,7 @@
     <string name="widget_star_count">Estrellas: %1$d</string>
     <string name="widget_lumi_description">Lumi</string>
     <string name="widget_card_picture_description">Imagen de la tarjeta</string>
+    <string name="widget_check_done">¡Listo!</string>
+    <string name="widget_check_praise">¡Muy bien!</string>
+    <string name="widget_continue_in_app">Sigue en la app</string>
 </resources>

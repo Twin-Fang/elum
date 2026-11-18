@@ -7,6 +7,7 @@ import '../../../core/lock_screen/lock_screen_bridge.dart';
 import '../../../core/lock_screen/lock_screen_routes.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/router/routes.dart';
+import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 
 /// 잠금화면·알림에서 연 경로 > 앱 화면 (앱 시작 때 1회 + 떠 있는 동안 계속)
@@ -29,11 +30,13 @@ StreamSubscription<String>? startLockScreenRouteOpener({
 }
 
 /// 홈 화면 위젯에서 누른 경로 > 앱 화면 (잠금화면과 같은 경로 값, #1465)
+/// `check:<일과>:<카드>`(마지막 카드 "다 했어요"): 그 카드를 체크하고 일과 카드 화면을 엶 > 앱의 칭찬 흐름
 StreamSubscription<String>? startHomeWidgetRouteOpener({
   required HomeWidgetBridge bridge,
   required GoRouter router,
   required bool Function() isElumiDevice,
   required Future<List<Routine>> Function() loadTodayRoutines,
+  required bool Function(Routine routine, ActionCard card) markCardChecked,
 }) {
   if (!bridge.isSupported) return null;
   return _startRouteOpener(
@@ -43,6 +46,7 @@ StreamSubscription<String>? startHomeWidgetRouteOpener({
     router: router,
     isElumiDevice: isElumiDevice,
     loadTodayRoutines: loadTodayRoutines,
+    markCardChecked: markCardChecked,
   );
 }
 
@@ -54,9 +58,16 @@ StreamSubscription<String> _startRouteOpener({
   required GoRouter router,
   required bool Function() isElumiDevice,
   required Future<List<Routine>> Function() loadTodayRoutines,
+  bool Function(Routine routine, ActionCard card)? markCardChecked,
 }) {
   void open(String route) {
     AppLogger.info('[$source] open route : $route');
+    final check = LockScreenRoutes.checkOf(route);
+    if (check != null && markCardChecked != null) {
+      router.go(Routes.child);
+      unawaited(_checkThenPushRoutineDetail(router, check, loadTodayRoutines, markCardChecked));
+      return;
+    }
     final routineId = LockScreenRoutes.routineIdOf(route);
     if (routineId != null) {
       router.go(Routes.child);
@@ -91,6 +102,25 @@ Future<void> _pushRoutineDetail(
     unawaited(router.push(Routes.childRoutineDetail, extra: routine));
   } catch (error) {
     AppLogger.error('lock screen', 'routine open failed : $error');
+  }
+}
+
+/// 위젯 마지막 카드: 그 카드 체크 > 카드 화면 열기 (못 찾으면 이룸이 홈에 머묾)
+Future<void> _checkThenPushRoutineDetail(
+  GoRouter router,
+  ({String routineId, String cardId}) check,
+  Future<List<Routine>> Function() loadTodayRoutines,
+  bool Function(Routine routine, ActionCard card) markCardChecked,
+) async {
+  try {
+    final routines = await loadTodayRoutines().timeout(_routineLoadTimeout);
+    final routine = routines.where((routine) => routine.id == check.routineId).firstOrNull;
+    final card = routine?.steps.where((card) => card.id == check.cardId).firstOrNull;
+    if (routine == null || card == null) return;
+    markCardChecked(routine, card);
+    unawaited(router.push(Routes.childRoutineDetail, extra: routine));
+  } catch (error) {
+    AppLogger.error('widget', 'check route failed : $error');
   }
 }
 

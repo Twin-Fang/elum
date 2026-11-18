@@ -74,7 +74,7 @@ abstract final class LockScreenSnapshotBuilder {
     return unfinishedRoutines.isEmpty ? null : unfinishedRoutines.first;
   }
 
-  /// 일과 > 아직 안 한 첫 카드 한 장 (카드 글은 제목 > 설명)
+  /// 일과 > 아직 안 한 첫 카드 한 장 + 남은 수 + 다음 카드 최대 2장 (카드 글은 제목 > 설명)
   static LockScreenElumiCard? _elumiCardOf(
     Routine? routine,
     bool Function(Routine routine, ActionCard card) isCardDone,
@@ -82,9 +82,8 @@ abstract final class LockScreenSnapshotBuilder {
     if (routine == null) return null;
     final sortedCards = [...routine.steps]
       ..sort((first, second) => first.stepOrder.compareTo(second.stepOrder));
-    final nextCard = sortedCards
-        .where((card) => !isCardDone(routine, card))
-        .firstOrNull;
+    final remainingCards = sortedCards.where((card) => !isCardDone(routine, card)).toList();
+    final nextCard = remainingCards.firstOrNull;
     if (nextCard == null) return null;
     return LockScreenElumiCard(
       routineId: routine.id,
@@ -94,6 +93,17 @@ abstract final class LockScreenSnapshotBuilder {
       contentLanguage: routine.language,
       pictogramId: nextCard.pictogramId,
       exampleImageId: nextCard.exampleImageId,
+      remainingCount: remainingCards.length,
+      // 위젯에서 체크한 뒤 앱 없이 보여 줄 다음 카드 (#1465 2단계)
+      upcomingCards: [
+        for (final card in remainingCards.skip(1).take(LockScreenElumiCard.maximumUpcomingCards))
+          LockScreenUpcomingCard(
+            cardId: card.id,
+            cardText: card.displayTitle,
+            pictogramId: card.pictogramId,
+            exampleImageId: card.exampleImageId,
+          ),
+      ],
     );
   }
 

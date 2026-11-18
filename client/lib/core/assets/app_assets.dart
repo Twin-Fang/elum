@@ -163,6 +163,9 @@ abstract final class AppAssets {
   /// 안드로이드에 없다. 윤곽선으로 뽑아 받았다.
   static const iconQuestionCircle = '$_images/icon_question_circle.svg';
 
+  /// 임시저장 (상단바, 디스켓 선 그림)
+  static const iconDraftSave = '$_images/icon_draft_save.svg';
+
   /// 준비 로딩 화면의 루미 캐릭터 (Figma `262:4675` `Group 26`).
   ///
   /// **`prepare` 화면에만 있다** — 카드 생성 로딩(262:4703)에는 없다.

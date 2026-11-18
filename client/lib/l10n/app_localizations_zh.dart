@@ -5857,4 +5857,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guardianHomeDetailEmptyTitle => '点击日程即可在这里查看卡片';
+
+  @override
+  String cardReviewSaveWithSchedule(String summary) {
+    return '保存后每$summary发送';
+  }
 }

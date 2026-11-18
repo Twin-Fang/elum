@@ -1673,5 +1673,6 @@
   "routineSchedulePickDone": "就这样设定",
   "routineSchedulePickClear": "不预约",
   "planRedeemCode": "输入优惠码",
-  "planRedeemCodeFailed": "无法打开兑换码页面"
+  "planRedeemCodeFailed": "无法打开兑换码页面",
+  "cardReviewSaveWithSchedule": "保存后每{summary}发送"
 }

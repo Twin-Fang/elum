@@ -22,9 +22,13 @@ class ElumButton extends StatelessWidget {
     this.labelStyle,
     this.loading = false,
     this.size = ElumButtonSize.regular,
+    this.caption,
   });
 
   final String label;
+
+  /// 이름 아래 작은 둘째 줄 (한 줄, 넘치면 줄임표). 버튼 높이는 그대로 (카드 확인 저장 버튼의 예약 요약 #1457)
+  final String? caption;
 
   /// null이면 비활성 상태
   final VoidCallback? onPressed;
@@ -74,17 +78,7 @@ class ElumButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(space.buttonRadius.r),
           ),
           alignment: Alignment.center,
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: (labelStyle ?? (size == ElumButtonSize.small ? context.typo.linkLater : context.typo.button)).copyWith(
-              color:
-                  labelColor ??
-                  (isEnabled
-                      ? colors.buttonEnabledText
-                      : colors.buttonDisabledText),
-            ),
-          ),
+          child: _labelWithCaption(context, isEnabled),
         ),
       ),
     );
@@ -105,6 +99,39 @@ class ElumButton extends StatelessWidget {
       ],
     );
   }
+
+  /// 이름 (+ 둘째 줄 작은 글: 이름 색을 옅게)
+  Widget _labelWithCaption(BuildContext context, bool isEnabled) {
+    final colors = context.colors;
+    final textColor = labelColor ?? (isEnabled ? colors.buttonEnabledText : colors.buttonDisabledText);
+    final labelText = Text(
+      label,
+      textAlign: TextAlign.center,
+      style: (labelStyle ?? (size == ElumButtonSize.small ? context.typo.linkLater : context.typo.button)).copyWith(
+        color: textColor,
+      ),
+    );
+    final caption = this.caption;
+    if (caption == null) return labelText;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        labelText,
+        SizedBox(height: _labelToCaption.h),
+        Text(
+          caption,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: context.typo.editChipLabel.copyWith(color: textColor.withValues(alpha: _captionOpacity)),
+        ),
+      ],
+    );
+  }
+
+  /// 이름 > 둘째 줄 · 둘째 줄 옅기
+  static const _labelToCaption = 2.0;
+  static const _captionOpacity = 0.7;
 
   /// regular 66 · small 48 (= xl + md, ElumSecondaryButton 과 같음)
   double _minHeight(BuildContext context) {
