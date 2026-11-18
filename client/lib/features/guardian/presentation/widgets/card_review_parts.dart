@@ -344,7 +344,13 @@ class CardReviewToolFace extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(icon, width: 16.w, height: 16.w),
+            // 도구 아이콘은 같은 색 (그림 원본 색이 달라도 네 칸이 한 벌로 보이게)
+            SvgPicture.asset(
+              icon,
+              width: 16.w,
+              height: 16.w,
+              colorFilter: ColorFilter.mode(colors.textPrimary, BlendMode.srcIn),
+            ),
             SizedBox(height: 8.h),
             Text(
               label,

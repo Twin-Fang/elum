@@ -1536,10 +1536,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardReviewReorderHint => '长按卡片可以调整顺序';
 
   @override
-  String get cardReviewToolReorder => '调整卡片顺序';
+  String get cardReviewToolReorder => '调整顺序';
 
   @override
-  String get cardReviewToolEdit => '修改这张卡片';
+  String get cardReviewToolEdit => '修改卡片';
 
   @override
   String get cardReviewToolAdd => '添加卡片';
@@ -2856,7 +2856,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardReviewCoachReorderMessage => '点这里后*长按并拖动*卡片\n就能调整顺序';
 
   @override
-  String get cardReviewCoachSaveMessage => '改好后一定要点*保存卡片*\n点了才算完成日常';
+  String get cardReviewCoachSaveMessage => '改好后点*保存卡片*\n点了就会*马上发送给Elumi*';
 
   @override
   String get coachHelpLabel => '查看使用方法';
