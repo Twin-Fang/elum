@@ -5,6 +5,7 @@ import Foundation
 enum ElumWidgetText {
   private static let table: [String: [String: String]] = [
     "ko": [
+      "check.done": "다 했어요", "check.praise": "잘했어요!", "check.continue": "앱에서 이어서 해요",
       "stale.guardian": "루미랑 오늘 일과 볼까요?", "stale.elumi": "루미랑 오늘 할 일 볼까요?",
       "empty.guardian": "오늘 일과를 만들어 볼까요?", "empty.elumi": "오늘은 쉬는 날이에요",
       "done.guardian": "오늘 일과를 다 했어요!", "done.elumi": "오늘 다 했어요! 최고예요",
@@ -19,6 +20,7 @@ enum ElumWidgetText {
       "lock.name": "오늘 진행", "lock.description": "잠금화면에서 오늘 진행을 봐요",
     ],
     "en": [
+      "check.done": "Done", "check.praise": "Great job!", "check.continue": "Continue in the app",
       "stale.guardian": "Check today's routines with Lumi?", "stale.elumi": "See today's plan with Lumi?",
       "empty.guardian": "Shall we make a routine today?", "empty.elumi": "Today is a rest day",
       "done.guardian": "All of today's routines are done!", "done.elumi": "All done today! Amazing",
@@ -33,6 +35,7 @@ enum ElumWidgetText {
       "lock.name": "Today's Progress", "lock.description": "See today's progress on the Lock Screen",
     ],
     "ja": [
+      "check.done": "できた", "check.praise": "よくできました！", "check.continue": "アプリで続けよう",
       "stale.guardian": "ルミと今日の日課を見ますか？", "stale.elumi": "ルミと今日やることを見よう",
       "empty.guardian": "今日の日課を作ってみませんか？", "empty.elumi": "今日はお休みの日です",
       "done.guardian": "今日の日課はぜんぶ終わりました！", "done.elumi": "今日はぜんぶできた！すごい",
@@ -47,6 +50,7 @@ enum ElumWidgetText {
       "lock.name": "今日の進み", "lock.description": "ロック画面で今日の進みを見られます",
     ],
     "zh": [
+      "check.done": "完成了", "check.praise": "做得好！", "check.continue": "在应用里继续",
       "stale.guardian": "和Lumi一起看看今天的日常？", "stale.elumi": "和Lumi一起看看今天要做的事？",
       "empty.guardian": "今天来做个日常吧？", "empty.elumi": "今天是休息日",
       "done.guardian": "今天的日常都完成了！", "done.elumi": "今天都完成了！真棒",
@@ -61,6 +65,7 @@ enum ElumWidgetText {
       "lock.name": "今天的进度", "lock.description": "在锁定屏幕上查看今天的进度",
     ],
     "es": [
+      "check.done": "¡Listo!", "check.praise": "¡Muy bien!", "check.continue": "Sigue en la app",
       "stale.guardian": "¿Vemos las rutinas de hoy con Lumi?", "stale.elumi": "¿Vemos lo de hoy con Lumi?",
       "empty.guardian": "¿Creamos una rutina hoy?", "empty.elumi": "Hoy es día de descanso",
       "done.guardian": "¡Todas las rutinas de hoy hechas!", "done.elumi": "¡Todo hecho hoy! Genial",

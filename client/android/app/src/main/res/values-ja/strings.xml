@@ -39,4 +39,7 @@
     <string name="widget_star_count">星 %1$d個</string>
     <string name="widget_lumi_description">ルミ</string>
     <string name="widget_card_picture_description">カードの絵</string>
+    <string name="widget_check_done">できた</string>
+    <string name="widget_check_praise">よくできました！</string>
+    <string name="widget_continue_in_app">アプリで続けよう</string>
 </resources>

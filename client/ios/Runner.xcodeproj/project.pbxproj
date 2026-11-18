@@ -29,6 +29,7 @@
 		E11A9681DEE6518324E56E64 /* ElumWidgetText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */; };
 		35AA5533771431A121B16003 /* ElumWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */; };
 		F658C043229B1FF52B279552 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69BE54FF00569624326076C3 /* Assets.xcassets */; };
+		F2B2D0252EB9B7344C38127C /* ElumWidgetCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = A478C7EB437565CF7E03FBD7 /* ElumWidgetCheck.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +117,7 @@
 		360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetText.swift; sourceTree = "<group>"; };
 		5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetViews.swift; sourceTree = "<group>"; };
 		69BE54FF00569624326076C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A478C7EB437565CF7E03FBD7 /* ElumWidgetCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElumWidgetCheck.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				9D4D012288B6FC6042949759 /* ElumHomeWidget.swift */,
+				A478C7EB437565CF7E03FBD7 /* ElumWidgetCheck.swift */,
 				255D029A7C7C876B262F2F31 /* ElumWidgetModel.swift */,
 				360BF0A2D9A818891F3019F6 /* ElumWidgetText.swift */,
 				5E47A721A4E66A67C9597FB6 /* ElumWidgetViews.swift */,
@@ -530,6 +533,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2B2D0252EB9B7344C38127C /* ElumWidgetCheck.swift in Sources */,
 				2D1B15731F61C844FCF12BC1 /* ElumWidgetModel.swift in Sources */,
 				E11A9681DEE6518324E56E64 /* ElumWidgetText.swift in Sources */,
 				35AA5533771431A121B16003 /* ElumWidgetViews.swift in Sources */,

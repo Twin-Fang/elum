@@ -125,6 +125,13 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
     return shouldReward;
   }
 
+  /// 위젯에서 체크한 카드 반영: 이미 체크됐으면 건너뜀 (토글 아님, #1465 2단계) · 반영했으면 true
+  bool markCheckedFromWidget({required Routine routine, required ActionCard card}) {
+    if (state.isChecked(routine.id, card)) return false;
+    toggle(routine: routine, card: card);
+    return true;
+  }
+
   bool _isEveryCardCompleted(Routine routine, Set<String> completedCardIds) =>
       routine.steps.isNotEmpty &&
       routine.steps.every((card) => completedCardIds.contains(card.id));

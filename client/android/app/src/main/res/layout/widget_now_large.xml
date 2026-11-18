@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 지금 할 카드 대 (4x4): 일과 제목 · n/m 칩 > 큰 카드 그림 > 큰 카드 글 -->
+<!-- 지금 할 카드 대 (4x4): 일과 제목(체크 직후 칭찬) · n/m 칩 > 큰 카드 그림 > 큰 카드 글 > "다 했어요" 버튼 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
@@ -13,6 +13,33 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/widget_check_praise_row"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/widget_check_praise_lumi"
+                android:layout_height="@dimen/widget_check_praise_lumi"
+                android:contentDescription="@string/widget_lumi_description"
+                android:scaleType="fitCenter"
+                android:src="@drawable/lumi_cheer" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/widget_gap_small"
+                android:maxLines="1"
+                android:text="@string/widget_check_praise"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="@dimen/widget_text_caption"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/widget_routine_title"
@@ -66,4 +93,23 @@
         android:textColor="@color/widget_text_primary"
         android:textSize="@dimen/widget_text_card_large"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_check_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/widget_gap"
+        android:background="@drawable/widget_check_button_background"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingStart="@dimen/widget_panel_padding"
+        android:paddingTop="@dimen/widget_check_button_padding_vertical"
+        android:paddingEnd="@dimen/widget_panel_padding"
+        android:paddingBottom="@dimen/widget_check_button_padding_vertical"
+        android:text="@string/widget_check_done"
+        android:textColor="@color/widget_check_button_text"
+        android:textSize="@dimen/widget_text_body"
+        android:textStyle="bold"
+        android:visibility="gone" />
 </LinearLayout>

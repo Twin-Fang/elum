@@ -2,7 +2,7 @@ import Flutter
 import WidgetKit
 
 // 앱(Runner) 채널: Dart HomeWidgetBridge(elum/home_widget) <> 홈 화면 위젯 (#1410, #1465)
-// 메서드 3개: updateSnapshot(요약 저장 > 위젯 새로 그림) · takePendingRoute(위젯으로 켠 경로) · openRoute(네이티브 > Dart)
+// 메서드 4개: updateSnapshot(요약 저장 > 위젯 새로 그림) · takePendingRoute(위젯으로 켠 경로) · takeWidgetChecks(위젯 체크 대기열) · openRoute(네이티브 > Dart)
 // 등록: AppDelegate.didInitializeImplicitFlutterEngine · 위젯 URL: ElumSceneBridgePlugin 이 open(url:) 로 넘김
 enum HomeWidgetChannel {
   static let channelName = "elum/home_widget"
@@ -11,8 +11,11 @@ enum HomeWidgetChannel {
   static let snapshotKey = "elum.lockScreenSnapshot"
   // 위젯이 읽을 카드 그림 사본 (App Group 컨테이너 안, 위젯 확장은 앱 폴더를 못 읽음)
   static let cardImageFileName = "widget-card.png"
-  // 위젯 URL: elum://widget?route=home | routine:<id>
+  // 위젯 URL: elum://widget?route=home | routine:<id> | check:<일과>:<카드>
   static let urlHost = "widget"
+  // 위젯 체크 저장 키 (ElumWidgetCheck.swift ElumWidgetCheckStore 와 같은 값, #1465 2단계)
+  static let checkOutboxKey = "elum.widget.checkOutbox"
+  static let checkedCardIdsKey = "elum.widget.checkedCardIds"
 
   private static var channel: FlutterMethodChannel?
   // 위젯을 눌러 앱을 켰는데 Dart 가 아직 듣지 않을 때 보관 (Dart 가 takePendingRoute 로 꺼내면 비움)
@@ -27,6 +30,11 @@ enum HomeWidgetChannel {
       case "takePendingRoute":
         result(pendingRoute)
         pendingRoute = nil
+      case "takeWidgetChecks":
+        // 위젯이 쌓은 체크 꺼내고 비움 (없으면 "[]")
+        let defaults = UserDefaults(suiteName: appGroupId)
+        result(defaults?.string(forKey: checkOutboxKey) ?? "[]")
+        defaults?.removeObject(forKey: checkOutboxKey)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -57,19 +65,29 @@ enum HomeWidgetChannel {
     } else {
       defaults.removeObject(forKey: snapshotKey)
     }
+    // 새 요약이 기준 > 위젯이 표시용으로 넘긴 카드 목록은 비움
+    defaults.removeObject(forKey: checkedCardIdsKey)
     WidgetCenter.shared.reloadAllTimelines()
     result(nil)
   }
 
-  // elumiCard.imageFilePath(앱 폴더) > App Group 사본 경로. 복사 실패면 경로를 비움 (위젯은 루미 그림으로 대신)
+  // elumiCard · upcomingCards 의 imageFilePath(앱 폴더) > App Group 사본 경로. 복사 실패면 경로를 비움 (위젯은 루미 그림으로 대신)
   private static func snapshotWithSharedCardImage(_ json: String) -> String {
     guard
       let data = json.data(using: .utf8),
       var snapshot = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
       var card = snapshot["elumiCard"] as? [String: Any]
     else { return json }
-    let sharedPath = copyCardImageToAppGroup(card["imageFilePath"] as? String)
-    card["imageFilePath"] = sharedPath ?? NSNull()
+    card["imageFilePath"] = copyCardImageToAppGroup(card["imageFilePath"] as? String, fileName: cardImageFileName) ?? NSNull()
+    if let upcomingCards = card["upcomingCards"] as? [[String: Any]] {
+      card["upcomingCards"] = upcomingCards.enumerated().map { index, upcoming -> [String: Any] in
+        var copied = upcoming
+        copied["imageFilePath"] = copyCardImageToAppGroup(
+          upcoming["imageFilePath"] as? String, fileName: "widget-card-next-\(index).png"
+        ) ?? NSNull()
+        return copied
+      }
+    }
     snapshot["elumiCard"] = card
     guard let updated = try? JSONSerialization.data(withJSONObject: snapshot),
           let updatedJson = String(data: updated, encoding: .utf8)
@@ -77,13 +95,13 @@ enum HomeWidgetChannel {
     return updatedJson
   }
 
-  private static func copyCardImageToAppGroup(_ sourcePath: String?) -> String? {
+  private static func copyCardImageToAppGroup(_ sourcePath: String?, fileName: String) -> String? {
     let manager = FileManager.default
     guard
       let sourcePath = sourcePath, !sourcePath.isEmpty, manager.fileExists(atPath: sourcePath),
       let container = manager.containerURL(forSecurityApplicationGroupIdentifier: appGroupId)
     else { return nil }
-    let target = container.appendingPathComponent(cardImageFileName)
+    let target = container.appendingPathComponent(fileName)
     do {
       if manager.fileExists(atPath: target.path) { try manager.removeItem(at: target) }
       try manager.copyItem(at: URL(fileURLWithPath: sourcePath), to: target)

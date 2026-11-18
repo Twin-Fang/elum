@@ -22,6 +22,10 @@ enum class LumiState { STALE, EMPTY, DONE, NIGHT, EVENING, MORNING, READY, PROGR
 class ElumWidgetState private constructor(
     val snapshot: LockScreenSnapshot?,
     val lumiState: LumiState,
+    // 위젯에서 체크한 카드 id·마지막 체크 시각·지금 시각 (#1465 2단계)
+    private val checkedCardIds: Set<String> = emptySet(),
+    private val lastCheckAtMillis: Long = 0L,
+    private val nowMillis: Long = System.currentTimeMillis(),
 ) {
     // 요약 없으면 보호자 문구 (역할을 모름)
     val isElumiDevice: Boolean
@@ -51,8 +55,25 @@ class ElumWidgetState private constructor(
     val nowCard: LockScreenElumiCard?
         get() = snapshot?.elumiCard?.takeIf { shouldShowProgress && lumiState != LumiState.DONE }
 
+    // 위젯 체크 가능: 이룸이 기기 + 오늘 요약 (보호자 기기·지난 요약은 버튼 없음)
+    private val canCheckFromWidget: Boolean
+        get() = isElumiDevice && lumiState != LumiState.STALE
+
+    // 지금 할 카드 체크 상태 (보여 줄 카드·버튼 동작, 카드 없으면 null)
+    val nowCardCheck: ElumWidgetCardCheck? by lazy {
+        nowCard?.let { ElumWidgetCardCheck.of(it, canCheckFromWidget, checkedCardIds) }
+    }
+
     // 지금 할 카드 그림 (크기 단계마다 다시 읽지 않게 한 번만, 없으면 null)
-    val nowCardPicture: Bitmap? by lazy { ElumWidgetCardPicture.decode(nowCard?.imageFilePath) }
+    val nowCardPicture: Bitmap? by lazy { ElumWidgetCardPicture.decode(nowCardCheck?.displayCard?.imageFilePath) }
+
+    // 체크 뒤 10분 동안 루미 cheer + "잘했어요!" (체크 가능할 때만)
+    val shouldShowCheckPraise: Boolean
+        get() {
+            if (!canCheckFromWidget || lastCheckAtMillis <= 0L) return false
+            val elapsedMillis = nowMillis - lastCheckAtMillis
+            return elapsedMillis in 0L until CHECK_PRAISE_DURATION_MILLIS
+        }
 
     val lumiDrawableRes: Int
         get() = when (lumiState) {
@@ -104,10 +125,19 @@ class ElumWidgetState private constructor(
         private const val MORNING_END_HOUR = 12
         // Dart LockScreenSnapshot.dateKeyOf 와 같은 모양
         private const val DATE_KEY_PATTERN = "yyyy-MM-dd"
+        // 체크 칭찬 보이는 시간 (10분)
+        private const val CHECK_PRAISE_DURATION_MILLIS = 10 * 60 * 1000L
 
         fun load(context: Context, now: Calendar = Calendar.getInstance()): ElumWidgetState {
-            val snapshot = ElumWidgetPreferences(context).snapshot
-            return ElumWidgetState(snapshot, lumiStateOf(snapshot, now))
+            val preferences = ElumWidgetPreferences(context)
+            val snapshot = preferences.snapshot
+            return ElumWidgetState(
+                snapshot = snapshot,
+                lumiState = lumiStateOf(snapshot, now),
+                checkedCardIds = preferences.checkedCardIds,
+                lastCheckAtMillis = preferences.lastCheckAtMillis,
+                nowMillis = now.timeInMillis,
+            )
         }
 
         /** 표 순서: stale > empty > done > night > evening > morning > ready > progress */

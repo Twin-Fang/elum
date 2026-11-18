@@ -89,18 +89,24 @@ Future<LockScreenSnapshot> _withCardImageFile(
       .value
       ?.where((routine) => routine.id == card.routineId)
       .firstOrNull;
-  final imagePath = routine?.steps
-      .where((step) => step.id == card.cardId)
-      .firstOrNull
-      ?.imagePath;
-  // 올린 그림 없음 > 예시 그림·픽토그램을 위젯이 읽을 파일로 (#1465)
-  final filePath = (imagePath == null || imagePath.isEmpty)
-      ? await ref
-            .read(bundledCardArtFileProvider)
-            .filePathOf(exampleImageId: card.exampleImageId, pictogramId: card.pictogramId)
-      : await ref.read(cardImageDiskCacheProvider).existingFilePath(imagePath);
-  if (filePath == null) return snapshot;
-  return snapshot.copyWithElumiCard(card.copyWithImageFilePath(filePath));
+  Future<String?> filePathOf(String cardId, String? exampleImageId, String? pictogramId) async {
+    final imagePath = routine?.steps.where((step) => step.id == cardId).firstOrNull?.imagePath;
+    // 올린 그림 없음 > 예시 그림·픽토그램을 위젯이 읽을 파일로 (#1465)
+    if (imagePath == null || imagePath.isEmpty) {
+      return ref.read(bundledCardArtFileProvider).filePathOf(exampleImageId: exampleImageId, pictogramId: pictogramId);
+    }
+    return ref.read(cardImageDiskCacheProvider).existingFilePath(imagePath);
+  }
+
+  // 지금 카드 + 위젯이 체크 뒤 넘겨 볼 다음 카드 (2단계)
+  final currentPath = await filePathOf(card.cardId, card.exampleImageId, card.pictogramId);
+  final upcomingCards = [
+    for (final upcoming in card.upcomingCards)
+      upcoming.copyWithImageFilePath(
+        await filePathOf(upcoming.cardId, upcoming.exampleImageId, upcoming.pictogramId),
+      ),
+  ];
+  return snapshot.copyWithElumiCard(card.copyWithImageFilePath(currentPath).copyWithUpcomingCards(upcomingCards));
 }
 
 /// 요약 보내기 함수 (홈이 떠 있는 동안 LockScreenSnapshotSync 가 바뀔 때마다 부름)

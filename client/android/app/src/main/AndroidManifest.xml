@@ -104,6 +104,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/elum_streak_widget_info" />
         </receiver>
+        <!-- 지금 할 카드 위젯 "다 했어요" 수신기 (#1465 2단계): 위젯 PendingIntent 명시 intent 만 받음 -->
+        <receiver
+            android:name=".widget.ElumWidgetCheckReceiver"
+            android:exported="false" />
         <!-- 잠금화면 카드 화면·서비스·부팅 수신기 선언은 Play 특수 용도 신고 승인 뒤 되돌린다 (#1420, 원본은 #1410 커밋 c44d3477) -->
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
