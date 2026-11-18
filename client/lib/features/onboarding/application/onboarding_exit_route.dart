@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/router/routes.dart';
 import '../../link/application/linked_device_check.dart';
-import '../../notification/application/push_permission_prompt.dart';
 
 final onboardingExitRouteProvider = Provider<OnboardingExitRoute>(OnboardingExitRoute.new);
 
-/// 온보딩 끝 순서: 이룸이 기기 연결 단계 > 알림 켜기 안내 > 보호자 홈
+/// 온보딩 끝 순서: 이룸이 기기 연결 단계 > 보호자 홈 (알림 켜기 안내는 홈 위 시트·창, 코치마크 전 #1455)
 /// 비밀암호 저장 뒤 · 초대 코드 합류 뒤 · 연결 단계 뒤가 모두 여기서 다음 자리를 받음
 class OnboardingExitRoute {
   OnboardingExitRoute(this._ref);
@@ -27,7 +26,6 @@ class OnboardingExitRoute {
     return Routes.onboardingLinkDevice;
   }
 
-  /// 연결 단계를 지난 뒤 (연결함 · 나중에): 알림 안내 차례면 안내, 아니면 홈
-  Future<String> resolveAfterLinkStep() =>
-      _ref.read(pushPermissionPromptProvider).resolveRouteAfterOnboarding();
+  /// 연결 단계를 지난 뒤 (연결함 · 나중에): 보호자 홈
+  Future<String> resolveAfterLinkStep() async => Routes.guardian;
 }

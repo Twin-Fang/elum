@@ -1,7 +1,5 @@
 {
   "@@locale": "es",
-  "notificationOffNoticeTitle": "¿Activar notificaciones?",
-  "notificationOffNoticeBody": "Te avisamos al terminar una rutina",
   "notificationOffValue": "Desactivadas",
   "appTitle": "elum",
   "commonConfirm": "Aceptar",
@@ -1534,16 +1532,13 @@
   "abaIntroGuardianBody": "Tú eliges las rutinas y las recompensas, y elum acompaña a Elumi",
   "abaIntroStart": "Empezar",
   "guardianSettingsAboutElum": "Cómo está hecho elum",
-  "notificationIntroTitle": "🔔 Activa las notificaciones",
+  "notificationIntroTitle": "Activa las notificaciones",
   "notificationIntroBody": "Así te avisamos al momento y no te pierdes nada de Elumi",
   "notificationIntroRoutineDone": "Cuando Elumi termina una rutina",
   "notificationIntroCaregiverRoutine": "Cuando otro tutor envía una rutina",
   "notificationIntroWeeklyReport": "Cuando el informe semanal está listo",
   "notificationIntroCreditRefilledWeek": "Cuando se recargan los créditos de esta semana",
   "notificationIntroCreditRefilledMonth": "Cuando se recargan los créditos de este mes",
-  "notificationOffNoticeHighlightRoutineDone": "Cuando termina una rutina",
-  "notificationOffNoticeHighlightCaregiver": "Novedades de los otros tutores",
-  "notificationOffNoticeAction": "Activar notificaciones",
   "homeAutoSendUpsellTitle": "⏰ ¿Enviar rutinas automáticamente a la misma hora cada día?",
   "homeAutoSendUpsellBody": "Elige los días y la hora, y la enviaremos al dispositivo de Elumi en ese momento",
   "homeAutoSendUpsellAction": "Ver más",
@@ -1660,5 +1655,9 @@
   "guideTipRewardsBody": "Pequeñas, inmediatas y anunciadas",
   "guideTipDismissLabel": "Ocultar esta guía",
   "guideTipOpenFailed": "No se pudo abrir la guía",
-  "guideTipReadAction": "Leer"
+  "guideTipReadAction": "Leer",
+  "guardianSettingsGuides": "Guías para cuidadores",
+  "guardianHomeElumiTodayProgress": "Elumi hoy {done}/{total}",
+  "guardianHomeElumiTodayProgressSemantics": "Elumi terminó {done} de {total} rutinas hoy. Toca para ir al modo Elumi",
+  "guardianHomeDetailEmptyTitle": "Toca una rutina para ver aquí sus tarjetas"
 }

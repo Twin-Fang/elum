@@ -104,18 +104,6 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// 보호자 홈 알림 꺼짐 카드 제목 (앞 이모지 1개 포함, #1275)
-  ///
-  /// In ko, this message translates to:
-  /// **'🔔 알림을 켜 둘까요?'**
-  String get notificationOffNoticeTitle;
-
-  /// 보호자 홈 알림 꺼짐 카드 본문 (이룸이가 일과를 끝낸 알림을 받는다는 뜻)
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이가 일과를 끝내면 바로 알려 드려요'**
-  String get notificationOffNoticeBody;
-
   /// 설정의 알림 설정 줄 오른쪽 값 (기기 알림이 꺼졌을 때)
   ///
   /// In ko, this message translates to:
@@ -9350,7 +9338,7 @@ abstract class AppLocalizations {
   /// 알림 켜기 안내 화면 제목 (온보딩 끝, 이미 가입한 보호자는 업데이트 뒤 한 번) #1275
   ///
   /// In ko, this message translates to:
-  /// **'🔔 알림을 꼭 켜 주세요'**
+  /// **'알림을 꼭 켜 주세요'**
   String get notificationIntroTitle;
 
   /// 알림 켜기 안내 화면 제목 아래 한 줄 (왜 켜야 하는지)
@@ -9388,24 +9376,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이번 달 크레딧이 다시 채워졌을 때'**
   String get notificationIntroCreditRefilledMonth;
-
-  /// 보호자 홈 알림 꺼짐 카드: 받는 알림 알약 1 (짧게)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과를 마쳤을 때'**
-  String get notificationOffNoticeHighlightRoutineDone;
-
-  /// 보호자 홈 알림 꺼짐 카드: 받는 알림 알약 2 (공동 보호자가 보낸 일과·합류, 짧게)
-  ///
-  /// In ko, this message translates to:
-  /// **'함께 돌보는 분 소식'**
-  String get notificationOffNoticeHighlightCaregiver;
-
-  /// 보호자 홈 알림 꺼짐 카드 버튼 (권한 요청 또는 기기 설정)
-  ///
-  /// In ko, this message translates to:
-  /// **'알림 켜기'**
-  String get notificationOffNoticeAction;
 
   /// 보호자 홈 안내 카드 제목: 일과를 3개 이상 만든 Free 보호자에게 한 번 (반복 일과 Pro 미리 보기로 감, #1284)
   ///
@@ -10085,17 +10055,41 @@ abstract class AppLocalizations {
   /// **'이 가이드 닫기'**
   String get guideTipDismissLabel;
 
-  /// 가이드 팁을 눌렀는데 외부 브라우저를 못 열었을 때 실패 팝업 문장
+  /// 가이드 글 앱 안 읽기 화면에서 글을 불러오지 못했을 때 문장 (E-GUIDE-LINK)
   ///
   /// In ko, this message translates to:
   /// **'가이드를 열지 못했어요'**
   String get guideTipOpenFailed;
 
-  /// 가이드 팁 카드 행동 알약 (사이트 안내 글 열기)
+  /// 가이드 팁 카드 행동 알약 (앱 안 읽기 화면 열기)
   ///
   /// In ko, this message translates to:
   /// **'읽어 보기'**
   String get guideTipReadAction;
+
+  /// 설정 약관 및 정보 묶음의 가이드 목록 줄 · 가이드 목록 화면 제목 (#1455)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 가이드'**
+  String get guardianSettingsGuides;
+
+  /// 보호자 홈 상단 알약: 다 끝낸 일과 수 / 오늘 일과 수 (#1455)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 오늘 {done}/{total}'**
+  String guardianHomeElumiTodayProgress(int done, int total);
+
+  /// 홈 상단 진행 알약 낭독 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 오늘 일과 {total}개 중 {done}개를 마쳤어요. 누르면 이룸이 화면으로 가요'**
+  String guardianHomeElumiTodayProgressSemantics(int done, int total);
+
+  /// 가로 태블릿 홈 오른쪽 상세 칸: 고른 일과가 없을 때 (#1455)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 누르면 여기에서 카드를 볼 수 있어요'**
+  String get guardianHomeDetailEmptyTitle;
 }
 
 class _AppLocalizationsDelegate

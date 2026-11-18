@@ -14,7 +14,6 @@ import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/pro_badge.dart';
 import '../../../shared/models/character.dart';
 import '../../subscription/application/plan_status_providers.dart';
-import 'widgets/coach_help_button.dart';
 import 'widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
@@ -28,11 +27,7 @@ class GuardianHomeHeader extends ConsumerWidget {
     required this.character,
     required this.modeKey,
     this.part = GuardianHomeHeaderPart.all,
-    this.onCoachReplay,
   });
-
-  /// 코치마크 다시 보기 `?` (null 이면 버튼 없음)
-  final VoidCallback? onCoachReplay;
 
   /// 그릴 부분. 폰은 머리 줄 + 인사말, 태블릿은 인사말만
   final GuardianHomeHeaderPart part;
@@ -50,9 +45,6 @@ class GuardianHomeHeader extends ConsumerWidget {
 
   /// 종 그림 ↔ 캐릭터 배지 (Figma 265+24 → 313)
   static const _bellToBadgeGap = 24.0;
-
-  /// `?` ↔ 종 (종 누름 영역 여백이 있어 좁게)
-  static const _helpToBellGap = 16.0;
 
   /// 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
   static const _rowToGreeting = 11.0;
@@ -74,53 +66,41 @@ class GuardianHomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final colors = context.colors;
-    final isPro = ref.watch(planStatusProvider.select((status) => status.isPro));
+    final isPro = ref.watch(
+      planStatusProvider.select((status) => status.isPro),
+    );
     final planChip = PlanTierChip(tier: isPro ? PlanTier.pro : PlanTier.free);
 
     final topRowChildren = <Widget>[
       SizedBox(height: _top.h),
+      // 로고 > 요금제 칩 … 종 > 배지
       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                AppAssets.homeLogo,
-                width: _logoW.w,
-                height: _logoH.h,
-              ),
-              SizedBox(width: _logoToPlanChip.w),
-              planChip,
-            ],
+          SvgPicture.asset(
+            AppAssets.homeLogo,
+            width: _logoW.w,
+            height: _logoH.h,
           ),
-          // 종 아이콘은 배지 왼쪽. 코치마크 키는 배지에만 건다.
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onCoachReplay != null) ...[
-                CoachHelpButton(onTap: onCoachReplay!),
-                SizedBox(width: _helpToBellGap.w),
-              ],
-              const NotificationBellButton(),
-              // 종 그림 끝 ↔ 배지 24 (누르는 영역 여백만큼 뺌)
-              SizedBox(
-                width: (_bellToBadgeGap - NotificationBellButton.iconInset).w,
-              ),
-              // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
-              // (이룸이→보호자 방향만 PIN으로 막는다)
-              AppPressable(
-                onTap: () => context.go(Routes.child),
-                scaleDown: AppPressable.scaleIcon,
-                // 그림뿐이라 이름을 주지 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
-                semanticLabel: context.l10n.guardianHomeGoChildScreen,
-                child: KeyedSubtree(
-                  key: modeKey,
-                  child: CharacterBadge(character: character),
-                ),
-              ),
-            ],
+          SizedBox(width: _logoToPlanChip.w),
+          planChip,
+          const Spacer(),
+          const NotificationBellButton(),
+          // 종 그림 끝 ↔ 배지 24 (누르는 영역 여백만큼 뺌)
+          SizedBox(
+            width: (_bellToBadgeGap - NotificationBellButton.iconInset).w,
+          ),
+          // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
+          // (이룸이→보호자 방향만 PIN으로 막는다). 코치마크 키는 배지에만 건다
+          AppPressable(
+            onTap: () => context.go(Routes.child),
+            scaleDown: AppPressable.scaleIcon,
+            // 그림뿐이라 이름을 주지 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
+            semanticLabel: context.l10n.guardianHomeGoChildScreen,
+            child: KeyedSubtree(
+              key: modeKey,
+              child: CharacterBadge(character: character),
+            ),
           ),
         ],
       ),
@@ -144,10 +124,10 @@ class GuardianHomeHeader extends ConsumerWidget {
       GuardianHomeHeaderPart.all => [...topRowChildren, ...greetingChildren],
       // 머리 줄 없이 쓰면 인사말 위 간격(11)도 뺀다. 요금제 칩은 인사말 위
       GuardianHomeHeaderPart.greeting => [
-          planChip,
-          SizedBox(height: _rowToGreeting.h),
-          ...greetingChildren.skip(1),
-        ],
+        planChip,
+        SizedBox(height: _rowToGreeting.h),
+        ...greetingChildren.skip(1),
+      ],
     };
 
     return Padding(

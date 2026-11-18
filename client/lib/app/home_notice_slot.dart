@@ -11,7 +11,6 @@ import 'home_auto_send_upsell_card.dart';
 import 'home_notice_priority.dart';
 import 'home_suggestion_card.dart';
 import 'low_credit_notice_card.dart';
-import 'notification_off_notice_card.dart';
 
 /// 보호자 홈 안내 카드 자리 (한 번에 하나): 우선순위 [homeNoticeChoiceProvider] > 종류별 카드 > 나타남·접힘 전환
 ///
@@ -66,7 +65,6 @@ class _HomeNoticeSlotState extends ConsumerState<HomeNoticeSlot> with WidgetsBin
   }
 
   Widget _cardOf(HomeNoticeKind kind) => switch (kind) {
-    HomeNoticeKind.notificationOff => const NotificationOffNoticeCard(),
     HomeNoticeKind.lowCredit => const LowCreditNoticeCard(),
     HomeNoticeKind.suggestion => HomeSuggestionCard(onCreateRoutine: widget.onCreateRoutine),
     HomeNoticeKind.autoSendUpsell => const HomeAutoSendUpsellCard(),

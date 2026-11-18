@@ -9,12 +9,6 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '¿Activar notificaciones?';
-
-  @override
-  String get notificationOffNoticeBody => 'Te avisamos al terminar una rutina';
-
-  @override
   String get notificationOffValue => 'Desactivadas';
 
   @override
@@ -5825,7 +5819,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianSettingsAboutElum => 'Cómo está hecho elum';
 
   @override
-  String get notificationIntroTitle => '🔔 Activa las notificaciones';
+  String get notificationIntroTitle => 'Activa las notificaciones';
 
   @override
   String get notificationIntroBody =>
@@ -5849,17 +5843,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationIntroCreditRefilledMonth =>
       'Cuando se recargan los créditos de este mes';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone =>
-      'Cuando termina una rutina';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver =>
-      'Novedades de los otros tutores';
-
-  @override
-  String get notificationOffNoticeAction => 'Activar notificaciones';
 
   @override
   String get homeAutoSendUpsellTitle =>
@@ -6310,4 +6293,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guideTipReadAction => 'Leer';
+
+  @override
+  String get guardianSettingsGuides => 'Guías para cuidadores';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi hoy $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return 'Elumi terminó $done de $total rutinas hoy. Toca para ir al modo Elumi';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle =>
+      'Toca una rutina para ver aquí sus tarjetas';
 }

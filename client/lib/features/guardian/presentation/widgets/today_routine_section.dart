@@ -46,10 +46,25 @@ import '../../../../core/widgets/elum_danger_confirm_dialog.dart';
 /// - **펼치기가 없다.** 카드 목록은 수정 화면에서 본다. 여러 개가 펼쳐지면
 ///   화면이 끝없이 길어지고, 줄 높이가 달라져 순서를 바꿀 때 자리가 튄다.
 class TodayRoutineSection extends ConsumerStatefulWidget {
-  const TodayRoutineSection({super.key, this.coachKey});
+  const TodayRoutineSection({
+    super.key,
+    this.coachKey,
+    this.columnCount = 1,
+    this.selectedRoutineId,
+    this.onRoutineSelected,
+  });
 
   /// 코치마크가 가리킬 줄(밀 수 있는 첫 줄)에 달 키.
   final GlobalKey? coachKey;
+
+  /// 열 수: 1 폰·가로 태블릿 목록 칸, 2 세로 태블릿 (#1455). 2열은 길게 눌러 순서 바꾸기 없음
+  final int columnCount;
+
+  /// 옆 칸에 상세가 보이는 일과 (가로 태블릿 홈). 그 줄을 강조
+  final String? selectedRoutineId;
+
+  /// 줄을 누르면 시트 대신 이 콜백 (가로 태블릿 홈 오른쪽 상세). null 이면 시트
+  final ValueChanged<Routine>? onRoutineSelected;
 
   @override
   ConsumerState<TodayRoutineSection> createState() =>
@@ -275,6 +290,15 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
         .firstOrNull
         ?.id;
 
+    if (widget.columnCount >= 2) {
+      return _buildTwoColumnGrid(
+        routines: routines,
+        progress: progress,
+        isDemoSwipeOpen: demoOpen,
+        coachId: coachId,
+        shouldShowCreator: shouldShowCreator,
+      );
+    }
     return ReorderFingerFollow(
       builder: (context, follow) => _buildReorderList(
         routines: routines,
@@ -339,75 +363,172 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
           padding: EdgeInsets.only(
             bottom: index == routines.length - 1 ? 0 : routineTileGap.h,
           ),
-          // 줄마다 위에서부터 차례로 떠오름 (처음 그려질 때 한 번)
-          child: AppReveal(
+          child: _buildRoutineItem(
+            routine: routine,
             index: index,
-            child: Column(
-            children: [
-              ReorderableDelayedDragStartListener(
-                // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
-                key: routine.id == coachId ? widget.coachKey : null,
-                index: index,
-                child: RoutineSwipeActions(
-                  // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
-                  //. 만든 사람을 모르면 지금처럼 민다.
-                  //
-                  // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
-                  // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
-                  // `다 끝낸 일과예요`로 이유를 본다.
-                  enabled:
-                      routine.isEditableByMe &&
-                      !_isFinished(routine) &&
-                      !isBusy(routine.id),
-                  isOpen:
-                      _openId == routine.id ||
-                      (isDemoSwipeOpen && routine.id == coachId),
-                  onOpenChanged: (open) =>
-                      setState(() => _openId = open ? routine.id : null),
-                  onDelete: () => _delete(routine),
-                  onEdit: () => _edit(routine),
-                  child: RoutineSummaryTile(
-                    routine: routine,
-                    // 오늘 요일에 켜진 반복이 있는 일과만 시각 (원본 일과의 예약)
-                    scheduleTimeLabel: todayScheduleTimeLabel(
-                      context,
-                      ref.watch(routineScheduleOfProvider(routine.sourceRoutineId ?? routine.id)),
-                      DateTime.now(),
-                    ),
-                    progress: routineProgress(routine, progress),
-                    creatorName: shouldShowCreator
-                        ? routine.creatorDisplayName
-                        : null,
-                    highlighted:
-                        _openId == routine.id ||
-                        _draggingId == routine.id ||
-                        (isDemoSwipeOpen && routine.id == coachId),
-                    // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
-                    // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
-                    // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.
-                    //
-                    // 길게 눌러 끄는 길은 남겨 둔다 — 목록이 `ReorderableListView` 라
-                    // 아래 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
-                    // 지우는 중인 줄만 오른쪽 끝에 스피너를 둔다.
-                    dragHandle: isBusy(routine.id)
-                        ? ElumSpinner(size: 18.w, strokeWidth: 2.w)
-                        : null,
-                    // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
-                    onTap: isBusy(routine.id)
-                        ? null
-                        : () => _openId == routine.id
-                              ? setState(() => _openId = null)
-                              : _openSheet(routine),
-                  ),
-                ),
-              ),
-              // 끝낸 일과 카드 아래 이야기 공유 링크 (조건은 위젯이 판단)
-              if (_isFinished(routine)) TalkShareHintLink(routine: routine),
-            ],
-          ),
+            progress: progress,
+            isDemoSwipeOpen: isDemoSwipeOpen,
+            coachId: coachId,
+            shouldShowCreator: shouldShowCreator,
+            isReorderable: true,
           ),
         );
       },
     );
+  }
+
+  /// 일과 한 줄: 밀어서 편집·삭제 + 요약 줄 + (끝냈으면) 이야기 공유 링크. 처음 그려질 때 차례로 떠오름
+  Widget _buildRoutineItem({
+    required Routine routine,
+    required int index,
+    required ChildRoutineState progress,
+    required bool isDemoSwipeOpen,
+    required String? coachId,
+    required bool shouldShowCreator,
+    required bool isReorderable,
+  }) {
+    return AppReveal(
+      index: index,
+      child: Column(
+        children: [
+          _wrapReorderHandle(
+            isReorderable: isReorderable,
+            // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
+            key: routine.id == coachId ? widget.coachKey : null,
+            index: index,
+            child: RoutineSwipeActions(
+              // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
+              //. 만든 사람을 모르면 지금처럼 민다.
+              //
+              // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
+              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
+              // `다 끝낸 일과예요`로 이유를 본다.
+              enabled:
+                  routine.isEditableByMe &&
+                  !_isFinished(routine) &&
+                  !isBusy(routine.id),
+              isOpen:
+                  _openId == routine.id ||
+                  (isDemoSwipeOpen && routine.id == coachId),
+              onOpenChanged: (open) =>
+                  setState(() => _openId = open ? routine.id : null),
+              onDelete: () => _delete(routine),
+              onEdit: () => _edit(routine),
+              child: RoutineSummaryTile(
+                routine: routine,
+                // 오늘 요일에 켜진 반복이 있는 일과만 시각 (원본 일과의 예약)
+                scheduleTimeLabel: todayScheduleTimeLabel(
+                  context,
+                  ref.watch(
+                    routineScheduleOfProvider(
+                      routine.sourceRoutineId ?? routine.id,
+                    ),
+                  ),
+                  DateTime.now(),
+                ),
+                progress: routineProgress(routine, progress),
+                creatorName: shouldShowCreator
+                    ? routine.creatorDisplayName
+                    : null,
+                highlighted:
+                    routine.id == widget.selectedRoutineId ||
+                    _openId == routine.id ||
+                    _draggingId == routine.id ||
+                    (isDemoSwipeOpen && routine.id == coachId),
+                // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
+                // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
+                // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.
+                //
+                // 길게 눌러 끄는 길은 한 열 목록에만 남겨 둔다 — 목록이 `ReorderableListView` 라
+                // 위 `_wrapReorderHandle` 의 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
+                // 지우는 중인 줄만 오른쪽 끝에 스피너를 둔다.
+                dragHandle: isBusy(routine.id)
+                    ? ElumSpinner(size: 18.w, strokeWidth: 2.w)
+                    : null,
+                // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
+                onTap: isBusy(routine.id)
+                    ? null
+                    : () => _openId == routine.id
+                          ? setState(() => _openId = null)
+                          : _selectOrOpenSheet(routine),
+              ),
+            ),
+          ),
+          // 끝낸 일과 카드 아래 이야기 공유 링크 (조건은 위젯이 판단)
+          if (_isFinished(routine)) TalkShareHintLink(routine: routine),
+        ],
+      ),
+    );
+  }
+
+  /// 순서 바꾸기 손잡이(길게 누르기)는 한 열 목록에서만. 2열은 키만 단다
+  Widget _wrapReorderHandle({
+    required bool isReorderable,
+    required Key? key,
+    required int index,
+    required Widget child,
+  }) {
+    if (!isReorderable) return KeyedSubtree(key: key, child: child);
+    return ReorderableDelayedDragStartListener(
+      key: key,
+      index: index,
+      child: child,
+    );
+  }
+
+  /// 세로 태블릿 2열: 두 줄씩 한 행, 행 높이는 위 맞춤 (#1455)
+  Widget _buildTwoColumnGrid({
+    required List<Routine> routines,
+    required ChildRoutineState progress,
+    required bool isDemoSwipeOpen,
+    required String? coachId,
+    required bool shouldShowCreator,
+  }) {
+    Widget itemAt(int index) => _buildRoutineItem(
+      routine: routines[index],
+      index: index,
+      progress: progress,
+      isDemoSwipeOpen: isDemoSwipeOpen,
+      coachId: coachId,
+      shouldShowCreator: shouldShowCreator,
+      isReorderable: false,
+    );
+    final rowCount = (routines.length + 1) ~/ 2;
+    return Column(
+      children: [
+        for (var row = 0; row < rowCount; row++)
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: row == rowCount - 1 ? 0 : routineTileGap.h,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: itemAt(row * 2)),
+                SizedBox(width: _gridColumnGap.w),
+                Expanded(
+                  child: row * 2 + 1 < routines.length
+                      ? itemAt(row * 2 + 1)
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// 2열 사이 간격
+  static const _gridColumnGap = 12.0;
+
+  /// 옆 칸 상세가 있으면 고르기, 없으면 시트
+  void _selectOrOpenSheet(Routine routine) {
+    final onRoutineSelected = widget.onRoutineSelected;
+    if (onRoutineSelected == null) {
+      _openSheet(routine);
+      return;
+    }
+    setState(() => _openId = null);
+    onRoutineSelected(routine);
   }
 }
