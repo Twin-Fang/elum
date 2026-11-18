@@ -42,4 +42,13 @@
     <string name="widget_check_done">できた</string>
     <string name="widget_check_praise">よくできました！</string>
     <string name="widget_continue_in_app">アプリで続けよう</string>
+    <string name="widget_routine_list_name">今日の日課リスト</string>
+    <string name="widget_routine_list_description">今日の日課がひと目でわかります</string>
+    <string name="widget_routine_list_header">今日の日課</string>
+    <string name="widget_quick_create_name">すぐ作る</string>
+    <string name="widget_quick_create_description">すぐに新しい日課を作れます</string>
+    <string name="widget_quick_create_button">新しい日課</string>
+    <string name="widget_preview_routine_1">朝のしたく</string>
+    <string name="widget_preview_routine_2">学校へ行く</string>
+    <string name="widget_preview_routine_3">寝るしたく</string>
 </resources>

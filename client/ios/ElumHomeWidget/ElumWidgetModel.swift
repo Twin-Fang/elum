@@ -29,6 +29,16 @@ struct ElumWidgetUpcomingCard: Decodable {
   let imageFilePath: String?
 }
 
+/// 「오늘 일과 목록」 한 줄 (요약 JSON routines 항목)
+struct ElumWidgetRoutineRow: Decodable, Identifiable {
+  let id: String
+  let title: String
+  let doneCards: Int
+  let totalCards: Int
+
+  var isDone: Bool { totalCards > 0 && doneCards >= totalCards }
+}
+
 /// 오늘 요약 (Dart LockScreenSnapshot.toJson 중 위젯이 쓰는 키만, 없는 키는 기본값)
 struct ElumWidgetSnapshot: Decodable {
   let mode: String
@@ -40,9 +50,11 @@ struct ElumWidgetSnapshot: Decodable {
   let elumiName: String?
   let streakDays: Int
   let starCount: Int
+  // 「오늘 일과 목록」 줄 (옛 요약이면 빈 목록)
+  let routines: [ElumWidgetRoutineRow]
 
   enum CodingKeys: String, CodingKey {
-    case mode, dateKey, doneCount, totalCount, nextRoutineTitle, elumiCard, elumiName, streakDays, starCount
+    case mode, dateKey, doneCount, totalCount, nextRoutineTitle, elumiCard, elumiName, streakDays, starCount, routines
   }
 
   init(from decoder: Decoder) throws {
@@ -56,6 +68,7 @@ struct ElumWidgetSnapshot: Decodable {
     elumiName = try? container.decodeIfPresent(String.self, forKey: .elumiName)
     streakDays = (try? container.decode(Int.self, forKey: .streakDays)) ?? 0
     starCount = (try? container.decode(Int.self, forKey: .starCount)) ?? 0
+    routines = (try? container.decodeIfPresent([ElumWidgetRoutineRow].self, forKey: .routines)) ?? []
   }
 
   var isElumiDevice: Bool { mode == "elumi" }
@@ -160,6 +173,9 @@ enum ElumWidgetRoute {
   static func url(routineId: String? = nil) -> URL {
     url(route: routineId.map { "routine:\($0)" } ?? "home")
   }
+
+  /// 「빠른 만들기」: 보호자 기기면 일과 만들기 시작
+  static func createURL() -> URL { url(route: "create") }
 
   /// 마지막 카드 "다 했어요": 앱이 그 카드를 체크하고 칭찬 흐름을 이어 감 (#1465 2단계)
   static func checkURL(routineId: String, cardId: String) -> URL {

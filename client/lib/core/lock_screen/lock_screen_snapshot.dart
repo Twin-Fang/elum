@@ -17,6 +17,36 @@ enum LockScreenMode {
   );
 }
 
+/// 위젯 「오늘 일과 목록」 한 줄: 일과 id · 제목 · 끝낸 카드 수 / 전체 카드 수
+@immutable
+class LockScreenRoutineRow {
+  const LockScreenRoutineRow({
+    required this.id,
+    required this.title,
+    required this.doneCards,
+    required this.totalCards,
+  });
+
+  final String id;
+  final String title;
+  final int doneCards;
+  final int totalCards;
+
+  Map<String, Object?> toJson() => {'id': id, 'title': title, 'doneCards': doneCards, 'totalCards': totalCards};
+
+  static LockScreenRoutineRow? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final id = json['id'];
+    if (id is! String || id.isEmpty) return null;
+    return LockScreenRoutineRow(
+      id: id,
+      title: _stringOrEmpty(json['title']),
+      doneCards: _intOrZero(json['doneCards']),
+      totalCards: _intOrZero(json['totalCards']),
+    );
+  }
+}
+
 /// 위젯이 체크한 뒤 앱 없이 보여 줄 다음 카드 한 장 (#1465 2단계)
 @immutable
 class LockScreenUpcomingCard {
@@ -179,6 +209,7 @@ class LockScreenSnapshot {
     this.elumiName,
     this.streakDays = 0,
     this.starCount = 0,
+    this.routines = const [],
   });
 
   final LockScreenMode mode;
@@ -199,6 +230,12 @@ class LockScreenSnapshot {
   /// 이어서 일과를 마친 일수 · 모은 별 수 (위젯 「별과 연속」, 모르면 0)
   final int streakDays;
   final int starCount;
+
+  /// 위젯 「오늘 일과 목록」 줄 (오늘 순서대로 최대 [maximumRoutineRows]개)
+  final List<LockScreenRoutineRow> routines;
+
+  // 목록 위젯 대 크기가 보여 주는 줄 수 (설계 2026-11-18-lumi-widgets-design.md)
+  static const maximumRoutineRows = 4;
 
   bool get isAllDone => totalCount > 0 && doneCount >= totalCount;
 
@@ -235,6 +272,7 @@ class LockScreenSnapshot {
     elumiName: elumiName ?? this.elumiName,
     streakDays: streakDays ?? this.streakDays,
     starCount: starCount ?? this.starCount,
+    routines: routines,
   );
 
   String toJsonString() => jsonEncode({
@@ -254,6 +292,7 @@ class LockScreenSnapshot {
     'elumiName': elumiName,
     'streakDays': streakDays,
     'starCount': starCount,
+    'routines': [for (final routine in routines) routine.toJson()],
   });
 
   /// 깨졌거나 비었으면 null (잠금화면은 "앱을 열어 확인" 으로 대신함)
@@ -275,6 +314,10 @@ class LockScreenSnapshot {
         elumiName: _stringOrNull(decoded['elumiName']),
         streakDays: _intOrZero(decoded['streakDays']),
         starCount: _intOrZero(decoded['starCount']),
+        routines: [
+          if (decoded['routines'] case final List rows)
+            for (final row in rows) ?LockScreenRoutineRow.fromJson(row),
+        ],
       );
     } catch (_) {
       return null;

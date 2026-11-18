@@ -24,6 +24,8 @@ import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
 import 'features/child/application/child_routine_notifier.dart';
+import 'features/credit/application/credit_start_gate.dart';
+import 'features/guardian/presentation/routine_start_entry.dart';
 import 'features/lock_screen/application/lock_screen_route_opener.dart';
 import 'features/lock_screen/application/widget_check_processor.dart';
 import 'core/lock_screen/home_widget_bridge.dart';
@@ -183,6 +185,14 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         : null;
   }
 
+  /// 위젯 「빠른 만들기」: 크레딧 확인 > 일과 만들기 시작 (보호자 화면 안일 때만, #1465)
+  Future<void> _startRoutineCreationFromWidget() async {
+    final blocked = await creditBlocksRoutineStart(ref);
+    final context = _contextIfInGuardianArea();
+    if (context == null || !context.mounted) return;
+    await continueRoutineStart(context, ref, blocked);
+  }
+
   /// 이룸이 기기 푸시로 일과를 열어도 되는 때의 루트 네비게이터 컨텍스트 (이룸이 화면 안일 때만, 아니면 null)
   BuildContext? _contextIfInElumiArea() {
     final path = _router.routerDelegate.currentConfiguration.uri.path;
@@ -223,6 +233,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         loadTodayRoutines: () => ref.read(todayRoutinesProvider.future),
         markCardChecked: (routine, card) =>
             ref.read(childRoutineProvider.notifier).markCheckedFromWidget(routine: routine, card: card),
+        startRoutineCreation: _startRoutineCreationFromWidget,
       );
       // 위젯에서 체크해 둔 카드 > 진행 기록 (이룸이 기기, #1465 2단계)
       _widgetCheckProcessor = WidgetCheckProcessor(

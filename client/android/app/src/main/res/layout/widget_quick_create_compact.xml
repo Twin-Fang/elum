@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 빠른 만들기 2x1: 새 일과 루미 왼쪽 | "새 일과 만들기" 민트 알약 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_background"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/widget_panel_padding"
+    android:paddingTop="@dimen/widget_gap"
+    android:paddingEnd="@dimen/widget_panel_padding"
+    android:paddingBottom="@dimen/widget_gap">
+
+    <ImageView
+        android:layout_width="@dimen/widget_lumi_streak_compact"
+        android:layout_height="@dimen/widget_lumi_streak_compact"
+        android:contentDescription="@string/widget_lumi_description"
+        android:scaleType="fitCenter"
+        android:src="@drawable/lumi_new_routine" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/widget_gap"
+        android:background="@drawable/widget_check_button_background"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingStart="@dimen/widget_chip_padding_horizontal"
+        android:paddingTop="@dimen/widget_check_button_padding_vertical"
+        android:paddingEnd="@dimen/widget_chip_padding_horizontal"
+        android:paddingBottom="@dimen/widget_check_button_padding_vertical"
+        android:text="@string/widget_quick_create_button"
+        android:textColor="@color/widget_check_button_text"
+        android:textSize="@dimen/widget_text_row"
+        android:textStyle="bold" />
+</LinearLayout>
