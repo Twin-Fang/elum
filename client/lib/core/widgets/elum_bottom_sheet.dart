@@ -89,15 +89,26 @@ Future<T?> _showElumSidePanel<T>({
   );
 }
 
-/// 시트 내용이 지금 어떤 모양으로 떠 있는지 (바닥 시트 / 옆 패널)
+/// 시트 내용이 지금 어떤 모양으로 떠 있는지 (바닥 시트 / 옆 패널 / 화면 안 칸)
 class ElumSheetPresentation extends InheritedWidget {
   const ElumSheetPresentation({
     super.key,
     required this.isSidePanel,
+    this.isInlinePane = false,
     required super.child,
   });
 
   final bool isSidePanel;
+
+  /// 띄우지 않고 화면 칸 안에 그대로 둠 (가로 태블릿 홈 오른쪽 상세 #1455): 높이 채움, 네 모서리 둥긂, 손잡이 없음
+  final bool isInlinePane;
+
+  /// 화면 칸 안이면 true
+  static bool isInlinePaneOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<ElumSheetPresentation>()
+          ?.isInlinePane ??
+      false;
 
   /// 옆 패널 안이면 true. 바닥 시트·그 밖은 false
   static bool isSidePanelOf(BuildContext context) =>
@@ -108,7 +119,8 @@ class ElumSheetPresentation extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ElumSheetPresentation oldWidget) =>
-      oldWidget.isSidePanel != isSidePanel;
+      oldWidget.isSidePanel != isSidePanel ||
+      oldWidget.isInlinePane != isInlinePane;
 }
 
 /// 시트 맨 위 손잡이. 40x4 둥근 막대.
@@ -119,8 +131,9 @@ class ElumSheetHandle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 옆 패널은 끌어내려 닫지 않는다 — 자리만 두고 그리지 않는다 (배치가 흔들리지 않게)
-    if (ElumSheetPresentation.isSidePanelOf(context)) {
+    // 옆 패널·화면 칸은 끌어내려 닫지 않는다 — 자리만 두고 그리지 않는다 (배치가 흔들리지 않게)
+    if (ElumSheetPresentation.isSidePanelOf(context) ||
+        ElumSheetPresentation.isInlinePaneOf(context)) {
       return SizedBox(width: 40.w, height: 4.h);
     }
     return Container(
@@ -177,17 +190,21 @@ class ElumSheetSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 옆 패널: 왼쪽 두 모서리만 둥글고, 높이 전체를 채우며, 손잡이(끌어내리기 신호)는 없다
+    // 화면 칸: 네 모서리 둥글고 높이를 채움, 손잡이 없음
     final isSidePanel = ElumSheetPresentation.isSidePanelOf(context);
+    final isInlinePane = ElumSheetPresentation.isInlinePaneOf(context);
     final decoration = BoxDecoration(
       color: context.colors.background,
-      borderRadius: isSidePanel
+      borderRadius: isInlinePane
+          ? BorderRadius.circular(radius.r)
+          : isSidePanel
           ? BorderRadius.horizontal(left: Radius.circular(radius.r))
           : BorderRadius.vertical(top: Radius.circular(radius.r)),
     );
-    final height = isSidePanel ? double.infinity : this.height;
+    final height = isSidePanel || isInlinePane ? double.infinity : this.height;
 
     // passthrough 로 부모 제약(고정 높이 등)을 자식에 그대로 전한다
-    final body = showHandle && !isSidePanel
+    final body = showHandle && !isSidePanel && !isInlinePane
         ? Stack(
             fit: StackFit.passthrough,
             children: [

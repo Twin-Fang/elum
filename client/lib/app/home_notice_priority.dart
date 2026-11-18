@@ -5,14 +5,13 @@ import '../core/storage/local_storage.dart';
 import '../features/credit/application/low_credit_notice.dart';
 import '../features/guardian/domain/home_suggestion.dart';
 import '../features/member/application/plan_access.dart';
-import '../features/notification/application/device_notification_permission_controller.dart';
-import '../features/notification/application/home_notification_notice_provider.dart';
 import 'home_auto_send_upsell.dart';
 import 'home_notice_day.dart';
 import 'home_suggestion_provider.dart';
 
-/// 보호자 홈 안내 카드 종류 4개: 선언 순서가 우선순위 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내)
-enum HomeNoticeKind { notificationOff, lowCredit, suggestion, autoSendUpsell }
+/// 보호자 홈 안내 카드 종류 3개: 선언 순서가 우선순위 (크레딧 부족 > 권유 > 자동 보내기 안내)
+/// 알림 켜기는 카드가 아니라 홈 첫 진입 시트·창 (#1455)
+enum HomeNoticeKind { lowCredit, suggestion, autoSendUpsell }
 
 /// 홈에 보일 안내 카드 하나: 종류 + 권유 카드인가 (하루 1개 기록 대상)
 typedef HomeNoticeChoice = ({HomeNoticeKind kind, bool isUpsell});
@@ -73,8 +72,6 @@ final homeNoticeChoiceProvider = Provider.autoDispose<HomeNoticeChoice?>((ref) {
 
 /// 종류별 보일 조건 (닫기 기록 포함)
 bool _isNoticeVisible(Ref ref, HomeNoticeKind kind) => switch (kind) {
-  HomeNoticeKind.notificationOff =>
-    ref.watch(deviceNotificationPermissionControllerProvider) && !ref.watch(homeNotificationNoticeDismissalProvider),
   HomeNoticeKind.lowCredit => ref.watch(lowCreditNoticeProvider) != null,
   HomeNoticeKind.suggestion => ref.watch(homeSuggestionProvider) != null,
   HomeNoticeKind.autoSendUpsell => ref.watch(homeAutoSendUpsellProvider),
@@ -82,7 +79,6 @@ bool _isNoticeVisible(Ref ref, HomeNoticeKind kind) => switch (kind) {
 
 /// 권유 카드인가: 크레딧 부족(광고 보상) · 자동 보내기 안내(Pro) · 반복을 못 쓰는 계정의 자동 보내기 제안(요금제 화면)
 bool _isNoticeUpsell(Ref ref, HomeNoticeKind kind) => switch (kind) {
-  HomeNoticeKind.notificationOff => false,
   HomeNoticeKind.lowCredit || HomeNoticeKind.autoSendUpsell => true,
   HomeNoticeKind.suggestion =>
     ref.watch(homeSuggestionProvider)?.kind == HomeSuggestionKind.autoSend &&

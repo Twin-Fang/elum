@@ -1,7 +1,5 @@
 {
   "@@locale": "zh",
-  "notificationOffNoticeTitle": "要开启通知吗？",
-  "notificationOffNoticeBody": "完成日程后会通知你",
   "notificationOffValue": "已关闭",
   "appTitle": "elum",
   "commonConfirm": "确定",
@@ -1533,16 +1531,13 @@
   "abaIntroGuardianBody": "日常和奖励由监护人来定，elum在身边帮忙",
   "abaIntroStart": "开始",
   "guardianSettingsAboutElum": "elum是这样设计的",
-  "notificationIntroTitle": "🔔 请一定要开启通知",
+  "notificationIntroTitle": "请一定要开启通知",
   "notificationIntroBody": "开启后，Elumi的消息会马上通知你，不会错过",
   "notificationIntroRoutineDone": "Elumi完成日常时",
   "notificationIntroCaregiverRoutine": "一起照顾的人发来日常时",
   "notificationIntroWeeklyReport": "每周报告出来时",
   "notificationIntroCreditRefilledWeek": "本周积分重新补满时",
   "notificationIntroCreditRefilledMonth": "本月积分重新补满时",
-  "notificationOffNoticeHighlightRoutineDone": "完成日常时",
-  "notificationOffNoticeHighlightCaregiver": "一起照顾的人的消息",
-  "notificationOffNoticeAction": "开启通知",
   "homeAutoSendUpsellTitle": "⏰ 要每天在同一时间自动发送吗？",
   "homeAutoSendUpsellBody": "设好星期和时间，到时就会发送到Elumi的设备",
   "homeAutoSendUpsellAction": "查看详情",
@@ -1659,5 +1654,9 @@
   "guideTipRewardsBody": "小一点，马上给，提前说",
   "guideTipDismissLabel": "关闭这条指南",
   "guideTipOpenFailed": "无法打开指南",
-  "guideTipReadAction": "去看看"
+  "guideTipReadAction": "去看看",
+  "guardianSettingsGuides": "看护者指南",
+  "guardianHomeElumiTodayProgress": "Elumi 今天 {done}/{total}",
+  "guardianHomeElumiTodayProgressSemantics": "今天完成了{total}个日程中的{done}个。点击去Elumi模式",
+  "guardianHomeDetailEmptyTitle": "点击日程即可在这里查看卡片"
 }

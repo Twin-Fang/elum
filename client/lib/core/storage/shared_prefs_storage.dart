@@ -60,10 +60,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
   // 알림 켜기 안내 마지막 표시 시각 (ISO-8601)
   static const _kPushPermissionNudgedAt = 'push.permissionNudgedAt';
-  // 알림 켜기 안내 화면(온보딩 끝·업데이트 뒤 한 번)을 이 기기에서 봤는가
+  // 알림 켜기 안내(홈 첫 진입·업데이트 뒤 한 번)를 이 기기에서 봤는가
   static const _kPushPermissionIntroSeen = 'push.permissionIntroSeen';
-  // 보호자 홈 알림 꺼짐 띠를 닫은 시각 (ISO-8601, 7일 숨김)
-  static const _kHomeNotificationNoticeDismissedAt = 'push.homeNoticeDismissedAt';
   // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
   static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
@@ -150,7 +148,6 @@ class SharedPrefsStorage implements LocalStorage {
     _kHasAskedPushPermission,
     _kPushPermissionNudgedAt,
     _kPushPermissionIntroSeen,
-    _kHomeNotificationNoticeDismissedAt,
     _kUpdateSuggestionShown,
     _kHomeCoachSeen,
     _kLinkDeviceSuggestionDismissed,
@@ -508,19 +505,6 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setCelebratedStreakMilestoneKeys(Set<String> celebratedKeys) async {
     AppLogger.storageWrite(_kCelebratedStreakMilestones, celebratedKeys.toList());
     await _prefs.setStringList(_kCelebratedStreakMilestones, celebratedKeys.toList());
-  }
-
-  @override
-  DateTime? get homeNotificationNoticeDismissedAt {
-    final raw = _prefs.getString(_kHomeNotificationNoticeDismissedAt);
-    return raw == null ? null : DateTime.tryParse(raw);
-  }
-
-  @override
-  Future<void> setHomeNotificationNoticeDismissedAt(DateTime at) async {
-    final raw = at.toIso8601String();
-    AppLogger.storageWrite(_kHomeNotificationNoticeDismissedAt, raw);
-    await _prefs.setString(_kHomeNotificationNoticeDismissedAt, raw);
   }
 
   @override

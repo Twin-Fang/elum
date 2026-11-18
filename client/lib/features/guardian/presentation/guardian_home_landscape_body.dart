@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/layout/tablet_two_pane.dart';
 import '../../../core/theme/theme_context_ext.dart';
 
-/// 보호자 홈 가로 태블릿 본문: 전폭 머리 줄(로고 · 이룸이 화면 가기 · 설정) > 왼쪽(인사말·새 일과 만들기·루미 장면) · 오른쪽(목록) (#789)
+/// 보호자 홈 가로 태블릿 본문: 왼쪽(인사말 · 새 일과 만들기 · 오늘 · 지난 일과, 스크롤) | 오른쪽(고른 일과 상세) (#1455)
 ///
-/// 왼쪽은 목록 칸 폭 토큰(`masterPaneWidth`) 고정, 오른쪽이 남는 폭. 코치마크가 목록을 잠글 때는 오른쪽 칸만 [listPhysics] 로 잠근다.
+/// 로고·이룸이 화면 입구는 옆 메뉴 (#798). 코치마크가 목록을 잠글 때는 왼쪽 칸만 [listPhysics] 로 잠근다.
 class GuardianHomeLandscapeBody extends StatelessWidget {
   const GuardianHomeLandscapeBody({
     super.key,
     required this.greeting,
     required this.createButton,
     required this.sections,
+    required this.detailPane,
     required this.listController,
     required this.listPhysics,
     required this.listScrollWrapper,
@@ -23,59 +23,53 @@ class GuardianHomeLandscapeBody extends StatelessWidget {
   final Widget createButton;
   final Widget sections;
 
-  /// 오른쪽 칸 스크롤 컨트롤러 (코치마크가 맨 위로 되돌릴 때 쓴다)
+  /// 오른쪽 칸 (고른 일과 상세)
+  final Widget detailPane;
+
+  /// 왼쪽 칸 스크롤 컨트롤러 (코치마크가 맨 위로 되돌릴 때 쓴다)
   final ScrollController listController;
   final ScrollPhysics? listPhysics;
 
-  /// 오른쪽 목록 스크롤을 감싸는 것 (당겨서 새로고침 — 동그라미가 목록 칸 위에 나옴)
+  /// 왼쪽 목록 스크롤을 감싸는 것 (당겨서 새로고침)
   final Widget Function(Widget listScroll) listScrollWrapper;
 
-  /// 인사말 > 버튼 간격 (393 기준)
+  /// 칸 위 여백 · 인사말 > 버튼 · 버튼 > 목록 (393 기준)
+  static const _paneTop = 24.0;
   static const _greetingToButton = 28.0;
+  static const _buttonToSections = 32.0;
+
+  /// 왼쪽 목록 : 오른쪽 상세 폭 비율
+  static const _listFlex = 5;
+  static const _detailFlex = 6;
 
   @override
   Widget build(BuildContext context) {
-    final margin = context.layout.pageMarginFor(context.sizeClass).w;
     final space = context.space;
-
-    // 로고·이룸이 화면 입구는 옆 메뉴에 있다 (#798) — 두 칸이 바로 시작한다
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: TabletTwoPane(
-            leadingWidth: context.layout.masterPaneWidth,
-            leadingPane: Padding(
-              padding: EdgeInsets.only(bottom: margin / 2),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 24.h),
-                  Transform.translate(
-                    offset: Offset(-space.screenH.w, 0),
-                    child: greeting,
-                  ),
-                  SizedBox(height: _greetingToButton.h),
-                  Transform.translate(
-                    offset: Offset(-space.screenH.w, 0),
-                    child: createButton,
-                  ),
-                  // 버튼 아래는 비워 둔다: 보호자 커뮤니티(#786)가 열리면 이 자리에 붙인다
-                  const Spacer(),
-                ],
-              ),
-            ),
-            trailingPane: listScrollWrapper(
-              SingleChildScrollView(
-                controller: listController,
-                physics: listPhysics,
-                padding: EdgeInsets.only(top: 24.h, bottom: space.xl),
-                child: sections,
-              ),
-            ),
+    return TabletTwoPane(
+      leadingFlex: _listFlex,
+      trailingFlex: _detailFlex,
+      leadingPane: listScrollWrapper(
+        SingleChildScrollView(
+          controller: listController,
+          physics: listPhysics,
+          padding: EdgeInsets.only(top: _paneTop.h, bottom: space.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 인사말은 머리말 안쪽 여백만큼 당겨 버튼·목록과 왼쪽 끝을 맞춤
+              Transform.translate(offset: Offset(-space.screenH.w, 0), child: greeting),
+              SizedBox(height: _greetingToButton.h),
+              createButton,
+              SizedBox(height: _buttonToSections.h),
+              sections,
+            ],
           ),
         ),
-      ],
+      ),
+      trailingPane: Padding(
+        padding: EdgeInsets.only(top: _paneTop.h, bottom: _paneTop.h),
+        child: detailPane,
+      ),
     );
   }
 }

@@ -29,6 +29,9 @@ import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
+import '../../features/guardian/domain/guide_tip.dart';
+import '../../features/guardian/presentation/guide/guide_article_screen.dart';
+import '../../features/guardian/presentation/guide/guide_list_screen.dart';
 
 /// 보호자 설정·내정보 하위 화면 (하단 바를 덮음): 결제 확인 암호, 약관, 주간 리포트·계획, 설계 원리 소개, 라이선스, 이야기 차단·내 글,
 /// 설정, 연결 암호, 임시저장, 그림 방식, AI 메모리, 의견, 알림·알림 설정, 크레딧 내역, 보호자·초대·이룸이 전환·정보, 연결 상태, 암호 바꾸기
@@ -70,6 +73,20 @@ List<RouteBase> guardianSettingsRoutes() => [
   GoRoute(
     path: Routes.guardianAboutElum,
     pageBuilder: (context, state) => slidePage(state, const AbaIntroScreen(isFromSettings: true)),
+  ),
+  // 보호자 가이드 목록 > 글 앱 안 읽기 (모르는 slug 는 첫 가이드, #1455)
+  GoRoute(
+    path: Routes.guardianGuides,
+    pageBuilder: (context, state) =>
+        slidePage(state, const GuideListScreen(), layoutKind: ScreenLayoutKind.contentColumn),
+  ),
+  GoRoute(
+    path: Routes.guardianGuideArticle,
+    pageBuilder: (context, state) {
+      final slug = state.uri.queryParameters[Routes.guideSlugQuery];
+      final tip = GuideTip.values.where((candidate) => candidate.slug == slug).firstOrNull ?? GuideTip.values.first;
+      return slidePage(state, GuideArticleScreen(tip: tip), layoutKind: ScreenLayoutKind.contentColumn);
+    },
   ),
   GoRoute(
     path: Routes.guardianLicenses,

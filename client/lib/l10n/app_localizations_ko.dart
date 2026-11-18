@@ -9,12 +9,6 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '🔔 알림을 켜 둘까요?';
-
-  @override
-  String get notificationOffNoticeBody => '이룸이가 일과를 끝내면 바로 알려 드려요';
-
-  @override
   String get notificationOffValue => '꺼짐';
 
   @override
@@ -5431,7 +5425,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guardianSettingsAboutElum => '이룸은 이렇게 만들었어요';
 
   @override
-  String get notificationIntroTitle => '🔔 알림을 꼭 켜 주세요';
+  String get notificationIntroTitle => '알림을 꼭 켜 주세요';
 
   @override
   String get notificationIntroBody => '켜 두면 이룸이 소식을 놓치지 않고 바로 알려 드려요';
@@ -5450,15 +5444,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationIntroCreditRefilledMonth => '이번 달 크레딧이 다시 채워졌을 때';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone => '일과를 마쳤을 때';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver => '함께 돌보는 분 소식';
-
-  @override
-  String get notificationOffNoticeAction => '알림 켜기';
 
   @override
   String get homeAutoSendUpsellTitle => '⏰ 매일 같은 시각에 자동으로 보내 볼까요?';
@@ -5874,4 +5859,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '읽어 보기';
+
+  @override
+  String get guardianSettingsGuides => '보호자 가이드';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return '이룸이 오늘 $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return '이룸이가 오늘 일과 $total개 중 $done개를 마쳤어요. 누르면 이룸이 화면으로 가요';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle => '일과를 누르면 여기에서 카드를 볼 수 있어요';
 }

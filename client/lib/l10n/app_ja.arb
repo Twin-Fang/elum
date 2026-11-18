@@ -1,7 +1,5 @@
 {
   "@@locale": "ja",
-  "notificationOffNoticeTitle": "通知をオンにしますか？",
-  "notificationOffNoticeBody": "ルーティンが終わったらお知らせします",
   "notificationOffValue": "オフ",
   "appTitle": "elum",
   "commonConfirm": "OK",
@@ -1533,16 +1531,13 @@
   "abaIntroGuardianBody": "日課とごほうびは保護者が決め、elumが手伝います",
   "abaIntroStart": "はじめる",
   "guardianSettingsAboutElum": "elumはこうして作りました",
-  "notificationIntroTitle": "🔔 通知をぜひオンにしてください",
+  "notificationIntroTitle": "通知をぜひオンにしてください",
   "notificationIntroBody": "オンにしておくと、Elumiの知らせを逃さずすぐにお知らせします",
   "notificationIntroRoutineDone": "Elumiが日課を終えたとき",
   "notificationIntroCaregiverRoutine": "一緒に見守る人が日課を送ったとき",
   "notificationIntroWeeklyReport": "週間レポートができたとき",
   "notificationIntroCreditRefilledWeek": "今週のクレジットが補充されたとき",
   "notificationIntroCreditRefilledMonth": "今月のクレジットが補充されたとき",
-  "notificationOffNoticeHighlightRoutineDone": "日課を終えたとき",
-  "notificationOffNoticeHighlightCaregiver": "一緒に見守る人からの知らせ",
-  "notificationOffNoticeAction": "通知をオンにする",
   "homeAutoSendUpsellTitle": "⏰ 毎日同じ時刻に自動で送ってみませんか？",
   "homeAutoSendUpsellBody": "曜日と時刻を決めておくと、その時にElumiの端末へ送ります",
   "homeAutoSendUpsellAction": "くわしく見る",
@@ -1659,5 +1654,9 @@
   "guideTipRewardsBody": "小さく、すぐに、前もって決めます",
   "guideTipDismissLabel": "このガイドを閉じる",
   "guideTipOpenFailed": "ガイドを開けませんでした",
-  "guideTipReadAction": "読んでみる"
+  "guideTipReadAction": "読んでみる",
+  "guardianSettingsGuides": "保護者ガイド",
+  "guardianHomeElumiTodayProgress": "Elumi 今日 {done}/{total}",
+  "guardianHomeElumiTodayProgressSemantics": "今日の日課{total}件のうち{done}件を終えました。タップでElumi画面へ",
+  "guardianHomeDetailEmptyTitle": "日課をタップするとここにカードが表示されます"
 }

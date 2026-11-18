@@ -9,12 +9,6 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get notificationOffNoticeTitle => '要开启通知吗？';
-
-  @override
-  String get notificationOffNoticeBody => '完成日程后会通知你';
-
-  @override
   String get notificationOffValue => '已关闭';
 
   @override
@@ -5376,7 +5370,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSettingsAboutElum => 'elum是这样设计的';
 
   @override
-  String get notificationIntroTitle => '🔔 请一定要开启通知';
+  String get notificationIntroTitle => '请一定要开启通知';
 
   @override
   String get notificationIntroBody => '开启后，Elumi的消息会马上通知你，不会错过';
@@ -5395,15 +5389,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationIntroCreditRefilledMonth => '本月积分重新补满时';
-
-  @override
-  String get notificationOffNoticeHighlightRoutineDone => '完成日常时';
-
-  @override
-  String get notificationOffNoticeHighlightCaregiver => '一起照顾的人的消息';
-
-  @override
-  String get notificationOffNoticeAction => '开启通知';
 
   @override
   String get homeAutoSendUpsellTitle => '⏰ 要每天在同一时间自动发送吗？';
@@ -5815,4 +5800,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guideTipReadAction => '去看看';
+
+  @override
+  String get guardianSettingsGuides => '看护者指南';
+
+  @override
+  String guardianHomeElumiTodayProgress(int done, int total) {
+    return 'Elumi 今天 $done/$total';
+  }
+
+  @override
+  String guardianHomeElumiTodayProgressSemantics(int done, int total) {
+    return '今天完成了$total个日程中的$done个。点击去Elumi模式';
+  }
+
+  @override
+  String get guardianHomeDetailEmptyTitle => '点击日程即可在这里查看卡片';
 }

@@ -326,10 +326,14 @@ class RoutineSectionTitle extends StatelessWidget {
     super.key,
     required this.iconAsset,
     required this.label,
+    this.trailing,
   });
 
   final String iconAsset;
   final String label;
+
+  /// 제목 줄 오른쪽 끝에 붙는 것 (오늘 일과의 이룸이 진행 칩 #1455)
+  final Widget? trailing;
 
   static const _iconSize = 18.0;
   static const _gap = 8.0;
@@ -354,6 +358,10 @@ class RoutineSectionTitle extends StatelessWidget {
               color: colors.routineTileLabel,
             ),
           ),
+          if (trailing case final trailingWidget?) ...[
+            const Spacer(),
+            trailingWidget,
+          ],
         ],
       ),
     );

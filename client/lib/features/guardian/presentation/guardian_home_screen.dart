@@ -24,7 +24,11 @@ import '../application/example_routine_seeder.dart';
 import '../application/home_routines.dart';
 import '../application/store_review_prompter.dart';
 import '../application/home_coach_notifier.dart';
+import '../../../core/storage/local_storage.dart';
+import '../../notification/application/push_permission_prompt.dart';
+import '../../../app/notification_intro_prompt.dart';
 import 'guardian_home_header.dart';
+import 'guardian_home_detail_pane.dart';
 import 'guardian_home_landscape_body.dart';
 import 'guardian_home_sections.dart';
 import 'routine_start_entry.dart';
@@ -58,8 +62,14 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
   /// 홈 목록 스크롤. 코치마크가 켜질 때 맨 위로 되돌리고, 떠 있는 동안 잠그는 데 쓴다.
   final _scroll = ScrollController();
 
+  /// 가로 태블릿 오른쪽 상세에 보일 일과 (null 이면 오늘 첫 일과, #1455)
+  String? _selectedRoutineId;
+
   /// Figma 실측 — 카드·버튼은 화면 끝에서 16, 글은 24
   static const _listInset = 16.0;
+
+  /// 세로 태블릿 오늘 일과 열 수
+  static const _tabletPortraitColumnCount = 2;
 
   /// 머리말 묶음 ↔ 만들기 버튼 32 · 버튼 ↔ 일과 40
   static const _toCreateButton = 32.0;
@@ -113,8 +123,43 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     checkCoachMarkStart();
   }
 
+  /// 이번 실행에서 첫 알림 안내 차례를 이미 따졌는가 (코치마크 전 한 번)
+  bool _isNotificationIntroChecked = false;
+
+  /// 알림 안내를 따지거나 띄우는 중인가 (그 사이 다시 불려도 코치마크를 켜지 않게)
+  bool _isNotificationIntroRunning = false;
+
   @override
-  void onCoachMarkStartReady() {
+  void onCoachMarkStartReady() => unawaited(_askNotificationThenStartCoach());
+
+  /// 홈 첫 진입 순서: 알림 안내(폰 시트 · 태블릿 가운데 창) > 시스템 권한 창 > 코치마크 (#1455)
+  /// 코치마크를 이미 봤으면 안내는 공지 런처 몫 (7일 다시 권하기 포함)
+  Future<void> _askNotificationThenStartCoach() async {
+    if (_isNotificationIntroRunning) return;
+    final isCoachSeen = ref.read(localStorageProvider).isHomeCoachSeen;
+    if (isCoachSeen || _isNotificationIntroChecked) {
+      _startCoach();
+      return;
+    }
+    _isNotificationIntroChecked = true;
+    _isNotificationIntroRunning = true;
+    var isIntroShown = false;
+    try {
+      final isIntroDue = await ref.read(pushPermissionPromptProvider).shouldShowIntro();
+      if (!mounted) return;
+      if (isIntroDue) {
+        isIntroShown = true;
+        await showNotificationIntroPrompt(context, ref);
+      }
+    } finally {
+      _isNotificationIntroRunning = false;
+    }
+    if (!mounted) return;
+    // 안내를 띄웠으면 홈이 다시 맨 앞·멈춤인지 처음부터 따짐, 아니면 바로
+    isIntroShown ? checkCoachMarkStart() : _startCoach();
+  }
+
+  void _startCoach() {
     final hasSwipeTarget = ref
         .read(homeRoutinesProvider)
         .any((r) => r.isEditableByMe);
@@ -128,17 +173,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     // 대기 중 스크롤했거나 관성이 도는 중이면 버튼이 밀려 구멍이 어긋난다. 켜질 때만 맨 위로
     // 되돌린다 — 이미 본 사람의 스크롤까지 끌어올리면 안 된다. jumpTo 는 진행 중인 관성도 끊는다.
     // 구멍은 다음 프레임 이후에 재므로 이 이동이 먼저 반영된다.
-    if (started && _scroll.hasClients) _scroll.jumpTo(0);
-  }
-
-  /// 코치마크 다시 보기 (`?`): 맨 위로 되돌린 뒤 모든 단계
-  void _replayCoach() {
-    final hasSwipeTarget = ref
-        .read(homeRoutinesProvider)
-        .any((r) => r.isEditableByMe);
-    final started = ref
-        .read(homeCoachProvider.notifier)
-        .replay(hasSwipeTarget: hasSwipeTarget);
     if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
@@ -221,6 +255,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     }
 
     final coachActive = ref.watch(homeCoachProvider.select((s) => s.active));
+    // 세로 태블릿 바깥 여백: 페이지 여백에서 안쪽 16 을 뺀 만큼
+    final tabletSideInset =
+        (context.layout.pageMarginFor(context.sizeClass).w - _listInset.w).clamp(0.0, double.infinity);
 
     final headerContent = GuardianHomeHeader(
       childName: identity.name,
@@ -229,7 +266,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       part: isPhone
           ? GuardianHomeHeaderPart.all
           : GuardianHomeHeaderPart.greeting,
-      onCoachReplay: _replayCoach,
     );
     // 태블릿 세로는 인사말이 맨 위라 상태 표시줄에 붙지 않게 숨 쉴 자리를 둔다 (폰은 머리 줄이 있다)
     final header = isPhone
@@ -238,15 +274,38 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
             padding: EdgeInsets.only(top: space.lg.h),
             child: headerContent,
           );
-    // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
+    // 가로 태블릿은 왼쪽 목록 | 오른쪽 상세, 낮은 창(분할 보기)은 한 열로 접는다
+    final metrics = context.layoutMetrics;
+    final hasTwoPanes =
+        metrics.isScaleOverridden &&
+        metrics.isLandscape &&
+        !metrics.isShortHeight;
+    // 세로 태블릿(두 칸 아님): 화면 폭을 다 쓰고 오늘 일과 2열 (#1455)
+    final isTabletSingleColumn = !isPhone && !hasTwoPanes;
+    // 두 칸은 칸 자체가 여백을 가져 안쪽 여백 없음
+    final listInset = hasTwoPanes ? 0.0 : _listInset;
+
+    // 오른쪽 상세에 보일 일과: 고른 일과가 아직 오늘 목록에 있으면 그것, 아니면 첫 일과
+    final todayRoutines = ref.watch(homeRoutinesProvider);
+    final selectedRoutine = hasTwoPanes
+        ? todayRoutines.where((routine) => routine.id == _selectedRoutineId).firstOrNull ??
+              todayRoutines.firstOrNull
+        : null;
+
+    // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다. 버튼은 칸 폭 끝까지
     final createButton = Padding(
-      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+      padding: EdgeInsets.symmetric(horizontal: listInset.w),
       child: KeyedSubtree(key: _createKey, child: const StartRoutineButton()),
     );
     final sections = GuardianHomeSections(
       swipeKey: _swipeKey,
       onCreateRoutine: _startRoutineFromSuggestion,
-      horizontalInset: _listInset,
+      horizontalInset: listInset,
+      todayColumnCount: isTabletSingleColumn ? _tabletPortraitColumnCount : 1,
+      selectedRoutineId: selectedRoutine?.id,
+      onRoutineSelected: hasTwoPanes
+          ? (routine) => setState(() => _selectedRoutineId = routine.id)
+          : null,
     );
 
     // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
@@ -264,13 +323,6 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
       child: listScroll,
     );
 
-    // 가로 태블릿은 왼쪽 머리말·만들기, 오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열로 접는다
-    final metrics = context.layoutMetrics;
-    final hasTwoPanes =
-        metrics.isScaleOverridden &&
-        metrics.isLandscape &&
-        !metrics.isShortHeight;
-
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -287,6 +339,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
                       ),
                       createButton: createButton,
                       sections: sections,
+                      detailPane: GuardianHomeDetailPane(routine: selectedRoutine),
                       listController: _scroll,
                       listPhysics: listPhysics,
                       listScrollWrapper: withPullToRefresh,
@@ -295,7 +348,12 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
                       SingleChildScrollView(
                         controller: _scroll,
                         physics: listPhysics,
-                        padding: EdgeInsets.only(bottom: space.xl),
+                        // 세로 태블릿은 화면 여백까지 (안쪽 16 은 그대로)
+                        padding: EdgeInsets.only(
+                          bottom: space.xl,
+                          left: isTabletSingleColumn ? tabletSideInset : 0,
+                          right: isTabletSingleColumn ? tabletSideInset : 0,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           // 인사 > 만들기 버튼 > 본문 칸이 차례로 떠오름
@@ -320,10 +378,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen>
     // 받아 둔 목록을 계속 쥐고 있어 마지막 단계를 끝낸 일과가 직전 퍼센트에 머물렀다 —
     // 완료 체크가 나오지 않아 "100% 가 안 뜬다"로 보였다. 이룸이 홈과 같은 주기로 다시 받는다.
     return AdaptivePageFrame(
-      // 태블릿에서 두 칸이 아니면 가운데 열에 담는다 (폰은 그대로 지나간다)
-      kind: hasTwoPanes
-          ? ScreenLayoutKind.adaptive
-          : ScreenLayoutKind.contentColumn,
+      // 태블릿은 세로·가로 모두 화면 폭을 직접 나눈다 (폰은 그대로 지나간다)
+      kind: ScreenLayoutKind.adaptive,
       child: RoutineAutoRefresh(
         // 오늘 진행 요약을 잠금화면 카드·iOS 위젯에 맞춤
         child: LockScreenSnapshotSync(

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../app/home_notice_priority.dart';
 import '../../../app/home_notice_slot.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/app_reveal.dart';
 import '../application/home_next_step.dart';
+import '../../../shared/models/routine.dart';
 import '../domain/guide_tip.dart';
+import 'widgets/elumi_today_progress_pill.dart';
 import 'widgets/guide_tip_card.dart';
 import 'widgets/home_next_step_card.dart';
 import 'widgets/home_streak_chip.dart';
@@ -19,7 +20,22 @@ import 'widgets/today_routine_section.dart';
 /// 보호자 홈 본문 칸: 연속 기록 > 안내 한 장 (다음에 할 일 또는 가이드 팁) > 알림 한 장 > 오늘 일과 > 지난 일과
 /// 안내 카드는 한 번에 하나 (다음에 할 일 또는 알림 켜기 카드가 있으면 가이드 팁은 숨김). 칸마다 위에서부터 차례로 떠오름
 class GuardianHomeSections extends ConsumerWidget {
-  const GuardianHomeSections({super.key, required this.swipeKey, required this.onCreateRoutine, required this.horizontalInset});
+  const GuardianHomeSections({
+    super.key,
+    required this.swipeKey,
+    required this.onCreateRoutine,
+    required this.horizontalInset,
+    this.todayColumnCount = 1,
+    this.selectedRoutineId,
+    this.onRoutineSelected,
+  });
+
+  /// 오늘 일과 열 수 (세로 태블릿 2, #1455)
+  final int todayColumnCount;
+
+  /// 가로 태블릿: 오른쪽에 상세가 보이는 일과 · 줄을 누르면 고르기 (null 이면 시트)
+  final String? selectedRoutineId;
+  final ValueChanged<Routine>? onRoutineSelected;
 
   /// 코치마크가 가리킬 오늘 일과 첫 줄
   final GlobalKey swipeKey;
@@ -41,8 +57,6 @@ class GuardianHomeSections extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasNextStep = ref.watch(homeNextStepProvider) != HomeNextStep.none;
-    // 알림 켜기 카드가 떠 있으면 가이드 팁은 뒤로 (첫 화면을 알림 한 장으로, 코치마크 대상이 밀리지 않게 #1441)
-    final isNotificationOffNoticeShown = ref.watch(homeNoticeChoiceProvider)?.kind == HomeNoticeKind.notificationOff;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalInset.w),
       child: Column(
@@ -51,20 +65,38 @@ class GuardianHomeSections extends ConsumerWidget {
           // 이룸이 연속 기록 불꽃 (2일 이상일 때만)
           const HomeStreakChip(bottomGap: _streakToNext),
           // 첫날 흐름 「다음에 할 일」 한 장 (첫 완료 뒤 사라짐)
-          HomeNextStepCard(onCreateRoutine: onCreateRoutine, bottomGap: _cardToSection),
-          // 가이드 팁: 다음에 할 일이 끝난 뒤에만 그 자리 아래 하나
-          GuideTipSlot(
-            placement: GuideTipPlacement.guardianHome,
-            isSuppressed: hasNextStep || isNotificationOffNoticeShown,
-            padding: EdgeInsets.only(bottom: _cardToSection.h),
+          HomeNextStepCard(
+            onCreateRoutine: onCreateRoutine,
+            bottomGap: _cardToSection,
           ),
           // 알림 카드 한 번에 하나 (알림 꺼짐 > 크레딧 부족 > 권유 > 자동 보내기 안내, 권유는 하루 1개)
-          HomeNoticeSlot(onCreateRoutine: onCreateRoutine, bottomGap: _cardToSection),
-          RoutineSectionTitle(iconAsset: AppAssets.iconTodayRoutine, label: context.l10n.guardianHomeTodayRoutine),
+          HomeNoticeSlot(
+            onCreateRoutine: onCreateRoutine,
+            bottomGap: _cardToSection,
+          ),
+          RoutineSectionTitle(
+            iconAsset: AppAssets.iconTodayRoutine,
+            label: context.l10n.guardianHomeTodayRoutine,
+            trailing: const ElumiTodayProgressPill(),
+          ),
           SizedBox(height: _titleToList.h),
-          TodayRoutineSection(coachKey: swipeKey),
+          TodayRoutineSection(
+            coachKey: swipeKey,
+            columnCount: todayColumnCount,
+            selectedRoutineId: selectedRoutineId,
+            onRoutineSelected: onRoutineSelected,
+          ),
+          // 가이드 팁: 오늘 일과를 다 본 자리에 한 장 (다음에 할 일이 끝난 뒤, 닫으면 다음 팁 #1455)
+          GuideTipSlot(
+            placement: GuideTipPlacement.guardianHome,
+            isSuppressed: hasNextStep,
+            padding: EdgeInsets.only(top: _cardToSection.h),
+          ),
           SizedBox(height: _betweenSections.h),
-          RoutineSectionTitle(iconAsset: AppAssets.iconTimePast, label: context.l10n.guardianHomePastRoutine),
+          RoutineSectionTitle(
+            iconAsset: AppAssets.iconTimePast,
+            label: context.l10n.guardianHomePastRoutine,
+          ),
           SizedBox(height: _titleToList.h),
           const PastRoutineSection(),
         ]),
