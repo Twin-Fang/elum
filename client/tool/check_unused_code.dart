@@ -26,6 +26,7 @@ const _arbKeyExceptions = <String, String>{};
 // (d) 예외: 폴더 경로 접두 > 이유 (파일명이 코드에서 문자열 조립으로 만들어지는 곳)
 const _assetPathExceptions = <String, String>{
   'assets/images/example_routines/': '서버가 주는 exampleImageId 로 `\$_images/example_routines/\$id.webp` 조립',
+  'assets/images/lumi/': '루미 표정 원본 (앱 번들 아님): tool/sync_lumi_assets.py 가 iOS·Android 위젯 사본을 만듦 (#1465)',
 };
 
 bool _isGenerated(String path) =>
