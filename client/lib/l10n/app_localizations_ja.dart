@@ -1547,13 +1547,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardReviewReorderHint => 'カードを長押しすると順番を変えられます';
 
   @override
-  String get cardReviewToolReorder => 'カードの順番を変更';
+  String get cardReviewToolReorder => '並べ替え';
 
   @override
-  String get cardReviewToolEdit => 'このカードを編集';
+  String get cardReviewToolEdit => 'カードを編集';
 
   @override
-  String get cardReviewToolAdd => 'カードを追加';
+  String get cardReviewToolAdd => 'カード追加';
 
   @override
   String get cardReviewReorderTitle => 'カードの順番を変更';
@@ -2877,7 +2877,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cardReviewCoachSaveMessage =>
-      '直し終わったら必ず*カードを保存*をタップしてください\nタップすると日課ができあがります';
+      '直し終わったら*カードを保存*をタップ\nタップすると*すぐElumiへ*送ります';
 
   @override
   String get coachHelpLabel => '使い方を見る';

@@ -23,9 +23,10 @@ const _binaryExtensions = {
 // (b) 예외: 키 이름 > 이유
 const _arbKeyExceptions = <String, String>{};
 
-// (d) 예외: 폴더 경로 접두 > 이유 (파일명이 코드에서 문자열 조립으로 만들어지는 곳)
+// (d) 예외: 폴더 경로 접두 > 이유 (파일명이 코드에서 문자열 조립으로 만들어지는 곳, 다른 사본을 만드는 원본 폴더)
 const _assetPathExceptions = <String, String>{
   'assets/images/example_routines/': '서버가 주는 exampleImageId 로 `\$_images/example_routines/\$id.webp` 조립',
+  'assets/images/lumi/': '루미 표정 단일 원본: tool/sync_lumi_assets.py 가 iOS ElumHomeWidget · Android drawable-nodpi 사본을 만듦 (#1465, #1475)',
 };
 
 bool _isGenerated(String path) =>
