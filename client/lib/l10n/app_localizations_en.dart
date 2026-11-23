@@ -3869,7 +3869,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardExportCardSizeSmall => 'Small';
 
   @override
-  String get cardExportProLayoutLocked => 'This format is available with Pro';
+  String get cardExportProLayoutLocked => 'This layout is available with Pro';
 
   @override
   String get cardExportUpsellTitle => 'Save in any layout with Pro';
@@ -4621,11 +4621,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Paused because Pro ended';
+  String get routineSchedulePaused => 'Repeat paused';
 
   @override
   String get routineSchedulePausedNote =>
-      'Repeating paused because Pro ended. Your days and time are still saved';
+      'Repeating is paused for now. Your days and time are saved and will run again with Pro';
 
   @override
   String get routineScheduleSheetTitle => 'When should it happen?';
@@ -5014,9 +5014,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineMemorySaveFailedFallback => 'Please try again in a moment.';
 
   @override
-  String get proTeaserSampleLabel => 'Example screen';
-
-  @override
   String get proOnlyNoticeTitle => 'This feature is available with Pro';
 
   @override
@@ -5051,8 +5048,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Remember how you edit so the next routines fit better';
 
   @override
-  String get proTeaserCardThemeBenefit =>
-      'Get printable cards in several designs';
+  String get proTeaserCardThemeBenefit => 'Save cards in several designs';
 
   @override
   String get proTeaserWeeklyPlanBenefit =>
@@ -5329,9 +5325,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get planSeeAllBenefits => 'See all Pro benefits';
-
-  @override
   String get planTierGift => 'Gift';
 
   @override
@@ -5362,14 +5355,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proTeaserRoutineMemoryTitle => 'Remember what works for Elumi';
 
   @override
-  String get proTeaserCardThemeTitle => 'Get prettier printable cards';
+  String get proTeaserCardThemeTitle => 'Save prettier cards';
 
   @override
-  String get proTeaserCardLayoutTitle => 'Get printable cards your way';
+  String get proTeaserCardLayoutTitle => 'Save cards your way';
 
   @override
   String get proTeaserCardLayoutBenefit =>
-      'Choose several cards per page, landscape paper, or a one-page routine';
+      'Save several cards per page, on landscape paper, or as a one-page routine';
 
   @override
   String get homeSuggestionDismissLabel => 'No thanks';

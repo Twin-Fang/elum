@@ -4367,10 +4367,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro已结束，已暂停';
+  String get routineSchedulePaused => '重复已暂停';
 
   @override
-  String get routineSchedulePausedNote => 'Pro已结束，重复已暂停。设置好的星期和时间仍然保留';
+  String get routineSchedulePausedNote => '目前重复已暂停。设置好的星期和时间仍然保留，使用 Pro 后会重新开始';
 
   @override
   String get routineScheduleSheetTitle => '什么时候做？';
@@ -4724,9 +4724,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '请稍后再试。';
 
   @override
-  String get proTeaserSampleLabel => '示例画面';
-
-  @override
   String get proOnlyNoticeTitle => '这是Pro可以使用的功能';
 
   @override
@@ -5014,9 +5011,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String planTryFreeTrial(String trial) {
     return '免费试用$trial';
   }
-
-  @override
-  String get planSeeAllBenefits => '查看全部Pro权益';
 
   @override
   String get planTierGift => '礼物';

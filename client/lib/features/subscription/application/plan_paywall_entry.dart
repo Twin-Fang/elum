@@ -46,13 +46,12 @@ Future<void> openPlanPaywall(BuildContext context, WidgetRef ref, {PlanBenefit? 
 }
 
 /// Pro 미리 보기 판의 버튼 (build 안에서 부름: 상품을 불러오면 `7일 무료로 써 보기` 로 바뀜)
-/// 주 버튼은 [highlight] 혜택을 맨 위로 올린 요금제 화면, `Pro 혜택 모두 보기` 는 그냥 요금제 화면
+/// 주 버튼은 [highlight] 혜택을 맨 위로 올린 요금제 화면
 ProUpsellActions watchProUpsellActions(BuildContext context, WidgetRef ref, {PlanBenefit? highlight}) {
   final trial = ref.watch(proUpsellFreeTrialProvider);
   return ProUpsellActions(
     freeTrialLabel: trial == null ? null : planTrialLabel(context.l10n, trial),
     onStart: () => openPlanPaywall(context, ref, highlight: highlight),
-    onSeeAllBenefits: () => openPlanPaywall(context, ref),
   );
 }
 
