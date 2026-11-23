@@ -490,7 +490,6 @@
   "routineDetailEdit": "Edit",
   "routineDetailTodayProgress": "{done}/{total} done today",
   "routineDetailPastProgress": "{done}/{total} done",
-  "routineDetailExportLabel": "Print",
   "routineDetailFinishedToday": "This routine is done",
   "routineDetailOpenHint": "Tap to see the card bigger",
   "routineDetailNoReward": "No reward after this routine",

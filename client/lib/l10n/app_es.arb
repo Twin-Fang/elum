@@ -532,7 +532,6 @@
   "routineDetailEdit": "Editar",
   "routineDetailTodayProgress": "Hoy: {done}/{total} hechas",
   "routineDetailPastProgress": "{done}/{total} hechas",
-  "routineDetailExportLabel": "Imprimir",
   "routineDetailFinishedToday": "Esta rutina ya está terminada",
   "routineDetailOpenHint": "Toca para ver la tarjeta más grande",
   "routineDetailNoReward": "Esta rutina no tiene recompensa",

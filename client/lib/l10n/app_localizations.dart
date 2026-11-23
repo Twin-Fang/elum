@@ -3305,12 +3305,6 @@ abstract class AppLocalizations {
   /// **'{done}/{total} 했어요'**
   String routineDetailPastProgress(int done, int total);
 
-  /// 일과 상세 시트 제목 오른쪽 버튼 글자: 인쇄용으로 받기 화면 열기 (#1298)
-  ///
-  /// In ko, this message translates to:
-  /// **'인쇄용'**
-  String get routineDetailExportLabel;
-
   /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
   ///
   /// In ko, this message translates to:

@@ -1797,9 +1797,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => '印刷用';
-
-  @override
   String get routineDetailFinishedToday => 'すべて終わった日課です';
 
   @override

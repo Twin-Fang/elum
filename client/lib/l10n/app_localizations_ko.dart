@@ -1805,9 +1805,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => '인쇄용';
-
-  @override
   String get routineDetailFinishedToday => '다 끝낸 일과예요';
 
   @override

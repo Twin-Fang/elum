@@ -1907,9 +1907,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => 'Print';
-
-  @override
   String get routineDetailFinishedToday => 'This routine is done';
 
   @override

@@ -1956,9 +1956,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => 'Imprimir';
-
-  @override
   String get routineDetailFinishedToday => 'Esta rutina ya está terminada';
 
   @override
