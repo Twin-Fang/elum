@@ -317,7 +317,7 @@ class _CardExportScreenState extends ConsumerState<CardExportScreen> {
           title: l10n.cardExportSaveDenied,
           code: CardExportErrorCode.saveDenied,
           actions: [
-            ElumDialogAction(label: l10n.commonCancel, value: false),
+            ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
             ElumDialogAction(label: l10n.cardExportOpenSettings, value: true),
           ],
         );
