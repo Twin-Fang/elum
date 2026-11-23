@@ -532,7 +532,6 @@
   "routineDetailEdit": "编辑",
   "routineDetailTodayProgress": "今天完成了 {done}/{total}",
   "routineDetailPastProgress": "完成了 {done}/{total}",
-  "routineDetailExportLabel": "打印用",
   "routineDetailFinishedToday": "已经全部完成的日常",
   "routineDetailOpenHint": "点一下放大看卡片",
   "routineDetailNoReward": "这个日常完成后没有奖励",

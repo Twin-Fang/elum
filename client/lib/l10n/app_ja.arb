@@ -532,7 +532,6 @@
   "routineDetailEdit": "編集する",
   "routineDetailTodayProgress": "今日 {done}/{total} できました",
   "routineDetailPastProgress": "{done}/{total} できました",
-  "routineDetailExportLabel": "印刷用",
   "routineDetailFinishedToday": "すべて終わった日課です",
   "routineDetailOpenHint": "タップしてカードを大きく見る",
   "routineDetailNoReward": "日課のあとのごほうびはありません",

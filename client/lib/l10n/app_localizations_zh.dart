@@ -1785,9 +1785,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => '打印用';
-
-  @override
   String get routineDetailFinishedToday => '已经全部完成的日常';
 
   @override

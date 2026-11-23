@@ -36,7 +36,7 @@ class RoutineDetailHeader extends StatelessWidget {
   /// 있으면 제목 옆 연필 > 이름 바꾸기 (고칠 수 있는 일과만)
   final VoidCallback? onTitleEditTap;
 
-  /// 있으면 제목 오른쪽에 `인쇄용` 버튼 > 인쇄용으로 받기 (#1073)
+  /// 있으면 제목 오른쪽에 ↓ 받기 버튼 > 인쇄용으로 받기 (#1073)
   final VoidCallback? onExportTap;
 
   /// 제목 아래 진행 한 줄 (`오늘 2/5 했어요`). 없으면 자리도 없다 (#1298)
@@ -123,43 +123,44 @@ class RoutineDetailHeader extends StatelessWidget {
   }
 }
 
-/// 머리 오른쪽 `인쇄용` 버튼: 아이콘 + 글자 (아이콘만으로는 「내려받기」로 읽힌다, #1298)
+/// 머리 오른쪽 ↓ 받기 버튼: 연한 동그라미 + 아이콘 (저장·공유·인쇄 공통 입구라 프린터 대신 ↓, #1461)
 class _ExportButton extends StatelessWidget {
   const _ExportButton({required this.onTap});
 
   final VoidCallback onTap;
 
-  /// 아이콘 한 변 (글자 옆이라 ⋯ 보다 작게)
-  static const _iconSize = 18.0;
-  static const _iconToLabel = 4.0;
+  /// 동그라미 지름 · 아이콘 한 변 (시안 export-button-v2 E)
+  static const _circleDiameter = 40.0;
+  static const _iconSize = 20.0;
+
+  /// 동그라미 바깥 여백 (누르는 자리 48 확보)
+  static const _touchPadding = 4.0;
 
   @override
   Widget build(BuildContext context) {
-    final color = context.colors.sheetTitleText;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
       semanticLabel: context.l10n.cardExportOpen,
       child: Padding(
-        padding: EdgeInsets.all(8.w),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              AppAssets.iconPrint,
-              width: _iconSize.w,
-              height: _iconSize.w,
-              excludeFromSemantics: true,
-              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-            ),
-            SizedBox(width: _iconToLabel.w),
-            ExcludeSemantics(
-              child: Text(
-                context.l10n.routineDetailExportLabel,
-                style: context.typo.body.copyWith(color: color),
-              ),
-            ),
-          ],
+        padding: EdgeInsets.all(_touchPadding.w),
+        child: Container(
+          width: _circleDiameter.w,
+          height: _circleDiameter.w,
+          alignment: Alignment.center,
+          // 단계 줄과 같은 바탕색: 시트 바탕보다 한 단계 진해 눌리는 버튼으로 보임
+          decoration: BoxDecoration(
+            color: colors.editChipBg,
+            shape: BoxShape.circle,
+          ),
+          child: SvgPicture.asset(
+            AppAssets.iconDownload,
+            width: _iconSize.w,
+            height: _iconSize.w,
+            excludeFromSemantics: true,
+            colorFilter: ColorFilter.mode(colors.sheetTitleText, BlendMode.srcIn),
+          ),
         ),
       ),
     );
