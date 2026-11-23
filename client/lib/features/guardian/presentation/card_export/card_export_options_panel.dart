@@ -62,6 +62,10 @@ class CardExportOptionsPanel extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final upsellTap = onUpsellTap;
+    final themeChoices = [
+      for (final theme in CardDesignTheme.values)
+        if (!_isThemeLocked(theme) || shouldShowProThemes) theme,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -81,17 +85,16 @@ class CardExportOptionsPanel extends StatelessWidget {
         SettingsGroup(
           header: l10n.cardExportStyleSection,
           children: [
-            _ChipRow<CardDesignTheme>(
-              label: l10n.cardExportThemeSection,
-              values: [
-                for (final theme in CardDesignTheme.values)
-                  if (!_isThemeLocked(theme) || shouldShowProThemes) theme,
-              ],
-              selected: options.theme,
-              labelOf: (theme) => themeLabelOf(context, theme),
-              isLocked: _isThemeLocked,
-              onSelected: _onThemeSelected,
-            ),
+            // 디자인: 고를 값이 둘 이상일 때만 (살 수 없는 Free 는 기본 하나라 줄째 생략)
+            if (themeChoices.length > 1)
+              _ChipRow<CardDesignTheme>(
+                label: l10n.cardExportThemeSection,
+                values: themeChoices,
+                selected: options.theme,
+                labelOf: (theme) => themeLabelOf(context, theme),
+                isLocked: _isThemeLocked,
+                onSelected: _onThemeSelected,
+              ),
             SettingsSwitchTile(
               label: l10n.cardExportIncludeText,
               value: options.shouldIncludeText,
