@@ -36,7 +36,7 @@ class RoutineDetailHeader extends StatelessWidget {
   /// 있으면 제목 옆 연필 > 이름 바꾸기 (고칠 수 있는 일과만)
   final VoidCallback? onTitleEditTap;
 
-  /// 있으면 제목 오른쪽에 ↓ 받기 버튼 > 인쇄용으로 받기 (#1073)
+  /// 있으면 제목 오른쪽에 ↓ 버튼 > 카드 저장하기 (#1073 · #1461)
   final VoidCallback? onExportTap;
 
   /// 제목 아래 진행 한 줄 (`오늘 2/5 했어요`). 없으면 자리도 없다 (#1298)

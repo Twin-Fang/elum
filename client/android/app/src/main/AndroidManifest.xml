@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- 보호자 목소리 녹음 (Pro). 거부해도 카드는 기본 목소리로 읽힌다 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- 카드 저장하기 (#1461): Android 10 미만만 사진 저장에 필요. 10 이상은 권한 없이 저장 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
     <!-- 광고 ID. Android 13(API 33)+에서 선언하지 않으면 광고 식별자가 0으로 나와 단가가 떨어진다. -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <!-- 일과 알림 (#777): 재부팅 뒤 예약 다시 걸기. 알림 권한(POST_NOTIFICATIONS)은 플러그인이 선언 -->

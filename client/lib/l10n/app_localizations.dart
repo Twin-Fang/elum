@@ -6296,13 +6296,13 @@ abstract class AppLocalizations {
   /// 일과 상세 시트 머리의 내려받기 버튼 낭독 이름 · 내보내기 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용으로 받기'**
+  /// **'카드 저장하기'**
   String get cardExportOpen;
 
   /// 내보내기 형태 고르기 묶음 제목
   ///
   /// In ko, this message translates to:
-  /// **'어떻게 받을까요?'**
+  /// **'어떤 모양으로 저장할까요?'**
   String get cardExportFormatSection;
 
   /// 형태: A4 한 장에 일과 카드 전부
@@ -6314,7 +6314,7 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'A4 한 장에 순서대로'**
+  /// **'A4에 순서대로'**
   String get cardExportFormatRoutineSheetCaption;
 
   /// 형태: 자를 선이 있는 A4
@@ -6326,7 +6326,7 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'A4에 자를 선과 함께'**
+  /// **'A4에 자를 선'**
   String get cardExportFormatCutCardsCaption;
 
   /// 형태: 카드마다 이미지 한 장
@@ -6338,14 +6338,8 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'카드마다 이미지 한 장'**
+  /// **'카드마다 한 장'**
   String get cardExportFormatCardImagesCaption;
-
-  /// 오려 쓰는 카드 장수 묶음 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'한 쪽에 몇 장 넣을까요?'**
-  String get cardExportPerPageSection;
 
   /// 카드 문장을 넣을지 켜고 끄는 줄
   ///
@@ -6425,24 +6419,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{그림을 불러오지 못한 카드 {count}장은 다른 그림이나 제목으로 들어가요}}'**
   String cardExportSomePicturesFailed(int count);
 
-  /// PDF 를 다른 앱으로 보낼 때 크기 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요'**
-  String get cardExportActualSizeHint;
-
-  /// 기기 인쇄 화면 열기 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'인쇄하기'**
-  String get cardExportPrint;
-
-  /// 공유 시트 열기 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'보내기'**
-  String get cardExportShare;
-
   /// 그림을 받는 동안
   ///
   /// In ko, this message translates to:
@@ -6458,14 +6434,8 @@ abstract class AppLocalizations {
   /// 파일 만들기 실패 팝업
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용 파일을 만들지 못했어요'**
+  /// **'저장할 그림을 만들지 못했어요'**
   String get cardExportRenderFailed;
-
-  /// 인쇄 화면을 못 열었을 때
-  ///
-  /// In ko, this message translates to:
-  /// **'이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요'**
-  String get cardExportPrintFailed;
 
   /// 카드 0장 일과
   ///
@@ -6476,8 +6446,44 @@ abstract class AppLocalizations {
   /// 카드 한 장씩에서 모두 뺐을 때
   ///
   /// In ko, this message translates to:
-  /// **'보낼 카드를 하나 이상 골라 주세요'**
+  /// **'저장할 카드를 하나 이상 골라 주세요'**
   String get cardExportNoneSelected;
+
+  /// 아래 저장하기 버튼: 저장할 그림 장수 포함 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{저장하기 ({count}장)}}'**
+  String cardExportSaveCount(int count);
+
+  /// 사진 앱 저장 끝 토스트 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{사진에 {count}장 저장했어요}}'**
+  String cardExportSaved(int count);
+
+  /// 사진 추가 권한 거부 팝업 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'사진에 저장하려면 설정에서 사진 추가를 허용해 주세요'**
+  String get cardExportSaveDenied;
+
+  /// 사진 저장 실패 팝업 (용량 등) #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'사진에 저장하지 못했어요'**
+  String get cardExportSaveFailed;
+
+  /// 사진 추가 권한 거부 팝업 버튼 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get cardExportOpenSettings;
+
+  /// 미리 보기 머리 오른쪽: 카드 한 장씩에서 눌러 빼고 넣기 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'눌러서 빼고 넣어요'**
+  String get cardExportPreviewToggleHint;
 
   /// Free 인쇄물 아래 띠 오른쪽 한 줄 (로고 옆)
   ///
@@ -6491,22 +6497,10 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
 
-  /// 인쇄용으로 받기 줄: 받는 형태 (누르면 형태 시트) #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'형태'**
-  String get cardExportFormatRow;
-
-  /// 인쇄용으로 받기 묶음 머리: 용지 방향 · 장수 · 카드 크기 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'배치'**
-  String get cardExportLayoutSection;
-
   /// 인쇄용으로 받기 묶음 머리: 디자인 · 카드 문장 #1224
   ///
   /// In ko, this message translates to:
-  /// **'꾸밈'**
+  /// **'꾸미기'**
   String get cardExportStyleSection;
 
   /// 인쇄용으로 받기 줄: A4 세로·가로 #1224
@@ -6514,12 +6508,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'용지 방향'**
   String get cardExportOrientationRow;
-
-  /// 용지 방향 고르기 시트 제목 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'용지를 어떻게 놓을까요?'**
-  String get cardExportOrientationSheetTitle;
 
   /// 용지 방향 값: 세로 #1224
   ///
@@ -6544,12 +6532,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'카드 크기'**
   String get cardExportCardSizeRow;
-
-  /// 카드 크기 고르기 시트 제목 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'카드를 얼마나 크게 넣을까요?'**
-  String get cardExportCardSizeSheetTitle;
 
   /// 카드 크기 값: 칸에 맞춰 가장 크게 #1224
   ///
@@ -6578,7 +6560,7 @@ abstract class AppLocalizations {
   /// Free 인쇄용으로 받기 아래 Pro 안내 제목 #1224
   ///
   /// In ko, this message translates to:
-  /// **'Pro면 원하는 대로 받을 수 있어요'**
+  /// **'Pro면 원하는 모양으로 저장할 수 있어요'**
   String get cardExportUpsellTitle;
 
   /// Free 인쇄용으로 받기 아래 Pro 안내 한 줄 #1224
@@ -6662,19 +6644,19 @@ abstract class AppLocalizations {
   /// 혜택 줄: 워터마크 없음
   ///
   /// In ko, this message translates to:
-  /// **'인쇄물 아래 띠 없이 깔끔해요'**
+  /// **'저장한 카드 아래 띠 없이 깔끔해요'**
   String get planBenefitCardExportWithoutWatermark;
 
   /// 혜택 줄: 카드 디자인 테마
   ///
   /// In ko, this message translates to:
-  /// **'인쇄 디자인을 모두 골라요'**
+  /// **'카드 디자인을 모두 골라요'**
   String get planBenefitCardExportAllThemes;
 
   /// 혜택 줄: 카드 내보내기 형태·배치 #1224
   ///
   /// In ko, this message translates to:
-  /// **'일과 한 장, 오려 쓰는 카드로 인쇄해요'**
+  /// **'일과 한 장, 오려 쓰는 카드로 저장해요'**
   String get planBenefitCardExportAllLayouts;
 
   /// 혜택 묶음 아래 안내

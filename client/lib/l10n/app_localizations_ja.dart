@@ -3518,10 +3518,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get licenseLoadFailedMessage => '一覧を読み込めませんでした';
 
   @override
-  String get cardExportOpen => '印刷用に保存';
+  String get cardExportOpen => 'カードを保存';
 
   @override
-  String get cardExportFormatSection => 'どの形で保存しますか？';
+  String get cardExportFormatSection => 'どの形で保存しますか?';
 
   @override
   String get cardExportFormatRoutineSheet => '日課を1枚に';
@@ -3540,9 +3540,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cardExportFormatCardImagesCaption => 'カードごとに画像1枚';
-
-  @override
-  String get cardExportPerPageSection => '1ページに何枚入れますか？';
 
   @override
   String get cardExportIncludeText => 'カードの文を入れる';
@@ -3591,31 +3588,51 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get cardExportActualSizeHint => 'ほかのアプリで印刷するときは「実際のサイズ」を選んでください';
-
-  @override
-  String get cardExportPrint => '印刷する';
-
-  @override
-  String get cardExportShare => '送る';
-
-  @override
   String get cardExportPreparing => 'カードを準備しています';
 
   @override
   String get cardExportImageFailed => 'カードの絵を読み込めませんでした';
 
   @override
-  String get cardExportRenderFailed => '印刷用ファイルを作れませんでした';
-
-  @override
-  String get cardExportPrintFailed => 'この端末では印刷できません。「送る」で保存してください';
+  String get cardExportRenderFailed => '保存する画像を作れませんでした';
 
   @override
   String get cardExportNoCards => 'カードがない日課です';
 
   @override
-  String get cardExportNoneSelected => '送るカードを1枚以上選んでください';
+  String get cardExportNoneSelected => '保存するカードを1枚以上選んでください';
+
+  @override
+  String cardExportSaveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '保存する($count枚)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardExportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '写真に$count枚保存しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportSaveDenied => '写真に保存するには、設定で写真の追加を許可してください';
+
+  @override
+  String get cardExportSaveFailed => '写真に保存できませんでした';
+
+  @override
+  String get cardExportOpenSettings => '設定を開く';
+
+  @override
+  String get cardExportPreviewToggleHint => 'タップで入れる・外す';
 
   @override
   String get printBrandTagline => '毎日をいっしょに | elum 行動カード';
@@ -3631,19 +3648,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get cardExportFormatRow => '形式';
-
-  @override
-  String get cardExportLayoutSection => '配置';
-
-  @override
   String get cardExportStyleSection => 'デザイン';
 
   @override
   String get cardExportOrientationRow => '用紙の向き';
-
-  @override
-  String get cardExportOrientationSheetTitle => '用紙をどの向きにしますか？';
 
   @override
   String get cardExportOrientationPortrait => '縦';
@@ -3656,9 +3664,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cardExportCardSizeRow => 'カードの大きさ';
-
-  @override
-  String get cardExportCardSizeSheetTitle => 'カードをどのくらいの大きさにしますか？';
 
   @override
   String get cardExportCardSizeFit => 'いっぱいに';
@@ -3722,13 +3727,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planBenefitMoreMonthlyCredits => '毎月もっと多くのクレジットがもらえます';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '印刷物の下に帯が入らずすっきりします';
+  String get planBenefitCardExportWithoutWatermark => '保存したカードの下に帯が入りません';
 
   @override
-  String get planBenefitCardExportAllThemes => 'すべての印刷デザインから選べます';
+  String get planBenefitCardExportAllThemes => 'カードのデザインをすべて選べます';
 
   @override
-  String get planBenefitCardExportAllLayouts => '日課を1枚に、切って使うカードで印刷できます';
+  String get planBenefitCardExportAllLayouts => '日課1枚・切り取りカードで保存できます';
 
   @override
   String get planKeepContentNotice => 'Proが終わっても、作った日課と絵はそのまま残ります';

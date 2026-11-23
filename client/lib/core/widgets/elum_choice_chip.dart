@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'pro_badge.dart';
 
 /// 알약 칩 한 개 (시안 1783:6645): 고르면 남색 판 · 흰 글자, 아니면 웜그레이 판
 /// 이야기 분류 줄 · 올리기 분류 고르기 · 전문가 일과 분류 줄이 함께 쓴다
@@ -15,6 +16,7 @@ class ElumChoiceChip extends StatelessWidget {
     required this.onTap,
     this.isExpanded = false,
     this.labelStyle,
+    this.shouldShowProBadge = false,
   });
 
   final String label;
@@ -29,19 +31,23 @@ class ElumChoiceChip extends StatelessWidget {
   /// 글자. null 이면 목록 분류 칩 500/14
   final TextStyle? labelStyle;
 
+  /// 글자 뒤 PRO 배지 (Free 에게 잠긴 값: 카드 저장 디자인 칩 등)
+  final bool shouldShowProBadge;
+
   static const _paddingH = 16.0;
   static const _paddingV = 10.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final text = Text(
+    final labelText = Text(
       label,
       textAlign: TextAlign.center,
       style: (labelStyle ?? context.typo.chipLabel).copyWith(
         color: isSelected ? colors.surface : colors.talkTitleText,
       ),
     );
+    final text = LabelWithProBadge(label: labelText, shouldShowProBadge: shouldShowProBadge);
     return Semantics(
       selected: isSelected,
       button: true,

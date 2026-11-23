@@ -5,9 +5,9 @@ import '../../../../core/widgets/pro_teaser.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import 'print_sheets.dart';
 
-/// 인쇄용으로 받기: Free 가 잠긴 값(형태·배치·디자인)을 고르면 그 값으로 만든 첫 지면을 Pro 미리 보기로 보여 줌
+/// 카드 저장하기: Free 가 잠긴 값(모양·배치·디자인)을 고르면 그 값으로 만든 첫 지면을 Pro 미리 보기로 보여 줌
 ///
-/// 굽는 미리 보기(RepaintBoundary)와 따로 그린다 — 보내기·인쇄는 언제나 고를 수 있는 값으로만 나감
+/// 굽는 미리 보기(RepaintBoundary)와 따로 그린다 — 저장은 언제나 고를 수 있는 값으로만 나감
 class CardExportProTeaser extends StatelessWidget {
   const CardExportProTeaser({
     super.key,

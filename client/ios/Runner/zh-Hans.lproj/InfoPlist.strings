@@ -1,6 +1,7 @@
 /* 권한 안내 문구 (중국어 간체): 기기 언어가 이 언어일 때 Info.plist 기본 문구(영어)를 덮어씀 */
 "NSCameraUsageDescription" = "使用相机拍摄照片，用作卡片图片。";
 "NSPhotoLibraryUsageDescription" = "使用照片图库选择照片，用作卡片图片。";
+"NSPhotoLibraryAddUsageDescription" = "用于把制作的卡片保存到照片。";
 "NSMicrophoneUsageDescription" = "使用麦克风录制您朗读卡片的声音。";
 "NSUserTrackingUsageDescription" = "用于在监护人画面显示合适的广告。不会使用Elumi的信息。";
 /* 홈 화면 앱 이름: 한국어 이룸, 그 밖의 언어 ELUM (#1419) */
