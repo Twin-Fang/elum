@@ -36,10 +36,12 @@ public class SubscriptionStatusService {
     try {
       PlanType plan = entitlementService.planOf(memberId);
       Optional<Subscription> subscription = subscriptionRepository.findByMemberId(memberId);
-      // 행 없음·가입 기본 Free 행인데 Pro = 기존 가입자 선물(PRO_GIFT) 또는 신규가입 체험(PROMO), 종료일 표시
-      boolean isPromotionCandidate = plan == PlanType.PRO && subscription.map(Subscription::isUntouchedSignupFree).orElse(true);
+      LocalDateTime now = LocalDateTime.now();
+      // Pro 인데 구독 행이 Pro 가 아님 = 기존 가입자 선물(PRO_GIFT) 또는 신규가입 체험(PROMO), 종료일 표시
+      boolean isPromotionCandidate = plan == PlanType.PRO
+        && subscription.map(row -> row.effectivePlan(now) != PlanType.PRO).orElse(true);
       Optional<MemberProPromotion.Promotion> promotion = isPromotionCandidate
-        ? memberProPromotion.findPromotion(memberId)
+        ? memberProPromotion.findPromotion(memberId, subscription.orElse(null), now)
         : Optional.empty();
       if (promotion.isPresent()) {
         return new MemberSubscriptionStatus(PlanType.PRO, promotion.get().source(), null, promotion.get().endsAt(), null, false);
