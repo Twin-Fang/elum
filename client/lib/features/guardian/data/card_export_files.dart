@@ -2,24 +2,28 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/rendering.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// 내보내기 실패 코드 (화면 에러 코드로 보임)
+import '../../../core/logger/app_logger.dart';
+
+/// 카드 저장 실패 코드 (화면 에러 코드로 보임)
 abstract final class CardExportErrorCode {
   static const image = 'E-EXPORT-IMAGE';
   static const render = 'E-EXPORT-RENDER';
-  static const print = 'E-EXPORT-PRINT';
+  static const save = 'E-EXPORT-SAVE';
+  static const saveDenied = 'E-EXPORT-SAVE-DENIED';
 }
 
-/// 인쇄 결과 3개: 인쇄 서비스 없음(안내 대상) · 사용자가 취소(조용히 돌아감) · 인쇄로 넘김
-enum CardPrintOutcome { unavailable, cancelled, printed }
+/// 사진 앱 저장 결과 3개: 저장함 · 권한 거부(설정 안내) · 그 밖의 실패(용량 등)
+enum CardSaveOutcome { saved, permissionDenied, failed }
 
-/// 내보내기 파일 만들기: 미리 보기 지면 굽기 > PNG · PDF > 공유 시트 · 인쇄 화면
+/// 내보내기 파일: 지면 굽기 > PNG > 사진 앱(카드 저장, #1461) · PDF > 공유 시트(주간 리포트 · AI 메모)
 class CardExportFiles {
   const CardExportFiles();
 
@@ -52,7 +56,7 @@ class CardExportFiles {
     return document.save();
   }
 
-  /// 공유 시트 (파일은 임시 폴더에: `{이름}.pdf` · `{이름}_01.png`)
+  /// 공유 시트 (파일은 임시 폴더에: `{이름}.pdf` · `{이름}.png` · `{이름}.json`)
   Future<void> share({
     required List<({String fileName, Uint8List bytes, String mimeType})> files,
     ui.Rect? sharePositionOrigin,
@@ -69,20 +73,30 @@ class CardExportFiles {
     );
   }
 
-  /// 기기 인쇄 화면 (iOS AirPrint · Android 인쇄 서비스) > 결과 3개
+  /// PNG 여러 장 > 사진 앱 (권한 확인 > 차례로 저장, 이름 `{이름}_01`)
   ///
-  /// `layoutPdf` 는 취소해도 false 라, 인쇄 불가 판정은 `Printing.info().canPrint` 하나로만 함
-  Future<CardPrintOutcome> printPdf({required Uint8List pdf, required String jobName, bool isLandscape = false}) async {
-    final info = await Printing.info();
-    if (!info.canPrint) return CardPrintOutcome.unavailable;
-    final isPrinted = await Printing.layoutPdf(
-      name: jobName,
-      format: isLandscape ? PdfPageFormat.a4.landscape : PdfPageFormat.a4,
-      // 실제 크기로 찍게 A4(고른 용지 방향) 그대로 넘김 (용지에 맞춤 축소를 막아 오려 쓰는 카드 크기 유지)
-      usePrinterSettings: false,
-      onLayout: (_) async => pdf,
-    );
-    return isPrinted ? CardPrintOutcome.printed : CardPrintOutcome.cancelled;
+  /// 권한은 사진 추가만 (iOS add-only · Android 10 이상은 묻지 않음)
+  Future<CardSaveOutcome> saveToPhotos({required List<Uint8List> pngs, required String fileStem}) async {
+    try {
+      final hasAccess = await Gal.hasAccess() || await Gal.requestAccess();
+      if (!hasAccess) return CardSaveOutcome.permissionDenied;
+      for (final (index, png) in pngs.indexed) {
+        await Gal.putImageBytes(png, name: '${fileStem}_${(index + 1).toString().padLeft(2, '0')}');
+      }
+      return CardSaveOutcome.saved;
+    } on GalException catch (error) {
+      AppLogger.error('card export save failed', error);
+      return error.type == GalExceptionType.accessDenied ? CardSaveOutcome.permissionDenied : CardSaveOutcome.failed;
+    }
+  }
+
+  /// 기기 설정의 이 앱 화면 (사진 추가 권한을 다시 켜는 길)
+  Future<void> openAppSettings() async {
+    try {
+      await AppSettings.openAppSettings();
+    } on Object catch (error) {
+      AppLogger.error('card export open settings failed', error);
+    }
   }
 }
 

@@ -144,7 +144,7 @@ List<RouteBase> guardianRoutes() => [
     ),
   ),
   // 전문가 일과 목록·미리 보기: 하단 바를 덮는 화면
-  // 인쇄용으로 받기: extra 가 일과가 아니면 카드 없는 일과 화면(안내)이 뜬다
+  // 카드 저장하기: extra 가 일과가 아니면 카드 없는 일과 화면(안내)이 뜬다
   GoRoute(
     path: Routes.guardianCardExport,
     pageBuilder: (context, state) => slidePage(

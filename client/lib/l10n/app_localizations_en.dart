@@ -3704,10 +3704,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenseLoadFailedMessage => 'We couldn\'t load the list';
 
   @override
-  String get cardExportOpen => 'Save for printing';
+  String get cardExportOpen => 'Save cards';
 
   @override
-  String get cardExportFormatSection => 'How would you like it?';
+  String get cardExportFormatSection => 'How should we save them?';
 
   @override
   String get cardExportFormatRoutineSheet => 'One-page routine';
@@ -3726,9 +3726,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardExportFormatCardImagesCaption => 'One image per card';
-
-  @override
-  String get cardExportPerPageSection => 'How many cards per page?';
 
   @override
   String get cardExportIncludeText => 'Include card text';
@@ -3782,34 +3779,53 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cardExportActualSizeHint =>
-      'When printing from another app, choose actual size';
-
-  @override
-  String get cardExportPrint => 'Print';
-
-  @override
-  String get cardExportShare => 'Send';
-
-  @override
   String get cardExportPreparing => 'Getting your cards ready';
 
   @override
   String get cardExportImageFailed => 'Couldn\'t load the card picture';
 
   @override
-  String get cardExportRenderFailed => 'Couldn\'t create the printable file';
-
-  @override
-  String get cardExportPrintFailed =>
-      'This device can\'t print. Please use Send instead';
+  String get cardExportRenderFailed => 'Couldn\'t make the images to save';
 
   @override
   String get cardExportNoCards => 'This routine has no cards';
 
   @override
-  String get cardExportNoneSelected =>
-      'Please choose at least one card to send';
+  String get cardExportNoneSelected => 'Choose at least one card to save';
+
+  @override
+  String cardExportSaveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Save ($count)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardExportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saved $count images to Photos',
+      one: 'Saved 1 image to Photos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportSaveDenied =>
+      'To save to Photos, allow adding photos in Settings';
+
+  @override
+  String get cardExportSaveFailed => 'Couldn\'t save to Photos';
+
+  @override
+  String get cardExportOpenSettings => 'Open Settings';
+
+  @override
+  String get cardExportPreviewToggleHint => 'Tap to include or skip';
 
   @override
   String get printBrandTagline => 'Every day, together | Elumi Behavior Cards';
@@ -3826,20 +3842,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cardExportFormatRow => 'Format';
-
-  @override
-  String get cardExportLayoutSection => 'Layout';
-
-  @override
   String get cardExportStyleSection => 'Style';
 
   @override
   String get cardExportOrientationRow => 'Paper orientation';
-
-  @override
-  String get cardExportOrientationSheetTitle =>
-      'How should the paper be laid out?';
 
   @override
   String get cardExportOrientationPortrait => 'Portrait';
@@ -3854,9 +3860,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardExportCardSizeRow => 'Card size';
 
   @override
-  String get cardExportCardSizeSheetTitle => 'How big should the cards be?';
-
-  @override
   String get cardExportCardSizeFit => 'Fill the page';
 
   @override
@@ -3869,7 +3872,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardExportProLayoutLocked => 'This format is available with Pro';
 
   @override
-  String get cardExportUpsellTitle => 'With Pro, save it your way';
+  String get cardExportUpsellTitle => 'Save in any layout with Pro';
 
   @override
   String get cardExportUpsellBody =>
@@ -3923,14 +3926,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBenefitCardExportWithoutWatermark =>
-      'Clean printouts with no strip at the bottom';
+      'Saved cards without the bottom band';
 
   @override
-  String get planBenefitCardExportAllThemes => 'Choose from every print design';
+  String get planBenefitCardExportAllThemes => 'Choose any card design';
 
   @override
   String get planBenefitCardExportAllLayouts =>
-      'Print a one-page routine or cut-out cards';
+      'Save as a one-page routine or cut-out cards';
 
   @override
   String get planKeepContentNotice =>
