@@ -19,7 +19,7 @@ enum ProUpsellStyle {
   link,
 }
 
-/// Pro 미리 보기 판이 할 일: 체험 기간 글 + 요금제 화면 열기 2개 (주 버튼 · `Pro 혜택 모두 보기`)
+/// Pro 미리 보기 판이 할 일: 체험 기간 글 + 요금제 화면 열기
 ///
 /// 기능 쪽이 `watchProUpsellActions` 로 만들어 넘김 (core 는 스토어 상품을 모름)
 @immutable
@@ -27,7 +27,6 @@ class ProUpsellActions {
   const ProUpsellActions({
     required this.freeTrialLabel,
     required this.onStart,
-    required this.onSeeAllBenefits,
   });
 
   /// 스토어가 체험 대상이라고 알린 기간 글 (`7일`). null 이면 `Pro 알아보기` (체험 없음 · 판매 모름)
@@ -35,9 +34,6 @@ class ProUpsellActions {
 
   /// 주 버튼 (연 기능 혜택을 맨 위로 올린 요금제 화면)
   final VoidCallback onStart;
-
-  /// `Pro 혜택 모두 보기` (요금제 화면)
-  final VoidCallback onSeeAllBenefits;
 }
 
 /// Pro 권유 버튼 단일 부품: 문구 `7일 무료로 써 보기` / `Pro 알아보기` + 모양 3개 (#1170 · #1189)

@@ -4394,11 +4394,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Proが終わり、止まりました';
+  String get routineSchedulePaused => 'くり返しお休み中';
 
   @override
   String get routineSchedulePausedNote =>
-      'Proが終わったため、くり返しを止めました。決めた曜日と時刻はそのまま残っています';
+      'いまはくり返しをお休みしています。決めた曜日と時刻は残っているので、Proを使うとまた動きます';
 
   @override
   String get routineScheduleSheetTitle => 'いつしますか？';
@@ -4753,9 +4753,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '少し待ってから、もう一度お試しください。';
 
   @override
-  String get proTeaserSampleLabel => 'サンプル画面';
-
-  @override
   String get proOnlyNoticeTitle => 'Proで使える機能です';
 
   @override
@@ -5045,9 +5042,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String planTryFreeTrial(String trial) {
     return '$trial無料で試す';
   }
-
-  @override
-  String get planSeeAllBenefits => 'Proの特典をすべて見る';
 
   @override
   String get planTierGift => 'ギフト';

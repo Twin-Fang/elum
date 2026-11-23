@@ -3690,7 +3690,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportCardSizeSmall => '작게';
 
   @override
-  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 형태예요';
+  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 모양이에요';
 
   @override
   String get cardExportUpsellTitle => 'Pro면 원하는 모양으로 저장할 수 있어요';
@@ -4414,11 +4414,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro가 끝나 멈췄어요';
+  String get routineSchedulePaused => '반복 쉬는 중';
 
   @override
   String get routineSchedulePausedNote =>
-      'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요';
+      '지금은 반복을 쉬고 있어요. 정해 둔 요일과 시각은 남아 있어서 Pro를 쓰면 다시 돌아가요';
 
   @override
   String get routineScheduleSheetTitle => '언제 할까요?';
@@ -4773,9 +4773,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
 
   @override
-  String get proTeaserSampleLabel => '예시 화면';
-
-  @override
   String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
 
   @override
@@ -4803,7 +4800,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proTeaserRoutineMemoryBenefit => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
 
   @override
-  String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
+  String get proTeaserCardThemeBenefit => '카드를 여러 디자인으로 저장할 수 있어요';
 
   @override
   String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
@@ -5067,9 +5064,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get planSeeAllBenefits => 'Pro 혜택 모두 보기';
-
-  @override
   String get planTierGift => '선물';
 
   @override
@@ -5097,14 +5091,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
 
   @override
-  String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
+  String get proTeaserCardThemeTitle => '카드를 더 예쁘게 저장해요';
 
   @override
-  String get proTeaserCardLayoutTitle => '인쇄용 카드를 원하는 대로 받아요';
+  String get proTeaserCardLayoutTitle => '카드를 원하는 모양으로 저장해요';
 
   @override
   String get proTeaserCardLayoutBenefit =>
-      '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+      '한 장에 여러 장, 가로 용지, 일과 한 장으로 저장할 수 있어요';
 
   @override
   String get homeSuggestionDismissLabel => '괜찮아요';

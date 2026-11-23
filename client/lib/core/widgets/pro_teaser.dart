@@ -4,12 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
-import 'elum_label_chip.dart';
-import 'elum_secondary_button.dart';
 import 'pro_badge.dart';
 import 'pro_upsell_button.dart';
 
-/// Pro 미리 보기: 또렷한 견본(아래로 사라짐, 입력·낭독 막음) + 떠 있는 카드 (PRO · 예시 화면 > 제목 > 한 줄 > 민트 버튼 > 혜택 모두 보기)
+/// Pro 미리 보기: 또렷한 견본(아래로 사라짐, 입력·낭독 막음) + 떠 있는 카드 (PRO > 제목 > 한 줄 > 민트 버튼)
 /// 보이는 조건은 부르는 쪽 (`PlanAccess.shouldShowTeaserFor`, 보호자 화면만), 요금제 화면은 [actions] 로 엶
 class ProTeaser extends StatelessWidget {
   const ProTeaser({
@@ -32,14 +30,12 @@ class ProTeaser extends StatelessWidget {
   /// 깔 견본 화면 (실제 사용자 기록이 아닌 예시 값)
   final Widget child;
 
-  /// 카드: 바깥 16 · 안쪽 20 · 모서리 24 · 배지 > 제목 12 · 제목 > 한 줄 6 · 한 줄 > 버튼 16 · 버튼 > 링크 8 · 배지 사이 4
+  /// 카드: 바깥 16 · 안쪽 20 · 모서리 24 · 배지 > 제목 12 · 제목 > 한 줄 6 · 한 줄 > 버튼 16
   static const _cardPadding = 20.0;
   static const _cardRadius = 24.0;
   static const _badgeToTitle = 12.0;
   static const _titleToBenefit = 6.0;
   static const _benefitToButton = 16.0;
-  static const _buttonToLink = 8.0;
-  static const _badgeGap = 4.0;
 
   /// 카드 그림자 (아래 14 · 번짐 34)
   static const _cardShadowOffsetY = 14.0;
@@ -76,7 +72,6 @@ class ProTeaser extends StatelessWidget {
 
   Widget _card(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(_cardPadding.w),
@@ -94,21 +89,7 @@ class ProTeaser extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 또렷한 견본을 진짜 기록으로 오해하지 않게 `예시 화면` 을 함께 둠
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: _badgeGap.w,
-            runSpacing: _badgeGap.h,
-            children: [
-              const ProBadge(),
-              ElumLabelChip(
-                label: l10n.proTeaserSampleLabel,
-                background: colors.editChipBg,
-                foreground: colors.textPrimary,
-              ),
-            ],
-          ),
+          const ProBadge(),
           SizedBox(height: _badgeToTitle.h),
           // 낱말 단위로 줄바꿈 (`쓸 / 수 있어요` 처럼 꺾이지 않게, #1169)
           Text(
@@ -130,8 +111,6 @@ class ProTeaser extends StatelessWidget {
             freeTrialLabel: actions.freeTrialLabel,
             onTap: actions.onStart,
           ),
-          SizedBox(height: _buttonToLink.h),
-          ElumSecondaryButton(label: l10n.planSeeAllBenefits, onTap: actions.onSeeAllBenefits),
         ],
       ),
     );

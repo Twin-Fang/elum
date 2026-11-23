@@ -4707,11 +4707,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'En pausa porque terminó Pro';
+  String get routineSchedulePaused => 'Repetición en pausa';
 
   @override
   String get routineSchedulePausedNote =>
-      'La repetición está en pausa porque terminó Pro. Tus días y hora siguen guardados';
+      'La repetición está en pausa por ahora. Tus días y hora siguen guardados y volverán a funcionar con Pro';
 
   @override
   String get routineScheduleSheetTitle => '¿Cuándo debe ser?';
@@ -5102,9 +5102,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inténtalo de nuevo en un momento.';
 
   @override
-  String get proTeaserSampleLabel => 'Pantalla de ejemplo';
-
-  @override
   String get proOnlyNoticeTitle => 'Esta función está disponible con Pro';
 
   @override
@@ -5421,9 +5418,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String planTryFreeTrial(String trial) {
     return 'Prueba gratis $trial';
   }
-
-  @override
-  String get planSeeAllBenefits => 'Ver todas las ventajas de Pro';
 
   @override
   String get planTierGift => 'Regalo';
