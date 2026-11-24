@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_circle_icon_button.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import 'routine_title_edit_label.dart';
@@ -81,7 +82,11 @@ class RoutineDetailHeader extends StatelessWidget {
                 ),
               ),
               if (onExportTap case final onExportTap?)
-                _ExportButton(onTap: onExportTap),
+                ElumCircleIconButton(
+                  iconAsset: AppAssets.iconDownload,
+                  semanticLabel: context.l10n.cardExportOpen,
+                  onTap: onExportTap,
+                ),
               if (onMoreTap != null)
                 AppPressable(
                   onTap: onMoreTap,
@@ -118,50 +123,6 @@ class RoutineDetailHeader extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// 머리 오른쪽 ↓ 받기 버튼: 연한 동그라미 + 아이콘 (저장·공유·인쇄 공통 입구라 프린터 대신 ↓, #1461)
-class _ExportButton extends StatelessWidget {
-  const _ExportButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  /// 동그라미 지름 · 아이콘 한 변 (시안 export-button-v2 E)
-  static const _circleDiameter = 40.0;
-  static const _iconSize = 20.0;
-
-  /// 동그라미 바깥 여백 (누르는 자리 48 확보)
-  static const _touchPadding = 4.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleIcon,
-      semanticLabel: context.l10n.cardExportOpen,
-      child: Padding(
-        padding: EdgeInsets.all(_touchPadding.w),
-        child: Container(
-          width: _circleDiameter.w,
-          height: _circleDiameter.w,
-          alignment: Alignment.center,
-          // 단계 줄과 같은 바탕색: 시트 바탕보다 한 단계 진해 눌리는 버튼으로 보임
-          decoration: BoxDecoration(
-            color: colors.editChipBg,
-            shape: BoxShape.circle,
-          ),
-          child: SvgPicture.asset(
-            AppAssets.iconDownload,
-            width: _iconSize.w,
-            height: _iconSize.w,
-            excludeFromSemantics: true,
-            colorFilter: ColorFilter.mode(colors.sheetTitleText, BlendMode.srcIn),
-          ),
-        ),
       ),
     );
   }
