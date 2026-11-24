@@ -11,7 +11,7 @@ import '../../domain/card_export_options.dart';
 
 /// 카드 저장 모양 고르기: 그림 타일 3개 한 줄 (카드 한 장씩 · 일과 한 장 · 오려 쓰는 카드, #1461)
 ///
-/// 고른 타일은 남색 테두리. 잠긴 모양은 오른쪽 위 PRO 배지 (누르면 부르는 쪽이 Pro 미리 보기)
+/// 고른 타일은 남색 테두리. 잠긴 모양은 아래 가장자리에 PRO 배지 ([ProBadgeHang], 누르면 부르는 쪽이 Pro 미리 보기)
 class CardExportFormatTiles extends StatelessWidget {
   const CardExportFormatTiles({
     super.key,
@@ -32,7 +32,8 @@ class CardExportFormatTiles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    final hasLockedFormat = _order.any(isLocked);
+    final tiles = IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -50,6 +51,9 @@ class CardExportFormatTiles extends StatelessWidget {
         ],
       ),
     );
+    // 잠긴 타일의 PRO 배지가 아래로 튀어나오는 만큼 비움 (아래 묶음을 덮지 않게)
+    if (!hasLockedFormat) return tiles;
+    return Padding(padding: EdgeInsets.only(bottom: ProBadgeHang.defaultHang.w), child: tiles);
   }
 
   /// 모양 > 이름
@@ -93,54 +97,46 @@ class _FormatTile extends StatelessWidget {
   static const _pictureHeight = 52.0;
   static const _pictureToLabel = 8.0;
   static const _labelToCaption = 2.0;
-  /// PRO 배지를 타일 위 가장자리에 걸치게 올리는 높이 (작은 그림을 가리지 않게)
-  static const _badgeLift = 22.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final borderWidth = context.space.selectedBorderWidth;
+    final tile = AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
+      padding: EdgeInsets.symmetric(horizontal: _paddingH.w, vertical: _paddingV.h),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(_radius.r),
+        // 안 고른 타일도 같은 두께 투명 테두리 (고를 때 글자가 밀리지 않게)
+        border: Border.all(color: isSelected ? colors.textPrimary : colors.surface, width: borderWidth),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: _pictureHeight.h, child: Center(child: _FormatPicture(format: format))),
+          SizedBox(height: _pictureToLabel.h),
+          // 좁은 타일이라 어절 단위로만 줄바꿈 (`순서대 / 로` 방지)
+          KeptText(
+            CardExportFormatTiles.labelOf(context, format),
+            textAlign: TextAlign.center,
+            style: context.typo.settingsTileLabel.copyWith(color: colors.textPrimary),
+          ),
+          SizedBox(height: _labelToCaption.h),
+          KeptText(
+            CardExportFormatTiles.captionOf(context, format),
+            textAlign: TextAlign.center,
+            style: context.typo.caption.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
     return Semantics(
       button: true,
       selected: isSelected,
       child: AppPressable(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          curve: AppMotion.standard,
-          padding: EdgeInsets.symmetric(horizontal: _paddingH.w, vertical: _paddingV.h),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(_radius.r),
-            // 안 고른 타일도 같은 두께 투명 테두리 (고를 때 글자가 밀리지 않게)
-            border: Border.all(color: isSelected ? colors.textPrimary : colors.surface, width: borderWidth),
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Column(
-                children: [
-                  SizedBox(height: _pictureHeight.h, child: Center(child: _FormatPicture(format: format))),
-                  SizedBox(height: _pictureToLabel.h),
-                  // 좁은 타일이라 어절 단위로만 줄바꿈 (`순서대 / 로` 방지)
-                  KeptText(
-                    CardExportFormatTiles.labelOf(context, format),
-                    textAlign: TextAlign.center,
-                    style: context.typo.settingsTileLabel.copyWith(color: colors.textPrimary),
-                  ),
-                  SizedBox(height: _labelToCaption.h),
-                  KeptText(
-                    CardExportFormatTiles.captionOf(context, format),
-                    textAlign: TextAlign.center,
-                    style: context.typo.caption.copyWith(color: colors.textSecondary),
-                  ),
-                ],
-              ),
-              if (isLocked)
-                Positioned(top: -_badgeLift.h, left: 0, right: 0, child: const Center(child: ProBadge())),
-            ],
-          ),
-        ),
+        child: ProBadgeHang(isShown: isLocked, child: tile),
       ),
     );
   }

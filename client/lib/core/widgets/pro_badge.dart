@@ -171,3 +171,46 @@ class PlanTierChip extends StatelessWidget {
     };
   }
 }
+
+/// 아이콘·도구 버튼·그림 타일의 PRO 표시: 감싼 조작 아래 가장자리 가운데에 [ProBadge] 를 걸침
+///
+/// 조작의 크기·아이콘·글자는 그대로 둠 (배지를 위에 얹거나 조작을 줄이지 않음). 튀어나온 [hang] 만큼 아래 자리는 부르는 쪽이 비움.
+/// 글이 있는 줄·칩은 이것 대신 글 뒤에 나란히 ([LabelWithProBadge])
+class ProBadgeHang extends StatelessWidget {
+  const ProBadgeHang({
+    super.key,
+    required this.isShown,
+    required this.child,
+    this.hang = defaultHang,
+  });
+
+  /// Free 에게 권하는 조작인가 (아니면 [child] 그대로)
+  final bool isShown;
+  final Widget child;
+
+  /// 배지가 조작 아래로 튀어나오는 길이 (배지 높이 22 중 거의 다 밖: 조작 안 글자와 떨어짐)
+  final double hang;
+
+  /// 기본 튀어나옴 · 줄 아래를 비울 때 쓰는 값
+  static const defaultHang = 20.0;
+
+  /// 배지가 조작보다 넓을 때 좌우로 삐져나가도 가운데에 서게 주는 폭
+  static const _overhang = 32.0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isShown) return child;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          bottom: -hang.w,
+          left: -_overhang.w,
+          right: -_overhang.w,
+          child: const Center(child: ProBadge()),
+        ),
+      ],
+    );
+  }
+}
