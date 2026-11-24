@@ -30,6 +30,9 @@ class CardExportFormatTiles extends StatelessWidget {
   static const _order = [CardExportFormat.cardImages, CardExportFormat.routineSheet, CardExportFormat.cutCards];
   static const _tileGap = 8.0;
 
+  /// PRO 배지 튀어나옴: 배지(22) 절반이 타일 하단에 걸침 (안쪽 아래 여백 12 라 글자는 안 덮음)
+  static const badgeHang = 11.0;
+
   @override
   Widget build(BuildContext context) {
     final hasLockedFormat = _order.any(isLocked);
@@ -53,7 +56,7 @@ class CardExportFormatTiles extends StatelessWidget {
     );
     // 잠긴 타일의 PRO 배지가 아래로 튀어나오는 만큼 비움 (아래 묶음을 덮지 않게)
     if (!hasLockedFormat) return tiles;
-    return Padding(padding: EdgeInsets.only(bottom: ProBadgeHang.defaultHang.w), child: tiles);
+    return Padding(padding: EdgeInsets.only(bottom: badgeHang.w), child: tiles);
   }
 
   /// 모양 > 이름
@@ -136,7 +139,7 @@ class _FormatTile extends StatelessWidget {
       selected: isSelected,
       child: AppPressable(
         onTap: onTap,
-        child: ProBadgeHang(isShown: isLocked, child: tile),
+        child: ProBadgeHang(isShown: isLocked, hang: CardExportFormatTiles.badgeHang, child: tile),
       ),
     );
   }
