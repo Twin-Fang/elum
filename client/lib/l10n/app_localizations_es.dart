@@ -1956,9 +1956,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => 'Imprimir';
-
-  @override
   String get routineDetailFinishedToday => 'Esta rutina ya está terminada';
 
   @override
@@ -3779,10 +3776,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get licenseLoadFailedMessage => 'No se pudo cargar la lista';
 
   @override
-  String get cardExportOpen => 'Guardar para imprimir';
+  String get cardExportOpen => 'Guardar tarjetas';
 
   @override
-  String get cardExportFormatSection => '¿Cómo lo quieres?';
+  String get cardExportFormatSection => '¿Cómo las guardamos?';
 
   @override
   String get cardExportFormatRoutineSheet => 'Rutina en una página';
@@ -3801,9 +3798,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cardExportFormatCardImagesCaption => 'Una imagen por tarjeta';
-
-  @override
-  String get cardExportPerPageSection => '¿Cuántas tarjetas por página?';
 
   @override
   String get cardExportIncludeText => 'Incluir el texto de la tarjeta';
@@ -3857,16 +3851,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get cardExportActualSizeHint =>
-      'Si imprimes desde otra app, elige el tamaño real';
-
-  @override
-  String get cardExportPrint => 'Imprimir';
-
-  @override
-  String get cardExportShare => 'Enviar';
-
-  @override
   String get cardExportPreparing => 'Preparando tus tarjetas';
 
   @override
@@ -3874,18 +3858,48 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo cargar la imagen de la tarjeta';
 
   @override
-  String get cardExportRenderFailed =>
-      'No se pudo crear el archivo para imprimir';
-
-  @override
-  String get cardExportPrintFailed =>
-      'Este dispositivo no puede imprimir. Usa Enviar';
+  String get cardExportRenderFailed => 'No pudimos crear las imágenes';
 
   @override
   String get cardExportNoCards => 'Esta rutina no tiene tarjetas';
 
   @override
-  String get cardExportNoneSelected => 'Elige al menos una tarjeta para enviar';
+  String get cardExportNoneSelected =>
+      'Elige al menos una tarjeta para guardar';
+
+  @override
+  String cardExportSaveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Guardar ($count)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardExportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Guardamos $count imágenes en Fotos',
+      one: 'Guardamos 1 imagen en Fotos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportSaveDenied =>
+      'Para guardar en Fotos, permite añadir fotos en Ajustes';
+
+  @override
+  String get cardExportSaveFailed => 'No pudimos guardar en Fotos';
+
+  @override
+  String get cardExportOpenSettings => 'Abrir Ajustes';
+
+  @override
+  String get cardExportPreviewToggleHint => 'Toca para incluir u omitir';
 
   @override
   String get printBrandTagline =>
@@ -3903,20 +3917,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get cardExportFormatRow => 'Formato';
-
-  @override
-  String get cardExportLayoutSection => 'Diseño de página';
-
-  @override
   String get cardExportStyleSection => 'Estilo';
 
   @override
   String get cardExportOrientationRow => 'Orientación del papel';
-
-  @override
-  String get cardExportOrientationSheetTitle =>
-      '¿Cómo quieres colocar el papel?';
 
   @override
   String get cardExportOrientationPortrait => 'Vertical';
@@ -3929,10 +3933,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cardExportCardSizeRow => 'Tamaño de la tarjeta';
-
-  @override
-  String get cardExportCardSizeSheetTitle =>
-      '¿De qué tamaño quieres las tarjetas?';
 
   @override
   String get cardExportCardSizeFit => 'Llenar la página';
@@ -3948,7 +3948,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este formato está disponible con Pro';
 
   @override
-  String get cardExportUpsellTitle => 'Con Pro, guárdalo a tu manera';
+  String get cardExportUpsellTitle =>
+      'Con Pro guardas con el diseño que quieras';
 
   @override
   String get cardExportUpsellBody =>
@@ -4005,15 +4006,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planBenefitCardExportWithoutWatermark =>
-      'Impresiones limpias sin franja abajo';
+      'Tarjetas guardadas sin la franja inferior';
 
   @override
   String get planBenefitCardExportAllThemes =>
-      'Elige entre todos los diseños de impresión';
+      'Elige cualquier diseño de tarjeta';
 
   @override
   String get planBenefitCardExportAllLayouts =>
-      'Imprime una rutina en una página o tarjetas para recortar';
+      'Guarda como rutina en una hoja o tarjetas para recortar';
 
   @override
   String get planKeepContentNotice =>
@@ -4706,11 +4707,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'En pausa porque terminó Pro';
+  String get routineSchedulePaused => 'Repetición en pausa';
 
   @override
   String get routineSchedulePausedNote =>
-      'La repetición está en pausa porque terminó Pro. Tus días y hora siguen guardados';
+      'La repetición está en pausa por ahora. Tus días y hora siguen guardados y volverán a funcionar con Pro';
 
   @override
   String get routineScheduleSheetTitle => '¿Cuándo debe ser?';
@@ -5101,9 +5102,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inténtalo de nuevo en un momento.';
 
   @override
-  String get proTeaserSampleLabel => 'Pantalla de ejemplo';
-
-  @override
   String get proOnlyNoticeTitle => 'Esta función está disponible con Pro';
 
   @override
@@ -5420,9 +5418,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String planTryFreeTrial(String trial) {
     return 'Prueba gratis $trial';
   }
-
-  @override
-  String get planSeeAllBenefits => 'Ver todas las ventajas de Pro';
 
   @override
   String get planTierGift => 'Regalo';

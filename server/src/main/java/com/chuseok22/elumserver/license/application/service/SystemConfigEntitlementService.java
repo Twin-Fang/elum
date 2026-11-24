@@ -54,13 +54,13 @@ public class SystemConfigEntitlementService implements EntitlementService {
     }
     try {
       Optional<Subscription> subscription = subscriptionRepository.findByMemberId(memberId);
+      LocalDateTime now = LocalDateTime.now();
       // 실제로 Pro 인 구독 행이 먼저 (선물·이벤트보다 우선)
-      if (subscription.isPresent() && subscription.get().effectivePlan(LocalDateTime.now()) == PlanType.PRO) {
+      if (subscription.isPresent() && subscription.get().effectivePlan(now) == PlanType.PRO) {
         return PlanType.PRO;
       }
-      // 행 없음·가입 기본 Free 행 > 기존 가입자 선물·신규가입 체험 (회수·스토어 행은 대상 아님)
-      boolean isPromotionCandidate = subscription.map(Subscription::isUntouchedSignupFree).orElse(true);
-      return isPromotionCandidate && memberProPromotion.findPromotion(memberId).isPresent()
+      // 그 외 > 기존 가입자 선물·신규가입 체험 (받는 범위는 MemberProPromotion)
+      return memberProPromotion.findPromotion(memberId, subscription.orElse(null), now).isPresent()
         ? PlanType.PRO
         : PlanType.FREE;
     } catch (Exception e) {

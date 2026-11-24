@@ -3,22 +3,23 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_choice_chip.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../../core/widgets/settings_group.dart';
 import '../../../../core/widgets/settings_switch_tile.dart';
 import '../../../../core/widgets/settings_tile.dart';
 import '../../domain/card_export_options.dart';
-import 'card_export_choice_sheet.dart';
+import 'card_export_format_tiles.dart';
 
-/// Free 가 잠긴 값을 고름 > 그 값으로 바꾼 설정 (Pro 미리 보기로만 그림, 내보내기 설정은 그대로)
+/// Free 가 잠긴 값을 고름 > 그 값으로 바꾼 설정 (Pro 미리 보기로만 그림, 저장 설정은 그대로)
 typedef CardExportLockedPick = void Function(CardExportOptions previewOptions, CardExportLock lock);
 
-/// 잠긴 값의 종류: 형태·배치(`cardExportAllLayouts`) · 디자인(`cardExportAllThemes`)
+/// 잠긴 값의 종류: 모양·배치(`cardExportAllLayouts`) · 디자인(`cardExportAllThemes`)
 enum CardExportLock { layout, theme }
 
-/// 내보내기 설정 (설정 화면 묶음 목록): 형태 > 배치(용지 방향 · 한 장에 · 카드 크기) > 꾸밈(디자인 · 카드 문장) > (Free) Pro 안내
+/// 카드 저장 설정: 모양 타일 > 꾸미기(디자인 칩 · 카드 문장 · A4 면 용지 방향 · 오려 쓰는 카드면 장수 · 카드 크기) > (Free) Pro 안내 (#1461)
 ///
-/// 줄을 누르면 고르기 시트. Free 는 카드 한 장씩 · 기본 디자인만, 나머지는 Pro 배지와 함께 보이고 고르면 Pro 미리 보기
+/// 누르면 바로 바뀜 (고르기 시트 없음). Free 는 카드 한 장씩 · 기본 디자인만, 나머지는 PRO 배지와 함께 보이고 고르면 Pro 미리 보기
 class CardExportOptionsPanel extends StatelessWidget {
   const CardExportOptionsPanel({
     super.key,
@@ -35,16 +36,16 @@ class CardExportOptionsPanel extends StatelessWidget {
   final CardExportOptions options;
   final ValueChanged<CardExportOptions> onChanged;
 
-  /// 형태·배치를 모두 고를 수 있는가 (`cardExportAllLayouts`)
+  /// 모양·배치를 모두 고를 수 있는가 (`cardExportAllLayouts`)
   final bool canUseAllLayouts;
 
   /// 디자인을 모두 고를 수 있는가 (`cardExportAllThemes`)
   final bool canUseAllThemes;
 
-  /// 잠긴 형태·배치를 Pro 배지와 함께 보이는가 (살 수 없으면 숨김)
+  /// 잠긴 모양을 PRO 배지와 함께 보이는가 (살 수 없으면 숨김)
   final bool shouldShowProLayouts;
 
-  /// 잠긴 디자인을 Pro 배지와 함께 보이는가 (살 수 없으면 숨김)
+  /// 잠긴 디자인을 PRO 배지와 함께 보이는가 (살 수 없으면 숨김)
   final bool shouldShowProThemes;
 
   final CardExportLockedPick onLockedPick;
@@ -53,77 +54,77 @@ class CardExportOptionsPanel extends StatelessWidget {
   final VoidCallback? onUpsellTap;
 
   static const _groupGap = 20.0;
-
-  /// Free 가 잠긴 배치 줄을 눌렀을 때 미리 보여 줄 오려 쓰는 카드 장수
-  static const _lockedPreviewCardsPerPage = CardsPerPage.four;
-
-  bool get _isLayoutLocked => !canUseAllLayouts;
+  static const _headerToContent = 8.0;
+  static const _headerInsetH = 4.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // 배치: 종이에 찍는 형태일 때, 또는 Free 에게 Pro 로 열리는 줄을 보일 때
-    final shouldShowLayoutGroup = options.format.hasPaperLayout || (_isLayoutLocked && shouldShowProLayouts);
-    final shouldShowPerPage = options.format == CardExportFormat.cutCards || _isLayoutLocked;
+    final colors = context.colors;
     final upsellTap = onUpsellTap;
+    final themeChoices = [
+      for (final theme in CardDesignTheme.values)
+        if (!_isThemeLocked(theme) || shouldShowProThemes) theme,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsGroup(
-          children: [
-            SettingsTile(
-              label: l10n.cardExportFormatRow,
-              valueText: formatLabelOf(context, options.format),
-              showChevronWithValue: true,
-              onTap: () => _pickFormat(context),
+        // 모양 고르기 (살 수 없는 Free 는 잠긴 모양을 숨겨 카드 한 장씩만 남음 > 줄째 생략)
+        if (canUseAllLayouts || shouldShowProLayouts) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: _headerInsetH.w),
+            child: Text(
+              l10n.cardExportFormatSection,
+              style: context.typo.settingsGroupLabel.copyWith(color: colors.settingsGroupLabel),
             ),
-          ],
-        ),
-        if (shouldShowLayoutGroup) ...[
-          SizedBox(height: _groupGap.h),
-          SettingsGroup(
-            header: l10n.cardExportLayoutSection,
-            children: [
-              SettingsTile(
-                label: l10n.cardExportOrientationRow,
-                valueText: _orientationLabel(context, options.orientation),
-                showChevronWithValue: true,
-                shouldShowProBadge: _isLayoutLocked,
-                onTap: () => _pickOrientation(context),
-              ),
-              if (shouldShowPerPage)
-                SettingsTile(
-                  label: l10n.cardExportPerPageRow,
-                  valueText: l10n.cardExportPerPage(options.cardsPerPage.count),
-                  showChevronWithValue: true,
-                  shouldShowProBadge: _isLayoutLocked,
-                  onTap: () => _pickCardsPerPage(context),
-                ),
-              SettingsTile(
-                label: l10n.cardExportCardSizeRow,
-                valueText: _cardSizeLabel(context, options.cardSize),
-                showChevronWithValue: true,
-                shouldShowProBadge: _isLayoutLocked,
-                onTap: () => _pickCardSize(context),
-              ),
-            ],
           ),
+          SizedBox(height: _headerToContent.h),
+          CardExportFormatTiles(selected: options.format, isLocked: _isFormatLocked, onSelected: _onFormatSelected),
+          SizedBox(height: _groupGap.h),
         ],
-        SizedBox(height: _groupGap.h),
         SettingsGroup(
           header: l10n.cardExportStyleSection,
           children: [
-            SettingsTile(
-              label: l10n.cardExportThemeSection,
-              valueText: themeLabelOf(context, options.theme),
-              showChevronWithValue: true,
-              onTap: () => _pickTheme(context),
-            ),
+            // 디자인: 고를 값이 둘 이상일 때만 (살 수 없는 Free 는 기본 하나라 줄째 생략)
+            if (themeChoices.length > 1)
+              _ChipRow<CardDesignTheme>(
+                label: l10n.cardExportThemeSection,
+                values: themeChoices,
+                selected: options.theme,
+                labelOf: (theme) => themeLabelOf(context, theme),
+                isLocked: _isThemeLocked,
+                onSelected: _onThemeSelected,
+              ),
             SettingsSwitchTile(
               label: l10n.cardExportIncludeText,
               value: options.shouldIncludeText,
               onChanged: (value) => onChanged(options.copyWith(shouldIncludeText: value)),
             ),
+            // 배치: 종이 모양일 때만 (카드 한 장씩은 카드 크기 그대로)
+            if (options.format.hasPaperLayout)
+              _ChipRow<PaperOrientation>(
+                label: l10n.cardExportOrientationRow,
+                values: PaperOrientation.values,
+                selected: options.orientation,
+                labelOf: (orientation) => _orientationLabel(context, orientation),
+                onSelected: (orientation) => onChanged(options.copyWith(orientation: orientation)),
+              ),
+            if (options.format == CardExportFormat.cutCards) ...[
+              _ChipRow<CardsPerPage>(
+                label: l10n.cardExportPerPageRow,
+                values: CardsPerPage.values,
+                selected: options.cardsPerPage,
+                labelOf: (perPage) => l10n.cardExportPerPage(perPage.count),
+                onSelected: (perPage) => onChanged(options.copyWith(cardsPerPage: perPage)),
+              ),
+              _ChipRow<CardSize>(
+                label: l10n.cardExportCardSizeRow,
+                values: CardSize.values,
+                selected: options.cardSize,
+                labelOf: (size) => _cardSizeLabel(context, size),
+                onSelected: (size) => onChanged(options.copyWith(cardSize: size)),
+              ),
+            ],
           ],
         ),
         if (upsellTap != null) ...[
@@ -134,129 +135,24 @@ class CardExportOptionsPanel extends StatelessWidget {
     );
   }
 
-  // 고른 값 반영: 잠긴 값이면 Pro 미리 보기, 아니면 설정 변경
-  void _apply(CardExportOptions next, {required bool isLocked, required CardExportLock lock}) {
-    if (isLocked) {
-      onLockedPick(next, lock);
-      return;
-    }
-    onChanged(next);
+  // 모양 고름: 잠긴 모양이면 Pro 미리 보기, 아니면 설정 변경
+  void _onFormatSelected(CardExportFormat format) {
+    if (format == options.format) return;
+    final next = options.copyWith(format: format);
+    _isFormatLocked(format) ? onLockedPick(next, CardExportLock.layout) : onChanged(next);
   }
 
-  Future<void> _pickFormat(BuildContext context) async {
-    final l10n = context.l10n;
-    final picked = await showCardExportChoiceSheet<CardExportFormat>(
-      context: context,
-      title: l10n.cardExportFormatSection,
-      selected: options.format,
-      choices: [
-        for (final format in CardExportFormat.values)
-          if (!_isFormatLocked(format) || shouldShowProLayouts)
-            CardExportChoice(
-              value: format,
-              label: formatLabelOf(context, format),
-              caption: _formatCaption(context, format),
-              isLocked: _isFormatLocked(format),
-            ),
-      ],
-    );
-    if (picked == null || picked == options.format) return;
-    _apply(options.copyWith(format: picked), isLocked: _isFormatLocked(picked), lock: CardExportLock.layout);
+  void _onThemeSelected(CardDesignTheme theme) {
+    if (theme == options.theme) return;
+    final next = options.copyWith(theme: theme);
+    _isThemeLocked(theme) ? onLockedPick(next, CardExportLock.theme) : onChanged(next);
   }
 
-  bool _isFormatLocked(CardExportFormat format) => _isLayoutLocked && format != CardExportFormat.cardImages;
-
-  // 배치 줄 3개: Free 는 시트 없이 바로 Pro 미리 보기 (오려 쓰는 카드로 그 값을 보여 줌)
-  Future<void> _pickOrientation(BuildContext context) async {
-    if (_isLayoutLocked) {
-      _showLockedLayout(options.copyWith(orientation: PaperOrientation.landscape));
-      return;
-    }
-    final picked = await showCardExportChoiceSheet<PaperOrientation>(
-      context: context,
-      title: context.l10n.cardExportOrientationSheetTitle,
-      selected: options.orientation,
-      choices: [
-        for (final orientation in PaperOrientation.values)
-          CardExportChoice(value: orientation, label: _orientationLabel(context, orientation)),
-      ],
-    );
-    if (picked != null) onChanged(options.copyWith(orientation: picked));
-  }
-
-  Future<void> _pickCardsPerPage(BuildContext context) async {
-    if (_isLayoutLocked) {
-      _showLockedLayout(options.copyWith(cardsPerPage: _lockedPreviewCardsPerPage));
-      return;
-    }
-    final l10n = context.l10n;
-    final picked = await showCardExportChoiceSheet<CardsPerPage>(
-      context: context,
-      title: l10n.cardExportPerPageSection,
-      selected: options.cardsPerPage,
-      choices: [
-        for (final perPage in CardsPerPage.values)
-          CardExportChoice(value: perPage, label: l10n.cardExportPerPage(perPage.count)),
-      ],
-    );
-    if (picked != null) onChanged(options.copyWith(cardsPerPage: picked));
-  }
-
-  Future<void> _pickCardSize(BuildContext context) async {
-    if (_isLayoutLocked) {
-      _showLockedLayout(options.copyWith(cardSize: CardSize.medium));
-      return;
-    }
-    final picked = await showCardExportChoiceSheet<CardSize>(
-      context: context,
-      title: context.l10n.cardExportCardSizeSheetTitle,
-      selected: options.cardSize,
-      choices: [
-        for (final size in CardSize.values) CardExportChoice(value: size, label: _cardSizeLabel(context, size)),
-      ],
-    );
-    if (picked != null) onChanged(options.copyWith(cardSize: picked));
-  }
-
-  // 배치는 종이에 찍는 형태에서만 보이므로 미리 보기는 오려 쓰는 카드로
-  void _showLockedLayout(CardExportOptions next) =>
-      onLockedPick(next.copyWith(format: CardExportFormat.cutCards), CardExportLock.layout);
-
-  Future<void> _pickTheme(BuildContext context) async {
-    final picked = await showCardExportChoiceSheet<CardDesignTheme>(
-      context: context,
-      title: context.l10n.cardExportThemeSection,
-      selected: options.theme,
-      choices: [
-        for (final theme in CardDesignTheme.values)
-          if (!_isThemeLocked(theme) || shouldShowProThemes)
-            CardExportChoice(value: theme, label: themeLabelOf(context, theme), isLocked: _isThemeLocked(theme)),
-      ],
-    );
-    if (picked == null || picked == options.theme) return;
-    _apply(options.copyWith(theme: picked), isLocked: _isThemeLocked(picked), lock: CardExportLock.theme);
-  }
+  bool _isFormatLocked(CardExportFormat format) => !canUseAllLayouts && format != CardExportFormat.cardImages;
 
   bool _isThemeLocked(CardDesignTheme theme) => theme.isProOnly && !canUseAllThemes;
 
-  static String formatLabelOf(BuildContext context, CardExportFormat format) {
-    final l10n = context.l10n;
-    return switch (format) {
-      CardExportFormat.routineSheet => l10n.cardExportFormatRoutineSheet,
-      CardExportFormat.cutCards => l10n.cardExportFormatCutCards,
-      CardExportFormat.cardImages => l10n.cardExportFormatCardImages,
-    };
-  }
-
-  static String _formatCaption(BuildContext context, CardExportFormat format) {
-    final l10n = context.l10n;
-    return switch (format) {
-      CardExportFormat.routineSheet => l10n.cardExportFormatRoutineSheetCaption,
-      CardExportFormat.cutCards => l10n.cardExportFormatCutCardsCaption,
-      CardExportFormat.cardImages => l10n.cardExportFormatCardImagesCaption,
-    };
-  }
-
+  /// 디자인 > 이름
   static String themeLabelOf(BuildContext context, CardDesignTheme theme) {
     final l10n = context.l10n;
     return switch (theme) {
@@ -268,17 +164,78 @@ class CardExportOptionsPanel extends StatelessWidget {
     };
   }
 
-  static String _orientationLabel(BuildContext context, PaperOrientation orientation) =>
-      switch (orientation) {
-        PaperOrientation.portrait => context.l10n.cardExportOrientationPortrait,
-        PaperOrientation.landscape => context.l10n.cardExportOrientationLandscape,
-      };
+  static String _orientationLabel(BuildContext context, PaperOrientation orientation) => switch (orientation) {
+    PaperOrientation.portrait => context.l10n.cardExportOrientationPortrait,
+    PaperOrientation.landscape => context.l10n.cardExportOrientationLandscape,
+  };
 
   static String _cardSizeLabel(BuildContext context, CardSize size) => switch (size) {
     CardSize.fit => context.l10n.cardExportCardSizeFit,
     CardSize.medium => context.l10n.cardExportCardSizeMedium,
     CardSize.small => context.l10n.cardExportCardSizeSmall,
   };
+}
+
+/// 묶음 안 한 줄: 이름 > 칩 줄 (넘치면 옆으로 밀기). 잠긴 값은 PRO 배지
+class _ChipRow<T> extends StatelessWidget {
+  const _ChipRow({
+    required this.label,
+    required this.values,
+    required this.selected,
+    required this.labelOf,
+    required this.onSelected,
+    this.isLocked,
+  });
+
+  final String label;
+  final List<T> values;
+  final T selected;
+  final String Function(T value) labelOf;
+  final ValueChanged<T> onSelected;
+
+  /// 이 값이 잠겼는가 (null 이면 잠긴 값 없음)
+  final bool Function(T value)? isLocked;
+
+  /// 칩 줄 좌우: 같은 묶음의 켜고 끄기 줄 글자와 왼쪽을 맞춤
+  static const _paddingH = SettingsTile.cardPadLeft;
+  static const _paddingV = 14.0;
+  static const _labelToChips = 10.0;
+  static const _chipGap = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: _paddingV.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: _paddingH.w),
+            child: Text(label, style: context.typo.settingsTileLabel.copyWith(color: colors.textPrimary)),
+          ),
+          SizedBox(height: _labelToChips.h),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: _paddingH.w),
+            child: Row(
+              children: [
+                for (final (index, value) in values.indexed) ...[
+                  if (index > 0) SizedBox(width: _chipGap.w),
+                  ElumChoiceChip(
+                    label: labelOf(value),
+                    isSelected: value == selected,
+                    shouldShowProBadge: isLocked?.call(value) ?? false,
+                    onTap: () => onSelected(value),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Free 아래 Pro 안내 판: 제목 > 한 줄 > 민트 버튼 (요금제 화면)

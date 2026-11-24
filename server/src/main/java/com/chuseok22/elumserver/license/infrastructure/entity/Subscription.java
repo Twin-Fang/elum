@@ -73,6 +73,11 @@ public class Subscription extends BaseEntity {
     return source == SubscriptionSource.SIGNUP && plan == PlanType.FREE;
   }
 
+  /// 관리자 수동 행인데 지금 Pro 가 아닌가 (수동 Pro 기간 끝남 · 관리자가 Free 로 돌림) — 기존 가입자 선물은 받음
+  public boolean isManualWithoutProNow(LocalDateTime now) {
+    return source == SubscriptionSource.MANUAL && effectivePlan(now) != PlanType.PRO;
+  }
+
   /**
    * 지금 이 시각에 실제로 유효한 플랜.
    *

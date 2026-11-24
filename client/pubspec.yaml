@@ -90,7 +90,6 @@ dependencies:
   firebase_crashlytics: ^6.0.0
   firebase_analytics: ^13.0.0
   pdf: ^3.12.0
-  printing: ^5.14.3
   in_app_purchase: ^3.3.1
   in_app_purchase_android: ^0.5.0
   # App Store 무료 체험 대상·기간 조회 (#1166). in_app_purchase 가 이미 쓰는 판과 같게
@@ -99,6 +98,8 @@ dependencies:
   record: ^6.2.1
   in_app_review: ^2.0.12
   webview_flutter: ^4.14.1
+  # 카드 저장하기: 사진 앱에 바로 저장 (#1461)
+  gal: ^2.3.3
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").

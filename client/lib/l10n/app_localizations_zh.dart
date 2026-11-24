@@ -1785,9 +1785,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => '打印用';
-
-  @override
   String get routineDetailFinishedToday => '已经全部完成的日常';
 
   @override
@@ -3495,10 +3492,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get licenseLoadFailedMessage => '没能加载列表';
 
   @override
-  String get cardExportOpen => '下载打印版';
+  String get cardExportOpen => '保存卡片';
 
   @override
-  String get cardExportFormatSection => '要怎么下载？';
+  String get cardExportFormatSection => '以什么样式保存?';
 
   @override
   String get cardExportFormatRoutineSheet => '一页日常';
@@ -3517,9 +3514,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cardExportFormatCardImagesCaption => '每张卡片一张图片';
-
-  @override
-  String get cardExportPerPageSection => '每页放几张？';
 
   @override
   String get cardExportIncludeText => '加入卡片文字';
@@ -3568,31 +3562,51 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cardExportActualSizeHint => '在其他应用中打印时，请选择实际大小';
-
-  @override
-  String get cardExportPrint => '打印';
-
-  @override
-  String get cardExportShare => '发送';
-
-  @override
   String get cardExportPreparing => '正在准备卡片';
 
   @override
   String get cardExportImageFailed => '没能加载卡片图片';
 
   @override
-  String get cardExportRenderFailed => '没能生成打印文件';
-
-  @override
-  String get cardExportPrintFailed => '这台设备无法打印。请用发送来下载';
+  String get cardExportRenderFailed => '无法生成要保存的图片';
 
   @override
   String get cardExportNoCards => '这个日常没有卡片';
 
   @override
-  String get cardExportNoneSelected => '请至少选择一张要发送的卡片';
+  String get cardExportNoneSelected => '请至少选择一张要保存的卡片';
+
+  @override
+  String cardExportSaveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '保存($count张)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardExportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已将 $count 张保存到照片',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportSaveDenied => '要保存到照片，请在设置中允许添加照片';
+
+  @override
+  String get cardExportSaveFailed => '无法保存到照片';
+
+  @override
+  String get cardExportOpenSettings => '打开设置';
+
+  @override
+  String get cardExportPreviewToggleHint => '点击加入或移除';
 
   @override
   String get printBrandTagline => '一起过好每一天 | elum 行为卡片';
@@ -3608,19 +3622,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cardExportFormatRow => '形式';
-
-  @override
-  String get cardExportLayoutSection => '排版';
-
-  @override
-  String get cardExportStyleSection => '装饰';
+  String get cardExportStyleSection => '样式';
 
   @override
   String get cardExportOrientationRow => '纸张方向';
-
-  @override
-  String get cardExportOrientationSheetTitle => '纸张要怎么放？';
 
   @override
   String get cardExportOrientationPortrait => '纵向';
@@ -3635,9 +3640,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportCardSizeRow => '卡片大小';
 
   @override
-  String get cardExportCardSizeSheetTitle => '卡片要放多大？';
-
-  @override
   String get cardExportCardSizeFit => '铺满';
 
   @override
@@ -3650,7 +3652,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardExportProLayoutLocked => '这是Pro可以使用的形式';
 
   @override
-  String get cardExportUpsellTitle => '有Pro就能按想要的方式下载';
+  String get cardExportUpsellTitle => '升级 Pro 可按任意样式保存';
 
   @override
   String get cardExportUpsellBody => '一页日常、剪下来用的卡片、一页多张、横向纸张，连设计都能选';
@@ -3699,13 +3701,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planBenefitMoreMonthlyCredits => '每月获得更多积分';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '打印件底部没有标志条，干净整洁';
+  String get planBenefitCardExportWithoutWatermark => '保存的卡片底部没有标识条';
 
   @override
-  String get planBenefitCardExportAllThemes => '可以选择所有打印设计';
+  String get planBenefitCardExportAllThemes => '可选择全部卡片样式';
 
   @override
-  String get planBenefitCardExportAllLayouts => '可以打印一页日常、剪下来用的卡片';
+  String get planBenefitCardExportAllLayouts => '可保存为一页日程或剪切卡片';
 
   @override
   String get planKeepContentNotice => 'Pro结束后，做好的日常和图片也会保留';
@@ -4365,10 +4367,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro已结束，已暂停';
+  String get routineSchedulePaused => '重复已暂停';
 
   @override
-  String get routineSchedulePausedNote => 'Pro已结束，重复已暂停。设置好的星期和时间仍然保留';
+  String get routineSchedulePausedNote => '目前重复已暂停。设置好的星期和时间仍然保留，使用 Pro 后会重新开始';
 
   @override
   String get routineScheduleSheetTitle => '什么时候做？';
@@ -4722,9 +4724,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '请稍后再试。';
 
   @override
-  String get proTeaserSampleLabel => '示例画面';
-
-  @override
   String get proOnlyNoticeTitle => '这是Pro可以使用的功能';
 
   @override
@@ -5012,9 +5011,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String planTryFreeTrial(String trial) {
     return '免费试用$trial';
   }
-
-  @override
-  String get planSeeAllBenefits => '查看全部Pro权益';
 
   @override
   String get planTierGift => '礼物';

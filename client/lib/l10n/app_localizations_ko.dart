@@ -1805,9 +1805,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get routineDetailExportLabel => '인쇄용';
-
-  @override
   String get routineDetailFinishedToday => '다 끝낸 일과예요';
 
   @override
@@ -3536,31 +3533,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get licenseLoadFailedMessage => '목록을 불러오지 못했어요';
 
   @override
-  String get cardExportOpen => '인쇄용으로 받기';
+  String get cardExportOpen => '카드 저장하기';
 
   @override
-  String get cardExportFormatSection => '어떻게 받을까요?';
+  String get cardExportFormatSection => '어떤 모양으로 저장할까요?';
 
   @override
   String get cardExportFormatRoutineSheet => '일과 한 장';
 
   @override
-  String get cardExportFormatRoutineSheetCaption => 'A4 한 장에 순서대로';
+  String get cardExportFormatRoutineSheetCaption => 'A4에 순서대로';
 
   @override
   String get cardExportFormatCutCards => '오려 쓰는 카드';
 
   @override
-  String get cardExportFormatCutCardsCaption => 'A4에 자를 선과 함께';
+  String get cardExportFormatCutCardsCaption => 'A4에 자를 선';
 
   @override
   String get cardExportFormatCardImages => '카드 한 장씩';
 
   @override
-  String get cardExportFormatCardImagesCaption => '카드마다 이미지 한 장';
-
-  @override
-  String get cardExportPerPageSection => '한 쪽에 몇 장 넣을까요?';
+  String get cardExportFormatCardImagesCaption => '카드마다 한 장';
 
   @override
   String get cardExportIncludeText => '카드 문장 넣기';
@@ -3609,31 +3603,51 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get cardExportActualSizeHint => '다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요';
-
-  @override
-  String get cardExportPrint => '인쇄하기';
-
-  @override
-  String get cardExportShare => '보내기';
-
-  @override
   String get cardExportPreparing => '카드를 준비하고 있어요';
 
   @override
   String get cardExportImageFailed => '카드 그림을 불러오지 못했어요';
 
   @override
-  String get cardExportRenderFailed => '인쇄용 파일을 만들지 못했어요';
-
-  @override
-  String get cardExportPrintFailed => '이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요';
+  String get cardExportRenderFailed => '저장할 그림을 만들지 못했어요';
 
   @override
   String get cardExportNoCards => '카드가 없는 일과예요';
 
   @override
-  String get cardExportNoneSelected => '보낼 카드를 하나 이상 골라 주세요';
+  String get cardExportNoneSelected => '저장할 카드를 하나 이상 골라 주세요';
+
+  @override
+  String cardExportSaveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '저장하기 ($count장)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cardExportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '사진에 $count장 저장했어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardExportSaveDenied => '사진에 저장하려면 설정에서 사진 추가를 허용해 주세요';
+
+  @override
+  String get cardExportSaveFailed => '사진에 저장하지 못했어요';
+
+  @override
+  String get cardExportOpenSettings => '설정 열기';
+
+  @override
+  String get cardExportPreviewToggleHint => '눌러서 빼고 넣어요';
 
   @override
   String get printBrandTagline => '일상을 함께 | 이룸 행동카드';
@@ -3649,19 +3663,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get cardExportFormatRow => '형태';
-
-  @override
-  String get cardExportLayoutSection => '배치';
-
-  @override
-  String get cardExportStyleSection => '꾸밈';
+  String get cardExportStyleSection => '꾸미기';
 
   @override
   String get cardExportOrientationRow => '용지 방향';
-
-  @override
-  String get cardExportOrientationSheetTitle => '용지를 어떻게 놓을까요?';
 
   @override
   String get cardExportOrientationPortrait => '세로';
@@ -3676,9 +3681,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportCardSizeRow => '카드 크기';
 
   @override
-  String get cardExportCardSizeSheetTitle => '카드를 얼마나 크게 넣을까요?';
-
-  @override
   String get cardExportCardSizeFit => '꽉 차게';
 
   @override
@@ -3688,10 +3690,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardExportCardSizeSmall => '작게';
 
   @override
-  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 형태예요';
+  String get cardExportProLayoutLocked => 'Pro에서 쓸 수 있는 모양이에요';
 
   @override
-  String get cardExportUpsellTitle => 'Pro면 원하는 대로 받을 수 있어요';
+  String get cardExportUpsellTitle => 'Pro면 원하는 모양으로 저장할 수 있어요';
 
   @override
   String get cardExportUpsellBody =>
@@ -3741,13 +3743,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planBenefitMoreMonthlyCredits => '매달 크레딧을 더 많이 받아요';
 
   @override
-  String get planBenefitCardExportWithoutWatermark => '인쇄물 아래 띠 없이 깔끔해요';
+  String get planBenefitCardExportWithoutWatermark => '저장한 카드 아래 띠 없이 깔끔해요';
 
   @override
-  String get planBenefitCardExportAllThemes => '인쇄 디자인을 모두 골라요';
+  String get planBenefitCardExportAllThemes => '카드 디자인을 모두 골라요';
 
   @override
-  String get planBenefitCardExportAllLayouts => '일과 한 장, 오려 쓰는 카드로 인쇄해요';
+  String get planBenefitCardExportAllLayouts => '일과 한 장, 오려 쓰는 카드로 저장해요';
 
   @override
   String get planKeepContentNotice => 'Pro가 끝나도 만든 일과와 그림은 그대로 남아요';
@@ -4412,11 +4414,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineScheduleDaySeparator => '·';
 
   @override
-  String get routineSchedulePaused => 'Pro가 끝나 멈췄어요';
+  String get routineSchedulePaused => '반복 쉬는 중';
 
   @override
   String get routineSchedulePausedNote =>
-      'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요';
+      '지금은 반복을 쉬고 있어요. 정해 둔 요일과 시각은 남아 있어서 Pro를 쓰면 다시 돌아가요';
 
   @override
   String get routineScheduleSheetTitle => '언제 할까요?';
@@ -4771,9 +4773,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineMemorySaveFailedFallback => '잠시 뒤 다시 해 주세요.';
 
   @override
-  String get proTeaserSampleLabel => '예시 화면';
-
-  @override
   String get proOnlyNoticeTitle => 'Pro에서 쓸 수 있는 기능이에요';
 
   @override
@@ -4801,7 +4800,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proTeaserRoutineMemoryBenefit => '내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요';
 
   @override
-  String get proTeaserCardThemeBenefit => '인쇄용 카드를 여러 디자인으로 받을 수 있어요';
+  String get proTeaserCardThemeBenefit => '카드를 여러 디자인으로 저장할 수 있어요';
 
   @override
   String get proTeaserWeeklyPlanBenefit => '매일 아침 일과를 새로 보내지 않아도 돼요';
@@ -5065,9 +5064,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get planSeeAllBenefits => 'Pro 혜택 모두 보기';
-
-  @override
   String get planTierGift => '선물';
 
   @override
@@ -5095,14 +5091,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get proTeaserRoutineMemoryTitle => '이룸이에게 맞춘 방식을 기억해요';
 
   @override
-  String get proTeaserCardThemeTitle => '인쇄용 카드를 더 예쁘게 받아요';
+  String get proTeaserCardThemeTitle => '카드를 더 예쁘게 저장해요';
 
   @override
-  String get proTeaserCardLayoutTitle => '인쇄용 카드를 원하는 대로 받아요';
+  String get proTeaserCardLayoutTitle => '카드를 원하는 모양으로 저장해요';
 
   @override
   String get proTeaserCardLayoutBenefit =>
-      '한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요';
+      '한 장에 여러 장, 가로 용지, 일과 한 장으로 저장할 수 있어요';
 
   @override
   String get homeSuggestionDismissLabel => '괜찮아요';

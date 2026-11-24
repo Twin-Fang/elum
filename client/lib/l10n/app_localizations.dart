@@ -3305,12 +3305,6 @@ abstract class AppLocalizations {
   /// **'{done}/{total} 했어요'**
   String routineDetailPastProgress(int done, int total);
 
-  /// 일과 상세 시트 제목 오른쪽 버튼 글자: 인쇄용으로 받기 화면 열기 (#1298)
-  ///
-  /// In ko, this message translates to:
-  /// **'인쇄용'**
-  String get routineDetailExportLabel;
-
   /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
   ///
   /// In ko, this message translates to:
@@ -6299,16 +6293,16 @@ abstract class AppLocalizations {
   /// **'목록을 불러오지 못했어요'**
   String get licenseLoadFailedMessage;
 
-  /// 일과 상세 시트 머리의 내려받기 버튼 낭독 이름 · 내보내기 화면 제목
+  /// 일과 상세 시트 머리의 내려받기 버튼 낭독 이름 · 카드 저장하기 화면 제목 #1461
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용으로 받기'**
+  /// **'카드 저장하기'**
   String get cardExportOpen;
 
-  /// 내보내기 형태 고르기 묶음 제목
+  /// 카드 저장하기 모양 타일 머리 #1461
   ///
   /// In ko, this message translates to:
-  /// **'어떻게 받을까요?'**
+  /// **'어떤 모양으로 저장할까요?'**
   String get cardExportFormatSection;
 
   /// 형태: A4 한 장에 일과 카드 전부
@@ -6320,7 +6314,7 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'A4 한 장에 순서대로'**
+  /// **'A4에 순서대로'**
   String get cardExportFormatRoutineSheetCaption;
 
   /// 형태: 자를 선이 있는 A4
@@ -6332,7 +6326,7 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'A4에 자를 선과 함께'**
+  /// **'A4에 자를 선'**
   String get cardExportFormatCutCardsCaption;
 
   /// 형태: 카드마다 이미지 한 장
@@ -6344,14 +6338,8 @@ abstract class AppLocalizations {
   /// 형태 설명
   ///
   /// In ko, this message translates to:
-  /// **'카드마다 이미지 한 장'**
+  /// **'카드마다 한 장'**
   String get cardExportFormatCardImagesCaption;
-
-  /// 오려 쓰는 카드 장수 묶음 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'한 쪽에 몇 장 넣을까요?'**
-  String get cardExportPerPageSection;
 
   /// 카드 문장을 넣을지 켜고 끄는 줄
   ///
@@ -6431,24 +6419,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{그림을 불러오지 못한 카드 {count}장은 다른 그림이나 제목으로 들어가요}}'**
   String cardExportSomePicturesFailed(int count);
 
-  /// PDF 를 다른 앱으로 보낼 때 크기 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 앱에서 인쇄할 때는 실제 크기를 골라 주세요'**
-  String get cardExportActualSizeHint;
-
-  /// 기기 인쇄 화면 열기 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'인쇄하기'**
-  String get cardExportPrint;
-
-  /// 공유 시트 열기 버튼
-  ///
-  /// In ko, this message translates to:
-  /// **'보내기'**
-  String get cardExportShare;
-
   /// 그림을 받는 동안
   ///
   /// In ko, this message translates to:
@@ -6464,14 +6434,8 @@ abstract class AppLocalizations {
   /// 파일 만들기 실패 팝업
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용 파일을 만들지 못했어요'**
+  /// **'저장할 그림을 만들지 못했어요'**
   String get cardExportRenderFailed;
-
-  /// 인쇄 화면을 못 열었을 때
-  ///
-  /// In ko, this message translates to:
-  /// **'이 기기에서 인쇄할 수 없어요. 보내기로 받아 주세요'**
-  String get cardExportPrintFailed;
 
   /// 카드 0장 일과
   ///
@@ -6482,8 +6446,44 @@ abstract class AppLocalizations {
   /// 카드 한 장씩에서 모두 뺐을 때
   ///
   /// In ko, this message translates to:
-  /// **'보낼 카드를 하나 이상 골라 주세요'**
+  /// **'저장할 카드를 하나 이상 골라 주세요'**
   String get cardExportNoneSelected;
+
+  /// 아래 저장하기 버튼: 저장할 그림 장수 포함 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{저장하기 ({count}장)}}'**
+  String cardExportSaveCount(int count);
+
+  /// 사진 앱 저장 끝 토스트 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{사진에 {count}장 저장했어요}}'**
+  String cardExportSaved(int count);
+
+  /// 사진 추가 권한 거부 팝업 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'사진에 저장하려면 설정에서 사진 추가를 허용해 주세요'**
+  String get cardExportSaveDenied;
+
+  /// 사진 저장 실패 팝업 (용량 등) #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'사진에 저장하지 못했어요'**
+  String get cardExportSaveFailed;
+
+  /// 사진 추가 권한 거부 팝업 버튼 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get cardExportOpenSettings;
+
+  /// 미리 보기 머리 오른쪽: 카드 한 장씩에서 눌러 빼고 넣기 #1461
+  ///
+  /// In ko, this message translates to:
+  /// **'눌러서 빼고 넣어요'**
+  String get cardExportPreviewToggleHint;
 
   /// Free 인쇄물 아래 띠 오른쪽 한 줄 (로고 옆)
   ///
@@ -6497,35 +6497,17 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{{count}장}}'**
   String cardExportPerPage(int count);
 
-  /// 인쇄용으로 받기 줄: 받는 형태 (누르면 형태 시트) #1224
+  /// 카드 저장하기 꾸미기 묶음 머리 #1461
   ///
   /// In ko, this message translates to:
-  /// **'형태'**
-  String get cardExportFormatRow;
-
-  /// 인쇄용으로 받기 묶음 머리: 용지 방향 · 장수 · 카드 크기 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'배치'**
-  String get cardExportLayoutSection;
-
-  /// 인쇄용으로 받기 묶음 머리: 디자인 · 카드 문장 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'꾸밈'**
+  /// **'꾸미기'**
   String get cardExportStyleSection;
 
-  /// 인쇄용으로 받기 줄: A4 세로·가로 #1224
+  /// 카드 저장하기 칩 줄 이름: A4 세로·가로 #1461
   ///
   /// In ko, this message translates to:
   /// **'용지 방향'**
   String get cardExportOrientationRow;
-
-  /// 용지 방향 고르기 시트 제목 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'용지를 어떻게 놓을까요?'**
-  String get cardExportOrientationSheetTitle;
 
   /// 용지 방향 값: 세로 #1224
   ///
@@ -6539,23 +6521,17 @@ abstract class AppLocalizations {
   /// **'가로'**
   String get cardExportOrientationLandscape;
 
-  /// 인쇄용으로 받기 줄: 오려 쓰는 카드 한 쪽 장수 #1224
+  /// 카드 저장하기 칩 줄 이름: 오려 쓰는 카드 한 쪽 장수 #1461
   ///
   /// In ko, this message translates to:
   /// **'한 장에'**
   String get cardExportPerPageRow;
 
-  /// 인쇄용으로 받기 줄: 카드 크기 #1224
+  /// 카드 저장하기 칩 줄 이름: 카드 크기 #1461
   ///
   /// In ko, this message translates to:
   /// **'카드 크기'**
   String get cardExportCardSizeRow;
-
-  /// 카드 크기 고르기 시트 제목 #1224
-  ///
-  /// In ko, this message translates to:
-  /// **'카드를 얼마나 크게 넣을까요?'**
-  String get cardExportCardSizeSheetTitle;
 
   /// 카드 크기 값: 칸에 맞춰 가장 크게 #1224
   ///
@@ -6578,16 +6554,16 @@ abstract class AppLocalizations {
   /// Pro 를 살 수 없을 때 잠긴 형태·배치를 누르면 뜨는 안내 #1224
   ///
   /// In ko, this message translates to:
-  /// **'Pro에서 쓸 수 있는 형태예요'**
+  /// **'Pro에서 쓸 수 있는 모양이에요'**
   String get cardExportProLayoutLocked;
 
-  /// Free 인쇄용으로 받기 아래 Pro 안내 제목 #1224
+  /// Free 카드 저장하기 아래 Pro 안내 제목 #1461
   ///
   /// In ko, this message translates to:
-  /// **'Pro면 원하는 대로 받을 수 있어요'**
+  /// **'Pro면 원하는 모양으로 저장할 수 있어요'**
   String get cardExportUpsellTitle;
 
-  /// Free 인쇄용으로 받기 아래 Pro 안내 한 줄 #1224
+  /// Free 카드 저장하기 아래 Pro 안내 한 줄 #1224
   ///
   /// In ko, this message translates to:
   /// **'일과 한 장, 오려 쓰는 카드, 한 장에 여러 장, 가로 용지, 디자인까지 골라요'**
@@ -6668,19 +6644,19 @@ abstract class AppLocalizations {
   /// 혜택 줄: 워터마크 없음
   ///
   /// In ko, this message translates to:
-  /// **'인쇄물 아래 띠 없이 깔끔해요'**
+  /// **'저장한 카드 아래 띠 없이 깔끔해요'**
   String get planBenefitCardExportWithoutWatermark;
 
   /// 혜택 줄: 카드 디자인 테마
   ///
   /// In ko, this message translates to:
-  /// **'인쇄 디자인을 모두 골라요'**
+  /// **'카드 디자인을 모두 골라요'**
   String get planBenefitCardExportAllThemes;
 
-  /// 혜택 줄: 카드 내보내기 형태·배치 #1224
+  /// 혜택 줄: 카드 저장 모양·배치 #1461
   ///
   /// In ko, this message translates to:
-  /// **'일과 한 장, 오려 쓰는 카드로 인쇄해요'**
+  /// **'일과 한 장, 오려 쓰는 카드로 저장해요'**
   String get planBenefitCardExportAllLayouts;
 
   /// 혜택 묶음 아래 안내
@@ -7631,16 +7607,16 @@ abstract class AppLocalizations {
   /// **'·'**
   String get routineScheduleDaySeparator;
 
-  /// 반복 줄·주간 계획 — 저장한 보호자의 Pro 가 끝나 반복이 멈춤 (예약은 남아 있음)
+  /// 반복 줄·주간 계획 — 정해 둔 보호자가 Pro 가 아니라 반복이 멈춤 (예약은 남아 있음). Pro 를 쓴 적 없는 보호자에게도 보여 「끝나」라고 쓰지 않음 #1499
   ///
   /// In ko, this message translates to:
-  /// **'Pro가 끝나 멈췄어요'**
+  /// **'반복 쉬는 중'**
   String get routineSchedulePaused;
 
   /// 주간 계획·반복 시트 — 멈춘 예약 안내
   ///
   /// In ko, this message translates to:
-  /// **'Pro가 끝나 반복을 멈췄어요. 정해 둔 요일과 시각은 그대로 남아 있어요'**
+  /// **'지금은 반복을 쉬고 있어요. 정해 둔 요일과 시각은 남아 있어서 Pro를 쓰면 다시 돌아가요'**
   String get routineSchedulePausedNote;
 
   /// 반복 요일·시각 시트 제목
@@ -8297,12 +8273,6 @@ abstract class AppLocalizations {
   /// **'잠시 뒤 다시 해 주세요.'**
   String get routineMemorySaveFailedFallback;
 
-  /// Pro 미리 보기가 실제 기록이 아닌 견본임을 알리는 배지
-  ///
-  /// In ko, this message translates to:
-  /// **'예시 화면'**
-  String get proTeaserSampleLabel;
-
   /// Pro 전용 기능을 Free 가 눌렀는데 앱에서 Pro 를 살 수 없을 때 안내 팝업 (실패 아님)
   ///
   /// In ko, this message translates to:
@@ -8357,10 +8327,10 @@ abstract class AppLocalizations {
   /// **'내가 고친 방식을 기억해 다음 일과를 더 알맞게 만들어요'**
   String get proTeaserRoutineMemoryBenefit;
 
-  /// 인쇄용으로 받기 Pro 테마 미리 보기 한 줄 혜택
+  /// 카드 저장하기 Pro 디자인 미리 보기 한 줄 혜택 #1461
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용 카드를 여러 디자인으로 받을 수 있어요'**
+  /// **'카드를 여러 디자인으로 저장할 수 있어요'**
   String get proTeaserCardThemeBenefit;
 
   /// 반복 일과·주간 계획 미리 보기 한 줄 혜택
@@ -8753,12 +8723,6 @@ abstract class AppLocalizations {
   /// **'{trial} 무료로 써 보기'**
   String planTryFreeTrial(String trial);
 
-  /// Pro 미리보기 카드 아래 글자 링크 (요금제 화면) #1189
-  ///
-  /// In ko, this message translates to:
-  /// **'Pro 혜택 모두 보기'**
-  String get planSeeAllBenefits;
-
   /// 내 요금제 줄: PRO 배지 옆 (선물받은 Pro) #1189
   ///
   /// In ko, this message translates to:
@@ -8813,22 +8777,22 @@ abstract class AppLocalizations {
   /// **'이룸이에게 맞춘 방식을 기억해요'**
   String get proTeaserRoutineMemoryTitle;
 
-  /// Pro 미리보기 제목: 인쇄 디자인 #1189
+  /// Pro 미리보기 제목: 카드 저장 디자인 #1461
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용 카드를 더 예쁘게 받아요'**
+  /// **'카드를 더 예쁘게 저장해요'**
   String get proTeaserCardThemeTitle;
 
-  /// Pro 미리보기 제목: 인쇄 형태·배치 #1224
+  /// Pro 미리보기 제목: 카드 저장 모양·배치 #1461
   ///
   /// In ko, this message translates to:
-  /// **'인쇄용 카드를 원하는 대로 받아요'**
+  /// **'카드를 원하는 모양으로 저장해요'**
   String get proTeaserCardLayoutTitle;
 
-  /// Pro 미리보기 한 줄: 인쇄 형태·배치 #1224
+  /// Pro 미리보기 한 줄: 카드 저장 모양·배치 #1461
   ///
   /// In ko, this message translates to:
-  /// **'한 장에 여러 장, 가로 용지, 일과 한 장으로 받을 수 있어요'**
+  /// **'한 장에 여러 장, 가로 용지, 일과 한 장으로 저장할 수 있어요'**
   String get proTeaserCardLayoutBenefit;
 
   /// 보호자 홈 권유 카드 닫기 x 낭독 글

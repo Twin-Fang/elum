@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.license.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,7 +76,7 @@ class SystemConfigEntitlementServiceTest {
   }
 
   private void givenPromotion(Optional<MemberProPromotion.Promotion> promotion) {
-    lenient().when(memberProPromotion.findPromotion(MEMBER_ID)).thenReturn(promotion);
+    lenient().when(memberProPromotion.findPromotion(eq(MEMBER_ID), any(), any())).thenReturn(promotion);
   }
 
   private static Optional<MemberProPromotion.Promotion> trialEndingIn30Days() {
@@ -110,25 +111,14 @@ class SystemConfigEntitlementServiceTest {
   }
 
   @Test
-  @DisplayName("관리자가 회수한 Free 행(MANUAL)은 혜택을 받지 않는다 — 회수가 체험·선물로 되살아나지 않게")
-  void promotion_revokedManualRowDoesNotGetPromotion() {
-    Subscription revoked = subscription(PlanType.FREE, SubscriptionStatus.ACTIVE, null);
-    revoked.setSource(SubscriptionSource.MANUAL);
-    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(revoked));
-    givenPromotion(trialEndingIn30Days());
+  @DisplayName("관리자 수동 Pro 가 끝난 기존 가입자는 선물로 Pro 다 — 수동 행이 선물을 가려 Free 로 떨어지던 문제(#1500)")
+  void endedManualPro_withGift_isPro() {
+    Subscription endedManual = subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, LocalDateTime.now().minusDays(1));
+    endedManual.setSource(SubscriptionSource.MANUAL);
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(endedManual));
+    givenPromotion(Optional.of(new MemberProPromotion.Promotion(SubscriptionSource.PRO_GIFT, LocalDateTime.now().plusDays(80))));
 
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
-  }
-
-  @Test
-  @DisplayName("스토어 구독이 끝나 Free 로 떨어진 행은 체험을 받지 않는다 — 결제 이력이 있는 회원은 구독이 우선이다")
-  void promotion_expiredStoreRowDoesNotGetPromotion() {
-    Subscription expiredStore = subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, LocalDateTime.now().minusDays(1));
-    expiredStore.setSource(SubscriptionSource.APPLE_IAP);
-    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(expiredStore));
-    givenPromotion(trialEndingIn30Days());
-
-    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.FREE);
+    assertThat(entitlementService.planOf(MEMBER_ID)).isEqualTo(PlanType.PRO);
   }
 
   @Test

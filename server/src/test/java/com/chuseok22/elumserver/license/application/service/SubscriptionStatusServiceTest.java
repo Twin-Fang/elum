@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.license.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.license.core.PlanType;
@@ -49,7 +51,7 @@ class SubscriptionStatusServiceTest {
     signupRow.setSource(SubscriptionSource.SIGNUP);
     when(entitlementService.planOf(MEMBER_ID)).thenReturn(PlanType.PRO);
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupRow));
-    when(memberProPromotion.findPromotion(MEMBER_ID))
+    when(memberProPromotion.findPromotion(eq(MEMBER_ID), any(), any()))
       .thenReturn(Optional.of(new MemberProPromotion.Promotion(SubscriptionSource.PRO_GIFT, GIFT_ENDS_AT)));
 
     MemberSubscriptionStatus status = subscriptionStatusService.statusOf(MEMBER_ID);
@@ -80,7 +82,7 @@ class SubscriptionStatusServiceTest {
     signupRow.setSource(SubscriptionSource.SIGNUP);
     when(entitlementService.planOf(MEMBER_ID)).thenReturn(PlanType.PRO);
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(signupRow));
-    when(memberProPromotion.findPromotion(MEMBER_ID))
+    when(memberProPromotion.findPromotion(eq(MEMBER_ID), any(), any()))
       .thenReturn(Optional.of(new MemberProPromotion.Promotion(SubscriptionSource.PROMO, GIFT_ENDS_AT)));
 
     MemberSubscriptionStatus status = subscriptionStatusService.statusOf(MEMBER_ID);
@@ -95,7 +97,7 @@ class SubscriptionStatusServiceTest {
   void status_signupTrialWithoutRow_showsPromoAndEnd() {
     when(entitlementService.planOf(MEMBER_ID)).thenReturn(PlanType.PRO);
     when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
-    when(memberProPromotion.findPromotion(MEMBER_ID))
+    when(memberProPromotion.findPromotion(eq(MEMBER_ID), any(), any()))
       .thenReturn(Optional.of(new MemberProPromotion.Promotion(SubscriptionSource.PROMO, GIFT_ENDS_AT)));
 
     MemberSubscriptionStatus status = subscriptionStatusService.statusOf(MEMBER_ID);

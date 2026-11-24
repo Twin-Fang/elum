@@ -53,6 +53,16 @@ class CardReviewToolRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tools = _tools(context);
+    // 예약 PRO 배지가 아래로 튀어나오는 만큼 줄 아래를 비움 (아래 저장 버튼을 덮지 않게)
+    if (schedule?.shouldShowProBadge ?? false) {
+      return Padding(padding: EdgeInsets.only(bottom: CardReviewToolFace.proBadgeHang.w), child: tools);
+    }
+    return tools;
+  }
+
+  /// 크기별 배치: 폰 한 줄 · 태블릿 큰 한 줄 · 가로 태블릿 2×2
+  Widget _tools(BuildContext context) {
     final buttons = _buttons(context);
     if (size == CardReviewToolSize.largeGrid) return _grid(buttons);
     if (size == CardReviewToolSize.largeRow) return _wideRow(buttons);
@@ -142,9 +152,9 @@ class CardReviewToolRow extends StatelessWidget {
             label: context.l10n.cardReviewToolSchedule,
             isActive: schedule.isActive,
             isLarge: isLarge,
+            shouldShowProBadge: schedule.shouldShowProBadge,
           ),
           isDimmed: reorderMode,
-          shouldShowProBadge: schedule.shouldShowProBadge,
           onTap: reorderMode ? null : schedule.onTap,
         ),
     ];
@@ -179,7 +189,11 @@ class CardReviewToolFace extends StatelessWidget {
     this.isPressed = false,
     this.isActive = false,
     this.isLarge = false,
+    this.shouldShowProBadge = false,
   });
+
+  /// Free 에게 권하는 도구: 아래 가장자리에 PRO 배지가 걸침 ([ProBadgeHang], 그림·이름 크기는 다른 도구와 같게 둠)
+  final bool shouldShowProBadge;
 
   /// 태블릿 큰 칸: 그림 24 · 글 한 단계 큼
   final bool isLarge;
@@ -198,6 +212,9 @@ class CardReviewToolFace extends StatelessWidget {
   static const _iconToLabel = 8.0;
   static const _largeIconToLabel = 10.0;
   static const _largeIconSize = 24.0;
+
+  /// PRO 배지 튀어나옴: 배지(22) 아래 일부가 버튼 하단에 걸침 (이름 글자 아래 빈 자리만 덮음)
+  static const proBadgeHang = 18.0;
 
   /// 체크 점 크기 · 체크 그림 · 위·오른쪽 여백
   static const _activeDotSize = 16.0;
@@ -242,6 +259,7 @@ class CardReviewToolFace extends StatelessWidget {
         ),
       ),
     );
+    if (shouldShowProBadge) return ProBadgeHang(isShown: true, hang: proBadgeHang, child: face);
     if (!isActive) return face;
     return Stack(
       fit: StackFit.passthrough,
@@ -282,7 +300,6 @@ class _ToolButton extends StatelessWidget {
     required this.face,
     required this.onTap,
     this.isDimmed = false,
-    this.shouldShowProBadge = false,
   });
 
   /// 버튼 폭 (화면 픽셀, 줄 폭을 버튼 수로 나눈 값) · 높이 (393 기준)
@@ -294,9 +311,6 @@ class _ToolButton extends StatelessWidget {
   /// 흐리게 (투명도 0.4)
   final bool isDimmed;
 
-  /// Free 에게 오른쪽 위 PRO 배지
-  final bool shouldShowProBadge;
-
   @override
   Widget build(BuildContext context) {
     final button = SizedBox(width: width, height: height.h, child: face);
@@ -305,20 +319,7 @@ class _ToolButton extends StatelessWidget {
       child: AppPressable(
         onTap: onTap,
         semanticLabel: face.label,
-        child: shouldShowProBadge
-            ? Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  button,
-                  // 버튼 위로 걸쳐 그림·이름을 덮지 않게 둠
-                  Positioned(
-                    top: -context.space.sm.h,
-                    right: 0,
-                    child: const ProBadge(),
-                  ),
-                ],
-              )
-            : button,
+        child: button,
       ),
     );
   }
