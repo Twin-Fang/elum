@@ -12,6 +12,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
+import '../../../../core/widgets/elum_circle_icon_button.dart';
 import '../../../../core/widgets/elum_floating_pill_button.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../member/application/plan_access.dart';
@@ -21,11 +22,10 @@ import '../../application/routine_schedule_controller.dart';
 import '../../application/routine_manage_coach_notifier.dart';
 import 'coach_help_button.dart';
 import 'grey_tile_shell.dart';
-import 'library_entry_pill.dart';
 
 // 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
-/// 제목 + 오른쪽 `주간 계획`·`전문가 일과` 입구(Pro) + (폰만) 오른쪽 위 이룸이 화면 배지. 태블릿은 옆 메뉴에 입구가 있다
+/// 제목 + 오른쪽 📅 주간 계획 동그라미(Free 는 PRO) + (폰만) 오른쪽 위 이룸이 화면 배지. 태블릿은 옆 메뉴에 입구가 있다
 class LibraryManageHeader extends ConsumerWidget {
   const LibraryManageHeader();
 
@@ -41,9 +41,9 @@ class LibraryManageHeader extends ConsumerWidget {
     final access = ref.watch(planAccessProvider);
     final entries = <Widget>[
       if (ref.watch(canShowRoutineScheduleProvider))
-        LibraryEntryPill(
-          label: context.l10n.weeklyPlanEntry,
+        ElumCircleIconButton(
           iconAsset: AppAssets.iconCalendar,
+          semanticLabel: context.l10n.weeklyPlanEntry,
           shouldShowProBadge: access.shouldShowTeaserFor(PlanBenefit.routineSchedule),
           onTap: () => context.push(Routes.guardianWeeklyPlan),
         ),
