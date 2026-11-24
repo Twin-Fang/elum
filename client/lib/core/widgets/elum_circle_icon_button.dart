@@ -34,11 +34,8 @@ class ElumCircleIconButton extends StatelessWidget {
   /// 동그라미 바깥 여백 (누르는 자리 48 확보)
   static const _touchPadding = 4.0;
 
-  /// PRO 배지 위 끝 (동그라미 아래 가장자리에 걸침: 가운데 아이콘 20 의 아래 끝 30 밑)
-  static const _badgeTop = 31.0;
-
-  /// 배지가 동그라미보다 넓어 좌우로 삐져나가는 폭
-  static const _badgeOverhang = 12.0;
+  /// PRO 배지 튀어나옴 (동그라미 아래 가장자리에 걸침: 가운데 아이콘 20 의 아래 끝 30 밑에서 시작)
+  static const _badgeHang = 13.0;
 
   @override
   Widget build(BuildContext context) {
@@ -63,20 +60,7 @@ class ElumCircleIconButton extends StatelessWidget {
       semanticLabel: semanticLabel,
       child: Padding(
         padding: EdgeInsets.all(_touchPadding.w),
-        child: shouldShowProBadge
-            ? Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  circle,
-                  Positioned(
-                    top: _badgeTop.w,
-                    left: -_badgeOverhang.w,
-                    right: -_badgeOverhang.w,
-                    child: const Center(child: ProBadge()),
-                  ),
-                ],
-              )
-            : circle,
+        child: ProBadgeHang(isShown: shouldShowProBadge, hang: _badgeHang, child: circle),
       ),
     );
   }
