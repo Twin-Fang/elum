@@ -3081,6 +3081,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pushPermissionTurnOn => 'Turn on notifications';
 
   @override
+  String get notificationSettingsGuideTitle =>
+      'Turn on notifications in Settings';
+
+  @override
+  String get notificationSettingsGuideBody =>
+      'Once notifications are off, you can only turn them back on in your device settings';
+
+  @override
+  String get notificationSettingsGuideStepOpen => 'Tap Open Settings below';
+
+  @override
+  String get notificationSettingsGuideStepNotifications => 'Tap Notifications';
+
+  @override
+  String get notificationSettingsGuideStepAllow =>
+      'Turn on Allow Notifications';
+
+  @override
+  String get notificationSettingsGuideOpen => 'Open Settings';
+
+  @override
   String get pushChannelElumiRoutines => 'New routines';
 
   @override

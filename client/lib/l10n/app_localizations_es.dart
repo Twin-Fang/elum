@@ -3149,6 +3149,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pushPermissionTurnOn => 'Activar notificaciones';
 
   @override
+  String get notificationSettingsGuideTitle =>
+      'Activa las notificaciones en Ajustes';
+
+  @override
+  String get notificationSettingsGuideBody =>
+      'Si desactivaste las notificaciones, solo puedes volver a activarlas en los ajustes del dispositivo';
+
+  @override
+  String get notificationSettingsGuideStepOpen => 'Toca Abrir ajustes abajo';
+
+  @override
+  String get notificationSettingsGuideStepNotifications =>
+      'Toca Notificaciones';
+
+  @override
+  String get notificationSettingsGuideStepAllow =>
+      'Activa Permitir notificaciones';
+
+  @override
+  String get notificationSettingsGuideOpen => 'Abrir ajustes';
+
+  @override
   String get pushChannelElumiRoutines => 'Rutinas nuevas';
 
   @override

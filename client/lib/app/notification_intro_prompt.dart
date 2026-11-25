@@ -14,7 +14,7 @@ import '../features/member/application/plan_access.dart';
 import '../features/notification/application/device_notification_permission_controller.dart';
 import '../features/notification/application/push_permission_prompt.dart';
 
-/// 알림 켜기 안내 (홈·공지 런처가 함께 써서 app 층): 폰은 아래 시트, 태블릿은 가운데 창 > `알림 켜기`(시스템 권한 창 · 거부 상태면 기기 설정) · `나중에` (#1455)
+/// 알림 켜기 안내 (홈·공지 런처가 함께 써서 app 층): 폰은 아래 시트, 태블릿은 가운데 창 > `알림 켜기`(시스템 권한 창 · 거부 상태면 설정 안내 > 기기 설정) · `나중에` (#1455)
 /// 띄운 순간 본 기록 (다시 안 띄움, 7일 다시 권하기와 겹치지 않게). 끝나면(어느 버튼이든) 돌아옴
 Future<void> showNotificationIntroPrompt(BuildContext context, WidgetRef ref) async {
   // 본 기록은 띄우면서 남김 (저장 실패해도 안내는 띄움, 기록 쪽이 로그)
@@ -26,8 +26,8 @@ Future<void> showNotificationIntroPrompt(BuildContext context, WidgetRef ref) as
       ? showElumGuideSheet<bool>(context: context, builder: panelOf)
       : showElumGuideDialog<bool>(context: context, builder: panelOf, barrierDismissible: true);
   final isTurnOnChosen = await promptClosed;
-  if (isTurnOnChosen != true) return;
-  await ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn();
+  if (isTurnOnChosen != true || !context.mounted) return;
+  await ref.read(deviceNotificationPermissionControllerProvider.notifier).turnOn(context);
 }
 
 /// 그림 > 제목 > 이유 한 줄 > 받는 알림 3줄 > 알림 켜기 · 나중에
