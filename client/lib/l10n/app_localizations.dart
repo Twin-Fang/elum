@@ -5261,6 +5261,42 @@ abstract class AppLocalizations {
   /// **'알림 켜기'**
   String get pushPermissionTurnOn;
 
+  /// 알림을 거부한 기기에서 켜기를 눌렀을 때 뜨는 설정 안내 시트 제목 (#1275)
+  ///
+  /// In ko, this message translates to:
+  /// **'설정에서 알림을 켜 주세요'**
+  String get notificationSettingsGuideTitle;
+
+  /// 설정 안내 시트 설명 한 줄: 왜 기기 설정으로 가야 하는지
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 한 번 꺼 두면 기기 설정에서만 다시 켤 수 있어요'**
+  String get notificationSettingsGuideBody;
+
+  /// 설정 안내 1단계: 아래 주 버튼(설정 열기)을 누름
+  ///
+  /// In ko, this message translates to:
+  /// **'아래 설정 열기 버튼을 눌러요'**
+  String get notificationSettingsGuideStepOpen;
+
+  /// 설정 안내 2단계 (iOS 만): 앱 설정 화면의 알림 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 항목을 눌러요'**
+  String get notificationSettingsGuideStepNotifications;
+
+  /// 설정 안내 마지막 단계: 알림 허용 스위치 켜기
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 허용을 켜요'**
+  String get notificationSettingsGuideStepAllow;
+
+  /// 설정 안내 시트 주 버튼: 기기 설정의 이 앱 알림 화면을 엶
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get notificationSettingsGuideOpen;
+
   /// 안드로이드 알림 채널 이름 — 이룸이 기기에 오는 새 일과 도착 푸시
   ///
   /// In ko, this message translates to:

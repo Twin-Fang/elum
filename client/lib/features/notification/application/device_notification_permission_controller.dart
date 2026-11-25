@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
@@ -31,22 +32,14 @@ class DeviceNotificationPermissionController extends Notifier<bool> {
     }
   }
 
-  /// 켜기: 한 번도 안 물은 기기면 시스템 권한 창, 이미 거부했으면 기기 설정
-  Future<void> turnOn() async {
+  /// 켜기: 한 번도 안 물은 기기면 시스템 권한 창, 이미 거부했으면 설정 안내 > 기기 설정 ([PushPermissionPrompt.turnOn])
+  Future<void> turnOn(BuildContext context) async {
     try {
-      final isRequested =
-          await ref.read(pushPermissionPromptProvider).requestIfNeverAsked();
-      if (isRequested) {
-        await recheck();
-        return;
-      }
+      await ref.read(pushPermissionPromptProvider).turnOn(context);
     } catch (e, st) {
-      AppLogger.error('notification', e, st, {'step': 'requestPermission'});
+      AppLogger.error('notification', e, st, {'step': 'turnOn'});
     }
-    try {
-      await _gate.openDeviceSettings();
-    } catch (e, st) {
-      AppLogger.error('notification', e, st, {'step': 'openDeviceSettings'});
-    }
+    // 권한 창 결과 반영 (기기 설정에서 돌아온 뒤는 띠의 resume 확인)
+    if (ref.mounted) await recheck();
   }
 }

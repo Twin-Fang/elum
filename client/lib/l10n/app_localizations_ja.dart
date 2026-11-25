@@ -2913,6 +2913,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pushPermissionTurnOn => '通知をオンにする';
 
   @override
+  String get notificationSettingsGuideTitle => '設定で通知をオンにしてください';
+
+  @override
+  String get notificationSettingsGuideBody => '一度オフにした通知は、端末の設定からのみオンに戻せます';
+
+  @override
+  String get notificationSettingsGuideStepOpen => '下の「設定を開く」をタップします';
+
+  @override
+  String get notificationSettingsGuideStepNotifications => '「通知」をタップします';
+
+  @override
+  String get notificationSettingsGuideStepAllow => '「通知を許可」をオンにします';
+
+  @override
+  String get notificationSettingsGuideOpen => '設定を開く';
+
+  @override
   String get pushChannelElumiRoutines => '新しい日課の通知';
 
   @override
