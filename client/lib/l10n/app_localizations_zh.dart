@@ -2892,6 +2892,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushPermissionTurnOn => '开启通知';
 
   @override
+  String get notificationSettingsGuideTitle => '请在设置中开启通知';
+
+  @override
+  String get notificationSettingsGuideBody => '通知关闭后，只能在设备设置中重新开启';
+
+  @override
+  String get notificationSettingsGuideStepOpen => '点击下方的“打开设置”';
+
+  @override
+  String get notificationSettingsGuideStepNotifications => '点击“通知”';
+
+  @override
+  String get notificationSettingsGuideStepAllow => '开启“允许通知”';
+
+  @override
+  String get notificationSettingsGuideOpen => '打开设置';
+
+  @override
   String get pushChannelElumiRoutines => '新日常通知';
 
   @override

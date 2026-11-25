@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../../core/widgets/notification_settings_guide_sheet.dart';
 import '../../../core/widgets/push_permission_sheet.dart';
 import '../data/notification_permission_gate.dart';
 import '../data/push_messaging_client.dart';
@@ -15,7 +16,7 @@ final pushPermissionPromptProvider = Provider<PushPermissionPrompt>(
   PushPermissionPrompt.new,
 );
 
-/// 알림 권한 요청 한 곳: 안내 시트·창(홈 첫 진입·업데이트 뒤 한 번, 코치마크 전) + 안내 시트(첫 일과를 보낸 뒤 한 번) + 꺼진 기기에 다시 권하기(7일마다) + 설정 화면의 직접 요청
+/// 알림 권한 요청 한 곳: 안내 시트·창(홈 첫 진입·업데이트 뒤 한 번, 코치마크 전) + 안내 시트(첫 일과를 보낸 뒤 한 번) + 꺼진 기기에 다시 권하기(7일마다, 거부 기기는 설정 안내) + 켜기 버튼 공통
 /// 요청은 모두 [PushMessagingClient] 한 경로 (iOS APNs 등록이 함께 일어남)
 class PushPermissionPrompt {
   PushPermissionPrompt(this._ref);
@@ -73,7 +74,7 @@ class PushPermissionPrompt {
     }
   }
 
-  /// 홈 진입 시: 허용이면 토큰 등록만, 꺼져 있고 마지막 안내 뒤 7일 지났으면 안내 시트 > 켜기
+  /// 홈 진입 시: 허용이면 토큰 등록만, 꺼져 있고 마지막 안내 뒤 7일 지났으면 안내 시트 > 켜기 (거부 기기는 설정 안내)
   /// 보호자 기기가 이룸이 화면을 보여 주는 중이거나 다른 시트가 떠 있으면 띄우지 않음
   Future<void> maybeNudge(BuildContext context) async {
     if (_isAsking) return;
@@ -91,6 +92,12 @@ class PushPermissionPrompt {
       final l10n = context.l10n;
       await _storage.setPushPermissionNudgedAt(DateTime.now());
       if (!context.mounted) return;
+      // 이미 거부한 기기: 권유 시트 대신 설정에서 켜는 법 안내 한 장
+      if (status == PushPermissionStatus.denied) {
+        AppLogger.info('[push] nudge shown : elumi=$isElumiDevice status=${status.name} guide=settings');
+        await _openSettingsWithGuide(context);
+        return;
+      }
       AppLogger.info('[push] nudge shown : elumi=$isElumiDevice status=${status.name}');
       final isAllowed = await showPushPermissionSheet(
         context,
@@ -99,7 +106,8 @@ class PushPermissionPrompt {
         allowLabel: l10n.pushPermissionTurnOn,
       );
       if (isAllowed != true) return; // 나중에·닫기: 7일 뒤 다시
-      await _turnOn(status);
+      await _storage.setHasAskedPushPermission(true);
+      await _requestAndRegister();
     } catch (e, st) {
       AppLogger.error('push', e, st, {'step': 'maybeNudge'});
     } finally {
@@ -132,13 +140,17 @@ class PushPermissionPrompt {
     return DateTime.now().difference(lastNudgedAt) >= const Duration(days: nudgeIntervalDays);
   }
 
-  // 켜기: 한 번도 안 물었으면 시스템 권한 창, 이미 거부했으면 기기 설정 (돌아오면 토큰 등록)
-  Future<void> _turnOn(PushPermissionStatus status) async {
-    if (status == PushPermissionStatus.notDetermined) {
-      await _storage.setHasAskedPushPermission(true);
-      await _requestAndRegister();
-      return;
-    }
+  /// 켜기 버튼 공통 (알림함·설정 띠, 알림 켜기 안내): 안 물었으면 시스템 권한 창, 거부했으면 설정 안내 > 기기 설정
+  Future<void> turnOn(BuildContext context) async {
+    if (await requestIfNeverAsked()) return;
+    if (!context.mounted) return;
+    await _openSettingsWithGuide(context);
+  }
+
+  // 거부한 기기: 설정에서 켜는 법 안내 > 설정 열기면 기기 설정 (돌아오면 토큰 등록)
+  Future<void> _openSettingsWithGuide(BuildContext context) async {
+    final isOpenChosen = await showNotificationSettingsGuideSheet(context);
+    if (isOpenChosen != true) return; // 나중에·닫기
     _registerOnNextResume();
     await _ref.read(notificationPermissionGateProvider).openDeviceSettings();
   }

@@ -2927,6 +2927,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pushPermissionTurnOn => '알림 켜기';
 
   @override
+  String get notificationSettingsGuideTitle => '설정에서 알림을 켜 주세요';
+
+  @override
+  String get notificationSettingsGuideBody =>
+      '알림을 한 번 꺼 두면 기기 설정에서만 다시 켤 수 있어요';
+
+  @override
+  String get notificationSettingsGuideStepOpen => '아래 설정 열기 버튼을 눌러요';
+
+  @override
+  String get notificationSettingsGuideStepNotifications => '알림 항목을 눌러요';
+
+  @override
+  String get notificationSettingsGuideStepAllow => '알림 허용을 켜요';
+
+  @override
+  String get notificationSettingsGuideOpen => '설정 열기';
+
+  @override
   String get pushChannelElumiRoutines => '새 일과 알림';
 
   @override

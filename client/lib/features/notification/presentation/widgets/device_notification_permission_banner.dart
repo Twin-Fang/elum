@@ -91,7 +91,7 @@ class _DeviceNotificationPermissionBannerState
           ),
           SizedBox(width: _textToButtonGap.w),
           AppPressable(
-            onTap: controller.turnOn,
+            onTap: () => controller.turnOn(context),
             child: Container(
               height: _buttonHeight.h,
               padding: EdgeInsets.symmetric(horizontal: _buttonPaddingH.w),
