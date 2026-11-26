@@ -1167,6 +1167,8 @@
   "planSheetRenewingNote": "如果不取消，将在{date}自动付款。可以在管理订阅中取消",
   "planSheetEndsToFreeNote": "结束后会变为Free。不会自动付款",
   "planSheetUnlimitedNote": "可以不限期使用Pro",
+  "planSheetDaysLeft": "还剩{days}天",
+  "planSheetLastDay": "可以用到今天",
   "planLearnPro": "了解Pro",
   "weeklyReportTitle": "每周报告",
   "weeklyReportWeekRange": "{startMonth}月{startDay}日 ~ {endMonth}月{endDay}日",

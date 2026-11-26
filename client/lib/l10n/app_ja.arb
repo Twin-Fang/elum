@@ -1167,6 +1167,8 @@
   "planSheetRenewingNote": "解約しない限り、{date}に自動でお支払いされます。解約はサブスクリプションの管理からできます",
   "planSheetEndsToFreeNote": "終了するとFreeに切り替わります。自動でお支払いされることはありません",
   "planSheetUnlimitedNote": "期限なしでProを使えます",
+  "planSheetDaysLeft": "残り{days}日です",
+  "planSheetLastDay": "今日まで使えます",
   "planLearnPro": "Proについて見る",
   "weeklyReportTitle": "週間レポート",
   "weeklyReportWeekRange": "{startMonth}月{startDay}日～{endMonth}月{endDay}日",
