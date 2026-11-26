@@ -1,0 +1,513 @@
+/* ===================================================================
+ * projectops Flutter wizard shared styles (source of truth)
+ * ===================================================================
+ *
+ * Shared by the testflight / playstore / firebase wizards.
+ * Editing this one file applies to all wizards at once.
+ *
+ * ⚠️ Read before editing this file
+ * -------------------------------------------------------------------
+ * 1. Wizard-specific colors and layout go in each wizard HTML's <style>.
+ *    Only "components" shared by all wizards go here.
+ * 2. .step-indicator is "the wrapper of one step item", not the whole container.
+ *    (firebase once used it as the container and clashed — never again)
+ * 3. When classes are added/removed, _shared/check-consistency.py
+ *    compares usage across the wizard HTMLs and catches unused/undefined ones.
+ *
+ * How to load (in each wizard HTML <head>)
+ *   <link rel="stylesheet" href="../_shared/wizard.css">
+ *
+ * If the folder is taken alone, this file is missing and component polish is lost,
+ * but Tailwind CDN handles layout, so the page still reads fine.
+ * =================================================================== */
+
+/* Tooltip Styles */
+.tooltip-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.tooltip-trigger {
+    cursor: help;
+    margin-left: 6px;
+}
+.tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    width: 280px;
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    line-height: 1.5;
+}
+.tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: #475569;
+}
+.tooltip-container:hover .tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Code Block */
+.code-block {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.code-block pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #e2e8f0;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* File Upload Styles */
+.file-upload {
+    border: 2px dashed #3f3f46;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 16px;
+    background: #1e293b;
+}
+.file-upload:hover {
+    border-color: #60a5fa;
+    background: rgba(59, 130, 246, 0.05);
+}
+.file-upload.dragover {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+.file-upload.has-file {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+.file-upload .icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+.file-upload input {
+    display: none;
+}
+.file-info {
+    margin-top: 12px;
+    padding: 8px;
+    background: rgba(34, 197, 94, 0.2);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #22c55e;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Validation */
+.input-error {
+    border-color: #ef4444 !important;
+}
+.error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+}
+.success-message {
+    color: #22c55e;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Modal */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* Skip Button */
+.skip-btn {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 8px;
+}
+.skip-btn:hover {
+    color: #e2e8f0;
+}
+
+/* Result Item */
+.result-item {
+    background: #18181b;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid #3f3f46;
+}
+.result-item .key {
+    font-weight: 600;
+    color: #60a5fa;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+.result-item .value {
+    background: #27272a;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+    max-height: 80px;
+    overflow-y: auto;
+    color: #cbd5e1;
+}
+.copy-btn-small {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    background: #3f3f46;
+    border: none;
+    border-radius: 4px;
+    color: #e4e4e7;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.copy-btn-small:hover {
+    background: #52525b;
+}
+.copy-btn-small.copied {
+    background: #22c55e;
+}
+
+/* Dependency Flow */
+.dependency-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 16px;
+    background: #0f172a;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+.dependency-item {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.dependency-arrow {
+    color: #64748b;
+    font-size: 20px;
+}
+
+/* Custom Secrets Section */
+.custom-secrets-section {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 12px;
+    border: 2px dashed #475569;
+}
+.custom-secret-item {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #334155;
+}
+.custom-secret-item:last-child {
+    margin-bottom: 0;
+}
+.secret-key-input {
+    font-family: 'Consolas', 'Monaco', monospace;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-size: 0.875rem;
+}
+.secret-key-input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+.add-secret-btn {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px dashed #60a5fa;
+    background: transparent;
+    color: #60a5fa;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-top: 1rem;
+}
+.add-secret-btn:hover {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: #93c5fd;
+    color: #93c5fd;
+}
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.type-badge.text {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.type-badge.binary {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+.usage-hint {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #0f172a;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+.custom-file-upload {
+    border: 2px dashed #475569;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #0f172a;
+}
+.custom-file-upload:hover {
+    border-color: #60a5fa;
+    background: rgba(59, 130, 246, 0.05);
+}
+.custom-file-upload.has-file {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+.custom-file-upload input {
+    display: none;
+}
+.remove-secret-btn {
+    padding: 0.25rem 0.5rem;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+.remove-secret-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+/* ===================================================================
+ * Step indicator (markup contract shared by all wizards)
+ * ===================================================================
+ * Markup structure — do not deviate from this shape:
+ *
+ *   <div class="flex items-start justify-between ...">   ← container (Tailwind)
+ *     <div class="step-indicator" data-step="1" onclick="goToStep(1)">
+ *       <div class="step-circle">1</div>
+ *       <span class="step-label">Start</span>
+ *     </div>
+ *     ...
+ *   </div>
+ *
+ * .step-indicator = one item. .step-circle = round number badge.
+ * Each wizard applies colors with Tailwind utilities (only behavior is defined here).
+ * =================================================================== */
+.step-indicator {
+    cursor: pointer;
+}
+.step-indicator .step-circle {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+/* Hover shows that any step can be reached freely */
+.step-indicator:hover .step-circle {
+    transform: translateY(-2px);
+}
+.step-label {
+    font-size: 0.625rem;
+    margin-top: 0.375rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* ===================================================================
+ * First-time user guide components
+ * =================================================================== */
+/* Summary banner at the top of a step (duration, prerequisites, etc.) */
+.wizard-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+.wizard-meta strong {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+/* Reassurance that progress is saved automatically */
+.resume-hint {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Language toggle button (#769) — wizard-i18n.js fills the label and removes hidden */
+.lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid #475569;
+    border-radius: 9999px;
+    background: rgba(30, 41, 59, 0.6);
+    color: #cbd5e1;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.lang-toggle:hover {
+    background: rgba(51, 65, 85, 0.8);
+    color: #fff;
+}
+/* Without the engine (folder taken alone) the button stays hidden and the page stays English */
+.lang-toggle.hidden {
+    display: none;
+}
+
+/* ===================================================================
+ * Behavior classes referenced by JS (styling is Tailwind's job)
+ * ===================================================================
+ * Why defined here: with pure Tailwind, "what role this class plays"
+ * is recorded nowhere in the code and it silently disappears in refactors.
+ * =================================================================== */
+
+/* Step body container. showStep() toggles hidden to show only one. */
+.step-content {
+    display: block;
+}
+.step-content.hidden {
+    display: none;
+}
+
+/* Round step number badge — colors come from per-wizard Tailwind utilities */
+.step-circle {
+    flex-shrink: 0;
+}
+
+/* Generic copy button (top-right of code blocks, etc.) */
+.copy-btn {
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.copy-btn.copied {
+    background: #22c55e;
+    color: #0f172a;
+}

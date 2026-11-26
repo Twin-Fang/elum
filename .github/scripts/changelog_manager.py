@@ -2,89 +2,152 @@
 """
 changelog_manager.py
 
-통합 체인지로그 매니저 스크립트.
+Unified changelog manager script.
 
-서브커맨드:
-  - update-from-summary: CodeRabbit Summary Markdown을 파싱하여 CHANGELOG.json 갱신
-  - generate-md        : CHANGELOG.json을 기반으로 CHANGELOG.md 재생성
-  - export             : 특정 버전의 릴리즈 노트를 생성하여 stdout 또는 파일로 저장
-  - classify-bump      : 커밋 제목 목록으로 semver 승격 폭(major/minor/patch) 판단
+Subcommands:
+  - update-from-summary: parse CodeRabbit Summary Markdown and update CHANGELOG.json
+  - generate-md        : regenerate CHANGELOG.md from CHANGELOG.json
+  - export             : build release notes for one version and write to stdout or a file
+  - classify-bump      : decide the semver bump (major/minor/patch) from a list of commit subjects
 
-사용 예:
+Usage:
   python3 changelog_manager.py update-from-summary
   python3 changelog_manager.py generate-md
   python3 changelog_manager.py export --version 0.0.2 --output release_notes.txt
 
-입력 파일:
-  - pr_body.md: GitHub PR body (Markdown 형식)
+Input files:
+  - pr_body.md: GitHub PR body (Markdown)
 """
 
 from __future__ import annotations
 
 import argparse
 import html
+import io
 import json
 import os
 import re
 import sys
 import traceback
 
+# Keep emoji output from crashing a cp949 console
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
-# ----------------------------- 공통 유틸 -----------------------------
+# Used in the release step, so it must not crash on old installs without the i18n folder (#787).
+# In that case it keeps the old Korean headers.
+try:
+    from i18n.messages import resolve_language, t
+except ImportError:  # pragma: no cover
+    def resolve_language():
+        return "ko"
+
+    def t(key, lang=None, **values):
+        return {"changelog.current_version": "현재 버전", "changelog.last_updated": "마지막 업데이트"}.get(key, key)
+
+
+# ----------------------------- Common utilities -----------------------------
 
 def _normalize_text(text: str) -> str:
-    """텍스트 정규화: HTML 엔티티 디코딩 및 공백 정리."""
+    """Normalize text: decode HTML entities and tidy whitespace."""
     return html.unescape(text).strip()
 
 
 def _clean_summary_noise(text: str) -> str:
     """
-    Summary 텍스트에서 불필요한 노이즈 제거.
+    Remove noise from the Summary text.
 
-    제거 대상:
-    1. HTML 주석 (<!-- ... -->)
-    2. CodeRabbit Tip 메시지
-    3. 남은 HTML 태그
-    4. 연속된 빈 줄
+    Removed:
+    1. HTML comments (<!-- ... -->)
+    2. CodeRabbit Tip messages
+    3. Leftover HTML tags
+    4. Runs of blank lines
     """
     if not text:
         return text
 
-    # 1. HTML 주석 제거
+    # 1. Remove HTML comments
     text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
 
-    # 2. CodeRabbit Tip 줄 제거
+    # 2. Remove CodeRabbit Tip lines
     text = re.sub(r'^.*?✏️\s*Tip:.*$', '', text, flags=re.MULTILINE)
     text = re.sub(r'<sub>.*?Tip:.*?</sub>', '', text, flags=re.IGNORECASE | re.DOTALL)
     text = re.sub(r'^\s*Tip:.*$', '', text, flags=re.MULTILINE | re.IGNORECASE)
 
-    # 3. 남은 HTML 태그 제거
+    # 3. Remove leftover HTML tags
     text = re.sub(r'<[^>]+>', '', text)
 
-    # 4. 연속된 빈 줄 정리 (3개 이상 → 2개)
+    # 4. Collapse blank lines (3 or more -> 2)
     text = re.sub(r'\n{3,}', '\n\n', text)
 
     return text.strip()
 
 
+# ----------------------- Per-language store notes (#829) -----------------------
+#
+# Translation drafts are appended to the end of the PR body in this block. The Korean parser (_parse_summary_markdown)
+# and _clean_summary_noise strip HTML comments/tags and read items into categories,
+# so **this block must be cut off before parsing** or the translated lines leak into Korean categories.
+#
+#   <!-- projectops:store-notes -->
+#   <details><summary>Store release notes (translations)</summary>
+#
+#   **en-US**
+#   - Improved alerts
+#
+#   **ja-JP**
+#   - 通知を改善
+#
+#   </details>
+#   <!-- /projectops:store-notes -->
+STORE_NOTES_BLOCK_RE = re.compile(r'<!--\s*projectops:store-notes\s*-->(.*?)<!--\s*/projectops:store-notes\s*-->', re.DOTALL)
+STORE_NOTES_LOCALE_RE = re.compile(r'^\*\*([a-z]{2,3}(?:-[A-Za-z0-9]+)*)\*\*\s*$')
+
+
+def extract_store_notes(content: str) -> tuple[str, dict]:
+    """Cut the per-language notes block from the body: (body without block, {language: text}). No block -> body unchanged."""
+    if not content or 'projectops:store-notes' not in content:
+        return content, {}
+    notes: dict[str, str] = {}
+    for m in STORE_NOTES_BLOCK_RE.finditer(content):
+        inner = re.sub(r'</?details>|<summary>.*?</summary>', '', m.group(1), flags=re.DOTALL | re.IGNORECASE)
+        current, buf = None, []
+
+        def flush():
+            text = "\n".join(buf).strip()
+            if current and text:
+                notes[current] = text
+
+        for line in inner.splitlines():
+            head = STORE_NOTES_LOCALE_RE.match(line.strip())
+            if head:
+                flush()
+                current, buf = head.group(1), []
+            elif current is not None:
+                buf.append(line.rstrip())
+        flush()
+    return STORE_NOTES_BLOCK_RE.sub('', content).strip() + "\n", notes
+
+
 def _make_safe_key(title: str, idx: int) -> str:
-    """카테고리 제목을 안전한 키로 변환."""
+    """Category title -> safe key."""
     safe_key = re.sub(r'[^a-zA-Z0-9가-힣]', '_', title.lower()).strip('_')
     return safe_key if safe_key else f"category_{idx}"
 
 
-# ----------------------- Markdown 파서 (통합) -----------------------
+# ----------------------- Markdown parser (unified) -----------------------
 
 def _parse_summary_markdown(md_content: str) -> dict:
     """
-    Markdown 형식의 CodeRabbit Summary 파싱.
+    Parse a CodeRabbit Summary in Markdown.
 
-    3단계 폴백 전략:
-    1. 정밀 파싱 (현재 CodeRabbit 형식)
-    2. 관대한 파싱 (형식 변형 대응)
-    3. 휴리스틱 파싱 (최후 수단)
+    3-step fallback:
+    1. Strict parse (current CodeRabbit format)
+    2. Lenient parse (format variations)
+    3. Heuristic parse (last resort)
 
-    예상 형식:
+    Expected format:
     ## Summary by CodeRabbit
 
     * **버그 수정**
@@ -94,41 +157,41 @@ def _parse_summary_markdown(md_content: str) -> dict:
     * **Chores**
       * 버전 0.1.39로 업그레이드
     """
-    # 1단계: 정밀 파싱
+    # Step 1: strict parse
     detected = _parse_markdown_precise(md_content)
     if detected:
-        print("  → 정밀 파서 성공")
+        print("  → Strict parser succeeded")
         return detected
 
-    # 2단계: 관대한 파싱
+    # Step 2: lenient parse
     detected = _parse_markdown_lenient(md_content)
     if detected:
-        print("  → 관대한 파서 성공")
+        print("  → Lenient parser succeeded")
         return detected
 
-    # 3단계: 휴리스틱 파싱
+    # Step 3: heuristic parse
     detected = _parse_markdown_heuristic(md_content)
     if detected:
-        print("  → 휴리스틱 파서 성공")
+        print("  → Heuristic parser succeeded")
     return detected
 
 
 def _parse_markdown_precise(md_content: str) -> dict:
     """
-    정밀 파서: 현재 CodeRabbit 형식에 최적화.
+    Strict parser: tuned for the current CodeRabbit format.
 
-    형식: * **카테고리**\n  * 항목
+    Format: * **Category**\n  * item
     """
     detected: dict[str, dict] = {}
 
-    # 패턴: * **카테고리** (bold, 들여쓰기 2칸)
+    # Pattern: * **Category** (bold, 2-space indent)
     pattern = r'\*\s*\*\*(.+?)\*\*\s*\n((?:\s{2}\*\s+.+(?:\n|$))*)'
     matches = re.findall(pattern, md_content, re.MULTILINE)
 
     for idx, (category_title, items_text) in enumerate(matches):
         category_title = category_title.strip()
 
-        # 항목 추출: "  * 항목 내용"
+        # Item extraction: "  * item text"
         items = re.findall(r'\s{2}\*\s+(.+)', items_text)
         items = [item.strip() for item in items if item.strip()]
 
@@ -146,31 +209,31 @@ def _parse_markdown_precise(md_content: str) -> dict:
 
 def _parse_markdown_lenient(md_content: str) -> dict:
     """
-    관대한 파서: 형식 변형에 대응.
+    Lenient parser: handles format variations.
 
-    지원:
-    - 들여쓰기 1~8칸 (탭 포함)
-    - bold 선택적 (**제목** 또는 제목)
-    - 다양한 리스트 마커 (*, -, +)
+    Supports:
+    - 1-8 spaces of indent (tabs included)
+    - optional bold (**title** or title)
+    - various list markers (*, -, +)
     """
     content = md_content.replace('\t', '    ')
     detected: dict[str, dict] = {}
 
-    # 패턴: 카테고리 + 중첩 항목
+    # Pattern: category + nested items
     pattern = r'(?:^|\n)([\*\-\+])\s*(\*\*)?([^\*\n]+?)(\*\*)?\s*\n((?:(?:^|\n)\s{1,8}[\*\-\+]\s+.+)*)'
     matches = re.findall(pattern, content, re.MULTILINE)
 
     for idx, (marker, bold_start, category_title, bold_end, items_text) in enumerate(matches):
         category_title = category_title.strip()
 
-        # 항목 추출
+        # Item extraction
         items = re.findall(r'(?:^|\n)\s{1,8}[\*\-\+]\s+(.+)', items_text, re.MULTILINE)
         items = [item.strip() for item in items if item.strip()]
 
         if not category_title and not items:
             continue
 
-        # 너무 긴 제목은 카테고리가 아님
+        # A very long title is not a category
         if len(category_title) > 100:
             continue
 
@@ -185,11 +248,11 @@ def _parse_markdown_lenient(md_content: str) -> dict:
 
 def _parse_markdown_heuristic(md_content: str) -> dict:
     """
-    휴리스틱 파서: 줄 단위로 카테고리/항목 추론.
+    Heuristic parser: infer category/item line by line.
 
-    규칙:
-    1. Bold 텍스트(**...**) → 카테고리
-    2. 들여쓰기 있는 줄 → 항목
+    Rules:
+    1. Bold text (**...**) -> category
+    2. Indented line -> item
     """
     lines = md_content.split('\n')
     detected: dict[str, dict] = {}
@@ -201,7 +264,7 @@ def _parse_markdown_heuristic(md_content: str) -> dict:
         if not stripped or stripped.startswith('<!--') or stripped.startswith('##'):
             continue
 
-        # Bold 텍스트 → 카테고리
+        # Bold text -> category
         bold_match = re.search(r'\*\*([^\*]+)\*\*', stripped)
         if bold_match:
             title = bold_match.group(1).strip()
@@ -212,7 +275,7 @@ def _parse_markdown_heuristic(md_content: str) -> dict:
                 detected[current_key] = {'title': title, 'items': []}
             continue
 
-        # 들여쓰기 있는 줄 → 항목
+        # Indented line -> item
         if line.startswith((' ', '\t')) and stripped:
             item = re.sub(r'^[\*\-\+\d\.]+\s*', '', stripped).strip()
             item = re.sub(r'<[^>]+>', '', item).strip()
@@ -220,21 +283,25 @@ def _parse_markdown_heuristic(md_content: str) -> dict:
             if current_key and item and len(item) > 3:
                 detected[current_key]['items'].append(item)
 
-    # 빈 카테고리 제거
+    # Drop empty categories
     return {k: v for k, v in detected.items() if v.get('items')}
 
 
-# ------------------------ 서브커맨드 구현부 ------------------------
+# ------------------------ Subcommand implementations ------------------------
 
 def cmd_update_from_summary() -> int:
-    """pr_body.md에서 Markdown을 파싱하여 CHANGELOG.json 갱신."""
+    """Parse Markdown from pr_body.md and update CHANGELOG.json."""
     version = os.environ.get('VERSION')
     project_type = os.environ.get('PROJECT_TYPE')
-    # 멀티타입 — PROJECT_TYPES(csv) env가 있으면 배열로, 없으면 단수 키 fallback
+    # Multi-type: PROJECT_TYPES (csv) env -> array, else fall back to the singular key
     project_types_csv = os.environ.get('PROJECT_TYPES', '')
     project_types = [t.strip() for t in project_types_csv.split(',') if t.strip()]
     if not project_types and project_type:
         project_types = [project_type]
+    # Recording without VERSION leaves a version: null release that taints every later decision
+    if not version:
+        print("❌ The VERSION environment variable is required", file=sys.stderr)
+        return 1
     today = os.environ.get('TODAY')
     pr_number_raw = os.environ.get('PR_NUMBER')
     timestamp = os.environ.get('TIMESTAMP')
@@ -244,10 +311,10 @@ def cmd_update_from_summary() -> int:
     except ValueError:
         pr_number = None
 
-    # 입력 파일 찾기.
-    # PR_BODY_PATH가 있으면 그것을 먼저 본다 (#564) — 워크플로우가 임시 파일을 워킹트리 밖
-    # ($RUNNER_TEMP)에 두기 때문이다. 루트에 두면 릴리스 커밋의 git add -A에 딸려가
-    # 저장소가 오염된다. env가 없으면 종전처럼 cwd에서 찾는다(하위호환).
+    # Find the input file.
+    # Check PR_BODY_PATH first (#564): the workflow puts the temp file outside the working tree
+    # ($RUNNER_TEMP). At the repo root it would ride along with the release commit's git add -A
+    # and pollute the repo. Without the env, look in cwd as before (backward compatible).
     candidates = []
     env_path = os.environ.get('PR_BODY_PATH')
     if env_path:
@@ -257,56 +324,68 @@ def cmd_update_from_summary() -> int:
     input_file = next((f for f in candidates if os.path.isfile(f)), None)
 
     if not input_file:
-        print(f"❌ 입력 파일을 찾을 수 없습니다 (확인한 경로: {', '.join(candidates)})")
+        print(f"❌ Input file not found (paths checked: {', '.join(candidates)})")
         return 1
 
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        print(f"📄 입력 파일: {input_file}")
-        print(f"📝 파일 크기: {len(content)} bytes")
+        print(f"📄 Input file: {input_file}")
+        print(f"📝 File size: {len(content)} bytes")
 
-        # Markdown 파싱 (통합)
-        print("\n🔍 Markdown 파싱 시작...")
+        # Cut the per-language notes block before the Korean parser sees it (#829)
+        content, store_notes = extract_store_notes(content)
+        if store_notes:
+            print(f"🌐 Store notes by language: {', '.join(store_notes)}")
+
+        # Parse Markdown (unified)
+        print("\n🔍 Parsing Markdown...")
         categories = _parse_summary_markdown(content)
 
         parse_method = 'markdown' if categories else 'markdown_failed'
         if categories:
-            print(f"✅ 파싱 성공: {len(categories)}개 카테고리")
+            print(f"✅ Parsed: {len(categories)} categories")
         else:
-            print("⚠️ 파싱 실패, raw_summary만 저장")
+            print("⚠️ Parsing failed, saving raw_summary only")
 
-        # raw_summary 생성 (노이즈 제거)
+        # Build raw_summary (noise removed)
         raw_summary = _clean_summary_noise(content)
 
-        # 릴리즈 데이터 생성
+        # Build release data
         new_release = {
             "version": version,
-            "project_type": project_type,      # 기존 단수 키 — 유지 (하위 호환)
-            "project_types": project_types,    # 신규 멀티타입 배열
+            "project_type": project_type,      # old singular key, kept (backward compatible)
+            "project_types": project_types,    # new multi-type array
             "date": today,
             "pr_number": pr_number,
             "raw_summary": raw_summary,
             "parsed_changes": categories or {},
             "parse_method": parse_method,
         }
+        # Add the key only when translations exist; otherwise CHANGELOG.json keeps its current shape
+        if store_notes:
+            new_release["store_notes"] = store_notes
 
-        # 파싱 결과 출력
-        print("\n📊 파싱 결과:")
-        print(f"  - 파싱 방식: {parse_method}")
-        print(f"  - raw_summary 길이: {len(raw_summary)} 문자")
-        print(f"  - 파싱된 카테고리: {len(categories)}개")
+        # Print parse result
+        print("\n📊 Parse result:")
+        print(f"  - Parse method: {parse_method}")
+        print(f"  - raw_summary length: {len(raw_summary)} characters")
+        print(f"  - Parsed categories: {len(categories)}")
         for key, value in categories.items():
             title = value.get('title', key)
             items_count = len(value.get('items', []))
-            print(f"    • {title}: {items_count}개 항목")
+            print(f"    • {title}: {items_count} items")
 
-        # CHANGELOG.json 업데이트
+        # Update CHANGELOG.json
         try:
             with open('CHANGELOG.json', 'r', encoding='utf-8') as f:
                 changelog_data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except json.JSONDecodeError as e:
+            # Overwriting a broken file with an empty structure would erase history; stop so a person fixes it
+            print(f"❌ CHANGELOG.json is corrupted, not updating it (repair it manually): {e}", file=sys.stderr)
+            return 1
+        except FileNotFoundError:
             changelog_data = {
                 "metadata": {
                     "lastUpdated": timestamp,
@@ -318,40 +397,50 @@ def cmd_update_from_summary() -> int:
                 "releases": [],
             }
 
+        if not isinstance(changelog_data.get("metadata"), dict) or not isinstance(changelog_data.get("releases", []), list):
+            print("❌ CHANGELOG.json has an invalid structure, not updating it", file=sys.stderr)
+            return 1
+
         changelog_data["metadata"]["lastUpdated"] = timestamp
         changelog_data["metadata"]["currentVersion"] = version
         changelog_data["metadata"]["projectType"] = project_type
         changelog_data["metadata"]["projectTypes"] = project_types
-        changelog_data["metadata"]["totalReleases"] = len(changelog_data.get("releases", [])) + 1
-        changelog_data.setdefault("releases", []).insert(0, new_release)
+        # Replace the same version so reruns and PR updates give the same result (idempotent)
+        releases = [r for r in changelog_data.get("releases", [])
+                    if not (isinstance(r, dict) and str(r.get("version")) == str(version))]
+        releases.insert(0, new_release)
+        changelog_data["releases"] = releases
+        changelog_data["metadata"]["totalReleases"] = len(releases)
 
         with open('CHANGELOG.json', 'w', encoding='utf-8') as f:
             json.dump(changelog_data, f, indent=2, ensure_ascii=False)
 
-        print("\n✅ CHANGELOG.json 업데이트 완료!")
+        print("\n✅ CHANGELOG.json updated!")
         return 0
 
     except Exception as e:
-        print(f"❌ update-from-summary 실패: {e}")
+        print(f"❌ update-from-summary failed: {e}")
         traceback.print_exc()
         return 1
 
 
 def cmd_generate_md() -> int:
-    """CHANGELOG.json을 기반으로 CHANGELOG.md 재생성."""
+    """Regenerate CHANGELOG.md from CHANGELOG.json."""
     try:
         with open('CHANGELOG.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        with open('CHANGELOG.md', 'w', encoding='utf-8') as f:
+        # Build everything in memory and write once so a mid-way exception does not truncate CHANGELOG.md
+        with io.StringIO() as f:
             f.write("# Changelog\n\n")
 
             metadata = data.get('metadata', {})
             current_version = metadata.get('currentVersion', 'Unknown')
             last_updated = metadata.get('lastUpdated', 'Unknown')
 
-            f.write(f"**현재 버전:** {current_version}  \n")
-            f.write(f"**마지막 업데이트:** {last_updated}  \n\n")
+            lang = resolve_language()
+            f.write(f"**{t('changelog.current_version', lang)}:** {current_version}  \n")
+            f.write(f"**{t('changelog.last_updated', lang)}:** {last_updated}  \n\n")
             f.write("---\n\n")
 
             for release in data.get('releases', []):
@@ -367,7 +456,7 @@ def cmd_generate_md() -> int:
                 parsed = release.get('parsed_changes') or {}
 
                 if parsed:
-                    # 구조화된 데이터 출력
+                    # Structured data output
                     for _, items in parsed.items():
                         if not items:
                             continue
@@ -383,7 +472,7 @@ def cmd_generate_md() -> int:
                             f.write(f"- {item}\n")
                         f.write("\n")
                 else:
-                    # 파싱 실패 시 raw_summary 출력
+                    # Parse failed: print raw_summary
                     raw_summary = release.get('raw_summary', '').strip()
                     if raw_summary:
                         raw_summary = _clean_summary_noise(raw_summary)
@@ -396,20 +485,23 @@ def cmd_generate_md() -> int:
 
                 f.write("---\n\n")
 
-        print("✅ CHANGELOG.md 재생성 완료!")
+            with open('CHANGELOG.md', 'w', encoding='utf-8') as out:
+                out.write(f.getvalue())
+
+        print("✅ CHANGELOG.md regenerated!")
         return 0
 
     except Exception as e:
-        print(f"❌ CHANGELOG.md 생성 실패: {e}")
+        print(f"❌ Failed to generate CHANGELOG.md: {e}")
         traceback.print_exc()
         return 1
 
 
 def cmd_export_release_notes(version: str, output_path: str | None) -> int:
-    """CHANGELOG에서 해당 버전 릴리즈 노트를 생성."""
+    """Build the release notes for a version from CHANGELOG."""
     notes_text = ""
 
-    # 1) CHANGELOG.json 시도
+    # 1) Try CHANGELOG.json
     try:
         if os.path.isfile('CHANGELOG.json'):
             with open('CHANGELOG.json', 'r', encoding='utf-8') as f:
@@ -431,10 +523,11 @@ def cmd_export_release_notes(version: str, output_path: str | None) -> int:
                 else:
                     body = (matched.get('raw_summary') or '').strip()
                 notes_text = (header + (body or "")).strip()
-    except Exception:
-        pass
+    except Exception as e:
+        # Swallowing it hides the fallback reason; log only the reason to stderr and try the next path
+        print(f"[warn] Could not build notes from CHANGELOG.json, falling back: {e}", file=sys.stderr)
 
-    # 2) CHANGELOG.md 폴백
+    # 2) Fall back to CHANGELOG.md
     if not notes_text and os.path.isfile('CHANGELOG.md'):
         try:
             with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
@@ -443,14 +536,16 @@ def cmd_export_release_notes(version: str, output_path: str | None) -> int:
             m = pattern.search(md)
             if m:
                 start = m.end()
-                next_m = re.search(r"^## \\[", md[start:], re.MULTILINE)
+                next_m = re.search(r"^## \[", md[start:], re.MULTILINE)
                 section = md[start: start + next_m.start()] if next_m else md[start:]
                 body = section.strip()
+                # Section separators (---) are not needed in store release notes
+                body = re.sub(r'\n*-{3,}\s*$', '', body).strip()
                 notes_text = (f"버전 {version} 업데이트\n\n" + body).strip()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[warn] Could not build notes from CHANGELOG.md, falling back: {e}", file=sys.stderr)
 
-    # 3) 최종 폴백
+    # 3) Final fallback
     if not notes_text:
         notes_text = f"버전 {version} 업데이트\n앱 안정성 및 사용자 경험이 개선되었습니다."
 
@@ -462,33 +557,33 @@ def cmd_export_release_notes(version: str, output_path: str | None) -> int:
     return 0
 
 
-# --------------------- semver 승격 폭 판정 (이슈 #546) ---------------------
+# --------------------- semver bump decision (issue #546) ---------------------
 #
-# 릴리스 노트 렌더링(changelog_providers 사다리)과는 분리된 경로다. 여기서는 버킷을
-# 구성하거나 문구를 다듬지 않고 "major/minor/patch 중 무엇인가"만 판정한다. 두 경로를
-# 합치면 릴리스 노트 생성이 이원화되어 드리프트가 난다.
+# Separate from release-notes rendering (the changelog_providers ladder). This only decides
+# "major, minor or patch" without building buckets or polishing text. Merging the two paths
+# would split release-note generation in two and cause drift.
 #
-# 커밋 제목 한 줄만 본다(수집이 %s라 본문에 접근할 수 없다). Conventional Commits 조항
-# 13이 `!` 마커 단독으로도 breaking 표기를 인정하므로, BREAKING CHANGE 푸터 미지원은
-# 표준이 허용하는 부분집합이다.
+# Looks only at the commit subject line (collection uses %s, so the body is unavailable). Conventional Commits item
+# 13 accepts the `!` marker alone as a breaking marker, so not supporting a BREAKING CHANGE footer is
+# a subset the standard allows.
 
-# tier-1: projectops 컨벤션 "제목 : type[!] : 내용 [URL]".
-# 타입 앞 콜론에 공백이 선행해야 하므로 제목 안의 맨몸 콜론("v1:2" 등)에서 잘리지 않는다.
+# tier-1: projectops convention "title : type[!] : text [URL]".
+# The colon before the type must be preceded by a space, so bare colons in the title ("v1:2") do not split it.
 _BUMP_TIER1_RE = re.compile(
-    r'^.+?\s:\s*(feat|fix|chore|docs|refactor|test)(!)?\s*:\s*.+$'
+    r'^.+?\s:\s*(feat|fix|chore|docs|refactor|test)(!)?\s*:\s*.+$', re.IGNORECASE
 )
-# tier-2: Conventional Commits "type(scope)[!]: 내용".
+# tier-2: Conventional Commits "type(scope)[!]: text".
 _BUMP_TIER2_RE = re.compile(
-    r'^(feat|fix|chore|docs|refactor|test|perf|style|build|ci)(?:\([^)]*\))?(!)?:\s*.+$'
+    r'^(feat|fix|chore|docs|refactor|test|perf|style|build|ci)(?:\([^)]*\))?(!)?:\s*.+$', re.IGNORECASE
 )
 
 
 def classify_bump_level(lines: list[str]) -> str:
-    """커밋 제목 목록에서 semver 승격 폭을 규칙 기반으로 판단(결정적 — AI 미사용).
+    """Decide the semver bump from commit subjects by rule (deterministic, no AI).
 
-    - 타입 뒤 `!` 마커(두 컨벤션 모두) → major (즉시 확정)
-    - feat 타입 → minor
-    - 그 외(매칭 실패·자유형식 포함) → patch
+    - `!` marker after the type (both conventions) -> major (decided at once)
+    - feat type -> minor
+    - anything else (no match, free-form) -> patch
     """
     level = 'patch'
 
@@ -497,7 +592,7 @@ def classify_bump_level(lines: list[str]) -> str:
         if not line or '[skip ci]' in line or line.startswith('Merge '):
             continue
 
-        # tier-1을 먼저 시도한다 — 제목이 앞에 붙는 우리 컨벤션이 우선이다.
+        # Try tier-1 first: our convention with the title in front wins.
         matched = _BUMP_TIER1_RE.match(line)
         if matched:
             commit_type, breaking = matched.group(1), matched.group(2)
@@ -508,23 +603,23 @@ def classify_bump_level(lines: list[str]) -> str:
             commit_type, breaking = matched.group(1), matched.group(2)
 
         if breaking:
-            return 'major'  # 최고 등급 — 더 볼 필요 없다
-        if commit_type == 'feat':
+            return 'major'  # highest level, no need to look further
+        if commit_type.lower() == 'feat':  # case-insensitive (#686)
             level = 'minor'
 
     return level
 
 
 def cmd_classify_bump(commits_file: str) -> int:
-    """커밋 목록 파일을 읽어 승격 폭을 stdout 마지막 줄에 출력.
+    """Read the commit list file and print the bump on the last stdout line.
 
-    파일을 읽지 못하면 patch로 떨어진다 — 판정 실패가 릴리스를 막지 않게 하기 위함이다.
+    If the file cannot be read it falls back to patch, so a failed decision never blocks a release.
     """
     try:
         with open(commits_file, 'r', encoding='utf-8') as f:
             commit_lines = [line.rstrip('\n').rstrip('\r') for line in f]
     except Exception as e:
-        print(f"[warn] 커밋 목록을 읽지 못했습니다 ({e}) — patch로 처리합니다", file=sys.stderr)
+        print(f"[warn] Could not read the commit list ({e}) — treating it as patch", file=sys.stderr)
         commit_lines = []
 
     print(classify_bump_level(commit_lines))
@@ -536,22 +631,22 @@ def cmd_classify_bump(commits_file: str) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog='changelog_manager',
-        description='통합 체인지로그 매니저',
+        description='Unified changelog manager',
         add_help=True
     )
     sub = parser.add_subparsers(dest='command', required=True)
 
-    sub.add_parser('update-from-summary', help='PR body에서 CHANGELOG.json 갱신')
-    sub.add_parser('generate-md', help='CHANGELOG.json → CHANGELOG.md 생성')
+    sub.add_parser('update-from-summary', help='Update CHANGELOG.json from the PR body')
+    sub.add_parser('generate-md', help='Generate CHANGELOG.md from CHANGELOG.json')
 
-    p_export = sub.add_parser('export', help='특정 버전 릴리즈 노트 추출')
-    p_export.add_argument('--version', required=True, help='버전 번호')
-    p_export.add_argument('--output', help='출력 파일 경로 (없으면 stdout)')
+    p_export = sub.add_parser('export', help='Export release notes for a specific version')
+    p_export.add_argument('--version', required=True, help='Version number')
+    p_export.add_argument('--output', help='Output file path (stdout if omitted)')
 
     p_classify_bump = sub.add_parser(
-        'classify-bump', help='커밋 목록으로 semver 승격 폭(major/minor/patch) 판단')
+        'classify-bump', help='Decide the semver bump (major/minor/patch) from a commit list')
     p_classify_bump.add_argument(
-        '--commits-file', required=True, help='커밋 제목 목록 파일 (한 줄당 1개)')
+        '--commits-file', required=True, help='File of commit subjects (one per line)')
 
     args = parser.parse_args(argv)
 
