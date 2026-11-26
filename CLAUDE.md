@@ -35,7 +35,7 @@ elum/
 | 7. deploy 최신화 | **배포 전 `main`에 `deploy`를 병합한다.** 생략하면 버전 충돌로 배포가 실패한다 | `git merge origin/deploy` |
 | 8. 배포 | develop → main 병합(배포 안 됨) 뒤 main → deploy 릴리스 PR을 올린다 | `/pro-changelog-deploy` |
 | 8-1. 테스트 빌드 | **앱이 바뀐 이슈**에 `@projectops app build <브랜치명>` 댓글 (아래 설명) | `/pro-github` |
-| 8-2. develop 되돌리기 | **배포가 끝나면 `deploy` > `main` > `develop` 순서로 버전 커밋을 되돌린다.** 생략하면 iOS 테스트 빌드가 멈춘다 (아래 설명) | `/pro-github` |
+| 8-2. develop 되돌리기 | 배포가 끝나면 `deploy` > `main` > `develop` 순서로 버전 커밋을 되돌린다 (아래 설명) | `/pro-github` |
 | 9. 완료 보고서 | **이슈가 마무리되면 해당 이슈에 구현 내용을 보고서로 남긴다** | `/pro-report` |
 | 10. 라벨 완료처리 | 라벨을 `작업완료`로 바꾸고 **이슈를 닫는다** | `/pro-github` |
 
@@ -136,10 +136,9 @@ git push origin main
 > 충돌이 이미 났다면 `git merge origin/deploy`로 해소한 뒤, **PR을 닫고 새로 연다.**
 > 실패한 워크플로우는 재실행해도 옛 커밋 기준으로 돌아 다시 실패한다.
 
-### 배포 뒤 필수 — 버전을 develop 으로 되돌린다 ⚠️ (#1523)
+### 배포 뒤 — 버전을 develop 으로 되돌린다 (#1523)
 
-릴리스 워크플로는 버전 커밋을 `main`, `deploy` 에만 남긴다. `develop` 에 돌아오지 않으면 develop 에서 딴 브랜치의
-iOS 테스트 빌드가 `이미 출시된 버전 이하`라며 준비 단계에서 멈춘다 (2026-11-18 ~ 11-26, develop 이 2.103.1 에 머물렀다).
+릴리스 워크플로는 버전 커밋을 `main`, `deploy` 에만 남긴다. `develop` 의 버전 파일이 뒤처지지 않게 배포 뒤에 되돌린다.
 
 ```bash
 git fetch origin
@@ -148,9 +147,19 @@ git log origin/develop..origin/main --oneline    # 내용이 있으면 main > de
 ```
 
 - main > develop 은 PR 로 병합한다 (`/pro-github` `create-pr --head main --base develop` > `merge-pr`). 버전 파일과 릴리스 문서만 들어온다.
-- 이미 딴 작업 브랜치는 develop 을 병합해야 새 버전을 받는다.
-- 지금 버전이 App Store 에 공개된 뒤에는 다음 배포가 버전을 올릴 때까지 iOS 테스트 빌드가 다시 멈춘다.
-  projectops 최신판 워크플로를 반영하면 사라지는 문제다 (#1523). 그때 이 절을 지운다.
+- iOS 테스트 빌드는 버전이 App Store 에 이미 출시돼 닫혀 있으면 다음 패치 버전으로 자동 전환한다 (projectops v4.119.0 반영). 되돌리기를 빠뜨려도 테스트 빌드가 멈추지는 않는다.
+- 테스트 빌드는 **빌드 대상 브랜치의** `.github/scripts` 를 쓴다. 2026-11-26 이전에 딴 브랜치는 develop 을 병합한 뒤 테스트 빌드를 요청한다.
+
+### 스토어 심사 제출과 빌드 번호 (#1523)
+
+| 무엇 | 어디서 정하나 |
+|---|---|
+| `deploy` 푸시가 심사 제출까지 가는가 | `.github/config/store-deploy.json` 의 `auto_submit_on_push` (지금 켜짐). 끄면 푸시 배포는 TestFlight, 내부 테스트까지만 |
+| 배포 모드 (`store_only` / `store_prepare` / `store_submit`) | 레포 변수 `IOS_DEPLOY_MODE`, `ANDROID_DEPLOY_MODE` (지금 `store_submit`). 급하면 변수만 `store_only` 로 바꾼다 |
+| iOS 빌드 번호 (테스트, 정식), Android 테스트 APK 번호 | 시간 기반 (`.github/scripts/build_number.py`, 약 9천만대) |
+| Play, Firebase 릴리스의 Android 빌드 번호 | `version.yml` 의 `version_code` (릴리스마다 1 증가) |
+
+워크플로를 손으로 돌리면(`workflow_dispatch`) 입력값이 우선하고 기본은 `store_only` 다 (심사 제출 없음).
 
 ### 여러 에이전트가 동시에 작업한다
 
