@@ -146,6 +146,11 @@ abstract final class AppMotion {
   /// (확인 버튼은 처음부터 눌림).
   static const celebrationSequence = Duration(milliseconds: 1800);
 
+  /// Pro 회원 카드 위로 빛 띠가 한 번 지나가는 시간 (ProMemberCardSurface)
+  ///
+  /// [emphasis](500)를 넘긴다. 띠가 판 끝에서 끝까지 가는 것이 눈에 잡혀야 하고, 아무것도 막지 않는다.
+  static const shineSweep = Duration(milliseconds: 700);
+
   /// 순차 등장 지연 (index 상한 적용)
   static Duration staggerDelayOf(int index) => staggerStep * index.clamp(0, maxStaggerIndex);
 

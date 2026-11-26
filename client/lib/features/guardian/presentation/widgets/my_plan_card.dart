@@ -7,12 +7,12 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/pro_badge.dart';
+import '../../../../core/widgets/pro_member_card.dart';
 import '../../../../core/widgets/pro_upsell_button.dart';
 import '../../../credit/application/credit_costs.dart';
-import '../../../member/application/plan_access.dart';
 import '../../../subscription/application/plan_paywall_entry.dart';
 import '../../../subscription/application/plan_status_providers.dart';
-import '../../../subscription/domain/plan_benefit.dart';
+import '../../../subscription/application/pro_member_benefit_labels.dart';
 import '../../../subscription/domain/plan_status.dart';
 import 'my_plan_card_parts.dart';
 
@@ -32,93 +32,47 @@ class MyPlanCard extends ConsumerWidget {
   }
 }
 
-/// Pro 카드 알약 후보 3개 (지금 계정이 쓸 수 있는 것만 보임, 짧은 문구 먼저)
-const _pillBenefits = [
-  PlanBenefit.freeRoutineText,
-  PlanBenefit.adsRemoved,
-  PlanBenefit.freeImageRegenerate,
-];
-
 /// Pro 금빛 카드: 누르면 내 요금제 시트 (날짜 · 결제한 곳 · 구독 관리, 판매와 무관, #1303)
 class _ProPlanFace extends ConsumerWidget {
   const _ProPlanFace({required this.status});
 
   final PlanStatus status;
 
-  /// 그림자 아래 6 · 번짐 18
-  static const _shadowOffsetY = 6.0;
-  static const _shadowBlur = 18.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final space = context.space;
     final l10n = context.l10n;
-    final access = ref.watch(planAccessProvider);
-    final periodUnit = ref.watch(creditPeriodUnitProvider);
-    // 다시 그리기 알약 `하루 N번까지` (서버 한도 모르면 숫자 없는 문구)
-    final freeRegenerateDailyCap = ref.watch(freeImageRegenerateDailyCapProvider);
     final title = _proTitleOf(l10n, status);
     // 체험은 제목이 곧 남은 날이라 아래 줄을 겹쳐 쓰지 않음
     final subline = status.isTrial ? null : planStatusFooter(l10n, status);
-    final pillLabels = [
-      for (final benefit in _pillBenefits)
-        if (access.canUseBenefit(benefit))
-          planBenefitLabel(l10n, benefit, periodUnit, freeRegenerateDailyCap: freeRegenerateDailyCap),
-    ];
-    final radius = BorderRadius.circular(space.cardRadius.r);
+    final pillLabels = watchProMemberBenefitLabels(context, ref);
 
-    final face = DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colors.proPlanMyCardStart, colors.proPlanMyCardEnd],
-        ),
-        borderRadius: radius,
-        border: Border.all(color: colors.proPlanMyCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: colors.proPlanMyCardShadow,
-            offset: Offset(0, _shadowOffsetY.h),
-            blurRadius: _shadowBlur.r,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Stack(
+    final face = ProMemberCardSurface(
+      child: Padding(
+        padding: EdgeInsets.all(MyPlanCardLayout.padding.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const MyPlanCornerGlow(),
-            Padding(
-              padding: EdgeInsets.all(MyPlanCardLayout.padding.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  MyPlanHeader(
-                    chip: PlanTierChip(tier: planTierOf(status)),
-                    title: MyPlanTitle(title: title, emojiAsset: _proEmojiOf(status)),
-                    subline: subline == null
-                        ? null
-                        : Text(
-                            subline,
-                            style: context.typo.proPlanTeaserBody.copyWith(
-                              color: colors.proPlanMyCardSubText,
-                            ),
-                          ),
-                    mascot: MyPlanMascot.pro(),
-                  ),
-                  if (pillLabels.isNotEmpty) ...[
-                    SizedBox(height: space.md.h),
-                    Wrap(
-                      spacing: MyPlanCardLayout.pillGap.w,
-                      runSpacing: MyPlanCardLayout.pillGap.h,
-                      children: [for (final label in pillLabels) MyPlanBenefitPill(label: label)],
+            MyPlanHeader(
+              chip: PlanTierChip(tier: planTierOf(status)),
+              title: MyPlanTitle(title: title, emojiAsset: _proEmojiOf(status)),
+              subline: subline == null
+                  ? null
+                  : Text(
+                      subline,
+                      style: context.typo.proPlanTeaserBody.copyWith(color: colors.proPlanMyCardSubText),
                     ),
-                  ],
-                ],
-              ),
+              mascot: MyPlanMascot.pro(),
             ),
+            if (pillLabels.isNotEmpty) ...[
+              SizedBox(height: space.md.h),
+              Wrap(
+                spacing: ProMemberBenefitPill.gap.w,
+                runSpacing: ProMemberBenefitPill.gap.h,
+                children: [for (final label in pillLabels) ProMemberBenefitPill(label: label)],
+              ),
+            ],
           ],
         ),
       ),

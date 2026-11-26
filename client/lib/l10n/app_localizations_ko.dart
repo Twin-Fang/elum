@@ -4058,6 +4058,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planSheetUnlimitedNote => '기간 제한 없이 Pro를 쓸 수 있어요';
 
   @override
+  String planSheetDaysLeft(int days) {
+    return '$days일 남았어요';
+  }
+
+  @override
+  String get planSheetLastDay => '오늘까지 쓸 수 있어요';
+
+  @override
   String get planLearnPro => 'Pro 알아보기';
 
   @override

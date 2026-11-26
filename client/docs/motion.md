@@ -173,6 +173,7 @@ opacity 0→1 + 아래에서 16px 올라오기. 지연 = `delay` + `index` × `s
 | `AppPopIn` | 0.7배·투명 > 끝을 살짝 넘었다가 1배 | `emphasis` · `springPop` |
 | `AppCountUp` | 숫자를 from > to 로 셈 | `countUp`(=`valueChange` 800) · `decelerate` |
 | `AppCelebration` | 그림 튐 > 뒤 빛 번짐·그림 위 빛 쓸기 > 제목·이유 한 줄 > 이전 → 이후 게이지, 시작 햅틱 | `celebrationSequence`(1800) |
+| `ProMemberCardSurface(hasShineSweep)` | 금빛 회원 카드 위로 빛 띠가 한 번 지나감 (판이 자리 잡은 `slow` 뒤) | `shineSweep`(700) · `standard` |
 
 모두 동작 줄이기면 끝 모습으로 바로 보인다 (`AppMotion.isReducedMotionOf`).
 

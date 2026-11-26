@@ -4040,6 +4040,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planSheetUnlimitedNote => '期限なしでProを使えます';
 
   @override
+  String planSheetDaysLeft(int days) {
+    return '残り$days日です';
+  }
+
+  @override
+  String get planSheetLastDay => '今日まで使えます';
+
+  @override
   String get planLearnPro => 'Proについて見る';
 
   @override
