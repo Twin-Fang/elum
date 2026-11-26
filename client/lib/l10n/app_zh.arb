@@ -8,6 +8,7 @@
   "commonNext": "下一步",
   "commonRetry": "重试",
   "dateYearMonthDay": "{year}年{month}月{day}日",
+  "dateMonthDay": "{month}月{day}日",
   "dateMonthDaySince": "{month}月{day}日起",
   "weekdayShort": "{weekday, select, mon{周一} tue{周二} wed{周三} thu{周四} fri{周五} sat{周六} sun{周日} other{}}",
   "creditResetAt": "{month}月{day}日({weekday}) {hour}点",

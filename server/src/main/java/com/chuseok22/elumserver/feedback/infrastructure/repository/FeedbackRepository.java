@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.feedback.infrastructure.repository;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, String> {
 
   /// 회원의 가장 최근 의견 (idx_feedback_member_created 사용)
   Optional<Feedback> findFirstByMemberIdOrderByCreatedAtDesc(String memberId);
+
+  /// 그 회원이 보낸 의견만 (알림 목록에 본문을 실을 때, 남의 의견 id 는 결과에 없음)
+  List<Feedback> findAllByIdInAndMemberId(Collection<String> ids, String memberId);
 
   /// 상태별 건수 (관리자 새 의견 배지)
   long countByStatus(FeedbackStatus status);

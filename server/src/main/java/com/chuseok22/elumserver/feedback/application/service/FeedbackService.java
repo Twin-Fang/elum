@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest
 import com.chuseok22.elumserver.feedback.core.FeedbackAdminNoteSaveResult;
 import com.chuseok22.elumserver.feedback.core.FeedbackAppReport;
 import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
+import com.chuseok22.elumserver.feedback.core.SentFeedback;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
 import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
@@ -13,8 +14,11 @@ import com.chuseok22.elumserver.systemconfig.application.service.UsageLimitSetti
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -64,6 +68,18 @@ public class FeedbackService {
     this.clock = clock;
     this.eventPublisher = eventPublisher;
     this.usageLimitSettings = usageLimitSettings;
+  }
+
+  /// 보낸 의견 묶음 조회 (id > 본문·보낸 시각), 그 회원이 보낸 것만. 알림 목록이 의견 처리 알림에 본문을 실을 때 쓴다.
+  /// 지워졌거나 남의 의견은 결과에 없다.
+  @Transactional(readOnly = true)
+  public Map<String, SentFeedback> sentFeedbacksOf(String memberId, Collection<String> feedbackIds) {
+    if (feedbackIds.isEmpty()) {
+      return Map.of();
+    }
+    return feedbackRepository.findAllByIdInAndMemberId(feedbackIds, memberId).stream()
+      .collect(Collectors.toMap(
+        Feedback::getId, feedback -> new SentFeedback(feedback.getMessage(), feedback.getCreatedAt())));
   }
 
   /// 의견을 저장하고 id 를 돌려준다. 앱 버전·OS 는 길면 거절하지 않고 잘라 저장한다.

@@ -35,6 +35,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String dateMonthDay(int month, int day) {
+    return '$month월 $day일';
+  }
+
+  @override
   String dateMonthDaySince(int month, int day) {
     return '$month월 $day일부터';
   }
@@ -1115,7 +1120,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationCreditRefilled => '이번 주 크레딧이 채워졌어요';
 
   @override
-  String get notificationFeedbackResolved => '보내 주신 의견을 확인하고 처리했어요';
+  String get notificationFeedbackResolved => '보내 주신 의견을 처리했어요';
+
+  @override
+  String notificationFeedbackQuote(String message) {
+    return '“$message”';
+  }
+
+  @override
+  String get notificationFeedbackSheetBody => '알려 주셔서 고마워요';
+
+  @override
+  String notificationFeedbackSentOn(int month, int day) {
+    return '$month월 $day일에 보낸 의견';
+  }
 
   @override
   String notificationTalkPostCommented(int count) {
@@ -1129,6 +1147,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationWeeklyReportReady => '지난주 리포트가 도착했어요';
+
+  @override
+  String notificationWeeklyReportPeriod(String range) {
+    return '$range 기록을 모았어요';
+  }
 
   @override
   String get notificationAdminMessageFallback => '이룸에서 알려 드려요';

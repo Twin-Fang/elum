@@ -35,6 +35,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String dateMonthDay(int month, int day) {
+    return '$month月$day日';
+  }
+
+  @override
   String dateMonthDaySince(int month, int day) {
     return '$month月$day日から';
   }
@@ -1108,6 +1113,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationFeedbackResolved => 'お送りいただいたご意見を確認し、対応しました';
 
   @override
+  String notificationFeedbackQuote(String message) {
+    return '“$message”';
+  }
+
+  @override
+  String get notificationFeedbackSheetBody => '알려 주셔서 고마워요';
+
+  @override
+  String notificationFeedbackSentOn(int month, int day) {
+    return '$month월 $day일에 보낸 의견';
+  }
+
+  @override
   String notificationTalkPostCommented(int count) {
     return '自分の投稿にコメントが$count件つきました';
   }
@@ -1119,6 +1137,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notificationWeeklyReportReady => '先週のレポートが届きました';
+
+  @override
+  String notificationWeeklyReportPeriod(String range) {
+    return '$range 기록을 모았어요';
+  }
 
   @override
   String get notificationAdminMessageFallback => 'elumからのお知らせです';
