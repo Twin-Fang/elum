@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-25T05:53:19Z",
-    "currentVersion": "2.109.0",
+    "lastUpdated": "2026-11-26T07:49:27Z",
+    "currentVersion": "2.110.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 357
+    "totalReleases": 358
   },
   "releases": [
+    {
+      "version": "2.110.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-11-26",
+      "pr_number": 1518,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 의견 처리 알림을 누르면 내가 보낸 의견을 다시 볼 수 있어요\n\n* **개선**\n  * 알림 목록을 한눈에 읽기 쉽게 정리했어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "의견 처리 알림을 누르면 내가 보낸 의견을 다시 볼 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "알림 목록을 한눈에 읽기 쉽게 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.109.0",
       "project_type": "flutter",
