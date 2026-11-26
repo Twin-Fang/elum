@@ -1,0 +1,34 @@
+{
+  "_description": "Copy this file to build-profile.json to turn build profiles on. Without the file the workflow does nothing.",
+  "_keys": {
+    "dev_keys": "Development-only runtime keys. They are stripped from .env before the profile is applied, so a value left over in a Secret cannot survive.",
+    "secret_keys": "Keys that stop a release build just by having a value (QA tokens and the like).",
+    "profiles": "Profile name → the env / dart_define to apply. Any name works; a profile named release is checked to make sure these switches are off."
+  },
+
+  "dev_keys": [
+    "APP_SHOW_DEV_TOOLS",
+    "APP_ENABLE_NETWORK_LOG"
+  ],
+  "secret_keys": [
+    "APP_DEV_ACCESS_TOKEN"
+  ],
+  "profiles": {
+    "test": {
+      "env": {
+        "APP_SHOW_DEV_TOOLS": "true",
+        "APP_ENABLE_NETWORK_LOG": "true"
+      },
+      "dart_define": {
+        "APP_FLAVOR": "dev"
+      }
+    },
+    "release": {
+      "env": {
+        "APP_SHOW_DEV_TOOLS": "false",
+        "APP_ENABLE_NETWORK_LOG": "false"
+      },
+      "dart_define": {}
+    }
+  }
+}

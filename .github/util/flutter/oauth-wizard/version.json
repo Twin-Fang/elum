@@ -1,0 +1,47 @@
+{
+  "name": "OAuth Login Setup Wizard",
+  "version": "1.0.2",
+  "description": "Setup wizard for Kakao and Google login in a Flutter app, from console setup to CI/CD",
+  "lastUpdated": "2026-10-24",
+  "changelog": [
+    {
+      "version": "1.0.2",
+      "date": "2026-10-24",
+      "changes": [
+        "Kakao step matches the 2026 Kakao Developers console; app creation, platform registration, Kakao Login ON and the login itself were run with a real app and a real login on iOS (projectops#156)",
+        "Android and iOS are registered on the Native App Key's own page; key hashes go one per field with the + button, not one per line",
+        "Kakao Login is turned on under Kakao Login > General; an app that reads only the user ID needs no consent item",
+        "Business and individual developers: email as a required consent item needs a Biz app, and how each can get one",
+        "Step count corrected to 9–10 (it said 7–10; one provider gives 9 steps, both give 10)"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "date": "2026-10-22",
+      "changes": [
+        "CI/CD step: the templates now restore google-services.json and GoogleService-Info.plist with .github/scripts/firebase_config_files.py (projectops#785), so you only register the two secrets",
+        "Older installs are told to update the templates with npx projectops; a manual iOS step remains only as a fallback and skips when the secret is empty",
+        "Removed the outdated note that Android workflows overwrite google-services.json when the secret is empty"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-10-22",
+      "changes": [
+        "First release (projectops#156): Kakao and Google, pick one or both; only the steps you need are shown",
+        "Signing-key step: which key signs which build, keytool commands per OS, Kakao key hash computed in the browser from the SHA-1",
+        "Kakao step: Native App Key, Android key hashes, iOS bundle ID, Kakao Login and consent items",
+        "Google step: Firebase or Google Cloud route; reads client IDs from google-services.json / GoogleService-Info.plist and checks package, bundle ID and registered SHA-1s",
+        "Secrets, CI/CD and .gitignore steps reuse the existing GOOGLE_SERVICES_JSON secret and add GOOGLE_SERVICE_INFO_PLIST for the two iOS workflows",
+        "oauth-wizard.py patches AndroidManifest.xml and Info.plist idempotently (detect, fingerprints, key-hash, setup with --dry-run)",
+        "English by default with a Korean toggle; generated files and commands are identical in both languages"
+      ]
+    }
+  ],
+  "compatibility": {
+    "flutter": ">=3.38.0",
+    "kakao_flutter_sdk_user": ">=2.0.0",
+    "google_sign_in": ">=7.0.0"
+  },
+  "repository": "https://github.com/Cassiiopeia/projectops"
+}

@@ -1,15 +1,15 @@
 #!/bin/bash
 # ===================================================================
-# version_manager.sh — Python 위임 shim (v4.2, 이슈 #448)
+# version_manager.sh — Python delegating shim (v4.2, issue #448)
 # ===================================================================
 #
-# 로직은 version_manager.py(크로스 플랫폼, stdlib 전용)로 이전되었다.
-# 이 파일은 기존 워크플로우/스크립트의 호출 계약을 보존하는 위임 shim이다:
+# The logic moved to version_manager.py (cross-platform, stdlib only).
+# This file is a delegating shim that keeps the call contract of existing workflows/scripts:
 #   ./.github/scripts/version_manager.sh get   →   python version_manager.py get
 #
-# stdout(결과값)/stderr(로그)/종료코드 계약은 .py가 동일하게 유지한다.
-# Windows(PowerShell/CMD)에서는 python .github/scripts/version_manager.py 를
-# 직접 실행해도 된다. yq/jq는 더 이상 필요 없다.
+# The .py keeps the same stdout (result) / stderr (logs) / exit code contract.
+# On Windows (PowerShell/CMD) you may run python .github/scripts/version_manager.py
+# directly. yq/jq are no longer needed.
 # ===================================================================
 set -e
 
@@ -25,8 +25,8 @@ for _py in python3 python; do
 done
 
 if [ -z "$PYTHON_BIN" ]; then
-    echo "❌ Python(3.x)이 필요합니다. version_manager는 v4.2부터 Python으로 동작합니다." >&2
-    echo "   설치: https://www.python.org/downloads/ (GitHub Actions ubuntu-latest에는 기본 설치)" >&2
+    echo "❌ Python (3.x) is required. version_manager runs on Python since v4.2." >&2
+    echo "   Install: https://www.python.org/downloads/ (preinstalled on GitHub Actions ubuntu-latest)" >&2
     exit 1
 fi
 

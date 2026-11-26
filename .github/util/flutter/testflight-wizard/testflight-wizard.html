@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="page.title">iOS TestFlight Deployment Wizard</title>
+    <!-- Version info (must stay in sync with version.json) -->
+    <script type="application/json" id="versionJson">
+{
+  "name": "iOS TestFlight Setup Wizard",
+  "version": "1.7.2",
+  "description": "Setup wizard for deploying a Flutter iOS app to TestFlight",
+  "lastUpdated": "2026-11-19",
+  "changelog": [
+    {
+      "version": "1.7.2",
+      "date": "2026-11-19",
+      "changes": [
+        "Gemfile asks for fastlane 2.240 or later: older versions fail on a stray altool ERROR line after a successful Xcode 27 upload (fastlane#30586, projectops#1232)",
+        "The Python wizard writes the Gemfile from templates/Gemfile instead of its own copy"
+      ]
+    },
+    {
+      "version": "1.7.1",
+      "date": "2026-11-14",
+      "changes": [
+        "Fastfile template log and error messages are in English (projectops#1212)"
+      ]
+    },
+    {
+      "version": "1.7.0",
+      "date": "2026-11-13",
+      "changes": [
+        "Fastfile template reads STORE_RELEASE_MODE (auto | manual, default auto = current behaviour). With manual, store_submit still submits for review but sets automatic_release: false, so a person releases the approved version in App Store Connect (projectops#1125)",
+        "An unknown STORE_RELEASE_MODE value stops the lane instead of falling back to automatic release"
+      ]
+    },
+    {
+      "version": "1.6.0",
+      "date": "2026-10-22",
+      "changes": [
+        "English is now the default; a language toggle switches to Korean and the choice is saved in this browser (projectops#769)",
+        "Korean text moved to testflight-wizard-i18n.js; the shared engine is _shared/wizard-i18n.js",
+        "Starts in Korean when there is no saved choice and the browser language is Korean; ?lang=en|ko in the address overrides",
+        "Generated files, commands and secret names are identical in both languages",
+        "Python CLI messages are now English"
+      ]
+    },
+    {
+      "version": "1.5.2",
+      "date": "2026-10-10",
+      "changes": [
+        "'새로운 기능' 안내에 언어별 노트(store_locales, store_locales_ios) 설명과 App Store에 없는 언어를 두면 deliver가 활성화한다는 경고 추가 (projectops#829)"
+      ]
+    },
+    {
+      "version": "1.5.1",
+      "date": "2026-09-30",
+      "changes": [
+        "Secret 등록이 끝나면 다운로드한 github-secrets 파일을 삭제하라는 안내 추가 - 완료 화면 등록 방법, 내보내기 버튼 위 경고, 다운로드 완료 토스트, ZIP 안 README",
+        "JSON/TXT/ZIP 내보내기 파일에는 인증서와 API 키가 그대로 들어 있어 다운로드 폴더에 남기면 위험함을 명시"
+      ]
+    },
+    {
+      "version": "1.5.0",
+      "date": "2026-07-27",
+      "changes": [
+        "3종 마법사 공통 자산 도입 — ../_shared/wizard.css(컴포넌트 CSS)와 wizard-common.js(공통 유틸)를 함께 로드",
+        "377줄 중복 CSS 제거 — testflight/playstore가 글자 단위로 같던 스타일을 단일 정본으로 통합",
+        "공통 유틸 중복 정의 제거 — escapeHtml/showToast/copyToClipboard 등 셋 중 가장 안전한 구현으로 통일",
+        "escapeHtml을 null 안전 + 따옴표까지 이스케이프하는 구현으로 통일 (속성 보간 시 XSS 여지 제거)",
+        "showToast를 DOM에 #toast가 없어도 동작하도록 통일 (요소 누락 시 예외로 죽던 문제 제거)",
+        "클립보드 복사에 execCommand 폴백 추가 — file://로 열었을 때 복사가 실패하던 문제 해결",
+        "localStorage 저장 실패(용량 초과) 시 마법사가 죽지 않고 안내만 하도록 변경",
+        "구 레포명(SUH-DEVOPS-TEMPLATE) 링크를 projectops로 교정",
+        "존재하지 않는 경로를 가리키던 secrets-converter 링크를 github-secrets-converter로 교정",
+        "version-sync.sh 3종 통일 — python3 미존재 환경 폴백 추가, 죽은 코드 제거, 주입 전 JSON 유효성 검증 추가",
+        "Python CLI를 명명 플래그로 통일 (--project-path 등) — 구 위치인자 호출도 계속 지원",
+        "--dry-run / --no-backup / --non-interactive 3종 공통 지원",
+        "--dry-run에 메모리 오버레이 도입 — 실제 실행과 동일한 경로를 타면서 디스크는 건드리지 않음",
+        "시작 화면에 예상 소요 시간·준비물·완료 산출물·문서 링크·중단 후 재개 안내 추가",
+        "_shared/check-consistency.py 추가 — 3종이 다시 갈라지면 즉시 검출",
+        "_shared/test_wizard_cli.py 추가 — CLI 계약과 dry-run 안전성 회귀 테스트 11종"
+      ]
+    },
+    {
+      "version": "1.4.0",
+      "date": "2026-07-21",
+      "changes": [
+        "Step 2 인증서 가이드를 실제 실행 순서(2-0 확인 → 2-1 CSR → 2-2 발급 → 2-3 p12)로 재구성",
+        "2-0 사전 확인 단계 신설 - security find-identity로 기존 인증서 유무 판별 후 분기",
+        "Apple Distribution 인증서 계정당 3개 제한 및 Revoke 안내 추가",
+        "CSR 다이얼로그의 '디스크에 저장됨' 라디오 선택 강조 (기본값이 'CA로 이메일 보냄'이라 오설정 빈발)",
+        "키체인 인증서 목록이 비어있는 경우를 정상 상태로 명시 - 최초 진입자 혼란 해소",
+        ".cer 다운로드 후 더블클릭 설치 및 '인증서 추가' 창의 키체인 선택(로그인) 안내 추가",
+        "설치 확인 명령(security find-identity) 안내 추가",
+        "키체인 목록의 Apple 중간 CA 인증서와 본인 인증서 구분법 추가",
+        "p12 내보내기 전 개인키 존재 확인 단계 추가",
+        "산출물 파일명을 CertificateSigningRequest / apple_distribution.cer / apple_distribution.p12로 통일",
+        "p12 저장 다이얼로그 입력값 및 비밀번호 2회 입력 안내 상세화",
+        "p12 개인키 포함 여부 검증 명령(openssl pkcs12) 추가",
+        "p12 유출 위험 및 백업 경고 추가",
+        "Step 2 완료 체크리스트 추가 - find-identity 기대 출력 예시 포함",
+        "Step 3에 Capabilities 선택 가이드 추가 - 체크할 것/Info.plist로 처리되는 것 구분",
+        "Step 3에 Xcode Bundle ID 대조 경고 추가 - Flutter 기본값 잔존으로 인한 서명 실패 예방",
+        "Step 4에 프로파일 검증 절차 추가 - security cms로 앱ID/만료/entitlements 확인",
+        "Team ID 입력란에 실시간 자리수 검증 추가 - 9자리 오입력이 Secret에 저장되는 문제 예방",
+        "Step 7에 .p8 파일명으로 Key ID 확인하는 방법 및 기존 키 재사용 안내 추가",
+        "폴더 선택 시 입력칸이 안내문으로 덮어써져 경로가 사라지던 문제 수정 - 힌트 영역 분리",
+        "프로젝트 경로 미입력 시 Step 8 명령어가 /path/to/project로 생성되던 문제에 경고 배너 추가",
+        "프로젝트 경로 상대경로 입력 차단 및 pwd 안내 추가",
+        "모노레포 지원 - 레포 루트와 Flutter 루트가 다를 때 cd 대상과 인자를 분리해 생성",
+        "Git 레포 루트 입력란 추가 (선택) 및 경로가 두 개인 이유 안내",
+        "Flutter 루트가 pubspec.yaml 위치임을 디렉토리 트리로 명시",
+        "Windows/macOS 경로 확인법 분리 안내 (pwd vs cd, 구분자 차이)",
+        "Windows 환경에서 python 실행 파일명과 역슬래시 경로로 명령어 생성",
+        "p12 비밀번호 입력란에 대응 Secret 키(APPLE_CERTIFICATE_PASSWORD) 표시",
+        "Step 8 생성 파일 목록을 실제 산출물과 일치시킴 - Appfile 오기재 제거, 수정 파일 목록 추가",
+        "Step 9 Secret 설명에 누락됐던 IOS_PROVISIONING_PROFILE_NAME/IOS_BUNDLE_ID/APPLE_TEAM_ID 추가",
+        "Flutter 워크플로우 7종의 Flutter 버전을 3.38.9로 상향 - Dart SDK 요구사항 불일치로 의존성 설치 실패 해결",
+        "Step 1에 CI/로컬 Flutter 버전 대조 점검 항목 추가 - version solving failed 사전 예방"
+      ]
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-07-20",
+      "changes": [
+        "로컬 setup 스크립트를 Python(testflight-wizard.py)으로 전환, bash 3.2 제약 제거"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-01-20",
+      "changes": [
+        "Step 9에 '추가 Secrets' 섹션 추가 - 사용자 정의 Secret 동적 추가 가능",
+        "파일 타입별 스마트 변환 (텍스트 파일 → 원본, 바이너리 파일 → Base64)",
+        "커스텀 Secret 키 이름 자동 생성 (바이너리 파일은 _BASE64 접미사 자동 추가)",
+        "Drag & Drop 파일 업로드 지원",
+        "커스텀 Secrets를 JSON/TXT/ZIP 내보내기에 통합",
+        "localStorage에 커스텀 Secrets 상태 저장"
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2025-01-08",
+      "changes": [
+        "내보내기/가져오기 기능 추가 (ZIP, JSON, TXT 포맷 지원)",
+        "모든 Secret 일괄 복사 기능 추가",
+        "스텝 인디케이터 클릭 네비게이션 추가",
+        "JSZip 라이브러리 통합",
+        "Play Store Wizard와 기능 동일화"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2024-12-01",
+      "changes": [
+        "초기 릴리즈",
+        "9단계 마법사 구성 (시작 → 인증서 → App ID → Profile → ASC등록 → 앱정보 → API Key → Fastlane → 완료)",
+        "JSON/TXT 다운로드 기능",
+        "localStorage 기반 진행상태 저장"
+      ]
+    }
+  ],
+  "compatibility": {
+    "flutter": ">=3.0.0",
+    "xcode": ">=15.0",
+    "fastlane": ">=2.220.0"
+  },
+  "repository": "https://github.com/Cassiiopeia/projectops"
+}
+
+    </script>
+    <!-- JSZip for ZIP export -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Pretendard font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <!-- Shared assets (shared by the wizards) — _shared/check-consistency.py verifies consistency -->
+    <link rel="stylesheet" href="../_shared/wizard.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Pretendard Variable', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            text: '#e2e8f0',
+                            muted: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen font-sans">
+    <!-- Security warning -->
+    <div id="securityWarning" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-900/90 border border-yellow-700 text-yellow-200 px-6 py-3 rounded-lg shadow-xl z-50 max-w-2xl hidden">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-medium" data-i18n="security.warning">If you close this page, the data you entered is lost (temporarily stored in localStorage)</p>
+            </div>
+            <button onclick="closeSecurityWarning()" class="text-yellow-400 hover:text-yellow-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3" style="background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-i18n="header.title">
+                🚀 iOS TestFlight Deployment Wizard
+            </h1>
+            <p class="text-zinc-400 text-base md:text-lg flex items-center justify-center gap-3">
+                <a href="https://github.com/Cassiiopeia/projectops" target="_blank" rel="noopener"
+                   class="hover:text-blue-400 transition inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    projectops
+                </a>
+                <span class="text-slate-600">|</span>
+                <button onclick="openChangelogModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 border border-blue-500/30 rounded-full text-sm text-blue-400 hover:text-blue-300 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    <span id="versionBadge">v1.2.0</span>
+                </button>
+                <span class="text-slate-600">|</span>
+                <button type="button" class="lang-toggle hidden" data-lang-toggle onclick="toggleWizardLanguage()">한국어</button>
+            </p>
+        </header>
+
+        <!-- First-time user guide — shows scope, prerequisites and outputs before starting -->
+        <div class="wizard-meta">
+            <span data-i18n="meta.duration">⏱️ Estimated time <strong>40–60 min</strong></span>
+            <span class="text-slate-600">·</span>
+            <span data-i18n="meta.stepCount">📑 <strong>9 steps</strong></span>
+            <span class="text-slate-600">·</span>
+            <span data-i18n="meta.requirements">🎒 You need <strong>Apple Developer Program ($99/year) · a Mac · a Flutter project</strong></span>
+        </div>
+        <div class="wizard-meta" style="margin-top:-0.5rem">
+            <span data-i18n="meta.outputs">🎁 When done, you get <strong>ExportOptions.plist, Fastfile, Gemfile + 7 GitHub Secrets</strong></span>
+            <span class="text-slate-600">·</span>
+            <a href="../../../../docs/FLUTTER-TESTFLIGHT-WIZARD.md" target="_blank" rel="noopener" class="text-blue-400 hover:underline" data-i18n="meta.docsLink">📖 Read the full guide →</a>
+        </div>
+        <p class="resume-hint" data-i18n="meta.resumeHint">Your progress is saved in this browser automatically. Close the window and reopen it to pick up where you left off.</p>
+
+        <!-- Progress Steps (9 steps) -->
+        <div class="flex justify-between mb-8 px-2 overflow-x-auto">
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="1">
+                <div class="step-circle w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold text-xs z-10 shadow-lg shadow-blue-500/30">1</div>
+                <span class="text-[9px] mt-1 text-slate-400 text-center hidden md:block" data-i18n="steps.start">Start</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="2">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">2</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block" data-i18n="steps.certificate">Certificate</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="3">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">3</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block">App ID</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="4">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">4</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block">Profile</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="5">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">5</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block" data-i18n="steps.ascRegistration">ASC app</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="6">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">6</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block" data-i18n="steps.appInfo">App info</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="7">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">7</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block">API Key</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 relative min-w-[40px]" data-step="8">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">8</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block">Fastlane</span>
+            </div>
+            <div class="step-indicator flex flex-col items-center flex-1 min-w-[40px]" data-step="9">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs z-10">9</div>
+                <span class="text-[9px] mt-1 text-slate-500 text-center hidden md:block" data-i18n="steps.done">Done</span>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 1: Get started -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content fade-in" data-step="1">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-sm">1</span>
+                <span data-i18n="step1.title">Getting started</span>
+            </h2>
+
+            <!-- Dependency flow description -->
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-200 mb-3" data-i18n="step1.flowTitle">📋 What iOS deployment needs, in order</p>
+                <div class="dependency-flow">
+                    <div class="dependency-item bg-purple-600 text-white text-[11px]" data-i18n="step1.flowCertificate">① Certificate</div>
+                    <span class="dependency-arrow">→</span>
+                    <div class="dependency-item bg-blue-600 text-white text-[11px]">② App ID</div>
+                    <span class="dependency-arrow">→</span>
+                    <div class="dependency-item bg-green-600 text-white text-[11px]">③ Profile</div>
+                    <span class="dependency-arrow">→</span>
+                    <div class="dependency-item bg-pink-600 text-white text-[11px]" data-i18n="step1.flowAsc">④ ASC app</div>
+                    <span class="dependency-arrow">→</span>
+                    <div class="dependency-item bg-purple-600 text-white text-[11px]">⑤ API Key</div>
+                </div>
+                <p class="text-xs text-slate-400 text-center mt-2" data-i18n="step1.flowNote">
+                    Go in this order. TestFlight uploads need the <span class="text-pink-400">app registered in App Store Connect</span> first.
+                </p>
+            </div>
+
+            <!-- Prerequisites checklist -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-slate-300 mb-3" data-i18n="step1.checklistTitle">✅ Before you start</p>
+                <ul class="text-xs text-slate-300 space-y-2">
+                    <li class="flex items-center gap-2">
+                        <input type="checkbox" id="check-apple-dev" class="w-4 h-4 rounded">
+                        <label for="check-apple-dev" data-i18n="step1.checkAppleDev">Joined the Apple Developer Program ($99/year)</label>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <input type="checkbox" id="check-mac" class="w-4 h-4 rounded">
+                        <label for="check-mac" data-i18n="step1.checkMac">A Mac (for Keychain Access)</label>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <input type="checkbox" id="check-flutter" class="w-4 h-4 rounded">
+                        <label for="check-flutter" data-i18n="step1.checkFlutter">A Flutter project is ready</label>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <input type="checkbox" id="check-flutter-version" class="w-4 h-4 rounded mt-0.5">
+                        <div>
+                            <label for="check-flutter-version" data-i18n="step1.checkFlutterVersion">CI uses the same Flutter version as your machine</label>
+                            <div class="mt-2 p-3 bg-red-900/30 border border-red-700 rounded">
+                                <p class="text-[11px] text-red-300 font-bold mb-1" data-i18n="step1.versionWarningTitle">⚠️ This is the most common cause of build failures</p>
+                                <p class="text-[11px] text-slate-400" data-i18n="step1.versionWarningBody">
+                                    <code class="text-slate-300">flutter create</code> writes the Dart SDK requirement into pubspec.yaml
+                                    based on <span class="text-slate-300">your local Flutter version</span>. If CI runs an older Flutter,
+                                    dependency install fails with <code class="text-slate-300">version solving failed</code>.
+                                </p>
+                                <div class="bg-slate-900 rounded p-2 mt-2 font-mono text-[10px] space-y-1 overflow-x-auto">
+                                    <div class="text-slate-500" data-i18n="step1.versionCommentLocal"># 1) Your Flutter/Dart version</div>
+                                    <div class="text-green-400">flutter --version</div>
+                                    <div class="text-slate-500 mt-1" data-i18n="step1.versionCommentPubspec"># 2) Dart version pubspec requires</div>
+                                    <div class="text-green-400">grep -A2 '^environment:' pubspec.yaml</div>
+                                    <div class="text-slate-500 mt-1" data-i18n="step1.versionCommentCi"># 3) Version set in CI</div>
+                                    <div class="text-green-400">grep -rn 'FLUTTER_VERSION:' .github/workflows/</div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-2" data-i18n="step1.versionFix">
+                                    If 3 is lower than 1, set the workflow's
+                                    <code class="text-yellow-400">FLUTTER_VERSION</code> to match your local version.
+                                    <span class="text-slate-500">(update the Android workflows too)</span>
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Project path -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step1.projectPathLabel">
+                    Absolute path to the Flutter project root <span class="text-red-400">*</span>
+                </label>
+                <div class="mb-3 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                    <p class="text-xs text-blue-200 font-bold mb-1" data-i18n="step1.flutterRootTitle">📍 "Flutter root" means the folder with pubspec.yaml</p>
+                    <p class="text-[11px] text-slate-400" data-i18n="step1.flutterRootBody">
+                        It can differ from the Git repo root. Enter the folder that holds both <code class="text-slate-300">pubspec.yaml</code>
+                        and the <code class="text-slate-300">ios/</code> folder.
+                    </p>
+                    <div class="bg-slate-900 rounded p-2 mt-2 font-mono text-[10px] space-y-0.5">
+                        <div class="text-slate-500">my-repo/            <span class="text-red-400" data-i18n="step1.treeRepoRoot">← ❌ repo root (no pubspec.yaml)</span></div>
+                        <div class="text-slate-500">├─ .github/</div>
+                        <div class="text-slate-500">└─ client/          <span class="text-green-400" data-i18n="step1.treeFlutterRoot">← ✅ here! Flutter root</span></div>
+                        <div class="text-slate-500">&nbsp;&nbsp;&nbsp;├─ pubspec.yaml</div>
+                        <div class="text-slate-500">&nbsp;&nbsp;&nbsp;└─ ios/</div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2" data-i18n="step1.flutterRootSame">
+                        In the usual layout, with pubspec.yaml right at the repo root, the repo root is the Flutter root.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <input type="text" id="projectPath"
+                        class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
+                        data-i18n-placeholder="step1.projectPathPlaceholder" placeholder="/Users/username/my-flutter-project (absolute path)">
+                    <button class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition flex items-center gap-2" onclick="selectProjectFolder()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <span data-i18n="step1.folderButton">Folder</span>
+                    </button>
+                </div>
+                <!-- Folder picker result — shown only here without overwriting the input -->
+                <p id="projectPath-hint" class="text-xs mt-2 text-slate-400 hidden"></p>
+
+                <!-- How to find the path per OS: separators and commands differ, so they are shown separately -->
+                <div class="mt-3 bg-slate-700/50 border border-slate-600 rounded-lg p-3">
+                    <p class="text-xs font-medium text-blue-400 mb-2" data-i18n="step1.absolutePathTitle">🔍 How to find the absolute path</p>
+                    <p class="text-[11px] text-slate-500 mb-2" data-i18n="step1.absolutePathWhy">
+                        For security, the browser can't read a folder's absolute path, so type it in.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-2">
+                        <div class="bg-slate-900 rounded p-2">
+                            <div class="text-[11px] text-slate-300 font-bold mb-1">🍎 macOS / Linux</div>
+                            <div class="font-mono text-[10px] text-green-400 break-all" data-i18n="step1.macPathCommand">cd your-project-folder && pwd</div>
+                            <div class="text-[10px] text-slate-500 mt-1.5" data-i18n="step1.exampleOutput">Example output:</div>
+                            <div class="font-mono text-[10px] text-slate-400 break-all">/Users/hong/projects/myapp</div>
+                            <div class="text-[10px] text-slate-600 mt-1" data-i18n="step1.macSeparator">Separator <span class="text-slate-400">/</span> · starts with <span class="text-slate-400">/</span></div>
+                        </div>
+                        <div class="bg-slate-900 rounded p-2">
+                            <div class="text-[11px] text-slate-300 font-bold mb-1">🪟 Windows</div>
+                            <div class="font-mono text-[10px] text-green-400 break-all" data-i18n="step1.windowsPathCommand">cd your-project-folder; (pwd).Path</div>
+                            <div class="text-[10px] text-slate-500 mt-1.5" data-i18n="step1.exampleOutput">Example output:</div>
+                            <div class="font-mono text-[10px] text-slate-400 break-all">C:\Users\hong\projects\myapp</div>
+                            <div class="text-[10px] text-slate-600 mt-1" data-i18n="step1.windowsSeparator">Separator <span class="text-slate-400">\</span> · starts with <span class="text-slate-400">drive letter:</span></div>
+                        </div>
+                    </div>
+                    <div class="mt-2 p-2 bg-orange-900/30 border border-orange-700/50 rounded">
+                        <p class="text-[10px] text-orange-300" data-i18n="step1.macOnlyNote">
+                            ⚠️ <span class="font-bold">iOS builds and signing only work on macOS.</span>
+                            On Windows, use this wizard to generate the config files and register GitHub Secrets;
+                            GitHub Actions (macOS runner) does the actual build.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monorepo support: needed only when the repo root differs from the Flutter root -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step1.repoRootLabel">
+                    Absolute path to the Git repo root
+                    <span class="text-xs text-slate-500 font-normal">(optional — leave empty if same as above)</span>
+                </label>
+                <input type="text" id="repoRoot"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-300 focus:border-blue-500 outline-none transition"
+                    data-i18n-placeholder="step1.repoRootPlaceholder" placeholder="/Users/username/my-repo (where the .github folder is)">
+                <p class="text-xs text-slate-500 mt-1" data-i18n="step1.repoRootHint">
+                    The folder that contains <code class="text-slate-400">.github/</code>.
+                    Fill this in only for a monorepo (Flutter lives in a subfolder such as <code class="text-slate-400">client/</code>).
+                </p>
+            </div>
+
+            <div class="flex justify-end mt-8">
+                <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step1.next">
+                    Next: create the certificate →
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 2: Distribution certificate (.p12) -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="2">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-sm">2</span>
+                <span data-i18n="step2.title">Create a Distribution certificate</span>
+                <span class="text-xs font-normal text-purple-400 bg-purple-500/20 px-2 py-1 rounded" data-i18n="step2.titleBadge">Do this first!</span>
+            </h2>
+
+            <!-- Why this comes first -->
+            <div class="bg-purple-900/30 border border-purple-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-purple-200" data-i18n="step2.whyFirst">
+                    🔑 <strong>Why the certificate comes first:</strong> you need it to create the Provisioning Profile!
+                </p>
+            </div>
+
+            <!-- Shortcut button -->
+            <div class="mb-4">
+                <a href="https://developer.apple.com/account/resources/certificates/list"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span data-i18n="step2.openCertificatesPage">Open the Apple Developer Certificates page</span>
+                </a>
+            </div>
+
+            <!-- Overall flow guide -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-3" data-i18n="step2.flowTitle">🗺️ Overall flow (go in order)</p>
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <span class="bg-slate-800 px-2 py-1 rounded text-slate-300" data-i18n="step2.flowCheck">2-0. Check what you have</span>
+                    <span class="text-slate-500">→</span>
+                    <span class="bg-slate-800 px-2 py-1 rounded text-slate-300" data-i18n="step2.flowCsr">2-1. Create a CSR</span>
+                    <span class="text-slate-500">→</span>
+                    <span class="bg-slate-800 px-2 py-1 rounded text-slate-300" data-i18n="step2.flowIssue">2-2. Issue the certificate</span>
+                    <span class="text-slate-500">→</span>
+                    <span class="bg-slate-800 px-2 py-1 rounded text-slate-300" data-i18n="step2.flowExport">2-3. Export the .p12</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2" data-i18n="step2.flowSkip">If you already have a valid certificate, jump from 2-0 straight to 2-3.</p>
+            </div>
+
+            <!-- 2-0. Check whether it already exists -->
+            <div class="bg-emerald-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-emerald-300 mb-2" data-i18n="step2.checkTitle">✅ 2-0. Check first: do you already have a certificate?</p>
+                <p class="text-xs text-slate-400 mb-2" data-i18n="step2.checkRunCommand">Run this command in a terminal.</p>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs mb-3">
+                    <div class="text-green-400">security find-identity -v -p codesigning</div>
+                </div>
+                <div class="text-xs text-slate-300 space-y-2">
+                    <div class="p-2 bg-slate-800/50 rounded border-l-4 border-green-500">
+                        <span class="text-green-400 font-bold" data-i18n="step2.checkFoundTitle">If you see "Apple Distribution: ..."</span>
+                        <div class="text-slate-400 mt-1" data-i18n="step2.checkFoundBody">You already have one! <span class="text-yellow-400">Skip 2-1 · 2-2 and go straight to 2-3 (.p12 export)</span> below.</div>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                        <span class="text-orange-400 font-bold" data-i18n="step2.checkMissingTitle">If you only see "Apple Development", or nothing</span>
+                        <div class="text-slate-400 mt-1" data-i18n="step2.checkMissingBody">You have no distribution certificate. <span class="text-yellow-400">Start from 2-1</span>. (A Development certificate can't distribute.)</div>
+                    </div>
+                </div>
+                <div class="mt-3 p-3 bg-red-900/30 border border-red-700 rounded">
+                    <p class="text-xs text-red-300 font-bold mb-1" data-i18n="step2.limitTitle">⚠️ Limit: at most 3 Apple Distribution certificates per account</p>
+                    <p class="text-[11px] text-slate-400" data-i18n="step2.limitBody">
+                        If you already have 3, you can't create a new one.
+                        On the <a href="https://developer.apple.com/account/resources/certificates/list" target="_blank" rel="noopener" class="text-blue-400 underline">Certificates page</a>,
+                        click an expired or unused certificate → <span class="text-yellow-400">Revoke</span> it, then try again.
+                    </p>
+                    <p class="text-[11px] text-slate-500 mt-1" data-i18n="step2.limitRevokeNote">
+                        Before you revoke: Provisioning Profiles signed with that certificate become invalid and must be recreated.
+                        However, <span class="text-slate-400">apps already released on the App Store are not affected.</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2-1. Create the CSR file -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-1" data-i18n="step2.csrTitle">📝 2-1. Create a CSR (Certificate Signing Request) file</p>
+                <p class="text-[11px] text-slate-500 mb-3" data-i18n="step2.csrKeyNote">
+                    Creating the CSR generates a private key on that Mac. <span class="text-yellow-400">Create it on the same Mac you'll export the .p12 from.</span>
+                </p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-2">
+                    <li data-i18n="step2.csrOpenKeychain">Open the <span class="text-yellow-400">"Keychain Access"</span> app (⌘+Space → "Keychain")</li>
+                    <li data-i18n="step2.csrMenu">Menu bar: <span class="text-yellow-400">Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority...</span></li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500 space-y-2">
+                            <span class="text-orange-400 font-bold" data-i18n="step2.csrDialogTitle">Dialog values</span>
+                            <div class="space-y-1.5 font-mono text-[11px]">
+                                <div data-i18n="step2.csrEmail"><span class="text-slate-400">User Email Address:</span> <span class="text-white">your Apple Developer account email</span></div>
+                                <div data-i18n="step2.csrCommonName"><span class="text-slate-400">Common Name:</span> <span class="text-white">[Your Name] Distribution</span> <span class="text-slate-600">(e.g. HONG GILDONG Distribution)</span></div>
+                                <div data-i18n="step2.csrCaEmail"><span class="text-slate-400">CA Email Address:</span> <span class="text-red-400 font-bold">leave it empty</span></div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700">
+                                <div class="text-red-400 font-bold text-[11px] mb-1" data-i18n="step2.csrRequestTitle">⚠️ Request is — the default is wrong!</div>
+                                <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                                    <span class="text-red-400">❌</span>
+                                    <span data-i18n="step2.csrEmailedToCa">Emailed to the CA <span class="text-slate-600">(default — not this one!)</span></span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <span class="text-green-400">✅</span>
+                                    <span class="text-green-400 font-bold" data-i18n="step2.csrSavedToDisk">Saved to disk</span>
+                                    <span class="text-slate-400" data-i18n="step2.csrSwitchToThis">← switch to this</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                                    <span class="text-slate-600">☐</span>
+                                    <span data-i18n="step2.csrKeyPairInfo">Let me specify key pair information <span class="text-slate-600">(leave unchecked)</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><span data-i18n="step2.csrContinue"><span class="text-yellow-400">Continue</span> → save to the <span class="text-yellow-400">Downloads folder</span> (recommended) → Save</span>
+                        <div class="text-slate-500 text-[10px] mt-1" data-i18n="step2.csrKeepFileName">
+                            Keep the default file name (<code class="text-slate-400">CertificateSigningRequest</code>). The commands below use it.
+                        </div>
+                    </li>
+                </ol>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs mt-3">
+                    <div class="text-green-400" data-i18n="step2.csrCreated">→ creates ~/Downloads/CertificateSigningRequest.certSigningRequest</div>
+                </div>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-[11px] mt-2">
+                    <div class="text-slate-500 mb-1" data-i18n="step2.csrVerifyComment"># Check that it was created correctly (optional)</div>
+                    <div class="text-green-400 break-all">openssl req -in ~/Downloads/CertificateSigningRequest.certSigningRequest -noout -subject -verify</div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2" data-i18n="step2.csrVerifyResult">
+                    It's fine if you see <span class="text-green-400">verify OK</span> and a Subject like
+                    <code class="text-slate-400">CN=..., C=KR</code>.
+                </p>
+                <div class="mt-3 p-2 bg-slate-800/50 rounded text-[11px] text-slate-400" data-i18n="step2.csrFinderTip">
+                    💡 If the file doesn't show up in the next step's upload dialog → in Finder, press <span class="text-yellow-400">⌘+Shift+G</span> and paste
+                    <code class="text-slate-300">~/Downloads/CertificateSigningRequest.certSigningRequest</code> to select it directly.
+                </div>
+            </div>
+
+            <!-- 2-2. Get the certificate issued -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-3" data-i18n="step2.issueTitle">📋 2-2. Get the certificate from Apple</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-2">
+                    <li data-i18n="step2.issueOpenPage">Click the <span class="text-blue-400">Open the Certificates page</span> button above</li>
+                    <li data-i18n="step2.issuePlus">Click the <span class="text-blue-400 font-bold text-sm">+</span> button</li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-red-500">
+                            <span class="text-red-400 font-bold" data-i18n="step2.issueTypeTitle">⚠️ Important! Pick the right type:</span>
+                            <div class="mt-2 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-400 text-lg">✅</span>
+                                    <span class="text-green-400 font-bold">Apple Distribution</span>
+                                    <span class="text-slate-400" data-i18n="step2.issueTypeDistribution">- for App Store distribution (pick this!)</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-500">
+                                    <span class="text-red-400">❌</span>
+                                    <span data-i18n="step2.issueTypeIosDistribution">iOS Distribution - legacy (don't pick)</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-500">
+                                    <span class="text-red-400">❌</span>
+                                    <span data-i18n="step2.issueTypeDevelopment">Apple Development - for development (can't distribute)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li data-i18n="step2.issueUploadCsr"><span class="text-yellow-400">Choose File</span> → upload the <span class="text-orange-400">.certSigningRequest</span> from 2-1 → Continue</li>
+                    <li data-i18n="step2.issueDownload">Click <span class="text-yellow-400">Download</span> → save <code class="text-orange-400">apple_distribution.cer</code> (keep the default file name)</li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-red-500">
+                            <span class="text-red-400 font-bold" data-i18n="step2.installTitle">⚠️ Downloading isn't enough — you must install it!</span>
+                            <div class="text-slate-400 mt-2 text-[11px]" data-i18n="step2.installDoubleClick">
+                                <span class="text-yellow-400 font-bold">Double-click</span> the downloaded .cer file.
+                                (Or run <code class="text-slate-300">open ~/Downloads/apple_distribution.cer</code> in a terminal.)
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700">
+                                <div class="text-orange-400 font-bold text-[11px] mb-1" data-i18n="step2.installKeychainTitle">When the "Add Certificates" window opens — choose the keychain</div>
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <span class="text-green-400">✅</span>
+                                    <span class="text-green-400 font-bold" data-i18n="step2.installLogin">login</span>
+                                    <span class="text-slate-400" data-i18n="step2.installKeepDefault">← keep the default and click "Add"</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                                    <span class="text-red-400">❌</span>
+                                    <span data-i18n="step2.installOtherKeychains">iCloud / System / System Roots <span class="text-slate-600">(don't pick)</span></span>
+                                </div>
+                                <div class="text-slate-500 text-[10px] mt-2" data-i18n="step2.installWhyLogin">
+                                    The private key lives in the <span class="text-slate-400">login keychain</span>, so the certificate has to go into the same keychain
+                                    to pair up and export as a .p12.
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li data-i18n="step2.installVerify">Check the install: run <code class="text-slate-300">security find-identity -v -p codesigning</code> in a terminal → success if you see <span class="text-green-400">Apple Distribution</span></li>
+                </ol>
+                <div class="mt-3 p-2 bg-slate-800/50 rounded text-[11px] text-slate-400" data-i18n="step2.maxCertificatesError">
+                    If you get a "maximum number of certificates" error → revoke an existing certificate as described in the 2-0 limit note.
+                </div>
+            </div>
+
+            <!-- 2-3. Export the .p12 from Keychain -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-2" data-i18n="step2.exportTitle">📤 2-3. Export the .p12 file from the keychain</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-1">
+                    <li data-i18n="step2.exportOpenKeychain">Open the <span class="text-yellow-400">"Keychain Access"</span> app on your Mac (⌘+Space → "Keychain")</li>
+                    <li><span data-i18n="step2.exportMyCertificates">Left: the <span class="text-yellow-400">"login"</span> keychain → top: the <span class="text-yellow-400">"My Certificates"</span> category</span>
+                        <span class="text-slate-500 text-[10px]" data-i18n="step2.exportCertificatesTabNote">(the "Certificates" tab mixes in Apple CAs and gets confusing)</span>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-red-500">
+                            <span class="text-red-400 font-bold" data-i18n="step2.exportManyCertificates">⚠️ Don't panic if the list shows about 10 certificates</span>
+                            <div class="text-slate-400 mt-2 text-[11px]" data-i18n="step2.exportIntermediateCa">
+                                Most are <span class="text-slate-300">intermediate CA certificates</span> Apple installed automatically.
+                                <span class="text-red-400">Leave them alone.</span>
+                            </div>
+                            <div class="bg-slate-900 rounded p-2 mt-2 font-mono text-[10px] space-y-0.5">
+                                <div class="text-slate-600">Developer ID Certification Authority</div>
+                                <div class="text-slate-600">Apple Worldwide Developer Relations CA</div>
+                                <div class="text-slate-600" data-i18n="step2.exportIgnoreAll">Apple Root CA <span class="text-slate-700">… ❌ ignore all of these</span></div>
+                                <div class="text-green-400 mt-1" data-i18n="step2.exportDistributionRow">▶ Apple Distribution: Name (TEAMID) <span class="text-yellow-400">← ✅ this one!</span></div>
+                                <div class="text-slate-500" data-i18n="step2.exportDevelopmentRow">▶ Apple Development: Name (TEAMID) <span class="text-slate-600">← ❌ for development, can't distribute</span></div>
+                            </div>
+                            <div class="text-slate-500 text-[10px] mt-2" data-i18n="step2.exportHowToTell">
+                                How to tell: the name starts with <span class="text-slate-400">"Apple Distribution:"</span>,
+                                and there's a <span class="text-yellow-400">▶ triangle</span> on the left (= it has a private key).
+                                CA certificates have no triangle.
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                            <span class="text-orange-400 font-bold" data-i18n="step2.exportPrivateKeyTitle">⚠️ First check that the private key is there!</span>
+                            <div class="text-slate-400 mt-1 text-[11px]" data-i18n="step2.exportPrivateKeyExpand">
+                                Expand the <span class="text-yellow-400">▶ triangle</span> left of the certificate; you should see a <span class="text-yellow-400">🔑 private key</span> under it.
+                            </div>
+                            <div class="text-slate-500 mt-1 text-[11px]" data-i18n="step2.exportNoPrivateKey">
+                                Without a private key the .p12 format won't even appear → the certificate was created on another Mac.
+                                Get the .p12 from that Mac, or start over from 2-1.
+                            </div>
+                        </div>
+                    </li>
+                    <li data-i18n="step2.exportRightClick">Right-click the certificate → <span class="text-yellow-400">"Export "Apple Distribution: ..."..."</span></li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500 space-y-2">
+                            <span class="text-orange-400 font-bold" data-i18n="step2.exportSaveDialog">Save dialog</span>
+                            <div class="space-y-1.5 font-mono text-[11px]">
+                                <div data-i18n="step2.exportSaveName"><span class="text-slate-400">Save As:</span> <code class="text-orange-400">apple_distribution.p12</code></div>
+                                <div data-i18n="step2.exportSaveWhere"><span class="text-slate-400">Where:</span> <span class="text-white">Downloads</span></div>
+                                <div data-i18n="step2.exportSaveFormat"><span class="text-slate-400">File Format:</span> <span class="text-green-400 font-bold">Personal Information Exchange (.p12)</span></div>
+                            </div>
+                            <div class="text-slate-500 text-[10px]" data-i18n="step2.exportNoP12Format">
+                                If the format dropdown has no <span class="text-slate-400">.p12</span>, you picked a certificate without a private key → go back to the step above.
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-red-500">
+                            <span class="text-red-400 font-bold" data-i18n="step2.exportPasswordTitle">🔑 Enter the password twice (Password · Verify)</span>
+                            <div class="text-slate-400 mt-1 text-[11px]" data-i18n="step2.exportPasswordIsSecret">
+                                The password you set here becomes the GitHub Secret
+                                <code class="text-yellow-400">APPLE_CERTIFICATE_PASSWORD</code>.
+                                <span class="text-red-400">Write it down.</span>
+                            </div>
+                            <div class="text-slate-500 text-[10px] mt-1" data-i18n="step2.exportPasswordForgot">
+                                If you forget it, export the .p12 again (no need to reissue the certificate).
+                            </div>
+                        </div>
+                    </li>
+                    <li><span data-i18n="step2.exportMacPassword">Enter your <span class="text-yellow-400">macOS login password</span> → Allow
+                        <span class="text-slate-500 text-[10px]">(Keychain confirming the private key export)</span></span>
+                    </li>
+                </ol>
+
+                <!-- Verification -->
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-[11px] mt-3">
+                    <div class="text-slate-500 mb-1" data-i18n="step2.exportVerifyComment"># Check that the private key is really inside (recommended)</div>
+                    <div class="text-green-400 break-all" data-i18n="step2.exportVerifyCommand">openssl pkcs12 -in ~/Downloads/apple_distribution.p12 -nodes -passin pass:YOUR_PASSWORD | grep -c "PRIVATE KEY"</div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1" data-i18n="step2.exportVerifyResult">
+                    A result of <span class="text-green-400">1</span> means it's fine.
+                    <span class="text-slate-400">0</span> or <span class="text-slate-400">Mac verify error</span> means the password is wrong or there's no private key.
+                </p>
+
+                <!-- Backup warning -->
+                <div class="mt-3 p-3 bg-red-900/30 border border-red-700 rounded">
+                    <p class="text-xs text-red-300 font-bold mb-1" data-i18n="step2.p12CautionTitle">🔒 The .p12 holds your private key — handle with care</p>
+                    <ul class="text-[11px] text-slate-400 list-disc list-inside space-y-0.5">
+                        <li data-i18n="step2.p12CautionNoGit"><span class="text-red-400">Never commit it to Git.</span> If it leaks, anyone can sign apps in your name</li>
+                        <li data-i18n="step2.p12CautionBackup"><span class="text-slate-300">Back it up</span> with its password somewhere safe (e.g. a password manager)</li>
+                        <li data-i18n="step2.p12CautionRecover">This file alone recovers you on a new Mac — lose it and you must reissue the certificate, using up another of the 3 slots</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Keychain illustration -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-3" data-i18n="step2.keychainWhereTitle">📍 Where to look in Keychain Access</p>
+
+                <!-- Shared: sidebar + category position -->
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs overflow-x-auto mb-3">
+                    <div class="flex gap-4">
+                        <div class="border-r border-slate-700 pr-4">
+                            <div class="text-slate-500 text-[10px] mb-1" data-i18n="step2.keychainDefault">Default Keychains</div>
+                            <div class="text-yellow-400 bg-yellow-900/30 px-2 py-0.5 rounded" data-i18n="step2.keychainLogin">login</div>
+                            <div class="text-slate-500 px-2 py-0.5">iCloud</div>
+                            <div class="text-slate-500 text-[10px] mt-2 mb-1" data-i18n="step2.keychainSystemKeychains">System Keychains</div>
+                            <div class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainSystem">System</div>
+                            <div class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainSystemRoots">System Roots</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-slate-500 text-[10px] mb-1" data-i18n="step2.keychainCategoryTabs">Category tabs at the top</div>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainAllItems">All Items</span>
+                                <span class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainPasswords">Passwords</span>
+                                <span class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainSecureNotes">Secure Notes</span>
+                                <span class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainMyCertificates">My Certificates</span>
+                                <span class="text-slate-500 px-2 py-0.5" data-i18n="step2.keychainKeys">Keys</span>
+                                <span class="text-yellow-400 bg-yellow-900/30 px-2 py-0.5 rounded" data-i18n="step2.keychainCertificates">Certificates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparing the two states -->
+                <p class="text-xs text-slate-400 mb-2" data-i18n="step2.keychainTwoStates">At this point you'll see one of two screens:</p>
+                <div class="grid md:grid-cols-2 gap-3">
+                    <!-- When empty -->
+                    <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs border-l-4 border-orange-500">
+                        <div class="text-orange-400 font-bold mb-2 text-[11px]" data-i18n="step2.keychainEmptyTitle">A. The list is empty 😰</div>
+                        <div class="border border-slate-700 rounded p-3 text-center text-slate-600 mb-2">
+                            <div class="text-[10px]" data-i18n="step2.keychainNoItems">(no items)</div>
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <span data-i18n="step2.keychainEmptyNormal"><span class="text-green-400 font-bold">That's normal!</span> Nothing is broken.
+                            It just means you haven't been issued a certificate yet.</span>
+                            <div class="mt-2 text-yellow-400" data-i18n="step2.keychainEmptyNext">→ Start from 2-1 (create a CSR) above.</div>
+                            <div class="mt-1 text-slate-500 text-[10px]" data-i18n="step2.keychainEmptyAfterCer">
+                                Creating a CSR doesn't change this list.
+                                Items appear only <span class="text-slate-400">after you double-click the .cer in 2-2</span>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- When present -->
+                    <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs border-l-4 border-green-500">
+                        <div class="text-green-400 font-bold mb-2 text-[11px]" data-i18n="step2.keychainFoundTitle">B. A certificate shows up 🎉</div>
+                        <div class="border border-slate-700 rounded mb-2">
+                            <div class="p-2 bg-green-900/20 flex items-start gap-1">
+                                <span class="text-slate-500">▼</span>
+                                <span>📜</span>
+                                <div class="min-w-0">
+                                    <div class="text-green-400 font-bold text-[11px] truncate">Apple Distribution: Team</div>
+                                    <div class="text-slate-500 text-[10px]" data-i18n="step2.keychainExpires">Expires: June 8, 2027</div>
+                                </div>
+                            </div>
+                            <div class="pl-7 py-1 flex items-center gap-1 border-t border-slate-800">
+                                <span>🔑</span>
+                                <span class="text-slate-400 text-[10px]" data-i18n="step2.keychainPrivateKey">private key</span>
+                                <span class="text-green-400 text-[10px]" data-i18n="step2.keychainRequired">← required!</span>
+                            </div>
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <span data-i18n="step2.keychainFoundExpand"><span class="text-yellow-400">Expand the ▼ triangle</span> and check that the private key is there.</span>
+                            <div class="mt-2 text-yellow-400" data-i18n="step2.keychainFoundNext">→ Go to 2-3 (.p12 export).</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-2 bg-slate-800/50 rounded text-[11px] text-slate-400" data-i18n="step2.keychainTabTip">
+                    💡 The <span class="text-slate-300">"My Certificates" tab</span> shows only certificates that have a private key.
+                    If it shows under <span class="text-slate-300">"Certificates"</span> but not under <span class="text-slate-300">"My Certificates"</span>, there's no private key → you can't export it as a .p12.
+                </div>
+            </div>
+
+            <!-- Completion checklist -->
+            <div class="bg-emerald-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-emerald-300 mb-3" data-i18n="step2.finalCheckTitle">🎯 Made it this far? — final check</p>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-[11px] mb-3">
+                    <div class="text-green-400">security find-identity -v -p codesigning</div>
+                </div>
+                <p class="text-[11px] text-slate-400 mb-2" data-i18n="step2.finalCheckBody">Step 2 is done if you see <span class="text-green-400">Apple Distribution</span> like below:</p>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-[10px] text-slate-400 mb-3 overflow-x-auto">
+                    <div data-i18n="step2.finalCheckDevelopment">1) 88BE0B2E... "Apple Development: Name (TEAMID)"</div>
+                    <div class="text-green-400" data-i18n="step2.finalCheckDistribution">2) A278F54B... "Apple Distribution: Name (TEAMID)"</div>
+                    <div class="text-slate-500">&nbsp;&nbsp;&nbsp;2 valid identities found</div>
+                </div>
+                <div class="text-[11px] text-slate-300 space-y-1">
+                    <div data-i18n="step2.finalCheckInstalled">✅ <span class="text-slate-400">Apple Distribution certificate installed in the keychain</span></div>
+                    <div data-i18n="step2.finalCheckP12Created">✅ <span class="text-slate-400">~/Downloads/apple_distribution.p12 created</span></div>
+                    <div data-i18n="step2.finalCheckPasswordNoted">✅ <span class="text-slate-400">.p12 password written down</span></div>
+                </div>
+            </div>
+
+            <!-- File upload -->
+            <div class="file-upload" id="p12-upload" onclick="document.getElementById('p12-input').click()">
+                <div class="icon">📄</div>
+                <div class="text-slate-300" data-i18n="step2.p12Drop">Drag a .p12 file here or click</div>
+                <input type="file" id="p12-input" accept=".p12" onchange="handleP12Upload(event)">
+                <div class="file-info" id="p12-info" style="display:none"></div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step2.p12PasswordLabel">.p12 password</label>
+                <input type="password" id="p12-password" data-i18n-placeholder="step2.p12PasswordPlaceholder" placeholder="the password you set when exporting in 2-3"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none">
+                <p class="text-xs text-slate-500 mt-1" data-i18n="step2.p12PasswordSecret">
+                    Registered as the GitHub Secret <code class="text-yellow-400">APPLE_CERTIFICATE_PASSWORD</code>
+                </p>
+            </div>
+
+            <div class="flex justify-between items-center mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <div class="flex gap-2 items-center">
+                    <span class="skip-btn" onclick="skipStep(2)" data-i18n="nav.alreadyHave">Already have it →</span>
+                    <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step2.next">Next: App ID →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 3: Register the App ID (Bundle ID) -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="3">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-sm">3</span>
+                <span data-i18n="step3.title">Register the App ID (Bundle ID)</span>
+            </h2>
+
+            <!-- Description -->
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-200" data-i18n="step3.whatIsAppId">
+                    📱 <strong>What's an App ID?</strong> It's your app's unique identifier. It must match your Flutter Bundle ID!
+                </p>
+            </div>
+
+            <!-- Shortcut button -->
+            <div class="mb-4">
+                <a href="https://developer.apple.com/account/resources/identifiers/list"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span data-i18n="step3.openIdentifiersPage">Open the Apple Developer Identifiers page</span>
+                </a>
+            </div>
+
+            <!-- Creation guide -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-3" data-i18n="step3.howToTitle">📋 How to register the App ID</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-2">
+                    <li data-i18n="step3.openPage">Click the button above → open the Identifiers page</li>
+                    <li data-i18n="step3.clickPlus">Click the <span class="text-blue-400 font-bold text-sm">+</span> button</li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-green-500">
+                            <span class="text-green-400 font-bold" data-i18n="step3.phase1">Step 1: Register a new identifier</span>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-green-400">◉</span>
+                                <span class="text-green-400 font-bold">App IDs</span>
+                                <span class="text-slate-400" data-i18n="step3.pickThis">← pick this!</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-green-500">
+                            <span class="text-green-400 font-bold" data-i18n="step3.phase2">Step 2: Select a type</span>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-green-400">◉</span>
+                                <span class="text-green-400 font-bold">App</span>
+                                <span class="text-slate-400" data-i18n="step3.pickThisNotAppClip">← pick this! (not App Clip)</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                            <span class="text-orange-400 font-bold" data-i18n="step3.phase3">Step 3: Set the Bundle ID</span>
+                            <div class="mt-2 space-y-2">
+                                <div>
+                                    <span class="text-slate-400">Description:</span>
+                                    <span class="text-white" data-i18n="step3.descriptionExample">app name (e.g. My Flutter App)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-400">◉</span>
+                                    <span class="text-green-400 font-bold">Explicit</span>
+                                    <span class="text-slate-400" data-i18n="step3.pickThis">← pick this!</span>
+                                </div>
+                                <div class="text-slate-400">Bundle ID: <span class="text-orange-400 font-bold">kr.mycompany.myapp</span></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                            <span class="text-orange-400 font-bold" data-i18n="step3.phase4">Step 4: Capabilities — the list has about 150 entries</span>
+                            <div class="text-slate-400 mt-2 text-[11px]" data-i18n="step3.capabilitiesMostlyNone">
+                                <span class="text-green-400 font-bold">You don't need to check most of them.</span>
+                                Capabilities only cover <span class="text-slate-300">features that use Apple server infrastructure or go beyond the sandbox</span>.
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700">
+                                <div class="text-[11px] text-slate-300 mb-1" data-i18n="step3.capabilitiesCheckIf">✅ Check if it applies:</div>
+                                <ul class="text-[10px] text-slate-400 list-disc list-inside space-y-0.5">
+                                    <li data-i18n="step3.capabilityPush"><span class="text-slate-300">Push Notifications</span> — push notifications (needs a separate .p8 key)</li>
+                                    <li data-i18n="step3.capabilitySignInWithApple"><span class="text-slate-300">Sign In with Apple</span> — Apple login</li>
+                                    <li data-i18n="step3.capabilityInAppPurchase"><span class="text-slate-300">In-App Purchase</span> — in-app payments</li>
+                                    <li data-i18n="step3.capabilityAssociatedDomains"><span class="text-slate-300">Associated Domains</span> — deep links / universal links</li>
+                                    <li data-i18n="step3.capabilityFrameworks"><span class="text-slate-300">HealthKit · iCloud · Maps</span> — if you use those frameworks</li>
+                                </ul>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700">
+                                <div class="text-[11px] text-red-400 font-bold mb-1" data-i18n="step3.capabilitiesDontCheck">❌ Don't check these — Info.plist handles them</div>
+                                <div class="text-[10px] text-slate-400" data-i18n="step3.capabilitiesPermissionList">
+                                    Camera · microphone recording · speech recognition (STT) · TTS · location · photo library · Bluetooth
+                                </div>
+                                <div class="text-[10px] text-slate-500 mt-1" data-i18n="step3.capabilitiesPermissionWhy">
+                                    These ask the user for permission at runtime, so they have nothing to do with provisioning.
+                                    Just add the <code class="text-slate-400">NS...UsageDescription</code> strings to <code class="text-slate-400">Info.plist</code>.
+                                </div>
+                                <div class="text-[10px] text-orange-400 mt-2" data-i18n="step3.capabilitiesSiri">
+                                    ⚠️ <span class="font-bold">Siri</span> is for "invoke my app with Siri" (SiriKit).
+                                    It's <span class="text-slate-400">unrelated to in-app speech recognition, so don't check it.</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700 text-[10px] text-slate-500" data-i18n="step3.capabilitiesLater">
+                                💡 You can add them later, but then you must <span class="text-slate-400">recreate the Provisioning Profile</span> (repeat step 4).
+                                Check features you're sure about now.
+                            </div>
+                        </div>
+                    </li>
+                    <li data-i18n="step3.clickRegister">Click <span class="text-green-400 font-bold">Register</span>!</li>
+                </ol>
+            </div>
+
+            <!-- Illustration -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-3" data-i18n="step3.previewTitle">📍 Identifiers page preview</p>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                    <div class="flex gap-4">
+                        <div class="border-r border-slate-700 pr-4 text-slate-500">
+                            <div class="py-1">Certificates</div>
+                            <div class="py-1 text-blue-400 bg-blue-900/30 px-2 rounded">Identifiers</div>
+                            <div class="py-1">Devices</div>
+                            <div class="py-1">Profiles</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-slate-300 font-bold">Identifiers</span>
+                                <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">+</span>
+                                <span class="text-green-400 text-[10px]" data-i18n="step3.clickHere">← click!</span>
+                            </div>
+                            <div class="border border-slate-700 rounded">
+                                <div class="grid grid-cols-2 gap-2 p-2 bg-slate-800 text-slate-500 text-[10px]">
+                                    <span>NAME</span>
+                                    <span>IDENTIFIER</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 p-2 text-slate-300">
+                                    <span>MyApp</span>
+                                    <span class="text-blue-400">kr.mycompany.myapp</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bundle ID naming guide -->
+            <div class="bg-gradient-to-r from-emerald-900/30 to-blue-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-emerald-400 mb-3" data-i18n="step3.namingTitle">💡 Bundle ID naming guide</p>
+                <div class="text-xs text-slate-300 space-y-2">
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <span class="text-slate-400" data-i18n="step3.namingRecommended">Recommended format:</span>
+                        <span class="text-orange-400 font-mono" data-i18n="step3.namingFormat">[reverse-domain].[app-name]</span>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">kr.mycompany.myapp</code>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">com.mycompany.myapp</code>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">io.github.username.appname</code>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-500">
+                            <span class="text-red-400">❌</span>
+                            <span data-i18n="step3.namingTooShort"><code>myapp</code> - too short</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-500">
+                            <span class="text-red-400">❌</span>
+                            <span data-i18n="step3.namingUppercase"><code>MyApp</code> - uppercase not recommended</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bundle ID input -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step3.bundleIdLabel">
+                    Enter the registered Bundle ID <span class="text-red-400">*</span>
+                </label>
+                <input type="text" id="bundleId"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none"
+                    placeholder="kr.mycompany.myapp">
+                <p class="text-xs text-slate-500 mt-1" data-i18n="step3.bundleIdHint">Must match the Bundle Identifier in your Flutter project's ios/Runner.xcodeproj</p>
+                <div class="mt-3 p-3 bg-red-900/30 border border-red-700 rounded">
+                    <p class="text-xs text-red-300 font-bold mb-2" data-i18n="step3.xcodeCompareTitle">⚠️ Compare with your Xcode project before registering</p>
+                    <div class="bg-slate-900 rounded p-2 font-mono text-[10px] overflow-x-auto">
+                        <div class="text-green-400 break-all">grep PRODUCT_BUNDLE_IDENTIFIER ios/Runner.xcodeproj/project.pbxproj</div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2" data-i18n="step3.xcodeDefaultLeft">
+                        Flutter's default (<code class="text-slate-300">com.example.appname</code> etc.) is often still there.
+                        If it differs from what you register with Apple, <span class="text-red-400">signing fails</span>.
+                    </p>
+                    <p class="text-[11px] text-slate-500 mt-1" data-i18n="step3.xcodeFixNow">
+                        If they differ, fix it now. Change the <code class="text-slate-400">RunnerTests</code> entries too.
+                        <span class="text-yellow-400">You can't change the Bundle ID after the App Store release.</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <div class="flex gap-2 items-center">
+                    <span class="skip-btn" onclick="skipStep(3)" data-i18n="nav.alreadyHave">Already have it →</span>
+                    <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step3.next">Next: Profile →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 4: Provisioning Profile -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="4">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-sm">4</span>
+                <span data-i18n="step4.title">Create the Provisioning Profile</span>
+            </h2>
+
+            <!-- Description -->
+            <div class="bg-green-900/30 border border-green-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-green-200" data-i18n="step4.whatIsProfile">
+                    🔗 <strong>What's a Provisioning Profile?</strong> A file that bundles the certificate + App ID to prove "this app is signed with this certificate".
+                </p>
+                <p class="text-xs text-slate-400 mt-2" data-i18n="step4.needsPrevious">
+                    ⚠️ You need the step 2 certificate + step 3 App ID first!
+                </p>
+            </div>
+
+            <!-- Shortcut button -->
+            <div class="mb-4">
+                <a href="https://developer.apple.com/account/resources/profiles/list"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span data-i18n="step4.openProfilesPage">Open the Apple Developer Profiles page</span>
+                </a>
+            </div>
+
+            <!-- Creation guide -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-3" data-i18n="step4.howToTitle">📋 How to create the Provisioning Profile</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-2">
+                    <li data-i18n="step4.openPage">Click the button above → open the Profiles page</li>
+                    <li data-i18n="step4.clickPlus">Click the <span class="text-blue-400 font-bold text-sm">+</span> button</li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-red-500">
+                            <span class="text-red-400 font-bold" data-i18n="step4.pickDistribution">⚠️ Pick the Distribution type (not Development!)</span>
+                            <div class="mt-2 space-y-1">
+                                <div class="text-slate-500">Development</div>
+                                <div class="text-slate-500 pl-4">○ iOS App Development</div>
+                                <div class="text-slate-300 font-bold">Distribution</div>
+                                <div class="flex items-center gap-2 pl-4">
+                                    <span class="text-green-400">◉</span>
+                                    <span class="text-green-400 font-bold">App Store Connect</span>
+                                    <span class="text-slate-400" data-i18n="step4.pickThis">← pick this!</span>
+                                </div>
+                                <div class="text-slate-500 pl-4">○ Ad Hoc</div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-blue-500">
+                            <span class="text-blue-400 font-bold" data-i18n="step4.pickAppId">Choose the App ID</span>
+                            <div class="mt-2">
+                                <span class="text-slate-400" data-i18n="step4.madeInStep3">the one from step 3</span>
+                                <span class="text-orange-400 font-bold" id="display-bundle-id">kr.mycompany.myapp</span>
+                                <span class="text-slate-400" data-i18n="step4.select">select</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-purple-500">
+                            <span class="text-purple-400 font-bold" data-i18n="step4.pickCertificate">Choose the Certificate</span>
+                            <div class="mt-2">
+                                <span class="text-slate-400" data-i18n="step4.madeInStep2">the one from step 2</span>
+                                <span class="text-purple-400 font-bold">Apple Distribution</span>
+                                <span class="text-slate-400" data-i18n="step4.checkCertificate">check the certificate</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                            <span class="text-orange-400 font-bold" data-i18n="step4.enterProfileName">Enter the profile name</span>
+                            <div class="mt-2 text-slate-400" data-i18n="step4.profileNameExample">
+                                e.g. <span class="text-orange-400">MyApp AppStore Distribution</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li><span data-i18n="step4.generateDownload"><span class="text-green-400 font-bold">Generate</span> → <span class="text-blue-400 font-bold">Download</span> → save the <code class="text-orange-400">.mobileprovision</code>
+                        <span class="text-slate-500 text-[10px]">(unlike the step 2 .p12, no keychain install needed — just keep the file)</span></span>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-emerald-500">
+                            <span class="text-emerald-400 font-bold" data-i18n="step4.verifyTitle">✅ Check that it was created correctly (recommended)</span>
+                            <div class="text-slate-400 mt-1 text-[11px]" data-i18n="step4.verifyWhy">
+                                A profile is a signed binary, not text, so it looks garbled if you just open it. Check its contents with the command below.
+                            </div>
+                            <div class="bg-slate-900 rounded p-2 mt-2 font-mono text-[10px] overflow-x-auto">
+                                <div class="text-green-400 break-all" data-i18n="step4.verifyCommand">security cms -D -i ~/Downloads/your-file.mobileprovision | plutil -p - | grep -E "Name|application-identifier|ExpirationDate|aps-environment"</div>
+                            </div>
+                            <div class="text-slate-400 mt-2 text-[11px]" data-i18n="step4.verifyWhatToCheck">What to check:</div>
+                            <ul class="text-[10px] text-slate-400 list-disc list-inside mt-1 space-y-0.5">
+                                <li data-i18n="step4.verifyAppIdentifier"><span class="text-slate-300">application-identifier</span> looks like <span class="text-yellow-400">TEAMID.yourBundleID</span></li>
+                                <li data-i18n="step4.verifyApsEnvironment"><span class="text-slate-300">aps-environment</span> is <span class="text-green-400">production</span> (if push is on)</li>
+                                <li data-i18n="step4.verifyExpiration"><span class="text-slate-300">ExpirationDate</span> is a year from now</li>
+                            </ul>
+                            <div class="text-slate-500 text-[10px] mt-2" data-i18n="step4.verifyTaskAllow">
+                                ⚠️ If <span class="text-slate-400">get-task-allow</span> is <span class="text-red-400">true</span>, you made a development profile by mistake → recreate it as Distribution.
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Profile name naming guide -->
+            <div class="bg-gradient-to-r from-emerald-900/30 to-blue-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-emerald-400 mb-3" data-i18n="step4.namingTitle">💡 Profile naming guide</p>
+                <div class="text-xs text-slate-300 space-y-2">
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <span class="text-slate-400" data-i18n="step4.namingRecommended">Recommended format:</span>
+                        <span class="text-orange-400 font-mono" data-i18n="step4.namingFormat">[app name] [purpose] [type]</span>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">MyApp AppStore Distribution</code>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">MyApp App Store Dist</code>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400">✅</span>
+                            <code class="text-green-400">ProjectName-AppStore-2024</code>
+                        </div>
+                    </div>
+                    <p class="text-yellow-400 mt-2" data-i18n="step4.rememberName">⚠️ Remember this exact name! You'll enter it into GitHub Secrets.</p>
+                    <p class="text-red-400 mt-1" data-i18n="step4.exactMatch">🚨 <strong>It must match exactly, spaces included!</strong> One character off and the build fails!</p>
+                </div>
+            </div>
+
+            <!-- File upload -->
+            <div class="file-upload" id="provision-upload" onclick="document.getElementById('provision-input').click()">
+                <div class="icon">📄</div>
+                <div class="text-slate-300" data-i18n="step4.provisionDrop">Drag a .mobileprovision file here or click</div>
+                <input type="file" id="provision-input" accept=".mobileprovision" onchange="handleProvisionUpload(event)">
+                <div class="file-info" id="provision-info" style="display:none"></div>
+            </div>
+
+            <!-- Profile name input -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step4.profileNameLabel">
+                    Provisioning Profile name <span class="text-red-400">*</span>
+                </label>
+                <input type="text" id="profileName"
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none"
+                    placeholder="MyApp AppStore Distribution">
+                <p class="text-xs text-slate-500 mt-1" data-i18n="step4.profileNameHint">Exactly the same as the name you entered in Apple Developer!</p>
+            </div>
+
+            <div class="flex justify-between items-center mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <div class="flex gap-2 items-center">
+                    <span class="skip-btn" onclick="skipStep(4)" data-i18n="nav.alreadyHave">Already have it →</span>
+                    <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step4.next">Next: register in ASC →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 5: Register the app in App Store Connect (new!) -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="5">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center text-sm">5</span>
+                <span data-i18n="step5.title">Register the app in App Store Connect</span>
+                <span class="text-xs font-normal text-pink-400 bg-pink-500/20 px-2 py-1 rounded" data-i18n="step5.titleBadge">Required for TestFlight!</span>
+            </h2>
+
+            <!-- Why it is needed -->
+            <div class="bg-pink-900/30 border border-pink-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-pink-200" data-i18n="step5.whyRequired">
+                    🎯 <strong>Why this step is required:</strong> the app must be registered in App Store Connect before you can upload to TestFlight!
+                </p>
+                <p class="text-xs text-slate-400 mt-2" data-i18n="step5.whyAppNotFound">
+                    Fastlane's <code class="text-pink-400">pilot</code>/<code class="text-pink-400">upload_to_testflight</code> finds the app by Bundle ID.
+                    <span class="text-red-400 font-bold">Without the app you get an "App not found" error!</span>
+                </p>
+            </div>
+
+            <!-- Shortcut button -->
+            <div class="mb-4">
+                <a href="https://appstoreconnect.apple.com/apps"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span data-i18n="step5.openMyApps">Open App Store Connect - My Apps</span>
+                </a>
+            </div>
+
+            <!-- Creation guide -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-3" data-i18n="step5.howToTitle">📋 How to register a new app</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-2">
+                    <li data-i18n="step5.openPage">Click the button above → open App Store Connect</li>
+                    <li data-i18n="step5.clickPlusNewApp">
+                        Click the <span class="text-blue-400 font-bold text-sm">+</span> button →
+                        choose <span class="text-pink-400 font-bold">New App</span>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-blue-500">
+                            <span class="text-blue-400 font-bold" data-i18n="step5.newAppDialog">New App dialog values</span>
+                            <div class="mt-3 space-y-3">
+                                <!-- Platforms -->
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 w-28">Platforms:</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-400">☑</span>
+                                        <span class="text-green-400 font-bold">iOS</span>
+                                        <span class="text-slate-500">☐ macOS</span>
+                                        <span class="text-slate-500">☐ tvOS</span>
+                                    </div>
+                                </div>
+                                <!-- Name -->
+                                <div class="flex items-start gap-2">
+                                    <span class="text-slate-400 w-28">Name:</span>
+                                    <div>
+                                        <span class="text-orange-400 font-bold" data-i18n="step5.appDisplayName">app display name</span>
+                                        <div class="text-slate-500 text-[10px]" data-i18n="step5.appDisplayNameHint">Shown on the App Store (e.g. Ear Location Alert)</div>
+                                    </div>
+                                </div>
+                                <!-- Primary Language -->
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 w-28">Primary Language:</span>
+                                    <span class="text-white" data-i18n="step5.primaryLanguage">English (or your app's main language)</span>
+                                </div>
+                                <!-- Bundle ID -->
+                                <div class="flex items-start gap-2">
+                                    <span class="text-slate-400 w-28">Bundle ID:</span>
+                                    <div>
+                                        <span class="text-green-400 font-bold" id="display-bundle-id-asc">kr.mycompany.myapp</span>
+                                        <div class="text-green-400 text-[10px]" data-i18n="step5.pickBundleId">↑ pick the Bundle ID you registered in step 3 from the dropdown!</div>
+                                    </div>
+                                </div>
+                                <!-- SKU -->
+                                <div class="flex items-start gap-2">
+                                    <span class="text-slate-400 w-28">SKU:</span>
+                                    <div>
+                                        <span class="text-yellow-400 font-bold">MYAPP2026</span>
+                                        <div class="text-slate-500 text-[10px]" data-i18n="step5.skuHint">for internal identification (any unique value; must not clash with your other apps)</div>
+                                    </div>
+                                </div>
+                                <!-- User Access -->
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 w-28">User Access:</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-400">◉</span>
+                                        <span class="text-green-400 font-bold">Full Access</span>
+                                        <span class="text-slate-500">○ Limited Access</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li data-i18n="step5.clickCreate">Click the <span class="text-pink-400 font-bold">Create</span> button!</li>
+                </ol>
+            </div>
+
+            <!-- Page illustration -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-3" data-i18n="step5.previewTitle">📍 App Store Connect page preview</p>
+                <div class="bg-slate-900 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                    <div class="border border-slate-600 rounded">
+                        <!-- Header -->
+                        <div class="flex items-center gap-4 p-3 bg-slate-800 border-b border-slate-600">
+                            <span class="text-blue-400 font-bold">My Apps</span>
+                            <span class="text-slate-500">App Analytics</span>
+                            <span class="text-slate-500">Users and Access</span>
+                        </div>
+                        <!-- Content -->
+                        <div class="p-4">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white text-lg">+</span>
+                                <span class="text-green-400 text-[10px]" data-i18n="step5.previewClickPlus">← click this button → "New App"</span>
+                            </div>
+                            <div class="text-slate-400 mb-2">Your Apps</div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="p-3 border border-slate-700 rounded-lg text-center">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl mx-auto mb-2"></div>
+                                    <div class="text-slate-300 text-[11px]">My App 1</div>
+                                </div>
+                                <div class="p-3 border border-slate-700 rounded-lg text-center">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl mx-auto mb-2"></div>
+                                    <div class="text-slate-300 text-[11px]">My App 2</div>
+                                </div>
+                                <div class="p-3 border-2 border-dashed border-pink-500 rounded-lg text-center bg-pink-900/20">
+                                    <div class="w-12 h-12 border-2 border-dashed border-pink-400 rounded-xl mx-auto mb-2 flex items-center justify-center text-pink-400 text-2xl">+</div>
+                                    <div class="text-pink-400 text-[11px] font-bold" data-i18n="step5.previewAddNewApp">Add a new app!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Tips -->
+            <div class="bg-gradient-to-r from-emerald-900/30 to-blue-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-emerald-400 mb-3">💡 Pro Tips</p>
+                <ul class="text-xs text-slate-300 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✓</span>
+                        <span data-i18n="step5.tipNameChangeable"><strong class="text-emerald-300">You can change the Name later!</strong> Edit it anytime in App Store Connect.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-yellow-400">⚠️</span>
+                        <span data-i18n="step5.tipBundleIdFixed"><strong class="text-yellow-300">The Bundle ID can't be changed!</strong> Once linked, it stays until you delete the app.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✓</span>
+                        <span data-i18n="step5.tipSkuInternal"><strong class="text-emerald-300">The SKU is internal!</strong> Users never see it. It just has to be unique.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✓</span>
+                        <span data-i18n="step5.tipAppInfoLater"><strong class="text-emerald-300">Fill in app info later!</strong> For now you only need the app "shell". Icons and screenshots come later.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Confirm checkbox -->
+            <div class="p-4 bg-slate-700/50 border border-slate-600 rounded-lg mb-6">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="asc-app-created" class="w-5 h-5 rounded text-pink-500 bg-slate-900 border-slate-600 focus:ring-pink-500">
+                    <span class="text-sm text-slate-200" data-i18n="step5.registeredCheck">I registered the app in App Store Connect</span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <div class="flex gap-2 items-center">
+                    <span class="skip-btn" onclick="skipStep(5)" data-i18n="step5.alreadyRegistered">Already registered →</span>
+                    <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step5.next">Next: app info →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 6: Check app info -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="6">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-sm">6</span>
+                <span data-i18n="step6.title">Review app info and extra settings</span>
+            </h2>
+
+            <!-- Description -->
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-200" data-i18n="step6.intro">
+                    ✅ Review what you entered in the earlier steps, then fill in the rest.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <!-- Bundle ID (filled automatically) -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300">
+                        Bundle ID
+                        <span class="text-xs text-green-400" data-i18n="step6.fromStep3">(entered in step 3)</span>
+                    </label>
+                    <input type="text" id="bundleId-confirm"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none"
+                        placeholder="kr.mycompany.myapp">
+                </div>
+
+                <!-- Team ID -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300">
+                        <span class="tooltip-container">
+                            Apple Team ID <span class="text-red-400">*</span>
+                            <span class="tooltip-trigger">
+                                <svg class="w-4 h-4 text-slate-400 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                            <div class="tooltip-content" style="width: 280px;" data-i18n="step6.teamIdTooltip">
+                                <strong class="text-yellow-400">📍 Where to find it</strong><br>
+                                Apple Developer → Membership → Team ID<br>
+                                <span class="text-slate-400 text-[11px]">10 letters and digits (e.g. ABC1234DEF)</span>
+                            </div>
+                        </span>
+                    </label>
+                    <input type="text" id="teamId" maxlength="10"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm uppercase focus:border-blue-500 outline-none"
+                        placeholder="ABC1234DEF"
+                        oninput="validateTeamId(this)">
+                    <!-- Too-short warning: the last character is often lost in copy-paste, so it is caught live -->
+                    <p id="teamId-warning" class="text-xs mt-1 hidden"></p>
+                </div>
+
+                <!-- Profile Name (filled automatically) -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300">
+                        <span data-i18n="step6.profileNameLabel">Provisioning Profile name</span>
+                        <span class="text-xs text-green-400" data-i18n="step6.fromStep4">(entered in step 4)</span>
+                    </label>
+                    <input type="text" id="profileName-confirm"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none"
+                        placeholder="MyApp AppStore Distribution">
+                </div>
+
+                <!-- App name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step6.appNameLabel">App name (optional)</label>
+                    <input type="text" id="appName"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none"
+                        placeholder="My App">
+                </div>
+            </div>
+
+            <!-- How to find the Team ID -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-2" data-i18n="step6.teamIdHowTitle">📍 How to find your Team ID</p>
+                <div class="flex gap-2 items-center mb-2">
+                    <a href="https://developer.apple.com/account#MembershipDetailsCard"
+                       target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-xs font-medium transition">
+                        <span data-i18n="step6.openMembershipPage">Open the Apple Developer Membership page</span>
+                    </a>
+                </div>
+                <p class="text-xs text-slate-400" data-i18n="step6.teamIdOnPage">Find the "Team ID" entry on the page (10 letters and digits)</p>
+                <div class="mt-3 pt-3 border-t border-slate-600">
+                    <p class="text-xs text-slate-400 mb-2" data-i18n="step6.teamIdFromProfile">Or read it straight from the profile you got in step 4:</p>
+                    <div class="bg-slate-900 rounded p-2 font-mono text-[10px] overflow-x-auto">
+                        <div class="text-green-400 break-all" data-i18n="step6.teamIdCommand">security cms -D -i ~/Downloads/your-file.mobileprovision | plutil -p - | grep -A2 TeamIdentifier</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encryption setting -->
+            <div class="p-4 bg-slate-700/50 border border-slate-600 rounded-lg mb-6">
+                <label class="block text-sm font-medium mb-3 text-slate-300" data-i18n="step6.encryptionLabel">🔐 App encryption</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-slate-600/50 transition">
+                        <input type="radio" name="encryptionType" value="none" checked
+                            class="w-4 h-4 text-blue-500 bg-slate-900 border-slate-600 focus:ring-blue-500">
+                        <div>
+                            <span class="text-sm font-medium text-slate-200" data-i18n="step6.encryptionNone">None - HTTPS only (recommended)</span>
+                            <p class="text-xs text-slate-400" data-i18n="step6.encryptionNoneHint">Most apps</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-slate-600/50 transition">
+                        <input type="radio" name="encryptionType" value="standard"
+                            class="w-4 h-4 text-blue-500 bg-slate-900 border-slate-600 focus:ring-blue-500">
+                        <div>
+                            <span class="text-sm font-medium text-slate-200">Standard encryption</span>
+                            <p class="text-xs text-slate-400" data-i18n="step6.encryptionStandardHint">Apps that use standard encryption</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step6.next">Next: API Key →</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 7: API Key (.p8) -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="7">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-sm">7</span>
+                App Store Connect API Key (.p8)
+            </h2>
+
+            <!-- Description -->
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-200" data-i18n="step7.whatIsApiKey">
+                    🔑 <strong>What's an API Key?</strong> The key Fastlane uses to upload to TestFlight automatically.
+                </p>
+            </div>
+
+            <!-- Shortcut button -->
+            <div class="mb-4">
+                <a href="https://appstoreconnect.apple.com/access/integrations/api"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    <span data-i18n="step7.openApiKeysPage">Open the App Store Connect API Keys page</span>
+                </a>
+            </div>
+
+            <!-- Creation guide -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-2" data-i18n="step7.howToTitle">📋 How to create the API Key</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-1">
+                    <li data-i18n="step7.openPage">Click the button above → open App Store Connect</li>
+                    <li data-i18n="step7.clickPlus">On the Team Keys tab, click the <span class="text-blue-400 font-bold">+</span> button</li>
+                    <li data-i18n="step7.enterName">Name: something easy to recognize (e.g. MY-PROJECT-KEY)</li>
+                    <li data-i18n="step7.pickAdmin">Access: choose <span class="text-orange-400 font-bold">Admin</span> (recommended)</li>
+                    <li><span data-i18n="step7.generateDownload">Generate → <span class="text-red-400 font-bold">download the .p8 file right away!</span></span>
+                        <div class="mt-2 p-2 bg-slate-800/50 rounded border-l-4 border-emerald-500 text-[11px]">
+                            <span class="text-emerald-400 font-bold" data-i18n="step7.keyIdInFileName">💡 The Key ID is in the file name</span>
+                            <div class="text-slate-400 mt-1 font-mono">
+                                AuthKey_<span class="text-yellow-400">9S3Y25UVZN</span>.p8 → Key ID = <span class="text-yellow-400">9S3Y25UVZN</span>
+                            </div>
+                            <div class="text-slate-500 mt-1" data-i18n="step7.keyIdNoNeedToNote">Even if you didn't write it down, the file name tells you.</div>
+                        </div>
+                    </li>
+                    <li class="pl-4">
+                        <div class="mt-2 p-3 bg-slate-800/50 rounded border-l-4 border-orange-500">
+                            <span class="text-orange-400 font-bold" data-i18n="step7.existingP8Title">If you already have a .p8</span>
+                            <div class="text-slate-400 mt-1 text-[11px]" data-i18n="step7.existingP8Reuse">
+                                Reuse it instead of creating a new one. But check that its Key ID is still in the
+                                <span class="text-slate-300">Active Keys</span> list in App Store Connect.
+                            </div>
+                            <div class="text-slate-500 text-[10px] mt-1" data-i18n="step7.existingP8Revoked">
+                                Revoked keys disappear from the list, and uploads fail even if you have the file.
+                            </div>
+                            <div class="bg-slate-900 rounded p-2 mt-2 font-mono text-[10px] overflow-x-auto">
+                                <div class="text-slate-500" data-i18n="step7.existingP8CheckComment"># Check the file format (EC P-256 means it's fine)</div>
+                                <div class="text-green-400 break-all">openssl pkcs8 -in ~/Downloads/AuthKey_XXXXXXXXXX.p8 -nocrypt | openssl ec -noout -text | grep NIST</div>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Page structure illustration -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-3" data-i18n="step7.previewTitle">📍 Where to find it on the App Store Connect page</p>
+                <div class="bg-slate-900 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                    <div class="text-slate-500 mb-2">Users and Access → Integrations → App Store Connect API</div>
+                    <div class="border border-slate-600 rounded p-3">
+                        <!-- Issuer ID section -->
+                        <div class="border-l-4 border-yellow-500 pl-3 mb-4 py-2 bg-yellow-900/20 rounded-r">
+                            <div class="text-slate-400 text-[10px] mb-1" data-i18n="step7.previewIssuerSeparate">⬇️ shown separately in the middle of the page</div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-400">Issuer ID</span>
+                                <span class="text-slate-500">ⓘ</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-yellow-400 font-bold">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</span>
+                                <span class="text-blue-400 text-[10px] border border-blue-400 rounded px-1">Copy</span>
+                            </div>
+                            <div class="text-green-400 text-[10px] mt-1" data-i18n="step7.previewCopyIssuer">↑ click the Copy button here!</div>
+                        </div>
+
+                        <!-- Active Keys table -->
+                        <div class="text-slate-400 mb-2">Active Keys <span class="text-green-500">●</span></div>
+                        <div class="border border-slate-700 rounded overflow-hidden">
+                            <div class="grid grid-cols-4 gap-2 p-2 bg-slate-800 text-slate-500 text-[10px]">
+                                <span>NAME</span>
+                                <span>GENERATED BY</span>
+                                <span class="text-orange-400">KEY ID</span>
+                                <span>ACCESS</span>
+                            </div>
+                            <div class="border-l-4 border-orange-500 grid grid-cols-4 gap-2 p-2 text-slate-300 bg-orange-900/20">
+                                <span>MY-PROJECT-KEY</span>
+                                <span class="text-slate-500" data-i18n="step7.previewUserName">Jane Doe</span>
+                                <span class="text-orange-400 font-bold">XXXXXXXXXX</span>
+                                <span class="text-purple-400">Admin</span>
+                            </div>
+                            <div class="text-green-400 text-[10px] pl-6 py-1" data-i18n="step7.previewCopyKeyId">↑ copy the Key ID from the table!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Tips -->
+            <div class="bg-gradient-to-r from-emerald-900/30 to-blue-900/30 border border-emerald-700 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-emerald-400 mb-3">💡 Pro Tips</p>
+                <ul class="text-xs text-slate-300 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✓</span>
+                        <span data-i18n="step7.tipOneAdminKey"><strong class="text-emerald-300">One Admin key manages every project!</strong> You can use the same API Key for multiple apps.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✓</span>
+                        <span data-i18n="step7.tipIssuerShared"><strong class="text-emerald-300">The Issuer ID is shared by the whole team!</strong> Every API Key uses the same Issuer ID.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-yellow-400">⚠️</span>
+                        <span data-i18n="step7.tipP8Once"><strong class="text-yellow-300">The .p8 file can be downloaded only once!</strong> Back it up right after creating it.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- File upload -->
+            <div class="file-upload" id="p8-upload" onclick="document.getElementById('p8-input').click()">
+                <div class="icon">📄</div>
+                <div class="text-slate-300" data-i18n="step7.p8Drop">Drag a .p8 file here or click</div>
+                <input type="file" id="p8-input" accept=".p8" onchange="handleP8Upload(event)">
+                <div class="file-info" id="p8-info" style="display:none"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300">
+                        <span class="tooltip-container">
+                            API Key ID
+                            <span class="tooltip-trigger">
+                                <svg class="w-4 h-4 text-slate-400 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                            <div class="tooltip-content" style="width: 260px;" data-i18n="step7.keyIdTooltip">
+                                <strong class="text-orange-400">📍 Where</strong><br>
+                                The <span class="text-orange-400">"KEY ID"</span> column of the Active Keys table<br>
+                                <span class="text-slate-400 text-[11px]">e.g. XXXXXXXXXX (10 characters)</span>
+                            </div>
+                        </span>
+                    </label>
+                    <input type="text" id="api-key-id" placeholder="XXXXXXXXXX"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-slate-300">
+                        <span class="tooltip-container">
+                            Issuer ID
+                            <span class="tooltip-trigger">
+                                <svg class="w-4 h-4 text-slate-400 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                            <div class="tooltip-content" style="width: 300px;" data-i18n="step7.issuerIdTooltip">
+                                <strong class="text-yellow-400">📍 Where (careful!)</strong><br>
+                                Shown separately <span class="text-yellow-400 font-bold">above</span> the table!<br>
+                                <span class="text-slate-400 text-[11px]">Click the Copy button next to the "Issuer ID" label</span>
+                            </div>
+                        </span>
+                    </label>
+                    <input type="text" id="issuer-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <div class="flex gap-2 items-center">
+                    <span class="skip-btn" onclick="skipStep(7)" data-i18n="nav.alreadyHave">Already have it →</span>
+                    <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step7.next">Next: Fastlane →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 8: Fastlane setup -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="8">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center text-sm">8</span>
+                <span data-i18n="step8.title">Generate the Fastlane files</span>
+            </h2>
+
+            <div class="bg-pink-900/30 border border-pink-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-pink-200" data-i18n="step8.whatIsFastlane">
+                    🚀 <strong>What's Fastlane?</strong> A tool that automates iOS builds & deployment. GitHub Actions uses it.
+                </p>
+            </div>
+
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-yellow-200 mb-1" data-i18n="step8.newFilesTitle">New files:</p>
+                <ul class="text-xs text-slate-300 list-disc list-inside">
+                    <li data-i18n="step8.fileGemfile"><code class="text-slate-400">ios/Gemfile</code> — Fastlane dependencies</li>
+                    <li data-i18n="step8.fileFastfile"><code class="text-slate-400">ios/fastlane/Fastfile</code> — TestFlight upload lane</li>
+                    <li data-i18n="step8.fileExportOptions"><code class="text-slate-400">ios/ExportOptions.plist</code> — IPA export settings</li>
+                </ul>
+                <p class="text-sm text-yellow-200 mt-3 mb-1" data-i18n="step8.modifiedFilesTitle">Existing files that change:</p>
+                <ul class="text-xs text-slate-300 list-disc list-inside">
+                    <li><code class="text-slate-400">ios/Runner.xcodeproj/project.pbxproj</code> — Bundle ID, Manual Signing, Team ID</li>
+                    <li data-i18n="step8.fileInfoPlist"><code class="text-slate-400">ios/Runner/Info.plist</code> — encryption setting (ITSAppUsesNonExemptEncryption)</li>
+                    <li data-i18n="step8.fileGitignore"><code class="text-slate-400">ios/.gitignore</code> — adds Gemfile.lock</li>
+                </ul>
+                <p class="text-[11px] text-slate-500 mt-2" data-i18n="step8.bundleIdAutoChange">
+                    ⚠️ If the Bundle ID differs from what you entered in step 3, it's <span class="text-slate-400">changed automatically</span>.
+                    No Appfile is created — app identifiers are injected as GitHub Actions environment variables, so it isn't needed.
+                </p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-slate-300" data-i18n="step8.runInTerminal">Run in a terminal:</label>
+                <!-- Warn before copying, since a missing path leads to a failed cd -->
+                <div id="initCmd-warning" class="hidden mb-2 p-3 bg-red-900/30 border border-red-700 rounded-lg">
+                    <p class="text-xs text-red-300 font-bold" data-i18n="step8.pathEmptyTitle">⚠️ The project path is empty</p>
+                    <p class="text-[11px] text-slate-400 mt-1" data-i18n="step8.pathEmptyBody">
+                        Go back to step 1 and enter the Flutter project's absolute path. Running it as is fails with
+                        <code class="text-slate-300">cd: no such file or directory</code>.
+                    </p>
+                </div>
+                <!-- Explains why the cd target and arguments differ in a monorepo -->
+                <div id="initCmd-mono" class="hidden mb-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                    <p class="text-xs text-blue-200 font-bold" data-i18n="step8.twoPathsTitle">📌 Why there are two paths</p>
+                    <p class="text-[11px] text-slate-400 mt-1" data-i18n="step8.twoPathsBody">
+                        <code class="text-slate-300">cd</code> goes to the <span class="text-yellow-400">repo root</span> where the script lives,
+                        and the argument points to the <span class="text-yellow-400">Flutter root</span> with pubspec.yaml.
+                        In a monorepo the two differ, so they have to be split like this.
+                    </p>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn absolute top-2 right-2 px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-slate-300 transition" onclick="copyCode(this)" data-i18n="step8.copy">Copy</button>
+                    <pre id="initCmd">cd "/path/to/project" && python3 ".github/util/flutter/testflight-wizard/testflight-wizard.py" setup ...</pre>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <button class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition" onclick="nextStep()" data-i18n="step8.next">Next: finish! →</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Step 9: Done & GitHub Secrets -->
+        <!-- ========================================== -->
+        <div class="card bg-slate-800 rounded-xl shadow-xl p-6 mb-6 step-content hidden" data-step="9">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-sm">✓</span>
+                <span data-i18n="step9.title">Done! GitHub Secrets values</span>
+            </h2>
+
+            <div class="bg-green-900/30 border border-green-700 rounded-lg p-4 mb-6">
+                <p class="text-sm text-green-200" data-i18n="step9.intro">🎉 All set! Register the values below as GitHub Secrets.</p>
+            </div>
+
+            <!-- How to register GitHub Secrets -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-medium text-blue-400 mb-2" data-i18n="step9.howToTitle">📍 How to register GitHub Secrets</p>
+                <ol class="text-xs text-slate-300 list-decimal list-inside space-y-1">
+                    <li data-i18n="step9.howToSettings">GitHub repository → Settings → Secrets and variables → Actions</li>
+                    <li data-i18n="step9.howToNewSecret">Click "New repository secret"</li>
+                    <li data-i18n="step9.howToNameValue">Enter the Name and Value of each item below</li>
+                    <li class="text-red-300 font-semibold" data-i18n="step9.howToDelete">When you're done, delete the downloaded github-secrets files</li>
+                </ol>
+            </div>
+
+            <h3 class="text-lg font-semibold mb-4 text-slate-200" data-i18n="step9.secretsListTitle">Secrets to register</h3>
+            <div id="results-container"></div>
+
+            <!-- Export / import section -->
+            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+                <p class="text-sm font-semibold text-slate-300 mb-4" data-i18n="step9.exportImportTitle">📦 Export / import settings</p>
+
+                <!-- Warning to delete downloaded files -->
+                <div class="bg-red-900/30 border border-red-700 rounded-lg p-3 mb-4">
+                    <p class="text-xs text-red-300 font-semibold" data-i18n="step9.exportDeleteWarning">🗑️ Once the secrets are registered, delete the downloaded github-secrets files. They contain your certificate and keys as is.</p>
+                    <p class="text-xs text-red-200/80 mt-1" data-i18n="step9.exportLeftoverRisk">If JSON/TXT/ZIP exports stay in your Downloads folder, anyone can pull out your distribution certificate and App Store Connect key.</p>
+                </div>
+
+                <!-- Export buttons -->
+                <div class="flex flex-wrap gap-3 mb-4">
+                    <button onclick="copyAllSecrets()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                        </svg>
+                        <span data-i18n="step9.copyAll">Copy all</span>
+                    </button>
+                    <button onclick="downloadAsJson()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span data-i18n="step9.exportJson">Export JSON</span>
+                    </button>
+                    <button onclick="downloadAsTxt()" class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span data-i18n="step9.exportTxt">Export TXT</span>
+                    </button>
+                    <button onclick="downloadAsZip()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                        </svg>
+                        <span data-i18n="step9.exportZip">Export ZIP</span>
+                    </button>
+                </div>
+
+                <!-- Import -->
+                <div class="border-t border-slate-600 pt-4">
+                    <p class="text-xs text-slate-400 mb-3" data-i18n="step9.importHint">Restore your settings from a JSON file you exported earlier.</p>
+                    <label class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600/20 hover:bg-purple-600/30 border-2 border-dashed border-purple-500 rounded-lg cursor-pointer transition">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <span class="text-purple-300 text-sm font-medium" data-i18n="step9.importJson">Import settings from a JSON file</span>
+                        <input type="file" accept=".json" onchange="importFromJson(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Required Secrets description -->
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+                <p class="text-sm font-semibold text-yellow-300 mb-3" data-i18n="step9.secretDescriptionsTitle">📝 What each secret is</p>
+                <div class="space-y-3 text-xs text-slate-300">
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APPLE_CERTIFICATE_BASE64</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descCertificateBase64">The distribution certificate (.p12), Base64-encoded</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APPLE_CERTIFICATE_PASSWORD</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descCertificatePassword">The password you set when exporting the .p12</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APPLE_PROVISIONING_PROFILE_BASE64</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descProfileBase64">The provisioning profile (.mobileprovision), Base64-encoded</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APP_STORE_CONNECT_API_KEY_BASE64</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descApiKeyBase64">The App Store Connect API Key (.p8), Base64-encoded</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APP_STORE_CONNECT_API_KEY_ID</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descApiKeyId">API Key ID (10 characters)</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APP_STORE_CONNECT_ISSUER_ID</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descIssuerId">App Store Connect Issuer ID (UUID format)</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">IOS_PROVISIONING_PROFILE_NAME</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descProfileName">The profile name from step 4 (e.g. MyApp AppStore Distribution)</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">IOS_BUNDLE_ID</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descBundleId">The Bundle ID registered in step 3 (e.g. kr.mycompany.myapp)</p>
+                    </div>
+                    <div class="p-2 bg-slate-800/50 rounded">
+                        <code class="text-green-400 font-bold">APPLE_TEAM_ID</code>
+                        <p class="text-slate-400 mt-1" data-i18n="step9.descTeamId">Apple Team ID (10 letters and digits)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ➕ Additional Secrets (custom) -->
+            <div class="custom-secrets-section">
+                <h4 class="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                    <span data-i18n="step9.customSecretsTitle">➕ Extra secrets (optional)</span>
+                    <a href="https://github.com/Cassiiopeia/projectops/tree/main/.github/util/common/github-secrets-converter"
+                       target="_blank"
+                       class="text-xs text-blue-400 hover:text-blue-300 font-normal">
+                        <span data-i18n="step9.openSeparateTool">(open the separate tool →)</span>
+                    </a>
+                </h4>
+                <p class="text-xs text-slate-400 mb-4" data-i18n="step9.customSecretsHint">
+                    Add anything else you need, such as extra provisioning profiles or env files.<br>
+                    Text files like <span class="text-blue-400">📄 .json/.yml/.env</span> are kept as is,
+                    binary files like <span class="text-orange-400">🔐 .p12/.mobileprovision/.p8</span> are converted to Base64 automatically.
+                </p>
+
+                <div id="customSecretsList">
+                    <!-- Generated dynamically -->
+                </div>
+
+                <button class="add-secret-btn" onclick="addCustomSecret()" data-i18n="step9.addSecret">
+                    + Add a secret
+                </button>
+            </div>
+
+            <div class="deploy-mode-card" style="margin-top:16px;padding:14px;border:1px solid #d0d7de;border-radius:8px;background:#f6f8fa;">
+              <h4 style="margin:0 0 8px;" data-i18n="step9.deployModeTitle">🎛️ Deploy mode &amp; release roadmap (iOS)</h4>
+              <p style="margin:0 0 8px;" data-i18n="step9.deployModeIntro">The GitHub repo <b>Variables → IOS_DEPLOY_MODE</b> sets the default deploy scope. A <code>deploy_mode</code> input on a manual workflow run takes precedence.</p>
+              <ul style="margin:0;padding-left:18px;">
+                <li data-i18n="step9.deployModeStoreOnly"><b>store_only</b> — up to the TestFlight upload (default)</li>
+                <li data-i18n="step9.deployModeStorePrepare"><b>store_prepare</b> — up to just before App Store submission (a person clicks 'Add for Review' in ASC)</li>
+                <li data-i18n="step9.deployModeStoreSubmit"><b>store_submit</b> — submits for App Store review automatically</li>
+              </ul>
+              <p style="margin:8px 0 0;color:#57606a;" data-i18n="step9.deployModeFirstRelease">⚠️ A new app needs one manual submission in App Store Connect first; updates after that are automated with store_submit.</p>
+              <p style="margin:8px 0 0;" data-i18n="step9.whatsNewNote"><b>'What's New' text</b> — defaults to that version's CHANGELOG entry. If you'd rather not show reviewers the details, put a one-line text in <code>STORE_WHATS_NEW_OVERRIDE</code> under the workflow file's <code>env</code>. TestFlight 'What to Test' is not affected.</p>
+              <p style="margin:8px 0 0;" data-i18n="step9.localesNote"><b>Per-language notes</b> — if the store has several languages, list them in <code>metadata.template.options.store_locales</code> in <code>version.yml</code> (e.g. <code>["ko-KR", "en-US", "ja-JP", "zh-CN"]</code>; the first is the default language). <code>/pro-changelog-deploy</code> drafts the translations for approval when it writes the release notes, and languages without a translation get the default-language text (the store rejects empty fields). Without the key, a single text is uploaded as today.</p>
+              <p style="margin:6px 0 0;color:#57606a;" data-i18n="step9.localesIosNote">If only the App Store has a different language set, list just this store in <code>store_locales_ios</code> (e.g. <code>["ko-KR", "en-US"]</code>). Language codes the App Store doesn't have are skipped, not uploaded.</p>
+              <p style="margin:6px 0 0;color:#57606a;" data-i18n="step9.localesIosWarning">⚠️ If the list has a language the App Store doesn't have, deliver enables that language for the app. If your App Store languages differ, narrow it with <code>store_locales_ios</code>.</p>
+              <p style="margin:6px 0 0;" data-i18n="step9.reviewNotes"><b>Review notes</b> — if <code>ios/fastlane/review_notes.txt</code> exists its contents are sent every time; otherwise the existing App Store Connect value is kept.</p>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition" onclick="prevStep()" data-i18n="nav.prev">← Back</button>
+                <button class="px-6 py-2.5 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium transition" onclick="resetWizard()" data-i18n="step9.startOver">🔄 Start over</button>
+            </div>
+
+            <!-- Star request -->
+            <div class="mt-6 flex items-center justify-center gap-3 text-slate-400 text-sm">
+                <span data-i18n="step9.starRequest">If this helped, please leave a ⭐️!!</span>
+                <a href="https://github.com/Cassiiopeia/projectops" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                    <span data-i18n="step9.starButton">Give a star</span>
+                </a>
+            </div>
+        </div>
+
+        <footer class="text-center text-slate-500 text-sm py-8">
+            <p data-i18n="footer.localOnly">🔒 Runs locally only - no data is sent to a server</p>
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div id="guideModal" class="modal-backdrop hidden" onclick="closeGuideModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold" id="guideTitle">Guide</h3>
+                <button class="text-slate-400 hover:text-slate-200" onclick="closeGuideModal()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="guideContent"></div>
+        </div>
+    </div>
+
+    <!-- Changelog Modal -->
+    <div id="changelogModal" class="modal-backdrop hidden" onclick="closeChangelogModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Changelog</h3>
+                        <p class="text-xs text-slate-400">iOS TestFlight Setup Wizard</p>
+                    </div>
+                </div>
+                <button class="text-slate-400 hover:text-slate-200 hover:bg-slate-700 p-2 rounded-lg transition" onclick="closeChangelogModal()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="changelogContent" class="space-y-4">
+                <!-- Changelog items will be inserted here -->
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-700 flex justify-between items-center text-xs text-slate-500">
+                <span id="changelogLastUpdated"></span>
+                <a href="https://github.com/Cassiiopeia/projectops" target="_blank" class="text-blue-400 hover:text-blue-300 transition">View on GitHub →</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../_shared/wizard-i18n.js"></script>
+    <script src="../_shared/wizard-common.js"></script>
+    <script src="testflight-wizard-i18n.js"></script>
+    <script src="testflight-wizard.js"></script>
+    <script src="testflight-wizard-export.js"></script>
+</body>
+</html>

@@ -1,51 +1,55 @@
 # ===================================================================
 # PROJECT-COMMON-RELEASE-CHANGELOG.yaml
-# 릴리스 + 체인지로그 관리 워크플로우 (구 RELEASE-CHANGELOG)
+# Release + changelog management workflow (formerly RELEASE-CHANGELOG)
 # ===================================================================
 #
-# 이 워크플로우는 deploy 브랜치로 릴리스 PR(main→deploy)이 생성될 때 릴리스 노트를 만들어
-# CHANGELOG.json / CHANGELOG.md를 업데이트하고 자동 머지합니다.
+# When a release PR (develop->main) is opened against main, this workflow builds release notes,
+# updates CHANGELOG.json / CHANGELOG.md and automerges.
 #
-# 릴리스 노트 생성기(provider)는 version.yml options.changelog.provider로 고른다 (#455):
-#   - coderabbit(미설정 시 기본 — 기존 동작 보존): Summary 요청 후 폴링, 무응답 시 사다리로 폴백
-#   - github-ai(신규 설치 기본): GitHub Models API — permissions: models: read만으로 동작(API 키 불필요)
-#   - openai/gemini/claude/ollama: OpenAI 호환 API (MODEL_API_KEY secret 필요)
-#   - commit: 커밋 분석 (AI·네트워크 무의존)
-# 폴백 사다리는 .github/scripts/changelog_providers/ladder.py가 실행:
-#   선택 provider → github-ai → commit 순으로 시도, commit은 항상 완주하는 최후 보루.
-# 폴백 발생 시 PR 댓글로 "○○ 실패 → △△ 사용"을 알린다.
+# The release-notes generator (provider) is chosen with version.yml options.changelog.provider (#455):
+#   - copilot: GitHub Copilot CLI — works with GITHUB_TOKEN alone (no API key; needs copilot-requests: write)
+#   - openai/gemini/claude/groq/mistral/ollama: OpenAI-compatible API (per-service keys: GEMINI_API_KEY etc. The old name MODEL_API_KEY is read too)
+#   - commit: commit analysis (no AI or network) — default when unset (#821)
+#   - coderabbit: respect the CodeRabbit summary in the body (no waiting). Also the value when unset if .coderabbit.yaml exists
+#   - github-ai: service shut down (2026-07-30) — a stored value is absorbed into commit
+# The fallback ladder runs in .github/scripts/changelog_providers/ladder.py:
+#   tries chosen provider -> (external AI if a key exists) -> commit; commit is the last resort that always finishes.
+# CodeRabbit is not waited for (#566) — respected if already in the body, otherwise generation starts at once.
+# On fallback, a PR comment reports "X failed -> Y used".
 #
-# 버전 승격 폭은 version.yml options.semver_auto로 고른다 (#546):
-#   - 키 없음(기존 통합 레포 전부): 항상 patch +1 — 현행 동작 보존
-#   - true: 릴리스 구간 커밋 제목을 분류해 major/minor/patch 결정 (changelog_manager classify-bump)
-#           `type!` 마커 → major, feat → minor, 그 외 → patch. AI 미사용(결정적).
-# version_code(빌드 번호)는 옵션과 무관하게 매 릴리스 +1이다.
+# The bump size is chosen with version.yml options.semver_auto (#546):
+#   - key missing or true: classify commit subjects in the release range into major/minor/patch (changelog_manager classify-bump) (#814)
+#   - false: always patch +1 — only repos that turned it off explicitly
+#           `type!` marker -> major, feat -> minor, else -> patch. No AI (deterministic).
+# version_code (build number) is +1 on every release regardless of options.
 #
 # ===================================================================
-# 🔑 GitHub Secrets — 전부 선택 (#551)
+# 🔑 GitHub Secrets — all optional (#551)
 # ===================================================================
-# _GITHUB_PAT_TOKEN: 없으면 GITHUB_TOKEN으로 동작한다. 등록하면 (1) 브랜치 보호 규칙이
-#   있어도 --admin 머지가 가능하고 (2) 머지 push가 후속 워크플로우를 자동 트리거한다.
-#   없을 때는 머지 후 dispatch_downstream.py가 후속 워크플로우를 직접 깨운다.
-# MODEL_API_KEY: 없으면 GitHub Models(무료) → commit 규칙으로 폴백한다.
+# _GITHUB_PAT_TOKEN: without it, runs with GITHUB_TOKEN. With it, (1) --admin merge works even with
+#   branch protection rules and (2) the merge push triggers follow-up workflows automatically.
+#   Without it, dispatch_downstream.py wakes the follow-up workflows directly after the merge.
+# GEMINI_API_KEY / GROQ_API_KEY / MISTRAL_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY: whichever is registered is used
+#   (applied automatically even with the commit default — #569, #566). None -> commit analysis. MODEL_API_KEY is the old name, read only for backward compatibility.
 # ===================================================================
 #
-# 작동 방식:
-# 1. deploy 브랜치로 릴리스 PR(main→deploy) 생성 시 트리거
-# 1-1. PR head가 main이 아니면 전체 파이프라인 스킵 (실수 feature PR 보호)
-# 2. PR 제목을 즉시 🚀 Deploy 형식으로 변경
-# 3. CodeRabbit Summary 요청 후 최대 10분 대기
-# 4. Summary 내용을 파싱하여 CHANGELOG 파일들 업데이트
-# 5. PR 자동 머지 후 배포 트리거
+# How it works:
+# 1. Triggered when a release PR (develop->main) is opened against main
+# 1-1. If the PR head is not develop, the whole pipeline is skipped (protects against a mistaken feature PR)
+# 2. Renames the PR title to the 🚀 Deploy format right away
+# 3. Uses release notes in the PR body if present, else generates them with the provider ladder (no waiting — #566)
+# 4. Parses the release notes and updates the CHANGELOG files
+# 5. Automerges the PR, then triggers deploys
 #
-# API Rate Limit 참고:
-# - GITHUB_TOKEN: 1,000 요청/시간/레포 (Actions 내)
-# - PAT: 5,000 요청/시간/계정
-# - 이 워크플로우 예상 사용량: ~130회/실행
+# API rate limit notes:
+# - GITHUB_TOKEN: 1,000 requests/hour/repo (inside Actions)
+# - PAT: 5,000 requests/hour/account
+# - Expected usage of this workflow: ~130 per run
 # ===================================================================
 
 name: RELEASE CHANGELOG
 
+# 릴리스 PR: main > deploy (위 설명의 develop > main 에 해당)
 on:
   pull_request_target:
     types: [opened]
@@ -54,16 +58,18 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  # 후속 워크플로우를 workflow_dispatch로 깨우는 데 필요 (#555 — 없으면 HTTP 403)
+  # Needed to wake follow-up workflows with workflow_dispatch (#555 — HTTP 403 without it)
   actions: write
 
 jobs:
-  # Job 1: CodeRabbit Summary 감지 및 파싱
+  # Job 1: detect and parse the CodeRabbit Summary
   detect-and-parse:
+    # Job names may be required status check names in branch protection, so they are not translated (#769)
     name: CodeRabbit Summary 감지 및 파싱
-    # head 가드: 작업 PR의 base가 deploy로 잘못 열릴 수 있다.
-    # main발 릴리스 PR만 automerge 파이프라인을 탄다. (후속 job은 needs 조건으로 연쇄 스킵)
-    if: github.event.pull_request.head.ref == 'main'
+    # head guard: main is the default, so a feature PR can be opened against main by mistake.
+    # Only release PRs from this repo's develop take the automerge pipeline. (Later jobs skip in a chain via needs)
+    # pull_request_target also runs for fork PRs, and the fork decides the branch name. Check the source repo too.
+    if: github.event.pull_request.head.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     outputs:
       summary_found: ${{ steps.detect_summary.outputs.summary_found }}
@@ -73,13 +79,13 @@ jobs:
       changelog_provider: ${{ steps.get_version.outputs.changelog_provider }}
       changelog_base_url: ${{ steps.get_version.outputs.changelog_base_url }}
     steps:
-      - name: PR 본문 초기화
+      - name: Reset PR body
         id: clear_body
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
 
-          # PR opened 직후엔 GitHub API replication lag로 body가 비어 보일 수 있으므로
-          # 비어 있으면 최대 3회(2초 간격) 재시도해 본다. 한 번이라도 Summary가 잡히면 본문 보존.
+          # Right after PR opened, API replication lag can make the body look empty,
+          # so retry up to 3 times (2 seconds apart) when empty. Once a Summary is caught, the body is kept.
           CURRENT_BODY=""
           for attempt in 1 2 3; do
             CURRENT_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -89,51 +95,51 @@ jobs:
               echo "[try $attempt] body length=$(echo -n "$CURRENT_BODY" | wc -c)"
               break
             fi
-            echo "[try $attempt] body 비어 있음 — replication lag 가능, 재시도"
+            echo "[try $attempt] body is empty (possible replication lag), retrying"
             sleep 2
           done
 
           if echo "$CURRENT_BODY" | grep -q "Summary by CodeRabbit"; then
-            echo "✅ 이미 'Summary by CodeRabbit' 감지 — 본문 초기화 건너뜀"
+            echo "✅ Found 'Summary by CodeRabbit', keeping the body"
             echo "$CURRENT_BODY" > pr_body.md
             echo "already_found=true" >> $GITHUB_OUTPUT
           else
-            echo "🗑️ PR #$PR_NUMBER 본문 초기화 중..."
+            echo "🗑️ Resetting the body of PR #$PR_NUMBER..."
             curl -s -H "Authorization: token ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
                  -H "Content-Type: application/json" \
                  -X PATCH \
                  -d '{"body": ""}' \
                  "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}"
-            echo "✅ PR 본문 초기화 완료"
+            echo "✅ PR body reset"
             echo "already_found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: 저장소 체크아웃
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: 버전 스크립트 권한 설정
+      - name: Make version script executable
         run: |
           if [ -f ".github/scripts/version_manager.sh" ]; then
             chmod +x .github/scripts/version_manager.sh
-            echo "✅ 버전 스크립트 권한 설정 완료"
+            echo "✅ Version script is executable"
           fi
 
-      - name: 버전 정보 확인
+      - name: Read version info
         id: get_version
         run: |
           VERSION="1.0.0"
           PROJECT_TYPE="unknown"
 
-          # 버전 스크립트 사용
+          # Use the version script
           if [ -f ".github/scripts/version_manager.sh" ]; then
             VERSION=$(./.github/scripts/version_manager.sh get | tail -n 1)
           elif [ -f "version.yml" ]; then
             VERSION=$(grep "^version:" version.yml | sed 's/version: *"\([^"]*\)".*/\1/')
-          # 폴백: 프로젝트 타입별 버전 파일
+          # Fallback: per-project-type version file
           elif [ -f "build.gradle" ]; then
             VERSION=$(grep "version = '" build.gradle | sed "s/version = '//" | sed "s/'//")
             PROJECT_TYPE="spring"
@@ -148,29 +154,49 @@ jobs:
             PROJECT_TYPE="python"
           fi
 
-          # 멀티타입 — project_types 배열을 csv로 추출 (v4.1.0 SSOT: 단수 project_type 키는 읽지 않음)
-          PROJECT_TYPES=$(grep "^project_types:" version.yml 2>/dev/null | sed -E 's/.*\[([^]]*)\].*/\1/' | tr -d '" ' || echo "")
-          # primary 타입 = 배열 첫 항목 (배열이 없으면 위 폴백에서 감지한 값 유지)
+          # Multi-type — extract the project_types array as csv (v4.1.0 SSOT: the singular project_type key is not read)
+          if [ -f ".github/scripts/version_manager.py" ]; then
+            PROJECT_TYPES=$(python3 .github/scripts/version_manager.py get-types 2>/dev/null || true)
+            # #851 — version_manager interprets block lists, nested keys and comments in one place
+          else
+            PROJECT_TYPES=$(grep "^project_types:" version.yml 2>/dev/null | sed -E 's/.*\[([^]]*)\].*/\1/' | tr -d '" ' || echo "")
+          fi
+          # primary type = first array item (without the array, keep the value detected by the fallback above)
           if [ -n "$PROJECT_TYPES" ]; then
             PROJECT_TYPE=$(echo "$PROJECT_TYPES" | cut -d',' -f1)
           fi
           [ -z "$PROJECT_TYPES" ] && PROJECT_TYPES="$PROJECT_TYPE"
 
-          # changelog provider 읽기 (#455) — version.yml options.changelog.provider.
-          # 미설정이면 coderabbit(기존 동작 100% 보존). commit/github-ai면 CodeRabbit 폴링을 건너뛴다.
-          CHANGELOG_PROVIDER=$(grep -A5 "changelog:" version.yml 2>/dev/null | grep "provider:" | head -1 | sed -E 's/.*provider: *"?([a-z-]+)"?.*/\1/' || true)
-          [ -z "$CHANGELOG_PROVIDER" ] && CHANGELOG_PROVIDER="coderabbit"
-          # ollama 등 자체 호스팅 provider의 base_url (#455) — 없으면 빈 값
-          CHANGELOG_BASE_URL=$(grep -A5 "changelog:" version.yml 2>/dev/null | grep "base_url:" | head -1 | sed -E 's/.*base_url: *"?([^" ]*)"?.*/\1/' || true)
+          # Read the changelog provider (#455) — version.yml options.changelog.provider.
+          # Unset -> 3-step decision (#821), same rule as the skill's detect-release-context:
+          #   explicit value -> coderabbit (if .coderabbit.yaml exists) -> commit.
+          # Keeps existing behavior for repos using CodeRabbit and matches the canonical default (commit) otherwise.
+          # Polling was removed in #566, so coderabbit also flows "respect body -> AI/commit" on the ladder.
+          if [ -f ".github/scripts/version_manager.py" ]; then
+            CHANGELOG_PROVIDER=$(python3 .github/scripts/version_manager.py get-option changelog.provider 2>/dev/null || true)
+            # #851 — version_manager interprets block lists, nested keys and comments in one place
+          else
+            CHANGELOG_PROVIDER=$(grep -A5 "changelog:" version.yml 2>/dev/null | grep "provider:" | head -1 | sed -E 's/.*provider: *"?([a-z-]+)"?.*/\1/' || true)
+          fi
+          if [ -z "$CHANGELOG_PROVIDER" ]; then
+            if [ -f ".coderabbit.yaml" ]; then CHANGELOG_PROVIDER="coderabbit"; else CHANGELOG_PROVIDER="commit"; fi
+          fi
+          # base_url for self-hosted providers such as ollama (#455) — empty if missing
+          if [ -f ".github/scripts/version_manager.py" ]; then
+            CHANGELOG_BASE_URL=$(python3 .github/scripts/version_manager.py get-option changelog.base_url 2>/dev/null || true)
+            # #851 — version_manager interprets block lists, nested keys and comments in one place
+          else
+            CHANGELOG_BASE_URL=$(grep -A5 "changelog:" version.yml 2>/dev/null | grep "base_url:" | head -1 | sed -E 's/.*base_url: *"?([^" ]*)"?.*/\1/' || true)
+          fi
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "project_type=$PROJECT_TYPE" >> $GITHUB_OUTPUT
           echo "project_types=$PROJECT_TYPES" >> $GITHUB_OUTPUT
           echo "changelog_provider=$CHANGELOG_PROVIDER" >> $GITHUB_OUTPUT
           echo "changelog_base_url=$CHANGELOG_BASE_URL" >> $GITHUB_OUTPUT
-          echo "✅ 버전: $VERSION, 프로젝트 타입: $PROJECT_TYPE (배열: $PROJECT_TYPES), changelog: $CHANGELOG_PROVIDER"
+          echo "✅ Version: $VERSION, project type: $PROJECT_TYPE (all: $PROJECT_TYPES), changelog: $CHANGELOG_PROVIDER"
 
-      - name: PR 제목 즉시 변경
+      - name: Rename PR title
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           VERSION="${{ steps.get_version.outputs.version }}"
@@ -183,87 +209,30 @@ jobs:
                -d "{\"title\": \"${NEW_TITLE}\"}" \
                "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}"
 
-          echo "✅ PR 제목 변경 완료: $NEW_TITLE"
+          echo "✅ PR title changed: $NEW_TITLE"
 
-      - name: CodeRabbit Summary 요청
-        # 이미 Summary가 있으면 요청 불필요. provider가 coderabbit일 때만 요청(#455 — 아니면 fallback 사다리로).
-        if: steps.clear_body.outputs.already_found != 'true' && steps.get_version.outputs.changelog_provider == 'coderabbit'
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-
-          curl -s -H "Authorization: token ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"body": "@coderabbitai summary"}' \
-               "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments"
-
-          echo "✅ CodeRabbit Summary 요청 완료"
-
-      - name: CodeRabbit Summary 감지 (폴링)
+      # No waiting (#566). It used to send @coderabbitai summary and poll for up to 10 minutes.
+      # Without a response those 10 minutes were wasted, and there was no way to tell if silence was a rate limit.
+      # Now it only does "respect it if already in the body, else generate at once" — nothing to judge, so no ambiguity.
+      # If CodeRabbit left a summary, the already_found path below uses it as is.
+      - name: Check existing summary
         id: detect_summary
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
-          CHANGELOG_PROVIDER="${{ steps.get_version.outputs.changelog_provider }}"
 
-          # provider가 coderabbit이 아니면(commit/github-ai/openai 등) CodeRabbit 폴링을 건너뛰고
-          # summary_found=false로 내려 fallback-summary(provider 사다리)가 릴리스 노트를 만들게 한다 (#455).
-          # 단, changelog-deploy 스킬이 미리 Summary를 넣었으면(already_found) 그건 그대로 존중.
-          if [ "${{ steps.clear_body.outputs.already_found }}" != "true" ] && [ "$CHANGELOG_PROVIDER" != "coderabbit" ]; then
-            echo "ℹ️ changelog provider='$CHANGELOG_PROVIDER' — CodeRabbit 폴링 생략, fallback 사다리로 위임"
-            echo "summary_found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # changelog-deploy가 이미 Summary를 작성한 경우 폴링 생략
           if [ "${{ steps.clear_body.outputs.already_found }}" = "true" ]; then
-            echo "✅ 초기화 단계에서 이미 Summary 감지 — 폴링 생략"
-            # clear_body가 만든 pr_body.md는 직후 체크아웃에서 덮어써져 사라지므로,
-            # 체크아웃 이후 시점인 여기서 PR 본문을 다시 받아 파일로 저장해야 업로드 artifact가 비지 않는다
+            echo "✅ The body already has release notes, using them as they are"
+            # The pr_body.md made by clear_body disappears on the next checkout, so fetch and save it again here
             curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                  "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}" | \
                  jq -r '.body // ""' > pr_body.md
             echo "summary_found=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          MAX_ATTEMPTS=120  # 10분 = 120 * 5초
-          ATTEMPT=0
-
-          echo "🔍 PR #$PR_NUMBER에서 CodeRabbit Summary 감지 시작..."
-          echo "⏰ 최대 대기 시간: 10분 (5초마다 체크)"
-
-          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            ATTEMPT=$((ATTEMPT + 1))
-            echo "[$ATTEMPT/$MAX_ATTEMPTS] Summary 확인 중... ($(date '+%H:%M:%S'))"
-
-            # JSON API로 PR body 가져오기 (Public/Private 동일하게 동작)
-            PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                           "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}" | \
-                           jq -r '.body // ""')
-
-            # 본문이 비어있는지 확인
-            if [ -z "$PR_BODY" ] || [ "$PR_BODY" = "null" ]; then
-              echo "⏳ PR 본문이 비어있습니다"
-            elif echo "$PR_BODY" | grep -q "Summary by CodeRabbit"; then
-              echo "✅ CodeRabbit Summary 발견!"
-              echo "$PR_BODY" > pr_body.md
-              echo "summary_found=true" >> $GITHUB_OUTPUT
-              break
-            else
-              echo "⏳ CodeRabbit Summary 아직 없음"
-            fi
-
-            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
-              sleep 5
-            fi
-          done
-
-          if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-            echo "⚠️ 10분 대기 후에도 Summary를 찾을 수 없습니다"
+          else
+            echo "ℹ️ No release notes in the body, handing over to the generation ladder"
             echo "summary_found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Summary 파일 업로드
+      - name: Upload summary file
         if: steps.detect_summary.outputs.summary_found == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -271,54 +240,68 @@ jobs:
           path: pr_body.md
           retention-days: 1
 
-  # Job 1-B: provider 사다리 — CodeRabbit Summary가 없을 때 릴리스 노트를 만든다 (#455).
-  #   provider=commit/github-ai/openai 계열 모두 이 job으로 위임된다. 사다리 로직은
-  #   .github/scripts/changelog_providers/ladder.py (선택 provider → github-ai → commit 순).
-  #   github-ai는 GitHub Models API — 아래 permissions의 models: read + GITHUB_TOKEN만으로
-  #   동작(API 키 불필요). commit은 AI·네트워크 무의존이라 항상 완주하는 최후 보루.
+  # Job 1-B: provider ladder — builds release notes when the PR body has none (#455, reworked in #566).
+  #   Ladder: chosen provider -> (external AI if a per-service AI key exists) -> commit.
+  #   copilot is the Copilot CLI — works with copilot-requests: write in the permissions below + GITHUB_TOKEN
+  #   (no API key). commit needs no AI or network, so it is the last resort that always finishes and
+  #   "empty release notes" never happen.
   fallback-summary:
+    # Job names may be required status check names in branch protection, so they are not translated (#769)
     name: 릴리스 노트 생성 (provider 사다리)
     runs-on: ubuntu-latest
     needs: detect-and-parse
     if: needs.detect-and-parse.outputs.summary_found == 'false'
-    # job 단위 permissions는 workflow 단위를 대체한다 — github-ai(Models API)용 models: read 포함
+    # Job-level permissions replace workflow-level ones — needed for Copilot CLI auth
     permissions:
       contents: read
-      models: read
+      pull-requests: write
+      copilot-requests: write
     outputs:
       summary_found: ${{ steps.generate.outputs.summary_found }}
     steps:
-      - name: 저장소 체크아웃
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: provider 사다리로 릴리스 노트 생성
+      # CLI used by the copilot provider. Not blocking if install fails, since the ladder drops to the next step.
+      - name: Install Copilot CLI
+        continue-on-error: true
+        run: npm install -g @github/copilot
+
+      - name: Generate release notes with the provider ladder
         id: generate
         env:
           CHANGELOG_PROVIDER: ${{ needs.detect-and-parse.outputs.changelog_provider }}
           CHANGELOG_BASE_URL: ${{ needs.detect-and-parse.outputs.changelog_base_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+          # Dedicated per-service names — only registered ones get values. The ladder picks (#569).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}   # old name — backward compatible
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          # deploy(프로덕션) 대비 커밋을 분석하도록 base 확보 — HEAD는 PR head(main) 체크아웃
+          # Fetch the base so commits are analyzed against the release PR base — HEAD is the development branch checkout
           git fetch origin "${{ github.event.pull_request.base.ref }}" 2>/dev/null || true
+          # Pass it so the range is not empty in repos whose base is not main (#1114)
           export COMMIT_RANGE="origin/${{ github.event.pull_request.base.ref }}..HEAD"
 
-          echo "🪜 changelog provider 사다리 실행 (provider=$CHANGELOG_PROVIDER)"
+          echo "🪜 Running the changelog provider ladder (provider=$CHANGELOG_PROVIDER)"
           python3 .github/scripts/changelog_providers/ladder.py
 
           if [ ! -f pr_body.md ]; then
-            echo "❌ provider 사다리 완주 실패 — pr_body.md 없음"
+            echo "❌ Provider ladder did not finish (no pr_body.md)"
             echo "summary_found=false" >> $GITHUB_OUTPUT
             exit 1
           fi
 
-          # PR 본문에 업데이트
+          # Update the PR body
           ESCAPED=$(cat pr_body.md | jq -Rs .)
           curl -s -H "Authorization: token ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
                -H "Content-Type: application/json" \
@@ -326,21 +309,23 @@ jobs:
                -d "{\"body\": $ESCAPED}" \
                "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}"
 
-          # 폴백 발생 시 PR 댓글로 알림 (#455 — "○○ 실패 → △△ 사용")
-          NOTICE=$(jq -r '.notice // ""' provider_result.json 2>/dev/null || echo "")
-          if [ -n "$NOTICE" ]; then
-            COMMENT=$(printf '⚠️ changelog provider 폴백: %s' "$NOTICE" | jq -Rs .)
-            curl -s -H "Authorization: token ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}" \
-                 -H "Content-Type: application/json" \
-                 -X POST -d "{\"body\": $COMMENT}" \
-                 "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" > /dev/null
-            echo "📣 폴백 알림 댓글 등록: $NOTICE"
-          fi
-
-          echo "✅ 릴리스 노트 생성·PR 본문 업데이트 완료 ($(jq -r '.provider // "?"' provider_result.json 2>/dev/null))"
+          echo "✅ Release notes generated and PR body updated ($(jq -r '.provider // "?"' provider_result.json 2>/dev/null))"
           echo "summary_found=true" >> $GITHUB_OUTPUT
 
-      - name: 폴백 Summary 파일 업로드
+      # Record which path produced them in the Job Summary, and comment on the PR only
+      # when no AI could be used (#566). The comment is updated by marker, so email goes out only once.
+      # A failed notice never blocks the release (the script always ends with 0).
+      - name: Report generation result
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/changelog_notice.py \
+            --repo "${{ github.repository }}" \
+            --pr "${{ github.event.pull_request.number }}" \
+            --result provider_result.json
+
+      - name: Upload fallback summary file
         if: steps.generate.outputs.summary_found == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -348,8 +333,9 @@ jobs:
           path: pr_body.md
           retention-days: 1
 
-  # Job 2: CHANGELOG 업데이트
+  # Job 2: update CHANGELOG
   update-changelog:
+    # Job names may be required status check names in branch protection, so they are not translated (#769)
     name: CHANGELOG 업데이트
     runs-on: ubuntu-latest
     outputs:
@@ -360,44 +346,51 @@ jobs:
       (needs.detect-and-parse.outputs.summary_found == 'true' ||
        needs.fallback-summary.outputs.summary_found == 'true')
     steps:
-      - name: 저장소 체크아웃
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Git 설정
+      - name: Configure Git
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+          HEAD_BRANCH="$PR_HEAD_REF"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git pull origin $HEAD_BRANCH
 
-      - name: Summary 파일 다운로드
+      # Unpacked at the working tree root it would ride along with git add -A in "commit and push changes" below and
+      # pollute the repo (#564 — pr_body.md was committed on every release since v4.4.1).
+      - name: Download summary file
         uses: actions/download-artifact@v4
         with:
           name: pr-content
+          path: ${{ runner.temp }}/pr-content
 
-      # semver 자동 승격 옵션 (이슈 #546)
-      # 키가 없으면 false — 이미 통합된 레포는 예고 없이 버전이 튀지 않고 patch 고정을 유지한다.
-      - name: semver 자동 승격 옵션 확인
+      # semver auto bump option (issue #546)
+      # true when the key is missing — new and existing repos bump from commit subjects. Set semver_auto: false to turn it off.
+      - name: Read semver auto bump option
         id: semver_options
         run: |
-          SEMVER_AUTO=$(python3 -c 'import re; t=open("version.yml",encoding="utf-8").read(); m=re.search(r"metadata:.*?template:.*?options:.*?semver_auto:\s*\"?(true|false)", t, re.S); print(m.group(1) if m else "false")' 2>/dev/null || echo "false")
+          SEMVER_AUTO=$(python3 .github/scripts/version_manager.py get-option semver_auto true 2>/dev/null || echo "true")
           echo "semver_auto=$SEMVER_AUTO" >> $GITHUB_OUTPUT
-          echo "ℹ️ semver 자동 승격: $SEMVER_AUTO"
+          echo "ℹ️ semver auto bump: $SEMVER_AUTO"
 
-      # 릴리스 구간 커밋 수집 — 워킹트리가 아닌 RUNNER_TEMP에 둔다.
-      # 아래 "변경사항 커밋 및 푸시" step이 git add -A를 하므로 워킹트리에 두면 릴리스 커밋에 딸려간다.
-      - name: 릴리스 구간 커밋 수집
+      # Collect commits in the release range — kept in RUNNER_TEMP, not the working tree.
+      # The "commit and push changes" step below runs git add -A, so in the working tree it would ride along with the release commit.
+      - name: Collect release range commits
         if: steps.semver_options.outputs.semver_auto == 'true'
         run: |
-          git fetch origin "${{ github.event.pull_request.base.ref }}"
-          git log --pretty=%s "origin/${{ github.event.pull_request.base.ref }}..HEAD" > "$RUNNER_TEMP/commits.txt"
-          echo "ℹ️ 수집된 커밋: $(wc -l < "$RUNNER_TEMP/commits.txt")줄"
+          # Based on the release PR base (#1114) — pinning main gives 0 commits > always patch in repos with another default branch
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          git fetch origin "$BASE_REF"
+          git log --pretty=%s "origin/${BASE_REF}..HEAD" > "$RUNNER_TEMP/commits.txt"
+          echo "ℹ️ Collected commits: $(wc -l < "$RUNNER_TEMP/commits.txt") lines"
 
-      - name: 릴리스 버전 확정
+      - name: Finalize release version
         id: bump_version
         run: |
           chmod +x .github/scripts/version_manager.sh
@@ -408,17 +401,17 @@ jobs:
           else
             BUMP="patch"
           fi
-          echo "ℹ️ 승격 폭: $BUMP"
+          echo "ℹ️ Bump level: $BUMP"
 
           NEW_VERSION=$(./.github/scripts/version_manager.sh increment --bump "$BUMP" | tail -n 1)
           if [ -z "$NEW_VERSION" ]; then
-            echo "❌ 버전 증가 실패"
+            echo "❌ Version bump failed"
             exit 1
           fi
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "✅ 릴리스 버전 확정: $NEW_VERSION"
+          echo "✅ Release version finalized: $NEW_VERSION"
 
-      - name: PR 제목 확정 버전으로 갱신
+      - name: Update PR title to the final version
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           VERSION="${{ steps.bump_version.outputs.new_version }}"
@@ -431,9 +424,9 @@ jobs:
                -d "{\"title\": \"${NEW_TITLE}\"}" \
                "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}"
 
-          echo "✅ PR 제목 확정 버전으로 갱신: $NEW_TITLE"
+          echo "✅ PR title updated to the final version: $NEW_TITLE"
 
-      - name: CHANGELOG 업데이트
+      - name: Update CHANGELOG
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           VERSION="${{ steps.bump_version.outputs.new_version }}"
@@ -442,68 +435,77 @@ jobs:
           TODAY=$(date '+%Y-%m-%d')
           TIMESTAMP=$(date '+%Y-%m-%dT%H:%M:%SZ')
 
-          echo "📝 CHANGELOG 업데이트 시작..."
-          echo "📋 프로젝트: $PROJECT_TYPE v$VERSION"
+          echo "📝 Updating CHANGELOG..."
+          echo "📋 Project: $PROJECT_TYPE v$VERSION"
 
-          # Python 스크립트 실행 권한 설정
+          # Make the Python scripts executable
           if [ -f ".github/scripts/changelog_manager.py" ]; then
             chmod +x .github/scripts/changelog_manager.py
           else
-            echo "❌ changelog_manager.py를 찾을 수 없습니다"
+            echo "❌ changelog_manager.py not found"
             exit 1
           fi
 
-          # 환경 변수 설정 후 Python 스크립트 실행
+          # Set env vars, then run the Python script
           export VERSION="$VERSION"
           export PROJECT_TYPE="$PROJECT_TYPE"
           export PROJECT_TYPES="$PROJECT_TYPES"
           export TODAY="$TODAY"
           export PR_NUMBER="$PR_NUMBER"
           export TIMESTAMP="$TIMESTAMP"
+          # The input file is outside the working tree (#564 — so it does not ride along with the commit)
+          export PR_BODY_PATH="$RUNNER_TEMP/pr-content/pr_body.md"
 
           python3 .github/scripts/changelog_manager.py update-from-summary
 
-          echo "📄 CHANGELOG.md 재생성 중..."
+          echo "📄 Regenerating CHANGELOG.md..."
           python3 .github/scripts/changelog_manager.py generate-md
 
-      - name: 변경사항 커밋 및 푸시
+      - name: Commit and push changes
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
-          # bump가 version.yml + 프로젝트 버전 파일도 수정하므로 전체 스테이징
+          HEAD_BRANCH="$PR_HEAD_REF"
+          # bump also edits version.yml + project version files (differ per type), so stage everything.
+          # ⚠️ Every temp file made in the working tree rides along here — keep work files in $RUNNER_TEMP (#564).
           git add -A
 
           if git diff --staged --quiet; then
-            echo "📝 변경사항이 없습니다"
+            echo "📝 No changes"
           else
             REPO_NAME=$(basename "${{ github.repository }}")
             VERSION="${{ steps.bump_version.outputs.new_version }}"
 
-            # [skip ci] 미포함 의도: 이 커밋이 main→deploy 머지로 deploy HEAD가 되어야
-            # 배포/동기화 워크플로우(CICD·NPM-PUBLISH·README-UPDATE·PLUGIN-SYNC)가 deploy push로 트리거된다.
-            # VERSION-CONTROL 안전망은 paths-ignore(version.yml) + release_guard(version.yml 변경 감지)로
-            # 이 커밋을 릴리스로 인식해 재bump를 건너뛰므로 무한 루프가 없다.
-            # main을 트리거로 쓰는 워크플로우는 없어 main push에서 중복 CI도 발생하지 않는다.
-            git commit -m "$REPO_NAME 버전 관리 : chore : v$VERSION 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR #${{ github.event.pull_request.number }})"
+            # Why no [skip ci]: this commit must become main HEAD via the develop->main merge so that
+            # deploy/sync workflows (CICD, NPM-PUBLISH, README-UPDATE, PLUGIN-SYNC) trigger on the main push.
+            # The VERSION-CONTROL safety net recognizes this commit as a release via paths-ignore(version.yml) + release_guard (version.yml change detection)
+            # and skips re-bumping, so there is no infinite loop.
+            # No workflow triggers on develop, so a develop push causes no duplicate CI.
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            # The commit message uses the version.yml language (#787). Old installs without the catalog fall back to the old Korean text.
+            COMMIT_TITLE=$(python3 .github/scripts/i18n/messages.py get release.commit.finalize --var repo="$REPO_NAME" --var version="$VERSION" --var pr="$PR_NUMBER" 2>/dev/null) \
+              || COMMIT_TITLE="$REPO_NAME 버전 관리 : chore : v$VERSION 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR #$PR_NUMBER)"
+            git commit -m "$COMMIT_TITLE"
 
-            # Race Condition 방지: pull-rebase 후 push (최대 3회 재시도)
+            # Prevent race conditions: pull-rebase, then push (up to 3 retries)
             MAX_RETRIES=3
             RETRY_COUNT=0
             PUSH_SUCCESS=false
 
             while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
               RETRY_COUNT=$((RETRY_COUNT + 1))
-              echo "🔄 Push 시도 $RETRY_COUNT/$MAX_RETRIES..."
+              echo "🔄 Push attempt $RETRY_COUNT/$MAX_RETRIES..."
 
               if git push origin HEAD:$HEAD_BRANCH; then
                 PUSH_SUCCESS=true
-                echo "✅ 변경사항 커밋 완료"
+                echo "✅ Changes committed"
                 break
               else
-                echo "⚠️ Push 실패, remote 변경사항 동기화 중..."
+                echo "⚠️ Push failed, syncing remote changes..."
                 if git pull --rebase origin $HEAD_BRANCH; then
-                  echo "✅ Rebase 성공, 다시 push 시도..."
+                  echo "✅ Rebase succeeded, retrying push..."
                 else
-                  echo "❌ Rebase 실패, 충돌 해결 필요"
+                  echo "❌ Rebase failed, resolve the conflict"
                   git rebase --abort 2>/dev/null || true
                   exit 1
                 fi
@@ -511,37 +513,23 @@ jobs:
             done
 
             if [ "$PUSH_SUCCESS" = false ]; then
-              echo "❌ $MAX_RETRIES회 시도 후에도 push 실패"
+              echo "❌ Push failed after $MAX_RETRIES attempts"
               exit 1
             fi
           fi
 
-      - name: 임시 파일 정리
-        run: rm -f pr_body.md
-
-  # Job 3: PR 머지 및 배포 트리거
-  merge-and-deploy:
-    name: PR 머지 및 배포 트리거
-    runs-on: ubuntu-latest
-    needs: [detect-and-parse, fallback-summary, update-changelog]
-    if: |
-      always() &&
-      needs.update-changelog.result == 'success' &&
-      (needs.detect-and-parse.outputs.summary_found == 'true' ||
-       needs.fallback-summary.outputs.summary_found == 'true')
-    steps:
-      - name: 저장소 체크아웃
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
           token: ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Git 설정
+      - name: Configure Git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: PR 브랜치 최신화
+      - name: Merge PR branch into base
         env:
           GH_TOKEN: ${{ secrets._GITHUB_PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
@@ -549,59 +537,59 @@ jobs:
           PR_BASE=$(gh pr view ${{ github.event.pull_request.number }} --json baseRefName -q .baseRefName)
 
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📋 PR 정보:"
-          echo "  • HEAD 브랜치: $PR_HEAD"
-          echo "  • BASE 브랜치: $PR_BASE"
-          echo "  • 목표: $PR_BASE 브랜치에 $PR_HEAD의 변경사항을 머지"
+          echo "📋 PR info:"
+          echo "  • HEAD branch: $PR_HEAD"
+          echo "  • BASE branch: $PR_BASE"
+          echo "  • Goal: merge $PR_HEAD into $PR_BASE"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-          # 원격 브랜치 최신화
-          echo "🔄 원격 브랜치 최신화 중..."
+          # Update remote branches
+          echo "🔄 Fetching remote branches..."
           git fetch origin $PR_HEAD
           git fetch origin $PR_BASE
 
-          # BASE 브랜치(deploy)로 체크아웃
-          echo "📦 $PR_BASE 브랜치로 체크아웃 중..."
+          # Check out the BASE branch (main)
+          echo "📦 Checking out $PR_BASE..."
           git checkout $PR_BASE
           git pull origin $PR_BASE
 
-          # HEAD 브랜치(main)의 최신 변경사항 다시 가져오기 (race condition 방지)
-          echo "🔄 $PR_HEAD 브랜치의 최신 변경사항 가져오는 중..."
+          # Fetch the latest HEAD branch (develop) changes again (prevents race conditions)
+          echo "🔄 Fetching the latest $PR_HEAD..."
           git fetch origin $PR_HEAD
 
-          # HEAD 브랜치(main)의 변경사항을 BASE(deploy)에 머지
-          echo "🔀 $PR_HEAD의 변경사항을 $PR_BASE에 머지 중..."
+          # Merge HEAD branch (develop) changes into BASE (main)
+          echo "🔀 Merging $PR_HEAD into $PR_BASE..."
           if git merge --no-edit origin/$PR_HEAD; then
-            echo "✅ 머지 성공"
+            echo "✅ Merge succeeded"
           else
-            echo "⚠️ 머지 충돌 발생"
-            echo "충돌 파일:"
+            echo "⚠️ Merge conflict"
+            echo "Conflicting files:"
             git diff --name-only --diff-filter=U || true
-            echo "❌ 머지 충돌로 인해 실패했습니다. 수동으로 해결 후 다시 시도하세요."
+            echo "❌ Failed because of a merge conflict. Resolve it manually and try again."
             exit 1
           fi
 
-          # base(deploy) 브랜치에 푸시 (다른 워크플로우 트리거)
-          # Race Condition 방지: pull-rebase 후 push (최대 3회 재시도)
-          echo "🚀 $PR_BASE 브랜치에 푸시 중..."
+          # Push to main (triggers other workflows)
+          # Prevent race conditions: pull-rebase, then push (up to 3 retries)
+          echo "🚀 Pushing to $PR_BASE..."
           MAX_RETRIES=3
           RETRY_COUNT=0
           PUSH_SUCCESS=false
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             RETRY_COUNT=$((RETRY_COUNT + 1))
-            echo "🔄 Push 시도 $RETRY_COUNT/$MAX_RETRIES..."
+            echo "🔄 Push attempt $RETRY_COUNT/$MAX_RETRIES..."
 
             if git push origin $PR_BASE; then
               PUSH_SUCCESS=true
-              echo "✅ $PR_BASE 브랜치에 푸시 완료 (배포 워크플로우 트리거됨)"
+              echo "✅ Pushed to $PR_BASE (deploy workflows triggered)"
               break
             else
-              echo "⚠️ Push 실패, remote 변경사항 동기화 중..."
+              echo "⚠️ Push failed, syncing remote changes..."
               if git pull --rebase origin $PR_BASE; then
-                echo "✅ Rebase 성공, 다시 push 시도..."
+                echo "✅ Rebase succeeded, retrying push..."
               else
-                echo "❌ Rebase 실패, 충돌 해결 필요"
+                echo "❌ Rebase failed, resolve the conflict"
                 git rebase --abort 2>/dev/null || true
                 exit 1
               fi
@@ -609,157 +597,162 @@ jobs:
           done
 
           if [ "$PUSH_SUCCESS" = false ]; then
-            echo "❌ $MAX_RETRIES회 시도 후에도 push 실패"
+            echo "❌ Push failed after $MAX_RETRIES attempts"
             exit 1
           fi
 
-      - name: 자동 PR Merge
+      - name: Auto merge PR
         id: merge_pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           
-          # PAT 토큰 존재 여부 확인
+          # Check whether a PAT token exists
           if [ -z "${{ secrets._GITHUB_PAT_TOKEN }}" ]; then
             PAT_AVAILABLE="false"
           else
             PAT_AVAILABLE="true"
           fi
-          # 후속 트리거 판단 기준 (#555): "PAT로 머지했는가"가 아니라 "PAT가 등록돼 있는가".
-          # PAT가 있으면 브랜치 최신화 등 다른 단계의 push가 PAT 신원으로 나가 후속이 이미
-          # 트리거된다 — 거기에 dispatch를 더하면 같은 워크플로우가 두 번 돈다.
+          # Follow-up trigger criterion (#555): not "merged with a PAT" but "a PAT is registered".
+          # With a PAT, pushes in other steps such as branch sync go out as the PAT identity and already
+          # trigger follow-ups — adding dispatch on top would run the same workflow twice.
           echo "pat_available=$PAT_AVAILABLE" >> $GITHUB_OUTPUT
           
-          # PR 상태 확인
+          # Check PR state
           PR_STATE=$(gh pr view $PR_NUMBER --json state,mergeable -q '.state + "," + (.mergeable | tostring)')
           PR_STATE_VALUE=$(echo "$PR_STATE" | cut -d',' -f1)
           PR_MERGEABLE=$(echo "$PR_STATE" | cut -d',' -f2)
 
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📋 PR 상태 확인:"
-          echo "  • 상태: $PR_STATE_VALUE"
-          echo "  • 병합 가능: $PR_MERGEABLE"
-          echo "  • PAT 토큰 사용 가능: $PAT_AVAILABLE"
+          echo "📋 PR status:"
+          echo "  • State: $PR_STATE_VALUE"
+          echo "  • Mergeable: $PR_MERGEABLE"
+          echo "  • PAT available: $PAT_AVAILABLE"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
           if [ "$PR_STATE_VALUE" = "CLOSED" ] || [ "$PR_STATE_VALUE" = "MERGED" ]; then
-            echo "✅ PR이 이미 닫혔거나 병합되었습니다"
+            echo "✅ The PR is already closed or merged"
             exit 0
           fi
 
           if [ "$PR_MERGEABLE" != "true" ]; then
-            echo "⚠️ PR을 GitHub API로 병합할 수 없습니다"
-            echo "💡 이미 'PR 브랜치 최신화' 단계에서 변경사항이 ${{ github.event.pull_request.base.ref }} 브랜치에 적용되었습니다"
-            echo "📝 PR 상태를 업데이트합니다..."
+            echo "⚠️ The PR cannot be merged through the GitHub API"
+            echo "💡 The 'Merge PR branch into base' step already applied the changes to ${{ github.event.pull_request.base.ref }}"
+            echo "📝 Updating the PR..."
             
-            # PR에 댓글 추가
+            # Add a PR comment — text follows the version.yml language (options.language) (#769).
+            # Old installs without the catalog fall back to the old Korean text.
             export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
-            gh pr comment $PR_NUMBER --body "✅ 변경사항이 자동으로 ${{ github.event.pull_request.base.ref }} 브랜치에 적용되었습니다. PR을 수동으로 닫아주세요."
+            APPLIED_COMMENT=$(python3 .github/scripts/i18n/messages.py get release.comment.applied_to_base --var base="${{ github.event.pull_request.base.ref }}" 2>/dev/null) \
+              || APPLIED_COMMENT="✅ 변경사항이 자동으로 ${{ github.event.pull_request.base.ref }} 브랜치에 적용되었습니다. PR을 수동으로 닫아주세요."
+            gh pr comment $PR_NUMBER --body "$APPLIED_COMMENT"
             
-            echo "✅ PR 상태 업데이트 완료"
+            echo "✅ PR updated"
             exit 0
           fi
 
-          # 머지 성공 여부 추적 변수
+          # Tracks whether the merge succeeded
           MERGE_SUCCESS="false"
 
-          # 1차 시도: GITHUB_TOKEN으로 머지 시도 (--admin 없이)
+          # Attempt 1: merge with GITHUB_TOKEN (without --admin)
           echo ""
-          echo "🔀 1차 시도: GITHUB_TOKEN으로 PR 병합 중..."
+          echo "🔀 Attempt 1: merging the PR with GITHUB_TOKEN..."
           export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           
           MERGE_OUTPUT=$(gh pr merge $PR_NUMBER --merge --delete-branch=false 2>&1)
           MERGE_EXIT_CODE=$?
           
           if [ $MERGE_EXIT_CODE -eq 0 ] && echo "$MERGE_OUTPUT" | grep -q "merged\|Merged"; then
-            echo "✅ GITHUB_TOKEN으로 PR 병합 성공"
+            echo "✅ Merged the PR with GITHUB_TOKEN"
             MERGE_SUCCESS="true"
           else
-            echo "⚠️ GITHUB_TOKEN으로 병합 실패"
-            echo "   출력: $MERGE_OUTPUT"
+            echo "⚠️ Merge with GITHUB_TOKEN failed"
+            echo "   Output: $MERGE_OUTPUT"
             
-            # PR 상태 재확인 (다른 프로세스가 머지했을 수 있음)
+            # Recheck PR state (another process may have merged it)
             PR_STATE_CHECK=$(gh pr view $PR_NUMBER --json state -q .state)
             if [ "$PR_STATE_CHECK" = "MERGED" ]; then
-              echo "✅ PR이 이미 머지되었습니다"
+              echo "✅ The PR is already merged"
               MERGE_SUCCESS="true"
             fi
           fi
 
-          # 2차 시도: PAT 토큰으로 재시도 (--admin 플래그 사용)
+          # Attempt 2: retry with the PAT token (with the --admin flag)
           if [ "$MERGE_SUCCESS" = "false" ] && [ "$PAT_AVAILABLE" = "true" ]; then
             echo ""
-            echo "🔀 2차 시도: PAT 토큰으로 PR 병합 중 (--admin 플래그 사용)..."
+            echo "🔀 Attempt 2: merging the PR with the PAT (--admin)..."
             export GH_TOKEN=${{ secrets._GITHUB_PAT_TOKEN }}
             
             MERGE_OUTPUT=$(gh pr merge $PR_NUMBER --merge --admin --delete-branch=false 2>&1)
             MERGE_EXIT_CODE=$?
             
             if [ $MERGE_EXIT_CODE -eq 0 ] && echo "$MERGE_OUTPUT" | grep -q "merged\|Merged"; then
-              echo "✅ PAT 토큰으로 PR 병합 성공"
+              echo "✅ Merged the PR with the PAT"
               MERGE_SUCCESS="true"
-              # PAT push는 후속 워크플로우를 정상 트리거한다 → 명시 dispatch 불필요 (#551)
+              # A PAT push triggers follow-up workflows normally -> no explicit dispatch needed (#551)
               echo "merged_with_pat=true" >> $GITHUB_OUTPUT
             else
-              echo "❌ PAT 토큰으로도 병합 실패"
-              echo "   출력: $MERGE_OUTPUT"
+              echo "❌ Merge with the PAT failed too"
+              echo "   Output: $MERGE_OUTPUT"
               
-              # PR 상태 재확인
+              # Recheck PR state
               PR_STATE_CHECK=$(gh pr view $PR_NUMBER --json state -q .state)
               if [ "$PR_STATE_CHECK" = "MERGED" ]; then
-                echo "✅ PR이 이미 머지되었습니다"
+                echo "✅ The PR is already merged"
                 MERGE_SUCCESS="true"
               fi
             fi
           fi
 
-          # 최종 실패 처리
+          # Final failure handling
           if [ "$MERGE_SUCCESS" = "false" ]; then
             echo ""
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "❌ PR 자동 병합 실패"
+            echo "❌ PR auto merge failed"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             
             if [ "$PAT_AVAILABLE" = "false" ]; then
               echo ""
-              echo "⚠️ PAT 토큰이 설정되어 있지 않습니다."
+              echo "⚠️ No PAT is configured."
               echo ""
-              echo "📋 해결 방법:"
-              echo "1. GitHub에서 Personal Access Token 생성"
+              echo "📋 How to fix:"
+              echo "1. Create a Personal Access Token on GitHub"
               echo "   - https://github.com/settings/tokens"
-              echo "   - 권한: repo (전체 권한)"
+              echo "   - Scope: repo (full)"
               echo ""
-              echo "2. Repository Secrets에 등록"
+              echo "2. Add it to Repository Secrets"
               echo "   - Settings > Secrets and variables > Actions"
               echo "   - New repository secret"
               echo "   - Name: _GITHUB_PAT_TOKEN"
-              echo "   - Value: 생성한 토큰"
+              echo "   - Value: the token you created"
               echo ""
-              echo "또는"
+              echo "or"
               echo ""
-              echo "3. Branch Protection Rules 조정"
+              echo "3. Adjust Branch Protection Rules"
               echo "   - Settings > Branches > Branch protection rules"
               echo "   - 'Allow specified actors to bypass required pull requests'"
-              echo "   - GitHub Actions bot을 예외로 추가"
+              echo "   - Add the GitHub Actions bot as an exception"
               echo ""
             else
               echo ""
-              echo "⚠️ GITHUB_TOKEN과 PAT 토큰 모두로 병합에 실패했습니다."
+              echo "⚠️ Merge failed with both GITHUB_TOKEN and the PAT."
               echo ""
-              echo "📋 가능한 원인:"
-              echo "1. Branch Protection Rules가 너무 엄격함"
-              echo "2. PR에 충돌이 있음"
-              echo "3. 필수 상태 체크가 통과하지 않음"
-              echo "4. 필수 리뷰 승인이 없음"
+              echo "📋 Possible causes:"
+              echo "1. Branch Protection Rules are too strict"
+              echo "2. The PR has conflicts"
+              echo "3. Required status checks have not passed"
+              echo "4. Required review approval is missing"
               echo ""
             fi
             
-            # PR에 댓글 추가
+            # Add a PR comment — per-language text; old Korean text when the catalog is missing (#769)
             export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
-            ERROR_COMMENT="❌ 자동 병합 실패. 수동으로 병합해주세요."
+            ERROR_COMMENT=$(python3 .github/scripts/i18n/messages.py get release.comment.merge_failed 2>/dev/null) \
+              || ERROR_COMMENT="❌ 자동 병합 실패. 수동으로 병합해주세요."
             if [ "$PAT_AVAILABLE" = "false" ]; then
-              ERROR_COMMENT="❌ 자동 병합 실패: PAT 토큰이 설정되어 있지 않습니다. Settings > Secrets에 \`_GITHUB_PAT_TOKEN\`을 등록하거나 Branch Protection Rules에서 GitHub Actions bot을 예외로 추가해주세요."
+              ERROR_COMMENT=$(python3 .github/scripts/i18n/messages.py get release.comment.merge_failed_no_pat 2>/dev/null) \
+                || ERROR_COMMENT="❌ 자동 병합 실패: PAT 토큰이 설정되어 있지 않습니다. Settings > Secrets에 \`_GITHUB_PAT_TOKEN\`을 등록하거나 Branch Protection Rules에서 GitHub Actions bot을 예외로 추가해주세요."
             fi
             gh pr comment $PR_NUMBER --body "$ERROR_COMMENT"
             
@@ -767,25 +760,43 @@ jobs:
           fi
           
           echo ""
-          echo "✅ PR 자동 병합 완료"
+          echo "✅ PR auto merge done"
 
-      - name: 후속 워크플로우 트리거 (PAT 없이 머지한 경우)
-        # GITHUB_TOKEN이 만든 push로는 워크플로우가 재트리거되지 않는다(무한 루프 방지).
-        # workflow_dispatch는 GITHUB_TOKEN으로도 트리거되므로 그 경로로 직접 깨운다 (#551).
-        # PAT가 등록된 저장소는 push가 PAT 신원으로 나가 후속이 이미 트리거된다 → 건너뛴다 (#555).
+      - name: Trigger follow-up workflows (merged without PAT)
+        # Pushes made by GITHUB_TOKEN do not re-trigger workflows (prevents infinite loops).
+        # workflow_dispatch triggers with GITHUB_TOKEN too, so wake them directly that way (#551).
+        # Repos with a registered PAT push as the PAT identity and follow-ups are already triggered -> skip (#555).
         if: steps.merge_pr.outputs.pat_available != 'true'
-        continue-on-error: true   # 릴리스는 이미 끝났다 — 여기서 실패해도 파이프라인을 막지 않는다
+        continue-on-error: true   # the release is already done — a failure here must not block the pipeline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}   # 전량 실패 시 알림용 (#555)
+          PR_NUMBER: ${{ github.event.pull_request.number }}   # for the all-failed notice (#555)
         run: |
           python3 .github/scripts/dispatch_downstream.py dispatch \
             --repo "${{ github.repository }}" \
             --branch "${{ github.event.pull_request.base.ref }}"
 
-      - name: 릴리스 태그 생성
+      - name: Create release tag
         run: |
-          NEW_VERSION="${{ needs.update-changelog.outputs.new_version }}"
+          # ⚠️ This step is **inside** the update-changelog job. Reading its own job via needs
+          # always gives an empty string and the tag becomes "v" — in fact from v4.8.0
+          # 11 releases silently lost their tags that way (#545). Outputs of the same job
+          # are read via steps.<id>.outputs.
+          NEW_VERSION="${{ steps.bump_version.outputs.new_version }}"
+
+          # An empty version makes TAG_NAME "v", pushing a tag named just v
+          # and reporting **success** as "Created release tag: v". That path silently loses
+          # a release, so stop here (#545 — "a missing tag shows as failure").
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::error::Release version is empty, stopping without creating a tag."
+            echo "Check the version finalize step of the update-changelog job."
+            exit 1
+          fi
+          if ! printf '%s' "$NEW_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Release version is not semver: '$NEW_VERSION'"
+            exit 1
+          fi
+
           TAG_NAME="v$NEW_VERSION"
           BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
 
@@ -794,19 +805,21 @@ jobs:
           git pull origin $BASE_BRANCH
 
           if git tag -l | grep -q "^$TAG_NAME$"; then
-            echo "⚠️ 태그 $TAG_NAME 이미 존재 — 건너뜀"
+            echo "⚠️ Tag $TAG_NAME already exists, skipping"
           else
             git tag "$TAG_NAME"
             git push origin "$TAG_NAME"
-            echo "✅ 릴리스 태그 생성: $TAG_NAME"
+            echo "✅ Created release tag: $TAG_NAME"
           fi
 
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          # Check that what was pushed actually exists on the remote. If push fails silently,
+          # everything up to here is green but the tag is missing.
+          if ! git ls-remote --tags origin "refs/tags/$TAG_NAME" | grep -q "$TAG_NAME"; then
+            echo "::error::Tag $TAG_NAME is not on the remote, the release is missing."
+            exit 1
+          fi
 
-      # ─────────────────────────────────────────────
-      # GitHub Release 첨부용 APK 빌드 (Flutter 프로젝트에서만)
-      # 실패해도 태그/배포는 이미 끝난 뒤이므로 워크플로우 전체를 막지 않는다 (#114)
-      # ─────────────────────────────────────────────
+      # GitHub Release 첨부용 APK 빌드 (Flutter 만, 실패해도 릴리스 유지, #114)
       - name: Flutter 설치 (APK 빌드용)
         if: contains(needs.detect-and-parse.outputs.project_types, 'flutter')
         uses: subosito/flutter-action@v2
@@ -821,8 +834,8 @@ jobs:
         working-directory: client
         run: |
           chmod +x ../.github/scripts/version_manager.sh
-          VERSION_NAME="${{ needs.update-changelog.outputs.new_version }}"
-          # version_manager는 레포 루트(version.yml 위치) 기준 cwd에서 실행해야 한다
+          VERSION_NAME="${{ steps.bump_version.outputs.new_version }}"
+          # version_manager 실행 위치: 레포 루트 (version.yml 기준)
           VERSION_CODE=$(cd .. && ./.github/scripts/version_manager.sh get-code)
 
           printf '%s\n' "${{ secrets.CLIENT_ENV_FILE }}" > .env
@@ -851,7 +864,7 @@ jobs:
         id: release_notes
         continue-on-error: true
         run: |
-          VERSION="${{ needs.update-changelog.outputs.new_version }}"
+          VERSION="${{ steps.bump_version.outputs.new_version }}"
           chmod +x ./.github/scripts/changelog_manager.py
 
           if [ -f "CHANGELOG.json" ]; then
@@ -870,6 +883,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets._GITHUB_PAT_TOKEN }}
         run: |
+          TAG_NAME="v${{ steps.bump_version.outputs.new_version }}"
           APK_PATH="client/build/app/outputs/flutter-apk/app-release.apk"
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
@@ -884,12 +898,12 @@ jobs:
             echo "✅ GitHub Release 생성 완료 (APK 없음): $TAG_NAME"
           fi
 
-      - name: 배포 완료 알림
+      - name: Report release completion
         run: |
-          echo "🎉 체인지로그 업데이트 및 배포 트리거 완료!"
+          echo "🎉 Changelog updated and deploy triggered"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📋 배포 정보:"
-          echo "  • 버전: ${{ needs.update-changelog.outputs.new_version }}"
-          echo "  • 프로젝트: ${{ needs.detect-and-parse.outputs.project_type }}"
+          echo "📋 Release info:"
+          echo "  • Version: ${{ steps.bump_version.outputs.new_version }}"
+          echo "  • Project: ${{ needs.detect-and-parse.outputs.project_type }}"
           echo "  • PR: #${{ github.event.pull_request.number }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""SUH-ISSUE-HELPER — 이슈 생성/제목수정 시 브랜치명·커밋 메시지 댓글 생성 (내재화 버전).
+"""SUH-ISSUE-HELPER — posts the branch name / commit message comment when an issue is created or retitled (in-house version).
 
-구 외부 액션(Cassiiopeia/github-issue-helper@deploy)을 대체한다. stdlib 전용.
+Replaces the old external action (Cassiiopeia/github-issue-helper@deploy). stdlib only.
 
-⚠️ 불변 계약 — 아래 형식을 기계 파싱하는 소비자가 있으므로 절대 깨지 마라:
-  1. 브랜치명 `{prefix}YYYYMMDD_#이슈번호_정규화제목`
+⚠️ Fixed contract — consumers machine-parse the formats below, never break them:
+  1. Branch name `{prefix}YYYYMMDD_#issueNumber_normalizedTitle`
      - PROJECT-FLUTTER-ANDROID-TEST-APK.yaml      : sed 's/.*#\\([0-9]*\\).*/\\1/p'
-     - PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml   : 동일
+     - PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml   : same
      - PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml : /#(\\d+)/
+     - PROJECT-REACT-NATIVE-EXPO-PROJECTOPS-APP-BUILD-TRIGGER.yaml : same (same body as the Flutter trigger)
      - scripts/common/issue_number.py             : \\d{8}_(\\d+)_ (worktree)
-  2. 댓글 본문의 `Guide by SUH-LAB` 문구 + `### 브랜치` 제목 + 코드블록
-     - PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml
-       : /### 브랜치\\s*```\\s*([\\s\\S]*?)\\s*```/ (구버전이 사용자 레포에서 계속 실행됨)
+  2. The `### 브랜치` heading + code block in the comment body, and the signature line
+     - PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml, PROJECT-REACT-NATIVE-EXPO-PROJECTOPS-APP-BUILD-TRIGGER.yaml
+       : /### 브랜치\\s*```\\s*([\\s\\S]*?)\\s*```/ (old versions keep running in user repos)
+     - The signature comes from config (guide_signature, default `Guide by ProjectOps`).
+       Old consumers look for the old text `Guide by SUH-LAB` with includes, so
+       the old marker always stays as one invisible HTML comment line (LEGACY_SIGNATURE).
 
-설정: version.yml metadata.template.options.issue_helper (없으면 전부 기본값).
+Config: version.yml metadata.template.options.issue_helper (all defaults when missing).
 """
 from __future__ import annotations
 
@@ -22,11 +26,14 @@ import os
 import re
 import sys
 import unicodedata
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-# ── 기본 설정 (version.yml에 issue_helper 섹션이 없을 때) ─────────────────
+import github_api
+from i18n.contracts import BRANCH_HEADING, LEGACY_COMMENT, LEGACY_SIGNATURE  # contract strings that are never translated (#787)
+from i18n.messages import resolve_language, t
+
+# ── Default config (when version.yml has no issue_helper section) ─────────────────
 DEFAULT_CONFIG = {
     "branch_prefix": "",
     "max_branch_length": 100,
@@ -34,10 +41,16 @@ DEFAULT_CONFIG = {
     "commit_template": "${issueTitle} : ${commitType} : {변경 사항에 대한 설명} ${issueUrl}",
     "commit_type_map": {},
     "comment_marker": "<!-- SUH-ISSUE-HELPER -->",
+    "guide_signature": "Guide by ProjectOps",
     "show_guide": True,
 }
 
-# 제목 태그 → 커밋 타입 (이슈 템플릿 4종의 제목 태그 기준). 설정 commit_type_map이 병합됨.
+# The old signature (LEGACY_SIGNATURE) has its source in i18n/contracts.py. Old consumer workflows (app build trigger,
+# PR preview) look for this text in comments, so it stays only as an invisible HTML comment.
+
+# Title tag -> commit type (based on the title tags of the 4 issue templates). Config commit_type_map is merged in.
+# Always knows both Korean and English tags: must work regardless of the template language (options.language),
+# and it only adds entries, so existing repos are unaffected (#769).
 DEFAULT_COMMIT_TYPE_MAP = {
     "버그": "fix",
     "기능요청": "feat",
@@ -46,15 +59,24 @@ DEFAULT_COMMIT_TYPE_MAP = {
     "문서": "docs",
     "디자인": "design",
     "시험요청": "test",
+    "Bug": "fix",
+    "Feature Request": "feat",
+    "Feature": "feat",
+    "Improvement": "feat",
+    "Docs": "docs",
+    "Design": "design",
+    "QA": "test",
 }
 
 _TAG = re.compile(r"\[([^\]]*)\]")
-_KEEP = re.compile(r"[^가-힣a-zA-Z0-9]")   # 한글/영문/숫자 외 → _
+# Keep Unicode letters/digits (kana, CJK, accented Latin included) and turn everything else (spaces, symbols) into _.
+# \w also includes `_`, which is harmless since it equals the separator.
+_KEEP = re.compile(r"[^\w]")
 _MULTI_UNDERSCORE = re.compile(r"_+")
 
 
 def _strip_emoji(text: str) -> str:
-    """이모지(So)·제어문자(C*)·변형선택자 제거 — 구 TS \\p{So}|\\p{C}|\\uFE0F|\\u200D 패리티."""
+    """Remove emoji (So), control chars (C*) and variation selectors — parity with old TS \\p{So}|\\p{C}|\\uFE0F|\\u200D."""
     out = []
     for ch in text:
         if ch in ("️", "‍"):
@@ -67,7 +89,7 @@ def _strip_emoji(text: str) -> str:
 
 
 def extract_issue_title(raw_title: str) -> str:
-    """[태그]·이모지 제거. 결과가 비면 원본 trim 반환 (구 동작 보존)."""
+    """Remove [tags] and emoji. If the result is empty, return the trimmed original (old behavior kept)."""
     title = _TAG.sub("", raw_title).strip()
     title = _strip_emoji(title).strip()
     return title if title else raw_title.strip()
@@ -80,12 +102,14 @@ def normalize_title(title: str) -> str:
 
 
 def infer_commit_type(raw_title: str, type_map: dict | None = None) -> str:
-    """원본 제목의 [태그]들을 순서대로 매핑 조회. 미매치 시 feat."""
+    """Look up the original title's [tags] in order. No match -> feat."""
     merged = dict(DEFAULT_COMMIT_TYPE_MAP)
     if type_map:
         merged.update(type_map)
+    lowered = {k.lower(): v for k, v in merged.items()}  # English tags ignore case
     for tag in _TAG.findall(raw_title):
-        commit_type = merged.get(tag.strip())
+        key = tag.strip()
+        commit_type = merged.get(key) or lowered.get(key.lower())
         if commit_type:
             return commit_type
     return "feat"
@@ -98,15 +122,18 @@ def create_branch_name(
     branch_prefix: str = "",
     max_branch_length: int = 100,
 ) -> str:
-    """불변 계약 1: 코어 `YYYYMMDD_#번호_제목` 고정. 길이 제한은 코어부에만 적용(구 TS 패리티)."""
-    base = f"{date_yyyymmdd}_#{issue_number}_{normalize_title(title)}"
+    """Fixed contract 1: core `YYYYMMDD_#number_title`. Length limit applies only to the core part (old TS parity)."""
+    # A title of only emoji/symbols normalizes to empty, so fill the title slot with a number-based fallback
+    slug = normalize_title(title) or f"issue-{issue_number}"
+    base = f"{date_yyyymmdd}_#{issue_number}_{slug}"
     if max_branch_length > 0:
-        base = base[:max_branch_length]
+        # A cut at a separator leaves a trailing `_`, so trim it
+        base = base[:max_branch_length].rstrip("_")
     return f"{branch_prefix}{base}"
 
 
 def render_commit_message(template: str, ctx: dict) -> str:
-    """${변수} 치환 — 기존 5종 + commitType/labels/assignees. 미지 변수는 그대로 둔다."""
+    """${var} substitution — the original 5 + commitType/labels/assignees. Unknown variables stay as is."""
     out = template
     for key in ("issueTitle", "issueUrl", "issueNumber", "branchName",
                 "date", "commitType", "labels", "assignees"):
@@ -114,7 +141,17 @@ def render_commit_message(template: str, ctx: dict) -> str:
     return out.strip()
 
 
-# ── 설정 로드 (version.yml — pyyaml 없이 이 섹션만 파싱) ────────────────────
+# ── Config load (version.yml — parses only this section, no pyyaml) ────────────────────
+def _strip_comment(raw: str) -> str:
+    """Strip the end-of-line comment after a value. A value starting with a quote is read up to the closing quote, keeping ` #` inside."""
+    raw = raw.strip()
+    if raw[:1] in ("'", '"'):
+        end = raw.find(raw[0], 1)
+        if end != -1:
+            return raw[: end + 1]
+    return re.sub(r"\s+#.*$", "", raw)
+
+
 def _unquote(value: str) -> str:
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
@@ -123,10 +160,10 @@ def _unquote(value: str) -> str:
 
 
 def load_config(repo_root: str = ".") -> dict:
-    """version.yml의 issue_helper 블록을 파싱해 DEFAULT_CONFIG에 병합한다.
+    """Parse the issue_helper block of version.yml and merge it into DEFAULT_CONFIG.
 
-    파일/섹션이 없으면 기본값 그대로 — 기존 통합 레포의 무설정 동작을 보존한다.
-    향후 마법사 '설정 중앙관리' 메뉴가 이 섹션을 읽고 쓴다 (플랫 스칼라 + 얕은 맵 1개 유지).
+    No file/section -> defaults, preserving the no-config behavior of existing repos.
+    A future wizard 'central settings' menu reads and writes this section (keep flat scalars + one shallow map).
     """
     cfg = dict(DEFAULT_CONFIG)
     cfg["commit_type_map"] = dict(DEFAULT_CONFIG["commit_type_map"])
@@ -149,13 +186,13 @@ def load_config(repo_root: str = ".") -> dict:
                 section_indent = indent
             continue
 
-        if indent <= section_indent:  # 섹션 종료
+        if indent <= section_indent:  # end of section
             break
 
         m = re.match(r"""^["']?([^"':]+)["']?\s*:\s*(.*?)\s*$""", stripped)
         if not m:
             continue
-        key, raw = m.group(1).strip(), re.sub(r"\s+#.*$", "", m.group(2))
+        key, raw = m.group(1).strip(), _strip_comment(m.group(2))
 
         if in_type_map and indent > type_map_indent:
             cfg["commit_type_map"][key] = _unquote(raw)
@@ -169,65 +206,82 @@ def load_config(repo_root: str = ".") -> dict:
             try:
                 cfg[key] = int(_unquote(raw))
             except ValueError:
-                pass  # 잘못된 값은 기본값 유지
+                pass  # invalid value keeps the default
         elif key == "show_guide":
             cfg[key] = _unquote(raw).lower() != "false"
-        elif key in ("branch_prefix", "timezone", "commit_template", "comment_marker"):
+        elif key in ("branch_prefix", "timezone", "commit_template", "comment_marker", "guide_signature"):
             cfg[key] = _unquote(raw)
     return cfg
 
 
-# ── 동적 가이드 — 레포에 실존하는 워크플로우만 안내 (거짓 안내 원천 차단) ────
-# ⚠️ 확장 규칙: 새 워크플로우가 브랜치 규칙(YYYYMMDD_#번호_)에 의존하게 되면 여기 한 줄 추가.
-#    파일 실존 기반이므로 마법사 setting에서 타입 변경 시 자동 추종된다.
+# ── Dynamic guide — mention only workflows that exist in the repo (no false guidance) ────
+# ⚠️ Extension rule: when a new workflow depends on the branch rule (YYYYMMDD_#number_), add one line here.
+#    Based on file existence, so it follows type changes made in the wizard setting automatically.
+# Values are message catalog keys, not text (i18n/en.json, #787). version.yml decides the language.
 GUIDE_LINES = [
-    ("PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml",
-     "`@projectops app build` 댓글 빌드 — 이 댓글의 브랜치를 자동 인식해서 빌드"),
-    ("PROJECT-FLUTTER-ANDROID-TEST-APK.yaml",
-     "테스트 APK 빌드 — 브랜치의 `#이슈번호`로 이슈 정보를 빌드 노트에 자동 포함"),
-    ("PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml",
-     "테스트 TestFlight 빌드 — 브랜치의 `#이슈번호`로 이슈 정보를 자동 연동"),
+    ("PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml", "issue_helper.guide.app_build"),
+    ("PROJECT-FLUTTER-ANDROID-TEST-APK.yaml", "issue_helper.guide.test_apk"),
+    ("PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml", "issue_helper.guide.test_testflight"),
+    ("PROJECT-REACT-NATIVE-EXPO-PROJECTOPS-APP-BUILD-TRIGGER.yaml", "issue_helper.guide.app_build"),
 ]
 
-_GUIDE_ALWAYS = [
-    "커밋/보고서/리뷰 스킬 — 브랜치·worktree 폴더명에서 이슈 번호를 자동 추출해 커밋 메시지·보고서 완성",
-]
+_GUIDE_ALWAYS = ["issue_helper.guide.skills"]
 
 
-def build_guide(workflows_dir: Path) -> str:
-    """접이식(details) 안내 본문. 레포에 의존 기능이 있으면 그 목록을, 없으면 권장 한 줄만."""
-    active = [text for fname, text in GUIDE_LINES if (workflows_dir / fname).exists()]
-    items = "\n".join(f"- {t}" for t in active + _GUIDE_ALWAYS)
+def effective_commit_template(cfg: dict, lang: str) -> str:
+    """Commit template. Uses a language-specific placeholder only when it is the untouched default (#790).
+
+    The default string had the Korean placeholder `{변경 사항에 대한 설명}` baked in, so it showed up in English comments too.
+    Repos that set commit_template in version.yml get that value as is regardless of language.
+    """
+    template = cfg["commit_template"]
+    if template == DEFAULT_CONFIG["commit_template"]:
+        return t("issue_helper.commit_template", lang)
+    return template
+
+
+def build_guide(workflows_dir: Path, lang: str | None = None) -> str:
+    """Collapsible (details) guide body. Lists dependent features if the repo has them, else one recommended line."""
+    lang = lang or resolve_language()
+    # One line per key even when several workflows share it (Flutter and Expo triggers)
+    active = list(dict.fromkeys(key for fname, key in GUIDE_LINES if (workflows_dir / fname).exists()))
+    items = "\n".join(f"- {t(key, lang)}" for key in active + _GUIDE_ALWAYS)
     return (
         "<details>\n"
-        "<summary>💡 왜 이 브랜치명을 써야 하나요?</summary>\n\n"
-        "이 브랜치명 형식(`YYYYMMDD_#이슈번호_제목`)을 쓰면 아래 기능이 자동으로 연동됩니다:\n"
+        f"<summary>{t('issue_helper.guide.summary', lang)}</summary>\n\n"
+        f"{t('issue_helper.guide.intro', lang)}\n"
         f"{items}\n\n"
-        "다른 형식의 브랜치명을 쓰면 위 자동화가 동작하지 않습니다.\n"
+        f"{t('issue_helper.guide.outro', lang)}\n"
         "</details>"
     )
 
 
-def build_comment_body(cfg: dict, branch_name: str, commit_message: str, guide: str) -> str:
-    """불변 계약 2: Guide by SUH-LAB + ### 브랜치 코드블록 구조 유지 (구 파서 하위호환)."""
+def build_comment_body(cfg: dict, branch_name: str, commit_message: str, guide: str, lang: str | None = None) -> str:
+    """Fixed contract 2: keep the ### 브랜치 code block structure + signature (configurable; old signature kept as a hidden comment)."""
     marker = cfg["comment_marker"]
+    signature = cfg.get("guide_signature") or DEFAULT_CONFIG["guide_signature"]
     guide_block = f"\n{guide}\n" if (cfg.get("show_guide", True) and guide) else ""
+    # Even with a changed signature, keep one invisible line with the old text old consumers look for
+    # ⚠️ A comment right below the signature breaks `signature\n---` (heading rendering), so it goes above
+    legacy = "" if LEGACY_SIGNATURE in signature else f"{LEGACY_COMMENT}\n\n"
+    lang = lang or resolve_language()
     return (
         f"{marker}\n\n"
-        "Guide by SUH-LAB\n"
+        f"{legacy}"
+        f"{signature}\n"
         "---\n\n"
-        "### 브랜치\n"
+        f"{BRANCH_HEADING}\n"
         f"```\n{branch_name}\n```\n\n"
-        "### 커밋 메시지\n"
+        f"### {t('issue_helper.heading.commit', lang)}\n"
         f"```\n{commit_message}\n```\n"
         f"{guide_block}\n"
         f"{marker}"
     )
 
 
-# ── 이벤트 처리 ──────────────────────────────────────────────────────────
+# ── Event handling ──────────────────────────────────────────────────────────
 def should_process(payload: dict) -> bool:
-    """opened 또는 edited(제목 변경)만 처리 — 구 워크플로우 if 조건과 동일."""
+    """Handle only opened or edited (title change) — same as the old workflow if condition."""
     action = payload.get("action")
     if action == "opened":
         return True
@@ -235,7 +289,7 @@ def should_process(payload: dict) -> bool:
 
 
 def today_yyyymmdd(tz_name: str) -> str:
-    """설정 타임존 기준 오늘 날짜. 구 액션의 UTC 러너 시각 오차(한국 새벽 -9h)를 개선."""
+    """Today's date in the configured time zone. Fixes the old action's UTC runner offset (-9h at dawn in Korea)."""
     try:
         from zoneinfo import ZoneInfo
         return datetime.now(ZoneInfo(tz_name)).strftime("%Y%m%d")
@@ -244,7 +298,7 @@ def today_yyyymmdd(tz_name: str) -> str:
 
 
 def prepare_comment(payload: dict, cfg: dict, workflows_dir: Path, date_yyyymmdd: str):
-    """페이로드 → (브랜치명, 커밋 메시지, 댓글 본문). 네트워크 무의존 — 테스트 가능 단위."""
+    """Payload -> (branch name, commit message, comment body). No network — a testable unit."""
     issue = payload["issue"]
     raw_title = issue["title"]
     title = extract_issue_title(raw_title)
@@ -264,35 +318,24 @@ def prepare_comment(payload: dict, cfg: dict, workflows_dir: Path, date_yyyymmdd
         "labels": ", ".join(l["name"] for l in issue.get("labels", [])),
         "assignees": ", ".join(a["login"] for a in issue.get("assignees", [])),
     }
-    commit_message = render_commit_message(cfg["commit_template"], ctx)
-    body = build_comment_body(cfg, branch, commit_message, build_guide(workflows_dir))
+    lang = resolve_language()  # decide once and use the same language for the whole comment
+    commit_message = render_commit_message(effective_commit_template(cfg, lang), ctx)
+    body = build_comment_body(cfg, branch, commit_message, build_guide(workflows_dir, lang), lang)
     return branch, commit_message, body
 
 
-# ── GitHub API (urllib — 같은 레포 이슈 댓글이라 redirect 없음) ──────────────
-_API = "https://api.github.com"
-
-# 구 액션이 남긴 댓글도 upsert 대상으로 매칭 (중복 댓글 방지 — 하위호환)
+# ── GitHub API (shared github_api — unified timeout and auth header) ──────────────────
+# Comments left by the old action are upsert targets too (avoids duplicate comments — backward compatible)
 LEGACY_MARKER_HINTS = ("github-issue-helper", "SUH-ISSUE-HELPER 에 의해 자동으로")
-
-
-def _request(method: str, url: str, token: str, data: dict | None = None):
-    req = urllib.request.Request(url, method=method)
-    req.add_header("Authorization", f"token {token}")
-    req.add_header("Accept", "application/vnd.github+json")
-    payload = None
-    if data is not None:
-        payload = json.dumps(data).encode("utf-8")
-        req.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(req, payload) as res:
-        return json.loads(res.read().decode("utf-8"))
+# Comment listing cap (100 x 50 pages) — generous so an existing guide is not missed on busy issues
+MAX_COMMENT_PAGES = 50
 
 
 def find_existing_comment(comments: list, marker: str):
-    """신형 마커 우선, 없으면 구 액션 마커 힌트로 매칭."""
-    for c in comments:
-        if marker in (c.get("body") or ""):
-            return c
+    """New marker first, else match by the old action's marker hints."""
+    found = github_api.find_marker_comment(comments, marker)
+    if found:
+        return found
     for c in comments:
         body = c.get("body") or ""
         if any(hint in body for hint in LEGACY_MARKER_HINTS):
@@ -301,41 +344,26 @@ def find_existing_comment(comments: list, marker: str):
 
 
 def upsert_comment(owner: str, repo: str, issue_number: int, marker: str, body: str, token: str):
-    comments = []
-    page = 1
-    while True:
-        batch = _request(
-            "GET",
-            f"{_API}/repos/{owner}/{repo}/issues/{issue_number}/comments?per_page=100&page={page}",
-            token)
-        comments.extend(batch)
-        if len(batch) < 100:
-            break
-        page += 1
-
-    existing = find_existing_comment(comments, marker)
-    if existing:
-        _request("PATCH", f"{_API}/repos/{owner}/{repo}/issues/comments/{existing['id']}",
-                 token, {"body": body})
-        return "updated"
-    _request("POST", f"{_API}/repos/{owner}/{repo}/issues/{issue_number}/comments",
-             token, {"body": body})
-    return "created"
+    action, _ = github_api.upsert_marker_comment(
+        f"{owner}/{repo}", issue_number, token, body, marker,
+        find_function=lambda comments: find_existing_comment(comments, marker),
+        max_pages=MAX_COMMENT_PAGES)
+    return action
 
 
 def main() -> int:
     event_path = os.environ.get("GITHUB_EVENT_PATH", "")
     token = os.environ.get("GITHUB_TOKEN", "")
     if not event_path or not Path(event_path).exists():
-        print("❌ GITHUB_EVENT_PATH가 없습니다 (Actions 환경 전용)", file=sys.stderr)
+        print("❌ GITHUB_EVENT_PATH is not set (Actions environment only)", file=sys.stderr)
         return 1
     if not token:
-        print("❌ GITHUB_TOKEN이 없습니다", file=sys.stderr)
+        print("❌ GITHUB_TOKEN is not set", file=sys.stderr)
         return 1
 
     payload = json.loads(Path(event_path).read_text(encoding="utf-8"))
     if not should_process(payload):
-        print("ℹ️ 처리 대상 이벤트가 아님 (opened/제목 edited만) → 종료", file=sys.stderr)
+        print("ℹ️ Not a handled event (only opened / title edited) -> exit", file=sys.stderr)
         return 0
 
     cfg = load_config(".")
@@ -346,7 +374,7 @@ def main() -> int:
     repo = payload["repository"]["name"]
     result = upsert_comment(
         owner, repo, payload["issue"]["number"], cfg["comment_marker"], body, token)
-    print(f"✅ 댓글 {result}: {branch}", file=sys.stderr)
+    print(f"✅ Comment {result}: {branch}", file=sys.stderr)
     return 0
 
 

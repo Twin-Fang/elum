@@ -1,0 +1,9 @@
+{
+  "_comment": "스토어 배포 설정. 우선순위: 수동 실행 입력 > 이 파일 > 레포 변수(ANDROID_DEPLOY_MODE, IOS_DEPLOY_MODE) > store_only. deploy_mode 는 일부러 적지 않는다(레포 변수가 정함: 급할 때 배포 없이 store_only 로 끌 수 있게). auto_submit_on_push: true = deploy 브랜치 푸시 배포도 레포 변수의 store_submit 을 그대로 따라 심사 제출까지 간다(2026-11-26 결정, #1523). 끄면 푸시 배포는 TestFlight, 내부 테스트까지만 가고 심사는 수동 실행에서만 한다.",
+  "android": {
+    "auto_submit_on_push": true
+  },
+  "ios": {
+    "auto_submit_on_push": true
+  }
+}

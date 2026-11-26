@@ -50,6 +50,7 @@ metadata:
   last_updated: "2026-11-26 08:22:39"
   last_updated_by: "Cassiiopeia"
   default_branch: "deploy"   # 릴리스 PR base: push 되면 스토어 제출·서버 배포 (#1330)
+  deploy_branch: "main"   # development_branch 의 구 이름 — 구버전 스킬용으로 같은 값 유지
   development_branch: "main"   # 릴리스 PR head: develop 을 모으는 곳, 병합만으로는 배포 안 됨 (#1330)
   integrated_from: "projectops"
   integration_date: "2026-09-16"
@@ -64,6 +65,13 @@ metadata:
       deploy: "none"
       publish: []
       secret_backup: true
+      # 이 레포가 쓰지 않는 템플릿 워크플로 4개 (갱신 때 다시 설치하지 않음, #1523)
+      #   릴리스 때 이슈 자동 닫기 (이슈는 보고서 뒤 직접 닫음) · 시크릿 파일 서버 업로드 · 템플릿 전용 유틸 버전 동기화 · Android 자체 서버 배포
+      excluded_workflows:
+        - "PROJECT-COMMON-CLOSE-ISSUES-ON-RELEASE.yaml"
+        - "PROJECT-COMMON-SECRET-FILE-UPLOAD.yaml"
+        - "PROJECT-COMMON-TEMPLATE-UTIL-VERSION-SYNC.yml"
+        - "PROJECT-FLUTTER-ANDROID-SELFHOSTED-CICD.yaml"
       # 릴리스 구간 커밋 제목으로 승격 폭을 정한다 (이슈 #203).
       # `type!` → major · `feat` → minor · 그 외 → patch. AI 아님, 결정적.
       # 통합 당시 기본값이 false여서 기능이 들어간 릴리스도 patch로만 올라갔다.
@@ -73,3 +81,8 @@ metadata:
       changelog:
         provider: "coderabbit"
         base_url: ""
+
+deploy:                          # 마법사가 기억하는 배포 설정 (비민감 / 직접 수정 가능)
+  flutter:
+    APP_ARTIFACT_NAME: "elum"
+    JAVA_VERSION: "17"

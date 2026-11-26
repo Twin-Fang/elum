@@ -1,15 +1,15 @@
 # ===================================================================
 # PROJECT-COMMON-SYNC-ISSUE-LABELS.yaml
-# Issue Labels 동기화
+# Issue label sync
 # ===================================================================
 #
-# .github/config/issue-labels.yml 파일을 기준으로
-# GitHub 레포지토리의 Labels를 동기화합니다.
+# Syncs the GitHub repository's labels
+# based on .github/config/issue-labels.yml.
 #
 # ===================================================================
-# 트리거:
-# - .github/config/issue-labels.yml 파일 변경 시
-# - 수동 실행 (workflow_dispatch)
+# Triggers:
+# - changes to .github/config/issue-labels.yml (including adding/editing this workflow file itself)
+# - manual run (workflow_dispatch)
 # ===================================================================
 
 name: "PROJECT-SYNC-GITHUB-LABELS"
@@ -17,8 +17,15 @@ name: "PROJECT-SYNC-GITHUB-LABELS"
 on:
   workflow_dispatch:
   push:
-    paths:
-      - '.github/config/issue-labels.yml'
+    # The paths filter is not evaluated on a new repo's first push (#668 measured: no labels in org or personal repos),
+    # so labels were never created right after install. Keep only the branch condition and run on every main push.
+    # The sync is idempotent (skip-delete) and serialized by concurrency, so repeated runs are safe.
+    branches: [main]
+
+# If main and develop are pushed at once, both try to create the same label and one fails — run in order (wait)
+concurrency:
+  group: sync-issue-labels
+  cancel-in-progress: false
 
 permissions:
   issues: write
@@ -30,7 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Sync labels from config
-        uses: crazy-max/ghaction-github-labeler@v5
+        uses: crazy-max/ghaction-github-labeler@24d110aa46a59976b8a7f35518cb7f14f434c916 # v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           yaml-file: .github/config/issue-labels.yml
+          # Do not delete labels users created themselves (the default deletes labels not in the list)
+          skip-delete: true
