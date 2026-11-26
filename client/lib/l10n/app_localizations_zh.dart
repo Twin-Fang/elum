@@ -4013,6 +4013,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planSheetUnlimitedNote => '可以不限期使用Pro';
 
   @override
+  String planSheetDaysLeft(int days) {
+    return '还剩$days天';
+  }
+
+  @override
+  String get planSheetLastDay => '可以用到今天';
+
+  @override
   String get planLearnPro => '了解Pro';
 
   @override

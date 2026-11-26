@@ -17,21 +17,9 @@ extension DateLabels on AppLocalizations {
   /// `2026년 9월 20일`
   String yearMonthDay(DateTime d) => dateYearMonthDay(d.year, d.month, d.day);
 
-  /// 끝나는 시각(그 시각부터 못 씀) > `…까지` 앞에 쓸 마지막 날 (0시 정각 종료면 전날, #1169)
+  /// 끝나는 시각(그 시각부터 못 씀) > `…까지` 앞에 쓸 마지막 날 ([lastUsableDayOf])
   /// 예: `2027-05-07T00:00` > `2027년 5월 6일`, `2027-05-07T14:30` > `2027년 5월 7일`
-  String yearMonthDayUntil(DateTime endsAt) {
-    final local = endsAt.toLocal();
-    final isMidnightEnd = local.hour == 0 &&
-        local.minute == 0 &&
-        local.second == 0 &&
-        local.millisecond == 0 &&
-        local.microsecond == 0;
-    // Duration 빼기 대신 날짜 칸을 줄임 (서머타임 날 23시간 하루에도 전날)
-    final lastDay = isMidnightEnd
-        ? DateTime(local.year, local.month, local.day - 1)
-        : local;
-    return yearMonthDay(lastDay);
-  }
+  String yearMonthDayUntil(DateTime endsAt) => yearMonthDay(lastUsableDayOf(endsAt));
 
   /// 올해면 `11월 16일`, 다른 해면 `2025년 11월 16일` (좁은 칸에 쓰는 짧은 날짜)
   String shortDateOf(DateTime d, DateTime now) =>
@@ -58,4 +46,16 @@ extension DateLabels on AppLocalizations {
     if (elapsed.inDays < _maxTimeAgoDays) return timeAgoDays(elapsed.inDays);
     return yearMonthDay(time);
   }
+}
+
+/// 끝나는 시각(그 시각부터 못 씀) > 마지막으로 쓸 수 있는 날 (기기 시간대, 0시 정각 종료면 전날, #1169)
+DateTime lastUsableDayOf(DateTime endsAt) {
+  final local = endsAt.toLocal();
+  final isMidnightEnd = local.hour == 0 &&
+      local.minute == 0 &&
+      local.second == 0 &&
+      local.millisecond == 0 &&
+      local.microsecond == 0;
+  // Duration 빼기 대신 날짜 칸을 줄임 (서머타임 날 23시간 하루에도 전날)
+  return isMidnightEnd ? DateTime(local.year, local.month, local.day - 1) : local;
 }

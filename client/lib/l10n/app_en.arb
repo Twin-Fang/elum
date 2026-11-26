@@ -1210,6 +1210,8 @@
   "planSheetRenewingNote": "Unless you cancel, you'll be charged automatically on {date}. You can cancel in Manage subscription",
   "planSheetEndsToFreeNote": "When it ends, you'll switch to Free. You won't be charged automatically",
   "planSheetUnlimitedNote": "You can use Pro with no end date",
+  "planSheetDaysLeft": "{days, plural, one{{days} day left} other{{days} days left}}",
+  "planSheetLastDay": "You can use it until today",
   "planLearnPro": "Learn about Pro",
   "weeklyReportTitle": "Weekly report",
   "weeklyReportWeekRange": "{startMonth}/{startDay} - {endMonth}/{endDay}",

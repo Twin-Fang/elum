@@ -4335,6 +4335,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planSheetUnlimitedNote => 'Puedes usar Pro sin fecha de fin';
 
   @override
+  String planSheetDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Quedan $days días',
+      one: 'Queda $days día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planSheetLastDay => 'Puedes usarlo hasta hoy';
+
+  @override
   String get planLearnPro => 'Conoce Pro';
 
   @override

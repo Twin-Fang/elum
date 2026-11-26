@@ -13,9 +13,6 @@ abstract final class MyPlanCardLayout {
   /// 카드 안쪽 여백
   static const padding = 20.0;
 
-  /// 혜택 알약 사이 (가로 · 세로)
-  static const pillGap = 6.0;
-
   /// 칩 > 제목 · 제목 > 한 줄
   static const chipToTitle = 10.0;
   static const titleToSubline = 4.0;
@@ -105,51 +102,6 @@ class MyPlanTitle extends StatelessWidget {
   }
 }
 
-/// Pro 혜택 알약: 체크 + 짧은 문장 (길면 알약 안에서 줄을 바꿈)
-class MyPlanBenefitPill extends StatelessWidget {
-  const MyPlanBenefitPill({super.key, required this.label});
-
-  final String label;
-
-  static const _padH = 10.0;
-  static const _padV = 6.0;
-  static const _checkSize = 10.0;
-  static const _checkToLabel = 6.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    // 체크는 글자 배율을 따라 커짐 (큰 글자에서 점처럼 작아지지 않게)
-    final checkSize = MediaQuery.textScalerOf(context).scale(_checkSize.w);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
-      decoration: BoxDecoration(
-        color: colors.proPlanMyCardPillFill,
-        borderRadius: BorderRadius.circular(context.space.pillRadius.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            AppAssets.iconCheck,
-            width: checkSize,
-            height: checkSize,
-            colorFilter: ColorFilter.mode(colors.proPlanMyCardPillCheck, BlendMode.srcIn),
-            excludeFromSemantics: true,
-          ),
-          SizedBox(width: _checkToLabel.w),
-          Flexible(
-            child: Text(
-              label,
-              style: context.typo.proPlanBenefitDetail.copyWith(color: colors.proPlanMyCardPillText),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// 오른쪽 루미: 둥근 빛 위 그림 (Pro 는 손 흔드는 루미, Free 는 얼굴 루미)
 class MyPlanMascot extends StatelessWidget {
   const MyPlanMascot._({required this.isPro});
@@ -177,34 +129,6 @@ class MyPlanMascot extends StatelessWidget {
         child: isPro
             ? Image.asset(AppAssets.myPlanProLumi, width: _proPictureSize.w, height: _proPictureSize.w)
             : Image.asset(AppAssets.guardianProfileLumi, width: _freePictureSize.w, height: _freePictureSize.w),
-      ),
-    );
-  }
-}
-
-/// Pro 카드 오른쪽 위 큰 둥근 빛 (회원 카드 광택, 카드 밖은 잘림)
-class MyPlanCornerGlow extends StatelessWidget {
-  const MyPlanCornerGlow({super.key});
-
-  /// 지름 · 카드 모서리 밖으로 나간 정도 · 투명도
-  static const _size = 180.0;
-  static const _overflow = 60.0;
-  static const _opacity = 0.5;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: -_overflow.w,
-      right: -_overflow.w,
-      child: IgnorePointer(
-        child: Opacity(
-          opacity: _opacity,
-          child: Container(
-            width: _size.w,
-            height: _size.w,
-            decoration: BoxDecoration(color: context.colors.proPlanMyCardHalo, shape: BoxShape.circle),
-          ),
-        ),
       ),
     );
   }

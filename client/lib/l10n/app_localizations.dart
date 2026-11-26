@@ -7151,6 +7151,18 @@ abstract class AppLocalizations {
   /// **'기간 제한 없이 Pro를 쓸 수 있어요'**
   String get planSheetUnlimitedNote;
 
+  /// 내 요금제 시트 회원 카드 큰 글: 끝나는 날이 있는 Pro 의 남은 날 (1 이상, 숫자만 크게 세어 올라감) (#1516)
+  ///
+  /// In ko, this message translates to:
+  /// **'{days}일 남았어요'**
+  String planSheetDaysLeft(int days);
+
+  /// 내 요금제 시트 회원 카드 큰 글: Pro 를 쓸 수 있는 마지막 날 (#1516)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘까지 쓸 수 있어요'**
+  String get planSheetLastDay;
+
   /// 요금제 화면을 여는 버튼 문구 하나 (미리 보기 판·글자 링크·크레딧 부족 팝업 공통, ProUpsellButton, #1170)
   ///
   /// In ko, this message translates to:

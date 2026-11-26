@@ -108,3 +108,42 @@ String? planStatusDateLabel(AppLocalizations l10n, PlanStatus status) {
   final isUntilLabel = status.kind == PlanStatusKind.proUntil || status.kind == PlanStatusKind.proGift;
   return isUntilLabel ? l10n.yearMonthDayUntil(date) : l10n.yearMonthDay(date.toLocal());
 }
+
+/// 끝나는 날이 있는 Pro 4개(선물 · 기간제 · 해지 예약 · 체험)의 남은 날: 화면에 적는 날짜 기준, 그날이 오늘이거나 지났으면 0
+/// 그 외 상태 · 날짜 모름은 null (세지 않음)
+int? planDaysLeft(PlanStatus status, DateTime now) {
+  final date = status.date;
+  if (date == null) return null;
+  final DateTime lastDay;
+  switch (status.kind) {
+    case PlanStatusKind.proTrial:
+      return status.trialDaysLeft(now);
+    case PlanStatusKind.proUntil || PlanStatusKind.proGift:
+      lastDay = lastUsableDayOf(date);
+    case PlanStatusKind.proCancelScheduled:
+      lastDay = date.toLocal();
+    case PlanStatusKind.free ||
+        PlanStatusKind.proRenewing ||
+        PlanStatusKind.proGracePeriod ||
+        PlanStatusKind.proUnlimited:
+      return null;
+  }
+  final days = DateTime(lastDay.year, lastDay.month, lastDay.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+  return days < 0 ? 0 : days;
+}
+
+/// 내 요금제 시트 머리 큰 글 + 그 안에서 크게 세어 보일 숫자 (남은 날이 1 이상일 때만, 아니면 null)
+///
+/// 체험 > `Pro 체험 중, N일 남았어요` · 끝나는 날 있음 > `N일 남았어요` (마지막 날 `오늘까지 쓸 수 있어요`) · 그 외 > 선물 · Pro 제목
+({String text, int? countedDays}) planSheetHeadline(AppLocalizations l10n, PlanStatus status, DateTime now) {
+  final daysLeft = planDaysLeft(status, now);
+  final countedDays = daysLeft == null || daysLeft == 0 ? null : daysLeft;
+  final text = switch (status.kind) {
+    PlanStatusKind.proTrial => _trialLabel(l10n, status),
+    _ when daysLeft == 0 => l10n.planSheetLastDay,
+    _ when daysLeft != null => l10n.planSheetDaysLeft(daysLeft),
+    PlanStatusKind.proGift => l10n.myPlanGiftTitle,
+    _ => l10n.myPlanProTitle,
+  };
+  return (text: text, countedDays: countedDays);
+}
