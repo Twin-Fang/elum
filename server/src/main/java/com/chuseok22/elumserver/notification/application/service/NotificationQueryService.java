@@ -4,6 +4,8 @@ import com.chuseok22.elumserver.common.application.paging.AppCursorPageSize;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.common.locale.CurrentRegion;
+import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
+import com.chuseok22.elumserver.feedback.core.SentFeedback;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
@@ -49,6 +51,7 @@ public class NotificationQueryService {
   private final RoutineQueryService routineQueryService;
   private final NoticeHistoryService noticeHistoryService;
   private final AdminMessageRepository adminMessageRepository;
+  private final FeedbackService feedbackService;
 
   /**
    * 알림 목록 한 쪽: size+1 개 조회 > 이름·일과 제목 일괄 조회 > 응답 변환
@@ -127,19 +130,42 @@ public class NotificationQueryService {
     // 운영자 알림 내용 (지워졌으면 제목·본문 없음)
     Map<String, AdminMessage> adminMessageById = adminMessagesOf(rows);
 
+    // 의견 처리 알림의 보낸 의견 (내 의견만, 지워졌으면 본문 없음)
+    Map<String, SentFeedback> sentFeedbackById = sentFeedbacksOf(memberId, rows);
+
     return rows.stream().map(row -> {
       String routineId = routineIdOf(row);
       AdminMessage adminMessage = row.getType() == NotificationType.ADMIN_MESSAGE && row.getTargetId() != null
         ? adminMessageById.get(row.getTargetId()) : null;
+      SentFeedback sentFeedback = row.getType() == NotificationType.FEEDBACK_RESOLVED && row.getTargetId() != null
+        ? sentFeedbackById.get(row.getTargetId()) : null;
       return new NotificationItemResponse(
         row.getId(), row.getType(), row.getProfileId(),
         profileNameById.get(row.getProfileId()), row.getTargetId(),
         routineId == null ? null : routineTitleById.get(routineId),
         row.getCount(), row.getLastOccurredAt(), row.getReadAt() != null,
         adminMessage == null ? null : adminMessage.getTitle(),
-        adminMessage == null ? null : adminMessage.getBody(),
-        adminMessage == null ? null : adminMessage.getRoute().getWire());
+        bodyOf(adminMessage, sentFeedback),
+        adminMessage == null ? null : adminMessage.getRoute().getWire(),
+        sentFeedback == null ? null : sentFeedback.sentAt());
     }).toList();
+  }
+
+  /** 줄 본문: 운영자 알림 본문 > 보낸 의견 본문 > 없음 */
+  private static String bodyOf(AdminMessage adminMessage, SentFeedback sentFeedback) {
+    if (adminMessage != null) {
+      return adminMessage.getBody();
+    }
+    return sentFeedback == null ? null : sentFeedback.message();
+  }
+
+  // 한 쪽의 의견 처리 알림 > 보낸 의견 (쿼리 1회, 없으면 조회 안 함)
+  private Map<String, SentFeedback> sentFeedbacksOf(String memberId, List<Notification> rows) {
+    Set<String> feedbackIds = rows.stream()
+      .filter(row -> row.getType() == NotificationType.FEEDBACK_RESOLVED && row.getTargetId() != null)
+      .map(Notification::getTargetId)
+      .collect(Collectors.toSet());
+    return feedbackService.sentFeedbacksOf(memberId, feedbackIds);
   }
 
   // 한 쪽의 운영자 알림 id > 내용 (쿼리 1회, 없으면 조회 안 함)

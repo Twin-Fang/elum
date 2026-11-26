@@ -219,6 +219,8 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 
 알림 줄: 아이콘 상자 `notificationIconBackground`(#AEE4D9) · 그림 `notificationIconForeground`(#FFF) · 안 읽음 점 `notificationUnreadDot`(#55CFBA) ·
 문장 `notificationRowText`(#000) · 시각·날짜 머리글·톱니 `notificationMutedText`(#74757D). 글자는 `notificationRowText`(14/w400) · `notificationRowTime`(12/w400).
+줄 틀(#1514): 아이콘 > 제목(최대 2줄, 어절 단위 줄바꿈) · 오른쪽 위 시각·안 읽음 점(제목 첫 줄 높이) > 회색 설명 1줄(운영자 본문 · 보낸 의견 앞부분 · 리포트 기간, 없는 종류는 제목만). 시각은 오늘·어제 시각, 올해 `11월 16일`, 다른 해만 연도 포함.
+의견 처리 시트: 그림 `featureIconFeedbackResolved`(256) · 보낸 의견 칸 바탕 `notificationFeedbackQuoteBg`(#FFFFFF, 크림 시트 위).
 기기 알림 꺼짐 띠: 바탕 `notificationPermissionBannerBg`(#EEE9E6) · `켜기` 글자 `notificationBannerButton`(14/w600).
 설정 묶음 카드 토글: 켜짐 `settingsToggleOn`(#55CFBA) · 꺼짐 `settingsToggleOff`(#D7D3D1).
 

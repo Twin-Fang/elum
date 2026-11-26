@@ -16,6 +16,8 @@ import '../../application/notification_list_controller.dart';
 import '../../application/notification_navigator.dart';
 import '../../application/notification_target.dart';
 import '../../domain/app_notification.dart';
+import '../../domain/notification_type.dart';
+import 'feedback_resolved_sheet.dart';
 import 'notification_copy.dart';
 import 'notification_row.dart';
 import 'notifications_empty_body.dart';
@@ -63,6 +65,11 @@ class _NotificationListTabState extends ConsumerState<NotificationListTab> {
 
   void _onRowTapped(AppNotification notification) {
     ref.read(notificationListControllerProvider.notifier).markRead(notification.id);
+    // 의견 처리는 갈 화면이 없어 보낸 의견을 시트로 다시 보여 줌
+    if (notification.type == NotificationType.feedbackResolved) {
+      showFeedbackResolvedSheet(context, notification);
+      return;
+    }
     ref
         .read(notificationNavigatorProvider)
         .open(context, NotificationTarget.fromNotification(notification));

@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'{year}년 {month}월 {day}일'**
   String dateYearMonthDay(int year, int month, int day);
 
+  /// 올해 날짜를 짧게 (알림 줄 시각 칸). 예: 11월 16일
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일'**
+  String dateMonthDay(int month, int day);
+
   /// 이룸이 기기가 연결된 날. 예: 9월 18일부터
   ///
   /// In ko, this message translates to:
@@ -2048,11 +2054,29 @@ abstract class AppLocalizations {
   /// **'이번 주 크레딧이 채워졌어요'**
   String get notificationCreditRefilled;
 
-  /// 알림 줄: 보낸 의견이 처리됨
+  /// 알림 줄·시트 제목: 보낸 의견이 처리됨
   ///
   /// In ko, this message translates to:
-  /// **'보내 주신 의견을 확인하고 처리했어요'**
+  /// **'보내 주신 의견을 처리했어요'**
   String get notificationFeedbackResolved;
+
+  /// 의견 처리 알림 줄 아래 회색 설명: 보낸 의견 앞부분을 따옴표로
+  ///
+  /// In ko, this message translates to:
+  /// **'“{message}”'**
+  String notificationFeedbackQuote(String message);
+
+  /// 의견 처리 알림을 누르면 뜨는 시트의 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'알려 주셔서 고마워요'**
+  String get notificationFeedbackSheetBody;
+
+  /// 의견 처리 시트: 보낸 의견 칸 머리글
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일에 보낸 의견'**
+  String notificationFeedbackSentOn(int month, int day);
 
   /// 알림 줄: 내 이야기 글에 댓글이 달림(묶음). count 는 댓글 수
   ///
@@ -2071,6 +2095,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지난주 리포트가 도착했어요'**
   String get notificationWeeklyReportReady;
+
+  /// 주간 리포트 알림 줄 아래 회색 설명. range 예: 11월 10일 ~ 11월 16일
+  ///
+  /// In ko, this message translates to:
+  /// **'{range} 기록을 모았어요'**
+  String notificationWeeklyReportPeriod(String range);
 
   /// 알림 줄: 운영자 알림의 제목을 못 받았을 때 (#1273)
   ///

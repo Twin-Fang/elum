@@ -18,6 +18,7 @@ class AppNotification {
     this.title,
     this.body,
     this.route,
+    this.feedbackSentAt,
   });
 
   final String id;
@@ -29,10 +30,15 @@ class AppNotification {
   final String? targetId;
   final String? routineTitle;
 
-  /// 운영자 알림만: 관리자가 쓴 제목·본문, 눌렀을 때 갈 화면 (`home` · `plan` · `myCredit`)
+  /// 운영자 알림만: 관리자가 쓴 제목, 눌렀을 때 갈 화면 (`home` · `plan` · `myCredit`)
   final String? title;
-  final String? body;
   final String? route;
+
+  /// 운영자 알림 본문 또는 의견 처리 알림의 보낸 의견 본문 (지워졌으면 null)
+  final String? body;
+
+  /// 의견 처리 알림만: 그 의견을 보낸 시각
+  final DateTime? feedbackSentAt;
 
   /// 묶인 건수 (일과 완료 등)
   final int count;
@@ -49,6 +55,7 @@ class AppNotification {
         title: title,
         body: body,
         route: route,
+        feedbackSentAt: feedbackSentAt,
         count: count,
         occurredAt: occurredAt,
         isRead: isRead ?? this.isRead,
@@ -75,6 +82,7 @@ class AppNotification {
       title: _readText(json['title']),
       body: _readText(json['body']),
       route: _readText(json['route']),
+      feedbackSentAt: DateTime.tryParse(_readText(json['feedbackSentAt']) ?? ''),
       count: json['count'] is num ? (json['count'] as num).toInt() : 1,
       occurredAt: occurredAt,
       isRead: json['isRead'] == true,
