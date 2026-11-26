@@ -1,0 +1,4 @@
+# New template copies of workflows projectops skipped — not tracked in the repository.
+# Temporary material for merge review, overwritten with the latest on every run.
+*
+!.gitignore

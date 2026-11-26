@@ -1,0 +1,81 @@
+# ===================================================================
+# Flutter iOS App Store Connect status lookup (manual run, read-only)
+# ===================================================================
+#
+# Uses the stored App Store Connect secrets to read the app's version list (state and whether closed)
+# and the latest uploaded build numbers, shown as a table in the run Summary.
+#
+# When to use:
+# - when you cannot check locally "is this version already released and closed?"
+#   (the issuer ID is only in GitHub secrets and the browser session has expired)
+# - to see why an iOS test build switched to the next patch version
+#
+# It only looks things up. It uploads or changes nothing and never prints secret values.
+# Finishes in a few seconds on a Linux runner (no macOS runner).
+#
+# Required Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_ISSUER_ID,
+#                   APP_STORE_CONNECT_API_KEY_BASE64, IOS_BUNDLE_ID (or Variables)
+# App Manager or higher is recommended for the API key role (read access is unconfirmed for Developer).
+#
+# Lookup logic: the asc-status subcommand of .github/scripts/ios_release.py (#651)
+
+name: PROJECT-FLUTTER-IOS-ASC-STATUS
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_id:
+        description: "Bundle ID (empty = use the IOS_BUNDLE_ID secret or variable)"
+        required: false
+        default: ""
+
+# Read-only, so repo read permission is enough
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  asc-status:
+    name: App Store Connect status
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # If the key is missing or broken the lookup script explains why, so only create the file here
+      - name: Setup App Store Connect API Key
+        env:
+          API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          if [ -n "$API_KEY_BASE64" ] && [ -n "$API_KEY_ID" ]; then
+            KEY_PATH="$RUNNER_TEMP/AuthKey_${API_KEY_ID}.p8"
+            if echo "$API_KEY_BASE64" | base64 --decode > "$KEY_PATH"; then
+              echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+            else
+              echo "::warning::Could not decode the App Store Connect key"
+            fi
+          fi
+
+      - name: Look up App Store Connect status
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          # Inputs and secrets come via env, never inlined in the script source
+          INPUT_BUNDLE_ID: ${{ github.event.inputs.bundle_id }}
+          SECRET_BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID || vars.IOS_BUNDLE_ID }}
+        run: |
+          BUNDLE_ID="${INPUT_BUNDLE_ID:-$SECRET_BUNDLE_ID}"
+          if [ -z "$BUNDLE_ID" ]; then
+            echo "::error::No bundle ID. Enter one, or add the IOS_BUNDLE_ID secret (or variable)"
+            exit 1
+          fi
+          python3 .github/scripts/ios_release.py asc-status --bundle-id "$BUNDLE_ID"

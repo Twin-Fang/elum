@@ -1,36 +1,36 @@
 # ===================================================================
 # PROJECT-COMMON-PROJECTS-SYNC-MANAGER.yaml
-# Issue Label → GitHub Projects Status 동기화
+# Issue Label -> GitHub Projects Status sync
 # ===================================================================
 #
-# GitHub Projects Status → Issue Label은 Cloudflare Worker가 담당합니다.
-# (projects-sync-wizard로 설정)
+# GitHub Projects Status -> Issue Label is handled by a Cloudflare Worker.
+# (set up with projects-sync-wizard)
 #
 # ===================================================================
-# 🔑 필수 GitHub Secrets
+# 🔑 Required GitHub Secrets
 # ===================================================================
-# _GITHUB_PAT_TOKEN: Projects API용 PAT (권한: repo, project)
+# _GITHUB_PAT_TOKEN: PAT for the Projects API (scopes: repo, project)
 # ===================================================================
 #
-# 🚀 빠른 시작 (워크플로우 파일은 수정하지 않습니다):
-# 1. _GITHUB_PAT_TOKEN Secret 설정
-# 2. Settings → Secrets and variables → Actions → Variables 탭
-# 3. PROJECT_URL 변수에 GitHub Projects URL 등록
-# 4. 끝!
+# 🚀 Quick start (the workflow file is not edited):
+# 1. Set the _GITHUB_PAT_TOKEN Secret
+# 2. Settings → Secrets and variables → Actions → Variables tab
+# 3. Register the GitHub Projects URL in the PROJECT_URL variable
+# 4. Done!
 #
-# 지원 URL 형식:
+# Supported URL formats:
 # - Organization: https://github.com/orgs/{org}/projects/{number}
 # - User: https://github.com/users/{user}/projects/{number}
-# - /views/{id} 경로가 포함되어도 됩니다
+# - a /views/{id} path is fine too
 #
-# ⚠️ Organization 프로젝트 사용 시 주의사항:
-# - 이 워크플로우를 사용하는 모든 레포에 동일한 Status Label이 필요합니다
-# - 라벨은 .github/config/issue-labels.yml 파일로 관리됩니다
-# - 자세한 내용: docs/PROJECTS-SYNC.md
+# ⚠️ When using an Organization project:
+# - every repo using this workflow needs the same Status Labels
+# - labels are managed in .github/config/issue-labels.yml
+# - details: docs/PROJECTS-SYNC.md
 #
-# 트리거:
-# - Issue Label 변경 시
-# - 수동 실행 (workflow_dispatch)
+# Triggers:
+# - Issue label changes
+# - Manual run (workflow_dispatch)
 # ===================================================================
 
 name: 🔄 Projects Sync - Label to Status
@@ -42,7 +42,7 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: '동기화할 Issue 번호'
+        description: 'Issue number to sync'
         required: true
         type: string
 
@@ -50,36 +50,42 @@ concurrency:
   group: projects-sync-${{ github.event.issue.number || github.event.inputs.issue_number }}
   cancel-in-progress: true
 
+permissions:
+  # GITHUB_TOKEN only reads. Declaring it keeps this workflow from gaining more permissions than needed
+  # even if the repo default later changes to write (#595).
+  contents: read
+
 env:
-  # 동기화할 Status Label 목록 (JSON 배열)
-  # projects-sync-wizard에서 설정한 값과 동일해야 합니다
-  STATUS_LABELS: '["작업전", "작업중", "담당자확인", "피드백", "작업완료", "보류", "취소"]'
+  # Status labels to sync (JSON array)
+  # Must match the values set in projects-sync-wizard
+  # Recognizes both Korean (existing) and English (#776 standard) labels — so automation keeps running during the rename transition
+  STATUS_LABELS: '["작업전", "작업중", "담당자확인", "피드백", "작업완료", "보류", "취소", "status: todo", "status: in progress", "status: needs review", "status: feedback", "status: done", "status: on hold", "status: cancelled"]'
 
   # ===================================================================
-  # GitHub Projects 연동 설정
+  # GitHub Projects integration settings
   # ===================================================================
   #
-  # 사용하려면 레포 설정에 변수를 등록하세요 (파일 수정 불필요):
+  # To use it, register a variable in the repo settings (no file edit needed):
   #   Settings → Secrets and variables → Actions → Variables → New repository variable
-  #   Name: PROJECT_URL   /   Value: 아래 형식의 보드 URL
+  #   Name: PROJECT_URL   /   Value: the board URL in the format below
   #
-  # 변수를 등록하지 않으면 이 워크플로우는 안내 로그만 남기고 조용히 종료됩니다.
-  # (워크플로우 파일에 URL을 직접 적지 마세요 — 커밋되어 레포 간에 섞입니다)
+  # Without the variable this workflow only logs guidance and exits quietly.
+  # (Do not put the URL in the workflow file — it gets committed and mixed across repos)
   #
-  # 지원 URL 형식:
+  # Supported URL formats:
   # - Organization: https://github.com/orgs/{org}/projects/{number}
   # - User: https://github.com/users/{user}/projects/{number}
-  # - /views/{id} 경로가 포함되어도 됩니다
+  # - a /views/{id} path is fine too
   #
-  # 예시:
-  # - https://github.com/orgs/MapSee-Lab/projects/1
-  # - https://github.com/orgs/TEAM-ROMROM/projects/6/views/2
-  # - https://github.com/users/Cassiiopeia/projects/2
+  # Examples:
+  # - https://github.com/orgs/{org}/projects/1
+  # - https://github.com/orgs/{org}/projects/6/views/2
+  # - https://github.com/users/{user}/projects/2
   #
-  # ⚠️ Organization 프로젝트 사용 시:
-  # - 이 워크플로우를 사용하는 모든 레포에 동일한 라벨이 필요합니다
-  # - .github/config/issue-labels.yml 파일로 라벨을 관리하세요
-  # - 자세한 내용: docs/PROJECTS-SYNC.md
+  # ⚠️ When using an Organization project:
+  # - every repo using this workflow needs the same labels
+  # - manage labels with .github/config/issue-labels.yml
+  # - details: docs/PROJECTS-SYNC.md
   # ===================================================================
 
   PROJECT_URL: ${{ vars.PROJECT_URL }}
@@ -87,24 +93,46 @@ env:
 jobs:
   sync-label-to-status:
     runs-on: ubuntu-latest
-    # 조건: Status Label이 변경된 경우에만 실행
+    # Condition: run only when a Status Label changed
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' &&
-       contains(fromJSON('["작업전", "작업중", "담당자확인", "피드백", "작업완료", "보류", "취소"]'), github.event.label.name))
+       contains(fromJSON('["작업전", "작업중", "담당자확인", "피드백", "작업완료", "보류", "취소", "status: todo", "status: in progress", "status: needs review", "status: feedback", "status: done", "status: on hold", "status: cancelled"]'), github.event.label.name))
 
     steps:
+      # Projects integration is optional. It works only when both the PAT Secret and the PROJECT_URL variable exist;
+      # if either is missing it only leaves guidance and ends successfully (avoids failure emails per label in unconfigured repos, #667).
+      # secrets cannot be read in a job-level if, so the first step decides and passes it via outputs.
+      - name: 🔎 Check Projects sync settings
+        id: config
+        env:
+          HAS_PAT: ${{ secrets._GITHUB_PAT_TOKEN != '' }}
+          HAS_PROJECT_URL: ${{ vars.PROJECT_URL != '' }}
+        run: |
+          if [ "$HAS_PAT" = "true" ] && [ "$HAS_PROJECT_URL" = "true" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Projects sync is not configured, skipping (optional feature). To use it, add both the secret _GITHUB_PAT_TOKEN and the variable PROJECT_URL."
+            [ "$HAS_PAT" = "true" ] || echo "  - Missing: secret _GITHUB_PAT_TOKEN (scopes: repo, project)"
+            [ "$HAS_PROJECT_URL" = "true" ] || echo "  - Missing: variable PROJECT_URL (Settings > Secrets and variables > Actions > Variables)"
+          fi
+
       - name: 🔍 Get Issue Info
         id: issue
+        if: steps.config.outputs.enabled == 'true'
+        env:
+          INPUT_ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "issue_number=${{ github.event.inputs.issue_number }}" >> $GITHUB_OUTPUT
+            echo "issue_number=$INPUT_ISSUE_NUMBER" >> $GITHUB_OUTPUT
           else
             echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
           fi
 
       - name: 🏷️ Get Current Labels
         id: labels
+        if: steps.config.outputs.enabled == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets._GITHUB_PAT_TOKEN }}
@@ -118,21 +146,21 @@ jobs:
               issue_number: issueNumber
             });
 
-            // Status Label 찾기
+            // Find the Status Label
             const currentStatusLabel = issue.labels
               .map(l => typeof l === 'string' ? l : l.name)
               .find(name => statusLabels.includes(name));
 
             if (currentStatusLabel) {
               core.setOutput('status_label', currentStatusLabel);
-              console.log(`📌 현재 Status Label: ${currentStatusLabel}`);
+              console.log(`📌 Current status label: ${currentStatusLabel}`);
             } else {
               core.setOutput('status_label', '');
-              console.log('⏭️ Status Label이 없습니다.');
+              console.log('⏭️ No status label.');
             }
 
       - name: 📋 Update Projects Status
-        if: steps.labels.outputs.status_label != ''
+        if: steps.config.outputs.enabled == 'true' && steps.labels.outputs.status_label != ''
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets._GITHUB_PAT_TOKEN }}
@@ -141,12 +169,12 @@ jobs:
             const issueNumber = parseInt('${{ steps.issue.outputs.issue_number }}');
 
             // ============================================
-            // URL 파싱 함수
+            // URL parsing function
             // ============================================
             function parseProjectUrl(url) {
               if (!url) return null;
 
-              // 지원 패턴:
+              // Supported patterns:
               // - https://github.com/orgs/{owner}/projects/{number}
               // - https://github.com/orgs/{owner}/projects/{number}/views/{view_id}
               // - https://github.com/users/{owner}/projects/{number}
@@ -176,16 +204,16 @@ jobs:
             }
 
             // ============================================
-            // 프로젝트 URL 파싱
+            // Parse the project URL
             // ============================================
             const projectUrl = process.env.PROJECT_URL;
 
             if (!projectUrl) {
-              console.log('⚠️ PROJECT_URL이 설정되지 않았습니다.');
-              console.log('   Settings → Secrets and variables → Actions → Variables 에서');
-              console.log('   PROJECT_URL 변수를 등록하세요 (워크플로우 파일 수정 불필요).');
+              console.log('⚠️ PROJECT_URL is not set.');
+              console.log('   Add the PROJECT_URL variable in');
+              console.log('   Settings → Secrets and variables → Actions → Variables (no workflow edit needed).');
               console.log('');
-              console.log('💡 지원 URL 형식:');
+              console.log('💡 Supported URL formats:');
               console.log('   - Organization: https://github.com/orgs/{org}/projects/{number}');
               console.log('   - User: https://github.com/users/{user}/projects/{number}');
               return;
@@ -194,24 +222,24 @@ jobs:
             const projectInfo = parseProjectUrl(projectUrl);
 
             if (!projectInfo) {
-              console.log('❌ PROJECT_URL 형식이 올바르지 않습니다.');
-              console.log(`   입력된 URL: ${projectUrl}`);
+              console.log('❌ PROJECT_URL has an invalid format.');
+              console.log(`   Given URL: ${projectUrl}`);
               console.log('');
-              console.log('💡 지원 URL 형식:');
+              console.log('💡 Supported URL formats:');
               console.log('   - Organization: https://github.com/orgs/{org}/projects/{number}');
               console.log('   - User: https://github.com/users/{user}/projects/{number}');
-              console.log('   - /views/{id} 경로는 포함되어도 됩니다');
+              console.log('   - a /views/{id} path is allowed');
               return;
             }
 
             const isOrgProject = projectInfo.type === 'organization';
-            console.log(`📌 프로젝트 타입: ${isOrgProject ? 'Organization' : 'User'}`);
-            console.log(`📌 소유자: ${projectInfo.owner}`);
-            console.log(`📌 프로젝트 번호: ${projectInfo.number}`);
+            console.log(`📌 Project type: ${isOrgProject ? 'Organization' : 'User'}`);
+            console.log(`📌 Owner: ${projectInfo.owner}`);
+            console.log(`📌 Project number: ${projectInfo.number}`);
             console.log(`📌 Issue #${issueNumber} → Status: "${statusLabel}"`);
 
             // ============================================
-            // GraphQL로 Project Item ID 찾기
+            // Find the Project Item ID with GraphQL
             // ============================================
             const projectItemQuery = `
               query($owner: String!, $repo: String!, $issueNumber: Int!) {
@@ -242,19 +270,19 @@ jobs:
             );
 
             if (!targetItem) {
-              console.log('⏭️ 이슈가 해당 프로젝트에 연결되어 있지 않습니다.');
-              console.log(`   프로젝트 번호: ${projectInfo.number}`);
+              console.log('⏭️ The issue is not in this project.');
+              console.log(`   Project number: ${projectInfo.number}`);
               console.log('');
-              console.log('💡 해결 방법:');
-              console.log('   1. GitHub Projects에서 이슈를 프로젝트에 추가하세요.');
-              console.log('   2. 또는 이슈 사이드바에서 "Projects"를 클릭하여 추가하세요.');
+              console.log('💡 How to fix:');
+              console.log('   1. Add the issue to the project in GitHub Projects.');
+              console.log('   2. Or add it from "Projects" in the issue sidebar.');
               return;
             }
 
             console.log(`📌 Project Item ID: ${targetItem.id}`);
 
             // ============================================
-            // Project 필드 정보 조회 (Organization vs User)
+            // Look up Project field info (Organization vs User)
             // ============================================
             const orgProjectQuery = `
               query($owner: String!, $projectNumber: Int!) {
@@ -303,13 +331,13 @@ jobs:
                 projectNumber: projectInfo.number
               });
             } catch (error) {
-              console.log('❌ 프로젝트 정보를 가져오는데 실패했습니다.');
-              console.log(`   에러: ${error.message}`);
+              console.log('❌ Failed to read the project.');
+              console.log(`   Error: ${error.message}`);
               console.log('');
-              console.log('💡 확인 사항:');
-              console.log('   1. PROJECT_URL이 올바른지 확인하세요.');
-              console.log('   2. _GITHUB_PAT_TOKEN에 프로젝트 접근 권한이 있는지 확인하세요.');
-              console.log('   3. 프로젝트가 존재하는지 확인하세요.');
+              console.log('💡 Check:');
+              console.log('   1. PROJECT_URL is correct.');
+              console.log('   2. _GITHUB_PAT_TOKEN can access the project.');
+              console.log('   3. The project exists.');
               return;
             }
 
@@ -318,41 +346,55 @@ jobs:
               : projectResult.user?.projectV2;
 
             if (!projectV2) {
-              console.log('❌ 프로젝트를 찾을 수 없습니다.');
-              console.log(`   소유자: ${projectInfo.owner}`);
-              console.log(`   프로젝트 번호: ${projectInfo.number}`);
+              console.log('❌ Project not found.');
+              console.log(`   Owner: ${projectInfo.owner}`);
+              console.log(`   Project number: ${projectInfo.number}`);
               return;
             }
 
             const statusField = projectV2.field;
             if (!statusField) {
-              console.log('❌ 프로젝트에서 Status 필드를 찾을 수 없습니다.');
+              console.log('❌ No Status field in the project.');
               console.log('');
-              console.log('💡 해결 방법:');
-              console.log('   1. GitHub Projects에서 "Status" 필드가 있는지 확인하세요.');
-              console.log('   2. 필드 이름이 정확히 "Status"인지 확인하세요.');
+              console.log('💡 How to fix:');
+              console.log('   1. Make sure GitHub Projects has a "Status" field.');
+              console.log('   2. Make sure the field is named exactly "Status".');
               return;
             }
 
-            const targetOption = statusField.options.find(opt => opt.name === statusLabel);
+            // Korean and English labels are the same state. Match by alias group so the board column is found either way (#776).
+            const STATUS_ALIASES = [
+              ['작업전', 'status: todo'],
+              ['작업중', 'status: in progress'],
+              ['담당자확인', 'status: needs review'],
+              ['피드백', 'status: feedback'],
+              ['작업완료', 'status: done'],
+              ['보류', 'status: on hold'],
+              ['취소', 'status: cancelled'],
+            ];
+            const aliasGroup = STATUS_ALIASES.find(g => g.includes(statusLabel)) || [statusLabel];
+            // Prefer the column named exactly like the label; use an alias column only when there is none
+            const targetOption =
+              statusField.options.find(opt => opt.name === statusLabel) ||
+              statusField.options.find(opt => aliasGroup.includes(opt.name));
             if (!targetOption) {
-              console.log(`❌ 프로젝트에 "${statusLabel}" Status 옵션이 없습니다.`);
+              console.log(`❌ The project has no "${statusLabel}" status option.`);
               console.log('');
-              console.log('💡 현재 프로젝트의 Status 옵션:');
+              console.log('💡 Status options in the project:');
               statusField.options.forEach(opt => {
                 console.log(`   - ${opt.name}`);
               });
               console.log('');
-              console.log('💡 해결 방법:');
-              console.log('   1. GitHub Projects에서 Status 옵션을 추가하세요.');
-              console.log('   2. 또는 워크플로우의 STATUS_LABELS를 프로젝트에 맞게 수정하세요.');
+              console.log('💡 How to fix:');
+              console.log('   1. Add the status option in GitHub Projects.');
+              console.log('   2. Or change STATUS_LABELS in the workflow to match the project.');
               return;
             }
 
             console.log(`📌 Status Option ID: ${targetOption.id}`);
 
             // ============================================
-            // Status 업데이트
+            // Status update
             // ============================================
             const updateMutation = `
               mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
@@ -381,8 +423,8 @@ jobs:
                 optionId: targetOption.id
               });
 
-              console.log(`✅ Status가 "${statusLabel}"(으)로 업데이트되었습니다.`);
+              console.log(`✅ Status updated to "${statusLabel}".`);
             } catch (error) {
-              console.log('❌ Status 업데이트에 실패했습니다.');
-              console.log(`   에러: ${error.message}`);
+              console.log('❌ Status update failed.');
+              console.log(`   Error: ${error.message}`);
             }

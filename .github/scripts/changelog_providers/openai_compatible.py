@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """openai-compatible provider — base_url preset swap (#455).
 
-openai/gemini/claude/ollama 모두 OpenAI 호환(/chat/completions). base_url·기본 모델만 다르다.
+openai/gemini/claude/ollama are all OpenAI-compatible (/chat/completions). Only base_url and default model differ.
 
-입력: PROVIDER_NAME(openai|gemini|claude|ollama), CHANGELOG_BASE_URL(ollama용),
-      MODEL_API_KEY, COMMIT_RANGE, CHANGELOG_MODEL(선택), CHANGELOG_TEST_RESPONSE(테스트용)
-출력: 성공 시 pr_body.md + `PROVIDER=openai:<name>` + exit 0. 실패 시 exit 1 (폴백).
+Input: PROVIDER_NAME (openai|gemini|claude|ollama), CHANGELOG_BASE_URL (for ollama),
+      MODEL_API_KEY, COMMIT_RANGE, CHANGELOG_MODEL (optional), CHANGELOG_TEST_RESPONSE (for tests)
+Output: on success pr_body.md + `PROVIDER=openai:<name>` + exit 0. On failure exit 1 (fallback).
 """
 import json
 import os
@@ -13,25 +13,24 @@ import sys
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import collect_commits, write_pr_body, fail  # noqa: E402
+from _common import collect_commits, release_commit_range, write_pr_body, fail, resolve_language, t  # noqa: E402
 
-# base_url + 기본 모델. 모델명은 **버전을 박지 않고 별칭을 쓴다** — 버전이 박힌 이름은
-# 1~2년이면 퇴역한다(실측: gemini-1.5-flash가 404로 죽어 있었다, #566).
-# gemini는 lite 별칭이 기본이다. 무료 등급에서 상위 Flash는 RPD 20인 반면 Lite는 500이라
-# 자동화에 쓸 수 있는 쪽은 Lite뿐이다(실측).
+# base_url + default model. Model names **use aliases, not pinned versions** — pinned names
+# retire within 1-2 years (measured: gemini-1.5-flash was dead with 404, #566).
+# gemini defaults to the lite alias. On the free tier the higher Flash has RPD 20 while Lite has 500,
+# so only Lite is usable for automation (measured).
 PRESETS = {
     "openai": ("https://api.openai.com/v1", "gpt-4o-mini"),
     "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-flash-lite-latest"),
     "claude": ("https://api.anthropic.com/v1", "claude-3-5-haiku-latest"),
     "groq": ("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile"),
     "mistral": ("https://api.mistral.ai/v1", "mistral-small-latest"),
-    "ollama": (None, "qwen2.5"),  # base_url은 CHANGELOG_BASE_URL 필수
+    "ollama": (None, "qwen2.5"),  # base_url requires CHANGELOG_BASE_URL
 }
 
-PROMPT_TEMPLATE = (
-    "다음 커밋들을 사용자용 릴리스 노트로 만들어라. 파일명·prefix·이슈번호·URL 금지. "
-    "'새 기능'/'버그 수정'/'개선'으로 분류:\n{commits}"
-)
+def build_prompt(commits, lang=None):
+    """The prompt body lives in the catalog — output language and category names must follow the repo language (#793)."""
+    return t("release_notes.prompt.openai", lang or resolve_language(), commits=commits)
 
 
 def request_completion(base_url, model, api_key, prompt):
@@ -56,7 +55,7 @@ def request_completion(base_url, model, api_key, prompt):
 def main():
     name = os.environ.get("PROVIDER_NAME", "openai")
     if name not in PRESETS:
-        fail(f"openai-compatible: 알 수 없는 provider '{name}' — 폴백")
+        fail(f"openai-compatible: unknown provider '{name}' — falling back")
     base_url, default_model = PRESETS[name]
     if name == "ollama":
         base_url = os.environ.get("CHANGELOG_BASE_URL") or None
@@ -67,15 +66,15 @@ def main():
         content = test_response
     else:
         if not base_url:
-            fail("openai-compatible: base_url 없음 (ollama는 CHANGELOG_BASE_URL 필요) — 폴백")
-        commits = collect_commits(os.environ.get("COMMIT_RANGE", "origin/main..HEAD"), limit=40)
-        prompt = PROMPT_TEMPLATE.format(commits="\n".join(commits))
+            fail("openai-compatible: no base_url (ollama needs CHANGELOG_BASE_URL) — falling back")
+        commits = collect_commits(release_commit_range(), limit=40)
+        prompt = build_prompt("\n".join(commits))
         try:
             content = request_completion(base_url, model, os.environ.get("MODEL_API_KEY", ""), prompt)
-        except Exception as e:  # 네트워크·인증·파싱 실패 전부 폴백 사유
-            fail(f"openai-compatible: API 호출 실패 ({e}) — 폴백")
+        except Exception as e:  # network, auth and parse failures are all fallback reasons
+            fail(f"openai-compatible: API call failed ({e}) — falling back")
         if not content or not content.strip():
-            fail("openai-compatible: 응답 비어있음 — 폴백")
+            fail("openai-compatible: empty response — falling back")
 
     write_pr_body(content.strip())
     print(f"PROVIDER=openai:{name}")

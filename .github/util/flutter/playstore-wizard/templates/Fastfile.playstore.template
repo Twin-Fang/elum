@@ -1,0 +1,340 @@
+# Report promotion failures **visibly**.
+#
+# On GitHub Actions it is raised as an annotation so it shows in the run list. Left only in the log,
+# it gets buried under green checks and nobody reads it — this repo has hit that several times (#612 · #545).
+# Promotion switches run only when turned on, so whoever turned one on wanted that promotion. If it failed, they should know.
+def report_promote_failure(track, error, production: false)
+  head = "#{track} track promotion failed — the internal testing upload completed normally."
+  why  = "Reason: #{error.message}"
+  what = "Check: (1) the service account has permission for that track " \
+         "(2) the track exists in the console (3) the same version code is not already on that track"
+  if production
+    # The Google API message alone hardly reveals whether this requirement is the cause (#765).
+    what += " (4) if this app has **never been released to production**, the API cannot promote it — " \
+            "the first release must be done by a person in Play Console. A build already on closed testing " \
+            "can be attached without rebuilding via console Production > Create new release > 'Add from library'"
+  end
+  puts "::error title=#{track} track promotion failed::#{head} / #{why} / #{what}" if ENV["GITHUB_ACTIONS"] == "true"
+  puts ""
+  puts "❌ #{head}"
+  puts "   #{why}"
+  puts "   #{what}"
+end
+
+# If the app was never released to production, API promotion fails — say so **before** the promotion fails (#765).
+# After the failure, the Google API message alone hardly reveals whether this requirement is the cause.
+#
+# Not blocking. Even if the history looks empty, only the console knows whether promotion works (apps with a draft release, etc.).
+# Even if the lookup itself fails (the service account lacks read permission, etc.), it only warns without killing the deploy.
+def warn_if_never_released(package_name, json_key)
+  codes = google_play_track_version_codes(package_name: package_name, track: "production", json_key: json_key)
+  return unless codes.respond_to?(:empty?) && codes.empty?
+  msg = "This app has no release history on the production track. API promotion to production may not work — " \
+        "the first release must be done by a person in Play Console. A build already on closed testing " \
+        "can be attached without rebuilding via Production > Create new release > 'Add from library'."
+  puts "::warning title=No production release history::#{msg}" if ENV["GITHUB_ACTIONS"] == "true"
+  puts "⚠️  #{msg}"
+rescue StandardError => e
+  puts "ℹ️  Could not check the production release history (#{e.class}). Continuing the deploy: #{e.message}"
+end
+
+default_platform(:android)
+
+platform :android do
+  desc "Build AAB"
+  lane :build_aab do
+    flutter_build(
+      build: 'appbundle',
+      project_dir: '..'
+    )
+  end
+
+  # ============================================================
+  # ⚠️ Read this before using this file for the first time
+  # ============================================================
+  # Apps never released to production on Google Play (Draft Apps)
+  # cannot use release_status: 'completed' or automatic production promotion.
+  #
+  # The first production release must be completed by hand in Play Console.
+  # After that, the automation below works normally:
+  #   internal(completed) → promote_internal_to_production → automatic Google review request
+  # ============================================================
+
+  # ============================================================
+  # 🔧 Before editing this file directly — what env vars can change
+  # ============================================================
+  # The workflow (PROJECT-FLUTTER-ANDROID-PLAYSTORE-CICD) passes the values below. Instead of editing
+  # the whole file, change values so your settings survive when the template update overwrites it.
+  #
+  #  Env var                         Default      Meaning
+  #  ------------------------------  -----------  ------------------------------------------
+  #  DEPLOY_MODE                     store_only   how far into production stages to go (table below)
+  #  PROMOTE_TO_CLOSED_TESTING       false        whether to promote to the closed testing track
+  #  PROMOTE_TO_OPEN_TESTING         false        whether to promote to the open testing track
+  #  CLOSED_TESTING_TRACK            alpha        closed track name (the new name if renamed in the console)
+  #  OPEN_TESTING_TRACK              beta         open track name
+  #  PRODUCTION_ROLLOUT              1.0          production rollout fraction (above 0, up to 1.0; see below)
+  #  STORE_RELEASE_MODE              auto         release mode for store_submit (auto | manual; see below, #1125)
+  #
+  # If you edit this file so it no longer reads the values above, they are **silently ignored** even when the workflow passes them.
+  # The workflow detects this and warns in the CI log (Copy Fastfile step), but does not block.
+  #
+  # Extension points — if you must edit by hand, edit these places.
+  #   · before/after promotion : around "Step 2/3" in deploy_internal
+  #   · shared track promotion : private_lane :promote_internal_to (edit only this to affect every track)
+  #
+  # On template update: the wizard rewrites this file. Your edits get overwritten,
+  # so if you edited it, check with diff before running the wizard and reapply only what you need.
+  # ============================================================
+
+  # ============================================================
+  # 🧭 What to turn on for my situation
+  # ============================================================
+  # DEPLOY_MODE decides **only the production stage**. Intermediate tracks (closed/open testing) are handled
+  # by separate switches below — they are independent axes, and squeezing them into one string explodes the combinations.
+  #
+  #  Situation                         DEPLOY_MODE     CLOSED  OPEN   Result
+  #  ------------------------------  --------------  ------  -----  --------------------------
+  #  in development, team only         store_only      false   false  up to internal testing. No review, minutes
+  #  preparing production access (⚠️)  store_only      true    false  internal + closed. Closed is reviewed every time
+  #  running an open beta              store_only      false   true   internal + open testing
+  #  right before review               store_prepare   keep    keep   up to a production draft (a person releases)
+  #  fully automatic release           store_submit    keep    keep   production review submitted automatically
+  #
+  # Rolling back — turning a switch off stops uploads to that track **from the next deploy**. Versions already
+  #               on the track stay there and must be removed in the console. Lowering DEPLOY_MODE is
+  #               the same — anything already in review is not cancelled.
+  #
+  # ============================================================
+  # 🛤️ Each track behaves differently
+  # ============================================================
+  #  Track            Google review  Takes effect     Counts toward production access
+  #  ---------------  ---------  -----------   --------------------------
+  #  internal         none           minutes          ❌
+  #  alpha (closed)   yes            tens of min~days ✅
+  #  beta (open)      yes            〃               ✅
+  #  production       yes            〃               —
+  #
+  # ⚠️ **Internal testing has no review and is convenient, but does not count toward production access.**
+  #    Personal developer accounts created after 2023-11-13 get production access only after finishing
+  #    **closed testing** with 12+ testers taking part for 14+ days. Running only internal testing never
+  #    meets that condition. (Accounts created earlier and organization accounts are exempt.)
+  # ============================================================
+
+  # ============================================================
+  # Deploy mode (DEPLOY_MODE):
+  #   store_only    : up to the internal testing (internal) track upload only
+  #   store_prepare : internal upload + promote to production as a draft (waits for "Start rollout" in the console)
+  #   store_submit  : internal upload + promote to production as completed (Google review submitted automatically) — fully automatic
+  # (old testflight_only/appstore_prepare/appstore_submit aliases also work)
+  #
+  # Release mode (STORE_RELEASE_MODE, #1125) — changes only the production status for store_submit:
+  #   auto   (default) : promote as completed → review → released as soon as it passes (current behavior)
+  #   manual           : promote as draft → a person presses 'Start rollout' in the console (review starts then)
+  # The Play API has no "send for review, hold release" state (only draft, inProgress, halted, completed).
+  # To get review first and go live at a chosen moment, turn on 'Managed publishing' in the console and use auto.
+  #
+  # ⚠️ New apps (Draft Apps) cannot use release_status: 'completed' or automatic production promotion.
+  #   Do the first official release by hand in Play Console; after that this lane automates it.
+  # ============================================================
+  desc "Deploy to Play Store (DEPLOY_MODE: store_only | store_prepare | store_submit)"
+  lane :deploy_internal do
+    version_name = ENV["VERSION_NAME"] || "1.0.0"
+    version_code = ENV["VERSION_CODE"] || "1"
+
+    # Deploy mode (3 levels shared with iOS — store_ prefix common to both platforms):
+    #   store_only    : up to the internal testing (internal) track upload only
+    #   store_prepare : internal upload + upload to production as a draft
+    #                   → review proceeds only after a person presses "Start rollout" in Play Console (just before submission)
+    #   store_submit  : internal upload + promote to production as completed (review submitted automatically) — fully automatic
+    # (old testflight_only/appstore_prepare/appstore_submit aliases also work)
+    # The default is **the safest one**. It used to be store_submit, so calling this lane directly
+    # without the workflow submitted to production review automatically — an irreversible kind
+    # of action (#601 · #618). It also disagreed with the workflow default (store_only).
+    deploy_mode = (ENV["DEPLOY_MODE"] || "store_only").strip
+    promote = ["store_prepare", "store_submit", "appstore_prepare", "appstore_submit"].include?(deploy_mode)
+    submit = ["store_submit", "appstore_submit"].include?(deploy_mode)
+
+    # Track promotion switches — **independent** of DEPLOY_MODE. Defaults are set here too
+    # so behavior is defined even when the workflow passes no value.
+    # Why track names are not hard-coded: closed tracks with any name can be created in the console,
+    # and hard-coding would silently skip uploads in such repos.
+    promote_closed = (ENV["PROMOTE_TO_CLOSED_TESTING"] || "false").strip.downcase == "true"
+    promote_open   = (ENV["PROMOTE_TO_OPEN_TESTING"]   || "false").strip.downcase == "true"
+    closed_track   = (ENV["CLOSED_TESTING_TRACK"] || "alpha").strip
+    open_track     = (ENV["OPEN_TESTING_TRACK"]   || "beta").strip
+
+    # Production rollout fraction — at 1.0 it goes to all users as soon as review passes (irreversible).
+    # Below 1.0 it rolls out gradually to that fraction of users. But **raising the fraction is not
+    # automated** — a person raises it in Play Console Production > Release management.
+    # If something goes wrong, 'Halt rollout' on the same screen stops it.
+    production_rollout = (ENV["PRODUCTION_ROLLOUT"] || "1.0").strip
+    rollout_value = Float(production_rollout, exception: false)
+    unless rollout_value && rollout_value > 0 && rollout_value <= 1
+      UI.user_error!("PRODUCTION_ROLLOUT must be a number above 0 and up to 1.0 (got: '#{production_rollout}'). e.g. 1.0 (all), 0.1 (10%)")
+    end
+
+    # Release mode: auto (current behavior) is the default even when the lane is called directly. Typos stop instead of silently becoming auto
+    release_mode = (ENV["STORE_RELEASE_MODE"] || "auto").strip
+    release_mode = "auto" if release_mode.empty?
+    unless ["auto", "manual"].include?(release_mode)
+      UI.user_error!("STORE_RELEASE_MODE must be auto or manual (got: '#{release_mode}')")
+    end
+    # manual keeps store_submit as a draft too — a person starts review submission and release in the console
+    submit = false if release_mode == "manual"
+
+    puts "📦 Deploy info: #{version_name} (#{version_code}) / mode: #{deploy_mode} (production promotion: #{promote} / automatic review submission: #{submit})"
+    puts "🚦 Release mode: #{release_mode} (production status on promotion: #{promote ? (submit ? 'completed' : 'draft') : 'not promoted'})"
+    puts "🛤️  Track promotion: closed(#{closed_track})=#{promote_closed} / open(#{open_track})=#{promote_open}"
+
+    # ── Step 1: upload to the internal testing track ──────────────────────
+    puts ""
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    puts "📤 Step 1: uploading to the Play Store internal testing track..."
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    upload_to_play_store(
+      package_name: "{{APPLICATION_ID}}",          # Android package name
+      track: 'internal',                           # internal testing track
+      aab: ENV["AAB_PATH"],                        # AAB file path
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY"],       # Service Account JSON path
+      skip_upload_apk: true,                       # no APK upload
+      skip_upload_metadata: true,                  # no metadata upload
+      skip_upload_images: true,                    # no image upload
+      skip_upload_screenshots: true,               # no screenshot upload
+      skip_upload_changelogs: false,               # upload the changelog (picked up from the metadata directory)
+      # release_status: 'draft',                   # ⚠️ use for Draft Apps (unreleased) - no completed/production promotion
+      release_status: 'completed',                 # after the app is published, deploy immediately as completed
+      version_name: ENV["VERSION_NAME"],           # version name
+      version_code: ENV["VERSION_CODE"]            # version code
+    )
+
+    puts "✅ Internal testing upload done!"
+
+    # ── Step 2: intermediate track promotion (only those turned on) ──────────────────────
+    # **Independent** of production. It runs even with store_only — personal accounts
+    # must keep running closed testing to meet the production access condition.
+    [[promote_closed, closed_track, "Closed testing"],
+     [promote_open,   open_track,   "Open testing"]].each do |on, track, label|
+      next unless on
+      puts ""
+      puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      puts "🧪 Promoting to the #{label} track (#{track})..."
+      puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      begin
+        promote_internal_to(to: track, status: 'completed')
+        puts "✅ #{label} (#{track}) promotion done — reaches testers after Google review."
+      rescue StandardError => e
+        # Do not pass silently. Whoever turned the switch on wanted this promotion,
+        # so the failure must show up in the run list.
+        report_promote_failure("#{label}(#{track})", e)
+        raise
+      end
+    end
+
+    unless promote
+      puts ""
+      puts "⏭️  #{deploy_mode} mode — skipping production promotion"
+      next
+    end
+
+    # ── Step 3: internal testing → production promotion ──
+    #   store_submit  : promote as completed → Google review submitted automatically (fully automatic)
+    #   store_prepare : promote as draft → review proceeds only after a person presses "Start rollout" in Play Console
+    #   store_submit + STORE_RELEASE_MODE=manual : same draft as store_prepare (submit turned off above)
+    promote_status = submit ? 'completed' : 'draft'
+    puts ""
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    puts "🚀 Promoting to the production track... (release_status: #{promote_status}, rollout: #{production_rollout})"
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    # Before promotion can fail, warn in advance if the app has no release history (not blocking).
+    warn_if_never_released("{{APPLICATION_ID}}", ENV["GOOGLE_PLAY_JSON_KEY"])
+
+    begin
+      promote_internal_to_production(promote_status: promote_status, rollout: production_rollout)
+    rescue StandardError => e
+      report_promote_failure("Production", e, production: true)
+      raise
+    end
+
+    puts ""
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if submit
+      puts "✅ Full deploy done! Production: Google review submitted automatically (full release after review passes)"
+    else
+      puts "✅ Production release ready (draft) — just press 'Start rollout' in Play Console to start review."
+    end
+    puts "📦 Version: #{version_name} (#{version_code})"
+    puts "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  end
+
+  # Shared behavior for promoting from the internal testing track to another track.
+  # Copying the lane per track splits ten lines of skip_ flags and only one side gets fixed.
+  private_lane :promote_internal_to do |options|
+    rollout = (options[:rollout] || '1.0').to_s
+    status = options[:status] || 'completed'
+    # A staged rollout (below 1.0) is expressed in the Play API as inProgress + a user fraction.
+    # With completed the fraction is meaningless, so it is adjusted. A draft is released by a person in the console, so it stays.
+    status = 'inProgress' if status == 'completed' && rollout.to_f < 1.0
+    upload_to_play_store(
+      package_name: "{{APPLICATION_ID}}",
+      track: 'internal',
+      track_promote_to: options[:to],
+      track_promote_release_status: status,
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY"],
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,                # no changelog upload on promotion (already uploaded)
+      rollout: rollout,                            # rollout fraction. 1.0 = full release, below = staged rollout (raising it is manual in the console)
+      changes_not_sent_for_review: false,          # send changes to Google review (the default, stated for intent)
+      rescue_changes_not_sent_for_review: false    # ⚠️ blocks false success: never turn a failed automatic review submission into success
+    )
+  end
+
+  desc "Promote internal track to production (promote_status: completed=auto review submission | draft=waits before rollout)"
+  lane :promote_internal_to_production do |options|
+    # ⚠️ This lane does not work for Draft Apps (unreleased).
+    # Usable after the first manual production release in Play Console.
+    #   promote_status: 'completed' → submitted for review immediately (store_submit)
+    #   promote_status: 'draft'     → uploaded to production only as a draft; a person presses "Start rollout" in the console (store_prepare)
+    promote_internal_to(to: 'production', status: options[:promote_status] || 'completed',
+                        rollout: options[:rollout] || ENV["PRODUCTION_ROLLOUT"] || '1.0')
+  end
+
+  desc "Promote internal track to closed testing (closed testing — CLOSED_TESTING_TRACK, default alpha)"
+  lane :promote_internal_to_closed_testing do |options|
+    # Unlike production promotion, it works **regardless of Draft App status**.
+    # Personal accounts after 2023-11-13 need this track to get production access.
+    promote_internal_to(to: options[:track] || ENV["CLOSED_TESTING_TRACK"] || 'alpha',
+                        status: 'completed')
+  end
+
+  desc "Promote internal track to open testing (open testing — OPEN_TESTING_TRACK, default beta)"
+  lane :promote_internal_to_open_testing do |options|
+    promote_internal_to(to: options[:track] || ENV["OPEN_TESTING_TRACK"] || 'beta',
+                        status: 'completed')
+  end
+
+  desc "Validate Play Store credentials"
+  lane :validate do
+    json_key = ENV["GOOGLE_PLAY_JSON_KEY"] || "~/.config/gcloud/service-account.json"
+    validate_play_store_json_key(json_key: json_key)
+  end
+end
+
+def flutter_build(options)
+  Dir.chdir(options[:project_dir]) do
+    sh(
+      "flutter",
+      "build",
+      options[:build],
+      "--release",
+      "--no-tree-shake-icons",
+      "-v"
+    )
+  end
+end
