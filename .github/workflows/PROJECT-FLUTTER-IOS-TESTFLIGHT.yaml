@@ -255,17 +255,9 @@ jobs:
           CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release ${{ env.ENV_FILE_PATH }}
 
-      - name: Create Secrets.xcconfig file
-        env:
-          SECRETS_XCCONFIG_CONTENT: ${{ secrets.SECRETS_XCCONFIG }}
-        run: |
-          mkdir -p ios/Flutter
-          if [ -n "$SECRETS_XCCONFIG_CONTENT" ]; then
-            echo "$SECRETS_XCCONFIG_CONTENT" > ios/Flutter/Secrets.xcconfig
-            echo "Secrets.xcconfig created"
-          else
-            echo "// No secrets provided" > ios/Flutter/Secrets.xcconfig
-          fi
+      # .env > ios/Flutter/Secrets.xcconfig (카카오·네이버·구글 URL 스킴, 광고 앱 ID). 별도 xcconfig 시크릿 없음 (#156)
+      - name: Generate iOS social login secrets
+        run: bash tool/gen_ios_secrets.sh
 
       - name: Make the version script executable
         working-directory: ${{ github.workspace }}   # repo-root assets (.github/scripts) are relative to the repo root, not APP_ROOT
