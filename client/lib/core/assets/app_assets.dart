@@ -522,6 +522,7 @@ abstract final class AppAssets {
   static const featureIconLockScreen = '$_images/feature_icon_lock_screen.png';
   static const featureIconAdPlay = '$_images/feature_icon_ad_play.png';
   static const featureIconHelp = '$_images/feature_icon_help.png';
+  static const featureIconFeedbackResolved = '$_images/feature_icon_feedback_resolved.png';
 
   /// 세트 목록 (개발자 도구 그림 미리 보기가 차례로 펼침)
   static const emptyStateIllustrations = [emptyStateNoRoutines, emptyStateNotLinked, emptyStateReportWeek, emptyStateNoNotifications, emptyStateError, emptyStateOffline];
@@ -529,5 +530,6 @@ abstract final class AppAssets {
   static const featureIcons = [
     featureIconSchedule, featureIconNotification, featureIconReward, featureIconWeeklyReport, featureIconGuide, featureIconLinkDevice,
     featureIconStreak, featureIconStar, featureIconCalendar, featureIconLockScreen, featureIconAdPlay, featureIconHelp,
+    featureIconFeedbackResolved,
   ];
 }

@@ -35,6 +35,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String dateMonthDay(int month, int day) {
+    return '$day/$month';
+  }
+
+  @override
   String dateMonthDaySince(int month, int day) {
     return 'Desde el $day/$month';
   }
@@ -1210,6 +1215,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notificationFeedbackResolved => 'Revisamos tu opinión';
 
   @override
+  String notificationFeedbackQuote(String message) {
+    return '“$message”';
+  }
+
+  @override
+  String get notificationFeedbackSheetBody => '알려 주셔서 고마워요';
+
+  @override
+  String notificationFeedbackSentOn(int month, int day) {
+    return '$month월 $day일에 보낸 의견';
+  }
+
+  @override
   String notificationTalkPostCommented(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1234,6 +1252,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationWeeklyReportReady =>
       'El informe de la semana pasada está listo';
+
+  @override
+  String notificationWeeklyReportPeriod(String range) {
+    return '$range 기록을 모았어요';
+  }
 
   @override
   String get notificationAdminMessageFallback => 'Un mensaje de elum';

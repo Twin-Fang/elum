@@ -291,6 +291,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.notificationRowText,
     required this.notificationMutedText,
     required this.notificationPermissionBannerBg,
+    required this.notificationFeedbackQuoteBg,
     required this.notificationBellIcon,
     required this.notificationBellUnreadDot,
     required this.notificationBellUnreadDotBorder,
@@ -1132,6 +1133,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 알림 설정 맨 위 기기 알림 꺼짐 띠 바탕 (#EEE9E6, 시안 1732:8433)
   final Color notificationPermissionBannerBg;
 
+  /// 의견 처리 시트의 보낸 의견 칸 바탕 (#FFFFFF, 크림색 시트 위 흰 칸)
+  final Color notificationFeedbackQuoteBg;
+
   /// 머리 줄 종 아이콘 (Figma `alarm` 1724:7739 `#74757D`)
   final Color notificationBellIcon;
 
@@ -1577,6 +1581,7 @@ class AppColors extends ThemeExtension<AppColors> {
     notificationRowText: Color(0xFF000000),
     notificationMutedText: Color(0xFF74757D),
     notificationPermissionBannerBg: Color(0xFFEEE9E6),
+    notificationFeedbackQuoteBg: Color(0xFFFFFFFF),
     notificationBellIcon: Color(0xFF74757D),
     notificationBellUnreadDot: Color(0xFF55CFBA),
     notificationBellUnreadDotBorder: Color(0xFFF7F2EF),
@@ -1891,6 +1896,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? notificationRowText,
     Color? notificationMutedText,
     Color? notificationPermissionBannerBg,
+    Color? notificationFeedbackQuoteBg,
     Color? notificationBellIcon,
     Color? notificationBellUnreadDot,
     Color? notificationBellUnreadDotBorder,
@@ -2209,6 +2215,7 @@ class AppColors extends ThemeExtension<AppColors> {
       notificationRowText: notificationRowText ?? this.notificationRowText,
       notificationMutedText: notificationMutedText ?? this.notificationMutedText,
       notificationPermissionBannerBg: notificationPermissionBannerBg ?? this.notificationPermissionBannerBg,
+      notificationFeedbackQuoteBg: notificationFeedbackQuoteBg ?? this.notificationFeedbackQuoteBg,
       notificationBellIcon: notificationBellIcon ?? this.notificationBellIcon,
       notificationBellUnreadDot: notificationBellUnreadDot ?? this.notificationBellUnreadDot,
       notificationBellUnreadDotBorder: notificationBellUnreadDotBorder ?? this.notificationBellUnreadDotBorder,
@@ -2706,6 +2713,7 @@ class AppColors extends ThemeExtension<AppColors> {
       notificationRowText: Color.lerp(notificationRowText, other.notificationRowText, t)!,
       notificationMutedText: Color.lerp(notificationMutedText, other.notificationMutedText, t)!,
       notificationPermissionBannerBg: Color.lerp(notificationPermissionBannerBg, other.notificationPermissionBannerBg, t)!,
+      notificationFeedbackQuoteBg: Color.lerp(notificationFeedbackQuoteBg, other.notificationFeedbackQuoteBg, t)!,
       notificationBellIcon: Color.lerp(notificationBellIcon, other.notificationBellIcon, t)!,
       notificationBellUnreadDot: Color.lerp(notificationBellUnreadDot, other.notificationBellUnreadDot, t)!,
       notificationBellUnreadDotBorder: Color.lerp(notificationBellUnreadDotBorder, other.notificationBellUnreadDotBorder, t)!,

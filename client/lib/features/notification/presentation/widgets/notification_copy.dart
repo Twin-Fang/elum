@@ -39,6 +39,38 @@ String notificationHeadline(AppLocalizations l10n, AppNotification notification)
   }
 }
 
+/// 제목 아래 회색 설명 한 줄: 운영자 알림 본문 · 보낸 의견 앞부분 · 리포트 기간 (보여 줄 것이 없는 종류는 null)
+String? notificationDetailLine(AppLocalizations l10n, AppNotification notification) {
+  switch (notification.type) {
+    case NotificationType.adminMessage:
+      return _singleLineOf(notification.body);
+    case NotificationType.feedbackResolved:
+      final message = _singleLineOf(notification.body);
+      return message == null ? null : l10n.notificationFeedbackQuote(message);
+    case NotificationType.weeklyReportReady:
+      final weekStart = DateTime.tryParse(notification.targetId ?? '');
+      if (weekStart == null) return null;
+      final weekEnd = DateTime(weekStart.year, weekStart.month, weekStart.day + _weekLastDayOffset);
+      return l10n.notificationWeeklyReportPeriod(l10n.weekRangeOf(weekStart, weekEnd));
+    case NotificationType.routineCompleted:
+    case NotificationType.routineSentByCoGuardian:
+    case NotificationType.coGuardianJoined:
+    case NotificationType.creditRefilled:
+    case NotificationType.talkPostCommented:
+    case NotificationType.talkPostImported:
+      return null;
+  }
+}
+
+/// 주 월요일 > 일요일 (날짜 칸 더하기, 서머타임 무관)
+const _weekLastDayOffset = 6;
+
+/// 줄바꿈·연속 공백 > 공백 하나 (한 줄 칸에 쓰는 글, 비었으면 null)
+String? _singleLineOf(String? text) {
+  final collapsed = text?.replaceAll(RegExp(r'\s+'), ' ').trim();
+  return collapsed == null || collapsed.isEmpty ? null : collapsed;
+}
+
 /// 날짜 묶음 > 머리글
 String notificationDayLabel(AppLocalizations l10n, NotificationDay day) =>
     switch (day) {
@@ -47,7 +79,7 @@ String notificationDayLabel(AppLocalizations l10n, NotificationDay day) =>
       NotificationDay.earlier => l10n.notificationDayEarlier,
     };
 
-/// 오늘·어제 묶음은 시각, 그 이전은 날짜
+/// 오늘·어제 묶음은 시각, 그 이전은 짧은 날짜 (올해는 월·일, 다른 해는 연도 포함)
 String notificationTimeLabel(
   BuildContext context,
   NotificationDay day,
@@ -55,7 +87,7 @@ String notificationTimeLabel(
 ) {
   final local = occurredAt.toLocal();
   if (day == NotificationDay.earlier) {
-    return AppLocalizations.of(context).yearMonthDay(local);
+    return AppLocalizations.of(context).shortDateOf(local, DateTime.now());
   }
   return MaterialLocalizations.of(context).formatTimeOfDay(
     TimeOfDay.fromDateTime(local),

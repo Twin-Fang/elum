@@ -8,6 +8,7 @@
   "commonNext": "Siguiente",
   "commonRetry": "Reintentar",
   "dateYearMonthDay": "{day}/{month}/{year}",
+  "dateMonthDay": "{day}/{month}",
   "dateMonthDaySince": "Desde el {day}/{month}",
   "weekdayShort": "{weekday, select, mon{lun} tue{mar} wed{mié} thu{jue} fri{vie} sat{sáb} sun{dom} other{}}",
   "creditResetAt": "{weekday} {day}/{month} a las {hour}:00",

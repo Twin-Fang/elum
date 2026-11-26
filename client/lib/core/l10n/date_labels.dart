@@ -33,6 +33,10 @@ extension DateLabels on AppLocalizations {
     return yearMonthDay(lastDay);
   }
 
+  /// 올해면 `11월 16일`, 다른 해면 `2025년 11월 16일` (좁은 칸에 쓰는 짧은 날짜)
+  String shortDateOf(DateTime d, DateTime now) =>
+      d.year == now.year ? dateMonthDay(d.month, d.day) : yearMonthDay(d);
+
   /// `9월 18일부터`
   String monthDaySince(DateTime d) => dateMonthDaySince(d.month, d.day);
 

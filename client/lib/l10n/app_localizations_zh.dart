@@ -35,6 +35,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String dateMonthDay(int month, int day) {
+    return '$month月$day日';
+  }
+
+  @override
   String dateMonthDaySince(int month, int day) {
     return '$month月$day日起';
   }
@@ -1100,6 +1105,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationFeedbackResolved => '已确认并处理了你发来的意见';
 
   @override
+  String notificationFeedbackQuote(String message) {
+    return '“$message”';
+  }
+
+  @override
+  String get notificationFeedbackSheetBody => '알려 주셔서 고마워요';
+
+  @override
+  String notificationFeedbackSentOn(int month, int day) {
+    return '$month월 $day일에 보낸 의견';
+  }
+
+  @override
   String notificationTalkPostCommented(int count) {
     return '我的帖子收到了$count条评论';
   }
@@ -1111,6 +1129,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationWeeklyReportReady => '上周的报告来了';
+
+  @override
+  String notificationWeeklyReportPeriod(String range) {
+    return '$range 기록을 모았어요';
+  }
 
   @override
   String get notificationAdminMessageFallback => '来自elum的消息';

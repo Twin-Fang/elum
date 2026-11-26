@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
+import com.chuseok22.elumserver.feedback.core.SentFeedback;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationItemResponse;
@@ -56,13 +58,16 @@ class NotificationQueryServiceTest {
   private NoticeHistoryService noticeHistoryService;
   @Mock
   private AdminMessageRepository adminMessageRepository;
+  @Mock
+  private FeedbackService feedbackService;
 
   private NotificationQueryService notificationQueryService;
 
   @BeforeEach
   void setUp() {
     notificationQueryService = new NotificationQueryService(
-      notificationRepository, profileGuardianService, routineQueryService, noticeHistoryService, adminMessageRepository);
+      notificationRepository, profileGuardianService, routineQueryService, noticeHistoryService, adminMessageRepository,
+      feedbackService);
     when(profileGuardianService.profileNamesOf(anyString(), anyCollection())).thenReturn(Map.of());
     when(routineQueryService.titlesOf(anyCollection(), anyCollection())).thenReturn(Map.of());
   }
@@ -104,6 +109,23 @@ class NotificationQueryServiceTest {
         NotificationItemResponse::route)
       .containsExactly(tuple("Pro 선물", "고마워요", "myCredit"),
         tuple(null, null, null));
+  }
+
+  @Test
+  @DisplayName("의견 처리 줄은 내가 보낸 의견 본문과 보낸 시각을 싣는다 (없으면 어떤 의견인지 구분 못 함), 지워진 의견은 본문 없이")
+  void page_feedbackResolved_carriesSentMessageAndSentAt() {
+    Notification resolved = feedbackResolvedRow("n-feedback", "fb-1");
+    Notification deleted = feedbackResolvedRow("n-deleted", "fb-gone");
+    when(notificationRepository.findByRecipientMemberIdOrderByLastOccurredAtDescIdDesc(eq(MEMBER_ID), any(Pageable.class)))
+      .thenReturn(List.of(resolved, deleted));
+    when(feedbackService.sentFeedbacksOf(eq(MEMBER_ID), anyCollection()))
+      .thenReturn(Map.of("fb-1", new SentFeedback("그림이 늦게 떠요", OLDER)));
+    when(profileGuardianService.profileNamesOf(anyString(), anyCollection())).thenReturn(new HashMap<>());
+
+    List<NotificationItemResponse> items = notificationQueryService.page(MEMBER_ID, null, 20).items();
+
+    assertThat(items).extracting(NotificationItemResponse::body, NotificationItemResponse::feedbackSentAt)
+      .containsExactly(tuple("그림이 늦게 떠요", OLDER), tuple(null, null));
   }
 
   @Test
@@ -248,6 +270,17 @@ class NotificationQueryServiceTest {
     row.setType(NotificationType.ADMIN_MESSAGE);
     row.setTargetId(messageId);
     row.setGroupKey("ADMIN_MESSAGE:" + messageId);
+    row.setLastOccurredAt(NEWER);
+    return row;
+  }
+
+  private static Notification feedbackResolvedRow(String id, String feedbackId) {
+    Notification row = new Notification();
+    row.setId(id);
+    row.setRecipientMemberId(MEMBER_ID);
+    row.setType(NotificationType.FEEDBACK_RESOLVED);
+    row.setTargetId(feedbackId);
+    row.setGroupKey("FEEDBACK_RESOLVED:" + feedbackId);
     row.setLastOccurredAt(NEWER);
     return row;
   }
